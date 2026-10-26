@@ -15,8 +15,18 @@ collector/runtime适用性、state/content/ready和第一阶段均OPEN。详见
 **GPU资源关系主树实门：** 已全量核515398 provider记录及461242 EEG实例；24082物理
 GPU活动（22457kernel/543copy/1082memset）获得单activity静止关系，22060 annotation另列。
 79428 actual0/101.88s，源/端点/错producer校验通过，原IR没有新Outcome或ready真值。
-程序snapshot/owner与state/materialization/visibility仍待跨片模型接线，见
+程序上下文现已按下述typed跨片关系连接；state/materialization/visibility仍OPEN。原资源资格见
 [完整资源结果](../artifacts/experiments/native_activity_work_memset_main_20261026/REPORT.md)。
+
+**跨片关系v2主树已验收：** 新main producer全24082 work实际exit0/783.955894s；
+11541 exact native/source与12541 enclosing native/source分别核对、重叠0，缺任何native
+context为0。全部work有retained source和至少一条CodeVersion/source-definition绑定，
+6个普通查询与原Region静态membership通过。原ETO父链是observer嵌套控制scope，
+不是direct call或Tensor/actual-formal数据边；host无exact12541、static body未核14932、
+state/content/ready未证24082均保留。未重lower或执行目标，未增加当前6882次body-linked
+calls，source858/6882指针及22060 annotation frontier不变。原v1失败、postflight和helper
+修正独立保留；成本、strict producer/path guards及348个规范chunks见
+[主树完整关系门](../artifacts/experiments/fragment_relations_v2_main_20261026/REPORT.md)。
 
 **原归档源码入口：** 已自动取得16个外部descriptor所需的8个模块编译见证；主树
 普通readonly消费16 matches/8 loads/compile0，实际0.61s。它保留原272038静态来源，

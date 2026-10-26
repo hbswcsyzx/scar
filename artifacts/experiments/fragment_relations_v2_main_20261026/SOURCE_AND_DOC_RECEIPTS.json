@@ -1,0 +1,46 @@
+{
+  "files": [
+    {
+      "path": "scar/ir/execution/fragment_relations.py",
+      "bytes": 16515,
+      "sha256": "287d5a62f7ff72757311be4a14db24b69289e74c092d67bd7b80528642a5e4b1"
+    },
+    {
+      "path": "scar/ir/execution/fragment_relations_codec.py",
+      "bytes": 2545,
+      "sha256": "24f23464756e0f3cce7cdecf7e06ce4d3de393ab2ddb8958ca3fa53a8f252556"
+    },
+    {
+      "path": "scar/store/fragment_relations.py",
+      "bytes": 14790,
+      "sha256": "4d50e4149f993857b4a0a8961d2cf316d7d3130266d7a5d64ff774fa77263770"
+    },
+    {
+      "path": "scar/analysis/fragment_relations.py",
+      "bytes": 64951,
+      "sha256": "a64505c60da4f8456026fa152772e5cb90351706bf8ff074a9bc422833522440"
+    },
+    {
+      "path": "scar/analysis/source_native_composition.py",
+      "bytes": 50387,
+      "sha256": "4ae4b980d0bdc65a44af1f44c8c92dd6191341f3348316d9782707e61dd73d21"
+    },
+    {
+      "path": "docs/FIRST_STAGE_MODEL_STATUS.md",
+      "bytes": 80667,
+      "sha256": "ece1370fe2fc998435bf0a8973d6fa98898e6a72472e1d0489d6da925aaed0a4"
+    },
+    {
+      "path": "docs/FIRST_STAGE_DELIVERY.md",
+      "bytes": 34183,
+      "sha256": "16a254110746768db543e5e1621328b0f5518f1e4bd80c30cb0d76cc0582e32d"
+    },
+    {
+      "path": "docs/TOOLING_SURVEY.md",
+      "bytes": 26873,
+      "sha256": "6f0de1761c1a9a266b767deac37efc9cdf20a9c7c317d68e2f4ea0688e3b5d36"
+    }
+  ],
+  "main_index_modified_by_agent": false,
+  "producer_sources_match_root_application": true
+}

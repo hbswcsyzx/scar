@@ -1,0 +1,19 @@
+{
+  "stage_paths": 383,
+  "production_paths": [
+    "scar/ir/execution/fragment_relations.py",
+    "scar/ir/execution/fragment_relations_codec.py",
+    "scar/store/fragment_relations.py",
+    "scar/analysis/fragment_relations.py",
+    "scar/analysis/source_native_composition.py"
+  ],
+  "doc_paths": [
+    "docs/FIRST_STAGE_MODEL_STATUS.md",
+    "docs/FIRST_STAGE_DELIVERY.md",
+    "docs/TOOLING_SURVEY.md"
+  ],
+  "normative_chunks": 348,
+  "stored_normative_chunk_bytes": 97637392,
+  "whole_program_complete": false,
+  "staging_or_commit_done_by_agent": false
+}

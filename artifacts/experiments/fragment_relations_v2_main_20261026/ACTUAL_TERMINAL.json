@@ -1,0 +1,453 @@
+{
+  "status": "ROOT_CONFIRMED_MAIN_FRESH_EXIT0_WITH_OPEN",
+  "root_session": 72613,
+  "outer": {
+    "actual_worker_exit_code": 0,
+    "elapsed_s": 783.9558943990269,
+    "freeze_sha256": "c960d48bdca79b2f7b38a899e4f5b6046df62fe7648630dc95f4243482b6e036",
+    "outer_guard_bytes": 18048286,
+    "whole_program_complete": false
+  },
+  "worker_seconds": 783.0509845869965,
+  "report": {
+    "all_gpu_candidates": 46142,
+    "declared_work_count": 24082,
+    "distinct_enclosed_hosts": 10823,
+    "enclosing_native_depth_work_counts": {
+      "1": 10047,
+      "2": 2208,
+      "3": 256,
+      "5": 30
+    },
+    "enclosing_parent_contract": {
+      "basis": "ETO ctrl_deps collector stack only",
+      "scope": "observer RecordFunction stack, not source direct call or CUDA timing/order",
+      "torch_revision": "cf30153c4c131c8164ee7798e5022d810682e2cb"
+    },
+    "first_enclosing_work_by_depth": {
+      "1": {
+        "scope": {
+          "coordinates": {
+            "schema": "scar.capture-coordinates",
+            "sha256": "4d266b9ea62ed0d4c25cb5606dae31dea5aeab453405f79608ab5c038f012a25",
+            "size_bytes": 674239,
+            "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_current_source_gate_20261023/result/capture-coordinates.json"
+          },
+          "process": {
+            "kind": "exec_process_instance",
+            "value": "capture:1ddea1de4990462b59cf5dd24beb3f120156eb47bca68cfb3f1a63f9f73f2cf0:process:0e3cdb6b87615e6df5d503f9e778d0aaa2cf6ad3f212b6fe86407f177ee81642",
+            "wire": "exec_process_instance:capture:1ddea1de4990462b59cf5dd24beb3f120156eb47bca68cfb3f1a63f9f73f2cf0:process:0e3cdb6b87615e6df5d503f9e778d0aaa2cf6ad3f212b6fe86407f177ee81642"
+          },
+          "run": {
+            "kind": "exec_run",
+            "value": "capture:1ddea1de4990462b59cf5dd24beb3f120156eb47bca68cfb3f1a63f9f73f2cf0",
+            "wire": "exec_run:capture:1ddea1de4990462b59cf5dd24beb3f120156eb47bca68cfb3f1a63f9f73f2cf0"
+          }
+        },
+        "work": {
+          "locator": {
+            "artifact": {
+              "schema": "scar.native-activity-work.rows",
+              "sha256": "939a54f4f9a12dde8e6e945ed62fd91a3147784ffa9796db797c3ec04fda0108",
+              "size_bytes": 41229,
+              "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/native_activity_work_memset_main_20261026/result/shards/000000.work.jsonl.gz"
+            },
+            "declaration": {
+              "artifact": {
+                "schema": "scar.native-activity-work-report",
+                "sha256": "32f1b2e705ca0ef63cddb985ce1ef17ee470c72dff2164ab0b751626d39b4dd2",
+                "size_bytes": 169344,
+                "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/native_activity_work_memset_main_20261026/result/manifest.json"
+              },
+              "locator": "#/shards/0/work_records"
+            },
+            "decoded_bytes": 2195124,
+            "decoded_sha256": "ff397cd29a1bb18668b5e1ac27d3e3bb05421e87bb5a94e16792dbc9db807506",
+            "encoding": "GZIP_JSONL",
+            "line": 1,
+            "pointer": "#/submission"
+          },
+          "ticket": {
+            "kind": "exec_work_ticket",
+            "value": "native-activity:8011554b07f2a8d8c7c75719244d77754ab77a731667b608e07adfd5a5224ef2",
+            "wire": "exec_work_ticket:native-activity:8011554b07f2a8d8c7c75719244d77754ab77a731667b608e07adfd5a5224ef2"
+          }
+        }
+      },
+      "2": {
+        "scope": {
+          "coordinates": {
+            "schema": "scar.capture-coordinates",
+            "sha256": "4d266b9ea62ed0d4c25cb5606dae31dea5aeab453405f79608ab5c038f012a25",
+            "size_bytes": 674239,
+            "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_current_source_gate_20261023/result/capture-coordinates.json"
+          },
+          "process": {
+            "kind": "exec_process_instance",
+            "value": "capture:1ddea1de4990462b59cf5dd24beb3f120156eb47bca68cfb3f1a63f9f73f2cf0:process:0e3cdb6b87615e6df5d503f9e778d0aaa2cf6ad3f212b6fe86407f177ee81642",
+            "wire": "exec_process_instance:capture:1ddea1de4990462b59cf5dd24beb3f120156eb47bca68cfb3f1a63f9f73f2cf0:process:0e3cdb6b87615e6df5d503f9e778d0aaa2cf6ad3f212b6fe86407f177ee81642"
+          },
+          "run": {
+            "kind": "exec_run",
+            "value": "capture:1ddea1de4990462b59cf5dd24beb3f120156eb47bca68cfb3f1a63f9f73f2cf0",
+            "wire": "exec_run:capture:1ddea1de4990462b59cf5dd24beb3f120156eb47bca68cfb3f1a63f9f73f2cf0"
+          }
+        },
+        "work": {
+          "locator": {
+            "artifact": {
+              "schema": "scar.native-activity-work.rows",
+              "sha256": "3c6ffae8eb58a41de74f18b08eb7bffc0f0f923f933153d300b349b264a0eada",
+              "size_bytes": 41120,
+              "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/native_activity_work_memset_main_20261026/result/shards/000001.work.jsonl.gz"
+            },
+            "declaration": {
+              "artifact": {
+                "schema": "scar.native-activity-work-report",
+                "sha256": "32f1b2e705ca0ef63cddb985ce1ef17ee470c72dff2164ab0b751626d39b4dd2",
+                "size_bytes": 169344,
+                "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/native_activity_work_memset_main_20261026/result/manifest.json"
+              },
+              "locator": "#/shards/1/work_records"
+            },
+            "decoded_bytes": 2195124,
+            "decoded_sha256": "998269b368ba679044aabb103e4ea548ea711d060e3b91b25e300ae1fcd6dfcb",
+            "encoding": "GZIP_JSONL",
+            "line": 48,
+            "pointer": "#/submission"
+          },
+          "ticket": {
+            "kind": "exec_work_ticket",
+            "value": "native-activity:222914618fd807a451e967fd26b6200a0497b69f610eee6979633768ebe41cdf",
+            "wire": "exec_work_ticket:native-activity:222914618fd807a451e967fd26b6200a0497b69f610eee6979633768ebe41cdf"
+          }
+        }
+      },
+      "3": {
+        "scope": {
+          "coordinates": {
+            "schema": "scar.capture-coordinates",
+            "sha256": "4d266b9ea62ed0d4c25cb5606dae31dea5aeab453405f79608ab5c038f012a25",
+            "size_bytes": 674239,
+            "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_current_source_gate_20261023/result/capture-coordinates.json"
+          },
+          "process": {
+            "kind": "exec_process_instance",
+            "value": "capture:1ddea1de4990462b59cf5dd24beb3f120156eb47bca68cfb3f1a63f9f73f2cf0:process:0e3cdb6b87615e6df5d503f9e778d0aaa2cf6ad3f212b6fe86407f177ee81642",
+            "wire": "exec_process_instance:capture:1ddea1de4990462b59cf5dd24beb3f120156eb47bca68cfb3f1a63f9f73f2cf0:process:0e3cdb6b87615e6df5d503f9e778d0aaa2cf6ad3f212b6fe86407f177ee81642"
+          },
+          "run": {
+            "kind": "exec_run",
+            "value": "capture:1ddea1de4990462b59cf5dd24beb3f120156eb47bca68cfb3f1a63f9f73f2cf0",
+            "wire": "exec_run:capture:1ddea1de4990462b59cf5dd24beb3f120156eb47bca68cfb3f1a63f9f73f2cf0"
+          }
+        },
+        "work": {
+          "locator": {
+            "artifact": {
+              "schema": "scar.native-activity-work.rows",
+              "sha256": "3c6ffae8eb58a41de74f18b08eb7bffc0f0f923f933153d300b349b264a0eada",
+              "size_bytes": 41120,
+              "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/native_activity_work_memset_main_20261026/result/shards/000001.work.jsonl.gz"
+            },
+            "declaration": {
+              "artifact": {
+                "schema": "scar.native-activity-work-report",
+                "sha256": "32f1b2e705ca0ef63cddb985ce1ef17ee470c72dff2164ab0b751626d39b4dd2",
+                "size_bytes": 169344,
+                "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/native_activity_work_memset_main_20261026/result/manifest.json"
+              },
+              "locator": "#/shards/1/work_records"
+            },
+            "decoded_bytes": 2195124,
+            "decoded_sha256": "998269b368ba679044aabb103e4ea548ea711d060e3b91b25e300ae1fcd6dfcb",
+            "encoding": "GZIP_JSONL",
+            "line": 50,
+            "pointer": "#/submission"
+          },
+          "ticket": {
+            "kind": "exec_work_ticket",
+            "value": "native-activity:b7de7d1070ff4ceef7bd0d7fbfcd513f3efe534ba9774252ba35074ec08d2cac",
+            "wire": "exec_work_ticket:native-activity:b7de7d1070ff4ceef7bd0d7fbfcd513f3efe534ba9774252ba35074ec08d2cac"
+          }
+        }
+      },
+      "5": {
+        "scope": {
+          "coordinates": {
+            "schema": "scar.capture-coordinates",
+            "sha256": "4d266b9ea62ed0d4c25cb5606dae31dea5aeab453405f79608ab5c038f012a25",
+            "size_bytes": 674239,
+            "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_current_source_gate_20261023/result/capture-coordinates.json"
+          },
+          "process": {
+            "kind": "exec_process_instance",
+            "value": "capture:1ddea1de4990462b59cf5dd24beb3f120156eb47bca68cfb3f1a63f9f73f2cf0:process:0e3cdb6b87615e6df5d503f9e778d0aaa2cf6ad3f212b6fe86407f177ee81642",
+            "wire": "exec_process_instance:capture:1ddea1de4990462b59cf5dd24beb3f120156eb47bca68cfb3f1a63f9f73f2cf0:process:0e3cdb6b87615e6df5d503f9e778d0aaa2cf6ad3f212b6fe86407f177ee81642"
+          },
+          "run": {
+            "kind": "exec_run",
+            "value": "capture:1ddea1de4990462b59cf5dd24beb3f120156eb47bca68cfb3f1a63f9f73f2cf0",
+            "wire": "exec_run:capture:1ddea1de4990462b59cf5dd24beb3f120156eb47bca68cfb3f1a63f9f73f2cf0"
+          }
+        },
+        "work": {
+          "locator": {
+            "artifact": {
+              "schema": "scar.native-activity-work.rows",
+              "sha256": "1c3e6f385949a20592411fb86e85e3d7e07cadbc7a5a8d061e9b049e3c2dc840",
+              "size_bytes": 41020,
+              "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/native_activity_work_memset_main_20261026/result/shards/000003.work.jsonl.gz"
+            },
+            "declaration": {
+              "artifact": {
+                "schema": "scar.native-activity-work-report",
+                "sha256": "32f1b2e705ca0ef63cddb985ce1ef17ee470c72dff2164ab0b751626d39b4dd2",
+                "size_bytes": 169344,
+                "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/native_activity_work_memset_main_20261026/result/manifest.json"
+              },
+              "locator": "#/shards/3/work_records"
+            },
+            "decoded_bytes": 2195124,
+            "decoded_sha256": "5ec0d31dea68ebf04819f529d6a58cb11dfef10f0c6b9d3ed91d5efe85f133d6",
+            "encoding": "GZIP_JSONL",
+            "line": 5,
+            "pointer": "#/submission"
+          },
+          "ticket": {
+            "kind": "exec_work_ticket",
+            "value": "native-activity:9807db502b6e37c0d9b1d0937f0f58a6e8d6dfbff7d68052b54ac04dd7be90e4",
+            "wire": "exec_work_ticket:native-activity:9807db502b6e37c0d9b1d0937f0f58a6e8d6dfbff7d68052b54ac04dd7be90e4"
+          }
+        }
+      }
+    },
+    "first_static_body_work": {
+      "scope": {
+        "coordinates": {
+          "schema": "scar.capture-coordinates",
+          "sha256": "4d266b9ea62ed0d4c25cb5606dae31dea5aeab453405f79608ab5c038f012a25",
+          "size_bytes": 674239,
+          "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_current_source_gate_20261023/result/capture-coordinates.json"
+        },
+        "process": {
+          "kind": "exec_process_instance",
+          "value": "capture:1ddea1de4990462b59cf5dd24beb3f120156eb47bca68cfb3f1a63f9f73f2cf0:process:0e3cdb6b87615e6df5d503f9e778d0aaa2cf6ad3f212b6fe86407f177ee81642",
+          "wire": "exec_process_instance:capture:1ddea1de4990462b59cf5dd24beb3f120156eb47bca68cfb3f1a63f9f73f2cf0:process:0e3cdb6b87615e6df5d503f9e778d0aaa2cf6ad3f212b6fe86407f177ee81642"
+        },
+        "run": {
+          "kind": "exec_run",
+          "value": "capture:1ddea1de4990462b59cf5dd24beb3f120156eb47bca68cfb3f1a63f9f73f2cf0",
+          "wire": "exec_run:capture:1ddea1de4990462b59cf5dd24beb3f120156eb47bca68cfb3f1a63f9f73f2cf0"
+        }
+      },
+      "work": {
+        "locator": {
+          "artifact": {
+            "schema": "scar.native-activity-work.rows",
+            "sha256": "1c3e6f385949a20592411fb86e85e3d7e07cadbc7a5a8d061e9b049e3c2dc840",
+            "size_bytes": 41020,
+            "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/native_activity_work_memset_main_20261026/result/shards/000003.work.jsonl.gz"
+          },
+          "declaration": {
+            "artifact": {
+              "schema": "scar.native-activity-work-report",
+              "sha256": "32f1b2e705ca0ef63cddb985ce1ef17ee470c72dff2164ab0b751626d39b4dd2",
+              "size_bytes": 169344,
+              "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/native_activity_work_memset_main_20261026/result/manifest.json"
+            },
+            "locator": "#/shards/3/work_records"
+          },
+          "decoded_bytes": 2195124,
+          "decoded_sha256": "5ec0d31dea68ebf04819f529d6a58cb11dfef10f0c6b9d3ed91d5efe85f133d6",
+          "encoding": "GZIP_JSONL",
+          "line": 14,
+          "pointer": "#/submission"
+        },
+        "ticket": {
+          "kind": "exec_work_ticket",
+          "value": "native-activity:b9d7e51a269902b00048e442a8835c4e3fcb9844a30e76ddaec3ee5b68a935d4",
+          "wire": "exec_work_ticket:native-activity:b9d7e51a269902b00048e442a8835c4e3fcb9844a30e76ddaec3ee5b68a935d4"
+        }
+      }
+    },
+    "first_unique_connected_work": {
+      "scope": {
+        "coordinates": {
+          "schema": "scar.capture-coordinates",
+          "sha256": "4d266b9ea62ed0d4c25cb5606dae31dea5aeab453405f79608ab5c038f012a25",
+          "size_bytes": 674239,
+          "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_current_source_gate_20261023/result/capture-coordinates.json"
+        },
+        "process": {
+          "kind": "exec_process_instance",
+          "value": "capture:1ddea1de4990462b59cf5dd24beb3f120156eb47bca68cfb3f1a63f9f73f2cf0:process:0e3cdb6b87615e6df5d503f9e778d0aaa2cf6ad3f212b6fe86407f177ee81642",
+          "wire": "exec_process_instance:capture:1ddea1de4990462b59cf5dd24beb3f120156eb47bca68cfb3f1a63f9f73f2cf0:process:0e3cdb6b87615e6df5d503f9e778d0aaa2cf6ad3f212b6fe86407f177ee81642"
+        },
+        "run": {
+          "kind": "exec_run",
+          "value": "capture:1ddea1de4990462b59cf5dd24beb3f120156eb47bca68cfb3f1a63f9f73f2cf0",
+          "wire": "exec_run:capture:1ddea1de4990462b59cf5dd24beb3f120156eb47bca68cfb3f1a63f9f73f2cf0"
+        }
+      },
+      "work": {
+        "locator": {
+          "artifact": {
+            "schema": "scar.native-activity-work.rows",
+            "sha256": "3c6ffae8eb58a41de74f18b08eb7bffc0f0f923f933153d300b349b264a0eada",
+            "size_bytes": 41120,
+            "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/native_activity_work_memset_main_20261026/result/shards/000001.work.jsonl.gz"
+          },
+          "declaration": {
+            "artifact": {
+              "schema": "scar.native-activity-work-report",
+              "sha256": "32f1b2e705ca0ef63cddb985ce1ef17ee470c72dff2164ab0b751626d39b4dd2",
+              "size_bytes": 169344,
+              "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/native_activity_work_memset_main_20261026/result/manifest.json"
+            },
+            "locator": "#/shards/1/work_records"
+          },
+          "decoded_bytes": 2195124,
+          "decoded_sha256": "998269b368ba679044aabb103e4ea548ea711d060e3b91b25e300ae1fcd6dfcb",
+          "encoding": "GZIP_JSONL",
+          "line": 72,
+          "pointer": "#/submission"
+        },
+        "ticket": {
+          "kind": "exec_work_ticket",
+          "value": "native-activity:c5fdc84acf16266dd74cbe9ad90396067a7dd96a48726a8e31c671eb8e2b2070",
+          "wire": "exec_work_ticket:native-activity:c5fdc84acf16266dd74cbe9ad90396067a7dd96a48726a8e31c671eb8e2b2070"
+        }
+      }
+    },
+    "host_relation_kinds": {
+      "PROVIDER_SCOPE_CONTEXT": 48164,
+      "SUBMITTED_BY_RUNTIME": 24082
+    },
+    "missing_relations": {
+      "NATIVE_OCCURRENCE_UNRESOLVED": 12541,
+      "STATE_CONTENT_READY_UNPROVED": 24082,
+      "STATIC_BODY_MEMBER_UNREVIEWED": 14932
+    },
+    "native_index": {
+      "invokes_indexed": 39796,
+      "shards_visited": 156
+    },
+    "original_eeg_index": {
+      "edges_visited": 1170339,
+      "instances_visited": 461242,
+      "provider_edges_indexed": 78171
+    },
+    "parent_record_replay": {
+      "additional_original_chunk_reads": 0,
+      "owned_original_field_records": 23655,
+      "source": "fresh original strict-decode pass; no old-index reuse"
+    },
+    "provider_frontier_counts": {
+      "GPU_CATEGORY_END_CONTRACT_UNSUPPORTED": 22060
+    },
+    "relationship_is_direct_call": false,
+    "source_retention": {
+      "binding_rows": 817,
+      "decoded_bytes": 603916348,
+      "decoded_sha256": "d8d0faaa7afb93549d7b35d393c1870324fb5d40e2d91f7c1449c7ac1f9c6d33",
+      "rows_visited": 79592,
+      "stored_bytes": 15536335,
+      "stored_sha256": "a7dc5050e0cb5b9e4cc95594c72a852d06fe8eef08be0b073d5a1564f482ead2"
+    },
+    "source_runtime_summary": {
+      "code_captures": 855,
+      "complete_descriptor_matches": 816,
+      "coordinate_bound_processes": 1,
+      "current_source_check_statuses": {
+        "FINGERPRINT_MATCH": 220
+      },
+      "entered_code_groups": 817,
+      "exits": 100438,
+      "frontiers": {
+        "CANONICAL_BODY_NOT_MODELLED_BY_SOURCE_ATTACHMENT": 86688,
+        "CANONICAL_BODY_UNAVAILABLE": 1904,
+        "CODE_SOURCE_INCOMPLETE": 803,
+        "FRAME_RESUMPTION_CONTINUITY_UNRECOVERED": 4021,
+        "NONFILE_CODE_FILENAME": 803,
+        "NO_MATCHING_CODE_WITNESS": 14,
+        "NO_MATCHING_STATIC_CODE_SOURCE_WITNESS": 14,
+        "PARENT_NO_PARENT_ENTRY_WITNESS": 1,
+        "PARENT_SUSPENDABLE_FRAME_OBSERVATION": 4021,
+        "VERIFIED_CODE_WITHOUT_DEFINITION_WITNESS": 4147
+      },
+      "invocation_statuses": {
+        "BODY_LINKED_REUSED_WITNESS": 6882,
+        "SOURCE_LINKED_REUSED_WITNESS": 88592,
+        "UNRESOLVED": 4964
+      },
+      "invocations": 100438,
+      "orphan_exits": 0,
+      "parent_qualifications": {
+        "RECORDED_FRAME_INTERVAL_MATCH": 96416,
+        "UNRESOLVED": 4022
+      },
+      "parent_relations": {
+        "DIRECT_RECORDED_PARENT": 96799,
+        "NO_RECORDED_PARENT": 1,
+        "RETAINED_ANCESTOR": 3638
+      },
+      "processes": 1,
+      "source_binding_statuses": {
+        "BODY_LINKED_REUSED_WITNESS": 92,
+        "SOURCE_LINKED_REUSED_WITNESS": 575,
+        "UNRESOLVED": 150
+      },
+      "unconnected_interfaces": {
+        "ACTUAL_FORMAL_ROUTING_UNVERIFIED": 100438,
+        "CANONICAL_CONTROL_COMPLETION_UNVERIFIED": 100438,
+        "FUNCTION_ENVIRONMENT_UNVERIFIED": 100438,
+        "RETURN_VALUE_ROUTING_UNVERIFIED": 100438,
+        "STATE_EFFECTS_UNVERIFIED": 100438
+      }
+    },
+    "static_inventory": {
+      "decoded_bytes": 83792,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/source_frontend_remainder_publication_20261025/result/publication/manifest.json",
+      "raw_bytes": 83792,
+      "raw_sha256": "4959e7a58abe42415ad2a066f96572a83c83f5b4aaebe9462778d5569439ef5d"
+    },
+    "visited_work_count": 24082,
+    "whole_program_complete": false,
+    "work_with_enclosing_native": 12541,
+    "work_with_enclosing_source_context": 12541,
+    "work_with_exact_and_enclosing_native": 0,
+    "work_with_exact_and_enclosing_source_context": 0,
+    "work_with_exact_source_context": 11541,
+    "work_with_host_relation": 24082,
+    "work_with_multiple_native_occurrences": 0,
+    "work_with_native_occurrence": 11541,
+    "work_with_source_context": 24082,
+    "work_with_static_code_source": 24082,
+    "work_with_unique_native_occurrence": 11541,
+    "work_without_any_native_context": 0
+  },
+  "normal_queries": 6,
+  "static_member_type": "Region",
+  "activity": {
+    "lower_attempts": 0,
+    "non_target_compile_events": 1199,
+    "source_prepare_attempts": 0,
+    "subprocess_attempts": 0,
+    "target_exec_attempts": 0,
+    "target_executable_compile_attempts": 0
+  },
+  "io": {
+    "actual_input_bytes": 8640110167,
+    "code_source_input_bytes": 31095464,
+    "core_input_bytes": 8609014703,
+    "decoded_bytes": 6179223827,
+    "elapsed_s": 781.3721623899764,
+    "scope": "returned stored plus decoded bytes, including repeats; source/runner guards separate",
+    "stored_bytes": 2460886340,
+    "stored_output_bytes": 814554920
+  },
+  "peak_rss_kib": 309796,
+  "root_verification": "candidate01/attempt01/ROOT_VERIFICATION.json",
+  "whole_program_complete": false
+}

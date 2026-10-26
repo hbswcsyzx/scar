@@ -17,7 +17,7 @@ SCAR复用编译器的前端、分层IR与分析方法；词法和语法复用CP
 | CFG、SSA、def-use | 原Operation/Value/Block/Region、block arguments、有序Use与显式状态流；validation核支配关系和可用性。当前主要在单图内部，不能当跨过程完整数据流。 |
 | effects、alias、内存依赖 | StateAccess、StateAddress和前后态已存在；很多真实alias/效果仍partial。没有实现完整LLVM MemorySSA或通用全程序别名分析。 |
 | region与多层表达 | function/module/loop/exception到native活动使用独立层级与来源；新C模块Try已接原控制/清理合同，scope扩展仍有明确debt。 |
-| interprocedural analysis / linking | 当前source858/6882实际调用对应通过；跨snapshot持久typed关系仍缺，正在补原qualified端点/证据链。 |
+| interprocedural analysis / linking | source858/6882指针保留；持久typed跨片v2已对24082 work核exact/enclosing native、retained source与CodeVersion绑定。嵌套scope不是direct call；跨过程参数/返回、state/ready仍缺。见[主树实门](../artifacts/experiments/fragment_relations_v2_main_20261026/REPORT.md)。 |
 | profile-guided feedback | 真实调用、Tensor/native活动和物理copy参与静态范围及来源核对；一次没执行的分支不判dead，活动结束不判value ready。 |
 | Pass管线与失效 | 需要明确每项analysis依赖与变更后失效/重算；现精确producer guards保守拒绝过期派生索引，不应暗降为兼容。统一analysis manager尚未实现。 |
 | SCCP / CSE-GVN / LICM / DCE / partial evaluation | 后续化简规则的明确参考，当前未作为完整通用优化管线接入；本阶段仍先完整建模。 |

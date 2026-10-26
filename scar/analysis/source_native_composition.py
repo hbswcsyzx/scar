@@ -26,6 +26,7 @@ from scar.ir.program.source_references import SourceDefinitionReference
 from scar.ir.record_codec import decode, encode, loads
 from scar.ir.execution.ids import OperationOccurrenceID
 from scar.ir.execution.model import OccurrenceEvidenceBinding
+from scar.ir.execution.fragment_relations import QualifiedOccurrenceRef
 
 
 SCHEMA = "scar.source-native-context-navigation"
@@ -131,18 +132,6 @@ class SourceAssociationRef:
               and type(self.line_sha256) is str and _SHA.fullmatch(self.line_sha256), "invalid source row reference")
         self.declaration.__post_init__()
         _path(self.original_stream_uri)
-
-
-@dataclass(frozen=True, slots=True)
-class QualifiedOccurrenceRef:
-    execution: ProviderArtifact
-    occurrence: OperationOccurrenceID
-    binding: OccurrenceEvidenceBinding
-
-    def __post_init__(self):
-        _need(type(self.execution) is ProviderArtifact and type(self.occurrence) is OperationOccurrenceID
-              and type(self.binding) is OccurrenceEvidenceBinding and self.binding.operation == self.occurrence,
-              "invalid qualified occurrence/binding")
 
 
 @dataclass(frozen=True, slots=True)

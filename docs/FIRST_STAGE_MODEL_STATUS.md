@@ -11,15 +11,21 @@ unresolved4964全部保留。静态仍151files/2217definitions/858active bodies�
 **GPU资源关系最新有限结果：** main79428 actual0/GNU101.88s，完整GPU分母46142中，
 24082 kernel/copy/memset单activity获独立WorkQuiescence，22060非物理annotation单列。
 源/actor/原EEG/不同起止端点及真实memset错producer负例通过，输入2.887GB、输出含回读310.69MB。
-这些typed work仍UNATTACHED_TO_PROGRAM_SNAPSHOT，内容/state/ready及全模型仍OPEN；见
+原work通过下述独立typed跨片关系连接原snapshot-qualified occurrence，保持单snapshot合同；
+内容/state/ready及全模型仍OPEN。原单activity资格见
 [主树完整资源门](../artifacts/experiments/native_activity_work_memset_main_20261026/REPORT.md)。
 
-**跨片关系隔离结果：** `codex/source-call-model` 已生成完整24082条work关系，
-11541条带规范native/source/static-code对应，12541条保留缺口，22060 annotations单列。
-原全门在后续静态查询接错codec API时exit1；独立postflight对同一原关系和静态Region
-普通读回actual exit0/3.97s，旧门失败状态未改。helper两行修正已另存新版本，
-main尚未应用，后继需要main producer版本的新验收。scope对应不授对象/content/ready或
-完整调用数据流。见[原完整分母及限定验证报告](https://github.com/hbswcsyzx/scar/blob/f3a1c96c76b875aee46f038c86a60fb62ca7e8cd/artifacts/experiments/fragment_relations_implementation_20261026/REPORT.md)。
+**跨片typed关系v2主树实门：** Root72613 actual exit0/783.955894s，完整24082 work中，
+11541有exact native/source context，另12541按原ETO控制父链建立独立enclosing native/source
+context，两者重叠0；全部work已有retained source与CodeVersion/source-definition绑定。
+6次正常关系查询和原静态Region membership通过；23655个parent实际字段复用本次owned
+原EEG严格读取，额外parent chunk读取0。host自身无exact occurrence的12541项仍保留，
+STATIC_BODY_MEMBER_UNREVIEWED=14932、STATE_CONTENT_READY_UNPROVED=24082。
+这是嵌套控制scope与保留上下文，不授direct call、actual/formal数据流、内容或ready；
+22060 annotation frontier和source858/6882正式指针不变。见
+[主树完整门与边界](../artifacts/experiments/fragment_relations_v2_main_20261026/REPORT.md)。
+旧v1原全门exit1、独立postflight0和单独helper修正均保留为历史，见
+[原报告](https://github.com/hbswcsyzx/scar/blob/f3a1c96c76b875aee46f038c86a60fb62ca7e8cd/artifacts/experiments/fragment_relations_implementation_20261026/REPORT.md)。
 
 当前交付与下一项统一见 [FIRST_STAGE_DELIVERY.md](FIRST_STAGE_DELIVERY.md)，
 实体和完整性定义见 [合同](FIRST_STAGE_MODEL_CONTRACT.md)。以下是按日期保留的
@@ -38,7 +44,8 @@ main尚未应用，后继需要main producer版本的新验收。scope对应不�
 
 四份archive接入后的正常metadata枚举为243候选：242可尝试、1个resumable入口尚缺适配；
 原817 groups/100438历史calls不变。扣除原33 terminal后剩209入口/99文件，已按原数据
-机械排成13批，尚未执行。新增eligible_entry_keys仅限制dispatch，保完整候选及调用分母；
+机械排成13批；这是启动前的准备记录。截至本段更新时，后继Root48283正在执行，
+尚未收到实际终态，不在此填入最终动态计数。新增eligible_entry_keys仅限制dispatch，保完整候选及调用分母；
 209正例、重复/未知key拒绝均通过，未解图。见
 [范围与API](../artifacts/analysis/external_entry_remaining_window_20261026/ELIGIBLE_ENTRY_API.md)及
 [分批声明计划](../artifacts/analysis/external_entry_remaining_window_20261026/BATCH_READ_PLAN.md)。
