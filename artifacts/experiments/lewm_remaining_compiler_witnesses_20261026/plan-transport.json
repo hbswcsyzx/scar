@@ -1,0 +1,14 @@
+{
+  "graph_CodeType_compile": false,
+  "logical_original": {
+    "bytes": 1527195,
+    "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/lewm_remaining_compiler_witnesses_20261026/plan.json",
+    "sha256": "dbf83b62de941d5b3918774f120cba0f0446252c084024780d3659746382a3d5"
+  },
+  "representation": "gzip of exact original normal metadata plan bytes; original logical URI unchanged",
+  "stored_transport": {
+    "bytes": 109548,
+    "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/lewm_remaining_compiler_witnesses_20261026/plan.json.gz",
+    "sha256": "3e4f600ee7480fe6276137d725d02bc3506d6dc8dd37822dfebddc1525327f72"
+  }
+}

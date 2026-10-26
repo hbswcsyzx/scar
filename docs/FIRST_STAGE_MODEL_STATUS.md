@@ -20,6 +20,11 @@ unresolved4964全部保留。静态仍151files/2217definitions/858active bodies�
 
 ### 2026-10-26：原归档源码的编译见证入口已接入
 
+剩余192个缺编译见证的候选也已通过正常metadata API全量规划：94份原源码、
+94个preferred keys、237个recorded variants，snapshot缺失0、编译build匹配。
+实际读取226,887,533B，未加载CodeType或编译；不是192项已补齐。见
+[输入与明确执行预算](../artifacts/experiments/lewm_remaining_compiler_witnesses_20261026/REPORT.md)。
+
 后继外部source-entry真实批次40479已actual exit0 / 958.56s：完整50入口中26成功、
 7不支持、17因worker时限未尝试；没有FAILED或无终态的STARTED。26原SP5均经普通
 source/code reader，压59,422,305B / 解516,098,986B留本地原URI及双SHA。
