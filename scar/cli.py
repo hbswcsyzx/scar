@@ -397,6 +397,22 @@ def main(argv=None) -> int:
     native_inputs.add_argument("--out", help="write a fresh result")
     from scar.analysis.native_input_query import query_native_inputs_cli
     native_inputs.set_defaults(func=query_native_inputs_cli)
+    native_ports = sub.add_parser("query-native-ports", help="query native operation ports from one compressed source-range fragment")
+    native_ports.add_argument("--index", required=True, help="native port publication index.json")
+    native_ports.add_argument("--sha256", required=True, help="expected index SHA256")
+    native_ports.add_argument("--ordinal", type=int, help="original ETO source node ordinal; omit for index summary")
+    native_ports.add_argument("--bundle", help="original bundle-partitions directory; required with ordinal")
+    native_ports.add_argument("--out", help="write a fresh result")
+    from scar.trace.native_ports_cli import query_native_ports_cli, build_native_ports_cli
+    native_ports.set_defaults(func=query_native_ports_cli)
+    native_port_build = sub.add_parser("build-native-ports", help="stream a retained ETO into port fragments without rerunning the target or importing its graph")
+    native_port_build.add_argument("--eto", required=True, help="retained ETO gzip")
+    native_port_build.add_argument("--archive-index", required=True)
+    native_port_build.add_argument("--archive-sha256", required=True)
+    native_port_build.add_argument("--bundle", required=True, help="original bundle-partitions directory")
+    native_port_build.add_argument("--out", required=True, help="fresh fragment publication directory")
+    native_port_build.add_argument("--shard-size", type=int, default=4096)
+    native_port_build.set_defaults(func=build_native_ports_cli)
     resource_query = sub.add_parser("query-os-file-topology", help="follow original OS file-use records and sourced resource connections")
     resource_query.add_argument("--manifest", required=True)
     resource_query.add_argument("--sha256", required=True)
@@ -415,6 +431,8 @@ def main(argv=None) -> int:
     model_run.add_argument("--out", required=True)
     model_run.add_argument("--plan-only", action="store_true", help="read bounded metadata only; no raw streams or compilation")
     model_run.add_argument("--resume", action="store_true", help="preserve old attempts and create a fresh attempt")
+    model_run.add_argument("--source-entry-profile", choices=("latest", "legacy"), default="latest",
+                           help="source-entries selects supported syntax automatically by default; legacy preserves the old capability policy")
     for name, default in (("metadata-bytes", 2_000_000), ("raw-bytes", 64_000_000),
                           ("record-bytes", 64_000_000), ("output-bytes", 128_000_000),
                           ("calls", 256), ("codes", 128), ("source-files", 4),
@@ -1588,6 +1606,8 @@ def _normalize_v2(args) -> int:
 def _model_run(args) -> int:
     from scar.analysis.model_run import DependencyRunBudget, ModelRunBudget, run_dependency_admission, run_model
     tokens = args._model_run_options
+    if '--source-entry-profile' in tokens and args.stage != 'source-entries':
+        raise SystemExit('--source-entry-profile applies only to --stage source-entries')
     if args.from_model_run is not None and args.stage == "source-entry-bindings":
         from scar.analysis.source_entry_run import SourceEntryBindingBudget, run_source_entry_binding_stage
         if any(option.startswith(("--max-", "--dependency-", "--entry-")) for option in tokens):
@@ -1611,7 +1631,8 @@ def _model_run(args) -> int:
             options[name] = getattr(defaults, name) if value is None else value
             sources[name] = "SOURCE_ENTRY_PROFILE_DEFAULT" if value is None else "CLI:--entry-" + name.replace("_", "-")
         report = run_source_entry_stage(args.from_model_run, args.out, plan_only=args.plan_only,
-            resume=args.resume, budget=SourceEntryRunBudget(**options), budget_sources=sources)
+            resume=args.resume, budget=SourceEntryRunBudget(**options), budget_sources=sources,
+            source_entry_profile=('PYTHON_SOURCE_ENTRY_314_CAPS_V2' if args.source_entry_profile == 'latest' else None))
     elif args.from_model_run is not None:
         if args.stage != "dependency-sources" or any(option.startswith(("--max-", "--entry-", "--binding-")) for option in tokens):
             raise SystemExit("--from-model-run requires --stage dependency-sources; use --dependency-max-* budgets")

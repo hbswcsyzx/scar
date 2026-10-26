@@ -1,5 +1,20 @@
 # 从已有采集自动组织建模
 
+最新source-entry阶段默认自动选择已实现语法，无须逐个指定capability：
+
+```bash
+python -B -m scar.cli model-run --from-model-run DEPENDENCY_RUN/model-run.json \
+  --stage source-entries --out fresh-entry-run
+```
+
+CLI默认`--source-entry-profile latest`，对应`PYTHON_SOURCE_ENTRY_314_CAPS_V2`。
+原entry/catalog/readonly CodeWitness解析后，准确的own-function AST自动选择Try、
+expanded-call、nested-function、import能力。策略写入plan digest，每次实际选择记录
+active capabilities；缺依据保原frontier。`legacy`与API默认None保留旧能力选择。
+这还没有迁移纯source-only inventory的默认能力，也没有完成所有语法或自动发布/绑定。
+一次真实import入口自动选择并普通读回148ops，12.086s、compile0，原SP5双SHA不变；
+记录见`artifacts/analysis/source_entry_auto_profile_20261026/`。
+
 `source-entry-bindings` 通用 CLI 现同时支持 project 与 dependency 的原 SP5。
 2026-10-26 同一次 generic CPU 采集的后段实际退出 0：schema2 publication 包含
 两个 project REVISE_GRAPH 和一个 dependency ADD_GRAPH；普通 qualified reader

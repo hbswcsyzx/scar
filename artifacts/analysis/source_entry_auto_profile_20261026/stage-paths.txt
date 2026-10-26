@@ -1,0 +1,16 @@
+scar/analysis/source_frontend_worklist.py
+artifacts/analysis/source_entry_auto_profile_20261026/REPORT.md
+artifacts/analysis/source_entry_auto_profile_20261026/SOURCE_RECEIPTS.json
+artifacts/analysis/source_entry_auto_profile_20261026/plan/dispatch.json.gz
+artifacts/analysis/source_entry_auto_profile_20261026/plan/entries.json.gz
+artifacts/analysis/source_entry_auto_profile_20261026/plan/groups.json.gz
+artifacts/analysis/source_entry_auto_profile_20261026/plan/plan.json
+artifacts/analysis/source_entry_auto_profile_20261026/receipt.json
+artifacts/analysis/source_entry_auto_profile_20261026/run.py
+artifacts/analysis/source_entry_auto_profile_20261026/stderr.txt
+artifacts/analysis/source_entry_auto_profile_20261026/stdout.jsonl
+artifacts/analysis/source_entry_auto_profile_20261026/worker/attempt-00001/result.json
+artifacts/analysis/source_entry_auto_profile_20261026/worker/attempt-00001/started.json
+artifacts/analysis/source_entry_auto_profile_20261026/worker/attempts.jsonl
+artifacts/analysis/source_entry_auto_profile_20261026/worker/manifest.json
+artifacts/analysis/source_entry_auto_profile_20261026/stage-paths.txt

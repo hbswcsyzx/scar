@@ -143,10 +143,12 @@ def _terminal(path, reader):
 
 
 def run_source_entry_stage(model_run_path, out, *, plan_only=False, resume=False,
-                           budget=SourceEntryRunBudget(), budget_sources=None):
+                           budget=SourceEntryRunBudget(), budget_sources=None, source_entry_profile=None):
     if type(budget) is not SourceEntryRunBudget or type(plan_only) is not bool or type(resume) is not bool:
         raise ValueError('source-entry stage requires exact budget and Boolean options')
     budget.__post_init__()
+    if source_entry_profile not in (None, 'PYTHON_SOURCE_ENTRY_314_CAPS_V2'):
+        raise ValueError('unsupported automatic source-entry frontend profile')
     root, source = Path(out).absolute(), Path(model_run_path).absolute()
     if root != root.resolve() or source != source.resolve():
         raise ValueError('source-entry input/output must be canonical')
@@ -190,6 +192,8 @@ def run_source_entry_stage(model_run_path, out, *, plan_only=False, resume=False
             'wall': 'worker between tasks plus required external timeout',
             'cumulative_stored_plus_decoded_input_io': 'OPEN'},
         'resume_policy': 'fresh source-entry attempt; no dependency/raw/native/OS replay or ownership restoration'}
+    if source_entry_profile is not None:
+        result['source_entry_profile'] = source_entry_profile
     if previous is not None:
         result['previous_attempt'] = {'path': previous['attempt'], 'status': previous['status']}
     _publish(attempt / 'started.json', {'input': str(source), 'implementation': implementation,
@@ -221,7 +225,7 @@ def run_source_entry_stage(model_run_path, out, *, plan_only=False, resume=False
             'raw_read': False, 'graph_decode': False, 'lower_run': False}, maximum=budget.max_report_bytes)
         result['status'] = 'BLOCKED' if blockers else 'METADATA_PLANNED_WITH_OPEN'
         if not blockers and not plan_only:
-            _execute(inputs, attempt, result, budget)
+            _execute(inputs, attempt, result, budget, source_entry_profile=source_entry_profile)
     except BaseException as error:
         result.update(status='FAILED', failure={'type': type(error).__name__, 'detail': str(error)})
     finally:
@@ -242,7 +246,7 @@ def run_source_entry_stage(model_run_path, out, *, plan_only=False, resume=False
     return navigation
 
 
-def _execute(inputs, attempt, result, budget):
+def _execute(inputs, attempt, result, budget, *, source_entry_profile=None):
     from scar.analysis.code_witness import CodeWitnessBudget
     from scar.analysis.compiler_witness_archives import CompilerArchiveBudget, CompilerWitnessArchives
     from scar.analysis.source_attachments import SourceAttachmentBudget, SourceAttachments
@@ -285,7 +289,9 @@ def _execute(inputs, attempt, result, budget):
             max_source_bytes=budget.max_source_bytes, max_operations_per_body=budget.max_operations_per_body,
             max_total_operations=budget.max_total_operations, max_record_bytes=budget.max_record_bytes,
             max_output_bytes=budget.max_output_bytes, max_elapsed_seconds=budget.max_seconds)
-        plan = plan_source_entries(catalog, budget=worker_budget, out_dir=stage / 'plan')
+        profile_options = ({'source_entry_profile': source_entry_profile}
+                           if source_entry_profile is not None else {})
+        plan = plan_source_entries(catalog, budget=worker_budget, out_dir=stage / 'plan', **profile_options)
         worker = run_source_entries(plan, stage / 'worker', budget=worker_budget, progress=progress)
         worker.require_unchanged()
         after = [dict(archives.store_for(ref).counts) for ref in archives.receipts()]

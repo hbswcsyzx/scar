@@ -45,17 +45,21 @@ OS、driver、allocator 的内部算法、完整 FD 表、SASS/机器指令和�
 ## 当前已落实和紧接着要做的事
 
 - 源前端新增 expanded call、函数 Try、nested function 能力已合入主分支；归并后的
-  243 个外部入口为 186 个可恢复、56 个未支持、1 个 resumable adapter 缺口。
-  这是源恢复结果，不是全部已接回动态调用。下一项先补剩余入口中的通用 import 语句。
+  函数内 import 又恢复4个完整body；243个外部入口现在190个可恢复、52个未支持、
+  1个 resumable adapter 缺口。这是源恢复结果，不是全部已接回动态调用。下一项补With。
 - 161 个旧成功入口已正常发布；新能力对应的 body 还需按原 ID 接回正式模型。
   不重跑已完成的整批普通发布/读取。
 - 精简 Region 视图已实现并对真实函数验证：239 操作→134 展示节点；714 Use、
   76 状态访问、121 控制边保留。折叠语言管理编码不等于删除运行工作。
 - 跨函数 normal return 查询已接入 CLI。真实 LeWM 的一条调用可从原参数端口
   追到 callee 的两个可能 normal return，再到 caller 结果；未声称观测到具体返回分支。
-- source context/body 分离已实现：两个真实函数共用一次 context。正接入通用存储/
-  区域查询入口；旧格式兼容。native 端口当前仅完成 128 个原节点窗口，下一步做
-  单次流式完整生成和分片，不能把窗口探针当全程序功能。
+- source context/body分离已接入通用存储/区域查询入口：两份真实SP5共用一次context，
+  5.15MB→2.74MB，原图视图相同。旧格式兼容，现publisher尚待迁移。
+- 最新source-entry profile已自动按原函数AST选择已实现的Try/expanded-call/nested/
+  import能力；model-run source-entries默认选择latest，API旧None/CLI legacy保留。
+  它仍要求正常entry及readonly CodeWitness，不把选择策略当作运行对应证明。
+- native端口全源流式生成已实际完成：310412原节点、230818算子实例、1256501端口，
+  76片压缩后约22MB；正在接入主树通用生成/局部查询，不等于全数据/状态依赖已闭合。
 - 旧完整 capture 可复用。最新扩张采集发生 frame 丢失和 operand 提前停止，
   下一 profile 只细采静态不能确定的必要接口；不为小字段反复跑 episode。
 - 最后集中补值/状态/物化及 IO 接口的必要跨层连接，生成可查询全链并汇报。

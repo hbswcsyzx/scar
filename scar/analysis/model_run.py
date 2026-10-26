@@ -552,6 +552,27 @@ def _execute_stages(capture, attempt, plan, result, budget):
 
     coordinates, coordinate_stage = stages.call("source-coordinates", bind_capture_coordinates, source_coordinates)
     link("source_coordinates", coordinate_stage / "capture-coordinates.json")
+
+    retention = coordinates.report.get('retention', {})
+    native_storage = capture_report.get('native_bundle_storage', {})
+    if retention.get('mode') == 'lossless_archive' and native_storage.get('kind') == 'partitioned':
+        from scar.trace.native_port_sidecar import build_native_port_publication
+        members = [row for row in coordinates.report['membership']
+                   if row['artifact']['schema'] == 'pytorch.execution-trace.v1']
+        if len(members) != 1:
+            raise ValueError('native port stage needs one original ETO membership')
+        member = members[0]
+        source = member.get('local_path', member['artifact']['uri'])
+        port_index, port_stage = stages.call('native-ports', build_native_port_publication,
+            lambda stage: build_native_port_publication(source, capture / 'archive-index.json',
+                retention['archive_sha256'], Path(native_storage['manifest']).parent, stage / 'ports'))
+        link('native_ports', port_stage / 'ports' / 'index.json')
+        result['native_port_summary'] = {'source_nodes': port_index.source_nodes,
+            'operation_rows': port_index.operation_rows, 'input_ports': port_index.input_ports,
+            'output_ports': port_index.output_ports, 'classification_counts': port_index.classification_counts,
+            'whole_model_established': False}
+    else:
+        result['native_port_scope'] = 'not generated: this route lacks a lossless ETO archive or partitioned bundle'
     project_root = plan["origins"]["project_root"]["value"]
 
     def seeds_stage(stage):

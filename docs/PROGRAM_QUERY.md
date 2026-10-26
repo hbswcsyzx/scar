@@ -134,3 +134,33 @@ provider位置和元数据来源；这是保留产物查询，不恢复producer�
 denotation限定端点；普通typed样例读回核对ValueOccurrence及实际UseOccurrence复合
 端点，不制造新的UseOccurrence ID。原metadata manifest只用于行查询，端口关联须
 使用port-navigation manifest。查询不建立内容、alias、状态或ready事实。
+
+## 全量原生输入输出端口
+
+```bash
+python -m scar.cli build-native-ports \
+  --eto PATH/execution-trace.json.gz \
+  --archive-index PATH/archive-index.json --archive-sha256 EXPECTED_SHA256 \
+  --bundle PATH/bundle-partitions --out fresh-native-ports
+
+python -m scar.cli query-native-ports \
+  --index PATH/native-ports/index.json --sha256 EXPECTED_INDEX_SHA256 \
+  --bundle PATH/bundle-partitions --ordinal 16
+```
+
+生成器单次流式解析整个原ETO，顺序复用原instance，共享definition/schema/provider
+引用，按source ordinal分片；不再限制为前128个节点。分片确定性gzip，index保存
+stored/decoded收据，局部查询只解一片。省略ordinal只读小index和计数。
+新的model-run bootstrap在已有lossless coordinates及partitioned native bundle后
+调用同一producer；plain旧route保留。此接线已实现，未为它重跑完整bootstrap/import。
+
+真实全源310412节点中，190498项registered schema、40320项无schema CPU算子，
+共230818原实例/1256501个有序端口。79592注释不另造操作；另2项是原provider的
+thread/process根，保在原bundle中。76压缩片合计22030062B，包含index共22059963B。
+构建与首次查询163.811s；压缩后主树public CLI局部查询exit0/1.551s。
+bulk分片在本机两工作树间硬链接，共享原不可变内容，没有复制额外22MB数据。
+
+方向/path/type、既有formal slot及Tensor provider/descriptor引用来自原记录；
+非Tensor formal缺口仍明确保留。端口观察不证明normal完成、LogicalVersion相等、
+alias/写入或ready，不能拿这些计数当全程序图完成。实际记录位于
+`artifacts/analysis/native_port_sidecar_full_20261026/`。

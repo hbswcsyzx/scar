@@ -214,6 +214,9 @@ class StructuredEnvironmentBuilder(StructuredBuilder):
             elif isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)) and self.has_language('NESTED_FUNCTION_314_V1'):
                 from scar.analysis.source_function_definition_lowering import lower_function_definition
                 cursor = lower_function_definition(self, node, cursor)
+            elif isinstance(node, (ast.Import, ast.ImportFrom)) and self.has_language('FUNCTION_IMPORT_314_V1'):
+                from scar.analysis.source_import_lowering import lower_import
+                cursor = lower_import(self, node, cursor)
             elif isinstance(node, ast.AnnAssign):
                 cursor = annotated_assignment(self, node, cursor)
             elif isinstance(node, ast.Assert):
