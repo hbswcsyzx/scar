@@ -40,7 +40,10 @@ S1 审计、已有数据的 S3 接线和独立产品复核可以并行；会改�
 - 同一新 CPU capture 的 project/dependency 正常函数统一出版和普通绑定，实际核
   原来源、命名空间、ADD/REVISE 和父版本，不拼接旧样例，不重新 lower 已有产物。
 
-两项均已合入；下一步先审同一SP8异常传播/清理接点，然后继续实际数据/状态及资源完成关系。
+两项均已合入；同一SP8异常传播/清理C方案已审，授权最小六源在隔离树实现，尚未验收。
+先核传播端口与pending frame-exit的真实API，再接现C0/C1及except-as两条清理走廊；
+见[原设计与实施决定](../artifacts/analysis/module_try_propagation_c_plan_20261026/ROOT_DECISION.md)。
+随后继续实际数据/状态及资源完成关系。
 资源薄bridge仅有[有界方案](../artifacts/analysis/resource_completion_bridge_20261025/PLAN.md)，
 未授权实现：已保存GPU活动区间不能直接授COMPLETED或value ready，先解决具体证据合同。
 完整LeWM链、CP2未知成本和历史失败均保留。详见[入口](MODEL_RUN.md)及上述三项工作表。
