@@ -1,0 +1,16 @@
+{
+  "root_session": 48283,
+  "actual_exit_code": 1,
+  "actual_terminal": "artifacts/experiments/source209_model_20261026/result/terminal.json",
+  "terminal_sha256": "e7344b70fe1d8a6284b9ef2833946740257d91ad0cfb0403ca02c8c4b640c0f8",
+  "old_run_status": "FAILED_RETAINED_WITH_OPEN",
+  "entry_statuses": {
+    "SUCCEEDED": 63,
+    "UNSUPPORTED": 49,
+    "FAILED": 17,
+    "PENDING_NOT_STARTED": 80
+  },
+  "failure": "Original main-tree evidence files removed by sparse checkout during Root Git archival; 17 identical FileNotFoundErrors.",
+  "resume_scope": "Separate 97-entry successor; old completed or unsupported entries not retried.",
+  "first_stage_complete": false
+}

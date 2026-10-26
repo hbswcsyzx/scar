@@ -1,0 +1,1 @@
+{"detail":"[Errno 2] No such file or directory: '/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_dependency_continuation_20261023/result/continuation.json'","plan_sha256":"2a385b64a33bbd7845d778b8cd9152e9010b60522a35a5acc0bce6a4b21e1937","status":"BUILDING_FAILED_RETAINED","type":"FileNotFoundError"}
