@@ -1,0 +1,35 @@
+{
+  "automatic_retry_or_resume": false,
+  "code_witness_activity": {
+    "compile_attempts": 0,
+    "complete_descriptor_matches": 242,
+    "module_loads": 20,
+    "source_bytes_read": 0
+  },
+  "detail": "'OperandRouteModel' object has no attribute 'arguments'",
+  "elapsed_s": 2365.628577445983,
+  "first_stage_complete": false,
+  "last_api_stage": "SOURCE_CALL_PORTS_BUILT",
+  "max_rss_kib": 2323504,
+  "owned_ancestor_reader_counts": {
+    "decoded_bytes": 309251028,
+    "parent_compositions": 4,
+    "parent_inventories": 4
+  },
+  "partial_outputs_retained": true,
+  "phase": "current-output-denominator-and-namespace-audit",
+  "reader_counts": {
+    "captured_codes": 855,
+    "completed_source_checkpoints": 0,
+    "entries": 100438,
+    "environment_scans": 1,
+    "exits": 100438,
+    "frame_scans": 1,
+    "operand_events": 312812,
+    "operand_scans": 1,
+    "source_binder_runs": 1
+  },
+  "traceback": "Traceback (most recent call last):\n  File \"/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/source_call_port_bindings_20261026/candidate04/run.py\", line 241, in main\n    port_result = port_consumer.compare_legacy(report.routing)\n  File \"/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/source_call_port_bindings_20261026/candidate04/port_consumer.py\", line 96, in compare_legacy\n    old={route.attempt for route in (*routing.arguments,*routing.completions)}\n                                      ^^^^^^^^^^^^^^^^^\nAttributeError: 'OperandRouteModel' object has no attribute 'arguments'\n",
+  "transformation_authorized": false,
+  "type": "AttributeError"
+}
