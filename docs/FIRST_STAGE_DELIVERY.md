@@ -1,6 +1,6 @@
 # 第一阶段交付：自动恢复整个程序及其资源
 
-日期：2026-10-25。状态：**OPEN**。验收标准以
+日期：2026-10-26。状态：**OPEN**。验收标准以
 [FIRST_STAGE_MODEL_CONTRACT.md](FIRST_STAGE_MODEL_CONTRACT.md) 为准。
 本文件统一当前执行顺序；历史 F 系列组件编号不构成串行开发队列。
 
@@ -17,6 +17,12 @@ GPU活动（22457kernel/543copy/1082memset）获得单activity静止关系，220
 79428 actual0/101.88s，源/端点/错producer校验通过，原IR没有新Outcome或ready真值。
 程序snapshot/owner与state/materialization/visibility仍待跨片模型接线，见
 [完整资源结果](../artifacts/experiments/native_activity_work_memset_main_20261026/REPORT.md)。
+
+**原归档源码入口：** 已自动取得16个外部descriptor所需的8个模块编译见证；主树
+普通readonly消费16 matches/8 loads/compile0，实际0.61s。它保留原272038静态来源，
+不改变当前369749运行的858/6882指针。接下来由普通source-entry worker自动调度
+可用源码，补continuation出版和当前运行对应；见
+[实际消费](../artifacts/experiments/lewm_archived_compiler_main_consumer_20261026/REPORT.md)。
 
 **当前模块C的有限结果：** 同SP8已表达Try传播pair与except-as正常/异常两条清理路径，
 原C0/C1 validator及normal reader通过；主树同图与旧function SP5读回通过。

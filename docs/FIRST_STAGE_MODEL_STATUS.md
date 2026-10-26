@@ -18,6 +18,19 @@ unresolved4964全部保留。静态仍151files/2217definitions/858active bodies�
 实体和完整性定义见 [合同](FIRST_STAGE_MODEL_CONTRACT.md)。以下是按日期保留的
 实施记录；其中“进行中”仅指该条写入时状态，不作为当前进程存活证明。
 
+### 2026-10-26：原归档源码的编译见证入口已接入
+
+通用 SourceAttachments → CodeWitnessStore 入口已合入 f9467972；原源码的编码、
+raw/normalized fingerprint、来源 locator 和 owner 保留。独立静态门从自动窗口
+16 个 descriptor / 8 份源码生成 8 个编译模块，随后 readonly 完整重验通过。
+主树普通 consumer 实际 exit0 / 0.61s：16 matches、8 loads、compile0，声明载荷845328B；
+未重读大图、未 lower 或执行目标。见
+[原静态门](../artifacts/experiments/lewm_archived_compiler_gate_20261026/REPORT.md)和
+[主树消费](../artifacts/experiments/lewm_archived_compiler_main_consumer_20261026/REPORT.md)。
+这些是原272038采集的静态证据，不能计入当前369749运行的6882次body-linked calls。
+下一项是让普通 source-entry worker 消费已可用的外部源码，再通过明确的
+continuation publication 和当前运行静态对应关系接入；不伪造direct-admissions或动态身份。
+
 ### 2026-10-26：C 模块Try与异常清理接入
 
 同SP8的C显式profile当前为354ops/2regions、9顶层接口/12stmt记录，精确余2句；

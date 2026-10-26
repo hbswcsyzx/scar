@@ -96,7 +96,7 @@ held109288/未定1901，几何107483/缺口3706。GNU28:41.75，peak1091472KiB�
 | 分工 | 具体模型断口 | 下一项实际验收 |
 | --- | --- | --- |
 | native接入 | 全dispatch端口门已通过；逻辑内容/state/ready仍缺关系 | 保留全部动态资格与原分母；后继连接原生值、状态和资源，而非再跑prefix |
-| source-call前端 | 65窗口产12成功图；原12ADD publication经修consumer后已组合为858静态快照，12普通reader通过，旧失败保留 | 汇总增量接线；runtime仍843，179calls仅潜在权重；原2FAILED/后续重试不在本12ADD，保留unwind/outer/effects和comprehension等缺口 |
+| source-call前端 | 858静态快照已在完整当前capture重新接线，6882次调用对应92个body groups；原归档源码的16个descriptor编译见证也已普通消费 | 自动调度外部source-entry，补continuation出版和当前运行静态复用接线；状态/环境/效果仍独立验收，不将历史权重当运行增量 |
 | main组合查询 | 实际79592/39796完整一次导航门已exit0，5个不同角色的查询样本通过 | 160压缩块及一个派生关系样本独立复核通过；后继补实际数据/状态/控制连接，不把context当direct call |
 
 计划及来源分别在`artifacts/analysis/kwargs_expansion_design_20261025`和
