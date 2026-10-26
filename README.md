@@ -9,6 +9,7 @@
 按可组合片段组织，原始事件及验证材料按需引用，不全部变成主图节点。
 
 - [建模范围审计及收敛决定](docs/MODELING_SCOPE_AUDIT.md)：当前哪些保留、折叠、移到证据或停止展开。
+- [第一阶段四项核心功能与实施顺序](docs/FIRST_STAGE_IMPLEMENTATION_PLAN.md)：拆解、连图、轻量存取、LeWM全链自动生成；开发者自行验收。
 - [实体、关系及完整性合同](docs/FIRST_STAGE_MODEL_CONTRACT.md)：什么东西需要建模、什么叫连接完整。
 - [图的节点、边与采集职责](docs/GRAPH_MODEL_GUIDE.md)：程序如何对应强类型记录，如何自动连接及递归展开。
 - [已实现的跨层查询入口](docs/PROGRAM_QUERY.md)：work到源码、跨函数端口和OS文件资源引用。

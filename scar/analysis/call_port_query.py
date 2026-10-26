@@ -75,7 +75,7 @@ def query_call_ports(model_path, *, expected_sha256, invocation=None,
             after.st_dev, after.st_ino, after.st_size, after.st_mtime_ns, after.st_ctime_ns):
         raise ValueError("source port model changed during query")
     bindings, issues, matched, issue_count = [], [], 0, 0
-    for binding in model.bindings:
+    for binding_index, binding in enumerate(model.bindings):
         owner = getattr(binding, direction) if version == 1 else getattr(binding.entry, direction)
         if invocation is not None and owner != invocation:
             continue
@@ -88,6 +88,7 @@ def query_call_ports(model_path, *, expected_sha256, invocation=None,
         matched += 1
         if len(bindings) < limit:
             item = encode(binding)
+            item["binding_index"] = binding_index
             item["ports" if version == 1 else "arguments"] = encode(ports)
             # v2 receiver is an independent callable projection. It retains
             # no actual index and is never shifted into explicit arguments.

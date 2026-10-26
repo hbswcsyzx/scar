@@ -1,0 +1,1 @@
+Retain only this directory's small before-source snapshots, semantic-merge/application/source receipts, two actual runner/result/stdout/stderr pairs and report. Inputs are referenced at their original source-entry-project URIs; do not duplicate the context/body/original SP5 archives. No main index operation was performed.

@@ -74,6 +74,44 @@ argument ports。选中真实callee 40398的第0参数，查询准确返回`to_p
 原runner最后的legacy比较字段写错，原exit1保留；生产consumer已完成，独立postflight
 核原输入并确认旧27条调用关系全部保留。查询成功不改变该失败历史。
 
+查询现在同时返回原 `binding_index`，可继续追正常返回：
+
+```bash
+python -m scar.cli query-source-returns \
+  --model PATH/model.json.gz --sha256 EXPECTED_STORED_SHA256 --binding-index 0
+```
+
+它复用原 caller/callee 命名空间、callee 的 NORMAL terminal Use 和 caller 的
+CompletionResult(0)/landing Value；world 不混成返回对象。原状态端口仍在规范图中，
+此命令尚不新增跨调用 world 连接。
+多个返回点保持带条件的 may-sites，不能据此认定运行中选中了哪个返回点。
+真实 LeWM 的 `DrawOptions.draw_fat_segment → to_pygame` 已用 public CLI 贯通；
+两个可能返回点均保留，实际返回选择、对象同一及内容等价未证。
+首次真实读取暴露旧压缩 composition/checkpoint 适配遗漏，已按其原格式补齐。
+正常 CLI exit0/31.318s，读取24.15MB stored/182.37MB decoded，body仅解码/建索引各两次；
+会话内可复用，整份旧 binding/composition 读取仍较重，尚非轻量全局查询。
+记录见 `artifacts/experiments/source_normal_return_main_20261026/lewm-query.json`。
+
+## 精简且可展开的源程序区域
+
+```bash
+python -m scar.cli query-source-region \
+  --source PATH/body.json.gz --sha256 EXPECTED_STORED_SHA256 --out view.json
+```
+
+接受原 SourceProgram、body checkpoint、canonical ProgramGraph 和独立 body fragment。
+`--region`选择原 Region，`--expand-lowering`显示原语言管理步骤。默认只合并同一
+原 Block 内连续的已知管理编码，不跨分支任意合并同类节点；未知操作仍可见。
+`ProgramRegionView.expand()`返回原操作，`value()`返回原值及消费者。Use/Value/
+Operation/Region ID 保持原命名空间；展示节点键仅在本次查询有效。
+
+真实239操作样本显示134节点，714次Use分为628跨节点和86内部Use，76状态访问及
+121控制边保留。每个原操作恰属一个展示节点，控制/退出/效果未删除。这个命令
+只读规范core结构，不重新验证全部source context，不授变换许可。
+记录见 `artifacts/experiments/program_region_view_20261026/verification.json`。
+
+### 文件资源引用
+
 OS查询返回原syscall/work/actor/handle依据及逐项资源路径；不将路径导航候选当作
 已绑定的文件身份。本次checkpoint查询能找到原read和work，状态明确为共享/未知
 FD绑定未决，`resource_path`为空；不能宣称已经连接到NVMe。

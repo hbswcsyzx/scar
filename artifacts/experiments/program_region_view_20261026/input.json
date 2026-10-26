@@ -1,0 +1,9 @@
+{
+  "decoded_bytes": 23597704,
+  "decoded_sha256": "5e6a033281356a3762b01f7efe6f4e6455e69d66f19ea5e7d9d6832e578a3b68",
+  "external": true,
+  "physical_bytes": 2590757,
+  "physical_sha256": "acce74d47f201df1443afe76ba20427564049c379dc5e074d3dc0e3d92f62f76",
+  "representation": "scar.source-program/5",
+  "uri": "/home/zyf/AAA/scar-worktrees/source-try-model/artifacts/experiments/function_try_real20_20261026/result/batch-01/worker/attempt-00004/source-program5.json.gz"
+}
