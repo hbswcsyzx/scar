@@ -1,0 +1,31 @@
+{
+  "graph_CodeType_decode": false,
+  "transports": [
+    {
+      "logical_original": {
+        "bytes": 1958779,
+        "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/lewm_remaining_compiler_gate_20261026/workset.json",
+        "sha256": "ce76e38e00a5d564604bfc73d6190cd255aa1c9780e4a4c4084e025d147f7df7"
+      },
+      "representation": "gzip of exact original metadata bytes, original logical URI unchanged",
+      "stored_transport": {
+        "bytes": 145648,
+        "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/lewm_remaining_compiler_gate_20261026/workset.json.gz",
+        "sha256": "ee7162bf5cc8d0300f3137da60268e6f892f9dc7c515b87cd7df1d50d207a27e"
+      }
+    },
+    {
+      "logical_original": {
+        "bytes": 1527192,
+        "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/lewm_remaining_compiler_gate_20261026/result/plan.json",
+        "sha256": "dae5c57685a460bea17928346acae58e0ce12f10c116f407fc75288da170cf3d"
+      },
+      "representation": "gzip of exact original metadata bytes, original logical URI unchanged",
+      "stored_transport": {
+        "bytes": 109542,
+        "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/lewm_remaining_compiler_gate_20261026/result/plan.json.gz",
+        "sha256": "c5c7b4239834699803bb5ca5c21cde9958779f5e302d2a9bb7ec57663432a8c8"
+      }
+    }
+  ]
+}

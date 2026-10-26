@@ -20,10 +20,14 @@ unresolved4964全部保留。静态仍151files/2217definitions/858active bodies�
 
 ### 2026-10-26：原归档源码的编译见证入口已接入
 
-剩余192个缺编译见证的候选也已通过正常metadata API全量规划：94份原源码、
-94个preferred keys、237个recorded variants，snapshot缺失0、编译build匹配。
-实际读取226,887,533B，未加载CodeType或编译；不是192项已补齐。见
-[输入与明确执行预算](../artifacts/experiments/lewm_remaining_compiler_witnesses_20261026/REPORT.md)。
+剩余192个缺编译见证的候选已真实补齐：88049 actual exit0 / 43.28s，94份原源码
+编译94个模块，独立readonly载入94模块并完整匹配192个descriptor、compile0。
+实际metadata1,938,365,549B / code8,195,834B，pending0；三个旧archive成员及字节未改。
+这仅关闭该192项的历史静态CodeType见证，不增加canonical body或当前运行绑定；
+831个runtime文件是冻结范围，不声称全部实际执行。见
+[实际全量结果](../artifacts/experiments/lewm_remaining_compiler_gate_20261026/REPORT.md)；
+此前[metadata计划](../artifacts/experiments/lewm_remaining_compiler_witnesses_20261026/REPORT.md)
+保留为原准备范围。
 
 后继外部source-entry真实批次40479已actual exit0 / 958.56s：完整50入口中26成功、
 7不支持、17因worker时限未尝试；没有FAILED或无终态的STARTED。26原SP5均经普通
