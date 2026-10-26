@@ -4,6 +4,12 @@
 [FIRST_STAGE_MODEL_CONTRACT.md](FIRST_STAGE_MODEL_CONTRACT.md) 为准。
 本文件统一当前执行顺序；历史 F 系列组件编号不构成串行开发队列。
 
+**当前模块C的有限结果：** 同SP8已表达Try传播pair与except-as正常/异常两条清理路径，
+原C0/C1 validator及normal reader通过；主树同图与旧function SP5读回通过。
+当前354ops/9顶层接口，精确余2句REQUIRED；实际namespace/传播/runtime/状态仍OPEN。
+原构建窗口exit1与独立postflight0分别保留，见
+[准确结果](../artifacts/experiments/module_try_propagation_c_applied_20261026/REPORT.md)。
+
 **2026-10-26最新有限门：** 新同Run CPU样例已通过project/dependency统一正常CLI：
 project2个原槽位REVISE、dependency1个ADD，所有3成功SP5均处理；12calls中10接规范body，
 1 source-only、1 unresolved。不是LeWM增量；五类动态关系仍各12 OPEN。原capture、

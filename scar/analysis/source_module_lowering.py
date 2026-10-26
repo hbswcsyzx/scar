@@ -7,14 +7,14 @@ record remain present. No import/try/other statement execution is invented.
 from __future__ import annotations
 
 import ast
-from dataclasses import replace
+from dataclasses import dataclass, replace
 import hashlib
 import sys
 
 from scar.analysis.program_lowering import _Unsupported, _key, _REF, LoweringMetadata, SourceProgram
 from scar.analysis.structured_lowering import StructuredBuilder
 from scar.analysis.source_language import SourceCodeEvidence
-from scar.ir.program.ids import RegionID, OperationID, UseID
+from scar.ir.program.ids import RegionID, OperationID, UseID, ValueID
 from scar.ir.program.model import (Behavior, ExitKind, Operation, ReferenceValue, StateVersionValue,
     Terminator, TerminatorKind, Use, UseRole)
 from scar.ir.program.module_entries import (ModuleUnitSource, ModuleCodeWitness, ModuleEntryDeclaration,
@@ -114,9 +114,11 @@ class ModuleBuilder(StructuredBuilder):
         if link not in self.value_link_set:self.value_links.append(link);self.value_link_set.add(link)
 
     def use(self,operation,value,node,role,index,*,semantic_value=None):
+        from scar.ir.program.model import ProtocolValue
         record=self.values_by_id[value]
         use_role=(UseRole.REFERENCE if type(record) is ReferenceValue else
-                  UseRole.STATE_CONTENT if type(record) is StateVersionValue else UseRole.DATA)
+                  UseRole.STATE_CONTENT if type(record) is StateVersionValue else
+                  UseRole.PROTOCOL if type(record) is ProtocolValue else UseRole.DATA)
         use=Use(self.fresh(UseID,'module-use'),value,use_role)
         self.use_links.append(ModuleUseSource(operation,use.id,self.source(node),role,index,semantic_value))
         return use
@@ -189,6 +191,8 @@ def lower_module_entry(context,selection,*,code_evidence,max_operations=10000,pr
     if type(max_operations) is not int or not 1<=max_operations<=100000:
         raise ValueError('module operation budget must be in [1,100000]')
     from scar.ir.program.module_entries import ModuleBodyExpansionProfile,FrameBodyProfile
+    if profile is FrameBodyProfile.STRUCTURED_MAPPING_PROPAGATION_314_V1:
+        return PropagationModuleBuilder(context,selection,code_evidence,max_operations).run_module()
     if profile is FrameBodyProfile.STRUCTURED_MAPPING_314_V1:
         return StructuredModuleBuilder(context,selection,code_evidence,max_operations).run_module()
     if profile is ModuleBodyExpansionProfile.IMPORT_PREFIX_314_V1:
@@ -375,7 +379,7 @@ def frame_statement_slice(context, owner, field, nodes):
         point.suite if point else None,point.id if point else None)
 
 
-def mapping_prefix_selection(context, evidence):
+def mapping_prefix_selection(context, evidence, *, profile=None):
     """Maximal contiguous supported statements; no workload/name allowlist."""
     unit=module_unit(context);require_root_evidence(unit,evidence)
     import dis
@@ -414,12 +418,21 @@ def mapping_prefix_selection(context, evidence):
             and all(expression(child) for child in (node.func,*node.args,*(keyword.value for keyword in node.keywords))))
         return False
     def target(node):return isinstance(node,ast.Name) and len([row for row in positioned(node,('STORE_NAME',)) if row.argval==node.id])==1
+    from scar.ir.program.module_entries import FrameBodyProfile
     def statement(node):
         if isinstance(node,ast.Import):return bool(node.names) and all('.' not in alias.name for alias in node.names)
         if isinstance(node,ast.ImportFrom):return bool(node.names) and all(alias.name!='*' for alias in node.names)
         if isinstance(node,ast.Assign):return len(node.targets)==1 and target(node.targets[0]) and expression(node.value)
         if isinstance(node,ast.Expr):return expression(node.value)
         if isinstance(node,ast.For):return target(node.target) and expression(node.iter) and all(statement(child) for child in (*node.body,*node.orelse))
+        if isinstance(node,ast.Try) and profile is FrameBodyProfile.STRUCTURED_MAPPING_PROPAGATION_314_V1:
+            return (node in context.tree.body and len(node.handlers)==1 and not node.orelse and not node.finalbody
+                and node.handlers[0].type is not None
+                and any(isinstance(child,(ast.Assign,ast.For,ast.Import,ast.ImportFrom))
+                    or isinstance(child,ast.Expr) and not isinstance(child.value,(ast.Constant,ast.Tuple)) for child in node.body)
+                and all(not isinstance(child,ast.Try) and statement(child) for child in node.body)
+                and (node.handlers[0].type is None or expression(node.handlers[0].type))
+                and all(not isinstance(child,ast.Try) and statement(child) for child in node.handlers[0].body))
         return isinstance(node,ast.Pass)
     end=0
     for node in context.tree.body:
@@ -440,6 +453,9 @@ class StructuredModuleBuilder(ModuleBuilder):
         self.root_scope=ControlScopeID(_key('module-frame-scope',self.unit.initializer.wire,self.unit.snapshot.fingerprint))
         self.frame_region=RegionID(_key('module-structured-frame',self.unit.initializer.wire,self.unit.snapshot.fingerprint))
         self.prefix_nodes,self.remaining_nodes=mapping_prefix_selection(context,evidence)
+        from scar.ir.program.module_entries import FrameBodyProfile,FrameCompletionProfile
+        self.frame_body_profile=FrameBodyProfile.STRUCTURED_MAPPING_314_V1
+        self.frame_completion_profile=FrameCompletionProfile.RAW_EXCEPTION_REF_314_V1
 
     def old_operation(self,node):
         rows=self.old_by_atom.get(self.source(node).atom_id,())
@@ -609,9 +625,9 @@ class StructuredModuleBuilder(ModuleBuilder):
         else:payload=self.literal(self.tree,None)
         self.finish_exit(cursor,self.tree,payload,ExitKind.NORMAL)
         self.regions.append(self.assemble_region(entry_world))
-        graph=replace(self.make_graph(),root=self.frame_region,state_address_refinements=tuple(self.address_refinements),
-            control_scopes=(ControlScope(self.root_scope,self.frame_region,None,ControlScopeKind.FRAME,self.unit,tuple(self.function_blocks)),),
-            frame_roots=(FrameRoot(self.root_scope,FrameKind.MODULE,self.evidence.captured,abi),))
+        graph=self.finish_module_graph(replace(self.make_graph(),root=self.frame_region,state_address_refinements=tuple(self.address_refinements)),
+            ControlScope(self.root_scope,self.frame_region,None,ControlScopeKind.FRAME,self.unit,tuple(self.function_blocks)),
+            FrameRoot(self.root_scope,FrameKind.MODULE,self.evidence.captured,abi))
         self.module_frontiers.extend((ModuleFrontier(self.unit,'ENTRY_PROTOCOL_UNPROVEN','declared source ABI is not an actual namespace/activation/import binding'),
             ModuleFrontier(self.unit,'NAMESPACE_CONTENT_UNPROVEN','mapping access attempts do not establish stored content or alias/effect completeness')))
         if remaining is not None:self.module_frontiers.append(ModuleFrontier(self.source(self.remaining_nodes[0]),'REQUIRED_EXPANSION',
@@ -619,9 +635,231 @@ class StructuredModuleBuilder(ModuleBuilder):
         overlay=StructuredFrameBodyOverlay(self.declaration,module_source_census(self.prepared_source),self.root_scope,
             frame_statement_slice(self.prepared_source,self.unit,F.BODY,self.prefix_nodes) if self.prefix_nodes else None,
             tuple(self.statement_expansions),remaining,tuple(self.module_frontiers),self.operations_emitted,
-            tuple(self.operation_links),tuple(self.value_links),tuple(self.use_links),tuple(self.protocols),tuple(self.loops),tuple(self.language_constants))
+            tuple(self.operation_links),tuple(self.value_links),tuple(self.use_links),tuple(self.protocols),tuple(self.loops),tuple(self.language_constants),
+            completion_profile=self.frame_completion_profile,profile=self.frame_body_profile)
         result=SourceProgram(graph,LoweringMetadata(self.entry,self.snapshot),self.semantic,self.semantics,self.control,
-            FrameBodyProfile.STRUCTURED_MAPPING_314_V1,module=overlay)
+            self.frame_body_profile,module=overlay)
         from scar.analysis.source_module_validation import require_valid_structured_module_program
         require_valid_structured_module_program(result,source_texts={str(self.prepared_source.path):self.prepared_source.text},code_evidence=self.evidence,max_operations=self.max_operations)
         return result
+
+    def finish_module_graph(self,graph,scope,frame):
+        return replace(graph,control_scopes=(scope,),frame_roots=(frame,))
+
+
+@dataclass(frozen=True)
+class PropagationOperands:
+    """Construction-only references to this canonical completion, never a fact store."""
+    exception: ValueID
+    traceback: ValueID
+
+    def __post_init__(self):
+        if type(self.exception) is not ValueID or type(self.traceback) is not ValueID:
+            raise TypeError('propagation operands require exact canonical ValueIDs')
+
+
+class PropagationModuleBuilder(StructuredModuleBuilder):
+    def __init__(self,context,selection,evidence,max_operations):
+        super().__init__(context,selection,evidence,max_operations)
+        from scar.ir.program.module_entries import FrameBodyProfile,FrameCompletionProfile
+        from scar.ir.program.control import ControlScopeKind
+        self.frame_body_profile=FrameBodyProfile.STRUCTURED_MAPPING_PROPAGATION_314_V1
+        self.frame_completion_profile=FrameCompletionProfile.PROPAGATION_REF_PAIR_314_V1
+        self.prefix_nodes,self.remaining_nodes=mapping_prefix_selection(context,evidence,profile=self.frame_body_profile)
+        self.current_owner=self.root_scope;self.block_owners={}
+        self.scope_specs={self.root_scope:(ControlScopeKind.FRAME,None,self.unit)}
+        self.control_ports=[];self.exception_packets=[];self.pending_completions=[]
+        self.cleanup_interfaces=[];self.cleanup_enters=[];self.cleanup_resumes=[];self.cleanup_replacements=[]
+        self.exception_matches=[];self.failure_sinks=[]
+
+    def raise_payload_types(self):return (_REF,_REF)
+    def failure_payload(self,values):
+        if len(values)!=2:raise ValueError('paired profile requires this invocation exception/traceback results')
+        return PropagationOperands(*values)
+    def exception_reference(self,payload):return payload.exception
+    def failure_references(self,payload):return (payload.exception,payload.traceback)
+
+    def new_block(self,*args,**kwargs):
+        cursor=super().new_block(*args,**kwargs)
+        if self.function_context==self.frame_region:self.block_owners[cursor.block]=self.current_owner
+        return cursor
+
+    def in_owner(self,owner):
+        from contextlib import contextmanager
+        @contextmanager
+        def entered():
+            previous=self.current_owner;self.current_owner=owner
+            try:yield
+            finally:self.current_owner=previous
+        return entered()
+
+    def new_scope(self,kind,node,parent):
+        from scar.ir.program.ids import ControlScopeID
+        identity=self.fresh(ControlScopeID,'source-control-scope')
+        self.scope_specs[identity]=(kind,parent,self.source(node));return identity
+
+    def jump_values(self,cursor,target,values,node):
+        from scar.ir.program.model import Successor
+        identity=self.fresh(OperationID,'source-control-jump')
+        uses=tuple(self.use(identity,value,node,'forwarded',i) for i,value in enumerate((*values,cursor.state)))
+        self.emit(cursor,Operation(identity,'source-control-jump',(Behavior.CONTROL,),uses,
+            terminator=Terminator(TerminatorKind.JUMP,(Successor(target.block,tuple(use.id for use in uses)),))),node,SourceRole.CONTROL)
+        return identity
+
+    def packet(self,cursor,node,payload):
+        from scar.ir.program.control import ExceptionPacketDefinition,ProtocolValueKind
+        from scar.ir.program.model import ProtocolValue,OperationResult
+        from scar.ir.program.ids import ValueID
+        if type(payload) is not PropagationOperands:raise TypeError('packet must use this completion pair')
+        identity=self.fresh(OperationID,'propagation-packet')
+        uses=tuple(self.use(identity,value,node,role,i) for i,(value,role) in enumerate(
+            ((payload.exception,'propagated-exception'),(payload.traceback,'propagation-traceback'))))
+        value=ProtocolValue(self.fresh(ValueID,'propagation-packet'),self.frame_region,OperationResult(identity,0),ProtocolValueKind.EXCEPTION_PACKET)
+        self.add_value(value);self.link_value(value,node,SourceRole.EXCEPTION)
+        self.emit(cursor,Operation(identity,'pack-propagation-pair',(Behavior.CONTROL,),uses,(value.id,),effects_complete=True),node,SourceRole.EXCEPTION)
+        self.exception_packets.append(ExceptionPacketDefinition(value.id,uses[0].id,uses[1].id))
+        return value.id
+
+    def pending(self,cursor,node,port,payload=None):
+        from scar.ir.program.control import PendingCompletionDefinition,ProtocolValueKind
+        from scar.ir.program.model import ProtocolValue,OperationResult
+        from scar.ir.program.ids import ValueID
+        identity=self.fresh(OperationID,'language-pending')
+        uses=() if payload is None else (self.use(identity,payload,node,'language-payload',0),)
+        value=ProtocolValue(self.fresh(ValueID,'language-pending'),self.frame_region,OperationResult(identity,0),ProtocolValueKind.PENDING_COMPLETION)
+        self.add_value(value);self.link_value(value,node,SourceRole.CONTROL)
+        self.emit(cursor,Operation(identity,'pack-language-pending',(Behavior.CONTROL,),uses,(value.id,),effects_complete=True),node,SourceRole.CONTROL)
+        self.pending_completions.append(PendingCompletionDefinition(value.id,port.id,uses[0].id if uses else None))
+        return value.id
+
+    def raise_landing(self,node):
+        """Internal Raise landing, not an exit-port shim containing extra work."""
+        from scar.ir.program.control import ControlPort,LanguageCompletionKind,ProtocolValueKind,ProtocolValueType
+        from scar.ir.program.module_entries import FrameBodyProtocolKind as K
+        from scar.ir.program.ids import ControlPortID
+        with self.in_owner(self.root_scope):
+            landing=self.new_block(node,role=SourceRole.EXCEPTION,extra_types=(ProtocolValueType(ProtocolValueKind.EXCEPTION_PACKET),))
+        packet=self.block_arguments[landing.block][0]
+        held=((packet,node,'selected-propagation-packet'),)
+        held+=tuple((reference,self.tree,'held-namespace') for reference in self.entry_references)
+        held+=tuple((reference,node,'held-temporary') for reference in self.active_temporaries)
+        self.frame_transition(landing,node,held,K.FRAME_EXIT_EXCEPTION_PACKET)
+        identity=self.fresh(OperationID,'propagation-exit')
+        uses=(self.use(identity,packet,node,'packet',0),self.use(identity,landing.state,node,'post-world',0))
+        self.emit(landing,Operation(identity,'propagation-exit',(Behavior.CONTROL,),uses,
+            terminator=Terminator(TerminatorKind.RAISE,exit='raise',values=tuple(use.id for use in uses))),node,SourceRole.EXCEPTION)
+        port=ControlPort(self.fresh(ControlPortID,'frame-raise-landing'),self.root_scope,LanguageCompletionKind.RAISE,block=landing.block)
+        self.control_ports.append(port);return port
+
+    def dispatch(self,cursor,node,pending,port):
+        from scar.ir.program.control import PendingDispatchTerminator,PendingSuccessor,PendingPayload,LanguageCompletionKind
+        identity=self.fresh(OperationID,'language-dispatch')
+        selector=self.use(identity,pending,node,'pending-selector',0)
+        uses=[selector];edges=[]
+        for index,case in enumerate(port if type(port) is tuple else (port,)):
+            state=self.use(identity,cursor.state,node,'dispatch-world',index);uses.append(state)
+            args=(PendingPayload(),state.id) if case.kind is LanguageCompletionKind.RAISE else (state.id,)
+            edges.append(PendingSuccessor(case.id,case.block,args))
+        self.emit(cursor,Operation(identity,'language-dispatch',(Behavior.CONTROL,),tuple(uses),
+            terminator=PendingDispatchTerminator(selector.id,tuple(edges))),node,SourceRole.CONTROL)
+
+    def finish_exit(self,cursor,node,value,kind,*,binding=None):
+        if kind is ExitKind.NORMAL:return super().finish_exit(cursor,node,value,kind,binding=binding)
+        if type(value) is not PropagationOperands:raise TypeError('C raise cannot fabricate missing propagation traceback')
+        if self.failure_sinks:return self.failure_sinks[-1](cursor,value)
+        port=self.raise_landing(node);packet=self.packet(cursor,node,value);pending=self.pending(cursor,node,port,packet)
+        return self.dispatch(cursor,node,pending,port)
+
+    def body_exit(self,cursor,payload,kind):
+        if kind is ExitKind.NORMAL:return super().body_exit(cursor,payload,kind)
+        if type(payload) is not PropagationOperands:raise TypeError('C suffix must retain paired raise')
+        identity=self.fresh(OperationID,'slice-propagation-exit')
+        uses=tuple(self.use(identity,value,self.tree,role,i) for i,(value,role) in enumerate(
+            ((payload.exception,'exception'),(payload.traceback,'traceback'),(cursor.state,'post-world'))))
+        self.emit(cursor,Operation(identity,'slice-propagation-exit',(Behavior.CONTROL,),uses,
+            terminator=Terminator(TerminatorKind.RAISE,exit='raise',values=tuple(use.id for use in uses))),self.tree,SourceRole.EXCEPTION)
+
+    def assemble_region(self,entry_world):
+        from scar.ir.program.control import ProtocolValueType,ProtocolValueKind
+        original=super().assemble_region(entry_world)
+        raise_types=((ProtocolValueType(ProtocolValueKind.EXCEPTION_PACKET),self.state_type)
+            if self.function_context==self.frame_region else (_REF,_REF,self.state_type))
+        return replace(original,exits=tuple(replace(port,types=raise_types) if port.kind is ExitKind.RAISE else port for port in original.exits))
+
+    def delete_name(self,node,name,cursor):
+        from scar.ir.program.module_entries import FrameBodyProtocolKind as K
+        from scar.ir.program.state_addresses import AddressEffect,ReferenceOwner,NamespaceKey
+        from scar.ir.program.model import AccessMode
+        key=self.literal(node,name)
+        cursor,_,identity=self.invoke(cursor,node,((self.entry_references[0],node,'locals-owner',0,None),(key,node,'namespace-key',0,None)),result_type=None)
+        self.protocol(identity,K.DELETE_NAME_314,node);op=self.operation_records[identity]
+        self._addresses(identity,(AddressEffect(ReferenceOwner(op.uses[0].id),(NamespaceKey(op.uses[1].id),),AccessMode.WRITE),))
+        return cursor
+
+    def cleanup_exit(self,cursor,node,cleanup,original,selected,context,port,*,resume=False):
+        from scar.ir.program.control import ProtocolValueKind,ProtocolValueType
+        from scar.ir.program.cleanup import CleanupResume,CleanupReplace,CleanupRouteTerminator,CleanupRouteSuccessor
+        from scar.ir.program.model import OperationResult,StateAccess,AccessMode,Footprint,FootprintKind
+        from scar.ir.program.ids import ValueID
+        from scar.ir.program.structured import ControlEdgeReference
+        parent=self.scope_specs[cleanup][1]
+        # Replace starts a dedicated action block; no user evaluation hidden in it.
+        with self.in_owner(cleanup):action=self.new_block(node)
+        self.jump_values(cursor,action,(),node)
+        with self.in_owner(parent):
+            corridor=self.new_block(node,extra_types=(ProtocolValueType(ProtocolValueKind.PENDING_COMPLETION),))
+            final=self.new_block(node,extra_types=(ProtocolValueType(ProtocolValueKind.PENDING_COMPLETION),))
+        identity=self.fresh(OperationID,'cleanup-resume' if resume else 'cleanup-replace')
+        pending_use=self.use(identity,original,node,'entry-pending',0)
+        replacement_use=None if resume else self.use(identity,selected,node,'replacement-pending',0)
+        context_use=self.use(identity,context,node,'saved-handled-context',0)
+        before=self.use(identity,action.state,node,'cleanup-world',0)
+        after=StateVersionValue(self.fresh(ValueID,'cleanup-post-world'),self.frame_region,OperationResult(identity,0),self.world)
+        self.add_value(after);self.link_value(after,node,SourceRole.STATE)
+        uses=(pending_use,context_use,before) if resume else (pending_use,replacement_use,context_use,before)
+        self.emit(action,Operation(identity,'cleanup-resume' if resume else 'cleanup-replace',(Behavior.CONTROL,Behavior.READ,Behavior.WRITE),uses,(after.id,),
+            (StateAccess(self.world,before.id,AccessMode.READ_WRITE,after.id,Footprint(FootprintKind.WHOLE)),),effects_complete=False),node,SourceRole.CONTROL)
+        action.state=after.id;jump=self.jump_values(action,corridor,(selected,),node)
+        record=(CleanupResume(identity,cleanup,pending_use.id,context_use.id,ControlEdgeReference(jump,0)) if resume else
+            CleanupReplace(identity,cleanup,pending_use.id,replacement_use.id,context_use.id,ControlEdgeReference(jump,0)))
+        (self.cleanup_resumes if resume else self.cleanup_replacements).append(record)
+        token=self.block_arguments[corridor.block][0]
+        route_id=self.fresh(OperationID,'post-pop-route')
+        selector=self.use(route_id,token,node,'pending-selector',0);uses=[selector];edges=[]
+        for index,case in enumerate(port if type(port) is tuple else (port,)):
+            forward=self.use(route_id,token,node,'forwarded-pending',index)
+            state=self.use(route_id,corridor.state,node,'post-pop-world',index)
+            uses.extend((forward,state));edges.append(CleanupRouteSuccessor(case.id,final.block,(forward.id,state.id)))
+        self.emit(corridor,Operation(route_id,'post-pop-route',(Behavior.CONTROL,),tuple(uses),
+            terminator=CleanupRouteTerminator(selector.id,tuple(edges))),node,SourceRole.CONTROL)
+        self.dispatch(final,node,self.block_arguments[final.block][0],port)
+
+    def cleanup_exit_cases(self,cursor,node,cleanup,original,selected,context,ports):
+        if not ports:raise ValueError('deferred handler failure has no canonical source ports')
+        return self.cleanup_exit(cursor,node,cleanup,original,selected,context,ports)
+
+    def statements(self,nodes,cursor):
+        from scar.ir.program.module_entries import FrameStatementExpansion,StatementSequenceField as F
+        from scar.analysis.source_statement_lowering import try_statement
+        for node in nodes:
+            if not isinstance(node,ast.Try):cursor=super().statements((node,),cursor);continue
+            start=len(self.operations);entry=cursor.block
+            cursor=try_statement(self,node,cursor)
+            children=(frame_statement_slice(self.prepared_source,self.source(node),F.BODY,node.body),)
+            children+=tuple(frame_statement_slice(self.prepared_source,self.source(handler),F.HANDLER_BODY,handler.body) for handler in node.handlers)
+            self.statement_expansions.append(FrameStatementExpansion(self.source(node),self.frame_region,entry,cursor.block,
+                tuple(op.id for op in self.operations[start:]),children))
+        return cursor
+
+    def finish_module_graph(self,graph,scope,frame):
+        from scar.ir.program.control import ControlScope
+        from scar.ir.program.cleanup import HandledContextDomain
+        rows=[]
+        for identity,(kind,parent,source) in self.scope_specs.items():
+            blocks=tuple(block for block in self.function_blocks if self.block_owners.get(block)==identity)
+            if blocks:rows.append(ControlScope(identity,self.frame_region,parent,kind,source,blocks))
+        return replace(graph,control_scopes=tuple(rows),frame_roots=(frame,),control_ports=tuple(self.control_ports),
+            exception_packets=tuple(self.exception_packets),pending_completions=tuple(self.pending_completions),
+            handled_context_domains=(HandledContextDomain(self.frame_region,self.world),) if self.cleanup_interfaces else (),
+            cleanup_interfaces=tuple(self.cleanup_interfaces),cleanup_enters=tuple(self.cleanup_enters),
+            cleanup_resumes=tuple(self.cleanup_resumes),cleanup_replacements=tuple(self.cleanup_replacements),exception_matches=tuple(self.exception_matches))

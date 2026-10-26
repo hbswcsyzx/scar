@@ -369,6 +369,7 @@ def decode_module_prefix(value):
 
 class FrameBodyProfile(str, Enum):
     STRUCTURED_MAPPING_314_V1 = 'STRUCTURED_MAPPING_314_V1'
+    STRUCTURED_MAPPING_PROPAGATION_314_V1 = 'STRUCTURED_MAPPING_PROPAGATION_314_V1'
 
 
 class NamespacePolicy(str, Enum):
@@ -377,6 +378,7 @@ class NamespacePolicy(str, Enum):
 
 class FrameCompletionProfile(str, Enum):
     RAW_EXCEPTION_REF_314_V1 = 'RAW_EXCEPTION_REF_314_V1'
+    PROPAGATION_REF_PAIR_314_V1 = 'PROPAGATION_REF_PAIR_314_V1'
 
 
 class StatementSequenceField(str, Enum):
@@ -398,6 +400,10 @@ class FrameBodyProtocolKind(str, Enum):
     IMPORT_FROM_314 = 'IMPORT_FROM_314'
     INVOKE_REMAINING = 'INVOKE_REMAINING'
     UNEXPANDED_SLICE = 'UNEXPANDED_SLICE'
+    DELETE_NAME_314 = 'DELETE_NAME_314'
+    VALIDATE_EXCEPT_TYPE_314 = 'VALIDATE_EXCEPT_TYPE_314'
+    MATCH_EXCEPTION_BORROWED_314 = 'MATCH_EXCEPTION_BORROWED_314'
+    FRAME_EXIT_EXCEPTION_PACKET = 'FRAME_EXIT_EXCEPTION_PACKET'
 
 
 class FrameBodyStatus(str, Enum):
@@ -498,9 +504,10 @@ class StructuredFrameBodyOverlay:
     def __post_init__(self):
         _need(type(self.declaration) is ModuleEntryDeclaration and type(self.census) is ModuleSourceCensus
               and type(self.root_scope) is ControlScopeID, 'structured frame needs original source and its sole core root')
-        _need(self.profile is FrameBodyProfile.STRUCTURED_MAPPING_314_V1
-              and self.namespace_policy is NamespacePolicy.MODULE_MAPPING_314_V1
-              and self.completion_profile is FrameCompletionProfile.RAW_EXCEPTION_REF_314_V1,
+        _need((self.profile,self.completion_profile) in (
+                  (FrameBodyProfile.STRUCTURED_MAPPING_314_V1,FrameCompletionProfile.RAW_EXCEPTION_REF_314_V1),
+                  (FrameBodyProfile.STRUCTURED_MAPPING_PROPAGATION_314_V1,FrameCompletionProfile.PROPAGATION_REF_PAIR_314_V1))
+              and self.namespace_policy is NamespacePolicy.MODULE_MAPPING_314_V1,
               'unsupported explicit structured mapping/completion profile')
         _need(type(self.operations_emitted) is int and self.operations_emitted > 0
               and (self.prefix is None or type(self.prefix) is FrameStatementSlice)

@@ -1,0 +1,69 @@
+{
+  "confirmation_source": "ROOT_OWNED_PROCESS_HANDLES",
+  "current_retained_artifact": {
+    "decoded_bytes": 3527430,
+    "decoded_sha256": "dbd78862ad2080f41e0126eea1144c96eef911c910dae6178edaca9c16740677",
+    "receipt_origin": "THIS_C_WRITER",
+    "stored_bytes": 312932,
+    "stored_sha256": "c4749c043de831cd3c4ab570e90d442db3c9e78443511bb93b183e2374a090aa",
+    "uri": "/home/zyf/AAA/scar-worktrees/source-call-model/artifacts/experiments/module_try_propagation_g1_20261026/candidate01/attempt01/sourceprogram8-propagation.json.gz"
+  },
+  "current_static_census": "RETAINED_GRAPH_CENSUS.json",
+  "live_traceback_observed": false,
+  "main_modified_or_published_by_this_delivery": false,
+  "module_body_complete": false,
+  "original_window": {
+    "actual_exit_code": 1,
+    "detail": "C runtime participant missing from freeze: ['/home/zyf/miniconda3/envs/lewm/lib/python3.14/lib-dynload/_uuid.cpython-314-x86_64-linux-gnu.so', '/home/zyf/miniconda3/envs/lewm/lib/python3.14/uuid.py']",
+    "failure_receipt": "candidate01/attempt01/failure.json",
+    "freeze_sha256": "b6fea12457b82355dc0406eca24dccab51fdf65f34127320fd77356af6adef77",
+    "original_construction_metrics": null,
+    "original_final_runtime_qualification": "OPEN_NOT_RECONSTRUCTED",
+    "outer_elapsed_s": 22.15746258897707,
+    "phase": "FINAL_SOURCE_INPUT_RUNTIME_CHECK",
+    "session": 6695
+  },
+  "postflight": {
+    "activity_counts": {
+      "actual_input_bytes": 4133867,
+      "ast_only_compile_calls": 8,
+      "decoded_bytes": 3674996,
+      "internal_freeze_check_reads": 1,
+      "non_target_compile_audit_events": 1412,
+      "source_prepare_attempts": 0,
+      "stored_bytes": 458871,
+      "symtable_calls": 0,
+      "target_analysis_compile_audit_events": 8,
+      "target_exec_attempts": 0,
+      "target_executable_compile_attempts": 0
+    },
+    "actual_exit_code": 0,
+    "code_witness_counts": {
+      "compile_attempts": 0,
+      "complete_descriptor_matches": 1,
+      "module_loads": 1,
+      "source_bytes_read": 0
+    },
+    "final_source_input_runtime_checks": "PASSED",
+    "freeze_sha256": "2329f56655b89d060bd3805d472e0e4b576ece3e694b1c3670d85314d95d3827",
+    "module_lowerings": 0,
+    "outer_elapsed_s": 14.691772118967492,
+    "scope": "CURRENT_RETAINED_C_GRAPH_NORMAL_READER_ONLY_NO_NEW_LOWERING",
+    "self_peak_rss_kib": 149188,
+    "session": 59038,
+    "source_validation": {
+      "compiler_root_witness_replayed": true,
+      "errors": [],
+      "import_module_object_established": false,
+      "namespace_alias_established": false,
+      "runtime_code_instance_established": false,
+      "valid": true,
+      "verification": "STRUCTURE",
+      "whole_program_coverage_established": false
+    },
+    "worker_elapsed_s": 14.427582453994546
+  },
+  "schema": "scar.module-c-actual-terminal",
+  "schema_version": 1,
+  "whole_program_complete": false
+}

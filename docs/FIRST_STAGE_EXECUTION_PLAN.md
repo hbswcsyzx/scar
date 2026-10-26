@@ -8,7 +8,7 @@
 
 | 工作 | 当前边界与下一验收 |
 | --- | --- |
-| 通用 frame/control 根 | A 的 core29 FRAME/单一 ABI 权威已接 B 的实际 SP8 producer：机械展开8顶层接口/118ops，Try等3句精确suffix仍REQUIRED；主树同SP8及旧function SP5普通读回通过。实际frame/namespace、内容/effects仍OPEN。下一步同SP8接传播payload与Try/异常清理，见[B实际报告](../artifacts/experiments/module_structured_prefix_b_applied_20261025/REPORT.md)及[整体设计](../artifacts/analysis/module_structured_frame_plan_20261025/PLAN.md)。 |
+| 通用 frame/control 根 | 同SP8已接C传播pair与Try/except-as清理：354ops/9顶层接口，剩余Assert/Expr两句REQUIRED；主树同C-SP8与旧function SP5普通读回通过。原producer因UUID freeze漏项exit1保留，独立normal-reader postflight0。实际frame/namespace、内容/effects仍OPEN。见[C准确接入](../artifacts/experiments/module_try_propagation_c_applied_20261026/REPORT.md)与[整体设计](../artifacts/analysis/module_structured_frame_plan_20261025/PLAN.md)。 |
 | callee-entry 参数边 | snapshot→原 formal port 的局部 projection 已通过真实隔离门及主树旧 SP5/typed consumer：271次入口/566个参数观测，260次入口/520 ports 对应，11次保留 frontier。caller 实参表达式、对象/内容身份与完整 ExecutionModel 不能据此宣布完成；见[实际接入报告](../artifacts/experiments/callee_entry_routing_applied_20261025/REPORT.md)。 |
 | project/dependency 统一出版 | 同一次新CPU capture的正常CLI已实际通过：3成功SP5全部消费，project REVISE2、dependency ADD1，5groups/12calls保全，body-linked10/source-only1/unresolved1。五类动态接口仍各12 OPEN；project ADD、父overlay继承和v5新路径未实测。见[真实门报告](../artifacts/experiments/project_dependency_publication_gate_20261025/REPORT.md)。 |
 | 真实 LeWM source858 运行接线 | 已在独立source858-runtime树实际启动root11969，完整100438 calls、原scope/所有frontier保留；先核准确15 CP2/ancestor，再执行一次fresh source→dispatch→SBA。尚无终态或新动态计数，见[批准与实际启动](../artifacts/analysis/source858_runtime_reconnection_20261026/ROOT_DECISION.md)。 |
@@ -41,8 +41,9 @@ S1 审计、已有数据的 S3 接线和独立产品复核可以并行；会改�
 - 同一新 CPU capture 的 project/dependency 正常函数统一出版和普通绑定，实际核
   原来源、命名空间、ADD/REVISE 和父版本，不拼接旧样例，不重新 lower 已有产物。
 
-两项均已合入；同一SP8异常传播/清理C方案已审，授权最小六源在隔离树实现，尚未验收。
-先核传播端口与pending frame-exit的真实API，再接现C0/C1及except-as两条清理走廊；
+两项均已合入；同一SP8异常传播/清理C六源也已接入：原图独立normal-reader/source/C0/C1与
+主树旧function兼容通过。原构建窗口exit1保留，不重建未记录的过去测量或runtime资格。
+传播端口、pending dispatch后packet frame-exit和except-as两条清理走廊使用原core；
 见[原设计与实施决定](../artifacts/analysis/module_try_propagation_c_plan_20261026/ROOT_DECISION.md)。
 随后继续实际数据/状态及资源完成关系。
 资源完成合同已有后继主要来源核对：严格单GPU activity的有效end可按原IR表示独立

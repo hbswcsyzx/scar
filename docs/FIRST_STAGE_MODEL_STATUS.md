@@ -6,6 +6,16 @@
 实体和完整性定义见 [合同](FIRST_STAGE_MODEL_CONTRACT.md)。以下是按日期保留的
 实施记录；其中“进行中”仅指该条写入时状态，不作为当前进程存活证明。
 
+### 2026-10-26：C 模块Try与异常清理接入
+
+同SP8的C显式profile当前为354ops/2regions、9顶层接口/12stmt记录，精确余2句；
+单frame、原C0/C1 pending/packet/cleanup权威，不造第二入口ABI或动态traceback事实。
+原6695 exit1因最后UUID runtime冻结漏项保留；同原C图独立59038普通reader/source/C0/C1
+与最终检查exit0/14.6918s，无新lower。主树51995普通C-SP8与旧function SP5读回
+exit0/13.4263s。原未记录construction/final-runtime资格保持OPEN，不补写PASS。
+namespace内容/state/ready及完整LeWM建模仍OPEN，见
+[主树接入](../artifacts/experiments/module_try_propagation_c_applied_20261026/REPORT.md)。
+
 ### 2026-10-26：project/dependency 同 Run 自动接入通过
 
 Root70391真实唯一CPU采集exit0/25.3018s；72518两正常CLI均exit0，bootstrap GNU106.14s、
