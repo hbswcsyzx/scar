@@ -1,0 +1,25 @@
+{
+  "scope": "development outcomes retained separately from final successful production cost",
+  "earlier_attempts": [
+    {
+      "status": "FAILED",
+      "reason": "Original instance identifier was serialized as a dict and used as a hash key; fixed to original wire ID",
+      "elapsed_s": null,
+      "details_source": "agent production report; original stack trace not retained in this root record"
+    },
+    {
+      "status": "UNUSABLE",
+      "reason": "Original ETO pointers use plural inputs/outputs while port directions are singular; no original edge matches. Translation and complete-match invariant corrected before final publication",
+      "retained_index": {
+        "uri": "/home/zyf/AAA/scar-worktrees/frame-entry-routing/artifacts/analysis/native_reference_flow_20261026/publication-incomplete-unusable/index.json",
+        "sha256": "44272cf894c43ac1407cf2504b123305984f734d1506aa05ce80e20adb356c4a",
+        "bytes": 40965
+      },
+      "elapsed_s": null
+    }
+  ],
+  "final_index_sha256": "63030af42af9adfb883d9b2a04e2289800b08caa95bed0f443f4e118a8f1e6ca",
+  "final_successful_build_s": 222.666,
+  "cumulative_development_s": null,
+  "old_unusable_publication_authorizes_nothing": true
+}

@@ -73,3 +73,60 @@ def query_native_ports_cli(args):
     else:
         print(payload, end='')
     return 0
+
+
+def _flow_summary(index):
+    return {name: getattr(index, name) for name in (
+        'source_nodes', 'operation_rows', 'native_ports', 'reference_ports',
+        'input_reference_ports', 'output_reference_ports', 'ports_with_one_original_edge',
+        'ports_without_one_original_edge', 'groups_with_input_and_output')}
+
+
+def build_native_reference_flow_cli(args):
+    from scar.trace.native_reference_flow import build_native_reference_flow_publication
+    started = time.monotonic()
+    ports = Path(args.ports_index).absolute()
+    if ports.name != 'index.json':
+        raise ValueError('--ports-index must select the original index.json')
+    index = build_native_reference_flow_publication(ports.parent, args.bundle, args.out,
+        expected_native_port_index_sha256=args.ports_sha256)
+    path = Path(args.out).absolute() / 'index.json'
+    print(json.dumps({'status': 'REFERENCE_GROUP_INDEX_PUBLISHED', 'index': str(path),
+        'sha256': sha256(path.read_bytes()).hexdigest(), 'summary': _flow_summary(index),
+        'elapsed_s': time.monotonic() - started, 'whole_model_established': False,
+        'content_versions_or_causal_def_use_proved': False}))
+    return 0
+
+
+def query_native_reference_flow_cli(args):
+    import re
+    from scar.trace.native_reference_flow import read_native_reference_flow_index, query_native_reference_flow_upstream
+    started = time.monotonic()
+    path, ports = Path(args.index).absolute(), Path(args.ports_index).absolute()
+    if path.name != 'index.json' or ports.name != 'index.json':
+        raise ValueError('flow and port indexes must select their original index.json')
+    if re.fullmatch(r'(?:0|[1-9][0-9]*)(?:/(?:0|[1-9][0-9]*))*', args.input_path) is None:
+        raise ValueError('--input-path needs canonical ordered indices, for example 0 or 0/1')
+    index, _ = read_native_reference_flow_index(path.parent, expected_sha256=args.sha256)
+    if not 0 <= args.ordinal < index.source_nodes:
+        raise ValueError('--ordinal must select an original source node')
+    bundle = BundlePartitions(args.bundle)
+    record = bundle.selected_records('evidence', 'instances', (args.ordinal,))[0]['record']
+    instance = decode(OperationInstance, record)
+    flows = query_native_reference_flow_upstream(path.parent, ports.parent, args.bundle, instance,
+        tuple(int(part) for part in args.input_path.split('/')), expected_flow_index_sha256=args.sha256,
+        expected_native_port_index_sha256=args.ports_sha256, max_candidates=args.max_candidates)
+    result = {'schema': 'scar.native-reference-flow-query', 'schema_version': 1,
+        'index': {'uri': str(path), 'sha256': args.sha256}, 'summary': _flow_summary(index),
+        'consumer': instance.id.wire, 'input_path': args.input_path, 'flows': encode(flows),
+        'matched_candidates': len(flows), 'ordering_basis': 'ETO_SOURCE_ORDINAL_ONLY',
+        'qualification': 'SAME_PROVIDER_REFERENCE_AND_DESCRIPTOR_CANDIDATES',
+        'content_versions_or_causal_def_use_proved': False, 'whole_model_established': False,
+        'transformation_authorized': False, 'elapsed_s': time.monotonic() - started}
+    payload = json.dumps(result, ensure_ascii=False, indent=2, allow_nan=False) + '\n'
+    if args.out:
+        with Path(args.out).open('x', encoding='utf-8') as stream:
+            stream.write(payload)
+    else:
+        print(payload, end='')
+    return 0

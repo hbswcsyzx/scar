@@ -566,11 +566,23 @@ def _execute_stages(capture, attempt, plan, result, budget):
         port_index, port_stage = stages.call('native-ports', build_native_port_publication,
             lambda stage: build_native_port_publication(source, capture / 'archive-index.json',
                 retention['archive_sha256'], Path(native_storage['manifest']).parent, stage / 'ports'))
-        link('native_ports', port_stage / 'ports' / 'index.json')
+        port_receipt = link('native_ports', port_stage / 'ports' / 'index.json')
         result['native_port_summary'] = {'source_nodes': port_index.source_nodes,
             'operation_rows': port_index.operation_rows, 'input_ports': port_index.input_ports,
             'output_ports': port_index.output_ports, 'classification_counts': port_index.classification_counts,
             'whole_model_established': False}
+        from scar.trace.native_reference_flow import build_native_reference_flow_publication
+        reference_index, reference_stage = stages.call('native-reference-flow', build_native_reference_flow_publication,
+            lambda stage: build_native_reference_flow_publication(port_stage / 'ports',
+                Path(native_storage['manifest']).parent, stage / 'references',
+                expected_native_port_index_sha256=port_receipt['sha256']))
+        link('native_reference_flow', reference_stage / 'references' / 'index.json')
+        result['native_reference_summary'] = {
+            'reference_ports': reference_index.reference_ports,
+            'ports_with_one_original_edge': reference_index.ports_with_one_original_edge,
+            'groups_with_input_and_output': reference_index.groups_with_input_and_output,
+            'ordering_basis': 'ETO_SOURCE_ORDINAL_ONLY',
+            'content_versions_or_causal_def_use_proved': False, 'whole_model_established': False}
     else:
         result['native_port_scope'] = 'not generated: this route lacks a lossless ETO archive or partitioned bundle'
     project_root = plan["origins"]["project_root"]["value"]

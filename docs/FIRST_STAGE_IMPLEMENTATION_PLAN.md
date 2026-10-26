@@ -67,6 +67,9 @@ OS、driver、allocator 的内部算法、完整 FD 表、SASS/机器指令和�
 - native端口全源流式生成已实际完成：310412原节点、230818算子实例、1256501端口，
   76片压缩后约22MB，已接入主树通用生成/局部查询。provider/descriptor查询能返回
   原input/output EvidenceEdge，但同ref不是同内容版本，不等于全数据/状态依赖已闭合。
+- native引用流分组索引已全量生成：533490个Tensor引用端口匹配原EvidenceEdge，
+  69362组、128压缩片约34.45MB。公共CLI一次输入→可能上游输出查询exit0/2.981s；
+  不生成output×input笛卡尔积，ordinal不充当完成/因果证明。
 - 新lean采集仅细采计划内CALL接口，未计划内部不因seen code递归扩张；局部gap
   不全局停，hook损坏仍使epoch失效。CLI和静态计划派生已接，通用CPU+Torch程序
   从进程启动实际capture/普通读回通过，0 instruction rows；小型GPU+OS联合capture
@@ -80,6 +83,8 @@ OS、driver、allocator 的内部算法、完整 FD 表、SASS/机器指令和�
 - source-entry共享存储模式已接公共入口`--shared-source-context`，保持可选，未改旧CP2
   格式边界。两个真实85/217-op body以1context+2body发布并正常读回：3.30MB→1.76MB。
   省的是存储/重复读取；仍先生成和验证SP5，尚未消除该生产成本。
+  完整正常worker也实际通过一个自动选出的原8-op entry（0.566s），原fragment端点、
+  worker terminal及普通共享session读回一致；未执行target/bootstrap/CP2。
 
 每次提交记录具体完成的功能与保留的缺口。当前详细差距见
 [FIRST_STAGE_GAPS_20261026.md](FIRST_STAGE_GAPS_20261026.md)；某个组件通过不把整体改为完成。
@@ -88,9 +93,9 @@ OS、driver、allocator 的内部算法、完整 FD 表、SASS/机器指令和�
 
 1. 补最高覆盖的源码语法缺口：按真实失败清单选通用结构，实现后用真实原入口读回；
    禁止按库名/函数名适配。完成的body按原命名空间纳入自动入口。
-2. 建native端口的跨实例引用流导航：从input直接找到原output出现，分片索引避免
-   每次全图扫描；引用流、alias、内容版本分别表达，不把索引候选当数据不变证明。
-3. 将共享source context/body存储接入正常publisher；两份真实body共用定义一次且
-   正常查询结果不变。旧格式兼容，不重建所有历史产物。
+2. native端口跨实例引用导航已完成；继续连接准确内容版本/写入/alias与必要资源接口，
+   不把引用候选当数据不变或因果证明。
+3. source-entry共享存储可选入口及完整worker已完成；后续迁移正式publication的
+   transport准入，避免每body重复context，不为此重建全部旧产物。
 4. 集成前述结果，继续补文件/数据/状态与资源必要接口，最后查询LeWM加载到保存的
    连续依赖。完成前不进入化简，也不把局部成功改写为第一阶段完成。

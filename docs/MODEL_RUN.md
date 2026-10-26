@@ -30,6 +30,9 @@ SP5副本，旧输入不变。fragment保原decoded receipt及`#/program/graph`�
 decoded30,744,053→16,639,065B；正常共享session仅读取/检查context一次，24.355s。
 主树普通region读取同一85-op片段0.223s，不重放context，完整性声明限core。
 记录见`artifacts/experiments/source_entry_shared_context_20261026/`。
+完整worker路径另以一个机械选出的原8-op entry实际通过：worker0.566s、正常
+shared session读回0.169s、1context1body共20061B；原worker terminal和fragment端点
+对应，旧case输入不变。见`source_entry_shared_worker_main_20261026/`。
 
 `source-entry-bindings` 通用 CLI 现同时支持 project 与 dependency 的原 SP5。
 2026-10-26 同一次 generic CPU 采集的后段实际退出 0：schema2 publication 包含
@@ -60,6 +63,11 @@ python -B -m scar.cli model-run --from-capture CAP --out RUN --resume --max-call
 普通模式依次调用既有capture importer、真实source coordinates、verified source
 seeds、inventory8、source-layers、composition、fresh source bindings及workload
 CodeWitness writer/readonly reader。工作单元和analysis seed由原记录机械确定。
+
+lossless ETO及partitioned native bundle路径还自动生成native ports，随后调用同一
+native-reference-flow producer生成分片引用导航，并在products保存两个小index引用。
+这段bootstrap接线已实现；完整producer和公共查询已实际运行，新增整段bootstrap
+未为此重复执行。原plain route保持其明确未生成状态，索引不建立内容版本或因果边。
 
 每阶段生成独立目录和started/terminal收据；规范图保持原schema、命名空间及
 artifact身份。小`model-run.json`保存导航和资格状态，没有新的可写图权威。

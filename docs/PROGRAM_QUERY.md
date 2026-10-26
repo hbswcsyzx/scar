@@ -181,6 +181,35 @@ bulk分片在本机两工作树间硬链接，共享原不可变内容，没有�
 alias/写入或ready，不能拿这些计数当全程序图完成。实际记录位于
 `artifacts/analysis/native_port_sidecar_full_20261026/`。
 
+### 原生输入的上游引用导航
+
+```bash
+python -m scar.cli build-native-reference-flow \
+  --ports-index PATH/native-ports/index.json --ports-sha256 PORTS_SHA \
+  --bundle PATH/bundle-partitions --out fresh-reference-index
+
+python -m scar.cli query-native-reference-flow \
+  --index PATH/reference-index/index.json --sha256 REFERENCE_SHA \
+  --ports-index ORIGINAL/native-ports/index.json --ports-sha256 PORTS_SHA \
+  --bundle PATH/bundle-partitions --ordinal 17 --input-path 0
+```
+
+索引复用原provider reference、descriptor、instance、formal slot及EvidenceEdge，
+按引用分组保存有序出现；不展开output×input笛卡尔积。查询只读目标分组所在片，
+返回限定数量的`reference_flow_candidate`。原port index URI/SHA保持准确来源，
+不能把相同字节的新路径静默当作原命名空间。
+
+真实全量310412节点/230818实例/1256501端口中，533490个Tensor引用端口全部匹配
+唯一原EvidenceEdge（311399 input、222091 output），69362组同时具有两方向端口。
+128压缩片34448256B（decoded776703548B），最终成功构建222.666s；这些是离线
+索引构建成本。主树公共CLI对ordinal17/input0的查询exit0/2.981s，返回ordinal16的
+一个可能输出及两端原edge IDs；没有重采或重导入原图。
+
+ETO ordinal只表示导航顺序，不是完成、happens-before或唯一producer证明。
+内容版本、alias、write、effects及ready仍须由各自关系限定；该索引不创建LogicalValue，
+不证明因果def-use，也不授复用或变换许可。记录见
+`artifacts/analysis/native_reference_flow_20261026/`。
+
 ## 对象引用旁的符号数据结果
 
 ```bash

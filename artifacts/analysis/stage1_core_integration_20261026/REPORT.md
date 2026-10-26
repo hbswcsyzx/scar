@@ -49,3 +49,13 @@ body解码及索引各2次，同会话复用。当前旧查询仍偏重，不称
 
 具体原件见`set_display_delivery_20261026/`、共享storage实验目录和本目录
 `main-storage-and-syntax-readback.json`。只读必要真实路径，未运行批量测试。
+
+- 完整正常shared worker随后实际PASS：机械选原成功列表最小8-op entry，只运行
+  一个entry，worker0.566s；fragment端点、原worker terminal、只retire本次SP5副本及
+  独立shared session读回均通过。未运行target、bootstrap、CP2或测试套件。
+- native引用分组索引完整成功：533490 Tensor端口全部匹配唯一原EvidenceEdge，
+  69362双向组，128片/34448256B。最终成功pass222.666s；主树公共query exit0/2.981s，
+  从ordinal17/input0返回ordinal16/output0的引用候选，原边不变。ordinal不作因果
+  或完成证明，未创建内容版本。build/query CLI及bootstrap后继stage接线已实现；
+  新bootstrap全链未重跑。开发时dict-key、复数role映射两处错误已修正，早先失败/
+  不可用publication不算成功pass；222.666s不是累计开发耗时。
