@@ -1,0 +1,242 @@
+{
+  "status": "ACTUAL_NATIVE_COMPONENT_IMPORTED_WITH_OPEN",
+  "elapsed_seconds": 1048.8502312960336,
+  "capture_model": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/native_inputs_full_20261026/native-import/capture-model.json",
+  "component_scope": {
+    "selected": [
+      "native"
+    ],
+    "skipped": [
+      "os"
+    ],
+    "scope": "only requested fragments imported; skipped component does not imply completion"
+  },
+  "native": {
+    "schema": "scar.native-evidence-import",
+    "schema_version": 1,
+    "scope": "native:636fde61a45803f11712767bc1cbf0b0ea3de13b14e0b27edc2d6071daea1612",
+    "provider_revision": "cf30153c4c131c8164ee7798e5022d810682e2cb",
+    "eto_schema": "1.1.1-chakra.0.0.4",
+    "pid": 1578961,
+    "kineto_supplied": true,
+    "cpu_rf_matches": 310410,
+    "runtime_gpu_matches": 24082,
+    "provider_scope_matches": 54089,
+    "provider_scope_matches_by_category": {
+      "cuda_driver": 50,
+      "cuda_runtime": 29957,
+      "gpu_memcpy": 543,
+      "gpu_memset": 1082,
+      "kernel": 22457
+    },
+    "provider_scope_contract": {
+      "torch_revision": "cf30153c4c131c8164ee7798e5022d810682e2cb",
+      "kineto_revision": "094d3c1d072362d0a919a77299459eee94f97931",
+      "correlation_kind": "CUSTOM0",
+      "cpu_category": "cpu_op",
+      "relation": "provider linked CPU scope; no call/control/order/ready claim",
+      "source": "https://github.com/pytorch/kineto/blob/094d3c1d072362d0a919a77299459eee94f97931/libkineto/src/output_json.cpp#L786-L807"
+    },
+    "category_counts": {
+      "": 62,
+      "Trace": 1,
+      "ac2g": 54096,
+      "cpu_instant_event": 74574,
+      "cpu_op": 230818,
+      "cuda_driver": 50,
+      "cuda_runtime": 29964,
+      "gpu_memcpy": 543,
+      "gpu_memset": 1082,
+      "gpu_user_annotation": 22060,
+      "kernel": 22457,
+      "overhead": 99,
+      "user_annotation": 79592
+    },
+    "inventory": {
+      "eto_nodes": 310412,
+      "kineto_events": 515398,
+      "operation_instances": 461242,
+      "provider_references": 74086,
+      "resource_observations": 3,
+      "retained_non_duration_events": 128732
+    },
+    "budget": {
+      "max_bytes": 4000000000,
+      "decompressed_bytes": 538059657
+    },
+    "whole_model_established": false,
+    "canonical_program_graph_imported": false,
+    "definition_namespace": "capture-local provider symbols; not CodeID or stable source definitions",
+    "full_operand_interface_established": false,
+    "literal_slots_imported": false,
+    "execution_model_imported": false,
+    "logical_versions_established": false,
+    "state_effects_established": false,
+    "resource_readiness_established": false,
+    "python_correspondence_established": false,
+    "transformation_authorized": false,
+    "dispatch_bridge": {
+      "schema": "scar.dispatch-observation-import",
+      "schema_version": 1,
+      "profile": "scar.dispatch-marker-collector-v1",
+      "scope": "dispatch-reference:6c23a3c4086ad54095a7a5a54b15804c33f7bb6decc7e6fd2e8886468c3b1d9a",
+      "production_collector": true,
+      "capture_membership_verified": true,
+      "retained_input_paths": {
+        "observations": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/lewm_joint_capture_20261026/capture/trace/dispatch-observations.1578961.adfc0475ed50cb37e1c0453142b5fa65.jsonl.gz",
+        "metadata": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/lewm_joint_capture_20261026/capture/trace/dispatch-meta.1578961.adfc0475ed50cb37e1c0453142b5fa65.json",
+        "calls": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/lewm_joint_capture_20261026/capture/trace/call-events.1578961.jsonl.gz",
+        "codes": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/lewm_joint_capture_20261026/capture/trace/call-codes.1578961.jsonl.gz",
+        "call_meta": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/lewm_joint_capture_20261026/capture/trace/call-meta.1578961.json",
+        "native_meta": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/lewm_joint_capture_20261026/capture/trace/execution-evidence.1578961.json"
+      },
+      "dispatches": 39796,
+      "marker_nodes": 79592,
+      "slot_associations": 109288,
+      "outcomes": {
+        "RETURNED": 39796
+      },
+      "gaps": {
+        "retained_ancestor_missing": 480,
+        "unqualified_payload_slots": 383
+      },
+      "direct_python_operator_correspondence_established": false,
+      "logical_versions_established": false,
+      "world_effects_established": false,
+      "resource_readiness_established": false,
+      "whole_model_established": false,
+      "transformation_authorized": false
+    },
+    "native_schema": {
+      "schema": "scar.native-schema-bridge",
+      "schema_version": 1,
+      "provider_revision": "cf30153c4c131c8164ee7798e5022d810682e2cb",
+      "parser_torch_version": "2.13.0+cu132",
+      "scope": "native:636fde61a45803f11712767bc1cbf0b0ea3de13b14e0b27edc2d6071daea1612:schema-contracts",
+      "unique_schemas_parsed": 100,
+      "parse_failures": [],
+      "definitions_with_ports": 100,
+      "formal_slots": 481,
+      "effect_summaries": 100,
+      "instances_with_qualified_tensor_slots": 190492,
+      "actual_tensor_slot_counts": {
+        "QUALIFIED": 467756,
+        "UNQUALIFIED": 175022
+      },
+      "contract_gaps": {
+        "registered_alias_analysis_kind_not_recovered_from_schema_text": 100,
+        "schema_does_not_close_rng_external_ordering_exception_or_lifetime_effects": 100,
+        "unlisted_alias_pairs_are_not_proven_disjoint": 100,
+        "contained_alias_annotations_not_exposed": 4
+      },
+      "binding_gaps": {
+        "actual_tensor_slots_have_no_qualified_schema": 175022
+      },
+      "conditions": [
+        "schema-ordered boxed ETO slots follow the pinned provider serializer contract",
+        "formal schema effects are declarations and remain partial",
+        "Tensor/container metadata paths are preserved; scalar arguments are not re-read"
+      ],
+      "actual_mutation_proven": false,
+      "alias_lifetimes_established": false,
+      "canonical_state_accesses_established": false,
+      "logical_versions_established": false,
+      "physical_copy_established": false,
+      "resource_readiness_established": false,
+      "whole_model_established": false,
+      "transformation_authorized": false
+    },
+    "tensor_physical": {
+      "schema": "scar.tensor-physical-import",
+      "schema_version": 1,
+      "profile": "scar.tensor-physical-event-tree-v1",
+      "artifacts": {
+        "observations": {
+          "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/lewm_joint_capture_20261026/capture/trace/tensor-physical.1578961.adfc0475ed50cb37e1c0453142b5fa65.jsonl",
+          "sha256": "852de7a088781f2c721dc8e06633fecf9f1c9f6034c54bfde6798f45c31c13c7",
+          "size_bytes": 147144696,
+          "schema": "scar.tensor-physical-observation.v1"
+        },
+        "metadata": {
+          "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/lewm_joint_capture_20261026/capture/trace/tensor-physical-meta.1578961.adfc0475ed50cb37e1c0453142b5fa65.json",
+          "sha256": "2de73fd79293f9f57ad457c07849745ba24fcc91727a38984132c7143ff4e7cd",
+          "size_bytes": 4242,
+          "schema": "scar.tensor-physical-trace"
+        }
+      },
+      "capture_membership_verified": true,
+      "rows": 132445,
+      "source_status": "OBSERVED",
+      "source_gaps": {},
+      "source_frontier": null,
+      "legacy_kineto_allocation_correspondence_established": false,
+      "layout_normalization_rule": "PINNED_TORCH_LAYOUT_V1",
+      "logical_versions_established": false,
+      "materializations_established": false,
+      "state_effects_established": false,
+      "resource_readiness_established": false,
+      "whole_model_established": false,
+      "transformation_authorized": false,
+      "scope": "tensor-physical:44b8f0b49dea1154bdc6896197ecb18e706f6b6f71ce9bc3975f5db7da0508dd",
+      "status": "IMPORTED_WITH_OPEN_OBLIGATIONS",
+      "marker_nodes": 79592,
+      "argument_slots": 109288,
+      "physical_slot_associations": 108682,
+      "allocation_epochs": 37506,
+      "evidence_edges": 217364,
+      "gaps": {
+        "TENSOR_PHYSICAL_REFERENCE_UNQUALIFIED": 606
+      },
+      "source_allocation_receipts": 52853,
+      "canonical_region_layout_counts": {
+        "strided": 108682
+      },
+      "interface_only_claim": "observation-scoped object/argument geometry and provider physical epochs"
+    },
+    "memory": {
+      "profile": "TORCH_KINETO_ALLOCATOR_V1",
+      "counts": {
+        "allocation_epochs": 37449,
+        "matched_frees": 37125,
+        "memory_records": 74574,
+        "negative_receipts": 37125,
+        "open_at_capture_end": 324,
+        "positive_receipts": 37449
+      },
+      "ordering_basis": "unique integer provider Ev Idx within one host thread per allocator slot",
+      "slot_conflict_policy": "reject every free association in a conflicting slot",
+      "allocation_lifetimes_complete": false,
+      "physical_cuda_allocation_established": false,
+      "logical_content_established": false,
+      "tensor_storage_association_established": false,
+      "open_epochs_are_leaks": false,
+      "lifetime_binding": {
+        "rows": 74574,
+        "status_counts": {
+          "CONDITIONAL": 74574
+        },
+        "flags": {
+          "matched": 74574,
+          "birth_verified": 74574,
+          "free_verified": 37125,
+          "ordering_qualified": 74574
+        },
+        "issues": {},
+        "binding_gaps": {},
+        "examples": [],
+        "conditions": [
+          "capture_association_uses_basename_and_decompressed_size",
+          "profiler_allocator_receipts_only"
+        ],
+        "canonical_stages_connected": false,
+        "canonical_effects_connected": false,
+        "physical_allocation_established": false,
+        "execution_model_imported": false,
+        "transformation_authorized": false
+      }
+    },
+    "shared_lifetime_points_checked": 74574
+  },
+  "whole_model_established": false,
+  "new_target_runs": 0
+}

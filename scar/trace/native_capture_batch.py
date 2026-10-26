@@ -219,6 +219,7 @@ class _SourceIndex:
         need(actual_limit == max_pages, "SQLite could not enforce the private index page cap")
         self.db.execute("CREATE TABLE records(kind TEXT,key TEXT,ordinal INTEGER,payload BLOB,mac BLOB,PRIMARY KEY(kind,key)) WITHOUT ROWID")
         self.parents, self.node_ordinals = {}, {}
+        self.rf_nodes = defaultdict(list)
         self.parent_frontiers, self.missing_parent_edges = {}, {}
         self.names, self.children, self.groups = defaultdict(list), defaultdict(list), defaultdict(list)
         self.physical_markers, self.births = {}, defaultdict(list)
@@ -284,7 +285,9 @@ class _SourceIndex:
                              and type(node.get("name")) is str, "invalid complete ETO node identity")
                         node_id = node["id"]
                         need(node_id not in self.parents, "duplicate ETO node ID")
-                        attributes(node)
+                        node_attributes = attributes(node)
+                        if type(node_attributes.get('rf_id')) is int and node_attributes['rf_id']>0:
+                            self.rf_nodes[node_attributes['rf_id']].append(node_id)
                         self.put("node", node_id, ordinal, node)
                         self.parents[node_id], self.node_ordinals[node_id] = node["ctrl_deps"], ordinal
                         self.names[node["name"]].append(node_id)
@@ -836,7 +839,8 @@ def _write_inventory(directory, rows, budget, publish, *, role, metadata=None, c
 def bind_native_capture_batches(coordinates, capture_directory, partitioned_native_manifest, out_dir, *,
                                 expected_manifest_sha256, capture_model_path, expected_capture_model_sha256,
                                 budget=NativeCaptureBatchBudget(), progress=None, on_verified_shard=None,
-                                scalar_input_profile=None, static_artifacts=None):
+                                scalar_input_profile=None, static_artifacts=None, input_metadata_budget=None,
+                                on_verified_input_shard=None):
     """Verify once and account for every actually enumerated dispatch group.
 
     Coordinates must already be freshly bound by the ordinary public binder.
@@ -846,6 +850,7 @@ def bind_native_capture_batches(coordinates, capture_directory, partitioned_nati
     from scar.ir.execution.validation import prepare_program_snapshot, validate
     need(type(budget) is NativeCaptureBatchBudget, "exact native batch budget required")
     need(on_verified_shard is None or callable(on_verified_shard), "verified shard consumer must be callable")
+    need(on_verified_input_shard is None or callable(on_verified_input_shard), 'verified input shard consumer must be callable')
     need(scalar_input_profile in (None, *SCALAR_INPUT_CAPABILITIES), 'unsupported requested scalar capability')
     need(static_artifacts is None or type(static_artifacts) is NativeStaticArtifacts, 'exact static artifact input required')
     budget.__post_init__()
@@ -853,6 +858,7 @@ def bind_native_capture_batches(coordinates, capture_directory, partitioned_nati
     need(not out.exists(), "native batch output must be fresh")
     out.mkdir(parents=True)
     started, owner = time.monotonic(), None
+    input_metadata = None
     published_total = 0
 
     def publish(path, raw, maximum):
@@ -866,6 +872,10 @@ def bind_native_capture_batches(coordinates, capture_directory, partitioned_nati
         owner = _SourceIndex(out, budget, progress)
         owner = _acquire(coordinates, capture_directory, partitioned_native_manifest, capture_model_path, out, budget,
                          expected_manifest_sha256, expected_capture_model_sha256, progress, owner)
+        if input_metadata_budget is not None:
+            from scar.trace.native_input_index import prepare_native_input_metadata_index
+            input_metadata=prepare_native_input_metadata_index(coordinates,owner,out/'input-metadata',
+                budget=input_metadata_budget,progress=progress)
         if scalar_input_profile is not None:
             owner.base['scalar_input_profile'] = scalar_input_profile
         parent_inventory_artifact, parent_inventory = _write_inventory(out / 'native-parent-inventory',
@@ -966,7 +976,8 @@ def bind_native_capture_batches(coordinates, capture_directory, partitioned_nati
             shard_dir = out / "shards" / f"{len(shard_reports):06d}"
             values, evidence, va, ea, geometry, payloads = _prepare_projection(source, interfaces, selected, shard_dir, budget)
             execution = _build_execution(program, layouts, interfaces, source, coordinates, program_artifact, va, ea,
-                                         prepared_snapshot=prepared_snapshot)
+                                         prepared_snapshot=prepared_snapshot,
+                                         actor_scope='referenced' if input_metadata is not None else 'capture')
             execution_bytes = execution_dumps(execution).encode()
             need(len(execution_bytes) <= budget.max_shard_execution_bytes and va.size_bytes <= budget.max_shard_values_bytes
                  and ea.size_bytes <= budget.max_shard_evidence_bytes, "materialized shard byte budget exceeded")
@@ -1032,6 +1043,9 @@ def bind_native_capture_batches(coordinates, capture_directory, partitioned_nati
                 "port_qualifications": encode(qualification_artifact),
                 "physical_associations": len(geometry), "gap_counts": dict(Counter(g.code for g in validation.gaps)),
                 "wall_seconds": time.monotonic() - shard_started}
+            if input_metadata is not None:
+                report['actor_declarations'] = {'scope': 'REFERENCED_TYPED_ACTOR_CLOSURE',
+                    'processes': len(execution.processes), 'threads': len(execution.threads)}
             if scalar_input_profile is not None:
                 report.update(scalar_input_profile=scalar_input_profile, scalar_input_ports=len(scalar_rows),
                     scalar_observed_roots=sum(r['frontier'] is None for r in scalar_rows),
@@ -1064,6 +1078,10 @@ def bind_native_capture_batches(coordinates, capture_directory, partitioned_nati
                     "activation_id": "native-port:" + owner.base["run"] + ":" + str(seq)}
             shard_reports.append(report)
             verified = NativeProtocolWindowResult(shard_dir, program, execution, values, evidence, native, validation, report)
+            if input_metadata is not None:
+                input_associations=input_metadata.bind_shard(verified)
+                if on_verified_input_shard is not None:
+                    on_verified_input_shard(verified,input_metadata,input_associations)
             if on_verified_shard is not None:
                 on_verified_shard(verified)
             if first_shard is None:
@@ -1140,6 +1158,12 @@ def bind_native_capture_batches(coordinates, capture_directory, partitioned_nati
             "alias_completeness_established": False, "resource_readiness_established": False,
             "whole_model_established": False, "transformation_authorized": False,
             "target_executions": 0, "compile_calls": 0, "prepare_calls": 0}
+        if input_metadata is not None:
+            report['actor_declarations'] = {'scope': 'REFERENCED_TYPED_ACTOR_CLOSURE',
+                'whole_run_inventory': encode(coordinates.artifact),
+                'whole_run_processes': len(coordinates.processes), 'whole_run_threads': len(coordinates.threads),
+                'run_inventory_complete_claimed_by_fragment': False}
+            report['native_input_metadata']=input_metadata.finalize()
         published = sum(p.stat().st_size for p in out.rglob("*") if p.is_file() and "private" not in p.relative_to(out).parts)
         if scalar_input_profile is not None:
             report.update(scalar_input_profile=scalar_input_profile,
@@ -1166,6 +1190,8 @@ def bind_native_capture_batches(coordinates, capture_directory, partitioned_nati
         _write_json(out / "failure.json", failure, budget.max_report_bytes)
         raise
     finally:
+        if input_metadata is not None:
+            input_metadata.db.close()
         if owner is not None:
             owner.db.close()
 

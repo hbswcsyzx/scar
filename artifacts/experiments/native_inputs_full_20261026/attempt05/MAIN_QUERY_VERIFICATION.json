@@ -1,0 +1,10 @@
+{
+  "normal_cli_exit": 0,
+  "row": 21,
+  "matches": 1,
+  "manifest_sha256": "7b6be9bd049ad7a6e59bf4f3c1342b085c96d996c77ca02a2017ce82190fc9e3",
+  "scope": "published transport only; no owner restored",
+  "parent_snapshot_navigation_established": false,
+  "whole_model_established": false,
+  "source_delivery_commit": "df7235145f56969b6289d63ea75a7e4c4ff7c1ab"
+}

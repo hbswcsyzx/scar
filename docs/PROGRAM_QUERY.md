@@ -77,3 +77,20 @@ argument ports。选中真实callee 40398的第0参数，查询准确返回`to_p
 OS查询返回原syscall/work/actor/handle依据及逐项资源路径；不将路径导航候选当作
 已绑定的文件身份。本次checkpoint查询能找到原read和work，状态明确为共享/未知
 FD绑定未决，`resource_path`为空；不能宣称已经连接到NVMe。
+
+## 原生 Tensor 输入
+
+```bash
+python -m scar.cli query-native-inputs \
+  --manifest PATH/input-metadata/manifest.json --sha256 EXPECTED_SHA256 \
+  --row 21 --associations --limit 2
+```
+
+省略`--associations`返回原元数据行；`--row`使用原 companion 行号。读取已发布的
+压缩分块，不重跑目标或扫描临时索引。返回值保留原native输入、ValueOccurrence、
+provider位置和元数据来源；这是保留产物查询，不恢复producer会话。
+
+本次原LeWM批次156片/39,796个规范边界实际通过，65,130条Tensor输入路径已关联，
+355,314条仍为`CANONICAL_NATIVE_BOUNDARY_UNAVAILABLE`。后者包含真实库内算子，
+不能都称为注解。当前关联中的片内端点还需要父ProgramSnapshot/execution定位，
+查询成功不将这些ID升级为全局限定数据流，不建立内容、alias、状态或ready事实。
