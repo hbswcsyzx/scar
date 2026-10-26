@@ -584,7 +584,8 @@ class SourceEntryFrontendPlan:
 def plan_source_entries(catalog, *, budget=SourceFrontendBudget(), capabilities=(
         SourceLanguageCapability.FIXED_UNPACK, SourceLanguageCapability.SLICE_KEYS,
         SourceLanguageCapability.LEXICAL_LOCALS, SourceLanguageCapability.CALL_KWARGS_314_V1), out_dir=None,
-        dispatch_order='CALL_WEIGHT_DESC_V1', eligible_entry_keys=None, automatic_function_try=False):
+        dispatch_order='CALL_WEIGHT_DESC_V1', eligible_entry_keys=None, automatic_function_try=False,
+        automatic_call_expansion=False, automatic_nested_functions=False):
     """Select by call weight, optionally batch the selected entries by file.
 
     Batching changes only analysis scheduling. It preserves window membership,
@@ -599,6 +600,8 @@ def plan_source_entries(catalog, *, budget=SourceFrontendBudget(), capabilities=
           'unsupported source-entry analysis dispatch order')
     budget.__post_init__()
     _need(type(automatic_function_try) is bool, 'automatic_function_try must be an explicit bool')
+    _need(type(automatic_call_expansion) is bool, 'automatic_call_expansion must be an explicit bool')
+    _need(type(automatic_nested_functions) is bool, 'automatic_nested_functions must be an explicit bool')
     SourceLanguageOptions(capabilities)
     if eligible_entry_keys is not None:
         _need(type(eligible_entry_keys) is tuple and bool(eligible_entry_keys)
@@ -642,6 +645,10 @@ def plan_source_entries(catalog, *, budget=SourceFrontendBudget(), capabilities=
         'source_body_publication': 'NOT_RUN', 'runtime_binding': 'NOT_RUN', 'first_stage_complete': False}
     if automatic_function_try:
         document['function_try_policy'] = 'AUTOMATIC_ORIGINAL_FUNCTION_AST_314_V1'
+    if automatic_call_expansion:
+        document['call_expansion_policy'] = 'AUTOMATIC_ORIGINAL_CALL_EXPANSION_AST_314_V1'
+    if automatic_nested_functions:
+        document['nested_function_policy'] = 'AUTOMATIC_ORIGINAL_FUNCTION_DEFINITION_AST_314_V1'
     if dispatch_order == 'FILE_GROUPED_V1':
         document['dispatch_order'] = dispatch_order
     if eligible_entry_keys is not None:
@@ -664,21 +671,40 @@ def plan_source_entries(catalog, *, budget=SourceFrontendBudget(), capabilities=
 
 def _entry_language_capabilities(plan, entry, context, capabilities):
     policy=plan.document.get('function_try_policy')
-    if policy is None:
+    call_policy=plan.document.get('call_expansion_policy')
+    nested_policy=plan.document.get('nested_function_policy')
+    if policy is None and call_policy is None and nested_policy is None:
         return capabilities
-    _need(policy=='AUTOMATIC_ORIGINAL_FUNCTION_AST_314_V1','unknown automatic function source policy')
+    _need(policy in(None,'AUTOMATIC_ORIGINAL_FUNCTION_AST_314_V1')
+          and call_policy in(None,'AUTOMATIC_ORIGINAL_CALL_EXPANSION_AST_314_V1')
+          and nested_policy in(None,'AUTOMATIC_ORIGINAL_FUNCTION_DEFINITION_AST_314_V1'),
+          'unknown automatic source capability policy')
     import ast
     source=entry.reference.source
     span=(source.start_line,source.end_line,source.start_column,source.end_column)
     nodes=[n for n in ast.walk(context.tree)if isinstance(n,(ast.FunctionDef,ast.AsyncFunctionDef))
         and(n.lineno,n.end_lineno,n.col_offset,n.end_col_offset)==span]
     _need(len(nodes)==1,'automatic function policy needs the exact original function AST')
-    def contains_try(node):
-        if isinstance(node,ast.Try):return True
-        if isinstance(node,(ast.FunctionDef,ast.AsyncFunctionDef,ast.Lambda,ast.ClassDef)):return False
-        return any(contains_try(child)for child in ast.iter_child_nodes(node))
-    if any(contains_try(n)for n in nodes[0].body)and SourceLanguageCapability.FUNCTION_TRY_314_V1 not in capabilities:
-        return capabilities+(SourceLanguageCapability.FUNCTION_TRY_314_V1,)
+    definitions=[]
+    def own_nodes(node):
+        if isinstance(node,(ast.FunctionDef,ast.AsyncFunctionDef)):
+            definitions.append(node)
+            for child in (*node.decorator_list,*node.args.defaults,*(x for x in node.args.kw_defaults if x is not None)):
+                yield from own_nodes(child)
+            return
+        if isinstance(node,(ast.Lambda,ast.ClassDef)):return
+        yield node
+        for child in ast.iter_child_nodes(node):yield from own_nodes(child)
+    own=tuple(n for root in nodes[0].body for n in own_nodes(root))
+    if (policy is not None and any(isinstance(n,ast.Try)for n in own)
+            and SourceLanguageCapability.FUNCTION_TRY_314_V1 not in capabilities):
+        capabilities+=(SourceLanguageCapability.FUNCTION_TRY_314_V1,)
+    if (call_policy is not None and any(isinstance(n,ast.Call)and(
+            any(isinstance(a,ast.Starred)for a in n.args)or any(k.arg is None for k in n.keywords))for n in own)
+            and SourceLanguageCapability.CALL_EXPANSION_314_V1 not in capabilities):
+        capabilities+=(SourceLanguageCapability.CALL_EXPANSION_314_V1,)
+    if nested_policy is not None and definitions and SourceLanguageCapability.NESTED_FUNCTION_314_V1 not in capabilities:
+        capabilities+=(SourceLanguageCapability.NESTED_FUNCTION_314_V1,)
     return capabilities
 
 
@@ -803,7 +829,7 @@ def run_source_entries(plan, out_dir, *, budget=SourceFrontendBudget(), progress
                     file_stats[active_file] = {'context_builds': 1, 'sealed_sessions': 1,
                         'source_prepare_attempts': 0, 'decoded_source_bytes': len(context.text.encode())}
                 active_capabilities=_entry_language_capabilities(plan,entry,context,capabilities)
-                if plan.document.get('function_try_policy') is not None:
+                if any(plan.document.get(field) is not None for field in ('function_try_policy','call_expansion_policy','nested_function_policy')):
                     row['active_capabilities']=[c.value for c in active_capabilities]
                 lower_started = True
                 owned = _lower_and_capture_entry(session, entry, context, evidence, active_capabilities, allocation, row['work_key'])

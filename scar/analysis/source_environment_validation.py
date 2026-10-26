@@ -96,6 +96,17 @@ def validate_environment_body(model, graph, interface, metadata, semantic, *, la
                  and atom is not None and atom.kind == "Call" and atom.reference == link.source
                  and link.opcode is Opcode.CALL, "kwargs call lost its capability or exact original SG Call")
             continue  # Exact call ports/pending/world are checked by the language validator.
+        if kind is Kind.MAKE_NESTED_FUNCTION:
+            from scar.ir.program.source_language import SourceLanguageCapability
+            declaration = semantic.definitions.get(link.semantic_operation)
+            atom = semantic.source_atoms.get(link.source.atom_id)
+            need(language is not None and SourceLanguageCapability.NESTED_FUNCTION_314_V1 in language.capabilities
+                 and declaration is not None and declaration.kind is OperationKind.OPERATOR
+                 and declaration.metadata.get('phase') == 'definition_time' and len(declaration.output_slots) == 1
+                 and declaration.code_id == link.source.atom_id.wire and link.source.atom_id in declaration.source_atoms
+                 and atom is not None and atom.kind == 'FunctionDef' and atom.reference == link.source
+                 and link.opcode is None, 'function creation lost its capability or original definition-time declaration')
+            continue  # Exact code/default/cell/name/world checks remain in the ordinary language validator.
         if kind not in _KINDS:
             need(link.semantic_operation is None, "a source-linked operation has an invented protocol")
             continue
@@ -202,6 +213,12 @@ def validate_environment_body(model, graph, interface, metadata, semantic, *, la
                      and row.coverage is AddressCoverage.PARTIAL and row.protocol is None
                      and row.effects == (effect,), "language index address differs from its exact receiver/key/world Uses")
                 expected_rows.add(operation.id)
+    if language is not None:
+        from scar.ir.program.source_language import SourceLanguageCapability
+        if SourceLanguageCapability.NESTED_FUNCTION_314_V1 in language.capabilities:
+            # Its original FunctionDef source/name/cell/address correspondence
+            # is checked by the dedicated ordinary language validator below.
+            expected_rows.update(p.operation for p in model.protocols if p.kind is Kind.STORE_NESTED_FUNCTION_CELL)
     need(set(rows) == expected_rows, "unexpected or missing source environment address refinement")
     for value in values.values():
         if type(value) is LocalBindingValue:

@@ -48,8 +48,9 @@ def dispatch_source_expression(builder, node, cursor):
     if builder.has_language("GENEXPR_314_V1") and isinstance(node, ast.GeneratorExp):
         from scar.analysis.source_generator_lowering import lower_generator
         return lower_generator(builder, node, cursor)
-    if (builder.has_language("CALL_KWARGS_314_V1") and isinstance(node, ast.Call)
-            and any(keyword.arg is None for keyword in node.keywords)):
+    if (isinstance(node, ast.Call) and (
+            builder.has_language("CALL_KWARGS_314_V1") and any(keyword.arg is None for keyword in node.keywords)
+            or builder.has_language("CALL_EXPANSION_314_V1") and any(isinstance(arg, ast.Starred) for arg in node.args))):
         from scar.analysis.source_call_lowering import lower_kwargs_call
         return lower_kwargs_call(builder, node, cursor)
     if builder.has_language("LEXICAL_LOCALS") and isinstance(node, (ast.ListComp, ast.SetComp, ast.DictComp, ast.GeneratorExp)):
@@ -210,6 +211,9 @@ class StructuredEnvironmentBuilder(StructuredBuilder):
                 continue
             if cursor is None:
                 cursor = super().statements((node,), cursor)
+            elif isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)) and self.has_language('NESTED_FUNCTION_314_V1'):
+                from scar.analysis.source_function_definition_lowering import lower_function_definition
+                cursor = lower_function_definition(self, node, cursor)
             elif isinstance(node, ast.AnnAssign):
                 cursor = annotated_assignment(self, node, cursor)
             elif isinstance(node, ast.Assert):
@@ -361,14 +365,29 @@ class StructuredEnvironmentBuilder(StructuredBuilder):
             self.function_context, self.function_definition.id, tuple(members))
         self.frame_transition(cursor, node, refs, PythonProtocolKind.FRAME_ENTER)
         parameter_values = {parameter.arg: port.value for parameter, port in zip(parameters, ports)}
+        def initial_local_bindings():
+            for name in sorted(self.locals):
+                parameter_node = next((parameter for parameter in parameters if parameter.arg == name), node)
+                self.define_binding(name, cursor, parameter_node, parameter_values.get(name))
+
+        # Frame initialization has already bound ordinary formal slots and
+        # left other fast locals unbound before the first MAKE_CELL executes
+        # (CPython 3.14.7 _PyEvalFramePushAndInit/initialize_locals). These are
+        # pure SSA definitions, not source stores or world operations. The Try
+        # path must carry these exact initial bindings even when cell allocation
+        # raises; delaying them leaves its real failure continuation undefined.
+        # self.locals excludes cell slots. Cell references are still introduced
+        # only by MAKE_CELL's normal result, before any body Try sink is active.
+        early_bindings = self.has_language("FUNCTION_TRY_314_V1") or self.has_language('NESTED_FUNCTION_314_V1')
+        if early_bindings:
+            initial_local_bindings()
         for name in layout.cellvars:
             if name not in self.local_cells:
                 continue
             parameter_node = next((parameter for parameter in parameters if parameter.arg == name), node)
             cursor = self._make_cell(cursor, parameter_node, name, parameter_values.get(name))
-        for name in sorted(self.locals):
-            parameter_node = next((parameter for parameter in parameters if parameter.arg == name), node)
-            self.define_binding(name, cursor, parameter_node, parameter_values.get(name))
+        if not early_bindings:
+            initial_local_bindings()
         self.gap(GapKind.FRAME_EFFECT, node,
             "frame interposition, lifetime, finalizers and noncompletion remain explicit unproved conditions")
         self.gap(GapKind.CODE_VERSION, node,
