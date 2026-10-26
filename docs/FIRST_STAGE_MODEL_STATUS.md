@@ -14,6 +14,13 @@ unresolved4964全部保留。静态仍151files/2217definitions/858active bodies�
 这些typed work仍UNATTACHED_TO_PROGRAM_SNAPSHOT，内容/state/ready及全模型仍OPEN；见
 [主树完整资源门](../artifacts/experiments/native_activity_work_memset_main_20261026/REPORT.md)。
 
+**跨片关系隔离结果：** `codex/source-call-model` 已生成完整24082条work关系，
+11541条带规范native/source/static-code对应，12541条保留缺口，22060 annotations单列。
+原全门在后续静态查询接错codec API时exit1；独立postflight对同一原关系和静态Region
+普通读回actual exit0/3.97s，旧门失败状态未改。helper两行修正已另存新版本，
+main尚未应用，后继需要main producer版本的新验收。scope对应不授对象/content/ready或
+完整调用数据流。见[原完整分母及限定验证报告](https://github.com/hbswcsyzx/scar/blob/f3a1c96c76b875aee46f038c86a60fb62ca7e8cd/artifacts/experiments/fragment_relations_implementation_20261026/REPORT.md)。
+
 当前交付与下一项统一见 [FIRST_STAGE_DELIVERY.md](FIRST_STAGE_DELIVERY.md)，
 实体和完整性定义见 [合同](FIRST_STAGE_MODEL_CONTRACT.md)。以下是按日期保留的
 实施记录；其中“进行中”仅指该条写入时状态，不作为当前进程存活证明。
