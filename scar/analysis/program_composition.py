@@ -21,7 +21,7 @@ from typing import Any
 from scar.analysis.source_layers import SourceLayerView, load_source_layers
 from scar.analysis.source_attachments import SourceAttachments, SourceAttachmentBudget
 from scar.analysis.inventory_partitions import InventoryPartitions
-from scar.ir.program.codec import loads as load_graph
+from scar.ir.program.codec import loads as load_graph, dumps as dump_graph
 from scar.ir.program.ids import OperationID, RegionID
 from scar.ir.program.inventory import (
     CallInventory, CoverageEntry, DefinitionInventory, SourceContextDigest,
@@ -857,7 +857,7 @@ class CompositionIndex:
             max_selected_decode_bytes=max_selected_decode_bytes)
         verified, actual, checked = read_source_entry_publication(path, expected_sha256=expected_sha256,
             catalog=catalog, max_programs=max_programs, max_operations_per_body=max_operations_per_body,
-            max_record_bytes=max_record_bytes, target_composition=parent)
+            max_record_bytes=max_record_bytes, target_composition=parent, _compact_body_cache=True)
         # Keep catalog's original parent separate: its source_inputs must never
         # be changed recursively by installation of this publication overlay.
         result = cls(original["path"], max_input_bytes=max_input_bytes, max_record_bytes=max_record_bytes)
@@ -1011,7 +1011,7 @@ class CompositionIndex:
             if item["entry"].reference == reference.definition:
                 if reference != self.body_reference(reference.definition):
                     raise ValueError("qualified body locator/namespace/region changed")
-                if hashlib.sha256(_canonical(item["program"].to_dict()["graph"])).hexdigest() != item["record"]["program_graph_sha256"]:
+                if hashlib.sha256(_canonical(json.loads(dump_graph(item["program"].graph)))).hexdigest() != item["record"]["program_graph_sha256"]:
                     raise ValueError("cached original typed body changed")
                 return item
         raise ValueError("qualified body is not in this publication")
@@ -1021,7 +1021,7 @@ class CompositionIndex:
         row, program = item["record"], item["program"]
         namespace = {"artifact": {"uri": reference.source_program.artifact.uri,
                                    "decoded_sha256": reference.source_program.decoded_sha256},
-            "representation": "scar.program-graph/" + str(program.to_dict()["graph"]["schema_version"]),
+            "representation": "scar.program-graph/" + str(json.loads(dump_graph(program.graph))["schema_version"]),
             "record_pointer": "#/graph", "body": {"definition": encode(reference.definition.definition),
                 "source": encode(reference.definition.source), "entry": program.metadata.entry}}
         return {"kind": "QUALIFIED_SOURCE_BODY", "reference": encode(reference), "namespace": namespace,
