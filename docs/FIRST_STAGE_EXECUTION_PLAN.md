@@ -11,6 +11,7 @@
 | 通用 frame/control 根 | A 的 core29 FRAME/单一 ABI 权威已接 B 的实际 SP8 producer：机械展开8顶层接口/118ops，Try等3句精确suffix仍REQUIRED；主树同SP8及旧function SP5普通读回通过。实际frame/namespace、内容/effects仍OPEN。下一步同SP8接传播payload与Try/异常清理，见[B实际报告](../artifacts/experiments/module_structured_prefix_b_applied_20261025/REPORT.md)及[整体设计](../artifacts/analysis/module_structured_frame_plan_20261025/PLAN.md)。 |
 | callee-entry 参数边 | snapshot→原 formal port 的局部 projection 已通过真实隔离门及主树旧 SP5/typed consumer：271次入口/566个参数观测，260次入口/520 ports 对应，11次保留 frontier。caller 实参表达式、对象/内容身份与完整 ExecutionModel 不能据此宣布完成；见[实际接入报告](../artifacts/experiments/callee_entry_routing_applied_20261025/REPORT.md)。 |
 | project/dependency 统一出版 | 同一次新CPU capture的正常CLI已实际通过：3成功SP5全部消费，project REVISE2、dependency ADD1，5groups/12calls保全，body-linked10/source-only1/unresolved1。五类动态接口仍各12 OPEN；project ADD、父overlay继承和v5新路径未实测。见[真实门报告](../artifacts/experiments/project_dependency_publication_gate_20261025/REPORT.md)。 |
+| 真实 LeWM source858 运行接线 | 已在独立source858-runtime树实际启动root11969，完整100438 calls、原scope/所有frontier保留；先核准确15 CP2/ancestor，再执行一次fresh source→dispatch→SBA。尚无终态或新动态计数，见[批准与实际启动](../artifacts/analysis/source858_runtime_reconnection_20261026/ROOT_DECISION.md)。 |
 
 这些是模型连接与类型修正，不是优化候选或 backend。下一版本仍必须保完整源码、
 调用和资源分母，并分别报告 source topology、运行对应、效果与完成状态。
@@ -44,8 +45,13 @@ S1 审计、已有数据的 S3 接线和独立产品复核可以并行；会改�
 先核传播端口与pending frame-exit的真实API，再接现C0/C1及except-as两条清理走廊；
 见[原设计与实施决定](../artifacts/analysis/module_try_propagation_c_plan_20261026/ROOT_DECISION.md)。
 随后继续实际数据/状态及资源完成关系。
-资源薄bridge仅有[有界方案](../artifacts/analysis/resource_completion_bridge_20261025/PLAN.md)，
-未授权实现：已保存GPU活动区间不能直接授COMPLETED或value ready，先解决具体证据合同。
+资源完成合同已有后继主要来源核对：严格单GPU activity的有效end可按原IR表示独立
+WorkQuiescence；不是child完成、输出正确或value ready。Root已授权原两源通用producer/checker，
+以全部原GPU活动和76个instances chunks为分母，逐记录有效性判定、分片输出；
+不采用为≥1.47GB扫描只保1手选活动的原提案。一次实门上限stored+decoded4GB、输出512MB，
+原EEG namespace/ordinal及不同start/end字段保留；ProgramSnapshot挂接仍须明确保OPEN，
+不造空图/任取host图。当前仅实施中，尚未实跑或授全量资格；
+早期[有界方案](../artifacts/analysis/resource_completion_bridge_20261025/PLAN.md)保留为设计历史。
 完整LeWM链、CP2未知成本和历史失败均保留。详见[入口](MODEL_RUN.md)及上述三项工作表。
 
 当前正式静态源码快照为858个active bodies/2217个定义/151个文件，769 UNSUPPORTED、
