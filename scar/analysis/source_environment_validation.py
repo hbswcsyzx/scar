@@ -29,6 +29,7 @@ _STORES = frozenset((Kind.STORE_CELL, Kind.STORE_GLOBAL, Kind.STORE_ATTRIBUTE, K
 
 def validate_environment_body(model, graph, interface, metadata, semantic, *, language=None):
     from scar.analysis.environment_lowering import captured_cell_slot
+    from scar.analysis.source_language import function_exception_types
 
     def need(condition, detail):
         if not condition:
@@ -112,7 +113,7 @@ def validate_environment_body(model, graph, interface, metadata, semantic, *, la
         payload = () if kind in _STORES else (reference_type,)
         need(tuple((signature.kind, signature.types) for signature in operation.completions)
              == ((ExitKind.NORMAL, payload + (state_type,)),
-                 (ExitKind.RAISE, (reference_type, state_type))), "normal/raise payload or state differs")
+                 (ExitKind.RAISE, function_exception_types(language, reference_type, state_type))), "normal/raise payload or state differs")
         need(tuple(edge.kind for edge in operation.terminator.successors) == (ExitKind.NORMAL, ExitKind.RAISE)
              and all(edge.arguments == tuple(CompletionResult(index) for index in range(len(signature.types)))
                      for edge, signature in zip(operation.terminator.successors, operation.completions)),

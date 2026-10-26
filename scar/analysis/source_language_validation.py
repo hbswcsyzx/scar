@@ -5,6 +5,8 @@ mode establishes runtime code-instance identity or operation purity.
 """
 from __future__ import annotations
 
+from scar.analysis.source_language import function_exception_types
+
 import ast
 import dis
 
@@ -57,9 +59,11 @@ def validate_language_body(model, graph, interface, metadata, semantic, language
           and len(constants) == len(language.constants), "duplicate language shape/provenance record")
     from scar.analysis.source_call_validation import CALL_PROTOCOLS, validate_call_protocols
     calls = {identity for identity, protocol in protocols.items() if protocol.kind in CALL_PROTOCOLS}
-    indexed = set(unpack) | set(slices) | set(constants) | calls
+    from scar.analysis.source_function_try_validation import validate_function_try_protocols
+    try_protocols = validate_function_try_protocols(model, graph, interface, metadata, semantic, language, source_tree=source_tree)
+    indexed = set(unpack) | set(slices) | set(constants) | calls | try_protocols
     actual = {key for key, row in protocols.items() if row.kind.value in EXTENDED_PROTOCOLS}
-    _need(indexed == actual and len(indexed) == len(unpack) + len(slices) + len(constants) + len(calls),
+    _need(indexed == actual and len(indexed) == len(unpack) + len(slices) + len(constants) + len(calls) + len(try_protocols),
           "new language operations must have one exact shape/provenance record")
 
     def source_node(reference, classes):
@@ -87,7 +91,7 @@ def validate_language_body(model, graph, interface, metadata, semantic, language
               "protocol must keep ordered normal and exceptional completions")
         normal, failure = operation.completions
         _need(normal.types == (_REF,) * result_count + (world_type,)
-              and failure.types == (_REF, world_type), "protocol payload/world types differ")
+              and failure.types == function_exception_types(language, _REF, world_type), "protocol payload/world types differ")
         _need(tuple(row.kind for row in operation.terminator.successors) == (ExitKind.NORMAL, ExitKind.RAISE)
               and all(edge.arguments == tuple(CompletionResult(i) for i in range(len(signature.types)))
                       for edge, signature in zip(operation.terminator.successors, operation.completions)),

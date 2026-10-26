@@ -1,0 +1,15 @@
+# Function Try source-only candidate
+
+Status: `IMPLEMENTED_COMPONENT_ONLY`.
+
+The isolated8f3ce335 producer now has an explicit `PYTHON_FUNCTION_TRY_314_V1` capability. Defaults and existing module C behavior remain unchanged. This is a source-only candidate, not a verified original archived-entry or runtime increment.
+
+Ordinary function try/finally uses the existing C0/C1 packet, pending and cleanup records: both protected completions enter cleanup, ordinary cleanup resumes its original pending completion with the post-world, and cleanup failure replaces it after restoring handled context. Single no-as handlers support bare handlers or an exact ordinary formal-name exception type; they keep borrowed matching, type-validation failures, reraise and else outside the protected body. Local binding tokens are carried with current state, never substituted with optional Python references. Raise boundaries keep the actual exception/traceback pair in an ExceptionPacket. The existing core remains unchanged.
+
+The normal SP5 reader requires exact retained source text for this new capability and checks pair provenance, original source suites, caught-reference provenance, formal handler binding, canonical cleanup actions and frame roots/post-state. The small3-case source-only check passed in2.205s, including two ordinary reader paths and packet-pair corruption rejection. Historical no-cap behavior and explicit unsupported frontiers were checked. No test function, target package, episode, raw trace or real source-entry gate was executed.
+
+Remaining frontiers are explicit: nested/combined Try, multiple/as handlers, cross-scope return/break/continue, resumable propagation, extended star/** call lifetime, and uncertain local-binding propagation. Global/attribute/dynamic handler type expressions lack the old function computational source protocol and remain `FUNCTION_TRY_HANDLER_EXPRESSION_SOURCE_PROTOCOL_UNIMPLEMENTED`; no semantic operation is fabricated. A protected suite with no raising operation currently remains a distinct unsupported case for the except adapter. Ordinary body semantics/effects, function environment, runtime identity and transformation authority remain OPEN.
+
+The actual archived acceptance anchor is pymunk/space.py:587, source fingerprint8741ab3c3d4a6190853356787d71c72c8c16cf341a34abec5b22d97a19307edc, with finally attribute reset at594–595. This turn inspected only the retained source snippet. Later star-call/set/unpack protocols may still prevent a whole-body result. Root will arrange normal archived source-entry consumption; neither this candidate nor the small check claims that original body is now modeled.
+
+Thirteen production source files, one small test and the short design document are listed with exact SHA in source-manifest.json. No main/source209/source858 production, frozen runner, original archive or Git index was modified. The independent source209_resume01 runner/freeze was prepared first and is now owned by Root session6064; it is unrelated to this new capability.

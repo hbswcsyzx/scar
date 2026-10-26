@@ -449,7 +449,13 @@ def _lower_prepared(context, entry, *, source, max_operations, expand_candidates
         if expand_candidates:
             raise ValueError("environment source bodies require root-only expansion")
         from scar.analysis.environment_lowering import StructuredEnvironmentBuilder
-        return StructuredEnvironmentBuilder(context, entry, source=source, max_operations=max_operations,
+        builder = StructuredEnvironmentBuilder
+        if language_options is not None:
+            from scar.ir.program.source_language import SourceLanguageCapability
+            if SourceLanguageCapability.FUNCTION_TRY_314_V1 in language_options.capabilities:
+                from scar.analysis.source_function_try_lowering import FunctionTryBuilder
+                builder = FunctionTryBuilder
+        return builder(context, entry, source=source, max_operations=max_operations,
                                              sealed_source=sealed_source, language_options=language_options).run()
     if profile is BodyLoweringProfile.STRUCTURED_BODY:
         if expand_candidates:
@@ -1305,11 +1311,18 @@ def validate_source_program(result: SourceProgram, *, max_operations: int = 1000
             if result.frame is not None or result.interface is None:
                 raise ValueError("structured bodies require a structured interface, not a legacy frame overlay")
             source_tree = None
-            if result.language is not None and not structural_only:
-                if language_options is None:
+            from scar.ir.program.source_language import SourceLanguageCapability
+            try_source = result.language is not None and SourceLanguageCapability.FUNCTION_TRY_314_V1 in result.language.capabilities
+            if result.language is not None and (not structural_only or try_source):
+                if not structural_only and language_options is None:
                     raise ValueError("v5 source replay requires explicit independently supplied language inputs")
-                with tokenize.open(result.metadata.source.path) as stream:
-                    source_text = stream.read()
+                if structural_only:
+                    if source_texts is None or result.metadata.source.path not in source_texts:
+                        raise ValueError("function Try STRUCTURE requires its exact retained source text")
+                    source_text = source_texts[result.metadata.source.path]
+                else:
+                    with tokenize.open(result.metadata.source.path) as stream:
+                        source_text = stream.read()
                 if "sha256:" + hashlib.sha256(source_text.encode()).hexdigest() != result.metadata.source.fingerprint:
                     raise ValueError("v5 source text changed")
                 source_tree = ast.parse(source_text, filename=result.metadata.source.path)

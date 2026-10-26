@@ -27,6 +27,7 @@ from scar.ir.program.structured import (
     PythonProtocol, PythonProtocolKind, StructuredBodyModel,
 )
 from scar.ir.program.validation import require_valid
+from scar.ir.program.source_language import FUNCTION_TRY_PROTOCOLS
 from scar.ir.v2.common import EvidenceKind
 
 
@@ -779,15 +780,17 @@ def _require_valid_structured_body(model, graph, interface, metadata, *, semanti
                 PythonProtocolKind.READ_CODE_CONSTANT, PythonProtocolKind.BUILD_CALL_POSITIONALS,
                 PythonProtocolKind.DICT_MERGE, PythonProtocolKind.CALL_FUNCTION_EX):
             pass  # Exact shapes, source, payloads and lifetime are checked below.
+        elif language is not None and protocol.kind.value in FUNCTION_TRY_PROTOCOLS:
+            pass  # Exact canonical C0/C1/source checks belong to the opt-in Try adapter.
         else:
             raise ValueError("opaque protocol has no implemented structured control interface")
     if environment_profile:
         from scar.analysis.source_environment_validation import validate_environment_body
         validate_environment_body(model, graph, interface, metadata, semantic, language=language)
         from scar.analysis.source_statement_lowering import validate_statement_protocols
-        validate_statement_protocols(model, graph, interface, metadata, semantic)
+        validate_statement_protocols(model, graph, interface, metadata, semantic, language=language)
         from scar.analysis.source_string_lowering import validate_string_protocols
-        validate_string_protocols(model, graph, interface, metadata, semantic)
+        validate_string_protocols(model, graph, interface, metadata, semantic, language=language)
         from scar.analysis.source_mapping_lowering import validate_mapping_protocols
         validate_mapping_protocols(model, graph, interface, metadata, semantic, language=language)
     if language is not None:

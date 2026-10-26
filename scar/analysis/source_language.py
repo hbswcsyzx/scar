@@ -124,4 +124,11 @@ def require_source_tree(tree, snapshot, source_reference):
                 source_reference.start_column, source_reference.end_column)]
 
 
+def function_exception_types(language, reference_type, world_type):
+    """Only the explicit function-Try profile carries propagation traceback."""
+    paired = language is not None and SourceLanguageCapability.FUNCTION_TRY_314_V1 in language.capabilities
+    return ((reference_type, reference_type, world_type) if paired
+            else (reference_type, world_type))
+
+
 __all__ = ["SourceCodeEvidence", "SourceLanguageOptions", "require_source_tree"]
