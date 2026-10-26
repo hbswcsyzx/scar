@@ -76,3 +76,12 @@ The subsequent owned/external/gzip case is in
 5 source calls, 2 receiver ports and 5 explicit argument ports, including both
 project→external and external→external normal SP5 bodies. Class/native/default
 layout boundaries and all environment/effect/ready/return-identity debt remain.
+
+`query-call-ports` now dispatches by the exact model schema/version pair: original
+`scar.source-call-port-bindings/1` or `scar.python-source-port-bindings/2`.
+The v1 query format is unchanged. In v2, `--actual-index` filters only explicit
+`arguments`; `receiver` is a separate callable projection with no actual index.
+Without an actual-index selector the full call includes both roles. Caller
+issues retain their original observed target, and a callee selector invents no
+destination for unresolved issues. Querying reuses the exact retained model;
+it does not imply return routes, reference/content identity or resource ready.

@@ -1,0 +1,2375 @@
+{
+  "schema": "scar.source-call-port-query",
+  "schema_version": 2,
+  "artifact": {
+    "uri": "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/call_port_query_v2_20261026/model-v2.json.gz",
+    "stored_bytes": 7720,
+    "stored_sha256": "7305823b9353590125caeb5df13971b69b0f10317bb50c14d480bd69e201dfa1",
+    "decoded_bytes": 90578,
+    "decoded_sha256": "d71743e6e58a4b90975a725cfa0ac53486e1abc7178754085fd404288037288b"
+  },
+  "selector": {
+    "invocation": {
+      "process_id": 1652336,
+      "thread_id": 140690766092096,
+      "invocation_id": 1
+    },
+    "direction": "caller",
+    "attempt_index": null,
+    "actual_index": 0,
+    "actual_index_role": "EXPLICIT_SOURCE_ARGUMENT_INDEX"
+  },
+  "summary": {
+    "targets": 8,
+    "bound_calls": 5,
+    "receiver_ports": 2,
+    "explicit_argument_ports": 5,
+    "open_targets": 3,
+    "reference_identity_established": false,
+    "effects_state_ready_established": false,
+    "whole_program_complete": false
+  },
+  "matched_bindings": 4,
+  "bindings": [
+    {
+      "target": {
+        "attempt_index": 6,
+        "caller": {
+          "process_id": 1652336,
+          "thread_id": 140690766092096,
+          "invocation_id": 1
+        },
+        "kind": "NORMALIZED_RECEIVER_FUNCTION",
+        "callable_reference": "weak:1652336:15",
+        "function_reference": "weak:1652336:15",
+        "code": "pycode-v2:02705fcb5b131fbf3f605bb810ebf1fa66759520acf97cba573f0b42d20b3405",
+        "layout": {
+          "argcount": 2,
+          "posonlyargcount": 0,
+          "kwonlyargcount": 0,
+          "flags": 134217731,
+          "parameters": [
+            "receiver",
+            "value"
+          ]
+        },
+        "receiver": {
+          "role": "IMPLICIT_CALL_RECEIVER",
+          "reference": "weak:1652336:16",
+          "explicit_positional": 1,
+          "conditions": [
+            "NO_INTERVENING_CALL_LAYOUT_MUTATION"
+          ]
+        },
+        "scope": "PROJECT"
+      },
+      "target_anchor": {
+        "path": "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/python_call_targets_owned_20261026/case01/capture/python-call-targets.1652336.jsonl",
+        "line_number": 2,
+        "line_sha256": "0778e931258b824aa24cf08bc1b9b176ca17711f13e8bcd776d7935d72728b25",
+        "index": 2
+      },
+      "entry": {
+        "attempt_index": 6,
+        "caller": {
+          "process_id": 1652336,
+          "thread_id": 140690766092096,
+          "invocation_id": 1
+        },
+        "callee": {
+          "process_id": 1652336,
+          "thread_id": 140690766092096,
+          "invocation_id": 2
+        },
+        "entry_index": 2,
+        "code": "pycode-v2:02705fcb5b131fbf3f605bb810ebf1fa66759520acf97cba573f0b42d20b3405",
+        "receiver_parameter_index": 0,
+        "receiver_reference": "weak:1652336:16"
+      },
+      "entry_anchor": {
+        "path": "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/python_call_targets_owned_20261026/case01/capture/python-call-targets.1652336.jsonl",
+        "line_number": 3,
+        "line_sha256": "8bc54617292fc9618fe4ada28a590389e4865f4bae35d66c2f2978420219a665",
+        "index": 3
+      },
+      "attempt": {
+        "path": "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/python_call_targets_owned_20261026/case01/capture/call-operands.1652336.jsonl",
+        "line_number": 6,
+        "line_sha256": "d206e02fd5ad9b49047c5673350e3dc750592e40235f4199bbe2f1a26de9d57f",
+        "index": 6
+      },
+      "frame_entry": {
+        "path": "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/python_call_targets_owned_20261026/case01/capture/call-events.1652336.jsonl",
+        "line_number": 2,
+        "line_sha256": "2654f1510973bfc0f4b8eb7c70be89c6a8a228842a01e275ae96974fa16c37d0",
+        "index": 2
+      },
+      "caller_code": {
+        "code": "pycode-v2:0b11284e645e8e4b0739041d6bc86d3203893f77823256766b9214d50ecdbbc6",
+        "status": "VERIFIED",
+        "snapshot": {
+          "path": "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/python_call_targets_owned_20261026/case01/project/sample.py",
+          "fingerprint": "sha256:0fd08002f1310b3a0f2c39025903bf39508145e0ced30b367c0635a1bbf9aa35",
+          "encoding": "utf-8",
+          "python_version": "3.14"
+        },
+        "definition": {
+          "kind": "opdef",
+          "value": "op:2495d46313fbe59a041ef9fb",
+          "wire": "opdef:op:2495d46313fbe59a041ef9fb"
+        },
+        "source": {
+          "atom_id": {
+            "kind": "source",
+            "value": "atom:05f378e568bdd300c0999bb5",
+            "wire": "source:atom:05f378e568bdd300c0999bb5"
+          },
+          "path": "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/python_call_targets_owned_20261026/case01/project/sample.py",
+          "fingerprint": "sha256:0fd08002f1310b3a0f2c39025903bf39508145e0ced30b367c0635a1bbf9aa35",
+          "start_line": 12,
+          "end_line": 21,
+          "start_column": 0,
+          "end_column": 50
+        },
+        "optimize_levels": [
+          0,
+          1,
+          2
+        ],
+        "issues": []
+      },
+      "callee_code": {
+        "code": "pycode-v2:02705fcb5b131fbf3f605bb810ebf1fa66759520acf97cba573f0b42d20b3405",
+        "status": "VERIFIED",
+        "snapshot": {
+          "path": "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/python_call_targets_owned_20261026/case01/project/sample.py",
+          "fingerprint": "sha256:0fd08002f1310b3a0f2c39025903bf39508145e0ced30b367c0635a1bbf9aa35",
+          "encoding": "utf-8",
+          "python_version": "3.14"
+        },
+        "definition": {
+          "kind": "opdef",
+          "value": "op:bc5b11653e384714f0a89b3f",
+          "wire": "opdef:op:bc5b11653e384714f0a89b3f"
+        },
+        "source": {
+          "atom_id": {
+            "kind": "source",
+            "value": "atom:17af61495cde6d3b6c63dd8a",
+            "wire": "source:atom:17af61495cde6d3b6c63dd8a"
+          },
+          "path": "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/python_call_targets_owned_20261026/case01/project/sample.py",
+          "fingerprint": "sha256:0fd08002f1310b3a0f2c39025903bf39508145e0ced30b367c0635a1bbf9aa35",
+          "start_line": 3,
+          "end_line": 4,
+          "start_column": 4,
+          "end_column": 24
+        },
+        "optimize_levels": [
+          0,
+          1,
+          2
+        ],
+        "issues": []
+      },
+      "call": {
+        "site": {
+          "code": "pycode-v2:0b11284e645e8e4b0739041d6bc86d3203893f77823256766b9214d50ecdbbc6",
+          "offset": 52,
+          "opname": "CALL",
+          "position": [
+            15,
+            15,
+            12,
+            30
+          ]
+        },
+        "status": "VERIFIED",
+        "source": {
+          "atom_id": {
+            "kind": "source",
+            "value": "atom:f1ef95da61090098652dbe1b",
+            "wire": "source:atom:f1ef95da61090098652dbe1b"
+          },
+          "path": "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/python_call_targets_owned_20261026/case01/project/sample.py",
+          "fingerprint": "sha256:0fd08002f1310b3a0f2c39025903bf39508145e0ced30b367c0635a1bbf9aa35",
+          "start_line": 15,
+          "end_line": 15,
+          "start_column": 12,
+          "end_column": 30
+        },
+        "call": {
+          "kind": "opdef",
+          "value": "op:07ca00b44358997689e704b6",
+          "wire": "opdef:op:07ca00b44358997689e704b6"
+        },
+        "execution_owner": {
+          "kind": "opdef",
+          "value": "op:2495d46313fbe59a041ef9fb",
+          "wire": "opdef:op:2495d46313fbe59a041ef9fb"
+        },
+        "core_region": {
+          "kind": "program_region",
+          "value": "af5958571d148fb6e3afcde4df102191",
+          "wire": "program_region:af5958571d148fb6e3afcde4df102191"
+        },
+        "core_operation": {
+          "kind": "program_operation",
+          "value": "a08fa699e1a102aba04e1a245550a38e",
+          "wire": "program_operation:a08fa699e1a102aba04e1a245550a38e"
+        },
+        "callee_use": {
+          "kind": "program_use",
+          "value": "065830f415e71128b8d23bd756ffa6cb",
+          "wire": "program_use:065830f415e71128b8d23bd756ffa6cb"
+        },
+        "callee_value": {
+          "kind": "program_value",
+          "value": "34e95f9055997d1e8529696cd82850e9",
+          "wire": "program_value:34e95f9055997d1e8529696cd82850e9"
+        },
+        "issues": []
+      },
+      "caller_body": {
+        "graph": {
+          "artifact": {
+            "uri": "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/python_call_targets_owned_20261026/case01/inventory.json",
+            "sha256": "341dc62104c84c07b63077ce53649afbb1a730ab93ace3f5d66147df605eece5",
+            "size_bytes": 1063063,
+            "schema": "scar.program-inventory"
+          },
+          "decoded_sha256": "341dc62104c84c07b63077ce53649afbb1a730ab93ace3f5d66147df605eece5",
+          "decoded_bytes": 1063063,
+          "representation": "canonical-json",
+          "pointer": "#/files/0/bodies/4/graph",
+          "declaration": {
+            "artifact": {
+              "uri": "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/python_call_targets_owned_20261026/case01/inventory-catalog.json",
+              "sha256": "0b27c75258edb55037a437ee785a33464e81243fb9fab9b1346c0c6a50ea509e",
+              "size_bytes": 345,
+              "schema": "scar.python-call-source-catalog/1"
+            },
+            "locator": "#/inventory"
+          }
+        },
+        "graph_representation": "scar.program-graph/15",
+        "definition": {
+          "kind": "opdef",
+          "value": "op:2495d46313fbe59a041ef9fb",
+          "wire": "opdef:op:2495d46313fbe59a041ef9fb"
+        },
+        "source": {
+          "atom_id": {
+            "kind": "source",
+            "value": "atom:05f378e568bdd300c0999bb5",
+            "wire": "source:atom:05f378e568bdd300c0999bb5"
+          },
+          "path": "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/python_call_targets_owned_20261026/case01/project/sample.py",
+          "fingerprint": "sha256:0fd08002f1310b3a0f2c39025903bf39508145e0ced30b367c0635a1bbf9aa35",
+          "start_line": 12,
+          "end_line": 21,
+          "start_column": 0,
+          "end_column": 50
+        },
+        "entry": "run",
+        "region": {
+          "kind": "program_region",
+          "value": "af5958571d148fb6e3afcde4df102191",
+          "wire": "program_region:af5958571d148fb6e3afcde4df102191"
+        }
+      },
+      "callee_body": {
+        "graph": {
+          "artifact": {
+            "uri": "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/python_call_targets_owned_20261026/case01/inventory.json",
+            "sha256": "341dc62104c84c07b63077ce53649afbb1a730ab93ace3f5d66147df605eece5",
+            "size_bytes": 1063063,
+            "schema": "scar.program-inventory"
+          },
+          "decoded_sha256": "341dc62104c84c07b63077ce53649afbb1a730ab93ace3f5d66147df605eece5",
+          "decoded_bytes": 1063063,
+          "representation": "canonical-json",
+          "pointer": "#/files/0/bodies/1/graph",
+          "declaration": {
+            "artifact": {
+              "uri": "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/python_call_targets_owned_20261026/case01/inventory-catalog.json",
+              "sha256": "0b27c75258edb55037a437ee785a33464e81243fb9fab9b1346c0c6a50ea509e",
+              "size_bytes": 345,
+              "schema": "scar.python-call-source-catalog/1"
+            },
+            "locator": "#/inventory"
+          }
+        },
+        "graph_representation": "scar.program-graph/5",
+        "definition": {
+          "kind": "opdef",
+          "value": "op:bc5b11653e384714f0a89b3f",
+          "wire": "opdef:op:bc5b11653e384714f0a89b3f"
+        },
+        "source": {
+          "atom_id": {
+            "kind": "source",
+            "value": "atom:17af61495cde6d3b6c63dd8a",
+            "wire": "source:atom:17af61495cde6d3b6c63dd8a"
+          },
+          "path": "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/python_call_targets_owned_20261026/case01/project/sample.py",
+          "fingerprint": "sha256:0fd08002f1310b3a0f2c39025903bf39508145e0ced30b367c0635a1bbf9aa35",
+          "start_line": 3,
+          "end_line": 4,
+          "start_column": 4,
+          "end_column": 24
+        },
+        "entry": "Operator.operation",
+        "region": {
+          "kind": "program_region",
+          "value": "cf3d9c3e941806bcce7f35ebb62b7c27",
+          "wire": "program_region:cf3d9c3e941806bcce7f35ebb62b7c27"
+        }
+      },
+      "receiver": {
+        "actual_body": {
+          "graph": {
+            "artifact": {
+              "uri": "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/python_call_targets_owned_20261026/case01/inventory.json",
+              "sha256": "341dc62104c84c07b63077ce53649afbb1a730ab93ace3f5d66147df605eece5",
+              "size_bytes": 1063063,
+              "schema": "scar.program-inventory"
+            },
+            "decoded_sha256": "341dc62104c84c07b63077ce53649afbb1a730ab93ace3f5d66147df605eece5",
+            "decoded_bytes": 1063063,
+            "representation": "canonical-json",
+            "pointer": "#/files/0/bodies/4/graph",
+            "declaration": {
+              "artifact": {
+                "uri": "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/python_call_targets_owned_20261026/case01/inventory-catalog.json",
+                "sha256": "0b27c75258edb55037a437ee785a33464e81243fb9fab9b1346c0c6a50ea509e",
+                "size_bytes": 345,
+                "schema": "scar.python-call-source-catalog/1"
+              },
+              "locator": "#/inventory"
+            }
+          },
+          "graph_representation": "scar.program-graph/15",
+          "definition": {
+            "kind": "opdef",
+            "value": "op:2495d46313fbe59a041ef9fb",
+            "wire": "opdef:op:2495d46313fbe59a041ef9fb"
+          },
+          "source": {
+            "atom_id": {
+              "kind": "source",
+              "value": "atom:05f378e568bdd300c0999bb5",
+              "wire": "source:atom:05f378e568bdd300c0999bb5"
+            },
+            "path": "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/python_call_targets_owned_20261026/case01/project/sample.py",
+            "fingerprint": "sha256:0fd08002f1310b3a0f2c39025903bf39508145e0ced30b367c0635a1bbf9aa35",
+            "start_line": 12,
+            "end_line": 21,
+            "start_column": 0,
+            "end_column": 50
+          },
+          "entry": "run",
+          "region": {
+            "kind": "program_region",
+            "value": "af5958571d148fb6e3afcde4df102191",
+            "wire": "program_region:af5958571d148fb6e3afcde4df102191"
+          }
+        },
+        "operation": {
+          "kind": "program_operation",
+          "value": "a08fa699e1a102aba04e1a245550a38e",
+          "wire": "program_operation:a08fa699e1a102aba04e1a245550a38e"
+        },
+        "callable_use": {
+          "kind": "program_use",
+          "value": "065830f415e71128b8d23bd756ffa6cb",
+          "wire": "program_use:065830f415e71128b8d23bd756ffa6cb"
+        },
+        "callable_value": {
+          "kind": "program_value",
+          "value": "34e95f9055997d1e8529696cd82850e9",
+          "wire": "program_value:34e95f9055997d1e8529696cd82850e9"
+        },
+        "formal_body": {
+          "graph": {
+            "artifact": {
+              "uri": "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/python_call_targets_owned_20261026/case01/inventory.json",
+              "sha256": "341dc62104c84c07b63077ce53649afbb1a730ab93ace3f5d66147df605eece5",
+              "size_bytes": 1063063,
+              "schema": "scar.program-inventory"
+            },
+            "decoded_sha256": "341dc62104c84c07b63077ce53649afbb1a730ab93ace3f5d66147df605eece5",
+            "decoded_bytes": 1063063,
+            "representation": "canonical-json",
+            "pointer": "#/files/0/bodies/1/graph",
+            "declaration": {
+              "artifact": {
+                "uri": "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/python_call_targets_owned_20261026/case01/inventory-catalog.json",
+                "sha256": "0b27c75258edb55037a437ee785a33464e81243fb9fab9b1346c0c6a50ea509e",
+                "size_bytes": 345,
+                "schema": "scar.python-call-source-catalog/1"
+              },
+              "locator": "#/inventory"
+            }
+          },
+          "graph_representation": "scar.program-graph/5",
+          "definition": {
+            "kind": "opdef",
+            "value": "op:bc5b11653e384714f0a89b3f",
+            "wire": "opdef:op:bc5b11653e384714f0a89b3f"
+          },
+          "source": {
+            "atom_id": {
+              "kind": "source",
+              "value": "atom:17af61495cde6d3b6c63dd8a",
+              "wire": "source:atom:17af61495cde6d3b6c63dd8a"
+            },
+            "path": "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/python_call_targets_owned_20261026/case01/project/sample.py",
+            "fingerprint": "sha256:0fd08002f1310b3a0f2c39025903bf39508145e0ced30b367c0635a1bbf9aa35",
+            "start_line": 3,
+            "end_line": 4,
+            "start_column": 4,
+            "end_column": 24
+          },
+          "entry": "Operator.operation",
+          "region": {
+            "kind": "program_region",
+            "value": "cf3d9c3e941806bcce7f35ebb62b7c27",
+            "wire": "program_region:cf3d9c3e941806bcce7f35ebb62b7c27"
+          }
+        },
+        "formal_slot": {
+          "kind": "slot",
+          "value": "slot:fbdba6f7e47548f8cecf9926",
+          "wire": "slot:slot:fbdba6f7e47548f8cecf9926"
+        },
+        "formal_value": {
+          "kind": "program_value",
+          "value": "ee76dad6109a7837e622d46a3e373eb2",
+          "wire": "program_value:ee76dad6109a7837e622d46a3e373eb2"
+        },
+        "formal_name": "receiver",
+        "observed": {
+          "role": "IMPLICIT_CALL_RECEIVER",
+          "reference": "weak:1652336:16",
+          "explicit_positional": 1,
+          "conditions": [
+            "NO_INTERVENING_CALL_LAYOUT_MUTATION"
+          ]
+        },
+        "projection": "PYTHON_BOUND_CALLABLE_RECEIVER_V1"
+      },
+      "arguments": [
+        {
+          "index": 0,
+          "actual_body": {
+            "graph": {
+              "artifact": {
+                "uri": "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/python_call_targets_owned_20261026/case01/inventory.json",
+                "sha256": "341dc62104c84c07b63077ce53649afbb1a730ab93ace3f5d66147df605eece5",
+                "size_bytes": 1063063,
+                "schema": "scar.program-inventory"
+              },
+              "decoded_sha256": "341dc62104c84c07b63077ce53649afbb1a730ab93ace3f5d66147df605eece5",
+              "decoded_bytes": 1063063,
+              "representation": "canonical-json",
+              "pointer": "#/files/0/bodies/4/graph",
+              "declaration": {
+                "artifact": {
+                  "uri": "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/python_call_targets_owned_20261026/case01/inventory-catalog.json",
+                  "sha256": "0b27c75258edb55037a437ee785a33464e81243fb9fab9b1346c0c6a50ea509e",
+                  "size_bytes": 345,
+                  "schema": "scar.python-call-source-catalog/1"
+                },
+                "locator": "#/inventory"
+              }
+            },
+            "graph_representation": "scar.program-graph/15",
+            "definition": {
+              "kind": "opdef",
+              "value": "op:2495d46313fbe59a041ef9fb",
+              "wire": "opdef:op:2495d46313fbe59a041ef9fb"
+            },
+            "source": {
+              "atom_id": {
+                "kind": "source",
+                "value": "atom:05f378e568bdd300c0999bb5",
+                "wire": "source:atom:05f378e568bdd300c0999bb5"
+              },
+              "path": "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/python_call_targets_owned_20261026/case01/project/sample.py",
+              "fingerprint": "sha256:0fd08002f1310b3a0f2c39025903bf39508145e0ced30b367c0635a1bbf9aa35",
+              "start_line": 12,
+              "end_line": 21,
+              "start_column": 0,
+              "end_column": 50
+            },
+            "entry": "run",
+            "region": {
+              "kind": "program_region",
+              "value": "af5958571d148fb6e3afcde4df102191",
+              "wire": "program_region:af5958571d148fb6e3afcde4df102191"
+            }
+          },
+          "operation": {
+            "kind": "program_operation",
+            "value": "a08fa699e1a102aba04e1a245550a38e",
+            "wire": "program_operation:a08fa699e1a102aba04e1a245550a38e"
+          },
+          "actual_source": {
+            "atom_id": {
+              "kind": "source",
+              "value": "atom:fd62aeadc9e193c1a06363fd",
+              "wire": "source:atom:fd62aeadc9e193c1a06363fd"
+            },
+            "path": "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/python_call_targets_owned_20261026/case01/project/sample.py",
+            "fingerprint": "sha256:0fd08002f1310b3a0f2c39025903bf39508145e0ced30b367c0635a1bbf9aa35",
+            "start_line": 15,
+            "end_line": 15,
+            "start_column": 28,
+            "end_column": 29
+          },
+          "actual_use": {
+            "kind": "program_use",
+            "value": "638b04de430f7f85838612a98e0f1579",
+            "wire": "program_use:638b04de430f7f85838612a98e0f1579"
+          },
+          "actual_value": {
+            "kind": "program_value",
+            "value": "9ddd2e080730efb6fceda2610f9e521a",
+            "wire": "program_value:9ddd2e080730efb6fceda2610f9e521a"
+          },
+          "formal_body": {
+            "graph": {
+              "artifact": {
+                "uri": "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/python_call_targets_owned_20261026/case01/inventory.json",
+                "sha256": "341dc62104c84c07b63077ce53649afbb1a730ab93ace3f5d66147df605eece5",
+                "size_bytes": 1063063,
+                "schema": "scar.program-inventory"
+              },
+              "decoded_sha256": "341dc62104c84c07b63077ce53649afbb1a730ab93ace3f5d66147df605eece5",
+              "decoded_bytes": 1063063,
+              "representation": "canonical-json",
+              "pointer": "#/files/0/bodies/1/graph",
+              "declaration": {
+                "artifact": {
+                  "uri": "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/python_call_targets_owned_20261026/case01/inventory-catalog.json",
+                  "sha256": "0b27c75258edb55037a437ee785a33464e81243fb9fab9b1346c0c6a50ea509e",
+                  "size_bytes": 345,
+                  "schema": "scar.python-call-source-catalog/1"
+                },
+                "locator": "#/inventory"
+              }
+            },
+            "graph_representation": "scar.program-graph/5",
+            "definition": {
+              "kind": "opdef",
+              "value": "op:bc5b11653e384714f0a89b3f",
+              "wire": "opdef:op:bc5b11653e384714f0a89b3f"
+            },
+            "source": {
+              "atom_id": {
+                "kind": "source",
+                "value": "atom:17af61495cde6d3b6c63dd8a",
+                "wire": "source:atom:17af61495cde6d3b6c63dd8a"
+              },
+              "path": "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/python_call_targets_owned_20261026/case01/project/sample.py",
+              "fingerprint": "sha256:0fd08002f1310b3a0f2c39025903bf39508145e0ced30b367c0635a1bbf9aa35",
+              "start_line": 3,
+              "end_line": 4,
+              "start_column": 4,
+              "end_column": 24
+            },
+            "entry": "Operator.operation",
+            "region": {
+              "kind": "program_region",
+              "value": "cf3d9c3e941806bcce7f35ebb62b7c27",
+              "wire": "program_region:cf3d9c3e941806bcce7f35ebb62b7c27"
+            }
+          },
+          "formal_slot": {
+            "kind": "slot",
+            "value": "slot:1f6d65a4e4e9dd85174716c4",
+            "wire": "slot:slot:1f6d65a4e4e9dd85174716c4"
+          },
+          "formal_value": {
+            "kind": "program_value",
+            "value": "2ffbac26b58760f1f15d4a49072354c5",
+            "wire": "program_value:2ffbac26b58760f1f15d4a49072354c5"
+          },
+          "formal_name": "value",
+          "parameter": {
+            "slot": {
+              "kind": "slot",
+              "value": "slot:1f6d65a4e4e9dd85174716c4",
+              "wire": "slot:slot:1f6d65a4e4e9dd85174716c4"
+            },
+            "origin": "ARGUMENT",
+            "argument_indices": [
+              0
+            ],
+            "default_source": null
+          }
+        }
+      ],
+      "candidate": null,
+      "conditions": [
+        "CAPTURE_PRODUCER_TRUSTED",
+        "NO_FRAME_INTERPOSITION",
+        "NO_NAMESPACE_MUTATION_BETWEEN_OBSERVATION_AND_LOAD",
+        "OBSERVER_AND_AUDIT_NONINTERFERENCE",
+        "MONITORING_DELIVERY_CONTINUITY_UNVERIFIED",
+        "SOURCE_CORE_EXECUTION_PRECONDITIONS",
+        "FUNCTION_ENVIRONMENT_UNVERIFIED",
+        "CONTENTS_EFFECTS_AND_WORLD_EQUIVALENCE_UNVERIFIED"
+      ]
+    },
+    {
+      "target": {
+        "attempt_index": 10,
+        "caller": {
+          "process_id": 1652336,
+          "thread_id": 140690766092096,
+          "invocation_id": 1
+        },
+        "kind": "NORMALIZED_RECEIVER_FUNCTION",
+        "callable_reference": "weak:1652336:15",
+        "function_reference": "weak:1652336:15",
+        "code": "pycode-v2:02705fcb5b131fbf3f605bb810ebf1fa66759520acf97cba573f0b42d20b3405",
+        "layout": {
+          "argcount": 2,
+          "posonlyargcount": 0,
+          "kwonlyargcount": 0,
+          "flags": 134217731,
+          "parameters": [
+            "receiver",
+            "value"
+          ]
+        },
+        "receiver": {
+          "role": "IMPLICIT_CALL_RECEIVER",
+          "reference": "weak:1652336:16",
+          "explicit_positional": 1,
+          "conditions": [
+            "NO_INTERVENING_CALL_LAYOUT_MUTATION"
+          ]
+        },
+        "scope": "PROJECT"
+      },
+      "target_anchor": {
+        "path": "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/python_call_targets_owned_20261026/case01/capture/python-call-targets.1652336.jsonl",
+        "line_number": 4,
+        "line_sha256": "0a95be2cac4d772c6122bdf8295a01bd3e08480faa43d09a1e992e2500f8bed3",
+        "index": 4
+      },
+      "entry": {
+        "attempt_index": 10,
+        "caller": {
+          "process_id": 1652336,
+          "thread_id": 140690766092096,
+          "invocation_id": 1
+        },
+        "callee": {
+          "process_id": 1652336,
+          "thread_id": 140690766092096,
+          "invocation_id": 3
+        },
+        "entry_index": 4,
+        "code": "pycode-v2:02705fcb5b131fbf3f605bb810ebf1fa66759520acf97cba573f0b42d20b3405",
+        "receiver_parameter_index": 0,
+        "receiver_reference": "weak:1652336:16"
+      },
+      "entry_anchor": {
+        "path": "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/python_call_targets_owned_20261026/case01/capture/python-call-targets.1652336.jsonl",
+        "line_number": 5,
+        "line_sha256": "7b9cc6ffb5338242ba3d07a9f2d83e94c154b9946f61693f81403f0403f7b136",
+        "index": 5
+      },
+      "attempt": {
+        "path": "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/python_call_targets_owned_20261026/case01/capture/call-operands.1652336.jsonl",
+        "line_number": 10,
+        "line_sha256": "18cf144de2bd27559f7bfd83ba0a178f2fc055922632b54de5e4226df891638b",
+        "index": 10
+      },
+      "frame_entry": {
+        "path": "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/python_call_targets_owned_20261026/case01/capture/call-events.1652336.jsonl",
+        "line_number": 4,
+        "line_sha256": "b7e3ac31e18546d846311058518c3dc575e48b8bfead2f2874ee98c4b7d538d2",
+        "index": 4
+      },
+      "caller_code": {
+        "code": "pycode-v2:0b11284e645e8e4b0739041d6bc86d3203893f77823256766b9214d50ecdbbc6",
+        "status": "VERIFIED",
+        "snapshot": {
+          "path": "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/python_call_targets_owned_20261026/case01/project/sample.py",
+          "fingerprint": "sha256:0fd08002f1310b3a0f2c39025903bf39508145e0ced30b367c0635a1bbf9aa35",
+          "encoding": "utf-8",
+          "python_version": "3.14"
+        },
+        "definition": {
+          "kind": "opdef",
+          "value": "op:2495d46313fbe59a041ef9fb",
+          "wire": "opdef:op:2495d46313fbe59a041ef9fb"
+        },
+        "source": {
+          "atom_id": {
+            "kind": "source",
+            "value": "atom:05f378e568bdd300c0999bb5",
+            "wire": "source:atom:05f378e568bdd300c0999bb5"
+          },
+          "path": "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/python_call_targets_owned_20261026/case01/project/sample.py",
+          "fingerprint": "sha256:0fd08002f1310b3a0f2c39025903bf39508145e0ced30b367c0635a1bbf9aa35",
+          "start_line": 12,
+          "end_line": 21,
+          "start_column": 0,
+          "end_column": 50
+        },
+        "optimize_levels": [
+          0,
+          1,
+          2
+        ],
+        "issues": []
+      },
+      "callee_code": {
+        "code": "pycode-v2:02705fcb5b131fbf3f605bb810ebf1fa66759520acf97cba573f0b42d20b3405",
+        "status": "VERIFIED",
+        "snapshot": {
+          "path": "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/python_call_targets_owned_20261026/case01/project/sample.py",
+          "fingerprint": "sha256:0fd08002f1310b3a0f2c39025903bf39508145e0ced30b367c0635a1bbf9aa35",
+          "encoding": "utf-8",
+          "python_version": "3.14"
+        },
+        "definition": {
+          "kind": "opdef",
+          "value": "op:bc5b11653e384714f0a89b3f",
+          "wire": "opdef:op:bc5b11653e384714f0a89b3f"
+        },
+        "source": {
+          "atom_id": {
+            "kind": "source",
+            "value": "atom:17af61495cde6d3b6c63dd8a",
+            "wire": "source:atom:17af61495cde6d3b6c63dd8a"
+          },
+          "path": "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/python_call_targets_owned_20261026/case01/project/sample.py",
+          "fingerprint": "sha256:0fd08002f1310b3a0f2c39025903bf39508145e0ced30b367c0635a1bbf9aa35",
+          "start_line": 3,
+          "end_line": 4,
+          "start_column": 4,
+          "end_column": 24
+        },
+        "optimize_levels": [
+          0,
+          1,
+          2
+        ],
+        "issues": []
+      },
+      "call": {
+        "site": {
+          "code": "pycode-v2:0b11284e645e8e4b0739041d6bc86d3203893f77823256766b9214d50ecdbbc6",
+          "offset": 86,
+          "opname": "CALL",
+          "position": [
+            16,
+            16,
+            13,
+            38
+          ]
+        },
+        "status": "VERIFIED",
+        "source": {
+          "atom_id": {
+            "kind": "source",
+            "value": "atom:9e49bb2e07cf4b3020d2f12a",
+            "wire": "source:atom:9e49bb2e07cf4b3020d2f12a"
+          },
+          "path": "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/python_call_targets_owned_20261026/case01/project/sample.py",
+          "fingerprint": "sha256:0fd08002f1310b3a0f2c39025903bf39508145e0ced30b367c0635a1bbf9aa35",
+          "start_line": 16,
+          "end_line": 16,
+          "start_column": 13,
+          "end_column": 38
+        },
+        "call": {
+          "kind": "opdef",
+          "value": "op:010033778ee2434ee31afbe5",
+          "wire": "opdef:op:010033778ee2434ee31afbe5"
+        },
+        "execution_owner": {
+          "kind": "opdef",
+          "value": "op:2495d46313fbe59a041ef9fb",
+          "wire": "opdef:op:2495d46313fbe59a041ef9fb"
+        },
+        "core_region": {
+          "kind": "program_region",
+          "value": "af5958571d148fb6e3afcde4df102191",
+          "wire": "program_region:af5958571d148fb6e3afcde4df102191"
+        },
+        "core_operation": {
+          "kind": "program_operation",
+          "value": "1b37475736dcc089b68ef3657cf9e107",
+          "wire": "program_operation:1b37475736dcc089b68ef3657cf9e107"
+        },
+        "callee_use": {
+          "kind": "program_use",
+          "value": "a76bc82277e65e643c09757515294ad1",
+          "wire": "program_use:a76bc82277e65e643c09757515294ad1"
+        },
+        "callee_value": {
+          "kind": "program_value",
+          "value": "5b15c407be2f864ce16877a0916ac220",
+          "wire": "program_value:5b15c407be2f864ce16877a0916ac220"
+        },
+        "issues": []
+      },
+      "caller_body": {
+        "graph": {
+          "artifact": {
+            "uri": "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/python_call_targets_owned_20261026/case01/inventory.json",
+            "sha256": "341dc62104c84c07b63077ce53649afbb1a730ab93ace3f5d66147df605eece5",
+            "size_bytes": 1063063,
+            "schema": "scar.program-inventory"
+          },
+          "decoded_sha256": "341dc62104c84c07b63077ce53649afbb1a730ab93ace3f5d66147df605eece5",
+          "decoded_bytes": 1063063,
+          "representation": "canonical-json",
+          "pointer": "#/files/0/bodies/4/graph",
+          "declaration": {
+            "artifact": {
+              "uri": "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/python_call_targets_owned_20261026/case01/inventory-catalog.json",
+              "sha256": "0b27c75258edb55037a437ee785a33464e81243fb9fab9b1346c0c6a50ea509e",
+              "size_bytes": 345,
+              "schema": "scar.python-call-source-catalog/1"
+            },
+            "locator": "#/inventory"
+          }
+        },
+        "graph_representation": "scar.program-graph/15",
+        "definition": {
+          "kind": "opdef",
+          "value": "op:2495d46313fbe59a041ef9fb",
+          "wire": "opdef:op:2495d46313fbe59a041ef9fb"
+        },
+        "source": {
+          "atom_id": {
+            "kind": "source",
+            "value": "atom:05f378e568bdd300c0999bb5",
+            "wire": "source:atom:05f378e568bdd300c0999bb5"
+          },
+          "path": "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/python_call_targets_owned_20261026/case01/project/sample.py",
+          "fingerprint": "sha256:0fd08002f1310b3a0f2c39025903bf39508145e0ced30b367c0635a1bbf9aa35",
+          "start_line": 12,
+          "end_line": 21,
+          "start_column": 0,
+          "end_column": 50
+        },
+        "entry": "run",
+        "region": {
+          "kind": "program_region",
+          "value": "af5958571d148fb6e3afcde4df102191",
+          "wire": "program_region:af5958571d148fb6e3afcde4df102191"
+        }
+      },
+      "callee_body": {
+        "graph": {
+          "artifact": {
+            "uri": "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/python_call_targets_owned_20261026/case01/inventory.json",
+            "sha256": "341dc62104c84c07b63077ce53649afbb1a730ab93ace3f5d66147df605eece5",
+            "size_bytes": 1063063,
+            "schema": "scar.program-inventory"
+          },
+          "decoded_sha256": "341dc62104c84c07b63077ce53649afbb1a730ab93ace3f5d66147df605eece5",
+          "decoded_bytes": 1063063,
+          "representation": "canonical-json",
+          "pointer": "#/files/0/bodies/1/graph",
+          "declaration": {
+            "artifact": {
+              "uri": "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/python_call_targets_owned_20261026/case01/inventory-catalog.json",
+              "sha256": "0b27c75258edb55037a437ee785a33464e81243fb9fab9b1346c0c6a50ea509e",
+              "size_bytes": 345,
+              "schema": "scar.python-call-source-catalog/1"
+            },
+            "locator": "#/inventory"
+          }
+        },
+        "graph_representation": "scar.program-graph/5",
+        "definition": {
+          "kind": "opdef",
+          "value": "op:bc5b11653e384714f0a89b3f",
+          "wire": "opdef:op:bc5b11653e384714f0a89b3f"
+        },
+        "source": {
+          "atom_id": {
+            "kind": "source",
+            "value": "atom:17af61495cde6d3b6c63dd8a",
+            "wire": "source:atom:17af61495cde6d3b6c63dd8a"
+          },
+          "path": "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/python_call_targets_owned_20261026/case01/project/sample.py",
+          "fingerprint": "sha256:0fd08002f1310b3a0f2c39025903bf39508145e0ced30b367c0635a1bbf9aa35",
+          "start_line": 3,
+          "end_line": 4,
+          "start_column": 4,
+          "end_column": 24
+        },
+        "entry": "Operator.operation",
+        "region": {
+          "kind": "program_region",
+          "value": "cf3d9c3e941806bcce7f35ebb62b7c27",
+          "wire": "program_region:cf3d9c3e941806bcce7f35ebb62b7c27"
+        }
+      },
+      "receiver": {
+        "actual_body": {
+          "graph": {
+            "artifact": {
+              "uri": "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/python_call_targets_owned_20261026/case01/inventory.json",
+              "sha256": "341dc62104c84c07b63077ce53649afbb1a730ab93ace3f5d66147df605eece5",
+              "size_bytes": 1063063,
+              "schema": "scar.program-inventory"
+            },
+            "decoded_sha256": "341dc62104c84c07b63077ce53649afbb1a730ab93ace3f5d66147df605eece5",
+            "decoded_bytes": 1063063,
+            "representation": "canonical-json",
+            "pointer": "#/files/0/bodies/4/graph",
+            "declaration": {
+              "artifact": {
+                "uri": "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/python_call_targets_owned_20261026/case01/inventory-catalog.json",
+                "sha256": "0b27c75258edb55037a437ee785a33464e81243fb9fab9b1346c0c6a50ea509e",
+                "size_bytes": 345,
+                "schema": "scar.python-call-source-catalog/1"
+              },
+              "locator": "#/inventory"
+            }
+          },
+          "graph_representation": "scar.program-graph/15",
+          "definition": {
+            "kind": "opdef",
+            "value": "op:2495d46313fbe59a041ef9fb",
+            "wire": "opdef:op:2495d46313fbe59a041ef9fb"
+          },
+          "source": {
+            "atom_id": {
+              "kind": "source",
+              "value": "atom:05f378e568bdd300c0999bb5",
+              "wire": "source:atom:05f378e568bdd300c0999bb5"
+            },
+            "path": "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/python_call_targets_owned_20261026/case01/project/sample.py",
+            "fingerprint": "sha256:0fd08002f1310b3a0f2c39025903bf39508145e0ced30b367c0635a1bbf9aa35",
+            "start_line": 12,
+            "end_line": 21,
+            "start_column": 0,
+            "end_column": 50
+          },
+          "entry": "run",
+          "region": {
+            "kind": "program_region",
+            "value": "af5958571d148fb6e3afcde4df102191",
+            "wire": "program_region:af5958571d148fb6e3afcde4df102191"
+          }
+        },
+        "operation": {
+          "kind": "program_operation",
+          "value": "1b37475736dcc089b68ef3657cf9e107",
+          "wire": "program_operation:1b37475736dcc089b68ef3657cf9e107"
+        },
+        "callable_use": {
+          "kind": "program_use",
+          "value": "a76bc82277e65e643c09757515294ad1",
+          "wire": "program_use:a76bc82277e65e643c09757515294ad1"
+        },
+        "callable_value": {
+          "kind": "program_value",
+          "value": "5b15c407be2f864ce16877a0916ac220",
+          "wire": "program_value:5b15c407be2f864ce16877a0916ac220"
+        },
+        "formal_body": {
+          "graph": {
+            "artifact": {
+              "uri": "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/python_call_targets_owned_20261026/case01/inventory.json",
+              "sha256": "341dc62104c84c07b63077ce53649afbb1a730ab93ace3f5d66147df605eece5",
+              "size_bytes": 1063063,
+              "schema": "scar.program-inventory"
+            },
+            "decoded_sha256": "341dc62104c84c07b63077ce53649afbb1a730ab93ace3f5d66147df605eece5",
+            "decoded_bytes": 1063063,
+            "representation": "canonical-json",
+            "pointer": "#/files/0/bodies/1/graph",
+            "declaration": {
+              "artifact": {
+                "uri": "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/python_call_targets_owned_20261026/case01/inventory-catalog.json",
+                "sha256": "0b27c75258edb55037a437ee785a33464e81243fb9fab9b1346c0c6a50ea509e",
+                "size_bytes": 345,
+                "schema": "scar.python-call-source-catalog/1"
+              },
+              "locator": "#/inventory"
+            }
+          },
+          "graph_representation": "scar.program-graph/5",
+          "definition": {
+            "kind": "opdef",
+            "value": "op:bc5b11653e384714f0a89b3f",
+            "wire": "opdef:op:bc5b11653e384714f0a89b3f"
+          },
+          "source": {
+            "atom_id": {
+              "kind": "source",
+              "value": "atom:17af61495cde6d3b6c63dd8a",
+              "wire": "source:atom:17af61495cde6d3b6c63dd8a"
+            },
+            "path": "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/python_call_targets_owned_20261026/case01/project/sample.py",
+            "fingerprint": "sha256:0fd08002f1310b3a0f2c39025903bf39508145e0ced30b367c0635a1bbf9aa35",
+            "start_line": 3,
+            "end_line": 4,
+            "start_column": 4,
+            "end_column": 24
+          },
+          "entry": "Operator.operation",
+          "region": {
+            "kind": "program_region",
+            "value": "cf3d9c3e941806bcce7f35ebb62b7c27",
+            "wire": "program_region:cf3d9c3e941806bcce7f35ebb62b7c27"
+          }
+        },
+        "formal_slot": {
+          "kind": "slot",
+          "value": "slot:fbdba6f7e47548f8cecf9926",
+          "wire": "slot:slot:fbdba6f7e47548f8cecf9926"
+        },
+        "formal_value": {
+          "kind": "program_value",
+          "value": "ee76dad6109a7837e622d46a3e373eb2",
+          "wire": "program_value:ee76dad6109a7837e622d46a3e373eb2"
+        },
+        "formal_name": "receiver",
+        "observed": {
+          "role": "IMPLICIT_CALL_RECEIVER",
+          "reference": "weak:1652336:16",
+          "explicit_positional": 1,
+          "conditions": [
+            "NO_INTERVENING_CALL_LAYOUT_MUTATION"
+          ]
+        },
+        "projection": "PYTHON_BOUND_CALLABLE_RECEIVER_V1"
+      },
+      "arguments": [
+        {
+          "index": 0,
+          "actual_body": {
+            "graph": {
+              "artifact": {
+                "uri": "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/python_call_targets_owned_20261026/case01/inventory.json",
+                "sha256": "341dc62104c84c07b63077ce53649afbb1a730ab93ace3f5d66147df605eece5",
+                "size_bytes": 1063063,
+                "schema": "scar.program-inventory"
+              },
+              "decoded_sha256": "341dc62104c84c07b63077ce53649afbb1a730ab93ace3f5d66147df605eece5",
+              "decoded_bytes": 1063063,
+              "representation": "canonical-json",
+              "pointer": "#/files/0/bodies/4/graph",
+              "declaration": {
+                "artifact": {
+                  "uri": "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/python_call_targets_owned_20261026/case01/inventory-catalog.json",
+                  "sha256": "0b27c75258edb55037a437ee785a33464e81243fb9fab9b1346c0c6a50ea509e",
+                  "size_bytes": 345,
+                  "schema": "scar.python-call-source-catalog/1"
+                },
+                "locator": "#/inventory"
+              }
+            },
+            "graph_representation": "scar.program-graph/15",
+            "definition": {
+              "kind": "opdef",
+              "value": "op:2495d46313fbe59a041ef9fb",
+              "wire": "opdef:op:2495d46313fbe59a041ef9fb"
+            },
+            "source": {
+              "atom_id": {
+                "kind": "source",
+                "value": "atom:05f378e568bdd300c0999bb5",
+                "wire": "source:atom:05f378e568bdd300c0999bb5"
+              },
+              "path": "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/python_call_targets_owned_20261026/case01/project/sample.py",
+              "fingerprint": "sha256:0fd08002f1310b3a0f2c39025903bf39508145e0ced30b367c0635a1bbf9aa35",
+              "start_line": 12,
+              "end_line": 21,
+              "start_column": 0,
+              "end_column": 50
+            },
+            "entry": "run",
+            "region": {
+              "kind": "program_region",
+              "value": "af5958571d148fb6e3afcde4df102191",
+              "wire": "program_region:af5958571d148fb6e3afcde4df102191"
+            }
+          },
+          "operation": {
+            "kind": "program_operation",
+            "value": "1b37475736dcc089b68ef3657cf9e107",
+            "wire": "program_operation:1b37475736dcc089b68ef3657cf9e107"
+          },
+          "actual_source": {
+            "atom_id": {
+              "kind": "source",
+              "value": "atom:76def3a8f81a982ebb7cf16f",
+              "wire": "source:atom:76def3a8f81a982ebb7cf16f"
+            },
+            "path": "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/python_call_targets_owned_20261026/case01/project/sample.py",
+            "fingerprint": "sha256:0fd08002f1310b3a0f2c39025903bf39508145e0ced30b367c0635a1bbf9aa35",
+            "start_line": 16,
+            "end_line": 16,
+            "start_column": 36,
+            "end_column": 37
+          },
+          "actual_use": {
+            "kind": "program_use",
+            "value": "40f2a42b383436df5ae0ec7d99ed6945",
+            "wire": "program_use:40f2a42b383436df5ae0ec7d99ed6945"
+          },
+          "actual_value": {
+            "kind": "program_value",
+            "value": "4487bad030f3879187ecf90c559e9aff",
+            "wire": "program_value:4487bad030f3879187ecf90c559e9aff"
+          },
+          "formal_body": {
+            "graph": {
+              "artifact": {
+                "uri": "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/python_call_targets_owned_20261026/case01/inventory.json",
+                "sha256": "341dc62104c84c07b63077ce53649afbb1a730ab93ace3f5d66147df605eece5",
+                "size_bytes": 1063063,
+                "schema": "scar.program-inventory"
+              },
+              "decoded_sha256": "341dc62104c84c07b63077ce53649afbb1a730ab93ace3f5d66147df605eece5",
+              "decoded_bytes": 1063063,
+              "representation": "canonical-json",
+              "pointer": "#/files/0/bodies/1/graph",
+              "declaration": {
+                "artifact": {
+                  "uri": "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/python_call_targets_owned_20261026/case01/inventory-catalog.json",
+                  "sha256": "0b27c75258edb55037a437ee785a33464e81243fb9fab9b1346c0c6a50ea509e",
+                  "size_bytes": 345,
+                  "schema": "scar.python-call-source-catalog/1"
+                },
+                "locator": "#/inventory"
+              }
+            },
+            "graph_representation": "scar.program-graph/5",
+            "definition": {
+              "kind": "opdef",
+              "value": "op:bc5b11653e384714f0a89b3f",
+              "wire": "opdef:op:bc5b11653e384714f0a89b3f"
+            },
+            "source": {
+              "atom_id": {
+                "kind": "source",
+                "value": "atom:17af61495cde6d3b6c63dd8a",
+                "wire": "source:atom:17af61495cde6d3b6c63dd8a"
+              },
+              "path": "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/python_call_targets_owned_20261026/case01/project/sample.py",
+              "fingerprint": "sha256:0fd08002f1310b3a0f2c39025903bf39508145e0ced30b367c0635a1bbf9aa35",
+              "start_line": 3,
+              "end_line": 4,
+              "start_column": 4,
+              "end_column": 24
+            },
+            "entry": "Operator.operation",
+            "region": {
+              "kind": "program_region",
+              "value": "cf3d9c3e941806bcce7f35ebb62b7c27",
+              "wire": "program_region:cf3d9c3e941806bcce7f35ebb62b7c27"
+            }
+          },
+          "formal_slot": {
+            "kind": "slot",
+            "value": "slot:1f6d65a4e4e9dd85174716c4",
+            "wire": "slot:slot:1f6d65a4e4e9dd85174716c4"
+          },
+          "formal_value": {
+            "kind": "program_value",
+            "value": "2ffbac26b58760f1f15d4a49072354c5",
+            "wire": "program_value:2ffbac26b58760f1f15d4a49072354c5"
+          },
+          "formal_name": "value",
+          "parameter": {
+            "slot": {
+              "kind": "slot",
+              "value": "slot:1f6d65a4e4e9dd85174716c4",
+              "wire": "slot:slot:1f6d65a4e4e9dd85174716c4"
+            },
+            "origin": "ARGUMENT",
+            "argument_indices": [
+              0
+            ],
+            "default_source": null
+          }
+        }
+      ],
+      "candidate": null,
+      "conditions": [
+        "CAPTURE_PRODUCER_TRUSTED",
+        "NO_FRAME_INTERPOSITION",
+        "NO_NAMESPACE_MUTATION_BETWEEN_OBSERVATION_AND_LOAD",
+        "OBSERVER_AND_AUDIT_NONINTERFERENCE",
+        "MONITORING_DELIVERY_CONTINUITY_UNVERIFIED",
+        "SOURCE_CORE_EXECUTION_PRECONDITIONS",
+        "FUNCTION_ENVIRONMENT_UNVERIFIED",
+        "CONTENTS_EFFECTS_AND_WORLD_EQUIVALENCE_UNVERIFIED"
+      ]
+    },
+    {
+      "target": {
+        "attempt_index": 14,
+        "caller": {
+          "process_id": 1652336,
+          "thread_id": 140690766092096,
+          "invocation_id": 1
+        },
+        "kind": "FUNCTION",
+        "callable_reference": "weak:1652336:24",
+        "function_reference": "weak:1652336:24",
+        "code": "pycode-v2:b17239f8bc46afc8928d3c4afb536d09e70663fe1cbbd736034d32016de2d440",
+        "layout": {
+          "argcount": 1,
+          "posonlyargcount": 0,
+          "kwonlyargcount": 0,
+          "flags": 3,
+          "parameters": [
+            "value"
+          ]
+        },
+        "receiver": null,
+        "scope": "PROJECT"
+      },
+      "target_anchor": {
+        "path": "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/python_call_targets_owned_20261026/case01/capture/python-call-targets.1652336.jsonl",
+        "line_number": 6,
+        "line_sha256": "29dd53c2b7d68b42e3a1518e67a10e64c50f1b30b8feded41d372ac27f14399b",
+        "index": 6
+      },
+      "entry": {
+        "attempt_index": 14,
+        "caller": {
+          "process_id": 1652336,
+          "thread_id": 140690766092096,
+          "invocation_id": 1
+        },
+        "callee": {
+          "process_id": 1652336,
+          "thread_id": 140690766092096,
+          "invocation_id": 4
+        },
+        "entry_index": 6,
+        "code": "pycode-v2:b17239f8bc46afc8928d3c4afb536d09e70663fe1cbbd736034d32016de2d440",
+        "receiver_parameter_index": null,
+        "receiver_reference": null
+      },
+      "entry_anchor": {
+        "path": "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/python_call_targets_owned_20261026/case01/capture/call-operands.1652336.jsonl",
+        "line_number": 15,
+        "line_sha256": "709a2fe513ea1cc6bc9c9e3f590a68c7cab6cfc9b97c4c986be85b4f2183b4c3",
+        "index": 15
+      },
+      "attempt": {
+        "path": "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/python_call_targets_owned_20261026/case01/capture/call-operands.1652336.jsonl",
+        "line_number": 14,
+        "line_sha256": "eb82c5a1de7e0b9e3ec6334ff2f7b2ef23bcf45436f80140567658af30139ae0",
+        "index": 14
+      },
+      "frame_entry": {
+        "path": "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/python_call_targets_owned_20261026/case01/capture/call-events.1652336.jsonl",
+        "line_number": 6,
+        "line_sha256": "a9ab879ed394bd20a1b4cab1079b1c11d321eafd5524ff9eeb2b59d3dc29a28e",
+        "index": 6
+      },
+      "caller_code": {
+        "code": "pycode-v2:0b11284e645e8e4b0739041d6bc86d3203893f77823256766b9214d50ecdbbc6",
+        "status": "VERIFIED",
+        "snapshot": {
+          "path": "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/python_call_targets_owned_20261026/case01/project/sample.py",
+          "fingerprint": "sha256:0fd08002f1310b3a0f2c39025903bf39508145e0ced30b367c0635a1bbf9aa35",
+          "encoding": "utf-8",
+          "python_version": "3.14"
+        },
+        "definition": {
+          "kind": "opdef",
+          "value": "op:2495d46313fbe59a041ef9fb",
+          "wire": "opdef:op:2495d46313fbe59a041ef9fb"
+        },
+        "source": {
+          "atom_id": {
+            "kind": "source",
+            "value": "atom:05f378e568bdd300c0999bb5",
+            "wire": "source:atom:05f378e568bdd300c0999bb5"
+          },
+          "path": "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/python_call_targets_owned_20261026/case01/project/sample.py",
+          "fingerprint": "sha256:0fd08002f1310b3a0f2c39025903bf39508145e0ced30b367c0635a1bbf9aa35",
+          "start_line": 12,
+          "end_line": 21,
+          "start_column": 0,
+          "end_column": 50
+        },
+        "optimize_levels": [
+          0,
+          1,
+          2
+        ],
+        "issues": []
+      },
+      "callee_code": {
+        "code": "pycode-v2:b17239f8bc46afc8928d3c4afb536d09e70663fe1cbbd736034d32016de2d440",
+        "status": "VERIFIED",
+        "snapshot": {
+          "path": "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/python_call_targets_owned_20261026/case01/project/sample.py",
+          "fingerprint": "sha256:0fd08002f1310b3a0f2c39025903bf39508145e0ced30b367c0635a1bbf9aa35",
+          "encoding": "utf-8",
+          "python_version": "3.14"
+        },
+        "definition": {
+          "kind": "opdef",
+          "value": "op:68be621f243323e72a0393c8",
+          "wire": "opdef:op:68be621f243323e72a0393c8"
+        },
+        "source": {
+          "atom_id": {
+            "kind": "source",
+            "value": "atom:d0ce084f0d3f50489d30a7af",
+            "wire": "source:atom:d0ce084f0d3f50489d30a7af"
+          },
+          "path": "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/python_call_targets_owned_20261026/case01/project/sample.py",
+          "fingerprint": "sha256:0fd08002f1310b3a0f2c39025903bf39508145e0ced30b367c0635a1bbf9aa35",
+          "start_line": 6,
+          "end_line": 7,
+          "start_column": 0,
+          "end_column": 20
+        },
+        "optimize_levels": [
+          0,
+          1,
+          2
+        ],
+        "issues": []
+      },
+      "call": {
+        "site": {
+          "code": "pycode-v2:0b11284e645e8e4b0739041d6bc86d3203893f77823256766b9214d50ecdbbc6",
+          "offset": 108,
+          "opname": "CALL",
+          "position": [
+            17,
+            17,
+            12,
+            23
+          ]
+        },
+        "status": "VERIFIED",
+        "source": {
+          "atom_id": {
+            "kind": "source",
+            "value": "atom:a786fa59a93aa6c854c5d845",
+            "wire": "source:atom:a786fa59a93aa6c854c5d845"
+          },
+          "path": "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/python_call_targets_owned_20261026/case01/project/sample.py",
+          "fingerprint": "sha256:0fd08002f1310b3a0f2c39025903bf39508145e0ced30b367c0635a1bbf9aa35",
+          "start_line": 17,
+          "end_line": 17,
+          "start_column": 12,
+          "end_column": 23
+        },
+        "call": {
+          "kind": "opdef",
+          "value": "op:0ce5946854536e8eb634c252",
+          "wire": "opdef:op:0ce5946854536e8eb634c252"
+        },
+        "execution_owner": {
+          "kind": "opdef",
+          "value": "op:2495d46313fbe59a041ef9fb",
+          "wire": "opdef:op:2495d46313fbe59a041ef9fb"
+        },
+        "core_region": {
+          "kind": "program_region",
+          "value": "af5958571d148fb6e3afcde4df102191",
+          "wire": "program_region:af5958571d148fb6e3afcde4df102191"
+        },
+        "core_operation": {
+          "kind": "program_operation",
+          "value": "4cb8ee86be80252d1c3718a3f257e022",
+          "wire": "program_operation:4cb8ee86be80252d1c3718a3f257e022"
+        },
+        "callee_use": {
+          "kind": "program_use",
+          "value": "fddfcd504b81c03aa2e3ebd235e6527b",
+          "wire": "program_use:fddfcd504b81c03aa2e3ebd235e6527b"
+        },
+        "callee_value": {
+          "kind": "program_value",
+          "value": "1e0f4e3965053e13568d70943afc19f8",
+          "wire": "program_value:1e0f4e3965053e13568d70943afc19f8"
+        },
+        "issues": []
+      },
+      "caller_body": {
+        "graph": {
+          "artifact": {
+            "uri": "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/python_call_targets_owned_20261026/case01/inventory.json",
+            "sha256": "341dc62104c84c07b63077ce53649afbb1a730ab93ace3f5d66147df605eece5",
+            "size_bytes": 1063063,
+            "schema": "scar.program-inventory"
+          },
+          "decoded_sha256": "341dc62104c84c07b63077ce53649afbb1a730ab93ace3f5d66147df605eece5",
+          "decoded_bytes": 1063063,
+          "representation": "canonical-json",
+          "pointer": "#/files/0/bodies/4/graph",
+          "declaration": {
+            "artifact": {
+              "uri": "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/python_call_targets_owned_20261026/case01/inventory-catalog.json",
+              "sha256": "0b27c75258edb55037a437ee785a33464e81243fb9fab9b1346c0c6a50ea509e",
+              "size_bytes": 345,
+              "schema": "scar.python-call-source-catalog/1"
+            },
+            "locator": "#/inventory"
+          }
+        },
+        "graph_representation": "scar.program-graph/15",
+        "definition": {
+          "kind": "opdef",
+          "value": "op:2495d46313fbe59a041ef9fb",
+          "wire": "opdef:op:2495d46313fbe59a041ef9fb"
+        },
+        "source": {
+          "atom_id": {
+            "kind": "source",
+            "value": "atom:05f378e568bdd300c0999bb5",
+            "wire": "source:atom:05f378e568bdd300c0999bb5"
+          },
+          "path": "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/python_call_targets_owned_20261026/case01/project/sample.py",
+          "fingerprint": "sha256:0fd08002f1310b3a0f2c39025903bf39508145e0ced30b367c0635a1bbf9aa35",
+          "start_line": 12,
+          "end_line": 21,
+          "start_column": 0,
+          "end_column": 50
+        },
+        "entry": "run",
+        "region": {
+          "kind": "program_region",
+          "value": "af5958571d148fb6e3afcde4df102191",
+          "wire": "program_region:af5958571d148fb6e3afcde4df102191"
+        }
+      },
+      "callee_body": {
+        "graph": {
+          "artifact": {
+            "uri": "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/python_call_targets_owned_20261026/case01/inventory.json",
+            "sha256": "341dc62104c84c07b63077ce53649afbb1a730ab93ace3f5d66147df605eece5",
+            "size_bytes": 1063063,
+            "schema": "scar.program-inventory"
+          },
+          "decoded_sha256": "341dc62104c84c07b63077ce53649afbb1a730ab93ace3f5d66147df605eece5",
+          "decoded_bytes": 1063063,
+          "representation": "canonical-json",
+          "pointer": "#/files/0/bodies/2/graph",
+          "declaration": {
+            "artifact": {
+              "uri": "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/python_call_targets_owned_20261026/case01/inventory-catalog.json",
+              "sha256": "0b27c75258edb55037a437ee785a33464e81243fb9fab9b1346c0c6a50ea509e",
+              "size_bytes": 345,
+              "schema": "scar.python-call-source-catalog/1"
+            },
+            "locator": "#/inventory"
+          }
+        },
+        "graph_representation": "scar.program-graph/5",
+        "definition": {
+          "kind": "opdef",
+          "value": "op:68be621f243323e72a0393c8",
+          "wire": "opdef:op:68be621f243323e72a0393c8"
+        },
+        "source": {
+          "atom_id": {
+            "kind": "source",
+            "value": "atom:d0ce084f0d3f50489d30a7af",
+            "wire": "source:atom:d0ce084f0d3f50489d30a7af"
+          },
+          "path": "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/python_call_targets_owned_20261026/case01/project/sample.py",
+          "fingerprint": "sha256:0fd08002f1310b3a0f2c39025903bf39508145e0ced30b367c0635a1bbf9aa35",
+          "start_line": 6,
+          "end_line": 7,
+          "start_column": 0,
+          "end_column": 20
+        },
+        "entry": "ordinary",
+        "region": {
+          "kind": "program_region",
+          "value": "0eac537c0ad5d4be15a9d214fa04e00b",
+          "wire": "program_region:0eac537c0ad5d4be15a9d214fa04e00b"
+        }
+      },
+      "receiver": null,
+      "arguments": [
+        {
+          "index": 0,
+          "actual_body": {
+            "graph": {
+              "artifact": {
+                "uri": "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/python_call_targets_owned_20261026/case01/inventory.json",
+                "sha256": "341dc62104c84c07b63077ce53649afbb1a730ab93ace3f5d66147df605eece5",
+                "size_bytes": 1063063,
+                "schema": "scar.program-inventory"
+              },
+              "decoded_sha256": "341dc62104c84c07b63077ce53649afbb1a730ab93ace3f5d66147df605eece5",
+              "decoded_bytes": 1063063,
+              "representation": "canonical-json",
+              "pointer": "#/files/0/bodies/4/graph",
+              "declaration": {
+                "artifact": {
+                  "uri": "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/python_call_targets_owned_20261026/case01/inventory-catalog.json",
+                  "sha256": "0b27c75258edb55037a437ee785a33464e81243fb9fab9b1346c0c6a50ea509e",
+                  "size_bytes": 345,
+                  "schema": "scar.python-call-source-catalog/1"
+                },
+                "locator": "#/inventory"
+              }
+            },
+            "graph_representation": "scar.program-graph/15",
+            "definition": {
+              "kind": "opdef",
+              "value": "op:2495d46313fbe59a041ef9fb",
+              "wire": "opdef:op:2495d46313fbe59a041ef9fb"
+            },
+            "source": {
+              "atom_id": {
+                "kind": "source",
+                "value": "atom:05f378e568bdd300c0999bb5",
+                "wire": "source:atom:05f378e568bdd300c0999bb5"
+              },
+              "path": "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/python_call_targets_owned_20261026/case01/project/sample.py",
+              "fingerprint": "sha256:0fd08002f1310b3a0f2c39025903bf39508145e0ced30b367c0635a1bbf9aa35",
+              "start_line": 12,
+              "end_line": 21,
+              "start_column": 0,
+              "end_column": 50
+            },
+            "entry": "run",
+            "region": {
+              "kind": "program_region",
+              "value": "af5958571d148fb6e3afcde4df102191",
+              "wire": "program_region:af5958571d148fb6e3afcde4df102191"
+            }
+          },
+          "operation": {
+            "kind": "program_operation",
+            "value": "4cb8ee86be80252d1c3718a3f257e022",
+            "wire": "program_operation:4cb8ee86be80252d1c3718a3f257e022"
+          },
+          "actual_source": {
+            "atom_id": {
+              "kind": "source",
+              "value": "atom:0c451bbe223f8c572a7e222e",
+              "wire": "source:atom:0c451bbe223f8c572a7e222e"
+            },
+            "path": "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/python_call_targets_owned_20261026/case01/project/sample.py",
+            "fingerprint": "sha256:0fd08002f1310b3a0f2c39025903bf39508145e0ced30b367c0635a1bbf9aa35",
+            "start_line": 17,
+            "end_line": 17,
+            "start_column": 21,
+            "end_column": 22
+          },
+          "actual_use": {
+            "kind": "program_use",
+            "value": "8e06e345000f4ab187333ce959782192",
+            "wire": "program_use:8e06e345000f4ab187333ce959782192"
+          },
+          "actual_value": {
+            "kind": "program_value",
+            "value": "23b9c86e42718444b60d7d4103527685",
+            "wire": "program_value:23b9c86e42718444b60d7d4103527685"
+          },
+          "formal_body": {
+            "graph": {
+              "artifact": {
+                "uri": "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/python_call_targets_owned_20261026/case01/inventory.json",
+                "sha256": "341dc62104c84c07b63077ce53649afbb1a730ab93ace3f5d66147df605eece5",
+                "size_bytes": 1063063,
+                "schema": "scar.program-inventory"
+              },
+              "decoded_sha256": "341dc62104c84c07b63077ce53649afbb1a730ab93ace3f5d66147df605eece5",
+              "decoded_bytes": 1063063,
+              "representation": "canonical-json",
+              "pointer": "#/files/0/bodies/2/graph",
+              "declaration": {
+                "artifact": {
+                  "uri": "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/python_call_targets_owned_20261026/case01/inventory-catalog.json",
+                  "sha256": "0b27c75258edb55037a437ee785a33464e81243fb9fab9b1346c0c6a50ea509e",
+                  "size_bytes": 345,
+                  "schema": "scar.python-call-source-catalog/1"
+                },
+                "locator": "#/inventory"
+              }
+            },
+            "graph_representation": "scar.program-graph/5",
+            "definition": {
+              "kind": "opdef",
+              "value": "op:68be621f243323e72a0393c8",
+              "wire": "opdef:op:68be621f243323e72a0393c8"
+            },
+            "source": {
+              "atom_id": {
+                "kind": "source",
+                "value": "atom:d0ce084f0d3f50489d30a7af",
+                "wire": "source:atom:d0ce084f0d3f50489d30a7af"
+              },
+              "path": "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/python_call_targets_owned_20261026/case01/project/sample.py",
+              "fingerprint": "sha256:0fd08002f1310b3a0f2c39025903bf39508145e0ced30b367c0635a1bbf9aa35",
+              "start_line": 6,
+              "end_line": 7,
+              "start_column": 0,
+              "end_column": 20
+            },
+            "entry": "ordinary",
+            "region": {
+              "kind": "program_region",
+              "value": "0eac537c0ad5d4be15a9d214fa04e00b",
+              "wire": "program_region:0eac537c0ad5d4be15a9d214fa04e00b"
+            }
+          },
+          "formal_slot": {
+            "kind": "slot",
+            "value": "slot:56149a9263b130bf961866bf",
+            "wire": "slot:slot:56149a9263b130bf961866bf"
+          },
+          "formal_value": {
+            "kind": "program_value",
+            "value": "ab1762d231e95925a3e570dc0c0a3911",
+            "wire": "program_value:ab1762d231e95925a3e570dc0c0a3911"
+          },
+          "formal_name": "value",
+          "parameter": {
+            "slot": {
+              "kind": "slot",
+              "value": "slot:56149a9263b130bf961866bf",
+              "wire": "slot:slot:56149a9263b130bf961866bf"
+            },
+            "origin": "ARGUMENT",
+            "argument_indices": [
+              0
+            ],
+            "default_source": null
+          }
+        }
+      ],
+      "candidate": {
+        "call": {
+          "kind": "opdef",
+          "value": "op:0ce5946854536e8eb634c252",
+          "wire": "opdef:op:0ce5946854536e8eb634c252"
+        },
+        "target": {
+          "kind": "opdef",
+          "value": "op:68be621f243323e72a0393c8",
+          "wire": "opdef:op:68be621f243323e72a0393c8"
+        },
+        "source": {
+          "atom_id": {
+            "kind": "source",
+            "value": "atom:a786fa59a93aa6c854c5d845",
+            "wire": "source:atom:a786fa59a93aa6c854c5d845"
+          },
+          "path": "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/python_call_targets_owned_20261026/case01/project/sample.py",
+          "fingerprint": "sha256:0fd08002f1310b3a0f2c39025903bf39508145e0ced30b367c0635a1bbf9aa35",
+          "start_line": 17,
+          "end_line": 17,
+          "start_column": 12,
+          "end_column": 23
+        },
+        "status": "CONDITIONAL",
+        "arguments": [
+          {
+            "index": 0,
+            "source": {
+              "atom_id": {
+                "kind": "source",
+                "value": "atom:0c451bbe223f8c572a7e222e",
+                "wire": "source:atom:0c451bbe223f8c572a7e222e"
+              },
+              "path": "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/python_call_targets_owned_20261026/case01/project/sample.py",
+              "fingerprint": "sha256:0fd08002f1310b3a0f2c39025903bf39508145e0ced30b367c0635a1bbf9aa35",
+              "start_line": 17,
+              "end_line": 17,
+              "start_column": 21,
+              "end_column": 22
+            },
+            "kind": "POSITIONAL",
+            "keyword": null,
+            "use": {
+              "kind": "program_use",
+              "value": "8e06e345000f4ab187333ce959782192",
+              "wire": "program_use:8e06e345000f4ab187333ce959782192"
+            }
+          }
+        ],
+        "routes": [
+          {
+            "slot": {
+              "kind": "slot",
+              "value": "slot:56149a9263b130bf961866bf",
+              "wire": "slot:slot:56149a9263b130bf961866bf"
+            },
+            "origin": "ARGUMENT",
+            "argument_indices": [
+              0
+            ],
+            "default_source": null
+          }
+        ],
+        "issues": [],
+        "conditions": [
+          "RAW_FUNCTION_TARGET_MATCHES_SIGNATURE",
+          "CODE_VERSION_MATCHES_SOURCE",
+          "FUNCTION_DEFAULT_STATE_MATCHES_SOURCE_DECLARATION",
+          "ARGUMENT_EVALUATION_AND_EXPANSION_COMPLETED",
+          "PACKING_AND_BINDING_EFFECTS_PRESERVED",
+          "CALL_STATE_AND_FRAME_MAPPING_PRESERVED"
+        ]
+      },
+      "conditions": [
+        "CAPTURE_PRODUCER_TRUSTED",
+        "NO_FRAME_INTERPOSITION",
+        "NO_NAMESPACE_MUTATION_BETWEEN_OBSERVATION_AND_LOAD",
+        "OBSERVER_AND_AUDIT_NONINTERFERENCE",
+        "MONITORING_DELIVERY_CONTINUITY_UNVERIFIED",
+        "SOURCE_CORE_EXECUTION_PRECONDITIONS",
+        "FUNCTION_ENVIRONMENT_UNVERIFIED",
+        "CONTENTS_EFFECTS_AND_WORLD_EQUIVALENCE_UNVERIFIED"
+      ]
+    },
+    {
+      "target": {
+        "attempt_index": 18,
+        "caller": {
+          "process_id": 1652336,
+          "thread_id": 140690766092096,
+          "invocation_id": 1
+        },
+        "kind": "FUNCTION",
+        "callable_reference": "weak:1652336:30",
+        "function_reference": "weak:1652336:30",
+        "code": "pycode-v2:23ff346e76f370da36be1321812a327161facdec9554f328ab69c9e13f0f5076",
+        "layout": {
+          "argcount": 1,
+          "posonlyargcount": 0,
+          "kwonlyargcount": 0,
+          "flags": 3,
+          "parameters": [
+            "value"
+          ]
+        },
+        "receiver": null,
+        "scope": "OBSERVED_EXTERNAL_PYTHON"
+      },
+      "target_anchor": {
+        "path": "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/python_call_targets_owned_20261026/case01/capture/python-call-targets.1652336.jsonl",
+        "line_number": 7,
+        "line_sha256": "c9499e8bfc0216f97ea18b894b4c8626e5756c9f1e1bf52da7ac249f8d320712",
+        "index": 7
+      },
+      "entry": {
+        "attempt_index": 18,
+        "caller": {
+          "process_id": 1652336,
+          "thread_id": 140690766092096,
+          "invocation_id": 1
+        },
+        "callee": {
+          "process_id": 1652336,
+          "thread_id": 140690766092096,
+          "invocation_id": 5
+        },
+        "entry_index": 8,
+        "code": "pycode-v2:23ff346e76f370da36be1321812a327161facdec9554f328ab69c9e13f0f5076",
+        "receiver_parameter_index": null,
+        "receiver_reference": null
+      },
+      "entry_anchor": {
+        "path": "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/python_call_targets_owned_20261026/case01/capture/python-call-targets.1652336.jsonl",
+        "line_number": 8,
+        "line_sha256": "e7c0fe2bc5707cba2877f02e820f397da046e2bb92ba7e20275e9f2d7ba67bca",
+        "index": 8
+      },
+      "attempt": {
+        "path": "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/python_call_targets_owned_20261026/case01/capture/call-operands.1652336.jsonl",
+        "line_number": 18,
+        "line_sha256": "51817e85c33f9b1193cb397f286a67e01d8784d45e6ec00c976d64a1f8547332",
+        "index": 18
+      },
+      "frame_entry": {
+        "path": "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/python_call_targets_owned_20261026/case01/capture/call-events.1652336.jsonl",
+        "line_number": 8,
+        "line_sha256": "e3e672608355b5d526863ae48d8b370cf85712f6ebaa0bb67525e1f9ffe4430b",
+        "index": 8
+      },
+      "caller_code": {
+        "code": "pycode-v2:0b11284e645e8e4b0739041d6bc86d3203893f77823256766b9214d50ecdbbc6",
+        "status": "VERIFIED",
+        "snapshot": {
+          "path": "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/python_call_targets_owned_20261026/case01/project/sample.py",
+          "fingerprint": "sha256:0fd08002f1310b3a0f2c39025903bf39508145e0ced30b367c0635a1bbf9aa35",
+          "encoding": "utf-8",
+          "python_version": "3.14"
+        },
+        "definition": {
+          "kind": "opdef",
+          "value": "op:2495d46313fbe59a041ef9fb",
+          "wire": "opdef:op:2495d46313fbe59a041ef9fb"
+        },
+        "source": {
+          "atom_id": {
+            "kind": "source",
+            "value": "atom:05f378e568bdd300c0999bb5",
+            "wire": "source:atom:05f378e568bdd300c0999bb5"
+          },
+          "path": "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/python_call_targets_owned_20261026/case01/project/sample.py",
+          "fingerprint": "sha256:0fd08002f1310b3a0f2c39025903bf39508145e0ced30b367c0635a1bbf9aa35",
+          "start_line": 12,
+          "end_line": 21,
+          "start_column": 0,
+          "end_column": 50
+        },
+        "optimize_levels": [
+          0,
+          1,
+          2
+        ],
+        "issues": []
+      },
+      "callee_code": {
+        "code": "pycode-v2:23ff346e76f370da36be1321812a327161facdec9554f328ab69c9e13f0f5076",
+        "status": "VERIFIED",
+        "snapshot": {
+          "path": "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/python_call_targets_owned_20261026/case01/dependency/helper.py",
+          "fingerprint": "sha256:a6085dcc08ca07bbabdc2a33aab6bd1629dc154bafdab16a9f790e5a42a60a99",
+          "encoding": "utf-8",
+          "python_version": "3.14"
+        },
+        "definition": {
+          "kind": "opdef",
+          "value": "op:d16e0ca148a51e69e446bde0",
+          "wire": "opdef:op:d16e0ca148a51e69e446bde0"
+        },
+        "source": {
+          "atom_id": {
+            "kind": "source",
+            "value": "atom:d8dd98bfa216ef451d37d357",
+            "wire": "source:atom:d8dd98bfa216ef451d37d357"
+          },
+          "path": "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/python_call_targets_owned_20261026/case01/dependency/helper.py",
+          "fingerprint": "sha256:a6085dcc08ca07bbabdc2a33aab6bd1629dc154bafdab16a9f790e5a42a60a99",
+          "start_line": 4,
+          "end_line": 5,
+          "start_column": 0,
+          "end_column": 22
+        },
+        "optimize_levels": [
+          0,
+          1,
+          2
+        ],
+        "issues": []
+      },
+      "call": {
+        "site": {
+          "code": "pycode-v2:0b11284e645e8e4b0739041d6bc86d3203893f77823256766b9214d50ecdbbc6",
+          "offset": 130,
+          "opname": "CALL",
+          "position": [
+            18,
+            18,
+            13,
+            24
+          ]
+        },
+        "status": "VERIFIED",
+        "source": {
+          "atom_id": {
+            "kind": "source",
+            "value": "atom:75588fc79c9f0ef16314415f",
+            "wire": "source:atom:75588fc79c9f0ef16314415f"
+          },
+          "path": "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/python_call_targets_owned_20261026/case01/project/sample.py",
+          "fingerprint": "sha256:0fd08002f1310b3a0f2c39025903bf39508145e0ced30b367c0635a1bbf9aa35",
+          "start_line": 18,
+          "end_line": 18,
+          "start_column": 13,
+          "end_column": 24
+        },
+        "call": {
+          "kind": "opdef",
+          "value": "op:6148a14aeee4aec5027e1e46",
+          "wire": "opdef:op:6148a14aeee4aec5027e1e46"
+        },
+        "execution_owner": {
+          "kind": "opdef",
+          "value": "op:2495d46313fbe59a041ef9fb",
+          "wire": "opdef:op:2495d46313fbe59a041ef9fb"
+        },
+        "core_region": {
+          "kind": "program_region",
+          "value": "af5958571d148fb6e3afcde4df102191",
+          "wire": "program_region:af5958571d148fb6e3afcde4df102191"
+        },
+        "core_operation": {
+          "kind": "program_operation",
+          "value": "e97a15371e0a5fa5414964601408dab3",
+          "wire": "program_operation:e97a15371e0a5fa5414964601408dab3"
+        },
+        "callee_use": {
+          "kind": "program_use",
+          "value": "d861843ca41647811bd4450d78946478",
+          "wire": "program_use:d861843ca41647811bd4450d78946478"
+        },
+        "callee_value": {
+          "kind": "program_value",
+          "value": "5582080aada5f1fcd47d45db9d181920",
+          "wire": "program_value:5582080aada5f1fcd47d45db9d181920"
+        },
+        "issues": []
+      },
+      "caller_body": {
+        "graph": {
+          "artifact": {
+            "uri": "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/python_call_targets_owned_20261026/case01/inventory.json",
+            "sha256": "341dc62104c84c07b63077ce53649afbb1a730ab93ace3f5d66147df605eece5",
+            "size_bytes": 1063063,
+            "schema": "scar.program-inventory"
+          },
+          "decoded_sha256": "341dc62104c84c07b63077ce53649afbb1a730ab93ace3f5d66147df605eece5",
+          "decoded_bytes": 1063063,
+          "representation": "canonical-json",
+          "pointer": "#/files/0/bodies/4/graph",
+          "declaration": {
+            "artifact": {
+              "uri": "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/python_call_targets_owned_20261026/case01/inventory-catalog.json",
+              "sha256": "0b27c75258edb55037a437ee785a33464e81243fb9fab9b1346c0c6a50ea509e",
+              "size_bytes": 345,
+              "schema": "scar.python-call-source-catalog/1"
+            },
+            "locator": "#/inventory"
+          }
+        },
+        "graph_representation": "scar.program-graph/15",
+        "definition": {
+          "kind": "opdef",
+          "value": "op:2495d46313fbe59a041ef9fb",
+          "wire": "opdef:op:2495d46313fbe59a041ef9fb"
+        },
+        "source": {
+          "atom_id": {
+            "kind": "source",
+            "value": "atom:05f378e568bdd300c0999bb5",
+            "wire": "source:atom:05f378e568bdd300c0999bb5"
+          },
+          "path": "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/python_call_targets_owned_20261026/case01/project/sample.py",
+          "fingerprint": "sha256:0fd08002f1310b3a0f2c39025903bf39508145e0ced30b367c0635a1bbf9aa35",
+          "start_line": 12,
+          "end_line": 21,
+          "start_column": 0,
+          "end_column": 50
+        },
+        "entry": "run",
+        "region": {
+          "kind": "program_region",
+          "value": "af5958571d148fb6e3afcde4df102191",
+          "wire": "program_region:af5958571d148fb6e3afcde4df102191"
+        }
+      },
+      "callee_body": {
+        "graph": {
+          "artifact": {
+            "uri": "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/python_call_targets_owned_20261026/case01/worker/attempt-00001/source-program5.json.gz",
+            "sha256": "961e2bbb0bfb401a8b72a0c1f7921ac65b157647796dd35d8cc8dd3471585d78",
+            "size_bytes": 21498,
+            "schema": "scar.source-program/5"
+          },
+          "decoded_sha256": "a4a674981962203f28cbf28af29827f4ff21ab92af088d3604786004bcd4c281",
+          "decoded_bytes": 251335,
+          "representation": "gzip-canonical-json",
+          "pointer": "#/graph",
+          "declaration": {
+            "artifact": {
+              "uri": "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/python_call_targets_owned_20261026/case01/publication/manifest.json",
+              "sha256": "5d33f7ff8417f79395dc598d6045eaac4a8f8ac3f68f6e3882492160d33e1723",
+              "size_bytes": 18497,
+              "schema": "scar.source-entry-publication/1"
+            },
+            "locator": "#/bodies/0/source_program"
+          }
+        },
+        "graph_representation": "scar.program-graph/15",
+        "definition": {
+          "kind": "opdef",
+          "value": "op:d16e0ca148a51e69e446bde0",
+          "wire": "opdef:op:d16e0ca148a51e69e446bde0"
+        },
+        "source": {
+          "atom_id": {
+            "kind": "source",
+            "value": "atom:d8dd98bfa216ef451d37d357",
+            "wire": "source:atom:d8dd98bfa216ef451d37d357"
+          },
+          "path": "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/python_call_targets_owned_20261026/case01/dependency/helper.py",
+          "fingerprint": "sha256:a6085dcc08ca07bbabdc2a33aab6bd1629dc154bafdab16a9f790e5a42a60a99",
+          "start_line": 4,
+          "end_line": 5,
+          "start_column": 0,
+          "end_column": 22
+        },
+        "entry": "external",
+        "region": {
+          "kind": "program_region",
+          "value": "91d39fc02caf965bd8bd6ca48d60ee3f",
+          "wire": "program_region:91d39fc02caf965bd8bd6ca48d60ee3f"
+        }
+      },
+      "receiver": null,
+      "arguments": [
+        {
+          "index": 0,
+          "actual_body": {
+            "graph": {
+              "artifact": {
+                "uri": "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/python_call_targets_owned_20261026/case01/inventory.json",
+                "sha256": "341dc62104c84c07b63077ce53649afbb1a730ab93ace3f5d66147df605eece5",
+                "size_bytes": 1063063,
+                "schema": "scar.program-inventory"
+              },
+              "decoded_sha256": "341dc62104c84c07b63077ce53649afbb1a730ab93ace3f5d66147df605eece5",
+              "decoded_bytes": 1063063,
+              "representation": "canonical-json",
+              "pointer": "#/files/0/bodies/4/graph",
+              "declaration": {
+                "artifact": {
+                  "uri": "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/python_call_targets_owned_20261026/case01/inventory-catalog.json",
+                  "sha256": "0b27c75258edb55037a437ee785a33464e81243fb9fab9b1346c0c6a50ea509e",
+                  "size_bytes": 345,
+                  "schema": "scar.python-call-source-catalog/1"
+                },
+                "locator": "#/inventory"
+              }
+            },
+            "graph_representation": "scar.program-graph/15",
+            "definition": {
+              "kind": "opdef",
+              "value": "op:2495d46313fbe59a041ef9fb",
+              "wire": "opdef:op:2495d46313fbe59a041ef9fb"
+            },
+            "source": {
+              "atom_id": {
+                "kind": "source",
+                "value": "atom:05f378e568bdd300c0999bb5",
+                "wire": "source:atom:05f378e568bdd300c0999bb5"
+              },
+              "path": "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/python_call_targets_owned_20261026/case01/project/sample.py",
+              "fingerprint": "sha256:0fd08002f1310b3a0f2c39025903bf39508145e0ced30b367c0635a1bbf9aa35",
+              "start_line": 12,
+              "end_line": 21,
+              "start_column": 0,
+              "end_column": 50
+            },
+            "entry": "run",
+            "region": {
+              "kind": "program_region",
+              "value": "af5958571d148fb6e3afcde4df102191",
+              "wire": "program_region:af5958571d148fb6e3afcde4df102191"
+            }
+          },
+          "operation": {
+            "kind": "program_operation",
+            "value": "e97a15371e0a5fa5414964601408dab3",
+            "wire": "program_operation:e97a15371e0a5fa5414964601408dab3"
+          },
+          "actual_source": {
+            "atom_id": {
+              "kind": "source",
+              "value": "atom:a207cab9e27c94da6cff331f",
+              "wire": "source:atom:a207cab9e27c94da6cff331f"
+            },
+            "path": "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/python_call_targets_owned_20261026/case01/project/sample.py",
+            "fingerprint": "sha256:0fd08002f1310b3a0f2c39025903bf39508145e0ced30b367c0635a1bbf9aa35",
+            "start_line": 18,
+            "end_line": 18,
+            "start_column": 22,
+            "end_column": 23
+          },
+          "actual_use": {
+            "kind": "program_use",
+            "value": "c35f06cac3e8aca8b7db495f82c98732",
+            "wire": "program_use:c35f06cac3e8aca8b7db495f82c98732"
+          },
+          "actual_value": {
+            "kind": "program_value",
+            "value": "515e4c5f0f6ee002222e27d1329498c9",
+            "wire": "program_value:515e4c5f0f6ee002222e27d1329498c9"
+          },
+          "formal_body": {
+            "graph": {
+              "artifact": {
+                "uri": "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/python_call_targets_owned_20261026/case01/worker/attempt-00001/source-program5.json.gz",
+                "sha256": "961e2bbb0bfb401a8b72a0c1f7921ac65b157647796dd35d8cc8dd3471585d78",
+                "size_bytes": 21498,
+                "schema": "scar.source-program/5"
+              },
+              "decoded_sha256": "a4a674981962203f28cbf28af29827f4ff21ab92af088d3604786004bcd4c281",
+              "decoded_bytes": 251335,
+              "representation": "gzip-canonical-json",
+              "pointer": "#/graph",
+              "declaration": {
+                "artifact": {
+                  "uri": "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/python_call_targets_owned_20261026/case01/publication/manifest.json",
+                  "sha256": "5d33f7ff8417f79395dc598d6045eaac4a8f8ac3f68f6e3882492160d33e1723",
+                  "size_bytes": 18497,
+                  "schema": "scar.source-entry-publication/1"
+                },
+                "locator": "#/bodies/0/source_program"
+              }
+            },
+            "graph_representation": "scar.program-graph/15",
+            "definition": {
+              "kind": "opdef",
+              "value": "op:d16e0ca148a51e69e446bde0",
+              "wire": "opdef:op:d16e0ca148a51e69e446bde0"
+            },
+            "source": {
+              "atom_id": {
+                "kind": "source",
+                "value": "atom:d8dd98bfa216ef451d37d357",
+                "wire": "source:atom:d8dd98bfa216ef451d37d357"
+              },
+              "path": "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/python_call_targets_owned_20261026/case01/dependency/helper.py",
+              "fingerprint": "sha256:a6085dcc08ca07bbabdc2a33aab6bd1629dc154bafdab16a9f790e5a42a60a99",
+              "start_line": 4,
+              "end_line": 5,
+              "start_column": 0,
+              "end_column": 22
+            },
+            "entry": "external",
+            "region": {
+              "kind": "program_region",
+              "value": "91d39fc02caf965bd8bd6ca48d60ee3f",
+              "wire": "program_region:91d39fc02caf965bd8bd6ca48d60ee3f"
+            }
+          },
+          "formal_slot": {
+            "kind": "slot",
+            "value": "slot:f031a30e87ec4ec41ddb5ddb",
+            "wire": "slot:slot:f031a30e87ec4ec41ddb5ddb"
+          },
+          "formal_value": {
+            "kind": "program_value",
+            "value": "cde7b84b553bd24c7c4fe75b0538bac4",
+            "wire": "program_value:cde7b84b553bd24c7c4fe75b0538bac4"
+          },
+          "formal_name": "value",
+          "parameter": {
+            "slot": {
+              "kind": "slot",
+              "value": "slot:f031a30e87ec4ec41ddb5ddb",
+              "wire": "slot:slot:f031a30e87ec4ec41ddb5ddb"
+            },
+            "origin": "ARGUMENT",
+            "argument_indices": [
+              0
+            ],
+            "default_source": null
+          }
+        }
+      ],
+      "candidate": {
+        "call": {
+          "kind": "opdef",
+          "value": "op:6148a14aeee4aec5027e1e46",
+          "wire": "opdef:op:6148a14aeee4aec5027e1e46"
+        },
+        "target": {
+          "kind": "opdef",
+          "value": "op:d16e0ca148a51e69e446bde0",
+          "wire": "opdef:op:d16e0ca148a51e69e446bde0"
+        },
+        "source": {
+          "atom_id": {
+            "kind": "source",
+            "value": "atom:75588fc79c9f0ef16314415f",
+            "wire": "source:atom:75588fc79c9f0ef16314415f"
+          },
+          "path": "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/python_call_targets_owned_20261026/case01/project/sample.py",
+          "fingerprint": "sha256:0fd08002f1310b3a0f2c39025903bf39508145e0ced30b367c0635a1bbf9aa35",
+          "start_line": 18,
+          "end_line": 18,
+          "start_column": 13,
+          "end_column": 24
+        },
+        "status": "CONDITIONAL",
+        "arguments": [
+          {
+            "index": 0,
+            "source": {
+              "atom_id": {
+                "kind": "source",
+                "value": "atom:a207cab9e27c94da6cff331f",
+                "wire": "source:atom:a207cab9e27c94da6cff331f"
+              },
+              "path": "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/python_call_targets_owned_20261026/case01/project/sample.py",
+              "fingerprint": "sha256:0fd08002f1310b3a0f2c39025903bf39508145e0ced30b367c0635a1bbf9aa35",
+              "start_line": 18,
+              "end_line": 18,
+              "start_column": 22,
+              "end_column": 23
+            },
+            "kind": "POSITIONAL",
+            "keyword": null,
+            "use": {
+              "kind": "program_use",
+              "value": "c35f06cac3e8aca8b7db495f82c98732",
+              "wire": "program_use:c35f06cac3e8aca8b7db495f82c98732"
+            }
+          }
+        ],
+        "routes": [
+          {
+            "slot": {
+              "kind": "slot",
+              "value": "slot:f031a30e87ec4ec41ddb5ddb",
+              "wire": "slot:slot:f031a30e87ec4ec41ddb5ddb"
+            },
+            "origin": "ARGUMENT",
+            "argument_indices": [
+              0
+            ],
+            "default_source": null
+          }
+        ],
+        "issues": [],
+        "conditions": [
+          "RAW_FUNCTION_TARGET_MATCHES_SIGNATURE",
+          "CODE_VERSION_MATCHES_SOURCE",
+          "FUNCTION_DEFAULT_STATE_MATCHES_SOURCE_DECLARATION",
+          "ARGUMENT_EVALUATION_AND_EXPANSION_COMPLETED",
+          "PACKING_AND_BINDING_EFFECTS_PRESERVED",
+          "CALL_STATE_AND_FRAME_MAPPING_PRESERVED"
+        ]
+      },
+      "conditions": [
+        "CAPTURE_PRODUCER_TRUSTED",
+        "NO_FRAME_INTERPOSITION",
+        "NO_NAMESPACE_MUTATION_BETWEEN_OBSERVATION_AND_LOAD",
+        "OBSERVER_AND_AUDIT_NONINTERFERENCE",
+        "MONITORING_DELIVERY_CONTINUITY_UNVERIFIED",
+        "SOURCE_CORE_EXECUTION_PRECONDITIONS",
+        "FUNCTION_ENVIRONMENT_UNVERIFIED",
+        "CONTENTS_EFFECTS_AND_WORLD_EQUIVALENCE_UNVERIFIED"
+      ]
+    }
+  ],
+  "matching_caller_issues": 3,
+  "issues": [
+    {
+      "target_anchor": {
+        "path": "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/python_call_targets_owned_20261026/case01/capture/python-call-targets.1652336.jsonl",
+        "line_number": 1,
+        "line_sha256": "69416b06abe1d9d70dd300f6ba13998b6b872c05ff4c82f5fb35b33e388fc996",
+        "index": 1
+      },
+      "attempt_index": 3,
+      "detail": "native/unclassified callable has no Python target",
+      "observed_target": {
+        "attempt_index": 3,
+        "caller": {
+          "process_id": 1652336,
+          "thread_id": 140690766092096,
+          "invocation_id": 1
+        },
+        "kind": "OTHER_UNCLASSIFIED",
+        "callable_reference": "weak:1652336:14",
+        "function_reference": null,
+        "code": null,
+        "layout": null,
+        "receiver": null,
+        "scope": "NO_PYTHON_CODE"
+      }
+    },
+    {
+      "target_anchor": {
+        "path": "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/python_call_targets_owned_20261026/case01/capture/python-call-targets.1652336.jsonl",
+        "line_number": 11,
+        "line_sha256": "85a941aea98f07bdc006201edb0ec1e1852d9dbc51ddf88ebb8dee5651e25b87",
+        "index": 11
+      },
+      "attempt_index": 26,
+      "detail": "native/unclassified callable has no Python target",
+      "observed_target": {
+        "attempt_index": 26,
+        "caller": {
+          "process_id": 1652336,
+          "thread_id": 140690766092096,
+          "invocation_id": 1
+        },
+        "kind": "NATIVE_BUILTIN",
+        "callable_reference": "weak:1652336:44",
+        "function_reference": null,
+        "code": null,
+        "layout": null,
+        "receiver": null,
+        "scope": "NO_PYTHON_CODE"
+      }
+    },
+    {
+      "target_anchor": {
+        "path": "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/python_call_targets_owned_20261026/case01/capture/python-call-targets.1652336.jsonl",
+        "line_number": 12,
+        "line_sha256": "2d48dc7e517a5d3279ad3a02fac55993ed369b7ed62e5fee75fd1dbb7beafda3",
+        "index": 12
+      },
+      "attempt_index": 29,
+      "detail": "receiver/explicit argument/entry layout mismatch",
+      "observed_target": {
+        "attempt_index": 29,
+        "caller": {
+          "process_id": 1652336,
+          "thread_id": 140690766092096,
+          "invocation_id": 1
+        },
+        "kind": "FUNCTION",
+        "callable_reference": "weak:1652336:46",
+        "function_reference": "weak:1652336:46",
+        "code": "pycode-v2:15b41ad6c2701ec3333cf22d7aad627f2720d08cf5b3c333330205d511c65dfd",
+        "layout": {
+          "argcount": 2,
+          "posonlyargcount": 0,
+          "kwonlyargcount": 0,
+          "flags": 3,
+          "parameters": [
+            "value",
+            "optional"
+          ]
+        },
+        "receiver": null,
+        "scope": "PROJECT"
+      }
+    }
+  ],
+  "truncated": false,
+  "qualification": "RETAINED_CONDITIONAL_PYTHON_SOURCE_PORTS_V2",
+  "transport_validated": true,
+  "producer_inputs_replayed": false,
+  "reference_identity_established": false,
+  "contents_state_ready_established": false,
+  "return_routes_implied": false,
+  "whole_program_complete": false,
+  "transformation_authorized": false,
+  "costs": {
+    "stored_bytes": 7720,
+    "decoded_bytes": 90578,
+    "elapsed_s": 0.024851889989804476
+  },
+  "model_transport": {
+    "schema": "scar.python-source-port-bindings",
+    "schema_version": 2
+  },
+  "receiver_selection": "INDEPENDENT_CALLABLE_RECEIVER_PORT"
+}

@@ -1,0 +1,16 @@
+scar/analysis/call_port_query.py
+docs/PYTHON_CALL_TARGETS_V2.md
+artifacts/experiments/call_port_query_v2_20261026/BASELINE.json
+artifacts/experiments/call_port_query_v2_20261026/FINAL_V1_COMPATIBILITY.json
+artifacts/experiments/call_port_query_v2_20261026/REPORT.md
+artifacts/experiments/call_port_query_v2_20261026/RESULT.json
+artifacts/experiments/call_port_query_v2_20261026/check.py
+artifacts/experiments/call_port_query_v2_20261026/invalid-schema.json
+artifacts/experiments/call_port_query_v2_20261026/model-v2.json.gz
+artifacts/experiments/call_port_query_v2_20261026/stderr.txt
+artifacts/experiments/call_port_query_v2_20261026/stdout.txt
+artifacts/experiments/call_port_query_v2_20261026/v1-query.json
+artifacts/experiments/call_port_query_v2_20261026/v2-gzip-query.json
+artifacts/experiments/call_port_query_v2_20261026/v2-plain-query.json
+artifacts/experiments/call_port_query_v2_20261026/RETENTION.json
+artifacts/experiments/call_port_query_v2_20261026/stage-paths.txt

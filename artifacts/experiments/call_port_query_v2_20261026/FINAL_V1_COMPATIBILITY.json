@@ -1,0 +1,8 @@
+{
+  "status": "PASS",
+  "retained_query_equal_except_elapsed": true,
+  "matched_bindings": 2516,
+  "elapsed_s": 27.676364917017054,
+  "source_sha256": "c5cadfe6bbe3f7645b5a8ef88291fb1131dbd6c6bfc7cbe7e48163647a1df1bb",
+  "change_since_previous_check": "release dispatch JSON after the normal v1 decoder; selection/output unchanged"
+}
