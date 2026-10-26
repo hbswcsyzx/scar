@@ -1,0 +1,21 @@
+Traceback (most recent call last):
+  File "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/source_call_port_bindings_20261026/candidate02/run.py", line 279, in <module>
+    if __name__ == '__main__': main()
+                               ~~~~^^
+  File "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/source_call_port_bindings_20261026/candidate02/run.py", line 171, in main
+    coordinates = bind_capture_coordinates(CAPTURE, max_bytes=BUDGETS['coordinate_bytes'],
+        max_lines=BUDGETS['coordinate_lines'], profile_uri=str(PROFILE))
+  File "/home/zyf/AAA/scar-worktrees/source-entry-project/scar/trace/capture_coordinates.py", line 438, in bind_capture_coordinates
+    tid = int(name[1]); artifact = files.verify(logical, "strace.syscalls.text.v1")
+                                   ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/zyf/AAA/scar-worktrees/source-entry-project/scar/trace/capture_coordinates.py", line 184, in verify
+    local, entry = self.local(logical)
+                   ~~~~~~~~~~^^^^^^^^^
+  File "/home/zyf/AAA/scar-worktrees/source-entry-project/scar/trace/capture_coordinates.py", line 175, in local
+    _need(not selected.is_symlink() and local.is_relative_to(self.root) and local.is_file(),
+    ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+          "mapped local artifact is absent, symlinked or escapes capture root")
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/zyf/AAA/scar-worktrees/source-entry-project/scar/trace/capture_coordinates.py", line 37, in _need
+    raise ValueError("capture coordinates: " + message)
+ValueError: capture coordinates: mapped local artifact is absent, symlinked or escapes capture root

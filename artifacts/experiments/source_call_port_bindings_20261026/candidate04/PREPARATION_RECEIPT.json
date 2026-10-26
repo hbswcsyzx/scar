@@ -1,0 +1,24 @@
+{
+  "graphs_opened": false,
+  "historical_capture_requalified": false,
+  "inputs": {
+    "bytes": 1001064,
+    "path": "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/source_call_port_bindings_20261026/candidate04/inputs.json",
+    "sha256": "bbdd0639dc56be18a8a9cf680ec13b0214fa72e887a63a34fd1d7b461469d9d6"
+  },
+  "launch_command": "bash /home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/source_call_port_bindings_20261026/candidate04/run.sh",
+  "original_input_members": 3124,
+  "producer": {
+    "bytes": 255359,
+    "path": "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/source_call_port_bindings_20261026/candidate04/frozen/producer.json",
+    "sha256": "f263ae83cd1cd961f8601a85454b3cb87644e99fc4eef25e4b4a5f0015905ee0"
+  },
+  "raw_scanned": false,
+  "runtime_files": 831,
+  "source_files": 385,
+  "source_lowered": false,
+  "source_prepared": false,
+  "status": "FROZEN_NOT_RUN",
+  "target_executed": false,
+  "unique_input_physical_bytes": 850229269
+}

@@ -1,0 +1,15 @@
+{
+  "status": "PASS_REQUIRED_PUBLIC_OWNED_API_AND_RUNNER_IMPORTS_NO_INPUTS",
+  "new_forward_parameters": "keyword-only default None",
+  "composition_apis": [
+    "original_code_source_origin",
+    "require_source_membership_ancestor",
+    "source_membership_query_counts"
+  ],
+  "normal_readers_imported": true,
+  "graphs_opened": false,
+  "raw_read": false,
+  "target_exec": false,
+  "source_prepare": false,
+  "compile_calls": 0
+}

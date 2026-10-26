@@ -1,0 +1,14 @@
+{
+  "after": {
+    "decoded_bytes": 309251028,
+    "parent_compositions": 4,
+    "parent_inventories": 4
+  },
+  "before": {
+    "decoded_bytes": 309251028,
+    "parent_compositions": 4,
+    "parent_inventories": 4
+  },
+  "detail": "source membership ancestor: requested ancestor is not in the bounded exact source chain",
+  "type": "ValueError"
+}

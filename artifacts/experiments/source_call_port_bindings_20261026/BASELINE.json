@@ -1,0 +1,17 @@
+{
+  "commit": "e0a8e21ec2e014187e0957b4e05f2b7a02a57bbe",
+  "path": "scar/analysis/call_operands.py",
+  "sha256": "12cb6a2301ebae6d2c41c93b3b29a827315f557ec998ad4352494dd93d264638",
+  "bytes": 14906,
+  "new_files": [
+    "scar/ir/program/source_call_bindings.py",
+    "scar/analysis/source_call_bindings.py"
+  ],
+  "main_modified": false,
+  "fourth_forward_source": {
+    "path": "scar/analysis/current_source_evidence.py",
+    "sha256": "1886477d1845dd5ddf669aec8b2b5830c375cbb328647e345b6329615d09cdf2",
+    "bytes": 29100,
+    "authorization": "Root approved defaults/checks/forward only"
+  }
+}

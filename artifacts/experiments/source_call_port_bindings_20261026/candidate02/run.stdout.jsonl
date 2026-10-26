@@ -1,0 +1,11 @@
+{"elapsed_s": 0.0005393530009314418, "event": "START", "last_api_stage": null, "max_rss_kib": 33164, "phase": "startup", "pid": 1577545}
+{"elapsed_s": 3.6671834419830702, "event": "PHASE_END", "last_api_stage": null, "max_rss_kib": 45868, "phase": "fixed-input-and-producer-revalidation", "pid": 1577545, "seconds": 3.6663841209956445}
+{"elapsed_s": 20.200834929011762, "event": "HEARTBEAT", "last_api_stage": null, "max_rss_kib": 1197236, "observed_output_phase": "pre-source", "phase": "public-read-of-official-858-snapshot", "pid": 1577545}
+{"elapsed_s": 40.76165540498914, "event": "HEARTBEAT", "last_api_stage": null, "max_rss_kib": 1197236, "observed_output_phase": "pre-source", "phase": "public-read-of-official-858-snapshot", "pid": 1577545}
+{"elapsed_s": 60.81407384900376, "event": "HEARTBEAT", "last_api_stage": null, "max_rss_kib": 1197236, "observed_output_phase": "pre-source", "phase": "public-read-of-official-858-snapshot", "pid": 1577545}
+{"elapsed_s": 80.81546294997679, "event": "HEARTBEAT", "last_api_stage": null, "max_rss_kib": 1197236, "observed_output_phase": "pre-source", "phase": "public-read-of-official-858-snapshot", "pid": 1577545}
+{"elapsed_s": 101.13869315298507, "event": "HEARTBEAT", "last_api_stage": null, "max_rss_kib": 1197236, "observed_output_phase": "pre-source", "phase": "public-read-of-official-858-snapshot", "pid": 1577545}
+{"elapsed_s": 121.39639729599003, "event": "HEARTBEAT", "last_api_stage": null, "max_rss_kib": 1197236, "observed_output_phase": "pre-source", "phase": "public-read-of-official-858-snapshot", "pid": 1577545}
+{"elapsed_s": 138.93034821399488, "event": "PHASE_END", "last_api_stage": null, "max_rss_kib": 1197236, "phase": "public-read-of-official-858-snapshot", "pid": 1577545, "seconds": 135.26294638199033}
+{"elapsed_s": 141.41287745599402, "event": "HEARTBEAT", "last_api_stage": null, "max_rss_kib": 1197236, "observed_output_phase": "pre-source", "phase": "original-coordinate-profile-membership", "pid": 1577545}
+{"detail": "capture coordinates: mapped local artifact is absent, symlinked or escapes capture root", "elapsed_s": 143.80234155000653, "error_type": "ValueError", "event": "FAILED", "last_api_stage": null, "max_rss_kib": 1197236, "phase": "original-coordinate-profile-membership", "pid": 1577545}

@@ -1,0 +1,63 @@
+{
+  "status": "PASS_NORMAL_INVENTORY_ORIGIN_METADATA_ONLY",
+  "normal_reader": "InventoryPartitions.code_source_origin",
+  "inventory_ancestors": 5,
+  "origin": {
+    "inventory": {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_restored_20261023/result/manifest.json",
+      "raw_sha256": "1443fedcbd8882e86dee392339a5ea51fd29ea102068a65d9e51e06b347de09e",
+      "raw_bytes": 63577,
+      "decoded_bytes": 63577
+    },
+    "call_sources": {
+      "artifact": {
+        "decoded_bytes": 1685522,
+        "decoded_sha256": "80d07551902c234544bfbdeeefa547881eddc1c4bce5b32fcc4defd640c67213",
+        "physical_bytes": 268682,
+        "physical_sha256": "1e54903e94bf3e0c73d2da75e4c1c8392d24254d126a3429839f1a251866d185",
+        "representation": "scar.inventory-component/1",
+        "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_restored_20261023/result/components/call_sources.json.gz"
+      },
+      "pointer": "#/value"
+    }
+  },
+  "actual_receipts": [
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/source_frontend_remainder_publication_20261025/result/publication/manifest.json",
+      "bytes": 83792,
+      "sha256": "4959e7a58abe42415ad2a066f96572a83c83f5b4aaebe9462778d5569439ef5d"
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/source_call_kwargs_publication_20261025/result/publication/manifest.json",
+      "bytes": 84419,
+      "sha256": "cf8e9a49b310337188ffb7a9bf2c99134dcf0c868c0474f1e09be93309237877"
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_source_body_revision_20261023/result/publication/manifest.json",
+      "bytes": 84407,
+      "sha256": "97342c29aaab8460f45b67a038e3a3cee22d1781393e1f57a4d7b22e58d26505"
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_source_publication_current_20261023/result/publication/manifest.json",
+      "bytes": 84488,
+      "sha256": "bc29bf5b9068085f2fe9b800638cadc875c6a32d2c9706514af3f01933f7ae14"
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_restored_20261023/result/manifest.json",
+      "bytes": 63577,
+      "sha256": "1443fedcbd8882e86dee392339a5ea51fd29ea102068a65d9e51e06b347de09e"
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_restored_20261023/result/components/call_sources.json.gz",
+      "bytes": 268682,
+      "sha256": "1e54903e94bf3e0c73d2da75e4c1c8392d24254d126a3429839f1a251866d185"
+    }
+  ],
+  "elapsed_s": 0.1082200690289028,
+  "CodeWitness_constructed": false,
+  "consumer_started": false,
+  "CompositionIndex_constructed": false,
+  "raw_or_graph_read": false,
+  "retained858_binding_used_as_live_owner": false,
+  "full_gate_pass_claimed": false
+}

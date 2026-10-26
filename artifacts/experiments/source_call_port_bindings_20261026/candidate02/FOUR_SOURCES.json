@@ -1,0 +1,26 @@
+{
+  "files": [
+    {
+      "path": "scar/ir/program/source_call_bindings.py",
+      "bytes": 10356,
+      "sha256": "5fe77147ea642e5faeedf0a5d4a244ff806274eefc74500e9a4516632a365fc3"
+    },
+    {
+      "path": "scar/analysis/source_call_bindings.py",
+      "bytes": 17875,
+      "sha256": "0063ffd225ac67c1efb6d8cc5701400b82ccc1304674f118ee1030b627fb25ae"
+    },
+    {
+      "path": "scar/analysis/call_operands.py",
+      "bytes": 16384,
+      "sha256": "b0f2bf9b234c3841f8f31d3427a493d0d07d411206d468adba456b049450cb8b"
+    },
+    {
+      "path": "scar/analysis/current_source_evidence.py",
+      "bytes": 29782,
+      "sha256": "6893a3c7d6d7ed22db1eb967e86747eb132f73d1a284c1178a008f797a750e65"
+    }
+  ],
+  "main_modified": false,
+  "git_operations": false
+}
