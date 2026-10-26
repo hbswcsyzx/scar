@@ -1,0 +1,348 @@
+{
+  "schema": "scar.original-python-call-boundary-audit/1",
+  "status": "OBSERVED_ORIGINAL_CAPTURE_COUNTS_ONLY",
+  "project_root": "/home/zyf/AAA/le-wm",
+  "attempts": 100550,
+  "handshake_events": 4069,
+  "unique_handshake_attempts": 4069,
+  "kinds": {
+    "OTHER": 88176,
+    "EXACT_FUNCTION": 12334,
+    "EXACT_METHOD": 40
+  },
+  "code_scope_availability": {
+    "CODE_NOT_RECORDED_FOR_KIND": 88216,
+    "RECORDED_OUTSIDE_PROJECT_PYTHON_CODE": 7298,
+    "RECORDED_NONFILESYSTEM_CODE_FILENAME": 22,
+    "RECORDED_PROJECT_PYTHON_CODE": 5014
+  },
+  "cross_counts": [
+    {
+      "kind": "EXACT_FUNCTION",
+      "scope": "RECORDED_NONFILESYSTEM_CODE_FILENAME",
+      "handshake": "NO_HANDSHAKE",
+      "attempts": 22,
+      "sample": {
+        "process_id": 369749,
+        "attempt_index": 8,
+        "dispatch": {
+          "kind": "EXACT_FUNCTION",
+          "reference": "weak:369749:111",
+          "code": "pycode-v2:13d538c3c7081646bed762c03ff0758b890cbfcfc9c23260e267f4eaef31ccc9",
+          "layout": {
+            "argcount": 3,
+            "posonlyargcount": 0,
+            "kwonlyargcount": 0,
+            "flags": 201326595,
+            "parameters": [
+              "self",
+              "key",
+              "default"
+            ]
+          }
+        },
+        "arg0_missing": false,
+        "invocation_id": 1,
+        "site": {
+          "code": "pycode-v2:c0ae657136e059abd7eb11655cdd3e390c164a258ac1d7c498ce7b5fec2fb622",
+          "offset": 168,
+          "opname": "CALL",
+          "position": [
+            19,
+            21,
+            4,
+            5
+          ]
+        },
+        "thread_id": 134637364963136,
+        "line_number": 8,
+        "line_sha256": "7468bab31b924bd5656fb26ee4547dcc7e21a8e6aa27546cec5f1f4b93f61c17",
+        "callee_code_descriptor": {
+          "key": "pycode-v2:13d538c3c7081646bed762c03ff0758b890cbfcfc9c23260e267f4eaef31ccc9",
+          "filename": "<frozen _collections_abc>",
+          "qualname": "Mapping.get",
+          "first_line": 792,
+          "flags": 201326595,
+          "parameters": [
+            "self",
+            "key",
+            "default"
+          ]
+        },
+        "handshakes": []
+      }
+    },
+    {
+      "kind": "EXACT_FUNCTION",
+      "scope": "RECORDED_OUTSIDE_PROJECT_PYTHON_CODE",
+      "handshake": "NO_HANDSHAKE",
+      "attempts": 7298,
+      "sample": {
+        "process_id": 369749,
+        "attempt_index": 5,
+        "dispatch": {
+          "kind": "EXACT_FUNCTION",
+          "reference": "weak:369749:90",
+          "code": "pycode-v2:36443b4d02a05661e264573ed5fe1dba5f6e1abd56f57844f94412e37efd553e",
+          "layout": {
+            "argcount": 2,
+            "posonlyargcount": 0,
+            "kwonlyargcount": 0,
+            "flags": 201326595,
+            "parameters": [
+              "self",
+              "strict"
+            ]
+          }
+        },
+        "arg0_missing": false,
+        "invocation_id": 1,
+        "site": {
+          "code": "pycode-v2:c0ae657136e059abd7eb11655cdd3e390c164a258ac1d7c498ce7b5fec2fb622",
+          "offset": 88,
+          "opname": "CALL",
+          "position": [
+            17,
+            17,
+            7,
+            31
+          ]
+        },
+        "thread_id": 134637364963136,
+        "line_number": 5,
+        "line_sha256": "bba745dc2bbf8bfcfda83df59098eedc07e7fde84c2067d634ea0aba7f63f49e",
+        "callee_code_descriptor": {
+          "key": "pycode-v2:36443b4d02a05661e264573ed5fe1dba5f6e1abd56f57844f94412e37efd553e",
+          "filename": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/pathlib/__init__.py",
+          "qualname": "Path.resolve",
+          "first_line": 932,
+          "flags": 201326595,
+          "parameters": [
+            "self",
+            "strict"
+          ]
+        },
+        "handshakes": []
+      }
+    },
+    {
+      "kind": "EXACT_FUNCTION",
+      "scope": "RECORDED_PROJECT_PYTHON_CODE",
+      "handshake": "NO_HANDSHAKE",
+      "attempts": 945,
+      "sample": {
+        "process_id": 369749,
+        "attempt_index": 1160,
+        "dispatch": {
+          "kind": "EXACT_FUNCTION",
+          "reference": "weak:369749:7767",
+          "code": "pycode-v2:9c18afab0989b6555f6da73414f89905b1c5bdae439024abb087bd50f2a3ad8f",
+          "layout": {
+            "argcount": 1,
+            "posonlyargcount": 0,
+            "kwonlyargcount": 0,
+            "flags": 16777251,
+            "parameters": [
+              ".0"
+            ]
+          }
+        },
+        "arg0_missing": false,
+        "invocation_id": 1,
+        "site": {
+          "code": "pycode-v2:c0ae657136e059abd7eb11655cdd3e390c164a258ac1d7c498ce7b5fec2fb622",
+          "offset": 928,
+          "opname": "CALL",
+          "position": [
+            81,
+            81,
+            14,
+            72
+          ]
+        },
+        "thread_id": 134637364963136,
+        "line_number": 1160,
+        "line_sha256": "024fddc97c891b9d1d0734acf927720c0e83c01fe503660c29a1c9fe94ebddd2",
+        "callee_code_descriptor": {
+          "key": "pycode-v2:9c18afab0989b6555f6da73414f89905b1c5bdae439024abb087bd50f2a3ad8f",
+          "filename": "/home/zyf/AAA/le-wm/run_inference.py",
+          "qualname": "<genexpr>",
+          "first_line": 81,
+          "flags": 16777251,
+          "parameters": [
+            ".0"
+          ]
+        },
+        "handshakes": []
+      }
+    },
+    {
+      "kind": "EXACT_FUNCTION",
+      "scope": "RECORDED_PROJECT_PYTHON_CODE",
+      "handshake": "UNIQUE_HANDSHAKE",
+      "attempts": 4069,
+      "sample": {
+        "process_id": 369749,
+        "attempt_index": 156,
+        "dispatch": {
+          "kind": "EXACT_FUNCTION",
+          "reference": "weak:369749:992",
+          "code": "pycode-v2:f25d7282d10c8696a41839c7953daabae9f5fcf626e39d6bffd9b4d2b8832c2a",
+          "layout": {
+            "argcount": 1,
+            "posonlyargcount": 0,
+            "kwonlyargcount": 0,
+            "flags": 16777219,
+            "parameters": [
+              "cls"
+            ]
+          }
+        },
+        "arg0_missing": false,
+        "invocation_id": 93,
+        "site": {
+          "code": "pycode-v2:309bee34f951bebf55a0ea042b45197e87c78283642f803f0b0eea04bc10410d",
+          "offset": 398,
+          "opname": "CALL",
+          "position": [
+            909,
+            909,
+            1,
+            16
+          ]
+        },
+        "thread_id": 134637364963136,
+        "line_number": 156,
+        "line_sha256": "e4a0813bb451f6accd6520824e5daa36f3501abd3fee1cfe6b1acb53ea70ff52",
+        "callee_code_descriptor": {
+          "key": "pycode-v2:f25d7282d10c8696a41839c7953daabae9f5fcf626e39d6bffd9b4d2b8832c2a",
+          "filename": "/home/zyf/AAA/le-wm/stable-worldmodel/stable_worldmodel/data/format.py",
+          "qualname": "register_format",
+          "first_line": 40,
+          "flags": 16777219,
+          "parameters": [
+            "cls"
+          ]
+        },
+        "handshakes": [
+          {
+            "index": 157,
+            "kind": "ENTRY_HANDSHAKE",
+            "process_id": 369749,
+            "thread_id": 134637364963136,
+            "invocation_id": 108,
+            "frame_index": 206,
+            "hook_epoch": 1,
+            "attempt_index": 156,
+            "entry_index": 206
+          }
+        ]
+      }
+    },
+    {
+      "kind": "EXACT_METHOD",
+      "scope": "CODE_NOT_RECORDED_FOR_KIND",
+      "handshake": "NO_HANDSHAKE",
+      "attempts": 40,
+      "sample": {
+        "process_id": 369749,
+        "attempt_index": 1603,
+        "dispatch": {
+          "kind": "EXACT_METHOD",
+          "reference": "weak:369749:9738",
+          "code": null,
+          "layout": null
+        },
+        "arg0_missing": true,
+        "invocation_id": 731,
+        "site": {
+          "code": "pycode-v2:a36ba2a39b35c2528614f6d083227c39d859eca9aef9f89a138796c67304e2ec",
+          "offset": 190,
+          "opname": "CALL_FUNCTION_EX",
+          "position": [
+            486,
+            493,
+            8,
+            9
+          ]
+        },
+        "thread_id": 134637364963136,
+        "line_number": 1603,
+        "line_sha256": "d4bed26b48b28de0f2a7ee40ff7ec2b157a1ca53126f0da933ee2e8f1edcdd7c",
+        "callee_code_descriptor": null,
+        "handshakes": []
+      }
+    },
+    {
+      "kind": "OTHER",
+      "scope": "CODE_NOT_RECORDED_FOR_KIND",
+      "handshake": "NO_HANDSHAKE",
+      "attempts": 88176,
+      "sample": {
+        "process_id": 369749,
+        "attempt_index": 2,
+        "dispatch": {
+          "kind": "OTHER",
+          "reference": "weak:369749:67",
+          "code": null,
+          "layout": null
+        },
+        "arg0_missing": false,
+        "invocation_id": 1,
+        "site": {
+          "code": "pycode-v2:c0ae657136e059abd7eb11655cdd3e390c164a258ac1d7c498ce7b5fec2fb622",
+          "offset": 60,
+          "opname": "CALL",
+          "position": [
+            17,
+            17,
+            7,
+            21
+          ]
+        },
+        "thread_id": 134637364963136,
+        "line_number": 2,
+        "line_sha256": "03d067ac863646cae5bebd49d9a779a1aaf68a8e51509f4b1798fb5eb36f3154",
+        "callee_code_descriptor": null,
+        "handshakes": []
+      }
+    }
+  ],
+  "events": {
+    "INSTRUCTION": 207248,
+    "CALL_ATTEMPT": 100550,
+    "ENTRY_HANDSHAKE": 4069,
+    "GAP": 945
+  },
+  "input_receipts": [
+    {
+      "logical_uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/trace/call-codes.369749.jsonl",
+      "physical_uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/trace/call-codes.369749.jsonl.gz",
+      "stored_bytes": 53224,
+      "stored_sha256": "0dc10987836eb67d3f1f6b6efa4f8e529ac72a5d646a6afdce464fef112c3880",
+      "decoded_bytes": 226156,
+      "decoded_sha256": "3955b8035274057c502969bd1276908871501795b6ff60d4720d1778bd71cc8c",
+      "rows": 855
+    },
+    {
+      "logical_uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/trace/call-operands.369749.jsonl",
+      "physical_uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/trace/call-operands.369749.jsonl.gz",
+      "stored_bytes": 3522792,
+      "stored_sha256": "26cd9d3211d0226072d5d3b96cff92da97df01271556cda853131c4e978c612a",
+      "decoded_bytes": 114238539,
+      "decoded_sha256": "66bcee4fe41dd76ed833b23cf3dc7bcee32e6eafaf8cccee7936001b40804698",
+      "rows": 312812
+    }
+  ],
+  "actual_stored_plus_decoded_bytes": 118040711,
+  "input_ceiling": 128000000,
+  "elapsed_s": 4.821076760999858,
+  "limits": [
+    "OTHER has no code/type/slot target fields: cannot split C/native vs Python callable objects/classes from this v1 artifact",
+    "EXACT_METHOD omits underlying function/code/receiver: cannot infer callee project scope or bound receiver",
+    "monitoring arg0 is first argument, not a receiver discriminator",
+    "outside-project label is from an original recorded Code filename only; no time/PID/name-pattern inference"
+  ],
+  "target_or_new_episode_executed": false,
+  "current_collector_behavior_inferred_from_code_not_requalified_historical_capture": true
+}

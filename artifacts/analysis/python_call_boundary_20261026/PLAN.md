@@ -1,0 +1,13 @@
+# Python调用目标/receiver与scope：下一实现
+
+原100550 attempts机械审计见RESULT.json：12334 exact function（7298项目外+22非文件名code均无handshake；项目内5014中4069有、945无）；40 exact method未存func/code/receiver；88176 OTHER不能分C/native与Python callable instance/class。不得把96481统称Python漏调。
+
+首能力用独立显式版本`PYTHON_CALL_TARGETS_V2`，旧call-operands v1事件、rule/profile/默认writer及27窄路由保持原义。新typed target/entry facts引用原attempt/FrameEntry anchor，不造Invocation/Value/Use/CallActivation。目标字段是callable reference、exact FunctionType的function reference/完整code key/layout、Python MethodType的__func__/code与独立BOUND_RECEIVER reference；BuiltinFunction/MethodWrapper仅记明确native边界，OTHER继续UNKNOWN而非猜Python。arg0仍是monitoring首参，不能用于推断receiver。
+
+当前entry observer在_code_inside前return，pending只给project exact function；新显式scope策略允许“已从受观察Python CALL实际见到的exact function/method code”进入，按code/path/dependency预算限制，包含关系由实际caller/entry而非时间或目录名规则。帧事件仍用原recorder；新scope声明必须随新能力保存。默认project-only不变，不在C函数或任意callable上执行探测调用；外部Python source/code可观测不等于已有其source body。
+
+bound receiver不得伪作显式actual index0、不得按self/cls名字推断。入口核 underlying function/code未变、真实caller CALL/entry、实际首formal布局，以及能证明的receiver连续性。weak receiver可直接实核；非weak receiver若没有仍存活的只读method owner，不持强引用、不猜id，保明确receiver-continuity frontier。函数env继续引用原function，receiver不充当FunctionObject/env。
+
+源端口层引用原callee Use/Value及明确PYTHON_BOUND_METHOD_RECEIVER投影，再接实际首formal；显式AST实参仍0..N-1接余下formals。需要新typed receiver route，与既有ParameterBinding(ARGUMENT)分开；不造假CallArgument。root function signature/normal Source/Use/Value仍原权威。无source body/receiver可表达端点时保OPEN，不因capture字段齐全填PASS。
+
+首个实际小门只采通用普通函数、保存bound method再调用、直接method调用、外部Python helper、native builtin；同一次采集含receiver/entry/scope与普通binder回读。新完整LeWM等字段闭合后统一采一次，不按字段重复episode，不做热点采样/cache。945项目内无handshake和OTHER分母保留，后续按真实新target字段解释。

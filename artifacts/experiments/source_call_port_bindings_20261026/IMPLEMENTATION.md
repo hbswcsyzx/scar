@@ -1,6 +1,6 @@
 # Source call port binding：实施与待验收
 
-2026-10-26，隔离树 `source-entry-project`，四生产文件；candidate01已因缺原输入在普通 composition 读取阶段失败，未进入 consumer。candidate02已补正常依赖闭包并冻结，未运行。
+2026-10-26，隔离树 `source-entry-project`，四生产文件；candidate01已因缺原输入在普通 composition 读取阶段失败，未进入 consumer。candidate02/03的后继真实缺档均保留；candidate04同fresh consumer实际生产2516调用/6805端口，原窗口因runner旧字段审计错误exit1，独立postflight01已exit0补retained27映射及末guard。
 
 `SourceCallPortBinding` 引用既有 `CallSiteLink`、两个 `CodeSourceLink`、原 attempt /
 handshake / entry anchor 与双方 InvocationKey。每个 `SourceArgumentPort` 把既有
