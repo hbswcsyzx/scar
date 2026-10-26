@@ -1,0 +1,734 @@
+{
+  "checkpoint": {
+    "artifact": {
+      "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/os_file_topology_20261026/connections/manifest.json",
+      "sha256": "f47af438635bcfc75ed579289289f9dfa6c5de2770c2c15a9fb79f1d6aa76337",
+      "size_bytes": 5979,
+      "schema": "scar.os-file-topology-connections"
+    },
+    "complete_scan": false,
+    "visited": 101246,
+    "matches": [
+      {
+        "binding": null,
+        "fd_number": 38,
+        "file_path_rendering": null,
+        "observation": {
+          "argument_rendering_complete": true,
+          "arguments": [
+            38,
+            null,
+            131072
+          ],
+          "binding": null,
+          "canonical_effect": "OPEN",
+          "canonical_stage": "OPEN",
+          "dependency_coverage": "UNKNOWN",
+          "direction": "READ",
+          "duration": "0.000060",
+          "duration_ns": 60000,
+          "effects_coverage": "UNKNOWN",
+          "entry_source": {
+            "artifact": 0,
+            "line": 386087
+          },
+          "errno": null,
+          "family": "BYTE_IO",
+          "fd": 38,
+          "fd_relation_status": "OPEN",
+          "interface_record": true,
+          "legacy_outside_fd_profile": false,
+          "nonreturn_protocol": null,
+          "ofd": null,
+          "offset": null,
+          "offset_mode": "SHARED_OFD_POSITION",
+          "ordinary_return": true,
+          "payload_argument_indices_omitted": [
+            1
+          ],
+          "post_receipt_rendering": null,
+          "process": "exec_process_instance:capture:ca66b69a8cfc3c1b88e0c22e8ec00d58d735fd016d16edf85e8cf0ac51eb5fc3:process:77d2388db95219723de606b529484e14f8b1912e51b6e58930344d911e863036",
+          "provider_entry_line_point_kind": "STRACE_COMPLETED_LINE_PRINTLEADER_NOT_RETURN_TIME",
+          "provider_entry_line_timestamp": "1793002717.435448",
+          "provider_entry_line_timestamp_ns": 1793002717435448000,
+          "provider_line_point_kind": "STRACE_COMPLETED_LINE_PRINTLEADER_NOT_RETURN_TIME",
+          "provider_line_timestamp": "1793002717.435448",
+          "provider_line_timestamp_ns": 1793002717435448000,
+          "requested_count": 131072,
+          "requested_unit": "bytes",
+          "resource_association_status": "OPEN_R2",
+          "result": 131072,
+          "result_rendering": "0x20000",
+          "retention_coverage": "UNKNOWN",
+          "return_source": {
+            "artifact": 0,
+            "line": 386087
+          },
+          "source": {
+            "artifact": 0,
+            "line": 386087
+          },
+          "syscall": "read",
+          "tid": 1578961,
+          "transferred_bytes": 131072,
+          "work_ticket": "capture:ca66b69a8cfc3c1b88e0c22e8ec00d58d735fd016d16edf85e8cf0ac51eb5fc3:os:0942ed76071fdf85efacfce9c128577d014ac29d2cede4282050089a4319170a:syscall-work:0:386087"
+        },
+        "path_navigation_candidate": {
+          "qualification": "SAME_TID_NUMERIC_FD_NAVIGATION_ONLY_NOT_FILE_COIDENTITY",
+          "rendering": "\"/gpu4-share/data/byx/lewm_data/checkpoints/pusht/weights.pt\"",
+          "source": {
+            "artifact": 0,
+            "line": 386083
+          }
+        },
+        "resource_path": [],
+        "source_ordinal": 386065,
+        "stat_identity": null,
+        "status": "FD_BINDING_UNRESOLVED_SHARED_OR_UNKNOWN_TABLE"
+      },
+      {
+        "binding": null,
+        "fd_number": 38,
+        "file_path_rendering": null,
+        "observation": {
+          "argument_rendering_complete": true,
+          "arguments": [
+            38,
+            null,
+            131072
+          ],
+          "binding": null,
+          "canonical_effect": "OPEN",
+          "canonical_stage": "OPEN",
+          "dependency_coverage": "UNKNOWN",
+          "direction": "READ",
+          "duration": "0.000030",
+          "duration_ns": 30000,
+          "effects_coverage": "UNKNOWN",
+          "entry_source": {
+            "artifact": 0,
+            "line": 386094
+          },
+          "errno": null,
+          "family": "BYTE_IO",
+          "fd": 38,
+          "fd_relation_status": "OPEN",
+          "interface_record": true,
+          "legacy_outside_fd_profile": false,
+          "nonreturn_protocol": null,
+          "ofd": null,
+          "offset": null,
+          "offset_mode": "SHARED_OFD_POSITION",
+          "ordinary_return": true,
+          "payload_argument_indices_omitted": [
+            1
+          ],
+          "post_receipt_rendering": null,
+          "process": "exec_process_instance:capture:ca66b69a8cfc3c1b88e0c22e8ec00d58d735fd016d16edf85e8cf0ac51eb5fc3:process:77d2388db95219723de606b529484e14f8b1912e51b6e58930344d911e863036",
+          "provider_entry_line_point_kind": "STRACE_COMPLETED_LINE_PRINTLEADER_NOT_RETURN_TIME",
+          "provider_entry_line_timestamp": "1793002717.435927",
+          "provider_entry_line_timestamp_ns": 1793002717435927000,
+          "provider_line_point_kind": "STRACE_COMPLETED_LINE_PRINTLEADER_NOT_RETURN_TIME",
+          "provider_line_timestamp": "1793002717.435927",
+          "provider_line_timestamp_ns": 1793002717435927000,
+          "requested_count": 131072,
+          "requested_unit": "bytes",
+          "resource_association_status": "OPEN_R2",
+          "result": 131072,
+          "result_rendering": "0x20000",
+          "retention_coverage": "UNKNOWN",
+          "return_source": {
+            "artifact": 0,
+            "line": 386094
+          },
+          "source": {
+            "artifact": 0,
+            "line": 386094
+          },
+          "syscall": "read",
+          "tid": 1578961,
+          "transferred_bytes": 131072,
+          "work_ticket": "capture:ca66b69a8cfc3c1b88e0c22e8ec00d58d735fd016d16edf85e8cf0ac51eb5fc3:os:0942ed76071fdf85efacfce9c128577d014ac29d2cede4282050089a4319170a:syscall-work:0:386094"
+        },
+        "path_navigation_candidate": {
+          "qualification": "SAME_TID_NUMERIC_FD_NAVIGATION_ONLY_NOT_FILE_COIDENTITY",
+          "rendering": "\"/gpu4-share/data/byx/lewm_data/checkpoints/pusht/weights.pt\"",
+          "source": {
+            "artifact": 0,
+            "line": 386083
+          }
+        },
+        "resource_path": [],
+        "source_ordinal": 386072,
+        "stat_identity": null,
+        "status": "FD_BINDING_UNRESOLVED_SHARED_OR_UNKNOWN_TABLE"
+      },
+      {
+        "binding": null,
+        "fd_number": 38,
+        "file_path_rendering": null,
+        "observation": {
+          "argument_rendering_complete": true,
+          "arguments": [
+            38,
+            null,
+            131072
+          ],
+          "binding": null,
+          "canonical_effect": "OPEN",
+          "canonical_stage": "OPEN",
+          "dependency_coverage": "UNKNOWN",
+          "direction": "READ",
+          "duration": "0.000018",
+          "duration_ns": 18000,
+          "effects_coverage": "UNKNOWN",
+          "entry_source": {
+            "artifact": 0,
+            "line": 386096
+          },
+          "errno": null,
+          "family": "BYTE_IO",
+          "fd": 38,
+          "fd_relation_status": "OPEN",
+          "interface_record": true,
+          "legacy_outside_fd_profile": false,
+          "nonreturn_protocol": null,
+          "ofd": null,
+          "offset": null,
+          "offset_mode": "SHARED_OFD_POSITION",
+          "ordinary_return": true,
+          "payload_argument_indices_omitted": [
+            1
+          ],
+          "post_receipt_rendering": null,
+          "process": "exec_process_instance:capture:ca66b69a8cfc3c1b88e0c22e8ec00d58d735fd016d16edf85e8cf0ac51eb5fc3:process:77d2388db95219723de606b529484e14f8b1912e51b6e58930344d911e863036",
+          "provider_entry_line_point_kind": "STRACE_COMPLETED_LINE_PRINTLEADER_NOT_RETURN_TIME",
+          "provider_entry_line_timestamp": "1793002717.436074",
+          "provider_entry_line_timestamp_ns": 1793002717436074000,
+          "provider_line_point_kind": "STRACE_COMPLETED_LINE_PRINTLEADER_NOT_RETURN_TIME",
+          "provider_line_timestamp": "1793002717.436074",
+          "provider_line_timestamp_ns": 1793002717436074000,
+          "requested_count": 131072,
+          "requested_unit": "bytes",
+          "resource_association_status": "OPEN_R2",
+          "result": 4096,
+          "result_rendering": "0x1000",
+          "retention_coverage": "UNKNOWN",
+          "return_source": {
+            "artifact": 0,
+            "line": 386096
+          },
+          "source": {
+            "artifact": 0,
+            "line": 386096
+          },
+          "syscall": "read",
+          "tid": 1578961,
+          "transferred_bytes": 4096,
+          "work_ticket": "capture:ca66b69a8cfc3c1b88e0c22e8ec00d58d735fd016d16edf85e8cf0ac51eb5fc3:os:0942ed76071fdf85efacfce9c128577d014ac29d2cede4282050089a4319170a:syscall-work:0:386096"
+        },
+        "path_navigation_candidate": {
+          "qualification": "SAME_TID_NUMERIC_FD_NAVIGATION_ONLY_NOT_FILE_COIDENTITY",
+          "rendering": "\"/gpu4-share/data/byx/lewm_data/checkpoints/pusht/weights.pt\"",
+          "source": {
+            "artifact": 0,
+            "line": 386083
+          }
+        },
+        "resource_path": [],
+        "source_ordinal": 386074,
+        "stat_identity": null,
+        "status": "FD_BINDING_UNRESOLVED_SHARED_OR_UNKNOWN_TABLE"
+      }
+    ]
+  },
+  "dataset": {
+    "artifact": {
+      "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/os_file_topology_20261026/connections/manifest.json",
+      "sha256": "f47af438635bcfc75ed579289289f9dfa6c5de2770c2c15a9fb79f1d6aa76337",
+      "size_bytes": 5979,
+      "schema": "scar.os-file-topology-connections"
+    },
+    "complete_scan": false,
+    "visited": 34898,
+    "matches": [
+      {
+        "binding": null,
+        "fd_number": 37,
+        "file_path_rendering": null,
+        "observation": {
+          "argument_rendering_complete": true,
+          "arguments": [
+            37,
+            null,
+            8,
+            0
+          ],
+          "binding": null,
+          "canonical_effect": "OPEN",
+          "canonical_stage": "OPEN",
+          "dependency_coverage": "UNKNOWN",
+          "direction": "READ",
+          "duration": "0.000029",
+          "duration_ns": 29000,
+          "effects_coverage": "UNKNOWN",
+          "entry_source": {
+            "artifact": 0,
+            "line": 257934
+          },
+          "errno": null,
+          "family": "BYTE_IO",
+          "fd": 37,
+          "fd_relation_status": "OPEN",
+          "interface_record": true,
+          "legacy_outside_fd_profile": false,
+          "nonreturn_protocol": null,
+          "ofd": null,
+          "offset": 0,
+          "offset_mode": "EXPLICIT",
+          "ordinary_return": true,
+          "payload_argument_indices_omitted": [
+            1
+          ],
+          "post_receipt_rendering": null,
+          "process": "exec_process_instance:capture:ca66b69a8cfc3c1b88e0c22e8ec00d58d735fd016d16edf85e8cf0ac51eb5fc3:process:77d2388db95219723de606b529484e14f8b1912e51b6e58930344d911e863036",
+          "provider_entry_line_point_kind": "STRACE_COMPLETED_LINE_PRINTLEADER_NOT_RETURN_TIME",
+          "provider_entry_line_timestamp": "1793002706.089818",
+          "provider_entry_line_timestamp_ns": 1793002706089818000,
+          "provider_line_point_kind": "STRACE_COMPLETED_LINE_PRINTLEADER_NOT_RETURN_TIME",
+          "provider_line_timestamp": "1793002706.089818",
+          "provider_line_timestamp_ns": 1793002706089818000,
+          "requested_count": 8,
+          "requested_unit": "bytes",
+          "resource_association_status": "OPEN_R2",
+          "result": 8,
+          "result_rendering": "0x8",
+          "retention_coverage": "UNKNOWN",
+          "return_source": {
+            "artifact": 0,
+            "line": 257934
+          },
+          "source": {
+            "artifact": 0,
+            "line": 257934
+          },
+          "syscall": "pread64",
+          "tid": 1578961,
+          "transferred_bytes": 8,
+          "work_ticket": "capture:ca66b69a8cfc3c1b88e0c22e8ec00d58d735fd016d16edf85e8cf0ac51eb5fc3:os:0942ed76071fdf85efacfce9c128577d014ac29d2cede4282050089a4319170a:syscall-work:0:257934"
+        },
+        "path_navigation_candidate": {
+          "qualification": "SAME_TID_NUMERIC_FD_NAVIGATION_ONLY_NOT_FILE_COIDENTITY",
+          "rendering": "\"/gpu4-share/data/byx/lewm_data/datasets/pusht_expert_train.h5\"",
+          "source": {
+            "artifact": 0,
+            "line": 257930
+          }
+        },
+        "resource_path": [],
+        "source_ordinal": 257915,
+        "stat_identity": null,
+        "status": "FD_BINDING_UNRESOLVED_SHARED_OR_UNKNOWN_TABLE"
+      },
+      {
+        "binding": null,
+        "fd_number": 37,
+        "file_path_rendering": null,
+        "observation": {
+          "argument_rendering_complete": true,
+          "arguments": [
+            37,
+            null,
+            48,
+            0
+          ],
+          "binding": null,
+          "canonical_effect": "OPEN",
+          "canonical_stage": "OPEN",
+          "dependency_coverage": "UNKNOWN",
+          "direction": "READ",
+          "duration": "0.000012",
+          "duration_ns": 12000,
+          "effects_coverage": "UNKNOWN",
+          "entry_source": {
+            "artifact": 0,
+            "line": 257935
+          },
+          "errno": null,
+          "family": "BYTE_IO",
+          "fd": 37,
+          "fd_relation_status": "OPEN",
+          "interface_record": true,
+          "legacy_outside_fd_profile": false,
+          "nonreturn_protocol": null,
+          "ofd": null,
+          "offset": 0,
+          "offset_mode": "EXPLICIT",
+          "ordinary_return": true,
+          "payload_argument_indices_omitted": [
+            1
+          ],
+          "post_receipt_rendering": null,
+          "process": "exec_process_instance:capture:ca66b69a8cfc3c1b88e0c22e8ec00d58d735fd016d16edf85e8cf0ac51eb5fc3:process:77d2388db95219723de606b529484e14f8b1912e51b6e58930344d911e863036",
+          "provider_entry_line_point_kind": "STRACE_COMPLETED_LINE_PRINTLEADER_NOT_RETURN_TIME",
+          "provider_entry_line_timestamp": "1793002706.089886",
+          "provider_entry_line_timestamp_ns": 1793002706089886000,
+          "provider_line_point_kind": "STRACE_COMPLETED_LINE_PRINTLEADER_NOT_RETURN_TIME",
+          "provider_line_timestamp": "1793002706.089886",
+          "provider_line_timestamp_ns": 1793002706089886000,
+          "requested_count": 48,
+          "requested_unit": "bytes",
+          "resource_association_status": "OPEN_R2",
+          "result": 48,
+          "result_rendering": "0x30",
+          "retention_coverage": "UNKNOWN",
+          "return_source": {
+            "artifact": 0,
+            "line": 257935
+          },
+          "source": {
+            "artifact": 0,
+            "line": 257935
+          },
+          "syscall": "pread64",
+          "tid": 1578961,
+          "transferred_bytes": 48,
+          "work_ticket": "capture:ca66b69a8cfc3c1b88e0c22e8ec00d58d735fd016d16edf85e8cf0ac51eb5fc3:os:0942ed76071fdf85efacfce9c128577d014ac29d2cede4282050089a4319170a:syscall-work:0:257935"
+        },
+        "path_navigation_candidate": {
+          "qualification": "SAME_TID_NUMERIC_FD_NAVIGATION_ONLY_NOT_FILE_COIDENTITY",
+          "rendering": "\"/gpu4-share/data/byx/lewm_data/datasets/pusht_expert_train.h5\"",
+          "source": {
+            "artifact": 0,
+            "line": 257930
+          }
+        },
+        "resource_path": [],
+        "source_ordinal": 257916,
+        "stat_identity": null,
+        "status": "FD_BINDING_UNRESOLVED_SHARED_OR_UNKNOWN_TABLE"
+      },
+      {
+        "binding": null,
+        "fd_number": 37,
+        "file_path_rendering": null,
+        "observation": {
+          "argument_rendering_complete": true,
+          "arguments": [
+            37,
+            null,
+            512,
+            48
+          ],
+          "binding": null,
+          "canonical_effect": "OPEN",
+          "canonical_stage": "OPEN",
+          "dependency_coverage": "UNKNOWN",
+          "direction": "READ",
+          "duration": "0.000012",
+          "duration_ns": 12000,
+          "effects_coverage": "UNKNOWN",
+          "entry_source": {
+            "artifact": 0,
+            "line": 257936
+          },
+          "errno": null,
+          "family": "BYTE_IO",
+          "fd": 37,
+          "fd_relation_status": "OPEN",
+          "interface_record": true,
+          "legacy_outside_fd_profile": false,
+          "nonreturn_protocol": null,
+          "ofd": null,
+          "offset": 48,
+          "offset_mode": "EXPLICIT",
+          "ordinary_return": true,
+          "payload_argument_indices_omitted": [
+            1
+          ],
+          "post_receipt_rendering": null,
+          "process": "exec_process_instance:capture:ca66b69a8cfc3c1b88e0c22e8ec00d58d735fd016d16edf85e8cf0ac51eb5fc3:process:77d2388db95219723de606b529484e14f8b1912e51b6e58930344d911e863036",
+          "provider_entry_line_point_kind": "STRACE_COMPLETED_LINE_PRINTLEADER_NOT_RETURN_TIME",
+          "provider_entry_line_timestamp": "1793002706.089947",
+          "provider_entry_line_timestamp_ns": 1793002706089947000,
+          "provider_line_point_kind": "STRACE_COMPLETED_LINE_PRINTLEADER_NOT_RETURN_TIME",
+          "provider_line_timestamp": "1793002706.089947",
+          "provider_line_timestamp_ns": 1793002706089947000,
+          "requested_count": 512,
+          "requested_unit": "bytes",
+          "resource_association_status": "OPEN_R2",
+          "result": 512,
+          "result_rendering": "0x200",
+          "retention_coverage": "UNKNOWN",
+          "return_source": {
+            "artifact": 0,
+            "line": 257936
+          },
+          "source": {
+            "artifact": 0,
+            "line": 257936
+          },
+          "syscall": "pread64",
+          "tid": 1578961,
+          "transferred_bytes": 512,
+          "work_ticket": "capture:ca66b69a8cfc3c1b88e0c22e8ec00d58d735fd016d16edf85e8cf0ac51eb5fc3:os:0942ed76071fdf85efacfce9c128577d014ac29d2cede4282050089a4319170a:syscall-work:0:257936"
+        },
+        "path_navigation_candidate": {
+          "qualification": "SAME_TID_NUMERIC_FD_NAVIGATION_ONLY_NOT_FILE_COIDENTITY",
+          "rendering": "\"/gpu4-share/data/byx/lewm_data/datasets/pusht_expert_train.h5\"",
+          "source": {
+            "artifact": 0,
+            "line": 257930
+          }
+        },
+        "resource_path": [],
+        "source_ordinal": 257917,
+        "stat_identity": null,
+        "status": "FD_BINDING_UNRESOLVED_SHARED_OR_UNKNOWN_TABLE"
+      }
+    ]
+  },
+  "outputs": {
+    "artifact": {
+      "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/os_file_topology_20261026/connections/manifest.json",
+      "sha256": "f47af438635bcfc75ed579289289f9dfa6c5de2770c2c15a9fb79f1d6aa76337",
+      "size_bytes": 5979,
+      "schema": "scar.os-file-topology-connections"
+    },
+    "complete_scan": false,
+    "visited": 17149,
+    "matches": [
+      {
+        "binding": null,
+        "fd_number": 29,
+        "file_path_rendering": null,
+        "observation": {
+          "argument_rendering_complete": true,
+          "arguments": [
+            29,
+            null,
+            806
+          ],
+          "binding": null,
+          "canonical_effect": "OPEN",
+          "canonical_stage": "OPEN",
+          "dependency_coverage": "UNKNOWN",
+          "direction": "WRITE",
+          "duration": "0.000045",
+          "duration_ns": 45000,
+          "effects_coverage": "UNKNOWN",
+          "entry_source": {
+            "artifact": 0,
+            "line": 159319
+          },
+          "errno": null,
+          "family": "BYTE_IO",
+          "fd": 29,
+          "fd_relation_status": "OPEN",
+          "interface_record": true,
+          "legacy_outside_fd_profile": false,
+          "nonreturn_protocol": null,
+          "ofd": null,
+          "offset": null,
+          "offset_mode": "SHARED_OFD_POSITION",
+          "ordinary_return": true,
+          "payload_argument_indices_omitted": [
+            1
+          ],
+          "post_receipt_rendering": null,
+          "process": "exec_process_instance:capture:ca66b69a8cfc3c1b88e0c22e8ec00d58d735fd016d16edf85e8cf0ac51eb5fc3:process:77d2388db95219723de606b529484e14f8b1912e51b6e58930344d911e863036",
+          "provider_entry_line_point_kind": "STRACE_COMPLETED_LINE_PRINTLEADER_NOT_RETURN_TIME",
+          "provider_entry_line_timestamp": "1793002661.390607",
+          "provider_entry_line_timestamp_ns": 1793002661390607000,
+          "provider_line_point_kind": "STRACE_COMPLETED_LINE_PRINTLEADER_NOT_RETURN_TIME",
+          "provider_line_timestamp": "1793002661.390607",
+          "provider_line_timestamp_ns": 1793002661390607000,
+          "requested_count": 806,
+          "requested_unit": "bytes",
+          "resource_association_status": "OPEN_R2",
+          "result": 806,
+          "result_rendering": "0x326",
+          "retention_coverage": "UNKNOWN",
+          "return_source": {
+            "artifact": 0,
+            "line": 159319
+          },
+          "source": {
+            "artifact": 0,
+            "line": 159319
+          },
+          "syscall": "write",
+          "tid": 1578961,
+          "transferred_bytes": 806,
+          "work_ticket": "capture:ca66b69a8cfc3c1b88e0c22e8ec00d58d735fd016d16edf85e8cf0ac51eb5fc3:os:0942ed76071fdf85efacfce9c128577d014ac29d2cede4282050089a4319170a:syscall-work:0:159319"
+        },
+        "path_navigation_candidate": {
+          "qualification": "SAME_TID_NUMERIC_FD_NAVIGATION_ONLY_NOT_FILE_COIDENTITY",
+          "rendering": "\"/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/lewm_joint_capture_20261026/lewm-output/hydra/joint-20261026/.hydra/config.yaml\"",
+          "source": {
+            "artifact": 0,
+            "line": 159315
+          }
+        },
+        "resource_path": [],
+        "source_ordinal": 159305,
+        "stat_identity": null,
+        "status": "FD_BINDING_UNRESOLVED_SHARED_OR_UNKNOWN_TABLE"
+      },
+      {
+        "binding": null,
+        "fd_number": 29,
+        "file_path_rendering": null,
+        "observation": {
+          "argument_rendering_complete": true,
+          "arguments": [
+            29,
+            null,
+            3922
+          ],
+          "binding": null,
+          "canonical_effect": "OPEN",
+          "canonical_stage": "OPEN",
+          "dependency_coverage": "UNKNOWN",
+          "direction": "WRITE",
+          "duration": "0.000046",
+          "duration_ns": 46000,
+          "effects_coverage": "UNKNOWN",
+          "entry_source": {
+            "artifact": 0,
+            "line": 159470
+          },
+          "errno": null,
+          "family": "BYTE_IO",
+          "fd": 29,
+          "fd_relation_status": "OPEN",
+          "interface_record": true,
+          "legacy_outside_fd_profile": false,
+          "nonreturn_protocol": null,
+          "ofd": null,
+          "offset": null,
+          "offset_mode": "SHARED_OFD_POSITION",
+          "ordinary_return": true,
+          "payload_argument_indices_omitted": [
+            1
+          ],
+          "post_receipt_rendering": null,
+          "process": "exec_process_instance:capture:ca66b69a8cfc3c1b88e0c22e8ec00d58d735fd016d16edf85e8cf0ac51eb5fc3:process:77d2388db95219723de606b529484e14f8b1912e51b6e58930344d911e863036",
+          "provider_entry_line_point_kind": "STRACE_COMPLETED_LINE_PRINTLEADER_NOT_RETURN_TIME",
+          "provider_entry_line_timestamp": "1793002661.559797",
+          "provider_entry_line_timestamp_ns": 1793002661559797000,
+          "provider_line_point_kind": "STRACE_COMPLETED_LINE_PRINTLEADER_NOT_RETURN_TIME",
+          "provider_line_timestamp": "1793002661.559797",
+          "provider_line_timestamp_ns": 1793002661559797000,
+          "requested_count": 3922,
+          "requested_unit": "bytes",
+          "resource_association_status": "OPEN_R2",
+          "result": 3922,
+          "result_rendering": "0xf52",
+          "retention_coverage": "UNKNOWN",
+          "return_source": {
+            "artifact": 0,
+            "line": 159470
+          },
+          "source": {
+            "artifact": 0,
+            "line": 159470
+          },
+          "syscall": "write",
+          "tid": 1578961,
+          "transferred_bytes": 3922,
+          "work_ticket": "capture:ca66b69a8cfc3c1b88e0c22e8ec00d58d735fd016d16edf85e8cf0ac51eb5fc3:os:0942ed76071fdf85efacfce9c128577d014ac29d2cede4282050089a4319170a:syscall-work:0:159470"
+        },
+        "path_navigation_candidate": {
+          "qualification": "SAME_TID_NUMERIC_FD_NAVIGATION_ONLY_NOT_FILE_COIDENTITY",
+          "rendering": "\"/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/lewm_joint_capture_20261026/lewm-output/hydra/joint-20261026/.hydra/hydra.yaml\"",
+          "source": {
+            "artifact": 0,
+            "line": 159323
+          }
+        },
+        "resource_path": [],
+        "source_ordinal": 159456,
+        "stat_identity": null,
+        "status": "FD_BINDING_UNRESOLVED_SHARED_OR_UNKNOWN_TABLE"
+      },
+      {
+        "binding": null,
+        "fd_number": 29,
+        "file_path_rendering": null,
+        "observation": {
+          "argument_rendering_complete": true,
+          "arguments": [
+            29,
+            null,
+            137
+          ],
+          "binding": null,
+          "canonical_effect": "OPEN",
+          "canonical_stage": "OPEN",
+          "dependency_coverage": "UNKNOWN",
+          "direction": "WRITE",
+          "duration": "0.000038",
+          "duration_ns": 38000,
+          "effects_coverage": "UNKNOWN",
+          "entry_source": {
+            "artifact": 0,
+            "line": 159479
+          },
+          "errno": null,
+          "family": "BYTE_IO",
+          "fd": 29,
+          "fd_relation_status": "OPEN",
+          "interface_record": true,
+          "legacy_outside_fd_profile": false,
+          "nonreturn_protocol": null,
+          "ofd": null,
+          "offset": null,
+          "offset_mode": "SHARED_OFD_POSITION",
+          "ordinary_return": true,
+          "payload_argument_indices_omitted": [
+            1
+          ],
+          "post_receipt_rendering": null,
+          "process": "exec_process_instance:capture:ca66b69a8cfc3c1b88e0c22e8ec00d58d735fd016d16edf85e8cf0ac51eb5fc3:process:77d2388db95219723de606b529484e14f8b1912e51b6e58930344d911e863036",
+          "provider_entry_line_point_kind": "STRACE_COMPLETED_LINE_PRINTLEADER_NOT_RETURN_TIME",
+          "provider_entry_line_timestamp": "1793002661.567876",
+          "provider_entry_line_timestamp_ns": 1793002661567876000,
+          "provider_line_point_kind": "STRACE_COMPLETED_LINE_PRINTLEADER_NOT_RETURN_TIME",
+          "provider_line_timestamp": "1793002661.567876",
+          "provider_line_timestamp_ns": 1793002661567876000,
+          "requested_count": 137,
+          "requested_unit": "bytes",
+          "resource_association_status": "OPEN_R2",
+          "result": 137,
+          "result_rendering": "0x89",
+          "retention_coverage": "UNKNOWN",
+          "return_source": {
+            "artifact": 0,
+            "line": 159479
+          },
+          "source": {
+            "artifact": 0,
+            "line": 159479
+          },
+          "syscall": "write",
+          "tid": 1578961,
+          "transferred_bytes": 137,
+          "work_ticket": "capture:ca66b69a8cfc3c1b88e0c22e8ec00d58d735fd016d16edf85e8cf0ac51eb5fc3:os:0942ed76071fdf85efacfce9c128577d014ac29d2cede4282050089a4319170a:syscall-work:0:159479"
+        },
+        "path_navigation_candidate": {
+          "qualification": "SAME_TID_NUMERIC_FD_NAVIGATION_ONLY_NOT_FILE_COIDENTITY",
+          "rendering": "\"/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/lewm_joint_capture_20261026/lewm-output/hydra/joint-20261026/.hydra/overrides.yaml\"",
+          "source": {
+            "artifact": 0,
+            "line": 159474
+          }
+        },
+        "resource_path": [],
+        "source_ordinal": 159465,
+        "stat_identity": null,
+        "status": "FD_BINDING_UNRESOLVED_SHARED_OR_UNKNOWN_TABLE"
+      }
+    ]
+  }
+}

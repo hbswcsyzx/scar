@@ -232,6 +232,25 @@ class OSResourceFragment:
                     Unresolved("syscall return does not establish device/work quiescence or complete effects", point), source)
 
 
+@dataclass(frozen=True, slots=True)
+class OSFileObservation:
+    """Read-only provider callback view; not a new IR or FD qualification.
+
+    binding is supplied only by the existing private-table replay at entry.
+    Shared/unknown tables and resumed calls never receive a guessed binding.
+    """
+    ordinal: int
+    source: ProviderFactReference
+    entry_source: ProviderFactReference
+    point: EvidencePoint
+    tid: int
+    syscall: str
+    arguments: tuple
+    result: int | None
+    binding: HandleBinding | None
+    complete_entry: bool
+
+
 def _scan(directory, max_bytes, max_lines, *, interface_work=False):
     files = []
     for path in sorted(directory.iterdir()):
@@ -600,7 +619,7 @@ def _clone_flags(call):
 
 
 def import_os_resources(directory, *, scope, run=None, root_tid=None, coordinates=None,
-                        max_bytes=512_000_000, max_lines=2_000_000, interface_work=False):
+                        max_bytes=512_000_000, max_lines=2_000_000, interface_work=False, file_observer=None):
     """Import one retained capture; scope always includes the artifact manifest hash.
 
     root_tid is an explicit capture declaration, never inferred from the lowest
@@ -615,6 +634,8 @@ def import_os_resources(directory, *, scope, run=None, root_tid=None, coordinate
         raise ValueError("OS import budgets must be positive exact integers")
     if type(interface_work) is not bool:
         raise TypeError("interface_work must be an exact bool")
+    if file_observer is not None and (not callable(file_observer) or not interface_work):
+        raise TypeError("file_observer requires interface_work and a callable")
     if run is not None and type(run) is not RunID:
         raise TypeError("run must be an exact RunID or None")
     if coordinates is not None:
@@ -707,7 +728,20 @@ def import_os_resources(directory, *, scope, run=None, root_tid=None, coordinate
     for child in private_children & replay.states.keys():
         replay.states[child]["safe"] = True
     for call in calls:
+        context = None
+        if file_observer is not None and call['name'] in _READ | _WRITE | frozenset(('fstat','newfstatat','statx','mmap','mmap2')):
+            state = replay.states[call['tid']]
+            position = 4 if call['name'] in ('mmap','mmap2') else 0
+            arguments = call['args']
+            fd = _number(arguments[position]) if len(arguments)>position else None
+            complete = call['first_line']==call['line'] and 'parser_gap' not in call
+            index = state['fds'].get(fd) if state['safe'] and complete else None
+            binding = replay.handles[index] if index is not None else None
+            context = OSFileObservation(len(replay.observations),replay.fact(call),replay.fact(call,True),
+                replay.point(call),call['tid'],call['name'],tuple(arguments),call['result'],binding,complete)
         replay.apply(call)
+        if context is not None:
+            file_observer(context)
     gaps = []
     for key, gap in replay.gaps.items():
         gaps.append(gap | {"occurrences": replay.gap_counts[key]})
