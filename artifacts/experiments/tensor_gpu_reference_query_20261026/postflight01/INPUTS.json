@@ -1,0 +1,34 @@
+{
+  "bundle": {
+    "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/native_inputs_full_20261026/native-import/native/bundle-partitions/manifest.json",
+    "sha256": "3a2a80d64ff7e67d72545aefe0154b0f48fa18a855847005675221c86954c29b",
+    "size_bytes": 73304,
+    "schema": "scar.partitioned-ir-bundle"
+  },
+  "capture_model": {
+    "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/native_inputs_full_20261026/native-import/capture-model.json",
+    "sha256": "4d370e7cb6e1d53e1bb45040d85d2fcd0f96f4b47a2010fded67ba8130222eff",
+    "size_bytes": 2409935,
+    "schema": "scar.capture-model"
+  },
+  "eto_source_namespace_only": {
+    "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/lewm_joint_capture_20261026/capture/trace/execution-trace.1578961.adfc0475ed50cb37e1c0453142b5fa65.json",
+    "sha256": "11960422233619b68d4a42d5b699a34cb57349df04df0bc90b6fd5ef3d8e4684",
+    "size_bytes": 321365939,
+    "schema": "pytorch.execution-trace.v1"
+  },
+  "index_input_bytes": 2050000000,
+  "index_seconds": 180,
+  "index_output_bytes": 200000000,
+  "query_input_bytes": 180000000,
+  "query_seconds": 60,
+  "source_shas": {
+    "/home/zyf/AAA/scar-worktrees/source-entry-project/scar/analysis/tensor_storage_index.py": "b9202ca5b9528ef51275bf5ec6ec80fa08d4844a0240d31e4069f89906f5e6d2",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/analysis/tensor_storage_query.py": "a1029d9815f32dfad13cac4a57f28a364ad502defe66b879f88436c8ec740083",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/store/bundle_partitions.py": "655c87445ab30e07ca1371362901e7bef53bf6aaca085d2c3ba8a0a330c389e3",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/record_codec.py": "0954c05e53a6dcb31f449461db71c63fdcdd9f95a9c053424d86bf5217a89ef3",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/v2/evidence.py": "c789c7aca05e217f95d4ca7bef6c761d9a5244a9779fed5174a0f4132c09630d",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/v2/values.py": "e12586470c294701c315d6108a80746f08a14ba26a4ca6dcf6374f458d1078b5"
+  },
+  "no_capture_target_or_EO_read": true
+}

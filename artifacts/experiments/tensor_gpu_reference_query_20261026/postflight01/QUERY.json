@@ -1,0 +1,409 @@
+{
+  "schema": "scar.tensor-storage-source-query",
+  "schema_version": 1,
+  "run": {
+    "id": {
+      "kind": "exec_run",
+      "value": "capture:ca66b69a8cfc3c1b88e0c22e8ec00d58d735fd016d16edf85e8cf0ac51eb5fc3",
+      "wire": "exec_run:capture:ca66b69a8cfc3c1b88e0c22e8ec00d58d735fd016d16edf85e8cf0ac51eb5fc3"
+    },
+    "source": {
+      "artifact": {
+        "schema": "strace.syscalls.text.v1",
+        "sha256": "22b921069ae83ca3600bae64931112c55c0c0ca5c55d44135de9b4d04d81f788",
+        "size_bytes": 179220927,
+        "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/lewm_joint_capture_20261026/capture/os/syscalls.1578961"
+      },
+      "locator": "#/lines/1"
+    }
+  },
+  "process": {
+    "kind": "exec_process_instance",
+    "value": "capture:ca66b69a8cfc3c1b88e0c22e8ec00d58d735fd016d16edf85e8cf0ac51eb5fc3:process:77d2388db95219723de606b529484e14f8b1912e51b6e58930344d911e863036",
+    "wire": "exec_process_instance:capture:ca66b69a8cfc3c1b88e0c22e8ec00d58d735fd016d16edf85e8cf0ac51eb5fc3:process:77d2388db95219723de606b529484e14f8b1912e51b6e58930344d911e863036"
+  },
+  "association": {
+    "artifact": {
+      "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/native_inputs_full_20261026/native-import/native/bundle-partitions/evidence/edges/000061.jsonl.gz",
+      "sha256": "a5ef78feb630e7bc5729bb025503284fefc19d6cfadb9bce36cab4444badc3a3",
+      "size_bytes": 466221,
+      "schema": "scar.bundle-record-chunk"
+    },
+    "locator": "#/lines/7158/record"
+  },
+  "original_edges": [
+    {
+      "edge_id": "tensor-physical:44b8f0b49dea1154bdc6896197ecb18e706f6b6f71ce9bc3975f5db7da0508dd:object:8428:0",
+      "relation": "uses_storage",
+      "source": {
+        "kind": "object",
+        "reference": {
+          "kind": "object",
+          "value": "dispatch-reference:6c23a3c4086ad54095a7a5a54b15804c33f7bb6decc7e6fd2e8886468c3b1d9a:weak:1578961:44467",
+          "wire": "object:dispatch-reference:6c23a3c4086ad54095a7a5a54b15804c33f7bb6decc7e6fd2e8886468c3b1d9a:weak:1578961:44467"
+        }
+      },
+      "target": {
+        "kind": "storage_region",
+        "reference": {
+          "kind": "region",
+          "value": "tensor-physical:44b8f0b49dea1154bdc6896197ecb18e706f6b6f71ce9bc3975f5db7da0508dd:region:8428:0",
+          "wire": "region:tensor-physical:44b8f0b49dea1154bdc6896197ecb18e706f6b6f71ce9bc3975f5db7da0508dd:region:8428:0"
+        }
+      },
+      "evidence": {
+        "kind": "Inferred",
+        "references": [
+          "sha256:11960422233619b68d4a42d5b699a34cb57349df04df0bc90b6fd5ef3d8e4684#/nodes/17305/inputs/values/0",
+          "sha256:2de73fd79293f9f57ad457c07849745ba24fcc91727a38984132c7143ff4e7cd#",
+          "sha256:852de7a088781f2c721dc8e06633fecf9f1c9f6034c54bfde6798f45c31c13c7#line/8428/arguments/0"
+        ],
+        "scope": "tensor-physical:44b8f0b49dea1154bdc6896197ecb18e706f6b6f71ce9bc3975f5db7da0508dd",
+        "confidence": null,
+        "assumptions": [
+          "association applies only at this marker observation; no permanent object/storage binding",
+          "capture membership verified",
+          "fixed owned collector passed the same held Tensor to this exact marker slot",
+          "provider allocation_id is capture-local physical identity, not logical content"
+        ]
+      }
+    },
+    {
+      "edge_id": "tensor-physical:44b8f0b49dea1154bdc6896197ecb18e706f6b6f71ce9bc3975f5db7da0508dd:use:8428:0",
+      "relation": "uses_storage",
+      "source": {
+        "kind": "operation_instance",
+        "reference": {
+          "kind": "opinst",
+          "value": "native:636fde61a45803f11712767bc1cbf0b0ea3de13b14e0b27edc2d6071daea1612:eto:20820",
+          "wire": "opinst:native:636fde61a45803f11712767bc1cbf0b0ea3de13b14e0b27edc2d6071daea1612:eto:20820"
+        }
+      },
+      "target": {
+        "kind": "storage_region",
+        "reference": {
+          "kind": "region",
+          "value": "tensor-physical:44b8f0b49dea1154bdc6896197ecb18e706f6b6f71ce9bc3975f5db7da0508dd:region:8428:0",
+          "wire": "region:tensor-physical:44b8f0b49dea1154bdc6896197ecb18e706f6b6f71ce9bc3975f5db7da0508dd:region:8428:0"
+        }
+      },
+      "evidence": {
+        "kind": "Inferred",
+        "references": [
+          "sha256:11960422233619b68d4a42d5b699a34cb57349df04df0bc90b6fd5ef3d8e4684#/nodes/17305/inputs/values/0",
+          "sha256:2de73fd79293f9f57ad457c07849745ba24fcc91727a38984132c7143ff4e7cd#",
+          "sha256:852de7a088781f2c721dc8e06633fecf9f1c9f6034c54bfde6798f45c31c13c7#line/8428/arguments/0"
+        ],
+        "scope": "tensor-physical:44b8f0b49dea1154bdc6896197ecb18e706f6b6f71ce9bc3975f5db7da0508dd",
+        "confidence": null,
+        "assumptions": [
+          "association applies only at this marker observation; no permanent object/storage binding",
+          "capture membership verified",
+          "fixed owned collector passed the same held Tensor to this exact marker slot",
+          "provider allocation_id is capture-local physical identity, not logical content"
+        ]
+      }
+    }
+  ],
+  "object": {
+    "id": {
+      "kind": "object",
+      "value": "dispatch-reference:6c23a3c4086ad54095a7a5a54b15804c33f7bb6decc7e6fd2e8886468c3b1d9a:weak:1578961:44467",
+      "wire": "object:dispatch-reference:6c23a3c4086ad54095a7a5a54b15804c33f7bb6decc7e6fd2e8886468c3b1d9a:weak:1578961:44467"
+    },
+    "scope": "dispatch-reference:6c23a3c4086ad54095a7a5a54b15804c33f7bb6decc7e6fd2e8886468c3b1d9a",
+    "evidence": [
+      {
+        "kind": "Inferred",
+        "references": [
+          "sha256:11960422233619b68d4a42d5b699a34cb57349df04df0bc90b6fd5ef3d8e4684#/nodes/17305/inputs/values/0",
+          "sha256:2d0eb6e6aea7b7d3d284c3be55fa2fa11d75cda9ab29284567ca4d8b5d2a8970#",
+          "sha256:2d721c4b1ad93c5fde4f3d42aba17706c0e564cfa5d8ed09c0ce4ba777725216#line/8564",
+          "sha256:8384d6582115721b19ed5c5405c79205fd7dd458a7ff1c68fd39a518b88f1d8a#"
+        ],
+        "scope": "dispatch-reference:6c23a3c4086ad54095a7a5a54b15804c33f7bb6decc7e6fd2e8886468c3b1d9a",
+        "confidence": null,
+        "assumptions": [
+          "association is local to this observation; no persistent content/storage identity",
+          "capture membership verified",
+          "fixed production collector passed the same held Tensor to this exact marker argument",
+          "retained ancestor is not a direct caller"
+        ]
+      }
+    ],
+    "metadata": {
+      "identity_basis": "existing call recorder weak-reference epoch",
+      "lifetime": "UNKNOWN",
+      "process_id": 1578961,
+      "weak_token": "weak:1578961:44467"
+    }
+  },
+  "object_source": {
+    "artifact": {
+      "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/native_inputs_full_20261026/native-import/native/bundle-partitions/values/objects/000000.jsonl.gz",
+      "sha256": "d57e2e4fcb767c72d97f6ef0ae73c1a965df8542c90056489a64e08934a0e864",
+      "size_bytes": 398807,
+      "schema": "scar.bundle-record-chunk"
+    },
+    "locator": "#/lines/1748/record"
+  },
+  "marker": {
+    "id": {
+      "kind": "opinst",
+      "value": "native:636fde61a45803f11712767bc1cbf0b0ea3de13b14e0b27edc2d6071daea1612:eto:20820",
+      "wire": "opinst:native:636fde61a45803f11712767bc1cbf0b0ea3de13b14e0b27edc2d6071daea1612:eto:20820"
+    },
+    "definition": {
+      "kind": "opdef",
+      "value": "native:636fde61a45803f11712767bc1cbf0b0ea3de13b14e0b27edc2d6071daea1612:symbol:292ce201b6d81302a57ea36eb014d3b98ec9a5098bdc567a6941325d6d8f8b7b",
+      "wire": "opdef:native:636fde61a45803f11712767bc1cbf0b0ea3de13b14e0b27edc2d6071daea1612:symbol:292ce201b6d81302a57ea36eb014d3b98ec9a5098bdc567a6941325d6d8f8b7b"
+    },
+    "process_id": 1578961,
+    "thread_id": 1578961,
+    "parent": {
+      "kind": "opinst",
+      "value": "native:636fde61a45803f11712767bc1cbf0b0ea3de13b14e0b27edc2d6071daea1612:eto:20814",
+      "wire": "opinst:native:636fde61a45803f11712767bc1cbf0b0ea3de13b14e0b27edc2d6071daea1612:eto:20814"
+    },
+    "control_scope": null,
+    "iteration": {},
+    "start_ns": 2145700257978358,
+    "end_ns": 2145700258050959,
+    "status": "Observed",
+    "metadata": {
+      "category": "user_annotation",
+      "clock_domain": "kineto",
+      "correlation": null,
+      "cpu_join_assumptions": [
+        "artifacts belong to the same supplied capture"
+      ],
+      "cpu_join_basis": "unique positive RF ID and exact name in supplied capture",
+      "cpu_join_status": "Inferred",
+      "ctrl_deps": 20814,
+      "eto_tid": 1,
+      "external_id": 17309,
+      "kineto_reference": "sha256:f2ba7bda8a41b385361373ea5efcbcfcc487a095eaf23cb48ebd4a898d74cebd#/traceEvents/17367",
+      "node_id": 20820,
+      "parent_basis": "ETO ctrl_deps collector stack only",
+      "provider": "ETO",
+      "raw_pid": 1578961,
+      "raw_reference": "sha256:11960422233619b68d4a42d5b699a34cb57349df04df0bc90b6fd5ef3d8e4684#/nodes/17305",
+      "raw_resource": {},
+      "raw_tid": 1578961,
+      "rf_id": 17309,
+      "tensor_slots": [
+        {
+          "descriptor_id": "3a72d40f1911c61074976b38134fa41fa258c701e87d5ab7c93515a92f2b3b52",
+          "native_schema_binding": {
+            "formal_slot": null,
+            "gap": "actual_tensor_slots_have_no_qualified_schema",
+            "schema_sha256": null,
+            "status": "UNQUALIFIED"
+          },
+          "ordered_path": [
+            0
+          ],
+          "provider_reference": "native:636fde61a45803f11712767bc1cbf0b0ea3de13b14e0b27edc2d6071daea1612:tensor-token:20817",
+          "raw_reference": "sha256:11960422233619b68d4a42d5b699a34cb57349df04df0bc90b6fd5ef3d8e4684#/nodes/17305/inputs/values/0",
+          "role": "inputs"
+        }
+      ],
+      "thread_namespace": "Kineto host thread"
+    }
+  },
+  "marker_source": {
+    "artifact": {
+      "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/native_inputs_full_20261026/native-import/native/bundle-partitions/evidence/instances/000002.jsonl.gz",
+      "sha256": "8edcd09c661793d4b8f958449132bbf528896d5e6040f81ec566337a81b81a65",
+      "size_bytes": 946163,
+      "schema": "scar.bundle-record-chunk"
+    },
+    "locator": "#/lines/5146/record"
+  },
+  "marker_slot": {
+    "descriptor_id": "3a72d40f1911c61074976b38134fa41fa258c701e87d5ab7c93515a92f2b3b52",
+    "native_schema_binding": {
+      "formal_slot": null,
+      "gap": "actual_tensor_slots_have_no_qualified_schema",
+      "schema_sha256": null,
+      "status": "UNQUALIFIED"
+    },
+    "ordered_path": [
+      0
+    ],
+    "provider_reference": "native:636fde61a45803f11712767bc1cbf0b0ea3de13b14e0b27edc2d6071daea1612:tensor-token:20817",
+    "raw_reference": "sha256:11960422233619b68d4a42d5b699a34cb57349df04df0bc90b6fd5ef3d8e4684#/nodes/17305/inputs/values/0",
+    "role": "inputs"
+  },
+  "object_marker_edge": {
+    "artifact": {
+      "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/native_inputs_full_20261026/native-import/native/bundle-partitions/evidence/edges/000051.jsonl.gz",
+      "sha256": "beb27401a7e97851113541884691792eb226d7cc3143bd00b760da54ddb9b75e",
+      "size_bytes": 463972,
+      "schema": "scar.bundle-record-chunk"
+    },
+    "locator": "#/lines/11318/record"
+  },
+  "provider_reference": {
+    "reference_id": "native:636fde61a45803f11712767bc1cbf0b0ea3de13b14e0b27edc2d6071daea1612:tensor-token:20817",
+    "provider": "torch.eto",
+    "scope": "native:636fde61a45803f11712767bc1cbf0b0ea3de13b14e0b27edc2d6071daea1612",
+    "domain": "tensor_reference_token",
+    "token": 20817,
+    "evidence": [
+      {
+        "kind": "Observed",
+        "references": [
+          "sha256:11960422233619b68d4a42d5b699a34cb57349df04df0bc90b6fd5ef3d8e4684#/nodes/17302/outputs/values/0"
+        ],
+        "scope": "native:636fde61a45803f11712767bc1cbf0b0ea3de13b14e0b27edc2d6071daea1612",
+        "confidence": null,
+        "assumptions": []
+      }
+    ],
+    "metadata": {
+      "allocation_generation": null,
+      "descriptors": [
+        {
+          "descriptor_id": "3a72d40f1911c61074976b38134fa41fa258c701e87d5ab7c93515a92f2b3b52",
+          "shape": [
+            192,
+            3,
+            14,
+            14
+          ],
+          "strides": [
+            588,
+            196,
+            14,
+            1
+          ],
+          "tensor_tuple": [
+            20817,
+            20818,
+            0,
+            112896,
+            4,
+            "cuda:0"
+          ],
+          "type": "Tensor(float)"
+        }
+      ],
+      "lifetime": "UNKNOWN",
+      "logical_version": null,
+      "observations": 9
+    }
+  },
+  "provider_source": {
+    "artifact": {
+      "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/native_inputs_full_20261026/native-import/native/bundle-partitions/evidence/provider_references/000000.jsonl.gz",
+      "sha256": "ced210d25446e0bcf10e7d8eaed9085fb5456ac9a21754e67eb9a99b73c51a7f",
+      "size_bytes": 1619202,
+      "schema": "scar.bundle-record-chunk"
+    },
+    "locator": "#/lines/2275/record"
+  },
+  "storage_region": {
+    "id": {
+      "kind": "region",
+      "value": "tensor-physical:44b8f0b49dea1154bdc6896197ecb18e706f6b6f71ce9bc3975f5db7da0508dd:region:8428:0",
+      "wire": "region:tensor-physical:44b8f0b49dea1154bdc6896197ecb18e706f6b6f71ce9bc3975f5db7da0508dd:region:8428:0"
+    },
+    "allocation": {
+      "kind": "alloc",
+      "value": "tensor-physical:44b8f0b49dea1154bdc6896197ecb18e706f6b6f71ce9bc3975f5db7da0508dd:epoch:79fc6d2e9ccaaefed355d488ba6f11af1424e126d465445791f837960c086b0e",
+      "wire": "alloc:tensor-physical:44b8f0b49dea1154bdc6896197ecb18e706f6b6f71ce9bc3975f5db7da0508dd:epoch:79fc6d2e9ccaaefed355d488ba6f11af1424e126d465445791f837960c086b0e"
+    },
+    "offset": 0,
+    "shape": [
+      192,
+      3,
+      14,
+      14
+    ],
+    "strides": [
+      588,
+      196,
+      14,
+      1
+    ],
+    "dtype": "torch.float32",
+    "device": "cuda:0",
+    "layout": "strided",
+    "metadata": {
+      "argument_ordinal": 0,
+      "association_persistent": false,
+      "eto_reference": "sha256:11960422233619b68d4a42d5b699a34cb57349df04df0bc90b6fd5ef3d8e4684#/nodes/17305/inputs/values/0",
+      "impl_ptr": 110368581149680,
+      "layout_normalization_rule": "PINNED_TORCH_LAYOUT_V1",
+      "logical_version": null,
+      "marker_instance": "opinst:native:636fde61a45803f11712767bc1cbf0b0ea3de13b14e0b27edc2d6071daea1612:eto:20820",
+      "offset_basis": "same held Tensor, exact ETO marker argument storage_offset",
+      "physical_observation": "sha256:852de7a088781f2c721dc8e06633fecf9f1c9f6034c54bfde6798f45c31c13c7#line/8428/arguments/0",
+      "provider_layout": "torch.strided",
+      "provider_tensor_id": 86
+    }
+  },
+  "region_source": {
+    "artifact": {
+      "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/native_inputs_full_20261026/native-import/native/bundle-partitions/values/regions/000000.jsonl.gz",
+      "sha256": "b512b231531332fd08747cb1ed0c6ca7fbefe922373038f413a550def95527e8",
+      "size_bytes": 846797,
+      "schema": "scar.bundle-record-chunk"
+    },
+    "locator": "#/lines/4701/record"
+  },
+  "allocation": {
+    "id": {
+      "kind": "alloc",
+      "value": "tensor-physical:44b8f0b49dea1154bdc6896197ecb18e706f6b6f71ce9bc3975f5db7da0508dd:epoch:79fc6d2e9ccaaefed355d488ba6f11af1424e126d465445791f837960c086b0e",
+      "wire": "alloc:tensor-physical:44b8f0b49dea1154bdc6896197ecb18e706f6b6f71ce9bc3975f5db7da0508dd:epoch:79fc6d2e9ccaaefed355d488ba6f11af1424e126d465445791f837960c086b0e"
+    },
+    "device": "cuda:0",
+    "nbytes": 451584,
+    "allocator_token": "provider-allocation-id:1522",
+    "lifetime_scope": "tensor-physical:44b8f0b49dea1154bdc6896197ecb18e706f6b6f71ce9bc3975f5db7da0508dd",
+    "metadata": {
+      "address": 12918456320,
+      "allocation_receipts": [
+        "sha256:852de7a088781f2c721dc8e06633fecf9f1c9f6034c54bfde6798f45c31c13c7#line/8427"
+      ],
+      "birth_reference": "sha256:852de7a088781f2c721dc8e06633fecf9f1c9f6034c54bfde6798f45c31c13c7#line/8427",
+      "free_reference": null,
+      "identity_basis": "same profiler result calculateUniqueTensorIDs allocation_id",
+      "legacy_kineto_allocation_correspondence_established": false,
+      "lifetime_status": "OBSERVED_BIRTH_OPEN_AT_CAPTURE_END",
+      "physical_cuda_allocation_established": false,
+      "provider_allocation_id": 1522,
+      "resource_ready_established": false
+    }
+  },
+  "allocation_source": {
+    "artifact": {
+      "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/native_inputs_full_20261026/native-import/native/bundle-partitions/values/allocations/000003.jsonl.gz",
+      "sha256": "cdab755272ca43ebc6a4992865f121a807f3b18cfdb27522000abfe58aac8192",
+      "size_bytes": 1202111,
+      "schema": "scar.bundle-record-chunk"
+    },
+    "locator": "#/lines/1625/record"
+  },
+  "retained_source_context": {
+    "artifact": {
+      "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/native_inputs_full_20261026/native-import/native/dispatch-bridge.json.gz",
+      "sha256": "6839cdf8f2849fd30283fb713d2b9b4912252a0b83a13438c59d66ace54e60f4",
+      "size_bytes": 5690003,
+      "schema": "scar.dispatch-observation-import"
+    },
+    "locator": "#/observations/5709"
+  },
+  "source_context_dereferenced": false,
+  "materialization": null,
+  "new_value_graph_nodes": 0,
+  "scope": "original held-Tensor marker observation only; no actual-op cross-point storage/content/ready binding",
+  "measurements": {
+    "stored_bytes": 15424194,
+    "decoded_bytes": 142017818,
+    "total_bytes": 157442012,
+    "elapsed_seconds": 1.0317776440060697
+  }
+}
