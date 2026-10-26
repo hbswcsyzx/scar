@@ -1,0 +1,26 @@
+Traceback (most recent call last):
+  File "/home/zyf/AAA/scar-worktrees/source209-model/artifacts/experiments/source209_resume01_20261026/prepare.py", line 65, in <module>
+    if __name__=='__main__':main()
+                            ~~~~^^
+  File "/home/zyf/AAA/scar-worktrees/source209-model/artifacts/experiments/source209_resume01_20261026/prepare.py", line 52, in main
+    owner,archives,catalog=driver.build_catalog(read_plan,remaining)
+                           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+  File "/home/zyf/AAA/scar-worktrees/source209-model/artifacts/experiments/source209_resume01_20261026/run.py", line 109, in build_catalog
+    archives=CompilerWitnessArchives(tuple((r['directory'],r['manifest']['sha256'])for r in c['archives']),store_budget=CodeWitnessBudget(max_compile_keys=94,max_source_files=94,max_source_bytes=8_000_000,max_module_bytes=16_000_000,max_archive_bytes=256_000_000,max_manifest_bytes=8_000_000),budget=CompilerArchiveBudget(max_archives=4,max_total_modules=256,max_total_sources=256,max_declared_payload_bytes=256_000_000))
+  File "/home/zyf/AAA/scar-worktrees/source209-model/scar/analysis/compiler_witness_archives.py", line 93, in __init__
+    store = CodeWitnessStore(directory, budget=store_budget)
+  File "/home/zyf/AAA/scar-worktrees/source209-model/scar/analysis/code_witness.py", line 104, in __init__
+    self._owned(path, directory=True)
+    ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/zyf/AAA/scar-worktrees/source209-model/scar/analysis/code_witness.py", line 133, in _owned
+    _need(not stat.S_ISLNK(status.st_mode)
+    ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+          and (stat.S_ISDIR(status.st_mode) if directory else stat.S_ISREG(status.st_mode))
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+          and status.st_uid == os.geteuid() and not status.st_mode & 0o022,
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+          "witness files/directories must be owned, regular, and not group/world writable")
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/zyf/AAA/scar-worktrees/source209-model/scar/analysis/code_witness.py", line 32, in _need
+    raise ValueError("code witness: " + detail)
+ValueError: code witness: witness files/directories must be owned, regular, and not group/world writable

@@ -1,0 +1,20 @@
+Traceback (most recent call last):
+  File "/home/zyf/AAA/scar-worktrees/source209-model/artifacts/experiments/source209_resume01_20261026/prepare.py", line 55, in <module>
+    if __name__=='__main__':main()
+                            ~~~~^^
+  File "/home/zyf/AAA/scar-worktrees/source209-model/artifacts/experiments/source209_resume01_20261026/prepare.py", line 42, in main
+    owner,archives,catalog=driver.build_catalog(read_plan,remaining)
+                           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+  File "/home/zyf/AAA/scar-worktrees/source209-model/artifacts/experiments/source209_resume01_20261026/run.py", line 108, in build_catalog
+    owner=SourceAttachments(c['continuation']['path'],expected_report_sha256=c['continuation']['sha256'],project_root=c['project_root'],budget=SourceAttachmentBudget(max_report_bytes=8_000_000,max_artifact_bytes=self.limits['max_selected_and_aux_decoded_total'],max_record_bytes=self.limits['max_record_bytes'],cached_files=2))
+  File "/home/zyf/AAA/scar-worktrees/source209-model/scar/analysis/source_attachments.py", line 287, in __init__
+    self._artifact_path(graph_ref, row["source_root"], "graphs")
+    ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/zyf/AAA/scar-worktrees/source209-model/scar/analysis/source_attachments.py", line 492, in _artifact_path
+    _need(path.is_file() and not path.is_symlink() and path.resolve() == path,
+    ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+          "artifact is not an ordinary file beneath its manifest directory")
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/zyf/AAA/scar-worktrees/source209-model/scar/analysis/source_attachments.py", line 66, in _need
+    raise ValueError("source attachments: " + detail)
+ValueError: source attachments: artifact is not an ordinary file beneath its manifest directory

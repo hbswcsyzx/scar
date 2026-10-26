@@ -1,0 +1,86 @@
+[
+  {
+    "declaration": {
+      "canonical_bytes": 18352955,
+      "canonical_sha256": "bab01071a53581f6c43d21741ab0c9c6771545901d888676a25064d09b2f2289",
+      "compressed_bytes": 1914477,
+      "path": "graphs/bab01071a53581f6c43d21741ab0c9c6771545901d888676a25064d09b2f2289.json.gz",
+      "schema": "scar.dependency-source-graphs",
+      "schema_version": 1
+    },
+    "field": "source_graph_artifact",
+    "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_dependency_sources_20261023/result/graphs/bab01071a53581f6c43d21741ab0c9c6771545901d888676a25064d09b2f2289.json.gz"
+  },
+  {
+    "declaration": {
+      "canonical_bytes": 24839831,
+      "canonical_sha256": "d4ad330de6455701f38d1ecbc2d5830223eb56798b3529613b261d5c5d01de23",
+      "compressed_bytes": 2818104,
+      "path": "graphs/d4ad330de6455701f38d1ecbc2d5830223eb56798b3529613b261d5c5d01de23.json.gz",
+      "schema": "scar.dependency-source-graphs",
+      "schema_version": 1
+    },
+    "field": "source_graph_artifact",
+    "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_dependency_sources_20261023/result/graphs/d4ad330de6455701f38d1ecbc2d5830223eb56798b3529613b261d5c5d01de23.json.gz"
+  },
+  {
+    "declaration": {
+      "canonical_bytes": 21711810,
+      "canonical_sha256": "6ddf9a39a0c1c876670f047298a87a3c7c767544f64f47f103c9fa8bf66abf0d",
+      "compressed_bytes": 2543929,
+      "path": "graphs/6ddf9a39a0c1c876670f047298a87a3c7c767544f64f47f103c9fa8bf66abf0d.json.gz",
+      "schema": "scar.dependency-source-graphs",
+      "schema_version": 1
+    },
+    "field": "source_graph_artifact",
+    "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_dependency_sources_20261023/result/graphs/6ddf9a39a0c1c876670f047298a87a3c7c767544f64f47f103c9fa8bf66abf0d.json.gz"
+  },
+  {
+    "declaration": {
+      "canonical_bytes": 11382556,
+      "canonical_sha256": "b20e8afde5c1503afc08360a225abcb4acbe42abe20aa3718e13f7468d6a07a6",
+      "compressed_bytes": 1281866,
+      "path": "graphs/b20e8afde5c1503afc08360a225abcb4acbe42abe20aa3718e13f7468d6a07a6.json.gz",
+      "schema": "scar.dependency-source-graphs",
+      "schema_version": 1
+    },
+    "field": "source_graph_artifact",
+    "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_dependency_sources_20261023/result/graphs/b20e8afde5c1503afc08360a225abcb4acbe42abe20aa3718e13f7468d6a07a6.json.gz"
+  },
+  {
+    "declaration": {
+      "canonical_bytes": 4584440,
+      "canonical_sha256": "163a0a59a71c15410ef40b12b7d80589985b70131f4041454537ac5eb169055d",
+      "compressed_bytes": 477374,
+      "path": "graphs/163a0a59a71c15410ef40b12b7d80589985b70131f4041454537ac5eb169055d.json.gz",
+      "schema": "scar.dependency-source-graphs",
+      "schema_version": 1
+    },
+    "field": "source_graph_artifact",
+    "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_dependency_sources_20261023/result/graphs/163a0a59a71c15410ef40b12b7d80589985b70131f4041454537ac5eb169055d.json.gz"
+  },
+  {
+    "declaration": {
+      "canonical_bytes": 2675086,
+      "canonical_sha256": "7874681b4a2253a24695153800a49ef86de194a0f7d28f67c90765cb81ea069d",
+      "compressed_bytes": 279163,
+      "path": "graphs/7874681b4a2253a24695153800a49ef86de194a0f7d28f67c90765cb81ea069d.json.gz",
+      "schema": "scar.dependency-source-graphs",
+      "schema_version": 1
+    },
+    "field": "source_graph_artifact",
+    "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_dependency_sources_20261023/result/graphs/7874681b4a2253a24695153800a49ef86de194a0f7d28f67c90765cb81ea069d.json.gz"
+  },
+  {
+    "declaration": {
+      "canonical_bytes": 53717920,
+      "canonical_sha256": "a466a13a303f1beca1b4127d1e5017508cac5df02ec240d50741605cf6bc15d0",
+      "compressed_bytes": 6271889,
+      "path": "graphs/a466a13a303f1beca1b4127d1e5017508cac5df02ec240d50741605cf6bc15d0.json.gz",
+      "schema": "scar.dependency-continuation-source-graphs",
+      "schema_version": 1
+    },
+    "field": "source_graph_artifact",
+    "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_dependency_continuation_20261023/result/graphs/a466a13a303f1beca1b4127d1e5017508cac5df02ec240d50741605cf6bc15d0.json.gz"
+  }
+]

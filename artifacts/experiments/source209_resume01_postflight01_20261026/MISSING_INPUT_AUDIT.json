@@ -1,0 +1,20 @@
+{
+  "existing_SHA_size_match": 461,
+  "existing_bytes": 21519151,
+  "mismatches": [],
+  "missing": [
+    {
+      "bytes": 272,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/source209_workspace_recovery_20261026/ORIGINAL_INPUT_SHA_CHECK.json",
+      "sha256": "9d014c3573a36d0ce46be390cdcd1ac6268f8eab3f4d54e4f509d229c7cb8507"
+    },
+    {
+      "bytes": 2998,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/source209_workspace_recovery_20261026/OWNER_FULL_DECLARATION_RECOVERY.json",
+      "sha256": "a42cedb3c7aa0eed5346ad3fb4f1d4107f83b0861723a17c04cf7a59e64413e6"
+    }
+  ],
+  "original_inputs": 463,
+  "restoration": "Root50692 actual0; preparation subsequently rechecked all463,21522421B; does not change original exit1",
+  "status": "DIAGNOSTIC_BEFORE_ROOT_RESTORATION"
+}
