@@ -166,14 +166,14 @@ def _pending_group(group, sources, operations, protocols, blocks, positions, use
 
 
 def validate_string_source(model, graph, interface, metadata, semantic, *,
-                           source_tree=None, options=None, structural_only=False):
+                           source_tree=None, options=None, structural_only=False, language=None):
     _need(type(structural_only) is bool, "verification mode must be explicit")
     protocols = {row.operation: row for row in model.protocols}
     selected = {identity for identity, row in protocols.items() if row.kind in _KINDS}
     if not selected:
         return {"policy": POLICY, "protocol_operations": 0, "records": [], "whole_lifetime_verified": False}
     from scar.analysis.source_string_lowering import validate_string_protocols
-    validate_string_protocols(model, graph, interface, metadata, semantic)
+    validate_string_protocols(model, graph, interface, metadata, semantic, language=language)
     operations = {row.id: row for row in graph.operations}
     values = {row.id: row for row in graph.values}
     blocks = {block.id: block for region in graph.regions for block in region.blocks}

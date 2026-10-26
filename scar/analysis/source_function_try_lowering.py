@@ -143,6 +143,23 @@ class FunctionTryBuilder(StructuredEnvironmentBuilder):
     def read_local(self, node, cursor, old):
         token = cursor.env[node.id]
         if self.known_binding_states.get(token) is not BindingState.BOUND:
+            # Conditional-expression joins use their own ordinary jump helper;
+            # derive their actual binding carries with the same canonical
+            # fixed-point implementation rather than guessing BOUND.
+            from scar.ir.program.binding_validation import _compute_binding_facts
+            from scar.ir.program.model import LocalBindingValue,BlockArgument
+            tokens={k:v for k,v in self.values_by_id.items()if type(v)is LocalBindingValue}
+            incoming={k:[]for k,v in tokens.items()if type(v.origin)is BlockArgument}
+            for operation in self.operations:
+                own={u.id:u.value for u in operation.uses}
+                for edge in getattr(operation.terminator,'successors',()):
+                    for operand,formal in zip(edge.arguments,self.block_arguments[edge.block]):
+                        if formal in incoming and operand in own and own[operand]in tokens and tokens[formal].slot==tokens[own[operand]].slot:
+                            incoming[formal].append(own[operand])
+            facts=_compute_binding_facts(tokens,{r.value:r for r in self.binding_definitions},incoming)
+            if facts.get(token)==frozenset((BindingState.BOUND,)):
+                self.known_binding_states[token]=BindingState.BOUND
+        if self.known_binding_states.get(token) is not BindingState.BOUND:
             raise _Unsupported(GapKind.UNSUPPORTED_SYNTAX, node,
                 'FUNCTION_TRY_LOCAL_BINDING_PROPAGATION_UNIMPLEMENTED')
         return super().read_local(node, cursor, old)

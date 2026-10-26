@@ -876,6 +876,34 @@ def _require_valid_structured_body(model, graph, interface, metadata, *, semanti
             owners = {control.nodes[edge.target].source for edge in control.edges.values()
                 if edge.kind is kind and control.nodes[edge.source].source == reference
                 and control.nodes[edge.source].scope == model.definition}
+            if not owners and language is not None and source_tree is not None:
+                from scar.ir.program.source_language import SourceLanguageCapability
+                if SourceLanguageCapability.FUNCTION_TRY_314_V1 in language.capabilities:
+                    # Old control-flow artifacts explicitly retain Try as a
+                    # gap, so nested handler Break/Continue has no old edge.
+                    # Resolve its exact lexical AST owner, never invent a CFG
+                    # edge or ignore a contradictory existing owner.
+                    expected="Break" if kind is EdgeKind.BREAK else "Continue"
+                    span=lambda n:(n.lineno,n.end_lineno,n.col_offset,n.end_col_offset)
+                    subject=(model.source.start_line,model.source.end_line,model.source.start_column,model.source.end_column)
+                    roots=[n for n in ast.walk(source_tree)if isinstance(n,(ast.FunctionDef,ast.AsyncFunctionDef))and span(n)==subject]
+                    found=[]
+                    def descend(node,stack):
+                        if type(node).__name__==expected and span(node)==(reference.start_line,reference.end_line,reference.start_column,reference.end_column):
+                            if stack:found.append(stack[-1])
+                            return
+                        if isinstance(node,(ast.FunctionDef,ast.AsyncFunctionDef,ast.Lambda,ast.ClassDef)):return
+                        if isinstance(node,(ast.For,ast.While,ast.AsyncFor)):
+                            for child in node.body:descend(child,stack+(node,))
+                            for child in node.orelse:descend(child,stack)
+                        else:
+                            for child in ast.iter_child_nodes(node):descend(child,stack)
+                    if len(roots)==1:
+                        for child in roots[0].body:descend(child,())
+                    if len(found)==1:
+                        refs=[a.reference for a in semantic.source_atoms.values()if a.kind==type(found[0]).__name__
+                            and (a.reference.start_line,a.reference.end_line,a.reference.start_column,a.reference.end_column)==span(found[0])]
+                        if len(refs)==1:return refs[0]
             if len(owners) != 1:
                 raise ValueError("source loop transfer has no unique lexical owner")
             return next(iter(owners))
