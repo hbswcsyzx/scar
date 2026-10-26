@@ -111,6 +111,10 @@ def _pointer(document, pointer):
     return value
 
 
+class ArchivedSourceUnavailable(LookupError):
+    """An explicitly missing original snapshot, distinct from contradictory bytes."""
+
+
 class SourceAttachments:
     """Bounded reader/resolver over one existing dependency continuation.
 
@@ -395,6 +399,43 @@ class SourceAttachments:
     def catalog_rows(self):
         """Original complete groups; does not resolve graphs or claim a Run."""
         return tuple(deepcopy(row) for row in self._rows.values())
+
+    def archived_source(self, snapshot):
+        """Read a verified link's original snapshot without graph or live-source access.
+
+        This proves original text/locator identity only. It does not resolve a
+        semantic definition, refresh a guard, or create a current capture fact.
+        """
+        _need(type(snapshot) is SourceSnapshot, "exact original source snapshot required")
+        self.require_unchanged()
+        filename = snapshot.path
+        _need(self._snapshots.get(filename) == snapshot and filename in self._files,
+              "snapshot is not the original verified compiler/source input")
+        row = self._files[filename]
+        if row["snapshot_artifact"] is None:
+            raise ArchivedSourceUnavailable("ARCHIVED_SOURCE_SNAPSHOT_UNAVAILABLE")
+        root = self._roots[row["source_root"]]
+        doc, locator = self._aux(row["snapshot_artifact"], row["source_root"], "sources")
+        raw = base64.b64decode(doc["raw_base64"], validate=True)
+        encoding, _ = tokenize.detect_encoding(BytesIO(raw).readline)
+        with TextIOWrapper(BytesIO(raw), encoding=encoding, newline=None) as stream:
+            text = stream.read()
+        _need(doc["original_uri"] == filename and doc["source_root"] == row["source_root"]
+              and doc["namespace_root"] == root["namespace_root"]
+              and len(raw) == row["raw_bytes"] == doc["raw_bytes"]
+              and _sha(raw) == row["raw_sha256"] == doc["raw_sha256"]
+              and text == doc["decoded_text"]
+              and snapshot.fingerprint == row["fingerprint"] == doc["fingerprint"]
+                  == "sha256:" + _sha(text.encode("utf-8"))
+              and snapshot.python_version == doc["python_version"]
+              and doc["code_source_match_established"] is False,
+              "original archived source bytes/namespace/snapshot contradict its witness")
+        self.require_unchanged()
+        return {"snapshot": snapshot, "text": text, "locator": locator,
+                "declaration": self._declaration(filename, "snapshot_artifact"),
+                "encoding": encoding, "raw_sha256": _sha(raw), "raw_bytes": len(raw),
+                "source_root": row["source_root"], "namespace_root": root["namespace_root"],
+                "owner": self.receipts()}
 
     def require_unchanged(self):
         schema = "scar.dependency-source-admissions" if getattr(self, "_admission_mode", False) else "scar.dependency-source-continuation"
@@ -764,4 +805,4 @@ class SourceAttachments:
                 "cached_source_files": len(self._views), "source_reprepared": False, "source_recompiled": False}
 
 
-__all__ = ["SourceAttachmentBudget", "SourceAttachments"]
+__all__ = ["SourceAttachmentBudget", "SourceAttachments", "ArchivedSourceUnavailable"]

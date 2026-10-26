@@ -14,14 +14,16 @@ import hashlib
 import json
 from pathlib import Path
 import re
+import sys
 import time
 
-from scar.analysis.call_compilation import compile_cache_key
-from scar.analysis.code_witness import CodeWitnessBudget, CodeWitnessStore
+from scar.analysis.call_compilation import compile_cache_key, UnsupportedCompilationFlags
+from scar.analysis.code_witness import CodeWitnessBudget, CodeWitnessStore, CodeWitnessUnavailable
 from scar.analysis.program_composition import CompositionIndex
 from scar.ir.program.call_edges import CapturedCode, CodeCapture, CodeSourceLink, CallLinkStatus
 from scar.ir.program.compilation import CallCompilationProfile
 from scar.ir.program.source_references import SourceDefinitionReference
+from scar.ir.program.call_demand import EnteredCallCode
 from scar.ir.record_codec import decode, encode
 from scar.ir.semantics_v2 import SourceSnapshot
 
@@ -237,15 +239,110 @@ def plan_observed_witness_acquisition(composition, definitions, archives, *, bud
     return _requests(composition, definitions, archives, budget)
 
 
+def _attachment_requests(owner, origins, archives, budget):
+    from scar.analysis.source_attachments import SourceAttachments
+    _need(type(owner) is SourceAttachments and type(archives) is CompilerWitnessArchives
+          and type(budget) is ObservedAcquisitionBudget, "normal attachment owner/archive/budget required")
+    budget.__post_init__(); owner.require_unchanged()
+    rows = owner.catalog_rows()
+    by_origin = {(row["process_id"], row["code"]): row for row in rows}
+    eligible = {key for key, row in by_origin.items() if row["status"] == "SOURCE_VERIFIED"}
+    if origins is None:
+        selected = tuple(sorted(eligible))
+    else:
+        _need(type(origins) is tuple and all(type(x) is EnteredCallCode for x in origins),
+              "selection requires original typed entered-code origins")
+        selected = tuple((x.process_id, x.code) for x in origins)
+        _need(len(set(selected)) == len(selected) and set(selected) <= eligible,
+              "selection repeats or changes an original verified code/source origin")
+    _need(0 < len(selected) <= budget.max_definitions, "attachment selection exceeds independent bound")
+    inputs, old_archives = owner.receipts(), archives.receipts()
+    builds = sorted({row["python"] for row in owner.capture_declaration()["collection_metadata"]})
+    requests, frontiers, sources = [], [], {}
+    groups = [{"origin": encode(EnteredCallCode(*key)), "entered_invocations": row["entered_invocations"],
+               "source_status": row["status"], "selection": "SELECTED" if key in selected else "RETAINED_NOT_SELECTED"}
+              for key, row in by_origin.items()]
+    for key in selected:
+        witness = owner.code_witness(*key); row = witness["record"]
+        captured, link = decode(CapturedCode, row["captured_code"]), decode(CodeSourceLink, row["code_source_link"])
+        _need(link.status is CallLinkStatus.VERIFIED and link.snapshot is not None
+              and link.code == captured.key == key[1] and captured.filename == link.snapshot.path,
+              "original attachment descriptor/source witness contradicts its origin")
+        levels = tuple(sorted(set(link.optimize_levels)))
+        _need(levels and all(type(x) is int and x in (0, 1, 2) for x in levels),
+              "original source witness lacks recorded optimize levels")
+        original = owner._files[link.snapshot.path]
+        snapshot_declaration = encode(owner._declaration(link.snapshot.path, "snapshot_artifact"))
+        sources[link.snapshot.path] = {"snapshot": encode(link.snapshot),
+            "snapshot_artifact": deepcopy(original["snapshot_artifact"]),
+            "declaration": snapshot_declaration, "raw_sha256": original["raw_sha256"],
+            "raw_bytes": original["raw_bytes"], "source_root": original["source_root"]}
+        if builds != [sys.version]:
+            frontiers.append({"origin": encode(EnteredCallCode(*key)), "status": "CAPTURED_PYTHON_BUILD_MISMATCH"})
+            continue
+        if original["snapshot_artifact"] is None:
+            frontiers.append({"origin": encode(EnteredCallCode(*key)), "status": "ARCHIVED_SOURCE_SNAPSHOT_UNAVAILABLE"})
+            continue
+        try:
+            keys = [encode(compile_cache_key(link.snapshot.path, link.snapshot.fingerprint,
+                CallCompilationProfile.RECORDED_FUTURE_FLAGS, captured.flags, level,
+                compile_filename=captured.filename)) for level in levels]
+        except UnsupportedCompilationFlags as error:
+            frontiers.append({"origin": encode(EnteredCallCode(*key)),
+                "status": "COMPILER_CONTEXT_OR_ARCHIVE_FRONTIER", "error": {"type": type(error).__name__, "detail": str(error)}})
+            continue
+        available = archives.metadata_variants(captured, link.snapshot, levels)
+        request = {"origin": encode(EnteredCallCode(*key)), "captured": encode(captured),
+            "source_link": encode(link), "captured_code_locators": [encode(witness["descriptor_locator"])],
+            "code_source_locator": encode(witness["code_source_locator"]),
+            "record_locator": encode(witness["record_locator"]), "compiler_basis": inputs,
+            "snapshot_declaration": snapshot_declaration,
+            "preferred_compile_key": keys[0], "recorded_compile_keys": keys,
+            "available_module_metadata": available, "scope": "ORIGINAL_ATTACHMENT_OBSERVED_CODE_SOURCE",
+            "captured_python_build_asserted_here": True, "definition_membership_checked": False,
+            "runtime_observation_created": False}
+        request["request_id"] = _sha(_bytes(request)); requests.append(request)
+        _need(len(requests) <= budget.max_requests, "attachment compiler request ceiling exceeded")
+    owner.require_unchanged()
+    _need(owner.receipts() == inputs and archives.receipts() == old_archives,
+          "original attachment/archive inputs changed during planning")
+    return {"schema": "scar.attachment-compiler-acquisition-plan", "schema_version": 1,
+        "source_attachment_inputs": inputs, "archives": old_archives,
+        "selected_origins": len(selected), "original_groups": len(rows),
+        "original_invocations": sum(x["entered_invocations"] for x in rows),
+        "groups": groups, "source_text_inputs": list(sources.values()),
+        "requests": requests, "frontiers": frontiers, "budget": asdict(budget),
+        "target_executed": False, "new_captures_created": False,
+        "captured_python_builds": builds, "compiler_python_build": sys.version,
+        "captured_python_build_matches": builds == [sys.version],
+        "definition_membership_checked": False, "module_metadata_is_nested_descriptor_proof": False}
+
+
+def plan_attachment_witness_acquisition(owner, archives, *, origins=None, budget=ObservedAcquisitionBudget()):
+    """Original complete observed descriptors/snapshots, without graph or compile."""
+    return _attachment_requests(owner, origins, archives, budget)
+
+
+def acquire_attachment_witnesses(owner, archives, out_dir, *, origins=None, producer,
+                                 budget=ObservedAcquisitionBudget(), store_budget=CodeWitnessBudget(), progress=None):
+    """New static compiler archive over original snapshots; no Run/body promotion."""
+    return _acquire_witnesses(owner, origins, archives, out_dir, producer=producer,
+        budget=budget, store_budget=store_budget, progress=progress, attachment=True)
+
+
 def acquire_observed_witnesses(composition, definitions, archives, out_dir, *, producer,
                                budget=ObservedAcquisitionBudget(), store_budget=CodeWitnessBudget(), progress=None):
-    """Create one fresh archive; never append to any admitted historical store.
+    """Existing composition-based acquisition; original defaults/report unchanged."""
+    return _acquire_witnesses(composition, definitions, archives, out_dir, producer=producer,
+        budget=budget, store_budget=store_budget, progress=progress)
 
-    The selected references are navigation inputs. Actual requests are derived
-    here again, not accepted from a caller's saved plan or success flag. Every
-    attempt is checkpointed before work; only a read-only reopened complete
-    descriptor match is reported as newly acquired.
-    """
+
+def _acquire_witnesses(composition, definitions, archives, out_dir, *, producer,
+                       budget, store_budget, progress, attachment=False):
+    """Shared original writer/checkpoint/independent-readonly acquisition loop."""
+    from scar.analysis.source_attachments import SourceAttachments, ArchivedSourceUnavailable
+    _need(type(attachment) is bool and (not attachment or type(composition) is SourceAttachments),
+          "attachment mode requires its normal original owner")
     _need(type(store_budget) is CodeWitnessBudget and type(budget) is ObservedAcquisitionBudget
           and type(producer) is dict and bool(producer)
           and (progress is None or callable(progress)), "explicit producer/typed writer budget/progress required")
@@ -266,18 +363,21 @@ def acquire_observed_witnesses(composition, definitions, archives, out_dir, *, p
         temporary.replace(output / name)
 
     def checkpoint(status):
-        publish("checkpoint.json", {"schema": "scar.observed-compiler-acquisition-checkpoint", "schema_version": 1,
+        publish("checkpoint.json", {"schema": "scar.attachment-compiler-acquisition-checkpoint" if attachment else "scar.observed-compiler-acquisition-checkpoint", "schema_version": 1,
             "status": status, "attempts": attempts, "elapsed_s": time.monotonic() - started,
             "writer_counts": dict(writer.counts) if writer is not None else None,
             "target_executed": False, "source_prepared": False,
             "transformation_authorized": False}, budget.max_report_bytes)
 
     try:
-        plan = _requests(composition, definitions, archives, budget)
+        plan = (_attachment_requests(composition, definitions, archives, budget) if attachment
+                else _requests(composition, definitions, archives, budget))
         publish("plan.json", plan, budget.max_report_bytes)
         writer = CodeWitnessStore(output / "archive", budget=store_budget, create=True,
-            compile_missing=True, producer={"kind": "OBSERVED_COMPLETE_DESCRIPTOR_ACQUISITION_V1",
-                "caller": deepcopy(producer), "composition_inputs": plan["composition_inputs"]}, progress=progress)
+            compile_missing=True, producer={"kind": "ORIGINAL_ARCHIVED_SOURCE_COMPLETE_DESCRIPTOR_ACQUISITION_V1" if attachment else "OBSERVED_COMPLETE_DESCRIPTOR_ACQUISITION_V1",
+                "caller": deepcopy(producer),
+                ("source_attachment_inputs" if attachment else "composition_inputs"):
+                    plan["source_attachment_inputs" if attachment else "composition_inputs"]}, progress=progress)
         ordered = sorted(plan["requests"], key=lambda row: (_bytes(row["preferred_compile_key"]), row["request_id"]))
         for index, request in enumerate(ordered):
             row = {"request_id": request["request_id"], "index": index, "status": "BUILDING",
@@ -300,10 +400,20 @@ def acquire_observed_witnesses(composition, definitions, archives, out_dir, *, p
                     row.update(status="EXISTING_WITNESS_VERIFIED", store=store.receipt(), witness=result)
                 else:
                     preferred = request["preferred_compile_key"]
+                    if attachment:
+                        writer.admit_archived_source(link.snapshot, source_owner=composition)
                     _, result = writer.resolve(captured, link.snapshot, (preferred["optimize"],), allow_compile=True)
                     row.update(status="WRITTEN_PENDING_READ_ONLY_REPLAY", witness=result)
                     verified_new.append((row, captured, link, preferred["optimize"]))
-            except (OSError, ValueError, SyntaxError, TypeError, OverflowError, RecursionError) as error:
+            except (OSError, ValueError, LookupError, SyntaxError, TypeError, OverflowError, RecursionError) as error:
+                if not attachment and isinstance(error, LookupError):
+                    raise  # Preserve the existing composition API exception contract.
+                if attachment and not isinstance(error, (CodeWitnessUnavailable, ArchivedSourceUnavailable)):
+                    row.update(status="HARD_REJECTED", error={"type": type(error).__name__, "detail": str(error)},
+                        elapsed_s=time.monotonic() - attempt_started,
+                        writer_delta={key: writer.counts[key] - before[key] for key in before})
+                    checkpoint("FAILED")
+                    raise
                 row.update(status="FRONTIER", error={"type": type(error).__name__, "detail": str(error)})
             row.update(elapsed_s=time.monotonic() - attempt_started,
                 writer_delta={key: writer.counts[key] - before[key] for key in before})
@@ -317,18 +427,30 @@ def acquire_observed_witnesses(composition, definitions, archives, out_dir, *, p
         _need(readonly.receipt() == writer_receipt, "fresh archive changed before read-only replay")
         for row, captured, link, level in verified_new:
             try:
+                if attachment:
+                    _need(readonly.text(link.snapshot) == writer.text(link.snapshot),
+                          "read-only archived source text differs from the admitted original")
                 _, result = readonly.resolve(captured, link.snapshot, (level,), allow_compile=False)
                 _need(result == row["witness"], "read-only nested descriptor/module/constant path differs")
                 row.update(status="ACQUIRED_VERIFIED", store=readonly.receipt())
             except (OSError, ValueError, TypeError, RecursionError) as error:
+                if attachment:
+                    row.update(status="READ_ONLY_REPLAY_FAILED", error={"type": type(error).__name__, "detail": str(error)})
+                    checkpoint("FAILED")
+                    raise
                 row.update(status="READ_ONLY_REPLAY_FAILED", error={"type": type(error).__name__, "detail": str(error)})
             checkpoint("READ_ONLY_REPLAY")
-        _need(archives.receipts() == plan["archives"] and composition.source_inputs() == plan["composition_inputs"],
+        if attachment:
+            composition.require_unchanged()
+        _need(archives.receipts() == plan["archives"] and
+              (composition.receipts() == plan["source_attachment_inputs"] if attachment
+               else composition.source_inputs() == plan["composition_inputs"]),
               "historical archive/composition inputs changed during acquisition")
         successful = sum(row["status"] in ("EXISTING_WITNESS_VERIFIED", "ACQUIRED_VERIFIED") for row in attempts)
-        report = {"schema": "scar.observed-compiler-acquisition", "schema_version": 1,
+        report = {"schema": "scar.attachment-compiler-acquisition" if attachment else "scar.observed-compiler-acquisition", "schema_version": 1,
             "status": "COMPLETE" if successful == len(attempts) and not plan["frontiers"] else "COMPLETE_WITH_FRONTIERS",
-            "selected_definitions": plan["selected_definitions"], "requests": len(plan["requests"]),
+            ("selected_origins" if attachment else "selected_definitions"):
+                plan["selected_origins" if attachment else "selected_definitions"], "requests": len(plan["requests"]),
             "attempts": attempts, "frontiers": plan["frontiers"], "archive": readonly.receipt(),
             "old_archives": archives.receipts(), "store_budget": asdict(store_budget),
             "acquisition_budget": asdict(budget), "writer_counts": dict(writer.counts),
@@ -340,9 +462,15 @@ def acquire_observed_witnesses(composition, definitions, archives, out_dir, *, p
                 if row.get("writer_delta", {}).get("compile_attempts", 0)}),
             "elapsed_s": time.monotonic() - started, "original_static_source_proof_recompiled": False,
             "new_observed_descriptor_witnesses_compiled": writer.counts["compile_attempts"],
-            "captured_python_build_asserted_here": False,
+            "captured_python_build_asserted_here": bool(attachment),
             "target_executed": False, "source_prepared": False, "captures_or_invocations_created": False,
             "whole_program_established": False, "transformation_authorized": False}
+        if attachment:
+            report.update(source_attachment_inputs=plan["source_attachment_inputs"],
+                original_groups=plan["original_groups"], original_invocations=plan["original_invocations"],
+                retained_groups=plan["groups"], graph_membership_checked=False,
+                original_snapshots_used=True, live_source_reads=writer.counts["source_bytes_read"],
+                captured_python_build_asserted_here=plan["captured_python_build_matches"])
         publish("report.json", report, budget.max_report_bytes); checkpoint(report["status"])
         return report
     except BaseException as error:
@@ -357,4 +485,5 @@ def acquire_observed_witnesses(composition, definitions, archives, out_dir, *, p
 
 
 __all__ = ["CompilerWitnessArchives", "CompilerArchiveBudget", "ObservedAcquisitionBudget",
-           "plan_observed_witness_acquisition", "acquire_observed_witnesses"]
+           "plan_observed_witness_acquisition", "acquire_observed_witnesses",
+           "plan_attachment_witness_acquisition", "acquire_attachment_witnesses"]
