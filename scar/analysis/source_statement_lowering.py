@@ -189,7 +189,10 @@ def assert_statement(builder, node, cursor):
     return succeeded
 
 
-def validate_statement_protocols(model, graph, interface, metadata, semantic):
+def validate_statement_protocols(model, graph, interface, metadata, semantic, *, language=None):
+    from scar.analysis.source_language import function_exception_types
+    from scar.ir.program.source_language import SourceLanguageCapability
+    paired = language is not None and SourceLanguageCapability.FUNCTION_TRY_314_V1 in language.capabilities
     """Validate language protocol ports; exact evaluation source is replayed."""
     from scar.ir.program.model import (CompletionResult, ReferenceValue, StateVersionValue,
         TerminatorKind, ValueKind, ValueType)
@@ -198,6 +201,7 @@ def validate_statement_protocols(model, graph, interface, metadata, semantic):
         PythonProtocolKind.RERAISE: (0,),
         PythonProtocolKind.RAISE_EXCEPTION: (1,),
         PythonProtocolKind.RAISE_WITH_CAUSE: (2,),
+        PythonProtocolKind.FUNCTION_START_PROPAGATION: (1,),
     }
     operations = {operation.id: operation for operation in graph.operations}
     values = {value.id: value for value in graph.values}
@@ -209,7 +213,7 @@ def validate_statement_protocols(model, graph, interface, metadata, semantic):
         if protocol.kind not in arities:
             continue
         operation, link = operations[protocol.operation], links[protocol.operation]
-        expected = "Assert" if protocol.kind is PythonProtocolKind.MAKE_ASSERTION_ERROR else "Raise"
+        expected = "Assert" if protocol.kind in (PythonProtocolKind.MAKE_ASSERTION_ERROR, PythonProtocolKind.FUNCTION_START_PROPAGATION) else "Raise"
         atom = semantic.source_atoms.get(link.source.atom_id)
         if (atom is None or atom.kind != expected or link.semantic_operation is not None
                 or len(operation.uses) - 1 not in arities[protocol.kind]
@@ -220,11 +224,12 @@ def validate_statement_protocols(model, graph, interface, metadata, semantic):
                 or operation.terminator is None or operation.terminator.kind is not TerminatorKind.INVOKE
                 or operation.invoke_arguments != tuple(use.id for use in operation.uses)):
             raise ValueError("statement protocol source, ordered references or world differ")
+        normal = ((ref_type, ref_type, state_type) if paired and protocol.kind is not PythonProtocolKind.MAKE_ASSERTION_ERROR else (ref_type, state_type))
         if (tuple((signature.kind, signature.types) for signature in operation.completions) !=
-                ((ExitKind.NORMAL, (ref_type, state_type)), (ExitKind.RAISE, (ref_type, state_type)))
+                ((ExitKind.NORMAL, normal), (ExitKind.RAISE, function_exception_types(language, ref_type, state_type)))
                 or tuple(edge.kind for edge in operation.terminator.successors) != (ExitKind.NORMAL, ExitKind.RAISE)
-                or any(edge.arguments != (CompletionResult(0), CompletionResult(1))
-                       for edge in operation.terminator.successors)):
+                or any(edge.arguments != tuple(CompletionResult(i) for i in range(len(signature.types)))
+                       for edge, signature in zip(operation.terminator.successors, operation.completions))):
             raise ValueError("statement protocol must keep its own normal/raise post-world")
         if protocol.kind is PythonProtocolKind.MAKE_ASSERTION_ERROR and Behavior.MEMORY not in operation.behaviors:
             raise ValueError("assertion error construction must record allocation behavior")

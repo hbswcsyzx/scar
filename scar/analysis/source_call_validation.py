@@ -6,6 +6,8 @@ frame prefix, runtime code identity, actual mapping items or full call cleanup.
 """
 from __future__ import annotations
 
+from scar.analysis.source_language import function_exception_types
+
 import ast
 import dis
 
@@ -235,7 +237,7 @@ def validate_call_protocols(model, graph, interface, metadata, semantic, languag
             count = len(operation.uses) - 1
             result_count = 1 if kind in (Kind.BUILD_MAP, Kind.BUILD_CALL_POSITIONALS, Kind.CALL_FUNCTION_EX) else 0
             _need(tuple((c.kind, c.types) for c in operation.completions) ==
-                  ((ExitKind.NORMAL, (ref,) * result_count + (world,)), (ExitKind.RAISE, (ref, world)))
+                  ((ExitKind.NORMAL, (ref,) * result_count + (world,)), (ExitKind.RAISE, function_exception_types(language, ref, world)))
                   and tuple(e.kind for e in operation.terminator.successors) == (ExitKind.NORMAL, ExitKind.RAISE)
                   and all(e.arguments == tuple(CompletionResult(i) for i in range(len(c.types)))
                           for e, c in zip(operation.terminator.successors, operation.completions)),

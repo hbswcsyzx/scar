@@ -201,7 +201,8 @@ def lower_joined_string(builder, node, cursor, *, recover_missing_children=False
         del builder.active_temporaries[initial_holds:]
 
 
-def validate_string_protocols(model, graph, interface, metadata, semantic):
+def validate_string_protocols(model, graph, interface, metadata, semantic, *, language=None):
+    from scar.analysis.source_language import function_exception_types
     from scar.ir.program.model import (CompletionResult, LiteralOrigin, ReferenceValue,
         StateVersionValue, TerminatorKind, ValueKind, ValueType)
     kinds = (PythonProtocolKind.FSTRING_CONVERT, PythonProtocolKind.FSTRING_FORMAT,
@@ -233,10 +234,10 @@ def validate_string_protocols(model, graph, interface, metadata, semantic):
             if type(origin) is not LiteralOrigin or type(origin.value) is not int or origin.value not in _CONVERSIONS:
                 raise ValueError("f-string conversion must use its exact source-generated ASCII literal")
         if (tuple((signature.kind, signature.types) for signature in operation.completions) !=
-                ((ExitKind.NORMAL, (ref_type, state_type)), (ExitKind.RAISE, (ref_type, state_type)))
+                ((ExitKind.NORMAL, (ref_type, state_type)), (ExitKind.RAISE, function_exception_types(language, ref_type, state_type)))
                 or tuple(edge.kind for edge in operation.terminator.successors) != (ExitKind.NORMAL, ExitKind.RAISE)
-                or any(edge.arguments != (CompletionResult(0), CompletionResult(1))
-                       for edge in operation.terminator.successors)):
+                or any(edge.arguments != tuple(CompletionResult(i) for i in range(len(signature.types)))
+                       for edge, signature in zip(operation.terminator.successors, operation.completions))):
             raise ValueError("string protocol must keep normal and exceptional payload/post-world")
 
 

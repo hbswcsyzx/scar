@@ -189,6 +189,7 @@ def validate_mapping_protocols(model, graph, interface, metadata, semantic, *, l
     """Check dict protocol shapes; fixed-source replay owns exact child order."""
     from scar.ir.program.model import (CompletionResult, ReferenceValue, StateVersionValue,
         TerminatorKind, ValueKind, ValueType)
+    from scar.analysis.source_language import function_exception_types
     kinds = (PythonProtocolKind.BUILD_MAP, PythonProtocolKind.MAP_ADD, PythonProtocolKind.DICT_UPDATE)
     operations = {operation.id: operation for operation in graph.operations}
     values = {value.id: value for value in graph.values}
@@ -235,7 +236,7 @@ def validate_mapping_protocols(model, graph, interface, metadata, semantic, *, l
             raise ValueError("dictionary protocol source, ordered references or incomplete world invoke differ")
         normal_types = (ref_type, state_type) if build else (state_type,)
         if (tuple((signature.kind, signature.types) for signature in operation.completions) !=
-                ((ExitKind.NORMAL, normal_types), (ExitKind.RAISE, (ref_type, state_type)))
+                ((ExitKind.NORMAL, normal_types), (ExitKind.RAISE, function_exception_types(language, ref_type, state_type)))
                 or tuple(edge.kind for edge in operation.terminator.successors) != (ExitKind.NORMAL, ExitKind.RAISE)
                 or any(edge.arguments != tuple(CompletionResult(index) for index in range(len(signature.types)))
                        for edge, signature in zip(operation.terminator.successors, operation.completions))):

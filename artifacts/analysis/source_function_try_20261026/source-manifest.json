@@ -1,0 +1,80 @@
+{
+  "baseline_head": "8f3ce3351d36ef9f74a79676ea59a0adacf26751",
+  "files": [
+    {
+      "bytes": 3644,
+      "path": "docs/SOURCE_FUNCTION_TRY_PLAN.md",
+      "sha256": "d475783b6f7a1e06f52b782ba82e9c9cdb201cfaf30fc34e13696c368859e9a5"
+    },
+    {
+      "bytes": 84833,
+      "path": "scar/analysis/program_lowering.py",
+      "sha256": "f1efe12cc44e9760acb42a200a041db88453ce9f25838c76401c54cdecbe2e2b"
+    },
+    {
+      "bytes": 24447,
+      "path": "scar/analysis/source_call_validation.py",
+      "sha256": "10e19942751790b33460d511d92aedd6261795faf711c6aeafb89914baaefa3c"
+    },
+    {
+      "bytes": 14501,
+      "path": "scar/analysis/source_environment_validation.py",
+      "sha256": "751277df46a8926028311d2cce73629213c88bae0db2cfa0db5ab3a92d108ee7"
+    },
+    {
+      "bytes": 29523,
+      "path": "scar/analysis/source_function_try_lowering.py",
+      "sha256": "29fd88706ce10d3a2b4fc40c662ffe24e4020e3e3dd6b5e7845a76f0502093bd"
+    },
+    {
+      "bytes": 15439,
+      "path": "scar/analysis/source_function_try_validation.py",
+      "sha256": "34399d78ddea6848bfd361df3dd54571989937b9bbdb1cfd3823c219ab6e5a5f"
+    },
+    {
+      "bytes": 7839,
+      "path": "scar/analysis/source_language.py",
+      "sha256": "97a136e4264fe1389cf3846d3cf72d7e4c6adcadb7af9bd47756f44616f749b8"
+    },
+    {
+      "bytes": 22614,
+      "path": "scar/analysis/source_language_validation.py",
+      "sha256": "a5eeb13e4293f66573cb09f0609073f3b4a06bb0e868de9f53a47c1cf8aad7e9"
+    },
+    {
+      "bytes": 13100,
+      "path": "scar/analysis/source_mapping_lowering.py",
+      "sha256": "3e44244ba504c7d018fe22e4d1c57a580d9d822e05770d6a49ee3e38fefbd7a3"
+    },
+    {
+      "bytes": 23063,
+      "path": "scar/analysis/source_statement_lowering.py",
+      "sha256": "0f7dd9f00afbea624ae81eb7ba8fa19dd23a24daf6e1765a0b5c3c2c35dbf843"
+    },
+    {
+      "bytes": 13383,
+      "path": "scar/analysis/source_string_lowering.py",
+      "sha256": "f4ee7705867f0d0515bcaaee927c50393eaba111d7e279f6708483e5a89f6117"
+    },
+    {
+      "bytes": 58301,
+      "path": "scar/analysis/structured_lowering.py",
+      "sha256": "9afb7fe8cb52821abad1117742031e44950154dd6ec9bf2e9c9630828aaa5769"
+    },
+    {
+      "bytes": 6686,
+      "path": "scar/ir/program/source_language.py",
+      "sha256": "21fdd8eeba334ed48fd9bff934b639d6a5f0a1273f1fb3c8b77965b2393159e4"
+    },
+    {
+      "bytes": 7538,
+      "path": "scar/ir/program/structured.py",
+      "sha256": "25e6fa5cf96a920415a385334306ec41bc53e1f78221a79abc0811c7abedc7ff"
+    },
+    {
+      "bytes": 4318,
+      "path": "tests/test_source_function_try.py",
+      "sha256": "0b4e1ff729281a7e86d1ca1b66c4e5a5cc50d240504d70d96b296772659f73ad"
+    }
+  ]
+}
