@@ -1,0 +1,8 @@
+Complete the four original remaining entries mechanically; do not lower the sixteen already successful bodies.
+
+1. Mixed local bindings retain their canonical BindingRead INVOKE. The paired RAISE extension is accepted only if this original read's exact completion pair and current world follow a single actual CFG/state corridor into its existing ExceptionPacketDefinition. NORMAL/legacy single-reference contracts and C0/C1 remain unchanged. A pair without a packet is rejected.
+2. Local AugAssign evaluates its original target before RHS, keeps the real holds, invokes typed in-place/fallback behavior with world/exception ports, then rebinds the same source slot. No pure BinOp, alias equality or heap-target reevaluation is invented. Heap/global/cell targets remain explicit frontiers.
+3. Reuse CALL_FUNCTION_EX/DICT_MERGE for the pinned compiler's one-direct-starred-iterable form, with optional kwargs. Exact archived CodeType instructions confirm the absence of a synthetic packing step. Tuple conversion belongs to the incomplete call boundary, including its failure and owned-operand unwind. Multiple/mixed star positionals remain unsupported rather than guessed. Existing fixed-kwargs defaults retain their prior shape.
+4. Call pending validation reads real unwind Uses up to the canonical exception cleanup/frame boundary. Handler execution and full runtime lifetime are not inferred.
+
+One normal catalog/planner/worker attempt selects every latest UNSUPPORTED key (four) from latest20-ledger.json, not names or packages; normal SP5 STRUCTURE plus independent readonly CodeWitness readers determine success. Original 817/100438/243 and all previous terminals remain. No compilation, raw capture, target, episode, publication or currentRun binding.

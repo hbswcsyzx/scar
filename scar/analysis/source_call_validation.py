@@ -50,7 +50,8 @@ def _ast_span(node):
 
 def _expected(node):
     """Independent AST staging: packing, complete named runs, then merges."""
-    result = [("PACK", len(node.args), None)]
+    starred = len(node.args) == 1 and isinstance(node.args[0], ast.Starred)
+    result = [] if starred else [("PACK", len(node.args), None)]
     receiver, index = False, 0
     while index < len(node.keywords):
         child = node.keywords[index]
@@ -88,7 +89,7 @@ def _check_failure_pending(actual, local, prefix=None, *, exact=True):
     return prefix
 
 
-def _local_pending(group, all_operations, protocols, use_links, blocks, values, links):
+def _local_pending(group, all_operations, protocols, use_links, blocks, values, links, language=None):
     final = group[-1]
     call = all_operations[final]
     callee = call.uses[0].value
@@ -144,11 +145,16 @@ def _local_pending(group, all_operations, protocols, use_links, blocks, values, 
                 normal_stack = failure_stack = _pop_suffix(stack, refs)
         failure = blocks[operation.terminator.successors[1].block]
         _need(bool(failure.operations), "call/child failure has no cleanup")
-        cleanup = all_operations[failure.operations[0]]
-        _need(protocols.get(cleanup.id) is not None and protocols[cleanup.id].kind is Kind.FRAME_EXIT,
-              "call/child failure does not route its post-world through FRAME_EXIT")
-        actual = tuple(use.value for use in cleanup.uses
-            if (link := use_links.get((cleanup.id, use.id))) is not None and link.role == "held-temporary")
+        paired = language is not None and Capability.FUNCTION_TRY_314_V1 in language.capabilities
+        if paired:
+            from scar.analysis.source_function_try_validation import exception_handoff_holds
+            actual = exception_handoff_holds(failure.id, all_operations, protocols, blocks, use_links)
+        else:
+            cleanup = all_operations[failure.operations[0]]
+            _need(protocols.get(cleanup.id) is not None and protocols[cleanup.id].kind is Kind.FRAME_EXIT,
+                  "call/child failure does not route its post-world through FRAME_EXIT")
+            actual = tuple(use.value for use in cleanup.uses
+                if (link := use_links.get((cleanup.id, use.id))) is not None and link.role == "held-temporary")
         if identity in group_set:
             prefix = _check_failure_pending(actual, failure_stack, prefix)
         else:
@@ -210,11 +216,25 @@ def validate_call_protocols(model, graph, interface, metadata, semantic, languag
             selected = [n for n in require_source_tree(source_tree, language.source, source) if isinstance(n, ast.Call)]
             _need(len(selected) == 1, "kwargs call has no unique exact source AST")
             node = selected[0]
-            _need(any(k.arg is None for k in node.keywords) and not any(isinstance(a, ast.Starred) for a in node.args),
-                  "kwargs profile requires ** and fixed ordinary positionals")
+            direct_star = len(node.args) == 1 and isinstance(node.args[0], ast.Starred)
+            _need(direct_star or any(k.arg is None for k in node.keywords)
+                  and not any(isinstance(a, ast.Starred) for a in node.args),
+                  "call profile requires fixed positionals/** or one direct starred iterable")
         built_maps, packed, stage, receiver = {}, {}, [], None
         final_refs = tuple(use.value for use in operations[final].uses[:-1])
-        _need(len(final_refs) == 3, "final call needs callee/positional tuple/kwargs dict")
+        final_sources = [uses[(final, u.id)] for u in operations[final].uses[:-1]]
+        direct_star = len(final_sources) >= 2 and final_sources[1].role == 'call-starred-positionals'
+        _need(len(final_refs) == 3 or direct_star and len(final_refs) == 2,
+              "final call needs callee/positionals and optional original kwargs dict")
+        if direct_star:
+            _need(Capability.FUNCTION_TRY_314_V1 in language.capabilities and isinstance(source_tree, ast.Module),
+                  'direct starred call requires the explicit function capability and retained AST')
+            candidates = [n for n in require_source_tree(source_tree, language.source, source) if isinstance(n, ast.Call)]
+            _need(len(candidates) == 1 and len(candidates[0].args) == 1
+                  and isinstance(candidates[0].args[0], ast.Starred)
+                  and _span(final_sources[1].source) == _ast_span(candidates[0].args[0].value),
+                  'direct starred call does not consume its unique original iterable expression')
+            packed[final_refs[1]] = None
         callee = final_refs[0]
         for identity in group:
             operation, kind = operations[identity], protocols[identity].kind
@@ -275,8 +295,12 @@ def validate_call_protocols(model, graph, interface, metadata, semantic, languag
                 _need(source_uses[2].role != "call-keyword-run" or refs[2] in built_maps,
                       "keyword run merge update has no original call BUILD_MAP")
             else:
-                _need(count == 3 and refs[1] in packed and refs[2] == receiver
-                      and [(u.role, u.index) for u in source_uses] == [("callee", 0), ("call-positionals", 0), ("call-keywords", 0)],
+                roles = [("callee", 0), ("call-starred-positionals" if direct_star else "call-positionals", 0)]
+                if receiver is not None:
+                    roles += [("call-keywords", 0)]
+                _need(count == len(roles) and refs[1] in packed
+                      and (receiver is None or refs[2] == receiver)
+                      and [(u.role, u.index) for u in source_uses] == roles,
                       "final call lost its original callee or prepared argument containers")
             stage.append((kind.value, identity))
         _need(len(packed) == 1, "call positional tuple preparation is not unique")
@@ -315,7 +339,7 @@ def validate_call_protocols(model, graph, interface, metadata, semantic, languag
         _need(any(g.kind is GapKind.FRAME_EFFECT and g.source == source
                   and g.detail.startswith("CALL_EX_LOCAL_UNWIND_CONTRACT_UNVERIFIED:") for g in metadata.gaps),
               "call must retain its explicit unverified runtime cleanup frontier")
-        pending = _local_pending(group, operations, protocols, uses, blocks, values, links)
+        pending = _local_pending(group, operations, protocols, uses, blocks, values, links, language)
         records.append({"operation": final.wire, "source": source.atom_id.wire,
             "protocol_operations": len(group), "source_code_verified": not structural_only,
             "pending": pending, "frontiers": ["CALL_EX_LOCAL_UNWIND_CONTRACT_UNVERIFIED", "OUTER_PENDING_PREFIX_UNVERIFIED"]})
@@ -364,6 +388,11 @@ def _check_source_and_code(node, group, operations, protocols, uses, constants, 
                   "merge source/update index differs from exact keyword sequence")
         elif kind == "CALL_FUNCTION_EX":
             _need(_span(source_uses[0].source) == _ast_span(node.func), "callee source is not the original single evaluation")
+            starred = len(node.args) == 1 and isinstance(node.args[0], ast.Starred)
+            if starred:
+                _need(source_uses[1].role == 'call-starred-positionals'
+                      and _span(source_uses[1].source) == _ast_span(node.args[0].value),
+                      'direct starred iterable lost its original single evaluation')
     names = {"LOAD_CONST", "BUILD_TUPLE", "BUILD_LIST", "LIST_APPEND", "LIST_EXTEND", "LIST_TO_TUPLE",
              "BUILD_MAP", "MAP_ADD", "DICT_MERGE", "DICT_UPDATE", "CALL_FUNCTION_EX", "CALL_KW", "CALL"}
     instructions = [i for i in dis.get_instructions(evidence.code) if tuple(i.positions) == _ast_span(node) and i.opname in names]

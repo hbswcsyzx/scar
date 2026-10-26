@@ -66,6 +66,19 @@ class FunctionTryChecks(unittest.TestCase):
             self.assertIsNotNone(missing_expression.graph)
             SourceProgram.read_structure(missing_expression.to_dict(), source_texts={str(Path(directory) / "ordinary.py"): 'def f(x, action):\n    try:\n        action(x)\n    except Exception:\n        action(x)\n    return x\n'})
 
+    def test_mixed_local_read_and_inplace_keep_real_exception_packet(self):
+        text = ('def f(flag, action):\n    try:\n        if flag:\n            x = 1\n'
+                '    except Exception:\n        x = 2\n    x += action()\n    return x\n')
+        with TemporaryDirectory() as directory:
+            result, sources = self.lower(directory, text)
+            self.assertIsNotNone(result.graph)
+            SourceProgram.read_structure(result.to_dict(), source_texts=sources)
+            from scar.ir.program.binding_validation import validate_bindings
+            # Merely retaining two exception References is insufficient: the
+            # actual completion must reach its own canonical packet Uses.
+            broken = replace(result.graph, exception_packets=())
+            self.assertTrue(any(x.code == 'binding_read_completion' for x in validate_bindings(broken)))
+
 
 if __name__ == '__main__':
     unittest.main()

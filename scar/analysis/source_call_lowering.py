@@ -41,10 +41,14 @@ def _keyword_runs(node):
 
 def _witness_plan(node, instructions):
     """Bounded compiler recognition only, not target evaluation or wire data."""
-    if (not isinstance(node, ast.Call) or not any(k.arg is None for k in node.keywords)
-            or any(isinstance(a, ast.Starred) for a in node.args)):
+    starred = len(node.args) == 1 and isinstance(node.args[0], ast.Starred)
+    if (not isinstance(node, ast.Call) or not (starred or any(k.arg is None for k in node.keywords))
+            or any(isinstance(a, ast.Starred) for a in node.args) and not starred):
         raise _Unsupported(GapKind.UNSUPPORTED_SYNTAX, node, "KWARGS_CALL_REQUIRES_FIXED_POSITIONALS_AND_DOUBLE_STAR")
-    expected = [("PACK", len(node.args), None)]
+    # One *expression is passed directly by this pinned compiler. Conversion
+    # to positional tuple (if needed) belongs to CALL_FUNCTION_EX, with its
+    # own failure/current-world boundary; no tuple object is invented here.
+    expected = [] if starred else [("PACK", len(node.args), None)]
     have_dict = False
     for start, end in _keyword_runs(node):
         if node.keywords[start].arg is None:
@@ -66,7 +70,7 @@ def _witness_plan(node, instructions):
     actual = [row for row in instructions if tuple(row.positions) == _span(node) and row.opname in names]
     if len(actual) != len(expected):
         raise _Unsupported(GapKind.CODE_VERSION, node, "KWARGS_EXACT_COMPILER_SEQUENCE_UNAVAILABLE")
-    keys, packing = {}, actual[0]
+    keys, packing = {}, None if starred else actual[0]
     for row, (name, argument, index) in zip(actual, expected):
         if name == "PACK":
             ok = ((row.opname == "BUILD_TUPLE" and row.arg == argument)
@@ -138,6 +142,10 @@ def lower_kwargs_call(builder, node, cursor):
     if not builder.has_language("CALL_KWARGS_314_V1"):
         raise _Unsupported(GapKind.UNSUPPORTED_SYNTAX, node, "KWARGS_CAPABILITY_REQUIRED")
     packing, constants = _witness_plan(node, _instructions(builder, node))
+    starred = len(node.args) == 1 and isinstance(node.args[0], ast.Starred)
+    if starred and not builder.has_language("FUNCTION_TRY_314_V1"):
+        raise _Unsupported(GapKind.UNSUPPORTED_SYNTAX, node,
+            "DIRECT_STAR_CALL_REQUIRES_FUNCTION_TRY_CAPABILITY")
     records = builder.old_by_atom.get(builder.source(node).atom_id, ())
     if len(records) > 1 or records and records[0].opcode is not Opcode.CALL:
         raise _Unsupported(GapKind.SOURCE_MAPPING, node, "kwargs Call has ambiguous source computational records")
@@ -151,17 +159,21 @@ def lower_kwargs_call(builder, node, cursor):
         if cursor is None: return None, None
         _hold(builder, cursor, node.func, callee, "callee")
         parts, inputs = [], []
-        for index, child in enumerate(node.args):
+        for index, argument in enumerate(node.args):
+            child = argument.value if starred else argument
             cursor, value = builder.expr(child, cursor)
             if cursor is None: return None, None
-            _hold(builder, cursor, child, value, "positional")
+            _hold(builder, cursor, child, value, "starred-positionals" if starred else "positional")
             parts.append((child, value)); inputs.append((value, child, "argument", index, None))
-        if packing.opname == "LOAD_CONST":
+        if starred:
+            positional = parts[0][1]
+        elif packing.opname == "LOAD_CONST":
             positional = _constant(builder, node, cursor, packing)
         else:
             cursor, positional, _ = _invoke(builder, cursor, node, inputs, Kind.BUILD_CALL_POSITIONALS,
                 tuple(parts), raise_consumed=(), result=True)
-        _hold(builder, cursor, node, positional, "positionals")
+        if not starred:
+            _hold(builder, cursor, node, positional, "positionals")
         receiver = None
         for start, end in _keyword_runs(node):
             keyword = node.keywords[start]
@@ -195,13 +207,18 @@ def lower_kwargs_call(builder, node, cursor):
             inputs = ((callee, node.func, "callee", 0, None), (receiver, node, "call-keywords", 0, None),
                       (update, update_source, role, start, None))
             cursor, _, _ = _invoke(builder, cursor, node, inputs, Kind.DICT_MERGE, ((update_source, update),))
-        inputs = ((callee, node.func, "callee", 0, None), (positional, node, "call-positionals", 0, None),
-                  (receiver, node, "call-keywords", 0, None))
+        positional_source = node.args[0].value if starred else node
+        inputs = ((callee, node.func, "callee", 0, None),
+                  (positional, positional_source, "call-starred-positionals" if starred else "call-positionals", 0, None))
+        if receiver is not None:
+            inputs += ((receiver, node, "call-keywords", 0, None),)
         # This source boundary includes cleanup of its own top-of-stack call
         # operands on an early-no-pop failure. It does NOT claim the raw opcode
         # consumed them on every path, nor that finalizer/monitoring effects are
         # established. The untouched enclosing prefix remains in FRAME_EXIT.
-        consumed = ((node.func, callee), (node, positional), (node, receiver))
+        consumed = ((node.func, callee), (positional_source, positional))
+        if receiver is not None:
+            consumed += ((node, receiver),)
         cursor, result, identity = _invoke(builder, cursor, node, inputs, Kind.CALL_FUNCTION_EX,
                                           consumed, old=old, result=True)
         if old is None:
