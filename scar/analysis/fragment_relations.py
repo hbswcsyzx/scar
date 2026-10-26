@@ -735,14 +735,14 @@ def static_member(reference, *, budgets=None, meter=None):
     alias, effect proof or dynamic execution for an unexecuted branch.
     """
     from scar.store.fragment_relations import Meter, RelationBudgets
-    from scar.ir.program.codec import from_dict as program_from_dict
+    from scar.ir.program.codec import loads as program_loads
     from scar.ir.program.ids import LocationID, OperationID, UseID
     exact(reference, StaticEntityRef, "qualified static member")
     if meter is None:
         meter = Meter(budgets if budgets is not None else RelationBudgets(max_input_bytes=256_000_000, max_seconds=30))
     exact(meter, Meter, "shared input budget")
     cache = {}
-    graph = program_from_dict(_source_locator_value(reference.graph, meter, cache))
+    graph = program_loads(canonical(_source_locator_value(reference.graph, meter, cache)).decode())
     if type(reference.identity) is RegionID:
         found = next((r for r in graph.regions if r.id == reference.identity), None)
     elif type(reference.identity) is OperationID:
