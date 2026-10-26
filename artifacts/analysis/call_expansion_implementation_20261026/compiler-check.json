@@ -1,0 +1,37 @@
+{
+  "status": "EXACT_ARCHIVED_COMPILER_WINDOWS_PASS",
+  "entries": [
+    "84e6dc922321b0ca4c33f3c0f620909ba1f014968ef3b4a26a123efe04642565",
+    "c2f47d49a0b11178a00efd8e769be5cfe70f18fa8bc8485ee3bb0e19160babf8",
+    "7184c61e989897ebc59947afe2bc74bb7ae370da2cf65268057f4ef7b657a67a",
+    "dbd49537b70fccf0573e684e709da7e8cbaf67929d494186afa1a1bb2577ddf3",
+    "aeecef00f24a6ff3bf39a9743f9c4d7365e27b6e5317735c3ea0e271173609be",
+    "1bedea5fd0784d9338b1a84c35c7a9f3488aaae5f16b358c39cdaf8171ed44a6",
+    "17f972bbdb8c6c1fe43803198db91a97b2de089d4360d0899461920ccc0f62ce",
+    "853d42ce2bfc3bd873eeda434f3550b0be36eac64a688317c522e3dd34b41c1d",
+    "9f256de8375362f8a676b3a0fa693b11bf26a29cbda4cf8a2e3d05e88d72f6be",
+    "ad8548ebaaef31b4c21ee3a0b859d0a4d0c8fb53a327d6b1d0e8a2c983937473",
+    "d8b535365fceb276a4fde502ee75ef0c988bca9c54e8db975edaee671b415d57",
+    "48868439c812714d134fbe3f623363ab752a6ccc61acb89a6ea78f1aeb9169df",
+    "5912b9f4bda29ddb188b71c389d558959c99eee1928b8050b6f85d39471ee7a0"
+  ],
+  "wrong_intrinsic_rejected": true,
+  "readonly_counts": [
+    {
+      "compile_attempts": 0,
+      "module_loads": 1,
+      "complete_descriptor_matches": 3,
+      "source_bytes_read": 0
+    },
+    {
+      "compile_attempts": 0,
+      "module_loads": 8,
+      "complete_descriptor_matches": 10,
+      "source_bytes_read": 0
+    }
+  ],
+  "elapsed_s": 0.4019957249984145,
+  "graph_decode": 0,
+  "compile": 0,
+  "target": 0
+}

@@ -1,0 +1,630 @@
+{
+  "observations": [
+    {
+      "entry_key": "84e6dc922321b0ca4c33f3c0f620909ba1f014968ef3b4a26a123efe04642565",
+      "source": {
+        "atom_id": {
+          "kind": "source",
+          "value": "atom:c513fbc8104e30d40059aebe",
+          "wire": "source:atom:c513fbc8104e30d40059aebe"
+        },
+        "end_column": 60,
+        "end_line": 1776,
+        "fingerprint": "sha256:341153e4099444f923f5b0766e8e41b45fbe909b87f4737cb28c828f297b7baa",
+        "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/torch/nn/modules/module.py",
+        "start_column": 19,
+        "start_line": 1776
+      },
+      "stages": [
+        [
+          "BUILD_MAP",
+          0,
+          "0"
+        ],
+        [
+          "DICT_MERGE",
+          1,
+          "1"
+        ],
+        [
+          "CALL_FUNCTION_EX",
+          null,
+          "None"
+        ]
+      ],
+      "original_terminal": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/lewm_external_source_entries_20261026/worker/attempt-00012/result.json"
+    },
+    {
+      "entry_key": "c2f47d49a0b11178a00efd8e769be5cfe70f18fa8bc8485ee3bb0e19160babf8",
+      "source": {
+        "atom_id": {
+          "kind": "source",
+          "value": "atom:7312c9cdaf95f641f739c2e3",
+          "wire": "source:atom:7312c9cdaf95f641f739c2e3"
+        },
+        "end_column": 50,
+        "end_line": 327,
+        "fingerprint": "sha256:dcf6bdf45e0b09600ba04a2c8e73743f2661eba7d1f0017764983f9aad78b52a",
+        "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/sklearn/utils/_set_output.py",
+        "start_column": 23,
+        "start_line": 327
+      },
+      "stages": [
+        [
+          "BUILD_LIST",
+          2,
+          "2"
+        ],
+        [
+          "LIST_EXTEND",
+          1,
+          "1"
+        ],
+        [
+          "CALL_INTRINSIC_1",
+          6,
+          "6"
+        ],
+        [
+          "BUILD_MAP",
+          0,
+          "0"
+        ],
+        [
+          "DICT_MERGE",
+          1,
+          "1"
+        ],
+        [
+          "CALL_FUNCTION_EX",
+          null,
+          "None"
+        ]
+      ],
+      "original_terminal": "/home/zyf/AAA/scar-worktrees/source209-model/artifacts/experiments/source209_model_20261026/result/batches/batch-001/worker/attempt-00019/result.json"
+    },
+    {
+      "entry_key": "7184c61e989897ebc59947afe2bc74bb7ae370da2cf65268057f4ef7b657a67a",
+      "source": {
+        "atom_id": {
+          "kind": "source",
+          "value": "atom:2498c615c3cd40b2bff9cc93",
+          "wire": "source:atom:2498c615c3cd40b2bff9cc93"
+        },
+        "end_column": 58,
+        "end_line": 1178,
+        "fingerprint": "sha256:de569368c2c4958b7aaddbe755056860a89b1d313f69d437177864f37cb2503b",
+        "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/typing.py",
+        "start_column": 4,
+        "start_line": 1178
+      },
+      "stages": [
+        [
+          "BUILD_MAP",
+          0,
+          "0"
+        ],
+        [
+          "DICT_MERGE",
+          1,
+          "1"
+        ],
+        [
+          "CALL_FUNCTION_EX",
+          null,
+          "None"
+        ],
+        [
+          "POP_TOP",
+          null,
+          "None"
+        ]
+      ],
+      "original_terminal": "/home/zyf/AAA/scar-worktrees/source209-model/artifacts/experiments/source209_model_20261026/result/batches/batch-002/worker/attempt-00009/result.json"
+    },
+    {
+      "entry_key": "dbd49537b70fccf0573e684e709da7e8cbaf67929d494186afa1a1bb2577ddf3",
+      "source": {
+        "atom_id": {
+          "kind": "source",
+          "value": "atom:6934e32095941b4faf4f2eb3",
+          "wire": "source:atom:6934e32095941b4faf4f2eb3"
+        },
+        "end_column": 50,
+        "end_line": 157,
+        "fingerprint": "sha256:15154fde290d6e65b5007905689a47a9a5a724822c5e06eec35d9ffbb2a3aa69",
+        "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/copy.py",
+        "start_column": 24,
+        "start_line": 157
+      },
+      "stages": [
+        [
+          "BUILD_LIST",
+          2,
+          "2"
+        ],
+        [
+          "LIST_EXTEND",
+          1,
+          "1"
+        ],
+        [
+          "CALL_INTRINSIC_1",
+          6,
+          "6"
+        ],
+        [
+          "PUSH_NULL",
+          null,
+          "None"
+        ],
+        [
+          "CALL_FUNCTION_EX",
+          null,
+          "None"
+        ]
+      ],
+      "original_terminal": "/home/zyf/AAA/scar-worktrees/source209-model/artifacts/experiments/source209_model_20261026/result/batches/batch-004/worker/attempt-00020/result.json"
+    },
+    {
+      "entry_key": "aeecef00f24a6ff3bf39a9743f9c4d7365e27b6e5317735c3ea0e271173609be",
+      "source": {
+        "atom_id": {
+          "kind": "source",
+          "value": "atom:85ff90968b486f5959d6d3aa",
+          "wire": "source:atom:85ff90968b486f5959d6d3aa"
+        },
+        "end_column": 45,
+        "end_line": 524,
+        "fingerprint": "sha256:341153e4099444f923f5b0766e8e41b45fbe909b87f4737cb28c828f297b7baa",
+        "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/torch/nn/modules/module.py",
+        "start_column": 12,
+        "start_line": 524
+      },
+      "stages": [
+        [
+          "BUILD_MAP",
+          0,
+          "0"
+        ],
+        [
+          "DICT_MERGE",
+          1,
+          "1"
+        ],
+        [
+          "CALL_FUNCTION_EX",
+          null,
+          "None"
+        ],
+        [
+          "POP_TOP",
+          null,
+          "None"
+        ],
+        [
+          "LOAD_CONST",
+          15,
+          "None"
+        ],
+        [
+          "RETURN_VALUE",
+          null,
+          "None"
+        ]
+      ],
+      "original_terminal": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/lewm_external_source_entries_20261026/worker/attempt-00015/result.json"
+    },
+    {
+      "entry_key": "1bedea5fd0784d9338b1a84c35c7a9f3488aaae5f16b358c39cdaf8171ed44a6",
+      "source": {
+        "atom_id": {
+          "kind": "source",
+          "value": "atom:38e60e35a969037cbb42068a",
+          "wire": "source:atom:38e60e35a969037cbb42068a"
+        },
+        "end_column": 41,
+        "end_line": 2005,
+        "fingerprint": "sha256:de569368c2c4958b7aaddbe755056860a89b1d313f69d437177864f37cb2503b",
+        "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/typing.py",
+        "start_column": 8,
+        "start_line": 2005
+      },
+      "stages": [
+        [
+          "BUILD_MAP",
+          0,
+          "0"
+        ],
+        [
+          "DICT_MERGE",
+          1,
+          "1"
+        ],
+        [
+          "CALL_FUNCTION_EX",
+          null,
+          "None"
+        ],
+        [
+          "POP_TOP",
+          null,
+          "None"
+        ]
+      ],
+      "original_terminal": "/home/zyf/AAA/scar-worktrees/source209-model/artifacts/experiments/source209_model_20261026/result/batches/batch-002/worker/attempt-00010/result.json"
+    },
+    {
+      "entry_key": "17f972bbdb8c6c1fe43803198db91a97b2de089d4360d0899461920ccc0f62ce",
+      "source": {
+        "atom_id": {
+          "kind": "source",
+          "value": "atom:7add2ced497f2fffd4a3f554",
+          "wire": "source:atom:7add2ced497f2fffd4a3f554"
+        },
+        "end_column": 35,
+        "end_line": 2201,
+        "fingerprint": "sha256:e525bc1ea1744fca8d5a3d1639082eac53eaced7a8543691ceeae71649be0975",
+        "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/logging/__init__.py",
+        "start_column": 4,
+        "start_line": 2201
+      },
+      "stages": [
+        [
+          "BUILD_LIST",
+          1,
+          "1"
+        ],
+        [
+          "LIST_EXTEND",
+          1,
+          "1"
+        ],
+        [
+          "CALL_INTRINSIC_1",
+          6,
+          "6"
+        ],
+        [
+          "BUILD_MAP",
+          0,
+          "0"
+        ],
+        [
+          "DICT_MERGE",
+          1,
+          "1"
+        ],
+        [
+          "CALL_FUNCTION_EX",
+          null,
+          "None"
+        ],
+        [
+          "POP_TOP",
+          null,
+          "None"
+        ],
+        [
+          "LOAD_CONST",
+          1,
+          "None"
+        ],
+        [
+          "RETURN_VALUE",
+          null,
+          "None"
+        ]
+      ],
+      "original_terminal": "/home/zyf/AAA/scar-worktrees/source209-model/artifacts/experiments/source209_resume01_20261026/result/batches/batch-002/worker/attempt-00012/result.json"
+    },
+    {
+      "entry_key": "853d42ce2bfc3bd873eeda434f3550b0be36eac64a688317c522e3dd34b41c1d",
+      "source": {
+        "atom_id": {
+          "kind": "source",
+          "value": "atom:f21b158755542d9ed0e04825",
+          "wire": "source:atom:f21b158755542d9ed0e04825"
+        },
+        "end_column": 9,
+        "end_line": 228,
+        "fingerprint": "sha256:9e4d4d947bfee4ce2e2df26e9ccff6b0f222b61e5f4c82096f93e5fa2ae0bff3",
+        "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/hydra/_internal/instantiate/_instantiate2.py",
+        "start_column": 15,
+        "start_line": 226
+      },
+      "stages": [
+        [
+          "BUILD_LIST",
+          1,
+          "1"
+        ],
+        [
+          "LIST_EXTEND",
+          1,
+          "1"
+        ],
+        [
+          "CALL_INTRINSIC_1",
+          6,
+          "6"
+        ],
+        [
+          "LOAD_CONST",
+          10,
+          "'recursive'"
+        ],
+        [
+          "LOAD_CONST",
+          11,
+          "'convert'"
+        ],
+        [
+          "LOAD_CONST",
+          12,
+          "'partial'"
+        ],
+        [
+          "BUILD_MAP",
+          3,
+          "3"
+        ],
+        [
+          "CALL_FUNCTION_EX",
+          null,
+          "None"
+        ]
+      ],
+      "original_terminal": "/home/zyf/AAA/scar-worktrees/source209-model/artifacts/experiments/source209_resume01_20261026/result/batches/batch-003/worker/attempt-00013/result.json"
+    },
+    {
+      "entry_key": "9f256de8375362f8a676b3a0fa693b11bf26a29cbda4cf8a2e3d05e88d72f6be",
+      "source": {
+        "atom_id": {
+          "kind": "source",
+          "value": "atom:d7c4cb9818a3b540e32fc894",
+          "wire": "source:atom:d7c4cb9818a3b540e32fc894"
+        },
+        "end_column": 55,
+        "end_line": 982,
+        "fingerprint": "sha256:9db56d38172c4c9e689b21cc58c8538008b09d86b682faf4dd193b529cdd79d5",
+        "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/functools.py",
+        "start_column": 15,
+        "start_line": 982
+      },
+      "stages": [
+        [
+          "BUILD_MAP",
+          0,
+          "0"
+        ],
+        [
+          "DICT_MERGE",
+          1,
+          "1"
+        ],
+        [
+          "CALL_FUNCTION_EX",
+          null,
+          "None"
+        ]
+      ],
+      "original_terminal": "/home/zyf/AAA/scar-worktrees/source209-model/artifacts/experiments/source209_resume01_20261026/result/batches/batch-003/worker/attempt-00003/result.json"
+    },
+    {
+      "entry_key": "ad8548ebaaef31b4c21ee3a0b859d0a4d0c8fb53a327d6b1d0e8a2c983937473",
+      "source": {
+        "atom_id": {
+          "kind": "source",
+          "value": "atom:1a20e7202889da6998cf6c63",
+          "wire": "source:atom:1a20e7202889da6998cf6c63"
+        },
+        "end_column": 47,
+        "end_line": 573,
+        "fingerprint": "sha256:de569368c2c4958b7aaddbe755056860a89b1d313f69d437177864f37cb2503b",
+        "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/typing.py",
+        "start_column": 15,
+        "start_line": 573
+      },
+      "stages": [
+        [
+          "BUILD_LIST",
+          1,
+          "1"
+        ],
+        [
+          "LIST_EXTEND",
+          1,
+          "1"
+        ],
+        [
+          "CALL_INTRINSIC_1",
+          6,
+          "6"
+        ],
+        [
+          "PUSH_NULL",
+          null,
+          "None"
+        ],
+        [
+          "CALL_FUNCTION_EX",
+          null,
+          "None"
+        ]
+      ],
+      "original_terminal": "/home/zyf/AAA/scar-worktrees/source209-model/artifacts/experiments/source209_model_20261026/result/batches/batch-002/worker/attempt-00017/result.json"
+    },
+    {
+      "entry_key": "d8b535365fceb276a4fde502ee75ef0c988bca9c54e8db975edaee671b415d57",
+      "source": {
+        "atom_id": {
+          "kind": "source",
+          "value": "atom:02338bce8a460462a4012ce1",
+          "wire": "source:atom:02338bce8a460462a4012ce1"
+        },
+        "end_column": 9,
+        "end_line": 174,
+        "fingerprint": "sha256:b59a648fe5d87ea98f953840a75542e0cd1ef89bf98127c9f00b8ed5051f1e07",
+        "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/torch/nn/modules/batchnorm.py",
+        "start_column": 8,
+        "start_line": 166
+      },
+      "stages": [
+        [
+          "BUILD_TUPLE",
+          5,
+          "5"
+        ],
+        [
+          "BUILD_MAP",
+          0,
+          "0"
+        ],
+        [
+          "DICT_MERGE",
+          1,
+          "1"
+        ],
+        [
+          "LOAD_CONST",
+          2,
+          "'bias'"
+        ],
+        [
+          "BUILD_MAP",
+          1,
+          "1"
+        ],
+        [
+          "DICT_MERGE",
+          1,
+          "1"
+        ],
+        [
+          "CALL_FUNCTION_EX",
+          null,
+          "None"
+        ],
+        [
+          "POP_TOP",
+          null,
+          "None"
+        ],
+        [
+          "LOAD_CONST",
+          3,
+          "None"
+        ],
+        [
+          "RETURN_VALUE",
+          null,
+          "None"
+        ]
+      ],
+      "original_terminal": "/home/zyf/AAA/scar-worktrees/source209-model/artifacts/experiments/source209_resume01_20261026/result/batches/batch-004/worker/attempt-00006/result.json"
+    },
+    {
+      "entry_key": "48868439c812714d134fbe3f623363ab752a6ccc61acb89a6ea78f1aeb9169df",
+      "source": {
+        "atom_id": {
+          "kind": "source",
+          "value": "atom:111e3044777cd2f0bb47dfaf",
+          "wire": "source:atom:111e3044777cd2f0bb47dfaf"
+        },
+        "end_column": 9,
+        "end_line": 1343,
+        "fingerprint": "sha256:341153e4099444f923f5b0766e8e41b45fbe909b87f4737cb28c828f297b7baa",
+        "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/torch/nn/modules/module.py",
+        "start_column": 57,
+        "start_line": 1340
+      },
+      "stages": [
+        [
+          "BUILD_MAP",
+          0,
+          "0"
+        ],
+        [
+          "DICT_MERGE",
+          1,
+          "1"
+        ],
+        [
+          "CALL_FUNCTION_EX",
+          null,
+          "None"
+        ]
+      ],
+      "original_terminal": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/lewm_external_source_entries_20261026/worker/attempt-00017/result.json"
+    },
+    {
+      "entry_key": "5912b9f4bda29ddb188b71c389d558959c99eee1928b8050b6f85d39471ee7a0",
+      "source": {
+        "atom_id": {
+          "kind": "source",
+          "value": "atom:df6f3226ec0e6246763ed4ba",
+          "wire": "source:atom:df6f3226ec0e6246763ed4ba"
+        },
+        "end_column": 9,
+        "end_line": 364,
+        "fingerprint": "sha256:960644e52167a16ba8700badde44ebb53921dc38b1c90e379fc8a4870303fdc0",
+        "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/torch/nn/modules/conv.py",
+        "start_column": 8,
+        "start_line": 351
+      },
+      "stages": [
+        [
+          "BUILD_TUPLE",
+          11,
+          "11"
+        ],
+        [
+          "BUILD_MAP",
+          0,
+          "0"
+        ],
+        [
+          "DICT_MERGE",
+          1,
+          "1"
+        ],
+        [
+          "CALL_FUNCTION_EX",
+          null,
+          "None"
+        ],
+        [
+          "POP_TOP",
+          null,
+          "None"
+        ],
+        [
+          "LOAD_CONST",
+          3,
+          "None"
+        ],
+        [
+          "RETURN_VALUE",
+          null,
+          "None"
+        ]
+      ],
+      "original_terminal": "/home/zyf/AAA/scar-worktrees/source209-model/artifacts/experiments/source209_resume01_20261026/result/batches/batch-005/worker/attempt-00004/result.json"
+    }
+  ],
+  "readonly_counts": [
+    {
+      "compile_attempts": 0,
+      "module_loads": 1,
+      "complete_descriptor_matches": 3,
+      "source_bytes_read": 0
+    },
+    {
+      "compile_attempts": 0,
+      "module_loads": 8,
+      "complete_descriptor_matches": 10,
+      "source_bytes_read": 0
+    }
+  ]
+}
