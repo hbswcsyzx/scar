@@ -122,19 +122,36 @@ def validate_function_try_protocols(model, graph, interface, metadata, semantic,
             validations = [operations[r.operation] for r in model.protocols
                            if r.kind is K.VALIDATE_EXCEPT_TYPE_314 and r.source == scope.source]
             if handler.type is not None:
-                formals = {semantic.slots[p.slot].name: p.slot for p in interface.parameters}
-                need(isinstance(handler.type, ast.Name) and handler.type.id in formals,
-                     'handler expression is outside the exact ordinary formal-name subset')
                 need(len(matches) == len(validations) == 1 and uses[matches[0].input_use].value == entry.arguments[-2],
                      'handler must match its own borrowed original caught reference')
                 normal = next(e for e in validations[0].terminator.successors if e.kind is ExitKind.NORMAL)
                 need(uses[matches[0].handler.use].value == blocks[normal.block].arguments[0],
                      'matcher did not consume its own handler validation result')
                 handler_value = validations[0].uses[0].value
-                reads = [r for r in graph.binding_reads if r.normal_result == handler_value]
-                need(len(reads) == 1 and values[uses[reads[0].binding].value].slot == formals[handler.type.id]
-                     and node_for(links[reads[0].operation].source, ast.Name) is handler.type,
-                     'handler validation did not read this exact original formal binding')
+                origin = values[handler_value].origin
+                if type(origin) is OperationResult:
+                    producer = operations[origin.operation]
+                else:
+                    producers = [op for op in graph.operations if op.terminator is not None
+                        and op.terminator.kind is TerminatorKind.INVOKE
+                        and any(e.kind is ExitKind.NORMAL and e.block == origin.block for e in op.terminator.successors)]
+                    need(len(producers) == 1, 'handler result has no unique actual evaluation')
+                    producer = producers[0]
+                need(node_for(links[producer.id].source, ast.expr) is handler.type,
+                     'handler validation did not evaluate its original AST expression')
+                definition = semantic.definitions.get(links[producer.id].semantic_operation)
+                if definition is None:
+                    # The initial explicit capability admitted only this exact
+                    # ordinary formal-name BindingRead, before the SG bridge.
+                    formals = {semantic.slots[p.slot].name:p.slot for p in interface.parameters}
+                    reads = [r for r in graph.binding_reads if r.operation == producer.id and r.normal_result == handler_value]
+                    need(isinstance(handler.type, ast.Name) and handler.type.id in formals
+                         and len(reads) == 1 and values[uses[reads[0].binding].value].slot == formals[handler.type.id],
+                         'legacy handler has no exact original formal binding')
+                else:
+                    need(definition.code_id == links[producer.id].source.atom_id.wire
+                         and links[producer.id].source.atom_id in definition.source_atoms,
+                         'handler evaluation lost exact original SG ownership')
             else:
                 need(not matches and not validations, 'bare handler must not fabricate matching/type validation')
             suites = ((scope, [handler]),)
