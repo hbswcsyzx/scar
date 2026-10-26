@@ -1,0 +1,16 @@
+{
+  "logical_uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/lewm_joint_capture_v2_20261026/capture/os/syscalls.1684268",
+  "line_number": 11,
+  "line_sha256": "47120811d5e882ce56c1e97541eef8685123f70a236764394938a7122d8437d5",
+  "line": "1793019868.359676 newfstatat(AT_FDCWD, \"/home/zyf/miniconda3/envs/lewm/bin/../lib/\", {st_dev=makedev(0xfc, 0x5), st_ino=15082394, st_mode=S_IFDIR|0775, st_nlink=16, st_uid=1000, st_gid=1000, st_blksize=4096, st_blocks=8, st_size=4096, st_atime=1789467865 /* 2026-09-15T10:24:25.899176456+0000 */, st_atime_nsec=899176456, st_mtime=1789467866 /* 2026-09-15T10:24:26.036024358+0000 */, st_mtime_nsec=36024358, st_ctime=1789467866 /* 2026-09-15T10:24:26.036024358+0000 */, st_ctime_nsec=36024358}, 0) = 0 <0.000016>\n",
+  "prefix_bytes_read": 2208,
+  "archive_declaration": {
+    "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/lewm_joint_capture_v2_20261026/capture/os/syscalls.1684268.gz",
+    "compressed_bytes": 15624253,
+    "gzip_sha256": "ddbe05b002112337f0cfe8ac19471ba9f9456383f47cb86ba14a6bee4d0c2538",
+    "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/lewm_joint_capture_v2_20261026/capture/os/syscalls.1684268",
+    "raw_bytes": 135582952,
+    "raw_sha256": "4591c8932ef33bdddef8c5dc8c0482a0c218d09002cc11edda0ab92d9d86b40a"
+  },
+  "qualification": "bounded real sample from ordinary CLI roundtrip-verified archive; full OS stream not rescanned"
+}

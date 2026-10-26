@@ -1,0 +1,9 @@
+{
+  "status": "ACTUAL_CAPTURE_TRANSPORT_PASSED_OPERAND_COVERAGE_OPEN",
+  "physical_file_bytes": 122372516,
+  "allocated_bytes": 124026880,
+  "disk_free_bytes": 108833640448,
+  "stat_line": 11,
+  "witness_reader": "PASS",
+  "native_input_chunks": 311
+}

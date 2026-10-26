@@ -1,0 +1,21 @@
+diff --git a/scar/cli.py b/scar/cli.py
+index 3886df84..9cb57a7e 100644
+--- a/scar/cli.py
++++ b/scar/cli.py
+@@ -358,6 +358,16 @@ def main(argv=None) -> int:
+     call_ports.add_argument("--out", help="write a fresh result")
+     from scar.analysis.call_port_query import query_call_ports_cli
+     call_ports.set_defaults(func=query_call_ports_cli)
++    native_inputs = sub.add_parser("query-native-inputs", help="read original native Tensor input metadata and canonical port references")
++    native_inputs.add_argument("--manifest", required=True, help="published native input association manifest")
++    native_inputs.add_argument("--sha256", required=True, help="expected manifest SHA256")
++    native_inputs.add_argument("--row", type=int, help="original companion row index")
++    native_inputs.add_argument("--node-id", type=int, help="original ETO node ID")
++    native_inputs.add_argument("--associations", action="store_true", help="return canonical port associations rather than metadata rows")
++    native_inputs.add_argument("--limit", type=int, default=10)
++    native_inputs.add_argument("--out", help="write a fresh result")
++    from scar.analysis.native_input_query import query_native_inputs_cli
++    native_inputs.set_defaults(func=query_native_inputs_cli)
+     resource_query = sub.add_parser("query-os-file-topology", help="follow original OS file-use records and sourced resource connections")
+     resource_query.add_argument("--manifest", required=True)
+     resource_query.add_argument("--sha256", required=True)
