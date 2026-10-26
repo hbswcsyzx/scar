@@ -1,0 +1,64 @@
+--- before/scar/trace/os_capture_launch.py
++++ after/scar/trace/os_capture_launch.py
+@@ -29,6 +29,9 @@
+ RAW_DATA_CALLS=('read','write','readv','writev','pread64','pwrite64','preadv','pwritev',
+     'preadv2','pwritev2','ioctl','sendto','recvfrom','sendmsg','recvmsg','sendmmsg','recvmmsg',
+     'getdents','getdents64','getrandom','process_vm_readv','process_vm_writev','setsockopt','getsockopt')
++# Structure detail only for file identity providers. execve stays abbreviated;
++# global -v would unnecessarily expand environment and unrelated structures.
++STAT_DETAIL_EXPRESSION='abbrev=!stat,lstat,fstat,newfstatat,statx'
+ 
+ 
+ @dataclass(frozen=True)
+@@ -37,7 +40,7 @@
+     max_raw_bytes:int=256_000_000
+     max_stored_bytes:int=128_000_000
+     max_os_lines:int=2_000_000
+-    max_files:int=1024
++    max_files:int=4096
+     max_metadata_bytes:int=2_000_000
+     max_seconds:int=300
+ 
+@@ -120,6 +123,8 @@
+     string_limit='4096' if env.get('SCAR_PROCESS_IMAGE_RECEIPTS')=='1' else '256'
+     options=['-ff','-ttt','-T','-s',string_limit,'-e','trace=all','-e','raw='+','.join(RAW_DATA_CALLS),
+              '-o',str(root/'os/syscalls')]
++    if env.get('SCAR_PROCESS_IMAGE_RECEIPTS')=='1':
++        options+=['-e',STAT_DETAIL_EXPRESSION]
+     argv=[str(binary),*options,*target_argv];boundary=1+len(options)
+     intent={'schema':INTENT_SCHEMA,'schema_version':1,'nonce':nonce,'capture_root':str(root),
+         'trace_directory':str(root/'trace'),'actual_exec_argv_planned':argv,'target_argv_index':boundary,
+--- before/scar/trace/os_capture_coverage.py
++++ after/scar/trace/os_capture_coverage.py
+@@ -61,6 +61,10 @@
+                 # tokens may add calls but are never credited here as coverage.
+                 covered=required<=set(token for token in tokens if not token.startswith('%'))
+         elif expression.startswith('raw='):continue  # representation only; no selection authority.
++        elif expression.startswith('abbrev='):
++            _need(expression=='abbrev=!stat,lstat,fstat,newfstatat,statx',
++                  'unsupported stat-detail representation contract')
++            continue  # No syscall selection/completeness authority.
+         else:raise OSCaptureCoverageError('OS capture coverage: selection is not explicit all: '+expression)
+     _need(covered,'explicit all/control-name coverage not recorded; class-filter zero is not absence')
+ 
+--- before/scar/cli.py
++++ after/scar/cli.py
+@@ -98,7 +98,8 @@
+         from scar.trace.os_capture_launch import OSCaptureBudgets, launch_os_capture
+         os_budgets = OSCaptureBudgets(max_os_bytes=args.max_os_bytes,
+             max_raw_bytes=args.max_capture_bytes, max_stored_bytes=args.max_archive_bytes,
+-            max_os_lines=args.max_os_lines, max_seconds=args.os_timeout)
++            max_os_lines=args.max_os_lines, max_seconds=args.os_timeout,
++            max_files=getattr(args,'max_archive_files',4096))
+         result, _ = launch_os_capture(cmd, env=env, capture_root=os_capture_root,
+             strace_executable=args.strace_executable, budgets=os_budgets)
+     (out / "run.json").write_text(json.dumps({"command": cmd, "returncode": result.returncode,
+@@ -379,6 +380,8 @@
+     trace.add_argument('--max-os-lines',type=int,default=2000000)
+     trace.add_argument('--max-capture-bytes',type=int,default=256000000)
+     trace.add_argument('--max-archive-bytes',type=int,default=128000000)
++    trace.add_argument('--max-archive-files',type=int,default=4096,
++                       help='lossless archive transport member count, including per-TID OS files, native chunks and collector members; not event coverage')
+     trace.add_argument('--os-timeout',type=int,default=300,help='owned OS provider wall-time budget in seconds')
+     trace.add_argument("command", nargs=argparse.REMAINDER)
+     trace.set_defaults(func=_trace)
