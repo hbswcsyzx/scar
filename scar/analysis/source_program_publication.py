@@ -23,7 +23,13 @@ from scar.analysis.structured_lowering import require_valid_structured_body
 from scar.ir.program.call_edges import CapturedCode, CodeCapture, CodeSourceLink
 from scar.ir.program.call_demand import CallSourceScope
 from scar.ir.program.inventory import BodyInventory, BodyStatus, DefinitionInventory
-from scar.ir.program.functions import FunctionSignature
+from scar.ir.program.functions import BodyEntryInterface, BodyLoweringProfile, FunctionSignature
+from scar.ir.program.codec import dumps as dump_graph
+from scar.ir.program.frames import FrameModel
+from scar.ir.program.model import ProgramGraph
+from scar.ir.program.source import LoweringMetadata
+from scar.ir.program.source_language import SourceLanguageOverlay
+from scar.ir.program.structured import StructuredBodyModel
 from scar.ir.record_codec import decode, encode
 from scar.ir.semantics_v2 import SourceSnapshot
 
@@ -36,6 +42,31 @@ _ENTRY_AUTHORITY = {
     "whole_program_established": False, "first_stage_complete": False,
     "transformation_authorized": False,
 }
+
+
+@dataclass(frozen=True, slots=True)
+class _EntryBodyCache:
+    """Already checked body fields used by CompositionIndex, without file layers.
+
+    This private in-memory projection is never serialized as SourceProgram or
+    treated as validation input. Original source contexts remain in their exact
+    archived artifacts. Projection occurs only after ordinary admission checks.
+    """
+    graph: ProgramGraph
+    metadata: LoweringMetadata
+    profile: BodyLoweringProfile
+    interface: BodyEntryInterface
+    frame: FrameModel | None
+    structured: StructuredBodyModel
+    language: SourceLanguageOverlay
+
+
+def _entry_body_cache(program, compact):
+    if not compact:
+        return program
+    _need(type(program) is SourceProgram and program.graph is not None,
+          "compact entry cache requires an admitted SourceProgram body")
+    return _EntryBodyCache(*(getattr(program, name) for name in _EntryBodyCache.__dataclass_fields__))
 
 
 def _need(condition, message):
@@ -437,7 +468,7 @@ def publish_source_entries(base_composition, catalog, source_programs, out_dir, 
         rows.append({"operation": "ADD_GRAPH", "entry_key": entry.key, "definition": encode(entry.reference),
             "source_program": deepcopy(request["source_program"]), "checkpoint": cp_ref,
             "signature": encode(signature), "admissions": _entry_admissions(catalog, entry, body),
-            "program_graph_sha256": sha256(_canonical(program.to_dict()["graph"])).hexdigest(),
+            "program_graph_sha256": sha256(_canonical(json.loads(dump_graph(program.graph)))).hexdigest(),
             "root": encode(program.graph.root), "construction_operations": None})
         if progress is not None:
             progress({"stage": "admit_qualified_entry", "entry_key": entry.key, "status": "VERIFIED"})
@@ -454,18 +485,19 @@ def publish_source_entries(base_composition, catalog, source_programs, out_dir, 
 
 def read_source_entry_publication(path, *, expected_sha256, catalog, max_programs=1,
                                   max_operations_per_body=4000, max_record_bytes=64_000_000,
-                                  target_composition=None):
+                                  target_composition=None, _compact_body_cache=False):
     """Ordinary source/code reader; returned records are a cache, not new graphs."""
     from scar.ir.program.source_references import SourceDefinitionReference
     _need(all(type(value) is int and value > 0 for value in
               (max_programs, max_operations_per_body, max_record_bytes)), "invalid entry-reader ceilings")
+    _need(type(_compact_body_cache) is bool, "compact cache selection requires exact bool")
     _need(type(catalog.projects) is tuple and len(catalog.projects) == 1,
           "publication reader needs one exact original project")
     document, receipt = _read_receipt(path, limit=max_record_bytes)
     if document.get("schema_version") in (2, 3):
         return _read_source_entries2(document, receipt, expected_sha256=expected_sha256, catalog=catalog,
             target=target_composition, max_programs=max_programs, max_operations=max_operations_per_body,
-            max_record_bytes=max_record_bytes)
+            max_record_bytes=max_record_bytes, compact_body_cache=_compact_body_cache)
     _need(receipt["physical_sha256"] == expected_sha256
           and _entry_canonical(document, receipt)
           and document.get("schema") == "scar.source-entry-publication" and document.get("schema_version") == 1
@@ -488,7 +520,7 @@ def read_source_entry_publication(path, *, expected_sha256, catalog, max_program
         seen.add(key)
         _need(row["signature"] == encode(signature) and row["root"] == encode(body.graph.root)
               and row["admissions"] == _entry_admissions(catalog, entry, body)
-              and row["program_graph_sha256"] == sha256(_canonical(program.to_dict()["graph"])).hexdigest(),
+              and row["program_graph_sha256"] == sha256(_canonical(json.loads(dump_graph(program.graph)))).hexdigest(),
               "entry signature/admission/root/graph digest differs")
         checkpoint, actual = _read_receipt(row["checkpoint"]["uri"], limit=max_record_bytes)
         _need(all(actual[name] == row["checkpoint"][name] for name in actual)
@@ -502,7 +534,8 @@ def read_source_entry_publication(path, *, expected_sha256, catalog, max_program
             "construction_operations": None, "construction_cost_known": False, "previous_body": None,
             "definition_reference": encode(reference), "whole_program_established": False}
         _need(checkpoint == expected, "entry CP2 fixed fields/origin/context/body identity differ")
-        checked.append({"record": deepcopy(row), "body": body, "program": program, "entry": entry})
+        checked.append({"record": deepcopy(row), "body": body,
+                        "program": _entry_body_cache(program, _compact_body_cache), "entry": entry})
     return document, receipt, tuple(checked)
 
 
@@ -664,7 +697,7 @@ def _publish_source_entries2(target, catalog, requests, out_dir, *, plan, max_pr
         ref = {**ref, "uri": str(out / ref["uri"]), "external": True}
         rows.append({**deepcopy(expected), "checkpoint": ref, "signature": encode(signature),
             "admissions": _entry_admissions(catalog, entry, body), "root": encode(body.graph.root),
-            "program_graph_sha256": sha256(_canonical(program.to_dict()["graph"])).hexdigest(),
+            "program_graph_sha256": sha256(_canonical(json.loads(dump_graph(program.graph)))).hexdigest(),
             "construction_operations": None})
         if progress is not None:
             progress({"stage": "admit_qualified_entry", "entry_key": entry.key, "owner_kind": expected["owner_kind"],
@@ -685,7 +718,7 @@ def _publish_source_entries2(target, catalog, requests, out_dir, *, plan, max_pr
 
 
 def _read_source_entries2(document, receipt, *, expected_sha256, catalog, target, max_programs,
-                           max_operations, max_record_bytes):
+                           max_operations, max_record_bytes, compact_body_cache=False):
     version = document.get("schema_version")
     _need(type(target) is CompositionIndex and receipt["physical_sha256"] == expected_sha256
           and _entry_canonical(document, receipt) and document.get("schema") == "scar.source-entry-publication"
@@ -713,9 +746,10 @@ def _read_source_entries2(document, receipt, *, expected_sha256, catalog, target
               and _entry_canonical(checkpoint, actual) and checkpoint == _entry2_checkpoint(entry, program, expected)
               and row["signature"] == encode(signature) and row["root"] == encode(body.graph.root)
               and row["admissions"] == _entry_admissions(catalog, entry, body)
-              and row["program_graph_sha256"] == sha256(_canonical(program.to_dict()["graph"])).hexdigest(),
+              and row["program_graph_sha256"] == sha256(_canonical(json.loads(dump_graph(program.graph)))).hexdigest(),
               "schema2 original checkpoint/program/signature/admission differs")
-        checked.append({"record": deepcopy(row), "body": body, "program": program, "entry": entry})
+        checked.append({"record": deepcopy(row), "body": body,
+                        "program": _entry_body_cache(program, compact_body_cache), "entry": entry})
     return document, receipt, tuple(checked)
 
 
