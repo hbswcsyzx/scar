@@ -2,6 +2,16 @@
 
 日期：2026-10-26。**OPEN：完整 LeWM 自动建模未验收。**
 
+本轮已接入通用图查询：work→native/source上下文→原源码body，以及原调用者Use→
+callee formal和OS文件资源引用；节点/边定义见[图模型说明](GRAPH_MODEL_GUIDE.md)。
+真实源端口consumer覆盖100,550 attempts，其中2,516 calls/6,805 argument ports；
+独立postflight确认旧27条关系全部保留。原runner末尾比较字段错误的exit1保留，
+不把端口关系升级为对象/内容相同。OS完整3,075,182行已处理，但目标文件IO到
+块设备的已证精确绑定仍为0，缺完整stat字段和共享FD连续性依据。下一次采集已
+实现保留stat-family身份字段，并修正archive member预算接口。
+采集仅为建模，利用率采样保持显式可选；不会用插桩时间推断目标原始性能。
+参见[可执行查询与真实边界](PROGRAM_QUERY.md)。
+
 当前必需关系的逐项差距与实施顺序见
 [完整跨层图还缺什么](FIRST_STAGE_GAPS_20261026.md)。五类实体可表达、源结构已恢复、
 运行对应已接通、数据/资源依赖已闭合分别报告，不以某一层全覆盖代替整体完成。

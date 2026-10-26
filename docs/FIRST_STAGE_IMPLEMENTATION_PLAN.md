@@ -41,16 +41,16 @@ OS/CUDA接口保输入输出、状态、效果、失败、资源、生命周期�
 | 节点 | 任务 | 必需验收依据 | 当前状态 |
 |---|---|---|---|
 | P1 类型与范围 | 核实体、协议、资源类型及其自动判定规则，固定软件/硬件深度。 | 每种构造/接口/资源有归属，角色/属性/事实不混型。 | 合同已有，本文固定最新边界；实际缺口继续补齐。 |
-| P2 软件恢复 | AST/symtable/dis、CFG/SSA/状态流；工作列表自动恢复模块、函数、依赖。 | 原source/code/规范端口一致，成功body正常准入，unsupported/未尝试不计成功。 | 正式858body；外部入口续跑、函数Try补齐进行中。 |
-| P3 数据与跨函数连接 | 实参Use→formal、return→调用结果、环境/状态；逻辑版本→对象/view/storage/materialization。 | 原端点和实际调用限定；不以来源/引用相同证明内容恒定，不要求保存全部Tensor值。 | 源端口绑定实门排障；全数据/状态连接未闭合。 |
-| P4 硬件及使用关系 | 自动采CPU/NUMA/DRAM、GPU/PCI、mount/fsdev、块设备/partition/mapper/controller/NVMe。 | 库存与使用分开；FD/mmap/allocation/work连接真实资源，有原来源；介质或隐藏层不能猜。 | 本机可用性已实测；通用collector与关系导入待验。 |
-| P5 同Run联合图 | 原LeWM完整episode收调用、Torch/native、OS、物理Tensor与资源身份/拓扑，正常归档连接。 | 实际调用/活动/资源全部入账；软件到runtime/kernel及内存/存储/队列依赖可连续查询。 | 历史trace与24082work上下文已验；下一唯一联合采集等字段齐备。 |
+| P2 软件恢复 | AST/symtable/dis、CFG/SSA/状态流；工作列表自动恢复模块、函数、依赖。 | 原source/code/规范端口一致，成功body正常准入，unsupported/未尝试不计成功。 | 正式858body不变；外部209入口已115成功/94不支持，未计正式publication；函数Try真实20入口验收中。 |
+| P3 数据与跨函数连接 | 实参Use→formal、return→调用结果、环境/状态；逻辑版本→对象/view/storage/materialization。 | 原端点和实际调用限定；不以来源/引用相同证明内容恒定，不要求保存全部Tensor值。 | 已产2516 calls/6805条件参数端口并接查询；全数据/状态连接未闭合，继续补方法/依赖入口与native输入端口。 |
+| P4 硬件及使用关系 | 自动采CPU/NUMA/DRAM、GPU/PCI、mount/fsdev、块设备/partition/mapper/controller/NVMe。 | 库存与使用分开；FD/mmap/allocation/work连接真实资源，有原来源；介质或隐藏层不能猜。 | 通用拓扑已实际采集；OS原操作可查询，当前目标文件IO到块设备已证精确绑定0，stat与共享FD缺口分别保留。 |
+| P5 同Run联合图 | 原LeWM完整episode收调用、Torch/native、OS、物理Tensor与资源身份/拓扑，正常归档连接。 | 实际调用/活动/资源全部入账；软件到runtime/kernel及内存/存储/队列依赖可连续查询。 | 新联合episode已完成、同份采集离线归档/普通binding通过；旧24082work上下文可查询。新图输入/状态/资源边仍未全部接通。 |
 | P6 完整性与交付 | 静态、实际执行、独立资源分母交叉核；查询加载到保存全链；报告建图成本/存储。 | 必需端口/依赖/资源/生命周期缺项使整体保持OPEN，未执行路径不冒充实测。 | 尚未达到。 |
 
-P2/P3/P4可在隔离树并行；P5不为每个新增字段反复跑episode。Root统一启动真实门、
-核实际终态/产物、写报告、提交推送，不需用户逐gate审批。当前97入口续跑保持原
-冻结；源端口门的低成本缺件失败保留并补正常metadata闭包；联合GPU采集待字段
-齐备及新freeze审读后运行，不修改LeWM原仓库/数据。
+P2/P3/P4在隔离树并行；不为每个新增字段反复跑episode。Root核实际终态/产物、
+接统一查询、提交推送，不需用户逐gate审批。原失败保留；当前优先补必要节点/边，
+不修改LeWM原仓库/数据。采集用于完整结构建模，不以性能热点选择范围，GPU/CPU
+利用率采样不是必需项；避免为观察新增Tensor拷贝、同步或逐迭代内容保存。
 
 ## 4. 交付条件
 
