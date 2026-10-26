@@ -61,6 +61,10 @@ def _explicit_all(options):
                 # tokens may add calls but are never credited here as coverage.
                 covered=required<=set(token for token in tokens if not token.startswith('%'))
         elif expression.startswith('raw='):continue  # representation only; no selection authority.
+        elif expression.startswith('abbrev='):
+            _need(expression=='abbrev=!stat,lstat,fstat,newfstatat,statx',
+                  'unsupported stat-detail representation contract')
+            continue  # No syscall selection/completeness authority.
         else:raise OSCaptureCoverageError('OS capture coverage: selection is not explicit all: '+expression)
     _need(covered,'explicit all/control-name coverage not recorded; class-filter zero is not absence')
 

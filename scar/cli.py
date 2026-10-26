@@ -98,7 +98,8 @@ def _trace(args) -> int:
         from scar.trace.os_capture_launch import OSCaptureBudgets, launch_os_capture
         os_budgets = OSCaptureBudgets(max_os_bytes=args.max_os_bytes,
             max_raw_bytes=args.max_capture_bytes, max_stored_bytes=args.max_archive_bytes,
-            max_os_lines=args.max_os_lines, max_seconds=args.os_timeout)
+            max_os_lines=args.max_os_lines, max_seconds=args.os_timeout,
+            max_files=getattr(args,'max_archive_files',4096))
         result, _ = launch_os_capture(cmd, env=env, capture_root=os_capture_root,
             strace_executable=args.strace_executable, budgets=os_budgets)
     (out / "run.json").write_text(json.dumps({"command": cmd, "returncode": result.returncode,
@@ -379,6 +380,8 @@ def main(argv=None) -> int:
     trace.add_argument('--max-os-lines',type=int,default=2000000)
     trace.add_argument('--max-capture-bytes',type=int,default=256000000)
     trace.add_argument('--max-archive-bytes',type=int,default=128000000)
+    trace.add_argument('--max-archive-files',type=int,default=4096,
+                       help='lossless archive transport member count, including per-TID OS files, native chunks and collector members; not event coverage')
     trace.add_argument('--os-timeout',type=int,default=300,help='owned OS provider wall-time budget in seconds')
     trace.add_argument("command", nargs=argparse.REMAINDER)
     trace.set_defaults(func=_trace)

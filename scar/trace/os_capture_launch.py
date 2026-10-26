@@ -29,6 +29,9 @@ VERSION=2
 RAW_DATA_CALLS=('read','write','readv','writev','pread64','pwrite64','preadv','pwritev',
     'preadv2','pwritev2','ioctl','sendto','recvfrom','sendmsg','recvmsg','sendmmsg','recvmmsg',
     'getdents','getdents64','getrandom','process_vm_readv','process_vm_writev','setsockopt','getsockopt')
+# Structure detail only for file identity providers. execve stays abbreviated;
+# global -v would unnecessarily expand environment and unrelated structures.
+STAT_DETAIL_EXPRESSION='abbrev=!stat,lstat,fstat,newfstatat,statx'
 
 
 @dataclass(frozen=True)
@@ -37,7 +40,7 @@ class OSCaptureBudgets:
     max_raw_bytes:int=256_000_000
     max_stored_bytes:int=128_000_000
     max_os_lines:int=2_000_000
-    max_files:int=1024
+    max_files:int=4096
     max_metadata_bytes:int=2_000_000
     max_seconds:int=300
 
@@ -120,6 +123,8 @@ def launch_os_capture(target_argv,*,env,capture_root,strace_executable='strace',
     string_limit='4096' if env.get('SCAR_PROCESS_IMAGE_RECEIPTS')=='1' else '256'
     options=['-ff','-ttt','-T','-s',string_limit,'-e','trace=all','-e','raw='+','.join(RAW_DATA_CALLS),
              '-o',str(root/'os/syscalls')]
+    if env.get('SCAR_PROCESS_IMAGE_RECEIPTS')=='1':
+        options+=['-e',STAT_DETAIL_EXPRESSION]
     argv=[str(binary),*options,*target_argv];boundary=1+len(options)
     intent={'schema':INTENT_SCHEMA,'schema_version':1,'nonce':nonce,'capture_root':str(root),
         'trace_directory':str(root/'trace'),'actual_exec_argv_planned':argv,'target_argv_index':boundary,
