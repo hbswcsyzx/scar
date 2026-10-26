@@ -210,10 +210,10 @@ class StructuredBuilder(_Builder):
                 for value, child, input_role, index, static in inputs]
         uses.append(self.use(operation_id, cursor.state, node, "state", 0))
         normal = self.new_block(node, role=role, extra_types=result_types)
-        failure = self.new_block(node, role=SourceRole.EXCEPTION, extra_types=(_REF,))
+        failure = self.new_block(node, role=SourceRole.EXCEPTION, extra_types=self.raise_payload_types())
         normal.env = dict(cursor.env); failure.env = dict(cursor.env)
         signatures = (CompletionSignature(ExitKind.NORMAL, result_types + (self.state_type,)),
-                      CompletionSignature(ExitKind.RAISE, (_REF, self.state_type)))
+                      CompletionSignature(ExitKind.RAISE, self.raise_payload_types() + (self.state_type,)))
         edges = tuple(CompletionSuccessor(signature.kind, target.block,
                       tuple(CompletionResult(index) for index in range(len(signature.types))))
                       for signature, target in zip(signatures, (normal, failure)))
@@ -222,12 +222,24 @@ class StructuredBuilder(_Builder):
                        terminator=Terminator(TerminatorKind.INVOKE, edges),
                        completions=signatures, invoke_arguments=tuple(use.id for use in uses))
         self.emit(cursor, op, node, role, old=old)
-        exception = self.block_arguments[failure.block][0]
+        exception = self.failure_payload(self.block_arguments[failure.block][:-1])
         if failure_handler is None:
             self.finish_exit(failure, node, exception, ExitKind.RAISE)
         else:
             failure_handler(failure, exception)
         return normal, tuple(self.block_arguments[normal.block][:-1]), operation_id
+
+    def raise_payload_types(self):
+        return (_REF,)
+
+    def failure_payload(self, values):
+        return values[0]
+
+    def exception_reference(self, payload):
+        return payload
+
+    def failure_references(self, payload):
+        return (payload,)
 
     def invoke_protocol(self, cursor, node, values, kind, *, result_type=_REF, failure_handler=None):
         inputs = tuple((value, node, "protocol-input", index, None) for index, value in enumerate(values))
@@ -411,7 +423,7 @@ class StructuredBuilder(_Builder):
 
         def exhausted_or_raise(failure, exception):
             operation_id = self.fresh(OperationID, "stop-iteration-match")
-            use = self.use(operation_id, exception, node, "exception", 0)
+            use = self.use(operation_id, self.exception_reference(exception), node, "exception", 0)
             before = self.use(operation_id, failure.state, node, "exception-type-state", 0)
             boolean = DataValue(self.fresh(ValueID, "matches-stop"), self.function_context,
                                 OperationResult(operation_id, 0), "builtins.bool")
@@ -423,7 +435,7 @@ class StructuredBuilder(_Builder):
             self.protocol(operation_id, PythonProtocolKind.MATCH_STOP_ITERATION, node)
             reraised = self.new_block(node)
             self.branch(failure, boolean.id, natural, reraised, node)
-            self.frame_transition(natural, node, ((exception, node, "consumed-exhaustion"),),
+            self.frame_transition(natural, node, tuple((ref, node, "consumed-exhaustion") for ref in self.failure_references(exception)),
                                   PythonProtocolKind.FRAME_DISCARD)
             self.finish_exit(reraised, node, exception, ExitKind.RAISE)
 

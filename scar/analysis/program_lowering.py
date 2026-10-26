@@ -165,7 +165,8 @@ class SourceProgram:
     def to_dict(self):
         if type(self.module) is StructuredFrameBodyOverlay:
             from scar.ir.program.module_entries import encode_frame_body
-            if (self.profile is not FrameBodyProfile.STRUCTURED_MAPPING_314_V1 or self.graph is None
+            if (self.profile is not self.module.profile or self.profile not in (
+                    FrameBodyProfile.STRUCTURED_MAPPING_314_V1,FrameBodyProfile.STRUCTURED_MAPPING_PROPAGATION_314_V1) or self.graph is None
                     or any(value is not None for value in (self.interface,self.frame,self.structured,self.language))):
                 raise ValueError('SP8 requires its explicit core FrameRoot/source overlay only')
             return {'schema':'scar.source-program','schema_version':8,'entry_kind':'MAPPING_FRAME',
@@ -257,14 +258,15 @@ class SourceProgram:
             from scar.ir.program.module_entries import decode_frame_body
             if (set(document) != expected_fields | {'entry_kind','profile','module'}
                     or document['schema'] != 'scar.source-program' or document['entry_kind'] != 'MAPPING_FRAME'
-                    or document['profile'] != FrameBodyProfile.STRUCTURED_MAPPING_314_V1.value
+                    or document['profile'] not in (FrameBodyProfile.STRUCTURED_MAPPING_314_V1.value,
+                        FrameBodyProfile.STRUCTURED_MAPPING_PROPAGATION_314_V1.value)
                     or language_options is not None or verification != 'STRUCTURE'
                     or module_code_evidence is None or type(document['graph']) is not dict
                     or document['graph'].get('schema_version') != 29):
                 raise ValueError('SP8 requires explicit source/core capability and readonly whole-root evidence')
             result=cls(load_graph(_canonical(document['graph'])),decode(LoweringMetadata,document['metadata']),
                 semantic_from_dict(document['semantic']),None,SourceControlFlowGraph.from_dict(document['control']),
-                FrameBodyProfile.STRUCTURED_MAPPING_314_V1,module=decode_frame_body(document['module']))
+                FrameBodyProfile(document['profile']),module=decode_frame_body(document['module']))
             result=replace(result,semantics=SourceSemanticsGraph.from_dict(document['semantics'],result.semantic))
             if _canonical(result.to_dict()) != _canonical(document):
                 raise ValueError('SP8 canonical source capability/summary differs')
@@ -689,7 +691,12 @@ class _Builder:
             self.add_value(value); args.append(value.id); env[name] = value.id
             self.link_value(value, node, role)
         for kind in extra_types:
-            if kind.kind is ValueKind.REFERENCE:
+            from scar.ir.program.control import ProtocolValueType
+            from scar.ir.program.model import ProtocolValue
+            if type(kind) is ProtocolValueType:
+                value = ProtocolValue(self.fresh(ValueID, 'completion-protocol'), self.function_context,
+                                      BlockArgument(block, len(args)), kind.protocol)
+            elif kind.kind is ValueKind.REFERENCE:
                 value = ReferenceValue(self.fresh(ValueID, "completion-reference"), self.function_context,
                                        BlockArgument(block, len(args)))
             elif kind.kind is ValueKind.DATA:

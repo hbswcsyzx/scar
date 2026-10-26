@@ -1,0 +1,34 @@
+{
+  "baseline_source_object_reuse": "BASELINE_REUSE.json",
+  "decoded_graph_copied_or_staged": false,
+  "exclude_unrelated": [
+    "artifacts/analysis/class_entry_design_20261025",
+    "artifacts/analysis/source_three_graph_add_plan_20261025/READ_PLAN.v2.json"
+  ],
+  "external_input_roots": [
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/model_run_offline_g0_20261025/model/attempts/1792955052545386845-1400879/06-source-composition/composition/index.json.gz",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/model_run_offline_g0_20261025/model/attempts/1792955052545386845-1400879/04-source-inventory/inventory.json.gz",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/model_run_offline_g0_20261025/model/attempts/1792955052545386845-1400879/08-workload-witness/archive/manifest.json",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/model_run_offline_g0_20261025/model/attempts/1792955052545386845-1400879/08-workload-witness/archive/90d7182d15e88422d396566eb3aace8e7c5df83cf7a1f687f942178c01d84690.marshal",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/model_run_offline_g0_20261025/model/attempts/1792955052545386845-1400879/08-workload-witness/archive/ba2db01c7be2c626b0b22dc8f173d17a8a287c2a223d951b2ce43e381d4f2a5d.source.utf8",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/model_run_offline_g0_20261025/model/attempts/1792955052545386845-1400879/05-source-layers/layers/index.json",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/model_run_offline_g0_20261025/model/attempts/1792955052545386845-1400879/05-source-layers/layers/archives/bd02ea8e77cc0d0ba1fe02629081611e342e370d410fff8b7e980d2dde667dd8.json.gz"
+  ],
+  "external_inputs_copied": false,
+  "local_unstaged_baseline_duplicate_directory": "baseline/scar",
+  "original_failed_scope": "candidate01 (Root6695 exit1)",
+  "preserve_original_failed_window": true,
+  "retained_graph": {
+    "decoded_bytes": 3527430,
+    "decoded_sha256": "dbd78862ad2080f41e0126eea1144c96eef911c910dae6178edaca9c16740677",
+    "receipt_origin": "THIS_C_WRITER",
+    "stored_bytes": 312932,
+    "stored_sha256": "c4749c043de831cd3c4ab570e90d442db3c9e78443511bb93b183e2374a090aa",
+    "uri": "/home/zyf/AAA/scar-worktrees/source-call-model/artifacts/experiments/module_try_propagation_g1_20261026/candidate01/attempt01/sourceprogram8-propagation.json.gz"
+  },
+  "schema": "scar.module-c-retention",
+  "schema_version": 1,
+  "stage_manifest_excludes_own_hash": true,
+  "successful_scope": "postflight01 normal-reader only (Root59038 exit0)",
+  "unrecorded_original_construction_and_final_runtime": "OPEN_NOT_RECONSTRUCTED"
+}

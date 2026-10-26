@@ -1,0 +1,36 @@
+{
+  "status": "BEFORE_AUTHORIZED_C_IMPLEMENTATION",
+  "base_commit": "8078ffdecff2734c5baeac3d6bdf7a6c436c0b55",
+  "files": [
+    {
+      "path": "scar/ir/program/module_entries.py",
+      "bytes": 21641,
+      "sha256": "07f423efa81b514aa9a08d7d1ee16d6cd8abcb6a06bf042a06984ae9a2c8c360"
+    },
+    {
+      "path": "scar/analysis/program_lowering.py",
+      "bytes": 83281,
+      "sha256": "77b1d7b2ac4c980c7ef922fbcb0fef61b425cc0906de7f9ca835ff53066bf767"
+    },
+    {
+      "path": "scar/analysis/structured_lowering.py",
+      "bytes": 57622,
+      "sha256": "1bf6e192cc268a2d327e5279cccc029be85c7324ef57efdfd6ed195a0593cc20"
+    },
+    {
+      "path": "scar/analysis/source_module_lowering.py",
+      "bytes": 45101,
+      "sha256": "437582148a1c1cf180120254ed30bec5a17798476139c3a6d4166fd8620ea621"
+    },
+    {
+      "path": "scar/analysis/source_statement_lowering.py",
+      "bytes": 12089,
+      "sha256": "9d6b86482d3d6202534803b095233cc8228aeb54a1e964e85e0e8764d12c8b26"
+    },
+    {
+      "path": "scar/analysis/source_module_validation.py",
+      "bytes": 57437,
+      "sha256": "7c300aed1e864f9dae5d7a6b2391421a3ec1808dcbb099b6628ff929de2db4b1"
+    }
+  ]
+}

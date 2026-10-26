@@ -35,7 +35,7 @@ from dataclasses import replace
 
 from scar.analysis.program_lowering import _Unsupported
 from scar.ir.program.model import Behavior, ExitKind
-from scar.ir.program.source import GapKind
+from scar.ir.program.source import GapKind, SourceRole
 from scar.ir.program.structured import PythonProtocolKind
 
 
@@ -231,3 +231,134 @@ def validate_statement_protocols(model, graph, interface, metadata, semantic):
 
 
 __all__ = ["annotated_assignment", "raise_statement", "assert_statement", "validate_statement_protocols"]
+
+
+def try_statement(builder,node,cursor):
+    """Single ordinary handler, using existing C0/C1 authorities and real CFG."""
+    from scar.ir.program.control import (ControlPort,ControlScopeKind as S,LanguageCompletionKind as L,
+        ProtocolValueKind as P,ProtocolValueType)
+    from scar.ir.program.cleanup import CleanupInterface,CleanupEnter,CleanupRouteTerminator,CleanupRouteSuccessor
+    from scar.ir.program.exception_matches import ExceptionMatcher,ExceptionHandlerOperand
+    from scar.ir.program.ids import ControlPortID,OperationID,ValueID
+    from scar.ir.program.model import (DataValue,Operation,OperationResult,ProtocolValue,StateVersionValue,StateAccess,
+        AccessMode,Footprint,FootprintKind,BlockArgument)
+    from scar.ir.program.state_addresses import ExistingAccess
+    from scar.ir.program.module_entries import FrameBodyProtocolKind as K
+    from scar.analysis.program_lowering import _REF
+    parent=builder.current_owner;handler=node.handlers[0]
+    after=builder.new_block(node)
+    normal_clear=builder.new_block(handler) if handler.name else after
+    fallthrough=ControlPort(builder.fresh(ControlPortID,'handled-fallthrough'),parent,L.FALLTHROUGH,block=normal_clear.block)
+    builder.control_ports.append(fallthrough)
+    body_scope=builder.new_scope(S.BLOCK,node,parent)
+    gate_scope=builder.new_scope(S.BLOCK,node,parent)
+    cleanup=builder.new_scope(S.CLEANUP,handler,parent)
+    with builder.in_owner(body_scope):body=builder.new_block(node)
+    with builder.in_owner(gate_scope):gate=builder.new_block(node,extra_types=(_REF,_REF))
+    with builder.in_owner(cleanup):entry=builder.new_block(handler,extra_types=(ProtocolValueType(P.PENDING_COMPLETION),_REF))
+    builder.cleanup_interfaces.append(CleanupInterface(cleanup,gate_scope,entry.block,builder.block_arguments[entry.block][0]))
+    builder.jump_values(cursor,body,(),node)
+    def caught(failed,payload):builder.jump_values(failed,gate,(payload.exception,payload.traceback),node)
+    with builder.in_owner(body_scope):
+        builder.failure_sinks.append(caught)
+        try:normal=builder.statements(node.body,body)
+        finally:builder.failure_sinks.pop()
+        if normal is not None:builder.jump_values(normal,after,(),node)
+    # Exception-only entry: the normal try path never enters or saves context.
+    from scar.analysis.source_module_lowering import PropagationOperands
+    exception,traceback=builder.block_arguments[gate.block][:-1]
+    original_port=builder.raise_landing(node)
+    packet=builder.packet(gate,node,PropagationOperands(exception,traceback))
+    original_pending=builder.pending(gate,node,original_port,packet)
+    identity=builder.fresh(OperationID,'caught-exception-route')
+    selector=builder.use(identity,original_pending,node,'pending-selector',0)
+    forwarded=builder.use(identity,original_pending,node,'entry-pending',0)
+    exception_use=builder.use(identity,exception,node,'caught-exception',0)
+    state=builder.use(identity,gate.state,node,'exception-world',0)
+    builder.emit(gate,Operation(identity,'caught-exception-route',(Behavior.CONTROL,),(selector,forwarded,exception_use,state),
+        terminator=CleanupRouteTerminator(selector.id,(CleanupRouteSuccessor(original_port.id,entry.block,
+            (forwarded.id,exception_use.id,state.id)),))),node,SourceRole.CONTROL)
+    entry_pending,caught_ref=builder.block_arguments[entry.block][:-1]
+    with builder.in_owner(cleanup):
+        identity=builder.fresh(OperationID,'handler-context-enter')
+        pending_use=builder.use(identity,entry_pending,handler,'entry-pending',0)
+        before=builder.use(identity,entry.state,handler,'context-world',0)
+        saved=ProtocolValue(builder.fresh(ValueID,'saved-handled-context'),builder.frame_region,OperationResult(identity,0),P.SAVED_HANDLED_CONTEXT)
+        after_state=StateVersionValue(builder.fresh(ValueID,'handler-enter-world'),builder.frame_region,OperationResult(identity,1),builder.world)
+        for value in (saved,after_state):builder.add_value(value);builder.link_value(value,handler,SourceRole.EXCEPTION)
+        builder.emit(entry,Operation(identity,'handler-context-enter',(Behavior.CONTROL,Behavior.READ,Behavior.WRITE),
+            (pending_use,before),(saved.id,after_state.id),
+            (StateAccess(builder.world,before.id,AccessMode.READ_WRITE,after_state.id,Footprint(FootprintKind.WHOLE)),),effects_complete=False),handler,SourceRole.CONTROL)
+        builder.cleanup_enters.append(CleanupEnter(identity,cleanup,pending_use.id,saved.id));entry.state=after_state.id
+        def replace_exception(failed,payload):
+            port=builder.raise_landing(handler);new_packet=builder.packet(failed,handler,payload)
+            replacement=builder.pending(failed,handler,port,new_packet)
+            builder.cleanup_exit(failed,handler,cleanup,entry_pending,replacement,saved.id,port)
+        builder.failure_sinks.append(replace_exception)
+        current=entry
+        try:
+            if handler.type is not None:
+                current,handler_ref=builder.expr(handler.type,current)
+                builder.frame_transition(current,handler,((handler_ref,handler.type,'handler-type-hold'),),PythonProtocolKind.FRAME_HOLD_TEMPORARY)
+                builder.active_temporaries.append(handler_ref)
+                def invalid_type(failed,payload):
+                    held=builder.active_temporaries.pop()
+                    try:
+                        builder.frame_transition(failed,handler,((held,handler.type,'handler-type-release'),),PythonProtocolKind.FRAME_RELEASE_TEMPORARY)
+                        replace_exception(failed,payload)
+                    finally:builder.active_temporaries.append(held)
+                current,validated_ref,validate=builder.invoke(current,handler,((handler_ref,handler.type,'handler-type',0,None),),failure_handler=invalid_type)
+                builder.protocol(validate,K.VALIDATE_EXCEPT_TYPE_314,handler)
+                match_id=builder.fresh(OperationID,'borrowed-exception-match')
+                exception_use=builder.use(match_id,caught_ref,handler,'caught-exception',0)
+                handler_use=builder.use(match_id,validated_ref,handler.type,'dynamic-handler',0)
+                state=builder.use(match_id,current.state,handler,'match-world',0)
+                result=DataValue(builder.fresh(ValueID,'exception-match-bool'),builder.frame_region,OperationResult(match_id,0),'builtins.bool')
+                builder.add_value(result);builder.link_value(result,handler,SourceRole.TRUTH)
+                builder.emit(current,Operation(match_id,'borrowed-exception-match',(Behavior.COMPUTE,Behavior.READ,Behavior.CONTROL),
+                    (exception_use,handler_use,state),(result.id,),
+                    (StateAccess(builder.world,state.id,AccessMode.READ,footprint=Footprint(FootprintKind.WHOLE)),),effects_complete=True),handler,SourceRole.TRUTH)
+                builder.protocol(match_id,K.MATCH_EXCEPTION_BORROWED_314,handler)
+                builder.active_temporaries.pop()
+                builder.frame_transition(current,handler,((handler_ref,handler.type,'handler-type-release'),),PythonProtocolKind.FRAME_RELEASE_TEMPORARY)
+                yes,no=builder.new_block(handler),builder.new_block(handler)
+                builder.branch(current,result.id,yes,no,handler);branch=builder.operations[-1].id
+                builder.exception_matches.append(ExceptionMatcher(match_id,exception_use.id,BlockArgument(entry.block,1),
+                    ExceptionHandlerOperand(handler_use.id,builder.values_by_id[validated_ref].origin),OperationResult(match_id,0),None,branch,(ExistingAccess(match_id,0),)))
+                builder.cleanup_exit(no,handler,cleanup,entry_pending,entry_pending,saved.id,original_port,resume=True)
+                current=yes
+            if handler.name:current=builder.store_name(handler,handler.name,caught_ref,current)
+            # Binding failure has not yet entered the name-clear protection.
+            error_block=None
+            body_base=len(builder.active_temporaries)
+            deferred_ports=[]
+            def handler_failed(failed,payload):
+                nonlocal error_block
+                if not handler.name:return replace_exception(failed,payload)
+                if error_block is None:error_block=builder.new_block(handler,extra_types=(ProtocolValueType(P.PENDING_COMPLETION),))
+                held=tuple(builder.active_temporaries[body_base:]);del builder.active_temporaries[body_base:]
+                try:
+                    if held:builder.frame_transition(failed,handler,tuple((ref,handler,'handler-unwind-temporary') for ref in reversed(held)),PythonProtocolKind.FRAME_RELEASE_TEMPORARY)
+                    port=builder.raise_landing(handler);deferred_ports.append(port)
+                    new_packet=builder.packet(failed,handler,payload);replacement=builder.pending(failed,handler,port,new_packet)
+                    builder.jump_values(failed,error_block,(replacement,),handler)
+                finally:builder.active_temporaries.extend(held)
+            builder.failure_sinks.append(handler_failed)
+            try:completed=builder.statements(handler.body,current)
+            finally:builder.failure_sinks.pop()
+            if completed is not None:
+                success=builder.pending(completed,handler,fallthrough)
+                builder.cleanup_exit(completed,handler,cleanup,entry_pending,success,saved.id,fallthrough)
+            if error_block is not None:
+                selected=builder.block_arguments[error_block.block][0]
+                error_block=builder.store_name(handler,handler.name,builder.literal(handler,None),error_block)
+                error_block=builder.delete_name(handler,handler.name,error_block)
+                # This shared block can carry several exact fresh Raise ports.
+                builder.cleanup_exit_cases(error_block,handler,cleanup,entry_pending,selected,saved.id,tuple(deferred_ports))
+        finally:builder.failure_sinks.pop()
+    if handler.name:
+        # Normal handler has already restored ambient context before these ops.
+        normal_clear=builder.store_name(handler,handler.name,builder.literal(handler,None),normal_clear)
+        normal_clear=builder.delete_name(handler,handler.name,normal_clear)
+        builder.jump_values(normal_clear,after,(),handler)
+    return after

@@ -1,0 +1,898 @@
+--- a/scar/analysis/program_lowering.py
++++ b/scar/analysis/program_lowering.py
+@@ -165,7 +165,8 @@
+     def to_dict(self):
+         if type(self.module) is StructuredFrameBodyOverlay:
+             from scar.ir.program.module_entries import encode_frame_body
+-            if (self.profile is not FrameBodyProfile.STRUCTURED_MAPPING_314_V1 or self.graph is None
++            if (self.profile is not self.module.profile or self.profile not in (
++                    FrameBodyProfile.STRUCTURED_MAPPING_314_V1,FrameBodyProfile.STRUCTURED_MAPPING_PROPAGATION_314_V1) or self.graph is None
+                     or any(value is not None for value in (self.interface,self.frame,self.structured,self.language))):
+                 raise ValueError('SP8 requires its explicit core FrameRoot/source overlay only')
+             return {'schema':'scar.source-program','schema_version':8,'entry_kind':'MAPPING_FRAME',
+@@ -257,14 +258,15 @@
+             from scar.ir.program.module_entries import decode_frame_body
+             if (set(document) != expected_fields | {'entry_kind','profile','module'}
+                     or document['schema'] != 'scar.source-program' or document['entry_kind'] != 'MAPPING_FRAME'
+-                    or document['profile'] != FrameBodyProfile.STRUCTURED_MAPPING_314_V1.value
++                    or document['profile'] not in (FrameBodyProfile.STRUCTURED_MAPPING_314_V1.value,
++                        FrameBodyProfile.STRUCTURED_MAPPING_PROPAGATION_314_V1.value)
+                     or language_options is not None or verification != 'STRUCTURE'
+                     or module_code_evidence is None or type(document['graph']) is not dict
+                     or document['graph'].get('schema_version') != 29):
+                 raise ValueError('SP8 requires explicit source/core capability and readonly whole-root evidence')
+             result=cls(load_graph(_canonical(document['graph'])),decode(LoweringMetadata,document['metadata']),
+                 semantic_from_dict(document['semantic']),None,SourceControlFlowGraph.from_dict(document['control']),
+-                FrameBodyProfile.STRUCTURED_MAPPING_314_V1,module=decode_frame_body(document['module']))
++                FrameBodyProfile(document['profile']),module=decode_frame_body(document['module']))
+             result=replace(result,semantics=SourceSemanticsGraph.from_dict(document['semantics'],result.semantic))
+             if _canonical(result.to_dict()) != _canonical(document):
+                 raise ValueError('SP8 canonical source capability/summary differs')
+@@ -689,7 +691,12 @@
+             self.add_value(value); args.append(value.id); env[name] = value.id
+             self.link_value(value, node, role)
+         for kind in extra_types:
+-            if kind.kind is ValueKind.REFERENCE:
++            from scar.ir.program.control import ProtocolValueType
++            from scar.ir.program.model import ProtocolValue
++            if type(kind) is ProtocolValueType:
++                value = ProtocolValue(self.fresh(ValueID, 'completion-protocol'), self.function_context,
++                                      BlockArgument(block, len(args)), kind.protocol)
++            elif kind.kind is ValueKind.REFERENCE:
+                 value = ReferenceValue(self.fresh(ValueID, "completion-reference"), self.function_context,
+                                        BlockArgument(block, len(args)))
+             elif kind.kind is ValueKind.DATA:
+--- a/scar/ir/program/module_entries.py
++++ b/scar/ir/program/module_entries.py
+@@ -369,6 +369,7 @@
+ 
+ class FrameBodyProfile(str, Enum):
+     STRUCTURED_MAPPING_314_V1 = 'STRUCTURED_MAPPING_314_V1'
++    STRUCTURED_MAPPING_PROPAGATION_314_V1 = 'STRUCTURED_MAPPING_PROPAGATION_314_V1'
+ 
+ 
+ class NamespacePolicy(str, Enum):
+@@ -377,6 +378,7 @@
+ 
+ class FrameCompletionProfile(str, Enum):
+     RAW_EXCEPTION_REF_314_V1 = 'RAW_EXCEPTION_REF_314_V1'
++    PROPAGATION_REF_PAIR_314_V1 = 'PROPAGATION_REF_PAIR_314_V1'
+ 
+ 
+ class StatementSequenceField(str, Enum):
+@@ -398,6 +400,10 @@
+     IMPORT_FROM_314 = 'IMPORT_FROM_314'
+     INVOKE_REMAINING = 'INVOKE_REMAINING'
+     UNEXPANDED_SLICE = 'UNEXPANDED_SLICE'
++    DELETE_NAME_314 = 'DELETE_NAME_314'
++    VALIDATE_EXCEPT_TYPE_314 = 'VALIDATE_EXCEPT_TYPE_314'
++    MATCH_EXCEPTION_BORROWED_314 = 'MATCH_EXCEPTION_BORROWED_314'
++    FRAME_EXIT_EXCEPTION_PACKET = 'FRAME_EXIT_EXCEPTION_PACKET'
+ 
+ 
+ class FrameBodyStatus(str, Enum):
+@@ -498,9 +504,10 @@
+     def __post_init__(self):
+         _need(type(self.declaration) is ModuleEntryDeclaration and type(self.census) is ModuleSourceCensus
+               and type(self.root_scope) is ControlScopeID, 'structured frame needs original source and its sole core root')
+-        _need(self.profile is FrameBodyProfile.STRUCTURED_MAPPING_314_V1
+-              and self.namespace_policy is NamespacePolicy.MODULE_MAPPING_314_V1
+-              and self.completion_profile is FrameCompletionProfile.RAW_EXCEPTION_REF_314_V1,
++        _need((self.profile,self.completion_profile) in (
++                  (FrameBodyProfile.STRUCTURED_MAPPING_314_V1,FrameCompletionProfile.RAW_EXCEPTION_REF_314_V1),
++                  (FrameBodyProfile.STRUCTURED_MAPPING_PROPAGATION_314_V1,FrameCompletionProfile.PROPAGATION_REF_PAIR_314_V1))
++              and self.namespace_policy is NamespacePolicy.MODULE_MAPPING_314_V1,
+               'unsupported explicit structured mapping/completion profile')
+         _need(type(self.operations_emitted) is int and self.operations_emitted > 0
+               and (self.prefix is None or type(self.prefix) is FrameStatementSlice)
+--- a/scar/analysis/structured_lowering.py
++++ b/scar/analysis/structured_lowering.py
+@@ -210,10 +210,10 @@
+                 for value, child, input_role, index, static in inputs]
+         uses.append(self.use(operation_id, cursor.state, node, "state", 0))
+         normal = self.new_block(node, role=role, extra_types=result_types)
+-        failure = self.new_block(node, role=SourceRole.EXCEPTION, extra_types=(_REF,))
++        failure = self.new_block(node, role=SourceRole.EXCEPTION, extra_types=self.raise_payload_types())
+         normal.env = dict(cursor.env); failure.env = dict(cursor.env)
+         signatures = (CompletionSignature(ExitKind.NORMAL, result_types + (self.state_type,)),
+-                      CompletionSignature(ExitKind.RAISE, (_REF, self.state_type)))
++                      CompletionSignature(ExitKind.RAISE, self.raise_payload_types() + (self.state_type,)))
+         edges = tuple(CompletionSuccessor(signature.kind, target.block,
+                       tuple(CompletionResult(index) for index in range(len(signature.types))))
+                       for signature, target in zip(signatures, (normal, failure)))
+@@ -222,12 +222,24 @@
+                        terminator=Terminator(TerminatorKind.INVOKE, edges),
+                        completions=signatures, invoke_arguments=tuple(use.id for use in uses))
+         self.emit(cursor, op, node, role, old=old)
+-        exception = self.block_arguments[failure.block][0]
++        exception = self.failure_payload(self.block_arguments[failure.block][:-1])
+         if failure_handler is None:
+             self.finish_exit(failure, node, exception, ExitKind.RAISE)
+         else:
+             failure_handler(failure, exception)
+         return normal, tuple(self.block_arguments[normal.block][:-1]), operation_id
++
++    def raise_payload_types(self):
++        return (_REF,)
++
++    def failure_payload(self, values):
++        return values[0]
++
++    def exception_reference(self, payload):
++        return payload
++
++    def failure_references(self, payload):
++        return (payload,)
+ 
+     def invoke_protocol(self, cursor, node, values, kind, *, result_type=_REF, failure_handler=None):
+         inputs = tuple((value, node, "protocol-input", index, None) for index, value in enumerate(values))
+@@ -411,7 +423,7 @@
+ 
+         def exhausted_or_raise(failure, exception):
+             operation_id = self.fresh(OperationID, "stop-iteration-match")
+-            use = self.use(operation_id, exception, node, "exception", 0)
++            use = self.use(operation_id, self.exception_reference(exception), node, "exception", 0)
+             before = self.use(operation_id, failure.state, node, "exception-type-state", 0)
+             boolean = DataValue(self.fresh(ValueID, "matches-stop"), self.function_context,
+                                 OperationResult(operation_id, 0), "builtins.bool")
+@@ -423,7 +435,7 @@
+             self.protocol(operation_id, PythonProtocolKind.MATCH_STOP_ITERATION, node)
+             reraised = self.new_block(node)
+             self.branch(failure, boolean.id, natural, reraised, node)
+-            self.frame_transition(natural, node, ((exception, node, "consumed-exhaustion"),),
++            self.frame_transition(natural, node, tuple((ref, node, "consumed-exhaustion") for ref in self.failure_references(exception)),
+                                   PythonProtocolKind.FRAME_DISCARD)
+             self.finish_exit(reraised, node, exception, ExitKind.RAISE)
+ 
+--- a/scar/analysis/source_statement_lowering.py
++++ b/scar/analysis/source_statement_lowering.py
+@@ -35,7 +35,7 @@
+ 
+ from scar.analysis.program_lowering import _Unsupported
+ from scar.ir.program.model import Behavior, ExitKind
+-from scar.ir.program.source import GapKind
++from scar.ir.program.source import GapKind, SourceRole
+ from scar.ir.program.structured import PythonProtocolKind
+ 
+ 
+@@ -231,3 +231,134 @@
+ 
+ 
+ __all__ = ["annotated_assignment", "raise_statement", "assert_statement", "validate_statement_protocols"]
++
++
++def try_statement(builder,node,cursor):
++    """Single ordinary handler, using existing C0/C1 authorities and real CFG."""
++    from scar.ir.program.control import (ControlPort,ControlScopeKind as S,LanguageCompletionKind as L,
++        ProtocolValueKind as P,ProtocolValueType)
++    from scar.ir.program.cleanup import CleanupInterface,CleanupEnter,CleanupRouteTerminator,CleanupRouteSuccessor
++    from scar.ir.program.exception_matches import ExceptionMatcher,ExceptionHandlerOperand
++    from scar.ir.program.ids import ControlPortID,OperationID,ValueID
++    from scar.ir.program.model import (DataValue,Operation,OperationResult,ProtocolValue,StateVersionValue,StateAccess,
++        AccessMode,Footprint,FootprintKind,BlockArgument)
++    from scar.ir.program.state_addresses import ExistingAccess
++    from scar.ir.program.module_entries import FrameBodyProtocolKind as K
++    from scar.analysis.program_lowering import _REF
++    parent=builder.current_owner;handler=node.handlers[0]
++    after=builder.new_block(node)
++    normal_clear=builder.new_block(handler) if handler.name else after
++    fallthrough=ControlPort(builder.fresh(ControlPortID,'handled-fallthrough'),parent,L.FALLTHROUGH,block=normal_clear.block)
++    builder.control_ports.append(fallthrough)
++    body_scope=builder.new_scope(S.BLOCK,node,parent)
++    gate_scope=builder.new_scope(S.BLOCK,node,parent)
++    cleanup=builder.new_scope(S.CLEANUP,handler,parent)
++    with builder.in_owner(body_scope):body=builder.new_block(node)
++    with builder.in_owner(gate_scope):gate=builder.new_block(node,extra_types=(_REF,_REF))
++    with builder.in_owner(cleanup):entry=builder.new_block(handler,extra_types=(ProtocolValueType(P.PENDING_COMPLETION),_REF))
++    builder.cleanup_interfaces.append(CleanupInterface(cleanup,gate_scope,entry.block,builder.block_arguments[entry.block][0]))
++    builder.jump_values(cursor,body,(),node)
++    def caught(failed,payload):builder.jump_values(failed,gate,(payload.exception,payload.traceback),node)
++    with builder.in_owner(body_scope):
++        builder.failure_sinks.append(caught)
++        try:normal=builder.statements(node.body,body)
++        finally:builder.failure_sinks.pop()
++        if normal is not None:builder.jump_values(normal,after,(),node)
++    # Exception-only entry: the normal try path never enters or saves context.
++    from scar.analysis.source_module_lowering import PropagationOperands
++    exception,traceback=builder.block_arguments[gate.block][:-1]
++    original_port=builder.raise_landing(node)
++    packet=builder.packet(gate,node,PropagationOperands(exception,traceback))
++    original_pending=builder.pending(gate,node,original_port,packet)
++    identity=builder.fresh(OperationID,'caught-exception-route')
++    selector=builder.use(identity,original_pending,node,'pending-selector',0)
++    forwarded=builder.use(identity,original_pending,node,'entry-pending',0)
++    exception_use=builder.use(identity,exception,node,'caught-exception',0)
++    state=builder.use(identity,gate.state,node,'exception-world',0)
++    builder.emit(gate,Operation(identity,'caught-exception-route',(Behavior.CONTROL,),(selector,forwarded,exception_use,state),
++        terminator=CleanupRouteTerminator(selector.id,(CleanupRouteSuccessor(original_port.id,entry.block,
++            (forwarded.id,exception_use.id,state.id)),))),node,SourceRole.CONTROL)
++    entry_pending,caught_ref=builder.block_arguments[entry.block][:-1]
++    with builder.in_owner(cleanup):
++        identity=builder.fresh(OperationID,'handler-context-enter')
++        pending_use=builder.use(identity,entry_pending,handler,'entry-pending',0)
++        before=builder.use(identity,entry.state,handler,'context-world',0)
++        saved=ProtocolValue(builder.fresh(ValueID,'saved-handled-context'),builder.frame_region,OperationResult(identity,0),P.SAVED_HANDLED_CONTEXT)
++        after_state=StateVersionValue(builder.fresh(ValueID,'handler-enter-world'),builder.frame_region,OperationResult(identity,1),builder.world)
++        for value in (saved,after_state):builder.add_value(value);builder.link_value(value,handler,SourceRole.EXCEPTION)
++        builder.emit(entry,Operation(identity,'handler-context-enter',(Behavior.CONTROL,Behavior.READ,Behavior.WRITE),
++            (pending_use,before),(saved.id,after_state.id),
++            (StateAccess(builder.world,before.id,AccessMode.READ_WRITE,after_state.id,Footprint(FootprintKind.WHOLE)),),effects_complete=False),handler,SourceRole.CONTROL)
++        builder.cleanup_enters.append(CleanupEnter(identity,cleanup,pending_use.id,saved.id));entry.state=after_state.id
++        def replace_exception(failed,payload):
++            port=builder.raise_landing(handler);new_packet=builder.packet(failed,handler,payload)
++            replacement=builder.pending(failed,handler,port,new_packet)
++            builder.cleanup_exit(failed,handler,cleanup,entry_pending,replacement,saved.id,port)
++        builder.failure_sinks.append(replace_exception)
++        current=entry
++        try:
++            if handler.type is not None:
++                current,handler_ref=builder.expr(handler.type,current)
++                builder.frame_transition(current,handler,((handler_ref,handler.type,'handler-type-hold'),),PythonProtocolKind.FRAME_HOLD_TEMPORARY)
++                builder.active_temporaries.append(handler_ref)
++                def invalid_type(failed,payload):
++                    held=builder.active_temporaries.pop()
++                    try:
++                        builder.frame_transition(failed,handler,((held,handler.type,'handler-type-release'),),PythonProtocolKind.FRAME_RELEASE_TEMPORARY)
++                        replace_exception(failed,payload)
++                    finally:builder.active_temporaries.append(held)
++                current,validated_ref,validate=builder.invoke(current,handler,((handler_ref,handler.type,'handler-type',0,None),),failure_handler=invalid_type)
++                builder.protocol(validate,K.VALIDATE_EXCEPT_TYPE_314,handler)
++                match_id=builder.fresh(OperationID,'borrowed-exception-match')
++                exception_use=builder.use(match_id,caught_ref,handler,'caught-exception',0)
++                handler_use=builder.use(match_id,validated_ref,handler.type,'dynamic-handler',0)
++                state=builder.use(match_id,current.state,handler,'match-world',0)
++                result=DataValue(builder.fresh(ValueID,'exception-match-bool'),builder.frame_region,OperationResult(match_id,0),'builtins.bool')
++                builder.add_value(result);builder.link_value(result,handler,SourceRole.TRUTH)
++                builder.emit(current,Operation(match_id,'borrowed-exception-match',(Behavior.COMPUTE,Behavior.READ,Behavior.CONTROL),
++                    (exception_use,handler_use,state),(result.id,),
++                    (StateAccess(builder.world,state.id,AccessMode.READ,footprint=Footprint(FootprintKind.WHOLE)),),effects_complete=True),handler,SourceRole.TRUTH)
++                builder.protocol(match_id,K.MATCH_EXCEPTION_BORROWED_314,handler)
++                builder.active_temporaries.pop()
++                builder.frame_transition(current,handler,((handler_ref,handler.type,'handler-type-release'),),PythonProtocolKind.FRAME_RELEASE_TEMPORARY)
++                yes,no=builder.new_block(handler),builder.new_block(handler)
++                builder.branch(current,result.id,yes,no,handler);branch=builder.operations[-1].id
++                builder.exception_matches.append(ExceptionMatcher(match_id,exception_use.id,BlockArgument(entry.block,1),
++                    ExceptionHandlerOperand(handler_use.id,builder.values_by_id[validated_ref].origin),OperationResult(match_id,0),None,branch,(ExistingAccess(match_id,0),)))
++                builder.cleanup_exit(no,handler,cleanup,entry_pending,entry_pending,saved.id,original_port,resume=True)
++                current=yes
++            if handler.name:current=builder.store_name(handler,handler.name,caught_ref,current)
++            # Binding failure has not yet entered the name-clear protection.
++            error_block=None
++            body_base=len(builder.active_temporaries)
++            deferred_ports=[]
++            def handler_failed(failed,payload):
++                nonlocal error_block
++                if not handler.name:return replace_exception(failed,payload)
++                if error_block is None:error_block=builder.new_block(handler,extra_types=(ProtocolValueType(P.PENDING_COMPLETION),))
++                held=tuple(builder.active_temporaries[body_base:]);del builder.active_temporaries[body_base:]
++                try:
++                    if held:builder.frame_transition(failed,handler,tuple((ref,handler,'handler-unwind-temporary') for ref in reversed(held)),PythonProtocolKind.FRAME_RELEASE_TEMPORARY)
++                    port=builder.raise_landing(handler);deferred_ports.append(port)
++                    new_packet=builder.packet(failed,handler,payload);replacement=builder.pending(failed,handler,port,new_packet)
++                    builder.jump_values(failed,error_block,(replacement,),handler)
++                finally:builder.active_temporaries.extend(held)
++            builder.failure_sinks.append(handler_failed)
++            try:completed=builder.statements(handler.body,current)
++            finally:builder.failure_sinks.pop()
++            if completed is not None:
++                success=builder.pending(completed,handler,fallthrough)
++                builder.cleanup_exit(completed,handler,cleanup,entry_pending,success,saved.id,fallthrough)
++            if error_block is not None:
++                selected=builder.block_arguments[error_block.block][0]
++                error_block=builder.store_name(handler,handler.name,builder.literal(handler,None),error_block)
++                error_block=builder.delete_name(handler,handler.name,error_block)
++                # This shared block can carry several exact fresh Raise ports.
++                builder.cleanup_exit_cases(error_block,handler,cleanup,entry_pending,selected,saved.id,tuple(deferred_ports))
++        finally:builder.failure_sinks.pop()
++    if handler.name:
++        # Normal handler has already restored ambient context before these ops.
++        normal_clear=builder.store_name(handler,handler.name,builder.literal(handler,None),normal_clear)
++        normal_clear=builder.delete_name(handler,handler.name,normal_clear)
++        builder.jump_values(normal_clear,after,(),handler)
++    return after
+--- a/scar/analysis/source_module_lowering.py
++++ b/scar/analysis/source_module_lowering.py
+@@ -7,14 +7,14 @@
+ from __future__ import annotations
+ 
+ import ast
+-from dataclasses import replace
++from dataclasses import dataclass, replace
+ import hashlib
+ import sys
+ 
+ from scar.analysis.program_lowering import _Unsupported, _key, _REF, LoweringMetadata, SourceProgram
+ from scar.analysis.structured_lowering import StructuredBuilder
+ from scar.analysis.source_language import SourceCodeEvidence
+-from scar.ir.program.ids import RegionID, OperationID, UseID
++from scar.ir.program.ids import RegionID, OperationID, UseID, ValueID
+ from scar.ir.program.model import (Behavior, ExitKind, Operation, ReferenceValue, StateVersionValue,
+     Terminator, TerminatorKind, Use, UseRole)
+ from scar.ir.program.module_entries import (ModuleUnitSource, ModuleCodeWitness, ModuleEntryDeclaration,
+@@ -114,9 +114,11 @@
+         if link not in self.value_link_set:self.value_links.append(link);self.value_link_set.add(link)
+ 
+     def use(self,operation,value,node,role,index,*,semantic_value=None):
++        from scar.ir.program.model import ProtocolValue
+         record=self.values_by_id[value]
+         use_role=(UseRole.REFERENCE if type(record) is ReferenceValue else
+-                  UseRole.STATE_CONTENT if type(record) is StateVersionValue else UseRole.DATA)
++                  UseRole.STATE_CONTENT if type(record) is StateVersionValue else
++                  UseRole.PROTOCOL if type(record) is ProtocolValue else UseRole.DATA)
+         use=Use(self.fresh(UseID,'module-use'),value,use_role)
+         self.use_links.append(ModuleUseSource(operation,use.id,self.source(node),role,index,semantic_value))
+         return use
+@@ -189,6 +191,8 @@
+     if type(max_operations) is not int or not 1<=max_operations<=100000:
+         raise ValueError('module operation budget must be in [1,100000]')
+     from scar.ir.program.module_entries import ModuleBodyExpansionProfile,FrameBodyProfile
++    if profile is FrameBodyProfile.STRUCTURED_MAPPING_PROPAGATION_314_V1:
++        return PropagationModuleBuilder(context,selection,code_evidence,max_operations).run_module()
+     if profile is FrameBodyProfile.STRUCTURED_MAPPING_314_V1:
+         return StructuredModuleBuilder(context,selection,code_evidence,max_operations).run_module()
+     if profile is ModuleBodyExpansionProfile.IMPORT_PREFIX_314_V1:
+@@ -375,7 +379,7 @@
+         point.suite if point else None,point.id if point else None)
+ 
+ 
+-def mapping_prefix_selection(context, evidence):
++def mapping_prefix_selection(context, evidence, *, profile=None):
+     """Maximal contiguous supported statements; no workload/name allowlist."""
+     unit=module_unit(context);require_root_evidence(unit,evidence)
+     import dis
+@@ -414,12 +418,21 @@
+             and all(expression(child) for child in (node.func,*node.args,*(keyword.value for keyword in node.keywords))))
+         return False
+     def target(node):return isinstance(node,ast.Name) and len([row for row in positioned(node,('STORE_NAME',)) if row.argval==node.id])==1
++    from scar.ir.program.module_entries import FrameBodyProfile
+     def statement(node):
+         if isinstance(node,ast.Import):return bool(node.names) and all('.' not in alias.name for alias in node.names)
+         if isinstance(node,ast.ImportFrom):return bool(node.names) and all(alias.name!='*' for alias in node.names)
+         if isinstance(node,ast.Assign):return len(node.targets)==1 and target(node.targets[0]) and expression(node.value)
+         if isinstance(node,ast.Expr):return expression(node.value)
+         if isinstance(node,ast.For):return target(node.target) and expression(node.iter) and all(statement(child) for child in (*node.body,*node.orelse))
++        if isinstance(node,ast.Try) and profile is FrameBodyProfile.STRUCTURED_MAPPING_PROPAGATION_314_V1:
++            return (node in context.tree.body and len(node.handlers)==1 and not node.orelse and not node.finalbody
++                and node.handlers[0].type is not None
++                and any(isinstance(child,(ast.Assign,ast.For,ast.Import,ast.ImportFrom))
++                    or isinstance(child,ast.Expr) and not isinstance(child.value,(ast.Constant,ast.Tuple)) for child in node.body)
++                and all(not isinstance(child,ast.Try) and statement(child) for child in node.body)
++                and (node.handlers[0].type is None or expression(node.handlers[0].type))
++                and all(not isinstance(child,ast.Try) and statement(child) for child in node.handlers[0].body))
+         return isinstance(node,ast.Pass)
+     end=0
+     for node in context.tree.body:
+@@ -440,6 +453,9 @@
+         self.root_scope=ControlScopeID(_key('module-frame-scope',self.unit.initializer.wire,self.unit.snapshot.fingerprint))
+         self.frame_region=RegionID(_key('module-structured-frame',self.unit.initializer.wire,self.unit.snapshot.fingerprint))
+         self.prefix_nodes,self.remaining_nodes=mapping_prefix_selection(context,evidence)
++        from scar.ir.program.module_entries import FrameBodyProfile,FrameCompletionProfile
++        self.frame_body_profile=FrameBodyProfile.STRUCTURED_MAPPING_314_V1
++        self.frame_completion_profile=FrameCompletionProfile.RAW_EXCEPTION_REF_314_V1
+ 
+     def old_operation(self,node):
+         rows=self.old_by_atom.get(self.source(node).atom_id,())
+@@ -609,9 +625,9 @@
+         else:payload=self.literal(self.tree,None)
+         self.finish_exit(cursor,self.tree,payload,ExitKind.NORMAL)
+         self.regions.append(self.assemble_region(entry_world))
+-        graph=replace(self.make_graph(),root=self.frame_region,state_address_refinements=tuple(self.address_refinements),
+-            control_scopes=(ControlScope(self.root_scope,self.frame_region,None,ControlScopeKind.FRAME,self.unit,tuple(self.function_blocks)),),
+-            frame_roots=(FrameRoot(self.root_scope,FrameKind.MODULE,self.evidence.captured,abi),))
++        graph=self.finish_module_graph(replace(self.make_graph(),root=self.frame_region,state_address_refinements=tuple(self.address_refinements)),
++            ControlScope(self.root_scope,self.frame_region,None,ControlScopeKind.FRAME,self.unit,tuple(self.function_blocks)),
++            FrameRoot(self.root_scope,FrameKind.MODULE,self.evidence.captured,abi))
+         self.module_frontiers.extend((ModuleFrontier(self.unit,'ENTRY_PROTOCOL_UNPROVEN','declared source ABI is not an actual namespace/activation/import binding'),
+             ModuleFrontier(self.unit,'NAMESPACE_CONTENT_UNPROVEN','mapping access attempts do not establish stored content or alias/effect completeness')))
+         if remaining is not None:self.module_frontiers.append(ModuleFrontier(self.source(self.remaining_nodes[0]),'REQUIRED_EXPANSION',
+@@ -619,9 +635,231 @@
+         overlay=StructuredFrameBodyOverlay(self.declaration,module_source_census(self.prepared_source),self.root_scope,
+             frame_statement_slice(self.prepared_source,self.unit,F.BODY,self.prefix_nodes) if self.prefix_nodes else None,
+             tuple(self.statement_expansions),remaining,tuple(self.module_frontiers),self.operations_emitted,
+-            tuple(self.operation_links),tuple(self.value_links),tuple(self.use_links),tuple(self.protocols),tuple(self.loops),tuple(self.language_constants))
++            tuple(self.operation_links),tuple(self.value_links),tuple(self.use_links),tuple(self.protocols),tuple(self.loops),tuple(self.language_constants),
++            completion_profile=self.frame_completion_profile,profile=self.frame_body_profile)
+         result=SourceProgram(graph,LoweringMetadata(self.entry,self.snapshot),self.semantic,self.semantics,self.control,
+-            FrameBodyProfile.STRUCTURED_MAPPING_314_V1,module=overlay)
++            self.frame_body_profile,module=overlay)
+         from scar.analysis.source_module_validation import require_valid_structured_module_program
+         require_valid_structured_module_program(result,source_texts={str(self.prepared_source.path):self.prepared_source.text},code_evidence=self.evidence,max_operations=self.max_operations)
+         return result
++
++    def finish_module_graph(self,graph,scope,frame):
++        return replace(graph,control_scopes=(scope,),frame_roots=(frame,))
++
++
++@dataclass(frozen=True)
++class PropagationOperands:
++    """Construction-only references to this canonical completion, never a fact store."""
++    exception: ValueID
++    traceback: ValueID
++
++    def __post_init__(self):
++        if type(self.exception) is not ValueID or type(self.traceback) is not ValueID:
++            raise TypeError('propagation operands require exact canonical ValueIDs')
++
++
++class PropagationModuleBuilder(StructuredModuleBuilder):
++    def __init__(self,context,selection,evidence,max_operations):
++        super().__init__(context,selection,evidence,max_operations)
++        from scar.ir.program.module_entries import FrameBodyProfile,FrameCompletionProfile
++        from scar.ir.program.control import ControlScopeKind
++        self.frame_body_profile=FrameBodyProfile.STRUCTURED_MAPPING_PROPAGATION_314_V1
++        self.frame_completion_profile=FrameCompletionProfile.PROPAGATION_REF_PAIR_314_V1
++        self.prefix_nodes,self.remaining_nodes=mapping_prefix_selection(context,evidence,profile=self.frame_body_profile)
++        self.current_owner=self.root_scope;self.block_owners={}
++        self.scope_specs={self.root_scope:(ControlScopeKind.FRAME,None,self.unit)}
++        self.control_ports=[];self.exception_packets=[];self.pending_completions=[]
++        self.cleanup_interfaces=[];self.cleanup_enters=[];self.cleanup_resumes=[];self.cleanup_replacements=[]
++        self.exception_matches=[];self.failure_sinks=[]
++
++    def raise_payload_types(self):return (_REF,_REF)
++    def failure_payload(self,values):
++        if len(values)!=2:raise ValueError('paired profile requires this invocation exception/traceback results')
++        return PropagationOperands(*values)
++    def exception_reference(self,payload):return payload.exception
++    def failure_references(self,payload):return (payload.exception,payload.traceback)
++
++    def new_block(self,*args,**kwargs):
++        cursor=super().new_block(*args,**kwargs)
++        if self.function_context==self.frame_region:self.block_owners[cursor.block]=self.current_owner
++        return cursor
++
++    def in_owner(self,owner):
++        from contextlib import contextmanager
++        @contextmanager
++        def entered():
++            previous=self.current_owner;self.current_owner=owner
++            try:yield
++            finally:self.current_owner=previous
++        return entered()
++
++    def new_scope(self,kind,node,parent):
++        from scar.ir.program.ids import ControlScopeID
++        identity=self.fresh(ControlScopeID,'source-control-scope')
++        self.scope_specs[identity]=(kind,parent,self.source(node));return identity
++
++    def jump_values(self,cursor,target,values,node):
++        from scar.ir.program.model import Successor
++        identity=self.fresh(OperationID,'source-control-jump')
++        uses=tuple(self.use(identity,value,node,'forwarded',i) for i,value in enumerate((*values,cursor.state)))
++        self.emit(cursor,Operation(identity,'source-control-jump',(Behavior.CONTROL,),uses,
++            terminator=Terminator(TerminatorKind.JUMP,(Successor(target.block,tuple(use.id for use in uses)),))),node,SourceRole.CONTROL)
++        return identity
++
++    def packet(self,cursor,node,payload):
++        from scar.ir.program.control import ExceptionPacketDefinition,ProtocolValueKind
++        from scar.ir.program.model import ProtocolValue,OperationResult
++        from scar.ir.program.ids import ValueID
++        if type(payload) is not PropagationOperands:raise TypeError('packet must use this completion pair')
++        identity=self.fresh(OperationID,'propagation-packet')
++        uses=tuple(self.use(identity,value,node,role,i) for i,(value,role) in enumerate(
++            ((payload.exception,'propagated-exception'),(payload.traceback,'propagation-traceback'))))
++        value=ProtocolValue(self.fresh(ValueID,'propagation-packet'),self.frame_region,OperationResult(identity,0),ProtocolValueKind.EXCEPTION_PACKET)
++        self.add_value(value);self.link_value(value,node,SourceRole.EXCEPTION)
++        self.emit(cursor,Operation(identity,'pack-propagation-pair',(Behavior.CONTROL,),uses,(value.id,),effects_complete=True),node,SourceRole.EXCEPTION)
++        self.exception_packets.append(ExceptionPacketDefinition(value.id,uses[0].id,uses[1].id))
++        return value.id
++
++    def pending(self,cursor,node,port,payload=None):
++        from scar.ir.program.control import PendingCompletionDefinition,ProtocolValueKind
++        from scar.ir.program.model import ProtocolValue,OperationResult
++        from scar.ir.program.ids import ValueID
++        identity=self.fresh(OperationID,'language-pending')
++        uses=() if payload is None else (self.use(identity,payload,node,'language-payload',0),)
++        value=ProtocolValue(self.fresh(ValueID,'language-pending'),self.frame_region,OperationResult(identity,0),ProtocolValueKind.PENDING_COMPLETION)
++        self.add_value(value);self.link_value(value,node,SourceRole.CONTROL)
++        self.emit(cursor,Operation(identity,'pack-language-pending',(Behavior.CONTROL,),uses,(value.id,),effects_complete=True),node,SourceRole.CONTROL)
++        self.pending_completions.append(PendingCompletionDefinition(value.id,port.id,uses[0].id if uses else None))
++        return value.id
++
++    def raise_landing(self,node):
++        """Internal Raise landing, not an exit-port shim containing extra work."""
++        from scar.ir.program.control import ControlPort,LanguageCompletionKind,ProtocolValueKind,ProtocolValueType
++        from scar.ir.program.module_entries import FrameBodyProtocolKind as K
++        from scar.ir.program.ids import ControlPortID
++        with self.in_owner(self.root_scope):
++            landing=self.new_block(node,role=SourceRole.EXCEPTION,extra_types=(ProtocolValueType(ProtocolValueKind.EXCEPTION_PACKET),))
++        packet=self.block_arguments[landing.block][0]
++        held=((packet,node,'selected-propagation-packet'),)
++        held+=tuple((reference,self.tree,'held-namespace') for reference in self.entry_references)
++        held+=tuple((reference,node,'held-temporary') for reference in self.active_temporaries)
++        self.frame_transition(landing,node,held,K.FRAME_EXIT_EXCEPTION_PACKET)
++        identity=self.fresh(OperationID,'propagation-exit')
++        uses=(self.use(identity,packet,node,'packet',0),self.use(identity,landing.state,node,'post-world',0))
++        self.emit(landing,Operation(identity,'propagation-exit',(Behavior.CONTROL,),uses,
++            terminator=Terminator(TerminatorKind.RAISE,exit='raise',values=tuple(use.id for use in uses))),node,SourceRole.EXCEPTION)
++        port=ControlPort(self.fresh(ControlPortID,'frame-raise-landing'),self.root_scope,LanguageCompletionKind.RAISE,block=landing.block)
++        self.control_ports.append(port);return port
++
++    def dispatch(self,cursor,node,pending,port):
++        from scar.ir.program.control import PendingDispatchTerminator,PendingSuccessor,PendingPayload,LanguageCompletionKind
++        identity=self.fresh(OperationID,'language-dispatch')
++        selector=self.use(identity,pending,node,'pending-selector',0)
++        uses=[selector];edges=[]
++        for index,case in enumerate(port if type(port) is tuple else (port,)):
++            state=self.use(identity,cursor.state,node,'dispatch-world',index);uses.append(state)
++            args=(PendingPayload(),state.id) if case.kind is LanguageCompletionKind.RAISE else (state.id,)
++            edges.append(PendingSuccessor(case.id,case.block,args))
++        self.emit(cursor,Operation(identity,'language-dispatch',(Behavior.CONTROL,),tuple(uses),
++            terminator=PendingDispatchTerminator(selector.id,tuple(edges))),node,SourceRole.CONTROL)
++
++    def finish_exit(self,cursor,node,value,kind,*,binding=None):
++        if kind is ExitKind.NORMAL:return super().finish_exit(cursor,node,value,kind,binding=binding)
++        if type(value) is not PropagationOperands:raise TypeError('C raise cannot fabricate missing propagation traceback')
++        if self.failure_sinks:return self.failure_sinks[-1](cursor,value)
++        port=self.raise_landing(node);packet=self.packet(cursor,node,value);pending=self.pending(cursor,node,port,packet)
++        return self.dispatch(cursor,node,pending,port)
++
++    def body_exit(self,cursor,payload,kind):
++        if kind is ExitKind.NORMAL:return super().body_exit(cursor,payload,kind)
++        if type(payload) is not PropagationOperands:raise TypeError('C suffix must retain paired raise')
++        identity=self.fresh(OperationID,'slice-propagation-exit')
++        uses=tuple(self.use(identity,value,self.tree,role,i) for i,(value,role) in enumerate(
++            ((payload.exception,'exception'),(payload.traceback,'traceback'),(cursor.state,'post-world'))))
++        self.emit(cursor,Operation(identity,'slice-propagation-exit',(Behavior.CONTROL,),uses,
++            terminator=Terminator(TerminatorKind.RAISE,exit='raise',values=tuple(use.id for use in uses))),self.tree,SourceRole.EXCEPTION)
++
++    def assemble_region(self,entry_world):
++        from scar.ir.program.control import ProtocolValueType,ProtocolValueKind
++        original=super().assemble_region(entry_world)
++        raise_types=((ProtocolValueType(ProtocolValueKind.EXCEPTION_PACKET),self.state_type)
++            if self.function_context==self.frame_region else (_REF,_REF,self.state_type))
++        return replace(original,exits=tuple(replace(port,types=raise_types) if port.kind is ExitKind.RAISE else port for port in original.exits))
++
++    def delete_name(self,node,name,cursor):
++        from scar.ir.program.module_entries import FrameBodyProtocolKind as K
++        from scar.ir.program.state_addresses import AddressEffect,ReferenceOwner,NamespaceKey
++        from scar.ir.program.model import AccessMode
++        key=self.literal(node,name)
++        cursor,_,identity=self.invoke(cursor,node,((self.entry_references[0],node,'locals-owner',0,None),(key,node,'namespace-key',0,None)),result_type=None)
++        self.protocol(identity,K.DELETE_NAME_314,node);op=self.operation_records[identity]
++        self._addresses(identity,(AddressEffect(ReferenceOwner(op.uses[0].id),(NamespaceKey(op.uses[1].id),),AccessMode.WRITE),))
++        return cursor
++
++    def cleanup_exit(self,cursor,node,cleanup,original,selected,context,port,*,resume=False):
++        from scar.ir.program.control import ProtocolValueKind,ProtocolValueType
++        from scar.ir.program.cleanup import CleanupResume,CleanupReplace,CleanupRouteTerminator,CleanupRouteSuccessor
++        from scar.ir.program.model import OperationResult,StateAccess,AccessMode,Footprint,FootprintKind
++        from scar.ir.program.ids import ValueID
++        from scar.ir.program.structured import ControlEdgeReference
++        parent=self.scope_specs[cleanup][1]
++        # Replace starts a dedicated action block; no user evaluation hidden in it.
++        with self.in_owner(cleanup):action=self.new_block(node)
++        self.jump_values(cursor,action,(),node)
++        with self.in_owner(parent):
++            corridor=self.new_block(node,extra_types=(ProtocolValueType(ProtocolValueKind.PENDING_COMPLETION),))
++            final=self.new_block(node,extra_types=(ProtocolValueType(ProtocolValueKind.PENDING_COMPLETION),))
++        identity=self.fresh(OperationID,'cleanup-resume' if resume else 'cleanup-replace')
++        pending_use=self.use(identity,original,node,'entry-pending',0)
++        replacement_use=None if resume else self.use(identity,selected,node,'replacement-pending',0)
++        context_use=self.use(identity,context,node,'saved-handled-context',0)
++        before=self.use(identity,action.state,node,'cleanup-world',0)
++        after=StateVersionValue(self.fresh(ValueID,'cleanup-post-world'),self.frame_region,OperationResult(identity,0),self.world)
++        self.add_value(after);self.link_value(after,node,SourceRole.STATE)
++        uses=(pending_use,context_use,before) if resume else (pending_use,replacement_use,context_use,before)
++        self.emit(action,Operation(identity,'cleanup-resume' if resume else 'cleanup-replace',(Behavior.CONTROL,Behavior.READ,Behavior.WRITE),uses,(after.id,),
++            (StateAccess(self.world,before.id,AccessMode.READ_WRITE,after.id,Footprint(FootprintKind.WHOLE)),),effects_complete=False),node,SourceRole.CONTROL)
++        action.state=after.id;jump=self.jump_values(action,corridor,(selected,),node)
++        record=(CleanupResume(identity,cleanup,pending_use.id,context_use.id,ControlEdgeReference(jump,0)) if resume else
++            CleanupReplace(identity,cleanup,pending_use.id,replacement_use.id,context_use.id,ControlEdgeReference(jump,0)))
++        (self.cleanup_resumes if resume else self.cleanup_replacements).append(record)
++        token=self.block_arguments[corridor.block][0]
++        route_id=self.fresh(OperationID,'post-pop-route')
++        selector=self.use(route_id,token,node,'pending-selector',0);uses=[selector];edges=[]
++        for index,case in enumerate(port if type(port) is tuple else (port,)):
++            forward=self.use(route_id,token,node,'forwarded-pending',index)
++            state=self.use(route_id,corridor.state,node,'post-pop-world',index)
++            uses.extend((forward,state));edges.append(CleanupRouteSuccessor(case.id,final.block,(forward.id,state.id)))
++        self.emit(corridor,Operation(route_id,'post-pop-route',(Behavior.CONTROL,),tuple(uses),
++            terminator=CleanupRouteTerminator(selector.id,tuple(edges))),node,SourceRole.CONTROL)
++        self.dispatch(final,node,self.block_arguments[final.block][0],port)
++
++    def cleanup_exit_cases(self,cursor,node,cleanup,original,selected,context,ports):
++        if not ports:raise ValueError('deferred handler failure has no canonical source ports')
++        return self.cleanup_exit(cursor,node,cleanup,original,selected,context,ports)
++
++    def statements(self,nodes,cursor):
++        from scar.ir.program.module_entries import FrameStatementExpansion,StatementSequenceField as F
++        from scar.analysis.source_statement_lowering import try_statement
++        for node in nodes:
++            if not isinstance(node,ast.Try):cursor=super().statements((node,),cursor);continue
++            start=len(self.operations);entry=cursor.block
++            cursor=try_statement(self,node,cursor)
++            children=(frame_statement_slice(self.prepared_source,self.source(node),F.BODY,node.body),)
++            children+=tuple(frame_statement_slice(self.prepared_source,self.source(handler),F.HANDLER_BODY,handler.body) for handler in node.handlers)
++            self.statement_expansions.append(FrameStatementExpansion(self.source(node),self.frame_region,entry,cursor.block,
++                tuple(op.id for op in self.operations[start:]),children))
++        return cursor
++
++    def finish_module_graph(self,graph,scope,frame):
++        from scar.ir.program.control import ControlScope
++        from scar.ir.program.cleanup import HandledContextDomain
++        rows=[]
++        for identity,(kind,parent,source) in self.scope_specs.items():
++            blocks=tuple(block for block in self.function_blocks if self.block_owners.get(block)==identity)
++            if blocks:rows.append(ControlScope(identity,self.frame_region,parent,kind,source,blocks))
++        return replace(graph,control_scopes=tuple(rows),frame_roots=(frame,),control_ports=tuple(self.control_ports),
++            exception_packets=tuple(self.exception_packets),pending_completions=tuple(self.pending_completions),
++            handled_context_domains=(HandledContextDomain(self.frame_region,self.world),) if self.cleanup_interfaces else (),
++            cleanup_interfaces=tuple(self.cleanup_interfaces),cleanup_enters=tuple(self.cleanup_enters),
++            cleanup_resumes=tuple(self.cleanup_resumes),cleanup_replacements=tuple(self.cleanup_replacements),exception_matches=tuple(self.exception_matches))
+--- a/scar/analysis/source_module_validation.py
++++ b/scar/analysis/source_module_validation.py
+@@ -423,9 +423,10 @@
+     from scar.ir.program.validation import require_valid
+     overlay=result.module
+     _need(type(overlay) is StructuredFrameBodyOverlay and decode_frame_body(encode_frame_body(overlay))==overlay,'SP8 needs its closed typed overlay')
+-    _need(result.profile is FrameBodyProfile.STRUCTURED_MAPPING_314_V1 and overlay.profile is result.profile
++    paired=result.profile is FrameBodyProfile.STRUCTURED_MAPPING_PROPAGATION_314_V1
++    _need(result.profile in (FrameBodyProfile.STRUCTURED_MAPPING_314_V1,FrameBodyProfile.STRUCTURED_MAPPING_PROPAGATION_314_V1) and overlay.profile is result.profile
+           and overlay.namespace_policy is NamespacePolicy.MODULE_MAPPING_314_V1
+-          and overlay.completion_profile is FrameCompletionProfile.RAW_EXCEPTION_REF_314_V1
++          and overlay.completion_profile is (FrameCompletionProfile.PROPAGATION_REF_PAIR_314_V1 if paired else FrameCompletionProfile.RAW_EXCEPTION_REF_314_V1)
+           and all(value is None for value in (result.interface,result.frame,result.structured,result.language)),
+           'SP8 mapping profile cannot acquire a function ABI or packet-completion claim')
+     unit=overlay.declaration.unit
+@@ -443,7 +444,7 @@
+     _need(module_unit(context)==unit and module_source_census(context)==overlay.census,'SP8 original MODULE census differs')
+     _need(code_evidence is not None and require_root_evidence(unit,code_evidence)==overlay.declaration.witness,
+           'SP8 requires exact readonly whole-root evidence, not a code-name or report boolean')
+-    prefix,tail=mapping_prefix_selection(context,code_evidence)
++    prefix,tail=mapping_prefix_selection(context,code_evidence,profile=result.profile)
+     _need(overlay.prefix==(frame_statement_slice(context,unit,F.BODY,prefix) if prefix else None),'SP8 prefix is not the mechanical maximal supported collection')
+     _need((overlay.remaining is not None)==bool(tail),'SP8 missing/extra remaining source collection')
+     if tail:
+@@ -454,12 +455,14 @@
+     _need(type(max_operations) is int and 1<=max_operations<=100000
+           and len(graph.operations)==overlay.operations_emitted<=max_operations,'SP8 operation budget/count differs')
+     _need(not any((graph.environments,graph.function_entries,graph.binding_definitions,graph.binding_reads,
+-          graph.control_ports,graph.exception_packets,graph.pending_completions,graph.handled_context_domains,
++          graph.resumable_bodies,graph.stored_value_writes,graph.stored_value_reads,
++          graph.call_effect_expansions)), 'B raw-reference profile cannot claim function/pending/cleanup/stored-content effects')
++    if not paired:_need(not any((graph.control_ports,graph.exception_packets,graph.pending_completions,graph.handled_context_domains,
+           graph.cleanup_interfaces,graph.cleanup_enters,graph.cleanup_resumes,graph.cleanup_replacements,
+-          graph.handled_context_reads,graph.resumable_bodies,graph.stored_value_writes,graph.stored_value_reads,
+-          graph.call_effect_expansions)), 'B raw-reference profile cannot claim function/pending/cleanup/stored-content effects')
+-    _need(len(graph.frame_roots)==len(graph.control_scopes)==1,'SP8 B has exactly one actual frame authority')
+-    root=graph.frame_roots[0];scope=graph.control_scopes[0]
++          graph.handled_context_reads)) and len(graph.control_scopes)==1,'B raw-reference profile cannot acquire C0/C1 propagation')
++    _need(len(graph.frame_roots)==1,'SP8 has exactly one actual frame authority')
++    root=graph.frame_roots[0];scope=next((row for row in graph.control_scopes if row.id==root.scope),None)
++    _need(scope is not None,'missing actual frame root scope')
+     _need(root.scope==scope.id==overlay.root_scope and root.kind is FrameKind.MODULE and root.code==code_evidence.captured
+           and scope.kind is ControlScopeKind.FRAME and scope.source==unit and scope.region==graph.root
+           and type(root.entry) is MappingFramePorts and not root.entry.closure_cells,
+@@ -494,7 +497,7 @@
+               and set(op.behaviors)=={Behavior.CONTROL,Behavior.READ,Behavior.WRITE}
+               and op.invoke_arguments==tuple(use.id for use in op.uses)
+               and tuple((row.kind,row.types) for row in op.completions)==
+-              ((ExitKind.NORMAL,normal_types),(ExitKind.RAISE,(ref_type,state_type)))
++              ((ExitKind.NORMAL,normal_types),(ExitKind.RAISE,((ref_type,ref_type,state_type) if paired else (ref_type,state_type))))
+               and tuple(edge.kind for edge in op.terminator.successors)==(ExitKind.NORMAL,ExitKind.RAISE)
+               and all(edge.arguments==tuple(CompletionResult(i) for i in range(len(signature.types)))
+                   for edge,signature in zip(op.terminator.successors,op.completions)), 'SP8 invocation raw completion/world signature differs')
+@@ -507,7 +510,7 @@
+     expected_addresses=set()
+     nodes={};expression_nodes={}
+     for node in ast.walk(context.tree):
+-        if isinstance(node,(ast.expr,ast.stmt)):
++        if isinstance(node,(ast.expr,ast.stmt,ast.ExceptHandler)):
+             try:reference=_module_statement_ref(context,node)
+             except ValueError:continue  # Unvisited source gaps do not acquire fabricated atoms.
+             (expression_nodes if isinstance(node,ast.expr) else nodes)[reference]=node
+@@ -516,7 +519,10 @@
+     for protocol in overlay.protocols:
+         op=operations[protocol.operation];kind=protocol.kind
+         if type(kind) is not K:continue
+-        normal_types=(state_type,) if kind in (K.STORE_NAME_314,K.UNEXPANDED_SLICE) else (ref_type,state_type)
++        if kind in (K.MATCH_EXCEPTION_BORROWED_314,K.FRAME_EXIT_EXCEPTION_PACKET):
++            _need(paired,'RAW profile cannot acquire propagation frame/matcher primitives')
++            continue
++        normal_types=(state_type,) if kind in (K.STORE_NAME_314,K.DELETE_NAME_314,K.UNEXPANDED_SLICE) else (ref_type,state_type)
+         invoke(op,normal_types)
+         if kind is K.LOAD_NAME_314:
+             node=expression_nodes.get(protocol.source)
+@@ -529,8 +535,8 @@
+             node=expression_nodes.get(protocol.source) or nodes.get(protocol.source)
+             if isinstance(node,ast.Name):literal(op.uses[1],node.id)
+             else:
+-                _need(isinstance(node,(ast.Import,ast.ImportFrom)),'STORE_NAME source must be an original binding/import')
+-                allowed=[alias.asname or alias.name for alias in node.names]
++                _need(isinstance(node,(ast.Import,ast.ImportFrom)) or paired and isinstance(node,ast.ExceptHandler),'STORE_NAME source must be an original binding/import/handler')
++                allowed=[node.name] if isinstance(node,ast.ExceptHandler) else [alias.asname or alias.name for alias in node.names]
+                 _need(type(values[op.uses[1].value].origin) is LiteralOrigin and values[op.uses[1].value].origin.value in allowed,'import alias STORE_NAME key differs')
+             expected_addresses.add(op.id);expected=[(0,1,'WRITE')]
+         elif kind is K.IMPORT_NAME_314:
+@@ -560,6 +566,15 @@
+             _need(isinstance(nodes.get(protocol.source),ast.ImportFrom) and len(op.uses)==3 and op.callee is None,
+                   'IMPORT_FROM must keep its original source and dynamic receiver/key')
+             expected=None
++        elif kind is K.DELETE_NAME_314:
++            node=nodes.get(protocol.source)
++            _need(paired and isinstance(node,ast.ExceptHandler) and node.name and len(op.uses)==3
++                  and op.uses[0].value==abi.locals_namespace,'handler deletion needs original as-name and L')
++            literal(op.uses[1],node.name);expected_addresses.add(op.id);expected=[(0,1,'WRITE')]
++        elif kind is K.VALIDATE_EXCEPT_TYPE_314:
++            _need(paired and isinstance(nodes.get(protocol.source),ast.ExceptHandler) and len(op.uses)==2,
++                  'handler validation needs its original source and dynamic handler ref')
++            expected=None
+         else:expected=None
+         if expected is not None:
+             row=refinements.get(op.id)
+@@ -577,6 +592,10 @@
+         expected_statements.append(node)
+         if isinstance(node,ast.For):
+             for child in (*node.body,*node.orelse):descend(child)
++        if paired and isinstance(node,ast.Try):
++            for child in node.body:descend(child)
++            for handler in node.handlers:
++                for child in handler.body:descend(child)
+     for node in prefix:descend(node)
+     expansions={row.source:row for row in overlay.expansions}
+     _need(len(expansions)==len(overlay.expansions) and set(expansions)=={_module_statement_ref(context,node) for node in expected_statements},
+@@ -585,6 +604,9 @@
+         expansion=expansions[_module_statement_ref(context,node)]
+         expected_children=tuple(frame_statement_slice(context,expansion.source,field,getattr(node,name))
+             for name,field in (('body',F.BODY),('orelse',F.ORELSE)) if isinstance(node,ast.For) and getattr(node,name))
++        if paired and isinstance(node,ast.Try):
++            expected_children=(frame_statement_slice(context,expansion.source,F.BODY,node.body),)+tuple(
++                frame_statement_slice(context,_module_statement_ref(context,handler),F.HANDLER_BODY,handler.body) for handler in node.handlers)
+         _need(expansion.region==graph.root and expansion.child_slices==expected_children
+               and expansion.entry in blocks and expansion.normal in blocks
+               and expansion.entry in {block.id for block in region.blocks}
+@@ -672,6 +694,7 @@
+     for protocol in overlay.protocols:
+         if protocol.kind is K.STORE_NAME_314:
+             store=operations[protocol.operation];consumed=store.uses[2].value
++            if paired and isinstance(nodes.get(protocol.source),ast.ExceptHandler):continue
+             _need([(op.id,use.id) for op in graph.operations for use in op.uses if use.value==consumed]==[(store.id,store.uses[2].id)],
+                   'STORE_NAME consumed stack input must not remain pending on either completion')
+     # Constant references remain the original typed whole-root code-slot records.
+@@ -704,3 +727,146 @@
+           and any(frontier.kind=='NAMESPACE_CONTENT_UNPROVEN' for frontier in overlay.frontiers)
+           and (not tail or any(frontier.kind=='REQUIRED_EXPANSION' for frontier in overlay.frontiers)),
+           'SP8 cannot silently discharge namespace/runtime/residual obligations')
++    if paired:require_valid_module_propagation(result,context=context,code_evidence=code_evidence)
++
++
++def require_valid_module_propagation(result,*,context,code_evidence):
++    """Source C: derive provenance and cleanup order from canonical endpoints."""
++    from scar.ir.program.module_entries import FrameBodyProtocolKind as K
++    from scar.ir.program.control import (ProtocolValueKind as P,ControlScopeKind as S,LanguageCompletionKind as L,
++        PendingDispatchTerminator)
++    from scar.ir.program.cleanup import CleanupRouteTerminator
++    from scar.ir.program.model import ProtocolValue,UseRole
++    from scar.analysis.source_module_lowering import _module_statement_ref
++    graph=result.graph;overlay=result.module
++    values={v.id:v for v in graph.values};ops={o.id:o for o in graph.operations}
++    blocks={b.id:b for region in graph.regions for b in region.blocks}
++    owners={b:s.id for s in graph.control_scopes for b in s.blocks}
++    scopes={s.id:s for s in graph.control_scopes}
++    op_blocks={op:b.id for b in blocks.values() for op in b.operations}
++    protocols={p.operation:p for p in overlay.protocols}
++    all_uses={use.id:use for op in graph.operations for use in op.uses}
++    # Only actual RAISE completion pairs seed provenance. Propagate pairs together
++    # over original Uses, never by class/name/hash equality or an evidence boolean.
++    pairs=set();incoming={b:[] for b in blocks}
++    for op in graph.operations:
++        term=op.terminator
++        if term is None:continue
++        for edge in term.successors:incoming[edge.block].append((op,edge))
++        if term.kind is TerminatorKind.INVOKE:
++            edge=next(edge for edge in term.successors if edge.kind is ExitKind.RAISE)
++            pairs.add(tuple(blocks[edge.block].arguments[:2]))
++    changed=True
++    while changed:
++        changed=False
++        for block in blocks.values():
++            refs=[v for v in block.arguments if isinstance(values[v],ReferenceValue)]
++            if len(refs)!=2 or tuple(refs) in pairs or not incoming[block.id]:continue
++            positions=[block.arguments.index(v) for v in refs]
++            sources=[]
++            for op,edge in incoming[block.id]:
++                actual=[edge.arguments[index] for index in positions]
++                if not all(use in {u.id for u in op.uses} for use in actual):sources.append(None)
++                else:sources.append(tuple(all_uses[use].value for use in actual))
++            if all(pair in pairs for pair in sources):pairs.add(tuple(refs));changed=True
++    for declaration in graph.exception_packets:
++        pair=(all_uses[declaration.exception].value,all_uses[declaration.traceback].value)
++        _need(pair in pairs,'packet must preserve one actual invocation/forwarded propagation pair; no guessed traceback')
++    frame=graph.frame_roots[0];abi=frame.entry
++    frame_exits={p.operation for p in overlay.protocols if p.kind is K.FRAME_EXIT_EXCEPTION_PACKET}
++    for identity in frame_exits:
++        op=ops[identity];packet=values[op.uses[0].value]
++        _need(isinstance(packet,ProtocolValue) and packet.protocol is P.EXCEPTION_PACKET
++              and op.uses[0].role is UseRole.PROTOCOL
++              and tuple(use.value for use in op.uses[1:4])==(abi.locals_namespace,abi.globals_namespace,abi.builtins_namespace)
++              and all(isinstance(values[use.value],ReferenceValue) for use in op.uses[1:-1])
++              and op.terminator is None and op.callee is None and not op.effects_complete
++              and set(op.behaviors)=={Behavior.READ,Behavior.WRITE,Behavior.MEMORY}
++              and len(op.accesses)==1 and op.accesses[0].mode.value=='READ_WRITE'
++              and op.accesses[0].before==op.uses[-1].id and op.results==(op.accesses[0].after,),
++              'packet frame-exit must retain its real protocol aggregate/refs and current world, without pending escape')
++        block=blocks[op_blocks[identity]];last=ops[block.operations[-1]]
++        _need(owners[block.id]==frame.scope and block.operations==(op.id,last.id)
++              and last.terminator.kind is TerminatorKind.RAISE and last.terminator.exit=='raise'
++              and tuple(use.value for use in last.uses)==(packet.id,op.results[0]),
++              'frame closing landing must raise the identical selected packet with its post-world')
++    for region in graph.regions:
++        if region.id!=graph.root:continue
++        for block in region.blocks:
++            last=ops[block.operations[-1]]
++            if last.terminator.kind is TerminatorKind.RAISE:
++                _need(len(block.operations)==2 and block.operations[0] in frame_exits,'module raise bypassed packet-preserving frame close')
++    for port in graph.control_ports:
++        if port.kind is L.RAISE:
++            _need(port.block in blocks and port.scope==frame.scope
++                  and blocks[port.block].operations[0] in frame_exits and port.exit is None,
++                  'C source Raise port is its explicit frame-closing block landing, never a relaxed exit shim')
++    # A paired profile never routes a symbolic traceback via Python attribute lookup.
++    _need(not graph.handled_context_reads,'C does not need a new context-read/source-sys.exception authority')
++    interfaces={row.scope:row for row in graph.cleanup_interfaces}
++    enters={row.cleanup:row for row in graph.cleanup_enters}
++    packets={row.value:row for row in graph.exception_packets}
++    pending={row.value:row for row in graph.pending_completions}
++    nodes={_module_statement_ref(context,node):node for node in ast.walk(context.tree) if isinstance(node,ast.ExceptHandler)}
++    def reachable(start,stop_actions=True):
++        seen=set();queue=[start]
++        action_ops={row.operation for row in (*graph.cleanup_resumes,*graph.cleanup_replacements)}
++        while queue:
++            identity=queue.pop()
++            if identity in seen:continue
++            seen.add(identity);block=blocks[identity]
++            if stop_actions and any(op in action_ops for op in block.operations):continue
++            term=ops[block.operations[-1]].terminator
++            queue.extend(edge.block for edge in term.successors)
++        return seen
++    for cleanup,interface in interfaces.items():
++        source=scopes[cleanup].source;handler=nodes.get(source)
++        _need(handler is not None and scopes[cleanup].kind is S.CLEANUP,'cleanup must correspond to the original ExceptHandler atom')
++        entry=blocks[interface.entry];enter=enters[cleanup]
++        _need(len(entry.arguments)==3 and isinstance(values[entry.arguments[1]],ReferenceValue),
++              'caught exception is an actual handler entry Reference, separate from pending/context')
++        caught=entry.arguments[1]
++        protected=scopes[interface.protected]
++        gate_blocks=[blocks[b] for b in protected.blocks]
++        _need(len(gate_blocks)==1,'caught propagation gate must retain its one original incoming pair')
++        gate=gate_blocks[0];route=ops[gate.operations[-1]]
++        _need(type(route.terminator) is CleanupRouteTerminator and len(route.terminator.successors)==1,'handler entry must use the canonical C1 route')
++        edge=route.terminator.successors[0]
++        token=all_uses[edge.arguments[0]].value;packet_value=all_uses[pending[token].payload].value
++        declaration=packets[packet_value]
++        _need(edge.block==entry.id and all_uses[edge.arguments[1]].value==all_uses[declaration.exception].value,
++              'handler exception reference must come from this same packet constructor, not a parallel identity guess')
++        if handler.type is not None:
++            matchers=[row for row in graph.exception_matches if protocols.get(row.operation) is not None and protocols[row.operation].source==source]
++            _need(len(matchers)==1 and matchers[0].raise_result is None
++                  and all_uses[matchers[0].input_use].value==caught
++                  and protocols[matchers[0].operation].kind is K.MATCH_EXCEPTION_BORROWED_314,
++                  'handler needs the original normal-only borrowed matcher, with type errors on the separate paired operation')
++            validations=[ops[p.operation] for p in overlay.protocols if p.kind is K.VALIDATE_EXCEPT_TYPE_314 and p.source==source]
++            _need(len(validations)==1,'dynamic handler type validation/error protocol missing')
++            handler_operand=all_uses[matchers[0].handler.use].value
++            normal_edge=validations[0].terminator.successors[0]
++            _need(handler_operand==blocks[normal_edge.block].arguments[0],'matcher must consume this validation normal result port')
++        stores=[ops[p.operation] for p in overlay.protocols if p.kind is K.STORE_NAME_314 and p.source==source]
++        deletes=[ops[p.operation] for p in overlay.protocols if p.kind is K.DELETE_NAME_314 and p.source==source]
++        if not handler.name:_need(not stores and not deletes,'bare handler invented an as-name cleanup');continue
++        binding=[op for op in stores if op.uses[2].value==caught]
++        clears=[op for op in stores if type(values[op.uses[2].value].origin) is LiteralOrigin
++                and values[op.uses[2].value].origin.value is None]
++        _need(len(binding)==1 and len(clears) in (1,2) and len(deletes)==len(clears),'as binding and actual cleanup paths are incomplete')
++        binding_failure=binding[0].terminator.successors[1].block
++        before_restore=reachable(binding_failure)
++        _need(not any(op_blocks[op.id] in before_restore for op in (*clears,*deletes)),
++              'binding failure must not execute name-clear protection that was not entered')
++        for clear in clears:
++            normal=blocks[clear.terminator.successors[0].block]
++            following=[op for op in deletes if op.id in normal.operations]
++            _need(len(following)==1 and following[0].uses[-1].value==normal.arguments[-1],
++                  'handler cleanup must perform None-store then delete on its exact normal post-world')
++            owner=owners[op_blocks[clear.id]]
++            _need(owner in (cleanup,scopes[cleanup].parent),'name clear escaped its normal/exceptional lexical corridor')
++        _need(any(owners[op_blocks[clear.id]]==scopes[cleanup].parent for clear in clears),
++              'normal handler must restore ambient before name clear')
++        # All C1 private context/token forwarding, LIFO, freshness and actual
++        # current-state edges already passed the ordinary core/C0/C1 validators.
++    _need(len(graph.cleanup_enters)==len(graph.cleanup_interfaces),'C cannot omit context entry for an expanded handler')
