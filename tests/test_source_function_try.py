@@ -64,9 +64,8 @@ class FunctionTryChecks(unittest.TestCase):
                           '\n'.join(g.detail for g in crossing.metadata.gaps))
             missing_expression, _ = self.lower(directory,
                 'def f(x, action):\n    try:\n        action(x)\n    except Exception:\n        action(x)\n    return x\n')
-            self.assertIsNone(missing_expression.graph)
-            self.assertIn('FUNCTION_TRY_HANDLER_EXPRESSION_SOURCE_PROTOCOL_UNIMPLEMENTED',
-                          '\n'.join(g.detail for g in missing_expression.metadata.gaps))
+            self.assertIsNotNone(missing_expression.graph)
+            SourceProgram.read_structure(missing_expression.to_dict(), source_texts={str(Path(directory) / "ordinary.py"): 'def f(x, action):\n    try:\n        action(x)\n    except Exception:\n        action(x)\n    return x\n'})
 
 
 if __name__ == '__main__':

@@ -32,6 +32,7 @@ class FunctionTryBuilder(StructuredEnvironmentBuilder):
         self.cleanup_interfaces, self.cleanup_enters, self.cleanup_resumes, self.cleanup_replacements = [], [], [], []
         self.exception_matches, self.failure_sinks = [], []
         self.try_depth = 0
+        self.handler_expression_depth = 0
         node = self.functions[self.entry]
         args = node.args
         self.formal_names = {x.arg for x in (*args.posonlyargs, *args.args, *args.kwonlyargs)}
@@ -136,7 +137,24 @@ class FunctionTryBuilder(StructuredEnvironmentBuilder):
                 'FUNCTION_TRY_LOCAL_BINDING_PROPAGATION_UNIMPLEMENTED')
         return super().read_local(node, cursor, old)
 
+    @contextmanager
+    def handler_expression(self):
+        self.handler_expression_depth += 1
+        try:
+            yield
+        finally:
+            self.handler_expression_depth -= 1
+
+    def old_operation(self, node):
+        records = self.old_by_atom.get(self.source(node).atom_id, ())
+        if self.handler_expression_depth and not records:
+            return None
+        return super().old_operation(node)
+
     def expr(self, node, cursor):
+        if self.handler_expression_depth and not self.old_by_atom.get(self.source(node).atom_id, ()):
+            from scar.analysis.source_heap_lowering import expression_for_heap_target
+            return expression_for_heap_target(self, node, cursor)
         if isinstance(node, ast.GeneratorExp):
             raise _Unsupported(GapKind.UNSUPPORTED_SYNTAX, node,
                 'FUNCTION_TRY_RESUMABLE_PROPAGATION_ABI_UNIMPLEMENTED')
@@ -346,16 +364,8 @@ class FunctionTryBuilder(StructuredEnvironmentBuilder):
             current = entry
             try:
                 if handler.type is not None:
-                    # The historical computational overlay does not visit
-                    # handler expressions. Reuse the existing source-name
-                    # adapter only for proven ordinary local parameters;
-                    # never fabricate a source operation or namespace read.
-                    if (not isinstance(handler.type, ast.Name)
-                            or handler.type.id not in self.formal_names
-                            or handler.type.id in self.cell_references):
-                        raise _Unsupported(GapKind.SOURCE_MAPPING, handler.type,
-                            'FUNCTION_TRY_HANDLER_EXPRESSION_SOURCE_PROTOCOL_UNIMPLEMENTED')
-                    current, handler_ref = self.read_source_name(handler.type, current)
+                    with self.handler_expression():
+                        current, handler_ref = self.expr(handler.type, current)
                     self.frame_transition(current, handler, ((handler_ref, handler.type, 'handler-type-hold'),), K.FRAME_HOLD_TEMPORARY)
                     self.active_temporaries.append(handler_ref)
                     def invalid_type(failed, payload):
