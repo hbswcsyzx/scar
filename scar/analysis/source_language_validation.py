@@ -272,7 +272,7 @@ def validate_language_body(model, graph, interface, metadata, semantic, language
         source_tree=source_tree, options=options, structural_only=structural_only)
     from scar.analysis.source_string_validation import validate_string_source
     string_protocols = validate_string_source(model, graph, interface, metadata, semantic,
-        source_tree=source_tree, options=options, structural_only=structural_only)
+        source_tree=source_tree, options=options, structural_only=structural_only, language=language)
     tuple_ownership = None
     if Capability.SLICE_KEYS in language.capabilities:
         from scar.analysis.source_tuple_validation import validate_tuple_key_ownership
