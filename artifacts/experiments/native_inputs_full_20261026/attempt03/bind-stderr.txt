@@ -1,0 +1,31 @@
+Traceback (most recent call last):
+  File "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/native_inputs_full_20261026/attempt03/bind_inputs.py", line 23, in <module>
+    result=bind_native_capture_batches(coordinates,C,part,D/'native-input-connections',expected_manifest_sha256=hashlib.sha256(part.read_bytes()).hexdigest(),capture_model_path=model,expected_capture_model_sha256=hashlib.sha256(model.read_bytes()).hexdigest(),budget=NativeCaptureBatchBudget(max_wall_seconds=2400),input_metadata_budget=NativeInputIndexBudget(),progress=progress,on_verified_input_shard=checked)
+  File "/home/zyf/AAA/scar-worktrees/frame-entry-routing/scar/trace/native_capture_batch.py", line 1098, in bind_native_capture_batches
+    emit_shard(pending)
+    ~~~~~~~~~~^^^^^^^^^
+  File "/home/zyf/AAA/scar-worktrees/frame-entry-routing/scar/trace/native_capture_batch.py", line 1078, in emit_shard
+    input_associations=input_metadata.bind_shard(verified)
+  File "/home/zyf/AAA/scar-worktrees/frame-entry-routing/scar/trace/native_input_index.py", line 237, in bind_shard
+    self.check(shard,associations)
+    ~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+  File "/home/zyf/AAA/scar-worktrees/frame-entry-routing/scar/trace/native_input_index.py", line 250, in check
+    source=self.unpacked('row',normal['row'],raw,mac)
+  File "/home/zyf/AAA/scar-worktrees/frame-entry-routing/scar/trace/native_input_index.py", line 68, in unpacked
+    return _json(decoded)
+  File "/home/zyf/AAA/scar-worktrees/frame-entry-routing/scar/trace/native_tensor_inputs.py", line 30, in _json
+    return json.loads(raw, object_pairs_hook=_pairs, parse_constant=invalid)
+           ~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/zyf/miniconda3/envs/lewm/lib/python3.14/json/__init__.py", line 365, in loads
+    return cls(**kw).decode(s)
+           ~~~~~~~~~~~~~~~~^^^
+  File "/home/zyf/miniconda3/envs/lewm/lib/python3.14/json/decoder.py", line 345, in decode
+    obj, end = self.raw_decode(s, idx=_w(s, 0).end())
+               ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/zyf/miniconda3/envs/lewm/lib/python3.14/json/decoder.py", line 361, in raw_decode
+    obj, end = self.scan_once(s, idx)
+               ~~~~~~~~~~~~~~^^^^^^^^
+  File "/home/zyf/AAA/scar-worktrees/frame-entry-routing/scar/trace/native_tensor_inputs.py", line 19, in _pairs
+    def _pairs(items):
+    
+KeyboardInterrupt

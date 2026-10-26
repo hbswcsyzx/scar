@@ -1,0 +1,11 @@
+{
+  "actual_exit_code": 0,
+  "session": 4614,
+  "whole_elapsed_seconds": 2407.181908766972,
+  "native_wall_before_metadata_finalize_seconds": 2258.826222064963,
+  "gnu_elapsed": "40:08.94",
+  "gnu_peak_rss_kib": 1168172,
+  "source_snapshot": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/native_inputs_full_20261026/attempt05/SOURCE.json",
+  "target_runs_added": 0,
+  "scope": "complete raw metadata join plus dispatch-boundary associations; whole model false; canonical parent navigation pending separate consumer step"
+}

@@ -1,0 +1,13 @@
+Traceback (most recent call last):
+  File "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/native_inputs_full_20261026/attempt02/bind_inputs.py", line 23, in <module>
+    result=bind_native_capture_batches(coordinates,C,part,D/'native-input-connections',expected_manifest_sha256=hashlib.sha256(part.read_bytes()).hexdigest(),capture_model_path=model,expected_capture_model_sha256=hashlib.sha256(model.read_bytes()).hexdigest(),budget=NativeCaptureBatchBudget(max_wall_seconds=2400),input_metadata_budget=NativeInputIndexBudget(),progress=progress,on_verified_input_shard=checked)
+  File "/home/zyf/AAA/scar-worktrees/frame-entry-routing/scar/trace/native_capture_batch.py", line 877, in bind_native_capture_batches
+    input_metadata=prepare_native_input_metadata_index(coordinates,owner,out/'input-metadata',
+        budget=input_metadata_budget,progress=progress)
+  File "/home/zyf/AAA/scar-worktrees/frame-entry-routing/scar/trace/native_input_index.py", line 302, in prepare_native_input_metadata_index
+    return NativeInputIndexSession(_INDEX_OWNER,coordinates,owner,out,limits,progress).prepare()
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/home/zyf/AAA/scar-worktrees/frame-entry-routing/scar/trace/native_input_index.py", line 190, in prepare
+    self.db.execute('INSERT INTO rows VALUES(?,?,?,?,?,?)',(idx,row['node_id'],row['tree_result'],row['tree_parent'],packed,seal))
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+sqlite3.OperationalError: database or disk is full

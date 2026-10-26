@@ -1,0 +1,49 @@
+{
+  "scope": "filesystem stat only; no bulk decode/revalidation",
+  "canonical_public_file_groups": {
+    "program.json": 5273398,
+    "native-interface.json": 64328,
+    "report.json": 1994062,
+    "dispatch-inventory": 95855423,
+    "native-parent-inventory": 361943162,
+    "input-metadata": 62298488,
+    "observed-dispatches": 53923175,
+    "source-evidence.json": 615321309,
+    "source-values.json": 261979624,
+    "source-projection-receipts.json": 1415839551,
+    "validation.json": 47654116,
+    "execution.json": 1415751485,
+    "manifest.json": 174007,
+    "000000.jsonl": 401325158
+  },
+  "files_per_group": {
+    "program.json": 1,
+    "native-interface.json": 1,
+    "report.json": 157,
+    "dispatch-inventory": 41,
+    "native-parent-inventory": 312,
+    "input-metadata": 378,
+    "observed-dispatches": 41,
+    "source-evidence.json": 156,
+    "source-values.json": 156,
+    "source-projection-receipts.json": 156,
+    "validation.json": 156,
+    "execution.json": 156,
+    "manifest.json": 156,
+    "000000.jsonl": 156
+  },
+  "metadata_tables": {
+    "associations": {
+      "records": 65130,
+      "chunks": 66,
+      "stored_bytes": 14867882,
+      "raw_bytes": 274582619
+    },
+    "rows": {
+      "records": 310410,
+      "chunks": 311,
+      "stored_bytes": 47315004,
+      "raw_bytes": 1149058252
+    }
+  }
+}

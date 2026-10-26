@@ -1,0 +1,251 @@
+{
+  "scope": "closed ordinary import and failed/stopped attempts only; no current result prefilled",
+  "files": [
+    {
+      "path": "import_native.py",
+      "source_uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/native_inputs_full_20261026/import_native.py",
+      "sha256": "54b35c6e01b52973f8f80ec9f1c9cc77e5037d0fe2f9ac33bba5a23f70c4a417",
+      "size_bytes": 989
+    },
+    {
+      "path": "import-result.json",
+      "source_uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/native_inputs_full_20261026/import-result.json",
+      "sha256": "1114d1973e2346868129aa2ff3552e11e7db330fca4ceb93eba027743b9b7909",
+      "size_bytes": 10210
+    },
+    {
+      "path": "import-gnu-time.txt",
+      "source_uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/native_inputs_full_20261026/import-gnu-time.txt",
+      "sha256": "e9bbdeb0b8b304aa0d2c0f6d1d822546c57c4f51807578394123766cb35a63f5",
+      "size_bytes": 904
+    },
+    {
+      "path": "import-stdout.txt",
+      "source_uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/native_inputs_full_20261026/import-stdout.txt",
+      "sha256": "72cb7cc4028377671301d027d5317037c9a75a87db2bbe054725543f4306446c",
+      "size_bytes": 66560
+    },
+    {
+      "path": "import-stderr.txt",
+      "source_uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/native_inputs_full_20261026/import-stderr.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size_bytes": 0
+    },
+    {
+      "path": "bind_inputs.py",
+      "source_uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/native_inputs_full_20261026/bind_inputs.py",
+      "sha256": "f0809223ab045266203551f079e8d9accffc591900ee1bfc358d53abdfd8c690",
+      "size_bytes": 3008
+    },
+    {
+      "path": "bind-progress.json",
+      "source_uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/native_inputs_full_20261026/bind-progress.json",
+      "sha256": "c855d0c6bf0c17c566207c16021b67b17ade9e8c74d0e8d51313d1a609e617b6",
+      "size_bytes": 225
+    },
+    {
+      "path": "bind-FAILURE.json",
+      "source_uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/native_inputs_full_20261026/bind-FAILURE.json",
+      "sha256": "10ac35dd1f356efa7bedbae7a8e257203165ee3b405a5901d0f7f67d5b57770f",
+      "size_bytes": 1584
+    },
+    {
+      "path": "bind-gnu-time.txt",
+      "source_uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/native_inputs_full_20261026/bind-gnu-time.txt",
+      "sha256": "9d0c42dc5b413d45ef62156d18f90d28705131b61aea2b0d64434f541e8331b7",
+      "size_bytes": 934
+    },
+    {
+      "path": "bind-stdout.txt",
+      "source_uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/native_inputs_full_20261026/bind-stdout.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size_bytes": 0
+    },
+    {
+      "path": "bind-stderr.txt",
+      "source_uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/native_inputs_full_20261026/bind-stderr.txt",
+      "sha256": "97749fb6d0c777fc14801ebe31bee0ad9ef0f2b2930146061ebce63da5a5c33a",
+      "size_bytes": 1451
+    },
+    {
+      "path": "native-input-connections/failure.json",
+      "source_uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/native_inputs_full_20261026/native-input-connections/failure.json",
+      "sha256": "ea3d56a70aaa26820901a1027d2bfb80995691aad7fdd445e44000611a7a4579",
+      "size_bytes": 3314
+    },
+    {
+      "path": "attempt01-source/native_input_index.py",
+      "source_uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/native_inputs_full_20261026/attempt01-source/native_input_index.py",
+      "sha256": "51b26e222a742d0f1aa67acb1d42abc53354e80dd2a4306242fe2bc3703de2ff",
+      "size_bytes": 24819
+    },
+    {
+      "path": "attempt01-source/native_capture_batch.py",
+      "source_uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/native_inputs_full_20261026/attempt01-source/native_capture_batch.py",
+      "sha256": "d136dfe6d1c507847681d199fe2d0e70860fca3716acf89208ce2bcb85a05286",
+      "size_bytes": 90824
+    },
+    {
+      "path": "attempt01-source/capture_import.py",
+      "source_uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/native_inputs_full_20261026/attempt01-source/capture_import.py",
+      "sha256": "34983670619807da4a86152ec4f90cd8d3c6d67cfb685b5fa64c72ba8d058bcc",
+      "size_bytes": 16592
+    },
+    {
+      "path": "attempt01-source/receipt.json",
+      "source_uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/native_inputs_full_20261026/attempt01-source/receipt.json",
+      "sha256": "ff2233c3c5a7d08792f14e5e562a23803f9861bb96310a5856b5cef62b32c0df",
+      "size_bytes": 1127
+    },
+    {
+      "path": "attempt02/bind-stdout.txt",
+      "source_uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/native_inputs_full_20261026/attempt02/bind-stdout.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size_bytes": 0
+    },
+    {
+      "path": "attempt02/bind-FAILURE.json",
+      "source_uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/native_inputs_full_20261026/attempt02/bind-FAILURE.json",
+      "sha256": "9ea023f7954dad738f99d6e1d739a192df1e0716f5e327e6dfdb46fc9b51affb",
+      "size_bytes": 1807
+    },
+    {
+      "path": "attempt02/bind-gnu-time.txt",
+      "source_uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/native_inputs_full_20261026/attempt02/bind-gnu-time.txt",
+      "sha256": "febf8bf07c05079fece41dae275934508a2e26e1807d02186b0bbd561426d0d3",
+      "size_bytes": 946
+    },
+    {
+      "path": "attempt02/bind-stderr.txt",
+      "source_uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/native_inputs_full_20261026/attempt02/bind-stderr.txt",
+      "sha256": "546ce03a30f3ffd544c3d636125a6ce1dc7d56bf1c3397576e97353fbefaeab0",
+      "size_bytes": 1655
+    },
+    {
+      "path": "attempt02/bind_inputs.py",
+      "source_uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/native_inputs_full_20261026/attempt02/bind_inputs.py",
+      "sha256": "8f9fedc4b0678c05d7a8117899e5e76508a9b90c95a514b4badd3e6a54bd2327",
+      "size_bytes": 3015
+    },
+    {
+      "path": "attempt02/bind-progress.json",
+      "source_uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/native_inputs_full_20261026/attempt02/bind-progress.json",
+      "sha256": "a321f12a74a5d34a98ec006d1a93b815d38a8c0a8b9f5c30cdeb34d57e3c5b30",
+      "size_bytes": 146
+    },
+    {
+      "path": "attempt02/source-snapshot/native_input_index.py",
+      "source_uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/native_inputs_full_20261026/attempt02/source-snapshot/native_input_index.py",
+      "sha256": "d7e6fb2dd5934f4c95ea8acb910bafe91ae072667ebf7320f4cab192eb5836b7",
+      "size_bytes": 24992
+    },
+    {
+      "path": "attempt02/source-snapshot/native_capture_batch.py",
+      "source_uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/native_inputs_full_20261026/attempt02/source-snapshot/native_capture_batch.py",
+      "sha256": "d136dfe6d1c507847681d199fe2d0e70860fca3716acf89208ce2bcb85a05286",
+      "size_bytes": 90824
+    },
+    {
+      "path": "attempt02/source-snapshot/capture_import.py",
+      "source_uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/native_inputs_full_20261026/attempt02/source-snapshot/capture_import.py",
+      "sha256": "34983670619807da4a86152ec4f90cd8d3c6d67cfb685b5fa64c72ba8d058bcc",
+      "size_bytes": 16592
+    },
+    {
+      "path": "attempt02/source-snapshot/receipt.json",
+      "source_uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/native_inputs_full_20261026/attempt02/source-snapshot/receipt.json",
+      "sha256": "c5bccb59cf209cbad16ad5a2e47ead77185b4433a8c7484480d929223f5da56f",
+      "size_bytes": 1154
+    },
+    {
+      "path": "attempt02/native-input-connections/failure.json",
+      "source_uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/native_inputs_full_20261026/attempt02/native-input-connections/failure.json",
+      "sha256": "39dc78ba4b1b06f0a7d70821c65241f31582cf18f3594c24dc13fe40d1364051",
+      "size_bytes": 3527
+    },
+    {
+      "path": "attempt03/ACTUAL_TERMINAL.json",
+      "source_uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/native_inputs_full_20261026/attempt03/ACTUAL_TERMINAL.json",
+      "sha256": "3f5c20660cd71a06e7cb3dd1af5873723453481926c7efeb525acb9930bad21a",
+      "size_bytes": 363
+    },
+    {
+      "path": "attempt03/bind-stdout.txt",
+      "source_uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/native_inputs_full_20261026/attempt03/bind-stdout.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size_bytes": 0
+    },
+    {
+      "path": "attempt03/bind-FAILURE.json",
+      "source_uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/native_inputs_full_20261026/attempt03/bind-FAILURE.json",
+      "sha256": "ff88390419bbd6379eb5829e5d30c05c84e84f908a1787579f80b8d58f3af4ca",
+      "size_bytes": 2573
+    },
+    {
+      "path": "attempt03/ROOT_AUTHORIZED_STOP.json",
+      "source_uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/native_inputs_full_20261026/attempt03/ROOT_AUTHORIZED_STOP.json",
+      "sha256": "51ac8ad9455ffd21dacc153ebd85a498105783eda2dba65147006620c671ef20",
+      "size_bytes": 1110
+    },
+    {
+      "path": "attempt03/bind-gnu-time.txt",
+      "source_uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/native_inputs_full_20261026/attempt03/bind-gnu-time.txt",
+      "sha256": "f2b287f9fdc1cf8a8d3ec5762f3bf887af70684762614285b86e53f66c77bc7d",
+      "size_bytes": 946
+    },
+    {
+      "path": "attempt03/negative.json",
+      "source_uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/native_inputs_full_20261026/attempt03/negative.json",
+      "sha256": "c8cb762451acb41ad31eaa12dfa94d5ea3983636bcd9d7f48fc77395ad0257ad",
+      "size_bytes": 1046
+    },
+    {
+      "path": "attempt03/bind-stderr.txt",
+      "source_uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/native_inputs_full_20261026/attempt03/bind-stderr.txt",
+      "sha256": "011c751b781f8a7c68915c993e08e4645c58834257141c577926c3afe58adaaa",
+      "size_bytes": 2411
+    },
+    {
+      "path": "attempt03/bind_inputs.py",
+      "source_uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/native_inputs_full_20261026/attempt03/bind_inputs.py",
+      "sha256": "8f9fedc4b0678c05d7a8117899e5e76508a9b90c95a514b4badd3e6a54bd2327",
+      "size_bytes": 3015
+    },
+    {
+      "path": "attempt03/bind-progress.json",
+      "source_uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/native_inputs_full_20261026/attempt03/bind-progress.json",
+      "sha256": "4504d81827a71f86e59ffaa1465a930b984855458f19eb75fefb57e7d8513598",
+      "size_bytes": 180
+    },
+    {
+      "path": "attempt03/source-snapshot/native_input_index.py",
+      "source_uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/native_inputs_full_20261026/attempt03/source-snapshot/native_input_index.py",
+      "sha256": "0d7ede43ad9994b57eabaa5f7e1cc06e8098d1313f6f336df6a16ac68473f011",
+      "size_bytes": 25325
+    },
+    {
+      "path": "attempt03/source-snapshot/native_capture_batch.py",
+      "source_uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/native_inputs_full_20261026/attempt03/source-snapshot/native_capture_batch.py",
+      "sha256": "d136dfe6d1c507847681d199fe2d0e70860fca3716acf89208ce2bcb85a05286",
+      "size_bytes": 90824
+    },
+    {
+      "path": "attempt03/source-snapshot/capture_import.py",
+      "source_uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/native_inputs_full_20261026/attempt03/source-snapshot/capture_import.py",
+      "sha256": "34983670619807da4a86152ec4f90cd8d3c6d67cfb685b5fa64c72ba8d058bcc",
+      "size_bytes": 16592
+    },
+    {
+      "path": "attempt03/source-snapshot/native_tensor_inputs.py",
+      "source_uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/native_inputs_full_20261026/attempt03/source-snapshot/native_tensor_inputs.py",
+      "sha256": "e54cf55ec69f6feab2570949075e245b27bb9a66499452ac05b7ae6b61c96828",
+      "size_bytes": 41269
+    },
+    {
+      "path": "attempt03/native-input-connections/failure.json",
+      "source_uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/native_inputs_full_20261026/attempt03/native-input-connections/failure.json",
+      "sha256": "b1291c55c158779b75f43ce9fdd5c2b9888219c034fc1a20d89159516698ff8d",
+      "size_bytes": 4297
+    }
+  ]
+}

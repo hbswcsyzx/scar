@@ -1,0 +1,432 @@
+{
+  "scope": "explicit small delivery; private indices and canonical bulk excluded",
+  "files": [
+    {
+      "path": "artifacts/experiments/native_inputs_full_20261026/ACTUAL_TERMINAL.json",
+      "size_bytes": 554,
+      "sha256": "d09d6443d4045c17f296c61b1125c346ec30957e7ff4890a3dd636c16c5b3a15"
+    },
+    {
+      "path": "artifacts/experiments/native_inputs_full_20261026/CLOSED_EARLIER_RECEIPTS.json",
+      "size_bytes": 13538,
+      "sha256": "3bb288fd5e86308d39730d49cf53276eda0ead2f3fffb3f849f627966b9b029f"
+    },
+    {
+      "path": "artifacts/experiments/native_inputs_full_20261026/FEATURE_ACTUAL.diff",
+      "size_bytes": 44436,
+      "sha256": "d4baa4404751fe18d7a621fab68035bcce0503f4ff172cba803eb88bc49ee525"
+    },
+    {
+      "path": "artifacts/experiments/native_inputs_full_20261026/OUTPUT_SIZES.json",
+      "size_bytes": 1335,
+      "sha256": "7ff638f1895ecfda2c569a114541db0f5884d56e63748266eadb9ecf3fe96486"
+    },
+    {
+      "path": "artifacts/experiments/native_inputs_full_20261026/PROPOSED_REFERENCED_ACTORS.diff",
+      "size_bytes": 6801,
+      "sha256": "8c11952a69c3c76e17e18026c537f4c467842d68ef2ee161a009851c3d2eb738"
+    },
+    {
+      "path": "artifacts/experiments/native_inputs_full_20261026/PROPOSED_SCOPE_DEDUP.diff",
+      "size_bytes": 1948,
+      "sha256": "befc7f923f5c34f4a900b133df6f2511bf6dbc78997121a6737c843b910bdce5"
+    },
+    {
+      "path": "artifacts/experiments/native_inputs_full_20261026/REPORT.md",
+      "size_bytes": 2511,
+      "sha256": "3ed7c6b3373fe50dd5fee07ffda60c76ebc0383549b5ff8bcbe6ad269f8ef048"
+    },
+    {
+      "path": "artifacts/experiments/native_inputs_full_20261026/RETENTION.md",
+      "size_bytes": 1130,
+      "sha256": "27f2b2ecf493736e2552ee90d125fe8d6e36231c697dbadcb22fb344c9415eb1"
+    },
+    {
+      "path": "artifacts/experiments/native_inputs_full_20261026/attempt01-source/capture_import.py",
+      "size_bytes": 16592,
+      "sha256": "34983670619807da4a86152ec4f90cd8d3c6d67cfb685b5fa64c72ba8d058bcc"
+    },
+    {
+      "path": "artifacts/experiments/native_inputs_full_20261026/attempt01-source/native_capture_batch.py",
+      "size_bytes": 90824,
+      "sha256": "d136dfe6d1c507847681d199fe2d0e70860fca3716acf89208ce2bcb85a05286"
+    },
+    {
+      "path": "artifacts/experiments/native_inputs_full_20261026/attempt01-source/native_input_index.py",
+      "size_bytes": 24819,
+      "sha256": "51b26e222a742d0f1aa67acb1d42abc53354e80dd2a4306242fe2bc3703de2ff"
+    },
+    {
+      "path": "artifacts/experiments/native_inputs_full_20261026/attempt01-source/receipt.json",
+      "size_bytes": 1127,
+      "sha256": "ff2233c3c5a7d08792f14e5e562a23803f9861bb96310a5856b5cef62b32c0df"
+    },
+    {
+      "path": "artifacts/experiments/native_inputs_full_20261026/attempt02/bind-FAILURE.json",
+      "size_bytes": 1807,
+      "sha256": "9ea023f7954dad738f99d6e1d739a192df1e0716f5e327e6dfdb46fc9b51affb"
+    },
+    {
+      "path": "artifacts/experiments/native_inputs_full_20261026/attempt02/bind-gnu-time.txt",
+      "size_bytes": 946,
+      "sha256": "febf8bf07c05079fece41dae275934508a2e26e1807d02186b0bbd561426d0d3"
+    },
+    {
+      "path": "artifacts/experiments/native_inputs_full_20261026/attempt02/bind-progress.json",
+      "size_bytes": 146,
+      "sha256": "a321f12a74a5d34a98ec006d1a93b815d38a8c0a8b9f5c30cdeb34d57e3c5b30"
+    },
+    {
+      "path": "artifacts/experiments/native_inputs_full_20261026/attempt02/bind-stderr.txt",
+      "size_bytes": 1655,
+      "sha256": "546ce03a30f3ffd544c3d636125a6ce1dc7d56bf1c3397576e97353fbefaeab0"
+    },
+    {
+      "path": "artifacts/experiments/native_inputs_full_20261026/attempt02/bind-stdout.txt",
+      "size_bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/experiments/native_inputs_full_20261026/attempt02/bind_inputs.py",
+      "size_bytes": 3015,
+      "sha256": "8f9fedc4b0678c05d7a8117899e5e76508a9b90c95a514b4badd3e6a54bd2327"
+    },
+    {
+      "path": "artifacts/experiments/native_inputs_full_20261026/attempt02/native-input-connections/failure.json",
+      "size_bytes": 3527,
+      "sha256": "39dc78ba4b1b06f0a7d70821c65241f31582cf18f3594c24dc13fe40d1364051"
+    },
+    {
+      "path": "artifacts/experiments/native_inputs_full_20261026/attempt02/source-snapshot/capture_import.py",
+      "size_bytes": 16592,
+      "sha256": "34983670619807da4a86152ec4f90cd8d3c6d67cfb685b5fa64c72ba8d058bcc"
+    },
+    {
+      "path": "artifacts/experiments/native_inputs_full_20261026/attempt02/source-snapshot/native_capture_batch.py",
+      "size_bytes": 90824,
+      "sha256": "d136dfe6d1c507847681d199fe2d0e70860fca3716acf89208ce2bcb85a05286"
+    },
+    {
+      "path": "artifacts/experiments/native_inputs_full_20261026/attempt02/source-snapshot/native_input_index.py",
+      "size_bytes": 24992,
+      "sha256": "d7e6fb2dd5934f4c95ea8acb910bafe91ae072667ebf7320f4cab192eb5836b7"
+    },
+    {
+      "path": "artifacts/experiments/native_inputs_full_20261026/attempt02/source-snapshot/receipt.json",
+      "size_bytes": 1154,
+      "sha256": "c5bccb59cf209cbad16ad5a2e47ead77185b4433a8c7484480d929223f5da56f"
+    },
+    {
+      "path": "artifacts/experiments/native_inputs_full_20261026/attempt03/ACTUAL_TERMINAL.json",
+      "size_bytes": 363,
+      "sha256": "3f5c20660cd71a06e7cb3dd1af5873723453481926c7efeb525acb9930bad21a"
+    },
+    {
+      "path": "artifacts/experiments/native_inputs_full_20261026/attempt03/ROOT_AUTHORIZED_STOP.json",
+      "size_bytes": 1110,
+      "sha256": "51ac8ad9455ffd21dacc153ebd85a498105783eda2dba65147006620c671ef20"
+    },
+    {
+      "path": "artifacts/experiments/native_inputs_full_20261026/attempt03/bind-FAILURE.json",
+      "size_bytes": 2573,
+      "sha256": "ff88390419bbd6379eb5829e5d30c05c84e84f908a1787579f80b8d58f3af4ca"
+    },
+    {
+      "path": "artifacts/experiments/native_inputs_full_20261026/attempt03/bind-gnu-time.txt",
+      "size_bytes": 946,
+      "sha256": "f2b287f9fdc1cf8a8d3ec5762f3bf887af70684762614285b86e53f66c77bc7d"
+    },
+    {
+      "path": "artifacts/experiments/native_inputs_full_20261026/attempt03/bind-progress.json",
+      "size_bytes": 180,
+      "sha256": "4504d81827a71f86e59ffaa1465a930b984855458f19eb75fefb57e7d8513598"
+    },
+    {
+      "path": "artifacts/experiments/native_inputs_full_20261026/attempt03/bind-stderr.txt",
+      "size_bytes": 2411,
+      "sha256": "011c751b781f8a7c68915c993e08e4645c58834257141c577926c3afe58adaaa"
+    },
+    {
+      "path": "artifacts/experiments/native_inputs_full_20261026/attempt03/bind-stdout.txt",
+      "size_bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/experiments/native_inputs_full_20261026/attempt03/bind_inputs.py",
+      "size_bytes": 3015,
+      "sha256": "8f9fedc4b0678c05d7a8117899e5e76508a9b90c95a514b4badd3e6a54bd2327"
+    },
+    {
+      "path": "artifacts/experiments/native_inputs_full_20261026/attempt03/native-input-connections/failure.json",
+      "size_bytes": 4297,
+      "sha256": "b1291c55c158779b75f43ce9fdd5c2b9888219c034fc1a20d89159516698ff8d"
+    },
+    {
+      "path": "artifacts/experiments/native_inputs_full_20261026/attempt03/negative.json",
+      "size_bytes": 1046,
+      "sha256": "c8cb762451acb41ad31eaa12dfa94d5ea3983636bcd9d7f48fc77395ad0257ad"
+    },
+    {
+      "path": "artifacts/experiments/native_inputs_full_20261026/attempt03/source-snapshot/capture_import.py",
+      "size_bytes": 16592,
+      "sha256": "34983670619807da4a86152ec4f90cd8d3c6d67cfb685b5fa64c72ba8d058bcc"
+    },
+    {
+      "path": "artifacts/experiments/native_inputs_full_20261026/attempt03/source-snapshot/native_capture_batch.py",
+      "size_bytes": 90824,
+      "sha256": "d136dfe6d1c507847681d199fe2d0e70860fca3716acf89208ce2bcb85a05286"
+    },
+    {
+      "path": "artifacts/experiments/native_inputs_full_20261026/attempt03/source-snapshot/native_input_index.py",
+      "size_bytes": 25325,
+      "sha256": "0d7ede43ad9994b57eabaa5f7e1cc06e8098d1313f6f336df6a16ac68473f011"
+    },
+    {
+      "path": "artifacts/experiments/native_inputs_full_20261026/attempt03/source-snapshot/native_tensor_inputs.py",
+      "size_bytes": 41269,
+      "sha256": "e54cf55ec69f6feab2570949075e245b27bb9a66499452ac05b7ae6b61c96828"
+    },
+    {
+      "path": "artifacts/experiments/native_inputs_full_20261026/attempt04/ACTUAL_TERMINAL.json",
+      "size_bytes": 364,
+      "sha256": "b0a48511a561e423f38263f94164abee5ae876fc7cfd102db26b49fab3feb668"
+    },
+    {
+      "path": "artifacts/experiments/native_inputs_full_20261026/attempt04/SOURCE.json",
+      "size_bytes": 859,
+      "sha256": "6cf4ee003c3bbf8942c2f00f59b6d0bf709af15c1787880dd950dff265819f9d"
+    },
+    {
+      "path": "artifacts/experiments/native_inputs_full_20261026/attempt04/bind-FAILURE.json",
+      "size_bytes": 2962,
+      "sha256": "611b3a75644140663e6c354b65e5a08362d93b079de5ff3fed945e68beafdfa2"
+    },
+    {
+      "path": "artifacts/experiments/native_inputs_full_20261026/attempt04/bind-gnu-time.txt",
+      "size_bytes": 954,
+      "sha256": "1380ff05f77487232be0cef1dfe1943e4b454e263c5d5436b3a3f914ddefa729"
+    },
+    {
+      "path": "artifacts/experiments/native_inputs_full_20261026/attempt04/bind-progress.json",
+      "size_bytes": 179,
+      "sha256": "283692655a6c7f7443517b3e2b22531a456754b9c77b06693eb0880658bc94c7"
+    },
+    {
+      "path": "artifacts/experiments/native_inputs_full_20261026/attempt04/bind-stderr.txt",
+      "size_bytes": 2743,
+      "sha256": "65013272e92325f9808b39d8846c7d27fc22ca153a268b6cedd1d682197f7b9e"
+    },
+    {
+      "path": "artifacts/experiments/native_inputs_full_20261026/attempt04/bind-stdout.txt",
+      "size_bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/experiments/native_inputs_full_20261026/attempt04/bind_inputs.py",
+      "size_bytes": 3015,
+      "sha256": "8f9fedc4b0678c05d7a8117899e5e76508a9b90c95a514b4badd3e6a54bd2327"
+    },
+    {
+      "path": "artifacts/experiments/native_inputs_full_20261026/attempt04/native-input-connections/failure.json",
+      "size_bytes": 4685,
+      "sha256": "85bcdcef3b1663ac2436f737e6a8895b404fd455b94e09efb3448f151aeccc54"
+    },
+    {
+      "path": "artifacts/experiments/native_inputs_full_20261026/attempt04/negative.json",
+      "size_bytes": 1046,
+      "sha256": "c8cb762451acb41ad31eaa12dfa94d5ea3983636bcd9d7f48fc77395ad0257ad"
+    },
+    {
+      "path": "artifacts/experiments/native_inputs_full_20261026/attempt04/source-snapshot/capture_import.py",
+      "size_bytes": 16592,
+      "sha256": "34983670619807da4a86152ec4f90cd8d3c6d67cfb685b5fa64c72ba8d058bcc"
+    },
+    {
+      "path": "artifacts/experiments/native_inputs_full_20261026/attempt04/source-snapshot/native_capture_batch.py",
+      "size_bytes": 90824,
+      "sha256": "d136dfe6d1c507847681d199fe2d0e70860fca3716acf89208ce2bcb85a05286"
+    },
+    {
+      "path": "artifacts/experiments/native_inputs_full_20261026/attempt04/source-snapshot/native_input_index.py",
+      "size_bytes": 25313,
+      "sha256": "d1c92300a6055aba84ce7ae3be661a50d7ea48599dbd02ad12f149b4103aa571"
+    },
+    {
+      "path": "artifacts/experiments/native_inputs_full_20261026/attempt04/source-snapshot/native_protocol.py",
+      "size_bytes": 59623,
+      "sha256": "14ac2da5789ca93635bfe85a1b08c3312a4fca9ea97ae7dbba8cc2f2bc3c2757"
+    },
+    {
+      "path": "artifacts/experiments/native_inputs_full_20261026/attempt04/source-snapshot/native_tensor_inputs.py",
+      "size_bytes": 41479,
+      "sha256": "12d185a42169186b4119f3614de4d9d4027ed30e754c6beb45b3d90cef60d373"
+    },
+    {
+      "path": "artifacts/experiments/native_inputs_full_20261026/attempt05/SOURCE.json",
+      "size_bytes": 1070,
+      "sha256": "8c2590800e0426981b49d99358585a8ef2af33309f88389a3f1902bfc426c704"
+    },
+    {
+      "path": "artifacts/experiments/native_inputs_full_20261026/attempt05/actor-negative.json",
+      "size_bytes": 340,
+      "sha256": "0e5bcbe1b81c765606b38d83f0da761aba52f7543316ad35660052ed9163442e"
+    },
+    {
+      "path": "artifacts/experiments/native_inputs_full_20261026/attempt05/association-query.local-only.json",
+      "size_bytes": 16827,
+      "sha256": "3923c72aa378789eb58b4ab62bace284d776dacb4ea4b6423227c1daff39e9e1"
+    },
+    {
+      "path": "artifacts/experiments/native_inputs_full_20261026/attempt05/bind-gnu-time.txt",
+      "size_bytes": 916,
+      "sha256": "cf7111e4500ad55c6a02a685fdb842f3efb04db1614e6e4ed283a46e0c1eb515"
+    },
+    {
+      "path": "artifacts/experiments/native_inputs_full_20261026/attempt05/bind-progress.json",
+      "size_bytes": 180,
+      "sha256": "e9791f21ce936dcb06daa2879be62e2962b549c21501f14b7ebc09be233f3291"
+    },
+    {
+      "path": "artifacts/experiments/native_inputs_full_20261026/attempt05/bind-stderr.txt",
+      "size_bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/experiments/native_inputs_full_20261026/attempt05/bind-stdout.txt",
+      "size_bytes": 620,
+      "sha256": "18f6b6709f5ae764b2ffa6ae8714fddae689dea53cba802402d3054b59e78e10"
+    },
+    {
+      "path": "artifacts/experiments/native_inputs_full_20261026/attempt05/bind_inputs.py",
+      "size_bytes": 3728,
+      "sha256": "71df96db40092bde827f46f1fd4e283969396fecefb151d64e18ffcca5204425"
+    },
+    {
+      "path": "artifacts/experiments/native_inputs_full_20261026/attempt05/native-input-connections/dispatch-inventory/manifest.json",
+      "size_bytes": 18218,
+      "sha256": "69bc81b2b8cc5481ed80880e62d126455f45f7b5066f520174a11798c3b14a45"
+    },
+    {
+      "path": "artifacts/experiments/native_inputs_full_20261026/attempt05/native-input-connections/input-metadata/manifest.json",
+      "size_bytes": 115602,
+      "sha256": "7b6be9bd049ad7a6e59bf4f3c1342b085c96d996c77ca02a2017ce82190fc9e3"
+    },
+    {
+      "path": "artifacts/experiments/native_inputs_full_20261026/attempt05/native-input-connections/native-parent-inventory/manifest.json",
+      "size_bytes": 145121,
+      "sha256": "8bda057ce4a3623022a7c2550b246dc5c2c1c98cb9777371d1e9999cc91f9e7d"
+    },
+    {
+      "path": "artifacts/experiments/native_inputs_full_20261026/attempt05/native-input-connections/observed-dispatches/manifest.json",
+      "size_bytes": 17950,
+      "sha256": "f00475dc94ae9493ee32181045278d676cd971fe071a2da85383ef7b27bd1f75"
+    },
+    {
+      "path": "artifacts/experiments/native_inputs_full_20261026/attempt05/native-input-connections/report.json",
+      "size_bytes": 1115068,
+      "sha256": "6d4c8fbf2e2a186e8b10d4a3cddfd32694e6cd0bfed77ed555282a42b6a222a7"
+    },
+    {
+      "path": "artifacts/experiments/native_inputs_full_20261026/attempt05/negative.json",
+      "size_bytes": 1046,
+      "sha256": "c8cb762451acb41ad31eaa12dfa94d5ea3983636bcd9d7f48fc77395ad0257ad"
+    },
+    {
+      "path": "artifacts/experiments/native_inputs_full_20261026/attempt05/result.json",
+      "size_bytes": 12991,
+      "sha256": "b5bac381b64e3fec3527e376d398e14c44c1d6a3e977938a69e31bef18d7c2de"
+    },
+    {
+      "path": "artifacts/experiments/native_inputs_full_20261026/bind-FAILURE.json",
+      "size_bytes": 1584,
+      "sha256": "10ac35dd1f356efa7bedbae7a8e257203165ee3b405a5901d0f7f67d5b57770f"
+    },
+    {
+      "path": "artifacts/experiments/native_inputs_full_20261026/bind-gnu-time.txt",
+      "size_bytes": 934,
+      "sha256": "9d0c42dc5b413d45ef62156d18f90d28705131b61aea2b0d64434f541e8331b7"
+    },
+    {
+      "path": "artifacts/experiments/native_inputs_full_20261026/bind-progress.json",
+      "size_bytes": 225,
+      "sha256": "c855d0c6bf0c17c566207c16021b67b17ade9e8c74d0e8d51313d1a609e617b6"
+    },
+    {
+      "path": "artifacts/experiments/native_inputs_full_20261026/bind-stderr.txt",
+      "size_bytes": 1451,
+      "sha256": "97749fb6d0c777fc14801ebe31bee0ad9ef0f2b2930146061ebce63da5a5c33a"
+    },
+    {
+      "path": "artifacts/experiments/native_inputs_full_20261026/bind-stdout.txt",
+      "size_bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/experiments/native_inputs_full_20261026/bind_inputs.py",
+      "size_bytes": 3008,
+      "sha256": "f0809223ab045266203551f079e8d9accffc591900ee1bfc358d53abdfd8c690"
+    },
+    {
+      "path": "artifacts/experiments/native_inputs_full_20261026/import-gnu-time.txt",
+      "size_bytes": 904,
+      "sha256": "e9bbdeb0b8b304aa0d2c0f6d1d822546c57c4f51807578394123766cb35a63f5"
+    },
+    {
+      "path": "artifacts/experiments/native_inputs_full_20261026/import-result.json",
+      "size_bytes": 10210,
+      "sha256": "1114d1973e2346868129aa2ff3552e11e7db330fca4ceb93eba027743b9b7909"
+    },
+    {
+      "path": "artifacts/experiments/native_inputs_full_20261026/import-stderr.txt",
+      "size_bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/experiments/native_inputs_full_20261026/import-stdout.txt",
+      "size_bytes": 66560,
+      "sha256": "72cb7cc4028377671301d027d5317037c9a75a87db2bbe054725543f4306446c"
+    },
+    {
+      "path": "artifacts/experiments/native_inputs_full_20261026/import_native.py",
+      "size_bytes": 989,
+      "sha256": "54b35c6e01b52973f8f80ec9f1c9cc77e5037d0fe2f9ac33bba5a23f70c4a417"
+    },
+    {
+      "path": "artifacts/experiments/native_inputs_full_20261026/native-input-connections/failure.json",
+      "size_bytes": 3314,
+      "sha256": "ea3d56a70aaa26820901a1027d2bfb80995691aad7fdd445e44000611a7a4579"
+    },
+    {
+      "path": "docs/NATIVE_INPUT_ASSOCIATIONS.md",
+      "size_bytes": 3627,
+      "sha256": "60b743a2bf57e93e9bd8bd760d7dbf822d5d1056ddef486756a23186423a1430"
+    },
+    {
+      "path": "scar/trace/capture_import.py",
+      "size_bytes": 16592,
+      "sha256": "34983670619807da4a86152ec4f90cd8d3c6d67cfb685b5fa64c72ba8d058bcc"
+    },
+    {
+      "path": "scar/trace/native_capture_batch.py",
+      "size_bytes": 91503,
+      "sha256": "37867549289f01fbd8a56959050c25d582643404be5d4198d9073a1c602fd106"
+    },
+    {
+      "path": "scar/trace/native_input_index.py",
+      "size_bytes": 25313,
+      "sha256": "d1c92300a6055aba84ce7ae3be661a50d7ea48599dbd02ad12f149b4103aa571"
+    },
+    {
+      "path": "scar/trace/native_protocol.py",
+      "size_bytes": 62925,
+      "sha256": "1a5d9c6bd319ccd2e78d56c6bb20ef7234a49e8b95a84673a66954d189d762fb"
+    },
+    {
+      "path": "scar/trace/native_tensor_inputs.py",
+      "size_bytes": 41479,
+      "sha256": "12d185a42169186b4119f3614de4d9d4027ed30e754c6beb45b3d90cef60d373"
+    }
+  ],
+  "file_count_excluding_self_and_stage_list": 85,
+  "bytes_excluding_self_and_stage_list": 2571157
+}

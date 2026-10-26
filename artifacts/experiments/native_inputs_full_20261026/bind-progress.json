@@ -1,0 +1,8 @@
+{
+  "stage": "native_source_verified",
+  "schema": "pytorch.kineto.chrome-trace.v1",
+  "raw_bytes": 216693718,
+  "lines": 6612000,
+  "metadata_index_elapsed_seconds": 80.32023627596209,
+  "whole_seconds": 292.4827467419673
+}

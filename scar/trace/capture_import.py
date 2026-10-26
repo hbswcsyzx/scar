@@ -86,7 +86,7 @@ def _check_os_coordinates(fragment, coordinates):
 
 def import_capture(capture_dir, output_dir, *, max_bytes=1_000_000_000, max_lines=2_000_000,
                    schema_contracts=False, bundle_partitions=False, os_interface_work=False,
-                   progress=None):
+                   progress=None, components=None):
     """Import an unmodified successful collector capture, without target execution.
 
     The membership binder validates the original artifacts once.  The existing
@@ -100,6 +100,10 @@ def import_capture(capture_dir, output_dir, *, max_bytes=1_000_000_000, max_line
 
     if type(os_interface_work) is not bool:
         raise TypeError('os_interface_work must be an exact bool')
+    if components not in (None, ('native',), ('native','os')):
+        raise ValueError('components must explicitly select native or native+os')
+    if components==('native',) and os_interface_work:
+        raise ValueError('native-only import cannot claim requested OS interface work')
 
     capture, out = Path(capture_dir).resolve(), Path(output_dir).resolve()
     if out.exists():
@@ -213,27 +217,31 @@ def import_capture(capture_dir, output_dir, *, max_bytes=1_000_000_000, max_line
               runtime_gpu_matches=native.report['runtime_gpu_matches'], lifetime_points=checked_lifetimes)
         del native, memory
         gc.collect()
-        stage('os_resources', 'RUNNING')
-        os_out = out / 'os'
-        os_out.mkdir()
-        os_fragment = import_os_resources(capture / 'os', scope='capture-import',
-            root_tid=manifest['pid'], max_bytes=max_bytes, max_lines=max_lines, coordinates=coordinates,
-            interface_work=os_interface_work)
-        os_check = _check_os_coordinates(os_fragment, coordinates)
-        (os_out / 'os-resource-profile.json').write_bytes(os_fragment.protocol_bytes)
-        if os_interface_work:
-            stage('os_interfaces', 'RUNNING')
-            publish_os_interfaces(os_fragment, os_out / 'interfaces',
-                progress=lambda record: stage('os_interfaces', 'WRITING', detail=record))
-            stage('os_interfaces', 'PUBLISHED_WITH_OPEN_OBLIGATIONS')
+        os_summary = None
+        if components==('native',):
+            stage('os_resources','NOT_REQUESTED_EXPLICIT_COMPONENT_SCOPE')
         else:
-            _write(os_out / 'os-resources.json.gz', os_fragment.to_dict())
-        _write(os_out / 'summary.json', os_fragment.summary)
-        outputs.extend(_stored(path) for path in sorted(os_out.rglob('*')) if path.is_file())
-        os_summary = dict(os_fragment.summary, coordinate_check=os_check)
-        stage('os_resources', 'IMPORTED', **os_fragment.summary)
-        del os_fragment
-        gc.collect()
+            stage('os_resources', 'RUNNING')
+            os_out = out / 'os'
+            os_out.mkdir()
+            os_fragment = import_os_resources(capture / 'os', scope='capture-import',
+                root_tid=manifest['pid'], max_bytes=max_bytes, max_lines=max_lines, coordinates=coordinates,
+                interface_work=os_interface_work)
+            os_check = _check_os_coordinates(os_fragment, coordinates)
+            (os_out / 'os-resource-profile.json').write_bytes(os_fragment.protocol_bytes)
+            if os_interface_work:
+                stage('os_interfaces', 'RUNNING')
+                publish_os_interfaces(os_fragment, os_out / 'interfaces',
+                    progress=lambda record: stage('os_interfaces', 'WRITING', detail=record))
+                stage('os_interfaces', 'PUBLISHED_WITH_OPEN_OBLIGATIONS')
+            else:
+                _write(os_out / 'os-resources.json.gz', os_fragment.to_dict())
+            _write(os_out / 'summary.json', os_fragment.summary)
+            outputs.extend(_stored(path) for path in sorted(os_out.rglob('*')) if path.is_file())
+            os_summary = dict(os_fragment.summary, coordinate_check=os_check)
+            stage('os_resources', 'IMPORTED', **os_fragment.summary)
+            del os_fragment
+            gc.collect()
         required = [
             {'id': 'canonical_program_snapshot', 'status': 'OPEN', 'reason': 'source regions and call interfaces still need whole-program composition'},
             {'id': 'python_torch_occurrence', 'status': 'OPEN', 'reason': 'shared capture membership is not an invocation-to-RF mapping'},
@@ -250,6 +258,9 @@ def import_capture(capture_dir, output_dir, *, max_bytes=1_000_000_000, max_line
             'transformation_authorized': False, 'elapsed_s': time.perf_counter() - started}
         if 'os_capture_provider' in coordinates.report:
             report['os_capture_provider'] = coordinates.report['os_capture_provider']
+        if components is not None:
+            report['component_scope']={'selected':list(components),'skipped':[] if 'os' in components else ['os'],
+                'scope':'only requested fragments imported; skipped component does not imply completion'}
         if bundle_partitions:
             report['native_bundle_storage'] = {'kind': 'partitioned',
                 'manifest': str(native_out / 'bundle-partitions' / 'manifest.json'),

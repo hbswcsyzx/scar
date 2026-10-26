@@ -1,0 +1,20 @@
+[
+  {
+    "source": "/home/zyf/AAA/scar-worktrees/frame-entry-routing/scar/trace/capture_import.py",
+    "snapshot": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/native_inputs_full_20261026/attempt02/source-snapshot/capture_import.py",
+    "sha256": "34983670619807da4a86152ec4f90cd8d3c6d67cfb685b5fa64c72ba8d058bcc",
+    "size_bytes": 16592
+  },
+  {
+    "source": "/home/zyf/AAA/scar-worktrees/frame-entry-routing/scar/trace/native_capture_batch.py",
+    "snapshot": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/native_inputs_full_20261026/attempt02/source-snapshot/native_capture_batch.py",
+    "sha256": "d136dfe6d1c507847681d199fe2d0e70860fca3716acf89208ce2bcb85a05286",
+    "size_bytes": 90824
+  },
+  {
+    "source": "/home/zyf/AAA/scar-worktrees/frame-entry-routing/scar/trace/native_input_index.py",
+    "snapshot": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/native_inputs_full_20261026/attempt02/source-snapshot/native_input_index.py",
+    "sha256": "d7e6fb2dd5934f4c95ea8acb910bafe91ae072667ebf7320f4cab192eb5836b7",
+    "size_bytes": 24992
+  }
+]

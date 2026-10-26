@@ -1,0 +1,34 @@
+--- a/scar/trace/native_tensor_inputs.py
++++ b/scar/trace/native_tensor_inputs.py
+@@ -391,11 +391,16 @@
+         self._seen, self._canonical_nodes, self._associations = set(), set(), []
+ 
+     def _expected(self, shard):
++        # Public checking always freshly verifies the exact program/model scope,
++        # including all-Unknown and zero-Tensor calls.
++        shard.native_port_evidence.require_scope(shard.execution, shard.program)
++        return self._candidate(shard)
++
++    def _candidate(self, shard):
++        """Unqualified builder data; independently check before publication."""
+         from scar.ir.execution.content import NativeInputRef
+         from scar.ir.program.model import TerminatorKind
+         from scar.ir.record_codec import encode
+-        # Covers all identities, including all-Unknown and zero-Tensor calls.
+-        shard.native_port_evidence.require_scope(shard.execution, shard.program)
+         source = _json(self._wire)
+         _need(len(shard.execution.runs) == 1 and shard.execution.runs[0].id.value == source['run']
+               and any(p.id.value == source['process'] for p in shard.execution.processes), 'association Run/process differs')
+--- a/scar/trace/native_input_index.py
++++ b/scar/trace/native_input_index.py
+@@ -223,8 +223,8 @@
+             'process':self.coordinates.target_process.id.value,'rows':rows})
+ 
+     def bind_shard(self,shard):
+-        subset=self._subset(shard);associations=subset.bind_shard(shard)
+-        for node in subset._canonical_nodes:self.db.execute('INSERT INTO canonical VALUES(?)',(node,))
++        subset=self._subset(shard);associations,nodes=subset._candidate(shard)
++        for node in nodes:self.db.execute('INSERT INTO canonical VALUES(?)',(node,))
+         for row in associations:
+             original=self.db.execute('SELECT payload,mac FROM rows WHERE idx=?',(row['row'],)).fetchone()
+             source=self.unpacked('row',row['row'],*original)

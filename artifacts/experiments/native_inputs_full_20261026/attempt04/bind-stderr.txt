@@ -1,0 +1,28 @@
+Traceback (most recent call last):
+  File "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/native_inputs_full_20261026/attempt04/bind_inputs.py", line 23, in <module>
+    result=bind_native_capture_batches(coordinates,C,part,D/'native-input-connections',expected_manifest_sha256=hashlib.sha256(part.read_bytes()).hexdigest(),capture_model_path=model,expected_capture_model_sha256=hashlib.sha256(model.read_bytes()).hexdigest(),budget=NativeCaptureBatchBudget(max_wall_seconds=2400),input_metadata_budget=NativeInputIndexBudget(),progress=progress,on_verified_input_shard=checked)
+  File "/home/zyf/AAA/scar-worktrees/frame-entry-routing/scar/trace/native_capture_batch.py", line 1106, in bind_native_capture_batches
+    inventory_artifact, _ = _write_inventory(out / "dispatch-inventory",
+                            ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        ({**owner.inventory(seq), **owner.classifications[seq]} for seq in sequences), budget, publish,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        role="dispatch-accounting", metadata={"declared_attempts": owner.declared_attempts, "program_snapshot": encode(program_artifact)})
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/zyf/AAA/scar-worktrees/frame-entry-routing/scar/trace/native_capture_batch.py", line 812, in _write_inventory
+    for row in rows:
+               ^^^^
+  File "/home/zyf/AAA/scar-worktrees/frame-entry-routing/scar/trace/native_capture_batch.py", line 1107, in <genexpr>
+    ({**owner.inventory(seq), **owner.classifications[seq]} for seq in sequences), budget, publish,
+        ~~~~~~~~~~~~~~~^^^^^
+  File "/home/zyf/AAA/scar-worktrees/frame-entry-routing/scar/trace/native_capture_batch.py", line 535, in inventory
+    rows = [self.get("dispatch", line) for line in self.groups[seq]]
+            ~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "/home/zyf/AAA/scar-worktrees/frame-entry-routing/scar/trace/native_capture_batch.py", line 257, in get
+    self.check()
+    ~~~~~~~~~~^^
+  File "/home/zyf/AAA/scar-worktrees/frame-entry-routing/scar/trace/native_capture_batch.py", line 236, in check
+    need(time.monotonic() - self.started <= self.budget.max_wall_seconds, "batch whole wall budget exceeded")
+    ~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/zyf/AAA/scar-worktrees/frame-entry-routing/scar/ir/execution/native_port_protocol.py", line 34, in need
+    raise ValueError("native reference protocol: " + message)
+ValueError: native reference protocol: batch whole wall budget exceeded

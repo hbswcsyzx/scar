@@ -1,0 +1,11 @@
+{
+  "actual_exit_code": 1,
+  "session": 30589,
+  "whole_elapsed_seconds": 2445.3517582860077,
+  "complete_verified_shards": 156,
+  "complete_verified_activations": 39796,
+  "failure_stage": "final dispatch inventory publication; owner 2400s wall budget",
+  "final_metadata_manifest_published": false,
+  "target_runs_added": 0,
+  "whole_model_established": false
+}

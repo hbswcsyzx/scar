@@ -1,0 +1,8 @@
+{
+  "actual_exit_code": 130,
+  "session": 58129,
+  "decision": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/native_inputs_full_20261026/attempt03/ROOT_AUTHORIZED_STOP.json",
+  "target_runs_added": 0,
+  "whole_model_established": false,
+  "scope": "operator-authorized controlled stop; not wall-budget/semantic rejection or PASS"
+}

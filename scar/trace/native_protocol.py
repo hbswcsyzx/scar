@@ -586,7 +586,60 @@ def _build_program(interfaces, source, interface_artifact):
     return graph, layouts
 
 
-def _build_execution(program, layouts, interfaces, source, coordinates, program_artifact, values_artifact, evidence_artifact, *, prepared_snapshot=None):
+def _referenced_actor_closure(model, processes, threads):
+    """Select original declarations for every typed actor reference in a fragment.
+
+    Source facts stay unchanged. IDs, including parent/source endpoints nested
+    in declarations, are followed by their types; PID/TID text is never a key.
+    The visited set is local traversal bookkeeping, never an identity cache.
+    """
+    from dataclasses import fields, is_dataclass
+    from collections.abc import Mapping
+    from scar.ir.execution.coordinates import ProcessInstance, HostThreadInstance
+    from scar.ir.execution.model import ExecutionModel
+    from scar.ir.execution.ids import ProcessInstanceID, HostThreadInstanceID, RunID
+    need(type(model) is ExecutionModel, 'exact execution fragment required')
+    need(type(processes) is tuple and all(type(p) is ProcessInstance for p in processes), 'actor process declarations')
+    need(type(threads) is tuple and all(type(t) is HostThreadInstance for t in threads), 'actor thread declarations')
+    by_process = {p.id: p for p in processes}
+    by_thread = {t.id: t for t in threads}
+    need(len(by_process) == len(processes) and len(by_thread) == len(threads), 'duplicate actor declaration')
+    runs = {r.id for r in model.runs}
+    wanted_process, wanted_thread, visited = set(), set(), set()
+    pending = [getattr(model, field.name) for field in fields(model) if field.name not in ('processes', 'threads')]
+    while pending:
+        value = pending.pop()
+        if type(value) is ProcessInstanceID:
+            need(value in by_process, 'referenced process declaration unavailable')
+            if value not in wanted_process:
+                wanted_process.add(value)
+                pending.append(by_process[value])
+        elif type(value) is HostThreadInstanceID:
+            need(value in by_thread, 'referenced thread declaration unavailable')
+            if value not in wanted_thread:
+                wanted_thread.add(value)
+                pending.append(by_thread[value])
+        elif type(value) is RunID:
+            need(value in runs, 'actor/source endpoint Run unavailable')
+        elif is_dataclass(value):
+            if id(value) in visited:
+                continue
+            visited.add(id(value))
+            pending.extend(getattr(value, field.name) for field in fields(value))
+        elif isinstance(value, (tuple, list, Mapping)):
+            if id(value) in visited:
+                continue
+            visited.add(id(value))
+            if isinstance(value, Mapping):
+                pending.extend(value.keys())
+                pending.extend(value.values())
+            else:
+                pending.extend(value)
+    return (tuple(p for p in processes if p.id in wanted_process),
+            tuple(t for t in threads if t.id in wanted_thread))
+
+
+def _build_execution(program, layouts, interfaces, source, coordinates, program_artifact, values_artifact, evidence_artifact, *, prepared_snapshot=None, actor_scope='capture'):
     from scar.ir.program.codec import dumps as program_dumps
     from scar.ir.execution.coordinates import (BlockVisit, ControlTransfer, ExecutionSegment, InitialEntry,
         OperationOccurrence, ProgramSnapshot, RegionActivation, UseOccurrence, ValueOccurrence)
@@ -670,11 +723,18 @@ def _build_execution(program, layouts, interfaces, source, coordinates, program_
         need(prepared_snapshot.sha256 == program_artifact.sha256 and len(wire) == program_artifact.size_bytes
              and program_artifact.schema == "scar.program-graph", "prepared program artifact differs")
         schema_version = prepared_snapshot.schema_version
-    return ExecutionModel(ProgramSnapshot(program_artifact, schema_version),
+    need(actor_scope in ('capture', 'referenced'), 'unsupported execution actor scope')
+    need(actor_scope == 'capture' or source.get('reference_profile') == PROFILE_V2, 'referenced actors require V2')
+    model = ExecutionModel(ProgramSnapshot(program_artifact, schema_version),
         runs=(coordinates.run,), processes=coordinates.processes, threads=coordinates.threads,
         activations=tuple(activations), segments=tuple(segments), visits=tuple(visits), operations=tuple(operations),
         values=tuple(values), uses=tuple(uses), transfers=tuple(transfers), evidence_bindings=tuple(evidence_bindings),
         denotations=tuple(denotations))
+    if actor_scope == 'referenced':
+        from dataclasses import replace
+        processes, threads = _referenced_actor_closure(model, coordinates.processes, coordinates.threads)
+        model = replace(model, processes=processes, threads=threads)
+    return model
 
 
 def bind_native_protocol_window(coordinates, capture_directory, partitioned_native_manifest,

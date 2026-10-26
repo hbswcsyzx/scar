@@ -1,0 +1,28 @@
+{
+  "decision": "ROOT_AUTHORIZED_CONTROLLED_STOP",
+  "reason": "measured duplicate full scope checks make remaining work exceed unchanged 2400s owner budget; no budget or producer hot modification",
+  "pid": 1627534,
+  "ppid": 1627533,
+  "starttime_ticks": "34559446",
+  "cmdline": [
+    "/home/zyf/miniconda3/envs/lewm/bin/python",
+    "-u",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/native_inputs_full_20261026/attempt03/bind_inputs.py"
+  ],
+  "signal": "SIGINT",
+  "time_unix": 1793014636.4957185,
+  "source_before_stop": {
+    "capture_import.py": "34983670619807da4a86152ec4f90cd8d3c6d67cfb685b5fa64c72ba8d058bcc",
+    "native_capture_batch.py": "d136dfe6d1c507847681d199fe2d0e70860fca3716acf89208ce2bcb85a05286",
+    "native_input_index.py": "0d7ede43ad9994b57eabaa5f7e1cc06e8098d1313f6f336df6a16ac68473f011"
+  },
+  "last_progress": {
+    "elapsed_s": 1720.9649479159852,
+    "stage": "actual_shard_verified",
+    "number": 77,
+    "activations": 256,
+    "tensor_denotations": 747,
+    "whole_seconds": 1767.3045994010172
+  },
+  "whole_model_established": false
+}

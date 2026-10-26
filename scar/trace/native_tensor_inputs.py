@@ -391,11 +391,16 @@ class NativeInputMetadataSession:
         self._seen, self._canonical_nodes, self._associations = set(), set(), []
 
     def _expected(self, shard):
+        # Public checking always freshly verifies the exact program/model scope,
+        # including all-Unknown and zero-Tensor calls.
+        shard.native_port_evidence.require_scope(shard.execution, shard.program)
+        return self._candidate(shard)
+
+    def _candidate(self, shard):
+        """Unqualified builder data; independently check before publication."""
         from scar.ir.execution.content import NativeInputRef
         from scar.ir.program.model import TerminatorKind
         from scar.ir.record_codec import encode
-        # Covers all identities, including all-Unknown and zero-Tensor calls.
-        shard.native_port_evidence.require_scope(shard.execution, shard.program)
         source = _json(self._wire)
         _need(len(shard.execution.runs) == 1 and shard.execution.runs[0].id.value == source['run']
               and any(p.id.value == source['process'] for p in shard.execution.processes), 'association Run/process differs')
