@@ -39,6 +39,8 @@ class DispatchEvidence:
             raise ValueError("dispatch output must be fresh")
         self.fd = os.open(self.event_path, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
         self._digest = hashlib.sha256()
+        self._buffer = bytearray()
+        self._buffer_limit = 65536
         self._lock = threading.RLock()
         self._mode = self._top_mode = self._torch = None
         self._enter = self._exit = None
@@ -69,17 +71,34 @@ class DispatchEvidence:
                 self._dropped += 1; self._stopped = True
                 self._gap("byte_or_line_budget_exceeded"); return False
             try:
-                offset = 0
-                while offset < len(data):
-                    size = os.write(self.fd, data[offset:])
-                    if size <= 0:
-                        raise OSError("dispatch sidecar made no write progress")
-                    self._bytes += size; self._digest.update(data[offset:offset + size]); offset += size
+                self._bytes += len(data)
+                self._digest.update(data)
+                if len(self._buffer) + len(data) > self._buffer_limit:
+                    self._flush()
+                if len(data) >= self._buffer_limit:
+                    self._write_all(data)
+                else:
+                    self._buffer.extend(data)
             except OSError as error:
                 self._io_failed = self._stopped = True
                 self._error("write", error); return False
             self._events += 1
             return True
+
+    def _write_all(self, data):
+        if os.getpid() != self.pid:
+            raise OSError("forked process cannot flush parent dispatch records")
+        offset = 0
+        while offset < len(data):
+            size = os.write(self.fd, data[offset:])
+            if size <= 0:
+                raise OSError("dispatch sidecar made no write progress")
+            offset += size
+
+    def _flush(self):
+        if self._buffer:
+            self._write_all(self._buffer)
+            self._buffer.clear()
 
     def _leaves(self, value, prefix):
         leaves, gaps, seen_containers = [], [], set()
@@ -232,6 +251,14 @@ class DispatchEvidence:
         self.stop()
         with self._lock:
             self._closed = True
+            try:
+                if not self._io_failed:
+                    self._flush()
+            except OSError as error:
+                self._io_failed = self._stopped = True
+                self._error("flush", error)
+            finally:
+                self._buffer.clear()
             os.close(self.fd)
             native = None
             if native_manifest is not None:

@@ -51,6 +51,10 @@ class CallEdgeRecorder:
         except BaseException:
             os.close(self.events_fd)
             raise
+        # Bytes only: no application references and no destructor that could
+        # flush a parent's buffered records after a raw fork.
+        self._buffers = {self.events_fd: bytearray(), self.codes_fd: bytearray()}
+        self._buffer_limit = 65536
 
     def _inside(self, frame):
         if frame is None:
@@ -62,20 +66,37 @@ class CallEdgeRecorder:
         data = (json.dumps(row,ensure_ascii=True,separators=(",",":"),allow_nan=False)+"\n").encode()
         if self.bytes + len(data) > self.limits['max_bytes']:
             return False
-        position = 0
         try:
-            while position < len(data):
-                written = os.write(fd,data[position:])
-                if written <= 0:
-                    raise OSError('call trace write made no progress')
-                position += written
-                self.bytes += written
+            buffer = self._buffers[fd]
+            self.bytes += len(data)
+            if len(buffer) + len(data) > self._buffer_limit:
+                self._flush(fd)
+            if len(data) >= self._buffer_limit:
+                self._write_all(fd, data)
+            else:
+                buffer.extend(data)
         except OSError:
             # A partial JSON row is invalid evidence. Stop this recorder;
             # retries must not append uncharged fragments or fabricate rows.
             self.io_failed = True
             raise
         return True
+
+    def _write_all(self, fd, data):
+        if os.getpid() != self.pid:
+            raise OSError("forked process cannot flush parent call records")
+        position = 0
+        while position < len(data):
+            written = os.write(fd, data[position:])
+            if written <= 0:
+                raise OSError("call trace write made no progress")
+            position += written
+
+    def _flush(self, fd):
+        buffer = self._buffers[fd]
+        if buffer:
+            self._write_all(fd, buffer)
+            buffer.clear()
 
     def _code(self, code):
         description = describe_code(code)
@@ -280,8 +301,17 @@ class CallEdgeRecorder:
             if self.closed or os.getpid() != self.pid:
                 return
             self.closed = True
-            os.close(self.events_fd)
-            os.close(self.codes_fd)
+            for fd in (self.events_fd, self.codes_fd):
+                try:
+                    if not self.io_failed:
+                        self._flush(fd)
+                except OSError as error:
+                    self.io_failed = True
+                    if len(self.errors) < 16:
+                        self.errors.append(type(error).__name__)
+                finally:
+                    self._buffers[fd].clear()
+                    os.close(fd)
             metadata = dict(schema='scar.call-edge-trace',schema_version=1,process_id=self.pid,
                 project_root=self.root,python=sys.version,limits=self.limits,events=self.written,event_attempts=self.index,
                 invocations=self.entered,invocation_attempts=self.invocation,codes=len(self.codes),bytes=self.bytes,
