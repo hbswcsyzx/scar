@@ -436,8 +436,6 @@ def _binding_inputs(path, reader, budget):
             _binding_require(record['public_structure_reader'] is True and record['independent_code_reader'] is True,
                              'successful worker record contradicts its reader outcomes')
             requests.append({'entry_key': record['entry_key'], 'source_program': program})
-            if reference['root']['artifact']['schema'] != 'scar.dependency-source-admissions':
-                blockers.append('PROJECT_BODY_PUBLICATION_ADAPTER_MISSING')
         _binding_require(worker['counts'].get('SUCCEEDED', 0) == len(requests),
                          'successful program denominator differs from the worker')
     if not requests:
@@ -564,7 +562,7 @@ def _execute_entry_bindings(inputs, attempt, result, budget):
     from scar.analysis.code_witness import CodeWitnessBudget
     from scar.analysis.source_entry_catalog import SourceEntryCatalog
     from scar.analysis.program_composition import CompositionIndex
-    from scar.analysis.source_program_publication import publish_source_entries
+    from scar.analysis.source_program_publication import publish_source_entries, plan_source_entry_publication
     from scar.analysis.source_invocations import bind_source_invocations
     from scar.ir.program.call_edges import CallEdgeBudget
     from scar.ir.program.source_references import SourceDefinitionReference
@@ -593,7 +591,8 @@ def _execute_entry_bindings(inputs, attempt, result, budget):
         actual = catalog.metadata()
         _binding_require(actual['entered_code_groups'] == inputs['original_denominators']['groups']
             and actual['entered_invocations'] == inputs['original_denominators']['calls'], 'publication catalog changed scope')
-        return publish_source_entries(parent, catalog, inputs['requests'], stage / 'publication',
+        publication_plan = plan_source_entry_publication(parent, catalog, inputs['requests'], max_programs=budget.max_programs)
+        return publish_source_entries(parent, catalog, inputs['requests'], stage / 'publication', plan=publication_plan,
             max_programs=budget.max_programs, max_operations_per_body=budget.max_operations_per_body,
             max_record_bytes=budget.max_record_bytes,
             progress=lambda row: print(json.dumps({'schema': SCHEMA, 'publication_progress': row}), flush=True))

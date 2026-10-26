@@ -1,14 +1,14 @@
 # 从已有采集自动组织建模
 
-保存的 source-entry SP5 现可通过 `publish_source_entries` 独立准入，并以
-`CompositionIndex.from_source_entry_publication` 查询原 qualified body；普通
-`bind_source_invocations` 已在同一 CPU 采集上实际关联 260 次调用。
-它保原 SourceDefinitionReference、namespace 和 SP5 URI，不伪造项目 fi/bi；
-原生图仍是原 SP5，publication 只导航。此后继现已接为独立
-`source-entry-bindings` 通用CLI，真实四阶段门exit0/40.817240s，实际仍为原9groups/
-271calls中的260body、5source、6unresolved；它与此前公共API门分别保留资格。
-参数/环境/state/return/control 仍未连接，详见
-[真实结果](../artifacts/experiments/qualified_source_entry_binding_resume02_20261025/RESULT.md)。
+`source-entry-bindings` 通用 CLI 现同时支持 project 与 dependency 的原 SP5。
+2026-10-26 同一次 generic CPU 采集的后段实际退出 0：schema2 publication 包含
+两个 project REVISE_GRAPH 和一个 dependency ADD_GRAPH；普通 qualified reader
+查询三个原 body，v4 binder 在原 5groups/12calls 中关联 10body（project6、dependency4）、
+1source、1unresolved。原 namespace、SourceDefinitionReference、SP5 URI 与项目
+真实 fi/bi 保留；原 compiler witness 与 entry navigation origin 分列。
+CP2 成本 UNKNOWN，publication/binding 不重 lower 或恢复 owner。
+actual-formal/环境/state/return/control 及完整模型仍 OPEN，详见
+[同 Run 实测与留存](../artifacts/experiments/project_dependency_publication_gate_20261025/REPORT.md)。
 
 2026-10-25。P0通用离线入口已实现，真实八阶段串联通过；完整程序建模仍OPEN。
 LeWM正式source858/runtime843的覆盖不受本次小CPU样例影响。
@@ -133,8 +133,9 @@ SP5 URI不变、CP2成本UNKNOWN，不lower/恢复owner/执行目标/重建nativ
 record64MB/output128MB是既有参数及post-stage检查，外部180s，全输入累计I/O仍OPEN。
 
 resume新建attempt并保旧失败。输出只链接原SP5、规范publication/v4绑定和原project
-composition，没有新图权威。当前publisher仅支持qualified external-entry；project
-SP5保全部declaration并报PROJECT_BODY_PUBLICATION_ADAPTER_MISSING，不伪fi/bi。
+composition，没有新图权威。schema1 保持 external-entry 合同；显式 schema2 计划
+按原父 root/body/artifact/namespace 做 ADD/REVISE CAS，project 使用真实槽位，
+dependency 保 qualified 来源。旧 compiler origin 不改名，entry origin 仅导航。
 actual-formal/env/state/return/control及完整模型仍OPEN，旧SBA不因新v4自动取得资格。
 实现范围与门见[短计划](../artifacts/analysis/model_run_source_entry_bindings_20261025/PLAN.md)。
 
@@ -142,5 +143,7 @@ actual-formal/env/state/return/control及完整模型仍OPEN，旧SBA不因新v4
 v4普通binder四阶段完成，无实验模块import、lower/compile/target/native或OS重建。
 readonly依赖1load/2matches、project0；原9/271守恒，260body+5source+6unresolved，
 271exits/0orphan。五类未连接接口仍各271，旧SBA2/3不放宽，858/843/6699不变。
-本门旧成功归属仅1/1兼容，未把任意legacy partial mapping或project adapter当已通过。
+这次历史门的旧成功归属仅1/1兼容，当时 project adapter 尚未实现；它不获得后续
+schema2 的新资格。新 mixed 门实际覆盖 project REVISE 与 dependency ADD，尚未覆盖
+project ADD、父 overlay 继承查询或 v5 参数路由。
 详见[CLI实测与留存](../artifacts/experiments/model_run_source_entry_bindings_gate_20261025/RESULT.md)。

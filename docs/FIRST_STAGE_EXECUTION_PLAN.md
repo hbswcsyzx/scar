@@ -10,7 +10,7 @@
 | --- | --- |
 | 通用 frame/control 根 | A 的 core29 FRAME/单一 ABI 权威已接 B 的实际 SP8 producer：机械展开8顶层接口/118ops，Try等3句精确suffix仍REQUIRED；主树同SP8及旧function SP5普通读回通过。实际frame/namespace、内容/effects仍OPEN。下一步同SP8接传播payload与Try/异常清理，见[B实际报告](../artifacts/experiments/module_structured_prefix_b_applied_20261025/REPORT.md)及[整体设计](../artifacts/analysis/module_structured_frame_plan_20261025/PLAN.md)。 |
 | callee-entry 参数边 | snapshot→原 formal port 的局部 projection 已通过真实隔离门及主树旧 SP5/typed consumer：271次入口/566个参数观测，260次入口/520 ports 对应，11次保留 frontier。caller 实参表达式、对象/内容身份与完整 ExecutionModel 不能据此宣布完成；见[实际接入报告](../artifacts/experiments/callee_entry_routing_applied_20261025/REPORT.md)。 |
-| project/dependency 统一出版 | 当前 CLI 对 project SP5 的 adapter 仍 BLOCKED；原 origin、父 body/CAS 和 namespace 设计已审，四源码正在实现 schema2 ADD/REVISE。保所有成功产物，不能只留下方便处理的 external case。随后用同一新 CPU capture 实际验证两类入口，不拼接旧样例。 |
+| project/dependency 统一出版 | 同一次新CPU capture的正常CLI已实际通过：3成功SP5全部消费，project REVISE2、dependency ADD1，5groups/12calls保全，body-linked10/source-only1/unresolved1。五类动态接口仍各12 OPEN；project ADD、父overlay继承和v5新路径未实测。见[真实门报告](../artifacts/experiments/project_dependency_publication_gate_20261025/REPORT.md)。 |
 
 这些是模型连接与类型修正，不是优化候选或 backend。下一版本仍必须保完整源码、
 调用和资源分母，并分别报告 source topology、运行对应、效果与完成状态。
@@ -33,15 +33,17 @@ S1 审计、已有数据的 S3 接线和独立产品复核可以并行；会改�
 通用 CPU 入口的 source-entries、qualified publication、source-entry-bindings CLI
 已实际通过；同样例保9 groups/271调用、260 body-linked/5 source-linked/6 unresolved。
 本轮入口 snapshot→formal 局部对应也已通过，不能当完整数据流。
-当前下一门为两条互不改同一 producer 的实现：
+本轮两条互不改同一 producer 的实现均已通过有限真实门：
 
 - 在通用 FRAME 根上生成模块 SP8：机械选择真实源码最大可支持连续段，展开
   import/namespace/expression/loop，准确保剩余语句和 required expansion；不造函数环境。
 - 同一新 CPU capture 的 project/dependency 正常函数统一出版和普通绑定，实际核
   原来源、命名空间、ADD/REVISE 和父版本，不拼接旧样例，不重新 lower 已有产物。
 
-两条先过各自真实有限门再合入；异常传播、内容/state/ready、完整 LeWM 链仍须继续。
-CP2 未知成本和历史失败保留。详见[入口](MODEL_RUN.md)及上述三项工作表。
+两项均已合入；下一步先审同一SP8异常传播/清理接点，然后继续实际数据/状态及资源完成关系。
+资源薄bridge仅有[有界方案](../artifacts/analysis/resource_completion_bridge_20261025/PLAN.md)，
+未授权实现：已保存GPU活动区间不能直接授COMPLETED或value ready，先解决具体证据合同。
+完整LeWM链、CP2未知成本和历史失败均保留。详见[入口](MODEL_RUN.md)及上述三项工作表。
 
 当前正式静态源码快照为858个active bodies/2217个定义/151个文件，769 UNSUPPORTED、
 590 NOT_ATTEMPTED。三kwargs图的846父快照上，后继12个既有图普通ADD及组合消费已完成；

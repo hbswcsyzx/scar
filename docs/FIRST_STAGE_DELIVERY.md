@@ -4,6 +4,12 @@
 [FIRST_STAGE_MODEL_CONTRACT.md](FIRST_STAGE_MODEL_CONTRACT.md) 为准。
 本文件统一当前执行顺序；历史 F 系列组件编号不构成串行开发队列。
 
+**2026-10-26最新有限门：** 新同Run CPU样例已通过project/dependency统一正常CLI：
+project2个原槽位REVISE、dependency1个ADD，所有3成功SP5均处理；12calls中10接规范body，
+1 source-only、1 unresolved。不是LeWM增量；五类动态关系仍各12 OPEN。原capture、
+三个消费者freeze、准确成本及未覆盖分支见[实际报告](../artifacts/experiments/project_dependency_publication_gate_20261025/REPORT.md)。
+下文旧CPU271调用是另一原样例，不与本门相加；历史project adapter BLOCKED已被本门取代。
+
 **通用入口的最新有限结果：** 原CPU G1八阶段125.90s通过时，基线为0body/271调用
 未解析。后继自动依赖门为6组/265调用建立SOURCE_VERIFIED；再后继entry门6.771874s
 实际正常lower1entry/28ops，相同SP5的普通source/code reader通过。260只是原调用权重，

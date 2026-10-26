@@ -1,0 +1,12 @@
+{"schema": "scar.model-run/1", "stage": "qualified-publication", "status": "STARTED"}
+{"schema": "scar.model-run/1", "publication_progress": {"stage": "admit_qualified_entry", "entry_key": "528e3bd223af08e8c94d57fbb931bb8e7d3853894d27424ce18b6e0c864077da", "owner_kind": "DEPENDENCY_ADMISSION", "operation": "ADD_GRAPH", "status": "VERIFIED"}}
+{"schema": "scar.model-run/1", "publication_progress": {"stage": "admit_qualified_entry", "entry_key": "0fa49de154c717280f3a040aa2a356dbd115cf02f3d75316e730695a63fb7f9d", "owner_kind": "PROJECT_INVENTORY", "operation": "REVISE_GRAPH", "status": "VERIFIED"}}
+{"schema": "scar.model-run/1", "publication_progress": {"stage": "admit_qualified_entry", "entry_key": "f287d49e9ce70787e28693fba80254773b4bccd6aa57a00bc5c97d58efff9836", "owner_kind": "PROJECT_INVENTORY", "operation": "REVISE_GRAPH", "status": "VERIFIED"}}
+{"schema": "scar.model-run/1", "stage": "qualified-publication", "status": "COMPLETED", "wall_seconds": 6.120757060998585}
+{"schema": "scar.model-run/1", "stage": "qualified-body-reader", "status": "STARTED"}
+{"schema": "scar.model-run/1", "stage": "qualified-body-reader", "status": "COMPLETED", "wall_seconds": 7.020118625019677}
+{"schema": "scar.model-run/1", "stage": "genuine-source-coordinates", "status": "STARTED"}
+{"schema": "scar.model-run/1", "stage": "genuine-source-coordinates", "status": "COMPLETED", "wall_seconds": 0.5792644430184737}
+{"schema": "scar.model-run/1", "stage": "source-entry-bindings", "status": "STARTED"}
+{"schema": "scar.model-run/1", "stage": "source-entry-bindings", "status": "COMPLETED", "wall_seconds": 6.917203242017422}
+{"out": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/project_dependency_publication_gate_20261025/offline/bindings", "status": "SOURCE_ENTRY_BINDINGS_WITH_OPEN", "attempt": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/project_dependency_publication_gate_20261025/offline/bindings/attempts/1792973134251522822-1470278", "whole_model_established": false}

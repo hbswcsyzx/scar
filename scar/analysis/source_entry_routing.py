@@ -42,11 +42,11 @@ class EntryRoutingSession:
             reference = decode(QualifiedSourceBodyReference, body['reference'])
             typed = composition.typed_qualified_body(reference)
             item = composition._qualified_entry_item(reference)
-            state = composition._require_entry_publication()
-            original = [r for r in state['document']['bodies'] if r['entry_key'] == item['record']['entry_key']]
-            if len(original) != 1 or _canonical(original[0]) != _canonical(item['record']):
+            original = item['record']
+            if (original['entry_key'] != item['entry'].key
+                    or original['definition'] != encode(reference.definition)):
                 raise ValueError('entry routing cached signature differs from original checked publication')
-            signature = decode(FunctionSignature, original[0]['signature'])
+            signature = decode(FunctionSignature, original['signature'])
             validate_body_interface(typed.body, typed.interface, signature)
             if (encode(reference.definition) != row['definition'] or body != composition.qualified_body_record(reference)
                     or typed.interface.definition != reference.definition.definition):

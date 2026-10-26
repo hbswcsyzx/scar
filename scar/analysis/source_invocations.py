@@ -584,6 +584,37 @@ def _attachment_witness(attached, *, binding_version):
     return result
 
 
+def _apply_qualified_entry_body(composition, row, key, reference):
+    """Use a checked overlay after either original project or external proof."""
+    if not composition.has_source_entry_publication:
+        return False
+    qualified = composition.body_reference(reference)
+    if qualified is None:
+        return False
+    _need(row["complete_descriptor_match"] is True and row.get("witness_status") == "VERIFIED"
+          and row["definition"] == encode(reference)
+          and not any(code in row["frontiers"] for code in
+                      ("DEFINITION_SOURCE_WITNESS_MISMATCH", "SOURCE_SNAPSHOT_MISMATCH",
+                       "STATIC_BODY_WITNESS_CONFLICT", "FINAL_ADMISSION_MISMATCH")),
+          "qualified body cannot hide an original descriptor/source/admission contradiction")
+    admission = composition.entry_body_admission(*key, qualified)
+    _need(admission["origin"]["process_id"] == key[0] and admission["origin"]["code"] == key[1]
+          and admission["status"] == CallSourceAdmissionStatus.CORE_LINKED.value
+          and admission["snapshot"] == row["snapshot"] and admission["definition"] == encode(reference.definition)
+          and admission["source"] == row["source"] and admission["core_region"] == encode(qualified.identity),
+          "qualified body admission contradicts the current original code/source witness")
+    unavailable = {"MISSING_FINAL_SOURCE_ADMISSION", "FINAL_ADMISSION_UNAVAILABLE", "CANONICAL_BODY_UNAVAILABLE",
+                   "CANONICAL_BODY_NOT_MODELLED_BY_SOURCE_ATTACHMENT"}
+    row["parent_body_frontiers"] = [code for code in row["frontiers"] if code in unavailable]
+    row["frontiers"] = [code for code in row["frontiers"] if code not in unavailable]
+    if "admission_reason" in row:
+        row["parent_admission_reason"] = row.pop("admission_reason")
+    row["body"] = composition.qualified_body_record(qualified)
+    row["qualified_body_admission"] = admission
+    row["status"] = "BODY_LINKED_REUSED_WITNESS"
+    return True
+
+
 def _formal_binding_rows(composition, bindings, captures, members, *, witness_mode="same_capture"):
     """Use one shared original-definition resolver; no new inventory or body."""
     composition.prefetch_definition_references((
@@ -624,21 +655,8 @@ def _formal_binding_rows(composition, bindings, captures, members, *, witness_mo
                 binding_version=4 if composition.has_source_entry_publication else 3)
             if reference is not None:
                 row["status"] = "SOURCE_LINKED_REUSED_WITNESS"
-                qualified = composition.body_reference(reference) if composition.has_source_entry_publication else None
-                if qualified is None:
+                if not _apply_qualified_entry_body(composition, row, key, reference):
                     row["frontiers"].append("CANONICAL_BODY_NOT_MODELLED_BY_SOURCE_ATTACHMENT")
-                else:
-                    admission = composition.entry_body_admission(*key, qualified)
-                    _need(admission["origin"]["process_id"] == key[0] and admission["origin"]["code"] == key[1]
-                          and admission["status"] == CallSourceAdmissionStatus.CORE_LINKED.value
-                          and admission["snapshot"] == row["snapshot"]
-                          and admission["definition"] == encode(reference.definition)
-                          and admission["source"] == row["source"]
-                          and admission["core_region"] == encode(qualified.identity),
-                          "qualified body admission contradicts the exact current code/source witness")
-                    row["body"] = composition.qualified_body_record(qualified)
-                    row["qualified_body_admission"] = admission
-                    row["status"] = "BODY_LINKED_REUSED_WITNESS"
             else:
                 row["status"] = "UNRESOLVED"
                 row["frontiers"].append("VERIFIED_CODE_WITHOUT_DEFINITION_WITNESS")
@@ -655,6 +673,8 @@ def _formal_binding_rows(composition, bindings, captures, members, *, witness_mo
                 _need(encode(reference.snapshot) == row["snapshot"] and encode(reference.source) == row["source"],
                       "formal project definition differs from its original code/source witness")
                 row["definition"] = encode(reference)
+                if witness_mode == "same_capture":
+                    _apply_qualified_entry_body(composition, row, key, reference)
     return bindings
 
 

@@ -6,6 +6,17 @@
 实体和完整性定义见 [合同](FIRST_STAGE_MODEL_CONTRACT.md)。以下是按日期保留的
 实施记录；其中“进行中”仅指该条写入时状态，不作为当前进程存活证明。
 
+### 2026-10-26：project/dependency 同 Run 自动接入通过
+
+Root70391真实唯一CPU采集exit0/25.3018s；72518两正常CLI均exit0，bootstrap GNU106.14s、
+dependency11.96s；31699后两CLI均exit0，source-entries20.37s、bindings21.93s。
+369源前后不变，采集与各消费者的源码版本分列，不追认新字节为旧collector来源。
+4候选实际3成功/1unsupported，3原SP5全部准入；project REVISE2、dependency ADD1。
+5groups/12calls中10 body-linked（project6/dependency4）、1 source-only、1 unresolved；
+五类actual-formal/return/environment/control/state接口仍各12项未连接。
+本门默认v4，v5/inherited-signature修正只有code review，未覆盖project ADD或父overlay继承。
+不是LeWM覆盖增量或完整执行图；见[精确结果](../artifacts/experiments/project_dependency_publication_gate_20261025/REPORT.md)。
+
 ### 2026-10-26：通用模块 SP8 连续前缀建模通过
 
 保存的同586B源码，由原AST/SG/CodeWitness机械选择8顶层接口，生成118ops/2regions，

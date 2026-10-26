@@ -786,7 +786,8 @@ class CompositionIndex:
                                       max_programs=1, max_operations_per_body=4000,
                                       max_catalog_groups=16, max_catalog_entries=16,
                                       max_selected_decode_bytes=128_000_000,
-                                      attachment_budget=SourceAttachmentBudget()):
+                                      attachment_budget=SourceAttachmentBudget(), max_parent_depth=4,
+                                      _depth=0, _shared_admissions=None):
         """Read a qualified overlay over an unchanged project composition.
 
         Direct admissions are explicit in this new contract. The legacy
@@ -795,35 +796,53 @@ class CompositionIndex:
         from scar.analysis.compiler_witness_archives import CompilerWitnessArchives
         from scar.analysis.source_entry_catalog import SourceEntryCatalog
         from scar.analysis.source_program_publication import read_source_entry_publication
-        if cls is not CompositionIndex or type(archives) is not CompilerWitnessArchives:
+        if (cls is not CompositionIndex or type(archives) is not CompilerWitnessArchives
+                or type(max_parent_depth) is not int or not 1 <= max_parent_depth <= 16
+                or _depth >= max_parent_depth):
             raise TypeError("entry composition requires exact readonly archives")
         document, receipt = _read(Path(path), max_input_bytes)
         if (receipt["raw_sha256"] != expected_sha256
-                or document.get("schema") != "scar.source-entry-publication" or document.get("schema_version") != 1):
+                or document.get("schema") != "scar.source-entry-publication" or document.get("schema_version") not in (1, 2)):
             raise ValueError("entry publication root receipt/schema differs")
         original = document["parent_composition"]
-        parent = cls(original["path"], max_input_bytes=max_input_bytes, max_record_bytes=max_record_bytes)
-        if (parent.index_receipt != original or parent.source_inputs() != document["parent_inputs"]
-                or archives.receipts() != document["catalog_inputs"]["archives"]):
-            raise ValueError("entry publication parent/archive inputs differ")
+        catalog_original = document.get("catalog_project_composition", original)
+        catalog_project = cls(catalog_original["path"], max_input_bytes=max_input_bytes, max_record_bytes=max_record_bytes)
+        if catalog_project.index_receipt != catalog_original or archives.receipts() != document["catalog_inputs"]["archives"]:
+            raise ValueError("entry publication original project/archive inputs differ")
         admissions = []
         for declaration in document["catalog_inputs"]["admissions"]:
             if (declaration.get("format") != "scar.source-admissions-input.v1"
                     or declaration.get("parent") is not None):
                 raise ValueError("entry publication requires an explicit direct-admissions locator")
             report = declaration["report"]
-            owner = SourceAttachments.from_admissions(report["artifact"]["uri"],
-                expected_report_sha256=report["artifact"]["sha256"],
-                project_root=parent.inventory_component("discovery")["project_root"], budget=attachment_budget)
+            shared = [owner for owner in (_shared_admissions or ()) if owner.receipts() == declaration]
+            if shared:
+                owner = shared[0]
+            else:
+                owner = SourceAttachments.from_admissions(report["artifact"]["uri"],
+                    expected_report_sha256=report["artifact"]["sha256"],
+                    project_root=catalog_project.inventory_component("discovery")["project_root"], budget=attachment_budget)
             if owner.receipts() != declaration:
                 raise ValueError("entry publication admission receipt differs")
             admissions.append(owner)
-        catalog = SourceEntryCatalog(archives=archives, admissions=tuple(admissions), projects=(parent,),
+        previous = document.get("parent_entry_publication") if document["schema_version"] == 2 else None
+        if previous is None:
+            parent = cls(original["path"], max_input_bytes=max_input_bytes, max_record_bytes=max_record_bytes)
+        else:
+            parent = cls.from_source_entry_publication(previous["uri"], expected_sha256=previous["sha256"], archives=archives,
+                max_input_bytes=max_input_bytes, max_record_bytes=max_record_bytes, max_programs=max_programs,
+                max_operations_per_body=max_operations_per_body, max_catalog_groups=max_catalog_groups,
+                max_catalog_entries=max_catalog_entries, max_selected_decode_bytes=max_selected_decode_bytes,
+                attachment_budget=attachment_budget, max_parent_depth=max_parent_depth, _depth=_depth + 1,
+                _shared_admissions=tuple(admissions))
+        if parent.index_receipt != original or parent.source_inputs() != document["parent_inputs"]:
+            raise ValueError("entry publication current parent view/CAS differs")
+        catalog = SourceEntryCatalog(archives=archives, admissions=tuple(admissions), projects=(catalog_project,),
             max_groups=max_catalog_groups, max_candidates=max_catalog_entries,
             max_selected_decode_bytes=max_selected_decode_bytes)
         verified, actual, checked = read_source_entry_publication(path, expected_sha256=expected_sha256,
             catalog=catalog, max_programs=max_programs, max_operations_per_body=max_operations_per_body,
-            max_record_bytes=max_record_bytes)
+            max_record_bytes=max_record_bytes, target_composition=parent)
         # Keep catalog's original parent separate: its source_inputs must never
         # be changed recursively by installation of this publication overlay.
         result = cls(original["path"], max_input_bytes=max_input_bytes, max_record_bytes=max_record_bytes)
@@ -835,8 +854,12 @@ class CompositionIndex:
             p = Path(ref["uri"])
             stat = p.stat()
             watched.append((deepcopy(ref), (stat.st_dev, stat.st_ino, stat.st_size, stat.st_mtime_ns)))
+        active = {_canonical(encode(item["entry"].reference)): item for item in
+                  (parent._require_entry_publication()["checked"] if parent.has_source_entry_publication else ())}
+        active.update({_canonical(encode(item["entry"].reference)): item for item in checked})
         result._entry_publication = {"document": verified, "receipt": actual, "path": str(Path(path).resolve()),
-                                     "catalog": catalog, "checked": checked, "watched": watched,
+                                     "catalog": catalog, "checked": tuple(active.values()), "watched": watched,
+                                     "parent_view": parent if parent.has_source_entry_publication else None,
                                      "document_sha256": hashlib.sha256(_canonical(verified)).hexdigest()}
         return result
 
@@ -844,10 +867,82 @@ class CompositionIndex:
     def has_source_entry_publication(self):
         return self._entry_publication is not None
 
+    def entry_publication_reference(self):
+        if not self.has_source_entry_publication:
+            return None
+        state = self._require_entry_publication()
+        return {"uri": state["path"], "sha256": state["receipt"]["physical_sha256"],
+                "size_bytes": state["receipt"]["physical_bytes"]}
+
+    def body_publication_state(self, reference):
+        """Receipt-bound CAS/history state, never a new source/body admission."""
+        if type(reference) is not SourceDefinitionReference:
+            raise TypeError("exact qualified source definition required")
+        reference.__post_init__()
+        project = self._project_reference_view(reference)
+        slot = None
+        if project is not None:
+            fi = self._project_snapshot_indexes[_canonical(encode(reference.snapshot))]
+            file = self.inventory_file(fi)
+            definitions = [row for row in file["definitions"] if row["id"] == encode(reference.definition)
+                           and row["source"] == encode(reference.source)]
+            bodies = [bi for bi, body in enumerate(file["bodies"]) if body["definition"] == encode(reference.definition)]
+            if len(definitions) != 1 or len(bodies) != 1 or file["context"] != encode(reference.context):
+                raise ValueError("project definition/source/context has no unique real file/body slot")
+            slot = {"file_index": fi, "body_index": bodies[0]}
+        result = {"definition": encode(reference), "project_slot": slot, "body": None}
+        if self.has_source_entry_publication:
+            for item in self._require_entry_publication()["checked"]:
+                if item["entry"].reference == reference:
+                    qualified = self.body_reference(reference)
+                    result["body"] = {"kind": "QUALIFIED_SOURCE_BODY", "reference": encode(qualified),
+                        "root": encode(qualified.identity), "graph_sha256": item["record"]["program_graph_sha256"],
+                        "namespace": self.qualified_body_record(qualified)["namespace"],
+                        "source_program": deepcopy(item["record"]["source_program"]),
+                        "checkpoint": deepcopy(item["record"]["checkpoint"]),
+                        "entry_profile": item["program"].profile.value, "frame_present": item["program"].frame is not None}
+                    return result
+        if slot is None:
+            return result
+        fi, bi = slot["file_index"], slot["body_index"]
+        summary = self.document["files"][fi]["bodies"][bi]
+        if summary["root"] is None:
+            return result
+        if self.partitioned:
+            header = self.inventory.file(fi)["bodies"][bi]
+            checkpoint = self.inventory.external_reference(header["checkpoint"]) if header["checkpoint"] else None
+            accounting = self.inventory.historical_body_accounting(fi, bi,
+                expected_parent=self.inventory.manifest_receipt, expected_checkpoint=checkpoint,
+                expected_namespace=summary["namespace"], expected_graph_sha256=summary["program_canonical_sha256"])
+            fields = accounting["field_locators"]
+            profile, frame = accounting["entry_profile"], accounting["frame_present"]
+        else:
+            raw = self.inventory_body(fi, bi)
+            if (raw["graph"] is None or raw["graph"]["root"]["wire"] != summary["root"]
+                    or hashlib.sha256(_canonical(raw["graph"])).hexdigest() != summary["program_canonical_sha256"]):
+                raise ValueError("project parent body/root/digest differs from original inventory")
+            load_graph(json.dumps(raw["graph"], allow_nan=False))  # core history only, no source-language promotion
+            fields = self.qualified_inventory_body_locators(fi, bi, raw["graph"])
+            interfaces = self.inventory_component("interfaces") or {}
+            matching = [row for row in interfaces.get("bodies", []) if row["definition"] == encode(reference.definition)
+                        and row["region"]["wire"] == summary["root"]]
+            if len(matching) != 1:
+                raise ValueError("parent body has no unique original entry interface")
+            profile = matching[0]["profile"]
+            frame = any(row["definition"] == encode(reference.definition) for row in (self.inventory_component("frames") or []))
+            checkpoint = None
+        result["body"] = {"kind": "PARENT_PROJECT_BODY", "root": summary["root"],
+            "graph_sha256": summary["program_canonical_sha256"], "namespace": fields["graph_locator"]["namespace"],
+            "graph_locator": fields["graph_locator"], "metadata_locator": fields["metadata_locator"],
+            "checkpoint": checkpoint, "entry_profile": profile, "frame_present": frame}
+        return result
+
     def _require_entry_publication(self):
         state = self._entry_publication
         if state is None:
             raise ValueError("composition has no qualified entry publication")
+        if state.get("parent_view") is not None:
+            state["parent_view"]._require_entry_publication()
         state["catalog"].require_unchanged()
         if hashlib.sha256(_canonical(state["document"])).hexdigest() != state["document_sha256"]:
             raise ValueError("bound entry publication document changed")
