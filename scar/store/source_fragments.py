@@ -235,12 +235,18 @@ class SourceFragmentWriter(_IO):
         return SourceArtifactLocator(ProviderArtifact(str(path), _sha(raw), len(raw),
             document['schema'] + '/1'), _sha(decoded), len(decoded), 'gzip-canonical-json')
 
-    def write(self, original, *, namespace_root):
+    def write(self, original, *, namespace_root=None):
         document = self._read(original)
         _need(document.get('schema') == 'scar.source-program' and type(document.get('schema_version')) is int
               and document['schema_version'] == 5, 'unsupported source fragment input; explicit SP5 required')
-        _need(type(document.get('language')) is dict and document['language'].get('namespace_root') == namespace_root,
-              'source body namespace differs')
+        _need(type(document.get('language')) is dict, 'source body language overlay differs')
+        recorded_namespace = document['language'].get('namespace_root')
+        if namespace_root is None:
+            namespace_root = recorded_namespace
+        _need(type(namespace_root) is str and Path(namespace_root).is_absolute()
+              and os.path.normpath(namespace_root) == namespace_root,
+              'context namespace must be an exact absolute root')
+        _need(recorded_namespace == namespace_root, 'source body namespace differs')
         original_canonical = _canonical(document)
         _matches_original(original_canonical, original)
         source = decode(SourceSnapshot, document['metadata']['source'])

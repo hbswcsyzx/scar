@@ -382,7 +382,8 @@ def _resume_records(paths, *, max_bytes):
     return records
 
 
-def run_source_frontend(plan, code_witnesses, out_dir, *, budget=SourceFrontendBudget(), resume_from=(), progress=None):
+def run_source_frontend(plan, code_witnesses, out_dir, *, budget=SourceFrontendBudget(), resume_from=(), progress=None,
+                        shared_context=False):
     """Run a bounded preplanned window, retaining every actual attempt.
 
     Same-input failures are skipped through explicit immutable resume indexes.
@@ -391,7 +392,8 @@ def run_source_frontend(plan, code_witnesses, out_dir, *, budget=SourceFrontendB
     if type(plan) is SourceEntryFrontendPlan:
         _need(not resume_from, "entry v2 resume requires a fresh explicit plan/attempt")
         _need(code_witnesses is plan.catalog.archives, "entry worker requires its explicitly admitted archives")
-        return run_source_entries(plan, out_dir, budget=budget, progress=progress)
+        return run_source_entries(plan, out_dir, budget=budget, progress=progress, shared_context=shared_context)
+    _need(shared_context is False, 'shared context output requires the qualified entry worker')
     _need(type(plan) is SourceFrontendPlan and type(budget) is SourceFrontendBudget, "regular worklist and independent worker budget required")
     plan.require_unchanged()
     budget.__post_init__()
@@ -561,7 +563,8 @@ def _entry_producer():
     result = _producer()
     directory = Path(__file__).resolve().parent
     return result + [_receipt(directory / name) for name in
-                     ('source_entry_catalog.py', 'source_attachments.py', 'source_layers.py', 'compiler_witness_archives.py')]
+                     ('source_entry_catalog.py', 'source_attachments.py', 'source_layers.py', 'compiler_witness_archives.py')] + [
+                         _receipt(directory.parent / 'store/source_fragments.py')]
 
 
 @dataclass(frozen=True)
@@ -732,12 +735,56 @@ class SourceEntryFrontendResult:
             item.require_unchanged()
 
 
-def run_source_entries(plan, out_dir, *, budget=SourceFrontendBudget(), progress=None):
+class _EntryProgramArchive:
+    """Storage adapter only: original public SP5 receipts remain reconstructible."""
+    def __init__(self, directory, budget):
+        from scar.store.source_fragments import SourceFragmentBudget, SourceFragmentWriter
+        self.directory = Path(directory).resolve()
+        self.writer = SourceFragmentWriter(self.directory, budget=SourceFragmentBudget(
+            max_stored_input_bytes=budget.max_output_bytes * 2,
+            max_decoded_input_bytes=budget.max_record_bytes * budget.max_dispatch_bodies,
+            max_record_bytes=budget.max_record_bytes, max_output_bytes=budget.max_output_bytes,
+            max_contexts=budget.max_source_files, max_operations=budget.max_operations_per_body,
+            seconds=budget.max_elapsed_seconds))
+        self.originals = []
+
+    def publish(self, reference, *, namespace_root=None):
+        from scar.ir.program.providers import ProviderArtifact
+        from scar.ir.program.source_references import SourceArtifactLocator
+        _need(reference.get('representation') == 'scar.source-program/5' and reference.get('external') is True,
+              'shared entry storage requires the original exact SP5 receipt')
+        original = SourceArtifactLocator(ProviderArtifact(reference['uri'], reference['physical_sha256'],
+            reference['physical_bytes'], reference['representation']), reference['decoded_sha256'],
+            reference['decoded_bytes'], 'gzip-canonical-json' if Path(reference['uri']).suffix == '.gz' else 'canonical-json')
+        fragment = self.writer.write(original, namespace_root=namespace_root)
+        self.originals.append(original)
+        return {'uri': fragment.artifact.uri, 'external': True, 'representation': fragment.artifact.schema,
+            'physical_sha256': fragment.artifact.sha256, 'physical_bytes': fragment.artifact.size_bytes,
+            'decoded_sha256': fragment.decoded_sha256, 'decoded_bytes': fragment.decoded_bytes}
+
+    def finish(self, *, retire_fresh_originals=False):
+        costs = self.writer.finish()
+        # Never retire prior inputs. Only this new worker's exact attempt files
+        # may be removed after all original receipt/EOF/input guards pass.
+        if retire_fresh_originals:
+            for original in self.originals:
+                path = Path(original.artifact.uri)
+                _need(path.parent.parent == self.directory.parent and path.name == 'source-program5.json.gz'
+                      and path.parent.name.startswith('attempt-'), 'cannot retire an existing external SP5 input')
+            for original in self.originals:
+                Path(original.artifact.uri).unlink()
+        return {**costs, 'original_sp5_records': len(self.originals),
+                'fresh_sp5_copies_retired': len(self.originals) if retire_fresh_originals else 0,
+                'qualification': 'same SP5 receipt reconstructed by fragment plus context; no new graph authority'}
+
+
+def run_source_entries(plan, out_dir, *, budget=SourceFrontendBudget(), progress=None, shared_context=False):
     """Normal sealed lowering and ordinary SP5/code readback, no publication."""
     from scar.analysis.code_witness import CodeWitnessUnavailable
     from scar.analysis.structured_lowering import require_valid_structured_body
     _need(type(plan) is SourceEntryFrontendPlan and type(budget) is SourceFrontendBudget,
           'entry v2 plan and independent worker budget required')
+    _need(type(shared_context) is bool, 'shared context output must be an explicit bool')
     plan.require_unchanged()
     budget.__post_init__()
     requested = SourceFrontendBudget(**plan.document['budget'])
@@ -748,6 +795,7 @@ def run_source_entries(plan, out_dir, *, budget=SourceFrontendBudget(), progress
     root.mkdir(parents=True)
     started, charged, source_bytes, output_bytes = time.perf_counter(), 0, 0, 0
     owned_returns, rows, file_stats = [], [], {}
+    archive = _EntryProgramArchive(root / 'source-fragments', requested) if shared_context else None
     capabilities = tuple(SourceLanguageCapability(x) for x in plan.document['capabilities'])
     active_file = context = session = None
     index = (root / 'attempts.jsonl').open('x', buffering=1)
@@ -763,7 +811,11 @@ def run_source_entries(plan, out_dir, *, budget=SourceFrontendBudget(), progress
                 'program': None, 'operations_emitted': None, 'budget_charge': 0, 'construction_cost_known': False,
                 'public_structure_reader': False, 'independent_code_reader': False, 'publication': 'NOT_RUN',
                 'target_executed': False, 'first_stage_complete': False}
-            row['work_key'] = _hash({'plan': plan.digest, 'entry': candidate, 'allocation': allocation})
+            work = {'plan': plan.digest, 'entry': candidate, 'allocation': allocation}
+            if shared_context:
+                work['program_storage'] = 'SHARED_SOURCE_CONTEXT_V1'
+                row['program_storage'] = 'SHARED_SOURCE_CONTEXT_V1'
+            row['work_key'] = _hash(work)
             (folder / 'started.json').write_bytes(_bytes(row) + b'\n')
             lower_started, owned = False, None
             try:
@@ -782,6 +834,7 @@ def run_source_entries(plan, out_dir, *, budget=SourceFrontendBudget(), progress
                 lower_started = True
                 owned = _lower_and_capture_entry(session, entry, context, evidence, capabilities, allocation, row['work_key'])
                 owned_returns.append(owned)
+                owned._attempt_directory = folder
                 row.update(operations_emitted=owned.result.operations_emitted, budget_charge=owned.result.operations_emitted,
                            construction_cost_known=True, entry_reference=encode(entry.reference))
                 (folder / 'returned-metadata.json').write_bytes(_bytes(owned.record()) + b'\n')
@@ -810,6 +863,15 @@ def run_source_entries(plan, out_dir, *, budget=SourceFrontendBudget(), progress
                         semantic=checked.semantic, control=checked.control, language=checked.language,
                         source_tree=context.tree, language_options=SourceLanguageOptions(capabilities, independent))
                     owned.require_unchanged()
+                    if archive is not None:
+                        before_output = archive.writer.counts['stored_output_bytes']
+                        fragment_ref = archive.publish(ref, namespace_root=entry.reference.context.namespace_root)
+                        output_bytes += archive.writer.counts['stored_output_bytes'] - before_output
+                        owned.program_reference = {'artifact': fragment_ref, 'pointer': '#/program/graph'}
+                        owned._bound_reference_json = _bytes(owned.program_reference)
+                        row.update(program=fragment_ref, original_program=ref,
+                            storage_qualification='original public SP5/code checks; archive split only, not CP2 admission')
+                        (folder / 'lowered-return.json').write_bytes(_bytes(owned.record()) + b'\n')
                     row.update(status='SUCCEEDED', public_structure_reader=True, independent_code_reader=True)
             except CodeWitnessUnavailable as error:
                 row.update(status='CODE_WITNESS_UNAVAILABLE', error={'type': type(error).__name__, 'detail': str(error)})
@@ -839,6 +901,9 @@ def run_source_entries(plan, out_dir, *, budget=SourceFrontendBudget(), progress
             'decoded_source_bytes': source_bytes, 'source_files': file_stats, 'catalog_measurements': plan.catalog.measurements(),
             'source_prepare_attempts': 0, 'target_executed': False, 'publication': 'NOT_RUN', 'runtime_binding': 'NOT_RUN',
             'first_stage_complete': False, 'elapsed_s': time.perf_counter() - started}
+        if archive is not None:
+            summary['program_storage'] = 'SHARED_SOURCE_CONTEXT_V1'
+            summary['source_fragment_costs'] = archive.finish(retire_fresh_originals=True)
         (root / 'manifest.json').write_bytes(_bytes(summary) + b'\n')
         return SourceEntryFrontendResult(summary, tuple(owned_returns), _hash(summary))
     except BaseException as error:
