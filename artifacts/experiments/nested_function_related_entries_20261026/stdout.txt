@@ -1,0 +1,14 @@
+{"batch": 1, "stage": "source_entry_attempt", "entry_key": "6ebcb77567de55f8e2375a25b01a1ab1943bd828dcbb0fc36641db3ea3973b60", "status": "FAILED"}
+{"batch": 1, "stage": "source_entry_attempt", "entry_key": "7bc3dcb9a7236ced0a2b4597bdbd5fa72f034fdfc36ba1fe64142aa39fda89b6", "status": "UNSUPPORTED"}
+{"batch": 1, "stage": "source_entry_attempt", "entry_key": "4b4d7d88fc40c664dac61ac0ecd0e008636a80cde7c06a0fd5d73900dfdd5443", "status": "UNSUPPORTED"}
+{"batch": 1, "stage": "source_entry_attempt", "entry_key": "6e9adeeacd351e7aa812d801e39bb3cee41059b113530f78b235cce371f16dd6", "status": "FAILED"}
+{"batch": 1, "stage": "source_entry_attempt", "entry_key": "01553a48d1f97c332276702710d31746867f65223ac2cbe2d40e4399f8280a4b", "status": "FAILED"}
+{"batch": 1, "stage": "source_entry_attempt", "entry_key": "6f55fcc6d14ee1d0b977c726cf8f2dfc4874a3a49075c155149e62761fa9d088", "status": "UNSUPPORTED"}
+{"batch": 1, "stage": "source_entry_attempt", "entry_key": "5c58e69a86db83ada43f58cb5211cd8b0322776dcd966073d8738aee658e1d5b", "status": "FAILED"}
+{"batch": 1, "stage": "source_entry_attempt", "entry_key": "bc531b87d8ccb591ee55d0098de155781b6c4b7bdcdbdadfc4ff5408077ec1e5", "status": "UNSUPPORTED"}
+{"batch": 1, "stage": "source_entry_attempt", "entry_key": "7489a22d11b9a9a72dcbbc823f17a30d15076ca72620c9950ae5e66f94585bba", "status": "FAILED"}
+{"batch": 1, "stage": "source_entry_attempt", "entry_key": "7a2e1da495a4843f3ea217798a694f917e90aaef763abee0d6fb99e9fac8e9cd", "status": "FAILED"}
+{"batch": 2, "stage": "source_entry_attempt", "entry_key": "bcb03575330b6e44c532f69ecce9dcc96cac925e53ae3af894991c70456298c9", "status": "UNSUPPORTED"}
+{"batch": 2, "stage": "source_entry_attempt", "entry_key": "f893ea0eeded9252e522ff8a76795985e7f4bfd8a185761d4c698b14b4ddadae", "status": "UNSUPPORTED"}
+{"batch": 2, "stage": "source_entry_attempt", "entry_key": "f9c716609c3290394f6b7d8c462a25f3902502d89d9e7df39075373e54412d8c", "status": "FAILED"}
+{"status": "FAILED_RETAINED_WITH_OPEN", "counts": {"FAILED": 7, "UNSUPPORTED": 6}, "failure": null, "elapsed_s": 222.58927218301687}

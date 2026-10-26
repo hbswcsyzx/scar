@@ -1,0 +1,2 @@
+{"stage": "source_entry_attempt", "entry_key": "f9c716609c3290394f6b7d8c462a25f3902502d89d9e7df39075373e54412d8c", "status": "FAILED"}
+{"status": "FAILED", "elapsed_s": 10.438099365972448}

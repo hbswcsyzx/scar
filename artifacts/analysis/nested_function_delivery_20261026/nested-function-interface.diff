@@ -1,0 +1,674 @@
+diff --git a/scar/analysis/environment_lowering.py b/scar/analysis/environment_lowering.py
+index 2a95425e..5b81a712 100644
+--- a/scar/analysis/environment_lowering.py
++++ b/scar/analysis/environment_lowering.py
+@@ -211,6 +211,9 @@ class StructuredEnvironmentBuilder(StructuredBuilder):
+                 continue
+             if cursor is None:
+                 cursor = super().statements((node,), cursor)
++            elif isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)) and self.has_language('NESTED_FUNCTION_314_V1'):
++                from scar.analysis.source_function_definition_lowering import lower_function_definition
++                cursor = lower_function_definition(self, node, cursor)
+             elif isinstance(node, ast.AnnAssign):
+                 cursor = annotated_assignment(self, node, cursor)
+             elif isinstance(node, ast.Assert):
+@@ -375,7 +378,7 @@ class StructuredEnvironmentBuilder(StructuredBuilder):
+         # raises; delaying them leaves its real failure continuation undefined.
+         # self.locals excludes cell slots. Cell references are still introduced
+         # only by MAKE_CELL's normal result, before any body Try sink is active.
+-        early_bindings = self.has_language("FUNCTION_TRY_314_V1")
++        early_bindings = self.has_language("FUNCTION_TRY_314_V1") or self.has_language('NESTED_FUNCTION_314_V1')
+         if early_bindings:
+             initial_local_bindings()
+         for name in layout.cellvars:
+diff --git a/scar/analysis/program_lowering.py b/scar/analysis/program_lowering.py
+index d04804e9..b2080fd3 100644
+--- a/scar/analysis/program_lowering.py
++++ b/scar/analysis/program_lowering.py
+@@ -1314,12 +1314,14 @@ def validate_source_program(result: SourceProgram, *, max_operations: int = 1000
+             from scar.ir.program.source_language import SourceLanguageCapability
+             try_source = result.language is not None and SourceLanguageCapability.FUNCTION_TRY_314_V1 in result.language.capabilities
+             call_source = result.language is not None and SourceLanguageCapability.CALL_EXPANSION_314_V1 in result.language.capabilities
+-            if result.language is not None and (not structural_only or try_source or call_source):
++            function_source = result.language is not None and SourceLanguageCapability.NESTED_FUNCTION_314_V1 in result.language.capabilities
++            if result.language is not None and (not structural_only or try_source or call_source or function_source):
+                 if not structural_only and language_options is None:
+                     raise ValueError("v5 source replay requires explicit independently supplied language inputs")
+                 if structural_only:
+                     if source_texts is None or result.metadata.source.path not in source_texts:
+                         raise ValueError("function Try STRUCTURE requires its exact retained source text" if try_source
++                                         else "function definition STRUCTURE requires its exact retained source text" if function_source
+                                          else "expanded call STRUCTURE requires its exact retained source text")
+                     source_text = source_texts[result.metadata.source.path]
+                 else:
+diff --git a/scar/analysis/source_environment_validation.py b/scar/analysis/source_environment_validation.py
+index c4fcaec1..a3b3dee4 100644
+--- a/scar/analysis/source_environment_validation.py
++++ b/scar/analysis/source_environment_validation.py
+@@ -96,6 +96,17 @@ def validate_environment_body(model, graph, interface, metadata, semantic, *, la
+                  and atom is not None and atom.kind == "Call" and atom.reference == link.source
+                  and link.opcode is Opcode.CALL, "kwargs call lost its capability or exact original SG Call")
+             continue  # Exact call ports/pending/world are checked by the language validator.
++        if kind is Kind.MAKE_NESTED_FUNCTION:
++            from scar.ir.program.source_language import SourceLanguageCapability
++            declaration = semantic.definitions.get(link.semantic_operation)
++            atom = semantic.source_atoms.get(link.source.atom_id)
++            need(language is not None and SourceLanguageCapability.NESTED_FUNCTION_314_V1 in language.capabilities
++                 and declaration is not None and declaration.kind is OperationKind.OPERATOR
++                 and declaration.metadata.get('phase') == 'definition_time' and len(declaration.output_slots) == 1
++                 and declaration.code_id == link.source.atom_id.wire and link.source.atom_id in declaration.source_atoms
++                 and atom is not None and atom.kind == 'FunctionDef' and atom.reference == link.source
++                 and link.opcode is None, 'function creation lost its capability or original definition-time declaration')
++            continue  # Exact code/default/cell/name/world checks remain in the ordinary language validator.
+         if kind not in _KINDS:
+             need(link.semantic_operation is None, "a source-linked operation has an invented protocol")
+             continue
+@@ -202,6 +213,12 @@ def validate_environment_body(model, graph, interface, metadata, semantic, *, la
+                      and row.coverage is AddressCoverage.PARTIAL and row.protocol is None
+                      and row.effects == (effect,), "language index address differs from its exact receiver/key/world Uses")
+                 expected_rows.add(operation.id)
++    if language is not None:
++        from scar.ir.program.source_language import SourceLanguageCapability
++        if SourceLanguageCapability.NESTED_FUNCTION_314_V1 in language.capabilities:
++            # Its original FunctionDef source/name/cell/address correspondence
++            # is checked by the dedicated ordinary language validator below.
++            expected_rows.update(p.operation for p in model.protocols if p.kind is Kind.STORE_NESTED_FUNCTION_CELL)
+     need(set(rows) == expected_rows, "unexpected or missing source environment address refinement")
+     for value in values.values():
+         if type(value) is LocalBindingValue:
+diff --git a/scar/analysis/source_frontend_worklist.py b/scar/analysis/source_frontend_worklist.py
+index 399d3df7..b8f80bb2 100644
+--- a/scar/analysis/source_frontend_worklist.py
++++ b/scar/analysis/source_frontend_worklist.py
+@@ -585,7 +585,7 @@ def plan_source_entries(catalog, *, budget=SourceFrontendBudget(), capabilities=
+         SourceLanguageCapability.FIXED_UNPACK, SourceLanguageCapability.SLICE_KEYS,
+         SourceLanguageCapability.LEXICAL_LOCALS, SourceLanguageCapability.CALL_KWARGS_314_V1), out_dir=None,
+         dispatch_order='CALL_WEIGHT_DESC_V1', eligible_entry_keys=None, automatic_function_try=False,
+-        automatic_call_expansion=False):
++        automatic_call_expansion=False, automatic_nested_functions=False):
+     """Select by call weight, optionally batch the selected entries by file.
+ 
+     Batching changes only analysis scheduling. It preserves window membership,
+@@ -601,6 +601,7 @@ def plan_source_entries(catalog, *, budget=SourceFrontendBudget(), capabilities=
+     budget.__post_init__()
+     _need(type(automatic_function_try) is bool, 'automatic_function_try must be an explicit bool')
+     _need(type(automatic_call_expansion) is bool, 'automatic_call_expansion must be an explicit bool')
++    _need(type(automatic_nested_functions) is bool, 'automatic_nested_functions must be an explicit bool')
+     SourceLanguageOptions(capabilities)
+     if eligible_entry_keys is not None:
+         _need(type(eligible_entry_keys) is tuple and bool(eligible_entry_keys)
+@@ -646,6 +647,8 @@ def plan_source_entries(catalog, *, budget=SourceFrontendBudget(), capabilities=
+         document['function_try_policy'] = 'AUTOMATIC_ORIGINAL_FUNCTION_AST_314_V1'
+     if automatic_call_expansion:
+         document['call_expansion_policy'] = 'AUTOMATIC_ORIGINAL_CALL_EXPANSION_AST_314_V1'
++    if automatic_nested_functions:
++        document['nested_function_policy'] = 'AUTOMATIC_ORIGINAL_FUNCTION_DEFINITION_AST_314_V1'
+     if dispatch_order == 'FILE_GROUPED_V1':
+         document['dispatch_order'] = dispatch_order
+     if eligible_entry_keys is not None:
+@@ -669,10 +672,12 @@ def plan_source_entries(catalog, *, budget=SourceFrontendBudget(), capabilities=
+ def _entry_language_capabilities(plan, entry, context, capabilities):
+     policy=plan.document.get('function_try_policy')
+     call_policy=plan.document.get('call_expansion_policy')
+-    if policy is None and call_policy is None:
++    nested_policy=plan.document.get('nested_function_policy')
++    if policy is None and call_policy is None and nested_policy is None:
+         return capabilities
+     _need(policy in(None,'AUTOMATIC_ORIGINAL_FUNCTION_AST_314_V1')
+-          and call_policy in(None,'AUTOMATIC_ORIGINAL_CALL_EXPANSION_AST_314_V1'),
++          and call_policy in(None,'AUTOMATIC_ORIGINAL_CALL_EXPANSION_AST_314_V1')
++          and nested_policy in(None,'AUTOMATIC_ORIGINAL_FUNCTION_DEFINITION_AST_314_V1'),
+           'unknown automatic source capability policy')
+     import ast
+     source=entry.reference.source
+@@ -680,8 +685,14 @@ def _entry_language_capabilities(plan, entry, context, capabilities):
+     nodes=[n for n in ast.walk(context.tree)if isinstance(n,(ast.FunctionDef,ast.AsyncFunctionDef))
+         and(n.lineno,n.end_lineno,n.col_offset,n.end_col_offset)==span]
+     _need(len(nodes)==1,'automatic function policy needs the exact original function AST')
++    definitions=[]
+     def own_nodes(node):
+-        if isinstance(node,(ast.FunctionDef,ast.AsyncFunctionDef,ast.Lambda,ast.ClassDef)):return
++        if isinstance(node,(ast.FunctionDef,ast.AsyncFunctionDef)):
++            definitions.append(node)
++            for child in (*node.decorator_list,*node.args.defaults,*(x for x in node.args.kw_defaults if x is not None)):
++                yield from own_nodes(child)
++            return
++        if isinstance(node,(ast.Lambda,ast.ClassDef)):return
+         yield node
+         for child in ast.iter_child_nodes(node):yield from own_nodes(child)
+     own=tuple(n for root in nodes[0].body for n in own_nodes(root))
+@@ -692,6 +703,8 @@ def _entry_language_capabilities(plan, entry, context, capabilities):
+             any(isinstance(a,ast.Starred)for a in n.args)or any(k.arg is None for k in n.keywords))for n in own)
+             and SourceLanguageCapability.CALL_EXPANSION_314_V1 not in capabilities):
+         capabilities+=(SourceLanguageCapability.CALL_EXPANSION_314_V1,)
++    if nested_policy is not None and definitions and SourceLanguageCapability.NESTED_FUNCTION_314_V1 not in capabilities:
++        capabilities+=(SourceLanguageCapability.NESTED_FUNCTION_314_V1,)
+     return capabilities
+ 
+ 
+@@ -816,7 +829,7 @@ def run_source_entries(plan, out_dir, *, budget=SourceFrontendBudget(), progress
+                     file_stats[active_file] = {'context_builds': 1, 'sealed_sessions': 1,
+                         'source_prepare_attempts': 0, 'decoded_source_bytes': len(context.text.encode())}
+                 active_capabilities=_entry_language_capabilities(plan,entry,context,capabilities)
+-                if plan.document.get('function_try_policy') is not None or plan.document.get('call_expansion_policy') is not None:
++                if any(plan.document.get(field) is not None for field in ('function_try_policy','call_expansion_policy','nested_function_policy')):
+                     row['active_capabilities']=[c.value for c in active_capabilities]
+                 lower_started = True
+                 owned = _lower_and_capture_entry(session, entry, context, evidence, active_capabilities, allocation, row['work_key'])
+diff --git a/scar/analysis/source_function_definition_lowering.py b/scar/analysis/source_function_definition_lowering.py
+new file mode 100644
+index 00000000..e81d0e42
+--- /dev/null
++++ b/scar/analysis/source_function_definition_lowering.py
+@@ -0,0 +1,193 @@
++"""Original nested function creation; child code is referenced, never executed."""
++from __future__ import annotations
++
++import ast
++import dis
++from dataclasses import replace
++from types import CodeType
++
++from scar.analysis.program_lowering import _Unsupported
++from scar.analysis.source_call_lowering import _constant, _invoke
++from scar.analysis.source_heap_lowering import expression_for_heap_target
++from scar.analysis.source_mapping_lowering import _transfer
++from scar.ir.program.environments import EnvironmentRole
++from scar.ir.program.ids import OperationID, ValueID
++from scar.ir.program.model import AccessMode, Behavior, ExitKind, Operation, OperationResult, StateAccess, StateVersionValue
++from scar.ir.program.source import GapKind, SourceRole
++from scar.ir.program.state_addresses import AddressEffect, CellContent, ReferenceOwner
++from scar.ir.program.structured import PythonProtocolKind as K
++
++
++def span(node):
++    return node.lineno, node.end_lineno, node.col_offset, node.end_col_offset
++
++
++def unsupported(node, detail):
++    raise _Unsupported(GapKind.UNSUPPORTED_SYNTAX, node, 'NESTED_FUNCTION_' + detail)
++
++
++def compiler_plan(node, code):
++    """Exact original creation window; no compilation, target import or eval."""
++    if not isinstance(node, ast.FunctionDef):
++        unsupported(node, 'ASYNC_DEFINITION_UNIMPLEMENTED')
++    if node.decorator_list:
++        unsupported(node, 'DECORATOR_APPLICATION_UNIMPLEMENTED')
++    if node.type_params:
++        unsupported(node, 'TYPE_PARAMETER_SCOPE_UNIMPLEMENTED')
++    if any(x is not None for x in node.args.kw_defaults):
++        unsupported(node, 'KEYWORD_DEFAULTS_UNIMPLEMENTED')
++    rows = tuple(dis.get_instructions(code))
++    own = [r for r in rows if tuple(r.positions) == span(node)]
++    children = [r for r in own if r.opname == 'LOAD_CONST' and type(r.argval) is CodeType
++                and r.argval.co_name == node.name and r.argval.co_firstlineno == node.lineno
++                and r.argval.co_qualname == code.co_qualname + '.<locals>.' + node.name]
++    if len(children) != 1:
++        unsupported(node, 'ORIGINAL_CHILD_CODE_OCCURRENCE_UNAVAILABLE')
++    child = children[0]
++    stores = [r for r in own if r.offset > child.offset and r.opname in ('STORE_FAST', 'STORE_DEREF', 'STORE_GLOBAL')
++              and r.argval == node.name]
++    if len(stores) != 1:
++        unsupported(node, 'ORIGINAL_NAME_STORE_OCCURRENCE_UNAVAILABLE')
++    stop = stores[0]
++    own = [r for r in own if r.offset <= stop.offset]
++    expected, stages = [], []
++    def constant(row, role):
++        expected.append(('LOAD_CONST', row.arg)); stages.append(('constant', role, row))
++    defaults = None
++    if node.args.defaults:
++        candidates = [r for r in own if r.opname == 'LOAD_CONST' and type(r.argval) is tuple
++                      and len(r.argval) == len(node.args.defaults)]
++        exact = [r for r in candidates if all(isinstance(n, ast.Constant) and type(n.value) is type(v) and n.value == v
++                                            for n, v in zip(node.args.defaults, r.argval))]
++        if exact:
++            if len(exact) != 1:
++                unsupported(node, 'DEFAULT_TUPLE_CONSTANT_AMBIGUOUS')
++            defaults = exact[0]; constant(defaults, 'defaults')
++        else:
++            expected.append(('BUILD_TUPLE', len(node.args.defaults)))
++            stages.append(('tuple', 'defaults', tuple(node.args.defaults)))
++    args = (*node.args.posonlyargs, *node.args.args, *node.args.kwonlyargs)
++    annotated = (node.returns is not None or any(a.annotation is not None for a in args)
++                 or any(a is not None and a.annotation is not None for a in (node.args.vararg, node.args.kwarg)))
++    annotation = None
++    if annotated:
++        annotations = [r for r in own if r.opname == 'LOAD_CONST' and type(r.argval) is CodeType
++                       and r.argval.co_name == '__annotate__' and r.offset < child.offset
++                       and r.argval.co_firstlineno == node.lineno]
++        if len(annotations) != 1:
++            unsupported(node, 'DEFERRED_ANNOTATION_CODE_UNAVAILABLE')
++        annotation = annotations[0]
++    def function(load, role):
++        names = tuple(load.argval.co_freevars)
++        if names:
++            expected.extend(('LOAD_FAST_BORROW', name) for name in names)
++            expected.append(('BUILD_TUPLE', len(names)))
++            stages.append(('tuple', role + '-closure', names))
++        constant(load, role + '-code')
++        expected.append(('MAKE_FUNCTION', None)); stages.append(('make', role, None))
++        if names:
++            expected.append(('SET_FUNCTION_ATTRIBUTE', 8)); stages.append(('set', role + '-closure', None))
++    if annotation is not None:
++        function(annotation, 'annotation')
++    function(child, 'function')
++    if annotation is not None:
++        expected.append(('SET_FUNCTION_ATTRIBUTE', 16)); stages.append(('set', 'annotation', None))
++    if node.args.defaults:
++        expected.append(('SET_FUNCTION_ATTRIBUTE', 1)); stages.append(('set', 'defaults', None))
++    expected.append((stop.opname, node.name)); stages.append(('bind', stop.opname, None))
++    def matches(row, token):
++        name, arg = token
++        return row.opname == name and (row.argval == arg if name.startswith(('LOAD_FAST', 'STORE_')) else row.arg == arg)
++    if len(own) != len(expected) or not all(matches(r, t) for r, t in zip(own, expected)):
++        unsupported(node, 'EXACT_COMPILER_CREATION_SEQUENCE_UNAVAILABLE')
++    return tuple(stages), child, annotation
++
++
++def _hold(builder, cursor, node, reference, role):
++    builder.frame_transition(cursor, node, ((reference, node, 'function-held-' + role),), K.FRAME_HOLD_TEMPORARY)
++    builder.active_temporaries.append(reference)
++
++
++def _code_reference(builder, node, cursor, instruction, role):
++    value = _constant(builder, node, cursor, instruction)
++    identity = builder.values_by_id[value].origin.operation
++    old = builder.operation_records[identity]
++    marked = replace(old, label='original function ' + role + ' reference')
++    builder.operations[builder.operations.index(old)] = marked
++    builder.operation_records[identity] = marked
++    return value
++
++
++def lower_function_definition(builder, node, cursor):
++    evidence = builder.language_options.code_evidence
++    if evidence is None or evidence.store.document['runtime']['version'][:3] != [3, 14, 7]:
++        unsupported(node, 'READONLY_CPYTHON_3147_CODE_REQUIRED')
++    evidence.require_definition(builder.snapshot, builder.function_definition.id, builder.source(builder.functions[builder.entry]))
++    stages, child, annotation = compiler_plan(node, evidence.code)
++    baseline = len(builder.active_temporaries)
++    try:
++        # Defaults are real source operations. Code/creation staging is the
++        # contract for one semantic interface, not a repeated child-body graph.
++        default_constant = next((row for action, role, row in stages if action == 'constant' and role == 'defaults'), None)
++        defaults = []
++        if default_constant is None:
++            for index, source in enumerate(node.args.defaults):
++                cursor, value = expression_for_heap_target(builder, source, cursor)
++                if cursor is None:
++                    return None
++                _hold(builder, cursor, source, value, 'default')
++                defaults.append((value, source, 'function-default', index, None))
++        else:
++            value = _code_reference(builder, node, cursor, default_constant, 'defaults')
++            defaults.append((value, node, 'function-defaults-tuple', 0, None))
++        main_code = _code_reference(builder, node, cursor, child, 'code')
++        inputs = [(main_code, node, 'function-code', 0, None),
++                  (builder.environment_references[EnvironmentRole.GLOBALS_NAMESPACE], node, 'function-globals', 0, None)]
++        inputs.extend(defaults)
++        for role, load in (('function', child), ('annotation', annotation)):
++            if load is None:
++                continue
++            if role == 'annotation':
++                inputs.append((_code_reference(builder, node, cursor, load, 'annotation code'), node, 'annotation-code', 0, None))
++            for index, name in enumerate(load.argval.co_freevars):
++                if name not in builder.cell_references:
++                    unsupported(node, 'CAPTURE_HAS_NO_ACTUAL_PARENT_CELL')
++                inputs.append((builder.cell_references[name], node, role + '-closure-cell', index, None))
++        consumed = tuple((source, value) for value, source, _, _, _ in defaults) if default_constant is None else ()
++        # The boundary owns construction, attribute initialization and unwinding
++        # of its unpublished temporaries. Closure cells/globals are borrowed
++        # identities, never eager cell-content reads. Both post-worlds remain
++        # incomplete; no runtime callable/code identity or purity is granted.
++        cursor, function, identity = _invoke(builder, cursor, node, tuple(inputs),
++            K.MAKE_NESTED_FUNCTION, consumed, result=True)
++        old = builder.operation_records[identity]
++        marked = replace(old, label='create function ' + node.name)
++        builder.operations[builder.operations.index(old)] = marked
++        builder.operation_records[identity] = marked
++        declarations = [d for d in builder.by_atom.get(builder.source(node).atom_id.wire, ())
++                        if d.metadata.get('phase') == 'definition_time']
++        if len(declarations) != 1:
++            unsupported(node, 'ORIGINAL_DEFINITION_TIME_DECLARATION_UNAVAILABLE')
++        i = next(i for i, link in enumerate(builder.operation_links) if link.operation == identity)
++        builder.operation_links[i] = replace(builder.operation_links[i], semantic_operation=declarations[0].id)
++        _hold(builder, cursor, node, function, 'function')
++        store = stages[-1][1]
++        if store == 'STORE_FAST' and node.name in builder.locals:
++            builder.frame_transition(cursor, node, ((cursor.env[node.name], node, 'previous-binding'),
++                (function, node, 'assigned-reference')), K.FRAME_BIND)
++            builder.define_binding(node.name, cursor, node, function)
++            _transfer(builder, ((node, function),), node)
++        elif store == 'STORE_DEREF' and node.name in builder.cell_references:
++            cursor, _, identity = _invoke(builder, cursor, node,
++                ((builder.cell_references[node.name], node, 'definition-cell', 0, None),
++                 (function, node, 'defined-function', 0, None)),
++                K.STORE_NESTED_FUNCTION_CELL, ((node, function),), raise_consumed=())
++            operation = builder.operation_records[identity]
++            builder._addresses(identity, (AddressEffect(ReferenceOwner(operation.uses[0].id), (CellContent(),), AccessMode.WRITE),))
++        else:
++            unsupported(node, 'NAME_BINDING_INTERFACE_UNIMPLEMENTED')
++        builder.gap(GapKind.CODE_VERSION, node, 'nested function creation references original code; runtime function/code instance identity remains unproved')
++        builder.gap(GapKind.EFFECT_SUMMARY, node, 'definition-time construction and ordered captures are connected; saved builtins resolution, finalizers and runtime annotation/call effects remain unproved')
++        return cursor
++    finally:
++        del builder.active_temporaries[baseline:]
+diff --git a/scar/analysis/source_function_definition_validation.py b/scar/analysis/source_function_definition_validation.py
+new file mode 100644
+index 00000000..921c7ede
+--- /dev/null
++++ b/scar/analysis/source_function_definition_validation.py
+@@ -0,0 +1,206 @@
++"""Check nested function creation as a source-level interface, not bytecode IR."""
++from __future__ import annotations
++
++import ast
++
++from scar.analysis.source_language import function_exception_types, require_source_tree
++from scar.ir.program.bindings import BindingState
++from scar.ir.program.environments import EnvironmentRole
++from scar.ir.program.model import (AccessMode, Behavior, CompletionResult, ExitKind, LocalBindingValue,
++    ReferenceValue, StateVersionValue, TerminatorKind, ValueKind, ValueType, value_type)
++from scar.ir.program.source_language import SourceLanguageCapability as C, NESTED_FUNCTION_PROTOCOLS
++from scar.ir.program.state_addresses import AddressCoverage, AddressEffect, CellContent, InvokeStateOperand, ReferenceOwner
++from scar.ir.program.structured import PythonProtocolKind as K
++from scar.ir.v2.semantic import OperationKind, SemanticRelation
++
++
++def need(value, detail):
++    if not value:
++        raise ValueError('function definition: ' + detail)
++
++
++def span(node):
++    return node.lineno, node.end_lineno, node.col_offset, node.end_col_offset
++
++
++def refspan(source):
++    return source.start_line, source.end_line, source.start_column, source.end_column
++
++
++def validate_function_definitions(model, graph, interface, metadata, semantic, language,
++                                  *, source_tree=None, options=None, structural_only=False):
++    protocols = {r.operation: r for r in model.protocols}
++    selected = {key for key, row in protocols.items() if row.kind.value in NESTED_FUNCTION_PROTOCOLS}
++    if not selected:
++        return set()
++    need(C.NESTED_FUNCTION_314_V1 in language.capabilities and isinstance(source_tree, ast.Module),
++         'explicit capability and exact retained original AST required')
++    operations = {r.id: r for r in graph.operations}
++    values = {r.id: r for r in graph.values}
++    blocks = {r.id: r for region in graph.regions for r in region.blocks}
++    links = {r.operation: r for r in metadata.operation_links}
++    sources = {(r.operation, r.use): r for r in metadata.use_links}
++    constants = {r.operation: r for r in language.constants}
++    addresses = {r.site.operation: r for r in graph.state_address_refinements}
++    environments = [r for r in graph.environments if r.region == interface.region]
++    need(len(environments) == 1, 'one original parent environment required')
++    environment = environments[0]
++    globals_ref = next(r.reference for r in environment.members if r.role is EnvironmentRole.GLOBALS_NAMESPACE)
++    cell_values = [blocks[operations[r.operation].terminator.successors[0].block].arguments[0]
++                   for r in model.protocols if r.kind is K.MAKE_CELL]
++    free_values = [r.reference for r in environment.members if r.role is EnvironmentRole.CAPTURED_CELL]
++    available_cells = set(cell_values + free_values)
++    cells_by_name = None
++    if not structural_only:
++        from scar.analysis.environment_lowering import captured_cell_slot
++        evidence = options.code_evidence
++        need(evidence is not None and evidence.store.document['runtime']['version'][:3] == [3, 14, 7],
++             'independent pinned readonly parent compiler witness required')
++        transient = {r.name for r in language.compiler_locals if r.category == 'COMPREHENSION_TRANSIENT'}
++        names = tuple(n for n in evidence.code.co_cellvars if n not in transient)
++        need(len(names) == len(cell_values) and len(evidence.code.co_freevars) == len(free_values),
++             'actual parent cells differ from the complete original compiler layout')
++        cells_by_name = dict(zip(names, cell_values))
++        for name, member in zip(evidence.code.co_freevars, environment.members[5:]):
++            need(member.cell_slot == captured_cell_slot(interface.definition, name), 'free cell name/position differs')
++            cells_by_name[name] = member.reference
++    world = value_type(values[interface.world])
++    reference = ValueType(ValueKind.REFERENCE)
++    covered = set()
++
++    def invoke(identity, count, results):
++        op = operations[identity]
++        need(op.callee is None and op.terminator is not None and op.terminator.kind is TerminatorKind.INVOKE
++             and not op.effects_complete and len(op.uses) == count + 1
++             and op.invoke_arguments == tuple(u.id for u in op.uses)
++             and all(type(values[u.value]) is ReferenceValue for u in op.uses[:-1])
++             and type(values[op.uses[-1].value]) is StateVersionValue
++             and values[op.uses[-1].value].location == values[interface.world].location
++             and tuple((s.kind, s.types) for s in op.completions) ==
++                 ((ExitKind.NORMAL, (reference,) * results + (world,)),
++                  (ExitKind.RAISE, function_exception_types(language, reference, world)))
++             and tuple(s.kind for s in op.terminator.successors) == (ExitKind.NORMAL, ExitKind.RAISE)
++             and all(e.arguments == tuple(CompletionResult(i) for i in range(len(s.types)))
++                     for e, s in zip(op.terminator.successors, op.completions)),
++             'creation/write lost its original references, world or normal/raise interface')
++        # Canonical source INVOKE carries world as its final Use and as a
++        # completion-specific result, not a redundant ordinary StateAccess.
++        need(not op.accesses and set(op.behaviors) == {Behavior.CONTROL, Behavior.READ, Behavior.WRITE, Behavior.MEMORY},
++             'creation/write must use its exact incomplete completion-specific world interface')
++        return op, blocks[op.terminator.successors[0].block]
++
++    makes = [r.operation for r in model.protocols if r.kind is K.MAKE_NESTED_FUNCTION]
++    need(len({protocols[i].source for i in makes}) == len(makes), 'source definition has duplicate creation interfaces')
++    for identity in makes:
++        covered.add(identity)
++        source = protocols[identity].source
++        nodes = [n for n in require_source_tree(source_tree, language.source, source) if isinstance(n, ast.FunctionDef)]
++        need(len(nodes) == 1, 'creation has no exact original FunctionDef AST')
++        node = nodes[0]
++        need(not node.decorator_list and not node.type_params and not any(x is not None for x in node.args.kw_defaults),
++             'unsupported decorator/type-parameter/keyword-default form entered a body')
++        declarations = [r for r in semantic.definitions.values() if r.code_id == source.atom_id.wire
++                        and source.atom_id in r.source_atoms and r.metadata.get('phase') == 'definition_time']
++        bodies = [r for r in semantic.definitions.values() if r.code_id == source.atom_id.wire
++                  and source.atom_id in r.source_atoms and r.metadata.get('phase') == 'call_time'
++                  and r.kind in (OperationKind.FUNCTION, OperationKind.METHOD)]
++        need(len(declarations) == len(bodies) == 1 and bodies[0].label == node.name
++             and links[identity].source == source and links[identity].semantic_operation == declarations[0].id
++             and links[identity].opcode is None, 'creation must link declaration, never execute the child body')
++        slots = [semantic.slots[e.target.id] for e in semantic.edges.values()
++                 if e.source.id == declarations[0].id and e.relation is SemanticRelation.WRITES_SLOT]
++        need(len(slots) == 1 and slots[0].owner == interface.definition and slots[0].name == node.name,
++             'definition name has no exact original parent lexical slot')
++        operation, normal = invoke(identity, len(operations[identity].uses) - 1, 1)
++        uses = [sources[(identity, u.id)] for u in operation.uses[:-1]]
++        refs = [u.value for u in operation.uses[:-1]]
++        need([(u.role, u.index) for u in uses[:2]] == [('function-code', 0), ('function-globals', 0)]
++             and refs[1] == globals_ref, 'function factory changed original code/globals inputs')
++        own_constants = {r.operation: r for r in language.constants if r.source == source}
++        by_reference = {operations[i].results[0]: r for i, r in own_constants.items()}
++        need(refs[0] in by_reference, 'function code is not the original code-table reference')
++        annotated = (node.returns is not None or any(a.annotation is not None for a in
++            (*node.args.posonlyargs, *node.args.args, *node.args.kwonlyargs)) or
++            any(a is not None and a.annotation is not None for a in (node.args.vararg, node.args.kwarg)))
++        roles = [(u.role, u.index) for u in uses]
++        cursor = 2
++        if node.args.defaults:
++            if cursor < len(uses) and uses[cursor].role == 'function-defaults-tuple':
++                need(uses[cursor].index == 0 and refs[cursor] in by_reference and uses[cursor].source == source,
++                     'default tuple lacks original constant provenance')
++                cursor += 1
++            else:
++                for index, default in enumerate(node.args.defaults):
++                    need(cursor < len(uses) and roles[cursor] == ('function-default', index)
++                         and refspan(uses[cursor].source) == span(default), 'default value/source order differs')
++                    cursor += 1
++        captures = {}
++        for role in ('function', 'annotation'):
++            if role == 'annotation':
++                if not annotated:
++                    break
++                need(cursor < len(uses) and roles[cursor] == ('annotation-code', 0)
++                     and refs[cursor] in by_reference, 'deferred annotation code reference missing')
++                cursor += 1
++            captured = []
++            while cursor < len(uses) and uses[cursor].role == role + '-closure-cell':
++                need(uses[cursor].index == len(captured) and uses[cursor].source == source
++                     and refs[cursor] in available_cells, 'capture substituted cell contents or changed original cell order')
++                captured.append(refs[cursor]); cursor += 1
++            captures[role] = tuple(captured)
++        need(cursor == len(uses), 'unexpected or duplicated creation input')
++        used_constants = {refs[i] for i, u in enumerate(uses) if u.role in
++                          ('function-code', 'annotation-code', 'function-defaults-tuple')}
++        need(used_constants == set(by_reference), 'orphan/foreign function constant table read')
++        if not structural_only:
++            from scar.analysis.source_function_definition_lowering import compiler_plan
++            stages, child, annotation = compiler_plan(node, evidence.code)
++            required = {'function-code': child.arg}
++            if annotation is not None:
++                required['annotation-code'] = annotation.arg
++            default = next((row for action, role, row in stages if action == 'constant' and role == 'defaults'), None)
++            if default is not None:
++                required['function-defaults-tuple'] = default.arg
++            for role, index in required.items():
++                selected_uses = [i for i, u in enumerate(uses) if u.role == role]
++                need(len(selected_uses) == 1 and by_reference[refs[selected_uses[0]]].constant_path == (index,),
++                     'creation input differs from exact original compiler constant index')
++            need(('function-defaults-tuple' in required) == any(u.role == 'function-defaults-tuple' for u in uses),
++                 'default tuple packing differs from original compiler')
++            for role, load in (('function', child), ('annotation', annotation)):
++                if load is not None:
++                    need(captures[role] == tuple(cells_by_name[n] for n in load.argval.co_freevars),
++                         'creation did not capture exact compiler-ordered parent cell identities')
++        function = normal.arguments[0]
++        following = [operations[i] for i in normal.operations]
++        need(len(following) >= 2 and protocols.get(following[0].id) is not None
++             and protocols[following[0].id].kind is K.FRAME_HOLD_TEMPORARY
++             and following[0].uses[0].value == function, 'created function is not retained until its actual name write')
++        binding = following[1]
++        marker = protocols.get(binding.id)
++        need(marker is not None and marker.source == source, 'name binding lost its exact FunctionDef source')
++        if marker.kind is K.FRAME_BIND:
++            need(len(binding.uses) == 3 and type(values[binding.uses[0].value]) is LocalBindingValue
++                 and values[binding.uses[0].value].slot == slots[0].slot_id and binding.uses[1].value == function
++                 and len(following) >= 3, 'fast-local definition binding changed its original slot/function')
++            definition = following[2]
++            need(len(definition.results) == 1 and type(values[definition.results[0]]) is LocalBindingValue
++                 and values[definition.results[0]].slot == slots[0].slot_id
++                 and len(definition.uses) == 1 and definition.uses[0].value == function
++                 and any(r.value == definition.results[0] and r.state is BindingState.BOUND for r in graph.binding_definitions),
++                 'created function was not the original bound SSA payload')
++        else:
++            need(marker.kind is K.STORE_NESTED_FUNCTION_CELL, 'definition has an unsupported name-write interface')
++            covered.add(binding.id)
++            op, _ = invoke(binding.id, 2, 0)
++            need(op.uses[0].value in available_cells and op.uses[1].value == function,
++                 'cell binding changed original cell/function inputs')
++            if not structural_only:
++                need(cells_by_name[node.name] == op.uses[0].value, 'definition stored into a different compiler cell')
++            row = addresses.get(op.id)
++            need(row is not None and row.site == InvokeStateOperand(op.id, op.uses[-1].id)
++                 and row.coverage is AddressCoverage.PARTIAL and row.protocol is None
++                 and row.effects == (AddressEffect(ReferenceOwner(op.uses[0].id), (CellContent(),), AccessMode.WRITE),),
++                 'definition cell write lacks exact original owner/content/post-world')
++    need(covered == selected, 'orphan function creation/name-write protocol')
++    return selected
+diff --git a/scar/analysis/source_language_validation.py b/scar/analysis/source_language_validation.py
+index 47c460c5..40b19823 100644
+--- a/scar/analysis/source_language_validation.py
++++ b/scar/analysis/source_language_validation.py
+@@ -20,6 +20,7 @@ from scar.ir.program.source_language import (
+     SourceLanguageOverlay, SourceLanguageCapability as Capability, EXTENDED_PROTOCOLS,
+ )
+ from scar.ir.record_codec import encode
++from types import CodeType
+ 
+ 
+ def _need(condition, detail):
+@@ -61,9 +62,12 @@ def validate_language_body(model, graph, interface, metadata, semantic, language
+     calls = {identity for identity, protocol in protocols.items() if protocol.kind in CALL_PROTOCOLS}
+     from scar.analysis.source_function_try_validation import validate_function_try_protocols
+     try_protocols = validate_function_try_protocols(model, graph, interface, metadata, semantic, language, source_tree=source_tree)
+-    indexed = set(unpack) | set(slices) | set(constants) | calls | try_protocols
++    from scar.analysis.source_function_definition_validation import validate_function_definitions
++    functions = validate_function_definitions(model, graph, interface, metadata, semantic, language,
++        source_tree=source_tree, options=options, structural_only=structural_only)
++    indexed = set(unpack) | set(slices) | set(constants) | calls | try_protocols | functions
+     actual = {key for key, row in protocols.items() if row.kind.value in EXTENDED_PROTOCOLS}
+-    _need(indexed == actual and len(indexed) == len(unpack) + len(slices) + len(constants) + len(calls) + len(try_protocols),
++    _need(indexed == actual and len(indexed) == len(unpack) + len(slices) + len(constants) + len(calls) + len(try_protocols) + len(functions),
+           "new language operations must have one exact shape/provenance record")
+ 
+     def source_node(reference, classes):
+@@ -243,10 +247,11 @@ def validate_language_body(model, graph, interface, metadata, semantic, language
+     for identity, constant in constants.items():
+         atom = semantic.source_atoms.get(constant.source.atom_id)
+         call_constant = atom is not None and atom.kind == "Call"
+-        capability = Capability.CALL_KWARGS_314_V1 if call_constant else Capability.SLICE_KEYS
++        function_constant = atom is not None and atom.kind == 'FunctionDef'
++        capability = Capability.NESTED_FUNCTION_314_V1 if function_constant else Capability.CALL_KWARGS_314_V1 if call_constant else Capability.SLICE_KEYS
+         _need(capability in language.capabilities and protocols[identity].kind.value == "READ_CODE_CONSTANT"
+               and constant.source == protocols[identity].source, "code constant kind/capability differs")
+-        node = source_node(constant.source, (ast.Call,) if call_constant else (ast.Slice, ast.Tuple))
++        node = source_node(constant.source, (ast.FunctionDef,) if function_constant else (ast.Call,) if call_constant else (ast.Slice, ast.Tuple))
+         operation = operations[identity]
+         _need(operation.terminator is None and not operation.effects_complete and len(operation.results) == 1
+               and type(values[operation.results[0]]) is ReferenceValue
+@@ -264,7 +269,7 @@ def validate_language_body(model, graph, interface, metadata, semantic, language
+             candidates = [row for row in dis.get_instructions(evidence.code)
+                 if row.opname == "LOAD_CONST" and row.arg == constant.constant_path[0]
+                 and tuple(row.positions) == (node.lineno, node.end_lineno, node.col_offset, node.end_col_offset)]
+-            allowed = (str, tuple) if call_constant else (slice, tuple)
++            allowed = (CodeType, tuple) if function_constant else (str, tuple) if call_constant else (slice, tuple)
+             _need(len(candidates) == 1 and type(candidates[0].argval) in allowed
+                   and (not call_constant or type(candidates[0].argval) is str or candidates[0].argval == ()),
+                   "source constant does not name its exact witnessed LOAD_CONST slot")
+diff --git a/scar/analysis/structured_lowering.py b/scar/analysis/structured_lowering.py
+index e24103d4..8d6fd61f 100644
+--- a/scar/analysis/structured_lowering.py
++++ b/scar/analysis/structured_lowering.py
+@@ -27,7 +27,7 @@ from scar.ir.program.structured import (
+     PythonProtocol, PythonProtocolKind, StructuredBodyModel,
+ )
+ from scar.ir.program.validation import require_valid
+-from scar.ir.program.source_language import FUNCTION_TRY_PROTOCOLS
++from scar.ir.program.source_language import FUNCTION_TRY_PROTOCOLS, NESTED_FUNCTION_PROTOCOLS
+ from scar.ir.v2.common import EvidenceKind
+ 
+ 
+@@ -782,7 +782,7 @@ def _require_valid_structured_body(model, graph, interface, metadata, *, semanti
+                 PythonProtocolKind.BUILD_CALL_POSITIONAL_LIST, PythonProtocolKind.EXTEND_CALL_POSITIONALS,
+                 PythonProtocolKind.APPEND_CALL_POSITIONAL, PythonProtocolKind.CALL_POSITIONALS_TO_TUPLE):
+             pass  # Exact shapes, source, payloads and lifetime are checked below.
+-        elif language is not None and protocol.kind.value in FUNCTION_TRY_PROTOCOLS:
++        elif language is not None and protocol.kind.value in FUNCTION_TRY_PROTOCOLS | NESTED_FUNCTION_PROTOCOLS:
+             pass  # Exact canonical C0/C1/source checks belong to the opt-in Try adapter.
+         else:
+             raise ValueError("opaque protocol has no implemented structured control interface")
+diff --git a/scar/ir/program/source_language.py b/scar/ir/program/source_language.py
+index 3c9fc392..09184a61 100644
+--- a/scar/ir/program/source_language.py
++++ b/scar/ir/program/source_language.py
+@@ -22,6 +22,7 @@ class SourceLanguageCapability(str, Enum):
+     LEXICAL_LOCALS = "PYTHON_LEXICAL_LOCALS_314_V1"
+     CALL_KWARGS_314_V1 = "PYTHON_CALL_KWARGS_314_V1"
+     CALL_EXPANSION_314_V1 = "PYTHON_CALL_EXPANSION_314_V1"
++    NESTED_FUNCTION_314_V1 = "PYTHON_NESTED_FUNCTION_314_V1"
+     GENEXPR_314_V1 = "PYTHON_GENEXPR_314_V1"
+     FUNCTION_TRY_314_V1 = "PYTHON_FUNCTION_TRY_314_V1"
+ 
+@@ -36,6 +37,8 @@ FUNCTION_TRY_PROTOCOLS = frozenset(("FUNCTION_EXCEPTION_PACKET", "FUNCTION_PENDI
+     "FUNCTION_FRAME_EXIT_EXCEPTION_PACKET", "FUNCTION_FRAME_EXIT_BINDINGS", "FUNCTION_START_PROPAGATION", "FUNCTION_CLEAR_EXCEPTION_NAME",
+     "VALIDATE_EXCEPT_TYPE_314", "MATCH_EXCEPTION_BORROWED_314", "FUNCTION_INPLACE_BINARY"))
+ EXTENDED_PROTOCOLS = EXTENDED_PROTOCOLS | FUNCTION_TRY_PROTOCOLS
++NESTED_FUNCTION_PROTOCOLS = frozenset(('MAKE_NESTED_FUNCTION', 'STORE_NESTED_FUNCTION_CELL'))
++EXTENDED_PROTOCOLS = EXTENDED_PROTOCOLS | NESTED_FUNCTION_PROTOCOLS
+ 
+ 
+ def _need(condition, detail):
+diff --git a/scar/ir/program/structured.py b/scar/ir/program/structured.py
+index 721f61e4..2e59ecc2 100644
+--- a/scar/ir/program/structured.py
++++ b/scar/ir/program/structured.py
+@@ -51,6 +51,8 @@ class PythonProtocolKind(str, Enum):
+     BUILD_SLICE = "BUILD_SLICE"
+     READ_CODE_CONSTANT = "READ_CODE_CONSTANT"
+     MAKE_GENEXPR_FUNCTION = "MAKE_GENEXPR_FUNCTION"
++    MAKE_NESTED_FUNCTION = "MAKE_NESTED_FUNCTION"
++    STORE_NESTED_FUNCTION_CELL = "STORE_NESTED_FUNCTION_CELL"
+     CREATE_GENEXPR = "CREATE_GENEXPR"
+     MAKE_UNPACK_ARITY_ERROR = "MAKE_UNPACK_ARITY_ERROR"
+     GENERATOR_ESCAPE_STOPITER_TO_RUNTIME_ERROR = "GENERATOR_ESCAPE_STOPITER_TO_RUNTIME_ERROR"

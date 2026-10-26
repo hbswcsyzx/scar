@@ -1,0 +1,7 @@
+{"batch": 1, "stage": "source_entry_attempt", "entry_key": "6ebcb77567de55f8e2375a25b01a1ab1943bd828dcbb0fc36641db3ea3973b60", "status": "SUCCEEDED"}
+{"batch": 1, "stage": "source_entry_attempt", "entry_key": "6e9adeeacd351e7aa812d801e39bb3cee41059b113530f78b235cce371f16dd6", "status": "SUCCEEDED"}
+{"batch": 1, "stage": "source_entry_attempt", "entry_key": "01553a48d1f97c332276702710d31746867f65223ac2cbe2d40e4399f8280a4b", "status": "SUCCEEDED"}
+{"batch": 1, "stage": "source_entry_attempt", "entry_key": "5c58e69a86db83ada43f58cb5211cd8b0322776dcd966073d8738aee658e1d5b", "status": "SUCCEEDED"}
+{"batch": 1, "stage": "source_entry_attempt", "entry_key": "7489a22d11b9a9a72dcbbc823f17a30d15076ca72620c9950ae5e66f94585bba", "status": "SUCCEEDED"}
+{"batch": 1, "stage": "source_entry_attempt", "entry_key": "7a2e1da495a4843f3ea217798a694f917e90aaef763abee0d6fb99e9fac8e9cd", "status": "SUCCEEDED"}
+{"status": "NESTED_FUNCTION_RELATED_RESULTS_WITH_OPEN", "counts": {"SUCCEEDED": 6}, "failure": null, "elapsed_s": 388.6278574829921}
