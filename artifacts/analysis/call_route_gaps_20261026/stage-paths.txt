@@ -1,0 +1,8 @@
+artifacts/analysis/call_route_gaps_20261026/FUNNEL.json
+artifacts/analysis/call_route_gaps_20261026/ORIGINAL_OPERAND_META.json
+artifacts/analysis/call_route_gaps_20261026/REPORT.md
+artifacts/analysis/call_route_gaps_20261026/RESULT.json
+artifacts/analysis/call_route_gaps_20261026/RETENTION.json
+artifacts/analysis/call_route_gaps_20261026/run.py
+artifacts/analysis/call_route_gaps_20261026/stage-paths.txt
+docs/SOURCE_CALL_PORT_BINDING_PLAN.md
