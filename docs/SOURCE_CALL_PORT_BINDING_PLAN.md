@@ -1,6 +1,6 @@
 # 源调用端口绑定与捕获引用路由分离
 
-2026-10-26。Proposed；为第一阶段建模补依赖连接，不增加优化 backend。
+2026-10-26。原设计已实施；同fresh真实consumer已产2516调用/6805端口，原窗口随后因实验审计字段错误exit1。见[实际报告](../artifacts/experiments/source_call_port_bindings_20261026/REPORT.md)。为第一阶段建模补依赖连接，不增加优化 backend。
 
 ## 问题及边界
 
