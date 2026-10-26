@@ -273,6 +273,49 @@ def _python_target_members(files, trace_root, pid, members, project_root):
             "collector_stopped": document["stopped"], "call_ports_established": False}, [str(events), str(metadata)]
 
 
+def _stream_interface_members(files, trace_root, pid, members, project_root):
+    """Retained resource-interface bytes, not content or canonical-call proof."""
+    events = trace_root / f'stream-interfaces.{pid}.jsonl'
+    metadata = trace_root / f'stream-interface-meta.{pid}.json'
+    present = files.contains(events)
+    _need(present == files.contains(metadata), 'stream events and metadata must be retained together')
+    if not present:
+        return None, []
+    doc, declaration = files.document(metadata, 'scar.stream-interface-collection')
+    _need(doc.get('schema') == 'scar.stream-interface-collection' and type(doc.get('schema_version')) is int
+          and doc['schema_version'] == 1 and doc.get('profile') == 'SCAR_BUILTIN_STREAM_INTERFACES_V1'
+          and type(doc.get('process_id')) is int and doc['process_id'] == pid
+          and doc.get('project_root') == project_root and type(doc.get('stopped')) is bool
+          and type(doc.get('errors')) is list and doc.get('tensor_or_stream_contents_read') is False
+          and doc.get('file_descriptor_table_replayed') is False
+          and doc.get('source_body_or_content_proof_established') is False,
+          'stream interface profile/issuer differs')
+    counts = doc.get('counts')
+    _need(type(counts) is dict and set(counts) == {'BEGIN', 'C_RETURN', 'C_RAISE', 'UNOBSERVED'}
+          and all(_integer(v) for v in counts.values()), 'stream interface counts differ')
+    artifact = files.verify(events, 'scar.stream-interfaces.events.v1')
+    ref = doc['file']
+    _need(ref.get('uri') == str(events) and ref.get('sha256') == artifact.sha256
+          and ref.get('size_bytes') == artifact.size_bytes and ref.get('rows') == sum(counts.values()),
+          'stream event receipt differs')
+    legacy = doc['legacy_inputs']
+    expected = {'codes': f'call-codes.{pid}.jsonl', 'events': f'call-events.{pid}.jsonl',
+                'meta': f'call-meta.{pid}.json', 'operands': f'call-operands.{pid}.jsonl',
+                'operand-meta': f'call-operand-meta.{pid}.json'}
+    _need(type(legacy) is list and len(legacy) == len(expected)
+          and {r.get('family') for r in legacy} == set(expected), 'stream legacy input families differ')
+    for row in legacy:
+        name = str(trace_root / expected[row['family']])
+        original = members[name]
+        _need(row['path'] == name and row['process_id'] == pid
+              and (row['raw_sha256'], row['raw_bytes']) == (original.sha256, original.size_bytes),
+              'stream sidecar refers to different original CALL/frame inputs')
+    members[str(events)], members[str(metadata)] = artifact, declaration
+    return {'capability': 'SCAR_STREAM_INTERFACE_MEMBERSHIP_V1', 'manifest': encode(declaration),
+            'events': encode(artifact), 'declared_counts': counts,
+            'collector_stopped': doc['stopped'], 'source_or_contents_established': False}, [str(events), str(metadata)]
+
+
 def _lean_plan_member(files, trace_root, pid, members, calls, operands):
     """Bind the exact selector receipt, never upgrade its observation scope."""
     from scar.ir.program.call_operands import LEAN_PORTS_RULE
@@ -388,6 +431,8 @@ def bind_capture_coordinates(capture_dir, *, max_bytes=1_000_000_000, max_lines=
     _need(members[str(operand_name)].size_bytes == operands["bytes"], "operand event byte count differs")
     python_target_membership, python_target_names = _python_target_members(
         files, trace_root, pid, members, operands["project_root"])
+    stream_membership, stream_names = _stream_interface_members(
+        files, trace_root, pid, members, operands['project_root'])
     lean_plan_membership, lean_plan_names = _lean_plan_member(files, trace_root, pid, members, calls, operands)
     environment_name = trace_root / ("function-environments." + str(pid) + ".jsonl")
     environment_meta_name = trace_root / ("function-environment-meta." + str(pid) + ".json")
@@ -628,6 +673,7 @@ def bind_capture_coordinates(capture_dir, *, max_bytes=1_000_000_000, max_lines=
                         str(trace_root / ("call-operand-meta." + str(pid) + ".json"))]
     exclusive_names += python_target_names
     exclusive_names += lean_plan_names
+    exclusive_names += stream_names
     if environment_present:
         exclusive_names += [str(environment_name), str(environment_meta_name)]
     exclusive_names += dispatch_names
@@ -779,6 +825,10 @@ def bind_capture_coordinates(capture_dir, *, max_bytes=1_000_000_000, max_lines=
         report['lean_capture_plan_membership'] = lean_plan_membership
         report['open'].append({'code': 'lean_unplanned_bodies_and_interfaces_remain_unexpanded',
                                'source': lean_plan_membership['plan']})
+    if stream_membership is not None:
+        report['stream_interface_membership'] = stream_membership
+        report['open'].append({'code': 'stream_interface_source_contents_and_backing_resources_unverified',
+                               'source': stream_membership['manifest']})
     if collector_membership is not None:
         report['collector_execution_membership']=collector_membership
         report['open'].append({'code':'collector_process_birth_requires_explicit_witness_binder',

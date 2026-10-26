@@ -1,0 +1,27 @@
+{
+  "command": [
+    "/home/zyf/miniconda3/envs/lewm/bin/python",
+    "-B",
+    "-m",
+    "scar.cli",
+    "trace",
+    "--capture-plan",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/stream_interfaces_main_20261026/lean-plan.1.json",
+    "--capture-plan-sha256",
+    "727fe1a0829df9cd2bf0990b49f25c97a93ba11845462692ccdd21b63218e480",
+    "--stream-interfaces",
+    "--out",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/stream_interfaces_main_20261026/trace",
+    "--",
+    "/home/zyf/miniconda3/envs/lewm/bin/python",
+    "-B",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/stream_interfaces_main_20261026/program/stream_program.py",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/stream_interfaces_main_20261026/output.bin"
+  ],
+  "returncode": 0,
+  "elapsed_s": 1.931388394034002,
+  "stdout": "STREAM_TARGET_RETURNED\n",
+  "stderr": "",
+  "instrumented": true,
+  "whole_model_established": false
+}

@@ -1381,7 +1381,8 @@ def validate_source_program(result: SourceProgram, *, max_operations: int = 1000
             import_source = result.language is not None and SourceLanguageCapability.FUNCTION_IMPORT_314_V1 in result.language.capabilities
             creation_source = result.language is not None and SourceLanguageCapability.GENEXPR_CREATION_314_V1 in result.language.capabilities
             set_source = result.language is not None and SourceLanguageCapability.SET_DISPLAY_314_V1 in result.language.capabilities
-            if result.language is not None and (not structural_only or try_source or call_source or function_source or import_source or creation_source or set_source):
+            unpack_source = result.language is not None and SourceLanguageCapability.UNPACK_TARGETS_314_V1 in result.language.capabilities
+            if result.language is not None and (not structural_only or try_source or call_source or function_source or import_source or creation_source or set_source or unpack_source):
                 if not structural_only and language_options is None:
                     raise ValueError("v5 source replay requires explicit independently supplied language inputs")
                 if structural_only:
@@ -1391,6 +1392,7 @@ def validate_source_program(result: SourceProgram, *, max_operations: int = 1000
                                          else "function import STRUCTURE requires its exact retained source text" if import_source
                                          else "generator creation STRUCTURE requires its exact retained source text" if creation_source
                                          else "set display STRUCTURE requires its exact retained source text" if set_source
+                                         else "unpack target STRUCTURE requires its exact retained source text" if unpack_source
                                          else "expanded call STRUCTURE requires its exact retained source text")
                     source_text = source_texts[result.metadata.source.path]
                 else:

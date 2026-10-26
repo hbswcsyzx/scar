@@ -145,7 +145,8 @@ def validate_language_body(model, graph, interface, metadata, semantic, language
               "unpack must publish all same-level results before ordered target stores")
         for reference in shape.child_targets:
             atom = semantic.source_atoms.get(reference.atom_id)
-            _need(atom is not None and atom.reference == reference and atom.kind in ("Name", "Tuple", "List"),
+            allowed = ("Name", "Tuple", "List", "Attribute", "Subscript") if Capability.UNPACK_TARGETS_314_V1 in language.capabilities else ("Name", "Tuple", "List")
+            _need(atom is not None and atom.reference == reference and atom.kind in allowed,
                   "local unpack child has no permitted original target atom")
     # Verify normal-path target order and direct original assigned ports. A
     # nested unpack starts only when its outer siblings before it were stored.
@@ -184,8 +185,13 @@ def validate_language_body(model, graph, interface, metadata, semantic, language
                 position += 2
         visiting.remove(identity)
         return block, position
-    for identity in unpack:
-        stores(identity)
+    if Capability.UNPACK_TARGETS_314_V1 in language.capabilities:
+        from scar.analysis.source_unpack_lowering import validate_unpack_targets
+        validate_unpack_targets(model,graph,interface,metadata,semantic,language,
+            source_tree=source_tree,options=options,structural_only=structural_only)
+    else:
+        for identity in unpack:
+            stores(identity)
     for identity, shape in slices.items():
         _need(Capability.SLICE_KEYS in language.capabilities and protocols[identity].kind.value == "BUILD_SLICE"
               and shape.source == protocols[identity].source, "slice shape/kind/capability differs")

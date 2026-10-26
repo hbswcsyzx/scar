@@ -227,3 +227,48 @@ ValueGraph存LV/version/UNKNOWN provenance/region=None Materialization。不同�
 evidence/values不变，新增仅1组符号。factory在调用者预先限定的记录上检查关系，
 query核publication receipt/内部一致性，二者都不重放所有来源。尚未接全量producer。
 记录见`artifacts/analysis/symbolic_native_output_20261026/report.md`。
+
+同一值模型已扩为原native operator的有序实参/结果接口：
+
+```bash
+python -m scar.cli query-native-operator-value \
+  --publication PATH/operator-values.json --sha256 FRAGMENT_SHA \
+  --ports-index PATH/native-ports/index.json --ports-sha256 PORTS_SHA \
+  --bundle PATH/bundle-partitions --ordinal 21686 --direction output --port-path 0
+```
+
+真实view→add_→view片段中，4个Tensor实参、3个结果各有端点局部符号。每个结果的
+UNKNOWN/Inferred provenance仅连该实例报告的实参符号，parent列表不是已知内容
+依赖或完整最小依赖；跨实例reference候选不成为parents。may-write/may-alias分别
+指原EffectSummary、formal slot和原port，物理region仍仅作为有来源的候选引用。
+原操作/引用图未改，未断言实际写入、copy/view内容等价、normal或ready。
+
+片段74854B；主树公共query exit0/3.109s，可查询add_两个原Tensor实参、一个结果、
+DECLARED_MAY_WRITE与SCHEMA_MAY_ALIAS。尚不是全量值生命周期producer。
+记录见`artifacts/analysis/native_operator_value_interface_20261026/`。
+
+完整native接口已有自动producer，无须人工给三个示例ordinal或组装定义映射：
+
+```bash
+python -m scar.cli build-native-operator-values \
+  --ports-index PATH/native-ports/index.json --ports-sha256 PORTS_SHA \
+  --reference-index PATH/reference-flow/index.json --reference-sha256 REFERENCE_SHA \
+  --bundle PATH/bundle-partitions --out fresh-value-declarations
+```
+
+query命令把`--publication`换成`--declaration-index PATH/index.json`，SHA对应声明index。
+普通source range/原instance、port、schema与provider目录完整扫描一次；声明只保存
+原76片的准确收据、逐片计数、ID推导profile及producer版本，目标operator的现有
+Fragment/ValueGraph按需派生，不保存第二份巨大的符号图。原数据和schema仍是依据。
+
+实际完整扫描230818实例/1256501端口，Tensor端口533490的descriptor/device均已
+解析；schema190498、无schema40320。formal467756已解析、788745未解析保留unknown。
+4034项may-write、100859项may-alias仅为声明接口。总263.202s，index77514B；没有
+持久化符号或ValueGraph记录。共享catalog预加载后的单query2.519s；新进程还需
+catalog加载，不能把warm query当冷启动成本。主树fresh-process公共query实际exit0/
+36.812s（含catalog加载）；目前冷查询仍偏重，进程内可复用catalog。完整报告见
+`artifacts/analysis/native_operator_value_declaration_20261026/`。
+
+程序侧IO可通过`trace --stream-interfaces`和`query-stream-interfaces`获取实际builtin
+接收者、声明状态接口和C_RETURN/C_RAISE，精确连接原CALL行。范围与实际GPU+OS
+联合读回见[STREAM_INTERFACES.md](STREAM_INTERFACES.md)，canonical/backing连接仍未闭合。

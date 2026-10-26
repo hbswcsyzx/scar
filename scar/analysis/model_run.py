@@ -576,13 +576,26 @@ def _execute_stages(capture, attempt, plan, result, budget):
             lambda stage: build_native_reference_flow_publication(port_stage / 'ports',
                 Path(native_storage['manifest']).parent, stage / 'references',
                 expected_native_port_index_sha256=port_receipt['sha256']))
-        link('native_reference_flow', reference_stage / 'references' / 'index.json')
+        reference_receipt = link('native_reference_flow', reference_stage / 'references' / 'index.json')
         result['native_reference_summary'] = {
             'reference_ports': reference_index.reference_ports,
             'ports_with_one_original_edge': reference_index.ports_with_one_original_edge,
             'groups_with_input_and_output': reference_index.groups_with_input_and_output,
             'ordering_basis': 'ETO_SOURCE_ORDINAL_ONLY',
             'content_versions_or_causal_def_use_proved': False, 'whole_model_established': False}
+        from scar.trace.native_operator_value_interface import build_native_operator_value_declaration_publication
+        (value_index, _), value_stage = stages.call('native-operator-values',
+            build_native_operator_value_declaration_publication,
+            lambda stage: build_native_operator_value_declaration_publication(port_stage / 'ports',
+                Path(native_storage['manifest']).parent, reference_stage / 'references', stage / 'values',
+                expected_native_port_index_sha256=port_receipt['sha256'],
+                expected_reference_flow_index_sha256=reference_receipt['sha256']))
+        link('native_operator_values', value_stage / 'values' / 'index.json')
+        result['native_operator_value_summary'] = {
+            'operation_rows': value_index.operation_rows,
+            'ports': value_index.input_ports + value_index.output_ports,
+            'tensor_ports': value_index.tensor_input_ports + value_index.tensor_output_ports,
+            'persisted_value_graph_records': 0, 'whole_model_established': False}
     else:
         result['native_port_scope'] = 'not generated: this route lacks a lossless ETO archive or partitioned bundle'
     project_root = plan["origins"]["project_root"]["value"]

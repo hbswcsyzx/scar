@@ -1,0 +1,42 @@
+{
+  "schema": "scar.call-edge-trace",
+  "schema_version": 1,
+  "process_id": 1919547,
+  "project_root": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/stream_interfaces_main_20261026/program",
+  "python": "3.14.7 | packaged by conda-forge | (main, Sep  2 2026, 21:08:32) [GCC 15.3.0]",
+  "limits": {
+    "max_events": 100000,
+    "max_bytes": 64000000,
+    "max_codes": 4096,
+    "max_values": 64,
+    "max_path": 16,
+    "max_references": 8192
+  },
+  "events": 2,
+  "event_attempts": 2,
+  "invocations": 1,
+  "invocation_attempts": 1,
+  "codes": 2,
+  "bytes": 1741,
+  "dropped_events": 0,
+  "dropped_codes": 0,
+  "unknown_exits": 0,
+  "suspended_exits": 0,
+  "open_invocations": 0,
+  "active_frames": 0,
+  "errors": [],
+  "path_gaps": 0,
+  "io_failed": false,
+  "wall_ns": 248533795,
+  "scope": "SCAR_LEAN_PORTS_V1: planned roots/direct thin boundaries; unplanned interiors/imports unexpanded",
+  "reference_contents_observed": false,
+  "callable_environment_established": false,
+  "capture_profile": "SCAR_LEAN_PORTS_V1",
+  "capture_plan": {
+    "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/stream_interfaces_main_20261026/trace/lean-plan.1919547.json",
+    "sha256": "727fe1a0829df9cd2bf0990b49f25c97a93ba11845462692ccdd21b63218e480",
+    "size_bytes": 946,
+    "schema": "scar.lean-capture-plan/1"
+  },
+  "unplanned_bodies_expanded": false
+}

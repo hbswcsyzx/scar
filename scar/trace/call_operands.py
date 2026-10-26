@@ -75,7 +75,10 @@ class CallOperandObserver:
 
     def __init__(self, recorder, *, capture="instructions", max_events=100_000,
                  max_bytes=32_000_000, max_loads=64, max_namespace_items=4096,
-                 max_references=None, python_targets=False):
+                 max_references=None, python_targets=False, stream_interfaces=False):
+        if type(stream_interfaces) is not bool:
+            raise TypeError('stream_interfaces must be an explicit bool')
+        python_targets = python_targets or stream_interfaces
         if type(capture) is not str or capture not in _CAPTURE_RULES:
             raise ValueError("operand capture must be 'instructions' or 'windows'")
         for name, value in (("max_events", max_events), ("max_bytes", max_bytes),
@@ -106,6 +109,9 @@ class CallOperandObserver:
         if capture == _CAPTURE_LEAN and python_targets is not True:
             raise ValueError('lean capture requires explicit Python target interfaces')
         self._local_mask = sys.monitoring.events.CALL if capture == _CAPTURE_LEAN else _LOCAL_MASK
+        self._stream_enabled = stream_interfaces
+        # CPython derives C_RETURN/C_RAISE from CALL. get_local_events returns
+        # the normalized CALL mask even when the dependent bits were supplied.
         self.rule = _CAPTURE_RULES[capture]
         self.limits = OperandCollectionLimits(max_events, max_bytes, max_loads,
                                                max_namespace_items, max_references)
@@ -136,6 +142,7 @@ class CallOperandObserver:
         self._pending = {}
         self.environment_observer = None
         self.python_targets = None
+        self.stream_interfaces = None
         if type(python_targets) is not bool:
             raise TypeError("python_targets must be an explicit bool")
         self._target_event_digest = hashlib.sha256() if python_targets else None
@@ -154,6 +161,9 @@ class CallOperandObserver:
                 from scar.trace.python_call_targets import PythonTargetObserver, PythonTargetBudget
                 self.python_targets = PythonTargetObserver(self, PythonTargetBudget(
                     max_records=max_events,max_bytes=max_bytes,max_selected_codes=recorder.limits["max_codes"]))
+            if stream_interfaces:
+                from scar.trace.stream_interfaces import StreamInterfaceObserver
+                self.stream_interfaces = StreamInterfaceObserver(self)
         except BaseException:
             if self._fd is not None:
                 os.close(self._fd)
@@ -163,7 +173,10 @@ class CallOperandObserver:
         recorder.operand_observer = self
         witness = getattr(recorder, 'collector_witness', None)
         if witness is not None:
-            witness.register('operands', self, ('_on_instruction','_on_call','_reference'))
+            callbacks = ('_on_instruction','_on_call','_reference')
+            if stream_interfaces:
+                callbacks += ('_on_stream_return', '_on_stream_raise')
+            witness.register('operands', self, callbacks)
             witness.register('environments', self.environment_observer, ('dispatch','entry'))
 
     def _acquire_tool(self):
@@ -178,6 +191,9 @@ class CallOperandObserver:
         try:
             monitoring.register_callback(self.tool_id, monitoring.events.INSTRUCTION, self._on_instruction)
             monitoring.register_callback(self.tool_id, monitoring.events.CALL, self._on_call)
+            if self._stream_enabled:
+                monitoring.register_callback(self.tool_id, monitoring.events.C_RETURN, self._on_stream_return)
+                monitoring.register_callback(self.tool_id, monitoring.events.C_RAISE, self._on_stream_raise)
             monitoring.set_events(self.tool_id, 0)
         except BaseException:
             self._release_tool()
@@ -881,6 +897,9 @@ class CallOperandObserver:
                     if self.python_targets is not None:
                         self.python_targets.on_call(callable_object, arg0, missing, code, owner, row_site, attempt_index,
                             lambda value: self._reference(value, seen, event_index, snapshots), _layout)
+                    if self.stream_interfaces is not None and attempt_index is not None:
+                        self.stream_interfaces.begin(callable_object, arg0, missing, owner, row_site, attempt_index,
+                            lambda value: self._reference(value, seen, event_index, snapshots))
                     if dispatch["kind"] == CallableKind.EXACT_FUNCTION.value and type(callable_object) is types.FunctionType:
                         target_code = observed_target_code
                         witness = getattr(self.recorder, 'collector_witness', None)
@@ -913,6 +932,16 @@ class CallOperandObserver:
                     if self.capture == _CAPTURE_WINDOWS:
                         self._stopped = True
                         return self._disabled_callback_result(code)
+
+    def _on_stream_return(self, code, offset, target, arg0):
+        if self.stream_interfaces is not None and not self._stopped:
+            with self.recorder.lock, self._lock:
+                self.stream_interfaces.complete(code, offset, target, sys._getframe(1), 'C_RETURN')
+
+    def _on_stream_raise(self, code, offset, target, arg0):
+        if self.stream_interfaces is not None and not self._stopped:
+            with self.recorder.lock, self._lock:
+                self.stream_interfaces.complete(code, offset, target, sys._getframe(1), 'C_RAISE')
 
     def stop(self):
         """Stop observation and remove only masks still owned by this tool."""
@@ -982,6 +1011,12 @@ class CallOperandObserver:
         if os.getpid() == self.pid:
             return
         self._stopped = self._closed = True
+        if self.stream_interfaces is not None:
+            self.stream_interfaces.closed = self.stream_interfaces.stopped = True
+            self.stream_interfaces.buffer.clear()
+            self.stream_interfaces.pending.clear()
+            try: os.close(self.stream_interfaces.fd)
+            except OSError: pass
         self._buffer.clear()
         if not self._monitoring_interfered and self.tool_id is not None:
             try:
@@ -1076,6 +1111,8 @@ class CallOperandObserver:
                         self._target_event_digest.hexdigest(), self._bytes, self._event_count),
                     CallTraceFile(str(self._metadata_path), "operand-meta", self.pid,
                         hashlib.sha256(data).hexdigest(), len(data), data.count(b"\n")))
+                if self.stream_interfaces is not None:
+                    self.stream_interfaces.close(self.python_targets.legacy_inputs)
         except BaseException as error:
             self._remember_error(error)
             raise
@@ -1099,10 +1136,16 @@ def _environment_limit(name, default):
 
 
 def install(recorder, *, capture=None, max_events=None, max_bytes=None,
-            max_loads=None, max_namespace_items=None, max_references=None, python_targets=None):
+            max_loads=None, max_namespace_items=None, max_references=None, python_targets=None,
+            stream_interfaces=None):
     """Attach the sidecar without replacing the existing sys.setprofile hook."""
     if capture is None:
         capture = os.environ.get("SCAR_OPERAND_CAPTURE", _CAPTURE_INSTRUCTIONS)
+    if stream_interfaces is None:
+        selection = os.environ.get('SCAR_STREAM_INTERFACES', '0')
+        if selection not in ('0', '1'):
+            raise ValueError('SCAR_STREAM_INTERFACES must be 0 or 1')
+        stream_interfaces = selection == '1'
     if python_targets is None:
         selection = os.environ.get("SCAR_PYTHON_CALL_TARGETS", "0")
         if selection not in ("0", "PYTHON_CALL_TARGETS_V2"):
@@ -1117,7 +1160,8 @@ def install(recorder, *, capture=None, max_events=None, max_bytes=None,
                            if max_namespace_items is None else max_namespace_items)
     return CallOperandObserver(recorder, capture=capture, max_events=max_events, max_bytes=max_bytes,
                                max_loads=max_loads, max_namespace_items=max_namespace_items,
-                               max_references=max_references, python_targets=python_targets)
+                               max_references=max_references, python_targets=python_targets,
+                               stream_interfaces=stream_interfaces)
 
 
 __all__ = ["CallOperandObserver", "install"]

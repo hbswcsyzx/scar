@@ -90,3 +90,7 @@ postflight核输入和旧27条关系通过，不能把原失败改写为成功�
 绑定仍缺完整stat与共享FD连续性依据，不能由硬件库存或文件路径补猜。
 
 实现入口见[跨层查询](PROGRAM_QUERY.md)，后续继续补真实缺失的边，不进入图化简。
+
+新增的[stream接口观察](STREAM_INTERFACES.md)给原CALL附加实际builtin接收者、状态
+角色及C完成，内存流与文件流共用接口；不包装对象、不读内容或cursor、不重建FD表。
+它仍是原调用的资源接口证据，尚未补齐流到backing资源和canonical状态端口。

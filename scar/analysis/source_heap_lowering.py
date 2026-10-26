@@ -244,7 +244,7 @@ def _release(builder, cursor, node, reference):
                              PythonProtocolKind.FRAME_RELEASE_TEMPORARY)
 
 
-def store_heap_target(builder, target, rhs, cursor):
+def store_heap_target(builder, target, rhs, cursor, *, rhs_held=False):
     """Construct one Attribute or nonslice Subscript store, or reject explicitly.
 
     STORE_ATTRIBUTE inputs are receiver, RHS; STORE_SUBSCRIPT inputs are
@@ -271,9 +271,12 @@ def store_heap_target(builder, target, rhs, cursor):
     protocol = getattr(PythonProtocolKind, kind_name, None)
     if protocol is None:
         _unsupported(target, "source profile has not connected the " + kind_name + " protocol")
-    initial_holds = len(builder.active_temporaries)
+    if rhs_held and (not builder.active_temporaries or builder.active_temporaries[-1] != rhs):
+        raise _Unsupported(GapKind.SOURCE_MAPPING, target, "heap store lost its exact pending unpack result")
+    initial_holds = len(builder.active_temporaries) - int(rhs_held)
     try:
-        _hold(builder, cursor, target, rhs)
+        if not rhs_held:
+            _hold(builder, cursor, target, rhs)
         cursor, receiver = expression_for_heap_target(builder, target.value, cursor)
         if cursor is None:
             return None

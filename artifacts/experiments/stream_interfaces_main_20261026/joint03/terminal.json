@@ -1,0 +1,32 @@
+{
+  "command": [
+    "/home/zyf/miniconda3/envs/lewm/bin/python",
+    "-B",
+    "-m",
+    "scar.cli",
+    "trace",
+    "--capture-plan",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/stream_interfaces_main_20261026/joint03/lean-plan.1.json",
+    "--capture-plan-sha256",
+    "5ef2df65f5e4f7b4e02bcc90f41eb20c2467f0cf0a69668516552169feaf968c",
+    "--stream-interfaces",
+    "--execution-evidence",
+    "--tensor-physical",
+    "--os-capture-root",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/stream_interfaces_main_20261026/joint03/capture",
+    "--out",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/stream_interfaces_main_20261026/joint03/capture/trace",
+    "--",
+    "/home/zyf/miniconda3/envs/lewm/bin/python",
+    "-B",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/stream_interfaces_main_20261026/joint03/program/stream_program.py",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/stream_interfaces_main_20261026/joint03/output.bin"
+  ],
+  "returncode": 0,
+  "elapsed_s": 25.68675853702007,
+  "stdout": "STREAM_TARGET_RETURNED\n{\"os_capture\": \"/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/stream_interfaces_main_20261026/joint03/capture\", \"coordinates\": \"/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/stream_interfaces_main_20261026/joint03/capture/capture-coordinates.json\", \"os_capture_provider\": {\"profile\": {\"uri\": \"/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/stream_interfaces_main_20261026/joint03/capture/os-capture-coverage.1ad7b5b216d5c2581f8d8031b5d16f83.json\", \"sha256\": \"591013c6455cb12168f4889ccfeed489985614e954ed50e6de7c8da6ee5518d6\", \"size_bytes\": 3188, \"schema\": \"scar.os-capture-coverage\"}, \"launch\": {\"uri\": \"/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/stream_interfaces_main_20261026/joint03/capture/os-capture-launch.1ad7b5b216d5c2581f8d8031b5d16f83.json\", \"sha256\": \"c0b2b9d64447681e19f957aa2e289b3291ea7687c413eea8036a83a039988224\", \"size_bytes\": 3425, \"schema\": \"scar.os-capture-launch\"}, \"nonce\": \"1ad7b5b216d5c2581f8d8031b5d16f83\", \"selection_qualification\": \"EXPLICIT_ARGV\", \"observation_completeness\": \"UNKNOWN\"}, \"whole_model_established\": false}\n",
+  "stderr": "",
+  "instrumented": true,
+  "whole_model_established": false,
+  "conda": "lewm"
+}

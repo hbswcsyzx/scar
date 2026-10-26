@@ -130,3 +130,58 @@ def query_native_reference_flow_cli(args):
     else:
         print(payload, end='')
     return 0
+
+
+def query_native_operator_value_cli(args):
+    import re
+    from scar.trace.native_operator_value_interface import query_native_operator_value_port
+    started = time.monotonic()
+    if re.fullmatch(r'(?:0|[1-9][0-9]*)(?:/(?:0|[1-9][0-9]*))*', args.port_path) is None:
+        raise ValueError('--port-path needs canonical ordered indices')
+    ports = Path(args.ports_index).absolute()
+    index = read_native_port_index(ports, expected_sha256=args.ports_sha256)
+    if not 0 <= args.ordinal < index.source_nodes:
+        raise ValueError('--ordinal must select an original source node')
+    record = BundlePartitions(args.bundle).selected_records('evidence', 'instances', (args.ordinal,))[0]['record']
+    instance = decode(OperationInstance, record)
+    path = tuple(int(x) for x in args.port_path.split('/'))
+    if args.declaration_index:
+        from scar.trace.native_operator_value_interface import query_native_operator_value_port_from_declaration
+        interface, binding, graph = query_native_operator_value_port_from_declaration(
+            args.declaration_index, instance, args.direction, path, expected_index_sha256=args.sha256)
+    else:
+        interface, binding, graph = query_native_operator_value_port(args.publication, instance, args.direction,
+            path, ports.parent, args.bundle, expected_fragment_sha256=args.sha256,
+            expected_native_port_index_sha256=args.ports_sha256)
+    result = {'schema': 'scar.native-operator-value-query', 'schema_version': 1,
+        'interface': encode(interface), 'selected_port': encode(binding), 'values': graph.to_dict(),
+        'qualification': 'REPORTED_ARGUMENT_SYMBOLS_AND_DECLARED_SCHEMA_STATE_INTERFACE',
+        'actual_content_dependencies_or_writes_proved': False, 'whole_model_established': False,
+        'transformation_authorized': False, 'elapsed_s': time.monotonic() - started}
+    payload = json.dumps(result, ensure_ascii=False, indent=2, allow_nan=False) + '\n'
+    if args.out:
+        with Path(args.out).open('x', encoding='utf-8') as stream:
+            stream.write(payload)
+    else:
+        print(payload, end='')
+    return 0
+
+
+def build_native_operator_values_cli(args):
+    from scar.trace.native_operator_value_interface import build_native_operator_value_declaration_publication
+    started = time.monotonic()
+    ports, references = Path(args.ports_index).absolute(), Path(args.reference_index).absolute()
+    if ports.name != 'index.json' or references.name != 'index.json':
+        raise ValueError('port and reference indexes must select their original index.json')
+    index, digest = build_native_operator_value_declaration_publication(
+        ports.parent, args.bundle, references.parent, args.out,
+        expected_native_port_index_sha256=args.ports_sha256,
+        expected_reference_flow_index_sha256=args.reference_sha256)
+    print(json.dumps({'status': 'ALL_NATIVE_PORT_SHARDS_VALIDATED',
+        'index': str(Path(args.out).absolute() / 'index.json'), 'sha256': digest,
+        'source_nodes': index.source_nodes, 'operation_rows': index.operation_rows,
+        'ports': index.input_ports + index.output_ports,
+        'tensor_ports': index.tensor_input_ports + index.tensor_output_ports,
+        'persisted_value_graph_records': 0, 'elapsed_s': time.monotonic() - started,
+        'whole_model_established': False}))
+    return 0

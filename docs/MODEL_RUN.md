@@ -7,10 +7,11 @@ python -B -m scar.cli model-run --from-model-run DEPENDENCY_RUN/model-run.json \
   --stage source-entries --out fresh-entry-run
 ```
 
-CLI默认`--source-entry-profile latest`，从公共registry选择当前V6。
+CLI默认`--source-entry-profile latest`，从公共registry选择当前V7。
 原entry/catalog/readonly CodeWitness解析后，准确的own-function AST自动选择Try、
 expanded-call、nested-function、import、flat With、独立generator创建及Set能力。
-AugAssign自动启用已有FunctionTry/in-place协议，不新增重复实现。创建和
+AugAssign自动启用已有FunctionTry/in-place协议；V7将固定解包结果接回既有heap/cell
+store，不重复实现赋值协议。创建和
 惰性body可以建模，不要求先证明未知C消费者的驱动次数。策略写入plan digest，每次实际选择记录
 active capabilities；缺依据保原frontier。`legacy`与API默认None保留旧能力选择。
 本阶段也自动导出`products.capture_plan`，可交给`trace --capture-plan URI
@@ -65,7 +66,8 @@ seeds、inventory8、source-layers、composition、fresh source bindings及workl
 CodeWitness writer/readonly reader。工作单元和analysis seed由原记录机械确定。
 
 lossless ETO及partitioned native bundle路径还自动生成native ports，随后调用同一
-native-reference-flow producer生成分片引用导航，并在products保存两个小index引用。
+native-reference-flow producer生成分片引用导航，再调用native-operator-values自动
+扫描原接口并保存紧凑派生声明；products保存三个index引用，不复制每个op的符号图。
 这段bootstrap接线已实现；完整producer和公共查询已实际运行，新增整段bootstrap
 未为此重复执行。原plain route保持其明确未生成状态，索引不建立内容版本或因果边。
 

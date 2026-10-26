@@ -59,3 +59,29 @@ body解码及索引各2次，同会话复用。当前旧查询仍偏重，不称
   或完成证明，未创建内容版本。build/query CLI及bootstrap后继stage接线已实现；
   新bootstrap全链未重跑。开发时dict-key、复数role映射两处错误已修正，早先失败/
   不可用publication不算成功pass；222.666s不是累计开发耗时。
+
+## 本轮：程序接口与声明式原生值模型
+
+- V7复用原heap/cell/global store连接固定解包结果。真实PIL入口92ops完整普通读回；
+  第二个入口越过解包停到Lambda，仍unsupported。当前source197/243、45未支持、
+  1resumable缺口；没有增加运行时绑定或正式出版数。
+- builtin stream资源/效果接口已实现optional trace、普通reader与owned coordinates。
+  不包装对象、读取内容/filename/cursor、调用fileno/tell/flush或回放FD表。
+  fresh普通case捕获7 calls（6正常/1异常），6095B；fresh GPU+OS case25.687s插桩，
+  stream相同7calls、CALL0instruction/0gap/0error，普通coordinates83成员、
+  8,644,413 raw bytes，Kineto实际1H2D/1kernel。首次mask错误采集保留为失败。
+- 原native operator值接口连接原输入/输出与schema may-write/alias；真实view→add_→view
+  7个Tensor端点符号，UNKNOWN/Inferred parents只接本实例报告的实参，跨instance仍
+  reference候选；源码/语义/实际写/ready不借此追认。主树公共query3.109s实际exit0。
+- 自动声明producer完整扫描76片/230818实例/1256501端口，Tensor descriptor/device
+  533490项全解析，保788745未解析formal。263.202s，只写77514B index；符号及
+  ValueGraph按需生成，没有再存几GB重复表示。Warm query2.519s不包含catalog加载。
+  主树fresh-process公共query实际exit0/36.812s，含共享catalog加载，尚非轻量冷查询。
+  公共build/query与model-run后继stage已接；完整bootstrap未为该接线重复执行。
+- 新35函数体的增量publication尚未完成：首轮925s仅11/35，因重复解析context已在
+  自有进程核实后主动停止（最终1129.900s/17partial、无manifest），不计出版。
+  typed-context复用首轮暴露cache属性API错误（约445s/0CP2），失败保留；窄修后
+  8-op真实普通publisher0.612s通过，随后继续同35完整范围；不是用小case代替35。
+
+本轮未增加detector/backend、未修改LeWM或重跑LeWM episode，未跑大套测试。
+完整资源/IO backing、跨调用全链与剩余source仍OPEN，第一阶段未完成。

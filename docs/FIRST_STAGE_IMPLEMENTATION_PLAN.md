@@ -46,8 +46,8 @@ OS、driver、allocator 的内部算法、完整 FD 表、SASS/机器指令和�
 
 - 源前端新增 expanded call、函数 Try、nested function 能力已合入主分支；归并后的
   函数内import、flat With及独立generator creation已分别补通4、2、1个真实body；
-  新增Set显示式及复用既有AugAssign接线后，243个外部入口现在196个可恢复、
-  46个未支持、1个resumable adapter缺口。
+  新增Set显示式、既有AugAssign接线及通用heap/cell解包后，243个外部入口现在
+  197个可恢复、45个未支持、1个resumable adapter缺口。
   这是源恢复结果，不是全部已接回动态调用。
 - 161 个旧成功入口已正常发布；新能力对应的 body 还需按原 ID 接回正式模型。
   不重跑已完成的整批普通发布/读取。
@@ -62,6 +62,8 @@ OS、driver、allocator 的内部算法、完整 FD 表、SASS/机器指令和�
 - 最新source-entry profile已自动按原函数AST选择已实现的Try/expanded-call/nested/
   import/flat With/generator creation/Set能力，AugAssign自动复用既有FunctionTry协议；
   generator创建/惰性body与未知消费接口分开。
+  V7固定解包继续复用原heap/cell/global store；真实新PIL body92ops完整恢复，另一
+  入口越过解包后停在Lambda，仍按未支持计数，不扩写成功范围。
   model-run source-entries默认选择latest，API旧None/CLI legacy保留。
   它仍要求正常entry及readonly CodeWitness，不把选择策略当作运行对应证明。
 - native端口全源流式生成已实际完成：310412原节点、230818算子实例、1256501端口，
@@ -80,11 +82,21 @@ OS、driver、allocator 的内部算法、完整 FD 表、SASS/机器指令和�
   已做一个真实native输出的符号payload投影：保原ReferenceValue/ObjectIdentity，
   另以Inferred关联连到LV/version/UNKNOWN provenance与region=None物化，未冒充
   已证内容、alias或ready；原主bundle未改。这是接线原型，尚未批量生成全程序值生命周期。
+  原型进一步接成真实view→add_→view的operator接口：4个Tensor实参和3个结果各有
+  端点符号，每个op只以本实例实参作为UNKNOWN/Inferred接口parents；声明may-write/
+  may-alias指回原effect/formal slot，跨op引用仍是候选，不证明内容依赖或实际写入。
+  完整native接口已由自动producer扫描：230818实例、1256501端口，Tensor descriptor/
+  device533490项全解析；只持久化77514B声明index，符号/ValueGraph按需派生。
+  formal仍有788745未解析，内容/状态/ready并未因此证明，不能改为全模型完成。
 - source-entry共享存储模式已接公共入口`--shared-source-context`，保持可选，未改旧CP2
   格式边界。两个真实85/217-op body以1context+2body发布并正常读回：3.30MB→1.76MB。
   省的是存储/重复读取；仍先生成和验证SP5，尚未消除该生产成本。
   完整正常worker也实际通过一个自动选出的原8-op entry（0.566s），原fragment端点、
   worker terminal及普通共享session读回一致；未执行target/bootstrap/CP2。
+- 程序侧builtin stream接口已接可选trace/普通reader/owned coordinates：接收者引用、
+  原CALL、read/write/flush/close等接口状态角色及实际C完成，内存流和文件流共用表示。
+  新GPU+OS小样例实际通过7次接口/1次H2D/1kernel；不读取流内容或重建FD表。
+  具体范围及canonical/backing连接缺口见[STREAM_INTERFACES.md](STREAM_INTERFACES.md)。
 
 每次提交记录具体完成的功能与保留的缺口。当前详细差距见
 [FIRST_STAGE_GAPS_20261026.md](FIRST_STAGE_GAPS_20261026.md)；某个组件通过不把整体改为完成。

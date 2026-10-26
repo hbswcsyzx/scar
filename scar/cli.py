@@ -35,7 +35,8 @@ def _trace(args) -> int:
         lean_plan = read_plan(capture_plan_path, expected_sha256=capture_plan_sha256)
         if args.project_root is not None and str(Path(args.project_root).resolve()) != lean_plan.namespace_root:
             raise SystemExit('--project-root differs from the capture plan namespace')
-    python_targets = getattr(args, 'python_call_targets', False) or lean_plan is not None
+    stream_interfaces = getattr(args, 'stream_interfaces', False)
+    python_targets = getattr(args, 'python_call_targets', False) or lean_plan is not None or stream_interfaces
     operands = getattr(args, 'call_operands', False) or python_targets
     os_capture_root = getattr(args, 'os_capture_root', None)
     if os_capture_root is not None:
@@ -53,6 +54,7 @@ def _trace(args) -> int:
     env.pop('SCAR_CALL_TRACE_OWNER_PID',None)
     env.pop('SCAR_CALL_OPERANDS',None)
     env.pop('SCAR_PYTHON_CALL_TARGETS',None)
+    env.pop('SCAR_STREAM_INTERFACES',None)
     env.pop('SCAR_OPERAND_CAPTURE',None)
     env.pop('SCAR_CAPTURE_PLAN',None)
     env.pop('SCAR_CAPTURE_PLAN_SHA256',None)
@@ -79,6 +81,8 @@ def _trace(args) -> int:
                 or any(out.glob('python-call-targets.*.jsonl*'))
                 or any(out.glob('python-call-target-meta.*.json*'))
                 or any(out.glob('lean-plan.*.json'))
+                or any(out.glob('stream-interfaces.*.jsonl*'))
+                or any(out.glob('stream-interface-meta.*.json*'))
                 or (execution_evidence and any(out.glob('execution-evidence.*.json')))):
             raise SystemExit("calls-only requires a fresh output directory")
         env['SCAR_TRACE_CALL_EDGES'] = '1'
@@ -97,6 +101,8 @@ def _trace(args) -> int:
             env['SCAR_CALL_OPERANDS'] = '1'
             if python_targets:
                 env['SCAR_PYTHON_CALL_TARGETS'] = 'PYTHON_CALL_TARGETS_V2'
+            if stream_interfaces:
+                env['SCAR_STREAM_INTERFACES'] = '1'
             env['SCAR_OPERAND_CAPTURE'] = capture
             env['SCAR_OPERAND_MAX_EVENTS'] = str(args.max_operand_events)
             env['SCAR_OPERAND_MAX_BYTES'] = str(args.max_operand_bytes)
@@ -476,6 +482,27 @@ def main(argv=None) -> int:
     native_flow_query.add_argument("--max-candidates", type=int, default=256)
     native_flow_query.add_argument("--out", help="write a fresh result")
     native_flow_query.set_defaults(func=query_native_reference_flow_cli)
+    native_value_build = sub.add_parser('build-native-operator-values', help='validate all original native interfaces and publish a compact derivation index')
+    for name in ('ports-index', 'ports-sha256', 'reference-index', 'reference-sha256', 'bundle', 'out'):
+        native_value_build.add_argument('--' + name, required=True)
+    from scar.trace.native_ports_cli import build_native_operator_values_cli
+    native_value_build.set_defaults(func=build_native_operator_values_cli)
+    native_value = sub.add_parser('query-native-operator-value', help='follow original ports through symbolic argument/result and declared state interfaces')
+    value_source = native_value.add_mutually_exclusive_group(required=True)
+    value_source.add_argument('--publication', help='existing typed value-interface fragment')
+    value_source.add_argument('--declaration-index', help='compact full-scan index; derive this operation on demand')
+    for name in ('sha256', 'ports-index', 'ports-sha256', 'bundle', 'port-path'):
+        native_value.add_argument('--' + name, required=True)
+    native_value.add_argument('--ordinal', required=True, type=int)
+    native_value.add_argument('--direction', choices=('input', 'output'), default='output')
+    native_value.add_argument('--out', help='write a fresh result')
+    from scar.trace.native_ports_cli import query_native_operator_value_cli
+    native_value.set_defaults(func=query_native_operator_value_cli)
+    stream_query = sub.add_parser('query-stream-interfaces', help='read exact builtin stream calls and their declared resource/state interface')
+    stream_query.add_argument('--metadata', required=True)
+    stream_query.add_argument('--sha256', required=True)
+    stream_query.add_argument('--out', help='write a fresh result')
+    stream_query.set_defaults(func=_query_stream_interfaces)
     symbolic_output = sub.add_parser("query-symbolic-output", help="read an inferred payload symbol beside an original output reference")
     symbolic_output.add_argument("--projection", required=True)
     symbolic_output.add_argument("--sha256", required=True)
@@ -553,6 +580,7 @@ def main(argv=None) -> int:
     trace.add_argument('--os-capture-root',help='opt in to owned trace=all strace, lossless retention and final coordinates; requires fresh ROOT and --out ROOT/trace')
     trace.add_argument('--strace-executable',default='strace',help='strace executable for the owned opt-in OS capture')
     trace.add_argument('--max-os-bytes',type=int,default=128000000)
+    trace.add_argument('--stream-interfaces', action='store_true', help='observe builtin stream calls and C completion without reading contents or wrapping objects')
     trace.add_argument('--max-os-lines',type=int,default=2000000)
     trace.add_argument('--max-capture-bytes',type=int,default=256000000)
     trace.add_argument('--max-archive-bytes',type=int,default=128000000)
@@ -1673,6 +1701,18 @@ def _normalize_v2(args) -> int:
     report = _write_document(args.report or str(out) + ".coverage.json", result.coverage)
     print(json.dumps({"schema": result.bundle.SCHEMA, "out": str(out),
                       "report": str(report), "valid": validation["valid"]}))
+    return 0
+
+
+def _query_stream_interfaces(args):
+    from scar.trace.stream_interfaces import read_stream_interfaces
+    result = read_stream_interfaces(args.metadata, expected_sha256=args.sha256)
+    payload = json.dumps(result, ensure_ascii=False, indent=2, allow_nan=False) + '\n'
+    if args.out:
+        with Path(args.out).open('x', encoding='utf-8') as stream:
+            stream.write(payload)
+    else:
+        print(payload, end='')
     return 0
 
 
