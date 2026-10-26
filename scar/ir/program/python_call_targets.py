@@ -35,6 +35,17 @@ class ReceiverCondition(str,Enum):
     NO_INTERVENING_CALL_LAYOUT_MUTATION='NO_INTERVENING_CALL_LAYOUT_MUTATION'
 
 @dataclass(frozen=True,slots=True)
+class PythonSourcePortBudget:
+    max_sidecar_bytes:int=32_000_000
+    max_sidecar_rows:int=1_000_000
+    max_attempts:int=1_000_000
+    max_bindings:int=100_000
+    max_ports:int=1_000_000
+    def __post_init__(self):
+        if any(type(getattr(self,name)) is not int or getattr(self,name)<1 for name in self.__dataclass_fields__):
+            raise ValueError('positive independent Python source-port ceilings required')
+
+@dataclass(frozen=True,slots=True)
 class BoundReceiver:
     role:ReceiverRole
     reference:str

@@ -164,7 +164,9 @@ def link_call_operands(trace, project_root, inventory=None, *, frame_budget=Call
                        operand_budget=CallOperandBudget(), route_budget=OperandRouteBudget(),
                        include_environments=False, composition=None, source_bindings=None,
                        coordinates=None, code_witnesses=None, progress=None,
-                       source_port_consumer=None, source_port_budget=None):
+                       source_port_consumer=None, source_port_budget=None,
+                       python_source_port_consumer=None, python_source_port_budget=None,
+                       python_source_body_composition=None, python_source_inventory_artifact=None):
     """Own one raw replay; optional consumer(model, check) gets a separate sidecar.
 
     ``check`` verifies a selected typed source-port record against this same
@@ -174,7 +176,10 @@ def link_call_operands(trace, project_root, inventory=None, *, frame_budget=Call
         operand_budget=operand_budget, route_budget=route_budget, include_environments=include_environments,
         composition=composition, source_bindings=source_bindings, coordinates=coordinates,
         code_witnesses=code_witnesses, progress=progress,
-        source_port_consumer=source_port_consumer, source_port_budget=source_port_budget)
+        source_port_consumer=source_port_consumer, source_port_budget=source_port_budget,
+        python_source_port_consumer=python_source_port_consumer, python_source_port_budget=python_source_port_budget,
+        python_source_body_composition=python_source_body_composition,
+        python_source_inventory_artifact=python_source_inventory_artifact)
 
 
 def _link_call_operands_owned(owner, trace, project_root, **kwargs):
@@ -187,7 +192,9 @@ def _link_call_operands(trace, project_root, inventory=None, *, frame_budget=Cal
                         operand_budget=CallOperandBudget(), route_budget=OperandRouteBudget(),
                         include_environments=False, composition=None, source_bindings=None,
                         coordinates=None, code_witnesses=None, progress=None, _owner=None,
-                        source_port_consumer=None, source_port_budget=None):
+                        source_port_consumer=None, source_port_budget=None,
+                        python_source_port_consumer=None, python_source_port_budget=None,
+                        python_source_body_composition=None, python_source_inventory_artifact=None):
     """Automatically reconstruct original call operands and typed core routes."""
     from scar.analysis.call_operand_reader import read_call_operands
     from scar.analysis.call_operand_routes import build_operand_routes
@@ -203,6 +210,26 @@ def _link_call_operands(trace, project_root, inventory=None, *, frame_budget=Cal
         source_port_budget = SourceCallPortBudget() if source_port_budget is None else source_port_budget
         _require(type(source_port_budget) is SourceCallPortBudget, "source-port budget must be typed")
         source_port_budget.__post_init__()
+    _require(python_source_port_consumer is None or callable(python_source_port_consumer),
+             "Python source-port consumer must be callable or None")
+    _require(python_source_port_consumer is not None or all(x is None for x in
+        (python_source_port_budget, python_source_body_composition, python_source_inventory_artifact)),
+        "Python source-port inputs require the explicit v2 consumer")
+    if python_source_port_consumer is not None:
+        from scar.ir.program.python_call_targets import PythonSourcePortBudget
+        python_source_port_budget = PythonSourcePortBudget() if python_source_port_budget is None else python_source_port_budget
+        _require(type(python_source_port_budget) is PythonSourcePortBudget, "Python source-port budget must be typed")
+        python_source_port_budget.__post_init__()
+        if python_source_body_composition is not None:
+            from scar.analysis.program_composition import CompositionIndex
+            _require(type(python_source_body_composition) is CompositionIndex
+                     and python_source_body_composition.has_source_entry_publication,
+                     "Python body input requires an ordinary qualified entry composition")
+        if python_source_inventory_artifact is not None:
+            from scar.ir.program.source_references import SourceArtifactLocator
+            _require(type(python_source_inventory_artifact) is SourceArtifactLocator,
+                     "Python inventory artifact must be its exact typed original locator")
+            python_source_inventory_artifact.__post_init__()
     def notify(stage, **fields):
         if progress is not None:
             progress({"stage": stage, **fields})
@@ -275,6 +302,13 @@ def _link_call_operands(trace, project_root, inventory=None, *, frame_budget=Cal
         source_ports = build_source_call_port_bindings(call_model=model, operand_model=operands,
             inventory=inventory, sources=sources, budget=source_port_budget, consumer=source_port_consumer)
         notify("SOURCE_CALL_PORTS_BUILT", summary=source_ports.summary())
+    if python_source_port_consumer is not None:
+        from scar.analysis.python_call_targets import build_python_source_ports
+        python_ports = build_python_source_ports(trace=operands, call_model=model, inventory=inventory,
+            sources=sources, inventory_artifact=python_source_inventory_artifact,
+            body_composition=python_source_body_composition, budget=python_source_port_budget,
+            consumer=python_source_port_consumer)
+        notify("PYTHON_SOURCE_CALL_PORTS_V2_BUILT", summary=python_ports.summary())
     return CallOperandReport(model, operands, routing, environments,
                              access.receipt() if access is not None else None, tuple(entry_parameters))
 
