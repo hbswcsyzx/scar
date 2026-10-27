@@ -78,6 +78,8 @@ class CallableEnvironmentObserver:
         if self.metadata_path.exists() or self.metadata_path.is_symlink():
             raise ValueError("environment metadata output must be fresh")
         self._fd = os.open(self.event_path, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
+        self._buffer = bytearray()
+        self._buffer_limit = 65536
         self._lock = threading.RLock()
         self._observer_ref = weakref.ref(self)
         self._index = self._attempts = self._events = self._bytes = self._references = 0
@@ -91,6 +93,42 @@ class CallableEnvironmentObserver:
         self._digest = hashlib.sha256()
         self._io_failed = self._stopped = self._closed = False
         self._stop_reason = None
+        if hasattr(os, 'register_at_fork'):
+            reference = self._observer_ref
+            def child_cleanup():
+                observer = reference()
+                if observer is not None:
+                    observer._after_fork()
+            os.register_at_fork(after_in_child=child_cleanup)
+
+    def _after_fork(self):
+        # Never replay a parent's accepted-but-unflushed rows in its child.
+        # Do not take an inherited lock, which another parent thread may own.
+        if os.getpid() == self.pid:
+            return
+        self._buffer.clear()
+        self._stopped = self._closed = True
+        if self._fd is not None:
+            try:
+                os.close(self._fd)
+            except OSError:
+                pass
+            self._fd = None
+
+    def _write_all(self, data):
+        position = 0
+        while position < len(data):
+            written = os.write(self._fd, data[position:])
+            if written <= 0:
+                raise OSError('environment write made no progress')
+            self._digest.update(data[position:position + written])
+            self._bytes += written
+            position += written
+
+    def _flush(self):
+        if self._buffer:
+            self._write_all(self._buffer)
+            self._buffer.clear()
 
     def _live(self):
         return os.getpid() == self.pid and not self._closed and not self._stopped
@@ -128,19 +166,17 @@ class CallableEnvironmentObserver:
                "thread_id": threading.get_ident(), **fields}
         data = (json.dumps(row, ensure_ascii=True, separators=(",", ":"),
                            allow_nan=False) + "\n").encode("ascii")
-        if len(data) > _MAX_LINE_BYTES or self._bytes + len(data) > self.limits["max_bytes"]:
+        if len(data) > _MAX_LINE_BYTES or self._bytes + len(self._buffer) + len(data) > self.limits["max_bytes"]:
             self._dropped += 1
             self._stop("LINE_BYTE_BUDGET" if len(data) > _MAX_LINE_BYTES else "BYTE_BUDGET")
             return None
         try:
-            position = 0
-            while position < len(data):
-                written = os.write(self._fd, data[position:])
-                if written <= 0:
-                    raise OSError("environment write made no progress")
-                self._digest.update(data[position:position + written])
-                self._bytes += written
-                position += written
+            if len(self._buffer) + len(data) > self._buffer_limit:
+                self._flush()
+            if len(data) >= self._buffer_limit:
+                self._write_all(data)
+            else:
+                self._buffer.extend(data)
         except BaseException as error:
             self._io_failed = True
             self._dropped += 1
@@ -371,12 +407,7 @@ class CallableEnvironmentObserver:
         """Close once, publishing bounded metadata; never propagate to target."""
         if os.getpid() != self.pid:
             # A child must not write a parent manifest or keep its inherited FD.
-            if self._fd is not None:
-                try:
-                    os.close(self._fd)
-                except BaseException:
-                    pass
-                self._fd = None
+            self._after_fork()
             return
         try:
             with self._lock:
@@ -385,6 +416,15 @@ class CallableEnvironmentObserver:
                 self._closed = True
                 pending = len(self._dispatches)
                 if self._fd is not None:
+                    try:
+                        if not self._io_failed:
+                            self._flush()
+                    except BaseException as error:
+                        self._io_failed = True
+                        self._remember_error(error)
+                        self._stop('WRITE_FAILURE')
+                    finally:
+                        self._buffer.clear()
                     try:
                         os.close(self._fd)
                     except BaseException as error:
