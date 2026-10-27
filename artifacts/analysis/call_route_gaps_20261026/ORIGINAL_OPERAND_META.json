@@ -1,0 +1,58 @@
+{
+  "schema": "scar.call-operands-trace",
+  "schema_version": 1,
+  "process_id": 369749,
+  "project_root": "/home/zyf/AAA/le-wm",
+  "python": "3.14.7 | packaged by conda-forge | (main, Sep  2 2026, 21:08:32) [GCC 15.3.0]",
+  "implementation": "cpython",
+  "rule": "CPYTHON_CALL_WINDOWS_V1",
+  "limits": {
+    "max_events": 2000000,
+    "max_bytes": 1200000000,
+    "max_loads": 64,
+    "max_namespace_items": 4096,
+    "max_references": 8192
+  },
+  "events": 312812,
+  "event_attempts": 312812,
+  "instructions": 207248,
+  "call_attempts": 100550,
+  "handshakes": 4069,
+  "gaps": 945,
+  "loads": 17037,
+  "references": 234853,
+  "bytes": 114238539,
+  "dropped_events": 0,
+  "errors": [],
+  "io_failed": false,
+  "previous_profile": false,
+  "base_manifest": [
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/trace/call-codes.369749.jsonl",
+      "family": "codes",
+      "process_id": 369749,
+      "raw_sha256": "3955b8035274057c502969bd1276908871501795b6ff60d4720d1778bd71cc8c",
+      "raw_bytes": 226156,
+      "lines": 855
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/trace/call-events.369749.jsonl",
+      "family": "events",
+      "process_id": 369749,
+      "raw_sha256": "bbe13d91c19fda3148e7e6fc63187638ef13c74323f5d383e89a5e40acb8749f",
+      "raw_bytes": 187485595,
+      "lines": 200876
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/trace/call-meta.369749.json",
+      "family": "meta",
+      "process_id": 369749,
+      "raw_sha256": "771e05915130df3632edf45b0f1b67d0b7f085474d62c198da490e90a6ccce59",
+      "raw_bytes": 956,
+      "lines": 34
+    }
+  ],
+  "reference_contents_observed": false,
+  "callable_environment_established": false,
+  "transformation_authorized": false
+}

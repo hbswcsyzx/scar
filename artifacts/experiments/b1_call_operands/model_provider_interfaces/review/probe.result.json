@@ -1,0 +1,110 @@
+{
+  "python": "3.14.7",
+  "head": "624560e102cc655ca2dca0362af5b646e5359d01",
+  "source_before": {
+    "scar/ir/program/providers.py": "fb96fe41a8c5f6cf33a01fd6974830b9dd73ee622107b3659411cc0c4f8d1343",
+    "scar/ir/program/provider_validation.py": "e3cce08c7a2493bd256c4012b52f8fdffa4a2aec52fa1a96670cd411f036d4fc",
+    "scar/ir/program/model.py": "fb3eaeebd9125becb7cac13e02eaf118f39cc9a5ee5dbd5505d30c83acb95e12",
+    "scar/ir/program/codec.py": "b873fe2cfa173147a2f85abb2b13d61f31d91b2b3ee032ab785008d7cc20d749",
+    "scar/ir/program/queries.py": "cc193a81335770a4172c988b8b7e75637b78b5a00c1997fe2fc888ae2df42dd9",
+    "scar/cli.py": "bcd6b5031eb3595443a64c4693a1de234f9ae7dc184b5e599236f3ecedf7cf47",
+    "docs/M1_PROVIDER_INTERFACES.md": "2bf6532787293ad1af641cf0688dc8c953763f530a224e8d318bc8e5d0ec0cbe"
+  },
+  "scope": "manual declaration/validator probe; no source/provider/runtime proof",
+  "cases": {
+    "valid_produced_normal": {
+      "issues": [],
+      "codec_accepted": true,
+      "roundtrip_equal": true,
+      "schema_version": 7
+    },
+    "wrong_producer_normal": {
+      "issues": [],
+      "codec_accepted": true,
+      "roundtrip_equal": true,
+      "schema_version": 7
+    },
+    "missing_projection_normal": {
+      "issues": [],
+      "codec_accepted": true,
+      "roundtrip_equal": true,
+      "schema_version": 7
+    },
+    "wrong_producer_raise": {
+      "issues": [],
+      "codec_accepted": true,
+      "roundtrip_equal": true,
+      "schema_version": 7
+    },
+    "wrong_producer_poststate": {
+      "issues": [],
+      "codec_accepted": true,
+      "roundtrip_equal": true,
+      "schema_version": 7
+    },
+    "ordinary_entry_has_no_invented_producer": {
+      "issues": [],
+      "codec_accepted": true,
+      "roundtrip_equal": true,
+      "schema_version": 7
+    },
+    "forwarded_block_argument_is_not_produced": {
+      "issues": [],
+      "codec_accepted": true,
+      "roundtrip_equal": true,
+      "schema_version": 7
+    },
+    "observation_scope_many_to_many": {
+      "issues": [],
+      "codec_accepted": true,
+      "roundtrip_equal": true,
+      "schema_version": 7
+    },
+    "complete_declaration_query": {
+      "issues": [],
+      "declared_completeness": [
+        "COMPLETE",
+        "COMPLETE",
+        "COMPLETE",
+        "COMPLETE",
+        "COMPLETE",
+        "COMPLETE",
+        "COMPLETE",
+        "COMPLETE"
+      ],
+      "conditions": 0,
+      "left_target": "program_use:twice.left",
+      "query_result_class": "ProviderRegionSource"
+    },
+    "historical_v2": {
+      "wire_equal": true,
+      "empty_future_table_rejected": true
+    },
+    "historical_v3": {
+      "wire_equal": true,
+      "empty_future_table_rejected": true
+    },
+    "historical_v4": {
+      "wire_equal": true,
+      "empty_future_table_rejected": true
+    },
+    "historical_v5": {
+      "wire_equal": true,
+      "empty_future_table_rejected": true
+    },
+    "historical_v6": {
+      "wire_equal": true,
+      "empty_future_table_rejected": true
+    }
+  },
+  "source_after": {
+    "scar/ir/program/providers.py": "fb96fe41a8c5f6cf33a01fd6974830b9dd73ee622107b3659411cc0c4f8d1343",
+    "scar/ir/program/provider_validation.py": "e3cce08c7a2493bd256c4012b52f8fdffa4a2aec52fa1a96670cd411f036d4fc",
+    "scar/ir/program/model.py": "fb3eaeebd9125becb7cac13e02eaf118f39cc9a5ee5dbd5505d30c83acb95e12",
+    "scar/ir/program/codec.py": "b873fe2cfa173147a2f85abb2b13d61f31d91b2b3ee032ab785008d7cc20d749",
+    "scar/ir/program/queries.py": "cc193a81335770a4172c988b8b7e75637b78b5a00c1997fe2fc888ae2df42dd9",
+    "scar/cli.py": "bcd6b5031eb3595443a64c4693a1de234f9ae7dc184b5e599236f3ecedf7cf47",
+    "docs/M1_PROVIDER_INTERFACES.md": "2bf6532787293ad1af641cf0688dc8c953763f530a224e8d318bc8e5d0ec0cbe"
+  },
+  "source_unchanged": true
+}

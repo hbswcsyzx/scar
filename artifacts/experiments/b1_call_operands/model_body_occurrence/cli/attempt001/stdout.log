@@ -1,0 +1,71 @@
+FFF.....................                                                 [100%]
+=================================== FAILURES ===================================
+_ test_cli_drive_uses_original_codec_occurrence_ids_and_keeps_missing_external_evidence[0] _
+
+number = 0
+tmp_path = PosixPath('/tmp/pytest-of-zyf/pytest-4189/test_cli_drive_uses_original_c0')
+capsys = <_pytest.capture.CaptureFixture object at 0x7d14b3d4cec0>
+
+    @pytest.mark.parametrize('number', (0, 1))
+    def test_cli_drive_uses_original_codec_occurrence_ids_and_keeps_missing_external_evidence(number, tmp_path, capsys):
+        _, model, details, paths, payloads = _files(tmp_path)
+        drive = details['instances'][0]['drives'][number]
+        assert main(_argv(paths, '--drive', drive.wire)) == 0
+        report = json.loads(capsys.readouterr().out)
+        view = report['query']
+>       assert report['status'] == view['status'] == 'PARTIAL'
+E       AssertionError: assert 'DECLARED' == 'PARTIAL'
+E         
+E         - PARTIAL
+E         + DECLARED
+
+tests/unit/test_execution_body_cli.py:40: AssertionError
+_ test_cli_drive_uses_original_codec_occurrence_ids_and_keeps_missing_external_evidence[1] _
+
+number = 1
+tmp_path = PosixPath('/tmp/pytest-of-zyf/pytest-4189/test_cli_drive_uses_original_c1')
+capsys = <_pytest.capture.CaptureFixture object at 0x7d14b3095a90>
+
+    @pytest.mark.parametrize('number', (0, 1))
+    def test_cli_drive_uses_original_codec_occurrence_ids_and_keeps_missing_external_evidence(number, tmp_path, capsys):
+        _, model, details, paths, payloads = _files(tmp_path)
+        drive = details['instances'][0]['drives'][number]
+        assert main(_argv(paths, '--drive', drive.wire)) == 0
+        report = json.loads(capsys.readouterr().out)
+        view = report['query']
+>       assert report['status'] == view['status'] == 'PARTIAL'
+E       AssertionError: assert 'DECLARED' == 'PARTIAL'
+E         
+E         - PARTIAL
+E         + DECLARED
+
+tests/unit/test_execution_body_cli.py:40: AssertionError
+_ test_cli_activation_projects_capture_keys_to_full_namespace_without_faking_identity _
+
+tmp_path = PosixPath('/tmp/pytest-of-zyf/pytest-4189/test_cli_activation_projects_c0')
+capsys = <_pytest.capture.CaptureFixture object at 0x7d14b2fdd6d0>
+
+    def test_cli_activation_projects_capture_keys_to_full_namespace_without_faking_identity(tmp_path, capsys):
+        _, model, details, paths, payloads = _files(tmp_path)
+        activation = details['instances'][0]['activation']
+        assert main(_argv(paths, '--activation', activation.wire)) == 0
+        report = json.loads(capsys.readouterr().out)
+        view = report['query']
+        assert view['association']['activation'] == activation.as_dict()
+        assert view['creation']['id'] == model.body_activation_origins[0].creation.as_dict()
+        assert len(view['captures']) == 6
+        for key, capture in view['captures'].items():
+            assert key == capture['definition']['formal']['wire'] and key.startswith('program_value:')
+        assert view['drives'] == [drive.as_dict() for drive in details['instances'][0]['drives']]
+>       assert view['status'] == 'PARTIAL' and view['gaps']
+E       AssertionError: assert ('DECLARED' == 'PARTIAL'
+E         
+E         - PARTIAL
+E         + DECLARED)
+
+tests/unit/test_execution_body_cli.py:63: AssertionError
+=========================== short test summary info ============================
+FAILED tests/unit/test_execution_body_cli.py::test_cli_drive_uses_original_codec_occurrence_ids_and_keeps_missing_external_evidence[0]
+FAILED tests/unit/test_execution_body_cli.py::test_cli_drive_uses_original_codec_occurrence_ids_and_keeps_missing_external_evidence[1]
+FAILED tests/unit/test_execution_body_cli.py::test_cli_activation_projects_capture_keys_to_full_namespace_without_faking_identity
+3 failed, 21 passed in 3.97s

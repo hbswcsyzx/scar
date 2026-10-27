@@ -1,0 +1,52 @@
+{
+  "schema": "scar.tooling-reassessment-review",
+  "created_utc": "2026-10-16T08:11:58.643394+00:00",
+  "base_revision": "78c5fdaaea5b189c0de8c3d9f26159912d615486",
+  "revision_during_check": "78c5fdaaea5b189c0de8c3d9f26159912d615486",
+  "scope": "Documentation/source/official-reference review, not adapter or model acceptance",
+  "new_product_code": false,
+  "new_tests_run": false,
+  "new_capture": false,
+  "new_lewm_run": false,
+  "external_links_validated_by_this_script": false,
+  "source_sha256": "7a476a2e161109dc924615cd1c5aeb17fc4ca39176ffade393e15917dbb6fb17",
+  "source_file_count": 376,
+  "same_source_as_previous_frozen_regression": true,
+  "previous_frozen_regression": {
+    "revision": "79bf2a95d5817e745b1fe81ac98e0ef6c7cf4a3e",
+    "status": "PASS",
+    "counts": {
+      "passed": 3215,
+      "failed": 0,
+      "error": 0,
+      "skipped": 0,
+      "total": 3215
+    }
+  },
+  "changed_tracked_paths": [
+    "README.md",
+    "docs/STATUS.md",
+    "docs/TOOLING_SURVEY.md",
+    "docs/WHOLE_PROGRAM_MODEL_PLAN.md"
+  ],
+  "tracked_changes_are_docs_only": true,
+  "local_document_links_checked": 137,
+  "missing_local_links": [],
+  "document_sha256": {
+    "README.md": "517801bfdcc282c9f88a2d173316de240b7a86f89ee235e2508cb7c997d90fd6",
+    "docs/STATUS.md": "f888336d9def0686ba7e248f5d5f14368aed9954f2e1f53a9cff7ef34a9de283",
+    "docs/TOOLING_SURVEY.md": "fdb61e304d61ba73c937c4cf6aace62713bb9fc3f7527273263a3024595ca3b5",
+    "docs/WHOLE_PROGRAM_MODEL_PLAN.md": "c6049e17894930169c84065de241af0de715a1eec7947e90103698c040b18e5f",
+    "docs/MODELING_REUSE_DECISION.md": "ecec6cf26e2e48fa3bb4f5b4f314fca41a75de2c6fee7fc8e9de9bcd3456b407",
+    "docs/M1_CLEANUP_INTERFACES.md": "40e332e6255ec7432f39c46cec86faf1327f56dabe01cc02f0b1d9c9a03d8599"
+  },
+  "review_file_sha256": {
+    "artifacts/experiments/tooling_reassessment_20261016/review/decision-review.md": "8e9958079f45062f90327f3f8adf1d05a509c86c8286a23dc6c3526573a6a8dc",
+    "artifacts/experiments/tooling_reassessment_20261016/review/graph_tools.md": "4c8c05cc187626e7ddf4788ea7ec77fb6a282a2b2a8f32e5405aa18606e520b0",
+    "artifacts/experiments/tooling_reassessment_20261016/review/pytorch.md": "cb750f8bdf58120135347aab11b27296d88d1ef163f565b68d8b07c70ffb9f27",
+    "artifacts/experiments/tooling_reassessment_20261016/review/status.md": "f3f351ea9b5a0561277d8a16d96aff7aee78adf4353ef5acf40bc6bd5ef5ba50"
+  },
+  "lewm_revision": "f70fed80288462ca4d006cb3607ec6da6eaa851f",
+  "lewm_status": "",
+  "status": "PASS"
+}

@@ -1,0 +1,134 @@
+{
+  "created_utc": "2026-10-17T23:36:10.719942+00:00",
+  "observations": {
+    "close_forwarded_to_delegate": {
+      "caller_context_restored": true,
+      "delegate_callbacks": [
+        {
+          "active_type": "ParentError",
+          "is_caller_exception": false,
+          "is_parent_exception": true,
+          "is_received_exception": false,
+          "method": "__next__"
+        },
+        {
+          "active_type": "CallerError",
+          "is_caller_exception": true,
+          "is_parent_exception": false,
+          "is_received_exception": false,
+          "method": "close"
+        }
+      ],
+      "final_state": "GEN_CLOSED",
+      "initial_yield": "delegate-first-item"
+    },
+    "normal_next_and_send": {
+      "caller_context_restored": true,
+      "delegate_callbacks": [
+        {
+          "active_type": "ParentError",
+          "is_caller_exception": false,
+          "is_parent_exception": true,
+          "is_received_exception": false,
+          "method": "__next__"
+        },
+        {
+          "active_type": "ParentError",
+          "is_caller_exception": false,
+          "is_parent_exception": true,
+          "is_received_exception": false,
+          "method": "__next__"
+        },
+        {
+          "active_type": "ParentError",
+          "is_caller_exception": false,
+          "is_parent_exception": true,
+          "is_received_exception": false,
+          "method": "send"
+        },
+        {
+          "active_type": null,
+          "is_caller_exception": false,
+          "is_parent_exception": false,
+          "is_received_exception": false,
+          "method": "close"
+        }
+      ],
+      "initial_yield": "delegate-first-item",
+      "next_yield": "delegate-next-item",
+      "send_yield": [
+        "delegate-send-item",
+        "sent-value"
+      ]
+    },
+    "throw_delegate_raises_parent_continues": {
+      "caller_context_restored": true,
+      "delegate_callbacks": [
+        {
+          "active_type": "ParentError",
+          "is_caller_exception": false,
+          "is_parent_exception": true,
+          "is_received_exception": false,
+          "method": "__next__"
+        },
+        {
+          "active_type": "CallerError",
+          "is_caller_exception": true,
+          "is_parent_exception": false,
+          "is_received_exception": false,
+          "method": "throw"
+        }
+      ],
+      "initial_yield": "delegate-first-item",
+      "parent_callbacks": [
+        {
+          "active_type": "InjectedError",
+          "is_caught_exception": true,
+          "is_parent_exception": false,
+          "site": "caught_delegate_throw"
+        },
+        {
+          "active_type": "ParentError",
+          "is_parent_exception": true,
+          "site": "after_delegate_throw_handler"
+        }
+      ],
+      "throw_result": "parent-after-delegate-throw"
+    },
+    "throw_returns_delegate_yield": {
+      "caller_context_restored": true,
+      "delegate_callbacks": [
+        {
+          "active_type": "ParentError",
+          "is_caller_exception": false,
+          "is_parent_exception": true,
+          "is_received_exception": false,
+          "method": "__next__"
+        },
+        {
+          "active_type": "CallerError",
+          "is_caller_exception": true,
+          "is_parent_exception": false,
+          "is_received_exception": false,
+          "method": "throw"
+        },
+        {
+          "active_type": null,
+          "is_caller_exception": false,
+          "is_parent_exception": false,
+          "is_received_exception": false,
+          "method": "close"
+        }
+      ],
+      "initial_yield": "delegate-first-item",
+      "throw_result": "delegate-throw-item"
+    }
+  },
+  "runtime": {
+    "implementation": "CPython",
+    "version": "3.14.7 | packaged by conda-forge | (main, Sep  2 2026, 21:08:32) [GCC 15.3.0]"
+  },
+  "schema": "scar.language-delegate-context-probe.v1",
+  "scope": "stdlib CPU witness only; no SCAR/PyTorch/target workload; output stores types and identity booleans, no frames",
+  "script_sha256": "90af01e0faae655a8219926d0d48cd55292ea2e3145733fe26b6a64648b4eb29"
+}

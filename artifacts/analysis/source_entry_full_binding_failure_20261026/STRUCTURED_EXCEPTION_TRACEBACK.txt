@@ -1,0 +1,78 @@
+Traceback (most recent call last):
+  File "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/analysis/source_entry_full_binding_20261026/source_snapshot/scar/analysis/source_program_publication.py", line 618, in read_source_entry_publication
+    document, receipt, checked = _read_source_entry_publication(path,
+                                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^
+        expected_sha256=expected_sha256, catalog=session.catalog, max_programs=max_programs,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        max_operations_per_body=max_operations_per_body, max_record_bytes=max_record_bytes,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        target_composition=session.target if target_composition is not None else None,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        _compact_body_cache=_compact_body_cache)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/analysis/source_entry_full_binding_20261026/source_snapshot/scar/analysis/source_program_publication.py", line 638, in _read_source_entry_publication
+    return _read_source_entries2(document, receipt, expected_sha256=expected_sha256, catalog=catalog,
+        target=target_composition, max_programs=max_programs, max_operations=max_operations_per_body,
+        max_record_bytes=max_record_bytes, compact_body_cache=_compact_body_cache)
+  File "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/analysis/source_entry_full_binding_20261026/source_snapshot/scar/analysis/source_program_publication.py", line 916, in _read_source_entries2
+    entry, program, body, signature = _entry_program(catalog,
+                                      ~~~~~~~~~~~~~~^^^^^^^^^
+        {"entry_key": row["entry_key"], "source_program": row["source_program"]},
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        max_operations, max_record_bytes, publication_version=version)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/analysis/source_entry_full_binding_20261026/source_snapshot/scar/analysis/source_program_publication.py", line 454, in _entry_program
+    context, program = shared.read(catalog, entry, expected)
+                       ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/analysis/source_entry_full_binding_20261026/source_snapshot/scar/analysis/source_program_publication.py", line 396, in read
+    locator = self.writer.write(original, namespace_root=entry.reference.context.namespace_root)
+  File "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/analysis/source_entry_full_binding_20261026/source_snapshot/scar/store/source_fragments.py", line 239, in write
+    document = self._read(original)
+  File "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/analysis/source_entry_full_binding_20261026/source_snapshot/scar/store/source_fragments.py", line 145, in _read
+    self._check()
+    ~~~~~~~~~~~^^
+  File "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/analysis/source_entry_full_binding_20261026/source_snapshot/scar/store/source_fragments.py", line 141, in _check
+    _need(time.monotonic() - self.started <= self.budget.seconds,
+    ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+          'source fragment wall budget exceeded')
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/analysis/source_entry_full_binding_20261026/source_snapshot/scar/store/source_fragments.py", line 34, in _need
+    raise ValueError(message)
+ValueError: source fragment wall budget exceeded
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/analysis/source_entry_full_binding_20261026/run_full_binding.py", line 142, in <module>
+    composition = CompositionIndex.from_source_entry_publication(
+        str(PUBLICATION), expected_sha256=PUBLICATION_SHA, archives=archives,
+        attachment_budget=attachment_budget, **budget_values)
+  File "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/analysis/source_entry_full_binding_20261026/source_snapshot/scar/analysis/program_composition.py", line 864, in from_source_entry_publication
+    verified, actual, checked = read_source_entry_publication(path, expected_sha256=expected_sha256,
+                                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        catalog=catalog, max_programs=max_programs, max_operations_per_body=max_operations_per_body,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        max_record_bytes=max_record_bytes, target_composition=parent, _compact_body_cache=True)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/analysis/source_entry_full_binding_20261026/source_snapshot/scar/analysis/source_program_publication.py", line 616, in read_source_entry_publication
+    with catalog._ordinary_read_session(target, controls=controls,
+         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                                         share_source_context=_compact_body_cache) as session:
+                                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/analysis/source_entry_full_binding_20261026/source_snapshot/scar/analysis/source_entry_catalog.py", line 109, in __exit__
+    self.program_reader.close()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/analysis/source_entry_full_binding_20261026/source_snapshot/scar/analysis/source_program_publication.py", line 418, in close
+    self.writer.finish()
+    ~~~~~~~~~~~~~~~~~~^^
+  File "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/analysis/source_entry_full_binding_20261026/source_snapshot/scar/store/source_fragments.py", line 182, in finish
+    self._check()
+    ~~~~~~~~~~~^^
+  File "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/analysis/source_entry_full_binding_20261026/source_snapshot/scar/store/source_fragments.py", line 141, in _check
+    _need(time.monotonic() - self.started <= self.budget.seconds,
+    ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+          'source fragment wall budget exceeded')
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/analysis/source_entry_full_binding_20261026/source_snapshot/scar/store/source_fragments.py", line 34, in _need
+    raise ValueError(message)
+ValueError: source fragment wall budget exceeded

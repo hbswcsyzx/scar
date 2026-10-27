@@ -1,0 +1,12 @@
+{
+  "revision": "624560e102cc655ca2dca0362af5b646e5359d01",
+  "origin": "git archive scar tests; isolated original code, not the new dataclasses",
+  "archive_sha256": "d439c1a5319476e227a632cb2ea2145410214af0f0c415ab39b5342da3da9889",
+  "original_codec_sha256": "9b4013a5dbf2e34f19ffa32bdf882f784ca44ae6da3bd37699a7bf25b05767e7",
+  "fixture": "tests/fixtures/program_graph_v6_frozen.json",
+  "factory": "tests.fixtures.program_control_graphs.shared_pending_graph",
+  "wire_sha256": "03fe4ff31daf44a390be8f6ab30f4201a55706e581594be84fb27f116e9fcf20",
+  "wire_bytes": 28905,
+  "file_sha256": "bcbf22f242a186fa12a981361d1dd2ed32a754a3c4fd08b973cbd8eb474726a8",
+  "temporary_directory_removed": true
+}

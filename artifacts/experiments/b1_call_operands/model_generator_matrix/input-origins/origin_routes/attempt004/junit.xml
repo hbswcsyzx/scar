@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="5" skipped="0" tests="6" time="0.809" timestamp="2026-10-18T17:04:15.017171+00:00" hostname="gpu1"><testcase classname="tests.unit.test_program_input_origins" name="test_two_layer_call_invoke_routes_keep_none_and_non_none_callers_separate" time="0.012"><failure message="ValueError: unreachable_block at program_region:inputs.driver: every block must be reachable from entry">def test_two_layer_call_invoke_routes_keep_none_and_non_none_callers_separate():
+        graph, details = input_origin_program()
+&gt;       require_valid(graph)
+
+tests/unit/test_program_input_origins.py:21: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='inputs.root'), regions=(Region(id=RegionID(value='inputs.root'), label='inputs.root'...al_frame_releases=(), state_address_refinements=(), literal_evaluations=(), protocol_scopes=(), protocol_operations=())
+
+    def require_valid(graph: ProgramGraph) -&gt; None:
+        issues = validate(graph)
+        if issues:
+&gt;           raise ValueError("; ".join(f"{issue.code} at {issue.path}: {issue.message}" for issue in issues))
+E           ValueError: unreachable_block at program_region:inputs.driver: every block must be reachable from entry
+
+scar/ir/program/validation.py:731: ValueError</failure></testcase><testcase classname="tests.unit.test_program_input_origins" name="test_reference_none_literal_is_a_leaf_only_for_the_exact_owned_use" time="0.045"><failure message="ValueError: unreachable_block at program_region:inputs.driver: every block must be reachable from entry">def test_reference_none_literal_is_a_leaf_only_for_the_exact_owned_use():
+        graph, details = input_origin_program()
+        raw_row = graph.raw_driver_requests[0]
+        operand = raw_row.operands[0]
+        operation_id = next(operation.id for operation in graph.operations
+                            if any(use.id == operand for use in operation.uses))
+    
+&gt;       view = input_origins(graph, operation_id, operand)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_program_input_origins.py:82: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+scar/ir/program/input_origins.py:70: in input_origins
+    index = ProgramIndex(graph)
+            ^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;scar.ir.program.queries.ProgramIndex object at 0x736b667bb4d0&gt;
+graph = ProgramGraph(root=RegionID(value='inputs.root'), regions=(Region(id=RegionID(value='inputs.root'), label='inputs.root'...al_frame_releases=(), state_address_refinements=(), literal_evaluations=(), protocol_scopes=(), protocol_operations=())
+
+    def __init__(self, graph: ProgramGraph):
+        # Reuse the validator's canonical CFG/dominators and derived cleanup
+        # result rather than running a second dataflow algorithm for queries.
+        from .validation import validate
+        cleanup, resumption, lifecycle = [], [], []
+        issues = validate(graph, _cleanup_facts=cleanup, _resumption_facts=resumption,
+                          _lifecycle_facts=lifecycle)
+        if issues:
+&gt;           raise ValueError("; ".join(f"{i.code} at {i.path}: {i.message}" for i in issues))
+E           ValueError: unreachable_block at program_region:inputs.driver: every block must be reachable from entry
+
+scar/ir/program/queries.py:279: ValueError</failure></testcase><testcase classname="tests.unit.test_program_input_origins" name="test_loop_backedge_keeps_prior_raw_producer_and_dynamic_visit_gap" time="0.003"><failure message="ValueError: unreachable_block at program_region:inputs.driver: every block must be reachable from entry">def test_loop_backedge_keeps_prior_raw_producer_and_dynamic_visit_gap():
+        graph, details = input_origin_program(loop=True)
+&gt;       require_valid(graph)
+
+tests/unit/test_program_input_origins.py:94: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='inputs.root'), regions=(Region(id=RegionID(value='inputs.root'), label='inputs.root'...al_frame_releases=(), state_address_refinements=(), literal_evaluations=(), protocol_scopes=(), protocol_operations=())
+
+    def require_valid(graph: ProgramGraph) -&gt; None:
+        issues = validate(graph)
+        if issues:
+&gt;           raise ValueError("; ".join(f"{issue.code} at {issue.path}: {issue.message}" for issue in issues))
+E           ValueError: unreachable_block at program_region:inputs.driver: every block must be reachable from entry
+
+scar/ir/program/validation.py:731: ValueError</failure></testcase><testcase classname="tests.unit.test_program_input_origins" name="test_static_recursion_is_finite_and_keeps_an_explicit_cycle_gap" time="0.002"><failure message="ValueError: unreachable_block at program_region:inputs.driver: every block must be reachable from entry">def test_static_recursion_is_finite_and_keeps_an_explicit_cycle_gap():
+        graph, details = input_origin_program(recursive=True, second_caller=False)
+&gt;       require_valid(graph)
+
+tests/unit/test_program_input_origins.py:113: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='inputs.root'), regions=(Region(id=RegionID(value='inputs.root'), label='inputs.root'...al_frame_releases=(), state_address_refinements=(), literal_evaluations=(), protocol_scopes=(), protocol_operations=())
+
+    def require_valid(graph: ProgramGraph) -&gt; None:
+        issues = validate(graph)
+        if issues:
+&gt;           raise ValueError("; ".join(f"{issue.code} at {issue.path}: {issue.message}" for issue in issues))
+E           ValueError: unreachable_block at program_region:inputs.driver: every block must be reachable from entry
+
+scar/ir/program/validation.py:731: ValueError</failure></testcase><testcase classname="tests.unit.test_program_input_origins" name="test_direct_call_layer_and_budget_cursor_preserve_pending_work" time="0.022"><failure message="TypeError: can only concatenate str (not &quot;ValueID&quot;) to str">def test_direct_call_layer_and_budget_cursor_preserve_pending_work():
+        graph, details = input_origin_program(invoke_middle=False)
+        require_valid(graph)
+    
+&gt;       direct = input_origins(graph, details["driver_consumer"],
+                               details["driver_consumer_use"])
+
+tests/unit/test_program_input_origins.py:128: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+scar/ir/program/input_origins.py:187: in input_origins
+    if not spend("nodes", current_id):
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+kind = 'nodes', path = ValueID(value='inputs.driver.raw')
+
+    def spend(kind, path):
+&gt;       return accounting.spend(kind, 1, "input_origins." + path)
+                                         ^^^^^^^^^^^^^^^^^^^^^^^
+E       TypeError: can only concatenate str (not "ValueID") to str
+
+scar/ir/program/input_origins.py:111: TypeError</failure></testcase><testcase classname="tests.unit.test_program_input_origins" name="test_unknown_consumer_use_is_not_repaired_from_equal_values" time="0.001" /></testsuite></testsuites>

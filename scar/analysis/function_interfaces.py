@@ -1,5 +1,6 @@
 """Source adapters for function interfaces; no target imports or evaluation."""
 import ast
+from dataclasses import dataclass
 
 from scar.ir.program.functions import (
     ArgumentKind, BodyEntryInterface, BodyLoweringProfile, CallArgument, FormalParameter,
@@ -59,6 +60,36 @@ def extract_signature(context, definition, *, node=None, sources=None, slots=Non
                              tuple(sources[_span(n)] for n in getattr(node,"decorator_list",())))
 
 
+def extract_entry_signature(context, reference):
+    """Use an original qualified definition, without inventing inventory indices."""
+    from scar.ir.program.source_references import SourceDefinitionReference
+    if type(reference) is not SourceDefinitionReference:
+        raise TypeError("entry signature requires an exact source definition reference")
+    reference.__post_init__()
+    if (str(context.path) != reference.snapshot.path or str(context.root) != reference.context.namespace_root
+            or context.semantics.sources.get(reference.snapshot.path) != reference.snapshot):
+        raise ValueError("entry signature context differs from the original source")
+    definition = context.semantic.definitions.get(reference.definition)
+    atom = context.semantic.source_atoms.get(reference.source.atom_id)
+    if (definition is None or atom is None or atom.reference != reference.source
+            or reference.source.atom_id not in definition.source_atoms):
+        raise ValueError("entry signature definition/source is absent from the original graph")
+    sources = _sources(context)
+    matches = [node for node in ast.walk(context.tree)
+               if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.Lambda))
+               and sources.get(_span(node)) == reference.source]
+    if len(matches) != 1:
+        raise ValueError("entry signature needs one original function AST")
+    # extract_signature only reads id/source.  The local adapter is not an
+    # inventory record, declaration, function object or persisted authority.
+    @dataclass(frozen=True)
+    class _SignatureSource:
+        id: object
+        source: object
+    return extract_signature(context, _SignatureSource(reference.definition, reference.source),
+                             node=matches[0], sources=sources)
+
+
 def validate_body_interface(body, interface, signature):
     if body.graph is None or interface.definition != signature.definition or interface.region != body.graph.root:
         raise ValueError("body interface differs from its source/root")
@@ -68,24 +99,37 @@ def validate_body_interface(body, interface, signature):
     values = {v.id:v for v in graph.values}
     if tuple(p.slot for p in interface.parameters) != tuple(p.slot for p in signature.parameters):
         raise ValueError("body interface does not cover the signature")
-    if entry.arguments != (*tuple(p.value for p in interface.parameters),interface.world):
+    offset = 0
+    if interface.profile is BodyLoweringProfile.STRUCTURED_ENV:
+        environments = {environment.id: environment for environment in graph.environments}
+        layouts = [layout for layout in graph.function_entries
+                   if environments[layout.environment].region == interface.region]
+        if len(layouts) != 1 or layouts[0].parameters != interface.parameters:
+            raise ValueError("environment body needs its exact function entry layout")
+        environment = environments[layouts[0].environment]
+        prefix = tuple(member.reference for member in environment.members)
+        offset = len(prefix)
+    else:
+        prefix = ()
+    if entry.arguments != (*prefix,*tuple(p.value for p in interface.parameters),interface.world):
         raise ValueError("formal/world ports differ from the body entry")
     for index,(parameter,port) in enumerate(zip(signature.parameters,interface.parameters)):
         value = values[port.value]
-        if not isinstance(value,ReferenceValue) or value.origin != BlockArgument(entry.id,index):
+        if not isinstance(value,ReferenceValue) or value.origin != BlockArgument(entry.id,index + offset):
             raise ValueError("formal port is not an entry reference")
         if not any(link.value == port.value and link.slot == parameter.slot and link.source == parameter.source
                    and link.role is SourceRole.PARAMETER for link in body.metadata.value_links):
             raise ValueError("formal port lacks exact parameter source correspondence")
     world = values[interface.world]
-    if not isinstance(world,StateVersionValue) or world.origin != BlockArgument(entry.id,len(interface.parameters)):
+    if not isinstance(world,StateVersionValue) or world.origin != BlockArgument(entry.id,len(interface.parameters) + offset):
         raise ValueError("body world port is not its own entry state")
 
 
 class FunctionInterfaceBuilder:
     def __init__(self, *, profile=BodyLoweringProfile.BOUND_FORMALS):
         if type(profile) is not BodyLoweringProfile or profile not in (
-                BodyLoweringProfile.BOUND_FORMALS, BodyLoweringProfile.BOUND_FRAME):
+                BodyLoweringProfile.BOUND_FORMALS, BodyLoweringProfile.BOUND_FRAME,
+                BodyLoweringProfile.STRUCTURED_BODY, BodyLoweringProfile.STRUCTURED_ENV):
             raise ValueError("function interfaces require an explicit bound profile")
         self.profile = profile
         self.signatures, self.arguments, self.body_interfaces = {}, {}, {}

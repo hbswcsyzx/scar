@@ -1,0 +1,29 @@
+{
+  "reviewer": "/root/await_wrapper_chain",
+  "scope": "Read-only architecture and final frozen source review; actual execution results are recorded separately by root.",
+  "source_frozen": true,
+  "source_sha256": "51da7700c5d9f29c1619ce8085c1c20102f98789eb768605c8d00802e9dbbbd5",
+  "reviewed_files": {
+    "scar/ir/execution/value_sources.py": "f280de465fff16fd3fde46a8b921bbbed205380cfc3506bfb13ec603b6a65f99",
+    "scar/ir/execution/stored_value_projection.py": "797fb705def357e87517abb8deae3f4759215422e61a9cc73d08b44123109c79",
+    "scar/ir/execution/query.py": "91bc5106cf392225dd6b58dfb6935bef9b60ccb759465de324fb02adcfd1efc6",
+    "scar/ir/execution/stored_values.py": "96ebd29d3e6961b27977d34c85a9fb847bc8bbd62087c2bc7416b4d9acef9e65",
+    "scar/ir/execution/body_state_history.py": "7b8224ee9c940a4a427bb8e75bc85085b0f0030e60f8de649e9e56b697c6fd63",
+    "tests/fixtures/execution_value_sources.py": "22cc3478daf2a89ed852a2bcf11d54f56dd63137065d311745e1aec05f38e5ba",
+    "tests/unit/test_execution_value_sources.py": "ef9ef912f2429846ac42b5e498b3347eac5a4ac254454b6d77b836acf8cbe550"
+  },
+  "resolved_findings": [
+    "Selected support reconstruction now charges before inspecting each link.",
+    "Original-copy and stored-source predecessors coexist; only selected supported paths get compatibility checks.",
+    "Projection cache is query-local, cycle-dependent failures are not fixed, and context conflicts or truncation cannot revive a True recipe.",
+    "Final shared consumer fixture uses four private completion landings and full arm state SSA; original validation remains unchanged."
+  ],
+  "unresolved_blocking_findings": [],
+  "limitations": [
+    "The body consumer test verifies the private thin branch only, not a public F19 terminal/history chain.",
+    "Supplied slot contracts and execution associations are not automatic source or native recovery.",
+    "No transformation authority, whole-stage acceptance or LeWM speedup follows from this review."
+  ],
+  "source_runtime_verified": false,
+  "transformation_authorized": false
+}

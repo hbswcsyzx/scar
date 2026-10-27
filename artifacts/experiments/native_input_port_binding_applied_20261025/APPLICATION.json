@@ -1,0 +1,88 @@
+{
+  "actual_gate": {
+    "associated_paths": 516,
+    "budget": {
+      "all_reserved_phases_verified_complete": true,
+      "kernel_IO_measurement": false,
+      "reservation_stored_plus_decoded": 67280634
+    },
+    "canonical_unavailable_paths": 2579,
+    "dispatches": 261,
+    "elapsed_seconds": 19.634581955964677,
+    "exit": 0,
+    "metadata_paths": 3095,
+    "metadata_rows": 2332,
+    "normal_modeled": 260,
+    "same_run_wrong_producer_negative": {
+      "candidate_sha256": "6665034a044a72ebebae97516504ab3cc02d308db9efba610ea09f0595f6624c",
+      "canonical_lease_changed": false,
+      "case": "same_Run_wrong_native_producer_and_ordinal",
+      "changed_producer": "native:33f1c66211e1f97d10729a20ccc5f124d367a2ada14036234a9923e35e03d911:eto:6",
+      "failure_was_old_owner_hash_scope": false,
+      "original_producer": "native:33f1c66211e1f97d10729a20ccc5f124d367a2ada14036234a9923e35e03d911:eto:17",
+      "reason": "native input retention: native input association producer/path/source mismatch",
+      "rejected": true
+    },
+    "verified_shards": 2
+  },
+  "files": [
+    {
+      "after_bytes": 84113,
+      "after_sha256": "d765fb25def905892e5d7e7d23f9fa9c1a7f666b2094782c623a3ffb13b778f3",
+      "before_sha256": "d0eac8d1adf64bae16703ac3289e159d23b2d8582a1110506def9f7b2e8de1ae",
+      "path": "scar/trace/native_capture_batch.py"
+    },
+    {
+      "after_bytes": 41269,
+      "after_sha256": "e54cf55ec69f6feab2570949075e245b27bb9a66499452ac05b7ae6b61c96828",
+      "before_sha256": "f8cf28fa8b375ccab3932db3f371a67d6a518e467eff133d4e4b0c02047d3ff8",
+      "path": "scar/trace/native_tensor_inputs.py"
+    },
+    {
+      "after_bytes": 57495,
+      "after_sha256": "8a328d05036804f34c8d5b77ce99a240a27ea4de834c3a47e381dd44618d544e",
+      "before_sha256": "2e0a6092b6f08a6c257d7686cf89c763e52ee8536d4fdef9d0b2479736f7bb1d",
+      "path": "scar/trace/native_protocol.py"
+    },
+    {
+      "after_bytes": 64011,
+      "after_sha256": "1c1765e25f2aa8829f1b3cd6fa7826ff2c2c01bf0deacf7d2b24d96241e8c10d",
+      "before_sha256": "608ba93502637c600fe46f8e9cfe1fca1005610d9b282da0633f69de93286338",
+      "path": "scar/ir/execution/native_port_protocol.py"
+    }
+  ],
+  "main_head_before": "21ea963dd163c08953d976763556caa6b1fb41c3",
+  "main_static_import_and_V1_check": {
+    "Torch_imported": false,
+    "all_other_existing_definitions_in_two_protocol_modules_unchanged": true,
+    "changed_top_level_definitions": {
+      "scar/ir/execution/native_port_protocol.py": [
+        "_geometry_v2",
+        "_native_region_layout_view"
+      ],
+      "scar/trace/native_protocol.py": [
+        "_prepare_projection_v2"
+      ]
+    },
+    "four_frozen_source_hashes": true,
+    "status": "PASSED",
+    "target_or_gate_replay": false
+  },
+  "native_B_C_content_state_ready_new_qualification": false,
+  "new_code_runs_main": 0,
+  "old_LeWM_source858_runtime843_unchanged": true,
+  "original_failures_preserved": {
+    "attempt01": "wrong selector domain for OS artifact",
+    "attempt02": "unrelated missing original ETO parent rejected whole batch",
+    "attempt03": "canonical layout compared with provider label"
+  },
+  "producer_freeze_sha256": "03c4e0290b92ad749da27f26bc378715f7b897ad1547dd167f224d23330066c4",
+  "schema": "scar.native-input-binding-source-application",
+  "schema_version": 1,
+  "source_baseline": "7946a40fd3e5f9b01f68f4fdf3423f3ff2cb7cd3",
+  "source_delivery_commit": "cb77abc81d0d2249f583f103a9731934bb9a34d5",
+  "source_delivery_commit_role": "later source and evidence archive; not the runtime producer HEAD",
+  "source_tree": "/home/zyf/AAA/scar-worktrees/native-scalar-model",
+  "status": "FOUR_EXACT_FROZEN_FILES_APPLIED",
+  "whole_model": "OPEN"
+}

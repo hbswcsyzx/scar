@@ -1,0 +1,10 @@
+{
+  "handle": 73229,
+  "actual_exit_code": 1,
+  "elapsed_seconds": 443.0310764340102,
+  "phase": "normal-publication35",
+  "published_bodies": 0,
+  "closed_partial_cp2_records": 0,
+  "failure_preserved": true,
+  "cause": "cache deliberately has no mutable semantic/control tables; independent validator arguments referenced missing fields"
+}

@@ -1,0 +1,10 @@
+{
+  "status": "PASS_WITH_SCOPE_TEST_CAPABILITY_MIGRATION",
+  "source_sha256": "b16a1bac16f134c69133f2b0f88a1c291fa0029f9714e95693ae0bdec233f3d4",
+  "registered_source_files": 668,
+  "product_changes_from_initial_implementation": [],
+  "reviewer": "reuse_capture; root records its read-only message",
+  "tests_started_by_reviewer": 0,
+  "finding": "Legacy case identities and v1-v7 fixtures preserved. Production automatic v5 and old execution golden automatic v7 remain byte-exact; explicit v8 roundtrips and v9/bool/string remain rejected. No other stale execution maximum/future-version assertions found.",
+  "component_duration_seconds": 23.852
+}

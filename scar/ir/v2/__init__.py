@@ -64,6 +64,7 @@ from .values import (
     LogicalValue,
     Materialization,
     ObjectBinding,
+    ObjectInstance,
     ProvenanceRecord,
     ProvenanceRelation,
     StorageAllocation,
@@ -93,6 +94,7 @@ from .evidence import (
     EvidenceRelation,
     EvidenceStatus,
     OperationInstance,
+    ProviderReference,
     ValueObservation,
 )
 from .correspondence import (
@@ -142,7 +144,7 @@ __all__ = [
     "LogicalValueID", "ResourceID", "SourceAtomID", "StaticValueID",
     "StaticBindingID", "BindingUseID", "StorageAllocationID",
     "StorageRegionID", "ValueSlotID", "ValueVersionID", "BindingRelation",
-    "EquivalenceClaim", "LogicalValue", "Materialization", "ObjectBinding",
+    "EquivalenceClaim", "LogicalValue", "Materialization", "ObjectBinding", "ObjectInstance",
     "ProvenanceRecord", "ProvenanceRelation", "StorageAllocation",
     "StorageRegion", "ValueGraph", "ValueVersion", "Completeness",
     "EvidenceClaim", "EvidenceKind", "ProofClaim", "ProofStatus",
@@ -154,7 +156,7 @@ __all__ = [
     "SemanticEndpoint", "SemanticGraph", "SemanticNodeKind", "SemanticRelation",
     "SourceAtom", "ValueSlot", "EvidenceEdge", "EvidenceEndpoint",
     "EvidenceGraph", "EvidenceNodeKind", "EvidenceRelation", "EvidenceStatus",
-    "OperationInstance", "ValueObservation", "CostRequest", "GuardSpec",
+    "OperationInstance", "ProviderReference", "ValueObservation", "CostRequest", "GuardSpec",
     "CorrespondenceGraph", "CorrespondenceKind", "CorrespondenceRecord",
     "InstructionKind", "InvalidationSpec", "LiteralValue", "MeasurementMode",
     "OptimizationContext", "OptimizationGraph", "OptimizationRegion",

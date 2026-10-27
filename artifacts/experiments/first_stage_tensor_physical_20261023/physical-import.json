@@ -1,0 +1,702 @@
+{
+  "schema": "scar.tensor-physical-import",
+  "schema_version": 1,
+  "profile": "scar.tensor-physical-event-tree-v1",
+  "artifacts": {
+    "observations": {
+      "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_tensor_physical_20261023/trace/tensor-physical.364729.154e43dcfa21f8b8b8266d9418809788.jsonl",
+      "sha256": "a8e7d50cbf3e8e6fc7ca24ba6f7b75cc441f36b378a1ed89ace0d8a731a1acb4",
+      "size_bytes": 65433,
+      "schema": "scar.tensor-physical-observation.v1"
+    },
+    "metadata": {
+      "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_tensor_physical_20261023/trace/tensor-physical-meta.364729.154e43dcfa21f8b8b8266d9418809788.json",
+      "sha256": "35eb646765e96c1f6bbb2deb78a948fce3f9a07b89f5cf216fdbe7629c16bd08",
+      "size_bytes": 4194,
+      "schema": "scar.tensor-physical-trace"
+    }
+  },
+  "capture_membership_verified": false,
+  "rows": 69,
+  "source_status": "OBSERVED",
+  "source_gaps": {},
+  "source_frontier": null,
+  "associations": [
+    {
+      "marker_instance": "opinst:native:16f94f0a3682c231eea50c6298517434d6dff37276e3a03112db429677ea440d:eto:13",
+      "argument_ordinal": 0,
+      "physical_reference": "sha256:a8e7d50cbf3e8e6fc7ca24ba6f7b75cc441f36b378a1ed89ace0d8a731a1acb4#line/3/arguments/0",
+      "provider_reference": "native:16f94f0a3682c231eea50c6298517434d6dff37276e3a03112db429677ea440d:tensor-token:8",
+      "storage_region": "region:tensor-physical:1f8eb446c454d8d2d5dc9689ff3dcaf1da86b084bbc864f77684fd1228fe8da4:region:3:0",
+      "allocation": "alloc:tensor-physical:1f8eb446c454d8d2d5dc9689ff3dcaf1da86b084bbc864f77684fd1228fe8da4:epoch:dc84edf549c8f021c2f0cbb57d0ef0f4352e33b2a78059f308eb02a4a27edfe1",
+      "object": "object:dispatch-reference:69c7601aeb7517bc68343b4d6817912469c82c2975c8d782669303a94ef60bf1:weak:364729:38"
+    },
+    {
+      "marker_instance": "opinst:native:16f94f0a3682c231eea50c6298517434d6dff37276e3a03112db429677ea440d:eto:16",
+      "argument_ordinal": 0,
+      "physical_reference": "sha256:a8e7d50cbf3e8e6fc7ca24ba6f7b75cc441f36b378a1ed89ace0d8a731a1acb4#line/4/arguments/0",
+      "provider_reference": "native:16f94f0a3682c231eea50c6298517434d6dff37276e3a03112db429677ea440d:tensor-token:8",
+      "storage_region": "region:tensor-physical:1f8eb446c454d8d2d5dc9689ff3dcaf1da86b084bbc864f77684fd1228fe8da4:region:4:0",
+      "allocation": "alloc:tensor-physical:1f8eb446c454d8d2d5dc9689ff3dcaf1da86b084bbc864f77684fd1228fe8da4:epoch:dc84edf549c8f021c2f0cbb57d0ef0f4352e33b2a78059f308eb02a4a27edfe1",
+      "object": "object:dispatch-reference:69c7601aeb7517bc68343b4d6817912469c82c2975c8d782669303a94ef60bf1:weak:364729:38"
+    },
+    {
+      "marker_instance": "opinst:native:16f94f0a3682c231eea50c6298517434d6dff37276e3a03112db429677ea440d:eto:16",
+      "argument_ordinal": 1,
+      "physical_reference": "sha256:a8e7d50cbf3e8e6fc7ca24ba6f7b75cc441f36b378a1ed89ace0d8a731a1acb4#line/4/arguments/1",
+      "provider_reference": "native:16f94f0a3682c231eea50c6298517434d6dff37276e3a03112db429677ea440d:tensor-token:8",
+      "storage_region": "region:tensor-physical:1f8eb446c454d8d2d5dc9689ff3dcaf1da86b084bbc864f77684fd1228fe8da4:region:4:1",
+      "allocation": "alloc:tensor-physical:1f8eb446c454d8d2d5dc9689ff3dcaf1da86b084bbc864f77684fd1228fe8da4:epoch:dc84edf549c8f021c2f0cbb57d0ef0f4352e33b2a78059f308eb02a4a27edfe1",
+      "object": "object:dispatch-reference:69c7601aeb7517bc68343b4d6817912469c82c2975c8d782669303a94ef60bf1:weak:364729:38"
+    },
+    {
+      "marker_instance": "opinst:native:16f94f0a3682c231eea50c6298517434d6dff37276e3a03112db429677ea440d:eto:20",
+      "argument_ordinal": 0,
+      "physical_reference": "sha256:a8e7d50cbf3e8e6fc7ca24ba6f7b75cc441f36b378a1ed89ace0d8a731a1acb4#line/6/arguments/0",
+      "provider_reference": "native:16f94f0a3682c231eea50c6298517434d6dff37276e3a03112db429677ea440d:tensor-token:18",
+      "storage_region": "region:tensor-physical:1f8eb446c454d8d2d5dc9689ff3dcaf1da86b084bbc864f77684fd1228fe8da4:region:6:0",
+      "allocation": "alloc:tensor-physical:1f8eb446c454d8d2d5dc9689ff3dcaf1da86b084bbc864f77684fd1228fe8da4:epoch:0d2e6ab208290d258461f085d11a31b791b97b8a3f2c07c6183a679858493594",
+      "object": "object:dispatch-reference:69c7601aeb7517bc68343b4d6817912469c82c2975c8d782669303a94ef60bf1:weak:364729:41"
+    },
+    {
+      "marker_instance": "opinst:native:16f94f0a3682c231eea50c6298517434d6dff37276e3a03112db429677ea440d:eto:23",
+      "argument_ordinal": 0,
+      "physical_reference": "sha256:a8e7d50cbf3e8e6fc7ca24ba6f7b75cc441f36b378a1ed89ace0d8a731a1acb4#line/7/arguments/0",
+      "provider_reference": "native:16f94f0a3682c231eea50c6298517434d6dff37276e3a03112db429677ea440d:tensor-token:8",
+      "storage_region": "region:tensor-physical:1f8eb446c454d8d2d5dc9689ff3dcaf1da86b084bbc864f77684fd1228fe8da4:region:7:0",
+      "allocation": "alloc:tensor-physical:1f8eb446c454d8d2d5dc9689ff3dcaf1da86b084bbc864f77684fd1228fe8da4:epoch:dc84edf549c8f021c2f0cbb57d0ef0f4352e33b2a78059f308eb02a4a27edfe1",
+      "object": "object:dispatch-reference:69c7601aeb7517bc68343b4d6817912469c82c2975c8d782669303a94ef60bf1:weak:364729:38"
+    },
+    {
+      "marker_instance": "opinst:native:16f94f0a3682c231eea50c6298517434d6dff37276e3a03112db429677ea440d:eto:26",
+      "argument_ordinal": 0,
+      "physical_reference": "sha256:a8e7d50cbf3e8e6fc7ca24ba6f7b75cc441f36b378a1ed89ace0d8a731a1acb4#line/8/arguments/0",
+      "provider_reference": "native:16f94f0a3682c231eea50c6298517434d6dff37276e3a03112db429677ea440d:tensor-token:25",
+      "storage_region": "region:tensor-physical:1f8eb446c454d8d2d5dc9689ff3dcaf1da86b084bbc864f77684fd1228fe8da4:region:8:0",
+      "allocation": "alloc:tensor-physical:1f8eb446c454d8d2d5dc9689ff3dcaf1da86b084bbc864f77684fd1228fe8da4:epoch:dc84edf549c8f021c2f0cbb57d0ef0f4352e33b2a78059f308eb02a4a27edfe1",
+      "object": "object:dispatch-reference:69c7601aeb7517bc68343b4d6817912469c82c2975c8d782669303a94ef60bf1:weak:364729:45"
+    },
+    {
+      "marker_instance": "opinst:native:16f94f0a3682c231eea50c6298517434d6dff37276e3a03112db429677ea440d:eto:36",
+      "argument_ordinal": 0,
+      "physical_reference": "sha256:a8e7d50cbf3e8e6fc7ca24ba6f7b75cc441f36b378a1ed89ace0d8a731a1acb4#line/11/arguments/0",
+      "provider_reference": "native:16f94f0a3682c231eea50c6298517434d6dff37276e3a03112db429677ea440d:tensor-token:32",
+      "storage_region": "region:tensor-physical:1f8eb446c454d8d2d5dc9689ff3dcaf1da86b084bbc864f77684fd1228fe8da4:region:11:0",
+      "allocation": "alloc:tensor-physical:1f8eb446c454d8d2d5dc9689ff3dcaf1da86b084bbc864f77684fd1228fe8da4:epoch:8900ce3f4ab80591c26008e316bb862592c7b5190aa5b9007a347b2adf30e351",
+      "object": "object:dispatch-reference:69c7601aeb7517bc68343b4d6817912469c82c2975c8d782669303a94ef60bf1:weak:364729:48"
+    },
+    {
+      "marker_instance": "opinst:native:16f94f0a3682c231eea50c6298517434d6dff37276e3a03112db429677ea440d:eto:39",
+      "argument_ordinal": 0,
+      "physical_reference": "sha256:a8e7d50cbf3e8e6fc7ca24ba6f7b75cc441f36b378a1ed89ace0d8a731a1acb4#line/12/arguments/0",
+      "provider_reference": "native:16f94f0a3682c231eea50c6298517434d6dff37276e3a03112db429677ea440d:tensor-token:32",
+      "storage_region": "region:tensor-physical:1f8eb446c454d8d2d5dc9689ff3dcaf1da86b084bbc864f77684fd1228fe8da4:region:12:0",
+      "allocation": "alloc:tensor-physical:1f8eb446c454d8d2d5dc9689ff3dcaf1da86b084bbc864f77684fd1228fe8da4:epoch:8900ce3f4ab80591c26008e316bb862592c7b5190aa5b9007a347b2adf30e351",
+      "object": "object:dispatch-reference:69c7601aeb7517bc68343b4d6817912469c82c2975c8d782669303a94ef60bf1:weak:364729:48"
+    },
+    {
+      "marker_instance": "opinst:native:16f94f0a3682c231eea50c6298517434d6dff37276e3a03112db429677ea440d:eto:39",
+      "argument_ordinal": 1,
+      "physical_reference": "sha256:a8e7d50cbf3e8e6fc7ca24ba6f7b75cc441f36b378a1ed89ace0d8a731a1acb4#line/12/arguments/1",
+      "provider_reference": "native:16f94f0a3682c231eea50c6298517434d6dff37276e3a03112db429677ea440d:tensor-token:32",
+      "storage_region": "region:tensor-physical:1f8eb446c454d8d2d5dc9689ff3dcaf1da86b084bbc864f77684fd1228fe8da4:region:12:1",
+      "allocation": "alloc:tensor-physical:1f8eb446c454d8d2d5dc9689ff3dcaf1da86b084bbc864f77684fd1228fe8da4:epoch:8900ce3f4ab80591c26008e316bb862592c7b5190aa5b9007a347b2adf30e351",
+      "object": "object:dispatch-reference:69c7601aeb7517bc68343b4d6817912469c82c2975c8d782669303a94ef60bf1:weak:364729:48"
+    },
+    {
+      "marker_instance": "opinst:native:16f94f0a3682c231eea50c6298517434d6dff37276e3a03112db429677ea440d:eto:43",
+      "argument_ordinal": 0,
+      "physical_reference": "sha256:a8e7d50cbf3e8e6fc7ca24ba6f7b75cc441f36b378a1ed89ace0d8a731a1acb4#line/14/arguments/0",
+      "provider_reference": "native:16f94f0a3682c231eea50c6298517434d6dff37276e3a03112db429677ea440d:tensor-token:41",
+      "storage_region": "region:tensor-physical:1f8eb446c454d8d2d5dc9689ff3dcaf1da86b084bbc864f77684fd1228fe8da4:region:14:0",
+      "allocation": "alloc:tensor-physical:1f8eb446c454d8d2d5dc9689ff3dcaf1da86b084bbc864f77684fd1228fe8da4:epoch:310f3296ca3f1f9f2e10c9d93b6fad01278070ff220e204343c61742f71b989e",
+      "object": "object:dispatch-reference:69c7601aeb7517bc68343b4d6817912469c82c2975c8d782669303a94ef60bf1:weak:364729:51"
+    },
+    {
+      "marker_instance": "opinst:native:16f94f0a3682c231eea50c6298517434d6dff37276e3a03112db429677ea440d:eto:46",
+      "argument_ordinal": 0,
+      "physical_reference": "sha256:a8e7d50cbf3e8e6fc7ca24ba6f7b75cc441f36b378a1ed89ace0d8a731a1acb4#line/15/arguments/0",
+      "provider_reference": "native:16f94f0a3682c231eea50c6298517434d6dff37276e3a03112db429677ea440d:tensor-token:41",
+      "storage_region": "region:tensor-physical:1f8eb446c454d8d2d5dc9689ff3dcaf1da86b084bbc864f77684fd1228fe8da4:region:15:0",
+      "allocation": "alloc:tensor-physical:1f8eb446c454d8d2d5dc9689ff3dcaf1da86b084bbc864f77684fd1228fe8da4:epoch:310f3296ca3f1f9f2e10c9d93b6fad01278070ff220e204343c61742f71b989e",
+      "object": "object:dispatch-reference:69c7601aeb7517bc68343b4d6817912469c82c2975c8d782669303a94ef60bf1:weak:364729:51"
+    },
+    {
+      "marker_instance": "opinst:native:16f94f0a3682c231eea50c6298517434d6dff37276e3a03112db429677ea440d:eto:54",
+      "argument_ordinal": 0,
+      "physical_reference": "sha256:a8e7d50cbf3e8e6fc7ca24ba6f7b75cc441f36b378a1ed89ace0d8a731a1acb4#line/17/arguments/0",
+      "provider_reference": "native:16f94f0a3682c231eea50c6298517434d6dff37276e3a03112db429677ea440d:tensor-token:50",
+      "storage_region": "region:tensor-physical:1f8eb446c454d8d2d5dc9689ff3dcaf1da86b084bbc864f77684fd1228fe8da4:region:17:0",
+      "allocation": "alloc:tensor-physical:1f8eb446c454d8d2d5dc9689ff3dcaf1da86b084bbc864f77684fd1228fe8da4:epoch:9314c429f5cac9cefc2ed344b30d8222c974595d7436353fde226c381a9e94a0",
+      "object": "object:dispatch-reference:69c7601aeb7517bc68343b4d6817912469c82c2975c8d782669303a94ef60bf1:weak:364729:55"
+    },
+    {
+      "marker_instance": "opinst:native:16f94f0a3682c231eea50c6298517434d6dff37276e3a03112db429677ea440d:eto:57",
+      "argument_ordinal": 0,
+      "physical_reference": "sha256:a8e7d50cbf3e8e6fc7ca24ba6f7b75cc441f36b378a1ed89ace0d8a731a1acb4#line/19/arguments/0",
+      "provider_reference": "native:16f94f0a3682c231eea50c6298517434d6dff37276e3a03112db429677ea440d:tensor-token:50",
+      "storage_region": "region:tensor-physical:1f8eb446c454d8d2d5dc9689ff3dcaf1da86b084bbc864f77684fd1228fe8da4:region:19:0",
+      "allocation": "alloc:tensor-physical:1f8eb446c454d8d2d5dc9689ff3dcaf1da86b084bbc864f77684fd1228fe8da4:epoch:9314c429f5cac9cefc2ed344b30d8222c974595d7436353fde226c381a9e94a0",
+      "object": "object:dispatch-reference:69c7601aeb7517bc68343b4d6817912469c82c2975c8d782669303a94ef60bf1:weak:364729:55"
+    },
+    {
+      "marker_instance": "opinst:native:16f94f0a3682c231eea50c6298517434d6dff37276e3a03112db429677ea440d:eto:64",
+      "argument_ordinal": 0,
+      "physical_reference": "sha256:a8e7d50cbf3e8e6fc7ca24ba6f7b75cc441f36b378a1ed89ace0d8a731a1acb4#line/21/arguments/0",
+      "provider_reference": "native:16f94f0a3682c231eea50c6298517434d6dff37276e3a03112db429677ea440d:tensor-token:61",
+      "storage_region": "region:tensor-physical:1f8eb446c454d8d2d5dc9689ff3dcaf1da86b084bbc864f77684fd1228fe8da4:region:21:0",
+      "allocation": "alloc:tensor-physical:1f8eb446c454d8d2d5dc9689ff3dcaf1da86b084bbc864f77684fd1228fe8da4:epoch:a5ea5855491396712e789954e3034b3a6078d9665ba83507804b86c479cd8262",
+      "object": "object:dispatch-reference:69c7601aeb7517bc68343b4d6817912469c82c2975c8d782669303a94ef60bf1:weak:364729:59"
+    },
+    {
+      "marker_instance": "opinst:native:16f94f0a3682c231eea50c6298517434d6dff37276e3a03112db429677ea440d:eto:69",
+      "argument_ordinal": 0,
+      "physical_reference": "sha256:a8e7d50cbf3e8e6fc7ca24ba6f7b75cc441f36b378a1ed89ace0d8a731a1acb4#line/22/arguments/0",
+      "provider_reference": "native:16f94f0a3682c231eea50c6298517434d6dff37276e3a03112db429677ea440d:tensor-token:61",
+      "storage_region": "region:tensor-physical:1f8eb446c454d8d2d5dc9689ff3dcaf1da86b084bbc864f77684fd1228fe8da4:region:22:0",
+      "allocation": "alloc:tensor-physical:1f8eb446c454d8d2d5dc9689ff3dcaf1da86b084bbc864f77684fd1228fe8da4:epoch:a5ea5855491396712e789954e3034b3a6078d9665ba83507804b86c479cd8262",
+      "object": "object:dispatch-reference:69c7601aeb7517bc68343b4d6817912469c82c2975c8d782669303a94ef60bf1:weak:364729:59"
+    },
+    {
+      "marker_instance": "opinst:native:16f94f0a3682c231eea50c6298517434d6dff37276e3a03112db429677ea440d:eto:73",
+      "argument_ordinal": 0,
+      "physical_reference": "sha256:a8e7d50cbf3e8e6fc7ca24ba6f7b75cc441f36b378a1ed89ace0d8a731a1acb4#line/23/arguments/0",
+      "provider_reference": "native:16f94f0a3682c231eea50c6298517434d6dff37276e3a03112db429677ea440d:tensor-token:72",
+      "storage_region": "region:tensor-physical:1f8eb446c454d8d2d5dc9689ff3dcaf1da86b084bbc864f77684fd1228fe8da4:region:23:0",
+      "allocation": "alloc:tensor-physical:1f8eb446c454d8d2d5dc9689ff3dcaf1da86b084bbc864f77684fd1228fe8da4:epoch:a5ea5855491396712e789954e3034b3a6078d9665ba83507804b86c479cd8262",
+      "object": "object:dispatch-reference:69c7601aeb7517bc68343b4d6817912469c82c2975c8d782669303a94ef60bf1:weak:364729:60"
+    },
+    {
+      "marker_instance": "opinst:native:16f94f0a3682c231eea50c6298517434d6dff37276e3a03112db429677ea440d:eto:78",
+      "argument_ordinal": 0,
+      "physical_reference": "sha256:a8e7d50cbf3e8e6fc7ca24ba6f7b75cc441f36b378a1ed89ace0d8a731a1acb4#line/24/arguments/0",
+      "provider_reference": "native:16f94f0a3682c231eea50c6298517434d6dff37276e3a03112db429677ea440d:tensor-token:72",
+      "storage_region": "region:tensor-physical:1f8eb446c454d8d2d5dc9689ff3dcaf1da86b084bbc864f77684fd1228fe8da4:region:24:0",
+      "allocation": "alloc:tensor-physical:1f8eb446c454d8d2d5dc9689ff3dcaf1da86b084bbc864f77684fd1228fe8da4:epoch:a5ea5855491396712e789954e3034b3a6078d9665ba83507804b86c479cd8262",
+      "object": "object:dispatch-reference:69c7601aeb7517bc68343b4d6817912469c82c2975c8d782669303a94ef60bf1:weak:364729:60"
+    },
+    {
+      "marker_instance": "opinst:native:16f94f0a3682c231eea50c6298517434d6dff37276e3a03112db429677ea440d:eto:78",
+      "argument_ordinal": 1,
+      "physical_reference": "sha256:a8e7d50cbf3e8e6fc7ca24ba6f7b75cc441f36b378a1ed89ace0d8a731a1acb4#line/24/arguments/1",
+      "provider_reference": "native:16f94f0a3682c231eea50c6298517434d6dff37276e3a03112db429677ea440d:tensor-token:32",
+      "storage_region": "region:tensor-physical:1f8eb446c454d8d2d5dc9689ff3dcaf1da86b084bbc864f77684fd1228fe8da4:region:24:1",
+      "allocation": "alloc:tensor-physical:1f8eb446c454d8d2d5dc9689ff3dcaf1da86b084bbc864f77684fd1228fe8da4:epoch:8900ce3f4ab80591c26008e316bb862592c7b5190aa5b9007a347b2adf30e351",
+      "object": "object:dispatch-reference:69c7601aeb7517bc68343b4d6817912469c82c2975c8d782669303a94ef60bf1:weak:364729:48"
+    },
+    {
+      "marker_instance": "opinst:native:16f94f0a3682c231eea50c6298517434d6dff37276e3a03112db429677ea440d:eto:82",
+      "argument_ordinal": 0,
+      "physical_reference": "sha256:a8e7d50cbf3e8e6fc7ca24ba6f7b75cc441f36b378a1ed89ace0d8a731a1acb4#line/26/arguments/0",
+      "provider_reference": "native:16f94f0a3682c231eea50c6298517434d6dff37276e3a03112db429677ea440d:tensor-token:80",
+      "storage_region": "region:tensor-physical:1f8eb446c454d8d2d5dc9689ff3dcaf1da86b084bbc864f77684fd1228fe8da4:region:26:0",
+      "allocation": "alloc:tensor-physical:1f8eb446c454d8d2d5dc9689ff3dcaf1da86b084bbc864f77684fd1228fe8da4:epoch:b61c583ede3de925250f55357a2cfb36b9b86ad4a241b154efe671507378a30d",
+      "object": "object:dispatch-reference:69c7601aeb7517bc68343b4d6817912469c82c2975c8d782669303a94ef60bf1:weak:364729:61"
+    },
+    {
+      "marker_instance": "opinst:native:16f94f0a3682c231eea50c6298517434d6dff37276e3a03112db429677ea440d:eto:85",
+      "argument_ordinal": 0,
+      "physical_reference": "sha256:a8e7d50cbf3e8e6fc7ca24ba6f7b75cc441f36b378a1ed89ace0d8a731a1acb4#line/27/arguments/0",
+      "provider_reference": "native:16f94f0a3682c231eea50c6298517434d6dff37276e3a03112db429677ea440d:tensor-token:72",
+      "storage_region": "region:tensor-physical:1f8eb446c454d8d2d5dc9689ff3dcaf1da86b084bbc864f77684fd1228fe8da4:region:27:0",
+      "allocation": "alloc:tensor-physical:1f8eb446c454d8d2d5dc9689ff3dcaf1da86b084bbc864f77684fd1228fe8da4:epoch:a5ea5855491396712e789954e3034b3a6078d9665ba83507804b86c479cd8262",
+      "object": "object:dispatch-reference:69c7601aeb7517bc68343b4d6817912469c82c2975c8d782669303a94ef60bf1:weak:364729:60"
+    },
+    {
+      "marker_instance": "opinst:native:16f94f0a3682c231eea50c6298517434d6dff37276e3a03112db429677ea440d:eto:85",
+      "argument_ordinal": 1,
+      "physical_reference": "sha256:a8e7d50cbf3e8e6fc7ca24ba6f7b75cc441f36b378a1ed89ace0d8a731a1acb4#line/27/arguments/1",
+      "provider_reference": "native:16f94f0a3682c231eea50c6298517434d6dff37276e3a03112db429677ea440d:tensor-token:32",
+      "storage_region": "region:tensor-physical:1f8eb446c454d8d2d5dc9689ff3dcaf1da86b084bbc864f77684fd1228fe8da4:region:27:1",
+      "allocation": "alloc:tensor-physical:1f8eb446c454d8d2d5dc9689ff3dcaf1da86b084bbc864f77684fd1228fe8da4:epoch:8900ce3f4ab80591c26008e316bb862592c7b5190aa5b9007a347b2adf30e351",
+      "object": "object:dispatch-reference:69c7601aeb7517bc68343b4d6817912469c82c2975c8d782669303a94ef60bf1:weak:364729:48"
+    },
+    {
+      "marker_instance": "opinst:native:16f94f0a3682c231eea50c6298517434d6dff37276e3a03112db429677ea440d:eto:89",
+      "argument_ordinal": 0,
+      "physical_reference": "sha256:a8e7d50cbf3e8e6fc7ca24ba6f7b75cc441f36b378a1ed89ace0d8a731a1acb4#line/29/arguments/0",
+      "provider_reference": "native:16f94f0a3682c231eea50c6298517434d6dff37276e3a03112db429677ea440d:tensor-token:87",
+      "storage_region": "region:tensor-physical:1f8eb446c454d8d2d5dc9689ff3dcaf1da86b084bbc864f77684fd1228fe8da4:region:29:0",
+      "allocation": "alloc:tensor-physical:1f8eb446c454d8d2d5dc9689ff3dcaf1da86b084bbc864f77684fd1228fe8da4:epoch:1be555522dd25f5615dd9d079150a3c8c4e247cc170a80f393ff6ccbcf4301c5",
+      "object": "object:dispatch-reference:69c7601aeb7517bc68343b4d6817912469c82c2975c8d782669303a94ef60bf1:weak:364729:62"
+    },
+    {
+      "marker_instance": "opinst:native:16f94f0a3682c231eea50c6298517434d6dff37276e3a03112db429677ea440d:eto:92",
+      "argument_ordinal": 0,
+      "physical_reference": "sha256:a8e7d50cbf3e8e6fc7ca24ba6f7b75cc441f36b378a1ed89ace0d8a731a1acb4#line/30/arguments/0",
+      "provider_reference": "native:16f94f0a3682c231eea50c6298517434d6dff37276e3a03112db429677ea440d:tensor-token:87",
+      "storage_region": "region:tensor-physical:1f8eb446c454d8d2d5dc9689ff3dcaf1da86b084bbc864f77684fd1228fe8da4:region:30:0",
+      "allocation": "alloc:tensor-physical:1f8eb446c454d8d2d5dc9689ff3dcaf1da86b084bbc864f77684fd1228fe8da4:epoch:1be555522dd25f5615dd9d079150a3c8c4e247cc170a80f393ff6ccbcf4301c5",
+      "object": "object:dispatch-reference:69c7601aeb7517bc68343b4d6817912469c82c2975c8d782669303a94ef60bf1:weak:364729:62"
+    },
+    {
+      "marker_instance": "opinst:native:16f94f0a3682c231eea50c6298517434d6dff37276e3a03112db429677ea440d:eto:92",
+      "argument_ordinal": 1,
+      "physical_reference": "sha256:a8e7d50cbf3e8e6fc7ca24ba6f7b75cc441f36b378a1ed89ace0d8a731a1acb4#line/30/arguments/1",
+      "provider_reference": "native:16f94f0a3682c231eea50c6298517434d6dff37276e3a03112db429677ea440d:tensor-token:80",
+      "storage_region": "region:tensor-physical:1f8eb446c454d8d2d5dc9689ff3dcaf1da86b084bbc864f77684fd1228fe8da4:region:30:1",
+      "allocation": "alloc:tensor-physical:1f8eb446c454d8d2d5dc9689ff3dcaf1da86b084bbc864f77684fd1228fe8da4:epoch:b61c583ede3de925250f55357a2cfb36b9b86ad4a241b154efe671507378a30d",
+      "object": "object:dispatch-reference:69c7601aeb7517bc68343b4d6817912469c82c2975c8d782669303a94ef60bf1:weak:364729:61"
+    },
+    {
+      "marker_instance": "opinst:native:16f94f0a3682c231eea50c6298517434d6dff37276e3a03112db429677ea440d:eto:96",
+      "argument_ordinal": 0,
+      "physical_reference": "sha256:a8e7d50cbf3e8e6fc7ca24ba6f7b75cc441f36b378a1ed89ace0d8a731a1acb4#line/32/arguments/0",
+      "provider_reference": "native:16f94f0a3682c231eea50c6298517434d6dff37276e3a03112db429677ea440d:tensor-token:94",
+      "storage_region": "region:tensor-physical:1f8eb446c454d8d2d5dc9689ff3dcaf1da86b084bbc864f77684fd1228fe8da4:region:32:0",
+      "allocation": "alloc:tensor-physical:1f8eb446c454d8d2d5dc9689ff3dcaf1da86b084bbc864f77684fd1228fe8da4:epoch:6e1e11c5bc601b6685ce43a9944fafb60e9fbdb3c5be654d59cbf5d8d5cabe7e",
+      "object": "object:dispatch-reference:69c7601aeb7517bc68343b4d6817912469c82c2975c8d782669303a94ef60bf1:weak:364729:63"
+    },
+    {
+      "marker_instance": "opinst:native:16f94f0a3682c231eea50c6298517434d6dff37276e3a03112db429677ea440d:eto:102",
+      "argument_ordinal": 0,
+      "physical_reference": "sha256:a8e7d50cbf3e8e6fc7ca24ba6f7b75cc441f36b378a1ed89ace0d8a731a1acb4#line/35/arguments/0",
+      "provider_reference": "native:16f94f0a3682c231eea50c6298517434d6dff37276e3a03112db429677ea440d:tensor-token:94",
+      "storage_region": "region:tensor-physical:1f8eb446c454d8d2d5dc9689ff3dcaf1da86b084bbc864f77684fd1228fe8da4:region:35:0",
+      "allocation": "alloc:tensor-physical:1f8eb446c454d8d2d5dc9689ff3dcaf1da86b084bbc864f77684fd1228fe8da4:epoch:6e1e11c5bc601b6685ce43a9944fafb60e9fbdb3c5be654d59cbf5d8d5cabe7e",
+      "object": "object:dispatch-reference:69c7601aeb7517bc68343b4d6817912469c82c2975c8d782669303a94ef60bf1:weak:364729:63"
+    },
+    {
+      "marker_instance": "opinst:native:16f94f0a3682c231eea50c6298517434d6dff37276e3a03112db429677ea440d:eto:105",
+      "argument_ordinal": 0,
+      "physical_reference": "sha256:a8e7d50cbf3e8e6fc7ca24ba6f7b75cc441f36b378a1ed89ace0d8a731a1acb4#line/36/arguments/0",
+      "provider_reference": "native:16f94f0a3682c231eea50c6298517434d6dff37276e3a03112db429677ea440d:tensor-token:104",
+      "storage_region": "region:tensor-physical:1f8eb446c454d8d2d5dc9689ff3dcaf1da86b084bbc864f77684fd1228fe8da4:region:36:0",
+      "allocation": "alloc:tensor-physical:1f8eb446c454d8d2d5dc9689ff3dcaf1da86b084bbc864f77684fd1228fe8da4:epoch:6e1e11c5bc601b6685ce43a9944fafb60e9fbdb3c5be654d59cbf5d8d5cabe7e",
+      "object": "object:dispatch-reference:69c7601aeb7517bc68343b4d6817912469c82c2975c8d782669303a94ef60bf1:weak:364729:64"
+    },
+    {
+      "marker_instance": "opinst:native:16f94f0a3682c231eea50c6298517434d6dff37276e3a03112db429677ea440d:eto:108",
+      "argument_ordinal": 0,
+      "physical_reference": "sha256:a8e7d50cbf3e8e6fc7ca24ba6f7b75cc441f36b378a1ed89ace0d8a731a1acb4#line/38/arguments/0",
+      "provider_reference": "native:16f94f0a3682c231eea50c6298517434d6dff37276e3a03112db429677ea440d:tensor-token:8",
+      "storage_region": "region:tensor-physical:1f8eb446c454d8d2d5dc9689ff3dcaf1da86b084bbc864f77684fd1228fe8da4:region:38:0",
+      "allocation": "alloc:tensor-physical:1f8eb446c454d8d2d5dc9689ff3dcaf1da86b084bbc864f77684fd1228fe8da4:epoch:dc84edf549c8f021c2f0cbb57d0ef0f4352e33b2a78059f308eb02a4a27edfe1",
+      "object": "object:dispatch-reference:69c7601aeb7517bc68343b4d6817912469c82c2975c8d782669303a94ef60bf1:weak:364729:38"
+    },
+    {
+      "marker_instance": "opinst:native:16f94f0a3682c231eea50c6298517434d6dff37276e3a03112db429677ea440d:eto:108",
+      "argument_ordinal": 1,
+      "physical_reference": "sha256:a8e7d50cbf3e8e6fc7ca24ba6f7b75cc441f36b378a1ed89ace0d8a731a1acb4#line/38/arguments/1",
+      "provider_reference": "native:16f94f0a3682c231eea50c6298517434d6dff37276e3a03112db429677ea440d:tensor-token:8",
+      "storage_region": "region:tensor-physical:1f8eb446c454d8d2d5dc9689ff3dcaf1da86b084bbc864f77684fd1228fe8da4:region:38:1",
+      "allocation": "alloc:tensor-physical:1f8eb446c454d8d2d5dc9689ff3dcaf1da86b084bbc864f77684fd1228fe8da4:epoch:dc84edf549c8f021c2f0cbb57d0ef0f4352e33b2a78059f308eb02a4a27edfe1",
+      "object": "object:dispatch-reference:69c7601aeb7517bc68343b4d6817912469c82c2975c8d782669303a94ef60bf1:weak:364729:38"
+    },
+    {
+      "marker_instance": "opinst:native:16f94f0a3682c231eea50c6298517434d6dff37276e3a03112db429677ea440d:eto:114",
+      "argument_ordinal": 0,
+      "physical_reference": "sha256:a8e7d50cbf3e8e6fc7ca24ba6f7b75cc441f36b378a1ed89ace0d8a731a1acb4#line/40/arguments/0",
+      "provider_reference": "native:16f94f0a3682c231eea50c6298517434d6dff37276e3a03112db429677ea440d:tensor-token:8",
+      "storage_region": "region:tensor-physical:1f8eb446c454d8d2d5dc9689ff3dcaf1da86b084bbc864f77684fd1228fe8da4:region:40:0",
+      "allocation": "alloc:tensor-physical:1f8eb446c454d8d2d5dc9689ff3dcaf1da86b084bbc864f77684fd1228fe8da4:epoch:dc84edf549c8f021c2f0cbb57d0ef0f4352e33b2a78059f308eb02a4a27edfe1",
+      "object": "object:dispatch-reference:69c7601aeb7517bc68343b4d6817912469c82c2975c8d782669303a94ef60bf1:weak:364729:38"
+    },
+    {
+      "marker_instance": "opinst:native:16f94f0a3682c231eea50c6298517434d6dff37276e3a03112db429677ea440d:eto:126",
+      "argument_ordinal": 0,
+      "physical_reference": "sha256:a8e7d50cbf3e8e6fc7ca24ba6f7b75cc441f36b378a1ed89ace0d8a731a1acb4#line/46/arguments/0",
+      "provider_reference": "native:16f94f0a3682c231eea50c6298517434d6dff37276e3a03112db429677ea440d:tensor-token:124",
+      "storage_region": "region:tensor-physical:1f8eb446c454d8d2d5dc9689ff3dcaf1da86b084bbc864f77684fd1228fe8da4:region:46:0",
+      "allocation": "alloc:tensor-physical:1f8eb446c454d8d2d5dc9689ff3dcaf1da86b084bbc864f77684fd1228fe8da4:epoch:da10b8f497b84c2d8bb37c3bf103e2815ad7ebe42ad76317f88b437f22bc26af",
+      "object": "object:dispatch-reference:69c7601aeb7517bc68343b4d6817912469c82c2975c8d782669303a94ef60bf1:weak:364729:73"
+    },
+    {
+      "marker_instance": "opinst:native:16f94f0a3682c231eea50c6298517434d6dff37276e3a03112db429677ea440d:eto:129",
+      "argument_ordinal": 0,
+      "physical_reference": "sha256:a8e7d50cbf3e8e6fc7ca24ba6f7b75cc441f36b378a1ed89ace0d8a731a1acb4#line/48/arguments/0",
+      "provider_reference": "native:16f94f0a3682c231eea50c6298517434d6dff37276e3a03112db429677ea440d:tensor-token:18",
+      "storage_region": "region:tensor-physical:1f8eb446c454d8d2d5dc9689ff3dcaf1da86b084bbc864f77684fd1228fe8da4:region:48:0",
+      "allocation": "alloc:tensor-physical:1f8eb446c454d8d2d5dc9689ff3dcaf1da86b084bbc864f77684fd1228fe8da4:epoch:0d2e6ab208290d258461f085d11a31b791b97b8a3f2c07c6183a679858493594",
+      "object": "object:dispatch-reference:69c7601aeb7517bc68343b4d6817912469c82c2975c8d782669303a94ef60bf1:weak:364729:41"
+    },
+    {
+      "marker_instance": "opinst:native:16f94f0a3682c231eea50c6298517434d6dff37276e3a03112db429677ea440d:eto:129",
+      "argument_ordinal": 1,
+      "physical_reference": "sha256:a8e7d50cbf3e8e6fc7ca24ba6f7b75cc441f36b378a1ed89ace0d8a731a1acb4#line/48/arguments/1",
+      "provider_reference": "native:16f94f0a3682c231eea50c6298517434d6dff37276e3a03112db429677ea440d:tensor-token:124",
+      "storage_region": "region:tensor-physical:1f8eb446c454d8d2d5dc9689ff3dcaf1da86b084bbc864f77684fd1228fe8da4:region:48:1",
+      "allocation": "alloc:tensor-physical:1f8eb446c454d8d2d5dc9689ff3dcaf1da86b084bbc864f77684fd1228fe8da4:epoch:da10b8f497b84c2d8bb37c3bf103e2815ad7ebe42ad76317f88b437f22bc26af",
+      "object": "object:dispatch-reference:69c7601aeb7517bc68343b4d6817912469c82c2975c8d782669303a94ef60bf1:weak:364729:73"
+    },
+    {
+      "marker_instance": "opinst:native:16f94f0a3682c231eea50c6298517434d6dff37276e3a03112db429677ea440d:eto:136",
+      "argument_ordinal": 0,
+      "physical_reference": "sha256:a8e7d50cbf3e8e6fc7ca24ba6f7b75cc441f36b378a1ed89ace0d8a731a1acb4#line/51/arguments/0",
+      "provider_reference": "native:16f94f0a3682c231eea50c6298517434d6dff37276e3a03112db429677ea440d:tensor-token:32",
+      "storage_region": "region:tensor-physical:1f8eb446c454d8d2d5dc9689ff3dcaf1da86b084bbc864f77684fd1228fe8da4:region:51:0",
+      "allocation": "alloc:tensor-physical:1f8eb446c454d8d2d5dc9689ff3dcaf1da86b084bbc864f77684fd1228fe8da4:epoch:8900ce3f4ab80591c26008e316bb862592c7b5190aa5b9007a347b2adf30e351",
+      "object": "object:dispatch-reference:69c7601aeb7517bc68343b4d6817912469c82c2975c8d782669303a94ef60bf1:weak:364729:48"
+    },
+    {
+      "marker_instance": "opinst:native:16f94f0a3682c231eea50c6298517434d6dff37276e3a03112db429677ea440d:eto:139",
+      "argument_ordinal": 0,
+      "physical_reference": "sha256:a8e7d50cbf3e8e6fc7ca24ba6f7b75cc441f36b378a1ed89ace0d8a731a1acb4#line/52/arguments/0",
+      "provider_reference": "native:16f94f0a3682c231eea50c6298517434d6dff37276e3a03112db429677ea440d:tensor-token:138",
+      "storage_region": "region:tensor-physical:1f8eb446c454d8d2d5dc9689ff3dcaf1da86b084bbc864f77684fd1228fe8da4:region:52:0",
+      "allocation": "alloc:tensor-physical:1f8eb446c454d8d2d5dc9689ff3dcaf1da86b084bbc864f77684fd1228fe8da4:epoch:8900ce3f4ab80591c26008e316bb862592c7b5190aa5b9007a347b2adf30e351",
+      "object": "object:dispatch-reference:69c7601aeb7517bc68343b4d6817912469c82c2975c8d782669303a94ef60bf1:weak:364729:82"
+    },
+    {
+      "marker_instance": "opinst:native:16f94f0a3682c231eea50c6298517434d6dff37276e3a03112db429677ea440d:eto:144",
+      "argument_ordinal": 0,
+      "physical_reference": "sha256:a8e7d50cbf3e8e6fc7ca24ba6f7b75cc441f36b378a1ed89ace0d8a731a1acb4#line/54/arguments/0",
+      "provider_reference": "native:16f94f0a3682c231eea50c6298517434d6dff37276e3a03112db429677ea440d:tensor-token:138",
+      "storage_region": "region:tensor-physical:1f8eb446c454d8d2d5dc9689ff3dcaf1da86b084bbc864f77684fd1228fe8da4:region:54:0",
+      "allocation": "alloc:tensor-physical:1f8eb446c454d8d2d5dc9689ff3dcaf1da86b084bbc864f77684fd1228fe8da4:epoch:8900ce3f4ab80591c26008e316bb862592c7b5190aa5b9007a347b2adf30e351",
+      "object": "object:dispatch-reference:69c7601aeb7517bc68343b4d6817912469c82c2975c8d782669303a94ef60bf1:weak:364729:82"
+    },
+    {
+      "marker_instance": "opinst:native:16f94f0a3682c231eea50c6298517434d6dff37276e3a03112db429677ea440d:eto:156",
+      "argument_ordinal": 0,
+      "physical_reference": "sha256:a8e7d50cbf3e8e6fc7ca24ba6f7b75cc441f36b378a1ed89ace0d8a731a1acb4#line/60/arguments/0",
+      "provider_reference": "native:16f94f0a3682c231eea50c6298517434d6dff37276e3a03112db429677ea440d:tensor-token:154",
+      "storage_region": "region:tensor-physical:1f8eb446c454d8d2d5dc9689ff3dcaf1da86b084bbc864f77684fd1228fe8da4:region:60:0",
+      "allocation": "alloc:tensor-physical:1f8eb446c454d8d2d5dc9689ff3dcaf1da86b084bbc864f77684fd1228fe8da4:epoch:e85eb807148a037d41fd7d3100a406031042da330db6c26b33bbed710a66fdd5",
+      "object": "object:dispatch-reference:69c7601aeb7517bc68343b4d6817912469c82c2975c8d782669303a94ef60bf1:weak:364729:85"
+    },
+    {
+      "marker_instance": "opinst:native:16f94f0a3682c231eea50c6298517434d6dff37276e3a03112db429677ea440d:eto:159",
+      "argument_ordinal": 0,
+      "physical_reference": "sha256:a8e7d50cbf3e8e6fc7ca24ba6f7b75cc441f36b378a1ed89ace0d8a731a1acb4#line/62/arguments/0",
+      "provider_reference": "native:16f94f0a3682c231eea50c6298517434d6dff37276e3a03112db429677ea440d:tensor-token:104",
+      "storage_region": "region:tensor-physical:1f8eb446c454d8d2d5dc9689ff3dcaf1da86b084bbc864f77684fd1228fe8da4:region:62:0",
+      "allocation": "alloc:tensor-physical:1f8eb446c454d8d2d5dc9689ff3dcaf1da86b084bbc864f77684fd1228fe8da4:epoch:6e1e11c5bc601b6685ce43a9944fafb60e9fbdb3c5be654d59cbf5d8d5cabe7e",
+      "object": "object:dispatch-reference:69c7601aeb7517bc68343b4d6817912469c82c2975c8d782669303a94ef60bf1:weak:364729:64"
+    },
+    {
+      "marker_instance": "opinst:native:16f94f0a3682c231eea50c6298517434d6dff37276e3a03112db429677ea440d:eto:159",
+      "argument_ordinal": 1,
+      "physical_reference": "sha256:a8e7d50cbf3e8e6fc7ca24ba6f7b75cc441f36b378a1ed89ace0d8a731a1acb4#line/62/arguments/1",
+      "provider_reference": "native:16f94f0a3682c231eea50c6298517434d6dff37276e3a03112db429677ea440d:tensor-token:154",
+      "storage_region": "region:tensor-physical:1f8eb446c454d8d2d5dc9689ff3dcaf1da86b084bbc864f77684fd1228fe8da4:region:62:1",
+      "allocation": "alloc:tensor-physical:1f8eb446c454d8d2d5dc9689ff3dcaf1da86b084bbc864f77684fd1228fe8da4:epoch:e85eb807148a037d41fd7d3100a406031042da330db6c26b33bbed710a66fdd5",
+      "object": "object:dispatch-reference:69c7601aeb7517bc68343b4d6817912469c82c2975c8d782669303a94ef60bf1:weak:364729:85"
+    }
+  ],
+  "epochs": [
+    {
+      "allocation": "alloc:tensor-physical:1f8eb446c454d8d2d5dc9689ff3dcaf1da86b084bbc864f77684fd1228fe8da4:epoch:dc84edf549c8f021c2f0cbb57d0ef0f4352e33b2a78059f308eb02a4a27edfe1",
+      "provider_allocation_id": 2,
+      "device": "cpu",
+      "nbytes": 16,
+      "identity_basis": "same profiler result calculateUniqueTensorIDs allocation_id",
+      "address": 101810648617600,
+      "allocation_receipts": [
+        "sha256:a8e7d50cbf3e8e6fc7ca24ba6f7b75cc441f36b378a1ed89ace0d8a731a1acb4#line/2",
+        "sha256:a8e7d50cbf3e8e6fc7ca24ba6f7b75cc441f36b378a1ed89ace0d8a731a1acb4#line/69"
+      ],
+      "birth_reference": "sha256:a8e7d50cbf3e8e6fc7ca24ba6f7b75cc441f36b378a1ed89ace0d8a731a1acb4#line/2",
+      "free_reference": "sha256:a8e7d50cbf3e8e6fc7ca24ba6f7b75cc441f36b378a1ed89ace0d8a731a1acb4#line/69",
+      "lifetime_status": "OBSERVED_BIRTH_AND_FREE",
+      "legacy_kineto_allocation_correspondence_established": false,
+      "physical_cuda_allocation_established": false,
+      "resource_ready_established": false
+    },
+    {
+      "allocation": "alloc:tensor-physical:1f8eb446c454d8d2d5dc9689ff3dcaf1da86b084bbc864f77684fd1228fe8da4:epoch:0d2e6ab208290d258461f085d11a31b791b97b8a3f2c07c6183a679858493594",
+      "provider_allocation_id": 3,
+      "device": "cpu",
+      "nbytes": 16,
+      "identity_basis": "same profiler result calculateUniqueTensorIDs allocation_id",
+      "address": 101810651130688,
+      "allocation_receipts": [
+        "sha256:a8e7d50cbf3e8e6fc7ca24ba6f7b75cc441f36b378a1ed89ace0d8a731a1acb4#line/5",
+        "sha256:a8e7d50cbf3e8e6fc7ca24ba6f7b75cc441f36b378a1ed89ace0d8a731a1acb4#line/68"
+      ],
+      "birth_reference": "sha256:a8e7d50cbf3e8e6fc7ca24ba6f7b75cc441f36b378a1ed89ace0d8a731a1acb4#line/5",
+      "free_reference": "sha256:a8e7d50cbf3e8e6fc7ca24ba6f7b75cc441f36b378a1ed89ace0d8a731a1acb4#line/68",
+      "lifetime_status": "OBSERVED_BIRTH_AND_FREE",
+      "legacy_kineto_allocation_correspondence_established": false,
+      "physical_cuda_allocation_established": false,
+      "resource_ready_established": false
+    },
+    {
+      "allocation": "alloc:tensor-physical:1f8eb446c454d8d2d5dc9689ff3dcaf1da86b084bbc864f77684fd1228fe8da4:epoch:8900ce3f4ab80591c26008e316bb862592c7b5190aa5b9007a347b2adf30e351",
+      "provider_allocation_id": 4,
+      "device": "cpu",
+      "nbytes": 16,
+      "identity_basis": "same profiler result calculateUniqueTensorIDs allocation_id",
+      "address": 101810650425536,
+      "allocation_receipts": [
+        "sha256:a8e7d50cbf3e8e6fc7ca24ba6f7b75cc441f36b378a1ed89ace0d8a731a1acb4#line/10",
+        "sha256:a8e7d50cbf3e8e6fc7ca24ba6f7b75cc441f36b378a1ed89ace0d8a731a1acb4#line/67"
+      ],
+      "birth_reference": "sha256:a8e7d50cbf3e8e6fc7ca24ba6f7b75cc441f36b378a1ed89ace0d8a731a1acb4#line/10",
+      "free_reference": "sha256:a8e7d50cbf3e8e6fc7ca24ba6f7b75cc441f36b378a1ed89ace0d8a731a1acb4#line/67",
+      "lifetime_status": "OBSERVED_BIRTH_AND_FREE",
+      "legacy_kineto_allocation_correspondence_established": false,
+      "physical_cuda_allocation_established": false,
+      "resource_ready_established": false
+    },
+    {
+      "allocation": "alloc:tensor-physical:1f8eb446c454d8d2d5dc9689ff3dcaf1da86b084bbc864f77684fd1228fe8da4:epoch:310f3296ca3f1f9f2e10c9d93b6fad01278070ff220e204343c61742f71b989e",
+      "provider_allocation_id": 5,
+      "device": "cpu",
+      "nbytes": 16,
+      "identity_basis": "same profiler result calculateUniqueTensorIDs allocation_id",
+      "address": 101810651721600,
+      "allocation_receipts": [
+        "sha256:a8e7d50cbf3e8e6fc7ca24ba6f7b75cc441f36b378a1ed89ace0d8a731a1acb4#line/13",
+        "sha256:a8e7d50cbf3e8e6fc7ca24ba6f7b75cc441f36b378a1ed89ace0d8a731a1acb4#line/18"
+      ],
+      "birth_reference": "sha256:a8e7d50cbf3e8e6fc7ca24ba6f7b75cc441f36b378a1ed89ace0d8a731a1acb4#line/13",
+      "free_reference": "sha256:a8e7d50cbf3e8e6fc7ca24ba6f7b75cc441f36b378a1ed89ace0d8a731a1acb4#line/18",
+      "lifetime_status": "OBSERVED_BIRTH_AND_FREE",
+      "legacy_kineto_allocation_correspondence_established": false,
+      "physical_cuda_allocation_established": false,
+      "resource_ready_established": false
+    },
+    {
+      "allocation": "alloc:tensor-physical:1f8eb446c454d8d2d5dc9689ff3dcaf1da86b084bbc864f77684fd1228fe8da4:epoch:9314c429f5cac9cefc2ed344b30d8222c974595d7436353fde226c381a9e94a0",
+      "provider_allocation_id": 6,
+      "device": "cpu",
+      "nbytes": 4,
+      "identity_basis": "same profiler result calculateUniqueTensorIDs allocation_id",
+      "address": 101810648400128,
+      "allocation_receipts": [
+        "sha256:a8e7d50cbf3e8e6fc7ca24ba6f7b75cc441f36b378a1ed89ace0d8a731a1acb4#line/16",
+        "sha256:a8e7d50cbf3e8e6fc7ca24ba6f7b75cc441f36b378a1ed89ace0d8a731a1acb4#line/65"
+      ],
+      "birth_reference": "sha256:a8e7d50cbf3e8e6fc7ca24ba6f7b75cc441f36b378a1ed89ace0d8a731a1acb4#line/16",
+      "free_reference": "sha256:a8e7d50cbf3e8e6fc7ca24ba6f7b75cc441f36b378a1ed89ace0d8a731a1acb4#line/65",
+      "lifetime_status": "OBSERVED_BIRTH_AND_FREE",
+      "legacy_kineto_allocation_correspondence_established": false,
+      "physical_cuda_allocation_established": false,
+      "resource_ready_established": false
+    },
+    {
+      "allocation": "alloc:tensor-physical:1f8eb446c454d8d2d5dc9689ff3dcaf1da86b084bbc864f77684fd1228fe8da4:epoch:a5ea5855491396712e789954e3034b3a6078d9665ba83507804b86c479cd8262",
+      "provider_allocation_id": 7,
+      "device": "cpu",
+      "nbytes": 4,
+      "identity_basis": "same profiler result calculateUniqueTensorIDs allocation_id",
+      "address": 101810650433216,
+      "allocation_receipts": [
+        "sha256:a8e7d50cbf3e8e6fc7ca24ba6f7b75cc441f36b378a1ed89ace0d8a731a1acb4#line/20",
+        "sha256:a8e7d50cbf3e8e6fc7ca24ba6f7b75cc441f36b378a1ed89ace0d8a731a1acb4#line/37"
+      ],
+      "birth_reference": "sha256:a8e7d50cbf3e8e6fc7ca24ba6f7b75cc441f36b378a1ed89ace0d8a731a1acb4#line/20",
+      "free_reference": "sha256:a8e7d50cbf3e8e6fc7ca24ba6f7b75cc441f36b378a1ed89ace0d8a731a1acb4#line/37",
+      "lifetime_status": "OBSERVED_BIRTH_AND_FREE",
+      "legacy_kineto_allocation_correspondence_established": false,
+      "physical_cuda_allocation_established": false,
+      "resource_ready_established": false
+    },
+    {
+      "allocation": "alloc:tensor-physical:1f8eb446c454d8d2d5dc9689ff3dcaf1da86b084bbc864f77684fd1228fe8da4:epoch:b61c583ede3de925250f55357a2cfb36b9b86ad4a241b154efe671507378a30d",
+      "provider_allocation_id": 8,
+      "device": "cpu",
+      "nbytes": 16,
+      "identity_basis": "same profiler result calculateUniqueTensorIDs allocation_id",
+      "address": 101810651550080,
+      "allocation_receipts": [
+        "sha256:a8e7d50cbf3e8e6fc7ca24ba6f7b75cc441f36b378a1ed89ace0d8a731a1acb4#line/25",
+        "sha256:a8e7d50cbf3e8e6fc7ca24ba6f7b75cc441f36b378a1ed89ace0d8a731a1acb4#line/34"
+      ],
+      "birth_reference": "sha256:a8e7d50cbf3e8e6fc7ca24ba6f7b75cc441f36b378a1ed89ace0d8a731a1acb4#line/25",
+      "free_reference": "sha256:a8e7d50cbf3e8e6fc7ca24ba6f7b75cc441f36b378a1ed89ace0d8a731a1acb4#line/34",
+      "lifetime_status": "OBSERVED_BIRTH_AND_FREE",
+      "legacy_kineto_allocation_correspondence_established": false,
+      "physical_cuda_allocation_established": false,
+      "resource_ready_established": false
+    },
+    {
+      "allocation": "alloc:tensor-physical:1f8eb446c454d8d2d5dc9689ff3dcaf1da86b084bbc864f77684fd1228fe8da4:epoch:1be555522dd25f5615dd9d079150a3c8c4e247cc170a80f393ff6ccbcf4301c5",
+      "provider_allocation_id": 9,
+      "device": "cpu",
+      "nbytes": 16,
+      "identity_basis": "same profiler result calculateUniqueTensorIDs allocation_id",
+      "address": 101810653994496,
+      "allocation_receipts": [
+        "sha256:a8e7d50cbf3e8e6fc7ca24ba6f7b75cc441f36b378a1ed89ace0d8a731a1acb4#line/28",
+        "sha256:a8e7d50cbf3e8e6fc7ca24ba6f7b75cc441f36b378a1ed89ace0d8a731a1acb4#line/33"
+      ],
+      "birth_reference": "sha256:a8e7d50cbf3e8e6fc7ca24ba6f7b75cc441f36b378a1ed89ace0d8a731a1acb4#line/28",
+      "free_reference": "sha256:a8e7d50cbf3e8e6fc7ca24ba6f7b75cc441f36b378a1ed89ace0d8a731a1acb4#line/33",
+      "lifetime_status": "OBSERVED_BIRTH_AND_FREE",
+      "legacy_kineto_allocation_correspondence_established": false,
+      "physical_cuda_allocation_established": false,
+      "resource_ready_established": false
+    },
+    {
+      "allocation": "alloc:tensor-physical:1f8eb446c454d8d2d5dc9689ff3dcaf1da86b084bbc864f77684fd1228fe8da4:epoch:6e1e11c5bc601b6685ce43a9944fafb60e9fbdb3c5be654d59cbf5d8d5cabe7e",
+      "provider_allocation_id": 10,
+      "device": "cpu",
+      "nbytes": 16,
+      "identity_basis": "same profiler result calculateUniqueTensorIDs allocation_id",
+      "address": 101810651550336,
+      "allocation_receipts": [
+        "sha256:a8e7d50cbf3e8e6fc7ca24ba6f7b75cc441f36b378a1ed89ace0d8a731a1acb4#line/31",
+        "sha256:a8e7d50cbf3e8e6fc7ca24ba6f7b75cc441f36b378a1ed89ace0d8a731a1acb4#line/66"
+      ],
+      "birth_reference": "sha256:a8e7d50cbf3e8e6fc7ca24ba6f7b75cc441f36b378a1ed89ace0d8a731a1acb4#line/31",
+      "free_reference": "sha256:a8e7d50cbf3e8e6fc7ca24ba6f7b75cc441f36b378a1ed89ace0d8a731a1acb4#line/66",
+      "lifetime_status": "OBSERVED_BIRTH_AND_FREE",
+      "legacy_kineto_allocation_correspondence_established": false,
+      "physical_cuda_allocation_established": false,
+      "resource_ready_established": false
+    },
+    {
+      "allocation": "alloc:tensor-physical:1f8eb446c454d8d2d5dc9689ff3dcaf1da86b084bbc864f77684fd1228fe8da4:epoch:b1f25f9948cea60d1f3fc64f4953d3dbe260ff7bc9fb8468af1abd40bc2d663f",
+      "provider_allocation_id": 11,
+      "device": "cpu",
+      "nbytes": 8,
+      "identity_basis": "same profiler result calculateUniqueTensorIDs allocation_id",
+      "address": 101810653997312,
+      "allocation_receipts": [
+        "sha256:a8e7d50cbf3e8e6fc7ca24ba6f7b75cc441f36b378a1ed89ace0d8a731a1acb4#line/39",
+        "sha256:a8e7d50cbf3e8e6fc7ca24ba6f7b75cc441f36b378a1ed89ace0d8a731a1acb4#line/47"
+      ],
+      "birth_reference": "sha256:a8e7d50cbf3e8e6fc7ca24ba6f7b75cc441f36b378a1ed89ace0d8a731a1acb4#line/39",
+      "free_reference": "sha256:a8e7d50cbf3e8e6fc7ca24ba6f7b75cc441f36b378a1ed89ace0d8a731a1acb4#line/47",
+      "lifetime_status": "OBSERVED_BIRTH_AND_FREE",
+      "legacy_kineto_allocation_correspondence_established": false,
+      "physical_cuda_allocation_established": false,
+      "resource_ready_established": false
+    },
+    {
+      "allocation": "alloc:tensor-physical:1f8eb446c454d8d2d5dc9689ff3dcaf1da86b084bbc864f77684fd1228fe8da4:epoch:eacf4ca0f746087e64d41622465a713418513da0b9c7d9d1e5e864e8e25b923c",
+      "provider_allocation_id": 12,
+      "device": "cpu",
+      "nbytes": 8,
+      "identity_basis": "same profiler result calculateUniqueTensorIDs allocation_id",
+      "address": 101810651551488,
+      "allocation_receipts": [
+        "sha256:a8e7d50cbf3e8e6fc7ca24ba6f7b75cc441f36b378a1ed89ace0d8a731a1acb4#line/41",
+        "sha256:a8e7d50cbf3e8e6fc7ca24ba6f7b75cc441f36b378a1ed89ace0d8a731a1acb4#line/45"
+      ],
+      "birth_reference": "sha256:a8e7d50cbf3e8e6fc7ca24ba6f7b75cc441f36b378a1ed89ace0d8a731a1acb4#line/41",
+      "free_reference": "sha256:a8e7d50cbf3e8e6fc7ca24ba6f7b75cc441f36b378a1ed89ace0d8a731a1acb4#line/45",
+      "lifetime_status": "OBSERVED_BIRTH_AND_FREE",
+      "legacy_kineto_allocation_correspondence_established": false,
+      "physical_cuda_allocation_established": false,
+      "resource_ready_established": false
+    },
+    {
+      "allocation": "alloc:tensor-physical:1f8eb446c454d8d2d5dc9689ff3dcaf1da86b084bbc864f77684fd1228fe8da4:epoch:1bb84be797cdc8663deeaa0cea74181a5762fc8f99934bd806d0eb51cb46b413",
+      "provider_allocation_id": 13,
+      "device": "cpu",
+      "nbytes": 4,
+      "identity_basis": "same profiler result calculateUniqueTensorIDs allocation_id",
+      "address": 101810654004160,
+      "allocation_receipts": [
+        "sha256:a8e7d50cbf3e8e6fc7ca24ba6f7b75cc441f36b378a1ed89ace0d8a731a1acb4#line/42",
+        "sha256:a8e7d50cbf3e8e6fc7ca24ba6f7b75cc441f36b378a1ed89ace0d8a731a1acb4#line/44"
+      ],
+      "birth_reference": "sha256:a8e7d50cbf3e8e6fc7ca24ba6f7b75cc441f36b378a1ed89ace0d8a731a1acb4#line/42",
+      "free_reference": "sha256:a8e7d50cbf3e8e6fc7ca24ba6f7b75cc441f36b378a1ed89ace0d8a731a1acb4#line/44",
+      "lifetime_status": "OBSERVED_BIRTH_AND_FREE",
+      "legacy_kineto_allocation_correspondence_established": false,
+      "physical_cuda_allocation_established": false,
+      "resource_ready_established": false
+    },
+    {
+      "allocation": "alloc:tensor-physical:1f8eb446c454d8d2d5dc9689ff3dcaf1da86b084bbc864f77684fd1228fe8da4:epoch:da10b8f497b84c2d8bb37c3bf103e2815ad7ebe42ad76317f88b437f22bc26af",
+      "provider_allocation_id": 14,
+      "device": "cpu",
+      "nbytes": 16,
+      "identity_basis": "same profiler result calculateUniqueTensorIDs allocation_id",
+      "address": 101810651563072,
+      "allocation_receipts": [
+        "sha256:a8e7d50cbf3e8e6fc7ca24ba6f7b75cc441f36b378a1ed89ace0d8a731a1acb4#line/43",
+        "sha256:a8e7d50cbf3e8e6fc7ca24ba6f7b75cc441f36b378a1ed89ace0d8a731a1acb4#line/50"
+      ],
+      "birth_reference": "sha256:a8e7d50cbf3e8e6fc7ca24ba6f7b75cc441f36b378a1ed89ace0d8a731a1acb4#line/43",
+      "free_reference": "sha256:a8e7d50cbf3e8e6fc7ca24ba6f7b75cc441f36b378a1ed89ace0d8a731a1acb4#line/50",
+      "lifetime_status": "OBSERVED_BIRTH_AND_FREE",
+      "legacy_kineto_allocation_correspondence_established": false,
+      "physical_cuda_allocation_established": false,
+      "resource_ready_established": false
+    },
+    {
+      "allocation": "alloc:tensor-physical:1f8eb446c454d8d2d5dc9689ff3dcaf1da86b084bbc864f77684fd1228fe8da4:epoch:587b517d5de4532cafc05984ed6cc44e68277aea723c881f939765490497f89a",
+      "provider_allocation_id": 15,
+      "device": "cpu",
+      "nbytes": 8,
+      "identity_basis": "same profiler result calculateUniqueTensorIDs allocation_id",
+      "address": 101810651756544,
+      "allocation_receipts": [
+        "sha256:a8e7d50cbf3e8e6fc7ca24ba6f7b75cc441f36b378a1ed89ace0d8a731a1acb4#line/53",
+        "sha256:a8e7d50cbf3e8e6fc7ca24ba6f7b75cc441f36b378a1ed89ace0d8a731a1acb4#line/61"
+      ],
+      "birth_reference": "sha256:a8e7d50cbf3e8e6fc7ca24ba6f7b75cc441f36b378a1ed89ace0d8a731a1acb4#line/53",
+      "free_reference": "sha256:a8e7d50cbf3e8e6fc7ca24ba6f7b75cc441f36b378a1ed89ace0d8a731a1acb4#line/61",
+      "lifetime_status": "OBSERVED_BIRTH_AND_FREE",
+      "legacy_kineto_allocation_correspondence_established": false,
+      "physical_cuda_allocation_established": false,
+      "resource_ready_established": false
+    },
+    {
+      "allocation": "alloc:tensor-physical:1f8eb446c454d8d2d5dc9689ff3dcaf1da86b084bbc864f77684fd1228fe8da4:epoch:7495ae08eebff39e1c17bbc50edb70c06dd51c877ea4170c6e9f39a3ce86be7e",
+      "provider_allocation_id": 16,
+      "device": "cpu",
+      "nbytes": 8,
+      "identity_basis": "same profiler result calculateUniqueTensorIDs allocation_id",
+      "address": 101810651552192,
+      "allocation_receipts": [
+        "sha256:a8e7d50cbf3e8e6fc7ca24ba6f7b75cc441f36b378a1ed89ace0d8a731a1acb4#line/55",
+        "sha256:a8e7d50cbf3e8e6fc7ca24ba6f7b75cc441f36b378a1ed89ace0d8a731a1acb4#line/59"
+      ],
+      "birth_reference": "sha256:a8e7d50cbf3e8e6fc7ca24ba6f7b75cc441f36b378a1ed89ace0d8a731a1acb4#line/55",
+      "free_reference": "sha256:a8e7d50cbf3e8e6fc7ca24ba6f7b75cc441f36b378a1ed89ace0d8a731a1acb4#line/59",
+      "lifetime_status": "OBSERVED_BIRTH_AND_FREE",
+      "legacy_kineto_allocation_correspondence_established": false,
+      "physical_cuda_allocation_established": false,
+      "resource_ready_established": false
+    },
+    {
+      "allocation": "alloc:tensor-physical:1f8eb446c454d8d2d5dc9689ff3dcaf1da86b084bbc864f77684fd1228fe8da4:epoch:bf4eac96a41362382838c0473b8aed025e9aa5ba6d25b57f5662dbc0ba54b3c3",
+      "provider_allocation_id": 17,
+      "device": "cpu",
+      "nbytes": 4,
+      "identity_basis": "same profiler result calculateUniqueTensorIDs allocation_id",
+      "address": 101810651688384,
+      "allocation_receipts": [
+        "sha256:a8e7d50cbf3e8e6fc7ca24ba6f7b75cc441f36b378a1ed89ace0d8a731a1acb4#line/56",
+        "sha256:a8e7d50cbf3e8e6fc7ca24ba6f7b75cc441f36b378a1ed89ace0d8a731a1acb4#line/58"
+      ],
+      "birth_reference": "sha256:a8e7d50cbf3e8e6fc7ca24ba6f7b75cc441f36b378a1ed89ace0d8a731a1acb4#line/56",
+      "free_reference": "sha256:a8e7d50cbf3e8e6fc7ca24ba6f7b75cc441f36b378a1ed89ace0d8a731a1acb4#line/58",
+      "lifetime_status": "OBSERVED_BIRTH_AND_FREE",
+      "legacy_kineto_allocation_correspondence_established": false,
+      "physical_cuda_allocation_established": false,
+      "resource_ready_established": false
+    },
+    {
+      "allocation": "alloc:tensor-physical:1f8eb446c454d8d2d5dc9689ff3dcaf1da86b084bbc864f77684fd1228fe8da4:epoch:e85eb807148a037d41fd7d3100a406031042da330db6c26b33bbed710a66fdd5",
+      "provider_allocation_id": 18,
+      "device": "cpu",
+      "nbytes": 16,
+      "identity_basis": "same profiler result calculateUniqueTensorIDs allocation_id",
+      "address": 101810654003520,
+      "allocation_receipts": [
+        "sha256:a8e7d50cbf3e8e6fc7ca24ba6f7b75cc441f36b378a1ed89ace0d8a731a1acb4#line/57",
+        "sha256:a8e7d50cbf3e8e6fc7ca24ba6f7b75cc441f36b378a1ed89ace0d8a731a1acb4#line/64"
+      ],
+      "birth_reference": "sha256:a8e7d50cbf3e8e6fc7ca24ba6f7b75cc441f36b378a1ed89ace0d8a731a1acb4#line/57",
+      "free_reference": "sha256:a8e7d50cbf3e8e6fc7ca24ba6f7b75cc441f36b378a1ed89ace0d8a731a1acb4#line/64",
+      "lifetime_status": "OBSERVED_BIRTH_AND_FREE",
+      "legacy_kineto_allocation_correspondence_established": false,
+      "physical_cuda_allocation_established": false,
+      "resource_ready_established": false
+    }
+  ],
+  "legacy_kineto_allocation_correspondence_established": false,
+  "logical_versions_established": false,
+  "materializations_established": false,
+  "state_effects_established": false,
+  "resource_readiness_established": false,
+  "whole_model_established": false,
+  "transformation_authorized": false,
+  "scope": "tensor-physical:1f8eb446c454d8d2d5dc9689ff3dcaf1da86b084bbc864f77684fd1228fe8da4",
+  "status": "IMPORTED_WITH_OPEN_OBLIGATIONS",
+  "marker_nodes": 35,
+  "argument_slots": 39,
+  "physical_slot_associations": 39,
+  "allocation_epochs": 17,
+  "evidence_edges": 78,
+  "gaps": {},
+  "source_allocation_receipts": 34,
+  "interface_only_claim": "observation-scoped object/argument geometry and provider physical epochs"
+}

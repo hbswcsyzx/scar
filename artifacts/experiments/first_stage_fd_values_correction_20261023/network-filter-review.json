@@ -1,0 +1,70 @@
+{
+  "interpretation": "TN-only calls not selected by the original four classes; no claim they occurred in the old episode. ioctl was selected but output-FD schema is not automatically decoded. FD scalar truth does not establish OFD/coidentity/end coverage.",
+  "native_amd64": [
+    {
+      "classification_flags": "TD",
+      "line": 24,
+      "raw_source_line": "[ 16] = { 3,\tTD,\t\tSEN(ioctl),\t\t\t\"ioctl\"\t\t\t},",
+      "syscall": "ioctl",
+      "syscall_number": 16
+    },
+    {
+      "classification_flags": "TN",
+      "line": 49,
+      "raw_source_line": "[ 41] = { 3,\tTN,\t\tSEN(socket),\t\t\t\"socket\"\t\t},",
+      "syscall": "socket",
+      "syscall_number": 41
+    },
+    {
+      "classification_flags": "TN",
+      "line": 51,
+      "raw_source_line": "[ 43] = { 3,\tTN,\t\tSEN(accept),\t\t\t\"accept\"\t\t},",
+      "syscall": "accept",
+      "syscall_number": 43
+    },
+    {
+      "classification_flags": "TN",
+      "line": 55,
+      "raw_source_line": "[ 47] = { 3,\tTN,\t\tSEN(recvmsg),\t\t\t\"recvmsg\"\t\t},",
+      "syscall": "recvmsg",
+      "syscall_number": 47
+    },
+    {
+      "classification_flags": "TN",
+      "line": 61,
+      "raw_source_line": "[ 53] = { 4,\tTN,\t\tSEN(socketpair),\t\t\"socketpair\"\t\t},",
+      "syscall": "socketpair",
+      "syscall_number": 53
+    },
+    {
+      "classification_flags": "0",
+      "line": 280,
+      "raw_source_line": "[272] = { 1,\t0,\t\tSEN(unshare),\t\t\t\"unshare\"\t\t},",
+      "syscall": "unshare",
+      "syscall_number": 272
+    },
+    {
+      "classification_flags": "TN",
+      "line": 296,
+      "raw_source_line": "[288] = { 4,\tTN,\t\tSEN(accept4),\t\t\t\"accept4\"\t\t},",
+      "syscall": "accept4",
+      "syscall_number": 288
+    },
+    {
+      "classification_flags": "TN",
+      "line": 307,
+      "raw_source_line": "[299] = { 5,\tTN,\t\tSEN(recvmmsg_time64),\t\t\"recvmmsg\"\t\t},",
+      "syscall": "recvmmsg",
+      "syscall_number": 299
+    }
+  ],
+  "primary_source": {
+    "bytes": 17653,
+    "sha256": "d381fb1ae2d4a548a1a4a5f0c24f72efcb522d1da75d4b87610af2e7f913ee63",
+    "url": "https://raw.githubusercontent.com/strace/strace/v6.8/src/linux/x86_64/syscallent.h"
+  },
+  "raw_capture_reads": 0,
+  "schema": "scar.os-network-filter-review",
+  "schema_version": 1,
+  "target_runs": 0
+}

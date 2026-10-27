@@ -1,0 +1,487 @@
+{
+  "source_sha256": "8f1564e887ec631f21671274fa2ac25e26898ce9dd0aae0e2a1466636c4d19ad",
+  "kind": "READ_ONLY_SOURCE_REVIEW_NOT_FAMILY_ACCEPTANCE",
+  "rows": [
+    {
+      "id": "F18",
+      "reviewer": "/root/cleanup_forward_review",
+      "status": "OPEN_SOURCE_REVIEW_ONLY",
+      "covered_in_source": "Natural Return/Raise use exact Drive/session sources; known non-None natural completion is rejected.",
+      "residual_assessment": "Active StopIteration/StopAsyncIteration classification through RuntimeError adapter own N/R and actual consumer is not reconciled; async fixed profile currently lists only yield/natural-return adapters.",
+      "evidence": [
+        {
+          "selector": "tests/unit/test_program_async_connections.py::test_real_async_association_gate_source_and_session_use_original_ports[value-ASYNC_YIELD]",
+          "current_final_cases": [
+            [
+              "tests.unit.test_program_async_connections",
+              "test_real_async_association_gate_source_and_session_use_original_ports[value-ASYNC_YIELD]"
+            ]
+          ],
+          "current_final_retested": true
+        },
+        {
+          "selector": "tests/unit/test_program_async_connections.py::test_real_async_association_gate_source_and_session_use_original_ports[packet-ASYNC_YIELD]",
+          "current_final_cases": [
+            [
+              "tests.unit.test_program_async_connections",
+              "test_real_async_association_gate_source_and_session_use_original_ports[packet-ASYNC_YIELD]"
+            ]
+          ],
+          "current_final_retested": true
+        },
+        {
+          "selector": "tests/unit/test_program_async_connections.py::test_async_return_cannot_publish_a_known_non_none_payload_as_natural_completion",
+          "current_final_cases": [
+            [
+              "tests.unit.test_program_async_connections",
+              "test_async_return_cannot_publish_a_known_non_none_payload_as_natural_completion"
+            ]
+          ],
+          "current_final_retested": true
+        }
+      ]
+    },
+    {
+      "id": "F19",
+      "reviewer": "/root/cleanup_forward_review",
+      "status": "OPEN_SOURCE_REVIEW_ONLY",
+      "covered_in_source": "Latent THROW/CLOSE normalizer own packets and failure state are linked; request completion cannot release unfinished body.",
+      "residual_assessment": "Asyncgen-specific same-body versioned closed athrow/aclose and ignored-GeneratorExit retry chain is not reconciled; generic coroutine/generator cases do not replace it.",
+      "evidence": [
+        {
+          "selector": "tests/unit/test_program_async_connections.py::test_first_request_uses_latent_normalization_normal_packet_and_keeps_failure_state[THROW]",
+          "current_final_cases": [
+            [
+              "tests.unit.test_program_async_connections",
+              "test_first_request_uses_latent_normalization_normal_packet_and_keeps_failure_state[THROW]"
+            ]
+          ],
+          "current_final_retested": true
+        },
+        {
+          "selector": "tests/unit/test_program_async_connections.py::test_first_request_uses_latent_normalization_normal_packet_and_keeps_failure_state[CLOSE]",
+          "current_final_cases": [
+            [
+              "tests.unit.test_program_async_connections",
+              "test_first_request_uses_latent_normalization_normal_packet_and_keeps_failure_state[CLOSE]"
+            ]
+          ],
+          "current_final_retested": true
+        },
+        {
+          "selector": "tests/unit/test_program_async_connections.py::test_suspended_body_is_not_finished_when_its_async_request_completes",
+          "current_final_cases": [
+            [
+              "tests.unit.test_program_async_connections",
+              "test_suspended_body_is_not_finished_when_its_async_request_completes"
+            ]
+          ],
+          "current_final_retested": true
+        }
+      ]
+    },
+    {
+      "id": "F20",
+      "reviewer": "/root/cleanup_forward_review",
+      "status": "OPEN_SOURCE_REVIEW_ONLY",
+      "covered_in_source": "GetIterator/advance N/R, item/extraction, independent iterator marker and backedge rejection exist. Old missing-method-lookup wording is obsolete.",
+      "residual_assessment": "Source expression own N/R to GetIterator and invalid-iterator/first exhaustion actual consumers remain to reconcile; expanded initial-next still explicitly reports continuation_source_unresolved.",
+      "evidence": [
+        {
+          "selector": "tests/unit/test_program_continuation_connections.py::test_lookup_iterator_request_and_actual_item_exhaustion_failure_are_distinct",
+          "current_final_cases": [
+            [
+              "tests.unit.test_program_continuation_connections",
+              "test_lookup_iterator_request_and_actual_item_exhaustion_failure_are_distinct[close-await]"
+            ],
+            [
+              "tests.unit.test_program_continuation_connections",
+              "test_lookup_iterator_request_and_actual_item_exhaustion_failure_are_distinct[close-delegate]"
+            ],
+            [
+              "tests.unit.test_program_continuation_connections",
+              "test_lookup_iterator_request_and_actual_item_exhaustion_failure_are_distinct[close-wrapper]"
+            ],
+            [
+              "tests.unit.test_program_continuation_connections",
+              "test_lookup_iterator_request_and_actual_item_exhaustion_failure_are_distinct[next-await]"
+            ],
+            [
+              "tests.unit.test_program_continuation_connections",
+              "test_lookup_iterator_request_and_actual_item_exhaustion_failure_are_distinct[next-delegate]"
+            ],
+            [
+              "tests.unit.test_program_continuation_connections",
+              "test_lookup_iterator_request_and_actual_item_exhaustion_failure_are_distinct[next-wrapper]"
+            ],
+            [
+              "tests.unit.test_program_continuation_connections",
+              "test_lookup_iterator_request_and_actual_item_exhaustion_failure_are_distinct[send-await]"
+            ],
+            [
+              "tests.unit.test_program_continuation_connections",
+              "test_lookup_iterator_request_and_actual_item_exhaustion_failure_are_distinct[send-delegate]"
+            ],
+            [
+              "tests.unit.test_program_continuation_connections",
+              "test_lookup_iterator_request_and_actual_item_exhaustion_failure_are_distinct[send-wrapper]"
+            ],
+            [
+              "tests.unit.test_program_continuation_connections",
+              "test_lookup_iterator_request_and_actual_item_exhaustion_failure_are_distinct[throw-await]"
+            ],
+            [
+              "tests.unit.test_program_continuation_connections",
+              "test_lookup_iterator_request_and_actual_item_exhaustion_failure_are_distinct[throw-delegate]"
+            ],
+            [
+              "tests.unit.test_program_continuation_connections",
+              "test_lookup_iterator_request_and_actual_item_exhaustion_failure_are_distinct[throw-wrapper]"
+            ]
+          ],
+          "current_final_retested": true
+        },
+        {
+          "selector": "tests/unit/test_program_method_lookup_connections.py::test_expanded_initial_next_uses_lookup_iterator_not_bound_method_as_marker",
+          "current_final_cases": [
+            [
+              "tests.unit.test_program_method_lookup_connections",
+              "test_expanded_initial_next_uses_lookup_iterator_not_bound_method_as_marker"
+            ]
+          ],
+          "current_final_retested": true
+        },
+        {
+          "selector": "tests/unit/test_program_continuation_connections.py::test_initial_advance_cannot_be_reused_after_a_real_advance_backedge",
+          "current_final_cases": [
+            [
+              "tests.unit.test_program_continuation_connections",
+              "test_initial_advance_cannot_be_reused_after_a_real_advance_backedge"
+            ]
+          ],
+          "current_final_retested": true
+        }
+      ]
+    },
+    {
+      "id": "F22",
+      "reviewer": "/root/value_resource_review",
+      "status": "OPEN_SOURCE_REVIEW_ONLY",
+      "covered_in_source": "Ordered raw THROW arities, distinct original/lookup/matcher packets and delegate item/error frontiers exist.",
+      "residual_assessment": "Same-source THROW through this delegate item/exhaustion/missing method to actual parent resume or lawful no-resume is not reconciled; fallback frontier_only is not whole-chain evidence.",
+      "evidence": [
+        {
+          "selector": "tests/unit/test_program_method_lookup_connections.py::test_bound_throw_call_still_uses_every_original_raw_ordinal",
+          "current_final_cases": [
+            [
+              "tests.unit.test_program_method_lookup_connections",
+              "test_bound_throw_call_still_uses_every_original_raw_ordinal[1]"
+            ],
+            [
+              "tests.unit.test_program_method_lookup_connections",
+              "test_bound_throw_call_still_uses_every_original_raw_ordinal[2]"
+            ],
+            [
+              "tests.unit.test_program_method_lookup_connections",
+              "test_bound_throw_call_still_uses_every_original_raw_ordinal[3]"
+            ]
+          ],
+          "current_final_retested": true
+        },
+        {
+          "selector": "tests/unit/test_program_lookup_fallback.py::test_throw_fallback_preserves_all_original_normal_method_arguments_and_independent_e0",
+          "current_final_cases": [
+            [
+              "tests.unit.test_program_lookup_fallback",
+              "test_throw_fallback_preserves_all_original_normal_method_arguments_and_independent_e0[1]"
+            ],
+            [
+              "tests.unit.test_program_lookup_fallback",
+              "test_throw_fallback_preserves_all_original_normal_method_arguments_and_independent_e0[2]"
+            ],
+            [
+              "tests.unit.test_program_lookup_fallback",
+              "test_throw_fallback_preserves_all_original_normal_method_arguments_and_independent_e0[3]"
+            ]
+          ],
+          "current_final_retested": true
+        },
+        {
+          "selector": "tests/unit/test_program_continuation_connections.py::test_lookup_iterator_request_and_actual_item_exhaustion_failure_are_distinct",
+          "current_final_cases": [
+            [
+              "tests.unit.test_program_continuation_connections",
+              "test_lookup_iterator_request_and_actual_item_exhaustion_failure_are_distinct[close-await]"
+            ],
+            [
+              "tests.unit.test_program_continuation_connections",
+              "test_lookup_iterator_request_and_actual_item_exhaustion_failure_are_distinct[close-delegate]"
+            ],
+            [
+              "tests.unit.test_program_continuation_connections",
+              "test_lookup_iterator_request_and_actual_item_exhaustion_failure_are_distinct[close-wrapper]"
+            ],
+            [
+              "tests.unit.test_program_continuation_connections",
+              "test_lookup_iterator_request_and_actual_item_exhaustion_failure_are_distinct[next-await]"
+            ],
+            [
+              "tests.unit.test_program_continuation_connections",
+              "test_lookup_iterator_request_and_actual_item_exhaustion_failure_are_distinct[next-delegate]"
+            ],
+            [
+              "tests.unit.test_program_continuation_connections",
+              "test_lookup_iterator_request_and_actual_item_exhaustion_failure_are_distinct[next-wrapper]"
+            ],
+            [
+              "tests.unit.test_program_continuation_connections",
+              "test_lookup_iterator_request_and_actual_item_exhaustion_failure_are_distinct[send-await]"
+            ],
+            [
+              "tests.unit.test_program_continuation_connections",
+              "test_lookup_iterator_request_and_actual_item_exhaustion_failure_are_distinct[send-delegate]"
+            ],
+            [
+              "tests.unit.test_program_continuation_connections",
+              "test_lookup_iterator_request_and_actual_item_exhaustion_failure_are_distinct[send-wrapper]"
+            ],
+            [
+              "tests.unit.test_program_continuation_connections",
+              "test_lookup_iterator_request_and_actual_item_exhaustion_failure_are_distinct[throw-await]"
+            ],
+            [
+              "tests.unit.test_program_continuation_connections",
+              "test_lookup_iterator_request_and_actual_item_exhaustion_failure_are_distinct[throw-delegate]"
+            ],
+            [
+              "tests.unit.test_program_continuation_connections",
+              "test_lookup_iterator_request_and_actual_item_exhaustion_failure_are_distinct[throw-wrapper]"
+            ]
+          ],
+          "current_final_retested": true
+        }
+      ]
+    },
+    {
+      "id": "F24",
+      "reviewer": "/root/value_resource_review",
+      "status": "OPEN_SOURCE_REVIEW_ONLY",
+      "covered_in_source": "Request, packet/target, handler or terminal and independent status consumers exist; missing relation preserves original denominator.",
+      "residual_assessment": "Caught fixture currently returns directly: suppression followed by another AWAIT/C1 Replace and CURRENT_AWAITED forwarding/callback actual chain remain missing.",
+      "evidence": [
+        {
+          "selector": "tests/unit/test_program_async_connections.py::test_cancel_call_injection_handling_and_final_status_are_distinct_original_sites",
+          "current_final_cases": [
+            [
+              "tests.unit.test_program_async_connections",
+              "test_cancel_call_injection_handling_and_final_status_are_distinct_original_sites[False]"
+            ],
+            [
+              "tests.unit.test_program_async_connections",
+              "test_cancel_call_injection_handling_and_final_status_are_distinct_original_sites[True]"
+            ]
+          ],
+          "current_final_retested": true
+        },
+        {
+          "selector": "tests/unit/test_program_async_connections.py::test_current_waiter_result_is_not_assumed_to_be_the_parent_body_without_forwarding",
+          "current_final_cases": [
+            [
+              "tests.unit.test_program_async_connections",
+              "test_current_waiter_result_is_not_assumed_to_be_the_parent_body_without_forwarding"
+            ]
+          ],
+          "current_final_retested": true
+        },
+        {
+          "selector": "tests/unit/test_program_async_connections.py::test_deleting_cancel_relations_does_not_delete_request_delivery_handler_status_denominator",
+          "current_final_cases": [
+            [
+              "tests.unit.test_program_async_connections",
+              "test_deleting_cancel_relations_does_not_delete_request_delivery_handler_status_denominator"
+            ]
+          ],
+          "current_final_retested": true
+        }
+      ]
+    },
+    {
+      "id": "X25",
+      "reviewer": "/root/await_wrapper_chain",
+      "status": "OPEN_SOURCE_REVIEW_ONLY",
+      "covered_in_source": "Two-cut pending/context/delegate, local binding preservation and loop-carried pending/context/fresh facts each exist.",
+      "residual_assessment": "The same active C1/two-cut/loop-merge combination with LOCAL_BINDING and current pending/context/delegate is not reconciled; no new canonical field identified by finite review.",
+      "evidence": [
+        {
+          "selector": "tests/unit/test_program_pending_cleanup.py::test_active_c1_pending_payload_crosses_two_cuts_to_the_original_host_raise",
+          "current_final_cases": [
+            [
+              "tests.unit.test_program_pending_cleanup",
+              "test_active_c1_pending_payload_crosses_two_cuts_to_the_original_host_raise"
+            ]
+          ],
+          "current_final_retested": true
+        },
+        {
+          "selector": "tests/unit/test_resumption_forwarding.py::test_binding_saved_actuals_keep_same_slot_bound_facts_in_validation_and_query",
+          "current_final_cases": [
+            [
+              "tests.unit.test_resumption_forwarding",
+              "test_binding_saved_actuals_keep_same_slot_bound_facts_in_validation_and_query"
+            ]
+          ],
+          "current_final_retested": true
+        },
+        {
+          "selector": "tests/unit/test_cleanup_forward.py::test_loop_self_carries_pending_context_and_fresh_pack_without_losing_seed",
+          "current_final_cases": [],
+          "current_final_retested": false
+        }
+      ]
+    },
+    {
+      "id": "X26",
+      "reviewer": "/root/await_wrapper_chain",
+      "status": "OPEN_SOURCE_REVIEW_ONLY",
+      "covered_in_source": "Original normal/raise terminal sources, partial poststates, session kill/reseed and release of exact commits exist.",
+      "residual_assessment": "Async/cancel terminal paths are not reconciled into one publication-to-same-body-history-to-current-state-to-release chain. Request completion or ASYNC_YIELD does not supply it.",
+      "evidence": [
+        {
+          "selector": "tests/unit/test_lifecycle_body_composition.py::test_actual_cleanup_return_and_raise_frontier_keep_independent_terminal_sources",
+          "current_final_cases": [],
+          "current_final_retested": false
+        },
+        {
+          "selector": "tests/unit/test_lifecycle_body_composition.py::test_real_helper_normal_and_raise_use_each_current_partial_poststate",
+          "current_final_cases": [],
+          "current_final_retested": false
+        },
+        {
+          "selector": "tests/unit/test_lifecycle_cleanup_composition.py::test_session_post_is_current_only_and_real_helper_normal_reseeds_it",
+          "current_final_cases": [],
+          "current_final_retested": false
+        }
+      ]
+    },
+    {
+      "id": "X27",
+      "reviewer": "/root/await_wrapper_chain",
+      "status": "OPEN_SOURCE_REVIEW_ONLY",
+      "covered_in_source": "Persistent activation/entry/outcome/full ports and exact missing-parent/sibling/reexecution negatives exist.",
+      "residual_assessment": "Remaining delegation/cancellation families need their own actual source-to-call/delivery-to-parent/no-parent-to-consumer joins. Existing occurrence fields should be reused.",
+      "evidence": [
+        {
+          "selector": "tests/unit/test_execution_resumable_links.py::test_persistent_body_start_and_resume_keep_every_original_port_and_selected_outcome",
+          "current_final_cases": [
+            [
+              "tests.unit.test_execution_resumable_links",
+              "test_persistent_body_start_and_resume_keep_every_original_port_and_selected_outcome[False-packet]"
+            ],
+            [
+              "tests.unit.test_execution_resumable_links",
+              "test_persistent_body_start_and_resume_keep_every_original_port_and_selected_outcome[False-value]"
+            ],
+            [
+              "tests.unit.test_execution_resumable_links",
+              "test_persistent_body_start_and_resume_keep_every_original_port_and_selected_outcome[True-packet]"
+            ],
+            [
+              "tests.unit.test_execution_resumable_links",
+              "test_persistent_body_start_and_resume_keep_every_original_port_and_selected_outcome[True-value]"
+            ]
+          ],
+          "current_final_retested": true
+        },
+        {
+          "selector": "tests/unit/test_execution_delegate_close_continuations.py::test_missing_close_parent_occurrence_cannot_borrow_the_complete_sibling",
+          "current_final_cases": [
+            [
+              "tests.unit.test_execution_delegate_close_continuations",
+              "test_missing_close_parent_occurrence_cannot_borrow_the_complete_sibling[pending-use-normal-injection]"
+            ],
+            [
+              "tests.unit.test_execution_delegate_close_continuations",
+              "test_missing_close_parent_occurrence_cannot_borrow_the_complete_sibling[pending-use-raise-own-packet]"
+            ],
+            [
+              "tests.unit.test_execution_delegate_close_continuations",
+              "test_missing_close_parent_occurrence_cannot_borrow_the_complete_sibling[resume-transfer-normal-injection]"
+            ],
+            [
+              "tests.unit.test_execution_delegate_close_continuations",
+              "test_missing_close_parent_occurrence_cannot_borrow_the_complete_sibling[resume-transfer-raise-own-packet]"
+            ],
+            [
+              "tests.unit.test_execution_delegate_close_continuations",
+              "test_missing_close_parent_occurrence_cannot_borrow_the_complete_sibling[terminal-use-normal-injection]"
+            ],
+            [
+              "tests.unit.test_execution_delegate_close_continuations",
+              "test_missing_close_parent_occurrence_cannot_borrow_the_complete_sibling[terminal-use-raise-own-packet]"
+            ]
+          ],
+          "current_final_retested": true
+        },
+        {
+          "selector": "tests/unit/test_execution_await_pipeline_reexecution.py::test_second_round_missing_capture_never_borrows_the_complete_first_round",
+          "current_final_cases": [
+            [
+              "tests.unit.test_execution_await_pipeline_reexecution",
+              "test_second_round_missing_capture_never_borrows_the_complete_first_round[child-call]"
+            ],
+            [
+              "tests.unit.test_execution_await_pipeline_reexecution",
+              "test_second_round_missing_capture_never_borrows_the_complete_first_round[helper-call]"
+            ],
+            [
+              "tests.unit.test_execution_await_pipeline_reexecution",
+              "test_second_round_missing_capture_never_borrows_the_complete_first_round[inner-call]"
+            ],
+            [
+              "tests.unit.test_execution_await_pipeline_reexecution",
+              "test_second_round_missing_capture_never_borrows_the_complete_first_round[observer-payload]"
+            ],
+            [
+              "tests.unit.test_execution_await_pipeline_reexecution",
+              "test_second_round_missing_capture_never_borrows_the_complete_first_round[observer-state]"
+            ],
+            [
+              "tests.unit.test_execution_await_pipeline_reexecution",
+              "test_second_round_missing_capture_never_borrows_the_complete_first_round[resume-transfer]"
+            ],
+            [
+              "tests.unit.test_execution_await_pipeline_reexecution",
+              "test_second_round_missing_capture_never_borrows_the_complete_first_round[source-use]"
+            ],
+            [
+              "tests.unit.test_execution_await_pipeline_reexecution",
+              "test_second_round_missing_capture_never_borrows_the_complete_first_round[terminal-use]"
+            ]
+          ],
+          "current_final_retested": true
+        }
+      ]
+    }
+  ],
+  "source_hashes": {
+    "scar/ir/program/protocol_rules.py": "86952b1f50809e035ab2a688ad0262a1392c8df541c9d1338ed0d946cdd0c967",
+    "tests/fixtures/program_async_connections.py": "f75ed1fe40bc816da6451ff230797a0099efb4dde20f9221507e27c7935b1b5e",
+    "tests/unit/test_cleanup_forward.py": "41a713d09d636dacc7682793b483a546df0d5927025d02f3f31661fef3b9bd82",
+    "tests/unit/test_execution_await_pipeline_reexecution.py": "b67ca5d1b794951d80aade3cf127c3bc0cd29deb8822dc210ca1e779d4207e1f",
+    "tests/unit/test_execution_delegate_close_continuations.py": "63d3f036e5183b1573ed15823c549c8f35b8d437716015864afa7a870ac53a64",
+    "tests/unit/test_execution_resumable_links.py": "6f809e44111bbc7e8d8bfea78fd526dacbff51d4028ee42f970572ac7df18dae",
+    "tests/unit/test_lifecycle_body_composition.py": "eafe223725a9b14c4771be373eb38a245be338da2bcc98072ea3bdeb3221eceb",
+    "tests/unit/test_lifecycle_cleanup_composition.py": "aae51c755e934eeaa43c88a57d4f6af16ab2c5ff779c0b37ca67dd58c7bbf5c5",
+    "tests/unit/test_program_async_connections.py": "121a3f67c42cfba5392180bce78568d5191325d16fcee9553a26ba8df30bbb69",
+    "tests/unit/test_program_continuation_connections.py": "10cbb8b02211b9938468e8f02ed20a298ebfb17d87275927aff5f9d6250accf5",
+    "tests/unit/test_program_lookup_fallback.py": "b3b28e19d7fae98fb170afc336e395ff96fa75d6cc130bfa2d5220f69cb5e180",
+    "tests/unit/test_program_method_lookup_connections.py": "7c2e597faec7523f535ce74799697a341c191d9c3138337a40dc9f7889502307",
+    "tests/unit/test_program_pending_cleanup.py": "ed5ed97fc5894522e7b9c03e27aab9db09f3cba80e990bdbd6e98aea99e3c2b8",
+    "tests/unit/test_resumption_forwarding.py": "abde52a64326f33857bf44eaa2a223110f3a642b1f41b7b5812ac54d172dd0c1"
+  },
+  "F16_reference": "family-obligations.json:F16_current_scope_review",
+  "all_nine_families_remain_open": true,
+  "newly_closed": [],
+  "tests_started": 0,
+  "note": "Empty current_final_cases means source/historical evidence only; do not claim it was retested in this run. No new canonical field was identified for X25-X27 by this finite review."
+}

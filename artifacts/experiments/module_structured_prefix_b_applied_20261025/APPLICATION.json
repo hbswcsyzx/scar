@@ -1,0 +1,52 @@
+{
+  "files": [
+    {
+      "after_sha256": "77b1d7b2ac4c980c7ef922fbcb0fef61b425cc0906de7f9ca835ff53066bf767",
+      "before_sha256": "537d334da77daf64f81266cecfb5bb1a8d874425d41946c68faf5189d60a5e6d",
+      "bytes": 83281,
+      "path": "scar/analysis/program_lowering.py"
+    },
+    {
+      "after_sha256": "07f423efa81b514aa9a08d7d1ee16d6cd8abcb6a06bf042a06984ae9a2c8c360",
+      "before_sha256": "14317fdf81410a4362520f3b7783e221e6bc6958cbab604000ca370e35392933",
+      "bytes": 21641,
+      "path": "scar/ir/program/module_entries.py"
+    },
+    {
+      "after_sha256": "1bf6e192cc268a2d327e5279cccc029be85c7324ef57efdfd6ed195a0593cc20",
+      "before_sha256": "4bc6f04bdd202f29ad16fc6b4e054f77978bb903c2a8254acf69fdcc43537643",
+      "bytes": 57622,
+      "path": "scar/analysis/structured_lowering.py"
+    },
+    {
+      "after_sha256": "f29a039fa3820c6a0a2bd74c6ec95e1d096b510f5b87d7ea7f2e645bc5f849dc",
+      "before_sha256": "a105749b764e2d13ee134f6b7f337d4634933a8e4fc7d64e01e87b74378b6f5e",
+      "bytes": 22919,
+      "path": "scar/analysis/environment_lowering.py"
+    },
+    {
+      "after_sha256": "437582148a1c1cf180120254ed30bec5a17798476139c3a6d4166fd8620ea621",
+      "before_sha256": "0e83aed9da8e72c6d50bb2630bcffa905f10da7104db1d94c31312f8b5fe3d9a",
+      "bytes": 45101,
+      "path": "scar/analysis/source_module_lowering.py"
+    },
+    {
+      "after_sha256": "7c300aed1e864f9dae5d7a6b2391421a3ec1808dcbb099b6628ff929de2db4b1",
+      "before_sha256": "b8c97c4d887dd01a553e37e6b10b0464eef87bec4213bd9583656cdedc3cd8fc",
+      "bytes": 57437,
+      "path": "scar/analysis/source_module_validation.py"
+    }
+  ],
+  "isolated_actual_exit": 0,
+  "isolated_delivery_commit": "8078ffdecff2734c5baeac3d6bdf7a6c436c0b55",
+  "isolated_outer_wall_seconds": 7.126339702983387,
+  "isolated_tool_session": 63369,
+  "isolated_worker_wall_seconds": 6.942416362988297,
+  "main_actual_exit": 0,
+  "main_consumer": "NORMAL_ORIGINAL_SP8_AND_PRIOR_FUNCTION_SP5",
+  "main_tool_session": 55827,
+  "main_wall_seconds": 4.898593024990987,
+  "schema": "scar.module-structured-prefix-b-main-application/1",
+  "status": "APPLIED_MAIN_READBACK_PASSED_WITH_OPEN",
+  "whole_model": "OPEN"
+}

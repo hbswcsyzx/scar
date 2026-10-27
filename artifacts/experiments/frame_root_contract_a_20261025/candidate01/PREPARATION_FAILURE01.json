@@ -1,0 +1,7 @@
+{
+  "status": "PREPARATION_FAILED_NO_GATE_RUN",
+  "actual_exit": 1,
+  "wall_time_seconds": 1.127072439,
+  "detail": "tests is an existing namespace package; no tests/__init__.py to freeze. No freeze/attempt/worker created.",
+  "production_changed": false
+}

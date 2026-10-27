@@ -1,0 +1,1 @@
+{"probe": "no-state-actual-syscalls", "results": [{"arguments": [0], "errno": 0, "return": 0, "syscall": "unshare"}, {"arguments": [4294967295, 4294967295, 0], "errno": 0, "return": 0, "syscall": "close_range"}]}

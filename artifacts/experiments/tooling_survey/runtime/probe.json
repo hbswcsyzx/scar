@@ -1,0 +1,1529 @@
+{
+  "python": "3.14.7 | packaged by conda-forge | (main, Sep  2 2026, 21:08:32) [GCC 15.3.0]",
+  "torch": "2.13.0+cu132",
+  "torch_git": "cf30153c4c131c8164ee7798e5022d810682e2cb",
+  "cuda_build": "13.2",
+  "cuda_initialized_before": false,
+  "script_sha256": "3bc52e2be7a21c7211fe0b4830742c120673520917924106c2c3ea4aa5f2c1bf",
+  "monitoring": {
+    "rows": [
+      {
+        "event": "PY_START",
+        "code": "control",
+        "argument_types": [
+          "code",
+          "int"
+        ],
+        "offset": 0,
+        "collector_perf_counter_ns": 4674128540631193
+      },
+      {
+        "event": "INSTRUCTION",
+        "code": "control",
+        "argument_types": [
+          "code",
+          "int"
+        ],
+        "offset": 2,
+        "collector_perf_counter_ns": 4674128540634651
+      },
+      {
+        "event": "INSTRUCTION",
+        "code": "control",
+        "argument_types": [
+          "code",
+          "int"
+        ],
+        "offset": 12,
+        "collector_perf_counter_ns": 4674128540636334
+      },
+      {
+        "event": "INSTRUCTION",
+        "code": "control",
+        "argument_types": [
+          "code",
+          "int"
+        ],
+        "offset": 14,
+        "collector_perf_counter_ns": 4674128540637141
+      },
+      {
+        "event": "INSTRUCTION",
+        "code": "control",
+        "argument_types": [
+          "code",
+          "int"
+        ],
+        "offset": 16,
+        "collector_perf_counter_ns": 4674128540637824
+      },
+      {
+        "event": "CALL",
+        "code": "control",
+        "argument_types": [
+          "code",
+          "int",
+          "function",
+          "int"
+        ],
+        "offset": 16,
+        "collector_perf_counter_ns": 4674128540639412
+      },
+      {
+        "event": "PY_START",
+        "code": "callee",
+        "argument_types": [
+          "code",
+          "int"
+        ],
+        "offset": 0,
+        "collector_perf_counter_ns": 4674128540640644
+      },
+      {
+        "event": "INSTRUCTION",
+        "code": "callee",
+        "argument_types": [
+          "code",
+          "int"
+        ],
+        "offset": 2,
+        "collector_perf_counter_ns": 4674128540641377
+      },
+      {
+        "event": "INSTRUCTION",
+        "code": "callee",
+        "argument_types": [
+          "code",
+          "int"
+        ],
+        "offset": 4,
+        "collector_perf_counter_ns": 4674128540642051
+      },
+      {
+        "event": "INSTRUCTION",
+        "code": "callee",
+        "argument_types": [
+          "code",
+          "int"
+        ],
+        "offset": 16,
+        "collector_perf_counter_ns": 4674128540643103
+      },
+      {
+        "event": "PY_RETURN",
+        "code": "callee",
+        "argument_types": [
+          "code",
+          "int",
+          "int"
+        ],
+        "offset": 16,
+        "collector_perf_counter_ns": 4674128540643993
+      },
+      {
+        "event": "INSTRUCTION",
+        "code": "control",
+        "argument_types": [
+          "code",
+          "int"
+        ],
+        "offset": 24,
+        "collector_perf_counter_ns": 4674128540644772
+      },
+      {
+        "event": "INSTRUCTION",
+        "code": "control",
+        "argument_types": [
+          "code",
+          "int"
+        ],
+        "offset": 26,
+        "collector_perf_counter_ns": 4674128540645429
+      },
+      {
+        "event": "INSTRUCTION",
+        "code": "control",
+        "argument_types": [
+          "code",
+          "int"
+        ],
+        "offset": 28,
+        "collector_perf_counter_ns": 4674128540646023
+      },
+      {
+        "event": "INSTRUCTION",
+        "code": "control",
+        "argument_types": [
+          "code",
+          "int"
+        ],
+        "offset": 36,
+        "collector_perf_counter_ns": 4674128540646695
+      },
+      {
+        "event": "INSTRUCTION",
+        "code": "control",
+        "argument_types": [
+          "code",
+          "int"
+        ],
+        "offset": 40,
+        "collector_perf_counter_ns": 4674128540647504
+      },
+      {
+        "event": "BRANCH_LEFT",
+        "code": "control",
+        "argument_types": [
+          "code",
+          "int",
+          "int"
+        ],
+        "offset": 40,
+        "collector_perf_counter_ns": 4674128540648355
+      },
+      {
+        "event": "INSTRUCTION",
+        "code": "control",
+        "argument_types": [
+          "code",
+          "int"
+        ],
+        "offset": 42,
+        "collector_perf_counter_ns": 4674128540649154
+      },
+      {
+        "event": "INSTRUCTION",
+        "code": "control",
+        "argument_types": [
+          "code",
+          "int"
+        ],
+        "offset": 44,
+        "collector_perf_counter_ns": 4674128540649810
+      },
+      {
+        "event": "INSTRUCTION",
+        "code": "control",
+        "argument_types": [
+          "code",
+          "int"
+        ],
+        "offset": 54,
+        "collector_perf_counter_ns": 4674128540650695
+      },
+      {
+        "event": "INSTRUCTION",
+        "code": "control",
+        "argument_types": [
+          "code",
+          "int"
+        ],
+        "offset": 56,
+        "collector_perf_counter_ns": 4674128540651359
+      },
+      {
+        "event": "INSTRUCTION",
+        "code": "control",
+        "argument_types": [
+          "code",
+          "int"
+        ],
+        "offset": 58,
+        "collector_perf_counter_ns": 4674128540651958
+      },
+      {
+        "event": "INSTRUCTION",
+        "code": "control",
+        "argument_types": [
+          "code",
+          "int"
+        ],
+        "offset": 60,
+        "collector_perf_counter_ns": 4674128540652769
+      },
+      {
+        "event": "CALL",
+        "code": "control",
+        "argument_types": [
+          "code",
+          "int",
+          "builtin_function_or_method",
+          "list"
+        ],
+        "offset": 60,
+        "collector_perf_counter_ns": 4674128540653907
+      },
+      {
+        "event": "C_RETURN",
+        "code": "control",
+        "argument_types": [
+          "code",
+          "int",
+          "builtin_function_or_method",
+          "list"
+        ],
+        "offset": 60,
+        "collector_perf_counter_ns": 4674128540655297
+      },
+      {
+        "event": "INSTRUCTION",
+        "code": "control",
+        "argument_types": [
+          "code",
+          "int"
+        ],
+        "offset": 68,
+        "collector_perf_counter_ns": 4674128540656343
+      },
+      {
+        "event": "INSTRUCTION",
+        "code": "control",
+        "argument_types": [
+          "code",
+          "int"
+        ],
+        "offset": 80,
+        "collector_perf_counter_ns": 4674128540657201
+      },
+      {
+        "event": "INSTRUCTION",
+        "code": "control",
+        "argument_types": [
+          "code",
+          "int"
+        ],
+        "offset": 82,
+        "collector_perf_counter_ns": 4674128540657935
+      },
+      {
+        "event": "INSTRUCTION",
+        "code": "control",
+        "argument_types": [
+          "code",
+          "int"
+        ],
+        "offset": 84,
+        "collector_perf_counter_ns": 4674128540658604
+      },
+      {
+        "event": "PY_RETURN",
+        "code": "control",
+        "argument_types": [
+          "code",
+          "int",
+          "int"
+        ],
+        "offset": 84,
+        "collector_perf_counter_ns": 4674128540659325
+      }
+    ],
+    "tool_released": true,
+    "counts": {
+      "PY_START": 2,
+      "INSTRUCTION": 22,
+      "CALL": 2,
+      "PY_RETURN": 2,
+      "BRANCH_LEFT": 1,
+      "C_RETURN": 1
+    }
+  },
+  "execution_trace": {
+    "schema": "1.1.1-chakra.0.0.4",
+    "top_fields": [
+      "schema",
+      "pid",
+      "time",
+      "start_ts",
+      "nodes",
+      "finish_ts"
+    ],
+    "node_count": 36,
+    "node_fields": [
+      "attrs",
+      "ctrl_deps",
+      "id",
+      "inputs",
+      "name",
+      "outputs"
+    ],
+    "node_names": {
+      "[pytorch|profiler|execution_trace|thread]": 1,
+      "aten::empty": 1,
+      "aten::resize_": 1,
+      "aten::arange": 2,
+      "aten::view": 1,
+      "aten::reshape": 1,
+      "aten::as_strided": 4,
+      "aten::transpose": 1,
+      "aten::t": 1,
+      "aten::empty_strided": 3,
+      "aten::copy_": 3,
+      "aten::clone": 1,
+      "aten::_to_copy": 2,
+      "aten::to": 2,
+      "aten::add_": 2,
+      "aten::fill_": 3,
+      "aten::sum": 6,
+      "[pytorch|profiler|execution_trace|process]": 1
+    },
+    "extra_resources_enabled": false
+  },
+  "chrome": {
+    "schemaVersion": 1,
+    "top_fields": [
+      "schemaVersion",
+      "deviceProperties",
+      "trace_id",
+      "with_stack",
+      "profile_memory",
+      "cuda_driver_version",
+      "record_shapes",
+      "cuda_runtime_version",
+      "cupti_version",
+      "host_name",
+      "displayTimeUnit",
+      "baseTimeNanoseconds",
+      "traceEvents",
+      "traceName"
+    ],
+    "categories": {
+      "None": 10,
+      "cpu_op": 34,
+      "cpu_instant_event": 13,
+      "python_function": 85,
+      "Trace": 1
+    },
+    "ts_fields": [
+      {
+        "baseTimeNanoseconds": 1790857026000000000,
+        "displayTimeUnit": "ms"
+      }
+    ]
+  },
+  "profiler_cpu_events": [
+    {
+      "name": "probe.py(59): <module>",
+      "input_shapes": [],
+      "cpu_parent": null,
+      "kernels": 0,
+      "device_type": "DeviceType.CPU",
+      "sequence_nr": -1
+    },
+    {
+      "name": "torch/profiler/profiler.py(1118): __enter__",
+      "input_shapes": [],
+      "cpu_parent": "probe.py(59): <module>",
+      "kernels": 0,
+      "device_type": "DeviceType.CPU",
+      "sequence_nr": -1
+    },
+    {
+      "name": "torch/profiler/profiler.py(1128): start",
+      "input_shapes": [],
+      "cpu_parent": "torch/profiler/profiler.py(1118): __enter__",
+      "kernels": 0,
+      "device_type": "DeviceType.CPU",
+      "sequence_nr": -1
+    },
+    {
+      "name": "torch/profiler/profiler.py(1262): _transit_action",
+      "input_shapes": [],
+      "cpu_parent": "torch/profiler/profiler.py(1128): start",
+      "kernels": 0,
+      "device_type": "DeviceType.CPU",
+      "sequence_nr": -1
+    },
+    {
+      "name": "torch/profiler/profiler.py(342): start_trace",
+      "input_shapes": [],
+      "cpu_parent": "torch/profiler/profiler.py(1262): _transit_action",
+      "kernels": 0,
+      "device_type": "DeviceType.CPU",
+      "sequence_nr": -1
+    },
+    {
+      "name": "torch/autograd/profiler.py(414): _start_trace",
+      "input_shapes": [],
+      "cpu_parent": "torch/profiler/profiler.py(342): start_trace",
+      "kernels": 0,
+      "device_type": "DeviceType.CPU",
+      "sequence_nr": -1
+    },
+    {
+      "name": "<built-in function perf_counter_ns>",
+      "input_shapes": [],
+      "cpu_parent": "torch/autograd/profiler.py(414): _start_trace",
+      "kernels": 0,
+      "device_type": "DeviceType.CPU",
+      "sequence_nr": -1
+    },
+    {
+      "name": "torch/profiler/profiler.py(538): add_metadata_json",
+      "input_shapes": [],
+      "cpu_parent": "torch/profiler/profiler.py(342): start_trace",
+      "kernels": 0,
+      "device_type": "DeviceType.CPU",
+      "sequence_nr": -1
+    },
+    {
+      "name": "<built-in method _add_metadata_json of pybind11_builtins.pybind11_detail_function_record_v1_system_libstdcpp_gxx_abi_1xxx_use_cxx11_abi_1 object at 0x70d581918e10>",
+      "input_shapes": [],
+      "cpu_parent": "torch/profiler/profiler.py(538): add_metadata_json",
+      "kernels": 0,
+      "device_type": "DeviceType.CPU",
+      "sequence_nr": -1
+    },
+    {
+      "name": "torch/profiler/profiler.py(538): add_metadata_json",
+      "input_shapes": [],
+      "cpu_parent": "torch/profiler/profiler.py(342): start_trace",
+      "kernels": 0,
+      "device_type": "DeviceType.CPU",
+      "sequence_nr": -1
+    },
+    {
+      "name": "<built-in method _add_metadata_json of pybind11_builtins.pybind11_detail_function_record_v1_system_libstdcpp_gxx_abi_1xxx_use_cxx11_abi_1 object at 0x70d581918e10>",
+      "input_shapes": [],
+      "cpu_parent": "torch/profiler/profiler.py(538): add_metadata_json",
+      "kernels": 0,
+      "device_type": "DeviceType.CPU",
+      "sequence_nr": -1
+    },
+    {
+      "name": "torch/profiler/profiler.py(538): add_metadata_json",
+      "input_shapes": [],
+      "cpu_parent": "torch/profiler/profiler.py(342): start_trace",
+      "kernels": 0,
+      "device_type": "DeviceType.CPU",
+      "sequence_nr": -1
+    },
+    {
+      "name": "<built-in method _add_metadata_json of pybind11_builtins.pybind11_detail_function_record_v1_system_libstdcpp_gxx_abi_1xxx_use_cxx11_abi_1 object at 0x70d581918e10>",
+      "input_shapes": [],
+      "cpu_parent": "torch/profiler/profiler.py(538): add_metadata_json",
+      "kernels": 0,
+      "device_type": "DeviceType.CPU",
+      "sequence_nr": -1
+    },
+    {
+      "name": "<built-in method kineto_available of pybind11_builtins.pybind11_detail_function_record_v1_system_libstdcpp_gxx_abi_1xxx_use_cxx11_abi_1 object at 0x70d581918e50>",
+      "input_shapes": [],
+      "cpu_parent": "torch/profiler/profiler.py(342): start_trace",
+      "kernels": 0,
+      "device_type": "DeviceType.CPU",
+      "sequence_nr": -1
+    },
+    {
+      "name": "torch/profiler/profiler.py(554): _get_distributed_info",
+      "input_shapes": [],
+      "cpu_parent": "torch/profiler/profiler.py(342): start_trace",
+      "kernels": 0,
+      "device_type": "DeviceType.CPU",
+      "sequence_nr": -1
+    },
+    {
+      "name": "torch/distributed/__init__.py(17): is_available",
+      "input_shapes": [],
+      "cpu_parent": "torch/profiler/profiler.py(554): _get_distributed_info",
+      "kernels": 0,
+      "device_type": "DeviceType.CPU",
+      "sequence_nr": -1
+    },
+    {
+      "name": "<built-in function hasattr>",
+      "input_shapes": [],
+      "cpu_parent": "torch/distributed/__init__.py(17): is_available",
+      "kernels": 0,
+      "device_type": "DeviceType.CPU",
+      "sequence_nr": -1
+    },
+    {
+      "name": "torch/distributed/distributed_c10d.py(1394): is_initialized",
+      "input_shapes": [],
+      "cpu_parent": "torch/profiler/profiler.py(554): _get_distributed_info",
+      "kernels": 0,
+      "device_type": "DeviceType.CPU",
+      "sequence_nr": -1
+    },
+    {
+      "name": "torch/distributed/distributed_c10d.py(817): WORLD",
+      "input_shapes": [],
+      "cpu_parent": "torch/distributed/distributed_c10d.py(1394): is_initialized",
+      "kernels": 0,
+      "device_type": "DeviceType.CPU",
+      "sequence_nr": -1
+    },
+    {
+      "name": "torch/distributed/distributed_c10d.py(688): default_pg",
+      "input_shapes": [],
+      "cpu_parent": "torch/distributed/distributed_c10d.py(817): WORLD",
+      "kernels": 0,
+      "device_type": "DeviceType.CPU",
+      "sequence_nr": -1
+    },
+    {
+      "name": "<built-in function hasattr>",
+      "input_shapes": [],
+      "cpu_parent": "torch/profiler/profiler.py(342): start_trace",
+      "kernels": 0,
+      "device_type": "DeviceType.CPU",
+      "sequence_nr": -1
+    },
+    {
+      "name": "<built-in function getattr>",
+      "input_shapes": [],
+      "cpu_parent": "torch/profiler/profiler.py(342): start_trace",
+      "kernels": 0,
+      "device_type": "DeviceType.CPU",
+      "sequence_nr": -1
+    },
+    {
+      "name": "<built-in method items of dict object at 0x70d57fd38940>",
+      "input_shapes": [],
+      "cpu_parent": "torch/profiler/profiler.py(342): start_trace",
+      "kernels": 0,
+      "device_type": "DeviceType.CPU",
+      "sequence_nr": -1
+    },
+    {
+      "name": "<built-in method arange of type object at 0x70d5b2dabe00>",
+      "input_shapes": [],
+      "cpu_parent": "probe.py(59): <module>",
+      "kernels": 0,
+      "device_type": "DeviceType.CPU",
+      "sequence_nr": -1
+    },
+    {
+      "name": "aten::arange",
+      "input_shapes": [
+        [],
+        [],
+        [],
+        [],
+        []
+      ],
+      "cpu_parent": "<built-in method arange of type object at 0x70d5b2dabe00>",
+      "kernels": 0,
+      "device_type": "DeviceType.CPU",
+      "sequence_nr": -1
+    },
+    {
+      "name": "aten::empty",
+      "input_shapes": [
+        [],
+        [],
+        [],
+        [],
+        [],
+        []
+      ],
+      "cpu_parent": "aten::arange",
+      "kernels": 0,
+      "device_type": "DeviceType.CPU",
+      "sequence_nr": -1
+    },
+    {
+      "name": "aten::arange",
+      "input_shapes": [
+        [],
+        [],
+        [],
+        [
+          0
+        ]
+      ],
+      "cpu_parent": "aten::arange",
+      "kernels": 0,
+      "device_type": "DeviceType.CPU",
+      "sequence_nr": -1
+    },
+    {
+      "name": "aten::resize_",
+      "input_shapes": [
+        [
+          0
+        ],
+        [],
+        []
+      ],
+      "cpu_parent": "aten::arange",
+      "kernels": 0,
+      "device_type": "DeviceType.CPU",
+      "sequence_nr": -1
+    },
+    {
+      "name": "<built-in method reshape of Tensor object at 0x70d57112e150>",
+      "input_shapes": [],
+      "cpu_parent": "probe.py(59): <module>",
+      "kernels": 0,
+      "device_type": "DeviceType.CPU",
+      "sequence_nr": -1
+    },
+    {
+      "name": "aten::reshape",
+      "input_shapes": [
+        [
+          4
+        ],
+        []
+      ],
+      "cpu_parent": "<built-in method reshape of Tensor object at 0x70d57112e150>",
+      "kernels": 0,
+      "device_type": "DeviceType.CPU",
+      "sequence_nr": 0
+    },
+    {
+      "name": "aten::view",
+      "input_shapes": [
+        [
+          4
+        ],
+        []
+      ],
+      "cpu_parent": "aten::reshape",
+      "kernels": 0,
+      "device_type": "DeviceType.CPU",
+      "sequence_nr": 0
+    },
+    {
+      "name": "<built-in method t of Tensor object at 0x70d5711a4830>",
+      "input_shapes": [],
+      "cpu_parent": "probe.py(59): <module>",
+      "kernels": 0,
+      "device_type": "DeviceType.CPU",
+      "sequence_nr": -1
+    },
+    {
+      "name": "aten::t",
+      "input_shapes": [
+        [
+          2,
+          2
+        ]
+      ],
+      "cpu_parent": "<built-in method t of Tensor object at 0x70d5711a4830>",
+      "kernels": 0,
+      "device_type": "DeviceType.CPU",
+      "sequence_nr": 0
+    },
+    {
+      "name": "aten::transpose",
+      "input_shapes": [
+        [
+          2,
+          2
+        ],
+        [],
+        []
+      ],
+      "cpu_parent": "aten::t",
+      "kernels": 0,
+      "device_type": "DeviceType.CPU",
+      "sequence_nr": -1
+    },
+    {
+      "name": "aten::as_strided",
+      "input_shapes": [
+        [
+          2,
+          2
+        ],
+        [],
+        [],
+        []
+      ],
+      "cpu_parent": "aten::transpose",
+      "kernels": 0,
+      "device_type": "DeviceType.CPU",
+      "sequence_nr": -1
+    },
+    {
+      "name": "<built-in method clone of Tensor object at 0x70d5711a4830>",
+      "input_shapes": [],
+      "cpu_parent": "probe.py(59): <module>",
+      "kernels": 0,
+      "device_type": "DeviceType.CPU",
+      "sequence_nr": -1
+    },
+    {
+      "name": "aten::clone",
+      "input_shapes": [
+        [
+          2,
+          2
+        ],
+        []
+      ],
+      "cpu_parent": "<built-in method clone of Tensor object at 0x70d5711a4830>",
+      "kernels": 0,
+      "device_type": "DeviceType.CPU",
+      "sequence_nr": 0
+    },
+    {
+      "name": "aten::empty_strided",
+      "input_shapes": [
+        [],
+        [],
+        [],
+        [],
+        [],
+        []
+      ],
+      "cpu_parent": "aten::clone",
+      "kernels": 0,
+      "device_type": "DeviceType.CPU",
+      "sequence_nr": -1
+    },
+    {
+      "name": "aten::copy_",
+      "input_shapes": [
+        [
+          2,
+          2
+        ],
+        [
+          2,
+          2
+        ],
+        []
+      ],
+      "cpu_parent": "aten::clone",
+      "kernels": 0,
+      "device_type": "DeviceType.CPU",
+      "sequence_nr": -1
+    },
+    {
+      "name": "<built-in method add_ of Tensor object at 0x70d571151e50>",
+      "input_shapes": [],
+      "cpu_parent": "probe.py(59): <module>",
+      "kernels": 0,
+      "device_type": "DeviceType.CPU",
+      "sequence_nr": -1
+    },
+    {
+      "name": "aten::add_",
+      "input_shapes": [
+        [
+          2,
+          2
+        ],
+        [],
+        []
+      ],
+      "cpu_parent": "<built-in method add_ of Tensor object at 0x70d571151e50>",
+      "kernels": 0,
+      "device_type": "DeviceType.CPU",
+      "sequence_nr": 0
+    },
+    {
+      "name": "aten::to",
+      "input_shapes": [
+        [],
+        [],
+        [],
+        [],
+        []
+      ],
+      "cpu_parent": "aten::add_",
+      "kernels": 0,
+      "device_type": "DeviceType.CPU",
+      "sequence_nr": -1
+    },
+    {
+      "name": "aten::_to_copy",
+      "input_shapes": [
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        []
+      ],
+      "cpu_parent": "aten::to",
+      "kernels": 0,
+      "device_type": "DeviceType.CPU",
+      "sequence_nr": -1
+    },
+    {
+      "name": "aten::empty_strided",
+      "input_shapes": [
+        [],
+        [],
+        [],
+        [],
+        [],
+        []
+      ],
+      "cpu_parent": "aten::_to_copy",
+      "kernels": 0,
+      "device_type": "DeviceType.CPU",
+      "sequence_nr": -1
+    },
+    {
+      "name": "aten::copy_",
+      "input_shapes": [
+        [],
+        [],
+        []
+      ],
+      "cpu_parent": "aten::_to_copy",
+      "kernels": 0,
+      "device_type": "DeviceType.CPU",
+      "sequence_nr": -1
+    },
+    {
+      "name": "<built-in method sum of Tensor object at 0x70d571151e50>",
+      "input_shapes": [],
+      "cpu_parent": "probe.py(59): <module>",
+      "kernels": 0,
+      "device_type": "DeviceType.CPU",
+      "sequence_nr": -1
+    },
+    {
+      "name": "aten::sum",
+      "input_shapes": [
+        [
+          2,
+          2
+        ],
+        []
+      ],
+      "cpu_parent": "<built-in method sum of Tensor object at 0x70d571151e50>",
+      "kernels": 0,
+      "device_type": "DeviceType.CPU",
+      "sequence_nr": 0
+    },
+    {
+      "name": "aten::as_strided",
+      "input_shapes": [
+        [],
+        [],
+        [],
+        []
+      ],
+      "cpu_parent": "aten::sum",
+      "kernels": 0,
+      "device_type": "DeviceType.CPU",
+      "sequence_nr": -1
+    },
+    {
+      "name": "aten::fill_",
+      "input_shapes": [
+        [
+          1,
+          1
+        ],
+        []
+      ],
+      "cpu_parent": "aten::sum",
+      "kernels": 0,
+      "device_type": "DeviceType.CPU",
+      "sequence_nr": -1
+    },
+    {
+      "name": "<built-in method add_ of Tensor object at 0x70d571151e50>",
+      "input_shapes": [],
+      "cpu_parent": "probe.py(59): <module>",
+      "kernels": 0,
+      "device_type": "DeviceType.CPU",
+      "sequence_nr": -1
+    },
+    {
+      "name": "aten::add_",
+      "input_shapes": [
+        [
+          2,
+          2
+        ],
+        [],
+        []
+      ],
+      "cpu_parent": "<built-in method add_ of Tensor object at 0x70d571151e50>",
+      "kernels": 0,
+      "device_type": "DeviceType.CPU",
+      "sequence_nr": 0
+    },
+    {
+      "name": "aten::to",
+      "input_shapes": [
+        [],
+        [],
+        [],
+        [],
+        []
+      ],
+      "cpu_parent": "aten::add_",
+      "kernels": 0,
+      "device_type": "DeviceType.CPU",
+      "sequence_nr": -1
+    },
+    {
+      "name": "aten::_to_copy",
+      "input_shapes": [
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        []
+      ],
+      "cpu_parent": "aten::to",
+      "kernels": 0,
+      "device_type": "DeviceType.CPU",
+      "sequence_nr": -1
+    },
+    {
+      "name": "aten::empty_strided",
+      "input_shapes": [
+        [],
+        [],
+        [],
+        [],
+        [],
+        []
+      ],
+      "cpu_parent": "aten::_to_copy",
+      "kernels": 0,
+      "device_type": "DeviceType.CPU",
+      "sequence_nr": -1
+    },
+    {
+      "name": "aten::copy_",
+      "input_shapes": [
+        [],
+        [],
+        []
+      ],
+      "cpu_parent": "aten::_to_copy",
+      "kernels": 0,
+      "device_type": "DeviceType.CPU",
+      "sequence_nr": -1
+    },
+    {
+      "name": "<built-in method sum of Tensor object at 0x70d571151e50>",
+      "input_shapes": [],
+      "cpu_parent": "probe.py(59): <module>",
+      "kernels": 0,
+      "device_type": "DeviceType.CPU",
+      "sequence_nr": -1
+    },
+    {
+      "name": "aten::sum",
+      "input_shapes": [
+        [
+          2,
+          2
+        ],
+        []
+      ],
+      "cpu_parent": "<built-in method sum of Tensor object at 0x70d571151e50>",
+      "kernels": 0,
+      "device_type": "DeviceType.CPU",
+      "sequence_nr": 0
+    },
+    {
+      "name": "aten::as_strided",
+      "input_shapes": [
+        [],
+        [],
+        [],
+        []
+      ],
+      "cpu_parent": "aten::sum",
+      "kernels": 0,
+      "device_type": "DeviceType.CPU",
+      "sequence_nr": -1
+    },
+    {
+      "name": "aten::fill_",
+      "input_shapes": [
+        [
+          1,
+          1
+        ],
+        []
+      ],
+      "cpu_parent": "aten::sum",
+      "kernels": 0,
+      "device_type": "DeviceType.CPU",
+      "sequence_nr": -1
+    },
+    {
+      "name": "probe.py(54): ordinary_python_region",
+      "input_shapes": [],
+      "cpu_parent": "probe.py(59): <module>",
+      "kernels": 0,
+      "device_type": "DeviceType.CPU",
+      "sequence_nr": -1
+    },
+    {
+      "name": "pathlib/__init__.py(172): __truediv__",
+      "input_shapes": [],
+      "cpu_parent": "probe.py(54): ordinary_python_region",
+      "kernels": 0,
+      "device_type": "DeviceType.CPU",
+      "sequence_nr": -1
+    },
+    {
+      "name": "pathlib/__init__.py(157): with_segments",
+      "input_shapes": [],
+      "cpu_parent": "pathlib/__init__.py(172): __truediv__",
+      "kernels": 0,
+      "device_type": "DeviceType.CPU",
+      "sequence_nr": -1
+    },
+    {
+      "name": "pathlib/__init__.py(632): __new__",
+      "input_shapes": [],
+      "cpu_parent": "pathlib/__init__.py(157): with_segments",
+      "kernels": 0,
+      "device_type": "DeviceType.CPU",
+      "sequence_nr": -1
+    },
+    {
+      "name": "<built-in method __new__ of type object at 0x62e8cda34780>",
+      "input_shapes": [],
+      "cpu_parent": "pathlib/__init__.py(632): __new__",
+      "kernels": 0,
+      "device_type": "DeviceType.CPU",
+      "sequence_nr": -1
+    },
+    {
+      "name": "pathlib/__init__.py(135): __init__",
+      "input_shapes": [],
+      "cpu_parent": "pathlib/__init__.py(157): with_segments",
+      "kernels": 0,
+      "device_type": "DeviceType.CPU",
+      "sequence_nr": -1
+    },
+    {
+      "name": "<built-in function isinstance>",
+      "input_shapes": [],
+      "cpu_parent": "pathlib/__init__.py(135): __init__",
+      "kernels": 0,
+      "device_type": "DeviceType.CPU",
+      "sequence_nr": -1
+    },
+    {
+      "name": "<built-in method extend of list object at 0x70d57f42cf00>",
+      "input_shapes": [],
+      "cpu_parent": "pathlib/__init__.py(135): __init__",
+      "kernels": 0,
+      "device_type": "DeviceType.CPU",
+      "sequence_nr": -1
+    },
+    {
+      "name": "<built-in function isinstance>",
+      "input_shapes": [],
+      "cpu_parent": "pathlib/__init__.py(135): __init__",
+      "kernels": 0,
+      "device_type": "DeviceType.CPU",
+      "sequence_nr": -1
+    },
+    {
+      "name": "<built-in function fspath>",
+      "input_shapes": [],
+      "cpu_parent": "pathlib/__init__.py(135): __init__",
+      "kernels": 0,
+      "device_type": "DeviceType.CPU",
+      "sequence_nr": -1
+    },
+    {
+      "name": "<built-in function isinstance>",
+      "input_shapes": [],
+      "cpu_parent": "pathlib/__init__.py(135): __init__",
+      "kernels": 0,
+      "device_type": "DeviceType.CPU",
+      "sequence_nr": -1
+    },
+    {
+      "name": "<built-in method append of list object at 0x70d57f42cf00>",
+      "input_shapes": [],
+      "cpu_parent": "pathlib/__init__.py(135): __init__",
+      "kernels": 0,
+      "device_type": "DeviceType.CPU",
+      "sequence_nr": -1
+    },
+    {
+      "name": "pathlib/__init__.py(799): write_text",
+      "input_shapes": [],
+      "cpu_parent": "probe.py(54): ordinary_python_region",
+      "kernels": 0,
+      "device_type": "DeviceType.CPU",
+      "sequence_nr": -1
+    },
+    {
+      "name": "<built-in function text_encoding>",
+      "input_shapes": [],
+      "cpu_parent": "pathlib/__init__.py(799): write_text",
+      "kernels": 0,
+      "device_type": "DeviceType.CPU",
+      "sequence_nr": -1
+    },
+    {
+      "name": "<built-in function isinstance>",
+      "input_shapes": [],
+      "cpu_parent": "pathlib/__init__.py(799): write_text",
+      "kernels": 0,
+      "device_type": "DeviceType.CPU",
+      "sequence_nr": -1
+    },
+    {
+      "name": "pathlib/__init__.py(763): open",
+      "input_shapes": [],
+      "cpu_parent": "pathlib/__init__.py(799): write_text",
+      "kernels": 0,
+      "device_type": "DeviceType.CPU",
+      "sequence_nr": -1
+    },
+    {
+      "name": "<built-in function text_encoding>",
+      "input_shapes": [],
+      "cpu_parent": "pathlib/__init__.py(763): open",
+      "kernels": 0,
+      "device_type": "DeviceType.CPU",
+      "sequence_nr": -1
+    },
+    {
+      "name": "<built-in function open>",
+      "input_shapes": [],
+      "cpu_parent": "pathlib/__init__.py(763): open",
+      "kernels": 0,
+      "device_type": "DeviceType.CPU",
+      "sequence_nr": -1
+    },
+    {
+      "name": "pathlib/__init__.py(190): __fspath__",
+      "input_shapes": [],
+      "cpu_parent": "<built-in function open>",
+      "kernels": 0,
+      "device_type": "DeviceType.CPU",
+      "sequence_nr": -1
+    },
+    {
+      "name": "pathlib/__init__.py(251): __str__",
+      "input_shapes": [],
+      "cpu_parent": "pathlib/__init__.py(190): __fspath__",
+      "kernels": 0,
+      "device_type": "DeviceType.CPU",
+      "sequence_nr": -1
+    },
+    {
+      "name": "pathlib/__init__.py(341): drive",
+      "input_shapes": [],
+      "cpu_parent": "pathlib/__init__.py(251): __str__",
+      "kernels": 0,
+      "device_type": "DeviceType.CPU",
+      "sequence_nr": -1
+    },
+    {
+      "name": "pathlib/__init__.py(330): _raw_path",
+      "input_shapes": [],
+      "cpu_parent": "pathlib/__init__.py(341): drive",
+      "kernels": 0,
+      "device_type": "DeviceType.CPU",
+      "sequence_nr": -1
+    },
+    {
+      "name": "<built-in function len>",
+      "input_shapes": [],
+      "cpu_parent": "pathlib/__init__.py(330): _raw_path",
+      "kernels": 0,
+      "device_type": "DeviceType.CPU",
+      "sequence_nr": -1
+    },
+    {
+      "name": "<frozen posixpath>(72): join",
+      "input_shapes": [],
+      "cpu_parent": "pathlib/__init__.py(330): _raw_path",
+      "kernels": 0,
+      "device_type": "DeviceType.CPU",
+      "sequence_nr": -1
+    },
+    {
+      "name": "<built-in function fspath>",
+      "input_shapes": [],
+      "cpu_parent": "<frozen posixpath>(72): join",
+      "kernels": 0,
+      "device_type": "DeviceType.CPU",
+      "sequence_nr": -1
+    },
+    {
+      "name": "<frozen posixpath>(42): _get_sep",
+      "input_shapes": [],
+      "cpu_parent": "<frozen posixpath>(72): join",
+      "kernels": 0,
+      "device_type": "DeviceType.CPU",
+      "sequence_nr": -1
+    },
+    {
+      "name": "<built-in function isinstance>",
+      "input_shapes": [],
+      "cpu_parent": "<frozen posixpath>(42): _get_sep",
+      "kernels": 0,
+      "device_type": "DeviceType.CPU",
+      "sequence_nr": -1
+    },
+    {
+      "name": "<built-in function fspath>",
+      "input_shapes": [],
+      "cpu_parent": "<frozen posixpath>(72): join",
+      "kernels": 0,
+      "device_type": "DeviceType.CPU",
+      "sequence_nr": -1
+    },
+    {
+      "name": "<built-in method startswith of str object at 0x70d6c98fe0b0>",
+      "input_shapes": [],
+      "cpu_parent": "<frozen posixpath>(72): join",
+      "kernels": 0,
+      "device_type": "DeviceType.CPU",
+      "sequence_nr": -1
+    },
+    {
+      "name": "<built-in method endswith of str object at 0x70d6c98b71b0>",
+      "input_shapes": [],
+      "cpu_parent": "<frozen posixpath>(72): join",
+      "kernels": 0,
+      "device_type": "DeviceType.CPU",
+      "sequence_nr": -1
+    },
+    {
+      "name": "pathlib/__init__.py(281): _parse_path",
+      "input_shapes": [],
+      "cpu_parent": "pathlib/__init__.py(341): drive",
+      "kernels": 0,
+      "device_type": "DeviceType.CPU",
+      "sequence_nr": -1
+    },
+    {
+      "name": "<built-in function _path_splitroot_ex>",
+      "input_shapes": [],
+      "cpu_parent": "pathlib/__init__.py(281): _parse_path",
+      "kernels": 0,
+      "device_type": "DeviceType.CPU",
+      "sequence_nr": -1
+    },
+    {
+      "name": "<built-in method split of str object at 0x70d5712ff630>",
+      "input_shapes": [],
+      "cpu_parent": "pathlib/__init__.py(281): _parse_path",
+      "kernels": 0,
+      "device_type": "DeviceType.CPU",
+      "sequence_nr": -1
+    },
+    {
+      "name": "pathlib/__init__.py(350): root",
+      "input_shapes": [],
+      "cpu_parent": "pathlib/__init__.py(251): __str__",
+      "kernels": 0,
+      "device_type": "DeviceType.CPU",
+      "sequence_nr": -1
+    },
+    {
+      "name": "pathlib/__init__.py(359): _tail",
+      "input_shapes": [],
+      "cpu_parent": "pathlib/__init__.py(251): __str__",
+      "kernels": 0,
+      "device_type": "DeviceType.CPU",
+      "sequence_nr": -1
+    },
+    {
+      "name": "pathlib/__init__.py(261): _format_parsed_parts",
+      "input_shapes": [],
+      "cpu_parent": "pathlib/__init__.py(251): __str__",
+      "kernels": 0,
+      "device_type": "DeviceType.CPU",
+      "sequence_nr": -1
+    },
+    {
+      "name": "<built-in method join of str object at 0x62e8cda74430>",
+      "input_shapes": [],
+      "cpu_parent": "pathlib/__init__.py(261): _format_parsed_parts",
+      "kernels": 0,
+      "device_type": "DeviceType.CPU",
+      "sequence_nr": -1
+    },
+    {
+      "name": "<frozen codecs>(189): __init__",
+      "input_shapes": [],
+      "cpu_parent": "<built-in function open>",
+      "kernels": 0,
+      "device_type": "DeviceType.CPU",
+      "sequence_nr": -1
+    },
+    {
+      "name": "<built-in method __enter__ of _io.TextIOWrapper object at 0x70d57f58fe60>",
+      "input_shapes": [],
+      "cpu_parent": "pathlib/__init__.py(799): write_text",
+      "kernels": 0,
+      "device_type": "DeviceType.CPU",
+      "sequence_nr": -1
+    },
+    {
+      "name": "<built-in method write of _io.TextIOWrapper object at 0x70d57f58fe60>",
+      "input_shapes": [],
+      "cpu_parent": "pathlib/__init__.py(799): write_text",
+      "kernels": 0,
+      "device_type": "DeviceType.CPU",
+      "sequence_nr": -1
+    },
+    {
+      "name": "<built-in method __exit__ of _io.TextIOWrapper object at 0x70d57f58fe60>",
+      "input_shapes": [],
+      "cpu_parent": "pathlib/__init__.py(799): write_text",
+      "kernels": 0,
+      "device_type": "DeviceType.CPU",
+      "sequence_nr": -1
+    },
+    {
+      "name": "<built-in method sum of Tensor object at 0x70d571151e50>",
+      "input_shapes": [],
+      "cpu_parent": "probe.py(59): <module>",
+      "kernels": 0,
+      "device_type": "DeviceType.CPU",
+      "sequence_nr": -1
+    },
+    {
+      "name": "aten::sum",
+      "input_shapes": [
+        [
+          4
+        ],
+        []
+      ],
+      "cpu_parent": "<built-in method sum of Tensor object at 0x70d571151e50>",
+      "kernels": 0,
+      "device_type": "DeviceType.CPU",
+      "sequence_nr": 0
+    },
+    {
+      "name": "aten::as_strided",
+      "input_shapes": [
+        [],
+        [],
+        [],
+        []
+      ],
+      "cpu_parent": "aten::sum",
+      "kernels": 0,
+      "device_type": "DeviceType.CPU",
+      "sequence_nr": -1
+    },
+    {
+      "name": "aten::fill_",
+      "input_shapes": [
+        [
+          1
+        ],
+        []
+      ],
+      "cpu_parent": "aten::sum",
+      "kernels": 0,
+      "device_type": "DeviceType.CPU",
+      "sequence_nr": -1
+    },
+    {
+      "name": "torch/profiler/profiler.py(1121): __exit__",
+      "input_shapes": [],
+      "cpu_parent": "probe.py(59): <module>",
+      "kernels": 0,
+      "device_type": "DeviceType.CPU",
+      "sequence_nr": -1
+    },
+    {
+      "name": "torch/profiler/profiler.py(1135): stop",
+      "input_shapes": [],
+      "cpu_parent": "torch/profiler/profiler.py(1121): __exit__",
+      "kernels": 0,
+      "device_type": "DeviceType.CPU",
+      "sequence_nr": -1
+    },
+    {
+      "name": "torch/profiler/profiler.py(1258): _transit_action",
+      "input_shapes": [],
+      "cpu_parent": "torch/profiler/profiler.py(1135): stop",
+      "kernels": 0,
+      "device_type": "DeviceType.CPU",
+      "sequence_nr": -1
+    },
+    {
+      "name": "<built-in method get of dict object at 0x70d57fcfd980>",
+      "input_shapes": [],
+      "cpu_parent": "torch/profiler/profiler.py(1258): _transit_action",
+      "kernels": 0,
+      "device_type": "DeviceType.CPU",
+      "sequence_nr": -1
+    },
+    {
+      "name": "enum.py(1300): __hash__",
+      "input_shapes": [],
+      "cpu_parent": "<built-in method get of dict object at 0x70d57fcfd980>",
+      "kernels": 0,
+      "device_type": "DeviceType.CPU",
+      "sequence_nr": -1
+    },
+    {
+      "name": "<built-in function hash>",
+      "input_shapes": [],
+      "cpu_parent": "enum.py(1300): __hash__",
+      "kernels": 0,
+      "device_type": "DeviceType.CPU",
+      "sequence_nr": -1
+    },
+    {
+      "name": "torch/profiler/profiler.py(388): stop_trace",
+      "input_shapes": [],
+      "cpu_parent": "torch/profiler/profiler.py(1258): _transit_action",
+      "kernels": 0,
+      "device_type": "DeviceType.CPU",
+      "sequence_nr": -1
+    },
+    {
+      "name": "torch/profiler/profiler.py(1489): stop",
+      "input_shapes": [],
+      "cpu_parent": "torch/profiler/profiler.py(388): stop_trace",
+      "kernels": 0,
+      "device_type": "DeviceType.CPU",
+      "sequence_nr": -1
+    },
+    {
+      "name": "<built-in method _disable_execution_trace_observer of pybind11_builtins.pybind11_detail_function_record_v1_system_libstdcpp_gxx_abi_1xxx_use_cxx11_abi_1 object at 0x70d60c5475b0>",
+      "input_shapes": [],
+      "cpu_parent": "torch/profiler/profiler.py(1489): stop",
+      "kernels": 0,
+      "device_type": "DeviceType.CPU",
+      "sequence_nr": -1
+    },
+    {
+      "name": "torch/autograd/profiler.py(419): __exit__",
+      "input_shapes": [],
+      "cpu_parent": "torch/profiler/profiler.py(388): stop_trace",
+      "kernels": 0,
+      "device_type": "DeviceType.CPU",
+      "sequence_nr": -1
+    },
+    {
+      "name": "<built-in function perf_counter_ns>",
+      "input_shapes": [],
+      "cpu_parent": "torch/autograd/profiler.py(419): __exit__",
+      "kernels": 0,
+      "device_type": "DeviceType.CPU",
+      "sequence_nr": -1
+    },
+    {
+      "name": "<built-in method _disable_profiler of pybind11_builtins.pybind11_detail_function_record_v1_system_libstdcpp_gxx_abi_1xxx_use_cxx11_abi_1 object at 0x70d581918d90>",
+      "input_shapes": [],
+      "cpu_parent": "torch/autograd/profiler.py(419): __exit__",
+      "kernels": 0,
+      "device_type": "DeviceType.CPU",
+      "sequence_nr": -1
+    }
+  ],
+  "cuda_initialized_after": false,
+  "source_sha256": {
+    "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/torch/profiler/profiler.py": "2e7e248cba6f46787aeb693cd3fb82a1328936dc37e41be86a8e490ea1051eb9"
+  }
+}

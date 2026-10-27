@@ -1,0 +1,1221 @@
+{
+  "schema": "scar.callable-environment-bindings",
+  "schema_version": 1,
+  "scope": "existing source environment entry reference ports; conditional identity only",
+  "valid": true,
+  "files": [
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_callable_environment_20261022/trace/function-environment-meta.75747.json",
+      "family": "environment-meta",
+      "process_id": 75747,
+      "raw_sha256": "3d40487d890459a71d58fb486f33dd9ebe8458fb86047215cdb29212939b1358",
+      "raw_bytes": 1422,
+      "lines": 1
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_callable_environment_20261022/trace/function-environments.75747.jsonl",
+      "family": "environments",
+      "process_id": 75747,
+      "raw_sha256": "b8b510aaa7e289da2dcfe6cf0c2175df9d75092b5e20e223a4aa320ce6198bc2",
+      "raw_bytes": 14441,
+      "lines": 19
+    }
+  ],
+  "metadata": [
+    {
+      "schema": "scar.function-environment-trace",
+      "schema_version": 1,
+      "process_id": 75747,
+      "python": "3.14.7 | packaged by conda-forge | (main, Sep  2 2026, 21:08:32) [GCC 15.3.0]",
+      "implementation": "cpython",
+      "limits": {
+        "max_events": 100000,
+        "max_bytes": 32000000,
+        "max_references": 8192
+      },
+      "events": 19,
+      "event_attempts": 19,
+      "dispatches": 10,
+      "entries": 9,
+      "gaps": 0,
+      "references": 87,
+      "bytes": 14441,
+      "dropped_events": 0,
+      "errors": [],
+      "io_failed": false,
+      "stop_reason": null,
+      "registry_peak": 5,
+      "anchor_peak": 11,
+      "anchors_per_object_limit": 4,
+      "pending_peak": 1,
+      "pending_dispatches": 0,
+      "discarded_dispatches": 1,
+      "scope": "exact-function dispatch fields and supplied entry readonly-association checks only",
+      "identity_continuity": "live readonly owner checked by is; no anchors means unknown continuity",
+      "owner_contract": "Python-level readonly exact-function fields; native owner mutation is not closed",
+      "file": {
+        "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_callable_environment_20261022/trace/function-environments.75747.jsonl",
+        "raw_sha256": "b8b510aaa7e289da2dcfe6cf0c2175df9d75092b5e20e223a4aa320ce6198bc2",
+        "raw_bytes": 14441,
+        "lines": 19
+      },
+      "reference_contents_observed": false,
+      "cell_contents_observed": false,
+      "logical_versions_established": false,
+      "callable_environment_established": false,
+      "defaults_binding_established": false,
+      "atomic_snapshot_established": false,
+      "effects_established": false,
+      "transformation_authorized": false
+    }
+  ],
+  "inventory_sha256": "bf064c6c3659ea44ac5d0326ffe188a80d512be7a5ab5e50d233921fa0f49993",
+  "original_operand_files": [
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_callable_environment_20261022/trace/call-operand-meta.75747.json",
+      "family": "operand-meta",
+      "process_id": 75747,
+      "raw_sha256": "2517b90beedde5f27dd64149b3e6ff277918262bdc8fdfb2d19f74508faf9e8e",
+      "raw_bytes": 2028,
+      "lines": 58
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_callable_environment_20261022/trace/call-operands.75747.jsonl",
+      "family": "operands",
+      "process_id": 75747,
+      "raw_sha256": "7133ad07044a593e8b926f2f2c7a2a3a44cccb41d3c76d720e0b9e6f47a7e15f",
+      "raw_bytes": 21669,
+      "lines": 60
+    }
+  ],
+  "original_frame_files": [
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_callable_environment_20261022/trace/call-codes.75747.jsonl",
+      "family": "codes",
+      "process_id": 75747,
+      "raw_sha256": "533547a14a4b7a6424a36e121cddfa3fff460a066855154d9092f435d41b1399",
+      "raw_bytes": 2714,
+      "lines": 9
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_callable_environment_20261022/trace/call-events.75747.jsonl",
+      "family": "events",
+      "process_id": 75747,
+      "raw_sha256": "5f569de1a6058b15088a45f799ab6a1307e76398ba8c4332cb5ddf03f43ed240",
+      "raw_bytes": 32382,
+      "lines": 38
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_callable_environment_20261022/trace/call-meta.75747.json",
+      "family": "meta",
+      "process_id": 75747,
+      "raw_sha256": "60c392d92b6a95d69bc0972966fda3ff13a4ef6a111afda98b899f5f68603337",
+      "raw_bytes": 1023,
+      "lines": 34
+    }
+  ],
+  "bindings": [
+    {
+      "invocation": {
+        "process_id": 75747,
+        "thread_id": 126013674526528,
+        "invocation_id": 6
+      },
+      "definition": {
+        "kind": "opdef",
+        "value": "op:214d29f682efe4755a8c7be2",
+        "wire": "opdef:op:214d29f682efe4755a8c7be2"
+      },
+      "region": {
+        "kind": "program_region",
+        "value": "7d738322febd9f7843562355a280d00d",
+        "wire": "program_region:7d738322febd9f7843562355a280d00d"
+      },
+      "environment": {
+        "kind": "program_environment",
+        "value": "08b5cff3d8045ff94793373d2ded1393",
+        "wire": "program_environment:08b5cff3d8045ff94793373d2ded1393"
+      },
+      "dispatch_anchor": {
+        "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_callable_environment_20261022/trace/function-environments.75747.jsonl",
+        "line_number": 7,
+        "line_sha256": "8a7071f164abd59af273966d2c8cb39e67dc735a98792085e59594f54c0e1d44",
+        "index": 7
+      },
+      "entry_anchor": {
+        "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_callable_environment_20261022/trace/function-environments.75747.jsonl",
+        "line_number": 8,
+        "line_sha256": "70e7f71590a4f2e5830de77c17901ba675b570cc4ee97fcf6008a164b2a42c1a",
+        "index": 8
+      },
+      "operand_attempt_anchor": {
+        "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_callable_environment_20261022/trace/call-operands.75747.jsonl",
+        "line_number": 15,
+        "line_sha256": "eba7e4455feed2b9330b9779e57657b4712e48e00f91e6d02f94c6c75fad6b8f",
+        "index": 15
+      },
+      "operand_handshake_anchor": {
+        "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_callable_environment_20261022/trace/call-operands.75747.jsonl",
+        "line_number": 16,
+        "line_sha256": "71d98c92800a551c917b3064b3bec07bf4514a66c4eb03490764e6529a0bc5cd",
+        "index": 16
+      },
+      "frame_entry_anchor": {
+        "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_callable_environment_20261022/trace/call-events.75747.jsonl",
+        "line_number": 9,
+        "line_sha256": "58e1156c5cea433564876f24981de5430e2d794e0a335391a1f44e8fc4a15bba",
+        "index": 9
+      },
+      "ports": [
+        {
+          "role": "FUNCTION_OBJECT",
+          "reference_port": {
+            "kind": "program_value",
+            "value": "a4cfdd4d08f840ad2da90c5ce9027d60",
+            "wire": "program_value:a4cfdd4d08f840ad2da90c5ce9027d60"
+          },
+          "cell_slot": null,
+          "cell_position": null,
+          "observed_reference": "weak:75747:23",
+          "identity_basis": "BASE_WEAK_REFERENCE"
+        },
+        {
+          "role": "GLOBALS_NAMESPACE",
+          "reference_port": {
+            "kind": "program_value",
+            "value": "00fd484446987a31c6cb6fa0dbbbad62",
+            "wire": "program_value:00fd484446987a31c6cb6fa0dbbbad62"
+          },
+          "cell_slot": null,
+          "cell_position": null,
+          "observed_reference": "environment-anchor:75747:1",
+          "identity_basis": "LIVE_READONLY_FUNCTION_OWNER"
+        },
+        {
+          "role": "BUILTINS_NAMESPACE",
+          "reference_port": {
+            "kind": "program_value",
+            "value": "21acf624e356e89a5c8fe177670eaddd",
+            "wire": "program_value:21acf624e356e89a5c8fe177670eaddd"
+          },
+          "cell_slot": null,
+          "cell_position": null,
+          "observed_reference": "environment-anchor:75747:2",
+          "identity_basis": "LIVE_READONLY_FUNCTION_OWNER"
+        },
+        {
+          "role": "CAPTURED_CELL",
+          "reference_port": {
+            "kind": "program_value",
+            "value": "7d901d14ea2eaa2812771860bbe39f00",
+            "wire": "program_value:7d901d14ea2eaa2812771860bbe39f00"
+          },
+          "cell_slot": {
+            "kind": "slot",
+            "value": "f4ca285457dbbe1e0243b34fd5be1573",
+            "wire": "slot:f4ca285457dbbe1e0243b34fd5be1573"
+          },
+          "cell_position": 0,
+          "observed_reference": "environment-anchor:75747:3",
+          "identity_basis": "LIVE_READONLY_FUNCTION_OWNER"
+        }
+      ],
+      "unresolved": [
+        {
+          "role": "DEFAULTS",
+          "reference_port": {
+            "kind": "program_value",
+            "value": "989ec3534ecef7252fb143d5e839159a",
+            "wire": "program_value:989ec3534ecef7252fb143d5e839159a"
+          },
+          "cell_slot": null,
+          "cell_position": null,
+          "observed_reference": "environment-snapshot:75747:7:1",
+          "identity_basis": "EVENT_LOCAL_SNAPSHOT",
+          "reason": "DISPATCH_DEFAULTS_SNAPSHOT_IS_NOT_ENTRY_BINDING"
+        },
+        {
+          "role": "KEYWORD_DEFAULTS",
+          "reference_port": {
+            "kind": "program_value",
+            "value": "9e6b7a88c15fd19eb073c6425cb7d619",
+            "wire": "program_value:9e6b7a88c15fd19eb073c6425cb7d619"
+          },
+          "cell_slot": null,
+          "cell_position": null,
+          "observed_reference": "environment-snapshot:75747:7:1",
+          "identity_basis": "EVENT_LOCAL_SNAPSHOT",
+          "reason": "DISPATCH_DEFAULTS_SNAPSHOT_IS_NOT_ENTRY_BINDING"
+        }
+      ],
+      "conditions": [
+        "CAPTURE_PRODUCER_TRUSTED",
+        "SIDECARS_BELONG_TO_THE_SAME_CAPTURE",
+        "PYTHON_READONLY_FUNCTION_OWNER_NOT_MUTATED_BY_NATIVE_CODE",
+        "MONITORING_AND_FRAME_INTERPOSITION_REMAIN_UNCLOSED"
+      ],
+      "status": "CONDITIONAL_REFERENCE_IDENTITY"
+    },
+    {
+      "invocation": {
+        "process_id": 75747,
+        "thread_id": 126013674526528,
+        "invocation_id": 7
+      },
+      "definition": {
+        "kind": "opdef",
+        "value": "op:c4554e4f8a793744f2864d05",
+        "wire": "opdef:op:c4554e4f8a793744f2864d05"
+      },
+      "region": {
+        "kind": "program_region",
+        "value": "bb09a973c6578c9a154e0fad093f3c5c",
+        "wire": "program_region:bb09a973c6578c9a154e0fad093f3c5c"
+      },
+      "environment": {
+        "kind": "program_environment",
+        "value": "2a429ac2f25e8ac2e4c67f9fa6a6e815",
+        "wire": "program_environment:2a429ac2f25e8ac2e4c67f9fa6a6e815"
+      },
+      "dispatch_anchor": {
+        "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_callable_environment_20261022/trace/function-environments.75747.jsonl",
+        "line_number": 9,
+        "line_sha256": "4b74acd58c25da3e84b25bc85365ea582831ae8fc5fb7216e48a8c2317f11d85",
+        "index": 9
+      },
+      "entry_anchor": {
+        "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_callable_environment_20261022/trace/function-environments.75747.jsonl",
+        "line_number": 10,
+        "line_sha256": "789753a31932c8f569da33c576e66c9794724d3f1c4183c7648f1473ee22bb89",
+        "index": 10
+      },
+      "operand_attempt_anchor": {
+        "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_callable_environment_20261022/trace/call-operands.75747.jsonl",
+        "line_number": 19,
+        "line_sha256": "11f59b0b89110c16f9e8a449dc8b48b30c8028f2a76aaf2ee41d8624c1fdf6ab",
+        "index": 19
+      },
+      "operand_handshake_anchor": {
+        "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_callable_environment_20261022/trace/call-operands.75747.jsonl",
+        "line_number": 20,
+        "line_sha256": "7196ae152617f250e8c9e443c6134f3b89daf82013e59c5c2894ad368e4eac52",
+        "index": 20
+      },
+      "frame_entry_anchor": {
+        "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_callable_environment_20261022/trace/call-events.75747.jsonl",
+        "line_number": 11,
+        "line_sha256": "c2c6f32063c88559c4e6ebaa18d6f6a7096ed69a9cf93a038bedd3dba2dd0c56",
+        "index": 11
+      },
+      "ports": [
+        {
+          "role": "FUNCTION_OBJECT",
+          "reference_port": {
+            "kind": "program_value",
+            "value": "cc5e8cdcbc97cc36b35a2c4e955751af",
+            "wire": "program_value:cc5e8cdcbc97cc36b35a2c4e955751af"
+          },
+          "cell_slot": null,
+          "cell_position": null,
+          "observed_reference": "weak:75747:24",
+          "identity_basis": "BASE_WEAK_REFERENCE"
+        },
+        {
+          "role": "GLOBALS_NAMESPACE",
+          "reference_port": {
+            "kind": "program_value",
+            "value": "bf0522f8b7d2ebb667a5feb02e6fb351",
+            "wire": "program_value:bf0522f8b7d2ebb667a5feb02e6fb351"
+          },
+          "cell_slot": null,
+          "cell_position": null,
+          "observed_reference": "environment-anchor:75747:1",
+          "identity_basis": "LIVE_READONLY_FUNCTION_OWNER"
+        },
+        {
+          "role": "BUILTINS_NAMESPACE",
+          "reference_port": {
+            "kind": "program_value",
+            "value": "fe02a79914b6a81a45e1b295f05b71bb",
+            "wire": "program_value:fe02a79914b6a81a45e1b295f05b71bb"
+          },
+          "cell_slot": null,
+          "cell_position": null,
+          "observed_reference": "environment-anchor:75747:2",
+          "identity_basis": "LIVE_READONLY_FUNCTION_OWNER"
+        },
+        {
+          "role": "CAPTURED_CELL",
+          "reference_port": {
+            "kind": "program_value",
+            "value": "441c65b472a7b526942db768dbde9ab4",
+            "wire": "program_value:441c65b472a7b526942db768dbde9ab4"
+          },
+          "cell_slot": {
+            "kind": "slot",
+            "value": "ceb902d6214a792dd3abcceadf260fe6",
+            "wire": "slot:ceb902d6214a792dd3abcceadf260fe6"
+          },
+          "cell_position": 0,
+          "observed_reference": "environment-anchor:75747:3",
+          "identity_basis": "LIVE_READONLY_FUNCTION_OWNER"
+        }
+      ],
+      "unresolved": [
+        {
+          "role": "DEFAULTS",
+          "reference_port": {
+            "kind": "program_value",
+            "value": "59681931a34b82e20cb6f5b78926ad59",
+            "wire": "program_value:59681931a34b82e20cb6f5b78926ad59"
+          },
+          "cell_slot": null,
+          "cell_position": null,
+          "observed_reference": "environment-snapshot:75747:9:1",
+          "identity_basis": "EVENT_LOCAL_SNAPSHOT",
+          "reason": "DISPATCH_DEFAULTS_SNAPSHOT_IS_NOT_ENTRY_BINDING"
+        },
+        {
+          "role": "KEYWORD_DEFAULTS",
+          "reference_port": {
+            "kind": "program_value",
+            "value": "a952a937665d86399c523f34d6ef7349",
+            "wire": "program_value:a952a937665d86399c523f34d6ef7349"
+          },
+          "cell_slot": null,
+          "cell_position": null,
+          "observed_reference": "environment-snapshot:75747:9:1",
+          "identity_basis": "EVENT_LOCAL_SNAPSHOT",
+          "reason": "DISPATCH_DEFAULTS_SNAPSHOT_IS_NOT_ENTRY_BINDING"
+        }
+      ],
+      "conditions": [
+        "CAPTURE_PRODUCER_TRUSTED",
+        "SIDECARS_BELONG_TO_THE_SAME_CAPTURE",
+        "PYTHON_READONLY_FUNCTION_OWNER_NOT_MUTATED_BY_NATIVE_CODE",
+        "MONITORING_AND_FRAME_INTERPOSITION_REMAIN_UNCLOSED"
+      ],
+      "status": "CONDITIONAL_REFERENCE_IDENTITY"
+    },
+    {
+      "invocation": {
+        "process_id": 75747,
+        "thread_id": 126013674526528,
+        "invocation_id": 8
+      },
+      "definition": {
+        "kind": "opdef",
+        "value": "op:214d29f682efe4755a8c7be2",
+        "wire": "opdef:op:214d29f682efe4755a8c7be2"
+      },
+      "region": {
+        "kind": "program_region",
+        "value": "7d738322febd9f7843562355a280d00d",
+        "wire": "program_region:7d738322febd9f7843562355a280d00d"
+      },
+      "environment": {
+        "kind": "program_environment",
+        "value": "08b5cff3d8045ff94793373d2ded1393",
+        "wire": "program_environment:08b5cff3d8045ff94793373d2ded1393"
+      },
+      "dispatch_anchor": {
+        "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_callable_environment_20261022/trace/function-environments.75747.jsonl",
+        "line_number": 11,
+        "line_sha256": "bb3412c4dd557a75d1074c455ba42d549d5d47674610911dc9d63f0b84ff3a57",
+        "index": 11
+      },
+      "entry_anchor": {
+        "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_callable_environment_20261022/trace/function-environments.75747.jsonl",
+        "line_number": 12,
+        "line_sha256": "dd9ca87adea8bfefba02a3a68678a85103afb9a0863873028cc90106db42690d",
+        "index": 12
+      },
+      "operand_attempt_anchor": {
+        "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_callable_environment_20261022/trace/call-operands.75747.jsonl",
+        "line_number": 25,
+        "line_sha256": "f66423cbd5adf9da5ead4a4b26da368cabb3589a73962af45004dc25300c8d92",
+        "index": 25
+      },
+      "operand_handshake_anchor": {
+        "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_callable_environment_20261022/trace/call-operands.75747.jsonl",
+        "line_number": 26,
+        "line_sha256": "6fff2aa500cece62e403049da742b1dd639425740531d00fcac75d1c5d4275bd",
+        "index": 26
+      },
+      "frame_entry_anchor": {
+        "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_callable_environment_20261022/trace/call-events.75747.jsonl",
+        "line_number": 13,
+        "line_sha256": "58c7b77dbe436881f3b950f6b05eaba3a66ea390b4301a5fd57d7edc90510817",
+        "index": 13
+      },
+      "ports": [
+        {
+          "role": "FUNCTION_OBJECT",
+          "reference_port": {
+            "kind": "program_value",
+            "value": "a4cfdd4d08f840ad2da90c5ce9027d60",
+            "wire": "program_value:a4cfdd4d08f840ad2da90c5ce9027d60"
+          },
+          "cell_slot": null,
+          "cell_position": null,
+          "observed_reference": "weak:75747:23",
+          "identity_basis": "BASE_WEAK_REFERENCE"
+        },
+        {
+          "role": "GLOBALS_NAMESPACE",
+          "reference_port": {
+            "kind": "program_value",
+            "value": "00fd484446987a31c6cb6fa0dbbbad62",
+            "wire": "program_value:00fd484446987a31c6cb6fa0dbbbad62"
+          },
+          "cell_slot": null,
+          "cell_position": null,
+          "observed_reference": "environment-anchor:75747:1",
+          "identity_basis": "LIVE_READONLY_FUNCTION_OWNER"
+        },
+        {
+          "role": "BUILTINS_NAMESPACE",
+          "reference_port": {
+            "kind": "program_value",
+            "value": "21acf624e356e89a5c8fe177670eaddd",
+            "wire": "program_value:21acf624e356e89a5c8fe177670eaddd"
+          },
+          "cell_slot": null,
+          "cell_position": null,
+          "observed_reference": "environment-anchor:75747:2",
+          "identity_basis": "LIVE_READONLY_FUNCTION_OWNER"
+        },
+        {
+          "role": "CAPTURED_CELL",
+          "reference_port": {
+            "kind": "program_value",
+            "value": "7d901d14ea2eaa2812771860bbe39f00",
+            "wire": "program_value:7d901d14ea2eaa2812771860bbe39f00"
+          },
+          "cell_slot": {
+            "kind": "slot",
+            "value": "f4ca285457dbbe1e0243b34fd5be1573",
+            "wire": "slot:f4ca285457dbbe1e0243b34fd5be1573"
+          },
+          "cell_position": 0,
+          "observed_reference": "environment-anchor:75747:3",
+          "identity_basis": "LIVE_READONLY_FUNCTION_OWNER"
+        }
+      ],
+      "unresolved": [
+        {
+          "role": "DEFAULTS",
+          "reference_port": {
+            "kind": "program_value",
+            "value": "989ec3534ecef7252fb143d5e839159a",
+            "wire": "program_value:989ec3534ecef7252fb143d5e839159a"
+          },
+          "cell_slot": null,
+          "cell_position": null,
+          "observed_reference": "environment-snapshot:75747:11:1",
+          "identity_basis": "EVENT_LOCAL_SNAPSHOT",
+          "reason": "DISPATCH_DEFAULTS_SNAPSHOT_IS_NOT_ENTRY_BINDING"
+        },
+        {
+          "role": "KEYWORD_DEFAULTS",
+          "reference_port": {
+            "kind": "program_value",
+            "value": "9e6b7a88c15fd19eb073c6425cb7d619",
+            "wire": "program_value:9e6b7a88c15fd19eb073c6425cb7d619"
+          },
+          "cell_slot": null,
+          "cell_position": null,
+          "observed_reference": "environment-snapshot:75747:11:1",
+          "identity_basis": "EVENT_LOCAL_SNAPSHOT",
+          "reason": "DISPATCH_DEFAULTS_SNAPSHOT_IS_NOT_ENTRY_BINDING"
+        }
+      ],
+      "conditions": [
+        "CAPTURE_PRODUCER_TRUSTED",
+        "SIDECARS_BELONG_TO_THE_SAME_CAPTURE",
+        "PYTHON_READONLY_FUNCTION_OWNER_NOT_MUTATED_BY_NATIVE_CODE",
+        "MONITORING_AND_FRAME_INTERPOSITION_REMAIN_UNCLOSED"
+      ],
+      "status": "CONDITIONAL_REFERENCE_IDENTITY"
+    },
+    {
+      "invocation": {
+        "process_id": 75747,
+        "thread_id": 126013674526528,
+        "invocation_id": 9
+      },
+      "definition": {
+        "kind": "opdef",
+        "value": "op:214d29f682efe4755a8c7be2",
+        "wire": "opdef:op:214d29f682efe4755a8c7be2"
+      },
+      "region": {
+        "kind": "program_region",
+        "value": "7d738322febd9f7843562355a280d00d",
+        "wire": "program_region:7d738322febd9f7843562355a280d00d"
+      },
+      "environment": {
+        "kind": "program_environment",
+        "value": "08b5cff3d8045ff94793373d2ded1393",
+        "wire": "program_environment:08b5cff3d8045ff94793373d2ded1393"
+      },
+      "dispatch_anchor": {
+        "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_callable_environment_20261022/trace/function-environments.75747.jsonl",
+        "line_number": 13,
+        "line_sha256": "2241eb9e329556fa08b8d09d6d412dbff9b2424319eefcf7a9cfeab59bc3af48",
+        "index": 13
+      },
+      "entry_anchor": {
+        "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_callable_environment_20261022/trace/function-environments.75747.jsonl",
+        "line_number": 14,
+        "line_sha256": "429da539f6988f38e8a25d844ea22218f549d939606a52015813dbdb0a23dbdc",
+        "index": 14
+      },
+      "operand_attempt_anchor": {
+        "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_callable_environment_20261022/trace/call-operands.75747.jsonl",
+        "line_number": 31,
+        "line_sha256": "097b658d0739c20751892cd7073f9059f51bdad2c48f41b4ff74fcfe692da7c1",
+        "index": 31
+      },
+      "operand_handshake_anchor": {
+        "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_callable_environment_20261022/trace/call-operands.75747.jsonl",
+        "line_number": 32,
+        "line_sha256": "0de2ab1d945395c20b35b914ce1a6d6fe0db7726ea17abca9c9a1aa2b29d8bc4",
+        "index": 32
+      },
+      "frame_entry_anchor": {
+        "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_callable_environment_20261022/trace/call-events.75747.jsonl",
+        "line_number": 15,
+        "line_sha256": "e1a42c2560ab81d032762713233942763effc8300b32da27d13c2987303d0431",
+        "index": 15
+      },
+      "ports": [
+        {
+          "role": "FUNCTION_OBJECT",
+          "reference_port": {
+            "kind": "program_value",
+            "value": "a4cfdd4d08f840ad2da90c5ce9027d60",
+            "wire": "program_value:a4cfdd4d08f840ad2da90c5ce9027d60"
+          },
+          "cell_slot": null,
+          "cell_position": null,
+          "observed_reference": "weak:75747:29",
+          "identity_basis": "BASE_WEAK_REFERENCE"
+        },
+        {
+          "role": "GLOBALS_NAMESPACE",
+          "reference_port": {
+            "kind": "program_value",
+            "value": "00fd484446987a31c6cb6fa0dbbbad62",
+            "wire": "program_value:00fd484446987a31c6cb6fa0dbbbad62"
+          },
+          "cell_slot": null,
+          "cell_position": null,
+          "observed_reference": "environment-anchor:75747:1",
+          "identity_basis": "LIVE_READONLY_FUNCTION_OWNER"
+        },
+        {
+          "role": "BUILTINS_NAMESPACE",
+          "reference_port": {
+            "kind": "program_value",
+            "value": "21acf624e356e89a5c8fe177670eaddd",
+            "wire": "program_value:21acf624e356e89a5c8fe177670eaddd"
+          },
+          "cell_slot": null,
+          "cell_position": null,
+          "observed_reference": "environment-anchor:75747:2",
+          "identity_basis": "LIVE_READONLY_FUNCTION_OWNER"
+        },
+        {
+          "role": "CAPTURED_CELL",
+          "reference_port": {
+            "kind": "program_value",
+            "value": "7d901d14ea2eaa2812771860bbe39f00",
+            "wire": "program_value:7d901d14ea2eaa2812771860bbe39f00"
+          },
+          "cell_slot": {
+            "kind": "slot",
+            "value": "f4ca285457dbbe1e0243b34fd5be1573",
+            "wire": "slot:f4ca285457dbbe1e0243b34fd5be1573"
+          },
+          "cell_position": 0,
+          "observed_reference": "environment-anchor:75747:4",
+          "identity_basis": "LIVE_READONLY_FUNCTION_OWNER"
+        }
+      ],
+      "unresolved": [
+        {
+          "role": "DEFAULTS",
+          "reference_port": {
+            "kind": "program_value",
+            "value": "989ec3534ecef7252fb143d5e839159a",
+            "wire": "program_value:989ec3534ecef7252fb143d5e839159a"
+          },
+          "cell_slot": null,
+          "cell_position": null,
+          "observed_reference": "environment-snapshot:75747:13:1",
+          "identity_basis": "EVENT_LOCAL_SNAPSHOT",
+          "reason": "DISPATCH_DEFAULTS_SNAPSHOT_IS_NOT_ENTRY_BINDING"
+        },
+        {
+          "role": "KEYWORD_DEFAULTS",
+          "reference_port": {
+            "kind": "program_value",
+            "value": "9e6b7a88c15fd19eb073c6425cb7d619",
+            "wire": "program_value:9e6b7a88c15fd19eb073c6425cb7d619"
+          },
+          "cell_slot": null,
+          "cell_position": null,
+          "observed_reference": "environment-snapshot:75747:13:1",
+          "identity_basis": "EVENT_LOCAL_SNAPSHOT",
+          "reason": "DISPATCH_DEFAULTS_SNAPSHOT_IS_NOT_ENTRY_BINDING"
+        }
+      ],
+      "conditions": [
+        "CAPTURE_PRODUCER_TRUSTED",
+        "SIDECARS_BELONG_TO_THE_SAME_CAPTURE",
+        "PYTHON_READONLY_FUNCTION_OWNER_NOT_MUTATED_BY_NATIVE_CODE",
+        "MONITORING_AND_FRAME_INTERPOSITION_REMAIN_UNCLOSED"
+      ],
+      "status": "CONDITIONAL_REFERENCE_IDENTITY"
+    },
+    {
+      "invocation": {
+        "process_id": 75747,
+        "thread_id": 126013674526528,
+        "invocation_id": 10
+      },
+      "definition": {
+        "kind": "opdef",
+        "value": "op:e3fd9081f6723d99fe9b99b7",
+        "wire": "opdef:op:e3fd9081f6723d99fe9b99b7"
+      },
+      "region": {
+        "kind": "program_region",
+        "value": "36fe7bfb5a27668ae72bd94bba02dcb6",
+        "wire": "program_region:36fe7bfb5a27668ae72bd94bba02dcb6"
+      },
+      "environment": {
+        "kind": "program_environment",
+        "value": "a32468397d9c6d571ccdbc2b1a3bffed",
+        "wire": "program_environment:a32468397d9c6d571ccdbc2b1a3bffed"
+      },
+      "dispatch_anchor": {
+        "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_callable_environment_20261022/trace/function-environments.75747.jsonl",
+        "line_number": 15,
+        "line_sha256": "bb914e4bd332f31ff61332ad0c44c0f73b606ae0b60293072aa8472956e237f1",
+        "index": 15
+      },
+      "entry_anchor": {
+        "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_callable_environment_20261022/trace/function-environments.75747.jsonl",
+        "line_number": 16,
+        "line_sha256": "75bbf6a45b3e660275eb334d3f3ab7aaa360239303e4b1e22e05150869ebef0b",
+        "index": 16
+      },
+      "operand_attempt_anchor": {
+        "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_callable_environment_20261022/trace/call-operands.75747.jsonl",
+        "line_number": 36,
+        "line_sha256": "4035e0dd3932d9db5e2ce80d77d329215f9ccbca1aca57d7eb7b96b054ba57ef",
+        "index": 36
+      },
+      "operand_handshake_anchor": {
+        "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_callable_environment_20261022/trace/call-operands.75747.jsonl",
+        "line_number": 37,
+        "line_sha256": "d3888f6759fc3fce464ba49ec3ba60ed0ccb1a1553ab96b469933486e1ad5af9",
+        "index": 37
+      },
+      "frame_entry_anchor": {
+        "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_callable_environment_20261022/trace/call-events.75747.jsonl",
+        "line_number": 17,
+        "line_sha256": "fee6751c1ff9460496009f396bfc267bd9bb9d177ba67533ba0daf486176283b",
+        "index": 17
+      },
+      "ports": [
+        {
+          "role": "FUNCTION_OBJECT",
+          "reference_port": {
+            "kind": "program_value",
+            "value": "45363e88a593b8ddaefce8e5657ccb0e",
+            "wire": "program_value:45363e88a593b8ddaefce8e5657ccb0e"
+          },
+          "cell_slot": null,
+          "cell_position": null,
+          "observed_reference": "weak:75747:18",
+          "identity_basis": "BASE_WEAK_REFERENCE"
+        },
+        {
+          "role": "GLOBALS_NAMESPACE",
+          "reference_port": {
+            "kind": "program_value",
+            "value": "fcac1ec3e8973efc4cf27288cfd2fd84",
+            "wire": "program_value:fcac1ec3e8973efc4cf27288cfd2fd84"
+          },
+          "cell_slot": null,
+          "cell_position": null,
+          "observed_reference": "environment-anchor:75747:1",
+          "identity_basis": "LIVE_READONLY_FUNCTION_OWNER"
+        },
+        {
+          "role": "BUILTINS_NAMESPACE",
+          "reference_port": {
+            "kind": "program_value",
+            "value": "4af5fed9af5fac9604d2d6160cd706e8",
+            "wire": "program_value:4af5fed9af5fac9604d2d6160cd706e8"
+          },
+          "cell_slot": null,
+          "cell_position": null,
+          "observed_reference": "environment-anchor:75747:2",
+          "identity_basis": "LIVE_READONLY_FUNCTION_OWNER"
+        }
+      ],
+      "unresolved": [
+        {
+          "role": "DEFAULTS",
+          "reference_port": {
+            "kind": "program_value",
+            "value": "5b2b63ca40be6dc7e10ba31dfcbf996b",
+            "wire": "program_value:5b2b63ca40be6dc7e10ba31dfcbf996b"
+          },
+          "cell_slot": null,
+          "cell_position": null,
+          "observed_reference": "environment-snapshot:75747:15:1",
+          "identity_basis": "EVENT_LOCAL_SNAPSHOT",
+          "reason": "DISPATCH_DEFAULTS_SNAPSHOT_IS_NOT_ENTRY_BINDING"
+        },
+        {
+          "role": "KEYWORD_DEFAULTS",
+          "reference_port": {
+            "kind": "program_value",
+            "value": "36bb321c97f55d74ff71269cad5755a1",
+            "wire": "program_value:36bb321c97f55d74ff71269cad5755a1"
+          },
+          "cell_slot": null,
+          "cell_position": null,
+          "observed_reference": "environment-snapshot:75747:15:2",
+          "identity_basis": "EVENT_LOCAL_SNAPSHOT",
+          "reason": "DISPATCH_DEFAULTS_SNAPSHOT_IS_NOT_ENTRY_BINDING"
+        }
+      ],
+      "conditions": [
+        "CAPTURE_PRODUCER_TRUSTED",
+        "SIDECARS_BELONG_TO_THE_SAME_CAPTURE",
+        "PYTHON_READONLY_FUNCTION_OWNER_NOT_MUTATED_BY_NATIVE_CODE",
+        "MONITORING_AND_FRAME_INTERPOSITION_REMAIN_UNCLOSED"
+      ],
+      "status": "CONDITIONAL_REFERENCE_IDENTITY"
+    },
+    {
+      "invocation": {
+        "process_id": 75747,
+        "thread_id": 126013674526528,
+        "invocation_id": 11
+      },
+      "definition": {
+        "kind": "opdef",
+        "value": "op:e3fd9081f6723d99fe9b99b7",
+        "wire": "opdef:op:e3fd9081f6723d99fe9b99b7"
+      },
+      "region": {
+        "kind": "program_region",
+        "value": "36fe7bfb5a27668ae72bd94bba02dcb6",
+        "wire": "program_region:36fe7bfb5a27668ae72bd94bba02dcb6"
+      },
+      "environment": {
+        "kind": "program_environment",
+        "value": "a32468397d9c6d571ccdbc2b1a3bffed",
+        "wire": "program_environment:a32468397d9c6d571ccdbc2b1a3bffed"
+      },
+      "dispatch_anchor": {
+        "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_callable_environment_20261022/trace/function-environments.75747.jsonl",
+        "line_number": 17,
+        "line_sha256": "d191eb7180109b46e42e338bb7df4ddb7d920eb0242a1d6ecc5b5213cf9580be",
+        "index": 17
+      },
+      "entry_anchor": {
+        "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_callable_environment_20261022/trace/function-environments.75747.jsonl",
+        "line_number": 18,
+        "line_sha256": "abbfbd8218da06530bf3c417a23d7881534efed8d5918a3f947c789ee9764eec",
+        "index": 18
+      },
+      "operand_attempt_anchor": {
+        "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_callable_environment_20261022/trace/call-operands.75747.jsonl",
+        "line_number": 41,
+        "line_sha256": "97bbeba0bcf91700fadfb11e88fbd79926c9c0c1fc6c6d7b4770b11901b02ab6",
+        "index": 41
+      },
+      "operand_handshake_anchor": {
+        "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_callable_environment_20261022/trace/call-operands.75747.jsonl",
+        "line_number": 42,
+        "line_sha256": "d2c1af2afb7440728e59b934d1557a2b457a5763e23ecda7bb5af23e28407a8e",
+        "index": 42
+      },
+      "frame_entry_anchor": {
+        "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_callable_environment_20261022/trace/call-events.75747.jsonl",
+        "line_number": 19,
+        "line_sha256": "d9c45d0f83c02a15cd33d8d9d52a67b05998eba43756dbc0fa0689c75e2f4aa2",
+        "index": 19
+      },
+      "ports": [
+        {
+          "role": "FUNCTION_OBJECT",
+          "reference_port": {
+            "kind": "program_value",
+            "value": "45363e88a593b8ddaefce8e5657ccb0e",
+            "wire": "program_value:45363e88a593b8ddaefce8e5657ccb0e"
+          },
+          "cell_slot": null,
+          "cell_position": null,
+          "observed_reference": "weak:75747:18",
+          "identity_basis": "BASE_WEAK_REFERENCE"
+        },
+        {
+          "role": "GLOBALS_NAMESPACE",
+          "reference_port": {
+            "kind": "program_value",
+            "value": "fcac1ec3e8973efc4cf27288cfd2fd84",
+            "wire": "program_value:fcac1ec3e8973efc4cf27288cfd2fd84"
+          },
+          "cell_slot": null,
+          "cell_position": null,
+          "observed_reference": "environment-anchor:75747:1",
+          "identity_basis": "LIVE_READONLY_FUNCTION_OWNER"
+        },
+        {
+          "role": "BUILTINS_NAMESPACE",
+          "reference_port": {
+            "kind": "program_value",
+            "value": "4af5fed9af5fac9604d2d6160cd706e8",
+            "wire": "program_value:4af5fed9af5fac9604d2d6160cd706e8"
+          },
+          "cell_slot": null,
+          "cell_position": null,
+          "observed_reference": "environment-anchor:75747:2",
+          "identity_basis": "LIVE_READONLY_FUNCTION_OWNER"
+        }
+      ],
+      "unresolved": [
+        {
+          "role": "DEFAULTS",
+          "reference_port": {
+            "kind": "program_value",
+            "value": "5b2b63ca40be6dc7e10ba31dfcbf996b",
+            "wire": "program_value:5b2b63ca40be6dc7e10ba31dfcbf996b"
+          },
+          "cell_slot": null,
+          "cell_position": null,
+          "observed_reference": "environment-snapshot:75747:17:1",
+          "identity_basis": "EVENT_LOCAL_SNAPSHOT",
+          "reason": "DISPATCH_DEFAULTS_SNAPSHOT_IS_NOT_ENTRY_BINDING"
+        },
+        {
+          "role": "KEYWORD_DEFAULTS",
+          "reference_port": {
+            "kind": "program_value",
+            "value": "36bb321c97f55d74ff71269cad5755a1",
+            "wire": "program_value:36bb321c97f55d74ff71269cad5755a1"
+          },
+          "cell_slot": null,
+          "cell_position": null,
+          "observed_reference": "environment-snapshot:75747:17:2",
+          "identity_basis": "EVENT_LOCAL_SNAPSHOT",
+          "reason": "DISPATCH_DEFAULTS_SNAPSHOT_IS_NOT_ENTRY_BINDING"
+        }
+      ],
+      "conditions": [
+        "CAPTURE_PRODUCER_TRUSTED",
+        "SIDECARS_BELONG_TO_THE_SAME_CAPTURE",
+        "PYTHON_READONLY_FUNCTION_OWNER_NOT_MUTATED_BY_NATIVE_CODE",
+        "MONITORING_AND_FRAME_INTERPOSITION_REMAIN_UNCLOSED"
+      ],
+      "status": "CONDITIONAL_REFERENCE_IDENTITY"
+    }
+  ],
+  "unresolved": [
+    {
+      "process_id": 75747,
+      "attempt_index": 2,
+      "dispatch_anchor": {
+        "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_callable_environment_20261022/trace/function-environments.75747.jsonl",
+        "line_number": 1,
+        "line_sha256": "e9e86e0eb4f37958c8c56f93dd494d5da002b7d7cf6bd8bd32c04e2d1596c630",
+        "index": 1
+      },
+      "observed_members": [
+        {
+          "role": "FUNCTION_OBJECT",
+          "reference": "weak:75747:11",
+          "basis": "BASE_WEAK_REFERENCE",
+          "owner_reference": null,
+          "cell_name": null,
+          "cell_position": null
+        },
+        {
+          "role": "GLOBALS_NAMESPACE",
+          "reference": "environment-anchor:75747:1",
+          "basis": "LIVE_READONLY_FUNCTION_OWNER",
+          "owner_reference": "weak:75747:11",
+          "cell_name": null,
+          "cell_position": null
+        },
+        {
+          "role": "BUILTINS_NAMESPACE",
+          "reference": "environment-anchor:75747:2",
+          "basis": "LIVE_READONLY_FUNCTION_OWNER",
+          "owner_reference": "weak:75747:11",
+          "cell_name": null,
+          "cell_position": null
+        },
+        {
+          "role": "DEFAULTS",
+          "reference": "environment-snapshot:75747:1:1",
+          "basis": "EVENT_LOCAL_SNAPSHOT",
+          "owner_reference": null,
+          "cell_name": null,
+          "cell_position": null
+        },
+        {
+          "role": "KEYWORD_DEFAULTS",
+          "reference": "environment-snapshot:75747:1:1",
+          "basis": "EVENT_LOCAL_SNAPSHOT",
+          "owner_reference": null,
+          "cell_name": null,
+          "cell_position": null
+        }
+      ],
+      "entry_anchor": {
+        "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_callable_environment_20261022/trace/function-environments.75747.jsonl",
+        "line_number": 2,
+        "line_sha256": "c0679f6c89b246b44ae9f7dc07b79666d46f32a20c975e13ea7f7a92305c5643",
+        "index": 2
+      },
+      "invocation": {
+        "process_id": 75747,
+        "thread_id": 126013674526528,
+        "invocation_id": 3
+      },
+      "definition": {
+        "kind": "opdef",
+        "value": "op:b2add8a35705c6e51da9032d",
+        "wire": "opdef:op:b2add8a35705c6e51da9032d"
+      },
+      "reason": "NO_GENERATED_SOURCE_BODY_INTERFACE"
+    },
+    {
+      "process_id": 75747,
+      "attempt_index": 5,
+      "dispatch_anchor": {
+        "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_callable_environment_20261022/trace/function-environments.75747.jsonl",
+        "line_number": 3,
+        "line_sha256": "a82b740757b4d58823d7a10324a55112cf62d9e2de3b59c2d26d2df4cbe12df7",
+        "index": 3
+      },
+      "observed_members": [
+        {
+          "role": "FUNCTION_OBJECT",
+          "reference": "weak:75747:17",
+          "basis": "BASE_WEAK_REFERENCE",
+          "owner_reference": null,
+          "cell_name": null,
+          "cell_position": null
+        },
+        {
+          "role": "GLOBALS_NAMESPACE",
+          "reference": "environment-anchor:75747:1",
+          "basis": "LIVE_READONLY_FUNCTION_OWNER",
+          "owner_reference": "weak:75747:17",
+          "cell_name": null,
+          "cell_position": null
+        },
+        {
+          "role": "BUILTINS_NAMESPACE",
+          "reference": "environment-anchor:75747:2",
+          "basis": "LIVE_READONLY_FUNCTION_OWNER",
+          "owner_reference": "weak:75747:17",
+          "cell_name": null,
+          "cell_position": null
+        },
+        {
+          "role": "DEFAULTS",
+          "reference": "environment-snapshot:75747:3:1",
+          "basis": "EVENT_LOCAL_SNAPSHOT",
+          "owner_reference": null,
+          "cell_name": null,
+          "cell_position": null
+        },
+        {
+          "role": "KEYWORD_DEFAULTS",
+          "reference": "environment-snapshot:75747:3:1",
+          "basis": "EVENT_LOCAL_SNAPSHOT",
+          "owner_reference": null,
+          "cell_name": null,
+          "cell_position": null
+        }
+      ],
+      "entry_anchor": {
+        "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_callable_environment_20261022/trace/function-environments.75747.jsonl",
+        "line_number": 4,
+        "line_sha256": "bef43ae59d134ce300c7acebe59713e45f04d620656c6feccdf4be1ad05ade86",
+        "index": 4
+      },
+      "invocation": {
+        "process_id": 75747,
+        "thread_id": 126013674526528,
+        "invocation_id": 4
+      },
+      "definition": {
+        "kind": "opdef",
+        "value": "op:5ed25c16ba76b86b3b3e08f1",
+        "wire": "opdef:op:5ed25c16ba76b86b3b3e08f1"
+      },
+      "reason": "NO_GENERATED_SOURCE_BODY_INTERFACE"
+    },
+    {
+      "process_id": 75747,
+      "attempt_index": 9,
+      "dispatch_anchor": {
+        "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_callable_environment_20261022/trace/function-environments.75747.jsonl",
+        "line_number": 5,
+        "line_sha256": "16822248a3c5d09cf0e9a8486cbbb3524ae3a39f5ee646f56ae2671bfbbf769e",
+        "index": 5
+      },
+      "observed_members": [
+        {
+          "role": "FUNCTION_OBJECT",
+          "reference": "weak:75747:17",
+          "basis": "BASE_WEAK_REFERENCE",
+          "owner_reference": null,
+          "cell_name": null,
+          "cell_position": null
+        },
+        {
+          "role": "GLOBALS_NAMESPACE",
+          "reference": "environment-anchor:75747:1",
+          "basis": "LIVE_READONLY_FUNCTION_OWNER",
+          "owner_reference": "weak:75747:17",
+          "cell_name": null,
+          "cell_position": null
+        },
+        {
+          "role": "BUILTINS_NAMESPACE",
+          "reference": "environment-anchor:75747:2",
+          "basis": "LIVE_READONLY_FUNCTION_OWNER",
+          "owner_reference": "weak:75747:17",
+          "cell_name": null,
+          "cell_position": null
+        },
+        {
+          "role": "DEFAULTS",
+          "reference": "environment-snapshot:75747:5:1",
+          "basis": "EVENT_LOCAL_SNAPSHOT",
+          "owner_reference": null,
+          "cell_name": null,
+          "cell_position": null
+        },
+        {
+          "role": "KEYWORD_DEFAULTS",
+          "reference": "environment-snapshot:75747:5:1",
+          "basis": "EVENT_LOCAL_SNAPSHOT",
+          "owner_reference": null,
+          "cell_name": null,
+          "cell_position": null
+        }
+      ],
+      "entry_anchor": {
+        "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_callable_environment_20261022/trace/function-environments.75747.jsonl",
+        "line_number": 6,
+        "line_sha256": "4a6de6c8d090cd697a26e5debeebd286308927d5723ddb573899ec4c125e5658",
+        "index": 6
+      },
+      "invocation": {
+        "process_id": 75747,
+        "thread_id": 126013674526528,
+        "invocation_id": 5
+      },
+      "definition": {
+        "kind": "opdef",
+        "value": "op:5ed25c16ba76b86b3b3e08f1",
+        "wire": "opdef:op:5ed25c16ba76b86b3b3e08f1"
+      },
+      "reason": "NO_GENERATED_SOURCE_BODY_INTERFACE"
+    },
+    {
+      "process_id": 75747,
+      "attempt_index": 56,
+      "dispatch_anchor": {
+        "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_callable_environment_20261022/trace/function-environments.75747.jsonl",
+        "line_number": 19,
+        "line_sha256": "c197f4b175a9ad302228c41403b3cfea0de911a33287dff0789b212a292ba2fc",
+        "index": 19
+      },
+      "observed_members": [
+        {
+          "role": "FUNCTION_OBJECT",
+          "reference": "weak:75747:83",
+          "basis": "BASE_WEAK_REFERENCE",
+          "owner_reference": null,
+          "cell_name": null,
+          "cell_position": null
+        },
+        {
+          "role": "GLOBALS_NAMESPACE",
+          "reference": "environment-anchor:75747:5",
+          "basis": "LIVE_READONLY_FUNCTION_OWNER",
+          "owner_reference": "weak:75747:83",
+          "cell_name": null,
+          "cell_position": null
+        },
+        {
+          "role": "BUILTINS_NAMESPACE",
+          "reference": "environment-anchor:75747:2",
+          "basis": "LIVE_READONLY_FUNCTION_OWNER",
+          "owner_reference": "weak:75747:83",
+          "cell_name": null,
+          "cell_position": null
+        },
+        {
+          "role": "DEFAULTS",
+          "reference": "environment-snapshot:75747:19:1",
+          "basis": "EVENT_LOCAL_SNAPSHOT",
+          "owner_reference": null,
+          "cell_name": null,
+          "cell_position": null
+        },
+        {
+          "role": "KEYWORD_DEFAULTS",
+          "reference": "environment-snapshot:75747:19:2",
+          "basis": "EVENT_LOCAL_SNAPSHOT",
+          "owner_reference": null,
+          "cell_name": null,
+          "cell_position": null
+        }
+      ],
+      "reason": "NO_OBSERVED_ENTRY_HANDSHAKE"
+    }
+  ],
+  "summary": {
+    "processes": 1,
+    "events": 19,
+    "references": 87,
+    "dispatches": 10,
+    "entries": 9,
+    "operand_attempts": 14,
+    "identity_bound_entries": 6,
+    "identity_bound_ports": 22,
+    "unresolved_entry_defaults": 12,
+    "unresolved_records": 4,
+    "unresolved_reasons": {
+      "NO_GENERATED_SOURCE_BODY_INTERFACE": 3,
+      "NO_OBSERVED_ENTRY_HANDSHAKE": 1
+    }
+  },
+  "whole_program_graph_established": false,
+  "state_versions_established": false,
+  "reference_contents_observed": false,
+  "cell_contents_observed": false,
+  "logical_versions_established": false,
+  "callable_environment_established": false,
+  "defaults_binding_established": false,
+  "atomic_snapshot_established": false,
+  "effects_established": false,
+  "transformation_authorized": false
+}

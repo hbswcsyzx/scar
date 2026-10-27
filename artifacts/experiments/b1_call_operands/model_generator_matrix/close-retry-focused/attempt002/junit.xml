@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="5" skipped="0" tests="5" time="0.728" timestamp="2026-10-18T17:11:50.833570+00:00" hostname="gpu1"><testcase classname="tests.unit.test_program_generator_close_retry" name="test_two_actual_calls_retry_the_new_cut_with_the_same_forwarded_instance_and_current_raise_states" time="0.044"><failure message="ValueError: protocol_definition_missing at program_value:close.second.adapter.packet.value: protocol result needs its unique typed constructor">def test_two_actual_calls_retry_the_new_cut_with_the_same_forwarded_instance_and_current_raise_states():
+        graph, details = two_close_requests_program()
+&gt;       require_valid(graph)
+
+tests/unit/test_program_generator_close_retry.py:29: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='close.calls'), regions=(Region(id=RegionID(value='close.calls'), label='declared dri...), source=StaticProtocolGap(reason=&lt;StaticGapReason.NATIVE_APPLICABILITY_UNPROVEN: 'NATIVE_APPLICABILITY_UNPROVEN'&gt;))))
+
+    def require_valid(graph: ProgramGraph) -&gt; None:
+        issues = validate(graph)
+        if issues:
+&gt;           raise ValueError("; ".join(f"{issue.code} at {issue.path}: {issue.message}" for issue in issues))
+E           ValueError: protocol_definition_missing at program_value:close.second.adapter.packet.value: protocol result needs its unique typed constructor
+
+scar/ir/program/validation.py:731: ValueError</failure></testcase><testcase classname="tests.unit.test_program_generator_close_retry" name="test_second_close_cannot_reenter_the_first_cut_while_claiming_the_retry_terminal" time="0.030"><failure message="AssertionError: assert 'driver_outcomes' in {'protocol_definition_missing'}&#10; +  where {'protocol_definition_missing'} = _codes(ProgramGraph(root=RegionID(value='close.calls'), regions=(Region(id=RegionID(value='close.calls'), label='declared dri...), source=StaticProtocolGap(reason=&lt;StaticGapReason.NATIVE_APPLICABILITY_UNPROVEN: 'NATIVE_APPLICABILITY_UNPROVEN'&gt;)))))">def test_second_close_cannot_reenter_the_first_cut_while_claiming_the_retry_terminal():
+        graph, details = two_close_requests_program()
+        row = next(row for row in graph.body_drives if row.operation == details["second"]["drive"])
+        wrong = replace(graph, body_drives=tuple(replace(current,
+            target=BodyResume(details["first_cut"], 1)) if current == row else current
+            for current in graph.body_drives))
+&gt;       assert "driver_outcomes" in _codes(wrong)
+E       AssertionError: assert 'driver_outcomes' in {'protocol_definition_missing'}
+E        +  where {'protocol_definition_missing'} = _codes(ProgramGraph(root=RegionID(value='close.calls'), regions=(Region(id=RegionID(value='close.calls'), label='declared dri...), source=StaticProtocolGap(reason=&lt;StaticGapReason.NATIVE_APPLICABILITY_UNPROVEN: 'NATIVE_APPLICABILITY_UNPROVEN'&gt;)))))
+
+tests/unit/test_program_generator_close_retry.py:81: AssertionError</failure></testcase><testcase classname="tests.unit.test_program_generator_close_retry" name="test_second_call_cannot_reuse_the_pre_first_call_state_after_the_actual_raise_completion" time="0.026"><failure message="ValueError: protocol_definition_missing at program_value:close.second.adapter.packet.value: protocol result needs its unique typed constructor">def test_second_call_cannot_reuse_the_pre_first_call_state_after_the_actual_raise_completion():
+        graph, details = two_close_requests_program()
+        second = _operation(graph, details["calls"][1])
+&gt;       index = ProgramIndex(graph)
+                ^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_program_generator_close_retry.py:87: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;scar.ir.program.queries.ProgramIndex object at 0x73afea245400&gt;
+graph = ProgramGraph(root=RegionID(value='close.calls'), regions=(Region(id=RegionID(value='close.calls'), label='declared dri...), source=StaticProtocolGap(reason=&lt;StaticGapReason.NATIVE_APPLICABILITY_UNPROVEN: 'NATIVE_APPLICABILITY_UNPROVEN'&gt;))))
+
+    def __init__(self, graph: ProgramGraph):
+        # Reuse the validator's canonical CFG/dominators and derived cleanup
+        # result rather than running a second dataflow algorithm for queries.
+        from .validation import validate
+        cleanup, resumption, lifecycle = [], [], []
+        issues = validate(graph, _cleanup_facts=cleanup, _resumption_facts=resumption,
+                          _lifecycle_facts=lifecycle)
+        if issues:
+&gt;           raise ValueError("; ".join(f"{i.code} at {i.path}: {i.message}" for i in issues))
+E           ValueError: protocol_definition_missing at program_value:close.second.adapter.packet.value: protocol result needs its unique typed constructor
+
+scar/ir/program/queries.py:279: ValueError</failure></testcase><testcase classname="tests.unit.test_program_generator_close_retry" name="test_second_close_cannot_deliver_the_previous_host_error_in_place_of_its_fresh_normalizer_packet" time="0.026"><failure message="ValueError: protocol_definition_missing at program_value:close.second.adapter.packet.value: protocol result needs its unique typed constructor">def test_second_close_cannot_deliver_the_previous_host_error_in_place_of_its_fresh_normalizer_packet():
+        graph, details = two_close_requests_program()
+        gate = _operation(graph, details["second_gate"])
+        row = next(row for row in graph.final_body_gates if row.operation == gate.id)
+        actual = gate.invoke_arguments[row.delivery_arguments[0]]
+        new_packet = next(use.value for use in gate.uses if use.id == actual)
+        changed = replace(gate, uses=tuple(replace(use, value=details["second_old_packet"])
+            if use.value == new_packet else use for use in gate.uses))
+        wrong = replace(graph, operations=tuple(changed if operation.id == changed.id else operation
+                                               for operation in graph.operations))
+&gt;       require_valid(replace(wrong, protocol_scopes=(), protocol_operations=()))
+
+tests/unit/test_program_generator_close_retry.py:104: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='close.calls'), regions=(Region(id=RegionID(value='close.calls'), label='declared dri...ose suppression result; native exception-class applicability unproved')),), protocol_scopes=(), protocol_operations=())
+
+    def require_valid(graph: ProgramGraph) -&gt; None:
+        issues = validate(graph)
+        if issues:
+&gt;           raise ValueError("; ".join(f"{issue.code} at {issue.path}: {issue.message}" for issue in issues))
+E           ValueError: protocol_definition_missing at program_value:close.second.adapter.packet.value: protocol result needs its unique typed constructor
+
+scar/ir/program/validation.py:731: ValueError</failure></testcase><testcase classname="tests.unit.test_program_generator_close_retry" name="test_first_yield_cannot_borrow_finished_history_from_the_second_driver_of_the_shared_body" time="0.031"><failure message="AssertionError: assert 'terminal_release_unfinished' in {'protocol_definition_missing'}&#10; +  where {'protocol_definition_missing'} = _codes(ProgramGraph(root=RegionID(value='close.calls'), regions=(Region(id=RegionID(value='close.calls'), label='declared dri...), source=StaticProtocolGap(reason=&lt;StaticGapReason.NATIVE_APPLICABILITY_UNPROVEN: 'NATIVE_APPLICABILITY_UNPROVEN'&gt;)))))">def test_first_yield_cannot_borrow_finished_history_from_the_second_driver_of_the_shared_body():
+        graph, _ = two_close_requests_program(release_first=True)
+&gt;       assert "terminal_release_unfinished" in _codes(graph)
+E       AssertionError: assert 'terminal_release_unfinished' in {'protocol_definition_missing'}
+E        +  where {'protocol_definition_missing'} = _codes(ProgramGraph(root=RegionID(value='close.calls'), regions=(Region(id=RegionID(value='close.calls'), label='declared dri...), source=StaticProtocolGap(reason=&lt;StaticGapReason.NATIVE_APPLICABILITY_UNPROVEN: 'NATIVE_APPLICABILITY_UNPROVEN'&gt;)))))
+
+tests/unit/test_program_generator_close_retry.py:110: AssertionError</failure></testcase></testsuite></testsuites>

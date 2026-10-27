@@ -1,0 +1,254 @@
+"""Later THROW/CLOSE normalize this scheduler S, independently of stored L."""
+from dataclasses import replace
+
+import pytest
+
+from scar.ir.execution.validity_budget import ValidityBudget
+from scar.ir.program.driver_flow import body_drive_target
+from scar.ir.program.model import (
+    BlockArgument, CompletionResult, ExitKind, InvokeLiteralResult, StateVersionValue,
+    TerminatorKind, value_type,
+)
+from scar.ir.program.protocol_async import _Analysis, async_connections
+from scar.ir.program.protocol_connection_flow import ConnectionContext
+from scar.ir.program.protocols import OwnedUse, RequestProcessingRule
+from scar.ir.program.queries import ProgramIndex
+from scar.ir.program.resumption import ResumeSlotKind
+from scar.ir.program.structured import ControlEdgeReference
+from scar.ir.program.validation import require_valid, validate
+from tests.fixtures.program_async_connections import request_creation_program
+
+
+QUERY_BUDGET = 65536
+
+
+def _core(graph):
+    return replace(graph, protocol_scopes=(), protocol_operations=(),
+        protocol_call_inputs=(), protocol_result_consumers=(), protocol_bindings=())
+
+
+def _scheduler_packet_program(kind):
+    graph, original = request_creation_program(kind=kind, initial_step=False,
+        scheduler_kind=kind, normalize=True)
+    operations = {operation.id: operation for operation in graph.operations}
+    values = {value.id: value for value in graph.values}
+    normalizer = operations[original['normalization']]
+    driver = next(region for region in graph.regions
+                  if region.id == original['interface'].region)
+    owner = next(block for block in driver.blocks if normalizer.id in block.operations)
+    scheduler_formal = values[original['interface'].scheduler_request].origin
+    assert type(scheduler_formal) is BlockArgument and scheduler_formal.block == driver.entry
+    # These independent B,L,S,R roles are forwarded by the original association
+    # and selected false edge. Keep every original actual/forward UseID.
+    latent, scheduler = owner.arguments[1:3]
+    assert latent != scheduler
+    assert value_type(values[latent]) == value_type(values[scheduler])
+    raw_id = original['normalization_raw'].id
+    normalizer = replace(normalizer, uses=tuple(replace(use, value=scheduler)
+        if use.id == raw_id else use for use in normalizer.uses))
+    graph = replace(graph, operations=tuple(normalizer if operation.id == normalizer.id else operation
+                                            for operation in graph.operations))
+    blocks = {block.id: block for region in graph.regions for block in region.blocks}
+    ports, landed, edges = {}, {}, {}
+    for number, edge in enumerate(normalizer.terminator.successors):
+        reference = ControlEdgeReference(normalizer.id, number)
+        signature = next(row for row in normalizer.completions if row.kind is edge.kind)
+        ports[edge.kind] = tuple(InvokeLiteralResult(reference, CompletionResult(slot))
+                                 for slot in range(len(signature.types)))
+        landed[edge.kind] = {
+            actual.index: formal for actual, formal in zip(edge.arguments, blocks[edge.block].arguments)
+            if type(actual) is CompletionResult}
+        edges[edge.kind] = reference
+    raised_edge = normalizer.terminator.successors[edges[ExitKind.RAISE].successor_index]
+    raised_terminal = operations[blocks[raised_edge.block].operations[-1]]
+    drive, = graph.body_drives
+    delivery, = drive.resume_inputs
+    _, _, ingress = body_drive_target(graph, drive)
+    gate = operations[original['gate']]
+    return graph, {**original, 'normalizer': normalizer, 'raw': OwnedUse(normalizer.id, raw_id),
+        'latent_value': latent, 'scheduler_value': scheduler,
+        'scheduler_source': values[original['scheduler_definition'].value].origin,
+        'scheduler_formal': scheduler_formal,
+        'ports': ports, 'landed': landed, 'edges': edges, 'gate_operation': gate,
+        'drive_record': drive, 'delivery': delivery, 'ingress': ingress,
+        'delivery_actual': OwnedUse(drive.operation, delivery.source),
+        'raised_terminal': raised_terminal}
+
+
+def _report(graph, *, budget=QUERY_BUDGET):
+    require_valid(_core(graph))
+    require_valid(graph)
+    shared = ValidityBudget(budget)
+    index = ProgramIndex(graph)
+    return async_connections(ConnectionContext(graph, index=index, budget=shared)), shared
+
+
+def _assert_original_ports_and_states(graph, details):
+    """Use logical completion ordinals, including forwarded normal landings."""
+    core = _core(graph)
+    require_valid(core)
+    index = ProgramIndex(core)
+    operation, ports = details['normalizer'], details['ports']
+    assert details['raw'].use in operation.invoke_arguments
+    assert {edge.kind for edge in operation.terminator.successors} == {ExitKind.NORMAL, ExitKind.RAISE}
+    assert details['ingress'].inputs[details['delivery'].slot].kind is ResumeSlotKind.THROWN_PACKET
+    assert {row.contract.result for row in details['normalization_rows']} == {
+        ports[ExitKind.NORMAL][0], ports[ExitKind.RAISE][0]}
+    wanted = (RequestProcessingRule.NORMALIZE_ASYNC_THROW
+        if details['scheduler_definition'].kind.value == 'THROW'
+        else RequestProcessingRule.NORMALIZE_GENERATOR_EXIT)
+    assert all(row.contract.rule is wanted for row in details['normalization_rows'])
+    assert index.source_binding(details['scheduler_source'], OwnedUse(
+        details['drive_record'].operation, details['drive_record'].scheduler_request),
+        budget=QUERY_BUDGET)['match'] is True
+    assert index.source_binding(ports[ExitKind.NORMAL][0], details['delivery_actual'],
+                                budget=QUERY_BUDGET)['match'] is True
+    terminal = details['raised_terminal']
+    assert terminal.terminator.kind is TerminatorKind.RAISE
+    assert index.source_binding(ports[ExitKind.RAISE][0],
+        OwnedUse(terminal.id, terminal.terminator.values[0]), budget=QUERY_BUDGET)['match'] is True
+    values = {value.id: value for value in graph.values}
+    # NORMAL's own poststate reaches the gate; the gate has its own state
+    # completion before Drive. RAISE's separate poststate reaches its terminal.
+    for kind, consumer in ((ExitKind.NORMAL, details['gate_operation']),
+                           (ExitKind.RAISE, terminal)):
+        own = ports[kind]
+        signature = next(row for row in operation.completions if row.kind is kind)
+        state_slots = tuple(slot for slot, type_ in enumerate(signature.types)
+                            if getattr(type_, 'location', None) is not None)
+        assert state_slots == (1, 2)
+        for slot in state_slots:
+            location = signature.types[slot].location
+            actuals = tuple(OwnedUse(consumer.id, use.id) for use in consumer.uses
+                if type(values[use.value]) is StateVersionValue
+                and values[use.value].location == location
+                and (consumer is terminal or use.id in consumer.invoke_arguments))
+            actual, = actuals
+            assert index.source_binding(own[slot], actual, budget=QUERY_BUDGET)['match'] is True
+            assert next(use.value for use in consumer.uses if use.id == actual.use) == details['landed'][kind][slot]
+
+
+def _selected_delivery(report, details):
+    delivery, = tuple(row for row in report['deliveries']
+        if row['drive'].operation == details['drive_record'].operation
+        and row['slot'] == details['delivery'].slot)
+    assert delivery['initial_step'] is False
+    assert delivery['selection_basis'] == 'ORIGINAL_PREDICATE_EDGE'
+    assert delivery['current_step_verified'] is False
+    assert delivery['actual'] == details['delivery_actual']
+    assert {item['definition'] for item in delivery['alternatives']} == {details['scheduler_definition']}
+    assert details['latent_definition'] != details['scheduler_definition']
+    return delivery
+
+
+@pytest.mark.parametrize('kind', ('THROW', 'CLOSE'))
+def test_later_scheduler_packet_uses_s_normalization_own_normal_and_separate_raise_states(kind):
+    graph, details = _scheduler_packet_program(kind)
+    _assert_original_ports_and_states(graph, details)
+    assert ProgramIndex(_core(graph)).source_binding(details['scheduler_source'], details['raw'],
+        budget=QUERY_BUDGET)['match'] is True
+    assert ProgramIndex(_core(graph)).source_binding(details['scheduler_formal'], details['raw'],
+        budget=QUERY_BUDGET)['match'] is True
+    report, shared = _report(graph)
+    delivery = _selected_delivery(report, details)
+    alternative, = delivery['alternatives']
+    assert alternative['match'] is True
+    normalization, = alternative['normalizations']
+    assert normalization['processing'].operation == details['normalizer'].id
+    assert normalization['processing'].contract.result == details['ports'][ExitKind.NORMAL][0]
+    assert normalization['delivered']['match'] is True
+    assert normalization['binding']['match'] is True
+    assert not report['issues']
+    changed = tuple(gap for gap in report['gaps']
+                    if gap['code'] == 'async_initial_selection_snapshot_changed')
+    assert changed and all(gap['current_gate_authorized'] is False for gap in changed)
+    assert not shared.truncated
+    for flag in ('source_runtime_verified', 'runtime_identity_verified',
+                 'value_identity_verified', 'transformation_authorized'):
+        assert report[flag] is False
+
+
+@pytest.mark.parametrize('kind', ('THROW', 'CLOSE'))
+def test_later_scheduler_normalizer_cannot_take_same_kind_latent_l_instead(kind):
+    graph, details = _scheduler_packet_program(kind)
+    normalizer = details['normalizer']
+    changed = replace(normalizer, uses=tuple(replace(use, value=details['latent_value'])
+        if use.id == details['raw'].use else use for use in normalizer.uses))
+    wrong = replace(graph, operations=tuple(changed if operation.id == normalizer.id else operation
+                                            for operation in graph.operations))
+    assert graph.values == wrong.values and graph.regions == wrong.regions
+    assert graph.protocol_operations == wrong.protocol_operations
+    assert tuple(use for use in normalizer.uses if use.id != details['raw'].use) == tuple(
+        use for use in changed.uses if use.id != details['raw'].use)
+    _assert_original_ports_and_states(wrong, {**details, 'normalizer': changed})
+    assert ProgramIndex(_core(wrong)).source_binding(details['scheduler_formal'], details['raw'],
+        budget=QUERY_BUDGET)['match'] is False
+    assert 'async_delivery_source' in {issue.code for issue in validate(wrong)}
+
+
+@pytest.mark.parametrize('kind', ('THROW', 'CLOSE'))
+def test_removing_scheduler_normalization_rows_keeps_original_delivery_and_unknown_source(kind):
+    graph, details = _scheduler_packet_program(kind)
+    removed = replace(graph, protocol_operations=tuple(row for row in graph.protocol_operations
+                       if row not in details['normalization_rows']))
+    assert graph.operations == removed.operations and graph.values == removed.values
+    assert graph.regions == removed.regions
+    _assert_original_ports_and_states(removed, details)
+    complete, _ = _report(graph)
+    report, shared = _report(removed)
+    before, after = _selected_delivery(complete, details), _selected_delivery(report, details)
+    assert before['drive'] == after['drive'] and before['actual'] == after['actual']
+    assert tuple(item['definition'] for item in before['alternatives']) == tuple(
+        item['definition'] for item in after['alternatives'])
+    assert len(before['alternatives']) == len(after['alternatives']) == 1
+    assert all(item['match'] is None for item in after['alternatives'])
+    assert any(gap['code'] == 'async_scheduler_packet_normalization_unresolved' for gap in report['gaps'])
+    assert not report['issues'] and not shared.truncated
+
+
+def test_budget_one_preserves_the_original_scheduler_drive_inventory_without_delivery_proof():
+    graph, details = _scheduler_packet_program('THROW')
+    _assert_original_ports_and_states(graph, details)
+    complete, _ = _report(graph)
+    report, shared = _report(graph, budget=1)
+    before = tuple(drive.operation for item in complete['inventory'] for drive in item['drives'])
+    after = tuple(drive.operation for item in report['inventory'] for drive in item['drives'])
+    assert before == after == (details['drive_record'].operation,)
+    assert report['cursor'] is not None and shared.truncated is True
+    assert shared.used <= 1
+    assert not any(alternative['match'] is True for delivery in report['deliveries']
+                   for alternative in delivery['alternatives'])
+
+
+def test_last_raise_candidate_scan_exhaustion_cannot_leave_scheduler_packet_match_true():
+    graph, details = _scheduler_packet_program('THROW')
+    _assert_original_ports_and_states(graph, details)
+    complete, _ = _report(graph)
+    alternative, = _selected_delivery(complete, details)['alternatives']
+    assert alternative['match'] is True
+    projection = alternative['projection']
+
+    def packet_delivery(limit):
+        shared = ValidityBudget(limit)
+        context = ConnectionContext(graph, index=ProgramIndex(graph), budget=shared)
+        analysis = _Analysis(context, prepare=False)
+        result = analysis.packet_delivery(context.scopes[details['scope']],
+            details['scheduler_definition'], projection, details['delivery_actual'],
+            'test.later.scheduler.packet')
+        return result, analysis, shared
+
+    full, _, work = packet_delivery(QUERY_BUDGET)
+    assert full['match'] is True and not work.truncated
+    assert work.costs['async_packet_processors'] == 2
+    assert len(full['normalizations']) == 1
+    assert full['normalizations'][0]['processing'].contract.result == details['ports'][ExitKind.NORMAL][0]
+    # The original RAISE row is scanned after the completed NORMAL candidate.
+    # It is not a delivery candidate, but even that final scan costs one unit.
+    limited, analysis, budget = packet_delivery(work.used - 1)
+    assert len(limited['normalizations']) == 1
+    assert limited['normalizations'][0]['match'] is True
+    assert limited['match'] is None
+    assert budget.truncated is True and budget.used <= budget.limit
+    assert analysis.cursor is not None and analysis.cursor['phase'] == 'packet_processors'
+    assert any(gap['code'] == 'protocol_budget_exhausted' for gap in analysis.gaps)
+    assert any(gap['code'] == 'validity_budget_exhausted' for gap in budget.gaps)

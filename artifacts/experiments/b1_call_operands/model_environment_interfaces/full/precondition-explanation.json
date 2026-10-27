@@ -1,0 +1,8 @@
+{
+  "status": "INVOCATION_PRECONDITION_FAILURE",
+  "cause": "Caller supplied short revision; driver requires exact full HEAD. No pytest process was started.",
+  "old_argument": "e826713",
+  "required_revision": "e8267134b5daf40e5a2b89b1a00a73186284e864",
+  "next_directory": "artifacts/experiments/b1_call_operands/model_environment_interfaces/full-final",
+  "source_changed": false
+}

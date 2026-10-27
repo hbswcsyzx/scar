@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="5" skipped="0" tests="21" time="17.963" timestamp="2026-10-19T05:06:55.569468+00:00" hostname="gpu1"><testcase classname="tests.unit.test_execution_await_outcomes" name="test_actual_completion_packet_and_final_value_stay_in_their_exact_instance[zero-cut]" time="0.662" /><testcase classname="tests.unit.test_execution_await_outcomes" name="test_actual_completion_packet_and_final_value_stay_in_their_exact_instance[two-cut]" time="1.469" /><testcase classname="tests.unit.test_execution_await_outcomes" name="test_actual_extractor_raise_uses_its_own_packet_after_the_selected_constructor_leg[completion-packet]" time="0.405" /><testcase classname="tests.unit.test_execution_await_outcomes" name="test_actual_extractor_raise_uses_its_own_packet_after_the_selected_constructor_leg[constructor-failure]" time="0.399" /><testcase classname="tests.unit.test_execution_await_outcomes" name="test_missing_exact_extractor_use_does_not_borrow_the_sibling_instance" time="1.461" /><testcase classname="tests.unit.test_execution_await_outcomes" name="test_missing_extractor_suffix_keeps_the_static_key_and_other_instance_terminal" time="1.489" /><testcase classname="tests.unit.test_execution_await_outcomes" name="test_deleting_final_metadata_keeps_captured_consumer_and_its_static_outcome_key" time="0.731" /><testcase classname="tests.unit.test_execution_await_outcomes" name="test_budget_one_preserves_original_successor_inventory_and_reports_unchecked_work" time="1.365" /><testcase classname="tests.unit.test_execution_await_outcome_failures" name="test_expanded_failure_uses_exact_helper_completion_parent_raise_and_consumers[lookup_raise-LOOKUP-await.general.helper.lookup]" time="0.599"><failure message="assert 0 == 1&#10; +  where 0 = len(())">failure_stage = 'lookup_raise', selected_stage = 'LOOKUP'
+stage_operation = 'await.general.helper.lookup'
+
+    @pytest.mark.parametrize(("failure_stage", "selected_stage", "stage_operation"), _STAGES)
+    def test_expanded_failure_uses_exact_helper_completion_parent_raise_and_consumers(
+            failure_stage, selected_stage, stage_operation):
+        program, model, details = await_outcome_failure_execution(failure_stage)
+        require_valid(program)
+        index = ExecutionIndex(model, program)
+        source, parent_packet, parent_states = _parent_raise_values(program, model, details)
+        view = index.await_body_links(details["acquisition_scope"], budget=65536)
+        assert view["source_runtime_verified"] is False
+        assert view["runtime_identity_verified"] is False
+        assert view["transformation_authorized"] is False
+    
+        # The static D4 paths remain the denominator of the occurrence join.
+        static = _static_await(program, details["acquisition_scope"])
+        static_keys = {row["key"] for row in static["failure_paths"]}
+        dynamic = _paths(view, source)
+        assert { _static_definition(row)["key"] for row in dynamic } == static_keys
+    
+        own = _stage_path(view, source, "ACQUISITION_RAISE")
+        assert own["stage"] == source
+        assert own["source"] == source
+        own_terminal = _dynamic_terminal(own, details["get_failure"].id)
+&gt;       host_occurrence = _operation_occurrence(
+            model, details["parent_operations"][details["get_failure"].id])
+
+tests/unit/test_execution_await_outcome_failures.py:166: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+model = ExecutionModel(snapshot=ProgramSnapshot(artifact=ProviderArtifact(uri='memory:canonical-program', sha256='a62a0bcc5fc4...authored call pairing; not source/runtime identity evidence')),), body_drive_executions=(), body_activation_origins=())
+operation_id = OperationOccurrenceID(value='await.outcome.lookup_raise.parent.2.factory.awaitable.failure.raise')
+
+    def _operation_occurrence(model, operation_id):
+        matches = tuple(row for row in model.operations if row.operation == operation_id)
+&gt;       assert len(matches) == 1
+E       assert 0 == 1
+E        +  where 0 = len(())
+
+tests/unit/test_execution_await_outcome_failures.py:81: AssertionError</failure></testcase><testcase classname="tests.unit.test_execution_await_outcome_failures" name="test_expanded_failure_uses_exact_helper_completion_parent_raise_and_consumers[method_call_raise-METHOD_CALL-await.general.helper.call]" time="0.545"><failure message="assert 0 == 1&#10; +  where 0 = len(())">failure_stage = 'method_call_raise', selected_stage = 'METHOD_CALL'
+stage_operation = 'await.general.helper.call'
+
+    @pytest.mark.parametrize(("failure_stage", "selected_stage", "stage_operation"), _STAGES)
+    def test_expanded_failure_uses_exact_helper_completion_parent_raise_and_consumers(
+            failure_stage, selected_stage, stage_operation):
+        program, model, details = await_outcome_failure_execution(failure_stage)
+        require_valid(program)
+        index = ExecutionIndex(model, program)
+        source, parent_packet, parent_states = _parent_raise_values(program, model, details)
+        view = index.await_body_links(details["acquisition_scope"], budget=65536)
+        assert view["source_runtime_verified"] is False
+        assert view["runtime_identity_verified"] is False
+        assert view["transformation_authorized"] is False
+    
+        # The static D4 paths remain the denominator of the occurrence join.
+        static = _static_await(program, details["acquisition_scope"])
+        static_keys = {row["key"] for row in static["failure_paths"]}
+        dynamic = _paths(view, source)
+        assert { _static_definition(row)["key"] for row in dynamic } == static_keys
+    
+        own = _stage_path(view, source, "ACQUISITION_RAISE")
+        assert own["stage"] == source
+        assert own["source"] == source
+        own_terminal = _dynamic_terminal(own, details["get_failure"].id)
+&gt;       host_occurrence = _operation_occurrence(
+            model, details["parent_operations"][details["get_failure"].id])
+
+tests/unit/test_execution_await_outcome_failures.py:166: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+model = ExecutionModel(snapshot=ProgramSnapshot(artifact=ProviderArtifact(uri='memory:canonical-program', sha256='a62a0bcc5fc4...authored call pairing; not source/runtime identity evidence')),), body_drive_executions=(), body_activation_origins=())
+operation_id = OperationOccurrenceID(value='await.outcome.method_call_raise.parent.2.factory.awaitable.failure.raise')
+
+    def _operation_occurrence(model, operation_id):
+        matches = tuple(row for row in model.operations if row.operation == operation_id)
+&gt;       assert len(matches) == 1
+E       assert 0 == 1
+E        +  where 0 = len(())
+
+tests/unit/test_execution_await_outcome_failures.py:81: AssertionError</failure></testcase><testcase classname="tests.unit.test_execution_await_outcome_failures" name="test_expanded_failure_uses_exact_helper_completion_parent_raise_and_consumers[qualification_reject-QUALIFICATION_REJECT-await.general.helper.qualify.branch]" time="0.549"><failure message="assert 0 == 1&#10; +  where 0 = len(())">failure_stage = 'qualification_reject', selected_stage = 'QUALIFICATION_REJECT'
+stage_operation = 'await.general.helper.qualify.branch'
+
+    @pytest.mark.parametrize(("failure_stage", "selected_stage", "stage_operation"), _STAGES)
+    def test_expanded_failure_uses_exact_helper_completion_parent_raise_and_consumers(
+            failure_stage, selected_stage, stage_operation):
+        program, model, details = await_outcome_failure_execution(failure_stage)
+        require_valid(program)
+        index = ExecutionIndex(model, program)
+        source, parent_packet, parent_states = _parent_raise_values(program, model, details)
+        view = index.await_body_links(details["acquisition_scope"], budget=65536)
+        assert view["source_runtime_verified"] is False
+        assert view["runtime_identity_verified"] is False
+        assert view["transformation_authorized"] is False
+    
+        # The static D4 paths remain the denominator of the occurrence join.
+        static = _static_await(program, details["acquisition_scope"])
+        static_keys = {row["key"] for row in static["failure_paths"]}
+        dynamic = _paths(view, source)
+        assert { _static_definition(row)["key"] for row in dynamic } == static_keys
+    
+        own = _stage_path(view, source, "ACQUISITION_RAISE")
+        assert own["stage"] == source
+        assert own["source"] == source
+        own_terminal = _dynamic_terminal(own, details["get_failure"].id)
+&gt;       host_occurrence = _operation_occurrence(
+            model, details["parent_operations"][details["get_failure"].id])
+
+tests/unit/test_execution_await_outcome_failures.py:166: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+model = ExecutionModel(snapshot=ProgramSnapshot(artifact=ProviderArtifact(uri='memory:canonical-program', sha256='ce4698909817...authored call pairing; not source/runtime identity evidence')),), body_drive_executions=(), body_activation_origins=())
+operation_id = OperationOccurrenceID(value='await.outcome.qualification_reject.parent.2.factory.awaitable.failure.raise')
+
+    def _operation_occurrence(model, operation_id):
+        matches = tuple(row for row in model.operations if row.operation == operation_id)
+&gt;       assert len(matches) == 1
+E       assert 0 == 1
+E        +  where 0 = len(())
+
+tests/unit/test_execution_await_outcome_failures.py:81: AssertionError</failure></testcase><testcase classname="tests.unit.test_execution_await_outcome_failures" name="test_parent_own_raise_is_kept_without_a_call_activation_or_body_advance" time="0.393"><failure message="assert 0 == 1&#10; +  where 0 = len(())">def test_parent_own_raise_is_kept_without_a_call_activation_or_body_advance():
+        program, model, details = await_outcome_failure_execution(
+            "qualification_reject", capture_call=False)
+        require_valid(program)
+        index = ExecutionIndex(model, program)
+        source, parent_packet, parent_states = _parent_raise_values(program, model, details)
+        view = index.await_body_links(details["acquisition_scope"], budget=65536)
+    
+        own = _stage_path(view, source, "ACQUISITION_RAISE")
+        assert own["source"] == source
+        assert own["stage"] == source
+        terminal = _dynamic_terminal(own, details["get_failure"].id)
+&gt;       host_occurrence = _operation_occurrence(
+            model, details["parent_operations"][details["get_failure"].id])
+
+tests/unit/test_execution_await_outcome_failures.py:246: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+model = ExecutionModel(snapshot=ProgramSnapshot(artifact=ProviderArtifact(uri='memory:canonical-program', sha256='ce4698909817...r_associations=(), contribution_supports=(), call_activations=(), body_drive_executions=(), body_activation_origins=())
+operation_id = OperationOccurrenceID(value='await.outcome.qualification_reject.parent.2.factory.awaitable.failure.raise')
+
+    def _operation_occurrence(model, operation_id):
+        matches = tuple(row for row in model.operations if row.operation == operation_id)
+&gt;       assert len(matches) == 1
+E       assert 0 == 1
+E        +  where 0 = len(())
+
+tests/unit/test_execution_await_outcome_failures.py:81: AssertionError</failure></testcase><testcase classname="tests.unit.test_execution_await_outcome_failures" name="test_deleted_source_raise_row_and_receipt_do_not_delete_its_dynamic_obligation" time="0.585" /><testcase classname="tests.unit.test_execution_await_outcome_failures" name="test_budget_cut_keeps_static_failure_denominator_and_cursor" time="0.544" /><testcase classname="tests.unit.test_execution_await_outcome_boundaries" name="test_original_parent_anchor_counts_are_not_derived_route_or_budget_prefix_counts[outcomes-outcome_inventory-advance_operation]" time="0.511"><failure message="assert None is not None">field = 'outcomes', inventory_field = 'outcome_inventory'
+parent_field = 'advance_operation'
+
+    @pytest.mark.parametrize("field,inventory_field,parent_field", (
+        ("outcomes", "outcome_inventory", "advance_operation"),
+        ("failure_paths", "failure_path_inventory", "source_operation"),
+    ))
+    def test_original_parent_anchor_counts_are_not_derived_route_or_budget_prefix_counts(
+            field, inventory_field, parent_field):
+        program, model, details = await_resume_execution(zero_cut=True, instances=2)
+        scope = details["static"]["acquisition_scope"]
+        original = _static(program, scope)[field]
+        assert original
+        expected = {row["key"]: sum(occurrence.operation == row[parent_field]
+            for occurrence in model.operations) for row in original}
+        assert all(count == 2 for count in expected.values())
+        index = _index(program, model)
+        complete = index.await_body_links(scope, budget=QUERY_BUDGET)
+        assert set(_keys(complete, field)) == set(expected)
+        inventory = complete[inventory_field]
+        assert inventory["occurrence_count"] == sum(expected.values())
+        assert inventory["observed_occurrence_count"] == sum(expected.values())
+        assert inventory["checked_occurrence_count"] == sum(expected.values())
+        assert inventory["pending_occurrence_count"] == 0
+        for row in complete[field]:
+            assert row["occurrence_count"] == expected[row["key"]]
+    
+        bounded = index.await_body_links(scope, budget=1)
+        inventory = bounded[inventory_field]
+        assert inventory["known_inventory_complete"] is False
+        assert inventory["jobs_total"] is None
+        assert inventory["pending_count"] is None
+        assert inventory["occurrence_count"] is None
+        assert inventory["pending_occurrence_count"] is None
+        assert inventory["observed_occurrence_count"] == sum(
+            expected[row["key"]] for row in bounded[field])
+        assert inventory["checked_occurrence_count"] &lt;= inventory["observed_occurrence_count"]
+&gt;       assert inventory["cursor"] is not None
+E       assert None is not None
+
+tests/unit/test_execution_await_outcome_boundaries.py:86: AssertionError</failure></testcase><testcase classname="tests.unit.test_execution_await_outcome_boundaries" name="test_original_parent_anchor_counts_are_not_derived_route_or_budget_prefix_counts[failure_paths-failure_path_inventory-source_operation]" time="0.508" /><testcase classname="tests.unit.test_execution_await_outcome_boundaries" name="test_returned_dynamic_outcome_and_nested_conversion_views_are_detached" time="0.429" /><testcase classname="tests.unit.test_execution_await_outcome_boundaries" name="test_whole_capture_deletion_keeps_static_outcome_and_failure_keys[return]" time="0.898" /><testcase classname="tests.unit.test_execution_await_outcome_boundaries" name="test_whole_capture_deletion_keeps_static_outcome_and_failure_keys[source-failure]" time="1.281" /><testcase classname="tests.unit.test_execution_await_outcome_boundaries" name="test_captured_unrelated_qualification_does_not_pollute_the_requested_scope" time="0.987" /><testcase classname="tests.unit.test_execution_await_outcome_boundaries" name="test_expanded_qualification_keeps_only_its_exact_source_helper_activation" time="1.126" /></testsuite></testsuites>

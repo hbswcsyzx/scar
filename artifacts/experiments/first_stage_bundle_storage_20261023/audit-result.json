@@ -1,0 +1,124 @@
+{
+  "all_original_records_and_order_equal": true,
+  "elapsed_s": 0.37161496100452496,
+  "manifest_receipt": {
+    "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_bundle_storage_20261023/result/manifest.json",
+    "physical_bytes": 9031,
+    "physical_sha256": "fe3b737d033ce7cda6b7e9773d036ab8b5c4d7b34db7e41c4a972eb677dc97be"
+  },
+  "physical_slots": 39,
+  "schema": "scar.real-bundle-partitions-audit",
+  "source": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_tensor_physical_20261023/trace",
+  "status": "PASS",
+  "tables": {
+    "evidence/control_events": {
+      "ordered_record_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "records": 0
+    },
+    "evidence/edges": {
+      "ordered_record_sha256": "724431d2d6bf51bd5b8749e2996d495528ea5a6b908c0f5683bd9c9a23d3d20a",
+      "records": 342
+    },
+    "evidence/external_references": {
+      "ordered_record_sha256": "6c34ee8434f1eb6d65687eb630be3373f28bfc1172b6fdb7f36224f5d4cce67f",
+      "records": 88
+    },
+    "evidence/instances": {
+      "ordered_record_sha256": "a62d4d4dc5dec4c4130e6bf6185308117b99b7c79061ccee77df55d29ebd2e67",
+      "records": 170
+    },
+    "evidence/measurements": {
+      "ordered_record_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "records": 0
+    },
+    "evidence/observations": {
+      "ordered_record_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "records": 0
+    },
+    "evidence/provider_references": {
+      "ordered_record_sha256": "4f10366027dfd81168454e027f88720d989a8c1b33ff993c653a6cbea657c676",
+      "records": 22
+    },
+    "semantic/contracts": {
+      "ordered_record_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "records": 0
+    },
+    "semantic/controls": {
+      "ordered_record_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "records": 0
+    },
+    "semantic/definitions": {
+      "ordered_record_sha256": "d12a0eeee656fe252b7fa6ab25e71cfa02fd64453407c99d2a122f022bbae900",
+      "records": 76
+    },
+    "semantic/edges": {
+      "ordered_record_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "records": 0
+    },
+    "semantic/effects": {
+      "ordered_record_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "records": 0
+    },
+    "semantic/modules": {
+      "ordered_record_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "records": 0
+    },
+    "semantic/packages": {
+      "ordered_record_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "records": 0
+    },
+    "semantic/resources": {
+      "ordered_record_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "records": 0
+    },
+    "semantic/slots": {
+      "ordered_record_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "records": 0
+    },
+    "semantic/source_atoms": {
+      "ordered_record_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "records": 0
+    },
+    "values/allocations": {
+      "ordered_record_sha256": "1ba4da999d91444b2d48603544f887a4255200c4dd24fe5d177e06e561ab72de",
+      "records": 34
+    },
+    "values/bindings": {
+      "ordered_record_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "records": 0
+    },
+    "values/logical_values": {
+      "ordered_record_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "records": 0
+    },
+    "values/materializations": {
+      "ordered_record_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "records": 0
+    },
+    "values/objects": {
+      "ordered_record_sha256": "18d7b191bd6ac5af3bca290ab18904cb8bd52e4f11fd0224bd081ff92b735b91",
+      "records": 15
+    },
+    "values/provenance": {
+      "ordered_record_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "records": 0
+    },
+    "values/regions": {
+      "ordered_record_sha256": "bf90782e1fcb68bfaae5ab4d87a463c104163d0cb99affd3a1abe0a1e1b25706",
+      "records": 39
+    },
+    "values/versions": {
+      "ordered_record_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "records": 0
+    }
+  },
+  "target_executed": false,
+  "totals": {
+    "chunks": 8,
+    "decoded_bytes": 914170,
+    "records": 786,
+    "stored_bytes": 52977
+  },
+  "transformation_authorized": false,
+  "whole_model_established": false
+}

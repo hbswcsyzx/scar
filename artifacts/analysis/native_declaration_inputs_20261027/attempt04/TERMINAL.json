@@ -1,0 +1,98 @@
+{
+  "attempt": 4,
+  "command": [
+    "/home/zyf/miniconda3/envs/lewm/bin/python",
+    "-B",
+    "/home/zyf/AAA/scar-worktrees/native-declaration-inputs/artifacts/analysis/native_declaration_inputs_20261027/run_first_fragment_mixed.py",
+    "--out",
+    "/home/zyf/AAA/scar-worktrees/native-declaration-inputs/artifacts/analysis/native_declaration_inputs_20261027/attempt04"
+  ],
+  "coverage": {
+    "input_ports_returned": 687,
+    "no_metadata_leaf_at_native_path": 402,
+    "no_retained_metadata_row": 0,
+    "unrepresented_input_ports": 0
+  },
+  "declaration_read": {
+    "decoded_bytes": 68384403,
+    "elapsed_seconds": 11.526281676022336,
+    "stored_bytes": 32201947,
+    "total_bytes": 100586350
+  },
+  "disposition_pairs": [
+    {
+      "canonical_status": "CANONICAL_BOUNDARY_AVAILABLE",
+      "count": 83,
+      "metadata_association": "ASSOCIATED"
+    },
+    {
+      "canonical_status": "CANONICAL_BOUNDARY_AVAILABLE",
+      "count": 94,
+      "metadata_association": null
+    },
+    {
+      "canonical_status": "CANONICAL_NATIVE_BOUNDARY_UNAVAILABLE",
+      "count": 202,
+      "metadata_association": "CANONICAL_NATIVE_BOUNDARY_UNAVAILABLE"
+    },
+    {
+      "canonical_status": "CANONICAL_NATIVE_BOUNDARY_UNAVAILABLE",
+      "count": 308,
+      "metadata_association": null
+    }
+  ],
+  "elapsed_seconds": 74.12427385902265,
+  "exit_code": 0,
+  "input_ports": 687,
+  "join_statuses": {
+    "MATCHED_EXACT_INPUT_PATH": 285,
+    "NO_METADATA_LEAF_AT_NATIVE_PATH": 402
+  },
+  "legacy_dto_compat_check": "PASS; prior wire row decoded with prior_metadata_association=None",
+  "metadata_index": {
+    "schema": "scar.native-input-association-index",
+    "sha256": "7b6be9bd049ad7a6e59bf4f3c1342b085c96d996c77ca02a2017ce82190fc9e3",
+    "size_bytes": 115602,
+    "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/native_inputs_full_20261026/attempt05/native-input-connections/input-metadata/manifest.json"
+  },
+  "navigation": {
+    "schema": "scar.native-input-port-navigation",
+    "sha256": "4436b171be0dec2782e7843bc097227d675efa5e33155a6e8a2bf2408b4b6f72",
+    "size_bytes": 146783,
+    "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/native_inputs_full_20261026/attempt05/port-navigation/manifest.json"
+  },
+  "normal_validation": {
+    "issues": 0,
+    "valid": true
+  },
+  "operation_rows": 256,
+  "postrun_source_edit": "Added decode_native_declaration_input_metadata_port for old wire DTOs only; normal join logic used in this run is unchanged.",
+  "publication_fragment": {
+    "schema": "scar.native-declaration-fragment",
+    "sha256": "a6af356b4888f093388fae9a6b18bfc29f89f923d2388fd6920b7a1363cb9b4b",
+    "size_bytes": 2273088,
+    "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/native_declaration_full_20261027/attempt01/shards/000000/000000/manifest.json"
+  },
+  "receipts": {
+    "module_sha256_at_execution": "e18d154ced8404b54ea1b2af125ff12511e8bdfc33d083f735c849fb88aeb635",
+    "module_sha256_current": "894cdfcb94fef1323a5c99d9c650c84c4a4e688ef0f1408d31f41bc72cd133c9",
+    "result_sha256": "bdb00242bb05d83a185eedc77c74a08d3dcde496eebdb3dff538785adf444608",
+    "runner_sha256": "d207cc251a082f96c5770af5db0bc19fb823b32323d4ddea4e4c4f852109b7b1",
+    "stderr_bytes": 0,
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stdout_bytes": 706,
+    "stdout_sha256": "d143d8dd59d35c6519891f8a0e94536e1cff86f332b267bd96e79e24eacb09ea"
+  },
+  "scan": {
+    "decoded_bytes": 1149320637,
+    "elapsed_seconds": 62.14649144199211,
+    "metadata_leaves": 420444,
+    "metadata_rows": 310410,
+    "stored_bytes": 47577389,
+    "temporary_index_bytes": 330141696
+  },
+  "schema": "scar.native-declaration-input-join-terminal",
+  "schema_version": 1,
+  "source_revision": "5b13e0c7270755c6fd3ccbed32114b4dc88cc972 plus native_declaration_inputs.py",
+  "terminal": "exit0"
+}

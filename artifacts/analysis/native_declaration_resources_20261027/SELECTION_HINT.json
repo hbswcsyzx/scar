@@ -1,0 +1,18 @@
+{
+  "fragment": {
+    "schema": "scar.native-declaration-fragment",
+    "sha256": "9a8e9c57972d86b08829f6697901621be8d9a4f20fc1954f53c85905c14858e5",
+    "size_bytes": 3030028,
+    "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/native_declaration_full_20261027/attempt01/shards/000004/000002/manifest.json"
+  },
+  "instance": {
+    "kind": "opinst",
+    "value": "native:636fde61a45803f11712767bc1cbf0b0ea3de13b14e0b27edc2d6071daea1612:eto:20816",
+    "wire": "opinst:native:636fde61a45803f11712767bc1cbf0b0ea3de13b14e0b27edc2d6071daea1612:eto:20816"
+  },
+  "edge_ordinal_hint": 715024,
+  "qualification": "UNQUALIFIED_MECHANICAL_SELECTOR_ONLY",
+  "discovery_stored_bytes": 210771000,
+  "discovery_decoded_json_bytes": 115907640,
+  "discovery_limit_bytes": 512000000
+}

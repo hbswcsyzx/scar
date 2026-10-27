@@ -1,0 +1,205 @@
+{
+  "source_sha256_before": "ff195afcf93be8597b8dfbf4f022dd99f7a9ea89e7ef91336267fddcfaf328e9",
+  "tests_started": 0,
+  "examples": {
+    "running": {
+      "expected_bool": null,
+      "budget": {
+        "limit": 1048576,
+        "used": 766,
+        "costs": {
+          "body_state_read": 1,
+          "body_state_read_accesses": 1,
+          "state_history_branch_visits": 1,
+          "state_history_branch_operations": 1,
+          "await_outcome_copy_pairs": 58,
+          "await_outcome_copy_ancestors": 248,
+          "await_outcome_copy_support": 106,
+          "await_outcome_compatibility": 58,
+          "body_state_active_sources": 3,
+          "await_outcome_recipe_compatibility": 53,
+          "body_state_drive_ports": 30,
+          "body_state_call_ancestry": 6,
+          "body_state_call_input_ports": 12,
+          "body_state_call_output_ports": 9,
+          "host_order_nodes": 38,
+          "host_order_edges": 138,
+          "body_state_terminal_sources": 3
+        },
+        "truncated": false
+      },
+      "candidates": [
+        {
+          "drive": "exec_operation_occurrence:native.running.0.driver.0.1.await.resume.driver.0.driver.drive",
+          "expected_bool": null,
+          "post_established": null,
+          "gaps": [
+            "body_state_subject_unproved",
+            "body_state_other_body_segment",
+            "body_state_active_interval_unproved"
+          ],
+          "subject_match": null,
+          "drive_supported": true,
+          "creation_match": true,
+          "port_failures": [],
+          "chain_supported": false,
+          "entry_order": true,
+          "outcome_order": false
+        },
+        {
+          "drive": "exec_operation_occurrence:native.running.0.driver.1.2.await.resume.driver.1.driver.drive",
+          "expected_bool": null,
+          "post_established": null,
+          "gaps": [
+            "body_state_drive_owner_unproved",
+            "body_state_subject_unproved"
+          ],
+          "subject_match": null,
+          "drive_supported": false,
+          "creation_match": null,
+          "port_failures": [],
+          "chain_supported": true,
+          "entry_order": true,
+          "outcome_order": true
+        },
+        {
+          "drive": "exec_operation_occurrence:native.running.0.driver.2.2.await.resume.driver.2.driver.drive",
+          "expected_bool": null,
+          "post_established": null,
+          "gaps": [
+            "body_state_drive_owner_unproved",
+            "body_state_subject_unproved",
+            "body_state_other_body_segment",
+            "body_state_active_interval_unproved"
+          ],
+          "subject_match": null,
+          "drive_supported": false,
+          "creation_match": null,
+          "port_failures": [],
+          "chain_supported": false,
+          "entry_order": false,
+          "outcome_order": true
+        }
+      ],
+      "await_links": [
+        {
+          "drive": "exec_operation_occurrence:native.running.0.driver.1.2.await.resume.driver.1.driver.drive",
+          "advance_selected": true,
+          "case_selected": true,
+          "derived_checked": true,
+          "gaps": [
+            "body_reference_identity_unproved",
+            "body_reference_identity_unproved"
+          ],
+          "matched_sources": 1,
+          "iterator_original_copy": [
+            true
+          ],
+          "projection": [
+            {
+              "none": true,
+              "bindings": [
+                true
+              ]
+            }
+          ]
+        },
+        {
+          "drive": "exec_operation_occurrence:native.running.0.driver.2.2.await.resume.driver.2.driver.drive",
+          "advance_selected": true,
+          "case_selected": true,
+          "derived_checked": true,
+          "gaps": [
+            "body_reference_identity_unproved",
+            "body_reference_identity_unproved"
+          ],
+          "matched_sources": 1,
+          "iterator_original_copy": [
+            true
+          ],
+          "projection": [
+            {
+              "none": true,
+              "bindings": [
+                true
+              ]
+            }
+          ]
+        }
+      ],
+      "projection_budget_truncated": false
+    },
+    "closed": {
+      "expected_bool": null,
+      "budget": {
+        "limit": 1048576,
+        "used": 320,
+        "costs": {
+          "body_state_read": 1,
+          "body_state_read_accesses": 1,
+          "state_history_branch_visits": 1,
+          "state_history_branch_operations": 1,
+          "await_outcome_copy_pairs": 30,
+          "await_outcome_copy_ancestors": 109,
+          "await_outcome_copy_support": 61,
+          "await_outcome_compatibility": 30,
+          "body_state_active_sources": 1,
+          "body_state_terminal_sources": 1,
+          "await_outcome_recipe_compatibility": 33,
+          "body_state_drive_ports": 12,
+          "body_state_commit_state_ports": 1,
+          "body_state_call_ancestry": 4,
+          "body_state_call_input_ports": 8,
+          "body_state_call_output_ports": 6,
+          "host_order_nodes": 5,
+          "host_order_edges": 15
+        },
+        "truncated": false
+      },
+      "candidates": [
+        {
+          "drive": "exec_operation_occurrence:native.closed.0.driver.0.1.await.resume.driver.0.driver.drive",
+          "expected_bool": null,
+          "post_established": null,
+          "gaps": [
+            "body_state_drive_owner_unproved",
+            "body_state_terminal_post_unproved"
+          ],
+          "subject_match": true,
+          "drive_supported": false,
+          "creation_match": null,
+          "port_failures": [],
+          "chain_supported": true,
+          "entry_order": false,
+          "outcome_order": false
+        }
+      ],
+      "await_links": [
+        {
+          "drive": "exec_operation_occurrence:native.closed.0.driver.0.1.await.resume.driver.0.driver.drive",
+          "advance_selected": true,
+          "case_selected": true,
+          "derived_checked": true,
+          "gaps": [
+            "body_reference_identity_unproved",
+            "body_reference_identity_unproved"
+          ],
+          "matched_sources": 1,
+          "iterator_original_copy": [
+            true
+          ],
+          "projection": [
+            {
+              "none": true,
+              "bindings": [
+                true
+              ]
+            }
+          ]
+        }
+      ],
+      "projection_budget_truncated": false
+    }
+  },
+  "source_sha256_after": "ff195afcf93be8597b8dfbf4f022dd99f7a9ea89e7ef91336267fddcfaf328e9"
+}

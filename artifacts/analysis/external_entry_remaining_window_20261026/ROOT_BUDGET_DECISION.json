@@ -1,0 +1,1 @@
+{"original_planned_metadata_ceiling_bytes":512000000,"root_approved_metadata_ceiling_bytes":1000000000,"reason":"ordinary new438185B manifest is reread for each optimize-level archive check; known normal guard repetition exceeds original512MB","original512MB_plan_executed":false,"normal_guard_cache_or_relaxation":false,"graph_CodeType_compile_lower":false}

@@ -89,6 +89,47 @@ class ValueObservation:
         }
 
 
+@dataclass(slots=True)
+class ProviderReference:
+    """One scoped provider-map token, without object or content semantics.
+
+    Repeated tokens do not establish Python identity, content equality,
+    storage/allocation identity or a lifetime. Evidence retains the provider's
+    actual interpretation and the original input/output slot location.
+    """
+
+    reference_id: str
+    provider: str
+    scope: str
+    domain: str
+    token: int | str
+    evidence: tuple[EvidenceClaim, ...]
+    metadata: dict[str, Any] = field(default_factory=dict)
+
+    def __post_init__(self) -> None:
+        for name in ("reference_id", "provider", "scope", "domain"):
+            value = getattr(self, name)
+            if type(value) is not str or not value:
+                raise ValueError(f"provider reference {name} must be a nonempty string")
+        if type(self.token) not in (int, str):
+            raise TypeError("provider reference token must be an exact integer or string")
+        if type(self.token) is str and not self.token:
+            raise ValueError("provider reference token cannot be empty")
+        if type(self.evidence) is not tuple or any(
+                not isinstance(item, EvidenceClaim) for item in self.evidence):
+            raise TypeError("provider reference evidence must be a tuple of EvidenceClaim records")
+        if type(self.metadata) is not dict:
+            raise TypeError("provider reference metadata must be a dictionary")
+
+    def as_dict(self) -> dict[str, Any]:
+        return {
+            "reference_id": self.reference_id, "provider": self.provider,
+            "scope": self.scope, "domain": self.domain, "token": self.token,
+            "evidence": [item.as_dict() for item in self.evidence],
+            "metadata": self.metadata,
+        }
+
+
 class EvidenceNodeKind(str, Enum):
     OPERATION_INSTANCE = "operation_instance"
     VALUE_OBSERVATION = "value_observation"
@@ -100,6 +141,9 @@ class EvidenceNodeKind(str, Enum):
     RESOURCE = "resource"
     MEASUREMENT = "measurement"
     CONTROL_EVENT = "control_event"
+    # A token in this graph's scoped provider reference catalog. It is neither a
+    # Python object identity nor a content version, allocation or storage ID.
+    PROVIDER_REFERENCE = "provider_reference"
 
 
 _TYPED_EVIDENCE_ENDPOINTS: dict[EvidenceNodeKind, type] = {
@@ -152,6 +196,21 @@ class EvidenceRelation(str, Enum):
     USES_STORAGE = "uses_storage"
     MEASURED_BY = "measured_by"
     USES_RESOURCE = "uses_resource"
+    # Ordered operand/result paths and the provider's token interpretation are
+    # retained in the evidence claim; these edges do not establish value copy,
+    # content identity, mutation or production.
+    INPUT_REFERENCE = "input_reference"
+    OUTPUT_REFERENCE = "output_reference"
+    # Provider correlation associates a submitting observation with work. It
+    # does not add containment, completion order or a happens-before edge.
+    SUBMITS_WORK = "submits_work"
+    # A provider links an activity to a CPU profiling scope. This association
+    # does not establish parentage, containment, submission, control or order.
+    PROVIDER_SCOPE_ASSOCIATION = "provider_scope_association"
+    # A Python object was passed as a particular marker argument which the
+    # provider encoded with this reference. Only that observation is asserted;
+    # this is neither aliasing nor persistent content/storage equivalence.
+    OBJECT_REFERENCE_ASSOCIATION = "object_reference_association"
 
 
 _E = EvidenceNodeKind
@@ -185,10 +244,22 @@ _EVIDENCE_RELATION_ENDPOINTS = {
         (source, target) for source in (_E.OPERATION_INSTANCE, _E.MATERIALIZATION, _E.OBJECT)
         for target in (_E.ALLOCATION, _E.STORAGE_REGION)},
     EvidenceRelation.MEASURED_BY: {
-        (source, _E.MEASUREMENT) for source in EvidenceNodeKind if source is not _E.MEASUREMENT},
+        (source, _E.MEASUREMENT) for source in EvidenceNodeKind
+        if source not in (_E.MEASUREMENT, _E.PROVIDER_REFERENCE)},
     EvidenceRelation.USES_RESOURCE: {
         (source, _E.RESOURCE) for source in (_E.OPERATION_INSTANCE, _E.MATERIALIZATION, _E.ALLOCATION)},
+    EvidenceRelation.INPUT_REFERENCE: {(_E.OPERATION_INSTANCE, _E.PROVIDER_REFERENCE)},
+    EvidenceRelation.OUTPUT_REFERENCE: {(_E.OPERATION_INSTANCE, _E.PROVIDER_REFERENCE)},
+    EvidenceRelation.SUBMITS_WORK: {(_E.OPERATION_INSTANCE, _E.OPERATION_INSTANCE)},
+    EvidenceRelation.PROVIDER_SCOPE_ASSOCIATION: {
+        (_E.OPERATION_INSTANCE, _E.OPERATION_INSTANCE)},
+    EvidenceRelation.OBJECT_REFERENCE_ASSOCIATION: {(_E.OBJECT, _E.PROVIDER_REFERENCE)},
 }
+
+_PROVIDER_REFERENCE_RELATIONS = frozenset({
+    EvidenceRelation.INPUT_REFERENCE, EvidenceRelation.OUTPUT_REFERENCE,
+    EvidenceRelation.SUBMITS_WORK,
+})
 
 
 @dataclass(frozen=True, slots=True)
@@ -221,11 +292,15 @@ class EvidenceGraph:
     """Normalized execution records; no optimization selection is performed."""
 
     SCHEMA = "scar.ir.v2.evidence"
-    SCHEMA_VERSION = 3
+    SCHEMA_VERSION = 6
+    PROVIDER_SCOPE_SCHEMA_VERSION = 5
+    PROVIDER_REFERENCE_SCHEMA_VERSION = 4
+    LEGACY_SCHEMA_VERSION = 3
 
     def __init__(self) -> None:
         self.instances: dict[OperationInstanceID, OperationInstance] = {}
         self.observations: dict[str, ValueObservation] = {}
+        self.provider_references: dict[str, ProviderReference] = {}
         self.measurements: dict[MeasurementID, MeasurementRecord] = {}
         self.control_events: set[str] = set()
         self.external_references: set[tuple[EvidenceNodeKind, str]] = set()
@@ -246,6 +321,14 @@ class EvidenceGraph:
             raise ValueError(f"unknown observation operation: {observation.operation.wire}")
         self.observations[observation.observation_id] = observation
 
+    def add_provider_reference(self, reference: ProviderReference) -> None:
+        if not isinstance(reference, ProviderReference):
+            raise TypeError("provider reference must be a ProviderReference record")
+        reference.__post_init__()
+        if reference.reference_id in self.provider_references:
+            raise ValueError(f"duplicate provider reference: {reference.reference_id}")
+        self.provider_references[reference.reference_id] = reference
+
     def add_measurement(self, measurement: MeasurementRecord) -> None:
         if measurement.id in self.measurements:
             raise ValueError(f"duplicate measurement: {measurement.id.wire}")
@@ -265,6 +348,7 @@ class EvidenceGraph:
             EvidenceNodeKind.VALUE_OBSERVATION,
             EvidenceNodeKind.MEASUREMENT,
             EvidenceNodeKind.CONTROL_EVENT,
+            EvidenceNodeKind.PROVIDER_REFERENCE,
         }:
             raise ValueError(f"{endpoint.kind.value} is owned by EvidenceGraph")
         self.external_references.add((endpoint.kind, endpoint.wire))
@@ -283,6 +367,8 @@ class EvidenceGraph:
             return endpoint.reference in self.instances
         if endpoint.kind is EvidenceNodeKind.VALUE_OBSERVATION:
             return endpoint.reference in self.observations
+        if endpoint.kind is EvidenceNodeKind.PROVIDER_REFERENCE:
+            return endpoint.reference in self.provider_references
         if endpoint.kind is EvidenceNodeKind.MEASUREMENT:
             return endpoint.reference in self.measurements
         if endpoint.kind is EvidenceNodeKind.CONTROL_EVENT:
@@ -312,6 +398,7 @@ class EvidenceGraph:
         for mapping, key_type, record_type, name, key_field in (
             (self.instances, OperationInstanceID, OperationInstance, "instances", "id"),
             (self.observations, str, ValueObservation, "observations", "observation_id"),
+            (self.provider_references, str, ProviderReference, "provider_references", "reference_id"),
             (self.measurements, MeasurementID, MeasurementRecord, "measurements", "id"),
             (self.edges, str, EvidenceEdge, "edges", "edge_id"),
         ):
@@ -323,7 +410,8 @@ class EvidenceGraph:
             return self._validation_report(errors)
         for kind, wire in sorted(self.external_references, key=lambda item: (item[0].value, item[1])):
             expected = _TYPED_EVIDENCE_ENDPOINTS.get(kind)
-            if kind in (_E.OPERATION_INSTANCE, _E.VALUE_OBSERVATION, _E.CONTROL_EVENT, _E.MEASUREMENT):
+            if kind in (_E.OPERATION_INSTANCE, _E.VALUE_OBSERVATION, _E.CONTROL_EVENT,
+                        _E.MEASUREMENT, _E.PROVIDER_REFERENCE):
                 errors.append(f"external reference {wire} has EEG-owned kind {kind.value}")
             elif expected is ValueVersionID:
                 if re.fullmatch(r"lv:.+@v(?:0|[1-9][0-9]*)", wire) is None:
@@ -352,19 +440,42 @@ class EvidenceGraph:
             (((edge.source.kind, edge.source.wire), (edge.target.kind, edge.target.wire))
              for edge in self.edges.values()
              if edge.relation is EvidenceRelation.HAPPENS_BEFORE), "happens-before relation"))
-        # Parentage is containment, not completion order: never combine parent
-        # edges with happens-before edges to invent a temporal relation.
+        # Parentage, submission and provider scope association do not establish
+        # completion order: none adds a happens-before relation.
         return self._validation_report(errors)
 
+    def _schema_version(self) -> int:
+        """Keep unchanged evidence graphs on their historical wire version."""
+        version = (self.PROVIDER_REFERENCE_SCHEMA_VERSION if self.provider_references
+                   else self.LEGACY_SCHEMA_VERSION)
+        for edge in self.edges.values():
+            if not isinstance(edge, EvidenceEdge):
+                continue
+            if edge.relation is EvidenceRelation.OBJECT_REFERENCE_ASSOCIATION:
+                return self.SCHEMA_VERSION
+            if edge.relation is EvidenceRelation.PROVIDER_SCOPE_ASSOCIATION:
+                version = max(version, self.PROVIDER_SCOPE_SCHEMA_VERSION)
+            if ((isinstance(edge.relation, EvidenceRelation)
+                 and edge.relation in _PROVIDER_REFERENCE_RELATIONS)
+                    or (isinstance(edge.source, EvidenceEndpoint)
+                        and edge.source.kind is _E.PROVIDER_REFERENCE)
+                    or (isinstance(edge.target, EvidenceEndpoint)
+                        and edge.target.kind is _E.PROVIDER_REFERENCE)):
+                version = max(version, self.PROVIDER_REFERENCE_SCHEMA_VERSION)
+        return version
+
     def _validation_report(self, errors: list[str]) -> dict[str, Any]:
-        return {"schema": self.SCHEMA, "schema_version": self.SCHEMA_VERSION,
-                "valid": not errors, "errors": errors,
-                "counts": {"instances": len(self.instances),
-                            "observations": len(self.observations),
-                            "measurements": len(self.measurements),
-                            "control_events": len(self.control_events),
-                            "external_references": len(self.external_references),
-                            "edges": len(self.edges)}}
+        version = self._schema_version()
+        counts = {"instances": len(self.instances),
+                  "observations": len(self.observations),
+                  "measurements": len(self.measurements),
+                  "control_events": len(self.control_events),
+                  "external_references": len(self.external_references),
+                  "edges": len(self.edges)}
+        if version >= self.PROVIDER_REFERENCE_SCHEMA_VERSION:
+            counts["provider_references"] = len(self.provider_references)
+        return {"schema": self.SCHEMA, "schema_version": version,
+                "valid": not errors, "errors": errors, "counts": counts}
 
     def assert_valid(self) -> dict[str, Any]:
         report = self.validate()
@@ -374,9 +485,10 @@ class EvidenceGraph:
 
     def to_dict(self) -> dict[str, Any]:
         self.assert_valid()
-        return {
+        version = self._schema_version()
+        document = {
             "schema": self.SCHEMA,
-            "schema_version": self.SCHEMA_VERSION,
+            "schema_version": version,
             "instances": [self.instances[key].as_dict()
                           for key in sorted(self.instances, key=lambda item: item.wire)],
             "observations": [self.observations[key].as_dict()
@@ -392,9 +504,16 @@ class EvidenceGraph:
             "edges": [self.edges[key].as_dict() for key in sorted(self.edges)],
             "validation": self.validate(),
         }
+        if version >= self.PROVIDER_REFERENCE_SCHEMA_VERSION:
+            document["provider_references"] = [
+                self.provider_references[key].as_dict()
+                for key in sorted(self.provider_references)
+            ]
+        return document
 
 
 __all__ = [
     "EvidenceEdge", "EvidenceEndpoint", "EvidenceGraph", "EvidenceNodeKind",
-    "EvidenceRelation", "EvidenceStatus", "OperationInstance", "ValueObservation",
+    "EvidenceRelation", "EvidenceStatus", "OperationInstance", "ProviderReference",
+    "ValueObservation",
 ]

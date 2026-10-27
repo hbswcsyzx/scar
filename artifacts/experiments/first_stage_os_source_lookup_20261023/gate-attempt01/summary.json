@@ -1,0 +1,110 @@
+{
+  "actual_gate_exit_expected": 0,
+  "automatic_lookup_counts": {
+    "birth_needs": 2,
+    "groups": 3,
+    "lookup_decoded_bytes_charged": 31998744,
+    "positive_matches": 2,
+    "preexec_birth_needs": 1,
+    "queries": 2,
+    "selected_ports": 35
+  },
+  "automatic_lookup_frontiers": [
+    {
+      "absence_claimed": false,
+      "group": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.369747",
+      "reason": "NO_OWN_BIRTH_COORDINATE"
+    }
+  ],
+  "contexts_typed_verified": 3,
+  "counts": {
+    "base_resources_total": 12683,
+    "complement_calls": 36664,
+    "complement_decoded_bytes": 9264445,
+    "complement_lines": 36665,
+    "exact_os_artifacts": 253,
+    "handle_containers_refined": 35,
+    "new_contexts_selected": 3,
+    "r2_base_resources_selected": 35,
+    "r2_handles_selected": 35,
+    "verified_complement_artifacts": 252
+  },
+  "elapsed_seconds": 17.451197429996682,
+  "eleven_frozen_modules_sha": "PASS",
+  "first_stage_complete": false,
+  "fresh_actual_scar_import_sources": 98,
+  "full_execution_model_semantics": "OPEN: no fake ProgramSnapshot; selected typed/FK checks only",
+  "handles_typed_verified": 35,
+  "manifest": {
+    "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_os_source_lookup_20261023/gate-attempt01/result/manifest.json",
+    "physical_bytes": 281314,
+    "physical_sha256": "d37eef5881d25a66c7500be2130b4f7af114586e0b8607f81a36ddd359886d84"
+  },
+  "not_selected_means_not_in_this_registry_not_absence": true,
+  "original_producer_works": 22,
+  "peak_rss_kib": 122308,
+  "pipe_pairs": 13,
+  "preparation": {
+    "all_needs_reported": true,
+    "context_evidence": {
+      "bytes": 6571,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_os_source_lookup_20261023/gate-attempt01/automatic-witness/context-evidence.json",
+      "sha256": "ef590b5b38f9ad91a409861a3acbfed1d9ef86de36e591e7d09bd4b73626efbf"
+    },
+    "counts": {
+      "birth_needs": 2,
+      "groups": 3,
+      "lookup_decoded_bytes_charged": 31998744,
+      "positive_matches": 2,
+      "preexec_birth_needs": 1,
+      "queries": 2,
+      "selected_ports": 35
+    },
+    "first_stage_complete": false,
+    "frontiers": [
+      {
+        "absence_claimed": false,
+        "group": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.369747",
+        "reason": "NO_OWN_BIRTH_COORDINATE"
+      }
+    ],
+    "full_execution_model_semantics": "OPEN",
+    "lookup_receipt": {
+      "bytes": 28589,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_os_source_lookup_20261023/gate-attempt01/automatic-witness/lookup.json",
+      "sha256": "7ee87674446bc17da777634956215d2154116639f169514647850de445b5a724"
+    },
+    "producer": "AUTOMATIC_SOURCE_LOOKUP",
+    "projection_receipts": {
+      "files": {
+        "bytes": 583581,
+        "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_fd_table_projection_20261023/file-receipts.json",
+        "schema": "application/json",
+        "sha256": "612fe0c359a8d253cd9edad5019f1d953bbf0975139759c993efb517cc986ef0"
+      },
+      "summary": {
+        "bytes": 7282,
+        "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_fd_table_projection_20261023/summary.json",
+        "schema": "scar.fd-table-complement-projection",
+        "sha256": "7e470d3ed1581e35ccecc8ba53c390d89a1dd04cb5cb2b164da613483a37ed19"
+      }
+    },
+    "report_receipt": {
+      "bytes": 1750,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_os_source_lookup_20261023/gate-attempt01/automatic-witness/preparation-report.json",
+      "sha256": "e64944bcb08cb0dcb15a517670b8e2eacd5882f67f5de32fc2f2caaf1940912c"
+    },
+    "schema": "scar.fd-context-evidence-preparation",
+    "schema_version": 1,
+    "status": "PUBLISHED_WITNESS"
+  },
+  "provider_accesses_unchanged": 38,
+  "same_selected_model_as_accepted_witness_gate": true,
+  "schema": "scar.fd-table-context-gate-report",
+  "schema_version": 1,
+  "selected_works_unchanged": 25,
+  "source_file_drift_after_import": [],
+  "status": "PASS_SELECTED_CONTAINER_SCOPE",
+  "transformation_authorized": false,
+  "upstream_child_birth_selector_discovery": "VERIFIED_AUTOMATIC_POSITIVE_EXACT_LOOKUP"
+}

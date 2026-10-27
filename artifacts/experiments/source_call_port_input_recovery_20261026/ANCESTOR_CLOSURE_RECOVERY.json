@@ -1,0 +1,10 @@
+{
+  "pin_file": "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/source_call_port_bindings_20261026/candidate02/MISSING_PINS.json",
+  "pin_sha256": "838d2a99cd51beb863470845802b10ca57f1279fed9c3f3b39dec4298489db57",
+  "verified_files": 1105,
+  "stored_bytes_checked": 52622306,
+  "missing_after": 0,
+  "graph_payload_decoded": false,
+  "existing_different_bytes_overwritten": false,
+  "exact_paths_persisted_in_sparse_patterns": true
+}

@@ -1,0 +1,10 @@
+{
+  "attempt": "derive02",
+  "handle": 80105,
+  "actual_exit_code": 0,
+  "worker_elapsed_seconds": 0.2003284509992227,
+  "old_failure_preserved": "failure.json",
+  "no_new_capture": true,
+  "source_file": "scar/trace/lean_capture.py",
+  "source_sha256": "1aa1abdf29fa06b109309463fac473c8a82dd1d5a0e8bc20ccc0d95c240d2d24"
+}

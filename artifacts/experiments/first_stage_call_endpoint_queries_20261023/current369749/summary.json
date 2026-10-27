@@ -1,0 +1,34 @@
+{
+  "checked_routes": {
+    "routing.argument_routes": 27,
+    "routing.completion_routes": 27
+  },
+  "code_compiled": false,
+  "elapsed_s": 2.904538182003307,
+  "maxrss_kib": 78480,
+  "negative_queries": 4,
+  "original_producers_rewritten": false,
+  "run": {
+    "id": {
+      "kind": "exec_run",
+      "value": "capture:1ddea1de4990462b59cf5dd24beb3f120156eb47bca68cfb3f1a63f9f73f2cf0",
+      "wire": "exec_run:capture:1ddea1de4990462b59cf5dd24beb3f120156eb47bca68cfb3f1a63f9f73f2cf0"
+    },
+    "source": {
+      "artifact": {
+        "schema": "strace.syscalls.text.v1",
+        "sha256": "70ab02c2c19c407b1bbfc85f0a4f54e1ab3582e71fc783d9426973b0527a7ecd",
+        "size_bytes": 81578171,
+        "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.369749"
+      },
+      "locator": "#/lines/7"
+    }
+  },
+  "source_and_runtime_proofs_replayed": false,
+  "source_prepared": false,
+  "status": "QUALIFIED_ENDPOINT_QUERY_PASS",
+  "target_executed": false,
+  "transformation_authorized": false,
+  "whole_program_established": false,
+  "world_equivalence_established": false
+}

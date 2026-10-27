@@ -1,0 +1,43 @@
+{
+  "schema": "scar.call-edge-trace",
+  "schema_version": 1,
+  "process_id": 2026697,
+  "project_root": "/home/zyf/AAA/scar-worktrees/program-ports-capture/artifacts/experiments/program_ports_cpu_20261027/project",
+  "python": "3.14.7 | packaged by conda-forge | (main, Sep  2 2026, 21:08:32) [GCC 15.3.0]",
+  "limits": {
+    "max_events": 100000,
+    "max_bytes": 32000000,
+    "max_codes": 8192,
+    "max_values": 64,
+    "max_path": 16,
+    "max_references": 8192
+  },
+  "events": 354,
+  "event_attempts": 354,
+  "invocations": 177,
+  "invocation_attempts": 177,
+  "codes": 99,
+  "bytes": 241029,
+  "dropped_events": 0,
+  "dropped_codes": 0,
+  "unknown_exits": 1,
+  "suspended_exits": 4,
+  "open_invocations": 0,
+  "active_frames": 0,
+  "errors": [],
+  "path_gaps": 0,
+  "io_failed": false,
+  "wall_ns": 27304728709,
+  "scope": "project entries and actual Python descendants in the owner process; native interiors unexpanded",
+  "reference_contents_observed": false,
+  "callable_environment_established": false,
+  "capture_profile": "SCAR_PROGRAM_PORTS_V1",
+  "scope_policy": "PROJECT_ROOT_AND_ACTUAL_PYTHON_DESCENDANTS_V1",
+  "instruction_monitoring": false,
+  "captured_sources": {
+    "uri": "/home/zyf/AAA/scar-worktrees/program-ports-capture/artifacts/experiments/program_ports_cpu_20261027/capture/trace/captured-source-meta.2026697.json",
+    "sha256": "69521cb317c57b9bed3087c5f36d0385e760146c8c5c672c0ad532bc876692e4",
+    "size_bytes": 21841,
+    "schema": "scar.captured-python-sources/1"
+  }
+}

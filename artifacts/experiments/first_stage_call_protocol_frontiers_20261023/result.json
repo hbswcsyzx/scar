@@ -1,0 +1,686 @@
+{
+  "captures": [
+    {
+      "absent_handshake_attempts": 96481,
+      "all_attempts_classified": true,
+      "argument_routes_established": false,
+      "attempt_opcodes": {
+        "CALL": 93230,
+        "CALL_FUNCTION_EX": 414,
+        "CALL_KW": 6773,
+        "LOAD_SUPER_ATTR": 133
+      },
+      "callable_implementation_or_completion_established": false,
+      "capture": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_dispatch_20261023",
+      "codes": 855,
+      "dispatch_counts": {
+        "EXACT_FUNCTION": 12334,
+        "EXACT_METHOD": 40,
+        "OTHER": 88176
+      },
+      "event_counts": {
+        "CALL_ATTEMPT": 100550,
+        "ENTRY_HANDSHAKE": 4069,
+        "GAP": 945,
+        "INSTRUCTION": 207248
+      },
+      "gap_reasons": {
+        "PROJECT_FUNCTION_CALL_DID_NOT_ENTER": 945
+      },
+      "inputs": [
+        {
+          "bytes": 4347,
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_dispatch_20261023/trace/execution-evidence.272038.json",
+          "sha256": "4ce717b65ecb353f966bdfab81eab7d388c016a30a96c416b122eabff69b0751"
+        },
+        {
+          "lines_or_documents": 1,
+          "local_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_dispatch_20261023/trace/call-operand-meta.272038.json",
+          "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_dispatch_20261023/trace/call-operand-meta.272038.json",
+          "raw_bytes": 1963,
+          "raw_sha256": "d9d01e797311105ea680e4a9537c89e19e8d31800601a6f9b963dfc594cbfd84"
+        },
+        {
+          "lines_or_documents": 855,
+          "local_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_dispatch_20261023/trace/call-codes.272038.jsonl",
+          "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_dispatch_20261023/trace/call-codes.272038.jsonl",
+          "raw_bytes": 226156,
+          "raw_sha256": "4d1f4c2b675481a1af7bc65f7ad6073796e2f1e85695d3538ecdc92988d8eff4"
+        },
+        {
+          "lines_or_documents": 312812,
+          "local_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_dispatch_20261023/trace/call-operands.272038.jsonl",
+          "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_dispatch_20261023/trace/call-operands.272038.jsonl",
+          "raw_bytes": 114238539,
+          "raw_sha256": "d696aea3ee00564e8d27b645fa4bf09d446640b75df33f237fe0afb6fb8c1002"
+        }
+      ],
+      "metadata_python": "3.14.7 | packaged by conda-forge | (main, Sep  2 2026, 21:08:32) [GCC 15.3.0]",
+      "native_calls_inferred_from_OTHER": false,
+      "partitions": [
+        {
+          "attempts": 7320,
+          "entry_handshake": "ABSENT",
+          "examples": [
+            {
+              "anchor": {
+                "index": 5,
+                "invocation_id": 1,
+                "site": {
+                  "code": "pycode-v2:c0ae657136e059abd7eb11655cdd3e390c164a258ac1d7c498ce7b5fec2fb622",
+                  "offset": 88,
+                  "opname": "CALL",
+                  "position": [
+                    17,
+                    17,
+                    7,
+                    31
+                  ]
+                },
+                "thread_id": 124602718246720
+              },
+              "callee_code": "pycode-v2:36443b4d02a05661e264573ed5fe1dba5f6e1abd56f57844f94412e37efd553e",
+              "caller_code": "pycode-v2:c0ae657136e059abd7eb11655cdd3e390c164a258ac1d7c498ce7b5fec2fb622",
+              "kind": "EXACT_FUNCTION",
+              "scope": "NON_PROJECT_PATH"
+            },
+            {
+              "anchor": {
+                "index": 8,
+                "invocation_id": 1,
+                "site": {
+                  "code": "pycode-v2:c0ae657136e059abd7eb11655cdd3e390c164a258ac1d7c498ce7b5fec2fb622",
+                  "offset": 168,
+                  "opname": "CALL",
+                  "position": [
+                    19,
+                    21,
+                    4,
+                    5
+                  ]
+                },
+                "thread_id": 124602718246720
+              },
+              "callee_code": "pycode-v2:13d538c3c7081646bed762c03ff0758b890cbfcfc9c23260e267f4eaef31ccc9",
+              "caller_code": "pycode-v2:c0ae657136e059abd7eb11655cdd3e390c164a258ac1d7c498ce7b5fec2fb622",
+              "kind": "EXACT_FUNCTION",
+              "scope": "NON_PROJECT_PATH"
+            }
+          ],
+          "kind": "EXACT_FUNCTION",
+          "retained_code_scope": "NON_PROJECT_PATH"
+        },
+        {
+          "attempts": 945,
+          "entry_handshake": "ABSENT",
+          "examples": [
+            {
+              "anchor": {
+                "index": 1160,
+                "invocation_id": 1,
+                "site": {
+                  "code": "pycode-v2:c0ae657136e059abd7eb11655cdd3e390c164a258ac1d7c498ce7b5fec2fb622",
+                  "offset": 928,
+                  "opname": "CALL",
+                  "position": [
+                    81,
+                    81,
+                    14,
+                    72
+                  ]
+                },
+                "thread_id": 124602718246720
+              },
+              "callee_code": "pycode-v2:9c18afab0989b6555f6da73414f89905b1c5bdae439024abb087bd50f2a3ad8f",
+              "caller_code": "pycode-v2:c0ae657136e059abd7eb11655cdd3e390c164a258ac1d7c498ce7b5fec2fb622",
+              "kind": "EXACT_FUNCTION",
+              "scope": "PROJECT_PATH"
+            },
+            {
+              "anchor": {
+                "index": 1595,
+                "invocation_id": 731,
+                "site": {
+                  "code": "pycode-v2:a36ba2a39b35c2528614f6d083227c39d859eca9aef9f89a138796c67304e2ec",
+                  "offset": 36,
+                  "opname": "CALL",
+                  "position": [
+                    483,
+                    483,
+                    18,
+                    45
+                  ]
+                },
+                "thread_id": 124602718246720
+              },
+              "callee_code": "pycode-v2:a4c318a027ff0b7f517acc825cb98ce7d575c986da17c89614c8d5ddee9d6bb6",
+              "caller_code": "pycode-v2:a36ba2a39b35c2528614f6d083227c39d859eca9aef9f89a138796c67304e2ec",
+              "kind": "EXACT_FUNCTION",
+              "scope": "PROJECT_PATH"
+            }
+          ],
+          "kind": "EXACT_FUNCTION",
+          "retained_code_scope": "PROJECT_PATH"
+        },
+        {
+          "attempts": 4069,
+          "entry_handshake": "UNIQUE",
+          "examples": [
+            {
+              "anchor": {
+                "index": 156,
+                "invocation_id": 93,
+                "site": {
+                  "code": "pycode-v2:309bee34f951bebf55a0ea042b45197e87c78283642f803f0b0eea04bc10410d",
+                  "offset": 398,
+                  "opname": "CALL",
+                  "position": [
+                    909,
+                    909,
+                    1,
+                    16
+                  ]
+                },
+                "thread_id": 124602718246720
+              },
+              "callee_code": "pycode-v2:f25d7282d10c8696a41839c7953daabae9f5fcf626e39d6bffd9b4d2b8832c2a",
+              "caller_code": "pycode-v2:309bee34f951bebf55a0ea042b45197e87c78283642f803f0b0eea04bc10410d",
+              "kind": "EXACT_FUNCTION",
+              "scope": "PROJECT_PATH"
+            },
+            {
+              "anchor": {
+                "index": 186,
+                "invocation_id": 112,
+                "site": {
+                  "code": "pycode-v2:97f8b89fe9153aa1ebb3c2905e397c6a6ea9f4733d91dbe03863a63b9ea55800",
+                  "offset": 232,
+                  "opname": "CALL",
+                  "position": [
+                    304,
+                    304,
+                    1,
+                    16
+                  ]
+                },
+                "thread_id": 124602718246720
+              },
+              "callee_code": "pycode-v2:f25d7282d10c8696a41839c7953daabae9f5fcf626e39d6bffd9b4d2b8832c2a",
+              "caller_code": "pycode-v2:97f8b89fe9153aa1ebb3c2905e397c6a6ea9f4733d91dbe03863a63b9ea55800",
+              "kind": "EXACT_FUNCTION",
+              "scope": "PROJECT_PATH"
+            }
+          ],
+          "kind": "EXACT_FUNCTION",
+          "retained_code_scope": "PROJECT_PATH"
+        },
+        {
+          "attempts": 40,
+          "entry_handshake": "ABSENT",
+          "examples": [
+            {
+              "anchor": {
+                "index": 1603,
+                "invocation_id": 731,
+                "site": {
+                  "code": "pycode-v2:a36ba2a39b35c2528614f6d083227c39d859eca9aef9f89a138796c67304e2ec",
+                  "offset": 190,
+                  "opname": "CALL_FUNCTION_EX",
+                  "position": [
+                    486,
+                    493,
+                    8,
+                    9
+                  ]
+                },
+                "thread_id": 124602718246720
+              },
+              "callee_code": null,
+              "caller_code": "pycode-v2:a36ba2a39b35c2528614f6d083227c39d859eca9aef9f89a138796c67304e2ec",
+              "kind": "EXACT_METHOD",
+              "scope": "NO_CODE_IN_THIS_CALLABLE_VARIANT"
+            },
+            {
+              "anchor": {
+                "index": 1606,
+                "invocation_id": 735,
+                "site": {
+                  "code": "pycode-v2:d3400ec568b8318ee90199912a0550849d5804c0b8396c003230b709e372ed07",
+                  "offset": 36,
+                  "opname": "CALL_FUNCTION_EX",
+                  "position": [
+                    349,
+                    349,
+                    8,
+                    52
+                  ]
+                },
+                "thread_id": 124602718246720
+              },
+              "callee_code": null,
+              "caller_code": "pycode-v2:d3400ec568b8318ee90199912a0550849d5804c0b8396c003230b709e372ed07",
+              "kind": "EXACT_METHOD",
+              "scope": "NO_CODE_IN_THIS_CALLABLE_VARIANT"
+            }
+          ],
+          "kind": "EXACT_METHOD",
+          "retained_code_scope": "NO_CODE_IN_THIS_CALLABLE_VARIANT"
+        },
+        {
+          "attempts": 88176,
+          "entry_handshake": "ABSENT",
+          "examples": [
+            {
+              "anchor": {
+                "index": 2,
+                "invocation_id": 1,
+                "site": {
+                  "code": "pycode-v2:c0ae657136e059abd7eb11655cdd3e390c164a258ac1d7c498ce7b5fec2fb622",
+                  "offset": 60,
+                  "opname": "CALL",
+                  "position": [
+                    17,
+                    17,
+                    7,
+                    21
+                  ]
+                },
+                "thread_id": 124602718246720
+              },
+              "callee_code": null,
+              "caller_code": "pycode-v2:c0ae657136e059abd7eb11655cdd3e390c164a258ac1d7c498ce7b5fec2fb622",
+              "kind": "OTHER",
+              "scope": "NO_CODE_IN_THIS_CALLABLE_VARIANT"
+            },
+            {
+              "anchor": {
+                "index": 10,
+                "invocation_id": 1,
+                "site": {
+                  "code": "pycode-v2:c0ae657136e059abd7eb11655cdd3e390c164a258ac1d7c498ce7b5fec2fb622",
+                  "offset": 176,
+                  "opname": "CALL",
+                  "position": [
+                    18,
+                    22,
+                    12,
+                    1
+                  ]
+                },
+                "thread_id": 124602718246720
+              },
+              "callee_code": null,
+              "caller_code": "pycode-v2:c0ae657136e059abd7eb11655cdd3e390c164a258ac1d7c498ce7b5fec2fb622",
+              "kind": "OTHER",
+              "scope": "NO_CODE_IN_THIS_CALLABLE_VARIANT"
+            }
+          ],
+          "kind": "OTHER",
+          "retained_code_scope": "NO_CODE_IN_THIS_CALLABLE_VARIANT"
+        }
+      ],
+      "pid": 272038,
+      "rule": "CPYTHON_CALL_WINDOWS_V1"
+    },
+    {
+      "absent_handshake_attempts": 96481,
+      "all_attempts_classified": true,
+      "argument_routes_established": false,
+      "attempt_opcodes": {
+        "CALL": 93230,
+        "CALL_FUNCTION_EX": 414,
+        "CALL_KW": 6773,
+        "LOAD_SUPER_ATTR": 133
+      },
+      "callable_implementation_or_completion_established": false,
+      "capture": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023",
+      "codes": 855,
+      "dispatch_counts": {
+        "EXACT_FUNCTION": 12334,
+        "EXACT_METHOD": 40,
+        "OTHER": 88176
+      },
+      "event_counts": {
+        "CALL_ATTEMPT": 100550,
+        "ENTRY_HANDSHAKE": 4069,
+        "GAP": 945,
+        "INSTRUCTION": 207248
+      },
+      "gap_reasons": {
+        "PROJECT_FUNCTION_CALL_DID_NOT_ENTER": 945
+      },
+      "inputs": [
+        {
+          "bytes": 5187,
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/trace/execution-evidence.369749.json",
+          "sha256": "bc43f911f955f0a2650c7ba02f199bb3f35a644b5b6c4b3e4d8ddf09377149e7"
+        },
+        {
+          "bytes": 145854,
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/archive-index.json",
+          "sha256": "f4b21fbaef73f27d0e708a9ff6e4d117e8d8f8e2b1a418baa9addaf141567815"
+        },
+        {
+          "lines_or_documents": 1,
+          "local_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/trace/call-operand-meta.369749.json",
+          "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/trace/call-operand-meta.369749.json",
+          "raw_bytes": 1963,
+          "raw_sha256": "fcbb3987fa771221eb4f5bae4a4bf26764de1c44b8b5c22de22e67122ff67511"
+        },
+        {
+          "archive_entry": {
+            "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/trace/call-codes.369749.jsonl.gz",
+            "compressed_bytes": 53224,
+            "gzip_sha256": "0dc10987836eb67d3f1f6b6efa4f8e529ac72a5d646a6afdce464fef112c3880",
+            "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/trace/call-codes.369749.jsonl",
+            "raw_bytes": 226156,
+            "raw_sha256": "3955b8035274057c502969bd1276908871501795b6ff60d4720d1778bd71cc8c"
+          },
+          "lines_or_documents": 855,
+          "local_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/trace/call-codes.369749.jsonl.gz",
+          "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/trace/call-codes.369749.jsonl",
+          "raw_bytes": 226156,
+          "raw_sha256": "3955b8035274057c502969bd1276908871501795b6ff60d4720d1778bd71cc8c"
+        },
+        {
+          "archive_entry": {
+            "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/trace/call-operands.369749.jsonl.gz",
+            "compressed_bytes": 3522792,
+            "gzip_sha256": "26cd9d3211d0226072d5d3b96cff92da97df01271556cda853131c4e978c612a",
+            "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/trace/call-operands.369749.jsonl",
+            "raw_bytes": 114238539,
+            "raw_sha256": "66bcee4fe41dd76ed833b23cf3dc7bcee32e6eafaf8cccee7936001b40804698"
+          },
+          "lines_or_documents": 312812,
+          "local_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/trace/call-operands.369749.jsonl.gz",
+          "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/trace/call-operands.369749.jsonl",
+          "raw_bytes": 114238539,
+          "raw_sha256": "66bcee4fe41dd76ed833b23cf3dc7bcee32e6eafaf8cccee7936001b40804698"
+        }
+      ],
+      "metadata_python": "3.14.7 | packaged by conda-forge | (main, Sep  2 2026, 21:08:32) [GCC 15.3.0]",
+      "native_calls_inferred_from_OTHER": false,
+      "partitions": [
+        {
+          "attempts": 7320,
+          "entry_handshake": "ABSENT",
+          "examples": [
+            {
+              "anchor": {
+                "index": 5,
+                "invocation_id": 1,
+                "site": {
+                  "code": "pycode-v2:c0ae657136e059abd7eb11655cdd3e390c164a258ac1d7c498ce7b5fec2fb622",
+                  "offset": 88,
+                  "opname": "CALL",
+                  "position": [
+                    17,
+                    17,
+                    7,
+                    31
+                  ]
+                },
+                "thread_id": 134637364963136
+              },
+              "callee_code": "pycode-v2:36443b4d02a05661e264573ed5fe1dba5f6e1abd56f57844f94412e37efd553e",
+              "caller_code": "pycode-v2:c0ae657136e059abd7eb11655cdd3e390c164a258ac1d7c498ce7b5fec2fb622",
+              "kind": "EXACT_FUNCTION",
+              "scope": "NON_PROJECT_PATH"
+            },
+            {
+              "anchor": {
+                "index": 8,
+                "invocation_id": 1,
+                "site": {
+                  "code": "pycode-v2:c0ae657136e059abd7eb11655cdd3e390c164a258ac1d7c498ce7b5fec2fb622",
+                  "offset": 168,
+                  "opname": "CALL",
+                  "position": [
+                    19,
+                    21,
+                    4,
+                    5
+                  ]
+                },
+                "thread_id": 134637364963136
+              },
+              "callee_code": "pycode-v2:13d538c3c7081646bed762c03ff0758b890cbfcfc9c23260e267f4eaef31ccc9",
+              "caller_code": "pycode-v2:c0ae657136e059abd7eb11655cdd3e390c164a258ac1d7c498ce7b5fec2fb622",
+              "kind": "EXACT_FUNCTION",
+              "scope": "NON_PROJECT_PATH"
+            }
+          ],
+          "kind": "EXACT_FUNCTION",
+          "retained_code_scope": "NON_PROJECT_PATH"
+        },
+        {
+          "attempts": 945,
+          "entry_handshake": "ABSENT",
+          "examples": [
+            {
+              "anchor": {
+                "index": 1160,
+                "invocation_id": 1,
+                "site": {
+                  "code": "pycode-v2:c0ae657136e059abd7eb11655cdd3e390c164a258ac1d7c498ce7b5fec2fb622",
+                  "offset": 928,
+                  "opname": "CALL",
+                  "position": [
+                    81,
+                    81,
+                    14,
+                    72
+                  ]
+                },
+                "thread_id": 134637364963136
+              },
+              "callee_code": "pycode-v2:9c18afab0989b6555f6da73414f89905b1c5bdae439024abb087bd50f2a3ad8f",
+              "caller_code": "pycode-v2:c0ae657136e059abd7eb11655cdd3e390c164a258ac1d7c498ce7b5fec2fb622",
+              "kind": "EXACT_FUNCTION",
+              "scope": "PROJECT_PATH"
+            },
+            {
+              "anchor": {
+                "index": 1595,
+                "invocation_id": 731,
+                "site": {
+                  "code": "pycode-v2:a36ba2a39b35c2528614f6d083227c39d859eca9aef9f89a138796c67304e2ec",
+                  "offset": 36,
+                  "opname": "CALL",
+                  "position": [
+                    483,
+                    483,
+                    18,
+                    45
+                  ]
+                },
+                "thread_id": 134637364963136
+              },
+              "callee_code": "pycode-v2:a4c318a027ff0b7f517acc825cb98ce7d575c986da17c89614c8d5ddee9d6bb6",
+              "caller_code": "pycode-v2:a36ba2a39b35c2528614f6d083227c39d859eca9aef9f89a138796c67304e2ec",
+              "kind": "EXACT_FUNCTION",
+              "scope": "PROJECT_PATH"
+            }
+          ],
+          "kind": "EXACT_FUNCTION",
+          "retained_code_scope": "PROJECT_PATH"
+        },
+        {
+          "attempts": 4069,
+          "entry_handshake": "UNIQUE",
+          "examples": [
+            {
+              "anchor": {
+                "index": 156,
+                "invocation_id": 93,
+                "site": {
+                  "code": "pycode-v2:309bee34f951bebf55a0ea042b45197e87c78283642f803f0b0eea04bc10410d",
+                  "offset": 398,
+                  "opname": "CALL",
+                  "position": [
+                    909,
+                    909,
+                    1,
+                    16
+                  ]
+                },
+                "thread_id": 134637364963136
+              },
+              "callee_code": "pycode-v2:f25d7282d10c8696a41839c7953daabae9f5fcf626e39d6bffd9b4d2b8832c2a",
+              "caller_code": "pycode-v2:309bee34f951bebf55a0ea042b45197e87c78283642f803f0b0eea04bc10410d",
+              "kind": "EXACT_FUNCTION",
+              "scope": "PROJECT_PATH"
+            },
+            {
+              "anchor": {
+                "index": 186,
+                "invocation_id": 112,
+                "site": {
+                  "code": "pycode-v2:97f8b89fe9153aa1ebb3c2905e397c6a6ea9f4733d91dbe03863a63b9ea55800",
+                  "offset": 232,
+                  "opname": "CALL",
+                  "position": [
+                    304,
+                    304,
+                    1,
+                    16
+                  ]
+                },
+                "thread_id": 134637364963136
+              },
+              "callee_code": "pycode-v2:f25d7282d10c8696a41839c7953daabae9f5fcf626e39d6bffd9b4d2b8832c2a",
+              "caller_code": "pycode-v2:97f8b89fe9153aa1ebb3c2905e397c6a6ea9f4733d91dbe03863a63b9ea55800",
+              "kind": "EXACT_FUNCTION",
+              "scope": "PROJECT_PATH"
+            }
+          ],
+          "kind": "EXACT_FUNCTION",
+          "retained_code_scope": "PROJECT_PATH"
+        },
+        {
+          "attempts": 40,
+          "entry_handshake": "ABSENT",
+          "examples": [
+            {
+              "anchor": {
+                "index": 1603,
+                "invocation_id": 731,
+                "site": {
+                  "code": "pycode-v2:a36ba2a39b35c2528614f6d083227c39d859eca9aef9f89a138796c67304e2ec",
+                  "offset": 190,
+                  "opname": "CALL_FUNCTION_EX",
+                  "position": [
+                    486,
+                    493,
+                    8,
+                    9
+                  ]
+                },
+                "thread_id": 134637364963136
+              },
+              "callee_code": null,
+              "caller_code": "pycode-v2:a36ba2a39b35c2528614f6d083227c39d859eca9aef9f89a138796c67304e2ec",
+              "kind": "EXACT_METHOD",
+              "scope": "NO_CODE_IN_THIS_CALLABLE_VARIANT"
+            },
+            {
+              "anchor": {
+                "index": 1606,
+                "invocation_id": 735,
+                "site": {
+                  "code": "pycode-v2:d3400ec568b8318ee90199912a0550849d5804c0b8396c003230b709e372ed07",
+                  "offset": 36,
+                  "opname": "CALL_FUNCTION_EX",
+                  "position": [
+                    349,
+                    349,
+                    8,
+                    52
+                  ]
+                },
+                "thread_id": 134637364963136
+              },
+              "callee_code": null,
+              "caller_code": "pycode-v2:d3400ec568b8318ee90199912a0550849d5804c0b8396c003230b709e372ed07",
+              "kind": "EXACT_METHOD",
+              "scope": "NO_CODE_IN_THIS_CALLABLE_VARIANT"
+            }
+          ],
+          "kind": "EXACT_METHOD",
+          "retained_code_scope": "NO_CODE_IN_THIS_CALLABLE_VARIANT"
+        },
+        {
+          "attempts": 88176,
+          "entry_handshake": "ABSENT",
+          "examples": [
+            {
+              "anchor": {
+                "index": 2,
+                "invocation_id": 1,
+                "site": {
+                  "code": "pycode-v2:c0ae657136e059abd7eb11655cdd3e390c164a258ac1d7c498ce7b5fec2fb622",
+                  "offset": 60,
+                  "opname": "CALL",
+                  "position": [
+                    17,
+                    17,
+                    7,
+                    21
+                  ]
+                },
+                "thread_id": 134637364963136
+              },
+              "callee_code": null,
+              "caller_code": "pycode-v2:c0ae657136e059abd7eb11655cdd3e390c164a258ac1d7c498ce7b5fec2fb622",
+              "kind": "OTHER",
+              "scope": "NO_CODE_IN_THIS_CALLABLE_VARIANT"
+            },
+            {
+              "anchor": {
+                "index": 10,
+                "invocation_id": 1,
+                "site": {
+                  "code": "pycode-v2:c0ae657136e059abd7eb11655cdd3e390c164a258ac1d7c498ce7b5fec2fb622",
+                  "offset": 176,
+                  "opname": "CALL",
+                  "position": [
+                    18,
+                    22,
+                    12,
+                    1
+                  ]
+                },
+                "thread_id": 134637364963136
+              },
+              "callee_code": null,
+              "caller_code": "pycode-v2:c0ae657136e059abd7eb11655cdd3e390c164a258ac1d7c498ce7b5fec2fb622",
+              "kind": "OTHER",
+              "scope": "NO_CODE_IN_THIS_CALLABLE_VARIANT"
+            }
+          ],
+          "kind": "OTHER",
+          "retained_code_scope": "NO_CODE_IN_THIS_CALLABLE_VARIANT"
+        }
+      ],
+      "pid": 369749,
+      "rule": "CPYTHON_CALL_WINDOWS_V1"
+    }
+  ],
+  "elapsed_s": 12.27744912399794,
+  "first_stage_complete": false,
+  "maxrss_kib": 147188,
+  "producer": {
+    "bytes": 8734,
+    "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_call_protocol_frontiers_20261023/audit.py",
+    "sha256": "0b2c0ff5932bcf8679ad5af39cf05e9ee54ce6abb58cd1f84a8d6d3696ed30ff"
+  },
+  "revision": "6e6b67b8009b8765e8adfab5d1b8f216809d2eee",
+  "scar_imported": false,
+  "schema": "scar.call-protocol-frontier-audit",
+  "schema_version": 1,
+  "source_prepared": false,
+  "status": "RAW_PARTITION_AUDIT_PASS",
+  "target_executed": false,
+  "transformation_authorized": false,
+  "whole_model_established": false
+}

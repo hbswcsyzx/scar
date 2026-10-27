@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="2" skipped="0" tests="2" time="0.607" timestamp="2026-10-18T11:56:51.229032+00:00" hostname="gpu1"><testcase classname="tests.unit.test_execution_validity_domains" name="test_endpoint_observation_matches_only_its_exact_protocol_not_any_flush[False]" time="0.092"><failure message="assert False&#10; +  where False = any(&lt;generator object test_endpoint_observation_matches_only_its_exact_protocol_not_any_flush.&lt;locals&gt;.&lt;genexpr&gt; at 0x75410c574930&gt;)">changed_protocol = False
+
+    @pytest.mark.parametrize('changed_protocol', [False, True])
+    def test_endpoint_observation_matches_only_its_exact_protocol_not_any_flush(changed_protocol):
+        from scar.ir.program.providers import ProviderFactReference
+        from tests.fixtures.execution_lifetime_graphs import endpoint_lifetime_execution
+        fixture = list(endpoint_lifetime_execution())
+        if changed_protocol:
+            model = fixture[1]
+            row = model.contribution_supports[0]
+            fixture[1] = replace(model, contribution_supports=(replace(row,
+                visibility=replace(row.visibility, protocol=ProviderFactReference(model.snapshot.artifact,
+                                                                                 'arbitrary-flush'))),))
+        ctx = _index(fixture)._ctx
+        assert ctx.resolved_supports[fixture[-1]['support']]['status'] == 'MISSING'
+        assert any(gap.code == 'content_selector_protocol_unverified' for gap in ctx.gaps)
+&gt;       assert any(gap.code == 'validity_endpoint_interpreter_unsupported' for gap in ctx.gaps)
+E       assert False
+E        +  where False = any(&lt;generator object test_endpoint_observation_matches_only_its_exact_protocol_not_any_flush.&lt;locals&gt;.&lt;genexpr&gt; at 0x75410c574930&gt;)
+
+tests/unit/test_execution_validity_domains.py:192: AssertionError</failure></testcase><testcase classname="tests.unit.test_execution_validity_domains" name="test_endpoint_observation_matches_only_its_exact_protocol_not_any_flush[True]" time="0.013"><failure message="assert False&#10; +  where False = any(&lt;generator object test_endpoint_observation_matches_only_its_exact_protocol_not_any_flush.&lt;locals&gt;.&lt;genexpr&gt; at 0x75410c575cb0&gt;)">changed_protocol = True
+
+    @pytest.mark.parametrize('changed_protocol', [False, True])
+    def test_endpoint_observation_matches_only_its_exact_protocol_not_any_flush(changed_protocol):
+        from scar.ir.program.providers import ProviderFactReference
+        from tests.fixtures.execution_lifetime_graphs import endpoint_lifetime_execution
+        fixture = list(endpoint_lifetime_execution())
+        if changed_protocol:
+            model = fixture[1]
+            row = model.contribution_supports[0]
+            fixture[1] = replace(model, contribution_supports=(replace(row,
+                visibility=replace(row.visibility, protocol=ProviderFactReference(model.snapshot.artifact,
+                                                                                 'arbitrary-flush'))),))
+        ctx = _index(fixture)._ctx
+        assert ctx.resolved_supports[fixture[-1]['support']]['status'] == 'MISSING'
+        assert any(gap.code == 'content_selector_protocol_unverified' for gap in ctx.gaps)
+&gt;       assert any(gap.code == 'validity_endpoint_interpreter_unsupported' for gap in ctx.gaps)
+E       assert False
+E        +  where False = any(&lt;generator object test_endpoint_observation_matches_only_its_exact_protocol_not_any_flush.&lt;locals&gt;.&lt;genexpr&gt; at 0x75410c575cb0&gt;)
+
+tests/unit/test_execution_validity_domains.py:192: AssertionError</failure></testcase></testsuite></testsuites>

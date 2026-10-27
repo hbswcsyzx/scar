@@ -1,0 +1,35 @@
+{
+  "requests": [
+    {
+      "entry_key": "84e6dc922321b0ca4c33f3c0f620909ba1f014968ef3b4a26a123efe04642565",
+      "source_program": {
+        "decoded_bytes": 54127858,
+        "decoded_sha256": "cd6e821ae31066978f6f5be2f53315bdf4c9dad6f1e25645d787493f61f43687",
+        "external": true,
+        "physical_bytes": 6309464,
+        "physical_sha256": "4c2a1261cb59986e60302473929f5a44120049e6fd4022ba7d22617d4e1fbf58",
+        "representation": "scar.source-program/5",
+        "uri": "/home/zyf/AAA/scar-worktrees/source-try-model/artifacts/experiments/call_expansion_related_entries_20261026/result/batch-01/worker/attempt-00001/source-program5.json.gz"
+      }
+    },
+    {
+      "entry_key": "aeecef00f24a6ff3bf39a9743f9c4d7365e27b6e5317735c3ea0e271173609be",
+      "source_program": {
+        "decoded_bytes": 57847555,
+        "decoded_sha256": "172d5fceaa29ff4595d96d11f7804a03416a20d77a190520d4570215f95d51f3",
+        "external": true,
+        "physical_bytes": 6626166,
+        "physical_sha256": "f16e0e85ac06b48a1bea5dfc9c2bc7c1c5d7c35ee974755e403778c54ff61edb",
+        "representation": "scar.source-program/5",
+        "uri": "/home/zyf/AAA/scar-worktrees/source-try-model/artifacts/experiments/call_expansion_related_entries_20261026/result/batch-01/worker/attempt-00002/source-program5.json.gz"
+      }
+    }
+  ],
+  "previous_context": {
+    "control_sha256": "7b8344d530413f95377acc486e8f14b74144950d58b8334227f5a3cec078994b",
+    "namespace_root": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages",
+    "semantic_sha256": "22bee2cf8739c205d3fde7eb62f9d0dff974d9182b2ccdaa7428674a1064607d",
+    "semantics_sha256": "2547069f3037e47ecc5de882f71d2c8c79459b8b8c169723f56288010c1a4265"
+  },
+  "reason": "largest formerly slow completed context with at least two bodies; smallest retained pair within it"
+}

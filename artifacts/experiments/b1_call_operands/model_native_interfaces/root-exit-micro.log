@@ -1,0 +1,30 @@
+.F.....                                                                  [100%]
+=================================== FAILURES ===================================
+________ test_declared_exit_without_a_terminal_has_no_invented_producer ________
+
+    def test_declared_exit_without_a_terminal_has_no_invented_producer():
+        graph = branch_state_program()
+        root = graph.regions[0]
+        unused = ExitPort("unused", ExitKind.NORMAL, root.exits[0].types)
+        graph = replace(graph, regions=(replace(root, exits=(*root.exits, unused)),))
+>       index = ProgramIndex(graph)
+                ^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_native_exit_queries.py:28: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+scar/ir/program/queries.py:66: in __init__
+    require_valid(graph)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='root'), regions=(Region(id=RegionID(value='root'), label='branch, update and observa...ions=(), provider_envelopes=(), provider_regions=(), provider_bindings=(), native_boundaries=(), boundary_relations=())
+
+    def require_valid(graph: ProgramGraph) -> None:
+        issues = validate(graph)
+        if issues:
+>           raise ValueError("; ".join(f"{issue.code} at {issue.path}: {issue.message}" for issue in issues))
+E           ValueError: unbound_exit at program_region:root: declared exits must be bound to actual control exits
+
+scar/ir/program/validation.py:562: ValueError
+=========================== short test summary info ============================
+FAILED tests/unit/test_native_exit_queries.py::test_declared_exit_without_a_terminal_has_no_invented_producer
+1 failed, 6 passed in 0.31s

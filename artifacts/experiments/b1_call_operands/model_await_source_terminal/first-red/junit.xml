@@ -1,0 +1,771 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="28" skipped="0" tests="50" time="58.062" timestamp="2026-10-19T07:06:41.772811+00:00" hostname="gpu1"><testcase classname="tests.unit.test_program_await_general_final" name="test_independent_general_source_is_acquired_before_start_and_reaches_all_final_slots[zero-depth1]" time="0.688" /><testcase classname="tests.unit.test_program_await_general_final" name="test_independent_general_source_is_acquired_before_start_and_reaches_all_final_slots[zero-depth2]" time="0.557" /><testcase classname="tests.unit.test_program_await_general_final" name="test_independent_general_source_is_acquired_before_start_and_reaches_all_final_slots[two-depth1]" time="1.425" /><testcase classname="tests.unit.test_program_await_general_final" name="test_independent_general_source_is_acquired_before_start_and_reaches_all_final_slots[two-depth2]" time="1.369" /><testcase classname="tests.unit.test_program_await_general_final" name="test_another_root_reference_cannot_supply_the_independent_A_contract" time="0.817" /><testcase classname="tests.unit.test_program_await_general_final" name="test_old_preacquisition_world_cannot_be_used_as_the_first_driver_current_state" time="0.481" /><testcase classname="tests.unit.test_program_await_general_final" name="test_deleting_all_body_links_keeps_every_original_advance_and_final_output_inventory" time="2.834" /><testcase classname="tests.unit.test_execution_await_general_final" name="test_general_acquisition_before_start_owns_the_persistent_body_and_real_final_chain[zero-depth1-normal]" time="1.677" /><testcase classname="tests.unit.test_execution_await_general_final" name="test_general_acquisition_before_start_owns_the_persistent_body_and_real_final_chain[zero-depth2-raise]" time="1.795" /><testcase classname="tests.unit.test_execution_await_general_final" name="test_general_acquisition_before_start_owns_the_persistent_body_and_real_final_chain[two-depth1-raise]" time="4.090" /><testcase classname="tests.unit.test_execution_await_general_final" name="test_general_acquisition_before_start_owns_the_persistent_body_and_real_final_chain[two-depth2-normal]" time="4.260" /><testcase classname="tests.unit.test_execution_await_general_final" name="test_missing_first_acquisition_join_or_completion_cannot_borrow_the_other_instance[association]" time="3.055" /><testcase classname="tests.unit.test_execution_await_general_final" name="test_missing_first_acquisition_join_or_completion_cannot_borrow_the_other_instance[completion]" time="3.132" /><testcase classname="tests.unit.test_execution_await_general_final" name="test_missing_exact_nested_final_capture_keeps_the_other_general_instance[child_call]" time="3.214" /><testcase classname="tests.unit.test_execution_await_general_final" name="test_missing_exact_nested_final_capture_keeps_the_other_general_instance[terminal_use]" time="3.388" /><testcase classname="tests.unit.test_execution_await_general_final" name="test_same_code_outer_create_cannot_claim_the_method_created_persistent_body" time="4.141" /><testcase classname="tests.unit.test_execution_await_general_final" name="test_tiny_budget_retains_canonical_source_and_marks_unchecked_actual_chain" time="3.099" /><testcase classname="tests.unit.test_program_await_wrapper_final" name="test_native_wrapper_source_to_real_body_return_to_every_child_own_slot[zero-E]" time="0.024"><failure message="ValueError: protocol_rule at protocol_operations[5]: contract/rule is not allowed in this fixed profile/clause; protocol_rule at protocol_operations[6]: contract/rule is not allowed in this fixed profile/clause">zero_cut = True, depth = 1
+
+    @pytest.mark.parametrize(("zero_cut", "depth"), _CORNERS,
+        ids=("zero-E", "zero-EG", "two-cut-E", "two-cut-EG"))
+    def test_native_wrapper_source_to_real_body_return_to_every_child_own_slot(zero_cut, depth):
+        program, details = await_wrapper_final_program(zero_cut=zero_cut, depth=depth)
+&gt;       report = _report(program, details)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_program_await_wrapper_final.py:110: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/unit/test_program_await_wrapper_final.py:21: in _report
+    require_valid(program)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='await.resume.caller'), regions=(Region(id=RegionID(value='await.resume.caller'), lab...ess(operation=OperationID(value='await.wrapper.advance.0.held.read'), index=0),)), guard=None),), exception_matches=())
+
+    def require_valid(graph: ProgramGraph) -&gt; None:
+        issues = validate(graph)
+        if issues:
+&gt;           raise ValueError("; ".join(f"{issue.code} at {issue.path}: {issue.message}" for issue in issues))
+E           ValueError: protocol_rule at protocol_operations[5]: contract/rule is not allowed in this fixed profile/clause; protocol_rule at protocol_operations[6]: contract/rule is not allowed in this fixed profile/clause
+
+scar/ir/program/validation.py:759: ValueError</failure></testcase><testcase classname="tests.unit.test_program_await_wrapper_final" name="test_native_wrapper_source_to_real_body_return_to_every_child_own_slot[zero-EG]" time="0.025"><failure message="ValueError: protocol_rule at protocol_operations[5]: contract/rule is not allowed in this fixed profile/clause; protocol_rule at protocol_operations[6]: contract/rule is not allowed in this fixed profile/clause">zero_cut = True, depth = 2
+
+    @pytest.mark.parametrize(("zero_cut", "depth"), _CORNERS,
+        ids=("zero-E", "zero-EG", "two-cut-E", "two-cut-EG"))
+    def test_native_wrapper_source_to_real_body_return_to_every_child_own_slot(zero_cut, depth):
+        program, details = await_wrapper_final_program(zero_cut=zero_cut, depth=depth)
+&gt;       report = _report(program, details)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_program_await_wrapper_final.py:110: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/unit/test_program_await_wrapper_final.py:21: in _report
+    require_valid(program)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='await.resume.caller'), regions=(Region(id=RegionID(value='await.resume.caller'), lab...ess(operation=OperationID(value='await.wrapper.advance.0.held.read'), index=0),)), guard=None),), exception_matches=())
+
+    def require_valid(graph: ProgramGraph) -&gt; None:
+        issues = validate(graph)
+        if issues:
+&gt;           raise ValueError("; ".join(f"{issue.code} at {issue.path}: {issue.message}" for issue in issues))
+E           ValueError: protocol_rule at protocol_operations[5]: contract/rule is not allowed in this fixed profile/clause; protocol_rule at protocol_operations[6]: contract/rule is not allowed in this fixed profile/clause
+
+scar/ir/program/validation.py:759: ValueError</failure></testcase><testcase classname="tests.unit.test_program_await_wrapper_final" name="test_native_wrapper_source_to_real_body_return_to_every_child_own_slot[two-cut-E]" time="0.044"><failure message="ValueError: read_behavior at program_operation:await.resume.call.0.handoff: read access requires READ behavior; read_behavior at program_operation:await.resume.call.1.handoff: read access requires READ behavior">zero_cut = False, depth = 1
+
+    @pytest.mark.parametrize(("zero_cut", "depth"), _CORNERS,
+        ids=("zero-E", "zero-EG", "two-cut-E", "two-cut-EG"))
+    def test_native_wrapper_source_to_real_body_return_to_every_child_own_slot(zero_cut, depth):
+        program, details = await_wrapper_final_program(zero_cut=zero_cut, depth=depth)
+&gt;       report = _report(program, details)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_program_await_wrapper_final.py:110: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/unit/test_program_await_wrapper_final.py:21: in _report
+    require_valid(program)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='await.resume.caller'), regions=(Region(id=RegionID(value='await.resume.caller'), lab...cess(operation=OperationID(value='await.wrapper.advance.2.held.read'), index=0),)), guard=None)), exception_matches=())
+
+    def require_valid(graph: ProgramGraph) -&gt; None:
+        issues = validate(graph)
+        if issues:
+&gt;           raise ValueError("; ".join(f"{issue.code} at {issue.path}: {issue.message}" for issue in issues))
+E           ValueError: read_behavior at program_operation:await.resume.call.0.handoff: read access requires READ behavior; read_behavior at program_operation:await.resume.call.1.handoff: read access requires READ behavior
+
+scar/ir/program/validation.py:759: ValueError</failure></testcase><testcase classname="tests.unit.test_program_await_wrapper_final" name="test_native_wrapper_source_to_real_body_return_to_every_child_own_slot[two-cut-EG]" time="0.044"><failure message="ValueError: read_behavior at program_operation:await.resume.call.0.handoff: read access requires READ behavior; read_behavior at program_operation:await.resume.call.1.handoff: read access requires READ behavior">zero_cut = False, depth = 2
+
+    @pytest.mark.parametrize(("zero_cut", "depth"), _CORNERS,
+        ids=("zero-E", "zero-EG", "two-cut-E", "two-cut-EG"))
+    def test_native_wrapper_source_to_real_body_return_to_every_child_own_slot(zero_cut, depth):
+        program, details = await_wrapper_final_program(zero_cut=zero_cut, depth=depth)
+&gt;       report = _report(program, details)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_program_await_wrapper_final.py:110: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/unit/test_program_await_wrapper_final.py:21: in _report
+    require_valid(program)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='await.resume.caller'), regions=(Region(id=RegionID(value='await.resume.caller'), lab...cess(operation=OperationID(value='await.wrapper.advance.2.held.read'), index=0),)), guard=None)), exception_matches=())
+
+    def require_valid(graph: ProgramGraph) -&gt; None:
+        issues = validate(graph)
+        if issues:
+&gt;           raise ValueError("; ".join(f"{issue.code} at {issue.path}: {issue.message}" for issue in issues))
+E           ValueError: read_behavior at program_operation:await.resume.call.0.handoff: read access requires READ behavior; read_behavior at program_operation:await.resume.call.1.handoff: read access requires READ behavior
+
+scar/ir/program/validation.py:759: ValueError</failure></testcase><testcase classname="tests.unit.test_program_await_wrapper_final" name="test_removing_all_wrapper_links_preserves_constructor_advance_and_final_denominator" time="0.085"><failure message="ValueError: read_behavior at program_operation:await.resume.call.0.handoff: read access requires READ behavior; read_behavior at program_operation:await.resume.call.1.handoff: read access requires READ behavior">def test_removing_all_wrapper_links_preserves_constructor_advance_and_final_denominator():
+        original, details = await_wrapper_final_program(zero_cut=False, depth=2)
+        removed, missing = await_wrapper_final_program(zero_cut=False, depth=2, attach_link=False)
+        assert original.operations == removed.operations and original.values == removed.values
+        assert original.regions == removed.regions
+&gt;       before, after = _report(original, details), _report(removed, missing)
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_program_await_wrapper_final.py:161: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/unit/test_program_await_wrapper_final.py:21: in _report
+    require_valid(program)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='await.resume.caller'), regions=(Region(id=RegionID(value='await.resume.caller'), lab...cess(operation=OperationID(value='await.wrapper.advance.2.held.read'), index=0),)), guard=None)), exception_matches=())
+
+    def require_valid(graph: ProgramGraph) -&gt; None:
+        issues = validate(graph)
+        if issues:
+&gt;           raise ValueError("; ".join(f"{issue.code} at {issue.path}: {issue.message}" for issue in issues))
+E           ValueError: read_behavior at program_operation:await.resume.call.0.handoff: read access requires READ behavior; read_behavior at program_operation:await.resume.call.1.handoff: read access requires READ behavior
+
+scar/ir/program/validation.py:759: ValueError</failure></testcase><testcase classname="tests.unit.test_program_await_wrapper_final" name="test_prior_child_state_never_covers_the_primitive_current_state_result" time="0.045"><failure message="ValueError: read_behavior at program_operation:await.resume.call.0.handoff: read access requires READ behavior; read_behavior at program_operation:await.resume.call.1.handoff: read access requires READ behavior; stale_state at program_use:await.final.implementation.2.raise.exit.use.1: use must read the current version of this block's state; stale_state at program_use:await.final.implementation.2.normal.exit.use.1: use must read the current version of this block's state">def test_prior_child_state_never_covers_the_primitive_current_state_result():
+        program, details = await_wrapper_final_program(zero_cut=False, depth=2, stale_child_state=True)
+&gt;       _, consumer = _consumer(_report(program, details), details)
+                                ^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_program_await_wrapper_final.py:173: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/unit/test_program_await_wrapper_final.py:21: in _report
+    require_valid(program)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='await.resume.caller'), regions=(Region(id=RegionID(value='await.resume.caller'), lab...cess(operation=OperationID(value='await.wrapper.advance.2.held.read'), index=0),)), guard=None)), exception_matches=())
+
+    def require_valid(graph: ProgramGraph) -&gt; None:
+        issues = validate(graph)
+        if issues:
+&gt;           raise ValueError("; ".join(f"{issue.code} at {issue.path}: {issue.message}" for issue in issues))
+E           ValueError: read_behavior at program_operation:await.resume.call.0.handoff: read access requires READ behavior; read_behavior at program_operation:await.resume.call.1.handoff: read access requires READ behavior; stale_state at program_use:await.final.implementation.2.raise.exit.use.1: use must read the current version of this block's state; stale_state at program_use:await.final.implementation.2.normal.exit.use.1: use must read the current version of this block's state
+
+scar/ir/program/validation.py:759: ValueError</failure></testcase><testcase classname="tests.unit.test_program_await_wrapper_final" name="test_tiny_budget_keeps_the_wrapper_source_and_unproved_original_jobs" time="0.044"><failure message="ValueError: read_behavior at program_operation:await.resume.call.0.handoff: read access requires READ behavior; read_behavior at program_operation:await.resume.call.1.handoff: read access requires READ behavior">def test_tiny_budget_keeps_the_wrapper_source_and_unproved_original_jobs():
+        program, details = await_wrapper_final_program(zero_cut=False, depth=2)
+&gt;       require_valid(program)
+
+tests/unit/test_program_await_wrapper_final.py:191: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='await.resume.caller'), regions=(Region(id=RegionID(value='await.resume.caller'), lab...cess(operation=OperationID(value='await.wrapper.advance.2.held.read'), index=0),)), guard=None)), exception_matches=())
+
+    def require_valid(graph: ProgramGraph) -&gt; None:
+        issues = validate(graph)
+        if issues:
+&gt;           raise ValueError("; ".join(f"{issue.code} at {issue.path}: {issue.message}" for issue in issues))
+E           ValueError: read_behavior at program_operation:await.resume.call.0.handoff: read access requires READ behavior; read_behavior at program_operation:await.resume.call.1.handoff: read access requires READ behavior
+
+scar/ir/program/validation.py:759: ValueError</failure></testcase><testcase classname="tests.unit.test_execution_await_wrapper_final" name="test_native_wrapper_two_instances_reach_their_own_current_final_ports[zero-E-N]" time="0.034"><failure message="ValueError: protocol_rule at protocol_operations[5]: contract/rule is not allowed in this fixed profile/clause; protocol_rule at protocol_operations[6]: contract/rule is not allowed in this fixed profile/clause">zero_cut = True, depth = 1, child_raised = False
+
+    @pytest.mark.parametrize(("zero_cut", "depth", "child_raised"), _CORNERS,
+        ids=("zero-E-N", "zero-EG-R", "two-cut-E-R", "two-cut-EG-N"))
+    def test_native_wrapper_two_instances_reach_their_own_current_final_ports(zero_cut, depth, child_raised):
+&gt;       program, model, details = await_wrapper_final_execution(
+            zero_cut=zero_cut, depth=depth, child_raised=child_raised, instances=2)
+
+tests/unit/test_execution_await_wrapper_final.py:150: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/fixtures/execution_await_wrapper_final_graphs.py:267: in await_wrapper_final_execution
+    model = ExecutionModel(snapshot_for(program),
+                           ^^^^^^^^^^^^^^^^^^^^^
+scar/ir/execution/snapshot.py:11: in snapshot_for
+    wire = program_dumps(program).encode('utf-8')
+           ^^^^^^^^^^^^^^^^^^^^^^
+scar/ir/program/codec.py:242: in dumps
+    _require_record_and_graph_valid(graph)
+scar/ir/program/codec.py:134: in _require_record_and_graph_valid
+    require_valid(graph)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='await.resume.caller'), regions=(Region(id=RegionID(value='await.resume.caller'), lab...ess(operation=OperationID(value='await.wrapper.advance.0.held.read'), index=0),)), guard=None),), exception_matches=())
+
+    def require_valid(graph: ProgramGraph) -&gt; None:
+        issues = validate(graph)
+        if issues:
+&gt;           raise ValueError("; ".join(f"{issue.code} at {issue.path}: {issue.message}" for issue in issues))
+E           ValueError: protocol_rule at protocol_operations[5]: contract/rule is not allowed in this fixed profile/clause; protocol_rule at protocol_operations[6]: contract/rule is not allowed in this fixed profile/clause
+
+scar/ir/program/validation.py:759: ValueError</failure></testcase><testcase classname="tests.unit.test_execution_await_wrapper_final" name="test_native_wrapper_two_instances_reach_their_own_current_final_ports[zero-EG-R]" time="0.036"><failure message="ValueError: protocol_rule at protocol_operations[5]: contract/rule is not allowed in this fixed profile/clause; protocol_rule at protocol_operations[6]: contract/rule is not allowed in this fixed profile/clause">zero_cut = True, depth = 2, child_raised = True
+
+    @pytest.mark.parametrize(("zero_cut", "depth", "child_raised"), _CORNERS,
+        ids=("zero-E-N", "zero-EG-R", "two-cut-E-R", "two-cut-EG-N"))
+    def test_native_wrapper_two_instances_reach_their_own_current_final_ports(zero_cut, depth, child_raised):
+&gt;       program, model, details = await_wrapper_final_execution(
+            zero_cut=zero_cut, depth=depth, child_raised=child_raised, instances=2)
+
+tests/unit/test_execution_await_wrapper_final.py:150: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/fixtures/execution_await_wrapper_final_graphs.py:267: in await_wrapper_final_execution
+    model = ExecutionModel(snapshot_for(program),
+                           ^^^^^^^^^^^^^^^^^^^^^
+scar/ir/execution/snapshot.py:11: in snapshot_for
+    wire = program_dumps(program).encode('utf-8')
+           ^^^^^^^^^^^^^^^^^^^^^^
+scar/ir/program/codec.py:242: in dumps
+    _require_record_and_graph_valid(graph)
+scar/ir/program/codec.py:134: in _require_record_and_graph_valid
+    require_valid(graph)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='await.resume.caller'), regions=(Region(id=RegionID(value='await.resume.caller'), lab...ess(operation=OperationID(value='await.wrapper.advance.0.held.read'), index=0),)), guard=None),), exception_matches=())
+
+    def require_valid(graph: ProgramGraph) -&gt; None:
+        issues = validate(graph)
+        if issues:
+&gt;           raise ValueError("; ".join(f"{issue.code} at {issue.path}: {issue.message}" for issue in issues))
+E           ValueError: protocol_rule at protocol_operations[5]: contract/rule is not allowed in this fixed profile/clause; protocol_rule at protocol_operations[6]: contract/rule is not allowed in this fixed profile/clause
+
+scar/ir/program/validation.py:759: ValueError</failure></testcase><testcase classname="tests.unit.test_execution_await_wrapper_final" name="test_native_wrapper_two_instances_reach_their_own_current_final_ports[two-cut-E-R]" time="0.068"><failure message="ValueError: read_behavior at program_operation:await.resume.call.0.handoff: read access requires READ behavior; read_behavior at program_operation:await.resume.call.1.handoff: read access requires READ behavior">zero_cut = False, depth = 1, child_raised = True
+
+    @pytest.mark.parametrize(("zero_cut", "depth", "child_raised"), _CORNERS,
+        ids=("zero-E-N", "zero-EG-R", "two-cut-E-R", "two-cut-EG-N"))
+    def test_native_wrapper_two_instances_reach_their_own_current_final_ports(zero_cut, depth, child_raised):
+&gt;       program, model, details = await_wrapper_final_execution(
+            zero_cut=zero_cut, depth=depth, child_raised=child_raised, instances=2)
+
+tests/unit/test_execution_await_wrapper_final.py:150: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/fixtures/execution_await_wrapper_final_graphs.py:267: in await_wrapper_final_execution
+    model = ExecutionModel(snapshot_for(program),
+                           ^^^^^^^^^^^^^^^^^^^^^
+scar/ir/execution/snapshot.py:11: in snapshot_for
+    wire = program_dumps(program).encode('utf-8')
+           ^^^^^^^^^^^^^^^^^^^^^^
+scar/ir/program/codec.py:242: in dumps
+    _require_record_and_graph_valid(graph)
+scar/ir/program/codec.py:134: in _require_record_and_graph_valid
+    require_valid(graph)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='await.resume.caller'), regions=(Region(id=RegionID(value='await.resume.caller'), lab...cess(operation=OperationID(value='await.wrapper.advance.2.held.read'), index=0),)), guard=None)), exception_matches=())
+
+    def require_valid(graph: ProgramGraph) -&gt; None:
+        issues = validate(graph)
+        if issues:
+&gt;           raise ValueError("; ".join(f"{issue.code} at {issue.path}: {issue.message}" for issue in issues))
+E           ValueError: read_behavior at program_operation:await.resume.call.0.handoff: read access requires READ behavior; read_behavior at program_operation:await.resume.call.1.handoff: read access requires READ behavior
+
+scar/ir/program/validation.py:759: ValueError</failure></testcase><testcase classname="tests.unit.test_execution_await_wrapper_final" name="test_native_wrapper_two_instances_reach_their_own_current_final_ports[two-cut-EG-N]" time="0.069"><failure message="ValueError: read_behavior at program_operation:await.resume.call.0.handoff: read access requires READ behavior; read_behavior at program_operation:await.resume.call.1.handoff: read access requires READ behavior">zero_cut = False, depth = 2, child_raised = False
+
+    @pytest.mark.parametrize(("zero_cut", "depth", "child_raised"), _CORNERS,
+        ids=("zero-E-N", "zero-EG-R", "two-cut-E-R", "two-cut-EG-N"))
+    def test_native_wrapper_two_instances_reach_their_own_current_final_ports(zero_cut, depth, child_raised):
+&gt;       program, model, details = await_wrapper_final_execution(
+            zero_cut=zero_cut, depth=depth, child_raised=child_raised, instances=2)
+
+tests/unit/test_execution_await_wrapper_final.py:150: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/fixtures/execution_await_wrapper_final_graphs.py:267: in await_wrapper_final_execution
+    model = ExecutionModel(snapshot_for(program),
+                           ^^^^^^^^^^^^^^^^^^^^^
+scar/ir/execution/snapshot.py:11: in snapshot_for
+    wire = program_dumps(program).encode('utf-8')
+           ^^^^^^^^^^^^^^^^^^^^^^
+scar/ir/program/codec.py:242: in dumps
+    _require_record_and_graph_valid(graph)
+scar/ir/program/codec.py:134: in _require_record_and_graph_valid
+    require_valid(graph)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='await.resume.caller'), regions=(Region(id=RegionID(value='await.resume.caller'), lab...cess(operation=OperationID(value='await.wrapper.advance.2.held.read'), index=0),)), guard=None)), exception_matches=())
+
+    def require_valid(graph: ProgramGraph) -&gt; None:
+        issues = validate(graph)
+        if issues:
+&gt;           raise ValueError("; ".join(f"{issue.code} at {issue.path}: {issue.message}" for issue in issues))
+E           ValueError: read_behavior at program_operation:await.resume.call.0.handoff: read access requires READ behavior; read_behavior at program_operation:await.resume.call.1.handoff: read access requires READ behavior
+
+scar/ir/program/validation.py:759: ValueError</failure></testcase><testcase classname="tests.unit.test_execution_await_wrapper_final" name="test_wrapper_identity_conflicts_do_not_rebind_expected_b[W-is-B]" time="0.069"><failure message="ValueError: read_behavior at program_operation:await.resume.call.0.handoff: read access requires READ behavior; read_behavior at program_operation:await.resume.call.1.handoff: read access requires READ behavior">same_object = True, other_body = None, code = 'body_reference_distinct_conflict'
+
+    @pytest.mark.parametrize(("same_object", "other_body", "code"),
+        ((True, None, "body_reference_distinct_conflict"), (False, 0, "await_wrapper_body_source")),
+        ids=("W-is-B", "getter-decoy-Create"))
+    def test_wrapper_identity_conflicts_do_not_rebind_expected_b(same_object, other_body, code):
+&gt;       program, model, details = await_wrapper_final_execution(
+            zero_cut=False, depth=2, same_object=same_object, other_body=other_body)
+
+tests/unit/test_execution_await_wrapper_final.py:209: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/fixtures/execution_await_wrapper_final_graphs.py:267: in await_wrapper_final_execution
+    model = ExecutionModel(snapshot_for(program),
+                           ^^^^^^^^^^^^^^^^^^^^^
+scar/ir/execution/snapshot.py:11: in snapshot_for
+    wire = program_dumps(program).encode('utf-8')
+           ^^^^^^^^^^^^^^^^^^^^^^
+scar/ir/program/codec.py:242: in dumps
+    _require_record_and_graph_valid(graph)
+scar/ir/program/codec.py:134: in _require_record_and_graph_valid
+    require_valid(graph)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='await.resume.caller'), regions=(Region(id=RegionID(value='await.resume.caller'), lab...cess(operation=OperationID(value='await.wrapper.advance.2.held.read'), index=0),)), guard=None)), exception_matches=())
+
+    def require_valid(graph: ProgramGraph) -&gt; None:
+        issues = validate(graph)
+        if issues:
+&gt;           raise ValueError("; ".join(f"{issue.code} at {issue.path}: {issue.message}" for issue in issues))
+E           ValueError: read_behavior at program_operation:await.resume.call.0.handoff: read access requires READ behavior; read_behavior at program_operation:await.resume.call.1.handoff: read access requires READ behavior
+
+scar/ir/program/validation.py:759: ValueError</failure></testcase><testcase classname="tests.unit.test_execution_await_wrapper_final" name="test_wrapper_identity_conflicts_do_not_rebind_expected_b[getter-decoy-Create]" time="0.069"><failure message="ValueError: read_behavior at program_operation:await.resume.call.0.handoff: read access requires READ behavior; read_behavior at program_operation:await.resume.call.1.handoff: read access requires READ behavior">same_object = False, other_body = 0, code = 'await_wrapper_body_source'
+
+    @pytest.mark.parametrize(("same_object", "other_body", "code"),
+        ((True, None, "body_reference_distinct_conflict"), (False, 0, "await_wrapper_body_source")),
+        ids=("W-is-B", "getter-decoy-Create"))
+    def test_wrapper_identity_conflicts_do_not_rebind_expected_b(same_object, other_body, code):
+&gt;       program, model, details = await_wrapper_final_execution(
+            zero_cut=False, depth=2, same_object=same_object, other_body=other_body)
+
+tests/unit/test_execution_await_wrapper_final.py:209: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/fixtures/execution_await_wrapper_final_graphs.py:267: in await_wrapper_final_execution
+    model = ExecutionModel(snapshot_for(program),
+                           ^^^^^^^^^^^^^^^^^^^^^
+scar/ir/execution/snapshot.py:11: in snapshot_for
+    wire = program_dumps(program).encode('utf-8')
+           ^^^^^^^^^^^^^^^^^^^^^^
+scar/ir/program/codec.py:242: in dumps
+    _require_record_and_graph_valid(graph)
+scar/ir/program/codec.py:134: in _require_record_and_graph_valid
+    require_valid(graph)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='await.resume.caller'), regions=(Region(id=RegionID(value='await.resume.caller'), lab...cess(operation=OperationID(value='await.wrapper.advance.2.held.read'), index=0),)), guard=None)), exception_matches=())
+
+    def require_valid(graph: ProgramGraph) -&gt; None:
+        issues = validate(graph)
+        if issues:
+&gt;           raise ValueError("; ".join(f"{issue.code} at {issue.path}: {issue.message}" for issue in issues))
+E           ValueError: read_behavior at program_operation:await.resume.call.0.handoff: read access requires READ behavior; read_behavior at program_operation:await.resume.call.1.handoff: read access requires READ behavior
+
+scar/ir/program/validation.py:759: ValueError</failure></testcase><testcase classname="tests.unit.test_execution_await_wrapper_final" name="test_missing_first_wrapper_call_keeps_its_obligation_and_cannot_borrow_another_instance" time="0.173"><failure message="ValueError: read_behavior at program_operation:await.resume.call.0.handoff: read access requires READ behavior; read_behavior at program_operation:await.resume.call.1.handoff: read access requires READ behavior">def test_missing_first_wrapper_call_keeps_its_obligation_and_cannot_borrow_another_instance():
+&gt;       program, model, details = await_wrapper_final_execution(
+            zero_cut=False, depth=2, missing_wrapper_call=(0, 0))
+
+tests/unit/test_execution_await_wrapper_final.py:223: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/fixtures/execution_await_wrapper_final_graphs.py:267: in await_wrapper_final_execution
+    model = ExecutionModel(snapshot_for(program),
+                           ^^^^^^^^^^^^^^^^^^^^^
+scar/ir/execution/snapshot.py:11: in snapshot_for
+    wire = program_dumps(program).encode('utf-8')
+           ^^^^^^^^^^^^^^^^^^^^^^
+scar/ir/program/codec.py:242: in dumps
+    _require_record_and_graph_valid(graph)
+scar/ir/program/codec.py:134: in _require_record_and_graph_valid
+    require_valid(graph)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='await.resume.caller'), regions=(Region(id=RegionID(value='await.resume.caller'), lab...cess(operation=OperationID(value='await.wrapper.advance.2.held.read'), index=0),)), guard=None)), exception_matches=())
+
+    def require_valid(graph: ProgramGraph) -&gt; None:
+        issues = validate(graph)
+        if issues:
+&gt;           raise ValueError("; ".join(f"{issue.code} at {issue.path}: {issue.message}" for issue in issues))
+E           ValueError: read_behavior at program_operation:await.resume.call.0.handoff: read access requires READ behavior; read_behavior at program_operation:await.resume.call.1.handoff: read access requires READ behavior
+
+scar/ir/program/validation.py:759: ValueError</failure></testcase><testcase classname="tests.unit.test_execution_await_wrapper_final" name="test_missing_child_call_retains_exact_frame_and_sibling_final_chain" time="0.071"><failure message="ValueError: read_behavior at program_operation:await.resume.call.0.handoff: read access requires READ behavior; read_behavior at program_operation:await.resume.call.1.handoff: read access requires READ behavior">def test_missing_child_call_retains_exact_frame_and_sibling_final_chain():
+&gt;       program, model, details = await_wrapper_final_execution(
+            zero_cut=False, depth=2, missing_child_call=(0, 0))
+
+tests/unit/test_execution_await_wrapper_final.py:239: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/fixtures/execution_await_wrapper_final_graphs.py:267: in await_wrapper_final_execution
+    model = ExecutionModel(snapshot_for(program),
+                           ^^^^^^^^^^^^^^^^^^^^^
+scar/ir/execution/snapshot.py:11: in snapshot_for
+    wire = program_dumps(program).encode('utf-8')
+           ^^^^^^^^^^^^^^^^^^^^^^
+scar/ir/program/codec.py:242: in dumps
+    _require_record_and_graph_valid(graph)
+scar/ir/program/codec.py:134: in _require_record_and_graph_valid
+    require_valid(graph)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='await.resume.caller'), regions=(Region(id=RegionID(value='await.resume.caller'), lab...cess(operation=OperationID(value='await.wrapper.advance.2.held.read'), index=0),)), guard=None)), exception_matches=())
+
+    def require_valid(graph: ProgramGraph) -&gt; None:
+        issues = validate(graph)
+        if issues:
+&gt;           raise ValueError("; ".join(f"{issue.code} at {issue.path}: {issue.message}" for issue in issues))
+E           ValueError: read_behavior at program_operation:await.resume.call.0.handoff: read access requires READ behavior; read_behavior at program_operation:await.resume.call.1.handoff: read access requires READ behavior
+
+scar/ir/program/validation.py:759: ValueError</failure></testcase><testcase classname="tests.unit.test_execution_await_wrapper_final" name="test_missing_leaf_terminal_use_cannot_borrow_sibling_payload_or_state[payload]" time="0.072"><failure message="ValueError: read_behavior at program_operation:await.resume.call.0.handoff: read access requires READ behavior; read_behavior at program_operation:await.resume.call.1.handoff: read access requires READ behavior">slot = 0
+
+    @pytest.mark.parametrize("slot", (0, 1), ids=("payload", "current-state"))
+    def test_missing_leaf_terminal_use_cannot_borrow_sibling_payload_or_state(slot):
+&gt;       program, model, details = await_wrapper_final_execution(
+            zero_cut=False, depth=2, child_raised=True, missing_terminal_use=(0, 1, slot))
+
+tests/unit/test_execution_await_wrapper_final.py:258: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/fixtures/execution_await_wrapper_final_graphs.py:267: in await_wrapper_final_execution
+    model = ExecutionModel(snapshot_for(program),
+                           ^^^^^^^^^^^^^^^^^^^^^
+scar/ir/execution/snapshot.py:11: in snapshot_for
+    wire = program_dumps(program).encode('utf-8')
+           ^^^^^^^^^^^^^^^^^^^^^^
+scar/ir/program/codec.py:242: in dumps
+    _require_record_and_graph_valid(graph)
+scar/ir/program/codec.py:134: in _require_record_and_graph_valid
+    require_valid(graph)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='await.resume.caller'), regions=(Region(id=RegionID(value='await.resume.caller'), lab...cess(operation=OperationID(value='await.wrapper.advance.2.held.read'), index=0),)), guard=None)), exception_matches=())
+
+    def require_valid(graph: ProgramGraph) -&gt; None:
+        issues = validate(graph)
+        if issues:
+&gt;           raise ValueError("; ".join(f"{issue.code} at {issue.path}: {issue.message}" for issue in issues))
+E           ValueError: read_behavior at program_operation:await.resume.call.0.handoff: read access requires READ behavior; read_behavior at program_operation:await.resume.call.1.handoff: read access requires READ behavior
+
+scar/ir/program/validation.py:759: ValueError</failure></testcase><testcase classname="tests.unit.test_execution_await_wrapper_final" name="test_missing_leaf_terminal_use_cannot_borrow_sibling_payload_or_state[current-state]" time="0.074"><failure message="ValueError: read_behavior at program_operation:await.resume.call.0.handoff: read access requires READ behavior; read_behavior at program_operation:await.resume.call.1.handoff: read access requires READ behavior">slot = 1
+
+    @pytest.mark.parametrize("slot", (0, 1), ids=("payload", "current-state"))
+    def test_missing_leaf_terminal_use_cannot_borrow_sibling_payload_or_state(slot):
+&gt;       program, model, details = await_wrapper_final_execution(
+            zero_cut=False, depth=2, child_raised=True, missing_terminal_use=(0, 1, slot))
+
+tests/unit/test_execution_await_wrapper_final.py:258: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/fixtures/execution_await_wrapper_final_graphs.py:267: in await_wrapper_final_execution
+    model = ExecutionModel(snapshot_for(program),
+                           ^^^^^^^^^^^^^^^^^^^^^
+scar/ir/execution/snapshot.py:11: in snapshot_for
+    wire = program_dumps(program).encode('utf-8')
+           ^^^^^^^^^^^^^^^^^^^^^^
+scar/ir/program/codec.py:242: in dumps
+    _require_record_and_graph_valid(graph)
+scar/ir/program/codec.py:134: in _require_record_and_graph_valid
+    require_valid(graph)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='await.resume.caller'), regions=(Region(id=RegionID(value='await.resume.caller'), lab...cess(operation=OperationID(value='await.wrapper.advance.2.held.read'), index=0),)), guard=None)), exception_matches=())
+
+    def require_valid(graph: ProgramGraph) -&gt; None:
+        issues = validate(graph)
+        if issues:
+&gt;           raise ValueError("; ".join(f"{issue.code} at {issue.path}: {issue.message}" for issue in issues))
+E           ValueError: read_behavior at program_operation:await.resume.call.0.handoff: read access requires READ behavior; read_behavior at program_operation:await.resume.call.1.handoff: read access requires READ behavior
+
+scar/ir/program/validation.py:759: ValueError</failure></testcase><testcase classname="tests.unit.test_execution_await_wrapper_final" name="test_old_child_input_state_does_not_match_its_new_own_result" time="0.073"><failure message="ValueError: read_behavior at program_operation:await.resume.call.0.handoff: read access requires READ behavior; read_behavior at program_operation:await.resume.call.1.handoff: read access requires READ behavior; stale_state at program_use:await.final.implementation.2.raise.exit.use.1: use must read the current version of this block's state; stale_state at program_use:await.final.implementation.2.normal.exit.use.1: use must read the current version of this block's state">def test_old_child_input_state_does_not_match_its_new_own_result():
+&gt;       program, model, details = await_wrapper_final_execution(
+            zero_cut=False, depth=2, stale_child_state=True)
+
+tests/unit/test_execution_await_wrapper_final.py:274: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/fixtures/execution_await_wrapper_final_graphs.py:267: in await_wrapper_final_execution
+    model = ExecutionModel(snapshot_for(program),
+                           ^^^^^^^^^^^^^^^^^^^^^
+scar/ir/execution/snapshot.py:11: in snapshot_for
+    wire = program_dumps(program).encode('utf-8')
+           ^^^^^^^^^^^^^^^^^^^^^^
+scar/ir/program/codec.py:242: in dumps
+    _require_record_and_graph_valid(graph)
+scar/ir/program/codec.py:134: in _require_record_and_graph_valid
+    require_valid(graph)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='await.resume.caller'), regions=(Region(id=RegionID(value='await.resume.caller'), lab...cess(operation=OperationID(value='await.wrapper.advance.2.held.read'), index=0),)), guard=None)), exception_matches=())
+
+    def require_valid(graph: ProgramGraph) -&gt; None:
+        issues = validate(graph)
+        if issues:
+&gt;           raise ValueError("; ".join(f"{issue.code} at {issue.path}: {issue.message}" for issue in issues))
+E           ValueError: read_behavior at program_operation:await.resume.call.0.handoff: read access requires READ behavior; read_behavior at program_operation:await.resume.call.1.handoff: read access requires READ behavior; stale_state at program_use:await.final.implementation.2.raise.exit.use.1: use must read the current version of this block's state; stale_state at program_use:await.final.implementation.2.normal.exit.use.1: use must read the current version of this block's state
+
+scar/ir/program/validation.py:759: ValueError</failure></testcase><testcase classname="tests.unit.test_execution_await_wrapper_final" name="test_budget_one_keeps_native_source_original_jobs_and_no_derived_authority" time="0.072"><failure message="ValueError: read_behavior at program_operation:await.resume.call.0.handoff: read access requires READ behavior; read_behavior at program_operation:await.resume.call.1.handoff: read access requires READ behavior">def test_budget_one_keeps_native_source_original_jobs_and_no_derived_authority():
+&gt;       program, model, details = await_wrapper_final_execution(zero_cut=False, depth=2)
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_execution_await_wrapper_final.py:292: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/fixtures/execution_await_wrapper_final_graphs.py:267: in await_wrapper_final_execution
+    model = ExecutionModel(snapshot_for(program),
+                           ^^^^^^^^^^^^^^^^^^^^^
+scar/ir/execution/snapshot.py:11: in snapshot_for
+    wire = program_dumps(program).encode('utf-8')
+           ^^^^^^^^^^^^^^^^^^^^^^
+scar/ir/program/codec.py:242: in dumps
+    _require_record_and_graph_valid(graph)
+scar/ir/program/codec.py:134: in _require_record_and_graph_valid
+    require_valid(graph)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='await.resume.caller'), regions=(Region(id=RegionID(value='await.resume.caller'), lab...cess(operation=OperationID(value='await.wrapper.advance.2.held.read'), index=0),)), guard=None)), exception_matches=())
+
+    def require_valid(graph: ProgramGraph) -&gt; None:
+        issues = validate(graph)
+        if issues:
+&gt;           raise ValueError("; ".join(f"{issue.code} at {issue.path}: {issue.message}" for issue in issues))
+E           ValueError: read_behavior at program_operation:await.resume.call.0.handoff: read access requires READ behavior; read_behavior at program_operation:await.resume.call.1.handoff: read access requires READ behavior
+
+scar/ir/program/validation.py:759: ValueError</failure></testcase><testcase classname="tests.unit.test_program_await_cleanup_final" name="test_two_real_cleanup_cuts_end_in_the_correct_await_source_and_consumer[resume-return]" time="0.837" /><testcase classname="tests.unit.test_program_await_cleanup_final" name="test_two_real_cleanup_cuts_end_in_the_correct_await_source_and_consumer[resume-return-nested-extractor]" time="0.939" /><testcase classname="tests.unit.test_program_await_cleanup_final" name="test_two_real_cleanup_cuts_end_in_the_correct_await_source_and_consumer[replace-body-raise]" time="0.027"><failure message="NameError: name 'OperationResult' is not defined">body_raised = True, depth = 1
+
+    @pytest.mark.parametrize(('body_raised', 'depth'), ((False, 1), (False, 2), (True, 1)),
+                             ids=('resume-return', 'resume-return-nested-extractor', 'replace-body-raise'))
+    def test_two_real_cleanup_cuts_end_in_the_correct_await_source_and_consumer(body_raised, depth):
+&gt;       program, details = await_cleanup_final_program(body_raised=body_raised, depth=depth)
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_program_await_cleanup_final.py:35: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/fixtures/program_await_cleanup_final_graphs.py:185: in await_cleanup_final_program
+    body, capture_map = _body(program, original, body_raised)
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/fixtures/program_await_cleanup_final_graphs.py:77: in _body
+    values=(*base.values, *(value for value in template.values if value.id not in original_values
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+.0 = &lt;tuple_iterator object at 0x7dc3ef180610&gt;
+
+    values=(*base.values, *(value for value in template.values if value.id not in original_values
+        and (type(value.origin) is BlockArgument and value.origin.block in {block.id for block in new_blocks}
+&gt;            or type(value.origin) is OperationResult and value.origin.operation in additions))),
+                                      ^^^^^^^^^^^^^^^
+    control_scopes=tuple(replace(scope, blocks=(*scope.blocks, *(block.id for block in new_blocks)))
+        if scope.kind.value == 'CLEANUP' else scope for scope in base.control_scopes),
+    frame_context_attaches=(*base.frame_context_attaches,
+        *(row for row in template.frame_context_attaches if row.operation in additions)),
+    frame_context_detaches=(*base.frame_context_detaches,
+        *(row for row in template.frame_context_detaches if row.operation in additions)))
+E       NameError: name 'OperationResult' is not defined
+
+tests/fixtures/program_await_cleanup_final_graphs.py:79: NameError</failure></testcase><testcase classname="tests.unit.test_program_await_cleanup_final" name="test_budget_one_retains_original_drive_successor_denominator_and_cursor" time="0.584" /><testcase classname="tests.unit.test_execution_await_cleanup_final" name="test_actual_pending_payload_reaches_this_b_terminal_and_its_own_await_consumer[cleanup-return-child-normal]" time="2.009"><failure message="KeyError: 'payload'">body_raised = False, depth = 1, child_raised = False
+
+    @pytest.mark.parametrize(('body_raised', 'depth', 'child_raised'),
+        ((False, 1, False), (False, 2, True), (True, 1, False)),
+        ids=('cleanup-return-child-normal', 'cleanup-return-nested-child-raise', 'cleanup-body-raise'))
+    def test_actual_pending_payload_reaches_this_b_terminal_and_its_own_await_consumer(
+            body_raised, depth, child_raised):
+        program, model, details = await_cleanup_final_execution(body_raised=body_raised,
+            depth=depth, child_raised=child_raised)
+        index = _index(program, model)
+        projected = routes(index._content_context(), budget=ValidityBudget(BUDGET))
+        report = index.await_body_links(details['static']['acquisition_scope'], budget=BUDGET)
+        row = _row(report, details)
+        for example in details['instances']:
+            assert len(example['body_segments']) == 3
+&gt;           witness = _projection(projected, example)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_execution_await_cleanup_final.py:58: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+report = {'operations': ({'occurrence': OperationOccurrence(id=OperationOccurrenceID(value='await.cleanup.instance.0.caller.0.a...alue='await.cleanup.instance.1.driver.1'), block=BlockID(value='await.resume.driver.1.driver.entry')), ...}, ...), ...}
+example = {'caller_activation': RegionActivationID(value='await.cleanup.instance.0.caller'), 'caller_operations': {OperationID(v...): OperationOccurrenceID(value='await.cleanup.instance.0.driver.2.3.await.resume.driver.2.publication.0'), ...})), ...}
+
+    def _projection(report, example):
+        arguments = tuple(argument for transfer in report['transfers']
+            if transfer['occurrence'].id == example['dispatch'] for argument in transfer['arguments']
+            if type(argument['argument']) is PendingPayload)
+        assert len(arguments) == 1
+&gt;       return arguments[0]['projection']['payload']
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       KeyError: 'payload'
+
+tests/unit/test_execution_await_cleanup_final.py:42: KeyError</failure></testcase><testcase classname="tests.unit.test_execution_await_cleanup_final" name="test_actual_pending_payload_reaches_this_b_terminal_and_its_own_await_consumer[cleanup-return-nested-child-raise]" time="2.064"><failure message="KeyError: 'payload'">body_raised = False, depth = 2, child_raised = True
+
+    @pytest.mark.parametrize(('body_raised', 'depth', 'child_raised'),
+        ((False, 1, False), (False, 2, True), (True, 1, False)),
+        ids=('cleanup-return-child-normal', 'cleanup-return-nested-child-raise', 'cleanup-body-raise'))
+    def test_actual_pending_payload_reaches_this_b_terminal_and_its_own_await_consumer(
+            body_raised, depth, child_raised):
+        program, model, details = await_cleanup_final_execution(body_raised=body_raised,
+            depth=depth, child_raised=child_raised)
+        index = _index(program, model)
+        projected = routes(index._content_context(), budget=ValidityBudget(BUDGET))
+        report = index.await_body_links(details['static']['acquisition_scope'], budget=BUDGET)
+        row = _row(report, details)
+        for example in details['instances']:
+            assert len(example['body_segments']) == 3
+&gt;           witness = _projection(projected, example)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_execution_await_cleanup_final.py:58: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+report = {'operations': ({'occurrence': OperationOccurrence(id=OperationOccurrenceID(value='await.cleanup.instance.0.caller.0.a...alue='await.cleanup.instance.1.driver.0'), block=BlockID(value='await.resume.driver.0.driver.entry')), ...}, ...), ...}
+example = {'caller_activation': RegionActivationID(value='await.cleanup.instance.0.caller'), 'caller_operations': {OperationID(v...): OperationOccurrenceID(value='await.cleanup.instance.0.driver.2.3.await.resume.driver.2.publication.0'), ...})), ...}
+
+    def _projection(report, example):
+        arguments = tuple(argument for transfer in report['transfers']
+            if transfer['occurrence'].id == example['dispatch'] for argument in transfer['arguments']
+            if type(argument['argument']) is PendingPayload)
+        assert len(arguments) == 1
+&gt;       return arguments[0]['projection']['payload']
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       KeyError: 'payload'
+
+tests/unit/test_execution_await_cleanup_final.py:42: KeyError</failure></testcase><testcase classname="tests.unit.test_execution_await_cleanup_final" name="test_actual_pending_payload_reaches_this_b_terminal_and_its_own_await_consumer[cleanup-body-raise]" time="0.030"><failure message="NameError: name 'OperationResult' is not defined">body_raised = True, depth = 1, child_raised = False
+
+    @pytest.mark.parametrize(('body_raised', 'depth', 'child_raised'),
+        ((False, 1, False), (False, 2, True), (True, 1, False)),
+        ids=('cleanup-return-child-normal', 'cleanup-return-nested-child-raise', 'cleanup-body-raise'))
+    def test_actual_pending_payload_reaches_this_b_terminal_and_its_own_await_consumer(
+            body_raised, depth, child_raised):
+&gt;       program, model, details = await_cleanup_final_execution(body_raised=body_raised,
+            depth=depth, child_raised=child_raised)
+
+tests/unit/test_execution_await_cleanup_final.py:50: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/fixtures/execution_await_cleanup_final_graphs.py:39: in await_cleanup_final_execution
+    program, static = await_cleanup_final_program(body_raised=body_raised, depth=depth)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/fixtures/program_await_cleanup_final_graphs.py:185: in await_cleanup_final_program
+    body, capture_map = _body(program, original, body_raised)
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/fixtures/program_await_cleanup_final_graphs.py:77: in _body
+    values=(*base.values, *(value for value in template.values if value.id not in original_values
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+.0 = &lt;tuple_iterator object at 0x7dc3efa68ca0&gt;
+
+    values=(*base.values, *(value for value in template.values if value.id not in original_values
+        and (type(value.origin) is BlockArgument and value.origin.block in {block.id for block in new_blocks}
+&gt;            or type(value.origin) is OperationResult and value.origin.operation in additions))),
+                                      ^^^^^^^^^^^^^^^
+    control_scopes=tuple(replace(scope, blocks=(*scope.blocks, *(block.id for block in new_blocks)))
+        if scope.kind.value == 'CLEANUP' else scope for scope in base.control_scopes),
+    frame_context_attaches=(*base.frame_context_attaches,
+        *(row for row in template.frame_context_attaches if row.operation in additions)),
+    frame_context_detaches=(*base.frame_context_detaches,
+        *(row for row in template.frame_context_detaches if row.operation in additions)))
+E       NameError: name 'OperationResult' is not defined
+
+tests/fixtures/program_await_cleanup_final_graphs.py:79: NameError</failure></testcase><testcase classname="tests.unit.test_execution_await_cleanup_final" name="test_missing_instance_zero_pending_evidence_cannot_borrow_the_complete_sibling[missing_payload_use-return-payload]" time="1.959"><failure message="KeyError: 'payload'">body_raised = False, missing = 'missing_payload_use'
+
+    @pytest.mark.parametrize('body_raised', (False, True), ids=('return-payload', 'raise-payload'))
+    @pytest.mark.parametrize('missing', ('missing_payload_use', 'missing_dispatch', 'missing_second_resume'))
+    def test_missing_instance_zero_pending_evidence_cannot_borrow_the_complete_sibling(body_raised, missing):
+        program, model, details = await_cleanup_final_execution(body_raised=body_raised, **{missing: 0})
+        index = _index(program, model)
+        report = index.await_body_links(details['static']['acquisition_scope'], budget=BUDGET)
+        row = _row(report, details)
+        first = _occurrence(row, details['instances'][0])
+        second = _occurrence(row, details['instances'][1])
+        assert first['status'] not in ('DECLARED', 'NOT_APPLICABLE')
+        assert first['gaps'] or any(consumer['gaps'] for consumer in first['consumers'])
+        assert second['selected'] is True
+        assert second['body_outcome'].id == details['instances'][1]['body_outcome']
+        if missing == 'missing_payload_use':
+            projected = routes(index._content_context(), budget=ValidityBudget(BUDGET))
+&gt;           absent = _projection(projected, details['instances'][0])
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_execution_await_cleanup_final.py:114: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+report = {'operations': ({'occurrence': OperationOccurrence(id=OperationOccurrenceID(value='await.cleanup.instance.0.caller.0.a...alue='await.cleanup.instance.1.driver.1'), block=BlockID(value='await.resume.driver.1.driver.entry')), ...}, ...), ...}
+example = {'caller_activation': RegionActivationID(value='await.cleanup.instance.0.caller'), 'caller_operations': {OperationID(v...): OperationOccurrenceID(value='await.cleanup.instance.0.driver.2.3.await.resume.driver.2.publication.0'), ...})), ...}
+
+    def _projection(report, example):
+        arguments = tuple(argument for transfer in report['transfers']
+            if transfer['occurrence'].id == example['dispatch'] for argument in transfer['arguments']
+            if type(argument['argument']) is PendingPayload)
+        assert len(arguments) == 1
+&gt;       return arguments[0]['projection']['payload']
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       KeyError: 'payload'
+
+tests/unit/test_execution_await_cleanup_final.py:42: KeyError</failure></testcase><testcase classname="tests.unit.test_execution_await_cleanup_final" name="test_missing_instance_zero_pending_evidence_cannot_borrow_the_complete_sibling[missing_payload_use-raise-payload]" time="0.026"><failure message="NameError: name 'OperationResult' is not defined">body_raised = True, missing = 'missing_payload_use'
+
+    @pytest.mark.parametrize('body_raised', (False, True), ids=('return-payload', 'raise-payload'))
+    @pytest.mark.parametrize('missing', ('missing_payload_use', 'missing_dispatch', 'missing_second_resume'))
+    def test_missing_instance_zero_pending_evidence_cannot_borrow_the_complete_sibling(body_raised, missing):
+&gt;       program, model, details = await_cleanup_final_execution(body_raised=body_raised, **{missing: 0})
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_execution_await_cleanup_final.py:102: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/fixtures/execution_await_cleanup_final_graphs.py:39: in await_cleanup_final_execution
+    program, static = await_cleanup_final_program(body_raised=body_raised, depth=depth)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/fixtures/program_await_cleanup_final_graphs.py:185: in await_cleanup_final_program
+    body, capture_map = _body(program, original, body_raised)
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/fixtures/program_await_cleanup_final_graphs.py:77: in _body
+    values=(*base.values, *(value for value in template.values if value.id not in original_values
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+.0 = &lt;tuple_iterator object at 0x7dc3efaa57b0&gt;
+
+    values=(*base.values, *(value for value in template.values if value.id not in original_values
+        and (type(value.origin) is BlockArgument and value.origin.block in {block.id for block in new_blocks}
+&gt;            or type(value.origin) is OperationResult and value.origin.operation in additions))),
+                                      ^^^^^^^^^^^^^^^
+    control_scopes=tuple(replace(scope, blocks=(*scope.blocks, *(block.id for block in new_blocks)))
+        if scope.kind.value == 'CLEANUP' else scope for scope in base.control_scopes),
+    frame_context_attaches=(*base.frame_context_attaches,
+        *(row for row in template.frame_context_attaches if row.operation in additions)),
+    frame_context_detaches=(*base.frame_context_detaches,
+        *(row for row in template.frame_context_detaches if row.operation in additions)))
+E       NameError: name 'OperationResult' is not defined
+
+tests/fixtures/program_await_cleanup_final_graphs.py:79: NameError</failure></testcase><testcase classname="tests.unit.test_execution_await_cleanup_final" name="test_missing_instance_zero_pending_evidence_cannot_borrow_the_complete_sibling[missing_dispatch-return-payload]" time="1.918" /><testcase classname="tests.unit.test_execution_await_cleanup_final" name="test_missing_instance_zero_pending_evidence_cannot_borrow_the_complete_sibling[missing_dispatch-raise-payload]" time="0.025"><failure message="NameError: name 'OperationResult' is not defined">body_raised = True, missing = 'missing_dispatch'
+
+    @pytest.mark.parametrize('body_raised', (False, True), ids=('return-payload', 'raise-payload'))
+    @pytest.mark.parametrize('missing', ('missing_payload_use', 'missing_dispatch', 'missing_second_resume'))
+    def test_missing_instance_zero_pending_evidence_cannot_borrow_the_complete_sibling(body_raised, missing):
+&gt;       program, model, details = await_cleanup_final_execution(body_raised=body_raised, **{missing: 0})
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_execution_await_cleanup_final.py:102: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/fixtures/execution_await_cleanup_final_graphs.py:39: in await_cleanup_final_execution
+    program, static = await_cleanup_final_program(body_raised=body_raised, depth=depth)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/fixtures/program_await_cleanup_final_graphs.py:185: in await_cleanup_final_program
+    body, capture_map = _body(program, original, body_raised)
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/fixtures/program_await_cleanup_final_graphs.py:77: in _body
+    values=(*base.values, *(value for value in template.values if value.id not in original_values
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+.0 = &lt;tuple_iterator object at 0x7dc3ef67f6a0&gt;
+
+    values=(*base.values, *(value for value in template.values if value.id not in original_values
+        and (type(value.origin) is BlockArgument and value.origin.block in {block.id for block in new_blocks}
+&gt;            or type(value.origin) is OperationResult and value.origin.operation in additions))),
+                                      ^^^^^^^^^^^^^^^
+    control_scopes=tuple(replace(scope, blocks=(*scope.blocks, *(block.id for block in new_blocks)))
+        if scope.kind.value == 'CLEANUP' else scope for scope in base.control_scopes),
+    frame_context_attaches=(*base.frame_context_attaches,
+        *(row for row in template.frame_context_attaches if row.operation in additions)),
+    frame_context_detaches=(*base.frame_context_detaches,
+        *(row for row in template.frame_context_detaches if row.operation in additions)))
+E       NameError: name 'OperationResult' is not defined
+
+tests/fixtures/program_await_cleanup_final_graphs.py:79: NameError</failure></testcase><testcase classname="tests.unit.test_execution_await_cleanup_final" name="test_missing_instance_zero_pending_evidence_cannot_borrow_the_complete_sibling[missing_second_resume-return-payload]" time="1.969" /><testcase classname="tests.unit.test_execution_await_cleanup_final" name="test_missing_instance_zero_pending_evidence_cannot_borrow_the_complete_sibling[missing_second_resume-raise-payload]" time="0.026"><failure message="NameError: name 'OperationResult' is not defined">body_raised = True, missing = 'missing_second_resume'
+
+    @pytest.mark.parametrize('body_raised', (False, True), ids=('return-payload', 'raise-payload'))
+    @pytest.mark.parametrize('missing', ('missing_payload_use', 'missing_dispatch', 'missing_second_resume'))
+    def test_missing_instance_zero_pending_evidence_cannot_borrow_the_complete_sibling(body_raised, missing):
+&gt;       program, model, details = await_cleanup_final_execution(body_raised=body_raised, **{missing: 0})
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_execution_await_cleanup_final.py:102: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/fixtures/execution_await_cleanup_final_graphs.py:39: in await_cleanup_final_execution
+    program, static = await_cleanup_final_program(body_raised=body_raised, depth=depth)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/fixtures/program_await_cleanup_final_graphs.py:185: in await_cleanup_final_program
+    body, capture_map = _body(program, original, body_raised)
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/fixtures/program_await_cleanup_final_graphs.py:77: in _body
+    values=(*base.values, *(value for value in template.values if value.id not in original_values
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+.0 = &lt;tuple_iterator object at 0x7dc3ed1e0430&gt;
+
+    values=(*base.values, *(value for value in template.values if value.id not in original_values
+        and (type(value.origin) is BlockArgument and value.origin.block in {block.id for block in new_blocks}
+&gt;            or type(value.origin) is OperationResult and value.origin.operation in additions))),
+                                      ^^^^^^^^^^^^^^^
+    control_scopes=tuple(replace(scope, blocks=(*scope.blocks, *(block.id for block in new_blocks)))
+        if scope.kind.value == 'CLEANUP' else scope for scope in base.control_scopes),
+    frame_context_attaches=(*base.frame_context_attaches,
+        *(row for row in template.frame_context_attaches if row.operation in additions)),
+    frame_context_detaches=(*base.frame_context_detaches,
+        *(row for row in template.frame_context_detaches if row.operation in additions)))
+E       NameError: name 'OperationResult' is not defined
+
+tests/fixtures/program_await_cleanup_final_graphs.py:79: NameError</failure></testcase><testcase classname="tests.unit.test_execution_await_cleanup_final" name="test_dynamic_budget_one_keeps_the_static_outcome_key_and_unknown_cursor" time="1.833"><failure message="assert False&#10; +  where False = any(&lt;generator object test_dynamic_budget_one_keeps_the_static_outcome_key_and_unknown_cursor.&lt;locals&gt;.&lt;genexpr&gt; at 0x7dc3eeadba00&gt;)">def test_dynamic_budget_one_keeps_the_static_outcome_key_and_unknown_cursor():
+        program, model, details = await_cleanup_final_execution(instances=1)
+        index = _index(program, model)
+        report = index.await_body_links(details['static']['acquisition_scope'], budget=1)
+&gt;       assert any(row['definition']['drive_outcome'] == details['drive_outcome'] for row in report['outcomes'])
+E       assert False
+E        +  where False = any(&lt;generator object test_dynamic_budget_one_keeps_the_static_outcome_key_and_unknown_cursor.&lt;locals&gt;.&lt;genexpr&gt; at 0x7dc3eeadba00&gt;)
+
+tests/unit/test_execution_await_cleanup_final.py:125: AssertionError</failure></testcase></testsuite></testsuites>

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1" time="0.900" timestamp="2026-10-18T23:38:01.068620+00:00" hostname="gpu1"><testcase classname="tests.unit.test_program_lookup_fallback" name="test_lookup_raise_has_three_independent_fallback_packet_routes" time="0.205"><failure message="AssertionError: real lookup/matcher consumers still lack independent fallback packet routes&#10;assert ()">def test_lookup_raise_has_three_independent_fallback_packet_routes():
+        """First red uses the existing continuation API, not a missing new API."""
+        graph, details = lookup_fallback_program(kind="throw", matcher="invoke")
+        _bare_valid(graph)
+        report = _view(graph)
+        obligation = _lookup(report, details)
+        assert any(gap["code"] == "method_lookup_exception_category_unproved"
+                   and gap["path"] == str(details["lookup"]) for gap in report["gaps"])
+        fallbacks = obligation.get("lookup_fallbacks", ())
+&gt;       assert fallbacks, "real lookup/matcher consumers still lack independent fallback packet routes"
+E       AssertionError: real lookup/matcher consumers still lack independent fallback packet routes
+E       assert ()
+
+tests/unit/test_program_lookup_fallback.py:42: AssertionError</failure></testcase></testsuite></testsuites>

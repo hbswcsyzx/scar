@@ -1,0 +1,57 @@
+{
+  "allocation": {
+    "allocation": {
+      "kind": "alloc",
+      "value": "tensor-physical:44b8f0b49dea1154bdc6896197ecb18e706f6b6f71ce9bc3975f5db7da0508dd:epoch:152c5d48a8d9677acb009a8a25b1f9e6e43323e514771186f27414d26b8caa0e",
+      "wire": "alloc:tensor-physical:44b8f0b49dea1154bdc6896197ecb18e706f6b6f71ce9bc3975f5db7da0508dd:epoch:152c5d48a8d9677acb009a8a25b1f9e6e43323e514771186f27414d26b8caa0e"
+    },
+    "artifact": {
+      "schema": "scar.bundle-record-chunk",
+      "sha256": "cdab755272ca43ebc6a4992865f121a807f3b18cfdb27522000abfe58aac8192",
+      "size_bytes": 1202111,
+      "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/native_inputs_full_20261026/native-import/native/bundle-partitions/values/allocations/000003.jsonl.gz"
+    }
+  },
+  "audit": {
+    "capture": 0,
+    "live_source_opens": [],
+    "raw_capture_opens": [],
+    "target_exec": 0
+  },
+  "device": "cpu",
+  "graph_nodes_created": 0,
+  "logical_version_established": false,
+  "materialization": null,
+  "max_rss_kib": 101376,
+  "measurements": {
+    "decoded_bytes": 43885446,
+    "elapsed_seconds": 2.1398372490075417,
+    "stored_bytes": 23524721,
+    "total_bytes": 67410167
+  },
+  "nbytes": 4,
+  "process": {
+    "kind": "exec_process_instance",
+    "value": "capture:ca66b69a8cfc3c1b88e0c22e8ec00d58d735fd016d16edf85e8cf0ac51eb5fc3:process:77d2388db95219723de606b529484e14f8b1912e51b6e58930344d911e863036",
+    "wire": "exec_process_instance:capture:ca66b69a8cfc3c1b88e0c22e8ec00d58d735fd016d16edf85e8cf0ac51eb5fc3:process:77d2388db95219723de606b529484e14f8b1912e51b6e58930344d911e863036"
+  },
+  "query": {
+    "bytes": 15736,
+    "sha256": "c357a623ddefa0580a4963c4f5e9843dd6cef6861766ff18aa7e82848171bb11",
+    "uri": "/home/zyf/AAA/scar-worktrees/native-input-storage-bridge/artifacts/analysis/native_input_storage_bridge_20261027/attempt02/QUERY.json"
+  },
+  "row": {
+    "path": [
+      0
+    ],
+    "row": 21
+  },
+  "run": {
+    "kind": "exec_run",
+    "value": "capture:ca66b69a8cfc3c1b88e0c22e8ec00d58d735fd016d16edf85e8cf0ac51eb5fc3",
+    "wire": "exec_run:capture:ca66b69a8cfc3c1b88e0c22e8ec00d58d735fd016d16edf85e8cf0ac51eb5fc3"
+  },
+  "source_sha256": "5499e0b48d284a53ff7026129327860ff2346e868421a9a8b737abc8b24373ce",
+  "status": "PASS",
+  "wall_seconds": 2.1483163770171814
+}

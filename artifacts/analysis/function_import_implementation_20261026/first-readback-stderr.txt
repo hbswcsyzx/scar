@@ -1,0 +1,4 @@
+Traceback (most recent call last):
+  File "/home/zyf/AAA/scar-worktrees/source-try-model/artifacts/analysis/function_import_implementation_20261026/readback_first.py", line 17, in <module>
+    from scar.analysis.program_composition import _read_receipt
+ImportError: cannot import name '_read_receipt' from 'scar.analysis.program_composition' (/home/zyf/AAA/scar-worktrees/source-try-model/scar/analysis/program_composition.py)

@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="4" skipped="0" tests="7" time="2.195" timestamp="2026-10-19T14:06:34.841135+00:00" hostname="gpu1"><testcase classname="tests.unit.test_program_async_scheduler_packets" name="test_later_scheduler_packet_uses_s_normalization_own_normal_and_separate_raise_states[THROW]" time="0.344"><failure message="assert None is True">kind = 'THROW'
+
+    @pytest.mark.parametrize('kind', ('THROW', 'CLOSE'))
+    def test_later_scheduler_packet_uses_s_normalization_own_normal_and_separate_raise_states(kind):
+        graph, details = _scheduler_packet_program(kind)
+        _assert_original_ports_and_states(graph, details)
+        assert ProgramIndex(_core(graph)).source_binding(details['scheduler_source'], details['raw'],
+            budget=QUERY_BUDGET)['match'] is True
+        report, shared = _report(graph)
+        delivery = _selected_delivery(report, details)
+        alternative, = delivery['alternatives']
+&gt;       assert alternative['match'] is True
+E       assert None is True
+
+tests/unit/test_program_async_scheduler_packets.py:150: AssertionError</failure></testcase><testcase classname="tests.unit.test_program_async_scheduler_packets" name="test_later_scheduler_packet_uses_s_normalization_own_normal_and_separate_raise_states[CLOSE]" time="0.166"><failure message="assert None is True">kind = 'CLOSE'
+
+    @pytest.mark.parametrize('kind', ('THROW', 'CLOSE'))
+    def test_later_scheduler_packet_uses_s_normalization_own_normal_and_separate_raise_states(kind):
+        graph, details = _scheduler_packet_program(kind)
+        _assert_original_ports_and_states(graph, details)
+        assert ProgramIndex(_core(graph)).source_binding(details['scheduler_source'], details['raw'],
+            budget=QUERY_BUDGET)['match'] is True
+        report, shared = _report(graph)
+        delivery = _selected_delivery(report, details)
+        alternative, = delivery['alternatives']
+&gt;       assert alternative['match'] is True
+E       assert None is True
+
+tests/unit/test_program_async_scheduler_packets.py:150: AssertionError</failure></testcase><testcase classname="tests.unit.test_program_async_scheduler_packets" name="test_later_scheduler_normalizer_cannot_take_same_kind_latent_l_instead[THROW]" time="0.055"><failure message="assert None is False">kind = 'THROW'
+
+    @pytest.mark.parametrize('kind', ('THROW', 'CLOSE'))
+    def test_later_scheduler_normalizer_cannot_take_same_kind_latent_l_instead(kind):
+        graph, details = _scheduler_packet_program(kind)
+        normalizer = details['normalizer']
+        changed = replace(normalizer, uses=tuple(replace(use, value=details['latent_value'])
+            if use.id == details['raw'].use else use for use in normalizer.uses))
+        wrong = replace(graph, operations=tuple(changed if operation.id == normalizer.id else operation
+                                                for operation in graph.operations))
+        assert graph.values == wrong.values and graph.regions == wrong.regions
+        assert graph.protocol_operations == wrong.protocol_operations
+        assert tuple(use for use in normalizer.uses if use.id != details['raw'].use) == tuple(
+            use for use in changed.uses if use.id != details['raw'].use)
+        _assert_original_ports_and_states(wrong, {**details, 'normalizer': changed})
+&gt;       assert ProgramIndex(_core(wrong)).source_binding(details['scheduler_source'], details['raw'],
+            budget=QUERY_BUDGET)['match'] is False
+E       assert None is False
+
+tests/unit/test_program_async_scheduler_packets.py:179: AssertionError</failure></testcase><testcase classname="tests.unit.test_program_async_scheduler_packets" name="test_later_scheduler_normalizer_cannot_take_same_kind_latent_l_instead[CLOSE]" time="0.056"><failure message="assert None is False">kind = 'CLOSE'
+
+    @pytest.mark.parametrize('kind', ('THROW', 'CLOSE'))
+    def test_later_scheduler_normalizer_cannot_take_same_kind_latent_l_instead(kind):
+        graph, details = _scheduler_packet_program(kind)
+        normalizer = details['normalizer']
+        changed = replace(normalizer, uses=tuple(replace(use, value=details['latent_value'])
+            if use.id == details['raw'].use else use for use in normalizer.uses))
+        wrong = replace(graph, operations=tuple(changed if operation.id == normalizer.id else operation
+                                                for operation in graph.operations))
+        assert graph.values == wrong.values and graph.regions == wrong.regions
+        assert graph.protocol_operations == wrong.protocol_operations
+        assert tuple(use for use in normalizer.uses if use.id != details['raw'].use) == tuple(
+            use for use in changed.uses if use.id != details['raw'].use)
+        _assert_original_ports_and_states(wrong, {**details, 'normalizer': changed})
+&gt;       assert ProgramIndex(_core(wrong)).source_binding(details['scheduler_source'], details['raw'],
+            budget=QUERY_BUDGET)['match'] is False
+E       assert None is False
+
+tests/unit/test_program_async_scheduler_packets.py:179: AssertionError</failure></testcase><testcase classname="tests.unit.test_program_async_scheduler_packets" name="test_removing_scheduler_normalization_rows_keeps_original_delivery_and_unknown_source[THROW]" time="0.237" /><testcase classname="tests.unit.test_program_async_scheduler_packets" name="test_removing_scheduler_normalization_rows_keeps_original_delivery_and_unknown_source[CLOSE]" time="0.239" /><testcase classname="tests.unit.test_program_async_scheduler_packets" name="test_budget_one_preserves_the_original_scheduler_drive_inventory_without_delivery_proof" time="0.284" /></testsuite></testsuites>

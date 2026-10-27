@@ -1,0 +1,99 @@
+..F.......F.............................                                 [100%]
+=================================== FAILURES ===================================
+_____ test_post_helper_failure_owns_host_packet_after_terminal_body_raise ______
+
+    def test_post_helper_failure_owns_host_packet_after_terminal_body_raise():
+        """A later primitive failure replaces the old packet at the actual host."""
+        from scar.ir.execution.common import Unresolved
+        from scar.ir.execution.coordinates import ExecutionSegment, ResumeIngress
+        from scar.ir.execution.ids import ExecutionSegmentID
+        from scar.ir.execution.query import ExecutionIndex
+        from scar.ir.execution.resumables import BodyActivationOrigin, BodyDriveExecution
+        from scar.ir.execution.validation import validate as execution_validate
+        from scar.ir.program.control import ProtocolValueKind
+        from scar.ir.program.lifecycle import SessionPost
+        from scar.ir.program.model import CompletionResult, ExitKind
+        from tests.fixtures.execution_async_pipeline_graphs import _body_path
+        from tests.fixtures.execution_call_graphs import _model
+        from tests.fixtures.program_async_pipeline_graphs import _selected_path
+    
+        graph, details = async_driver_program(target='packet', helper=True)
+>       require_valid(graph)
+
+tests/unit/test_program_async_terminal_inventory.py:58: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='driver'), regions=(Region(id=RegionID(value='driver'), label='declared driver fixtur...D(value='driver.drive'), source=OperationID(value='resume.raise'))),), exception_matches=(), call_effect_expansions=())
+
+    def require_valid(graph: ProgramGraph) -> None:
+        issues = validate(graph)
+        if issues:
+>           raise ValueError("; ".join(f"{issue.code} at {issue.path}: {issue.message}" for issue in issues))
+E           ValueError: protocol_copy at program_operation:async.session.helper.raise.exit: host outcome is neither this body RAISE packet nor its selected adapter result
+
+scar/ir/program/validation.py:763: ValueError
+_ test_deleting_optional_session_receipts_or_budget_does_not_delete_body_raise_sources _
+
+    def test_deleting_optional_session_receipts_or_budget_does_not_delete_body_raise_sources():
+        graph, details = async_terminal_program()
+        require_valid(graph)
+        expected = {commit.outcome for commit in graph.body_outcome_commits}
+        changed = replace(graph, protocol_bindings=tuple(row for row in graph.protocol_bindings
+                                                        if type(row) is not AsyncSessionOutcome))
+        require_valid(changed)
+        public = ProgramIndex(changed).protocol_obligations(budget=BUDGET)
+        sources = public['connections']['families']['async']['session_consumers']
+        assert {row['source'] for row in sources} == expected
+        assert all(row['targets'] and all(target['binding'] is None for target in row['targets'])
+                   for row in sources)
+        assert all(row['status'] == 'MISSING' for row in sources)
+>       limited = ProgramIndex(graph).protocol_obligations(budget=1)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_program_async_terminal.py:199: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+scar/ir/program/queries.py:736: in protocol_obligations
+    return protocol_obligations(self.graph, scope, budget=budget, _index=self)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scar/ir/program/protocol_query.py:238: in protocol_obligations
+    connections = connection_reports(ctx)
+                  ^^^^^^^^^^^^^^^^^^^^^^^
+scar/ir/program/protocol_connection_validation.py:338: in connection_reports
+    predicate_issues.extend(request_state_errors(ctx, row))
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scar/ir/program/protocol_async.py:994: in request_state_errors
+    issues = list(predicate_shape_errors(ctx, row, identity=subject.request_use,
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+ctx = <scar.ir.program.protocol_connection_flow.ConnectionContext object at 0x72b7e79a1f90>
+row = ProtocolOperation(scope=ProtocolScopeID(value='terminal.driver.0.async.terminal.scope'), clause=<ProtocolClause.ASYNC_...')), source=StaticProtocolGap(reason=<StaticGapReason.NATIVE_APPLICABILITY_UNPROVEN: 'NATIVE_APPLICABILITY_UNPROVEN'>))
+identity = UseID(value='terminal.driver.0.terminal.request.step.owner')
+state_sites = (ExistingAccess(operation=OperationID(value='terminal.driver.0.terminal.request.step.predicate'), index=0),)
+stateful = True
+
+    def predicate_shape_errors(ctx, row, *, identity, state_sites=(), stateful=True):
+        """Ordinary READ/bool/branch shape, without choosing an R or B owner."""
+        contract, operation = row.contract, ctx.operations[row.operation]
+        issues = []
+    
+        def error(code, message):
+            issues.append((code, str(row.operation), message))
+    
+        if (operation.terminator is not None or operation.callee is not None
+                or operation.call_arguments or operation.invoke_arguments or operation.completions
+                or not operation.effects_complete
+                or not set(operation.behaviors).issubset({Behavior.CONTROL, Behavior.COMPUTE, Behavior.READ})
+                or any(access.mode is not AccessMode.READ or access.after is not None
+                       for access in operation.accesses)):
+            error('admission_effect', 'admission predicate is a declared callback-free read-only ordinary primitive')
+        try:
+            produced = ctx.port(contract.result)
+>           if produced.operation != operation.id or row.slot != 0:
+               ^^^^^^^^^^^^^^^^^^
+E           AttributeError: 'NoneType' object has no attribute 'operation'
+
+scar/ir/program/admission.py:32: AttributeError
+=========================== short test summary info ============================
+FAILED tests/unit/test_program_async_terminal_inventory.py::test_post_helper_failure_owns_host_packet_after_terminal_body_raise
+FAILED tests/unit/test_program_async_terminal.py::test_deleting_optional_session_receipts_or_budget_does_not_delete_body_raise_sources
+2 failed, 38 passed in 27.57s

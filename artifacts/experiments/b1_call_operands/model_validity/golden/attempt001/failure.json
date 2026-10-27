@@ -1,0 +1,7 @@
+{
+  "returncode": 128,
+  "stage": "git archive",
+  "stderr": "fatal: pathspec 'tests/__init__.py' did not match any files",
+  "cause": "driver requested a nonexistent tracked tests/__init__.py",
+  "scope": "No Python child, golden bytes, or product test was run. Tool failure reproduced verbatim in this receipt."
+}

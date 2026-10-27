@@ -1,0 +1,8 @@
+{
+  "status": "PREPARATION_CHECK_REJECTED_BY_EXTRA_ASSERTION",
+  "detail": "OS launcher syscalls.369747 is an archive/normal os_names input but is not in the selected target-process profile membership; requiring equality was an extra preflight assertion, not an original guard",
+  "correction": "all archive and normal os_names inputs remain checked independently; every actual profile member remains separately checked",
+  "production_changed": false,
+  "raw_decompressed_or_parsed": false,
+  "source_port_consumer_started": false
+}

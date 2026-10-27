@@ -1,0 +1,13 @@
+Root session26007 已确认 actual exit0。candidate04 wrapper 4.321424327s，worker receipt 4.168742046s（FINISHED event4.169262s）；外部 GNU wall4.42s，GNU/SELF peak RSS57872KiB。前两次真实失败完整保留：candidate02 的 Region.name→label 字段误用（exit1/1.366903s），candidate03 的 census 误取计算 Opcode 层而非原 SG definitions（exit1/2.167475s）；candidate01 未运行。
+
+本次返回 SourceProgram6/core28：**2 Regions、9 个静态构造操作**。原 MODULE initializer 的 mapping-frame 入口保 locals/globals/builtins 三个引用和 world，通过普通 callee/invoke 指向同一 child Region；child 提供全 world 的 NORMAL/RAISE 接口，正常载荷 None，异常载荷 exception。它是 source body 的保守接口，不是额外 Python frame。普通 SourceProgram6 reader 读回完整图并通过独立原源码/readonly CodeWitness 检查；没有删图投影。unknown field、缺 retained text、伪装历史 version、把 REQUIRED 改 COMPLETE 四项均拒绝。
+
+**内部语句恢复数0，unexpanded body 的 required_expansion=REQUIRED。** 准确 ModuleUnit+SourceContextDigest 保留原95 atoms、92 SG OperationDefinitions、45 source CFG nodes/56 edges；不能把9个入口构造操作算成92个源码操作已展开。import/try/循环与具体数据边、实际 namespace alias/builtins 来源、import/__main__/exec 进入协议、sys.modules/ModuleObject、activation/runtime binding、outer cleanup 和效果完整性均未证。原0 function/class、9 code groups/271 calls（module1）的独立分母保留，本门未重分类或重新扫描动态事实。没有 publish/ADD、没有 main index 修改，整个程序仍 OPEN。
+
+本次 retained 实读1,109,039B = stored121,384 + gzip decoded987,655，包含重复；source/runtime/runner SHA guard 两次各14,788,957B，单独记账。图序列化及 owned readback 计账2,033,484B；最终小 worker/result/progress/time 文件另在保留清单列stat，不能把该计数当所有文件总量。CodeWitness load1/match1/compile0/source-read0；target executable compile/exec/fresh-prepare均0。analysis AST14/symtable1，不称 all-compile0。
+
+图留本地：83250B gzip、933492B decoded；stored SHA `4b17bf4fd37fd7f3471711f0a11f7ebe3580c33d6c0cb455f9bcd18ea3fe9612`，decoded SHA `299fddcf0e22f01960000a0e0740902416155301068a8cebdc2a6cd0709cf184`。准确原 URI 见 RETENTION.json；本报告未再次打开或解码图，复用实际门的 EOF/SHA/codec收据。
+
+下一最小门建议：按已存 root AST 的 module.body 顺序，机械选择首个单 alias、无 dotted-name 的 ast.Import，凭原 SourceReference/span+原SG唯一归属核回；真实G1对应首行 `import json`（仅展示实际选择，不作为选择规则）。用同只读 compiler root 核 IMPORT_NAME→STORE_NAME 的求值顺序；新通用 import 接口把原 builtins/globals/locals 与 world 接入，返回任意引用后写入 locals namespace；__import__ 可替换、mapping store可raise/有副作用，全部保 normal/raise/post-world与pending引用，不据此推断ModuleObject或sys.modules。先明确**剩余 module.body 成员的 typed subject/原source-context**与版本分支：当前v6的 unexpanded_body 指整段原 module，不能将它直接改叫suffix并在prefix之后再次执行整段。然后把同一body Region细化为首Import/namespace store→准确剩余区域；剩余及导入内部债务继续REQUIRED。此处仅建议，未新增实现、未开门、未读77MB根或raw。
+
+批准6源最终 SHA、main readonly baseline及应用方式见 APPLICATION_RECEIPT.json。FINAL_PRODUCTION.patch 对隔离HEAD给准确增量；main worklist 必须语义追加 catalog（独立附 WORKLIST_MODULE_CATALOG_APPEND.py），保留 sourceentryv2/eligible_body_keys/default policy，不能整文件覆盖。初版 PRODUCTION.patch/IMPLEMENTATION_RECEIPT/RUNNER_PLAN 作为历史候选保留，不冒充最终源码或真实结果。

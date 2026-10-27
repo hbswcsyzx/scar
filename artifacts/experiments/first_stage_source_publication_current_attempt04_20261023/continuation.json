@@ -1,0 +1,12 @@
+{
+  "completed_source_binder_reexecuted": false,
+  "first_stage_complete": false,
+  "fresh_frame_and_operand_reader_required": true,
+  "original_outputs_overwritten": false,
+  "parent_actual_shell_exit": 130,
+  "parent_failure": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_source_publication_current_attempt03_20261023/failure.json",
+  "parent_failure_sha256": "f6f774c2c035cea381833c2816ad80ca8aa35369cb756b5b9b20338284086be9",
+  "parent_gnu_time_exit_field_is_not_signal_exit_code": true,
+  "publisher_reexecuted": false,
+  "repair_scope": "Batch exact project source-definition prefetch by file before unchanged per-binding verification; stack-confirmed repeated source decoding."
+}

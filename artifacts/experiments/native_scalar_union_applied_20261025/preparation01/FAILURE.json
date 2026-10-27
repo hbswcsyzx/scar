@@ -1,0 +1,7 @@
+{
+  "gate_or_target_run": false,
+  "production_files_written": 0,
+  "readback_started": false,
+  "reason": "required decoder exists in native branch but was absent from main; strict baseline equality caught the absent dependency before writes",
+  "status": "PREPARATION_FAILED_PRESERVED"
+}

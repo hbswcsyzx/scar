@@ -1,0 +1,16 @@
+{
+  "additional_post_report_stored_bytes_read": 2588848,
+  "graph_raw_or_CodeType_read": false,
+  "logical_original": {
+    "bytes": 2588848,
+    "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/lewm_external_entry_g0_20261026/catalog.json",
+    "sha256": "e123fe026dc0af2cfd17df4eeda11f332b464b3f0bbdd4e957a091bb4e7807c4"
+  },
+  "representation": "gzip of exact original bytes; not new catalog authority",
+  "schema": "scar.exact-json-transport-receipt/1",
+  "stored_transport": {
+    "bytes": 258912,
+    "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/lewm_external_entry_g0_20261026/catalog.json.gz",
+    "sha256": "b86351fbd8fe0f4114cbcd7bfca0f1823f3ba78c80021b761b36f68afee4387d"
+  }
+}

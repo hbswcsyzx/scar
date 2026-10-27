@@ -1,0 +1,28 @@
+{
+  "schema": "scar.structured-source-stress-preflight-failure",
+  "schema_version": 1,
+  "started_utc": "2026-10-16T03:07:05.146302+00:00",
+  "terminal_observed_utc": "2026-10-16T03:08:06Z",
+  "command": {
+    "shell": "source /home/zyf/miniconda3/etc/profile.d/conda.sh && conda activate lewm && python /home/zyf/AAA/scar/artifacts/experiments/b1_call_operands/structured_model_source_stress/driver.py --inventory /home/zyf/AAA/scar/artifacts/experiments/b1_call_operands/windows_lewm_analysis/inventory.json.gz --project-root /home/zyf/AAA/le-wm --scar-root /tmp/scar-structured-model-280qf4mi --out /home/zyf/AAA/scar/artifacts/experiments/b1_call_operands/structured_model_source_stress",
+    "argv": [
+      "/home/zyf/AAA/scar/artifacts/experiments/b1_call_operands/structured_model_source_stress/driver.py",
+      "--inventory",
+      "/home/zyf/AAA/scar/artifacts/experiments/b1_call_operands/windows_lewm_analysis/inventory.json.gz",
+      "--project-root",
+      "/home/zyf/AAA/le-wm",
+      "--scar-root",
+      "/tmp/scar-structured-model-280qf4mi",
+      "--out",
+      "/home/zyf/AAA/scar/artifacts/experiments/b1_call_operands/structured_model_source_stress"
+    ],
+    "display": "/home/zyf/AAA/scar/artifacts/experiments/b1_call_operands/structured_model_source_stress/driver.py --inventory /home/zyf/AAA/scar/artifacts/experiments/b1_call_operands/windows_lewm_analysis/inventory.json.gz --project-root /home/zyf/AAA/le-wm --scar-root /tmp/scar-structured-model-280qf4mi --out /home/zyf/AAA/scar/artifacts/experiments/b1_call_operands/structured_model_source_stress"
+  },
+  "stdout": "",
+  "stderr": "Traceback (most recent call last):\n  File \"/home/zyf/AAA/scar/artifacts/experiments/b1_call_operands/structured_model_source_stress/driver.py\", line 872, in <module>\n    raise SystemExit(main())\n                     ~~~~^^\n  File \"/home/zyf/AAA/scar/artifacts/experiments/b1_call_operands/structured_model_source_stress/driver.py\", line 776, in main\n    node, source_errors = _candidate_check(context, source_snapshot, definition, indexes)\n                          ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/zyf/AAA/scar/artifacts/experiments/b1_call_operands/structured_model_source_stress/driver.py\", line 196, in _candidate_check\n    by_span, by_reference, nodes, duplicate_spans = indexes\n    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nValueError: too many values to unpack (expected 4, got 6)\n",
+  "exit_code": "not returned by the session poll; uncaught exception terminated the process",
+  "classification": "driver preflight defect; no source lower call occurred; one source file was prepared before candidate-index unpack failed",
+  "source_or_model_failure": false,
+  "saved_manifest": "/home/zyf/AAA/scar/artifacts/experiments/b1_call_operands/structured_model_source_stress/attempt-000-preflight-failed/manifest.json",
+  "saved_empty_progress": "/home/zyf/AAA/scar/artifacts/experiments/b1_call_operands/structured_model_source_stress/attempt-000-preflight-failed/progress.jsonl"
+}

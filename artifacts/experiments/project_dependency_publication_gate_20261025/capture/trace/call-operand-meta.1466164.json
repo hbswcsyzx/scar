@@ -1,0 +1,58 @@
+{
+  "schema": "scar.call-operands-trace",
+  "schema_version": 1,
+  "process_id": 1466164,
+  "project_root": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/project_dependency_publication_gate_20261025/project",
+  "python": "3.14.7 | packaged by conda-forge | (main, Sep  2 2026, 21:08:32) [GCC 15.3.0]",
+  "implementation": "cpython",
+  "rule": "CPYTHON_CALL_WINDOWS_V1",
+  "limits": {
+    "max_events": 12000,
+    "max_bytes": 4000000,
+    "max_loads": 64,
+    "max_namespace_items": 4096,
+    "max_references": 8192
+  },
+  "events": 39,
+  "event_attempts": 39,
+  "instructions": 22,
+  "call_attempts": 11,
+  "handshakes": 6,
+  "gaps": 0,
+  "loads": 0,
+  "references": 22,
+  "bytes": 13085,
+  "dropped_events": 0,
+  "errors": [],
+  "io_failed": false,
+  "previous_profile": false,
+  "base_manifest": [
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/project_dependency_publication_gate_20261025/capture/trace/call-codes.1466164.jsonl",
+      "family": "codes",
+      "process_id": 1466164,
+      "raw_sha256": "382c9c20eca50a1e376e0c784a48227aa32cda6ac0cc47e89b868eaf453928d9",
+      "raw_bytes": 1555,
+      "lines": 5
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/project_dependency_publication_gate_20261025/capture/trace/call-events.1466164.jsonl",
+      "family": "events",
+      "process_id": 1466164,
+      "raw_sha256": "cefa65d8747c59d84956788412b3ee8cef7c5612b70900ee8574dec2a5e3e339",
+      "raw_bytes": 22268,
+      "lines": 24
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/project_dependency_publication_gate_20261025/capture/trace/call-meta.1466164.json",
+      "family": "meta",
+      "process_id": 1466164,
+      "raw_sha256": "d231277073044d5745e62821d05c2d1b4aa9f92c70cb3f39efc232bf41655693",
+      "raw_bytes": 1035,
+      "lines": 34
+    }
+  ],
+  "reference_contents_observed": false,
+  "callable_environment_established": false,
+  "transformation_authorized": false
+}

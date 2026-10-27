@@ -1,0 +1,11 @@
+{
+  "returncode": 0,
+  "duration_seconds": 10.7219143435359,
+  "source_sha256_before": "4f5b009d03440cfa0507c77651a3b46295372d9a88da036c9e5c4e8293a62fb2",
+  "source_sha256_after": "0b0399f627d1de243c20bf7d2f768b6f74c557187b25e64efc39882f44aef49e",
+  "source_unchanged": false,
+  "changed_paths": [
+    "scar/ir/program/protocol_continuations.py",
+    "tests/unit/test_program_continuation_connections.py"
+  ]
+}

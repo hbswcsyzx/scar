@@ -1,0 +1,47 @@
+{
+  "ETO_port_join": false,
+  "actual_feature_cpu_captures": 1,
+  "application_receipt": {
+    "path": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_tensor_inputs_probe_20261025/MAIN_APPLICATION_RECEIPT.json",
+    "sha256": "4b348b3a2794eccb678a64a5d3844975cca16c8401480c8573d35ce603768516"
+  },
+  "base_main_commit": "3c8a81aa",
+  "files": [
+    {
+      "isolated_new": {
+        "bytes": 41956,
+        "sha256": "cbfcbc00d21c4a0c636af22bde8ebd8672481fcf759f326b3de99c804b56f164"
+      },
+      "main_old": {
+        "bytes": 31708,
+        "sha256": "6a4026e6cbb038a243851e14156216b693c90dd2d587d56d0e02ebdabfaf94b3"
+      },
+      "path": "scar/trace/tensor_physical.py"
+    },
+    {
+      "isolated_new": {
+        "bytes": 23140,
+        "sha256": "ac1c9f1d88b91b37f8c46b4c8c9ba26ffca1510f9b9683d265fe1202cf903b53"
+      },
+      "main_old": {
+        "bytes": 21819,
+        "sha256": "fadabefb7f81b30aa11db1374d1a59e01ad7aa6954b1406761bd6f1aaafb3fec"
+      },
+      "path": "scar/trace/execution_evidence.py"
+    },
+    {
+      "isolated_new": {
+        "bytes": 15232,
+        "sha256": "548a013eaad9f795945769c03b60dd8f12adfa6acab6f2a1688a77eef5ec3474"
+      },
+      "main_old": null,
+      "path": "scar/trace/native_tensor_inputs.py"
+    }
+  ],
+  "main_probe_reexecuted": false,
+  "offline_retention_reader_exit": 0,
+  "old_1901_ports_newly_qualified": 0,
+  "original_probe_exit": 1,
+  "source_commit": "3b16c0d2",
+  "whole_model_complete": false
+}

@@ -1,0 +1,22 @@
+...............F                                                         [100%]
+=================================== FAILURES ===================================
+________ test_visited_work_with_unvisited_relations_is_still_truncated _________
+
+    def test_visited_work_with_unvisited_relations_is_still_truncated():
+        program, model, values = ordinary_work_execution(retained='materialization')
+        index = ExecutionIndex(model, program, value_graphs=values)
+        complete = index.resource_composition()
+        limit = _cost_before(complete, 'composition_work_relation')
+        partial = index.resource_composition(budget=limit)
+        lifecycle = partial['lifecycle']
+        assert lifecycle['pending_work'] == 0
+        assert lifecycle['status'] == 'TRUNCATED'
+        assert lifecycle['cursor']['relation'] == 'outcomes'
+>       assert lifecycle['work'][0]['pending']['outcomes'] == len(model.work_outcomes)
+                                                                  ^^^^^^^^^^^^^^^^^^^
+E       AttributeError: 'ExecutionModel' object has no attribute 'work_outcomes'
+
+tests/unit/test_execution_composition_query.py:171: AttributeError
+=========================== short test summary info ============================
+FAILED tests/unit/test_execution_composition_query.py::test_visited_work_with_unvisited_relations_is_still_truncated
+1 failed, 15 passed in 1.16s

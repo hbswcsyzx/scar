@@ -1,0 +1,64 @@
+{
+  "source_sha256": "8f1564e887ec631f21671274fa2ac25e26898ce9dd0aae0e2a1466636c4d19ad",
+  "all_authors_frozen": true,
+  "interpreters_started_by_reviewers": 0,
+  "reviewed_sources": {
+    "scar/ir/program/__init__.py": "4b9d3ebaf321ea76e151ff4b0d707a0283b34554ce79709f759b7890506cfabf",
+    "scar/ir/program/model.py": "3667b47eaab561cd027984c7adb15fecb6a8aeb717a8cf229aa937cdead659b5",
+    "scar/ir/program/validation.py": "0857ef214a255a4c17f47cc41487308629fa16e2652396524128494f36abf826",
+    "scar/ir/program/queries.py": "648712113a9c19f767700064d7274d38ae6a7b95413cb4a87c1143d1d56ce0ff",
+    "scar/ir/program/codec.py": "304ba8680fefcc14e123979ca9363dd29a795a2db44ce271f295a7aad838da90",
+    "scar/ir/execution/state_preservation.py": "feb00e2bc5506c7e2da2abcddfe7423971ba9e9c078d81b00257ce2a64d39ec0",
+    "scar/ir/execution/flow.py": "f4682d97b2dce5fcd928461d2a7608ab56919a827bd1e213f579aa9b31ecb058",
+    "scar/ir/program/call_effect_expansion.py": "c4f7778bb29570f151ebe8ebdd22c781492b382c6e90cf9341b00fd30413ba79",
+    "tests/fixtures/program_call_effect_expansion_graphs.py": "ca8cd6d838c7f0e1ea4ea50133e9f1345f50c6108ec764413a39f07cf74e58d7",
+    "tests/fixtures/execution_call_effect_expansion_graphs.py": "5f4d06ea23def9fbd15dcd2d0783f843b115aafa8df78c4bf88538e0ac53992e",
+    "tests/unit/test_program_call_effect_expansion.py": "2f844579aa6004d22ee058f9d431ee1fde2b05e61fa24f3885ec135088006d19",
+    "tests/unit/test_program_call_effect_expansion_codec.py": "3b7dfae6a49a42005388dfdcffd9350a1c635faf703760dc466b18331d07f46b",
+    "tests/unit/test_execution_call_effect_expansion.py": "75467947f0a75cb19ca27c88d17d8b0cb1977a0c493d6ef19fdd246287cb731b"
+  },
+  "frozen_supplements": {
+    "docs/M1_CALL_EFFECT_EXPANSION_TEST_PREMISE.md": "034e4b4dffad7e5ed7a3cce597d1f289be0ba5075944ede62f29db4146382a85",
+    "docs/M1_CALL_EFFECT_EXPANSION_STATE_FLOW.md": "aebc6a49d6cc18af279c01530bd248bfea9049fca984c742cd9910cf7aa9844e"
+  },
+  "reviewers": {
+    "/root/cleanup_forward_review": {
+      "scope": "New record/validation; final ordinary CALL state/current update and precise state-preservation read-only review.",
+      "result": "No remaining concrete blocker identified by finite source review; final same-source runtime evidence belongs to root.",
+      "frozen": true
+    },
+    "/root/value_resource_review": {
+      "scope": "Program25 and exact old-test migration; final flow/preservation read-only review; next-gate documentation.",
+      "result": "No remaining concrete false-to-true counterexample; candidate CALL with StateAccess withdrawn because existing core validation forbids the shape.",
+      "frozen": true
+    },
+    "/root/await_wrapper_chain": {
+      "scope": "New original CFG and actual capture fixtures,13 dynamic cases; corrected first JUMP use fault; strengthened current-state assertions.",
+      "result": "New actual occurrences, N/R slots and effect inventories preserved; supplied relation is not source/runtime proof.",
+      "frozen": true
+    },
+    "/root": {
+      "scope": "Integration across all listed sources, frozen contracts, exact baseline subclass probe, actual serial attempts and before/after probes.",
+      "result": "45 new directed tests passed; final related run completed on same frozen source; original scope remains open."
+    }
+  },
+  "test_premise_correction": "The baseline public ProgramGraph subclass was already rejected by address_graph; only the new test premise was corrected. Existing address validation was unchanged.",
+  "real_model_defect": "Ordinary CALL StateVersion results did not advance dynamic current. Update from actual result and kill old current on missing capture; preserve INVOKE/BodyDrive EDGE semantics.",
+  "independent_invalid_counterexample_withdrawn": "Ordinary CALL StateAccess is forbidden by program/validation.py call_access; do not change product for a non-model shape.",
+  "whole_program_scope_review": {
+    "reviewer": "/root/await_wrapper_chain",
+    "tests_started": 0,
+    "result": "Current repairs serve cross-layer dependencies, but supplied graphs cannot replace automatic recovery. Reconcile original nine families/P5/113 constructs196 fields without inventing a Cartesian-product test mandate or requiring all native Unknown to vanish.",
+    "next_bounded_automatic_delivery": "After original M0-M2 and user explanation: entry-driven two-file Python shell plus one FX/Export region; no manual IR/slot mapping; preserve original ports/state/ordered uses and exact missing-evidence gaps.",
+    "design_references": {
+      "docs/WHOLE_PROGRAM_MODEL.md": "cb73ac186d272b09529d055853a0a0a44477e59e14803e3d4e784ac977555883",
+      "docs/MODELING_REUSE_DECISION.md": "02d82acb0489e4432aa334e626f2b833115924ea5aeefedd844c177af5a4cffd",
+      "docs/MODELING_INTEGRATION.md": "71fc1827428195be702bb9b953a5d93d52612f210a8d8c01a8807645f0dbf6fb",
+      "docs/M1_CALL_EFFECT_EXPANSION_NEXT_GATE.md": "0f19171da8485e2d3648285fc84bae2e64ba786fed68eaca5964278cf7fb91e1"
+    }
+  },
+  "automatic_source_recovery": false,
+  "transformation_authorized": false,
+  "p4_complete": false,
+  "tests_started": 0
+}

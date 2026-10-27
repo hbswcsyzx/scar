@@ -1,0 +1,36 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+___ test_uninventoried_valid_incoming_origin_prevents_single_recipe_success ____
+
+    def test_uninventoried_valid_incoming_origin_prevents_single_recipe_success():
+        graph, details = duplicate_argument_composition_program(duplicate=False)
+        selected_branch = details["guards"][1].operation
+        branch = next(operation for operation in graph.operations if operation.id == selected_branch)
+        edges = list(branch.terminator.successors)
+        second = edges[1]
+        missing_origin_use = second.arguments[0]
+        edges[1] = replace(second, arguments=(
+            _UseIDSubclass(missing_origin_use.value), *second.arguments[1:]))
+        changed_branch = replace(branch, terminator=replace(
+            branch.terminator, successors=tuple(edges)))
+        graph = replace(graph, operations=tuple(
+            changed_branch if operation.id == branch.id else operation
+            for operation in graph.operations))
+    
+        # Core validation accepts this typed edge port. The original reverse
+        # inventory currently recognizes only exact UseID values and therefore
+        # omits the second predecessor recipe while reporting its gap.
+        require_valid(graph)
+        report = ProgramIndex(graph).source_binding(details["expected"], details["actual"], budget=50000)
+    
+        assert any(route["match"] is True for route in report["routes"]), report
+        assert any(gap.get("code") == "cfg_source_kind_unresolved"
+                   for gap in report["gaps"] if type(gap) is dict), report
+>       assert report["match"] is None, report
+E       AssertionError: {'match': True, 'routes': ({'source': BlockArgument(block=BlockID(value='duplicate.root.entry'), index=0), 'actual': O...age': 'the original CFG route is preserved, but no dynamic visit or loop iteration is selected'}), 'cursor': None, ...}
+E       assert True is None
+
+tests/unit/test_program_call_composition_coverage.py:48: AssertionError
+=========================== short test summary info ============================
+FAILED tests/unit/test_program_call_composition_coverage.py::test_uninventoried_valid_incoming_origin_prevents_single_recipe_success
+1 failed in 0.68s

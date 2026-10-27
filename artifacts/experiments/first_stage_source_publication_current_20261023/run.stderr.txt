@@ -1,0 +1,13 @@
+Traceback (most recent call last):
+  File "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_source_publication_current_20261023/run.py", line 307, in <module>
+    main()
+    ~~~~^^
+  File "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_source_publication_current_20261023/run.py", line 255, in main
+    static = publication_audit(base, INDEX)
+  File "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_source_publication_current_20261023/run.py", line 125, in publication_audit
+    assert set(value.wire for value in graph.operations) == {
+           ~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_source_publication_current_20261023/run.py", line 125, in <genexpr>
+    assert set(value.wire for value in graph.operations) == {
+               ^^^^^^^^^^
+AttributeError: 'Operation' object has no attribute 'wire'

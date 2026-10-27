@@ -1,0 +1,36 @@
+{
+  "native_target_executions_this_gate": 0,
+  "reference_python": "CPython 3.14.7 packaged by conda-forge",
+  "probe": {
+    "path": "artifacts/experiments/b1_call_operands/model_async_terminal_semantics/native-probe.json",
+    "sha256": "675b9f16386ce0a6a7c8247725bb63009235676080eb7116d4ed9575fad42a99",
+    "observations": 22,
+    "compile_observations": 2,
+    "selected_labels": [
+      "finished-frame-new-athrow",
+      "finished-frame-same-athrow-retry",
+      "finished-frame-new-aclose",
+      "ignored-close-first-request-error",
+      "ignored-close-same-request-retry",
+      "ignored-close-new-aclose-with-continuation",
+      "ignored-close-new-athrow-with-continuation",
+      "ignored-close-new-anext-resumes-continuation",
+      "awaited-close-handoff-keeps-active-request",
+      "awaited-close-resume-completes-body-and-request"
+    ]
+  },
+  "reference_source": {
+    "path": "artifacts/experiments/b1_call_operands/model_async_terminal_semantics/reference-genobject.c.txt",
+    "sha256": "9f130a9c1fac701a80116f142b5dc72b72f004401fe5053a6510e0c768024e0f",
+    "functions": ["async_gen_athrow_send", "async_gen_athrow_throw"],
+    "relevant_labels": ["yield_close", "check_error"]
+  },
+  "limitations": [
+    "Native ag_closed is not exposed by the probe; the field sequence is inferred from the versioned reference source.",
+    "Public frame absence and narrow terminal frame reference relinquishment do not prove physical free.",
+    "Observed native outcomes do not automatically associate the supplied SCAR graph with native/source implementation."
+  ],
+  "source_runtime_verified": false,
+  "native_identity_verified": false,
+  "transformation_authorized": false
+}

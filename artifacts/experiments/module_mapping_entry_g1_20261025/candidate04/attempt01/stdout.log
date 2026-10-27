@@ -1,0 +1,6 @@
+{"elapsed_s":0.8706895819632336,"event":"BEGIN","phase":"NORMAL_COMPOSITION_AND_CATALOG","self_rss_kib":43420}
+{"elapsed_s":1.2087394300033338,"event":"BEGIN","phase":"READONLY_COMPILER_ROOT","self_rss_kib":48464}
+{"elapsed_s":1.2173263439908624,"event":"BEGIN","phase":"ONE_MODULE_LOWER","self_rss_kib":48464}
+{"elapsed_s":2.064069159969222,"event":"BEGIN","phase":"NORMAL_SOURCEPROGRAM6_READBACK","self_rss_kib":48464}
+{"elapsed_s":4.035416552971583,"event":"BEGIN","phase":"FINAL_CODE_INPUT_RUNTIME_CHECK","self_rss_kib":57872}
+{"elapsed_s":4.169261655013543,"event":"FINISHED","phase":"FINAL_CODE_INPUT_RUNTIME_CHECK","self_rss_kib":57872,"status":"ENTRY_MODEL_READBACK_WITH_OPEN"}

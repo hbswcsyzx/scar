@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1" time="0.993" timestamp="2026-10-19T14:59:33.200856+00:00" hostname="gpu1"><testcase classname="tests.unit.test_execution_state_preservation" name="test_missing_this_instances_route_or_effect_capture_does_not_borrow_its_complete_sibling[child-branch-transfer]" time="0.218"><failure message="TypeError: 'NoneType' object is not subscriptable">missing = 'child-branch-transfer'
+
+    @pytest.mark.parametrize('missing', ('call', 'entry', 'completion', 'use', 'transfer',
+                                       'child-branch-transfer', 'operation'))
+    def test_missing_this_instances_route_or_effect_capture_does_not_borrow_its_complete_sibling(missing):
+        program, model, details = _preservation_execution()
+        example, sibling = details['examples']
+        link = example['link']
+        if missing == 'call':
+            model = replace(model, call_activations=(sibling['link'],))
+        elif missing in ('entry', 'completion'):
+            point = next(row.entry for row in model.activations if row.id == link.activation)
+            changed = replace(link, **{missing: Unresolved('this call endpoint was not captured', point)})
+            model = replace(model, call_activations=(changed, sibling['link']))
+        elif missing == 'use':
+            state_use = next(use.id for use in details['call'].uses
+                if use.id in details['call'].invoke_arguments
+                and any(value.id == use.value and type(value) is StateVersionValue for value in program.values))
+            model = replace(model, uses=tuple(use for use in model.uses
+                if not (use.operation == link.caller and use.use == state_use)))
+        elif missing == 'transfer':
+            model = replace(model, transfers=tuple(row for row in model.transfers if row.operation != link.caller))
+        elif missing == 'child-branch-transfer':
+            branch = example['child'][2][details['branch'].id]
+            model = replace(model, transfers=tuple(row for row in model.transfers if row.operation != branch))
+        else:
+            omitted = example['child'][2][details['getter'].id]
+            model = replace(model, operations=tuple(row for row in model.operations if row.id != omitted),
+                uses=tuple(row for row in model.uses if row.operation != omitted))
+        index = _index(program, model)
+&gt;       view = _query(index, details)
+               ^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_execution_state_preservation.py:345: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/unit/test_execution_state_preservation.py:234: in _query
+    return index.state_preservation(example['start'], example['end'],
+scar/ir/execution/query.py:242: in state_preservation
+    return deepcopy(state_preservation(self._ctx, start, end, locations, shared=shared))
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scar/ir/execution/state_preservation.py:493: in state_preservation
+    return _Walk(ctx, start, end, locations, shared).run()
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scar/ir/execution/state_preservation.py:468: in run
+    self.position = self.escape(None)
+                    ^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;scar.ir.execution.state_preservation._Walk object at 0x75b373ca01a0&gt;
+occurrence = None
+
+    def escape(self, occurrence):
+        """Resume only an explicit parent association, never a sibling frame."""
+&gt;       activation = self.ctx.segments[self.ctx.visits[self.position[0]].segment].activation
+                                                       ^^^^^^^^^^^^^^^^
+E       TypeError: 'NoneType' object is not subscriptable
+
+scar/ir/execution/state_preservation.py:375: TypeError</failure></testcase></testsuite></testsuites>

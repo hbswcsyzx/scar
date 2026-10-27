@@ -1,0 +1,80 @@
+..FFFF................                                                   [100%]
+=================================== FAILURES ===================================
+_ test_completeness_is_required_at_the_call_boundary_and_inside_its_actual_child[outer] _
+
+layer = 'outer'
+
+    @pytest.mark.parametrize('layer', ('outer', 'child'))
+    def test_completeness_is_required_at_the_call_boundary_and_inside_its_actual_child(layer):
+        program, model, details = _preservation_execution(
+            outer_complete=layer != 'outer', child_complete=layer != 'child')
+        view = _query(_index(program, model), details)
+        assert view['preserved'] is None and view['reached'] is True
+        example = details['examples'][0]
+        culprit = example['link'].caller if layer == 'outer' else example['child'][2][details['getter'].id]
+>       assert any(row['code'] == 'state_preservation_effects_incomplete'
+                   and row['operation'] == culprit for row in view['blockers'])
+E       assert False
+E        +  where False = any(<generator object test_completeness_is_required_at_the_call_boundary_and_inside_its_actual_child.<locals>.<genexpr> at 0x7954645ddfc0>)
+
+tests/unit/test_execution_state_preservation.py:299: AssertionError
+_ test_completeness_is_required_at_the_call_boundary_and_inside_its_actual_child[child] _
+
+layer = 'child'
+
+    @pytest.mark.parametrize('layer', ('outer', 'child'))
+    def test_completeness_is_required_at_the_call_boundary_and_inside_its_actual_child(layer):
+        program, model, details = _preservation_execution(
+            outer_complete=layer != 'outer', child_complete=layer != 'child')
+        view = _query(_index(program, model), details)
+        assert view['preserved'] is None and view['reached'] is True
+        example = details['examples'][0]
+        culprit = example['link'].caller if layer == 'outer' else example['child'][2][details['getter'].id]
+>       assert any(row['code'] == 'state_preservation_effects_incomplete'
+                   and row['operation'] == culprit for row in view['blockers'])
+E       assert False
+E        +  where False = any(<generator object test_completeness_is_required_at_the_call_boundary_and_inside_its_actual_child.<locals>.<genexpr> at 0x795464635000>)
+
+tests/unit/test_execution_state_preservation.py:299: AssertionError
+_ test_unexcluded_writes_cannot_preserve_content_by_location_name[same-location-write] _
+
+location = 'same', mode = <AccessMode.WRITE: 'WRITE'>
+
+    @pytest.mark.parametrize('location,mode', (
+        ('same', AccessMode.WRITE), ('different', AccessMode.READ_WRITE)),
+        ids=('same-location-write', 'different-location-rw-without-isolation'))
+    def test_unexcluded_writes_cannot_preserve_content_by_location_name(location, mode):
+        program, model, details = _preservation_execution(write_location=location, write_mode=mode)
+        view = _query(_index(program, model), details)
+        assert view['preserved'] is None and view['reached'] is True
+        writer = details['examples'][0]['child'][2][details['writer'].id]
+>       assert any(row['code'] == 'state_preservation_potential_clobber'
+                   and row['operation'] == writer for row in view['blockers'])
+E       assert False
+E        +  where False = any(<generator object test_unexcluded_writes_cannot_preserve_content_by_location_name.<locals>.<genexpr> at 0x7954645de0a0>)
+
+tests/unit/test_execution_state_preservation.py:312: AssertionError
+_ test_unexcluded_writes_cannot_preserve_content_by_location_name[different-location-rw-without-isolation] _
+
+location = 'different', mode = <AccessMode.READ_WRITE: 'READ_WRITE'>
+
+    @pytest.mark.parametrize('location,mode', (
+        ('same', AccessMode.WRITE), ('different', AccessMode.READ_WRITE)),
+        ids=('same-location-write', 'different-location-rw-without-isolation'))
+    def test_unexcluded_writes_cannot_preserve_content_by_location_name(location, mode):
+        program, model, details = _preservation_execution(write_location=location, write_mode=mode)
+        view = _query(_index(program, model), details)
+        assert view['preserved'] is None and view['reached'] is True
+        writer = details['examples'][0]['child'][2][details['writer'].id]
+>       assert any(row['code'] == 'state_preservation_potential_clobber'
+                   and row['operation'] == writer for row in view['blockers'])
+E       assert False
+E        +  where False = any(<generator object test_unexcluded_writes_cannot_preserve_content_by_location_name.<locals>.<genexpr> at 0x7954646359a0>)
+
+tests/unit/test_execution_state_preservation.py:312: AssertionError
+=========================== short test summary info ============================
+FAILED tests/unit/test_execution_state_preservation.py::test_completeness_is_required_at_the_call_boundary_and_inside_its_actual_child[outer]
+FAILED tests/unit/test_execution_state_preservation.py::test_completeness_is_required_at_the_call_boundary_and_inside_its_actual_child[child]
+FAILED tests/unit/test_execution_state_preservation.py::test_unexcluded_writes_cannot_preserve_content_by_location_name[same-location-write]
+FAILED tests/unit/test_execution_state_preservation.py::test_unexcluded_writes_cannot_preserve_content_by_location_name[different-location-rw-without-isolation]
+4 failed, 18 passed in 3.16s

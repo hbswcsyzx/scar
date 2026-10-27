@@ -1,0 +1,21 @@
+{
+  "actual_exit": 0,
+  "actual_exit_sources": [
+    "unified_exec completion",
+    "retained GNU time footer"
+  ],
+  "automatic_lookup_counts": {
+    "birth_needs": 2,
+    "groups": 3,
+    "lookup_decoded_bytes_charged": 31998744,
+    "positive_matches": 2,
+    "preexec_birth_needs": 1,
+    "queries": 2,
+    "selected_ports": 35
+  },
+  "first_stage_complete": false,
+  "full_execution_model_semantics": "OPEN",
+  "schema": "scar.automatic-source-lookup-gate-completion",
+  "schema_version": 1,
+  "status": "PASS_SELECTED_CONTAINER_SCOPE"
+}

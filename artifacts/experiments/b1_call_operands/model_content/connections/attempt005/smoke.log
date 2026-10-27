@@ -1,0 +1,9 @@
+Traceback (most recent call last):
+  File "<stdin>", line 11, in <module>
+  File "/tmp/scar-structured-model-280qf4mi/tests/fixtures/execution_content_graphs.py", line 420, in native_content_fixture
+    model, entry_visit, output_operation = _native_declared_path(program, region, path)
+                                           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/scar-structured-model-280qf4mi/tests/fixtures/execution_content_graphs.py", line 343, in _native_declared_path
+    point = EvidencePoint(run, process, missing)
+            ^^^^^^^^^^^^^
+NameError: name 'EvidencePoint' is not defined. Did you mean: 'EvidenceKind'?

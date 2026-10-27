@@ -1,0 +1,15 @@
+{
+  "command": [
+    "/home/zyf/miniconda3/envs/lewm/bin/python",
+    "/tmp/scar-structured-model-280qf4mi/artifacts/experiments/b1_call_operands/model_await_source_terminal/diagnose_connections_01.py"
+  ],
+  "cwd": "/tmp/scar-structured-model-280qf4mi",
+  "python": "3.14.7 | packaged by conda-forge | (main, Sep  2 2026, 21:08:32) [GCC 15.3.0]",
+  "activation": "source /home/zyf/miniconda3/etc/profile.d/conda.sh; conda activate lewm",
+  "environment": {
+    "PYTHONPATH": ".",
+    "PYTHONDONTWRITEBYTECODE": "1"
+  },
+  "script_sha256": "7b631f42a487d99e762f29c27233a68e7aff1bf5bef680f023d68d50865e2491",
+  "scope": "source diagnosis only, not acceptance or native execution"
+}

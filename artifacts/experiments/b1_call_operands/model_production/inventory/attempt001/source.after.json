@@ -1,0 +1,7 @@
+{
+  "scar/ir/execution/inventory.py": "cde69f26a12ee37a92b13ff8919f311d250e85c0c72983443c0a24fa80b9d888",
+  "scar/trace/normalize_v2.py": "e9a2987481911a1cf51dc3d793d3a49d1e07740a4304967c8618d9e302c8bffb",
+  "tests/unit/test_execution_inventory.py": "03a756cf3e5f6d49848c2678a5f1dda6aafa2397146f18522ec6872835a08da8",
+  "tests/fixtures/execution_inventory_sources.py": "0796c3fcc9764960964859b4d4eae316a51a93c66a85009344cd8c4d49ca3423",
+  "scar/ir/execution/snapshot.py": "4c2f0410e796107a47ca034f6ba6f90546e8a28028db91e31bda989fb2de9dd8"
+}

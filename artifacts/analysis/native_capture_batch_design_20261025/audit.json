@@ -1,0 +1,196 @@
+{
+  "archive_chunks_read_by_this_design_audit": 0,
+  "archive_four_table_upper_bounds": {
+    "tables": [
+      {
+        "chunks": 76,
+        "decoded_bytes": 1200966077,
+        "graph": "evidence",
+        "records": 461242,
+        "stored_bytes": 76212360,
+        "table": "instances"
+      },
+      {
+        "chunks": 4,
+        "decoded_bytes": 54018019,
+        "graph": "values",
+        "records": 41993,
+        "stored_bytes": 1304314,
+        "table": "objects"
+      },
+      {
+        "chunks": 9,
+        "decoded_bytes": 142927166,
+        "graph": "values",
+        "records": 108682,
+        "stored_bytes": 7693289,
+        "table": "regions"
+      },
+      {
+        "chunks": 6,
+        "decoded_bytes": 92998937,
+        "graph": "values",
+        "records": 74955,
+        "stored_bytes": 5834508,
+        "table": "allocations"
+      }
+    ],
+    "totals": {
+      "chunks": 95,
+      "decoded_bytes": 1490910199,
+      "records": 686872,
+      "stored_bytes": 91044471
+    }
+  },
+  "bundle_partitions_native_schema_generic_validation_changes_required": false,
+  "delivered_six_sources_match_attempt03_freeze": true,
+  "full_domain_semantics_newly_verified": false,
+  "git_commands": 0,
+  "history_writes": 0,
+  "implementation_waits_for_root_dependency_freeze_window": true,
+  "invariants": [
+    "one ordinary coordinate bind plus one live native acquisition per batch run",
+    "shared immutable complete static catalog and identical ProgramSnapshot artifact for every shard",
+    "independent full-static and shard-actual order domains",
+    "freshly sealed generic-valid wrong-order candidate rejects as NativePortOrderError using genuine live owner",
+    "complete original parent closure and qualified projection artifact namespaces",
+    "qualified plus explicit frontier equals original full dispatch denominator; unvisited zero only after actual full accounting",
+    "reference correspondence does not establish contents, complete world/state, alias completeness or readiness",
+    "no workload-name selection and no saved report or index restores runtime authority"
+  ],
+  "metadata_declared_domain": {
+    "dispatch_attempts": 39796,
+    "dispatch_rows": 119388,
+    "eto_nodes": 310412,
+    "physical_argument_slots": 109288,
+    "physical_rows": 132445,
+    "physical_slots_with_epoch_reference": 108682,
+    "physical_slots_without_epoch_reference": 606
+  },
+  "metadata_declared_native_raw_bytes": 546619922,
+  "minimal_existing_modules_requiring_future_edit": [
+    "scar/trace/native_protocol.py",
+    "scar/ir/execution/native_port_protocol.py"
+  ],
+  "new_gates_run": 0,
+  "new_generic_batch_orchestrator_proposed": true,
+  "original_metadata_inputs": [
+    {
+      "bytes": 5187,
+      "path": "artifacts/experiments/first_stage_lewm_physical_20261023/trace/execution-evidence.369749.json",
+      "sha256": "bc43f911f955f0a2650c7ba02f199bb3f35a644b5b6c4b3e4d8ddf09377149e7"
+    },
+    {
+      "bytes": 1522,
+      "path": "artifacts/experiments/first_stage_lewm_physical_20261023/trace/dispatch-meta.369749.72816598bfa183a810428fe30a7873ff.json",
+      "sha256": "27b2dfcf1e36a6d1d98fae67e4422a775ba13532765eb882a47b941b111dc94d"
+    },
+    {
+      "bytes": 4233,
+      "path": "artifacts/experiments/first_stage_lewm_physical_20261023/trace/tensor-physical-meta.369749.72816598bfa183a810428fe30a7873ff.json",
+      "sha256": "581fd61305154ad1c1c88fc4112f16884512f864b4cb363feca1517107c2c39d"
+    }
+  ],
+  "other_input_fingerprints": [
+    {
+      "bytes": 674239,
+      "path": "artifacts/experiments/first_stage_native_protocol_bridge_attempt03_20261023/native-coordinates.json",
+      "sha256": "4d266b9ea62ed0d4c25cb5606dae31dea5aeab453405f79608ab5c038f012a25"
+    },
+    {
+      "bytes": 350275,
+      "path": "artifacts/experiments/first_stage_joined_physical_20261023/result/capture-model.json",
+      "sha256": "37d595221ff41b2efb600540a41b0f856be9d5930650e40d036b10a2e9b919ad"
+    },
+    {
+      "bytes": 72965,
+      "path": "artifacts/experiments/first_stage_joined_physical_20261023/result/native/bundle-partitions/manifest.json",
+      "sha256": "a7b23bdb385b50522e6401433a8308343a593a4080288f3502d6e338e1e4b1b6"
+    }
+  ],
+  "plan": {
+    "bytes": 21741,
+    "path": "docs/NATIVE_CAPTURE_BATCH_PLAN.md",
+    "sha256": "392b75bd49e0e1da51de1d7cf843c8c277e32eae9b7faa0a95888ab13c2f42f5"
+  },
+  "planning_estimates_inferred_not_measured": {
+    "combined_decoded_input_representation_bytes_excluding_spool_and_codec": 3299400335,
+    "execution_bytes_if_13_call_prefix_average_extrapolated": 2254553604.3076925,
+    "extrapolation_is_not_an_upper_bound": true,
+    "minimum_256_attempt_shards_for_fixture": 156,
+    "proposed_free_working_space_bytes": 16000000000,
+    "proposed_private_spool_bytes": 4000000000,
+    "proposed_published_output_bytes": 8000000000,
+    "proposed_rss_limit_bytes": 2147483648,
+    "proposed_whole_run_seconds": 1800
+  },
+  "production_imports": 0,
+  "production_writes": 0,
+  "raw_sources_read_by_this_design_audit": 0,
+  "source_fingerprints": [
+    {
+      "bytes": 48391,
+      "path": "scar/trace/native_protocol.py",
+      "sha256": "650ae1f3691f195a0dda9dbb18306409f5123ca3965c8a78e48dc61bd7863484"
+    },
+    {
+      "bytes": 32566,
+      "path": "scar/ir/execution/native_port_protocol.py",
+      "sha256": "efc880368660782a856785968bfb53a35523cae48c1f75b6b73ed8dab4d586d0"
+    },
+    {
+      "bytes": 28250,
+      "path": "scar/ir/execution/validation.py",
+      "sha256": "a998f6d9cc312e4ddddb7dc4d79dd5c2daf54907359683a009be28000626c2a2"
+    },
+    {
+      "bytes": 38926,
+      "path": "scar/ir/execution/content_validation.py",
+      "sha256": "3a71d980f10e1d6c80057439baa35a68230e037d74f9aec793885cc9cf7fb4b8"
+    },
+    {
+      "bytes": 17141,
+      "path": "scar/trace/native_schema.py",
+      "sha256": "b407a61322183e74e140682d32c2de779d595b8468655ec21e8ba3bea8294aee"
+    },
+    {
+      "bytes": 27087,
+      "path": "scar/store/bundle_partitions.py",
+      "sha256": "655c87445ab30e07ca1371362901e7bef53bf6aaca085d2c3ba8a0a330c389e3"
+    },
+    {
+      "bytes": 37640,
+      "path": "scar/trace/capture_coordinates.py",
+      "sha256": "b7069000d5c986984f98589917397a398728de0600b65ee5893ba9ddcdda2995"
+    },
+    {
+      "bytes": 32455,
+      "path": "scar/trace/native_import.py",
+      "sha256": "b65c817daf876855912a811196a97d89845d6fd7ae92d9df176c758b58f5613f"
+    },
+    {
+      "bytes": 19916,
+      "path": "scar/trace/tensor_physical_import.py",
+      "sha256": "c834d0a1072b610d9cc23d163709171ae329b6b175f1a9388c95e9842a5f0372"
+    },
+    {
+      "bytes": 8916,
+      "path": "scar/ir/execution/snapshot.py",
+      "sha256": "7757c299a965e37f5e73eeaa1f4ed304da6b7bfb970cded5d274fdc4e8483107"
+    },
+    {
+      "bytes": 16011,
+      "path": "scar/ir/execution/codec.py",
+      "sha256": "f171cbabc251822b17014ad36fcce642b8d8e782fdb67ad23d92bc3dd4b70049"
+    },
+    {
+      "bytes": 40826,
+      "path": "scar/ir/program/codec.py",
+      "sha256": "63689ab9741b613f8ab0549c4618a4bc8a03e073da52c91dcf9a9342ecb4f443"
+    }
+  ],
+  "source_fingerprints_unchanged_during_audit": true,
+  "status": "DESIGN_ONLY_METADATA_AND_SOURCE_AUDIT_COMPLETE",
+  "target_executions": 0,
+  "whole_program_model_established": false
+}

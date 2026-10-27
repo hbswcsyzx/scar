@@ -1,0 +1,140 @@
+{
+  "schema": "scar.native-boxed-port-query",
+  "schema_version": 1,
+  "index": {
+    "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/analysis/native_port_sidecar_full_20261026/publication/index.json",
+    "sha256": "54f9dfbcc8a4e3cfc720c2dfb0c377d61707cde3f70c1360f1f68fd54cbf17b2"
+  },
+  "summary": {
+    "source_nodes": 310412,
+    "operation_rows": 230818,
+    "input_ports": 1030969,
+    "output_ports": 225532,
+    "classification_counts": {
+      "REGISTERED_SCHEMA_OPERATION": 190498,
+      "UNKNOWN_NATIVE_BOUNDARY": 2,
+      "UNSCHEMATIZED_CPU_OPERATION": 40320,
+      "USER_ANNOTATION": 79592
+    },
+    "shards": 76,
+    "stored_shard_bytes": 22030062,
+    "decoded_shard_bytes": 687492374
+  },
+  "qualification": "ORIGINAL_NATIVE_INSTANCE_AND_ORDERED_OBSERVED_PORTS",
+  "logical_content_or_ready_proved": false,
+  "whole_model_established": false,
+  "transformation_authorized": false,
+  "row": {
+    "instance": {
+      "kind": "opinst",
+      "value": "native:636fde61a45803f11712767bc1cbf0b0ea3de13b14e0b27edc2d6071daea1612:eto:18",
+      "wire": "opinst:native:636fde61a45803f11712767bc1cbf0b0ea3de13b14e0b27edc2d6071daea1612:eto:18"
+    },
+    "definition": {
+      "kind": "opdef",
+      "value": "native:636fde61a45803f11712767bc1cbf0b0ea3de13b14e0b27edc2d6071daea1612:symbol:e7489389308fce563da1ba3f9824f22d6feabf65bedb5b7108c70c137a025fce",
+      "wire": "opdef:native:636fde61a45803f11712767bc1cbf0b0ea3de13b14e0b27edc2d6071daea1612:symbol:e7489389308fce563da1ba3f9824f22d6feabf65bedb5b7108c70c137a025fce"
+    },
+    "source_ordinal": 16,
+    "input_status": "COMPLETE",
+    "output_status": "COMPLETE",
+    "ports": [
+      {
+        "direction": "input",
+        "path": [
+          0
+        ],
+        "provider_type": "GenericList[]",
+        "kind": "EMPTY_CONTAINER",
+        "source_locator": "/inputs/values/0",
+        "formal_slot": null,
+        "formal_status": "UNRESOLVED_NON_TENSOR_FORMAL_PATH",
+        "provider_reference": null,
+        "descriptor_id": null
+      },
+      {
+        "direction": "input",
+        "path": [
+          1
+        ],
+        "provider_type": "Int",
+        "kind": "SCALAR_OR_OPAQUE",
+        "source_locator": "/inputs/values/1",
+        "formal_slot": null,
+        "formal_status": "UNRESOLVED_NON_TENSOR_FORMAL_PATH",
+        "provider_reference": null,
+        "descriptor_id": null
+      },
+      {
+        "direction": "input",
+        "path": [
+          2
+        ],
+        "provider_type": "Int",
+        "kind": "SCALAR_OR_OPAQUE",
+        "source_locator": "/inputs/values/2",
+        "formal_slot": null,
+        "formal_status": "UNRESOLVED_NON_TENSOR_FORMAL_PATH",
+        "provider_reference": null,
+        "descriptor_id": null
+      },
+      {
+        "direction": "input",
+        "path": [
+          3
+        ],
+        "provider_type": "Device",
+        "kind": "SCALAR_OR_OPAQUE",
+        "source_locator": "/inputs/values/3",
+        "formal_slot": null,
+        "formal_status": "UNRESOLVED_NON_TENSOR_FORMAL_PATH",
+        "provider_reference": null,
+        "descriptor_id": null
+      },
+      {
+        "direction": "input",
+        "path": [
+          4
+        ],
+        "provider_type": "Bool",
+        "kind": "SCALAR_OR_OPAQUE",
+        "source_locator": "/inputs/values/4",
+        "formal_slot": null,
+        "formal_status": "UNRESOLVED_NON_TENSOR_FORMAL_PATH",
+        "provider_reference": null,
+        "descriptor_id": null
+      },
+      {
+        "direction": "input",
+        "path": [
+          5
+        ],
+        "provider_type": "None",
+        "kind": "SCALAR_OR_OPAQUE",
+        "source_locator": "/inputs/values/5",
+        "formal_slot": null,
+        "formal_status": "UNRESOLVED_NON_TENSOR_FORMAL_PATH",
+        "provider_reference": null,
+        "descriptor_id": null
+      },
+      {
+        "direction": "output",
+        "path": [
+          0
+        ],
+        "provider_type": "Tensor(float)",
+        "kind": "TENSOR",
+        "source_locator": "/outputs/values/0",
+        "formal_slot": {
+          "kind": "slot",
+          "value": "native:636fde61a45803f11712767bc1cbf0b0ea3de13b14e0b27edc2d6071daea1612:symbol:e7489389308fce563da1ba3f9824f22d6feabf65bedb5b7108c70c137a025fce:schema:output_slots:0",
+          "wire": "slot:native:636fde61a45803f11712767bc1cbf0b0ea3de13b14e0b27edc2d6071daea1612:symbol:e7489389308fce563da1ba3f9824f22d6feabf65bedb5b7108c70c137a025fce:schema:output_slots:0"
+        },
+        "formal_status": "QUALIFIED",
+        "provider_reference": "native:636fde61a45803f11712767bc1cbf0b0ea3de13b14e0b27edc2d6071daea1612:tensor-token:19",
+        "descriptor_id": "d38d15147c00358219c47ec3f7319db1bbd99b1ef205d55879f3096122dbcbd6"
+      }
+    ]
+  },
+  "elapsed_s": 1.550945352006238
+}

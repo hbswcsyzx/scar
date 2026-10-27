@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="3" skipped="0" tests="24" time="3.966" timestamp="2026-10-18T18:57:27.417931+00:00" hostname="gpu1"><testcase classname="tests.unit.test_execution_body_cli" name="test_cli_drive_uses_original_codec_occurrence_ids_and_keeps_missing_external_evidence[0]" time="0.437"><failure message="AssertionError: assert 'DECLARED' == 'PARTIAL'&#10;  &#10;  - PARTIAL&#10;  + DECLARED">number = 0
+tmp_path = PosixPath('/tmp/pytest-of-zyf/pytest-4189/test_cli_drive_uses_original_c0')
+capsys = &lt;_pytest.capture.CaptureFixture object at 0x7d14b3d4cec0&gt;
+
+    @pytest.mark.parametrize('number', (0, 1))
+    def test_cli_drive_uses_original_codec_occurrence_ids_and_keeps_missing_external_evidence(number, tmp_path, capsys):
+        _, model, details, paths, payloads = _files(tmp_path)
+        drive = details['instances'][0]['drives'][number]
+        assert main(_argv(paths, '--drive', drive.wire)) == 0
+        report = json.loads(capsys.readouterr().out)
+        view = report['query']
+&gt;       assert report['status'] == view['status'] == 'PARTIAL'
+E       AssertionError: assert 'DECLARED' == 'PARTIAL'
+E         
+E         - PARTIAL
+E         + DECLARED
+
+tests/unit/test_execution_body_cli.py:40: AssertionError</failure></testcase><testcase classname="tests.unit.test_execution_body_cli" name="test_cli_drive_uses_original_codec_occurrence_ids_and_keeps_missing_external_evidence[1]" time="0.167"><failure message="AssertionError: assert 'DECLARED' == 'PARTIAL'&#10;  &#10;  - PARTIAL&#10;  + DECLARED">number = 1
+tmp_path = PosixPath('/tmp/pytest-of-zyf/pytest-4189/test_cli_drive_uses_original_c1')
+capsys = &lt;_pytest.capture.CaptureFixture object at 0x7d14b3095a90&gt;
+
+    @pytest.mark.parametrize('number', (0, 1))
+    def test_cli_drive_uses_original_codec_occurrence_ids_and_keeps_missing_external_evidence(number, tmp_path, capsys):
+        _, model, details, paths, payloads = _files(tmp_path)
+        drive = details['instances'][0]['drives'][number]
+        assert main(_argv(paths, '--drive', drive.wire)) == 0
+        report = json.loads(capsys.readouterr().out)
+        view = report['query']
+&gt;       assert report['status'] == view['status'] == 'PARTIAL'
+E       AssertionError: assert 'DECLARED' == 'PARTIAL'
+E         
+E         - PARTIAL
+E         + DECLARED
+
+tests/unit/test_execution_body_cli.py:40: AssertionError</failure></testcase><testcase classname="tests.unit.test_execution_body_cli" name="test_cli_activation_projects_capture_keys_to_full_namespace_without_faking_identity" time="0.161"><failure message="AssertionError: assert ('DECLARED' == 'PARTIAL'&#10;  &#10;  - PARTIAL&#10;  + DECLARED)">tmp_path = PosixPath('/tmp/pytest-of-zyf/pytest-4189/test_cli_activation_projects_c0')
+capsys = &lt;_pytest.capture.CaptureFixture object at 0x7d14b2fdd6d0&gt;
+
+    def test_cli_activation_projects_capture_keys_to_full_namespace_without_faking_identity(tmp_path, capsys):
+        _, model, details, paths, payloads = _files(tmp_path)
+        activation = details['instances'][0]['activation']
+        assert main(_argv(paths, '--activation', activation.wire)) == 0
+        report = json.loads(capsys.readouterr().out)
+        view = report['query']
+        assert view['association']['activation'] == activation.as_dict()
+        assert view['creation']['id'] == model.body_activation_origins[0].creation.as_dict()
+        assert len(view['captures']) == 6
+        for key, capture in view['captures'].items():
+            assert key == capture['definition']['formal']['wire'] and key.startswith('program_value:')
+        assert view['drives'] == [drive.as_dict() for drive in details['instances'][0]['drives']]
+&gt;       assert view['status'] == 'PARTIAL' and view['gaps']
+E       AssertionError: assert ('DECLARED' == 'PARTIAL'
+E         
+E         - PARTIAL
+E         + DECLARED)
+
+tests/unit/test_execution_body_cli.py:63: AssertionError</failure></testcase><testcase classname="tests.unit.test_execution_body_cli" name="test_cli_budget_one_keeps_full_port_denominators_and_cursor[drive]" time="0.163" /><testcase classname="tests.unit.test_execution_body_cli" name="test_cli_budget_one_keeps_full_port_denominators_and_cursor[activation]" time="0.156" /><testcase classname="tests.unit.test_execution_body_cli" name="test_cli_missing_endpoint_remains_explicit_and_does_not_erase_other_endpoint[entry]" time="0.164" /><testcase classname="tests.unit.test_execution_body_cli" name="test_cli_missing_endpoint_remains_explicit_and_does_not_erase_other_endpoint[outcome]" time="0.163" /><testcase classname="tests.unit.test_execution_body_cli" name="test_cli_strict_wire_identity_errors_return_two_and_preserve_inputs[--drive-not-a-wire]" time="0.061" /><testcase classname="tests.unit.test_execution_body_cli" name="test_cli_strict_wire_identity_errors_return_two_and_preserve_inputs[--drive-exec_operation_occurrence:]" time="0.062" /><testcase classname="tests.unit.test_execution_body_cli" name="test_cli_strict_wire_identity_errors_return_two_and_preserve_inputs[--drive-exec_region_activation:wrong-family]" time="0.065" /><testcase classname="tests.unit.test_execution_body_cli" name="test_cli_strict_wire_identity_errors_return_two_and_preserve_inputs[--activation-exec_operation_occurrence:wrong-family]" time="0.096" /><testcase classname="tests.unit.test_execution_body_cli" name="test_cli_strict_wire_identity_errors_return_two_and_preserve_inputs[--drive-exec_operation_occurrence:absent]" time="0.162" /><testcase classname="tests.unit.test_execution_body_cli" name="test_cli_strict_wire_identity_errors_return_two_and_preserve_inputs[--activation-exec_region_activation:absent]" time="0.156" /><testcase classname="tests.unit.test_execution_body_cli" name="test_cli_known_id_of_wrong_canonical_kind_is_not_selected_by_region_or_name[drive]" time="0.163" /><testcase classname="tests.unit.test_execution_body_cli" name="test_cli_known_id_of_wrong_canonical_kind_is_not_selected_by_region_or_name[activation]" time="0.160" /><testcase classname="tests.unit.test_execution_body_cli" name="test_cli_strict_codecs_reject_malformed_wire_without_repairing_inputs[0-syntax]" time="0.065" /><testcase classname="tests.unit.test_execution_body_cli" name="test_cli_strict_codecs_reject_malformed_wire_without_repairing_inputs[0-duplicate]" time="0.068" /><testcase classname="tests.unit.test_execution_body_cli" name="test_cli_strict_codecs_reject_malformed_wire_without_repairing_inputs[1-syntax]" time="0.111" /><testcase classname="tests.unit.test_execution_body_cli" name="test_cli_strict_codecs_reject_malformed_wire_without_repairing_inputs[1-unknown-field]" time="0.134" /><testcase classname="tests.unit.test_execution_body_cli" name="test_cli_output_cannot_overwrite_either_input_even_via_resolved_symlink[0]" time="0.074" /><testcase classname="tests.unit.test_execution_body_cli" name="test_cli_output_cannot_overwrite_either_input_even_via_resolved_symlink[1]" time="0.067" /><testcase classname="tests.unit.test_execution_body_cli" name="test_cli_output_cannot_overwrite_either_input_even_via_resolved_symlink[symlink]" time="0.063" /><testcase classname="tests.unit.test_execution_body_cli" name="test_cli_output_document_matches_machine_stdout_and_keeps_original_inputs" time="0.180" /><testcase classname="tests.unit.test_execution_body_cli" name="test_cli_invalid_budget_is_error_without_creating_output" time="0.189" /></testsuite></testsuites>

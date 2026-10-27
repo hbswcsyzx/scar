@@ -1,0 +1,27 @@
+................F.                                                       [100%]
+=================================== FAILURES ===================================
+________ test_no_actual_return_frontier_is_not_an_empty_all_true_proof _________
+
+    def test_no_actual_return_frontier_is_not_an_empty_all_true_proof():
+        graph, details = multi_return_program(no_terminal=True)
+>       index = _index(graph)
+                ^^^^^^^^^^^^^
+
+tests/unit/test_program_call_returns.py:132: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/unit/test_program_call_returns.py:16: in _index
+    require_valid(graph)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='many.root'), regions=(Region(id=RegionID(value='many.root'), label='caller', entry=B...rotocol_scopes=(), protocol_operations=(), protocol_call_inputs=(), protocol_result_consumers=(), protocol_bindings=())
+
+    def require_valid(graph: ProgramGraph) -> None:
+        issues = validate(graph)
+        if issues:
+>           raise ValueError("; ".join(f"{issue.code} at {issue.path}: {issue.message}" for issue in issues))
+E           ValueError: unbound_exit at program_region:many.helper: declared exits must be bound to actual control exits
+
+scar/ir/program/validation.py:745: ValueError
+=========================== short test summary info ============================
+FAILED tests/unit/test_program_call_returns.py::test_no_actual_return_frontier_is_not_an_empty_all_true_proof
+1 failed, 17 passed in 0.78s

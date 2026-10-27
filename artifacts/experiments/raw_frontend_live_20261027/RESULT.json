@@ -1,0 +1,10 @@
+{
+  "status": "CURRENT_RAW_FRONTEND_NORMAL_READER_PASS",
+  "frame_entries": 822,
+  "frame_exits": 822,
+  "attempts": 1024,
+  "target_entries": 787,
+  "observation_issues": 0,
+  "target_gaps": 0,
+  "whole_program_complete": false
+}

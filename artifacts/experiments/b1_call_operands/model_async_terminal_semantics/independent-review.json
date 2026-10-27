@@ -1,0 +1,53 @@
+{
+  "source_sha256": "37dfff022d371ee43a66e24d481e09c4b6933a81230e51eb540c1fbabfd2faa8",
+  "all_authors_frozen": true,
+  "interpreters_started_by_reviewers": 0,
+  "reviewed_sources": {
+    "scar/ir/program/protocol_async.py": "da016a1f45cf846e3c207723e2cd59be0ce5e43a4ddaa5f0cab39ec8b5e4fe14",
+    "scar/ir/execution/resumable_sessions.py": "f7a6aed6b96adea3288054f1f15386ad53ff623df61ad6d6d2a3df46864ebd48",
+    "scar/ir/program/protocol_validation.py": "184b19263eda9b7edc96e0448fb05c84a12297a7ece7519fe2a8fb454608149a",
+    "scar/ir/program/admission.py": "382f1757b2e779318876cb0f12442bc8a4f8fa1542f59a760bab2b8c74fa85fb",
+    "scar/analysis/source_compilation.py": "e68cb99a98fd5b94ecbef83d0c06ca0b1ec65279c91fff927b7272bce3d69092",
+    "tests/fixtures/program_async_terminal_graphs.py": "7060598ddebb90f7710ae612ea275f35d31f05efb59e3abb249e436671d9551b",
+    "tests/fixtures/execution_async_terminal_graphs.py": "1f47a5df4f064b7a0a4d3db7a9b8232ed0ba1bc9cca587145a0b044fb3d20045",
+    "tests/unit/test_program_async_terminal_inventory.py": "545f1b693180a480ccc32fce464432b26bd75b3d24065480d32053efdf76c36c",
+    "tests/unit/test_program_async_terminal.py": "b4bf58c7230719d17ae817e1d465c3f556209e202a4040a53a7d18a4d635320b",
+    "tests/unit/test_source_compilation.py": "215ef223f466f1f6347dc93477cd9f7ac3e502642320fcd3ee6970185ddb087e",
+    "tests/unit/test_execution_async_terminal.py": "e41cdb136a33d56eb874d9b4165395c744a854e80111accbd3feac2187ea7465"
+  },
+  "reviewers": [
+    {
+      "agent": "/root/value_resource_review",
+      "mode": "read-only",
+      "paths": [
+        "tests/fixtures/program_async_terminal_graphs.py",
+        "tests/unit/test_program_async_terminal.py",
+        "tests/fixtures/execution_async_terminal_graphs.py",
+        "tests/unit/test_execution_async_terminal.py"
+      ],
+      "result": "No new blocking issue in original packet/fullstate/instance/conditional native and deletion-budget boundaries"
+    },
+    {
+      "agent": "/root/cleanup_forward_review",
+      "mode": "read-only",
+      "paths": [
+        "scar/analysis/source_compilation.py",
+        "tests/unit/test_source_compilation.py",
+        "scar/ir/program/protocol_async.py"
+      ],
+      "result": "Original type-comment false rejection repaired; ordinary fallback retains spans without atom/link authorization; source-first Return inventory retained"
+    },
+    {
+      "agent": "/root/await_wrapper_chain",
+      "mode": "read-only",
+      "paths": [
+        "scar/ir/program/protocol_validation.py",
+        "scar/ir/program/admission.py",
+        "scar/ir/execution/resumable_sessions.py",
+        "tests/unit/test_program_async_terminal_inventory.py"
+      ],
+      "result": "Canonical-choice ordering, fullslot budget and static/dynamic later-failure source-set findings closed on exact final SHAs; missing packet remains None and cannot fall back"
+    }
+  ],
+  "review_limit": "Finite supplied-model structural scope. Actual pytest, original obligation acceptance and final source stability are separate root receipts. No F19/native/runtime/transform authority."
+}

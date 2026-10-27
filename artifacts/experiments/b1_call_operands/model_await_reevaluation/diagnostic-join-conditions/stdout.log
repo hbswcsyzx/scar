@@ -1,0 +1,17 @@
+EARLIER
+ACTUAL exec_operation_occurrence:await.visits.caller.6.await.resume.call.0 ControlEdgeReference(operation=OperationID(value='await.visits.retry'), successor_index=0) True GAPS ('await_iterator_source_unresolved',)
+DEFINITION CONSUMERS 0
+PIPELINE TWO RAISED False
+ACTUAL exec_operation_occurrence:await.pipeline.caller.14.await.resume.call.2 ControlEdgeReference(operation=OperationID(value='await.pipeline.normal.branch'), successor_index=0) True GAPS ('await_iterator_source_unresolved', 'await_consumer_inventory_unresolved')
+DEFINITION CONSUMERS 0
+ACTUAL exec_operation_occurrence:await.pipeline.caller.6.await.resume.call.2 ControlEdgeReference(operation=OperationID(value='await.pipeline.enter'), successor_index=0) True GAPS ('await_consumer_callee_expansion_pending',)
+CONSUMER OwnedUse(operation=OperationID(value='await.resume.extract'), use=UseID(value='await.resume.extract.packet')) REQUIRES True FINALROWS 2 SELECTED True MATCH True IMPLEMENTATION PARTIAL GAPS (ExecutionIssue(code='body_reference_identity_unproved', path='await.outcome.copy', message='binding lacks both scoped ObjectID declarations'), 'await_outcome_value_unobserved')
+CONSUMER OwnedUse(operation=OperationID(value='await.resume.extract'), use=UseID(value='await.resume.extract.packet')) REQUIRES False FINALROWS 2 SELECTED False MATCH True IMPLEMENTATION None GAPS ()
+DEFINITION CONSUMERS 2
+PIPELINE TWO RAISED True
+ACTUAL exec_operation_occurrence:await.pipeline.caller.13.await.resume.call.2 ControlEdgeReference(operation=OperationID(value='await.pipeline.raise.branch'), successor_index=0) True GAPS ('await_iterator_source_unresolved', 'await_consumer_inventory_unresolved', 'await_advance_outcome_leg_unproved')
+DEFINITION CONSUMERS 0
+ACTUAL exec_operation_occurrence:await.pipeline.caller.6.await.resume.call.2 ControlEdgeReference(operation=OperationID(value='await.pipeline.enter'), successor_index=0) True GAPS ()
+CONSUMER OwnedUse(operation=OperationID(value='await.pipeline.raise.observe'), use=UseID(value='await.pipeline.raise.observe.slot.0')) REQUIRES False FINALROWS 0 SELECTED True MATCH True IMPLEMENTATION None GAPS (ExecutionIssue(code='body_data_correspondence_unproved', path='await.outcome.copy', message='different or missing scoped versions do not prove unequal numerical values'),)
+CONSUMER HostTerminal(operation=OperationID(value='await.cleanup.propagate')) REQUIRES False FINALROWS 0 SELECTED False MATCH None IMPLEMENTATION None GAPS ()
+DEFINITION CONSUMERS 2

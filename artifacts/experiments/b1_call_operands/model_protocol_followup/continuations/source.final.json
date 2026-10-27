@@ -1,0 +1,8 @@
+{
+  "scar/ir/program/protocols.py": "d665ffb437dddd18bc58f386f953c26ec521292d03947d5ecdc6cd0a247b5d01",
+  "scar/ir/program/protocol_rules.py": "1333bfeccab26e2d7234ec790f1f4073eca98648c86610c94e00a910ac9f0bf6",
+  "scar/ir/program/protocol_continuations.py": "ef26888f07aa6934fe50009a5afc50606dced4f231e52eea8da5d942fa494635",
+  "tests/fixtures/program_method_lookup_graphs.py": "22d1b4c41d6813a24200fa99b9c9ada76affb220c9f5e53fe4bbeb88c2c85412",
+  "tests/unit/test_program_method_lookup_connections.py": "7c2e597faec7523f535ce74799697a341c191d9c3138337a40dc9f7889502307",
+  "docs/M1_PROTOCOL_FOLLOWUP_PLAN.md": "44437087abfe3fa1a7b074ca973c06a0f863eb0c4fc9073ef26f8881de412f78"
+}

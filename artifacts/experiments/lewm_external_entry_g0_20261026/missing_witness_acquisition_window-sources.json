@@ -1,0 +1,402 @@
+{
+  "compile_lower_target": false,
+  "declared_decoded_bytes": 143780744,
+  "declared_stored_bytes": 16307247,
+  "graph_bytes_read": 0,
+  "largest_declared_decoded_record": 53717920,
+  "post_report_measurement_scope": "three reads of the fixed2,026,468B continuation header for derivation/bytecount; no graph payload",
+  "schema": "scar.lewm-external-window-source-declarations/1",
+  "scope": "original272038 static catalog window; no graph read/current369749 body credit",
+  "shared_post_report_metadata_bytes_read_for_both_windows": 6079404,
+  "source_file_count": 8,
+  "sources": [
+    {
+      "compressed_bytes": 1914477,
+      "decoded_bytes": 18352955,
+      "snapshot": {
+        "artifact": {
+          "canonical_bytes": 52828,
+          "canonical_sha256": "7b62ecd514484fc340d0414294d80c8ec4e27c55c511862a710352bb601619fe",
+          "compressed_bytes": 15096,
+          "path": "sources/7b62ecd514484fc340d0414294d80c8ec4e27c55c511862a710352bb601619fe.json.gz",
+          "schema": "scar.dependency-source-snapshot",
+          "schema_version": 1
+        },
+        "origin": "PARENT",
+        "parent_directory": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_dependency_sources_20261023/result",
+        "parent_report_raw_sha256": "fc97075aa66a92758938ad8416347d895e6b18ef0e454053fc7f9c1a7d2f0424",
+        "source_root": "dependency-source-root:39161c70cb0781242f8e628b94aa6ddd60cd1f99cc6510b5cdf1b7f99848f4fe"
+      },
+      "source": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/trace/callable_environment.py",
+      "source_graph": {
+        "artifact": {
+          "canonical_bytes": 18352955,
+          "canonical_sha256": "bab01071a53581f6c43d21741ab0c9c6771545901d888676a25064d09b2f2289",
+          "compressed_bytes": 1914477,
+          "path": "graphs/bab01071a53581f6c43d21741ab0c9c6771545901d888676a25064d09b2f2289.json.gz",
+          "schema": "scar.dependency-source-graphs",
+          "schema_version": 1
+        },
+        "origin": "PARENT",
+        "parent_directory": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_dependency_sources_20261023/result",
+        "parent_report_raw_sha256": "fc97075aa66a92758938ad8416347d895e6b18ef0e454053fc7f9c1a7d2f0424",
+        "source_root": "dependency-source-root:39161c70cb0781242f8e628b94aa6ddd60cd1f99cc6510b5cdf1b7f99848f4fe"
+      },
+      "source_root": "dependency-source-root:39161c70cb0781242f8e628b94aa6ddd60cd1f99cc6510b5cdf1b7f99848f4fe"
+    },
+    {
+      "compressed_bytes": 2818104,
+      "decoded_bytes": 24839831,
+      "snapshot": {
+        "artifact": {
+          "canonical_bytes": 90628,
+          "canonical_sha256": "2fa5ed50f767763d3bf068419ad948d9f112ed38897367ce8fc508539cf23e22",
+          "compressed_bytes": 26196,
+          "path": "sources/2fa5ed50f767763d3bf068419ad948d9f112ed38897367ce8fc508539cf23e22.json.gz",
+          "schema": "scar.dependency-source-snapshot",
+          "schema_version": 1
+        },
+        "origin": "PARENT",
+        "parent_directory": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_dependency_sources_20261023/result",
+        "parent_report_raw_sha256": "fc97075aa66a92758938ad8416347d895e6b18ef0e454053fc7f9c1a7d2f0424",
+        "source_root": "dependency-source-root:e3d802a1bd20a52f4819a1a1046e25b99042788bc1e0855aa2cd6dbfd6493fe9"
+      },
+      "source": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/einops/einops.py",
+      "source_graph": {
+        "artifact": {
+          "canonical_bytes": 24839831,
+          "canonical_sha256": "d4ad330de6455701f38d1ecbc2d5830223eb56798b3529613b261d5c5d01de23",
+          "compressed_bytes": 2818104,
+          "path": "graphs/d4ad330de6455701f38d1ecbc2d5830223eb56798b3529613b261d5c5d01de23.json.gz",
+          "schema": "scar.dependency-source-graphs",
+          "schema_version": 1
+        },
+        "origin": "PARENT",
+        "parent_directory": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_dependency_sources_20261023/result",
+        "parent_report_raw_sha256": "fc97075aa66a92758938ad8416347d895e6b18ef0e454053fc7f9c1a7d2f0424",
+        "source_root": "dependency-source-root:e3d802a1bd20a52f4819a1a1046e25b99042788bc1e0855aa2cd6dbfd6493fe9"
+      },
+      "source_root": "dependency-source-root:e3d802a1bd20a52f4819a1a1046e25b99042788bc1e0855aa2cd6dbfd6493fe9"
+    },
+    {
+      "compressed_bytes": 2543929,
+      "decoded_bytes": 21711810,
+      "snapshot": {
+        "artifact": {
+          "canonical_bytes": 341177,
+          "canonical_sha256": "a8ffe1120becfb191004eca978689be8594481fad35967af3c6e023ff3102009",
+          "compressed_bytes": 82906,
+          "path": "sources/a8ffe1120becfb191004eca978689be8594481fad35967af3c6e023ff3102009.json.gz",
+          "schema": "scar.dependency-source-snapshot",
+          "schema_version": 1
+        },
+        "origin": "PARENT",
+        "parent_directory": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_dependency_sources_20261023/result",
+        "parent_report_raw_sha256": "fc97075aa66a92758938ad8416347d895e6b18ef0e454053fc7f9c1a7d2f0424",
+        "source_root": "dependency-source-root:e3d802a1bd20a52f4819a1a1046e25b99042788bc1e0855aa2cd6dbfd6493fe9"
+      },
+      "source": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/numpy/_core/fromnumeric.py",
+      "source_graph": {
+        "artifact": {
+          "canonical_bytes": 21711810,
+          "canonical_sha256": "6ddf9a39a0c1c876670f047298a87a3c7c767544f64f47f103c9fa8bf66abf0d",
+          "compressed_bytes": 2543929,
+          "path": "graphs/6ddf9a39a0c1c876670f047298a87a3c7c767544f64f47f103c9fa8bf66abf0d.json.gz",
+          "schema": "scar.dependency-source-graphs",
+          "schema_version": 1
+        },
+        "origin": "PARENT",
+        "parent_directory": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_dependency_sources_20261023/result",
+        "parent_report_raw_sha256": "fc97075aa66a92758938ad8416347d895e6b18ef0e454053fc7f9c1a7d2f0424",
+        "source_root": "dependency-source-root:e3d802a1bd20a52f4819a1a1046e25b99042788bc1e0855aa2cd6dbfd6493fe9"
+      },
+      "source_root": "dependency-source-root:e3d802a1bd20a52f4819a1a1046e25b99042788bc1e0855aa2cd6dbfd6493fe9"
+    },
+    {
+      "compressed_bytes": 22161,
+      "decoded_bytes": 271460,
+      "snapshot": {
+        "artifact": {
+          "canonical_bytes": 1713,
+          "canonical_sha256": "616a1d3e7dcfd2f4a499d88885f57328440c9f02ed5cb1c2c76f6b85a461abea",
+          "compressed_bytes": 981,
+          "path": "sources/616a1d3e7dcfd2f4a499d88885f57328440c9f02ed5cb1c2c76f6b85a461abea.json.gz",
+          "schema": "scar.dependency-source-snapshot",
+          "schema_version": 1
+        },
+        "origin": "PARENT",
+        "parent_directory": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_dependency_sources_20261023/result",
+        "parent_report_raw_sha256": "fc97075aa66a92758938ad8416347d895e6b18ef0e454053fc7f9c1a7d2f0424",
+        "source_root": "dependency-source-root:e3d802a1bd20a52f4819a1a1046e25b99042788bc1e0855aa2cd6dbfd6493fe9"
+      },
+      "source": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/pymunk/_typing_attr.py",
+      "source_graph": {
+        "artifact": {
+          "canonical_bytes": 271460,
+          "canonical_sha256": "c7666676c71231a42989879a9c2686e13a10883f6cf46e238e83acd120b43a2e",
+          "compressed_bytes": 22161,
+          "path": "graphs/c7666676c71231a42989879a9c2686e13a10883f6cf46e238e83acd120b43a2e.json.gz",
+          "schema": "scar.dependency-source-graphs",
+          "schema_version": 1
+        },
+        "origin": "PARENT",
+        "parent_directory": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_dependency_sources_20261023/result",
+        "parent_report_raw_sha256": "fc97075aa66a92758938ad8416347d895e6b18ef0e454053fc7f9c1a7d2f0424",
+        "source_root": "dependency-source-root:e3d802a1bd20a52f4819a1a1046e25b99042788bc1e0855aa2cd6dbfd6493fe9"
+      },
+      "source_root": "dependency-source-root:e3d802a1bd20a52f4819a1a1046e25b99042788bc1e0855aa2cd6dbfd6493fe9"
+    },
+    {
+      "compressed_bytes": 1281866,
+      "decoded_bytes": 11382556,
+      "snapshot": {
+        "artifact": {
+          "canonical_bytes": 65628,
+          "canonical_sha256": "51248bd7d0465e51ea86a40391a8bbdf41002c556a115c49fce3e698e8c16025",
+          "compressed_bytes": 19522,
+          "path": "sources/51248bd7d0465e51ea86a40391a8bbdf41002c556a115c49fce3e698e8c16025.json.gz",
+          "schema": "scar.dependency-source-snapshot",
+          "schema_version": 1
+        },
+        "origin": "PARENT",
+        "parent_directory": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_dependency_sources_20261023/result",
+        "parent_report_raw_sha256": "fc97075aa66a92758938ad8416347d895e6b18ef0e454053fc7f9c1a7d2f0424",
+        "source_root": "dependency-source-root:e3d802a1bd20a52f4819a1a1046e25b99042788bc1e0855aa2cd6dbfd6493fe9"
+      },
+      "source": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/pymunk/body.py",
+      "source_graph": {
+        "artifact": {
+          "canonical_bytes": 11382556,
+          "canonical_sha256": "b20e8afde5c1503afc08360a225abcb4acbe42abe20aa3718e13f7468d6a07a6",
+          "compressed_bytes": 1281866,
+          "path": "graphs/b20e8afde5c1503afc08360a225abcb4acbe42abe20aa3718e13f7468d6a07a6.json.gz",
+          "schema": "scar.dependency-source-graphs",
+          "schema_version": 1
+        },
+        "origin": "PARENT",
+        "parent_directory": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_dependency_sources_20261023/result",
+        "parent_report_raw_sha256": "fc97075aa66a92758938ad8416347d895e6b18ef0e454053fc7f9c1a7d2f0424",
+        "source_root": "dependency-source-root:e3d802a1bd20a52f4819a1a1046e25b99042788bc1e0855aa2cd6dbfd6493fe9"
+      },
+      "source_root": "dependency-source-root:e3d802a1bd20a52f4819a1a1046e25b99042788bc1e0855aa2cd6dbfd6493fe9"
+    },
+    {
+      "compressed_bytes": 477374,
+      "decoded_bytes": 4584440,
+      "snapshot": {
+        "artifact": {
+          "canonical_bytes": 30469,
+          "canonical_sha256": "540fab26a83d314202d85e2a39807f1c5ebf5b96c3f8668a7998de4ce2a48f05",
+          "compressed_bytes": 7527,
+          "path": "sources/540fab26a83d314202d85e2a39807f1c5ebf5b96c3f8668a7998de4ce2a48f05.json.gz",
+          "schema": "scar.dependency-source-snapshot",
+          "schema_version": 1
+        },
+        "origin": "PARENT",
+        "parent_directory": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_dependency_sources_20261023/result",
+        "parent_report_raw_sha256": "fc97075aa66a92758938ad8416347d895e6b18ef0e454053fc7f9c1a7d2f0424",
+        "source_root": "dependency-source-root:e3d802a1bd20a52f4819a1a1046e25b99042788bc1e0855aa2cd6dbfd6493fe9"
+      },
+      "source": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/pymunk/space_debug_draw_options.py",
+      "source_graph": {
+        "artifact": {
+          "canonical_bytes": 4584440,
+          "canonical_sha256": "163a0a59a71c15410ef40b12b7d80589985b70131f4041454537ac5eb169055d",
+          "compressed_bytes": 477374,
+          "path": "graphs/163a0a59a71c15410ef40b12b7d80589985b70131f4041454537ac5eb169055d.json.gz",
+          "schema": "scar.dependency-source-graphs",
+          "schema_version": 1
+        },
+        "origin": "PARENT",
+        "parent_directory": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_dependency_sources_20261023/result",
+        "parent_report_raw_sha256": "fc97075aa66a92758938ad8416347d895e6b18ef0e454053fc7f9c1a7d2f0424",
+        "source_root": "dependency-source-root:e3d802a1bd20a52f4819a1a1046e25b99042788bc1e0855aa2cd6dbfd6493fe9"
+      },
+      "source_root": "dependency-source-root:e3d802a1bd20a52f4819a1a1046e25b99042788bc1e0855aa2cd6dbfd6493fe9"
+    },
+    {
+      "compressed_bytes": 977447,
+      "decoded_bytes": 8919772,
+      "snapshot": {
+        "artifact": {
+          "canonical_bytes": 50075,
+          "canonical_sha256": "e0e58807f0d9d7e90b5afe5502b7e6f4be341a072c15f7635e3be21e545c8317",
+          "compressed_bytes": 13263,
+          "path": "sources/e0e58807f0d9d7e90b5afe5502b7e6f4be341a072c15f7635e3be21e545c8317.json.gz",
+          "schema": "scar.dependency-source-snapshot",
+          "schema_version": 1
+        },
+        "origin": "PARENT",
+        "parent_directory": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_dependency_sources_20261023/result",
+        "parent_report_raw_sha256": "fc97075aa66a92758938ad8416347d895e6b18ef0e454053fc7f9c1a7d2f0424",
+        "source_root": "dependency-source-root:e3d802a1bd20a52f4819a1a1046e25b99042788bc1e0855aa2cd6dbfd6493fe9"
+      },
+      "source": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/pymunk/vec2d.py",
+      "source_graph": {
+        "artifact": {
+          "canonical_bytes": 8919772,
+          "canonical_sha256": "51029309edc928e8d04b6f94fd55c7268516ccdef8752c2e2e602849ffe20dc4",
+          "compressed_bytes": 977447,
+          "path": "graphs/51029309edc928e8d04b6f94fd55c7268516ccdef8752c2e2e602849ffe20dc4.json.gz",
+          "schema": "scar.dependency-source-graphs",
+          "schema_version": 1
+        },
+        "origin": "PARENT",
+        "parent_directory": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_dependency_sources_20261023/result",
+        "parent_report_raw_sha256": "fc97075aa66a92758938ad8416347d895e6b18ef0e454053fc7f9c1a7d2f0424",
+        "source_root": "dependency-source-root:e3d802a1bd20a52f4819a1a1046e25b99042788bc1e0855aa2cd6dbfd6493fe9"
+      },
+      "source_root": "dependency-source-root:e3d802a1bd20a52f4819a1a1046e25b99042788bc1e0855aa2cd6dbfd6493fe9"
+    },
+    {
+      "compressed_bytes": 6271889,
+      "decoded_bytes": 53717920,
+      "snapshot": {
+        "artifact": {
+          "canonical_bytes": 303234,
+          "canonical_sha256": "98a58ee5db6a50e695eac86f5ebd4b49db263b88771eaef00b8af79916aa3452",
+          "compressed_bytes": 68819,
+          "path": "sources/98a58ee5db6a50e695eac86f5ebd4b49db263b88771eaef00b8af79916aa3452.json.gz",
+          "schema": "scar.dependency-source-snapshot",
+          "schema_version": 1
+        },
+        "origin": "CONTINUATION",
+        "source_root": "dependency-source-root:e3d802a1bd20a52f4819a1a1046e25b99042788bc1e0855aa2cd6dbfd6493fe9"
+      },
+      "source": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/torch/nn/modules/module.py",
+      "source_graph": {
+        "artifact": {
+          "canonical_bytes": 53717920,
+          "canonical_sha256": "a466a13a303f1beca1b4127d1e5017508cac5df02ec240d50741605cf6bc15d0",
+          "compressed_bytes": 6271889,
+          "path": "graphs/a466a13a303f1beca1b4127d1e5017508cac5df02ec240d50741605cf6bc15d0.json.gz",
+          "schema": "scar.dependency-continuation-source-graphs",
+          "schema_version": 1
+        },
+        "origin": "CONTINUATION",
+        "source_root": "dependency-source-root:e3d802a1bd20a52f4819a1a1046e25b99042788bc1e0855aa2cd6dbfd6493fe9"
+      },
+      "source_root": "dependency-source-root:e3d802a1bd20a52f4819a1a1046e25b99042788bc1e0855aa2cd6dbfd6493fe9"
+    }
+  ],
+  "window": {
+    "call_weight": 68556,
+    "entries": [
+      {
+        "archive_variant_count": 0,
+        "calls": 18685,
+        "entry_key": "2a4cce2f97c89e1ce33e1673af6f2f37d449da83806e2b923e87d660354e55a1",
+        "file": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/numpy/_core/fromnumeric.py",
+        "status": "CODE_WITNESS_UNAVAILABLE"
+      },
+      {
+        "archive_variant_count": 0,
+        "calls": 18685,
+        "entry_key": "8250fe7322097ca33ed5034d62f9ef2953d60f035888bcc2742ae46686cc807f",
+        "file": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/numpy/_core/fromnumeric.py",
+        "status": "CODE_WITNESS_UNAVAILABLE"
+      },
+      {
+        "archive_variant_count": 0,
+        "calls": 10499,
+        "entry_key": "84e6dc922321b0ca4c33f3c0f620909ba1f014968ef3b4a26a123efe04642565",
+        "file": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/torch/nn/modules/module.py",
+        "status": "CODE_WITNESS_UNAVAILABLE"
+      },
+      {
+        "archive_variant_count": 0,
+        "calls": 9911,
+        "entry_key": "15449fac92343dc90b4111afa1dea65c6f606405253af3319e84c50e19afcdab",
+        "file": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/torch/nn/modules/module.py",
+        "status": "CODE_WITNESS_UNAVAILABLE"
+      },
+      {
+        "archive_variant_count": 0,
+        "calls": 4024,
+        "entry_key": "ff3433862bc84befaadb133783423eedb61fc2a1f93b65268b46be9b5813cf9f",
+        "file": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/einops/einops.py",
+        "status": "CODE_WITNESS_UNAVAILABLE"
+      },
+      {
+        "archive_variant_count": 0,
+        "calls": 1891,
+        "entry_key": "ea1e57c4f92586c68dd63def283bc965b9362e2d3baec6536ad7aa5a015bee19",
+        "file": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/trace/callable_environment.py",
+        "status": "CODE_WITNESS_UNAVAILABLE"
+      },
+      {
+        "archive_variant_count": 0,
+        "calls": 1411,
+        "entry_key": "bd24eda3af0988022b3e10d76492aa38bd1e63e55af6ba9facc08dd73012da95",
+        "file": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/pymunk/space_debug_draw_options.py",
+        "status": "CODE_WITNESS_UNAVAILABLE"
+      },
+      {
+        "archive_variant_count": 0,
+        "calls": 552,
+        "entry_key": "394328aa70aaca57bfa857d3a11a8fef0daf08da64311d33ad4d94c292b82b26",
+        "file": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/pymunk/body.py",
+        "status": "CODE_WITNESS_UNAVAILABLE"
+      },
+      {
+        "archive_variant_count": 0,
+        "calls": 526,
+        "entry_key": "170bd6086cd464077c48670fcaf8bac1466ad79567354e6d55e0adf52e402d37",
+        "file": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/pymunk/vec2d.py",
+        "status": "CODE_WITNESS_UNAVAILABLE"
+      },
+      {
+        "archive_variant_count": 0,
+        "calls": 500,
+        "entry_key": "2f0ae0ddcac693d6922cc65eda22b52fd2f9e8e7e5eff5f9ee5aa8923f790a7d",
+        "file": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/pymunk/vec2d.py",
+        "status": "CODE_WITNESS_UNAVAILABLE"
+      },
+      {
+        "archive_variant_count": 0,
+        "calls": 500,
+        "entry_key": "672203ab1f4e3a3db6fad6ab6a756a86bdbf828cccde124bbbbf3c9ea39bb246",
+        "file": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/pymunk/vec2d.py",
+        "status": "CODE_WITNESS_UNAVAILABLE"
+      },
+      {
+        "archive_variant_count": 0,
+        "calls": 412,
+        "entry_key": "768db23cfb04545b363e86157e9de63958e2a6b33d61086b90e5b65ec0924113",
+        "file": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/pymunk/_typing_attr.py",
+        "status": "CODE_WITNESS_UNAVAILABLE"
+      },
+      {
+        "archive_variant_count": 0,
+        "calls": 379,
+        "entry_key": "d4145db0b6eb8afc92d0ee7af65e5ce562665a712997594304409b7734218d94",
+        "file": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/pymunk/body.py",
+        "status": "CODE_WITNESS_UNAVAILABLE"
+      },
+      {
+        "archive_variant_count": 0,
+        "calls": 250,
+        "entry_key": "ece337176e5119727a2798aa8c839ade2363f41c5900f013af8a60e690dc0280",
+        "file": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/pymunk/vec2d.py",
+        "status": "CODE_WITNESS_UNAVAILABLE"
+      },
+      {
+        "archive_variant_count": 0,
+        "calls": 216,
+        "entry_key": "1d009b0ca4b2712461dd26a1dc78a27fa43319cfc67c43b2a1a0a4cf25295bf9",
+        "file": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/pymunk/body.py",
+        "status": "CODE_WITNESS_UNAVAILABLE"
+      },
+      {
+        "archive_variant_count": 0,
+        "calls": 115,
+        "entry_key": "6ebcb77567de55f8e2375a25b01a1ab1943bd828dcbb0fc36641db3ea3973b60",
+        "file": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/torch/nn/modules/module.py",
+        "status": "CODE_WITNESS_UNAVAILABLE"
+      }
+    ],
+    "files": 8,
+    "mechanical_selection": "call weight descending then entry_key; first16 ordinary entries within8 files",
+    "not_an_actual_dispatch_or_current_369749_body_count": true
+  }
+}

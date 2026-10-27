@@ -1,0 +1,190 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="3" skipped="0" tests="42" time="75.851" timestamp="2026-10-19T18:35:05.193963+00:00" hostname="gpu1"><testcase classname="tests.unit.test_program_async_initial_selection" name="test_initial_nonNone_scheduler_cannot_be_replaced_with_stored_none_latent" time="0.247" /><testcase classname="tests.unit.test_program_async_initial_selection" name="test_initial_nonNone_scheduler_supplies_the_original_resume_input" time="0.108" /><testcase classname="tests.unit.test_program_async_initial_selection" name="test_unknown_first_scheduler_never_authorizes_unconditional_latent_reuse" time="0.136" /><testcase classname="tests.unit.test_program_async_initial_selection" name="test_unknown_effective_input_cannot_become_a_created_start_proof" time="0.947" /><testcase classname="tests.unit.test_program_async_initial_selection" name="test_association_state_change_cannot_be_dropped_from_the_joint_body_proof" time="0.972" /><testcase classname="tests.unit.test_program_async_initial_selection" name="test_mixed_known_and_opaque_scheduler_recipes_keep_the_unclassified_source" time="0.052" /><testcase classname="tests.unit.test_program_async_initial_control" name="test_initial_asend_joint_control_keeps_real_sources_targets_and_all_ports[created-none-start]" time="1.029" /><testcase classname="tests.unit.test_program_async_initial_control" name="test_initial_asend_joint_control_keeps_real_sources_targets_and_all_ports[created-reject-own-normal]" time="2.627"><failure message="assert False&#10; +  where False = all(&lt;generator object test_initial_asend_joint_control_keeps_real_sources_targets_and_all_ports.&lt;locals&gt;.&lt;genexpr&gt; at 0x7d497e290930&gt;)">scenario = 'created-reject', reject_raised = False
+
+    @pytest.mark.parametrize('scenario,reject_raised', (
+        ('created-none', False), ('created-reject', False),
+        ('created-reject', True), ('suspended-new', False)),
+        ids=('created-none-start', 'created-reject-own-normal',
+             'created-reject-own-raise', 'yielded-new-nonNone-resume'))
+    def test_initial_asend_joint_control_keeps_real_sources_targets_and_all_ports(scenario, reject_raised):
+        program, details = async_initial_control_program(scenario=scenario, reject_raised=reject_raised)
+        require_valid(_core(program))
+        require_valid(program)
+        report = _report(program)
+        assert not report['issues']
+        view = report['initial_asend']
+        _inventory(program, details, view)
+        assert not view['issues'] and view['known_inventory_complete']
+        assert len(program.resumable_creates) == 1
+        assert len(program.async_request_creates) == (1 if scenario == 'created-none' else 2)
+        assert all(request['latent'].kind is RawRequestKind.SEND for request in details['requests'])
+        first_start = next(stage for stage in details['drivers'] if not stage['reject'])
+        route = _selected_route(view, first_start)
+        assert type(route['drive'].target) is BodyStart
+        assert route['initial_step'] is True and route['body_created'] is True
+        assert route['effective_is_none'] is True
+        assert route['compatible_at_snapshot'] is True
+        controls = first_start['initial_controls']
+        selected = {edge.operation: edge.successor_index for edge in route['choices']}
+        assert {controls['request']['branch']: 0, controls['phase']['branch']: 0,
+                controls['none']['branch']: 0}.items() &lt;= selected.items()
+        assert all(predicate['binding']['match'] is True for predicate in route['predicates'])
+        # None is selected from the actual first NEXT scheduler and independent
+        # latent SEND operand, not from a nonexistent Start resume input.
+        assert not first_start['drive'].resume_inputs
+        assert first_start['scheduler'].kind is RawRequestKind.NEXT
+        assert first_start['request']['operand'].origin.value is None
+        body_predicate = _row(program, controls['phase']['predicate'])
+        none_predicate = _row(program, controls['none']['predicate'])
+        body_view = next(item['view'] for item in view['predicates'] if item['record'] == body_predicate)
+        none_view = next(item['view'] for item in view['predicates'] if item['record'] == none_predicate)
+        assert body_view['body_binding']['match'] is True and body_view['associations']
+        assert none_view['binding']['match'] is True and none_view['operand_bindings']
+        if scenario == 'created-reject':
+            rejected = details['drivers'][0]
+            reject_route = _selected_route(view, rejected, terminal=True)
+            assert reject_route['drive'] is None and reject_route['gate'] is None
+            assert reject_route['initial_step'] is True and reject_route['body_created'] is True
+            assert reject_route['effective_is_none'] is False
+            assert reject_route['processing']
+            update = rejected['reject_complete']
+            assert update.post is SessionPost.COMPLETE and update.binding is LifecyclePostBinding.AFTER_OPERATION
+            assert not any(type(row) is AsyncSessionOutcome and row.update == update.operation
+                           for row in program.protocol_bindings)
+            assert not any(row.operation == update.operation for row in program.body_outcome_commits)
+            request_index = ProgramIndex(program)
+            assert request_index.source_binding(details['requests'][0]['result'],
+                OwnedUse(update.operation, update.request), budget=_BUDGET)['match'] is True
+            assert details['requests'][0]['result'] != details['requests'][1]['result']
+            helper = next(operation for operation in program.operations
+                          if operation.id == details['initial_control']['reject_helper'])
+            rows = tuple(row for row in details['initial_control']['processing'] if row.operation == helper.id)
+            assert len(rows) == 2
+            for row in rows:
+                assert tuple(binding.request_ordinal for binding in row.contract.operand_bindings) == (0,)
+                edge = helper.terminator.successors[row.contract.result.edge.successor_index]
+                assert edge.kind is (ExitKind.NORMAL if row.contract.result.edge.successor_index == 0 else ExitKind.RAISE)
+                assert tuple(argument.index for argument in edge.arguments if type(argument) is CompletionResult) == tuple(
+                    range(1 + len(program.locations)))
+                landing = next(block for region in program.regions for block in region.blocks if block.id == edge.block)
+                own = tuple(formal for actual, formal in zip(edge.arguments, landing.arguments)
+                            if type(actual) is CompletionResult)
+                terminal = next(operation for operation in program.operations if operation.id == landing.operations[-1])
+                assert terminal.terminator.kind is TerminatorKind.RAISE
+                assert tuple(next(use.value for use in terminal.uses if use.id == identity)
+                             for identity in terminal.terminator.values) == own
+            selected_processing = next(item for item in reject_route['processing_views']
+                if item['record'].contract.result.edge.successor_index == int(reject_raised))
+            assert selected_processing['applicable']
+&gt;           assert all(binding['report']['match'] is True for binding in selected_processing['operand_bindings'])
+E           assert False
+E            +  where False = all(&lt;generator object test_initial_asend_joint_control_keeps_real_sources_targets_and_all_ports.&lt;locals&gt;.&lt;genexpr&gt; at 0x7d497e290930&gt;)
+
+tests/unit/test_program_async_initial_control.py:142: AssertionError</failure></testcase><testcase classname="tests.unit.test_program_async_initial_control" name="test_initial_asend_joint_control_keeps_real_sources_targets_and_all_ports[created-reject-own-raise]" time="2.664"><failure message="assert False&#10; +  where False = all(&lt;generator object test_initial_asend_joint_control_keeps_real_sources_targets_and_all_ports.&lt;locals&gt;.&lt;genexpr&gt; at 0x7d497d4bb6b0&gt;)">scenario = 'created-reject', reject_raised = True
+
+    @pytest.mark.parametrize('scenario,reject_raised', (
+        ('created-none', False), ('created-reject', False),
+        ('created-reject', True), ('suspended-new', False)),
+        ids=('created-none-start', 'created-reject-own-normal',
+             'created-reject-own-raise', 'yielded-new-nonNone-resume'))
+    def test_initial_asend_joint_control_keeps_real_sources_targets_and_all_ports(scenario, reject_raised):
+        program, details = async_initial_control_program(scenario=scenario, reject_raised=reject_raised)
+        require_valid(_core(program))
+        require_valid(program)
+        report = _report(program)
+        assert not report['issues']
+        view = report['initial_asend']
+        _inventory(program, details, view)
+        assert not view['issues'] and view['known_inventory_complete']
+        assert len(program.resumable_creates) == 1
+        assert len(program.async_request_creates) == (1 if scenario == 'created-none' else 2)
+        assert all(request['latent'].kind is RawRequestKind.SEND for request in details['requests'])
+        first_start = next(stage for stage in details['drivers'] if not stage['reject'])
+        route = _selected_route(view, first_start)
+        assert type(route['drive'].target) is BodyStart
+        assert route['initial_step'] is True and route['body_created'] is True
+        assert route['effective_is_none'] is True
+        assert route['compatible_at_snapshot'] is True
+        controls = first_start['initial_controls']
+        selected = {edge.operation: edge.successor_index for edge in route['choices']}
+        assert {controls['request']['branch']: 0, controls['phase']['branch']: 0,
+                controls['none']['branch']: 0}.items() &lt;= selected.items()
+        assert all(predicate['binding']['match'] is True for predicate in route['predicates'])
+        # None is selected from the actual first NEXT scheduler and independent
+        # latent SEND operand, not from a nonexistent Start resume input.
+        assert not first_start['drive'].resume_inputs
+        assert first_start['scheduler'].kind is RawRequestKind.NEXT
+        assert first_start['request']['operand'].origin.value is None
+        body_predicate = _row(program, controls['phase']['predicate'])
+        none_predicate = _row(program, controls['none']['predicate'])
+        body_view = next(item['view'] for item in view['predicates'] if item['record'] == body_predicate)
+        none_view = next(item['view'] for item in view['predicates'] if item['record'] == none_predicate)
+        assert body_view['body_binding']['match'] is True and body_view['associations']
+        assert none_view['binding']['match'] is True and none_view['operand_bindings']
+        if scenario == 'created-reject':
+            rejected = details['drivers'][0]
+            reject_route = _selected_route(view, rejected, terminal=True)
+            assert reject_route['drive'] is None and reject_route['gate'] is None
+            assert reject_route['initial_step'] is True and reject_route['body_created'] is True
+            assert reject_route['effective_is_none'] is False
+            assert reject_route['processing']
+            update = rejected['reject_complete']
+            assert update.post is SessionPost.COMPLETE and update.binding is LifecyclePostBinding.AFTER_OPERATION
+            assert not any(type(row) is AsyncSessionOutcome and row.update == update.operation
+                           for row in program.protocol_bindings)
+            assert not any(row.operation == update.operation for row in program.body_outcome_commits)
+            request_index = ProgramIndex(program)
+            assert request_index.source_binding(details['requests'][0]['result'],
+                OwnedUse(update.operation, update.request), budget=_BUDGET)['match'] is True
+            assert details['requests'][0]['result'] != details['requests'][1]['result']
+            helper = next(operation for operation in program.operations
+                          if operation.id == details['initial_control']['reject_helper'])
+            rows = tuple(row for row in details['initial_control']['processing'] if row.operation == helper.id)
+            assert len(rows) == 2
+            for row in rows:
+                assert tuple(binding.request_ordinal for binding in row.contract.operand_bindings) == (0,)
+                edge = helper.terminator.successors[row.contract.result.edge.successor_index]
+                assert edge.kind is (ExitKind.NORMAL if row.contract.result.edge.successor_index == 0 else ExitKind.RAISE)
+                assert tuple(argument.index for argument in edge.arguments if type(argument) is CompletionResult) == tuple(
+                    range(1 + len(program.locations)))
+                landing = next(block for region in program.regions for block in region.blocks if block.id == edge.block)
+                own = tuple(formal for actual, formal in zip(edge.arguments, landing.arguments)
+                            if type(actual) is CompletionResult)
+                terminal = next(operation for operation in program.operations if operation.id == landing.operations[-1])
+                assert terminal.terminator.kind is TerminatorKind.RAISE
+                assert tuple(next(use.value for use in terminal.uses if use.id == identity)
+                             for identity in terminal.terminator.values) == own
+            selected_processing = next(item for item in reject_route['processing_views']
+                if item['record'].contract.result.edge.successor_index == int(reject_raised))
+            assert selected_processing['applicable']
+&gt;           assert all(binding['report']['match'] is True for binding in selected_processing['operand_bindings'])
+E           assert False
+E            +  where False = all(&lt;generator object test_initial_asend_joint_control_keeps_real_sources_targets_and_all_ports.&lt;locals&gt;.&lt;genexpr&gt; at 0x7d497d4bb6b0&gt;)
+
+tests/unit/test_program_async_initial_control.py:142: AssertionError</failure></testcase><testcase classname="tests.unit.test_program_async_initial_control" name="test_initial_asend_joint_control_keeps_real_sources_targets_and_all_ports[yielded-new-nonNone-resume]" time="1.803" /><testcase classname="tests.unit.test_program_async_initial_control" name="test_independent_roles_and_bool_are_not_joint_initial_control[body-async_initial_body]" time="0.469" /><testcase classname="tests.unit.test_program_async_initial_control" name="test_independent_roles_and_bool_are_not_joint_initial_control[operand-async_initial_operand]" time="0.626" /><testcase classname="tests.unit.test_program_async_initial_control" name="test_independent_roles_and_bool_are_not_joint_initial_control[ordinal-async_initial_processing_ordinal]" time="0.491" /><testcase classname="tests.unit.test_program_async_initial_control" name="test_independent_roles_and_bool_are_not_joint_initial_control[bool-admission_bool_source]" time="0.508" /><testcase classname="tests.unit.test_program_async_initial_control" name="test_callback_keeps_historical_bool_legal_but_current_phase_support_unknown" time="0.523" /><testcase classname="tests.unit.test_program_async_initial_control" name="test_missing_none_attachment_retains_original_bool_branch_helper_and_gates" time="0.511" /><testcase classname="tests.unit.test_program_async_initial_control" name="test_created_start_cannot_reuse_latent_none_when_first_scheduler_is_nonNone" time="1.046" /><testcase classname="tests.unit.test_program_async_initial_control" name="test_tiny_budget_preserves_whole_joint_inventory_and_never_grants_a_prefix" time="1.694" /><testcase classname="tests.unit.test_execution_async_initial_control" name="test_actual_initial_control_has_exact_request_body_current_states_and_continuation[created-none-start]" time="2.973" /><testcase classname="tests.unit.test_execution_async_initial_control" name="test_actual_initial_control_has_exact_request_body_current_states_and_continuation[created-reject-own-normal]" time="5.769" /><testcase classname="tests.unit.test_execution_async_initial_control" name="test_actual_initial_control_has_exact_request_body_current_states_and_continuation[created-reject-own-raise]" time="5.616" /><testcase classname="tests.unit.test_execution_async_initial_control" name="test_actual_initial_control_has_exact_request_body_current_states_and_continuation[yielded-new-nonNone-resume]" time="5.319" /><testcase classname="tests.unit.test_execution_async_initial_control" name="test_missing_current_initial_input_or_transfer_cannot_borrow_complete_sibling[call]" time="2.774" /><testcase classname="tests.unit.test_execution_async_initial_control" name="test_missing_current_initial_input_or_transfer_cannot_borrow_complete_sibling[operand]" time="3.055" /><testcase classname="tests.unit.test_execution_async_initial_control" name="test_missing_current_initial_input_or_transfer_cannot_borrow_complete_sibling[initial-transfer]" time="2.893" /><testcase classname="tests.unit.test_execution_async_initial_control" name="test_budget_one_retains_each_actual_drive_port_and_session_target_without_true_prefix" time="5.553" /><testcase classname="tests.unit.test_execution_async_initial_control" name="test_missing_fourth_return_adapter_input_cannot_borrow_earlier_item_or_sibling" time="9.250"><failure message="AssertionError: assert {'status': 'UNPROVED', 'source': ValueOccurrence(id=ValueOccurrenceID(value='async.initial.control.0.body.0.literal.pi...none'), origin=RegionActivationID(value='async.initial.control.0.body')), 'target': None, 'source_identity': None, ...} is None">def test_missing_fourth_return_adapter_input_cannot_borrow_earlier_item_or_sibling():
+        program, model, details = async_initial_control_execution(scenario='suspended-new', instances=2)
+        original = _index(program, model)
+        static, example = details['static'], details['instances'][0]
+        driver = static['drivers'][-1]
+        association = example['body_drives'][-1]
+        view = original.drive_execution(association.drive, budget=_BUDGET)
+        constructor, selected = _return_adapter(original, program, model, driver, example, 3, view)
+        occurrence = example['driver_scopes'][3][2][constructor.id]
+        changed = replace(model, uses=tuple(row for row in model.uses
+            if (row.operation, row.use) != (occurrence, selected.contract.input_use)))
+        index = _index(program, changed)
+        actual = index.drive_execution(association.drive, budget=_BUDGET)
+        assert actual['association'] == association
+        assert actual['session']['source'] == driver['outcome']
+        assert actual['session']['target_count'] == 1
+        assert actual['session']['status'] == 'PARTIAL'
+        host, = actual['session']['hosts']
+        assert host['operation'].id == example['call_activations'][3].completion
+        assert host['adapter']['declaration'] == selected
+        assert host['adapter']['occurrence'].id == occurrence
+        assert host['adapter']['input'] is None
+        assert host['bindings'][0]['source_value'] == view['outputs'][0]['source_value']
+        assert host['bindings'][0]['target_value'] is None
+&gt;       assert host['bindings'][0]['compatibility'] is None
+E       AssertionError: assert {'status': 'UNPROVED', 'source': ValueOccurrence(id=ValueOccurrenceID(value='async.initial.control.0.body.0.literal.pi...none'), origin=RegionActivationID(value='async.initial.control.0.body')), 'target': None, 'source_identity': None, ...} is None
+
+tests/unit/test_execution_async_initial_control.py:368: AssertionError</failure></testcase><testcase classname="tests.unit.test_program_async_initial_control_codec" name="test_program26_preserves_original_body_none_ports_and_uses_the_existing_subject_tags[body]" time="2.163" /><testcase classname="tests.unit.test_program_async_initial_control_codec" name="test_program26_preserves_original_body_none_ports_and_uses_the_existing_subject_tags[none]" time="2.049" /><testcase classname="tests.unit.test_program_async_initial_control_codec" name="test_capability_is_the_exact_async_subject_profile_clause_combination" time="0.443" /><testcase classname="tests.unit.test_program_async_initial_control_codec" name="test_historical_headers_reject_the_new_combination_even_with_old_untagged_subject_shapes[19]" time="1.241" /><testcase classname="tests.unit.test_program_async_initial_control_codec" name="test_historical_headers_reject_the_new_combination_even_with_old_untagged_subject_shapes[25]" time="1.186" /><testcase classname="tests.unit.test_program_async_initial_control_codec" name="test_old_profile_subjects_remain_program18_and_cannot_select_program26_by_header[body]" time="0.065" /><testcase classname="tests.unit.test_program_async_initial_control_codec" name="test_old_profile_subjects_remain_program18_and_cannot_select_program26_by_header[none]" time="0.061" /><testcase classname="tests.unit.test_program_async_initial_control_codec" name="test_old_initial_asend_processing_rule_alone_does_not_select_program26" time="0.181" /><testcase classname="tests.unit.test_program_async_initial_control_codec" name="test_program26_can_coexist_with_expansions_while_program25_still_requires_the_nonempty_table" time="1.712" /><testcase classname="tests.unit.test_program_async_initial_control_codec" name="test_program26_does_not_relax_original_subject_types_or_allow_new_phase_facts[wrong-use-namespace]" time="1.002" /><testcase classname="tests.unit.test_program_async_initial_control_codec" name="test_program26_does_not_relax_original_subject_types_or_allow_new_phase_facts[duplicate-read]" time="1.099" /><testcase classname="tests.unit.test_program_async_initial_control_codec" name="test_program26_does_not_relax_original_subject_types_or_allow_new_phase_facts[invented-phase]" time="0.954" /><testcase classname="tests.unit.test_program_async_initial_control_codec" name="test_boolean_or_future_schema_does_not_enable_async_initial_control[True]" time="0.994" /><testcase classname="tests.unit.test_program_async_initial_control_codec" name="test_boolean_or_future_schema_does_not_enable_async_initial_control[27]" time="0.866" /><testcase classname="tests.unit.test_program_async_initial_control_codec" name="test_independent_program25_encoder_keeps_the_original_effect_expansion_bytes" time="0.860" /></testsuite></testsuites>

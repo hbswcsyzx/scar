@@ -1,0 +1,39 @@
+{
+  "schema": "scar.environment-entry-component-receipt",
+  "schema_version": 1,
+  "status": "COMPONENT_PASS_FULL_REGRESSION_PENDING",
+  "product_source_sha256": "efefa8a50396c4637935a488fca04663d738f4430679bd4f0975fd07be0c00cd",
+  "product_source_files": 346,
+  "component_report": "component-final/report.json",
+  "component_duration_seconds": 16.941,
+  "criteria": [
+    {
+      "id": "strict-environment-and-entry-declarations",
+      "status": "PASS",
+      "case_count": 88
+    },
+    {
+      "id": "canonical-entry-partition-call-state-and-completion-interfaces",
+      "status": "PASS",
+      "case_count": 112
+    },
+    {
+      "id": "canonical-binding-queries-and-original-v1-to-v4-wire",
+      "status": "PASS",
+      "case_count": 67
+    },
+    {
+      "id": "public-check-program-and-unchanged-source-profiles",
+      "status": "PASS",
+      "case_count": 60
+    }
+  ],
+  "prior_evidence": "component/report.json is the pre-slot-collision 326-check report, preserved unchanged.",
+  "language_probe": "artifacts/experiments/model_environment_interfaces/language/ uses only Python, not Torch or LeWM.",
+  "limits": [
+    "Static declaration validation only; no automatic source or runtime function/environment identity proof.",
+    "M1/M2 and the complete first modeling phase remain unfinished.",
+    "No detector, backend, LeWM change or workload speedup is claimed."
+  ],
+  "additional_evidence_root": "artifacts/experiments/model_environment_interfaces/"
+}

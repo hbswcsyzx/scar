@@ -1,0 +1,15 @@
+{
+  "aggregate": "OPEN",
+  "calls": 64,
+  "max_rss_kib": 39816,
+  "output": {
+    "chunks": 2,
+    "decoded_bytes": 2403376,
+    "stored_bytes": 68721
+  },
+  "raw_capture_reads": 0,
+  "scope": "small synthetic metadata only; no real archives",
+  "source_definitions": 5,
+  "target_executions": 0,
+  "wall_seconds": 0.488628933992004
+}

@@ -1,0 +1,23 @@
+{
+  "source_revision": "dcd498699e0cd1331cf496158b29575c3fc2c536",
+  "generation": "git archive scar/tests, import original isolated package in fresh CPython process",
+  "command": [
+    "/home/zyf/miniconda3/envs/lewm/bin/python",
+    "-c",
+    "import json,scar\nfrom scar.ir.program.codec import dumps\nfrom tests.fixtures.program_graphs import loop_state_program\nfrom tests.unit.test_program_bindings import _bound_graph\nprint(json.dumps({\"module\":scar.__file__,\"v2\":dumps(loop_state_program()),\"v3\":dumps(_bound_graph())}))\n"
+  ],
+  "python": "3.14.7 | packaged by conda-forge | (main, Sep  2 2026, 21:08:32) [GCC 15.3.0]",
+  "fixtures": [
+    {
+      "path": "tests/fixtures/program_graph_v2_frozen.json",
+      "wire_sha256": "e56b6cbe869f1618717e7533b9a5140c1f59a2622b480db11cb669a3cccf030b",
+      "schema_version": 2
+    },
+    {
+      "path": "tests/fixtures/program_graph_v3_frozen.json",
+      "wire_sha256": "477544a3a318dbcab7b38f7ba690453cbbf4f357859ce868f56b65e94fc83ef2",
+      "schema_version": 3
+    }
+  ],
+  "stderr": ""
+}

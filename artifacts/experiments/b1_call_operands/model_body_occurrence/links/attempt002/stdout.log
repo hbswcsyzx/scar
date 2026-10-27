@@ -1,0 +1,62 @@
+...................F............F                                        [100%]
+=================================== FAILURES ===================================
+__ test_known_old_suspend_from_another_activation_is_not_a_resume_generation ___
+
+    def test_known_old_suspend_from_another_activation_is_not_a_resume_generation():
+        program, model, details = resumable_execution(instances=2)
+        _index(program, model, details)
+        first, second = details['instances']
+        wrong = replace(model, segments=tuple(replace(row, ingress=replace(row.ingress, suspension=first['suspension']))
+            if row.id == second['segments'][1] else row for row in model.segments))
+>       assert 'resume_source' in _codes(program, wrong, details)
+E       AssertionError: assert 'resume_source' in {'transfer_resume'}
+E        +  where {'transfer_resume'} = _codes(ProgramGraph(root=RegionID(value='factory'), regions=(Region(id=RegionID(value='factory'), label='declared driver fixt...al_frame_releases=(), state_address_refinements=(), literal_evaluations=(), protocol_scopes=(), protocol_operations=()), ExecutionModel(snapshot=ProgramSnapshot(artifact=ProviderArtifact(uri='memory:canonical-program', sha256='3a1691429a28....factory.create'), source=MissingEvidence(reason='hand-authored call pairing; not source/runtime identity evidence')))), {'instances': ({'activation': RegionActivationID(value='instance.0.body'), 'entries': (BlockVisitID(value='instance.0....lue='calls'), source=MissingEvidence(reason='hand-authored call pairing; not source/runtime identity evidence'))), ...})
+
+tests/unit/test_execution_resumable_links.py:183: AssertionError
+_ test_public_views_are_detached_and_strict_ids_budget_preserve_unchecked_work _
+
+    def test_public_views_are_detached_and_strict_ids_budget_preserve_unchecked_work():
+        program, model, details = resumable_execution()
+        index = _index(program, model, details)
+        item, = details['instances']
+        drive = item['drives'][0]
+        view = index.drive_execution(drive)
+        object.__setattr__(view['drive'], 'operation', OperationID('not.the.original'))
+        view['inputs'] = ()
+        original = index.drive_execution(drive)
+        assert original['drive'].operation == OperationID('driver.drive') and original['inputs']
+        small = index.drive_execution(drive, budget=1)
+        assert small['budget']['used'] <= 1 and small['budget']['truncated'] is True
+        assert small['cursor'] is not None
+        assert small['outcome_candidates'] == original['outcome_candidates']
+        assert small['association'] == original['association']
+        for bad in (True, 0, -1):
+            with pytest.raises((TypeError, ValueError)):
+                index.drive_execution(drive, budget=bad)
+        with pytest.raises(TypeError):
+            index.drive_execution(drive.value)
+        with pytest.raises(KeyError):
+>           index.drive_execution(OperationOccurrenceID('missing'))
+
+tests/unit/test_execution_resumable_links.py:351: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+scar/ir/execution/query.py:173: in drive_execution
+    return drive_execution(self._content_context(), identity, shared=shared)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+ctx = <scar.ir.execution.validation._Context object at 0x7485d318f770>
+identity = OperationOccurrenceID(value='missing')
+shared = <scar.ir.execution.validity_budget.ValidityBudget object at 0x7485d3081ef0>
+
+    def drive_execution(ctx, identity, *, shared):
+        _identifier(identity, OperationOccurrenceID, 'body drive query occurrence')
+        if identity not in ctx.body_drive_occurrences:
+>           raise ValueError('body drive query requires a captured canonical BodyDrive occurrence')
+E           ValueError: body drive query requires a captured canonical BodyDrive occurrence
+
+scar/ir/execution/resumable_query.py:28: ValueError
+=========================== short test summary info ============================
+FAILED tests/unit/test_execution_resumable_links.py::test_known_old_suspend_from_another_activation_is_not_a_resume_generation
+FAILED tests/unit/test_execution_resumable_links.py::test_public_views_are_detached_and_strict_ids_budget_preserve_unchecked_work
+2 failed, 31 passed in 5.90s

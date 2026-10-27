@@ -1,0 +1,555 @@
+{
+  "schema": "scar.source-normal-return-query",
+  "schema_version": 1,
+  "qualification": "CONDITIONAL_LANGUAGE_NORMAL_RETURN_PORTS",
+  "return": {
+    "binding_source": {
+      "artifact": {
+        "uri": "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/source_call_port_bindings_20261026/candidate04/result/source-ports/model.json.gz",
+        "sha256": "8b9e8abc8731880bb08ee92ce789f3abe359389c52eb402ba8cf069f15f123d2",
+        "size_bytes": 6605220,
+        "schema": "scar.source-call-port-bindings/1"
+      },
+      "locator": "#/model/bindings/0"
+    },
+    "binding_index": 0,
+    "caller": {
+      "process_id": 369749,
+      "thread_id": 134637364963136,
+      "invocation_id": 40397
+    },
+    "callee": {
+      "process_id": 369749,
+      "thread_id": 134637364963136,
+      "invocation_id": 40398
+    },
+    "caller_body": {
+      "graph": {
+        "artifact": {
+          "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_plain_20261023/checkpoints/00128.json.gz",
+          "sha256": "f645a97db1b628675259b345b6a303fbe290fdac179da53b8e045bcbd0b0103c",
+          "size_bytes": 387878,
+          "schema": "scar.body-construction-checkpoint/1"
+        },
+        "decoded_sha256": "87e50293a0054c13afb2ca9bf96dd0580ab9782f681416a0b4e771fa2766a11f",
+        "decoded_bytes": 4596226,
+        "representation": "gzip-canonical-json",
+        "pointer": "#/graph",
+        "declaration": {
+          "artifact": {
+            "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/source_frontend_remainder_composition_resume02_20261025/result/composition/index.json.gz",
+            "sha256": "45569e930c3fe03a6d2cf4c26a93491c7ce9b496d25aab5fae09767deb91fe9b",
+            "size_bytes": 17109069,
+            "schema": "scar.program-composition"
+          },
+          "locator": "#/files/113/bodies/4/graph_locator"
+        }
+      },
+      "graph_representation": "scar.program-graph/15",
+      "definition": {
+        "kind": "opdef",
+        "value": "op:66cb434f91ff974dc6fe96ba",
+        "wire": "opdef:op:66cb434f91ff974dc6fe96ba"
+      },
+      "source": {
+        "atom_id": {
+          "kind": "source",
+          "value": "atom:660e253633bd2baade442a15",
+          "wire": "source:atom:660e253633bd2baade442a15"
+        },
+        "path": "/home/zyf/AAA/le-wm/stable-worldmodel/stable_worldmodel/envs/utils.py",
+        "fingerprint": "sha256:2e5d98a5c13227cba6f5574bf72b6eab149ee5b3783df0481b8d240f34047f56",
+        "start_line": 91,
+        "end_line": 133,
+        "start_column": 4,
+        "end_column": 13
+      },
+      "entry": "DrawOptions.draw_fat_segment",
+      "region": {
+        "kind": "program_region",
+        "value": "15c977f593209680d3ede8501779e9d9",
+        "wire": "program_region:15c977f593209680d3ede8501779e9d9"
+      }
+    },
+    "callee_body": {
+      "graph": {
+        "artifact": {
+          "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_plain_20261023/checkpoints/00090.json.gz",
+          "sha256": "12db9ab0f720d0957bc78133f7db8f3844595d8e11e2e1d5894774b06387c0b7",
+          "size_bytes": 49248,
+          "schema": "scar.body-construction-checkpoint/1"
+        },
+        "decoded_sha256": "56ae2fbb3d3af32a1119941cc5d85af91c07a7d3cea02689ac01dc46f1cd9a89",
+        "decoded_bytes": 517809,
+        "representation": "gzip-canonical-json",
+        "pointer": "#/graph",
+        "declaration": {
+          "artifact": {
+            "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/source_frontend_remainder_composition_resume02_20261025/result/composition/index.json.gz",
+            "sha256": "45569e930c3fe03a6d2cf4c26a93491c7ce9b496d25aab5fae09767deb91fe9b",
+            "size_bytes": 17109069,
+            "schema": "scar.program-composition"
+          },
+          "locator": "#/files/113/bodies/9/graph_locator"
+        }
+      },
+      "graph_representation": "scar.program-graph/15",
+      "definition": {
+        "kind": "opdef",
+        "value": "op:1b2c68fb98614934e6ca723e",
+        "wire": "opdef:op:1b2c68fb98614934e6ca723e"
+      },
+      "source": {
+        "atom_id": {
+          "kind": "source",
+          "value": "atom:18ada1f7ae81b472ab6ed7ef",
+          "wire": "source:atom:18ada1f7ae81b472ab6ed7ef"
+        },
+        "path": "/home/zyf/AAA/le-wm/stable-worldmodel/stable_worldmodel/envs/utils.py",
+        "fingerprint": "sha256:2e5d98a5c13227cba6f5574bf72b6eab149ee5b3783df0481b8d240f34047f56",
+        "start_line": 167,
+        "end_line": 179,
+        "start_column": 0,
+        "end_column": 39
+      },
+      "entry": "to_pygame",
+      "region": {
+        "kind": "program_region",
+        "value": "01e191d044bc311f7a3a477219de0cb7",
+        "wire": "program_region:01e191d044bc311f7a3a477219de0cb7"
+      }
+    },
+    "operation": {
+      "kind": "program_operation",
+      "value": "de7a4ea86d198711d14735c754d04d67",
+      "wire": "program_operation:de7a4ea86d198711d14735c754d04d67"
+    },
+    "completion_edge": {
+      "operation": {
+        "kind": "program_operation",
+        "value": "de7a4ea86d198711d14735c754d04d67",
+        "wire": "program_operation:de7a4ea86d198711d14735c754d04d67"
+      },
+      "successor_index": 0
+    },
+    "completion": {
+      "index": 0
+    },
+    "landing_block": {
+      "kind": "program_block",
+      "value": "0afd5a1359d3ecb2349291f1a1526509",
+      "wire": "program_block:0afd5a1359d3ecb2349291f1a1526509"
+    },
+    "landing_position": 0,
+    "landing_value": {
+      "kind": "program_value",
+      "value": "ba7b6131edbf2f4454ad46a7e2ce5b14",
+      "wire": "program_value:ba7b6131edbf2f4454ad46a7e2ce5b14"
+    },
+    "sites": [
+      {
+        "exit_port": {
+          "region": {
+            "kind": "program_region",
+            "value": "01e191d044bc311f7a3a477219de0cb7",
+            "wire": "program_region:01e191d044bc311f7a3a477219de0cb7"
+          },
+          "exit_name": "normal",
+          "index": 0
+        },
+        "block": {
+          "kind": "program_block",
+          "value": "ac5a96c9d49ba37eaa2efb836c843f44",
+          "wire": "program_block:ac5a96c9d49ba37eaa2efb836c843f44"
+        },
+        "operation": {
+          "kind": "program_operation",
+          "value": "05aac0b7df8d0738777770cc3d181281",
+          "wire": "program_operation:05aac0b7df8d0738777770cc3d181281"
+        },
+        "use": {
+          "kind": "program_use",
+          "value": "92f87313f1c97c309aae2d639f00e657",
+          "wire": "program_use:92f87313f1c97c309aae2d639f00e657"
+        },
+        "value": {
+          "kind": "program_value",
+          "value": "0a152c4458dd847e8e581bbe33a649f6",
+          "wire": "program_value:0a152c4458dd847e8e581bbe33a649f6"
+        },
+        "terminator_position": 0,
+        "condition": "CALLEE_RETURN_SITE_SELECTED"
+      },
+      {
+        "exit_port": {
+          "region": {
+            "kind": "program_region",
+            "value": "01e191d044bc311f7a3a477219de0cb7",
+            "wire": "program_region:01e191d044bc311f7a3a477219de0cb7"
+          },
+          "exit_name": "normal",
+          "index": 0
+        },
+        "block": {
+          "kind": "program_block",
+          "value": "fabf8287720d3252063a7ab18b56fafa",
+          "wire": "program_block:fabf8287720d3252063a7ab18b56fafa"
+        },
+        "operation": {
+          "kind": "program_operation",
+          "value": "f90cbe2cdbe853766d9652d6f9bb9a2a",
+          "wire": "program_operation:f90cbe2cdbe853766d9652d6f9bb9a2a"
+        },
+        "use": {
+          "kind": "program_use",
+          "value": "81bf6fd6ec37ee9208b99e3d30061e26",
+          "wire": "program_use:81bf6fd6ec37ee9208b99e3d30061e26"
+        },
+        "value": {
+          "kind": "program_value",
+          "value": "4493a000c88300e54f63c0d9a00c6826",
+          "wire": "program_value:4493a000c88300e54f63c0d9a00c6826"
+        },
+        "terminator_position": 0,
+        "condition": "CALLEE_RETURN_SITE_SELECTED"
+      }
+    ],
+    "rule": "PYTHON_SINGLE_OBJECT_NORMAL_RETURN_V1",
+    "conditions": [
+      "ORIGINAL_TARGET_AND_ENTRY_BINDING",
+      "CALLEE_COMPLETES_NORMALLY",
+      "CALL_NORMAL_EDGE_SELECTED"
+    ]
+  },
+  "original_binding_conditions": [
+    "CAPTURE_PRODUCER_TRUSTED",
+    "NO_FRAME_INTERPOSITION",
+    "NO_NAMESPACE_MUTATION_BETWEEN_OBSERVATION_AND_LOAD",
+    "OBSERVER_AND_AUDIT_NONINTERFERENCE",
+    "MONITORING_DELIVERY_CONTINUITY_UNVERIFIED",
+    "SOURCE_CORE_EXECUTION_PRECONDITIONS",
+    "FUNCTION_ENVIRONMENT_UNVERIFIED",
+    "CONTENTS_EFFECTS_AND_WORLD_EQUIVALENCE_UNVERIFIED"
+  ],
+  "original_argument_ports": [
+    {
+      "index": 0,
+      "actual_body": {
+        "graph": {
+          "artifact": {
+            "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_plain_20261023/checkpoints/00128.json.gz",
+            "sha256": "f645a97db1b628675259b345b6a303fbe290fdac179da53b8e045bcbd0b0103c",
+            "size_bytes": 387878,
+            "schema": "scar.body-construction-checkpoint/1"
+          },
+          "decoded_sha256": "87e50293a0054c13afb2ca9bf96dd0580ab9782f681416a0b4e771fa2766a11f",
+          "decoded_bytes": 4596226,
+          "representation": "gzip-canonical-json",
+          "pointer": "#/graph",
+          "declaration": {
+            "artifact": {
+              "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/source_frontend_remainder_composition_resume02_20261025/result/composition/index.json.gz",
+              "sha256": "45569e930c3fe03a6d2cf4c26a93491c7ce9b496d25aab5fae09767deb91fe9b",
+              "size_bytes": 17109069,
+              "schema": "scar.program-composition"
+            },
+            "locator": "#/files/113/bodies/4/graph_locator"
+          }
+        },
+        "graph_representation": "scar.program-graph/15",
+        "definition": {
+          "kind": "opdef",
+          "value": "op:66cb434f91ff974dc6fe96ba",
+          "wire": "opdef:op:66cb434f91ff974dc6fe96ba"
+        },
+        "source": {
+          "atom_id": {
+            "kind": "source",
+            "value": "atom:660e253633bd2baade442a15",
+            "wire": "source:atom:660e253633bd2baade442a15"
+          },
+          "path": "/home/zyf/AAA/le-wm/stable-worldmodel/stable_worldmodel/envs/utils.py",
+          "fingerprint": "sha256:2e5d98a5c13227cba6f5574bf72b6eab149ee5b3783df0481b8d240f34047f56",
+          "start_line": 91,
+          "end_line": 133,
+          "start_column": 4,
+          "end_column": 13
+        },
+        "entry": "DrawOptions.draw_fat_segment",
+        "region": {
+          "kind": "program_region",
+          "value": "15c977f593209680d3ede8501779e9d9",
+          "wire": "program_region:15c977f593209680d3ede8501779e9d9"
+        }
+      },
+      "operation": {
+        "kind": "program_operation",
+        "value": "de7a4ea86d198711d14735c754d04d67",
+        "wire": "program_operation:de7a4ea86d198711d14735c754d04d67"
+      },
+      "actual_source": {
+        "atom_id": {
+          "kind": "source",
+          "value": "atom:b1b17d2d45ff21ab0aca1443",
+          "wire": "source:atom:b1b17d2d45ff21ab0aca1443"
+        },
+        "path": "/home/zyf/AAA/le-wm/stable-worldmodel/stable_worldmodel/envs/utils.py",
+        "fingerprint": "sha256:2e5d98a5c13227cba6f5574bf72b6eab149ee5b3783df0481b8d240f34047f56",
+        "start_line": 99,
+        "end_line": 99,
+        "start_column": 23,
+        "end_column": 24
+      },
+      "actual_use": {
+        "kind": "program_use",
+        "value": "1b592758d9eadbc2d8f633ac5241b6bf",
+        "wire": "program_use:1b592758d9eadbc2d8f633ac5241b6bf"
+      },
+      "actual_value": {
+        "kind": "program_value",
+        "value": "3ce086faeea483a4b45c57d33aeeb833",
+        "wire": "program_value:3ce086faeea483a4b45c57d33aeeb833"
+      },
+      "formal_body": {
+        "graph": {
+          "artifact": {
+            "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_plain_20261023/checkpoints/00090.json.gz",
+            "sha256": "12db9ab0f720d0957bc78133f7db8f3844595d8e11e2e1d5894774b06387c0b7",
+            "size_bytes": 49248,
+            "schema": "scar.body-construction-checkpoint/1"
+          },
+          "decoded_sha256": "56ae2fbb3d3af32a1119941cc5d85af91c07a7d3cea02689ac01dc46f1cd9a89",
+          "decoded_bytes": 517809,
+          "representation": "gzip-canonical-json",
+          "pointer": "#/graph",
+          "declaration": {
+            "artifact": {
+              "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/source_frontend_remainder_composition_resume02_20261025/result/composition/index.json.gz",
+              "sha256": "45569e930c3fe03a6d2cf4c26a93491c7ce9b496d25aab5fae09767deb91fe9b",
+              "size_bytes": 17109069,
+              "schema": "scar.program-composition"
+            },
+            "locator": "#/files/113/bodies/9/graph_locator"
+          }
+        },
+        "graph_representation": "scar.program-graph/15",
+        "definition": {
+          "kind": "opdef",
+          "value": "op:1b2c68fb98614934e6ca723e",
+          "wire": "opdef:op:1b2c68fb98614934e6ca723e"
+        },
+        "source": {
+          "atom_id": {
+            "kind": "source",
+            "value": "atom:18ada1f7ae81b472ab6ed7ef",
+            "wire": "source:atom:18ada1f7ae81b472ab6ed7ef"
+          },
+          "path": "/home/zyf/AAA/le-wm/stable-worldmodel/stable_worldmodel/envs/utils.py",
+          "fingerprint": "sha256:2e5d98a5c13227cba6f5574bf72b6eab149ee5b3783df0481b8d240f34047f56",
+          "start_line": 167,
+          "end_line": 179,
+          "start_column": 0,
+          "end_column": 39
+        },
+        "entry": "to_pygame",
+        "region": {
+          "kind": "program_region",
+          "value": "01e191d044bc311f7a3a477219de0cb7",
+          "wire": "program_region:01e191d044bc311f7a3a477219de0cb7"
+        }
+      },
+      "formal_slot": {
+        "kind": "slot",
+        "value": "slot:74fd3f25b4ba2f1fe866d09b",
+        "wire": "slot:slot:74fd3f25b4ba2f1fe866d09b"
+      },
+      "formal_value": {
+        "kind": "program_value",
+        "value": "83a580f72ecb492124336052c00a5c4d",
+        "wire": "program_value:83a580f72ecb492124336052c00a5c4d"
+      },
+      "formal_name": "p",
+      "parameter": {
+        "slot": {
+          "kind": "slot",
+          "value": "slot:74fd3f25b4ba2f1fe866d09b",
+          "wire": "slot:slot:74fd3f25b4ba2f1fe866d09b"
+        },
+        "origin": "ARGUMENT",
+        "argument_indices": [
+          0
+        ],
+        "default_source": null
+      }
+    },
+    {
+      "index": 1,
+      "actual_body": {
+        "graph": {
+          "artifact": {
+            "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_plain_20261023/checkpoints/00128.json.gz",
+            "sha256": "f645a97db1b628675259b345b6a303fbe290fdac179da53b8e045bcbd0b0103c",
+            "size_bytes": 387878,
+            "schema": "scar.body-construction-checkpoint/1"
+          },
+          "decoded_sha256": "87e50293a0054c13afb2ca9bf96dd0580ab9782f681416a0b4e771fa2766a11f",
+          "decoded_bytes": 4596226,
+          "representation": "gzip-canonical-json",
+          "pointer": "#/graph",
+          "declaration": {
+            "artifact": {
+              "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/source_frontend_remainder_composition_resume02_20261025/result/composition/index.json.gz",
+              "sha256": "45569e930c3fe03a6d2cf4c26a93491c7ce9b496d25aab5fae09767deb91fe9b",
+              "size_bytes": 17109069,
+              "schema": "scar.program-composition"
+            },
+            "locator": "#/files/113/bodies/4/graph_locator"
+          }
+        },
+        "graph_representation": "scar.program-graph/15",
+        "definition": {
+          "kind": "opdef",
+          "value": "op:66cb434f91ff974dc6fe96ba",
+          "wire": "opdef:op:66cb434f91ff974dc6fe96ba"
+        },
+        "source": {
+          "atom_id": {
+            "kind": "source",
+            "value": "atom:660e253633bd2baade442a15",
+            "wire": "source:atom:660e253633bd2baade442a15"
+          },
+          "path": "/home/zyf/AAA/le-wm/stable-worldmodel/stable_worldmodel/envs/utils.py",
+          "fingerprint": "sha256:2e5d98a5c13227cba6f5574bf72b6eab149ee5b3783df0481b8d240f34047f56",
+          "start_line": 91,
+          "end_line": 133,
+          "start_column": 4,
+          "end_column": 13
+        },
+        "entry": "DrawOptions.draw_fat_segment",
+        "region": {
+          "kind": "program_region",
+          "value": "15c977f593209680d3ede8501779e9d9",
+          "wire": "program_region:15c977f593209680d3ede8501779e9d9"
+        }
+      },
+      "operation": {
+        "kind": "program_operation",
+        "value": "de7a4ea86d198711d14735c754d04d67",
+        "wire": "program_operation:de7a4ea86d198711d14735c754d04d67"
+      },
+      "actual_source": {
+        "atom_id": {
+          "kind": "source",
+          "value": "atom:9628e3dd091be696a8660463",
+          "wire": "source:atom:9628e3dd091be696a8660463"
+        },
+        "path": "/home/zyf/AAA/le-wm/stable-worldmodel/stable_worldmodel/envs/utils.py",
+        "fingerprint": "sha256:2e5d98a5c13227cba6f5574bf72b6eab149ee5b3783df0481b8d240f34047f56",
+        "start_line": 99,
+        "end_line": 99,
+        "start_column": 26,
+        "end_column": 38
+      },
+      "actual_use": {
+        "kind": "program_use",
+        "value": "0f36dda5d4fcfe4f7c9d6a9975c4c78a",
+        "wire": "program_use:0f36dda5d4fcfe4f7c9d6a9975c4c78a"
+      },
+      "actual_value": {
+        "kind": "program_value",
+        "value": "c055be7a5410d2cd56ddf7899ed1f511",
+        "wire": "program_value:c055be7a5410d2cd56ddf7899ed1f511"
+      },
+      "formal_body": {
+        "graph": {
+          "artifact": {
+            "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_plain_20261023/checkpoints/00090.json.gz",
+            "sha256": "12db9ab0f720d0957bc78133f7db8f3844595d8e11e2e1d5894774b06387c0b7",
+            "size_bytes": 49248,
+            "schema": "scar.body-construction-checkpoint/1"
+          },
+          "decoded_sha256": "56ae2fbb3d3af32a1119941cc5d85af91c07a7d3cea02689ac01dc46f1cd9a89",
+          "decoded_bytes": 517809,
+          "representation": "gzip-canonical-json",
+          "pointer": "#/graph",
+          "declaration": {
+            "artifact": {
+              "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/source_frontend_remainder_composition_resume02_20261025/result/composition/index.json.gz",
+              "sha256": "45569e930c3fe03a6d2cf4c26a93491c7ce9b496d25aab5fae09767deb91fe9b",
+              "size_bytes": 17109069,
+              "schema": "scar.program-composition"
+            },
+            "locator": "#/files/113/bodies/9/graph_locator"
+          }
+        },
+        "graph_representation": "scar.program-graph/15",
+        "definition": {
+          "kind": "opdef",
+          "value": "op:1b2c68fb98614934e6ca723e",
+          "wire": "opdef:op:1b2c68fb98614934e6ca723e"
+        },
+        "source": {
+          "atom_id": {
+            "kind": "source",
+            "value": "atom:18ada1f7ae81b472ab6ed7ef",
+            "wire": "source:atom:18ada1f7ae81b472ab6ed7ef"
+          },
+          "path": "/home/zyf/AAA/le-wm/stable-worldmodel/stable_worldmodel/envs/utils.py",
+          "fingerprint": "sha256:2e5d98a5c13227cba6f5574bf72b6eab149ee5b3783df0481b8d240f34047f56",
+          "start_line": 167,
+          "end_line": 179,
+          "start_column": 0,
+          "end_column": 39
+        },
+        "entry": "to_pygame",
+        "region": {
+          "kind": "program_region",
+          "value": "01e191d044bc311f7a3a477219de0cb7",
+          "wire": "program_region:01e191d044bc311f7a3a477219de0cb7"
+        }
+      },
+      "formal_slot": {
+        "kind": "slot",
+        "value": "slot:f85da0b4962d8762199f8307",
+        "wire": "slot:slot:f85da0b4962d8762199f8307"
+      },
+      "formal_value": {
+        "kind": "program_value",
+        "value": "9d4f5e1b2667f61ef9d7809adb84aacb",
+        "wire": "program_value:9d4f5e1b2667f61ef9d7809adb84aacb"
+      },
+      "formal_name": "surface",
+      "parameter": {
+        "slot": {
+          "kind": "slot",
+          "value": "slot:f85da0b4962d8762199f8307",
+          "wire": "slot:slot:f85da0b4962d8762199f8307"
+        },
+        "origin": "ARGUMENT",
+        "argument_indices": [
+          1
+        ],
+        "default_source": null
+      }
+    }
+  ],
+  "receiver": null,
+  "callee_region": {
+    "kind": "program_region",
+    "value": "01e191d044bc311f7a3a477219de0cb7",
+    "wire": "program_region:01e191d044bc311f7a3a477219de0cb7"
+  },
+  "observed_return_site_selected": false,
+  "object_identity_established": false,
+  "content_equivalence_established": false,
+  "effects_or_world_equivalence_established": false,
+  "producer_inputs_replayed": false,
+  "transformation_authorized": false,
+  "costs": {
+    "stored_bytes": 24151415,
+    "decoded_bytes": 182372465,
+    "body_codec_reads": 2,
+    "body_index_builds": 2
+  },
+  "elapsed_s": 31.31761311000446
+}

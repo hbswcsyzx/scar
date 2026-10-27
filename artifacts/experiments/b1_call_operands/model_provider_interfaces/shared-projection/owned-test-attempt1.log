@@ -1,0 +1,7 @@
+started_utc=2026-10-16T06:38:56Z
+command=source /home/zyf/miniconda3/etc/profile.d/conda.sh && conda activate lewm && PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=/tmp/scar-structured-model-280qf4mi python -m pytest -q tests/unit/test_provider_shared_projection.py
+.                                                                        [100%]
+1 passed in 0.26s
+
+exit_code=0
+finished_utc=2026-10-16T06:38:58Z

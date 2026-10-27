@@ -1,0 +1,531 @@
+"""Mechanical source recovery tasks, separate from canonical program graphs.
+
+Planning reads metadata only. Workers use existing immutable source graphs,
+owned CodeWitnesses and ordinary source lowerers, without executing the target.
+"""
+from __future__ import annotations
+
+import ast
+from collections import Counter, defaultdict
+from dataclasses import asdict, dataclass
+from hashlib import sha256
+import inspect
+import json
+from pathlib import Path
+import time
+import tokenize
+import traceback
+
+from scar.analysis.call_compilation import compile_cache_key
+from scar.analysis.code_witness import CodeWitnessStore
+from scar.analysis.inventory_partitions import _read_receipt, _write_shard
+from scar.analysis.program_composition import CompositionIndex
+from scar.analysis.program_lowering import PreparedSource, SourceProgram, _symbol_tables
+from scar.analysis.source_language import SourceCodeEvidence, SourceLanguageOptions
+from scar.ir.program.call_edges import CapturedCode, CodeCapture, CodeSourceLink, CallLinkStatus
+from scar.ir.program.compilation import CallCompilationProfile
+from scar.ir.program.functions import BodyLoweringProfile
+from scar.ir.program.inventory import DefinitionKind, DefinitionInventory, SourceContextDigest
+from scar.ir.program.source_language import SourceLanguageCapability
+from scar.ir.record_codec import decode, encode
+from scar.ir.semantics_v2 import SourceSnapshot
+
+
+_SUSPENDED = inspect.CO_GENERATOR | inspect.CO_COROUTINE | inspect.CO_ASYNC_GENERATOR | inspect.CO_ITERABLE_COROUTINE
+_TERMINAL = frozenset(("SUCCEEDED", "UNSUPPORTED", "FAILED", "CODE_WITNESS_UNAVAILABLE", "SOURCE_CONTEXT_UNAVAILABLE"))
+
+
+def _need(condition, message):
+    if not condition:
+        raise ValueError("source frontend: " + message)
+
+
+def _bytes(value):
+    return json.dumps(value, sort_keys=True, ensure_ascii=False, separators=(",", ":"), allow_nan=False).encode()
+
+
+def _hash(value):
+    return sha256(_bytes(value)).hexdigest()
+
+
+def _receipt(path):
+    path = Path(path).resolve()
+    raw = path.read_bytes()
+    return {"path": str(path), "sha256": sha256(raw).hexdigest(), "bytes": len(raw)}
+
+
+def _producer():
+    analysis = Path(__file__).resolve().parent
+    names = ("source_frontend_worklist.py", "program_lowering.py", "structured_lowering.py",
+        "environment_lowering.py", "source_language.py", "source_environment_layout.py",
+        "function_interfaces.py", "program_composition.py", "inventory_partitions.py",
+        "code_witness.py", "call_compilation.py")
+    paths = {analysis / name for name in names}
+    paths.update(analysis.glob('source_*_lowering.py'))
+    paths.update(analysis.glob('source_*_validation.py'))
+    # Canonical type/codec contracts affect source construction and its guards.
+    paths.update((analysis.parent / 'ir').rglob('*.py'))
+    paths.add(analysis.parent / 'trace/code_snapshot.py')
+    return [_receipt(path) for path in sorted(paths)]
+
+
+@dataclass(frozen=True)
+class SourceFrontendBudget:
+    max_catalog_files: int = 4096
+    max_catalog_bodies: int = 100000
+    max_catalog_groups: int = 100000
+    max_dispatch_bodies: int = 128
+    max_source_files: int = 64
+    max_source_bytes: int = 16_000_000
+    max_operations_per_body: int = 10000
+    max_total_operations: int = 1_000_000
+    max_record_bytes: int = 128_000_000
+    max_output_bytes: int = 512_000_000
+    max_elapsed_seconds: int = 900
+
+    def __post_init__(self):
+        _need(all(type(value) is int and value > 0 for value in asdict(self).values()), "budgets must be positive exact integers")
+        _need(self.max_operations_per_body <= 100000, "per-body source lowerer ceiling exceeds its public API")
+
+
+@dataclass(frozen=True)
+class SourceFrontendPlan:
+    composition: CompositionIndex
+    document: dict
+    bodies: tuple[dict, ...]
+    groups: tuple[dict, ...]
+    dispatch: tuple[dict, ...]
+    digest: str
+
+    def require_unchanged(self):
+        _need(type(self.composition) is CompositionIndex and self.digest == _hash({
+            "document": self.document, "bodies": self.bodies, "groups": self.groups, "dispatch": self.dispatch}),
+            "worklist changed after planning")
+        _need(self.document["composition_inputs"] == self.composition.source_inputs(), "composition inputs changed")
+
+
+def _body_key(snapshot, context, definition):
+    return _hash({"snapshot": snapshot, "context": context, "definition": definition})
+
+
+def _module_variants(store, captured, link):
+    found, frontiers = [], []
+    for level in link.optimize_levels:
+        try:
+            key = compile_cache_key(Path(link.snapshot.path), link.snapshot.fingerprint,
+                CallCompilationProfile.RECORDED_FUTURE_FLAGS, captured.flags, level,
+                compile_filename=captured.filename)
+        except ValueError as error:
+            frontiers.append({'kind': 'COMPILER_CONTEXT_UNSUPPORTED', 'type': type(error).__name__, 'detail': str(error)})
+            continue
+        digest = _hash(encode(key))
+        row = store.document["modules"].get(digest)
+        if row is not None and row["compile_key"] == encode(key) and row["snapshot"] == encode(link.snapshot):
+            found.append(digest)
+    return found, frontiers
+
+
+def _check_store(store):
+    _need(type(store) is CodeWitnessStore and not store.writable and not store.compile_missing,
+          "an explicit owned read-only CodeWitnessStore is required")
+    return store.receipt()
+
+
+def _write_rows(root, name, rows, limit):
+    return _write_shard(root, name, {"schema": "scar.source-frontend-table", "schema_version": 1,
+        "rows": list(rows)}, limit=limit)
+
+
+def plan_source_frontend(composition, current_bindings, code_witnesses, *,
+                         budget=SourceFrontendBudget(), capabilities=tuple(SourceLanguageCapability),
+                         out_dir=None, progress=None):
+    """Inventory every body/group, then bound metadata-only dispatch candidates.
+
+    No reason text or name pattern participates in selection. A matching module
+    entry is merely PENDING_CODE_RESOLVE, never a verified nested CodeType.
+    """
+    _need(type(composition) is CompositionIndex and composition.partitioned, "a regular partitioned composition is required")
+    _need(type(budget) is SourceFrontendBudget, "budget must be independently supplied")
+    budget.__post_init__()
+    SourceLanguageOptions(capabilities)  # Exact enum types and uniqueness, no I/O.
+    store_receipt = _check_store(code_witnesses)
+    root = Path(current_bindings).resolve()
+    report_path = root / "report.json" if root.is_dir() else root
+    report, report_receipt = _read_receipt(report_path, limit=budget.max_record_bytes)
+    _need(report.get("schema") == "scar.source-invocations" and report.get("schema_version") in (2, 3)
+          and report.get("current_capture_raw_scan_verified") is True
+          and report.get("old_capture_dynamic_facts_used_for_current_run") is False,
+          "current binding must retain its independently verified Run scope")
+    inputs = composition.source_inputs()
+    _need(report["inventory"] == composition.document["inventory"]
+          and report["composition_canonical_sha256"] == inputs["composition_canonical_sha256"],
+          "binding belongs to a different composition/inventory")
+    declaration = report["bindings"]
+    _need(declaration["path"] == "bindings.json", "binding table must be its fixed local artifact")
+    bindings_path = report_path.parent / declaration["path"]
+    bindings, bindings_receipt = _read_receipt(bindings_path, limit=budget.max_record_bytes)
+    _need(bindings_receipt["physical_sha256"] == declaration["raw_sha256"]
+          and bindings_receipt["physical_bytes"] == declaration["raw_bytes"]
+          and bindings.get("schema") == "scar.source-invocation-bindings"
+          and bindings["schema_version"] == report["schema_version"], "current binding receipt/schema differs")
+    rows = bindings["bindings"]
+    _need(len(rows) <= budget.max_catalog_groups and composition.inventory_file_count <= budget.max_catalog_files,
+          "complete metadata catalog exceeds the independent ceiling")
+    model = composition.inventory_component("call_sources")["model"]
+    captures = {}
+    for raw in model["codes"]:
+        row = decode(CodeCapture, raw)
+        _need(row.code.key not in captures or captures[row.code.key] == row.code, "conflicting complete code descriptors")
+        captures[row.code.key] = row.code
+    links = [(i, decode(CodeSourceLink, raw)) for i, raw in enumerate(model["code_links"])]
+    variants = defaultdict(list)
+    for index, link in links:
+        if link.status is CallLinkStatus.VERIFIED and link.definition is not None and link.source is not None:
+            captured = captures[link.code]
+            variants[(link.snapshot.path, link.snapshot.fingerprint, link.definition.wire)].append((index, link, captured))
+    bodies, by_key, by_source, by_element, status_counts = [], {}, {}, {}, Counter()
+    for fi in range(composition.inventory_file_count):
+        raw = composition.inventory_file(fi)  # Header/ref metadata, not body graphs.
+        declarations = {row.id: row for row in decode(tuple[DefinitionInventory, ...], raw["definitions"])}
+        declarations_by_wire = {identity.wire: row for identity, row in declarations.items()}
+        snapshot = decode(SourceSnapshot, raw["snapshot"])
+        context = decode(SourceContextDigest, raw["context"]) if raw["context"] is not None else None
+        _need(len(declarations) == len(raw["definitions"]), "duplicate source definition metadata")
+        for bi, old in enumerate(raw["bodies"]):
+            definition = declarations_by_wire.get(old["definition"]["wire"])
+            _need(definition is not None, "body has no original indexed definition")
+            key = _body_key(raw["snapshot"], raw["context"], old["definition"])
+            _need(key not in by_key, "duplicate fully qualified body")
+            exact = [(i, link, code) for i, link, code in variants[(snapshot.path, snapshot.fingerprint, definition.id.wire)]
+                     if link.snapshot == snapshot and link.source == definition.source]
+            evidence = []
+            for i, link, code in exact:
+                module_variants, compiler_frontiers = _module_variants(code_witnesses, code, link)
+                evidence.append({"captured": encode(code), "code_source_link": encode(link),
+                    "code_source_locator": composition.inventory_component_locator("call_sources", f"/model/code_links/{i}"),
+                    "module_variants": module_variants, "compiler_frontiers": compiler_frontiers})
+            if old["status"] == "LOWERED_WITH_GAPS":
+                category = "ALREADY_MODELED"
+            elif context is None:
+                category = "SOURCE_CONTEXT_UNAVAILABLE"
+            elif definition.kind is not DefinitionKind.FUNCTION:
+                category = "ENTRY_ADAPTER_MISSING:" + definition.kind.value
+            elif not evidence:
+                category = "CAPTURED_CODE_SOURCE_WITNESS_MISSING"
+            elif len({row["captured"]["key"] for row in evidence}) != 1:
+                category = "MULTIPLE_CODE_VARIANTS_REQUIRE_ENTRY_APPLICABILITY"
+            elif evidence[0]["captured"]["flags"] & _SUSPENDED:
+                category = "ENTRY_ADAPTER_MISSING:RESUMABLE_FUNCTION"
+            elif evidence[0]["compiler_frontiers"] and not evidence[0]["module_variants"]:
+                category = "COMPILER_CONTEXT_UNSUPPORTED"
+            elif not evidence[0]["module_variants"]:
+                category = "CODE_WITNESS_MODULE_VARIANT_MISSING"
+            else:
+                category = "PENDING_CODE_RESOLVE"
+            item = {"body_key": key, "file_index": fi, "body_index": bi, "snapshot": raw["snapshot"],
+                "context": raw["context"], "definition": encode(definition), "prior_status": old["status"],
+                "metadata_status": category, "code_variants": evidence, "current_groups": [], "current_calls": 0,
+                "body_locator": composition.inventory_file_locator(fi, f"/bodies/{bi}")}
+            by_key[key] = item
+            if context is not None:
+                by_source[(snapshot.path, snapshot.fingerprint, context.namespace_root, definition.id.wire)] = item
+            by_element[fi, definition.id.wire] = item
+            bodies.append(item)
+            status_counts[old["status"]] += 1
+            _need(len(bodies) <= budget.max_catalog_bodies, "complete body catalog exceeds the independent ceiling")
+        if progress is not None:
+            progress({"stage": "frontend_catalog_file", "file_index": fi, "bodies": len(raw["bodies"])})
+    groups, group_counts, call_counts, seen = [], Counter(), Counter(), set()
+    for ordinal, binding in enumerate(rows):
+        identity = binding["process_id"], binding["code"]
+        capture = decode(CodeCapture, binding["code_capture"])
+        _need(identity not in seen and binding["binding_index"] == ordinal
+              and capture.process_id == identity[0] and capture.code.key == identity[1], "duplicate or inconsistent current group")
+        seen.add(identity)
+        reference = binding["definition"]
+        item = None
+        if reference is None:
+            category = "SOURCE_DEFINITION_UNRESOLVED"
+        elif report["schema_version"] == 3 and binding.get("composition_element") is None:
+            category = "EXTERNAL_ENTRY_CATALOG_AND_ADMISSION_SCOPE_REQUIRED"
+        else:
+            if report["schema_version"] == 3:
+                source_key = (reference["snapshot"]["path"], reference["snapshot"]["fingerprint"],
+                              reference["context"]["namespace_root"], reference["definition"]["wire"])
+                item = by_source.get(source_key)
+            else:
+                element = reference
+                item = by_element.get((element["file_index"], element["identity"]["wire"]))
+            _need(item is not None, "current project group has no exact original body metadata")
+            _need(any(row["captured"] == encode(capture.code) for row in item["code_variants"]),
+                  "current project descriptor has no exact original code/source match")
+            category = "BODY_LINKED" if binding["body"] is not None else item["metadata_status"]
+            item["current_groups"].append(ordinal)
+            item["current_calls"] += binding["entered_invocations"]
+        count = binding["entered_invocations"]
+        _need(type(count) is int and count >= 1, "current group must retain its actual invocation count")
+        group = {"binding_index": ordinal, "process_id": identity[0], "captured": encode(capture.code),
+            "current_calls": count, "status": category, "body_key": item["body_key"] if item is not None else None,
+            "binding_locator": {"artifact": {"uri": str(bindings_path), **bindings_receipt}, "pointer": f"#/bindings/{ordinal}"}}
+        groups.append(group)
+        group_counts[category] += 1
+        call_counts[category] += count
+    _need(len(groups) == report["summary"]["entered_code_groups"], "current group denominator differs")
+    _need(sum(call_counts.values()) == report["summary"]["invocations"], "current call denominator differs")
+    # Lexical metadata determines structural depth; no qualname/name rule.
+    declarations = {(row["file_index"], row["definition"]["id"]["wire"]): row for row in bodies}
+    def depth(item):
+        count, seen = 0, set()
+        parent = item["definition"]["lexical_owner"]
+        while parent is not None:
+            key = item["file_index"], parent["wire"]
+            _need(key not in seen, "lexical metadata cycle")
+            seen.add(key); count += 1
+            owner = declarations.get(key)
+            parent = owner["definition"]["lexical_owner"] if owner is not None else None
+        return count
+    candidates = [row for row in bodies if row["metadata_status"] == "PENDING_CODE_RESOLVE"]
+    candidates.sort(key=lambda row: (not bool(row["current_groups"]), depth(row), -row["current_calls"], row["body_key"]))
+    dispatch, files = [], set()
+    for item in candidates:
+        if len(dispatch) == budget.max_dispatch_bodies:
+            break
+        if item["file_index"] not in files and len(files) == budget.max_source_files:
+            continue
+        files.add(item["file_index"])
+        dispatch.append({"body_key": item["body_key"], "file_index": item["file_index"], "body_index": item["body_index"],
+                         "code_key": item["code_variants"][0]["captured"]["key"]})
+    document = {"schema": "scar.source-frontend-worklist", "schema_version": 1,
+        "composition_inputs": inputs, "code_source_origin": composition.original_code_source_origin(),
+        "current_report": {"path": str(report_path), **report_receipt},
+        "current_bindings": {"path": str(bindings_path), **bindings_receipt}, "run": report["run"],
+        "code_witness_store": store_receipt, "capabilities": encode(capabilities), "profile": "STRUCTURED_ENV_V1",
+        "budget": asdict(budget), "producer": _producer(),
+        "summary": {"source_files": composition.inventory_file_count, "bodies": len(bodies),
+            "body_statuses": dict(status_counts), "metadata_statuses": dict(Counter(row["metadata_status"] for row in bodies)),
+            "current_groups": len(groups), "current_calls": sum(call_counts.values()),
+            "group_statuses": dict(group_counts), "call_statuses": dict(call_counts),
+            "metadata_candidates": len(candidates), "dispatched_bodies": len(dispatch), "dispatched_files": len(files)},
+        "code_type_verified_during_planning": False, "target_executed": False, "first_stage_complete": False}
+    digest = _hash({"document": document, "bodies": bodies, "groups": groups, "dispatch": dispatch})
+    plan = SourceFrontendPlan(composition, document, tuple(bodies), tuple(groups), tuple(dispatch), digest)
+    if out_dir is not None:
+        output = Path(out_dir).resolve()
+        _need(not output.exists(), "plan output already exists")
+        output.mkdir(parents=True, exist_ok=False)
+        try:
+            tables = {name: _write_rows(output, name + '.json.gz', values, budget.max_record_bytes)
+                      for name, values in (("bodies", bodies), ("groups", groups), ("dispatch", dispatch))}
+            (output / "manifest.json").write_text(json.dumps({
+                "schema": "scar.source-frontend-worklist-partitions", "schema_version": 1,
+                "document": document, "tables": tables, "plan_sha256": digest}, indent=2) + "\n")
+        except BaseException as error:
+            (output / 'failure.json').write_bytes(_bytes({'status': 'BUILDING_FAILED_RETAINED',
+                'type': type(error).__name__, 'detail': str(error), 'plan_sha256': digest}) + b'\n')
+            raise
+    return plan
+
+
+def _resume_records(paths, *, max_bytes):
+    records = {}
+    for path in paths:
+        path = Path(path).resolve()
+        index = path / "attempts.jsonl" if path.is_dir() else path
+        _need(index.is_file() and not index.is_symlink() and index.stat().st_size <= max_bytes, "resume index is missing or oversized")
+        with index.open() as stream:
+            for line in stream:
+                row = json.loads(line)
+                _need(row.get("schema") == "scar.source-frontend-attempt" and row.get("schema_version") == 1,
+                      "unknown resume attempt schema")
+                if row["status"] not in _TERMINAL:
+                    continue
+                _need(row["work_key"] == _hash(row["work_input"]), "resume work key differs from its exact inputs")
+                result_ref = row["result_artifact"]
+                actual_result = _receipt(result_ref['path'])
+                _need(actual_result == result_ref, "resume original terminal record SHA/size differs")
+                original = json.loads(Path(result_ref['path']).read_text())
+                _need(original == {key: value for key, value in row.items() if key != 'result_artifact'},
+                      "resume index changed its original terminal record")
+                if row["status"] == "SUCCEEDED":
+                    artifact = row["program"]
+                    actual = _receipt(artifact["uri"])
+                    _need(actual["sha256"] == artifact["physical_sha256"] and actual["bytes"] == artifact["physical_bytes"],
+                          "resumed successful source artifact changed")
+                key = row["work_key"]
+                _need(key not in records or records[key] == row, "conflicting resume results for one exact work key")
+                records[key] = row
+    return records
+
+
+def run_source_frontend(plan, code_witnesses, out_dir, *, budget=SourceFrontendBudget(), resume_from=(), progress=None):
+    """Run a bounded preplanned window, retaining every actual attempt.
+
+    Same-input failures are skipped through explicit immutable resume indexes.
+    Changed capabilities/compiler/source/producer/budget produce a different key.
+    """
+    _need(type(plan) is SourceFrontendPlan and type(budget) is SourceFrontendBudget, "regular worklist and independent worker budget required")
+    plan.require_unchanged()
+    budget.__post_init__()
+    requested = SourceFrontendBudget(**plan.document["budget"])
+    _need(all(getattr(requested, name) <= getattr(budget, name) for name in asdict(budget)), "plan exceeds independent worker ceiling")
+    _need(_check_store(code_witnesses) == plan.document["code_witness_store"], "owned witness archive differs from plan")
+    _need(_producer() == plan.document["producer"], "frontend implementation changed; regenerate worklist")
+    _need(len(plan.dispatch) <= requested.max_dispatch_bodies
+          and len({row['file_index'] for row in plan.dispatch}) <= requested.max_source_files,
+          "dispatch window exceeds independent worker ceilings")
+    output = Path(out_dir).resolve()
+    _need(not output.exists(), "worker output already exists")
+    output.mkdir(parents=True, exist_ok=False)
+    resumed = _resume_records(resume_from, max_bytes=requested.max_record_bytes)
+    body_index = {row["body_key"]: row for row in plan.bodies}
+    started, charged, source_bytes, output_bytes = time.perf_counter(), 0, 0, 0
+    store_before = dict(code_witnesses.counts)
+    counts, program_paths, file_stats = Counter(), [], {}
+    index = (output / "attempts.jsonl").open('x', buffering=1)
+    active_file = context = session = None
+    source_failures = {}
+
+    def persist(row):
+        nonlocal output_bytes
+        payload = _bytes(row) + b'\n'
+        output_bytes += len(payload)
+        index.write(payload.decode())
+        index.flush()
+        counts[row["status"]] += 1
+        _need(output_bytes <= requested.max_output_bytes, "worker output byte budget exhausted; terminal record retained")
+        if progress is not None:
+            progress({"stage": "frontend_attempt", "status": row["status"], "body_key": row["body_key"]})
+
+    try:
+        # File grouping ensures one context/AST per admitted file without
+        # retaining all source graphs at once. Initial priority orders files.
+        grouped = defaultdict(list)
+        for item in plan.dispatch:
+            grouped[item["file_index"]].append(item)
+        sequence, stopped = 0, False
+        for fi, entries in grouped.items():
+            for item in entries:
+                if time.perf_counter() - started >= requested.max_elapsed_seconds or charged >= requested.max_total_operations:
+                    counts["WINDOW_BUDGET_STOP"] += 1
+                    stopped = True
+                    break
+                body = body_index[item["body_key"]]
+                allocation = min(requested.max_operations_per_body, requested.max_total_operations - charged)
+                work_input = {"snapshot": body["snapshot"], "context": body["context"],
+                    "definition": body["definition"]["id"], "source": body["definition"]["source"],
+                    "captured": body["code_variants"][0]["captured"], "capabilities": plan.document["capabilities"],
+                    "profile": plan.document["profile"], "producer": plan.document["producer"],
+                    "code_source_origin": plan.document["code_source_origin"],
+                    "code_witness_store": plan.document["code_witness_store"], "operation_budget": allocation}
+                key = _hash(work_input)
+                if key in resumed:
+                    counts["RESUMED_" + resumed[key]["status"]] += 1
+                    if resumed[key]["status"] == "SUCCEEDED":
+                        program_paths.append(resumed[key]["program"]["uri"])
+                    continue
+                sequence += 1
+                attempt = output / f'attempt-{sequence:05d}'
+                attempt.mkdir(exist_ok=False)
+                row = {"schema": "scar.source-frontend-attempt", "schema_version": 1, "sequence": sequence,
+                    "body_key": body["body_key"], "work_key": key, "work_input": work_input,
+                    "body_locator": body["body_locator"], "status": "STARTED", "program": None,
+                    "operations_emitted": None, "graph_operations": None, "budget_charge": None,
+                    "construction_cost_known": False, "code_type_verified": False,
+                    "target_executed": False, "first_stage_complete": False}
+                (attempt / 'started.json').write_bytes(_bytes(row) + b'\n')
+                tick, result, lower_started = time.perf_counter(), None, False
+                try:
+                    captured = decode(CapturedCode, work_input["captured"])
+                    evidence = SourceCodeEvidence(code_witnesses, plan.composition, captured)
+                    row['code_type_verified'] = True
+                    row['code_witness'] = evidence.to_dict()
+                    row['ready_state'] = 'READY_VERIFIED_CODE'
+                    (attempt / 'ready.json').write_bytes(_bytes(row) + b'\n')
+                    if active_file != fi:
+                        _need(fi not in source_failures, "source context has a retained failure in this window: " + str(source_failures.get(fi)))
+                        _need(len(file_stats) < requested.max_source_files, "worker source-file ceiling exceeded")
+                        view = plan.composition.source(fi)
+                        snapshot = decode(SourceSnapshot, body["snapshot"])
+                        _need(view.snapshot == snapshot and encode(view.context) == body["context"], "cached source context differs")
+                        text = code_witnesses.text(snapshot)
+                        source_bytes += len(text.encode())
+                        _need(source_bytes <= requested.max_source_bytes, "worker decoded source-byte budget exhausted")
+                        tree = ast.parse(text, filename=snapshot.path)
+                        context = PreparedSource(Path(snapshot.path), Path(view.context.namespace_root), text,
+                            view.semantic, view.semantics, view.control, tree, _symbol_tables(text, snapshot.path))
+                        session = context.seal_for_lowering()
+                        active_file = fi
+                        file_stats[str(fi)] = {"context_loads": 1, "ast_parses": 1, "symtable_parses": 1,
+                            "source_prepare_attempts": 0, "decoded_source_bytes": len(text.encode())}
+                    definition = decode(DefinitionInventory, body["definition"])
+                    evidence.require_definition(decode(SourceSnapshot, body["snapshot"]), definition.id, definition.source)
+                    options = SourceLanguageOptions(tuple(SourceLanguageCapability(value) for value in work_input["capabilities"]), evidence)
+                    lower_started = True
+                    result = session.lower(definition.qualname, source=definition.source,
+                        max_operations=allocation, expand_candidates=False,
+                        profile=BodyLoweringProfile.STRUCTURED_ENV, language_options=options)
+                    row['operations_emitted'] = result.operations_emitted
+                    row['construction_cost_known'] = True
+                    row['budget_charge'] = result.operations_emitted
+                    row['graph_operations'] = len(result.graph.operations) if result.graph is not None else 0
+                    # Persist the actual lowerer-return metadata immediately,
+                    # before any potentially large source-program serialization.
+                    returned = {'schema': 'scar.source-frontend-lowered-return', 'schema_version': 1,
+                        'metadata': encode(result.metadata), 'interface': encode(result.interface), 'frame': encode(result.frame),
+                        'structured': encode(result.structured), 'language': encode(result.language),
+                        'operations_emitted': result.operations_emitted, 'graph_present': result.graph is not None,
+                        'graph_artifact': None, 'whole_program_established': False}
+                    (attempt / 'returned-metadata.json').write_bytes(_bytes(returned) + b'\n')
+                    if result.graph is None:
+                        row['status'] = 'UNSUPPORTED'
+                    else:
+                        program = SourceProgram(result.graph, result.metadata, context.semantic, context.semantics,
+                            context.control, BodyLoweringProfile.STRUCTURED_ENV, result.interface,
+                            result.frame, result.structured, result.language)
+                        ref = _write_shard(attempt, 'source-program5.json.gz', program.to_dict(), limit=requested.max_record_bytes)
+                        ref = {**ref, 'uri': str(attempt / ref['uri']), 'external': True}
+                        row['program'] = ref
+                        output_bytes += ref['physical_bytes']
+                        returned['graph_artifact'] = {'artifact': ref, 'pointer': '#/graph'}
+                        (attempt / 'lowered-return.json').write_bytes(_bytes(returned) + b'\n')
+                        row['status'] = 'SUCCEEDED'
+                        program_paths.append(ref['uri'])
+                except Exception as error:
+                    row['status'] = 'FAILED'
+                    if not row['code_type_verified']:
+                        row['status'] = 'CODE_WITNESS_UNAVAILABLE'
+                    elif context is None or active_file != fi:
+                        row['status'] = 'SOURCE_CONTEXT_UNAVAILABLE'
+                        source_failures.setdefault(fi, {'type': type(error).__name__, 'detail': str(error)})
+                    row['error'] = {'type': type(error).__name__, 'detail': str(error), 'traceback': traceback.format_exc()}
+                    if result is None:
+                        row['budget_charge'] = allocation if lower_started else 0
+                charged += row['budget_charge']
+                row['elapsed_s'] = time.perf_counter() - tick
+                (attempt / 'result.json').write_bytes(_bytes(row) + b'\n')
+                persist({**row, 'result_artifact': _receipt(attempt / 'result.json')})
+            active_file = context = session = None
+            if stopped:
+                break
+        _need(_producer() == plan.document['producer'], "frontend source changed during worker")
+        plan.require_unchanged()
+        _need(_check_store(code_witnesses) == plan.document['code_witness_store'], "owned witness archive changed")
+        summary = {'schema': 'scar.source-frontend-result', 'schema_version': 1, 'status': 'FINISHED_WITH_OPEN',
+            'plan_sha256': plan.digest, 'counts': dict(counts), 'program_paths': program_paths,
+            'original_static_bodies': len(plan.bodies), 'original_current_groups': len(plan.groups),
+            'original_current_calls': plan.document['summary']['current_calls'],
+            'source_files': file_stats, 'budget_operation_charge': charged, 'decoded_source_bytes': source_bytes,
+            'code_witness_counts': {name: code_witnesses.counts[name] - store_before[name] for name in store_before},
+            'elapsed_s': time.perf_counter() - started, 'source_prepare_attempts': 0, 'target_executed': False,
+            'current_run_integrated': False, 'first_stage_complete': False}
+        (output / 'manifest.json').write_bytes(_bytes(summary) + b'\n')
+        return summary
+    except BaseException as error:
+        (output / 'failure.json').write_bytes(_bytes({'status': 'BUILDING_FAILED_RETAINED', 'type': type(error).__name__,
+            'detail': str(error), 'traceback': traceback.format_exc(), 'plan_sha256': plan.digest}) + b'\n')
+        raise
+    finally:
+        index.close()
+
+
+__all__ = ['SourceFrontendBudget', 'SourceFrontendPlan', 'plan_source_frontend', 'run_source_frontend']

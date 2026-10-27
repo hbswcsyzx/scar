@@ -1,0 +1,192 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="10" skipped="0" tests="44" time="1.831" timestamp="2026-10-18T16:59:45.361897+00:00" hostname="gpu1"><testcase classname="tests.unit.test_program_admission_codec" name="test_sixth_variant_roundtrip_preserves_original_uses_and_branch_without_fake_inputs[body]" time="0.137" /><testcase classname="tests.unit.test_program_admission_codec" name="test_sixth_variant_roundtrip_preserves_original_uses_and_branch_without_fake_inputs[none]" time="0.061" /><testcase classname="tests.unit.test_program_admission_codec" name="test_independent_v17_golden_and_current_original_f_factory_are_identical_bytes" time="0.071" /><testcase classname="tests.unit.test_program_admission_codec" name="test_new_predicate_cannot_be_downgraded_into_any_historical_schema[1]" time="0.023" /><testcase classname="tests.unit.test_program_admission_codec" name="test_new_predicate_cannot_be_downgraded_into_any_historical_schema[2]" time="0.016" /><testcase classname="tests.unit.test_program_admission_codec" name="test_new_predicate_cannot_be_downgraded_into_any_historical_schema[3]" time="0.016" /><testcase classname="tests.unit.test_program_admission_codec" name="test_new_predicate_cannot_be_downgraded_into_any_historical_schema[4]" time="0.017" /><testcase classname="tests.unit.test_program_admission_codec" name="test_new_predicate_cannot_be_downgraded_into_any_historical_schema[5]" time="0.016" /><testcase classname="tests.unit.test_program_admission_codec" name="test_new_predicate_cannot_be_downgraded_into_any_historical_schema[6]" time="0.016" /><testcase classname="tests.unit.test_program_admission_codec" name="test_new_predicate_cannot_be_downgraded_into_any_historical_schema[7]" time="0.016" /><testcase classname="tests.unit.test_program_admission_codec" name="test_new_predicate_cannot_be_downgraded_into_any_historical_schema[8]" time="0.017" /><testcase classname="tests.unit.test_program_admission_codec" name="test_new_predicate_cannot_be_downgraded_into_any_historical_schema[9]" time="0.016" /><testcase classname="tests.unit.test_program_admission_codec" name="test_new_predicate_cannot_be_downgraded_into_any_historical_schema[10]" time="0.016" /><testcase classname="tests.unit.test_program_admission_codec" name="test_new_predicate_cannot_be_downgraded_into_any_historical_schema[11]" time="0.016" /><testcase classname="tests.unit.test_program_admission_codec" name="test_new_predicate_cannot_be_downgraded_into_any_historical_schema[12]" time="0.017" /><testcase classname="tests.unit.test_program_admission_codec" name="test_new_predicate_cannot_be_downgraded_into_any_historical_schema[13]" time="0.016" /><testcase classname="tests.unit.test_program_admission_codec" name="test_new_predicate_cannot_be_downgraded_into_any_historical_schema[14]" time="0.016" /><testcase classname="tests.unit.test_program_admission_codec" name="test_new_predicate_cannot_be_downgraded_into_any_historical_schema[15]" time="0.016" /><testcase classname="tests.unit.test_program_admission_codec" name="test_new_predicate_cannot_be_downgraded_into_any_historical_schema[16]" time="0.017" /><testcase classname="tests.unit.test_program_admission_codec" name="test_new_predicate_cannot_be_downgraded_into_any_historical_schema[17]" time="0.028" /><testcase classname="tests.unit.test_program_admission_codec" name="test_v17_rejects_untagged_new_shape_as_well_as_new_nested_subject_tags" time="0.030" /><testcase classname="tests.unit.test_program_admission_codec" name="test_v18_requires_the_new_variant_not_only_original_protocol_tables" time="0.029" /><testcase classname="tests.unit.test_program_admission_codec" name="test_nested_wire_variants_exact_fields_and_owned_port_ids_do_not_fallback[subject-tag]" time="0.028" /><testcase classname="tests.unit.test_program_admission_codec" name="test_nested_wire_variants_exact_fields_and_owned_port_ids_do_not_fallback[missing]" time="0.028" /><testcase classname="tests.unit.test_program_admission_codec" name="test_nested_wire_variants_exact_fields_and_owned_port_ids_do_not_fallback[extra]" time="0.027" /><testcase classname="tests.unit.test_program_admission_codec" name="test_nested_wire_variants_exact_fields_and_owned_port_ids_do_not_fallback[result-union]" time="0.028" /><testcase classname="tests.unit.test_program_admission_codec" name="test_nested_wire_variants_exact_fields_and_owned_port_ids_do_not_fallback[site-id]" time="0.028" /><testcase classname="tests.unit.test_program_admission_codec" name="test_nested_record_mutation_is_revalidated_before_encode" time="0.005" /><testcase classname="tests.unit.test_program_admission_codec" name="test_old_literal_or_operation_label_matching_a_new_tag_is_not_capability" time="0.015"><failure message="TypeError: Operation.__init__() got an unexpected keyword argument 'kind'">def test_old_literal_or_operation_label_matching_a_new_tag_is_not_capability():
+        literal, _ = literal_program(payload="PROTOCOL_ADMISSION_PREDICATE")
+        wire = codec.dumps(literal)
+        assert json.loads(wire)["schema_version"] == 16
+        assert codec.loads(wire) == literal
+        graph, details = generator_protocol_program(target="start")
+        first = graph.operations[0]
+&gt;       graph = replace(graph, operations=(replace(first, kind="PROTOCOL_BODY_STATE_CONDITION"),
+                                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                                            *graph.operations[1:]))
+
+tests/unit/test_program_admission_codec.py:131: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/home/zyf/miniconda3/envs/lewm/lib/python3.14/dataclasses.py:1779: in replace
+    return _replace(obj, **changes)
+           ^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = Operation(id=OperationID(value='resume.initial'), label='resume.initial', behaviors=(&lt;Behavior.CONTROL: 'CONTROL'&gt;,), ...cesses=(), effects_complete=True, terminator=None, callee=None, call_arguments=(), completions=(), invoke_arguments=())
+changes = {'kind': 'PROTOCOL_BODY_STATE_CONDITION', 'id': OperationID(value='resume.initial'), 'label': 'resume.initial', 'behaviors': (&lt;Behavior.CONTROL: 'CONTROL'&gt;,), ...}
+
+    def _replace(self, /, **changes):
+        # We're going to mutate 'changes', but that's okay because it's a
+        # new dict, even if called with 'replace(self, **my_changes)'.
+    
+        # It's an error to have init=False fields in 'changes'.
+        # If a field is not in 'changes', read its value from the provided 'self'.
+    
+        for f in getattr(self, _FIELDS).values():
+            # Only consider normal fields or InitVars.
+            if f._field_type is _FIELD_CLASSVAR:
+                continue
+    
+            if not f.init:
+                # Error if this field is specified in changes.
+                if f.name in changes:
+                    raise TypeError(f'field {f.name} is declared with '
+                                    f'init=False, it cannot be specified with '
+                                    f'replace()')
+                continue
+    
+            if f.name not in changes:
+                if f._field_type is _FIELD_INITVAR and f.default is MISSING:
+                    raise TypeError(f"InitVar {f.name!r} "
+                                    f'must be specified with replace()')
+                changes[f.name] = getattr(self, f.name)
+    
+        # Create the new object, which calls __init__() and
+        # __post_init__() (if defined), using all of the init fields we've
+        # added and/or left in 'changes'.  If there are values supplied in
+        # changes that aren't fields, this will correctly raise a
+        # TypeError.
+&gt;       return self.__class__(**changes)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^
+E       TypeError: Operation.__init__() got an unexpected keyword argument 'kind'
+
+/home/zyf/miniconda3/envs/lewm/lib/python3.14/dataclasses.py:1813: TypeError</failure></testcase><testcase classname="tests.unit.test_program_admission_codec" name="test_existing_golden_profiles_keep_their_original_bytes[2]" time="0.010"><failure message="assert '{&quot;locations&quot;...ion:loop&quot;}}]}' == '{&quot;locations&quot;...n:loop&quot;}}]}\n'&#10;  &#10;  Skipping 11342 identical leading characters in diff, use -v to show&#10;  - n:loop&quot;}}]}&#10;  ?            -&#10;  + n:loop&quot;}}]}">version = 2
+
+    @pytest.mark.parametrize("version", range(2, 17))
+    def test_existing_golden_profiles_keep_their_original_bytes(version):
+        directory = Path(__file__).parents[1] / "fixtures"
+        payload = (directory / f"program_graph_v{version}_frozen.json").read_text()
+        assert json.loads(payload)["schema_version"] == version
+&gt;       assert codec.dumps(codec.loads(payload)) == payload
+E       assert '{"locations"...ion:loop"}}]}' == '{"locations"...n:loop"}}]}\n'
+E         
+E         Skipping 11342 identical leading characters in diff, use -v to show
+E         - n:loop"}}]}
+E         ?            -
+E         + n:loop"}}]}
+
+tests/unit/test_program_admission_codec.py:143: AssertionError</failure></testcase><testcase classname="tests.unit.test_program_admission_codec" name="test_existing_golden_profiles_keep_their_original_bytes[3]" time="0.006"><failure message="assert '{&quot;binding_de...:&quot;slot:x&quot;}}]}' == '{&quot;binding_de...slot:x&quot;}}]}\n'&#10;  &#10;  Skipping 3587 identical leading characters in diff, use -v to show&#10;  - slot:x&quot;}}]}&#10;  ?            -&#10;  + slot:x&quot;}}]}">version = 3
+
+    @pytest.mark.parametrize("version", range(2, 17))
+    def test_existing_golden_profiles_keep_their_original_bytes(version):
+        directory = Path(__file__).parents[1] / "fixtures"
+        payload = (directory / f"program_graph_v{version}_frozen.json").read_text()
+        assert json.loads(payload)["schema_version"] == version
+&gt;       assert codec.dumps(codec.loads(payload)) == payload
+E       assert '{"binding_de...:"slot:x"}}]}' == '{"binding_de...slot:x"}}]}\n'
+E         
+E         Skipping 3587 identical leading characters in diff, use -v to show
+E         - slot:x"}}]}
+E         ?            -
+E         + slot:x"}}]}
+
+tests/unit/test_program_admission_codec.py:143: AssertionError</failure></testcase><testcase classname="tests.unit.test_program_admission_codec" name="test_existing_golden_profiles_keep_their_original_bytes[4]" time="0.005"><failure message="assert '{&quot;binding_de...argets&quot;:[]}]}' == '{&quot;binding_de...gets&quot;:[]}]}\n'&#10;  &#10;  Skipping 2572 identical leading characters in diff, use -v to show&#10;  - gets&quot;:[]}]}&#10;  ?            -&#10;  + gets&quot;:[]}]}">version = 4
+
+    @pytest.mark.parametrize("version", range(2, 17))
+    def test_existing_golden_profiles_keep_their_original_bytes(version):
+        directory = Path(__file__).parents[1] / "fixtures"
+        payload = (directory / f"program_graph_v{version}_frozen.json").read_text()
+        assert json.loads(payload)["schema_version"] == version
+&gt;       assert codec.dumps(codec.loads(payload)) == payload
+E       assert '{"binding_de...argets":[]}]}' == '{"binding_de...gets":[]}]}\n'
+E         
+E         Skipping 2572 identical leading characters in diff, use -v to show
+E         - gets":[]}]}
+E         ?            -
+E         + gets":[]}]}
+
+tests/unit/test_program_admission_codec.py:143: AssertionError</failure></testcase><testcase classname="tests.unit.test_program_admission_codec" name="test_existing_golden_profiles_keep_their_original_bytes[5]" time="0.016"><failure message="assert '{&quot;binding_de...n:calls&quot;}]}]}' == '{&quot;binding_de...calls&quot;}]}]}\n'&#10;  &#10;  Skipping 26249 identical leading characters in diff, use -v to show&#10;  - calls&quot;}]}]}&#10;  ?            -&#10;  + calls&quot;}]}]}">version = 5
+
+    @pytest.mark.parametrize("version", range(2, 17))
+    def test_existing_golden_profiles_keep_their_original_bytes(version):
+        directory = Path(__file__).parents[1] / "fixtures"
+        payload = (directory / f"program_graph_v{version}_frozen.json").read_text()
+        assert json.loads(payload)["schema_version"] == version
+&gt;       assert codec.dumps(codec.loads(payload)) == payload
+E       assert '{"binding_de...n:calls"}]}]}' == '{"binding_de...calls"}]}]}\n'
+E         
+E         Skipping 26249 identical leading characters in diff, use -v to show
+E         - calls"}]}]}
+E         ?            -
+E         + calls"}]}]}
+
+tests/unit/test_program_admission_codec.py:143: AssertionError</failure></testcase><testcase classname="tests.unit.test_program_admission_codec" name="test_existing_golden_profiles_keep_their_original_bytes[6]" time="0.020"><failure message="assert '{&quot;binding_de...d.region&quot;}}]}' == '{&quot;binding_de...region&quot;}}]}\n'&#10;  &#10;  Skipping 28894 identical leading characters in diff, use -v to show&#10;  - region&quot;}}]}&#10;  ?            -&#10;  + region&quot;}}]}">version = 6
+
+    @pytest.mark.parametrize("version", range(2, 17))
+    def test_existing_golden_profiles_keep_their_original_bytes(version):
+        directory = Path(__file__).parents[1] / "fixtures"
+        payload = (directory / f"program_graph_v{version}_frozen.json").read_text()
+        assert json.loads(payload)["schema_version"] == version
+&gt;       assert codec.dumps(codec.loads(payload)) == payload
+E       assert '{"binding_de...d.region"}}]}' == '{"binding_de...region"}}]}\n'
+E         
+E         Skipping 28894 identical leading characters in diff, use -v to show
+E         - region"}}]}
+E         ?            -
+E         + region"}}]}
+
+tests/unit/test_program_admission_codec.py:143: AssertionError</failure></testcase><testcase classname="tests.unit.test_program_admission_codec" name="test_existing_golden_profiles_keep_their_original_bytes[7]" time="0.016"><failure message="assert '{&quot;binding_de...n:callee&quot;}}]}' == '{&quot;binding_de...callee&quot;}}]}\n'&#10;  &#10;  Skipping 17717 identical leading characters in diff, use -v to show&#10;  - callee&quot;}}]}&#10;  ?            -&#10;  + callee&quot;}}]}">version = 7
+
+    @pytest.mark.parametrize("version", range(2, 17))
+    def test_existing_golden_profiles_keep_their_original_bytes(version):
+        directory = Path(__file__).parents[1] / "fixtures"
+        payload = (directory / f"program_graph_v{version}_frozen.json").read_text()
+        assert json.loads(payload)["schema_version"] == version
+&gt;       assert codec.dumps(codec.loads(payload)) == payload
+E       assert '{"binding_de...n:callee"}}]}' == '{"binding_de...callee"}}]}\n'
+E         
+E         Skipping 17717 identical leading characters in diff, use -v to show
+E         - callee"}}]}
+E         ?            -
+E         + callee"}}]}
+
+tests/unit/test_program_admission_codec.py:143: AssertionError</failure></testcase><testcase classname="tests.unit.test_program_admission_codec" name="test_existing_golden_profiles_keep_their_original_bytes[8]" time="0.034"><failure message="assert '{&quot;binding_de...tive.rep&quot;}}]}' == '{&quot;binding_de...ve.rep&quot;}}]}\n'&#10;  &#10;  Skipping 50143 identical leading characters in diff, use -v to show&#10;  - ve.rep&quot;}}]}&#10;  ?            -&#10;  + ve.rep&quot;}}]}">version = 8
+
+    @pytest.mark.parametrize("version", range(2, 17))
+    def test_existing_golden_profiles_keep_their_original_bytes(version):
+        directory = Path(__file__).parents[1] / "fixtures"
+        payload = (directory / f"program_graph_v{version}_frozen.json").read_text()
+        assert json.loads(payload)["schema_version"] == version
+&gt;       assert codec.dumps(codec.loads(payload)) == payload
+E       assert '{"binding_de...tive.rep"}}]}' == '{"binding_de...ve.rep"}}]}\n'
+E         
+E         Skipping 50143 identical leading characters in diff, use -v to show
+E         - ve.rep"}}]}
+E         ?            -
+E         + ve.rep"}}]}
+
+tests/unit/test_program_admission_codec.py:143: AssertionError</failure></testcase><testcase classname="tests.unit.test_program_admission_codec" name="test_existing_golden_profiles_keep_their_original_bytes[9]" time="0.034"><failure message="assert '{&quot;binding_de...d.region&quot;}}]}' == '{&quot;binding_de...region&quot;}}]}\n'&#10;  &#10;  Skipping 60945 identical leading characters in diff, use -v to show&#10;  - region&quot;}}]}&#10;  ?            -&#10;  + region&quot;}}]}">version = 9
+
+    @pytest.mark.parametrize("version", range(2, 17))
+    def test_existing_golden_profiles_keep_their_original_bytes(version):
+        directory = Path(__file__).parents[1] / "fixtures"
+        payload = (directory / f"program_graph_v{version}_frozen.json").read_text()
+        assert json.loads(payload)["schema_version"] == version
+&gt;       assert codec.dumps(codec.loads(payload)) == payload
+E       assert '{"binding_de...d.region"}}]}' == '{"binding_de...region"}}]}\n'
+E         
+E         Skipping 60945 identical leading characters in diff, use -v to show
+E         - region"}}]}
+E         ?            -
+E         + region"}}]}
+
+tests/unit/test_program_admission_codec.py:143: AssertionError</failure></testcase><testcase classname="tests.unit.test_program_admission_codec" name="test_existing_golden_profiles_keep_their_original_bytes[10]" time="0.021"><failure message="assert '{&quot;binding_de...n:resume&quot;}}]}' == '{&quot;binding_de...resume&quot;}}]}\n'&#10;  &#10;  Skipping 34705 identical leading characters in diff, use -v to show&#10;  - resume&quot;}}]}&#10;  ?            -&#10;  + resume&quot;}}]}">version = 10
+
+    @pytest.mark.parametrize("version", range(2, 17))
+    def test_existing_golden_profiles_keep_their_original_bytes(version):
+        directory = Path(__file__).parents[1] / "fixtures"
+        payload = (directory / f"program_graph_v{version}_frozen.json").read_text()
+        assert json.loads(payload)["schema_version"] == version
+&gt;       assert codec.dumps(codec.loads(payload)) == payload
+E       assert '{"binding_de...n:resume"}}]}' == '{"binding_de...resume"}}]}\n'
+E         
+E         Skipping 34705 identical leading characters in diff, use -v to show
+E         - resume"}}]}
+E         ?            -
+E         + resume"}}]}
+
+tests/unit/test_program_admission_codec.py:143: AssertionError</failure></testcase><testcase classname="tests.unit.test_program_admission_codec" name="test_existing_golden_profiles_keep_their_original_bytes[11]" time="0.037" /><testcase classname="tests.unit.test_program_admission_codec" name="test_existing_golden_profiles_keep_their_original_bytes[12]" time="0.038" /><testcase classname="tests.unit.test_program_admission_codec" name="test_existing_golden_profiles_keep_their_original_bytes[13]" time="0.048" /><testcase classname="tests.unit.test_program_admission_codec" name="test_existing_golden_profiles_keep_their_original_bytes[14]" time="0.048" /><testcase classname="tests.unit.test_program_admission_codec" name="test_existing_golden_profiles_keep_their_original_bytes[15]" time="0.012" /><testcase classname="tests.unit.test_program_admission_codec" name="test_existing_golden_profiles_keep_their_original_bytes[16]" time="0.013" /></testsuite></testsuites>

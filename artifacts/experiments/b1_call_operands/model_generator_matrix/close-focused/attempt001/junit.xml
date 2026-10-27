@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="5" skipped="0" tests="10" time="0.867" timestamp="2026-10-18T16:47:03.198386+00:00" hostname="gpu1"><testcase classname="tests.unit.test_program_generator_close_contracts" name="test_close_metadata_cannot_call_an_unchanged_state_effect_a_yield_payload_or_runtime_error" time="0.049"><failure message="AssertionError: assert 'protocol_adapter_source' in set()&#10; +  where set() = _codes(ProgramGraph(root=RegionID(value='driver'), regions=(Region(id=RegionID(value='driver'), label='declared driver fixtur..., source=StaticProtocolGap(reason=&lt;StaticGapReason.NATIVE_APPLICABILITY_UNPROVEN: 'NATIVE_APPLICABILITY_UNPROVEN'&gt;)),)))">def test_close_metadata_cannot_call_an_unchanged_state_effect_a_yield_payload_or_runtime_error():
+        graph, details = state_as_close_payload_program()
+        require_valid(_core(graph))
+        assert details["source_slot"] &gt; 0
+&gt;       assert "protocol_adapter_source" in _codes(graph)
+E       AssertionError: assert 'protocol_adapter_source' in set()
+E        +  where set() = _codes(ProgramGraph(root=RegionID(value='driver'), regions=(Region(id=RegionID(value='driver'), label='declared driver fixtur..., source=StaticProtocolGap(reason=&lt;StaticGapReason.NATIVE_APPLICABILITY_UNPROVEN: 'NATIVE_APPLICABILITY_UNPROVEN'&gt;)),)))
+
+tests/unit/test_program_generator_close_contracts.py:39: AssertionError</failure></testcase><testcase classname="tests.unit.test_program_generator_close_contracts" name="test_close_body_return_connects_the_real_value_or_selected_helper_results_to_host[direct]" time="0.148" /><testcase classname="tests.unit.test_program_generator_close_contracts" name="test_close_body_return_connects_the_real_value_or_selected_helper_results_to_host[helper]" time="0.019"><failure message="ValueError: protocol_host_adapter at program_operation:driver.drive: body Return needs its explicit Python completion adapter">adapter = 'helper'
+
+    @pytest.mark.parametrize("adapter", ("direct", "helper"))
+    def test_close_body_return_connects_the_real_value_or_selected_helper_results_to_host(adapter):
+        graph, details = generator_close_program(adapter=adapter)
+        require_valid(_core(graph))
+&gt;       require_valid(graph)
+
+tests/unit/test_program_generator_close_contracts.py:46: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='driver'), regions=(Region(id=RegionID(value='driver'), label='declared driver fixtur...), source=StaticProtocolGap(reason=&lt;StaticGapReason.NATIVE_APPLICABILITY_UNPROVEN: 'NATIVE_APPLICABILITY_UNPROVEN'&gt;))))
+
+    def require_valid(graph: ProgramGraph) -&gt; None:
+        issues = validate(graph)
+        if issues:
+&gt;           raise ValueError("; ".join(f"{issue.code} at {issue.path}: {issue.message}" for issue in issues))
+E           ValueError: protocol_host_adapter at program_operation:driver.drive: body Return needs its explicit Python completion adapter
+
+scar/ir/program/validation.py:731: ValueError</failure></testcase><testcase classname="tests.unit.test_program_generator_close_contracts" name="test_ignored_generator_exit_is_a_real_yield_with_two_error_constructor_routes_and_no_finished_fact" time="0.031" /><testcase classname="tests.unit.test_program_generator_close_contracts" name="test_close_error_adapter_cannot_ignore_its_actual_result_and_replay_an_old_packet[0]" time="0.023"><failure message="AssertionError: assert 'protocol_copy' in set()&#10; +  where set() = _codes(ProgramGraph(root=RegionID(value='driver'), regions=(Region(id=RegionID(value='driver'), label='declared driver fixtur...), source=StaticProtocolGap(reason=&lt;StaticGapReason.NATIVE_APPLICABILITY_UNPROVEN: 'NATIVE_APPLICABILITY_UNPROVEN'&gt;)))))">edge = 0
+
+    @pytest.mark.parametrize("edge", (0, 1))
+    def test_close_error_adapter_cannot_ignore_its_actual_result_and_replay_an_old_packet(edge):
+        graph, details = generator_close_program(outcome="yield", adapter="helper")
+        terminal = _operation(graph, details["terminals"][edge])
+        old = ValueID("driver.entry.arg.2")
+        wrong = _change_use(graph, terminal.id, terminal.terminator.values[0], old)
+        require_valid(_core(wrong))
+&gt;       assert "protocol_copy" in _codes(wrong)
+E       AssertionError: assert 'protocol_copy' in set()
+E        +  where set() = _codes(ProgramGraph(root=RegionID(value='driver'), regions=(Region(id=RegionID(value='driver'), label='declared driver fixtur...), source=StaticProtocolGap(reason=&lt;StaticGapReason.NATIVE_APPLICABILITY_UNPROVEN: 'NATIVE_APPLICABILITY_UNPROVEN'&gt;)))))
+
+tests/unit/test_program_generator_close_contracts.py:87: AssertionError</failure></testcase><testcase classname="tests.unit.test_program_generator_close_contracts" name="test_close_error_adapter_cannot_ignore_its_actual_result_and_replay_an_old_packet[1]" time="0.023"><failure message="AssertionError: assert 'protocol_copy' in set()&#10; +  where set() = _codes(ProgramGraph(root=RegionID(value='driver'), regions=(Region(id=RegionID(value='driver'), label='declared driver fixtur...), source=StaticProtocolGap(reason=&lt;StaticGapReason.NATIVE_APPLICABILITY_UNPROVEN: 'NATIVE_APPLICABILITY_UNPROVEN'&gt;)))))">edge = 1
+
+    @pytest.mark.parametrize("edge", (0, 1))
+    def test_close_error_adapter_cannot_ignore_its_actual_result_and_replay_an_old_packet(edge):
+        graph, details = generator_close_program(outcome="yield", adapter="helper")
+        terminal = _operation(graph, details["terminals"][edge])
+        old = ValueID("driver.entry.arg.2")
+        wrong = _change_use(graph, terminal.id, terminal.terminator.values[0], old)
+        require_valid(_core(wrong))
+&gt;       assert "protocol_copy" in _codes(wrong)
+E       AssertionError: assert 'protocol_copy' in set()
+E        +  where set() = _codes(ProgramGraph(root=RegionID(value='driver'), regions=(Region(id=RegionID(value='driver'), label='declared driver fixtur...), source=StaticProtocolGap(reason=&lt;StaticGapReason.NATIVE_APPLICABILITY_UNPROVEN: 'NATIVE_APPLICABILITY_UNPROVEN'&gt;)))))
+
+tests/unit/test_program_generator_close_contracts.py:87: AssertionError</failure></testcase><testcase classname="tests.unit.test_program_generator_close_contracts" name="test_host_close_error_after_yield_does_not_make_terminal_frame_release_legal" time="0.014" /><testcase classname="tests.unit.test_program_generator_close_contracts" name="test_a_different_static_body_terminal_cannot_supply_finished_history_for_this_yield" time="0.020" /><testcase classname="tests.unit.test_program_generator_close_contracts" name="test_close_release_cannot_reuse_the_pre_drive_state_instead_of_the_actual_current_post" time="0.010" /><testcase classname="tests.unit.test_program_generator_close_contracts" name="test_close_return_helper_cannot_replay_an_available_owner_instead_of_its_own_result" time="0.019"><failure message="AssertionError: assert 'protocol_copy' in {'protocol_host_adapter'}&#10; +  where {'protocol_host_adapter'} = _codes(ProgramGraph(root=RegionID(value='driver'), regions=(Region(id=RegionID(value='driver'), label='declared driver fixtur...), source=StaticProtocolGap(reason=&lt;StaticGapReason.NATIVE_APPLICABILITY_UNPROVEN: 'NATIVE_APPLICABILITY_UNPROVEN'&gt;)))))">def test_close_return_helper_cannot_replay_an_available_owner_instead_of_its_own_result():
+        graph, details = generator_close_program(adapter="helper")
+        terminal = _operation(graph, details["terminals"][0])
+        wrong = _change_use(graph, terminal.id, terminal.terminator.values[0],
+                            graph.driver_interfaces[0].receiver)
+        require_valid(_core(wrong))
+&gt;       assert "protocol_copy" in _codes(wrong)
+E       AssertionError: assert 'protocol_copy' in {'protocol_host_adapter'}
+E        +  where {'protocol_host_adapter'} = _codes(ProgramGraph(root=RegionID(value='driver'), regions=(Region(id=RegionID(value='driver'), label='declared driver fixtur...), source=StaticProtocolGap(reason=&lt;StaticGapReason.NATIVE_APPLICABILITY_UNPROVEN: 'NATIVE_APPLICABILITY_UNPROVEN'&gt;)))))
+
+tests/unit/test_program_generator_close_contracts.py:125: AssertionError</failure></testcase></testsuite></testsuites>

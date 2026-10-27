@@ -1,0 +1,25 @@
+{
+  "gate": "M1-R1-RESOURCE-IDENTITY",
+  "scope": "Canonical program snapshot, distinct execution/value/Use occurrences, dynamic host CFG/state incarnation, resource realization/requirement/handle/current support, exact external graph links and strict independent execution wire/query. Declared finite IR compositions only.",
+  "limitations": [
+    "Structural validity and typed references do not establish Python/native/runtime correspondence, physical identity, content equality or transformation authority. Every report retains exact gaps and unverified runtime applicability.",
+    "R2 work/outcome/event-generation/order/ready and R3 load-consume-save composition are not implemented by this gate. Complete M0-M2, denotation/provenance, literal/selector and catalog interfaces remain open.",
+    "No new source lowerer, detector, optimization backend, LeWM profiling or clean performance measurement. Test timings are acceptance cost, not workload speedup."
+  ],
+  "criteria": [
+    {"id": "exact-coordinate-ids-scopes-records-and-explicit-unresolved-variants", "tests": ["tests/unit/test_execution_coordinates_records.py"]},
+    {"id": "resource-native-object-allocation-targets-rights-ownership-and-nested-mutation", "tests": ["tests/unit/test_execution_resource_records.py"]},
+    {"id": "strict-tagged-record-id-enum-union-json-with-original-namespaces", "tests": ["tests/unit/test_execution_codec.py"]},
+    {"id": "create-activations-external-implicit-dup-open-and-exact-owners", "tests": ["tests/unit/test_execution_resources_graph.py"]},
+    {"id": "actual-loop-visits-fresh-definitions-original-uses-and-state", "tests": ["tests/unit/test_execution_flow.py::test_loop_revisits_have_fresh_values_and_original_use_and_formal_routes", "tests/unit/test_execution_flow.py::test_loop_rejects_old_result_and_old_state_from_same_static_definition", "tests/unit/test_execution_flow.py::test_absent_producer_does_not_allow_an_old_result_at_a_later_block", "tests/unit/test_execution_flow.py::test_resource_support_cannot_fall_back_to_old_loop_state_when_current_formal_is_missing"]},
+    {"id": "exact-suspension-segment-body-activation-thread-migration-and-resume-ports", "tests": ["tests/unit/test_execution_flow.py::test_resume_keeps_body_activation_and_uses_new_segment_state_and_actual_saved_port", "tests/unit/test_execution_flow.py::test_resume_cannot_be_folded_into_initial_segment_or_rebound_to_another_successor"]},
+    {"id": "invoke-actual-completions-have-no-ordinary-common-after-state", "tests": ["tests/unit/test_execution_flow.py::test_invoke_has_no_common_after_state_and_actual_completion_supplies_fresh_formals"]},
+    {"id": "invalid-foreign-links-scope-and-input-types-report-without-crashing", "tests": ["tests/unit/test_execution_flow.py::test_bad_dynamic_links_report_issues_without_crashing", "tests/unit/test_execution_flow.py::test_even_self_consistent_evidence_points_cannot_switch_the_segments_process", "tests/unit/test_execution_flow.py::test_public_queries_and_catalog_inputs_report_invalid_types"]},
+    {"id": "partial-capture-and-untaken-edge-are-not-empty-effects-or-hb", "tests": ["tests/unit/test_execution_flow.py::test_missing_observation_is_gap_and_does_not_authorize_optimization", "tests/unit/test_execution_flow.py::test_disconnected_entry_visit_is_not_silently_a_second_initial_entry", "tests/unit/test_execution_flow.py::test_untaken_edge_cannot_supply_a_state_or_a_host_precedence_point"]},
+    {"id": "detached-query-exact-program-snapshot-and-existing-instance-acquisition", "tests": ["tests/unit/test_execution_flow.py::test_queries_are_detached_and_snapshot_conflicts_are_not_missing_evidence", "tests/unit/test_execution_links.py::test_acquiring_a_preexisting_instance_does_not_require_faking_a_second_creation"]},
+    {"id": "external-graph-hash-schema-size-entity-and-eeg-many-to-many-namespace", "tests": ["tests/unit/test_execution_links.py::test_external_allocation_catalog_is_exact_and_never_opened_from_uri", "tests/unit/test_execution_links.py::test_legacy_evidence_link_is_artifact_scoped_and_many_to_many_without_id_rebranding", "tests/unit/test_execution_links.py::test_malformed_same_family_external_graph_is_an_issue_not_an_exception_or_missing_graph"]},
+    {"id": "native-namespace-is-not-referent-realm-and-binding-checks-owner-run-before-access", "tests": ["tests/unit/test_execution_links.py::test_native_handle_namespace_and_referent_identity_realm_need_not_be_identical", "tests/unit/test_execution_links.py::test_requirement_owner_cannot_bind_a_known_other_run_even_before_any_access"]},
+    {"id": "canonical-resource-requirement-and-state-core-remain-authoritative", "tests": ["tests/unit/test_program_resources.py", "tests/unit/test_program_graph.py", "tests/unit/test_program_graph_adversarial.py"]},
+    {"id": "original-program-wire-through-v14-and-generic-tagged-codec-remain-readable", "tests": ["tests/unit/test_program_session_release_codec.py", "tests/unit/test_record_codec_tags.py", "tests/integration/test_program_graph_roundtrip.py"]}
+  ]
+}

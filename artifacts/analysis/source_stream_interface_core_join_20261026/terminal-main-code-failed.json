@@ -1,0 +1,10 @@
+{
+  "actual": true,
+  "exit_code": 1,
+  "stage": "source lowering before source-stream query",
+  "reason": "runner replaced default source capabilities with two additional capabilities; resulting source body was incomplete",
+  "run_result": "NOT_PASS",
+  "target_rerun": false,
+  "production_join_invoked": true,
+  "fix": "runner extends and deduplicates the existing default capability tuple; records the complete tuple"
+}

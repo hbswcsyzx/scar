@@ -1,0 +1,13 @@
+{
+  "analysis_sha256": "71e824d8c4d5bbe2aaa9b2017f255aed79ef525746065da1f988f1f975b16834",
+  "exit_code": 0,
+  "invocation_body_open": "prohibited in test",
+  "raw_capture_reads": 0,
+  "real_rows_read": 0,
+  "schema": "scar.modeling-scope-final-descriptor-header-check",
+  "schema_version": 1,
+  "script_sha256": "e9c8afd7d6624f66bab7d8354968959677e67c7f75a721150def3bc0a2d0731a",
+  "stderr": "test_current_five_fields_stat_without_body (__main__.InvocationDescriptorChecks.test_current_five_fields_stat_without_body) ... ok\ntest_missing_unknown_wrong_type_or_stat_is_rejected_without_body (__main__.InvocationDescriptorChecks.test_missing_unknown_wrong_type_or_stat_is_rejected_without_body) ... ok\ntest_stored_and_decoded_budgets_are_checked_without_body (__main__.InvocationDescriptorChecks.test_stored_and_decoded_budgets_are_checked_without_body) ... ok\n\n----------------------------------------------------------------------\nRan 3 tests in 0.036s\n\nOK\n",
+  "stdout": "",
+  "wall_seconds": 1.111299313022755
+}

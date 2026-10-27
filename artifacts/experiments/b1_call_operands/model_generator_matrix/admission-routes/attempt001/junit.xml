@@ -1,0 +1,257 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="8" skipped="0" tests="17" time="1.058" timestamp="2026-10-18T17:13:18.943557+00:00" hostname="gpu1"><testcase classname="tests.unit.test_program_admission_routes" name="test_original_branch_reaches_actual_gate_and_compares_read_with_gate_inputs[True-start-IS_CREATED]" time="0.187" /><testcase classname="tests.unit.test_program_admission_routes" name="test_original_branch_reaches_actual_gate_and_compares_read_with_gate_inputs[True-start-IS_RUNNING]" time="0.010" /><testcase classname="tests.unit.test_program_admission_routes" name="test_original_branch_reaches_actual_gate_and_compares_read_with_gate_inputs[True-start-IS_SUSPENDED]" time="0.009" /><testcase classname="tests.unit.test_program_admission_routes" name="test_original_branch_reaches_actual_gate_and_compares_read_with_gate_inputs[True-start-IS_CLOSED]" time="0.009" /><testcase classname="tests.unit.test_program_admission_routes" name="test_original_branch_reaches_actual_gate_and_compares_read_with_gate_inputs[True-value-IS_CREATED]" time="0.013"><failure message="ValueError: exit_binding at program_operation:phase.alternate: missing or wrong kind of exit">rule = &lt;BodyStatePredicateRule.IS_CREATED: 'IS_CREATED'&gt;, target = 'value'
+truth = True
+
+    @pytest.mark.parametrize('rule', tuple(Rule))
+    @pytest.mark.parametrize('target', ('start', 'value'))
+    @pytest.mark.parametrize('truth', (True, False))
+    def test_original_branch_reaches_actual_gate_and_compares_read_with_gate_inputs(rule, target, truth):
+        graph, details = phase_gate_program(rule=rule, target=target, truth=truth)
+&gt;       predicate, gate = _gate_route(graph, details)
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_program_admission_routes.py:114: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/unit/test_program_admission_routes.py:102: in _gate_route
+    report = ProgramIndex(graph).protocol_obligations(details['scope'], budget=20000)
+             ^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;scar.ir.program.queries.ProgramIndex object at 0x797edc4fcc20&gt;
+graph = ProgramGraph(root=RegionID(value='driver'), regions=(Region(id=RegionID(value='driver'), label='declared driver fixtur...), source=StaticProtocolGap(reason=&lt;StaticGapReason.NATIVE_APPLICABILITY_UNPROVEN: 'NATIVE_APPLICABILITY_UNPROVEN'&gt;))))
+
+    def __init__(self, graph: ProgramGraph):
+        # Reuse the validator's canonical CFG/dominators and derived cleanup
+        # result rather than running a second dataflow algorithm for queries.
+        from .validation import validate
+        cleanup, resumption, lifecycle = [], [], []
+        issues = validate(graph, _cleanup_facts=cleanup, _resumption_facts=resumption,
+                          _lifecycle_facts=lifecycle)
+        if issues:
+&gt;           raise ValueError("; ".join(f"{i.code} at {i.path}: {i.message}" for i in issues))
+E           ValueError: exit_binding at program_operation:phase.alternate: missing or wrong kind of exit
+
+scar/ir/program/queries.py:279: ValueError</failure></testcase><testcase classname="tests.unit.test_program_admission_routes" name="test_original_branch_reaches_actual_gate_and_compares_read_with_gate_inputs[True-value-IS_RUNNING]" time="0.009"><failure message="ValueError: exit_binding at program_operation:phase.alternate: missing or wrong kind of exit">rule = &lt;BodyStatePredicateRule.IS_RUNNING: 'IS_RUNNING'&gt;, target = 'value'
+truth = True
+
+    @pytest.mark.parametrize('rule', tuple(Rule))
+    @pytest.mark.parametrize('target', ('start', 'value'))
+    @pytest.mark.parametrize('truth', (True, False))
+    def test_original_branch_reaches_actual_gate_and_compares_read_with_gate_inputs(rule, target, truth):
+        graph, details = phase_gate_program(rule=rule, target=target, truth=truth)
+&gt;       predicate, gate = _gate_route(graph, details)
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_program_admission_routes.py:114: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/unit/test_program_admission_routes.py:102: in _gate_route
+    report = ProgramIndex(graph).protocol_obligations(details['scope'], budget=20000)
+             ^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;scar.ir.program.queries.ProgramIndex object at 0x797edbd2e510&gt;
+graph = ProgramGraph(root=RegionID(value='driver'), regions=(Region(id=RegionID(value='driver'), label='declared driver fixtur...), source=StaticProtocolGap(reason=&lt;StaticGapReason.NATIVE_APPLICABILITY_UNPROVEN: 'NATIVE_APPLICABILITY_UNPROVEN'&gt;))))
+
+    def __init__(self, graph: ProgramGraph):
+        # Reuse the validator's canonical CFG/dominators and derived cleanup
+        # result rather than running a second dataflow algorithm for queries.
+        from .validation import validate
+        cleanup, resumption, lifecycle = [], [], []
+        issues = validate(graph, _cleanup_facts=cleanup, _resumption_facts=resumption,
+                          _lifecycle_facts=lifecycle)
+        if issues:
+&gt;           raise ValueError("; ".join(f"{i.code} at {i.path}: {i.message}" for i in issues))
+E           ValueError: exit_binding at program_operation:phase.alternate: missing or wrong kind of exit
+
+scar/ir/program/queries.py:279: ValueError</failure></testcase><testcase classname="tests.unit.test_program_admission_routes" name="test_original_branch_reaches_actual_gate_and_compares_read_with_gate_inputs[True-value-IS_SUSPENDED]" time="0.009"><failure message="ValueError: exit_binding at program_operation:phase.alternate: missing or wrong kind of exit">rule = &lt;BodyStatePredicateRule.IS_SUSPENDED: 'IS_SUSPENDED'&gt;, target = 'value'
+truth = True
+
+    @pytest.mark.parametrize('rule', tuple(Rule))
+    @pytest.mark.parametrize('target', ('start', 'value'))
+    @pytest.mark.parametrize('truth', (True, False))
+    def test_original_branch_reaches_actual_gate_and_compares_read_with_gate_inputs(rule, target, truth):
+        graph, details = phase_gate_program(rule=rule, target=target, truth=truth)
+&gt;       predicate, gate = _gate_route(graph, details)
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_program_admission_routes.py:114: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/unit/test_program_admission_routes.py:102: in _gate_route
+    report = ProgramIndex(graph).protocol_obligations(details['scope'], budget=20000)
+             ^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;scar.ir.program.queries.ProgramIndex object at 0x797edbd2e3c0&gt;
+graph = ProgramGraph(root=RegionID(value='driver'), regions=(Region(id=RegionID(value='driver'), label='declared driver fixtur...), source=StaticProtocolGap(reason=&lt;StaticGapReason.NATIVE_APPLICABILITY_UNPROVEN: 'NATIVE_APPLICABILITY_UNPROVEN'&gt;))))
+
+    def __init__(self, graph: ProgramGraph):
+        # Reuse the validator's canonical CFG/dominators and derived cleanup
+        # result rather than running a second dataflow algorithm for queries.
+        from .validation import validate
+        cleanup, resumption, lifecycle = [], [], []
+        issues = validate(graph, _cleanup_facts=cleanup, _resumption_facts=resumption,
+                          _lifecycle_facts=lifecycle)
+        if issues:
+&gt;           raise ValueError("; ".join(f"{i.code} at {i.path}: {i.message}" for i in issues))
+E           ValueError: exit_binding at program_operation:phase.alternate: missing or wrong kind of exit
+
+scar/ir/program/queries.py:279: ValueError</failure></testcase><testcase classname="tests.unit.test_program_admission_routes" name="test_original_branch_reaches_actual_gate_and_compares_read_with_gate_inputs[True-value-IS_CLOSED]" time="0.009"><failure message="ValueError: exit_binding at program_operation:phase.alternate: missing or wrong kind of exit">rule = &lt;BodyStatePredicateRule.IS_CLOSED: 'IS_CLOSED'&gt;, target = 'value'
+truth = True
+
+    @pytest.mark.parametrize('rule', tuple(Rule))
+    @pytest.mark.parametrize('target', ('start', 'value'))
+    @pytest.mark.parametrize('truth', (True, False))
+    def test_original_branch_reaches_actual_gate_and_compares_read_with_gate_inputs(rule, target, truth):
+        graph, details = phase_gate_program(rule=rule, target=target, truth=truth)
+&gt;       predicate, gate = _gate_route(graph, details)
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_program_admission_routes.py:114: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/unit/test_program_admission_routes.py:102: in _gate_route
+    report = ProgramIndex(graph).protocol_obligations(details['scope'], budget=20000)
+             ^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;scar.ir.program.queries.ProgramIndex object at 0x797edbd2ea50&gt;
+graph = ProgramGraph(root=RegionID(value='driver'), regions=(Region(id=RegionID(value='driver'), label='declared driver fixtur...), source=StaticProtocolGap(reason=&lt;StaticGapReason.NATIVE_APPLICABILITY_UNPROVEN: 'NATIVE_APPLICABILITY_UNPROVEN'&gt;))))
+
+    def __init__(self, graph: ProgramGraph):
+        # Reuse the validator's canonical CFG/dominators and derived cleanup
+        # result rather than running a second dataflow algorithm for queries.
+        from .validation import validate
+        cleanup, resumption, lifecycle = [], [], []
+        issues = validate(graph, _cleanup_facts=cleanup, _resumption_facts=resumption,
+                          _lifecycle_facts=lifecycle)
+        if issues:
+&gt;           raise ValueError("; ".join(f"{i.code} at {i.path}: {i.message}" for i in issues))
+E           ValueError: exit_binding at program_operation:phase.alternate: missing or wrong kind of exit
+
+scar/ir/program/queries.py:279: ValueError</failure></testcase><testcase classname="tests.unit.test_program_admission_routes" name="test_original_branch_reaches_actual_gate_and_compares_read_with_gate_inputs[False-start-IS_CREATED]" time="0.010" /><testcase classname="tests.unit.test_program_admission_routes" name="test_original_branch_reaches_actual_gate_and_compares_read_with_gate_inputs[False-start-IS_RUNNING]" time="0.009" /><testcase classname="tests.unit.test_program_admission_routes" name="test_original_branch_reaches_actual_gate_and_compares_read_with_gate_inputs[False-start-IS_SUSPENDED]" time="0.009" /><testcase classname="tests.unit.test_program_admission_routes" name="test_original_branch_reaches_actual_gate_and_compares_read_with_gate_inputs[False-start-IS_CLOSED]" time="0.009" /><testcase classname="tests.unit.test_program_admission_routes" name="test_original_branch_reaches_actual_gate_and_compares_read_with_gate_inputs[False-value-IS_CREATED]" time="0.009"><failure message="ValueError: exit_binding at program_operation:phase.alternate: missing or wrong kind of exit">rule = &lt;BodyStatePredicateRule.IS_CREATED: 'IS_CREATED'&gt;, target = 'value'
+truth = False
+
+    @pytest.mark.parametrize('rule', tuple(Rule))
+    @pytest.mark.parametrize('target', ('start', 'value'))
+    @pytest.mark.parametrize('truth', (True, False))
+    def test_original_branch_reaches_actual_gate_and_compares_read_with_gate_inputs(rule, target, truth):
+        graph, details = phase_gate_program(rule=rule, target=target, truth=truth)
+&gt;       predicate, gate = _gate_route(graph, details)
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_program_admission_routes.py:114: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/unit/test_program_admission_routes.py:102: in _gate_route
+    report = ProgramIndex(graph).protocol_obligations(details['scope'], budget=20000)
+             ^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;scar.ir.program.queries.ProgramIndex object at 0x797edbe8fe00&gt;
+graph = ProgramGraph(root=RegionID(value='driver'), regions=(Region(id=RegionID(value='driver'), label='declared driver fixtur...), source=StaticProtocolGap(reason=&lt;StaticGapReason.NATIVE_APPLICABILITY_UNPROVEN: 'NATIVE_APPLICABILITY_UNPROVEN'&gt;))))
+
+    def __init__(self, graph: ProgramGraph):
+        # Reuse the validator's canonical CFG/dominators and derived cleanup
+        # result rather than running a second dataflow algorithm for queries.
+        from .validation import validate
+        cleanup, resumption, lifecycle = [], [], []
+        issues = validate(graph, _cleanup_facts=cleanup, _resumption_facts=resumption,
+                          _lifecycle_facts=lifecycle)
+        if issues:
+&gt;           raise ValueError("; ".join(f"{i.code} at {i.path}: {i.message}" for i in issues))
+E           ValueError: exit_binding at program_operation:phase.alternate: missing or wrong kind of exit
+
+scar/ir/program/queries.py:279: ValueError</failure></testcase><testcase classname="tests.unit.test_program_admission_routes" name="test_original_branch_reaches_actual_gate_and_compares_read_with_gate_inputs[False-value-IS_RUNNING]" time="0.009"><failure message="ValueError: exit_binding at program_operation:phase.alternate: missing or wrong kind of exit">rule = &lt;BodyStatePredicateRule.IS_RUNNING: 'IS_RUNNING'&gt;, target = 'value'
+truth = False
+
+    @pytest.mark.parametrize('rule', tuple(Rule))
+    @pytest.mark.parametrize('target', ('start', 'value'))
+    @pytest.mark.parametrize('truth', (True, False))
+    def test_original_branch_reaches_actual_gate_and_compares_read_with_gate_inputs(rule, target, truth):
+        graph, details = phase_gate_program(rule=rule, target=target, truth=truth)
+&gt;       predicate, gate = _gate_route(graph, details)
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_program_admission_routes.py:114: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/unit/test_program_admission_routes.py:102: in _gate_route
+    report = ProgramIndex(graph).protocol_obligations(details['scope'], budget=20000)
+             ^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;scar.ir.program.queries.ProgramIndex object at 0x797edc4fcc20&gt;
+graph = ProgramGraph(root=RegionID(value='driver'), regions=(Region(id=RegionID(value='driver'), label='declared driver fixtur...), source=StaticProtocolGap(reason=&lt;StaticGapReason.NATIVE_APPLICABILITY_UNPROVEN: 'NATIVE_APPLICABILITY_UNPROVEN'&gt;))))
+
+    def __init__(self, graph: ProgramGraph):
+        # Reuse the validator's canonical CFG/dominators and derived cleanup
+        # result rather than running a second dataflow algorithm for queries.
+        from .validation import validate
+        cleanup, resumption, lifecycle = [], [], []
+        issues = validate(graph, _cleanup_facts=cleanup, _resumption_facts=resumption,
+                          _lifecycle_facts=lifecycle)
+        if issues:
+&gt;           raise ValueError("; ".join(f"{i.code} at {i.path}: {i.message}" for i in issues))
+E           ValueError: exit_binding at program_operation:phase.alternate: missing or wrong kind of exit
+
+scar/ir/program/queries.py:279: ValueError</failure></testcase><testcase classname="tests.unit.test_program_admission_routes" name="test_original_branch_reaches_actual_gate_and_compares_read_with_gate_inputs[False-value-IS_SUSPENDED]" time="0.009"><failure message="ValueError: exit_binding at program_operation:phase.alternate: missing or wrong kind of exit">rule = &lt;BodyStatePredicateRule.IS_SUSPENDED: 'IS_SUSPENDED'&gt;, target = 'value'
+truth = False
+
+    @pytest.mark.parametrize('rule', tuple(Rule))
+    @pytest.mark.parametrize('target', ('start', 'value'))
+    @pytest.mark.parametrize('truth', (True, False))
+    def test_original_branch_reaches_actual_gate_and_compares_read_with_gate_inputs(rule, target, truth):
+        graph, details = phase_gate_program(rule=rule, target=target, truth=truth)
+&gt;       predicate, gate = _gate_route(graph, details)
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_program_admission_routes.py:114: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/unit/test_program_admission_routes.py:102: in _gate_route
+    report = ProgramIndex(graph).protocol_obligations(details['scope'], budget=20000)
+             ^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;scar.ir.program.queries.ProgramIndex object at 0x797edbd2e3c0&gt;
+graph = ProgramGraph(root=RegionID(value='driver'), regions=(Region(id=RegionID(value='driver'), label='declared driver fixtur...), source=StaticProtocolGap(reason=&lt;StaticGapReason.NATIVE_APPLICABILITY_UNPROVEN: 'NATIVE_APPLICABILITY_UNPROVEN'&gt;))))
+
+    def __init__(self, graph: ProgramGraph):
+        # Reuse the validator's canonical CFG/dominators and derived cleanup
+        # result rather than running a second dataflow algorithm for queries.
+        from .validation import validate
+        cleanup, resumption, lifecycle = [], [], []
+        issues = validate(graph, _cleanup_facts=cleanup, _resumption_facts=resumption,
+                          _lifecycle_facts=lifecycle)
+        if issues:
+&gt;           raise ValueError("; ".join(f"{i.code} at {i.path}: {i.message}" for i in issues))
+E           ValueError: exit_binding at program_operation:phase.alternate: missing or wrong kind of exit
+
+scar/ir/program/queries.py:279: ValueError</failure></testcase><testcase classname="tests.unit.test_program_admission_routes" name="test_original_branch_reaches_actual_gate_and_compares_read_with_gate_inputs[False-value-IS_CLOSED]" time="0.009"><failure message="ValueError: exit_binding at program_operation:phase.alternate: missing or wrong kind of exit">rule = &lt;BodyStatePredicateRule.IS_CLOSED: 'IS_CLOSED'&gt;, target = 'value'
+truth = False
+
+    @pytest.mark.parametrize('rule', tuple(Rule))
+    @pytest.mark.parametrize('target', ('start', 'value'))
+    @pytest.mark.parametrize('truth', (True, False))
+    def test_original_branch_reaches_actual_gate_and_compares_read_with_gate_inputs(rule, target, truth):
+        graph, details = phase_gate_program(rule=rule, target=target, truth=truth)
+&gt;       predicate, gate = _gate_route(graph, details)
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_program_admission_routes.py:114: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/unit/test_program_admission_routes.py:102: in _gate_route
+    report = ProgramIndex(graph).protocol_obligations(details['scope'], budget=20000)
+             ^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;scar.ir.program.queries.ProgramIndex object at 0x797edbd2e510&gt;
+graph = ProgramGraph(root=RegionID(value='driver'), regions=(Region(id=RegionID(value='driver'), label='declared driver fixtur...), source=StaticProtocolGap(reason=&lt;StaticGapReason.NATIVE_APPLICABILITY_UNPROVEN: 'NATIVE_APPLICABILITY_UNPROVEN'&gt;))))
+
+    def __init__(self, graph: ProgramGraph):
+        # Reuse the validator's canonical CFG/dominators and derived cleanup
+        # result rather than running a second dataflow algorithm for queries.
+        from .validation import validate
+        cleanup, resumption, lifecycle = [], [], []
+        issues = validate(graph, _cleanup_facts=cleanup, _resumption_facts=resumption,
+                          _lifecycle_facts=lifecycle)
+        if issues:
+&gt;           raise ValueError("; ".join(f"{i.code} at {i.path}: {i.message}" for i in issues))
+E           ValueError: exit_binding at program_operation:phase.alternate: missing or wrong kind of exit
+
+scar/ir/program/queries.py:279: ValueError</failure></testcase><testcase classname="tests.unit.test_program_admission_routes" name="test_changed_state_support_keeps_historical_bool_but_does_not_select_a_phase_target" time="0.010" /></testsuite></testsuites>

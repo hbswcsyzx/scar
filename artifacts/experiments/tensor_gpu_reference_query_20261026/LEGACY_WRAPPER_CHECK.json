@@ -1,0 +1,6 @@
+{
+  "qualification": "static AST only",
+  "legacy_args_and_body_unchanged": true,
+  "wrapper_index_path_runtime_tested": false,
+  "new_generic_sourcefact_path_actual_exit0": true
+}

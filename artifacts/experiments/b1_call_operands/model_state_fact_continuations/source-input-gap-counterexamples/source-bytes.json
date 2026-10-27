@@ -1,0 +1,22 @@
+{
+  "scar/ir/execution/query.py": {
+    "path": "source-input-gap-counterexamples/source-bytes/scar__ir__execution__query.py.txt",
+    "sha256": "8ae644dd2946bbadef84a3915f57afab01e765ffc8eeae2d2ac3165b5fa708ae"
+  },
+  "scar/ir/execution/request_state_history.py": {
+    "path": "source-input-gap-counterexamples/source-bytes/scar__ir__execution__request_state_history.py.txt",
+    "sha256": "0b01cbd2063865eec9238eea1eaddbb6e3fff68458c6b15fa05697e08beb8ffb"
+  },
+  "scar/ir/execution/state_preservation.py": {
+    "path": "source-input-gap-counterexamples/source-bytes/scar__ir__execution__state_preservation.py.txt",
+    "sha256": "09fb8f688ea8672aae566440287ec94983821b1930c2b92eda1dffaf764f854a"
+  },
+  "tests/unit/test_execution_request_state_history.py": {
+    "path": "source-input-gap-counterexamples/source-bytes/tests__unit__test_execution_request_state_history.py.txt",
+    "sha256": "29c770c58b2c9842e249fbd7b71d16abb49826525fec2b75138cd9a6c2423b0d"
+  },
+  "tests/unit/test_execution_state_preservation.py": {
+    "path": "source-input-gap-counterexamples/source-bytes/tests__unit__test_execution_state_preservation.py.txt",
+    "sha256": "159f46624aad12f8a2a55555e11abfb043aad1c4d24f9a0621098983c410771e"
+  }
+}

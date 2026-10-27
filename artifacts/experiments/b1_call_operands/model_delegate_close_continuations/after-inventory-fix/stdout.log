@@ -1,0 +1,132 @@
+..FFF                                                                    [100%]
+=================================== FAILURES ===================================
+____ test_unknown_packet_root_does_not_contradict_a_real_return_replacement ____
+
+    def test_unknown_packet_root_does_not_contradict_a_real_return_replacement():
+        from scar.ir.execution.validity_budget import ValidityBudget
+        from scar.ir.program.control import LanguageCompletionKind
+        from scar.ir.program.model import OperationResult, ReferenceValue, TerminatorKind
+        from scar.ir.program.protocol_connection_flow import ConnectionContext
+        from scar.ir.program.protocol_packet_routes import packet_continuations
+        from scar.ir.program.protocols import OwnedUse, StaticGapReason
+        from tests.fixtures.program_packet_continuation_graphs import _explicit_transfers
+        from tests.fixtures.program_resumption_graphs import resumption_cleanup_program
+    
+        program, _ = _explicit_transfers(resumption_cleanup_program(replace_pending=True))
+        require_valid(program)
+        index = ProgramIndex(program)
+        context = ConnectionContext(program, index=index, budget=ValidityBudget(262144))
+        action, = program.cleanup_replacements
+        block, = tuple(block for region in program.regions for block in region.blocks
+                       if action.operation in block.operations)
+        start = (block.id, block.operations.index(action.operation))
+    
+        # The current source follows the original replacement token's constructor,
+        # not the unknown packet that existed before this C1 action.
+        originals = context.origins(OwnedUse(action.operation, action.replacement))
+        definitions = {definition.value: definition for definition in program.pending_completions}
+        candidates = {recipe['leaf'].id for recipe in originals['recipes']
+                      if recipe['leaf'].id in definitions}
+        replacement_id, = candidates
+        definition = definitions[replacement_id]
+        ports = {port.id: port for port in program.control_ports}
+        assert ports[definition.port].kind is LanguageCompletionKind.RETURN
+        values = {value.id: value for value in program.values}
+        origin = values[definition.value].origin
+        assert type(origin) is OperationResult and definition.payload is not None
+        current = OwnedUse(origin.operation, definition.payload)
+        assert isinstance(values[context.owned_use(current.operation, current.use).value], ReferenceValue)
+        terminal, = tuple(operation for operation in program.operations
+            if operation.terminator is not None
+            and operation.terminator.kind is TerminatorKind.RETURN)
+        host = OwnedUse(terminal.id, terminal.terminator.values[0])
+    
+        unknown = StaticProtocolGap(StaticGapReason.PORT_UNCAPTURED)
+        route = packet_continuations(context, unknown, start=start)
+        assert route['source'] == unknown
+>       assert route['status'] == 'PARTIAL'
+E       AssertionError: assert 'CONTRADICTED' == 'PARTIAL'
+E         
+E         - PARTIAL
+E         + CONTRADICTED
+
+tests/unit/test_program_delegate_close_inventory.py:218: AssertionError
+_ test_selected_close_packet_crosses_its_actual_parent_c1_and_future_resume[normal-injection] _
+
+close_raised = False
+
+    @pytest.mark.parametrize('close_raised', (False, True), ids=('normal-injection', 'raise-own-packet'))
+    def test_selected_close_packet_crosses_its_actual_parent_c1_and_future_resume(close_raised):
+>       program, model, details = _capture(close_raised=close_raised)
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_execution_delegate_close_continuations.py:319: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/unit/test_execution_delegate_close_continuations.py:173: in _capture
+    program, static = _driven_program()
+                      ^^^^^^^^^^^^^^^^^
+tests/unit/test_execution_delegate_close_continuations.py:159: in _driven_program
+    program = replace(body, root=host_region.id,
+/home/zyf/miniconda3/envs/lewm/lib/python3.14/dataclasses.py:1779: in replace
+    return _replace(obj, **changes)
+           ^^^^^^^^^^^^^^^^^^^^^^^^
+/home/zyf/miniconda3/envs/lewm/lib/python3.14/dataclasses.py:1813: in _replace
+    return self.__class__(**changes)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+<string>:57: in __init__
+    ???
+scar/ir/program/model.py:923: in __post_init__
+    _unique(tuple(row.site for row in evaluations), "literal evaluation sites")
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+values = (InvokeLiteralResult(edge=ControlEdgeReference(operation=OperationID(value='finally.invoke'), successor_index=0), resu...trolEdgeReference(operation=OperationID(value='finally.invoke'), successor_index=0), result=CompletionResult(index=0)))
+name = 'literal evaluation sites'
+
+    def _unique(values: tuple, name: str) -> None:
+        if len(set(values)) != len(values):
+>           raise ValueError(f"{name} must not contain duplicates")
+E           ValueError: literal evaluation sites must not contain duplicates
+
+scar/ir/program/model.py:69: ValueError
+_ test_selected_close_packet_crosses_its_actual_parent_c1_and_future_resume[raise-own-packet] _
+
+close_raised = True
+
+    @pytest.mark.parametrize('close_raised', (False, True), ids=('normal-injection', 'raise-own-packet'))
+    def test_selected_close_packet_crosses_its_actual_parent_c1_and_future_resume(close_raised):
+>       program, model, details = _capture(close_raised=close_raised)
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_execution_delegate_close_continuations.py:319: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/unit/test_execution_delegate_close_continuations.py:173: in _capture
+    program, static = _driven_program()
+                      ^^^^^^^^^^^^^^^^^
+tests/unit/test_execution_delegate_close_continuations.py:159: in _driven_program
+    program = replace(body, root=host_region.id,
+/home/zyf/miniconda3/envs/lewm/lib/python3.14/dataclasses.py:1779: in replace
+    return _replace(obj, **changes)
+           ^^^^^^^^^^^^^^^^^^^^^^^^
+/home/zyf/miniconda3/envs/lewm/lib/python3.14/dataclasses.py:1813: in _replace
+    return self.__class__(**changes)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+<string>:57: in __init__
+    ???
+scar/ir/program/model.py:923: in __post_init__
+    _unique(tuple(row.site for row in evaluations), "literal evaluation sites")
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+values = (InvokeLiteralResult(edge=ControlEdgeReference(operation=OperationID(value='finally.invoke'), successor_index=0), resu...trolEdgeReference(operation=OperationID(value='finally.invoke'), successor_index=0), result=CompletionResult(index=0)))
+name = 'literal evaluation sites'
+
+    def _unique(values: tuple, name: str) -> None:
+        if len(set(values)) != len(values):
+>           raise ValueError(f"{name} must not contain duplicates")
+E           ValueError: literal evaluation sites must not contain duplicates
+
+scar/ir/program/model.py:69: ValueError
+=========================== short test summary info ============================
+FAILED tests/unit/test_program_delegate_close_inventory.py::test_unknown_packet_root_does_not_contradict_a_real_return_replacement
+FAILED tests/unit/test_execution_delegate_close_continuations.py::test_selected_close_packet_crosses_its_actual_parent_c1_and_future_resume[normal-injection]
+FAILED tests/unit/test_execution_delegate_close_continuations.py::test_selected_close_packet_crosses_its_actual_parent_c1_and_future_resume[raise-own-packet]
+3 failed, 2 passed in 1.90s

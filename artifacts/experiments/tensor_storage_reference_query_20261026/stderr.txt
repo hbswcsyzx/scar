@@ -1,0 +1,5 @@
+Traceback (most recent call last):
+  File "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/tensor_storage_reference_query_20261026/run.py", line 17, in <module>
+    (ROOT/'INPUTS.json').write_text(json.dumps({'fragment':artifact(fragment,'scar.native-operator-value-interface').__dict__,'capture_model':artifact(capture,'scar.capture-model').__dict__,'candidate_index':0,'max_stored_plus_decoded_bytes':512_000_000,'max_seconds':180,'source_shas':before,'no_new_graphs':True,'no_raw_EO_or_target':True},indent=2)+'\n')
+                                                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'ProviderArtifact' object has no attribute '__dict__'. Did you mean: '__dir__'?

@@ -1,0 +1,35 @@
+{
+  "acquisition": {
+    "max_attempts": 192,
+    "max_definitions": 1024,
+    "max_elapsed_seconds": 900,
+    "max_record_bytes": 16000000,
+    "max_report_bytes": 64000000,
+    "max_requests": 4096
+  },
+  "basis": "normal plan exists; future owner guard subtotal1.573GB plus fresh normal planning/archive receipt reads. Output/module sizes unknown until compile; ceilings are not predictions",
+  "code_archive_stored_read_ceiling": 64000000,
+  "compile_run": false,
+  "minimum_counts": {
+    "attempts": 192,
+    "compile_keys": 94,
+    "normalized_source_bytes": 3747227,
+    "source_files": 94
+  },
+  "normal_metadata_stored_plus_decoded_ceiling": 2500000000,
+  "not_applied_to_saved_normal_plan": true,
+  "post_stage_output_bytes": 256000000,
+  "proposed_store_budget": {
+    "max_archive_bytes": 256000000,
+    "max_compile_keys": 94,
+    "max_depth": 128,
+    "max_manifest_bytes": 8000000,
+    "max_module_bytes": 16000000,
+    "max_nested_codes": 8192,
+    "max_source_bytes": 4000000,
+    "max_source_files": 94
+  },
+  "selection": "all192 missing original origins, no named window",
+  "status": "PROPOSED_ONLY_ROOT_AUTHORIZATION_REQUIRED",
+  "suggested_outer_seconds": 1200
+}

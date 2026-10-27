@@ -1,0 +1,101 @@
+{
+  "schema": "scar.created-throw-language-witness",
+  "python": "3.14.7 | packaged by conda-forge | (main, Sep  2 2026, 21:08:32) [GCC 15.3.0]",
+  "implementation": "cpython",
+  "script_sha256": "511abb54885c693fd10910fda359e247ed3ebcb3815dcab076d54f15f46009df",
+  "scope": "Six controlled stdlib CPU observations; no SCAR, torch, pytest, target workload or compiler invocation.",
+  "cases": [
+    {
+      "family": "generator",
+      "mode": "instance",
+      "before": "GEN_CREATED",
+      "request_created_state": null,
+      "after_throw": "GEN_CLOSED",
+      "error_type": "ValueError",
+      "cause_type": null,
+      "body_log_at_throw": [],
+      "normalization_log": [],
+      "can_start_after_failure": null,
+      "cleanup_log": [],
+      "cleanup_state": "GEN_CLOSED"
+    },
+    {
+      "family": "generator",
+      "mode": "invalid",
+      "before": "GEN_CREATED",
+      "request_created_state": null,
+      "after_throw": "GEN_CREATED",
+      "error_type": "TypeError",
+      "cause_type": null,
+      "body_log_at_throw": [],
+      "normalization_log": [],
+      "can_start_after_failure": "item",
+      "cleanup_log": [
+        "body-enter",
+        "body-finally"
+      ],
+      "cleanup_state": "GEN_CLOSED"
+    },
+    {
+      "family": "generator",
+      "mode": "constructor_failure",
+      "before": "GEN_CREATED",
+      "request_created_state": null,
+      "after_throw": "GEN_CLOSED",
+      "error_type": "RuntimeError",
+      "cause_type": null,
+      "body_log_at_throw": [],
+      "normalization_log": [
+        "exception-constructor"
+      ],
+      "can_start_after_failure": null,
+      "cleanup_log": [],
+      "cleanup_state": "GEN_CLOSED"
+    },
+    {
+      "family": "generator",
+      "mode": "stop_iteration",
+      "before": "GEN_CREATED",
+      "request_created_state": null,
+      "after_throw": "GEN_CLOSED",
+      "error_type": "StopIteration",
+      "cause_type": null,
+      "body_log_at_throw": [],
+      "normalization_log": [],
+      "can_start_after_failure": null,
+      "cleanup_log": [],
+      "cleanup_state": "GEN_CLOSED"
+    },
+    {
+      "family": "coroutine",
+      "mode": "instance",
+      "before": "CORO_CREATED",
+      "request_created_state": null,
+      "after_throw": "CORO_CLOSED",
+      "error_type": "ValueError",
+      "cause_type": null,
+      "body_log_at_throw": [],
+      "normalization_log": [],
+      "can_start_after_failure": null,
+      "cleanup_log": [],
+      "cleanup_state": "CORO_CLOSED"
+    },
+    {
+      "family": "async_generator",
+      "mode": "instance",
+      "before": "AGEN_CREATED",
+      "request_created_state": "AGEN_CREATED",
+      "after_throw": "AGEN_CLOSED",
+      "error_type": "ValueError",
+      "cause_type": null,
+      "body_log_at_throw": [],
+      "normalization_log": [],
+      "can_start_after_failure": null,
+      "cleanup_log": [],
+      "cleanup_state": "AGEN_CLOSED"
+    }
+  ],
+  "family_model_implemented": false,
+  "source_runtime_correspondence_verified": false,
+  "transformation_authorized": false
+}

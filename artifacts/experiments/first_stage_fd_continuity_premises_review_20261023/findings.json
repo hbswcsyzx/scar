@@ -1,0 +1,31 @@
+{
+  "actual_counterexample_through_all_shape_guards_constructed": false,
+  "actual_new_cpu_context_binding_run": false,
+  "closure_plan": "version-pinned synchronous ptrace provider/output-error contract, bounded control projection, scoped mechanical qualifier and only then container consumer",
+  "full_execution_model_semantics": "OPEN",
+  "insufficient_existing_checks": [
+    "retained-row classification/count conservation",
+    "receipt/member equality",
+    "replay of same retained data",
+    "typed codec/FK/realm",
+    "ImportedAt source anchor",
+    "whole-model OPEN flag"
+  ],
+  "missing_proofs": [
+    "relevant control-interval observation closure",
+    "task/sharer incarnation and escape/ABI/lifecycle qualification",
+    "namespace coidentity vs physical fdtable allocation distinction",
+    "provider evidence ordering/availability alignment"
+  ],
+  "production_modified": false,
+  "schema": "scar.fd-continuity-premises-review",
+  "schema_version": 1,
+  "selection_implies_event_completeness": false,
+  "selection_profile_is_valid": true,
+  "static_promotion_sites": [
+    "os_fd_table_contexts.py:281-286",
+    "os_fd_table_contexts.py:333-359"
+  ],
+  "status": "MISSING_INDEPENDENT_IDENTITY_CONTINUITY_PREMISE",
+  "temporary_safe_gate": "Reject InstanceTarget coalescing before raw replay without separately qualified continuity proof; keep R2 FD-values functional. Not final stage completion."
+}

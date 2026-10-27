@@ -1,0 +1,101 @@
+{
+  "schema": "scar.execution-evidence-collection",
+  "schema_version": 1,
+  "pid": 261999,
+  "install_thread_id": 125573649028928,
+  "python_version": "3.14.7 | packaged by conda-forge | (main, Sep  2 2026, 21:08:32) [GCC 15.3.0]",
+  "status": "CLOSED",
+  "whole_model_established": false,
+  "canonical_graph_imported": false,
+  "raw_json_validated": false,
+  "completeness": {
+    "all_paths": false,
+    "all_processes": false,
+    "all_threads": false,
+    "state_effects": false,
+    "logical_value_identity": false,
+    "resource_readiness": false
+  },
+  "window": {
+    "clock": "time.perf_counter_ns",
+    "start_requested_ns": 55340149986753,
+    "started_ns": 55346202471193,
+    "stop_requested_ns": 55346497215017,
+    "stopped_ns": 55346793937091,
+    "alignment": "one profiler lifecycle; provider start/stop calls are sequenced"
+  },
+  "provider": {
+    "torch_version": "2.13.0+cu132",
+    "torch_git_version": "cf30153c4c131c8164ee7798e5022d810682e2cb"
+  },
+  "configuration": {
+    "record_shapes": false,
+    "profile_memory": true,
+    "with_stack": false,
+    "with_modules": false,
+    "execution_trace_observer": true,
+    "extra_resources": false,
+    "extra_tensor_data": false,
+    "activities": [
+      "ProfilerActivity.CPU",
+      "ProfilerActivity.CUDA"
+    ],
+    "memory_dataflow_graph": false,
+    "experimental_config": {
+      "adjust_timestamps": false
+    },
+    "extra_collection_environment": {},
+    "dispatch_observations": {
+      "profile": "scar.dispatch-marker-collector-v1",
+      "started": true,
+      "events": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_dispatch_bridge_20261023/raw/dispatch-observations.261999.35ff7185dd2ecce8509a7718cc99d301.jsonl",
+      "metadata": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_dispatch_bridge_20261023/raw/dispatch-meta.261999.35ff7185dd2ecce8509a7718cc99d301.json",
+      "owner_python_ident": 125573649028928,
+      "scope": "installing thread only; retained ancestor is not a direct caller"
+    }
+  },
+  "registration": {
+    "owned": true,
+    "rule": "previously_absent_nonce_path_created_by_registration",
+    "source_revision": "cf30153c4c131c8164ee7798e5022d810682e2cb",
+    "source_sha256": "c6ec2dac4140b28eea17c8c6054d42e084ab6014fa8f47e72282e7c4caba46db",
+    "source_url": "https://raw.githubusercontent.com/pytorch/pytorch/cf30153c4c131c8164ee7798e5022d810682e2cb/torch/csrc/profiler/standalone/execution_trace_observer.cpp",
+    "source_lines": "322-327,904-961",
+    "assumptions": [
+      "installed provider implements the declared source revision",
+      "no external actor creates the private random path concurrently"
+    ],
+    "path_absent_before_registration": true,
+    "path_created_after_registration": true,
+    "observer_registered": true
+  },
+  "artifacts": {
+    "execution_trace": {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_dispatch_bridge_20261023/raw/execution-trace.261999.35ff7185dd2ecce8509a7718cc99d301.json",
+      "size_bytes": 109759,
+      "exists": true
+    },
+    "kineto": {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_dispatch_bridge_20261023/raw/kineto.261999.35ff7185dd2ecce8509a7718cc99d301.json",
+      "size_bytes": 58711,
+      "exists": true
+    }
+  },
+  "failures": [],
+  "gaps": [
+    "only the installing process and provider capture window are observed",
+    "forked/child processes and complete thread coverage are not established",
+    "imports bypassing builtins.__import__ may not trigger delayed startup",
+    "profiler startup/shutdown must run on the installing thread",
+    "external provider mutation during capture cannot be globally excluded",
+    "Python-to-Torch occurrence correspondence is not established",
+    "host return does not establish GPU completion or materialization readiness",
+    "provider buffers have no collector-enforced hard memory budget",
+    "native observation can change reference lifetimes, allocation and timing"
+  ],
+  "provider_schemas": {
+    "execution_trace": "1.1.1-chakra.0.0.4",
+    "execution_trace_basis": "pinned provider source, not JSON validation",
+    "kineto": "provider Chrome trace; retained without schema conversion"
+  }
+}

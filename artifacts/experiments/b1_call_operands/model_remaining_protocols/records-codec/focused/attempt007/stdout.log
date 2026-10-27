@@ -1,0 +1,90 @@
+..............F.F.                                                       [100%]
+=================================== FAILURES ===================================
+_ test_new_body_profile_applicability_of_old_admission_shape_selects_v19[body-COROUTINE_BODY_V1-COROUTINE] _
+
+profile = <ProtocolProfile.COROUTINE_BODY_V1: 'COROUTINE_BODY_V1'>
+kind = <ResumableKind.COROUTINE: 'COROUTINE'>, subject = 'body'
+
+    @pytest.mark.parametrize(
+        ("profile", "kind"),
+        [
+            (ProtocolProfile.COROUTINE_BODY_V1, ResumableKind.COROUTINE),
+            (ProtocolProfile.GENERATOR_COROUTINE_BODY_V1, ResumableKind.GENERATOR_COROUTINE),
+        ],
+    )
+    @pytest.mark.parametrize("subject", ["body", "none"])
+    def test_new_body_profile_applicability_of_old_admission_shape_selects_v19(
+            profile, kind, subject):
+        graph, _ = admission_program(subject=subject)
+        graph = replace(
+            graph,
+            protocol_scopes=tuple(replace(row, profile=profile) for row in graph.protocol_scopes),
+            resumable_bodies=tuple(replace(row, kind=kind) for row in graph.resumable_bodies),
+        )
+        assert has_protocol_connection_capability(graph)
+>       wire = codec.dumps(graph)
+               ^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_program_protocol_connections_codec.py:232: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+scar/ir/program/codec.py:226: in dumps
+    _require_record_and_graph_valid(graph)
+scar/ir/program/codec.py:118: in _require_record_and_graph_valid
+    require_valid(graph)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='driver'), regions=(Region(id=RegionID(value='driver'), label='declared driver fixtur...VEN: 'NATIVE_APPLICABILITY_UNPROVEN'>)),), protocol_call_inputs=(), protocol_result_consumers=(), protocol_bindings=())
+
+    def require_valid(graph: ProgramGraph) -> None:
+        issues = validate(graph)
+        if issues:
+>           raise ValueError("; ".join(f"{issue.code} at {issue.path}: {issue.message}" for issue in issues))
+E           ValueError: resumption_flavor at program_operation:resume.suspend: suspension flavor differs from declared body family
+
+scar/ir/program/validation.py:745: ValueError
+_ test_new_body_profile_applicability_of_old_admission_shape_selects_v19[none-COROUTINE_BODY_V1-COROUTINE] _
+
+profile = <ProtocolProfile.COROUTINE_BODY_V1: 'COROUTINE_BODY_V1'>
+kind = <ResumableKind.COROUTINE: 'COROUTINE'>, subject = 'none'
+
+    @pytest.mark.parametrize(
+        ("profile", "kind"),
+        [
+            (ProtocolProfile.COROUTINE_BODY_V1, ResumableKind.COROUTINE),
+            (ProtocolProfile.GENERATOR_COROUTINE_BODY_V1, ResumableKind.GENERATOR_COROUTINE),
+        ],
+    )
+    @pytest.mark.parametrize("subject", ["body", "none"])
+    def test_new_body_profile_applicability_of_old_admission_shape_selects_v19(
+            profile, kind, subject):
+        graph, _ = admission_program(subject=subject)
+        graph = replace(
+            graph,
+            protocol_scopes=tuple(replace(row, profile=profile) for row in graph.protocol_scopes),
+            resumable_bodies=tuple(replace(row, kind=kind) for row in graph.resumable_bodies),
+        )
+        assert has_protocol_connection_capability(graph)
+>       wire = codec.dumps(graph)
+               ^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_program_protocol_connections_codec.py:232: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+scar/ir/program/codec.py:226: in dumps
+    _require_record_and_graph_valid(graph)
+scar/ir/program/codec.py:118: in _require_record_and_graph_valid
+    require_valid(graph)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='driver'), regions=(Region(id=RegionID(value='driver'), label='declared driver fixtur...VEN: 'NATIVE_APPLICABILITY_UNPROVEN'>)),), protocol_call_inputs=(), protocol_result_consumers=(), protocol_bindings=())
+
+    def require_valid(graph: ProgramGraph) -> None:
+        issues = validate(graph)
+        if issues:
+>           raise ValueError("; ".join(f"{issue.code} at {issue.path}: {issue.message}" for issue in issues))
+E           ValueError: resumption_flavor at program_operation:resume.suspend: suspension flavor differs from declared body family
+
+scar/ir/program/validation.py:745: ValueError
+=========================== short test summary info ============================
+FAILED tests/unit/test_program_protocol_connections_codec.py::test_new_body_profile_applicability_of_old_admission_shape_selects_v19[body-COROUTINE_BODY_V1-COROUTINE]
+FAILED tests/unit/test_program_protocol_connections_codec.py::test_new_body_profile_applicability_of_old_admission_shape_selects_v19[none-COROUTINE_BODY_V1-COROUTINE]
+2 failed, 16 passed in 1.47s

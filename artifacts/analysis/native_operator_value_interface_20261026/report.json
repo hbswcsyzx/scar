@@ -1,0 +1,172 @@
+{
+  "elapsed_seconds": 23.971,
+  "publication": {
+    "bytes": 74854,
+    "path": "/home/zyf/AAA/scar-worktrees/frame-entry-routing/artifacts/analysis/native_operator_value_interface_20261026/publication-v3/operator-values.json",
+    "readback_query_seconds": 8.94,
+    "sha256": "b42eeb7d26901c81f1f9c14330f76d67aea6b7c48f51204ba978a39fbe00132c",
+    "write_seconds": 0.011
+  },
+  "route": {
+    "first": {
+      "consumer_instance": "opinst:native:636fde61a45803f11712767bc1cbf0b0ea3de13b14e0b27edc2d6071daea1612:eto:26101",
+      "consumer_ordinal": 21686,
+      "consumer_path": [
+        1
+      ],
+      "content_identity": "NOT_ASSERTED",
+      "descriptor_id": "b0291ec646885e2b4bd7999310375b8dbb8806e79f33c9a0e60841e360993a05",
+      "input_edge": "native:636fde61a45803f11712767bc1cbf0b0ea3de13b14e0b27edc2d6071daea1612:edge:31156",
+      "input_symbol": "lv:native-port-payload:8b8323414378cacb3822ace7580b7c26aacd592baed39ced151e2983a3e2d85e@v0",
+      "logical_version": null,
+      "ordering_basis": "ETO_SOURCE_ORDINAL_ONLY",
+      "output_edge": "native:636fde61a45803f11712767bc1cbf0b0ea3de13b14e0b27edc2d6071daea1612:edge:31152",
+      "output_instance": "opinst:native:636fde61a45803f11712767bc1cbf0b0ea3de13b14e0b27edc2d6071daea1612:eto:26099",
+      "output_ordinal": 21684,
+      "output_path": [
+        0
+      ],
+      "output_symbol": "lv:native-port-payload:70de49be043bfdb120db4a7dd0663e298b8e66a147f5371aa3994174d1abf2bc@v0",
+      "provider_reference": "native:636fde61a45803f11712767bc1cbf0b0ea3de13b14e0b27edc2d6071daea1612:tensor-token:26100",
+      "relation": "reference_flow_candidate",
+      "status": "Inferred"
+    },
+    "inplace_interface": {
+      "actual_write": "UNKNOWN",
+      "input_formal": "slot:native:636fde61a45803f11712767bc1cbf0b0ea3de13b14e0b27edc2d6071daea1612:symbol:5003df7d835bb4c583531c3dca5befa2f9b07047d5e7598d52a507c48f7b7e4c:schema:input_slots:0",
+      "input_port_id": "eto:21686:input:0",
+      "input_symbol": "lv:native-port-payload:aad438e958957420ae2827fcf87bf08b012c9499ba15d8f6145af32eb9502cc7@v0",
+      "instance": "opinst:native:636fde61a45803f11712767bc1cbf0b0ea3de13b14e0b27edc2d6071daea1612:eto:26101",
+      "label": "aten::add_",
+      "other_tensor_argument_symbol": "lv:native-port-payload:8b8323414378cacb3822ace7580b7c26aacd592baed39ced151e2983a3e2d85e@v0",
+      "output_formal": "slot:native:636fde61a45803f11712767bc1cbf0b0ea3de13b14e0b27edc2d6071daea1612:symbol:5003df7d835bb4c583531c3dca5befa2f9b07047d5e7598d52a507c48f7b7e4c:schema:output_slots:0",
+      "output_port_id": "eto:21686:output:0",
+      "output_symbol": "lv:native-port-payload:2c7b3b95e2f676f36424872ae24834daa8634903719427af57831beb41108114@v0",
+      "same_symbol_or_content": "NOT_ASSERTED",
+      "state_boundaries": [
+        {
+          "effect_summary": "effect:native:636fde61a45803f11712767bc1cbf0b0ea3de13b14e0b27edc2d6071daea1612:symbol:5003df7d835bb4c583531c3dca5befa2f9b07047d5e7598d52a507c48f7b7e4c:provider-schema-effects",
+          "left_formal_slot": "slot:native:636fde61a45803f11712767bc1cbf0b0ea3de13b14e0b27edc2d6071daea1612:symbol:5003df7d835bb4c583531c3dca5befa2f9b07047d5e7598d52a507c48f7b7e4c:schema:input_slots:0",
+          "left_port": "eto:21686:input:0",
+          "relation": "DECLARED_MAY_WRITE",
+          "right_formal_slot": null,
+          "right_port": null
+        },
+        {
+          "effect_summary": "effect:native:636fde61a45803f11712767bc1cbf0b0ea3de13b14e0b27edc2d6071daea1612:symbol:5003df7d835bb4c583531c3dca5befa2f9b07047d5e7598d52a507c48f7b7e4c:provider-schema-effects",
+          "left_formal_slot": "slot:native:636fde61a45803f11712767bc1cbf0b0ea3de13b14e0b27edc2d6071daea1612:symbol:5003df7d835bb4c583531c3dca5befa2f9b07047d5e7598d52a507c48f7b7e4c:schema:input_slots:0",
+          "left_port": "eto:21686:input:0",
+          "relation": "SCHEMA_MAY_ALIAS",
+          "right_formal_slot": "slot:native:636fde61a45803f11712767bc1cbf0b0ea3de13b14e0b27edc2d6071daea1612:symbol:5003df7d835bb4c583531c3dca5befa2f9b07047d5e7598d52a507c48f7b7e4c:schema:output_slots:0",
+          "right_port": "eto:21686:output:0"
+        }
+      ]
+    },
+    "second": {
+      "consumer_instance": "opinst:native:636fde61a45803f11712767bc1cbf0b0ea3de13b14e0b27edc2d6071daea1612:eto:26107",
+      "consumer_ordinal": 21694,
+      "consumer_path": [
+        0
+      ],
+      "consumer_symbol": "lv:native-port-payload:0bc2841085bf34d2ae5863fccc78548dc401a56ac8ae1f770ad877fea7b43328@v0",
+      "content_identity": "NOT_ASSERTED",
+      "descriptor_id": "91dc2cde5f5ce75db77682f84869540f0aab42b3eff59af8f2834267d412682d",
+      "input_edge": "native:636fde61a45803f11712767bc1cbf0b0ea3de13b14e0b27edc2d6071daea1612:edge:31181",
+      "logical_version": null,
+      "ordering_basis": "ETO_SOURCE_ORDINAL_ONLY",
+      "output_edge": "native:636fde61a45803f11712767bc1cbf0b0ea3de13b14e0b27edc2d6071daea1612:edge:31157",
+      "output_instance": "opinst:native:636fde61a45803f11712767bc1cbf0b0ea3de13b14e0b27edc2d6071daea1612:eto:26101",
+      "output_ordinal": 21686,
+      "output_path": [
+        0
+      ],
+      "output_symbol": "lv:native-port-payload:2c7b3b95e2f676f36424872ae24834daa8634903719427af57831beb41108114@v0",
+      "provider_reference": "native:636fde61a45803f11712767bc1cbf0b0ea3de13b14e0b27edc2d6071daea1612:tensor-token:26096",
+      "relation": "reference_flow_candidate",
+      "status": "Inferred"
+    }
+  },
+  "schema": "scar.native-operator-value-interface-report",
+  "schema_version": 1,
+  "scope": {
+    "operation_labels": [
+      "aten::view",
+      "aten::add_",
+      "aten::view"
+    ],
+    "ordered_ports": 15,
+    "original_port_rows": 3,
+    "per_operator_tensor_io_and_provenance_parents": [
+      {
+        "cross_instance_reference_flows_as_parents": false,
+        "instance": "opinst:native:636fde61a45803f11712767bc1cbf0b0ea3de13b14e0b27edc2d6071daea1612:eto:26099",
+        "label": "aten::view",
+        "matches_same_instance_tensor_input_count": true,
+        "output_provenance_input_versions": 1,
+        "source_ordinal": 21684,
+        "tensor_input_ports": 1,
+        "tensor_output_ports": 1
+      },
+      {
+        "cross_instance_reference_flows_as_parents": false,
+        "instance": "opinst:native:636fde61a45803f11712767bc1cbf0b0ea3de13b14e0b27edc2d6071daea1612:eto:26101",
+        "label": "aten::add_",
+        "matches_same_instance_tensor_input_count": true,
+        "output_provenance_input_versions": 2,
+        "source_ordinal": 21686,
+        "tensor_input_ports": 2,
+        "tensor_output_ports": 1
+      },
+      {
+        "cross_instance_reference_flows_as_parents": false,
+        "instance": "opinst:native:636fde61a45803f11712767bc1cbf0b0ea3de13b14e0b27edc2d6071daea1612:eto:26107",
+        "label": "aten::view",
+        "matches_same_instance_tensor_input_count": true,
+        "output_provenance_input_versions": 1,
+        "source_ordinal": 21694,
+        "tensor_input_ports": 1,
+        "tensor_output_ports": 1
+      }
+    ],
+    "physical_reference_candidates": 12,
+    "schema_state_boundaries": 4,
+    "source_ordinals": [
+      21684,
+      21686,
+      21694
+    ],
+    "tensor_input_ports": 4,
+    "tensor_output_ports": 3,
+    "tensor_ports": 7,
+    "typed_value_graph_delta": {
+      "allocations": 0,
+      "bindings": 0,
+      "logical_values": 7,
+      "materializations": 7,
+      "provenance": 7,
+      "regions": 0,
+      "versions": 7
+    }
+  },
+  "semantics": {
+    "cross_instance_candidates": "same original provider reference+descriptor; not ValueGraph parents or happens-before",
+    "normal_completion_ready_storage_contents": "UNKNOWN",
+    "physical_candidates": "original marker/storage refs keyed by provider token only; not bound to an operator symbol",
+    "physical_candidates_for_add_input0": 2,
+    "schema_state": "provider-declared may-write and possible-alias, mapped to original actual formal ports; not actual write/alias proof",
+    "symbol_identity": "different endpoint IDs do not imply different tensor contents",
+    "tensor_values_saved": false,
+    "unknown_provenance_inputs": "reported Tensor argument interface only; not complete/minimal parents or actual read proof"
+  },
+  "source": {
+    "bundle_manifest": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/native_inputs_full_20261026/native-import/native/bundle-partitions/manifest.json",
+    "bundle_manifest_sha256": "3a2a80d64ff7e67d72545aefe0154b0f48fa18a855847005675221c86954c29b",
+    "eto_source_sha256": "11960422233619b68d4a42d5b699a34cb57349df04df0bc90b6fd5ef3d8e4684",
+    "eto_source_uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/lewm_joint_capture_20261026/capture/trace/execution-trace.1578961.adfc0475ed50cb37e1c0453142b5fa65.json",
+    "native_port_index": "/home/zyf/AAA/scar-worktrees/frame-entry-routing/artifacts/analysis/native_port_sidecar_full_20261026/publication/index.json",
+    "native_port_index_sha256": "54f9dfbcc8a4e3cfc720c2dfb0c377d61707cde3f70c1360f1f68fd54cbf17b2",
+    "reference_flow_index": "/home/zyf/AAA/scar-worktrees/frame-entry-routing/artifacts/analysis/native_reference_flow_20261026/publication/index.json",
+    "reference_flow_index_sha256": "63030af42af9adfb883d9b2a04e2289800b08caa95bed0f443f4e118a8f1e6ca"
+  },
+  "terminal_status": "SUCCEEDED"
+}

@@ -1,0 +1,892 @@
+{
+  "production_paths": 6,
+  "files": [
+    {
+      "path": "artifacts/experiments/source_entry_incremental35_20261026/ACTUAL_STOP.json",
+      "bytes": 5931
+    },
+    {
+      "path": "artifacts/experiments/source_entry_incremental35_20261026/FAILURE.json",
+      "bytes": 5538
+    },
+    {
+      "path": "artifacts/experiments/source_entry_incremental35_20261026/INPUTS.json",
+      "bytes": 24345
+    },
+    {
+      "path": "artifacts/experiments/source_entry_incremental35_20261026/LAUNCH_FAILURE.json",
+      "bytes": 221
+    },
+    {
+      "path": "artifacts/experiments/source_entry_incremental35_20261026/SOURCE_RECEIPTS.json",
+      "bytes": 829
+    },
+    {
+      "path": "artifacts/experiments/source_entry_incremental35_20261026/TYPED_CONTEXT_RECEIPT.json",
+      "bytes": 495
+    },
+    {
+      "path": "artifacts/experiments/source_entry_incremental35_20261026/TYPED_CONTEXT_REUSE.diff",
+      "bytes": 10288
+    },
+    {
+      "path": "artifacts/experiments/source_entry_incremental35_20261026/result/delta/bodies/00000.json.gz",
+      "bytes": 1725
+    },
+    {
+      "path": "artifacts/experiments/source_entry_incremental35_20261026/result/delta/bodies/00001.json.gz",
+      "bytes": 1733
+    },
+    {
+      "path": "artifacts/experiments/source_entry_incremental35_20261026/result/delta/bodies/00002.json.gz",
+      "bytes": 1724
+    },
+    {
+      "path": "artifacts/experiments/source_entry_incremental35_20261026/result/delta/bodies/00003.json.gz",
+      "bytes": 1728
+    },
+    {
+      "path": "artifacts/experiments/source_entry_incremental35_20261026/result/delta/bodies/00004.json.gz",
+      "bytes": 1733
+    },
+    {
+      "path": "artifacts/experiments/source_entry_incremental35_20261026/result/delta/bodies/00005.json.gz",
+      "bytes": 1729
+    },
+    {
+      "path": "artifacts/experiments/source_entry_incremental35_20261026/result/delta/bodies/00006.json.gz",
+      "bytes": 1707
+    },
+    {
+      "path": "artifacts/experiments/source_entry_incremental35_20261026/result/delta/bodies/00007.json.gz",
+      "bytes": 1735
+    },
+    {
+      "path": "artifacts/experiments/source_entry_incremental35_20261026/result/delta/bodies/00008.json.gz",
+      "bytes": 1748
+    },
+    {
+      "path": "artifacts/experiments/source_entry_incremental35_20261026/result/delta/bodies/00009.json.gz",
+      "bytes": 1742
+    },
+    {
+      "path": "artifacts/experiments/source_entry_incremental35_20261026/result/delta/bodies/00010.json.gz",
+      "bytes": 1731
+    },
+    {
+      "path": "artifacts/experiments/source_entry_incremental35_20261026/result/delta/bodies/00011.json.gz",
+      "bytes": 1708
+    },
+    {
+      "path": "artifacts/experiments/source_entry_incremental35_20261026/result/delta/bodies/00012.json.gz",
+      "bytes": 1726
+    },
+    {
+      "path": "artifacts/experiments/source_entry_incremental35_20261026/result/delta/bodies/00013.json.gz",
+      "bytes": 1706
+    },
+    {
+      "path": "artifacts/experiments/source_entry_incremental35_20261026/result/delta/bodies/00014.json.gz",
+      "bytes": 1735
+    },
+    {
+      "path": "artifacts/experiments/source_entry_incremental35_20261026/result/delta/bodies/00015.json.gz",
+      "bytes": 1715
+    },
+    {
+      "path": "artifacts/experiments/source_entry_incremental35_20261026/result/delta/bodies/00016.json.gz",
+      "bytes": 1702
+    },
+    {
+      "path": "artifacts/experiments/source_entry_incremental35_20261026/result/selection.json",
+      "bytes": 33963
+    },
+    {
+      "path": "artifacts/experiments/source_entry_incremental35_20261026/run.py",
+      "bytes": 6931
+    },
+    {
+      "path": "artifacts/experiments/source_entry_incremental35_20261026/sources-before-shared/RECEIPT.json",
+      "bytes": 413
+    },
+    {
+      "path": "artifacts/experiments/source_entry_incremental35_20261026/sources-before-shared/source_entry_catalog.py",
+      "bytes": 23239
+    },
+    {
+      "path": "artifacts/experiments/source_entry_incremental35_20261026/sources-before-shared/source_entry_incremental.py",
+      "bytes": 11015
+    },
+    {
+      "path": "artifacts/experiments/source_entry_incremental35_20261026/sources-before-shared/source_program_publication.py",
+      "bytes": 75739
+    },
+    {
+      "path": "artifacts/experiments/source_entry_incremental35_20261026/stderr.txt",
+      "bytes": 5297
+    },
+    {
+      "path": "artifacts/experiments/source_entry_incremental35_20261026/stdout.txt",
+      "bytes": 5425
+    },
+    {
+      "path": "artifacts/experiments/source_entry_incremental35_continuation02_20261026/ACTUAL_TERMINAL.json",
+      "bytes": 911
+    },
+    {
+      "path": "artifacts/experiments/source_entry_incremental35_continuation02_20261026/BASELINE.json",
+      "bytes": 369
+    },
+    {
+      "path": "artifacts/experiments/source_entry_incremental35_continuation02_20261026/BASELINE_FINAL_GUARD.json",
+      "bytes": 172
+    },
+    {
+      "path": "artifacts/experiments/source_entry_incremental35_continuation02_20261026/FROZEN_SOURCE.json",
+      "bytes": 1279
+    },
+    {
+      "path": "artifacts/experiments/source_entry_incremental35_continuation02_20261026/INPUTS.json",
+      "bytes": 24345
+    },
+    {
+      "path": "artifacts/experiments/source_entry_incremental35_continuation02_20261026/MAIN_INCREMENTAL_PUBLICATION.diff",
+      "bytes": 44095
+    },
+    {
+      "path": "artifacts/experiments/source_entry_incremental35_continuation02_20261026/MAIN_INCREMENTAL_SOURCE_RECEIPTS.json",
+      "bytes": 1499
+    },
+    {
+      "path": "artifacts/experiments/source_entry_incremental35_continuation02_20261026/QUERY.json",
+      "bytes": 2160212
+    },
+    {
+      "path": "artifacts/experiments/source_entry_incremental35_continuation02_20261026/RECOVERY_CODEC_SMOKE.json",
+      "bytes": 1246
+    },
+    {
+      "path": "artifacts/experiments/source_entry_incremental35_continuation02_20261026/REPORT.md",
+      "bytes": 3918
+    },
+    {
+      "path": "artifacts/experiments/source_entry_incremental35_continuation02_20261026/RESULT.json",
+      "bytes": 4043
+    },
+    {
+      "path": "artifacts/experiments/source_entry_incremental35_continuation02_20261026/RESUME.json",
+      "bytes": 12821
+    },
+    {
+      "path": "artifacts/experiments/source_entry_incremental35_continuation02_20261026/RETENTION.md",
+      "bytes": 948
+    },
+    {
+      "path": "artifacts/experiments/source_entry_incremental35_continuation02_20261026/SOURCE_RECEIPTS.json",
+      "bytes": 1207
+    },
+    {
+      "path": "artifacts/experiments/source_entry_incremental35_continuation02_20261026/result/delta/admissions/00000.json",
+      "bytes": 20750
+    },
+    {
+      "path": "artifacts/experiments/source_entry_incremental35_continuation02_20261026/result/delta/admissions/00001.json",
+      "bytes": 20746
+    },
+    {
+      "path": "artifacts/experiments/source_entry_incremental35_continuation02_20261026/result/delta/admissions/00002.json",
+      "bytes": 29184
+    },
+    {
+      "path": "artifacts/experiments/source_entry_incremental35_continuation02_20261026/result/delta/admissions/00003.json",
+      "bytes": 21636
+    },
+    {
+      "path": "artifacts/experiments/source_entry_incremental35_continuation02_20261026/result/delta/admissions/00004.json",
+      "bytes": 20849
+    },
+    {
+      "path": "artifacts/experiments/source_entry_incremental35_continuation02_20261026/result/delta/admissions/00005.json",
+      "bytes": 20669
+    },
+    {
+      "path": "artifacts/experiments/source_entry_incremental35_continuation02_20261026/result/delta/admissions/00006.json",
+      "bytes": 20584
+    },
+    {
+      "path": "artifacts/experiments/source_entry_incremental35_continuation02_20261026/result/delta/admissions/00007.json",
+      "bytes": 27328
+    },
+    {
+      "path": "artifacts/experiments/source_entry_incremental35_continuation02_20261026/result/delta/admissions/00008.json",
+      "bytes": 21494
+    },
+    {
+      "path": "artifacts/experiments/source_entry_incremental35_continuation02_20261026/result/delta/admissions/00009.json",
+      "bytes": 21493
+    },
+    {
+      "path": "artifacts/experiments/source_entry_incremental35_continuation02_20261026/result/delta/admissions/00010.json",
+      "bytes": 21474
+    },
+    {
+      "path": "artifacts/experiments/source_entry_incremental35_continuation02_20261026/result/delta/admissions/00011.json",
+      "bytes": 28967
+    },
+    {
+      "path": "artifacts/experiments/source_entry_incremental35_continuation02_20261026/result/delta/admissions/00012.json",
+      "bytes": 21303
+    },
+    {
+      "path": "artifacts/experiments/source_entry_incremental35_continuation02_20261026/result/delta/admissions/00013.json",
+      "bytes": 20037
+    },
+    {
+      "path": "artifacts/experiments/source_entry_incremental35_continuation02_20261026/result/delta/admissions/00014.json",
+      "bytes": 24322
+    },
+    {
+      "path": "artifacts/experiments/source_entry_incremental35_continuation02_20261026/result/delta/admissions/00015.json",
+      "bytes": 22302
+    },
+    {
+      "path": "artifacts/experiments/source_entry_incremental35_continuation02_20261026/result/delta/admissions/00016.json",
+      "bytes": 22201
+    },
+    {
+      "path": "artifacts/experiments/source_entry_incremental35_continuation02_20261026/result/delta/admissions/00017.json",
+      "bytes": 20519
+    },
+    {
+      "path": "artifacts/experiments/source_entry_incremental35_continuation02_20261026/result/delta/admissions/00018.json",
+      "bytes": 21105
+    },
+    {
+      "path": "artifacts/experiments/source_entry_incremental35_continuation02_20261026/result/delta/admissions/00019.json",
+      "bytes": 20746
+    },
+    {
+      "path": "artifacts/experiments/source_entry_incremental35_continuation02_20261026/result/delta/admissions/00020.json",
+      "bytes": 26399
+    },
+    {
+      "path": "artifacts/experiments/source_entry_incremental35_continuation02_20261026/result/delta/admissions/00021.json",
+      "bytes": 23000
+    },
+    {
+      "path": "artifacts/experiments/source_entry_incremental35_continuation02_20261026/result/delta/admissions/00022.json",
+      "bytes": 21143
+    },
+    {
+      "path": "artifacts/experiments/source_entry_incremental35_continuation02_20261026/result/delta/admissions/00023.json",
+      "bytes": 18359
+    },
+    {
+      "path": "artifacts/experiments/source_entry_incremental35_continuation02_20261026/result/delta/admissions/00024.json",
+      "bytes": 17834
+    },
+    {
+      "path": "artifacts/experiments/source_entry_incremental35_continuation02_20261026/result/delta/admissions/00025.json",
+      "bytes": 17310
+    },
+    {
+      "path": "artifacts/experiments/source_entry_incremental35_continuation02_20261026/result/delta/admissions/00026.json",
+      "bytes": 19383
+    },
+    {
+      "path": "artifacts/experiments/source_entry_incremental35_continuation02_20261026/result/delta/admissions/00027.json",
+      "bytes": 20135
+    },
+    {
+      "path": "artifacts/experiments/source_entry_incremental35_continuation02_20261026/result/delta/admissions/00028.json",
+      "bytes": 17691
+    },
+    {
+      "path": "artifacts/experiments/source_entry_incremental35_continuation02_20261026/result/delta/admissions/00029.json",
+      "bytes": 18891
+    },
+    {
+      "path": "artifacts/experiments/source_entry_incremental35_continuation02_20261026/result/delta/admissions/00030.json",
+      "bytes": 21249
+    },
+    {
+      "path": "artifacts/experiments/source_entry_incremental35_continuation02_20261026/result/delta/admissions/00031.json",
+      "bytes": 19186
+    },
+    {
+      "path": "artifacts/experiments/source_entry_incremental35_continuation02_20261026/result/delta/admissions/00032.json",
+      "bytes": 18535
+    },
+    {
+      "path": "artifacts/experiments/source_entry_incremental35_continuation02_20261026/result/delta/admissions/00033.json",
+      "bytes": 18550
+    },
+    {
+      "path": "artifacts/experiments/source_entry_incremental35_continuation02_20261026/result/delta/admissions/00034.json",
+      "bytes": 20963
+    },
+    {
+      "path": "artifacts/experiments/source_entry_incremental35_continuation02_20261026/result/delta/bodies/00023.json.gz",
+      "bytes": 1713
+    },
+    {
+      "path": "artifacts/experiments/source_entry_incremental35_continuation02_20261026/result/delta/bodies/00024.json.gz",
+      "bytes": 1723
+    },
+    {
+      "path": "artifacts/experiments/source_entry_incremental35_continuation02_20261026/result/delta/bodies/00025.json.gz",
+      "bytes": 1706
+    },
+    {
+      "path": "artifacts/experiments/source_entry_incremental35_continuation02_20261026/result/delta/bodies/00026.json.gz",
+      "bytes": 1717
+    },
+    {
+      "path": "artifacts/experiments/source_entry_incremental35_continuation02_20261026/result/delta/bodies/00027.json.gz",
+      "bytes": 1725
+    },
+    {
+      "path": "artifacts/experiments/source_entry_incremental35_continuation02_20261026/result/delta/bodies/00028.json.gz",
+      "bytes": 1749
+    },
+    {
+      "path": "artifacts/experiments/source_entry_incremental35_continuation02_20261026/result/delta/bodies/00029.json.gz",
+      "bytes": 1694
+    },
+    {
+      "path": "artifacts/experiments/source_entry_incremental35_continuation02_20261026/result/delta/bodies/00030.json.gz",
+      "bytes": 1721
+    },
+    {
+      "path": "artifacts/experiments/source_entry_incremental35_continuation02_20261026/result/delta/bodies/00031.json.gz",
+      "bytes": 1735
+    },
+    {
+      "path": "artifacts/experiments/source_entry_incremental35_continuation02_20261026/result/delta/bodies/00032.json.gz",
+      "bytes": 1742
+    },
+    {
+      "path": "artifacts/experiments/source_entry_incremental35_continuation02_20261026/result/delta/bodies/00033.json.gz",
+      "bytes": 1734
+    },
+    {
+      "path": "artifacts/experiments/source_entry_incremental35_continuation02_20261026/result/delta/bodies/00034.json.gz",
+      "bytes": 1731
+    },
+    {
+      "path": "artifacts/experiments/source_entry_incremental35_continuation02_20261026/result/delta/manifest.json",
+      "bytes": 1005443
+    },
+    {
+      "path": "artifacts/experiments/source_entry_incremental35_continuation02_20261026/result/increment.json",
+      "bytes": 1918
+    },
+    {
+      "path": "artifacts/experiments/source_entry_incremental35_continuation02_20261026/result/manifest.json",
+      "bytes": 5505173
+    },
+    {
+      "path": "artifacts/experiments/source_entry_incremental35_continuation02_20261026/result/selection.json",
+      "bytes": 33963
+    },
+    {
+      "path": "artifacts/experiments/source_entry_incremental35_continuation02_20261026/run.py",
+      "bytes": 8629
+    },
+    {
+      "path": "artifacts/experiments/source_entry_incremental35_continuation02_20261026/smoke_recovery_codec.py",
+      "bytes": 3467
+    },
+    {
+      "path": "artifacts/experiments/source_entry_incremental35_continuation02_20261026/stderr.txt",
+      "bytes": 0
+    },
+    {
+      "path": "artifacts/experiments/source_entry_incremental35_continuation02_20261026/stdout.txt",
+      "bytes": 18571
+    },
+    {
+      "path": "artifacts/experiments/source_entry_incremental35_continuation_20261026/ACTUAL_TERMINAL.json",
+      "bytes": 219
+    },
+    {
+      "path": "artifacts/experiments/source_entry_incremental35_continuation_20261026/FAILURE.json",
+      "bytes": 1326
+    },
+    {
+      "path": "artifacts/experiments/source_entry_incremental35_continuation_20261026/FROZEN_SOURCE.json",
+      "bytes": 1279
+    },
+    {
+      "path": "artifacts/experiments/source_entry_incremental35_continuation_20261026/INPUTS.json",
+      "bytes": 24345
+    },
+    {
+      "path": "artifacts/experiments/source_entry_incremental35_continuation_20261026/MAIN_INCREMENTAL_PUBLICATION.diff",
+      "bytes": 44073
+    },
+    {
+      "path": "artifacts/experiments/source_entry_incremental35_continuation_20261026/MAIN_INCREMENTAL_SOURCE_RECEIPTS.json",
+      "bytes": 2504
+    },
+    {
+      "path": "artifacts/experiments/source_entry_incremental35_continuation_20261026/PRIOR_WINDOWS.json",
+      "bytes": 1355
+    },
+    {
+      "path": "artifacts/experiments/source_entry_incremental35_continuation_20261026/RESUME.json",
+      "bytes": 12821
+    },
+    {
+      "path": "artifacts/experiments/source_entry_incremental35_continuation_20261026/SOURCE_RECEIPTS.json",
+      "bytes": 1207
+    },
+    {
+      "path": "artifacts/experiments/source_entry_incremental35_continuation_20261026/baseline/SOURCE_RECEIPTS.json",
+      "bytes": 163091
+    },
+    {
+      "path": "artifacts/experiments/source_entry_incremental35_continuation_20261026/result/selection.json",
+      "bytes": 33963
+    },
+    {
+      "path": "artifacts/experiments/source_entry_incremental35_continuation_20261026/run.py",
+      "bytes": 8507
+    },
+    {
+      "path": "artifacts/experiments/source_entry_incremental35_continuation_20261026/sources-before-core-payload-fix/program_lowering.py",
+      "bytes": 91203
+    },
+    {
+      "path": "artifacts/experiments/source_entry_incremental35_continuation_20261026/sources-before-core-payload-fix/source_entry_catalog.py",
+      "bytes": 24299
+    },
+    {
+      "path": "artifacts/experiments/source_entry_incremental35_continuation_20261026/sources-before-core-payload-fix/source_entry_incremental.py",
+      "bytes": 20295
+    },
+    {
+      "path": "artifacts/experiments/source_entry_incremental35_continuation_20261026/sources-before-core-payload-fix/source_fragments.py",
+      "bytes": 21050
+    },
+    {
+      "path": "artifacts/experiments/source_entry_incremental35_continuation_20261026/sources-before-core-payload-fix/source_program_publication.py",
+      "bytes": 80831
+    },
+    {
+      "path": "artifacts/experiments/source_entry_incremental35_continuation_20261026/sources-before-core-payload-fix/structured_lowering.py",
+      "bytes": 62112
+    },
+    {
+      "path": "artifacts/experiments/source_entry_incremental35_continuation_20261026/stderr.txt",
+      "bytes": 1106
+    },
+    {
+      "path": "artifacts/experiments/source_entry_incremental35_continuation_20261026/stdout.txt",
+      "bytes": 2329
+    },
+    {
+      "path": "artifacts/experiments/source_entry_incremental35_owned_context_20261026/ACTUAL_STOP.json",
+      "bytes": 12204
+    },
+    {
+      "path": "artifacts/experiments/source_entry_incremental35_owned_context_20261026/FAILURE.json",
+      "bytes": 5737
+    },
+    {
+      "path": "artifacts/experiments/source_entry_incremental35_owned_context_20261026/INPUTS.json",
+      "bytes": 24345
+    },
+    {
+      "path": "artifacts/experiments/source_entry_incremental35_owned_context_20261026/MAIN_INCREMENTAL_PUBLICATION.diff",
+      "bytes": 32758
+    },
+    {
+      "path": "artifacts/experiments/source_entry_incremental35_owned_context_20261026/MAIN_INCREMENTAL_SOURCE_RECEIPTS.json",
+      "bytes": 1367
+    },
+    {
+      "path": "artifacts/experiments/source_entry_incremental35_owned_context_20261026/SOURCE_RECEIPTS.json",
+      "bytes": 1131
+    },
+    {
+      "path": "artifacts/experiments/source_entry_incremental35_owned_context_20261026/STOP_REQUEST.json",
+      "bytes": 416
+    },
+    {
+      "path": "artifacts/experiments/source_entry_incremental35_owned_context_20261026/result/delta/bodies/00000.json.gz",
+      "bytes": 1725
+    },
+    {
+      "path": "artifacts/experiments/source_entry_incremental35_owned_context_20261026/result/delta/bodies/00001.json.gz",
+      "bytes": 1733
+    },
+    {
+      "path": "artifacts/experiments/source_entry_incremental35_owned_context_20261026/result/delta/bodies/00002.json.gz",
+      "bytes": 1724
+    },
+    {
+      "path": "artifacts/experiments/source_entry_incremental35_owned_context_20261026/result/delta/bodies/00003.json.gz",
+      "bytes": 1728
+    },
+    {
+      "path": "artifacts/experiments/source_entry_incremental35_owned_context_20261026/result/delta/bodies/00004.json.gz",
+      "bytes": 1733
+    },
+    {
+      "path": "artifacts/experiments/source_entry_incremental35_owned_context_20261026/result/delta/bodies/00005.json.gz",
+      "bytes": 1729
+    },
+    {
+      "path": "artifacts/experiments/source_entry_incremental35_owned_context_20261026/result/delta/bodies/00006.json.gz",
+      "bytes": 1707
+    },
+    {
+      "path": "artifacts/experiments/source_entry_incremental35_owned_context_20261026/result/delta/bodies/00007.json.gz",
+      "bytes": 1735
+    },
+    {
+      "path": "artifacts/experiments/source_entry_incremental35_owned_context_20261026/result/delta/bodies/00008.json.gz",
+      "bytes": 1748
+    },
+    {
+      "path": "artifacts/experiments/source_entry_incremental35_owned_context_20261026/result/delta/bodies/00009.json.gz",
+      "bytes": 1742
+    },
+    {
+      "path": "artifacts/experiments/source_entry_incremental35_owned_context_20261026/result/delta/bodies/00010.json.gz",
+      "bytes": 1731
+    },
+    {
+      "path": "artifacts/experiments/source_entry_incremental35_owned_context_20261026/result/delta/bodies/00011.json.gz",
+      "bytes": 1708
+    },
+    {
+      "path": "artifacts/experiments/source_entry_incremental35_owned_context_20261026/result/delta/bodies/00012.json.gz",
+      "bytes": 1726
+    },
+    {
+      "path": "artifacts/experiments/source_entry_incremental35_owned_context_20261026/result/delta/bodies/00013.json.gz",
+      "bytes": 1706
+    },
+    {
+      "path": "artifacts/experiments/source_entry_incremental35_owned_context_20261026/result/delta/bodies/00014.json.gz",
+      "bytes": 1735
+    },
+    {
+      "path": "artifacts/experiments/source_entry_incremental35_owned_context_20261026/result/delta/bodies/00015.json.gz",
+      "bytes": 1715
+    },
+    {
+      "path": "artifacts/experiments/source_entry_incremental35_owned_context_20261026/result/delta/bodies/00016.json.gz",
+      "bytes": 1702
+    },
+    {
+      "path": "artifacts/experiments/source_entry_incremental35_owned_context_20261026/result/delta/bodies/00017.json.gz",
+      "bytes": 1705
+    },
+    {
+      "path": "artifacts/experiments/source_entry_incremental35_owned_context_20261026/result/delta/bodies/00018.json.gz",
+      "bytes": 1722
+    },
+    {
+      "path": "artifacts/experiments/source_entry_incremental35_owned_context_20261026/result/delta/bodies/00019.json.gz",
+      "bytes": 1718
+    },
+    {
+      "path": "artifacts/experiments/source_entry_incremental35_owned_context_20261026/result/delta/bodies/00020.json.gz",
+      "bytes": 1721
+    },
+    {
+      "path": "artifacts/experiments/source_entry_incremental35_owned_context_20261026/result/delta/bodies/00021.json.gz",
+      "bytes": 1744
+    },
+    {
+      "path": "artifacts/experiments/source_entry_incremental35_owned_context_20261026/result/delta/bodies/00022.json.gz",
+      "bytes": 1708
+    },
+    {
+      "path": "artifacts/experiments/source_entry_incremental35_owned_context_20261026/result/selection.json",
+      "bytes": 33963
+    },
+    {
+      "path": "artifacts/experiments/source_entry_incremental35_owned_context_20261026/run.py",
+      "bytes": 8117
+    },
+    {
+      "path": "artifacts/experiments/source_entry_incremental35_owned_context_20261026/sources-before-session-final-guard/RECEIPT.json",
+      "bytes": 2924
+    },
+    {
+      "path": "artifacts/experiments/source_entry_incremental35_owned_context_20261026/sources-before-session-final-guard/program_composition.py",
+      "bytes": 114807
+    },
+    {
+      "path": "artifacts/experiments/source_entry_incremental35_owned_context_20261026/sources-before-session-final-guard/program_lowering.py",
+      "bytes": 91203
+    },
+    {
+      "path": "artifacts/experiments/source_entry_incremental35_owned_context_20261026/sources-before-session-final-guard/source_entry_catalog.py",
+      "bytes": 24094
+    },
+    {
+      "path": "artifacts/experiments/source_entry_incremental35_owned_context_20261026/sources-before-session-final-guard/source_entry_incremental.py",
+      "bytes": 11474
+    },
+    {
+      "path": "artifacts/experiments/source_entry_incremental35_owned_context_20261026/sources-before-session-final-guard/source_fragments.py",
+      "bytes": 20559
+    },
+    {
+      "path": "artifacts/experiments/source_entry_incremental35_owned_context_20261026/sources-before-session-final-guard/source_program_publication.py",
+      "bytes": 80206
+    },
+    {
+      "path": "artifacts/experiments/source_entry_incremental35_owned_context_20261026/sources-before-session-final-guard/structured_lowering.py",
+      "bytes": 62112
+    },
+    {
+      "path": "artifacts/experiments/source_entry_incremental35_owned_context_20261026/stderr.txt",
+      "bytes": 5473
+    },
+    {
+      "path": "artifacts/experiments/source_entry_incremental35_owned_context_20261026/stdout.txt",
+      "bytes": 8271
+    },
+    {
+      "path": "artifacts/experiments/source_entry_incremental35_shared02_20261026/ACTUAL_STOP.json",
+      "bytes": 5034
+    },
+    {
+      "path": "artifacts/experiments/source_entry_incremental35_shared02_20261026/FAILURE.json",
+      "bytes": 4747
+    },
+    {
+      "path": "artifacts/experiments/source_entry_incremental35_shared02_20261026/INPUTS.json",
+      "bytes": 24345
+    },
+    {
+      "path": "artifacts/experiments/source_entry_incremental35_shared02_20261026/MAIN_TYPED_CONTEXT.diff",
+      "bytes": 10891
+    },
+    {
+      "path": "artifacts/experiments/source_entry_incremental35_shared02_20261026/MAIN_TYPED_CONTEXT_RECEIPTS.json",
+      "bytes": 495
+    },
+    {
+      "path": "artifacts/experiments/source_entry_incremental35_shared02_20261026/SOURCE_RECEIPTS.json",
+      "bytes": 821
+    },
+    {
+      "path": "artifacts/experiments/source_entry_incremental35_shared02_20261026/result/delta/bodies/00000.json.gz",
+      "bytes": 1725
+    },
+    {
+      "path": "artifacts/experiments/source_entry_incremental35_shared02_20261026/result/delta/bodies/00001.json.gz",
+      "bytes": 1733
+    },
+    {
+      "path": "artifacts/experiments/source_entry_incremental35_shared02_20261026/result/delta/bodies/00002.json.gz",
+      "bytes": 1724
+    },
+    {
+      "path": "artifacts/experiments/source_entry_incremental35_shared02_20261026/result/delta/bodies/00003.json.gz",
+      "bytes": 1728
+    },
+    {
+      "path": "artifacts/experiments/source_entry_incremental35_shared02_20261026/result/delta/bodies/00004.json.gz",
+      "bytes": 1733
+    },
+    {
+      "path": "artifacts/experiments/source_entry_incremental35_shared02_20261026/result/delta/bodies/00005.json.gz",
+      "bytes": 1729
+    },
+    {
+      "path": "artifacts/experiments/source_entry_incremental35_shared02_20261026/result/delta/bodies/00006.json.gz",
+      "bytes": 1707
+    },
+    {
+      "path": "artifacts/experiments/source_entry_incremental35_shared02_20261026/result/delta/bodies/00007.json.gz",
+      "bytes": 1735
+    },
+    {
+      "path": "artifacts/experiments/source_entry_incremental35_shared02_20261026/result/delta/bodies/00008.json.gz",
+      "bytes": 1748
+    },
+    {
+      "path": "artifacts/experiments/source_entry_incremental35_shared02_20261026/result/delta/bodies/00009.json.gz",
+      "bytes": 1742
+    },
+    {
+      "path": "artifacts/experiments/source_entry_incremental35_shared02_20261026/result/delta/bodies/00010.json.gz",
+      "bytes": 1731
+    },
+    {
+      "path": "artifacts/experiments/source_entry_incremental35_shared02_20261026/result/delta/bodies/00011.json.gz",
+      "bytes": 1708
+    },
+    {
+      "path": "artifacts/experiments/source_entry_incremental35_shared02_20261026/result/selection.json",
+      "bytes": 33963
+    },
+    {
+      "path": "artifacts/experiments/source_entry_incremental35_shared02_20261026/run.py",
+      "bytes": 7456
+    },
+    {
+      "path": "artifacts/experiments/source_entry_incremental35_shared02_20261026/sources-before-owned-layer/program_lowering.py",
+      "bytes": 91113
+    },
+    {
+      "path": "artifacts/experiments/source_entry_incremental35_shared02_20261026/sources-before-owned-layer/source_entry_catalog.py",
+      "bytes": 24094
+    },
+    {
+      "path": "artifacts/experiments/source_entry_incremental35_shared02_20261026/sources-before-owned-layer/source_entry_incremental.py",
+      "bytes": 11474
+    },
+    {
+      "path": "artifacts/experiments/source_entry_incremental35_shared02_20261026/sources-before-owned-layer/source_fragments.py",
+      "bytes": 18419
+    },
+    {
+      "path": "artifacts/experiments/source_entry_incremental35_shared02_20261026/sources-before-owned-layer/source_program_publication.py",
+      "bytes": 79841
+    },
+    {
+      "path": "artifacts/experiments/source_entry_incremental35_shared02_20261026/sources-before-owned-layer/structured_lowering.py",
+      "bytes": 61045
+    },
+    {
+      "path": "artifacts/experiments/source_entry_incremental35_shared02_20261026/stderr.txt",
+      "bytes": 4519
+    },
+    {
+      "path": "artifacts/experiments/source_entry_incremental35_shared02_20261026/stdout.txt",
+      "bytes": 4630
+    },
+    {
+      "path": "artifacts/experiments/source_entry_incremental35_shared_20261026/ACTUAL_TERMINAL.json",
+      "bytes": 342
+    },
+    {
+      "path": "artifacts/experiments/source_entry_incremental35_shared_20261026/FAILURE.json",
+      "bytes": 2502
+    },
+    {
+      "path": "artifacts/experiments/source_entry_incremental35_shared_20261026/INPUTS.json",
+      "bytes": 24345
+    },
+    {
+      "path": "artifacts/experiments/source_entry_incremental35_shared_20261026/SOURCE_RECEIPTS.json",
+      "bytes": 821
+    },
+    {
+      "path": "artifacts/experiments/source_entry_incremental35_shared_20261026/result/selection.json",
+      "bytes": 33963
+    },
+    {
+      "path": "artifacts/experiments/source_entry_incremental35_shared_20261026/run.py",
+      "bytes": 7456
+    },
+    {
+      "path": "artifacts/experiments/source_entry_incremental35_shared_20261026/source-before-cache-field-fix/source_program_publication.py",
+      "bytes": 79746
+    },
+    {
+      "path": "artifacts/experiments/source_entry_incremental35_shared_20261026/stderr.txt",
+      "bytes": 2274
+    },
+    {
+      "path": "artifacts/experiments/source_entry_incremental35_shared_20261026/stdout.txt",
+      "bytes": 2098
+    },
+    {
+      "path": "artifacts/experiments/source_publication_large_context_probe_20261026/publication/bodies/00000.json.gz",
+      "bytes": 1742
+    },
+    {
+      "path": "artifacts/experiments/source_publication_large_context_probe_20261026/publication/bodies/00001.json.gz",
+      "bytes": 1731
+    },
+    {
+      "path": "artifacts/experiments/source_publication_large_context_probe_20261026/publication/manifest.json",
+      "bytes": 69797
+    },
+    {
+      "path": "artifacts/experiments/source_publication_large_context_probe_20261026/result.json",
+      "bytes": 3026
+    },
+    {
+      "path": "artifacts/experiments/source_publication_large_context_probe_20261026/run.py",
+      "bytes": 6628
+    },
+    {
+      "path": "artifacts/experiments/source_publication_large_context_probe_20261026/selection.json",
+      "bytes": 1835
+    },
+    {
+      "path": "artifacts/experiments/source_publication_large_context_probe_20261026/stderr.txt",
+      "bytes": 0
+    },
+    {
+      "path": "artifacts/experiments/source_publication_large_context_probe_20261026/stdout.txt",
+      "bytes": 3026
+    },
+    {
+      "path": "artifacts/experiments/source_publication_shared_generic_20261026/publication/bodies/00000.json.gz",
+      "bytes": 1627
+    },
+    {
+      "path": "artifacts/experiments/source_publication_shared_generic_20261026/publication/manifest.json",
+      "bytes": 36346
+    },
+    {
+      "path": "artifacts/experiments/source_publication_shared_generic_20261026/result.json",
+      "bytes": 1867
+    },
+    {
+      "path": "artifacts/experiments/source_publication_shared_generic_20261026/run.py",
+      "bytes": 2609
+    },
+    {
+      "path": "artifacts/experiments/source_publication_shared_generic_20261026/stderr.txt",
+      "bytes": 0
+    },
+    {
+      "path": "artifacts/experiments/source_publication_shared_generic_20261026/stdout.txt",
+      "bytes": 1867
+    },
+    {
+      "path": "scar/analysis/program_lowering.py",
+      "bytes": 91203
+    },
+    {
+      "path": "scar/analysis/source_entry_catalog.py",
+      "bytes": 24299
+    },
+    {
+      "path": "scar/analysis/source_entry_incremental.py",
+      "bytes": 20317
+    },
+    {
+      "path": "scar/analysis/source_program_publication.py",
+      "bytes": 80831
+    },
+    {
+      "path": "scar/analysis/structured_lowering.py",
+      "bytes": 62112
+    },
+    {
+      "path": "scar/store/source_fragments.py",
+      "bytes": 21050
+    }
+  ],
+  "excludes": [
+    "all original SP5/raw/large source inputs",
+    "private baseline .py copies",
+    "unrelated trace buffering",
+    "class design and other artifacts",
+    "compact reader proposal"
+  ]
+}

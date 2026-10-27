@@ -1,0 +1,12 @@
+{
+  "argv": [
+    "/home/zyf/miniconda3/envs/lewm/bin/python",
+    "-c",
+    "import hashlib,json,sys\nfrom pathlib import Path\nimport scar.ir.program.codec as codec\nfrom tests.fixtures.program_resumption_graphs import resumption_program\nisolated=Path(sys.argv[1]).resolve()\nassert codec.SCHEMA_VERSION==10\nassert Path(codec.__file__).resolve().is_relative_to(isolated)\nwire=codec.dumps(resumption_program())\nfixture=Path(sys.argv[2])\nfixture.write_bytes((wire+'\\n').encode())\nprint(json.dumps({'schema':'scar.program-graph-v10-freeze-proof','schema_version':10,\n 'fixture':'tests.fixtures.program_resumption_graphs.resumption_program',\n 'logical_wire_sha256':hashlib.sha256(wire.encode()).hexdigest(),\n 'fixture_file_sha256':hashlib.sha256(fixture.read_bytes()).hexdigest(),\n 'fixture_file_bytes':fixture.stat().st_size,'isolated_codec_sha256':hashlib.sha256(Path(codec.__file__).read_bytes()).hexdigest(),\n 'isolated_codec':str(Path(codec.__file__).resolve()),'terminal_newline':True,\n 'generated_from_current_worktree':False,'runtime':sys.version}))\n",
+    "/tmp/scar-driver-v10-0bhz5myx",
+    "/tmp/scar-structured-model-280qf4mi/tests/fixtures/program_graph_v10_frozen.json"
+  ],
+  "revision": "306a789c80ea7dd407b7fc88635056fa99fed1ad",
+  "archive_sha256": "6ae13c4911702a371a717e92db601b3af7b6bb1f2f10b307a9c2563f2b455869",
+  "returncode": 0
+}

@@ -1,0 +1,605 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="7" skipped="0" tests="13" time="0.550" timestamp="2026-10-18T12:38:22.896559+00:00" hostname="gpu1"><testcase classname="tests.unit.test_program_state_address_records" name="test_access_mode_is_one_shared_enum_and_address_variants_are_typed" time="0.001" /><testcase classname="tests.unit.test_program_state_address_records" name="test_all_selector_variants_keep_ordered_operands_and_duplicates" time="0.001"><failure message="AssertionError: assert (UseID(value=...e='key'), ...) == (UseID(value=...e='key'), ...)&#10;  &#10;  At index 4 diff: UseID(value='key') != UseID(value='name')&#10;  Right contains one more item: UseID(value='key')&#10;  Use -v to get more diff">def test_all_selector_variants_keep_ordered_operands_and_duplicates():
+        key = UseID("key")
+        name = UseID("name")
+        selectors = (
+            WholeOwner(), NamespaceKey(key), ObjectField("field"), DynamicField(name),
+            CellContent(), Element(key), Slice(key, None, key),
+            StorageRange(AddressUnit.BYTE, key, key), UnknownSelection("opaque", (name, key)),
+        )
+        effect = AddressEffect(UnknownOwner("owner", (key, name, key)), selectors,
+                               AccessMode.READ_WRITE, 3)
+        assert selector_uses(selectors[0]) == ()
+        assert selector_uses(selectors[1]) == (key,)
+        assert selector_uses(selectors[6]) == (key, key)
+        assert selector_uses(selectors[7]) == (key, key)
+&gt;       assert address_effect_uses(effect) == (key, name, key, key, name, key,
+                                               key, key, name, key)
+E       AssertionError: assert (UseID(value=...e='key'), ...) == (UseID(value=...e='key'), ...)
+E         
+E         At index 4 diff: UseID(value='key') != UseID(value='name')
+E         Right contains one more item: UseID(value='key')
+E         Use -v to get more diff
+
+tests/unit/test_program_state_address_records.py:43: AssertionError</failure></testcase><testcase classname="tests.unit.test_program_state_address_records" name="test_refinement_requires_nonempty_effects_and_nonempty_paths" time="0.001" /><testcase classname="tests.unit.test_program_state_address_records" name="test_protocol_is_a_scoped_fact_reference_not_a_truth_flag" time="0.001" /><testcase classname="tests.unit.test_program_state_address_records" name="test_nested_exact_types_are_revalidated_and_records_are_frozen" time="0.000" /><testcase classname="tests.unit.test_program_state_address_records" name="test_slice_omission_is_distinct_from_a_real_none_value_use" time="0.000" /><testcase classname="tests.unit.test_program_state_address_validation" name="test_mixed_owner_access_and_real_invoke_ports_form_valid_overlay" time="0.001"><failure message="NameError: name 'ExistingAccess' is not defined">def test_mixed_owner_access_and_real_invoke_ports_form_valid_overlay():
+&gt;       graph, details = state_address_program()
+                         ^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_program_state_address_validation.py:28: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def state_address_program():
+        """Return ``(ProgramGraph, details)`` with one access and one INVOKE site."""
+        values = (
+            _reference("address.source", BlockArgument(BlockID("address.entry"), 0)),
+            _reference("address.destination", BlockArgument(BlockID("address.entry"), 1)),
+            _reference("address.invoke_owner", BlockArgument(BlockID("address.entry"), 2)),
+            _data("address.key", BlockArgument(BlockID("address.entry"), 3)),
+            _state("address.world.initial", BlockArgument(BlockID("address.entry"), 4)),
+            _state("address.world.accessed", OperationResult(OperationID("address.root_access"), 0)),
+            _state("address.world.normal", BlockArgument(BlockID("address.normal"), 0)),
+            _data("address.error", BlockArgument(BlockID("address.raise"), 0), "builtins.Exception"),
+            _state("address.world.raise", BlockArgument(BlockID("address.raise"), 1)),
+        )
+        source = _use("address.source.use", "address.source", UseRole.REFERENCE)
+        destination = _use("address.destination.use", "address.destination", UseRole.REFERENCE)
+        key = _use("address.key.use", "address.key")
+        before = _use("address.world.before", "address.world.initial", UseRole.STATE_CONTENT)
+        root_id = OperationID("address.root_access")
+        root_operation = Operation(
+            root_id, "read and update multiple owners on one carrier",
+            (Behavior.READ, Behavior.WRITE),
+            (source, destination, key, before),
+            (ValueID("address.world.accessed"),),
+            (StateAccess(LocationID("address.world"), before.id, AccessMode.READ_WRITE,
+                         ValueID("address.world.accessed"), Footprint()),),
+            effects_complete=False,
+        )
+    
+        requirement_id = ResourceRequirementID("address.resource.requirement")
+        requirement = ResourceRequirement(
+            requirement_id, root_id, ResourceKind.OTHER, ResourceRole.OPAQUE_RESOURCE,
+        )
+        resource_use = ResourceUse(root_id, requirement_id)
+    
+        invoke_world = _use("address.invoke.world", "address.world.accessed", UseRole.STATE_CONTENT)
+        invoke_reference = _use("address.invoke.reference", "address.invoke_owner", UseRole.REFERENCE)
+        invoke_key = _use("address.invoke.key", "address.key")
+        invoke_id = OperationID("address.invoke")
+        invoke = Operation(
+            invoke_id, "unknown operation with distinct NORMAL and RAISE state outcomes",
+            (Behavior.CONTROL, Behavior.READ, Behavior.WRITE),
+            (invoke_world, invoke_reference, invoke_key),
+            effects_complete=True,
+            terminator=Terminator(TerminatorKind.INVOKE, (
+                CompletionSuccessor(ExitKind.NORMAL, BlockID("address.normal"),
+                                    (CompletionResult(0),)),
+                CompletionSuccessor(ExitKind.RAISE, BlockID("address.raise"),
+                                    (CompletionResult(0), CompletionResult(1))),
+            )),
+            completions=(
+                CompletionSignature(ExitKind.NORMAL, (
+                    ValueType(ValueKind.STATE, location=LocationID("address.world")),
+                )),
+                CompletionSignature(ExitKind.RAISE, (
+                    ValueType(ValueKind.DATA, data_type="builtins.Exception"),
+                    ValueType(ValueKind.STATE, location=LocationID("address.world")),
+                )),
+            ),
+            invoke_arguments=(invoke_world.id, invoke_reference.id, invoke_key.id),
+        )
+    
+        normal_use = _use("address.normal.world", "address.world.normal", UseRole.STATE_CONTENT)
+        normal_return = Operation(
+            OperationID("address.normal.return"), "return through the NORMAL port",
+            (Behavior.CONTROL,), (normal_use,),
+            terminator=Terminator(TerminatorKind.RETURN, exit="normal",
+                                  values=(normal_use.id,)),
+        )
+        raised_error = _use("address.raise.error", "address.error")
+        raised_world = _use("address.raise.world", "address.world.raise", UseRole.STATE_CONTENT)
+        raised_return = Operation(
+            OperationID("address.raise.return"), "raise through the RAISE port",
+            (Behavior.CONTROL,), (raised_error, raised_world),
+            terminator=Terminator(TerminatorKind.RAISE, exit="failure",
+                                  values=(raised_error.id, raised_world.id)),
+        )
+    
+        root_refinement = StateAddressRefinement(
+&gt;           ExistingAccess(root_id, 0),
+            ^^^^^^^^^^^^^^
+            (
+                AddressEffect(ReferenceOwner(source.id), (Element(key.id),), AccessMode.READ),
+                AddressEffect(ReferenceOwner(destination.id), (Element(key.id),), AccessMode.WRITE),
+                AddressEffect(ResourceOwner(requirement_id), (Element(key.id),),
+                              AccessMode.READ_WRITE),
+            ),
+            AddressCoverage.PARTIAL,
+        )
+E       NameError: name 'ExistingAccess' is not defined
+
+tests/fixtures/program_state_addresses.py:123: NameError</failure></testcase><testcase classname="tests.unit.test_program_state_address_validation" name="test_foreign_selector_use_and_wrong_access_index_are_rejected" time="0.001"><failure message="NameError: name 'ExistingAccess' is not defined">def test_foreign_selector_use_and_wrong_access_index_are_rejected():
+&gt;       graph, _ = state_address_program()
+                   ^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_program_state_address_validation.py:43: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def state_address_program():
+        """Return ``(ProgramGraph, details)`` with one access and one INVOKE site."""
+        values = (
+            _reference("address.source", BlockArgument(BlockID("address.entry"), 0)),
+            _reference("address.destination", BlockArgument(BlockID("address.entry"), 1)),
+            _reference("address.invoke_owner", BlockArgument(BlockID("address.entry"), 2)),
+            _data("address.key", BlockArgument(BlockID("address.entry"), 3)),
+            _state("address.world.initial", BlockArgument(BlockID("address.entry"), 4)),
+            _state("address.world.accessed", OperationResult(OperationID("address.root_access"), 0)),
+            _state("address.world.normal", BlockArgument(BlockID("address.normal"), 0)),
+            _data("address.error", BlockArgument(BlockID("address.raise"), 0), "builtins.Exception"),
+            _state("address.world.raise", BlockArgument(BlockID("address.raise"), 1)),
+        )
+        source = _use("address.source.use", "address.source", UseRole.REFERENCE)
+        destination = _use("address.destination.use", "address.destination", UseRole.REFERENCE)
+        key = _use("address.key.use", "address.key")
+        before = _use("address.world.before", "address.world.initial", UseRole.STATE_CONTENT)
+        root_id = OperationID("address.root_access")
+        root_operation = Operation(
+            root_id, "read and update multiple owners on one carrier",
+            (Behavior.READ, Behavior.WRITE),
+            (source, destination, key, before),
+            (ValueID("address.world.accessed"),),
+            (StateAccess(LocationID("address.world"), before.id, AccessMode.READ_WRITE,
+                         ValueID("address.world.accessed"), Footprint()),),
+            effects_complete=False,
+        )
+    
+        requirement_id = ResourceRequirementID("address.resource.requirement")
+        requirement = ResourceRequirement(
+            requirement_id, root_id, ResourceKind.OTHER, ResourceRole.OPAQUE_RESOURCE,
+        )
+        resource_use = ResourceUse(root_id, requirement_id)
+    
+        invoke_world = _use("address.invoke.world", "address.world.accessed", UseRole.STATE_CONTENT)
+        invoke_reference = _use("address.invoke.reference", "address.invoke_owner", UseRole.REFERENCE)
+        invoke_key = _use("address.invoke.key", "address.key")
+        invoke_id = OperationID("address.invoke")
+        invoke = Operation(
+            invoke_id, "unknown operation with distinct NORMAL and RAISE state outcomes",
+            (Behavior.CONTROL, Behavior.READ, Behavior.WRITE),
+            (invoke_world, invoke_reference, invoke_key),
+            effects_complete=True,
+            terminator=Terminator(TerminatorKind.INVOKE, (
+                CompletionSuccessor(ExitKind.NORMAL, BlockID("address.normal"),
+                                    (CompletionResult(0),)),
+                CompletionSuccessor(ExitKind.RAISE, BlockID("address.raise"),
+                                    (CompletionResult(0), CompletionResult(1))),
+            )),
+            completions=(
+                CompletionSignature(ExitKind.NORMAL, (
+                    ValueType(ValueKind.STATE, location=LocationID("address.world")),
+                )),
+                CompletionSignature(ExitKind.RAISE, (
+                    ValueType(ValueKind.DATA, data_type="builtins.Exception"),
+                    ValueType(ValueKind.STATE, location=LocationID("address.world")),
+                )),
+            ),
+            invoke_arguments=(invoke_world.id, invoke_reference.id, invoke_key.id),
+        )
+    
+        normal_use = _use("address.normal.world", "address.world.normal", UseRole.STATE_CONTENT)
+        normal_return = Operation(
+            OperationID("address.normal.return"), "return through the NORMAL port",
+            (Behavior.CONTROL,), (normal_use,),
+            terminator=Terminator(TerminatorKind.RETURN, exit="normal",
+                                  values=(normal_use.id,)),
+        )
+        raised_error = _use("address.raise.error", "address.error")
+        raised_world = _use("address.raise.world", "address.world.raise", UseRole.STATE_CONTENT)
+        raised_return = Operation(
+            OperationID("address.raise.return"), "raise through the RAISE port",
+            (Behavior.CONTROL,), (raised_error, raised_world),
+            terminator=Terminator(TerminatorKind.RAISE, exit="failure",
+                                  values=(raised_error.id, raised_world.id)),
+        )
+    
+        root_refinement = StateAddressRefinement(
+&gt;           ExistingAccess(root_id, 0),
+            ^^^^^^^^^^^^^^
+            (
+                AddressEffect(ReferenceOwner(source.id), (Element(key.id),), AccessMode.READ),
+                AddressEffect(ReferenceOwner(destination.id), (Element(key.id),), AccessMode.WRITE),
+                AddressEffect(ResourceOwner(requirement_id), (Element(key.id),),
+                              AccessMode.READ_WRITE),
+            ),
+            AddressCoverage.PARTIAL,
+        )
+E       NameError: name 'ExistingAccess' is not defined
+
+tests/fixtures/program_state_addresses.py:123: NameError</failure></testcase><testcase classname="tests.unit.test_program_state_address_validation" name="test_effect_modes_cannot_exceed_or_misstate_complete_coarse_access" time="0.001"><failure message="NameError: name 'ExistingAccess' is not defined">def test_effect_modes_cannot_exceed_or_misstate_complete_coarse_access():
+&gt;       graph, _ = state_address_program()
+                   ^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_program_state_address_validation.py:53: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def state_address_program():
+        """Return ``(ProgramGraph, details)`` with one access and one INVOKE site."""
+        values = (
+            _reference("address.source", BlockArgument(BlockID("address.entry"), 0)),
+            _reference("address.destination", BlockArgument(BlockID("address.entry"), 1)),
+            _reference("address.invoke_owner", BlockArgument(BlockID("address.entry"), 2)),
+            _data("address.key", BlockArgument(BlockID("address.entry"), 3)),
+            _state("address.world.initial", BlockArgument(BlockID("address.entry"), 4)),
+            _state("address.world.accessed", OperationResult(OperationID("address.root_access"), 0)),
+            _state("address.world.normal", BlockArgument(BlockID("address.normal"), 0)),
+            _data("address.error", BlockArgument(BlockID("address.raise"), 0), "builtins.Exception"),
+            _state("address.world.raise", BlockArgument(BlockID("address.raise"), 1)),
+        )
+        source = _use("address.source.use", "address.source", UseRole.REFERENCE)
+        destination = _use("address.destination.use", "address.destination", UseRole.REFERENCE)
+        key = _use("address.key.use", "address.key")
+        before = _use("address.world.before", "address.world.initial", UseRole.STATE_CONTENT)
+        root_id = OperationID("address.root_access")
+        root_operation = Operation(
+            root_id, "read and update multiple owners on one carrier",
+            (Behavior.READ, Behavior.WRITE),
+            (source, destination, key, before),
+            (ValueID("address.world.accessed"),),
+            (StateAccess(LocationID("address.world"), before.id, AccessMode.READ_WRITE,
+                         ValueID("address.world.accessed"), Footprint()),),
+            effects_complete=False,
+        )
+    
+        requirement_id = ResourceRequirementID("address.resource.requirement")
+        requirement = ResourceRequirement(
+            requirement_id, root_id, ResourceKind.OTHER, ResourceRole.OPAQUE_RESOURCE,
+        )
+        resource_use = ResourceUse(root_id, requirement_id)
+    
+        invoke_world = _use("address.invoke.world", "address.world.accessed", UseRole.STATE_CONTENT)
+        invoke_reference = _use("address.invoke.reference", "address.invoke_owner", UseRole.REFERENCE)
+        invoke_key = _use("address.invoke.key", "address.key")
+        invoke_id = OperationID("address.invoke")
+        invoke = Operation(
+            invoke_id, "unknown operation with distinct NORMAL and RAISE state outcomes",
+            (Behavior.CONTROL, Behavior.READ, Behavior.WRITE),
+            (invoke_world, invoke_reference, invoke_key),
+            effects_complete=True,
+            terminator=Terminator(TerminatorKind.INVOKE, (
+                CompletionSuccessor(ExitKind.NORMAL, BlockID("address.normal"),
+                                    (CompletionResult(0),)),
+                CompletionSuccessor(ExitKind.RAISE, BlockID("address.raise"),
+                                    (CompletionResult(0), CompletionResult(1))),
+            )),
+            completions=(
+                CompletionSignature(ExitKind.NORMAL, (
+                    ValueType(ValueKind.STATE, location=LocationID("address.world")),
+                )),
+                CompletionSignature(ExitKind.RAISE, (
+                    ValueType(ValueKind.DATA, data_type="builtins.Exception"),
+                    ValueType(ValueKind.STATE, location=LocationID("address.world")),
+                )),
+            ),
+            invoke_arguments=(invoke_world.id, invoke_reference.id, invoke_key.id),
+        )
+    
+        normal_use = _use("address.normal.world", "address.world.normal", UseRole.STATE_CONTENT)
+        normal_return = Operation(
+            OperationID("address.normal.return"), "return through the NORMAL port",
+            (Behavior.CONTROL,), (normal_use,),
+            terminator=Terminator(TerminatorKind.RETURN, exit="normal",
+                                  values=(normal_use.id,)),
+        )
+        raised_error = _use("address.raise.error", "address.error")
+        raised_world = _use("address.raise.world", "address.world.raise", UseRole.STATE_CONTENT)
+        raised_return = Operation(
+            OperationID("address.raise.return"), "raise through the RAISE port",
+            (Behavior.CONTROL,), (raised_error, raised_world),
+            terminator=Terminator(TerminatorKind.RAISE, exit="failure",
+                                  values=(raised_error.id, raised_world.id)),
+        )
+    
+        root_refinement = StateAddressRefinement(
+&gt;           ExistingAccess(root_id, 0),
+            ^^^^^^^^^^^^^^
+            (
+                AddressEffect(ReferenceOwner(source.id), (Element(key.id),), AccessMode.READ),
+                AddressEffect(ReferenceOwner(destination.id), (Element(key.id),), AccessMode.WRITE),
+                AddressEffect(ResourceOwner(requirement_id), (Element(key.id),),
+                              AccessMode.READ_WRITE),
+            ),
+            AddressCoverage.PARTIAL,
+        )
+E       NameError: name 'ExistingAccess' is not defined
+
+tests/fixtures/program_state_addresses.py:123: NameError</failure></testcase><testcase classname="tests.unit.test_program_state_address_validation" name="test_existing_reference_envelope_cannot_be_bypassed_by_other_owners" time="0.001"><failure message="NameError: name 'ExistingAccess' is not defined">def test_existing_reference_envelope_cannot_be_bypassed_by_other_owners():
+&gt;       graph, _ = state_address_program()
+                   ^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_program_state_address_validation.py:65: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def state_address_program():
+        """Return ``(ProgramGraph, details)`` with one access and one INVOKE site."""
+        values = (
+            _reference("address.source", BlockArgument(BlockID("address.entry"), 0)),
+            _reference("address.destination", BlockArgument(BlockID("address.entry"), 1)),
+            _reference("address.invoke_owner", BlockArgument(BlockID("address.entry"), 2)),
+            _data("address.key", BlockArgument(BlockID("address.entry"), 3)),
+            _state("address.world.initial", BlockArgument(BlockID("address.entry"), 4)),
+            _state("address.world.accessed", OperationResult(OperationID("address.root_access"), 0)),
+            _state("address.world.normal", BlockArgument(BlockID("address.normal"), 0)),
+            _data("address.error", BlockArgument(BlockID("address.raise"), 0), "builtins.Exception"),
+            _state("address.world.raise", BlockArgument(BlockID("address.raise"), 1)),
+        )
+        source = _use("address.source.use", "address.source", UseRole.REFERENCE)
+        destination = _use("address.destination.use", "address.destination", UseRole.REFERENCE)
+        key = _use("address.key.use", "address.key")
+        before = _use("address.world.before", "address.world.initial", UseRole.STATE_CONTENT)
+        root_id = OperationID("address.root_access")
+        root_operation = Operation(
+            root_id, "read and update multiple owners on one carrier",
+            (Behavior.READ, Behavior.WRITE),
+            (source, destination, key, before),
+            (ValueID("address.world.accessed"),),
+            (StateAccess(LocationID("address.world"), before.id, AccessMode.READ_WRITE,
+                         ValueID("address.world.accessed"), Footprint()),),
+            effects_complete=False,
+        )
+    
+        requirement_id = ResourceRequirementID("address.resource.requirement")
+        requirement = ResourceRequirement(
+            requirement_id, root_id, ResourceKind.OTHER, ResourceRole.OPAQUE_RESOURCE,
+        )
+        resource_use = ResourceUse(root_id, requirement_id)
+    
+        invoke_world = _use("address.invoke.world", "address.world.accessed", UseRole.STATE_CONTENT)
+        invoke_reference = _use("address.invoke.reference", "address.invoke_owner", UseRole.REFERENCE)
+        invoke_key = _use("address.invoke.key", "address.key")
+        invoke_id = OperationID("address.invoke")
+        invoke = Operation(
+            invoke_id, "unknown operation with distinct NORMAL and RAISE state outcomes",
+            (Behavior.CONTROL, Behavior.READ, Behavior.WRITE),
+            (invoke_world, invoke_reference, invoke_key),
+            effects_complete=True,
+            terminator=Terminator(TerminatorKind.INVOKE, (
+                CompletionSuccessor(ExitKind.NORMAL, BlockID("address.normal"),
+                                    (CompletionResult(0),)),
+                CompletionSuccessor(ExitKind.RAISE, BlockID("address.raise"),
+                                    (CompletionResult(0), CompletionResult(1))),
+            )),
+            completions=(
+                CompletionSignature(ExitKind.NORMAL, (
+                    ValueType(ValueKind.STATE, location=LocationID("address.world")),
+                )),
+                CompletionSignature(ExitKind.RAISE, (
+                    ValueType(ValueKind.DATA, data_type="builtins.Exception"),
+                    ValueType(ValueKind.STATE, location=LocationID("address.world")),
+                )),
+            ),
+            invoke_arguments=(invoke_world.id, invoke_reference.id, invoke_key.id),
+        )
+    
+        normal_use = _use("address.normal.world", "address.world.normal", UseRole.STATE_CONTENT)
+        normal_return = Operation(
+            OperationID("address.normal.return"), "return through the NORMAL port",
+            (Behavior.CONTROL,), (normal_use,),
+            terminator=Terminator(TerminatorKind.RETURN, exit="normal",
+                                  values=(normal_use.id,)),
+        )
+        raised_error = _use("address.raise.error", "address.error")
+        raised_world = _use("address.raise.world", "address.world.raise", UseRole.STATE_CONTENT)
+        raised_return = Operation(
+            OperationID("address.raise.return"), "raise through the RAISE port",
+            (Behavior.CONTROL,), (raised_error, raised_world),
+            terminator=Terminator(TerminatorKind.RAISE, exit="failure",
+                                  values=(raised_error.id, raised_world.id)),
+        )
+    
+        root_refinement = StateAddressRefinement(
+&gt;           ExistingAccess(root_id, 0),
+            ^^^^^^^^^^^^^^
+            (
+                AddressEffect(ReferenceOwner(source.id), (Element(key.id),), AccessMode.READ),
+                AddressEffect(ReferenceOwner(destination.id), (Element(key.id),), AccessMode.WRITE),
+                AddressEffect(ResourceOwner(requirement_id), (Element(key.id),),
+                              AccessMode.READ_WRITE),
+            ),
+            AddressCoverage.PARTIAL,
+        )
+E       NameError: name 'ExistingAccess' is not defined
+
+tests/fixtures/program_state_addresses.py:123: NameError</failure></testcase><testcase classname="tests.unit.test_program_state_address_validation" name="test_local_selector_cannot_refine_an_existing_full_overwrite" time="0.002" /><testcase classname="tests.unit.test_program_state_address_validation" name="test_invoke_selector_must_use_actual_invoke_argument_not_edge_forwarding" time="0.001"><failure message="NameError: name 'ExistingAccess' is not defined">def test_invoke_selector_must_use_actual_invoke_argument_not_edge_forwarding():
+&gt;       graph, details = state_address_program()
+                         ^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_program_state_address_validation.py:103: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def state_address_program():
+        """Return ``(ProgramGraph, details)`` with one access and one INVOKE site."""
+        values = (
+            _reference("address.source", BlockArgument(BlockID("address.entry"), 0)),
+            _reference("address.destination", BlockArgument(BlockID("address.entry"), 1)),
+            _reference("address.invoke_owner", BlockArgument(BlockID("address.entry"), 2)),
+            _data("address.key", BlockArgument(BlockID("address.entry"), 3)),
+            _state("address.world.initial", BlockArgument(BlockID("address.entry"), 4)),
+            _state("address.world.accessed", OperationResult(OperationID("address.root_access"), 0)),
+            _state("address.world.normal", BlockArgument(BlockID("address.normal"), 0)),
+            _data("address.error", BlockArgument(BlockID("address.raise"), 0), "builtins.Exception"),
+            _state("address.world.raise", BlockArgument(BlockID("address.raise"), 1)),
+        )
+        source = _use("address.source.use", "address.source", UseRole.REFERENCE)
+        destination = _use("address.destination.use", "address.destination", UseRole.REFERENCE)
+        key = _use("address.key.use", "address.key")
+        before = _use("address.world.before", "address.world.initial", UseRole.STATE_CONTENT)
+        root_id = OperationID("address.root_access")
+        root_operation = Operation(
+            root_id, "read and update multiple owners on one carrier",
+            (Behavior.READ, Behavior.WRITE),
+            (source, destination, key, before),
+            (ValueID("address.world.accessed"),),
+            (StateAccess(LocationID("address.world"), before.id, AccessMode.READ_WRITE,
+                         ValueID("address.world.accessed"), Footprint()),),
+            effects_complete=False,
+        )
+    
+        requirement_id = ResourceRequirementID("address.resource.requirement")
+        requirement = ResourceRequirement(
+            requirement_id, root_id, ResourceKind.OTHER, ResourceRole.OPAQUE_RESOURCE,
+        )
+        resource_use = ResourceUse(root_id, requirement_id)
+    
+        invoke_world = _use("address.invoke.world", "address.world.accessed", UseRole.STATE_CONTENT)
+        invoke_reference = _use("address.invoke.reference", "address.invoke_owner", UseRole.REFERENCE)
+        invoke_key = _use("address.invoke.key", "address.key")
+        invoke_id = OperationID("address.invoke")
+        invoke = Operation(
+            invoke_id, "unknown operation with distinct NORMAL and RAISE state outcomes",
+            (Behavior.CONTROL, Behavior.READ, Behavior.WRITE),
+            (invoke_world, invoke_reference, invoke_key),
+            effects_complete=True,
+            terminator=Terminator(TerminatorKind.INVOKE, (
+                CompletionSuccessor(ExitKind.NORMAL, BlockID("address.normal"),
+                                    (CompletionResult(0),)),
+                CompletionSuccessor(ExitKind.RAISE, BlockID("address.raise"),
+                                    (CompletionResult(0), CompletionResult(1))),
+            )),
+            completions=(
+                CompletionSignature(ExitKind.NORMAL, (
+                    ValueType(ValueKind.STATE, location=LocationID("address.world")),
+                )),
+                CompletionSignature(ExitKind.RAISE, (
+                    ValueType(ValueKind.DATA, data_type="builtins.Exception"),
+                    ValueType(ValueKind.STATE, location=LocationID("address.world")),
+                )),
+            ),
+            invoke_arguments=(invoke_world.id, invoke_reference.id, invoke_key.id),
+        )
+    
+        normal_use = _use("address.normal.world", "address.world.normal", UseRole.STATE_CONTENT)
+        normal_return = Operation(
+            OperationID("address.normal.return"), "return through the NORMAL port",
+            (Behavior.CONTROL,), (normal_use,),
+            terminator=Terminator(TerminatorKind.RETURN, exit="normal",
+                                  values=(normal_use.id,)),
+        )
+        raised_error = _use("address.raise.error", "address.error")
+        raised_world = _use("address.raise.world", "address.world.raise", UseRole.STATE_CONTENT)
+        raised_return = Operation(
+            OperationID("address.raise.return"), "raise through the RAISE port",
+            (Behavior.CONTROL,), (raised_error, raised_world),
+            terminator=Terminator(TerminatorKind.RAISE, exit="failure",
+                                  values=(raised_error.id, raised_world.id)),
+        )
+    
+        root_refinement = StateAddressRefinement(
+&gt;           ExistingAccess(root_id, 0),
+            ^^^^^^^^^^^^^^
+            (
+                AddressEffect(ReferenceOwner(source.id), (Element(key.id),), AccessMode.READ),
+                AddressEffect(ReferenceOwner(destination.id), (Element(key.id),), AccessMode.WRITE),
+                AddressEffect(ResourceOwner(requirement_id), (Element(key.id),),
+                              AccessMode.READ_WRITE),
+            ),
+            AddressCoverage.PARTIAL,
+        )
+E       NameError: name 'ExistingAccess' is not defined
+
+tests/fixtures/program_state_addresses.py:123: NameError</failure></testcase><testcase classname="tests.unit.test_program_state_address_validation" name="test_unknown_and_domain_owner_cannot_override_an_explicit_reference" time="0.001"><failure message="NameError: name 'ExistingAccess' is not defined">def test_unknown_and_domain_owner_cannot_override_an_explicit_reference():
+&gt;       graph, _ = state_address_program()
+                   ^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_program_state_address_validation.py:116: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def state_address_program():
+        """Return ``(ProgramGraph, details)`` with one access and one INVOKE site."""
+        values = (
+            _reference("address.source", BlockArgument(BlockID("address.entry"), 0)),
+            _reference("address.destination", BlockArgument(BlockID("address.entry"), 1)),
+            _reference("address.invoke_owner", BlockArgument(BlockID("address.entry"), 2)),
+            _data("address.key", BlockArgument(BlockID("address.entry"), 3)),
+            _state("address.world.initial", BlockArgument(BlockID("address.entry"), 4)),
+            _state("address.world.accessed", OperationResult(OperationID("address.root_access"), 0)),
+            _state("address.world.normal", BlockArgument(BlockID("address.normal"), 0)),
+            _data("address.error", BlockArgument(BlockID("address.raise"), 0), "builtins.Exception"),
+            _state("address.world.raise", BlockArgument(BlockID("address.raise"), 1)),
+        )
+        source = _use("address.source.use", "address.source", UseRole.REFERENCE)
+        destination = _use("address.destination.use", "address.destination", UseRole.REFERENCE)
+        key = _use("address.key.use", "address.key")
+        before = _use("address.world.before", "address.world.initial", UseRole.STATE_CONTENT)
+        root_id = OperationID("address.root_access")
+        root_operation = Operation(
+            root_id, "read and update multiple owners on one carrier",
+            (Behavior.READ, Behavior.WRITE),
+            (source, destination, key, before),
+            (ValueID("address.world.accessed"),),
+            (StateAccess(LocationID("address.world"), before.id, AccessMode.READ_WRITE,
+                         ValueID("address.world.accessed"), Footprint()),),
+            effects_complete=False,
+        )
+    
+        requirement_id = ResourceRequirementID("address.resource.requirement")
+        requirement = ResourceRequirement(
+            requirement_id, root_id, ResourceKind.OTHER, ResourceRole.OPAQUE_RESOURCE,
+        )
+        resource_use = ResourceUse(root_id, requirement_id)
+    
+        invoke_world = _use("address.invoke.world", "address.world.accessed", UseRole.STATE_CONTENT)
+        invoke_reference = _use("address.invoke.reference", "address.invoke_owner", UseRole.REFERENCE)
+        invoke_key = _use("address.invoke.key", "address.key")
+        invoke_id = OperationID("address.invoke")
+        invoke = Operation(
+            invoke_id, "unknown operation with distinct NORMAL and RAISE state outcomes",
+            (Behavior.CONTROL, Behavior.READ, Behavior.WRITE),
+            (invoke_world, invoke_reference, invoke_key),
+            effects_complete=True,
+            terminator=Terminator(TerminatorKind.INVOKE, (
+                CompletionSuccessor(ExitKind.NORMAL, BlockID("address.normal"),
+                                    (CompletionResult(0),)),
+                CompletionSuccessor(ExitKind.RAISE, BlockID("address.raise"),
+                                    (CompletionResult(0), CompletionResult(1))),
+            )),
+            completions=(
+                CompletionSignature(ExitKind.NORMAL, (
+                    ValueType(ValueKind.STATE, location=LocationID("address.world")),
+                )),
+                CompletionSignature(ExitKind.RAISE, (
+                    ValueType(ValueKind.DATA, data_type="builtins.Exception"),
+                    ValueType(ValueKind.STATE, location=LocationID("address.world")),
+                )),
+            ),
+            invoke_arguments=(invoke_world.id, invoke_reference.id, invoke_key.id),
+        )
+    
+        normal_use = _use("address.normal.world", "address.world.normal", UseRole.STATE_CONTENT)
+        normal_return = Operation(
+            OperationID("address.normal.return"), "return through the NORMAL port",
+            (Behavior.CONTROL,), (normal_use,),
+            terminator=Terminator(TerminatorKind.RETURN, exit="normal",
+                                  values=(normal_use.id,)),
+        )
+        raised_error = _use("address.raise.error", "address.error")
+        raised_world = _use("address.raise.world", "address.world.raise", UseRole.STATE_CONTENT)
+        raised_return = Operation(
+            OperationID("address.raise.return"), "raise through the RAISE port",
+            (Behavior.CONTROL,), (raised_error, raised_world),
+            terminator=Terminator(TerminatorKind.RAISE, exit="failure",
+                                  values=(raised_error.id, raised_world.id)),
+        )
+    
+        root_refinement = StateAddressRefinement(
+&gt;           ExistingAccess(root_id, 0),
+            ^^^^^^^^^^^^^^
+            (
+                AddressEffect(ReferenceOwner(source.id), (Element(key.id),), AccessMode.READ),
+                AddressEffect(ReferenceOwner(destination.id), (Element(key.id),), AccessMode.WRITE),
+                AddressEffect(ResourceOwner(requirement_id), (Element(key.id),),
+                              AccessMode.READ_WRITE),
+            ),
+            AddressCoverage.PARTIAL,
+        )
+E       NameError: name 'ExistingAccess' is not defined
+
+tests/fixtures/program_state_addresses.py:123: NameError</failure></testcase></testsuite></testsuites>

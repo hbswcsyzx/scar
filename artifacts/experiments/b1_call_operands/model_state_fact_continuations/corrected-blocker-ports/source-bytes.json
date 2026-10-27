@@ -1,0 +1,22 @@
+{
+  "scar/ir/execution/query.py": {
+    "path": "corrected-blocker-ports/source-bytes/scar__ir__execution__query.py.txt",
+    "sha256": "8ae644dd2946bbadef84a3915f57afab01e765ffc8eeae2d2ac3165b5fa708ae"
+  },
+  "scar/ir/execution/request_state_history.py": {
+    "path": "corrected-blocker-ports/source-bytes/scar__ir__execution__request_state_history.py.txt",
+    "sha256": "0b01cbd2063865eec9238eea1eaddbb6e3fff68458c6b15fa05697e08beb8ffb"
+  },
+  "scar/ir/execution/state_preservation.py": {
+    "path": "corrected-blocker-ports/source-bytes/scar__ir__execution__state_preservation.py.txt",
+    "sha256": "04cd470782628f837c8f5db6a8f3eacd7465f6c6fd75e2b6c4cbe6a1b2678550"
+  },
+  "tests/unit/test_execution_request_state_history.py": {
+    "path": "corrected-blocker-ports/source-bytes/tests__unit__test_execution_request_state_history.py.txt",
+    "sha256": "ecabb8e5bca05f9c1d7c5ae95024c1a2116ff7eb1b6620e50a0236e7d9e9b79a"
+  },
+  "tests/unit/test_execution_state_preservation.py": {
+    "path": "corrected-blocker-ports/source-bytes/tests__unit__test_execution_state_preservation.py.txt",
+    "sha256": "159f46624aad12f8a2a55555e11abfb043aad1c4d24f9a0621098983c410771e"
+  }
+}

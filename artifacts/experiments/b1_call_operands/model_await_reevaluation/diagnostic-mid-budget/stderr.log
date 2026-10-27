@@ -1,0 +1,33 @@
+Traceback (most recent call last):
+  File "/tmp/scar-structured-model-280qf4mi/artifacts/experiments/b1_call_operands/model_await_reevaluation/probe_mid_budget.py", line 25, in <module>
+    scan(report)
+    ~~~~^^^^^^^^
+  File "/tmp/scar-structured-model-280qf4mi/artifacts/experiments/b1_call_operands/model_await_reevaluation/probe_mid_budget.py", line 21, in scan
+    scan(child, path + '.' + key)
+    ~~~~^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/scar-structured-model-280qf4mi/artifacts/experiments/b1_call_operands/model_await_reevaluation/probe_mid_budget.py", line 24, in scan
+    scan(child, path + f'[{slot}]')
+    ~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/scar-structured-model-280qf4mi/artifacts/experiments/b1_call_operands/model_await_reevaluation/probe_mid_budget.py", line 21, in scan
+    scan(child, path + '.' + key)
+    ~~~~^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/scar-structured-model-280qf4mi/artifacts/experiments/b1_call_operands/model_await_reevaluation/probe_mid_budget.py", line 24, in scan
+    scan(child, path + f'[{slot}]')
+    ~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/scar-structured-model-280qf4mi/artifacts/experiments/b1_call_operands/model_await_reevaluation/probe_mid_budget.py", line 21, in scan
+    scan(child, path + '.' + key)
+    ~~~~^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/scar-structured-model-280qf4mi/artifacts/experiments/b1_call_operands/model_await_reevaluation/probe_mid_budget.py", line 24, in scan
+    scan(child, path + f'[{slot}]')
+    ~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/scar-structured-model-280qf4mi/artifacts/experiments/b1_call_operands/model_await_reevaluation/probe_mid_budget.py", line 21, in scan
+    scan(child, path + '.' + key)
+    ~~~~^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/scar-structured-model-280qf4mi/artifacts/experiments/b1_call_operands/model_await_reevaluation/probe_mid_budget.py", line 21, in scan
+    scan(child, path + '.' + key)
+    ~~~~^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/scar-structured-model-280qf4mi/artifacts/experiments/b1_call_operands/model_await_reevaluation/probe_mid_budget.py", line 21, in scan
+    scan(child, path + '.' + key)
+    ~~~~^^^^^^^^^^^^^^^^^^^^^^^^^
+  [Previous line repeated 1 more time]
+TypeError: can only concatenate str (not "ValueID") to str

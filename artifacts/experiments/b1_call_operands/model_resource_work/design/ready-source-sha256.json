@@ -1,0 +1,15 @@
+{
+  "docs/M1_RESOURCE_EXECUTION_CONTRACT.md": "74a606fca89ecb94ad9a04f77d8ad41706bcdacb10210352ccad185272993729",
+  "scar/ir/execution/model.py": "f1b9941741f48bcfafc224e50722422450e6a07ef7c606c2422395d2de274411",
+  "scar/ir/execution/resources.py": "657fca489d07fd3e32e5552782e02c6b6b58c8ed061c3c0040313d442a2e3000",
+  "scar/ir/execution/common.py": "a6a4287df931d21221be181023df0233f0b7b8cfbe0fdb69798fc9238ea2c0b8",
+  "scar/ir/execution/coordinates.py": "b19e45c8af710b93d7197ca91e7cbcdfa7a9ee239a7faf73903d2ff85003ce09",
+  "scar/ir/execution/validation.py": "2c60deee43107fe0310140fcd9e73a55288a45b7ebebda22b699d238e695cdfa",
+  "scar/ir/execution/flow.py": "2b6189a1ad658072176a00bc4c72a4c5af4c66e96edc844bad904471c8eb0501",
+  "scar/ir/execution/resource_validation.py": "3a8bcd72fc07231360b9c9bdc4b35adc9dbc21b569026bba25712d84639b1c08",
+  "scar/ir/execution/query.py": "3fc8137359765f878f2b82476893cc6562da90f4a710144ed764280b4f027c3e",
+  "scar/ir/v2/values.py": "2c4ab8a69d46ef312f454c487329150cd7f3f4a12819e51bf8a8ae218210f259",
+  "scar/ir/v2/contracts.py": "c7aaae3ea0e292e425cfbe820d4508363b9e26e0c94427cefc5a4bb0ae6e15b1",
+  "scar/ir/provenance.py": "f8f11d353a05c9b2ec893ae5ab3da7be747b4a2ea3b28a21eb1f7891237523c1",
+  "scar/ir/program/model.py": "3a72c7692afdb19f74f19df5990527140e360748954c64dde3e335551580b2b1"
+}

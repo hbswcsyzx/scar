@@ -694,7 +694,8 @@ def _load_source_texts(semantic, source_semantics, sources, budget):
 
 
 def _build_generated_source_layers(paths, root, *, sources,
-                                   budget: ControlFlowBudget = ControlFlowBudget()):
+                                   budget: ControlFlowBudget = ControlFlowBudget(),
+                                   _root_is_package=None):
     """Generate all source layers from one caller-owned decoded snapshot.
 
     This private construction path accepts source, never a purportedly verified
@@ -708,7 +709,12 @@ def _build_generated_source_layers(paths, root, *, sources,
     if type(budget) is not ControlFlowBudget:
         raise TypeError("budget must be ControlFlowBudget")
     budget.__post_init__()
-    semantic = build_semantic_files(paths, root, sources=sources).graph
+    if _root_is_package is None:
+        semantic = build_semantic_files(paths, root, sources=sources).graph
+    else:
+        from scar.ir.frontend_v2 import build_semantic_source_texts
+        semantic = build_semantic_source_texts(paths, root, sources=sources,
+            root_is_package=_root_is_package).graph
     source_semantics = extract_source_semantics(semantic, sources=sources)
     texts = _load_source_texts(semantic, source_semantics, sources, budget)
     builder = _Builder(semantic, source_semantics, texts,

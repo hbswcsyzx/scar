@@ -1,0 +1,65 @@
+{
+  "command": [
+    "/home/zyf/miniconda3/envs/lewm/bin/python",
+    "-m",
+    "pytest",
+    "-q",
+    "tests/unit/test_program_session_release_codec.py"
+  ],
+  "cwd": "/tmp/scar-structured-model-280qf4mi",
+  "python": "3.14.7 | packaged by conda-forge | (main, Sep  2 2026, 21:08:32) [GCC 15.3.0]",
+  "exit_code": 0,
+  "elapsed_seconds": 2.502737283706665,
+  "source_hashes": [
+    {
+      "path": "scar/ir/program/lifecycle.py",
+      "sha256": "326422e0b5c0a89fef3abda0f27037928d6c20bfc5adbd9afc875236678d17d7",
+      "single_terminal_newline": true
+    },
+    {
+      "path": "scar/ir/program/model.py",
+      "sha256": "3a72c7692afdb19f74f19df5990527140e360748954c64dde3e335551580b2b1",
+      "single_terminal_newline": true
+    },
+    {
+      "path": "scar/ir/program/__init__.py",
+      "sha256": "849f39246a771e5ad3a98b769764fc0431bb3154238772cf894a53afe9328648",
+      "single_terminal_newline": true
+    },
+    {
+      "path": "scar/ir/program/codec.py",
+      "sha256": "415cd3c7832e00c5ffb9ae7332802514944c98b672136a0d010c640d0c9acec0",
+      "single_terminal_newline": true
+    },
+    {
+      "path": "tests/unit/test_session_release_records.py",
+      "sha256": "482a663588fd8a0f549acf202f2305330b745a124e17de76dfcbd6c3165d2849",
+      "single_terminal_newline": true
+    },
+    {
+      "path": "tests/unit/test_program_session_release_codec.py",
+      "sha256": "4e5f7c55083accec0ede2fc837c5ef50334705372c0acf17a55250fc88c5e1a3",
+      "single_terminal_newline": true
+    },
+    {
+      "path": "tests/unit/test_program_resumption_codec.py",
+      "sha256": "ee414e3ecf926dd63ae1bcbffeed6a4cf9369683d23359de0fedd33713123b4f",
+      "single_terminal_newline": true
+    },
+    {
+      "path": "tests/unit/test_program_driver_codec.py",
+      "sha256": "cbadf5f3c26ec36c936d411803097fc042212f489f940b3174da3fde857ef1c9",
+      "single_terminal_newline": true
+    },
+    {
+      "path": "tests/unit/test_program_publication_codec.py",
+      "sha256": "dc5a681bc7f07ff1098d1b168f3ec82ec0b8f6949284c6329a331ebcf2345b4c",
+      "single_terminal_newline": true
+    },
+    {
+      "path": "tests/unit/test_program_no_body_codec.py",
+      "sha256": "0372b7bc16a8873d9452a71940491de698c8433f235045c971fba65ebb9b6a28",
+      "single_terminal_newline": true
+    }
+  ]
+}

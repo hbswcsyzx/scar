@@ -1,0 +1,5 @@
+# Starred display
+
+Base86a414f8, separate source-starred-model. Original125-call entry has one tuple display `(Call(...), *Subscript(...))`. Exact archived CodeWitness shows BUILD_LIST1, LIST_EXTEND1, intrinsic list-to-tuple. Use existing call-expansion invoke/consumption helpers, with separate display protocols and automatic V10. No callable/argument-binding/kwargs qualification is attached to a container display.
+
+Initial list allocation steals prefix references only on success. Append/extend retain the container, consume the item/iterable on both completions, and keep partial mutation/iteration/user effects in post-world. Tuple conversion consumes the list; List forwards its original allocated reference. Source order, original SG output, pending holds and both normal/exceptional states are checked. Initial subset Tuple/List with <=30members; Set-star and other compiler staging remain explicit frontiers. One same real entry uses normal catalog, RO archives and public worker/source/code readers. No target/raw/compile/publication/currentRun binding.

@@ -9,6 +9,7 @@ existing ``nvidia-smi`` command when it is available.
 from __future__ import annotations
 
 import json
+import math
 import os
 import subprocess
 import threading
@@ -30,33 +31,81 @@ def _proc_cpu_seconds(pid: int) -> float | None:
         return None
 
 
-def _gpu_snapshot() -> list[dict[str, Any]]:
-    command = [
-        "nvidia-smi", "--query-gpu=index,utilization.gpu,memory.used,memory.total",
-        "--format=csv,noheader,nounits",
-    ]
-    try:
-        result = subprocess.run(command, capture_output=True, text=True,
-                                timeout=1.0, check=False)
-    except (OSError, subprocess.SubprocessError):
-        return []
-    if result.returncode != 0:
-        return []
-    values: list[dict[str, Any]] = []
-    for line in result.stdout.splitlines():
-        columns = [column.strip() for column in line.split(",")]
-        if len(columns) != 4:
-            continue
+class _GPUQuery:
+    """One owned provider process, with bounded nonblocking reads.
+
+    Only new provider rows enter a sample; an old GPU observation is never
+    silently relabeled with a fresh sampler timestamp. Missing providers do
+    not trigger repeated spawn attempts.
+    """
+
+    def __init__(self, interval_s):
+        self.process = None
+        self.launches = 0
+        self.status = "UNAVAILABLE"
+        self.pending = b""
+        command = ["nvidia-smi",
+                   "--query-gpu=timestamp,index,utilization.gpu,memory.used,memory.total",
+                   "--format=csv,noheader,nounits",
+                   "--loop-ms=" + str(max(1, round(interval_s * 1000)))]
         try:
-            values.append({
-                "index": int(columns[0]),
-                "utilization_gpu_percent": float(columns[1]),
-                "memory_used_mib": float(columns[2]),
-                "memory_total_mib": float(columns[3]),
-            })
-        except (TypeError, ValueError):
-            continue
-    return values
+            self.process = subprocess.Popen(command, stdin=subprocess.DEVNULL,
+                                            stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)
+            self.launches = 1
+            os.set_blocking(self.process.stdout.fileno(), False)
+            self.status = "RUNNING"
+        except (OSError, subprocess.SubprocessError):
+            self.close()
+
+    def sample(self):
+        if self.process is None or self.process.stdout is None:
+            return []
+        try:
+            chunk = os.read(self.process.stdout.fileno(), 65536)
+        except BlockingIOError:
+            return []
+        except OSError:
+            self.status = "READ_FAILED"
+            return []
+        if not chunk and self.process.poll() is not None:
+            self.status = "EXITED"
+        rows = (self.pending + chunk).split(b"\n")
+        self.pending = rows.pop()
+        if len(self.pending) > 4096:
+            self.pending = b""
+            self.status = "OVERLONG_PROVIDER_LINE"
+        values = {}
+        for raw in rows:
+            columns = [column.strip() for column in raw.decode("utf-8", errors="replace").split(",")]
+            if len(columns) != 5:
+                continue
+            try:
+                index = int(columns[1])
+                metrics = [float(v) for v in columns[2:]]
+                if not all(math.isfinite(v) for v in metrics):
+                    continue
+                values[index] = {"index": index, "provider_timestamp": columns[0],
+                                 "utilization_gpu_percent": metrics[0],
+                                 "memory_used_mib": metrics[1],
+                                 "memory_total_mib": metrics[2]}
+            except ValueError:
+                continue
+        return list(values.values())
+
+    def close(self):
+        if self.process is None:
+            return
+        if self.process.poll() is None:
+            self.process.terminate()
+            try:
+                self.process.wait(timeout=0.5)
+            except subprocess.TimeoutExpired:
+                self.process.kill()
+                self.process.wait(timeout=1)
+        if self.process.stdout is not None:
+            self.process.stdout.close()
+        if self.status == "RUNNING":
+            self.status = "STOPPED"
 
 
 class ResourceSampler:
@@ -64,7 +113,7 @@ class ResourceSampler:
 
     def __init__(self, out: str | Path, *, pid: int | None = None,
                  interval_s: float = 0.1):
-        if interval_s <= 0:
+        if not math.isfinite(interval_s) or interval_s <= 0:
             raise ValueError("resource sampling interval must be positive")
         self.out = Path(out)
         self.out.mkdir(parents=True, exist_ok=True)
@@ -77,6 +126,7 @@ class ResourceSampler:
         self._file = None
         self._started_ns: int | None = None
         self._sample_count = 0
+        self._gpu_query = None
 
     def start(self) -> None:
         if self._thread is not None:
@@ -88,10 +138,16 @@ class ResourceSampler:
         self._thread.start()
 
     def _run(self) -> None:
+        self._gpu_query = _GPUQuery(self.interval_s)
+        try:
+            self._sample_loop()
+        finally:
+            self._gpu_query.close()
+
+    def _sample_loop(self) -> None:
         previous_cpu = _proc_cpu_seconds(self.pid)
         previous_ns = time.perf_counter_ns()
-        while not self._stop.is_set():
-            self._stop.wait(self.interval_s)
+        while not self._stop.wait(self.interval_s):
             now_ns = time.perf_counter_ns()
             cpu = _proc_cpu_seconds(self.pid)
             elapsed_s = max((now_ns - previous_ns) / 1e9, 1e-9)
@@ -104,7 +160,7 @@ class ResourceSampler:
                 "pid": self.pid,
                 "cpu_process_seconds": cpu,
                 "cpu_utilization_percent": cpu_util,
-                "gpu": _gpu_snapshot(),
+                "gpu": self._gpu_query.sample(),
                 "evidence": "Observed",
             }
             if self._file is not None:
@@ -155,6 +211,10 @@ class ResourceSampler:
                 "average": sum(gpu_memory) / len(gpu_memory) if gpu_memory else None,
             },
             "gpu_count_observed": len({item.get("index") for item in gpu_values}),
+            "gpu_query": {"kind": "PERSISTENT_NVIDIA_SMI",
+                          "process_launches": self._gpu_query.launches if self._gpu_query else 0,
+                          "provider_status": self._gpu_query.status if self._gpu_query else "UNAVAILABLE",
+                          "stale_observations_reused": False},
             "evidence": "Observed",
         }
         self.summary_path.write_text(json.dumps(summary, indent=2) + "\n",

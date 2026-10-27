@@ -1,0 +1,37 @@
+.......F..F.............................                                 [100%]
+=================================== FAILURES ===================================
+___ test_mixed_return_paths_keep_both_original_exit_uses_and_conditionality ____
+
+    def test_mixed_return_paths_keep_both_original_exit_uses_and_conditionality():
+        graph, details = conditional_return_copy_consumer_program()
+        report = _query(graph, details["expected"])
+        frame = _frames(report)[(details["calls"][0],)]
+        expected_uses = {
+            OwnedUse(operation.id, operation.uses[0].id)
+            for operation in graph.operations if operation.id in details["terminals"]
+        }
+        rows = [row for row in frame["returns"] if row["actual"] in expected_uses]
+    
+        assert {row["actual"] for row in rows} == expected_uses
+        assert {row["slot"] for row in rows} == {0}
+>       assert any(row["must"] is True for row in rows)
+E       assert False
+E        +  where False = any(<generator object test_mixed_return_paths_keep_both_original_exit_uses_and_conditionality.<locals>.<genexpr> at 0x7c09c36b8450>)
+
+tests/unit/test_program_copy_consumers.py:187: AssertionError
+________ test_recursive_call_is_kept_as_an_unresolved_original_boundary ________
+
+    def test_recursive_call_is_kept_as_an_unresolved_original_boundary():
+        graph, details = recursive_copy_consumer_program()
+        report = _query(graph, details["expected"])
+        recursive_call = details["calls"][1]
+>       assert any(call["operation"] == recursive_call
+                   for frame in report["frames"] for call in frame["calls"])
+E       assert False
+E        +  where False = any(<generator object test_recursive_call_is_kept_as_an_unresolved_original_boundary.<locals>.<genexpr> at 0x7c09c36cc7c0>)
+
+tests/unit/test_program_copy_consumers.py:211: AssertionError
+=========================== short test summary info ============================
+FAILED tests/unit/test_program_copy_consumers.py::test_mixed_return_paths_keep_both_original_exit_uses_and_conditionality
+FAILED tests/unit/test_program_copy_consumers.py::test_recursive_call_is_kept_as_an_unresolved_original_boundary
+2 failed, 38 passed in 3.26s

@@ -1,0 +1,31 @@
+{
+  "status": "PASS",
+  "runs": [
+    {
+      "label": "before",
+      "exit_code": 0,
+      "elapsed_seconds": 0.9164391869562678,
+      "result": {
+        "sigint_sent": true,
+        "loop_completed": true,
+        "keyboard_interrupt_reached_program": false,
+        "only_owned_process_signalled": true,
+        "Torch_or_LeWM_imported": false,
+        "operand_errors": []
+      }
+    },
+    {
+      "label": "after",
+      "exit_code": -2,
+      "elapsed_seconds": 0.8665527330012992,
+      "result": {
+        "sigint_sent": true,
+        "loop_completed": false,
+        "keyboard_interrupt_reached_program": true,
+        "only_owned_process_signalled": true,
+        "Torch_or_LeWM_imported": false,
+        "operand_errors": []
+      }
+    }
+  ]
+}

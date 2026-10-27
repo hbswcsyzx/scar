@@ -9,6 +9,7 @@ from __future__ import annotations
 from collections import Counter, defaultdict
 from dataclasses import dataclass
 import hashlib
+import io
 import json
 import math
 from pathlib import Path
@@ -531,4 +532,36 @@ def normalize_trace(path: str | Path, *, namespace: str | None = None) -> Normal
     return normalizer.finish()
 
 
-__all__ = ["NormalizationResult", "normalize_records", "normalize_trace"]
+def normalize_bytes(payload: bytes, *, source: str = "memory", namespace: str = "memory",
+                    max_lines: int = 1_000_000, max_line_bytes: int = 4_194_304) -> NormalizationResult:
+    """Project exact UTF-8 JSONL bytes with bounded LF-only physical lines.
+
+    Invalid/blank rows remain in the original invalid ledger. The caller owns
+    the aggregate input-byte budget. This entry never opens a URI or imports a
+    target; unlike normalize_records it does not reserialize physical rows.
+    """
+    if type(payload) is not bytes:
+        raise TypeError("normalization payload must be exact bytes")
+    if any(type(value) is not str or not value for value in (source, namespace)):
+        raise ValueError("normalization source and namespace must be nonempty strings")
+    if any(type(value) is not int or value <= 0 for value in (max_lines, max_line_bytes)):
+        raise ValueError("normalization line budgets must be positive exact integers")
+    normalizer = _Normalizer(source, namespace)
+    stream = io.BytesIO(payload)
+    line = 0
+    while raw := stream.readline(max_line_bytes + 1):
+        line += 1
+        if line > max_lines or len(raw) > max_line_bytes:
+            raise ValueError("normalization physical-line budget exceeded")
+        try:
+            text = raw.decode("utf-8", errors="strict")
+            record = json.loads(text, object_pairs_hook=_unique_object,
+                                parse_constant=_no_constant, parse_float=_finite_float)
+        except (ValueError, UnicodeError, RecursionError) as error:
+            normalizer.raw(None, line, raw, f"invalid JSON: {error}")
+        else:
+            normalizer.raw(record, line, raw)
+    return normalizer.finish()
+
+
+__all__ = ["NormalizationResult", "normalize_records", "normalize_trace", "normalize_bytes"]

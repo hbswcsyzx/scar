@@ -1,0 +1,47 @@
+FFFF                                                                     [100%]
+=================================== FAILURES ===================================
+_ test_no_drive_inventory_keeps_original_entry_branches_and_every_own_completion_slot _
+
+    def test_no_drive_inventory_keeps_original_entry_branches_and_every_own_completion_slot():
+        graph, details = _graph()
+>       view = ProgramIndex(graph).request_no_drive_paths(budget=131072)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: 'ProgramIndex' object has no attribute 'request_no_drive_paths'
+
+tests/unit/test_program_async_request_path_inventory.py:25: AttributeError
+_ test_actual_rejection_prefix_reaches_both_helper_exits_without_inventing_a_body_drive _
+
+    def test_actual_rejection_prefix_reaches_both_helper_exits_without_inventing_a_body_drive():
+        graph, details = _graph()
+>       view = ProgramIndex(graph).request_no_drive_paths(budget=131072)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: 'ProgramIndex' object has no attribute 'request_no_drive_paths'
+
+tests/unit/test_program_async_request_path_inventory.py:54: AttributeError
+_ test_deleting_optional_protocol_annotations_cannot_delete_original_no_drive_inventory _
+
+    def test_deleting_optional_protocol_annotations_cannot_delete_original_no_drive_inventory():
+        graph, _ = _graph()
+        removed = replace(graph, protocol_scopes=(), protocol_operations=(), protocol_bindings=())
+        require_valid(removed)
+>       original = ProgramIndex(graph).request_no_drive_paths(budget=131072)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: 'ProgramIndex' object has no attribute 'request_no_drive_paths'
+
+tests/unit/test_program_async_request_path_inventory.py:84: AttributeError
+_ test_budget_one_retains_inventory_and_does_not_mistake_an_unvisited_drive_for_absence _
+
+    def test_budget_one_retains_inventory_and_does_not_mistake_an_unvisited_drive_for_absence():
+        graph, _ = _graph()
+        index = ProgramIndex(graph)
+>       full = index.request_no_drive_paths(budget=131072)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: 'ProgramIndex' object has no attribute 'request_no_drive_paths'
+
+tests/unit/test_program_async_request_path_inventory.py:100: AttributeError
+=========================== short test summary info ============================
+FAILED tests/unit/test_program_async_request_path_inventory.py::test_no_drive_inventory_keeps_original_entry_branches_and_every_own_completion_slot
+FAILED tests/unit/test_program_async_request_path_inventory.py::test_actual_rejection_prefix_reaches_both_helper_exits_without_inventing_a_body_drive
+FAILED tests/unit/test_program_async_request_path_inventory.py::test_deleting_optional_protocol_annotations_cannot_delete_original_no_drive_inventory
+FAILED tests/unit/test_program_async_request_path_inventory.py::test_budget_one_retains_inventory_and_does_not_mistake_an_unvisited_drive_for_absence
+4 failed in 1.29s

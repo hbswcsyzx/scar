@@ -1,22 +1,904 @@
 # Current evidence and remaining work
 
-## In development: B1 conditional cross-call reference provenance (2026-10-16)
+## P4 continuous async source/consumer/occurrence checkpoint (2026-10-19)
 
-Branch `codex/call-operands-b1`, implementation `c91876b`, passed the frozen
-**304-check component gate / 52.893s**. Source fingerprint:
-`33d92b1635ac614ab817388dbeb45cda5fe6f71a6af99b115193e473582d1933`.
-Original two-file commands automatically produce source/core records and public
-queries through exact actual/formal/normal-return occurrences back to the unique
-upper input, including shared and non-weakref inputs. Tampering, independent
-budgets and legacy frame/source behavior are covered. A reproduced branch-merge
-misjoin now stops at an explicit control-selection boundary.
+[Plan](M1_ASYNC_PIPELINE_PLAN.md) and [acceptance](M1_ASYNC_PIPELINE_PROGRESS.md)
+connect producer-first session obligations to selected static paths and actual
+Drive/update/host occurrences. One R/B spans three calls, one persistent body
+activation has three segments, and item completion remains its real RAISE
+adapter. Shared incoming tuples, exact scopes, missing capture and NORMAL-only
+post-state support retain distinct receipts. Fresh identity and necessary
+original copy ancestors are checked together; no second SSA/phase graph.
 
-This branch is **not merged or accepted as the complete B1 gate**. The new full
-regression, persistent independent PyTorch/GPU evidence and a new bounded run of
-the unchanged LeWM command remain required. Routes are conditional reference
-provenance, not contents, environments, effects, complete program graphs or
-transformation authority. No new LeWM speedup is measured. See
-[automation scope and next gates](AUTOMATION_STATUS_20261016.md).
+Final **1308 affected focused** pass at728 stable sources: previous1032 unchanged
+case identities/obligations,22 new and254 related old P3/CALL/codec tests; zero
+failures/errors/skips. All failed fixture/API and genuine old-product red
+attempts remain archived. Program1–22/Execution8, old fixtures and tests remain
+unchanged. All16 P4 groups, P5/M2 and wholeM0–M2 remain OPEN. Next complete
+remaining wrapper/source/family and occurrence combinations under the original
+denominator before component/frozen-full. No automatic whole-LeWM model,
+transformation or new speedup is claimed; the protected original repos stay clean.
+
+## P4 complete declared packet-continuation checkpoint (2026-10-19)
+
+[Plan](M1_PACKET_CONTINUATION_PLAN.md) and [acceptance](M1_PACKET_CONTINUATION_PROGRESS.md)
+connect the original C1 action to actual dispatch/projection and host/parent
+consumers. Old first-frontier receipts remain separate. Each fallback leg keeps
+all compatible receiver cases and their own guards; current pending provenance
+is correlated before payload checks. Known return-copy summaries cannot hide
+opaque callee internals: a separate reachable-scope inventory retains boundaries.
+
+Final **1032 affected focused** pass at721 stable sources: previous1018 case IDs
+and obligations retained,14 new; zero failures/errors/skips. Two invalid-fixture
+attempts, one actual missing-continuation red and the97P/2F first integration
+remain archived. Real two-cut C1/terminal, exact known helper and internal opaque
+examples pass within supplied-IR scope. Nested budget truncation remains partial;
+its exact inner cursor is still unavailable. Program1–22/Execution8 and original
+fixtures stay unchanged. All16 P4 groups, P5/M2 and completeM0–M2 remain OPEN.
+Next integrate these proofs into original family/P3 occurrence combinations.
+No component/full, automatic whole-LeWM model or new speedup is claimed here.
+
+## P4 pending-payload source checkpoint (2026-10-19)
+
+[Plan](M1_PENDING_PAYLOAD_PLAN.md) and [acceptance](M1_PENDING_PAYLOAD_PROGRESS.md)
+interpret the existing owned PendingPayload projection in the shared source
+flow and origin traversal. Independent carrier/port possibility and source-
+relative support preserve all same-port alternatives, filter other ports, and
+reject vacuous success. Original token/state/context and payload remain distinct.
+Source reevaluation, constructor reevaluation, guards, known helper returns and
+private saved roles retain separate meanings without a new producer or wire.
+
+Final **1018 affected focused** pass with718 stable sources: original965 IDs/
+obligations unchanged,26 new tests and27 additional existing forwarding/cleanup
+tests; zero failures/errors/skips. Genuine missing-connection and new-fixture
+failures remain archived. Connected C1 examples verify old Return payload across
+two real cuts and new helper RAISE payload retained only by pending over the
+second cut, through actual dispatch to host. This is static supplied-IR evidence;
+full dynamic occurrence/native/source applicability and transformation stay
+unproved. All16 P4 groups, P5/M2 and fullM0–M2 remain OPEN. Next bridge these
+shared proofs into complete family/continuation inventories and P3 occurrences.
+No component/full, new backend, automatic whole-LeWM model or speedup here.
+
+## P4 independent lookup-fallback packet checkpoint (2026-10-18)
+
+[Plan](M1_LOOKUP_FALLBACK_PLAN.md) and [acceptance](M1_LOOKUP_FALLBACK_PROGRESS.md)
+connect E0 injection, own lookup RAISE EL and own matcher RAISE EM to three
+derived original routes. Per-case complete tuples, active C1 pending frontiers,
+reevaluation/cycle/opaque boundaries and budget truncation retain their distinct
+roles. A real wrong-RAW-role omission is reproduced and fixed; the local OR
+positive passed before the change, so it is not labeled a reproduced bug.
+
+Final **965 affected focused** pass at one stable **713-source** fingerprint:
+old880 obligations (878 unchanged IDs plus two future-version22→23 migrations),
+new85; zero failures/errors/skips. All prior failed attempts remain archived.
+Program22 is a new binding capability, not a new table; an independent old21
+encoder oracle and legacy2–21 bytes pass, Execution8 remains unchanged.
+All16 P4 groups, P5/M2 and fullM0–M2 remain OPEN. Next: normalization/source,
+full C1 projection/context/override and remaining caller/family combinations.
+No new component/full, backend, automatic whole-LeWM model, transformation or
+speedup is claimed. Original LeWM and the protected main checkout remain clean.
+
+## P4 generic exception matcher checkpoint (2026-10-18)
+
+[Plan](M1_EXCEPTION_MATCH_PLAN.md) and [acceptance](M1_EXCEPTION_MATCH_PROGRESS.md)
+add original-operation matcher attachments with independent exception/handler
+inputs, exact own NORMAL/RAISE ports, bool branch and produced/forwarded state
+edges. Ordinary, dynamic, only-RAISE and known-callee INVOKE paths are represented
+without fake operands or protocol scopes. Lookup-RAISE consumers now connect to
+their real matcher; category/native applicability and fallback remain unproved.
+
+Final **880 affected focused cases** pass (old811 obligations:810 unchanged IDs
+and one documented future-schema21→22 migration; new69), zero failures/errors/
+skips, one stable **707-source** fingerprint. Real missing-connection, expanded
+INVOKE, forwarded-state and applicability failures remain archived. Program21
+is isolated by a nonempty capability; an independent old20 encoder oracle and
+legacy2–20 bytes pass. Execution8 remains unchanged. All16 P4 groups, P5/M2 and
+fullM0–M2 stay OPEN. Next: independent injected/lookup/matcher packets and true/
+false/failure fallback routes, then remaining families. No new component/full,
+backend, automatic whole-LeWM model, transformation or speedup here.
+
+## P4 return-then-downward composition checkpoint (2026-10-18)
+
+[Plan](M1_CALL_COMPOSITION_PLAN.md) and [acceptance record](M1_CALL_COMPOSITION_PROGRESS.md)
+connect exact known-call return copies to later helper entry formals and actual
+internal consumer Uses. Per-call multi-argument seeds, state versions, local
+guards and fresh resets remain distinct. A reproduced false positive from an
+uninventoried original branch is repaired with explicit incomplete-origin
+coverage; known routes remain evidence without authorizing the whole query.
+
+Final **811 affected focused cases** pass (previous788 + new23), zero failures,
+errors or skips, at one stable **702-source** fingerprint. The first809P/2F
+budget regression and prior failures remain archived. Rejecting unresolved
+occurrence prerequisites before unnecessary path scanning restores the original
+4096-budget tests without changing limits/assertions. All16 P4 groups, P5/M2
+and fullM0–M2 remain OPEN. Next: remaining exception matcher/packet/handler and
+family connections. No component/full, new backend, automatic whole-LeWM model,
+transformation or speedup is claimed for this checkpoint.
+
+## P4 known-callee return connection checkpoint (2026-10-18)
+
+[Plan](M1_CALL_RETURN_PLAN.md) and [acceptance record](M1_CALL_RETURN_PROGRESS.md)
+connect original callee Return/Raise Uses to exact caller output slots. The
+new prepared-index source_binding query supports nested/serial known-call
+copies, separately versioned state, unique caller export and simultaneous
+same-call result copies. Guards, terminal evidence and unknown reasons remain
+explicit; none of this grants runtime identity or transformation authority.
+
+Final **788 affected focused cases** pass (previous746 + new42), zero failures/
+errors/skips, one stable **696-source** fingerprint. The first unified786P/2F
+budget regression and intermediate failures remain archived. Reusing completed
+projections/exact caller bundles and charging new dependency jobs fixes the old
+4096-budget tests without changing their limits/assertions. All16 complete P4
+groups, P5/M2 and fullM0–M2 remain OPEN. Next verify return-then-downward helper
+composition, then the remaining packet/matcher and family connections. No new
+backend, full regression, automatic LeWM transformation or speedup here.
+
+## P4 bounded followup checkpoint (2026-10-18)
+
+[Plan](M1_PROTOCOL_FOLLOWUP_PLAN.md) and [implementation/acceptance record](M1_PROTOCOL_FOLLOWUP_PROGRESS.md)
+connect independently declared method lookup results to actual callable Uses,
+preserve request predicate/gate inventories and distinguish historical L/S
+selection from current admission. A real atomic-phi false InitialAdvance proof
+was reproduced and repaired. Program20 isolates four new closed lookup rules;
+an independent Program19 oracle retains the historical wire. Final **746
+affected focused cases** pass at one stable **689-source** fingerprint, with
+no failures/errors/skips. Three read-only reviews close this bounded scope.
+All16 complete P4 groups, P5/M2 and fullM0–M2 remain OPEN. This is supplied-IR
+connection checking, not automatic whole-LeWM modeling or a verified speedup.
+No complete regression ran on this source; historical full results below stay
+attributed to their original revisions. Next: remaining family/combination
+connections under the unchanged denominator, then the original gate sequence.
+
+## P4-2 scoped implementation checkpoint (2026-10-18)
+
+[Implementation notes](M1_PROTOCOL_CONNECTION_IMPLEMENTATION.md) connect new
+Program19 records to original ports, guarded input tuples, independent consumer
+inventories and prepared-index queries. Async/session/cancel and continuation
+resolvers pass **694 affected focused cases** at one stable **684-source**
+fingerprint. Independent review exposed and fixed alias export, ambiguous merge
+visits and unresolved context false positives; original failures remain.
+Conditional consumers
+must survive must-copy failure; missing attachments keep their denominators.
+The original16-group P4 gate remains OPEN. This is not whole-program automatic
+recovery, a new backend, completeM0–M2, or a verified LeWM speedup. No complete
+regression on this implementation has run; the historical full below stays
+attributed to its original frozen revision.
+
+## P4 connection design frozen; shared source query implemented (2026-10-18)
+
+[Contract v1](M1_PROTOCOL_CONNECTION_CONTRACT.md) passes three independent
+design reviews. It defines expected input tuples/merge guards, original resume
+slots, an independent consumer ledger, request/session and exact cancel-target
+links; it adds no second producer/use/state graph. Initial proposals and rejected
+shapes are preserved. Program19 records and the full16-group P4 implementation
+remain pending; design acceptance does not close P4.
+
+The [helper query checkpoint](M1_PROTOCOL_HELPER_INPUTS.md) first reproduced one
+missing positive, then implemented exact static caller-prefix extension without
+fake RAW helper parameters.22 focused and final112 affected source/admission/
+budget cases pass; all670 source hashes stay fixed. This remains an intermediate
+P4 check, with no complete P4 component/full run. The last full regression below
+belongs to `8138986`, not this new query implementation. No automatic LeWM
+transformation, heavy profile or new speedup is claimed. FullM0–M2 remains OPEN.
+
+## P3 declared persistent-body occurrences accepted (2026-10-18)
+
+[Acceptance](M1_BODY_OCCURRENCE_ACCEPTANCE.md) closes O01–O16: persistent
+activation/Drive/segment/first outcome, original ports, Create/owner/copy
+compatibility and conditional CALL/body host order. **255 focused /606 component
+cases /18 criteria** pass. Clean frozen `8138986` passes **5,822 full tests**,
+zero failures/errors/skips, five warnings,563.710s and1,029,520 KiB RSS.
+All668 source hashes match; previous5,676 and failed-full5,822 case identities,
+92 old/99 current fixtures and protected checkouts are conserved. The first
+failed full and its test-only capability repair remain separate evidence.
+Execution8 is conditional; legacy wire families retain exact bytes. This is
+declared occurrence validation, not automatic runtime recovery or optimization.
+Next is [P4's detailed plan](M1_REMAINING_PROTOCOL_PLAN.md), then P5 and original
+M2 obligations. D3, completeM0–M2, automatic LeWM modeling and speedup remain OPEN.
+
+## Repair history: P3 first frozen full failed (2026-10-18)
+
+The clean `61db593` full finished **5,816 passed /6 failed /0 errors or skips**,
+562.467s and1,030,792 KiB RSS; all668 source hashes stayed fixed. The six
+failures are old future-v8/maximum-v7 assertions in three codec test files
+omitted from the component selection. [Repair gates](M1_BODY_OCCURRENCE_REPAIR.md)
+preserve that failed full, require exact legacy wire/fixture checks and include
+all89 affected cases before a separate clean repair full. P3 is not accepted;
+the prior scoped component PASS does not override this failure.
+
+The narrow repair changes only three codec test files and the gate selection;
+product code is unchanged.89 affected,255 final focused and606 component cases
+across18 criteria now pass at one668-source fingerprint. Independent read-only
+review confirms exact old v5/v7 wire bytes and separate v8/future9 checks.
+The separate repair full subsequently passed as reported above. [P4 planning](M1_REMAINING_PROTOCOL_PLAN.md)
+records three read-only reviews and the original16 obligation groups; it is not
+P4 implementation or acceptance.
+
+## Earlier P3 persistent-body component checkpoint (2026-10-18)
+
+[Plan](M1_BODY_OCCURRENCE_PLAN.md), [API](M1_BODY_OCCURRENCE_API.md) and
+[progress/failures](M1_BODY_OCCURRENCE_PROGRESS.md) connect original Drive ports,
+Create/owner/captures, persistent activation/segment/first outcome, fresh scoped
+copy compatibility and conditional CALL/body host order. Final166 focused and
+517 component cases across18 criteria pass at one668-source fingerprint.
+Clean frozen-full acceptance and archive remain pending; P3 is not yet accepted.
+Independent reviews closed endpoint/inventory, intermediate-copy and
+unassociated-Create-source gaps; all original failures remain. No automatic runtime adapter, new backend,
+LeWM transformation or speedup is claimed. P4/P5, D3 and fullM0–M2 remain OPEN.
+
+## P2 synchronous generator declared matrix accepted (2026-10-18)
+
+[Acceptance](M1_GENERATOR_MATRIX_ACCEPTANCE.md): all16 phase/request cells now
+connect original caller inputs, state predicates, branches, drive/no-entry,
+current outcomes and host consumers. Program18 selects explicit new capabilities;
+legacy wires remain. **275 focused /660 component cases /37 criteria** pass.
+One clean frozen `bd673cd` passes **5,676 full tests /548.571s /1,028,776 KiB**,
+zero failures/errors/skips, five warnings. All647 registered source hashes match;
+prior5,401 and initial failed-full5,673 identities and all92 fixtures survive.
+Protected checkouts remain unchanged. The initial failed full and repair evidence
+below are retained. P3–P5, D3, complete M0–M2, automatic LeWM recovery and verified
+speedup remain OPEN. Next is persistent-body occurrence/instance correspondence
+and conditional host order under the frozen P3 contract, without new backends.
+
+## Repair history: P2 frozen full failed (2026-10-18)
+
+The actual frozen `44d56af` run finished **5,672 passed /1 failed /0 errors or
+skips**, five warnings,545.049s. All646 registered source hashes stayed fixed.
+The sole Created-close positive exhausted its default query budget. A fresh
+eight-seed investigation reproduced hash-order-dependent worklist costs without
+old-test pollution: seed5 truncated at4,096; sufficient-budget costs ranged
+1,712–4,676. None remains an unproved result, never a successful proof.
+[Repair gates](M1_GENERATOR_MATRIX_REPAIR.md) preserve this failed full and
+require deterministic original-CFG scheduling, focused/component checks, then
+a separate clean frozen full. P2 acceptance remained open at that checkpoint;
+the earlier scoped component results did not override this failure.
+
+The minimal RPO repair now passes275 focused cases and660 component cases across
+37 criteria at one647-source fingerprint. New regressions first reproduced the
+failure, then verified eight fresh hash processes, declaration-table reordering
+and real budget truncation. Source review found no blocker. The separate
+`repair/full` subsequently passed as reported above. Its result does not change
+the status or source attribution of the initial failed full.
+
+## P2 declared matrix and component checkpoint (2026-10-18)
+
+[Plan](M1_GENERATOR_MATRIX_PLAN.md), [amendment](M1_ADMISSION_PREDICATE_CONTRACT.md)
+and [progress/failures](M1_GENERATOR_MATRIX_PROGRESS.md) now connect original
+state reads, this bool/branch, static caller inputs, final gate snapshots and
+current close/exception host payloads. All16 phase/request cells and their
+consumer counterexamples are covered in the supplied model, including actual
+static body reentry and initial/internal/escaping exception routes. Caller-context
+joint inputs share prepared indexes, flow and budget. Single-completion INVOKE
+uses explicit Program18 capability; legacy wires retain their family. Independent
+review passes within scope. **272 focused /657 component cases /36 criteria**
+pass at one646-source fingerprint. The subsequent full failed as recorded above;
+the prior5,401 result below belongs to its older implementation. Source/native category,
+holder coherence and runtime identity remain unproved. P3–P5, D3 and full
+M0–M2 remain OPEN; no automatic LeWM recovery, transformation or new speedup.
+
+## P2 protocol foundation accepted; complete P2 remains open (2026-10-18)
+
+[Scope and next steps](M1_PROTOCOL_FOUNDATION.md): exact protocol records attach
+to the original CFG/Use/result/state ports. Current-evaluation copies, raw
+ordinals, explicit packet components, adapter host outputs and selected no-entry
+edges are checked separately from type equality. Fixed profile/clause and known
+N/R denominators survive missing rows and bounded-query truncation. Program17
+keeps legacy family selection; Execution remains7. Independent review added
+missing-domain, cyclic-route and unrelated-host-output counterexamples.
+[Acceptance](M1_PROTOCOL_FOUNDATION_ACCEPTANCE.md): **155 focused /334 component
+cases /11 criteria**; one clean frozen `8a62a98` passes **5,401 full tests,
+551.192s,1,026,944 KiB**, zero failures/errors/skips and five warnings.
+All prior5,294 identities/78 fixtures survive;617 source hashes/82 current
+fixtures match. Protected checkouts remain clean and unchanged.
+Complete P2's16-cell matrix, P3–P5, D3 and full M0–M2 remain OPEN.
+No automatic LeWM recovery, new backend, transformation or speedup is claimed.
+
+## P1 protocol/occurrence contract frozen; implementation open (2026-10-18)
+
+[Joint contract](M1_PROTOCOL_CONTRACT.md) passes independent PASS_WITH_SCOPE for
+the exact design: two static subject forms, five fixed operation contracts,
+11 profiles and original consumer/host routes; two natural-key O tables pair
+each Drive with a persistent activation and this ingress/outcome. Exact source,
+N/R state, no-entry edge-only lifecycle, per-binding identity and conditional
+host order are explicit. Initial proposals and corrections remain archived.
+One existing-IR blueprint connects Start/Resume original ports; it leaves six
+Start capture recipes and native/source identity unproved. This is not an O
+validator or runtime capture test. Product603 files/78 fixtures are unchanged;
+no new pytest/full/native witness or LeWM benchmark. The prior5,294 full result
+below remains attributed to4bc55eb. Next is P2 implementation, then P3–P5 and
+the original M2 denominator. Complete M0–M2, automatic LeWM modeling and a
+verified speedup remain unfinished. Historical checkpoint scopes follow.
+
+## Earlier C2/D3 audit; exact fields were open at that checkpoint (2026-10-18)
+
+[Audit](M1_PROTOCOL_FAMILY_AUDIT.md) and [plan](M1_PROTOCOL_FAMILY_PLAN.md)
+preserve F01–F24/X25–X28. Three source reviews identify two connected gaps:
+protocol obligations on original CFG/Uses/results/current state, and actual
+Drive→persistent body activation→this ingress/first outcome. Existing C2B/D1/D2
+records remain canonical. No-body/delegate-only paths must not invent Drive.
+Five declared-IR observations show the old generic scope. Six bounded CPython
+startup-throw observations refute uniform CREATED-after-normalization-error and
+startup StopIteration wrapping assumptions; the original script exit1 and data
+remain. A read-only data check is not a passing native test rerun. Product603
+source hashes/78 fixtures are unchanged; the5,294 full result below belongs to
+the prior frozen implementation, not a new run. P0 audit is complete; P1 field
+freeze, F/O implementation, D3, full M0–M2 and automatic LeWM modeling remain
+open. No new detector/backend/profile or speedup. Historical checkpoints follow.
+
+## L exact content, source and original evaluation ports accepted (2026-10-18)
+
+[Interfaces](M1_LITERAL_INTERFACES.md), [acceptance](M1_LITERAL_ACCEPTANCE.md):
+**1,716 component cases /32 criteria /49.349s**; one clean frozen `4bc55eb` passes
+**5,294 full tests /544.368s /1,027,208 KiB**, zero failures/errors/skips,
+five warnings. All prior 5,144 identities/74 fixtures survive; current 603 source
+hashes/78 fixtures match. Exact abstract Data and original Data/Reference result
+attachments separate typed contents, scoped definitions and actual evaluations.
+Loop/call/resume, two-state NORMAL/RAISE/forward and existing execution wire
+connections pass; shared budgets and legacy family boundaries remain explicit.
+Independent review is PASS_WITH_SCOPE. Original failures, source findings and
+the legacy raw-surrogate JSON defect remain recorded. Source/code-slot replay,
+runtime identity and opaque construction interiors remain unproved. Next:
+remaining C2/D3 family obligations and M2 construct decomposition. Complete
+M0–M2 and automatic LeWM recovery/simplification remain unfinished; no new
+speedup was measured. Historical checkpoint scopes follow.
+
+## S typed state-address interfaces accepted (2026-10-18)
+
+[Interfaces](M1_STATE_ADDRESS_INTERFACES.md), [acceptance](M1_STATE_ADDRESS_ACCEPTANCE.md):
+**1,317 component cases /25 criteria /44.578s**; one clean frozen `805c670` passes
+**5,144 full tests /516.754s /1,026,572 KiB**, zero failures/errors/skips,
+five warnings. All prior 5,055 identities and 72 fixtures survive; current 590
+source hashes and 74 fixtures match. Typed owner/selector/mode/stage effects
+retain original state carriers, actual operand occurrences and N/R/forward
+ports. Six selector, branch owner/key and original ContentRead guard combinations
+close the finite declaration gate; native/address/alias identity remains unproved.
+Original failures, withdrawn assumptions and independent scope review survive.
+Next: precise literal payload/budgets/core wire, remaining C2/D3 and M2.
+Complete M0–M2, automatic LeWM recovery and simplification remain unfinished;
+no new speedup was measured. Historical checkpoint scopes follow.
+
+## R3.3 generic buffered pipeline and bounded OS observations accepted (2026-10-18)
+
+[API](M1_PIPELINE_CLOSURE_API.md), [acceptance](M1_PIPELINE_CLOSURE_ACCEPTANCE.md):
+**722 component cases /17 criteria /33.458s**; one clean frozen `6947778` passes
+**5,055 full tests /501.339s /1,028,008 KiB**, zero failures/errors/skips,
+five warnings. All prior 5,011 identities and 69 fixtures survive; current 578
+source hashes and 72 fixtures match. Exact synchronous call bridges, independent
+READ8/request8/actual4 byte profiles, buffer→flush→file contents, empty-buffer and
+actual RAISE/pending/cleanup paths compose in one seven-region model. Three real
+bounded OS cases retain separate attribution. Final normal query uses115,996/
+131,072; default4096 remains, host-order search cost remains a known limit.
+Original failed attempts and independent review closures are retained. Declared
+MATCHED is not native/runtime identity, persistence or transformation permission.
+R3.3's limited plan is closed; selector/literal/C2/D3/M2, complete M0–M2 and
+automatic LeWM recovery/simplification remain open. No new speedup was measured.
+
+## R3.2 supplied-model Q and execution composition accepted (2026-10-18)
+
+[API](M1_PIPELINE_COMPOSITION_API.md), [acceptance](M1_PIPELINE_COMPOSITION_ACCEPTANCE.md):
+**677 component cases / 13 criteria / 20.8s**; all **567** source hashes unchanged.
+One clean frozen `31bf2e4` passes **5,011 full tests / 486.670s / 1,028,760 KiB**,
+zero failures/errors/skips, four warnings. All prior **4,951** case identities
+and **68** fixtures survive; current **69** fixtures match. Protected checkouts
+remain unchanged/clean; only owned basetemp removed after child exit.
+Query-only exact contract/owner scopes preserve missing requirement/root/read
+obligations, with facet target/cardinality gaps retained. Full supplied-model
+inventory and original Use/state/CFG/call/source/work/lifetime associations
+share one fresh external context and one derived budget; independent source
+edges do not require ContentRead. An absent scope stays unresolved, not empty success.
+These are declared model associations, not automatic capture or transformation
+authority. R3.3 generic load→consume→write→flush/close, endpoint/native protocols,
+selector/literal/C2/D3 and complete M0–M2 remain open. No new LeWM recovery,
+optimization or speedup was measured. Earlier checkpoint scopes follow.
+
+## R3.1 call activation and work-set connections accepted (2026-10-18)
+
+[API](M1_CALL_ACTIVATION_API.md) and [acceptance](M1_CALL_ACTIVATION_ACCEPTANCE.md):
+**591 component cases / 8 criteria / 16.611s**, all **555** source hashes unchanged.
+One clean frozen `881cbfb` passes **4,951 full tests / 490.693s / 1,025,300 KiB**,
+zero failures/errors/skips, four warnings. All prior **4,826** case identities
+and **65** fixtures survive; current **68** fixtures match. Owned basetemp removed,
+protected checkouts unchanged. Exact caller/activation/entry/completion links
+derive original argument/result/state routes; missing capture stays explicit.
+Known thread conflicts, multiple terminal occurrences and duplicate/cyclic
+dynamic links are rejected. Complete work Mat sets agree with declared reads,
+writes and Mat borrow targets. Execution v7 preserves v1–v6 bytes and tags.
+These are declared connections, not runtime/value identity or transformation
+proof. [Next R3.2/R3.3](M1_RESOURCE_COMPOSITION_PLAN.md) connects complete Q
+requirements to load/consume/save/lifetime; endpoint protocols, native capture,
+full M0–M2 and automatic LeWM modeling/simplification remain unfinished.
+No new workload speedup was measured. Earlier checkpoint scopes follow.
+
+## R2.3-V content validity/support interfaces and frozen full accepted (2026-10-18)
+
+The [V API](M1_VALIDITY_API.md) derives labeled source contributions, exact
+Completed/Ordered alternatives, actual versus future coverage and whole-read
+threat/lifetime conditions. Unknown rules cannot waive original Mat placement;
+deleting an observed-result association cannot enable future whole coverage.
+Only necessary blocked portions cause conflict; unused historical leaves do
+not poison unrelated missing portions. [Acceptance](M1_VALIDITY_ACCEPTANCE.md):
+**649 component cases / 11 criteria / 18.653s**, all **544** hashes unchanged.
+One clean frozen `550496f` passes **4,826 full tests / 494.394s / 1,026,012 KiB**,
+zero failures/errors/skips, four warnings. All previous **4,713** case identities
+and **59** fixtures survive; current **65** fixtures match. Owned basetemp removed,
+protected checkouts unchanged. Execution v6 preserves v1–v5 bytes with an
+independent pre-V golden. Endpoint protocol parsing and whole-work source
+boundary mapping remain unresolved; no native/ready/free/transform authority.
+Next is R3 composition and the remaining complete M0–M2 denominator. Automatic
+LeWM recovery/simplification and a new measured speedup remain unfinished.
+The following sections preserve earlier checkpoint scopes.
+
+## R2.3-P source/write/production interfaces and frozen full accepted (2026-10-18)
+
+The [P API](M1_PRODUCTION_API.md) connects independent supplied-source manifests,
+exact raw normalization replay, scoped endpoints, original work/host/external
+writes and partial Outcome selectors. Source candidates survive deleted joins;
+lineage, current production associations and possible invalidators remain distinct.
+[Acceptance](M1_PRODUCTION_ACCEPTANCE.md): **477 component cases / 8 criteria /
+11.647s**, all **521** source hashes unchanged. One clean frozen `c84fbfe` passes
+**4,713 full tests / 477.899s / 1,028,872 KiB**, zero failures/errors/skips and
+four warnings. All prior **4,568** case identities and **54** fixtures survive;
+current **59** fixtures match, owned basetemp removed, protected checkouts unchanged.
+Execution v5 retains v1–v4 bytes with an independently archived v4 golden.
+These are declared interfaces, not native complete writer capture, automatic
+whole-program recovery, readiness or transformation authority. V/R3 and full
+M0–M2 remain open; no new LeWM profiling, optimization or speedup is claimed.
+
+## R2.3-D content/consumer component and frozen full accepted (2026-10-18)
+
+The [D interfaces](M1_CONTENT_CONNECTION_API.md) connect original values/ports,
+scoped denotations and placements, exact work/source pairs, conservative reads
+and explicit contract observation roots. Open partial source pairs do not imply
+exclusion or permit same-host substitution. Execution v4 retains v1–v3 bytes.
+The component passes **445 cases / 7 criteria / 9.995s** with all **506** source
+hashes unchanged. One clean frozen `f71740e` passes **4,568 full tests /
+477.660s / 1,025,092 KiB**, zero failures/errors/skips and three warnings.
+All prior 4,427 identities and 50 fixtures survive; all current 54 fixtures match,
+owned basetemp is removed, protected checkouts remain clean. Original failures,
+review corrections and hash migrations are archived; see
+[acceptance](M1_CONTENT_CONNECTION_ACCEPTANCE.md). These are declared model
+interfaces, not native/runtime recovery or ready/transform authority. P/V, R3,
+complete M0–M2 and automatic LeWM modeling/simplification remain open. No new
+LeWM speedup has been measured.
+
+## R2.3 contract and geometry component/full accepted (2026-10-18)
+
+The [R2.3 relation contract](M1_RESOURCE_READY_CONTRACT.md) keeps source-derived
+contributions separate from lineage/invalidators, exact consumers and actual
+read intervals. The [shared geometry prerequisite](M1_RESOURCE_COVERAGE_ACCEPTANCE.md)
+passes **432 cases / 6 criteria / 9.768s**, with all **493** registered hashes
+unchanged. It connects original MatRefs to scoped, budgeted byte coverage;
+snapshot validation and strict decoding reuse existing ValueGraph machinery.
+Three real bounded CPU/OS witnesses pass; no GPU profiling or source recovery
+is claimed. Clean frozen `aa2b917` passes **4,427 full tests / 473.159s /
+1,026,340 KiB**, zero failures/errors/skips and three warnings. All 493 source
+and 50 fixture hashes match; all prior 4,387 case identities and 50 fixtures
+survive, owned basetemp removed and protected checkouts unchanged. D/P/V, R3 and complete
+M0–M2 remain open; COVERED grants no content/ready/free/transform authority
+and no LeWM speedup is measured.
+
+## R2.2 event/order component and frozen full accepted (2026-10-18)
+
+The [order interfaces](M1_RESOURCE_ORDER_INTERFACES.md) preserve exact record
+generations, original event-state ports, finite queue profiles and conditional
+producer-end→consumer-start paths. The component passes **497 cases / 7 criteria /
+9.382s**, all **489** registered hashes unchanged. Historical v1/v2 bytes remain
+exact under capability-aware execution v3. Independent review closed external
+queue/run/process scope gaps; original fixture failure and corrected checks are
+retained. Clean frozen `e8121f0` passes **4,387 full tests / 476.489s /
+1,027,808 KiB**, zero failures/errors/skips and three warnings. All 489 source
+and 50 fixture hashes match; all prior 4,297 case identities and 47 fixtures
+survive. The owned basetemp was removed and protected checkouts remain clean.
+See [acceptance](M1_RESOURCE_ORDER_ACCEPTANCE.md). This does not establish native/runtime truth, ready/free or
+transformation authority. R2.3 consumer/production/denotation, R3 and complete
+M0–M2 remain open; no new LeWM speedup has been measured.
+
+## R2.1 work foundation component and frozen full accepted (2026-10-18)
+
+The [work interface](M1_RESOURCE_WORK_INTERFACES.md) connects submissions to
+original access/actual INVOKE completion ports, separate terminal observations,
+quiescence and retained original resources. Persistent queue-prefix coordinates
+and detached indexed queries preserve scope; they do not establish device order.
+The final component passes **407 cases / 9 criteria / 6.282s** with all **480**
+registered source hashes unchanged. Independent immutable v1 wire is byte-exact;
+new work capability uses execution v2. Raw failures and bounded review closure
+are archived. Clean frozen `bb1b402` passes **4,297 full tests / 461.721s /
+1,029,332 KiB**, zero failures/errors/skips and three warnings. All 480 source
+and 47 fixture hashes match; all prior 4,192 case identities and 44 fixtures
+survive. The owned basetemp was removed and protected checkouts remain clean.
+See [acceptance and evidence](M1_RESOURCE_WORK_ACCEPTANCE.md).
+[R2.2 event/order and R2.3 consumer/coverage/ready](M1_RESOURCE_WORK_PLAN.md),
+R3 composition, complete M0–M2 and automatic LeWM modeling/simplification remain
+open. No runtime/native verification, free, transformation or speedup is granted.
+
+## R1 identity component and frozen full accepted (2026-10-18)
+
+The [R1 implementation](M1_RESOURCE_IDENTITY_IMPLEMENTATION.md) binds canonical
+program bytes, run/process/thread incarnations, activation/segment/block visits,
+operation/value/Use occurrences, resource realizations, requirement owners and
+handle lifetimes. Actual host CFG derives current definitions and state; omitted
+observations cannot authorize an explicitly old loop value or state. Distinct
+native handle and referent realms do not require identical namespace types.
+Component **302 cases / 14 criteria / 4.575s** passes with all **472** registered
+source hashes unchanged, including 142 new execution cases. Original failures
+and bounded independent reviews remain archived. Clean frozen `6fcac0f` passes
+**4,192 full tests / 459.327s / 1,027,068 KiB**, zero failures/errors/skips and
+three warnings. All prior 4,050 identities, 451 source and 42 fixtures survive;
+all 472 source and 44 fixture hashes match before/after. The owned basetemp was
+removed and protected checkouts remain unchanged. See the
+[acceptance and archive](M1_RESOURCE_IDENTITY_ACCEPTANCE.md). R2/R3, denotation/provenance,
+selector/literal, remaining family/catalog and complete M0–M2 remain open.
+These are declared-IR checks, not automatic source/runtime recovery or a LeWM
+optimization/speedup result. Earlier sections preserve their checkpoint scopes.
+
+## R0 resource execution relation contract reviewed (2026-10-18)
+
+The [resource design gate](M1_RESOURCE_EXECUTION_DESIGN_ACCEPTANCE.md) converges
+core occurrences versus evidence instances, resource/handle lifetimes, canonical
+ordinary/INVOKE effect links, work outcomes and per-consumer completion/order
+supports. Three independent final reviews bind the contract. Six asserted real
+stdlib CPU/OS witnesses pass; no GPU experiment or new full regression was run.
+Production and registered test/gate sources still match accepted D2.4. R1/R2
+records/validators remain **unimplemented**, not silently granted by the design.
+Next follows [R1→R2→R3](M1_RESOURCE_EXECUTION_PLAN.md): identities/bindings,
+work/ready, then complete load/consume/save interface composition. M0–M2 and
+LeWM automatic simplification remain open. Earlier sections are checkpointed.
+
+## D2.4 cleanup composition and scoped queries accepted (2026-10-18)
+
+The [composition component](M1_LIFECYCLE_COMPOSITION_ACCEPTANCE.md) passes
+**1,015 cases / 32 criteria / 18.022s**. Actual body and driver-owned cleanup
+fixtures preserve canonical source, pending/context, current state and real
+helper NORMAL/RAISE. Detached points retain original scope/rule/operation and
+actual edge; applicability remains UNKNOWN. Wire stays v14.
+Frozen clean `37baeaf` passes **4,050 tests / 457.655s / 1,029,216KiB**, no
+failures/errors/skips and three warnings. All 451 source and 42 fixture hashes
+match before/after; all prior 4,009 test identities and 38 fixtures remain.
+[Evidence and read-only checker](../artifacts/experiments/b1_call_operands/model_lifecycle_composition/README.md)
+retain raw failures, immutable v14 generation and independent reviews. Protected
+checkouts are unchanged. Next are resource instance/work/ready, selector/literal,
+occurrence/provenance and remaining family/catalog interfaces. Complete M0–M2,
+source/runtime recovery and LeWM simplification remain open; no new speedup is
+measured. The following sections preserve their earlier checkpoint scopes.
+
+## D2.3 session/release and conditional E/F/P accepted (2026-10-18)
+
+The [session/release component](M1_SESSION_RELEASE_ACCEPTANCE.md) derives terminal
+E/F, then explanatory T, and ordered current R/B session predicates with exact
+state support and invalidation. Actual edges rename simultaneously before must
+joins. The component passes **974 cases / 27 criteria**, with all 443 source
+hashes unchanged. Final independent cross-reviews bind the implementation.
+Strict v14, original endpoints and CLI keep native/runtime/transform authority
+false. Frozen clean `f67037d` passes **4,009 tests / 468.490s / 1,030,312KiB**,
+zero failures/errors/skips and three warnings. HEAD, 443 source and 38 fixture
+hashes match before/after; every prior 35 fixture and 3,871 test identity survives.
+The 974-case / 27-criterion component takes 15.967s. Two independent cross-reviews
+bind the final fingerprint, and the exclusively owned basetemp was removed.
+[Archived evidence](../artifacts/experiments/b1_call_operands/model_session_release/README.md)
+retains original failures and immutable v13 generation. Protected checkouts are
+unchanged. D2.4/D3 and complete M0–M2 remain open; no new LeWM transformation
+or clean A/B speedup is established.
+
+## D2.2 no-body component and frozen full run accepted (2026-10-18)
+
+The [no-body component](M1_NO_BODY_ACCEPTANCE.md) passes **836 cases / 21 criteria /
+12.709s**, with all 430 source hashes unchanged. It joins a declared current-state
+test, its real bool BRANCH and an explicit private true-path body-only mark.
+Predicate-only graphs remain legal; the false path keeps the original final
+gate and BodyDrive. No runtime guard, native lifecycle or transformation is proved.
+Frozen clean `006a0e0` passes **3,871 tests / 463.982s / 1,028,088KiB**, with
+zero failures/errors/skips and three warnings. All 430 source and 35 fixture
+hashes match before/after. All prior 3,776 test identities survive; the only
+changed prior fixture is the authorized publication helper extraction, and all
+old JSON wires are byte-exact. Independent bounded source review matches the
+component fingerprint. The owned basetemp was removed and protected checkouts
+are unchanged. [Archived evidence](../artifacts/experiments/b1_call_operands/model_no_body/README.md)
+preserves original failures and commands. D2.3 was still open at that checkpoint;
+its acceptance is recorded above. D2.4/D3 and complete M0–M2 remain open;
+no new LeWM transform or clean A/B speedup is established.
+
+## D2.0 contract and D2.1 body publication accepted (2026-10-18)
+
+The [frozen D2 contract](M1_DRIVER_LIFECYCLE_CONTRACT.md) separates historical
+terminal facts from current session posts. Alias/finish analysis uses simultaneous
+edge renaming before a must join; explanatory sources are derived only after
+the Boolean E/F solution is fixed. No path-configuration enumeration or consumed
+release token is required. Design equations are not product E/F/P analysis.
+
+The [D2.1 component](M1_BODY_PUBLICATION_ACCEPTANCE.md) connects explicit scope,
+exact body source, original owner and current StateAccess/after at the private
+landing's first operation. Its v12 wire, endpoint queries and CLI pass **741
+component checks / 17 criteria / 10.937s**, with all 423 source hashes unchanged.
+Independent bounded review passes with unchanged source. Frozen `49201e7` passes
+**3,776 full tests / 459.570s / 1,028,440KiB**, no failures/errors/skips and three
+existing warnings. HEAD, clean status, all 423 source and 32 fixture hashes match;
+all prior 29 fixtures and 3,706 test identities remain. The owned basetemp was removed.
+See the [archive](../artifacts/experiments/b1_call_operands/model_body_publication/README.md).
+At that D2.1 checkpoint, D2.2–D2.4 were open; D2.2 acceptance is recorded above.
+D2.4/D3, complete C2/M0–M2 and LeWM automatic modeling/simplification remain open.
+
+## D2 lifecycle review and ordered implementation gates (2026-10-18)
+
+The [D2 review](M1_DRIVER_LIFECYCLE.md) separates exact body publication,
+nonraising no-body branches, session postconditions and reference drop. Shared
+release after multiple completions is legal; anchor/owner relations must be
+derived per actual CFG path. Body publication must not imply session completion.
+
+Three stdlib assertion cases pass: a callback invalidates a helper's earlier
+post, an exceptional completion retains partial writes, and unraisable finalizer
+failure preserves the return while retaining effects. A separate six-case
+lifecycle script emits observations only, with no assertions. Root corrected a
+reviewer's CLOSED claim against its raw JSON: second async-close exhaustion
+still reports SUSPENDED through inspect. The initial report remains archived.
+
+D2.0 was **OPEN at this review checkpoint**. State coverage, no-body request roles, multiple
+anchor/current-owner propagation, post invalidation and drop scope must converge
+before implementation; the subsequent contract/component are recorded above.
+No product code, detector, backend or heavy workload run
+was added by this review; D1 acceptance below remains the latest product receipt.
+
+## D1 canonical driver connections accepted (2026-10-18)
+
+The [D1 component](M1_DRIVER_ACCEPTANCE.md) implements the accepted static
+Create/raw/request/association/gate/BodyDrive records, core state and CFG joins,
+v11 strict wire, original UseSite input/output queries and CLI. All **671
+component cases / 13 criteria** pass; 415 source hashes are unchanged during
+the run. Historical v10 golden was generated from isolated immutable `306a789`,
+with no mutable codec imports. Independent review found and fixed raw constructor
+behavior-tag inconsistency; both the failing reproduction and fixed results remain.
+
+Final bounded independent review reports no remaining implementation blocker.
+Frozen implementation `382363c` passes **3,706 full tests / 457.563s /
+1,025,620KiB**, with no failures, errors or skips and three existing warnings.
+HEAD, clean status, all 415 source hashes and 29 fixture hashes match before/after;
+the prior 26 fixtures are unchanged and the exclusively owned basetemp was removed.
+The [archive](../artifacts/experiments/b1_call_operands/model_driver_implementation/README.md)
+retains commands, original failures, reviews, JUnit and source receipts.
+D2 lifecycle, D3 full protocol-family rules, complete
+C2D/M0–M2 and source/runtime/instance correspondence remain open. No new LeWM
+profiling, transformation or speedup is established.
+
+## Driver connection contract, second review (2026-10-18)
+
+The [revised D1 connection contract](M1_DRIVER_CONTRACT_V2.md) replaces a
+transferable permit and request-history state machine with a final admission
+INVOKE whose private NORMAL landing contains only the paired BodyDrive. State
+is produced by canonical completions; existing owner/request identities are
+forwarded through distinct Uses. Captures, resume inputs and finite outcomes
+remain derived from the original body interfaces and exact source sites.
+
+Six corrected design-witness checks exercise current core wiring; the original
+script enum error is preserved. These are **not BodyDrive product tests**. The
+[implementation matrix](M1_DRIVER_IMPLEMENTATION.md) defines D1's complete
+Create→Start→Suspend and Resume→outcome path, positive cases and rejection cases.
+Product sources remain unchanged. D2 lifecycle fields, full C2D, M0–M2 and
+automatic LeWM modeling/simplification are still incomplete; no new speedup.
+D1 connection fields are now accepted for implementation after independent
+review and the recorded root resolutions. Lifecycle domains may be a proper
+subset of the driver's domains; gate inputs and both post-state completions
+still cover every driver domain. This is design acceptance only.
+
+## Driver modeling review and first-outcome query (2026-10-18)
+
+[Driver review](M1_DRIVER_INTERFACES.md) rejects the old raw-THROW packet,
+combined claim/session and region-wide outcome assumptions. Eight lifecycle
+stdlib witnesses and three separate claim/request observations constrain the
+revised design; neither is a SCAR driver implementation. The exact gate/permit,
+association, commit and release fields remain under review, so C2D.0 is open.
+
+The [first-outcome frontier](M1_BODY_OUTCOME_FRONTIER.md) now connects to
+the existing canonical body/CFG and ProgramIndex: stop at the first Suspend,
+Return or Raise from a selected entry/landing, without following temporal edges
+or exposing saved private values. Seven new API tests and all **517 component
+checks / 7.384s** pass. Frozen `9f3d7e7` passes **3,549 full tests / 433.223s /
+1,030,428KiB**, zero failures/errors/skips and three existing warnings. HEAD,
+clean status, 406 source hashes and 26 fixture hashes match before/after; the
+owned basetemp was removed. See the [archive](../artifacts/experiments/b1_call_operands/model_driver_interfaces/README.md).
+The prior
+3,542-test body receipt below remains scoped to `e6b4723`. Complete M0–M2 and
+automatic LeWM modeling/simplification remain unfinished.
+
+## C2B resumable body component (2026-10-18)
+
+[Body contract](M1_RESUMPTION_BODY_COMPONENT.md) now has strict records,
+Suspend-owned saved Uses, current-state ResumeInput signatures, context
+Initial/Attach/Detach, separate logical and availability projections, and
+binding/C0/C1 composition. Six initial valid graph probes passed; the missing
+saved-value probe was rejected at its unavailable Use. These are manual IR
+checks, not automatically recovered Python execution.
+
+Independent review reproduced and fixed an overstrict frame-alias check. The
+final component gate passes **499 checks / 7.077s**, all seven criteria, with
+403 source hashes unchanged during the run. Frozen `e6b4723` passes **3,542 full
+tests / 432.922s / 1,030,184KiB**, with zero failures/errors/skips and three existing
+warnings. HEAD, clean status, source and 26 fixture hashes match before/after;
+its own basetemp was removed. See the [acceptance](M1_RESUMPTION_BODY_ACCEPTANCE.md)
+and [evidence archive](../artifacts/experiments/b1_call_operands/model_resume_interfaces/BODY_README.md).
+Full C2.0/C2.4 driver, instance/generation/exclusivity and final
+release remain open. M0–M2 and automatic LeWM modeling remain incomplete; no
+transformation or speedup is claimed. Earlier design/C1 results below retain
+their original source and scope.
+
+## C2 resumption architecture review (2026-10-17)
+
+[C2 design](M1_RESUMPTION_INTERFACES.md) chooses explicit temporal successors in
+one logical body, with separate derived logical-control and cut-availability
+queries. Three reviews and small stdlib witnesses expose context inheritance,
+delegate-only driver paths and the old synchronous FrameExit adjacency conflict.
+The first language batch contains 23 dynamic observation groups and four static
+code shapes; four later delegation-context observations are separate. Five design
+checks on existing valid core CFGs support the availability cut, not an implemented
+Suspend validator. C2.0 exact-field freeze remains open. Product schema/source
+are unchanged from the C1 implementation; no full retry, new capture, LeWM run,
+transformation or speedup accompanies this specification update.
+
+## C1 cleanup/context static component (2026-10-16; archived 2026-10-17)
+
+[C1](M1_CLEANUP_INTERFACES.md) connects Enter/Resume/Replace and saved exception
+context to canonical pending Uses, current all-domain state and lexical CFG
+routes. All **243 component checks** pass. Independent review found and fixed
+a valid divergent cleanup rejected by the old actual-exit requirement; a second
+integration fix rejects new Route subclasses that would lose their wire tag.
+Original failures and precise counterexamples remain archived.
+
+Frozen `0ea05e6` passed **3,330 full tests / 428.510s / 1,028,484KiB**, with three
+existing warnings and zero failures/errors/skips. HEAD, clean status, 391 source
+hashes and 22 fixture hashes matched before/after; its exclusively owned basetemp
+was removed. Schema v9 preserves original v1–v8 contracts. This verifies declared
+static IR composition only: no new source recovery, runtime unwinding proof,
+provider adapter, LeWM transformation or speedup. Complete M0–M2 remain unfinished;
+resumption, precise state/literals, dynamic resources and occurrence/denotation
+still require interfaces. See the [evidence archive](../artifacts/experiments/b1_call_operands/model_cleanup_interfaces/README.md).
+
+## Current modeling/tool reuse review (2026-10-16)
+
+The [status and modeling decision](MODELING_REUSE_DECISION.md) separates five core
+entity types, behavior tags and dependency relations, and maps them to existing
+tool providers. Read-only reviews at `78c5fda` confirm profiler/Kineto and Python
+monitoring are integrated, while FX/Export/ETO remain unimplemented adapters.
+TorchLens offers finer dynamic relations than a module-only graph; torchview is
+useful for display but its deduplicated edges do not preserve every argument Use.
+The audit also identifies name-based mutation guesses and collector failure-path
+gaps in the current trace code; these records do not establish complete effects.
+Reuse op schemas, native descriptors and provider artifacts before writing parallel
+logic. No new product code, capture, tests or workload run accompanies this review.
+At that read-only checkpoint C1 was a design and schema was v8; the separate C1
+receipt above records the later implementation. M0–M2, automatic whole-program
+LeWM connectivity and a credible automatic transformation/speedup remain incomplete.
+
+## P1 thin native boundary component (2026-10-16)
+
+[P1](M1_NATIVE_INTERFACES.md) adds ordered native slot references and an exact
+native/core-only canonical port partition, all Return/Raise UseSite queries,
+cross-region declared pairs with eight unproved domains, schema v8 and public CLI.
+Final component: **168 PASS / 8.815s**, 376-file source fingerprint
+`7a476a2e161109dc924615cd1c5aeb17fc4ca39176ffade393e15917dbb6fb17`.
+Independent integration review reproduced a validator-valid legacy ID-subclass
+index regression after the first 164-check pass; raw original-ID coordinates and
+four new regressions fix it without weakening strict new records. The unchanged
+five-case IR-only probe then passed. Initial results remain archived.
+Frozen `79bf2a9` passed **3,215 full tests / 431.085s / 1,027,692KiB**, three
+warnings, zero failures/errors/skips. HEAD, clean status, all 376 source hashes and
+18 fixture hashes were identical before/after; the exclusively owned basetemp
+was removed. The single full run needed no retry. This does not implement native artifact/tree
+replay, provider adapters, current lifted-state/write-back, dynamic provenance or
+equivalence. Complete T1/M1/M2 and automatic LeWM modeling remain unfinished.
+
+## Tool reuse boundary refinement (2026-10-16)
+
+The [survey](TOOLING_SURVEY.md) now includes an isolated PyPI torchview 0.2.7 CPU
+probe: four small cases / five successful captures, with duplicate-input,
+view/in-place, nested-display and capture-side-effect observations. This is not
+a SCAR adapter or workload run. The [integration design §7.2](MODELING_INTEGRATION.md)
+keeps native signature/TreeSpec artifacts authoritative and narrows SCAR additions
+to canonical boundary references and scoped correspondences, avoiding a duplicate
+pytree/signature implementation. Product/test source is unchanged from `5ccc1d2`;
+the existing 3,139-test frozen result was not rerun for these research/docs changes.
+FX/Export/ETO adapters, complete M1/M2 and automatic LeWM whole-program connections
+remain unfinished; no transformation or speedup is claimed.
+
+## P0 provider provenance component (2026-10-16)
+
+[P0](M1_PROVIDER_INTERFACES.md) connects typed provider envelopes, representation
+ownership/observation scope and ordered endpoints to the existing canonical core.
+All 225 final component checks pass with source fingerprint
+`97a2dfe24a6e5d3c72c31ee6d3cb94dc6e8bc9d8dad35e3e9bb4e21ebf3f4b0b`
+(367 files). Schema v7 preserves original v1–v6 contracts. An independent review
+found and reproduced four accepted INVOKE-result source mismatches; the fixed
+validator now derives direct completion/pending projections from canonical CFG
+edges. A further shared-landing review found and fixed order-dependent pending
+projection ownership; a valid two-dispatch phi regression now checks record-order
+invariance. The initial frozen full run was deliberately interrupted before any
+tracked edit; its FAIL/-15 receipt is retained. Final frozen `b140708` passed
+3,139 full tests in 424.444s / 1,026,828KiB, with three existing warnings and no
+failures/errors/skips. HEAD, clean status, 367 source hashes and 15 fixture hashes
+were identical before/after; the exclusively owned temporary directory was removed.
+This is a declaration component, not
+an FX/Export/ETO adapter, artifact replay, occurrence bridge or equivalence proof.
+Complete T1, M1/M2 and first-stage modeling remain unfinished.
+
+## Tool reuse reassessment (2026-10-16)
+
+The [integration contract](MODELING_INTEGRATION.md) now specifies field ownership,
+granularity and observer replacement criteria. Reuse existing Tensor subgraphs;
+evaluate source CFG providers before expanding custom control lowering. M0–M2
+requires composable boundary types, not an independently implemented full Python
+compiler. A single metadata-only CPU profiler probe found allocation IDs and
+schema-derived mutation versions (0→1→2); see [survey §3.5](TOOLING_SURVEY.md).
+This private/experimental provider is not integrated. Product source and the
+existing frozen 3,027-test result are unchanged; no new full regression, LeWM
+run, automatic transformation or speedup is claimed. First-stage modeling
+remains incomplete.
+
+## C0 lexical control and pending protocol component (2026-10-16)
+
+[C0](M1_CONTROL_INTERFACES.md) passed 354 component checks: typed lexical scopes
+and ports, exception packet/pending SSA constructors, CFG-derived case unions,
+dispatch projections, old wire and public CLI. Source fingerprint is
+`06773c8c8863910cffb70d5859e5019dc040f0a5e8903799abeb837bb52d4a53`
+(356 files). Frozen `54eb7ec` passed 3,027 full tests in 410.615s / 1,029,132KiB,
+with three existing warnings, no failures/errors/skips, and identical HEAD,
+clean status, source hashes and 11 fixture hashes before/after. Schema v6 preserves original
+v1–v5 contracts; v5 wire came from an isolated original-revision archive.
+This does not verify source ownership, runtime exception validity or cleanup
+unwinding. C1 must preserve original token/payload and active exception context
+across cleanup using current state; first-stage modeling remains incomplete.
+
+## Function environment interface component (2026-10-16)
+
+[Environment/entry declarations](M1_ENVIRONMENT_INTERFACES.md) now connect to
+the existing canonical Uses, entry ports and state SSA. All 327 component checks
+and 2,835 frozen full-repository tests passed. Implementation `e826713` retained
+the same 346-file source fingerprint and eight fixture hashes across the run
+(411.858s / 1,026,996KiB; three existing warnings). Wire v5 adds these interfaces
+while original v1–v4 fixtures retain their exact contracts. Declarations do not
+verify runtime callable identity, source signature binding or pure effects.
+The [first-stage completion matrix](FIRST_STAGE_COMPLETION_MATRIX.md) records
+remaining control/resumption, location/literal, resource, denotation and provider
+interfaces. The complete modeling stage is unfinished.
+
+## Tool reuse review (2026-10-16)
+
+[Survey](TOOLING_SURVEY.md) and [integration design](MODELING_INTEGRATION.md)
+separate existing capture capabilities from SCAR's cross-layer responsibilities.
+Small CPU experiments verified usable FX/Export/state interfaces, an ETO↔Kineto
+CPU record-ID join, and isolated LibCST 1.9.0 parsing/metadata. These are research
+witnesses, not integrated adapters or whole-program coverage. Current SCAR already
+uses profiler/Kineto and sys.monitoring; FX/Export/ETO integration remains pending.
+Pinned TorchLens source/docs now add a fine-grained dynamic-provider candidate;
+no TorchLens installation or local compatibility/capture experiment is claimed.
+No new backend, workload run or speedup claim. Complete first-stage modeling is
+still unfinished; its stopping boundary is unchanged.
+
+## Current priority: complete the model before whole-program graphs (2026-10-16)
+
+M1 now has one implemented [static resource interface component](M1_RESOURCE_INTERFACES.md):
+four canonical tables, strict v4 capability and unchanged frozen v2/v3 wire,
+198 component checks and 2,686 frozen full-regression checks passing.
+[Field-level protocol specifications](PYTHON314_PROTOCOL_CATALOG.md)
+now cover data/definitions, control/resumption and resource/library boundaries;
+their independent language witnesses do not certify a SCAR implementation.
+The rest of M1 and the complete first modeling stage remain unfinished.
+
+**Whole-program abstraction is incomplete.** The revised
+[model specification](WHOLE_PROGRAM_MODEL.md) defines independent Operation,
+Value, StateLocation, Region and Resource, typed environment/completion/resume/
+readiness interfaces, and the static ValueID→occurrence→denotation bridge.
+Specification consistency does not mean those interfaces are all implemented.
+The [model-first gates](WHOLE_PROGRAM_MODEL_PLAN.md) now precede further detector
+or backend work; [review scope](WHOLE_PROGRAM_MODEL_REVIEW.md) separates them.
+
+Development branch `codex/structured-program-model`, frozen implementation
+`dcd4986`, passed 290 component checks and 2,657 full tests. It implements a
+limited synchronous binding/loop subset. The fixed 256-body source stress has
+51 graphs with gaps and 205 unsupported bodies; 77 of 1,591 source calls have
+the checked ordered core endpoints. This is not a whole-project coverage ratio.
+See [bounded acceptance](N2_STRUCTURED_BODY_ACCEPTANCE.md). Existing main branch
+and historical results below must not be mistaken for this development state.
+
+The LeWM load→inference→environment→video graph remains incomplete. No credible
+automatic LeWM transformation or clean A/B speedup is available. More tests or
+conditional reference routes do not change that conclusion.
 
 ## Latest bounded component: R1 recorded compilation context (2026-10-16)
 
@@ -53,8 +935,9 @@ analysis costs; generation overlapped regression. Raw/source/Git remained unchan
 No actual/formal proof, whole-program graph, transformation or LeWM speedup.
 See [D1 acceptance](N2_CALL_DEMAND_ACCEPTANCE.md).
 
-R1 above resolved the inherited-future compilation mismatch. Next: complete B1
-end-to-end acceptance, then environment/world mapping, control, loops and state provenance under
+Historical next step at that checkpoint: resolve the observed inherited-future compilation mismatch with explicit
+matching profiles and historical replay, then deliver actual→formal→return queries,
+environment/world mapping, loops and state provenance under
 [the concrete cross-call plan](N2_CROSS_CALL_IMPLEMENTATION.md).
 
 ## Historical bounded component: D0 compact source seeds (2026-10-15)

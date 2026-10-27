@@ -1,0 +1,19 @@
+Traceback (most recent call last):
+  File "/home/zyf/AAA/scar-worktrees/source-call-model/artifacts/experiments/module_import_prefix_g1_20261025/candidate02/run_gate.py", line 185, in worker
+    'code_witness_counts':store.counts,'producer_guard_bytes_per_pass':guard_bytes,
+                          ^^^^^^^^^^^^
+AttributeError: 'Operation' object has no attribute 'counts'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/zyf/AAA/scar-worktrees/source-call-model/artifacts/experiments/module_import_prefix_g1_20261025/candidate02/run_gate.py", line 221, in <module>
+    if __name__=='__main__':raise SystemExit(main())
+                                             ~~~~^^
+  File "/home/zyf/AAA/scar-worktrees/source-call-model/artifacts/experiments/module_import_prefix_g1_20261025/candidate02/run_gate.py", line 205, in main
+    if args.worker:return worker(args.approved_freeze_sha256)
+                          ~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/zyf/AAA/scar-worktrees/source-call-model/artifacts/experiments/module_import_prefix_g1_20261025/candidate02/run_gate.py", line 195, in worker
+    'activity':guard.receipt() if guard else None,'code_witness_counts':store.counts if store else None})
+                                                                        ^^^^^^^^^^^^
+AttributeError: 'Operation' object has no attribute 'counts'

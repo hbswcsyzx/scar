@@ -1,0 +1,54 @@
+{
+  "actual_scar_imports": 99,
+  "all_handle_public_codec": 12684,
+  "auxiliary_records": {
+    "birth_facts": 4,
+    "frontiers": 0
+  },
+  "baseline_resource_targets_preserved": 12683,
+  "baseline_target_lifetime_coidentity_semantics": "NOT_REPROVED",
+  "container_counts": {
+    "Unresolved": 12684
+  },
+  "counts": {
+    "base_handles": 12684,
+    "new_container_bindings": 0,
+    "projected_fd_ports": 12649,
+    "raw_bytes_read_during_requalification": 0,
+    "retained_provider_handles": 35,
+    "unrefined_legacy_handles": 0
+  },
+  "elapsed_seconds": 65.01412138699379,
+  "extraction_contracts": {
+    "DUP_RETURN_EXISTING_TARGET": 1,
+    "OPEN_RETURN": 12648
+  },
+  "fail_closed_negative_paths": 2,
+  "field_results": {
+    "FD_values_only_endpoint": 12649,
+    "original_R2_endpoint_exact": 35
+  },
+  "first_stage_complete": false,
+  "full_execution_model_semantics": "OPEN",
+  "hardlinked_payload_chunks": 3,
+  "manifest": {
+    "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_fd_values_correction_20261023/gate-attempt01/result/manifest.json",
+    "physical_bytes": 199812,
+    "physical_sha256": "bb0b7b16d503ea09dc95fe728c8826c302b3f8c86c79243a34070aad936ea624"
+  },
+  "peak_rss_kib": 277160,
+  "point_selector_samples": 2,
+  "port_selectors_batch_verified": 12649,
+  "process_none_preserved": 290,
+  "raw_open_guard": "all exact logical/local archive data paths denied by this-process audit hook",
+  "raw_reopens": 0,
+  "schema": "scar.fd-values-correction-gate-report",
+  "schema_version": 1,
+  "scope": "offline with possible parallel load; not target benchmark",
+  "selected_accesses_unchanged": 38,
+  "selected_works_unchanged": 25,
+  "source_drift": [],
+  "status": "PASS_FD_VALUES_ONLY_R2",
+  "target_runs": 0,
+  "transformation_authorized": false
+}

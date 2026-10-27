@@ -1,0 +1,20 @@
+{
+  "attempt": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/source_native_context_gate_20261025/attempt01",
+  "automatic_retry": false,
+  "command": [
+    "/usr/bin/time",
+    "-v",
+    "-o",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/source_native_context_gate_20261025/attempt01/time.txt",
+    "/home/zyf/miniconda3/envs/lewm/bin/python",
+    "-B",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/source_native_context_gate_20261025/run_gate.py",
+    "--worker",
+    "--freeze-sha256",
+    "00140598568a5c5776ed77b8a2a46f91392de837dd6806fb67921f678390cd24"
+  ],
+  "exit_code": 0,
+  "parent_stop_exit": null,
+  "status": "EXIT0_RETAINED_CONTEXT_MODEL_OPEN",
+  "wall_seconds": 104.43441399501171
+}

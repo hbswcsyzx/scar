@@ -1,0 +1,79 @@
+{
+  "ast_preflight": "PASS",
+  "current_mutable_production_paths_not_required_to_equal_old_producer": true,
+  "documentation": [
+    {
+      "bytes": 7460,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_source_revision_current_20261025/README.md",
+      "sha256": "d42657b2996ef21a511f7f63606e2a886649936a2637b3722861f9a184101c29"
+    },
+    {
+      "bytes": 2531,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/docs/SOURCE_REVISION_CURRENT_GATE_PLAN_20261025.md",
+      "sha256": "11297309d99cc51e5d2b1d8498c71d2f586ae33169ac87ad574ae4a53e549953"
+    }
+  ],
+  "entry_files": [
+    {
+      "bytes": 14025,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_source_revision_current_20261025/audit.py",
+      "sha256": "1c1c35e5c226a0ff851c5ba1531230cd643553dd67a8a2134e75af910c313bc5"
+    },
+    {
+      "bytes": 2769,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_source_revision_current_20261025/config.py",
+      "sha256": "9ee64a5cc7942777a70903b302f96f3d29a27a91b17cd2bfce4e26d44fe85c0d"
+    },
+    {
+      "bytes": 8695,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_source_revision_current_20261025/prepare.py",
+      "sha256": "46c7d9aa2c14fdc866d29dda9b419183d8cf7aabd145e9fc8630dabae0d9584f"
+    },
+    {
+      "bytes": 664,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_source_revision_current_20261025/prepare.sh",
+      "sha256": "07eaffd0475c9cb63507500f64543ded4bbddefe2da4cdd98e598f452374a582"
+    },
+    {
+      "bytes": 4625,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_source_revision_current_20261025/report_archive.py",
+      "sha256": "a13fae9ddea04d74b53c3ce2f899f8710f36ea81717489ece9b2d8e4ec42da5b"
+    },
+    {
+      "bytes": 15754,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_source_revision_current_20261025/run.py",
+      "sha256": "2f860b9b6e290db5343a51b056ab2d79da5ec67c1b88189673b94a48127dd492"
+    },
+    {
+      "bytes": 627,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_source_revision_current_20261025/run.sh",
+      "sha256": "b3cf27ebbb86dd267d885fc6bb381d6b33880d67094d12308ef94b28c3e2d806"
+    }
+  ],
+  "explicit_resume_arguments_in_public_call": false,
+  "git_used": false,
+  "historical_input_manifest_nonartifact_paths": [],
+  "historical_ledger_nonartifact_paths": [],
+  "historical_module_receipts_compare_archived_sources_only": true,
+  "prepare_executed": false,
+  "private_source_proof_factory_executed_here": false,
+  "production_files_edited": false,
+  "public_orchestration_calls_in_runner": 1,
+  "raw_current_gate_executed": false,
+  "reviewed_ancestor_production": [
+    {
+      "bytes": 87585,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/analysis/program_composition.py",
+      "sha256": "a0577c7762a53a1c167451bf6b4bd0bd029cd82bbd115721b36315f283dda070"
+    },
+    {
+      "bytes": 29100,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/analysis/current_source_evidence.py",
+      "sha256": "1886477d1845dd5ddf669aec8b2b5830c375cbb328647e345b6329615d09cdf2"
+    }
+  ],
+  "schema": "scar.source-revision-current-entry-review",
+  "schema_version": 1,
+  "shell_syntax_preflight": "PASS",
+  "status": "PREPARED_NOT_RUN"
+}

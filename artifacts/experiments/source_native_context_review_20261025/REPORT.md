@@ -1,0 +1,9 @@
+独立复核通过，范围仅为stored字节、五份报告绑定和一个派生关系样本；不表示全部39,796跨片语义闭合。
+
+导航root精确SHA `8cef855ccfe081830a4548aaee80b4226d10aab22d4aa5e102cd1ebe18be8fa6` /47,237B，PUBLISHED。160个gzip的stored SHA/bytes逐项核对：source80/native40/index40，共24,179,311B，无漏项/额外gzip。descriptor分母相合：source79,592/native39,796/index39,796，index声明区间连续1–39,796；未展开所有index/data记录。manifest成本decoded_bytes是原builder计费，不能当本次解码量或混同输出descriptor合计。
+
+root session16093的actual exit0由root确认，保留launch-result也为0。五份query(1/4/244/2331/3182)均绑定准确导航root、八项原inputs和旧scope revision `scope_revision:1ae1c9387ba076a51170c9a60e0a0e5c63ef611c8e5fcc3320d6b0f6a3c03e73`；旧ledger原URI/bytes/SHA及其确切revision字段核对。source/native coordinates即使同SHA也保不同原URI，没有替换namespace或关闭旧scope义务。
+
+四份RETAINED只报告RETAINED_SOURCE_CONTEXT，sample4为CONTEXT_UNRESOLVED且relationship为空、无invocation/definition关联。零Tensor选例1和native-only选例3182均仍保具体invoke+normal Return occurrence、同一原EEG instance/投影与原ETO ordinal事实，Return事实准确附/outputs；不是从Tensor/对象身份外推出上下文。所有报告保HISTORICAL_SCAR_COLLECTOR_EXECUTION_SOURCE_UNRECORDED assumption与相应source/interface前沿，不授directcall/object/content/effects/ready。
+
+仅解一次派生source/000004.jsonl.gz，6,115,281decoded bytes，并核其decoded SHA/rows。样本2331原行4661/4662(原observation index4660/4661)的含换行SHA、span/output、invocation、definition、binding/activation/source事实、原region namespace及其body/source身份均与query相符；原marker事实也在query native_facts内。原行direct_callsite_established=false与source/interface frontiers保留。未解其它159chunks，也未重读原association stream/EEG/raw/DB、重跑query/producer/目标或277源/native门。这个样本不能推广成全39,796关系语义证明。

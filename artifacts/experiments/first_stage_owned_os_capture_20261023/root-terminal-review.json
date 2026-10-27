@@ -1,0 +1,12 @@
+{
+  "status": "PASS_TERMINAL_OWNED_LAUNCH_RECEIPTS_AND_ARCHIVE_BYTES",
+  "verified": {
+    "files": 11,
+    "stored_bytes": 916903,
+    "decoded_bytes": 8344309
+  },
+  "target_reexecuted": false,
+  "observation_completeness": "UNKNOWN",
+  "full_resource_identity_established": false,
+  "first_stage_complete": false
+}

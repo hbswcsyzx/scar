@@ -1,5 +1,104 @@
 # SCAR 当前 IR 到 IR v2 的迁移方案
 
+## 2026-10-22：公共structured库存的显式版本
+
+公共`inventory-program --body-profile structured`使用`scar.program-inventory` v7，
+复用原ProgramGraph/StructuredBodyModel和调用来源队列。v7 typed structured表
+逐一对应成功body/interface/root/source，无legacy frames；calls证据在calls模式
+保留，静态/runtime模式这两项为null。旧inventory1–6、默认frame及Program27/
+Execution8保持原语义。不要把本组件v7与历史ProgramGraph v7混淆。
+
+source-layer留存支持v7 header；expression→statement的结构对应仍是派生查询，
+不写回另一份CFG，也不证明表达式必执行。测试与真实执行范围见
+[structured公共入口验收](../artifacts/experiments/first_stage_structured_inventory_20261022/README.md)。
+全阶段、完整资源模型和优化授权仍未通过。
+
+## 2026-10-20：原生证据接入边界
+
+对象身份独立于内容的最小修正已接入：ValueGraph.objects 拥有 ObjectInstance，
+不要求 ValueVersion；旧 ObjectBinding 继续表示内容关联。使用目录时 Values2，
+无目录仍输出原 Values1。准确 marker 参数引用对应使用 evidence6；旧 scope/
+provider/基础能力仍分别输出5/4/3。所有 owner 消费者接受“显式对象目录 ∪ 旧
+bindings”，内容推导继续只用真正的内容链接。研究 profile 的对应是有条件的
+Inferred，不是生产 Python→ATen 或 LogicalVersion 证明。见上述原生模型文档。
+
+按 [第一阶段合同](FIRST_STAGE_MODEL_CONTRACT.md)先完成自动建模。
+[原生观察适配](NATIVE_OBSERVATION_MODEL.md)复用现 EvidenceGraph；provider 引用
+由该图的 ProviderReference 目录持有，新引用边和提交关联使用 evidence schema 4。
+没有新能力的旧图继续使用 schema 3。Program27/Execution8 不变，不制造静态
+RETURN/Region、LogicalVersion 或 allocation generation 来填缺口。
+旧 region 投影未支持这类观察时显式拒绝，不能默认为 CONTROL；旧 source-content
+桥接不能把 provider 引用直接转为内容。完整 SSA/执行对应仍需后续机械恢复。
+
+## 当前迁移决定（2026-10-16）
+
+规范：[WHOLE_PROGRAM_MODEL.md](WHOLE_PROGRAM_MODEL.md)。旧目录提案及下文历史
+盘点不构成重建另一套 ProgramGraph 的授权。保留一处 canonical producer/Use/
+state/control，按 [M0—M6](WHOLE_PROGRAM_MODEL_PLAN.md)逐门落实：
+
+前端/证据导入先遵循 [工具复用决定](TOOLING_SURVEY.md) 和
+[适配合同](MODELING_INTEGRATION.md)：复用现成 FX/Export/ETO 图与标准 Python
+编译见证；不以另一套 Tensor tracer 替代跨层对应。provider 图保留为不可变证据，
+规范输入/状态只在 core 一处定义。此为迁移设计，尚未实现新 adapter。
+
+| 部分 | 当前决定 |
+| --- | --- |
+| trace/profiler/raw evidence | 保留采集与原始格式，缺口/来源不升级为证明；本轮不扩大采集。 |
+| `ir/program` graph | 保留有限同步子集、严格旧版 reader；在原 core 版本化扩控制/环境/资源接口。 |
+| state/value identity | 新接 ValueOccurrence→Denotation；引用经当前 StateRead 取内容；旧 storage observer 只作物理证据。 |
+| provenance/materialization | 保留既有 allocation/alias 证据；分 ValueDerivation/RealizationDerivation，补有效区间和 typed ready。 |
+| candidate/region | 待完整输入/环境/状态/资源/完成边界闭合后重构；旧重复 pattern 不自动获权。 |
+| planner | 保留 NO-OP/成本/证明语义；输入改为闭合区域的具体替代方案，尚未实施该完整桥接。 |
+| backend | 保留旧实现与历史验证；不新增、不因规格通过自动启用。 |
+
+已实施的函数环境/入口分区是现 `ir/program` 的 v5 capability，见
+[组件范围](M1_ENVIRONMENT_INTERFACES.md)；无该 capability 的图仍按原 v2/v3/v4
+写出，原 v1—v4 reader 保留。这里的 v5 是实际发布的环境表/入口表，不是历史
+提案中尚未实现的控制协议版本。来源/动态对应与旧 source profile 仍有明确缺口。
+
+新实施的 [C0](M1_CONTROL_INTERFACES.md)是 `scar.program-graph` v6：词法scope/port、
+packet/pending Value与唯一构造表、专用dispatch。旧Terminator不改字段；新terminator
+用独立严格record。没有新能力的图仍按原v2—v5写出；旧reader禁止夹带新协议类型。
+C0只验证声明结构；同步cleanup及handled context由下述C1扩展，实际source/runtime
+对应及完整跨边界pending合同仍未完成。
+
+[P0来源合同](M1_PROVIDER_INTERFACES.md)新增 `scar.program-graph` v7：envelope、
+provider region 归属/观察关联、定义层端点 binding 三表。没有此能力的图仍按
+原 v2—v6 写出，旧 schema 拒绝新字段；producer/use/state 不另存。v7 不读取
+artifact、不把执行证据直绑静态实体，也不授予跨表示等价或变换权限。
+
+[P1薄边界](M1_NATIVE_INTERFACES.md)新增 `scar.program-graph` v8：
+`native_boundaries/boundary_relations` 只引用既有 entry/exit，保存有序 native 槽
+及 core-only 分区、不同 Region 之间的逐域未证义务。原生 TreeSpec/signature
+留在 artifact，不复制其解释器。无此能力仍按原 v2—v7 写出；原 v7 golden 由
+隔离原 codec 产生。168 项组件与 `79bf2a9` 的3,215项冻结全仓已通过；动态 occurrence/
+denotation、真实 native 适配/写回/等价及完整建模仍未完成。
+
+[C1 cleanup/context](M1_CLEANUP_INTERFACES.md)新增 `scar.program-graph` v9：
+六表引用既有pending/context/当前state/CFG，派生栈与entry-relative copy/fresh，
+不另存producer。新CleanupRoute使用显式wire tag，旧C0 dispatch不变；旧v1—v8
+拒绝新能力，没有C1的图仍按原版本写出。243项组件与`0ea05e6`的3,330项冻结全仓
+通过。允许清理截留的潜在函数出口没有实际站点，必须由指定pending入口完整facts
+支撑；旧无C1图的实际出口要求保留。with/except*、挂起恢复和真实context仍未验证。
+
+[C2B body组件](M1_RESUMPTION_BODY_COMPONENT.md)已实施v10：四张body/context表、
+独立Suspend variant、SavedInput/ResumeInput及精确context作用域。logical CFG保留
+cleanup activation；availability在独立landing切断未保存定义。相同saved Use解析
+用于引用精度、local binding及C0/C1推导，不另造actual/producer。无该capability
+的图继续按原v2–v9写出；v1–v9拒绝新字段/协议，隔离原v9 codec的golden保留。
+499项组件及冻结`e6b4723`的3,542项全仓通过；原C1的3,330项报告保持历史范围。
+
+完整[C2](M1_RESUMPTION_INTERFACES.md)仍缺Create/专用driver ingress、实例和代次、
+delegate-only路径及final release。普通CALL/INVOKE禁止直接以ResumableBody为callee，
+同步FrameModel不放宽。静态body有效不证明source/runtime adapter或可变换。
+
+新完整模型 Resource 有静态 definition/requirement 和动态 instance，handle
+经对应关系引用它；不能仅作为 EEG 标签。旧 `ready_event` 不承担新完成证明。
+语言 completion、suspend/resume、host outcome、work outcome 有强类型接口，
+不静默重释旧 NORMAL/RAISE。逐项实现与迁移将保留历史报告按原版本严格重放。
+
+以下保留原迁移审查，凡与上述决定冲突，以本节及完整模型规范为准。
+
 状态：**审查和迁移计划**。
 
 2026-10-13 当前迁移优先级由 [CORE_GRAPH_MODEL.md](CORE_GRAPH_MODEL.md) §7—8

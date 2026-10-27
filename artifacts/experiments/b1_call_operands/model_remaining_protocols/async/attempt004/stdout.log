@@ -1,0 +1,197 @@
+.............F.FFFFF                                                     [100%]
+=================================== FAILURES ===================================
+_ test_cancel_call_injection_handling_and_final_status_are_distinct_original_sites[True] _
+
+handled = True
+
+    @pytest.mark.parametrize('handled', (True, False))
+    def test_cancel_call_injection_handling_and_final_status_are_distinct_original_sites(handled):
+>       graph, details = cancellation_program(handled=handled)
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_program_async_connections.py:115: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/fixtures/program_async_connections.py:201: in cancellation_program
+    graph, handler_packet, continuation = _caught_body(graph)
+                                          ^^^^^^^^^^^^^^^^^^^
+tests/fixtures/program_async_connections.py:171: in _caught_body
+    graph = replace(graph, regions=tuple(replace(item, blocks=blocks,
+                                   ^^^^^
+tests/fixtures/program_async_connections.py:172: in <genexpr>
+    exits=tuple(exit_ for exit_ in item.exits if exit_.kind is not ExitKind.RAISE))
+          ^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+.0 = <tuple_iterator object at 0x761f79e76380>
+
+>       exits=tuple(exit_ for exit_ in item.exits if exit_.kind is not ExitKind.RAISE))
+                                                                       ^^^^^^^^
+        if item.id == region.id else item for item in graph.regions),
+    values=(*graph.values, continued, after, *new_values),
+    operations=tuple(detach if op.id == detach.id else terminal if op.id == terminal.id else op for op in graph.operations) + (handler, jump),
+    control_scopes=tuple(replace(scope, blocks=(*scope.blocks, destination)) if scope.region == region.id else scope for scope in graph.control_scopes))
+E   NameError: name 'ExitKind' is not defined
+
+tests/fixtures/program_async_connections.py:172: NameError
+_ test_actual_failed_task_creation_cannot_supply_expected_cancellation_target __
+
+    def test_actual_failed_task_creation_cannot_supply_expected_cancellation_target():
+        from scar.ir.program.protocol_connections import CancelDelivery
+>       graph, _ = cancellation_program()
+                   ^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_program_async_connections.py:137: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/fixtures/program_async_connections.py:201: in cancellation_program
+    graph, handler_packet, continuation = _caught_body(graph)
+                                          ^^^^^^^^^^^^^^^^^^^
+tests/fixtures/program_async_connections.py:171: in _caught_body
+    graph = replace(graph, regions=tuple(replace(item, blocks=blocks,
+                                   ^^^^^
+tests/fixtures/program_async_connections.py:172: in <genexpr>
+    exits=tuple(exit_ for exit_ in item.exits if exit_.kind is not ExitKind.RAISE))
+          ^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+.0 = <tuple_iterator object at 0x761f79e769b0>
+
+>       exits=tuple(exit_ for exit_ in item.exits if exit_.kind is not ExitKind.RAISE))
+                                                                       ^^^^^^^^
+        if item.id == region.id else item for item in graph.regions),
+    values=(*graph.values, continued, after, *new_values),
+    operations=tuple(detach if op.id == detach.id else terminal if op.id == terminal.id else op for op in graph.operations) + (handler, jump),
+    control_scopes=tuple(replace(scope, blocks=(*scope.blocks, destination)) if scope.region == region.id else scope for scope in graph.control_scopes))
+E   NameError: name 'ExitKind' is not defined
+
+tests/fixtures/program_async_connections.py:172: NameError
+__ test_full_delivery_reference_cannot_silently_choose_another_packet_source ___
+
+    def test_full_delivery_reference_cannot_silently_choose_another_packet_source():
+        from scar.ir.program.protocol_connections import CancelHandling
+>       graph, _ = cancellation_program()
+                   ^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_program_async_connections.py:148: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/fixtures/program_async_connections.py:201: in cancellation_program
+    graph, handler_packet, continuation = _caught_body(graph)
+                                          ^^^^^^^^^^^^^^^^^^^
+tests/fixtures/program_async_connections.py:171: in _caught_body
+    graph = replace(graph, regions=tuple(replace(item, blocks=blocks,
+                                   ^^^^^
+tests/fixtures/program_async_connections.py:172: in <genexpr>
+    exits=tuple(exit_ for exit_ in item.exits if exit_.kind is not ExitKind.RAISE))
+          ^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+.0 = <tuple_iterator object at 0x761f79e747c0>
+
+>       exits=tuple(exit_ for exit_ in item.exits if exit_.kind is not ExitKind.RAISE))
+                                                                       ^^^^^^^^
+        if item.id == region.id else item for item in graph.regions),
+    values=(*graph.values, continued, after, *new_values),
+    operations=tuple(detach if op.id == detach.id else terminal if op.id == terminal.id else op for op in graph.operations) + (handler, jump),
+    control_scopes=tuple(replace(scope, blocks=(*scope.blocks, destination)) if scope.region == region.id else scope for scope in graph.control_scopes))
+E   NameError: name 'ExitKind' is not defined
+
+tests/fixtures/program_async_connections.py:172: NameError
+_ test_deleting_cancel_relations_does_not_delete_request_delivery_handler_status_denominator _
+
+    def test_deleting_cancel_relations_does_not_delete_request_delivery_handler_status_denominator():
+        from scar.ir.program.protocol_connections import TaskStatusRead
+>       graph, _ = cancellation_program()
+                   ^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_program_async_connections.py:158: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/fixtures/program_async_connections.py:201: in cancellation_program
+    graph, handler_packet, continuation = _caught_body(graph)
+                                          ^^^^^^^^^^^^^^^^^^^
+tests/fixtures/program_async_connections.py:171: in _caught_body
+    graph = replace(graph, regions=tuple(replace(item, blocks=blocks,
+                                   ^^^^^
+tests/fixtures/program_async_connections.py:172: in <genexpr>
+    exits=tuple(exit_ for exit_ in item.exits if exit_.kind is not ExitKind.RAISE))
+          ^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+.0 = <tuple_iterator object at 0x761f79e77f70>
+
+>       exits=tuple(exit_ for exit_ in item.exits if exit_.kind is not ExitKind.RAISE))
+                                                                       ^^^^^^^^
+        if item.id == region.id else item for item in graph.regions),
+    values=(*graph.values, continued, after, *new_values),
+    operations=tuple(detach if op.id == detach.id else terminal if op.id == terminal.id else op for op in graph.operations) + (handler, jump),
+    control_scopes=tuple(replace(scope, blocks=(*scope.blocks, destination)) if scope.region == region.id else scope for scope in graph.control_scopes))
+E   NameError: name 'ExitKind' is not defined
+
+tests/fixtures/program_async_connections.py:172: NameError
+_ test_task_status_cannot_read_another_reference_and_report_this_cancelled_task _
+
+    def test_task_status_cannot_read_another_reference_and_report_this_cancelled_task():
+>       graph, details = cancellation_program()
+                         ^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_program_async_connections.py:168: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/fixtures/program_async_connections.py:201: in cancellation_program
+    graph, handler_packet, continuation = _caught_body(graph)
+                                          ^^^^^^^^^^^^^^^^^^^
+tests/fixtures/program_async_connections.py:171: in _caught_body
+    graph = replace(graph, regions=tuple(replace(item, blocks=blocks,
+                                   ^^^^^
+tests/fixtures/program_async_connections.py:172: in <genexpr>
+    exits=tuple(exit_ for exit_ in item.exits if exit_.kind is not ExitKind.RAISE))
+          ^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+.0 = <tuple_iterator object at 0x761f79e74a00>
+
+>       exits=tuple(exit_ for exit_ in item.exits if exit_.kind is not ExitKind.RAISE))
+                                                                       ^^^^^^^^
+        if item.id == region.id else item for item in graph.regions),
+    values=(*graph.values, continued, after, *new_values),
+    operations=tuple(detach if op.id == detach.id else terminal if op.id == terminal.id else op for op in graph.operations) + (handler, jump),
+    control_scopes=tuple(replace(scope, blocks=(*scope.blocks, destination)) if scope.region == region.id else scope for scope in graph.control_scopes))
+E   NameError: name 'ExitKind' is not defined
+
+tests/fixtures/program_async_connections.py:172: NameError
+__ test_task_status_cannot_use_the_earlier_cancel_calls_boolean_as_its_result __
+
+    def test_task_status_cannot_use_the_earlier_cancel_calls_boolean_as_its_result():
+        from scar.ir.program.protocol_connections import TaskStatusRead
+>       graph, details = cancellation_program()
+                         ^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_program_async_connections.py:179: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/fixtures/program_async_connections.py:201: in cancellation_program
+    graph, handler_packet, continuation = _caught_body(graph)
+                                          ^^^^^^^^^^^^^^^^^^^
+tests/fixtures/program_async_connections.py:171: in _caught_body
+    graph = replace(graph, regions=tuple(replace(item, blocks=blocks,
+                                   ^^^^^
+tests/fixtures/program_async_connections.py:172: in <genexpr>
+    exits=tuple(exit_ for exit_ in item.exits if exit_.kind is not ExitKind.RAISE))
+          ^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+.0 = <tuple_iterator object at 0x761f79e76020>
+
+>       exits=tuple(exit_ for exit_ in item.exits if exit_.kind is not ExitKind.RAISE))
+                                                                       ^^^^^^^^
+        if item.id == region.id else item for item in graph.regions),
+    values=(*graph.values, continued, after, *new_values),
+    operations=tuple(detach if op.id == detach.id else terminal if op.id == terminal.id else op for op in graph.operations) + (handler, jump),
+    control_scopes=tuple(replace(scope, blocks=(*scope.blocks, destination)) if scope.region == region.id else scope for scope in graph.control_scopes))
+E   NameError: name 'ExitKind' is not defined
+
+tests/fixtures/program_async_connections.py:172: NameError
+=========================== short test summary info ============================
+FAILED tests/unit/test_program_async_connections.py::test_cancel_call_injection_handling_and_final_status_are_distinct_original_sites[True]
+FAILED tests/unit/test_program_async_connections.py::test_actual_failed_task_creation_cannot_supply_expected_cancellation_target
+FAILED tests/unit/test_program_async_connections.py::test_full_delivery_reference_cannot_silently_choose_another_packet_source
+FAILED tests/unit/test_program_async_connections.py::test_deleting_cancel_relations_does_not_delete_request_delivery_handler_status_denominator
+FAILED tests/unit/test_program_async_connections.py::test_task_status_cannot_read_another_reference_and_report_this_cancelled_task
+FAILED tests/unit/test_program_async_connections.py::test_task_status_cannot_use_the_earlier_cancel_calls_boolean_as_its_result
+6 failed, 14 passed in 1.36s

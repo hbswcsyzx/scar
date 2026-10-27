@@ -1,0 +1,4 @@
+command: ['/home/zyf/miniconda3/envs/lewm/bin/python', '-m', 'pytest', '-q', 'tests/unit/test_resumption_forwarding.py', '-k', 'one_saved_frame_slot']
+returncode: 0
+..                                                                       [100%]
+2 passed, 11 deselected in 0.30s

@@ -12,6 +12,8 @@ from functools import lru_cache
 from types import UnionType
 from typing import Any, Union, get_args, get_origin, get_type_hints
 
+from ..literals import PythonLiteral, _preflight_literal
+
 
 @lru_cache(maxsize=None)
 def _hints(cls: type) -> dict:
@@ -24,6 +26,7 @@ _CONTAINER_PLAN = 2
 _INT_PLAN = 3
 _FLOAT_PLAN = 4
 _INSTANCE_PLAN = 5
+_EXACT_BUILTIN_SCALARS = (str, int, float, bool, bytes, type(None))
 
 
 @lru_cache(maxsize=None)
@@ -110,6 +113,17 @@ def _record_errors(value: Any, plan: tuple, path: str) -> list[str]:
         good_type = isinstance(value, expected)
     if not good_type:
         return [f"{path} must be {getattr(expected, '__name__', expected)}"]
+    if expected is PythonLiteral:
+        try:
+            _preflight_literal(value)
+        except (TypeError, ValueError) as exc:
+            return [f"{path}: {exc}"]
+        return []
+    # Exact builtin scalars cannot have dataclass fields or a post-init hook.
+    # Do this only after the original type checks and literal preflight. A
+    # subclass can be a dataclass, so it must still take the ordinary path.
+    if type(value) in _EXACT_BUILTIN_SCALARS:
+        return []
     if not is_dataclass(value):
         return []
     errors = []

@@ -196,7 +196,7 @@ class _Extractor:
         definition, reference = pair
         if isinstance(node, ast.Constant):
             try:
-                literal = PythonLiteral.from_python(node.value)
+                literal = PythonLiteral.from_python(node.value, exact=False)
             except (ValueError, TypeError):
                 self.gap("Literal representation is outside the supported exact subset.",
                          operation=definition.id, source=reference,

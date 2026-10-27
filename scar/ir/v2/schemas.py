@@ -143,9 +143,7 @@ class IRBundle:
         external_owners = {
             EvidenceNodeKind.VALUE_VERSION: self.values.versions,
             EvidenceNodeKind.MATERIALIZATION: self.values.materializations,
-            EvidenceNodeKind.OBJECT: {
-                item.object_id for item in self.values.bindings
-            },
+            EvidenceNodeKind.OBJECT: self.values.object_ids(),
             EvidenceNodeKind.ALLOCATION: self.values.allocations,
             EvidenceNodeKind.STORAGE_REGION: self.values.regions,
             EvidenceNodeKind.RESOURCE: self.semantic.resources,

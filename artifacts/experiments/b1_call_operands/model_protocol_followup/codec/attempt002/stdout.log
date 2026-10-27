@@ -1,0 +1,1 @@
+{"bytes": 44484, "connection_tables": ["protocol_call_inputs", "protocol_result_consumers"], "path": "/tmp/scar-structured-model-280qf4mi/artifacts/experiments/b1_call_operands/model_protocol_followup/codec/oracle-v19/program_graph_v19_frozen.json", "schema_version": 19, "sha256": "57fe9feb47f5b186cb1b5c708c1eff56e54a61b43c597a6951a82719cfd0a5f6"}

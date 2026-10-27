@@ -1,0 +1,41 @@
+[
+  {
+    "original": {
+      "bytes": 987,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_os_fd_source_projection_20261023/gate-attempt01/result/fd_sources/birth_facts/000000.jsonl.gz",
+      "sha256": "70ca2909f927a99f73a237c0715510bef25731499603e5e26d37ca75b8186c1f"
+    },
+    "retained": {
+      "bytes": 987,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_fd_values_correction_20261023/gate-attempt01/result/fd_sources/birth_facts/000000.jsonl.gz",
+      "sha256": "70ca2909f927a99f73a237c0715510bef25731499603e5e26d37ca75b8186c1f"
+    },
+    "same_inode_device": true
+  },
+  {
+    "original": {
+      "bytes": 777795,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_os_fd_source_projection_20261023/gate-attempt01/result/fd_sources/fd_ports/000000.jsonl.gz",
+      "sha256": "3edcd64b96191be06e1c4849789144c06dddcf9ccaa8bd86fba4e6be1e5bc279"
+    },
+    "retained": {
+      "bytes": 777795,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_fd_values_correction_20261023/gate-attempt01/result/fd_sources/fd_ports/000000.jsonl.gz",
+      "sha256": "3edcd64b96191be06e1c4849789144c06dddcf9ccaa8bd86fba4e6be1e5bc279"
+    },
+    "same_inode_device": true
+  },
+  {
+    "original": {
+      "bytes": 564960,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_os_fd_source_projection_20261023/gate-attempt01/result/fd_sources/fd_ports/000001.jsonl.gz",
+      "sha256": "49a9bb68e13769f2f971cdffeab05a4e0e4342d9976bd65c8c5b1c92d351fb0c"
+    },
+    "retained": {
+      "bytes": 564960,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_fd_values_correction_20261023/gate-attempt01/result/fd_sources/fd_ports/000001.jsonl.gz",
+      "sha256": "49a9bb68e13769f2f971cdffeab05a4e0e4342d9976bd65c8c5b1c92d351fb0c"
+    },
+    "same_inode_device": true
+  }
+]

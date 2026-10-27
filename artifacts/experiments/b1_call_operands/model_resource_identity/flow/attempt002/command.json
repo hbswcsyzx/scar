@@ -1,0 +1,29 @@
+{
+  "command": [
+    "/home/zyf/miniconda3/envs/lewm/bin/python",
+    "-m",
+    "pytest",
+    "-q",
+    "tests/unit/test_execution_flow.py",
+    "tests/unit/test_execution_links.py",
+    "--junitxml=artifacts/experiments/b1_call_operands/model_resource_identity/flow/attempt002/results.xml"
+  ],
+  "python": "3.14.7 | packaged by conda-forge | (main, Sep  2 2026, 21:08:32) [GCC 15.3.0]",
+  "files": {
+    "scar/ir/execution/resource_validation.py": "bbce9ae2d3664b59cfc981d863b9d151c882f6d83f4db9eeababd72463c3f985",
+    "scar/ir/execution/query.py": "3fc8137359765f878f2b82476893cc6562da90f4a710144ed764280b4f027c3e",
+    "scar/ir/execution/flow.py": "7b9e2b9df4af89a83225ae0c520d7d44b61a75e9e1c1d2b64edad55a82cc9f20",
+    "scar/ir/execution/codec.py": "9fe67ab00091d1477c71baa3259394d8f2062d9c3deb93bdf3c318f9faaf37bd",
+    "scar/ir/execution/validation.py": "d8bb45288bc6180b1052b20599fbb161a14511ca6b1180acd9168385b3647d02",
+    "scar/ir/execution/snapshot.py": "2e81b3bf1410dc37602207e6f0bea767ea572741c8629602eb6e5ac3065f2574",
+    "scar/ir/execution/resources.py": "657fca489d07fd3e32e5552782e02c6b6b58c8ed061c3c0040313d442a2e3000",
+    "scar/ir/execution/model.py": "f1b9941741f48bcfafc224e50722422450e6a07ef7c606c2422395d2de274411",
+    "scar/ir/execution/__init__.py": "5821b4b1b26bdc234fb26e93e74bee38fa6a03fadbc3b215da35a9d9761c39b4",
+    "scar/ir/execution/coordinates.py": "b19e45c8af710b93d7197ca91e7cbcdfa7a9ee239a7faf73903d2ff85003ce09",
+    "scar/ir/execution/common.py": "a6a4287df931d21221be181023df0233f0b7b8cfbe0fdb69798fc9238ea2c0b8",
+    "scar/ir/execution/ids.py": "db98ea72739fc4f99f3a8aa7870c3eec023fc3db2f3c19bcf47b2110780afa07",
+    "tests/fixtures/execution_paths.py": "f9f0023e212adfb251b5f8e33fc79c868f3aac45d076df79b58eb5d51f3f832b",
+    "tests/unit/test_execution_flow.py": "2ea75d3cabf9a7a5e71cae1d21b7c5ef5adb56f1f225b5e9ccd89d9581553986",
+    "tests/unit/test_execution_links.py": "6bedea8f2a7d38a112c3f51072db6f58fb73fcd1e887b59392810a75920abc36"
+  }
+}

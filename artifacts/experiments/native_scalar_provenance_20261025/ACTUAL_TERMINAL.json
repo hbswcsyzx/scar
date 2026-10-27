@@ -1,0 +1,67 @@
+{
+  "GNU_peak_RSS_KiB": 735780,
+  "GNU_wall_seconds": 22.01,
+  "Root_confirmed_terminal_exit": 0,
+  "Root_stderr": {
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_scalar_provenance_20261025/attempt01/root-stderr.txt"
+  },
+  "Root_stdout": {
+    "bytes": 20744,
+    "sha256": "9f0161ccdb37d5187f04e533a28dfca675de6714ca5c06c1b47764a7801cea18",
+    "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_scalar_provenance_20261025/attempt01/root-stdout.txt"
+  },
+  "actual_passed_input_accounting": {
+    "accounting_role": "RESERVATIONS; not actual or kernel IO",
+    "completed_verified_phase_bytes": 67598442,
+    "control_metadata_bytes": 864842,
+    "control_metadata_limit": 1000000,
+    "kernel_IO_measurement": false,
+    "limit": 68000000,
+    "pending_reserved_bytes": 0,
+    "stored_plus_decoded_bytes": 67598442
+  },
+  "freeze": {
+    "bytes": 118758,
+    "sha256": "908d5c6cccd61ab9f01efb897100cbb1dda2d6bf53afc9bc9a808e76c6229090",
+    "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_scalar_provenance_20261025/attempt01/freeze.json"
+  },
+  "full_model": "OPEN",
+  "gate_elapsed_seconds": 21.421191263012588,
+  "new_capture_runs": 0,
+  "new_target_runs": 0,
+  "qualified_literal_kinds": {
+    "bool": 1,
+    "int": 1,
+    "none": 2
+  },
+  "result": {
+    "bytes": 25533,
+    "sha256": "6fb5e26cb86684fd25027b9c1fc53b9ff4cbb7283348bc2112b9da800f926950",
+    "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_scalar_provenance_20261025/attempt01/result.json"
+  },
+  "root_session": 94465,
+  "runner": {
+    "bytes": 7978,
+    "sha256": "bf649446f7831f729db2e80f46f675fc2277094ca2d06bdd567ffba30cb7b91d",
+    "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_scalar_provenance_20261025/attempt01/gate.py"
+  },
+  "scalar_frontiers": {
+    "CONTAINER_OR_TRUNCATED_LEAF_IS_NOT_SCALAR": 1,
+    "ENUM_OR_NONBUILTIN_SCALAR_FORMAL": 257,
+    "SYMBOLIC_SCALAR_CONTENT_UNESTABLISHED": 2
+  },
+  "scalar_input_ports": 264,
+  "scalar_observed_roots": 4,
+  "schema": "scar.native-scalar-actual-terminal",
+  "schema_real_kind_union_histogram": "NOT_MEASURED; no large rows scanned",
+  "schema_version": 1,
+  "source": "Root-owned session confirmation and retained GNU time exit0",
+  "time": {
+    "bytes": 876,
+    "sha256": "008c8005d068f0dacf9b5c8560654dc91da7109f8541771eabcb537546268cd8",
+    "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_scalar_provenance_20261025/attempt01/time.txt"
+  },
+  "upstream_producers_established": false
+}

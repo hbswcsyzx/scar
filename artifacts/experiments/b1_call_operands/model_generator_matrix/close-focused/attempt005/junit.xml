@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="2" skipped="0" tests="3" time="0.665" timestamp="2026-10-18T17:01:47.386565+00:00" hostname="gpu1"><testcase classname="tests.unit.test_program_generator_close_contracts" name="test_other_body_helper_exception_packets_propagate_without_close_none_suppression" time="0.061" /><testcase classname="tests.unit.test_program_generator_close_contracts" name="test_other_exception_propagation_cannot_replay_the_preexisting_input_packet[0]" time="0.026"><failure message="AssertionError: assert 'protocol_copy' in set()&#10; +  where set() = _codes(ProgramGraph(root=RegionID(value='driver'), regions=(Region(id=RegionID(value='driver'), label='declared driver fixtur...), source=StaticProtocolGap(reason=&lt;StaticGapReason.NATIVE_APPLICABILITY_UNPROVEN: 'NATIVE_APPLICABILITY_UNPROVEN'&gt;)))))">edge = 0
+
+    @pytest.mark.parametrize("edge", (0, 1))
+    def test_other_exception_propagation_cannot_replay_the_preexisting_input_packet(edge):
+        graph, details = generator_close_program(outcome="propagate")
+        terminal = _operation(graph, details["terminals"][edge])
+        wrong = _change_use(graph, terminal.id, terminal.terminator.values[0], ValueID("driver.entry.arg.2"))
+        require_valid(_core(wrong))
+&gt;       assert "protocol_copy" in _codes(wrong)
+E       AssertionError: assert 'protocol_copy' in set()
+E        +  where set() = _codes(ProgramGraph(root=RegionID(value='driver'), regions=(Region(id=RegionID(value='driver'), label='declared driver fixtur...), source=StaticProtocolGap(reason=&lt;StaticGapReason.NATIVE_APPLICABILITY_UNPROVEN: 'NATIVE_APPLICABILITY_UNPROVEN'&gt;)))))
+
+tests/unit/test_program_generator_close_contracts.py:180: AssertionError</failure></testcase><testcase classname="tests.unit.test_program_generator_close_contracts" name="test_other_exception_propagation_cannot_replay_the_preexisting_input_packet[1]" time="0.024"><failure message="AssertionError: assert 'protocol_copy' in set()&#10; +  where set() = _codes(ProgramGraph(root=RegionID(value='driver'), regions=(Region(id=RegionID(value='driver'), label='declared driver fixtur...), source=StaticProtocolGap(reason=&lt;StaticGapReason.NATIVE_APPLICABILITY_UNPROVEN: 'NATIVE_APPLICABILITY_UNPROVEN'&gt;)))))">edge = 1
+
+    @pytest.mark.parametrize("edge", (0, 1))
+    def test_other_exception_propagation_cannot_replay_the_preexisting_input_packet(edge):
+        graph, details = generator_close_program(outcome="propagate")
+        terminal = _operation(graph, details["terminals"][edge])
+        wrong = _change_use(graph, terminal.id, terminal.terminator.values[0], ValueID("driver.entry.arg.2"))
+        require_valid(_core(wrong))
+&gt;       assert "protocol_copy" in _codes(wrong)
+E       AssertionError: assert 'protocol_copy' in set()
+E        +  where set() = _codes(ProgramGraph(root=RegionID(value='driver'), regions=(Region(id=RegionID(value='driver'), label='declared driver fixtur...), source=StaticProtocolGap(reason=&lt;StaticGapReason.NATIVE_APPLICABILITY_UNPROVEN: 'NATIVE_APPLICABILITY_UNPROVEN'&gt;)))))
+
+tests/unit/test_program_generator_close_contracts.py:180: AssertionError</failure></testcase></testsuite></testsuites>

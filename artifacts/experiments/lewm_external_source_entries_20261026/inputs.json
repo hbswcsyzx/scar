@@ -1,0 +1,60 @@
+{
+  "archives": [
+    {
+      "directory": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_partitioned_operand_routes_20261023/result/code-witnesses",
+      "manifest": {
+        "bytes": 42283,
+        "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_partitioned_operand_routes_20261023/result/code-witnesses/manifest.json",
+        "sha256": "56355f7ef10d16d8ab4fb02a84988cf2f0070b75e4cd5fccbf1c86c1ea34170d"
+      }
+    },
+    {
+      "directory": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/model_run_dependency_gate_20261025/model/attempts/1792957279902353768-1410025/02-dependency-witness/archive",
+      "manifest": {
+        "bytes": 9689,
+        "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/model_run_dependency_gate_20261025/model/attempts/1792957279902353768-1410025/02-dependency-witness/archive/manifest.json",
+        "sha256": "8c16a942e037c6a3a5357043e291df521ba67a809ed5d3770c98d663b5057c71"
+      }
+    },
+    {
+      "directory": "/home/zyf/AAA/scar-worktrees/source858-runtime/artifacts/experiments/lewm_archived_compiler_gate_20261026/result/archive",
+      "manifest": {
+        "bytes": 39492,
+        "path": "/home/zyf/AAA/scar-worktrees/source858-runtime/artifacts/experiments/lewm_archived_compiler_gate_20261026/result/archive/manifest.json",
+        "sha256": "d3c67c93ff2da74c3fd51bcbe235382dc09a7ca2f363b56edc158fc1004791b1"
+      }
+    }
+  ],
+  "budgets": {
+    "address_space_bytes": 4294967296,
+    "input_stored_plus_decoded_bytes": 4000000000,
+    "max_dispatch_bodies": 256,
+    "max_operations_per_body": 10000,
+    "max_record_bytes": 128000000,
+    "max_source_bytes": 2000000,
+    "max_source_files": 16,
+    "max_total_operations": 1000000,
+    "outer_seconds": 1200,
+    "output_bytes": 512000000,
+    "selected_decode_bytes": 512000000,
+    "worker_seconds": 900
+  },
+  "compiler_workset": {
+    "bytes": 350625,
+    "path": "/home/zyf/AAA/scar-worktrees/source858-runtime/artifacts/experiments/lewm_archived_compiler_gate_20261026/workset.json",
+    "sha256": "8a1f6237bf4bc535ca5cfb869902a69ef8f700736c4b1d8112568a1f01927199"
+  },
+  "continuation": {
+    "bytes": 2026468,
+    "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_dependency_continuation_20261023/result/continuation.json",
+    "sha256": "c9ff2f87a0e90ee42297501d256d9d24aeeab60273c6172fe692c0323207173e"
+  },
+  "dispatch_order": "FILE_GROUPED_V1",
+  "historical_denominators": {
+    "entered_code_groups": 817,
+    "entered_invocations": 100438
+  },
+  "project_root": "/home/zyf/AAA/le-wm",
+  "schema": "scar.lewm-external-source-entry-gate-inputs/1",
+  "source_scope": "original272038 static entries; no current369749 binding"
+}

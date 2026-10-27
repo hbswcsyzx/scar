@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="3" skipped="0" tests="3" time="0.872" timestamp="2026-10-18T21:02:22.186767+00:00" hostname="gpu1"><testcase classname="tests.unit.test_program_continuation_connections" name="test_close_normal_and_raise_merge_into_one_real_fresh_pending_and_current_cleanup_replace" time="0.033"><failure message="ValueError: resumption_caller_parameter at program_block:finally.close.call: only an Attached block carries exactly one current caller parameter; resumption_caller_forward at program_operation:finally.invoke: ordinary edge forwards the exact current caller; resumption_caller_forward at program_operation:finally.invoke: ordinary edge forwards the exact current caller">def test_close_normal_and_raise_merge_into_one_real_fresh_pending_and_current_cleanup_replace():
+        from scar.ir.program.resumption import SavedRole, SuspendTerminator
+        graph, details = continuation_close_cleanup_program()
+&gt;       _core_valid(graph)
+
+tests/unit/test_program_continuation_connections.py:354: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/unit/test_program_continuation_connections.py:36: in _core_valid
+    require_valid(replace(graph, protocol_scopes=(), protocol_operations=(),
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='finally'), regions=(Region(id=RegionID(value='finally'), label='hand-authored resuma...rotocol_scopes=(), protocol_operations=(), protocol_call_inputs=(), protocol_result_consumers=(), protocol_bindings=())
+
+    def require_valid(graph: ProgramGraph) -&gt; None:
+        issues = validate(graph)
+        if issues:
+&gt;           raise ValueError("; ".join(f"{issue.code} at {issue.path}: {issue.message}" for issue in issues))
+E           ValueError: resumption_caller_parameter at program_block:finally.close.call: only an Attached block carries exactly one current caller parameter; resumption_caller_forward at program_operation:finally.invoke: ordinary edge forwards the exact current caller; resumption_caller_forward at program_operation:finally.invoke: ordinary edge forwards the exact current caller
+
+scar/ir/program/validation.py:745: ValueError</failure></testcase><testcase classname="tests.unit.test_program_continuation_connections" name="test_shared_cleanup_pending_cannot_use_close_none_or_lose_the_new_close_exception[normal_none]" time="0.013"><failure message="ValueError: resumption_caller_parameter at program_block:finally.close.call: only an Attached block carries exactly one current caller parameter; resumption_caller_forward at program_operation:finally.invoke: ordinary edge forwards the exact current caller; resumption_caller_forward at program_operation:finally.invoke: ordinary edge forwards the exact current caller">wrong = 'normal_none'
+
+    @pytest.mark.parametrize("wrong", ("normal_none", "raise_old_packet"))
+    def test_shared_cleanup_pending_cannot_use_close_none_or_lose_the_new_close_exception(wrong):
+        graph, details = continuation_close_cleanup_program()
+        operation_id = details["normal_jump"] if wrong == "normal_none" else details["failure_jump"]
+        original = next(operation for operation in graph.operations if operation.id == operation_id)
+        if wrong == "normal_none":
+            # Metadata-only wrong source stays core-valid: choose the close NORMAL
+            # Reference result as the packet trigger, without changing any edge.
+            from scar.ir.program.protocol_connections import InjectedPacketTrigger
+            graph = replace(graph, protocol_call_inputs=tuple(replace(row, cases=tuple(
+                replace(case, trigger=InjectedPacketTrigger(details["none_result"])) for case in row.cases))
+                for row in graph.protocol_call_inputs))
+&gt;           assert "protocol_continuation_trigger" in _codes(graph)
+                                                      ^^^^^^^^^^^^^
+
+tests/unit/test_program_continuation_connections.py:391: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/unit/test_program_continuation_connections.py:41: in _codes
+    _core_valid(graph)
+tests/unit/test_program_continuation_connections.py:36: in _core_valid
+    require_valid(replace(graph, protocol_scopes=(), protocol_operations=(),
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='finally'), regions=(Region(id=RegionID(value='finally'), label='hand-authored resuma...rotocol_scopes=(), protocol_operations=(), protocol_call_inputs=(), protocol_result_consumers=(), protocol_bindings=())
+
+    def require_valid(graph: ProgramGraph) -&gt; None:
+        issues = validate(graph)
+        if issues:
+&gt;           raise ValueError("; ".join(f"{issue.code} at {issue.path}: {issue.message}" for issue in issues))
+E           ValueError: resumption_caller_parameter at program_block:finally.close.call: only an Attached block carries exactly one current caller parameter; resumption_caller_forward at program_operation:finally.invoke: ordinary edge forwards the exact current caller; resumption_caller_forward at program_operation:finally.invoke: ordinary edge forwards the exact current caller
+
+scar/ir/program/validation.py:745: ValueError</failure></testcase><testcase classname="tests.unit.test_program_continuation_connections" name="test_shared_cleanup_pending_cannot_use_close_none_or_lose_the_new_close_exception[raise_old_packet]" time="0.013"><failure message="ValueError: resumption_caller_parameter at program_block:finally.close.call: only an Attached block carries exactly one current caller parameter; resumption_caller_forward at program_operation:finally.invoke: ordinary edge forwards the exact current caller; resumption_caller_forward at program_operation:finally.invoke: ordinary edge forwards the exact current caller">wrong = 'raise_old_packet'
+
+    @pytest.mark.parametrize("wrong", ("normal_none", "raise_old_packet"))
+    def test_shared_cleanup_pending_cannot_use_close_none_or_lose_the_new_close_exception(wrong):
+        graph, details = continuation_close_cleanup_program()
+        operation_id = details["normal_jump"] if wrong == "normal_none" else details["failure_jump"]
+        original = next(operation for operation in graph.operations if operation.id == operation_id)
+        if wrong == "normal_none":
+            # Metadata-only wrong source stays core-valid: choose the close NORMAL
+            # Reference result as the packet trigger, without changing any edge.
+            from scar.ir.program.protocol_connections import InjectedPacketTrigger
+            graph = replace(graph, protocol_call_inputs=tuple(replace(row, cases=tuple(
+                replace(case, trigger=InjectedPacketTrigger(details["none_result"])) for case in row.cases))
+                for row in graph.protocol_call_inputs))
+            assert "protocol_continuation_trigger" in _codes(graph)
+        else:
+            changed = replace(original, uses=tuple(replace(use, value=details["injected"])
+                if index == 0 else use for index, use in enumerate(original.uses)))
+            graph = replace(graph, operations=tuple(changed if operation.id == changed.id else operation
+                                                   for operation in graph.operations))
+&gt;           assert "protocol_close_continuation" in _codes(graph)
+                                                    ^^^^^^^^^^^^^
+
+tests/unit/test_program_continuation_connections.py:397: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/unit/test_program_continuation_connections.py:41: in _codes
+    _core_valid(graph)
+tests/unit/test_program_continuation_connections.py:36: in _core_valid
+    require_valid(replace(graph, protocol_scopes=(), protocol_operations=(),
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='finally'), regions=(Region(id=RegionID(value='finally'), label='hand-authored resuma...rotocol_scopes=(), protocol_operations=(), protocol_call_inputs=(), protocol_result_consumers=(), protocol_bindings=())
+
+    def require_valid(graph: ProgramGraph) -&gt; None:
+        issues = validate(graph)
+        if issues:
+&gt;           raise ValueError("; ".join(f"{issue.code} at {issue.path}: {issue.message}" for issue in issues))
+E           ValueError: resumption_caller_parameter at program_block:finally.close.call: only an Attached block carries exactly one current caller parameter; resumption_caller_forward at program_operation:finally.invoke: ordinary edge forwards the exact current caller; resumption_caller_forward at program_operation:finally.invoke: ordinary edge forwards the exact current caller
+
+scar/ir/program/validation.py:745: ValueError</failure></testcase></testsuite></testsuites>

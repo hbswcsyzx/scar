@@ -1,0 +1,128 @@
+{
+  "status": "PASSED_MAIN_SHARED_CONTEXT_AND_LEGACY_WIRE",
+  "graph_operations": [
+    85,
+    217
+  ],
+  "source_lower": 0,
+  "target_exec": 0,
+  "whole_publication_recheck": false,
+  "fragments": [
+    {
+      "artifact": {
+        "uri": "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/source_body_fragments_20261026/attempt03/store/bodies/8c904cf31604c77b8c160ac308bf3df34a7493af01e73543cf66cbd9aa2c9164.json.gz",
+        "sha256": "daccf2266e010ec9be53db7d021a3479eac2e1a79dd7ad435f115842d54dd966",
+        "size_bytes": 62325,
+        "schema": "scar.source-body-fragment/1"
+      },
+      "decoded_sha256": "8c904cf31604c77b8c160ac308bf3df34a7493af01e73543cf66cbd9aa2c9164",
+      "decoded_bytes": 662175,
+      "representation": "gzip-canonical-json",
+      "pointer": "#",
+      "declaration": null
+    },
+    {
+      "artifact": {
+        "uri": "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/source_body_fragments_20261026/attempt03/store/bodies/167c30e230e9775975ce4b97095b7e7b671d33b8ae21c5701e57cae4463c2ebf.json.gz",
+        "sha256": "4f3ee42171a1a6c45cb5eb8faa0442851f613433ee67e87cc144ed00458c2a99",
+        "size_bytes": 162209,
+        "schema": "scar.source-body-fragment/1"
+      },
+      "decoded_sha256": "167c30e230e9775975ce4b97095b7e7b671d33b8ae21c5701e57cae4463c2ebf",
+      "decoded_bytes": 1867126,
+      "representation": "gzip-canonical-json",
+      "pointer": "#",
+      "declaration": null
+    }
+  ],
+  "original_legacy": {
+    "artifact": {
+      "uri": "/home/zyf/AAA/scar-worktrees/source-call-model/artifacts/experiments/source_call_kwargs_bodies_20261025/candidate04/attempt04/body-01-source-program5.json.gz",
+      "sha256": "6d13b95d22473d1712ebcf2852f512f5fcef2b56902dd0de4369e244027bbcfc",
+      "size_bytes": 1602195,
+      "schema": "scar.source-program/5"
+    },
+    "decoded_sha256": "afc1809be2642fca9116e90b33178db23e7c75a6b7529485f54dd3fa406920d8",
+    "decoded_bytes": 14769551,
+    "representation": "gzip-canonical-json",
+    "pointer": "#",
+    "declaration": null
+  },
+  "shared_session": {
+    "stored_input_bytes": 1764916,
+    "decoded_input_bytes": 16639005,
+    "stored_output_bytes": 0,
+    "decoded_output_bytes": 0,
+    "existing_output_guard_bytes": 0,
+    "context_reads": 1,
+    "context_validations": 1,
+    "context_hash_guards": 4,
+    "body_reads": 2,
+    "elapsed_seconds": 21.65767439902993
+  },
+  "wrong_context_session": {
+    "stored_input_bytes": 1540382,
+    "decoded_input_bytes": 0,
+    "stored_output_bytes": 0,
+    "decoded_output_bytes": 0,
+    "existing_output_guard_bytes": 0,
+    "context_reads": 0,
+    "context_validations": 0,
+    "context_hash_guards": 0,
+    "body_reads": 0,
+    "elapsed_seconds": 0.05205610295524821
+  },
+  "wrong_namespace_session": {
+    "stored_input_bytes": 62325,
+    "decoded_input_bytes": 662175,
+    "stored_output_bytes": 0,
+    "decoded_output_bytes": 0,
+    "existing_output_guard_bytes": 0,
+    "context_reads": 0,
+    "context_validations": 0,
+    "context_hash_guards": 0,
+    "body_reads": 0,
+    "elapsed_seconds": 0.022481897962279618
+  },
+  "negative_checks": [
+    {
+      "case": "wrong-context-SHA",
+      "error": "source fragment stored SHA/input changed"
+    },
+    {
+      "case": "wrong-namespace",
+      "error": "source fragment namespace differs"
+    }
+  ],
+  "legacy_compatibility": {
+    "source_program_schema": 5,
+    "wire_tree_equal": true,
+    "graph_metadata_equal": true,
+    "stored_input_bytes": 1602195,
+    "decoded_input_bytes": 14769551
+  },
+  "retained_text_input_bytes": 22880,
+  "extra_body_receipt_projection_read": 62325,
+  "extra_body_receipt_projection_decoded": 662175,
+  "elapsed_seconds": 37.336779746983666,
+  "peak_self_rss_KiB": 225264,
+  "source_receipts": [
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/store/source_fragments.py",
+      "bytes": 18029,
+      "sha256": "1a970ebf8e6e762e9a8884078da52b1c3c2d7b4dc3c449319c6bce60903fd5bb"
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/analysis/program_lowering.py",
+      "bytes": 89533,
+      "sha256": "fffecc3f51414be699d54107d0850f71a619e9dc1c9c2cdd483b0500d9d8d992"
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/program/source_language.py",
+      "bytes": 7144,
+      "sha256": "a2cb9513d7a880561f45183277d57f390aef6da521f1830e15e157230f463f96"
+    }
+  ],
+  "source_receipts_unchanged": true,
+  "scope": "existing normal source context AST/semantics/CFG and ordinary core/structured/language body checks; no new CodeWitness/runtime/effects/content/ready proof"
+}

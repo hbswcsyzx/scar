@@ -1,0 +1,82 @@
+{
+  "checks": {
+    "missing_raise_release": {
+      "message": "string source validation: string completion lost or reordered a consumed input release",
+      "rejected": true
+    },
+    "real_frontend_call_value": {
+      "effects_established": false,
+      "outer_pending_verified": false,
+      "policy": "CPYTHON_314_FSTRING_SOURCE_V1",
+      "protocol_operations": 3,
+      "records": [
+        {
+          "both_completion_releases_checked": true,
+          "compiler_verified": false,
+          "effects_established": false,
+          "frontiers": [
+            "FSTRING_CODE_WITNESS_REQUIRED",
+            "FSTRING_OUTER_PENDING_PREFIX_UNVERIFIED",
+            "FSTRING_RUNTIME_AND_EFFECTS_UNVERIFIED"
+          ],
+          "pending": {
+            "enclosing_prefix_consistency_checked": true,
+            "frontiers": [
+              {
+                "kind": "FSTRING_CHILD_PRIMITIVE_CONSUMPTION_UNVERIFIED",
+                "operation": "program_operation:500052be343e1206b4ef3ee6a9801a39"
+              }
+            ],
+            "intermediate_consumption_verified": false,
+            "ordered_local_pending_checked": true,
+            "outer_pending_verified": false,
+            "whole_lifetime_verified": false
+          },
+          "protocol_operations": 3,
+          "runtime_code_instance_established": false,
+          "source": "source:atom:cc964a70d0171311b0cbae8c",
+          "source_shape_verified": true,
+          "whole_lifetime_verified": false
+        }
+      ],
+      "runtime_code_instance_established": false,
+      "whole_lifetime_verified": false
+    },
+    "reordered_normal_release": {
+      "message": "string source validation: string completion lost or reordered a consumed input release",
+      "rejected": true
+    }
+  },
+  "code_witness_compiler_check_performed": false,
+  "elapsed_s": 0.2294202100019902,
+  "fixture_layout_compilation_performed": true,
+  "operations": 42,
+  "ordinary_string_overlay_count": 1,
+  "original_target_body_lowerings": 0,
+  "production_sources": [
+    {
+      "bytes": 15507,
+      "path": "scar/analysis/source_heap_lowering.py",
+      "sha256": "a4e6d4b7ccd1c4981e67cd38117f6887ade8f63b7d9e3a07193cc7db64f28f0e"
+    },
+    {
+      "bytes": 13200,
+      "path": "scar/analysis/source_string_lowering.py",
+      "sha256": "5c7b5483effa97cfebb5905c4fc64050a200399c944a5f9eb48bde3b10759d7f"
+    },
+    {
+      "bytes": 22863,
+      "path": "scar/analysis/source_string_validation.py",
+      "sha256": "2be18373563d4850c95f341e3c57fe33f7e0c31aa6de5fd35ac81c8baab44b2e"
+    },
+    {
+      "bytes": 21725,
+      "path": "scar/analysis/source_language_validation.py",
+      "sha256": "9aab0db3459c3cc31124c5630bca365a35cd4b70d82183fc3e98dd46d8d37d7e"
+    }
+  ],
+  "small_fixture_lowerings": 1,
+  "source_prepares": 1,
+  "status": "PASSED",
+  "target_executions": 0
+}

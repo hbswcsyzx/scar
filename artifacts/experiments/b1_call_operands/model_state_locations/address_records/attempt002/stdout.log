@@ -1,0 +1,54 @@
+......F.F..F..                                                           [100%]
+=================================== FAILURES ===================================
+_______ test_mixed_owner_access_and_real_invoke_ports_form_valid_overlay _______
+
+    def test_mixed_owner_access_and_real_invoke_ports_form_valid_overlay():
+        graph, details = state_address_program()
+        require_valid(graph)
+        assert state_address_errors(graph) == ()
+        root, invoke = graph.state_address_refinements
+        assert type(root.site) is ExistingAccess
+        assert root.site.operation == details["root_operation"]
+        assert [effect.mode for effect in root.effects] == [
+            AccessMode.READ, AccessMode.WRITE, AccessMode.READ_WRITE,
+        ]
+>       assert type(invoke.site) is InvokeStateOperand
+                                    ^^^^^^^^^^^^^^^^^^
+E       NameError: name 'InvokeStateOperand' is not defined
+
+tests/unit/test_program_state_address_validation.py:37: NameError
+______ test_effect_modes_cannot_exceed_or_misstate_complete_coarse_access ______
+
+    def test_effect_modes_cannot_exceed_or_misstate_complete_coarse_access():
+        graph, _ = state_address_program()
+        root = graph.state_address_refinements[0]
+        read_as_write = replace(root.effects[0], mode=AccessMode.READ_WRITE)
+        bad_mode = replace(root, effects=(read_as_write, *root.effects[1:]))
+>       assert "address_mode_exceeds_summary" in _codes(_replace_refinement(graph, 0, bad_mode))
+E       AssertionError: assert 'address_mode_exceeds_summary' in set()
+E        +  where set() = _codes(ProgramGraph(root=RegionID(value='address.root'), regions=(Region(id=RegionID(value='address.root'), label='state addr...e=<AccessMode.READ_WRITE: 'READ_WRITE'>, stage=None),), coverage=<AddressCoverage.PARTIAL: 'PARTIAL'>, protocol=None))))
+E        +    where ProgramGraph(root=RegionID(value='address.root'), regions=(Region(id=RegionID(value='address.root'), label='state addr...e=<AccessMode.READ_WRITE: 'READ_WRITE'>, stage=None),), coverage=<AddressCoverage.PARTIAL: 'PARTIAL'>, protocol=None))) = _replace_refinement(ProgramGraph(root=RegionID(value='address.root'), regions=(Region(id=RegionID(value='address.root'), label='state addr...e=<AccessMode.READ_WRITE: 'READ_WRITE'>, stage=None),), coverage=<AddressCoverage.PARTIAL: 'PARTIAL'>, protocol=None))), 0, StateAddressRefinement(site=ExistingAccess(operation=OperationID(value='address.root_access'), index=0), effects=(Addr...mode=<AccessMode.READ_WRITE: 'READ_WRITE'>, stage=None)), coverage=<AddressCoverage.PARTIAL: 'PARTIAL'>, protocol=None))
+
+tests/unit/test_program_state_address_validation.py:57: AssertionError
+___ test_invoke_selector_must_use_actual_invoke_argument_not_edge_forwarding ___
+
+    def test_invoke_selector_must_use_actual_invoke_argument_not_edge_forwarding():
+        graph, details = state_address_program()
+        invoke_id = details["invoke_operation"]
+        operations = {operation.id: operation for operation in graph.operations}
+        invoke = operations[invoke_id]
+        operations[invoke_id] = replace(
+            invoke, invoke_arguments=tuple(use for use in invoke.invoke_arguments
+                                          if use != details["dynamic_key_use"]),
+        )
+        bad_graph = replace(graph, operations=tuple(operations[row.id] for row in graph.operations))
+>       assert "address_invoke_argument" in _codes(bad_graph)
+E       AssertionError: assert 'address_invoke_argument' in set()
+E        +  where set() = _codes(ProgramGraph(root=RegionID(value='address.root'), regions=(Region(id=RegionID(value='address.root'), label='state addr...e=<AccessMode.READ_WRITE: 'READ_WRITE'>, stage=None),), coverage=<AddressCoverage.PARTIAL: 'PARTIAL'>, protocol=None))))
+
+tests/unit/test_program_state_address_validation.py:112: AssertionError
+=========================== short test summary info ============================
+FAILED tests/unit/test_program_state_address_validation.py::test_mixed_owner_access_and_real_invoke_ports_form_valid_overlay
+FAILED tests/unit/test_program_state_address_validation.py::test_effect_modes_cannot_exceed_or_misstate_complete_coarse_access
+FAILED tests/unit/test_program_state_address_validation.py::test_invoke_selector_must_use_actual_invoke_argument_not_edge_forwarding
+3 failed, 11 passed in 0.49s

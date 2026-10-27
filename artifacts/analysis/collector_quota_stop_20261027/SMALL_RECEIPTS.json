@@ -1,0 +1,724 @@
+{
+  "python-call-target-meta.2187000.json": {
+    "schema": "scar.python-call-target-collection",
+    "schema_version": 2,
+    "capabilities": [
+      "PYTHON_CALL_TARGETS_V2",
+      "OBSERVED_PYTHON_CALLEE_SCOPE_V1"
+    ],
+    "process_id": 2187000,
+    "project_root": "/home/zyf/AAA/scar-worktrees/collector-noop-events/artifacts/analysis/collector_quota_stop_20261027",
+    "scope_policy": "OBSERVED_EXACT_PYTHON_CALLEES_V1",
+    "budget": {
+      "max_records": 100,
+      "max_bytes": 18000,
+      "max_selected_codes": 32
+    },
+    "counts": {
+      "TARGET": 2,
+      "ENTRY": 0,
+      "GAP": 0
+    },
+    "stopped": false,
+    "file": {
+      "path": "/tmp/quota-bound-collector-ebe8z7bh/python-call-targets.2187000.jsonl",
+      "bytes": 818,
+      "sha256": "ec3fb167c50c0e1f3558095046e9342f2e283e8f5ffa23b8bd51df2da944466b",
+      "rows": 2
+    },
+    "legacy_inputs": [],
+    "receiver_is_separate_from_monitoring_arg0": true,
+    "contents_state_ready_or_complete_program_established": false
+  },
+  "python-call-targets.2187000.jsonl.snapshot-receipt.json": {
+    "status": "MATERIALIZED",
+    "complete": true,
+    "source": {
+      "uri": "/tmp/quota-bound-collector-ebe8z7bh/python-call-targets.2187000.jsonl.snapshot",
+      "raw_bytes": 1863,
+      "sha256": "018333a8681812e6f89ebf0af035bb622f03ae776339cf11aece20b0bd91e132",
+      "format": "scar.snapshot-journal/1",
+      "declared_pid": 2187000,
+      "closed_footer": true
+    },
+    "output": {
+      "uri": "/tmp/quota-bound-collector-ebe8z7bh/python-call-targets.2187000.jsonl",
+      "raw_bytes": 818,
+      "lines": 2,
+      "sha256": "ec3fb167c50c0e1f3558095046e9342f2e283e8f5ffa23b8bd51df2da944466b",
+      "published": true
+    },
+    "producer_receipt": {
+      "complete": true,
+      "counts": {
+        "accepted_bytes": 756,
+        "accepted_frame_bytes": 790,
+        "accepted_records": 2,
+        "append_calls": 2,
+        "close_timed_out": false,
+        "inflight_highwater_bytes": 790,
+        "queue_highwater_bytes": 790,
+        "queued_bytes": 0,
+        "rejected": {
+          "closing_or_closed": 0,
+          "queue_full": 0,
+          "record_byte_limit": 0,
+          "serialization_error": 0,
+          "total_byte_limit": 0,
+          "writer_unavailable": 0,
+          "wrong_root": 0
+        },
+        "writer_error": null,
+        "written_frame_bytes": 790,
+        "written_records": 2
+      },
+      "owner_pid": 2187000,
+      "schema": "scar.snapshot-journal-footer",
+      "schema_version": 1
+    },
+    "errors": [],
+    "rows_validated": true,
+    "domain_schema_validated": false,
+    "legacy_meta_allowed": true,
+    "encoder": {
+      "ensure_ascii": true,
+      "separators": [
+        ",",
+        ":"
+      ],
+      "allow_nan": false,
+      "newline": "\n"
+    },
+    "max_output_bytes": 18000,
+    "max_output_line_bytes": 2000000,
+    "postprocessor": {
+      "process_id": 2187031,
+      "parent_process_id": 2187000,
+      "role": "SCAR_OFFLINE_POSTPROCESSING"
+    }
+  },
+  "python-call-targets.2187000.jsonl.snapshot-close.json": {
+    "status": "CLOSED",
+    "complete": true,
+    "source": {
+      "uri": "/tmp/quota-bound-collector-ebe8z7bh/python-call-targets.2187000.jsonl.snapshot",
+      "raw_bytes": 1863,
+      "sha256": "018333a8681812e6f89ebf0af035bb622f03ae776339cf11aece20b0bd91e132",
+      "format": "scar.snapshot-journal/1",
+      "declared_pid": 2187000,
+      "closed_footer": true
+    },
+    "counts": {
+      "append_calls": 2,
+      "accepted_records": 2,
+      "accepted_bytes": 756,
+      "accepted_frame_bytes": 790,
+      "written_records": 2,
+      "written_frame_bytes": 790,
+      "rejected": {
+        "wrong_root": 0,
+        "serialization_error": 0,
+        "record_byte_limit": 0,
+        "total_byte_limit": 0,
+        "queue_full": 0,
+        "closing_or_closed": 0,
+        "writer_unavailable": 0
+      },
+      "queue_highwater_bytes": 790,
+      "inflight_highwater_bytes": 790,
+      "queued_bytes": 0,
+      "writer_error": null,
+      "close_timed_out": false
+    },
+    "errors": [],
+    "rows_validated": false,
+    "json_byte_quota_validated": false,
+    "writer_thread_alive": false,
+    "writer_thread_id": 137427163895488,
+    "writer_native_thread_id": 2187028,
+    "close_sha_readback_bytes": 1863
+  },
+  "function-environment-meta.2187000.json": {
+    "schema": "scar.function-environment-trace",
+    "schema_version": 1,
+    "process_id": 2187000,
+    "python": "3.14.7 | packaged by conda-forge | (main, Sep  2 2026, 21:08:32) [GCC 15.3.0]",
+    "implementation": "cpython",
+    "limits": {
+      "max_events": 100,
+      "max_bytes": 18000,
+      "max_references": 256
+    },
+    "events": 1,
+    "event_attempts": 2,
+    "dispatches": 1,
+    "entries": 0,
+    "gaps": 0,
+    "references": 7,
+    "bytes": 808,
+    "dropped_events": 1,
+    "errors": [
+      "OSError"
+    ],
+    "io_failed": true,
+    "stop_reason": "SNAPSHOT_TRANSPORT_REJECTED",
+    "registry_peak": 2,
+    "anchor_peak": 2,
+    "anchors_per_object_limit": 4,
+    "pending_peak": 1,
+    "pending_dispatches": 0,
+    "discarded_dispatches": 0,
+    "scope": "exact-function dispatch fields and supplied entry readonly-association checks only",
+    "identity_continuity": "live readonly owner checked by is; no anchors means unknown continuity",
+    "owner_contract": "Python-level readonly exact-function fields; native owner mutation is not closed",
+    "file": {
+      "path": "/tmp/quota-bound-collector-ebe8z7bh/function-environments.2187000.jsonl",
+      "raw_sha256": null,
+      "raw_bytes": 808,
+      "lines": 1
+    },
+    "reference_contents_observed": false,
+    "cell_contents_observed": false,
+    "logical_versions_established": false,
+    "callable_environment_established": false,
+    "defaults_binding_established": false,
+    "atomic_snapshot_established": false,
+    "effects_established": false,
+    "transformation_authorized": false
+  },
+  "function-environments.2187000.jsonl.snapshot-close.json": {
+    "status": "INCOMPLETE",
+    "complete": false,
+    "source": {
+      "uri": "/tmp/quota-bound-collector-ebe8z7bh/function-environments.2187000.jsonl.snapshot",
+      "raw_bytes": 1899,
+      "sha256": "8e397160fd5bbd37eb42c391db1c2e72644a9bdf786952b75e19bb8b92f1dd93",
+      "format": "scar.snapshot-journal/1",
+      "declared_pid": 2187000,
+      "closed_footer": true
+    },
+    "counts": {
+      "append_calls": 2,
+      "accepted_records": 1,
+      "accepted_bytes": 808,
+      "accepted_frame_bytes": 825,
+      "written_records": 1,
+      "written_frame_bytes": 825,
+      "rejected": {
+        "wrong_root": 0,
+        "serialization_error": 0,
+        "record_byte_limit": 0,
+        "total_byte_limit": 1,
+        "queue_full": 0,
+        "closing_or_closed": 0,
+        "writer_unavailable": 0
+      },
+      "queue_highwater_bytes": 825,
+      "inflight_highwater_bytes": 825,
+      "queued_bytes": 0,
+      "writer_error": null,
+      "close_timed_out": false
+    },
+    "errors": [],
+    "rows_validated": false,
+    "json_byte_quota_validated": false,
+    "writer_thread_alive": false,
+    "writer_thread_id": 137427172288192,
+    "writer_native_thread_id": 2187027,
+    "close_sha_readback_bytes": 1899
+  },
+  "stream-interface-meta.2187000.json": {
+    "schema": "scar.stream-interface-collection",
+    "schema_version": 1,
+    "profile": "SCAR_BUILTIN_STREAM_INTERFACES_V1",
+    "process_id": 2187000,
+    "project_root": "/home/zyf/AAA/scar-worktrees/collector-noop-events/artifacts/analysis/collector_quota_stop_20261027",
+    "file": {
+      "uri": "/tmp/quota-bound-collector-ebe8z7bh/stream-interfaces.2187000.jsonl",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size_bytes": 0,
+      "rows": 0
+    },
+    "counts": {
+      "BEGIN": 0,
+      "C_RETURN": 0,
+      "C_RAISE": 0,
+      "UNOBSERVED": 0
+    },
+    "errors": [
+      "OPERAND_INPUT_HANDOFF_UNAVAILABLE"
+    ],
+    "stopped": true,
+    "legacy_inputs": [],
+    "scope": "exact builtin stream calls at retained CALL sites; unplanned interiors and implicit IO unexpanded",
+    "tensor_or_stream_contents_read": false,
+    "file_descriptor_table_replayed": false,
+    "source_body_or_content_proof_established": false
+  },
+  "call-operand-meta.2187000.json": {
+    "schema": "scar.call-operands-trace",
+    "schema_version": 1,
+    "process_id": 2187000,
+    "project_root": "/home/zyf/AAA/scar-worktrees/collector-noop-events/artifacts/analysis/collector_quota_stop_20261027",
+    "python": "3.14.7 | packaged by conda-forge | (main, Sep  2 2026, 21:08:32) [GCC 15.3.0]",
+    "implementation": "cpython",
+    "rule": "SCAR_PROGRAM_PORTS_V2",
+    "limits": {
+      "max_events": 100,
+      "max_bytes": 18000,
+      "max_loads": 64,
+      "max_namespace_items": 4096,
+      "max_references": 256
+    },
+    "events": 2,
+    "event_attempts": 3,
+    "instructions": 0,
+    "call_attempts": 2,
+    "handshakes": 0,
+    "gaps": 0,
+    "loads": 0,
+    "references": 3,
+    "bytes": 941,
+    "dropped_events": 1,
+    "errors": [
+      "OSError",
+      "OPERAND_MATERIALIZATION_UNAVAILABLE"
+    ],
+    "io_failed": true,
+    "previous_profile": true,
+    "base_manifest": [
+      {
+        "path": "/tmp/quota-bound-collector-ebe8z7bh/call-codes.2187000.jsonl",
+        "family": "codes",
+        "process_id": 2187000,
+        "raw_sha256": "eb9b45e1b763a37c0553731de114aeb69956c29e6ed6562f73d128f8aa14e5e5",
+        "raw_bytes": 804,
+        "lines": 3
+      },
+      {
+        "path": "/tmp/quota-bound-collector-ebe8z7bh/call-events.2187000.jsonl",
+        "family": "events",
+        "process_id": 2187000,
+        "raw_sha256": "fd32b0d1006a7ef33e7bc5e780d85ced783f81ac96370ce92075666a6d59caf8",
+        "raw_bytes": 2207,
+        "lines": 4
+      },
+      {
+        "path": "/tmp/quota-bound-collector-ebe8z7bh/call-meta.2187000.json",
+        "family": "meta",
+        "process_id": 2187000,
+        "raw_sha256": "820be625ca247d37fb5c5e1352d7b55f98e72c107f8114491250eae25059db77",
+        "raw_bytes": 2549,
+        "lines": 1
+      }
+    ],
+    "reference_contents_observed": false,
+    "callable_environment_established": false,
+    "transformation_authorized": false
+  },
+  "call-meta.2187000.json": {
+    "schema": "scar.call-edge-trace",
+    "schema_version": 1,
+    "process_id": 2187000,
+    "project_root": "/home/zyf/AAA/scar-worktrees/collector-noop-events/artifacts/analysis/collector_quota_stop_20261027",
+    "python": "3.14.7 | packaged by conda-forge | (main, Sep  2 2026, 21:08:32) [GCC 15.3.0]",
+    "limits": {
+      "max_events": 100,
+      "max_bytes": 200000,
+      "max_codes": 32,
+      "max_values": 64,
+      "max_path": 16,
+      "max_references": 256
+    },
+    "events": 4,
+    "event_attempts": 4,
+    "invocations": 2,
+    "invocation_attempts": 2,
+    "codes": 3,
+    "bytes": 3011,
+    "dropped_events": 30,
+    "dropped_codes": 0,
+    "unknown_exits": 0,
+    "suspended_exits": 0,
+    "open_invocations": 0,
+    "active_frames": 0,
+    "errors": [],
+    "path_gaps": 0,
+    "io_failed": false,
+    "wall_ns": 705213323,
+    "scope": "actual Python calls delivered by installed owner-process thread hooks; no inferred thread submission",
+    "reference_contents_observed": false,
+    "callable_environment_established": false,
+    "recording_stop": {
+      "reason": "OPERAND_SNAPSHOT_TRANSPORT_REJECTED",
+      "skipped_entries": 30,
+      "retained_returns_still_attempted": true,
+      "scope_complete": false,
+      "atexit_or_conversion_boundary": false
+    },
+    "capture_profile": "SCAR_PROGRAM_PORTS_V2",
+    "scope_policy": "TARGET_PROCESS_INSTALLED_PYTHON_THREADS_V1",
+    "instruction_monitoring": false,
+    "captured_sources": {
+      "uri": "/tmp/quota-bound-collector-ebe8z7bh/captured-source-meta.2187000.json",
+      "sha256": "61f94c1fab69ecd6438377ef4f5b74670128c941b85ae58957f49adeff634f25",
+      "size_bytes": 1806,
+      "schema": "scar.captured-python-sources/1"
+    },
+    "instrumentation_excluded": {
+      "package_root": "/home/zyf/AAA/scar-worktrees/collector-noop-events/scar/trace",
+      "loader": "/home/zyf/AAA/scar-worktrees/collector-noop-events/sitecustomize.py"
+    },
+    "thread_hooks": {
+      "api": "threading.setprofile_all_threads",
+      "enumeration_api": "sys._current_frames",
+      "python_threads_at_install": 3,
+      "python_thread_identifiers_at_install": [
+        137427189073600,
+        137427197466304,
+        137427226724160
+      ],
+      "installing_python_ident": 137427226724160,
+      "installing_native_tid": 2187000,
+      "known_current_hook_present": true,
+      "known_future_threading_hook_present": false,
+      "existing_other_thread_hook_history": "NOT_OBSERVED",
+      "other_thread_hook_restoration": "NOT_ENUMERABLE; CLOSED_COLLECTOR_NOOP_IF_STILL_INSTALLED"
+    },
+    "target_forwarding": {
+      "kinds": [
+        "DISPATCH",
+        "IMPORT",
+        "TRACE"
+      ],
+      "roots": [],
+      "roots_seen": 0,
+      "max_metadata_bytes": 1000000,
+      "frontiers": [],
+      "context": "original entry caller site/path/ancestor; not direct-call or submission proof"
+    },
+    "scope_frontiers": [
+      "FUTURE_NON_THREADING_PYTHON_THREADS_NOT_GUARANTEED",
+      "PREINSTALL_ACTIVE_FRAMES_HAVE_NO_RETROACTIVE_ENTRY",
+      "FORK_AND_EXEC_CHILD_PYTHON_NOT_CAPTURED",
+      "PREEXISTING_OTHER_THREAD_HOOK_HISTORY_NOT_OBSERVED"
+    ]
+  },
+  "captured-source-meta.2187000.json": {
+    "schema": "scar.captured-python-sources",
+    "schema_version": 1,
+    "profile": "SCAR_PROGRAM_PORTS_V2",
+    "process_id": 2187000,
+    "limits": {
+      "max_files": 4,
+      "max_file_bytes": 20000,
+      "max_total_bytes": 40000
+    },
+    "files": [
+      {
+        "path": "/home/zyf/AAA/scar-worktrees/collector-noop-events/artifacts/analysis/collector_quota_stop_20261027/check.py",
+        "status": "ARCHIVED_SOURCE_BYTES",
+        "frontier": null,
+        "compiler_match": "NOT_CHECKED",
+        "loader_bytes_observed": false,
+        "stamp_at_observation": [
+          64517,
+          17599013,
+          4309,
+          1793090961032084606,
+          1793090961032084606
+        ],
+        "raw_sha256": "795a1125370c1995d0f5d375afa6c1c6ca214aadc22b65e447b727eb7a68e8fc",
+        "raw_bytes": 4309,
+        "encoding": "utf-8",
+        "normalized_sha256": "795a1125370c1995d0f5d375afa6c1c6ca214aadc22b65e447b727eb7a68e8fc",
+        "normalized_bytes": 4309,
+        "observation": "FIRST_DESCRIPTOR_OBSERVATION",
+        "source_row": 1,
+        "unchanged_at_close": true
+      }
+    ],
+    "code_sources": [
+      {
+        "code": "pycode-v2:d305e46adcd68147b2b12dfab3b3a3c587bc30cc5b357a9b61dacbda985d0640",
+        "path": "/home/zyf/AAA/scar-worktrees/collector-noop-events/artifacts/analysis/collector_quota_stop_20261027/check.py"
+      },
+      {
+        "code": "pycode-v2:eeef4ee73a4df64f8db5d8a36930adffbb5e8be5960feaada78ca09ee2b135ad",
+        "path": "/home/zyf/AAA/scar-worktrees/collector-noop-events/artifacts/analysis/collector_quota_stop_20261027/check.py"
+      },
+      {
+        "code": "pycode-v2:f652143ac7f62fc95a332622e0f466fba7febc34ce1dc055596bc3eb442be60c",
+        "path": "/home/zyf/AAA/scar-worktrees/collector-noop-events/artifacts/analysis/collector_quota_stop_20261027/check.py"
+      }
+    ],
+    "file": {
+      "uri": "/tmp/quota-bound-collector-ebe8z7bh/captured-sources.2187000.jsonl",
+      "sha256": "056408fde2b2367e86fca292294592e43f632361f94c3fe49097ed0dea801e7e",
+      "size_bytes": 6441,
+      "rows": 1
+    },
+    "source_raw_bytes_read": 4309,
+    "compiler_match": "NOT_CHECKED",
+    "loader_bytes_observed": false,
+    "runtime_optimize": 0,
+    "compile_flags_and_per_code_optimize": "NOT_OBSERVED"
+  },
+  "call-codes.2187000.jsonl.snapshot-receipt.json": {
+    "status": "MATERIALIZED",
+    "complete": true,
+    "source": {
+      "uri": "/tmp/quota-bound-collector-ebe8z7bh/call-codes.2187000.jsonl.snapshot",
+      "raw_bytes": 1924,
+      "sha256": "49ce2474422d5290db3a091562a4bbfbf3e11401976ba7a4202de34a9faf048a",
+      "format": "scar.snapshot-journal/1",
+      "declared_pid": 2187000,
+      "closed_footer": true
+    },
+    "output": {
+      "uri": "/tmp/quota-bound-collector-ebe8z7bh/call-codes.2187000.jsonl",
+      "raw_bytes": 804,
+      "lines": 3,
+      "sha256": "eb9b45e1b763a37c0553731de114aeb69956c29e6ed6562f73d128f8aa14e5e5",
+      "published": true
+    },
+    "producer_receipt": {
+      "complete": true,
+      "counts": {
+        "accepted_bytes": 799,
+        "accepted_frame_bytes": 850,
+        "accepted_records": 3,
+        "append_calls": 3,
+        "close_timed_out": false,
+        "inflight_highwater_bytes": 568,
+        "queue_highwater_bytes": 568,
+        "queued_bytes": 0,
+        "rejected": {
+          "closing_or_closed": 0,
+          "queue_full": 0,
+          "record_byte_limit": 0,
+          "serialization_error": 0,
+          "total_byte_limit": 0,
+          "writer_unavailable": 0,
+          "wrong_root": 0
+        },
+        "writer_error": null,
+        "written_frame_bytes": 850,
+        "written_records": 3
+      },
+      "owner_pid": 2187000,
+      "schema": "scar.snapshot-journal-footer",
+      "schema_version": 1
+    },
+    "errors": [],
+    "rows_validated": true,
+    "domain_schema_validated": false,
+    "legacy_meta_allowed": true,
+    "encoder": {
+      "ensure_ascii": true,
+      "separators": [
+        ",",
+        ":"
+      ],
+      "allow_nan": false,
+      "newline": "\n"
+    },
+    "max_output_bytes": 200000,
+    "max_output_line_bytes": 2000000,
+    "postprocessor": {
+      "process_id": 2187030,
+      "parent_process_id": 2187000,
+      "role": "SCAR_OFFLINE_POSTPROCESSING"
+    }
+  },
+  "call-codes.2187000.jsonl.snapshot-close.json": {
+    "status": "CLOSED",
+    "complete": true,
+    "source": {
+      "uri": "/tmp/quota-bound-collector-ebe8z7bh/call-codes.2187000.jsonl.snapshot",
+      "raw_bytes": 1924,
+      "sha256": "49ce2474422d5290db3a091562a4bbfbf3e11401976ba7a4202de34a9faf048a",
+      "format": "scar.snapshot-journal/1",
+      "declared_pid": 2187000,
+      "closed_footer": true
+    },
+    "counts": {
+      "append_calls": 3,
+      "accepted_records": 3,
+      "accepted_bytes": 799,
+      "accepted_frame_bytes": 850,
+      "written_records": 3,
+      "written_frame_bytes": 850,
+      "rejected": {
+        "wrong_root": 0,
+        "serialization_error": 0,
+        "record_byte_limit": 0,
+        "total_byte_limit": 0,
+        "queue_full": 0,
+        "closing_or_closed": 0,
+        "writer_unavailable": 0
+      },
+      "queue_highwater_bytes": 568,
+      "inflight_highwater_bytes": 568,
+      "queued_bytes": 0,
+      "writer_error": null,
+      "close_timed_out": false
+    },
+    "errors": [],
+    "rows_validated": false,
+    "json_byte_quota_validated": false,
+    "writer_thread_alive": false,
+    "writer_thread_id": 137427189073600,
+    "writer_native_thread_id": 2187025,
+    "close_sha_readback_bytes": 1924
+  },
+  "call-events.2187000.jsonl.snapshot-receipt.json": {
+    "status": "MATERIALIZED",
+    "complete": true,
+    "source": {
+      "uri": "/tmp/quota-bound-collector-ebe8z7bh/call-events.2187000.jsonl.snapshot",
+      "raw_bytes": 2871,
+      "sha256": "219d0056fa739df0f76771de91f46a1c34877a38f8b7ec60b121666fb5651864",
+      "format": "scar.snapshot-journal/1",
+      "declared_pid": 2187000,
+      "closed_footer": true
+    },
+    "output": {
+      "uri": "/tmp/quota-bound-collector-ebe8z7bh/call-events.2187000.jsonl",
+      "raw_bytes": 2207,
+      "lines": 4,
+      "sha256": "fd32b0d1006a7ef33e7bc5e780d85ced783f81ac96370ce92075666a6d59caf8",
+      "published": true
+    },
+    "producer_receipt": {
+      "complete": true,
+      "counts": {
+        "accepted_bytes": 1724,
+        "accepted_frame_bytes": 1792,
+        "accepted_records": 4,
+        "append_calls": 4,
+        "close_timed_out": false,
+        "inflight_highwater_bytes": 1792,
+        "queue_highwater_bytes": 1792,
+        "queued_bytes": 0,
+        "rejected": {
+          "closing_or_closed": 0,
+          "queue_full": 0,
+          "record_byte_limit": 0,
+          "serialization_error": 0,
+          "total_byte_limit": 0,
+          "writer_unavailable": 0,
+          "wrong_root": 0
+        },
+        "writer_error": null,
+        "written_frame_bytes": 1792,
+        "written_records": 4
+      },
+      "owner_pid": 2187000,
+      "schema": "scar.snapshot-journal-footer",
+      "schema_version": 1
+    },
+    "errors": [],
+    "rows_validated": true,
+    "domain_schema_validated": false,
+    "legacy_meta_allowed": true,
+    "encoder": {
+      "ensure_ascii": true,
+      "separators": [
+        ",",
+        ":"
+      ],
+      "allow_nan": false,
+      "newline": "\n"
+    },
+    "max_output_bytes": 200000,
+    "max_output_line_bytes": 2000000,
+    "postprocessor": {
+      "process_id": 2187029,
+      "parent_process_id": 2187000,
+      "role": "SCAR_OFFLINE_POSTPROCESSING"
+    }
+  },
+  "call-events.2187000.jsonl.snapshot-close.json": {
+    "status": "CLOSED",
+    "complete": true,
+    "source": {
+      "uri": "/tmp/quota-bound-collector-ebe8z7bh/call-events.2187000.jsonl.snapshot",
+      "raw_bytes": 2871,
+      "sha256": "219d0056fa739df0f76771de91f46a1c34877a38f8b7ec60b121666fb5651864",
+      "format": "scar.snapshot-journal/1",
+      "declared_pid": 2187000,
+      "closed_footer": true
+    },
+    "counts": {
+      "append_calls": 4,
+      "accepted_records": 4,
+      "accepted_bytes": 1724,
+      "accepted_frame_bytes": 1792,
+      "written_records": 4,
+      "written_frame_bytes": 1792,
+      "rejected": {
+        "wrong_root": 0,
+        "serialization_error": 0,
+        "record_byte_limit": 0,
+        "total_byte_limit": 0,
+        "queue_full": 0,
+        "closing_or_closed": 0,
+        "writer_unavailable": 0
+      },
+      "queue_highwater_bytes": 1792,
+      "inflight_highwater_bytes": 1792,
+      "queued_bytes": 0,
+      "writer_error": null,
+      "close_timed_out": false
+    },
+    "errors": [],
+    "rows_validated": false,
+    "json_byte_quota_validated": false,
+    "writer_thread_alive": false,
+    "writer_thread_id": 137427197466304,
+    "writer_native_thread_id": 2187024,
+    "close_sha_readback_bytes": 2871
+  },
+  "call-operands.2187000.jsonl.snapshot-close.json": {
+    "status": "INCOMPLETE",
+    "complete": false,
+    "source": {
+      "uri": "/tmp/quota-bound-collector-ebe8z7bh/call-operands.2187000.jsonl.snapshot",
+      "raw_bytes": 2049,
+      "sha256": "af29c125c2244094c60be64bef1ef64ace6cfb88a129cff805c922f84cf34712",
+      "format": "scar.snapshot-journal/1",
+      "declared_pid": 2187000,
+      "closed_footer": true
+    },
+    "counts": {
+      "append_calls": 3,
+      "accepted_records": 2,
+      "accepted_bytes": 941,
+      "accepted_frame_bytes": 975,
+      "written_records": 2,
+      "written_frame_bytes": 975,
+      "rejected": {
+        "wrong_root": 0,
+        "serialization_error": 0,
+        "record_byte_limit": 0,
+        "total_byte_limit": 1,
+        "queue_full": 0,
+        "closing_or_closed": 0,
+        "writer_unavailable": 0
+      },
+      "queue_highwater_bytes": 975,
+      "inflight_highwater_bytes": 975,
+      "queued_bytes": 0,
+      "writer_error": null,
+      "close_timed_out": false
+    },
+    "errors": [],
+    "rows_validated": false,
+    "json_byte_quota_validated": false,
+    "writer_thread_alive": false,
+    "writer_thread_id": 137427180680896,
+    "writer_native_thread_id": 2187026,
+    "close_sha_readback_bytes": 2049
+  }
+}

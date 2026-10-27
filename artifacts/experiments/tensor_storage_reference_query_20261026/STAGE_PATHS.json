@@ -1,0 +1,197 @@
+[
+  {
+    "path": "scar/analysis/tensor_storage_query.py",
+    "bytes": 17885,
+    "sha256": "a1029d9815f32dfad13cac4a57f28a364ad502defe66b879f88436c8ec740083"
+  },
+  {
+    "path": "artifacts/experiments/tensor_storage_reference_query_20261026/ACTUAL_TERMINAL.json",
+    "bytes": 920,
+    "sha256": "c7fd3b3c27de8f7b3dcf0a4c23675697ab9a9b308ffa1734e0ca500f1ac4f6c6"
+  },
+  {
+    "path": "artifacts/experiments/tensor_storage_reference_query_20261026/LAUNCH_FAILURE.json",
+    "bytes": 217,
+    "sha256": "b4209649669c256d6f31b1c179aee3549729df880b05544db3f03fb189de1466"
+  },
+  {
+    "path": "artifacts/experiments/tensor_storage_reference_query_20261026/REPORT.md",
+    "bytes": 4162,
+    "sha256": "0bbae3de59fa1adcb81ce21b20a2dd09c054886e5ff3e86c46b72d951b14e504"
+  },
+  {
+    "path": "artifacts/experiments/tensor_storage_reference_query_20261026/RETENTION.md",
+    "bytes": 524,
+    "sha256": "b5ec023115ccea04edc8ebe720504a97d35ec6126dbcb872e48f766a6bf464a6"
+  },
+  {
+    "path": "artifacts/experiments/tensor_storage_reference_query_20261026/attempt02/FAILURE.json",
+    "bytes": 1190,
+    "sha256": "9f365a3c38aae989cdbab0501385130c6568f50c5e026fb369671268b2e1b8b4"
+  },
+  {
+    "path": "artifacts/experiments/tensor_storage_reference_query_20261026/attempt02/INPUTS.json",
+    "bytes": 1979,
+    "sha256": "ca4530eaa3f1c4d154b42262f94faacc91389cdb6874a45b20392537fcea839a"
+  },
+  {
+    "path": "artifacts/experiments/tensor_storage_reference_query_20261026/attempt02/SOURCE_BEFORE_ANNOTATION_FIX.py",
+    "bytes": 16834,
+    "sha256": "7de4007c3d9b2d91213c7cc5181d46d3728726f4b0d0f1fc153c2c6be9a4c92c"
+  },
+  {
+    "path": "artifacts/experiments/tensor_storage_reference_query_20261026/attempt02/run.py",
+    "bytes": 2860,
+    "sha256": "bdd30da41a0c83201c1b4f4ca3b5f2aab0d65776acc3604b6ab1f7b25cc54dc3"
+  },
+  {
+    "path": "artifacts/experiments/tensor_storage_reference_query_20261026/attempt02/stderr.txt",
+    "bytes": 999,
+    "sha256": "4acb8ba7bfbb30609ce5295e192628c6124dce989e9f0dd46f038b5a7c91961e"
+  },
+  {
+    "path": "artifacts/experiments/tensor_storage_reference_query_20261026/attempt02/stdout.txt",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "artifacts/experiments/tensor_storage_reference_query_20261026/attempt03/FAILURE.json",
+    "bytes": 1417,
+    "sha256": "edb610c8d3df776e6cc7fa5d9585adffbced9592d73be18cd33cdb7b4b44060c"
+  },
+  {
+    "path": "artifacts/experiments/tensor_storage_reference_query_20261026/attempt03/INPUTS.json",
+    "bytes": 1979,
+    "sha256": "b990806a16f89cb1e85759b019dcd1b7006233141aaec18bc014222a4f7d1fe9"
+  },
+  {
+    "path": "artifacts/experiments/tensor_storage_reference_query_20261026/attempt03/SOURCE_BEFORE_ALLOCATION_LOOKUP_FIX.py",
+    "bytes": 17260,
+    "sha256": "c4b54c502e757dc59101461dbe6a4cc937fee6a284fc2cdda19b90a1e114a6a0"
+  },
+  {
+    "path": "artifacts/experiments/tensor_storage_reference_query_20261026/attempt03/run.py",
+    "bytes": 2860,
+    "sha256": "bdd30da41a0c83201c1b4f4ca3b5f2aab0d65776acc3604b6ab1f7b25cc54dc3"
+  },
+  {
+    "path": "artifacts/experiments/tensor_storage_reference_query_20261026/attempt03/stderr.txt",
+    "bytes": 1239,
+    "sha256": "d448fe283dc11a81b85950f1721ac1085dec1fbbe784bdf7cdf80b8329148222"
+  },
+  {
+    "path": "artifacts/experiments/tensor_storage_reference_query_20261026/attempt03/stdout.txt",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "artifacts/experiments/tensor_storage_reference_query_20261026/attempt04/FAILURE.json",
+    "bytes": 1860,
+    "sha256": "7b2fb326fa6a0e437b96445e95cb51d89edd4402856ce16bdeae9765e0397bfb"
+  },
+  {
+    "path": "artifacts/experiments/tensor_storage_reference_query_20261026/attempt04/INPUTS.json",
+    "bytes": 1979,
+    "sha256": "07ae6e56581fe002b229f42b47973e8194ed795d95a65433578d20183ce00709"
+  },
+  {
+    "path": "artifacts/experiments/tensor_storage_reference_query_20261026/attempt04/SOURCE_BEFORE_PROVIDER_KEY_FIX.py",
+    "bytes": 17315,
+    "sha256": "3ec09a583cbfc293bb0b40eb465926b438ed0ac1a6ad2afbd282d01b91f8c6ee"
+  },
+  {
+    "path": "artifacts/experiments/tensor_storage_reference_query_20261026/attempt04/run.py",
+    "bytes": 2860,
+    "sha256": "bdd30da41a0c83201c1b4f4ca3b5f2aab0d65776acc3604b6ab1f7b25cc54dc3"
+  },
+  {
+    "path": "artifacts/experiments/tensor_storage_reference_query_20261026/attempt04/stderr.txt",
+    "bytes": 1665,
+    "sha256": "e60cab2f493273dc25ef1859f14f5fc76af6b23cf5fa061639abb69dc3e731e8"
+  },
+  {
+    "path": "artifacts/experiments/tensor_storage_reference_query_20261026/attempt04/stdout.txt",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "artifacts/experiments/tensor_storage_reference_query_20261026/attempt05/INPUTS.json",
+    "bytes": 1979,
+    "sha256": "4378ecdb2b1347578daf4fbb790de578b7df78974e4d9f87a0d64a3d8d129504"
+  },
+  {
+    "path": "artifacts/experiments/tensor_storage_reference_query_20261026/attempt05/QUERY.json",
+    "bytes": 21526,
+    "sha256": "30498707814b0c104e7cc62aa7beae76e07295653b24a3ba8894e006d0369439"
+  },
+  {
+    "path": "artifacts/experiments/tensor_storage_reference_query_20261026/attempt05/RESULT.json",
+    "bytes": 1934,
+    "sha256": "c390dc0ce0445b2e8972d9c236f6fdea0ef037cc3b22f6d385b4ceb82c13f6f9"
+  },
+  {
+    "path": "artifacts/experiments/tensor_storage_reference_query_20261026/attempt05/SOURCE_PASSED.py",
+    "bytes": 17384,
+    "sha256": "a43053dae852f3b31a830473314c1dd8bc4fa61d109343e429fcabf577b057b3"
+  },
+  {
+    "path": "artifacts/experiments/tensor_storage_reference_query_20261026/attempt05/run.py",
+    "bytes": 2860,
+    "sha256": "bdd30da41a0c83201c1b4f4ca3b5f2aab0d65776acc3604b6ab1f7b25cc54dc3"
+  },
+  {
+    "path": "artifacts/experiments/tensor_storage_reference_query_20261026/attempt05/stderr.txt",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "artifacts/experiments/tensor_storage_reference_query_20261026/attempt05/stdout.txt",
+    "bytes": 1935,
+    "sha256": "bce15be9a287bd46050df6e8968ccda5f25fa774d0df6bf4e03a95c3d270d51b"
+  },
+  {
+    "path": "artifacts/experiments/tensor_storage_reference_query_20261026/attempt06/INPUTS.json",
+    "bytes": 1979,
+    "sha256": "0e54dcc9b41317b7ced8215891ccb835f5db24805c32d22551eec96eb3657e65"
+  },
+  {
+    "path": "artifacts/experiments/tensor_storage_reference_query_20261026/attempt06/QUERY.json",
+    "bytes": 21526,
+    "sha256": "b9e1b818edf24b159c2a841f3b0e8cd52f2c65b18d9105b72b18196c40da5f52"
+  },
+  {
+    "path": "artifacts/experiments/tensor_storage_reference_query_20261026/attempt06/RESULT.json",
+    "bytes": 1933,
+    "sha256": "3578429c6c9cf074637de1c35ec5238f7ce8010ea80c68c73b15fbb0a72d158c"
+  },
+  {
+    "path": "artifacts/experiments/tensor_storage_reference_query_20261026/attempt06/run.py",
+    "bytes": 2860,
+    "sha256": "bdd30da41a0c83201c1b4f4ca3b5f2aab0d65776acc3604b6ab1f7b25cc54dc3"
+  },
+  {
+    "path": "artifacts/experiments/tensor_storage_reference_query_20261026/attempt06/stderr.txt",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "artifacts/experiments/tensor_storage_reference_query_20261026/attempt06/stdout.txt",
+    "bytes": 1934,
+    "sha256": "fe3ac3beeef810c66376f230a4f7090a089feb493196343c226766e78b739ddd"
+  },
+  {
+    "path": "artifacts/experiments/tensor_storage_reference_query_20261026/run.py",
+    "bytes": 2822,
+    "sha256": "49afa26e82d330474d2e2a1c1570860f53437f40b21f75035d58ab71db837768"
+  },
+  {
+    "path": "artifacts/experiments/tensor_storage_reference_query_20261026/stderr.txt",
+    "bytes": 765,
+    "sha256": "a41a2a6a21d285a3f75af7f01c9b0a6828bb3004c7182f477ab944f7a39d2726"
+  },
+  {
+    "path": "artifacts/experiments/tensor_storage_reference_query_20261026/stdout.txt",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+]

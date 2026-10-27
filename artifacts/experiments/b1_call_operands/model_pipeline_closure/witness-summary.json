@@ -1,0 +1,42 @@
+{
+  "scope": "Actual bounded owned OS observations; no automatic IR binding, GPU or durability proof.",
+  "script_sha256": "d301a6fb3caad1538138ce10d157d9e73edf6285de3ba26e9d796fa3f1cabf02",
+  "observed": {
+    "file": {
+      "accepted_bytes": 8,
+      "closed": true,
+      "explicit_flush_returned": true,
+      "final_bytes": 8,
+      "final_sha256": "e30e916712e1c3cadfa6929d4ece20a189a5ab5ccce238f528b72055e8169fbc",
+      "fsync_returned": true,
+      "host_exception": null,
+      "requested_bytes": 8,
+      "visible_after_explicit_flush_bytes": 8,
+      "visible_before_explicit_flush_bytes": 0
+    },
+    "file_raise": {
+      "accepted_bytes": 8,
+      "closed": true,
+      "explicit_flush_returned": false,
+      "final_bytes": 8,
+      "final_sha256": "e30e916712e1c3cadfa6929d4ece20a189a5ab5ccce238f528b72055e8169fbc",
+      "fsync_returned": false,
+      "host_exception": "HostFailure",
+      "requested_bytes": 8,
+      "visible_before_explicit_flush_bytes": 0
+    },
+    "pending_raise": {
+      "actual_bytes": 4,
+      "buffer_nonzero_bytes_at_host_raise": 0,
+      "final_sha256": "39c962d347ed1503afcf75afae38d53c8e2bf2496a163a82f22a259540e935a9",
+      "host_exception": "HostFailure",
+      "requested_bytes": 8,
+      "this_view_released": true,
+      "work_done": true,
+      "work_done_at_host_raise": false,
+      "work_exception": "PartialWorkFailure"
+    }
+  },
+  "source_runtime_verified": false,
+  "transformation_authorized": false
+}

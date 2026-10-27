@@ -6,6 +6,7 @@ from enum import Enum
 from typing import Any
 
 from ._validation import cycle_errors, mapping_errors, record_errors
+from .common import EvidenceClaim
 
 from .ids import (
     MaterializationID,
@@ -176,6 +177,42 @@ class Materialization:
 
 
 @dataclass(slots=True)
+class ObjectInstance:
+    """A scoped object identity observation, independent of its contents.
+
+    Registration does not declare a birth, release, allocation or logical
+    value version. Evidence identifies the observation that supplied the ID;
+    first and last observations are not object lifetime boundaries.
+    """
+
+    id: ObjectID
+    scope: str
+    evidence: tuple[EvidenceClaim, ...]
+    metadata: dict[str, Any] = field(default_factory=dict)
+
+    def __post_init__(self) -> None:
+        if not isinstance(self.id, ObjectID):
+            raise TypeError("object instance id must be ObjectID")
+        self.id.__post_init__()
+        if type(self.scope) is not str or not self.scope:
+            raise ValueError("object instance scope must be a nonempty string")
+        if type(self.evidence) is not tuple or any(
+                not isinstance(item, EvidenceClaim) for item in self.evidence):
+            raise TypeError("object instance evidence must be a tuple of EvidenceClaim records")
+        if not self.evidence:
+            raise ValueError("object instance evidence must be nonempty")
+        if type(self.metadata) is not dict:
+            raise TypeError("object instance metadata must be a dictionary")
+
+    def as_dict(self) -> dict[str, Any]:
+        return {
+            "id": self.id.as_dict(), "scope": self.scope,
+            "evidence": [item.as_dict() for item in self.evidence],
+            "metadata": self.metadata,
+        }
+
+
+@dataclass(slots=True)
 class ObjectBinding:
     object_id: ObjectID
     value_version: ValueVersionID
@@ -204,7 +241,8 @@ class ValueGraph:
     """
 
     SCHEMA = "scar.ir.v2.values"
-    SCHEMA_VERSION = 1
+    SCHEMA_VERSION = 2
+    LEGACY_SCHEMA_VERSION = 1
 
     def __init__(self) -> None:
         self.logical_values: dict[LogicalValueID, LogicalValue] = {}
@@ -213,7 +251,23 @@ class ValueGraph:
         self.allocations: dict[StorageAllocationID, StorageAllocation] = {}
         self.regions: dict[StorageRegionID, StorageRegion] = {}
         self.materializations: dict[MaterializationID, Materialization] = {}
+        self.objects: dict[ObjectID, ObjectInstance] = {}
         self.bindings: list[ObjectBinding] = []
+
+    def add_object(self, instance: ObjectInstance) -> None:
+        errors = record_errors(instance, ObjectInstance, "object instance")
+        if errors:
+            raise ValueError("invalid object instance: " + "; ".join(errors))
+        self._insert(self.objects, instance.id, instance, "object")
+
+    def object_ids(self) -> set[ObjectID]:
+        """Return registered identities, including historical binding owners."""
+        return set(self.objects) | {binding.object_id for binding in self.bindings}
+
+    def has_object(self, object_id: ObjectID) -> bool:
+        """Check identity registration without selecting a content version."""
+        return object_id in self.objects or any(
+            binding.object_id == object_id for binding in self.bindings)
 
     def add_logical_value(self, value: LogicalValue) -> None:
         self._insert(self.logical_values, value.id, value, "logical value")
@@ -287,6 +341,7 @@ class ValueGraph:
             (self.allocations, StorageAllocationID, StorageAllocation, "allocations"),
             (self.regions, StorageRegionID, StorageRegion, "regions"),
             (self.materializations, MaterializationID, Materialization, "materializations"),
+            (self.objects, ObjectID, ObjectInstance, "objects"),
         ):
             errors.extend(mapping_errors(mapping, key_type, record_type, name))
         errors.extend(record_errors(self.bindings, list[ObjectBinding], "bindings"))
@@ -395,21 +450,27 @@ class ValueGraph:
         return errors
 
     def _validation_report(self, errors: list[str]) -> dict[str, Any]:
+        counts = {
+            "logical_values": len(self.logical_values),
+            "versions": len(self.versions),
+            "provenance": len(self.provenance),
+            "allocations": len(self.allocations),
+            "regions": len(self.regions),
+            "materializations": len(self.materializations),
+            "bindings": len(self.bindings),
+        }
+        if self.objects:
+            counts["objects"] = len(self.objects)
         return {
             "schema": self.SCHEMA,
-            "schema_version": self.SCHEMA_VERSION,
+            "schema_version": self._schema_version(),
             "valid": not errors,
             "errors": errors,
-            "counts": {
-                "logical_values": len(self.logical_values),
-                "versions": len(self.versions),
-                "provenance": len(self.provenance),
-                "allocations": len(self.allocations),
-                "regions": len(self.regions),
-                "materializations": len(self.materializations),
-                "bindings": len(self.bindings),
-            },
+            "counts": counts,
         }
+
+    def _schema_version(self) -> int:
+        return self.SCHEMA_VERSION if self.objects else self.LEGACY_SCHEMA_VERSION
 
     def assert_valid(self) -> dict[str, Any]:
         report = self.validate()
@@ -421,9 +482,9 @@ class ValueGraph:
         self.assert_valid()
         ordered = lambda mapping: [mapping[key].as_dict() for key in sorted(
             mapping, key=lambda item: item.wire)]
-        return {
+        document = {
             "schema": self.SCHEMA,
-            "schema_version": self.SCHEMA_VERSION,
+            "schema_version": self._schema_version(),
             "logical_values": ordered(self.logical_values),
             "versions": ordered(self.versions),
             "provenance": ordered(self.provenance),
@@ -436,10 +497,13 @@ class ValueGraph:
                                   item.relation.value))],
             "validation": self.validate(),
         }
+        if self.objects:
+            document["objects"] = ordered(self.objects)
+        return document
 
 
 __all__ = [
     "ProvenanceRelation", "EquivalenceClaim", "BindingRelation",
     "LogicalValue", "ValueVersion", "ProvenanceRecord", "StorageAllocation",
-    "StorageRegion", "Materialization", "ObjectBinding", "ValueGraph",
+    "StorageRegion", "Materialization", "ObjectInstance", "ObjectBinding", "ValueGraph",
 ]

@@ -1,0 +1,550 @@
+"""Conditional body activity and terminal history over original occurrences.
+
+Activity has an exact Drive interval. Terminal history uses the existing
+explicit native/no-reset lifecycle scope, independently of mutable state
+contents. Neither relation establishes native applicability or rewrite rights.
+"""
+from scar.ir.program.model import AccessMode, OperationResult, StateVersionValue, TerminatorKind
+from scar.ir.program.protocols import AdmissionPredicate, BodyStateCondition, BodyStatePredicateRule
+from scar.ir.program.queries import ProgramIndex
+
+from .await_outcome_evidence import pair
+from .common import Unresolved
+from .coordinates import OccurrencePhase, OccurrencePoint
+from .host_order import host_path
+from .request_state_history import _History, _empty_preservation, _flags, _unknown_pair
+from .resumable_flow import value_for_use
+from .state_preservation import state_preservation
+
+
+class _BodyHistory:
+    def __init__(self, ctx, shared):
+        self.ctx, self.shared = ctx, shared
+        self.read_helper = _History(ctx, shared)
+        self.gaps, self.cursor = [], None
+        self.native_scopes, self.native_by_drive = set(), {}
+        self.parents = {}
+        for call in ctx.resolved_call_activations.values():
+            self.parents.setdefault(call['activation'].id, []).append(call)
+
+    def gap(self, code):
+        if code not in self.gaps:
+            self.gaps.append(code)
+
+    def spend(self, kind, identity):
+        if self.shared.truncated or not self.shared.spend('body_state_' + kind, path=str(identity)):
+            self.gap('body_state_budget_exhausted')
+            if self.cursor is None:
+                self.cursor = {'phase': kind, 'identity': identity}
+            return False
+        return True
+
+    def value(self, identity):
+        return None if identity is None or type(identity) is Unresolved else self.ctx.values.get(identity)
+
+    def use(self, occurrence, identity):
+        return value_for_use(self.ctx, self.ctx.uses.get((occurrence.id, identity)))
+
+    def operation_ports(self, occurrence):
+        """All original owned ports, including raw scheduler/control Uses."""
+        definition = self.ctx.core_operations[occurrence.operation]
+        inputs, outputs, gaps = [], [], []
+        before = self.ctx.before.get(occurrence.id, {})
+        for use in definition.uses:
+            if not self.spend('owned_uses', occurrence.id):
+                break
+            actual = self.ctx.uses.get((occurrence.id, use.id))
+            value = value_for_use(self.ctx, actual)
+            original = self.ctx.core_values[use.value]
+            complete = value is not None and type(value) is not Unresolved
+            if complete and isinstance(original, StateVersionValue):
+                complete = before.get(original.location) == value.id
+            inputs.append({'definition': use, 'actual': actual, 'value': value, 'supported': complete})
+            if not complete:
+                gaps.append('body_state_owned_use_unobserved')
+        for identity in definition.results:
+            if not self.spend('owned_results', occurrence.id):
+                break
+            value = self.ctx.results.get((occurrence.id, identity))
+            outputs.append({'definition': self.ctx.core_values[identity], 'value': value})
+            if value is None:
+                gaps.append('body_state_owned_result_unobserved')
+        transfer = self.ctx.outgoing.get(occurrence.id)
+        if definition.terminator is not None and definition.terminator.successors:
+            if transfer is None:
+                gaps.append('body_state_owned_transfer_unobserved')
+            else:
+                block = self.ctx.blocks[self.ctx.visits[transfer.target].block]
+                for identity in block.arguments:
+                    if not self.spend('owned_landing_ports', occurrence.id):
+                        break
+                    value = self.ctx.results.get((transfer.target, identity))
+                    outputs.append({'definition': self.ctx.core_values[identity], 'value': value})
+                    if value is None:
+                        gaps.append('body_state_owned_landing_unobserved')
+        return {'input_inventory': definition.uses, 'inputs': tuple(inputs),
+                'outputs': tuple(outputs), 'transfer': transfer,
+                'supported': not gaps and not self.shared.truncated,
+                'gaps': tuple(dict.fromkeys(gaps))}
+
+    def native_projection(self, view):
+        """Original source-first native self projection, not an identity union."""
+        from scar.ir.program.protocol_await_records import AwaitAcquisition, AwaitBodyLink, ExpandedAwaitCallee
+        from .await_links import project_await_links, await_identity_errors
+        links = tuple(row for row in self.ctx.program.protocol_bindings
+                      if type(row) is AwaitBodyLink and row.drive == view['drive'].operation
+                      and row.projection is None)
+        for scope in dict.fromkeys(row.scope for row in links):
+            if scope in self.native_scopes:
+                continue
+            if not self.spend('native_source_scopes', scope):
+                break
+            self.native_scopes.add(scope)
+            project_await_links(self.ctx, scope, self.shared)
+            await_identity_errors(self.ctx, self.shared)
+            for job in self.ctx.await_jobs:
+                row = job.get('source_row')
+                if (row is None or type(row.contract) is not AwaitAcquisition
+                        or type(row.contract.expansion) is ExpandedAwaitCallee):
+                    continue
+                for occurrence in job['occurrences']:
+                    if not self.spend('native_source_occurrences', occurrence['advance'].id):
+                        break
+                    sources = occurrence.get('matched_sources', ())
+                    if (not occurrence['derived_checked'] or occurrence['advance_selected'] is not True
+                            or occurrence['case_selected'] is not True or len(sources) != 1
+                            or not occurrence['bindings']
+                            or any(item['original_copy'] is not True for item in occurrence['bindings'])):
+                        continue
+                    source, = sources
+                    if (source['accepted'] is not True or source['required_choices'] is not True
+                            or source['body_source_gaps']
+                            or any(getattr(gap, 'code', str(gap)).startswith('await_')
+                                   for gap in occurrence['gaps'])):
+                        continue
+                    for route in occurrence['routes']:
+                        for projection in route.get('projections', ()):
+                            if (projection['projection'] is not None or not projection['bindings']
+                                    or any(item['original_copy'] is not True
+                                           or item['compatibility']['status'] == 'CONFLICT'
+                                           for item in projection['bindings'])):
+                                continue
+                            identity = route['drive_occurrence'].id
+                            actual = self.ctx.resolved_body_drives[identity]
+                            # The native projection does not exempt ordinary
+                            # delivery from the selected advance to this Drive.
+                            delivery = pair(self.ctx, occurrence['iterator_value'],
+                                            actual['instance']['value'], self.shared)
+                            source_ports = self.operation_ports(source['occurrence'])
+                            if (delivery['match'] is not True or not source_ports['supported']
+                                    or self.shared.truncated):
+                                continue
+                            self.native_by_drive.setdefault(identity, []).append({
+                                'source_row': row, 'source': source, 'advance': occurrence['advance'],
+                                'iterator_bindings': occurrence['bindings'], 'route': route,
+                                'projection': projection, 'delivery': delivery,
+                                'source_ports': source_ports,
+                                'scope': scope, **_flags()})
+        receipts = tuple(self.native_by_drive.get(view['drive'].id, ()))
+        supported = len(receipts) == 1 and not self.shared.truncated and not self.ctx.issues
+        return {'inventory': links, 'receipts': receipts, 'supported': supported,
+                'scope': 'conditional original native self acquisition; no ordinary copy edge is added',
+                **_flags()}
+
+    def body_pair(self, view, source, target):
+        # Comparing another candidate's frame is not an asserted copy edge.
+        # Select the local identity comparison before pair() could register a
+        # global copy conflict for an ordinary, expected distinct object.
+        from .content import ObjectIdentity
+        from .content_validation import artifact_key
+        identities = []
+        for value in (source, target):
+            row = (None if value is None or type(value) is Unresolved else
+                   self.ctx.resolved_denotations.get(value.id))
+            identities.append(None if row is None else row['denotation'].identity)
+        left, right = identities
+        if (type(left) is ObjectIdentity and type(right) is ObjectIdentity
+                and artifact_key(left.object.artifact) == artifact_key(right.object.artifact)
+                and left.object.object != right.object.object):
+            # These declarations choose a comparison algorithm only. The
+            # bounded helper still checks the fresh catalogs and actual scope.
+            return self.object_binding(source, target)
+        ordinary = pair(self.ctx, source, target, self.shared)
+        if ordinary['match'] is not None or self.shared.truncated:
+            return ordinary
+        identity = self.object_binding(source, target, ordinary=ordinary)
+        if identity['match'] is not None or self.shared.truncated:
+            return identity
+        if view is None:
+            return identity
+        projection = self.native_projection(view)
+        if not projection['supported']:
+            return {**identity, 'native_projection': projection}
+        handle, receiver = view['instance']['creation_handle'], view['instance']['value']
+        routes = []
+        for left, right in ((handle, receiver), (receiver, handle)):
+            a = pair(self.ctx, source, left, self.shared)
+            b = pair(self.ctx, target, right, self.shared)
+            routes.append({'source': a, 'target': b})
+            if a['match'] is True and b['match'] is True and not self.shared.truncated:
+                support = (*a['support'], *b['support'], {
+                    'source': source.id, 'target': target.id,
+                    'rule': 'CONDITIONAL_NATIVE_BODY_PROJECTION', 'support': projection['receipts']})
+                return {**ordinary, 'match': True, 'ordinary_binding': ordinary,
+                        'conditional_native_projection': True, 'native_projection': projection,
+                        'projection_bindings': tuple(routes), 'support': support}
+        return {**identity, 'native_projection': projection, 'projection_bindings': tuple(routes)}
+
+    def object_binding(self, source, target, *, ordinary=None):
+        """A supplied current object identity, never a new original copy."""
+        from .reference_identity import object_identity
+        guard = object_identity(self.ctx, source, target, shared=self.shared)
+        match = guard['match']
+        if match is True and self.ctx.issues:
+            match = None
+        if self.shared.truncated:
+            match = None
+        support = (() if match is not True else ({
+            'rule': 'DECLARED_SCOPED_OBJECT_IDENTITY',
+            'source': source.id, 'target': target.id, 'identity_guard': guard},))
+        return {**_unknown_pair(), 'source_value': source, 'target_value': target,
+            'match': match, 'support': support, 'ordinary_binding': ordinary,
+            'identity_guard': guard,
+            'binding_kind': 'DECLARED_SCOPED_OBJECT_IDENTITY' if match is True else
+                            'DECLARED_SCOPED_DISTINCT_OBJECTS' if match is False else
+                            'UNPROVED_OBJECT_IDENTITY',
+            'conditional_object_identity': match is True,
+            'gaps': guard['gaps'],
+            'conditions': ('current same-object declarations are conditional; original copy is separate',
+                'no stored request field preservation or data-content equality is inferred')}
+
+    def chain(self, occurrence, *, stop=None, segment=None):
+        """Only exact synchronous ancestry; no temporal/callee instance guesses."""
+        ctx, rows, gaps, seen = self.ctx, [], [], set()
+        anchor, activation = occurrence, ctx.activation_of(occurrence.id)
+        supported = True
+        while activation not in seen:
+            if not self.spend('call_ancestry', activation):
+                supported = False
+                break
+            seen.add(activation)
+            if activation == stop:
+                if segment is not None and ctx.visits[anchor.visit].segment != segment:
+                    supported = False
+                    gaps.append('body_state_other_body_segment')
+                return {'calls': tuple(rows), 'root': activation, 'anchor': anchor,
+                        'supported': supported and not self.shared.truncated, 'gaps': tuple(gaps)}
+            candidates = self.parents.get(activation, ())
+            if not candidates and stop is None and ctx.activations[activation].region == ctx.program.root:
+                return {'calls': tuple(rows), 'root': activation, 'anchor': anchor,
+                        'supported': supported and not self.shared.truncated, 'gaps': tuple(gaps)}
+            if len(candidates) != 1:
+                supported = False
+                gaps.append('body_state_call_association_missing')
+                break
+            call, = candidates
+            ports = []
+            structural_gaps = tuple(gap for gap in call['gaps']
+                                    if gap.code != 'call_source_runtime_unverified')
+            if structural_gaps:
+                supported = False
+                gaps.extend(gap.code for gap in structural_gaps)
+            if call['entry'] is None or call['completion'] is None:
+                supported = False
+                gaps.append('body_state_call_endpoint_unobserved')
+            call_path = None
+            if call['entry'] is not None and call['completion'] is not None:
+                block = ctx.blocks[call['entry'].block]
+                first = self.read_helper.sites.get((call['entry'].id, block.operations[0]))
+                if first is not None:
+                    call_path = host_path(ctx, OccurrencePoint(first.id, OccurrencePhase.BEFORE),
+                        OccurrencePoint(call['completion'].id, OccurrencePhase.BEFORE), budget=self.shared)
+            if call_path is None:
+                supported = False
+                gaps.append('body_state_call_path_unproved')
+            for route in call['inputs']:
+                if not self.spend('call_input_ports', call['caller'].id):
+                    supported = False
+                    break
+                binding = pair(ctx, route['actual_value'], route['formal'], self.shared)
+                ports.append({'kind': 'input', 'route': route, 'binding': binding})
+                if binding['match'] is not True:
+                    supported = False
+                    gaps.append('body_state_call_input_unproved')
+            for route in call['outputs']:
+                if not self.spend('call_output_ports', call['caller'].id):
+                    supported = False
+                    break
+                actual = route['callee_use']
+                source = None if actual is None else self.value(actual.value)
+                target = route['caller_formal'] or route['caller_result']
+                binding = pair(ctx, source, target, self.shared)
+                ports.append({'kind': 'output', 'route': route, 'binding': binding})
+                if binding['match'] is not True:
+                    supported = False
+                    gaps.append('body_state_call_output_unproved')
+            rows.append({'association': call['association'], 'caller': call['caller'],
+                'entry': call['entry'], 'completion': call['completion'], 'ports': tuple(ports),
+                'entry_to_completion': call_path, 'validation_gaps': call['gaps']})
+            anchor, activation = call['caller'], ctx.activation_of(call['caller'].id)
+        if activation in seen and not gaps:
+            gaps.append('body_state_call_ancestry_cycle')
+        return {'calls': tuple(rows), 'root': activation, 'anchor': anchor,
+                'supported': False, 'gaps': tuple(dict.fromkeys(gaps))}
+
+    def drive_support(self, view):
+        ports, gaps = [], []
+        supported = (view['association'] is not None and view['entry_bridge']
+                     and view['outcome_bridge'] and view['path_complete'])
+        if not supported:
+            gaps.append('body_state_drive_interval_unproved')
+        owned_ports = self.operation_ports(view['drive'])
+        driver_chain = self.chain(view['drive'])
+        if not owned_ports['supported'] or not driver_chain['supported']:
+            supported = False
+            gaps.extend((*owned_ports['gaps'], *driver_chain['gaps']))
+        origin = view['origin']
+        creation_ports, creation_chain = None, None
+        if (origin is None or origin['association'] is None or origin['creation'] is None
+                or view['instance']['creation_handle'] is None):
+            supported = False
+            gaps.append('body_state_creation_unobserved')
+        if origin is not None and origin['creation'] is not None:
+            creation_ports = self.operation_ports(origin['creation'])
+            creation_chain = self.chain(origin['creation'])
+            if not creation_ports['supported'] or not creation_chain['supported']:
+                supported = False
+                gaps.extend((*creation_ports['gaps'], *creation_chain['gaps']))
+        creation_binding = self.body_pair(view, view['instance']['value'],
+                                         view['instance']['creation_handle'])
+        if creation_binding['match'] is not True:
+            supported = False
+            gaps.append('body_state_drive_owner_unproved')
+        for field in ('inputs', 'outputs', 'forwards'):
+            for row in view[field]:
+                if not self.spend('drive_ports', view['drive'].id):
+                    supported = False
+                    break
+                binding = pair(self.ctx, row['source_value'], row['formal'], self.shared)
+                ports.append({'kind': field, 'route': row, 'binding': binding})
+                if row['source_use'] is None or binding['match'] is not True:
+                    supported = False
+                    gaps.append('body_state_drive_port_unproved')
+        return {'supported': supported and not self.shared.truncated,
+                'creation_binding': creation_binding, 'ports': tuple(ports),
+                'owned_ports': owned_ports, 'driver_chain': driver_chain,
+                'creation_ports': creation_ports, 'creation_chain': creation_chain,
+                'gaps': tuple(dict.fromkeys(gaps))}
+
+
+def body_state_history(ctx, read_id, *, shared):
+    analysis = _BodyHistory(ctx, shared)
+    read, program = ctx.occurrences[read_id], ctx.program
+    operation = ctx.core_operations[read.operation]
+    declarations = tuple(row for row in program.protocol_operations
+        if row.operation == read.operation and type(row.contract) is AdmissionPredicate
+        and type(row.contract.subject) is BodyStateCondition)
+    predicate = declarations[0] if len(declarations) == 1 else None
+    drive_inventory, commit_inventory = tuple(program.body_drives), tuple(program.body_outcome_commits)
+    by_site = {}
+    for row in ctx.occurrences.values():
+        by_site.setdefault(row.operation, []).append(row)
+    active = [dict(drive=view['drive'], association=view['association'],
+        subject_binding=_unknown_pair(), drive_support=None, call_chain=None,
+        entry_order=None, outcome_order=None, expected_bool=None, gaps=(), status='NOT_CHECKED')
+        for view in ctx.resolved_body_drives.values()]
+    terminal = [dict(commit=commit, source=source, drive=None, association=None,
+        post_established=None, subject_binding=_unknown_pair(), terminal_scope=None,
+        terminal_route=None, source_chain=None, read_chain=None, drive_support=None,
+        source_state_bindings=(), content_preservation=_empty_preservation(),
+        expected_bool=None, gaps=(), status='NOT_CHECKED')
+        for commit in commit_inventory for source in by_site.get(commit.operation, ())]
+    missing = tuple(('drive', row) for row in drive_inventory if not by_site.get(row.operation)) + tuple(
+        ('commit', row) for row in commit_inventory if not by_site.get(row.operation))
+    if missing:
+        analysis.gap('body_state_original_sources_unobserved')
+    index = getattr(ctx, 'body_program_index', None)
+    prepared = index is not None
+    if index is None:
+        index = ProgramIndex(program)
+    read_region = ctx.block_regions[ctx.visits[read.visit].block]
+    read_scope = index.lifecycle_scope(read_region) if read_region in {
+        row.region for row in program.driver_lifecycles} else None
+    locations = tuple(sorted({access.location for access in operation.accesses}, key=lambda item: item.wire))
+    read_supported, subject, boolean, observed = False, None, None, None
+    if analysis.spend('read', read.id) and predicate is not None:
+        read_supported = operation.effects_complete
+        subject = analysis.use(read, predicate.contract.subject.instance_use)
+        current = ctx.current(OccurrencePoint(read.id, OccurrencePhase.BEFORE)) or {}
+        for access in operation.accesses:
+            if not analysis.spend('read_accesses', read.id):
+                read_supported = False
+                break
+            value = analysis.use(read, access.before)
+            if (access.mode is not AccessMode.READ or value is None or type(value) is Unresolved
+                    or current.get(access.location) != value.id):
+                read_supported = False
+                analysis.gap('body_state_read_input_unproved')
+        result = predicate.contract.result
+        if type(result) is OperationResult and result.operation == read.operation:
+            boolean = ctx.results.get((read.id, operation.results[result.index]))
+        if boolean is None or not locations:
+            read_supported = False
+            analysis.gap('body_state_read_result_or_support_unobserved')
+        observed = analysis.read_helper.observed_branch(read, predicate, boolean)
+    else:
+        analysis.gap('body_state_predicate_unresolved')
+    rule = None if predicate is None else predicate.contract.subject.rule
+    if rule not in (BodyStatePredicateRule.IS_RUNNING, BodyStatePredicateRule.IS_CLOSED):
+        analysis.gap('body_state_rule_inventory_only')
+    if rule is BodyStatePredicateRule.IS_RUNNING and not active:
+        analysis.gap('body_state_active_source_missing')
+    if rule is BodyStatePredicateRule.IS_CLOSED and not terminal:
+        analysis.gap('body_state_terminal_source_missing')
+    before_read = OccurrencePoint(read.id, OccurrencePhase.BEFORE)
+    for candidate in active:
+        drive = candidate['drive']
+        if not analysis.spend('active_sources', drive.id):
+            break
+        if rule is not BodyStatePredicateRule.IS_RUNNING:
+            candidate['status'] = 'NOT_APPLICABLE'
+            continue
+        view = ctx.resolved_body_drives[drive.id]
+        support = analysis.drive_support(view)
+        binding = analysis.body_pair(view, view['instance']['creation_handle'], subject)
+        gaps = list(support['gaps'])
+        candidate.update(drive_support=support, subject_binding=binding)
+        if binding['match'] is not True:
+            gaps.append('body_state_subject_unproved')
+        if view['association'] is not None and view['segment'] is not None:
+            chain = analysis.chain(read, stop=view['association'].activation, segment=view['segment'].id)
+            candidate['call_chain'] = chain
+            gaps.extend(chain['gaps'])
+        else:
+            chain = None
+            gaps.append('body_state_active_association_missing')
+        entry, outcome = view['entry_first'], view['outcome']
+        if entry is not None and outcome is not None:
+            candidate['entry_order'] = host_path(ctx,
+                OccurrencePoint(entry.id, OccurrencePhase.BEFORE), before_read, budget=shared)
+            candidate['outcome_order'] = host_path(ctx, before_read,
+                OccurrencePoint(outcome.id, OccurrencePhase.BEFORE), budget=shared)
+        if not candidate['entry_order'] or not candidate['outcome_order']:
+            gaps.append('body_state_active_interval_unproved')
+        if (read_supported and support['supported'] and binding['match'] is True
+                and chain is not None and chain['supported']
+                and candidate['entry_order'] and candidate['outcome_order'] and not shared.truncated):
+            candidate['expected_bool'] = True
+        candidate['gaps'] = tuple(dict.fromkeys(gaps))
+        candidate['status'] = 'DECLARED' if candidate['expected_bool'] is True else 'PARTIAL'
+    for candidate in terminal:
+        source, commit = candidate['source'], candidate['commit']
+        if not analysis.spend('terminal_sources', source.id):
+            break
+        if rule is not BodyStatePredicateRule.IS_CLOSED:
+            candidate['status'] = 'NOT_APPLICABLE'
+            continue
+        publication = index.body_publication(commit.operation)
+        point = index.lifecycle_after(commit.operation)
+        scope = point.scope if point is not None else None
+        source_region = ctx.block_regions[ctx.visits[source.visit].block]
+        transfer = ctx.incoming.get(source.visit)
+        view = None if transfer is None else ctx.resolved_body_drives.get(transfer.operation)
+        source_subject = analysis.use(source, commit.instance)
+        binding = analysis.body_pair(view, source_subject, subject)
+        gaps = []
+        established = (view is not None and view['drive'].operation == commit.outcome.drive
+            and view['outcome'] is not None and view['outcome'].operation == commit.outcome.source
+            and publication.source.kind in (TerminatorKind.RETURN, TerminatorKind.RAISE)
+            and scope is not None and scope.declaration.region == source_region
+            and point.terminal.is_finished(publication.instance.use.value)
+            and commit.operation in point.terminal.source_operations(publication.instance.use.value))
+        candidate.update(drive=None if view is None else view['drive'],
+            association=None if view is None else view['association'], terminal_scope=scope,
+            subject_binding=binding)
+        if view is not None:
+            support = analysis.drive_support(view)
+            candidate['drive_support'] = support
+            drive_binding = analysis.body_pair(view, view['instance']['creation_handle'], source_subject)
+            candidate['source_subject_binding'] = drive_binding
+            established = established and support['supported'] and drive_binding['match'] is True
+            gaps.extend(support['gaps'])
+        else:
+            gaps.append('body_state_terminal_drive_missing')
+        source_operation = ctx.core_operations[source.operation]
+        current = ctx.current(OccurrencePoint(source.id, OccurrencePhase.BEFORE)) or {}
+        after = ctx.current(OccurrencePoint(source.id, OccurrencePhase.AFTER)) or {}
+        ports = []
+        for access in source_operation.accesses:
+            if not analysis.spend('commit_state_ports', source.id):
+                established = False
+                break
+            value = analysis.use(source, access.before)
+            output = None if access.after is None else ctx.results.get((source.id, access.after))
+            ports.append({'access': access, 'input': value, 'output': output,
+                          'before': current.get(access.location), 'after': after.get(access.location)})
+            if (value is None or type(value) is Unresolved or current.get(access.location) != value.id
+                    or access.after is not None and (output is None or after.get(access.location) != output.id)):
+                established = False
+                gaps.append('body_state_terminal_state_port_unobserved')
+        candidate['source_state_bindings'] = tuple(ports)
+        candidate['post_established'] = True if established and not shared.truncated else None
+        source_chain, read_chain = analysis.chain(source), analysis.chain(read)
+        candidate.update(source_chain=source_chain, read_chain=read_chain)
+        gaps.extend((*source_chain['gaps'], *read_chain['gaps']))
+        route = host_path(ctx, OccurrencePoint(source.id, OccurrencePhase.AFTER), before_read, budget=shared)
+        candidate['terminal_route'] = route
+        same_scope = (scope is not None and read_scope is not None
+            and scope.interface.body == read_scope.interface.body
+            and scope.rule == read_scope.rule)
+        if not same_scope:
+            gaps.append('body_state_terminal_scope_unproved')
+        if binding['match'] is not True:
+            gaps.append('body_state_subject_unproved')
+        if not route:
+            gaps.append('body_state_terminal_route_unproved')
+        domains = tuple(sorted(set(locations) | (set(scope.interface.lifecycle) if scope else set()),
+                               key=lambda item: item.wire))
+        if established and domains and not shared.truncated:
+            candidate['content_preservation'] = state_preservation(ctx,
+                OccurrencePoint(source.id, OccurrencePhase.AFTER), before_read, domains, shared=shared)
+        # F is historical under the original explicit no-reset scope; P/field
+        # contents may change across these same calls. Keep that receipt apart.
+        if (read_supported and established and same_scope and binding['match'] is True and route
+                and source_chain['supported'] and read_chain['supported']
+                and source_chain['root'] == read_chain['root'] and not shared.truncated):
+            candidate['expected_bool'] = True
+        if not established:
+            gaps.append('body_state_terminal_post_unproved')
+        candidate['gaps'] = tuple(dict.fromkeys(gaps))
+        candidate['status'] = 'DECLARED' if candidate['expected_bool'] is True else 'PARTIAL'
+    expected = True if not shared.truncated and any(row['expected_bool'] is True
+                                                   for row in (*active, *terminal)) else None
+    analysis.gaps.extend(gap for gap in analysis.read_helper.gaps if gap not in analysis.gaps)
+    if shared.truncated:
+        analysis.gap('body_state_budget_exhausted')
+        if analysis.cursor is None:
+            analysis.cursor = {'phase': 'nested_query', 'read': read.id}
+    return {'read': read, 'predicate': predicate, 'predicate_inventory': declarations,
+        'drive_inventory': drive_inventory, 'commit_inventory': commit_inventory,
+        'no_body_finish_inventory': tuple(program.no_body_finishes),
+        'identity_inventory': tuple(ctx.model.denotations),
+        'missing_sources': missing, 'read_scope': read_scope, 'locations': locations,
+        'active_candidates': tuple(active), 'terminal_candidates': tuple(terminal),
+        'source_keys': tuple(('active', row['drive'].id) for row in active)
+                       + tuple(('terminal', row['source'].id) for row in terminal),
+        'expected_bool': expected, 'observed_branch': observed,
+        'consistent': None if expected is None or observed is None else expected is observed,
+        'status': 'NOT_CHECKED' if shared.truncated else 'DECLARED' if expected is True else 'PARTIAL',
+        'gaps': tuple(dict.fromkeys(analysis.gaps)), 'cursor': analysis.cursor,
+        'budget': {'limit': shared.limit, 'used': shared.used, 'costs': dict(shared.costs),
+                   'truncated': shared.truncated},
+        'preparation': {'original_occurrences': len(ctx.occurrences),
+            'call_associations': len(ctx.resolved_call_activations), 'program_index_reused': prepared},
+        'conditions': ('original BodyStateCondition/native profile semantics remain conditional',
+            'terminal F uses the original explicit same-native-lifetime/no-reset scope',
+            'F history does not prove mutable state content, current P or physical lifetime',
+            'same-object identity may use independent scoped denotations; unresolved basis remains conditional',
+            'object identity does not prove request-field provenance or a stable data version',
+            'created-close NoBodyFinish and other predicate rules are inventory-only here'),
+        'native_phase_verified': False, **_flags()}

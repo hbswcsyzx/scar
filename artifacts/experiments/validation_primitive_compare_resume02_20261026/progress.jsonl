@@ -1,0 +1,3 @@
+{"actual_child_exit":0,"mode":"baseline_clean","structure_wall_s":21.44865023496095,"whole_elapsed_s":22.85353678598767}
+{"actual_child_exit":0,"mode":"candidate_clean","structure_wall_s":20.27905708400067,"whole_elapsed_s":44.40912587096682}
+{"actual_child_exit":0,"mode":"candidate_profile","structure_wall_s":73.70924941496924,"whole_elapsed_s":119.40159030194627}

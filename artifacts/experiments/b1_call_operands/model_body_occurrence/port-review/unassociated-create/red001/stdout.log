@@ -1,0 +1,22 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+_ test_known_contrary_create_source_is_not_hidden_by_an_absent_origin_association _
+
+    def test_known_contrary_create_source_is_not_hidden_by_an_absent_origin_association():
+        program, model, details = resumable_execution(instances=2)
+        left, right = model.body_activation_origins
+        # The actual owner still comes from Create-left, which now has no origin
+        # association anywhere. The supplied body claims Create-right instead.
+        changed = replace(model, denotations=(), body_activation_origins=(
+            replace(left, creation=right.creation),))
+        bare = replace(changed, body_drive_executions=(), body_activation_origins=())
+        assert validate(bare, program).valid
+        report = validate(changed, program)
+>       assert 'body_instance_source' in {row.code for row in report.issues}, report
+E       AssertionError: ValidationReport(issues=(), gaps=(ExecutionIssue(code='call_source_runtime_unverified', path='exec_call_activation:0.s...verified', path='model', message='declared occurrence/identity links have not been established by a runtime adapter')))
+E       assert 'body_instance_source' in set()
+
+tests/unit/test_execution_body_port_review.py:89: AssertionError
+=========================== short test summary info ============================
+FAILED tests/unit/test_execution_body_port_review.py::test_known_contrary_create_source_is_not_hidden_by_an_absent_origin_association
+1 failed in 1.01s

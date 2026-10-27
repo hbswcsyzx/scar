@@ -1,0 +1,5 @@
+Traceback (most recent call last):
+  File "/tmp/scar-structured-model-280qf4mi/artifacts/experiments/b1_call_operands/model_await_reevaluation/probe_budget_scope.py", line 23, in <module>
+    for definition in context._connection_reports['await']['outcomes']:
+                      ~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+KeyError: 'await'

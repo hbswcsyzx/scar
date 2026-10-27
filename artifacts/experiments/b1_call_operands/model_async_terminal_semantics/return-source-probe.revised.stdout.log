@@ -1,0 +1,163 @@
+{
+  "source_sha256": "f8e32575b74ba5eec077c1f18f2da7fcbaf03f2443b1579c92a5e40e791bf990",
+  "observations": [
+    {
+      "label": "bare",
+      "text": "async def body():\n    yield 1\n    return\n",
+      "returns": [
+        {
+          "line": 3,
+          "expression_present": false
+        }
+      ],
+      "symbol_table": {
+        "accepted": true,
+        "children": [
+          {
+            "name": "__annotate__",
+            "type": "annotation",
+            "generator_api": []
+          },
+          {
+            "name": "body",
+            "type": "function",
+            "generator_api": []
+          }
+        ]
+      },
+      "compiler": {
+        "accepted": true
+      }
+    },
+    {
+      "label": "explicit-none",
+      "text": "async def body():\n    yield 1\n    return None\n",
+      "returns": [
+        {
+          "line": 3,
+          "expression_present": true
+        }
+      ],
+      "symbol_table": {
+        "accepted": true,
+        "children": [
+          {
+            "name": "__annotate__",
+            "type": "annotation",
+            "generator_api": []
+          },
+          {
+            "name": "body",
+            "type": "function",
+            "generator_api": []
+          }
+        ]
+      },
+      "compiler": {
+        "accepted": false,
+        "message": "'return' with value in async generator",
+        "line": 3,
+        "offset": 5,
+        "end_line": 3,
+        "end_offset": 16
+      }
+    },
+    {
+      "label": "nested-sync-return",
+      "text": "async def body():\n    yield 1\n    def nested():\n        return None\n    return\n",
+      "returns": [
+        {
+          "line": 5,
+          "expression_present": false
+        },
+        {
+          "line": 4,
+          "expression_present": true
+        }
+      ],
+      "symbol_table": {
+        "accepted": true,
+        "children": [
+          {
+            "name": "__annotate__",
+            "type": "annotation",
+            "generator_api": []
+          },
+          {
+            "name": "body",
+            "type": "function",
+            "generator_api": []
+          }
+        ]
+      },
+      "compiler": {
+        "accepted": true
+      }
+    },
+    {
+      "label": "yield-only-in-nested",
+      "text": "async def body():\n    def nested():\n        yield 1\n    return None\n",
+      "returns": [
+        {
+          "line": 4,
+          "expression_present": true
+        }
+      ],
+      "symbol_table": {
+        "accepted": true,
+        "children": [
+          {
+            "name": "__annotate__",
+            "type": "annotation",
+            "generator_api": []
+          },
+          {
+            "name": "body",
+            "type": "function",
+            "generator_api": []
+          }
+        ]
+      },
+      "compiler": {
+        "accepted": true
+      }
+    },
+    {
+      "label": "yield-in-nested-default",
+      "text": "async def body():\n    def nested(x=(yield 1)):\n        return None\n    return None\n",
+      "returns": [
+        {
+          "line": 4,
+          "expression_present": true
+        },
+        {
+          "line": 3,
+          "expression_present": true
+        }
+      ],
+      "symbol_table": {
+        "accepted": true,
+        "children": [
+          {
+            "name": "__annotate__",
+            "type": "annotation",
+            "generator_api": []
+          },
+          {
+            "name": "body",
+            "type": "function",
+            "generator_api": []
+          }
+        ]
+      },
+      "compiler": {
+        "accepted": false,
+        "message": "'return' with value in async generator",
+        "line": 4,
+        "offset": 5,
+        "end_line": 4,
+        "end_offset": 16
+      }
+    }
+  ]
+}

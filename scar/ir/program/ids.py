@@ -31,6 +31,47 @@ class UseID(Identifier):
     prefix = "program_use"
 
 
+class ResourceDefinitionID(Identifier):
+    prefix = "program_resource"
+
+
+class ResourceRequirementID(Identifier):
+    prefix = "program_resource_requirement"
+
+
+class EnvironmentInterfaceID(Identifier):
+    prefix = "program_environment"
+
+
+class ControlScopeID(Identifier):
+    prefix = "program_control_scope"
+
+
+class ControlPortID(Identifier):
+    prefix = "program_control_port"
+
+
+class ProviderID(Identifier):
+    prefix = "program_provider"
+
+
+class NativeBoundaryID(Identifier):
+    prefix = "program_native_boundary"
+
+
+class BoundaryRelationID(Identifier):
+    prefix = "program_boundary_relation"
+
+
+class ProtocolScopeID(Identifier):
+    prefix = "program_protocol_scope"
+
+
 __all__ = [
     "BlockID", "LocationID", "OperationID", "RegionID", "UseID", "ValueID",
+    "ResourceDefinitionID", "ResourceRequirementID",
+    "EnvironmentInterfaceID",
+    "ControlScopeID", "ControlPortID",
+    "ProviderID",
+    "NativeBoundaryID", "BoundaryRelationID", "ProtocolScopeID",
 ]

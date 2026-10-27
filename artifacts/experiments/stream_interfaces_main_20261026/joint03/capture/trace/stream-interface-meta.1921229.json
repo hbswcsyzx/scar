@@ -1,0 +1,67 @@
+{
+  "schema": "scar.stream-interface-collection",
+  "schema_version": 1,
+  "profile": "SCAR_BUILTIN_STREAM_INTERFACES_V1",
+  "process_id": 1921229,
+  "project_root": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/stream_interfaces_main_20261026/joint03/program",
+  "file": {
+    "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/stream_interfaces_main_20261026/joint03/capture/trace/stream-interfaces.1921229.jsonl",
+    "sha256": "d3dae598334443c4c45cd4bb1c92ccbe84a9442135b674e461f694cf65c0f565",
+    "size_bytes": 6095,
+    "rows": 14
+  },
+  "counts": {
+    "BEGIN": 7,
+    "C_RETURN": 6,
+    "C_RAISE": 1,
+    "UNOBSERVED": 0
+  },
+  "errors": [],
+  "stopped": false,
+  "legacy_inputs": [
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/stream_interfaces_main_20261026/joint03/capture/trace/call-codes.1921229.jsonl",
+      "family": "codes",
+      "process_id": 1921229,
+      "raw_sha256": "a079b88eec8490268ce9847534b79ebee939d5116127e5c887ba6f17a98a9628",
+      "raw_bytes": 1155,
+      "lines": 4
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/stream_interfaces_main_20261026/joint03/capture/trace/call-events.1921229.jsonl",
+      "family": "events",
+      "process_id": 1921229,
+      "raw_sha256": "f4345680d24fc42f31ff22f0e7bfa301c68801bcd199481d717cff6d67ce620c",
+      "raw_bytes": 5584,
+      "lines": 10
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/stream_interfaces_main_20261026/joint03/capture/trace/call-meta.1921229.json",
+      "family": "meta",
+      "process_id": 1921229,
+      "raw_sha256": "b048669b150ff38029ddcef12cb8e62512d6286fc52aa58a09aa373d6fd991ea",
+      "raw_bytes": 1443,
+      "lines": 42
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/stream_interfaces_main_20261026/joint03/capture/trace/call-operands.1921229.jsonl",
+      "family": "operands",
+      "process_id": 1921229,
+      "raw_sha256": "4a33ee86b2395ee6d16bd183a8c5a1643a948974475c2431f62c2bfc923855a7",
+      "raw_bytes": 4621,
+      "lines": 11
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/stream_interfaces_main_20261026/joint03/capture/trace/call-operand-meta.1921229.json",
+      "family": "operand-meta",
+      "process_id": 1921229,
+      "raw_sha256": "18b33ce36ea62ee31365197f4f9f43633e76cc05e734828c16cab45e016cb4a8",
+      "raw_bytes": 2058,
+      "lines": 58
+    }
+  ],
+  "scope": "exact builtin stream calls at retained CALL sites; unplanned interiors and implicit IO unexpanded",
+  "tensor_or_stream_contents_read": false,
+  "file_descriptor_table_replayed": false,
+  "source_body_or_content_proof_established": false
+}

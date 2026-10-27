@@ -1,0 +1,8 @@
+
+==================================== ERRORS ====================================
+_____ ERROR collecting tests/unit/test_program_continuation_connections.py _____
+tests/unit/test_program_continuation_connections.py::test_lookup_iterator_request_and_actual_item_exhaustion_failure_are_distinct: 'request' is a reserved name and cannot be used in @pytest.mark.parametrize
+=========================== short test summary info ============================
+ERROR tests/unit/test_program_continuation_connections.py - Failed: tests/uni...
+!!!!!!!!!!!!!!!!!!!! Interrupted: 1 error during collection !!!!!!!!!!!!!!!!!!!!
+1 error in 0.73s

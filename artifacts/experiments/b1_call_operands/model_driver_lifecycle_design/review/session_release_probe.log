@@ -1,0 +1,48 @@
+{
+  "python": "3.14.7 | packaged by conda-forge | (main, Sep  2 2026, 21:08:32) [GCC 15.3.0]",
+  "command": [
+    "/home/zyf/miniconda3/envs/lewm/bin/python",
+    "/tmp/scar-structured-model-280qf4mi/artifacts/experiments/b1_call_operands/model_driver_lifecycle_design/review/session_release_probe.py"
+  ],
+  "attempt": 1,
+  "cases": [
+    {
+      "case": "callback_changes_post",
+      "status": "PASS",
+      "events": [
+        "metadata.COMPLETE",
+        "callback.enter",
+        "callback.reassociate.HOLD",
+        "helper.NORMAL"
+      ],
+      "normal_returned": 1,
+      "final_phase": "HOLD"
+    },
+    {
+      "case": "raise_after_partial_write",
+      "status": "PASS",
+      "events": [
+        "write.COMPLETE",
+        "helper.RAISE"
+      ],
+      "final_phase": "COMPLETE",
+      "world": 1
+    },
+    {
+      "case": "unraisable_keeps_completion_and_effects",
+      "status": "PASS",
+      "events": [
+        "finalizer.write",
+        "unraisable.FinalizerFailure",
+        "helper.NORMAL"
+      ],
+      "result": "KEPT",
+      "world": 1
+    }
+  ],
+  "passed": 3,
+  "failed": 0,
+  "exit_code": 0,
+  "torch_imported": 0,
+  "scar_imported": 0
+}

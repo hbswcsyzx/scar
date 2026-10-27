@@ -1,0 +1,92 @@
+.........FFF...........F............                                     [100%]
+=================================== FAILURES ===================================
+_ test_lookup_iterator_request_and_actual_item_exhaustion_failure_are_distinct[close-delegate] _
+
+kind = 'delegate', request_kind = 'close'
+
+    @pytest.mark.parametrize("kind", ("delegate", "await", "wrapper"))
+    @pytest.mark.parametrize("request_kind", ("next", "send", "throw", "close"))
+    def test_lookup_iterator_request_and_actual_item_exhaustion_failure_are_distinct(kind, request_kind):
+        graph, details = _typed(kind=kind, request=request_kind)
+>       require_valid(graph)
+
+tests/unit/test_program_continuation_connections.py:52: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='continuation'), regions=(Region(id=RegionID(value='continuation'), label='declared o...tion=OperationID(value='continuation.advance'), use=UseID(value='continuation.advance.a0')),)),), protocol_bindings=())
+
+    def require_valid(graph: ProgramGraph) -> None:
+        issues = validate(graph)
+        if issues:
+>           raise ValueError("; ".join(f"{issue.code} at {issue.path}: {issue.message}" for issue in issues))
+E           ValueError: unbound_exit at program_region:continuation: declared exits must be bound to actual control exits
+
+scar/ir/program/validation.py:745: ValueError
+_ test_lookup_iterator_request_and_actual_item_exhaustion_failure_are_distinct[close-await] _
+
+kind = 'await', request_kind = 'close'
+
+    @pytest.mark.parametrize("kind", ("delegate", "await", "wrapper"))
+    @pytest.mark.parametrize("request_kind", ("next", "send", "throw", "close"))
+    def test_lookup_iterator_request_and_actual_item_exhaustion_failure_are_distinct(kind, request_kind):
+        graph, details = _typed(kind=kind, request=request_kind)
+>       require_valid(graph)
+
+tests/unit/test_program_continuation_connections.py:52: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='continuation'), regions=(Region(id=RegionID(value='continuation'), label='declared o...ation=OperationID(value='continuation.advance'), use=UseID(value='continuation.advance.a0')),))), protocol_bindings=())
+
+    def require_valid(graph: ProgramGraph) -> None:
+        issues = validate(graph)
+        if issues:
+>           raise ValueError("; ".join(f"{issue.code} at {issue.path}: {issue.message}" for issue in issues))
+E           ValueError: unbound_exit at program_region:continuation: declared exits must be bound to actual control exits
+
+scar/ir/program/validation.py:745: ValueError
+_ test_lookup_iterator_request_and_actual_item_exhaustion_failure_are_distinct[close-wrapper] _
+
+kind = 'wrapper', request_kind = 'close'
+
+    @pytest.mark.parametrize("kind", ("delegate", "await", "wrapper"))
+    @pytest.mark.parametrize("request_kind", ("next", "send", "throw", "close"))
+    def test_lookup_iterator_request_and_actual_item_exhaustion_failure_are_distinct(kind, request_kind):
+        graph, details = _typed(kind=kind, request=request_kind)
+>       require_valid(graph)
+
+tests/unit/test_program_continuation_connections.py:52: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='continuation'), regions=(Region(id=RegionID(value='continuation'), label='declared o...ation=OperationID(value='continuation.advance'), use=UseID(value='continuation.advance.a0')),))), protocol_bindings=())
+
+    def require_valid(graph: ProgramGraph) -> None:
+        issues = validate(graph)
+        if issues:
+>           raise ValueError("; ".join(f"{issue.code} at {issue.path}: {issue.message}" for issue in issues))
+E           ValueError: unbound_exit at program_region:continuation: declared exits must be bound to actual control exits
+
+scar/ir/program/validation.py:745: ValueError
+_ test_close_normal_continues_old_injection_but_raise_overrides_with_own_packet _
+
+    def test_close_normal_continues_old_injection_but_raise_overrides_with_own_packet():
+        graph, details = continuation_close_program()
+>       require_valid(graph)
+
+tests/unit/test_program_continuation_connections.py:140: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='continuation'), regions=(Region(id=RegionID(value='continuation'), label='declared o...tion=OperationID(value='continuation.advance'), use=UseID(value='continuation.advance.a0')),)),), protocol_bindings=())
+
+    def require_valid(graph: ProgramGraph) -> None:
+        issues = validate(graph)
+        if issues:
+>           raise ValueError("; ".join(f"{issue.code} at {issue.path}: {issue.message}" for issue in issues))
+E           ValueError: unbound_exit at program_region:continuation: declared exits must be bound to actual control exits
+
+scar/ir/program/validation.py:745: ValueError
+=========================== short test summary info ============================
+FAILED tests/unit/test_program_continuation_connections.py::test_lookup_iterator_request_and_actual_item_exhaustion_failure_are_distinct[close-delegate]
+FAILED tests/unit/test_program_continuation_connections.py::test_lookup_iterator_request_and_actual_item_exhaustion_failure_are_distinct[close-await]
+FAILED tests/unit/test_program_continuation_connections.py::test_lookup_iterator_request_and_actual_item_exhaustion_failure_are_distinct[close-wrapper]
+FAILED tests/unit/test_program_continuation_connections.py::test_close_normal_continues_old_injection_but_raise_overrides_with_own_packet
+4 failed, 32 passed in 1.55s

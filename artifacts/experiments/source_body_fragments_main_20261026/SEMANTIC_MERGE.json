@@ -1,0 +1,26 @@
+{
+  "patch_origin": "88ae201c PROGRAM_LOWERING_CONTEXT.diff",
+  "all_other_top_level_definitions_unchanged": [
+    "_key",
+    "_span",
+    "LoweredSourceBody",
+    "PreparedSource",
+    "_lower_prepared",
+    "_SealedLoweringSession",
+    "_SourceLoweringIndex",
+    "_source_lowering_index",
+    "_canonical",
+    "_Unsupported",
+    "_Cursor",
+    "_Builder",
+    "_span_atom",
+    "_check_arguments",
+    "prepare_source",
+    "_symbol_tables",
+    "lower_source",
+    "_check_structure_source_texts"
+  ],
+  "main_Try_call_expansion_nested_function_source_branch_unchanged": true,
+  "private_source_text_forward_added": true,
+  "whole_file_replacement": false
+}

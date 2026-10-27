@@ -1,0 +1,24 @@
+{
+  "actual_exit_code": 0,
+  "basis": "Root held actual execution handle and explicitly confirmed terminal0; GNU record agrees",
+  "gate_whole_elapsed_s": 101.77305573801277,
+  "gnu_elapsed_s": 101.88,
+  "gnu_time": {
+    "bytes": 888,
+    "sha256": "3142a3973d0e0de2792e3eec9e04e868d4d2c780f11786bbf554d74dca04eb48",
+    "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/native_activity_work_memset_main_20261026/gnu-time.txt"
+  },
+  "peak_rss_kib": 290016,
+  "producer_elapsed_s": 100.95074019097956,
+  "result": {
+    "bytes": 170529,
+    "sha256": "e6b0d71439a7ea92789812690a2857a8f111647aa41183ae98576e67326ba4f5",
+    "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/native_activity_work_memset_main_20261026/result.json"
+  },
+  "schema": "scar.actual-root-terminal",
+  "schema_version": 1,
+  "session": 79428,
+  "source_freeze_sha256": "81c976910b6d032d4c41dc9952dbc835d66d35c07e213bc96d721c755f843b1c",
+  "source_tree": "/home/zyf/AAA/scar-worktrees/structured-program-model",
+  "target_executions": 0
+}

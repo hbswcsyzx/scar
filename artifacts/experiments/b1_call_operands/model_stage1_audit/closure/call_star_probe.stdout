@@ -1,0 +1,222 @@
+{
+  "scope": "CPython language witnesses only; no SCAR/Torch/workload import",
+  "python": "3.14.7 | packaged by conda-forge | (main, Sep  2 2026, 21:08:32) [GCC 15.3.0]",
+  "script_sha256": "3a4d6210a6000b6302df81ea4f974496add8d0550993b9151515c7c6b99d149b",
+  "results": [
+    {
+      "form": "single_star",
+      "mode": "normal",
+      "source": "fn(*star('a'), named=kw())",
+      "events": [
+        "star_expr:a",
+        "kw",
+        "iter:a",
+        "next:a",
+        "next:a",
+        "body"
+      ],
+      "error": null,
+      "argument_count": 1
+    },
+    {
+      "form": "prefix_star",
+      "mode": "normal",
+      "source": "fn(0, *star('a'), named=kw())",
+      "events": [
+        "star_expr:a",
+        "iter:a",
+        "next:a",
+        "next:a",
+        "kw",
+        "body"
+      ],
+      "error": null,
+      "argument_count": 2
+    },
+    {
+      "form": "post_position",
+      "mode": "normal",
+      "source": "fn(*star('a'), 0, named=kw())",
+      "events": [
+        "star_expr:a",
+        "iter:a",
+        "next:a",
+        "next:a",
+        "kw",
+        "body"
+      ],
+      "error": null,
+      "argument_count": 2
+    },
+    {
+      "form": "multiple_stars",
+      "mode": "normal",
+      "source": "fn(*star('a'), *star('b'), named=kw())",
+      "events": [
+        "star_expr:a",
+        "iter:a",
+        "next:a",
+        "next:a",
+        "star_expr:b",
+        "iter:b",
+        "next:b",
+        "next:b",
+        "kw",
+        "body"
+      ],
+      "error": null,
+      "argument_count": 2
+    },
+    {
+      "form": "single_star",
+      "mode": "iter_raises",
+      "source": "fn(*star('a'), named=kw())",
+      "events": [
+        "star_expr:a",
+        "kw",
+        "iter:a"
+      ],
+      "error": "iter witness",
+      "argument_count": null
+    },
+    {
+      "form": "prefix_star",
+      "mode": "iter_raises",
+      "source": "fn(0, *star('a'), named=kw())",
+      "events": [
+        "star_expr:a",
+        "iter:a"
+      ],
+      "error": "iter witness",
+      "argument_count": null
+    },
+    {
+      "form": "post_position",
+      "mode": "iter_raises",
+      "source": "fn(*star('a'), 0, named=kw())",
+      "events": [
+        "star_expr:a",
+        "iter:a"
+      ],
+      "error": "iter witness",
+      "argument_count": null
+    },
+    {
+      "form": "multiple_stars",
+      "mode": "iter_raises",
+      "source": "fn(*star('a'), *star('b'), named=kw())",
+      "events": [
+        "star_expr:a",
+        "iter:a"
+      ],
+      "error": "iter witness",
+      "argument_count": null
+    },
+    {
+      "form": "single_star",
+      "mode": "next_raises",
+      "source": "fn(*star('a'), named=kw())",
+      "events": [
+        "star_expr:a",
+        "kw",
+        "iter:a",
+        "next:a"
+      ],
+      "error": "next witness",
+      "argument_count": null
+    },
+    {
+      "form": "prefix_star",
+      "mode": "next_raises",
+      "source": "fn(0, *star('a'), named=kw())",
+      "events": [
+        "star_expr:a",
+        "iter:a",
+        "next:a"
+      ],
+      "error": "next witness",
+      "argument_count": null
+    },
+    {
+      "form": "post_position",
+      "mode": "next_raises",
+      "source": "fn(*star('a'), 0, named=kw())",
+      "events": [
+        "star_expr:a",
+        "iter:a",
+        "next:a"
+      ],
+      "error": "next witness",
+      "argument_count": null
+    },
+    {
+      "form": "multiple_stars",
+      "mode": "next_raises",
+      "source": "fn(*star('a'), *star('b'), named=kw())",
+      "events": [
+        "star_expr:a",
+        "iter:a",
+        "next:a"
+      ],
+      "error": "next witness",
+      "argument_count": null
+    },
+    {
+      "form": "single_star",
+      "mode": "kw_raises",
+      "source": "fn(*star('a'), named=kw())",
+      "events": [
+        "star_expr:a",
+        "kw"
+      ],
+      "error": "kw witness",
+      "argument_count": null
+    },
+    {
+      "form": "prefix_star",
+      "mode": "kw_raises",
+      "source": "fn(0, *star('a'), named=kw())",
+      "events": [
+        "star_expr:a",
+        "iter:a",
+        "next:a",
+        "next:a",
+        "kw"
+      ],
+      "error": "kw witness",
+      "argument_count": null
+    },
+    {
+      "form": "post_position",
+      "mode": "kw_raises",
+      "source": "fn(*star('a'), 0, named=kw())",
+      "events": [
+        "star_expr:a",
+        "iter:a",
+        "next:a",
+        "next:a",
+        "kw"
+      ],
+      "error": "kw witness",
+      "argument_count": null
+    },
+    {
+      "form": "multiple_stars",
+      "mode": "kw_raises",
+      "source": "fn(*star('a'), *star('b'), named=kw())",
+      "events": [
+        "star_expr:a",
+        "iter:a",
+        "next:a",
+        "next:a",
+        "star_expr:b",
+        "iter:b",
+        "next:b",
+        "next:b",
+        "kw"
+      ],
+      "error": "kw witness",
+      "argument_count": null
+    }
+  ]
+}

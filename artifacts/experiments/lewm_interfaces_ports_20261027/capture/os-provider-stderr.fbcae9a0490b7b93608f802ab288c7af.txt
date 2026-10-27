@@ -1,0 +1,2 @@
+[W1027 04:28:03.609270640 execution_trace_observer.cpp:989] Enabling Execution Trace Observer
+USDT:2026-10-27 04:28:03 2114801:2114801 SyncActivityProfilerHandler.cpp:52] profiler_start

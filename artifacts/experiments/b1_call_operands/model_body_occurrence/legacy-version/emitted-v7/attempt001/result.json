@@ -1,0 +1,8 @@
+{
+  "returncode": 0,
+  "duration_seconds": 1.3647834239527583,
+  "source_sha256_before": "9bfa9e3a744dce73a8cac6df6abfc5efec4b1d3ee48d1d394ee4782c997138a2",
+  "source_sha256_after": "9bfa9e3a744dce73a8cac6df6abfc5efec4b1d3ee48d1d394ee4782c997138a2",
+  "source_unchanged": true,
+  "changed_paths": []
+}

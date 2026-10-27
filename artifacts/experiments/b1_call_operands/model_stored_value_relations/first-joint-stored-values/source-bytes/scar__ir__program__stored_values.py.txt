@@ -1,0 +1,313 @@
+"""Explicit values of direct slots at original state access boundaries.
+
+Writes describe the selected post-state and reads the original before-state.
+These attachments add neither state carriers nor effects, and do not prove
+native field semantics, alias isolation or complete operation effects.
+"""
+from __future__ import annotations
+
+from dataclasses import dataclass
+from types import MappingProxyType
+
+from .ids import OperationID, UseID
+from .state_addresses import (
+    CellContent, DomainOwner, ExistingAccess, InvokeStateOperand, ObjectField,
+    ReferenceOwner, ResourceOwner, WholeOwner,
+)
+from .structured import ControlEdgeReference
+
+
+def _identifier(value, expected, name):
+    if type(value) is not expected:
+        raise TypeError(name + ' requires exact ' + expected.__name__)
+    value.__post_init__()
+    if type(value.value) is not str or not value.value:
+        raise ValueError(name + ' requires a nonempty exact identifier string')
+
+
+def _site(site, effect_index):
+    if type(site) not in (ExistingAccess, InvokeStateOperand):
+        raise TypeError('stored value site requires an exact original state site')
+    site.__post_init__()
+    _identifier(site.operation, OperationID, 'stored value operation')
+    if type(site) is InvokeStateOperand:
+        _identifier(site.state_use, UseID, 'stored value state Use')
+    if type(effect_index) is not int or effect_index < 0:
+        raise ValueError('stored value effect_index must be a nonnegative exact integer')
+
+
+def _edge(edge):
+    if type(edge) is not ControlEdgeReference:
+        raise TypeError('stored value completion requires exact ControlEdgeReference')
+    edge.__post_init__()
+    _identifier(edge.operation, OperationID, 'stored value completion operation')
+
+
+@dataclass(frozen=True, slots=True)
+class StoredValueWrite:
+    site: ExistingAccess | InvokeStateOperand
+    effect_index: int
+    payload: UseID
+    completion: ControlEdgeReference | None = None
+
+    def __post_init__(self):
+        _site(self.site, self.effect_index)
+        _identifier(self.payload, UseID, 'stored value payload')
+        if self.completion is not None:
+            _edge(self.completion)
+
+
+@dataclass(frozen=True, slots=True)
+class StoredValueRead:
+    site: ExistingAccess | InvokeStateOperand
+    effect_index: int
+    result: OperationResult | InvokeLiteralResult
+
+    def __post_init__(self):
+        _site(self.site, self.effect_index)
+        if type(self.result) not in (OperationResult, InvokeLiteralResult):
+            raise TypeError('stored value read requires an exact own result port')
+        self.result.__post_init__()
+        if type(self.result) is OperationResult:
+            _identifier(self.result.operation, OperationID, 'stored value result operation')
+        else:
+            _edge(self.result.edge)
+
+
+def _bind_model_results(operation_result, invoke_result):
+    """Install canonical ports before record_codec resolves annotations."""
+    global OperationResult, InvokeLiteralResult
+    OperationResult, InvokeLiteralResult = operation_result, invoke_result
+
+
+STORED_VALUE_RECORD_TAGS = MappingProxyType({
+    StoredValueWrite: ('kind', 'STORED_VALUE_WRITE'),
+    StoredValueRead: ('kind', 'STORED_VALUE_READ'),
+})
+
+
+def has_stored_value_capability(graph):
+    return bool(getattr(graph, 'stored_value_writes', ())
+                or getattr(graph, 'stored_value_reads', ()))
+
+
+def stored_value_errors(graph):
+    """Check original ports only; unknown addresses remain valid but unproved."""
+    from .model import (
+        AccessMode, BlockArgument, CompletionResult, DataValue, ExitKind,
+        ProgramGraph, ReferenceValue, StateVersionValue, TerminatorKind,
+        UseRole, ValueKind, ValueType, value_type,
+    )
+
+    if not isinstance(graph, ProgramGraph):
+        raise TypeError('stored value validation requires ProgramGraph')
+    operations = {row.id: row for row in graph.operations}
+    values = {row.id: row for row in graph.values}
+    blocks = {block.id: block for region in graph.regions for block in region.blocks}
+    refinements = {row.site: row for row in graph.state_address_refinements}
+    issues, write_keys, read_results, post_slots = [], set(), set(), set()
+
+    def error(code, path, message):
+        issues.append((code, path, message))
+
+    def completion(operation, reference, path):
+        term = operation.terminator
+        if (term is None or term.kind is not TerminatorKind.INVOKE
+                or reference.operation != operation.id
+                or reference.successor_index >= len(term.successors)):
+            error('stored_value_completion', path, 'completion is not an own original INVOKE edge')
+            return None
+        edge = term.successors[reference.successor_index]
+        signatures = tuple(row for row in operation.completions if row.kind is edge.kind)
+        block = blocks.get(edge.block)
+        if len(signatures) != 1 or block is None or len(edge.arguments) != len(block.arguments):
+            error('stored_value_completion', path, 'completion signature and original landing must resolve')
+            return None
+        return edge, signatures[0], block
+
+    def result_value(operation, reference, path):
+        if type(reference) is OperationResult:
+            if ((operation.terminator is not None
+                 and operation.terminator.kind is TerminatorKind.INVOKE)
+                    or reference.operation != operation.id
+                    or reference.index >= len(operation.results)):
+                error('stored_value_result', path, 'read result must be this operation own original result')
+                return None
+            value = values.get(operation.results[reference.index])
+            if value is None:
+                error('stored_value_result', path, 'own result is absent from original values')
+            return value
+        resolved = completion(operation, reference.edge, path)
+        if resolved is None:
+            return None
+        edge, signature, block = resolved
+        if edge.kind is not ExitKind.NORMAL:
+            error('stored_value_read_completion', path, 'stored reads produce a slot value only on NORMAL')
+            return None
+        slot = reference.result.index
+        if slot >= len(signature.types):
+            error('stored_value_result', path, 'read result slot is outside the original signature')
+            return None
+        produced = tuple((position, formal) for position, (actual, formal)
+            in enumerate(zip(edge.arguments, block.arguments))
+            if type(actual) is CompletionResult and actual.index == slot)
+        if len(produced) != 1:
+            error('stored_value_result_landing', path, 'own slot must have one exact produced landing formal')
+            return None
+        position, formal = produced[0]
+        value = values.get(formal)
+        if (value is None or value.origin != BlockArgument(block.id, position)
+                or value_type(value) != signature.types[slot]):
+            error('stored_value_result_landing', path, 'own slot and landing formal types must agree')
+            return None
+        return value
+
+    def address(row, path):
+        operation = operations.get(row.site.operation)
+        if operation is None:
+            error('stored_value_operation', path, 'site references a missing original operation')
+            return None
+        refinement = refinements.get(row.site)
+        if refinement is None or row.effect_index >= len(refinement.effects):
+            error('stored_value_effect', path, 'site and effect_index must select an original address effect')
+            return None
+        own = {use.id: use for use in operation.uses}
+        is_invoke = operation.terminator is not None and operation.terminator.kind is TerminatorKind.INVOKE
+        if type(row.site) is ExistingAccess:
+            if is_invoke or row.site.index >= len(operation.accesses):
+                error('stored_value_site', path, 'ExistingAccess must select a non-INVOKE original access')
+                return None
+            access = operation.accesses[row.site.index]
+            before_use = own.get(access.before)
+            location = access.location
+        else:
+            if not is_invoke or row.site.state_use not in operation.invoke_arguments:
+                error('stored_value_site', path, 'InvokeStateOperand must be an original INVOKE actual')
+                return None
+            access = None
+            before_use = own.get(row.site.state_use)
+            original = None if before_use is None else values.get(before_use.value)
+            location = None if type(original) is not StateVersionValue else original.location
+        before = None if before_use is None else values.get(before_use.value)
+        if type(before) is not StateVersionValue or before.location != location:
+            error('stored_value_state_before', path, 'site must consume its original state domain')
+            return None
+        return operation, own, access, location, refinement.effects[row.effect_index]
+
+    def static_slot(effect, own, location):
+        if type(effect.owner) is ReferenceOwner:
+            use = own.get(effect.owner.use)
+            if use is None:
+                return None
+            owner = ('reference', use.value)
+        elif type(effect.owner) is DomainOwner:
+            owner = ('domain', location)
+        elif type(effect.owner) is ResourceOwner:
+            owner = ('resource', effect.owner.requirement)
+        else:
+            return None
+        selectors = []
+        for selector in effect.path:
+            if type(selector) is ObjectField:
+                selectors.append(('field', selector.name))
+            elif type(selector) in (CellContent, WholeOwner):
+                selectors.append((type(selector).__name__,))
+            else:
+                return None
+        return owner, tuple(selectors)
+
+    for index, row in enumerate(graph.stored_value_writes):
+        path = f'stored_value_writes[{index}]'
+        if type(row) is not StoredValueWrite:
+            error('stored_value_record', path, 'expected exact StoredValueWrite')
+            continue
+        try:
+            row.__post_init__()
+        except (TypeError, ValueError) as exc:
+            error('stored_value_record', path, str(exc))
+            continue
+        key = row.site, row.effect_index, row.completion
+        if key in write_keys:
+            error('stored_value_write_duplicate', path, 'one slot completion permits one post-state declaration')
+        write_keys.add(key)
+        resolved = address(row, path)
+        if resolved is None:
+            continue
+        operation, own, access, location, effect = resolved
+        if effect.mode not in (AccessMode.WRITE, AccessMode.READ_WRITE):
+            error('stored_value_write_mode', path, 'write relation requires a selected WRITE effect')
+        payload = own.get(row.payload)
+        value = None if payload is None else values.get(payload.value)
+        if (type(value) not in (DataValue, ReferenceValue)
+                or payload.role not in (UseRole.DATA, UseRole.REFERENCE)):
+            error('stored_value_payload', path, 'payload must be an owned ordinary Data/Reference Use')
+        if access is not None:
+            if row.completion is not None:
+                error('stored_value_completion', path, 'ordinary write has no INVOKE completion selector')
+            after = values.get(access.after)
+            if (type(after) is not StateVersionValue or after.location != location
+                    or access.after not in operation.results):
+                error('stored_value_state_after', path, 'ordinary write requires its own after-state result')
+        else:
+            if row.payload not in operation.invoke_arguments:
+                error('stored_value_payload', path, 'INVOKE payload must be an original invocation argument')
+            if row.completion is None:
+                error('stored_value_completion', path, 'INVOKE write must select an explicit original completion')
+                completed = None
+            else:
+                completed = completion(operation, row.completion, path)
+            if completed is not None:
+                edge, signature, block = completed
+                slots = tuple(slot for slot, type_ in enumerate(signature.types)
+                    if type(type_) is ValueType and type_.kind is ValueKind.STATE and type_.location == location)
+                if len(slots) != 1:
+                    error('stored_value_state_after', path, 'write completion needs one own result for this state domain')
+                else:
+                    produced = tuple((position, formal) for position, (actual, formal)
+                        in enumerate(zip(edge.arguments, block.arguments))
+                        if type(actual) is CompletionResult and actual.index == slots[0])
+                    if len(produced) != 1:
+                        error('stored_value_state_after', path, 'state slot needs one exact own produced landing formal')
+                    else:
+                        position, formal = produced[0]
+                        after = values.get(formal)
+                        if (type(after) is not StateVersionValue or after.location != location
+                                or after.origin != BlockArgument(block.id, position)):
+                            error('stored_value_state_after', path, 'write completion state landing must match its original slot')
+        slot = static_slot(effect, own, location)
+        if slot is not None:
+            post = operation.id, row.completion, slot
+            if post in post_slots:
+                error('stored_value_post_conflict', path, 'statically identical final slots cannot declare multiple post values')
+            post_slots.add(post)
+
+    for index, row in enumerate(graph.stored_value_reads):
+        path = f'stored_value_reads[{index}]'
+        if type(row) is not StoredValueRead:
+            error('stored_value_record', path, 'expected exact StoredValueRead')
+            continue
+        try:
+            row.__post_init__()
+        except (TypeError, ValueError) as exc:
+            error('stored_value_record', path, str(exc))
+            continue
+        if row.result in read_results:
+            error('stored_value_read_duplicate', path, 'one own result permits one direct-slot source declaration')
+        read_results.add(row.result)
+        resolved = address(row, path)
+        if resolved is None:
+            continue
+        operation, own, access, location, effect = resolved
+        if effect.mode not in (AccessMode.READ, AccessMode.READ_WRITE):
+            error('stored_value_read_mode', path, 'read relation requires a selected READ effect')
+        if ((access is None) != (type(row.result) is InvokeLiteralResult)):
+            error('stored_value_result', path, 'read result kind must match its ordinary or INVOKE site')
+            continue
+        value = result_value(operation, row.result, path)
+        if value is not None and type(value) not in (DataValue, ReferenceValue):
+            error('stored_value_result_type', path, 'read result must be an own ordinary Data/Reference value')
+    return tuple(issues)
+
+
+__all__ = ['StoredValueWrite', 'StoredValueRead', 'STORED_VALUE_RECORD_TAGS',
+           'has_stored_value_capability', 'stored_value_errors']

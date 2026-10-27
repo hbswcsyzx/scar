@@ -1,0 +1,22 @@
+{
+  "status": "PASS",
+  "rows": 9,
+  "bytes": 3933,
+  "sha256": "0de651f07958c7cdab98cddbe9144f753cb30ac0378d3f0086bdb2d50b9aca17",
+  "target_kinds": [
+    "NORMALIZED_RECEIVER_FUNCTION",
+    "FUNCTION",
+    "BOUND_METHOD",
+    "BOUND_METHOD",
+    "NATIVE_BUILTIN",
+    "NATIVE_WRAPPER",
+    "OTHER_UNCLASSIFIED"
+  ],
+  "ordinary_typed_readback": true,
+  "all_three_record_variants_byte_equal": true,
+  "changed_defaults_and_two_receivers_retained": true,
+  "fresh_layout_wire": true,
+  "invalid_typed_record_still_rejected": true,
+  "hooks_installed": false,
+  "capture_started": false
+}

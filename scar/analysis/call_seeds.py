@@ -7,8 +7,9 @@ actual function environment nor caller, data or effect relationships.
 """
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 import json
+import hashlib
 from pathlib import Path
 
 from scar.analysis.call_edges import _Sources
@@ -20,7 +21,7 @@ from scar.ir.program.call_seeds import (
     CallSourceSeedModel, EnteredCodeGroup, SeedCollectionMetadata,
 )
 from scar.ir.program.compilation import CallCompilationProfile
-from scar.ir.record_codec import decode
+from scar.ir.record_codec import decode, encode
 
 
 def _require(condition, detail):
@@ -64,6 +65,7 @@ class _EnteredCodeSink:
 class CallSourceSeedReport:
     model: CallSourceSeedModel
     compilation_profile: CallCompilationProfile = CallCompilationProfile.LEGACY_ZERO_FLAGS
+    _captured_session: object = field(default=None,repr=False,compare=False)
 
     def __post_init__(self):
         _require(isinstance(self.model, CallSourceSeedModel), "source seeds require a typed model")
@@ -158,9 +160,123 @@ class CallSourceSeedReport:
         return CallSourceSeedModel.from_dict(document["model"])
 
 
+def _captured_source_budget(call_budget, explicit=None):
+    """Bound archive membership separately from selected project analysis."""
+    from scar.analysis.captured_source_owner import CapturedSourceBudget
+    _require(type(call_budget) is CallEdgeBudget, 'typed normal frame budget required')
+    call_budget.__post_init__()
+    ceilings = {
+        'max_metadata_bytes': call_budget.max_raw_bytes,
+        'max_rows_bytes': call_budget.max_raw_bytes,
+        'max_row_bytes': min(call_budget.max_line_bytes, call_budget.max_raw_bytes),
+        # Each captured filename has a code member. max_source_files instead
+        # limits selected project contexts, not all observed archived files.
+        'max_files': call_budget.max_codes,
+        'max_source_bytes': call_budget.max_raw_bytes,
+        'max_codes': call_budget.max_codes,
+        'max_code_bytes': call_budget.max_raw_bytes,
+    }
+    if explicit is None:
+        return CapturedSourceBudget(**{
+            **ceilings,
+            'max_metadata_bytes': min(CapturedSourceBudget().max_metadata_bytes,
+                                      call_budget.max_raw_bytes),
+        })
+    _require(type(explicit) is CapturedSourceBudget, 'typed captured-source budget required')
+    explicit.__post_init__()
+    _require(all(getattr(explicit, name) <= limit for name, limit in ceilings.items()),
+             'captured-source budget exceeds independent frame reader ceilings')
+    return explicit
+
+
+class _CapturedSourceSession:
+    """Live normal readers shared by one automatic source construction."""
+    def __init__(self, scanned, root, budget, coordinates=None, *, captured_source_budget=None):
+        from scar.analysis.captured_source_owner import CapturedSourceOwner
+        from scar.analysis.source_discovery import _root_has_initializer
+        from scar.ir.program.providers import ProviderArtifact
+        from scar.trace.capture_coordinates import CaptureCoordinates
+        from scar.trace.captured_sources import PROGRAM_PORTS_PROFILES
+        candidates=[meta for meta in scanned.metadata if meta.get('capture_profile') in PROGRAM_PORTS_PROFILES]
+        _require(candidates,'captured session needs an original program-ports process')
+        if coordinates is not None:
+            _require(type(coordinates) is CaptureCoordinates,'source membership needs normal coordinates')
+            membership=coordinates.report.get('captured_python_source_membership')
+            _require(type(membership) is dict,'captured Python source coordinate membership is absent')
+            candidates=[meta for meta in candidates if meta.get('captured_sources')==membership.get('manifest')]
+            _require(len(candidates)==1,'coordinate source membership does not select one original process')
+            self.membership=membership
+        else:
+            _require(len(candidates)==1,'multiple source owners require exact coordinate membership')
+            self.membership=None
+        metadata=decode(ProviderArtifact,candidates[0]['captured_sources'])
+        self.owner=CapturedSourceOwner(scanned.directory,project_root=str(root),metadata=metadata,
+                                      budget=_captured_source_budget(budget,captured_source_budget),
+                                      frame_scan=scanned,frame_budget=budget)
+        self.root=Path(root);self.scanned=scanned;self.static_versions={};self.records={};self.codes={}
+        _require(self.root.is_dir(),'CAPTURED_NAMESPACE_POLICY_UNAVAILABLE: namespace directory unavailable')
+        self.policy={'root':str(root),'root_is_package':_root_has_initializer(self.root),
+            'basis':'CURRENT_STATIC_NAMESPACE_INPUT','selector':'source_discovery._root_has_initializer',
+            'initializer':str(self.root/'__init__.py'),'loaded_module_established':False}
+        for code in self.owner.captured_codes():
+            if Path(code.filename).is_absolute():
+                self.codes.setdefault(code.filename,code)
+                try:self.records[code.filename]=self.owner.archived_source(self.owner.snapshot(code))
+                except LookupError:pass
+
+    def has_path(self,path):return str(path) in self.codes
+
+    def archived(self,path):
+        code=self.codes.get(str(path))
+        if code is None:raise LookupError('source filename has no original capture observation')
+        return self.owner.archived_source(self.owner.snapshot(code))
+
+    def prepare(self,path,namespace_root=None):
+        from scar.analysis.program_lowering import prepare_captured_source
+        namespace=Path(namespace_root) if namespace_root is not None else self.root
+        _require(namespace==self.root,'captured source namespace changed without an admission adapter')
+        self.require_unchanged()
+        return prepare_captured_source(self.owner,self.codes[str(path)],project_root=namespace,
+                                      root_is_package=self.policy['root_is_package'])
+
+    def record_static(self,path,text,encoding,raw_bytes):
+        self.static_versions[str(path)]={'path':str(path),'fingerprint':'sha256:'+hashlib.sha256(text.encode()).hexdigest(),
+            'encoding':encoding,'raw_bytes':raw_bytes,'basis':'CURRENT_STATIC_UNEXECUTED_SOURCE_VERSION',
+            'same_capture_source_bytes_established':False,'execution_established':False}
+
+    def require_unchanged(self):
+        from scar.analysis.source_discovery import _root_has_initializer
+        self.owner.require_unchanged()
+        _require(self.root.is_dir() and _root_has_initializer(self.root)==self.policy['root_is_package'],
+                 'static source namespace policy changed during construction')
+
+    def report(self):
+        self.require_unchanged()
+        return {'namespace_policy':dict(self.policy),'owner':self.owner.receipts(),
+            'coordinate_membership':self.membership,
+            'captured_files':[{'snapshot':encode(r.snapshot),'source':encode(r.source),
+                'original_encoding':r.original_encoding,'compiler_match':'NOT_CHECKED','loader_bytes_observed':False}
+                for path,r in sorted(self.records.items())if Path(path).is_relative_to(self.root)],
+            'current_static_files':[dict(r)for _,r in sorted(self.static_versions.items())],
+            'frontiers':self.owner.frontiers(),'whole_model_established':False}
+
+    def close(self):
+        try:
+            self.require_unchanged()
+        except BaseException:
+            try:
+                self.owner.close()
+            except BaseException:
+                pass  # Preserve the first detected input/namespace failure.
+            raise
+        else:
+            self.owner.close()
+
+
 def read_call_source_seeds(
     trace, project_root, *, budget=CallEdgeBudget(),
-    compilation_profile=CallCompilationProfile.RECORDED_FUTURE_FLAGS,
+    compilation_profile=CallCompilationProfile.RECORDED_FUTURE_FLAGS, coordinates=None,
+    captured_source_budget=None,
 ):
     """Read bounded collector records and resolve only actually entered codes.
 
@@ -169,18 +285,21 @@ def read_call_source_seeds(
     definition remains in the report but is not an eligible source seed.
     """
     return _read_call_source_seeds(
-        trace, project_root, budget=budget, compilation_profile=compilation_profile,
+        trace, project_root, budget=budget, compilation_profile=compilation_profile,coordinates=coordinates,
+        captured_source_budget=captured_source_budget,
     )
 
 
 def _read_call_source_seeds(
     trace, project_root, *, budget, _source_workspace=None,
-    compilation_profile=CallCompilationProfile.RECORDED_FUTURE_FLAGS,
+    compilation_profile=CallCompilationProfile.RECORDED_FUTURE_FLAGS,coordinates=None,
+    captured_source_budget=None,
 ):
     """Private composition shares locally prepared contexts, never report seeds."""
     _require(isinstance(budget, CallEdgeBudget), "source seeds require a typed replay budget")
     _require(type(compilation_profile) is CallCompilationProfile,
              "source seeds require a typed compilation profile")
+    captured_source_budget = _captured_source_budget(budget, captured_source_budget)
     root = Path(project_root).resolve()
     _require(root.is_dir(), "project root must be a directory")
     sink = _EnteredCodeSink()
@@ -199,19 +318,24 @@ def _read_call_source_seeds(
             ))
         else:
             descriptors[group.code] = captured
+    from scar.trace.captured_sources import PROGRAM_PORTS_PROFILES
+    captured_session=(_CapturedSourceSession(scanned,root,budget,coordinates,
+                                           captured_source_budget=captured_source_budget)
+        if any(meta.get('capture_profile')in PROGRAM_PORTS_PROFILES for meta in scanned.metadata)else None)
     if _source_workspace is not None:
+        if captured_session is not None:_source_workspace.bind_captured_session(captured_session)
         _source_workspace.prime_sources(tuple(descriptors.values()))
-    sources = _Sources(
-        root, budget, inventory=None, _source_workspace=_source_workspace,
+    sources = _Sources(root,budget,inventory=None,_source_workspace=_source_workspace,
         compilation_profile=compilation_profile,
-    )
+        captured_source_owner=captured_session.owner if captured_session is not None else None,
+        captured_source_root_is_package=captured_session.policy['root_is_package']if captured_session is not None else None)
     code_links = tuple(sources.code(descriptors[key]) for key in sorted(descriptors))
     return CallSourceSeedReport(CallSourceSeedModel(
         scanned.directory, str(root), budget, scanned.files, scanned.captures,
         groups, code_links,
         tuple(SeedCollectionMetadata.from_metadata(meta) for meta in scanned.metadata),
         tuple(issues),
-    ), compilation_profile=compilation_profile)
+    ), compilation_profile=compilation_profile,_captured_session=captured_session)
 
 
 __all__ = ["CallSourceSeedReport", "read_call_source_seeds"]

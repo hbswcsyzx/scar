@@ -1,0 +1,22 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+_ test_lookup_raise_has_a_real_matcher_consumer_before_category_or_fallback_proof _
+
+    def test_lookup_raise_has_a_real_matcher_consumer_before_category_or_fallback_proof():
+        """The first red is an old connection gap, not an absent new query API."""
+        graph, details = lookup_exception_match_program()
+        _bare_valid(graph)
+        require_valid(graph)
+        view = _continuations(graph)
+        obligation = _lookup(view, details)
+        assert any(gap["code"] == "method_lookup_exception_category_unproved"
+                   and gap["path"] == str(details["consumer_site"]) for gap in view["gaps"])
+        matches = obligation.get("method_exception_matches", ())
+>       assert matches, "the real lookup RAISE consumer is a matcher, not a proven missing-method fallback"
+E       AssertionError: the real lookup RAISE consumer is a matcher, not a proven missing-method fallback
+E       assert ()
+
+tests/unit/test_program_exception_matches.py:64: AssertionError
+=========================== short test summary info ============================
+FAILED tests/unit/test_program_exception_matches.py::test_lookup_raise_has_a_real_matcher_consumer_before_category_or_fallback_proof
+1 failed in 0.92s

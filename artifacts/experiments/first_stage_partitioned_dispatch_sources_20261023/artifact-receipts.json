@@ -1,0 +1,91 @@
+{
+  "adapter_ast": "PASS",
+  "adapter_sha256": "d15b156047f5ef2d7ae7cf52e551ccc084f37453f2f203d994316c0825de69e5",
+  "files": [
+    {
+      "path": "README.md",
+      "stored_bytes": 3642,
+      "stored_sha256": "4d8c44953d44174c5392f3fc4fe98dd5f975dc77a137f1190297423780877567"
+    },
+    {
+      "path": "capture-coordinates.json",
+      "stored_bytes": 665555,
+      "stored_sha256": "dbfaa3248973d0256e658dab3c16e25ae9ef4d16e4dc3b503794adbcea0a164a"
+    },
+    {
+      "path": "implementation.patch",
+      "stored_bytes": 31268,
+      "stored_sha256": "d962f9673c74c6492bd2a3f031c0a6a00468596d08f2d5ed490d3792287db992"
+    },
+    {
+      "path": "producer.json",
+      "stored_bytes": 3025,
+      "stored_sha256": "b014e42f757f8b2fcbcdf4bc1afddfb24eeab7c22c64bb2ce8f758841fe02a46"
+    },
+    {
+      "path": "progress.jsonl",
+      "stored_bytes": 10644,
+      "stored_sha256": "472c7001ad842b8ce233609070f2c0c7d545ca45299281c0492f38b83ba3ce88"
+    },
+    {
+      "path": "query-results.json",
+      "stored_bytes": 17498,
+      "stored_sha256": "65092888b69116f50f7bb4fc08b8f2d1a2d89031d994e445bce47f8860138967"
+    },
+    {
+      "path": "result/associations.jsonl.gz",
+      "stored_bytes": 6381900,
+      "stored_sha256": "f758d5cff74aeefc023d40bd92bbd0b855c4ca762625f300d6c1c9742f74b4fa"
+    },
+    {
+      "path": "result/capture-coordinates.json",
+      "stored_bytes": 665555,
+      "stored_sha256": "dbfaa3248973d0256e658dab3c16e25ae9ef4d16e4dc3b503794adbcea0a164a"
+    },
+    {
+      "path": "result/marker-index.json.gz",
+      "stored_bytes": 3713700,
+      "stored_sha256": "d5386fb9eff9297bf59038d9f1ec9ccbc2a5d1ca6ca946918f2176d2cbb6b32d"
+    },
+    {
+      "path": "result/report.json",
+      "stored_bytes": 22415,
+      "stored_sha256": "da896ba8ccda219065a26c485a75b4e3b00de1f7334b8ce58323d6bfee3a97b7"
+    },
+    {
+      "path": "run.py",
+      "stored_bytes": 10918,
+      "stored_sha256": "104bb2b495007d93327d2721f7a2cc7223bf29e9cc441c238a9146f4aa49df66"
+    },
+    {
+      "path": "run.sh",
+      "stored_bytes": 661,
+      "stored_sha256": "8b9f5394bf792395c16e7510cb5e4f80b8536196d1b54627fb1be8834a472864"
+    },
+    {
+      "path": "run.stderr.txt",
+      "stored_bytes": 0,
+      "stored_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "run.stdout.jsonl",
+      "stored_bytes": 10644,
+      "stored_sha256": "472c7001ad842b8ce233609070f2c0c7d545ca45299281c0492f38b83ba3ce88"
+    },
+    {
+      "path": "run.time.txt",
+      "stored_bytes": 819,
+      "stored_sha256": "9a18877c15afbb163532db0bedcc55dea3cbbdcdb9d083df89af49c4e592b066"
+    },
+    {
+      "path": "summary.json",
+      "stored_bytes": 3615,
+      "stored_sha256": "d5d5cd4e953a4f0c92ece7e1d05ea8b662322f920f09f25b0591e1a220a657c7"
+    }
+  ],
+  "first_stage_complete": false,
+  "schema": "scar.experiment-artifact-receipts",
+  "schema_version": 1,
+  "scope": "physical output receipts, not a new semantic graph or whole-model validation",
+  "transformation_authorized": false
+}

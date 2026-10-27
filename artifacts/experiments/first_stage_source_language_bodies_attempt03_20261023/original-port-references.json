@@ -1,0 +1,501 @@
+{
+  "scope": "stdlib extraction, not public full-codec replay",
+  "references": [
+    {
+      "artifact": {
+        "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_source_language_bodies_20261023/result/body-11.source-program5.json.gz",
+        "physical_sha256": "ed9588c1c0b6692b220afc692757c929830a7b67049048a58bb65efce42cc81e",
+        "physical_bytes": 904701,
+        "decoded_sha256": "3ca4e35bc3a92d5bdebf000eac994526679bce01a014b4dc3bf0564bccd1b675",
+        "decoded_bytes": 8766759,
+        "representation": "scar.source-program/5"
+      },
+      "namespace": {
+        "artifact": {
+          "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_source_language_bodies_20261023/result/body-11.source-program5.json.gz",
+          "decoded_sha256": "3ca4e35bc3a92d5bdebf000eac994526679bce01a014b4dc3bf0564bccd1b675"
+        },
+        "representation": "scar.program-graph/15",
+        "record_pointer": "#/graph",
+        "body": {
+          "definition": {
+            "kind": "opdef",
+            "value": "op:958f52c21714db9099c836ab",
+            "wire": "opdef:op:958f52c21714db9099c836ab"
+          },
+          "entry": "ConditionalBlock.forward",
+          "source": {
+            "atom_id": {
+              "kind": "source",
+              "value": "atom:153c6f3c92739063fe04e2d2",
+              "wire": "source:atom:153c6f3c92739063fe04e2d2"
+            },
+            "end_column": 16,
+            "end_line": 101,
+            "fingerprint": "sha256:3a6209baf30c11f77a5f6637282a1821fc62cea827438a97b23933caab51d8c7",
+            "path": "/home/zyf/AAA/le-wm/stable-worldmodel/stable_worldmodel/wm/lewm/module.py",
+            "start_column": 4,
+            "start_line": 91
+          }
+        }
+      },
+      "root": {
+        "kind": "program_region",
+        "value": "7b5435ae58bb92e81885ec9ebfabef55",
+        "wire": "program_region:7b5435ae58bb92e81885ec9ebfabef55"
+      },
+      "operation_count": 118,
+      "source": {
+        "encoding": "utf-8",
+        "fingerprint": "sha256:3a6209baf30c11f77a5f6637282a1821fc62cea827438a97b23933caab51d8c7",
+        "path": "/home/zyf/AAA/le-wm/stable-worldmodel/stable_worldmodel/wm/lewm/module.py",
+        "python_version": "3.14"
+      },
+      "language_shapes": {
+        "unpackings": [
+          {
+            "child_targets": [
+              {
+                "atom_id": {
+                  "kind": "source",
+                  "value": "atom:bab56c9ae73960c1d1b03fa2",
+                  "wire": "source:atom:bab56c9ae73960c1d1b03fa2"
+                },
+                "end_column": 17,
+                "end_line": 92,
+                "fingerprint": "sha256:3a6209baf30c11f77a5f6637282a1821fc62cea827438a97b23933caab51d8c7",
+                "path": "/home/zyf/AAA/le-wm/stable-worldmodel/stable_worldmodel/wm/lewm/module.py",
+                "start_column": 8,
+                "start_line": 92
+              },
+              {
+                "atom_id": {
+                  "kind": "source",
+                  "value": "atom:9a7fe3c43fbb6380c96a1b4f",
+                  "wire": "source:atom:9a7fe3c43fbb6380c96a1b4f"
+                },
+                "end_column": 28,
+                "end_line": 92,
+                "fingerprint": "sha256:3a6209baf30c11f77a5f6637282a1821fc62cea827438a97b23933caab51d8c7",
+                "path": "/home/zyf/AAA/le-wm/stable-worldmodel/stable_worldmodel/wm/lewm/module.py",
+                "start_column": 19,
+                "start_line": 92
+              },
+              {
+                "atom_id": {
+                  "kind": "source",
+                  "value": "atom:a15fbf7deb8fae8458bc16e1",
+                  "wire": "source:atom:a15fbf7deb8fae8458bc16e1"
+                },
+                "end_column": 38,
+                "end_line": 92,
+                "fingerprint": "sha256:3a6209baf30c11f77a5f6637282a1821fc62cea827438a97b23933caab51d8c7",
+                "path": "/home/zyf/AAA/le-wm/stable-worldmodel/stable_worldmodel/wm/lewm/module.py",
+                "start_column": 30,
+                "start_line": 92
+              },
+              {
+                "atom_id": {
+                  "kind": "source",
+                  "value": "atom:8f1a041b7bb7fc45fe2b34b7",
+                  "wire": "source:atom:8f1a041b7bb7fc45fe2b34b7"
+                },
+                "end_column": 49,
+                "end_line": 92,
+                "fingerprint": "sha256:3a6209baf30c11f77a5f6637282a1821fc62cea827438a97b23933caab51d8c7",
+                "path": "/home/zyf/AAA/le-wm/stable-worldmodel/stable_worldmodel/wm/lewm/module.py",
+                "start_column": 40,
+                "start_line": 92
+              },
+              {
+                "atom_id": {
+                  "kind": "source",
+                  "value": "atom:c8b200ee8168e55dc44b7f3f",
+                  "wire": "source:atom:c8b200ee8168e55dc44b7f3f"
+                },
+                "end_column": 60,
+                "end_line": 92,
+                "fingerprint": "sha256:3a6209baf30c11f77a5f6637282a1821fc62cea827438a97b23933caab51d8c7",
+                "path": "/home/zyf/AAA/le-wm/stable-worldmodel/stable_worldmodel/wm/lewm/module.py",
+                "start_column": 51,
+                "start_line": 92
+              },
+              {
+                "atom_id": {
+                  "kind": "source",
+                  "value": "atom:ee0e3fb6e9afcbf0bc844911",
+                  "wire": "source:atom:ee0e3fb6e9afcbf0bc844911"
+                },
+                "end_column": 70,
+                "end_line": 92,
+                "fingerprint": "sha256:3a6209baf30c11f77a5f6637282a1821fc62cea827438a97b23933caab51d8c7",
+                "path": "/home/zyf/AAA/le-wm/stable-worldmodel/stable_worldmodel/wm/lewm/module.py",
+                "start_column": 62,
+                "start_line": 92
+              }
+            ],
+            "operation": {
+              "kind": "program_operation",
+              "value": "0b90c73d1c1e7485a88bd526006367a6",
+              "wire": "program_operation:0b90c73d1c1e7485a88bd526006367a6"
+            },
+            "source": {
+              "atom_id": {
+                "kind": "source",
+                "value": "atom:3eac0053be62d2193f143b53",
+                "wire": "source:atom:3eac0053be62d2193f143b53"
+              },
+              "end_column": 70,
+              "end_line": 92,
+              "fingerprint": "sha256:3a6209baf30c11f77a5f6637282a1821fc62cea827438a97b23933caab51d8c7",
+              "path": "/home/zyf/AAA/le-wm/stable-worldmodel/stable_worldmodel/wm/lewm/module.py",
+              "start_column": 8,
+              "start_line": 92
+            }
+          }
+        ],
+        "slices": [],
+        "constants": []
+      },
+      "index_reads": [],
+      "reference_scope": "archived static SourceProgram5 graph; not inventory checkpoint/Run activation"
+    },
+    {
+      "artifact": {
+        "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_source_language_bodies_attempt03_20261023/result/body-26.source-program5.json.gz",
+        "physical_sha256": "180521b7803f93873ecbeb20ce41271cdc3d09259a264b113da27bce72f67e4c",
+        "physical_bytes": 862959,
+        "decoded_sha256": "8306870473819c9282b5786f373baf5e59d1b1a9905bf268d9c8ea01e0597490",
+        "decoded_bytes": 8299897,
+        "representation": "scar.source-program/5"
+      },
+      "namespace": {
+        "artifact": {
+          "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_source_language_bodies_attempt03_20261023/result/body-26.source-program5.json.gz",
+          "decoded_sha256": "8306870473819c9282b5786f373baf5e59d1b1a9905bf268d9c8ea01e0597490"
+        },
+        "representation": "scar.program-graph/15",
+        "record_pointer": "#/graph",
+        "body": {
+          "definition": {
+            "kind": "opdef",
+            "value": "op:2bbbf0465da144672babb952",
+            "wire": "opdef:op:2bbbf0465da144672babb952"
+          },
+          "entry": "Predictor.forward",
+          "source": {
+            "atom_id": {
+              "kind": "source",
+              "value": "atom:6c731b209fd1462bbb37fc2a",
+              "wire": "source:atom:6c731b209fd1462bbb37fc2a"
+            },
+            "end_column": 16,
+            "end_line": 294,
+            "fingerprint": "sha256:3a6209baf30c11f77a5f6637282a1821fc62cea827438a97b23933caab51d8c7",
+            "path": "/home/zyf/AAA/le-wm/stable-worldmodel/stable_worldmodel/wm/lewm/module.py",
+            "start_column": 4,
+            "start_line": 285
+          }
+        }
+      },
+      "root": {
+        "kind": "program_region",
+        "value": "dfefceda582030738ccef909e109db6b",
+        "wire": "program_region:dfefceda582030738ccef909e109db6b"
+      },
+      "operation_count": 65,
+      "source": {
+        "encoding": "utf-8",
+        "fingerprint": "sha256:3a6209baf30c11f77a5f6637282a1821fc62cea827438a97b23933caab51d8c7",
+        "path": "/home/zyf/AAA/le-wm/stable-worldmodel/stable_worldmodel/wm/lewm/module.py",
+        "python_version": "3.14"
+      },
+      "language_shapes": {
+        "unpackings": [],
+        "slices": [
+          {
+            "lower": null,
+            "operation": {
+              "kind": "program_operation",
+              "value": "c5e38954dbac3eb9f051d7ee226b4880",
+              "wire": "program_operation:c5e38954dbac3eb9f051d7ee226b4880"
+            },
+            "source": {
+              "atom_id": {
+                "kind": "source",
+                "value": "atom:c97cb91588b34cba0bddf223",
+                "wire": "source:atom:c97cb91588b34cba0bddf223"
+              },
+              "end_column": 40,
+              "end_line": 291,
+              "fingerprint": "sha256:3a6209baf30c11f77a5f6637282a1821fc62cea827438a97b23933caab51d8c7",
+              "path": "/home/zyf/AAA/le-wm/stable-worldmodel/stable_worldmodel/wm/lewm/module.py",
+              "start_column": 38,
+              "start_line": 291
+            },
+            "step": null,
+            "upper": {
+              "atom_id": {
+                "kind": "source",
+                "value": "atom:6bbd62eb86aba3ec1bebb1c2",
+                "wire": "source:atom:6bbd62eb86aba3ec1bebb1c2"
+              },
+              "end_column": 40,
+              "end_line": 291,
+              "fingerprint": "sha256:3a6209baf30c11f77a5f6637282a1821fc62cea827438a97b23933caab51d8c7",
+              "path": "/home/zyf/AAA/le-wm/stable-worldmodel/stable_worldmodel/wm/lewm/module.py",
+              "start_column": 39,
+              "start_line": 291
+            }
+          }
+        ],
+        "constants": [
+          {
+            "code_key": "pycode-v2:84d02981041d27e3557319215e6d1a3264d274d0275e50fdc441fddbc68801ad",
+            "constant_path": [
+              1
+            ],
+            "operation": {
+              "kind": "program_operation",
+              "value": "9706a245d7bc776af6d826cccd4466fd",
+              "wire": "program_operation:9706a245d7bc776af6d826cccd4466fd"
+            },
+            "source": {
+              "atom_id": {
+                "kind": "source",
+                "value": "atom:6e5b96dc5fff70ae58694130",
+                "wire": "source:atom:6e5b96dc5fff70ae58694130"
+              },
+              "end_column": 36,
+              "end_line": 291,
+              "fingerprint": "sha256:3a6209baf30c11f77a5f6637282a1821fc62cea827438a97b23933caab51d8c7",
+              "path": "/home/zyf/AAA/le-wm/stable-worldmodel/stable_worldmodel/wm/lewm/module.py",
+              "start_column": 35,
+              "start_line": 291
+            }
+          }
+        ]
+      },
+      "index_reads": [
+        {
+          "operation": {
+            "kind": "program_operation",
+            "value": "99ea20756732e0780c7ace98c33a826d",
+            "wire": "program_operation:99ea20756732e0780c7ace98c33a826d"
+          },
+          "source": {
+            "opcode": "index",
+            "operation": {
+              "kind": "program_operation",
+              "value": "99ea20756732e0780c7ace98c33a826d",
+              "wire": "program_operation:99ea20756732e0780c7ace98c33a826d"
+            },
+            "role": "EXPRESSION",
+            "semantic_operation": {
+              "kind": "opdef",
+              "value": "op:879d615751a60af01f6ad7d7",
+              "wire": "opdef:op:879d615751a60af01f6ad7d7"
+            },
+            "source": {
+              "atom_id": {
+                "kind": "source",
+                "value": "atom:8dd9d935177da9b9e094d65a",
+                "wire": "source:atom:8dd9d935177da9b9e094d65a"
+              },
+              "end_column": 41,
+              "end_line": 291,
+              "fingerprint": "sha256:3a6209baf30c11f77a5f6637282a1821fc62cea827438a97b23933caab51d8c7",
+              "path": "/home/zyf/AAA/le-wm/stable-worldmodel/stable_worldmodel/wm/lewm/module.py",
+              "start_column": 16,
+              "start_line": 291
+            }
+          },
+          "uses": [
+            {
+              "id": {
+                "kind": "program_use",
+                "value": "09eb1a8ed9b05f9328aa9f011b01fe58",
+                "wire": "program_use:09eb1a8ed9b05f9328aa9f011b01fe58"
+              },
+              "role": "REFERENCE",
+              "value": {
+                "kind": "program_value",
+                "value": "d1756200c128c4a7d161e57ebb524036",
+                "wire": "program_value:d1756200c128c4a7d161e57ebb524036"
+              }
+            },
+            {
+              "id": {
+                "kind": "program_use",
+                "value": "f92b1a0dddf24d50cd1cc9aaf94816f2",
+                "wire": "program_use:f92b1a0dddf24d50cd1cc9aaf94816f2"
+              },
+              "role": "REFERENCE",
+              "value": {
+                "kind": "program_value",
+                "value": "48da09024f5dda1a6fec57198508e012",
+                "wire": "program_value:48da09024f5dda1a6fec57198508e012"
+              }
+            },
+            {
+              "id": {
+                "kind": "program_use",
+                "value": "c56dd96635c8dd9a563ae5ac0bab6be8",
+                "wire": "program_use:c56dd96635c8dd9a563ae5ac0bab6be8"
+              },
+              "role": "STATE_CONTENT",
+              "value": {
+                "kind": "program_value",
+                "value": "6db9eeb07bf46dfc17cc34aaff809c30",
+                "wire": "program_value:6db9eeb07bf46dfc17cc34aaff809c30"
+              }
+            }
+          ],
+          "invoke_arguments": [
+            {
+              "kind": "program_use",
+              "value": "09eb1a8ed9b05f9328aa9f011b01fe58",
+              "wire": "program_use:09eb1a8ed9b05f9328aa9f011b01fe58"
+            },
+            {
+              "kind": "program_use",
+              "value": "f92b1a0dddf24d50cd1cc9aaf94816f2",
+              "wire": "program_use:f92b1a0dddf24d50cd1cc9aaf94816f2"
+            },
+            {
+              "kind": "program_use",
+              "value": "c56dd96635c8dd9a563ae5ac0bab6be8",
+              "wire": "program_use:c56dd96635c8dd9a563ae5ac0bab6be8"
+            }
+          ],
+          "completions": [
+            {
+              "kind": "NORMAL",
+              "types": [
+                {
+                  "data_type": null,
+                  "kind": "REFERENCE",
+                  "location": null
+                },
+                {
+                  "data_type": null,
+                  "kind": "STATE",
+                  "location": {
+                    "kind": "program_location",
+                    "value": "8a150580b860b7b86263d5f4decb5819",
+                    "wire": "program_location:8a150580b860b7b86263d5f4decb5819"
+                  }
+                }
+              ]
+            },
+            {
+              "kind": "RAISE",
+              "types": [
+                {
+                  "data_type": null,
+                  "kind": "REFERENCE",
+                  "location": null
+                },
+                {
+                  "data_type": null,
+                  "kind": "STATE",
+                  "location": {
+                    "kind": "program_location",
+                    "value": "8a150580b860b7b86263d5f4decb5819",
+                    "wire": "program_location:8a150580b860b7b86263d5f4decb5819"
+                  }
+                }
+              ]
+            }
+          ],
+          "terminator": {
+            "condition": null,
+            "exit": null,
+            "kind": "INVOKE",
+            "successors": [
+              {
+                "arguments": [
+                  {
+                    "index": 0
+                  },
+                  {
+                    "index": 1
+                  }
+                ],
+                "block": {
+                  "kind": "program_block",
+                  "value": "51c754b18c28dc262f758e11c14f8bb6",
+                  "wire": "program_block:51c754b18c28dc262f758e11c14f8bb6"
+                },
+                "kind": "NORMAL"
+              },
+              {
+                "arguments": [
+                  {
+                    "index": 0
+                  },
+                  {
+                    "index": 1
+                  }
+                ],
+                "block": {
+                  "kind": "program_block",
+                  "value": "2e5588df67b4ffa33ad74be259f6d6e8",
+                  "wire": "program_block:2e5588df67b4ffa33ad74be259f6d6e8"
+                },
+                "kind": "RAISE"
+              }
+            ],
+            "values": []
+          },
+          "partial_address": {
+            "coverage": "PARTIAL",
+            "effects": [
+              {
+                "mode": "READ",
+                "owner": {
+                  "kind": "REFERENCE_OWNER",
+                  "use": {
+                    "kind": "program_use",
+                    "value": "09eb1a8ed9b05f9328aa9f011b01fe58",
+                    "wire": "program_use:09eb1a8ed9b05f9328aa9f011b01fe58"
+                  }
+                },
+                "path": [
+                  {
+                    "index": {
+                      "kind": "program_use",
+                      "value": "f92b1a0dddf24d50cd1cc9aaf94816f2",
+                      "wire": "program_use:f92b1a0dddf24d50cd1cc9aaf94816f2"
+                    },
+                    "kind": "ELEMENT"
+                  }
+                ],
+                "stage": null
+              }
+            ],
+            "protocol": null,
+            "site": {
+              "kind": "INVOKE_STATE_OPERAND",
+              "operation": {
+                "kind": "program_operation",
+                "value": "99ea20756732e0780c7ace98c33a826d",
+                "wire": "program_operation:99ea20756732e0780c7ace98c33a826d"
+              },
+              "state_use": {
+                "kind": "program_use",
+                "value": "c56dd96635c8dd9a563ae5ac0bab6be8",
+                "wire": "program_use:c56dd96635c8dd9a563ae5ac0bab6be8"
+              }
+            }
+          },
+          "effects_complete": false
+        }
+      ],
+      "reference_scope": "archived static SourceProgram5 graph; not inventory checkpoint/Run activation"
+    }
+  ],
+  "bare_local_ids_globally_merged": false,
+  "runtime_code_instance_established": false,
+  "current_run_integrated": false
+}

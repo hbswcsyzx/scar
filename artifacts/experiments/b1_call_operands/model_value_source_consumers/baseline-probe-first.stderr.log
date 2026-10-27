@@ -1,0 +1,17 @@
+Traceback (most recent call last):
+  File "/tmp/scar-structured-model-280qf4mi/artifacts/experiments/b1_call_operands/model_value_source_consumers/baseline_probe.py", line 35, in <module>
+    Path(__file__).with_name('baseline.json').write_text(json.dumps(record, indent=2) + '\n')
+                                                         ~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "/home/zyf/miniconda3/envs/lewm/lib/python3.14/json/__init__.py", line 242, in dumps
+    **kw).encode(obj)
+          ~~~~~~^^^^^
+  File "/home/zyf/miniconda3/envs/lewm/lib/python3.14/json/encoder.py", line 202, in encode
+    chunks = self.iterencode(o, _one_shot=True)
+  File "/home/zyf/miniconda3/envs/lewm/lib/python3.14/json/encoder.py", line 263, in iterencode
+    return _iterencode(o, 0)
+  File "/home/zyf/miniconda3/envs/lewm/lib/python3.14/json/encoder.py", line 182, in default
+    raise TypeError(f'Object of type {o.__class__.__name__} '
+                    f'is not JSON serializable')
+TypeError: Object of type ExecutionIssue is not JSON serializable
+when serializing tuple item 1
+when serializing dict item 'ordinary_gaps'

@@ -1,0 +1,95 @@
+{
+  "status": "ACTUAL_STREAM_GPU_OS_CAPTURE_AND_READBACK_PASS",
+  "coordinate_counts": {
+    "artifact_members": 83,
+    "os_artifacts": 64,
+    "os_lines": 83672,
+    "processes": 2,
+    "threads": 64,
+    "verified_raw_bytes": 8644413
+  },
+  "stream_membership": {
+    "capability": "SCAR_STREAM_INTERFACE_MEMBERSHIP_V1",
+    "collector_stopped": false,
+    "declared_counts": {
+      "BEGIN": 7,
+      "C_RAISE": 1,
+      "C_RETURN": 6,
+      "UNOBSERVED": 0
+    },
+    "events": {
+      "schema": "scar.stream-interfaces.events.v1",
+      "sha256": "d3dae598334443c4c45cd4bb1c92ccbe84a9442135b674e461f694cf65c0f565",
+      "size_bytes": 6095,
+      "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/stream_interfaces_main_20261026/joint03/capture/trace/stream-interfaces.1921229.jsonl"
+    },
+    "manifest": {
+      "schema": "scar.stream-interface-collection",
+      "sha256": "dfc1ef4573c8640f33d1836e8b8f0c3eac861ad66e555d8a5af013057ca8a239",
+      "size_bytes": 2879,
+      "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/stream_interfaces_main_20261026/joint03/capture/trace/stream-interface-meta.1921229.json"
+    },
+    "source_or_contents_established": false
+  },
+  "io_counts": {
+    "BEGIN": 7,
+    "C_RETURN": 6,
+    "C_RAISE": 1,
+    "UNOBSERVED": 0
+  },
+  "io_calls": [
+    [
+      "seek",
+      "MEMORY_BYTES",
+      "C_RETURN"
+    ],
+    [
+      "read",
+      "MEMORY_BYTES",
+      "C_RETURN"
+    ],
+    [
+      "write",
+      "BUFFERED_STREAM",
+      "C_RETURN"
+    ],
+    [
+      "flush",
+      "BUFFERED_STREAM",
+      "C_RETURN"
+    ],
+    [
+      "close",
+      "BUFFERED_STREAM",
+      "C_RETURN"
+    ],
+    [
+      "close",
+      "MEMORY_BYTES",
+      "C_RETURN"
+    ],
+    [
+      "read",
+      "BUFFERED_STREAM",
+      "C_RAISE"
+    ]
+  ],
+  "operand_instructions": 0,
+  "operand_gaps": 0,
+  "operand_errors": [],
+  "kineto_categories": {
+    "": 60,
+    "cpu_op": 14,
+    "user_annotation": 6,
+    "cpu_instant_event": 10,
+    "cuda_runtime": 12,
+    "ac2g": 14,
+    "overhead": 9,
+    "gpu_memcpy": 1,
+    "kernel": 1,
+    "gpu_user_annotation": 2,
+    "Trace": 1
+  },
+  "whole_model_established": false,
+  "scope": "one planned general stream/GPU function; no actual input/output bytes captured, no file content version/backing identity or full LeWM claim"
+}

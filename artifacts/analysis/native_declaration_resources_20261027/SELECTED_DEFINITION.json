@@ -1,0 +1,142 @@
+{
+  "definition": {
+    "id": {
+      "kind": "opdef",
+      "value": "native:636fde61a45803f11712767bc1cbf0b0ea3de13b14e0b27edc2d6071daea1612:symbol:ca7395838270677a7ae3b26d85d104197a6e2bcfbd66201257d5d126a562dec9",
+      "wire": "opdef:native:636fde61a45803f11712767bc1cbf0b0ea3de13b14e0b27edc2d6071daea1612:symbol:ca7395838270677a7ae3b26d85d104197a6e2bcfbd66201257d5d126a562dec9"
+    },
+    "kind": "operator",
+    "label": "aten::copy_",
+    "code_id": null,
+    "source_file": null,
+    "source_start": null,
+    "source_end": null,
+    "parent_id": null,
+    "control_region": null,
+    "input_slots": [
+      {
+        "kind": "slot",
+        "value": "native:636fde61a45803f11712767bc1cbf0b0ea3de13b14e0b27edc2d6071daea1612:symbol:ca7395838270677a7ae3b26d85d104197a6e2bcfbd66201257d5d126a562dec9:schema:input_slots:0",
+        "wire": "slot:native:636fde61a45803f11712767bc1cbf0b0ea3de13b14e0b27edc2d6071daea1612:symbol:ca7395838270677a7ae3b26d85d104197a6e2bcfbd66201257d5d126a562dec9:schema:input_slots:0"
+      },
+      {
+        "kind": "slot",
+        "value": "native:636fde61a45803f11712767bc1cbf0b0ea3de13b14e0b27edc2d6071daea1612:symbol:ca7395838270677a7ae3b26d85d104197a6e2bcfbd66201257d5d126a562dec9:schema:input_slots:1",
+        "wire": "slot:native:636fde61a45803f11712767bc1cbf0b0ea3de13b14e0b27edc2d6071daea1612:symbol:ca7395838270677a7ae3b26d85d104197a6e2bcfbd66201257d5d126a562dec9:schema:input_slots:1"
+      },
+      {
+        "kind": "slot",
+        "value": "native:636fde61a45803f11712767bc1cbf0b0ea3de13b14e0b27edc2d6071daea1612:symbol:ca7395838270677a7ae3b26d85d104197a6e2bcfbd66201257d5d126a562dec9:schema:input_slots:2",
+        "wire": "slot:native:636fde61a45803f11712767bc1cbf0b0ea3de13b14e0b27edc2d6071daea1612:symbol:ca7395838270677a7ae3b26d85d104197a6e2bcfbd66201257d5d126a562dec9:schema:input_slots:2"
+      }
+    ],
+    "output_slots": [
+      {
+        "kind": "slot",
+        "value": "native:636fde61a45803f11712767bc1cbf0b0ea3de13b14e0b27edc2d6071daea1612:symbol:ca7395838270677a7ae3b26d85d104197a6e2bcfbd66201257d5d126a562dec9:schema:output_slots:0",
+        "wire": "slot:native:636fde61a45803f11712767bc1cbf0b0ea3de13b14e0b27edc2d6071daea1612:symbol:ca7395838270677a7ae3b26d85d104197a6e2bcfbd66201257d5d126a562dec9:schema:output_slots:0"
+      }
+    ],
+    "state_slots": [],
+    "source_atoms": [],
+    "contract": null,
+    "effect_summary": {
+      "kind": "effect",
+      "value": "native:636fde61a45803f11712767bc1cbf0b0ea3de13b14e0b27edc2d6071daea1612:symbol:ca7395838270677a7ae3b26d85d104197a6e2bcfbd66201257d5d126a562dec9:provider-schema-effects",
+      "wire": "effect:native:636fde61a45803f11712767bc1cbf0b0ea3de13b14e0b27edc2d6071daea1612:symbol:ca7395838270677a7ae3b26d85d104197a6e2bcfbd66201257d5d126a562dec9:provider-schema-effects"
+    },
+    "resource_requirements": [],
+    "metadata": {
+      "definition_basis": "observed provider symbol, not original source",
+      "native_schema_contract": {
+        "alias_pair_inventory_complete": false,
+        "alias_symbols_scope": "this schema contract only; symbols are not global storage identities",
+        "declared_is_mutable": true,
+        "gaps": [
+          "registered_alias_analysis_kind_not_recovered_from_schema_text",
+          "schema_does_not_close_rng_external_ordering_exception_or_lifetime_effects",
+          "unlisted_alias_pairs_are_not_proven_disjoint"
+        ],
+        "input_slots": [
+          {
+            "kind": "slot",
+            "value": "native:636fde61a45803f11712767bc1cbf0b0ea3de13b14e0b27edc2d6071daea1612:symbol:ca7395838270677a7ae3b26d85d104197a6e2bcfbd66201257d5d126a562dec9:schema:input_slots:0",
+            "wire": "slot:native:636fde61a45803f11712767bc1cbf0b0ea3de13b14e0b27edc2d6071daea1612:symbol:ca7395838270677a7ae3b26d85d104197a6e2bcfbd66201257d5d126a562dec9:schema:input_slots:0"
+          },
+          {
+            "kind": "slot",
+            "value": "native:636fde61a45803f11712767bc1cbf0b0ea3de13b14e0b27edc2d6071daea1612:symbol:ca7395838270677a7ae3b26d85d104197a6e2bcfbd66201257d5d126a562dec9:schema:input_slots:1",
+            "wire": "slot:native:636fde61a45803f11712767bc1cbf0b0ea3de13b14e0b27edc2d6071daea1612:symbol:ca7395838270677a7ae3b26d85d104197a6e2bcfbd66201257d5d126a562dec9:schema:input_slots:1"
+          },
+          {
+            "kind": "slot",
+            "value": "native:636fde61a45803f11712767bc1cbf0b0ea3de13b14e0b27edc2d6071daea1612:symbol:ca7395838270677a7ae3b26d85d104197a6e2bcfbd66201257d5d126a562dec9:schema:input_slots:2",
+            "wire": "slot:native:636fde61a45803f11712767bc1cbf0b0ea3de13b14e0b27edc2d6071daea1612:symbol:ca7395838270677a7ae3b26d85d104197a6e2bcfbd66201257d5d126a562dec9:schema:input_slots:2"
+          }
+        ],
+        "output_slots": [
+          {
+            "kind": "slot",
+            "value": "native:636fde61a45803f11712767bc1cbf0b0ea3de13b14e0b27edc2d6071daea1612:symbol:ca7395838270677a7ae3b26d85d104197a6e2bcfbd66201257d5d126a562dec9:schema:output_slots:0",
+            "wire": "slot:native:636fde61a45803f11712767bc1cbf0b0ea3de13b14e0b27edc2d6071daea1612:symbol:ca7395838270677a7ae3b26d85d104197a6e2bcfbd66201257d5d126a562dec9:schema:output_slots:0"
+          }
+        ],
+        "overload_name": "",
+        "possible_aliases": [
+          {
+            "left": {
+              "kind": "slot",
+              "value": "native:636fde61a45803f11712767bc1cbf0b0ea3de13b14e0b27edc2d6071daea1612:symbol:ca7395838270677a7ae3b26d85d104197a6e2bcfbd66201257d5d126a562dec9:schema:input_slots:0",
+              "wire": "slot:native:636fde61a45803f11712767bc1cbf0b0ea3de13b14e0b27edc2d6071daea1612:symbol:ca7395838270677a7ae3b26d85d104197a6e2bcfbd66201257d5d126a562dec9:schema:input_slots:0"
+            },
+            "relation": "may_alias",
+            "right": {
+              "kind": "slot",
+              "value": "native:636fde61a45803f11712767bc1cbf0b0ea3de13b14e0b27edc2d6071daea1612:symbol:ca7395838270677a7ae3b26d85d104197a6e2bcfbd66201257d5d126a562dec9:schema:output_slots:0",
+              "wire": "slot:native:636fde61a45803f11712767bc1cbf0b0ea3de13b14e0b27edc2d6071daea1612:symbol:ca7395838270677a7ae3b26d85d104197a6e2bcfbd66201257d5d126a562dec9:schema:output_slots:0"
+            }
+          }
+        ],
+        "provider_revision": "cf30153c4c131c8164ee7798e5022d810682e2cb",
+        "raw_schema": "aten::copy_(Tensor(a!) self, Tensor src, bool non_blocking=False) -> Tensor(a!)",
+        "schema_name": "aten::copy_",
+        "schema_sha256": "fe4718df3a2d866d6c1051787300fe19158f94500c37dc64b1ad552f140c5706",
+        "source_reference": "sha256:11960422233619b68d4a42d5b699a34cb57349df04df0bc90b6fd5ef3d8e4684#/nodes/50"
+      },
+      "op_schema": "aten::copy_(Tensor(a!) self, Tensor src, bool non_blocking=False) -> Tensor(a!)",
+      "provider": "eto",
+      "provider_revision": "cf30153c4c131c8164ee7798e5022d810682e2cb",
+      "source_correspondence": "UNRESOLVED",
+      "state_effects": "UNKNOWN"
+    }
+  },
+  "source": {
+    "artifact": {
+      "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/native_inputs_full_20261026/native-import/native/bundle-partitions/semantic/definitions/000000.jsonl.gz",
+      "sha256": "d7373607550c4656f6238ec07a9fc9183a3bdf039c2c464aa78c1da774872d6c",
+      "size_bytes": 1044470,
+      "schema": "scar.bundle-record-chunk"
+    },
+    "decoded_sha256": "5876f318ad515dc0dcb83b72d2589de424b14c12965689cfe1cd7953bb898864",
+    "decoded_bytes": 15999647,
+    "encoding": "GZIP_JSONL",
+    "line": 30,
+    "pointer": "#/record",
+    "declaration": {
+      "artifact": {
+        "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/native_inputs_full_20261026/native-import/native/bundle-partitions/manifest.json",
+        "sha256": "3a2a80d64ff7e67d72545aefe0154b0f48fa18a855847005675221c86954c29b",
+        "size_bytes": 73304,
+        "schema": "scar.partitioned-ir-bundle"
+      },
+      "locator": "#/graphs/semantic/tables/definitions/chunks/0"
+    }
+  },
+  "measurements": {
+    "stored_bytes": 1191078,
+    "decoded_bytes": 16146255,
+    "total_bytes": 17337333,
+    "elapsed_seconds": 0.12581370095722377
+  },
+  "purpose": "identify already-normal-read selected original definition; no new boundary qualification"
+}

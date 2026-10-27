@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="1" failures="0" skipped="0" tests="1" time="0.779" timestamp="2026-10-18T17:26:36.774856+00:00" hostname="gpu1"><testcase classname="" name="tests.unit.test_program_input_origins" time="0.000"><error message="collection failure">ImportError while importing test module '/tmp/scar-structured-model-280qf4mi/tests/unit/test_program_input_origins.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/home/zyf/miniconda3/envs/lewm/lib/python3.14/importlib/__init__.py:88: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/unit/test_program_input_origins.py:6: in &lt;module&gt;
+    from scar.ir.program.literal_sources import LiteralEvaluation
+E   ImportError: cannot import name 'LiteralEvaluation' from 'scar.ir.program.literal_sources' (/tmp/scar-structured-model-280qf4mi/scar/ir/program/literal_sources.py)</error></testcase></testsuite></testsuites>

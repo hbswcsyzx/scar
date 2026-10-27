@@ -1,0 +1,224 @@
+FFFFF                                                                    [100%]
+=================================== FAILURES ===================================
+_ test_two_actual_calls_retry_the_new_cut_with_the_same_forwarded_instance_and_current_raise_states _
+
+    def test_two_actual_calls_retry_the_new_cut_with_the_same_forwarded_instance_and_current_raise_states():
+>       graph, details = two_close_requests_program()
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_program_generator_close_retry.py:28: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/fixtures/program_generator_close_retry_graphs.py:109: in two_close_requests_program
+    terminator=Terminator(TerminatorKind.INVOKE, (
+<string>:8: in __init__
+    ???
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = Terminator(kind=<TerminatorKind.INVOKE: 'INVOKE'>, successors=(CompletionSuccessor(kind=<ExitKind.RAISE: 'RAISE'>, blo...CompletionResult(index=2), UseID(value='close.calls.first.forward.instance'))),), condition=None, exit=None, values=())
+
+    def __post_init__(self) -> None:
+        if not isinstance(self.kind, TerminatorKind):
+            raise TypeError("Terminator.kind must be TerminatorKind")
+        if self.kind in (TerminatorKind.PENDING_DISPATCH, TerminatorKind.CLEANUP_ROUTE,
+                         TerminatorKind.SUSPEND, TerminatorKind.BODY_DRIVE):
+            raise ValueError(f"{self.kind.value} requires its dedicated typed terminator")
+        _tuple(self.successors, "Terminator.successors")
+        if any(not isinstance(item, (Successor, CompletionSuccessor)) for item in self.successors):
+            raise TypeError("Terminator.successors must contain successor records")
+        if self.condition is not None and not isinstance(self.condition, UseID):
+            raise TypeError("Terminator.condition must be UseID or None")
+        if self.exit is not None:
+            _nonempty_text(self.exit, "Terminator.exit")
+        _tuple(self.values, "Terminator.values")
+        if any(not isinstance(item, UseID) for item in self.values):
+            raise TypeError("Terminator.values must contain UseID")
+    
+        if self.kind is TerminatorKind.INVOKE:
+            if (len(self.successors) != 2
+                    or any(not isinstance(item, CompletionSuccessor) for item in self.successors)
+                    or {item.kind for item in self.successors} != {ExitKind.NORMAL, ExitKind.RAISE}
+                    or self.successors[0].block == self.successors[1].block
+                    or self.condition is not None or self.exit is not None or self.values):
+>               raise ValueError(
+E               ValueError: INVOKE requires distinct NORMAL and RAISE completion successors and no other terminator payload
+
+scar/ir/program/model.py:589: ValueError
+_ test_second_close_cannot_reenter_the_first_cut_while_claiming_the_retry_terminal _
+
+    def test_second_close_cannot_reenter_the_first_cut_while_claiming_the_retry_terminal():
+>       graph, details = two_close_requests_program()
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_program_generator_close_retry.py:75: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/fixtures/program_generator_close_retry_graphs.py:109: in two_close_requests_program
+    terminator=Terminator(TerminatorKind.INVOKE, (
+<string>:8: in __init__
+    ???
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = Terminator(kind=<TerminatorKind.INVOKE: 'INVOKE'>, successors=(CompletionSuccessor(kind=<ExitKind.RAISE: 'RAISE'>, blo...CompletionResult(index=2), UseID(value='close.calls.first.forward.instance'))),), condition=None, exit=None, values=())
+
+    def __post_init__(self) -> None:
+        if not isinstance(self.kind, TerminatorKind):
+            raise TypeError("Terminator.kind must be TerminatorKind")
+        if self.kind in (TerminatorKind.PENDING_DISPATCH, TerminatorKind.CLEANUP_ROUTE,
+                         TerminatorKind.SUSPEND, TerminatorKind.BODY_DRIVE):
+            raise ValueError(f"{self.kind.value} requires its dedicated typed terminator")
+        _tuple(self.successors, "Terminator.successors")
+        if any(not isinstance(item, (Successor, CompletionSuccessor)) for item in self.successors):
+            raise TypeError("Terminator.successors must contain successor records")
+        if self.condition is not None and not isinstance(self.condition, UseID):
+            raise TypeError("Terminator.condition must be UseID or None")
+        if self.exit is not None:
+            _nonempty_text(self.exit, "Terminator.exit")
+        _tuple(self.values, "Terminator.values")
+        if any(not isinstance(item, UseID) for item in self.values):
+            raise TypeError("Terminator.values must contain UseID")
+    
+        if self.kind is TerminatorKind.INVOKE:
+            if (len(self.successors) != 2
+                    or any(not isinstance(item, CompletionSuccessor) for item in self.successors)
+                    or {item.kind for item in self.successors} != {ExitKind.NORMAL, ExitKind.RAISE}
+                    or self.successors[0].block == self.successors[1].block
+                    or self.condition is not None or self.exit is not None or self.values):
+>               raise ValueError(
+E               ValueError: INVOKE requires distinct NORMAL and RAISE completion successors and no other terminator payload
+
+scar/ir/program/model.py:589: ValueError
+_ test_second_call_cannot_reuse_the_pre_first_call_state_after_the_actual_raise_completion _
+
+    def test_second_call_cannot_reuse_the_pre_first_call_state_after_the_actual_raise_completion():
+>       graph, details = two_close_requests_program()
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_program_generator_close_retry.py:84: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/fixtures/program_generator_close_retry_graphs.py:109: in two_close_requests_program
+    terminator=Terminator(TerminatorKind.INVOKE, (
+<string>:8: in __init__
+    ???
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = Terminator(kind=<TerminatorKind.INVOKE: 'INVOKE'>, successors=(CompletionSuccessor(kind=<ExitKind.RAISE: 'RAISE'>, blo...CompletionResult(index=2), UseID(value='close.calls.first.forward.instance'))),), condition=None, exit=None, values=())
+
+    def __post_init__(self) -> None:
+        if not isinstance(self.kind, TerminatorKind):
+            raise TypeError("Terminator.kind must be TerminatorKind")
+        if self.kind in (TerminatorKind.PENDING_DISPATCH, TerminatorKind.CLEANUP_ROUTE,
+                         TerminatorKind.SUSPEND, TerminatorKind.BODY_DRIVE):
+            raise ValueError(f"{self.kind.value} requires its dedicated typed terminator")
+        _tuple(self.successors, "Terminator.successors")
+        if any(not isinstance(item, (Successor, CompletionSuccessor)) for item in self.successors):
+            raise TypeError("Terminator.successors must contain successor records")
+        if self.condition is not None and not isinstance(self.condition, UseID):
+            raise TypeError("Terminator.condition must be UseID or None")
+        if self.exit is not None:
+            _nonempty_text(self.exit, "Terminator.exit")
+        _tuple(self.values, "Terminator.values")
+        if any(not isinstance(item, UseID) for item in self.values):
+            raise TypeError("Terminator.values must contain UseID")
+    
+        if self.kind is TerminatorKind.INVOKE:
+            if (len(self.successors) != 2
+                    or any(not isinstance(item, CompletionSuccessor) for item in self.successors)
+                    or {item.kind for item in self.successors} != {ExitKind.NORMAL, ExitKind.RAISE}
+                    or self.successors[0].block == self.successors[1].block
+                    or self.condition is not None or self.exit is not None or self.values):
+>               raise ValueError(
+E               ValueError: INVOKE requires distinct NORMAL and RAISE completion successors and no other terminator payload
+
+scar/ir/program/model.py:589: ValueError
+_ test_second_close_cannot_deliver_the_previous_host_error_in_place_of_its_fresh_normalizer_packet _
+
+    def test_second_close_cannot_deliver_the_previous_host_error_in_place_of_its_fresh_normalizer_packet():
+>       graph, details = two_close_requests_program()
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_program_generator_close_retry.py:94: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/fixtures/program_generator_close_retry_graphs.py:109: in two_close_requests_program
+    terminator=Terminator(TerminatorKind.INVOKE, (
+<string>:8: in __init__
+    ???
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = Terminator(kind=<TerminatorKind.INVOKE: 'INVOKE'>, successors=(CompletionSuccessor(kind=<ExitKind.RAISE: 'RAISE'>, blo...CompletionResult(index=2), UseID(value='close.calls.first.forward.instance'))),), condition=None, exit=None, values=())
+
+    def __post_init__(self) -> None:
+        if not isinstance(self.kind, TerminatorKind):
+            raise TypeError("Terminator.kind must be TerminatorKind")
+        if self.kind in (TerminatorKind.PENDING_DISPATCH, TerminatorKind.CLEANUP_ROUTE,
+                         TerminatorKind.SUSPEND, TerminatorKind.BODY_DRIVE):
+            raise ValueError(f"{self.kind.value} requires its dedicated typed terminator")
+        _tuple(self.successors, "Terminator.successors")
+        if any(not isinstance(item, (Successor, CompletionSuccessor)) for item in self.successors):
+            raise TypeError("Terminator.successors must contain successor records")
+        if self.condition is not None and not isinstance(self.condition, UseID):
+            raise TypeError("Terminator.condition must be UseID or None")
+        if self.exit is not None:
+            _nonempty_text(self.exit, "Terminator.exit")
+        _tuple(self.values, "Terminator.values")
+        if any(not isinstance(item, UseID) for item in self.values):
+            raise TypeError("Terminator.values must contain UseID")
+    
+        if self.kind is TerminatorKind.INVOKE:
+            if (len(self.successors) != 2
+                    or any(not isinstance(item, CompletionSuccessor) for item in self.successors)
+                    or {item.kind for item in self.successors} != {ExitKind.NORMAL, ExitKind.RAISE}
+                    or self.successors[0].block == self.successors[1].block
+                    or self.condition is not None or self.exit is not None or self.values):
+>               raise ValueError(
+E               ValueError: INVOKE requires distinct NORMAL and RAISE completion successors and no other terminator payload
+
+scar/ir/program/model.py:589: ValueError
+_ test_first_yield_cannot_borrow_finished_history_from_the_second_driver_of_the_shared_body _
+
+    def test_first_yield_cannot_borrow_finished_history_from_the_second_driver_of_the_shared_body():
+>       graph, _ = two_close_requests_program(release_first=True)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_program_generator_close_retry.py:108: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/fixtures/program_generator_close_retry_graphs.py:109: in two_close_requests_program
+    terminator=Terminator(TerminatorKind.INVOKE, (
+<string>:8: in __init__
+    ???
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = Terminator(kind=<TerminatorKind.INVOKE: 'INVOKE'>, successors=(CompletionSuccessor(kind=<ExitKind.RAISE: 'RAISE'>, blo...CompletionResult(index=2), UseID(value='close.calls.first.forward.instance'))),), condition=None, exit=None, values=())
+
+    def __post_init__(self) -> None:
+        if not isinstance(self.kind, TerminatorKind):
+            raise TypeError("Terminator.kind must be TerminatorKind")
+        if self.kind in (TerminatorKind.PENDING_DISPATCH, TerminatorKind.CLEANUP_ROUTE,
+                         TerminatorKind.SUSPEND, TerminatorKind.BODY_DRIVE):
+            raise ValueError(f"{self.kind.value} requires its dedicated typed terminator")
+        _tuple(self.successors, "Terminator.successors")
+        if any(not isinstance(item, (Successor, CompletionSuccessor)) for item in self.successors):
+            raise TypeError("Terminator.successors must contain successor records")
+        if self.condition is not None and not isinstance(self.condition, UseID):
+            raise TypeError("Terminator.condition must be UseID or None")
+        if self.exit is not None:
+            _nonempty_text(self.exit, "Terminator.exit")
+        _tuple(self.values, "Terminator.values")
+        if any(not isinstance(item, UseID) for item in self.values):
+            raise TypeError("Terminator.values must contain UseID")
+    
+        if self.kind is TerminatorKind.INVOKE:
+            if (len(self.successors) != 2
+                    or any(not isinstance(item, CompletionSuccessor) for item in self.successors)
+                    or {item.kind for item in self.successors} != {ExitKind.NORMAL, ExitKind.RAISE}
+                    or self.successors[0].block == self.successors[1].block
+                    or self.condition is not None or self.exit is not None or self.values):
+>               raise ValueError(
+E               ValueError: INVOKE requires distinct NORMAL and RAISE completion successors and no other terminator payload
+
+scar/ir/program/model.py:589: ValueError
+=========================== short test summary info ============================
+FAILED tests/unit/test_program_generator_close_retry.py::test_two_actual_calls_retry_the_new_cut_with_the_same_forwarded_instance_and_current_raise_states
+FAILED tests/unit/test_program_generator_close_retry.py::test_second_close_cannot_reenter_the_first_cut_while_claiming_the_retry_terminal
+FAILED tests/unit/test_program_generator_close_retry.py::test_second_call_cannot_reuse_the_pre_first_call_state_after_the_actual_raise_completion
+FAILED tests/unit/test_program_generator_close_retry.py::test_second_close_cannot_deliver_the_previous_host_error_in_place_of_its_fresh_normalizer_packet
+FAILED tests/unit/test_program_generator_close_retry.py::test_first_yield_cannot_borrow_finished_history_from_the_second_driver_of_the_shared_body
+5 failed in 0.71s

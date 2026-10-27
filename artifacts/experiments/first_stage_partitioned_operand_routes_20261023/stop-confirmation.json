@@ -1,0 +1,23 @@
+{
+  "status": "PERFORMANCE_STOP_CONFIRMED",
+  "process_id": 456184,
+  "process_no_longer_exists": true,
+  "exec_session": 98266,
+  "exec_exit_code": 130,
+  "signal_requested": "SIGINT",
+  "termination": "KeyboardInterrupt retained in failure.json/stderr",
+  "routes_stage_begin_s": 299.3055520509952,
+  "interrupt_elapsed_s": 1063.7240810749936,
+  "routes_wall_before_interrupt_s": 764.4185290239984,
+  "code_witness_archive": {
+    "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_partitioned_operand_routes_20261023/result/code-witnesses/manifest.json",
+    "sha256": "56355f7ef10d16d8ab4fb02a84988cf2f0070b75e4cd5fccbf1c86c1ea34170d",
+    "bytes": 42283,
+    "modules": 20,
+    "sources": 20
+  },
+  "target_failed": false,
+  "target_executed": false,
+  "original_artifacts_preserved": true,
+  "time_report_exit_status_note": "GNU time reports command signal termination plus Exit status:0; exec session exit130 and retained KeyboardInterrupt describe actual interruption"
+}

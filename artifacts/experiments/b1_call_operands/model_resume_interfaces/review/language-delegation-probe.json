@@ -1,0 +1,48 @@
+{
+  "created_utc": "2026-10-17T23:29:59.732452+00:00",
+  "observations": {
+    "close_forwarded_through_delegation": {
+      "close_result": null,
+      "first_yield": "child-ready",
+      "log": [
+        "child-finally",
+        "parent-finally"
+      ]
+    },
+    "missing_delegate_throw_enters_parent": {
+      "first_yield": "only-item",
+      "log": [
+        [
+          "parent-caught-missing-delegate-throw",
+          "LookupError"
+        ]
+      ],
+      "terminal_value": "parent-finished",
+      "throw_result_yield": "parent-handled"
+    },
+    "throw_forwarded_to_delegate": {
+      "first_yield": "child-start",
+      "log": [
+        [
+          "child-caught-throw",
+          "LookupError"
+        ],
+        "child-finally",
+        "parent-finally",
+        [
+          "parent-expression-result",
+          "child-final-value"
+        ]
+      ],
+      "terminal_value": "parent-return-value",
+      "throw_result_yield": "child-after-throw"
+    }
+  },
+  "runtime": {
+    "implementation": "CPython",
+    "version": "3.14.7 | packaged by conda-forge | (main, Sep  2 2026, 21:08:32) [GCC 15.3.0]"
+  },
+  "schema": "scar.language-delegation-probe.v1",
+  "scope": "stdlib CPU witness; only text and return results recorded; no frame/local retention, torch, SCAR, or target workload",
+  "script_sha256": "5479bd0b711b859492803689696730897a692cd753e54b6b28bf3d5859f52803"
+}

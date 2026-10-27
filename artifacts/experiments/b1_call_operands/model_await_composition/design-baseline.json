@@ -1,0 +1,22 @@
+{
+  "base_revision": "e935082bb3626eae7e8b299e20e36441c7052c5f",
+  "previous_turn": "progress:1393 affected focused, archive, commit/push and remote SHA verified",
+  "scope_plan": "docs/M1_AWAIT_COMPOSITION_PLAN.md",
+  "plan_sha256": "818f1b0c10c60fc5cdf4d4344d3abce0c9633f89954fdb9bd20af53ada5fafa6",
+  "parent_plan_sha256": "e1f32606355976afc78b99a4e1896e0e3ff4559fe26f25e0f6c1c761689e13e2",
+  "contract_sha256": "bb9466c4b05ba7d7271eb423232184ed9fad62b9cdec14dd660d0965c710b72c",
+  "previous_focused_cases": 1393,
+  "obligation_groups": ["F12", "F13", "F14", "F15", "F16", "F17", "F18", "F19", "F20", "F21", "F22", "F23", "F24", "X25", "X26", "X27"],
+  "completed_obligation_groups": [],
+  "full_original_A_H_required": true,
+  "p4_complete": false,
+  "m0_m2_complete": false,
+  "native12_reused_not_rerun": true,
+  "subagents_execute_python_or_tests": false,
+  "new_backend": false,
+  "new_lewm_speedup": false,
+  "protected": {
+    "le-wm": {"path": "/home/zyf/AAA/le-wm", "head": "f70fed80288462ca4d006cb3607ec6da6eaa851f", "status": ""},
+    "scar": {"path": "/home/zyf/AAA/scar", "head": "84f165fce1e2e37617c974ce9fee574ea816406b", "status": ""}
+  }
+}

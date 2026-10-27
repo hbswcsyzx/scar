@@ -1,0 +1,113 @@
+{
+  "domains": [
+    {
+      "collection": "inventory manifest #/files; fixed recursive profile over all source shards",
+      "domain": "SOURCE_DEFINITIONS",
+      "generation_now": "all retained definitions and original body status/absence; no typed body required",
+      "must_retain": [
+        "UNSUPPORTED",
+        "NOT_ATTEMPTED",
+        "source-only",
+        "unexecuted definitions"
+      ],
+      "origin": "actual source shard #/file/definitions/j; snapshot/context; original source definition reference when present",
+      "reader": "scar/analysis/inventory_partitions.py:InventoryPartitions.file",
+      "reported_baseline_not_remeasured": {
+        "active_bodies": 843,
+        "body_definitions": 2217,
+        "source_files": 151
+      }
+    },
+    {
+      "collection": "inventory manifest #/files; fixed recursive source-construct profile",
+      "domain": "SOURCE_CONSTRUCTS",
+      "generation_now": "source phase/construct membership; no new operations for non-executing text",
+      "origin": "#/file/coverage/j, #/file/calls/j, #/file/implicit_invocations/j",
+      "reader": "scar/analysis/inventory_partitions.py:InventoryPartitions.file"
+    },
+    {
+      "collection": "source-invocations report #/invocations and #/orphan_exits declarations",
+      "domain": "OBSERVED_PYTHON_CALLS",
+      "generation_now": "all original invocation rows; retain prior842 targets as prior-snapshot evidence only",
+      "must_retain": [
+        "body-linked",
+        "source-only",
+        "unresolved",
+        "orphan exits"
+      ],
+      "origin": "exact invocation JSONL line/hash and original InvocationKey/entry/exit anchors",
+      "reader": "scar/analysis/source_invocations.py:published invocations and orphan-exits files",
+      "reported_baseline_not_remeasured": {
+        "calls": 100438,
+        "current_source_snapshot": 843,
+        "linked_report_source_snapshot": 842
+      }
+    },
+    {
+      "collection": "bridge #/observations plus original #/dispatches and capture dispatch metadata",
+      "domain": "DISPATCH_ATTEMPTS",
+      "forbidden": [
+        "assume sequence1..N",
+        "marker_count/2 denominator",
+        "16-prefix completion",
+        "drop no-schema/failed groups"
+      ],
+      "generation_now": "only sequence members actually locatable in retained observations; any unproved group difference remains collection OPEN debt",
+      "missing_upstream_fields": [
+        "complete per-sequence group inventory",
+        "all END references",
+        "operator source per original BEGIN",
+        "end-only/markerless group rows"
+      ],
+      "origin": "dispatch-bridge schema1 #/observations/j with actual sequence/phase/source_line and upstream metadata",
+      "reader": "scar/trace/dispatch_import.py:import_dispatch_bridge",
+      "reported_baseline_not_remeasured": {
+        "dispatches": 39796
+      },
+      "required_upstream_change": "publish complete bounded DispatchInventoryEntry records in the new native-capture-batch artifact with explicit schema and original phase/operator/outcome/count receipts; only modifying the old strict dispatch report requires its schema2/capability"
+    },
+    {
+      "collection": "bundle manifest #/graphs/evidence/tables/instances",
+      "domain": "NATIVE_ACTIVITIES",
+      "generation_now": "manifest declares collection and cursor; full typed per-member obligations require streaming original derived chunks, no raw replay",
+      "origin": "evidence.instances original chunk record; actual manifest #/graphs/evidence/tables/instances/chunks/n",
+      "reader": "scar/store/bundle_partitions.py:BundlePartitions.iter_records"
+    },
+    {
+      "collection": "OS fragment manifest #/tables/<allowed-table>",
+      "domain": "OS_INTERFACES",
+      "generation_now": "all existing derived interface rows with explicit parser/selection/canonical-effect gaps; no syscall-return-to-ready promotion",
+      "origin": "observations/line_classifications/submissions/outcomes original record envelopes",
+      "reader": "scar/trace/os_resources.py:OSInterfacePartitions.iter_records"
+    },
+    {
+      "collection": "OS fragment manifest #/tables/<allowed-table> and independent OS/provider inventory",
+      "domain": "OS_RESOURCES",
+      "forbidden": [
+        "existing FD bindings are the OS universe",
+        "new owned-launch selection qualifies old filtered capture"
+      ],
+      "generation_now": "exact retained resources and handles; domain completeness stays OPEN for missing inherited/stdio/shared/short-lived resources",
+      "origin": "resources/handles/target_lifetime_events/processes/threads original record envelopes",
+      "reader": "scar/trace/os_resources.py:OSInterfacePartitions.iter_records"
+    },
+    {
+      "collection": "bundle manifest #/graphs/values/tables/<allowed-table>",
+      "domain": "PHYSICAL_OBJECTS_AND_RESOURCES",
+      "generation_now": "exact original identities and geometry membership; content/materialization/ready absent remain independent OPEN requirements",
+      "origin": "values.objects/allocations/regions original records and provider resource catalogs",
+      "reader": "scar/store/bundle_partitions.py:BundlePartitions.iter_records"
+    }
+  ],
+  "initial_implementation_priority": [
+    "all original SOURCE_DEFINITIONS",
+    "all original SOURCE_CONSTRUCTS",
+    "current OBSERVED_PYTHON_CALLS denominator",
+    "current DISPATCH_ATTEMPTS denominator with exact retained members and collection debt"
+  ],
+  "mainline": "automatic whole39796 dispatch integration; scalar is one relation family, not a new repeated prefix gate",
+  "other_domains": "always preserve collection obligations and exact missing/unvisited gaps; do not fabricate per-member rows from summary counts",
+  "schema": "scar.proposed.modeling-scope-producer-map",
+  "schema_version": 1,
+  "status": "PLAN_ONLY_NO_ARCHIVE_OR_RAW_READ"
+}

@@ -1,0 +1,24 @@
+{
+  "legacy_capture": {
+    "owned_session": 21332,
+    "actual_exit_code": 0
+  },
+  "first_lean_capture": {
+    "owned_session": 43794,
+    "actual_exit_code": 0
+  },
+  "scope_fixed_capture": {
+    "owned_session": 52080,
+    "actual_exit_code": 0
+  },
+  "indexed_final_capture": {
+    "owned_session": 83594,
+    "actual_exit_code": 0
+  },
+  "normal_owned_consumer": {
+    "owned_session": 12347,
+    "actual_exit_code": 0,
+    "elapsed_seconds": 1.2398690780391917
+  },
+  "new_LeWM_episode": false
+}

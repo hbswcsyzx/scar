@@ -1,0 +1,477 @@
+FFFFFF....FFFFFFFFF                                                      [100%]
+=================================== FAILURES ===================================
+_ test_real_close_chain_keeps_same_body_current_session_and_only_terminal_f[graceful-return] _
+
+route = 'graceful-return'
+
+    @pytest.mark.parametrize('route', ('graceful-return', 'graceful-ge', 'graceful-ordinary', 'illegal'))
+    def test_real_close_chain_keeps_same_body_current_session_and_only_terminal_f(route):
+        program, details = _graph(route)
+>       index = _checked(program)
+                ^^^^^^^^^^^^^^^^^
+
+tests/unit/test_program_async_close_chains.py:50: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/unit/test_program_async_close_chains.py:26: in _checked
+    require_valid(core)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='close.caller'), regions=(Region(id=RegionID(value='close.caller'), label='declared d..., protocol_bindings=(), exception_matches=(), call_effect_expansions=(), stored_value_writes=(), stored_value_reads=())
+
+    def require_valid(graph: ProgramGraph) -> None:
+        issues = validate(graph)
+        if issues:
+>           raise ValueError("; ".join(f"{issue.code} at {issue.path}: {issue.message}" for issue in issues))
+E           ValueError: control_binding at program_operation:close.stage.0.close.drive: each control input port needs its own exact use; control_binding at program_operation:close.stage.1.close.drive: each control input port needs its own exact use; control_binding at program_operation:close.stage.2.close.drive: each control input port needs its own exact use
+
+scar/ir/program/validation.py:768: ValueError
+_ test_real_close_chain_keeps_same_body_current_session_and_only_terminal_f[graceful-ge] _
+
+route = 'graceful-ge'
+
+    @pytest.mark.parametrize('route', ('graceful-return', 'graceful-ge', 'graceful-ordinary', 'illegal'))
+    def test_real_close_chain_keeps_same_body_current_session_and_only_terminal_f(route):
+        program, details = _graph(route)
+>       index = _checked(program)
+                ^^^^^^^^^^^^^^^^^
+
+tests/unit/test_program_async_close_chains.py:50: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/unit/test_program_async_close_chains.py:26: in _checked
+    require_valid(core)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='close.caller'), regions=(Region(id=RegionID(value='close.caller'), label='declared d..., protocol_bindings=(), exception_matches=(), call_effect_expansions=(), stored_value_writes=(), stored_value_reads=())
+
+    def require_valid(graph: ProgramGraph) -> None:
+        issues = validate(graph)
+        if issues:
+>           raise ValueError("; ".join(f"{issue.code} at {issue.path}: {issue.message}" for issue in issues))
+E           ValueError: control_binding at program_operation:close.stage.0.close.drive: each control input port needs its own exact use; control_binding at program_operation:close.stage.1.close.drive: each control input port needs its own exact use; control_binding at program_operation:close.stage.2.close.drive: each control input port needs its own exact use
+
+scar/ir/program/validation.py:768: ValueError
+_ test_real_close_chain_keeps_same_body_current_session_and_only_terminal_f[graceful-ordinary] _
+
+route = 'graceful-ordinary'
+
+    @pytest.mark.parametrize('route', ('graceful-return', 'graceful-ge', 'graceful-ordinary', 'illegal'))
+    def test_real_close_chain_keeps_same_body_current_session_and_only_terminal_f(route):
+        program, details = _graph(route)
+>       index = _checked(program)
+                ^^^^^^^^^^^^^^^^^
+
+tests/unit/test_program_async_close_chains.py:50: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/unit/test_program_async_close_chains.py:26: in _checked
+    require_valid(core)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='close.caller'), regions=(Region(id=RegionID(value='close.caller'), label='declared d..., protocol_bindings=(), exception_matches=(), call_effect_expansions=(), stored_value_writes=(), stored_value_reads=())
+
+    def require_valid(graph: ProgramGraph) -> None:
+        issues = validate(graph)
+        if issues:
+>           raise ValueError("; ".join(f"{issue.code} at {issue.path}: {issue.message}" for issue in issues))
+E           ValueError: control_binding at program_operation:close.stage.0.close.drive: each control input port needs its own exact use; control_binding at program_operation:close.stage.1.close.drive: each control input port needs its own exact use; control_binding at program_operation:close.stage.2.close.drive: each control input port needs its own exact use
+
+scar/ir/program/validation.py:768: ValueError
+_ test_real_close_chain_keeps_same_body_current_session_and_only_terminal_f[illegal] _
+
+route = 'illegal'
+
+    @pytest.mark.parametrize('route', ('graceful-return', 'graceful-ge', 'graceful-ordinary', 'illegal'))
+    def test_real_close_chain_keeps_same_body_current_session_and_only_terminal_f(route):
+        program, details = _graph(route)
+>       index = _checked(program)
+                ^^^^^^^^^^^^^^^^^
+
+tests/unit/test_program_async_close_chains.py:50: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/unit/test_program_async_close_chains.py:26: in _checked
+    require_valid(core)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='close.caller'), regions=(Region(id=RegionID(value='close.caller'), label='declared d..., protocol_bindings=(), exception_matches=(), call_effect_expansions=(), stored_value_writes=(), stored_value_reads=())
+
+    def require_valid(graph: ProgramGraph) -> None:
+        issues = validate(graph)
+        if issues:
+>           raise ValueError("; ".join(f"{issue.code} at {issue.path}: {issue.message}" for issue in issues))
+E           ValueError: control_binding at program_operation:close.stage.0.close.drive: each control input port needs its own exact use; control_binding at program_operation:close.stage.1.close.drive: each control input port needs its own exact use; control_binding at program_operation:close.stage.2.close.drive: each control input port needs its own exact use; control_binding at program_operation:close.stage.3.close.drive: each control input port needs its own exact use; control_binding at program_operation:close.stage.4.close.drive: each control input port needs its own exact use; control_binding at program_operation:close.stage.5.close.drive: each control input port needs its own exact use
+
+scar/ir/program/validation.py:768: ValueError
+_ test_illegal_yield_request_complete_still_rejects_release_before_real_body_terminal _
+
+    def test_illegal_yield_request_complete_still_rejects_release_before_real_body_terminal():
+        program, details = _graph('illegal')
+>       index = _checked(program)
+                ^^^^^^^^^^^^^^^^^
+
+tests/unit/test_program_async_close_chains.py:99: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/unit/test_program_async_close_chains.py:26: in _checked
+    require_valid(core)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='close.caller'), regions=(Region(id=RegionID(value='close.caller'), label='declared d..., protocol_bindings=(), exception_matches=(), call_effect_expansions=(), stored_value_writes=(), stored_value_reads=())
+
+    def require_valid(graph: ProgramGraph) -> None:
+        issues = validate(graph)
+        if issues:
+>           raise ValueError("; ".join(f"{issue.code} at {issue.path}: {issue.message}" for issue in issues))
+E           ValueError: control_binding at program_operation:close.stage.0.close.drive: each control input port needs its own exact use; control_binding at program_operation:close.stage.1.close.drive: each control input port needs its own exact use; control_binding at program_operation:close.stage.2.close.drive: each control input port needs its own exact use; control_binding at program_operation:close.stage.3.close.drive: each control input port needs its own exact use; control_binding at program_operation:close.stage.4.close.drive: each control input port needs its own exact use; control_binding at program_operation:close.stage.5.close.drive: each control input port needs its own exact use
+
+scar/ir/program/validation.py:768: ValueError
+_ test_illegal_source_inventory_survives_missing_post_relation_and_tiny_budget _
+
+    def test_illegal_source_inventory_survives_missing_post_relation_and_tiny_budget():
+        program, details = _graph('illegal')
+>       original = _checked(program)
+                   ^^^^^^^^^^^^^^^^^
+
+tests/unit/test_program_async_close_chains.py:117: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/unit/test_program_async_close_chains.py:26: in _checked
+    require_valid(core)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='close.caller'), regions=(Region(id=RegionID(value='close.caller'), label='declared d..., protocol_bindings=(), exception_matches=(), call_effect_expansions=(), stored_value_writes=(), stored_value_reads=())
+
+    def require_valid(graph: ProgramGraph) -> None:
+        issues = validate(graph)
+        if issues:
+>           raise ValueError("; ".join(f"{issue.code} at {issue.path}: {issue.message}" for issue in issues))
+E           ValueError: control_binding at program_operation:close.stage.0.close.drive: each control input port needs its own exact use; control_binding at program_operation:close.stage.1.close.drive: each control input port needs its own exact use; control_binding at program_operation:close.stage.2.close.drive: each control input port needs its own exact use; control_binding at program_operation:close.stage.3.close.drive: each control input port needs its own exact use; control_binding at program_operation:close.stage.4.close.drive: each control input port needs its own exact use; control_binding at program_operation:close.stage.5.close.drive: each control input port needs its own exact use
+
+scar/ir/program/validation.py:768: ValueError
+_ test_actual_close_chain_has_three_body_segments_and_exact_finally_reply_ports[graceful-return] _
+
+route = 'graceful-return'
+
+    @pytest.mark.parametrize('route', ('graceful-return', 'graceful-ge', 'graceful-ordinary', 'illegal'))
+    def test_actual_close_chain_has_three_body_segments_and_exact_finally_reply_ports(route):
+>       program, model, details = async_close_chains_execution(route=route, instances=2)
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_execution_async_close_chains.py:231: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/fixtures/execution_async_close_chains_graphs.py:171: in async_close_chains_execution
+    model, details = capture_program(program, supplied, instances=instances,
+tests/fixtures/native_coroutine_common.py:198: in capture_program
+    model = ExecutionModel(snapshot_for(program), runs=(ExecutionRun(run, source),),
+                           ^^^^^^^^^^^^^^^^^^^^^
+scar/ir/execution/snapshot.py:11: in snapshot_for
+    wire = program_dumps(program).encode('utf-8')
+           ^^^^^^^^^^^^^^^^^^^^^^
+scar/ir/program/codec.py:265: in dumps
+    _require_record_and_graph_valid(graph)
+scar/ir/program/codec.py:150: in _require_record_and_graph_valid
+    require_valid(graph)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='close.caller'), regions=(Region(id=RegionID(value='close.caller'), label='declared d....stage.2.close.reply.match.ge'), index=1)))), call_effect_expansions=(), stored_value_writes=(), stored_value_reads=())
+
+    def require_valid(graph: ProgramGraph) -> None:
+        issues = validate(graph)
+        if issues:
+>           raise ValueError("; ".join(f"{issue.code} at {issue.path}: {issue.message}" for issue in issues))
+E           ValueError: control_binding at program_operation:close.stage.0.close.drive: each control input port needs its own exact use; control_binding at program_operation:close.stage.1.close.drive: each control input port needs its own exact use; control_binding at program_operation:close.stage.2.close.drive: each control input port needs its own exact use
+
+scar/ir/program/validation.py:768: ValueError
+_ test_actual_close_chain_has_three_body_segments_and_exact_finally_reply_ports[graceful-ge] _
+
+route = 'graceful-ge'
+
+    @pytest.mark.parametrize('route', ('graceful-return', 'graceful-ge', 'graceful-ordinary', 'illegal'))
+    def test_actual_close_chain_has_three_body_segments_and_exact_finally_reply_ports(route):
+>       program, model, details = async_close_chains_execution(route=route, instances=2)
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_execution_async_close_chains.py:231: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/fixtures/execution_async_close_chains_graphs.py:171: in async_close_chains_execution
+    model, details = capture_program(program, supplied, instances=instances,
+tests/fixtures/native_coroutine_common.py:198: in capture_program
+    model = ExecutionModel(snapshot_for(program), runs=(ExecutionRun(run, source),),
+                           ^^^^^^^^^^^^^^^^^^^^^
+scar/ir/execution/snapshot.py:11: in snapshot_for
+    wire = program_dumps(program).encode('utf-8')
+           ^^^^^^^^^^^^^^^^^^^^^^
+scar/ir/program/codec.py:265: in dumps
+    _require_record_and_graph_valid(graph)
+scar/ir/program/codec.py:150: in _require_record_and_graph_valid
+    require_valid(graph)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='close.caller'), regions=(Region(id=RegionID(value='close.caller'), label='declared d....stage.2.close.reply.match.ge'), index=1)))), call_effect_expansions=(), stored_value_writes=(), stored_value_reads=())
+
+    def require_valid(graph: ProgramGraph) -> None:
+        issues = validate(graph)
+        if issues:
+>           raise ValueError("; ".join(f"{issue.code} at {issue.path}: {issue.message}" for issue in issues))
+E           ValueError: control_binding at program_operation:close.stage.0.close.drive: each control input port needs its own exact use; control_binding at program_operation:close.stage.1.close.drive: each control input port needs its own exact use; control_binding at program_operation:close.stage.2.close.drive: each control input port needs its own exact use
+
+scar/ir/program/validation.py:768: ValueError
+_ test_actual_close_chain_has_three_body_segments_and_exact_finally_reply_ports[graceful-ordinary] _
+
+route = 'graceful-ordinary'
+
+    @pytest.mark.parametrize('route', ('graceful-return', 'graceful-ge', 'graceful-ordinary', 'illegal'))
+    def test_actual_close_chain_has_three_body_segments_and_exact_finally_reply_ports(route):
+>       program, model, details = async_close_chains_execution(route=route, instances=2)
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_execution_async_close_chains.py:231: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/fixtures/execution_async_close_chains_graphs.py:171: in async_close_chains_execution
+    model, details = capture_program(program, supplied, instances=instances,
+tests/fixtures/native_coroutine_common.py:198: in capture_program
+    model = ExecutionModel(snapshot_for(program), runs=(ExecutionRun(run, source),),
+                           ^^^^^^^^^^^^^^^^^^^^^
+scar/ir/execution/snapshot.py:11: in snapshot_for
+    wire = program_dumps(program).encode('utf-8')
+           ^^^^^^^^^^^^^^^^^^^^^^
+scar/ir/program/codec.py:265: in dumps
+    _require_record_and_graph_valid(graph)
+scar/ir/program/codec.py:150: in _require_record_and_graph_valid
+    require_valid(graph)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='close.caller'), regions=(Region(id=RegionID(value='close.caller'), label='declared d....stage.2.close.reply.match.ge'), index=1)))), call_effect_expansions=(), stored_value_writes=(), stored_value_reads=())
+
+    def require_valid(graph: ProgramGraph) -> None:
+        issues = validate(graph)
+        if issues:
+>           raise ValueError("; ".join(f"{issue.code} at {issue.path}: {issue.message}" for issue in issues))
+E           ValueError: control_binding at program_operation:close.stage.0.close.drive: each control input port needs its own exact use; control_binding at program_operation:close.stage.1.close.drive: each control input port needs its own exact use; control_binding at program_operation:close.stage.2.close.drive: each control input port needs its own exact use
+
+scar/ir/program/validation.py:768: ValueError
+_ test_actual_close_chain_has_three_body_segments_and_exact_finally_reply_ports[illegal] _
+
+route = 'illegal'
+
+    @pytest.mark.parametrize('route', ('graceful-return', 'graceful-ge', 'graceful-ordinary', 'illegal'))
+    def test_actual_close_chain_has_three_body_segments_and_exact_finally_reply_ports(route):
+>       program, model, details = async_close_chains_execution(route=route, instances=2)
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_execution_async_close_chains.py:231: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/fixtures/execution_async_close_chains_graphs.py:171: in async_close_chains_execution
+    model, details = capture_program(program, supplied, instances=instances,
+tests/fixtures/native_coroutine_common.py:198: in capture_program
+    model = ExecutionModel(snapshot_for(program), runs=(ExecutionRun(run, source),),
+                           ^^^^^^^^^^^^^^^^^^^^^
+scar/ir/execution/snapshot.py:11: in snapshot_for
+    wire = program_dumps(program).encode('utf-8')
+           ^^^^^^^^^^^^^^^^^^^^^^
+scar/ir/program/codec.py:265: in dumps
+    _require_record_and_graph_valid(graph)
+scar/ir/program/codec.py:150: in _require_record_and_graph_valid
+    require_valid(graph)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='close.caller'), regions=(Region(id=RegionID(value='close.caller'), label='declared d...y.return.terminal')))), exception_matches=(), call_effect_expansions=(), stored_value_writes=(), stored_value_reads=())
+
+    def require_valid(graph: ProgramGraph) -> None:
+        issues = validate(graph)
+        if issues:
+>           raise ValueError("; ".join(f"{issue.code} at {issue.path}: {issue.message}" for issue in issues))
+E           ValueError: control_binding at program_operation:close.stage.0.close.drive: each control input port needs its own exact use; control_binding at program_operation:close.stage.1.close.drive: each control input port needs its own exact use; control_binding at program_operation:close.stage.2.close.drive: each control input port needs its own exact use; control_binding at program_operation:close.stage.3.close.drive: each control input port needs its own exact use; control_binding at program_operation:close.stage.4.close.drive: each control input port needs its own exact use; control_binding at program_operation:close.stage.5.close.drive: each control input port needs its own exact use
+
+scar/ir/program/validation.py:768: ValueError
+_ test_illegal_close_constructor_own_raise_keeps_preceding_request_complete_and_future_body _
+
+    def test_illegal_close_constructor_own_raise_keeps_preceding_request_complete_and_future_body():
+        from tests.fixtures.program_async_close_chains_graphs import async_close_chains_program
+    
+        original, supplied = async_close_chains_program(route='illegal')
+        illegal = supplied['drivers'][1]
+        adapters = tuple(row for row in original.protocol_operations
+            if type(row.contract) is OutcomeAdapter
+            and row.contract.rule is OutcomeAdapterRule.ASYNCGEN_CLOSE_YIELD_ERROR
+            and type(row.contract.input) is DriveResult
+            and row.contract.input.outcome == illegal['publication'].outcome)
+        operations = {row.operation for row in adapters}
+        assert len(operations) == 1
+        operation = next(row for row in original.operations if row.id in operations)
+        port, = tuple(row.contract.output for row in adapters
+            if operation.terminator.successors[row.slot].kind is ExitKind.RAISE)
+>       program, model, details = async_close_chains_execution(route='illegal', instances=2,
+            choices={'drivers': {1: (port.edge,)}})
+
+tests/unit/test_execution_async_close_chains.py:254: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/fixtures/execution_async_close_chains_graphs.py:171: in async_close_chains_execution
+    model, details = capture_program(program, supplied, instances=instances,
+tests/fixtures/native_coroutine_common.py:198: in capture_program
+    model = ExecutionModel(snapshot_for(program), runs=(ExecutionRun(run, source),),
+                           ^^^^^^^^^^^^^^^^^^^^^
+scar/ir/execution/snapshot.py:11: in snapshot_for
+    wire = program_dumps(program).encode('utf-8')
+           ^^^^^^^^^^^^^^^^^^^^^^
+scar/ir/program/codec.py:265: in dumps
+    _require_record_and_graph_valid(graph)
+scar/ir/program/codec.py:150: in _require_record_and_graph_valid
+    require_valid(graph)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='close.caller'), regions=(Region(id=RegionID(value='close.caller'), label='declared d...y.return.terminal')))), exception_matches=(), call_effect_expansions=(), stored_value_writes=(), stored_value_reads=())
+
+    def require_valid(graph: ProgramGraph) -> None:
+        issues = validate(graph)
+        if issues:
+>           raise ValueError("; ".join(f"{issue.code} at {issue.path}: {issue.message}" for issue in issues))
+E           ValueError: control_binding at program_operation:close.stage.0.close.drive: each control input port needs its own exact use; control_binding at program_operation:close.stage.1.close.drive: each control input port needs its own exact use; control_binding at program_operation:close.stage.2.close.drive: each control input port needs its own exact use; control_binding at program_operation:close.stage.3.close.drive: each control input port needs its own exact use; control_binding at program_operation:close.stage.4.close.drive: each control input port needs its own exact use; control_binding at program_operation:close.stage.5.close.drive: each control input port needs its own exact use
+
+scar/ir/program/validation.py:768: ValueError
+_ test_missing_this_instances_finally_capture_cannot_borrow_the_complete_close_chain[payload_use] _
+
+missing = 'payload_use'
+
+    @pytest.mark.parametrize('missing', ('payload_use', 'dispatch', 'driver_call'))
+    def test_missing_this_instances_finally_capture_cannot_borrow_the_complete_close_chain(missing):
+>       program, model, details = async_close_chains_execution(route='illegal', instances=2)
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_execution_async_close_chains.py:300: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/fixtures/execution_async_close_chains_graphs.py:171: in async_close_chains_execution
+    model, details = capture_program(program, supplied, instances=instances,
+tests/fixtures/native_coroutine_common.py:198: in capture_program
+    model = ExecutionModel(snapshot_for(program), runs=(ExecutionRun(run, source),),
+                           ^^^^^^^^^^^^^^^^^^^^^
+scar/ir/execution/snapshot.py:11: in snapshot_for
+    wire = program_dumps(program).encode('utf-8')
+           ^^^^^^^^^^^^^^^^^^^^^^
+scar/ir/program/codec.py:265: in dumps
+    _require_record_and_graph_valid(graph)
+scar/ir/program/codec.py:150: in _require_record_and_graph_valid
+    require_valid(graph)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='close.caller'), regions=(Region(id=RegionID(value='close.caller'), label='declared d...y.return.terminal')))), exception_matches=(), call_effect_expansions=(), stored_value_writes=(), stored_value_reads=())
+
+    def require_valid(graph: ProgramGraph) -> None:
+        issues = validate(graph)
+        if issues:
+>           raise ValueError("; ".join(f"{issue.code} at {issue.path}: {issue.message}" for issue in issues))
+E           ValueError: control_binding at program_operation:close.stage.0.close.drive: each control input port needs its own exact use; control_binding at program_operation:close.stage.1.close.drive: each control input port needs its own exact use; control_binding at program_operation:close.stage.2.close.drive: each control input port needs its own exact use; control_binding at program_operation:close.stage.3.close.drive: each control input port needs its own exact use; control_binding at program_operation:close.stage.4.close.drive: each control input port needs its own exact use; control_binding at program_operation:close.stage.5.close.drive: each control input port needs its own exact use
+
+scar/ir/program/validation.py:768: ValueError
+_ test_missing_this_instances_finally_capture_cannot_borrow_the_complete_close_chain[dispatch] _
+
+missing = 'dispatch'
+
+    @pytest.mark.parametrize('missing', ('payload_use', 'dispatch', 'driver_call'))
+    def test_missing_this_instances_finally_capture_cannot_borrow_the_complete_close_chain(missing):
+>       program, model, details = async_close_chains_execution(route='illegal', instances=2)
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_execution_async_close_chains.py:300: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/fixtures/execution_async_close_chains_graphs.py:171: in async_close_chains_execution
+    model, details = capture_program(program, supplied, instances=instances,
+tests/fixtures/native_coroutine_common.py:198: in capture_program
+    model = ExecutionModel(snapshot_for(program), runs=(ExecutionRun(run, source),),
+                           ^^^^^^^^^^^^^^^^^^^^^
+scar/ir/execution/snapshot.py:11: in snapshot_for
+    wire = program_dumps(program).encode('utf-8')
+           ^^^^^^^^^^^^^^^^^^^^^^
+scar/ir/program/codec.py:265: in dumps
+    _require_record_and_graph_valid(graph)
+scar/ir/program/codec.py:150: in _require_record_and_graph_valid
+    require_valid(graph)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='close.caller'), regions=(Region(id=RegionID(value='close.caller'), label='declared d...y.return.terminal')))), exception_matches=(), call_effect_expansions=(), stored_value_writes=(), stored_value_reads=())
+
+    def require_valid(graph: ProgramGraph) -> None:
+        issues = validate(graph)
+        if issues:
+>           raise ValueError("; ".join(f"{issue.code} at {issue.path}: {issue.message}" for issue in issues))
+E           ValueError: control_binding at program_operation:close.stage.0.close.drive: each control input port needs its own exact use; control_binding at program_operation:close.stage.1.close.drive: each control input port needs its own exact use; control_binding at program_operation:close.stage.2.close.drive: each control input port needs its own exact use; control_binding at program_operation:close.stage.3.close.drive: each control input port needs its own exact use; control_binding at program_operation:close.stage.4.close.drive: each control input port needs its own exact use; control_binding at program_operation:close.stage.5.close.drive: each control input port needs its own exact use
+
+scar/ir/program/validation.py:768: ValueError
+_ test_missing_this_instances_finally_capture_cannot_borrow_the_complete_close_chain[driver_call] _
+
+missing = 'driver_call'
+
+    @pytest.mark.parametrize('missing', ('payload_use', 'dispatch', 'driver_call'))
+    def test_missing_this_instances_finally_capture_cannot_borrow_the_complete_close_chain(missing):
+>       program, model, details = async_close_chains_execution(route='illegal', instances=2)
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_execution_async_close_chains.py:300: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/fixtures/execution_async_close_chains_graphs.py:171: in async_close_chains_execution
+    model, details = capture_program(program, supplied, instances=instances,
+tests/fixtures/native_coroutine_common.py:198: in capture_program
+    model = ExecutionModel(snapshot_for(program), runs=(ExecutionRun(run, source),),
+                           ^^^^^^^^^^^^^^^^^^^^^
+scar/ir/execution/snapshot.py:11: in snapshot_for
+    wire = program_dumps(program).encode('utf-8')
+           ^^^^^^^^^^^^^^^^^^^^^^
+scar/ir/program/codec.py:265: in dumps
+    _require_record_and_graph_valid(graph)
+scar/ir/program/codec.py:150: in _require_record_and_graph_valid
+    require_valid(graph)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='close.caller'), regions=(Region(id=RegionID(value='close.caller'), label='declared d...y.return.terminal')))), exception_matches=(), call_effect_expansions=(), stored_value_writes=(), stored_value_reads=())
+
+    def require_valid(graph: ProgramGraph) -> None:
+        issues = validate(graph)
+        if issues:
+>           raise ValueError("; ".join(f"{issue.code} at {issue.path}: {issue.message}" for issue in issues))
+E           ValueError: control_binding at program_operation:close.stage.0.close.drive: each control input port needs its own exact use; control_binding at program_operation:close.stage.1.close.drive: each control input port needs its own exact use; control_binding at program_operation:close.stage.2.close.drive: each control input port needs its own exact use; control_binding at program_operation:close.stage.3.close.drive: each control input port needs its own exact use; control_binding at program_operation:close.stage.4.close.drive: each control input port needs its own exact use; control_binding at program_operation:close.stage.5.close.drive: each control input port needs its own exact use
+
+scar/ir/program/validation.py:768: ValueError
+_ test_tiny_budget_keeps_the_real_close_drive_and_all_its_original_consumer_ports _
+
+    def test_tiny_budget_keeps_the_real_close_drive_and_all_its_original_consumer_ports():
+>       program, model, details = async_close_chains_execution(route='illegal', instances=2)
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_execution_async_close_chains.py:336: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/fixtures/execution_async_close_chains_graphs.py:171: in async_close_chains_execution
+    model, details = capture_program(program, supplied, instances=instances,
+tests/fixtures/native_coroutine_common.py:198: in capture_program
+    model = ExecutionModel(snapshot_for(program), runs=(ExecutionRun(run, source),),
+                           ^^^^^^^^^^^^^^^^^^^^^
+scar/ir/execution/snapshot.py:11: in snapshot_for
+    wire = program_dumps(program).encode('utf-8')
+           ^^^^^^^^^^^^^^^^^^^^^^
+scar/ir/program/codec.py:265: in dumps
+    _require_record_and_graph_valid(graph)
+scar/ir/program/codec.py:150: in _require_record_and_graph_valid
+    require_valid(graph)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='close.caller'), regions=(Region(id=RegionID(value='close.caller'), label='declared d...y.return.terminal')))), exception_matches=(), call_effect_expansions=(), stored_value_writes=(), stored_value_reads=())
+
+    def require_valid(graph: ProgramGraph) -> None:
+        issues = validate(graph)
+        if issues:
+>           raise ValueError("; ".join(f"{issue.code} at {issue.path}: {issue.message}" for issue in issues))
+E           ValueError: control_binding at program_operation:close.stage.0.close.drive: each control input port needs its own exact use; control_binding at program_operation:close.stage.1.close.drive: each control input port needs its own exact use; control_binding at program_operation:close.stage.2.close.drive: each control input port needs its own exact use; control_binding at program_operation:close.stage.3.close.drive: each control input port needs its own exact use; control_binding at program_operation:close.stage.4.close.drive: each control input port needs its own exact use; control_binding at program_operation:close.stage.5.close.drive: each control input port needs its own exact use
+
+scar/ir/program/validation.py:768: ValueError
+=========================== short test summary info ============================
+FAILED tests/unit/test_program_async_close_chains.py::test_real_close_chain_keeps_same_body_current_session_and_only_terminal_f[graceful-return]
+FAILED tests/unit/test_program_async_close_chains.py::test_real_close_chain_keeps_same_body_current_session_and_only_terminal_f[graceful-ge]
+FAILED tests/unit/test_program_async_close_chains.py::test_real_close_chain_keeps_same_body_current_session_and_only_terminal_f[graceful-ordinary]
+FAILED tests/unit/test_program_async_close_chains.py::test_real_close_chain_keeps_same_body_current_session_and_only_terminal_f[illegal]
+FAILED tests/unit/test_program_async_close_chains.py::test_illegal_yield_request_complete_still_rejects_release_before_real_body_terminal
+FAILED tests/unit/test_program_async_close_chains.py::test_illegal_source_inventory_survives_missing_post_relation_and_tiny_budget
+FAILED tests/unit/test_execution_async_close_chains.py::test_actual_close_chain_has_three_body_segments_and_exact_finally_reply_ports[graceful-return]
+FAILED tests/unit/test_execution_async_close_chains.py::test_actual_close_chain_has_three_body_segments_and_exact_finally_reply_ports[graceful-ge]
+FAILED tests/unit/test_execution_async_close_chains.py::test_actual_close_chain_has_three_body_segments_and_exact_finally_reply_ports[graceful-ordinary]
+FAILED tests/unit/test_execution_async_close_chains.py::test_actual_close_chain_has_three_body_segments_and_exact_finally_reply_ports[illegal]
+FAILED tests/unit/test_execution_async_close_chains.py::test_illegal_close_constructor_own_raise_keeps_preceding_request_complete_and_future_body
+FAILED tests/unit/test_execution_async_close_chains.py::test_missing_this_instances_finally_capture_cannot_borrow_the_complete_close_chain[payload_use]
+FAILED tests/unit/test_execution_async_close_chains.py::test_missing_this_instances_finally_capture_cannot_borrow_the_complete_close_chain[dispatch]
+FAILED tests/unit/test_execution_async_close_chains.py::test_missing_this_instances_finally_capture_cannot_borrow_the_complete_close_chain[driver_call]
+FAILED tests/unit/test_execution_async_close_chains.py::test_tiny_budget_keeps_the_real_close_drive_and_all_its_original_consumer_ports
+15 failed, 4 passed in 41.65s

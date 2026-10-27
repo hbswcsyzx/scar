@@ -1,0 +1,2470 @@
+{
+  "original_base": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+  "current_base": "4ec0448bf34b43be225c47b74c1d7c389ca87621",
+  "original_patch": {
+    "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_plain_20261023/implementation.patch",
+    "sha256": "a2640cee145771ee44f854f4d712abe1d7508e0d664cc684f8b91abad4722a5c",
+    "bytes": 602
+  },
+  "original_wrapper": {
+    "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_plain_20261023/run_progress.py",
+    "sha256": "47431a5e98179a8919b46a802181ad19f5b6aeae53574f31b172e51ab2fdd6e1",
+    "bytes": 3386
+  },
+  "recovery_wrapper": {
+    "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_restored_20261023/run_partitioned.py",
+    "sha256": "933145eeb446d774b1b3b08d16a994b10f80e063e9161e4c2b6b842afd793f9b",
+    "bytes": 18680
+  },
+  "production_modules": [
+    {
+      "path": "scar/analysis/__init__.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "d00d3f539d292f3bf90d84a49d20f81a1723fb7284e7303a3a200bbd8582652b",
+      "current_sha256": "d00d3f539d292f3bf90d84a49d20f81a1723fb7284e7303a3a200bbd8582652b",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/analysis/call_compilation.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "9913057f2594541ba960bdb0221a1b613ff3a7f3526aa7db5643547aec9eef05",
+      "current_sha256": "9913057f2594541ba960bdb0221a1b613ff3a7f3526aa7db5643547aec9eef05",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/analysis/call_demand.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "fdb90556b9b7ef8507e1e79aec6a477d98a3be6e12c2fbed5e78377a1e19d264",
+      "current_sha256": "fdb90556b9b7ef8507e1e79aec6a477d98a3be6e12c2fbed5e78377a1e19d264",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/analysis/call_demand_schedule.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "4796afe7453ae5c78df7d4a2ba8b88885baecf7009e8840d18a347ecf5393183",
+      "current_sha256": "4796afe7453ae5c78df7d4a2ba8b88885baecf7009e8840d18a347ecf5393183",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/analysis/call_edges.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "60f94a29384e6c3e076e2dfcf20ac4b2fbc9bd1a71414a58bcfbe538fbe4952c",
+      "current_sha256": "60f94a29384e6c3e076e2dfcf20ac4b2fbc9bd1a71414a58bcfbe538fbe4952c",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/analysis/call_operand_reader.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "5dc26ce1e4e3fb2eed5fcaf4cda9fd0650f3c794d49c61d171f0dd933f08bf3d",
+      "current_sha256": "5dc26ce1e4e3fb2eed5fcaf4cda9fd0650f3c794d49c61d171f0dd933f08bf3d",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/analysis/call_operand_routes.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "1259f1e93ff7507395d7c09e32754d0462ed4d77a83423e2ed661db496b4816c",
+      "current_sha256": "1259f1e93ff7507395d7c09e32754d0462ed4d77a83423e2ed661db496b4816c",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/analysis/call_operands.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "6b58b4bc4b4422076d155033b14701f1e68afd1bc52a648b1e9768a35b5b6009",
+      "current_sha256": "6b58b4bc4b4422076d155033b14701f1e68afd1bc52a648b1e9768a35b5b6009",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/analysis/call_seeds.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "e8c480b6146500cec09cd529170bcba80e33f70628c6b37737069062f3e77de7",
+      "current_sha256": "e8c480b6146500cec09cd529170bcba80e33f70628c6b37737069062f3e77de7",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/analysis/call_trace_reader.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "684c16a34b27e233407e64cfa5a313515d95fbcea13152ae253a21e1b9bb0416",
+      "current_sha256": "684c16a34b27e233407e64cfa5a313515d95fbcea13152ae253a21e1b9bb0416",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/analysis/callable_environment_import.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "85b06861b08ae247c8ed44bbebbc3c5791e20481376bc5598c768e4d07cb6ce9",
+      "current_sha256": "85b06861b08ae247c8ed44bbebbc3c5791e20481376bc5598c768e4d07cb6ce9",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/analysis/candidates.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "6dd95a2fd55a1f28f489bcb2e90280c88c73f5464400e3512ba20c29a3a17f53",
+      "current_sha256": "6dd95a2fd55a1f28f489bcb2e90280c88c73f5464400e3512ba20c29a3a17f53",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/analysis/constants.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "bdefa5e32789f2e735232a5a32a5c20ff20581d77c3b18ba0555c97fca248d4f",
+      "current_sha256": "bdefa5e32789f2e735232a5a32a5c20ff20581d77c3b18ba0555c97fca248d4f",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/analysis/constants_v2.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "00295d01d9eac66382a6120c488845e284289fa1ab97d8e3b27595957f32607c",
+      "current_sha256": "00295d01d9eac66382a6120c488845e284289fa1ab97d8e3b27595957f32607c",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/analysis/contracts_v2.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "bd73e71118edbeb527e922d4358f98fa126ba86c2bece6cf80fe4d0d478e8ee1",
+      "current_sha256": "bd73e71118edbeb527e922d4358f98fa126ba86c2bece6cf80fe4d0d478e8ee1",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/analysis/control_flow_v2.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "595917215df8ff593142a1e6beb517acc891c78b6b7693d5260e7ca4de09f367",
+      "current_sha256": "595917215df8ff593142a1e6beb517acc891c78b6b7693d5260e7ca4de09f367",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/analysis/correspondence_v2.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "74da61b7413e0fb46ae353bc967743d64484e80a51cbf9debbadebf59abf0d9a",
+      "current_sha256": "74da61b7413e0fb46ae353bc967743d64484e80a51cbf9debbadebf59abf0d9a",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/analysis/effects_v2.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "e47e56d9d6d23eff502f58072c811f2f640072e5a850ebdeac0f80b5f3db43c1",
+      "current_sha256": "e47e56d9d6d23eff502f58072c811f2f640072e5a850ebdeac0f80b5f3db43c1",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/analysis/environment_lowering.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "f9dfd7b2058972d87d469980ab0aee70588fbeab351f94e36da57766b80e22e6",
+      "current_sha256": "f9dfd7b2058972d87d469980ab0aee70588fbeab351f94e36da57766b80e22e6",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/analysis/frame_queries.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "4db3d0ca485ef345ad2625673a97f5a5490d4c42a682f752864e99632ac6ca40",
+      "current_sha256": "4db3d0ca485ef345ad2625673a97f5a5490d4c42a682f752864e99632ac6ca40",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/analysis/function_binding.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "af6a9e38c6e0225d819afaa1fb32dcfd22e08e77cb450f09e074237488a2f77c",
+      "current_sha256": "af6a9e38c6e0225d819afaa1fb32dcfd22e08e77cb450f09e074237488a2f77c",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/analysis/function_interfaces.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "cf1245d1405628e1c719fd6099bc37c10055ee62007394946c1b3244e811b7ac",
+      "current_sha256": "cf1245d1405628e1c719fd6099bc37c10055ee62007394946c1b3244e811b7ac",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/analysis/graph_candidates.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "0cba159cd741159dc6349e9249030d477c91a7bbe0933e1dc923630a1bdbd564",
+      "current_sha256": "0cba159cd741159dc6349e9249030d477c91a7bbe0933e1dc923630a1bdbd564",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/analysis/graph_loops.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "27930dea62b3aea8d7d0c79c42d04b9478bd4cf2d5b67a67db0fe4459c36c7c1",
+      "current_sha256": "27930dea62b3aea8d7d0c79c42d04b9478bd4cf2d5b67a67db0fe4459c36c7c1",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/analysis/import_report_v2.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "fcd9281baef7d9935f3000b04f5a6b900e3ce5467b7ec3dc46afe6b476e3f63a",
+      "current_sha256": "fcd9281baef7d9935f3000b04f5a6b900e3ce5467b7ec3dc46afe6b476e3f63a",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/analysis/import_values_v2.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "b5bee769f71bca3fccb135ce69c35d4be19fe91749a0255e91bc5c4a611d860c",
+      "current_sha256": "b5bee769f71bca3fccb135ce69c35d4be19fe91749a0255e91bc5c4a611d860c",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/analysis/inspection_v2.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "fbe676b7f7dfc1d82fcf8d189e387c450715301a17d9db3404a0e72467b61b46",
+      "current_sha256": "fbe676b7f7dfc1d82fcf8d189e387c450715301a17d9db3404a0e72467b61b46",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/analysis/invariance.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "3a89e48d684a0f687f83b5c8304c0b550ff450e31e681fab0a5efea87efb4b7c",
+      "current_sha256": "3a89e48d684a0f687f83b5c8304c0b550ff450e31e681fab0a5efea87efb4b7c",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/analysis/inventory.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "246c292b9c4d71e20e1eb01ec6d76cef3b68bfa22bae16be8f20b92bbf7a7093",
+      "current_sha256": "246c292b9c4d71e20e1eb01ec6d76cef3b68bfa22bae16be8f20b92bbf7a7093",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/analysis/liveness.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "125177d1f67870489bc278e0fae0ff2828181581f73020ab0a3c4cdcb24a317d",
+      "current_sha256": "125177d1f67870489bc278e0fae0ff2828181581f73020ab0a3c4cdcb24a317d",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/analysis/local_statement_semantics_v2.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "acc97151e208982c35ef0c49dc8b45105508f202aab97ec008f189cc861e7dfc",
+      "current_sha256": "acc97151e208982c35ef0c49dc8b45105508f202aab97ec008f189cc861e7dfc",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/analysis/loops.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "3a0d17920ffdd9eecf0a45d676e1191d49dd880f6c9b0e154105ebd3e5a16cac",
+      "current_sha256": "3a0d17920ffdd9eecf0a45d676e1191d49dd880f6c9b0e154105ebd3e5a16cac",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/analysis/materialization.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "457d798746b7ca63daf4db9cd9b9bc7409cd534a1026e56d5a8547e15edd6f12",
+      "current_sha256": "457d798746b7ca63daf4db9cd9b9bc7409cd534a1026e56d5a8547e15edd6f12",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/analysis/memory.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "dd95d0743048b80540053a3e7631cb8602ec399e4a381b3be92fd12c31d5a36b",
+      "current_sha256": "dd95d0743048b80540053a3e7631cb8602ec399e4a381b3be92fd12c31d5a36b",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/analysis/primitive_semantics_v2.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "dd6bbe3fe165767a3c4c1766068502ff867c031bc6769f5a78fe5040d77c9522",
+      "current_sha256": "dd6bbe3fe165767a3c4c1766068502ff867c031bc6769f5a78fe5040d77c9522",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/analysis/program_composition.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "6b159aa2aa9ace1b112ecd6cd4edc11d667dace62555e5111f4903a909034452",
+      "current_sha256": "6b159aa2aa9ace1b112ecd6cd4edc11d667dace62555e5111f4903a909034452",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/analysis/program_context_store.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "de964205aa0ae8c6beffd7be5f47be60efbe90becfcee20e86d0489fb61c5165",
+      "current_sha256": "de964205aa0ae8c6beffd7be5f47be60efbe90becfcee20e86d0489fb61c5165",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/analysis/program_expansion.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "c1f6857be8ff7b1e391736e9716691a3f150af76c5908837162ddb3960ed2a93",
+      "current_sha256": "c1f6857be8ff7b1e391736e9716691a3f150af76c5908837162ddb3960ed2a93",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/analysis/program_inventory.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "34e47c4903feef1c34c9c5f6159937a01dbdf4cd89624702b1a292c20735e3ec",
+      "current_sha256": "34e47c4903feef1c34c9c5f6159937a01dbdf4cd89624702b1a292c20735e3ec",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/analysis/program_lowering.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "143a129afa4d2dc039a6d9fa289e7734377c98d1b09caf12a449ad73c2e7e62e",
+      "current_sha256": "143a129afa4d2dc039a6d9fa289e7734377c98d1b09caf12a449ad73c2e7e62e",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/analysis/proof_ledger_v2.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "62bc8433ead43544eb22dc02713d410378188d5f3e71b0753b4ce8a086d845b1",
+      "current_sha256": "62bc8433ead43544eb22dc02713d410378188d5f3e71b0753b4ce8a086d845b1",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/analysis/proof_models_report_v2.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "bf8507779c03da6a24f828f24c367bb3aebfc66d9bdc2e0c38c638f4682b7bcb",
+      "current_sha256": "bf8507779c03da6a24f828f24c367bb3aebfc66d9bdc2e0c38c638f4682b7bcb",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/analysis/region_conflicts_v2.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "39f6da71dbdc63f81e125074c8108f35c786144658631ea5e946a7a5c7d16026",
+      "current_sha256": "39f6da71dbdc63f81e125074c8108f35c786144658631ea5e946a7a5c7d16026",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/analysis/region_queries_v2.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "d110d948730fe0e5ab121a5545dd9299eb5263397c68ae2a5c8378996cb5e546",
+      "current_sha256": "d110d948730fe0e5ab121a5545dd9299eb5263397c68ae2a5c8378996cb5e546",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/analysis/region_report_v2.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "82b6e283673fee3e966c3247bd6ef4a5c8435a9ec61b3bcbad2fb38ac2ea1c68",
+      "current_sha256": "82b6e283673fee3e966c3247bd6ef4a5c8435a9ec61b3bcbad2fb38ac2ea1c68",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/analysis/regions_v2.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "0579edffbb3ce3f29cf24ea815209fe851173c0a47c9d0548d2b68ea1c6d9f1b",
+      "current_sha256": "0579edffbb3ce3f29cf24ea815209fe851173c0a47c9d0548d2b68ea1c6d9f1b",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/analysis/rejection_audit.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "720155d11974203527adf95d07ddcebebe8de0ae19b23ecbdcbe0fbdc5c107ba",
+      "current_sha256": "720155d11974203527adf95d07ddcebebe8de0ae19b23ecbdcbe0fbdc5c107ba",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/analysis/repetition.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "482256e38c5cef6f1dfced78606561e2a32bd59967eed9bd11be1c1ffbb727a5",
+      "current_sha256": "482256e38c5cef6f1dfced78606561e2a32bd59967eed9bd11be1c1ffbb727a5",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/analysis/runtime_effects_v2.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "e31b0bd16aa2433ae9d8c096f9f3f192f38be6719d1d13cbe0b81a5bdf2d14d4",
+      "current_sha256": "e31b0bd16aa2433ae9d8c096f9f3f192f38be6719d1d13cbe0b81a5bdf2d14d4",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/analysis/runtime_inventory.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "8360727acde8135dc4b883777661ac42fa6cc561f7e099bfd9fe96cd6da064cc",
+      "current_sha256": "8360727acde8135dc4b883777661ac42fa6cc561f7e099bfd9fe96cd6da064cc",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/analysis/runtime_sources.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "d31380d3175dd18eb0a8d46b7398bd9b029c8d2207bd1dcaada7ed32220adf81",
+      "current_sha256": "d31380d3175dd18eb0a8d46b7398bd9b029c8d2207bd1dcaada7ed32220adf81",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/analysis/semantics_report_v2.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "0728783025411b4e9e59f04799a41748875eff0016b1eb08f37115ddc72f2a1b",
+      "current_sha256": "0728783025411b4e9e59f04799a41748875eff0016b1eb08f37115ddc72f2a1b",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/analysis/source_compilation.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "e68cb99a98fd5b94ecbef83d0c06ca0b1ec65279c91fff927b7272bce3d69092",
+      "current_sha256": "e68cb99a98fd5b94ecbef83d0c06ca0b1ec65279c91fff927b7272bce3d69092",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/analysis/source_conditional_lowering.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "ea8a7e1ff7dbfaab064edec7a6b1ba8a3481acc0551a3ed295293f14c915d96d",
+      "current_sha256": "ea8a7e1ff7dbfaab064edec7a6b1ba8a3481acc0551a3ed295293f14c915d96d",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/analysis/source_control_context.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "28d97257faa37b3a53c86003ba173f5b62efb77239583ea7558e00629266c725",
+      "current_sha256": "28d97257faa37b3a53c86003ba173f5b62efb77239583ea7558e00629266c725",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/analysis/source_discovery.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "7b4e1af9ed88fe8fe1ede7ccf087ae1b8924ba451054e4ed19f700ab353f36ad",
+      "current_sha256": "7b4e1af9ed88fe8fe1ede7ccf087ae1b8924ba451054e4ed19f700ab353f36ad",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/analysis/source_environment_layout.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "8ab33fd9a79af057d1952f23c1bdcf850b324237c41d39d8656746ffcd6c7baa",
+      "current_sha256": "8ab33fd9a79af057d1952f23c1bdcf850b324237c41d39d8656746ffcd6c7baa",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/analysis/source_environment_validation.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "058c4dc4fd6a4c3d9ebcbdeeaf420f91d8c79d7b159f7d69ad4d0966e524acfa",
+      "current_sha256": "058c4dc4fd6a4c3d9ebcbdeeaf420f91d8c79d7b159f7d69ad4d0966e524acfa",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/analysis/source_fragments_v2.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "6ec6d0324d0423c2b2926a0d8c7cfc0d7a8a5cde3f8842d6d2ffdd74d70a93e2",
+      "current_sha256": "6ec6d0324d0423c2b2926a0d8c7cfc0d7a8a5cde3f8842d6d2ffdd74d70a93e2",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/analysis/source_heap_lowering.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "9ac1f60f547817308c56c0f5e990f6047d52fd0879dac6eaf4311f666354a2bc",
+      "current_sha256": "9ac1f60f547817308c56c0f5e990f6047d52fd0879dac6eaf4311f666354a2bc",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/analysis/source_heap_validation.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "2ce2113cbe6e8a201fc6fe4f9bdb18225e56bbfb53424aa5d63b640dbff9c2bd",
+      "current_sha256": "2ce2113cbe6e8a201fc6fe4f9bdb18225e56bbfb53424aa5d63b640dbff9c2bd",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/analysis/source_invocations.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "89fca37a9c5be663baed4da6b0575278c7af3b9d0a26778ba3a0703d53341d02",
+      "current_sha256": "89fca37a9c5be663baed4da6b0575278c7af3b9d0a26778ba3a0703d53341d02",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/analysis/source_layers.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "8abeabe7fb37eb02a87b40b0a14e29d4bf5c7c0072ddced971dd54fa6ef989e4",
+      "current_sha256": "8abeabe7fb37eb02a87b40b0a14e29d4bf5c7c0072ddced971dd54fa6ef989e4",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/analysis/source_mapping_lowering.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "2f9f3973dc2fe64ac95cd22010af4fb1c871d6cf520690388adf93cb415cdbf4",
+      "current_sha256": "2f9f3973dc2fe64ac95cd22010af4fb1c871d6cf520690388adf93cb415cdbf4",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/analysis/source_semantics_v2.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "2c20b09a3affc372f1103904bdf100dd3e0963c6ed89463bd57dbcae1e512a96",
+      "current_sha256": "2c20b09a3affc372f1103904bdf100dd3e0963c6ed89463bd57dbcae1e512a96",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/analysis/source_statement_lowering.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "9d6b86482d3d6202534803b095233cc8228aeb54a1e964e85e0e8764d12c8b26",
+      "current_sha256": "9d6b86482d3d6202534803b095233cc8228aeb54a1e964e85e0e8764d12c8b26",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/analysis/source_string_lowering.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "33061d4dd8680eb33e696a6d9312323d4aadd225ebf036fc453c45b9dd6b5407",
+      "current_sha256": "33061d4dd8680eb33e696a6d9312323d4aadd225ebf036fc453c45b9dd6b5407",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/analysis/static_candidates.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "973b77a3965e5d003cb55951914458ce19425f271a20ae926aa50d58360ad0ec",
+      "current_sha256": "973b77a3965e5d003cb55951914458ce19425f271a20ae926aa50d58360ad0ec",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/analysis/structured_lowering.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "0cc1213ea82ab7ca4af0353f9b59852851e5f6946c6f3eeb0c83cdff5fa6b52d",
+      "current_sha256": "0cc1213ea82ab7ca4af0353f9b59852851e5f6946c6f3eeb0c83cdff5fa6b52d",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/analysis/synchronization.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "6c09397ee2335e405b1fc7b33e99bfe24d42276e248a544d603668b4229809ab",
+      "current_sha256": "6c09397ee2335e405b1fc7b33e99bfe24d42276e248a544d603668b4229809ab",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/analysis/topdown.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "211266a77b3ebc88bda1e29887ab019ae17cadd3c590db775e8ee4eb9ed568aa",
+      "current_sha256": "211266a77b3ebc88bda1e29887ab019ae17cadd3c590db775e8ee4eb9ed568aa",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/cli.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "402ead59a6dcd84ae9287d55d3ddfcf927ddf6ce3e53a4ee07fe9b55d4b8217b",
+      "current_sha256": "8656fe317250a5a710258d02388ce25ca6b4f20f2d0f84a2a4f50c94a29681ac",
+      "equal": false,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": true
+    },
+    {
+      "path": "scar/ir/__init__.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "104501dea2488611e70e31a3579604c3e5249c1315bfc60591e1c26cd91a27fe",
+      "current_sha256": "104501dea2488611e70e31a3579604c3e5249c1315bfc60591e1c26cd91a27fe",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/ir/cfg.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "8cf0ba8584735ff87ab0ef9ea049fea9169450e5c4f956faf3e4f55ccc0f74df",
+      "current_sha256": "8cf0ba8584735ff87ab0ef9ea049fea9169450e5c4f956faf3e4f55ccc0f74df",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/ir/control_flow_v2.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "d31fed629ff80fb80294343bb1904c9375c5a976d3073e274c6e4b6c5a52e92e",
+      "current_sha256": "d31fed629ff80fb80294343bb1904c9375c5a976d3073e274c6e4b6c5a52e92e",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/ir/correspondence.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "4d657909fed7734337510262f7788bab09cee3753a1f7b49b930a6f5a2ed47c5",
+      "current_sha256": "4d657909fed7734337510262f7788bab09cee3753a1f7b49b930a6f5a2ed47c5",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/ir/effects.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "56f9500bc2e0ae08a59ab2b93e67adcbb33518e0e9376b5a772c5f555f06022f",
+      "current_sha256": "56f9500bc2e0ae08a59ab2b93e67adcbb33518e0e9376b5a772c5f555f06022f",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/ir/entities.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "92ac005de66ea22b8217115285f34d9619f14705f644d8c22dece3791c48b341",
+      "current_sha256": "92ac005de66ea22b8217115285f34d9619f14705f644d8c22dece3791c48b341",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/ir/events.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "e7a7a0458f71fa2822e4c23aadd2dc4e713a48da5262707a381e41d243580017",
+      "current_sha256": "e7a7a0458f71fa2822e4c23aadd2dc4e713a48da5262707a381e41d243580017",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/ir/execution/__init__.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "6f5096f7edee3c263001a204f4c3c14f5f373344edc0389730474ed59e380b0e",
+      "current_sha256": "6f5096f7edee3c263001a204f4c3c14f5f373344edc0389730474ed59e380b0e",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/ir/execution/await_links.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "59bc695076f3d6c398e37697b2bdb5aee75f20167050fb1b888e019ae41fa075",
+      "current_sha256": "59bc695076f3d6c398e37697b2bdb5aee75f20167050fb1b888e019ae41fa075",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/ir/execution/await_outcome_evidence.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "9f64b5cda5b7856ff2dfa42fd35737881a15dbb741beeceaccd1df182efab6f4",
+      "current_sha256": "9f64b5cda5b7856ff2dfa42fd35737881a15dbb741beeceaccd1df182efab6f4",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/ir/execution/await_outcomes.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "34e0fbe6e6991515c1b89a6aba6f41387c94dd7210eeb6c9ff5d8d996dfb518c",
+      "current_sha256": "34e0fbe6e6991515c1b89a6aba6f41387c94dd7210eeb6c9ff5d8d996dfb518c",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/ir/execution/await_qualification.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "fdd29572181c78cdef4dbff4ae6b5b39113d20885df8cc9ab3c80b681d922bd5",
+      "current_sha256": "fdd29572181c78cdef4dbff4ae6b5b39113d20885df8cc9ab3c80b681d922bd5",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/ir/execution/body_state_history.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "7b8224ee9c940a4a427bb8e75bc85085b0f0030e60f8de649e9e56b697c6fd63",
+      "current_sha256": "7b8224ee9c940a4a427bb8e75bc85085b0f0030e60f8de649e9e56b697c6fd63",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/ir/execution/call_query.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "9cecb45f6da0ee59a4e86faa1ae05fe5de3d019ed362d5e42aa91830cf1ebe42",
+      "current_sha256": "9cecb45f6da0ee59a4e86faa1ae05fe5de3d019ed362d5e42aa91830cf1ebe42",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/ir/execution/call_validation.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "9b9de07e1002e4f2c973dba2a48fac44e7ecfde546caf191a8b47c192adb09c2",
+      "current_sha256": "9b9de07e1002e4f2c973dba2a48fac44e7ecfde546caf191a8b47c192adb09c2",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/ir/execution/calls.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "a287446babd077c072f51182d12ecc5e670bd2e1700b6396e914e134d95a183f",
+      "current_sha256": "a287446babd077c072f51182d12ecc5e670bd2e1700b6396e914e134d95a183f",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/ir/execution/cli.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "28d6c8729b6caa52ddc8238453b4933fb88369ad03a669831e7211be03f14baa",
+      "current_sha256": "28d6c8729b6caa52ddc8238453b4933fb88369ad03a669831e7211be03f14baa",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/ir/execution/codec.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "d9d5014a6fb2738a48336705007d9a71125903d573f618bb6741d978c703b2ea",
+      "current_sha256": "d9d5014a6fb2738a48336705007d9a71125903d573f618bb6741d978c703b2ea",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/ir/execution/common.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "a6a4287df931d21221be181023df0233f0b7b8cfbe0fdb69798fc9238ea2c0b8",
+      "current_sha256": "a6a4287df931d21221be181023df0233f0b7b8cfbe0fdb69798fc9238ea2c0b8",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/ir/execution/completion_continuations.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "b7ec6c61b2373f0b2f2437d8e2d5f1424eb7c5c818f881e04d0e9330fe01bb1c",
+      "current_sha256": "b7ec6c61b2373f0b2f2437d8e2d5f1424eb7c5c818f881e04d0e9330fe01bb1c",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/ir/execution/composition.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "6190ab8faa17c4b2823a061ce5179fb850fa9dd32c77806f04bc478052171852",
+      "current_sha256": "6190ab8faa17c4b2823a061ce5179fb850fa9dd32c77806f04bc478052171852",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/ir/execution/composition_query.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "ed631511a56893d419edf76c8ddbf15862761c7e851227db772348471587aa6c",
+      "current_sha256": "ed631511a56893d419edf76c8ddbf15862761c7e851227db772348471587aa6c",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/ir/execution/composition_requirements.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "7f3c536a36ddcc905a0200c440c2e2d62660aba49fd1be3104bd9de7893da601",
+      "current_sha256": "7f3c536a36ddcc905a0200c440c2e2d62660aba49fd1be3104bd9de7893da601",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/ir/execution/composition_routes.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "4040eacd33c8bf378803293826a4c386d3cced036fe4a19b83ff14ed2fe9df82",
+      "current_sha256": "4040eacd33c8bf378803293826a4c386d3cced036fe4a19b83ff14ed2fe9df82",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/ir/execution/content.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "1eee1822056e59a0be9f4f3a1524f97948df91497ad57072c7c0ca53c670cf9e",
+      "current_sha256": "1eee1822056e59a0be9f4f3a1524f97948df91497ad57072c7c0ca53c670cf9e",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/ir/execution/content_validation.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "f66811ed0e500c29bf42b85a16e87c219803904844296659cb27bf10cf563f12",
+      "current_sha256": "f66811ed0e500c29bf42b85a16e87c219803904844296659cb27bf10cf563f12",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/ir/execution/coordinates.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "b19e45c8af710b93d7197ca91e7cbcdfa7a9ee239a7faf73903d2ff85003ce09",
+      "current_sha256": "b19e45c8af710b93d7197ca91e7cbcdfa7a9ee239a7faf73903d2ff85003ce09",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/ir/execution/coverage.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "53da83b9cb3b67ae63a12163d74e58cf9d9d6d76511e2d4011a6918d43c59411",
+      "current_sha256": "53da83b9cb3b67ae63a12163d74e58cf9d9d6d76511e2d4011a6918d43c59411",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/ir/execution/effects.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "fd3d756ea382af33916ae6076b17e71a7bc3bc59a45db30c2b7974b573534e6d",
+      "current_sha256": "fd3d756ea382af33916ae6076b17e71a7bc3bc59a45db30c2b7974b573534e6d",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/ir/execution/endpoint_protocol.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "4b9cf7163c498ce85e654c3c1ff2ac863dab8efb9fae471bf07398535ed037fb",
+      "current_sha256": "4b9cf7163c498ce85e654c3c1ff2ac863dab8efb9fae471bf07398535ed037fb",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/ir/execution/flow.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "f4682d97b2dce5fcd928461d2a7608ab56919a827bd1e213f579aa9b31ecb058",
+      "current_sha256": "f4682d97b2dce5fcd928461d2a7608ab56919a827bd1e213f579aa9b31ecb058",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/ir/execution/host_order.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "c4578ff1cf51b7ac922453a8e89e951a5c2393ac63d4817ebaa8bd029e659a91",
+      "current_sha256": "c4578ff1cf51b7ac922453a8e89e951a5c2393ac63d4817ebaa8bd029e659a91",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/ir/execution/ids.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "3d5097166d01f177ec7295e74b74567c0a93ef2482cd371138d3e23578df7d29",
+      "current_sha256": "3d5097166d01f177ec7295e74b74567c0a93ef2482cd371138d3e23578df7d29",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/ir/execution/inventory.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "99ed4011ebd379cff8f9b8731b5fd5c2cf9611ff7865d1241dc83dfe67a9afb5",
+      "current_sha256": "99ed4011ebd379cff8f9b8731b5fd5c2cf9611ff7865d1241dc83dfe67a9afb5",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/ir/execution/literals.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "ac1a100d74f333cc0f85efeb5e4624ec0ef838ceb3ab95a0986c037d29f09598",
+      "current_sha256": "ac1a100d74f333cc0f85efeb5e4624ec0ef838ceb3ab95a0986c037d29f09598",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/ir/execution/model.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "eccfa5bdddb418068e34deedd836463083677e0e816195abaeb4945d82dc4a0c",
+      "current_sha256": "eccfa5bdddb418068e34deedd836463083677e0e816195abaeb4945d82dc4a0c",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/ir/execution/native_memory_binding.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "eb8d59ac7cae672a126c2a18434a2f9a916fdee377b625f895dc289c879cc72a",
+      "current_sha256": "eb8d59ac7cae672a126c2a18434a2f9a916fdee377b625f895dc289c879cc72a",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/ir/execution/native_memory_protocol.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "277d572dac359da5db0a3bd2fb6728025316fe7e22be30fb704f3f5d18d54b40",
+      "current_sha256": "277d572dac359da5db0a3bd2fb6728025316fe7e22be30fb704f3f5d18d54b40",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/ir/execution/observation_validation.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "eaae52e54664107ac7baa7aa5707fbf2a19be6e9b59346f0ce37040f563ff983",
+      "current_sha256": "eaae52e54664107ac7baa7aa5707fbf2a19be6e9b59346f0ce37040f563ff983",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/ir/execution/observations.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "8c8237c855680e78f6e1c256a30086105636c2af5ad6fb59958385840ed7d882",
+      "current_sha256": "8c8237c855680e78f6e1c256a30086105636c2af5ad6fb59958385840ed7d882",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/ir/execution/order.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "e4ce65c33bb8169e643eb5bebd8bf5f3620d8d2cc5c8d333b62b52e2e4aea43a",
+      "current_sha256": "e4ce65c33bb8169e643eb5bebd8bf5f3620d8d2cc5c8d333b62b52e2e4aea43a",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/ir/execution/order_validation.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "cbea6d0b1072c0cf7a3579e07a13a3a9bad808b807c779e66ac76acf43f6ea09",
+      "current_sha256": "cbea6d0b1072c0cf7a3579e07a13a3a9bad808b807c779e66ac76acf43f6ea09",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/ir/execution/pending_payloads.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "e344ef6176fee208dc3da2c2f700bf4d02cb0032b85980b69c5c0d2744720b24",
+      "current_sha256": "e344ef6176fee208dc3da2c2f700bf4d02cb0032b85980b69c5c0d2744720b24",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/ir/execution/production.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "abd9700207262eed121af4a7edb064c01afe903cbd3898f99d8d4653bee24097",
+      "current_sha256": "abd9700207262eed121af4a7edb064c01afe903cbd3898f99d8d4653bee24097",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/ir/execution/production_query.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "48cceaa0878db98508f4700ad24eb1b02b889219a8531aee0d7e69e3ca21c703",
+      "current_sha256": "48cceaa0878db98508f4700ad24eb1b02b889219a8531aee0d7e69e3ca21c703",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/ir/execution/production_ranges.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "42778b9c3ede578e1f664c5689aa4471f4df096855c273434bde589b429ca292",
+      "current_sha256": "42778b9c3ede578e1f664c5689aa4471f4df096855c273434bde589b429ca292",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/ir/execution/production_validation.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "63f55ef4c4270f137d62799874ee51b783f562fc5086005e3f1769e8571158aa",
+      "current_sha256": "63f55ef4c4270f137d62799874ee51b783f562fc5086005e3f1769e8571158aa",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/ir/execution/query.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "91bc5106cf392225dd6b58dfb6935bef9b60ccb759465de324fb02adcfd1efc6",
+      "current_sha256": "91bc5106cf392225dd6b58dfb6935bef9b60ccb759465de324fb02adcfd1efc6",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/ir/execution/reference_identity.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "60ee15ce024c3a7e344b991694b76b9abda2a0f92fdc5229361329077b944cc6",
+      "current_sha256": "60ee15ce024c3a7e344b991694b76b9abda2a0f92fdc5229361329077b944cc6",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/ir/execution/region_implementation.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "496c5500e5c8e1b4d8ca321e0b18788ea0775d8c65a1963427ccdd04130d24e4",
+      "current_sha256": "496c5500e5c8e1b4d8ca321e0b18788ea0775d8c65a1963427ccdd04130d24e4",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/ir/execution/request_state_history.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "7ff1171ac41044d1e3d2622355ab048a0dd0ad0c112ca4a7b81e4df41cf3487e",
+      "current_sha256": "7ff1171ac41044d1e3d2622355ab048a0dd0ad0c112ca4a7b81e4df41cf3487e",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/ir/execution/resource_validation.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "b536d02451175895c2a9655a7096959dec2e3fa9dbff48d3927b61fb27d6e430",
+      "current_sha256": "b536d02451175895c2a9655a7096959dec2e3fa9dbff48d3927b61fb27d6e430",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/ir/execution/resources.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "657fca489d07fd3e32e5552782e02c6b6b58c8ed061c3c0040313d442a2e3000",
+      "current_sha256": "657fca489d07fd3e32e5552782e02c6b6b58c8ed061c3c0040313d442a2e3000",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/ir/execution/resumable_flow.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "a09dacd299e71d5119bd8feb00a077c6e8ea788ce0508a87e047dce9486feea6",
+      "current_sha256": "a09dacd299e71d5119bd8feb00a077c6e8ea788ce0508a87e047dce9486feea6",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/ir/execution/resumable_identity.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "523e25800bbbb86166b0fd780643fb1fcbc1301cc7a8abf6518f2970be630c60",
+      "current_sha256": "523e25800bbbb86166b0fd780643fb1fcbc1301cc7a8abf6518f2970be630c60",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/ir/execution/resumable_query.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "b1860cb99671b95af03f9842663c1588aff980d861e5176093a71ac0994e3310",
+      "current_sha256": "b1860cb99671b95af03f9842663c1588aff980d861e5176093a71ac0994e3310",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/ir/execution/resumable_sessions.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "35aac3108fc6f7707bf6273f85e8f90b58932456d6b3170afb1a211761cd9695",
+      "current_sha256": "35aac3108fc6f7707bf6273f85e8f90b58932456d6b3170afb1a211761cd9695",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/ir/execution/resumable_validation.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "f6cffc61110db87205619cc16e1948742263bbee9ec5983e73390dc4b1d6750a",
+      "current_sha256": "f6cffc61110db87205619cc16e1948742263bbee9ec5983e73390dc4b1d6750a",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/ir/execution/resumables.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "fdb741f337f7537533c77b2461dcbd424e9723f3ef3e4402907499519c52203f",
+      "current_sha256": "fdb741f337f7537533c77b2461dcbd424e9723f3ef3e4402907499519c52203f",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/ir/execution/session_occupancy_history.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "0298dac5a58245ed45d331a7259fedd13436c4cadca08fa87f69849161f48c70",
+      "current_sha256": "0298dac5a58245ed45d331a7259fedd13436c4cadca08fa87f69849161f48c70",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/ir/execution/snapshot.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "7757c299a965e37f5e73eeaa1f4ed304da6b7bfb970cded5d274fdc4e8483107",
+      "current_sha256": "7757c299a965e37f5e73eeaa1f4ed304da6b7bfb970cded5d274fdc4e8483107",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/ir/execution/source_validation.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "96b2ba96349574ee2ba12a24dd8d0784157fc9015e186acf87ac895cee749cbe",
+      "current_sha256": "96b2ba96349574ee2ba12a24dd8d0784157fc9015e186acf87ac895cee749cbe",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/ir/execution/state_addresses.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "2ce0377920a5b07e9268fbcb91404afc414a129385b155255998b75b718dc49b",
+      "current_sha256": "2ce0377920a5b07e9268fbcb91404afc414a129385b155255998b75b718dc49b",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/ir/execution/state_preservation.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "feb00e2bc5506c7e2da2abcddfe7423971ba9e9c078d81b00257ce2a64d39ec0",
+      "current_sha256": "feb00e2bc5506c7e2da2abcddfe7423971ba9e9c078d81b00257ce2a64d39ec0",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/ir/execution/stored_value_projection.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "797fb705def357e87517abb8deae3f4759215422e61a9cc73d08b44123109c79",
+      "current_sha256": "797fb705def357e87517abb8deae3f4759215422e61a9cc73d08b44123109c79",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/ir/execution/stored_values.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "96ebd29d3e6961b27977d34c85a9fb847bc8bbd62087c2bc7416b4d9acef9e65",
+      "current_sha256": "96ebd29d3e6961b27977d34c85a9fb847bc8bbd62087c2bc7416b4d9acef9e65",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/ir/execution/validation.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "2696dc8fc96272bb7ef3114bb117d06c8f67d5e0a32ea0af0a6eda427f8dc5f1",
+      "current_sha256": "2696dc8fc96272bb7ef3114bb117d06c8f67d5e0a32ea0af0a6eda427f8dc5f1",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/ir/execution/validity.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "55df8f7cc20c06b246e92822ea51ea4fcf9a64647ede17613e4325b8b8d0f120",
+      "current_sha256": "55df8f7cc20c06b246e92822ea51ea4fcf9a64647ede17613e4325b8b8d0f120",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/ir/execution/validity_budget.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "e1b297345fc1a63716da5d8d7f2434b4999e3200ad3b6ee4f3823c5d99244b10",
+      "current_sha256": "e1b297345fc1a63716da5d8d7f2434b4999e3200ad3b6ee4f3823c5d99244b10",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/ir/execution/validity_order.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "c569e2b039e1f2c63760b02092e61a5d0e7799a50421f51598acd27f41c78368",
+      "current_sha256": "c569e2b039e1f2c63760b02092e61a5d0e7799a50421f51598acd27f41c78368",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/ir/execution/validity_query.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "cf1ff0f076939d04357cb64a2b03af5d77fb7aad7a1d9243465d2ad452ffea0c",
+      "current_sha256": "cf1ff0f076939d04357cb64a2b03af5d77fb7aad7a1d9243465d2ad452ffea0c",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/ir/execution/validity_stability.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "ef78805eba6be300dcc222836b8920910720b811ce19c15f1f327ac2000adea6",
+      "current_sha256": "ef78805eba6be300dcc222836b8920910720b811ce19c15f1f327ac2000adea6",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/ir/execution/validity_validation.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "0c640eadb9099fffd6a39525495e7fc3d3e01a74a715c4da9950cda92047bee2",
+      "current_sha256": "0c640eadb9099fffd6a39525495e7fc3d3e01a74a715c4da9950cda92047bee2",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/ir/execution/value_sources.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "f280de465fff16fd3fde46a8b921bbbed205380cfc3506bfb13ec603b6a65f99",
+      "current_sha256": "f280de465fff16fd3fde46a8b921bbbed205380cfc3506bfb13ec603b6a65f99",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/ir/execution/work.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "c092b7b39691fce22d8cc00d8922cce5df4800c6ece615d28492edbd3fc6bd70",
+      "current_sha256": "c092b7b39691fce22d8cc00d8922cce5df4800c6ece615d28492edbd3fc6bd70",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/ir/execution/work_validation.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "1cccc760cb93268f4e282417e1d5fe8f1034870c474866237246ea7bae9e6984",
+      "current_sha256": "1cccc760cb93268f4e282417e1d5fe8f1034870c474866237246ea7bae9e6984",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/ir/frontend_v2.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "dd258588e3c68f121c7652b6d5c639d3f851f9b401e61920ad15a410867695f9",
+      "current_sha256": "dd258588e3c68f121c7652b6d5c639d3f851f9b401e61920ad15a410867695f9",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/ir/graph.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "ba39496a99441ee855d5cd761afb202afd9cb916480e28dadc2d9587b36ad301",
+      "current_sha256": "ba39496a99441ee855d5cd761afb202afd9cb916480e28dadc2d9587b36ad301",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/ir/ids.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "3507c19a291f10a3ddeffa22ba2be274b33c15f28904786ea5ca9c87c2e74f5e",
+      "current_sha256": "3507c19a291f10a3ddeffa22ba2be274b33c15f28904786ea5ca9c87c2e74f5e",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/ir/invocation_bindings_v2.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "a66f4ae5993b56087c3682f9dee49bb4d133d11fbedc52ff2e108e6b79332dca",
+      "current_sha256": "a66f4ae5993b56087c3682f9dee49bb4d133d11fbedc52ff2e108e6b79332dca",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/ir/literals.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "a2ef2cb826378d034143134f3c85f0e3fb91c9adb67415ce88e74b64812f24f9",
+      "current_sha256": "a2ef2cb826378d034143134f3c85f0e3fb91c9adb67415ce88e74b64812f24f9",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/ir/program/__init__.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "50d1763436541150853644fae4dcec4f792c5f56eb31dbb0d959c7f8d5e9984b",
+      "current_sha256": "50d1763436541150853644fae4dcec4f792c5f56eb31dbb0d959c7f8d5e9984b",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/ir/program/admission.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "382f1757b2e779318876cb0f12442bc8a4f8fa1542f59a760bab2b8c74fa85fb",
+      "current_sha256": "382f1757b2e779318876cb0f12442bc8a4f8fa1542f59a760bab2b8c74fa85fb",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/ir/program/async_initial.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "13b9c46ef90598f28b31111e0be372ef0cfaceea0d390537fdc8e07e12be360c",
+      "current_sha256": "13b9c46ef90598f28b31111e0be372ef0cfaceea0d390537fdc8e07e12be360c",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/ir/program/async_request_paths.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "6f57aebaafa8b1d9abedcda34cb3df9f0cea9e9f1f6ee1e020ad269187dbfd2c",
+      "current_sha256": "6f57aebaafa8b1d9abedcda34cb3df9f0cea9e9f1f6ee1e020ad269187dbfd2c",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/ir/program/async_session_sources.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "ee192bb2f6f11b4ce48d32c2328fbf250050a616d4df70a379d1982875306747",
+      "current_sha256": "ee192bb2f6f11b4ce48d32c2328fbf250050a616d4df70a379d1982875306747",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/ir/program/await_failures.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "16ed0d6021ac070da16d7a3a144bc07684d62dff36833382812e02df718b7f69",
+      "current_sha256": "16ed0d6021ac070da16d7a3a144bc07684d62dff36833382812e02df718b7f69",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/ir/program/await_inventory_originals.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "1860f988838ebfaf9875a60df08fc949f0b5f7ceed5bbea91dffcc05d123cc81",
+      "current_sha256": "1860f988838ebfaf9875a60df08fc949f0b5f7ceed5bbea91dffcc05d123cc81",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/ir/program/await_outcome_flow.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "ce86b8d714a7ce72c87ce70940150a52ac7340dee385a1ce9c200f5be9982219",
+      "current_sha256": "ce86b8d714a7ce72c87ce70940150a52ac7340dee385a1ce9c200f5be9982219",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/ir/program/await_outcomes.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "84c3779e63150bd63d0a77c9000c9f7cc6ba8e2fd67c505af42a42f7180c5fc1",
+      "current_sha256": "84c3779e63150bd63d0a77c9000c9f7cc6ba8e2fd67c505af42a42f7180c5fc1",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/ir/program/await_qualification.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "119225840de2abe49e98086f07c03d221bc7488c3d9e962d14764acf9bd7ec4e",
+      "current_sha256": "119225840de2abe49e98086f07c03d221bc7488c3d9e962d14764acf9bd7ec4e",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/ir/program/await_structured_completion.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "7182c95c7b61e24716e08dc15f84759d988602ded0b085ad1f61306b4825b6d6",
+      "current_sha256": "7182c95c7b61e24716e08dc15f84759d988602ded0b085ad1f61306b4825b6d6",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/ir/program/binding_validation.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "498e7515e4951013822befc419c85b842159be70c1ced08e5cd6ab74d8cd99cd",
+      "current_sha256": "498e7515e4951013822befc419c85b842159be70c1ced08e5cd6ab74d8cd99cd",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/ir/program/bindings.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "8bb4dfaddbeaf0fb70f675da4db60ba655f9b8f4ee56047f0b9a95f0009e3a46",
+      "current_sha256": "8bb4dfaddbeaf0fb70f675da4db60ba655f9b8f4ee56047f0b9a95f0009e3a46",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/ir/program/call_composition.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "f03ef49aa1d0925b7dd22d43541ce04722c52e2acaf066e42c9e47db06a1b6bf",
+      "current_sha256": "f03ef49aa1d0925b7dd22d43541ce04722c52e2acaf066e42c9e47db06a1b6bf",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/ir/program/call_demand.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "7307de2bdfbebcdce3e66e6146012eb3e4321fefac01730c2ae034ead04b59c6",
+      "current_sha256": "7307de2bdfbebcdce3e66e6146012eb3e4321fefac01730c2ae034ead04b59c6",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/ir/program/call_edges.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "b2a414942e7d236596e088bdf36396a86afaf247cc1cf3b069978d93f0499063",
+      "current_sha256": "b2a414942e7d236596e088bdf36396a86afaf247cc1cf3b069978d93f0499063",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/ir/program/call_effect_expansion.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "c4f7778bb29570f151ebe8ebdd22c781492b382c6e90cf9341b00fd30413ba79",
+      "current_sha256": "c4f7778bb29570f151ebe8ebdd22c781492b382c6e90cf9341b00fd30413ba79",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/ir/program/call_operand_routes.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "339dbd3433c1beadc5e4a038ff8f447f637c498036946696a650b9e0579e829e",
+      "current_sha256": "339dbd3433c1beadc5e4a038ff8f447f637c498036946696a650b9e0579e829e",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/ir/program/call_operands.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "3f7a8ce71c2e2ba706b5fac952cfeb1b6ebc381fb0531058f6eab844fe8cbd14",
+      "current_sha256": "3f7a8ce71c2e2ba706b5fac952cfeb1b6ebc381fb0531058f6eab844fe8cbd14",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/ir/program/call_returns.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "1b7aabe7512330504e2e3c0225883a7d962b6429b656c194896b2a2fc96b929d",
+      "current_sha256": "1b7aabe7512330504e2e3c0225883a7d962b6429b656c194896b2a2fc96b929d",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/ir/program/call_seeds.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "c20e12f2d5d3ee95a8f58cffcae2fbd827f929589955b983e726ecd7a526a0fb",
+      "current_sha256": "c20e12f2d5d3ee95a8f58cffcae2fbd827f929589955b983e726ecd7a526a0fb",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/ir/program/cleanup.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "79b5888885bf8c4ad50df77e8f6dc7ffff4e5aa8956aca9010a98a055cbd372c",
+      "current_sha256": "79b5888885bf8c4ad50df77e8f6dc7ffff4e5aa8956aca9010a98a055cbd372c",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/ir/program/cleanup_forward.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "ff99ec4320a1e65079c0988d483faec604838f0e84a260962d85a3a1955629a2",
+      "current_sha256": "ff99ec4320a1e65079c0988d483faec604838f0e84a260962d85a3a1955629a2",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/ir/program/cleanup_validation.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "2bc12af79a58a08728196e0a9ec7907da9b16a810a444d46c009f91b63a948c3",
+      "current_sha256": "2bc12af79a58a08728196e0a9ec7907da9b16a810a444d46c009f91b63a948c3",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/ir/program/codec.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "5bbdbecd76d3b0b2c223b7c34573f091c81aa0b40ef73bf85f013a7e398eeade",
+      "current_sha256": "5bbdbecd76d3b0b2c223b7c34573f091c81aa0b40ef73bf85f013a7e398eeade",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/ir/program/compilation.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "2924eb78ece2c6fa3c993f84a0f84f29768ad9d19b835b3e34ab3aba9c57058c",
+      "current_sha256": "2924eb78ece2c6fa3c993f84a0f84f29768ad9d19b835b3e34ab3aba9c57058c",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/ir/program/completion_adapter_routes.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "7f20e972c1a13d5877dd123337a868d36b5c4cd3a610f7816201fb435cf08612",
+      "current_sha256": "7f20e972c1a13d5877dd123337a868d36b5c4cd3a610f7816201fb435cf08612",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/ir/program/completion_continuations.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "2d042822ac8c03d0ae7132f681b07d11ac1c5fd0f973b5b25d5bbbf0722a951c",
+      "current_sha256": "2d042822ac8c03d0ae7132f681b07d11ac1c5fd0f973b5b25d5bbbf0722a951c",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/ir/program/continuation_receipts.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "28861135e25bdc0d54865d45ca3fb975bf298081c00aa5e3f2dc3538b39e33ca",
+      "current_sha256": "28861135e25bdc0d54865d45ca3fb975bf298081c00aa5e3f2dc3538b39e33ca",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/ir/program/control.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "88d2640c7cb23c454f95888ced4130784fd829e8d1d60292a17000278fbe4ef2",
+      "current_sha256": "88d2640c7cb23c454f95888ced4130784fd829e8d1d60292a17000278fbe4ef2",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/ir/program/control_validation.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "3217ddedc8c00f5d19b299cd40f1ee7b5b53f3545f2ec7992d07312b6ee51fa5",
+      "current_sha256": "3217ddedc8c00f5d19b299cd40f1ee7b5b53f3545f2ec7992d07312b6ee51fa5",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/ir/program/copy_consumers.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "78e25935a1aa1a670641ebdea7a66de146e79113725f9198f5742fdea65e635c",
+      "current_sha256": "78e25935a1aa1a670641ebdea7a66de146e79113725f9198f5742fdea65e635c",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/ir/program/copy_flow.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "25a8a07f5fdaa567eb024ed9489e5bca48107ed6065b958707d6ba72981e6432",
+      "current_sha256": "25a8a07f5fdaa567eb024ed9489e5bca48107ed6065b958707d6ba72981e6432",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/ir/program/created_close.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "5c1088ffd8260a83742a6ba193f29f4acee66066d45c76f44944e8b527d3fb8e",
+      "current_sha256": "5c1088ffd8260a83742a6ba193f29f4acee66066d45c76f44944e8b527d3fb8e",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/ir/program/discovery.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "d9bfc4b5218413a3dc72ea7cc65be8f4746c87b07576bca495a8091d60556617",
+      "current_sha256": "d9bfc4b5218413a3dc72ea7cc65be8f4746c87b07576bca495a8091d60556617",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/ir/program/driver_flow.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "1815918ff1419257a33d19060ec3d7ca941fb84f80af8fc8733612d4c3f244aa",
+      "current_sha256": "1815918ff1419257a33d19060ec3d7ca941fb84f80af8fc8733612d4c3f244aa",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/ir/program/driver_validation.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "cdd8439fb1cd63c3ecd52c42f796a4c0cf15ec53591b0859f25137bee2f0e4d6",
+      "current_sha256": "cdd8439fb1cd63c3ecd52c42f796a4c0cf15ec53591b0859f25137bee2f0e4d6",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/ir/program/drivers.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "d1a4844d3b00fefed05e2fb743daaf32c9082ae8f0fec3a9db6bce255561aabd",
+      "current_sha256": "d1a4844d3b00fefed05e2fb743daaf32c9082ae8f0fec3a9db6bce255561aabd",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/ir/program/environment_validation.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "edfefa6a74b80fbbe425de3dce2a0d4750ab971c42f372072f7252c6d19da834",
+      "current_sha256": "edfefa6a74b80fbbe425de3dce2a0d4750ab971c42f372072f7252c6d19da834",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/ir/program/environments.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "14e9c16d89db388793236a3636adaac0557c410a5c633c65f7558d413db029f8",
+      "current_sha256": "14e9c16d89db388793236a3636adaac0557c410a5c633c65f7558d413db029f8",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/ir/program/evaluated_sources.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "9b77839ad692ec6ee88204298cf99e922fd657f6167c3df664d4fe1b8d51b0aa",
+      "current_sha256": "9b77839ad692ec6ee88204298cf99e922fd657f6167c3df664d4fe1b8d51b0aa",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/ir/program/exception_match_query.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "b9d9dc890f80e2e8760607e03f0dcd817584cad4c79449e0f9bc40525ba4666b",
+      "current_sha256": "b9d9dc890f80e2e8760607e03f0dcd817584cad4c79449e0f9bc40525ba4666b",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/ir/program/exception_matches.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "bbdbdbc098da785e6b86713a829f513ebe809ebd28f8cb60be98f62eb7b21bd0",
+      "current_sha256": "bbdbdbc098da785e6b86713a829f513ebe809ebd28f8cb60be98f62eb7b21bd0",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/ir/program/expansion.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "7b9c9e1fcc091d994e820b2c6e9dd5d0b18ae323f0801098396556d7ccd78e04",
+      "current_sha256": "7b9c9e1fcc091d994e820b2c6e9dd5d0b18ae323f0801098396556d7ccd78e04",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/ir/program/frame_validation.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "f497bfd4849609384ff4e086bce259c3c80a748affd2876c3de553602da11356",
+      "current_sha256": "f497bfd4849609384ff4e086bce259c3c80a748affd2876c3de553602da11356",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/ir/program/frames.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "4c24a8719043778fdfaec6285c5b579a8855b6b0c8b31bde6c9ec2e81613cba2",
+      "current_sha256": "4c24a8719043778fdfaec6285c5b579a8855b6b0c8b31bde6c9ec2e81613cba2",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/ir/program/functions.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "aa6440229e87cfbf67d57d9d268c1d6b4c89b824ff379c24509caa1af94b922f",
+      "current_sha256": "aa6440229e87cfbf67d57d9d268c1d6b4c89b824ff379c24509caa1af94b922f",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/ir/program/handled_completion_routes.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "ca637488ae3f2756119761b75b3ef325d07c0439a6b0c2863c5e365651660fe1",
+      "current_sha256": "ca637488ae3f2756119761b75b3ef325d07c0439a6b0c2863c5e365651660fe1",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/ir/program/ids.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "d13dcf373b8ca771bb107becad41fc6bd1dd6d8f1bf146ea4c48b0e962e342c8",
+      "current_sha256": "d13dcf373b8ca771bb107becad41fc6bd1dd6d8f1bf146ea4c48b0e962e342c8",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/ir/program/input_origins.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "1c3ccb3010b42bebf8081f0ebb5bc760c1893bba1a4c8e424d6e9dc8575aae98",
+      "current_sha256": "1c3ccb3010b42bebf8081f0ebb5bc760c1893bba1a4c8e424d6e9dc8575aae98",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/ir/program/inventory.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "05792f6b5319cf093f9763e92651a99ca9155c9613ad5b6711c21e5eb913ee15",
+      "current_sha256": "05792f6b5319cf093f9763e92651a99ca9155c9613ad5b6711c21e5eb913ee15",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/ir/program/lifecycle.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "326422e0b5c0a89fef3abda0f27037928d6c20bfc5adbd9afc875236678d17d7",
+      "current_sha256": "326422e0b5c0a89fef3abda0f27037928d6c20bfc5adbd9afc875236678d17d7",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/ir/program/lifecycle_analysis.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "153c309f0cd32a6b6b719f0266dbc68209a107c9746bb88c2463194d7d650dd7",
+      "current_sha256": "153c309f0cd32a6b6b719f0266dbc68209a107c9746bb88c2463194d7d650dd7",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/ir/program/lifecycle_flow.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "9fc23f943b8389764876856579db2e82797b2fb375a8c9ecc701b785b094d7f7",
+      "current_sha256": "9fc23f943b8389764876856579db2e82797b2fb375a8c9ecc701b785b094d7f7",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/ir/program/lifecycle_validation.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "49dee4e82ebe09964a1a72c0d5d19fc91b67645822e7b1abc4961d13ba381daa",
+      "current_sha256": "49dee4e82ebe09964a1a72c0d5d19fc91b67645822e7b1abc4961d13ba381daa",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/ir/program/literal_sources.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "9b3e99c0335d4177ee1814301a0be0da52039dfa10575bb78e46f411ba5c7a06",
+      "current_sha256": "9b3e99c0335d4177ee1814301a0be0da52039dfa10575bb78e46f411ba5c7a06",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/ir/program/literal_validation.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "1c0cc6ce2464804dfb29fced4cdf9ba7f4f0ffa65407b62073e0f17fd91436ca",
+      "current_sha256": "1c0cc6ce2464804dfb29fced4cdf9ba7f4f0ffa65407b62073e0f17fd91436ca",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/ir/program/model.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "9f8cf2996cfefd45aeda92bc04877711f1da4d431b592c2d672128989bd9b7b0",
+      "current_sha256": "9f8cf2996cfefd45aeda92bc04877711f1da4d431b592c2d672128989bd9b7b0",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/ir/program/native.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "17543d01b8351d74eefc665d48c74383bca27d820507fff98646dc3cef2a22b0",
+      "current_sha256": "17543d01b8351d74eefc665d48c74383bca27d820507fff98646dc3cef2a22b0",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/ir/program/native_validation.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "7fb36d01c70dc36889cf6dea65aa23763c0dd5139afc1bccdee65324e5e2743b",
+      "current_sha256": "7fb36d01c70dc36889cf6dea65aa23763c0dd5139afc1bccdee65324e5e2743b",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/ir/program/no_body_validation.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "22669aec4d7c608b1b60c7d161908452f1135e4a1b434b7b80fccccca12607ea",
+      "current_sha256": "22669aec4d7c608b1b60c7d161908452f1135e4a1b434b7b80fccccca12607ea",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/ir/program/operation_results.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "1e7ce57c21eda7bf2c3d3f66dcf5db4863af8f04173a61068bba2ec870e0991d",
+      "current_sha256": "1e7ce57c21eda7bf2c3d3f66dcf5db4863af8f04173a61068bba2ec870e0991d",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/ir/program/pending_payload_flow.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "b1230cc9757844ab22a476b6025a8785f6a13aad42b79fe2350c6493ff6f3037",
+      "current_sha256": "b1230cc9757844ab22a476b6025a8785f6a13aad42b79fe2350c6493ff6f3037",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/ir/program/protocol_async.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "f674dc70ddc3b00d7d8619d5f9ab412a72e7402db2d6fc288529baa40f9a77ff",
+      "current_sha256": "f674dc70ddc3b00d7d8619d5f9ab412a72e7402db2d6fc288529baa40f9a77ff",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/ir/program/protocol_await.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "11d898c966ce152f1c92738d50460202f5a6e78166cf15da409e94287946f92e",
+      "current_sha256": "11d898c966ce152f1c92738d50460202f5a6e78166cf15da409e94287946f92e",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/ir/program/protocol_await_records.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "af6513c1589025467d5e75f78f9a9b539159ca18efb4532f6199a3026db0a2c5",
+      "current_sha256": "af6513c1589025467d5e75f78f9a9b539159ca18efb4532f6199a3026db0a2c5",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/ir/program/protocol_connection_flow.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "4f5ec8057c47b3508e7540e06f48f3e577733d68dab307bd6ea7f12dbe2d84d7",
+      "current_sha256": "4f5ec8057c47b3508e7540e06f48f3e577733d68dab307bd6ea7f12dbe2d84d7",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/ir/program/protocol_connection_validation.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "fa6ce1fc31f1d5b29806e4436d3a649b8b4337207b7596f6c83e43dae768dcf1",
+      "current_sha256": "fa6ce1fc31f1d5b29806e4436d3a649b8b4337207b7596f6c83e43dae768dcf1",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/ir/program/protocol_connections.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "a632e35f625abb2a6725361d29fa3180233a6eae3873e9a050ff92b634ca6cfb",
+      "current_sha256": "a632e35f625abb2a6725361d29fa3180233a6eae3873e9a050ff92b634ca6cfb",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/ir/program/protocol_continuations.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "4df206a2fb8aeb07a04c48b08a1c981241a66ebc18287adddd0fd99ef590b893",
+      "current_sha256": "4df206a2fb8aeb07a04c48b08a1c981241a66ebc18287adddd0fd99ef590b893",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/ir/program/protocol_flow.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "9cb0bbe7c2d0ac3ebf6d9da413d88126b1d4dacb4e69d1db4ac27cf52b7498d4",
+      "current_sha256": "9cb0bbe7c2d0ac3ebf6d9da413d88126b1d4dacb4e69d1db4ac27cf52b7498d4",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/ir/program/protocol_lookup_fallbacks.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "c63a4da2d9f9eee82bc76b2c7c6e5a92c6ae175f08705e4f766eb5c1f3794380",
+      "current_sha256": "c63a4da2d9f9eee82bc76b2c7c6e5a92c6ae175f08705e4f766eb5c1f3794380",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/ir/program/protocol_packet_routes.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "27895e8c7bf6c0648449b1cdc93bacb194c3309022aec923c5f5fd508cce4072",
+      "current_sha256": "27895e8c7bf6c0648449b1cdc93bacb194c3309022aec923c5f5fd508cce4072",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/ir/program/protocol_query.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "4006dd4b38ba38572513acfbe05761ba536803dcdb5bd897f6f582e66fe45568",
+      "current_sha256": "4006dd4b38ba38572513acfbe05761ba536803dcdb5bd897f6f582e66fe45568",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/ir/program/protocol_rules.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "828ad23a2a14f6aa56ca4bbaa2f1fc45cc68f927dd895e12a71ae3c57692b865",
+      "current_sha256": "828ad23a2a14f6aa56ca4bbaa2f1fc45cc68f927dd895e12a71ae3c57692b865",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/ir/program/protocol_validation.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "814b68bfb9d3299aa6c89346314b55241992940ab26b6437242806950be07cbd",
+      "current_sha256": "814b68bfb9d3299aa6c89346314b55241992940ab26b6437242806950be07cbd",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/ir/program/protocols.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "894f432e6b9ca4525fb6465b11199fef53fc70a5172fe7dde8d42027106e1885",
+      "current_sha256": "894f432e6b9ca4525fb6465b11199fef53fc70a5172fe7dde8d42027106e1885",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/ir/program/provider_validation.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "1db55a3b5ab2c67f32496601a946b97263083b3d19af58bdedba3a83ef3e7877",
+      "current_sha256": "1db55a3b5ab2c67f32496601a946b97263083b3d19af58bdedba3a83ef3e7877",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/ir/program/providers.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "fb96fe41a8c5f6cf33a01fd6974830b9dd73ee622107b3659411cc0c4f8d1343",
+      "current_sha256": "fb96fe41a8c5f6cf33a01fd6974830b9dd73ee622107b3659411cc0c4f8d1343",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/ir/program/queries.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "3c47ec80d76292ab752fe3784f6b5a7d30db0d56c00ae1b818640c9e71c5d162",
+      "current_sha256": "3c47ec80d76292ab752fe3784f6b5a7d30db0d56c00ae1b818640c9e71c5d162",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/ir/program/region_implementation.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "06ae780292613cd76784fdc6590b496e8d20738da182b15ff3f9d0ae4dcac39e",
+      "current_sha256": "06ae780292613cd76784fdc6590b496e8d20738da182b15ff3f9d0ae4dcac39e",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/ir/program/request_inputs.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "3854ab1af53a8b050cba03285f90ef2a1a99f5de299e1418646c310b3f1507a4",
+      "current_sha256": "3854ab1af53a8b050cba03285f90ef2a1a99f5de299e1418646c310b3f1507a4",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/ir/program/resource_validation.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "f2709a6d9e9898bc5ecb87ae2396510750550fde1bb071f8ab9808569f352c39",
+      "current_sha256": "f2709a6d9e9898bc5ecb87ae2396510750550fde1bb071f8ab9808569f352c39",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/ir/program/resources.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "167f0b2e1267278362341e6622e5cb164292e93484da94c8403b382e1e6e434f",
+      "current_sha256": "167f0b2e1267278362341e6622e5cb164292e93484da94c8403b382e1e6e434f",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/ir/program/resumption.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "ef9d208d57ff6d3cd834529df7b68f377d1ac210f3f262b421c15aeadf5109ac",
+      "current_sha256": "ef9d208d57ff6d3cd834529df7b68f377d1ac210f3f262b421c15aeadf5109ac",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/ir/program/resumption_flow.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "c7c6b5c8e6d84d568fa87e52f71f9b66a6c1a50930633d0e97ea8613ce014cbc",
+      "current_sha256": "c7c6b5c8e6d84d568fa87e52f71f9b66a6c1a50930633d0e97ea8613ce014cbc",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/ir/program/resumption_validation.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "3e8f0a60bc9b636af1b4e25abc1caeaadfa208dc54b6abf9db89e8d468bf182a",
+      "current_sha256": "3e8f0a60bc9b636af1b4e25abc1caeaadfa208dc54b6abf9db89e8d468bf182a",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/ir/program/runtime_sources.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "74843e78617e5a76f6f671df344b5843af3d332323893a97407d6ee06cb537a6",
+      "current_sha256": "74843e78617e5a76f6f671df344b5843af3d332323893a97407d6ee06cb537a6",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/ir/program/session_flow.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "13e90d83f74bd46281a678c778c559ad1d6d52d3d5722137be38848f853a7387",
+      "current_sha256": "13e90d83f74bd46281a678c778c559ad1d6d52d3d5722137be38848f853a7387",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/ir/program/session_occupancy.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "ef73ff6654252eb2528751f4ffc798c2a619ff77d6a31d409225d9964903106d",
+      "current_sha256": "ef73ff6654252eb2528751f4ffc798c2a619ff77d6a31d409225d9964903106d",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/ir/program/session_release_validation.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "b96e989a611a518630e2c33bbf61b5f69d4cc015b54166d27f78a6486482e0fc",
+      "current_sha256": "b96e989a611a518630e2c33bbf61b5f69d4cc015b54166d27f78a6486482e0fc",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/ir/program/source.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "dbff369035e06452de1f6c0e741e68553f188addac8483859ae47a444f5a002b",
+      "current_sha256": "dbff369035e06452de1f6c0e741e68553f188addac8483859ae47a444f5a002b",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/ir/program/state_address_validation.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "03c1d4f8b3e9fe991f902a4e775051b2fbc8f048b49e4758fb3431833937a096",
+      "current_sha256": "03c1d4f8b3e9fe991f902a4e775051b2fbc8f048b49e4758fb3431833937a096",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/ir/program/state_addresses.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "6ff4052771e4c92cf248f298131037f9a25a5bda8059e1547da44410d3577b61",
+      "current_sha256": "6ff4052771e4c92cf248f298131037f9a25a5bda8059e1547da44410d3577b61",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/ir/program/state_modes.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "8d841907f306ee66996b9b45b3c7b5a6a4c799361e818851dff66534e0ee519e",
+      "current_sha256": "8d841907f306ee66996b9b45b3c7b5a6a4c799361e818851dff66534e0ee519e",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/ir/program/stored_values.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "8fb11f28816e0e19997722f59b6156909f6b987a10aec58f929eb079b548cb6f",
+      "current_sha256": "8fb11f28816e0e19997722f59b6156909f6b987a10aec58f929eb079b548cb6f",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/ir/program/structured.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "c328813c916918c51f7a0e0e17c1cf80e45792d31f790c585edfefb6a1eed3d1",
+      "current_sha256": "c328813c916918c51f7a0e0e17c1cf80e45792d31f790c585edfefb6a1eed3d1",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/ir/program/validation.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "55ea38011ebee30d9e5606f466c12c1de6c9422e7dcf66a9cd435a2a13dd5f90",
+      "current_sha256": "55ea38011ebee30d9e5606f466c12c1de6c9422e7dcf66a9cd435a2a13dd5f90",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/ir/proofs.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "57d0ba9768d0a5e9db79d4f468c41ae73058e46df18e6f28cdb4039581ecf527",
+      "current_sha256": "57d0ba9768d0a5e9db79d4f468c41ae73058e46df18e6f28cdb4039581ecf527",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/ir/provenance.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "f8f11d353a05c9b2ec893ae5ab3da7be747b4a2ea3b28a21eb1f7891237523c1",
+      "current_sha256": "f8f11d353a05c9b2ec893ae5ab3da7be747b4a2ea3b28a21eb1f7891237523c1",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/ir/record_codec.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "0954c05e53a6dcb31f449461db71c63fdcdd9f95a9c053424d86bf5217a89ef3",
+      "current_sha256": "0954c05e53a6dcb31f449461db71c63fdcdd9f95a9c053424d86bf5217a89ef3",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/ir/semantics_v2.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "5d943b7d48b159cfb8512ffff228236aee29d3c4f795ff0319d44489a81a4094",
+      "current_sha256": "5d943b7d48b159cfb8512ffff228236aee29d3c4f795ff0319d44489a81a4094",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/ir/source_fragments_v2.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "25629ca20d5d9186d1a6c65534d0e78371f1e6a7dc2b30d5c3d2789e46ba7e51",
+      "current_sha256": "25629ca20d5d9186d1a6c65534d0e78371f1e6a7dc2b30d5c3d2789e46ba7e51",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/ir/static.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "30be3dc04e6f03d8c91e8469dbd50771120b3c91ecedc3ea2cfdb4fd0cd495ca",
+      "current_sha256": "30be3dc04e6f03d8c91e8469dbd50771120b3c91ecedc3ea2cfdb4fd0cd495ca",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/ir/v2/__init__.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "6d1da8e107dfb8fb6a424fd2e6004f8ef71e8d18add1324d939334d94eefbd91",
+      "current_sha256": "6d1da8e107dfb8fb6a424fd2e6004f8ef71e8d18add1324d939334d94eefbd91",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/ir/v2/_validation.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "f1c640101d6d9ffc8baa7a647cad2862353fcdcd196c698f1f97b7764be04ede",
+      "current_sha256": "f1c640101d6d9ffc8baa7a647cad2862353fcdcd196c698f1f97b7764be04ede",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/ir/v2/codec.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "8b1392d3840daee80f21a88b87e09443f06f186cc2ed4bec9d0cd001c45dee9b",
+      "current_sha256": "8b1392d3840daee80f21a88b87e09443f06f186cc2ed4bec9d0cd001c45dee9b",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/ir/v2/common.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "691a7ec169c81cb51e271731ea11ee4c2aed38b5553b1f48f072a8ff368979b9",
+      "current_sha256": "691a7ec169c81cb51e271731ea11ee4c2aed38b5553b1f48f072a8ff368979b9",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/ir/v2/contracts.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "c7aaae3ea0e292e425cfbe820d4508363b9e26e0c94427cefc5a4bb0ae6e15b1",
+      "current_sha256": "c7aaae3ea0e292e425cfbe820d4508363b9e26e0c94427cefc5a4bb0ae6e15b1",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/ir/v2/correspondence.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "7882dfa21e7877f41dc441f40875433d6b340f4fdb657df547ca57fc34953de5",
+      "current_sha256": "7882dfa21e7877f41dc441f40875433d6b340f4fdb657df547ca57fc34953de5",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/ir/v2/evidence.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "c789c7aca05e217f95d4ca7bef6c761d9a5244a9779fed5174a0f4132c09630d",
+      "current_sha256": "c789c7aca05e217f95d4ca7bef6c761d9a5244a9779fed5174a0f4132c09630d",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/ir/v2/ids.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "d11e038a6a4c7de6dee5c8050182a97ddb4a6a6a399c466836ca64d6d9cb0a23",
+      "current_sha256": "d11e038a6a4c7de6dee5c8050182a97ddb4a6a6a399c466836ca64d6d9cb0a23",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/ir/v2/optimization.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "429313a4b30d82fb0dbbb908d48caec5d4849142ac72cc1ab10cdf2bd919620f",
+      "current_sha256": "429313a4b30d82fb0dbbb908d48caec5d4849142ac72cc1ab10cdf2bd919620f",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/ir/v2/schemas.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "de5c56960aa70ad5633758ccd61f9bc6ae3f66a97aea67b85d994b66e1ad0682",
+      "current_sha256": "de5c56960aa70ad5633758ccd61f9bc6ae3f66a97aea67b85d994b66e1ad0682",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/ir/v2/semantic.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "9d0af8a2b4a868df00388ccb910cdabdc93066aad7ff0e593d1c8d0e969885ab",
+      "current_sha256": "9d0af8a2b4a868df00388ccb910cdabdc93066aad7ff0e593d1c8d0e969885ab",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/ir/v2/values.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "e12586470c294701c315d6108a80746f08a14ba26a4ca6dcf6374f458d1078b5",
+      "current_sha256": "e12586470c294701c315d6108a80746f08a14ba26a4ca6dcf6374f458d1078b5",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/ir/versions.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "e6f31b33c3854244c52e26977942beb57909f4526752396f052c56555c57b98d",
+      "current_sha256": "e6f31b33c3854244c52e26977942beb57909f4526752396f052c56555c57b98d",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    },
+    {
+      "path": "scar/trace/files.py",
+      "original_commit": "415ac6b02d88249251ff9285ab79be72e20c25a3",
+      "original_sha256": "cc0dee95dde97b488272e4b23ccb23df9cd84fca98fe5c2bb05003e8dad6e8b0",
+      "current_sha256": "cc0dee95dde97b488272e4b23ccb23df9cd84fca98fe5c2bb05003e8dad6e8b0",
+      "equal": true,
+      "excluded_changed_module": false,
+      "participating_cli_functions_verified": false
+    }
+  ],
+  "original_checkpoints": {
+    "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_plain_20261023/checkpoints/index.jsonl",
+    "sha256": "4390c6097da97fdcea3366252c4237af3841df42c96a548880596cf7756d2672",
+    "bytes": 469585
+  },
+  "body_construction": "REUSED_MATERIALIZED_ORIGINAL_RETURNS",
+  "source_preparation": "UNCHANGED_PUBLIC_PREPARE_AND_CALL_SEED_QUEUE",
+  "public_graph_and_overlay_validation": "FULL",
+  "fresh_body_lowering_performed": false,
+  "whole_program_established": false
+}

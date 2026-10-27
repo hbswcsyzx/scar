@@ -1,0 +1,40 @@
+Command: PYTHONPATH=. /home/zyf/miniconda3/envs/lewm/bin/python -m pytest -q tests/unit/test_resumption_forwarding.py
+Exit code: 1
+.FF........                                                              [100%]
+=================================== FAILURES ===================================
+_ test_binding_saved_role_and_local_slot_are_not_inferred_from_value_type_alone _
+
+    def test_binding_saved_role_and_local_slot_are_not_inferred_from_value_type_alone():
+        graph = resumption_binding_program()
+        op = _operation(graph, "resume.suspend")
+        bad_role = _change(graph, replace(op, terminator=replace(op.terminator, saved=tuple(
+            replace(slot, role=SavedRole.VALUE) if slot.role is SavedRole.LOCAL_BINDING else slot
+            for slot in op.terminator.saved))))
+>       assert not derive_binding_facts(bad_role)[ValueID("resume.value.binding")]
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       KeyError: ValueID(value='resume.value.binding')
+
+tests/unit/test_resumption_forwarding.py:79: KeyError
+____________ test_resume_input_does_not_fabricate_a_binding_history ____________
+
+    def test_resume_input_does_not_fabricate_a_binding_history():
+        graph = resumption_binding_program()
+        op = _operation(graph, "resume.suspend")
+        normal, other = op.terminator.successors
+        # Swap the delivered-reference and binding argument positions, preserving
+        # each ResumeInput's exact-once constructor condition. Core type checks
+        # reject this too; the binding derivation must independently gain no seed.
+        arguments = tuple(SavedInput(1) if index == 3 else ResumeInput(1) if index == 5 else actual
+                          for index, actual in enumerate(normal.arguments))
+        graph = _change(graph, replace(op, terminator=replace(op.terminator,
+            successors=(replace(normal, arguments=arguments), other))))
+>       assert not derive_binding_facts(graph)[ValueID("resume.value.binding")]
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       KeyError: ValueID(value='resume.value.binding')
+
+tests/unit/test_resumption_forwarding.py:99: KeyError
+=========================== short test summary info ============================
+FAILED tests/unit/test_resumption_forwarding.py::test_binding_saved_role_and_local_slot_are_not_inferred_from_value_type_alone
+FAILED tests/unit/test_resumption_forwarding.py::test_resume_input_does_not_fabricate_a_binding_history
+2 failed, 9 passed in 0.39s
+

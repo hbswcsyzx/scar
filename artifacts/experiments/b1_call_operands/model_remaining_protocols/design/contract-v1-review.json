@@ -1,0 +1,15 @@
+{
+  "status": "PASS_WITH_SCOPE_DESIGN",
+  "reviewed_draft_sha256": "5dd62427c6b702f8a25e54816a68b9780b37cfdfc409b007782c273bc25fa557",
+  "frozen_contract_sha256": "f8ec4ed141c5e9d8d25a201b9f978ea1b93d81d72a0dab9466d3fef33fa17eb8",
+  "root_records_readonly_review_messages": true,
+  "reviews": {
+    "reuse_capture": "PASS_WITH_SCOPE after independent consumer denominator and merge/copy-route constraints were added",
+    "value_resource_review": "PASS_WITH_SCOPE after exact cancellation target/delivery references; three scope/tuple/version clarifications confirmed",
+    "cleanup_forward_review": "PASS_WITH_SCOPE after merge-to-copy-to-call guard expressivity and independent source selection were clarified"
+  },
+  "frozen_changes": "Title/status, helper checkpoint bookkeeping, and design acceptance section only; reviewed fields/invariants unchanged.",
+  "tests_started_by_reviewers": 0,
+  "p4_product_complete": false,
+  "source_runtime_verified": false
+}

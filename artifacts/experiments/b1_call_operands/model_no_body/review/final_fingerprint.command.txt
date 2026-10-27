@@ -1,0 +1,4 @@
+cd /tmp/scar-structured-model-280qf4mi
+source /home/zyf/miniconda3/etc/profile.d/conda.sh
+conda activate lewm
+PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=. python artifacts/experiments/b1_call_operands/model_no_body/review/final_fingerprint.py > artifacts/experiments/b1_call_operands/model_no_body/review/final_fingerprint.log 2>&1

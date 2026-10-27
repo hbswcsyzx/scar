@@ -1,0 +1,71 @@
+{
+  "scope": "Original F14 conditional supplied-model relations; not automatic source recovery or native runtime applicability.",
+  "all_authors_frozen": true,
+  "interpreters_started_by_reviewers": 0,
+  "original_family_structural_review": "F14",
+  "p4_complete": false,
+  "transformation_authorized": false,
+  "reviewed_sources": {
+    "scar/ir/execution/query.py": "b7ab306ab0f217495a891f3ebb0003bb1df8e46d4e61334c4c2927b0e5463e71",
+    "scar/ir/execution/body_state_history.py": "5de60ba0d8fef638079791baa383eb84e10e88a3357d04a83168e4ba4a406a8d",
+    "tests/fixtures/native_coroutine_common.py": "32ac1bb8c43b6bdcc25df5cc6772405860fd9a030699603f4548ddd5bd40a0cb",
+    "tests/fixtures/execution_coroutine_running_graphs.py": "87dc3b605a8b445bf36ba85d13ecd9430d62ab3c9847f7dd7928b6c20f55430c",
+    "tests/unit/test_execution_coroutine_running.py": "9c7e404370265d00fbc73f9e8e6b4f28693e53ff66d15b314a4d817e9c72538e",
+    "tests/fixtures/execution_coroutine_closed_graphs.py": "e65dbe34aac2b874ec77d89a8bd5ea24c56a6d4bc59a8be4c4fb260a0db8b356",
+    "tests/unit/test_execution_coroutine_closed.py": "41f17ecd04b900de044b2db8eceb6f41d9d8fb1437e3a639d3b8bab3d122a197",
+    "tests/fixtures/execution_coroutine_packets_graphs.py": "bab06b41a1b30b1b4d7a9dfc03abac98419f879b3384ae1b3292d64552225428",
+    "tests/unit/test_execution_coroutine_packets.py": "9578169584b55bc2847f0b58b3ea45eb17ca9a01390fc2b1b87e40e403b0c049"
+  },
+  "reviews": [
+    {
+      "agent": "/root/cleanup_forward_review",
+      "role": "Running graph author, independent native projection review and original F14 clause audit",
+      "method": "Authored only two new Running files; final source/contracts/JUnit read-only, no interpreter or Git.",
+      "findings": [
+        "Concrete missing-current-raw-Use counterexample revealed unsound complete support after initial 15 green cases; final Drive checks every original owned Use/current state and complete source caller ancestry.",
+        "Native projection requires exact own NORMAL, source-first selected/accepted qualification and ordinary iterator-to-current-Drive binding; conditional receipt does not union identity or override False.",
+        "All five frozen original F14 scenarios and native zero/two-cut foundation mapped. No further missing supplied-model clause identified; final 1890-plus-17 same-source identity retention and archive checks still required."
+      ],
+      "final_conclusion": "FROZEN; no additional concrete blocker; F16/P4/P5/M2 remain independent."
+    },
+    {
+      "agent": "/root/value_resource_review",
+      "role": "Closed reuse/callback graph author and independent history review",
+      "method": "Authored only two new Closed files; final source read-only, no interpreter or Git.",
+      "findings": [
+        "Missing source gate transfer counterexample found source_chain incorrectly complete; global expected bool was already unknown. Final chain preserves call_path_unobserved and exact entry-to-completion path.",
+        "Terminal F uses the original native/no-reset contract and does not prove mutable content preservation or request P. Subject/post/READ ancestry and current own packet remain independent.",
+        "Owned raw/state/landing ports, source Driver caller ancestry, shared budget and ordinary False/native conditional distinction retained; no new incorrect True found.",
+        "Cost boundary: some original inventory/FK scans are not charged individually; proof budget is not a strict total CPU bound."
+      ],
+      "final_conclusion": "FROZEN; no further concrete semantic blocker; inventory cost boundary recorded."
+    },
+    {
+      "agent": "/root/await_wrapper_chain",
+      "role": "Suspended packet graph author and independent final repair review",
+      "method": "Authored only two new packet files; final history/common reads, no interpreter or Git.",
+      "findings": [
+        "Normalizer R retains its own packet/fullstate and no fake Drive; CLOSE and THROW preserve their distinct body/adapter semantics.",
+        "Reviewed exact UseOccurrence rebinding after literal deduplication in NEW shared capture helper.",
+        "Reviewed all original raw ports and complete caller chain; missing callee path blocks support. NativeGet stays opaque and ordinary copy stays unknown beside conditional projection."
+      ],
+      "final_conclusion": "FROZEN; no new concrete blocker; measured tests remain root responsibility."
+    }
+  ],
+  "archive_read_only_review": {
+    "agent": "/root/await_wrapper_chain",
+    "method": "Read new checkpoint, family/review metadata and acceptance/progress/next docs; no interpreter or Git.",
+    "findings": [
+      "No concrete blocker in exact old1890 identity retention, 870-source invariants, 17-case 5/6/6 accounting, historical failed snapshots or F14-only new conditional acceptance.",
+      "Historical F16 remaining description still mentions already covered scheduler packet normalization. Root retained historical text and added explicit current coverage/open-items notes; checker also requires the credited original selectors in final green JUnit."
+    ],
+    "final_conclusion": "FROZEN; final run/archive verification remain root responsibility."
+  },
+  "case_accounting": {
+    "running": 5,
+    "closed": 6,
+    "packets": 6,
+    "first_authored_identities_retained": 15,
+    "reason_for_two_additional_cases": "Concrete missing original raw Use and source gate transfer findings, not a new feature matrix."
+  }
+}

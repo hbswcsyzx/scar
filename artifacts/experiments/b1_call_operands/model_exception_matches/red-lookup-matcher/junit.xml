@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1" time="0.916" timestamp="2026-10-18T23:12:00.165891+00:00" hostname="gpu1"><testcase classname="tests.unit.test_program_exception_matches" name="test_lookup_raise_has_a_real_matcher_consumer_before_category_or_fallback_proof" time="0.185"><failure message="AssertionError: the real lookup RAISE consumer is a matcher, not a proven missing-method fallback&#10;assert ()">def test_lookup_raise_has_a_real_matcher_consumer_before_category_or_fallback_proof():
+        """The first red is an old connection gap, not an absent new query API."""
+        graph, details = lookup_exception_match_program()
+        _bare_valid(graph)
+        require_valid(graph)
+        view = _continuations(graph)
+        obligation = _lookup(view, details)
+        assert any(gap["code"] == "method_lookup_exception_category_unproved"
+                   and gap["path"] == str(details["consumer_site"]) for gap in view["gaps"])
+        matches = obligation.get("method_exception_matches", ())
+&gt;       assert matches, "the real lookup RAISE consumer is a matcher, not a proven missing-method fallback"
+E       AssertionError: the real lookup RAISE consumer is a matcher, not a proven missing-method fallback
+E       assert ()
+
+tests/unit/test_program_exception_matches.py:64: AssertionError</failure></testcase></testsuite></testsuites>

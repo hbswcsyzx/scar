@@ -1,0 +1,58 @@
+{
+  "schema": "scar.call-operands-trace",
+  "schema_version": 1,
+  "process_id": 1920152,
+  "project_root": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/stream_interfaces_main_20261026/program",
+  "python": "3.14.7 | packaged by conda-forge | (main, Sep  2 2026, 21:08:32) [GCC 15.3.0]",
+  "implementation": "cpython",
+  "rule": "SCAR_LEAN_PORTS_V1",
+  "limits": {
+    "max_events": 100000,
+    "max_bytes": 32000000,
+    "max_loads": 64,
+    "max_namespace_items": 4096,
+    "max_references": 8192
+  },
+  "events": 9,
+  "event_attempts": 9,
+  "instructions": 0,
+  "call_attempts": 9,
+  "handshakes": 0,
+  "gaps": 0,
+  "loads": 0,
+  "references": 18,
+  "bytes": 3773,
+  "dropped_events": 0,
+  "errors": [],
+  "io_failed": false,
+  "previous_profile": false,
+  "base_manifest": [
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/stream_interfaces_main_20261026/attempt02/trace/call-codes.1920152.jsonl",
+      "family": "codes",
+      "process_id": 1920152,
+      "raw_sha256": "601da4315eb96ab9e6a4dd43ea4f62d52ee2c1c1965e82c105dd0a27327a8525",
+      "raw_bytes": 591,
+      "lines": 2
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/stream_interfaces_main_20261026/attempt02/trace/call-events.1920152.jsonl",
+      "family": "events",
+      "process_id": 1920152,
+      "raw_sha256": "a7643eb5d23b045594fe2df428cdf449af8412bd10bf6ce58fa62cabc4b293cb",
+      "raw_bytes": 1151,
+      "lines": 2
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/stream_interfaces_main_20261026/attempt02/trace/call-meta.1920152.json",
+      "family": "meta",
+      "process_id": 1920152,
+      "raw_sha256": "1d2c7e10e9770476d1dfb38edd70b92dfe6ac081ddd109456394a2c254150bc0",
+      "raw_bytes": 1425,
+      "lines": 42
+    }
+  ],
+  "reference_contents_observed": false,
+  "callable_environment_established": false,
+  "transformation_authorized": false
+}

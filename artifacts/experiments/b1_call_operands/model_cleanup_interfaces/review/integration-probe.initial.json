@@ -1,0 +1,63 @@
+{
+  "scope": "IR-only integration mutations, not runtime/source proof",
+  "results": [
+    {
+      "name": "baseline",
+      "pass": true,
+      "issues": []
+    },
+    {
+      "name": "context-ordinary-operation-escape",
+      "pass": true,
+      "issues": [
+        {
+          "code": "cleanup_context_escape",
+          "path": "program_use:review.escape.context",
+          "message": "saved context only forwards within its owning active cleanup or restores it"
+        }
+      ]
+    },
+    {
+      "name": "resume-stale-state",
+      "pass": true,
+      "issues": [
+        {
+          "code": "stale_state",
+          "path": "program_use:shared.cleanup.resume.world",
+          "message": "use must read the current version of this block's state"
+        }
+      ]
+    },
+    {
+      "name": "protected-entry-without-route",
+      "pass": true,
+      "issues": [
+        {
+          "code": "cleanup_protected_bypass",
+          "path": "program_operation:shared.return.to.cleanup",
+          "message": "every physical exit from protection first enters its cleanup via a route"
+        },
+        {
+          "code": "cleanup_entry_edge",
+          "path": "program_operation:shared.return.to.cleanup",
+          "message": "cleanup entry only accepts a derived Enter route"
+        }
+      ]
+    },
+    {
+      "name": "replace-saved-old-pending",
+      "pass": true,
+      "issues": [
+        {
+          "code": "cleanup_replacement_fresh",
+          "path": "program_operation:shared.cleanup.resume",
+          "message": "replacement must be freshly constructed after this entry on all incoming paths"
+        }
+      ]
+    },
+    {
+      "name": "canonical-query-index",
+      "pass": true
+    }
+  ]
+}

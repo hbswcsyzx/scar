@@ -43,6 +43,7 @@ from .evidence import (
     EvidenceRelation,
     EvidenceStatus,
     OperationInstance,
+    ProviderReference,
     ValueObservation,
 )
 from .ids import (
@@ -98,7 +99,7 @@ from .optimization import (
     ValuePattern,
     ValueSubstitution,
 )
-from ..literals import LiteralKind, PythonLiteral
+from ..literals import PythonLiteral, require_legacy_literal
 from .semantic import (
     ControlRegion,
     ModuleDefinition,
@@ -119,6 +120,7 @@ from .values import (
     LogicalValue,
     Materialization,
     ObjectBinding,
+    ObjectInstance,
     ProvenanceRecord,
     ProvenanceRelation,
     StorageAllocation,
@@ -184,6 +186,9 @@ def _wire_type(value: Any, expected: Any, path: str) -> None:
         for key, child in value.items():
             _wire_type(key, arguments[0], f"{path}.key")
             _wire_type(child, arguments[1], f"{path}.{key}")
+        return
+    if expected is PythonLiteral:
+        require_legacy_literal(PythonLiteral.from_dict(value))
         return
     if isinstance(expected, type) and issubclass(expected, Identifier):
         if expected is Identifier:
@@ -343,12 +348,9 @@ def _source(data: dict[str, Any]) -> SourceReference:
 
 
 def _python_literal(data: dict[str, Any]) -> PythonLiteral:
-    if not isinstance(data, dict) or set(data) != {"kind", "payload", "items"}:
-        raise ValueError("python_literal: expected exact kind/payload/items fields")
-    _record(data, PythonLiteral, "python_literal")
-    return PythonLiteral(
-        LiteralKind(data["kind"]), data.get("payload"),
-        tuple(_python_literal(item) for item in data.get("items", ())))
+    literal = PythonLiteral.from_dict(data)
+    require_legacy_literal(literal)
+    return literal
 
 
 def _effect_set(data: dict[str, Any]) -> EffectSet:
@@ -475,15 +477,32 @@ def semantic_from_dict(data: dict[str, Any]) -> SemanticGraph:
     return graph
 
 
+class _ValuesDocumentV1:
+    SCHEMA = ValueGraph.SCHEMA
+    SCHEMA_VERSION = ValueGraph.LEGACY_SCHEMA_VERSION
+
+
 @_decoder
 def values_from_dict(data: dict[str, Any]) -> ValueGraph:
-    _document(data, ValueGraph, {
+    version = data.get("schema_version") if isinstance(data, dict) else None
+    legacy = type(version) is int and version == _ValuesDocumentV1.SCHEMA_VERSION
+    collections = {
         "logical_values": LogicalValue, "versions": ValueVersion,
         "provenance": ProvenanceRecord, "allocations": StorageAllocation,
         "regions": StorageRegion, "materializations": Materialization,
         "bindings": ObjectBinding,
-    })
+    }
+    if not legacy:
+        collections["objects"] = ObjectInstance
+    _document(data, _ValuesDocumentV1 if legacy else ValueGraph, collections)
+    if not legacy and "objects" not in data:
+        raise ValueError("values schema_version 2 missing required field objects")
     graph = ValueGraph()
+    for item in data.get("objects", ()):
+        graph.add_object(ObjectInstance(
+            _required_id(item["id"], ObjectID), item["scope"],
+            tuple(_evidence(value) for value in item["evidence"]),
+            item.get("metadata", {})))
     for item in data.get("logical_values", ()):
         node = LogicalValue(_required_id(item["id"], LogicalValueID),
                             item["semantic_type"], item.get("description", ""),
@@ -553,7 +572,8 @@ _EVIDENCE_ID_TYPES: dict[EvidenceNodeKind, type] = {
 def _evidence_endpoint(data: dict[str, Any]) -> EvidenceEndpoint:
     kind = EvidenceNodeKind(data["kind"])
     reference = data["reference"]
-    if kind in {EvidenceNodeKind.VALUE_OBSERVATION, EvidenceNodeKind.CONTROL_EVENT}:
+    if kind in {EvidenceNodeKind.VALUE_OBSERVATION, EvidenceNodeKind.CONTROL_EVENT,
+                EvidenceNodeKind.PROVIDER_REFERENCE}:
         return EvidenceEndpoint(kind, reference)
     cls = _EVIDENCE_ID_TYPES[kind]
     if cls is ValueVersionID:
@@ -561,12 +581,38 @@ def _evidence_endpoint(data: dict[str, Any]) -> EvidenceEndpoint:
     return EvidenceEndpoint(kind, _required_id(reference, cls))
 
 
+class _EvidenceDocumentV3:
+    SCHEMA = EvidenceGraph.SCHEMA
+    SCHEMA_VERSION = EvidenceGraph.LEGACY_SCHEMA_VERSION
+
+
+class _EvidenceDocumentV4:
+    SCHEMA = EvidenceGraph.SCHEMA
+    SCHEMA_VERSION = EvidenceGraph.PROVIDER_REFERENCE_SCHEMA_VERSION
+
+
+class _EvidenceDocumentV5:
+    SCHEMA = EvidenceGraph.SCHEMA
+    SCHEMA_VERSION = EvidenceGraph.PROVIDER_SCOPE_SCHEMA_VERSION
+
+
 @_decoder
 def evidence_from_dict(data: dict[str, Any]) -> EvidenceGraph:
-    _document(data, EvidenceGraph, {
+    version = data.get("schema_version") if isinstance(data, dict) else None
+    legacy = type(version) is int and version == _EvidenceDocumentV3.SCHEMA_VERSION
+    document_type = _EvidenceDocumentV3 if legacy else (
+        _EvidenceDocumentV4 if type(version) is int
+        and version == _EvidenceDocumentV4.SCHEMA_VERSION else
+        _EvidenceDocumentV5 if type(version) is int
+        and version == _EvidenceDocumentV5.SCHEMA_VERSION else EvidenceGraph)
+    collections = {
         "instances": OperationInstance, "observations": ValueObservation,
         "measurements": MeasurementRecord, "edges": EvidenceEdge,
-    }, extra_fields=("control_events", "external_references"))
+    }
+    if not legacy:
+        collections["provider_references"] = ProviderReference
+    _document(data, document_type, collections,
+              extra_fields=("control_events", "external_references"))
     graph = EvidenceGraph()
     for item in data.get("instances", ()):
         node = OperationInstance(
@@ -584,6 +630,12 @@ def evidence_from_dict(data: dict[str, Any]) -> EvidenceGraph:
             _id(item.get("materialization"), MaterializationID), item.get("role", "value"),
             EvidenceStatus(item["status"]), item.get("metadata", {}))
         graph.observations[node.observation_id] = node
+    for item in data.get("provider_references", ()):
+        node = ProviderReference(
+            item["reference_id"], item["provider"], item["scope"], item["domain"],
+            item["token"], tuple(_evidence(value) for value in item["evidence"]),
+            item.get("metadata", {}))
+        graph.add_provider_reference(node)
     for item in data.get("measurements", ()):
         node = MeasurementRecord(
             _required_id(item["id"], MeasurementID), item["metric"], item["value"],
@@ -614,6 +666,10 @@ def evidence_from_dict(data: dict[str, Any]) -> EvidenceGraph:
             _evidence(item["evidence"]))
         graph.edges[edge.edge_id] = edge
     graph.assert_valid()
+    required_version = graph._schema_version()
+    if version < required_version:
+        raise ValueError(f"evidence schema_version {version} cannot contain vocabulary "
+                         f"requiring schema_version {required_version}")
     return graph
 
 

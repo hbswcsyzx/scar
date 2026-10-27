@@ -1,0 +1,87 @@
+{
+  "date": "2026-10-16",
+  "local_sources": [
+    {
+      "anchors": {
+        "export": 59
+      },
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/torch/export/__init__.py",
+      "sha256": "5a6382799fe55ec3a865c73a706348dccf6ebb81e11bc03a485420fed657c6aa",
+      "upstream": "https://github.com/pytorch/pytorch/blob/cf30153c4c131c8164ee7798e5022d810682e2cb/torch/export/__init__.py"
+    },
+    {
+      "anchors": {
+        "ExportGraphSignature": 166,
+        "InputKind": 81,
+        "OutputKind": 121
+      },
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/torch/export/graph_signature.py",
+      "sha256": "38c48480384efca7e2f0c8cb17f84f4b3dd9bcda2d5c78850cb3ea862ad58ea7",
+      "upstream": "https://github.com/pytorch/pytorch/blob/cf30153c4c131c8164ee7798e5022d810682e2cb/torch/export/graph_signature.py"
+    },
+    {
+      "anchors": {
+        "run_decompositions": 1501
+      },
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/torch/export/exported_program.py",
+      "sha256": "7541b89a3915e801b3661f625717eb1fa88c7ca683078e3ce6070c372daf19f2",
+      "upstream": "https://github.com/pytorch/pytorch/blob/cf30153c4c131c8164ee7798e5022d810682e2cb/torch/export/exported_program.py"
+    },
+    {
+      "anchors": {
+        "functionalize": 1601
+      },
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/torch/_functorch/eager_transforms.py",
+      "sha256": "70ee5ed7102af299c53c1d1fbe4dca2a681f312b5b0943dfaca2ed2fa1f9633d",
+      "upstream": "https://github.com/pytorch/pytorch/blob/cf30153c4c131c8164ee7798e5022d810682e2cb/torch/_functorch/eager_transforms.py"
+    },
+    {
+      "anchors": {
+        "_aot_export_function": 1864,
+        "aot_export_module": 1538
+      },
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/torch/_functorch/aot_autograd.py",
+      "sha256": "d9eec974f09f91f825fd03c7501bf4b974f10ca6e93eee6d60de0176f7991e79",
+      "upstream": "https://github.com/pytorch/pytorch/blob/cf30153c4c131c8164ee7798e5022d810682e2cb/torch/_functorch/aot_autograd.py"
+    },
+    {
+      "anchors": {
+        "GraphSignature": 927,
+        "InputAliasInfo": 133,
+        "OutputAliasInfo": 81,
+        "ViewAndMutationMeta": 417
+      },
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/torch/_functorch/_aot_autograd/schemas.py",
+      "sha256": "a59e1c7eb7a540d409d87b2eef9c9b847bac31c619eb97c45fdc576ba555be7f",
+      "upstream": "https://github.com/pytorch/pytorch/blob/cf30153c4c131c8164ee7798e5022d810682e2cb/torch/_functorch/_aot_autograd/schemas.py"
+    },
+    {
+      "anchors": {
+        "explain": 1812
+      },
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/torch/_dynamo/eval_frame.py",
+      "sha256": "95b3095fa67dc38c2a0650ada130b28459cc90485c06284bd0b178ce92001e34",
+      "upstream": "https://github.com/pytorch/pytorch/blob/cf30153c4c131c8164ee7798e5022d810682e2cb/torch/_dynamo/eval_frame.py"
+    },
+    {
+      "anchors": {
+        "ExplainOutput": 598
+      },
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/torch/_dynamo/backends/debugging.py",
+      "sha256": "081a9fc6c4baeb68a51c2f237d23e56787ca99d06e9c03aad6d228f4dfab47f8",
+      "upstream": "https://github.com/pytorch/pytorch/blob/cf30153c4c131c8164ee7798e5022d810682e2cb/torch/_dynamo/backends/debugging.py"
+    }
+  ],
+  "official_docs": [
+    "https://docs.pytorch.org/docs/stable/export.html",
+    "https://docs.pytorch.org/docs/2.14/generated/torch.func.functionalize.html",
+    "https://docs.pytorch.org/docs/2.14/user_guide/torch_compiler/torch.compiler_dynamo_overview.html",
+    "https://docs.pytorch.org/docs/2.14/user_guide/torch_compiler/torch.compiler_custom_backends.html",
+    "https://docs.pytorch.org/docs/2.14/user_guide/torch_compiler/export/ir_spec.html"
+  ],
+  "online_version_note": "stable redirects to 2.14; local torch is 2.13.0+cu132; /docs/2.13 pages were empty/inaccessible via browsing tool",
+  "scar_head": "d5311a63211470500c6892af484f500e71c0d61f",
+  "scope": "read installed source + small CPU fixtures only; no SCAR/product changes",
+  "torch_git": "cf30153c4c131c8164ee7798e5022d810682e2cb",
+  "worktree": "/tmp/scar-structured-model-280qf4mi"
+}

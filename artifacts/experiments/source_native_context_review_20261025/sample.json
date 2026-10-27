@@ -1,0 +1,971 @@
+{
+  "chunk": {
+    "decoded_bytes": 6115281,
+    "decoded_sha256": "d3b437e34e354ce9e777138557d7d6ae10727eb5b73a93e88c85757e6881c010",
+    "rows": 1000,
+    "stored_bytes": 73203,
+    "stored_sha256": "eb1a425f10ae5db9d70a338ad340e08a49fee89fac89ecc47f87208d811065df",
+    "uri": "source/000004.jsonl.gz"
+  },
+  "original_first_line": 4001,
+  "samples": [
+    {
+      "expected_context": {
+        "activation_fact": {
+          "artifact": {
+            "schema": "scar.source-invocations.events.v3",
+            "sha256": "c89de9d6d5d8c8044e2bd5f987025f62c61723dafd295758375614ae6fcf2e2e",
+            "size_bytes": 577182812,
+            "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_source_revision_current_20261025/result/connections/source/invocations.jsonl.gz"
+          },
+          "locator": "#/lines/1726/region_activation"
+        },
+        "association": {
+          "declaration": {
+            "artifact": {
+              "schema": "scar.dispatch-source-associations",
+              "sha256": "a12c38060e23b94397287d2578e3d3b8f26d61b400d21de55e2cd7617b3acf70",
+              "size_bytes": 39419,
+              "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_source_revision_current_20261025/result/connections/dispatch/report.json"
+            },
+            "locator": "#/observations"
+          },
+          "line": 4661,
+          "line_sha256": "f5441e2c8b2c47a68a03da27fb7761f1ebe95ed98794502dd199998d4aab3976",
+          "original_stream_uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_source_revision_current_20261025/result/connections/dispatch/associations.jsonl.gz"
+        },
+        "binding_fact": {
+          "artifact": {
+            "schema": "scar.source-invocation-bindings",
+            "sha256": "23ec72636ac40ccc980942da977efdc52757ad83784f339936ce98490c1214f4",
+            "size_bytes": 7582898,
+            "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_source_revision_current_20261025/result/connections/source/bindings.json"
+          },
+          "locator": "#/bindings/313"
+        },
+        "definition": {
+          "context": {
+            "control_sha256": "51da3a5127c4016ad1a1db60f6fca0c195fdabace13c154c80ba761163e61182",
+            "namespace_root": "/home/zyf/AAA/le-wm",
+            "semantic_sha256": "42c2ba9bcd5e2961154dbe08f5dda93ff3ee5f3ac07ac21867b551dc56d7cd8f",
+            "semantics_sha256": "df1db7e4f7363ae176336c6adaab169e77d0f633ee77c59d8faad44504377551"
+          },
+          "definition": {
+            "kind": "opdef",
+            "value": "op:3572540e8ce0c88b6e8e95ac",
+            "wire": "opdef:op:3572540e8ce0c88b6e8e95ac"
+          },
+          "graph": {
+            "artifact": {
+              "schema": "scar.source-layers.record",
+              "sha256": "a6bdaa92e60ac3f18ff4e45b02d264a9e512e9123fcc795133ab5c811b0e170e",
+              "size_bytes": 820097,
+              "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_source_context_20261022/result/source-layers/archives/25eedf0b31140093cb9d1b9eea0ca83c1d7c87f06ff8344254fc57bafb555a93.json.gz"
+            },
+            "declaration": {
+              "artifact": {
+                "schema": "scar.source-layers",
+                "sha256": "5c68691c28273676a8262f24fe9891e03433f06b7d16758e8620050c160a97c4",
+                "size_bytes": 135207,
+                "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_source_context_20261022/result/source-layers/index.json"
+              },
+              "locator": "#/files/140"
+            },
+            "decoded_bytes": 7856396,
+            "decoded_sha256": "25eedf0b31140093cb9d1b9eea0ca83c1d7c87f06ff8344254fc57bafb555a93",
+            "pointer": "#/payload/semantic/definitions/185",
+            "representation": "gzip-canonical-json"
+          },
+          "providers": [
+            {
+              "artifact": {
+                "schema": "scar.source-layers.record",
+                "sha256": "a6bdaa92e60ac3f18ff4e45b02d264a9e512e9123fcc795133ab5c811b0e170e",
+                "size_bytes": 820097,
+                "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_source_context_20261022/result/source-layers/archives/25eedf0b31140093cb9d1b9eea0ca83c1d7c87f06ff8344254fc57bafb555a93.json.gz"
+              },
+              "declaration": {
+                "artifact": {
+                  "schema": "scar.source-layers",
+                  "sha256": "5c68691c28273676a8262f24fe9891e03433f06b7d16758e8620050c160a97c4",
+                  "size_bytes": 135207,
+                  "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_source_context_20261022/result/source-layers/index.json"
+                },
+                "locator": "#/files/140"
+              },
+              "decoded_bytes": 7856396,
+              "decoded_sha256": "25eedf0b31140093cb9d1b9eea0ca83c1d7c87f06ff8344254fc57bafb555a93",
+              "pointer": "#/metadata",
+              "representation": "gzip-canonical-json"
+            }
+          ],
+          "reference_format": "scar.source-definition-reference.v1",
+          "root": {
+            "artifact": {
+              "schema": "scar.source-layers.record",
+              "sha256": "a6bdaa92e60ac3f18ff4e45b02d264a9e512e9123fcc795133ab5c811b0e170e",
+              "size_bytes": 820097,
+              "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_source_context_20261022/result/source-layers/archives/25eedf0b31140093cb9d1b9eea0ca83c1d7c87f06ff8344254fc57bafb555a93.json.gz"
+            },
+            "declaration": {
+              "artifact": {
+                "schema": "scar.source-layers",
+                "sha256": "5c68691c28273676a8262f24fe9891e03433f06b7d16758e8620050c160a97c4",
+                "size_bytes": 135207,
+                "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_source_context_20261022/result/source-layers/index.json"
+              },
+              "locator": "#/files/140"
+            },
+            "decoded_bytes": 7856396,
+            "decoded_sha256": "25eedf0b31140093cb9d1b9eea0ca83c1d7c87f06ff8344254fc57bafb555a93",
+            "pointer": "#/source/context/namespace_root",
+            "representation": "gzip-canonical-json"
+          },
+          "snapshot": {
+            "encoding": "utf-8",
+            "fingerprint": "sha256:3a6209baf30c11f77a5f6637282a1821fc62cea827438a97b23933caab51d8c7",
+            "path": "/home/zyf/AAA/le-wm/stable-worldmodel/stable_worldmodel/wm/lewm/module.py",
+            "python_version": "3.14"
+          },
+          "source": {
+            "atom_id": {
+              "kind": "source",
+              "value": "atom:73d457c6ef8f164b9e5871ec",
+              "wire": "source:atom:73d457c6ef8f164b9e5871ec"
+            },
+            "end_column": 9,
+            "end_line": 283,
+            "fingerprint": "sha256:3a6209baf30c11f77a5f6637282a1821fc62cea827438a97b23933caab51d8c7",
+            "path": "/home/zyf/AAA/le-wm/stable-worldmodel/stable_worldmodel/wm/lewm/module.py",
+            "start_column": 4,
+            "start_line": 245
+          }
+        },
+        "invocation": {
+          "invocation_id": 1726,
+          "process_id": 369749,
+          "thread_id": 134637364963136
+        },
+        "invocation_fact": {
+          "artifact": {
+            "schema": "scar.source-invocations.events.v3",
+            "sha256": "c89de9d6d5d8c8044e2bd5f987025f62c61723dafd295758375614ae6fcf2e2e",
+            "size_bytes": 577182812,
+            "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_source_revision_current_20261025/result/connections/source/invocations.jsonl.gz"
+          },
+          "locator": "#/lines/1726"
+        },
+        "namespace_field": "#/lines/4661/region_namespace",
+        "phase": "span"
+      },
+      "line_sha256_with_newline": "f5441e2c8b2c47a68a03da27fb7761f1ebe95ed98794502dd199998d4aab3976",
+      "line_sha256_without_newline": "ef664e0a5d1d8c77ce158af3cf1d0a2437622d949e8229e8df86cb73fcbf10ae",
+      "local_row_zero_based": 660,
+      "original_line": 4661,
+      "retained_row": {
+        "body": {
+          "canonical_locator": {
+            "artifact": {
+              "decoded_bytes": 1525036,
+              "decoded_sha256": "d32037cbbe1fa219991295491d999c627992c95aa85f0ff17075f6f69643ebd9",
+              "physical_bytes": 132963,
+              "physical_sha256": "c6f38a2845e9bb76d377b1ff893780592f1d01188582594dca36cd0b336bf1c1",
+              "representation": "scar.body-construction-checkpoint/1",
+              "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_plain_20261023/checkpoints/00060.json.gz"
+            },
+            "namespace": {
+              "artifact": {
+                "decoded_sha256": "d32037cbbe1fa219991295491d999c627992c95aa85f0ff17075f6f69643ebd9",
+                "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_plain_20261023/checkpoints/00060.json.gz"
+              },
+              "body": {
+                "definition": {
+                  "kind": "opdef",
+                  "value": "op:3572540e8ce0c88b6e8e95ac",
+                  "wire": "opdef:op:3572540e8ce0c88b6e8e95ac"
+                },
+                "entry": "Predictor.__init__",
+                "source": {
+                  "atom_id": {
+                    "kind": "source",
+                    "value": "atom:73d457c6ef8f164b9e5871ec",
+                    "wire": "source:atom:73d457c6ef8f164b9e5871ec"
+                  },
+                  "end_column": 9,
+                  "end_line": 283,
+                  "fingerprint": "sha256:3a6209baf30c11f77a5f6637282a1821fc62cea827438a97b23933caab51d8c7",
+                  "path": "/home/zyf/AAA/le-wm/stable-worldmodel/stable_worldmodel/wm/lewm/module.py",
+                  "start_column": 4,
+                  "start_line": 245
+                }
+              },
+              "record_pointer": "#/graph",
+              "representation": "scar.program-graph/15"
+            },
+            "pointer": "#/graph"
+          },
+          "inventory_locator": {
+            "artifact": {
+              "decoded_bytes": 853467,
+              "decoded_sha256": "2ec80808e898efead20865b9d2d3859dc523e473130a8c7051ece76bb7132a42",
+              "physical_bytes": 54925,
+              "physical_sha256": "f14e0a7bde0cf23b33922df40fa149b9730ddad9bfd9ef4659107cb3a8098f79",
+              "representation": "scar.partitioned-file-inventory/2",
+              "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_source_body_revision_20261023/result/publication/sources/00140.json.gz"
+            },
+            "pointer": "#/file/bodies/25"
+          },
+          "inventory_pointer": null,
+          "metadata_locator": {
+            "artifact": {
+              "decoded_bytes": 1525036,
+              "decoded_sha256": "d32037cbbe1fa219991295491d999c627992c95aa85f0ff17075f6f69643ebd9",
+              "physical_bytes": 132963,
+              "physical_sha256": "c6f38a2845e9bb76d377b1ff893780592f1d01188582594dca36cd0b336bf1c1",
+              "representation": "scar.body-construction-checkpoint/1",
+              "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_plain_20261023/checkpoints/00060.json.gz"
+            },
+            "pointer": "#/metadata"
+          },
+          "namespace": {
+            "artifact": {
+              "decoded_sha256": "d32037cbbe1fa219991295491d999c627992c95aa85f0ff17075f6f69643ebd9",
+              "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_plain_20261023/checkpoints/00060.json.gz"
+            },
+            "body": {
+              "definition": {
+                "kind": "opdef",
+                "value": "op:3572540e8ce0c88b6e8e95ac",
+                "wire": "opdef:op:3572540e8ce0c88b6e8e95ac"
+              },
+              "entry": "Predictor.__init__",
+              "source": {
+                "atom_id": {
+                  "kind": "source",
+                  "value": "atom:73d457c6ef8f164b9e5871ec",
+                  "wire": "source:atom:73d457c6ef8f164b9e5871ec"
+                },
+                "end_column": 9,
+                "end_line": 283,
+                "fingerprint": "sha256:3a6209baf30c11f77a5f6637282a1821fc62cea827438a97b23933caab51d8c7",
+                "path": "/home/zyf/AAA/le-wm/stable-worldmodel/stable_worldmodel/wm/lewm/module.py",
+                "start_column": 4,
+                "start_line": 245
+              }
+            },
+            "record_pointer": "#/graph",
+            "representation": "scar.program-graph/15"
+          },
+          "program_canonical_sha256": "326968a44daedfaea0d2cde3257c6e622d072d340cf033e23a7f9013d9338bce",
+          "program_schema_version": 15,
+          "reference": {
+            "body_index": 25,
+            "file_index": 140,
+            "identity": {
+              "kind": "program_region",
+              "value": "cb6694b3726ddc72fdc9312e5a865c60",
+              "wire": "program_region:cb6694b3726ddc72fdc9312e5a865c60"
+            }
+          }
+        },
+        "bridge_pointer": "#/observations/4660",
+        "composition_element": {
+          "body_index": null,
+          "file_index": 140,
+          "identity": {
+            "kind": "opdef",
+            "value": "op:3572540e8ce0c88b6e8e95ac",
+            "wire": "opdef:op:3572540e8ce0c88b6e8e95ac"
+          }
+        },
+        "definition": {
+          "context": {
+            "control_sha256": "51da3a5127c4016ad1a1db60f6fca0c195fdabace13c154c80ba761163e61182",
+            "namespace_root": "/home/zyf/AAA/le-wm",
+            "semantic_sha256": "42c2ba9bcd5e2961154dbe08f5dda93ff3ee5f3ac07ac21867b551dc56d7cd8f",
+            "semantics_sha256": "df1db7e4f7363ae176336c6adaab169e77d0f633ee77c59d8faad44504377551"
+          },
+          "definition": {
+            "kind": "opdef",
+            "value": "op:3572540e8ce0c88b6e8e95ac",
+            "wire": "opdef:op:3572540e8ce0c88b6e8e95ac"
+          },
+          "graph": {
+            "artifact": {
+              "schema": "scar.source-layers.record",
+              "sha256": "a6bdaa92e60ac3f18ff4e45b02d264a9e512e9123fcc795133ab5c811b0e170e",
+              "size_bytes": 820097,
+              "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_source_context_20261022/result/source-layers/archives/25eedf0b31140093cb9d1b9eea0ca83c1d7c87f06ff8344254fc57bafb555a93.json.gz"
+            },
+            "declaration": {
+              "artifact": {
+                "schema": "scar.source-layers",
+                "sha256": "5c68691c28273676a8262f24fe9891e03433f06b7d16758e8620050c160a97c4",
+                "size_bytes": 135207,
+                "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_source_context_20261022/result/source-layers/index.json"
+              },
+              "locator": "#/files/140"
+            },
+            "decoded_bytes": 7856396,
+            "decoded_sha256": "25eedf0b31140093cb9d1b9eea0ca83c1d7c87f06ff8344254fc57bafb555a93",
+            "pointer": "#/payload/semantic/definitions/185",
+            "representation": "gzip-canonical-json"
+          },
+          "providers": [
+            {
+              "artifact": {
+                "schema": "scar.source-layers.record",
+                "sha256": "a6bdaa92e60ac3f18ff4e45b02d264a9e512e9123fcc795133ab5c811b0e170e",
+                "size_bytes": 820097,
+                "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_source_context_20261022/result/source-layers/archives/25eedf0b31140093cb9d1b9eea0ca83c1d7c87f06ff8344254fc57bafb555a93.json.gz"
+              },
+              "declaration": {
+                "artifact": {
+                  "schema": "scar.source-layers",
+                  "sha256": "5c68691c28273676a8262f24fe9891e03433f06b7d16758e8620050c160a97c4",
+                  "size_bytes": 135207,
+                  "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_source_context_20261022/result/source-layers/index.json"
+                },
+                "locator": "#/files/140"
+              },
+              "decoded_bytes": 7856396,
+              "decoded_sha256": "25eedf0b31140093cb9d1b9eea0ca83c1d7c87f06ff8344254fc57bafb555a93",
+              "pointer": "#/metadata",
+              "representation": "gzip-canonical-json"
+            }
+          ],
+          "reference_format": "scar.source-definition-reference.v1",
+          "root": {
+            "artifact": {
+              "schema": "scar.source-layers.record",
+              "sha256": "a6bdaa92e60ac3f18ff4e45b02d264a9e512e9123fcc795133ab5c811b0e170e",
+              "size_bytes": 820097,
+              "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_source_context_20261022/result/source-layers/archives/25eedf0b31140093cb9d1b9eea0ca83c1d7c87f06ff8344254fc57bafb555a93.json.gz"
+            },
+            "declaration": {
+              "artifact": {
+                "schema": "scar.source-layers",
+                "sha256": "5c68691c28273676a8262f24fe9891e03433f06b7d16758e8620050c160a97c4",
+                "size_bytes": 135207,
+                "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_source_context_20261022/result/source-layers/index.json"
+              },
+              "locator": "#/files/140"
+            },
+            "decoded_bytes": 7856396,
+            "decoded_sha256": "25eedf0b31140093cb9d1b9eea0ca83c1d7c87f06ff8344254fc57bafb555a93",
+            "pointer": "#/source/context/namespace_root",
+            "representation": "gzip-canonical-json"
+          },
+          "snapshot": {
+            "encoding": "utf-8",
+            "fingerprint": "sha256:3a6209baf30c11f77a5f6637282a1821fc62cea827438a97b23933caab51d8c7",
+            "path": "/home/zyf/AAA/le-wm/stable-worldmodel/stable_worldmodel/wm/lewm/module.py",
+            "python_version": "3.14"
+          },
+          "source": {
+            "atom_id": {
+              "kind": "source",
+              "value": "atom:73d457c6ef8f164b9e5871ec",
+              "wire": "source:atom:73d457c6ef8f164b9e5871ec"
+            },
+            "end_column": 9,
+            "end_line": 283,
+            "fingerprint": "sha256:3a6209baf30c11f77a5f6637282a1821fc62cea827438a97b23933caab51d8c7",
+            "path": "/home/zyf/AAA/le-wm/stable-worldmodel/stable_worldmodel/wm/lewm/module.py",
+            "start_column": 4,
+            "start_line": 245
+          }
+        },
+        "direct_callsite_established": false,
+        "frontiers": [],
+        "invocation": {
+          "invocation_id": 1726,
+          "process_id": 369749,
+          "thread_id": 134637364963136
+        },
+        "marker_instance": "opinst:native:2a622492625eb1b2a7a105036e0ac792b5a6249fc60cf111443bf7fe53140d88:eto:17687",
+        "marker_reference": {
+          "artifact": {
+            "schema": "pytorch.execution-trace.v1",
+            "sha256": "625558680ced281fc2b4789d9d742bc97dd4fed57106701e98adea3ebe0428b6",
+            "size_bytes": 321287818,
+            "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/trace/execution-trace.369749.72816598bfa183a810428fe30a7873ff.json"
+          },
+          "locator": "#/nodes/14470"
+        },
+        "native_thread": {
+          "kind": "exec_host_thread_instance",
+          "value": "capture:1ddea1de4990462b59cf5dd24beb3f120156eb47bca68cfb3f1a63f9f73f2cf0:thread:0e3cdb6b87615e6df5d503f9e778d0aaa2cf6ad3f212b6fe86407f177ee81642",
+          "wire": "exec_host_thread_instance:capture:1ddea1de4990462b59cf5dd24beb3f120156eb47bca68cfb3f1a63f9f73f2cf0:thread:0e3cdb6b87615e6df5d503f9e778d0aaa2cf6ad3f212b6fe86407f177ee81642"
+        },
+        "native_thread_reference": {
+          "artifact": {
+            "schema": "scar.capture-coordinates",
+            "sha256": "4d266b9ea62ed0d4c25cb5606dae31dea5aeab453405f79608ab5c038f012a25",
+            "size_bytes": 674239,
+            "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_current_source_gate_20261023/result/capture-coordinates.json"
+          },
+          "locator": "#/threads/0"
+        },
+        "native_tid_verified_by_bridge": true,
+        "observation_index": 4660,
+        "phase": "span",
+        "qualified_slot_path_indices": [],
+        "region_activation": {
+          "kind": "exec_region_activation",
+          "value": "capture:1ddea1de4990462b59cf5dd24beb3f120156eb47bca68cfb3f1a63f9f73f2cf0:source-frame:d9eb0e805e868e7aac0ac3b111712403e4ab58908c2f1d76b1a065a59d7952c4",
+          "wire": "exec_region_activation:capture:1ddea1de4990462b59cf5dd24beb3f120156eb47bca68cfb3f1a63f9f73f2cf0:source-frame:d9eb0e805e868e7aac0ac3b111712403e4ab58908c2f1d76b1a065a59d7952c4"
+        },
+        "region_activation_reference": {
+          "artifact": {
+            "schema": "scar.source-invocations.events.v3",
+            "sha256": "c89de9d6d5d8c8044e2bd5f987025f62c61723dafd295758375614ae6fcf2e2e",
+            "size_bytes": 577182812,
+            "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_source_revision_current_20261025/result/connections/source/invocations.jsonl.gz"
+          },
+          "locator": "#/lines/1726/region_activation"
+        },
+        "region_namespace": {
+          "artifact": {
+            "decoded_sha256": "d32037cbbe1fa219991295491d999c627992c95aa85f0ff17075f6f69643ebd9",
+            "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_plain_20261023/checkpoints/00060.json.gz"
+          },
+          "body": {
+            "definition": {
+              "kind": "opdef",
+              "value": "op:3572540e8ce0c88b6e8e95ac",
+              "wire": "opdef:op:3572540e8ce0c88b6e8e95ac"
+            },
+            "entry": "Predictor.__init__",
+            "source": {
+              "atom_id": {
+                "kind": "source",
+                "value": "atom:73d457c6ef8f164b9e5871ec",
+                "wire": "source:atom:73d457c6ef8f164b9e5871ec"
+              },
+              "end_column": 9,
+              "end_line": 283,
+              "fingerprint": "sha256:3a6209baf30c11f77a5f6637282a1821fc62cea827438a97b23933caab51d8c7",
+              "path": "/home/zyf/AAA/le-wm/stable-worldmodel/stable_worldmodel/wm/lewm/module.py",
+              "start_column": 4,
+              "start_line": 245
+            }
+          },
+          "record_pointer": "#/graph",
+          "representation": "scar.program-graph/15"
+        },
+        "relationship": "RETAINED_ANCESTOR_CONTEXT",
+        "sequence": 2331,
+        "source_binding_reference": {
+          "artifact": {
+            "schema": "scar.source-invocation-bindings",
+            "sha256": "23ec72636ac40ccc980942da977efdc52757ad83784f339936ce98490c1214f4",
+            "size_bytes": 7582898,
+            "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_source_revision_current_20261025/result/connections/source/bindings.json"
+          },
+          "locator": "#/bindings/313"
+        },
+        "source_frontiers": [],
+        "source_interface_frontiers": [
+          "ACTUAL_FORMAL_ROUTING_UNVERIFIED",
+          "RETURN_VALUE_ROUTING_UNVERIFIED",
+          "FUNCTION_ENVIRONMENT_UNVERIFIED",
+          "STATE_EFFECTS_UNVERIFIED",
+          "CANONICAL_CONTROL_COMPLETION_UNVERIFIED"
+        ],
+        "source_invocation_line_sha256": "0a47832cd88aef5e29b58b033165a7f3af40dd396f6b6b71376fbf3523df487a",
+        "source_invocation_reference": {
+          "artifact": {
+            "schema": "scar.source-invocations.events.v3",
+            "sha256": "c89de9d6d5d8c8044e2bd5f987025f62c61723dafd295758375614ae6fcf2e2e",
+            "size_bytes": 577182812,
+            "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_source_revision_current_20261025/result/connections/source/invocations.jsonl.gz"
+          },
+          "locator": "#/lines/1726"
+        },
+        "source_origin": "INVENTORY",
+        "status": "RETAINED_BODY_LINKED"
+      }
+    },
+    {
+      "expected_context": {
+        "activation_fact": {
+          "artifact": {
+            "schema": "scar.source-invocations.events.v3",
+            "sha256": "c89de9d6d5d8c8044e2bd5f987025f62c61723dafd295758375614ae6fcf2e2e",
+            "size_bytes": 577182812,
+            "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_source_revision_current_20261025/result/connections/source/invocations.jsonl.gz"
+          },
+          "locator": "#/lines/1726/region_activation"
+        },
+        "association": {
+          "declaration": {
+            "artifact": {
+              "schema": "scar.dispatch-source-associations",
+              "sha256": "a12c38060e23b94397287d2578e3d3b8f26d61b400d21de55e2cd7617b3acf70",
+              "size_bytes": 39419,
+              "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_source_revision_current_20261025/result/connections/dispatch/report.json"
+            },
+            "locator": "#/observations"
+          },
+          "line": 4662,
+          "line_sha256": "77e0d7efc1aa813742f2cf8177f4be0069def6f4a7ebc8e28a1b0005e13d1acf",
+          "original_stream_uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_source_revision_current_20261025/result/connections/dispatch/associations.jsonl.gz"
+        },
+        "binding_fact": {
+          "artifact": {
+            "schema": "scar.source-invocation-bindings",
+            "sha256": "23ec72636ac40ccc980942da977efdc52757ad83784f339936ce98490c1214f4",
+            "size_bytes": 7582898,
+            "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_source_revision_current_20261025/result/connections/source/bindings.json"
+          },
+          "locator": "#/bindings/313"
+        },
+        "definition": {
+          "context": {
+            "control_sha256": "51da3a5127c4016ad1a1db60f6fca0c195fdabace13c154c80ba761163e61182",
+            "namespace_root": "/home/zyf/AAA/le-wm",
+            "semantic_sha256": "42c2ba9bcd5e2961154dbe08f5dda93ff3ee5f3ac07ac21867b551dc56d7cd8f",
+            "semantics_sha256": "df1db7e4f7363ae176336c6adaab169e77d0f633ee77c59d8faad44504377551"
+          },
+          "definition": {
+            "kind": "opdef",
+            "value": "op:3572540e8ce0c88b6e8e95ac",
+            "wire": "opdef:op:3572540e8ce0c88b6e8e95ac"
+          },
+          "graph": {
+            "artifact": {
+              "schema": "scar.source-layers.record",
+              "sha256": "a6bdaa92e60ac3f18ff4e45b02d264a9e512e9123fcc795133ab5c811b0e170e",
+              "size_bytes": 820097,
+              "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_source_context_20261022/result/source-layers/archives/25eedf0b31140093cb9d1b9eea0ca83c1d7c87f06ff8344254fc57bafb555a93.json.gz"
+            },
+            "declaration": {
+              "artifact": {
+                "schema": "scar.source-layers",
+                "sha256": "5c68691c28273676a8262f24fe9891e03433f06b7d16758e8620050c160a97c4",
+                "size_bytes": 135207,
+                "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_source_context_20261022/result/source-layers/index.json"
+              },
+              "locator": "#/files/140"
+            },
+            "decoded_bytes": 7856396,
+            "decoded_sha256": "25eedf0b31140093cb9d1b9eea0ca83c1d7c87f06ff8344254fc57bafb555a93",
+            "pointer": "#/payload/semantic/definitions/185",
+            "representation": "gzip-canonical-json"
+          },
+          "providers": [
+            {
+              "artifact": {
+                "schema": "scar.source-layers.record",
+                "sha256": "a6bdaa92e60ac3f18ff4e45b02d264a9e512e9123fcc795133ab5c811b0e170e",
+                "size_bytes": 820097,
+                "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_source_context_20261022/result/source-layers/archives/25eedf0b31140093cb9d1b9eea0ca83c1d7c87f06ff8344254fc57bafb555a93.json.gz"
+              },
+              "declaration": {
+                "artifact": {
+                  "schema": "scar.source-layers",
+                  "sha256": "5c68691c28273676a8262f24fe9891e03433f06b7d16758e8620050c160a97c4",
+                  "size_bytes": 135207,
+                  "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_source_context_20261022/result/source-layers/index.json"
+                },
+                "locator": "#/files/140"
+              },
+              "decoded_bytes": 7856396,
+              "decoded_sha256": "25eedf0b31140093cb9d1b9eea0ca83c1d7c87f06ff8344254fc57bafb555a93",
+              "pointer": "#/metadata",
+              "representation": "gzip-canonical-json"
+            }
+          ],
+          "reference_format": "scar.source-definition-reference.v1",
+          "root": {
+            "artifact": {
+              "schema": "scar.source-layers.record",
+              "sha256": "a6bdaa92e60ac3f18ff4e45b02d264a9e512e9123fcc795133ab5c811b0e170e",
+              "size_bytes": 820097,
+              "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_source_context_20261022/result/source-layers/archives/25eedf0b31140093cb9d1b9eea0ca83c1d7c87f06ff8344254fc57bafb555a93.json.gz"
+            },
+            "declaration": {
+              "artifact": {
+                "schema": "scar.source-layers",
+                "sha256": "5c68691c28273676a8262f24fe9891e03433f06b7d16758e8620050c160a97c4",
+                "size_bytes": 135207,
+                "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_source_context_20261022/result/source-layers/index.json"
+              },
+              "locator": "#/files/140"
+            },
+            "decoded_bytes": 7856396,
+            "decoded_sha256": "25eedf0b31140093cb9d1b9eea0ca83c1d7c87f06ff8344254fc57bafb555a93",
+            "pointer": "#/source/context/namespace_root",
+            "representation": "gzip-canonical-json"
+          },
+          "snapshot": {
+            "encoding": "utf-8",
+            "fingerprint": "sha256:3a6209baf30c11f77a5f6637282a1821fc62cea827438a97b23933caab51d8c7",
+            "path": "/home/zyf/AAA/le-wm/stable-worldmodel/stable_worldmodel/wm/lewm/module.py",
+            "python_version": "3.14"
+          },
+          "source": {
+            "atom_id": {
+              "kind": "source",
+              "value": "atom:73d457c6ef8f164b9e5871ec",
+              "wire": "source:atom:73d457c6ef8f164b9e5871ec"
+            },
+            "end_column": 9,
+            "end_line": 283,
+            "fingerprint": "sha256:3a6209baf30c11f77a5f6637282a1821fc62cea827438a97b23933caab51d8c7",
+            "path": "/home/zyf/AAA/le-wm/stable-worldmodel/stable_worldmodel/wm/lewm/module.py",
+            "start_column": 4,
+            "start_line": 245
+          }
+        },
+        "invocation": {
+          "invocation_id": 1726,
+          "process_id": 369749,
+          "thread_id": 134637364963136
+        },
+        "invocation_fact": {
+          "artifact": {
+            "schema": "scar.source-invocations.events.v3",
+            "sha256": "c89de9d6d5d8c8044e2bd5f987025f62c61723dafd295758375614ae6fcf2e2e",
+            "size_bytes": 577182812,
+            "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_source_revision_current_20261025/result/connections/source/invocations.jsonl.gz"
+          },
+          "locator": "#/lines/1726"
+        },
+        "namespace_field": "#/lines/4662/region_namespace",
+        "phase": "output"
+      },
+      "line_sha256_with_newline": "77e0d7efc1aa813742f2cf8177f4be0069def6f4a7ebc8e28a1b0005e13d1acf",
+      "line_sha256_without_newline": "0f95535801f8ccfd112a4c7767582c055e3b91eed7f0c82b553fafe736224c12",
+      "local_row_zero_based": 661,
+      "original_line": 4662,
+      "retained_row": {
+        "body": {
+          "canonical_locator": {
+            "artifact": {
+              "decoded_bytes": 1525036,
+              "decoded_sha256": "d32037cbbe1fa219991295491d999c627992c95aa85f0ff17075f6f69643ebd9",
+              "physical_bytes": 132963,
+              "physical_sha256": "c6f38a2845e9bb76d377b1ff893780592f1d01188582594dca36cd0b336bf1c1",
+              "representation": "scar.body-construction-checkpoint/1",
+              "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_plain_20261023/checkpoints/00060.json.gz"
+            },
+            "namespace": {
+              "artifact": {
+                "decoded_sha256": "d32037cbbe1fa219991295491d999c627992c95aa85f0ff17075f6f69643ebd9",
+                "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_plain_20261023/checkpoints/00060.json.gz"
+              },
+              "body": {
+                "definition": {
+                  "kind": "opdef",
+                  "value": "op:3572540e8ce0c88b6e8e95ac",
+                  "wire": "opdef:op:3572540e8ce0c88b6e8e95ac"
+                },
+                "entry": "Predictor.__init__",
+                "source": {
+                  "atom_id": {
+                    "kind": "source",
+                    "value": "atom:73d457c6ef8f164b9e5871ec",
+                    "wire": "source:atom:73d457c6ef8f164b9e5871ec"
+                  },
+                  "end_column": 9,
+                  "end_line": 283,
+                  "fingerprint": "sha256:3a6209baf30c11f77a5f6637282a1821fc62cea827438a97b23933caab51d8c7",
+                  "path": "/home/zyf/AAA/le-wm/stable-worldmodel/stable_worldmodel/wm/lewm/module.py",
+                  "start_column": 4,
+                  "start_line": 245
+                }
+              },
+              "record_pointer": "#/graph",
+              "representation": "scar.program-graph/15"
+            },
+            "pointer": "#/graph"
+          },
+          "inventory_locator": {
+            "artifact": {
+              "decoded_bytes": 853467,
+              "decoded_sha256": "2ec80808e898efead20865b9d2d3859dc523e473130a8c7051ece76bb7132a42",
+              "physical_bytes": 54925,
+              "physical_sha256": "f14e0a7bde0cf23b33922df40fa149b9730ddad9bfd9ef4659107cb3a8098f79",
+              "representation": "scar.partitioned-file-inventory/2",
+              "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_source_body_revision_20261023/result/publication/sources/00140.json.gz"
+            },
+            "pointer": "#/file/bodies/25"
+          },
+          "inventory_pointer": null,
+          "metadata_locator": {
+            "artifact": {
+              "decoded_bytes": 1525036,
+              "decoded_sha256": "d32037cbbe1fa219991295491d999c627992c95aa85f0ff17075f6f69643ebd9",
+              "physical_bytes": 132963,
+              "physical_sha256": "c6f38a2845e9bb76d377b1ff893780592f1d01188582594dca36cd0b336bf1c1",
+              "representation": "scar.body-construction-checkpoint/1",
+              "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_plain_20261023/checkpoints/00060.json.gz"
+            },
+            "pointer": "#/metadata"
+          },
+          "namespace": {
+            "artifact": {
+              "decoded_sha256": "d32037cbbe1fa219991295491d999c627992c95aa85f0ff17075f6f69643ebd9",
+              "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_plain_20261023/checkpoints/00060.json.gz"
+            },
+            "body": {
+              "definition": {
+                "kind": "opdef",
+                "value": "op:3572540e8ce0c88b6e8e95ac",
+                "wire": "opdef:op:3572540e8ce0c88b6e8e95ac"
+              },
+              "entry": "Predictor.__init__",
+              "source": {
+                "atom_id": {
+                  "kind": "source",
+                  "value": "atom:73d457c6ef8f164b9e5871ec",
+                  "wire": "source:atom:73d457c6ef8f164b9e5871ec"
+                },
+                "end_column": 9,
+                "end_line": 283,
+                "fingerprint": "sha256:3a6209baf30c11f77a5f6637282a1821fc62cea827438a97b23933caab51d8c7",
+                "path": "/home/zyf/AAA/le-wm/stable-worldmodel/stable_worldmodel/wm/lewm/module.py",
+                "start_column": 4,
+                "start_line": 245
+              }
+            },
+            "record_pointer": "#/graph",
+            "representation": "scar.program-graph/15"
+          },
+          "program_canonical_sha256": "326968a44daedfaea0d2cde3257c6e622d072d340cf033e23a7f9013d9338bce",
+          "program_schema_version": 15,
+          "reference": {
+            "body_index": 25,
+            "file_index": 140,
+            "identity": {
+              "kind": "program_region",
+              "value": "cb6694b3726ddc72fdc9312e5a865c60",
+              "wire": "program_region:cb6694b3726ddc72fdc9312e5a865c60"
+            }
+          }
+        },
+        "bridge_pointer": "#/observations/4661",
+        "composition_element": {
+          "body_index": null,
+          "file_index": 140,
+          "identity": {
+            "kind": "opdef",
+            "value": "op:3572540e8ce0c88b6e8e95ac",
+            "wire": "opdef:op:3572540e8ce0c88b6e8e95ac"
+          }
+        },
+        "definition": {
+          "context": {
+            "control_sha256": "51da3a5127c4016ad1a1db60f6fca0c195fdabace13c154c80ba761163e61182",
+            "namespace_root": "/home/zyf/AAA/le-wm",
+            "semantic_sha256": "42c2ba9bcd5e2961154dbe08f5dda93ff3ee5f3ac07ac21867b551dc56d7cd8f",
+            "semantics_sha256": "df1db7e4f7363ae176336c6adaab169e77d0f633ee77c59d8faad44504377551"
+          },
+          "definition": {
+            "kind": "opdef",
+            "value": "op:3572540e8ce0c88b6e8e95ac",
+            "wire": "opdef:op:3572540e8ce0c88b6e8e95ac"
+          },
+          "graph": {
+            "artifact": {
+              "schema": "scar.source-layers.record",
+              "sha256": "a6bdaa92e60ac3f18ff4e45b02d264a9e512e9123fcc795133ab5c811b0e170e",
+              "size_bytes": 820097,
+              "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_source_context_20261022/result/source-layers/archives/25eedf0b31140093cb9d1b9eea0ca83c1d7c87f06ff8344254fc57bafb555a93.json.gz"
+            },
+            "declaration": {
+              "artifact": {
+                "schema": "scar.source-layers",
+                "sha256": "5c68691c28273676a8262f24fe9891e03433f06b7d16758e8620050c160a97c4",
+                "size_bytes": 135207,
+                "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_source_context_20261022/result/source-layers/index.json"
+              },
+              "locator": "#/files/140"
+            },
+            "decoded_bytes": 7856396,
+            "decoded_sha256": "25eedf0b31140093cb9d1b9eea0ca83c1d7c87f06ff8344254fc57bafb555a93",
+            "pointer": "#/payload/semantic/definitions/185",
+            "representation": "gzip-canonical-json"
+          },
+          "providers": [
+            {
+              "artifact": {
+                "schema": "scar.source-layers.record",
+                "sha256": "a6bdaa92e60ac3f18ff4e45b02d264a9e512e9123fcc795133ab5c811b0e170e",
+                "size_bytes": 820097,
+                "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_source_context_20261022/result/source-layers/archives/25eedf0b31140093cb9d1b9eea0ca83c1d7c87f06ff8344254fc57bafb555a93.json.gz"
+              },
+              "declaration": {
+                "artifact": {
+                  "schema": "scar.source-layers",
+                  "sha256": "5c68691c28273676a8262f24fe9891e03433f06b7d16758e8620050c160a97c4",
+                  "size_bytes": 135207,
+                  "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_source_context_20261022/result/source-layers/index.json"
+                },
+                "locator": "#/files/140"
+              },
+              "decoded_bytes": 7856396,
+              "decoded_sha256": "25eedf0b31140093cb9d1b9eea0ca83c1d7c87f06ff8344254fc57bafb555a93",
+              "pointer": "#/metadata",
+              "representation": "gzip-canonical-json"
+            }
+          ],
+          "reference_format": "scar.source-definition-reference.v1",
+          "root": {
+            "artifact": {
+              "schema": "scar.source-layers.record",
+              "sha256": "a6bdaa92e60ac3f18ff4e45b02d264a9e512e9123fcc795133ab5c811b0e170e",
+              "size_bytes": 820097,
+              "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_source_context_20261022/result/source-layers/archives/25eedf0b31140093cb9d1b9eea0ca83c1d7c87f06ff8344254fc57bafb555a93.json.gz"
+            },
+            "declaration": {
+              "artifact": {
+                "schema": "scar.source-layers",
+                "sha256": "5c68691c28273676a8262f24fe9891e03433f06b7d16758e8620050c160a97c4",
+                "size_bytes": 135207,
+                "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_source_context_20261022/result/source-layers/index.json"
+              },
+              "locator": "#/files/140"
+            },
+            "decoded_bytes": 7856396,
+            "decoded_sha256": "25eedf0b31140093cb9d1b9eea0ca83c1d7c87f06ff8344254fc57bafb555a93",
+            "pointer": "#/source/context/namespace_root",
+            "representation": "gzip-canonical-json"
+          },
+          "snapshot": {
+            "encoding": "utf-8",
+            "fingerprint": "sha256:3a6209baf30c11f77a5f6637282a1821fc62cea827438a97b23933caab51d8c7",
+            "path": "/home/zyf/AAA/le-wm/stable-worldmodel/stable_worldmodel/wm/lewm/module.py",
+            "python_version": "3.14"
+          },
+          "source": {
+            "atom_id": {
+              "kind": "source",
+              "value": "atom:73d457c6ef8f164b9e5871ec",
+              "wire": "source:atom:73d457c6ef8f164b9e5871ec"
+            },
+            "end_column": 9,
+            "end_line": 283,
+            "fingerprint": "sha256:3a6209baf30c11f77a5f6637282a1821fc62cea827438a97b23933caab51d8c7",
+            "path": "/home/zyf/AAA/le-wm/stable-worldmodel/stable_worldmodel/wm/lewm/module.py",
+            "start_column": 4,
+            "start_line": 245
+          }
+        },
+        "direct_callsite_established": false,
+        "frontiers": [],
+        "invocation": {
+          "invocation_id": 1726,
+          "process_id": 369749,
+          "thread_id": 134637364963136
+        },
+        "marker_instance": "opinst:native:2a622492625eb1b2a7a105036e0ac792b5a6249fc60cf111443bf7fe53140d88:eto:17693",
+        "marker_reference": {
+          "artifact": {
+            "schema": "pytorch.execution-trace.v1",
+            "sha256": "625558680ced281fc2b4789d9d742bc97dd4fed57106701e98adea3ebe0428b6",
+            "size_bytes": 321287818,
+            "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/trace/execution-trace.369749.72816598bfa183a810428fe30a7873ff.json"
+          },
+          "locator": "#/nodes/14469"
+        },
+        "native_thread": {
+          "kind": "exec_host_thread_instance",
+          "value": "capture:1ddea1de4990462b59cf5dd24beb3f120156eb47bca68cfb3f1a63f9f73f2cf0:thread:0e3cdb6b87615e6df5d503f9e778d0aaa2cf6ad3f212b6fe86407f177ee81642",
+          "wire": "exec_host_thread_instance:capture:1ddea1de4990462b59cf5dd24beb3f120156eb47bca68cfb3f1a63f9f73f2cf0:thread:0e3cdb6b87615e6df5d503f9e778d0aaa2cf6ad3f212b6fe86407f177ee81642"
+        },
+        "native_thread_reference": {
+          "artifact": {
+            "schema": "scar.capture-coordinates",
+            "sha256": "4d266b9ea62ed0d4c25cb5606dae31dea5aeab453405f79608ab5c038f012a25",
+            "size_bytes": 674239,
+            "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_current_source_gate_20261023/result/capture-coordinates.json"
+          },
+          "locator": "#/threads/0"
+        },
+        "native_tid_verified_by_bridge": true,
+        "observation_index": 4661,
+        "phase": "output",
+        "qualified_slot_path_indices": [
+          4057
+        ],
+        "region_activation": {
+          "kind": "exec_region_activation",
+          "value": "capture:1ddea1de4990462b59cf5dd24beb3f120156eb47bca68cfb3f1a63f9f73f2cf0:source-frame:d9eb0e805e868e7aac0ac3b111712403e4ab58908c2f1d76b1a065a59d7952c4",
+          "wire": "exec_region_activation:capture:1ddea1de4990462b59cf5dd24beb3f120156eb47bca68cfb3f1a63f9f73f2cf0:source-frame:d9eb0e805e868e7aac0ac3b111712403e4ab58908c2f1d76b1a065a59d7952c4"
+        },
+        "region_activation_reference": {
+          "artifact": {
+            "schema": "scar.source-invocations.events.v3",
+            "sha256": "c89de9d6d5d8c8044e2bd5f987025f62c61723dafd295758375614ae6fcf2e2e",
+            "size_bytes": 577182812,
+            "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_source_revision_current_20261025/result/connections/source/invocations.jsonl.gz"
+          },
+          "locator": "#/lines/1726/region_activation"
+        },
+        "region_namespace": {
+          "artifact": {
+            "decoded_sha256": "d32037cbbe1fa219991295491d999c627992c95aa85f0ff17075f6f69643ebd9",
+            "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_plain_20261023/checkpoints/00060.json.gz"
+          },
+          "body": {
+            "definition": {
+              "kind": "opdef",
+              "value": "op:3572540e8ce0c88b6e8e95ac",
+              "wire": "opdef:op:3572540e8ce0c88b6e8e95ac"
+            },
+            "entry": "Predictor.__init__",
+            "source": {
+              "atom_id": {
+                "kind": "source",
+                "value": "atom:73d457c6ef8f164b9e5871ec",
+                "wire": "source:atom:73d457c6ef8f164b9e5871ec"
+              },
+              "end_column": 9,
+              "end_line": 283,
+              "fingerprint": "sha256:3a6209baf30c11f77a5f6637282a1821fc62cea827438a97b23933caab51d8c7",
+              "path": "/home/zyf/AAA/le-wm/stable-worldmodel/stable_worldmodel/wm/lewm/module.py",
+              "start_column": 4,
+              "start_line": 245
+            }
+          },
+          "record_pointer": "#/graph",
+          "representation": "scar.program-graph/15"
+        },
+        "relationship": "RETAINED_ANCESTOR_CONTEXT",
+        "sequence": 2331,
+        "source_binding_reference": {
+          "artifact": {
+            "schema": "scar.source-invocation-bindings",
+            "sha256": "23ec72636ac40ccc980942da977efdc52757ad83784f339936ce98490c1214f4",
+            "size_bytes": 7582898,
+            "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_source_revision_current_20261025/result/connections/source/bindings.json"
+          },
+          "locator": "#/bindings/313"
+        },
+        "source_frontiers": [],
+        "source_interface_frontiers": [
+          "ACTUAL_FORMAL_ROUTING_UNVERIFIED",
+          "RETURN_VALUE_ROUTING_UNVERIFIED",
+          "FUNCTION_ENVIRONMENT_UNVERIFIED",
+          "STATE_EFFECTS_UNVERIFIED",
+          "CANONICAL_CONTROL_COMPLETION_UNVERIFIED"
+        ],
+        "source_invocation_line_sha256": "0a47832cd88aef5e29b58b033165a7f3af40dd396f6b6b71376fbf3523df487a",
+        "source_invocation_reference": {
+          "artifact": {
+            "schema": "scar.source-invocations.events.v3",
+            "sha256": "c89de9d6d5d8c8044e2bd5f987025f62c61723dafd295758375614ae6fcf2e2e",
+            "size_bytes": 577182812,
+            "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_source_revision_current_20261025/result/connections/source/invocations.jsonl.gz"
+          },
+          "locator": "#/lines/1726"
+        },
+        "source_origin": "INVENTORY",
+        "status": "RETAINED_BODY_LINKED"
+      }
+    }
+  ]
+}

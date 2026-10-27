@@ -1,0 +1,1 @@
+The original attempt ran attached to the exec session, without shell redirection; byte-for-byte stderr was not written to a file. The complete inner traceback emitted by `traceback.format_exc()` is preserved in `STRUCTURED_EXCEPTION_TRACEBACK.txt` and the terminal object. Python also printed the uncaught re-raise wrapper to the exec session.

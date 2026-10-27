@@ -1,0 +1,21 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+_ test_independent_current_frame_identity_supports_each_real_terminal_without_copy_or_peer_borrowing _
+
+    def test_independent_current_frame_identity_supports_each_real_terminal_without_copy_or_peer_borrowing():
+        program, model, details = frame_identity_execution(instances=2, retry=True)
+        index = _index(program, model, details)
+        assert len(model.body_activation_origins) == 2
+        assert len(model.body_drive_executions) == details['static']['base_drive_count'] * 2
+        assert details['objects'][0] != details['objects'][1]
+        for number, endpoint in enumerate(details['frame_identities']):
+            view = index.body_state_history(endpoint['read'], budget=_BUDGET)
+            # This is the first semantic assertion: the old implementation has
+            # all actual ports/call routes, but cannot use declared object identity.
+>           assert view['expected_bool'] is True
+E           assert None is True
+
+tests/unit/test_execution_frame_identity_history.py:46: AssertionError
+=========================== short test summary info ============================
+FAILED tests/unit/test_execution_frame_identity_history.py::test_independent_current_frame_identity_supports_each_real_terminal_without_copy_or_peer_borrowing
+1 failed in 7.62s

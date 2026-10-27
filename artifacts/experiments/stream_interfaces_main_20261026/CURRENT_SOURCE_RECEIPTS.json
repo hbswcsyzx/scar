@@ -1,0 +1,22 @@
+[
+  {
+    "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/trace/stream_interfaces.py",
+    "sha256": "d0d72aa49cee18ca606c2fcf0d7a54b96738370f0021ae0fe6af5ee80ceca25d",
+    "bytes": 13790
+  },
+  {
+    "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/trace/call_operands.py",
+    "sha256": "5f719bae51ff331976cc0345c301e6a5591aa53c411c1f7d865be4b7cbe6c46d",
+    "bytes": 60356
+  },
+  {
+    "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/trace/capture_coordinates.py",
+    "sha256": "1813ad73b72c1667861015d27514591cc41b136e4cd6bf24c2cdbc2463b71411",
+    "bytes": 55266
+  },
+  {
+    "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/cli.py",
+    "sha256": "22aca9852d584fdbd532c0c097f4984e135dd3a8a2336f0aa7ab8104f6dd1b7c",
+    "bytes": 124240
+  }
+]

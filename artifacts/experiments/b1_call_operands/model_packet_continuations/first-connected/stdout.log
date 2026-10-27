@@ -1,0 +1,62 @@
+.........F..F........................................................... [ 72%]
+...........................                                              [100%]
+=================================== FAILURES ===================================
+_ test_every_fallback_leg_keeps_both_receiver_cases_and_their_own_continuation_choices _
+
+    def test_every_fallback_leg_keeps_both_receiver_cases_and_their_own_continuation_choices():
+        """Input tuple correlation alone is not a per-case continuation receipt."""
+        graph, details = lookup_fallback_receiver_merge_program()
+        require_valid(graph)
+        report = _view(graph)
+        lookup = next(row for row in report["obligations"] if row["site"] == details["lookup"])
+        fallback = next(row for row in lookup["lookup_fallbacks"]
+                        if row["binding"] == details["fallback"])
+        expected_cases = next(row.cases for row in graph.protocol_call_inputs
+                              if row.site == details["lookup"])
+        assert len(expected_cases) == 2
+        assert {path["kind"] for path in fallback["paths"]} == {"MATCH", "NO_MATCH", "MATCHER_RAISE"}
+        for path in fallback["paths"]:
+            cases = path.get("continuation_cases", ())
+>           assert len(cases) == len(expected_cases), path
+E           AssertionError: {'kind': 'MATCH', 'source': BlockArgument(block=BlockID(value='continuation.entry'), index=6), 'edge': ControlEdgeRefe...), 'binding': {'match': True, 'routes': ({...},), 'gaps': (), 'cursor': None, ...}, 'kind': 'HOST_RAISE'},), ...}, ...}
+E           assert 0 == 2
+E            +  where 0 = len(())
+E            +  and   2 = len((ProtocolCallInputCase(guard=ControlEdgeReference(operation=OperationID(value='fallback.receiver.left.jump'), successo...onID(value='continuation.lookup'), successor_index=0), result=CompletionResult(index=0))), arguments=(), trigger=None)))
+
+tests/unit/test_program_packet_continuations.py:196: AssertionError
+_ test_known_packet_helper_copy_does_not_hide_an_opaque_operation_inside_the_callee _
+
+    def test_known_packet_helper_copy_does_not_hide_an_opaque_operation_inside_the_callee():
+        graph, details = packet_continuation_program(two_cuts=True,
+            complete_transitions=True, packet_helper="known")
+        helper = details["packet_helper"]
+        terminal = details["packet_helper_terminal"]
+        opaque = Operation(
+            id=type(helper.id)("packet.continuation.known-helper.opaque"),
+            label="unknown helper effect before returning the packet",
+            behaviors=(Behavior.COMPUTE,), effects_complete=False)
+        regions = tuple(replace(region, blocks=tuple(
+            replace(block, operations=(opaque.id, *block.operations))
+            if terminal.id in block.operations else block
+            for block in region.blocks)) if region.id == helper.callee else region
+            for region in graph.regions)
+        graph = replace(graph, regions=regions, operations=(*graph.operations, opaque))
+    
+        # The exact input-to-return copy remains present, but the helper's opaque
+        # body prevents the surrounding packet continuation from becoming complete.
+        report = continuation_connections(_context(graph))
+        obligation = next(row for row in report["obligations"]
+                          if row["site"].operation == details["helper"] and row["site"].slot == 1)
+        route, = obligation["close_routes"]
+>       assert route["status"] == "PARTIAL", route
+E       AssertionError: {'status': 'DECLARED', 'source': InvokeLiteralResult(edge=ControlEdgeReference(operation=OperationID(value='finally.in...ue='finally.raise-exit.packet.out')), 'guard': (...), 'context': None, ...},), 'gaps': (), 'cursor': None, ...}}), ...}
+E       assert 'DECLARED' == 'PARTIAL'
+E         
+E         - PARTIAL
+E         + DECLARED
+
+tests/unit/test_program_packet_continuation_edges.py:108: AssertionError
+=========================== short test summary info ============================
+FAILED tests/unit/test_program_packet_continuations.py::test_every_fallback_leg_keeps_both_receiver_cases_and_their_own_continuation_choices
+FAILED tests/unit/test_program_packet_continuation_edges.py::test_known_packet_helper_copy_does_not_hide_an_opaque_operation_inside_the_callee
+2 failed, 97 passed in 7.19s

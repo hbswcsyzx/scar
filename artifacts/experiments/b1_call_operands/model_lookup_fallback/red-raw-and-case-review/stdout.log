@@ -1,0 +1,18 @@
+F.                                                                       [100%]
+=================================== FAILURES ===================================
+_ test_known_reference_operand_cannot_stand_for_a_missing_external_raw_request _
+
+    def test_known_reference_operand_cannot_stand_for_a_missing_external_raw_request():
+        graph, details = lookup_fallback_program(kind="throw", matcher="invoke")
+        lookup = details["lookup_row"]
+        wrong = OwnedUse(lookup.operation, lookup.contract.receiver_use)
+        request = replace(details["request"], raw=wrong)
+        graph, _ = _binding(graph, details, request=request)
+>       assert "protocol_lookup_fallback_source" in _codes(graph)
+E       AssertionError: assert 'protocol_lookup_fallback_source' in set()
+E        +  where set() = _codes(ProgramGraph(root=RegionID(value='continuation'), regions=(Region(id=RegionID(value='continuation'), label='declared o...(InvokeStateOperand(operation=OperationID(value='fallback.match'), state_use=UseID(value='fallback.match.world')),)),)))
+
+tests/unit/test_program_lookup_fallback.py:179: AssertionError
+=========================== short test summary info ============================
+FAILED tests/unit/test_program_lookup_fallback.py::test_known_reference_operand_cannot_stand_for_a_missing_external_raw_request
+1 failed, 1 passed in 1.08s

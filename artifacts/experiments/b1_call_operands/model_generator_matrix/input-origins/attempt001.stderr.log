@@ -1,0 +1,9 @@
+Traceback (most recent call last):
+  File "<stdin>", line 4, in <module>
+  File "/home/zyf/miniconda3/envs/lewm/lib/python3.14/ast.py", line 46, in parse
+    return compile(source, filename, mode, flags,
+                   _feature_version=feature_version, optimize=optimize)
+  File "scar/ir/program/input_origins.py", line 359
+    pending.append((source.use.value, source.operation, source.use.id,
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+SyntaxError: invalid syntax. Perhaps you forgot a comma?

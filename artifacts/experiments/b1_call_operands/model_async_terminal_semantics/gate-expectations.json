@@ -1,0 +1,90 @@
+{
+  "declared_scope": "OriginalF18; exact2058 prior identities, fourNEW modules, no old test/fixture migration",
+  "new_cases_by_module": {
+    "tests.unit.test_program_async_terminal_inventory": 7,
+    "tests.unit.test_program_async_terminal": 8,
+    "tests.unit.test_source_compilation": 22,
+    "tests.unit.test_execution_async_terminal": 9
+  },
+  "attempts": {
+    "initial-source-denominator": [
+      1,
+      1,
+      0,
+      0,
+      893
+    ],
+    "first-joint-authored": [
+      38,
+      20,
+      0,
+      0,
+      899
+    ],
+    "revised-joint-terminal": [
+      40,
+      2,
+      0,
+      0,
+      899
+    ],
+    "precise-terminal-residuals": [
+      43,
+      0,
+      0,
+      0,
+      899
+    ],
+    "canonical-choices-counterexample": [
+      2,
+      2,
+      0,
+      0,
+      899
+    ],
+    "ordered-terminal-residuals": [
+      45,
+      0,
+      0,
+      0,
+      899
+    ],
+    "verified-final": [
+      380,
+      0,
+      0,
+      0,
+      899
+    ],
+    "static-dynamic-failure-counterexample": [
+      1,
+      1,
+      0,
+      0,
+      899
+    ],
+    "unified-terminal-residuals": [
+      46,
+      0,
+      0,
+      0,
+      899
+    ],
+    "verified-current": [
+      2104,
+      0,
+      0,
+      0,
+      899
+    ]
+  },
+  "attempt_numbers": [
+    "testcases",
+    "failures",
+    "errors",
+    "skips",
+    "stable_source_files"
+  ],
+  "notes": "New authored counts are expectations before first joint execution; actual results will be added with immutable JUnit/source snapshots. No final pass is preclaimed.",
+  "interrupted_JUnit_note": "verified-final has379 named completed pass plus1 anonymous unfinished time=0.000 row; rawcase denominator380, no complete identity assigned to placeholder"
+}

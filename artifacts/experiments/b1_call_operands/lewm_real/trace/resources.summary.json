@@ -1,0 +1,23 @@
+{
+  "enabled": true,
+  "status": "Observed",
+  "pid": 532447,
+  "sample_count": 503,
+  "interval_s": 0.5,
+  "started_ns": 4663392037655371,
+  "ended_ns": 4663690924255808,
+  "cpu_utilization_percent": {
+    "average": 1.9728949763145678,
+    "peak": 19.171842923703647
+  },
+  "gpu_utilization_percent": {
+    "average": 1.6739562624254474,
+    "peak": 7.0
+  },
+  "gpu_memory_used_mib": {
+    "peak": 2410.0,
+    "average": 1548.7594433399602
+  },
+  "gpu_count_observed": 1,
+  "evidence": "Observed"
+}

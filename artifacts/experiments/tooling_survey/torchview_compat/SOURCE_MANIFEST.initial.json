@@ -1,0 +1,57 @@
+{
+  "probe_date": "2026-10-16",
+  "worktree": "/tmp/scar-structured-model-280qf4mi",
+  "worktree_head": "d5311a63211470500c6892af484f500e71c0d61f",
+  "scope": "torchview CPU compatibility and machine-readable graph probe; no product edits",
+  "runtime": {
+    "python": "3.14.7",
+    "torch": "2.13.0+cu132",
+    "execution_device": "cpu",
+    "cuda_api_called": false
+  },
+  "temporary_downloads": [
+    {
+      "project": "torchview",
+      "version": "0.2.7",
+      "filename": "torchview-0.2.7-py3-none-any.whl",
+      "url": "https://files.pythonhosted.org/packages/17/66/b87d835f664f0f99a0bf1e2e294c45d286545fed35b96f2c99e700915dd9/torchview-0.2.7-py3-none-any.whl",
+      "sha256": "c7f3a9d16138c20b606900ecbf46d01489f2b8c77ed97e71293883bc606c2be0"
+    },
+    {
+      "project": "graphviz",
+      "version": "0.20.3",
+      "filename": "graphviz-0.20.3-py3-none-any.whl",
+      "url": "https://files.pythonhosted.org/packages/00/be/d59db2d1d52697c6adc9eacaf50e8965b6345cc143f671e1ed068818d5cf/graphviz-0.20.3-py3-none-any.whl",
+      "sha256": "81f848f2904515d8cd359cc611faba817598d2feaac4027b266aa3eda7b3dde5"
+    }
+  ],
+  "inspected_torchview_files_sha256": {
+    "torchview/torchview.py": "0cb7c5355f744b3323cf31a17efd0ab4f220cbc363514e6f7947c2acc24c5f37",
+    "torchview/computation_graph.py": "428bc8bbd2508f4a63e5a60716fabc11cbc56c8685be892c0aab93bcb8b16916",
+    "torchview/computation_node/base_node.py": "70db54288e8e7be5d7396dde6edb78985a60373de703f99cf5bbc528f0e42e3f",
+    "torchview/computation_node/compute_node.py": "596f3d61b3ece507ce85cc37fbffc37bf1c064fef4187bf29651f0599e2e28b1",
+    "torchview/recorder_tensor.py": "769b8ca9ed0b7203ae01aabe703ce6f73870485916955910260e571b29d31b79"
+  },
+  "package_registration_check": {
+    "conda_list_json_before_sha256": "b9609d643dfeb8cd84cff541e5907b13b86f507602f8fbed2cb0400e963df209",
+    "conda_list_json_after_sha256": "b9609d643dfeb8cd84cff541e5907b13b86f507602f8fbed2cb0400e963df209",
+    "conda_list_identical": true,
+    "torchview_registered_in_lewm_before_or_after": false,
+    "graphviz_registered_in_lewm_before_or_after": false,
+    "installation_or_environment_upgrade_run": false
+  },
+  "upstream_revision_note": "An existing survey pins a torchview upstream main commit 241d22b5cdeb2c227acee2c85611f0442f15c091 and reports version 0.2.7. This runtime probe is specifically for the separately hash-pinned PyPI 0.2.7 wheel. No equivalence between that wheel and the cited main commit was verified.",
+  "probe": {
+    "command": "source /home/zyf/miniconda3/etc/profile.d/conda.sh && conda activate lewm && PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=<temporary-unpacked-wheel-roots> python artifacts/experiments/tooling_survey/torchview_compat/torchview_probe.py",
+    "captures": [
+      "x_plus_x",
+      "view_then_inplace_add",
+      "nested_expand_false",
+      "nested_expand_true",
+      "python_counter_and_registered_buffer"
+    ],
+    "all_capture_statuses": "OK",
+    "graphviz_render_called": false,
+    "raw_tensor_values_saved": false
+  }
+}

@@ -1,0 +1,18 @@
+mkdir -p artifacts/experiments/b1_call_operands/model_no_body/fixtures/attempt001 && source /home/zyf/miniconda3/etc/profile.d/conda.sh && conda activate lewm && PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=. python - <<'PY'
+import ast
+from pathlib import Path
+from scar.ir.program.validation import require_valid
+from tests.fixtures.program_no_body_graphs import no_body_program
+path = Path('tests/fixtures/program_no_body_graphs.py')
+ast.parse(path.read_text())
+print('AST_PARSE_OK', path)
+for label, kwargs in (
+    ('BODY', dict(receiver='BODY')),
+    ('ASYNC_EXTERNAL', dict(receiver='ASYNC_REQUEST')),
+    ('ASYNC_ASSOCIATION', dict(receiver='ASYNC_REQUEST', association=True)),
+):
+    print('CASE_START', label)
+    graph = no_body_program(**kwargs)
+    require_valid(graph)
+    print('CASE_VALID', label, len(graph.operations), len(graph.values))
+PY

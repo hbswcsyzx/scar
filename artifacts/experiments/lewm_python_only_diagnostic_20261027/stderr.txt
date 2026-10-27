@@ -1,0 +1,73 @@
+Traceback (most recent call last):
+  File "/home/zyf/AAA/le-wm/run_inference.py", line 53, in <module>
+    import stable_worldmodel as swm  # noqa: E402
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/zyf/AAA/le-wm/stable-worldmodel/stable_worldmodel/__init__.py", line 1, in <module>
+    from stable_worldmodel import (
+    ...<8 lines>...
+    )
+  File "/home/zyf/AAA/le-wm/stable-worldmodel/stable_worldmodel/data/__init__.py", line 25, in <module>
+    from . import formats as _formats  # noqa: F401
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/zyf/AAA/le-wm/stable-worldmodel/stable_worldmodel/data/formats/__init__.py", line 13, in <module>
+    from . import lance  # noqa: F401
+    ^^^^^^^^^^^^^^^^^^^
+  File "/home/zyf/AAA/le-wm/stable-worldmodel/stable_worldmodel/data/formats/lance.py", line 56, in <module>
+    from torchvision.io import (
+    ...<2 lines>...
+    )
+  File "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/torchvision/__init__.py", line 8, in <module>
+    from torchvision import (
+    ^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<8 lines>...
+    )  # usort:skip
+    ^
+  File "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/torchvision/models/__init__.py", line 2, in <module>
+    from .convnext import *
+  File "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/torchvision/models/convnext.py", line 9, in <module>
+    from ..ops.misc import Conv2dNormActivation, Permute
+  File "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/torchvision/ops/__init__.py", line 23, in <module>
+    from .poolers import MultiScaleRoIAlign
+  File "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/torchvision/ops/poolers.py", line 10, in <module>
+    from .roi_align import roi_align
+  File "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/torchvision/ops/roi_align.py", line 7, in <module>
+    from torch._dynamo.utils import is_compile_supported
+  File "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/torch/_dynamo/__init__.py", line 13, in <module>
+    from . import (
+    ...<7 lines>...
+    )
+  File "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/torch/_dynamo/aot_compile.py", line 17, in <module>
+    from torch._dynamo.convert_frame import GraphRuntimeEnv
+  File "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/torch/_dynamo/convert_frame.py", line 61, in <module>
+    from torch._dynamo.distributed import get_compile_pg
+  File "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/torch/_dynamo/distributed.py", line 19, in <module>
+    from . import config
+  File "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/torch/_dynamo/config.py", line 932, in <module>
+    install_config_module(sys.modules[__name__])
+    ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/torch/utils/_config_module.py", line 245, in install_config_module
+    compile_ignored_keys = get_assignments_with_compile_ignored_comments(module)
+  File "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/torch/utils/_config_module.py", line 276, in get_assignments_with_compile_ignored_comments
+    for token in tokens:
+                 ^^^^^^
+  File "/home/zyf/miniconda3/envs/lewm/lib/python3.14/tokenize.py", line 498, in tokenize
+    yield from _generate_tokens_from_c_tokenizer(rl_gen.__next__, encoding, extra_tokens=True)
+  File "/home/zyf/AAA/scar-worktrees/collector-noop-events/artifacts/experiments/lewm_python_only_diagnostic_20261027/collector-source/scar/trace/call_edges.py", line 628, in profile
+    recorder.profile(frame,event,arg)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "/home/zyf/AAA/scar-worktrees/collector-noop-events/artifacts/experiments/lewm_python_only_diagnostic_20261027/collector-source/scar/trace/call_edges.py", line 383, in profile
+    if self.program_ports and self._instrumentation_barrier(frame, event):
+                              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^
+  File "/home/zyf/AAA/scar-worktrees/collector-noop-events/artifacts/experiments/lewm_python_only_diagnostic_20261027/collector-source/scar/trace/call_edges.py", line 180, in _instrumentation_barrier
+    ancestor = ancestor.f_back
+    ^^^^^^^^
+KeyboardInterrupt
+Exception ignored in atexit callback <function install.<locals>.finish_at_exit at 0x76f46aa72770>:
+Traceback (most recent call last):
+  File "/home/zyf/AAA/scar-worktrees/collector-noop-events/artifacts/experiments/lewm_python_only_diagnostic_20261027/collector-source/scar/trace/call_edges.py", line 699, in finish_at_exit
+    finish()
+  File "/home/zyf/AAA/scar-worktrees/collector-noop-events/artifacts/experiments/lewm_python_only_diagnostic_20261027/collector-source/scar/trace/call_edges.py", line 675, in finish
+    observer.close()
+  File "/home/zyf/AAA/scar-worktrees/collector-noop-events/artifacts/experiments/lewm_python_only_diagnostic_20261027/collector-source/scar/trace/call_operands.py", line 1202, in close
+    else self._deferred.result['output']['sha256']), self._bytes, self._event_count),
+TypeError: 'NoneType' object is not subscriptable

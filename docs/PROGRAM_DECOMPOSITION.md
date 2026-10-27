@@ -1,6 +1,18 @@
 # SCAR program decomposition
 
-The latest node/edge decision is [CORE_GRAPH_MODEL.md](CORE_GRAPH_MODEL.md):
+**2026-10-25 current scope:** use the [first-stage contract](FIRST_STAGE_MODEL_CONTRACT.md)
+and [actual delivery](FIRST_STAGE_DELIVERY.md) for acceptance. [Type layers](TYPE_LAYERS.md)
+distinguishes source classification, computational opcode, core operation and real occurrence;
+they must not be treated as one enum. Historical projections below remain for reference.
+
+**2026-10-16 revision:** [WHOLE_PROGRAM_MODEL.md](WHOLE_PROGRAM_MODEL.md) is the
+whole-program specification. Resource is independent, and static definitions,
+dynamic occurrences, logical contents and physical realizations are joined by
+explicit typed relations. The four-family graph discussed below is a bounded
+projection. Entire-program abstraction and automatic connectivity remain unmet;
+follow [the model-first gates](WHOLE_PROGRAM_MODEL_PLAN.md).
+
+The previous bounded node/edge decision is [CORE_GRAPH_MODEL.md](CORE_GRAPH_MODEL.md):
 Operation, Value, StateLocation and Region. Value has typed data, reference and
 state-version variants; ports encode input/output roles. Control and effects
 are explicit dependencies. This unified core is proposed, not already supplied

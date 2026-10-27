@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1" time="0.752" timestamp="2026-10-18T22:14:51.753936+00:00" hostname="gpu1"><testcase classname="tests.unit.test_program_call_return_export" name="test_internal_source_export_combines_two_simultaneous_call_result_copies" time="0.208"><failure message="AssertionError: {'match': False, 'routes': ({'source': OperationResult(operation=OperationID(value='return.helper.generate'), index=0)...='return.helper'), 'kind': &lt;ExitKind.NORMAL: 'NORMAL'&gt;, ...},), 'match': False, ...}), 'gaps': (), 'cursor': None, ...}&#10;assert False is True">def test_internal_source_export_combines_two_simultaneous_call_result_copies():
+        graph, source, actual = _double_result_program()
+        require_valid(graph)
+        report = ProgramIndex(graph).source_binding(source, actual)
+&gt;       assert report["match"] is True, report
+E       AssertionError: {'match': False, 'routes': ({'source': OperationResult(operation=OperationID(value='return.helper.generate'), index=0)...='return.helper'), 'kind': &lt;ExitKind.NORMAL: 'NORMAL'&gt;, ...},), 'match': False, ...}), 'gaps': (), 'cursor': None, ...}
+E       assert False is True
+
+tests/unit/test_program_call_return_export.py:87: AssertionError</failure></testcase></testsuite></testsuites>

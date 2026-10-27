@@ -1,0 +1,22 @@
+{
+  "scope": "same private helper, 100000 ordinary C callbacks per timing, no target/profile hooks or episode",
+  "classifications_equal": true,
+  "all_callbacks_checked": 17,
+  "rounds": [
+    {
+      "old": 0.16269549,
+      "direct": 0.114407009
+    },
+    {
+      "direct": 0.113038138,
+      "old": 0.163184536
+    },
+    {
+      "old": 0.163955351,
+      "direct": 0.113063765
+    }
+  ],
+  "old_median": 0.163184536,
+  "direct_median": 0.113063765,
+  "whole_program_complete": false
+}

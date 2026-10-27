@@ -1,0 +1,2 @@
+cd /tmp/scar-structured-model-280qf4mi
+/usr/bin/python3 artifacts/experiments/b1_call_operands/model_driver_lifecycle_contract/review/owner_flow.py > artifacts/experiments/b1_call_operands/model_driver_lifecycle_contract/review/owner_flow.log 2>&1

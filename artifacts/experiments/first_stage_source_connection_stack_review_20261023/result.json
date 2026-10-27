@@ -1,0 +1,13 @@
+{
+  "status": "READ_ONLY_STACK_UNAVAILABLE",
+  "target_pid": 645054,
+  "target_command": "python artifacts/experiments/first_stage_source_publication_current_attempt02_20261023/run.py ",
+  "samples": [],
+  "error": "PermissionError: [Errno 1] Operation not permitted",
+  "remote_code_executed": false,
+  "target_stopped_or_restarted": false,
+  "global_configuration_changed": false,
+  "elapsed_s": 0.00017048900190275162,
+  "first_stage_complete": false,
+  "api_basis": "CPython v3.14.7 Modules/clinic/_remote_debugging_module.c.h RemoteUnwinder.get_stack_trace"
+}

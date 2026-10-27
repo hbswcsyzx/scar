@@ -1,0 +1,94 @@
+{
+  "zero_cut": true,
+  "expected_source": "ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.AWAIT_ACQUISITION: 'AWAIT_ACQUISITION'>, operation=OperationID(value='await.resume.acquire'), slot=0)",
+  "matching_expected_source_count": 1,
+  "rows": [
+    {
+      "key": [
+        "program_protocol_scope:await.resume.acquisition",
+        "program_operation:await.resume.acquire",
+        "program_operation:await.resume.call.0",
+        null,
+        [],
+        "DriveOutcomeRef(drive=OperationID(value='await.resume.driver.0.driver.drive'), source=OperationID(value='await.raise.zero.raise'))"
+      ],
+      "source": "ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.AWAIT_ACQUISITION: 'AWAIT_ACQUISITION'>, operation=OperationID(value='await.resume.acquire'), slot=0)",
+      "source_operation": "program_operation:await.resume.acquire",
+      "scope": "program_protocol_scope:await.resume.acquisition",
+      "input_guard": null,
+      "choices": [],
+      "drive_outcome": "DriveOutcomeRef(drive=OperationID(value='await.resume.driver.0.driver.drive'), source=OperationID(value='await.raise.zero.raise'))",
+      "advance_operation": "program_operation:await.resume.call.0",
+      "status": "DECLARED"
+    },
+    {
+      "key": [
+        "program_protocol_scope:await.general.final.method",
+        "program_operation:await.general.helper.qualify",
+        "program_operation:await.resume.call.0",
+        null,
+        [
+          "ControlEdgeReference(operation=OperationID(value='await.general.helper.qualify.branch'), successor_index=0)"
+        ],
+        "DriveOutcomeRef(drive=OperationID(value='await.resume.driver.0.driver.drive'), source=OperationID(value='await.raise.zero.raise'))"
+      ],
+      "source": "ProtocolOperationRef(scope=ProtocolScopeID(value='await.general.final.method'), clause=<ProtocolClause.AWAIT_ITERATOR_QUALIFICATION: 'AWAIT_ITERATOR_QUALIFICATION'>, operation=OperationID(value='await.general.helper.qualify'), slot=0)",
+      "source_operation": "program_operation:await.general.helper.qualify",
+      "scope": "program_protocol_scope:await.general.final.method",
+      "input_guard": null,
+      "choices": [
+        "ControlEdgeReference(operation=OperationID(value='await.general.helper.qualify.branch'), successor_index=0)"
+      ],
+      "drive_outcome": "DriveOutcomeRef(drive=OperationID(value='await.resume.driver.0.driver.drive'), source=OperationID(value='await.raise.zero.raise'))",
+      "advance_operation": "program_operation:await.resume.call.0",
+      "status": "PARTIAL"
+    }
+  ]
+}
+{
+  "zero_cut": false,
+  "expected_source": "ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.AWAIT_ACQUISITION: 'AWAIT_ACQUISITION'>, operation=OperationID(value='await.resume.acquire'), slot=0)",
+  "matching_expected_source_count": 1,
+  "rows": [
+    {
+      "key": [
+        "program_protocol_scope:await.resume.acquisition",
+        "program_operation:await.resume.acquire",
+        "program_operation:await.resume.call.2",
+        null,
+        [],
+        "DriveOutcomeRef(drive=OperationID(value='await.resume.driver.2.driver.drive'), source=OperationID(value='finally.raise-exit.op'))"
+      ],
+      "source": "ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.AWAIT_ACQUISITION: 'AWAIT_ACQUISITION'>, operation=OperationID(value='await.resume.acquire'), slot=0)",
+      "source_operation": "program_operation:await.resume.acquire",
+      "scope": "program_protocol_scope:await.resume.acquisition",
+      "input_guard": null,
+      "choices": [],
+      "drive_outcome": "DriveOutcomeRef(drive=OperationID(value='await.resume.driver.2.driver.drive'), source=OperationID(value='finally.raise-exit.op'))",
+      "advance_operation": "program_operation:await.resume.call.2",
+      "status": "PARTIAL"
+    },
+    {
+      "key": [
+        "program_protocol_scope:await.general.final.method",
+        "program_operation:await.general.helper.qualify",
+        "program_operation:await.resume.call.2",
+        null,
+        [
+          "ControlEdgeReference(operation=OperationID(value='await.general.helper.qualify.branch'), successor_index=0)"
+        ],
+        "DriveOutcomeRef(drive=OperationID(value='await.resume.driver.2.driver.drive'), source=OperationID(value='finally.raise-exit.op'))"
+      ],
+      "source": "ProtocolOperationRef(scope=ProtocolScopeID(value='await.general.final.method'), clause=<ProtocolClause.AWAIT_ITERATOR_QUALIFICATION: 'AWAIT_ITERATOR_QUALIFICATION'>, operation=OperationID(value='await.general.helper.qualify'), slot=0)",
+      "source_operation": "program_operation:await.general.helper.qualify",
+      "scope": "program_protocol_scope:await.general.final.method",
+      "input_guard": null,
+      "choices": [
+        "ControlEdgeReference(operation=OperationID(value='await.general.helper.qualify.branch'), successor_index=0)"
+      ],
+      "drive_outcome": "DriveOutcomeRef(drive=OperationID(value='await.resume.driver.2.driver.drive'), source=OperationID(value='finally.raise-exit.op'))",
+      "advance_operation": "program_operation:await.resume.call.2",
+      "status": "PARTIAL"
+    }
+  ]
+}

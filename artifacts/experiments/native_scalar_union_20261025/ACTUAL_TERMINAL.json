@@ -1,0 +1,136 @@
+{
+  "GNU_exit_status": 0,
+  "GNU_max_RSS_KiB": 738128,
+  "GNU_wall_seconds": 22.37,
+  "V1_observation_footprints_preserved": true,
+  "actual_terminal_exit": 0,
+  "builtin_type_is_literal_representation_only": true,
+  "earlier_enum_symbolic_origin_established": false,
+  "freeze": {
+    "bytes": 128397,
+    "path": "artifacts/experiments/native_scalar_union_20261025/attempt01/freeze.json",
+    "sha256": "748696f8e349b5431e1a1fa9bebc5447fad154dbe68a3dd1ae8feb015796fa13"
+  },
+  "full_model": "OPEN",
+  "gate_elapsed_seconds": 21.848741628986318,
+  "new_G1_imports": 0,
+  "new_captures": 0,
+  "new_target_runs": 0,
+  "result": {
+    "bytes": 554427,
+    "path": "artifacts/experiments/native_scalar_union_20261025/attempt01/result.json",
+    "sha256": "34a871267039d7e43a19db2eb1cf0a665d63209abb6d015d27ed774dc4aee652"
+  },
+  "root_session": 68758,
+  "runtime_kind_distribution": [
+    {
+      "count": 1,
+      "formal_kind": "BoolType",
+      "formal_real_kind": "BoolType",
+      "provider_type": "Bool",
+      "status": "QUALIFIED"
+    },
+    {
+      "count": 1,
+      "formal_kind": "DeviceObjType",
+      "formal_real_kind": "DeviceObjType",
+      "provider_type": "Device",
+      "status": "ENUM_OR_NONBUILTIN_SCALAR_FORMAL"
+    },
+    {
+      "count": 1,
+      "formal_kind": "IntType",
+      "formal_real_kind": "IntType",
+      "provider_type": "Int",
+      "status": "QUALIFIED"
+    },
+    {
+      "count": 2,
+      "formal_kind": "IntType",
+      "formal_real_kind": "SymIntType",
+      "provider_type": "Int",
+      "status": "SYMBOLIC_SCALAR_CONTENT_UNESTABLISHED"
+    },
+    {
+      "count": 1,
+      "formal_kind": "ListType",
+      "formal_real_kind": "ListType",
+      "provider_type": "GenericList[]",
+      "status": "CONTAINER_OR_TRUNCATED_LEAF_IS_NOT_SCALAR"
+    },
+    {
+      "count": 256,
+      "formal_kind": "NumberType",
+      "formal_real_kind": "NumberType",
+      "provider_type": "Int",
+      "status": "QUALIFIED"
+    },
+    {
+      "count": 2,
+      "formal_kind": "OptionalType",
+      "formal_real_kind": "OptionalType",
+      "provider_type": "None",
+      "status": "QUALIFIED"
+    }
+  ],
+  "scalar_frontiers": {
+    "CONTAINER_OR_TRUNCATED_LEAF_IS_NOT_SCALAR": 1,
+    "ENUM_OR_NONBUILTIN_SCALAR_FORMAL": 1,
+    "SYMBOLIC_SCALAR_CONTENT_UNESTABLISHED": 2
+  },
+  "scalar_input_ports": 264,
+  "scalar_observed_roots": 260,
+  "schema": "scar.native-scalar-union-actual-terminal",
+  "schema_version": 1,
+  "sole_negative": {
+    "case": "swap_equal_NumberType_Int_observation_roots_source_and_version",
+    "different_content_or_upstream_claimed": false,
+    "equal_content": true,
+    "independent_source_slot_rejection": true,
+    "old_seal_rejection": false,
+    "reason": "native_port_order: native_scalar_source at native-port:capture:0819d8df4eb6d0a8e5990bdeeac4b5b1c88c5aa760d21c80904dfbef6ad28e44:2:inputs:2: scalar input lost its exact original basis/source/ordinal; native_scalar_identity at native-port:capture:0819d8df4eb6d0a8e5990bdeeac4b5b1c88c5aa760d21c80904dfbef6ad28e44:2:inputs:2: scalar input borrows or erases another observed root/version; native_scalar_source at native-port:capture:0819d8df4eb6d0a8e5990bdeeac4b5b1c88c5aa760d21c80904dfbef6ad28e44:3:inputs:2: scalar input lost its exact original basis/source/ordinal; native_scalar_identity at native-port:capture:0819d8df4eb6d0a8e5990bdeeac4b5b1c88c5aa760d21c80904dfbef6ad28e44:3:inputs:2: scalar input borrows or erases another observed root/version",
+    "rejected": true,
+    "roots": [
+      {
+        "artifact": {
+          "schema": "scar.ir.v2.values",
+          "sha256": "63447674eedee12a397df4880096eb98eb8225daca073f0c271106cc752f36f4",
+          "size_bytes": 2029513,
+          "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_scalar_union_20261025/attempt01/products/native/shards/000000/source-values.json"
+        },
+        "version": {
+          "logical_value": {
+            "kind": "lv",
+            "value": "native-scalar:native:33f1c66211e1f97d10729a20ccc5f124d367a2ada14036234a9923e35e03d911:capture:0819d8df4eb6d0a8e5990bdeeac4b5b1c88c5aa760d21c80904dfbef6ad28e44:2:inputs:2",
+            "wire": "lv:native-scalar:native:33f1c66211e1f97d10729a20ccc5f124d367a2ada14036234a9923e35e03d911:capture:0819d8df4eb6d0a8e5990bdeeac4b5b1c88c5aa760d21c80904dfbef6ad28e44:2:inputs:2"
+          },
+          "version": 0,
+          "wire": "lv:native-scalar:native:33f1c66211e1f97d10729a20ccc5f124d367a2ada14036234a9923e35e03d911:capture:0819d8df4eb6d0a8e5990bdeeac4b5b1c88c5aa760d21c80904dfbef6ad28e44:2:inputs:2@v0"
+        }
+      },
+      {
+        "artifact": {
+          "schema": "scar.ir.v2.values",
+          "sha256": "63447674eedee12a397df4880096eb98eb8225daca073f0c271106cc752f36f4",
+          "size_bytes": 2029513,
+          "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_scalar_union_20261025/attempt01/products/native/shards/000000/source-values.json"
+        },
+        "version": {
+          "logical_value": {
+            "kind": "lv",
+            "value": "native-scalar:native:33f1c66211e1f97d10729a20ccc5f124d367a2ada14036234a9923e35e03d911:capture:0819d8df4eb6d0a8e5990bdeeac4b5b1c88c5aa760d21c80904dfbef6ad28e44:3:inputs:2",
+            "wire": "lv:native-scalar:native:33f1c66211e1f97d10729a20ccc5f124d367a2ada14036234a9923e35e03d911:capture:0819d8df4eb6d0a8e5990bdeeac4b5b1c88c5aa760d21c80904dfbef6ad28e44:3:inputs:2"
+          },
+          "version": 0,
+          "wire": "lv:native-scalar:native:33f1c66211e1f97d10729a20ccc5f124d367a2ada14036234a9923e35e03d911:capture:0819d8df4eb6d0a8e5990bdeeac4b5b1c88c5aa760d21c80904dfbef6ad28e44:3:inputs:2@v0"
+        }
+      }
+    ]
+  },
+  "source": "Root actual session68758 terminal confirmation plus unchanged GNU time/result",
+  "time": {
+    "bytes": 871,
+    "path": "artifacts/experiments/native_scalar_union_20261025/attempt01/time.txt",
+    "sha256": "072a691c72e5c9e856add8c762f584b8a74b039b7e71a9817bbba471b1eace42"
+  }
+}

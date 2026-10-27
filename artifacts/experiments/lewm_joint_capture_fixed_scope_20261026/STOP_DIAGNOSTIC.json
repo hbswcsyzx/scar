@@ -1,0 +1,2860 @@
+{
+  "qualification": "archived raw EOF/SHA and GAP/tail projection only; no full typed stream/model qualification",
+  "files": [
+    {
+      "original_archive_declaration": {
+        "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/lewm_joint_capture_fixed_scope_20261026/capture/trace/call-operands.1705107.jsonl.gz",
+        "compressed_bytes": 13873783,
+        "gzip_sha256": "a126153ca187796ca1778056610c9d344cbed46e930aaed2a21b918044b68daa",
+        "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/lewm_joint_capture_fixed_scope_20261026/capture/trace/call-operands.1705107.jsonl",
+        "raw_bytes": 272259267,
+        "raw_sha256": "e84da8999edabf7e6358bf3b298e087b0e2c3e8835b7a0d5d211b8fbdf90b4d2"
+      },
+      "raw_rows": 694960,
+      "decoded_bytes_read": 272259267,
+      "stored_bytes_read": 27747566,
+      "stored_sha256_verified": "a126153ca187796ca1778056610c9d344cbed46e930aaed2a21b918044b68daa",
+      "raw_sha256_verified": "e84da8999edabf7e6358bf3b298e087b0e2c3e8835b7a0d5d211b8fbdf90b4d2",
+      "elapsed_seconds": 2.403256663994398,
+      "gap_reason_counts": {
+        "PROJECT_FUNCTION_CALL_DID_NOT_ENTER": 1,
+        "INSTRUCTION_FRAME_UNAVAILABLE": 1
+      },
+      "gaps": [
+        {
+          "index": 531809,
+          "kind": "GAP",
+          "process_id": 1705107,
+          "thread_id": 124353089103680,
+          "invocation_id": 1,
+          "frame_index": 27457,
+          "hook_epoch": 1,
+          "reason": "PROJECT_FUNCTION_CALL_DID_NOT_ENTER"
+        },
+        {
+          "index": 694960,
+          "kind": "GAP",
+          "process_id": 1705107,
+          "thread_id": 124353089103680,
+          "invocation_id": null,
+          "frame_index": 58826,
+          "hook_epoch": 2,
+          "reason": "INSTRUCTION_FRAME_UNAVAILABLE"
+        }
+      ],
+      "last_eight_records": [
+        {
+          "index": 694953,
+          "kind": "INSTRUCTION",
+          "process_id": 1705107,
+          "thread_id": 124353089103680,
+          "invocation_id": 29415,
+          "frame_index": 58822,
+          "hook_epoch": 2,
+          "site": {
+            "code": "pycode-v2:bb23f90367ead1fec115ce776f292e7211238d507ce21f4882f2be0d1ab0442c",
+            "offset": 284,
+            "opname": "POP_TOP",
+            "position": [
+              1453,
+              1453,
+              13,
+              18
+            ]
+          },
+          "loads": []
+        },
+        {
+          "index": 694954,
+          "kind": "INSTRUCTION",
+          "process_id": 1705107,
+          "thread_id": 124353089103680,
+          "invocation_id": 29413,
+          "frame_index": 58823,
+          "hook_epoch": 2,
+          "site": {
+            "code": "pycode-v2:c9bf2bdd20c50b12d2bbd7347636257dc0fa67b6d6e3dd481eca93efa513cca6",
+            "offset": 84,
+            "opname": "POP_TOP",
+            "position": [
+              1496,
+              1496,
+              8,
+              35
+            ]
+          },
+          "loads": []
+        },
+        {
+          "index": 694955,
+          "kind": "INSTRUCTION",
+          "process_id": 1705107,
+          "thread_id": 124353089103680,
+          "invocation_id": 29410,
+          "frame_index": 58824,
+          "hook_epoch": 2,
+          "site": {
+            "code": "pycode-v2:975a4dcba31129bf9498f63e03157eea4ef02bf7792966680102e1cba3b1d5c7",
+            "offset": 1248,
+            "opname": "POP_TOP",
+            "position": [
+              2124,
+              2124,
+              16,
+              36
+            ]
+          },
+          "loads": []
+        },
+        {
+          "index": 694956,
+          "kind": "INSTRUCTION",
+          "process_id": 1705107,
+          "thread_id": 124353089103680,
+          "invocation_id": 29410,
+          "frame_index": 58824,
+          "hook_epoch": 2,
+          "site": {
+            "code": "pycode-v2:975a4dcba31129bf9498f63e03157eea4ef02bf7792966680102e1cba3b1d5c7",
+            "offset": 1370,
+            "opname": "CALL",
+            "position": [
+              2079,
+              2079,
+              9,
+              14
+            ]
+          },
+          "loads": []
+        },
+        {
+          "index": 694957,
+          "kind": "CALL_ATTEMPT",
+          "process_id": 1705107,
+          "thread_id": 124353089103680,
+          "invocation_id": 29410,
+          "frame_index": 58824,
+          "hook_epoch": 2,
+          "site": {
+            "code": "pycode-v2:975a4dcba31129bf9498f63e03157eea4ef02bf7792966680102e1cba3b1d5c7",
+            "offset": 1370,
+            "opname": "CALL",
+            "position": [
+              2079,
+              2079,
+              9,
+              14
+            ]
+          },
+          "dispatch": {
+            "kind": "OTHER",
+            "reference": "operand-snapshot:1705107:694957:1",
+            "code": null,
+            "layout": null
+          },
+          "arg0": "weak:1705107:544773",
+          "arg0_missing": false
+        },
+        {
+          "index": 694958,
+          "kind": "INSTRUCTION",
+          "process_id": 1705107,
+          "thread_id": 124353089103680,
+          "invocation_id": 29410,
+          "frame_index": 58824,
+          "hook_epoch": 2,
+          "site": {
+            "code": "pycode-v2:975a4dcba31129bf9498f63e03157eea4ef02bf7792966680102e1cba3b1d5c7",
+            "offset": 1378,
+            "opname": "POP_TOP",
+            "position": [
+              2079,
+              2079,
+              9,
+              14
+            ]
+          },
+          "loads": []
+        },
+        {
+          "index": 694959,
+          "kind": "INSTRUCTION",
+          "process_id": 1705107,
+          "thread_id": 124353089103680,
+          "invocation_id": 25068,
+          "frame_index": 58825,
+          "hook_epoch": 2,
+          "site": {
+            "code": "pycode-v2:3f7009c4f2d990134ce7f121be4a0f9eb2d84e9e1e586ec6401e3fbd6b624aae",
+            "offset": 756,
+            "opname": "POP_TOP",
+            "position": [
+              138,
+              138,
+              0,
+              65
+            ]
+          },
+          "loads": []
+        },
+        {
+          "index": 694960,
+          "kind": "GAP",
+          "process_id": 1705107,
+          "thread_id": 124353089103680,
+          "invocation_id": null,
+          "frame_index": 58826,
+          "hook_epoch": 2,
+          "reason": "INSTRUCTION_FRAME_UNAVAILABLE"
+        }
+      ],
+      "stored_unique_bytes": 13873783,
+      "stored_read_accounting": "one stored SHA pass + one gzip decode pass; neither repeats capture"
+    },
+    {
+      "original_archive_declaration": {
+        "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/lewm_joint_capture_fixed_scope_20261026/capture/trace/python-call-targets.1705107.jsonl.gz",
+        "compressed_bytes": 2841101,
+        "gzip_sha256": "deb388a80f4b2b64125f06f30098f80dffcad3da67e165bb650fa65ccc5494df",
+        "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/lewm_joint_capture_fixed_scope_20261026/capture/trace/python-call-targets.1705107.jsonl",
+        "raw_bytes": 75855828,
+        "raw_sha256": "3f263657b7f0aa1e95ec0befb4a559c62387c31a6d9a0ccd5cf7c58bee0dde1e"
+      },
+      "raw_rows": 193533,
+      "decoded_bytes_read": 75855828,
+      "stored_bytes_read": 5682202,
+      "stored_sha256_verified": "deb388a80f4b2b64125f06f30098f80dffcad3da67e165bb650fa65ccc5494df",
+      "raw_sha256_verified": "3f263657b7f0aa1e95ec0befb4a559c62387c31a6d9a0ccd5cf7c58bee0dde1e",
+      "elapsed_seconds": 0.665851095051039,
+      "gap_reason_counts": {
+        "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL": 236,
+        "PYTHON_TARGET_NO_IMMEDIATE_ENTRY_RETAINED": 47
+      },
+      "gaps": [
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 523109,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 523118,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 523182,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 523191,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 523255,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 523264,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 523328,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 523337,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 523401,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 523410,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 523474,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 523483,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 523547,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 523556,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 523620,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 523629,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 523693,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 523702,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 523766,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 523775,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 523839,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 523848,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 523912,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 523921,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 523985,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 523994,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 524058,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 524067,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 524131,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 524140,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 524204,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 524213,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 524277,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 524286,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 524350,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 524359,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 524423,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 524432,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 524496,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 524505,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 524569,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 524578,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 524645,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 524654,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 524721,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 524730,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 524794,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 524803,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 524870,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 524879,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 524939,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 524948,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 525008,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 525017,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 525077,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 525086,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 525146,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 525155,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 525215,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 525224,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 525284,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 525293,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 525353,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 525362,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 525422,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 525431,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 525491,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 525500,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 525560,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 525569,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 525629,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 525638,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 525698,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 525707,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 525771,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 525780,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 525847,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 525856,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 525923,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 525932,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 525999,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 526008,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 526075,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 526084,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 527477,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 527649,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 527676,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 527929,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 529580,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 529752,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 529906,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 531808,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 589433,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 589556,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 589651,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 590473,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 590842,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 590993,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 591098,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 591985,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 593473,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 593588,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 593742,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 594512,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 594703,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 595503,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 596324,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 596496,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 597288,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 597533,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 597705,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 598519,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 599068,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 599205,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 599284,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 600106,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 601947,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 602140,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 602239,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 603104,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 603571,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 603705,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 604462,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 605203,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 605394,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 606175,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 606816,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 606988,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 607767,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 608282,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 608397,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 609119,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 609380,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 609419,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 609484,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 609638,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 610201,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 610354,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 611097,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 611457,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 611572,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 612299,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 612554,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 612650,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 613369,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 613726,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 613841,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 614568,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 614896,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 615011,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 615760,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 616224,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 616358,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 617104,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 617357,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 617453,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 618172,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 619199,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 619447,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 620274,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 620724,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 620858,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 621588,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 622338,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 622529,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 623310,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 625097,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 625497,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 626454,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 627918,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 628128,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 628961,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 629488,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 629622,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 630368,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 630830,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 630964,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 631699,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 633867,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 633982,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 634009,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 634821,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 635060,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 635156,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 635886,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 636331,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 636484,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 637276,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 637739,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 637806,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 637881,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 638644,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 639215,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 639387,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 639541,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 639914,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 640048,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 640840,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 641193,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 641308,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 642046,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 642380,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 642495,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 643244,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 644201,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 644411,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 645233,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 645587,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 645702,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 646440,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 646998,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 647151,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 647916,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 648761,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 648971,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 649644,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 650177,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 650330,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 651090,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 651523,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 651657,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 652409,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 652750,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 652865,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 653614,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 657838,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 658289,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 658385,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 681865,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 682189,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 682343,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 682827,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 682961,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 683115,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 685589,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 689131,
+            "reason": "PYTHON_TARGET_DID_NOT_ENTER_BEFORE_NEXT_CALL"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 527488,
+            "reason": "PYTHON_TARGET_NO_IMMEDIATE_ENTRY_RETAINED"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 529591,
+            "reason": "PYTHON_TARGET_NO_IMMEDIATE_ENTRY_RETAINED"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 589446,
+            "reason": "PYTHON_TARGET_NO_IMMEDIATE_ENTRY_RETAINED"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 590857,
+            "reason": "PYTHON_TARGET_NO_IMMEDIATE_ENTRY_RETAINED"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 593481,
+            "reason": "PYTHON_TARGET_NO_IMMEDIATE_ENTRY_RETAINED"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 594524,
+            "reason": "PYTHON_TARGET_NO_IMMEDIATE_ENTRY_RETAINED"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 596335,
+            "reason": "PYTHON_TARGET_NO_IMMEDIATE_ENTRY_RETAINED"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 597544,
+            "reason": "PYTHON_TARGET_NO_IMMEDIATE_ENTRY_RETAINED"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 599082,
+            "reason": "PYTHON_TARGET_NO_IMMEDIATE_ENTRY_RETAINED"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 601965,
+            "reason": "PYTHON_TARGET_NO_IMMEDIATE_ENTRY_RETAINED"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 603580,
+            "reason": "PYTHON_TARGET_NO_IMMEDIATE_ENTRY_RETAINED"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 605215,
+            "reason": "PYTHON_TARGET_NO_IMMEDIATE_ENTRY_RETAINED"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 606827,
+            "reason": "PYTHON_TARGET_NO_IMMEDIATE_ENTRY_RETAINED"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 608290,
+            "reason": "PYTHON_TARGET_NO_IMMEDIATE_ENTRY_RETAINED"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 609387,
+            "reason": "PYTHON_TARGET_NO_IMMEDIATE_ENTRY_RETAINED"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 610211,
+            "reason": "PYTHON_TARGET_NO_IMMEDIATE_ENTRY_RETAINED"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 611465,
+            "reason": "PYTHON_TARGET_NO_IMMEDIATE_ENTRY_RETAINED"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 612561,
+            "reason": "PYTHON_TARGET_NO_IMMEDIATE_ENTRY_RETAINED"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 613734,
+            "reason": "PYTHON_TARGET_NO_IMMEDIATE_ENTRY_RETAINED"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 614904,
+            "reason": "PYTHON_TARGET_NO_IMMEDIATE_ENTRY_RETAINED"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 616233,
+            "reason": "PYTHON_TARGET_NO_IMMEDIATE_ENTRY_RETAINED"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 617364,
+            "reason": "PYTHON_TARGET_NO_IMMEDIATE_ENTRY_RETAINED"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 619214,
+            "reason": "PYTHON_TARGET_NO_IMMEDIATE_ENTRY_RETAINED"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 620733,
+            "reason": "PYTHON_TARGET_NO_IMMEDIATE_ENTRY_RETAINED"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 622350,
+            "reason": "PYTHON_TARGET_NO_IMMEDIATE_ENTRY_RETAINED"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 625120,
+            "reason": "PYTHON_TARGET_NO_IMMEDIATE_ENTRY_RETAINED"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 627931,
+            "reason": "PYTHON_TARGET_NO_IMMEDIATE_ENTRY_RETAINED"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 629497,
+            "reason": "PYTHON_TARGET_NO_IMMEDIATE_ENTRY_RETAINED"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 630839,
+            "reason": "PYTHON_TARGET_NO_IMMEDIATE_ENTRY_RETAINED"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 633875,
+            "reason": "PYTHON_TARGET_NO_IMMEDIATE_ENTRY_RETAINED"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 635067,
+            "reason": "PYTHON_TARGET_NO_IMMEDIATE_ENTRY_RETAINED"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 636341,
+            "reason": "PYTHON_TARGET_NO_IMMEDIATE_ENTRY_RETAINED"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 637748,
+            "reason": "PYTHON_TARGET_NO_IMMEDIATE_ENTRY_RETAINED"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 639226,
+            "reason": "PYTHON_TARGET_NO_IMMEDIATE_ENTRY_RETAINED"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 639923,
+            "reason": "PYTHON_TARGET_NO_IMMEDIATE_ENTRY_RETAINED"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 641201,
+            "reason": "PYTHON_TARGET_NO_IMMEDIATE_ENTRY_RETAINED"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 642388,
+            "reason": "PYTHON_TARGET_NO_IMMEDIATE_ENTRY_RETAINED"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 644214,
+            "reason": "PYTHON_TARGET_NO_IMMEDIATE_ENTRY_RETAINED"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 645595,
+            "reason": "PYTHON_TARGET_NO_IMMEDIATE_ENTRY_RETAINED"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 647008,
+            "reason": "PYTHON_TARGET_NO_IMMEDIATE_ENTRY_RETAINED"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 648774,
+            "reason": "PYTHON_TARGET_NO_IMMEDIATE_ENTRY_RETAINED"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 650187,
+            "reason": "PYTHON_TARGET_NO_IMMEDIATE_ENTRY_RETAINED"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 651532,
+            "reason": "PYTHON_TARGET_NO_IMMEDIATE_ENTRY_RETAINED"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 652758,
+            "reason": "PYTHON_TARGET_NO_IMMEDIATE_ENTRY_RETAINED"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 657892,
+            "reason": "PYTHON_TARGET_NO_IMMEDIATE_ENTRY_RETAINED"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 681884,
+            "reason": "PYTHON_TARGET_NO_IMMEDIATE_ENTRY_RETAINED"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 682836,
+            "reason": "PYTHON_TARGET_NO_IMMEDIATE_ENTRY_RETAINED"
+          }
+        }
+      ],
+      "last_eight_records": [
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 647008,
+            "reason": "PYTHON_TARGET_NO_IMMEDIATE_ENTRY_RETAINED"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 648774,
+            "reason": "PYTHON_TARGET_NO_IMMEDIATE_ENTRY_RETAINED"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 650187,
+            "reason": "PYTHON_TARGET_NO_IMMEDIATE_ENTRY_RETAINED"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 651532,
+            "reason": "PYTHON_TARGET_NO_IMMEDIATE_ENTRY_RETAINED"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 652758,
+            "reason": "PYTHON_TARGET_NO_IMMEDIATE_ENTRY_RETAINED"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 657892,
+            "reason": "PYTHON_TARGET_NO_IMMEDIATE_ENTRY_RETAINED"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 681884,
+            "reason": "PYTHON_TARGET_NO_IMMEDIATE_ENTRY_RETAINED"
+          }
+        },
+        {
+          "schema": "scar.python-call-targets",
+          "schema_version": 2,
+          "kind": "GAP",
+          "value": {
+            "attempt_index": 682836,
+            "reason": "PYTHON_TARGET_NO_IMMEDIATE_ENTRY_RETAINED"
+          }
+        }
+      ],
+      "stored_unique_bytes": 2841101,
+      "stored_read_accounting": "one stored SHA pass + one gzip decode pass; neither repeats capture"
+    }
+  ]
+}

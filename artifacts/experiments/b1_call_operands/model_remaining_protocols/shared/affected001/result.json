@@ -1,0 +1,10 @@
+{
+  "returncode": 0,
+  "duration_seconds": 9.803022120147943,
+  "source_sha256_before": "a6e81da4687dd4662495f14d09b0ac9abad69bb2963ebc1740635277697f393b",
+  "source_sha256_after": "50d3ec0459aeade0fea1d914e6849d409ae176f610b5506545fbb2e1319b2b5d",
+  "source_unchanged": false,
+  "changed_paths": [
+    "scar/ir/program/protocol_async.py"
+  ]
+}

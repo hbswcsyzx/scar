@@ -1,0 +1,52 @@
+{
+  "archive": {
+    "bytes": 145854,
+    "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/archive-index.json",
+    "sha256": "f4b21fbaef73f27d0e708a9ff6e4d117e8d8f8e2b1a418baa9addaf141567815"
+  },
+  "base": {
+    "bytes": 316803,
+    "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_os_interface_work_20261023/result/interfaces/manifest.json",
+    "sha256": "cbc6dcfd78ccca0961bdabecce94bc747b7b281fdbc3f49228c8b52b9b3aec14"
+  },
+  "birth_facts": {
+    "bytes": 11598,
+    "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_os_fd_source_projection_20261023/gate-attempt01/birth-facts.json",
+    "sha256": "d804c91353578a8feadab7af2fe2118d776b3a0c8d1fdcfc4da51843e08ada3d"
+  },
+  "contexts": {
+    "bytes": 281314,
+    "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_os_source_lookup_20261023/gate-attempt01/result/manifest.json",
+    "sha256": "d37eef5881d25a66c7500be2130b4f7af114586e0b8607f81a36ddd359886d84"
+  },
+  "coords": {
+    "bytes": 674239,
+    "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_os_interface_work_20261023/result/capture-coordinates.json",
+    "sha256": "4d266b9ea62ed0d4c25cb5606dae31dea5aeab453405f79608ab5c038f012a25"
+  },
+  "events": {
+    "bytes": 154531,
+    "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_fd_table_projection_20261023/context-events.json",
+    "sha256": "e4601e54e1a1b406aaa89b4de424c814fbc12b5ce30db4b2a926def86a81020d"
+  },
+  "fd_final_receipts": {
+    "bytes": 6045,
+    "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_os_fd_source_projection_20261023/gate-final-artifact-receipts.json",
+    "sha256": "86d5199e73e4ec4390fc8dd241d189418fdf81074b21f4c5eb41ab55828b05f1"
+  },
+  "fd_manifest": {
+    "bytes": 197638,
+    "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_os_fd_source_projection_20261023/gate-attempt01/result/manifest.json",
+    "sha256": "0ebb957e8b4fd86eafefbce6f854ff045627cface9523f06766aabab8b2e8723"
+  },
+  "fd_summary": {
+    "bytes": 8971,
+    "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_os_fd_source_projection_20261023/gate-attempt01/summary.json",
+    "sha256": "dbcb33262fed054f6bd604c2efdb75848369656bd6ad052f6a1abd8e57c760e9"
+  },
+  "file_receipts": {
+    "bytes": 583581,
+    "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_fd_table_projection_20261023/file-receipts.json",
+    "sha256": "612fe0c359a8d253cd9edad5019f1d953bbf0975139759c993efb517cc986ef0"
+  }
+}

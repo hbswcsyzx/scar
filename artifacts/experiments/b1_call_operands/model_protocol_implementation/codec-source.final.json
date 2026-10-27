@@ -1,0 +1,27 @@
+{
+  "scar/ir/program/model.py": {
+    "sha256": "2546e57c7303e6ff97c65a51d9cc472401acaf4d8917eb36af27e0706ec1363c",
+    "size_bytes": 50428,
+    "mtime_ns": 1792337399958282035
+  },
+  "scar/ir/program/codec.py": {
+    "sha256": "862e85f251deadb216b9688f10b94ebce4ebda38b33a4a9eb4fe3224c0b72764",
+    "size_bytes": 27757,
+    "mtime_ns": 1792337476980518457
+  },
+  "tests/unit/test_program_protocol_codec.py": {
+    "sha256": "be153159f135cde07dfabd41d50de99cf1c0fbc29c71a8e369f24bc6f62ab2c7",
+    "size_bytes": 8894,
+    "mtime_ns": 1792337921948247275
+  },
+  "tests/fixtures/program_graph_v16_frozen.json": {
+    "sha256": "c1ad1ba55842b1b5451389275744212216a652231ace7e9106fd37ceb19f0351",
+    "size_bytes": 15059,
+    "mtime_ns": 1792337233845492686
+  },
+  "tests/fixtures/program_graph_v16_frozen.proof.json": {
+    "sha256": "95072c4607c67e7460811e45f322dcd977093720c494cbfcece3000bdc6f0899",
+    "size_bytes": 1068,
+    "mtime_ns": 1792337233846021226
+  }
+}

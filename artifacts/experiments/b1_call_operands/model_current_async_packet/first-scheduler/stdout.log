@@ -1,0 +1,86 @@
+FFFF...                                                                  [100%]
+=================================== FAILURES ===================================
+_ test_later_scheduler_packet_uses_s_normalization_own_normal_and_separate_raise_states[THROW] _
+
+kind = 'THROW'
+
+    @pytest.mark.parametrize('kind', ('THROW', 'CLOSE'))
+    def test_later_scheduler_packet_uses_s_normalization_own_normal_and_separate_raise_states(kind):
+        graph, details = _scheduler_packet_program(kind)
+        _assert_original_ports_and_states(graph, details)
+        assert ProgramIndex(_core(graph)).source_binding(details['scheduler_source'], details['raw'],
+            budget=QUERY_BUDGET)['match'] is True
+        report, shared = _report(graph)
+        delivery = _selected_delivery(report, details)
+        alternative, = delivery['alternatives']
+>       assert alternative['match'] is True
+E       assert None is True
+
+tests/unit/test_program_async_scheduler_packets.py:150: AssertionError
+_ test_later_scheduler_packet_uses_s_normalization_own_normal_and_separate_raise_states[CLOSE] _
+
+kind = 'CLOSE'
+
+    @pytest.mark.parametrize('kind', ('THROW', 'CLOSE'))
+    def test_later_scheduler_packet_uses_s_normalization_own_normal_and_separate_raise_states(kind):
+        graph, details = _scheduler_packet_program(kind)
+        _assert_original_ports_and_states(graph, details)
+        assert ProgramIndex(_core(graph)).source_binding(details['scheduler_source'], details['raw'],
+            budget=QUERY_BUDGET)['match'] is True
+        report, shared = _report(graph)
+        delivery = _selected_delivery(report, details)
+        alternative, = delivery['alternatives']
+>       assert alternative['match'] is True
+E       assert None is True
+
+tests/unit/test_program_async_scheduler_packets.py:150: AssertionError
+_ test_later_scheduler_normalizer_cannot_take_same_kind_latent_l_instead[THROW] _
+
+kind = 'THROW'
+
+    @pytest.mark.parametrize('kind', ('THROW', 'CLOSE'))
+    def test_later_scheduler_normalizer_cannot_take_same_kind_latent_l_instead(kind):
+        graph, details = _scheduler_packet_program(kind)
+        normalizer = details['normalizer']
+        changed = replace(normalizer, uses=tuple(replace(use, value=details['latent_value'])
+            if use.id == details['raw'].use else use for use in normalizer.uses))
+        wrong = replace(graph, operations=tuple(changed if operation.id == normalizer.id else operation
+                                                for operation in graph.operations))
+        assert graph.values == wrong.values and graph.regions == wrong.regions
+        assert graph.protocol_operations == wrong.protocol_operations
+        assert tuple(use for use in normalizer.uses if use.id != details['raw'].use) == tuple(
+            use for use in changed.uses if use.id != details['raw'].use)
+        _assert_original_ports_and_states(wrong, {**details, 'normalizer': changed})
+>       assert ProgramIndex(_core(wrong)).source_binding(details['scheduler_source'], details['raw'],
+            budget=QUERY_BUDGET)['match'] is False
+E       assert None is False
+
+tests/unit/test_program_async_scheduler_packets.py:179: AssertionError
+_ test_later_scheduler_normalizer_cannot_take_same_kind_latent_l_instead[CLOSE] _
+
+kind = 'CLOSE'
+
+    @pytest.mark.parametrize('kind', ('THROW', 'CLOSE'))
+    def test_later_scheduler_normalizer_cannot_take_same_kind_latent_l_instead(kind):
+        graph, details = _scheduler_packet_program(kind)
+        normalizer = details['normalizer']
+        changed = replace(normalizer, uses=tuple(replace(use, value=details['latent_value'])
+            if use.id == details['raw'].use else use for use in normalizer.uses))
+        wrong = replace(graph, operations=tuple(changed if operation.id == normalizer.id else operation
+                                                for operation in graph.operations))
+        assert graph.values == wrong.values and graph.regions == wrong.regions
+        assert graph.protocol_operations == wrong.protocol_operations
+        assert tuple(use for use in normalizer.uses if use.id != details['raw'].use) == tuple(
+            use for use in changed.uses if use.id != details['raw'].use)
+        _assert_original_ports_and_states(wrong, {**details, 'normalizer': changed})
+>       assert ProgramIndex(_core(wrong)).source_binding(details['scheduler_source'], details['raw'],
+            budget=QUERY_BUDGET)['match'] is False
+E       assert None is False
+
+tests/unit/test_program_async_scheduler_packets.py:179: AssertionError
+=========================== short test summary info ============================
+FAILED tests/unit/test_program_async_scheduler_packets.py::test_later_scheduler_packet_uses_s_normalization_own_normal_and_separate_raise_states[THROW]
+FAILED tests/unit/test_program_async_scheduler_packets.py::test_later_scheduler_packet_uses_s_normalization_own_normal_and_separate_raise_states[CLOSE]
+FAILED tests/unit/test_program_async_scheduler_packets.py::test_later_scheduler_normalizer_cannot_take_same_kind_latent_l_instead[THROW]
+FAILED tests/unit/test_program_async_scheduler_packets.py::test_later_scheduler_normalizer_cannot_take_same_kind_latent_l_instead[CLOSE]
+4 failed, 3 passed in 2.20s

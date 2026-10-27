@@ -1,0 +1,4 @@
+{
+  "message": "OS capture coverage: actual launch nonce is not capture-bound",
+  "type": "OSCaptureCoverageError"
+}

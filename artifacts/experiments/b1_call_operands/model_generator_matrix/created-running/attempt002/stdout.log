@@ -1,0 +1,22 @@
+.............F.                                                          [100%]
+=================================== FAILURES ===================================
+_ test_a_same_typed_other_bool_cannot_replace_the_real_running_guard_condition _
+
+    def test_a_same_typed_other_bool_cannot_replace_the_real_running_guard_condition():
+        graph, details = generator_admission_program(stage="running", kind=RawRequestKind.THROW)
+        require_valid(graph)
+        first, second = details["guards"]
+        wrong_value = next(value for value in graph.values
+                           if value.origin == first["row"].contract.result).id
+        branch = _op(graph, second["branch"])
+        malformed = replace(graph, operations=tuple(replace(op, uses=tuple(
+            replace(use, value=wrong_value) if use.id == branch.terminator.condition else use
+            for use in op.uses)) if op.id == branch.id else op for op in graph.operations))
+>       assert "admission_bool_source" in _codes(malformed)
+E       AssertionError: assert 'admission_bool_source' in {'unavailable_value'}
+E        +  where {'unavailable_value'} = _codes(ProgramGraph(root=RegionID(value='matrix.calls'), regions=(Region(id=RegionID(value='matrix.calls'), label='declared d...), source=StaticProtocolGap(reason=<StaticGapReason.NATIVE_APPLICABILITY_UNPROVEN: 'NATIVE_APPLICABILITY_UNPROVEN'>)))))
+
+tests/unit/test_program_generator_admission.py:143: AssertionError
+=========================== short test summary info ============================
+FAILED tests/unit/test_program_generator_admission.py::test_a_same_typed_other_bool_cannot_replace_the_real_running_guard_condition
+1 failed, 14 passed in 1.69s

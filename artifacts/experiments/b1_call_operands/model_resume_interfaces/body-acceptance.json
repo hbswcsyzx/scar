@@ -1,0 +1,28 @@
+{
+  "schema": "scar.resumable-body-acceptance",
+  "schema_version": 1,
+  "status": "PASS",
+  "implementation_revision": "e6b47239c874b179416b2ed5a37bd0bd07b5d2b7",
+  "source_sha256": "5ad7f47129a81b79c036dd46c458ecf603687546fa6e77bb4b7d2630b133d5a2",
+  "source_file_count": 403,
+  "fixture_file_count": 26,
+  "component_checks": 499,
+  "component_seconds": 7.077,
+  "full_counts": {
+    "passed": 3542,
+    "failed": 0,
+    "error": 0,
+    "skipped": 0,
+    "total": 3542
+  },
+  "full_seconds": 432.9224936636165,
+  "max_rss_kib": 1030184,
+  "full_first_stage_complete": false,
+  "full_c2_complete": false,
+  "source_recovery_verified": false,
+  "driver_verified": false,
+  "runtime_resumption_verified": false,
+  "transformation_verified": false,
+  "lewm_speedup_measured": false,
+  "scope": "Declared body structure with canonical saved Uses, current ingress state, drive-local context and binding/C0/C1 composition. No driver/source/runtime authority."
+}

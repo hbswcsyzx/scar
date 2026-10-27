@@ -1,0 +1,26 @@
+{
+  "schema": "scar.d2-lifecycle-contract-acceptance",
+  "schema_version": 1,
+  "status": "PASS_DESIGN",
+  "contract_sha256": "94e0e84e918129875ae0f913095015ecef42ee9c25bb8305d96135ce9b8ef699",
+  "baseline_revision": "38d29681170f481cc9d8682ca7786dfc924dee1a",
+  "baseline_source_matches_d1_implementation": true,
+  "source_comparison": "git diff 382363c 38d2968 -- scar tests scripts gates pyproject.toml is empty",
+  "scope": "Fields, conditional applicability, canonical source/state roles, E/F then T and current P transfer; not a product or native-runtime test",
+  "reviews": {
+    "session_and_narrow_drop": "review/final_review.txt",
+    "body_no_body": "review/no_body_final_review.md",
+    "owner_transfer_and_convergence": "review/owner_flow.md"
+  },
+  "review_version_note": "First two final reviews bound the initial combined contract; root clarified applicable-and-completed pending wording and E/F-before-T. The owner reviewer checked the final contract hash.",
+  "lewm_design_probe_scenarios": 11,
+  "lewm_design_probe_bounded_checks": 1920,
+  "not_exhaustive": true,
+  "wrong_initial_interpreter_preserved": true,
+  "d2_product_complete": false,
+  "efp_product_analysis_implemented": false,
+  "source_runtime_verified": false,
+  "transformation_authorized": false,
+  "full_first_stage_complete": false,
+  "lewm_speedup_measured": false
+}

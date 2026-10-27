@@ -1,0 +1,220 @@
+{
+  "status": "INTERRUPTED_IMPORT_PREFIX",
+  "signal": 2,
+  "pid": 2145559,
+  "elapsed_ns": 69247978404,
+  "affinity": [
+    54,
+    55
+  ],
+  "workload": "runpy.run_path(original run_inference.py, non-main name): same top-level import prefix only",
+  "helpers": [
+    {
+      "helper": "targets.on_call",
+      "source": "/home/zyf/AAA/scar-worktrees/os-postprocessing-roles/artifacts/experiments/lewm_collector_helper_timing_20261027/diagnostic-source/scar/trace/python_call_targets.py",
+      "line": 124,
+      "calls": 249693,
+      "inclusive_ns": 16421667109,
+      "inclusive_seconds": 16.421667109
+    },
+    {
+      "helper": "deferred.append",
+      "source": "/home/zyf/AAA/scar-worktrees/os-postprocessing-roles/artifacts/experiments/lewm_collector_helper_timing_20261027/diagnostic-source/scar/trace/deferred_jsonl.py",
+      "line": 55,
+      "calls": 913845,
+      "inclusive_ns": 12968246777,
+      "inclusive_seconds": 12.968246777
+    },
+    {
+      "helper": "journal.append",
+      "source": "/home/zyf/AAA/scar-worktrees/os-postprocessing-roles/artifacts/experiments/lewm_collector_helper_timing_20261027/diagnostic-source/scar/trace/snapshot_journal.py",
+      "line": 147,
+      "calls": 913844,
+      "inclusive_ns": 10784856038,
+      "inclusive_seconds": 10.784856038
+    },
+    {
+      "helper": "targets.emit",
+      "source": "/home/zyf/AAA/scar-worktrees/os-postprocessing-roles/artifacts/experiments/lewm_collector_helper_timing_20261027/diagnostic-source/scar/trace/python_call_targets.py",
+      "line": 83,
+      "calls": 311923,
+      "inclusive_ns": 9471743382,
+      "inclusive_seconds": 9.471743382
+    },
+    {
+      "helper": "operands._emit",
+      "source": "/home/zyf/AAA/scar-worktrees/os-postprocessing-roles/artifacts/experiments/lewm_collector_helper_timing_20261027/diagnostic-source/scar/trace/call_operands.py",
+      "line": 278,
+      "calls": 312373,
+      "inclusive_ns": 6460150295,
+      "inclusive_seconds": 6.460150295
+    },
+    {
+      "helper": "env.dispatch",
+      "source": "/home/zyf/AAA/scar-worktrees/os-postprocessing-roles/artifacts/experiments/lewm_collector_helper_timing_20261027/diagnostic-source/scar/trace/callable_environment.py",
+      "line": 310,
+      "calls": 62680,
+      "inclusive_ns": 5088147227,
+      "inclusive_seconds": 5.088147227
+    },
+    {
+      "helper": "targets._target_record",
+      "source": "/home/zyf/AAA/scar-worktrees/os-postprocessing-roles/artifacts/experiments/lewm_collector_helper_timing_20261027/diagnostic-source/scar/trace/python_call_targets.py",
+      "line": 19,
+      "calls": 311923,
+      "inclusive_ns": 3781988856,
+      "inclusive_seconds": 3.781988856
+    },
+    {
+      "helper": "operands._reference",
+      "source": "/home/zyf/AAA/scar-worktrees/os-postprocessing-roles/artifacts/experiments/lewm_collector_helper_timing_20261027/diagnostic-source/scar/trace/call_operands.py",
+      "line": 707,
+      "calls": 878046,
+      "inclusive_ns": 3648953126,
+      "inclusive_seconds": 3.648953126
+    },
+    {
+      "helper": "code.site",
+      "source": "/home/zyf/AAA/scar-worktrees/os-postprocessing-roles/artifacts/experiments/lewm_collector_helper_timing_20261027/diagnostic-source/scar/trace/code_snapshot.py",
+      "line": 328,
+      "calls": 536382,
+      "inclusive_ns": 3447764016,
+      "inclusive_seconds": 3.447764016
+    },
+    {
+      "helper": "code._key_record",
+      "source": "/home/zyf/AAA/scar-worktrees/os-postprocessing-roles/artifacts/experiments/lewm_collector_helper_timing_20261027/diagnostic-source/scar/trace/code_snapshot.py",
+      "line": 171,
+      "calls": 1369208,
+      "inclusive_ns": 3323620889,
+      "inclusive_seconds": 3.323620889
+    },
+    {
+      "helper": "edges._reference",
+      "source": "/home/zyf/AAA/scar-worktrees/os-postprocessing-roles/artifacts/experiments/lewm_collector_helper_timing_20261027/diagnostic-source/scar/trace/call_edges.py",
+      "line": 298,
+      "calls": 1124191,
+      "inclusive_ns": 2925667686,
+      "inclusive_seconds": 2.925667686
+    },
+    {
+      "helper": "operands._shape",
+      "source": "/home/zyf/AAA/scar-worktrees/os-postprocessing-roles/artifacts/experiments/lewm_collector_helper_timing_20261027/diagnostic-source/scar/trace/call_operands.py",
+      "line": 718,
+      "calls": 249693,
+      "inclusive_ns": 2854592289,
+      "inclusive_seconds": 2.854592289
+    },
+    {
+      "helper": "code.code_key",
+      "source": "/home/zyf/AAA/scar-worktrees/os-postprocessing-roles/artifacts/experiments/lewm_collector_helper_timing_20261027/diagnostic-source/scar/trace/code_snapshot.py",
+      "line": 213,
+      "calls": 560876,
+      "inclusive_ns": 2702842076,
+      "inclusive_seconds": 2.702842076
+    },
+    {
+      "helper": "env._emit",
+      "source": "/home/zyf/AAA/scar-worktrees/os-postprocessing-roles/artifacts/experiments/lewm_collector_helper_timing_20261027/diagnostic-source/scar/trace/callable_environment.py",
+      "line": 157,
+      "calls": 123257,
+      "inclusive_ns": 2629188451,
+      "inclusive_seconds": 2.629188451
+    },
+    {
+      "helper": "edges._code",
+      "source": "/home/zyf/AAA/scar-worktrees/os-postprocessing-roles/artifacts/experiments/lewm_collector_helper_timing_20261027/diagnostic-source/scar/trace/call_edges.py",
+      "line": 279,
+      "calls": 247055,
+      "inclusive_ns": 2339152949,
+      "inclusive_seconds": 2.339152949
+    },
+    {
+      "helper": "edges._site",
+      "source": "/home/zyf/AAA/scar-worktrees/os-postprocessing-roles/artifacts/experiments/lewm_collector_helper_timing_20261027/diagnostic-source/scar/trace/call_edges.py",
+      "line": 294,
+      "calls": 164688,
+      "inclusive_ns": 1993365306,
+      "inclusive_seconds": 1.993365306
+    },
+    {
+      "helper": "edges._bindings",
+      "source": "/home/zyf/AAA/scar-worktrees/os-postprocessing-roles/artifacts/experiments/lewm_collector_helper_timing_20261027/diagnostic-source/scar/trace/call_edges.py",
+      "line": 325,
+      "calls": 82367,
+      "inclusive_ns": 1046524423,
+      "inclusive_seconds": 1.046524423
+    },
+    {
+      "helper": "targets.pending_for",
+      "source": "/home/zyf/AAA/scar-worktrees/os-postprocessing-roles/artifacts/experiments/lewm_collector_helper_timing_20261027/diagnostic-source/scar/trace/python_call_targets.py",
+      "line": 161,
+      "calls": 82366,
+      "inclusive_ns": 630704934,
+      "inclusive_seconds": 0.630704934
+    },
+    {
+      "helper": "env._anchored_reference",
+      "source": "/home/zyf/AAA/scar-worktrees/os-postprocessing-roles/artifacts/experiments/lewm_collector_helper_timing_20261027/diagnostic-source/scar/trace/callable_environment.py",
+      "line": 245,
+      "calls": 127980,
+      "inclusive_ns": 625632841,
+      "inclusive_seconds": 0.625632841
+    },
+    {
+      "helper": "operands._layout",
+      "source": "/home/zyf/AAA/scar-worktrees/os-postprocessing-roles/artifacts/experiments/lewm_collector_helper_timing_20261027/diagnostic-source/scar/trace/call_operands.py",
+      "line": 81,
+      "calls": 125361,
+      "inclusive_ns": 477922434,
+      "inclusive_seconds": 0.477922434
+    },
+    {
+      "helper": "sources.observe",
+      "source": "/home/zyf/AAA/scar-worktrees/os-postprocessing-roles/artifacts/experiments/lewm_collector_helper_timing_20261027/diagnostic-source/scar/trace/captured_sources.py",
+      "line": 63,
+      "calls": 1604,
+      "inclusive_ns": 238596727,
+      "inclusive_seconds": 0.238596727
+    },
+    {
+      "helper": "code.code_parameters",
+      "source": "/home/zyf/AAA/scar-worktrees/os-postprocessing-roles/artifacts/experiments/lewm_collector_helper_timing_20261027/diagnostic-source/scar/trace/code_snapshot.py",
+      "line": 223,
+      "calls": 82960,
+      "inclusive_ns": 219733690,
+      "inclusive_seconds": 0.21973369
+    },
+    {
+      "helper": "code.describe_code",
+      "source": "/home/zyf/AAA/scar-worktrees/os-postprocessing-roles/artifacts/experiments/lewm_collector_helper_timing_20261027/diagnostic-source/scar/trace/code_snapshot.py",
+      "line": 315,
+      "calls": 1604,
+      "inclusive_ns": 30251613,
+      "inclusive_seconds": 0.030251613
+    }
+  ],
+  "completed_helper_calls_only": true,
+  "timer_threads": 1,
+  "timer_calibration": {
+    "iterations": 20000,
+    "plain_ns": 1463978,
+    "wrapped_ns": 12626173,
+    "incremental_ns_per_call": 558.10975
+  },
+  "inclusive_times_overlap": true,
+  "exclusive_time_established": false,
+  "performance_AB": false,
+  "collector_witness_enabled": false,
+  "production_source_qualification": false,
+  "native_OS_profiler_enabled": false,
+  "CUDA_VISIBLE_DEVICES": "",
+  "episode_started": false,
+  "differences": [
+    "timer wrappers add clock/counter/function-call cost",
+    "only unchanged LeWM import prefix; no main/eval/model construction",
+    "no strace/native/collector execution witness; 2 CPU affinity; BLAS threads=1",
+    "diagnostic copy, not frozen collector byte/source equivalence",
+    "counter dump precedes collector materialization; close costs not included"
+  ]
+}

@@ -1,0 +1,10 @@
+{
+  "actual_root_session": 72613,
+  "actual_outer_exit_code": 0,
+  "outer_elapsed_s": 783.9558943990269,
+  "worker_result_sha256": "f7e9b465ee1461e716c0150fe6e703014a42709770f28927dded31bd2ac6c6ad",
+  "source_freeze_sha256": "c960d48bdca79b2f7b38a899e4f5b6046df62fe7648630dc95f4243482b6e036",
+  "normal_queries": 6,
+  "static_member_type": "Region",
+  "whole_program_complete": false
+}

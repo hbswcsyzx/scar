@@ -1,0 +1,23 @@
+{
+  "status": "RUNNING",
+  "wrapper_pid": 2145557,
+  "command": [
+    "/usr/bin/time",
+    "-v",
+    "-o",
+    "/home/zyf/AAA/scar-worktrees/os-postprocessing-roles/artifacts/experiments/lewm_collector_helper_timing_20261027/time.txt",
+    "/usr/bin/timeout",
+    "--signal=INT",
+    "--kill-after=15s",
+    "70s",
+    "/home/zyf/miniconda3/envs/lewm/bin/python",
+    "-B",
+    "/home/zyf/AAA/scar-worktrees/os-postprocessing-roles/artifacts/experiments/lewm_collector_helper_timing_20261027/bootstrap.py"
+  ],
+  "max_target_seconds": 70,
+  "kill_grace_seconds": 15,
+  "only_two_affinity_cpus": [
+    54,
+    55
+  ]
+}

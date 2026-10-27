@@ -1,0 +1,10 @@
+{
+  "returncode": 0,
+  "duration_seconds": 4.1641634572297335,
+  "source_sha256_before": "6afaaf9ca9085d57bbc026df217a25701c7fac838aba5fb9347e29a90bc4f123",
+  "source_sha256_after": "b4872422e3a47833debba8f4ae5a80e41f5f7d74c82d2dc09452f27101c95d34",
+  "source_unchanged": false,
+  "changed_paths": [
+    "scar/ir/program/input_origins.py"
+  ]
+}

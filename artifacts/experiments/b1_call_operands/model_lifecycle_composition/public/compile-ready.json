@@ -1,0 +1,26 @@
+{
+  "python": "3.14.7 | packaged by conda-forge | (main, Sep  2 2026, 21:08:32) [GCC 15.3.0]",
+  "imports": "ok",
+  "files": [
+    {
+      "path": "scar/ir/program/queries.py",
+      "sha256": "584fc4b40c83d3618b42f84c71c06d750e264465195f62676bc542e29f0d3ad1",
+      "single_terminal_newline": true
+    },
+    {
+      "path": "scar/cli.py",
+      "sha256": "f01c732d085173355c8048f99c9496cb7a2cf2b25e7a7956b96e2b4278fad32d",
+      "single_terminal_newline": true
+    },
+    {
+      "path": "tests/unit/test_lifecycle_scope_queries.py",
+      "sha256": "b7434157245b788cfbad01ec7e6ac1da4f0c599ed9bd07778029ec63eb735101",
+      "single_terminal_newline": true
+    },
+    {
+      "path": "tests/unit/test_lifecycle_scope_cli.py",
+      "sha256": "5b11ae56c84b26432b2467b6bd60525b24ced74c508f692a635139872bc49bfb",
+      "single_terminal_newline": true
+    }
+  ]
+}

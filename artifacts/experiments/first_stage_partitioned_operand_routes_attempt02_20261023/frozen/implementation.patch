@@ -1,0 +1,20 @@
+diff --git a/scar/analysis/call_operand_routes.py b/scar/analysis/call_operand_routes.py
+index b382c22..4316180 100644
+--- a/scar/analysis/call_operand_routes.py
++++ b/scar/analysis/call_operand_routes.py
+@@ -306,12 +306,14 @@ def build_operand_routes(*, call_model, operand_model, inventory, sources, budge
+         raise ValueError('operand routes require the matching explicit frame/structured inventory used by source verification')
+     core = _Core(sources)
+     issues, templates, obligations, returned = [], [], [], []
++    issue_seen = set()
+     arguments, completions = [], []
+     counts = {'values': 0, 'routes': 0}
+ 
+     def issue(kind, detail, invocation=None, anchor=None):
+         value = OperandRouteIssue(kind, detail, invocation, anchor)
+-        if value not in issues:
++        if value not in issue_seen:
++            issue_seen.add(value)
+             issues.append(value)
+ 
+     def charge(routes=0, values=0):

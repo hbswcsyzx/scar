@@ -1,0 +1,260 @@
+FFFFFFFFFFF.                                                             [100%]
+=================================== FAILURES ===================================
+__________ test_two_incoming_tuples_remain_valid_through_a_later_jump __________
+
+    def test_two_incoming_tuples_remain_valid_through_a_later_jump():
+>       graph, _ = merged_connection_program()
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_program_connection_flow.py:24: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/fixtures/program_connection_graphs.py:80: in merged_connection_program
+    CompletionSuccessor(blocks["normal"], ExitKind.NORMAL, (CompletionResult(0),)),
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+<string>:6: in __init__
+    ???
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = CompletionSuccessor(kind=BlockID(value='merge.normal'), block=<ExitKind.NORMAL: 'NORMAL'>, arguments=(CompletionResult(index=0),))
+
+    def __post_init__(self) -> None:
+        if not isinstance(self.kind, ExitKind):
+>           raise TypeError("CompletionSuccessor.kind must be ExitKind")
+E           TypeError: CompletionSuccessor.kind must be ExitKind
+
+scar/ir/program/model.py:558: TypeError
+_ test_receiver_and_argument_cannot_be_selected_from_different_incoming_routes _
+
+    def test_receiver_and_argument_cannot_be_selected_from_different_incoming_routes():
+>       graph, _ = merged_connection_program(swap_argument=True)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_program_connection_flow.py:36: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/fixtures/program_connection_graphs.py:80: in merged_connection_program
+    CompletionSuccessor(blocks["normal"], ExitKind.NORMAL, (CompletionResult(0),)),
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+<string>:6: in __init__
+    ???
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = CompletionSuccessor(kind=BlockID(value='merge.normal'), block=<ExitKind.NORMAL: 'NORMAL'>, arguments=(CompletionResult(index=0),))
+
+    def __post_init__(self) -> None:
+        if not isinstance(self.kind, ExitKind):
+>           raise TypeError("CompletionSuccessor.kind must be ExitKind")
+E           TypeError: CompletionSuccessor.kind must be ExitKind
+
+scar/ir/program/model.py:558: TypeError
+_ test_missing_incoming_case_keeps_an_obligation_instead_of_accepting_the_good_subset _
+
+    def test_missing_incoming_case_keeps_an_obligation_instead_of_accepting_the_good_subset():
+>       graph, _ = merged_connection_program(omit_right=True)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_program_connection_flow.py:41: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/fixtures/program_connection_graphs.py:80: in merged_connection_program
+    CompletionSuccessor(blocks["normal"], ExitKind.NORMAL, (CompletionResult(0),)),
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+<string>:6: in __init__
+    ???
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = CompletionSuccessor(kind=BlockID(value='merge.normal'), block=<ExitKind.NORMAL: 'NORMAL'>, arguments=(CompletionResult(index=0),))
+
+    def __post_init__(self) -> None:
+        if not isinstance(self.kind, ExitKind):
+>           raise TypeError("CompletionSuccessor.kind must be ExitKind")
+E           TypeError: CompletionSuccessor.kind must be ExitKind
+
+scar/ir/program/model.py:558: TypeError
+__ test_actual_result_uses_define_inventory_before_declared_targets_are_read ___
+
+    def test_actual_result_uses_define_inventory_before_declared_targets_are_read():
+>       graph, details = merged_connection_program(omit_consumer=True)
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_program_connection_flow.py:50: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/fixtures/program_connection_graphs.py:80: in merged_connection_program
+    CompletionSuccessor(blocks["normal"], ExitKind.NORMAL, (CompletionResult(0),)),
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+<string>:6: in __init__
+    ???
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = CompletionSuccessor(kind=BlockID(value='merge.normal'), block=<ExitKind.NORMAL: 'NORMAL'>, arguments=(CompletionResult(index=0),))
+
+    def __post_init__(self) -> None:
+        if not isinstance(self.kind, ExitKind):
+>           raise TypeError("CompletionSuccessor.kind must be ExitKind")
+E           TypeError: CompletionSuccessor.kind must be ExitKind
+
+scar/ir/program/model.py:558: TypeError
+__ test_removing_attachments_does_not_remove_input_or_result_use_denominators __
+
+    def test_removing_attachments_does_not_remove_input_or_result_use_denominators():
+>       graph, details = merged_connection_program(attach=False)
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_program_connection_flow.py:59: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/fixtures/program_connection_graphs.py:80: in merged_connection_program
+    CompletionSuccessor(blocks["normal"], ExitKind.NORMAL, (CompletionResult(0),)),
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+<string>:6: in __init__
+    ???
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = CompletionSuccessor(kind=BlockID(value='merge.normal'), block=<ExitKind.NORMAL: 'NORMAL'>, arguments=(CompletionResult(index=0),))
+
+    def __post_init__(self) -> None:
+        if not isinstance(self.kind, ExitKind):
+>           raise TypeError("CompletionSuccessor.kind must be ExitKind")
+E           TypeError: CompletionSuccessor.kind must be ExitKind
+
+scar/ir/program/model.py:558: TypeError
+_____ test_opaque_consumer_is_retained_and_never_becomes_a_dead_work_proof _____
+
+    def test_opaque_consumer_is_retained_and_never_becomes_a_dead_work_proof():
+>       graph, details = merged_connection_program(opaque_consumer=True)
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_program_connection_flow.py:66: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/fixtures/program_connection_graphs.py:80: in merged_connection_program
+    CompletionSuccessor(blocks["normal"], ExitKind.NORMAL, (CompletionResult(0),)),
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+<string>:6: in __init__
+    ???
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = CompletionSuccessor(kind=BlockID(value='merge.normal'), block=<ExitKind.NORMAL: 'NORMAL'>, arguments=(CompletionResult(index=0),))
+
+    def __post_init__(self) -> None:
+        if not isinstance(self.kind, ExitKind):
+>           raise TypeError("CompletionSuccessor.kind must be ExitKind")
+E           TypeError: CompletionSuccessor.kind must be ExitKind
+
+scar/ir/program/model.py:558: TypeError
+______ test_invalid_call_input_foreign_key_is_a_structural_contradiction _______
+
+    def test_invalid_call_input_foreign_key_is_a_structural_contradiction():
+>       graph, details = merged_connection_program()
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_program_connection_flow.py:73: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/fixtures/program_connection_graphs.py:80: in merged_connection_program
+    CompletionSuccessor(blocks["normal"], ExitKind.NORMAL, (CompletionResult(0),)),
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+<string>:6: in __init__
+    ???
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = CompletionSuccessor(kind=BlockID(value='merge.normal'), block=<ExitKind.NORMAL: 'NORMAL'>, arguments=(CompletionResult(index=0),))
+
+    def __post_init__(self) -> None:
+        if not isinstance(self.kind, ExitKind):
+>           raise TypeError("CompletionSuccessor.kind must be ExitKind")
+E           TypeError: CompletionSuccessor.kind must be ExitKind
+
+scar/ir/program/model.py:558: TypeError
+_____ test_formal_resolves_original_value_without_manufacturing_a_producer _____
+
+    def test_formal_resolves_original_value_without_manufacturing_a_producer():
+>       graph, details = merged_connection_program()
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_program_connection_flow.py:81: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/fixtures/program_connection_graphs.py:80: in merged_connection_program
+    CompletionSuccessor(blocks["normal"], ExitKind.NORMAL, (CompletionResult(0),)),
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+<string>:6: in __init__
+    ???
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = CompletionSuccessor(kind=BlockID(value='merge.normal'), block=<ExitKind.NORMAL: 'NORMAL'>, arguments=(CompletionResult(index=0),))
+
+    def __post_init__(self) -> None:
+        if not isinstance(self.kind, ExitKind):
+>           raise TypeError("CompletionSuccessor.kind must be ExitKind")
+E           TypeError: CompletionSuccessor.kind must be ExitKind
+
+scar/ir/program/model.py:558: TypeError
+___ test_known_small_budget_stays_partial_and_preserves_fixed_call_inventory ___
+
+    def test_known_small_budget_stays_partial_and_preserves_fixed_call_inventory():
+>       graph, _ = merged_connection_program()
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_program_connection_flow.py:91: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/fixtures/program_connection_graphs.py:80: in merged_connection_program
+    CompletionSuccessor(blocks["normal"], ExitKind.NORMAL, (CompletionResult(0),)),
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+<string>:6: in __init__
+    ???
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = CompletionSuccessor(kind=BlockID(value='merge.normal'), block=<ExitKind.NORMAL: 'NORMAL'>, arguments=(CompletionResult(index=0),))
+
+    def __post_init__(self) -> None:
+        if not isinstance(self.kind, ExitKind):
+>           raise TypeError("CompletionSuccessor.kind must be ExitKind")
+E           TypeError: CompletionSuccessor.kind must be ExitKind
+
+scar/ir/program/model.py:558: TypeError
+________ test_prepared_query_does_not_construct_a_second_program_index _________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7858c7e4da70>
+
+    def test_prepared_query_does_not_construct_a_second_program_index(monkeypatch):
+>       graph, _ = merged_connection_program()
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_program_connection_flow.py:98: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/fixtures/program_connection_graphs.py:80: in merged_connection_program
+    CompletionSuccessor(blocks["normal"], ExitKind.NORMAL, (CompletionResult(0),)),
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+<string>:6: in __init__
+    ???
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = CompletionSuccessor(kind=BlockID(value='merge.normal'), block=<ExitKind.NORMAL: 'NORMAL'>, arguments=(CompletionResult(index=0),))
+
+    def __post_init__(self) -> None:
+        if not isinstance(self.kind, ExitKind):
+>           raise TypeError("CompletionSuccessor.kind must be ExitKind")
+E           TypeError: CompletionSuccessor.kind must be ExitKind
+
+scar/ir/program/model.py:558: TypeError
+___ test_reference_only_helper_routes_retain_both_callers_and_the_raw_anchor ___
+
+    def test_reference_only_helper_routes_retain_both_callers_and_the_raw_anchor():
+        graph, details = helper_request_program(depth=2)
+        index = ProgramIndex(graph)
+        ctx = ConnectionContext(graph, index=index, budget=ValidityBudget(50000))
+        result = ctx.bind(RawOperandSource(details["raw"]["left"], 0), details["inputs"][0])
+        assert len(result["routes"]) == 1
+>       assert result["routes"][0]["context"][0][0] == details["calls"]["left"].id
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       TypeError: 'NoneType' object is not subscriptable
+
+tests/unit/test_program_connection_flow.py:113: TypeError
+=========================== short test summary info ============================
+FAILED tests/unit/test_program_connection_flow.py::test_two_incoming_tuples_remain_valid_through_a_later_jump
+FAILED tests/unit/test_program_connection_flow.py::test_receiver_and_argument_cannot_be_selected_from_different_incoming_routes
+FAILED tests/unit/test_program_connection_flow.py::test_missing_incoming_case_keeps_an_obligation_instead_of_accepting_the_good_subset
+FAILED tests/unit/test_program_connection_flow.py::test_actual_result_uses_define_inventory_before_declared_targets_are_read
+FAILED tests/unit/test_program_connection_flow.py::test_removing_attachments_does_not_remove_input_or_result_use_denominators
+FAILED tests/unit/test_program_connection_flow.py::test_opaque_consumer_is_retained_and_never_becomes_a_dead_work_proof
+FAILED tests/unit/test_program_connection_flow.py::test_invalid_call_input_foreign_key_is_a_structural_contradiction
+FAILED tests/unit/test_program_connection_flow.py::test_formal_resolves_original_value_without_manufacturing_a_producer
+FAILED tests/unit/test_program_connection_flow.py::test_known_small_budget_stays_partial_and_preserves_fixed_call_inventory
+FAILED tests/unit/test_program_connection_flow.py::test_prepared_query_does_not_construct_a_second_program_index
+FAILED tests/unit/test_program_connection_flow.py::test_reference_only_helper_routes_retain_both_callers_and_the_raw_anchor
+11 failed, 1 passed in 1.10s

@@ -1,0 +1,392 @@
+{
+  "artifacts": [
+    {
+      "bytes": 10952,
+      "path": "/home/zyf/AAA/scar-worktrees/source-heap-augassign/artifacts/analysis/heap_augassign_implementation_20261026/READ_PLAN.json",
+      "sha256": "fe0323103ff5118517398c3cb027a63d77e490176103961b77befae37047711e"
+    },
+    {
+      "bytes": 2563,
+      "path": "/home/zyf/AAA/scar-worktrees/source-heap-augassign/artifacts/analysis/heap_augassign_implementation_20261026/SOURCE_RECEIPTS.json",
+      "sha256": "68e53838279e83aec82729998992674425a97fc308282a7ced6ae45b50d9c069"
+    },
+    {
+      "bytes": 1377,
+      "path": "/home/zyf/AAA/scar-worktrees/source-heap-augassign/artifacts/analysis/heap_augassign_implementation_20261026/candidate01/plan/dispatch.json.gz",
+      "sha256": "c15f7bcf7595a5734cee954753818a037dd4eaa8a4a2199deb2b16080bae504f"
+    },
+    {
+      "bytes": 79500,
+      "path": "/home/zyf/AAA/scar-worktrees/source-heap-augassign/artifacts/analysis/heap_augassign_implementation_20261026/candidate01/plan/entries.json.gz",
+      "sha256": "a7eae9e259703080ebcb617cf84e108e1355455a6c804a4d567353ebe1433b38"
+    },
+    {
+      "bytes": 193663,
+      "path": "/home/zyf/AAA/scar-worktrees/source-heap-augassign/artifacts/analysis/heap_augassign_implementation_20261026/candidate01/plan/groups.json.gz",
+      "sha256": "57c7e4dde321e22b7b1620e1590246b4a4a004859e57a1d26d324bb4514b1e56"
+    },
+    {
+      "bytes": 54149,
+      "path": "/home/zyf/AAA/scar-worktrees/source-heap-augassign/artifacts/analysis/heap_augassign_implementation_20261026/candidate01/plan/plan.json",
+      "sha256": "c6512d1f427d080b14523264c9cdf90542e33fa33bec8ac680afa3b4b181619b"
+    },
+    {
+      "bytes": 22122,
+      "path": "/home/zyf/AAA/scar-worktrees/source-heap-augassign/artifacts/analysis/heap_augassign_implementation_20261026/candidate01/production/scar/analysis/source_environment_validation.py",
+      "sha256": "47774e3816956b714160d0cb8322e10ec65268c7bb0ea0742d859687d339d206"
+    },
+    {
+      "bytes": 71380,
+      "path": "/home/zyf/AAA/scar-worktrees/source-heap-augassign/artifacts/analysis/heap_augassign_implementation_20261026/candidate01/production/scar/analysis/source_frontend_worklist.py",
+      "sha256": "526e19f5cafd0ba56293d14e1002cf771a31f8e8e5fb6fcac5eab0cccab2d156"
+    },
+    {
+      "bytes": 44778,
+      "path": "/home/zyf/AAA/scar-worktrees/source-heap-augassign/artifacts/analysis/heap_augassign_implementation_20261026/candidate01/production/scar/analysis/source_function_try_lowering.py",
+      "sha256": "9cf6c2886dccee36ad66b8167a1ddfa3b18055e29f30a878634c0ae617ab11f1"
+    },
+    {
+      "bytes": 40407,
+      "path": "/home/zyf/AAA/scar-worktrees/source-heap-augassign/artifacts/analysis/heap_augassign_implementation_20261026/candidate01/production/scar/analysis/source_function_try_validation.py",
+      "sha256": "547b73713c894b7b7e1e5c9c336fb2dbbb5652e94c05435a62b2133e7de577ff"
+    },
+    {
+      "bytes": 22002,
+      "path": "/home/zyf/AAA/scar-worktrees/source-heap-augassign/artifacts/analysis/heap_augassign_implementation_20261026/candidate01/production/scar/analysis/source_heap_lowering.py",
+      "sha256": "a72d041f0f3116c88e39423b97ff4671e801d50d6b8999b2b24ebc8efab05b88"
+    },
+    {
+      "bytes": 10290,
+      "path": "/home/zyf/AAA/scar-worktrees/source-heap-augassign/artifacts/analysis/heap_augassign_implementation_20261026/candidate01/production/scar/ir/program/source_language.py",
+      "sha256": "bfb27375e6b5e70172b995a4751a22b44c04403b90c45505f495aa585f423aaa"
+    },
+    {
+      "bytes": 1327,
+      "path": "/home/zyf/AAA/scar-worktrees/source-heap-augassign/artifacts/analysis/heap_augassign_implementation_20261026/candidate01/public-return.json",
+      "sha256": "c08e1c07a7c9d999eeccf527236cad9a7c91aa6a9be33a7fa85982d2bdc10d1a"
+    },
+    {
+      "bytes": 54997,
+      "path": "/home/zyf/AAA/scar-worktrees/source-heap-augassign/artifacts/analysis/heap_augassign_implementation_20261026/candidate01/receipt.json",
+      "sha256": "229cf8c70a7457b77c69fbe8badf447b769f232ad1583a0cbe902695caf3ce6f"
+    },
+    {
+      "bytes": 3171,
+      "path": "/home/zyf/AAA/scar-worktrees/source-heap-augassign/artifacts/analysis/heap_augassign_implementation_20261026/candidate01/run.py",
+      "sha256": "fe1da77524cf9ebe025f6b25ea0261025418a3a8fc01a25bef0bb69c6c71e584"
+    },
+    {
+      "bytes": 833,
+      "path": "/home/zyf/AAA/scar-worktrees/source-heap-augassign/artifacts/analysis/heap_augassign_implementation_20261026/candidate01/stderr.txt",
+      "sha256": "ec5d51d4dc4e4f2fa0e7a2af4ab671da5956ab729fec3594f3b6548d57796a63"
+    },
+    {
+      "bytes": 851,
+      "path": "/home/zyf/AAA/scar-worktrees/source-heap-augassign/artifacts/analysis/heap_augassign_implementation_20261026/candidate01/stdout.txt",
+      "sha256": "6ca7e608b5ebf850b065b25480ba7369b91cb276acede18d5acdd6c912e8e73b"
+    },
+    {
+      "bytes": 11135,
+      "path": "/home/zyf/AAA/scar-worktrees/source-heap-augassign/artifacts/analysis/heap_augassign_implementation_20261026/candidate01/worker/attempt-00001/result.json",
+      "sha256": "b072296a71b606f907dd5bbb2a6b674351bcfda1fa1aafbc49f8de841882b656"
+    },
+    {
+      "bytes": 22262,
+      "path": "/home/zyf/AAA/scar-worktrees/source-heap-augassign/artifacts/analysis/heap_augassign_implementation_20261026/candidate01/worker/attempt-00001/returned-metadata.json",
+      "sha256": "bf04b6d4b6692c0bcaa42bb5d628bec4d6868be94b9fe8d2766bd8d288437a70"
+    },
+    {
+      "bytes": 487,
+      "path": "/home/zyf/AAA/scar-worktrees/source-heap-augassign/artifacts/analysis/heap_augassign_implementation_20261026/candidate01/worker/attempt-00001/started.json",
+      "sha256": "176c7c93eff3180edbb13f5c402ed786764783f10ca02a676f1d68cc737219b9"
+    },
+    {
+      "bytes": 11135,
+      "path": "/home/zyf/AAA/scar-worktrees/source-heap-augassign/artifacts/analysis/heap_augassign_implementation_20261026/candidate01/worker/attempts.jsonl",
+      "sha256": "b072296a71b606f907dd5bbb2a6b674351bcfda1fa1aafbc49f8de841882b656"
+    },
+    {
+      "bytes": 1238,
+      "path": "/home/zyf/AAA/scar-worktrees/source-heap-augassign/artifacts/analysis/heap_augassign_implementation_20261026/candidate01/worker/manifest.json",
+      "sha256": "df77ab1a7ba347b14b22ee526a570dc0c68a8602047376ba7764503460323633"
+    },
+    {
+      "bytes": 3584,
+      "path": "/home/zyf/AAA/scar-worktrees/source-heap-augassign/artifacts/analysis/heap_augassign_implementation_20261026/candidate02/ACTUAL_TERMINAL.json",
+      "sha256": "e85c0e04c3be607e487f8844f3831b2759dc11ba26e3216399746811998878f8"
+    },
+    {
+      "bytes": 1377,
+      "path": "/home/zyf/AAA/scar-worktrees/source-heap-augassign/artifacts/analysis/heap_augassign_implementation_20261026/candidate02/plan/dispatch.json.gz",
+      "sha256": "c15f7bcf7595a5734cee954753818a037dd4eaa8a4a2199deb2b16080bae504f"
+    },
+    {
+      "bytes": 79500,
+      "path": "/home/zyf/AAA/scar-worktrees/source-heap-augassign/artifacts/analysis/heap_augassign_implementation_20261026/candidate02/plan/entries.json.gz",
+      "sha256": "a7eae9e259703080ebcb617cf84e108e1355455a6c804a4d567353ebe1433b38"
+    },
+    {
+      "bytes": 193663,
+      "path": "/home/zyf/AAA/scar-worktrees/source-heap-augassign/artifacts/analysis/heap_augassign_implementation_20261026/candidate02/plan/groups.json.gz",
+      "sha256": "57c7e4dde321e22b7b1620e1590246b4a4a004859e57a1d26d324bb4514b1e56"
+    },
+    {
+      "bytes": 54149,
+      "path": "/home/zyf/AAA/scar-worktrees/source-heap-augassign/artifacts/analysis/heap_augassign_implementation_20261026/candidate02/plan/plan.json",
+      "sha256": "9458c9eebbe23f7858ea9d871fd16975c7e0a579a5e1bc77abd476efcee38b53"
+    },
+    {
+      "bytes": 1325,
+      "path": "/home/zyf/AAA/scar-worktrees/source-heap-augassign/artifacts/analysis/heap_augassign_implementation_20261026/candidate02/public-return.json",
+      "sha256": "f36d97639cfb3b5c7f7c80a3fbac367e19ae6f1e189b519ac26f1d1f85d792a3"
+    },
+    {
+      "bytes": 55440,
+      "path": "/home/zyf/AAA/scar-worktrees/source-heap-augassign/artifacts/analysis/heap_augassign_implementation_20261026/candidate02/receipt.json",
+      "sha256": "e6441e19e434caef7fb1eefaa9dfae7bec36622c4c69ce735f5155a842752128"
+    },
+    {
+      "bytes": 3178,
+      "path": "/home/zyf/AAA/scar-worktrees/source-heap-augassign/artifacts/analysis/heap_augassign_implementation_20261026/candidate02/run.py",
+      "sha256": "c66f09e9f80c262776d01ffd7592f8729b915a7f54084d57cc36ed89d6f6538d"
+    },
+    {
+      "bytes": 848,
+      "path": "/home/zyf/AAA/scar-worktrees/source-heap-augassign/artifacts/analysis/heap_augassign_implementation_20261026/candidate02/stderr.txt",
+      "sha256": "6706e9a79b5b67e869de1634db0816a3881e0a463d0a5fa353b0ef804db92634"
+    },
+    {
+      "bytes": 936,
+      "path": "/home/zyf/AAA/scar-worktrees/source-heap-augassign/artifacts/analysis/heap_augassign_implementation_20261026/candidate02/stdout.txt",
+      "sha256": "eac0455711bbed262e83c70573ecf7d16b363c17a98a63ed04ccdc237e16b76c"
+    },
+    {
+      "bytes": 604461,
+      "path": "/home/zyf/AAA/scar-worktrees/source-heap-augassign/artifacts/analysis/heap_augassign_implementation_20261026/candidate02/worker/attempt-00001/lowered-return.json",
+      "sha256": "69b26baeb5d8d1d7906fab24b4decf23e6f091711fcfb933e6247dfb8e6fa416"
+    },
+    {
+      "bytes": 11580,
+      "path": "/home/zyf/AAA/scar-worktrees/source-heap-augassign/artifacts/analysis/heap_augassign_implementation_20261026/candidate02/worker/attempt-00001/result.json",
+      "sha256": "7100ae9771fb13505f47851ed8cccd88a8d88d13328d152b2de865560f73fa97"
+    },
+    {
+      "bytes": 603981,
+      "path": "/home/zyf/AAA/scar-worktrees/source-heap-augassign/artifacts/analysis/heap_augassign_implementation_20261026/candidate02/worker/attempt-00001/returned-metadata.json",
+      "sha256": "e96f7e83a9385c4c1bef1f5e3ea2510338b00aa7c64560242c48534a7a8e0ddb"
+    },
+    {
+      "bytes": 1101998,
+      "path": "/home/zyf/AAA/scar-worktrees/source-heap-augassign/artifacts/analysis/heap_augassign_implementation_20261026/candidate02/worker/attempt-00001/source-program5.json.gz",
+      "sha256": "6d8f16e517cce68c5089383125c13188125a978ec85ccc545f1bbe23877bade6"
+    },
+    {
+      "bytes": 487,
+      "path": "/home/zyf/AAA/scar-worktrees/source-heap-augassign/artifacts/analysis/heap_augassign_implementation_20261026/candidate02/worker/attempt-00001/started.json",
+      "sha256": "12ea2373e7f7f1e1e46c0c7003e3e8fbba2202b13aeadfbfd2e14b2a4e7b69f9"
+    },
+    {
+      "bytes": 11580,
+      "path": "/home/zyf/AAA/scar-worktrees/source-heap-augassign/artifacts/analysis/heap_augassign_implementation_20261026/candidate02/worker/attempts.jsonl",
+      "sha256": "7100ae9771fb13505f47851ed8cccd88a8d88d13328d152b2de865560f73fa97"
+    },
+    {
+      "bytes": 1236,
+      "path": "/home/zyf/AAA/scar-worktrees/source-heap-augassign/artifacts/analysis/heap_augassign_implementation_20261026/candidate02/worker/manifest.json",
+      "sha256": "5469b3db1cf3f54a5a0319c6bbf89da28afc5d5f35ed33328bb6d5844507f60b"
+    },
+    {
+      "bytes": 3908,
+      "path": "/home/zyf/AAA/scar-worktrees/source-heap-augassign/artifacts/analysis/heap_augassign_implementation_20261026/collect.py",
+      "sha256": "839d744d6d380f386463aa2eb6febef970103439a8dbba1ae99f36d33fbffe0e"
+    },
+    {
+      "bytes": 2675,
+      "path": "/home/zyf/AAA/scar-worktrees/source-heap-augassign/artifacts/analysis/heap_augassign_implementation_20261026/prepare.py",
+      "sha256": "9c49a350de0a4abd1f0e4dc50f78f9812740c08c866343b9bd4060ca6aebaf60"
+    },
+    {
+      "bytes": 5354,
+      "path": "/home/zyf/AAA/scar-worktrees/source-heap-augassign/artifacts/analysis/heap_augassign_implementation_20261026/successful-programs-delta1.json",
+      "sha256": "9385ca8db4523e3a102d6067262fde4cfc0963ffd268c51f9f39a52d15d26ed4"
+    },
+    {
+      "bytes": 8500,
+      "path": "/home/zyf/AAA/scar-worktrees/source-heap-augassign/artifacts/analysis/heap_augassign_implementation_20261026/PRODUCTION.diff.gz",
+      "sha256": "c3d8e7204e3c6c8804847aaf2e6777b7c9e6984884b96eaf8d3a216c258ec4ec"
+    }
+  ],
+  "bulk_not_in_git": [
+    {
+      "decoded_bytes": 10286294,
+      "decoded_sha256": "f3de9d39c27834d9f54b2af7adca8e03f8d6ec72be04e7e2796a31d43b269e1d",
+      "external": true,
+      "physical_bytes": 1101998,
+      "physical_sha256": "6d8f16e517cce68c5089383125c13188125a978ec85ccc545f1bbe23877bade6",
+      "representation": "scar.source-program/5",
+      "uri": "/home/zyf/AAA/scar-worktrees/source-heap-augassign/artifacts/analysis/heap_augassign_implementation_20261026/candidate02/worker/attempt-00001/source-program5.json.gz"
+    }
+  ],
+  "external_inputs_unchanged": [
+    {
+      "archive_manifest": {
+        "bytes": 438185,
+        "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/lewm_remaining_compiler_gate_20261026/result/archive/manifest.json",
+        "sha256": "33f6fdbc0765ec8787159ced5b1d4acda031e85aba16f77fe0eaab041bb26179"
+      },
+      "archived_source": {
+        "bytes": 130712,
+        "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/lewm_remaining_compiler_gate_20261026/result/archive/d94a266f30c07dc0fa809b733b48a1afaf156bd5924aa7c0cfec578b61f6b748.source.utf8",
+        "sha256": "4e4588e51cf26364c0b28c1ee7694a9029798a6c6e34b1098bcbac1149da0325"
+      },
+      "entry_key": "5ceec2709e6e347e59ad71f45cefc50c87dce4e2cf01dae0dcb9f39d2f77c94b",
+      "expression": "X *= xp.astype(self.scale_, X.dtype)",
+      "frontier": {
+        "detail": "structured control/effect protocol still required for AugAssign",
+        "kind": "UNSUPPORTED_SYNTAX",
+        "source": {
+          "atom_id": {
+            "kind": "source",
+            "value": "atom:1b41e8fe9f124bd929a2ad5e",
+            "wire": "source:atom:1b41e8fe9f124bd929a2ad5e"
+          },
+          "end_column": 52,
+          "end_line": 1176,
+          "fingerprint": "sha256:4e4588e51cf26364c0b28c1ee7694a9029798a6c6e34b1098bcbac1149da0325",
+          "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/sklearn/preprocessing/_data.py",
+          "start_column": 16,
+          "start_line": 1176
+        }
+      },
+      "historical_calls": 25,
+      "public_terminal": "/home/zyf/AAA/scar-worktrees/source209-model/artifacts/experiments/source209_model_20261026/result/batches/batch-005/worker/attempt-00002/result.json",
+      "target_kind": "Name",
+      "terminal_receipt": {
+        "bytes": 10976,
+        "path": "/home/zyf/AAA/scar-worktrees/source209-model/artifacts/experiments/source209_model_20261026/result/batches/batch-005/worker/attempt-00002/result.json",
+        "sha256": "dd2c7d288ee73ed5c92149a554e5fe5581486f71d47e224439cdbcc81f535a17"
+      }
+    },
+    {
+      "archive_manifest": {
+        "bytes": 438185,
+        "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/lewm_remaining_compiler_gate_20261026/result/archive/manifest.json",
+        "sha256": "33f6fdbc0765ec8787159ced5b1d4acda031e85aba16f77fe0eaab041bb26179"
+      },
+      "archived_source": {
+        "bytes": 21286,
+        "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/lewm_remaining_compiler_gate_20261026/result/archive/0539b2e0ce8711ab87055c7ee0e94d4ea2769198ea02c14335fd8cd6d25e6600.source.utf8",
+        "sha256": "2a2cd78973296d5871af0ae1334f4c567cacef380bc69b4a759fcc29cbcff51a"
+      },
+      "entry_key": "67455b76dece1d3a3157481796dc1ac16f27efc78094bfa2f2300ed374a97546",
+      "expression": "self._elapsed_steps += 1",
+      "frontier": {
+        "detail": "structured control/effect protocol still required for AugAssign",
+        "kind": "UNSUPPORTED_SYNTAX",
+        "source": {
+          "atom_id": {
+            "kind": "source",
+            "value": "atom:f240d059994259eac59522d6",
+            "wire": "source:atom:f240d059994259eac59522d6"
+          },
+          "end_column": 32,
+          "end_line": 125,
+          "fingerprint": "sha256:2a2cd78973296d5871af0ae1334f4c567cacef380bc69b4a759fcc29cbcff51a",
+          "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/gymnasium/wrappers/common.py",
+          "start_column": 8,
+          "start_line": 125
+        }
+      },
+      "historical_calls": 25,
+      "public_terminal": "/home/zyf/AAA/scar-worktrees/source209-model/artifacts/experiments/source209_model_20261026/result/batches/batch-005/worker/attempt-00005/result.json",
+      "target_kind": "Attribute",
+      "terminal_receipt": {
+        "bytes": 10903,
+        "path": "/home/zyf/AAA/scar-worktrees/source209-model/artifacts/experiments/source209_model_20261026/result/batches/batch-005/worker/attempt-00005/result.json",
+        "sha256": "ceb997e163a16e0f4127ab7df192b04009f56683489b18e50aae9e74f4d66a1c"
+      }
+    },
+    {
+      "archive_manifest": {
+        "bytes": 438185,
+        "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/lewm_remaining_compiler_gate_20261026/result/archive/manifest.json",
+        "sha256": "33f6fdbc0765ec8787159ced5b1d4acda031e85aba16f77fe0eaab041bb26179"
+      },
+      "archived_source": {
+        "bytes": 136036,
+        "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/lewm_remaining_compiler_gate_20261026/result/archive/e63f3bd3f89dfd3568a4f08e0c47d80bf45f17f399f008e049f2dd66db9c7917.source.utf8",
+        "sha256": "de569368c2c4958b7aaddbe755056860a89b1d313f69d437177864f37cb2503b"
+      },
+      "entry_key": "34b767a23425e6b9f20204de2934e0304f5c10905005f01d7a20b55256aad09a",
+      "expression": "invalid_generic_forms += (ClassVar,)",
+      "frontier": {
+        "detail": "structured control/effect protocol still required for AugAssign",
+        "kind": "UNSUPPORTED_SYNTAX",
+        "source": {
+          "atom_id": {
+            "kind": "source",
+            "value": "atom:48ec536334250737733cb258",
+            "wire": "source:atom:48ec536334250737733cb258"
+          },
+          "end_column": 44,
+          "end_line": 198,
+          "fingerprint": "sha256:de569368c2c4958b7aaddbe755056860a89b1d313f69d437177864f37cb2503b",
+          "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/typing.py",
+          "start_column": 8,
+          "start_line": 198
+        }
+      },
+      "historical_calls": 2,
+      "public_terminal": "/home/zyf/AAA/scar-worktrees/source209-model/artifacts/experiments/source209_model_20261026/result/batches/batch-002/worker/attempt-00015/result.json",
+      "target_kind": "Name",
+      "terminal_receipt": {
+        "bytes": 10745,
+        "path": "/home/zyf/AAA/scar-worktrees/source209-model/artifacts/experiments/source209_model_20261026/result/batches/batch-002/worker/attempt-00015/result.json",
+        "sha256": "cc4fe92a20f64477a5aae6567306f889c3caa2c6d0178ffbe91d47b5c8e5d1c4"
+      }
+    },
+    {
+      "archive_manifest": {
+        "bytes": 438185,
+        "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/lewm_remaining_compiler_gate_20261026/result/archive/manifest.json",
+        "sha256": "33f6fdbc0765ec8787159ced5b1d4acda031e85aba16f77fe0eaab041bb26179"
+      },
+      "archived_source": {
+        "bytes": 4767,
+        "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/lewm_remaining_compiler_gate_20261026/result/archive/9e7ed65f998134b9a825d3feec877df3ef380d4a9dc4e441ee56753d2e66ed87.source.utf8",
+        "sha256": "72b07de4133a7e39b2f6a7920465669aa04626f217e800779587bc0713fe002e"
+      },
+      "entry_key": "80f24c27516743da2dfd9d1d9e04791f8a943f6327499b8ef05b08265ab499b6",
+      "expression": "level += 1",
+      "frontier": {
+        "detail": "structured control/effect protocol still required for AugAssign",
+        "kind": "UNSUPPORTED_SYNTAX",
+        "source": {
+          "atom_id": {
+            "kind": "source",
+            "value": "atom:06759c4bedc4f2efe08c1342",
+            "wire": "source:atom:06759c4bedc4f2efe08c1342"
+          },
+          "end_column": 22,
+          "end_line": 87,
+          "fingerprint": "sha256:72b07de4133a7e39b2f6a7920465669aa04626f217e800779587bc0713fe002e",
+          "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/importlib/__init__.py",
+          "start_column": 12,
+          "start_line": 87
+        }
+      },
+      "historical_calls": 1,
+      "public_terminal": "/home/zyf/AAA/scar-worktrees/source209-model/artifacts/experiments/source209_resume01_20261026/result/batches/batch-005/worker/attempt-00010/result.json",
+      "target_kind": "Name",
+      "terminal_receipt": {
+        "bytes": 10693,
+        "path": "/home/zyf/AAA/scar-worktrees/source209-model/artifacts/experiments/source209_resume01_20261026/result/batches/batch-005/worker/attempt-00010/result.json",
+        "sha256": "93568b8df635b399e6c46f6f123d739eba5a151397d946bbed54b9786c2aa1e8"
+      }
+    }
+  ],
+  "no_raw_or_target": true,
+  "original_failure_preserved": true,
+  "schema": "scar.heap-augassign-retention",
+  "schema_version": 1
+}

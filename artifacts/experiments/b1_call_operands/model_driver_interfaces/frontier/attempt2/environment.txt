@@ -1,0 +1,3 @@
+012db08a43c410745996d8bbaa021738f59d0c38
+Python 3.14.7
+pytest 9.1.1

@@ -1,0 +1,88 @@
+....................FF                                                   [100%]
+=================================== FAILURES ===================================
+___ test_callee_normal_source_reject_choice_is_false_instead_of_an_exception ___
+
+    def test_callee_normal_source_reject_choice_is_false_instead_of_an_exception():
+        context, budget, source, result, _, _ = _general_result_context()
+        reject = _qualification_reject(context, source)
+    
+>       report = _result_copy(context, source, result, choices=(reject,))
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_program_await_outcome_boundaries.py:80: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+scar/ir/program/protocol_await.py:460: in _result_copy
+    ctx._returns.guards = _selected(ctx, previous, choices, required)
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scar/ir/program/protocol_await.py:44: in _selected
+    return ctx.selected_edges(tuple(edge for group in groups for edge in ctx.selected_edges(group)))
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <scar.ir.program.protocol_connection_flow.ConnectionContext object at 0x7b7b7ede4e10>
+guard = (ControlEdgeReference(operation=OperationID(value='await.general.helper.qualify.branch'), successor_index=1), ControlE..._index=0), ControlEdgeReference(operation=OperationID(value='await.general.helper.qualify.branch'), successor_index=0))
+region = None
+
+    def selected_edges(self, guard=None, *, region=None):
+        """Exact temporary CFG choices, not a new graph or dynamic visit ID."""
+        from .structured import ControlEdgeReference
+        edges = () if guard is None else guard if type(guard) is tuple else (guard,)
+        selected = {}
+        for edge in edges:
+            if type(edge) is not ControlEdgeReference:
+                raise TypeError("selected edges require exact ControlEdgeReference records")
+            edge.__post_init__()
+            operation = self.operations.get(edge.operation)
+            if (operation is None or operation.terminator is None or
+                    edge.successor_index >= len(operation.terminator.successors)):
+                raise ValueError("selected edge must exist in the original CFG")
+            if edge.operation in selected and selected[edge.operation] != edge:
+>               raise ValueError("one static operation cannot select two different successors")
+E               ValueError: one static operation cannot select two different successors
+
+scar/ir/program/protocol_flow.py:107: ValueError
+__ test_known_source_choice_conflict_has_an_explicit_empty_consumer_inventory __
+
+    def test_known_source_choice_conflict_has_an_explicit_empty_consumer_inventory():
+        context, budget, source, _, _, _ = _general_result_context()
+        reject = _qualification_reject(context, source)
+    
+>       assert flow(context, source, (reject,)) == {}
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_program_await_outcome_boundaries.py:90: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+scar/ir/program/await_outcome_flow.py:140: in flow
+    ctx._returns.guards = selected(ctx, previous, choices, required)
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scar/ir/program/await_outcome_flow.py:30: in selected
+    return ctx.selected_edges(tuple(edge for group in groups for edge in ctx.selected_edges(group)))
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <scar.ir.program.protocol_connection_flow.ConnectionContext object at 0x7b7b7ede4a50>
+guard = (ControlEdgeReference(operation=OperationID(value='await.general.helper.qualify.branch'), successor_index=1), ControlE..._index=0), ControlEdgeReference(operation=OperationID(value='await.general.helper.qualify.branch'), successor_index=0))
+region = None
+
+    def selected_edges(self, guard=None, *, region=None):
+        """Exact temporary CFG choices, not a new graph or dynamic visit ID."""
+        from .structured import ControlEdgeReference
+        edges = () if guard is None else guard if type(guard) is tuple else (guard,)
+        selected = {}
+        for edge in edges:
+            if type(edge) is not ControlEdgeReference:
+                raise TypeError("selected edges require exact ControlEdgeReference records")
+            edge.__post_init__()
+            operation = self.operations.get(edge.operation)
+            if (operation is None or operation.terminator is None or
+                    edge.successor_index >= len(operation.terminator.successors)):
+                raise ValueError("selected edge must exist in the original CFG")
+            if edge.operation in selected and selected[edge.operation] != edge:
+>               raise ValueError("one static operation cannot select two different successors")
+E               ValueError: one static operation cannot select two different successors
+
+scar/ir/program/protocol_flow.py:107: ValueError
+=========================== short test summary info ============================
+FAILED tests/unit/test_program_await_outcome_boundaries.py::test_callee_normal_source_reject_choice_is_false_instead_of_an_exception
+FAILED tests/unit/test_program_await_outcome_boundaries.py::test_known_source_choice_conflict_has_an_explicit_empty_consumer_inventory
+2 failed, 20 passed in 8.91s

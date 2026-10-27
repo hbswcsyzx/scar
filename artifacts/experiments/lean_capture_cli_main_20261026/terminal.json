@@ -1,0 +1,32 @@
+{
+  "command": [
+    "/home/zyf/miniconda3/envs/lewm/bin/python",
+    "-B",
+    "-m",
+    "scar.cli",
+    "trace",
+    "--capture-plan",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/lean_capture_profile_20261026/case01/lean03/lean-plan.1843970.json",
+    "--capture-plan-sha256",
+    "620dd3cc706c7d299666a22c6f2004a76ce960ca236254949f665850a230ef5d",
+    "--out",
+    "artifacts/experiments/lean_capture_cli_main_20261026/trace",
+    "--max-call-events",
+    "10000",
+    "--max-call-bytes",
+    "1000000",
+    "--max-operand-events",
+    "10000",
+    "--max-operand-bytes",
+    "1000000",
+    "--",
+    "/home/zyf/miniconda3/envs/lewm/bin/python",
+    "-B",
+    "-c",
+    "import sys,torch; sys.path.insert(0,'/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/lean_capture_profile_20261026/case01/project'); import sample; value=torch.ones(2); result=sample.run(sample.Box(),value,(value,)); assert result.shape==value.shape; print(\"TARGET_RETURNED\")"
+  ],
+  "exit_code": 0,
+  "wall_s": 9.139591445971746,
+  "stdout": "TARGET_RETURNED\n",
+  "stderr": ""
+}

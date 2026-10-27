@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="2" skipped="0" tests="4" time="3.348" timestamp="2026-10-19T12:02:16.910509+00:00" hostname="gpu1"><testcase classname="tests.unit.test_execution_await_source_visits" name="test_same_static_get_visits_select_the_actual_own_result_not_latest_or_common_b[latest]" time="1.023"><failure message="AssertionError: assert (OperationOcc...ume.acquire')) == (OperationOcc...me.acquire'),)&#10;  &#10;  At index 0 diff: OperationOccurrenceID(value='await.visits.caller.2.await.resume.acquire') != OperationOccurrenceID(value='await.visits.caller.4.await.resume.acquire')&#10;  Left contains one more item: OperationOccurrenceID(value='await.visits.caller.4.await.resume.acquire')&#10;  Use -v to get more diff">iterator_origin = 'latest'
+
+    @pytest.mark.parametrize('iterator_origin', ('latest', 'earlier'), ids=('latest', 'earlier'))
+    def test_same_static_get_visits_select_the_actual_own_result_not_latest_or_common_b(iterator_origin):
+        program, model, details = _source_visit_execution(iterator_origin=iterator_origin)
+        static = details['static']
+        assert len(program.resumable_creates) == 1
+        assert len(model.body_activation_origins) == len(model.body_drive_executions) == 1
+        assert details['body_origin'].creation == details['creation']
+        assert len({row.visit for row in details['gets']}) == 2
+        assert {row.operation for row in details['gets']} == {static['get'].id}
+        assert tuple(row.caller for row in details['identity_calls']) == tuple(row.id for row in details['gets'])
+        assert len({row.activation for row in details['identity_calls']}) == 2
+        assert len(static['get'].completions) == 1
+        assert static['get'].completions[0].kind is ExitKind.NORMAL
+        assert tuple(edge.kind for edge in static['get'].terminator.successors) == (ExitKind.NORMAL,)
+        assert details['get_values'][0].id != details['get_values'][1].id
+        assert static['get'].terminator.successors[0].arguments[0] == CompletionResult(0)
+        assert static['get'].terminator.successors[0].arguments[4] == static['previous_forward'].id
+        assert static['previous_forward'].id not in static['get'].invoke_arguments
+        assert type(static['previous']) is BlockArgument
+        expected_number = 1 if iterator_origin == 'latest' else 0
+        if iterator_origin == 'earlier':
+            first_inputs = tuple(row for row in program.protocol_call_inputs
+                                 if row.site.operation == static['advance_operation'])
+            assert first_inputs
+            assert all(case.receiver == static['previous'] for row in first_inputs for case in row.cases)
+            # The actual backedge saves the first own result, not the stable B seed.
+            saved, = tuple(use for use in static['retry'].uses
+                           if use.id == static['retry'].terminator.successors[0].arguments[3])
+            assert saved.value == static['landing'][0].id
+        # Current W/C always come from Get1's full logical state slots, even when
+        # the iterator is the earlier returned Reference.
+        proceed = static['retry'].terminator.successors[1]
+        assert tuple(next(use.value for use in static['retry'].uses if use.id == identity)
+                     for identity in proceed.arguments[-2:]) == tuple(value.id for value in static['landing'][2:4])
+        assert tuple(static['get'].terminator.successors[0].arguments[slot]
+                     for slot in (2, 3)) == (CompletionResult(1), CompletionResult(2))
+    
+        report = _query(program, model, details)
+        _job, occurrence = _active(report, details)
+&gt;       assert tuple(row['occurrence'].id for row in occurrence['matched_sources']) == (
+            details['gets'][expected_number].id,)
+E       AssertionError: assert (OperationOcc...ume.acquire')) == (OperationOcc...me.acquire'),)
+E         
+E         At index 0 diff: OperationOccurrenceID(value='await.visits.caller.2.await.resume.acquire') != OperationOccurrenceID(value='await.visits.caller.4.await.resume.acquire')
+E         Left contains one more item: OperationOccurrenceID(value='await.visits.caller.4.await.resume.acquire')
+E         Use -v to get more diff
+
+tests/unit/test_execution_await_source_visits.py:431: AssertionError</failure></testcase><testcase classname="tests.unit.test_execution_await_source_visits" name="test_same_static_get_visits_select_the_actual_own_result_not_latest_or_common_b[earlier]" time="0.087"><failure message="ValueError: protocol_result_consumer at program_operation:await.resume.acquire: listed target does not consume this exact result; protocol_continuation_source at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.call.0.scope'), clause=&lt;ProtocolClause.DELEGATE_ADVANCE: 'DELEGATE_ADVANCE'&gt;, operation=OperationID(value='await.resume.call.0'), slot=0): merge formal is not the independently required lookup evaluation; protocol_initial_advance at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.call.0.scope'), clause=&lt;ProtocolClause.DELEGATE_ADVANCE: 'DELEGATE_ADVANCE'&gt;, operation=OperationID(value='await.resume.call.0'), slot=0): initial marker does not name this call's actual iterator evaluation">iterator_origin = 'earlier'
+
+    @pytest.mark.parametrize('iterator_origin', ('latest', 'earlier'), ids=('latest', 'earlier'))
+    def test_same_static_get_visits_select_the_actual_own_result_not_latest_or_common_b(iterator_origin):
+&gt;       program, model, details = _source_visit_execution(iterator_origin=iterator_origin)
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_execution_await_source_visits.py:394: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/unit/test_execution_await_source_visits.py:330: in _source_visit_execution
+    model = ExecutionModel(snapshot_for(program),
+                           ^^^^^^^^^^^^^^^^^^^^^
+scar/ir/execution/snapshot.py:11: in snapshot_for
+    wire = program_dumps(program).encode('utf-8')
+           ^^^^^^^^^^^^^^^^^^^^^^
+scar/ir/program/codec.py:242: in dumps
+    _require_record_and_graph_valid(graph)
+scar/ir/program/codec.py:134: in _require_record_and_graph_valid
+    require_valid(graph)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='await.resume.caller'), regions=(Region(id=RegionID(value='await.resume.caller'), lab...), drive=OperationID(value='await.resume.driver.0.driver.drive'), projection=None, guard=None),), exception_matches=())
+
+    def require_valid(graph: ProgramGraph) -&gt; None:
+        issues = validate(graph)
+        if issues:
+&gt;           raise ValueError("; ".join(f"{issue.code} at {issue.path}: {issue.message}" for issue in issues))
+E           ValueError: protocol_result_consumer at program_operation:await.resume.acquire: listed target does not consume this exact result; protocol_continuation_source at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.call.0.scope'), clause=&lt;ProtocolClause.DELEGATE_ADVANCE: 'DELEGATE_ADVANCE'&gt;, operation=OperationID(value='await.resume.call.0'), slot=0): merge formal is not the independently required lookup evaluation; protocol_initial_advance at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.call.0.scope'), clause=&lt;ProtocolClause.DELEGATE_ADVANCE: 'DELEGATE_ADVANCE'&gt;, operation=OperationID(value='await.resume.call.0'), slot=0): initial marker does not name this call's actual iterator evaluation
+
+scar/ir/program/validation.py:759: ValueError</failure></testcase><testcase classname="tests.unit.test_execution_await_source_visits" name="test_missing_get1_input_or_selected_transfer_keeps_both_sources_without_borrowing_get0[operand-use]" time="0.710" /><testcase classname="tests.unit.test_execution_await_source_visits" name="test_missing_get1_input_or_selected_transfer_keeps_both_sources_without_borrowing_get0[selected-transfer]" time="0.655" /></testsuite></testsuites>

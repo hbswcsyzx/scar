@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="2" time="0.945" timestamp="2026-10-19T10:23:36.358723+00:00" hostname="gpu1"><testcase classname="tests.unit.test_program_await_input_inventory" name="test_expanded_universal_case_keeps_both_original_iterator_loop_incoming" time="0.178"><failure message="AssertionError: assert {None} == {ControlEdgeR...ssor_index=0)}&#10;  &#10;  Extra items in the left set:&#10;  None&#10;  Extra items in the right set:&#10;  ControlEdgeReference(operation=OperationID(value='continuation.to.loop'), successor_index=0)&#10;  ControlEdgeReference(operation=OperationID(value='continuation.item'), successor_index=0)&#10;  Use -v to get more diff">def test_expanded_universal_case_keeps_both_original_iterator_loop_incoming():
+        graph, details, guards = _expanded_iterator_loop()
+        context = _context(graph)
+        rows = details['advance_rows']
+        assert len(rows) == 2
+        for row in rows:
+            attachment = context.call_inputs[_site(row)]
+            case, = attachment.cases
+            assert case.guard is None and case.arguments == ()
+            assert type(case.receiver) is ContractResult
+            assert case.receiver == details['method_source']
+            assert iterator_use(context, row, case) == OwnedUse(
+                details['method']['operation'].id, details['method']['receiver'])
+            inventory = _input_case_inventory(context, row)
+&gt;           assert {guard for _, guard, _ in inventory} == set(guards)
+E           AssertionError: assert {None} == {ControlEdgeR...ssor_index=0)}
+E             
+E             Extra items in the left set:
+E             None
+E             Extra items in the right set:
+E             ControlEdgeReference(operation=OperationID(value='continuation.to.loop'), successor_index=0)
+E             ControlEdgeReference(operation=OperationID(value='continuation.item'), successor_index=0)
+E             Use -v to get more diff
+
+tests/unit/test_program_await_input_inventory.py:78: AssertionError</failure></testcase><testcase classname="tests.unit.test_program_await_input_inventory" name="test_missing_expanded_input_attachment_keeps_an_unresolved_inventory" time="0.041" /></testsuite></testsuites>

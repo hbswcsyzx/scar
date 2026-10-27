@@ -1,0 +1,449 @@
+"""Whole async-close paths retain actual owners, packets and current state."""
+from dataclasses import replace
+
+import pytest
+
+from scar.ir.execution.query import ExecutionIndex
+from scar.ir.execution.composition_routes import routes
+from scar.ir.execution.coordinates import OccurrencePhase, OccurrencePoint, ResumeIngress
+from scar.ir.execution.validity_budget import ValidityBudget
+from scar.ir.execution.validation import validate as validate_execution
+from scar.ir.program.control import PendingPayload
+from scar.ir.program.lifecycle import SessionPost
+from scar.ir.program.model import ExitKind, StateVersionValue, TerminatorKind
+from scar.ir.program.protocols import DriveResult, OutcomeAdapter, OutcomeAdapterRule
+from scar.ir.program.queries import ProgramIndex
+from scar.ir.program.resumption import SavedInput, SuspendTerminator, SuspensionFlavor, saved_actual_use
+from scar.ir.program.validation import require_valid
+from tests.fixtures.execution_async_close_chains_graphs import (
+    async_close_chains_execution, finished_frame_identity_execution,
+)
+from tests.unit.test_execution_async_terminal import _call, _copied, _current, _own, _use
+from tests.unit.test_program_async_finished_requests import (
+    _finished_capture, _finished_inventory, _path, _ports,
+)
+
+
+_BUDGET = 1048576
+_FLAGS = ('source_runtime_verified', 'runtime_identity_verified',
+          'value_identity_verified', 'transformation_authorized')
+
+
+def _index(program, model, details):
+    require_valid(program)
+    evidence = details.get('evidence_graphs', {})
+    result = validate_execution(model, program, evidence_graphs=evidence)
+    assert result.valid, result.issues
+    return ExecutionIndex(model, program, evidence_graphs=evidence)
+
+
+def _candidate(view, endpoint):
+    rows = tuple(row for row in view['terminal_candidates'] if row['source'].id == endpoint['source'])
+    assert len(rows) == 1
+    return rows[0]
+
+
+def _guard(binding):
+    assert binding['match'] is True
+    assert binding['binding_kind'] == 'DECLARED_SCOPED_OBJECT_IDENTITY'
+    assert binding['ordinary_binding']['match'] is None
+    identity = binding['identity_guard']
+    assert identity['match'] is True and identity['status'] == 'DECLARED_SAME_OBJECT'
+    assert len(identity['inventory']) == 2
+    assert all(identity[flag] is False for flag in _FLAGS)
+
+
+@pytest.mark.parametrize(('terminal', 'request_kind', 'constructor_raised', 'retry'), (
+    ('return', 'throw', False, True), ('return', 'close', False, False),
+    ('raise', 'throw', False, False), ('raise', 'close', True, False)))
+def test_finished_frame_history_and_exact_new_request_reply_share_one_actual_chain(
+        terminal, request_kind, constructor_raised, retry):
+    program, model, details = finished_frame_identity_execution(terminal=terminal, request=request_kind,
+        constructor_raised=constructor_raised, retry=retry, instances=2)
+    index = _index(program, model, details)
+    static = details['static']
+    finished = static['finished_request']
+    original = finished['original_terminal_driver']
+    source = next(row for row in program.operations if row.id == original['outcome_source'])
+    assert source.terminator.kind is (TerminatorKind.RETURN if terminal == 'return' else TerminatorKind.RAISE)
+    assert original['update'].post is SessionPost.COMPLETE
+    assert details['objects'][0] != details['objects'][1]
+    assert len(program.resumable_creates) == 1
+    assert len(model.body_drive_executions) == static['base_drive_count'] * 2
+    public = ProgramIndex(program)
+    paths = public.request_no_drive_paths(finished['scope'].id, budget=_BUDGET)
+    _finished_inventory(paths, finished)
+    # Both real reply-construction outcomes remain in the original CFG. The
+    # actual selected one is checked independently by _finished_capture below.
+    for raised in (False, True):
+        _ports(public, program, finished, _path(paths, finished, raised=raised), raised=raised)
+    for ordinal, endpoint in enumerate(details['frame_identities']):
+        _finished_capture(index, program, model, details, ordinal)
+        view = index.body_state_history(endpoint['read'], budget=_BUDGET)
+        assert view['expected_bool'] is True and view['observed_branch'] is True
+        assert view['drive_inventory'] == program.body_drives
+        assert view['commit_inventory'] == program.body_outcome_commits
+        assert view['budget']['truncated'] is False
+        candidate = _candidate(view, endpoint)
+        assert candidate['commit'] == endpoint['publication']
+        assert candidate['post_established'] is candidate['expected_bool'] is True
+        assert candidate['drive_support']['supported'] is True
+        assert candidate['source_chain']['supported'] is candidate['read_chain']['supported'] is True
+        assert candidate['source_chain']['root'] == candidate['read_chain']['root'] == endpoint['caller_activation']
+        assert candidate['terminal_route']
+        _guard(candidate['subject_binding'])
+        _guard(candidate['source_subject_binding'])
+        _guard(candidate['drive_support']['creation_binding'])
+        assert candidate['terminal_scope'].applicability.value == 'UNKNOWN'
+        assert candidate['content_preservation']['preserved'] is None
+        assert _candidate(view, details['frame_identities'][1 - ordinal])['expected_bool'] is None
+        assert all(view[flag] is False for flag in (*_FLAGS, 'native_phase_verified'))
+    # Remove only the explicit endpoint catalog declarations on the same graph
+    # and capture: observation and request metadata alone still do not prove F.
+    plain = replace(model, denotations=())
+    plain_index = _index(program, plain, details)
+    for endpoint in details['frame_identities']:
+        view = plain_index.body_state_history(endpoint['read'], budget=_BUDGET)
+        assert view['observed_branch'] is True and view['expected_bool'] is None
+        assert view['drive_inventory'] == program.body_drives
+        assert view['commit_inventory'] == program.body_outcome_commits
+        assert _candidate(view, endpoint)['post_established'] is None
+
+
+def _pending_endpoint(program, model, details, example):
+    cleanup = details['static']['body']['cleanup']
+    final_body = example['body_scopes'][example['active_driver_ordinals'][-1]][2]
+    selected = tuple(action for action in cleanup['actions'] if action['operation'].id in final_body)
+    assert len(selected) == 1
+    action, = selected
+    source = action['payload_use']
+    if source is None:
+        source, = tuple(item['source'] for item in cleanup['pending_sources']
+                       if item['operation'].id in example['body_occurrences'][1])
+    constructors = tuple(mapping[source.operation] for mapping in example['body_occurrences']
+                         if source.operation in mapping)
+    assert len(constructors) == 1
+    return cleanup, action, source, constructors[0], final_body[cleanup['dispatch'].id]
+
+
+def _pending_projection(projected, dispatch):
+    result = tuple(argument['projection']['payload'] for row in projected['transfers']
+        if row['occurrence'].id == dispatch for argument in row['arguments']
+        if type(argument['argument']) is PendingPayload)
+    assert len(result) == 1
+    return result[0]
+
+
+def _handled_reply(index, program, model, actual, body_outcome):
+    """Check the raw fixture ports, independently of the derived receipt."""
+    stage, operations = actual['definition'], actual['operations']
+    reply, = tuple(row for row in stage['reply_stages']
+                   if row.get('matchers') and row['constructor'].id in operations)
+    source = next(row for row in program.operations if row.id == body_outcome.operation)
+    current = _use(model, body_outcome.id, source.terminator.values[0]).value
+    if source.terminator.kind is TerminatorKind.RETURN:
+        first, = tuple(row for row in stage['reply_stages']
+            if row['source'] is not None and type(row['source']) is DriveResult
+            and row['source'].outcome == stage['publication'].outcome
+            and row['constructor'].id in operations)
+        constructor = operations[first['constructor'].id]
+        _copied(index, model, _use(model, constructor, first['input_use'].use).value, current)
+        transfer, = tuple(row for row in model.transfers if row.operation == constructor)
+        kind = first['constructor'].terminator.successors[transfer.successor_index].kind
+        own = _own(program, model, constructor, first['own_results_by_kind'][kind][0])
+        if kind is ExitKind.NORMAL:
+            pack = operations[first['pack'].id]
+            _copied(index, model, _use(model, pack, first['packet_definition'].exception).value, own.id)
+            current, = tuple(row.id for row in model.values
+                if row.origin == pack and row.value == first['packet_definition'].value)
+        else:
+            current = own.id
+    matched = []
+    for matcher in reply['matchers']:
+        if matcher.operation not in operations:
+            continue
+        occurrence, branch = operations[matcher.operation], operations[matcher.branch]
+        _copied(index, model, _use(model, occurrence, matcher.input_use).value, current)
+        definition = next(row for row in program.operations if row.id == matcher.branch)
+        _copied(index, model, _use(model, branch, definition.terminator.condition).value,
+                _own(program, model, occurrence, matcher.normal_result).id)
+        transfer, = tuple(row for row in model.transfers if row.operation == branch)
+        if transfer.successor_index == 0:
+            matched.append(matcher)
+    assert len(matched) == 1
+    constructor = operations[reply['constructor'].id]
+    transfer, = tuple(row for row in model.transfers if row.operation == constructor)
+    kind = reply['constructor'].terminator.successors[transfer.successor_index].kind
+    own = _own(program, model, constructor, reply['own_results_by_kind'][kind][0])
+    if kind is ExitKind.NORMAL:
+        pack = operations[reply['pack'].id]
+        _copied(index, model, _use(model, pack, reply['packet_definition'].exception).value, own.id)
+        final, = tuple(row.id for row in model.values
+            if row.origin == pack and row.value == reply['packet_definition'].value)
+    else:
+        final = own.id
+    _copied(index, model, _use(model, actual['host'], stage['host_terminal'].terminator.values[0]).value, final)
+    assert final != current
+    _current(index, program, model, constructor)
+    return matched[0], constructor, final
+
+
+def _whole_chain(index, program, model, details, number):
+    static, example = details['static'], details['instances'][number]
+    definitions = {row.id: row for row in program.operations}
+    stages = example['stages']
+    assert len(stages) == (6 if static['route'] == 'illegal' else 3)
+    assert len(example['body_drives']) == len(example['body_segments']) == 3
+    assert len(model.body_activation_origins) == len(details['instances'])
+    assert example['body_origin'].creation == example['creation']
+    assert {row.activation for row in example['body_drives']} == {example['body_activation']}
+    expected_ordinals = (0, 1, 5) if static['route'] == 'illegal' else (0, 1, 2)
+    assert example['active_driver_ordinals'] == expected_ordinals
+    for body_number, ordinal in enumerate(expected_ordinals):
+        actual = stages[ordinal]
+        stage = actual['definition']
+        association = actual['drive']
+        assert association == example['body_drives'][body_number]
+        assert association.outcome == example['body_occurrences'][body_number][stage['outcome_source']]
+        if body_number:
+            segment = next(row for row in model.segments if row.id == example['body_segments'][body_number])
+            assert type(segment.ingress) is ResumeIngress
+            assert segment.ingress.suspension == example['body_drives'][body_number - 1].outcome
+            transfer, = tuple(row for row in model.transfers if row.operation == segment.ingress.suspension)
+            assert transfer.target == association.entry
+            assert transfer.successor_index == stage['drive'].target.successor
+            previous_occurrence = next(row for row in model.operations if row.id == segment.ingress.suspension)
+            previous = definitions[previous_occurrence.operation]
+            successor = previous.terminator.successors[transfer.successor_index]
+            destination = next(block for region in program.regions for block in region.blocks
+                               if block.id == successor.block)
+            for argument, formal in zip(successor.arguments, destination.arguments, strict=True):
+                value, = tuple(row for row in model.values
+                               if row.origin == association.entry and row.value == formal)
+                receipt = index.formal_route(value.id)
+                assert receipt.transfer == transfer and receipt.argument == argument
+                if type(argument) is SavedInput:
+                    source_use = saved_actual_use(previous, argument)
+                    assert receipt.source_use == _use(model, segment.ingress.suspension, source_use)
+        driven = index.drive_execution(association.drive, budget=_BUDGET)
+        assert driven['association'] == association
+        assert driven['entry_bridge'] is driven['path_complete'] is True
+        session = driven['session']
+        source = definitions[stage['outcome_source']]
+        expected = (SessionPost.HOLD if type(source.terminator) is SuspendTerminator
+                    and source.terminator.flavor is SuspensionFlavor.AWAIT else SessionPost.COMPLETE)
+        assert session['source'] == stage['publication'].outcome
+        assert session['expected_post'] is expected
+        targets = tuple(row for row in session['targets'] if row['update'] == stage['update'])
+        assert len(targets) == 1
+        target, = targets
+        assert target['post_established'] is True
+        assert target['state_bindings'] and all(row['use'] is not None and row['value'] is not None
+            and row['current'] == row['value'].id for row in target['state_bindings'])
+        hosts = tuple(row for row in session['hosts'] if row['operation'] is not None
+                      and row['operation'].id == actual['host'])
+        assert len(hosts) == 1
+        host, = hosts
+        assert host['target_value'].id == _use(model, actual['host'],
+            stage['host_terminal'].terminator.values[0]).value
+        assert host['bindings']
+        assert all(binding['copy_status'] == 'DECLARED_ORIGINAL_COPY' for binding in host['bindings'])
+        if body_number == 2 and static['route'] in ('graceful-return', 'graceful-ge'):
+            matched, constructor, final = _handled_reply(index, program, model, actual,
+                next(row for row in model.operations if row.id == association.outcome))
+            receipt = host['handled_completion']
+            assert receipt['supported'] is True
+            assert receipt['constructor'].id == constructor
+            assert receipt['current_value'].id == final
+            assert any(row['definition'] == matched for row in receipt['matchers'])
+            assert all(receipt[flag] is False for flag in (
+                'source_runtime_verified', 'runtime_identity_verified',
+                'native_applicability_verified', 'transformation_authorized'))
+        assert all(driven[flag] is False for flag in _FLAGS)
+    for actual in stages:
+        _call(index, program, model, actual['call'])
+        _current(index, program, model, actual['host'])
+        if actual['drive'] is None:
+            assert actual['body'] is None
+            assert not any(item.drive in actual['operations'].values() for item in example['body_drives'])
+    cleanup, action, source, constructor, dispatch = _pending_endpoint(program, model, details, example)
+    for mapping in example['body_occurrences']:
+        for operation in (cleanup['enter'], *(item['operation'] for item in cleanup['actions'])):
+            if operation.id in mapping:
+                _current(index, program, model, mapping[operation.id])
+    projected = routes(index._content_context(), budget=ValidityBudget(_BUDGET))
+    pending = _pending_projection(projected, dispatch)
+    assert pending['constructor'].id == constructor
+    assert pending['payload_use'].operation == constructor and pending['payload_use'].use == source.use
+    assert pending['payload_value'].id == _use(model, constructor, source.use).value
+    assert pending['selector'].operation == dispatch
+    assert pending['binding']['match'] is True and pending['token_path']
+    assert pending['payload_value'].id != _use(model, dispatch, pending['selector'].use).value
+    terminal = example['body_drives'][-1].outcome
+    _current(index, program, model, terminal)
+    # The resumed C1 action writes current state before dispatch and Detach;
+    # body, driver and caller terminals must consume those real produced ports.
+    for transfer in projected['transfers']:
+        if transfer['occurrence'].id == dispatch:
+            assert transfer['arguments']
+    for flag in _FLAGS:
+        assert pending[flag] is False
+    return example
+
+
+@pytest.mark.parametrize('route', ('graceful-return', 'graceful-ge', 'graceful-ordinary', 'illegal'))
+def test_actual_close_chain_has_three_body_segments_and_exact_finally_reply_ports(route):
+    program, model, details = async_close_chains_execution(route=route, instances=2)
+    index = _index(program, model, details)
+    assert len(program.resumable_creates) == 1
+    assert len(model.body_drive_executions) == 6
+    for number in range(2):
+        _whole_chain(index, program, model, details, number)
+
+
+def test_illegal_close_constructor_own_raise_keeps_preceding_request_complete_and_future_body():
+    from tests.fixtures.program_async_close_chains_graphs import async_close_chains_program
+
+    original, supplied = async_close_chains_program(route='illegal')
+    illegal = supplied['drivers'][1]
+    adapters = tuple(row for row in original.protocol_operations
+        if type(row.contract) is OutcomeAdapter
+        and row.contract.rule is OutcomeAdapterRule.ASYNCGEN_CLOSE_YIELD_ERROR
+        and type(row.contract.input) is DriveResult
+        and row.contract.input.outcome == illegal['publication'].outcome)
+    operations = {row.operation for row in adapters}
+    assert len(operations) == 1
+    operation = next(row for row in original.operations if row.id in operations)
+    port, = tuple(row.contract.output for row in adapters
+        if operation.terminator.successors[row.slot].kind is ExitKind.RAISE)
+    program, model, details = async_close_chains_execution(route='illegal', instances=2,
+        choices={'drivers': {1: (port.edge,)}})
+    index = _index(program, model, details)
+    static_index = ProgramIndex(program)
+    for number, example in enumerate(details['instances']):
+        actual = example['stages'][1]
+        stage = actual['definition']
+        before = actual['operations'][stage['update'].operation]
+        constructor = actual['operations'][operation.id]
+        before_occurrence = next(row for row in model.operations if row.id == before)
+        constructor_occurrence = next(row for row in model.operations if row.id == constructor)
+        assert before_occurrence.visit == constructor_occurrence.visit
+        block = next(block for region in program.regions for block in region.blocks
+                     if stage['update'].operation in block.operations)
+        assert block.operations.index(stage['update'].operation) < block.operations.index(operation.id)
+        publication = static_index.session_publication(stage['update'].operation)
+        assert stage['update'].post is SessionPost.COMPLETE
+        assert publication.update == stage['update']
+        assert publication.update.post is SessionPost.COMPLETE
+        update_operation = next(row for row in program.operations if row.id == stage['update'].operation)
+        current = index.state_at(OccurrencePoint(constructor, OccurrencePhase.BEFORE))
+        for access in update_operation.accesses:
+            if access.after is not None:
+                produced, = tuple(row for row in model.values
+                                  if row.origin == before and row.value == access.after)
+                assert current[access.location] == produced.id
+        body = next(use.value for use in update_operation.uses if use.id == stage['update'].body)
+        assert static_index.lifecycle_after(stage['update'].operation).terminal.is_finished(body) is False
+        source = next(row for row in program.operations if row.id == stage['outcome_source'])
+        assert type(source.terminator) is SuspendTerminator
+        assert source.terminator.flavor is SuspensionFlavor.ASYNC_YIELD
+        transfer, = tuple(row for row in model.transfers if row.operation == constructor)
+        assert transfer.successor_index == port.edge.successor_index
+        packet = _own(program, model, constructor, port)
+        host_value = _use(model, actual['host'], stage['host_terminal'].terminator.values[0]).value
+        _copied(index, model, host_value, packet.id)
+        _current(index, program, model, constructor)
+        _current(index, program, model, actual['host'])
+        # The failed constructor ends this request attempt; the same B still
+        # has its real final-resume segment, not an F synthesized by the error.
+        assert example['active_driver_ordinals'] == (0, 1, 5)
+        _whole_chain(index, program, model, details, number)
+
+
+@pytest.mark.parametrize('missing', ('payload_use', 'dispatch', 'driver_call'))
+def test_missing_this_instances_finally_capture_cannot_borrow_the_complete_close_chain(missing):
+    program, model, details = async_close_chains_execution(route='illegal', instances=2)
+    original = _index(program, model, details)
+    first, second = details['instances']
+    cleanup, action, source, constructor, dispatch = _pending_endpoint(program, model, details, first)
+    if missing == 'payload_use':
+        changed = replace(model, uses=tuple(row for row in model.uses
+            if (row.operation, row.use) != (constructor, source.use)))
+    elif missing == 'dispatch':
+        changed = replace(model, transfers=tuple(row for row in model.transfers if row.operation != dispatch))
+    else:
+        call = first['stages'][1]['call']
+        changed = replace(model, call_activations=tuple(row for row in model.call_activations if row.id != call.id))
+    index = _index(program, changed, details)
+    assert changed.body_drive_executions == model.body_drive_executions
+    assert changed.body_activation_origins == model.body_activation_origins
+    assert changed.operations == model.operations
+    if missing == 'driver_call':
+        absent = index.call_entries(first['stages'][1]['caller'])
+        assert absent['status'] == 'MISSING' and absent['entries'] == ()
+        assert index.call_entries(second['stages'][1]['caller'])['entries']
+    else:
+        projected = routes(index._content_context(), budget=ValidityBudget(_BUDGET))
+        if missing == 'payload_use':
+            partial = _pending_projection(projected, dispatch)
+            assert partial['binding']['match'] is not True and partial['gaps']
+        else:
+            rows = tuple(row for row in projected['transfers'] if row['occurrence'].id == dispatch)
+            assert rows == ()
+            last = index.drive_execution(first['body_drives'][-1].drive, budget=_BUDGET)
+            assert last['path_complete'] is False and last['gaps']
+        drive = first['body_drives'][-1].drive
+        assert index.drive_execution(drive, budget=_BUDGET)['association'] == original.drive_execution(drive, budget=_BUDGET)['association']
+    _whole_chain(index, program, changed, details, 1)
+
+
+def test_tiny_budget_keeps_the_real_close_drive_and_all_its_original_consumer_ports():
+    program, model, details = async_close_chains_execution(route='illegal', instances=2)
+    index = _index(program, model, details)
+    actual = details['instances'][0]['body_drives'][1]
+    full = index.drive_execution(actual.drive, budget=_BUDGET)
+    tiny = index.drive_execution(actual.drive, budget=1)
+    assert tiny['association'] == actual
+    assert tiny['outcome'] == full['outcome']
+    assert len(tiny['inputs']) == len(full['inputs'])
+    assert len(tiny['outputs']) == len(full['outputs'])
+    assert tuple(row['update'] for row in tiny['session']['targets']) == tuple(row['update'] for row in full['session']['targets'])
+    assert tuple(row['definition'] for row in tiny['session']['hosts']) == tuple(row['definition'] for row in full['session']['hosts'])
+    assert tiny['budget']['truncated'] is True and tiny['cursor'] is not None
+    assert all(row['post_established'] is False for row in tiny['session']['targets'])
+    assert all(tiny[flag] is False for flag in _FLAGS)
+
+
+@pytest.mark.parametrize('missing', ('matcher_input', 'bool_condition', 'constructor_packet', 'body_outcome'))
+def test_missing_handled_reply_operand_cannot_borrow_a_complete_sibling(missing):
+    program, model, details = async_close_chains_execution(route='graceful-return', instances=2)
+    first, second = details['instances']
+    stage = first['stages'][-1]
+    reply, = tuple(row for row in stage['definition']['reply_stages'] if row.get('matchers'))
+    matcher = reply['matchers'][0]
+    if missing == 'matcher_input':
+        operation, use = matcher.operation, matcher.input_use
+    elif missing == 'bool_condition':
+        branch = next(row for row in program.operations if row.id == matcher.branch)
+        operation, use = branch.id, branch.terminator.condition
+    else:
+        operation, use = reply['pack'].id, reply['packet_definition'].exception
+    occurrence = stage['operations'][operation]
+    changed = (replace(model, body_drive_executions=tuple(row for row in model.body_drive_executions
+                if row != first['body_drives'][-1])) if missing == 'body_outcome' else
+        replace(model, uses=tuple(row for row in model.uses
+            if (row.operation, row.use) != (occurrence, use))))
+    index = _index(program, changed, details)
+    view = index.drive_execution(first['body_drives'][-1].drive, budget=_BUDGET)
+    if missing == 'body_outcome':
+        assert view['outcome'] is None and view['session']['hosts'] == ()
+    else:
+        host, = tuple(row for row in view['session']['hosts']
+                      if row['operation'] is not None and row['operation'].id == stage['host'])
+        assert host['handled_completion']['supported'] is False
+    assert view['session']['gaps']
+    assert changed.operations == model.operations
+    if missing != 'body_outcome':
+        assert changed.body_drive_executions == model.body_drive_executions
+    assert changed.body_activation_origins == model.body_activation_origins
+    _whole_chain(index, program, changed, details, 1)

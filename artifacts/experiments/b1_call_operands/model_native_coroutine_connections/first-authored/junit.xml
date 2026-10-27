@@ -1,0 +1,519 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="12" skipped="0" tests="15" time="11.489" timestamp="2026-10-19T15:37:22.613632+00:00" hostname="gpu1"><testcase classname="tests.unit.test_execution_coroutine_running" name="test_native_same_body_is_actually_running_during_reentry_and_then_finishes" time="0.105"><failure message="ValueError: region_parent at program_region:resume: non-root region needs an existing parent">def test_native_same_body_is_actually_running_during_reentry_and_then_finishes():
+&gt;       program, model, details = coroutine_running_execution(instances=2)
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_execution_coroutine_running.py:82: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/fixtures/execution_coroutine_running_graphs.py:349: in coroutine_running_execution
+    model, capture = capture_program(graph, details, instances=instances,
+tests/fixtures/native_coroutine_common.py:195: in capture_program
+    model = ExecutionModel(snapshot_for(program), runs=(ExecutionRun(run, source),),
+                           ^^^^^^^^^^^^^^^^^^^^^
+scar/ir/execution/snapshot.py:11: in snapshot_for
+    wire = program_dumps(program).encode('utf-8')
+           ^^^^^^^^^^^^^^^^^^^^^^
+scar/ir/program/codec.py:242: in dumps
+    _require_record_and_graph_valid(graph)
+scar/ir/program/codec.py:134: in _require_record_and_graph_valid
+    require_valid(graph)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='await.resume.caller'), regions=(Region(id=RegionID(value='await.resume.caller'), lab...0), drive=OperationID(value='await.resume.driver.2.driver.drive'), projection=None, guard=None)), exception_matches=())
+
+    def require_valid(graph: ProgramGraph) -&gt; None:
+        issues = validate(graph)
+        if issues:
+&gt;           raise ValueError("; ".join(f"{issue.code} at {issue.path}: {issue.message}" for issue in issues))
+E           ValueError: region_parent at program_region:resume: non-root region needs an existing parent
+
+scar/ir/program/validation.py:759: ValueError</failure></testcase><testcase classname="tests.unit.test_execution_coroutine_running" name="test_missing_this_instances_inner_chain_or_sent_source_cannot_borrow_its_sibling[inner-call]" time="0.101"><failure message="ValueError: region_parent at program_region:resume: non-root region needs an existing parent">missing = 'inner-call'
+
+    @pytest.mark.parametrize('missing', ('inner-call', 'sent-use'))
+    def test_missing_this_instances_inner_chain_or_sent_source_cannot_borrow_its_sibling(missing):
+&gt;       program, model, details = coroutine_running_execution(instances=2,
+            missing_inner_call=0 if missing == 'inner-call' else None,
+            missing_sent_use=0 if missing == 'sent-use' else None)
+
+tests/unit/test_execution_coroutine_running.py:158: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/fixtures/execution_coroutine_running_graphs.py:349: in coroutine_running_execution
+    model, capture = capture_program(graph, details, instances=instances,
+tests/fixtures/native_coroutine_common.py:195: in capture_program
+    model = ExecutionModel(snapshot_for(program), runs=(ExecutionRun(run, source),),
+                           ^^^^^^^^^^^^^^^^^^^^^
+scar/ir/execution/snapshot.py:11: in snapshot_for
+    wire = program_dumps(program).encode('utf-8')
+           ^^^^^^^^^^^^^^^^^^^^^^
+scar/ir/program/codec.py:242: in dumps
+    _require_record_and_graph_valid(graph)
+scar/ir/program/codec.py:134: in _require_record_and_graph_valid
+    require_valid(graph)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='await.resume.caller'), regions=(Region(id=RegionID(value='await.resume.caller'), lab...0), drive=OperationID(value='await.resume.driver.2.driver.drive'), projection=None, guard=None)), exception_matches=())
+
+    def require_valid(graph: ProgramGraph) -&gt; None:
+        issues = validate(graph)
+        if issues:
+&gt;           raise ValueError("; ".join(f"{issue.code} at {issue.path}: {issue.message}" for issue in issues))
+E           ValueError: region_parent at program_region:resume: non-root region needs an existing parent
+
+scar/ir/program/validation.py:759: ValueError</failure></testcase><testcase classname="tests.unit.test_execution_coroutine_running" name="test_missing_this_instances_inner_chain_or_sent_source_cannot_borrow_its_sibling[sent-use]" time="0.134"><failure message="ValueError: region_parent at program_region:resume: non-root region needs an existing parent">missing = 'sent-use'
+
+    @pytest.mark.parametrize('missing', ('inner-call', 'sent-use'))
+    def test_missing_this_instances_inner_chain_or_sent_source_cannot_borrow_its_sibling(missing):
+&gt;       program, model, details = coroutine_running_execution(instances=2,
+            missing_inner_call=0 if missing == 'inner-call' else None,
+            missing_sent_use=0 if missing == 'sent-use' else None)
+
+tests/unit/test_execution_coroutine_running.py:158: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/fixtures/execution_coroutine_running_graphs.py:349: in coroutine_running_execution
+    model, capture = capture_program(graph, details, instances=instances,
+tests/fixtures/native_coroutine_common.py:195: in capture_program
+    model = ExecutionModel(snapshot_for(program), runs=(ExecutionRun(run, source),),
+                           ^^^^^^^^^^^^^^^^^^^^^
+scar/ir/execution/snapshot.py:11: in snapshot_for
+    wire = program_dumps(program).encode('utf-8')
+           ^^^^^^^^^^^^^^^^^^^^^^
+scar/ir/program/codec.py:242: in dumps
+    _require_record_and_graph_valid(graph)
+scar/ir/program/codec.py:134: in _require_record_and_graph_valid
+    require_valid(graph)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='await.resume.caller'), regions=(Region(id=RegionID(value='await.resume.caller'), lab...0), drive=OperationID(value='await.resume.driver.2.driver.drive'), projection=None, guard=None)), exception_matches=())
+
+    def require_valid(graph: ProgramGraph) -&gt; None:
+        issues = validate(graph)
+        if issues:
+&gt;           raise ValueError("; ".join(f"{issue.code} at {issue.path}: {issue.message}" for issue in issues))
+E           ValueError: region_parent at program_region:resume: non-root region needs an existing parent
+
+scar/ir/program/validation.py:759: ValueError</failure></testcase><testcase classname="tests.unit.test_execution_coroutine_running" name="test_running_budget_one_retains_all_original_sources_without_a_true_prefix" time="0.084"><failure message="ValueError: region_parent at program_region:resume: non-root region needs an existing parent">def test_running_budget_one_retains_all_original_sources_without_a_true_prefix():
+&gt;       program, model, details = coroutine_running_execution(instances=2)
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_execution_coroutine_running.py:179: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/fixtures/execution_coroutine_running_graphs.py:349: in coroutine_running_execution
+    model, capture = capture_program(graph, details, instances=instances,
+tests/fixtures/native_coroutine_common.py:195: in capture_program
+    model = ExecutionModel(snapshot_for(program), runs=(ExecutionRun(run, source),),
+                           ^^^^^^^^^^^^^^^^^^^^^
+scar/ir/execution/snapshot.py:11: in snapshot_for
+    wire = program_dumps(program).encode('utf-8')
+           ^^^^^^^^^^^^^^^^^^^^^^
+scar/ir/program/codec.py:242: in dumps
+    _require_record_and_graph_valid(graph)
+scar/ir/program/codec.py:134: in _require_record_and_graph_valid
+    require_valid(graph)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='await.resume.caller'), regions=(Region(id=RegionID(value='await.resume.caller'), lab...0), drive=OperationID(value='await.resume.driver.2.driver.drive'), projection=None, guard=None)), exception_matches=())
+
+    def require_valid(graph: ProgramGraph) -&gt; None:
+        issues = validate(graph)
+        if issues:
+&gt;           raise ValueError("; ".join(f"{issue.code} at {issue.path}: {issue.message}" for issue in issues))
+E           ValueError: region_parent at program_region:resume: non-root region needs an existing parent
+
+scar/ir/program/validation.py:759: ValueError</failure></testcase><testcase classname="tests.unit.test_execution_coroutine_closed" name="test_completed_native_same_body_reuse_has_history_and_its_own_rejection_packet[next-after-extract-normal]" time="1.325"><failure message="assert None is True">kind = &lt;RawRequestKind.NEXT: 'NEXT'&gt;
+extractor_kind = &lt;ExitKind.NORMAL: 'NORMAL'&gt;
+reject_kind = &lt;ExitKind.NORMAL: 'NORMAL'&gt;
+
+    @pytest.mark.parametrize(('kind', 'extractor_kind', 'reject_kind'), (
+        (RawRequestKind.NEXT, ExitKind.NORMAL, ExitKind.NORMAL),
+        (RawRequestKind.SEND, ExitKind.RAISE, ExitKind.RAISE),
+    ), ids=('next-after-extract-normal', 'send-none-after-extract-raise'))
+    def test_completed_native_same_body_reuse_has_history_and_its_own_rejection_packet(
+            kind, extractor_kind, reject_kind):
+        program, model, captured = coroutine_closed_execution(
+            kind=kind, extractor_kind=extractor_kind, reject_kind=reject_kind)
+        index = _index(program, model)
+        details, = (captured['static'],)
+        example, = captured['instances']
+        closed = details['closed']
+        assert program.resumable_bodies[0].kind is ResumableKind.COROUTINE
+        assert len(program.resumable_creates) == len(model.body_activation_origins) == 1
+        assert len(program.body_drives) == len(model.body_drive_executions) == 1
+        retry_ids = {identity for block in closed['region'].blocks for identity in block.operations}
+        assert not any(row.operation in retry_ids for row in program.body_drives)
+        assert not any(row.operation in retry_ids for row in program.body_outcome_commits)
+        assert not program.no_body_finishes
+        assert example['body_origin'].creation == example['creation']
+    
+        view = index.body_state_history(captured['read'], budget=_BUDGET)
+        candidate = _candidate(view, details)
+        assert view['read'].id == captured['read']
+        assert view['predicate'].contract.subject.rule is BodyStatePredicateRule.IS_CLOSED
+        assert view['drive_inventory'] == program.body_drives
+        assert view['commit_inventory'] == program.body_outcome_commits
+        assert candidate['source'].operation == candidate['commit'].operation
+        assert candidate['drive'].id == model.body_drive_executions[0].drive
+        assert candidate['association'] == model.body_drive_executions[0]
+&gt;       assert candidate['post_established'] is True
+E       assert None is True
+
+tests/unit/test_execution_coroutine_closed.py:94: AssertionError</failure></testcase><testcase classname="tests.unit.test_execution_coroutine_closed" name="test_completed_native_same_body_reuse_has_history_and_its_own_rejection_packet[send-none-after-extract-raise]" time="1.275"><failure message="assert None is True">kind = &lt;RawRequestKind.SEND: 'SEND'&gt;, extractor_kind = &lt;ExitKind.RAISE: 'RAISE'&gt;
+reject_kind = &lt;ExitKind.RAISE: 'RAISE'&gt;
+
+    @pytest.mark.parametrize(('kind', 'extractor_kind', 'reject_kind'), (
+        (RawRequestKind.NEXT, ExitKind.NORMAL, ExitKind.NORMAL),
+        (RawRequestKind.SEND, ExitKind.RAISE, ExitKind.RAISE),
+    ), ids=('next-after-extract-normal', 'send-none-after-extract-raise'))
+    def test_completed_native_same_body_reuse_has_history_and_its_own_rejection_packet(
+            kind, extractor_kind, reject_kind):
+        program, model, captured = coroutine_closed_execution(
+            kind=kind, extractor_kind=extractor_kind, reject_kind=reject_kind)
+        index = _index(program, model)
+        details, = (captured['static'],)
+        example, = captured['instances']
+        closed = details['closed']
+        assert program.resumable_bodies[0].kind is ResumableKind.COROUTINE
+        assert len(program.resumable_creates) == len(model.body_activation_origins) == 1
+        assert len(program.body_drives) == len(model.body_drive_executions) == 1
+        retry_ids = {identity for block in closed['region'].blocks for identity in block.operations}
+        assert not any(row.operation in retry_ids for row in program.body_drives)
+        assert not any(row.operation in retry_ids for row in program.body_outcome_commits)
+        assert not program.no_body_finishes
+        assert example['body_origin'].creation == example['creation']
+    
+        view = index.body_state_history(captured['read'], budget=_BUDGET)
+        candidate = _candidate(view, details)
+        assert view['read'].id == captured['read']
+        assert view['predicate'].contract.subject.rule is BodyStatePredicateRule.IS_CLOSED
+        assert view['drive_inventory'] == program.body_drives
+        assert view['commit_inventory'] == program.body_outcome_commits
+        assert candidate['source'].operation == candidate['commit'].operation
+        assert candidate['drive'].id == model.body_drive_executions[0].drive
+        assert candidate['association'] == model.body_drive_executions[0]
+&gt;       assert candidate['post_established'] is True
+E       assert None is True
+
+tests/unit/test_execution_coroutine_closed.py:94: AssertionError</failure></testcase><testcase classname="tests.unit.test_execution_coroutine_closed" name="test_missing_retry_call_does_not_borrow_the_first_drive_or_another_call_for_closed_history" time="1.095" /><testcase classname="tests.unit.test_execution_coroutine_closed" name="test_native_historical_phase_bool_does_not_supply_the_current_gate_snapshot[callback-normal-latest-gate]" time="0.924" /><testcase classname="tests.unit.test_execution_coroutine_closed" name="test_native_historical_phase_bool_does_not_supply_the_current_gate_snapshot[callback-raise-own-packet]" time="0.983" /><testcase classname="tests.unit.test_execution_coroutine_packets" name="test_native_suspended_packets_follow_their_exact_normalizer_and_body_ports[own-normal-throw]" time="1.034"><failure message="TypeError: 'UseOccurrence' object is not a mapping">kind = &lt;RawRequestKind.THROW: 'THROW'&gt;, normalization_raised = False
+
+    @pytest.mark.parametrize('kind', (RawRequestKind.THROW, RawRequestKind.CLOSE), ids=('throw', 'close'))
+    @pytest.mark.parametrize('normalization_raised', (False, True), ids=('own-normal', 'own-raise'))
+    def test_native_suspended_packets_follow_their_exact_normalizer_and_body_ports(kind, normalization_raised):
+        program, model, details = coroutine_suspended_packet_execution(kind,
+            normalization_raised=normalization_raised, instances=2)
+        require_valid(program)
+        validation = execution_validate(model, program)
+        assert validation.valid, validation.issues
+        index = ExecutionIndex(model, program)
+        static, packet = details['static'], details['static']['packet']
+        definitions = {row.id: row for row in program.operations}
+        body, = program.resumable_bodies
+        assert body.kind is ResumableKind.COROUTINE
+        suspends = tuple(row for row in program.operations if type(row.terminator) is SuspendTerminator)
+        assert len(suspends) == 2
+        assert all(row.terminator.flavor is SuspensionFlavor.AWAIT for row in suspends)
+        assert all(row.profile is ProtocolProfile.COROUTINE_BODY_V1 for row in program.protocol_scopes)
+        final = static['drivers'][-1]
+        second = definitions[static['second_suspend']]
+        assert final['drive'].target.suspend == second.id and final['drive'].target.successor == 1
+        ingress = second.terminator.successors[1]
+        assert ingress.inputs[final['drive'].resume_inputs[0].slot].kind is ResumeSlotKind.THROWN_PACKET
+        first = next(row for row in suspends if row.id != second.id)
+        assert ingress.block != first.terminator.successors[1].block
+        assert tuple(row.contract.result for row in packet['rows']) == (packet['normal_result'], packet['raise_result'])
+        binding = ProgramIndex(program).source_binding(packet['normal_source'],
+            OwnedUse(final['drive'].operation, final['drive'].resume_inputs[0].source), budget=262144)
+        assert binding['match'] is True
+        obligation = _resume_obligation(program, static)
+        assert obligation['status'] == 'DECLARED' and obligation['binding']['match'] is True
+        if kind is RawRequestKind.CLOSE:
+            close_rows = tuple(row for row in program.protocol_operations if type(row.contract) is OutcomeAdapter)
+            assert len(close_rows) == 1 and close_rows[0].contract.rule is OutcomeAdapterRule.CLOSE_RETURN_VALUE
+        else:
+            assert not any(type(row.contract) is OutcomeAdapter for row in program.protocol_operations)
+    
+        expected_drives = 2 if normalization_raised else 3
+        assert len({example['creation'] for example in details['instances']}) == 2
+        assert len({example['body_activation'] for example in details['instances']}) == 2
+        for example in details['instances']:
+            assert len(example['body_segments']) == expected_drives
+            assert len(example['body_drives']) == expected_drives
+            assert example['active_driver_ordinals'] == tuple(range(expected_drives))
+            assert {row.activation for row in example['body_drives']} == {example['body_activation']}
+            origin = index.body_activation_origin(example['body_activation'], budget=262144)
+            assert origin['association'] == example['body_origin']
+            assert origin['association'].creation == example['creation']
+            for ordinal, association in enumerate(example['body_drives']):
+                view = index.drive_execution(association.drive, budget=262144)
+                assert view['association'] == association
+                assert view['entry'].id == example['body_entries'][ordinal]
+                assert view['instance']['creation_handle'] is not None
+                _copied_from(view, view['instance']['value'].id, view['instance']['creation_handle'].id)
+                assert not any(gap.code == 'body_instance_copy_unproved' for gap in view['gaps'])
+                assert len(view['outputs']) == 3
+                assert all(row['source_value'] is not None and row['formal'] is not None
+                           for row in (*view['inputs'], *view['outputs']))
+                for key in ('source_runtime_verified', 'runtime_identity_verified', 'value_identity_verified',
+                            'transformation_authorized'):
+                    assert view[key] is False
+            driver_operations = example['driver_scopes'][2][2]
+            normalizer = driver_operations[packet['normalizer']]
+            own_port = packet['raise_result'] if normalization_raised else packet['normal_result']
+            own = _own(program, model, normalizer, own_port)
+            route = index.formal_route(own.id)
+            assert route.transfer.operation == normalizer
+            assert route.argument == CompletionResult(0)
+            for association in example['call_activations']:
+                call = index.call_activation(association.id)
+                assert call['association'] == association
+                assert len(call['outputs']) == 3
+                assert all(row['callee_use'] is not None and row['caller_formal'] is not None
+                           for row in call['outputs'])
+            host = next(row for row in model.operations if row.id == driver_operations[final['host_terminal'].id])
+&gt;           _assert_current_states(index, program, model, host)
+
+tests/unit/test_execution_coroutine_packets.py:154: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/unit/test_execution_coroutine_packets.py:76: in _assert_current_states
+    value = _value(model, _use(model, operation.id, use.id).value)
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+model = ExecutionModel(snapshot=ProgramSnapshot(artifact=ProviderArtifact(uri='memory:canonical-program', sha256='a4e2d4485d2e....0.native.create'), source=MissingEvidence(reason='supplied native coroutine paths; no source/native runtime proof'))))
+occurrence = OperationOccurrenceID(value='native.packet.throw.0.driver.2.4.native.packet.driver.2.driver.outcome.exit')
+identity = UseID(value='native.packet.driver.2.driver.outcome.exit.use.1')
+
+    def _use(model, occurrence, identity):
+        rows = tuple(row for row in model.uses if row.operation == occurrence and row.use == identity)
+        assert len(rows) == 1
+&gt;       return {**rows[0], 'gaps': report['gaps']}
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       TypeError: 'UseOccurrence' object is not a mapping
+
+tests/unit/test_execution_coroutine_packets.py:31: TypeError</failure></testcase><testcase classname="tests.unit.test_execution_coroutine_packets" name="test_native_suspended_packets_follow_their_exact_normalizer_and_body_ports[own-normal-close]" time="0.418"><failure message="AssertionError: (ExecutionIssue(code='use_definition', path='program_use:native.second.resume.raise.packet', message='dynamic operand ...'program_use:native.second.resume.raise.packet', message='dynamic operand references another static value definition'))&#10;assert False&#10; +  where False = ValidationReport(issues=(ExecutionIssue(code='use_definition', path='program_use:native.second.resume.raise.packet', m...erified', path='model', message='declared occurrence/identity links have not been established by a runtime adapter'),)).valid">kind = &lt;RawRequestKind.CLOSE: 'CLOSE'&gt;, normalization_raised = False
+
+    @pytest.mark.parametrize('kind', (RawRequestKind.THROW, RawRequestKind.CLOSE), ids=('throw', 'close'))
+    @pytest.mark.parametrize('normalization_raised', (False, True), ids=('own-normal', 'own-raise'))
+    def test_native_suspended_packets_follow_their_exact_normalizer_and_body_ports(kind, normalization_raised):
+        program, model, details = coroutine_suspended_packet_execution(kind,
+            normalization_raised=normalization_raised, instances=2)
+        require_valid(program)
+        validation = execution_validate(model, program)
+&gt;       assert validation.valid, validation.issues
+E       AssertionError: (ExecutionIssue(code='use_definition', path='program_use:native.second.resume.raise.packet', message='dynamic operand ...'program_use:native.second.resume.raise.packet', message='dynamic operand references another static value definition'))
+E       assert False
+E        +  where False = ValidationReport(issues=(ExecutionIssue(code='use_definition', path='program_use:native.second.resume.raise.packet', m...erified', path='model', message='declared occurrence/identity links have not been established by a runtime adapter'),)).valid
+
+tests/unit/test_execution_coroutine_packets.py:87: AssertionError</failure></testcase><testcase classname="tests.unit.test_execution_coroutine_packets" name="test_native_suspended_packets_follow_their_exact_normalizer_and_body_ports[own-raise-throw]" time="1.094"><failure message="TypeError: 'UseOccurrence' object is not a mapping">kind = &lt;RawRequestKind.THROW: 'THROW'&gt;, normalization_raised = True
+
+    @pytest.mark.parametrize('kind', (RawRequestKind.THROW, RawRequestKind.CLOSE), ids=('throw', 'close'))
+    @pytest.mark.parametrize('normalization_raised', (False, True), ids=('own-normal', 'own-raise'))
+    def test_native_suspended_packets_follow_their_exact_normalizer_and_body_ports(kind, normalization_raised):
+        program, model, details = coroutine_suspended_packet_execution(kind,
+            normalization_raised=normalization_raised, instances=2)
+        require_valid(program)
+        validation = execution_validate(model, program)
+        assert validation.valid, validation.issues
+        index = ExecutionIndex(model, program)
+        static, packet = details['static'], details['static']['packet']
+        definitions = {row.id: row for row in program.operations}
+        body, = program.resumable_bodies
+        assert body.kind is ResumableKind.COROUTINE
+        suspends = tuple(row for row in program.operations if type(row.terminator) is SuspendTerminator)
+        assert len(suspends) == 2
+        assert all(row.terminator.flavor is SuspensionFlavor.AWAIT for row in suspends)
+        assert all(row.profile is ProtocolProfile.COROUTINE_BODY_V1 for row in program.protocol_scopes)
+        final = static['drivers'][-1]
+        second = definitions[static['second_suspend']]
+        assert final['drive'].target.suspend == second.id and final['drive'].target.successor == 1
+        ingress = second.terminator.successors[1]
+        assert ingress.inputs[final['drive'].resume_inputs[0].slot].kind is ResumeSlotKind.THROWN_PACKET
+        first = next(row for row in suspends if row.id != second.id)
+        assert ingress.block != first.terminator.successors[1].block
+        assert tuple(row.contract.result for row in packet['rows']) == (packet['normal_result'], packet['raise_result'])
+        binding = ProgramIndex(program).source_binding(packet['normal_source'],
+            OwnedUse(final['drive'].operation, final['drive'].resume_inputs[0].source), budget=262144)
+        assert binding['match'] is True
+        obligation = _resume_obligation(program, static)
+        assert obligation['status'] == 'DECLARED' and obligation['binding']['match'] is True
+        if kind is RawRequestKind.CLOSE:
+            close_rows = tuple(row for row in program.protocol_operations if type(row.contract) is OutcomeAdapter)
+            assert len(close_rows) == 1 and close_rows[0].contract.rule is OutcomeAdapterRule.CLOSE_RETURN_VALUE
+        else:
+            assert not any(type(row.contract) is OutcomeAdapter for row in program.protocol_operations)
+    
+        expected_drives = 2 if normalization_raised else 3
+        assert len({example['creation'] for example in details['instances']}) == 2
+        assert len({example['body_activation'] for example in details['instances']}) == 2
+        for example in details['instances']:
+            assert len(example['body_segments']) == expected_drives
+            assert len(example['body_drives']) == expected_drives
+            assert example['active_driver_ordinals'] == tuple(range(expected_drives))
+            assert {row.activation for row in example['body_drives']} == {example['body_activation']}
+            origin = index.body_activation_origin(example['body_activation'], budget=262144)
+            assert origin['association'] == example['body_origin']
+            assert origin['association'].creation == example['creation']
+            for ordinal, association in enumerate(example['body_drives']):
+                view = index.drive_execution(association.drive, budget=262144)
+                assert view['association'] == association
+                assert view['entry'].id == example['body_entries'][ordinal]
+                assert view['instance']['creation_handle'] is not None
+                _copied_from(view, view['instance']['value'].id, view['instance']['creation_handle'].id)
+                assert not any(gap.code == 'body_instance_copy_unproved' for gap in view['gaps'])
+                assert len(view['outputs']) == 3
+                assert all(row['source_value'] is not None and row['formal'] is not None
+                           for row in (*view['inputs'], *view['outputs']))
+                for key in ('source_runtime_verified', 'runtime_identity_verified', 'value_identity_verified',
+                            'transformation_authorized'):
+                    assert view[key] is False
+            driver_operations = example['driver_scopes'][2][2]
+            normalizer = driver_operations[packet['normalizer']]
+            own_port = packet['raise_result'] if normalization_raised else packet['normal_result']
+            own = _own(program, model, normalizer, own_port)
+            route = index.formal_route(own.id)
+            assert route.transfer.operation == normalizer
+            assert route.argument == CompletionResult(0)
+            for association in example['call_activations']:
+                call = index.call_activation(association.id)
+                assert call['association'] == association
+                assert len(call['outputs']) == 3
+                assert all(row['callee_use'] is not None and row['caller_formal'] is not None
+                           for row in call['outputs'])
+            host = next(row for row in model.operations if row.id == driver_operations[final['host_terminal'].id])
+&gt;           _assert_current_states(index, program, model, host)
+
+tests/unit/test_execution_coroutine_packets.py:154: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/unit/test_execution_coroutine_packets.py:76: in _assert_current_states
+    value = _value(model, _use(model, operation.id, use.id).value)
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+model = ExecutionModel(snapshot=ProgramSnapshot(artifact=ProviderArtifact(uri='memory:canonical-program', sha256='a4e2d4485d2e....0.native.create'), source=MissingEvidence(reason='supplied native coroutine paths; no source/native runtime proof'))))
+occurrence = OperationOccurrenceID(value='native.packet.throw.0.driver.2.1.native.packet.driver.2.boundary.raise')
+identity = UseID(value='native.packet.driver.2.boundary.raise.u.1')
+
+    def _use(model, occurrence, identity):
+        rows = tuple(row for row in model.uses if row.operation == occurrence and row.use == identity)
+        assert len(rows) == 1
+&gt;       return {**rows[0], 'gaps': report['gaps']}
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       TypeError: 'UseOccurrence' object is not a mapping
+
+tests/unit/test_execution_coroutine_packets.py:31: TypeError</failure></testcase><testcase classname="tests.unit.test_execution_coroutine_packets" name="test_native_suspended_packets_follow_their_exact_normalizer_and_body_ports[own-raise-close]" time="0.986"><failure message="TypeError: 'UseOccurrence' object is not a mapping">kind = &lt;RawRequestKind.CLOSE: 'CLOSE'&gt;, normalization_raised = True
+
+    @pytest.mark.parametrize('kind', (RawRequestKind.THROW, RawRequestKind.CLOSE), ids=('throw', 'close'))
+    @pytest.mark.parametrize('normalization_raised', (False, True), ids=('own-normal', 'own-raise'))
+    def test_native_suspended_packets_follow_their_exact_normalizer_and_body_ports(kind, normalization_raised):
+        program, model, details = coroutine_suspended_packet_execution(kind,
+            normalization_raised=normalization_raised, instances=2)
+        require_valid(program)
+        validation = execution_validate(model, program)
+        assert validation.valid, validation.issues
+        index = ExecutionIndex(model, program)
+        static, packet = details['static'], details['static']['packet']
+        definitions = {row.id: row for row in program.operations}
+        body, = program.resumable_bodies
+        assert body.kind is ResumableKind.COROUTINE
+        suspends = tuple(row for row in program.operations if type(row.terminator) is SuspendTerminator)
+        assert len(suspends) == 2
+        assert all(row.terminator.flavor is SuspensionFlavor.AWAIT for row in suspends)
+        assert all(row.profile is ProtocolProfile.COROUTINE_BODY_V1 for row in program.protocol_scopes)
+        final = static['drivers'][-1]
+        second = definitions[static['second_suspend']]
+        assert final['drive'].target.suspend == second.id and final['drive'].target.successor == 1
+        ingress = second.terminator.successors[1]
+        assert ingress.inputs[final['drive'].resume_inputs[0].slot].kind is ResumeSlotKind.THROWN_PACKET
+        first = next(row for row in suspends if row.id != second.id)
+        assert ingress.block != first.terminator.successors[1].block
+        assert tuple(row.contract.result for row in packet['rows']) == (packet['normal_result'], packet['raise_result'])
+        binding = ProgramIndex(program).source_binding(packet['normal_source'],
+            OwnedUse(final['drive'].operation, final['drive'].resume_inputs[0].source), budget=262144)
+        assert binding['match'] is True
+        obligation = _resume_obligation(program, static)
+        assert obligation['status'] == 'DECLARED' and obligation['binding']['match'] is True
+        if kind is RawRequestKind.CLOSE:
+            close_rows = tuple(row for row in program.protocol_operations if type(row.contract) is OutcomeAdapter)
+            assert len(close_rows) == 1 and close_rows[0].contract.rule is OutcomeAdapterRule.CLOSE_RETURN_VALUE
+        else:
+            assert not any(type(row.contract) is OutcomeAdapter for row in program.protocol_operations)
+    
+        expected_drives = 2 if normalization_raised else 3
+        assert len({example['creation'] for example in details['instances']}) == 2
+        assert len({example['body_activation'] for example in details['instances']}) == 2
+        for example in details['instances']:
+            assert len(example['body_segments']) == expected_drives
+            assert len(example['body_drives']) == expected_drives
+            assert example['active_driver_ordinals'] == tuple(range(expected_drives))
+            assert {row.activation for row in example['body_drives']} == {example['body_activation']}
+            origin = index.body_activation_origin(example['body_activation'], budget=262144)
+            assert origin['association'] == example['body_origin']
+            assert origin['association'].creation == example['creation']
+            for ordinal, association in enumerate(example['body_drives']):
+                view = index.drive_execution(association.drive, budget=262144)
+                assert view['association'] == association
+                assert view['entry'].id == example['body_entries'][ordinal]
+                assert view['instance']['creation_handle'] is not None
+                _copied_from(view, view['instance']['value'].id, view['instance']['creation_handle'].id)
+                assert not any(gap.code == 'body_instance_copy_unproved' for gap in view['gaps'])
+                assert len(view['outputs']) == 3
+                assert all(row['source_value'] is not None and row['formal'] is not None
+                           for row in (*view['inputs'], *view['outputs']))
+                for key in ('source_runtime_verified', 'runtime_identity_verified', 'value_identity_verified',
+                            'transformation_authorized'):
+                    assert view[key] is False
+            driver_operations = example['driver_scopes'][2][2]
+            normalizer = driver_operations[packet['normalizer']]
+            own_port = packet['raise_result'] if normalization_raised else packet['normal_result']
+            own = _own(program, model, normalizer, own_port)
+            route = index.formal_route(own.id)
+            assert route.transfer.operation == normalizer
+            assert route.argument == CompletionResult(0)
+            for association in example['call_activations']:
+                call = index.call_activation(association.id)
+                assert call['association'] == association
+                assert len(call['outputs']) == 3
+                assert all(row['callee_use'] is not None and row['caller_formal'] is not None
+                           for row in call['outputs'])
+            host = next(row for row in model.operations if row.id == driver_operations[final['host_terminal'].id])
+&gt;           _assert_current_states(index, program, model, host)
+
+tests/unit/test_execution_coroutine_packets.py:154: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/unit/test_execution_coroutine_packets.py:76: in _assert_current_states
+    value = _value(model, _use(model, operation.id, use.id).value)
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+model = ExecutionModel(snapshot=ProgramSnapshot(artifact=ProviderArtifact(uri='memory:canonical-program', sha256='a6eff90735f5....0.native.create'), source=MissingEvidence(reason='supplied native coroutine paths; no source/native runtime proof'))))
+occurrence = OperationOccurrenceID(value='native.packet.close.0.driver.2.1.native.packet.driver.2.boundary.raise')
+identity = UseID(value='native.packet.driver.2.boundary.raise.u.1')
+
+    def _use(model, occurrence, identity):
+        rows = tuple(row for row in model.uses if row.operation == occurrence and row.use == identity)
+        assert len(rows) == 1
+&gt;       return {**rows[0], 'gaps': report['gaps']}
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       TypeError: 'UseOccurrence' object is not a mapping
+
+tests/unit/test_execution_coroutine_packets.py:31: TypeError</failure></testcase><testcase classname="tests.unit.test_execution_coroutine_packets" name="test_same_typed_independent_packet_cannot_replace_current_normalizer_own_packet" time="0.083"><failure message="AssertionError: assert 'protocol_resume_source' in {'protocol_copy'}">def test_same_typed_independent_packet_cannot_replace_current_normalizer_own_packet():
+        program, details = coroutine_suspended_packet_program(RawRequestKind.THROW, wrong_packet=True)
+        core = _core(program)
+        require_valid(core)
+        final = details['drivers'][-1]['drive']
+        binding = ProgramIndex(core).source_binding(details['packet']['normal_source'].result_port,
+            OwnedUse(final.operation, final.resume_inputs[0].source), budget=262144)
+        assert binding['match'] is False
+        report = program_validate(program)
+        assert report
+&gt;       assert 'protocol_resume_source' in {issue.code for issue in report}
+E       AssertionError: assert 'protocol_resume_source' in {'protocol_copy'}
+
+tests/unit/test_execution_coroutine_packets.py:203: AssertionError</failure></testcase><testcase classname="tests.unit.test_execution_coroutine_packets" name="test_removed_packet_source_keeps_the_original_thrown_packet_obligation" time="0.254"><failure message="KeyError: 'gaps'">def test_removed_packet_source_keeps_the_original_thrown_packet_obligation():
+        program, details = coroutine_suspended_packet_program(RawRequestKind.CLOSE, attach_source=False)
+        require_valid(program)
+        obligation = _resume_obligation(program, details)
+        assert obligation['kind'] is ResumeSlotKind.THROWN_PACKET
+        assert obligation['status'] == 'MISSING'
+&gt;       assert any(gap['code'] == 'continuation_resume_source_missing' for gap in obligation['gaps'])
+                                                                                  ^^^^^^^^^^^^^^^^^^
+E       KeyError: 'gaps'
+
+tests/unit/test_execution_coroutine_packets.py:212: KeyError</failure></testcase></testsuite></testsuites>

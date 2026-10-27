@@ -1,0 +1,59 @@
+{
+  "status": "IMPLEMENTED_API_CHECKED_ONLY",
+  "base": "66ed821b6dd13e585af03b4f8054270fe6d180d1",
+  "checks": [
+    "3 files AST and compile without execution",
+    "65536 code / 4096 selected-source constructor mapping",
+    "explicit typed budget forwarding signature"
+  ],
+  "capture_runs": 0,
+  "source_bootstrap_reruns": 0,
+  "old_cpu_run_applies_to": "SOURCE_RECEIPTS.json of automatic_captured_source_20261027 only",
+  "wide_call_budget": {
+    "max_raw_bytes": 1000000000,
+    "max_lines": 200000,
+    "max_line_bytes": 8000000,
+    "max_processes": 128,
+    "max_codes": 65536,
+    "max_events": 100000,
+    "max_source_files": 4096,
+    "max_source_bytes": 16000000,
+    "max_references": 1000000,
+    "max_path": 128
+  },
+  "derived_owner_budget": {
+    "max_metadata_bytes": 8000000,
+    "max_rows_bytes": 1000000000,
+    "max_row_bytes": 8000000,
+    "max_files": 65536,
+    "max_source_bytes": 1000000000,
+    "max_codes": 65536,
+    "max_code_bytes": 1000000000
+  },
+  "explicit_owner_budget": {
+    "max_metadata_bytes": 2000000,
+    "max_rows_bytes": 1000000000,
+    "max_row_bytes": 4000000,
+    "max_files": 65536,
+    "max_source_bytes": 1000000000,
+    "max_codes": 65536,
+    "max_code_bytes": 1000000000
+  },
+  "sources": [
+    {
+      "path": "scar/analysis/call_seeds.py",
+      "bytes": 17054,
+      "sha256": "1a4704824ac0741d437cc500f466eb5dac6e38eb5561c9ebad47da4625980646"
+    },
+    {
+      "path": "scar/analysis/model_run.py",
+      "bytes": 70820,
+      "sha256": "dfcf82b9ae79a8e68a7e23dd38b2620bff24f8ebb8e6ba7ccd5db43b3bc234e1"
+    },
+    {
+      "path": "scar/analysis/captured_source_owner.py",
+      "bytes": 13791,
+      "sha256": "7ff99f0eb812ca020294e67def5e16a8d42cb2370251c96430cec003c807d299"
+    }
+  ]
+}

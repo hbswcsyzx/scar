@@ -1,0 +1,98 @@
+{
+  "command": "Python inline two-candidate preflight; no target execution",
+  "driver_path": "/home/zyf/AAA/scar/artifacts/experiments/b1_call_operands/structured_model_source_stress/attempt-002/driver.py",
+  "driver_sha256": "20d561f43b7d17881ec804e218b2d0e05de280e4669318cb8743ae8de2297ab7",
+  "finished_utc": "2026-10-16T03:16:10.328771+00:00",
+  "frozen_source_unchanged": true,
+  "inventory_path": "/home/zyf/AAA/scar/artifacts/experiments/b1_call_operands/windows_lewm_analysis/inventory.json.gz",
+  "inventory_sha256": "1b29ba654226d6c374bebc2fe7ba212f4658b05b57b521c90590ac4d5384c422",
+  "inventory_shape_issues": [],
+  "prepared_paths": {
+    "/home/zyf/AAA/le-wm/eval.py": 1,
+    "/home/zyf/AAA/le-wm/run_inference.py": 1
+  },
+  "python": "3.14.7 | packaged by conda-forge | (main, Sep  2 2026, 21:08:32) [GCC 15.3.0]",
+  "results": [
+    {
+      "category": "old_graph",
+      "current_snapshot_equal": true,
+      "definition_and_ast_validation": "VALID",
+      "definition_id": "opdef:op:42c3c268672e21760bf4943b",
+      "definition_name": "_load_local_checkpoint",
+      "definition_source": {
+        "atom_id": "source:atom:a0792a1274b2abf3933f0418",
+        "end": [
+          64,
+          5
+        ],
+        "fingerprint": "sha256:39eea50429a9bc1383fe3ee1264c85f25ee4e43517fb513246b9999e695914a0",
+        "path": "/home/zyf/AAA/le-wm/run_inference.py",
+        "start": [
+          59,
+          0
+        ]
+      },
+      "new_gap_kinds": [
+        "CODE_VERSION",
+        "DYNAMIC_DISPATCH",
+        "DYNAMIC_TARGET",
+        "EFFECT_SUMMARY",
+        "FRAME_EFFECT"
+      ],
+      "new_graph_present": true,
+      "new_operation_links": 23,
+      "new_operations_emitted": 23,
+      "new_use_links": 62,
+      "old_graph_present": true,
+      "old_status": "LOWERED_WITH_GAPS",
+      "path": "/home/zyf/AAA/le-wm/run_inference.py",
+      "snapshot_fingerprint": "sha256:39eea50429a9bc1383fe3ee1264c85f25ee4e43517fb513246b9999e695914a0"
+    },
+    {
+      "category": "old_unsupported",
+      "current_snapshot_equal": true,
+      "definition_and_ast_validation": "VALID",
+      "definition_id": "opdef:op:1d0050503e1baadc23f6e50d",
+      "definition_name": "img_transform",
+      "definition_source": {
+        "atom_id": "source:atom:3ce9d36aea40d2aae5c295c0",
+        "end": [
+          26,
+          20
+        ],
+        "fingerprint": "sha256:6584f009b40550fa0df2f8dee22b9329fbfacdfaf74464aa4fd105f464795245",
+        "path": "/home/zyf/AAA/le-wm/eval.py",
+        "start": [
+          17,
+          0
+        ]
+      },
+      "new_gap_kinds": [
+        "CODE_VERSION",
+        "DYNAMIC_DISPATCH",
+        "DYNAMIC_TARGET",
+        "EFFECT_SUMMARY",
+        "FRAME_EFFECT",
+        "UNSUPPORTED_SYNTAX"
+      ],
+      "new_graph_present": false,
+      "new_operation_links": 0,
+      "new_operations_emitted": 33,
+      "new_use_links": 0,
+      "old_graph_present": false,
+      "old_status": "UNSUPPORTED",
+      "path": "/home/zyf/AAA/le-wm/eval.py",
+      "snapshot_fingerprint": "sha256:6584f009b40550fa0df2f8dee22b9329fbfacdfaf74464aa4fd105f464795245"
+    }
+  ],
+  "schema": "scar.structured-source-stress-preflight",
+  "schema_version": 1,
+  "scope": {
+    "authority_granted": false,
+    "target_execution": false,
+    "whole_program_claim": false
+  },
+  "selected_candidate_decode_errors": 0,
+  "started_utc": "2026-10-16T03:16:03.771987+00:00",
+  "target_source_unchanged": true
+}

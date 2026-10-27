@@ -1,0 +1,7 @@
+{
+  "returncode": 0,
+  "pytest_result": "14 passed in 0.41s",
+  "module_sha256": "8adaa530a1801949a0706948c9aef2410148782fa95e49da18706ed5c794fae0",
+  "test_sha256": "f69f403a2b4cc625e84d5cd752f0f02956f333330f571d7d32d7a8dddc5754e6",
+  "scope": "owned lifecycle-flow tests; 600 bounded concrete must-transfer checks inside one test"
+}

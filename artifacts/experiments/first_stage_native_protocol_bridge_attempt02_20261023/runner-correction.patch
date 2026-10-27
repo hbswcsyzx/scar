@@ -1,0 +1,32 @@
+--- attempt01/gate.py
++++ attempt02/gate.py
+@@ -2,6 +2,7 @@
+ from pathlib import Path
+ import ast,builtins,io,gzip,json,hashlib,os,resource,signal,sys,time,traceback
+ from dataclasses import replace
++from functools import lru_cache
+ BASE=Path(__file__).resolve().parents[3]
+ OUT=Path(__file__).resolve().parent
+ CAPTURE=BASE/'artifacts/experiments/first_stage_lewm_physical_20261023'
+@@ -19,13 +20,17 @@
+ # original selected archive files participate, never imports/output files.
+ original_open,original_io_open=builtins.open,io.open
+ original_gread,original_gline=gzip.GzipFile.read,gzip.GzipFile.readline
++@lru_cache(maxsize=1024)
++def source_path(path):
++ try:return Path(path).resolve()
++ except (TypeError,ValueError):return None
++@lru_cache(maxsize=1024)
+ def tracked(path):
+- try:p=Path(path).resolve()
+- except (TypeError,ValueError):return False
+- return p.is_relative_to(CAPTURE) or p.is_relative_to(PARENT/'native/bundle-partitions') or p==PARENT/'capture-model.json'
++ p=source_path(path)
++ return p is not None and (p.is_relative_to(CAPTURE) or p.is_relative_to(PARENT/'native/bundle-partitions') or p==PARENT/'capture-model.json')
+ def add(path,kind,n):
+  if not n:return
+- key=(phase,str(Path(path).resolve()),kind);reads[key]=reads.get(key,0)+n
++ key=(phase,str(source_path(path)),kind);reads[key]=reads.get(key,0)+n
+ class FileRead:
+  def __init__(self,f):self._f=f
+  def __getattr__(self,n):return getattr(self._f,n)

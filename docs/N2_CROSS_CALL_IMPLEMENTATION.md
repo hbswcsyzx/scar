@@ -1,8 +1,11 @@
 # C1/B1：跨层参数来源的实现与验收计划
 
-日期：2026-10-15。状态：**Proposed；前置探针有 Observed 证据，尚无生产 B1 实现**。
+日期：2026-10-15，2026-10-16续。状态：**Implementing；R1已验收，B1采集、
+有界读取和路线/公开查询已实现，联合冻结验收尚未完成**。
 本文件细化 [调用与环境总计划](N2_CALL_BINDING_PLAN.md)，不替代 E0/E1、C2、循环
 和状态来源门。不新增 detector/backend，不手工补 workload 图。
+当前实现与失败复查见 [B1执行记录](N2_B1_IMPLEMENTATION.md)，原始协议见
+[operand证据协议](N2_OPERAND_PROTOCOL.md)。
 
 ## 1. 交付必须是能查询的连接
 

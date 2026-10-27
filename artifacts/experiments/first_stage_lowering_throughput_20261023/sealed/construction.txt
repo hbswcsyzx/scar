@@ -1,0 +1,53 @@
+         32000992 function calls (28147968 primitive calls) in 19.003 seconds
+
+   Ordered by: cumulative time
+   List reduced from 1145 to 45 due to restriction <45>
+
+   ncalls  tottime  percall  cumtime  percall filename:lineno(function)
+   203245    0.200    0.000   12.958    0.000 /home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/v2/_validation.py:72(record_errors)
+3295264/203245    7.166    0.000   12.668    0.000 /home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/v2/_validation.py:77(_record_errors)
+      115    0.298    0.003   10.964    0.095 /home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/v2/_validation.py:141(mapping_errors)
+        1    0.001    0.001   10.370   10.370 /home/zyf/AAA/scar-worktrees/structured-program-model/scar/analysis/program_lowering.py:993(prepare_source)
+        1    0.001    0.001   10.364   10.364 /home/zyf/AAA/scar-worktrees/structured-program-model/scar/analysis/control_flow_v2.py:696(_build_generated_source_layers)
+        8    0.094    0.012    9.572    1.197 /home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/v2/semantic.py:412(validate)
+        1    0.000    0.000    8.363    8.363 /home/zyf/AAA/scar-worktrees/structured-program-model/scar/analysis/program_lowering.py:215(seal_for_lowering)
+        1    0.011    0.011    8.363    8.363 /home/zyf/AAA/scar-worktrees/structured-program-model/scar/analysis/program_lowering.py:263(__init__)
+        6    0.000    0.000    7.275    1.212 /home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/v2/semantic.py:505(assert_valid)
+        2    0.000    0.000    6.061    3.031 /home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/control_flow_v2.py:525(assert_valid)
+        2    0.046    0.023    6.061    3.031 /home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/control_flow_v2.py:262(validate)
+        5    0.000    0.000    5.696    1.139 /home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/semantics_v2.py:512(assert_valid)
+        5    0.046    0.009    5.696    1.139 /home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/semantics_v2.py:327(validate)
+        1    0.014    0.014    5.635    5.635 /home/zyf/AAA/scar-worktrees/structured-program-model/scar/analysis/control_flow_v2.py:547(build)
+        3    0.000    0.000    4.144    1.381 /home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/v2/semantic.py:511(to_dict)
+        1    0.001    0.001    3.099    3.099 /home/zyf/AAA/scar-worktrees/structured-program-model/scar/analysis/source_semantics_v2.py:549(extract_source_semantics)
+        3    0.007    0.002    2.913    0.971 /home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/semantics_v2.py:518(to_dict)
+  2527976    1.692    0.000    2.629    0.000 /home/zyf/miniconda3/envs/lewm/lib/python3.14/dataclasses.py:1477(is_dataclass)
+950131/923007    0.461    0.000    2.366    0.000 /home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/v2/_validation.py:82(<genexpr>)
+ 413486/1    0.590    0.000    2.134    2.134 /home/zyf/miniconda3/envs/lewm/lib/python3.14/copy.py:110(deepcopy)
+  22824/1    0.052    0.000    2.134    2.134 /home/zyf/miniconda3/envs/lewm/lib/python3.14/copy.py:181(_deepcopy_tuple)
+  48871/4    0.191    0.000    2.134    0.533 /home/zyf/miniconda3/envs/lewm/lib/python3.14/copy.py:228(_reconstruct)
+   8857/4    0.089    0.000    2.134    0.533 /home/zyf/miniconda3/envs/lewm/lib/python3.14/copy.py:198(_deepcopy_dict)
+        1    0.001    0.001    1.940    1.940 /home/zyf/AAA/scar-worktrees/structured-program-model/scar/analysis/source_semantics_v2.py:512(run)
+        1    0.001    0.001    1.611    1.611 /home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/frontend_v2.py:825(build_semantic_files)
+        1    0.004    0.004    1.610    1.610 /home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/frontend_v2.py:757(build)
+  7472166    1.316    0.000    1.316    0.000 {built-in method builtins.isinstance}
+43104/26377    0.120    0.000    0.900    0.000 /home/zyf/miniconda3/envs/lewm/lib/python3.14/copy.py:172(_deepcopy_list)
+    12930    0.010    0.000    0.825    0.000 /home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/record_codec.py:44(encode)
+177594/12930    0.380    0.000    0.812    0.000 /home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/record_codec.py:53(_encode)
+3247209/3247194    0.740    0.000    0.741    0.000 {built-in method builtins.getattr}
+  3429741    0.657    0.000    0.661    0.000 {built-in method builtins.hasattr}
+2747258/2747213    0.513    0.000    0.532    0.000 {method 'extend' of 'list' objects}
+       30    0.031    0.001    0.486    0.016 /home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/v2/semantic.py:514(ordered)
+   108422    0.277    0.000    0.421    0.000 /home/zyf/miniconda3/envs/lewm/lib/python3.14/dataclasses.py:1454(fields)
+     4032    0.007    0.000    0.405    0.000 /home/zyf/miniconda3/envs/lewm/lib/python3.14/json/__init__.py:185(dumps)
+     4032    0.005    0.000    0.398    0.000 /home/zyf/miniconda3/envs/lewm/lib/python3.14/json/encoder.py:185(encode)
+     4032    0.390    0.000    0.390    0.000 /home/zyf/miniconda3/envs/lewm/lib/python3.14/json/encoder.py:207(iterencode)
+    88446    0.049    0.000    0.327    0.000 {built-in method builtins.sorted}
+        6    0.000    0.000    0.325    0.054 /home/zyf/AAA/scar-worktrees/structured-program-model/scar/analysis/program_lowering.py:284(lower)
+        6    0.000    0.000    0.325    0.054 /home/zyf/AAA/scar-worktrees/structured-program-model/scar/analysis/program_lowering.py:230(_lower_prepared)
+        4    0.000    0.000    0.303    0.076 /home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/control_flow_v2.py:621(_digest)
+    48871    0.059    0.000    0.302    0.000 {method '__reduce_ex__' of 'object' objects}
+        6    0.000    0.000    0.288    0.048 /home/zyf/AAA/scar-worktrees/structured-program-model/scar/analysis/structured_lowering.py:518(run)
+   437334    0.200    0.000    0.265    0.000 /home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/v2/ids.py:18(__post_init__)
+
+

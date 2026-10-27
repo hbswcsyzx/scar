@@ -1,0 +1,15 @@
+{
+  "status": "PASS",
+  "command": "python -B -m scar.cli query-source-dependencies --model artifacts/analysis/source_call_bridge_20261027/attempt03/source_ports.json --sha256 4a78314ff0c840f37a694150d44fc4f7adfd798d19d3206c5a09f2fc792afde0 --binding-index 0 --actual-index 0 --out artifacts/analysis/source_dependency_navigation_20261027/cli_query.json",
+  "output_sha256": "08da91d59d8840a6753efe124dbd7fcc112327c9285f4c25d8978dbc3a862fb8",
+  "output_bytes": 45583,
+  "nodes": 4,
+  "routes": {
+    "ACTUAL_TO_FORMAL": 1,
+    "LOCAL_BINDING_READ": 1,
+    "LOCAL_BINDING_PAYLOAD": 1
+  },
+  "producer_inputs_replayed": false,
+  "new_capture_or_target_execution": false,
+  "whole_program_complete": false
+}

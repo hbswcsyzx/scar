@@ -1,0 +1,13 @@
+{
+  "revision": "8585d7f2aa013896fa58c3759d540338b78d43a5",
+  "sources": {
+    "encoder": {
+      "path": "scar/ir/program/codec.py",
+      "sha256": "9b36d73cecda61688d6d62a0b5e7e471543ba8c471e70c44d199219843351032"
+    },
+    "fixture": {
+      "path": "tests/fixtures/program_exception_match_graphs.py",
+      "sha256": "8bd2e1aae771d92f8101565ad1a3e1e2926a9ac5514e2f1de95d80ab00ea4531"
+    }
+  }
+}

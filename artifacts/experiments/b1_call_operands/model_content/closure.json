@@ -1,0 +1,24 @@
+{
+  "implementation_revision": "f71740e1a6c5e71e4b3b1a71565d8dfb78cd0a73",
+  "source_sha256": "264df18c32498a03e637604de28a81912fd176b75eddeb79c7b818234bf22198",
+  "source_files": 506,
+  "component_cases": 445,
+  "full_cases": 4568,
+  "documents": {
+    "README.md": "c1ae137216a44ed0bd14290fbfd82bb81cb35e93abaae50560577057d2ba85a5",
+    "docs/M1_CONTENT_CONNECTION_PLAN.md": "26f86d36c172ea4d37ab396a32cbcc0c6f99f4a5a84299b29afd5a8e72d7c8de",
+    "docs/M1_CONTENT_CONNECTION_API.md": "894c22d9a724981e049dc5e7b1fafa4092beb3834753fc7dfdd7c4da1eb4ae27",
+    "docs/M1_CONTENT_CONNECTION_ACCEPTANCE.md": "dcdeb58d38e44af4aaa96360829cd579672e82d3ef3486c7923c50208bdff92e",
+    "docs/STATUS.md": "d09bfa4e91831c0b2c8fdb9441f2f3d6fd07d39903b893ff0e1427a9b8ca7d19",
+    "docs/ROADMAP.md": "d7ee290b51691be63a33d62a10d184c57ed892c4be6cab0db3067b54283d4a3d",
+    "docs/FIRST_STAGE_COMPLETION_MATRIX.md": "b731c13839428cd710859b040f2760b3e885c45cb11b1270b7bbb4161af76441",
+    "docs/WHOLE_PROGRAM_MODEL_PLAN.md": "6228a659b5c1b9d1f547a44175b69df3a67e2305244f63fceff9ee8d06e383e9"
+  },
+  "review_sha256": "8964f64896c3b37c1fe7d0b115ca7fb757a28641db3bfea3e63bf7381ae31c6e",
+  "limitations": [
+    "D declared associations only; no runtime recovery/native proof",
+    "P/V/R3 and full M0-M2 open",
+    "No new backend, LeWM profiling or speedup"
+  ],
+  "tests_started_by_archive_checker": 0
+}

@@ -1,0 +1,59 @@
+{
+  "scope": "Six real source bodies; instrumented SCAR construction only, not LeWM runtime or whole coverage",
+  "source": "/home/zyf/AAA/le-wm/stable-worldmodel/stable_worldmodel/policy.py",
+  "source_sha256": "4967e7e3d5b20eb7a1d0b00e5d60fd701cce1c750ae7ec4a9b02529b9366db22",
+  "prepare_s": 10.369971421001537,
+  "seal_s": 8.363317205003113,
+  "sealed": true,
+  "prepared_peak_rss_kib": 67684,
+  "sealed_peak_rss_kib": 71580,
+  "lower_s": 0.32532062599784695,
+  "bodies": [
+    {
+      "entry": "PlanConfig.plan_len",
+      "wall_s": 0.20373649400426075,
+      "status": "LOWERED_WITH_GAPS",
+      "operations": 15,
+      "canonical_sha256": "7ea66adb1d1549ae4bc097813a3bda0cbb79050236cae50a2d8a58132bf551a2"
+    },
+    {
+      "entry": "BasePolicy.__init__",
+      "wall_s": 0.026355864996730816,
+      "status": "UNSUPPORTED",
+      "operations": 39,
+      "canonical_sha256": "de774b12a6e1f142f298bdd50809a62d869132f8670f8522b47f74ec5f411f84"
+    },
+    {
+      "entry": "BasePolicy.get_action",
+      "wall_s": 0.03591810799844097,
+      "status": "LOWERED_WITH_GAPS",
+      "operations": 14,
+      "canonical_sha256": "a134cdc6d945eac6ab0b9bf08f2e8e571388523c00c1b2c9654ea630a00b0b6c"
+    },
+    {
+      "entry": "BasePolicy.set_env",
+      "wall_s": 0.03622477300086757,
+      "status": "LOWERED_WITH_GAPS",
+      "operations": 14,
+      "canonical_sha256": "68c555e0cf6c4acb7f976a83e1d505ba998f07b75048826dc18853a5759bb5f7"
+    },
+    {
+      "entry": "BasePolicy._prepare_info",
+      "wall_s": 0.012939845000801142,
+      "status": "UNSUPPORTED",
+      "operations": 8,
+      "canonical_sha256": "26c87a22bad7b9b83743ed2f53aa1679ae8793535f037e9b5c539f17af1b2716"
+    },
+    {
+      "entry": "RandomPolicy.__init__",
+      "wall_s": 0.010145540996745694,
+      "status": "UNSUPPORTED",
+      "operations": 4,
+      "canonical_sha256": "f3c4a3bce924ed12f756eef7a0aa4db5410848128648a2c4f8ab26ff394d0451"
+    }
+  ],
+  "max_operations_per_body": 100000,
+  "target_executed": false,
+  "validation_disabled": false,
+  "whole_program_graph_established": false
+}

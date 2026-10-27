@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import ast
 from collections import Counter, defaultdict, deque
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 import hashlib
 import json
 import os
@@ -23,7 +23,7 @@ from scar.analysis.call_compilation import (
 )
 from scar.analysis.function_interfaces import extract_signature
 from scar.analysis.program_inventory import _Inventory
-from scar.analysis.program_lowering import prepare_source
+from scar.analysis.program_lowering import prepare_source, prepare_captured_source
 from scar.ir.program.call_edges import (
     CallEdgeBudget, CallEdgeCondition, CallEdgeIssue, CallEdgeIssueKind,
     CallEdgeModel, CallLinkStatus, CallRecordAnchor, CallSiteLink,
@@ -34,6 +34,7 @@ from scar.ir.program.call_edges import (
 )
 from scar.ir.program.frames import FrameExit as SourceFrameExit
 from scar.ir.program.functions import BodyLoweringProfile
+from scar.ir.program.structured import PythonProtocolKind
 from scar.ir.program.compilation import CallCompilationProfile
 from scar.ir.program.model import CompletionResult, ExitKind, TerminatorKind
 from scar.ir.program.source import SourceRole
@@ -89,15 +90,31 @@ class _LightSource:
     return_nodes_by_position: dict
 
 
+@dataclass(frozen=True)
+class _QualifiedBodyContext:
+    """A view of an original admitted body; no records enter bare-ID maps."""
+    reference: object
+    bundle: object
+    signature: object
+    link: CodeSourceLink
+    code: CodeType
+    context: _LightSource
+    indexed: object
+    namespace: object
+    core: tuple
+
+
 def _source_witness_projection(prepared):
     """Publish only the source/signature records consumed by this matcher."""
     indexed = _Inventory(prepared, 0, 0).source_witness_index()
     signatures = {}
+    first_nodes = {}
+    for node in ast.walk(prepared.tree):
+        if hasattr(node, 'args') and hasattr(node, 'end_lineno'):
+            first_nodes.setdefault((node.lineno,node.end_lineno,node.col_offset,node.end_col_offset),node)
     for definition in indexed.definitions:
-        node = next((node for node in ast.walk(prepared.tree) if hasattr(node, "args")
-                     and hasattr(node, "end_lineno") and _span(node) == (
-                         definition.source.start_line, definition.source.end_line,
-                         definition.source.start_column, definition.source.end_column)), None)
+        source = definition.source
+        node = first_nodes.get((source.start_line,source.end_line,source.start_column,source.end_column))
         if node is not None:
             signatures[definition.id] = extract_signature(prepared, definition, node=node)
     return indexed, prepared.text, prepared.tree, signatures
@@ -107,21 +124,50 @@ class _Sources:
     def __init__(
         self, root, budget, inventory, *, _source_workspace=None,
         compilation_profile=CallCompilationProfile.LEGACY_ZERO_FLAGS,
+        captured_source_owner=None, captured_source_root_is_package=None,
     ):
         if type(compilation_profile) is not CallCompilationProfile:
             raise ValueError("compilation profile must be a CallCompilationProfile")
         self.root, self.budget, self.inventory = root, budget, inventory
+        from scar.analysis.captured_source_owner import CapturedSourceOwner
+        _require(captured_source_owner is None or type(captured_source_owner) is CapturedSourceOwner,
+                 'captured source construction requires its normal owner, not serialized metadata')
+        _require(captured_source_owner is None or type(captured_source_root_is_package) is bool,
+                 'CAPTURED_NAMESPACE_POLICY_UNAVAILABLE: original namespace package policy is required')
+        if captured_source_owner is not None and _source_workspace is not None:
+            from scar.analysis.call_demand import _SourceWorkspace
+            _require(type(_source_workspace)is _SourceWorkspace
+                     and _source_workspace.captured_session is not None
+                     and _source_workspace.captured_session.owner is captured_source_owner
+                     and _source_workspace.captured_session.policy['root_is_package']==captured_source_root_is_package,
+                     'captured source workspace requires the same normal owner/namespace policy')
+        self.captured_source_owner = captured_source_owner
+        self.captured_source_root_is_package = captured_source_root_is_package
+        self.source_origins = {}
         self._source_workspace = _source_workspace
         self.compilation_profile = compilation_profile
         self.contexts, self.indexes, self.compiled, self.links, self.objects = {}, {}, {}, {}, {}
         self.context_errors = {}
         self.site_links, self.operand_links = {}, {}
+        self.qualified_bodies = {}
         self.total_source_bytes = 0
+        from scar.analysis.source_body_access import SourceBodyAccess
+        self.source_access = inventory if type(inventory) is SourceBodyAccess else None
+        if self.source_access is not None:
+            _require(captured_source_owner is None,
+                     'captured source owner with bound source-body access needs an explicit adapter')
+            _require(self.source_access.bound, "partitioned source access has no current raw scan")
+            self.inventory_files = {}
+            self.bodies, self.signatures = inventory.bodies, inventory.signatures
+            self.ports, self.frames, self.structured = inventory.ports, inventory.frames, inventory.structured
+            self.core = inventory.core
+            return
         self.inventory_files = {file.snapshot.path: file for file in inventory.files} if inventory else {}
         self.bodies = {body.definition: body for file in inventory.files for body in file.bodies} if inventory else {}
         self.signatures = {signature.definition: signature for signature in inventory.interfaces.signatures} if inventory else {}
         self.ports = {body.definition: body for body in inventory.interfaces.bodies} if inventory else {}
         self.frames = {frame.definition: frame for frame in inventory.frames} if inventory else {}
+        self.structured = {body.definition: body for body in inventory.structured} if inventory else {}
         self.core = {}
         for body in self.bodies.values():
             if body.graph is None:
@@ -131,36 +177,85 @@ class _Sources:
             blocks = {block.id: block for region in body.graph.regions for block in region.blocks}
             self.core[body.definition] = body, operations, uses, blocks
 
-    def context(self, filename):
+    def context(self, filename, *, captured=None):
+        if self.captured_source_owner is not None:
+            # Even cached contexts retain original CodeID/source membership;
+            # a closed/missing owner cannot silently reopen a live filename.
+            snapshot = self.captured_source_owner.snapshot(captured)
+            _require(snapshot.path == filename, 'captured CodeID/context filename differs')
         if filename in self.contexts:
             return self.contexts[filename]
         if filename in self.context_errors:
             raise ValueError(self.context_errors[filename])
+        if self.source_access is not None:
+            _require(len(self.contexts) < self.budget.max_source_files, "source file budget exceeded")
+            indexed, text, tree = self.source_access.source_context(filename)
+            size = len(text.encode("utf-8"))
+            _require(self.total_source_bytes + size <= self.budget.max_source_bytes, "source byte budget exceeded")
+            self.total_source_bytes += size
+            references = {(item.ast_kind, item.source.start_line, item.source.end_line,
+                           item.source.start_column, item.source.end_column): item.source
+                          for item in indexed.coverage}
+            nodes, returns = defaultdict(list), defaultdict(list)
+            for node in ast.walk(tree):
+                if hasattr(node, "end_lineno"):
+                    nodes[_span(node)].append(node)
+                if isinstance(node, ast.Return) and node.value is not None:
+                    for position in dict.fromkeys((_span(node), _span(node.value))):
+                        returns[position].append(node)
+            context = _LightSource(Path(filename), text, tree, indexed.snapshot, references,
+                                   dict(nodes), {key: tuple(value) for key, value in returns.items()})
+            self.contexts[filename], self.indexes[filename] = context, indexed
+            return context
         path = Path(filename)
-        _require(path.is_absolute() and path.resolve().is_relative_to(self.root), "code filename is outside project root")
-        _require(path == path.resolve() and path.is_file(), "code filename is missing or noncanonical")
-        _require(len(self.contexts) < self.budget.max_source_files, "source file budget exceeded")
-        size = path.stat().st_size
-        _require(self.total_source_bytes + size <= self.budget.max_source_bytes, "source byte budget exceeded")
-        self.total_source_bytes += size
-        if filename in self.inventory_files:
-            indexed = self.inventory_files[filename]
-            with tokenize.open(path) as stream:
-                text = stream.read()
-            _require(indexed.snapshot.fingerprint == "sha256:" + hashlib.sha256(text.encode()).hexdigest(),
-                     "inventory source snapshot differs from current code verification")
-            tree = ast.parse(text, filename=filename)
-        else:
-            # The optional-inventory path builds source records once, then
-            # drops the heavyweight semantic/opcode/control overlays.
+        if self.captured_source_owner is not None:
+            _require(path.is_absolute() and path.is_relative_to(self.root), 'code filename is outside admitted namespace root')
+            _require(len(self.contexts) < self.budget.max_source_files, 'source file budget exceeded')
+            original = self.captured_source_owner.archived_source(snapshot)
+            size = len(original.text.encode('utf8'))
+            _require(self.total_source_bytes + size <= self.budget.max_source_bytes, 'source byte budget exceeded')
             if self._source_workspace is not None:
-                indexed, text, tree, signatures = self._source_workspace.source_projection(path)
+                indexed,text,tree,signatures=self._source_workspace.source_projection(path)
             else:
-                prepared = prepare_source(path, project_root=self.root)
-                indexed, text, tree, signatures = _source_witness_projection(prepared)
-                del prepared
-            self.signatures.update((key, value) for key, value in signatures.items()
-                                   if key not in self.signatures)
+                prepared = prepare_captured_source(self.captured_source_owner,captured,project_root=self.root,
+                    root_is_package=self.captured_source_root_is_package)
+                indexed,text,tree,signatures=_source_witness_projection(prepared)
+            if filename in self.inventory_files:
+                existing = self.inventory_files[filename]
+                _require(existing.snapshot == indexed.snapshot
+                         and existing.definitions == indexed.definitions and existing.calls == indexed.calls
+                         and existing.coverage == indexed.coverage,
+                         'captured static namespace/source differs from the original inventory')
+                indexed = existing
+            self.total_source_bytes += size
+            self.source_origins[filename] = original
+            self.signatures.update((key,value) for key,value in signatures.items() if key not in self.signatures)
+        else:
+            path = Path(filename)
+            _require(path.is_absolute() and path.resolve().is_relative_to(self.root), "code filename is outside project root")
+            _require(path == path.resolve() and path.is_file(), "code filename is missing or noncanonical")
+            _require(len(self.contexts) < self.budget.max_source_files, "source file budget exceeded")
+            size = path.stat().st_size
+            _require(self.total_source_bytes + size <= self.budget.max_source_bytes, "source byte budget exceeded")
+            self.total_source_bytes += size
+            if filename in self.inventory_files:
+                indexed = self.inventory_files[filename]
+                with tokenize.open(path) as stream:
+                    text = stream.read()
+                _require(indexed.snapshot.fingerprint == "sha256:" + hashlib.sha256(text.encode()).hexdigest(),
+                         "inventory source snapshot differs from current code verification")
+                tree = ast.parse(text, filename=filename)
+            else:
+                # The optional-inventory path builds source records once, then
+                # drops the heavyweight semantic/opcode/control overlays.
+                if self._source_workspace is not None:
+                    indexed, text, tree, signatures = self._source_workspace.source_projection(path)
+                else:
+                    prepared = prepare_source(path, project_root=self.root)
+                    indexed, text, tree, signatures = _source_witness_projection(prepared)
+                    del prepared
+                self.signatures.update((key, value) for key, value in signatures.items()
+                                       if key not in self.signatures)
         references = {(item.ast_kind, item.source.start_line, item.source.end_line,
                        item.source.start_column, item.source.end_column): item.source for item in indexed.coverage}
         nodes = defaultdict(list)
@@ -180,6 +275,22 @@ class _Sources:
         return context
 
     def code(self, captured):
+        if self.source_access is not None:
+            # Source correspondence and executable-bytecode evidence are distinct.
+            # Missing CodeType never changes VERIFIED source into a mismatch.
+            result = self.source_access.code_link(captured)
+            self.links[captured.key] = result
+            if captured.key not in self.objects and result.status is CallLinkStatus.VERIFIED:
+                code = self.source_access.code_object(captured, result)
+                if code is not None:
+                    try:
+                        self.context(captured.filename, captured=captured)
+                    except (OSError, ValueError, SyntaxError, KeyError, RecursionError) as error:
+                        self.context_errors[captured.filename] = str(error)
+                        self.source_access.frontiers[captured.key] = "SOURCE_CONTEXT_UNAVAILABLE: " + str(error)
+                    else:
+                        self.objects[captured.key] = code
+            return result
         if captured.key in self.links:
             return self.links[captured.key]
         try:
@@ -194,8 +305,8 @@ class _Sources:
             self.links[captured.key] = result
             return result
         try:
-            context = self.context(captured.filename)
-        except (OSError, ValueError, SyntaxError, TypeError, KeyError, RecursionError) as error:
+            context = self.context(captured.filename, captured=captured)
+        except (OSError, ValueError, SyntaxError, TypeError, LookupError, RecursionError) as error:
             self.context_errors[captured.filename] = str(error)
             result = CodeSourceLink(captured.key, CallLinkStatus.INCOMPLETE,
                                     issues=(_issue(CallEdgeIssueKind.SOURCE_BOUNDARY, str(error)),))
@@ -246,7 +357,8 @@ class _Sources:
         if not matches:
             result = CodeSourceLink(captured.key, CallLinkStatus.MISMATCH, snapshot,
                                     issues=(_issue(CallEdgeIssueKind.CODE_MISMATCH,
-                                                   "current source does not reproduce the complete captured code descriptor"),))
+                                                   ("captured source" if self.captured_source_owner is not None else "current source")
+                                                   + " does not reproduce the complete captured code descriptor"),))
         else:
             self.objects[captured.key] = matches[0][1]
             indexed = self.indexes[captured.filename]
@@ -270,6 +382,130 @@ class _Sources:
         # An Expr and its Call can share a span; callers need the expression.
         return next((node for node in matches if isinstance(node, ast.Call)), matches[0] if matches else None)
 
+    def qualified_body(self, process_id, code_key, *, composition, operands):
+        """Resolve an explicit original body through its full source reference.
+
+        Current source bindings authorize only their original source witness.
+        The separate publication supplies the static body, never a dynamic
+        admission or a replacement source/body namespace.
+        """
+        if composition is None:
+            return None
+        from scar.analysis.program_composition import CompositionIndex
+        from scar.ir.program.source_references import SourceArtifactLocator, SourceDefinitionReference
+        from scar.ir.program.source_call_bindings import SourceBodyNamespace
+        from scar.ir.program.providers import ProviderArtifact, ProviderFactReference
+        from scar.ir.program.functions import FunctionSignature
+        _require(type(composition) is CompositionIndex and composition.has_source_entry_publication,
+                 'Python body resolver requires an ordinary qualified entry composition')
+        key = id(composition), process_id, code_key
+        if key in self.qualified_bodies:
+            return self.qualified_bodies[key]
+        capture = next((c for c in operands.frame_scan.captures
+                        if (c.process_id, c.code.key) == (process_id, code_key)), None)
+        _require(capture is not None, 'qualified body has no original current descriptor')
+        reference = None
+        if self.source_access is not None:
+            access = self.source_access
+            _require(access.bound, 'qualified body requires the current bound raw/source scan')
+            row = access.by_group.get((process_id, code_key))
+            if row is None or row.get('definition') is None:
+                self.qualified_bodies[key] = None
+                return None
+            _require(access.formal and row['complete_descriptor_match'] is True
+                     and row['code_capture'] == encode(capture)
+                     and access.code_link(capture.code).status is CallLinkStatus.VERIFIED,
+                     'qualified body differs from the current exact code/source binding')
+            reference = decode(SourceDefinitionReference, row['definition'])
+            qualified = composition.body_reference(reference)
+            if qualified is None:
+                self.qualified_bodies[key] = None
+                return None
+            item = composition._qualified_entry_item(qualified)
+            link = access.code_link(capture.code)
+        else:
+            # The normal inventory path has no saved current binding report.
+            # Its catalog must name this exact original raw capture, including
+            # file receipts and the complete entered group, before selection.
+            matches = []
+            for item in composition._require_entry_publication()['checked']:
+                entry = item['entry']
+                catalog = entry._owner
+                groups = [g for g in catalog.metadata()['groups']
+                          if (g['process_id'], g['code']) == (process_id, code_key)
+                          and g.get('entry_key') == entry.key]
+                if not groups or entry.captured != capture.code:
+                    continue
+                owner = catalog.require_entry(entry)
+                original = (owner.capture_declaration()['trace_files']
+                    if hasattr(owner, 'capture_declaration') else owner.inventory_component('call_sources')['model']['files'])
+                _require(original == encode(operands.frame_scan.files),
+                         'qualified body catalog belongs to another exact raw capture')
+                count = sum(e.invocation.process_id == process_id and e.code == code_key for e in operands.entries)
+                _require(len(groups) == 1 and groups[0]['entered_invocations'] == count,
+                         'qualified body catalog changes the original entered denominator')
+                matches.append(item)
+            _require(len(matches) <= 1, 'multiple qualified original body namespaces for one captured code')
+            if not matches:
+                self.qualified_bodies[key] = None
+                return None
+            item, = matches
+            reference = item['entry'].reference
+            qualified = composition.body_reference(reference)
+            link = item['entry'].source_link
+        _require(item['entry'].captured == capture.code and link.code == code_key
+                 and link.snapshot == reference.snapshot and link.definition == reference.definition
+                 and link.source == reference.source,
+                 'qualified static body changes current CodeVersion/source identity')
+        entry = item['entry']; catalog = entry._owner
+        bundle = composition.typed_qualified_body(qualified)
+        signature = decode(FunctionSignature, item['record']['signature'])
+        from scar.analysis.function_interfaces import validate_body_interface
+        validate_body_interface(bundle.body, bundle.interface, signature)
+        prepared = catalog.prepare(entry)  # Original archived SG/AST; no lower or compile.
+        indexed, text, tree, _ = _source_witness_projection(prepared)
+        _require(indexed.snapshot == reference.snapshot and bundle.body.metadata.source == reference.snapshot,
+                 'qualified source context differs from its original namespace')
+        references = {(x.ast_kind, x.source.start_line, x.source.end_line,
+                       x.source.start_column, x.source.end_column): x.source for x in indexed.coverage}
+        nodes, returns = defaultdict(list), defaultdict(list)
+        for node in ast.walk(tree):
+            if hasattr(node, 'end_lineno'): nodes[_span(node)].append(node)
+            if isinstance(node, ast.Return) and node.value is not None:
+                for position in dict.fromkeys((_span(node), _span(node.value))): returns[position].append(node)
+        context = _LightSource(Path(reference.snapshot.path), text, tree, reference.snapshot,
+            references, dict(nodes), {k: tuple(v) for k, v in returns.items()})
+        code, _ = catalog.store_for(entry).resolve(capture.code, reference.snapshot,
+                                                   link.optimize_levels, allow_compile=False)
+        # A real declaration must occur in this publication or an exact parent;
+        # a body's JSON pointer is not an artifact declaration.
+        current = composition
+        declaration = None
+        while current is not None and current.has_source_entry_publication:
+            state = current._require_entry_publication()
+            for index, record in enumerate(state['document']['bodies']):
+                if record['definition'] == encode(reference) and record['source_program'] == item['record']['source_program']:
+                    receipt = state['receipt']
+                    declaration = ProviderFactReference(ProviderArtifact(state['path'], receipt['physical_sha256'],
+                        receipt['physical_bytes'], 'scar.source-entry-publication/' + str(state['document']['schema_version'])),
+                        f'#/bodies/{index}/source_program')
+                    break
+            if declaration is not None: break
+            current = state.get('parent_view')
+        _require(declaration is not None, 'qualified source program lost its original declaration')
+        locator = replace(qualified.source_program, pointer='#/graph', declaration=declaration)
+        namespace = SourceBodyNamespace(locator, bundle.namespace['representation'], reference.definition,
+            reference.source, bundle.body.metadata.entry, qualified.identity)
+        _require(namespace.original_namespace() == bundle.namespace,
+                 'qualified endpoint changes the original source/body namespace')
+        graph = bundle.body.graph
+        core = (bundle.body, {op.id: op for op in graph.operations},
+                {use.id: use for op in graph.operations for use in op.uses},
+                {block.id: block for region in graph.regions for block in region.blocks})
+        result = _QualifiedBodyContext(qualified, bundle, signature, link, code, context, indexed, namespace, core)
+        self.qualified_bodies[key] = result
+        return result
+
     def source(self, filename, node):
         context = self.contexts[filename]
         return context.references[(type(node).__name__, *_span(node))]
@@ -287,6 +523,10 @@ class _Sources:
         code_link = self.code(description)
         if code_link.status is not CallLinkStatus.VERIFIED:
             return CallSiteLink(captured, code_link.status, issues=code_link.issues)
+        if captured.code not in self.objects:
+            return CallSiteLink(captured, CallLinkStatus.INCOMPLETE,
+                issues=(_issue(CallEdgeIssueKind.SOURCE_BOUNDARY,
+                               "CODE_WITNESS_UNAVAILABLE: source correspondence remains verified"),))
         actual = decode(CapturedSite, site(self.objects[captured.code], captured.offset))
         if actual != captured or captured.position is None:
             return CallSiteLink(captured, CallLinkStatus.MISMATCH,
@@ -295,7 +535,22 @@ class _Sources:
         if captured.opname is None or not captured.opname.startswith("CALL"):
             return CallSiteLink(captured, CallLinkStatus.INCOMPLETE,
                                 issues=(_issue(CallEdgeIssueKind.NO_SOURCE_CALL, "frame entry is not located at a source CALL instruction"),))
-        indexed = self.indexes[description.filename]
+        return self._call_site_body(captured, self.indexes[description.filename], code_link, self.core)
+
+    def qualified_call_site(self, captured, context):
+        if type(context) is not _QualifiedBodyContext:
+            raise TypeError('exact qualified caller body context required')
+        actual = decode(CapturedSite, site(context.code, captured.offset))
+        if actual != captured or captured.position is None or captured.opname is None or not captured.opname.startswith('CALL'):
+            return CallSiteLink(captured, CallLinkStatus.MISMATCH,
+                issues=(_issue(CallEdgeIssueKind.POSITION_MISMATCH, 'qualified caller CodeWitness/source CALL differs'),))
+        # The original body was selected by its complete qualified reference.
+        # This temporary local view only reuses the existing CallSiteLink guard.
+        return self._call_site_body(captured, context.indexed, context.link,
+            {context.reference.definition.definition: context.core})
+
+    @staticmethod
+    def _call_site_body(captured, indexed, code_link, cores):
         matches = [call for call in indexed.calls if
                    (call.source.start_line, call.source.end_line, call.source.start_column, call.source.end_column) == captured.position
                    and (code_link.definition is None or call.execution_owner == code_link.definition)]
@@ -304,8 +559,8 @@ class _Sources:
                                 issues=(_issue(CallEdgeIssueKind.NO_SOURCE_CALL, "instruction span does not identify one call in its verified owner"),))
         call, = matches
         core_matches = []
-        if call.execution_owner in self.core:
-            body, operations, uses, blocks = self.core[call.execution_owner]
+        if call.execution_owner in cores:
+            body, operations, uses, blocks = cores[call.execution_owner]
             for link in body.metadata.operation_links:
                 if link.source == call.source and link.opcode is Opcode.CALL and link.semantic_operation == call.semantic_operation:
                     operation = operations[link.operation]
@@ -336,7 +591,9 @@ class _Sources:
 
     def return_operand(self, owner, node, reference):
         interface = self.ports.get(owner)
-        if interface is None or interface.profile is not BodyLoweringProfile.BOUND_FRAME:
+        if interface is None or interface.profile not in (
+                BodyLoweringProfile.BOUND_FRAME, BodyLoweringProfile.STRUCTURED_BODY,
+                BodyLoweringProfile.STRUCTURED_ENV):
             # Preserve the v4 opaque-return correspondence, including its wire
             # UseID and ValueID, for complete historical report replay.
             return self.operand(owner, reference, "return")
@@ -345,16 +602,66 @@ class _Sources:
             self.operand_links[key] = self._frame_return_operand(owner, node, reference)
         return self.operand_links[key]
 
+    def frame_rules(self, owner):
+        """Use each source profile's actual frame model without fabricating one."""
+        interface = self.ports.get(owner)
+        if interface is None or owner not in self.core:
+            return None
+        body = self.bodies[owner]
+        if interface.profile is BodyLoweringProfile.BOUND_FRAME:
+            frame = self.frames.get(owner)
+            return frame.rules if frame is not None and frame.region == body.graph.root else None
+        if interface.profile in (BodyLoweringProfile.STRUCTURED_BODY, BodyLoweringProfile.STRUCTURED_ENV):
+            model = self.structured.get(owner)
+            return model.frame_rules if model is not None and model.region == body.graph.root else None
+        return None
+
+    def _structured_frame_exits(self, owner):
+        """Project the validated FRAME_EXIT/terminal pair into its existing view.
+
+        StructuredBodyModel owns its protocols and frame_rules.  It is not a
+        FrameModel; this projection only names the original operations/Uses.
+        """
+        body, operations, uses, _ = self.core[owner]
+        model = self.structured.get(owner)
+        if model is None or model.region != body.graph.root:
+            return ()
+        operation_blocks = {operation: block for region in body.graph.regions
+                            for block in region.blocks for operation in block.operations}
+        links = {link.operation: link for link in body.metadata.operation_links}
+        transitions = []
+        for protocol in model.protocols:
+            if protocol.kind is not PythonProtocolKind.FRAME_EXIT:
+                continue
+            block = operation_blocks.get(protocol.operation)
+            held = operations.get(protocol.operation)
+            if (block is None or len(block.operations) < 2 or block.operations[-2] != protocol.operation
+                    or held is None or not held.uses):
+                continue
+            completion = operations.get(block.operations[-1])
+            if (completion is None or completion.terminator is None
+                    or completion.terminator.kind not in (TerminatorKind.RETURN, TerminatorKind.RAISE)
+                    or len(completion.terminator.values) != 2):
+                continue
+            held_link, completion_link = links.get(held.id), links.get(completion.id)
+            payload = uses.get(completion.terminator.values[0])
+            if (held_link is None or completion_link is None
+                    or held_link.source != protocol.source or completion_link.source != protocol.source
+                    or payload is None or payload.value != held.uses[0].value):
+                continue
+            transitions.append(SourceFrameExit(held.id, protocol.source, completion.id, held.uses[0].id))
+        return tuple(transitions)
+
     def _frame_return_operand(self, owner, node, reference):
-        if owner not in self.core or owner not in self.frames:
+        if owner not in self.core or self.frame_rules(owner) is None:
             return None, None
         body, operations, uses, blocks = self.core[owner]
-        frame = self.frames[owner]
-        if frame.region != body.graph.root:
-            return None, None
+        interface = self.ports[owner]
+        transitions = (self.frames[owner].transitions
+            if interface.profile is BodyLoweringProfile.BOUND_FRAME else self._structured_frame_exits(owner))
         returned_source = self.source(reference.path, node)
         matches = []
-        for transition in frame.transitions:
+        for transition in transitions:
             if not isinstance(transition, SourceFrameExit) or transition.source != returned_source:
                 continue
             operation = operations.get(transition.completion)
@@ -389,7 +696,9 @@ class _Sources:
 
     def parameter_port(self, definition, name):
         signature, ports = self.signatures.get(definition), self.ports.get(definition)
-        if signature and ports:
+        if (signature and ports and len(signature.parameters) == len(ports.parameters)
+                and tuple(parameter.slot for parameter in signature.parameters)
+                == tuple(port.slot for port in ports.parameters)):
             return next(((parameter.source, port.value) for parameter, port in zip(signature.parameters, ports.parameters)
                          if parameter.name == name), (None, None))
         return None, None
@@ -402,7 +711,9 @@ class _Sources:
             return None
         if actual.opname not in ("RETURN_VALUE", "RETURN_CONST") or actual.position is None:
             return None
-        context = self.contexts[code_link.snapshot.path]
+        context = self.contexts.get(code_link.snapshot.path)
+        if context is None:
+            return None
         matches = context.return_nodes_by_position.get(actual.position, ())
         return matches[0] if len(matches) == 1 else None
 
@@ -567,7 +878,8 @@ class CallEdgeReport:
                 "transformation_authorized": False}
 
     @classmethod
-    def from_dict(cls, document, *, inventory=None, verification_budget=CallEdgeBudget()):
+    def from_dict(cls, document, *, inventory=None, verification_budget=CallEdgeBudget(),
+                  captured_source_owner=None, captured_source_root_is_package=None):
         _require(isinstance(verification_budget, CallEdgeBudget), "call replay requires a typed independent verifier budget")
         _require(type(document) is dict and set(document) == {
             "schema", "schema_version", "model", "summary", "target_executed_by_linker",
@@ -579,7 +891,9 @@ class CallEdgeReport:
         for name in model.budget.__dataclass_fields__:
             _require(getattr(model.budget, name) <= getattr(verification_budget, name),
                      "call report exceeds independent verifier budget: " + name)
-        rebuilt = link_calls(model.trace, model.project_root, inventory=inventory, budget=model.budget)
+        rebuilt = link_calls(model.trace, model.project_root, inventory=inventory, budget=model.budget,
+            captured_source_owner=captured_source_owner,
+            captured_source_root_is_package=captured_source_root_is_package)
         _require(_canonical(rebuilt.to_dict()) == _canonical(document),
                  "call links differ from current raw trace/source/inventory replay")
         return rebuilt
@@ -651,22 +965,48 @@ class CallEdgeReport:
         return ReferenceTrace(identity, groups, tuple(dict.fromkeys(traversed)), tuple(dict.fromkeys(issues)))
 
 
-def link_calls(trace, project_root, inventory=None, budget=CallEdgeBudget()):
-    """Read a collector directory and replay exact source/core relationships.
+def _link_call_model(trace, project_root, inventory=None, budget=CallEdgeBudget(), *,
+                     compilation_profile=CallCompilationProfile.LEGACY_ZERO_FLAGS,
+                     frame_scan=None, entries=None, exits=None, allow_v6=False,
+                     include_identity_routes=True, captured_source_owner=None,
+                     captured_source_root_is_package=None):
+    """Compose frame/source links from a local scan, keeping report policy separate.
 
-    The public CLI independently replays a supplied v4/v5 inventory before calling
-    here. Its complete canonical document is bound into this report as well.
+    Only in-process readers supply ``frame_scan``. Public report decoders always
+    rescan their original raw input; serialized models never enter this path as
+    a substitute for scanning. The legacy wrapper retains its v4/v5 policy.
     """
     _require(isinstance(budget, CallEdgeBudget), "link_calls requires a typed replay budget")
-    root = Path(project_root).resolve()
-    _require(root.is_dir(), "project root must be a directory")
+    if captured_source_owner is None:
+        root = Path(project_root).resolve()
+        _require(root.is_dir(), "project root must be a directory")
+    else:
+        root = Path(project_root)
+        _require(root.is_absolute() and '..' not in root.parts and str(root) == str(project_root),
+                 'captured source namespace must retain its exact original absolute root')
+    from scar.analysis.source_body_access import SourceBodyAccess
+    partitioned_access = inventory if type(inventory) is SourceBodyAccess else None
     if inventory is not None:
-        _require(inventory.to_dict()["schema_version"] in (4, 5) and inventory.interfaces is not None,
+        versions = (5, 6, 7, 8) if allow_v6 else (4, 5)
+        supported = (allow_v6 and partitioned_access.supported_call_abi == "STRUCTURED_ENV_V1"
+                     if partitioned_access is not None else inventory.to_dict()["schema_version"] in versions)
+        _require(supported and inventory.interfaces is not None,
+                 "operand/core linking requires an explicit frame/structured v5-v8 inventory" if allow_v6 else
                  "call/core linking requires a bound-formal v4 or bound-frame v5 inventory")
-        _require(inventory.discovery.project_root == str(root), "inventory project root differs from call replay")
-    trace_path, files, captures, entries, exits, metadata, trace_issues = _read_trace(trace, root, budget)
+        inventory_root = str(partitioned_access.root) if partitioned_access is not None else inventory.discovery.project_root
+        _require(inventory_root == str(root), "inventory project root differs from call replay")
+    if frame_scan is None:
+        trace_path, files, captures, entries, exits, metadata, trace_issues = _read_trace(trace, root, budget)
+    else:
+        _require(frame_scan.directory == str(Path(trace).resolve())
+                 and type(entries) is tuple and type(exits) is tuple,
+                 "local frame scan must bind its original trace and observations")
+        trace_path, files, captures = frame_scan.directory, frame_scan.files, frame_scan.captures
+        metadata, trace_issues = frame_scan.metadata, frame_scan.issues
     descriptors = {capture.code.key: capture.code for capture in captures}
-    sources = _Sources(root, budget, inventory)
+    sources = _Sources(root, budget, inventory, compilation_profile=compilation_profile,
+        captured_source_owner=captured_source_owner,
+        captured_source_root_is_package=captured_source_root_is_package)
     for descriptor in descriptors.values():
         sources.code(descriptor)
     entry_index = {entry.invocation: entry for entry in entries}
@@ -689,6 +1029,8 @@ def link_calls(trace, project_root, inventory=None, budget=CallEdgeBudget()):
             stack.pop(position)
     incomplete_processes = {meta["process_id"] for meta in metadata
                             if meta["dropped_events"] or meta["dropped_codes"] or meta["errors"] or meta.get("io_failed")}
+    if partitioned_access is not None:
+        incomplete_processes.update(partitioned_access.unbound_processes)
     issues, edges = list(trace_issues), []
     for entry in entries:
         descriptor = descriptors.get(entry.code)
@@ -753,7 +1095,7 @@ def link_calls(trace, project_root, inventory=None, budget=CallEdgeBudget()):
             if exit.code != entry.code or exit.return_site.code != entry.code or exit.anchor.index <= entry.anchor.index:
                 edge_issues.append(_issue(CallEdgeIssueKind.INVOCATION_MISMATCH,
                                           "frame exit code/order differs from its entry", exit.anchor))
-            elif target.status is CallLinkStatus.VERIFIED:
+            elif target.status is CallLinkStatus.VERIFIED and entry.code in sources.objects:
                 replay_site = decode(CapturedSite, site(sources.objects[entry.code], exit.return_site.offset))
                 exit_verified = (replay_site == exit.return_site and not entry.suspended
                                  and exit.completion is FrameCompletion.NORMAL
@@ -761,9 +1103,16 @@ def link_calls(trace, project_root, inventory=None, budget=CallEdgeBudget()):
                 if replay_site != exit.return_site:
                     edge_issues.append(_issue(CallEdgeIssueKind.POSITION_MISMATCH,
                                               "frame return site differs from verified current code", exit.anchor))
+            elif target.status is CallLinkStatus.VERIFIED:
+                edge_issues.append(_issue(CallEdgeIssueKind.SOURCE_BOUNDARY,
+                    "CODE_WITNESS_UNAVAILABLE: normal return instruction cannot be certified", exit.anchor))
         target_body = sources.bodies.get(target.definition)
         region = target_body.graph.root if (target.status is CallLinkStatus.VERIFIED
                                            and target_body and target_body.graph and not entry.suspended) else None
+        if partitioned_access is not None and entry.invocation.process_id in partitioned_access.unbound_processes:
+            region, exit_verified = None, False
+            edge_issues.append(_issue(CallEdgeIssueKind.SOURCE_BOUNDARY,
+                "CAPTURE_PROCESS_MEMBERSHIP_UNRESOLVED", entry.anchor))
         if region is None:
             edge_issues.append(_issue(CallEdgeIssueKind.TARGET_BODY_MISSING,
                                       "verified callee has no emitted synchronous body port", entry.anchor))
@@ -773,10 +1122,28 @@ def link_calls(trace, project_root, inventory=None, budget=CallEdgeBudget()):
         if exit.invocation not in entry_index:
             issues.append(_issue(CallEdgeIssueKind.INVOCATION_MISSING,
                                  "frame exit has no retained entry in the same process/thread", exit.anchor))
-    references, routes = _references(tuple(edges), sources, metadata)
+    references, routes = (_references(tuple(edges), sources, metadata)
+                          if include_identity_routes else ((), ()))
     model = CallEdgeModel(trace_path, str(root), budget, files, captures, tuple(edges), exits,
                           tuple(sources.links.values()), references, routes, tuple(issues), metadata,
+                          partitioned_access.inventory_sha256 if partitioned_access is not None else
                           _sha(inventory.to_dict()) if inventory is not None else None)
+    return model, sources
+
+
+def link_calls(trace, project_root, inventory=None, budget=CallEdgeBudget(), *,
+               captured_source_owner=None, captured_source_root_is_package=None):
+    """Replay the original calls; an explicit normal owner selects archive text.
+
+    Historical default source/compile policy and report wire are unchanged.
+    Capture-owner mode uses recorded flags and requires the original explicit
+    static namespace policy; it does not infer loaded module identity.
+    """
+    profile = (CallCompilationProfile.LEGACY_ZERO_FLAGS if captured_source_owner is None
+               else CallCompilationProfile.RECORDED_FUTURE_FLAGS)
+    model, _ = _link_call_model(trace, project_root, inventory, budget, compilation_profile=profile,
+        captured_source_owner=captured_source_owner,
+        captured_source_root_is_package=captured_source_root_is_package)
     return CallEdgeReport(model)
 
 

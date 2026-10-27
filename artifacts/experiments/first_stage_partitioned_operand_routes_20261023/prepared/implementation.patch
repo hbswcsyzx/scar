@@ -1,0 +1,1926 @@
+diff --git a/scar/analysis/call_edges.py b/scar/analysis/call_edges.py
+index d92a240..6a7d0d3 100644
+--- a/scar/analysis/call_edges.py
++++ b/scar/analysis/call_edges.py
+@@ -118,6 +118,15 @@ class _Sources:
+         self.context_errors = {}
+         self.site_links, self.operand_links = {}, {}
+         self.total_source_bytes = 0
++        from scar.analysis.source_body_access import SourceBodyAccess
++        self.source_access = inventory if type(inventory) is SourceBodyAccess else None
++        if self.source_access is not None:
++            _require(self.source_access.bound, "partitioned source access has no current raw scan")
++            self.inventory_files = {}
++            self.bodies, self.signatures = inventory.bodies, inventory.signatures
++            self.ports, self.frames, self.structured = inventory.ports, inventory.frames, inventory.structured
++            self.core = inventory.core
++            return
+         self.inventory_files = {file.snapshot.path: file for file in inventory.files} if inventory else {}
+         self.bodies = {body.definition: body for file in inventory.files for body in file.bodies} if inventory else {}
+         self.signatures = {signature.definition: signature for signature in inventory.interfaces.signatures} if inventory else {}
+@@ -138,6 +147,26 @@ class _Sources:
+             return self.contexts[filename]
+         if filename in self.context_errors:
+             raise ValueError(self.context_errors[filename])
++        if self.source_access is not None:
++            _require(len(self.contexts) < self.budget.max_source_files, "source file budget exceeded")
++            indexed, text, tree = self.source_access.source_context(filename)
++            size = len(text.encode("utf-8"))
++            _require(self.total_source_bytes + size <= self.budget.max_source_bytes, "source byte budget exceeded")
++            self.total_source_bytes += size
++            references = {(item.ast_kind, item.source.start_line, item.source.end_line,
++                           item.source.start_column, item.source.end_column): item.source
++                          for item in indexed.coverage}
++            nodes, returns = defaultdict(list), defaultdict(list)
++            for node in ast.walk(tree):
++                if hasattr(node, "end_lineno"):
++                    nodes[_span(node)].append(node)
++                if isinstance(node, ast.Return) and node.value is not None:
++                    for position in dict.fromkeys((_span(node), _span(node.value))):
++                        returns[position].append(node)
++            context = _LightSource(Path(filename), text, tree, indexed.snapshot, references,
++                                   dict(nodes), {key: tuple(value) for key, value in returns.items()})
++            self.contexts[filename], self.indexes[filename] = context, indexed
++            return context
+         path = Path(filename)
+         _require(path.is_absolute() and path.resolve().is_relative_to(self.root), "code filename is outside project root")
+         _require(path == path.resolve() and path.is_file(), "code filename is missing or noncanonical")
+@@ -182,6 +211,22 @@ class _Sources:
+         return context
+ 
+     def code(self, captured):
++        if self.source_access is not None:
++            # Source correspondence and executable-bytecode evidence are distinct.
++            # Missing CodeType never changes VERIFIED source into a mismatch.
++            result = self.source_access.code_link(captured)
++            self.links[captured.key] = result
++            if captured.key not in self.objects and result.status is CallLinkStatus.VERIFIED:
++                code = self.source_access.code_object(captured, result)
++                if code is not None:
++                    try:
++                        self.context(captured.filename)
++                    except (OSError, ValueError, SyntaxError, KeyError, RecursionError) as error:
++                        self.context_errors[captured.filename] = str(error)
++                        self.source_access.frontiers[captured.key] = "SOURCE_CONTEXT_UNAVAILABLE: " + str(error)
++                    else:
++                        self.objects[captured.key] = code
++            return result
+         if captured.key in self.links:
+             return self.links[captured.key]
+         try:
+@@ -289,6 +334,10 @@ class _Sources:
+         code_link = self.code(description)
+         if code_link.status is not CallLinkStatus.VERIFIED:
+             return CallSiteLink(captured, code_link.status, issues=code_link.issues)
++        if captured.code not in self.objects:
++            return CallSiteLink(captured, CallLinkStatus.INCOMPLETE,
++                issues=(_issue(CallEdgeIssueKind.SOURCE_BOUNDARY,
++                               "CODE_WITNESS_UNAVAILABLE: source correspondence remains verified"),))
+         actual = decode(CapturedSite, site(self.objects[captured.code], captured.offset))
+         if actual != captured or captured.position is None:
+             return CallSiteLink(captured, CallLinkStatus.MISMATCH,
+@@ -458,7 +507,9 @@ class _Sources:
+             return None
+         if actual.opname not in ("RETURN_VALUE", "RETURN_CONST") or actual.position is None:
+             return None
+-        context = self.contexts[code_link.snapshot.path]
++        context = self.contexts.get(code_link.snapshot.path)
++        if context is None:
++            return None
+         matches = context.return_nodes_by_position.get(actual.position, ())
+         return matches[0] if len(matches) == 1 else None
+ 
+@@ -720,12 +771,16 @@ def _link_call_model(trace, project_root, inventory=None, budget=CallEdgeBudget(
+     _require(isinstance(budget, CallEdgeBudget), "link_calls requires a typed replay budget")
+     root = Path(project_root).resolve()
+     _require(root.is_dir(), "project root must be a directory")
++    from scar.analysis.source_body_access import SourceBodyAccess
++    partitioned_access = inventory if type(inventory) is SourceBodyAccess else None
+     if inventory is not None:
+         versions = (5, 6, 7, 8) if allow_v6 else (4, 5)
+-        _require(inventory.to_dict()["schema_version"] in versions and inventory.interfaces is not None,
++        version = partitioned_access.schema_version if partitioned_access is not None else inventory.to_dict()["schema_version"]
++        _require(version in versions and inventory.interfaces is not None,
+                  "operand/core linking requires an explicit frame/structured v5-v8 inventory" if allow_v6 else
+                  "call/core linking requires a bound-formal v4 or bound-frame v5 inventory")
+-        _require(inventory.discovery.project_root == str(root), "inventory project root differs from call replay")
++        inventory_root = str(partitioned_access.root) if partitioned_access is not None else inventory.discovery.project_root
++        _require(inventory_root == str(root), "inventory project root differs from call replay")
+     if frame_scan is None:
+         trace_path, files, captures, entries, exits, metadata, trace_issues = _read_trace(trace, root, budget)
+     else:
+@@ -760,6 +815,8 @@ def _link_call_model(trace, project_root, inventory=None, budget=CallEdgeBudget(
+             stack.pop(position)
+     incomplete_processes = {meta["process_id"] for meta in metadata
+                             if meta["dropped_events"] or meta["dropped_codes"] or meta["errors"] or meta.get("io_failed")}
++    if partitioned_access is not None:
++        incomplete_processes.update(partitioned_access.unbound_processes)
+     issues, edges = list(trace_issues), []
+     for entry in entries:
+         descriptor = descriptors.get(entry.code)
+@@ -824,7 +881,7 @@ def _link_call_model(trace, project_root, inventory=None, budget=CallEdgeBudget(
+             if exit.code != entry.code or exit.return_site.code != entry.code or exit.anchor.index <= entry.anchor.index:
+                 edge_issues.append(_issue(CallEdgeIssueKind.INVOCATION_MISMATCH,
+                                           "frame exit code/order differs from its entry", exit.anchor))
+-            elif target.status is CallLinkStatus.VERIFIED:
++            elif target.status is CallLinkStatus.VERIFIED and entry.code in sources.objects:
+                 replay_site = decode(CapturedSite, site(sources.objects[entry.code], exit.return_site.offset))
+                 exit_verified = (replay_site == exit.return_site and not entry.suspended
+                                  and exit.completion is FrameCompletion.NORMAL
+@@ -832,9 +889,16 @@ def _link_call_model(trace, project_root, inventory=None, budget=CallEdgeBudget(
+                 if replay_site != exit.return_site:
+                     edge_issues.append(_issue(CallEdgeIssueKind.POSITION_MISMATCH,
+                                               "frame return site differs from verified current code", exit.anchor))
++            elif target.status is CallLinkStatus.VERIFIED:
++                edge_issues.append(_issue(CallEdgeIssueKind.SOURCE_BOUNDARY,
++                    "CODE_WITNESS_UNAVAILABLE: normal return instruction cannot be certified", exit.anchor))
+         target_body = sources.bodies.get(target.definition)
+         region = target_body.graph.root if (target.status is CallLinkStatus.VERIFIED
+                                            and target_body and target_body.graph and not entry.suspended) else None
++        if partitioned_access is not None and entry.invocation.process_id in partitioned_access.unbound_processes:
++            region, exit_verified = None, False
++            edge_issues.append(_issue(CallEdgeIssueKind.SOURCE_BOUNDARY,
++                "CAPTURE_PROCESS_MEMBERSHIP_UNRESOLVED", entry.anchor))
+         if region is None:
+             edge_issues.append(_issue(CallEdgeIssueKind.TARGET_BODY_MISSING,
+                                       "verified callee has no emitted synchronous body port", entry.anchor))
+@@ -848,6 +912,7 @@ def _link_call_model(trace, project_root, inventory=None, budget=CallEdgeBudget(
+                           if include_identity_routes else ((), ()))
+     model = CallEdgeModel(trace_path, str(root), budget, files, captures, tuple(edges), exits,
+                           tuple(sources.links.values()), references, routes, tuple(issues), metadata,
++                          partitioned_access.inventory_sha256 if partitioned_access is not None else
+                           _sha(inventory.to_dict()) if inventory is not None else None)
+     return model, sources
+ 
+diff --git a/scar/analysis/call_operand_routes.py b/scar/analysis/call_operand_routes.py
+index 7c12e80..b382c22 100644
+--- a/scar/analysis/call_operand_routes.py
++++ b/scar/analysis/call_operand_routes.py
+@@ -402,6 +402,10 @@ def build_operand_routes(*, call_model, operand_model, inventory, sources, budge
+                   and handshake.thread_id == attempt.thread_id
+                   and handshake.hook_epoch == attempt.hook_epoch,
+                   Issue.HANDSHAKE_BOUNDARY, 'handshake does not identify the active direct caller/entry interval')
++            if getattr(sources, 'source_access', None) is not None:
++                _need(attempt.site.code in sources.objects and edge.entry.code in sources.objects,
++                      Issue.SOURCE_CORE_BOUNDARY,
++                      'CODE_WITNESS_UNAVAILABLE: verified source alone cannot certify a CALL instruction window')
+             _need(len(edge.path) == 1 and edge.path[0].site == attempt.site
+                   and edge.path[0].status is CallLinkStatus.VERIFIED
+                   and edge.path[0].core_operation is not None
+diff --git a/scar/analysis/call_operands.py b/scar/analysis/call_operands.py
+index 2237e89..70f2475 100644
+--- a/scar/analysis/call_operands.py
++++ b/scar/analysis/call_operands.py
+@@ -11,7 +11,9 @@ from pathlib import Path
+ from typing import TYPE_CHECKING
+ 
+ from scar.analysis.call_edges import CallEdgeReport, _canonical, _link_call_model
+-from scar.ir.program.call_edges import CallEdgeBudget, CallEdgeModel
++from scar.ir.program.call_edges import (
++    CallEdgeBudget, CallEdgeModel, CallLinkStatus, ReferenceOccurrence, ReferenceRole,
++)
+ from scar.ir.program.call_operand_routes import OperandRouteBudget, OperandRouteModel
+ from scar.ir.program.call_operands import CallOperandBudget
+ from scar.ir.program.compilation import CallCompilationProfile
+@@ -32,6 +34,7 @@ _FIELDS = {
+     "operand_files", "operand_metadata", "inventory_sha256", "routing", "summary",
+     *_AUTHORITY,
+ }
++_PARTITION_FIELDS = {"source_body_access", "entry_parameters", "environments"}
+ 
+ 
+ def _require(condition, message):
+@@ -57,18 +60,24 @@ class CallOperandReport:
+     # Independent raw sidecar projection.  The historical v1 operand report
+     # remains byte-compatible; callers explicitly retain this separate record.
+     environments: dict | None = None
++    source_body_access: dict | None = None
++    entry_parameters: tuple[ReferenceOccurrence, ...] = ()
+ 
+     def summary(self):
+-        return {
++        result = {
+             "frame": CallEdgeReport(self.frame_model).summary(),
+             "operand_events": len(self.operands.events),
+             "routing": self.routing.summary(),
+             "scope": "conditional reference provenance; state, contents and effects remain separate",
+             **{name: False for name in _AUTHORITY},
+         }
++        if self.source_body_access is not None:
++            result["entry_parameter_occurrences"] = len(self.entry_parameters)
++            result["source_body_storage"] = "PARTITIONED"
++        return result
+ 
+     def to_dict(self):
+-        return {
++        result = {
+             "schema": "scar.call-operand-links", "schema_version": 1,
+             "trace": self.frame_model.trace,
+             "project_root": self.frame_model.project_root,
+@@ -84,15 +93,22 @@ class CallOperandReport:
+             "routing": encode(self.routing), "summary": self.summary(),
+             **{name: False for name in _AUTHORITY},
+         }
++        if self.source_body_access is not None:
++            result.update({"schema_version": 2, "source_body_access": self.source_body_access,
++                           "entry_parameters": encode(self.entry_parameters), "environments": self.environments})
++        return result
+ 
+     @staticmethod
+     def check_replay_header(document, *, frame_ceiling=CallEdgeBudget(),
+                             operand_ceiling=CallOperandBudget(), route_ceiling=OperandRouteBudget()):
+         """Validate versions, authority and independent limits before input I/O."""
+-        _require(type(document) is dict and set(document) == _FIELDS,
++        _require(type(document) is dict and type(document.get("schema_version")) is int
++                 and document["schema_version"] in (1, 2), "operand link report version mismatch")
++        partitioned = document["schema_version"] == 2
++        _require(set(document) == (_FIELDS | _PARTITION_FIELDS if partitioned else _FIELDS),
+                  "operand link report fields mismatch")
+         _require(document["schema"] == "scar.call-operand-links"
+-                 and type(document["schema_version"]) is int and document["schema_version"] == 1,
++                 and type(document["schema_version"]) is int and document["schema_version"] in (1, 2),
+                  "operand link report schema/version mismatch")
+         _require(document["compilation_profile"] == CallCompilationProfile.RECORDED_FUTURE_FLAGS.value,
+                  "operand link report compilation profile mismatch")
+@@ -108,17 +124,33 @@ class CallOperandReport:
+         # checked, then rebuild it rather than consuming its claimed edges.
+         routing = OperandRouteModel.from_dict(document["routing"])
+         _require(routing.budget == route, "route model and report budgets disagree")
++        if partitioned:
++            _require(type(document["source_body_access"]) is dict
++                     and document["source_body_access"].get("current_raw_scan_verified") is True
++                     and document["source_body_access"].get("transformation_authorized") is False,
++                     "partition report lacks its bounded source/current-capture receipts")
++            decode(tuple[ReferenceOccurrence, ...], document["entry_parameters"])
+         return frame, operand, route
+ 
+     @classmethod
+-    def from_dict(cls, document, *, inventory, frame_ceiling=CallEdgeBudget(),
++    def from_dict(cls, document, *, inventory=None, composition=None, source_bindings=None,
++                  coordinates=None, code_witnesses=None, frame_ceiling=CallEdgeBudget(),
+                   operand_ceiling=CallOperandBudget(), route_ceiling=OperandRouteBudget()):
+         frame, operand, route = cls.check_replay_header(
+             document, frame_ceiling=frame_ceiling, operand_ceiling=operand_ceiling,
+             route_ceiling=route_ceiling,
+         )
++        partitioned = document["schema_version"] == 2
++        if partitioned:
++            _require(code_witnesses is not None and not code_witnesses.writable
++                     and not code_witnesses.compile_missing, "public v2 replay needs a read-only CodeWitnessStore")
++        else:
++            _require(all(value is None for value in (composition, source_bindings, coordinates, code_witnesses)),
++                     "legacy v1 replay cannot accept partitioned inputs")
+         rebuilt = link_call_operands(document["trace"], document["project_root"], inventory,
+-                                     frame_budget=frame, operand_budget=operand, route_budget=route)
++            composition=composition, source_bindings=source_bindings, coordinates=coordinates,
++            code_witnesses=code_witnesses, frame_budget=frame, operand_budget=operand, route_budget=route,
++            include_environments=partitioned and document["environments"] is not None)
+         _require(_canonical(rebuilt.to_dict()) == _canonical(document),
+                  "operand links differ from current raw/source/inventory replay")
+         return rebuilt
+@@ -128,27 +160,52 @@ class CallOperandReport:
+         return query_operand_routes(self.frame_model, self.routing, invocation, max_steps=max_steps)
+ 
+ 
+-def link_call_operands(trace, project_root, inventory, *, frame_budget=CallEdgeBudget(),
++def link_call_operands(trace, project_root, inventory=None, *, frame_budget=CallEdgeBudget(),
+                        operand_budget=CallOperandBudget(), route_budget=OperandRouteBudget(),
+-                       include_environments=False):
++                       include_environments=False, composition=None, source_bindings=None,
++                       coordinates=None, code_witnesses=None, progress=None):
+     """Automatically reconstruct original call operands and typed core routes."""
+     from scar.analysis.call_operand_reader import read_call_operands
+     from scar.analysis.call_operand_routes import build_operand_routes
+ 
+-    _require(inventory is not None, "operand/core linking requires an automatic frame inventory")
++    from scar.analysis.source_body_access import SourceBodyAccess
++    _require(progress is None or callable(progress), "progress must be callable or None")
++    def notify(stage, **fields):
++        if progress is not None:
++            progress({"stage": stage, **fields})
++    partitioned = composition is not None
++    if partitioned:
++        _require(inventory is None and all(value is not None for value in
++                     (source_bindings, coordinates, code_witnesses)),
++                 "partition path requires explicit composition/source bindings/coordinates/witnesses and no inventory")
++    else:
++        _require(inventory is not None and all(value is None for value in
++                     (source_bindings, coordinates, code_witnesses)),
++                 "legacy operand/core linking requires its original automatic inventory")
+     _require(type(include_environments) is bool, "include_environments must be an exact bool")
+     _require(type(route_budget) is OperandRouteBudget, "route budget must be typed")
+     route_budget.__post_init__()
+     root = Path(project_root).resolve()
++    notify("OPERAND_READ_BEGIN")
+     operands = read_call_operands(trace, root, budget=operand_budget, frame_budget=frame_budget)
++    notify("OPERAND_READ_END", invocations=len(operands.entries), events=len(operands.events))
++    access = None
++    if partitioned:
++        access = SourceBodyAccess(composition, source_bindings, coordinates, code_witnesses)
++        _require(root == access.root, "partition source project root differs from current operand replay")
++        access.bind_scan(operands.frame_scan, operands.entries, operands.exits)
++        inventory = access
++        notify("SOURCE_BODY_ACCESS_BOUND", counts=access.scan_counts, selected_bodies=len(access.selected))
+     model, sources = _link_call_model(
+         trace, root, inventory, frame_budget,
+         compilation_profile=CallCompilationProfile.RECORDED_FUTURE_FLAGS,
+         frame_scan=operands.frame_scan, entries=operands.entries, exits=operands.exits,
+         allow_v6=True, include_identity_routes=False,
+     )
++    notify("CALL_MODEL_LINKED", invocations=len(model.edges))
+     routing = build_operand_routes(call_model=model, operand_model=operands, inventory=inventory,
+                                    sources=sources, budget=route_budget)
++    notify("OPERAND_ROUTES_BUILT", summary=routing.summary())
+     environments = None
+     if include_environments:
+         from scar.analysis.callable_environment_import import import_callable_environments
+@@ -158,7 +215,26 @@ def link_call_operands(trace, project_root, inventory, *, frame_budget=CallEdgeB
+             max_events=operand_budget.max_events,
+             max_line_bytes=operand_budget.max_line_bytes,
+             max_references=operand_budget.max_references)
+-    return CallOperandReport(model, operands, routing, environments)
++        notify("CALLABLE_ENVIRONMENTS_BOUND", summary=environments["summary"])
++    entry_parameters = []
++    if access is not None:
++        for edge in model.edges:
++            if (edge.target.status is not CallLinkStatus.VERIFIED or edge.entry.suspended
++                    or not edge.entry.parameters_complete or edge.entry.code not in sources.objects
++                    or edge.entry.invocation.process_id in access.unbound_processes
++                    or edge.target.definition not in sources.ports):
++                continue
++            signature = sources.signatures[edge.target.definition]
++            if {parameter.name for parameter in edge.entry.parameters} != {parameter.name for parameter in signature.parameters}:
++                continue
++            for parameter in edge.entry.parameters:
++                source, value = sources.parameter_port(edge.target.definition, parameter.name)
++                if value is not None:
++                    entry_parameters.append(ReferenceOccurrence(edge.entry.anchor, edge.entry.invocation,
++                        edge.entry.invocation, ReferenceRole.PARAMETER, parameter.name, parameter.ref,
++                        source_reference=source, core_value=value))
++    return CallOperandReport(model, operands, routing, environments,
++                             access.receipt() if access is not None else None, tuple(entry_parameters))
+ 
+ 
+ __all__ = ["CallOperandReport", "link_call_operands"]
+diff --git a/scar/analysis/callable_environment_import.py b/scar/analysis/callable_environment_import.py
+index d0c6590..fde6dda 100644
+--- a/scar/analysis/callable_environment_import.py
++++ b/scar/analysis/callable_environment_import.py
+@@ -323,6 +323,10 @@ def import_callable_environments(trace, *, inventory, sources, call_model, opera
+               "environment entry disagrees with original operand handshake")
+         invocation = InvocationKey(key[0], entry["thread_id"], entry["invocation_id"])
+         candidate["invocation"] = encode(invocation)
++        access = getattr(sources, "source_access", None)
++        if access is not None and invocation.process_id in access.unbound_processes:
++            unresolved.append({**candidate, "reason": "CAPTURE_PROCESS_MEMBERSHIP_UNRESOLVED"})
++            continue
+         if not all(entry[name] for name in ("function_match", "globals_match", "builtins_match")):
+             unresolved.append({**candidate, "reason": "ENTRY_READONLY_ASSOCIATION_MISMATCH"})
+             continue
+@@ -344,6 +348,10 @@ def import_callable_environments(trace, *, inventory, sources, call_model, opera
+             continue
+         environment = environments[0]
+         code = sources.objects.get(dispatch["code_key"])
++        if code is None and getattr(sources, "source_access", None) is not None:
++            unresolved.append({**candidate, "definition": encode(definition),
++                               "reason": "CODE_WITNESS_UNAVAILABLE"})
++            continue
+         names = () if code is None else tuple(code.co_freevars)
+         cells = environment.members[5:]
+         if (code is None or len(environment.members) != len(dispatch["members"])
+@@ -364,12 +372,17 @@ def import_callable_environments(trace, *, inventory, sources, call_model, opera
+                 missing.append({**record, "reason": "DISPATCH_DEFAULTS_SNAPSHOT_IS_NOT_ENTRY_BINDING"})
+             else:
+                 ports.append(record)
+-        bindings.append({"invocation": encode(invocation), "definition": encode(definition),
++        binding = {"invocation": encode(invocation), "definition": encode(definition),
+             "region": encode(environment.region), "environment": encode(environment.id),
+             "dispatch_anchor": dispatch_anchor, "entry_anchor": entry_anchor,
+             "operand_attempt_anchor": encode(attempt.anchor), "operand_handshake_anchor": encode(handshake.anchor),
+             "frame_entry_anchor": encode(edge.entry.anchor), "ports": ports, "unresolved": missing,
+-            "conditions": list(_CONDITIONS), "status": "CONDITIONAL_REFERENCE_IDENTITY"})
++            "conditions": list(_CONDITIONS), "status": "CONDITIONAL_REFERENCE_IDENTITY"}
++        access = getattr(sources, "source_access", None)
++        if access is not None:
++            fi, bi = access.selected[definition]
++            binding["body_namespace"] = access.composition.document["files"][fi]["bodies"][bi]["namespace"]
++        bindings.append(binding)
+     for key, attempt in attempts.items():
+         if attempt.dispatch.kind is CallableKind.EXACT_FUNCTION and key not in dispatches:
+             unresolved.append({"process_id": key[0], "attempt_index": key[1],
+@@ -386,13 +399,17 @@ def import_callable_environments(trace, *, inventory, sources, call_model, opera
+                "unresolved_entry_defaults": sum(len(record["unresolved"]) for record in bindings),
+                "unresolved_records": len(unresolved),
+                "unresolved_reasons": dict(sorted(Counter(record["reason"] for record in unresolved).items()))}
+-    return {"schema": "scar.callable-environment-bindings", "schema_version": 1,
++    access = getattr(sources, "source_access", None)
++    result = {"schema": "scar.callable-environment-bindings", "schema_version": 2 if access is not None else 1,
+             "scope": "existing source environment entry reference ports; conditional identity only",
+             "valid": True, "files": files, "metadata": metadata,
+             "inventory_sha256": call_model.inventory_sha256,
+             "original_operand_files": encode(operand_model.files), "original_frame_files": encode(call_model.files),
+             "bindings": bindings, "unresolved": unresolved, "summary": summary,
+             "whole_program_graph_established": False, "state_versions_established": False, **_AUTHORITY}
++    if access is not None:
++        result["source_body_access"] = access.receipt()
++    return result
+ 
+ 
+ __all__ = ["import_callable_environments"]
+diff --git a/scar/analysis/dispatch_sources.py b/scar/analysis/dispatch_sources.py
+index dbeefd3..bb6d972 100644
+--- a/scar/analysis/dispatch_sources.py
++++ b/scar/analysis/dispatch_sources.py
+@@ -21,6 +21,7 @@ from scar.ir.execution.common import EvidencePoint
+ from scar.ir.execution.coordinates import ExecutionRun, HostThreadInstance, RegionActivation
+ from scar.ir.program.call_edges import CallRecordAnchor, InvocationKey
+ from scar.ir.program.providers import ProviderArtifact, ProviderFactReference
++from scar.ir.program.source_references import SourceDefinitionReference
+ from scar.ir.record_codec import decode, encode, loads as strict_loads
+ from scar.trace.capture_coordinates import CaptureCoordinates
+ from scar.trace.dispatch_evidence import PRODUCTION_PROFILE
+@@ -103,7 +104,7 @@ def _inputs(source_directory, bridge_path, coordinates, max_bytes):
+           and _canonical(coordinates.report) == coordinates.payload, "coordinate payload is inconsistent")
+     root = Path(source_directory).resolve()
+     report, report_artifact = _read_document(root / "report.json", "scar.source-invocations", 16_000_000,
+-                                           versions=(1, 2))
++                                           versions=(1, 2, 3))
+     _need(report.get("current_capture_raw_scan_verified") is True
+           and report.get("old_capture_dynamic_facts_used_for_current_run") is False,
+           "source report does not bind a completed current-capture raw scan")
+@@ -114,6 +115,11 @@ def _inputs(source_directory, bridge_path, coordinates, max_bytes):
+         versions=(report["schema_version"],))
+     _need(bindings.get("witness_mode") == report["witness_mode"]
+           and bindings.get("transformation_authorized") is False, "source binding header differs from its report")
++    if report["schema_version"] == 3:
++        _need(report.get("source_definition_reference_format") == "scar.source-definition-reference.v1"
++              and bindings.get("source_definition_reference_format") == report["source_definition_reference_format"]
++              and bindings.get("source_inputs") == report.get("source_inputs"),
++              "formal source definition format/input receipts differ")
+     bridge, bridge_artifact = _read_document(bridge_path, "scar.dispatch-observation-import", max_bytes)
+     _need(bridge.get("profile") == PRODUCTION_PROFILE and bridge.get("production_collector") is True
+           and bridge.get("capture_membership_verified") is True
+@@ -325,6 +331,120 @@ class _PartitionedSourceScope:
+             "definition_scope": "exact original snapshot/context + DefinitionID; not path/line matching"}
+ 
+ 
++class _FormalSourceScope:
++    """Resolve v3 definitions without extending the original inventory root.
++
++    Project bodies retain their original v2 witness checks. Dependency source
++    definitions resolve through the same public CompositionIndex resolver;
++    source-only evidence never creates a typed body or region activation.
++    """
++
++    def __init__(self, composition, report):
++        self.project = _PartitionedSourceScope(composition, report)
++        self.composition, self.counts = composition, Counter()
++        _need(composition.has_source_attachments
++              and report["source_inputs"] == composition.source_inputs(),
++              "formal source inputs differ from the explicitly bound attachments")
++        _need(report["witness_mode"] == "same_capture"
++              and report.get("attachment_capture_checks"),
++              "formal attachments have no declared complete same-capture check")
++        declaration = {key: report[key] for key in
++                       ("trace_files", "collection_metadata", "raw_scan_issues")}
++        _need(all(value == declaration for value in composition.attachment_capture_declarations()),
++              "attachment source witnesses belong to a different raw capture")
++        expected_scan = {"trace_files_sha256": hashlib.sha256(_canonical(report["trace_files"])).hexdigest(),
++                         "captured_codes": report["summary"]["code_captures"],
++                         "entered_code_groups": report["summary"]["entered_code_groups"],
++                         "entered_invocations": report["summary"]["invocations"]}
++        _need(len(report["attachment_capture_checks"]) == len(composition.attachment_capture_declarations())
++              and all(type(receipt) is dict and all(receipt.get(key) == value
++                      for key, value in expected_scan.items())
++                      for receipt in report["attachment_capture_checks"]),
++              "attachment raw-scan receipt denominator differs from the source report")
++
++    def binding(self, binding):
++        origin = binding.get("source_origin")
++        _need(origin in ("INVENTORY", "SOURCE_ATTACHMENT"), "unsupported formal source origin")
++        reference = (decode(SourceDefinitionReference, binding["definition"])
++                     if binding["definition"] is not None else None)
++        if origin == "INVENTORY":
++            _need(binding.get("attachment_witness") is None,
++                  "project definition cannot acquire an external compiler witness")
++            element = binding.get("composition_element")
++            restored = {**binding, "definition": element}
++            self.project.binding(restored)
++            _need((reference is None) == (element is None),
++                  "project definition lost its original composition view")
++            if reference is not None:
++                from scar.ir.v2.ids import OperationDefinitionID
++                expected = self.composition.definition_reference(element["file_index"],
++                    decode(OperationDefinitionID, element["identity"]))
++                _need(reference == expected, "project formal definition differs from its original graph")
++                self.composition.resolve_definition(reference)
++                self.counts["project_formal_definitions_verified"] += 1
++            return
++
++        from scar.ir.program.call_edges import CodeCapture, CodeSourceLink, CallLinkStatus
++        _need(binding.get("composition_element") is None and binding["body"] is None
++              and all(binding.get(name) is None for name in (
++                  "descriptor_witness_pointer", "code_source_witness_pointer", "admission_pointer",
++                  "descriptor_witness_locator", "code_source_witness_locator", "admission_locator"))
++              and binding.get("static_body_witness_pointers") == []
++              and binding.get("static_body_witness_locators") == [],
++              "source-only attachment cannot masquerade as an inventory/body admission")
++        witness = self.composition.attached_code_witness(binding["process_id"], binding["code"])
++        _need(witness is not None and witness["record"]["status"] == "SOURCE_VERIFIED",
++              "external definition has no bound original source witness")
++        record = witness["record"]
++        capture = decode(CodeCapture, binding["code_capture"])
++        _need(capture.process_id == binding["process_id"] and capture.code.key == binding["code"]
++              and record["captured_code"] == encode(capture.code)
++              and record["descriptor_anchor"] == encode(capture.anchor)
++              and record["entered_invocations"] == binding["entered_invocations"]
++              and binding["complete_descriptor_match"] is True,
++              "external source definition has no exact descriptor/group identity")
++        link = decode(CodeSourceLink, record["code_source_link"])
++        _need(link.status is CallLinkStatus.VERIFIED and link.code == binding["code"]
++              and binding["snapshot"] == encode(link.snapshot) and binding["source"] == encode(link.source)
++              and binding["source_verification"] == "REUSED_HISTORICAL_CODE_SOURCE_WITNESS"
++              and binding["witness_status"] == "VERIFIED" and binding["witness_issues"] == encode(link.issues)
++              and binding["current_source_check"] is None,
++              "historical source witness was changed or promoted to a current-source proof")
++        expected_witness = {
++            "record_locator": encode(witness["record_locator"]),
++            "descriptor_locator": encode(witness["descriptor_locator"]),
++            "code_source_locator": encode(witness["code_source_locator"]),
++            "code_source_link": record["code_source_link"], "witness_scope": witness["witness_scope"],
++            "source_compiler_witness_reused": record["source_compiler_witness_reused"],
++            "source_compiler_matching_performed": record["source_compiler_matching_performed"],
++            "guard_scope": witness["guard_scope"], "guard": witness["guard"],
++            "guard_locator": encode(witness["guard_locator"]) if witness["guard_locator"] is not None else None,
++        }
++        _need(binding.get("attachment_witness") == expected_witness,
++              "external witness/guard locator differs from the original attachment")
++        expected = self.composition.attached_definition_reference(binding["process_id"], binding["code"])
++        _need(reference == expected
++              and binding["definition_locator"] == (encode(reference.graph) if reference is not None else None),
++              "external formal definition differs from its bound original source graph")
++        if reference is not None:
++            _need(reference.definition == link.definition and encode(reference.snapshot) == binding["snapshot"]
++                  and encode(reference.source) == binding["source"],
++                  "external graph identity differs from its full CodeSourceLink")
++            self.composition.resolve_definition(reference)
++            self.counts["external_source_only_definitions_verified"] += 1
++        else:
++            self.counts["external_verified_codes_without_definition"] += 1
++        self.counts["historical_compiler_witnesses_reused"] += 1
++        if witness["guard"] is not None and witness["guard"].get("matches") is False:
++            self.counts["admission_time_source_drift_preserved"] += 1
++
++    def audit(self):
++        return {"formal_definition_reference_format": "scar.source-definition-reference.v1",
++                "explicit_source_inputs_verified": True, "project": self.project.audit(),
++                **dict(self.counts), "source_recompiled": False, "source_reprepared": False,
++                "attachment_guard_refreshed": False, "typed_bodies_added": False}
++
++
+ def _load_invocations(root, report, bindings, artifacts, coordinates, pid, process, wanted, maximum, max_rows):
+     declaration = report["invocations"]
+     _need(declaration["path"] == "invocations.jsonl.gz", "unsupported invocation artifact path")
+@@ -363,7 +483,7 @@ def _load_invocations(root, report, bindings, artifacts, coordinates, pid, proce
+                   and point.source == raw_source and point.source.locator == "#/lines/" + str(anchor.line_number),
+                   "invocation raw source or common execution coordinate differs")
+             activation = decode(RegionActivation, row["region_activation"]) if row["region_activation"] is not None else None
+-            if version == 2:
++            if version in (2, 3):
+                 namespace = binding["body"]["namespace"] if binding["body"] is not None else None
+                 _need("region_namespace" in row and row["region_namespace"] == namespace,
+                       "invocation region namespace differs from its verified source body")
+@@ -377,7 +497,7 @@ def _load_invocations(root, report, bindings, artifacts, coordinates, pid, proce
+                 _need(binding["body"] is not None and activation.region.as_dict() == binding["body"]["reference"]["identity"]
+                       and activation.process == process.id and activation.entry == point,
+                       "source region activation differs from its original body/entry")
+-                if version == 2:
++                if version in (2, 3):
+                     expected_id = coordinates.run.id.value + ":source-frame:" + hashlib.sha256(_canonical({
+                         "process": encode(point.process), "invocation": encode(invocation),
+                         "entry": encode(point.source)})).hexdigest()
+@@ -390,7 +510,7 @@ def _load_invocations(root, report, bindings, artifacts, coordinates, pid, proce
+                     "code": row["code"], "binding_index": index, "activation": activation,
+                     "anchor": anchor, "status": row["status"], "frontiers": row["frontiers"],
+                     "suspended": row["suspended"]}
+-                if version == 2:
++                if version in (2, 3):
+                     selected[invocation]["region_namespace"] = row["region_namespace"]
+     _need((digest.hexdigest(), size, count) == (declaration["raw_sha256"], declaration["raw_bytes"], declaration["rows"]),
+           "complete invocation raw SHA/bytes/row receipt differs")
+@@ -419,11 +539,12 @@ def bind_dispatch_sources(source_directory, dispatch_bridge, coordinates, out_di
+      artifacts, native, pid, process) = _inputs(source_directory, dispatch_bridge, coordinates, max_input_bytes)
+     version = source_report["schema_version"]
+     source_scope = None
+-    if version == 2:
+-        source_scope = _PartitionedSourceScope(composition_index, source_report)
++    if version in (2, 3):
++        source_scope = (_FormalSourceScope(composition_index, source_report) if version == 3
++                        else _PartitionedSourceScope(composition_index, source_report))
+         for index, binding in enumerate(bindings["bindings"]):
+             _need(type(binding["binding_index"]) is int and binding["binding_index"] == index,
+-                  "source schema2 binding table ordinal differs")
++                  "source binding table ordinal differs")
+             source_scope.binding(binding)
+     observations = bridge["observations"]
+     _need(type(observations) is list and len(observations) <= max_observations
+@@ -476,8 +597,11 @@ def bind_dispatch_sources(source_directory, dispatch_bridge, coordinates, out_di
+                            "native_thread": None, "native_thread_reference": None,
+                            "qualified_slot_path_indices": slot_indices[observation["marker_instance"]],
+                            "frontiers": missing, "status": "UNRESOLVED"}
+-                    if version == 2:
++                    if version in (2, 3):
+                         row["region_namespace"] = None
++                    if version == 3:
++                        row["source_origin"] = None
++                        row["composition_element"] = None
+                     if observation["native_tid_verified"] is True:
+                         thread = coordinates.thread_for(native["kineto"], observation["native_tid"], "linux_native_tid")
+                         if type(thread) is HostThreadInstance:
+@@ -510,8 +634,11 @@ def bind_dispatch_sources(source_directory, dispatch_bridge, coordinates, out_di
+                                 "#/bindings/" + str(source["binding_index"])))
+                             row["source_invocation_line_sha256"] = source["line_sha256"]
+                             row["definition"], row["body"] = binding["definition"], binding["body"]
+-                            if version == 2:
++                            if version in (2, 3):
+                                 row["region_namespace"] = source["region_namespace"]
++                            if version == 3:
++                                row["source_origin"] = binding["source_origin"]
++                                row["composition_element"] = binding["composition_element"]
+                             row["status"] = "RETAINED_INVOCATION_LINKED"
+                             if binding["definition"] is None:
+                                 missing.append("SOURCE_DEFINITION_UNAVAILABLE")
+@@ -571,7 +698,10 @@ def bind_dispatch_sources(source_directory, dispatch_bridge, coordinates, out_di
+                 "unqualified payload leaves remain upstream gaps; compact bridge does not carry their individual raw descriptions"],
+             **_AUTHORITY}
+         if source_scope is not None:
+-            report["partitioned_source_scope_audit"] = source_scope.audit()
++            report["formal_source_scope_audit" if version == 3 else "partitioned_source_scope_audit"] = source_scope.audit()
++        if version == 3:
++            report["source_definition_reference_format"] = source_report["source_definition_reference_format"]
++            report["source_inputs"] = source_report["source_inputs"]
+         (stage / "report.json").write_bytes(_canonical(report))
+         (stage / "capture-coordinates.json").write_bytes(coordinates.payload)
+         output.mkdir(exist_ok=False)
+@@ -584,7 +714,10 @@ def query_dispatch_source(output_directory, marker_instance):
+     """Resolve one marker's original references; verify the selected output row."""
+     root = Path(output_directory)
+     report, _ = _read_document(root / "report.json", "scar.dispatch-source-associations", 16_000_000,
+-                              versions=(1, 2))
++                              versions=(1, 2, 3))
++    if report["schema_version"] == 3:
++        _need(report.get("source_definition_reference_format") == "scar.source-definition-reference.v1",
++              "unsupported queried formal definition reference format")
+     declaration = report["index"]
+     index, artifact = _read_document(root / declaration["path"], "scar.dispatch-source-index", 64_000_000)
+     _need((artifact.sha256, artifact.size_bytes) == (declaration["raw_sha256"], declaration["raw_bytes"]),
+diff --git a/scar/analysis/program_composition.py b/scar/analysis/program_composition.py
+index 60bc265..9ad1a8d 100644
+--- a/scar/analysis/program_composition.py
++++ b/scar/analysis/program_composition.py
+@@ -9,7 +9,8 @@ from __future__ import annotations
+ 
+ import argparse
+ from collections import Counter, OrderedDict
+-from dataclasses import dataclass
++from copy import deepcopy
++from dataclasses import dataclass, replace
+ import gzip
+ import hashlib
+ from io import BytesIO
+@@ -18,6 +19,7 @@ from pathlib import Path
+ from typing import Any
+ 
+ from scar.analysis.source_layers import SourceLayerView, load_source_layers
++from scar.analysis.source_attachments import SourceAttachments, SourceAttachmentBudget
+ from scar.analysis.inventory_partitions import InventoryPartitions
+ from scar.ir.program.codec import loads as load_graph
+ from scar.ir.program.ids import OperationID, RegionID
+@@ -26,6 +28,7 @@ from scar.ir.program.inventory import (
+ )
+ from scar.ir.program.model import ProgramGraph
+ from scar.ir.program.source import LoweringMetadata
++from scar.ir.program.source_references import SourceDefinitionReference
+ from scar.ir.record_codec import decode, encode, loads as strict_loads
+ from scar.ir.semantics_v2 import SourceSnapshot
+ from scar.ir.v2.ids import (
+@@ -518,10 +521,12 @@ class CompositionIndex:
+     """Bounded lazy queries over the original graphs, with no copied producers."""
+ 
+     def __init__(self, index_path: str | Path, *, max_input_bytes: int = 512_000_000,
+-                 max_record_bytes: int = 128_000_000, cached_files: int = 2):
++                 max_record_bytes: int = 128_000_000, cached_files: int = 2,
++                 source_attachments=(), attachment_budget=SourceAttachmentBudget()):
+         if type(cached_files) is not int or cached_files < 1:
+             raise ValueError("cached_files must be positive")
+         self.document, _ = _read(Path(index_path), max_input_bytes)
++        self._original_document_sha256 = hashlib.sha256(_canonical(self.document)).hexdigest()
+         if self.document.get("schema") != "scar.program-composition" or self.document.get("schema_version") not in (1, 2):
+             raise ValueError("unsupported composition index")
+         for key, value in _AUTHORITY.items():
+@@ -549,6 +554,123 @@ class CompositionIndex:
+         self.max_record_bytes, self.cached_files = max_record_bytes, cached_files
+         self._views: OrderedDict[int, SourceLayerView] = OrderedDict()
+         self._bodies: OrderedDict[tuple[int, int], tuple[ProgramGraph, LoweringMetadata]] = OrderedDict()
++        if type(source_attachments) is not tuple or type(attachment_budget) is not SourceAttachmentBudget:
++            raise TypeError("explicit source attachment tuples and typed independent budget required")
++        self._attachments = []
++        if source_attachments:
++            if not self.partitioned:
++                raise ValueError("formal source attachments require the explicit partitioned composition namespace")
++            discovery = self.inventory_component("discovery")
++            if type(discovery) is not dict or type(discovery.get("project_root")) is not str:
++                raise ValueError("source attachments require the original project-root declaration")
++            for declaration in source_attachments:
++                if type(declaration) is not tuple or len(declaration) != 2:
++                    raise ValueError("each source attachment requires its exact (report path, SHA256)")
++                self._attachments.append(SourceAttachments(declaration[0], expected_report_sha256=declaration[1],
++                    project_root=discovery["project_root"], budget=attachment_budget))
++        self._project_definition_refs = {}
++        self._project_snapshot_indexes = {_canonical(row["snapshot"]): index
++                                          for index, row in enumerate(self.document["files"])}
++
++    @property
++    def has_source_attachments(self):
++        return bool(self._attachments)
++
++    def source_inputs(self):
++        """Explicit input receipts; the original composition document stays intact."""
++        if hashlib.sha256(_canonical(self.document)).hexdigest() != self._original_document_sha256:
++            raise ValueError("composition document changed after its bound original receipt")
++        return {"composition_canonical_sha256": self._original_document_sha256,
++                "inventory": deepcopy(self.document["inventory"]),
++                "attachments": [attachment.receipts() for attachment in self._attachments]}
++
++    def verify_source_attachments(self, scanned, groups):
++        return [attachment.verify_capture(scanned, groups) for attachment in self._attachments]
++
++    def attachment_capture_declarations(self):
++        return [attachment.capture_declaration() for attachment in self._attachments]
++
++    def attached_code_witness(self, process_id, code):
++        found = [(attachment, attachment.code_witness(process_id, code)) for attachment in self._attachments]
++        found = [(attachment, witness) for attachment, witness in found if witness is not None]
++        verified = [(attachment, witness) for attachment, witness in found
++                    if witness["record"]["status"] == "SOURCE_VERIFIED"]
++        chosen = verified or found
++        if not chosen:
++            return None
++        first = chosen[0][1]
++        for _, witness in chosen[1:]:
++            if (witness["record"]["captured_code"] != first["record"]["captured_code"]
++                    or witness["record"]["code_source_link"] != first["record"]["code_source_link"]):
++                raise ValueError("source attachments contain contradictory full code/source witnesses")
++        return first
++
++    def attached_definition_reference(self, process_id, code):
++        references = [attachment.definition_reference(process_id, code) for attachment in self._attachments]
++        references = [reference for reference in references if reference is not None]
++        if any(reference.identity_key() != references[0].identity_key() for reference in references[1:]):
++            raise ValueError("source attachments disagree on the original source-qualified definition")
++        return references[0] if references else None
++
++    def definition_reference(self, file_index, definition_id):
++        """Reference an original project definition; file_index remains an internal view."""
++        key = file_index, definition_id
++        if key in self._project_definition_refs:
++            return self._project_definition_refs[key]
++        raw = self.inventory_file(file_index)
++        definitions = decode(tuple[DefinitionInventory, ...], raw["definitions"])
++        matches = [definition for definition in definitions if definition.id == definition_id]
++        if len(matches) != 1:
++            raise ValueError("definition is not one original inventory/source record")
++        definition = matches[0]
++        view = self.source(file_index)
++        if view.artifact_locator is None or view.snapshot != decode(SourceSnapshot, raw["snapshot"]):
++            raise ValueError("source view has no exact original artifact/snapshot locator")
++        semantic = view.semantic.definitions.get(definition_id)
++        atom = view.semantic.source_atoms.get(definition.source.atom_id)
++        if (semantic is None or atom is None or atom.reference != definition.source
++                or definition.source.atom_id not in semantic.source_atoms):
++            raise ValueError("project definition/source differs from the original semantic graph")
++        indexes = {item.id: index for index, item in enumerate(view.semantic.definitions.values())}
++        graph = replace(view.artifact_locator, pointer=f"#/payload/semantic/definitions/{indexes[definition_id]}")
++        root = replace(view.artifact_locator, pointer="#/source/context/namespace_root")
++        providers = (replace(view.artifact_locator, pointer="#/metadata"),)
++        reference = SourceDefinitionReference(root, providers, graph, view.snapshot, view.context,
++                                               definition_id, definition.source)
++        self._project_definition_refs[key] = reference
++        return reference
++
++    def _project_reference_view(self, reference):
++        file_index = self._project_snapshot_indexes.get(_canonical(encode(reference.snapshot)))
++        if file_index is None:
++            return None
++        expected = self.definition_reference(file_index, reference.definition)
++        if expected != reference:
++            raise ValueError("formal project definition locator differs from the bound original")
++        return self.source(file_index)
++
++    def resolve_definition(self, reference):
++        if type(reference) is not SourceDefinitionReference:
++            raise TypeError("formal source definition reference required")
++        reference.__post_init__()
++        view = self._project_reference_view(reference)
++        if view is not None:
++            return deepcopy(view.semantic.definitions[reference.definition])
++        for attachment in self._attachments:
++            if attachment.owns_reference(reference):
++                return attachment.resolve_definition(reference)
++        raise ValueError("formal definition has no bound original source attachment")
++
++    def source_view(self, reference):
++        if type(reference) is not SourceDefinitionReference:
++            raise TypeError("formal source definition reference required")
++        view = self._project_reference_view(reference)
++        if view is not None:
++            return deepcopy(view)
++        for attachment in self._attachments:
++            if attachment.owns_reference(reference):
++                return attachment.source_view(reference)
++        raise ValueError("formal source graph has no exact bound attachment")
+ 
+     @property
+     def inventory_file_count(self):
+diff --git a/scar/analysis/source_invocations.py b/scar/analysis/source_invocations.py
+index c579c5d..6152b59 100644
+--- a/scar/analysis/source_invocations.py
++++ b/scar/analysis/source_invocations.py
+@@ -32,6 +32,8 @@ from scar.ir.program.call_edges import (
+ from scar.ir.program.call_seeds import EnteredCodeGroup, SeedCollectionMetadata
+ from scar.ir.program.ids import RegionID
+ from scar.ir.program.inventory import DefinitionInventory
++from scar.ir.program.source_references import SourceDefinitionReference
++from scar.ir.v2.ids import OperationDefinitionID
+ from scar.ir.program.providers import ProviderArtifact, ProviderFactReference
+ from scar.ir.record_codec import decode, encode
+ from scar.ir.semantics_v2 import SourceSnapshot
+@@ -550,6 +552,71 @@ def _binding_rows(composition, model, scope, sink, captures, members, witness_mo
+     return rows, indexes
+ 
+ 
++def _formal_binding_rows(composition, bindings, captures, members):
++    """Use one shared original-definition resolver; no new inventory or body."""
++    for row in bindings:
++        row["source_origin"] = "INVENTORY"
++        row["composition_element"] = row["definition"]
++        row["attachment_witness"] = None
++        row["attachment_frontiers"] = []
++        key = row["process_id"], row["code"]
++        attached = composition.attached_code_witness(*key)
++        if attached is not None and attached["record"]["status"] != "PROGRAM_SCOPE_RETAINED":
++            row["attachment_frontiers"] = [gap["code"] for gap in attached["record"]["frontiers"]]
++        if attached is not None and attached["record"]["status"] == "SOURCE_VERIFIED":
++            record = attached["record"]
++            capture = captures.get(key)
++            _need(attached["capture_verified"] is True and capture is not None
++                  and record["captured_code"] == encode(capture.code)
++                  and record["descriptor_anchor"] == encode(capture.anchor)
++                  and record["entered_invocations"] == row["entered_invocations"],
++                  "attached source witness has no exact current-capture descriptor/group proof")
++            _need(row["definition"] is None and row["body"] is None,
++                  "attachment contradicts an already bound project definition/body")
++            link = record["code_source_link"]
++            reference = composition.attached_definition_reference(*key)
++            row.update(source_origin="SOURCE_ATTACHMENT", composition_element=None,
++                complete_descriptor_match=True, source_verification="REUSED_HISTORICAL_CODE_SOURCE_WITNESS",
++                witness_status="VERIFIED", witness_issues=link["issues"],
++                snapshot=link["snapshot"], source=link["source"],
++                definition=encode(reference) if reference is not None else None, body=None,
++                definition_locator=encode(reference.graph) if reference is not None else None,
++                descriptor_witness_pointer=None, code_source_witness_pointer=None, admission_pointer=None,
++                static_body_witness_pointers=[], descriptor_witness_locator=None,
++                code_source_witness_locator=None, admission_locator=None, static_body_witness_locators=[],
++                current_source_check=None, frontiers=list(row["attachment_frontiers"]))
++            row["attachment_witness"] = {
++                "record_locator": encode(attached["record_locator"]),
++                "descriptor_locator": encode(attached["descriptor_locator"]),
++                "code_source_locator": encode(attached["code_source_locator"]),
++                "code_source_link": link, "witness_scope": attached["witness_scope"],
++                "source_compiler_witness_reused": record["source_compiler_witness_reused"],
++                "source_compiler_matching_performed": record["source_compiler_matching_performed"],
++                "guard_scope": attached["guard_scope"], "guard": attached["guard"],
++                "guard_locator": encode(attached["guard_locator"]) if attached["guard_locator"] is not None else None,
++            }
++            if reference is not None:
++                row["status"] = "SOURCE_LINKED_REUSED_WITNESS"
++                row["frontiers"].append("CANONICAL_BODY_NOT_MODELLED_BY_SOURCE_ATTACHMENT")
++            else:
++                row["status"] = "UNRESOLVED"
++                row["frontiers"].append("VERIFIED_CODE_WITHOUT_DEFINITION_WITNESS")
++            if members.processes[key[0], "events"] is None:
++                row["frontiers"].append("CAPTURE_PROCESS_MEMBERSHIP_UNRESOLVED")
++        else:
++            for frontier in row["attachment_frontiers"]:
++                if frontier not in row["frontiers"]:
++                    row["frontiers"].append(frontier)
++            if row["definition"] is not None:
++                element = row["definition"]
++                reference = composition.definition_reference(element["file_index"],
++                    decode(OperationDefinitionID, element["identity"]))
++                _need(encode(reference.snapshot) == row["snapshot"] and encode(reference.source) == row["source"],
++                      "formal project definition differs from its original code/source witness")
++                row["definition"] = encode(reference)
++    return bindings
++
++
+ def _parent(entry, sink, incomplete_processes):
+     direct = entry.caller_invocation
+     ancestor = entry.ancestor_invocation
+@@ -641,6 +708,9 @@ def bind_source_invocations(composition: CompositionIndex, coordinates: CaptureC
+     _need(type(call_budget) is CallEdgeBudget, "call_budget must be CallEdgeBudget")
+     _need(type(witness_mode) is str and witness_mode in ("same_capture", "reused_code"),
+           "witness_mode must be same_capture or reused_code")
++    _need(not composition.has_source_attachments or witness_mode == "same_capture",
++          "formal source attachments currently require exact same-capture evidence")
++    source_version = 3 if composition.has_source_attachments else 2 if composition.partitioned else 1
+     call_budget.__post_init__()
+     output = Path(out_dir).resolve()
+     _need(not output.exists() and not output.is_symlink(), "output directory already exists")
+@@ -668,10 +738,13 @@ def bind_source_invocations(composition: CompositionIndex, coordinates: CaptureC
+     members.bind(scanned.files)
+     if seed_model is not None and witness_mode == "same_capture":
+         _verify_seed_model(seed_model, scanned, sink, members)
++    attachment_capture_checks = composition.verify_source_attachments(scanned, tuple(sink.groups.values()))
+     captures = {(capture.process_id, capture.code.key): capture for capture in scanned.captures}
+     source_guard = _SourceGuard(call_budget) if witness_mode == "reused_code" else None
+     bindings, binding_indexes = _binding_rows(composition, seed_model, scope, sink, captures,
+                                              members, witness_mode, source_guard)
++    if composition.has_source_attachments:
++        bindings = _formal_binding_rows(composition, bindings, captures, members)
+     incomplete = {meta["process_id"] for meta in scanned.metadata if meta["dropped_events"]
+                   or meta["dropped_codes"] or meta["errors"] or meta.get("io_failed")}
+     incomplete.update(invocation.process_id for invocation in sink.exits if invocation not in sink.entries)
+@@ -738,15 +811,19 @@ def bind_source_invocations(composition: CompositionIndex, coordinates: CaptureC
+         stage = Path(temporary)
+         invocation_file = _write_rows(stage / "invocations.jsonl.gz", invocation_rows())
+         orphan_file = _write_rows(stage / "orphan-exits.jsonl.gz", orphan_rows())
+-        binding_payload = _canonical({"schema": "scar.source-invocation-bindings", "schema_version": 2 if composition.partitioned else 1,
+-                                      "witness_mode": witness_mode, "bindings": bindings, **_AUTHORITY})
++        binding_document = {"schema": "scar.source-invocation-bindings", "schema_version": source_version,
++                            "witness_mode": witness_mode, "bindings": bindings, **_AUTHORITY}
++        if source_version == 3:
++            binding_document.update(source_definition_reference_format="scar.source-definition-reference.v1",
++                                    source_inputs=composition.source_inputs())
++        binding_payload = _canonical(binding_document)
+         (stage / "bindings.json").write_bytes(binding_payload)
+         (stage / "capture-coordinates.json").write_bytes(coordinates.payload)
+         _need(invocation_file["rows"] == sum(group.count for group in sink.groups.values())
+               == sum(meta["invocations"] for meta in scanned.metadata),
+               "published invocation denominator differs from complete raw replay")
+         report = {
+-            "schema": "scar.source-invocations", "schema_version": 2 if composition.partitioned else 1,
++            "schema": "scar.source-invocations", "schema_version": source_version,
+             "scope": "observed frame entries to original source/body; reused code/source witness",
+             "inventory": composition.document["inventory"],
+             "composition_canonical_sha256": _sha(composition.document),
+@@ -787,6 +864,10 @@ def bind_source_invocations(composition: CompositionIndex, coordinates: CaptureC
+                 "a recorded frame parent interval is not an actual/formal/return, environment, effect or ATen callsite proof",
+             ], **_AUTHORITY,
+         }
++        if source_version == 3:
++            report.update(source_definition_reference_format="scar.source-definition-reference.v1",
++                source_inputs=composition.source_inputs(), attachment_capture_checks=attachment_capture_checks,
++                attachment_scope="original source fragments; no added inventory files or typed bodies")
+         (stage / "report.json").write_bytes(_canonical(report))
+         # All scanning, cross-input checking and row creation have succeeded.
+         # Reserve the caller's destination exclusively, publish data first, and
+diff --git a/scar/analysis/source_layers.py b/scar/analysis/source_layers.py
+index 8af5df8..d5095b1 100644
+--- a/scar/analysis/source_layers.py
++++ b/scar/analysis/source_layers.py
+@@ -26,6 +26,8 @@ from typing import Any
+ from scar.analysis.program_lowering import prepare_source
+ from scar.ir.control_flow_v2 import SourceControlFlowGraph
+ from scar.ir.program.inventory import SourceContextDigest
++from scar.ir.program.providers import ProviderArtifact, ProviderFactReference
++from scar.ir.program.source_references import SourceArtifactLocator
+ from scar.ir.record_codec import decode, encode, loads as strict_loads
+ from scar.ir.semantics_v2 import SourceSemanticsGraph, SourceSnapshot
+ from scar.ir.v2.codec import semantic_from_dict
+@@ -55,6 +57,7 @@ class SourceLayerView:
+     semantics: SourceSemanticsGraph
+     control: SourceControlFlowGraph
+     metadata: dict[str, Any]
++    artifact_locator: SourceArtifactLocator | None = None
+ 
+ 
+ def _check_budgets(**budgets: int) -> None:
+@@ -739,6 +742,28 @@ def load_source_layers(
+             or type(envelope["metadata"]) is not dict):
+         raise ValueError("source-layer record metadata overstates authority")
+     payload = envelope["payload"]
++    if type(payload) is not dict or set(payload) != {"semantic", "semantics", "control"}:
++        raise ValueError("source-layer payload fields mismatch")
++    metadata = dict(envelope["metadata"])
++    metadata.update({
++        "archive_sha256": row["canonical_sha256"],
++        "archive_bytes": row["canonical_bytes"],
++        "input_inventory_raw_sha256": document["input"]["raw_sha256"],
++        "input_inventory_schema_version": document["input"]["schema_version"],
++        "source_replay_on_load": False,
++    })
++    declaration = ProviderFactReference(ProviderArtifact(str(index_path.resolve()),
++        hashlib.sha256(index_bytes).hexdigest(), len(index_bytes), _SCHEMA),
++        "#/files/" + str(rows.index(row)))
++    locator = SourceArtifactLocator(ProviderArtifact(str(archive_path.resolve()),
++        hashlib.sha256(compressed_payload).hexdigest(), len(compressed_payload), "scar.source-layers.record"),
++        row["canonical_sha256"], decoded_size, "gzip-canonical-json", declaration=declaration)
++    return _decoded_source_layer_view(snapshot, context, payload, metadata, locator)
++
++
++def _decoded_source_layer_view(snapshot, context, payload, metadata, locator=None):
++    """Shared graph validation, without changing either producer's envelope."""
++    _validate_snapshot(snapshot); _validate_context(context)
+     if type(payload) is not dict or set(payload) != {"semantic", "semantics", "control"}:
+         raise ValueError("source-layer payload fields mismatch")
+     semantic = semantic_from_dict(payload["semantic"])
+@@ -749,21 +774,74 @@ def load_source_layers(
+         raise ValueError("source-layer semantics snapshot differs from source record")
+     if control.sources.get(snapshot.path) is None or control.sources[snapshot.path].fingerprint != snapshot.fingerprint:
+         raise ValueError("source-layer control source version differs from source record")
+-    actual_digests = (_digest(semantic.to_dict()), _digest(semantics.to_dict()),
+-                      _digest(control.to_dict()))
+-    expected_digests = (context.semantic_sha256, context.semantics_sha256,
+-                        context.control_sha256)
+-    if actual_digests != expected_digests:
++    actual_digests = (_digest(semantic.to_dict()), _digest(semantics.to_dict()), _digest(control.to_dict()))
++    if actual_digests != (context.semantic_sha256, context.semantics_sha256, context.control_sha256):
+         raise ValueError("source-layer graph digest differs from index context")
+-    metadata = dict(envelope["metadata"])
+-    metadata.update({
+-        "archive_sha256": row["canonical_sha256"],
+-        "archive_bytes": row["canonical_bytes"],
+-        "input_inventory_raw_sha256": document["input"]["raw_sha256"],
+-        "input_inventory_schema_version": document["input"]["schema_version"],
+-        "source_replay_on_load": False,
+-    })
+-    return SourceLayerView(snapshot, context, semantic, semantics, control, metadata)
++    return SourceLayerView(snapshot, context, semantic, semantics, control, metadata, locator)
+ 
+ 
+-__all__ = ["SourceLayerView", "reconstruct_source_layers", "load_source_layers"]
++def load_source_graph_artifact(path, *, schema, canonical_sha256, canonical_bytes,
++                               compressed_bytes, source_root, snapshot, context,
++                               snapshot_locator, declaration, max_record_bytes=128_000_000):
++    """Read an original dependency graph artifact without source preparation.
++
++    The caller binds the original manifest declaration and admitted path. This
++    reader preserves both existing dependency envelopes and their true origin;
++    it does not manufacture an inventory/source-replay receipt.
++    """
++    _check_budgets(max_record_bytes=max_record_bytes, canonical_bytes=canonical_bytes,
++                   compressed_bytes=compressed_bytes)
++    if schema not in ("scar.dependency-source-graphs", "scar.dependency-continuation-source-graphs"):
++        raise ValueError("unsupported dependency source graph schema")
++    if not _SHA256.fullmatch(canonical_sha256) or canonical_bytes > max_record_bytes:
++        raise ValueError("source graph hash/record budget mismatch")
++    if type(snapshot) is not SourceSnapshot or type(context) is not SourceContextDigest:
++        raise TypeError("source graph requires the bound original snapshot/context")
++    if type(declaration) is not ProviderFactReference:
++        raise TypeError("source graph requires its original artifact declaration")
++    path = Path(path)
++    if path.is_symlink() or not path.is_file() or str(path.resolve()) != str(path):
++        raise ValueError("source graph artifact must be an ordinary canonical path")
++    before = path.stat()
++    if before.st_size != compressed_bytes:
++        raise ValueError("source graph compressed-byte receipt mismatch")
++    payload, physical_sha = _read_bounded(path, limit=max_record_bytes)
++    after = path.stat()
++    if ((before.st_dev, before.st_ino, before.st_size, before.st_mtime_ns)
++            != (after.st_dev, after.st_ino, after.st_size, after.st_mtime_ns)
++            or len(payload) != canonical_bytes or hashlib.sha256(payload).hexdigest() != canonical_sha256):
++        raise ValueError("source graph artifact changed or differs from its original receipt")
++    document = strict_loads(payload.decode("utf-8", errors="strict"))
++    if (_canonical(document) != payload or document.get("schema") != schema
++            or type(document.get("schema_version")) is not int or document["schema_version"] != 1):
++        raise ValueError("source graph canonical schema/version mismatch")
++    flags = ("target_executed_by_resolver", "transitive_dependency_closure_established",
++             "canonical_bodies_established", "actual_formal_routing_established",
++             "function_environment_established", "effects_established", "state_versions_established",
++             "observer_origin_established", "provider_version_at_capture_established",
++             "whole_program_graph_established", "first_stage_complete", "transformation_authorized")
++    if (any(document.get(name) is not False for name in flags)
++            or document.get("independent_source_replay_established") is not False):
++        raise ValueError("source graph artifact overstates its authority")
++    if (document["source_root"] != source_root or decode(SourceSnapshot, document["snapshot"]) != snapshot
++            or decode(SourceContextDigest, document["context"]) != context
++            or document["namespace_root"] != context.namespace_root):
++        raise ValueError("source graph root/snapshot/context differs from its declaration")
++    if schema == "scar.dependency-source-graphs":
++        if (snapshot_locator.get("origin") != "PARENT"
++                or document["source_snapshot_artifact"] != snapshot_locator["artifact"]):
++            raise ValueError("original graph snapshot artifact differs from its parent declaration")
++    elif document["source_snapshot_locator"] != snapshot_locator:
++        raise ValueError("continuation graph snapshot locator differs from its original declaration")
++    metadata = {"archive_sha256": canonical_sha256, "archive_bytes": canonical_bytes,
++                "source_replay_on_load": False, "source_layer_producer": document["source_layer_producer"],
++                "independent_source_replay_established": False, "whole_program_graph_established": False,
++                "fine_state_effects_established": False, "transformation_authorized": False}
++    locator = SourceArtifactLocator(ProviderArtifact(str(path), physical_sha, compressed_bytes, schema),
++        canonical_sha256, canonical_bytes, "gzip-canonical-json", declaration=declaration)
++    view = _decoded_source_layer_view(snapshot, context,
++        {name: document[name] for name in ("semantic", "semantics", "control")}, metadata, locator)
++    return view, locator
++
++
++__all__ = ["SourceLayerView", "reconstruct_source_layers", "load_source_layers", "load_source_graph_artifact"]
+diff --git a/scar/cli.py b/scar/cli.py
+index a037da6..06e8bd8 100644
+--- a/scar/cli.py
++++ b/scar/cli.py
+@@ -545,15 +545,18 @@ def main(argv=None) -> int:
+     capture_model.add_argument("--max-lines", type=int, default=2000000)
+     capture_model.add_argument("--schema-contracts", action="store_true", help="recover ordered provider ports using the exact matching installed Torch schema parser")
+     capture_model.add_argument("--bundle-partitions", action="store_true", help="store native graph records as bounded chunks instead of one nested bundle JSON")
++    capture_model.add_argument("--os-interface-work", action="store_true", help="retain kernel interfaces and typed work in bounded partitions; effects and resource closure remain explicit")
+     capture_model.add_argument("--out", required=True, help="fresh assembled capture directory with per-stage progress")
+     capture_model.set_defaults(func=_import_capture)
+     os_resources = sub.add_parser("import-os-resources", help="import retained per-TID strace files into existing resource and handle identities")
+     os_resources.add_argument("directory", help="strace -ff -ttt -T files, optionally gzip")
+     os_resources.add_argument("--scope", default="capture", help="namespace, additionally bound to the artifact manifest hash")
+     os_resources.add_argument("--root-tid", type=int, help="explicit captured target process declaration")
++    os_resources.add_argument("--capture-root", help="bind the original collector capture containing this os/ directory to verified shared Run/Process/Thread coordinates")
++    os_resources.add_argument("--interface-work", action="store_true", help="publish schema2 interface and typed-work tables in bounded chunks")
+     os_resources.add_argument("--max-bytes", type=int, default=512000000)
+     os_resources.add_argument("--max-lines", type=int, default=2000000)
+-    os_resources.add_argument("--max-report-bytes", type=int, default=512000000)
++    os_resources.add_argument("--max-report-bytes", type=int, default=512000000, help="legacy single-report ceiling; interface-work uses the independent partition budgets")
+     os_resources.add_argument("--out", required=True, help="fresh output directory")
+     os_resources.set_defaults(func=_import_os_resources)
+     native = sub.add_parser("import-native", help="import collected ETO/Kineto evidence without running or importing the target")
+@@ -1430,6 +1433,7 @@ def _import_capture(args) -> int:
+     from scar.trace.capture_import import import_capture
+     report = import_capture(args.directory, args.out, max_bytes=args.max_bytes, max_lines=args.max_lines,
+         schema_contracts=args.schema_contracts, bundle_partitions=args.bundle_partitions,
++        os_interface_work=args.os_interface_work,
+         progress=lambda record: print(json.dumps(record), flush=True))
+     print(json.dumps({"out": str(Path(args.out).resolve()), "coordinate_identity_consistent": report["coordinate_identity_consistent"],
+                       "whole_model_established": report["whole_model_established"]}))
+@@ -1437,15 +1441,34 @@ def _import_capture(args) -> int:
+ 
+ 
+ def _import_os_resources(args) -> int:
+-    from scar.trace.os_resources import import_os_resources
++    from scar.trace.os_resources import import_os_resources, publish_os_interfaces
+     output = Path(args.out).resolve()
+     if output.exists():
+         raise SystemExit("import-os-resources requires a fresh output directory")
+-    fragment = import_os_resources(args.directory, scope=args.scope, root_tid=args.root_tid,
+-                                  max_bytes=args.max_bytes, max_lines=args.max_lines)
++    coordinates, root_tid = None, args.root_tid
++    if args.capture_root is not None:
++        from scar.trace.capture_coordinates import bind_capture_coordinates
++        capture = Path(args.capture_root).resolve()
++        if Path(args.directory).resolve() != capture / 'os':
++            raise SystemExit("capture-root must contain the exact imported os/ directory")
++        coordinates = bind_capture_coordinates(capture, max_bytes=args.max_bytes,
++            max_lines=args.max_lines, profile_uri=str(output / 'capture-coordinates.json'))
++        declared_pid = coordinates.target_process.pid
++        if root_tid is not None and root_tid != declared_pid:
++            raise SystemExit("root-tid contradicts the original collector target declaration")
++        root_tid = declared_pid
++    fragment = import_os_resources(args.directory, scope=args.scope, root_tid=root_tid,
++        max_bytes=args.max_bytes, max_lines=args.max_lines, coordinates=coordinates,
++        interface_work=args.interface_work)
+     output.mkdir(parents=True)
++    if coordinates is not None:
++        (output / 'capture-coordinates.json').write_bytes(coordinates.payload)
+     (output / "os-resource-profile.json").write_bytes(fragment.protocol_bytes)
+-    _write_call_document(output / "os-resources.json.gz", fragment.to_dict(), args.max_report_bytes)
++    if args.interface_work:
++        publish_os_interfaces(fragment, output / 'interfaces',
++            progress=lambda record: print(json.dumps(record), flush=True))
++    else:
++        _write_call_document(output / "os-resources.json.gz", fragment.to_dict(), args.max_report_bytes)
+     (output / "summary.json").write_text(json.dumps(fragment.summary, indent=2) + "\n")
+     print(json.dumps({"out": str(output), **fragment.summary}))
+     return 0
+diff --git a/scar/trace/capture_import.py b/scar/trace/capture_import.py
+index 4f1653c..ed16467 100644
+--- a/scar/trace/capture_import.py
++++ b/scar/trace/capture_import.py
+@@ -85,7 +85,8 @@ def _check_os_coordinates(fragment, coordinates):
+ 
+ 
+ def import_capture(capture_dir, output_dir, *, max_bytes=1_000_000_000, max_lines=2_000_000,
+-                   schema_contracts=False, bundle_partitions=False, progress=None):
++                   schema_contracts=False, bundle_partitions=False, os_interface_work=False,
++                   progress=None):
+     """Import an unmodified successful collector capture, without target execution.
+ 
+     The membership binder validates the original artifacts once.  The existing
+@@ -95,7 +96,10 @@ def import_capture(capture_dir, output_dir, *, max_bytes=1_000_000_000, max_line
+     from scar.trace.capture_coordinates import bind_capture_coordinates
+     from scar.trace.native_import import import_native_evidence
+     from scar.trace.native_memory_export import export_native_memory
+-    from scar.trace.os_resources import import_os_resources
++    from scar.trace.os_resources import import_os_resources, publish_os_interfaces
++
++    if type(os_interface_work) is not bool:
++        raise TypeError('os_interface_work must be an exact bool')
+ 
+     capture, out = Path(capture_dir).resolve(), Path(output_dir).resolve()
+     if out.exists():
+@@ -213,12 +217,19 @@ def import_capture(capture_dir, output_dir, *, max_bytes=1_000_000_000, max_line
+         os_out = out / 'os'
+         os_out.mkdir()
+         os_fragment = import_os_resources(capture / 'os', scope='capture-import',
+-            root_tid=manifest['pid'], max_bytes=max_bytes, max_lines=max_lines, coordinates=coordinates)
++            root_tid=manifest['pid'], max_bytes=max_bytes, max_lines=max_lines, coordinates=coordinates,
++            interface_work=os_interface_work)
+         os_check = _check_os_coordinates(os_fragment, coordinates)
+         (os_out / 'os-resource-profile.json').write_bytes(os_fragment.protocol_bytes)
+-        _write(os_out / 'os-resources.json.gz', os_fragment.to_dict())
++        if os_interface_work:
++            stage('os_interfaces', 'RUNNING')
++            publish_os_interfaces(os_fragment, os_out / 'interfaces',
++                progress=lambda record: stage('os_interfaces', 'WRITING', detail=record))
++            stage('os_interfaces', 'PUBLISHED_WITH_OPEN_OBLIGATIONS')
++        else:
++            _write(os_out / 'os-resources.json.gz', os_fragment.to_dict())
+         _write(os_out / 'summary.json', os_fragment.summary)
+-        outputs.extend(_stored(path) for path in sorted(os_out.iterdir()))
++        outputs.extend(_stored(path) for path in sorted(os_out.rglob('*')) if path.is_file())
+         os_summary = dict(os_fragment.summary, coordinate_check=os_check)
+         stage('os_resources', 'IMPORTED', **os_fragment.summary)
+         del os_fragment
+@@ -241,6 +252,10 @@ def import_capture(capture_dir, output_dir, *, max_bytes=1_000_000_000, max_line
+             report['native_bundle_storage'] = {'kind': 'partitioned',
+                 'manifest': str(native_out / 'bundle-partitions' / 'manifest.json'),
+                 'publication_is_model_completeness': False}
++        if os_interface_work:
++            report['os_interface_storage'] = {'kind': 'partitioned',
++                'manifest': str(os_out / 'interfaces' / 'manifest.json'),
++                'publication_is_model_completeness': False}
+         _write(out / 'capture-model.json', report)
+         stage('capture', 'IMPORTED_WITH_OPEN_OBLIGATIONS', coordinate_identity_consistent=True)
+         return report
+diff --git a/scar/trace/os_resources.py b/scar/trace/os_resources.py
+index fddc415..0c9bbe6 100644
+--- a/scar/trace/os_resources.py
++++ b/scar/trace/os_resources.py
+@@ -18,19 +18,24 @@ from dataclasses import dataclass, replace
+ import gzip
+ import hashlib
+ import json
++import os
+ from pathlib import Path
+ import re
++import secrets
+ 
+ from scar.ir.execution.common import EvidencePoint, Unresolved
+ from scar.ir.execution.coordinates import ExecutionRun, HostThreadInstance, ProcessInstance
+ from scar.ir.execution.ids import (HandleBindingID, HostThreadInstanceID, ProcessInstanceID,
+-    ResourceInstanceID, RunID, TargetLifetimeEventID)
++    ResourceInstanceID, RunID, TargetLifetimeEventID, WorkTicketID, WorkOutcomeID)
+ from scar.ir.execution.resources import (EndedAt, HandleBinding, ImportedAt, InstanceTarget,
+     ResourceInstance, RunRealm, UnresolvedHandle)
+ from scar.ir.execution.validity import LifetimeEventKind, TargetLifetimeEvent
++from scar.ir.execution.work import (DirectExecution, ExternalWorkSource, ResourceOutcome,
++    WorkOutcomeKind, WorkSubmission)
+ from scar.ir.program.providers import ProviderArtifact, ProviderFactReference
+ from scar.ir.program.resources import ResourceKind, ResourceRole
+-from scar.ir.record_codec import encode
++from scar.ir.record_codec import encode, loads as strict_loads
++from scar.ir.v2.common import Completeness
+ 
+ 
+ _OPEN = frozenset(("open", "openat", "openat2", "creat"))
+@@ -46,6 +51,80 @@ _RESUMED = re.compile(r"^<\.\.\. ([a-zA-Z0-9_]+) resumed>(.*)$")
+ _UNFINISHED = re.compile(r"^([a-zA-Z0-9_]+)\((.*)<unfinished \.\.\.>$")
+ _FLAGS = re.compile(r"\bflags=([^,}]+)")
+ 
++# Kernel interface categories describe the observed protocol, not application
++# purpose, purity, physical data movement, or complete effects.
++_METADATA = frozenset(("stat", "lstat", "fstat", "newfstatat", "statx", "statfs", "fstatfs",
++    "access", "faccessat", "faccessat2", "readlink", "readlinkat", "getcwd", "getdents", "getdents64"))
++_MAPPING = frozenset(("mmap", "mmap2", "munmap", "mprotect", "mremap", "brk", "madvise",
++    "mbind", "get_mempolicy", "set_mempolicy"))
++_WAIT = frozenset(("poll", "ppoll", "epoll_wait", "epoll_pwait", "epoll_pwait2", "wait4", "waitid", "flock"))
++_NAMESPACE = frozenset(("mkdir", "mkdirat", "rmdir", "unlink", "unlinkat", "rename", "renameat",
++    "renameat2", "symlink", "symlinkat", "link", "linkat", "utimensat"))
++_FD_PRODUCERS = frozenset(("pipe", "pipe2", "eventfd", "eventfd2", "epoll_create", "epoll_create1"))
++_EXIT = frozenset(("exit", "exit_group"))
++_EXTRA = _METADATA | _MAPPING | _WAIT | _NAMESPACE | _FD_PRODUCERS | _EXIT | frozenset(("lseek", "ioctl", "epoll_ctl"))
++_DURATION = re.compile(r"\s*<([0-9]+(?:\.[0-9]+)?)>\s*$")
++_STAMP = re.compile(r"^([0-9]+(?:\.[0-9]+)?)\s+")
++_PIPE_PAIR = re.compile(r"^\[\s*(-?(?:0x[0-9a-fA-F]+|[0-9]+))\s*,\s*(-?(?:0x[0-9a-fA-F]+|[0-9]+))\s*\]$")
++
++
++def _decimal_ns(text):
++    """Keep exact decimal provider precision; never float-round or infer order."""
++    if type(text) is not str or re.fullmatch(r"[0-9]+(?:\.[0-9]+)?", text) is None:
++        return None
++    whole, _, fraction = text.partition(".")
++    if len(fraction) > 9:
++        return None
++    return int(whole) * 1_000_000_000 + int(fraction.ljust(9, "0") or "0")
++
++
++def _interface_family(name):
++    if name in _OPEN | _FD_PRODUCERS:
++        return "DESCRIPTOR_PRODUCER"
++    if name in _READ | _WRITE:
++        return "BYTE_IO"
++    if name in _METADATA:
++        return "METADATA_QUERY"
++    if name in _MAPPING:
++        return "VIRTUAL_MEMORY_INTERFACE"
++    if name in _WAIT:
++        return "WAIT_OR_LOCK_INTERFACE"
++    if name in _NAMESPACE:
++        return "FILESYSTEM_NAMESPACE_INTERFACE"
++    if name in _CLONE | _EXIT | frozenset(("execve", "execveat", "unshare")):
++        return "EXECUTION_CONTEXT_INTERFACE"
++    if name in _SELECTED | frozenset(("lseek", "ioctl", "epoll_ctl")):
++        return "DESCRIPTOR_OR_DEVICE_INTERFACE"
++    return "UNMODELED_KERNEL_INTERFACE"
++
++
++def _interface_arguments(name, args):
++    """Preserve ordered protocol scalars/renderings, omit all data payloads.
++
++    Unknown interfaces retain arity only. Structured return buffers are not
++    parsed as complete values; their original line remains the authority.
++    """
++    omitted = set()
++    if name in _READ | _WRITE | frozenset(("getdents", "getdents64")):
++        omitted.add(1)
++    elif name == "readlink":
++        omitted.add(1)
++    elif name == "readlinkat":
++        omitted.add(2)
++    elif name == "getcwd":
++        omitted.add(0)
++    elif name == "execve":
++        omitted.update((1, 2))
++    elif name == "execveat":
++        omitted.update((2, 3))
++    elif name == "ioctl":
++        omitted.update(range(2, len(args)))
++    elif name not in _SELECTED | _EXTRA:
++        omitted.update(range(len(args)))
++    result = [None if index in omitted else (_number(value) if _number(value) is not None else value)
++              for index, value in enumerate(args)]
++    return result, sorted(index for index in omitted if index < len(args))
++
+ 
+ def _number(text):
+     if type(text) is not str or re.fullmatch(r"-?(?:0x[0-9a-fA-F]+|[0-9]+)", text.strip()) is None:
+@@ -97,8 +176,11 @@ class OSResourceFragment:
+     protocol_artifact: ProviderArtifact
+     protocol_bytes: bytes
+     summary: dict
++    interface_work: bool = False
+ 
+     def to_dict(self):
++        if self.interface_work:
++            raise ValueError("interface_work schema2 requires publish_os_interfaces; refusing a giant JSON/work copy")
+         return {"schema": "scar.os-resource-fragment", "schema_version": 1, "scope": self.scope,
+             "run": encode(self.run), "processes": encode(self.processes), "threads": encode(self.threads),
+             "resources": encode(self.resources), "handles": encode(self.handles),
+@@ -110,8 +192,47 @@ class OSResourceFragment:
+             "observation_source_encoding": "artifact is an index into artifacts; line is a one-based decompressed physical line",
+             "line_classifications": list(self.line_classifications), "summary": self.summary}
+ 
++    def iter_work_records(self, table):
++        """Construct original typed work one at a time, without a second graph.
++
++        Syscall return is not device quiescence or whole-effect completion.
++        Source/canonical bindings and all unknown coverage remain explicit.
++        """
++        if not self.interface_work or table not in ("submissions", "outcomes"):
++            raise ValueError("typed OS interface work requires schema2 submissions/outcomes")
++        native_threads = {row.tid: row.id for row in self.threads if row.tid is not None}
++        processes = {row.id.wire: row.id for row in self.processes}
++        for row in self.observations:
++            if row.get("interface_record") is not True:
++                continue
++            entry_source = row["entry_source"]
++            return_source = row["source"]
++            artifact = self.artifacts[entry_source["artifact"]]
++            entry = EvidencePoint(self.run.id, processes.get(row["process"]),
++                ProviderFactReference(artifact, "#/lines/" + str(entry_source["line"])))
++            source = ProviderFactReference(self.artifacts[return_source["artifact"]],
++                                          "#/lines/" + str(return_source["line"]))
++            ticket = WorkTicketID(row["work_ticket"])
++            unresolved = Unresolved("source operation, executor, dependency/effect/retention closure is not established", entry)
++            if table == "submissions":
++                thread = native_threads.get(row["tid"])
++                scheduling = DirectExecution(thread if thread is not None else
++                    Unresolved("native thread coordinate is not established", entry), entry.source)
++                yield WorkSubmission(ticket, ExternalWorkSource(entry, entry.source), unresolved, scheduling,
++                    (), Completeness.UNKNOWN, (), Completeness.UNKNOWN, (), Completeness.UNKNOWN,
++                    unresolved, ProviderFactReference(self.protocol_artifact, "#/contract/interface_work"), source)
++            elif row["ordinary_return"]:
++                point = EvidencePoint(self.run.id, entry.process, source)
++                # COMPLETED means only that this syscall returned. brk, partial
++                # IO, readiness, driver work and filesystem visibility retain
++                # their distinct protocol receipts, never a device completion.
++                kind = WorkOutcomeKind.FAILED if row["result"] == -1 else WorkOutcomeKind.COMPLETED
++                yield ResourceOutcome(WorkOutcomeID(row["work_ticket"] + ":return"), ticket, kind,
++                    point, source, (), Completeness.UNKNOWN,
++                    Unresolved("syscall return does not establish device/work quiescence or complete effects", point), source)
+ 
+-def _scan(directory, max_bytes, max_lines):
++
++def _scan(directory, max_bytes, max_lines, *, interface_work=False):
+     files = []
+     for path in sorted(directory.iterdir()):
+         match = re.search(r"\.([0-9]+)(?:\.gz)?$", path.name)
+@@ -146,6 +267,7 @@ def _scan(directory, max_bytes, max_lines):
+                     barrier(row[4])
+                     continue
+                 body = match[1]
++                timestamp = _STAMP.match(text)[1] if interface_work and _STAMP.match(text) is not None else None
+                 if body.startswith("--- "):
+                     row[2:5] = ["SIGNAL", None, None]; continue
+                 if body.startswith("+++ "):
+@@ -154,7 +276,7 @@ def _scan(directory, max_bytes, max_lines):
+                 if unfinished:
+                     if pending is not None:
+                         pending[3][4] = "unfinished_replaced_without_resume"
+-                    pending = (unfinished[1], unfinished[2], line_number, row)
++                    pending = (unfinished[1], unfinished[2], line_number, row, timestamp)
+                     # A signal handler may run before the resumed receipt.
+                     # Replaying that receipt against a later FD table could
+                     # connect it to a reopened descriptor's different OFD.
+@@ -162,12 +284,14 @@ def _scan(directory, max_bytes, max_lines):
+                     row[2:5] = ["UNFINISHED", unfinished[1], None]; continue
+                 resumed = _RESUMED.match(body)
+                 first_line = line_number
++                entry_timestamp = timestamp
+                 if resumed:
+                     row[2:5] = ["RESUMED", resumed[1], None]
+                     if pending is None or pending[0] != resumed[1]:
+                         row[4] = "resume_without_matching_unfinished"
+                         barrier(row[4], resumed[1]); continue
+                     body, first_line = pending[0] + "(" + pending[1] + resumed[2], pending[2]
++                    entry_timestamp = pending[4]
+                     pending = None
+                 completed = _CALL.match(body)
+                 if completed is None:
+@@ -176,21 +300,44 @@ def _scan(directory, max_bytes, max_lines):
+                 if not resumed:
+                     row[2:5] = ["COMPLETED", name, None]
+                 if name not in _SELECTED:
+-                    row[4] = "outside_fd_profile"; continue
++                    row[4] = "outside_fd_profile"
++                    if not interface_work:
++                        continue
+                 try:
+                     args = _arguments(arguments)
++                    if interface_work:
++                        normalized, omitted = _interface_arguments(name, [] if args == [""] else args)
++                        parsed_arguments = True
+                     # Never retain the rendered read/write buffer or iovecs.
+                     if name in _READ | _WRITE:
+                         args = [args[0], None, *args[2:]]
+                     elif name in ("execve", "execveat"):
+                         args = []
+                 except (ValueError, IndexError):
+-                    row[4] = "unsupported_argument_rendering"
+-                    barrier(row[4], name, invalidates=name not in _READ | _WRITE); continue
+-                calls.append({"file": file_index, "tid": tid, "line": line_number,
++                    if interface_work:
++                        # Retain the known interface/return even if its argument
++                        # rendering is incomplete; no argument identity is made.
++                        args, normalized, omitted = [], [], []
++                        parsed_arguments = False
++                    else:
++                        row[4] = "unsupported_argument_rendering"
++                        barrier(row[4], name, invalidates=name not in _READ | _WRITE); continue
++                call = {"file": file_index, "tid": tid, "line": line_number,
+                     "first_line": first_line, "name": name, "args": args,
+                     "result": _number(result),
+-                    "errno": tail.strip().split()[0] if result == "-1" and tail.strip() else None})
++                    "errno": tail.strip().split()[0] if result == "-1" and tail.strip() else None}
++                if interface_work:
++                    duration = _DURATION.search(tail)
++                    errno = re.match(r"\s*([A-Z][A-Z0-9_]+)\b", tail) if result == "-1" else None
++                    call["errno"] = errno[1] if errno is not None else None
++                    call.update(interface_record=True, legacy_outside_fd_profile=name not in _SELECTED,
++                        normalized_arguments=normalized, payload_argument_indices_omitted=omitted,
++                        argument_rendering_complete=parsed_arguments and "..." not in arguments,
++                        result_rendering=result, provider_entry_line_timestamp=entry_timestamp,
++                        provider_line_timestamp=timestamp, duration=duration[1] if duration else None,
++                        post_receipt_rendering=(tail[:duration.start()].strip() if duration else tail.strip())
++                            if name in ("poll", "ppoll", "epoll_wait", "epoll_pwait", "epoll_pwait2") else None)
++                calls.append(call)
+         if pending is not None:
+             pending[3][4] = "unfinished_at_capture_end"
+         artifacts.append(ProviderArtifact(str(path.absolute()), digest.hexdigest(), size,
+@@ -199,9 +346,10 @@ def _scan(directory, max_bytes, max_lines):
+ 
+ 
+ class _Replay:
+-    def __init__(self, scope, run, artifacts, files, protocol, processes):
++    def __init__(self, scope, run, artifacts, files, protocol, processes, *, interface_work=False):
+         self.scope, self.run, self.artifacts, self.protocol = scope, run, artifacts, protocol
+         self.processes = processes
++        self.interface_work = interface_work
+         self.resources, self.handles, self.lifetimes, self.observations = [], [], [], []
+         self.gaps, self.gap_counts = {}, Counter()
+         self.states = {tid: {"safe": False, "fds": {}, "generation": Counter()} for _, tid in files}
+@@ -241,6 +389,22 @@ class _Replay:
+         binding = self.handles[index]
+         self.handles[index] = replace(binding, end=EndedAt(self.point(call), self.fact(call)))
+ 
++    def introduced_fd(self, state, call, fd, port):
++        """One actual producer port, never a path identity or shared pipe OFD."""
++        if fd in state["fds"]:
++            self.invalidate(state, call, "FD producer reuses a believed-live descriptor; table history is incomplete")
++        point, source = self.point(call), self.fact(call)
++        target = ResourceInstanceID(self.scope + ":ofd:" + str(call["file"]) + ":" + str(call["line"]) + ":" + port)
++        self.resources.append(ResourceInstance(target, ResourceKind.FILE, ResourceRole.OPEN_FILE_DESCRIPTION,
++            RunRealm(self.run.id), ImportedAt(point), source))
++        self.lifetimes.append(TargetLifetimeEvent(TargetLifetimeEventID(target.value + ":live"),
++            InstanceTarget(target), LifetimeEventKind.LIVE, point,
++            Unresolved("raw syscall stage is not connected to a canonical source stage", point),
++            Unresolved("syscall effects are not connected to canonical state/effect ports", point), self.protocol, source))
++        index, generation = self.binding(state, call, fd, target)
++        return {"port": port, "fd": fd, "generation": generation,
++                "binding": self.handles[index].id.wire, "target": target.wire}
++
+     def apply(self, call):
+         state, name, args, result = self.states[call["tid"]], call["name"], call["args"], call["result"]
+         # Diagnostic IO rows reference the immutable artifact table.  Repeating
+@@ -251,6 +415,34 @@ class _Replay:
+             "tid": call["tid"], "syscall": name, "result": result, "errno": call["errno"],
+             "fd_relation_status": "OPEN", "binding": None, "ofd": None,
+             "canonical_stage": "OPEN", "canonical_effect": "OPEN"}
++        if self.interface_work:
++            observation["interface_record"] = call.get("interface_record", False)
++            if observation["interface_record"]:
++                ordinary = result is not None and name not in _EXIT and not (
++                    name in ("execve", "execveat") and result == 0)
++                observation.update(process=self.processes[call["tid"]].wire if call["tid"] in self.processes else None,
++                    family=_interface_family(name), legacy_outside_fd_profile=call["legacy_outside_fd_profile"],
++                    arguments=call["normalized_arguments"],
++                    payload_argument_indices_omitted=call["payload_argument_indices_omitted"],
++                    argument_rendering_complete=call["argument_rendering_complete"],
++                    result_rendering=call["result_rendering"], ordinary_return=ordinary,
++                    return_source={"artifact": call["file"], "line": call["line"]} if ordinary else None,
++                    nonreturn_protocol="EXIT_REQUEST" if name in _EXIT else (
++                        "EXEC_IMAGE_REPLACED" if name in ("execve", "execveat") and result == 0 else (
++                        "RETURN_RENDERING_UNRECOVERED" if not ordinary else None)),
++                    provider_entry_line_timestamp=call["provider_entry_line_timestamp"],
++                    provider_line_timestamp=call["provider_line_timestamp"],
++                    provider_entry_line_timestamp_ns=_decimal_ns(call["provider_entry_line_timestamp"]),
++                    provider_line_timestamp_ns=_decimal_ns(call["provider_line_timestamp"]),
++                    provider_entry_line_point_kind="STRACE_UNFINISHED_ENTRY_PRINTLEADER" if call["first_line"] != call["line"]
++                        else "STRACE_COMPLETED_LINE_PRINTLEADER_NOT_RETURN_TIME",
++                    provider_line_point_kind="STRACE_RESUMED_LINE_PRINTLEADER_NOT_VERIFIED_RETURN_TIME" if call["first_line"] != call["line"]
++                        else "STRACE_COMPLETED_LINE_PRINTLEADER_NOT_RETURN_TIME",
++                    duration=call["duration"], duration_ns=_decimal_ns(call["duration"]),
++                    post_receipt_rendering=call["post_receipt_rendering"],
++                    work_ticket=self.scope + ":syscall-work:" + str(call["file"]) + ":" + str(call["first_line"]),
++                    resource_association_status="OPEN_R2", effects_coverage="UNKNOWN",
++                    dependency_coverage="UNKNOWN", retention_coverage="UNKNOWN")
+         self.observations.append(observation)
+         if "parser_gap" in call:
+             observation.update(kind="TRACE_PARSE_FRONTIER", reason=call["parser_gap"],
+@@ -267,11 +459,20 @@ class _Replay:
+             state["fds"].clear(); state["safe"] = True
+             self.gap("exec_inheritance_open", call, "exec unshares the FD table; inherited/CLOEXEC descriptor identities remain unknown")
+             return
++        if self.interface_work and name in ("execve", "execveat"):
++            # Importer defect in schema1: PATH-search failures previously fell
++            # through to an absent-FD diagnostic after argv/env were omitted.
++            # Failure does not install an image or produce a handle.
++            observation["fd_relation_status"] = "NOT_A_DESCRIPTOR_ARGUMENT_INTERFACE"
++            return
+         if name == "unshare" and result == 0:
+             if args and "CLONE_FILES" in args[0]:
+                 state["fds"].clear(); state["safe"] = True
+                 self.gap("unshare_inheritance_open", call, "private table established; copied descriptor identities remain unknown")
+             return
++        if self.interface_work and name == "unshare":
++            observation["fd_relation_status"] = "NOT_A_DESCRIPTOR_ARGUMENT_INTERFACE"
++            return
+         if name in _CLONE:
+             if result is not None and result > 0:
+                 flags = _clone_flags(call)
+@@ -281,6 +482,36 @@ class _Replay:
+         if name in _TABLE:
+             self.invalidate(state, call, "unmodeled range/asynchronous FD-table mutation prevents later descriptor matching")
+             return
++        if self.interface_work and name in _FD_PRODUCERS:
++            if result is None or result < 0:
++                if result is None:
++                    self.invalidate(state, call, "unknown FD producer return leaves its introduced descriptor ports unresolved")
++                return
++            if name in ("pipe", "pipe2"):
++                pair = _PIPE_PAIR.fullmatch(args[0]) if args else None
++                fds = [_number(pair[1]), _number(pair[2])] if pair is not None else []
++                if len(fds) != 2 or any(fd is None or fd < 0 for fd in fds) or fds[0] == fds[1] or result != 0:
++                    self.invalidate(state, call, "successful pipe producer lacks its exact distinct output FD pair")
++                    self.gap("fd_producer_ports_open", call, "pipe output endpoints are not fully rendered")
++                    return
++                receipts = [self.introduced_fd(state, call, fd, port)
++                            for fd, port in zip(fds, ("read_end", "write_end"), strict=True)]
++            else:
++                receipts = [self.introduced_fd(state, call, result,
++                    "counter_endpoint" if name.startswith("eventfd") else "eventpoll_endpoint")]
++            observation.update(created_handles=receipts, fd_relation_status="OBSERVED_FD_PRODUCER_PORTS",
++                table_status="PRIVATE_OBSERVED_INTERVAL" if state["safe"] else "OPEN",
++                endpoint_pair_relation="SAME_PIPE_RECEIPT_DISTINCT_OFD_ENDPOINTS" if name in ("pipe", "pipe2") else None,
++                resource_association_status="PRODUCER_PORTS_OBSERVED_R2_TYPED_RELATION_OPEN",
++                generation_basis="observed_bound_assignments_not_complete_kernel_history")
++            return
++        if self.interface_work and name not in _SELECTED:
++            # Inputs/outputs and actual work are retained, but mapping, poll,
++            # metadata and shared-context relations are not fabricated here.
++            if name not in _EXTRA:
++                self.invalidate(state, call, "unmodeled kernel interface may mutate descriptor state")
++                self.gap("kernel_interface_contract_open", call, "arguments and side effects have no supported protocol")
++            return
+         if name in _OPEN:
+             if result is None or result < 0:
+                 return
+@@ -369,17 +600,21 @@ def _clone_flags(call):
+ 
+ 
+ def import_os_resources(directory, *, scope, run=None, root_tid=None, coordinates=None,
+-                        max_bytes=512_000_000, max_lines=2_000_000):
++                        max_bytes=512_000_000, max_lines=2_000_000, interface_work=False):
+     """Import one retained capture; scope always includes the artifact manifest hash.
+ 
+     root_tid is an explicit capture declaration, never inferred from the lowest
+     TID or timestamp.  Its provenance and capture completeness remain OPEN.
+     protocol_bytes is the exact generated manifest payload for catalog export.
++    interface_work=True explicitly enables schema2 interface/work coverage and
++    bounded export. The default legacy schema1 and to_dict path is unchanged.
+     """
+     if type(scope) is not str or not scope or (root_tid is not None and (type(root_tid) is not int or root_tid <= 0)):
+         raise ValueError("OS import needs a nonempty scope and optional positive root_tid")
+     if any(type(value) is not int or value <= 0 for value in (max_bytes, max_lines)):
+         raise ValueError("OS import budgets must be positive exact integers")
++    if type(interface_work) is not bool:
++        raise TypeError("interface_work must be an exact bool")
+     if run is not None and type(run) is not RunID:
+         raise TypeError("run must be an exact RunID or None")
+     if coordinates is not None:
+@@ -388,7 +623,7 @@ def import_os_resources(directory, *, scope, run=None, root_tid=None, coordinate
+             raise TypeError("OS coordinates must be a bound CaptureCoordinates")
+         if run is not None and run != coordinates.run.id:
+             raise ValueError("OS run declaration contradicts bound capture coordinates")
+-    files, artifacts, lines, calls = _scan(Path(directory), max_bytes, max_lines)
++    files, artifacts, lines, calls = _scan(Path(directory), max_bytes, max_lines, interface_work=interface_work)
+     if root_tid is not None and root_tid not in {tid for _, tid in files}:
+         raise ValueError("declared root_tid has no retained per-TID artifact")
+     manifest = {"schema": "scar.os-resource-profile", "schema_version": 1,
+@@ -398,6 +633,26 @@ def import_os_resources(directory, *, scope, run=None, root_tid=None, coordinate
+             "assumptions": ["retained files belong to one declared capture", "Linux syscall contract",
+                 "no unobserved shared FD-table actor in connected private intervals"],
+             "canonical_source_connected": False, "complete_resource_model": False}}
++    if interface_work:
++        manifest["schema_version"] = 2
++        interface_counts = Counter(call["name"] for call in calls if call.get("interface_record"))
++        manifest["contract"]["interface_work"] = {
++            "mode": "OBSERVED_KERNEL_INTERFACES_R1", "fragment_schema_version": 2,
++            "interfaces": [{"name": name, "count": count, "family": _interface_family(name),
++                "legacy_fd_profile": name in _SELECTED} for name, count in sorted(interface_counts.items())],
++            "parameter_encoding": "ordered exact numeric scalars or strace renderings; payload positions are null and explicitly listed",
++            "argument_truncation": "argument_rendering_complete describes only formatting/ellipsis; structured stat outputs remain provider renderings, not complete out values",
++            "timestamps": "provider_line_timestamp and provider_entry_line_timestamp are strace -ttt realtime printleader stamps, never independently observed host return times; see each point_kind",
++            "duration": "strace -T reported decimal elapsed duration; no inferred end timestamp or cross-thread order",
++            "outcome_scope": "ordinary syscall return only; not full effects, GPU ready or device quiescence",
++            "successful_exec_and_exit_have_ordinary_return": False,
++            "work_dependencies_effects_materializations_retention": "UNKNOWN, never NONE",
++            "quiescence_records_created": 0, "r2_resource_associations_established": False,
++            "importer_defect_fixed": "failed execve/execveat PATH search no longer produces a missing-FD-argument gap",
++            "linux_contracts": ["https://man7.org/linux/man-pages/man2/pipe.2.html",
++                "https://man7.org/linux/man-pages/man2/eventfd.2.html",
++                "https://man7.org/linux/man-pages/man2/epoll_create.2.html",
++                "https://man7.org/linux/man-pages/man2/execve.2.html"]}
+     if coordinates is not None:
+         manifest["contract"]["coordinate_binding"] = encode(coordinates.artifact)
+     payload = json.dumps(manifest, sort_keys=True, separators=(",", ":"), ensure_ascii=False).encode("utf-8")
+@@ -447,7 +702,8 @@ def import_os_resources(directory, *, scope, run=None, root_tid=None, coordinate
+             if type(thread) is HostThreadInstance:
+                 bound_threads[thread.id] = thread
+         processes, threads = tuple(bound_processes.values()), tuple(bound_threads.values())
+-    replay = _Replay(bound_scope, execution_run, artifacts, files, protocol, process_for_tid)
++    replay = _Replay(bound_scope, execution_run, artifacts, files, protocol, process_for_tid,
++                     interface_work=interface_work)
+     for child in private_children & replay.states.keys():
+         replay.states[child]["safe"] = True
+     for call in calls:
+@@ -466,9 +722,213 @@ def import_os_resources(directory, *, scope, run=None, root_tid=None, coordinate
+         "connected_io": sum(row["syscall"] in _READ | _WRITE and row["fd_relation_status"] == "CONNECTED_PRIVATE_INTERVAL"
+                             for row in replay.observations),
+         "source_runtime_verified": False, "transformation_authorized": False, "complete_resource_model": False}
++    if interface_work:
++        observed = [row for row in replay.observations if row.get("interface_record")]
++        outside = Counter(row["syscall"] for row in observed if row["legacy_outside_fd_profile"])
++        summary.update(interface_mode="OBSERVED_KERNEL_INTERFACES_R1", interface_records=len(observed),
++            interface_counts=dict(sorted(Counter(row["syscall"] for row in observed).items())),
++            interface_families=dict(sorted(Counter(row["family"] for row in observed).items())),
++            legacy_syscall_observations=len(replay.observations) - sum(outside.values()),
++            legacy_outside_fd_profile_count=sum(outside.values()), legacy_outside_fd_profile_by_syscall=dict(sorted(outside.items())),
++            ordinary_return_outcomes=sum(row["ordinary_return"] for row in observed),
++            nonreturn_protocol_counts=dict(sorted(Counter(row["nonreturn_protocol"] for row in observed
++                if row["nonreturn_protocol"] is not None).items())),
++            argument_frontiers=sum(not row["argument_rendering_complete"] for row in observed),
++            missing_duration=sum(row["duration_ns"] is None for row in observed),
++            process_coordinate_open=sum(row["process"] is None for row in observed),
++            legacy_process_coordinate_open=sum(row["process"] is None and not row["legacy_outside_fd_profile"]
++                                               for row in observed),
++            actual_fd_producer_ports=sum(len(row.get("created_handles", ())) for row in observed),
++            gap_groups=len(gaps), gap_occurrences=sum(row["occurrences"] for row in gaps),
++            quiescence_records=0, canonical_dependencies_established=False,
++            syscall_work_dependencies_coverage="UNKNOWN", complete_work_effects_established=False)
+     return OSResourceFragment(bound_scope, execution_run, processes, threads, tuple(replay.resources),
+         tuple(replay.handles), tuple(replay.lifetimes), tuple(replay.observations),
+-        tuple(tuple(row) for row in lines), tuple(gaps), tuple(artifacts), protocol_artifact, payload, summary)
++        tuple(tuple(row) for row in lines), tuple(gaps), tuple(artifacts), protocol_artifact, payload, summary,
++        interface_work=interface_work)
++
++
++_INTERFACE_TABLES = ("observations", "line_classifications", "resources", "handles",
++    "target_lifetime_events", "processes", "threads", "artifacts", "gaps", "submissions", "outcomes")
++
++
++def publish_os_interfaces(fragment, fresh_out, *, budgets=None, progress=None):
++    """Export schema2 records through the existing bounded bundle chunk sink.
++
++    This is immutable transport of the original resource fragment plus its
++    lazy typed syscall work, not a new resource IR. No giant to_dict, complete
++    graph copy, or quiescence record is created. Inputs must remain stable.
++    """
++    from scar.store.bundle_partitions import _Chunk, _budgets, _line, _require
++    from dataclasses import fields
++    limits = _budgets(budgets)
++    _require(type(fragment) is OSResourceFragment and fragment.interface_work is True,
++             "OS interface partitions require the explicit schema2 fragment")
++    _require(progress is None or callable(progress), "progress must be callable or None")
++    out = Path(fresh_out).absolute()
++    out.mkdir(mode=0o700, parents=False, exist_ok=False)
++    totals = {"records": 0, "chunks": 0, "decoded_bytes": 0, "stored_bytes": 0}
++    tables, active = {}, None
++    try:
++        for table in _INTERFACE_TABLES:
++            if table in ("submissions", "outcomes"):
++                expected = fragment.summary["interface_records" if table == "submissions" else "ordinary_return_outcomes"]
++                records = (encode(record) for record in fragment.iter_work_records(table))
++            else:
++                collection = getattr(fragment, table)
++                expected = len(collection)
++                records = (encode(record) for record in collection)
++            ordinal, chunks = 0, []
++            if progress is not None:
++                progress({"phase": "TABLE_BEGIN", "table": table, "expected": expected, **totals})
++            for record in records:
++                _require(totals["records"] < limits.max_records, "OS interface record budget exceeded")
++                data = _line({"ordinal": ordinal, "record": record}, limits)
++                _require(totals["decoded_bytes"] + len(data) <= limits.max_total_decoded_bytes,
++                         "OS interface decoded budget exceeded")
++                if active is not None and active.decoded_bytes + len(data) > limits.max_chunk_decoded_bytes:
++                    chunks.append(active.close()); active = None
++                    if progress is not None:
++                        progress({"phase": "CHUNK_CLOSED", "table": table, "table_records": ordinal, **totals})
++                if active is None:
++                    active = _Chunk(out, "os", table, len(chunks), ordinal, totals, limits)
++                active.write(data)
++                ordinal += 1
++            if active is not None:
++                chunks.append(active.close()); active = None
++            _require(ordinal == expected, "OS interface original table/work denominator differs")
++            tables[table] = {"records": ordinal, "chunks": chunks}
++            if progress is not None:
++                progress({"phase": "TABLE_COMPLETE", "table": table, "table_records": ordinal, **totals})
++        document = {"schema": "scar.partitioned-os-resource-fragment", "schema_version": 1,
++            "status": "PUBLISHED", "fragment": {"schema": "scar.os-resource-fragment", "schema_version": 2},
++            "scope": fragment.scope, "run": encode(fragment.run), "tables": tables,
++            "protocol_artifact": encode(fragment.protocol_artifact),
++            "protocol_document": json.loads(fragment.protocol_bytes), "summary": fragment.summary,
++            "totals": totals, "limits": {field.name: getattr(limits, field.name) for field in fields(limits)},
++            "line_columns": ["artifact", "line", "classification", "syscall", "reason"],
++            "observation_source_encoding": "artifact table index + one-based decompressed physical line",
++            "work_id_encoding": "observation.work_ticket is WorkTicketID.value, not wire or a canonical operation ID",
++            "validation": {"typed_constructor_validation_performed": True,
++                "full_execution_model_cross_reference_validation_performed": False,
++                "reader_semantic_revalidation_performed": False,
++                "quiescence_records_created": 0,
++                "stability_assumption": "original fragment remains stable through export"},
++            "whole_model_established": False, "first_stage_complete": False,
++            "transformation_authorized": False}
++        manifest_limits = replace(limits, max_record_bytes=limits.max_manifest_bytes,
++                                  max_chunk_decoded_bytes=max(limits.max_chunk_decoded_bytes, limits.max_manifest_bytes))
++        payload = _line(document, manifest_limits)
++        _require(len(payload) <= limits.max_manifest_bytes, "OS interface manifest byte budget exceeded")
++        temporary = out / (".manifest." + secrets.token_hex(16) + ".tmp")
++        with temporary.open("xb") as stream:
++            stream.write(payload); stream.flush(); os.fsync(stream.fileno())
++        os.link(temporary, out / "manifest.json")
++        try:
++            temporary.unlink()
++        except OSError:
++            pass
++        return {**document, "manifest_receipt": {"path": str(out / "manifest.json"),
++            "physical_sha256": hashlib.sha256(payload).hexdigest(), "physical_bytes": len(payload)}}
++    finally:
++        if active is not None and not active.closed:
++            active.close()
++
++
++class OSInterfacePartitions:
++    """Read only PUBLISHED schema2 transport, checking full chunks before yield.
++
++    Byte/ordinal verification does not validate Linux effects, canonical links,
++    or all cross-record references. Callers can decode selected typed records
++    through the existing public record_codec independently.
++    """
++    def __init__(self, manifest, *, budgets=None):
++        from scar.store.bundle_partitions import _budgets, _require
++        self.limits = _budgets(budgets)
++        path = Path(manifest).absolute()
++        if path.is_dir():
++            path = path / "manifest.json"
++        _require(path.is_file() and not path.is_symlink(), "OS interface manifest is not published/regular")
++        with path.open("rb") as stream:
++            payload = stream.read(self.limits.max_manifest_bytes + 1)
++        _require(len(payload) <= self.limits.max_manifest_bytes, "OS interface manifest read budget exceeded")
++        self.root, self.manifest = path.parent, strict_loads(payload.decode("utf-8"))
++        self.manifest_receipt = {"path": str(path), "physical_sha256": hashlib.sha256(payload).hexdigest(),
++                                 "physical_bytes": len(payload)}
++        m = self.manifest
++        _require(type(m) is dict and m.get("schema") == "scar.partitioned-os-resource-fragment"
++                 and type(m.get("schema_version")) is int and m["schema_version"] == 1
++                 and m.get("status") == "PUBLISHED"
++                 and m.get("fragment") == {"schema": "scar.os-resource-fragment", "schema_version": 2},
++                 "unsupported/unpublished OS interface storage/fragment version")
++        _require(type(m.get("tables")) is dict and set(m["tables"]) == set(_INTERFACE_TABLES)
++                 and m.get("whole_model_established") is False and m.get("first_stage_complete") is False
++                 and m.get("transformation_authorized") is False,
++                 "OS interface tables/authority differ from the explicit transport contract")
++        totals = {"records": 0, "chunks": 0, "decoded_bytes": 0, "stored_bytes": 0}
++        for table in _INTERFACE_TABLES:
++            descriptor, ordinal = m["tables"][table], 0
++            _require(type(descriptor) is dict and type(descriptor.get("chunks")) is list,
++                     "OS interface table descriptor is invalid")
++            for number, chunk in enumerate(descriptor["chunks"]):
++                _require(chunk.get("uri") == f"os/{table}/{number:06d}.jsonl.gz"
++                         and chunk.get("compression") == "gzip", "OS interface chunk path/compression differs")
++                for field in ("lines", "decoded_bytes", "physical_bytes"):
++                    _require(type(chunk.get(field)) is int and chunk[field] > 0, "OS chunk counters must be positive")
++                _require(type(chunk.get("first_ordinal")) is int and chunk["first_ordinal"] == ordinal
++                         and type(chunk.get("last_ordinal")) is int
++                         and chunk["last_ordinal"] == ordinal + chunk["lines"] - 1,
++                         "OS interface chunk ordinals are not contiguous")
++                for field in ("physical_sha256", "decoded_sha256"):
++                    _require(type(chunk.get(field)) is str and re.fullmatch(r"[0-9a-f]{64}", chunk[field]) is not None,
++                             "OS interface chunk SHA is invalid")
++                _require(chunk["physical_bytes"] <= self.limits.max_chunk_stored_bytes
++                         and chunk["decoded_bytes"] <= self.limits.max_chunk_decoded_bytes,
++                         "OS interface chunk exceeds its independent budget")
++                ordinal += chunk["lines"]; totals["chunks"] += 1
++                totals["decoded_bytes"] += chunk["decoded_bytes"]; totals["stored_bytes"] += chunk["physical_bytes"]
++            _require(type(descriptor.get("records")) is int and descriptor["records"] == ordinal,
++                     "OS interface table count differs from its chunk ranges")
++            totals["records"] += ordinal
++        _require(m.get("totals") == totals and all(type(value) is int for value in m["totals"].values()),
++                 "OS interface totals differ from original chunk declarations")
++        _require(totals["records"] <= self.limits.max_records and totals["chunks"] <= self.limits.max_chunks
++                 and totals["decoded_bytes"] <= self.limits.max_total_decoded_bytes
++                 and totals["stored_bytes"] <= self.limits.max_total_stored_bytes,
++                 "OS interface aggregate read budget exceeded")
++        protocol = (json.dumps(m["protocol_document"], sort_keys=True, separators=(",", ":"),
++                               ensure_ascii=False)).encode("utf-8")
++        _require(hashlib.sha256(protocol).hexdigest() == m["protocol_artifact"]["sha256"]
++                 and len(protocol) == m["protocol_artifact"]["size_bytes"], "OS protocol receipt differs")
++        for table, count in (("observations", m["summary"]["syscall_observations"]),
++                             ("line_classifications", m["summary"]["physical_lines"]),
++                             ("submissions", m["summary"]["interface_records"]),
++                             ("outcomes", m["summary"]["ordinary_return_outcomes"])):
++            _require(m["tables"][table]["records"] == count, "OS work/line source denominator differs")
++
++    def iter_records(self, table):
++        import io
++        from scar.store.bundle_partitions import BundlePartitions, _require
++        _require(table in _INTERFACE_TABLES, "unknown explicit OS interface table")
++        for chunk in self.manifest["tables"][table]["chunks"]:
++            # Reuse the existing stored+decoded SHA/size/line and safe-path
++            # reader. It verifies the entire bounded chunk before first yield.
++            decoded = BundlePartitions._chunk(self, chunk)
++            stream = io.BytesIO(decoded)
++            for index in range(chunk["lines"]):
++                raw = stream.readline(self.limits.max_record_bytes + 1)
++                _require(len(raw) <= self.limits.max_record_bytes and raw.endswith(b"\n"), "OS record byte bound exceeded")
++                row = strict_loads(raw.decode("utf-8"))
++                ordinal = chunk["first_ordinal"] + index
++                _require(type(row) is dict and set(row) == {"ordinal", "record"}
++                         and type(row["ordinal"]) is int and row["ordinal"] == ordinal,
++                         "OS record envelope/ordinal differs")
++                yield {**row, "locator": {"artifact": dict(chunk), "line": index + 1,
++                    "pointer_within_line": "/record", "manifest_receipt": dict(self.manifest_receipt)},
++                    "verification": {"whole_chunk_stored_sha_verified": True,
++                        "whole_chunk_decoded_sha_verified": True, "current_row_ordinal_verified": True,
++                        "record_semantics_revalidated": False, "whole_model_revalidated": False}}
++            _require(stream.read(1) == b"", "unexpected bytes after OS chunk records")
+ 
+ 
+-__all__ = ["OSResourceFragment", "import_os_resources"]
++__all__ = ["OSResourceFragment", "import_os_resources", "publish_os_interfaces", "OSInterfacePartitions"]

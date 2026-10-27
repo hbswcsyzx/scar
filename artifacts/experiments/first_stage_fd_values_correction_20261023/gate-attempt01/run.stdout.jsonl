@@ -1,0 +1,16 @@
+{"phase": "FD_VALUES_REQUALIFICATION_BEGIN", "r2_provider_handles": 35}
+{"phase": "FD_VALUES_REQUALIFIED", "ports": 2000}
+{"phase": "FD_VALUES_REQUALIFIED", "ports": 4000}
+{"phase": "FD_VALUES_REQUALIFIED", "ports": 6000}
+{"phase": "FD_VALUES_REQUALIFIED", "ports": 8000}
+{"phase": "FD_VALUES_REQUALIFIED", "ports": 10000}
+{"phase": "FD_VALUES_REQUALIFIED", "ports": 12000}
+{"phase": "EXPLICIT_SCHEMA2_PUBLISHED", "receipt": {"path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_fd_values_correction_20261023/gate-attempt01/result/manifest.json", "physical_bytes": 199812, "physical_sha256": "bb0b7b16d503ea09dc95fe728c8826c302b3f8c86c79243a34070aad936ea624"}}
+{"fd_ports": 12649, "phase": "ALL_PROVIDER_ROWS_PASS", "tables": {"birth_facts": 4, "frontiers": 0}}
+{"handles": 2000, "phase": "ALL_HANDLE_CODEC_AND_INVARIANTS"}
+{"handles": 4000, "phase": "ALL_HANDLE_CODEC_AND_INVARIANTS"}
+{"handles": 6000, "phase": "ALL_HANDLE_CODEC_AND_INVARIANTS"}
+{"handles": 8000, "phase": "ALL_HANDLE_CODEC_AND_INVARIANTS"}
+{"handles": 10000, "phase": "ALL_HANDLE_CODEC_AND_INVARIANTS"}
+{"handles": 12000, "phase": "ALL_HANDLE_CODEC_AND_INVARIANTS"}
+{"counts": {"base_handles": 12684, "new_container_bindings": 0, "projected_fd_ports": 12649, "raw_bytes_read_during_requalification": 0, "retained_provider_handles": 35, "unrefined_legacy_handles": 0}, "phase": "GATE_COMPLETE", "status": "PASS_FD_VALUES_ONLY_R2"}

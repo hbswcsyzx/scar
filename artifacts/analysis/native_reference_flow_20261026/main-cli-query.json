@@ -1,0 +1,130 @@
+{
+  "schema": "scar.native-reference-flow-query",
+  "schema_version": 1,
+  "index": {
+    "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/analysis/native_reference_flow_20261026/publication/index.json",
+    "sha256": "63030af42af9adfb883d9b2a04e2289800b08caa95bed0f443f4e118a8f1e6ca"
+  },
+  "summary": {
+    "source_nodes": 310412,
+    "operation_rows": 230818,
+    "native_ports": 1256501,
+    "reference_ports": 533490,
+    "input_reference_ports": 311399,
+    "output_reference_ports": 222091,
+    "ports_with_one_original_edge": 533490,
+    "ports_without_one_original_edge": 0,
+    "groups_with_input_and_output": 69362
+  },
+  "consumer": "opinst:native:636fde61a45803f11712767bc1cbf0b0ea3de13b14e0b27edc2d6071daea1612:eto:21",
+  "input_path": "0",
+  "flows": [
+    {
+      "relation": "reference_flow_candidate",
+      "status": "Inferred",
+      "output": {
+        "port_id": "eto:16:output:0",
+        "instance": {
+          "kind": "opinst",
+          "value": "native:636fde61a45803f11712767bc1cbf0b0ea3de13b14e0b27edc2d6071daea1612:eto:18",
+          "wire": "opinst:native:636fde61a45803f11712767bc1cbf0b0ea3de13b14e0b27edc2d6071daea1612:eto:18"
+        },
+        "definition": {
+          "kind": "opdef",
+          "value": "native:636fde61a45803f11712767bc1cbf0b0ea3de13b14e0b27edc2d6071daea1612:symbol:e7489389308fce563da1ba3f9824f22d6feabf65bedb5b7108c70c137a025fce",
+          "wire": "opdef:native:636fde61a45803f11712767bc1cbf0b0ea3de13b14e0b27edc2d6071daea1612:symbol:e7489389308fce563da1ba3f9824f22d6feabf65bedb5b7108c70c137a025fce"
+        },
+        "source_ordinal": 16,
+        "direction": "output",
+        "path": [
+          0
+        ],
+        "source_locator": "/outputs/values/0",
+        "formal_slot": {
+          "kind": "slot",
+          "value": "native:636fde61a45803f11712767bc1cbf0b0ea3de13b14e0b27edc2d6071daea1612:symbol:e7489389308fce563da1ba3f9824f22d6feabf65bedb5b7108c70c137a025fce:schema:output_slots:0",
+          "wire": "slot:native:636fde61a45803f11712767bc1cbf0b0ea3de13b14e0b27edc2d6071daea1612:symbol:e7489389308fce563da1ba3f9824f22d6feabf65bedb5b7108c70c137a025fce:schema:output_slots:0"
+        },
+        "formal_status": "QUALIFIED",
+        "kind": "TENSOR",
+        "provider_type": "Tensor(float)",
+        "provider_reference": "native:636fde61a45803f11712767bc1cbf0b0ea3de13b14e0b27edc2d6071daea1612:tensor-token:19",
+        "descriptor_id": "d38d15147c00358219c47ec3f7319db1bbd99b1ef205d55879f3096122dbcbd6",
+        "evidence_edge_id": "native:636fde61a45803f11712767bc1cbf0b0ea3de13b14e0b27edc2d6071daea1612:edge:0"
+      },
+      "input": {
+        "port_id": "eto:17:input:0",
+        "instance": {
+          "kind": "opinst",
+          "value": "native:636fde61a45803f11712767bc1cbf0b0ea3de13b14e0b27edc2d6071daea1612:eto:21",
+          "wire": "opinst:native:636fde61a45803f11712767bc1cbf0b0ea3de13b14e0b27edc2d6071daea1612:eto:21"
+        },
+        "definition": {
+          "kind": "opdef",
+          "value": "native:636fde61a45803f11712767bc1cbf0b0ea3de13b14e0b27edc2d6071daea1612:symbol:7f4ecb457f5d2688c78a982ed322a7cfae1fa67fa26259164a595bd886cf6137",
+          "wire": "opdef:native:636fde61a45803f11712767bc1cbf0b0ea3de13b14e0b27edc2d6071daea1612:symbol:7f4ecb457f5d2688c78a982ed322a7cfae1fa67fa26259164a595bd886cf6137"
+        },
+        "source_ordinal": 17,
+        "direction": "input",
+        "path": [
+          0
+        ],
+        "source_locator": "/inputs/values/0",
+        "formal_slot": {
+          "kind": "slot",
+          "value": "native:636fde61a45803f11712767bc1cbf0b0ea3de13b14e0b27edc2d6071daea1612:symbol:7f4ecb457f5d2688c78a982ed322a7cfae1fa67fa26259164a595bd886cf6137:schema:input_slots:0",
+          "wire": "slot:native:636fde61a45803f11712767bc1cbf0b0ea3de13b14e0b27edc2d6071daea1612:symbol:7f4ecb457f5d2688c78a982ed322a7cfae1fa67fa26259164a595bd886cf6137:schema:input_slots:0"
+        },
+        "formal_status": "QUALIFIED",
+        "kind": "TENSOR",
+        "provider_type": "Tensor(float)",
+        "provider_reference": "native:636fde61a45803f11712767bc1cbf0b0ea3de13b14e0b27edc2d6071daea1612:tensor-token:19",
+        "descriptor_id": "d38d15147c00358219c47ec3f7319db1bbd99b1ef205d55879f3096122dbcbd6",
+        "evidence_edge_id": "native:636fde61a45803f11712767bc1cbf0b0ea3de13b14e0b27edc2d6071daea1612:edge:1"
+      },
+      "output_edge": {
+        "artifact": {
+          "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/native_inputs_full_20261026/native-import/native/bundle-partitions/manifest.json",
+          "sha256": "3a2a80d64ff7e67d72545aefe0154b0f48fa18a855847005675221c86954c29b",
+          "size_bytes": 73304,
+          "schema": "scar.partitioned-ir-bundle"
+        },
+        "edge": "native:636fde61a45803f11712767bc1cbf0b0ea3de13b14e0b27edc2d6071daea1612:edge:0"
+      },
+      "input_edge": {
+        "artifact": {
+          "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/native_inputs_full_20261026/native-import/native/bundle-partitions/manifest.json",
+          "sha256": "3a2a80d64ff7e67d72545aefe0154b0f48fa18a855847005675221c86954c29b",
+          "size_bytes": 73304,
+          "schema": "scar.partitioned-ir-bundle"
+        },
+        "edge": "native:636fde61a45803f11712767bc1cbf0b0ea3de13b14e0b27edc2d6071daea1612:edge:1"
+      },
+      "provider_reference": "native:636fde61a45803f11712767bc1cbf0b0ea3de13b14e0b27edc2d6071daea1612:tensor-token:19",
+      "descriptor_id": "d38d15147c00358219c47ec3f7319db1bbd99b1ef205d55879f3096122dbcbd6",
+      "ordering_basis": "ETO_SOURCE_ORDINAL_ONLY",
+      "schema_annotation_basis": "ORIGINAL_DEFINITION_AND_FORMAL_SLOT_REFERENCES",
+      "content_identity": "NOT_ASSERTED",
+      "logical_version": null,
+      "alias_boundary": "UNKNOWN",
+      "write_boundary": "UNKNOWN",
+      "effects_boundary": "UNKNOWN",
+      "readiness_boundary": "UNKNOWN",
+      "unknowns": [
+        "same_provider_reference_does_not_establish_same_tensor_contents",
+        "source_ordinal_is_an_ordered_locator_not_happens_before_or_completion_proof",
+        "unique_producer_and_causal_def_use_are_not_proved",
+        "logical_value_or_content_version_is_not_created",
+        "schema_alias_write_and_native_effects_are_not_resolved_as_edge_proofs",
+        "storage_region_and_device_readiness_are_unknown"
+      ]
+    }
+  ],
+  "matched_candidates": 1,
+  "ordering_basis": "ETO_SOURCE_ORDINAL_ONLY",
+  "qualification": "SAME_PROVIDER_REFERENCE_AND_DESCRIPTOR_CANDIDATES",
+  "content_versions_or_causal_def_use_proved": false,
+  "whole_model_established": false,
+  "transformation_authorized": false,
+  "elapsed_s": 1.6776919270050712
+}

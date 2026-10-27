@@ -1,0 +1,18 @@
+{
+  "status": "PASS",
+  "scope": "lossless retention preserves exact Run/Process/Thread records",
+  "counts": {
+    "verified_raw_bytes": 627001665,
+    "artifact_members": 262,
+    "os_artifacts": 253,
+    "os_lines": 720049,
+    "processes": 5,
+    "threads": 252
+  },
+  "retention": {
+    "mode": "lossless_archive",
+    "archive_sha256": "c73a4e9b6811ab4e7c63827dab8490299ced35134330e4f813d234cda0b9e260",
+    "gzip_names_inferred": false
+  },
+  "whole_model_established": false
+}

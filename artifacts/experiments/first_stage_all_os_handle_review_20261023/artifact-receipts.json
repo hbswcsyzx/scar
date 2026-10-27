@@ -1,0 +1,108 @@
+{
+  "files": [
+    {
+      "bytes": 1267,
+      "path": "artifacts/experiments/first_stage_all_os_handle_review_20261023/README.md",
+      "sha256": "14719792c401c1988dd006148269256302ac3ba4079a5584941dd820284585af"
+    },
+    {
+      "bytes": 8435,
+      "path": "artifacts/experiments/first_stage_all_os_handle_review_20261023/boundaries.json",
+      "sha256": "05ec82f7207baa707e7a4e262c8a2ccd9dbefc3ed40542716e03d57e56398d50"
+    },
+    {
+      "bytes": 3741,
+      "path": "artifacts/experiments/first_stage_all_os_handle_review_20261023/boundaries.py",
+      "sha256": "d6fe59c5d4d1c890035b89f6e29285a62a969a85f5089ef86521629ce876be85"
+    },
+    {
+      "bytes": 0,
+      "path": "artifacts/experiments/first_stage_all_os_handle_review_20261023/boundaries.stderr.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 63,
+      "path": "artifacts/experiments/first_stage_all_os_handle_review_20261023/boundaries.stdout.json",
+      "sha256": "9d4b165367dc82091100f0ca6de39076c6372cbf880d6df99b42e9468e089844"
+    },
+    {
+      "bytes": 9994,
+      "path": "artifacts/experiments/first_stage_all_os_handle_review_20261023/catalog.py",
+      "sha256": "5206d2122a81f4177c207f81ccf39f9187943f8b7e23ea6cb04f41eff580ef75"
+    },
+    {
+      "bytes": 342,
+      "path": "artifacts/experiments/first_stage_all_os_handle_review_20261023/completion-receipt.json",
+      "sha256": "222c41d6b29500251d8286da210a51d36a65c8456d99f957d3822b3b3b0f7a67"
+    },
+    {
+      "bytes": 285792,
+      "path": "artifacts/experiments/first_stage_all_os_handle_review_20261023/handles.jsonl.gz",
+      "sha256": "52928c3f5069f701d75f46eb9754a3001dae4cbc556d1efc9616f55630be1c40"
+    },
+    {
+      "bytes": 1909,
+      "path": "artifacts/experiments/first_stage_all_os_handle_review_20261023/producer.json",
+      "sha256": "7b77bc5e83ee1c00d83a785bf1fe7d45fec9971b481d71b03cda8b49865d5aa3"
+    },
+    {
+      "bytes": 2901,
+      "path": "artifacts/experiments/first_stage_all_os_handle_review_20261023/representatives.json",
+      "sha256": "8e4e672d5f87791c1eb0268d39d88e9b13e5ebff20fcd154252f4cccb9010121"
+    },
+    {
+      "bytes": 2861,
+      "path": "artifacts/experiments/first_stage_all_os_handle_review_20261023/representatives.py",
+      "sha256": "ed80941f22f97e990707a69c64c189dd0771c142fcbedc3a7d9c8ccef16527fb"
+    },
+    {
+      "bytes": 0,
+      "path": "artifacts/experiments/first_stage_all_os_handle_review_20261023/representatives.stderr.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 73,
+      "path": "artifacts/experiments/first_stage_all_os_handle_review_20261023/representatives.stdout.json",
+      "sha256": "ed4c53aa574c70384de026b61b790313ab563d244a0c6a7efd08e21b01a21045"
+    },
+    {
+      "bytes": 4847,
+      "path": "artifacts/experiments/first_stage_all_os_handle_review_20261023/route-costs.json",
+      "sha256": "1aede7ab89bc5f3eba6bc6d7a7dc72e95fddbdd5a0fc80fc843f621382fe4333"
+    },
+    {
+      "bytes": 492,
+      "path": "artifacts/experiments/first_stage_all_os_handle_review_20261023/run.sh",
+      "sha256": "08a4a00d4356c2f5202b1ee6bd9b7862b446efb5b2f136f39fa72071ff92db50"
+    },
+    {
+      "bytes": 0,
+      "path": "artifacts/experiments/first_stage_all_os_handle_review_20261023/run.stderr.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 460,
+      "path": "artifacts/experiments/first_stage_all_os_handle_review_20261023/run.stdout.jsonl",
+      "sha256": "2260567ccc47e406e75a33d0751eef131f126920ead1e7f2fafadf200c9cb7c5"
+    },
+    {
+      "bytes": 838,
+      "path": "artifacts/experiments/first_stage_all_os_handle_review_20261023/run.time.txt",
+      "sha256": "8231bda791915279fa55645a239a819326b4a6c3bda2203415c0328f43e4e21f"
+    },
+    {
+      "bytes": 9490,
+      "path": "artifacts/experiments/first_stage_all_os_handle_review_20261023/summary.json",
+      "sha256": "9ddc35665652848fc136f7eb15979dd33e416cd56701e9899671b04a897ebeee"
+    },
+    {
+      "bytes": 10862,
+      "path": "docs/ALL_OS_HANDLE_OWNERSHIP_REVIEW.md",
+      "sha256": "2aee2b6fb8487a4b6e0a3e816e396cef873ee52ce296611d62011a4f1d934d3f"
+    }
+  ],
+  "full_execution_model_semantics": "OPEN",
+  "schema": "scar.all-os-handle-review-artifact-receipts",
+  "schema_version": 1,
+  "scope": "read-only small tables and two small raw representatives, no source projection implementation"
+}

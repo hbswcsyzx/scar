@@ -1,0 +1,21 @@
+{
+  "status": "B_SYNTAX_API_PROFILE_CHECK_PASS",
+  "syntax_files": [
+    "scar/ir/program/module_entries.py",
+    "scar/analysis/program_lowering.py",
+    "scar/analysis/structured_lowering.py",
+    "scar/analysis/environment_lowering.py",
+    "scar/analysis/source_module_lowering.py",
+    "scar/analysis/source_module_validation.py"
+  ],
+  "default_library_capability_count": 3,
+  "overlay_has_root_scope_no_interface": true,
+  "constants_type": "tuple[existing CodeConstantSource,...]",
+  "shared_dispatch_functions": [
+    "dispatch_source_expression",
+    "dispatch_source_condition"
+  ],
+  "real_source_lowerings": 0,
+  "code_witness_loaded": false,
+  "source_or_runtime_proof": false
+}

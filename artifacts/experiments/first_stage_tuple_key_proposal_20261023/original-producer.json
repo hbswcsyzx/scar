@@ -1,0 +1,17 @@
+{
+  "schema": "scar.isolated-source-proposal",
+  "schema_version": 1,
+  "current_worktree_production_modified": false,
+  "originals": [
+    {
+      "path": "scar/analysis/source_slice_lowering.py",
+      "sha256": "1c6ee6a3b353a7263c94081e6d3ea35c84559ffa35354fc089375becb681b5a6",
+      "bytes": 9719
+    },
+    {
+      "path": "scar/analysis/source_language_validation.py",
+      "sha256": "59ee23fc1cccc0a1d134679a5b48e6342c58d02d8c04d8bcae75b67479e8fef0",
+      "bytes": 20143
+    }
+  ]
+}

@@ -1,0 +1,10 @@
+{
+  "command": [
+    "/home/zyf/miniconda3/envs/lewm/bin/python",
+    "-B",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/stream_interfaces_main_20261026/joint03/program/stream_program.py",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/stream_interfaces_main_20261026/joint03/output.bin"
+  ],
+  "returncode": 0,
+  "wall_s": 23.386962136020884
+}

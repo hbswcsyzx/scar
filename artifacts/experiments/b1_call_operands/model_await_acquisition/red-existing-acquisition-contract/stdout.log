@@ -1,0 +1,22 @@
+.F                                                                       [100%]
+=================================== FAILURES ===================================
+_____ test_general_await_cannot_return_a_known_generator_coroutine_handle ______
+
+    def test_general_await_cannot_return_a_known_generator_coroutine_handle():
+        graph, details = await_acquisition_program(
+            result_kind=ResumableKind.GENERATOR_COROUTINE)
+        require_valid(_without_protocol_records(graph))
+    
+        call = details["await_call"]["operation"]
+        assert details["create"].operation == call.id
+        assert details["create"].handle_result == NormalResultPort(0)
+        assert details["advance_receiver"].value == details["iterator_value"]
+    
+>       assert "protocol_await_return_qualification" in _codes(graph)
+E       AssertionError: assert 'protocol_await_return_qualification' in set()
+E        +  where set() = _codes(ProgramGraph(root=RegionID(value='continuation'), regions=(Region(id=RegionID(value='continuation'), label='declared o...ostTerminal(operation=OperationID(value='continuation.extract.error')),))), protocol_bindings=(), exception_matches=()))
+
+tests/unit/test_program_await_acquisition.py:54: AssertionError
+=========================== short test summary info ============================
+FAILED tests/unit/test_program_await_acquisition.py::test_general_await_cannot_return_a_known_generator_coroutine_handle
+1 failed, 1 passed in 0.97s

@@ -1,0 +1,159 @@
+--- original-frozen/program_composition.py
++++ consumer/program_composition.py
+@@ -54,7 +54,7 @@
+                       separators=(",", ":"), allow_nan=False).encode("utf-8")
+ 
+ 
+-def _read(path: Path, limit: int) -> tuple[dict, dict]:
++def _read(path: Path, limit: int, *, _decoded_identity=None) -> tuple[dict, dict]:
+     if type(limit) is not int or limit < 1:
+         raise ValueError("byte budget must be a positive exact integer")
+     if path.is_symlink() or not path.is_file() or path.stat().st_size > limit:
+@@ -72,6 +72,8 @@
+     document = strict_loads(payload.decode("utf-8"))
+     if type(document) is not dict:
+         raise ValueError("input must be a JSON object")
++    if _decoded_identity is not None:
++        _decoded_identity.update(sha256=hashlib.sha256(payload).hexdigest())
+     return document, {
+         "path": str(path.resolve()), "raw_sha256": hashlib.sha256(raw).hexdigest(),
+         "raw_bytes": len(raw), "decoded_bytes": len(payload),
+@@ -103,7 +105,8 @@
+         path = Path(path)
+         if path.is_dir():
+             path = path / "manifest.json"
+-        document, self.receipt = _read(path, max_input_bytes)
++        self._decoded_identity = {}
++        document, self.receipt = _read(path, max_input_bytes, _decoded_identity=self._decoded_identity)
+         self.partitions = None
+         self.document = None
+         self._files = OrderedDict()
+@@ -176,6 +179,33 @@
+                 graph_locator = {"artifact": artifact, "pointer": "#/graph", "namespace": namespace}
+         return {"inventory_locator": header, "graph_locator": graph_locator,
+                 "metadata_locator": metadata_locator, "namespace": namespace}
++
++    def qualified_body_locators(self, file_index, body_index, graph_document):
++        """Explicit v4 namespace; the legacy locator/receipt API is unchanged."""
++        if self.partitions is not None:
++            return self.body_locators(file_index, body_index, graph_document)
++        if any(type(value) is not int or value < 0 for value in (file_index, body_index)):
++            raise ValueError("qualified monolith body needs nonnegative original indices")
++        file, body = self.file(file_index), self.body(file_index, body_index)
++        if body["graph"] is None or body["graph"] != graph_document or body["metadata"] is None:
++            raise ValueError("qualified monolith graph differs from its original body")
++        definitions = [row for row in file["definitions"] if row["id"] == body["definition"]]
++        if len(definitions) != 1:
++            raise ValueError("qualified monolith body has no unique original definition")
++        original = self.body_locators(file_index, body_index, graph_document)
++        artifact = {"uri": self.receipt["path"], "physical_sha256": self.receipt["raw_sha256"],
++            "physical_bytes": self.receipt["raw_bytes"], "decoded_bytes": self.receipt["decoded_bytes"],
++            "decoded_sha256": self._decoded_identity["sha256"],
++            "representation": "scar.program-inventory/" + str(self.document["schema_version"])}
++        namespace = {"artifact": {"uri": artifact["uri"], "decoded_sha256": artifact["decoded_sha256"]},
++            "representation": "scar.program-graph/" + str(graph_document["schema_version"]),
++            "record_pointer": original["graph_locator"]["pointer"],
++            "body": {"definition": body["definition"], "source": definitions[0]["source"],
++                     "entry": body["metadata"]["entry"]}}
++        return {"inventory_locator": {"artifact": artifact, "pointer": original["inventory_locator"]["pointer"]},
++            "graph_locator": {"artifact": artifact, "pointer": original["graph_locator"]["pointer"], "namespace": namespace},
++            "metadata_locator": {"artifact": artifact, "pointer": original["metadata_locator"]["pointer"]},
++            "namespace": namespace}
+ 
+ 
+ def _definition_key(snapshot, identity):
+@@ -1381,6 +1411,14 @@
+     def inventory_body_locators(self, file_index, body_index, graph_document=None):
+         return self._inventory.body_locators(file_index, body_index, graph_document)
+ 
++    def qualified_inventory_body_locators(self, file_index, body_index, graph_document):
++        """Exact monolith artifact/graph namespace for the explicit v4 path.
++
++        The original locator API and all legacy receipts remain unchanged.
++        Decoded SHA was measured while reading the original inventory payload.
++        """
++        return self._inventory.qualified_body_locators(file_index, body_index, graph_document)
++
+     def _row(self, index: int) -> dict:
+         if type(index) is not int or not 0 <= index < len(self.document["files"]):
+             raise ValueError("file index is outside the composition")
+--- original-frozen/source_invocations.py
++++ consumer/source_invocations.py
+@@ -412,6 +412,11 @@
+                     locators = composition.inventory_body_locators(file_index, body_index, original["graph"])
+                     _need(all(body.get(name) == value for name, value in locators.items()),
+                           "composition body locator/namespace differs from original source shard/checkpoint")
++                    reference.update({"canonical_locator": locators["graph_locator"],
++                        "inventory_locator": locators["inventory_locator"],
++                        "metadata_locator": locators["metadata_locator"], "namespace": locators["namespace"]})
++                elif composition.has_source_entry_publication:
++                    locators = composition.qualified_inventory_body_locators(file_index, body_index, original["graph"])
+                     reference.update({"canonical_locator": locators["graph_locator"],
+                         "inventory_locator": locators["inventory_locator"],
+                         "metadata_locator": locators["metadata_locator"], "namespace": locators["namespace"]})
+@@ -772,10 +777,10 @@
+ 
+ def bind_source_invocations(composition: CompositionIndex, coordinates: CaptureCoordinates,
+                             trace_directory, out_dir, *, call_budget=CallEdgeBudget(),
+-                            witness_mode="same_capture"):
++                            witness_mode="same_capture", seed_verification_budget=None):
+     """Independently read raw frames through the unchanged public contract."""
+     return _bind_source_invocations(composition, coordinates, trace_directory, out_dir,
+-        call_budget=call_budget, witness_mode=witness_mode)
++        call_budget=call_budget, witness_mode=witness_mode, seed_verification_budget=seed_verification_budget)
+ 
+ 
+ def _bind_source_invocations_owned(owner, composition, coordinates, trace_directory, out_dir, **kwargs):
+@@ -786,7 +791,7 @@
+ 
+ def _bind_source_invocations(composition: CompositionIndex, coordinates: CaptureCoordinates,
+                              trace_directory, out_dir, *, call_budget=CallEdgeBudget(),
+-                             witness_mode="same_capture", _owner=None):
++                             witness_mode="same_capture", seed_verification_budget=None, _owner=None):
+     """Reuse exact source witnesses and bind every recorded invocation.
+ 
+     There is no target execution or compiler/source replay.  With an inventory
+@@ -803,7 +808,12 @@
+                       3 if composition.has_source_attachments else 2 if composition.partitioned else 1)
+     _need(source_version != 4 or witness_mode == "same_capture",
+           "qualified entry publication currently requires the ordinary exact same-capture binder")
++    _need(seed_verification_budget is None or source_version == 4
++          and type(seed_verification_budget) is CallEdgeBudget,
++          "independent seed metadata budget requires the explicit v4 contract")
+     call_budget.__post_init__()
++    seed_budget = call_budget if seed_verification_budget is None else seed_verification_budget
++    seed_budget.__post_init__()
+     output = Path(out_dir).resolve()
+     _need(not output.exists() and not output.is_symlink(), "output directory already exists")
+     directory = Path(trace_directory).resolve()
+@@ -813,7 +823,7 @@
+           "inventory lacks its original project root")
+     root = discovery["project_root"]
+     seed_document = composition.inventory_component("call_sources")
+-    seed_model = (CallSourceSeedReport._decode_replay_input(seed_document, verification_budget=call_budget)
++    seed_model = (CallSourceSeedReport._decode_replay_input(seed_document, verification_budget=seed_budget)
+                   if seed_document is not None else None)
+     if seed_model is not None:
+         _need(seed_model.project_root == root, "source witness project root differs from inventory discovery")
+@@ -933,6 +943,12 @@
+                 binding_document["attachment_source_match_rule"] = "EXACT_CAPTURED_CODE_STATIC_REUSE_V1"
+             if source_version == 4:
+                 binding_document["source_body_reference_format"] = "scar.qualified-source-body-reference.v1"
++                binding_document.update(source_seed_verification_budget=encode(seed_budget), call_budget=encode(call_budget),
++                    budget_roles={"source_seed_verification_budget": "original seed metadata decode ceiling only; no raw/source I/O grant",
++                                  "call_budget": "actual fresh raw scan and current source guards"},
++                    actual_call_scan={"raw_bytes": sum(file.raw_bytes for file in scanned.files),
++                                      "lines": sum(file.lines for file in scanned.files),
++                                      "captured_codes": len(scanned.captures), "entered_groups": len(sink.groups)})
+         if _owner is not None:
+             binding_document.update(raw_reader_rule="OWNED_CURRENT_OPERAND_FRAME_SCAN_V1",
+                 same_run_source_proof=_owner.proof.receipt())
+@@ -992,6 +1008,8 @@
+                 report.update(source_body_reference_format="scar.qualified-source-body-reference.v1",
+                     attachment_scope="original qualified source/body fragments; unchanged project inventory",
+                     body_association_scope="complete current captured code to original source definition and admitted body; no callable/environment proof")
++                report.update({name: binding_document[name] for name in
++                    ("source_seed_verification_budget", "budget_roles", "actual_call_scan")})
+             if witness_mode == "reused_code":
+                 report["attachment_source_match_rule"] = "EXACT_CAPTURED_CODE_STATIC_REUSE_V1"
+         if _owner is not None:

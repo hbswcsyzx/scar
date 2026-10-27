@@ -1,0 +1,81 @@
+{
+  "A": {
+    "native_coroutine_self_no_wrapper_complete_definition_and_supplied_capture": [
+      "tests/unit/test_program_await_native_and_general_sources.py::test_native_coroutine_self_no_wrapper_has_a_complete_zero_cut_supplied_chain"
+    ],
+    "generator_coroutine_self_and_ordinary_generator_not_confused": [
+      "tests/unit/test_program_await_direct_qualification.py::test_generator_coroutine_self_await_keeps_get_body_return_and_both_final_completions",
+      "tests/unit/test_program_await_direct_qualification.py::test_ordinary_generator_next_is_a_legal_body_drive_without_self_await_qualification",
+      "tests/unit/test_program_await_direct_qualification.py::test_known_ordinary_generator_cannot_continue_as_a_direct_self_await_source"
+    ],
+    "general_lookup_call_and_ordinary_generator_return_accepted": [
+      "tests/unit/test_program_await_general.py::test_general_await_expands_real_lookup_call_qualification_and_iterator_return",
+      "tests/unit/test_program_await_acquisition.py::test_general_await_normal_result_can_be_a_known_generator_iterator",
+      "tests/unit/test_program_await_qualification_flow.py::test_generator_candidate_keeps_the_same_check_and_can_accept"
+    ],
+    "known_bad_general_coroutine_generator_coroutine_and_builtin_returns_rejected": [
+      "tests/unit/test_program_await_acquisition.py::test_general_await_cannot_return_a_known_generator_coroutine_handle",
+      "tests/unit/test_program_await_native_and_general_sources.py::test_general_await_known_coroutine_return_cannot_be_continued_as_an_iterator",
+      "tests/unit/test_program_await_native_and_general_sources.py::test_general_await_exact_builtin_return_cannot_be_continued_as_an_iterator"
+    ],
+    "unknown_return_is_not_known_bad_and_source_deletion_budget_preserve_obligations": [
+      "tests/unit/test_program_await_qualification_flow.py::test_unknown_method_result_does_not_make_its_accepting_path_infeasible",
+      "tests/unit/test_program_await_native_and_general_sources.py::test_general_await_exact_builtin_return_cannot_be_continued_as_an_iterator",
+      "tests/unit/test_execution_await_general_final.py::test_missing_first_acquisition_join_or_completion_cannot_borrow_the_other_instance",
+      "tests/unit/test_execution_await_general_final.py::test_tiny_budget_retains_canonical_source_and_marks_unchecked_actual_chain"
+    ],
+    "explicit_wrapper_keeps_its_distinct_owner_and_source": [
+      "tests/unit/test_program_await_wrapper.py::test_native_wrapper_has_real_constructor_getter_and_nested_driver_ports",
+      "tests/unit/test_execution_await_wrapper.py::test_explicit_native_wrapper_routes_distinct_w_to_held_b_without_copy_union",
+      "tests/unit/test_execution_await_wrapper_final.py::test_native_wrapper_two_instances_reach_their_own_current_final_ports"
+    ]
+  },
+  "F12": {
+    "native_coroutine_self_no_wrapper_complete_definition_and_supplied_capture": [
+      "tests/unit/test_program_await_native_and_general_sources.py::test_native_coroutine_self_no_wrapper_has_a_complete_zero_cut_supplied_chain"
+    ],
+    "generator_coroutine_self_and_ordinary_generator_not_confused": [
+      "tests/unit/test_program_await_direct_qualification.py::test_generator_coroutine_self_await_keeps_get_body_return_and_both_final_completions",
+      "tests/unit/test_program_await_direct_qualification.py::test_ordinary_generator_next_is_a_legal_body_drive_without_self_await_qualification",
+      "tests/unit/test_program_await_direct_qualification.py::test_known_ordinary_generator_cannot_continue_as_a_direct_self_await_source"
+    ],
+    "general_lookup_call_and_ordinary_generator_return_accepted": [
+      "tests/unit/test_program_await_general.py::test_general_await_expands_real_lookup_call_qualification_and_iterator_return",
+      "tests/unit/test_program_await_acquisition.py::test_general_await_normal_result_can_be_a_known_generator_iterator",
+      "tests/unit/test_program_await_qualification_flow.py::test_generator_candidate_keeps_the_same_check_and_can_accept"
+    ],
+    "known_bad_general_coroutine_generator_coroutine_and_builtin_returns_rejected": [
+      "tests/unit/test_program_await_acquisition.py::test_general_await_cannot_return_a_known_generator_coroutine_handle",
+      "tests/unit/test_program_await_native_and_general_sources.py::test_general_await_known_coroutine_return_cannot_be_continued_as_an_iterator",
+      "tests/unit/test_program_await_native_and_general_sources.py::test_general_await_exact_builtin_return_cannot_be_continued_as_an_iterator"
+    ],
+    "unknown_return_is_not_known_bad_and_source_deletion_budget_preserve_obligations": [
+      "tests/unit/test_program_await_qualification_flow.py::test_unknown_method_result_does_not_make_its_accepting_path_infeasible",
+      "tests/unit/test_program_await_native_and_general_sources.py::test_general_await_exact_builtin_return_cannot_be_continued_as_an_iterator",
+      "tests/unit/test_execution_await_general_final.py::test_missing_first_acquisition_join_or_completion_cannot_borrow_the_other_instance",
+      "tests/unit/test_execution_await_general_final.py::test_tiny_budget_retains_canonical_source_and_marks_unchecked_actual_chain"
+    ],
+    "explicit_wrapper_keeps_its_distinct_owner_and_source": [
+      "tests/unit/test_program_await_wrapper.py::test_native_wrapper_has_real_constructor_getter_and_nested_driver_ports",
+      "tests/unit/test_execution_await_wrapper.py::test_explicit_native_wrapper_routes_distinct_w_to_held_b_without_copy_union",
+      "tests/unit/test_execution_await_wrapper_final.py::test_native_wrapper_two_instances_reach_their_own_current_final_ports"
+    ],
+    "exact_lookup_call_qualification_and_all_failure_prefixes": [
+      "tests/unit/test_program_await_general.py::test_general_await_expands_real_lookup_call_qualification_and_iterator_return",
+      "tests/unit/test_program_await_outcome_failures.py::test_lookup_call_and_bool_rejection_failures_keep_distinct_prefixes_and_slots",
+      "tests/unit/test_execution_await_outcome_failures.py::test_expanded_failure_uses_exact_helper_completion_parent_raise_and_consumers"
+    ],
+    "wrong_receiver_bool_path_and_parent_slot_rejected": [
+      "tests/unit/test_program_continuation_connections.py::test_await_call_cannot_use_same_typed_root_instead_of_its_lookup_result",
+      "tests/unit/test_program_await_qualification_flow.py::test_an_unrelated_bool_cannot_supply_the_qualification_branch",
+      "tests/unit/test_program_await_qualification_flow.py::test_a_side_check_cannot_qualify_the_path_that_bypasses_it",
+      "tests/unit/test_execution_await_qualification_flow.py::test_captured_acceptance_of_known_bad_candidate_is_a_protocol_contradiction",
+      "tests/unit/test_program_await_outcome_failures.py::test_parent_raise_packet_cannot_be_declared_from_a_state_completion_slot"
+    ],
+    "missing_deletion_and_shared_budget_keep_original_obligations": [
+      "tests/unit/test_execution_await_failure_cleanup.py::test_missing_one_instances_bridge_never_uses_the_siblings_helper_or_current_packet",
+      "tests/unit/test_execution_await_outcome_failures.py::test_deleted_source_raise_row_and_receipt_do_not_delete_its_dynamic_obligation",
+      "tests/unit/test_execution_await_outcome_failures.py::test_budget_cut_keeps_static_failure_denominator_and_cursor"
+    ]
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "dispatch_order": "FILE_GROUPED_V1",
+  "max_input_stored_plus_decoded_bytes": 4000000000,
+  "old_metadata_preview": "unchanged original call-weight order; no SourceFrontendPlan was frozen",
+  "previous_10GB_proposal": "NOT_APPLIED",
+  "producer_sha256": "4c1e6b7ee1a5cbada64e6017412840944ae3048a17ec7a188080fb86f0960c33",
+  "selection": "same exact50 call-weight selected keys, grouped by first file appearance and original within-file order",
+  "source_bytes_ceiling_unchanged": 2000000,
+  "status": "ROOT_APPROVED_NOT_WORKER_RUN"
+}

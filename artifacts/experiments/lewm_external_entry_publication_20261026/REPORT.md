@@ -1,0 +1,5 @@
+Root确认session49787实际exit1。普通plain858构造器在核历史schema2 revision时因缺原inventory file0而失败，未进入schema3 catalog/出版。首缺URI为 `first_stage_full_inventory_restored_20261023/result/sources/00000.json.gz`，stored33,093B、SHA b057f37bc64c7bf4bfff1dcbfe2438ae887379deae547c5690539828c8fed102。原bound inventory manifest明确声明该文件；先前source858运行输入列表未包含它，恢复白名单未闭包。此为历史库存可用性失败，不能描述为schema3逻辑拒绝。
+
+producer失败收据32.744714930s；GNU33.69s、peak1,222,112KiB。实际stored+decoded1,247,613,049B，pending0、无预算拒。原726missing恢复212,670,116B完成并保原URI，无替换。没有publication manifest、CP2、独立factory或all-body query资格。
+
+原run/freeze/inputs/started/failure全部原样保留。后继resume02补原manifest声明引用，并完整重新走normal readers；它不追认本失败门。所有26成功SP5的后续出版资格仍须独立正常factory/query完成，原50窗口(26SUCCEEDED/7UNSUPPORTED/17NOT_ATTEMPTED)、817groups/100438历史calls不变。无lower/compile/target/current369749绑定，wholemodel/content/state/ready未闭合。

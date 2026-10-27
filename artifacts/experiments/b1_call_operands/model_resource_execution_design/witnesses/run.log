@@ -1,0 +1,53 @@
+{
+  "scope": "six real stdlib CPU/OS witnesses, not SCAR product or CUDA",
+  "cases": [
+    {
+      "case": "dup-open-offset-close",
+      "status": "PASS",
+      "first": "01",
+      "dup": "23",
+      "independent_open": "01",
+      "dup_after_other_handle_closed": "45"
+    },
+    {
+      "case": "descriptor-number-reuse",
+      "status": "PASS",
+      "descriptor": 3,
+      "new_read": "new",
+      "same_integer_is_not_same_lifetime": true
+    },
+    {
+      "case": "same-path-new-binding",
+      "status": "PASS",
+      "old_open_read": "012",
+      "new_open_read": "rep"
+    },
+    {
+      "case": "buffered-write-flush-fsync",
+      "status": "PASS",
+      "write_return": 3,
+      "before_flush_bytes": 0,
+      "after_flush_bytes": 3,
+      "fsync_returned": true,
+      "power_loss_durability_tested": false
+    },
+    {
+      "case": "host-submit-partial-failure",
+      "status": "PASS",
+      "returned_future_before_completion": true,
+      "cancel_running_return": false,
+      "failed_but_effect_retained": [
+        "written-before-failure"
+      ]
+    },
+    {
+      "case": "queued-cancellation-is-not-success",
+      "status": "PASS",
+      "done": true,
+      "cancelled": true,
+      "executed": []
+    }
+  ],
+  "status": "PASS",
+  "owned_temporary_removed": true
+}

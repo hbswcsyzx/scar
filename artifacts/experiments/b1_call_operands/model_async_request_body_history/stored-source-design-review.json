@@ -1,0 +1,33 @@
+{
+  "reviewer": "/root/cleanup_forward_review",
+  "kind": "read-only existing-contract audit; no interpreter, edits or Git mutation",
+  "conclusion": "A general object-field store payload to current state version to load-result relation is not yet expressed by the existing contracts.",
+  "evidence": [
+    {
+      "file": "scar/ir/program/bindings.py",
+      "relation": "BindingDefinition/BindingRead payload relations are for LocalBindingValue environment slots; binding_validation requires that type and constrains ordinary-call token transfer. They are not general heap-field bindings."
+    },
+    {
+      "file": "scar/ir/program/state_addresses.py",
+      "relation": "StateAddressRefinement has site, owner, path, mode and coverage; it has no stored payload Use or load own-result relation. StateAccess.reference identifies the access reference, not the stored payload."
+    },
+    {
+      "file": "scar/ir/execution/content_validation.py",
+      "relation": "The existing validator preserves content_state_version_unverified for Reference/access content; ContentRead alone does not establish correspondence to the current materialization version."
+    },
+    {
+      "file": "scar/ir/program/drivers.py",
+      "relation": "RequestAssociationRead names the current request input and exact body/latent output roles; it does not assert unchanged fields since Create."
+    }
+  ],
+  "required_design_decisions": [
+    "Reference the original access site, refinement effect ordinal, store owned payload Use and load own result; reuse original state SSA.",
+    "Define completion-specific NORMAL/RAISE establishment and partial-write invalidation, keeping result slots separate from landing positions.",
+    "Separate primitive storage slots from descriptors/custom/native access; names do not identify getter/setter behavior.",
+    "Keep alias writes, unknown calls/native effects, missing capture and budget truncation conservative; joins retain original guards, callers and complete source inventory.",
+    "CallEffectExpansion supplies an effect path but needs original stored-value relations to recover a payload source."
+  ],
+  "implementation_in_this_batch": false,
+  "automatic_stored_source_complete": false,
+  "transformation_authorized": false
+}

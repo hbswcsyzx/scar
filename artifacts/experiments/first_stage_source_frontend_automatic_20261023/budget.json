@@ -1,0 +1,13 @@
+{
+  "max_catalog_files": 4096,
+  "max_catalog_bodies": 100000,
+  "max_catalog_groups": 100000,
+  "max_dispatch_bodies": 12,
+  "max_source_files": 4,
+  "max_source_bytes": 16000000,
+  "max_operations_per_body": 4000,
+  "max_total_operations": 24000,
+  "max_record_bytes": 128000000,
+  "max_output_bytes": 128000000,
+  "max_elapsed_seconds": 180
+}

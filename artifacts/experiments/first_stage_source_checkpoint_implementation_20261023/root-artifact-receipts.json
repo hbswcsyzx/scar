@@ -1,0 +1,33 @@
+{
+  "files": [
+    {
+      "bytes": 1340,
+      "path": "freeze.json",
+      "sha256": "dd50d6169909219dff37a86271d6864699f15a0081f8dddc3d3d50984f5ba566"
+    },
+    {
+      "bytes": 12933,
+      "path": "narrow.patch",
+      "sha256": "29bf472052c1ffd9613a1e409252ae96e2464a991450eec49a89cb6ef402544f"
+    },
+    {
+      "bytes": 14906,
+      "path": "sources/call_operands.py",
+      "sha256": "12cb6a2301ebae6d2c41c93b3b29a827315f557ec998ad4352494dd93d264638"
+    },
+    {
+      "bytes": 28572,
+      "path": "sources/current_source_evidence.py",
+      "sha256": "a892d77ac41bedbc6dbee122ffcd29f99df35763346f77976b30933b4419539f"
+    },
+    {
+      "bytes": 54675,
+      "path": "sources/dispatch_sources.py",
+      "sha256": "039a57281a860d1d66aa5d4ebf36294fce7751c001065091789fea6d094c6cb7"
+    }
+  ],
+  "first_stage_complete": false,
+  "schema": "scar.root-artifact-receipts",
+  "schema_version": 1,
+  "snapshot_only": true
+}

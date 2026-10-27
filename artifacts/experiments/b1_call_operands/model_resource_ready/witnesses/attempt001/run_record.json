@@ -1,0 +1,18 @@
+{
+  "attempt": 1,
+  "recorded_at_utc": "2026-10-18 06:03:44 UTC",
+  "worktree_head": "2d6f1d44d81e36a3f0638d79a60d4f4c1c4312fc",
+  "command_file": "command.txt",
+  "exit_code": 0,
+  "failure": null,
+  "python": "3.14.7",
+  "torch": "2.13.0+cu132",
+  "numpy": "2.5.2",
+  "script_sha256": "542a80628e5c1046a06e23970bbd387f5f7f00a0e95a8a873510330e887f56da",
+  "command_sha256": "8bc99c6b13db8141a9f750ccbbc0a23ef722ba81d2af755d3800e67d40c81c8e",
+  "stdout_sha256": "cfbf90a3045649f4ad00f1ebf5ab7179455a780c186f6f34d01d582f4c21c014",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "result_sha256": "cfbf90a3045649f4ad00f1ebf5ab7179455a780c186f6f34d01d582f4c21c014",
+  "artifact_directory_ignored": true,
+  "final_git_status_note": "Workspace status also showed unrelated untracked docs/M1_RESOURCE_COVERAGE_PLAN.md, docs/M1_RESOURCE_READY_CONTRACT.md, and scar/ir/execution/coverage.py; this witness task wrote only ignored artifacts."
+}

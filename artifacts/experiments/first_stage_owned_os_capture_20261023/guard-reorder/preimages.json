@@ -1,0 +1,14 @@
+[
+  {
+    "bytes": 16698,
+    "path": "scar/trace/call_edges.py",
+    "sha256": "7e75e82557b73edd620c8c7fea01811aa0e16f4fa0963bebe6273a7e4fe97298",
+    "snapshot": "artifacts/experiments/first_stage_owned_os_capture_20261023/guard-reorder/call_edges.py"
+  },
+  {
+    "bytes": 47871,
+    "path": "scar/trace/call_operands.py",
+    "sha256": "c0183d57d72e556a5b64c88e7ed9847a3d6ae0992a6d0e2b47e4280c1af3f423",
+    "snapshot": "artifacts/experiments/first_stage_owned_os_capture_20261023/guard-reorder/call_operands.py"
+  }
+]

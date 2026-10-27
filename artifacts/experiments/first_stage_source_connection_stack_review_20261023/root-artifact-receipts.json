@@ -1,0 +1,18 @@
+{
+  "files": [
+    {
+      "bytes": 564,
+      "path": "result.json",
+      "sha256": "7cf4c482b4555540f5386c959975d10ea39259e6f4e1632d2f24d8e8c4e0faeb"
+    },
+    {
+      "bytes": 1339,
+      "path": "sample.py",
+      "sha256": "1188215153f190ed95cbeff0ca6ba3470eeb0981974c347d60fc657234be4ebe"
+    }
+  ],
+  "first_stage_complete": false,
+  "schema": "scar.root-artifact-receipts",
+  "schema_version": 1,
+  "snapshot_only": true
+}

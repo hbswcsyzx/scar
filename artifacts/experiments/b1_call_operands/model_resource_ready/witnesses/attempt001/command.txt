@@ -1,0 +1,4 @@
+source /home/zyf/miniconda3/etc/profile.d/conda.sh
+conda activate lewm
+export PYTHONDONTWRITEBYTECODE=1
+python artifacts/experiments/b1_call_operands/model_resource_ready/witnesses/attempt001/witnesses.py > artifacts/experiments/b1_call_operands/model_resource_ready/witnesses/attempt001/stdout.log 2> artifacts/experiments/b1_call_operands/model_resource_ready/witnesses/attempt001/stderr.log

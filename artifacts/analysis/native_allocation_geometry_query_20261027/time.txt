@@ -1,0 +1,1 @@
+elapsed_sec=3.79 maxrss_kb=104112 exit_code=0

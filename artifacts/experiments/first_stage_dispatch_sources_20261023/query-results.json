@@ -1,0 +1,83 @@
+{
+  "RETAINED_BODY_LINKED": {
+    "body": {
+      "inventory_pointer": "#/files/140/bodies/20/graph",
+      "program_canonical_sha256": "1a5877202fe492993fcad9d99d8110b475115933239709201439075948960f65",
+      "program_schema_version": 5,
+      "reference": {
+        "body_index": 20,
+        "file_index": 140,
+        "identity": {
+          "kind": "program_region",
+          "value": "28970a668be04422a7601e6fcc334cc6",
+          "wire": "program_region:28970a668be04422a7601e6fcc334cc6"
+        }
+      }
+    },
+    "definition": {
+      "body_index": null,
+      "file_index": 140,
+      "identity": {
+        "kind": "opdef",
+        "value": "op:34ccd037e91642bc24024408",
+        "wire": "opdef:op:34ccd037e91642bc24024408"
+      }
+    },
+    "direct_callsite_established": false,
+    "invocation": {
+      "invocation_id": 41154,
+      "process_id": 272038,
+      "thread_id": 124602718246720
+    },
+    "marker_instance": "opinst:native:c4dc6a72edc7124d5769acec9e7f3c2932d971a4422573a7389472daa42d990d:eto:28888",
+    "region_activation": {
+      "kind": "exec_region_activation",
+      "value": "capture:91a2ed5e3f92817799bd02fb2453dadd65ad28fbf4361165c31b881c371c0c66:source-frame:3795ae0b9810b1bab69763bf460ab7b2e827bcf4f096af77ca91c6eb1251fd77",
+      "wire": "exec_region_activation:capture:91a2ed5e3f92817799bd02fb2453dadd65ad28fbf4361165c31b881c371c0c66:source-frame:3795ae0b9810b1bab69763bf460ab7b2e827bcf4f096af77ca91c6eb1251fd77"
+    },
+    "status": "RETAINED_BODY_LINKED"
+  },
+  "RETAINED_INVOCATION_LINKED": {
+    "body": null,
+    "definition": null,
+    "direct_callsite_established": false,
+    "invocation": {
+      "invocation_id": 103,
+      "process_id": 272038,
+      "thread_id": 124602718246720
+    },
+    "marker_instance": "opinst:native:c4dc6a72edc7124d5769acec9e7f3c2932d971a4422573a7389472daa42d990d:eto:5",
+    "region_activation": null,
+    "status": "RETAINED_INVOCATION_LINKED"
+  },
+  "RETAINED_SOURCE_LINKED": {
+    "body": null,
+    "definition": {
+      "body_index": null,
+      "file_index": 140,
+      "identity": {
+        "kind": "opdef",
+        "value": "op:3572540e8ce0c88b6e8e95ac",
+        "wire": "opdef:op:3572540e8ce0c88b6e8e95ac"
+      }
+    },
+    "direct_callsite_established": false,
+    "invocation": {
+      "invocation_id": 1726,
+      "process_id": 272038,
+      "thread_id": 124602718246720
+    },
+    "marker_instance": "opinst:native:c4dc6a72edc7124d5769acec9e7f3c2932d971a4422573a7389472daa42d990d:eto:16108",
+    "region_activation": null,
+    "status": "RETAINED_SOURCE_LINKED"
+  },
+  "UNRESOLVED": {
+    "body": null,
+    "definition": null,
+    "direct_callsite_established": false,
+    "invocation": null,
+    "marker_instance": "opinst:native:c4dc6a72edc7124d5769acec9e7f3c2932d971a4422573a7389472daa42d990d:eto:24",
+    "region_activation": null,
+    "status": "UNRESOLVED"
+  }
+}

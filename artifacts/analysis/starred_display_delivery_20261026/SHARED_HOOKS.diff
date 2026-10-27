@@ -1,0 +1,216 @@
+diff --git a/scar/analysis/environment_lowering.py b/scar/analysis/environment_lowering.py
+index 292b828b..51db46bd 100644
+--- a/scar/analysis/environment_lowering.py
++++ b/scar/analysis/environment_lowering.py
+@@ -45,6 +45,10 @@ def captured_cell_slot(definition, name):
+ 
+ 
+ def dispatch_source_expression(builder, node, cursor):
++    if (builder.has_language("STARRED_DISPLAY_314_V1") and isinstance(node,(ast.Tuple,ast.List))
++            and isinstance(node.ctx,ast.Load) and any(isinstance(n,ast.Starred)for n in node.elts)):
++        from scar.analysis.source_display_lowering import lower_starred_display
++        return lower_starred_display(builder,node,cursor)
+     if builder.has_language("COMPREHENSION_314_V1") and isinstance(node,(ast.ListComp,ast.SetComp,ast.DictComp)):
+         from scar.analysis.source_comprehension_lowering import lower_comprehension
+         return lower_comprehension(builder,node,cursor)
+diff --git a/scar/analysis/program_lowering.py b/scar/analysis/program_lowering.py
+index d96e0c1c..038c5ee7 100644
+--- a/scar/analysis/program_lowering.py
++++ b/scar/analysis/program_lowering.py
+@@ -1386,7 +1386,8 @@ def validate_source_program(result: SourceProgram, *, max_operations: int = 1000
+             unpack_source = result.language is not None and SourceLanguageCapability.UNPACK_TARGETS_314_V1 in result.language.capabilities
+             lambda_source = result.language is not None and SourceLanguageCapability.LAMBDA_EXPRESSION_314_V1 in result.language.capabilities
+             comprehension_source = result.language is not None and SourceLanguageCapability.COMPREHENSION_314_V1 in result.language.capabilities
+-            if result.language is not None and (not structural_only or try_source or call_source or function_source or import_source or creation_source or set_source or unpack_source or lambda_source or comprehension_source):
++            display_source = result.language is not None and SourceLanguageCapability.STARRED_DISPLAY_314_V1 in result.language.capabilities
++            if result.language is not None and (not structural_only or try_source or call_source or function_source or import_source or creation_source or set_source or unpack_source or lambda_source or comprehension_source or display_source):
+                 if not structural_only and language_options is None:
+                     raise ValueError("v5 source replay requires explicit independently supplied language inputs")
+                 if structural_only:
+@@ -1397,6 +1398,7 @@ def validate_source_program(result: SourceProgram, *, max_operations: int = 1000
+                                          else "generator creation STRUCTURE requires its exact retained source text" if creation_source
+                                          else "set display STRUCTURE requires its exact retained source text" if set_source
+                                          else "unpack target STRUCTURE requires its exact retained source text" if unpack_source
++                                         else "starred display STRUCTURE requires its exact retained source text" if display_source
+                                          else "comprehension STRUCTURE requires its exact retained source text" if comprehension_source
+                                          else "Lambda expression STRUCTURE requires its exact retained source text" if lambda_source
+                                          else "expanded call STRUCTURE requires its exact retained source text")
+diff --git a/scar/analysis/source_environment_validation.py b/scar/analysis/source_environment_validation.py
+index ac369516..0748bd34 100644
+--- a/scar/analysis/source_environment_validation.py
++++ b/scar/analysis/source_environment_validation.py
+@@ -19,6 +19,7 @@ from scar.ir.program.state_modes import AccessMode
+ from scar.ir.program.structured import PythonProtocolKind as Kind
+ from scar.ir.semantics_v2 import Opcode
+ from scar.ir.v2.semantic import OperationKind, SemanticRelation
++from scar.ir.program.source_language import STARRED_DISPLAY_PROTOCOLS, SourceLanguageCapability as DisplayCapability
+ 
+ 
+ _KINDS = frozenset((Kind.LOOKUP_GLOBAL, Kind.READ_FREE_CELL, Kind.READ_LOCAL_CELL,
+@@ -85,6 +86,11 @@ def validate_environment_body(model, graph, interface, metadata, semantic, *, la
+     for protocol in model.protocols:
+         operation, kind = operations[protocol.operation], protocol.kind
+         link = links[operation.id]
++        if kind.value in STARRED_DISPLAY_PROTOCOLS:
++            need(language is not None and DisplayCapability.STARRED_DISPLAY_314_V1 in language.capabilities
++                 and semantic.source_atoms[link.source.atom_id].kind in ('Tuple','List'),
++                 'display primitive has no original container source/capability')
++            continue  # Complete original AST/SG/ordered port checks belong to its display validator.
+         if kind is Kind.COMPREHENSION_BUILD:
+             from scar.ir.program.source_language import SourceLanguageCapability
+             declaration=semantic.definitions.get(link.semantic_operation)
+diff --git a/scar/analysis/source_frontend_worklist.py b/scar/analysis/source_frontend_worklist.py
+index 9376fa11..f93947df 100644
+--- a/scar/analysis/source_frontend_worklist.py
++++ b/scar/analysis/source_frontend_worklist.py
+@@ -592,8 +592,9 @@ SOURCE_ENTRY_PROFILE_314_V6 = 'PYTHON_SOURCE_ENTRY_314_CAPS_V6'
+ SOURCE_ENTRY_PROFILE_314_V7 = 'PYTHON_SOURCE_ENTRY_314_CAPS_V7'
+ SOURCE_ENTRY_PROFILE_314_V8 = 'PYTHON_SOURCE_ENTRY_314_CAPS_V8'
+ SOURCE_ENTRY_PROFILE_314_V9 = 'PYTHON_SOURCE_ENTRY_314_CAPS_V9'
+-SOURCE_ENTRY_PROFILES = (SOURCE_ENTRY_PROFILE_314_V2, SOURCE_ENTRY_PROFILE_314_V3, SOURCE_ENTRY_PROFILE_314_V4, SOURCE_ENTRY_PROFILE_314_V5, SOURCE_ENTRY_PROFILE_314_V6, SOURCE_ENTRY_PROFILE_314_V7, SOURCE_ENTRY_PROFILE_314_V8,SOURCE_ENTRY_PROFILE_314_V9)
+-LATEST_SOURCE_ENTRY_PROFILE = SOURCE_ENTRY_PROFILE_314_V9
++SOURCE_ENTRY_PROFILE_314_V10 = 'PYTHON_SOURCE_ENTRY_314_CAPS_V10'
++SOURCE_ENTRY_PROFILES = (SOURCE_ENTRY_PROFILE_314_V2, SOURCE_ENTRY_PROFILE_314_V3, SOURCE_ENTRY_PROFILE_314_V4, SOURCE_ENTRY_PROFILE_314_V5, SOURCE_ENTRY_PROFILE_314_V6, SOURCE_ENTRY_PROFILE_314_V7, SOURCE_ENTRY_PROFILE_314_V8,SOURCE_ENTRY_PROFILE_314_V9,SOURCE_ENTRY_PROFILE_314_V10)
++LATEST_SOURCE_ENTRY_PROFILE = SOURCE_ENTRY_PROFILE_314_V10
+ 
+ 
+ def plan_source_entries(catalog, *, budget=SourceFrontendBudget(), capabilities=(
+@@ -730,7 +731,7 @@ def _entry_language_capabilities(plan, entry, context, capabilities):
+                 yield from own_nodes(child)
+             return
+         if isinstance(node,ast.Lambda):
+-            if profile in (SOURCE_ENTRY_PROFILE_314_V8,SOURCE_ENTRY_PROFILE_314_V9):
++            if profile in (SOURCE_ENTRY_PROFILE_314_V8,SOURCE_ENTRY_PROFILE_314_V9,SOURCE_ENTRY_PROFILE_314_V10):
+                 yield node
+                 for value in (*node.args.defaults,*(v for v in node.args.kw_defaults if v is not None)):
+                     yield from own_nodes(value)
+@@ -739,8 +740,8 @@ def _entry_language_capabilities(plan, entry, context, capabilities):
+         yield node
+         for child in ast.iter_child_nodes(node):yield from own_nodes(child)
+     own=tuple(n for root in nodes[0].body for n in own_nodes(root))
+-    with_scope=profile in (SOURCE_ENTRY_PROFILE_314_V3,SOURCE_ENTRY_PROFILE_314_V4,SOURCE_ENTRY_PROFILE_314_V5,SOURCE_ENTRY_PROFILE_314_V6,SOURCE_ENTRY_PROFILE_314_V7,SOURCE_ENTRY_PROFILE_314_V8,SOURCE_ENTRY_PROFILE_314_V9) and any(isinstance(n,ast.With)for n in own)
+-    augmented_scope=profile in (SOURCE_ENTRY_PROFILE_314_V6,SOURCE_ENTRY_PROFILE_314_V7,SOURCE_ENTRY_PROFILE_314_V8,SOURCE_ENTRY_PROFILE_314_V9) and any(isinstance(n,ast.AugAssign)for n in own)
++    with_scope=profile in (SOURCE_ENTRY_PROFILE_314_V3,SOURCE_ENTRY_PROFILE_314_V4,SOURCE_ENTRY_PROFILE_314_V5,SOURCE_ENTRY_PROFILE_314_V6,SOURCE_ENTRY_PROFILE_314_V7,SOURCE_ENTRY_PROFILE_314_V8,SOURCE_ENTRY_PROFILE_314_V9,SOURCE_ENTRY_PROFILE_314_V10) and any(isinstance(n,ast.With)for n in own)
++    augmented_scope=profile in (SOURCE_ENTRY_PROFILE_314_V6,SOURCE_ENTRY_PROFILE_314_V7,SOURCE_ENTRY_PROFILE_314_V8,SOURCE_ENTRY_PROFILE_314_V9,SOURCE_ENTRY_PROFILE_314_V10) and any(isinstance(n,ast.AugAssign)for n in own)
+     if ((automatic or policy is not None) and (any(isinstance(n,ast.Try)for n in own)or with_scope or augmented_scope)
+             and SourceLanguageCapability.FUNCTION_TRY_314_V1 not in capabilities):
+         capabilities+=(SourceLanguageCapability.FUNCTION_TRY_314_V1,)
+@@ -756,22 +757,26 @@ def _entry_language_capabilities(plan, entry, context, capabilities):
+         capabilities+=(SourceLanguageCapability.FUNCTION_WITH_314_V1,)
+     if profile == SOURCE_ENTRY_PROFILE_314_V4 and any(isinstance(n,ast.GeneratorExp)for n in own) and SourceLanguageCapability.GENEXPR_314_V1 not in capabilities:
+         capabilities+=(SourceLanguageCapability.GENEXPR_314_V1,)
+-    if profile in (SOURCE_ENTRY_PROFILE_314_V5,SOURCE_ENTRY_PROFILE_314_V6,SOURCE_ENTRY_PROFILE_314_V7,SOURCE_ENTRY_PROFILE_314_V8,SOURCE_ENTRY_PROFILE_314_V9) and any(isinstance(n,ast.GeneratorExp)for n in own) and SourceLanguageCapability.GENEXPR_CREATION_314_V1 not in capabilities:
++    if profile in (SOURCE_ENTRY_PROFILE_314_V5,SOURCE_ENTRY_PROFILE_314_V6,SOURCE_ENTRY_PROFILE_314_V7,SOURCE_ENTRY_PROFILE_314_V8,SOURCE_ENTRY_PROFILE_314_V9,SOURCE_ENTRY_PROFILE_314_V10) and any(isinstance(n,ast.GeneratorExp)for n in own) and SourceLanguageCapability.GENEXPR_CREATION_314_V1 not in capabilities:
+         capabilities+=(SourceLanguageCapability.GENEXPR_CREATION_314_V1,)
+-    if profile in (SOURCE_ENTRY_PROFILE_314_V6,SOURCE_ENTRY_PROFILE_314_V7,SOURCE_ENTRY_PROFILE_314_V8,SOURCE_ENTRY_PROFILE_314_V9) and any(isinstance(n,ast.Set)for n in own) and SourceLanguageCapability.SET_DISPLAY_314_V1 not in capabilities:
++    if profile in (SOURCE_ENTRY_PROFILE_314_V6,SOURCE_ENTRY_PROFILE_314_V7,SOURCE_ENTRY_PROFILE_314_V8,SOURCE_ENTRY_PROFILE_314_V9,SOURCE_ENTRY_PROFILE_314_V10) and any(isinstance(n,ast.Set)for n in own) and SourceLanguageCapability.SET_DISPLAY_314_V1 not in capabilities:
+         capabilities+=(SourceLanguageCapability.SET_DISPLAY_314_V1,)
+-    if profile in (SOURCE_ENTRY_PROFILE_314_V7,SOURCE_ENTRY_PROFILE_314_V8,SOURCE_ENTRY_PROFILE_314_V9) and any(isinstance(n,(ast.Tuple,ast.List))and isinstance(n.ctx,ast.Store)for n in own) and SourceLanguageCapability.UNPACK_TARGETS_314_V1 not in capabilities:
++    if profile in (SOURCE_ENTRY_PROFILE_314_V7,SOURCE_ENTRY_PROFILE_314_V8,SOURCE_ENTRY_PROFILE_314_V9,SOURCE_ENTRY_PROFILE_314_V10) and any(isinstance(n,(ast.Tuple,ast.List))and isinstance(n.ctx,ast.Store)for n in own) and SourceLanguageCapability.UNPACK_TARGETS_314_V1 not in capabilities:
+         capabilities+=(SourceLanguageCapability.UNPACK_TARGETS_314_V1,)
+-    if profile in (SOURCE_ENTRY_PROFILE_314_V8,SOURCE_ENTRY_PROFILE_314_V9) and any(isinstance(n,ast.Lambda)for n in own) and SourceLanguageCapability.LAMBDA_EXPRESSION_314_V1 not in capabilities:
++    if profile in (SOURCE_ENTRY_PROFILE_314_V8,SOURCE_ENTRY_PROFILE_314_V9,SOURCE_ENTRY_PROFILE_314_V10) and any(isinstance(n,ast.Lambda)for n in own) and SourceLanguageCapability.LAMBDA_EXPRESSION_314_V1 not in capabilities:
+         capabilities+=(SourceLanguageCapability.LAMBDA_EXPRESSION_314_V1,)
+-    if profile in (SOURCE_ENTRY_PROFILE_314_V8,SOURCE_ENTRY_PROFILE_314_V9):
++    if profile in (SOURCE_ENTRY_PROFILE_314_V8,SOURCE_ENTRY_PROFILE_314_V9,SOURCE_ENTRY_PROFILE_314_V10):
+         from scar.analysis.source_constant_lowering import needs_code_constant
+         if (any(needs_code_constant(node) for node in own)
+                 and SourceLanguageCapability.CODE_CONSTANTS_314_V1 not in capabilities):
+             capabilities += (SourceLanguageCapability.CODE_CONSTANTS_314_V1,)
+-    if (profile == SOURCE_ENTRY_PROFILE_314_V9 and any(isinstance(n,(ast.ListComp,ast.SetComp,ast.DictComp))for n in own)
++    if (profile in (SOURCE_ENTRY_PROFILE_314_V9,SOURCE_ENTRY_PROFILE_314_V10) and any(isinstance(n,(ast.ListComp,ast.SetComp,ast.DictComp))for n in own)
+             and SourceLanguageCapability.COMPREHENSION_314_V1 not in capabilities):
+         capabilities += (SourceLanguageCapability.COMPREHENSION_314_V1,)
++    if (profile == SOURCE_ENTRY_PROFILE_314_V10 and any(isinstance(n,(ast.Tuple,ast.List))and isinstance(n.ctx,ast.Load)
++            and any(isinstance(e,ast.Starred)for e in n.elts)for n in own)
++            and SourceLanguageCapability.STARRED_DISPLAY_314_V1 not in capabilities):
++        capabilities += (SourceLanguageCapability.STARRED_DISPLAY_314_V1,)
+     return capabilities
+ 
+ 
+@@ -1033,7 +1038,7 @@ def run_source_entries(plan, out_dir, *, budget=SourceFrontendBudget(), progress
+ __all__ = ['SourceFrontendBudget', 'SourceFrontendPlan', 'plan_source_frontend', 'run_source_frontend',
+            'SourceEntryFrontendPlan', 'SourceEntryFrontendResult', 'plan_source_entries', 'run_source_entries',
+            'SOURCE_ENTRY_PROFILE_314_V2', 'SOURCE_ENTRY_PROFILE_314_V3', 'SOURCE_ENTRY_PROFILE_314_V4',
+-           'SOURCE_ENTRY_PROFILE_314_V5', 'SOURCE_ENTRY_PROFILE_314_V6', 'SOURCE_ENTRY_PROFILE_314_V7', 'SOURCE_ENTRY_PROFILE_314_V8', 'SOURCE_ENTRY_PROFILE_314_V9', 'SOURCE_ENTRY_PROFILES', 'LATEST_SOURCE_ENTRY_PROFILE']
++           'SOURCE_ENTRY_PROFILE_314_V5', 'SOURCE_ENTRY_PROFILE_314_V6', 'SOURCE_ENTRY_PROFILE_314_V7', 'SOURCE_ENTRY_PROFILE_314_V8', 'SOURCE_ENTRY_PROFILE_314_V9', 'SOURCE_ENTRY_PROFILE_314_V10', 'SOURCE_ENTRY_PROFILES', 'LATEST_SOURCE_ENTRY_PROFILE']
+ 
+ 
+ def module_entry_catalog(composition, *, max_files=4096):
+diff --git a/scar/analysis/source_language_validation.py b/scar/analysis/source_language_validation.py
+index bbaa755d..1bc019a9 100644
+--- a/scar/analysis/source_language_validation.py
++++ b/scar/analysis/source_language_validation.py
+@@ -84,9 +84,12 @@ def validate_language_body(model, graph, interface, metadata, semantic, language
+     from scar.analysis.source_comprehension_validation import validate_comprehensions
+     comprehensions=validate_comprehensions(model,graph,interface,metadata,semantic,language,
+         source_tree=source_tree,options=options,structural_only=structural_only)
+-    indexed = comprehensions | set(unpack) | set(slices) | set(constants) | calls | try_protocols | functions | imports | withs | sets
++    from scar.analysis.source_display_lowering import validate_starred_displays
++    displays=validate_starred_displays(model,graph,interface,metadata,semantic,language,
++        source_tree=source_tree,options=options,structural_only=structural_only)
++    indexed = displays | comprehensions | set(unpack) | set(slices) | set(constants) | calls | try_protocols | functions | imports | withs | sets
+     actual = {key for key, row in protocols.items() if row.kind.value in EXTENDED_PROTOCOLS}
+-    _need(indexed == actual and len(indexed) == len(unpack) + len(slices) + len(constants) + len(calls) + len(try_protocols) + len(functions) + len(imports) + len(withs) + len(sets) + len(comprehensions),
++    _need(indexed == actual and len(indexed) == len(unpack) + len(slices) + len(constants) + len(calls) + len(try_protocols) + len(functions) + len(imports) + len(withs) + len(sets) + len(comprehensions) + len(displays),
+           "new language operations must have one exact shape/provenance record")
+ 
+     def source_node(reference, classes):
+diff --git a/scar/analysis/structured_lowering.py b/scar/analysis/structured_lowering.py
+index 6dad9ec9..dbf760af 100644
+--- a/scar/analysis/structured_lowering.py
++++ b/scar/analysis/structured_lowering.py
+@@ -27,7 +27,7 @@ from scar.ir.program.structured import (
+     PythonProtocol, PythonProtocolKind, StructuredBodyModel,
+ )
+ from scar.ir.program.validation import require_valid
+-from scar.ir.program.source_language import FUNCTION_TRY_PROTOCOLS, NESTED_FUNCTION_PROTOCOLS, FUNCTION_IMPORT_PROTOCOLS, FUNCTION_WITH_PROTOCOLS, FUNCTION_SET_PROTOCOLS, COMPREHENSION_PROTOCOLS
++from scar.ir.program.source_language import FUNCTION_TRY_PROTOCOLS, NESTED_FUNCTION_PROTOCOLS, FUNCTION_IMPORT_PROTOCOLS, FUNCTION_WITH_PROTOCOLS, FUNCTION_SET_PROTOCOLS, COMPREHENSION_PROTOCOLS, STARRED_DISPLAY_PROTOCOLS
+ from scar.ir.v2.common import EvidenceKind
+ 
+ 
+@@ -805,7 +805,7 @@ def _require_valid_structured_body(model, graph, interface, metadata, *, semanti
+                 PythonProtocolKind.BUILD_CALL_POSITIONAL_LIST, PythonProtocolKind.EXTEND_CALL_POSITIONALS,
+                 PythonProtocolKind.APPEND_CALL_POSITIONAL, PythonProtocolKind.CALL_POSITIONALS_TO_TUPLE):
+             pass  # Exact shapes, source, payloads and lifetime are checked below.
+-        elif language is not None and protocol.kind.value in FUNCTION_TRY_PROTOCOLS | NESTED_FUNCTION_PROTOCOLS | FUNCTION_IMPORT_PROTOCOLS | FUNCTION_WITH_PROTOCOLS | FUNCTION_SET_PROTOCOLS | COMPREHENSION_PROTOCOLS:
++        elif language is not None and protocol.kind.value in FUNCTION_TRY_PROTOCOLS | NESTED_FUNCTION_PROTOCOLS | FUNCTION_IMPORT_PROTOCOLS | FUNCTION_WITH_PROTOCOLS | FUNCTION_SET_PROTOCOLS | COMPREHENSION_PROTOCOLS | STARRED_DISPLAY_PROTOCOLS:
+             pass  # Exact canonical C0/C1/source checks belong to the opt-in Try adapter.
+         else:
+             raise ValueError("opaque protocol has no implemented structured control interface")
+diff --git a/scar/ir/program/source_language.py b/scar/ir/program/source_language.py
+index 5b1b2b54..6a89fa1f 100644
+--- a/scar/ir/program/source_language.py
++++ b/scar/ir/program/source_language.py
+@@ -34,6 +34,7 @@ class SourceLanguageCapability(str, Enum):
+     CODE_CONSTANTS_314_V1 = "PYTHON_CODE_CONSTANTS_314_V1"
+     LAMBDA_EXPRESSION_314_V1 = "PYTHON_LAMBDA_EXPRESSION_314_V1"
+     COMPREHENSION_314_V1 = "PYTHON_COMPREHENSION_314_V1"
++    STARRED_DISPLAY_314_V1 = "PYTHON_STARRED_DISPLAY_314_V1"
+ 
+ 
+ EXTENDED_PROTOCOLS = frozenset(("UNPACK_FIXED", "BUILD_SLICE", "READ_CODE_CONSTANT",
+@@ -55,6 +56,8 @@ FUNCTION_WITH_PROTOCOLS = frozenset(('WITH_ENTER_CONTEXT', 'WITH_EXIT_NORMAL', '
+ EXTENDED_PROTOCOLS = EXTENDED_PROTOCOLS | FUNCTION_WITH_PROTOCOLS
+ FUNCTION_SET_PROTOCOLS = frozenset(('BUILD_SET_DISPLAY',))
+ EXTENDED_PROTOCOLS = EXTENDED_PROTOCOLS | FUNCTION_SET_PROTOCOLS
++STARRED_DISPLAY_PROTOCOLS = frozenset(('BUILD_DISPLAY_LIST','EXTEND_DISPLAY','APPEND_DISPLAY','DISPLAY_LIST_TO_TUPLE'))
++EXTENDED_PROTOCOLS = EXTENDED_PROTOCOLS | STARRED_DISPLAY_PROTOCOLS
+ COMPREHENSION_PROTOCOLS = frozenset(('COMPREHENSION_BUILD','COMPREHENSION_NEXT','COMPREHENSION_ADD','COMPREHENSION_LEAVE'))
+ EXTENDED_PROTOCOLS = EXTENDED_PROTOCOLS | COMPREHENSION_PROTOCOLS
+ LAMBDA_PROTOCOLS = frozenset(('MAKE_LAMBDA_FUNCTION',))
+diff --git a/scar/ir/program/structured.py b/scar/ir/program/structured.py
+index dfc71bd8..2a8b8d1c 100644
+--- a/scar/ir/program/structured.py
++++ b/scar/ir/program/structured.py
+@@ -57,6 +57,10 @@ class PythonProtocolKind(str, Enum):
+     FUNCTION_IMPORT_FROM = "FUNCTION_IMPORT_FROM"
+     BUILD_SET_DISPLAY = "BUILD_SET_DISPLAY"
+     MAKE_LAMBDA_FUNCTION = "MAKE_LAMBDA_FUNCTION"
++    BUILD_DISPLAY_LIST = "BUILD_DISPLAY_LIST"
++    EXTEND_DISPLAY = "EXTEND_DISPLAY"
++    APPEND_DISPLAY = "APPEND_DISPLAY"
++    DISPLAY_LIST_TO_TUPLE = "DISPLAY_LIST_TO_TUPLE"
+     COMPREHENSION_BUILD = "COMPREHENSION_BUILD"
+     COMPREHENSION_NEXT = "COMPREHENSION_NEXT"
+     COMPREHENSION_ADD = "COMPREHENSION_ADD"

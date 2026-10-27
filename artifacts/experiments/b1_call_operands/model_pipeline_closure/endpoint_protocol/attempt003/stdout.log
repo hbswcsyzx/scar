@@ -1,0 +1,76 @@
+...........FF.............                                               [100%]
+=================================== FAILURES ===================================
+__ test_endpoint_geometry_budget_preserves_demand_offers_and_pending_portion ___
+
+    def test_endpoint_geometry_budget_preserves_demand_offers_and_pending_portion():
+        from tests.fixtures.execution_io_pipeline import io_pipeline_execution
+        from scar.ir.execution.query import ExecutionIndex
+        from scar.ir.execution.validity_budget import ValidityBudget
+        from scar.ir.execution.validity_query import _endpoint_coverage
+    
+        program, model, catalogs, details = io_pipeline_execution()
+        index = ExecutionIndex(model, program, **catalogs)
+        complete = index.validity(details["endpoint_read"], budget=131072)
+        required = complete["conditional_fragment_coverage"]["required"]
+        offered = tuple((fragment["label"], fragment["actual"])
+                        for fragment in complete["contributions"]
+                        if type(fragment["actual"]) is dict
+                        and fragment["actual"].get("kind") == "endpoint-byte-range")
+        assert offered
+    
+        # A single valid offer costs 2 for request/offer parsing, 3 to construct
+        # boundaries and 6 to sort the two boundary points. The final portion scan
+        # is therefore cut off at this limit while the complete offer is retained.
+        budget = ValidityBudget(13)
+        partial = _endpoint_coverage(required, offered, budget)
+    
+        assert partial["truncated"] is True and budget.truncated is True
+        assert partial["status"] == "UNRESOLVED"
+        assert partial["required"] == required
+        assert partial["geometry"]["required_intervals"] == ((0, 8),)
+        assert partial["geometry"]["covered_intervals"] == ((0, 8),)
+        assert partial["offered"] == tuple(offer for _, offer in offered)
+>       assert partial["pending_portions"] == {
+            "boundaries": (0, 8), "next_pair_index": 0}
+E       AssertionError: assert ('boundaries'...t_pair_index') == {'boundaries'...air_index': 0}
+E         
+E         Use -v to get more diff
+
+tests/unit/test_execution_endpoint_protocol.py:145: AssertionError
+____ test_outcome_production_retains_actual_endpoint_selector_for_validity _____
+
+    def test_outcome_production_retains_actual_endpoint_selector_for_validity():
+        from tests.fixtures.execution_io_pipeline import io_pipeline_execution
+        from scar.ir.execution.ids import OutcomeProductionID
+        from scar.ir.execution.query import ExecutionIndex
+    
+        program, model, catalogs, details = io_pipeline_execution()
+        index = ExecutionIndex(model, program, **catalogs)
+>       production = index.outcome_production(OutcomeProductionID("io.close.flush"))
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_execution_endpoint_protocol.py:172: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <scar.ir.execution.query.ExecutionIndex object at 0x73d1468e9a90>
+identity = OutcomeProductionID(value='io.close.flush')
+
+    def outcome_production(self, identity):
+        """Observed outcome/result and actual selector without ready inference."""
+        ctx = self._content_context()
+>       return deepcopy({**ctx.resolved_produced[identity], 'validation_gaps': tuple(ctx.gaps),
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                         'source_runtime_verified': False, 'transformation_authorized': False})
+E       KeyError: OutcomeProductionID(value='io.close.flush')
+
+scar/ir/execution/query.py:138: KeyError
+=============================== warnings summary ===============================
+tests/integration/test_execution_io_pipeline.py::test_complete_pipeline_uses_one_program_and_exact_dynamic_calls
+  tests/integration/test_execution_io_pipeline.py:28: PytestWarning: record_property is incompatible with junit_family 'xunit2' (use 'legacy' or 'xunit1')
+    def test_complete_pipeline_uses_one_program_and_exact_dynamic_calls(record_property):
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/unit/test_execution_endpoint_protocol.py::test_endpoint_geometry_budget_preserves_demand_offers_and_pending_portion
+FAILED tests/unit/test_execution_endpoint_protocol.py::test_outcome_production_retains_actual_endpoint_selector_for_validity
+2 failed, 24 passed, 1 warning in 12.32s

@@ -1,0 +1,40 @@
+{
+  "command": [
+    "/home/zyf/miniconda3/envs/lewm/bin/python",
+    "-m",
+    "pytest",
+    "-q",
+    "tests/unit/test_session_release_records.py"
+  ],
+  "cwd": "/tmp/scar-structured-model-280qf4mi",
+  "python": "3.14.7 | packaged by conda-forge | (main, Sep  2 2026, 21:08:32) [GCC 15.3.0]",
+  "exit_code": 1,
+  "elapsed_seconds": 1.2244529724121094,
+  "source_hashes": [
+    {
+      "path": "scar/ir/program/lifecycle.py",
+      "sha256": "326422e0b5c0a89fef3abda0f27037928d6c20bfc5adbd9afc875236678d17d7",
+      "single_terminal_newline": true
+    },
+    {
+      "path": "scar/ir/program/model.py",
+      "sha256": "3a72c7692afdb19f74f19df5990527140e360748954c64dde3e335551580b2b1",
+      "single_terminal_newline": true
+    },
+    {
+      "path": "scar/ir/program/__init__.py",
+      "sha256": "849f39246a771e5ad3a98b769764fc0431bb3154238772cf894a53afe9328648",
+      "single_terminal_newline": true
+    },
+    {
+      "path": "scar/ir/program/codec.py",
+      "sha256": "415cd3c7832e00c5ffb9ae7332802514944c98b672136a0d010c640d0c9acec0",
+      "single_terminal_newline": true
+    },
+    {
+      "path": "tests/unit/test_session_release_records.py",
+      "sha256": "3ebee0dd8fabad7d6cd5e9bb1ceb708b8745a926cfd3b95b11d2dbfc798ad0f0",
+      "single_terminal_newline": true
+    }
+  ]
+}

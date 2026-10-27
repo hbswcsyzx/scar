@@ -291,7 +291,7 @@ _UNARY_EXPR_TYPES = (ast.UAdd, ast.USub, ast.Invert)
 def _expression_children(node: ast.AST, *, allow_arithmetic: bool):
     if isinstance(node, ast.Constant):
         try:
-            sm.PythonLiteral.from_python(node.value)
+            sm.PythonLiteral.from_python(node.value, exact=False)
         except (ValueError, TypeError):
             return None
         return ()

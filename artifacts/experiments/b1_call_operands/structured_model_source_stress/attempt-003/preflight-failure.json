@@ -1,0 +1,15 @@
+{
+  "attempt": "attempt-003",
+  "classification": "DRIVER_PREFLIGHT_FAILURE",
+  "driver_path": "/home/zyf/AAA/scar/artifacts/experiments/b1_call_operands/structured_model_source_stress/attempt-003/driver.py",
+  "driver_sha256": "37e4603decd0883c529b0ac72510765f38ab8fdaee254d09323004766d57c55d",
+  "failure": "generator object is not reversible",
+  "failure_type": "TypeError",
+  "finished_utc": "2026-10-16T03:18:24Z",
+  "location": "driver helper _expr_nodes called reversed(ast.iter_child_nodes(node)) during call-subtree coverage after source/definition validation and lower",
+  "process_exit_code": 1,
+  "schema": "scar.structured-source-stress-preflight-failure",
+  "schema_version": 1,
+  "scope": "two-candidate preflight; official 256-body run not started",
+  "target_execution": false
+}

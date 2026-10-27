@@ -1,0 +1,15 @@
+{
+  "command": [
+    "/home/zyf/miniconda3/envs/lewm/bin/python",
+    "/tmp/scar-structured-model-280qf4mi/artifacts/experiments/b1_call_operands/model_await_reevaluation/probe_mid_budget.py"
+  ],
+  "cwd": "/tmp/scar-structured-model-280qf4mi",
+  "python": "3.14.7 | packaged by conda-forge | (main, Sep  2 2026, 21:08:32) [GCC 15.3.0]",
+  "activation": "source /home/zyf/miniconda3/etc/profile.d/conda.sh; conda activate lewm",
+  "environment": {
+    "PYTHONPATH": ".",
+    "PYTHONDONTWRITEBYTECODE": "1"
+  },
+  "script_sha256": "4105fed9992d1c12a3544b4baf1aea37f4d0ed0162ce18f1aa42089d6c54167d",
+  "scope": "source diagnosis only, not acceptance or native execution"
+}

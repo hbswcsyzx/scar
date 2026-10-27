@@ -1,0 +1,182 @@
+..................FFFFF....................................              [100%]
+=================================== FAILURES ===================================
+_ test_two_state_domains_and_leading_forwarded_reference_keep_exact_produced_slot[False-invoke] _
+
+key = 'invoke', raised = False
+
+    @pytest.mark.parametrize('key', ('invoke', 'invoke_reference'))
+    @pytest.mark.parametrize('raised', (False, True))
+    def test_two_state_domains_and_leading_forwarded_reference_keep_exact_produced_slot(key, raised):
+>       program, model, details = two_domain_literal_invoke(raised)
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/integration/test_execution_literals.py:109: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/fixtures/execution_literals.py:196: in two_domain_literal_invoke
+    model = declared_path(program, ((BlockID('entry'), int(raised)),
+tests/fixtures/execution_paths.py:61: in declared_path
+    return ExecutionModel(snapshot_for(program), runs=(ExecutionRun(run, missing),),
+                          ^^^^^^^^^^^^^^^^^^^^^
+scar/ir/execution/snapshot.py:11: in snapshot_for
+    wire = program_dumps(program).encode('utf-8')
+           ^^^^^^^^^^^^^^^^^^^^^^
+scar/ir/program/codec.py:192: in dumps
+    _require_record_and_graph_valid(graph)
+scar/ir/program/codec.py:101: in _require_record_and_graph_valid
+    require_valid(graph)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='literal.root'), regions=(Region(id=RegionID(value='literal.root'), label='literal ev...Kind.NONE: 'none'>, payload=None, items=()))), definition=UnlocatedLiteral(reason='object payload declaration only'))))
+
+    def require_valid(graph: ProgramGraph) -> None:
+        issues = validate(graph)
+        if issues:
+>           raise ValueError("; ".join(f"{issue.code} at {issue.path}: {issue.message}" for issue in issues))
+E           ValueError: control_binding at program_operation:invoke: each control input port needs its own exact use
+
+scar/ir/program/validation.py:727: ValueError
+_ test_two_state_domains_and_leading_forwarded_reference_keep_exact_produced_slot[False-invoke_reference] _
+
+key = 'invoke_reference', raised = False
+
+    @pytest.mark.parametrize('key', ('invoke', 'invoke_reference'))
+    @pytest.mark.parametrize('raised', (False, True))
+    def test_two_state_domains_and_leading_forwarded_reference_keep_exact_produced_slot(key, raised):
+>       program, model, details = two_domain_literal_invoke(raised)
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/integration/test_execution_literals.py:109: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/fixtures/execution_literals.py:196: in two_domain_literal_invoke
+    model = declared_path(program, ((BlockID('entry'), int(raised)),
+tests/fixtures/execution_paths.py:61: in declared_path
+    return ExecutionModel(snapshot_for(program), runs=(ExecutionRun(run, missing),),
+                          ^^^^^^^^^^^^^^^^^^^^^
+scar/ir/execution/snapshot.py:11: in snapshot_for
+    wire = program_dumps(program).encode('utf-8')
+           ^^^^^^^^^^^^^^^^^^^^^^
+scar/ir/program/codec.py:192: in dumps
+    _require_record_and_graph_valid(graph)
+scar/ir/program/codec.py:101: in _require_record_and_graph_valid
+    require_valid(graph)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='literal.root'), regions=(Region(id=RegionID(value='literal.root'), label='literal ev...Kind.NONE: 'none'>, payload=None, items=()))), definition=UnlocatedLiteral(reason='object payload declaration only'))))
+
+    def require_valid(graph: ProgramGraph) -> None:
+        issues = validate(graph)
+        if issues:
+>           raise ValueError("; ".join(f"{issue.code} at {issue.path}: {issue.message}" for issue in issues))
+E           ValueError: control_binding at program_operation:invoke: each control input port needs its own exact use
+
+scar/ir/program/validation.py:727: ValueError
+_ test_two_state_domains_and_leading_forwarded_reference_keep_exact_produced_slot[True-invoke] _
+
+key = 'invoke', raised = True
+
+    @pytest.mark.parametrize('key', ('invoke', 'invoke_reference'))
+    @pytest.mark.parametrize('raised', (False, True))
+    def test_two_state_domains_and_leading_forwarded_reference_keep_exact_produced_slot(key, raised):
+>       program, model, details = two_domain_literal_invoke(raised)
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/integration/test_execution_literals.py:109: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/fixtures/execution_literals.py:196: in two_domain_literal_invoke
+    model = declared_path(program, ((BlockID('entry'), int(raised)),
+tests/fixtures/execution_paths.py:61: in declared_path
+    return ExecutionModel(snapshot_for(program), runs=(ExecutionRun(run, missing),),
+                          ^^^^^^^^^^^^^^^^^^^^^
+scar/ir/execution/snapshot.py:11: in snapshot_for
+    wire = program_dumps(program).encode('utf-8')
+           ^^^^^^^^^^^^^^^^^^^^^^
+scar/ir/program/codec.py:192: in dumps
+    _require_record_and_graph_valid(graph)
+scar/ir/program/codec.py:101: in _require_record_and_graph_valid
+    require_valid(graph)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='literal.root'), regions=(Region(id=RegionID(value='literal.root'), label='literal ev...Kind.NONE: 'none'>, payload=None, items=()))), definition=UnlocatedLiteral(reason='object payload declaration only'))))
+
+    def require_valid(graph: ProgramGraph) -> None:
+        issues = validate(graph)
+        if issues:
+>           raise ValueError("; ".join(f"{issue.code} at {issue.path}: {issue.message}" for issue in issues))
+E           ValueError: control_binding at program_operation:invoke: each control input port needs its own exact use
+
+scar/ir/program/validation.py:727: ValueError
+_ test_two_state_domains_and_leading_forwarded_reference_keep_exact_produced_slot[True-invoke_reference] _
+
+key = 'invoke_reference', raised = True
+
+    @pytest.mark.parametrize('key', ('invoke', 'invoke_reference'))
+    @pytest.mark.parametrize('raised', (False, True))
+    def test_two_state_domains_and_leading_forwarded_reference_keep_exact_produced_slot(key, raised):
+>       program, model, details = two_domain_literal_invoke(raised)
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/integration/test_execution_literals.py:109: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/fixtures/execution_literals.py:196: in two_domain_literal_invoke
+    model = declared_path(program, ((BlockID('entry'), int(raised)),
+tests/fixtures/execution_paths.py:61: in declared_path
+    return ExecutionModel(snapshot_for(program), runs=(ExecutionRun(run, missing),),
+                          ^^^^^^^^^^^^^^^^^^^^^
+scar/ir/execution/snapshot.py:11: in snapshot_for
+    wire = program_dumps(program).encode('utf-8')
+           ^^^^^^^^^^^^^^^^^^^^^^
+scar/ir/program/codec.py:192: in dumps
+    _require_record_and_graph_valid(graph)
+scar/ir/program/codec.py:101: in _require_record_and_graph_valid
+    require_valid(graph)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='literal.root'), regions=(Region(id=RegionID(value='literal.root'), label='literal ev...Kind.NONE: 'none'>, payload=None, items=()))), definition=UnlocatedLiteral(reason='object payload declaration only'))))
+
+    def require_valid(graph: ProgramGraph) -> None:
+        issues = validate(graph)
+        if issues:
+>           raise ValueError("; ".join(f"{issue.code} at {issue.path}: {issue.message}" for issue in issues))
+E           ValueError: control_binding at program_operation:invoke: each control input port needs its own exact use
+
+scar/ir/program/validation.py:727: ValueError
+_ test_forwarded_operand_and_second_state_slot_cannot_be_new_literal_producers _
+
+    def test_forwarded_operand_and_second_state_slot_cannot_be_new_literal_producers():
+        from scar.ir.program.model import CompletionResult, InvokeLiteralResult
+        from scar.ir.program.queries import ProgramIndex
+>       program, _, details = two_domain_literal_invoke()
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/integration/test_execution_literals.py:129: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/fixtures/execution_literals.py:196: in two_domain_literal_invoke
+    model = declared_path(program, ((BlockID('entry'), int(raised)),
+tests/fixtures/execution_paths.py:61: in declared_path
+    return ExecutionModel(snapshot_for(program), runs=(ExecutionRun(run, missing),),
+                          ^^^^^^^^^^^^^^^^^^^^^
+scar/ir/execution/snapshot.py:11: in snapshot_for
+    wire = program_dumps(program).encode('utf-8')
+           ^^^^^^^^^^^^^^^^^^^^^^
+scar/ir/program/codec.py:192: in dumps
+    _require_record_and_graph_valid(graph)
+scar/ir/program/codec.py:101: in _require_record_and_graph_valid
+    require_valid(graph)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='literal.root'), regions=(Region(id=RegionID(value='literal.root'), label='literal ev...Kind.NONE: 'none'>, payload=None, items=()))), definition=UnlocatedLiteral(reason='object payload declaration only'))))
+
+    def require_valid(graph: ProgramGraph) -> None:
+        issues = validate(graph)
+        if issues:
+>           raise ValueError("; ".join(f"{issue.code} at {issue.path}: {issue.message}" for issue in issues))
+E           ValueError: control_binding at program_operation:invoke: each control input port needs its own exact use
+
+scar/ir/program/validation.py:727: ValueError
+=========================== short test summary info ============================
+FAILED tests/integration/test_execution_literals.py::test_two_state_domains_and_leading_forwarded_reference_keep_exact_produced_slot[False-invoke]
+FAILED tests/integration/test_execution_literals.py::test_two_state_domains_and_leading_forwarded_reference_keep_exact_produced_slot[False-invoke_reference]
+FAILED tests/integration/test_execution_literals.py::test_two_state_domains_and_leading_forwarded_reference_keep_exact_produced_slot[True-invoke]
+FAILED tests/integration/test_execution_literals.py::test_two_state_domains_and_leading_forwarded_reference_keep_exact_produced_slot[True-invoke_reference]
+FAILED tests/integration/test_execution_literals.py::test_forwarded_operand_and_second_state_slot_cannot_be_new_literal_producers
+5 failed, 54 passed in 1.96s

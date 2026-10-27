@@ -1,0 +1,12 @@
+{
+  "schema": "scar.original-program-wire-provenance",
+  "schema_version": 1,
+  "original_revision": "618cf83fff4e82ed0e873db0d2f4e9a14d6e4ab5",
+  "original_recipe": "from scar.ir.program.codec import dumps; from tests.unit.test_program_environments import _environment_graph; print(dumps(_environment_graph()),end=\"\")",
+  "mechanism": "git archive of original scar/tests into owned temporary directory; child imports only archived code via PYTHONPATH; no current dataclass reconstruction.",
+  "wire_sha256": "87fd64e01aac6aae762973c2ba1b5d839250c8e3975ea3694eec1d169d9f6152",
+  "file_sha256": "450ebb97b8af4482a707dec40094243ce802586b452c98b820234a93bbc07a29",
+  "wire_bytes": 26260,
+  "schema_version_generated": 5,
+  "cleanup": "Only exclusively owned temporary git archive removed at exit."
+}

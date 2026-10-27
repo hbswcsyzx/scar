@@ -1,0 +1,61 @@
+..............F...................                                       [100%]
+=================================== FAILURES ===================================
+_ test_missing_and_mismatched_original_endpoints_are_issues[host-owner-production_host] _
+
+case = 'host-owner', code = 'production_host'
+
+    @pytest.mark.parametrize('case,code', (
+        ('write', 'production_write'), ('outcome', 'production_outcome'),
+        ('ticket', 'production_ticket'), ('frontier-index', 'production_frontier'),
+        ('frontier-none', 'production_state_frontier'), ('effect', 'production_effect'),
+        ('host-owner', 'production_host'), ('wrong-ticket', 'production_outcome_ticket'),
+    ))
+    def test_missing_and_mismatched_original_endpoints_are_issues(case, code):
+        program, model, values = produced_execution()
+        write, produced = model.writes[0], model.produced[0]
+        if case == 'write':
+            produced = replace(produced, write=WriteAssociationID('absent'))
+        elif case == 'outcome':
+            produced = replace(produced, outcome=WorkOutcomeID('absent'))
+        elif case == 'ticket':
+            write = replace(write, writer=WorkWrite(WorkTicketID('absent')))
+        elif case == 'frontier-index':
+            produced = replace(produced, frontier=999)
+        elif case == 'frontier-none':
+            produced = replace(produced, frontier=None)
+        elif case == 'effect':
+            write = replace(write, production=StateProduction(AccessRef(model.operations[0].id, 999)))
+        elif case == 'host-owner':
+            write = replace(write, writer=HostWrite(OperationOccurrenceID('absent')))
+        else:
+            write = replace(write, writer=HostWrite(model.operations[1].id))
+        model = replace(model, writes=(write,), produced=(produced,))
+>       assert any(row.code == code for row in _report(program, model, values).issues)
+                                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_execution_produced.py:62: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/unit/test_execution_produced.py:18: in _report
+    return validate(model, program, value_graphs=values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scar/ir/execution/validation.py:429: in validate
+    return _analyze(model, program, value_graphs=value_graphs, evidence_graphs=evidence_graphs,
+scar/ir/execution/validation.py:420: in _analyze
+    write_errors(ctx)
+scar/ir/execution/production_validation.py:140: in write_errors
+    if ctx.activation_of(actual_operation) == ctx.activation_of(operation):
+                                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <scar.ir.execution.validation._Context object at 0x756238c8fb60>
+operation = OperationOccurrenceID(value='absent')
+
+    def activation_of(self, operation):
+>       return self.segments[self.visits[self.occurrences[operation].visit].segment].activation
+                                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       KeyError: OperationOccurrenceID(value='absent')
+
+scar/ir/execution/validation.py:113: KeyError
+=========================== short test summary info ============================
+FAILED tests/unit/test_execution_produced.py::test_missing_and_mismatched_original_endpoints_are_issues[host-owner-production_host]
+1 failed, 33 passed in 1.39s

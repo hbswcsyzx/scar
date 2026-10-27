@@ -1,0 +1,25 @@
+{
+  "SP5_source_graph_raw_reads": 0,
+  "checks": [
+    "five sources and runner syntax/import",
+    "qualified reference codec roundtrip on explicitly synthetic region/CP2 locator",
+    "canonical JSON with original writer LF receipt"
+  ],
+  "genuine_gate_run": false,
+  "lower_compile_target": 0,
+  "signatures": {
+    "CompositionIndex.from_source_entry_publication": "(path, *, expected_sha256, archives, max_input_bytes=64000000, max_record_bytes=64000000, max_programs=1, max_operations_per_body=4000, max_catalog_groups=16, max_catalog_entries=16, max_selected_decode_bytes=128000000, attachment_budget=SourceAttachmentBudget(max_report_bytes=64000000, max_files=256, max_codes=8192, max_roots=8, max_artifact_bytes=2200000000, max_record_bytes=128000000, cached_files=2))",
+    "derive_entry_source_admission": "(origin, code_source_link, *, catalog, entry, body)",
+    "extract_entry_signature": "(context, reference)",
+    "publish_source_entries": "(base_composition, catalog, source_programs, out_dir, *, max_programs=1, max_operations_per_body=4000, max_record_bytes=64000000, progress=None)",
+    "read_source_entry_publication": "(path, *, expected_sha256, catalog, max_programs=1, max_operations_per_body=4000, max_record_bytes=64000000)"
+  },
+  "source_sha256": {
+    "scar/analysis/call_demand.py": "7b534c7972f7bdb98ab040f64119ba1052d0ae3af385eeaaef729a50b1ccde5b",
+    "scar/analysis/function_interfaces.py": "1d9d64b552f378d20239155994c6e889a2c40cbd9b3c796cd85df90afd62eef4",
+    "scar/analysis/program_composition.py": "02185c3bad03196cd5a24c101dc4eceb357007fcb52f98757a4c3dbaa70a1f56",
+    "scar/analysis/source_invocations.py": "96dcff563e32299bda6710dcfa2314326be5b2a7e68f8ed649042ba481f258df",
+    "scar/analysis/source_program_publication.py": "53637e9f9d1e8a62fb36c8c5b5d2a4f8ed5d5f1d90ea85a430d73934b29ac419"
+  },
+  "status": "SYNTAX_IMPORT_API_METADATA_PASS"
+}

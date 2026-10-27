@@ -1,0 +1,11 @@
+# Collector callbacks must preserve interruption
+
+Root-authorized narrow fix: replace 30 non-reraising `except BaseException` handlers with `Exception` in `trace/call_operands.py` and `trace/callable_environment.py`. Ordinary capture failures still take their original error/gap path. KeyboardInterrupt, SystemExit and GeneratorExit can propagate. No main/frozen source, LeWM or native provider was changed.
+
+The pre-fix blockers include operand `_emit:328`, `profile:467/479`, `_shape:726`, `_on_instruction:778/882`, `_on_call:911/993/998` and their frame/mask/name-lookup fallbacks; environment `_emit:195`, `dispatch:375/380`, `entry:412/417` and close/error fallbacks. Line numbers refer to the pre-fix 1d4 source. They logged/fell back/returned rather than reraising. Constructor/registration cleanup-and-reraise, target serializer/close reraises, and original dispatch-func exception recording plus bare raise remain unchanged.
+
+One owned pure-Python loop exercised the real installed `sys.monitoring` CALL callback. Its diagnostic `_shape` wrapper sent SIGINT only to its own child, before calling target observation. **Before: exit0, signal sent, loop continued, no KeyboardInterrupt reached program. After: exit by SIGINT (subprocess -2), KeyboardInterrupt reached program and loop did not finish.** Runs took 0.916s/0.867s, with no Torch/LeWM imports, episode or foreign process signal. This proves a collector swallowing path; it does not assert where SIGINT landed in the prior LeWM-prefix attempt.
+
+The first harness used the already-active module frame, so neither child actually sent SIGINT. Those `before/after/RESULT.json` files remain as an untriggered setup frontier; the test then entered a fresh loop function after observer registration. `attempt02-*` and `COMPARISON.json` contain the actual signal result. No large test matrix was run.
+
+The weakref-finalizer `forgotten` handler remains a distinct Python unraisable boundary: replacing its catch cannot make Python propagate an exception from that callback. This fix is not a universal assertion that applications or other libraries never catch control exceptions. Partial trace files remain local diagnostic artifacts, not qualified program-model evidence.

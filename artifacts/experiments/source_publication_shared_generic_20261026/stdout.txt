@@ -1,0 +1,59 @@
+{
+  "status": "PASS_ACTUAL_NORMAL_PUBLISHER_SHARED_CONTEXT_8OP",
+  "actual_body_count": 1,
+  "selected_original_operations": 8,
+  "publication": {
+    "manifest": "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/source_publication_shared_generic_20261026/publication/manifest.json",
+    "sha256": "825cbacdc691c31a655d5f456446c9e5debc16610fb17139d9e12b38c1fda285",
+    "body_count": 1,
+    "schema_version": 2,
+    "construction_operations": null,
+    "target_executed": false,
+    "source_relowered": false,
+    "construction_cost_known": false,
+    "runtime_code_instance_established": false,
+    "actual_formal_routing_established": false,
+    "function_environment_established": false,
+    "state_versions_established": false,
+    "effects_established": false,
+    "whole_program_established": false,
+    "first_stage_complete": false,
+    "transformation_authorized": false
+  },
+  "source_context_costs": {
+    "contexts": {
+      "stored_input_bytes": 20055,
+      "decoded_input_bytes": 227450,
+      "stored_output_bytes": 0,
+      "decoded_output_bytes": 0,
+      "existing_output_guard_bytes": 0,
+      "context_reads": 1,
+      "context_validations": 1,
+      "context_hash_guards": 2,
+      "body_reads": 1
+    },
+    "original_sp5_reader": {
+      "stored_input_bytes": 19132,
+      "decoded_input_bytes": 225027,
+      "stored_output_bytes": 20055,
+      "decoded_output_bytes": 227450,
+      "existing_output_guard_bytes": 0,
+      "context_reads": 0,
+      "context_validations": 0,
+      "context_hash_guards": 0,
+      "body_reads": 0
+    }
+  },
+  "readonly_activity": [
+    {
+      "compile_attempts": 0,
+      "module_loads": 1,
+      "complete_descriptor_matches": 1,
+      "source_bytes_read": 0
+    }
+  ],
+  "elapsed_seconds": 0.6122121849912219,
+  "new_lower": 0,
+  "new_target": 0,
+  "whole_program_complete": false
+}

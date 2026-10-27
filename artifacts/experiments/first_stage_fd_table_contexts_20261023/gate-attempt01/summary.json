@@ -1,0 +1,38 @@
+{
+  "actual_gate_exit_expected": 0,
+  "contexts_typed_verified": 3,
+  "counts": {
+    "base_resources_total": 12683,
+    "complement_calls": 36664,
+    "complement_decoded_bytes": 9264445,
+    "complement_lines": 36665,
+    "exact_os_artifacts": 253,
+    "handle_containers_refined": 35,
+    "new_contexts_selected": 3,
+    "r2_base_resources_selected": 35,
+    "r2_handles_selected": 35,
+    "verified_complement_artifacts": 252
+  },
+  "elapsed_seconds": 13.575507668007049,
+  "first_stage_complete": false,
+  "fresh_actual_scar_import_sources": 97,
+  "full_execution_model_semantics": "OPEN: no fake ProgramSnapshot; selected typed/FK checks only",
+  "handles_typed_verified": 35,
+  "manifest": {
+    "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_fd_table_contexts_20261023/gate-attempt01/result/manifest.json",
+    "physical_bytes": 281281,
+    "physical_sha256": "6084ad77231fd9790bd4706966ceb7d44370f58b3c5d47bcc3b660ca7941ee8c"
+  },
+  "not_selected_means_not_in_this_registry_not_absence": true,
+  "original_producer_works": 22,
+  "peak_rss_kib": 188896,
+  "pipe_pairs": 13,
+  "provider_accesses_unchanged": 38,
+  "schema": "scar.fd-table-context-gate-report",
+  "schema_version": 1,
+  "selected_works_unchanged": 25,
+  "status": "PASS_SELECTED_CONTAINER_SCOPE",
+  "ten_frozen_modules_sha": "PASS",
+  "transformation_authorized": false,
+  "upstream_child_birth_selector_discovery": "OPEN: supplied witness checked, not automatically located"
+}

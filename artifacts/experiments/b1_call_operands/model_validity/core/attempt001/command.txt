@@ -1,0 +1,2 @@
+conda run -n lewm env PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=. pytest -q tests/unit/test_execution_canonical_effects.py
+Terminal status: exit 1 (replayed to retain full stdout; first tool response was truncated).

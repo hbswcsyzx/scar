@@ -1,0 +1,112 @@
+[
+  {
+    "decoded_bytes": 8231828,
+    "decoded_sha256": "59fc959db825a2760760a5fb2926f2cf54441bfa557bb1e5986e57648820e238",
+    "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_owned_os_capture_20261023/gate-attempt02/capture/os/syscalls.678903",
+    "stored": {
+      "bytes": 901529,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_owned_os_capture_20261023/gate-attempt02/capture/os/syscalls.678903.gz",
+      "sha256": "66956e7578d4f81beac3479c0a192f621e3a97ce3e4e353bd3fd8ce34ead3e02"
+    }
+  },
+  {
+    "decoded_bytes": 16292,
+    "decoded_sha256": "609c9776a920caf219a89cfbcf1360e686014c79f10628fca9cb7f04e2903a8a",
+    "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_owned_os_capture_20261023/gate-attempt02/capture/os/syscalls.678908",
+    "stored": {
+      "bytes": 3011,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_owned_os_capture_20261023/gate-attempt02/capture/os/syscalls.678908.gz",
+      "sha256": "e5a220a9d24899ac95af916c0aeea7351ab334f42c1af268bcd63daae10aefdf"
+    }
+  },
+  {
+    "decoded_bytes": 1000,
+    "decoded_sha256": "6f5fb2de81c0442c008d6c69a36874139b384198daacb402cf73ea20cc20f25f",
+    "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_owned_os_capture_20261023/gate-attempt02/capture/os/syscalls.678923",
+    "stored": {
+      "bytes": 507,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_owned_os_capture_20261023/gate-attempt02/capture/os/syscalls.678923.gz",
+      "sha256": "e280d479c752652e4a7a772059ebbdb291bf9b4589fbb5ed8b03c7fca3639df4"
+    }
+  },
+  {
+    "decoded_bytes": 1220,
+    "decoded_sha256": "9a50ade40c5a1d20d41b406df5619da5ff77fe5268f3158e12982066bdce736b",
+    "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_owned_os_capture_20261023/gate-attempt02/capture/os/syscalls.678944",
+    "stored": {
+      "bytes": 630,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_owned_os_capture_20261023/gate-attempt02/capture/os/syscalls.678944.gz",
+      "sha256": "2b40466e9875b796658ff3f96a4f0dc5f78a7aae60119ef707eeb6c0d3092740"
+    }
+  },
+  {
+    "decoded_bytes": 2035,
+    "decoded_sha256": "19d82d7834f75e8d04efb4913e5b9afc9b74f9a31483e1cf2e75c114f5cb69fa",
+    "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_owned_os_capture_20261023/gate-attempt02/capture/trace/call-codes.678903.jsonl",
+    "stored": {
+      "bytes": 867,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_owned_os_capture_20261023/gate-attempt02/capture/trace/call-codes.678903.jsonl.gz",
+      "sha256": "9bd25993967827a9548bfc047a4a33a1fbeddfe0ee594b0a44763fa56dbd0717"
+    }
+  },
+  {
+    "decoded_bytes": 24443,
+    "decoded_sha256": "0a9ac5679719ff329f247f8a6310e852cf02afb07b260cb017d2bf29cbc6b97c",
+    "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_owned_os_capture_20261023/gate-attempt02/capture/trace/call-events.678903.jsonl",
+    "stored": {
+      "bytes": 2734,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_owned_os_capture_20261023/gate-attempt02/capture/trace/call-events.678903.jsonl.gz",
+      "sha256": "321472381b55fcbd110e4eda3a9910e0b583256e4d6e66c1aa956415aa173698"
+    }
+  },
+  {
+    "decoded_bytes": 14529,
+    "decoded_sha256": "61b57e7ea948d6a1545a0e0263ae77741ee515a7a9ab048ffa77c5368e315cee",
+    "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_owned_os_capture_20261023/gate-attempt02/capture/trace/call-operands.678903.jsonl",
+    "stored": {
+      "bytes": 1527,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_owned_os_capture_20261023/gate-attempt02/capture/trace/call-operands.678903.jsonl.gz",
+      "sha256": "04b299e93dafbe8418124bcc87a3aff2b781a2357336f26e7aaf0631223d1a38"
+    }
+  },
+  {
+    "decoded_bytes": 7903,
+    "decoded_sha256": "c60634958b3183c6fca369cc0d94c0d86963a0ff4526d80a3d6b85f237073055",
+    "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_owned_os_capture_20261023/gate-attempt02/capture/trace/dispatch-observations.678903.adb1fe22ca95ec5e6194a16958012630.jsonl",
+    "stored": {
+      "bytes": 1063,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_owned_os_capture_20261023/gate-attempt02/capture/trace/dispatch-observations.678903.adb1fe22ca95ec5e6194a16958012630.jsonl.gz",
+      "sha256": "9337720669d90562644842b84cd1363f08cbd6a0fe2d80686e7f006cc505a26d"
+    }
+  },
+  {
+    "decoded_bytes": 2531,
+    "decoded_sha256": "0a15ebf1467d8627ba2cc548a608703f61ec32c3d52d0be7814dda1d4ef8745b",
+    "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_owned_os_capture_20261023/gate-attempt02/capture/trace/function-environments.678903.jsonl",
+    "stored": {
+      "bytes": 653,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_owned_os_capture_20261023/gate-attempt02/capture/trace/function-environments.678903.jsonl.gz",
+      "sha256": "30092ce1353658d57d6c3f473916a7250fdbf06b0f9983578cb3e6dfd83ad5c2"
+    }
+  },
+  {
+    "decoded_bytes": 30273,
+    "decoded_sha256": "89d1016392f4c870e557a9dadd63ce2901f18401e7a4662b513a9ed90420b4a6",
+    "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_owned_os_capture_20261023/gate-attempt02/capture/trace/execution-trace.678903.adb1fe22ca95ec5e6194a16958012630.json",
+    "stored": {
+      "bytes": 2235,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_owned_os_capture_20261023/gate-attempt02/capture/trace/execution-trace.678903.adb1fe22ca95ec5e6194a16958012630.json.gz",
+      "sha256": "964966dd25e6924ff8050600592bcda45e854814516a7d1af3d130fe274caa1d"
+    }
+  },
+  {
+    "decoded_bytes": 12255,
+    "decoded_sha256": "6ba56503b71ce251c5d1f89a8852298701015989b78991e08be6b378cbe513ea",
+    "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_owned_os_capture_20261023/gate-attempt02/capture/trace/kineto.678903.adb1fe22ca95ec5e6194a16958012630.json",
+    "stored": {
+      "bytes": 2147,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_owned_os_capture_20261023/gate-attempt02/capture/trace/kineto.678903.adb1fe22ca95ec5e6194a16958012630.json.gz",
+      "sha256": "c2587480a44e61278f85a49a6dff1708aded57c4f529f2a9016f57abd7600c9a"
+    }
+  }
+]

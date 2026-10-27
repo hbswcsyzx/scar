@@ -1,5 +1,12 @@
 # LeWM as an external testcase
 
+2026-10-16: the current pressure requirements and modeling boundaries are in
+[WHOLE_PROGRAM_MODEL.md](WHOLE_PROGRAM_MODEL.md), especially §8. The fixed
+source-stress sample is reported separately in
+[N2_STRUCTURED_BODY_ACCEPTANCE.md](N2_STRUCTURED_BODY_ACCEPTANCE.md). None of
+the expected paths below is a hand-authored optimization rule or proof that
+the entire LeWM execution has been automatically connected.
+
 LeWM is useful because its CEM policy combines Python control, PyTorch module
 execution, GPU state, host data, and environment side effects. It is **not** a
 special case in SCAR. This document records what a generic graph should be able

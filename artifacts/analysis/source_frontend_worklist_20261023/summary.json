@@ -1,0 +1,874 @@
+{
+  "scope": "stdlib metadata projection only; no new modeling gate",
+  "source_files": 151,
+  "definitions": 2217,
+  "static_statuses": {
+    "UNSUPPORTED": 787,
+    "LOWERED_WITH_GAPS": 840,
+    "NOT_ATTEMPTED": 590
+  },
+  "definition_kinds": {
+    "FUNCTION": 1636,
+    "COMPREHENSION": 253,
+    "CLASS": 301,
+    "LAMBDA": 27
+  },
+  "status_by_kind": {
+    "LOWERED_WITH_GAPS:FUNCTION": 840,
+    "NOT_ATTEMPTED:CLASS": 301,
+    "NOT_ATTEMPTED:COMPREHENSION": 253,
+    "NOT_ATTEMPTED:FUNCTION": 9,
+    "NOT_ATTEMPTED:LAMBDA": 27,
+    "UNSUPPORTED:FUNCTION": 787
+  },
+  "missing_body_categories": {
+    "ENTRY_ADAPTER_MISSING:CLASS": 301,
+    "ENTRY_ADAPTER_MISSING:COMPREHENSION": 253,
+    "ENTRY_ADAPTER_MISSING:LAMBDA": 27,
+    "ENTRY_ADAPTER_MISSING:RESUMABLE_FUNCTION": 2,
+    "FUNCTION_WITHOUT_COMPLETE_CAPTURED_CODE_SOURCE_WITNESS": 705,
+    "SYNC_FUNCTION_MODULE_VARIANT_MISSING": 12,
+    "SYNC_FUNCTION_MODULE_VARIANT_PRESENT": 77
+  },
+  "current_run": {
+    "id": {
+      "kind": "exec_run",
+      "value": "capture:1ddea1de4990462b59cf5dd24beb3f120156eb47bca68cfb3f1a63f9f73f2cf0",
+      "wire": "exec_run:capture:1ddea1de4990462b59cf5dd24beb3f120156eb47bca68cfb3f1a63f9f73f2cf0"
+    },
+    "source": {
+      "artifact": {
+        "schema": "strace.syscalls.text.v1",
+        "sha256": "70ab02c2c19c407b1bbfc85f0a4f54e1ab3582e71fc783d9426973b0527a7ecd",
+        "size_bytes": 81578171,
+        "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.369749"
+      },
+      "locator": "#/lines/7"
+    }
+  },
+  "current_groups": {
+    "CURRENT_BODY_LINKED": 74,
+    "CURRENT_EXTERNAL_SOURCE_ONLY_NEEDS_ENTRY_CATALOG_AND_ADMISSION_SCOPE": 242,
+    "CURRENT_PROJECT_SOURCE_ONLY_NOT_ATTEMPTED": 260,
+    "CURRENT_PROJECT_SOURCE_ONLY_UNSUPPORTED": 91,
+    "CURRENT_SOURCE_DEFINITION_UNRESOLVED": 150
+  },
+  "current_calls": {
+    "CURRENT_BODY_LINKED": 5624,
+    "CURRENT_EXTERNAL_SOURCE_ONLY_NEEDS_ENTRY_CATALOG_AND_ADMISSION_SCOPE": 86688,
+    "CURRENT_PROJECT_SOURCE_ONLY_NOT_ATTEMPTED": 260,
+    "CURRENT_PROJECT_SOURCE_ONLY_UNSUPPORTED": 2902,
+    "CURRENT_SOURCE_DEFINITION_UNRESOLVED": 4964
+  },
+  "current_source_only_entry_groups": {
+    "ENTRY_ADAPTER_MISSING:CLASS": 260,
+    "ENTRY_ADAPTER_MISSING:RESUMABLE_FUNCTION": 2,
+    "SYNC_FUNCTION_MODULE_VARIANT_MISSING": 12,
+    "SYNC_FUNCTION_MODULE_VARIANT_PRESENT": 77
+  },
+  "current_source_only_entry_calls": {
+    "ENTRY_ADAPTER_MISSING:CLASS": 260,
+    "ENTRY_ADAPTER_MISSING:RESUMABLE_FUNCTION": 47,
+    "SYNC_FUNCTION_MODULE_VARIANT_MISSING": 104,
+    "SYNC_FUNCTION_MODULE_VARIANT_PRESENT": 2751
+  },
+  "code_witness_modules": 20,
+  "code_witness_sources": 20,
+  "module_variant_present_is_complete_codetype_proof": false,
+  "source_or_graph_loaded": false,
+  "source_prepared": false,
+  "code_compiled_or_loaded": false,
+  "elapsed_s": 1.5164357140020002,
+  "inputs": [
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_restored_20261023/result/manifest.json",
+      "sha256": "1443fedcbd8882e86dee392339a5ea51fd29ea102068a65d9e51e06b347de09e",
+      "bytes": 63577
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_current_source_gate_20261023/result/source/report.json",
+      "sha256": "988c82df02b2d698a5f8061d88e1d3a13ddc323801353102b959d12566c86c48",
+      "bytes": 105902
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_current_source_gate_20261023/result/source/bindings.json",
+      "sha256": "2d4b921873f9d463132e3e45f63db7fb227f8c4988f168d47d541aa08b404ae5",
+      "bytes": 7561996
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_partitioned_operand_routes_20261023/result/code-witnesses/manifest.json",
+      "sha256": "56355f7ef10d16d8ab4fb02a84988cf2f0070b75e4cd5fccbf1c86c1ea34170d",
+      "bytes": 42283
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_restored_20261023/result/components/call_sources.json.gz",
+      "sha256": "1e54903e94bf3e0c73d2da75e4c1c8392d24254d126a3429839f1a251866d185",
+      "bytes": 268682
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_restored_20261023/result/sources/00000.json.gz",
+      "sha256": "b057f37bc64c7bf4bfff1dcbfe2438ae887379deae547c5690539828c8fed102",
+      "bytes": 33093
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_restored_20261023/result/sources/00001.json.gz",
+      "sha256": "93bd946bad0e0999661912f5e9a82bb18c8e11a1a3b1a36efd77ea9a8506c087",
+      "bytes": 13111
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_restored_20261023/result/sources/00002.json.gz",
+      "sha256": "e9f1f81f272c1c128c555186b8a377e17e981ef3f98981899e51efdaf51c40a6",
+      "bytes": 2520
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_restored_20261023/result/sources/00003.json.gz",
+      "sha256": "ccc7d330d01ae74ac7d442ecc965a62812d8f349a08864ba513b24a69fc610ee",
+      "bytes": 39738
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_restored_20261023/result/sources/00004.json.gz",
+      "sha256": "443e5eeb5740429d5876f45f39056b7007e63bde6df890d55b3f53820b212580",
+      "bytes": 64988
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_restored_20261023/result/sources/00005.json.gz",
+      "sha256": "ff47777ec0b908dd7b01d56cfb712ddbe697d0244e10395fa5d30c56339a1466",
+      "bytes": 2982
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_restored_20261023/result/sources/00006.json.gz",
+      "sha256": "b79af7a82a79c4ef37d9cfb24a6125ab9474c738858d43f9f9a519502cdf7cc7",
+      "bytes": 788
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_restored_20261023/result/sources/00007.json.gz",
+      "sha256": "b74bb529bee6abb890be748dc26d39a78576076c735d00b4a1bf4dda03d726fd",
+      "bytes": 5396
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_restored_20261023/result/sources/00008.json.gz",
+      "sha256": "6efcd3b01aa4b4ec4f0d6733305ac94c1e48d9dba32292b341b88135c9f28512",
+      "bytes": 54196
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_restored_20261023/result/sources/00009.json.gz",
+      "sha256": "1b8cab523dfe0ce705490bfdb9d75393ce787952409c77d475f131645e3a92f0",
+      "bytes": 11303
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_restored_20261023/result/sources/00010.json.gz",
+      "sha256": "b89aab66b38954532e9fa592c6bd6512ebe556a1f67b79ac457fafbffc5b4246",
+      "bytes": 54463
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_restored_20261023/result/sources/00011.json.gz",
+      "sha256": "6e41ac63cf4fceac711e9e66f4fcd32315086aa9cb5749a910de72831ea41453",
+      "bytes": 9439
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_restored_20261023/result/sources/00012.json.gz",
+      "sha256": "800e03c18a6451cd3f2a389d8ff3bef6d0535b56bd94fb9e02fecfe9c44b10b7",
+      "bytes": 24207
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_restored_20261023/result/sources/00013.json.gz",
+      "sha256": "07a06837ca56312c5dbbe52f2898fb2bd1636bba69997d3a386440c5f209d485",
+      "bytes": 146663
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_restored_20261023/result/sources/00014.json.gz",
+      "sha256": "d3edf28f78dc7f39a21fb2d49db266a0596f4a195afb9894ecfb26a72bc97266",
+      "bytes": 105074
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_restored_20261023/result/sources/00015.json.gz",
+      "sha256": "6f265f0e1d72e9f45bd67fd959149565e4284c26f1894e6feeb5039a70fceb46",
+      "bytes": 80534
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_restored_20261023/result/sources/00016.json.gz",
+      "sha256": "52230078df4758f97368bbff2b9facbd29437e5d2d74c926e11c8c5120558e58",
+      "bytes": 27819
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_restored_20261023/result/sources/00017.json.gz",
+      "sha256": "eef29bc3876eb49d5a378bd5992d4cfd146332c583ae13d16c456c0bcc1d9731",
+      "bytes": 190610
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_restored_20261023/result/sources/00018.json.gz",
+      "sha256": "25be2b71957e459729d238ba3c2d0f466bf0593f108db2bb7d31fdb0d74ce95a",
+      "bytes": 4562
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_restored_20261023/result/sources/00019.json.gz",
+      "sha256": "ee7d0b51f0b6809979debd28edbb061c7dfde0c88f57c2e011cd8186e0ada1b7",
+      "bytes": 14133
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_restored_20261023/result/sources/00020.json.gz",
+      "sha256": "10c2554ff33b1d98aa392143ff1ba5620d86e230fb10374649208abfaf65b187",
+      "bytes": 72460
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_restored_20261023/result/sources/00021.json.gz",
+      "sha256": "80e26a517f0e3ecd2f6773dd2d2fadace755c8de3a18c5bf1535aed9f2211171",
+      "bytes": 30471
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_restored_20261023/result/sources/00022.json.gz",
+      "sha256": "36f0b01589e3dd06668f2c804b37fc0b77ebae98601e4a45827a9afb87aa8281",
+      "bytes": 42566
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_restored_20261023/result/sources/00023.json.gz",
+      "sha256": "bd8f3a51ab1e5d12becd622e79a61e2b32ddd2b68efa7ef8810ae67c3885961a",
+      "bytes": 7254
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_restored_20261023/result/sources/00024.json.gz",
+      "sha256": "480dd4d82c1b47c36b7f6b8624ca91156563569020969bc98c518c42f03c0212",
+      "bytes": 59663
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_restored_20261023/result/sources/00025.json.gz",
+      "sha256": "578ddfe11ecc6ea4022928adaf9efe7767dc4a0952a7d5eb64f922d781702fcc",
+      "bytes": 38646
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_restored_20261023/result/sources/00026.json.gz",
+      "sha256": "8893a4a87752d85b86af55328c6e4684fd8559e8e317a34c54883ce961ee3b82",
+      "bytes": 68603
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_restored_20261023/result/sources/00027.json.gz",
+      "sha256": "80a9df0f3574d0d716e9cba9f20211eaa64448fc1995744eed482b001bee4937",
+      "bytes": 313467
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_restored_20261023/result/sources/00028.json.gz",
+      "sha256": "2d86ce3c0d7d9213ec19fcb7d4510f683d3b529634cf00c593c1ef7713b98cda",
+      "bytes": 3673
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_restored_20261023/result/sources/00029.json.gz",
+      "sha256": "2c536c64ecafead4f225d9da70ae915293f74a6a1beb7ecb60940b10914e04cc",
+      "bytes": 47185
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_restored_20261023/result/sources/00030.json.gz",
+      "sha256": "189cd3cdded4ceb7c4d580243b1e377197b41ec17e22bf464329c4e157ac8218",
+      "bytes": 13766
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_restored_20261023/result/sources/00031.json.gz",
+      "sha256": "24ebd856a3e77693db9a2a02f028a44c302b46a53e970ee86ecf65538444f73e",
+      "bytes": 13623
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_restored_20261023/result/sources/00032.json.gz",
+      "sha256": "82fa2492f3ff8bd7954ddf0379fa160119707f99633a1cb18d8e38c51ecbd937",
+      "bytes": 41926
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_restored_20261023/result/sources/00033.json.gz",
+      "sha256": "81d2a66be126ab28646b4c4bda263f9b52baa294110497436bc4c150ecec859d",
+      "bytes": 22591
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_restored_20261023/result/sources/00034.json.gz",
+      "sha256": "44059f98cd4d7eeb2e12c45d247b352ae8a293d703203c971015c3b431903497",
+      "bytes": 26329
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_restored_20261023/result/sources/00035.json.gz",
+      "sha256": "1c92ac6df42d367120caf0d2d42ccf96ba9e019558b41ba93a7f3f7268391371",
+      "bytes": 18454
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_restored_20261023/result/sources/00036.json.gz",
+      "sha256": "89d40109b515edda319bd9fae575ff1331b06f767f56cf1ed9368b7061eac1d9",
+      "bytes": 75412
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_restored_20261023/result/sources/00037.json.gz",
+      "sha256": "0eae83e2ca7d36b23cdafaff8fccf3914050095aca9bd385a46264f50c592bcb",
+      "bytes": 51896
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_restored_20261023/result/sources/00038.json.gz",
+      "sha256": "58369fd466115b79cf0b8c964df5daa47d0cec2fb0c2e2609b050adabe10a111",
+      "bytes": 33558
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_restored_20261023/result/sources/00039.json.gz",
+      "sha256": "447b2e2c8e3a2c126ad3cfc5a6f5d1ee6c79fe05f24cc5d0e9a1b99e60654d38",
+      "bytes": 24377
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_restored_20261023/result/sources/00040.json.gz",
+      "sha256": "c0f6a9c0fc0578c90aac867d830b28031f41f74b903e8242a2d24b9a8a38a670",
+      "bytes": 39590
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_restored_20261023/result/sources/00041.json.gz",
+      "sha256": "53d887eeda65d1ff6a988200a4416d4f9208dd8a5ca2e6751db7d9064a6fa910",
+      "bytes": 43452
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_restored_20261023/result/sources/00042.json.gz",
+      "sha256": "7a350e50f4b3d2a3ed871c9bffa22d7e59de18aebe2ed287df325659c846e13d",
+      "bytes": 59825
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_restored_20261023/result/sources/00043.json.gz",
+      "sha256": "3e1596185defa84f120871bd291989ff048b7d1902c95c313c27162f7825ef3d",
+      "bytes": 34354
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_restored_20261023/result/sources/00044.json.gz",
+      "sha256": "a9b856fee66037e4e76f2b6283644498ff32cd54ba282f7280f15bff28172439",
+      "bytes": 27026
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_restored_20261023/result/sources/00045.json.gz",
+      "sha256": "2f9af992fe0820c15a1331383bd49d85856e3e4cbe629d90fabe9d7575ff06c5",
+      "bytes": 64479
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_restored_20261023/result/sources/00046.json.gz",
+      "sha256": "ebcf2500e01cc45b8cf2c922f31414ffd993c363f846f41bb3e0cd34683105d3",
+      "bytes": 61196
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_restored_20261023/result/sources/00047.json.gz",
+      "sha256": "740cb1f7890fd2ae4b1dd3026b0ba9001c37983558dda228e370c35b1da944d0",
+      "bytes": 19252
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_restored_20261023/result/sources/00048.json.gz",
+      "sha256": "7be8649e8bdd78b647736885c39ee22802cfd5864b89c3c22f1d68dd32d5280b",
+      "bytes": 35162
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_restored_20261023/result/sources/00049.json.gz",
+      "sha256": "8d0a67025b51cc5b82aed5b741fcdeb34341f874cbc7a81879a6b32d6f1601b8",
+      "bytes": 20680
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_restored_20261023/result/sources/00050.json.gz",
+      "sha256": "a81785792fcb5fe92d873ff1c049a8764e2d90ea1f732c24390164f52b07882d",
+      "bytes": 27717
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_restored_20261023/result/sources/00051.json.gz",
+      "sha256": "2c66b19cca9f05473689e50734bfbfecf23096a9bbebaf4e4a8160134ffc28ec",
+      "bytes": 22142
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_restored_20261023/result/sources/00052.json.gz",
+      "sha256": "22717b18346fccfe0c1b83d88256d4bc17fccbd55622d210cd6bb934d83170d0",
+      "bytes": 88666
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_restored_20261023/result/sources/00053.json.gz",
+      "sha256": "9c0dbb43482afa096476a5f295fae5a4bf89558520ef07cf6499e9daa36de14f",
+      "bytes": 22551
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_restored_20261023/result/sources/00054.json.gz",
+      "sha256": "ceb3c35957bd397a6663cab774845920dc3e078ce4f0ca4c15559fffc150e96d",
+      "bytes": 31651
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_restored_20261023/result/sources/00055.json.gz",
+      "sha256": "f31cdc06233927b027b12b60e3cae22f6e3013a01de20904fde89824467603d5",
+      "bytes": 5260
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_restored_20261023/result/sources/00056.json.gz",
+      "sha256": "c39de4fb773b8756b3192d4c986effeaa7643304cd15d5e7170a376a87e78266",
+      "bytes": 25675
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_restored_20261023/result/sources/00057.json.gz",
+      "sha256": "2f9ee19943a7191361ff4b45056a87e867d83827b37bbbafa2c68da9a9b70330",
+      "bytes": 12824
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_restored_20261023/result/sources/00058.json.gz",
+      "sha256": "c763a33f0efd95ab00bd6b368647991a331b081808d8c4e68b715226988812c8",
+      "bytes": 49360
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_restored_20261023/result/sources/00059.json.gz",
+      "sha256": "77c3247423d1026c8963e9ece1a06297cbab44bc3340d383696c24d42bf43c3f",
+      "bytes": 20673
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_restored_20261023/result/sources/00060.json.gz",
+      "sha256": "e75b180e538bfc4f6fc58f289673bee1b993c7fcd48de06837fde611ef98556c",
+      "bytes": 100164
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_restored_20261023/result/sources/00061.json.gz",
+      "sha256": "9901b6d24aa0222b4f8ecad00f62889cc12eaaff7c93555fc7772c0176c90ec5",
+      "bytes": 73498
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_restored_20261023/result/sources/00062.json.gz",
+      "sha256": "3873a79085340adcaa5b2e4bd20596fd5430c61175c8ac06147267e9aaa5b4fc",
+      "bytes": 17570
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_restored_20261023/result/sources/00063.json.gz",
+      "sha256": "5d00e9cd57704b3607e48ae0ef0868a334c57f917e33418c5f19d38db181a4df",
+      "bytes": 50201
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_restored_20261023/result/sources/00064.json.gz",
+      "sha256": "945caec6aa0444a387e1aced0c69a2c63c8c51c0e5e00d6df67589aec3b04154",
+      "bytes": 34088
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_restored_20261023/result/sources/00065.json.gz",
+      "sha256": "f7eddedf44f569ab24167fad35495a97a7337cd0a32ab78f8c5e8a8d3cc4d7a3",
+      "bytes": 87461
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_restored_20261023/result/sources/00066.json.gz",
+      "sha256": "38878984102d6aca1771a30835607473e7080a494d657f6113462b031aa59398",
+      "bytes": 240548
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_restored_20261023/result/sources/00067.json.gz",
+      "sha256": "c2d088041747433f087815f190c8de34b0538c041293e4c50e6fffb4d97b4677",
+      "bytes": 31207
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_restored_20261023/result/sources/00068.json.gz",
+      "sha256": "c9d0e99c5999faa2655a7e394983fdf1573422c83ac9e1428c065b0c46e6de17",
+      "bytes": 80336
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_restored_20261023/result/sources/00069.json.gz",
+      "sha256": "36a80bd7a1784086441d4618bcda1dc332cff5123d270f059c06599d523660c8",
+      "bytes": 1329
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_restored_20261023/result/sources/00070.json.gz",
+      "sha256": "c0c89d739964137838fd3b0d3949bd21fe488af80defb0d8fe036277cedb1382",
+      "bytes": 86454
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_restored_20261023/result/sources/00071.json.gz",
+      "sha256": "b5ac9b590f5e743014f4ac5de5f8fd58b8bd8a6b284aadc62953dcc73bb79a61",
+      "bytes": 15289
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_restored_20261023/result/sources/00072.json.gz",
+      "sha256": "f8289bab22eefa8f87c24bda3bd3311f7501c9fae0fc8ce8cba20e6b605c8df8",
+      "bytes": 49320
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_restored_20261023/result/sources/00073.json.gz",
+      "sha256": "75dd71a75785bef49c99850a3f89720b7e6f88ba2e240c04a522d32cabd0eece",
+      "bytes": 1648
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_restored_20261023/result/sources/00074.json.gz",
+      "sha256": "4917a2b1f1c3cbc2e6b404281a683ca13f270950ac94f1f9f37f486b6587155e",
+      "bytes": 16814
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_restored_20261023/result/sources/00075.json.gz",
+      "sha256": "331cce7ab0ca7f31c830f1a307117832dd9c2ffad1f014cf0c7a7e689d7bf092",
+      "bytes": 45912
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_restored_20261023/result/sources/00076.json.gz",
+      "sha256": "aab6f0eff694fd6cd6f3f279842bf009b739cad5c8ff0809dc31d9536b327f1f",
+      "bytes": 28746
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_restored_20261023/result/sources/00077.json.gz",
+      "sha256": "ffdf15916bd9f4bcc8a7ebbe171f3d27e84d427653cf48b54d47cfef63c4b615",
+      "bytes": 3592
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_restored_20261023/result/sources/00078.json.gz",
+      "sha256": "00d87aa474262a5df48f7ae5558a39a5cd9bc719c90a0b135d683f2188b935f0",
+      "bytes": 17917
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_restored_20261023/result/sources/00079.json.gz",
+      "sha256": "5b4593205bfae9b76b7b5fa38635d4441397f522833c07f2063ca44376b5be5c",
+      "bytes": 25036
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_restored_20261023/result/sources/00080.json.gz",
+      "sha256": "220709f13298214ae64934fb0f2c634970b90ce7028cf6a74d7b74f5a801fada",
+      "bytes": 27422
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_restored_20261023/result/sources/00081.json.gz",
+      "sha256": "e36c92927b10c82cd27d9abb0b7f02afeecdcfc237e7d3dde5a898c2aadddde2",
+      "bytes": 11221
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_restored_20261023/result/sources/00082.json.gz",
+      "sha256": "f8f7059636cbfdc6252a3e1ed60cd50d02c6790ea2947395f994f913b5451b19",
+      "bytes": 31549
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_restored_20261023/result/sources/00083.json.gz",
+      "sha256": "5ae4d43fcb07fd676f7722bd0c79bb0020bbba190b80e68ae0bf3f8edc846d68",
+      "bytes": 20288
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_restored_20261023/result/sources/00084.json.gz",
+      "sha256": "9c67646f64e39a126fdb328fb691bef075cec3d4b73da755c71bffe52b1bf14c",
+      "bytes": 11528
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_restored_20261023/result/sources/00085.json.gz",
+      "sha256": "2adc664ff952579ea52106213231a5c2f67a70eb5f5690b6bfd51bcd65147e93",
+      "bytes": 40157
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_restored_20261023/result/sources/00086.json.gz",
+      "sha256": "2cdfa36210196bddb69e97cf0316317530341a1b4bf7b107f028492a96e0bd75",
+      "bytes": 60807
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_restored_20261023/result/sources/00087.json.gz",
+      "sha256": "25df650060927f83cec07eb81be0c7668b6a3f575107f771b39394746033fcfe",
+      "bytes": 8318
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_restored_20261023/result/sources/00088.json.gz",
+      "sha256": "16519ee9213a9f895453bad84fae8aef7674a10d878e032386e9abc4b99e7257",
+      "bytes": 57784
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_restored_20261023/result/sources/00089.json.gz",
+      "sha256": "116be475ab163caf22ff24cbe68ed864c55dd4bba7af6e5038b6f9b81786b8a6",
+      "bytes": 40667
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_restored_20261023/result/sources/00090.json.gz",
+      "sha256": "c9ffe4736a7c71b8838518f904b717fdc12be7eeb0082296bc2e31b8695d7a49",
+      "bytes": 19002
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_restored_20261023/result/sources/00091.json.gz",
+      "sha256": "16afa112e7b9177fc9e6ecad84036e9e7fb41c1bd68f7754b942cc8acdc0217b",
+      "bytes": 60825
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_restored_20261023/result/sources/00092.json.gz",
+      "sha256": "fca813f3dd752c1966993b239eda448d7d7e20bc6f9bf7bf8f2e71aacfa8e2af",
+      "bytes": 1741
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_restored_20261023/result/sources/00093.json.gz",
+      "sha256": "dc74bdcf3abbca5d55c00132a697a820d17fdb85114537b0202e67e9028e7718",
+      "bytes": 3220
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_restored_20261023/result/sources/00094.json.gz",
+      "sha256": "6f905e9cd27b70c6205b57fd1d0f6043df7ffb87ffe5223b74f9e4d0615a8645",
+      "bytes": 83562
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_restored_20261023/result/sources/00095.json.gz",
+      "sha256": "585840fa81ef7460826c4b3d97f7328038dc4687e893bde6415c842c261c9b9e",
+      "bytes": 94222
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_restored_20261023/result/sources/00096.json.gz",
+      "sha256": "7892dcfe01b40517fd20728f781f1dc0c3505b27dedba1009eb6668937cd0a3d",
+      "bytes": 16584
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_restored_20261023/result/sources/00097.json.gz",
+      "sha256": "c7e8d254a3445ccf469b6d5a53a9d7583d0690561e95bd15ce046c8eefb499ad",
+      "bytes": 3745
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_restored_20261023/result/sources/00098.json.gz",
+      "sha256": "0ea38598410960da2aae4a481f3aaba24f3924418956f1766dc788741dcaef98",
+      "bytes": 69022
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_restored_20261023/result/sources/00099.json.gz",
+      "sha256": "07ffeb40289b29e14402e3e9f2d198c3795595af37679638e3894d72875273fa",
+      "bytes": 73981
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_restored_20261023/result/sources/00100.json.gz",
+      "sha256": "3855addd4aac2d07e877413fb11967a09507a7abafeadc3189c3ee21eefd3fa9",
+      "bytes": 180126
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_restored_20261023/result/sources/00101.json.gz",
+      "sha256": "eb0f1a9b696552112fe4f027494aeb2860bffd8d903f5bdefc71b6be7859843c",
+      "bytes": 71082
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_restored_20261023/result/sources/00102.json.gz",
+      "sha256": "75e9998f9ff7e040c19cf219a4db78ed3e7209008d909f79c5de5a0eb2d9a352",
+      "bytes": 3464
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_restored_20261023/result/sources/00103.json.gz",
+      "sha256": "6740981cae141e77f8fc4ee4a267adeb6639ce64f00185d1600f8dee909431ef",
+      "bytes": 58303
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_restored_20261023/result/sources/00104.json.gz",
+      "sha256": "89d2f67e4e8226bc4ba8dbbc2d1730fbe83f4bdd05b0f8cebd5f73f015df7d04",
+      "bytes": 32974
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_restored_20261023/result/sources/00105.json.gz",
+      "sha256": "fc9351bffa18119fb4b487627dbb53914af12a66f45b4e7fde33f2c305fcafbb",
+      "bytes": 52110
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_restored_20261023/result/sources/00106.json.gz",
+      "sha256": "1172c39f555e428abbb8114993fa989651bf12294f8087c53a10753898500a66",
+      "bytes": 16619
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_restored_20261023/result/sources/00107.json.gz",
+      "sha256": "cc60eb051cd77ee30d586eb41fe727acacc1cd80ad9d6698b45bd6fa791ade41",
+      "bytes": 1865
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_restored_20261023/result/sources/00108.json.gz",
+      "sha256": "ba52d1f591db28080575b27c6c70a221b9954dc42fb054124bab68fc7e7da1d3",
+      "bytes": 1182
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_restored_20261023/result/sources/00109.json.gz",
+      "sha256": "2e8998f131b79654d5894b2b27fb9f5994cbb4122082ef76a34a0c3c07fb06a3",
+      "bytes": 148010
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_restored_20261023/result/sources/00110.json.gz",
+      "sha256": "b1fce8c62877aa3a4e288174b610db619a3f3eff94fbddfb38d4233537c98c80",
+      "bytes": 7988
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_restored_20261023/result/sources/00111.json.gz",
+      "sha256": "64655bb6d9aab871bf54017a4fb803156a68da2a419ea2fd767fa4d3dee51bc5",
+      "bytes": 15089
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_restored_20261023/result/sources/00112.json.gz",
+      "sha256": "f9d52c40352d06b8342c46ff9712c723347a1183e540b687328a2fb3d3226ee3",
+      "bytes": 13346
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_restored_20261023/result/sources/00113.json.gz",
+      "sha256": "31980d78f869d7efffea17ea8cdac83c828f6ea5121171e1c553582fb007b87e",
+      "bytes": 46484
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_restored_20261023/result/sources/00114.json.gz",
+      "sha256": "84a4b02d127a98fbc4f3fbe93843fb3bf09f2207912dd3b5482725b2bbf72307",
+      "bytes": 1040
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_restored_20261023/result/sources/00115.json.gz",
+      "sha256": "b03080ab25c345f5a705abdcd5a8acc3e9e8333cd53e530464b967111c1950db",
+      "bytes": 19675
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_restored_20261023/result/sources/00116.json.gz",
+      "sha256": "83811dcfd90f924e89924e5ca3b9834b56d231d10569d41809f3443dbe97f45d",
+      "bytes": 70038
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_restored_20261023/result/sources/00117.json.gz",
+      "sha256": "6222ad0c78ec3fc3bc3a916554e84e5dff11cb5415c995af5720ad9e94bbc5cd",
+      "bytes": 7038
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_restored_20261023/result/sources/00118.json.gz",
+      "sha256": "62b53094f64e5346645ba2f17bfa61453be924993167b8cadba7894e1c4944c6",
+      "bytes": 1776
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_restored_20261023/result/sources/00119.json.gz",
+      "sha256": "e47c5857aea307567784304bf6a609d81c29708413d57b7aee98b337d9c8157d",
+      "bytes": 1666
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_restored_20261023/result/sources/00120.json.gz",
+      "sha256": "0c12433d7ab677f8c75a6465a0188335b71842b4fd155a729707753dbba59ecc",
+      "bytes": 12744
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_restored_20261023/result/sources/00121.json.gz",
+      "sha256": "cf83afdb111ac4c61eec90ae9fb3b61311183afd7c580893d8c1f7c87b386239",
+      "bytes": 16310
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_restored_20261023/result/sources/00122.json.gz",
+      "sha256": "86b1b174752d2a2512249245d48fbd454748fed9834b204136c3ea02f1a503a7",
+      "bytes": 10817
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_restored_20261023/result/sources/00123.json.gz",
+      "sha256": "7f81ef3cab42c892617fcc1697aadb3778fcc617d40f5a381e733c54af801db6",
+      "bytes": 42579
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_restored_20261023/result/sources/00124.json.gz",
+      "sha256": "e125d4184881cbb5afd463bad692744172f1006bec9e6540420e485ecc2156b7",
+      "bytes": 42095
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_restored_20261023/result/sources/00125.json.gz",
+      "sha256": "370549f9fff1519fb6cc3c429240398bfbdc09697253a5797bd2e805947cafa1",
+      "bytes": 45079
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_restored_20261023/result/sources/00126.json.gz",
+      "sha256": "bf9afae3bb36a7d21e63726bdcc8077fcef748bb82814dbf3eaafc00197d7e52",
+      "bytes": 52646
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_restored_20261023/result/sources/00127.json.gz",
+      "sha256": "e34127ea5071818083edd23fc2f2538674266f03b8793a2bed4c7488cd0a71e8",
+      "bytes": 60568
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_restored_20261023/result/sources/00128.json.gz",
+      "sha256": "7d1099e3786a09427abf74382cfc0359af2d83593a4f9923705da3d596723115",
+      "bytes": 40523
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_restored_20261023/result/sources/00129.json.gz",
+      "sha256": "11a7e0a017ea4ec1e4627f4e49cddf06c377d24565940c6bba00460511bd20ab",
+      "bytes": 48523
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_restored_20261023/result/sources/00130.json.gz",
+      "sha256": "1cd1376e91bc41771272a8c0d2283012efed297bafa417e8e770ea52e91d0c94",
+      "bytes": 31946
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_restored_20261023/result/sources/00131.json.gz",
+      "sha256": "c51c5d4188ff2d8495c98e52a79999e6d939e994fa9e4ec50a5b122060062322",
+      "bytes": 8081
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_restored_20261023/result/sources/00132.json.gz",
+      "sha256": "c1ce9dec7ab1d71572c1a5f5d0d6aebc17267427506acc95180bcde6308fda64",
+      "bytes": 8325
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_restored_20261023/result/sources/00133.json.gz",
+      "sha256": "c1ce57c836ca0434a85c17bafb1cf9e994685a4ce4119b72d3e4b78fa7eb1c24",
+      "bytes": 108179
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_restored_20261023/result/sources/00134.json.gz",
+      "sha256": "877abf645cfdd11f37fea28b88ccc2b9dabaf12169872b216e0d4ba5859cffac",
+      "bytes": 22273
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_restored_20261023/result/sources/00135.json.gz",
+      "sha256": "1adf156f5b46fbf5c03d7103e66a743797fc4469212f83c9b8409a1f269adea9",
+      "bytes": 1088
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_restored_20261023/result/sources/00136.json.gz",
+      "sha256": "bf2423eb09f4c1a9b1e6de8d30653986f5cb802a9845795d6665c3321580c469",
+      "bytes": 817
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_restored_20261023/result/sources/00137.json.gz",
+      "sha256": "e9c3e4bb5dbf057c723f39b66a8ad302ea2a9df6cc0e47579e65c274b664dbfe",
+      "bytes": 28249
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_restored_20261023/result/sources/00138.json.gz",
+      "sha256": "6005d60bffc58322b7e2d12c7b65c019dc300db4079878354ddb66e948ad9def",
+      "bytes": 815
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_restored_20261023/result/sources/00139.json.gz",
+      "sha256": "c3ccd80edee6f93a0b7e5637d0f7578f9dff53e08cf0a0b3d70d37e7e594138f",
+      "bytes": 29294
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_restored_20261023/result/sources/00140.json.gz",
+      "sha256": "f363734ef286d5532a3d58319b04c53052bf173d7911266bd0516028b60b715b",
+      "bytes": 54613
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_restored_20261023/result/sources/00141.json.gz",
+      "sha256": "5180de686ae39ef4590537341fb14112b76b56d74be3394db00217599b8b5c4e",
+      "bytes": 29415
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_restored_20261023/result/sources/00142.json.gz",
+      "sha256": "b5a57cc56bb382322c729725ca56dd1343246df0ef235de12d096854a133ee81",
+      "bytes": 820
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_restored_20261023/result/sources/00143.json.gz",
+      "sha256": "41d30288adc7eba4ab9954fbf66cebc1a8f7107bbdc7560c35199f0acb25f6f8",
+      "bytes": 68487
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_restored_20261023/result/sources/00144.json.gz",
+      "sha256": "662aa2ea506e17efff7c8c6312358c6dd24210811f7350a119118e028c3d32eb",
+      "bytes": 29958
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_restored_20261023/result/sources/00145.json.gz",
+      "sha256": "7f5d62bbc1e600e1c48a18e25f0e96c103bb410b97316623282824eee98afea3",
+      "bytes": 1076
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_restored_20261023/result/sources/00146.json.gz",
+      "sha256": "7ab4cd42980bd07314e0d6a570b8bdfa49d1ea28f55ef5039874659126e16367",
+      "bytes": 35289
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_restored_20261023/result/sources/00147.json.gz",
+      "sha256": "45140c30b0dc45c694828ae18c4157c4f95edbc54ddfaaab963134563aacecb7",
+      "bytes": 88494
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_restored_20261023/result/sources/00148.json.gz",
+      "sha256": "0539acc8c02d15c98a1a98dcda45b4757348eac3683fd006042ecb3e92ca6a71",
+      "bytes": 2516
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_restored_20261023/result/sources/00149.json.gz",
+      "sha256": "955c13bc234d87bee6d07cdcad9c819d1b01dc9ad5070448368aa4c17a130752",
+      "bytes": 88904
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_restored_20261023/result/sources/00150.json.gz",
+      "sha256": "848afa5cc593a1269f9f956e48d67b9ba0da61c8412185695f62a25093964e72",
+      "bytes": 115008
+    }
+  ],
+  "first_stage_complete": false,
+  "candidate_source_files": {
+    "ENTRY_ADAPTER_MISSING:CLASS": 104,
+    "ENTRY_ADAPTER_MISSING:COMPREHENSION": 67,
+    "ENTRY_ADAPTER_MISSING:LAMBDA": 9,
+    "ENTRY_ADAPTER_MISSING:RESUMABLE_FUNCTION": 2,
+    "FUNCTION_WITHOUT_COMPLETE_CAPTURED_CODE_SOURCE_WITNESS": 113,
+    "SYNC_FUNCTION_MODULE_VARIANT_MISSING": 10,
+    "SYNC_FUNCTION_MODULE_VARIANT_PRESENT": 15
+  }
+}

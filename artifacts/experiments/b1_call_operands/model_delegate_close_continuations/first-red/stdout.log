@@ -1,0 +1,183 @@
+.FFF                                                                     [100%]
+=================================== FAILURES ===================================
+_ test_optional_close_tables_do_not_define_the_two_original_c1_continuations[inputs-and-consumers] _
+
+deleted = 'inputs-and-consumers'
+
+    @pytest.mark.parametrize('deleted', ('consumers', 'inputs-and-consumers'))
+    def test_optional_close_tables_do_not_define_the_two_original_c1_continuations(deleted):
+        program, details = packet_continuation_program(two_cuts=True, complete_transitions=True)
+        sites = {_site(row) for row in details['rows']}
+        assert len(sites) == 2
+        operations = {operation.id: operation for operation in program.operations}
+        by_kind = {}
+        for row in details['rows']:
+            result = row.contract.result
+            assert result.edge.operation == row.operation == details['helper']
+            assert result.edge.successor_index == row.slot
+            edge = operations[row.operation].terminator.successors[result.edge.successor_index]
+            by_kind[edge.kind] = _site(row)
+        assert set(by_kind) == {ExitKind.NORMAL, ExitKind.RAISE}
+        assert sum(type(operation.terminator) is SuspendTerminator
+                   for operation in program.operations) == 2
+    
+        baseline = _report(program, details)
+        original_entries = _close_entries(baseline, sites)
+        original_routes = _routes(original_entries)
+        original_consumers = _common_entries(baseline, 'consumers', sites)
+        for site, route in original_routes.items():
+            assert original_entries[site]['row'] in details['rows']
+            assert route['status'] == 'DECLARED'
+            assert route['known_inventory_complete'] is True
+            assert route['actions'] and route['projections']
+            assert details['replacement'] in _topology(route)['actions']
+            # Both own N and own R reach this same original second cut. A handled
+            # branch that never called close is not its NORMAL completion.
+            assert _topology(route)['suspensions'] == {details['second_suspend']}
+            assert details['host_packet'] in route['targets']
+            assert all(item['binding']['match'] is True
+                       for item in _host_checks(route, details['host_packet']))
+            _flags(route)
+    
+        normal_site, raise_site = by_kind[ExitKind.NORMAL], by_kind[ExitKind.RAISE]
+        normal_attachment, = tuple(row for row in program.protocol_call_inputs
+                                   if row.site == normal_site)
+        normal_case, = normal_attachment.cases
+        assert type(normal_case.trigger) is InjectedPacketTrigger
+        assert original_routes[normal_site]['source'] == normal_case.trigger.packet
+        assert original_routes[normal_site]['source'] != original_entries[normal_site]['row'].contract.result
+        assert original_routes[raise_site]['source'] == original_entries[raise_site]['row'].contract.result
+    
+        changed = replace(program,
+            protocol_call_inputs=tuple(row for row in program.protocol_call_inputs
+                if not (deleted == 'inputs-and-consumers' and row.site in sites)),
+            protocol_result_consumers=tuple(row for row in program.protocol_result_consumers
+                                           if row.site not in sites))
+        # Every canonical operation, value, state, control port, cleanup action,
+        # pending definition and cut is exactly the original record. Only the two
+        # optional declaration tables differ.
+        assert replace(changed, protocol_call_inputs=program.protocol_call_inputs,
+            protocol_result_consumers=program.protocol_result_consumers) == program
+        partial = _report(changed, details)
+        entries = _close_entries(partial, sites)
+>       routes = _routes(entries)
+                 ^^^^^^^^^^^^^^^^
+
+tests/unit/test_program_delegate_close_inventory.py:135: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+entries = {ProtocolOperationRef(scope=ProtocolScopeID(value='finally.close.protocol'), clause=<ProtocolClause.DELEGATE_CLOSE: 'D...<StaticGapReason.NATIVE_APPLICABILITY_UNPROVEN: 'NATIVE_APPLICABILITY_UNPROVEN'>)), 'status': 'PARTIAL', 'checks': ()}}
+
+    def _routes(entries):
+        result = {}
+        for site, entry in entries.items():
+            routes = entry.get('close_routes', ())
+>           assert len(routes) == 1, (site, entry)
+E           AssertionError: (ProtocolOperationRef(scope=ProtocolScopeID(value='finally.close.protocol'), clause=<ProtocolClause.DELEGATE_CLOSE: 'D...<StaticGapReason.NATIVE_APPLICABILITY_UNPROVEN: 'NATIVE_APPLICABILITY_UNPROVEN'>)), 'status': 'PARTIAL', 'checks': ()})
+E           assert 0 == 1
+E            +  where 0 = len(())
+
+tests/unit/test_program_delegate_close_inventory.py:42: AssertionError
+_ test_selected_close_packet_crosses_its_actual_parent_c1_and_future_resume[normal-injection] _
+
+close_raised = False
+
+    @pytest.mark.parametrize('close_raised', (False, True), ids=('normal-injection', 'raise-own-packet'))
+    def test_selected_close_packet_crosses_its_actual_parent_c1_and_future_resume(close_raised):
+>       program, model, details = _capture(close_raised=close_raised)
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_execution_delegate_close_continuations.py:317: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/unit/test_execution_delegate_close_continuations.py:171: in _capture
+    program, static = _driven_program()
+                      ^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def _driven_program():
+        body, old = packet_continuation_program(two_cuts=True, complete_transitions=True)
+        parent = body.regions[0]
+        cuts = (OperationID('finally.suspend'), old['second_suspend'])
+        sources = (*cuts, old['host'].id)
+        parts = tuple(_driver(body, number, source,
+            None if number == 0 else cuts[number - 1], packet=number == 1)
+            for number, source in enumerate(sources))
+        locations = tuple(row.id for row in body.locations)
+        state_types = tuple(ValueType(ValueKind.STATE, location=identity) for identity in locations)
+        host = _Builder('delegate.close.host', locations)
+        entry_name = 'delegate.close.host.entry'
+        entry = host.formals(entry_name, (REFERENCE, PACKET, REFERENCE, *state_types))
+        receiver, injection, sent = entry[:3]
+        current_name, current_arguments, current_states = entry_name, entry, entry[3:]
+        calls, raws, selected_calls = [], [], {}
+        for number, part in enumerate(parts):
+            name = f'delegate.close.host.call.{number}'
+            raw_operands = (_use(name + '.sent', sent),) if number == 2 else ()
+            raw = host.value(name + '.raw.value', OperationResult(OperationID(name + '.raw'), 0), RAW)
+            pack = host.add(name + '.raw', raw_operands, results=(raw,), effects_complete=True)
+            raws.append(RawRequestDefinition(raw,
+                (RawRequestKind.NEXT, RawRequestKind.CLOSE, RawRequestKind.SEND)[number],
+                tuple(use.id for use in raw_operands)))
+>           actuals = (_use(name + '.receiver', receiver), _use(name + '.scheduler', raw, protocol=True),
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                *((_use(name + '.packet', injection, protocol=True),) if number == 1 else
+                  (_use(name + '.value', sent),) if number == 2 else ()),
+                *(_use(name + f'.state.{index}', value, state=True)
+                  for index, value in enumerate(current_states)))
+E           TypeError: _use() missing 1 required positional argument: 'identity'
+
+tests/unit/test_execution_delegate_close_continuations.py:121: TypeError
+_ test_selected_close_packet_crosses_its_actual_parent_c1_and_future_resume[raise-own-packet] _
+
+close_raised = True
+
+    @pytest.mark.parametrize('close_raised', (False, True), ids=('normal-injection', 'raise-own-packet'))
+    def test_selected_close_packet_crosses_its_actual_parent_c1_and_future_resume(close_raised):
+>       program, model, details = _capture(close_raised=close_raised)
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_execution_delegate_close_continuations.py:317: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/unit/test_execution_delegate_close_continuations.py:171: in _capture
+    program, static = _driven_program()
+                      ^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def _driven_program():
+        body, old = packet_continuation_program(two_cuts=True, complete_transitions=True)
+        parent = body.regions[0]
+        cuts = (OperationID('finally.suspend'), old['second_suspend'])
+        sources = (*cuts, old['host'].id)
+        parts = tuple(_driver(body, number, source,
+            None if number == 0 else cuts[number - 1], packet=number == 1)
+            for number, source in enumerate(sources))
+        locations = tuple(row.id for row in body.locations)
+        state_types = tuple(ValueType(ValueKind.STATE, location=identity) for identity in locations)
+        host = _Builder('delegate.close.host', locations)
+        entry_name = 'delegate.close.host.entry'
+        entry = host.formals(entry_name, (REFERENCE, PACKET, REFERENCE, *state_types))
+        receiver, injection, sent = entry[:3]
+        current_name, current_arguments, current_states = entry_name, entry, entry[3:]
+        calls, raws, selected_calls = [], [], {}
+        for number, part in enumerate(parts):
+            name = f'delegate.close.host.call.{number}'
+            raw_operands = (_use(name + '.sent', sent),) if number == 2 else ()
+            raw = host.value(name + '.raw.value', OperationResult(OperationID(name + '.raw'), 0), RAW)
+            pack = host.add(name + '.raw', raw_operands, results=(raw,), effects_complete=True)
+            raws.append(RawRequestDefinition(raw,
+                (RawRequestKind.NEXT, RawRequestKind.CLOSE, RawRequestKind.SEND)[number],
+                tuple(use.id for use in raw_operands)))
+>           actuals = (_use(name + '.receiver', receiver), _use(name + '.scheduler', raw, protocol=True),
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                *((_use(name + '.packet', injection, protocol=True),) if number == 1 else
+                  (_use(name + '.value', sent),) if number == 2 else ()),
+                *(_use(name + f'.state.{index}', value, state=True)
+                  for index, value in enumerate(current_states)))
+E           TypeError: _use() missing 1 required positional argument: 'identity'
+
+tests/unit/test_execution_delegate_close_continuations.py:121: TypeError
+=========================== short test summary info ============================
+FAILED tests/unit/test_program_delegate_close_inventory.py::test_optional_close_tables_do_not_define_the_two_original_c1_continuations[inputs-and-consumers]
+FAILED tests/unit/test_execution_delegate_close_continuations.py::test_selected_close_packet_crosses_its_actual_parent_c1_and_future_resume[normal-injection]
+FAILED tests/unit/test_execution_delegate_close_continuations.py::test_selected_close_packet_crosses_its_actual_parent_c1_and_future_resume[raise-own-packet]
+3 failed, 1 passed in 1.72s

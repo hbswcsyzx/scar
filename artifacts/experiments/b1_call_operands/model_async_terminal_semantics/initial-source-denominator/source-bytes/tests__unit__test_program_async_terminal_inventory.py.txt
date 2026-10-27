@@ -1,0 +1,16 @@
+"""Original async terminal legality survives deletion of optional consumers."""
+from dataclasses import replace
+
+from scar.ir.program.model import LiteralOrigin
+from scar.ir.program.protocol_connections import AsyncSessionOutcome
+from scar.ir.program.validation import validate
+from tests.fixtures.program_async_connections import async_driver_program
+
+
+def test_known_non_none_async_return_is_rejected_without_its_session_source_attachment():
+    graph, _ = async_driver_program(target='value')
+    original = next(value for value in graph.values if value.id.value == 'async.body.none')
+    changed = replace(original, origin=LiteralOrigin(7))
+    graph = replace(graph, values=tuple(changed if value is original else value for value in graph.values),
+        protocol_bindings=tuple(row for row in graph.protocol_bindings if type(row) is not AsyncSessionOutcome))
+    assert 'async_return_value' in {issue.code for issue in validate(graph)}

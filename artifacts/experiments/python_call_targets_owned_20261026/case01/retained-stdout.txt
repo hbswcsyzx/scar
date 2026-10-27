@@ -1,0 +1,44 @@
+{
+  "status": "PASS_WITH_OPEN",
+  "elapsed_seconds": 2.3796783019788563,
+  "model_equal_before_after_lossless_archive": true,
+  "ports": {
+    "targets": 8,
+    "bound_calls": 5,
+    "receiver_ports": 2,
+    "explicit_argument_ports": 5,
+    "open_targets": 3,
+    "reference_identity_established": false,
+    "effects_state_ready_established": false,
+    "whole_program_complete": false
+  },
+  "observed": {
+    "targets": 8,
+    "entries": 6,
+    "gaps": 0,
+    "kinds": {
+      "OTHER_UNCLASSIFIED": 1,
+      "NORMALIZED_RECEIVER_FUNCTION": 2,
+      "FUNCTION": 4,
+      "NATIVE_BUILTIN": 1
+    },
+    "receiver_entries": 2,
+    "contents_state_ready_established": false,
+    "whole_program_complete": false
+  },
+  "receiver_rejection": "Python source binding differs from original code/source/receiver/ports",
+  "old_expected_definition_rejection": "formal interface has no matching root/definition",
+  "old_report_version": 1,
+  "external_SP5_relowered": false,
+  "target_or_LeWM_replayed": false,
+  "model_sha256": "d71743e6e58a4b90975a725cfa0ac53486e1abc7178754085fd404288037288b",
+  "source_sha256": {
+    "scar/ir/program/python_call_targets.py": "e14c12326e0411973363f862ddef64e472311bd5dee996f1e42e6292ba4e9d71",
+    "scar/analysis/python_call_targets.py": "f90bb153b8fbe5641731a8cee5b16d227873e0bcbe22aa09e7656ee6b901f9ad",
+    "scar/analysis/call_operands.py": "857acbf3d6d70b97befb1b6f8d8ddef5ac832473ae1cb64a83bb1fa707de3189",
+    "scar/analysis/current_source_evidence.py": "b9ac48b9c32988d97ce153eb405e01675fef1a7c513e91fdbb141ce1ac426138",
+    "scar/analysis/call_edges.py": "7536bed3080d61344685b6e8d1fd6e0a5252cffdd274490ba8351b0a114cd5bf",
+    "scar/analysis/call_operand_routes.py": "182bfe065fc74b544211903d6c6ae0fe062232562fdfb88e5c0f0062a465044f",
+    "scar/trace/call_operands.py": "720f77e48710e8e9c5bf1dd17ef41fb5b8832b107af3ceb2b0a44952ed6628a7"
+  }
+}

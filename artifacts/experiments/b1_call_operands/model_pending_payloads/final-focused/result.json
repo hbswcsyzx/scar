@@ -1,0 +1,8 @@
+{
+  "returncode": 0,
+  "duration_seconds": 42.680510396137834,
+  "source_sha256_before": "1b92351bac44522b6cbe84afeee1f3ed32eab4deed679c6260dec6da81df00fa",
+  "source_sha256_after": "1b92351bac44522b6cbe84afeee1f3ed32eab4deed679c6260dec6da81df00fa",
+  "source_unchanged": true,
+  "source_count": 718
+}

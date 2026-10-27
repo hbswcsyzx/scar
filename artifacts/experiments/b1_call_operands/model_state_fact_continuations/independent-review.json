@@ -1,0 +1,56 @@
+{
+  "scope": "Finite conditional content-preservation/post-history review; supplied graphs and captures only.",
+  "all_authors_frozen": true,
+  "interpreters_started_by_reviewers": 0,
+  "full_family_closed": false,
+  "transformation_authorized": false,
+  "reviewed_sources": {
+    "scar/ir/execution/state_preservation.py": "d85db0865e75d087f9136f3bd92d0191500555c4ce4ca7201cb56c78b7b587c7",
+    "scar/ir/execution/request_state_history.py": "c3a201d741609b7e1676d9dacaf4559e211446e6fffe1709334ca129554abfc7",
+    "scar/ir/execution/query.py": "8ae644dd2946bbadef84a3915f57afab01e765ffc8eeae2d2ac3165b5fa708ae",
+    "tests/unit/test_execution_state_preservation.py": "c258d84dc91e078322dd3d7647e9f67d7ce6a95e34bba92d15c4be325ee86540",
+    "tests/unit/test_execution_request_state_history.py": "29c770c58b2c9842e249fbd7b71d16abb49826525fec2b75138cd9a6c2423b0d"
+  },
+  "reviews": [
+    {
+      "agent": "/root/cleanup_forward_review",
+      "role": "Generic interval implementation and final independent source review",
+      "method": "Read original canonical state/session/effect/call contracts and all final product/test files; no interpreter or Git.",
+      "findings": [
+        "Post output support cannot replace missing original input Uses. Independently found AFTER/NORMAL input boundary defect, then reviewed publication.state_inputs/current BEFORE repair.",
+        "Outer incomplete effects and child incomplete effects remain independent blockers; addresses and LocationID labels grant no isolation.",
+        "Exact N/R call full-slot bindings, selected transfers, parent unwind, missing child transfer and shared-budget incomplete state remain explicit."
+      ],
+      "final_conclusion": "FROZEN; no further blocking finding within this finite source review; not a test pass or family acceptance."
+    },
+    {
+      "agent": "/root/await_wrapper_chain",
+      "role": "Independently authored generic interval tests and adversarial source review",
+      "method": "Only authored the one new test module; read-only final review, no interpreter or Git.",
+      "findings": [
+        "Found missing source state inputs, budget-prefix READ-domain inventory loss, and a TypeError when a child branch transfer is absent.",
+        "Added only the concrete missing child branch transfer to the original six missing-capture cases; all fourteen prior new case identities retained.",
+        "Reviewed final fixes: input/current BEFORE checks; full original READ domains; next_position preserves child coordinate and incomplete cannot be cleared by known parent completion."
+      ],
+      "final_conclusion": "FROZEN; three concrete fixes reviewed; supplied-model/conditional boundary remains, no native or transformation authority."
+    },
+    {
+      "agent": "/root/value_resource_review",
+      "role": "Independently authored post-history tests and source review",
+      "method": "Only authored the one new history test module; no interpreter or Git.",
+      "findings": [
+        "Kept old R3 opaque source unchanged and asserted all four original blockers instead of making its boundary pure.",
+        "After root authorization, added AFTER/NORMAL missing-input counterexamples and full READ-domain assertion to existing budget1 case; original eight identities/semantic assertions retained.",
+        "Source post, same-request binding, entire support union, interval preservation and own observed boolean remain separate relations. NORMAL source requires all state invoke inputs, including ancillary context, not only lifecycle support."
+      ],
+      "final_conclusion": "FROZEN; no additional finding beyond the concrete reviewed gaps; final execution and archive acceptance remain root responsibility."
+    }
+  ],
+  "case_accounting": {
+    "generic": 15,
+    "history": 10,
+    "original_new_generic_cases_retained": 14,
+    "original_new_history_cases_retained": 8,
+    "reason_for_three_additional_cases": "Concrete review findings in source-input capture and internal branch transfer; no new backend, detector, family or parameter matrix."
+  }
+}

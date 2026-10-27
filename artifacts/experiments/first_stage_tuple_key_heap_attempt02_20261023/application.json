@@ -1,0 +1,9 @@
+{
+  "module": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/analysis/source_heap_lowering.py",
+  "sha256": "e0948eb09225b4e31e1c3ba72bbcd47eadfa4460d605e3a400435f3936ff8d97",
+  "bytes": 14653,
+  "ast": "PASS",
+  "legacy_without_slice_keys_path_preserved": true,
+  "new_uses_or_states_created": false,
+  "validator_weakened": false
+}

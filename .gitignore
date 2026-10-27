@@ -16,6 +16,11 @@ dist/
 artifacts/traces/
 artifacts/reports/
 artifacts/experiments/
+# Rebuildable bulk graph fragments; keep small publication indexes/reports.
+artifacts/analysis/**/publication/shards/
+# Dependency views are derived bulk payloads; retain their small query indexes.
+artifacts/analysis/**/views/**/view*.json.gz
+artifacts/analysis/**/views/**/queries/*.json.gz
 artifacts/baseline/*
 !artifacts/baseline/environment.md
 !artifacts/baseline/pip-freeze.txt

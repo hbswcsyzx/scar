@@ -1,0 +1,51 @@
+F...........F........................................................... [ 48%]
+........................................................................ [ 96%]
+......                                                                   [100%]
+=================================== FAILURES ===================================
+_____ test_v5_roundtrip_reaches_all_production_records_and_target_variants _____
+
+production_model = ExecutionModel(snapshot=ProgramSnapshot(artifact=ProviderArtifact(uri='memory:canonical-program', sha256='54fceb91dc7c...c397682f3d42eead6054956deca2093e', size_bytes=7312, schema='scar.program-graph'), locator='production-fixture/fact'))))
+
+    def test_v5_roundtrip_reaches_all_production_records_and_target_variants(production_model):
+        document = to_dict(production_model)
+        assert document["schema_version"] == SCHEMA_VERSION == 5
+        assert all(_fields(document)[field] for field in PRODUCTION_FIELDS)
+        restored = loads(dumps(production_model))
+        assert restored == production_model
+        assert dumps(restored) == dumps(production_model)
+        assert tuple(type(row) for row in restored.source_bridges) == (
+            SourceEndpointBridge,) * len(restored.source_bridges)
+        assert type(restored.source_bridges[0].target.version) is ValueVersionID
+        assert type(restored.source_bridges[1].endpoint.endpoint.reference) is MaterializationID
+>       assert type(restored.source_bridges[7].endpoint.endpoint.reference) is ResourceID
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       IndexError: tuple index out of range
+
+tests/unit/test_execution_production_codec.py:170: IndexError
+___________ test_production_wire_rejects_malformed_new_nested_fields ___________
+
+production_model = ExecutionModel(snapshot=ProgramSnapshot(artifact=ProviderArtifact(uri='memory:canonical-program', sha256='54fceb91dc7c...c397682f3d42eead6054956deca2093e', size_bytes=7312, schema='scar.program-graph'), locator='production-fixture/fact'))))
+
+    def test_production_wire_rejects_malformed_new_nested_fields(production_model):
+        document = to_dict(production_model)
+        inventory = _fields(document)["source_inventories"][0]
+        inventory["fields"]["run"]["kind"] = "exec_work_ticket"
+        with pytest.raises(ValueError):
+            from_dict(document)
+    
+        document = to_dict(production_model)
+        source_endpoint = _fields(document)["source_bridges"][2]["fields"]["endpoint"]["fields"]["endpoint"]
+        source_endpoint["fields"]["reference"]["kind"] = "wrong"
+        with pytest.raises(ValueError):
+            from_dict(document)
+    
+        document = to_dict(production_model)
+>       resource_endpoint = _fields(document)["source_bridges"][7]["fields"]["endpoint"]["fields"]["endpoint"]
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       IndexError: list index out of range
+
+tests/unit/test_execution_production_codec.py:252: IndexError
+=========================== short test summary info ============================
+FAILED tests/unit/test_execution_production_codec.py::test_v5_roundtrip_reaches_all_production_records_and_target_variants
+FAILED tests/unit/test_execution_production_codec.py::test_production_wire_rejects_malformed_new_nested_fields
+2 failed, 148 passed in 3.47s

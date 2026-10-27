@@ -1,0 +1,88 @@
+{
+  "active_source_bodies": 858,
+  "actual_terminal_exit_reported_by_root": 0,
+  "combined_stored_and_decoded_io_accounting": "OPEN",
+  "compiler_origin_and_lineage_preserved": true,
+  "complete_runtime_snapshot_bodies": 843,
+  "composition_stored_receipt_from_actual_run": {
+    "bytes": 17109069,
+    "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/source_frontend_remainder_composition_resume02_20261025/result/composition/index.json.gz",
+    "sha256": "45569e930c3fe03a6d2cf4c26a93491c7ce9b496d25aab5fae09767deb91fe9b"
+  },
+  "consumer_code_witness_counts": {
+    "compile_attempts": 0,
+    "complete_descriptor_matches": 0,
+    "module_loads": 0,
+    "source_bytes_read": 0
+  },
+  "current_body_linked_calls_from_original_runtime_gate": 6699,
+  "definitions": 2217,
+  "elapsed_s": 651.1432472639717,
+  "extra_external_typed_reader_calls": 0,
+  "max_rss_kib": 1494132,
+  "new_consumer_freeze": {
+    "bytes": 228507,
+    "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/source_frontend_remainder_composition_resume02_20261025/freeze.json",
+    "sha256": "75322b32d8daeec49112671417ee3620099313d7ecd805d66a7db12b9e9f2b76"
+  },
+  "new_native_capture_or_target": false,
+  "new_publisher_or_lowerer_run": false,
+  "not_attempted": 590,
+  "observer_order_and_singleton_map_checked_in_actual_run": true,
+  "old_failures": [
+    {
+      "elapsed_s": 396.74998496402986,
+      "exit": 1,
+      "failure": "revision active interface replacement differs",
+      "session": 20197
+    },
+    {
+      "elapsed_s": 140.04625647503417,
+      "exit": 1,
+      "failure": "sources must exactly cover local module paths",
+      "session": 18536
+    }
+  ],
+  "old_failures_preserved_not_reclassified": true,
+  "ordinary_reader_evidence": {
+    "bytes": 14709,
+    "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/source_frontend_remainder_composition_resume02_20261025/composer-reader-returns.json",
+    "sha256": "30c94640cf2d690249538bb22ed37f19a3eeee0b751442f9bc3038729e8de93b"
+  },
+  "ordinary_reader_returns": 12,
+  "original_65_failed_string_cases_not_published": true,
+  "original_publication_manifest_stored_receipt_from_actual_run": {
+    "bytes": 83792,
+    "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/source_frontend_remainder_publication_20261025/result/publication/manifest.json",
+    "sha256": "4959e7a58abe42415ad2a066f96572a83c83f5b4aaebe9462778d5569439ef5d"
+  },
+  "potential_new_body_call_weight": 179,
+  "potential_weight_is_not_added_to_current_calls": true,
+  "producer_separation": {
+    "bytes": 6026,
+    "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/source_frontend_remainder_composition_resume02_20261025/producer-separation.json",
+    "sha256": "d19fa8c9c00deac4ff70560908f07dd6456dd13fbdb66d38988e56fdde455481"
+  },
+  "public_constructor_accounting_checks_retained": true,
+  "result": {
+    "bytes": 31829,
+    "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/source_frontend_remainder_composition_resume02_20261025/result.json",
+    "sha256": "0effc10a7c77bb032bce82bd106b01cac759f29257f601efd70baa3d5f694bbe"
+  },
+  "root_or_program_decoded_during_report_preparation": false,
+  "schema": "scar.source-publication-consumer-terminal",
+  "schema_version": 1,
+  "source_files": 151,
+  "source_paths": [
+    "/home/zyf/AAA/le-wm/stable-worldmodel/stable_worldmodel/data/formats/hdf5.py",
+    "/home/zyf/AAA/le-wm/stable-worldmodel/stable_worldmodel/envs/pusht/env.py",
+    "/home/zyf/AAA/le-wm/stable-worldmodel/stable_worldmodel/policy.py",
+    "/home/zyf/AAA/le-wm/stable-worldmodel/stable_worldmodel/spaces.py",
+    "/home/zyf/AAA/le-wm/stable-worldmodel/stable_worldmodel/wm/lewm/lewm.py",
+    "/home/zyf/AAA/le-wm/stable-worldmodel/stable_worldmodel/world/world.py",
+    "/home/zyf/AAA/le-wm/stable-worldmodel/stable_worldmodel/wrapper/default.py"
+  ],
+  "status": "COMPOSED_EXISTING_PUBLICATION_WITH_OPEN",
+  "unsupported": 769,
+  "whole_first_stage_established": false
+}

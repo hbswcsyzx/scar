@@ -1,0 +1,35 @@
+{
+  "status": "BEFORE_B_IMPLEMENTATION",
+  "files": [
+    {
+      "path": "scar/ir/program/module_entries.py",
+      "bytes": 15199,
+      "sha256": "14317fdf81410a4362520f3b7783e221e6bc6958cbab604000ca370e35392933"
+    },
+    {
+      "path": "scar/analysis/program_lowering.py",
+      "bytes": 78974,
+      "sha256": "537d334da77daf64f81266cecfb5bb1a8d874425d41946c68faf5189d60a5e6d"
+    },
+    {
+      "path": "scar/analysis/structured_lowering.py",
+      "bytes": 57049,
+      "sha256": "4bc6f04bdd202f29ad16fc6b4e054f77978bb903c2a8254acf69fdcc43537643"
+    },
+    {
+      "path": "scar/analysis/environment_lowering.py",
+      "bytes": 22626,
+      "sha256": "a105749b764e2d13ee134f6b7f337d4634933a8e4fc7d64e01e87b74378b6f5e"
+    },
+    {
+      "path": "scar/analysis/source_module_lowering.py",
+      "bytes": 25226,
+      "sha256": "0e83aed9da8e72c6d50bb2630bcffa905f10da7104db1d94c31312f8b5fe3d9a"
+    },
+    {
+      "path": "scar/analysis/source_module_validation.py",
+      "bytes": 32259,
+      "sha256": "b8c97c4d887dd01a553e37e6b10b0464eef87bec4213bd9583656cdedc3cd8fc"
+    }
+  ]
+}

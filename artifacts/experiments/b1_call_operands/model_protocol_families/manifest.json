@@ -1,0 +1,70 @@
+{
+  "schema": "scar.protocol-family-audit-archive",
+  "schema_version": 1,
+  "files": {
+    "README.md": {
+      "bytes": 3303,
+      "sha256": "6c6917eedeae6d8659fe1eede0bd60e51eb87a825a19b165e144ccefb18ff902"
+    },
+    "check_archive.py": {
+      "bytes": 4306,
+      "sha256": "428c2d1fcb8526a314d871c2515d75a56c23d5e809d5c6d01584f8821d7d0424"
+    },
+    "check_created_throw_observation.py": {
+      "bytes": 1909,
+      "sha256": "f8677439978582015b14f0676def17fe8694d6b53839819957a6262bc759ff11"
+    },
+    "closure.json": {
+      "bytes": 2540,
+      "sha256": "265f540470f2561d40ed51973119367b3676fae8fed4d8f0a62ba0d4e248fc2a"
+    },
+    "created_throw_witness.first_failure.txt": {
+      "bytes": 1157,
+      "sha256": "c81ed318a4f7c4a9f8c74c0cb071a3f53fb6953ba813ccfb65d9b09bcd2890b9"
+    },
+    "created_throw_witness.json": {
+      "bytes": 3020,
+      "sha256": "a252e2b377fcbd227f1a188278f52dee9667b41b5a3d88c2e7d287768b0ebc0d"
+    },
+    "created_throw_witness.py": {
+      "bytes": 4299,
+      "sha256": "511abb54885c693fd10910fda359e247ed3ebcb3815dcab076d54f15f46009df"
+    },
+    "current_core_probe.json": {
+      "bytes": 2969,
+      "sha256": "51aaa2ebdda244aae1c0afddd22f881422c163200e120ba8c3d06d9c0e191d09"
+    },
+    "current_core_probe.py": {
+      "bytes": 3875,
+      "sha256": "b07e7587b66a6ec73284fcd16552bbebed1452d547a9b26b6f3915d7b4f55c62"
+    },
+    "design/core-connections.md": {
+      "bytes": 24163,
+      "sha256": "dfa6a6106e3078570b923673374f33c4cad02e4db29b20c0cf6729765e01c3cb"
+    },
+    "design/family-obligations.md": {
+      "bytes": 30795,
+      "sha256": "54dffe02e15494ce5e038d5afc7403e3372e96c238dc1083dd0b6622acfb70e7"
+    },
+    "design/independent-scope.md": {
+      "bytes": 37585,
+      "sha256": "fb9377699540576fcf292fc8fa078476d2b17b8ae53220d20547e23be9c85497"
+    },
+    "finalize_archive.py": {
+      "bytes": 3516,
+      "sha256": "3f94903b57f10837607114d73acf69f5ada6a435f4b6eb00584f5b9346ab52ea"
+    },
+    "protected.after.json": {
+      "bytes": 265,
+      "sha256": "96720a92d5c8bd336e0385425cd1a717934e5b3bd01cc929e1152a9b8701e0fc"
+    },
+    "protected.before.json": {
+      "bytes": 265,
+      "sha256": "96720a92d5c8bd336e0385425cd1a717934e5b3bd01cc929e1152a9b8701e0fc"
+    },
+    "source.json": {
+      "bytes": 76491,
+      "sha256": "7d7bf6379a03a2bd4f8e7214ace9867fdb29496b7e5cdb9ff549a73a47cd9e3c"
+    }
+  }
+}

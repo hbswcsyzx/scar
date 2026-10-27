@@ -1,0 +1,45 @@
+{
+  "status": "AUDITED_FIELDS_OPEN",
+  "baseline_revision": "08c4cbfc6b675919ab15e8654567889727f3c466",
+  "source_sha256": "7d3187f36f6cca07e0714a49ac20dbe1c0634601568f2986ef8f0c178431f7a9",
+  "source_files": 603,
+  "fixtures": 78,
+  "scope_inventory_complete": false,
+  "fields_frozen": false,
+  "protocol_implementation_complete": false,
+  "source_runtime_verified": false,
+  "transformation_authorized": false,
+  "new_lewm_speedup_measurement": false,
+  "obligation_groups": 28,
+  "old_ir_observations": 5,
+  "native_observations": 6,
+  "native_witness_executions": 1,
+  "original_native_witness_exit_code": 1,
+  "new_pytest_runs": 0,
+  "new_full_runs": 0,
+  "prior_full": {
+    "path": "artifacts/experiments/b1_call_operands/model_literals/full/report.json",
+    "sha256": "92825a87fa8067eda81bafca8250584387aabc95805266317e76e4b50b8c69d4",
+    "implementation_revision": "4bc55ebcec2537adabfe3a40db7c3f1df17c4d48",
+    "cases": 5294
+  },
+  "documents": {
+    "README.md": "d998291eb6edce9c678a433729fac5373b69898e52fa11e009b9fc9444c76003",
+    "docs/STATUS.md": "bf03b68eed8586d10ca7652d6a957873662922eed95c2a37dd2aaeb66bfb04f3",
+    "docs/ROADMAP.md": "f430c2bf87c21e465833df036883ff9ab4b520360b207b4e91ee618e86721c88",
+    "docs/FIRST_STAGE_COMPLETION_MATRIX.md": "323b0ce6a43132f6a303bc7d278aa3e5ed36747ed02bffcb25ab8401fce1d430",
+    "docs/WHOLE_PROGRAM_MODEL_PLAN.md": "310576c36942554f4752fe23c773ffb76902d4f6558121aae1df57b83e9a474b",
+    "docs/WHOLE_PROGRAM_MODEL.md": "cb73ac186d272b09529d055853a0a0a44477e59e14803e3d4e784ac977555883",
+    "docs/MODELING_REUSE_DECISION.md": "9c0bdd9ef0baf6673836a2f223ce5fffb350674cb4e78874c0480c0bcc275c56",
+    "docs/M1_RESUMPTION_INTERFACES.md": "d441006da7f4e528df7127fd9956db8583bbbae9057873ed77bd3dae42626ca8",
+    "docs/M1_DRIVER_CONTRACT_V2.md": "f9cb68d28695918860c0c0a6fb25561ff56d210f602e4ee780630b3e56df061c",
+    "docs/model/PYTHON_CONTROL_PROTOCOLS.md": "28d2ac164049598921f7f01c24d6638afdb17161f9a637b555e6192a8c31d02f",
+    "docs/M1_PROTOCOL_FAMILY_AUDIT.md": "da0b30175af7387c4794957e4f52be2a91298103a4921d98453450ff562a333f",
+    "docs/M1_PROTOCOL_FAMILY_PLAN.md": "b026b709ffb8c5d6c42a95781175f675225dea4c04299d2bbe763e5e2c11b49f"
+  },
+  "review_reports": {
+    "design/core-connections.md": "dfa6a6106e3078570b923673374f33c4cad02e4db29b20c0cf6729765e01c3cb",
+    "design/family-obligations.md": "54dffe02e15494ce5e038d5afc7403e3372e96c238dc1083dd0b6622acfb70e7",
+    "design/independent-scope.md": "fb9377699540576fcf292fc8fa078476d2b17b8ae53220d20547e23be9c85497"
+  }
+}

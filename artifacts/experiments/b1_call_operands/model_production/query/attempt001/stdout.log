@@ -1,0 +1,169 @@
+.FF.FFF..................                                                [100%]
+=================================== FAILURES ===================================
+_ test_removing_produced_writes_and_even_work_cannot_shrink_raw_candidate_universe[False] _
+
+remove_work = False
+
+    @pytest.mark.parametrize('remove_work', (False, True))
+    def test_removing_produced_writes_and_even_work_cannot_shrink_raw_candidate_universe(remove_work):
+>       fixture = native_production_query_fixture()
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_execution_production_query.py:54: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/fixtures/execution_production_queries.py:66: in native_production_query_fixture
+    missing = Unresolved('no native read-port proof', anchor)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+<string>:5: in __init__
+    ???
+scar/ir/execution/common.py:71: in __post_init__
+    _record(self.point, EvidencePoint, "unresolved point")
+scar/ir/execution/common.py:27: in _record
+    _exact(value, expected, name)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+value = OccurrencePoint(operation=OperationOccurrenceID(value='activation.0.resource.use.0'), phase=<OccurrencePhase.BEFORE: 'BEFORE'>, successor_index=None)
+expected = <class 'scar.ir.execution.common.EvidencePoint'>
+name = 'unresolved point'
+
+    def _exact(value, expected, name):
+        if type(value) is not expected:
+>           raise TypeError(f"{name} must be {expected.__name__}")
+E           TypeError: unresolved point must be EvidencePoint
+
+scar/ir/execution/common.py:16: TypeError
+_ test_removing_produced_writes_and_even_work_cannot_shrink_raw_candidate_universe[True] _
+
+remove_work = True
+
+    @pytest.mark.parametrize('remove_work', (False, True))
+    def test_removing_produced_writes_and_even_work_cannot_shrink_raw_candidate_universe(remove_work):
+>       fixture = native_production_query_fixture()
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_execution_production_query.py:54: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/fixtures/execution_production_queries.py:66: in native_production_query_fixture
+    missing = Unresolved('no native read-port proof', anchor)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+<string>:5: in __init__
+    ???
+scar/ir/execution/common.py:71: in __post_init__
+    _record(self.point, EvidencePoint, "unresolved point")
+scar/ir/execution/common.py:27: in _record
+    _exact(value, expected, name)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+value = OccurrencePoint(operation=OperationOccurrenceID(value='activation.0.resource.use.0'), phase=<OccurrencePhase.BEFORE: 'BEFORE'>, successor_index=None)
+expected = <class 'scar.ir.execution.common.EvidencePoint'>
+name = 'unresolved point'
+
+    def _exact(value, expected, name):
+        if type(value) is not expected:
+>           raise TypeError(f"{name} must be {expected.__name__}")
+E           TypeError: unresolved point must be EvidencePoint
+
+scar/ir/execution/common.py:16: TypeError
+_ test_native_partial_results_remain_exact_under_failure_or_cancel[COMPLETED] __
+
+kind = <WorkOutcomeKind.COMPLETED: 'COMPLETED'>
+
+    @pytest.mark.parametrize('kind', (WorkOutcomeKind.COMPLETED, WorkOutcomeKind.FAILED, WorkOutcomeKind.CANCELLED))
+    def test_native_partial_results_remain_exact_under_failure_or_cancel(kind):
+>       result = _query(native_production_query_fixture(kind=kind, requested=8, written=4))
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_execution_production_query.py:79: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/fixtures/execution_production_queries.py:66: in native_production_query_fixture
+    missing = Unresolved('no native read-port proof', anchor)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+<string>:5: in __init__
+    ???
+scar/ir/execution/common.py:71: in __post_init__
+    _record(self.point, EvidencePoint, "unresolved point")
+scar/ir/execution/common.py:27: in _record
+    _exact(value, expected, name)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+value = OccurrencePoint(operation=OperationOccurrenceID(value='activation.0.resource.use.0'), phase=<OccurrencePhase.BEFORE: 'BEFORE'>, successor_index=None)
+expected = <class 'scar.ir.execution.common.EvidencePoint'>
+name = 'unresolved point'
+
+    def _exact(value, expected, name):
+        if type(value) is not expected:
+>           raise TypeError(f"{name} must be {expected.__name__}")
+E           TypeError: unresolved point must be EvidencePoint
+
+scar/ir/execution/common.py:16: TypeError
+___ test_native_partial_results_remain_exact_under_failure_or_cancel[FAILED] ___
+
+kind = <WorkOutcomeKind.FAILED: 'FAILED'>
+
+    @pytest.mark.parametrize('kind', (WorkOutcomeKind.COMPLETED, WorkOutcomeKind.FAILED, WorkOutcomeKind.CANCELLED))
+    def test_native_partial_results_remain_exact_under_failure_or_cancel(kind):
+>       result = _query(native_production_query_fixture(kind=kind, requested=8, written=4))
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_execution_production_query.py:79: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/fixtures/execution_production_queries.py:66: in native_production_query_fixture
+    missing = Unresolved('no native read-port proof', anchor)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+<string>:5: in __init__
+    ???
+scar/ir/execution/common.py:71: in __post_init__
+    _record(self.point, EvidencePoint, "unresolved point")
+scar/ir/execution/common.py:27: in _record
+    _exact(value, expected, name)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+value = OccurrencePoint(operation=OperationOccurrenceID(value='activation.0.resource.use.0'), phase=<OccurrencePhase.BEFORE: 'BEFORE'>, successor_index=None)
+expected = <class 'scar.ir.execution.common.EvidencePoint'>
+name = 'unresolved point'
+
+    def _exact(value, expected, name):
+        if type(value) is not expected:
+>           raise TypeError(f"{name} must be {expected.__name__}")
+E           TypeError: unresolved point must be EvidencePoint
+
+scar/ir/execution/common.py:16: TypeError
+_ test_native_partial_results_remain_exact_under_failure_or_cancel[CANCELLED] __
+
+kind = <WorkOutcomeKind.CANCELLED: 'CANCELLED'>
+
+    @pytest.mark.parametrize('kind', (WorkOutcomeKind.COMPLETED, WorkOutcomeKind.FAILED, WorkOutcomeKind.CANCELLED))
+    def test_native_partial_results_remain_exact_under_failure_or_cancel(kind):
+>       result = _query(native_production_query_fixture(kind=kind, requested=8, written=4))
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_execution_production_query.py:79: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/fixtures/execution_production_queries.py:66: in native_production_query_fixture
+    missing = Unresolved('no native read-port proof', anchor)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+<string>:5: in __init__
+    ???
+scar/ir/execution/common.py:71: in __post_init__
+    _record(self.point, EvidencePoint, "unresolved point")
+scar/ir/execution/common.py:27: in _record
+    _exact(value, expected, name)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+value = OccurrencePoint(operation=OperationOccurrenceID(value='activation.0.resource.use.0'), phase=<OccurrencePhase.BEFORE: 'BEFORE'>, successor_index=None)
+expected = <class 'scar.ir.execution.common.EvidencePoint'>
+name = 'unresolved point'
+
+    def _exact(value, expected, name):
+        if type(value) is not expected:
+>           raise TypeError(f"{name} must be {expected.__name__}")
+E           TypeError: unresolved point must be EvidencePoint
+
+scar/ir/execution/common.py:16: TypeError
+=========================== short test summary info ============================
+FAILED tests/unit/test_execution_production_query.py::test_removing_produced_writes_and_even_work_cannot_shrink_raw_candidate_universe[False]
+FAILED tests/unit/test_execution_production_query.py::test_removing_produced_writes_and_even_work_cannot_shrink_raw_candidate_universe[True]
+FAILED tests/unit/test_execution_production_query.py::test_native_partial_results_remain_exact_under_failure_or_cancel[COMPLETED]
+FAILED tests/unit/test_execution_production_query.py::test_native_partial_results_remain_exact_under_failure_or_cancel[FAILED]
+FAILED tests/unit/test_execution_production_query.py::test_native_partial_results_remain_exact_under_failure_or_cancel[CANCELLED]
+5 failed, 20 passed in 2.06s

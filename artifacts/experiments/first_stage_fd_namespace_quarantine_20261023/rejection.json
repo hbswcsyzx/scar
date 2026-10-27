@@ -1,0 +1,6 @@
+{
+  "exception": "FDNamespaceContinuityUnproven",
+  "message": "OS FD table context OPEN: selection coverage is qualified; independent scoped descriptor-namespace continuity qualification is not implemented. No container coidentity may be inferred from zero observed transitions; use the FD_VALUES_ONLY_R2 path to preserve FD evidence.",
+  "reason_code": "FD_NAMESPACE_CONTINUITY_QUALIFICATION_NOT_IMPLEMENTED",
+  "status": "OPEN"
+}

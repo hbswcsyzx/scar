@@ -1,0 +1,22 @@
+{
+  "returncode": 0,
+  "duration_seconds": 11.029371988028288,
+  "source_sha256_before": "b462e9254d11398ec65d17a69f84816bed61433619362b4d54af38f3e51af6db",
+  "source_sha256_after": "b462e9254d11398ec65d17a69f84816bed61433619362b4d54af38f3e51af6db",
+  "source_unchanged": true,
+  "changed_paths": [],
+  "tests": [
+    "tests/unit/test_program_state_address_codec.py",
+    "tests/unit/test_program_literal_codec.py",
+    "tests/unit/test_program_admission_codec.py",
+    "tests/unit/test_program_no_body_codec.py",
+    "tests/unit/test_program_protocol_codec.py",
+    "tests/unit/test_program_session_release_codec.py",
+    "tests/unit/test_program_driver_codec.py",
+    "tests/unit/test_program_publication_codec.py",
+    "tests/unit/test_program_resumption_codec.py",
+    "tests/unit/test_lifecycle_composition_codec.py",
+    "tests/unit/test_program_protocol_connection_records.py",
+    "tests/unit/test_program_protocol_connections_codec.py"
+  ]
+}

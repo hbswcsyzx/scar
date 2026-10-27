@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1" time="7.622" timestamp="2026-10-20T05:22:00.065879+00:00" hostname="gpu1"><testcase classname="tests.unit.test_execution_frame_identity_history" name="test_independent_current_frame_identity_supports_each_real_terminal_without_copy_or_peer_borrowing" time="6.835"><failure message="assert None is True">def test_independent_current_frame_identity_supports_each_real_terminal_without_copy_or_peer_borrowing():
+        program, model, details = frame_identity_execution(instances=2, retry=True)
+        index = _index(program, model, details)
+        assert len(model.body_activation_origins) == 2
+        assert len(model.body_drive_executions) == details['static']['base_drive_count'] * 2
+        assert details['objects'][0] != details['objects'][1]
+        for number, endpoint in enumerate(details['frame_identities']):
+            view = index.body_state_history(endpoint['read'], budget=_BUDGET)
+            # This is the first semantic assertion: the old implementation has
+            # all actual ports/call routes, but cannot use declared object identity.
+&gt;           assert view['expected_bool'] is True
+E           assert None is True
+
+tests/unit/test_execution_frame_identity_history.py:46: AssertionError</failure></testcase></testsuite></testsuites>

@@ -1,0 +1,23 @@
+	Command being timed: "/home/zyf/miniconda3/envs/lewm/bin/python -m scar.cli trace --call-operands --project-root /home/zyf/AAA/le-wm --out /home/zyf/AAA/scar/artifacts/experiments/b1_call_operands/lewm_real/trace --max-call-events 250000 --max-call-bytes 256000000 --max-operand-events 2000000 --max-operand-bytes 1200000000 --resources --resource-interval 0.5 -- /home/zyf/miniconda3/envs/lewm/bin/python run_inference.py --config-name=pusht policy=pusht/weights.pt eval.num_eval=1 eval.eval_budget=25 eval.goal_offset_steps=25 cache_dir=/gpu4-share/data/byx/lewm_data hydra.job.chdir=False"
+	User time (seconds): 312.03
+	System time (seconds): 32.50
+	Percent of CPU this job got: 114%
+	Elapsed (wall clock) time (h:mm:ss or m:ss): 5:02.10
+	Average shared text size (kbytes): 0
+	Average unshared data size (kbytes): 0
+	Average stack size (kbytes): 0
+	Average total size (kbytes): 0
+	Maximum resident set size (kbytes): 2179140
+	Average resident set size (kbytes): 0
+	Major (requiring I/O) page faults: 0
+	Minor (reclaiming a frame) page faults: 3759764
+	Voluntary context switches: 158593
+	Involuntary context switches: 846993
+	Swaps: 0
+	File system inputs: 0
+	File system outputs: 1816496
+	Socket messages sent: 0
+	Socket messages received: 0
+	Signals delivered: 0
+	Page size (bytes): 4096
+	Exit status: 0

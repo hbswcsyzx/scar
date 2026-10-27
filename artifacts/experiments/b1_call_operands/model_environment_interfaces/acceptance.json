@@ -1,0 +1,58 @@
+{
+  "schema": "scar.function-environment-component-acceptance",
+  "schema_version": 1,
+  "created_at": "2026-10-16T05:12:25.816872+00:00",
+  "status": "PASS_BOUNDED_COMPONENT",
+  "complete_first_modeling_stage": false,
+  "complete_M1": false,
+  "complete_M2": false,
+  "implementation_revision": "e8267134b5daf40e5a2b89b1a00a73186284e864",
+  "product_source_sha256": "efefa8a50396c4637935a488fca04663d738f4430679bd4f0975fd07be0c00cd",
+  "product_source_files": 346,
+  "component": {
+    "cases": 327,
+    "status": "PASS",
+    "duration_seconds": 16.941,
+    "report": "component-final/report.json"
+  },
+  "full_regression": {
+    "status": "PASS",
+    "counts": {
+      "passed": 2835,
+      "failed": 0,
+      "error": 0,
+      "skipped": 0,
+      "total": 2835
+    },
+    "duration_seconds": 411.8582258038223,
+    "max_rss_kib": 1026996,
+    "source_unchanged_during_test": true,
+    "revision_before": "e8267134b5daf40e5a2b89b1a00a73186284e864",
+    "revision_after": "e8267134b5daf40e5a2b89b1a00a73186284e864",
+    "worktree_status_before": "",
+    "worktree_status_after": ""
+  },
+  "full_report": "full-final/report.json",
+  "frozen_fixture_files": 8,
+  "fixture_hashes_unchanged": true,
+  "independent_slot_closure": {
+    "path": "review/slot_collision.closure.json",
+    "status": "PASS",
+    "sha256": "e754161040818cf49b70028431a883c7adaab593d63604921d59d76b49909ee6"
+  },
+  "preserved_initial_results": [
+    "component/report.json: 326-check intermediate prior to added slot-collision regression.",
+    "full/precondition.failure.json: caller used short HEAD; exact revision check rejected before launching pytest.",
+    "full-final/: one actual full test run on the same frozen implementation."
+  ],
+  "cost_scope": "Acceptance process cost, not LeWM runtime or optimization speedup; a bounded network/source-only tooling review overlapped part of the regression.",
+  "protected_workload": "No LeWM execution or edits, no CUDA/driver/PyTorch update, no new detector/backend.",
+  "additional_evidence_root": "artifacts/experiments/model_environment_interfaces",
+  "research_addendum": "artifacts/experiments/tooling_survey/torchlens_review/REPORT.md",
+  "next_component_scope": "review/NEXT_CONTROL_INTERFACE_SCOPE.md (read-only design; pending union representation still needs a design decision)",
+  "limitations": [
+    "Only static interface declaration/combination validation, not automatic source signature/environment recovery or runtime binding.",
+    "Control/cleanup/resume, full location/literal, dynamic resource completion, denotation/provenance and provider interfaces remain incomplete.",
+    "No whole-program LeWM graph, transformation authority or clean speedup claim."
+  ]
+}

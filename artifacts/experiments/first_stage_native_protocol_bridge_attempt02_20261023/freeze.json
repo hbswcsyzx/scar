@@ -1,0 +1,42 @@
+{
+  "api_audit_sha256": "89659167508fa8b5d2ec726c2212b1e8e6b3c81554c7022d486cae84b46f72af",
+  "base_revision": "9da2ea3c14282ccec536fc1c844c4fc78d363057",
+  "coordinate_decoded_limit": 1270000000,
+  "coordinate_stored_limit": 119000000,
+  "native_three_raw_limit": 600000000,
+  "production": [
+    {
+      "bytes": 48391,
+      "path": "scar/trace/native_protocol.py",
+      "sha256": "650ae1f3691f195a0dda9dbb18306409f5123ca3965c8a78e48dc61bd7863484"
+    },
+    {
+      "bytes": 17666,
+      "path": "scar/ir/execution/native_port_protocol.py",
+      "sha256": "f77c5e0951ab459730c0ae449155760a8ad2a104266cd6f0a48309774d2b32ad"
+    },
+    {
+      "bytes": 28250,
+      "path": "scar/ir/execution/validation.py",
+      "sha256": "a998f6d9cc312e4ddddb7dc4d79dd5c2daf54907359683a009be28000626c2a2"
+    },
+    {
+      "bytes": 38926,
+      "path": "scar/ir/execution/content_validation.py",
+      "sha256": "3a71d980f10e1d6c80057439baa35a68230e037d74f9aec793885cc9cf7fb4b8"
+    },
+    {
+      "bytes": 17141,
+      "path": "scar/trace/native_schema.py",
+      "sha256": "b407a61322183e74e140682d32c2de779d595b8468655ec21e8ba3bea8294aee"
+    },
+    {
+      "bytes": 27087,
+      "path": "scar/store/bundle_partitions.py",
+      "sha256": "655c87445ab30e07ca1371362901e7bef53bf6aaca085d2c3ba8a0a330c389e3"
+    }
+  ],
+  "raw_rereplay_performed": false,
+  "status": "API_PREFLIGHT_PASS_AWAITING_ROOT_GATE_AUTHORIZATION",
+  "whole_gate_budget_seconds": 300
+}

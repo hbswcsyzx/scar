@@ -1,0 +1,37 @@
+.F..                                                                     [100%]
+=================================== FAILURES ===================================
+_ test_same_static_get_visits_select_the_actual_own_result_not_latest_or_common_b[earlier] _
+
+iterator_origin = 'earlier'
+
+    @pytest.mark.parametrize('iterator_origin', ('latest', 'earlier'), ids=('latest', 'earlier'))
+    def test_same_static_get_visits_select_the_actual_own_result_not_latest_or_common_b(iterator_origin):
+>       program, model, details = _source_visit_execution(iterator_origin=iterator_origin)
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_execution_await_source_visits.py:404: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/unit/test_execution_await_source_visits.py:340: in _source_visit_execution
+    model = ExecutionModel(snapshot_for(program),
+                           ^^^^^^^^^^^^^^^^^^^^^
+scar/ir/execution/snapshot.py:11: in snapshot_for
+    wire = program_dumps(program).encode('utf-8')
+           ^^^^^^^^^^^^^^^^^^^^^^
+scar/ir/program/codec.py:242: in dumps
+    _require_record_and_graph_valid(graph)
+scar/ir/program/codec.py:134: in _require_record_and_graph_valid
+    require_valid(graph)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='await.resume.caller'), regions=(Region(id=RegionID(value='await.resume.caller'), lab...), drive=OperationID(value='await.resume.driver.0.driver.drive'), projection=None, guard=None),), exception_matches=())
+
+    def require_valid(graph: ProgramGraph) -> None:
+        issues = validate(graph)
+        if issues:
+>           raise ValueError("; ".join(f"{issue.code} at {issue.path}: {issue.message}" for issue in issues))
+E           ValueError: protocol_continuation_source at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.call.0.scope'), clause=<ProtocolClause.DELEGATE_ADVANCE: 'DELEGATE_ADVANCE'>, operation=OperationID(value='await.resume.call.0'), slot=0): merge formal is not the independently required lookup evaluation
+
+scar/ir/program/validation.py:759: ValueError
+=========================== short test summary info ============================
+FAILED tests/unit/test_execution_await_source_visits.py::test_same_static_get_visits_select_the_actual_own_result_not_latest_or_common_b[earlier]
+1 failed, 3 passed in 3.32s

@@ -1,0 +1,6 @@
+Traceback (most recent call last):
+  File "/tmp/scar-structured-model-280qf4mi/artifacts/experiments/b1_call_operands/model_async_terminal_semantics/probe_residuals.py", line 29, in <module>
+    index = ProgramIndex(program)
+  File "/tmp/scar-structured-model-280qf4mi/scar/ir/program/queries.py", line 279, in __init__
+    raise ValueError("; ".join(f"{i.code} at {i.path}: {i.message}" for i in issues))
+ValueError: protocol_copy at program_operation:async.session.helper.raise.exit: host outcome is neither this body RAISE packet nor its selected adapter result

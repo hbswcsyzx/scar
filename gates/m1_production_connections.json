@@ -1,0 +1,20 @@
+{
+  "gate": "M1-R2.3-P-SOURCE-WRITE-PRODUCTION-CONNECTIONS",
+  "scope": "Independent supplied-source inventory and strict replay; scoped source endpoints; original write/result/effect/selector associations; source-rooted conditional production queries. Model interfaces, not authoritative native writer capture or readiness.",
+  "limitations": [
+    "Given-file manifest/normalization closure does not prove all runtime writes, aliases, processes, windows or native content identity were captured.",
+    "Source PRODUCES records an observed result, not necessarily physical allocation or write. Cross-artifact bridges and host/work/native stage associations remain explicit conditional links.",
+    "Outcome and parsed byte-prefix result do not grant visibility, interval stability, quiescence, ready/free or transformation authority. P does not close V/R3 or full M0-M2.",
+    "No detector/backend/lowerer, LeWM/GPU profiling or speedup is added. The real OS witness separates native request/return from wrapper failure."
+  ],
+  "criteria": [
+    {"id": "strict-source-write-result-records", "tests": ["tests/unit/test_execution_production_records.py"]},
+    {"id": "independent-source-manifest-index-raw-byte-replay-and-budgets", "tests": ["tests/unit/test_execution_inventory.py", "tests/unit/test_trace_normalize_v2.py"]},
+    {"id": "scoped-bundle-components-explicit-bridges-and-fresh-source-snapshots", "tests": ["tests/unit/test_execution_source_connections.py", "tests/unit/test_execution_external_snapshots.py"]},
+    {"id": "original-effects-actual-completion-partial-outcomes-and-os-witness", "tests": ["tests/unit/test_execution_produced.py"]},
+    {"id": "source-derived-candidates-survive-deleted-associations-and-truncation", "tests": ["tests/unit/test_execution_production_query.py"]},
+    {"id": "execution-v5-and-independent-historical-wire-goldens", "tests": ["tests/unit/test_execution_production_codec.py", "tests/unit/test_execution_content_codec.py", "tests/unit/test_execution_codec.py", "tests/unit/test_execution_work_codec.py", "tests/unit/test_execution_order_codec.py"]},
+    {"id": "original-content-port-state-and-work-correspondence-preserved", "tests": ["tests/unit/test_execution_content_connections.py", "tests/unit/test_execution_content_query.py", "tests/unit/test_execution_flow.py", "tests/unit/test_execution_links.py", "tests/unit/test_execution_work_graph.py", "tests/unit/test_execution_work_queries.py"]},
+    {"id": "shared-scoped-selector-geometry-preserved", "tests": ["tests/unit/test_execution_coverage.py", "tests/unit/test_execution_materialization_coverage.py"]}
+  ]
+}

@@ -1,0 +1,35 @@
+{
+  "scope": "M1 bounded canonical environment validation; no runtime code/environment proof or whole-stage acceptance",
+  "owned_files_sha256": {
+    "scar/ir/program/environment_validation.py": "1dd56d597e63ddfe7d57fe19088e79e0f70eac0b6779c4c0221e2e011b5c1974",
+    "tests/unit/test_program_environments.py": "189ccf5017e1b2699eace68cacf226015d9f80bec569921bce7bd25d48a81e9e"
+  },
+  "runs": [
+    {
+      "phase": "before root integrated validator; imported old validation module",
+      "command": "PYTHONDONTWRITEBYTECODE=1 python -m pytest -q tests/unit/test_program_environments.py",
+      "returncode": 1,
+      "passed": 14,
+      "failed": 7,
+      "duration_pytest_seconds": 0.42,
+      "failure_scope": "missing environment errors because hook not yet wired; existing call/state negative cases and positive graphs passed"
+    },
+    {
+      "phase": "after root integrated validator and one additional real OperationResult rejection case",
+      "command": "PYTHONDONTWRITEBYTECODE=1 python -m pytest -q tests/unit/test_program_environments.py",
+      "returncode": 0,
+      "passed": 22,
+      "failed": 0,
+      "duration_pytest_seconds": 0.4,
+      "stdout": "......................                                                   [100%]\n22 passed in 0.40s\n"
+    }
+  ],
+  "limitations": [
+    "manual constructed graphs, not automatic source recovery",
+    "declared code symbol not verified runtime function identity",
+    "all actuals use existing call/invoke operands; no duplicate environment binding table",
+    "necessary location subset is not exhaustive read/alias effect summary",
+    "same-typed reference permutations are structural declarations, not runtime correctness proofs",
+    "no full repository or workload run by this agent"
+  ]
+}

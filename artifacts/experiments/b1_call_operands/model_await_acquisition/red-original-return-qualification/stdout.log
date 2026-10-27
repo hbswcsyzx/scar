@@ -1,0 +1,16 @@
+
+==================================== ERRORS ====================================
+________ ERROR collecting tests/unit/test_program_await_acquisition.py _________
+ImportError while importing test module '/tmp/scar-structured-model-280qf4mi/tests/unit/test_program_await_acquisition.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/home/zyf/miniconda3/envs/lewm/lib/python3.14/importlib/__init__.py:88: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/unit/test_program_await_acquisition.py:4: in <module>
+    from scar.ir.program.drivers import NormalResultPort, ResumableKind
+E   ImportError: cannot import name 'ResumableKind' from 'scar.ir.program.drivers' (/tmp/scar-structured-model-280qf4mi/scar/ir/program/drivers.py)
+=========================== short test summary info ============================
+ERROR tests/unit/test_program_await_acquisition.py
+!!!!!!!!!!!!!!!!!!!! Interrupted: 1 error during collection !!!!!!!!!!!!!!!!!!!!
+1 error in 0.58s

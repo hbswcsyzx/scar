@@ -1,0 +1,11 @@
+{
+  "already_tracked_unchanged": [
+    {
+      "head_blob_sha256": "d94087a5bad54ecbe6f7be9554e69ba48cc5c112945e3506bfe09f888a8bf92f",
+      "path": "artifacts/analysis/resource_completion_bridge_20261025/REVIEW.md"
+    }
+  ],
+  "changed_paths": 537,
+  "no_extra_staged_paths": true,
+  "retained_paths": 538
+}

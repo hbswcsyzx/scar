@@ -151,11 +151,12 @@ class _Bindings(ast.NodeVisitor):
 
 
 class _Frontend:
-    def __init__(self, paths: list[Path], root: Path, sources=None) -> None:
+    def __init__(self, paths: list[Path], root: Path, sources=None, *, root_is_package=None) -> None:
         self.graph = SemanticGraph()
         self.root = root
         self.paths = paths
         self.supplied_sources = sources
+        self.root_is_package = root_is_package
         self.trees: dict[str, ast.Module] = {}
         self.texts: dict[str, str] = {}
         self.fingerprints: dict[str, str] = {}
@@ -287,7 +288,9 @@ class _Frontend:
             parts = list(relative.with_suffix("").parts)
             if parts[-1] == "__init__":
                 parts.pop()
-            if (self.root / "__init__.py").is_file():
+            package = ((self.root / "__init__.py").is_file() if self.root_is_package is None
+                       else self.root_is_package)
+            if package:
                 parts.insert(0, self.root.name)
             name = ".".join(parts) or self.root.name
             if self.supplied_sources is None:
@@ -856,4 +859,30 @@ def build_semantic_files(paths, project_root: Path | str, *, sources=None) -> Fr
     return result
 
 
-__all__ = ["EXCLUDED_DIRECTORIES", "FrontendResult", "build_semantic", "build_semantic_files", "source_reference"]
+def build_semantic_source_texts(paths, project_root, *, sources, root_is_package):
+    """Build the existing SG from explicit text and static namespace policy.
+
+    No file/directory lookup or path resolution occurs. This entry says
+    nothing about loaded code; a caller needs separate source/capture proof.
+    """
+    root = Path(project_root)
+    if not root.is_absolute() or '..' in root.parts or type(root_is_package) is not bool:
+        raise ValueError('text namespace requires an absolute root and explicit package policy')
+    if isinstance(paths, (str, Path)):
+        raise ValueError('text sources require an explicit file collection')
+    selected = set()
+    for item in paths:
+        path = Path(item)
+        if (not path.is_absolute() or '..' in path.parts or path.suffix != '.py'
+                or not path.is_relative_to(root) or str(path) != str(item)):
+            raise ValueError('text source must preserve its absolute Python filename within the namespace')
+        selected.add(path)
+    if (not selected or type(sources) is not dict or set(sources) != {str(path) for path in selected}
+            or any(type(text) is not str for text in sources.values())):
+        raise ValueError('text inputs must exactly cover the original filenames')
+    result = _Frontend(sorted(selected), root, dict(sources), root_is_package=root_is_package).build()
+    result.coverage['selection_scope'] = 'explicit_files_not_reachability'
+    return result
+
+
+__all__ = ["EXCLUDED_DIRECTORIES", "FrontendResult", "build_semantic", "build_semantic_files", "build_semantic_source_texts", "source_reference"]

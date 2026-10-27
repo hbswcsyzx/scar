@@ -1,0 +1,8 @@
+# 两次资源关系门版本边界
+
+V1原259项从Git461156466016859fb17559b2a8564b683694c4dc的blob读取，主树保存257项非生产资料。
+两份V1生产源码仍在原artifact快照/commit保存，主树生产位置为独立通过79428的V2。
+V1 PLAN原Git路径与main更早已审稿不同，按原字节另存PLAN.v1-4611564.md，不覆盖main早期PLAN。
+其它original namespace/URI及字节不迁移，原stage清单作为V1历史清单保留。
+V1实际44866 exit0；V2实际main79428 exit0。APPLICATION及freeze原字节未改，
+V2实际结果另记ROOT_APPLICATION_RESULT，不补写过去；snapshot/state/ready仍OPEN。

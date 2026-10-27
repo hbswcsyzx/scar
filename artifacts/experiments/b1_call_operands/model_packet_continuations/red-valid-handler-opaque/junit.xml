@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1" time="0.852" timestamp="2026-10-19T00:36:13.125144+00:00" hostname="gpu1"><testcase classname="tests.unit.test_program_packet_continuations" name="test_close_route_does_not_stop_successfully_at_c1_before_a_later_opaque_operation" time="0.190"><failure message="AssertionError: ({'status': 'DECLARED', 'source': BlockArgument(block=BlockID(value='finally.landing'), index=5), 'targets': (OwnedUse...lly.raise.port'), payload=UseID(value='finally.new-raise.packet')), 'token_binding': {...}, 'packet_match': True},)})})&#10;assert False&#10; +  where False = all(&lt;generator object test_close_route_does_not_stop_successfully_at_c1_before_a_later_opaque_operation.&lt;locals&gt;.&lt;genexpr&gt; at 0x7b728ade8d40&gt;)">def test_close_route_does_not_stop_successfully_at_c1_before_a_later_opaque_operation():
+        graph, details = packet_continuation_program(opaque_after_replace=True,
+                                                     complete_transitions=True)
+        _core_valid(graph)
+        require_valid(graph)
+        assert details["opaque"] is not None
+        report = _view(graph)
+        rows = tuple(row for row in report["obligations"] if row["site"].operation == details["helper"])
+        assert len(rows) == 2
+        routes = tuple(row["close_routes"][0] for row in rows)
+&gt;       assert all(route["status"] == "PARTIAL" for route in routes), routes
+E       AssertionError: ({'status': 'DECLARED', 'source': BlockArgument(block=BlockID(value='finally.landing'), index=5), 'targets': (OwnedUse...lly.raise.port'), payload=UseID(value='finally.new-raise.packet')), 'token_binding': {...}, 'packet_match': True},)})})
+E       assert False
+E        +  where False = all(&lt;generator object test_close_route_does_not_stop_successfully_at_c1_before_a_later_opaque_operation.&lt;locals&gt;.&lt;genexpr&gt; at 0x7b728ade8d40&gt;)
+
+tests/unit/test_program_packet_continuations.py:33: AssertionError</failure></testcase></testsuite></testsuites>

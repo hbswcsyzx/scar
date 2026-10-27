@@ -1,0 +1,1 @@
+git diff --cached --check found one blank-line trailing whitespace at records/attempt1.log:13, in the preserved original failing pytest output. Raw evidence intentionally remains byte-exact. A second staged whitespace check excluded only this exact raw log and passed. No source, fixture, gate or documentation changed for this issue.

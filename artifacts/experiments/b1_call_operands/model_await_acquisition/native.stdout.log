@@ -1,0 +1,134 @@
+{
+  "scope": "finite native language evidence; no SCAR correctness/performance claim",
+  "python": "3.14.7 | packaged by conda-forge | (main, Sep  2 2026, 21:08:32) [GCC 15.3.0]",
+  "executable": "/home/zyf/miniconda3/envs/lewm/bin/python",
+  "base_revision": "0bbc6235992e89e2a5735287e94622cfe0755cf8",
+  "script_sha256": "73b5bf71c106f29de463c3f301fdb9ebb5e316c31d7288ce75344c43c9b25b3f",
+  "plan_sha256": "e1f32606355976afc78b99a4e1896e0e3ff4559fe26f25e0f6c1c761689e13e2",
+  "decorator_code_transition": {
+    "same_function_object": true,
+    "code_object_replaced": true,
+    "bytecode_equal": true,
+    "flags_before": 35,
+    "flags_after": 291
+  },
+  "flagged_generator_has_await": false,
+  "cases": [
+    {
+      "case": "native-self-zero",
+      "kind": "RETURN",
+      "value": 23
+    },
+    {
+      "case": "iterable-generator-self-zero",
+      "kind": "RETURN",
+      "value": 23
+    },
+    {
+      "case": "ordinary-generator-direct-rejected",
+      "kind": "RAISE",
+      "exception": "TypeError",
+      "message": "'generator' object can't be awaited"
+    },
+    {
+      "case": "general-return-ordinary-generator",
+      "kind": "RETURN",
+      "value": 23,
+      "await_method_calls": 1
+    },
+    {
+      "case": "general-return-native-coroutine-rejected",
+      "kind": "RAISE",
+      "exception": "TypeError",
+      "message": "__await__() returned a coroutine",
+      "await_method_calls": 1
+    },
+    {
+      "case": "general-return-iterable-generator-coroutine-rejected",
+      "kind": "RAISE",
+      "exception": "TypeError",
+      "message": "__await__() returned a coroutine",
+      "await_method_calls": 1
+    },
+    {
+      "case": "general-return-non-iterator-rejected",
+      "kind": "RAISE",
+      "exception": "TypeError",
+      "message": "__await__() returned non-iterator of type 'int'",
+      "await_method_calls": 1
+    },
+    {
+      "case": "await-method-own-failure",
+      "kind": "RAISE",
+      "exception": "RuntimeError",
+      "message": "declared await method failure",
+      "await_method_calls": 1
+    },
+    {
+      "case": "native-self-two-cuts",
+      "yielded": [
+        "first",
+        "second"
+      ],
+      "cr_await_is_expected_iterator": [
+        true,
+        true
+      ],
+      "return": [
+        17,
+        29
+      ],
+      "await_method_calls": null
+    },
+    {
+      "case": "iterable-generator-self-two-cuts",
+      "yielded": [
+        "first",
+        "second"
+      ],
+      "cr_await_is_expected_iterator": [
+        true,
+        true
+      ],
+      "return": [
+        17,
+        29
+      ],
+      "await_method_calls": null
+    },
+    {
+      "case": "general-protocol-two-cuts",
+      "yielded": [
+        "first",
+        "second"
+      ],
+      "cr_await_is_expected_iterator": [
+        true,
+        true
+      ],
+      "return": [
+        17,
+        29
+      ],
+      "await_method_calls": 1
+    },
+    {
+      "case": "explicit-coroutine-await-wrapper",
+      "wrapper_is_not_body": true,
+      "iter_wrapper_is_wrapper": true,
+      "yielded": [
+        "first",
+        "second"
+      ],
+      "return": [
+        17,
+        29
+      ],
+      "native_held_body_identity_observed": false
+    }
+  ],
+  "case_count": 12,
+  "gpu_used": false,
+  "scar_ir_verified": false,
+  "transformation_authorized": false
+}

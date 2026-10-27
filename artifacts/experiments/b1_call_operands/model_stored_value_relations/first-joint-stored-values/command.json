@@ -1,0 +1,25 @@
+{
+  "command": [
+    "/home/zyf/miniconda3/envs/lewm/bin/python",
+    "-m",
+    "pytest",
+    "-q",
+    "tests/unit/test_program_stored_value_records.py",
+    "tests/unit/test_program_stored_value_codec.py",
+    "tests/unit/test_execution_stored_values.py",
+    "tests/unit/test_program_async_initial_control_codec.py",
+    "tests/unit/test_program_state_address_codec.py",
+    "tests/unit/test_execution_state_preservation.py",
+    "--junitxml=/tmp/scar-structured-model-280qf4mi/artifacts/experiments/b1_call_operands/model_stored_value_relations/first-joint-stored-values/junit.xml"
+  ],
+  "cwd": "/tmp/scar-structured-model-280qf4mi",
+  "python": "3.14.7 | packaged by conda-forge | (main, Sep  2 2026, 21:08:32) [GCC 15.3.0]",
+  "base_revision": "5fd5a7f0b246f72ff708f53ba000728817a8feca",
+  "activation": "source /home/zyf/miniconda3/etc/profile.d/conda.sh; conda activate lewm",
+  "environment": {
+    "PYTHONPATH": ".",
+    "PYTHONDONTWRITEBYTECODE": "1"
+  },
+  "scope": "affected supplied-model queries; not full phase, native validation or performance",
+  "runner_sha256": "7e43dc72d04ce83af15eb8c11cb3e910e3e123ec19c27c717fbac3cc19b0f535"
+}

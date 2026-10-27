@@ -1,0 +1,9 @@
+{
+  "status": "PASS_TERMINAL_RECORD_CONSERVATION_ONLY",
+  "attempts": 12,
+  "actual_emitted_operations": 1163,
+  "successful_programs": 0,
+  "source_replayed": false,
+  "target_executed": false,
+  "first_stage_complete": false
+}

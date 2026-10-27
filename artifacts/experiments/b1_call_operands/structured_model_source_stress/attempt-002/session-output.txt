@@ -1,0 +1,2 @@
+completed 16/256 candidates; operation budget 10198/50000
+completed 32/256 candidates; operation budget 20465/50000

@@ -1,0 +1,63 @@
+{
+  "changes": {
+    "fd_argument_open": "25 failed exec PATH-search returns no longer treated as FD arguments (SCAR importer defect).",
+    "fd_binding_open": "3 observed close ends plus1 IO binding now have actual FD producer receipts; no shared-table closure."
+  },
+  "decoded_prefix_limit": 1000000,
+  "gaps_parse_end": 90892,
+  "new_groups": 47,
+  "new_occurrences": 899089,
+  "old_groups": 50,
+  "old_occurrences": 899118,
+  "old_stored_receipt": {
+    "bytes": 13108711,
+    "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_joined_physical_20261023/result/os/os-resources.json.gz",
+    "sha256": "6af74438de7e3a0c228e39cb3a3fdc7f636181bf66cce16c17c4296e4634aaa1"
+  },
+  "rows": [
+    {
+      "code": "canonical_os_bridge_open",
+      "new_groups": 1,
+      "new_occurrences": 1,
+      "old_groups": 1,
+      "old_occurrences": 1
+    },
+    {
+      "code": "dup_source_open",
+      "new_groups": 7,
+      "new_occurrences": 20,
+      "old_groups": 7,
+      "old_occurrences": 20
+    },
+    {
+      "code": "exec_inheritance_open",
+      "new_groups": 6,
+      "new_occurrences": 7,
+      "old_groups": 6,
+      "old_occurrences": 7
+    },
+    {
+      "code": "fd_argument_open",
+      "new_groups": 0,
+      "new_occurrences": 0,
+      "old_groups": 1,
+      "old_occurrences": 25
+    },
+    {
+      "code": "fd_binding_open",
+      "new_groups": 29,
+      "new_occurrences": 898814,
+      "old_groups": 31,
+      "old_occurrences": 898818
+    },
+    {
+      "code": "fd_table_identity_open",
+      "new_groups": 4,
+      "new_occurrences": 247,
+      "old_groups": 4,
+      "old_occurrences": 247
+    }
+  ],
+  "scope": "old published metadata gaps prefix only; no OS/native reimport",
+  "whole_model_established": false
+}

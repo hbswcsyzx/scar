@@ -1,0 +1,138 @@
+{
+  "schema": "scar.b1-call-operands-performance-preflight",
+  "schema_version": 1,
+  "review_scope": "Read-only code inspection of B1 reader, frame-source linker, and operand route builder. No target run or tests were performed.",
+  "source_snapshot": {
+    "worktree": "/tmp/scar-call-operands-fe9ytsud",
+    "revision": "c91876b73ed7b15351a0cb925d17c2e017d2c88d",
+    "sha256": {
+      "scar/analysis/call_operand_reader.py": "e1d59ca51077b35dc58a360daec73a84ffa9c0c394044899ae54f40848a848e0",
+      "scar/analysis/call_edges.py": "e62a19fcfac138cc5560a51fa71387a942d17d2394a6f8113a0fe907dc753a36",
+      "scar/analysis/call_operand_routes.py": "84c78fc9d9bc013b10e0cc7dd0fa7ff9c00e35ba420211377a619de1cc9e2b8d",
+      "scar/analysis/call_operands.py": "c1f1de86aeba1a96a58ef07541f567288be10fd20cefd3363501c640b6e22a46"
+    }
+  },
+  "findings": [
+    {
+      "id": "reader_row_and_event_retention",
+      "severity": "bounded_memory_overhead",
+      "observed": "The reader does not first retain all JSON dictionaries. call_operand_reader.py:118-146 streams one bounded line; :177-188 parses one row and immediately decodes one typed event. However :175/:214 keeps a per-process event list, :222 copies its references into the aggregate events list, :224 makes a tuple copy for relationship validation, and :227-228 makes another tuple copy for the returned model. For the final process, the process list, aggregate list, and validation tuple coexist; the event objects themselves are shared references, not duplicated payload objects. Also :91-93 converts CollectingCallSink entry/exit lists to tuples without clearing the sink lists, so both pointer arrays remain alive through all sidecar reads and validation.",
+      "complexity": "O(E+F) retained objects, plus O(E+F) duplicate pointer arrays at peak; no O(E^2) JSON-row accumulation was found.",
+      "code": [
+        {
+          "path": "scar/analysis/call_operand_reader.py",
+          "lines": "91-93",
+          "point": "frame entry/exit list-to-tuple copies"
+        },
+        {
+          "path": "scar/analysis/call_operand_reader.py",
+          "lines": "118-146",
+          "point": "bounded streaming line reader"
+        },
+        {
+          "path": "scar/analysis/call_operand_reader.py",
+          "lines": "175-188",
+          "point": "per-process decoded event list"
+        },
+        {
+          "path": "scar/analysis/call_operand_reader.py",
+          "lines": "214-228",
+          "point": "aggregate extend, validation tuple, return tuple"
+        }
+      ],
+      "generic_fix": "Append decoded events directly to one aggregate list while maintaining per-process counters; after parsing, create one events tuple, pass that same tuple to validation and the result, and clear/release the frame sink lists immediately after transferring their records. This removes pointer-array copies without changing the raw protocol or event payloads."
+    },
+    {
+      "id": "frame_scan_reuse_and_inventory_serialization",
+      "severity": "bounded_repeated_work",
+      "observed": "_link_call_model with frame_scan supplied uses frame_scan.directory/files/captures/metadata and the passed entries/exits at call_edges.py:673-680, so it does not call _read_trace or decode the frame JSON a second time. It does rebuild entry/exit indexes and a sorted ancestry stack at :687-704. The reader already builds a separate ancestry stack for handshake validation at call_operand_reader.py:231-248; this is a second O(F log F) ancestry pass, not an N^2 pass. A separate concrete duplicate is that call_edges.py:669 calls inventory.to_dict() just to inspect schema_version, then :795 calls inventory.to_dict() again for its digest. ProgramInventory.to_dict at program_inventory.py:180-203 constructs the full inventory document, including files/bodies/frames and other present sections.",
+      "complexity": "No repeated raw frame read or per-entry JSON serialization in this path. Entry/exit ancestry is traversed twice in O(F log F). The complete inventory is materialized twice per model build.",
+      "code": [
+        {
+          "path": "scar/analysis/call_edges.py",
+          "lines": "673-680",
+          "point": "reuse caller-provided frame scan"
+        },
+        {
+          "path": "scar/analysis/call_edges.py",
+          "lines": "687-704",
+          "point": "one linker ancestry/index pass"
+        },
+        {
+          "path": "scar/analysis/call_edges.py",
+          "lines": "669, 795",
+          "point": "two full inventory.to_dict() calls"
+        },
+        {
+          "path": "scar/analysis/call_operand_reader.py",
+          "lines": "231-248",
+          "point": "reader handshake ancestry pass"
+        },
+        {
+          "path": "scar/analysis/program_inventory.py",
+          "lines": "180-203",
+          "point": "full inventory document encoding"
+        }
+      ],
+      "generic_fix": "Read schema version from a cheap typed property/constant and compute the canonical inventory digest once. If the duplicate ancestry sweep becomes material, have the local raw-reader coordinator produce one ephemeral parent/invalid-interval index and pass it to the private linker; public replay must still rebuild that index from raw inputs."
+    },
+    {
+      "id": "attempt_to_instruction_matching",
+      "severity": "linear_indexed_matching",
+      "observed": "build_operand_routes groups instructions once by invocation and builds per-invocation ordered index arrays at call_operand_routes.py:270-273. Attempts are traversed once at :295. _load_window uses bisect_left at :185 and checks only the call plan-sized suffix at :186-213. Gap/read-issue range checks are also binary searches (:174-176). Thus repeated attempts do not each scan the invocation instruction list.",
+      "complexity": "O(E+I+H+G + A log I_owner + sum(W_call)), where W_call is the narrow verified bytecode window per attempt. The attempt-to-instruction matcher is not quadratic in attempts or instructions.",
+      "code": [
+        {
+          "path": "scar/analysis/call_operand_routes.py",
+          "lines": "270-295",
+          "point": "one-time grouping and attempt traversal"
+        },
+        {
+          "path": "scar/analysis/call_operand_routes.py",
+          "lines": "174-213",
+          "point": "binary search and bounded window check"
+        }
+      ],
+      "generic_fix": "No fix is indicated for attempt-to-instruction indexing. A one-pass event partition could remove some temporary filtered tuples, but it is a linear memory/constant-factor cleanup only."
+    },
+    {
+      "id": "per_callsite_full_disassembly",
+      "severity": "potential_quadratic_per_code_object",
+      "observed": "_instruction_plan calls dis.get_instructions(code) and rebuilds the complete offset-position map at call_operand_routes.py:139-144. _load_window caches plans by (code fingerprint, call offset) at :181-183, so repeated executions at the same site are cached, but every distinct CALL offset in the same code object triggers another full disassembly.",
+      "complexity": "For a code object with K distinct exercised CALL offsets and bytecode size S, preprocessing can cost O(K*S); if S grows with K this is quadratic in the number of sites. This is distinct from and does not make per-attempt instruction lookup quadratic.",
+      "code": [
+        {
+          "path": "scar/analysis/call_operand_routes.py",
+          "lines": "139-171",
+          "point": "full disassembly per plan build"
+        },
+        {
+          "path": "scar/analysis/call_operand_routes.py",
+          "lines": "179-184",
+          "point": "cache keyed by call offset"
+        }
+      ],
+      "generic_fix": "Cache dis.get_instructions(code) and offset-to-position once per code fingerprint within build_operand_routes; keep the existing per-(code,offset) verified window-plan cache."
+    },
+    {
+      "id": "return_site_ast_index",
+      "severity": "no_current_repeat_scan_found",
+      "observed": "_LightSource builds return_nodes_by_position in one ast.walk per source context at call_edges.py:168-178. returned_node queries that index at :397-407. _Core.return_root can call returned_node for each edge, but does not ast.walk the source file per return.",
+      "complexity": "O(AST nodes) index build per context and O(1) lookup per returned edge.",
+      "code": [
+        {
+          "path": "scar/analysis/call_edges.py",
+          "lines": "82-90, 164-179",
+          "point": "single source-tree return index"
+        },
+        {
+          "path": "scar/analysis/call_edges.py",
+          "lines": "397-407",
+          "point": "indexed return-site lookup"
+        }
+      ],
+      "generic_fix": "None indicated."
+    }
+  ],
+  "limitations": "These are source-level complexity and object-lifetime observations, not cProfile results or measured costs on the newly running capture. No LeWM process was started."
+}

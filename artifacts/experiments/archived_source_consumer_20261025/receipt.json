@@ -1,0 +1,38 @@
+{
+  "body_index": 0,
+  "code_witness_compile_attempts": 0,
+  "composer_forwarding_implemented": true,
+  "composer_reexecuted": false,
+  "elapsed_s": 8.1431346659665,
+  "file_index": 0,
+  "live_workload_source_reads": 0,
+  "operations": 92,
+  "runtime_identity_or_effects_established": false,
+  "sba_forwarding_implemented": true,
+  "sba_runtime_reexecuted": false,
+  "source_fingerprint": "sha256:6584f009b40550fa0df2f8dee22b9329fbfacdfaf74464aa4fd105f464795245",
+  "sources": [
+    {
+      "bytes": 87781,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/analysis/program_composition.py",
+      "sha256": "431e1b9d73d08ed362f18d945c551bdc565c1325c3b7495877364299b552afd1"
+    },
+    {
+      "bytes": 37785,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/analysis/source_body_access.py",
+      "sha256": "545b6cc3bd73b05027507e9ff242d4f01b332a5394c7a4a8ea4697159f194995"
+    },
+    {
+      "bytes": 37877,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/analysis/inventory_partitions.py",
+      "sha256": "4eb3814294b10d4f15c0464d13b78094eca0351295b7cd93092bf00bf470eb5d"
+    },
+    {
+      "bytes": 40668,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/analysis/source_program_publication.py",
+      "sha256": "b25caef649883d71f4d32e1b31896147c0d5e22572af0f493c7379b9581127cc"
+    }
+  ],
+  "status": "ARCHIVED_CP2_STRUCTURE_PASS",
+  "whole_first_stage_complete": false
+}

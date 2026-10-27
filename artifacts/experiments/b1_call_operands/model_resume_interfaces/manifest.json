@@ -1,0 +1,28 @@
+{
+  "schema": "scar.c2-design-evidence",
+  "schema_version": 1,
+  "scope": "Static resumption design evidence only; C2.0 OPEN",
+  "files": {
+    "README.md": "732e66c968cc3f75538ed17c7fbf5a00cb6fc4f8c8d9268ca91a8206458118d3",
+    "check_review.py": "e3b28fc2f0901383dfc71a33b0919d5fbfed3f6a91e41236bac5a0de037d7483",
+    "review/availability-probe.json": "a42f892ef39fcb1dc136d64b3266918ef84cc0b5f51254828422fe3be46d6cf8",
+    "review/availability-probe.py": "6c3c5a0fb8328b589870bb0b6a7b52fd7c55bb6d2aaaa91d38b1541292132af2",
+    "review/composition-review.md": "5124c7be28eb5d517769ba94a440219b9399cb5d2dfe8b6de22eae9714d59a11",
+    "review/control-design.md": "2ba513110bfeec502c9431ac94b47b82b4e0771725b3fbe70e566f18e5fdc5cf",
+    "review/final-design-review.md": "35a96f1da8f769908f50348d014ab895ef509b0bfb34a8c4335b1556962f9ca3",
+    "review/language-bytecode-probe.json": "55676c0e5cbf3970576a7d05cd5949854332db4c8f8bc96748745ef2657eca6d",
+    "review/language-bytecode-probe.py": "93af8789e2523a86d8b6b70de5adedb3f9b7be31b902d2f768e99ac79ab61869",
+    "review/language-delegate-context-followup.md": "f9e1465cfe6a90aa3091e4d55a90428f28f70126d513a62a09417f18dd495f11",
+    "review/language-delegate-context-probe.json": "64e752d1e3f88da6879a0a4a4bdf62c69f22c48d04f55eee80dcf9a833dc2f1d",
+    "review/language-delegate-context-probe.py": "90af01e0faae655a8219926d0d48cd55292ea2e3145733fe26b6a64648b4eb29",
+    "review/language-delegation-probe.json": "98d81a011cd26a38e3fca9d5d0563f3a64930dba6cf59f360642fbc79ef66dfa",
+    "review/language-delegation-probe.py": "5479bd0b711b859492803689696730897a692cd753e54b6b28bf3d5859f52803",
+    "review/language-exception-context-probe.json": "08ad741a3d15a831e6a10a6c33cb5fc0baf5c9fce74bab655a44f7ae5b19d071",
+    "review/language-exception-context-probe.py": "b939847a945b1d5d1c4eac69a01f5c7d49e113655b0eff5c6a5c040bbe4c37a2",
+    "review/language-provider-review.md": "724a71b8d23682581ef08538a58edce74292e97b201ada3099f121179009ded9",
+    "review/language-runtime-probe.json": "3a7c543e62d2b1d710717ec7291e6517827e0a2938b024bc7f71afd4708fb8f7",
+    "review/language-runtime-probe.py": "f413c4718333c629c84cdbe57a071148c5c679eb0ffc903847d804919ec74266",
+    "review/root-resolution.md": "ccf0a5482318e77a006948dd5392a27cacd8ab48c48382cdee49820e068af0f3",
+    "review_checks.json": "e14f4b36980fa8a470ccedacf02921b012f42875f74a750f6f84231a3fcde6fb"
+  }
+}

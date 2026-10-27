@@ -1,0 +1,1481 @@
+{
+  "schema": "scar.lossless-capture-retention",
+  "schema_version": 1,
+  "files": [
+    {
+      "path": "os/syscalls.76348",
+      "retained": "os/syscalls.76348.gz",
+      "raw_sha256": "55f70b223e57717d37932c70a086eb1a6999173a9813a5d67fbbffa2e6bbfda7",
+      "raw_bytes": 289565,
+      "raw_lines": 2553,
+      "compressed_bytes": 30187
+    },
+    {
+      "path": "os/syscalls.76351",
+      "retained": "os/syscalls.76351.gz",
+      "raw_sha256": "2ad775da67157dd362ec8ffef410748fec6c1245241f97955d7fb1d6635c48fe",
+      "raw_bytes": 25885821,
+      "raw_lines": 211108,
+      "compressed_bytes": 2161697
+    },
+    {
+      "path": "os/syscalls.76355",
+      "retained": "os/syscalls.76355.gz",
+      "raw_sha256": "b7f3ce19ab09f471ec60730e6d3c6059c8ab4effa7a6059eefefdcc60a9b88ed",
+      "raw_bytes": 125,
+      "raw_lines": 2,
+      "compressed_bytes": 138
+    },
+    {
+      "path": "os/syscalls.76356",
+      "retained": "os/syscalls.76356.gz",
+      "raw_sha256": "551cc02254862e3c05ee9f906b63a12fde7db633cf2a39806deab7f78e2a199f",
+      "raw_bytes": 125,
+      "raw_lines": 2,
+      "compressed_bytes": 138
+    },
+    {
+      "path": "os/syscalls.76357",
+      "retained": "os/syscalls.76357.gz",
+      "raw_sha256": "f894c2c300b9c953a15e8506197ce2881136497ea2d0e17add93c5a8630a8866",
+      "raw_bytes": 125,
+      "raw_lines": 2,
+      "compressed_bytes": 138
+    },
+    {
+      "path": "os/syscalls.76358",
+      "retained": "os/syscalls.76358.gz",
+      "raw_sha256": "55b6da7702f2cf527cae051022a96cea170b6a18c6a1955ebfa68ab99838567f",
+      "raw_bytes": 125,
+      "raw_lines": 2,
+      "compressed_bytes": 138
+    },
+    {
+      "path": "os/syscalls.76359",
+      "retained": "os/syscalls.76359.gz",
+      "raw_sha256": "534d4a3196887c6d453b67246c531b47a89b3f1585f2e130ef69284a37d770d7",
+      "raw_bytes": 125,
+      "raw_lines": 2,
+      "compressed_bytes": 136
+    },
+    {
+      "path": "os/syscalls.76360",
+      "retained": "os/syscalls.76360.gz",
+      "raw_sha256": "ece66c2f2ac78f20171df20ecd829e6e01e00671af2c50424d8a727a907ba2d6",
+      "raw_bytes": 125,
+      "raw_lines": 2,
+      "compressed_bytes": 138
+    },
+    {
+      "path": "os/syscalls.76361",
+      "retained": "os/syscalls.76361.gz",
+      "raw_sha256": "bbb724941f7fb53e9325bcbbe980a4935b86f3cc6bb58d385759c55f7fe924e1",
+      "raw_bytes": 125,
+      "raw_lines": 2,
+      "compressed_bytes": 138
+    },
+    {
+      "path": "os/syscalls.76362",
+      "retained": "os/syscalls.76362.gz",
+      "raw_sha256": "b49d5f2f97f2fdffad189cdbe8ded053f9f5d13bc937755acd80fc462f841424",
+      "raw_bytes": 125,
+      "raw_lines": 2,
+      "compressed_bytes": 138
+    },
+    {
+      "path": "os/syscalls.76363",
+      "retained": "os/syscalls.76363.gz",
+      "raw_sha256": "42133cbba9244d82fb2fce54faac0961c20eb85348728374d8b08dbc31f268bf",
+      "raw_bytes": 125,
+      "raw_lines": 2,
+      "compressed_bytes": 135
+    },
+    {
+      "path": "os/syscalls.76364",
+      "retained": "os/syscalls.76364.gz",
+      "raw_sha256": "d0d1f0ed981a12358b4b8ff81588cda8471838c85ee96cb893852b878b8cc4ee",
+      "raw_bytes": 125,
+      "raw_lines": 2,
+      "compressed_bytes": 138
+    },
+    {
+      "path": "os/syscalls.76365",
+      "retained": "os/syscalls.76365.gz",
+      "raw_sha256": "aff7e9662a08887083ddf83701862c8191ab80574aa2053c46e503debc6784d0",
+      "raw_bytes": 125,
+      "raw_lines": 2,
+      "compressed_bytes": 137
+    },
+    {
+      "path": "os/syscalls.76366",
+      "retained": "os/syscalls.76366.gz",
+      "raw_sha256": "420fe5d6cc0fcad2d25a00e9d8f65bf6dd7ab3b94f8a4f86368553e0f4331ab1",
+      "raw_bytes": 125,
+      "raw_lines": 2,
+      "compressed_bytes": 138
+    },
+    {
+      "path": "os/syscalls.76367",
+      "retained": "os/syscalls.76367.gz",
+      "raw_sha256": "c3fee84f5bdb502137a8efa55ec10fef9bceb75a4f398463ab41c18546efe569",
+      "raw_bytes": 125,
+      "raw_lines": 2,
+      "compressed_bytes": 138
+    },
+    {
+      "path": "os/syscalls.76368",
+      "retained": "os/syscalls.76368.gz",
+      "raw_sha256": "f3e952728f0f175784a2e6aca9b4fb49bdcc80fccb08486f77732ba307efd6eb",
+      "raw_bytes": 125,
+      "raw_lines": 2,
+      "compressed_bytes": 138
+    },
+    {
+      "path": "os/syscalls.76369",
+      "retained": "os/syscalls.76369.gz",
+      "raw_sha256": "bf07652fd7d9b1667ebd5699214946d15c990a670bc8a187216b5129db76cf43",
+      "raw_bytes": 125,
+      "raw_lines": 2,
+      "compressed_bytes": 136
+    },
+    {
+      "path": "os/syscalls.76370",
+      "retained": "os/syscalls.76370.gz",
+      "raw_sha256": "5d6c22ab541493ff1ea1959f0627de2707315e31b1264b204b8f07bbc0625e1f",
+      "raw_bytes": 125,
+      "raw_lines": 2,
+      "compressed_bytes": 136
+    },
+    {
+      "path": "os/syscalls.76371",
+      "retained": "os/syscalls.76371.gz",
+      "raw_sha256": "8db3355772030c0b5fa834a2b6a5a88bac276597ced8954daaafd32c8262c3d1",
+      "raw_bytes": 125,
+      "raw_lines": 2,
+      "compressed_bytes": 138
+    },
+    {
+      "path": "os/syscalls.76372",
+      "retained": "os/syscalls.76372.gz",
+      "raw_sha256": "5e1b1115d5a718fcaebe4e0d70ea97ff947559fc77706d6c165218ba4c9405c8",
+      "raw_bytes": 125,
+      "raw_lines": 2,
+      "compressed_bytes": 138
+    },
+    {
+      "path": "os/syscalls.76373",
+      "retained": "os/syscalls.76373.gz",
+      "raw_sha256": "a54960c0a09ce70943857e7c5df4339f3dce04867df2b24f6e8945c778ce91b5",
+      "raw_bytes": 125,
+      "raw_lines": 2,
+      "compressed_bytes": 138
+    },
+    {
+      "path": "os/syscalls.76374",
+      "retained": "os/syscalls.76374.gz",
+      "raw_sha256": "9235ae8ac80e86a1548dd565b9fb8c82388b042cb50d03d2050980e9a7516ccb",
+      "raw_bytes": 125,
+      "raw_lines": 2,
+      "compressed_bytes": 138
+    },
+    {
+      "path": "os/syscalls.76375",
+      "retained": "os/syscalls.76375.gz",
+      "raw_sha256": "a0d1d85c2da76093b8173c100574c135a24687f91f481a8a226dad2a3d890bbe",
+      "raw_bytes": 125,
+      "raw_lines": 2,
+      "compressed_bytes": 138
+    },
+    {
+      "path": "os/syscalls.76376",
+      "retained": "os/syscalls.76376.gz",
+      "raw_sha256": "4c9a74c8f23fe85c736b2d2f9ca27ee29cbfb74438f4d82ea4a5e2382c32111f",
+      "raw_bytes": 125,
+      "raw_lines": 2,
+      "compressed_bytes": 138
+    },
+    {
+      "path": "os/syscalls.76377",
+      "retained": "os/syscalls.76377.gz",
+      "raw_sha256": "32b9b842b028063c04971d6690a45877ca34adda6647f886682ae71c8e2a72b1",
+      "raw_bytes": 125,
+      "raw_lines": 2,
+      "compressed_bytes": 138
+    },
+    {
+      "path": "os/syscalls.76378",
+      "retained": "os/syscalls.76378.gz",
+      "raw_sha256": "82d0900e6c9b2f9f526491c8e70ba1fe1cfb42793dd155c20552637bc81f4abd",
+      "raw_bytes": 125,
+      "raw_lines": 2,
+      "compressed_bytes": 138
+    },
+    {
+      "path": "os/syscalls.76379",
+      "retained": "os/syscalls.76379.gz",
+      "raw_sha256": "2d2edb348c23f8fb2833b44463bd11034a103dba83c6cb282acf16756a4a4f47",
+      "raw_bytes": 125,
+      "raw_lines": 2,
+      "compressed_bytes": 137
+    },
+    {
+      "path": "os/syscalls.76380",
+      "retained": "os/syscalls.76380.gz",
+      "raw_sha256": "204ff49e05afff8495cc79faeb82634988228a3682c52816a50835c583e56974",
+      "raw_bytes": 125,
+      "raw_lines": 2,
+      "compressed_bytes": 138
+    },
+    {
+      "path": "os/syscalls.76381",
+      "retained": "os/syscalls.76381.gz",
+      "raw_sha256": "967b1c0c9e34ee5eabf94eea2dc521e326bb09115fad4b675e6a458706b0e95f",
+      "raw_bytes": 125,
+      "raw_lines": 2,
+      "compressed_bytes": 138
+    },
+    {
+      "path": "os/syscalls.76382",
+      "retained": "os/syscalls.76382.gz",
+      "raw_sha256": "ab71d3c533a233e0da4eaf0266fd7ed9835685665f5b27fb8ae4a465d7c04ede",
+      "raw_bytes": 125,
+      "raw_lines": 2,
+      "compressed_bytes": 138
+    },
+    {
+      "path": "os/syscalls.76383",
+      "retained": "os/syscalls.76383.gz",
+      "raw_sha256": "b6de4bb7886e76abbb196887b7d7a8efbffdc3af35bca3be670b7592b1bc463e",
+      "raw_bytes": 125,
+      "raw_lines": 2,
+      "compressed_bytes": 136
+    },
+    {
+      "path": "os/syscalls.76384",
+      "retained": "os/syscalls.76384.gz",
+      "raw_sha256": "9aa7cb95aa33b3ffaeffcfbb1c2b1b55cc0cb7cb3e8195f834bab7ed1a152138",
+      "raw_bytes": 125,
+      "raw_lines": 2,
+      "compressed_bytes": 138
+    },
+    {
+      "path": "os/syscalls.76385",
+      "retained": "os/syscalls.76385.gz",
+      "raw_sha256": "b26a85c07247ae56d63346a4dd8de7d9d5ed18b21251d51e7f57aa5403e58aac",
+      "raw_bytes": 125,
+      "raw_lines": 2,
+      "compressed_bytes": 138
+    },
+    {
+      "path": "os/syscalls.76386",
+      "retained": "os/syscalls.76386.gz",
+      "raw_sha256": "c0da1e90a4bee589ee5e7a2df02f5c09c8f274ef63fc42a3f1e3e28f702c9b56",
+      "raw_bytes": 125,
+      "raw_lines": 2,
+      "compressed_bytes": 136
+    },
+    {
+      "path": "os/syscalls.76387",
+      "retained": "os/syscalls.76387.gz",
+      "raw_sha256": "2c34e489e15dbb4b2b983a69f407c4fa62b4c07add394683c29762e140cc9f60",
+      "raw_bytes": 125,
+      "raw_lines": 2,
+      "compressed_bytes": 138
+    },
+    {
+      "path": "os/syscalls.76388",
+      "retained": "os/syscalls.76388.gz",
+      "raw_sha256": "5ba4cc491e91c2e34c2af4a267a9ef4ece3b2d9f4e310a91354453359fdf0435",
+      "raw_bytes": 125,
+      "raw_lines": 2,
+      "compressed_bytes": 136
+    },
+    {
+      "path": "os/syscalls.76389",
+      "retained": "os/syscalls.76389.gz",
+      "raw_sha256": "43acc1bdd7c113fcecb142b63c4bf63607abd01667f0e3502c184ae33ba94e25",
+      "raw_bytes": 125,
+      "raw_lines": 2,
+      "compressed_bytes": 138
+    },
+    {
+      "path": "os/syscalls.76390",
+      "retained": "os/syscalls.76390.gz",
+      "raw_sha256": "dac0fd10de9b871b3b889747211438c4b066b0e505d3c0605150f943792af402",
+      "raw_bytes": 125,
+      "raw_lines": 2,
+      "compressed_bytes": 138
+    },
+    {
+      "path": "os/syscalls.76391",
+      "retained": "os/syscalls.76391.gz",
+      "raw_sha256": "22cb93c311565f53037519c75bb245e1639240d4cb0403584cdd22919e685909",
+      "raw_bytes": 125,
+      "raw_lines": 2,
+      "compressed_bytes": 138
+    },
+    {
+      "path": "os/syscalls.76392",
+      "retained": "os/syscalls.76392.gz",
+      "raw_sha256": "32f0700ff01c6fd10520384a1b17221b9774c938bc2422dba0b187d2bca1ad27",
+      "raw_bytes": 125,
+      "raw_lines": 2,
+      "compressed_bytes": 138
+    },
+    {
+      "path": "os/syscalls.76393",
+      "retained": "os/syscalls.76393.gz",
+      "raw_sha256": "b237090f551d48703c73ec8fdbea9a91fc461d76c3a9dd0bf866b0ec6cfb75b1",
+      "raw_bytes": 125,
+      "raw_lines": 2,
+      "compressed_bytes": 138
+    },
+    {
+      "path": "os/syscalls.76394",
+      "retained": "os/syscalls.76394.gz",
+      "raw_sha256": "cb1405b96ac574df7788685d5cb2f50febaea4014ce284e8f936ab5c6b62dc13",
+      "raw_bytes": 125,
+      "raw_lines": 2,
+      "compressed_bytes": 137
+    },
+    {
+      "path": "os/syscalls.76395",
+      "retained": "os/syscalls.76395.gz",
+      "raw_sha256": "ec583671d59a5950bc6790bd7412f5dd5ad07f8234b6928dc49fd65934f18b8d",
+      "raw_bytes": 125,
+      "raw_lines": 2,
+      "compressed_bytes": 138
+    },
+    {
+      "path": "os/syscalls.76396",
+      "retained": "os/syscalls.76396.gz",
+      "raw_sha256": "da7d9b016d2c169c14ff6d4e5c9f4d6ed7329cf5284bba893167cc4c78ee3798",
+      "raw_bytes": 125,
+      "raw_lines": 2,
+      "compressed_bytes": 138
+    },
+    {
+      "path": "os/syscalls.76397",
+      "retained": "os/syscalls.76397.gz",
+      "raw_sha256": "ed21edc3997e48804119225980cefbf31d925cd69d3337f352269849a54e83b7",
+      "raw_bytes": 125,
+      "raw_lines": 2,
+      "compressed_bytes": 138
+    },
+    {
+      "path": "os/syscalls.76398",
+      "retained": "os/syscalls.76398.gz",
+      "raw_sha256": "e1526681534c27f831fc908ca43b337981d577902489e70010147682ab7fcfec",
+      "raw_bytes": 125,
+      "raw_lines": 2,
+      "compressed_bytes": 138
+    },
+    {
+      "path": "os/syscalls.76399",
+      "retained": "os/syscalls.76399.gz",
+      "raw_sha256": "b853c750ffafdfdb5e364b8292acf54208d7d77ee1ad8bfb08297e311827434d",
+      "raw_bytes": 125,
+      "raw_lines": 2,
+      "compressed_bytes": 136
+    },
+    {
+      "path": "os/syscalls.76400",
+      "retained": "os/syscalls.76400.gz",
+      "raw_sha256": "1e0c805999774c64da0febf5ee876d4d9ebebea47baf1cd73d25b79302ab936f",
+      "raw_bytes": 125,
+      "raw_lines": 2,
+      "compressed_bytes": 138
+    },
+    {
+      "path": "os/syscalls.76401",
+      "retained": "os/syscalls.76401.gz",
+      "raw_sha256": "3c79f61d7d55a7953b2870372bf5fc8502f8e0ddbcba0e2bb378b479c1580f47",
+      "raw_bytes": 125,
+      "raw_lines": 2,
+      "compressed_bytes": 138
+    },
+    {
+      "path": "os/syscalls.76402",
+      "retained": "os/syscalls.76402.gz",
+      "raw_sha256": "c9786d606a8cbe27b2820f97db81bdfb7db40a9cf28081a8ed26fe7802db4557",
+      "raw_bytes": 125,
+      "raw_lines": 2,
+      "compressed_bytes": 136
+    },
+    {
+      "path": "os/syscalls.76403",
+      "retained": "os/syscalls.76403.gz",
+      "raw_sha256": "bf544437a3f53343e55e361f7832078d828bf552519b8a5875550dd58e350497",
+      "raw_bytes": 125,
+      "raw_lines": 2,
+      "compressed_bytes": 136
+    },
+    {
+      "path": "os/syscalls.76404",
+      "retained": "os/syscalls.76404.gz",
+      "raw_sha256": "8251cbc1ec9e274b1fff10a5d6d3efcf4179d90688b63c7c6c0387d9167b4f4a",
+      "raw_bytes": 125,
+      "raw_lines": 2,
+      "compressed_bytes": 138
+    },
+    {
+      "path": "os/syscalls.76405",
+      "retained": "os/syscalls.76405.gz",
+      "raw_sha256": "7071136ce191e195f2d464ed0f58c861af406069fd30ba84aa40d94972ebaa9a",
+      "raw_bytes": 125,
+      "raw_lines": 2,
+      "compressed_bytes": 138
+    },
+    {
+      "path": "os/syscalls.76406",
+      "retained": "os/syscalls.76406.gz",
+      "raw_sha256": "0bbdd03db459be5b26187708135dd8f577af4e4254109b73ae164b1940933452",
+      "raw_bytes": 125,
+      "raw_lines": 2,
+      "compressed_bytes": 138
+    },
+    {
+      "path": "os/syscalls.76407",
+      "retained": "os/syscalls.76407.gz",
+      "raw_sha256": "765b7cc18b1390daabf4574f6f040c34537a35edd53f33fa9c4dd75ebc58f47f",
+      "raw_bytes": 125,
+      "raw_lines": 2,
+      "compressed_bytes": 138
+    },
+    {
+      "path": "os/syscalls.76408",
+      "retained": "os/syscalls.76408.gz",
+      "raw_sha256": "1cd14f63548897ff9ae481fff4669b6a6b6b00db27870c75fa2e7aa783a378e5",
+      "raw_bytes": 125,
+      "raw_lines": 2,
+      "compressed_bytes": 138
+    },
+    {
+      "path": "os/syscalls.76409",
+      "retained": "os/syscalls.76409.gz",
+      "raw_sha256": "8761c2df6aafcda304dfaa6f934d02dade57d1fbf3b8a08e20280c1fd263317b",
+      "raw_bytes": 125,
+      "raw_lines": 2,
+      "compressed_bytes": 136
+    },
+    {
+      "path": "os/syscalls.76412",
+      "retained": "os/syscalls.76412.gz",
+      "raw_sha256": "35c14192fdcb9a7f17543e8a56a35beb8cd6ed60c11ee650fba0a9f2585f3bae",
+      "raw_bytes": 6397,
+      "raw_lines": 83,
+      "compressed_bytes": 1482
+    },
+    {
+      "path": "os/syscalls.76437",
+      "retained": "os/syscalls.76437.gz",
+      "raw_sha256": "32b96955f9c86f924412a7125f0c246f07ec99607a253daf1c29a8fddec4dd24",
+      "raw_bytes": 804,
+      "raw_lines": 9,
+      "compressed_bytes": 358
+    },
+    {
+      "path": "os/syscalls.76536",
+      "retained": "os/syscalls.76536.gz",
+      "raw_sha256": "0984855cee630aa39ccb3d4a396b588115e0d0647d8311c35e22189ef947b2e0",
+      "raw_bytes": 333,
+      "raw_lines": 4,
+      "compressed_bytes": 217
+    },
+    {
+      "path": "os/syscalls.76537",
+      "retained": "os/syscalls.76537.gz",
+      "raw_sha256": "5929234d1fb84628dc9979ca1163dea2c97b301e087e03898fa39c518e3711d2",
+      "raw_bytes": 2859,
+      "raw_lines": 39,
+      "compressed_bytes": 567
+    },
+    {
+      "path": "os/syscalls.76538",
+      "retained": "os/syscalls.76538.gz",
+      "raw_sha256": "4d6d60e93974d33973e985c3abbc9f61a12a9ac683acccd0015ca1a4f5e2c499",
+      "raw_bytes": 577,
+      "raw_lines": 7,
+      "compressed_bytes": 360
+    },
+    {
+      "path": "os/syscalls.76542",
+      "retained": "os/syscalls.76542.gz",
+      "raw_sha256": "3694234cc73b136679f4b474f09431b2b29f3b33e6dff3f4dbd23acec8c70f9f",
+      "raw_bytes": 333,
+      "raw_lines": 4,
+      "compressed_bytes": 222
+    },
+    {
+      "path": "os/syscalls.76554",
+      "retained": "os/syscalls.76554.gz",
+      "raw_sha256": "1063234bc2061e0f6c58495ce454231a03873b1884705f38116c31a2db9b33ee",
+      "raw_bytes": 386,
+      "raw_lines": 4,
+      "compressed_bytes": 247
+    },
+    {
+      "path": "os/syscalls.77122",
+      "retained": "os/syscalls.77122.gz",
+      "raw_sha256": "99952bfdffc61abf0ef4029188dd6e7575d6dd174e6bcc30e5cceff81c6bbe97",
+      "raw_bytes": 14954,
+      "raw_lines": 161,
+      "compressed_bytes": 2455
+    },
+    {
+      "path": "os/syscalls.77126",
+      "retained": "os/syscalls.77126.gz",
+      "raw_sha256": "5bcad32a07d8752f65a0215fc928bd27577ddd7349ef909d95a4256e155366c3",
+      "raw_bytes": 343,
+      "raw_lines": 4,
+      "compressed_bytes": 249
+    },
+    {
+      "path": "os/syscalls.77127",
+      "retained": "os/syscalls.77127.gz",
+      "raw_sha256": "ddec342ee30ba5412b4dc3aa5cdbf4ddd773da533f6fd19ce277872a14d1ff22",
+      "raw_bytes": 343,
+      "raw_lines": 4,
+      "compressed_bytes": 250
+    },
+    {
+      "path": "os/syscalls.77128",
+      "retained": "os/syscalls.77128.gz",
+      "raw_sha256": "23d35a1c60ec27c265c93570714117a897348d243bfdb8f27f1b1adcb8ae271c",
+      "raw_bytes": 343,
+      "raw_lines": 4,
+      "compressed_bytes": 251
+    },
+    {
+      "path": "os/syscalls.77129",
+      "retained": "os/syscalls.77129.gz",
+      "raw_sha256": "293a3a8d064f0883a7e1d265c5f929d4b6acebad95a7ceb6935019bd81a80a61",
+      "raw_bytes": 343,
+      "raw_lines": 4,
+      "compressed_bytes": 251
+    },
+    {
+      "path": "os/syscalls.77130",
+      "retained": "os/syscalls.77130.gz",
+      "raw_sha256": "a8cdfa69c1cd094bff9866c1cede835a9bb4a17dc5d49526ebf02e6633e043cf",
+      "raw_bytes": 343,
+      "raw_lines": 4,
+      "compressed_bytes": 252
+    },
+    {
+      "path": "os/syscalls.77131",
+      "retained": "os/syscalls.77131.gz",
+      "raw_sha256": "d6cbc8a0cd783503e0257cc52299fdcd3b47af24b125fce19a8cbb621b0df6c6",
+      "raw_bytes": 343,
+      "raw_lines": 4,
+      "compressed_bytes": 250
+    },
+    {
+      "path": "os/syscalls.77132",
+      "retained": "os/syscalls.77132.gz",
+      "raw_sha256": "b7e3b09ebb10f9f01d2d14cb624492eb4a95376b84a314ab6906c04a221aceba",
+      "raw_bytes": 343,
+      "raw_lines": 4,
+      "compressed_bytes": 250
+    },
+    {
+      "path": "os/syscalls.77133",
+      "retained": "os/syscalls.77133.gz",
+      "raw_sha256": "df0833637f04cc8e3effe43dc43f24625d3ac12462d3a62b2471391af85b95ba",
+      "raw_bytes": 343,
+      "raw_lines": 4,
+      "compressed_bytes": 249
+    },
+    {
+      "path": "os/syscalls.77134",
+      "retained": "os/syscalls.77134.gz",
+      "raw_sha256": "cdefc00cca357b12d15dda7b338e9652c95f1ff4f0d60b857fb6b9a420802844",
+      "raw_bytes": 343,
+      "raw_lines": 4,
+      "compressed_bytes": 249
+    },
+    {
+      "path": "os/syscalls.77135",
+      "retained": "os/syscalls.77135.gz",
+      "raw_sha256": "f1bf0abf0c4561d2478f821ea4add212ffede47ad48ce8e863dcc7c08bcbe004",
+      "raw_bytes": 343,
+      "raw_lines": 4,
+      "compressed_bytes": 250
+    },
+    {
+      "path": "os/syscalls.77136",
+      "retained": "os/syscalls.77136.gz",
+      "raw_sha256": "66898d2c298a7c5e2d64732a41f2d6dcb2768b1d0d81132b8066d9433dba0de7",
+      "raw_bytes": 343,
+      "raw_lines": 4,
+      "compressed_bytes": 251
+    },
+    {
+      "path": "os/syscalls.77137",
+      "retained": "os/syscalls.77137.gz",
+      "raw_sha256": "40946f2137b4c4c7a1a5d382c4f9a619271ebd9bcdcd6d1e5896815176aa5585",
+      "raw_bytes": 343,
+      "raw_lines": 4,
+      "compressed_bytes": 251
+    },
+    {
+      "path": "os/syscalls.77138",
+      "retained": "os/syscalls.77138.gz",
+      "raw_sha256": "a47940567bd40e86f52413bfc132d8a28469488e9ae16a8c9a85687919f297ec",
+      "raw_bytes": 343,
+      "raw_lines": 4,
+      "compressed_bytes": 250
+    },
+    {
+      "path": "os/syscalls.77139",
+      "retained": "os/syscalls.77139.gz",
+      "raw_sha256": "ade4c8b8267bd509f4296cd05fd8ef16352b4ea67cc01f9f666bd77ec89f8eba",
+      "raw_bytes": 343,
+      "raw_lines": 4,
+      "compressed_bytes": 251
+    },
+    {
+      "path": "os/syscalls.77140",
+      "retained": "os/syscalls.77140.gz",
+      "raw_sha256": "e7eca613aa4317d168bc3593f59855434a0d4d175e1d9e84379c33bb75789280",
+      "raw_bytes": 343,
+      "raw_lines": 4,
+      "compressed_bytes": 250
+    },
+    {
+      "path": "os/syscalls.77141",
+      "retained": "os/syscalls.77141.gz",
+      "raw_sha256": "fffec79e541cd61a413b9c9f25739a0253e7341240c40d732168219838235761",
+      "raw_bytes": 343,
+      "raw_lines": 4,
+      "compressed_bytes": 250
+    },
+    {
+      "path": "os/syscalls.77142",
+      "retained": "os/syscalls.77142.gz",
+      "raw_sha256": "4cde620b9fb3cc89dc389978f4e76d0f3b46defba80c2fd04da92202c8b4b2ef",
+      "raw_bytes": 343,
+      "raw_lines": 4,
+      "compressed_bytes": 250
+    },
+    {
+      "path": "os/syscalls.77143",
+      "retained": "os/syscalls.77143.gz",
+      "raw_sha256": "555dde6b0950cbeb10081f836c29e53774060d57abc2b85405203d32e96bcaa9",
+      "raw_bytes": 343,
+      "raw_lines": 4,
+      "compressed_bytes": 251
+    },
+    {
+      "path": "os/syscalls.77144",
+      "retained": "os/syscalls.77144.gz",
+      "raw_sha256": "d10cbfe26f42c88c8052fca104c20cd630aa177d2ac2f4b2db04f217e66ce3fb",
+      "raw_bytes": 343,
+      "raw_lines": 4,
+      "compressed_bytes": 250
+    },
+    {
+      "path": "os/syscalls.77145",
+      "retained": "os/syscalls.77145.gz",
+      "raw_sha256": "bec72d54d7917d83dc0e1e64d2aa90fa505567ebf5ab1e32183557939744e7e7",
+      "raw_bytes": 343,
+      "raw_lines": 4,
+      "compressed_bytes": 251
+    },
+    {
+      "path": "os/syscalls.77146",
+      "retained": "os/syscalls.77146.gz",
+      "raw_sha256": "b9ac7d6c359de417ab90ad0e8f08c9cb2e4ef35208904496669a1244a84c4656",
+      "raw_bytes": 343,
+      "raw_lines": 4,
+      "compressed_bytes": 250
+    },
+    {
+      "path": "os/syscalls.77147",
+      "retained": "os/syscalls.77147.gz",
+      "raw_sha256": "27f1ebce6c04632e8be5e539b40ceea9992920a18ecac6a4f8fc81e1be747789",
+      "raw_bytes": 343,
+      "raw_lines": 4,
+      "compressed_bytes": 249
+    },
+    {
+      "path": "os/syscalls.77148",
+      "retained": "os/syscalls.77148.gz",
+      "raw_sha256": "c6eaacc3db5bbcb7dfbb21c18d1a31e906dcdbc1723ac0642b4bbc8e6404849f",
+      "raw_bytes": 343,
+      "raw_lines": 4,
+      "compressed_bytes": 250
+    },
+    {
+      "path": "os/syscalls.77149",
+      "retained": "os/syscalls.77149.gz",
+      "raw_sha256": "8c83cc62e9c9ea4082751008fbe84119bad95bcafaaab801ab782d946d0d3156",
+      "raw_bytes": 343,
+      "raw_lines": 4,
+      "compressed_bytes": 251
+    },
+    {
+      "path": "os/syscalls.77150",
+      "retained": "os/syscalls.77150.gz",
+      "raw_sha256": "c225f924342dcd5cf32adfa230226f108883ca0e754b7180b3c1f6579b71f175",
+      "raw_bytes": 343,
+      "raw_lines": 4,
+      "compressed_bytes": 251
+    },
+    {
+      "path": "os/syscalls.77151",
+      "retained": "os/syscalls.77151.gz",
+      "raw_sha256": "39514c95595b8bf6bd395c5d87bffe28ee2a283875427ed9fc71ebdaf1dae9a2",
+      "raw_bytes": 343,
+      "raw_lines": 4,
+      "compressed_bytes": 248
+    },
+    {
+      "path": "os/syscalls.77152",
+      "retained": "os/syscalls.77152.gz",
+      "raw_sha256": "21e1053cfb8a8cae7f491650af35ae880866d6a0dbcc5ec404f1d7ce43d7f41c",
+      "raw_bytes": 343,
+      "raw_lines": 4,
+      "compressed_bytes": 252
+    },
+    {
+      "path": "os/syscalls.77153",
+      "retained": "os/syscalls.77153.gz",
+      "raw_sha256": "6e4ef9e80ad5a73fda8ba02e2899e1e201576fd17dbbbb495041f8fc82d40802",
+      "raw_bytes": 343,
+      "raw_lines": 4,
+      "compressed_bytes": 251
+    },
+    {
+      "path": "os/syscalls.77154",
+      "retained": "os/syscalls.77154.gz",
+      "raw_sha256": "7e61e4ed672dfc054655e561a95158215d718102078a29d69b6e2f34afe6a708",
+      "raw_bytes": 343,
+      "raw_lines": 4,
+      "compressed_bytes": 251
+    },
+    {
+      "path": "os/syscalls.77155",
+      "retained": "os/syscalls.77155.gz",
+      "raw_sha256": "175d30519fd314970cd71074d1336ba73204bf0dd6f8964e474c3149c25120c7",
+      "raw_bytes": 343,
+      "raw_lines": 4,
+      "compressed_bytes": 249
+    },
+    {
+      "path": "os/syscalls.77156",
+      "retained": "os/syscalls.77156.gz",
+      "raw_sha256": "20ddc1303de7028f14cd9bb80c6c7a90a844dbe89dda5aba99f746f25bdda90a",
+      "raw_bytes": 343,
+      "raw_lines": 4,
+      "compressed_bytes": 251
+    },
+    {
+      "path": "os/syscalls.77157",
+      "retained": "os/syscalls.77157.gz",
+      "raw_sha256": "121b611fd3d6560a5b90c309287b14a7586345976c913e6134a48d06e84a6d0a",
+      "raw_bytes": 343,
+      "raw_lines": 4,
+      "compressed_bytes": 250
+    },
+    {
+      "path": "os/syscalls.77158",
+      "retained": "os/syscalls.77158.gz",
+      "raw_sha256": "ac29c4f62c1c36e3c70a960749f9db3a74f4a539021617e7419161cffc278025",
+      "raw_bytes": 343,
+      "raw_lines": 4,
+      "compressed_bytes": 249
+    },
+    {
+      "path": "os/syscalls.77159",
+      "retained": "os/syscalls.77159.gz",
+      "raw_sha256": "8da1a6a34fb9e734930cf8c5b3ab2d7d15db060806b14584f26bc91150f10505",
+      "raw_bytes": 343,
+      "raw_lines": 4,
+      "compressed_bytes": 252
+    },
+    {
+      "path": "os/syscalls.77160",
+      "retained": "os/syscalls.77160.gz",
+      "raw_sha256": "28ddc88fb7ce076bba113e6aaf0697aee46ee56ebd47c1296bf02166dd218c56",
+      "raw_bytes": 343,
+      "raw_lines": 4,
+      "compressed_bytes": 253
+    },
+    {
+      "path": "os/syscalls.77161",
+      "retained": "os/syscalls.77161.gz",
+      "raw_sha256": "20135184a21ad2026453fcf48d3a5e6f8d995f569748c34878f8a50a965d072d",
+      "raw_bytes": 343,
+      "raw_lines": 4,
+      "compressed_bytes": 251
+    },
+    {
+      "path": "os/syscalls.77162",
+      "retained": "os/syscalls.77162.gz",
+      "raw_sha256": "b0ec3bb2917e8dd99f29f5859a2edca9131c59e6797a61b549bb01b56a2a0015",
+      "raw_bytes": 343,
+      "raw_lines": 4,
+      "compressed_bytes": 251
+    },
+    {
+      "path": "os/syscalls.77163",
+      "retained": "os/syscalls.77163.gz",
+      "raw_sha256": "0b4a639642a247c6e139cfa642dd899171a6d158e1802460de1c9872fadb116c",
+      "raw_bytes": 343,
+      "raw_lines": 4,
+      "compressed_bytes": 250
+    },
+    {
+      "path": "os/syscalls.77164",
+      "retained": "os/syscalls.77164.gz",
+      "raw_sha256": "5a63df071b56452898a5e49ece17d54e8b2c38d346d26217d8dde30b19cac550",
+      "raw_bytes": 343,
+      "raw_lines": 4,
+      "compressed_bytes": 253
+    },
+    {
+      "path": "os/syscalls.77165",
+      "retained": "os/syscalls.77165.gz",
+      "raw_sha256": "fe3dd941c90a272ee5f82a883a49d19ea096dee20740f48584d45bcf88eb01d1",
+      "raw_bytes": 343,
+      "raw_lines": 4,
+      "compressed_bytes": 251
+    },
+    {
+      "path": "os/syscalls.77166",
+      "retained": "os/syscalls.77166.gz",
+      "raw_sha256": "fea5e7085b1f343af4dfb6d55ae99e739132b6022ed01fc59b317ead34c6532b",
+      "raw_bytes": 343,
+      "raw_lines": 4,
+      "compressed_bytes": 252
+    },
+    {
+      "path": "os/syscalls.77167",
+      "retained": "os/syscalls.77167.gz",
+      "raw_sha256": "d8207d0e7ad8a36ae6286de6bf0626c972def68eeec430d34dff4a74426199ec",
+      "raw_bytes": 343,
+      "raw_lines": 4,
+      "compressed_bytes": 254
+    },
+    {
+      "path": "os/syscalls.77168",
+      "retained": "os/syscalls.77168.gz",
+      "raw_sha256": "ba8d17b8abf0a98a5b919a79bc6610b004d6afe51da6185dca183b2de43480ed",
+      "raw_bytes": 343,
+      "raw_lines": 4,
+      "compressed_bytes": 250
+    },
+    {
+      "path": "os/syscalls.77169",
+      "retained": "os/syscalls.77169.gz",
+      "raw_sha256": "698b9c91f1a890c7aeee03c79aa36b66e5e61026312dd20c94f59a017dfa0723",
+      "raw_bytes": 343,
+      "raw_lines": 4,
+      "compressed_bytes": 252
+    },
+    {
+      "path": "os/syscalls.77170",
+      "retained": "os/syscalls.77170.gz",
+      "raw_sha256": "9dd7c11779f407a6a00fb2735bf17952b7900e0f14098f3a2a08a86aa68710ea",
+      "raw_bytes": 343,
+      "raw_lines": 4,
+      "compressed_bytes": 252
+    },
+    {
+      "path": "os/syscalls.77171",
+      "retained": "os/syscalls.77171.gz",
+      "raw_sha256": "20f9b9492f5ed35e08f8fe41bf58c563bec4e3619375002382aee9324ef45c91",
+      "raw_bytes": 343,
+      "raw_lines": 4,
+      "compressed_bytes": 249
+    },
+    {
+      "path": "os/syscalls.77172",
+      "retained": "os/syscalls.77172.gz",
+      "raw_sha256": "96163a2509c6867b500510089e816ecf92cbeca9e80b2276a54c7e639cbe1e97",
+      "raw_bytes": 343,
+      "raw_lines": 4,
+      "compressed_bytes": 250
+    },
+    {
+      "path": "os/syscalls.77173",
+      "retained": "os/syscalls.77173.gz",
+      "raw_sha256": "c125c8c237e50aa7998e939cfb8272e1e180cfae5c07592e8d7f46b1fe06637c",
+      "raw_bytes": 343,
+      "raw_lines": 4,
+      "compressed_bytes": 251
+    },
+    {
+      "path": "os/syscalls.77174",
+      "retained": "os/syscalls.77174.gz",
+      "raw_sha256": "fb0f8ef3076a99195307c5e8dc55f90ed746bba872c87e7205470d2dfca2350f",
+      "raw_bytes": 343,
+      "raw_lines": 4,
+      "compressed_bytes": 251
+    },
+    {
+      "path": "os/syscalls.77175",
+      "retained": "os/syscalls.77175.gz",
+      "raw_sha256": "a6ed3c5bdb16d13b62e29f8613a2240508db2bfcc15a64c66a93f4951fffd107",
+      "raw_bytes": 343,
+      "raw_lines": 4,
+      "compressed_bytes": 251
+    },
+    {
+      "path": "os/syscalls.77176",
+      "retained": "os/syscalls.77176.gz",
+      "raw_sha256": "83d9fb66a0c758b982aa114e3d019ac93342a04ee03f5ec36c0117d90f840d67",
+      "raw_bytes": 343,
+      "raw_lines": 4,
+      "compressed_bytes": 250
+    },
+    {
+      "path": "os/syscalls.77177",
+      "retained": "os/syscalls.77177.gz",
+      "raw_sha256": "1f028b33779c9cf1700cd62073c0bd535f6ceb3ee9726988f85a4cea21977d10",
+      "raw_bytes": 343,
+      "raw_lines": 4,
+      "compressed_bytes": 249
+    },
+    {
+      "path": "os/syscalls.77178",
+      "retained": "os/syscalls.77178.gz",
+      "raw_sha256": "950d1fe99a690f598fb3f1d6f7e84685f235fec04dbe699ddd04d6ed3cf9c244",
+      "raw_bytes": 343,
+      "raw_lines": 4,
+      "compressed_bytes": 252
+    },
+    {
+      "path": "os/syscalls.77179",
+      "retained": "os/syscalls.77179.gz",
+      "raw_sha256": "fe7168fccd3370536b148da3e480c4f2a3706d4d9e9f50aacc4bdd6b870aae58",
+      "raw_bytes": 343,
+      "raw_lines": 4,
+      "compressed_bytes": 251
+    },
+    {
+      "path": "os/syscalls.77180",
+      "retained": "os/syscalls.77180.gz",
+      "raw_sha256": "0d30b3edb0b197cf317302f2fc4ae7ee2b549e3799a34ce79198cc1dd66f3ee0",
+      "raw_bytes": 343,
+      "raw_lines": 4,
+      "compressed_bytes": 250
+    },
+    {
+      "path": "os/syscalls.77419",
+      "retained": "os/syscalls.77419.gz",
+      "raw_sha256": "49f0f55fc3bf5684e13b80920d2ba501aae25f73a1255362f41254b0d422e58d",
+      "raw_bytes": 125,
+      "raw_lines": 2,
+      "compressed_bytes": 137
+    },
+    {
+      "path": "os/syscalls.77420",
+      "retained": "os/syscalls.77420.gz",
+      "raw_sha256": "87f90195523306c6ee8b204be8f899539bfd6f3a853584722957587479e7c47a",
+      "raw_bytes": 125,
+      "raw_lines": 2,
+      "compressed_bytes": 137
+    },
+    {
+      "path": "os/syscalls.77421",
+      "retained": "os/syscalls.77421.gz",
+      "raw_sha256": "3c532b03fdbfb6e8a46de750e5f1450cdb09dfeeb60f2d0fd4af8a1901be2b33",
+      "raw_bytes": 125,
+      "raw_lines": 2,
+      "compressed_bytes": 137
+    },
+    {
+      "path": "os/syscalls.77422",
+      "retained": "os/syscalls.77422.gz",
+      "raw_sha256": "5c985174264da786f30bc3404fbe7a920c5ceadff71d551fe748fcddb0cf6a70",
+      "raw_bytes": 125,
+      "raw_lines": 2,
+      "compressed_bytes": 137
+    },
+    {
+      "path": "os/syscalls.77423",
+      "retained": "os/syscalls.77423.gz",
+      "raw_sha256": "6b60f427ade6521403f6d25d9c08ffd538674939e3580c408c71f55e608542d0",
+      "raw_bytes": 125,
+      "raw_lines": 2,
+      "compressed_bytes": 137
+    },
+    {
+      "path": "os/syscalls.77424",
+      "retained": "os/syscalls.77424.gz",
+      "raw_sha256": "2e5c9a30605ba1695078082ee4fe79165c55bdbdf360ec2653e65775a0b1dbdc",
+      "raw_bytes": 125,
+      "raw_lines": 2,
+      "compressed_bytes": 136
+    },
+    {
+      "path": "os/syscalls.77425",
+      "retained": "os/syscalls.77425.gz",
+      "raw_sha256": "7bbe48396895f7d0cb90e65a0f09179822b976cca11a558c2de915312eb685fc",
+      "raw_bytes": 125,
+      "raw_lines": 2,
+      "compressed_bytes": 137
+    },
+    {
+      "path": "os/syscalls.77426",
+      "retained": "os/syscalls.77426.gz",
+      "raw_sha256": "c744e655d5f51bc6da8f74a80e017235f020f133ebfeccf4e89674985bb7c12d",
+      "raw_bytes": 125,
+      "raw_lines": 2,
+      "compressed_bytes": 137
+    },
+    {
+      "path": "os/syscalls.77427",
+      "retained": "os/syscalls.77427.gz",
+      "raw_sha256": "ac13d49552aa6c1f84388ea78b7bb6ce4a7279506d829cca8fe9a763dab38ba8",
+      "raw_bytes": 125,
+      "raw_lines": 2,
+      "compressed_bytes": 137
+    },
+    {
+      "path": "os/syscalls.77428",
+      "retained": "os/syscalls.77428.gz",
+      "raw_sha256": "188192297f618d72f0ace72066936aae6b7b5acd3e3bed7d6c94b940c4189ccf",
+      "raw_bytes": 125,
+      "raw_lines": 2,
+      "compressed_bytes": 137
+    },
+    {
+      "path": "os/syscalls.77429",
+      "retained": "os/syscalls.77429.gz",
+      "raw_sha256": "c6256b1d8bf26774039db035781cffb9cdbeeb5a972cff7d6a1b15b104e16bb5",
+      "raw_bytes": 125,
+      "raw_lines": 2,
+      "compressed_bytes": 137
+    },
+    {
+      "path": "os/syscalls.77430",
+      "retained": "os/syscalls.77430.gz",
+      "raw_sha256": "583a0672b3c522736340d8909d2042eff4dbee018c7c942d5a606a09433ecac0",
+      "raw_bytes": 125,
+      "raw_lines": 2,
+      "compressed_bytes": 137
+    },
+    {
+      "path": "os/syscalls.77431",
+      "retained": "os/syscalls.77431.gz",
+      "raw_sha256": "f76fa0b36773c8059228b31aa9409b6515db045ed047ef3b7eabc0922f63094a",
+      "raw_bytes": 125,
+      "raw_lines": 2,
+      "compressed_bytes": 137
+    },
+    {
+      "path": "os/syscalls.77432",
+      "retained": "os/syscalls.77432.gz",
+      "raw_sha256": "0ea76a8a2d9cf5c34cafa844c3c62d16bf2ea82b18ccf6457a0474e6cc281259",
+      "raw_bytes": 125,
+      "raw_lines": 2,
+      "compressed_bytes": 137
+    },
+    {
+      "path": "os/syscalls.77433",
+      "retained": "os/syscalls.77433.gz",
+      "raw_sha256": "af4ea2e102e9e5556db6f5de244776b9def6d8ef20dd36f6c4293e6c2041f287",
+      "raw_bytes": 125,
+      "raw_lines": 2,
+      "compressed_bytes": 137
+    },
+    {
+      "path": "os/syscalls.77434",
+      "retained": "os/syscalls.77434.gz",
+      "raw_sha256": "1a223e29ede1f0317ea113c79cd3f51c5739071cbbf87e989ece6b1ef718564b",
+      "raw_bytes": 125,
+      "raw_lines": 2,
+      "compressed_bytes": 136
+    },
+    {
+      "path": "os/syscalls.77435",
+      "retained": "os/syscalls.77435.gz",
+      "raw_sha256": "d152230b94fbcf5e2696b4d33c2a560dced1d81576c10b6597883ea851763990",
+      "raw_bytes": 125,
+      "raw_lines": 2,
+      "compressed_bytes": 136
+    },
+    {
+      "path": "os/syscalls.77436",
+      "retained": "os/syscalls.77436.gz",
+      "raw_sha256": "5ba3c3813116c0c31020e245c1cde108f3593051c80336c87c2bf8b30fe59ed4",
+      "raw_bytes": 125,
+      "raw_lines": 2,
+      "compressed_bytes": 137
+    },
+    {
+      "path": "os/syscalls.77437",
+      "retained": "os/syscalls.77437.gz",
+      "raw_sha256": "e90aee113ebbe642c9dc483d80e5e0d1e0ba8ed091d127c5fe96ae4521db1578",
+      "raw_bytes": 125,
+      "raw_lines": 2,
+      "compressed_bytes": 137
+    },
+    {
+      "path": "os/syscalls.77438",
+      "retained": "os/syscalls.77438.gz",
+      "raw_sha256": "c6290b08f87d75a9b3c0b7b635a23e919af623a69169c97df663010fa4f70144",
+      "raw_bytes": 125,
+      "raw_lines": 2,
+      "compressed_bytes": 137
+    },
+    {
+      "path": "os/syscalls.77439",
+      "retained": "os/syscalls.77439.gz",
+      "raw_sha256": "79156cf51c0b82d49e5f9a03b3e8f701c321ae91f1fdcb0267cda025acccdbb5",
+      "raw_bytes": 125,
+      "raw_lines": 2,
+      "compressed_bytes": 138
+    },
+    {
+      "path": "os/syscalls.77440",
+      "retained": "os/syscalls.77440.gz",
+      "raw_sha256": "209182c4dba70bf1e0b7f5e975e224da8fe9f5764a413143028f061737af127a",
+      "raw_bytes": 125,
+      "raw_lines": 2,
+      "compressed_bytes": 138
+    },
+    {
+      "path": "os/syscalls.77441",
+      "retained": "os/syscalls.77441.gz",
+      "raw_sha256": "d98d93a98542d2a058dbfd036a583372b62acbb7cef796085070369cc72e6f9c",
+      "raw_bytes": 125,
+      "raw_lines": 2,
+      "compressed_bytes": 138
+    },
+    {
+      "path": "os/syscalls.77442",
+      "retained": "os/syscalls.77442.gz",
+      "raw_sha256": "a9cffb82e062dec04792a2d6ca7858f8b3e16883b7e07a11bde65fc70beb9133",
+      "raw_bytes": 125,
+      "raw_lines": 2,
+      "compressed_bytes": 138
+    },
+    {
+      "path": "os/syscalls.77443",
+      "retained": "os/syscalls.77443.gz",
+      "raw_sha256": "9e88f984dc200e0f05d65016e6670b8fd54fd1f84aa957bccfd58f1b5ebdb332",
+      "raw_bytes": 125,
+      "raw_lines": 2,
+      "compressed_bytes": 138
+    },
+    {
+      "path": "os/syscalls.77444",
+      "retained": "os/syscalls.77444.gz",
+      "raw_sha256": "c74fe3927884483624a507291138cd1a9e6b99cce63018b8ce34f709cd214bdd",
+      "raw_bytes": 125,
+      "raw_lines": 2,
+      "compressed_bytes": 138
+    },
+    {
+      "path": "os/syscalls.77445",
+      "retained": "os/syscalls.77445.gz",
+      "raw_sha256": "75b1f976a6775568ab81c6a890263d559dac5966204e384220e0e352f65fce98",
+      "raw_bytes": 125,
+      "raw_lines": 2,
+      "compressed_bytes": 138
+    },
+    {
+      "path": "os/syscalls.77446",
+      "retained": "os/syscalls.77446.gz",
+      "raw_sha256": "a96e2b3354c447ef0ea90b93e0269b58b9fa02d8b63dc613b50e237bdf0a3a0f",
+      "raw_bytes": 125,
+      "raw_lines": 2,
+      "compressed_bytes": 138
+    },
+    {
+      "path": "os/syscalls.77447",
+      "retained": "os/syscalls.77447.gz",
+      "raw_sha256": "fa6aac1ca1c4b5c42ab41474ad7b43ab14cd90c75414a9190de5f7f84bdf7b74",
+      "raw_bytes": 125,
+      "raw_lines": 2,
+      "compressed_bytes": 138
+    },
+    {
+      "path": "os/syscalls.77448",
+      "retained": "os/syscalls.77448.gz",
+      "raw_sha256": "2b4021b9f5c635e9e7b66992a532e70c6ddedbb65e682adf789fe48feefe2a58",
+      "raw_bytes": 125,
+      "raw_lines": 2,
+      "compressed_bytes": 138
+    },
+    {
+      "path": "os/syscalls.77449",
+      "retained": "os/syscalls.77449.gz",
+      "raw_sha256": "ff89032af0f1549bf987d17c9671ac24acd6973b8a1aa6afbbbe644bd0f0fcdb",
+      "raw_bytes": 125,
+      "raw_lines": 2,
+      "compressed_bytes": 138
+    },
+    {
+      "path": "os/syscalls.77450",
+      "retained": "os/syscalls.77450.gz",
+      "raw_sha256": "c476584829984302309c9cca99d1579fef9fc07084ea35c5fd493fce0d4dc966",
+      "raw_bytes": 125,
+      "raw_lines": 2,
+      "compressed_bytes": 136
+    },
+    {
+      "path": "os/syscalls.77451",
+      "retained": "os/syscalls.77451.gz",
+      "raw_sha256": "05b7cbd764f2215bc3ee0fe0c27d1d903e17dcfb544766ae20c9c398bd77f657",
+      "raw_bytes": 125,
+      "raw_lines": 2,
+      "compressed_bytes": 137
+    },
+    {
+      "path": "os/syscalls.77452",
+      "retained": "os/syscalls.77452.gz",
+      "raw_sha256": "19fb7e889a7ba0dca3bb9be7bb19f0a831a50b3d6e92bfde832f5849fb044fdc",
+      "raw_bytes": 125,
+      "raw_lines": 2,
+      "compressed_bytes": 138
+    },
+    {
+      "path": "os/syscalls.77453",
+      "retained": "os/syscalls.77453.gz",
+      "raw_sha256": "7a13b01c309241437208c3afb0d685f0c4d8caac370ca49052710d9826e2be41",
+      "raw_bytes": 125,
+      "raw_lines": 2,
+      "compressed_bytes": 136
+    },
+    {
+      "path": "os/syscalls.77454",
+      "retained": "os/syscalls.77454.gz",
+      "raw_sha256": "6db7a3141c6e10ae59535ee9e5617b3285fead71c617a99c8fd6680e143d8fb3",
+      "raw_bytes": 125,
+      "raw_lines": 2,
+      "compressed_bytes": 138
+    },
+    {
+      "path": "os/syscalls.77455",
+      "retained": "os/syscalls.77455.gz",
+      "raw_sha256": "59d3123ddfc948a380ab132e7870ccc23db6cc7c9b02090b233e55f315f87f34",
+      "raw_bytes": 125,
+      "raw_lines": 2,
+      "compressed_bytes": 136
+    },
+    {
+      "path": "os/syscalls.77456",
+      "retained": "os/syscalls.77456.gz",
+      "raw_sha256": "009e24d1baf29962daad60d8a6189b1000fe57ef6122be90f34d843de50903eb",
+      "raw_bytes": 125,
+      "raw_lines": 2,
+      "compressed_bytes": 138
+    },
+    {
+      "path": "os/syscalls.77457",
+      "retained": "os/syscalls.77457.gz",
+      "raw_sha256": "fa680fb527e21fa35eb14762c56af8e74aa7e3bf36f02471bea43c44301ea6db",
+      "raw_bytes": 125,
+      "raw_lines": 2,
+      "compressed_bytes": 138
+    },
+    {
+      "path": "os/syscalls.77458",
+      "retained": "os/syscalls.77458.gz",
+      "raw_sha256": "078c33131129416fbb573637a80e0ffbf5faad112e5357ff7252209c24e63f8a",
+      "raw_bytes": 125,
+      "raw_lines": 2,
+      "compressed_bytes": 137
+    },
+    {
+      "path": "os/syscalls.77459",
+      "retained": "os/syscalls.77459.gz",
+      "raw_sha256": "665855fc248f902ad57b33c75f91c8a1f7d4e6b849c9b8d553129c0c064a6419",
+      "raw_bytes": 125,
+      "raw_lines": 2,
+      "compressed_bytes": 138
+    },
+    {
+      "path": "os/syscalls.77460",
+      "retained": "os/syscalls.77460.gz",
+      "raw_sha256": "77a15e42bc16dbb7478aa01157ae4db8dc9940791d4173b71051512db473a4c3",
+      "raw_bytes": 125,
+      "raw_lines": 2,
+      "compressed_bytes": 137
+    },
+    {
+      "path": "os/syscalls.77461",
+      "retained": "os/syscalls.77461.gz",
+      "raw_sha256": "fa4973d8dc441e63c03d4ab9ad8de530791bb12335606f1c73c47224997d7830",
+      "raw_bytes": 125,
+      "raw_lines": 2,
+      "compressed_bytes": 138
+    },
+    {
+      "path": "os/syscalls.77462",
+      "retained": "os/syscalls.77462.gz",
+      "raw_sha256": "7706a4a91d20585fec1bdf62d2eaae49e077f143ae5eadc08ae5e9178c9043d0",
+      "raw_bytes": 125,
+      "raw_lines": 2,
+      "compressed_bytes": 138
+    },
+    {
+      "path": "os/syscalls.77463",
+      "retained": "os/syscalls.77463.gz",
+      "raw_sha256": "fe37e0e2fa5c55f8d166a8025e695ffb5dae3a895869af7a203c1cabe38bbe36",
+      "raw_bytes": 125,
+      "raw_lines": 2,
+      "compressed_bytes": 138
+    },
+    {
+      "path": "os/syscalls.77464",
+      "retained": "os/syscalls.77464.gz",
+      "raw_sha256": "c90b28d865f09ffdad0631e44b8cd3c19422d32058c8bf7e80c144942855820d",
+      "raw_bytes": 125,
+      "raw_lines": 2,
+      "compressed_bytes": 138
+    },
+    {
+      "path": "os/syscalls.77465",
+      "retained": "os/syscalls.77465.gz",
+      "raw_sha256": "10b07f142db2191a7004386cc89e312b86b17296eb00cc5ac8b7e1084f44ef2a",
+      "raw_bytes": 125,
+      "raw_lines": 2,
+      "compressed_bytes": 138
+    },
+    {
+      "path": "os/syscalls.77466",
+      "retained": "os/syscalls.77466.gz",
+      "raw_sha256": "2c09487fd9ae07604a4c29ab1dbe5bfb81c91b29b41f9b5c63a54690c02bd516",
+      "raw_bytes": 125,
+      "raw_lines": 2,
+      "compressed_bytes": 136
+    },
+    {
+      "path": "os/syscalls.77467",
+      "retained": "os/syscalls.77467.gz",
+      "raw_sha256": "251e510f37af1a5ea85fbe5327df4034efba1673feaf4d7f1f6f36d86f30ff5f",
+      "raw_bytes": 125,
+      "raw_lines": 2,
+      "compressed_bytes": 136
+    },
+    {
+      "path": "os/syscalls.77468",
+      "retained": "os/syscalls.77468.gz",
+      "raw_sha256": "f7002eb91f09a6e3157337beb9fe4de87c39d279ca6ff137aca9bd3275dea1f9",
+      "raw_bytes": 125,
+      "raw_lines": 2,
+      "compressed_bytes": 137
+    },
+    {
+      "path": "os/syscalls.77469",
+      "retained": "os/syscalls.77469.gz",
+      "raw_sha256": "346a7b6a7717c858e66ed6c810b6509aa9020783b3c268adb452180889a16ce8",
+      "raw_bytes": 125,
+      "raw_lines": 2,
+      "compressed_bytes": 138
+    },
+    {
+      "path": "os/syscalls.77470",
+      "retained": "os/syscalls.77470.gz",
+      "raw_sha256": "bb988ea91dbd91c77d892d1831787632b8c231d11afdd8ecb0e055af6040e48a",
+      "raw_bytes": 125,
+      "raw_lines": 2,
+      "compressed_bytes": 137
+    },
+    {
+      "path": "os/syscalls.77471",
+      "retained": "os/syscalls.77471.gz",
+      "raw_sha256": "9280d56b7964f4cb2f1970ce37ba37869eca9ed7cf683295581809fea3d3b676",
+      "raw_bytes": 125,
+      "raw_lines": 2,
+      "compressed_bytes": 138
+    },
+    {
+      "path": "os/syscalls.77472",
+      "retained": "os/syscalls.77472.gz",
+      "raw_sha256": "6430c2c1911cf50302db144f66f74b117c18d47c3c93c46144258a1603728234",
+      "raw_bytes": 125,
+      "raw_lines": 2,
+      "compressed_bytes": 138
+    },
+    {
+      "path": "os/syscalls.77473",
+      "retained": "os/syscalls.77473.gz",
+      "raw_sha256": "360f7538b0f01f02615156adb4284aa9dff7f9b223e8b88b3d4744e53437a392",
+      "raw_bytes": 125,
+      "raw_lines": 2,
+      "compressed_bytes": 137
+    },
+    {
+      "path": "os/syscalls.78242",
+      "retained": "os/syscalls.78242.gz",
+      "raw_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "raw_bytes": 0,
+      "raw_lines": 0,
+      "compressed_bytes": 35
+    },
+    {
+      "path": "os/syscalls.78243",
+      "retained": "os/syscalls.78243.gz",
+      "raw_sha256": "f60f2f5219e6fc889274fd5cfbbe6ecb2b50f7bbc8cd07f91aa4a510c5293d0c",
+      "raw_bytes": 8628,
+      "raw_lines": 43,
+      "compressed_bytes": 819
+    },
+    {
+      "path": "os/syscalls.78244",
+      "retained": "os/syscalls.78244.gz",
+      "raw_sha256": "f4517aea7798aae02adfc9aa49455af7003fbd0c2459472f3483a22f27af009d",
+      "raw_bytes": 2510,
+      "raw_lines": 25,
+      "compressed_bytes": 515
+    },
+    {
+      "path": "trace/call-codes.76351.jsonl",
+      "retained": "trace/call-codes.76351.jsonl.gz",
+      "raw_sha256": "661d9ed2661a136565a121b3442d05065a6e78b107726edd23b0b15c6f3794d2",
+      "raw_bytes": 133816,
+      "raw_lines": 528,
+      "compressed_bytes": 32329
+    },
+    {
+      "path": "trace/call-events.76351.jsonl",
+      "retained": "trace/call-events.76351.jsonl.gz",
+      "raw_sha256": "29f980d13da742242569f348410ca050295d2a638fd59e08e46da5bac4c3b089",
+      "raw_bytes": 3691667,
+      "raw_lines": 3156,
+      "compressed_bytes": 265149
+    },
+    {
+      "path": "trace/call-operands.76351.jsonl",
+      "retained": "trace/call-operands.76351.jsonl.gz",
+      "raw_sha256": "b5cf0bd7dbfd08d979ec56dd3a03758e1f7688d7543ce18226b8b7c6c2036c26",
+      "raw_bytes": 1105329,
+      "raw_lines": 3091,
+      "compressed_bytes": 63248
+    },
+    {
+      "path": "trace/function-environments.76351.jsonl",
+      "retained": "trace/function-environments.76351.jsonl.gz",
+      "raw_sha256": "e7374236a174a18fbf9a50d79418aca56c2142b4bf1e1df07497f399b1d638a4",
+      "raw_bytes": 259535,
+      "raw_lines": 272,
+      "compressed_bytes": 11315
+    },
+    {
+      "path": "trace/execution-trace.76351.016541001d2aaf6411461b5da5801940.json",
+      "retained": "trace/execution-trace.76351.016541001d2aaf6411461b5da5801940.json.gz",
+      "raw_sha256": "e4087f577fc3cbff8d3286eff8a0ff362f896ea79cca6747d6f1c0a72e2be111",
+      "raw_bytes": 464022,
+      "raw_lines": 2885,
+      "compressed_bytes": 12712
+    },
+    {
+      "path": "trace/kineto.76351.016541001d2aaf6411461b5da5801940.json",
+      "retained": "trace/kineto.76351.016541001d2aaf6411461b5da5801940.json.gz",
+      "raw_sha256": "9e099121c1ce791f34d845f4369aa614d0c62b47b0a28e026497e22df174bbaf",
+      "raw_bytes": 192560,
+      "raw_lines": 9096,
+      "compressed_bytes": 15665
+    }
+  ],
+  "raw_bytes": 32092711,
+  "compressed_bytes": 2628477,
+  "all_decoded_hashes_checked": true
+}

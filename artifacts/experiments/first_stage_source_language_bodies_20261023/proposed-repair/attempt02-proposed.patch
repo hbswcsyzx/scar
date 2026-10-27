@@ -1,0 +1,115 @@
+--- a/scar/analysis/structured_lowering.py
++++ b/scar/analysis/structured_lowering.py
+@@ -730,7 +730,7 @@
+             raise ValueError("opaque protocol has no implemented structured control interface")
+     if environment_profile:
+         from scar.analysis.source_environment_validation import validate_environment_body
+-        validate_environment_body(model, graph, interface, metadata, semantic)
++        validate_environment_body(model, graph, interface, metadata, semantic, language=language)
+         from scar.analysis.source_statement_lowering import validate_statement_protocols
+         validate_statement_protocols(model, graph, interface, metadata, semantic)
+         from scar.analysis.source_string_lowering import validate_string_protocols
+--- a/scar/analysis/source_environment_validation.py
++++ b/scar/analysis/source_environment_validation.py
+@@ -13,7 +13,7 @@
+     LocalBindingValue, ReferenceValue, StateVersionValue, TerminatorKind, ValueKind, ValueType,
+ )
+ from scar.ir.program.state_addresses import (
+-    AddressCoverage, AddressEffect, CellContent, InvokeStateOperand, NamespaceKey, ReferenceOwner,
++    AddressCoverage, AddressEffect, CellContent, Element, InvokeStateOperand, NamespaceKey, ReferenceOwner,
+ )
+ from scar.ir.program.state_modes import AccessMode
+ from scar.ir.program.structured import PythonProtocolKind as Kind
+@@ -27,7 +27,7 @@
+ _STORES = frozenset((Kind.STORE_CELL, Kind.STORE_GLOBAL, Kind.STORE_ATTRIBUTE, Kind.STORE_SUBSCRIPT))
+ 
+ 
+-def validate_environment_body(model, graph, interface, metadata, semantic):
++def validate_environment_body(model, graph, interface, metadata, semantic, *, language=None):
+     from scar.analysis.environment_lowering import captured_cell_slot
+ 
+     def need(condition, detail):
+@@ -161,6 +161,36 @@
+              and row.coverage is AddressCoverage.PARTIAL and row.protocol is None and row.effects == effects,
+              "state address must name this operation's exact owner/key/world Uses")
+         expected_rows.add(operation.id)
++    if language is not None:
++        from scar.ir.program.source_language import SourceLanguageCapability
++        from scar.ir.v2.semantic import OperationKind
++        if SourceLanguageCapability.SLICE_KEYS in language.capabilities:
++            for link in metadata.operation_links:
++                if link.opcode is not Opcode.INDEX:
++                    continue
++                operation = operations[link.operation]
++                source = semantic.definitions.get(link.semantic_operation)
++                atom = semantic.source_atoms.get(link.source.atom_id)
++                need(source is not None and source.kind is OperationKind.INDEX
++                     and source.code_id == link.source.atom_id.wire
++                     and link.source.atom_id in source.source_atoms
++                     and atom is not None and atom.kind == "Subscript" and atom.reference == link.source,
++                     "language index address has no exact original source INDEX")
++                need(operation.terminator is not None and operation.terminator.kind is TerminatorKind.INVOKE
++                     and not operation.effects_complete and operation.callee is None
++                     and len(operation.uses) == 3
++                     and tuple(use.id for use in operation.uses) == operation.invoke_arguments
++                     and all(type(values[use.value]) is ReferenceValue for use in operation.uses[:2])
++                     and type(values[operation.uses[-1].value]) is StateVersionValue
++                     and values[operation.uses[-1].value].location == world.location,
++                     "language index address needs original receiver/key/world invoke Uses")
++                effect = AddressEffect(ReferenceOwner(operation.uses[0].id),
++                                       (Element(operation.uses[1].id),), AccessMode.READ)
++                row = rows.get(operation.id)
++                need(row is not None and row.site == InvokeStateOperand(operation.id, operation.uses[-1].id)
++                     and row.coverage is AddressCoverage.PARTIAL and row.protocol is None
++                     and row.effects == (effect,), "language index address differs from its exact receiver/key/world Uses")
++                expected_rows.add(operation.id)
+     need(set(rows) == expected_rows, "unexpected or missing source environment address refinement")
+     for value in values.values():
+         if type(value) is LocalBindingValue:
+--- a/scar/analysis/source_language_validation.py
++++ b/scar/analysis/source_language_validation.py
+@@ -190,6 +190,44 @@
+                 if row.opname == "BUILD_SLICE" and row.arg == len(operands) - 1
+                 and tuple(row.positions) == (node.lineno, node.end_lineno, node.col_offset, node.end_col_offset)]
+             _need(len(candidates) == 1, "dynamic slice does not match its exact BUILD_SLICE code position")
++    if Capability.SLICE_KEYS in language.capabilities:
++        from scar.ir.program.state_addresses import AddressCoverage, AddressEffect, Element, InvokeStateOperand, ReferenceOwner
++        from scar.ir.semantics_v2 import Opcode
++        from scar.ir.v2.semantic import OperationKind
++        addresses = {row.site.operation: row for row in graph.state_address_refinements}
++        source_uses = {(row.operation, row.use): row for row in metadata.use_links}
++        for identity, link in links.items():
++            if link.opcode is not Opcode.INDEX:
++                continue
++            definition = semantic.definitions.get(link.semantic_operation)
++            _need(definition is not None and definition.kind is OperationKind.INDEX
++                  and definition.code_id == link.source.atom_id.wire
++                  and link.source.atom_id in definition.source_atoms,
++                  "index operation lost its exact original source definition")
++            node = source_node(link.source, (ast.Subscript,))
++            _need(node is None or isinstance(node.ctx, ast.Load), "load-key capability cannot certify a store")
++            operation, operands, _ = invoke(identity, 2, 1)
++            _need(operation.callee is None and values[operands[-1].value].location == values[interface.world].location,
++                  "index invoke does not consume its original coarse world")
++            row = addresses.get(identity)
++            expected = AddressEffect(ReferenceOwner(operands[0].id), (Element(operands[1].id),), AccessMode.READ)
++            _need(row is not None and row.site == InvokeStateOperand(identity, operands[-1].id)
++                  and row.coverage is AddressCoverage.PARTIAL and row.protocol is None and row.effects == (expected,),
++                  "index partial address differs from its exact receiver/key/world Uses")
++            for index, role in enumerate(("receiver", "index")):
++                source_use = source_uses.get((identity, operands[index].id))
++                _need(source_use is not None and source_use.role == role and source_use.index == index,
++                      "index original receiver/key Use order differs")
++                atom = semantic.source_atoms.get(source_use.source.atom_id)
++                _need(atom is not None and atom.reference == source_use.source,
++                      "index operand has no exact original source atom")
++                if node is not None:
++                    child = (node.value, node.slice)[index]
++                    _need((source_use.source.path, source_use.source.fingerprint) == (language.source.path, language.source.fingerprint)
++                          and (source_use.source.start_line, source_use.source.end_line,
++                               source_use.source.start_column, source_use.source.end_column)
++                          == (child.lineno, child.end_lineno, child.col_offset, child.end_col_offset),
++                          "index receiver/key differs from exact source expression")
+     for identity, constant in constants.items():
+         _need(Capability.SLICE_KEYS in language.capabilities and protocols[identity].kind.value == "READ_CODE_CONSTANT"
+               and constant.source == protocols[identity].source, "code constant kind/capability differs")

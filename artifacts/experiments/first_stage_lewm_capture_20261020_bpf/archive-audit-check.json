@@ -1,0 +1,12 @@
+{
+  "archive_matches_pre_archive_audit": true,
+  "checked_file_hashes": 257,
+  "operand_bytes_match_metadata": true,
+  "verified_compressed_file_hashes": 258,
+  "os_trace_files": 253,
+  "os_record_lines": 705569,
+  "raw_bytes": 610589591,
+  "compressed_bytes": 41097195,
+  "whole_model_established": false,
+  "initial_receipt_correction": "normalize relative audit paths before comparing to absolute archive keys"
+}

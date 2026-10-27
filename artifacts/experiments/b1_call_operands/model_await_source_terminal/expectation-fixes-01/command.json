@@ -1,0 +1,22 @@
+{
+  "command": [
+    "/home/zyf/miniconda3/envs/lewm/bin/python",
+    "-m",
+    "pytest",
+    "-q",
+    "tests/unit/test_program_await_wrapper_final.py::test_another_wrapper_terminal_packet_cannot_match_the_driver_packet_result",
+    "tests/unit/test_execution_await_wrapper_final.py::test_native_wrapper_two_instances_reach_their_own_current_final_ports[zero-E-N]",
+    "tests/unit/test_execution_await_wrapper_final.py::test_native_wrapper_two_instances_reach_their_own_current_final_ports[two-cut-EG-N]",
+    "tests/unit/test_execution_await_wrapper_final.py::test_missing_first_wrapper_call_keeps_its_obligation_and_cannot_borrow_another_instance",
+    "tests/unit/test_execution_await_wrapper_final.py::test_missing_child_call_retains_exact_frame_and_sibling_final_chain",
+    "--junitxml=/tmp/scar-structured-model-280qf4mi/artifacts/experiments/b1_call_operands/model_await_source_terminal/expectation-fixes-01/junit.xml"
+  ],
+  "cwd": "/tmp/scar-structured-model-280qf4mi",
+  "python": "3.14.7 | packaged by conda-forge | (main, Sep  2 2026, 21:08:32) [GCC 15.3.0]",
+  "activation": "source /home/zyf/miniconda3/etc/profile.d/conda.sh; conda activate lewm",
+  "environment": {
+    "PYTHONPATH": ".",
+    "PYTHONDONTWRITEBYTECODE": "1"
+  },
+  "scope": "affected focused only, not complete component/full"
+}

@@ -1,0 +1,51 @@
+{
+  "status": "PASS_WITH_OPEN",
+  "elapsed_seconds": 3.6606475680018775,
+  "observed": {
+    "targets": 8,
+    "entries": 6,
+    "gaps": 0,
+    "kinds": {
+      "OTHER_UNCLASSIFIED": 1,
+      "NORMALIZED_RECEIVER_FUNCTION": 2,
+      "FUNCTION": 4,
+      "NATIVE_BUILTIN": 1
+    },
+    "receiver_entries": 2,
+    "contents_state_ready_established": false,
+    "whole_program_complete": false
+  },
+  "ports": {
+    "targets": 8,
+    "bound_calls": 5,
+    "receiver_ports": 2,
+    "explicit_argument_ports": 5,
+    "open_targets": 3,
+    "reference_identity_established": false,
+    "effects_state_ready_established": false,
+    "whole_program_complete": false
+  },
+  "external_incoming_and_outgoing_calls": 2,
+  "receiver_negative": "Python source binding differs from original code/source/receiver/ports",
+  "old_report_schema": 1,
+  "old_routing": {
+    "argument_routes": 0,
+    "completion_routes": 0,
+    "template_values": 95,
+    "invocation_returns": 5,
+    "issues": 8,
+    "conditional_only": true,
+    "function_environment_established": false,
+    "contents_or_effects_established": false,
+    "world_equivalence_established": false,
+    "transformation_authorized": false
+  },
+  "external_bodies": 2,
+  "new_LeWM_or_target_episode": false,
+  "retained_generic_capture": "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/python_call_targets_owned_20261026/case01/capture",
+  "model": {
+    "path": "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/python_call_targets_owned_20261026/case01/model.json",
+    "bytes": 90578,
+    "sha256": "d71743e6e58a4b90975a725cfa0ac53486e1abc7178754085fd404288037288b"
+  }
+}

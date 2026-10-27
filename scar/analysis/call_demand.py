@@ -15,6 +15,7 @@ from pathlib import Path
 from scar.analysis.program_context_store import PreparedContextStore, ContextStoreLimit
 from scar.analysis.program_lowering import prepare_source
 from scar.ir.program.compilation import CallCompilationProfile
+from scar.ir.program.functions import BodyLoweringProfile
 
 
 def _fresh_failure(error):
@@ -39,6 +40,15 @@ class _SourceWorkspace:
         self._observed_paths = set()
         self.entry, self.source_roots, self.inventory_budget = entry, source_roots, inventory_budget
         self.entry_frontier = None
+        self.captured_session = None
+
+    def bind_captured_session(self, session):
+        from scar.analysis.call_seeds import _CapturedSourceSession
+        if type(session) is not _CapturedSourceSession or session.root != self.root:
+            raise TypeError('workspace requires the same normal captured source session')
+        if self.captured_session is not None and self.captured_session is not session:
+            raise ValueError('workspace captured source owner changed')
+        self.captured_session = session
 
     def prime_sources(self, descriptors):
         """Give the entry closure first claim on the private context budget.
@@ -47,6 +57,7 @@ class _SourceWorkspace:
         source projections survive a full-context spool failure, so lack of
         scratch space does not turn an otherwise verifiable code into a match.
         """
+        self._observed_paths = {code.filename for code in descriptors}
         if self.entry is None:
             return
         from scar.analysis.program_inventory import _ordered_files
@@ -56,7 +67,7 @@ class _SourceWorkspace:
         self.entry_frontier = _discover_sources_from_call_sources(self.entry,
             project_root=self.root, source_roots=self.source_roots, source_witnesses=(),
             max_files=budget.max_files, max_bytes=budget.max_bytes,
-            max_directories=budget.max_directories)
+            max_directories=budget.max_directories,_captured_source_session=self.captured_session)
         for file in _ordered_files(self.entry_frontier):
             try:
                 context = self.prepare(file.snapshot.path)
@@ -66,8 +77,9 @@ class _SourceWorkspace:
                 # The normal inventory path publishes the concrete boundary.
                 pass
 
-    @staticmethod
-    def _current_fingerprint(path):
+    def _current_fingerprint(self,path):
+        if self.captured_session is not None and self.captured_session.has_path(path):
+            return self.captured_session.archived(path).snapshot.fingerprint
         from scar.analysis.source_discovery import _read_source
         try:
             text, _, _ = _read_source(Path(path), 4_000_000)
@@ -120,7 +132,8 @@ class _SourceWorkspace:
             return context
         self.preparations[key] += 1
         try:
-            context = prepare_source(path, project_root=self.root)
+            context = (self.captured_session.prepare(path) if self.captured_session is not None
+                       and self.captured_session.has_path(path) else prepare_source(path,project_root=self.root))
         except (OSError, ValueError, TypeError, KeyError, SyntaxError, RecursionError) as error:
             self._source_errors[key] = _fresh_failure(error)
             raise
@@ -149,75 +162,152 @@ class _SourceWorkspace:
 
 def inventory_from_calls(entry, *, project_root, source_roots, budget, call_trace,
                          call_budget, context_budget, expected_call_sources=None,
-                         compilation_profile=CallCompilationProfile.RECORDED_FUTURE_FLAGS):
+                         compilation_profile=CallCompilationProfile.RECORDED_FUTURE_FLAGS,
+                         body_profile=BodyLoweringProfile.BOUND_FRAME,_seed_report=None,_workspace=None,
+                         coordinates=None):
     from scar.analysis.call_seeds import _read_call_source_seeds
     from scar.analysis.program_expansion import expand_inventory
     from scar.analysis.program_inventory import ProgramInventory, _canonical
     from scar.analysis.source_discovery import _discover_sources_from_call_sources
     from scar.ir.program.functions import BodyLoweringProfile
 
+    if type(body_profile) is not BodyLoweringProfile or body_profile not in (
+            BodyLoweringProfile.BOUND_FRAME, BodyLoweringProfile.STRUCTURED_BODY, BodyLoweringProfile.STRUCTURED_ENV):
+        raise ValueError("call-source inventory requires a frame or structured body profile")
+
     root = Path(project_root).resolve() if project_root is not None else Path(entry).absolute().parent.resolve()
-    with _SourceWorkspace(root, context_budget, entry=entry, source_roots=source_roots,
-                          inventory_budget=budget) as workspace:
-        report = _read_call_source_seeds(call_trace, root, budget=call_budget,
-            _source_workspace=workspace, compilation_profile=compilation_profile)
+    from contextlib import nullcontext
+    scope=(nullcontext(_workspace) if _workspace is not None else
+           _SourceWorkspace(root,context_budget,entry=entry,source_roots=source_roots,inventory_budget=budget))
+    with scope as workspace:
+        if _seed_report is None:
+            report = _read_call_source_seeds(call_trace,root,budget=call_budget,
+                _source_workspace=workspace,compilation_profile=compilation_profile,coordinates=coordinates)
+        else:
+            from scar.analysis.call_seeds import CallSourceSeedReport,_CapturedSourceSession
+            if (type(_seed_report)is not CallSourceSeedReport or
+                    type(_seed_report._captured_session)is not _CapturedSourceSession or
+                    workspace.captured_session is not _seed_report._captured_session):
+                raise ValueError('inventory seed reuse requires this live normal workspace/session')
+            report=_seed_report
         if expected_call_sources is not None and _canonical(report.to_dict()) != _canonical(expected_call_sources):
             raise ValueError("call seeds differ from current raw trace/source replay")
         discovery = _discover_sources_from_call_sources(entry, project_root=root,
             source_roots=source_roots, source_witnesses=report.eligible_code_links(),
             max_files=budget.max_files, max_bytes=budget.max_bytes,
-            max_directories=budget.max_directories)
-        files, schedule, measurements, interfaces, frames = expand_inventory(
+            max_directories=budget.max_directories,_captured_source_session=workspace.captured_session)
+        files, schedule, measurements, interfaces, frames, structured = expand_inventory(
             discovery, None, budget, context_budget, discovery.files, interface_model=True,
-            body_profile=BodyLoweringProfile.BOUND_FRAME, call_source_report=report,
+            body_profile=body_profile, call_source_report=report,
             source_workspace=workspace)
         scope = _call_source_scope(report, files)
         result = ProgramInventory(discovery, files, budget, expansion=schedule,
             analysis_measurements=measurements, interfaces=interfaces,
-            profile=BodyLoweringProfile.BOUND_FRAME, frames=frames,
+            profile=body_profile, frames=frames, structured=structured,
             call_sources=report, call_source_scope=scope,
             source_analysis_measurements=workspace.measurements())
         result._check_profile()
         return result
 
 
+def derive_call_source_admission(origin, code_source_link, *, source_snapshot,
+                                 indexed_definitions, body=None, source_unavailable=False):
+    """Derive one static source/body association using the full original join.
+
+    ``body`` is the existing BodyInventory produced/read through the public
+    body pipeline, not a caller success flag or standalone region claim.
+    This correspondence does not prove effects or any current invocation.
+    """
+    from scar.ir.program.call_demand import (
+        CallSourceAdmission, CallSourceAdmissionStatus as Status, EnteredCallCode,
+    )
+    from scar.ir.program.call_edges import CodeSourceLink, CallLinkStatus
+    from scar.ir.program.inventory import BodyInventory, BodyStatus, DefinitionInventory
+    from scar.ir.semantics_v2 import SourceSnapshot
+    if (type(origin) is not EnteredCallCode or type(code_source_link) is not CodeSourceLink
+            or code_source_link.status is not CallLinkStatus.VERIFIED
+            or origin.code != code_source_link.code or type(indexed_definitions) is not tuple
+            or any(type(item) is not DefinitionInventory for item in indexed_definitions)
+            or type(source_unavailable) is not bool):
+        raise TypeError("static admission needs exact original origin/link/definition records")
+    if source_snapshot is None:
+        return CallSourceAdmission(origin, Status.UNAVAILABLE,
+            reason="source not admitted by discovery budgets or source boundary")
+    if type(source_snapshot) is not SourceSnapshot:
+        raise TypeError("static admission source snapshot must be exact")
+    link = code_source_link
+    if source_snapshot.path != link.snapshot.path or source_snapshot.fingerprint != link.snapshot.fingerprint:
+        return CallSourceAdmission(origin, Status.MISMATCH,
+            reason="discovered source content differs from the verified code/source snapshot")
+    matches = [definition for definition in indexed_definitions
+               if definition.id == link.definition and definition.source == link.source]
+    if len(matches) != 1:
+        status = Status.UNAVAILABLE if not indexed_definitions and source_unavailable else Status.MISMATCH
+        return CallSourceAdmission(origin, status,
+            reason="verified unique definition was not indexed in the admitted source")
+    definition = matches[0]
+    if body is not None and (type(body) is not BodyInventory or body.definition != definition.id):
+        raise ValueError("static admission body differs from its unique original definition")
+    if body is not None and body.graph is not None:
+        if (body.status is not BodyStatus.LOWERED_WITH_GAPS or body.metadata is None
+                or body.metadata.source != source_snapshot):
+            raise ValueError("canonical body status/source contradicts its static admission")
+        return CallSourceAdmission(origin, Status.CORE_LINKED,
+            source_snapshot, definition.id, definition.source, body.graph.root)
+    reason = body.reason if body is not None and body.reason else "indexed source has no supported body interface"
+    return CallSourceAdmission(origin, Status.INDEXED_WITHOUT_BODY,
+        source_snapshot, definition.id, definition.source, reason=reason)
+
+
+def derive_entry_source_admission(origin, code_source_link, *, catalog, entry, body):
+    """Associate one checked original entry/body, without project inventory slots.
+
+    This is static membership only. Current frame/process membership is checked
+    independently by the invocation binder; no callable/environment is inferred.
+    """
+    from scar.analysis.source_entry_catalog import SourceEntryCatalog, ResolvedSourceEntry
+    from scar.ir.program.call_demand import EnteredCallCode, CallSourceAdmission, CallSourceAdmissionStatus
+    from scar.ir.program.call_edges import CodeSourceLink, CallLinkStatus
+    from scar.ir.program.inventory import BodyInventory, BodyStatus
+    if (type(catalog) is not SourceEntryCatalog or type(entry) is not ResolvedSourceEntry
+            or type(origin) is not EnteredCallCode or type(code_source_link) is not CodeSourceLink
+            or type(body) is not BodyInventory):
+        raise TypeError("qualified admission requires exact catalog/entry/origin/link/body")
+    owner = catalog.require_entry(entry)
+    owner.resolve_definition(entry.reference)
+    link, reference = entry.source_link, entry.reference
+    if (code_source_link != link or link.status is not CallLinkStatus.VERIFIED
+            or origin.code != entry.captured.key or link.code != origin.code
+            or link.snapshot != reference.snapshot or link.definition != reference.definition
+            or link.source != reference.source or body.definition != reference.definition
+            or body.status is not BodyStatus.LOWERED_WITH_GAPS or body.graph is None
+            or body.metadata is None or body.metadata.source != reference.snapshot
+            or body.construction_operations is not None):
+        raise ValueError("qualified body admission contradicts its original code/source/body")
+    groups = [row for row in catalog.metadata()["groups"]
+              if row["process_id"] == origin.process_id and row["code"] == origin.code
+              and row.get("entry_key") == entry.key]
+    if len(groups) != 1:
+        raise ValueError("qualified admission origin is not one original catalog group")
+    return CallSourceAdmission(origin, CallSourceAdmissionStatus.CORE_LINKED,
+        reference.snapshot, reference.definition, reference.source, body.graph.root)
+
+
 def _call_source_scope(report, files):
     """Link only final bodies, after every preparation/interface failure."""
-    from scar.ir.program.call_demand import (
-        CallSourceAdmission, CallSourceAdmissionStatus as Status, CallSourceScope, EnteredCallCode,
-    )
-    from scar.analysis.call_demand_schedule import _matched_call_sources
+    from scar.ir.program.call_demand import CallSourceScope, EnteredCallCode
     by_path = {file.snapshot.path: file for file in files}
     links = {link.code: link for link in report.eligible_code_links()}
-    matched = _matched_call_sources(report, files)
     admissions = []
     for group in report.eligible_groups():
-        origin = EnteredCallCode(group.process_id, group.code)
         link = links[group.code]
         file = by_path.get(link.snapshot.path)
-        if file is None:
-            admissions.append(CallSourceAdmission(origin, Status.UNAVAILABLE,
-                reason="source not admitted by discovery budgets or source boundary"))
-            continue
-        if file.snapshot.fingerprint != link.snapshot.fingerprint:
-            admissions.append(CallSourceAdmission(origin, Status.MISMATCH,
-                reason="discovered source content differs from the verified code/source snapshot"))
-            continue
-        selected = matched[group.process_id, group.code]
-        if selected is None:
-            status = Status.UNAVAILABLE if not file.definitions and file.gaps else Status.MISMATCH
-            admissions.append(CallSourceAdmission(origin, status,
-                reason="verified unique definition was not indexed in the admitted source"))
-            continue
-        _, definition = selected
-        body = next((body for body in file.bodies if body.definition == definition.id), None)
-        if body is not None and body.graph is not None:
-            admissions.append(CallSourceAdmission(origin, Status.CORE_LINKED,
-                file.snapshot, definition.id, definition.source, body.graph.root))
-        else:
-            reason = body.reason if body is not None and body.reason else "indexed source has no supported body interface"
-            admissions.append(CallSourceAdmission(origin, Status.INDEXED_WITHOUT_BODY,
-                file.snapshot, definition.id, definition.source, reason=reason))
+        definitions = () if file is None else file.definitions
+        body = (next((body for body in file.bodies if body.definition == link.definition), None)
+                if file is not None else None)
+        admissions.append(derive_call_source_admission(EnteredCallCode(group.process_id, group.code), link,
+            source_snapshot=None if file is None else file.snapshot, indexed_definitions=definitions,
+            body=body, source_unavailable=file is not None and bool(file.gaps)))
     return CallSourceScope(tuple(admissions))
 
 
@@ -234,10 +324,17 @@ def replay_inventory_from_calls(document, *, discovery, roots, budget, context_c
     schedule = decode(ExpansionScheduleV6, document["expansion"])
     _check_context_budget(schedule.budget, context_ceiling)
     interfaces = decode(FunctionInterfaces, document["interfaces"])
-    if (decode(BodyLoweringProfile, document["profile"]) is not BodyLoweringProfile.BOUND_FRAME
-            or interfaces.profile is not BodyLoweringProfile.BOUND_FRAME):
-        raise ValueError("inventory v6 requires the bound-frame profile")
-    decode(tuple[FrameModel, ...], document["frames"])
+    expected_profile = (BodyLoweringProfile.STRUCTURED_ENV if document["schema_version"] == 8 else
+                        BodyLoweringProfile.STRUCTURED_BODY if document["schema_version"] == 7
+                        else BodyLoweringProfile.BOUND_FRAME)
+    if (decode(BodyLoweringProfile, document["profile"]) is not expected_profile
+            or interfaces.profile is not expected_profile):
+        raise ValueError("inventory version differs from its call-source body profile")
+    if expected_profile is BodyLoweringProfile.BOUND_FRAME:
+        decode(tuple[FrameModel, ...], document["frames"])
+    else:
+        from scar.ir.program.structured import StructuredBodyModel
+        decode(tuple[StructuredBodyModel, ...], document["structured"])
     decode(CallSourceScope, document["call_source_scope"])
     model = CallSourceSeedReport._decode_replay_input(document["call_sources"],
         verification_budget=call_ceiling)
@@ -247,4 +344,5 @@ def replay_inventory_from_calls(document, *, discovery, roots, budget, context_c
     return inventory_from_calls(discovery.entry, project_root=discovery.project_root,
         source_roots=roots, budget=budget, call_trace=model.trace_directory,
         call_budget=model.budget, context_budget=schedule.budget,
-        expected_call_sources=document["call_sources"], compilation_profile=compilation_profile)
+        expected_call_sources=document["call_sources"], compilation_profile=compilation_profile,
+        body_profile=expected_profile)

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="6" time="0.433" timestamp="2026-10-18T02:58:12.725301+00:00" hostname="gpu1"><testcase classname="tests.unit.test_session_flow" name="test_after_operation_support_uses_exact_lifecycle_current_state_versions" time="0.042"><failure message="AssertionError: assert 3 &lt; 3&#10; +  where 3 = len((LocationID(value='resume.world'), LocationID(value='resume.context'), LocationID(value='driver.extra')))&#10; +    where (LocationID(value='resume.world'), LocationID(value='resume.context'), LocationID(value='driver.extra')) = DriverInterface(region=RegionID(value='driver'), body=RegionID(value='resume'), receiver_kind=&lt;DriverReceiverKind.ASYN...aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', size_bytes=1, schema='driver-contract-v1'), locator='D1 declaration only'))).lifecycle&#10; +  and   3 = len({LocationID(value='driver.extra'), LocationID(value='resume.world'), LocationID(value='resume.context')})">def test_after_operation_support_uses_exact_lifecycle_current_state_versions():
+        graph = session_release_program(strict_subset=True, extra_domain=True, release=False)
+        facts = _analyze(graph)
+        interface, = graph.driver_interfaces
+        row, = graph.session_updates
+        request, body = _pair(graph, row)
+        point = facts.session.after[row.operation]
+        posts = point.for_pair(request, body)
+        by_post = {fact.post: fact for fact in posts}
+    
+        assert set(by_post) == {SessionPost.COMPLETE, SessionPost.ABANDON}
+        assert point.reachable
+&gt;       assert len(interface.lifecycle) &lt; len({
+            value.location for value in graph.values if isinstance(value, StateVersionValue)
+        })
+E       AssertionError: assert 3 &lt; 3
+E        +  where 3 = len((LocationID(value='resume.world'), LocationID(value='resume.context'), LocationID(value='driver.extra')))
+E        +    where (LocationID(value='resume.world'), LocationID(value='resume.context'), LocationID(value='driver.extra')) = DriverInterface(region=RegionID(value='driver'), body=RegionID(value='resume'), receiver_kind=&lt;DriverReceiverKind.ASYN...aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', size_bytes=1, schema='driver-contract-v1'), locator='D1 declaration only'))).lifecycle
+E        +  and   3 = len({LocationID(value='driver.extra'), LocationID(value='resume.world'), LocationID(value='resume.context')})
+
+tests/unit/test_session_flow.py:41: AssertionError</failure></testcase><testcase classname="tests.unit.test_session_flow" name="test_normal_completion_seeds_only_its_real_normal_edge_and_not_raise" time="0.009" /><testcase classname="tests.unit.test_session_flow" name="test_callback_kills_current_session_facts_but_keeps_terminal_history" time="0.011" /><testcase classname="tests.unit.test_session_flow" name="test_complete_post_does_not_turn_a_suspended_body_into_a_terminal_body" time="0.008" /><testcase classname="tests.unit.test_session_flow" name="test_simultaneous_pair_renaming_keeps_roles_and_shared_body_facts_separate" time="0.000" /><testcase classname="tests.unit.test_session_flow" name="test_simultaneous_swap_and_same_value_role_alias_are_not_conflated" time="0.000" /></testsuite></testsuites>

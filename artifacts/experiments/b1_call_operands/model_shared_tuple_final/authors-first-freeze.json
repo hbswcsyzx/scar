@@ -1,0 +1,11 @@
+{
+  "all_authors_frozen_before_execution": true,
+  "root_exclusive_python_execution": true,
+  "files": {
+    "tests/fixtures/program_await_shared_final_graphs.py": "0227a9f49f659d5e05613d59da0493bd6d6193eb575dde85c73f688082db111f",
+    "tests/fixtures/execution_await_shared_final_graphs.py": "2cdda1843217ed1c127b12b9d887ae3e333c3dd205b642d6508468d738dea35b",
+    "tests/unit/test_program_await_shared_final.py": "f085740ee5e844eac72c8dd540676fd2e88ae80aefa4b0ec7fbe231bbe934bec",
+    "tests/unit/test_execution_await_shared_final.py": "4ed1c840e1994c0553cda3fe8976ab1cca41e6b1a5f60da526fe370dc7d4d0dd"
+  },
+  "scope": "first four complete universal-case zero/two-cut tests; not full original G"
+}

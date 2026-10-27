@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="2" skipped="0" tests="40" time="27.559" timestamp="2026-10-20T04:00:50.645222+00:00" hostname="gpu1"><testcase classname="tests.unit.test_program_async_terminal_inventory" name="test_known_non_none_async_return_is_rejected_without_its_session_source_attachment" time="0.187" /><testcase classname="tests.unit.test_program_async_terminal_inventory" name="test_return_source_denominator_survives_deleted_consumers_and_budget_one" time="0.057" /><testcase classname="tests.unit.test_program_async_terminal_inventory" name="test_post_helper_failure_owns_host_packet_after_terminal_body_raise" time="0.017"><failure message="ValueError: protocol_copy at program_operation:async.session.helper.raise.exit: host outcome is neither this body RAISE packet nor its selected adapter result">def test_post_helper_failure_owns_host_packet_after_terminal_body_raise():
+        """A later primitive failure replaces the old packet at the actual host."""
+        from scar.ir.execution.common import Unresolved
+        from scar.ir.execution.coordinates import ExecutionSegment, ResumeIngress
+        from scar.ir.execution.ids import ExecutionSegmentID
+        from scar.ir.execution.query import ExecutionIndex
+        from scar.ir.execution.resumables import BodyActivationOrigin, BodyDriveExecution
+        from scar.ir.execution.validation import validate as execution_validate
+        from scar.ir.program.control import ProtocolValueKind
+        from scar.ir.program.lifecycle import SessionPost
+        from scar.ir.program.model import CompletionResult, ExitKind
+        from tests.fixtures.execution_async_pipeline_graphs import _body_path
+        from tests.fixtures.execution_call_graphs import _model
+        from tests.fixtures.program_async_pipeline_graphs import _selected_path
+    
+        graph, details = async_driver_program(target='packet', helper=True)
+&gt;       require_valid(graph)
+
+tests/unit/test_program_async_terminal_inventory.py:58: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='driver'), regions=(Region(id=RegionID(value='driver'), label='declared driver fixtur...D(value='driver.drive'), source=OperationID(value='resume.raise'))),), exception_matches=(), call_effect_expansions=())
+
+    def require_valid(graph: ProgramGraph) -&gt; None:
+        issues = validate(graph)
+        if issues:
+&gt;           raise ValueError("; ".join(f"{issue.code} at {issue.path}: {issue.message}" for issue in issues))
+E           ValueError: protocol_copy at program_operation:async.session.helper.raise.exit: host outcome is neither this body RAISE packet nor its selected adapter result
+
+scar/ir/program/validation.py:763: ValueError</failure></testcase><testcase classname="tests.unit.test_program_async_terminal" name="test_frame_local_conversion_uses_its_own_results_before_body_raise_and_host[stop-iteration]" time="0.575" /><testcase classname="tests.unit.test_program_async_terminal" name="test_frame_local_conversion_uses_its_own_results_before_body_raise_and_host[stop-async-iteration]" time="0.533" /><testcase classname="tests.unit.test_program_async_terminal" name="test_frame_local_conversion_uses_its_own_results_before_body_raise_and_host[ordinary]" time="0.508" /><testcase classname="tests.unit.test_program_async_terminal" name="test_frame_local_conversion_uses_its_own_results_before_body_raise_and_host[constructor-raise]" time="0.498" /><testcase classname="tests.unit.test_program_async_terminal" name="test_matcher_rejects_another_available_same_typed_packet" time="0.193" /><testcase classname="tests.unit.test_program_async_terminal" name="test_chaining_needs_the_original_exception_not_the_new_same_typed_owner" time="0.261" /><testcase classname="tests.unit.test_program_async_terminal" name="test_raw_packet_is_not_a_body_terminal_publication_before_intrinsic_completion" time="0.049" /><testcase classname="tests.unit.test_program_async_terminal" name="test_deleting_optional_session_receipts_or_budget_does_not_delete_body_raise_sources" time="0.742"><failure message="AttributeError: 'NoneType' object has no attribute 'operation'">def test_deleting_optional_session_receipts_or_budget_does_not_delete_body_raise_sources():
+        graph, details = async_terminal_program()
+        require_valid(graph)
+        expected = {commit.outcome for commit in graph.body_outcome_commits}
+        changed = replace(graph, protocol_bindings=tuple(row for row in graph.protocol_bindings
+                                                        if type(row) is not AsyncSessionOutcome))
+        require_valid(changed)
+        public = ProgramIndex(changed).protocol_obligations(budget=BUDGET)
+        sources = public['connections']['families']['async']['session_consumers']
+        assert {row['source'] for row in sources} == expected
+        assert all(row['targets'] and all(target['binding'] is None for target in row['targets'])
+                   for row in sources)
+        assert all(row['status'] == 'MISSING' for row in sources)
+&gt;       limited = ProgramIndex(graph).protocol_obligations(budget=1)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_program_async_terminal.py:199: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+scar/ir/program/queries.py:736: in protocol_obligations
+    return protocol_obligations(self.graph, scope, budget=budget, _index=self)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scar/ir/program/protocol_query.py:238: in protocol_obligations
+    connections = connection_reports(ctx)
+                  ^^^^^^^^^^^^^^^^^^^^^^^
+scar/ir/program/protocol_connection_validation.py:338: in connection_reports
+    predicate_issues.extend(request_state_errors(ctx, row))
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scar/ir/program/protocol_async.py:994: in request_state_errors
+    issues = list(predicate_shape_errors(ctx, row, identity=subject.request_use,
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+ctx = &lt;scar.ir.program.protocol_connection_flow.ConnectionContext object at 0x72b7e79a1f90&gt;
+row = ProtocolOperation(scope=ProtocolScopeID(value='terminal.driver.0.async.terminal.scope'), clause=&lt;ProtocolClause.ASYNC_...')), source=StaticProtocolGap(reason=&lt;StaticGapReason.NATIVE_APPLICABILITY_UNPROVEN: 'NATIVE_APPLICABILITY_UNPROVEN'&gt;))
+identity = UseID(value='terminal.driver.0.terminal.request.step.owner')
+state_sites = (ExistingAccess(operation=OperationID(value='terminal.driver.0.terminal.request.step.predicate'), index=0),)
+stateful = True
+
+    def predicate_shape_errors(ctx, row, *, identity, state_sites=(), stateful=True):
+        """Ordinary READ/bool/branch shape, without choosing an R or B owner."""
+        contract, operation = row.contract, ctx.operations[row.operation]
+        issues = []
+    
+        def error(code, message):
+            issues.append((code, str(row.operation), message))
+    
+        if (operation.terminator is not None or operation.callee is not None
+                or operation.call_arguments or operation.invoke_arguments or operation.completions
+                or not operation.effects_complete
+                or not set(operation.behaviors).issubset({Behavior.CONTROL, Behavior.COMPUTE, Behavior.READ})
+                or any(access.mode is not AccessMode.READ or access.after is not None
+                       for access in operation.accesses)):
+            error('admission_effect', 'admission predicate is a declared callback-free read-only ordinary primitive')
+        try:
+            produced = ctx.port(contract.result)
+&gt;           if produced.operation != operation.id or row.slot != 0:
+               ^^^^^^^^^^^^^^^^^^
+E           AttributeError: 'NoneType' object has no attribute 'operation'
+
+scar/ir/program/admission.py:32: AttributeError</failure></testcase><testcase classname="tests.unit.test_source_compilation" name="test_cpython_compilation_and_return_expression_inventory_are_independent[bare-return]" time="0.001" /><testcase classname="tests.unit.test_source_compilation" name="test_cpython_compilation_and_return_expression_inventory_are_independent[explicit-none]" time="0.001" /><testcase classname="tests.unit.test_source_compilation" name="test_cpython_compilation_and_return_expression_inventory_are_independent[nested-sync-return]" time="0.001" /><testcase classname="tests.unit.test_source_compilation" name="test_cpython_compilation_and_return_expression_inventory_are_independent[yield-only-nested]" time="0.001" /><testcase classname="tests.unit.test_source_compilation" name="test_cpython_compilation_and_return_expression_inventory_are_independent[yield-in-nested-default]" time="0.001" /><testcase classname="tests.unit.test_source_compilation" name="test_first_compiler_error_keeps_all_return_sites_without_claiming_all_diagnosed" time="0.001" /><testcase classname="tests.unit.test_source_compilation" name="test_compilation_does_not_run_imports_decorators_defaults_or_module_effects" time="0.002" /><testcase classname="tests.unit.test_source_compilation" name="test_unverified_source_is_not_compiled_or_recovered_from_the_filesystem[missing-text]" time="0.001" /><testcase classname="tests.unit.test_source_compilation" name="test_unverified_source_is_not_compiled_or_recovered_from_the_filesystem[fingerprint]" time="0.001" /><testcase classname="tests.unit.test_source_compilation" name="test_unverified_source_is_not_compiled_or_recovered_from_the_filesystem[version]" time="0.001" /><testcase classname="tests.unit.test_source_compilation" name="test_unverified_source_is_not_compiled_or_recovered_from_the_filesystem[missing-version]" time="0.001" /><testcase classname="tests.unit.test_source_compilation" name="test_unverified_source_is_not_compiled_or_recovered_from_the_filesystem[patch]" time="0.001" /><testcase classname="tests.unit.test_source_compilation" name="test_encoding_is_checked_against_the_snapshot_without_changing_utf8_fingerprint" time="0.001" /><testcase classname="tests.unit.test_source_compilation" name="test_budget_cut_does_not_present_an_inventory_prefix_or_unchecked_compile_as_complete" time="0.001" /><testcase classname="tests.unit.test_source_compilation" name="test_return_atom_identity_and_exact_optional_links_preserve_the_original_namespace" time="0.001" /><testcase classname="tests.unit.test_source_compilation" name="test_unicode_syntaxerror_character_offsets_match_the_original_ast_byte_span" time="0.001" /><testcase classname="tests.unit.test_source_compilation" name="test_unicode_parser_character_offsets_are_converted_to_utf8_byte_columns" time="0.001" /><testcase classname="tests.unit.test_source_compilation" name="test_four_mebibyte_compile_ceiling_keeps_oversized_source_unchecked" time="0.018" /><testcase classname="tests.unit.test_source_compilation" name="test_budget_requires_a_positive_exact_integer[True-TypeError]" time="0.001" /><testcase classname="tests.unit.test_source_compilation" name="test_budget_requires_a_positive_exact_integer[0-ValueError]" time="0.001" /><testcase classname="tests.unit.test_execution_async_terminal" name="test_body_local_async_terminal_conversion_owns_its_current_packet_and_host[stop-iteration]" time="3.162" /><testcase classname="tests.unit.test_execution_async_terminal" name="test_body_local_async_terminal_conversion_owns_its_current_packet_and_host[stop-async-iteration]" time="3.523" /><testcase classname="tests.unit.test_execution_async_terminal" name="test_body_local_async_terminal_conversion_owns_its_current_packet_and_host[ordinary]" time="2.846" /><testcase classname="tests.unit.test_execution_async_terminal" name="test_body_local_async_terminal_conversion_owns_its_current_packet_and_host[constructor-raise]" time="2.594" /><testcase classname="tests.unit.test_execution_async_terminal" name="test_missing_conversion_input_or_exact_call_keeps_the_complete_sibling_independent[intrinsic-call]" time="2.057" /><testcase classname="tests.unit.test_execution_async_terminal" name="test_missing_conversion_input_or_exact_call_keeps_the_complete_sibling_independent[constructor-input]" time="2.546" /><testcase classname="tests.unit.test_execution_async_terminal" name="test_missing_conversion_input_or_exact_call_keeps_the_complete_sibling_independent[chaining-owner]" time="2.381" /><testcase classname="tests.unit.test_execution_async_terminal" name="test_missing_conversion_input_or_exact_call_keeps_the_complete_sibling_independent[driver-input]" time="2.272" /><testcase classname="tests.unit.test_execution_async_terminal" name="test_tiny_budget_keeps_both_actual_sources_and_all_terminal_session_targets" time="1.177" /></testsuite></testsuites>

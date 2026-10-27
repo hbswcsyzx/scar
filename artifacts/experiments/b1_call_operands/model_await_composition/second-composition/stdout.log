@@ -1,0 +1,146 @@
+................................FFFFF..F....                             [100%]
+=================================== FAILURES ===================================
+_ test_general_await_expands_real_lookup_call_qualification_and_iterator_return _
+
+    def test_general_await_expands_real_lookup_call_qualification_and_iterator_return():
+        graph, details = await_general_program()
+>       require_valid(graph)
+
+tests/unit/test_program_await_general.py:12: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='factory'), regions=(Region(id=RegionID(value='factory'), label='declared driver fixt...'factory.call'), slot=1), drive=OperationID(value='driver.drive'), projection=None, guard=None)), exception_matches=())
+
+    def require_valid(graph: ProgramGraph) -> None:
+        issues = validate(graph)
+        if issues:
+>           raise ValueError("; ".join(f"{issue.code} at {issue.path}: {issue.message}" for issue in issues))
+E           ValueError: control_binding at program_operation:await.general.helper.qualify.branch: each control input port needs its own exact use
+
+scar/ir/program/validation.py:749: ValueError
+_______ test_general_await_source_inventory_survives_a_missing_body_link _______
+
+    def test_general_await_source_inventory_survives_a_missing_body_link():
+        graph, details = await_general_program(attach_link=False)
+>       require_valid(graph)
+
+tests/unit/test_program_await_general.py:48: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='factory'), regions=(Region(id=RegionID(value='factory'), label='declared driver fixt...y.branch'), use=UseID(value='await.general.helper.qualify.condition')),))), protocol_bindings=(), exception_matches=())
+
+    def require_valid(graph: ProgramGraph) -> None:
+        issues = validate(graph)
+        if issues:
+>           raise ValueError("; ".join(f"{issue.code} at {issue.path}: {issue.message}" for issue in issues))
+E           ValueError: control_binding at program_operation:await.general.helper.qualify.branch: each control input port needs its own exact use
+
+scar/ir/program/validation.py:749: ValueError
+___ test_general_await_known_generator_coroutine_cannot_continue_as_iterator ___
+
+    def test_general_await_known_generator_coroutine_cannot_continue_as_iterator():
+        graph, details = await_general_program(result_kind=ResumableKind.GENERATOR_COROUTINE)
+        # The graph is structurally valid; the selected general-method result is
+        # known to be the wrong resumable kind for the subsequent iterator call.
+>       assert "protocol_await_return_qualification" in {
+            issue.code for issue in validate(graph)
+        }
+E       AssertionError: assert 'protocol_await_return_qualification' in {'control_binding'}
+
+tests/unit/test_program_await_general.py:64: AssertionError
+__ test_general_await_occurrence_joins_parent_helper_driver_and_create_origin __
+
+    def test_general_await_occurrence_joins_parent_helper_driver_and_create_origin():
+>       program, model, details = await_general_execution()
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_execution_await_general.py:17: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/fixtures/execution_await_general_graphs.py:48: in await_general_execution
+    model, scopes, source = _model(program, paths)
+                            ^^^^^^^^^^^^^^^^^^^^^^
+tests/fixtures/execution_call_graphs.py:87: in _model
+    rows, activation, visits, operations = _activation(program, region, path, label, point, thread)
+                                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/fixtures/execution_call_graphs.py:72: in _activation
+    rows.update(activations=(RegionActivation(identity, region, point.process, point),),
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+<string>:7: in __init__
+    ???
+scar/ir/execution/coordinates.py:122: in __post_init__
+    _nested_id(self.region, RegionID, "region-activation region")
+scar/ir/execution/coordinates.py:51: in _nested_id
+    _identifier(value, expected, name)
+scar/ir/execution/coordinates.py:39: in _identifier
+    _exact(value, expected, name)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+value = Region(id=RegionID(value='await.general.helper'), label='general await acquisition helper', entry=BlockID(value='await...ind.STATE: 'STATE'>, data_type=None, location=LocationID(value='resume.context'))))), parent=RegionID(value='factory'))
+expected = <class 'scar.ir.program.ids.RegionID'>
+name = 'region-activation region'
+
+    def _exact(value, expected, name):
+        if type(value) is not expected:
+>           raise TypeError(f"{name} must be {expected.__name__}")
+E           TypeError: region-activation region must be RegionID
+
+scar/ir/execution/coordinates.py:29: TypeError
+__ test_general_await_missing_link_keeps_the_actual_helper_and_drive_capture ___
+
+    def test_general_await_missing_link_keeps_the_actual_helper_and_drive_capture():
+>       program, model, details = await_general_execution(attach_link=False)
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_execution_await_general.py:43: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/fixtures/execution_await_general_graphs.py:48: in await_general_execution
+    model, scopes, source = _model(program, paths)
+                            ^^^^^^^^^^^^^^^^^^^^^^
+tests/fixtures/execution_call_graphs.py:87: in _model
+    rows, activation, visits, operations = _activation(program, region, path, label, point, thread)
+                                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/fixtures/execution_call_graphs.py:72: in _activation
+    rows.update(activations=(RegionActivation(identity, region, point.process, point),),
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+<string>:7: in __init__
+    ???
+scar/ir/execution/coordinates.py:122: in __post_init__
+    _nested_id(self.region, RegionID, "region-activation region")
+scar/ir/execution/coordinates.py:51: in _nested_id
+    _identifier(value, expected, name)
+scar/ir/execution/coordinates.py:39: in _identifier
+    _exact(value, expected, name)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+value = Region(id=RegionID(value='await.general.helper'), label='general await acquisition helper', entry=BlockID(value='await...ind.STATE: 'STATE'>, data_type=None, location=LocationID(value='resume.context'))))), parent=RegionID(value='factory'))
+expected = <class 'scar.ir.program.ids.RegionID'>
+name = 'region-activation region'
+
+    def _exact(value, expected, name):
+        if type(value) is not expected:
+>           raise TypeError(f"{name} must be {expected.__name__}")
+E           TypeError: region-activation region must be RegionID
+
+scar/ir/execution/coordinates.py:29: TypeError
+______ test_deleting_the_whole_input_attachment_keeps_the_canonical_merge ______
+
+    def test_deleting_the_whole_input_attachment_keeps_the_canonical_merge():
+        graph, details = await_case_program()
+        graph = replace(graph, protocol_call_inputs=tuple(row for row in graph.protocol_call_inputs
+            if row.site.operation != details['call'].id))
+        report = _await(graph, details)
+        assert report['inventory']['source_count'] == 1
+        jobs = report['inventory']['jobs']
+>       assert len(jobs) == 4
+E       AssertionError: assert 2 == 4
+E        +  where 2 = len(({'scope': ProtocolScopeID(value='await.self.acquisition'), 'source': ProtocolOperationRef(scope=ProtocolScopeID(value...ence(operation=OperationID(value='factory.get_awaitable'), successor_index=0), result=CompletionResult(index=0)), ...}))
+
+tests/unit/test_program_await_cases.py:44: AssertionError
+=========================== short test summary info ============================
+FAILED tests/unit/test_program_await_general.py::test_general_await_expands_real_lookup_call_qualification_and_iterator_return
+FAILED tests/unit/test_program_await_general.py::test_general_await_source_inventory_survives_a_missing_body_link
+FAILED tests/unit/test_program_await_general.py::test_general_await_known_generator_coroutine_cannot_continue_as_iterator
+FAILED tests/unit/test_execution_await_general.py::test_general_await_occurrence_joins_parent_helper_driver_and_create_origin
+FAILED tests/unit/test_execution_await_general.py::test_general_await_missing_link_keeps_the_actual_helper_and_drive_capture
+FAILED tests/unit/test_program_await_cases.py::test_deleting_the_whole_input_attachment_keeps_the_canonical_merge
+6 failed, 38 passed in 18.91s

@@ -1,0 +1,1 @@
+{"gate": "M1-R2.3-P-SOURCE-WRITE-PRODUCTION-CONNECTIONS", "status": "PASS", "report": "artifacts/experiments/b1_call_operands/model_production/component/attempt001/report.json", "tests": 477}

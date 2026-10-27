@@ -1,0 +1,461 @@
+{
+  "bounded_prefixes": [
+    {
+      "decoded_bytes": 26898,
+      "full_raw_or_shard_sha_revalidated": false,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/trace/tensor-physical.369749.72816598bfa183a810428fe30a7873ff.jsonl.gz",
+      "prefix_sha256": "3ec48069a2c517e0d8ba6cdcf61bee3bd22ecfc6fb981ecce07d8ccb86ba6d40"
+    },
+    {
+      "decoded_bytes": 196608,
+      "full_raw_or_shard_sha_revalidated": false,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/trace/execution-trace.369749.72816598bfa183a810428fe30a7873ff.json.gz",
+      "prefix_sha256": "0f183396a3997f707304cbb54403477dbeb648ba3786ecd60479b64507744132"
+    },
+    {
+      "decoded_bytes": 20357,
+      "full_raw_or_shard_sha_revalidated": false,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_joined_physical_20261023/result/native/bundle-partitions/values/regions/000000.jsonl.gz",
+      "prefix_sha256": "acf6e8d5fb5505071e6743e0b9dcb701bdc9de18ebde3fbf6c2b90568b2752cc"
+    }
+  ],
+  "bounds": {
+    "first_row": [
+      0,
+      40
+    ],
+    "full": [
+      0,
+      640
+    ],
+    "scalar": [
+      0,
+      4
+    ],
+    "second_row": [
+      40,
+      80
+    ]
+  },
+  "content_or_readiness_qualification_changed": false,
+  "elapsed_s": 0.34283670999866445,
+  "first_stage_complete": false,
+  "full_bundle_validation_performed": false,
+  "inputs": [
+    {
+      "bytes": 1518,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_tensor_layout_20261023/producer.json",
+      "sha256": "c797e8c367d6ecbfaa0c026a0dfbd0f56caf8d09ad6e5db1be27cbecceffa8e9"
+    },
+    {
+      "bytes": 72965,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_joined_physical_20261023/result/native/bundle-partitions/manifest.json",
+      "sha256": "a7b23bdb385b50522e6401433a8308343a593a4080288f3502d6e338e1e4b1b6"
+    },
+    {
+      "bytes": 4233,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/trace/tensor-physical-meta.369749.72816598bfa183a810428fe30a7873ff.json",
+      "sha256": "581fd61305154ad1c1c88fc4112f16884512f864b4cb363feca1517107c2c39d"
+    }
+  ],
+  "negative_profile_checks": [
+    {
+      "layout": "torch.strided",
+      "profile": "wrong",
+      "rejected": "physical Tensor bridge: layout conversion requires the exact physical provider profile/revision",
+      "revision": "cf30153c4c131c8164ee7798e5022d810682e2cb"
+    },
+    {
+      "layout": "torch.strided",
+      "profile": "scar.tensor-physical-event-tree-v1",
+      "rejected": "physical Tensor bridge: layout conversion requires the exact physical provider profile/revision",
+      "revision": "0000000000000000000000000000000000000000"
+    },
+    {
+      "layout": "strided",
+      "profile": "scar.tensor-physical-event-tree-v1",
+      "rejected": "physical Tensor bridge: layout must retain its original provider spelling",
+      "revision": "cf30153c4c131c8164ee7798e5022d810682e2cb"
+    }
+  ],
+  "new_allocations": 0,
+  "new_logical_values": 0,
+  "new_materializations": 0,
+  "new_provenance": 0,
+  "new_regions": 4,
+  "new_versions": 0,
+  "old_artifacts_modified": false,
+  "overlap": {
+    "first_row_scalar": "OVERLAPS",
+    "first_second_rows": "DISJOINT",
+    "full_first_row": "OVERLAPS",
+    "unknown_layout": "POSSIBLE"
+  },
+  "producer": {
+    "base_revision": "da6a9d7e5eff1476ab982ee132a8fd723ad54e38",
+    "modules": [
+      {
+        "bytes": 19916,
+        "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/trace/tensor_physical_import.py",
+        "sha256": "c834d0a1072b610d9cc23d163709171ae329b6b175f1a9388c95e9842a5f0372"
+      },
+      {
+        "bytes": 31708,
+        "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/trace/tensor_physical.py",
+        "sha256": "6a4026e6cbb038a243851e14156216b693c90dd2d587d56d0e02ebdabfaf94b3"
+      },
+      {
+        "bytes": 53719,
+        "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/provenance.py",
+        "sha256": "f8f11d353a05c9b2ec893ae5ab3da7be747b4a2ea3b28a21eb1f7891237523c1"
+      },
+      {
+        "bytes": 22415,
+        "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/v2/values.py",
+        "sha256": "e12586470c294701c315d6108a80746f08a14ba26a4ca6dcf6374f458d1078b5"
+      },
+      {
+        "bytes": 22116,
+        "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/execution/coverage.py",
+        "sha256": "53da83b9cb3b67ae63a12163d74e58cf9d9d6d76511e2d4011a6918d43c59411"
+      },
+      {
+        "bytes": 8787,
+        "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_tensor_layout_20261023/gate.py",
+        "sha256": "adc2aa1c40c873cf46e8b2d3f20254d4d6a06d663fb39d9a2daf7ce7ee21d6f8"
+      }
+    ],
+    "only_product_modified": "scar/trace/tensor_physical_import.py",
+    "target_executed": false
+  },
+  "records": [
+    {
+      "allocation_extent_raw_source_line": 11,
+      "byte_bounds": [
+        0,
+        640
+      ],
+      "name": "full",
+      "new": {
+        "allocation": {
+          "kind": "alloc",
+          "value": "tensor-physical:2ac220bb749919c40dff08964248a759849b4297386d564d5d6a2b366a69bbe0:epoch:dc84edf549c8f021c2f0cbb57d0ef0f4352e33b2a78059f308eb02a4a27edfe1",
+          "wire": "alloc:tensor-physical:2ac220bb749919c40dff08964248a759849b4297386d564d5d6a2b366a69bbe0:epoch:dc84edf549c8f021c2f0cbb57d0ef0f4352e33b2a78059f308eb02a4a27edfe1"
+        },
+        "device": "cpu",
+        "dtype": "torch.float32",
+        "id": {
+          "kind": "region",
+          "value": "tensor-physical:2ac220bb749919c40dff08964248a759849b4297386d564d5d6a2b366a69bbe0:region:12:0",
+          "wire": "region:tensor-physical:2ac220bb749919c40dff08964248a759849b4297386d564d5d6a2b366a69bbe0:region:12:0"
+        },
+        "layout": "strided",
+        "metadata": {
+          "argument_ordinal": 0,
+          "association_persistent": false,
+          "eto_reference": "sha256:625558680ced281fc2b4789d9d742bc97dd4fed57106701e98adea3ebe0428b6#/nodes/29/inputs/values/0",
+          "impl_ptr": 99366275338288,
+          "layout_normalization_rule": "PINNED_TORCH_LAYOUT_V1",
+          "logical_version": null,
+          "marker_instance": "opinst:native:2a622492625eb1b2a7a105036e0ac792b5a6249fc60cf111443bf7fe53140d88:eto:38",
+          "offset_basis": "same held Tensor, exact ETO marker argument storage_offset",
+          "physical_observation": "sha256:d666fa820e88d95a6ea0a2539c8241126ac605ea48094bb2e330318c7756a778#line/12/arguments/0",
+          "provider_layout": "torch.strided",
+          "provider_tensor_id": 1
+        },
+        "offset": 0,
+        "shape": [
+          16,
+          10
+        ],
+        "strides": [
+          10,
+          1
+        ]
+      },
+      "new_allocation_constructed": false,
+      "old": {
+        "allocation": {
+          "kind": "alloc",
+          "value": "tensor-physical:2ac220bb749919c40dff08964248a759849b4297386d564d5d6a2b366a69bbe0:epoch:dc84edf549c8f021c2f0cbb57d0ef0f4352e33b2a78059f308eb02a4a27edfe1",
+          "wire": "alloc:tensor-physical:2ac220bb749919c40dff08964248a759849b4297386d564d5d6a2b366a69bbe0:epoch:dc84edf549c8f021c2f0cbb57d0ef0f4352e33b2a78059f308eb02a4a27edfe1"
+        },
+        "device": "cpu",
+        "dtype": "torch.float32",
+        "id": {
+          "kind": "region",
+          "value": "tensor-physical:2ac220bb749919c40dff08964248a759849b4297386d564d5d6a2b366a69bbe0:region:12:0",
+          "wire": "region:tensor-physical:2ac220bb749919c40dff08964248a759849b4297386d564d5d6a2b366a69bbe0:region:12:0"
+        },
+        "layout": "torch.strided",
+        "metadata": {
+          "argument_ordinal": 0,
+          "association_persistent": false,
+          "eto_reference": "sha256:625558680ced281fc2b4789d9d742bc97dd4fed57106701e98adea3ebe0428b6#/nodes/29/inputs/values/0",
+          "impl_ptr": 99366275338288,
+          "logical_version": null,
+          "marker_instance": "opinst:native:2a622492625eb1b2a7a105036e0ac792b5a6249fc60cf111443bf7fe53140d88:eto:38",
+          "offset_basis": "same held Tensor, exact ETO marker argument storage_offset",
+          "physical_observation": "sha256:d666fa820e88d95a6ea0a2539c8241126ac605ea48094bb2e330318c7756a778#line/12/arguments/0",
+          "provider_tensor_id": 1
+        },
+        "offset": 0,
+        "shape": [
+          16,
+          10
+        ],
+        "strides": [
+          10,
+          1
+        ]
+      },
+      "original_region_line": 3
+    },
+    {
+      "allocation_extent_raw_source_line": 11,
+      "byte_bounds": [
+        0,
+        40
+      ],
+      "name": "first_row",
+      "new": {
+        "allocation": {
+          "kind": "alloc",
+          "value": "tensor-physical:2ac220bb749919c40dff08964248a759849b4297386d564d5d6a2b366a69bbe0:epoch:dc84edf549c8f021c2f0cbb57d0ef0f4352e33b2a78059f308eb02a4a27edfe1",
+          "wire": "alloc:tensor-physical:2ac220bb749919c40dff08964248a759849b4297386d564d5d6a2b366a69bbe0:epoch:dc84edf549c8f021c2f0cbb57d0ef0f4352e33b2a78059f308eb02a4a27edfe1"
+        },
+        "device": "cpu",
+        "dtype": "torch.float32",
+        "id": {
+          "kind": "region",
+          "value": "tensor-physical:2ac220bb749919c40dff08964248a759849b4297386d564d5d6a2b366a69bbe0:region:17:0",
+          "wire": "region:tensor-physical:2ac220bb749919c40dff08964248a759849b4297386d564d5d6a2b366a69bbe0:region:17:0"
+        },
+        "layout": "strided",
+        "metadata": {
+          "argument_ordinal": 0,
+          "association_persistent": false,
+          "eto_reference": "sha256:625558680ced281fc2b4789d9d742bc97dd4fed57106701e98adea3ebe0428b6#/nodes/40/inputs/values/0",
+          "impl_ptr": 99366275535680,
+          "layout_normalization_rule": "PINNED_TORCH_LAYOUT_V1",
+          "logical_version": null,
+          "marker_instance": "opinst:native:2a622492625eb1b2a7a105036e0ac792b5a6249fc60cf111443bf7fe53140d88:eto:52",
+          "offset_basis": "same held Tensor, exact ETO marker argument storage_offset",
+          "physical_observation": "sha256:d666fa820e88d95a6ea0a2539c8241126ac605ea48094bb2e330318c7756a778#line/17/arguments/0",
+          "provider_layout": "torch.strided",
+          "provider_tensor_id": 1
+        },
+        "offset": 0,
+        "shape": [
+          10
+        ],
+        "strides": [
+          1
+        ]
+      },
+      "new_allocation_constructed": false,
+      "old": {
+        "allocation": {
+          "kind": "alloc",
+          "value": "tensor-physical:2ac220bb749919c40dff08964248a759849b4297386d564d5d6a2b366a69bbe0:epoch:dc84edf549c8f021c2f0cbb57d0ef0f4352e33b2a78059f308eb02a4a27edfe1",
+          "wire": "alloc:tensor-physical:2ac220bb749919c40dff08964248a759849b4297386d564d5d6a2b366a69bbe0:epoch:dc84edf549c8f021c2f0cbb57d0ef0f4352e33b2a78059f308eb02a4a27edfe1"
+        },
+        "device": "cpu",
+        "dtype": "torch.float32",
+        "id": {
+          "kind": "region",
+          "value": "tensor-physical:2ac220bb749919c40dff08964248a759849b4297386d564d5d6a2b366a69bbe0:region:17:0",
+          "wire": "region:tensor-physical:2ac220bb749919c40dff08964248a759849b4297386d564d5d6a2b366a69bbe0:region:17:0"
+        },
+        "layout": "torch.strided",
+        "metadata": {
+          "argument_ordinal": 0,
+          "association_persistent": false,
+          "eto_reference": "sha256:625558680ced281fc2b4789d9d742bc97dd4fed57106701e98adea3ebe0428b6#/nodes/40/inputs/values/0",
+          "impl_ptr": 99366275535680,
+          "logical_version": null,
+          "marker_instance": "opinst:native:2a622492625eb1b2a7a105036e0ac792b5a6249fc60cf111443bf7fe53140d88:eto:52",
+          "offset_basis": "same held Tensor, exact ETO marker argument storage_offset",
+          "physical_observation": "sha256:d666fa820e88d95a6ea0a2539c8241126ac605ea48094bb2e330318c7756a778#line/17/arguments/0",
+          "provider_tensor_id": 1
+        },
+        "offset": 0,
+        "shape": [
+          10
+        ],
+        "strides": [
+          1
+        ]
+      },
+      "original_region_line": 7
+    },
+    {
+      "allocation_extent_raw_source_line": 11,
+      "byte_bounds": [
+        0,
+        4
+      ],
+      "name": "scalar",
+      "new": {
+        "allocation": {
+          "kind": "alloc",
+          "value": "tensor-physical:2ac220bb749919c40dff08964248a759849b4297386d564d5d6a2b366a69bbe0:epoch:dc84edf549c8f021c2f0cbb57d0ef0f4352e33b2a78059f308eb02a4a27edfe1",
+          "wire": "alloc:tensor-physical:2ac220bb749919c40dff08964248a759849b4297386d564d5d6a2b366a69bbe0:epoch:dc84edf549c8f021c2f0cbb57d0ef0f4352e33b2a78059f308eb02a4a27edfe1"
+        },
+        "device": "cpu",
+        "dtype": "torch.float32",
+        "id": {
+          "kind": "region",
+          "value": "tensor-physical:2ac220bb749919c40dff08964248a759849b4297386d564d5d6a2b366a69bbe0:region:19:0",
+          "wire": "region:tensor-physical:2ac220bb749919c40dff08964248a759849b4297386d564d5d6a2b366a69bbe0:region:19:0"
+        },
+        "layout": "strided",
+        "metadata": {
+          "argument_ordinal": 0,
+          "association_persistent": false,
+          "eto_reference": "sha256:625558680ced281fc2b4789d9d742bc97dd4fed57106701e98adea3ebe0428b6#/nodes/46/inputs/values/0",
+          "impl_ptr": 99366275675600,
+          "layout_normalization_rule": "PINNED_TORCH_LAYOUT_V1",
+          "logical_version": null,
+          "marker_instance": "opinst:native:2a622492625eb1b2a7a105036e0ac792b5a6249fc60cf111443bf7fe53140d88:eto:59",
+          "offset_basis": "same held Tensor, exact ETO marker argument storage_offset",
+          "physical_observation": "sha256:d666fa820e88d95a6ea0a2539c8241126ac605ea48094bb2e330318c7756a778#line/19/arguments/0",
+          "provider_layout": "torch.strided",
+          "provider_tensor_id": 1
+        },
+        "offset": 0,
+        "shape": [],
+        "strides": []
+      },
+      "new_allocation_constructed": false,
+      "old": {
+        "allocation": {
+          "kind": "alloc",
+          "value": "tensor-physical:2ac220bb749919c40dff08964248a759849b4297386d564d5d6a2b366a69bbe0:epoch:dc84edf549c8f021c2f0cbb57d0ef0f4352e33b2a78059f308eb02a4a27edfe1",
+          "wire": "alloc:tensor-physical:2ac220bb749919c40dff08964248a759849b4297386d564d5d6a2b366a69bbe0:epoch:dc84edf549c8f021c2f0cbb57d0ef0f4352e33b2a78059f308eb02a4a27edfe1"
+        },
+        "device": "cpu",
+        "dtype": "torch.float32",
+        "id": {
+          "kind": "region",
+          "value": "tensor-physical:2ac220bb749919c40dff08964248a759849b4297386d564d5d6a2b366a69bbe0:region:19:0",
+          "wire": "region:tensor-physical:2ac220bb749919c40dff08964248a759849b4297386d564d5d6a2b366a69bbe0:region:19:0"
+        },
+        "layout": "torch.strided",
+        "metadata": {
+          "argument_ordinal": 0,
+          "association_persistent": false,
+          "eto_reference": "sha256:625558680ced281fc2b4789d9d742bc97dd4fed57106701e98adea3ebe0428b6#/nodes/46/inputs/values/0",
+          "impl_ptr": 99366275675600,
+          "logical_version": null,
+          "marker_instance": "opinst:native:2a622492625eb1b2a7a105036e0ac792b5a6249fc60cf111443bf7fe53140d88:eto:59",
+          "offset_basis": "same held Tensor, exact ETO marker argument storage_offset",
+          "physical_observation": "sha256:d666fa820e88d95a6ea0a2539c8241126ac605ea48094bb2e330318c7756a778#line/19/arguments/0",
+          "provider_tensor_id": 1
+        },
+        "offset": 0,
+        "shape": [],
+        "strides": []
+      },
+      "original_region_line": 9
+    },
+    {
+      "allocation_extent_raw_source_line": 11,
+      "byte_bounds": [
+        40,
+        80
+      ],
+      "name": "second_row",
+      "new": {
+        "allocation": {
+          "kind": "alloc",
+          "value": "tensor-physical:2ac220bb749919c40dff08964248a759849b4297386d564d5d6a2b366a69bbe0:epoch:dc84edf549c8f021c2f0cbb57d0ef0f4352e33b2a78059f308eb02a4a27edfe1",
+          "wire": "alloc:tensor-physical:2ac220bb749919c40dff08964248a759849b4297386d564d5d6a2b366a69bbe0:epoch:dc84edf549c8f021c2f0cbb57d0ef0f4352e33b2a78059f308eb02a4a27edfe1"
+        },
+        "device": "cpu",
+        "dtype": "torch.float32",
+        "id": {
+          "kind": "region",
+          "value": "tensor-physical:2ac220bb749919c40dff08964248a759849b4297386d564d5d6a2b366a69bbe0:region:27:0",
+          "wire": "region:tensor-physical:2ac220bb749919c40dff08964248a759849b4297386d564d5d6a2b366a69bbe0:region:27:0"
+        },
+        "layout": "strided",
+        "metadata": {
+          "argument_ordinal": 0,
+          "association_persistent": false,
+          "eto_reference": "sha256:625558680ced281fc2b4789d9d742bc97dd4fed57106701e98adea3ebe0428b6#/nodes/62/inputs/values/0",
+          "impl_ptr": 99366275471504,
+          "layout_normalization_rule": "PINNED_TORCH_LAYOUT_V1",
+          "logical_version": null,
+          "marker_instance": "opinst:native:2a622492625eb1b2a7a105036e0ac792b5a6249fc60cf111443bf7fe53140d88:eto:78",
+          "offset_basis": "same held Tensor, exact ETO marker argument storage_offset",
+          "physical_observation": "sha256:d666fa820e88d95a6ea0a2539c8241126ac605ea48094bb2e330318c7756a778#line/27/arguments/0",
+          "provider_layout": "torch.strided",
+          "provider_tensor_id": 1
+        },
+        "offset": 10,
+        "shape": [
+          10
+        ],
+        "strides": [
+          1
+        ]
+      },
+      "new_allocation_constructed": false,
+      "old": {
+        "allocation": {
+          "kind": "alloc",
+          "value": "tensor-physical:2ac220bb749919c40dff08964248a759849b4297386d564d5d6a2b366a69bbe0:epoch:dc84edf549c8f021c2f0cbb57d0ef0f4352e33b2a78059f308eb02a4a27edfe1",
+          "wire": "alloc:tensor-physical:2ac220bb749919c40dff08964248a759849b4297386d564d5d6a2b366a69bbe0:epoch:dc84edf549c8f021c2f0cbb57d0ef0f4352e33b2a78059f308eb02a4a27edfe1"
+        },
+        "device": "cpu",
+        "dtype": "torch.float32",
+        "id": {
+          "kind": "region",
+          "value": "tensor-physical:2ac220bb749919c40dff08964248a759849b4297386d564d5d6a2b366a69bbe0:region:27:0",
+          "wire": "region:tensor-physical:2ac220bb749919c40dff08964248a759849b4297386d564d5d6a2b366a69bbe0:region:27:0"
+        },
+        "layout": "torch.strided",
+        "metadata": {
+          "argument_ordinal": 0,
+          "association_persistent": false,
+          "eto_reference": "sha256:625558680ced281fc2b4789d9d742bc97dd4fed57106701e98adea3ebe0428b6#/nodes/62/inputs/values/0",
+          "impl_ptr": 99366275471504,
+          "logical_version": null,
+          "marker_instance": "opinst:native:2a622492625eb1b2a7a105036e0ac792b5a6249fc60cf111443bf7fe53140d88:eto:78",
+          "offset_basis": "same held Tensor, exact ETO marker argument storage_offset",
+          "physical_observation": "sha256:d666fa820e88d95a6ea0a2539c8241126ac605ea48094bb2e330318c7756a778#line/27/arguments/0",
+          "provider_tensor_id": 1
+        },
+        "offset": 10,
+        "shape": [
+          10
+        ],
+        "strides": [
+          1
+        ]
+      },
+      "original_region_line": 16
+    }
+  ],
+  "scalar_node_clarification": {
+    "id": 6,
+    "is_process_root": false,
+    "name": "torchvision::_cuda_version",
+    "next_bridge_priority": "actual ATen operation",
+    "pointer": "#/nodes/1",
+    "types": [
+      "Int"
+    ],
+    "used_to_create_content": false,
+    "values": [
+      13020
+    ]
+  },
+  "schema": "scar.tensor-layout-bounded-actual-gate",
+  "schema_version": 1,
+  "status": "PASS",
+  "target_executed": false,
+  "torch_imported": false,
+  "transformation_authorized": false
+}

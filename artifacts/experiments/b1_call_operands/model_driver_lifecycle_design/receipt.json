@@ -1,0 +1,27 @@
+{
+  "schema": "scar.d2-lifecycle-design-review",
+  "schema_version": 1,
+  "created_at": "2026-10-18T01:44:56.928077+00:00",
+  "product_revision": "cc44e14a2d173328a4e2f89f405a5add401d85e1",
+  "implementation_revision": "382363c3a5e762b40a7b4bf0d47726a7bbbbe509",
+  "design_gate_status": "OPEN",
+  "review_completed": true,
+  "scope": "Independent design reviews and bounded stdlib CPU witnesses only",
+  "source_unchanged_since_d1": true,
+  "source_sha256": "4d1b28511b8005829d87349fd81a859ef4225af81c810f1641068fa3272066a4",
+  "source_file_count": 415,
+  "session_probe_assertion_cases": {
+    "passed": 3,
+    "failed": 0
+  },
+  "lifecycle_probe_observation_groups": 6,
+  "lifecycle_probe_contains_assertions": false,
+  "initial_report_error_preserved_and_corrected": true,
+  "d2_product_implemented": false,
+  "d2_fields_frozen": false,
+  "full_first_stage_complete": false,
+  "lewm_speedup_measured": false,
+  "new_pytest_run": false,
+  "new_lewm_gpu_run": false,
+  "next_step": "Resolve exact D2.0 fields and per-path anchor/state invalidation, then implement ordered D2.1-D2.4 gates"
+}

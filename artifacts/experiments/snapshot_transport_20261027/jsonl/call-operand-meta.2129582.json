@@ -1,0 +1,58 @@
+{
+  "schema": "scar.call-operands-trace",
+  "schema_version": 1,
+  "process_id": 2129582,
+  "project_root": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/snapshot_transport_20261027",
+  "python": "3.14.7 | packaged by conda-forge | (main, Sep  2 2026, 21:08:32) [GCC 15.3.0]",
+  "implementation": "cpython",
+  "rule": "CPYTHON_CALL_WINDOWS_V1",
+  "limits": {
+    "max_events": 10000,
+    "max_bytes": 10000000,
+    "max_loads": 64,
+    "max_namespace_items": 4096,
+    "max_references": 8192
+  },
+  "events": 2773,
+  "event_attempts": 2773,
+  "instructions": 1547,
+  "call_attempts": 624,
+  "handshakes": 601,
+  "gaps": 1,
+  "loads": 605,
+  "references": 2456,
+  "bytes": 1117512,
+  "dropped_events": 0,
+  "errors": [],
+  "io_failed": false,
+  "previous_profile": false,
+  "base_manifest": [
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/snapshot_transport_20261027/jsonl/call-codes.2129582.jsonl",
+      "family": "codes",
+      "process_id": 2129582,
+      "raw_sha256": "eb666725df6a31907f1c30f9e9192e8a3d37b2b40abae946906ae1ffe3d141a7",
+      "raw_bytes": 5360,
+      "lines": 20
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/snapshot_transport_20261027/jsonl/call-events.2129582.jsonl",
+      "family": "events",
+      "process_id": 2129582,
+      "raw_sha256": "fb4cef8d037478065f0653dbadbcefd76320fb3f098d66fc7bda872c00ab87e6",
+      "raw_bytes": 1077092,
+      "lines": 1360
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/snapshot_transport_20261027/jsonl/call-meta.2129582.json",
+      "family": "meta",
+      "process_id": 2129582,
+      "raw_sha256": "09d446a7f2bdf91993839c43b448968aabdb8da0e210aff45f3e7607a433617c",
+      "raw_bytes": 1020,
+      "lines": 34
+    }
+  ],
+  "reference_contents_observed": false,
+  "callable_environment_established": false,
+  "transformation_authorized": false
+}

@@ -1,0 +1,7 @@
+{
+  "all_authors_frozen_before_execution": true,
+  "scope": "two NEW static scope-oracle corrections only; canonical graphs and other assertions unchanged",
+  "static_test_sha256": "fec4c43b887fb014b3f1dbef2975f2dd4dbde7ba297f3165b1e3a8a21f20428d",
+  "dynamic_test_sha256": "24f1e738f4b9382e76ada9f33fe78dfbdc7e19a741863be1cead1a18ddfb585f",
+  "root_fix": "nearest current incoming for same-merge guarded links; fully inactive links explicitly lack current projection"
+}

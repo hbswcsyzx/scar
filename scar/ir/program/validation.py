@@ -11,10 +11,17 @@ from ..v2._validation import cycle_errors, record_errors
 from .ids import UseID
 from .model import (
     AccessMode, Behavior, BlockArgument, CompletionResult, CompletionSuccessor,
-    DataValue, ExitKind, FootprintKind,
-    LiteralOrigin, OperationResult, ProgramGraph, ReferenceValue,
+    DataValue, ExitKind, FootprintKind, LocalBindingValue,
+    LiteralOrigin, is_literal_origin, OperationResult, ProgramGraph, ProtocolValue, ReferenceValue,
     StateVersionValue, TerminatorKind, UseRole, ValueKind, value_type,
 )
+from .control import PendingDispatchTerminator
+from .cleanup import CleanupRouteTerminator
+from .resumption import (
+    ResumeInput, SuspendTerminator, saved_actual_use, resume_slot_type,
+)
+from .drivers import BodyDriveResult, BodyDriveSuccessor, BodyDriveTerminator
+from .driver_flow import body_outcome_types
 
 
 @dataclass(frozen=True, slots=True)
@@ -24,8 +31,13 @@ class ValidationIssue:
     message: str
 
 
-def validate(graph: ProgramGraph) -> tuple[ValidationIssue, ...]:
-    """Check exact uses, CFG availability, interfaces and explicit state SSA."""
+def validate(graph: ProgramGraph, *, _cleanup_facts=None, _resumption_facts=None,
+             _lifecycle_facts=None, _prepared_index=None) -> tuple[ValidationIssue, ...]:
+    """Check exact uses, CFG availability, interfaces and explicit state SSA.
+
+    The private output collector lets ProgramIndex reuse derived cleanup facts
+    after every validator passes; it never accepts caller-supplied proof facts.
+    """
     issues: list[ValidationIssue] = []
 
     def error(code, path, message):
@@ -44,7 +56,9 @@ def validate(graph: ProgramGraph) -> tuple[ValidationIssue, ...]:
         return result
 
     regions = registry(graph.regions, "regions")
+    body_regions = {row.region for row in graph.resumable_bodies}
     operations = registry(graph.operations, "operations")
+    drives = {row.operation: row for row in graph.body_drives}
     values = registry(graph.values, "values")
     locations = registry(graph.locations, "locations")
     blocks = {}
@@ -88,6 +102,9 @@ def validate(graph: ProgramGraph) -> tuple[ValidationIssue, ...]:
                 error("missing_result", operation.id, str(value_id))
         if operation.callee is not None and operation.callee not in regions:
             error("missing_callee", operation.id, str(operation.callee))
+        if operation.callee in body_regions:
+            error("resumption_direct_call", operation.id,
+                  "a resumable body requires a dedicated driver ingress, not CALL/INVOKE")
     for value in graph.values:
         if value.region not in regions:
             error("value_region", value.id, str(value.region))
@@ -127,6 +144,29 @@ def validate(graph: ProgramGraph) -> tuple[ValidationIssue, ...]:
     if issues:
         return tuple(issues)
 
+    from .resource_validation import resource_errors
+    for code, path, message in resource_errors(
+            graph, {op: block_region[block] for op, block in operation_block.items()}, uses):
+        error(code, path, message)
+
+    from .environment_validation import environment_errors
+    for code, path, message in environment_errors(
+            graph, {op: block_region[block] for op, block in operation_block.items()}, uses):
+        error(code, path, message)
+
+    from .state_address_validation import state_address_errors
+    for code, path, message in state_address_errors(graph):
+        error(code, path, message)
+
+    if graph.stored_value_writes or graph.stored_value_reads:
+        from .stored_values import stored_value_errors
+        for code, path, message in stored_value_errors(graph):
+            error(code, path, message)
+
+    from .literal_validation import literal_errors
+    for code, path, message in literal_errors(graph):
+        error(code, path, message)
+
     def check_footprint(footprint, location, path):
         extent = locations[location].extent
         if (footprint.kind is FootprintKind.INTERVAL and extent is not None
@@ -149,11 +189,18 @@ def validate(graph: ProgramGraph) -> tuple[ValidationIssue, ...]:
                 check_footprint(value.selector, location, value.id)
 
     # Each use has one owner and a role matching the kind of the actual value.
+    use_value_types = {
+        UseRole.DATA: DataValue,
+        UseRole.REFERENCE: ReferenceValue,
+        UseRole.STATE_CONTENT: StateVersionValue,
+        UseRole.STATE_ORDER: StateVersionValue,
+        UseRole.LOCAL_BINDING: LocalBindingValue,
+        UseRole.PROTOCOL: ProtocolValue,
+    }
     for operation in operations.values():
         for use in operation.uses:
             value = values[use.value]
-            expected = (DataValue if use.role is UseRole.DATA else ReferenceValue
-                        if use.role is UseRole.REFERENCE else StateVersionValue)
+            expected = use_value_types[use.role]
             if not isinstance(value, expected):
                 error("use_role", use.id, "input role does not match value kind")
             if value.region != block_region[operation_block[operation.id]]:
@@ -180,6 +227,7 @@ def validate(graph: ProgramGraph) -> tuple[ValidationIssue, ...]:
         if Behavior.CONTROL not in final.behaviors:
             error("control_behavior", final.id, "terminator requires CONTROL")
         is_invoke = term.kind is TerminatorKind.INVOKE
+        is_drive = type(term) is BodyDriveTerminator
         if (final.results or final.accesses or final.callee is not None) and not is_invoke:
             error("terminator_effect", final.id, "N1 terminators only bind control and interface uses")
         own_uses = {use.id: use for use in final.uses}
@@ -187,10 +235,25 @@ def validate(graph: ProgramGraph) -> tuple[ValidationIssue, ...]:
             if isinstance(values[use.value], StateVersionValue) and use.role is not UseRole.STATE_CONTENT:
                 error("control_state_role", use.id, "state carried across control ports retains content dependence")
         bound = ([term.condition] if term.condition is not None else [])
+        if isinstance(term, (PendingDispatchTerminator, CleanupRouteTerminator)):
+            bound.append(term.pending)
         bound += [use for edge in term.successors for use in edge.arguments if isinstance(use, UseID)]
         bound += list(term.values)
         if is_invoke:
             bound += list(final.invoke_arguments)
+        if is_drive:
+            if final.id not in drives:
+                error("driver_declaration_missing", final.id,
+                      "a BodyDrive terminator requires its canonical driver record")
+            else:
+                bound += list(drives[final.id].actual_uses)
+        if term.kind is TerminatorKind.RAISE:
+            # A definitely-unbound LOAD_LOCAL reads its token as the reason
+            # for raising, but that token is not part of the exception exit
+            # interface. BindingRead is the sole typed exception to the usual
+            # terminator-operand equality rule.
+            bound += [item.binding for item in graph.binding_reads
+                      if item.operation == final.id and item.normal_result is None]
         if len(set(bound)) != len(bound) or set(bound) != set(own_uses):
             error("control_binding", final.id, "each control input port needs its own exact use")
         signatures = {signature.kind: signature for signature in final.completions}
@@ -204,8 +267,46 @@ def validate(graph: ProgramGraph) -> tuple[ValidationIssue, ...]:
             incoming_edges[edge.block].append((final.id, edge_index))
             if len(edge.arguments) != len(target.arguments):
                 error("edge_arity", final.id, "successor argument count mismatch")
+            drive_types = None
+            if isinstance(edge, BodyDriveSuccessor):
+                try:
+                    drive_types = body_outcome_types(graph, edge.source)
+                except ValueError as exc:
+                    error("driver_outcome_source", final.id, str(exc))
             for actual, formal in zip(edge.arguments, target.arguments):
-                if isinstance(actual, CompletionResult):
+                if isinstance(actual, ResumeInput):
+                    if not isinstance(term, SuspendTerminator):
+                        error("resumption_binding", final.id, "resume input requires SUSPEND")
+                        continue
+                    if value_type(values[formal]) != resume_slot_type(edge.inputs[actual.resume_slot]):
+                        error("resumption_input_type", formal, "resume input signature differs from landing parameter")
+                    ref = values[formal]
+                    if isinstance(ref, ReferenceValue) and (
+                            ref.targets is not None or ref.referent_identity is not None
+                            or ref.selector.kind is not FootprintKind.UNKNOWN):
+                        error("resumption_reference_precision", formal,
+                              "a newly delivered reference grants no target, selector or identity facts")
+                elif isinstance(actual, BodyDriveResult):
+                    if not is_drive or not isinstance(edge, BodyDriveSuccessor):
+                        error("driver_result_binding", final.id,
+                              "a body projection requires a typed BodyDrive successor")
+                        continue
+                    if drive_types is None:
+                        continue
+                    if actual.index >= len(drive_types):
+                        error("driver_result_index", final.id,
+                              "body result index exceeds this source's actual signature")
+                        continue
+                    if value_type(values[formal]) != drive_types[actual.index]:
+                        error("driver_result_type", formal,
+                              "body projection type differs from this source's signature")
+                    ref = values[formal]
+                    if isinstance(ref, ReferenceValue) and (
+                            ref.targets is not None or ref.referent_identity is not None
+                            or ref.selector.kind is not FootprintKind.UNKNOWN):
+                        error("driver_reference_precision", formal,
+                              "a body reference result grants no identity or alias precision")
+                elif isinstance(actual, CompletionResult):
                     if not isinstance(edge, CompletionSuccessor) or edge.kind not in signatures:
                         error("completion_binding", final.id, "produced value requires an invoke completion")
                         continue
@@ -221,12 +322,19 @@ def validate(graph: ProgramGraph) -> tuple[ValidationIssue, ...]:
                             or ref.selector.kind is not FootprintKind.UNKNOWN):
                         error("completion_reference_precision", formal,
                               "produced references need verified summaries before gaining target or identity precision")
-                elif actual in own_uses and value_type(values[own_uses[actual].value]) != value_type(values[formal]):
-                    error("edge_type", actual, "successor argument type mismatch")
+                else:
+                    source = saved_actual_use(final, actual)
+                    if source in own_uses and value_type(values[own_uses[source].value]) != value_type(values[formal]):
+                        error("edge_type", source, "successor argument type mismatch")
             if isinstance(edge, CompletionSuccessor) and edge.kind in signatures:
                 produced = [arg.index for arg in edge.arguments if isinstance(arg, CompletionResult)]
                 if len(set(produced)) != len(produced) or set(produced) != set(range(len(signatures[edge.kind].types))):
                     error("completion_slots", final.id, "every produced completion slot must bind exactly once")
+            if isinstance(edge, BodyDriveSuccessor) and drive_types is not None:
+                produced = [arg.index for arg in edge.arguments if isinstance(arg, BodyDriveResult)]
+                if len(set(produced)) != len(produced) or set(produced) != set(range(len(drive_types))):
+                    error("driver_result_slots", final.id,
+                          "every source outcome slot must bind exactly once")
         if term.kind is TerminatorKind.BRANCH and term.condition in own_uses:
             condition = values[own_uses[term.condition].value]
             if not isinstance(condition, DataValue) or condition.data_type != "builtins.bool":
@@ -247,7 +355,8 @@ def validate(graph: ProgramGraph) -> tuple[ValidationIssue, ...]:
         return tuple(issues)
 
     for operation in terminators.values():
-        if operation.terminator.kind is TerminatorKind.INVOKE:
+        if operation.terminator.kind in (
+                TerminatorKind.INVOKE, TerminatorKind.SUSPEND, TerminatorKind.BODY_DRIVE):
             for edge in operation.terminator.successors:
                 if len(incoming_edges[edge.block]) != 1:
                     error("completion_private_target", operation.id,
@@ -256,6 +365,7 @@ def validate(graph: ProgramGraph) -> tuple[ValidationIssue, ...]:
         return tuple(issues)
 
     dominators = {}
+    availability = {}
     for region in graph.regions:
         local = {block.id for block in region.blocks}
         if predecessors[region.entry]:
@@ -280,9 +390,32 @@ def validate(graph: ProgramGraph) -> tuple[ValidationIssue, ...]:
                     dom[block] = updated
                     changed = True
         dominators.update(dom)
+        # Logical edges preserve cleanup activation. Availability has additional
+        # roots: a future drive cannot use an old definition without an explicit
+        # saved slot and a fresh landing parameter, even through a loop/merge.
+        roots = {region.entry} | {
+            edge.block for block in local
+            if isinstance(terminators[block].terminator, SuspendTerminator)
+            for edge in terminators[block].terminator.successors
+        }
+        available = {block: ({block} if block in roots else set(local)) for block in local}
+        changed = True
+        while changed:
+            changed = False
+            for block in local - roots:
+                updated = {block} | set.intersection(*(available[p] for p in predecessors[block]))
+                if updated != available[block]:
+                    available[block] = updated
+                    changed = True
+        availability.update(available)
         bound_exits = {terminators[block].terminator.exit for block in local
                        if terminators[block].terminator.exit is not None}
-        if {port.name for port in region.exits} != bound_exits:
+        # C1 can intercept a declared language target forever, or replace its
+        # pending transfer. Its full validator checks support from the exact
+        # cleanup entry token after stack/routing checks. Old schemas retain
+        # their original requirement for an actual terminal site at every exit.
+        c1_enabled = any(row.region == region.id for row in graph.handled_context_domains)
+        if {port.name for port in region.exits} != bound_exits and not c1_enabled:
             error("unbound_exit", region.id, "declared exits must be bound to actual control exits")
     if issues:
         return tuple(issues)
@@ -291,12 +424,12 @@ def validate(graph: ProgramGraph) -> tuple[ValidationIssue, ...]:
         block = operation_block[operation.id]
         for use in operation.uses:
             origin = values[use.value].origin
-            if isinstance(origin, LiteralOrigin):
+            if is_literal_origin(origin):
                 continue
             producer_block = (origin.block if isinstance(origin, BlockArgument)
                               else operation_block[origin.operation])
-            if producer_block not in dominators[block]:
-                error("unavailable_value", use.id, "definition does not dominate use")
+            if producer_block not in availability[block]:
+                error("unavailable_value", use.id, "definition does not dominate use across all availability roots")
             elif (isinstance(origin, OperationResult) and producer_block == block
                   and positions[origin.operation] >= positions[operation.id]):
                 error("use_before_definition", use.id, "result must be defined before use")
@@ -436,6 +569,23 @@ def validate(graph: ProgramGraph) -> tuple[ValidationIssue, ...]:
                     if callee_types != {kind: signature.types for kind, signature in signatures.items()}:
                         error("invoke_callee_exits", operation.id, "callee completion interfaces differ from invocation")
 
+            if operation.id in drives and type(operation.terminator) is BodyDriveTerminator:
+                drive = drives[operation.id]
+                input_domains = {
+                    values[own_uses[item.source].value].location
+                    for item in drive.state_inputs
+                    if item.source in own_uses
+                    and isinstance(values[own_uses[item.source].value], StateVersionValue)
+                }
+                for edge in operation.terminator.successors:
+                    for actual, formal in zip(edge.arguments, blocks[edge.block].arguments):
+                        value = values[formal]
+                        if (isinstance(value, StateVersionValue)
+                                and isinstance(actual, BodyDriveResult)
+                                and value.location not in input_domains):
+                            error("driver_state_input", operation.id,
+                                  "produced body state requires its current location as a drive input")
+
             if operation.callee is not None and not is_invoke:
                 callee = regions[operation.callee]
                 if Behavior.CONTROL not in operation.behaviors:
@@ -491,8 +641,9 @@ def validate(graph: ProgramGraph) -> tuple[ValidationIssue, ...]:
                                       if isinstance(values[use.value], StateVersionValue))
                 for edge in operation.terminator.successors:
                     for actual, formal in zip(edge.arguments, blocks[edge.block].arguments):
-                        if isinstance(actual, UseID):
-                            reference_binding(values[own_uses[actual].value], values[formal], actual)
+                        source = saved_actual_use(operation, actual)
+                        if source is not None:
+                            reference_binding(values[own_uses[source].value], values[formal], source)
             actual_state_uses = {use.id for use in operation.uses if isinstance(values[use.value], StateVersionValue)}
             if actual_state_uses != consumed_state:
                 error("unaccounted_state_use", operation.id, "state inputs require access, call or control bindings")
@@ -510,6 +661,104 @@ def validate(graph: ProgramGraph) -> tuple[ValidationIssue, ...]:
         elif (first not in dominators[second]
               or (first == second and positions[edge.before] >= positions[edge.after])):
             error("order_direction", "ordering", "order must agree with mandatory control order")
+    from .binding_validation import validate_bindings
+    for issue in validate_bindings(graph):
+        error(issue.code, issue.path, issue.message)
+    if not issues and graph.call_effect_expansions:
+        from .call_effect_expansion import call_effect_expansion_errors
+        for code, path, message in call_effect_expansion_errors(graph):
+            error(code, path, message)
+    if not issues:
+        from .control_validation import control_errors
+        for code, path, message in control_errors(graph):
+            error(code, path, message)
+    if not issues:
+        from .cleanup_validation import analyze_cleanup
+        cleanup_issues, cleanup_facts = analyze_cleanup(
+                graph, operation_blocks=operation_block, dominators=dominators)
+        for code, path, message in cleanup_issues:
+            error(code, path, message)
+    if not issues:
+        from .resumption_validation import analyze_resumption
+        resumption_issues, resumption_facts = analyze_resumption(
+                graph, operation_blocks=operation_block, region_domains=region_domains,
+                incoming_edges=incoming_edges)
+        for code, path, message in resumption_issues:
+            error(code, path, message)
+    if not issues:
+        from .driver_validation import driver_errors
+        for code, path, message in driver_errors(
+                graph, operation_blocks=operation_block, region_domains=region_domains,
+                incoming_edges=incoming_edges):
+            error(code, path, message)
+    if not issues:
+        from .lifecycle_validation import body_publication_errors
+        for code, path, message in body_publication_errors(
+                graph, operation_blocks=operation_block, region_domains=region_domains,
+                incoming_edges=incoming_edges):
+            error(code, path, message)
+    if not issues:
+        from .no_body_validation import no_body_errors
+        for code, path, message in no_body_errors(
+                graph, operation_blocks=operation_block, incoming_edges=incoming_edges):
+            error(code, path, message)
+    if not issues:
+        from .session_release_validation import session_release_errors
+        for code, path, message in session_release_errors(
+                graph, operation_blocks=operation_block, region_domains=region_domains):
+            error(code, path, message)
+    if not issues:
+        from .protocol_validation import no_entry_preconditions
+        for code, path, message in no_entry_preconditions(graph):
+            error(code, path, message)
+    if not issues:
+        from .lifecycle_analysis import analyze_lifecycles
+        lifecycle_issues, lifecycle_facts = analyze_lifecycles(graph, operation_blocks=operation_block)
+        for code, path, message in lifecycle_issues:
+            error(code, path, message)
+    if not issues:
+        from .provider_validation import provider_errors
+        for code, path, message in provider_errors(
+                graph, {op: block_region[block] for op, block in operation_block.items()}, uses):
+            error(code, path, message)
+    if not issues:
+        from .native_validation import native_errors
+        for code, path, message in native_errors(graph):
+            error(code, path, message)
+    prepared = None
+    ctx = None
+    if not issues:
+        from .protocol_connections import has_protocol_connection_capability
+        # Return-aware protocol checks require the same validated core as the
+        # connection views. Preparing here avoids recursive public validation
+        # and retains the old protocol checks even without new attachments.
+        if (has_protocol_connection_capability(graph) or graph.exception_matches
+                or graph.protocol_operations and any(op.callee is not None for op in graph.operations)):
+            from .queries import ProgramIndex
+            from .protocol_connection_flow import ConnectionContext
+            prepared = ProgramIndex._from_validated_core(
+                graph, cleanup_facts, resumption_facts, lifecycle_facts)
+            ctx = ConnectionContext(graph, index=prepared)
+        from .protocol_validation import protocol_errors
+        for code, path, message in protocol_errors(graph, context=ctx):
+            error(code, path, message)
+    if not issues and graph.exception_matches:
+        from .exception_match_query import exception_match_errors
+        for code, path, message in exception_match_errors(graph, context=ctx):
+            error(code, path, message)
+    if not issues and ctx is not None:
+        if has_protocol_connection_capability(graph) or graph.exception_matches:
+            from .protocol_connection_validation import connection_reports
+            for code, path, message in connection_reports(ctx)["issues"]:
+                error(code, path, message)
+    if not issues and _prepared_index is not None and prepared is not None:
+        _prepared_index.append(prepared)
+    if not issues and _cleanup_facts is not None:
+        _cleanup_facts.append(cleanup_facts)
+    if not issues and _resumption_facts is not None:
+        _resumption_facts.append(resumption_facts)
+    if not issues and _lifecycle_facts is not None:
+        _lifecycle_facts.append(lifecycle_facts)
     return tuple(issues)
 
 

@@ -1,0 +1,615 @@
+diff --git a/scar/analysis/call_operands.py b/scar/analysis/call_operands.py
+index 72af1fa..d3a8c31 100644
+--- a/scar/analysis/call_operands.py
++++ b/scar/analysis/call_operands.py
+@@ -209,9 +209,12 @@ def _link_call_operands(trace, project_root, inventory=None, *, frame_budget=Cal
+     notify("OPERAND_READ_END", invocations=len(operands.entries), events=len(operands.events))
+     access = None
+     if partitioned:
+-        access = SourceBodyAccess(composition, source_bindings, coordinates, code_witnesses)
++        access = (_owner.checked_source_access(composition, source_bindings, coordinates, code_witnesses)
++                  if _owner is not None else None)
++        if access is None:
++            access = SourceBodyAccess(composition, source_bindings, coordinates, code_witnesses)
++            access.bind_scan(operands.frame_scan, operands.entries, operands.exits)
+         _require(root == access.root, "partition source project root differs from current operand replay")
+-        access.bind_scan(operands.frame_scan, operands.entries, operands.exits)
+         inventory = access
+         notify("SOURCE_BODY_ACCESS_BOUND", counts=access.scan_counts, selected_bodies=len(access.selected))
+     model, sources = _link_call_model(
+diff --git a/scar/analysis/current_source_evidence.py b/scar/analysis/current_source_evidence.py
+index e82ad35..6300cb4 100644
+--- a/scar/analysis/current_source_evidence.py
++++ b/scar/analysis/current_source_evidence.py
+@@ -8,6 +8,7 @@ from __future__ import annotations
+ 
+ from collections import Counter
+ from copy import deepcopy
++import gzip
+ import hashlib
+ from pathlib import Path
+ import sys
+@@ -257,6 +258,7 @@ class _OwnedCurrent:
+         self._key, self.operands, self.coordinates = key, operands, coordinates
+         self.builds = {meta["process_id"]: meta["python"] for meta in operands.frame_scan.metadata}
+         self.proof = None
++        self._bound_source_access = None
+ 
+     def require(self, trace, root, frame_budget, operand_budget=None, coordinates=None):
+         _need(self._key is _KEY and self.operands.directory == str(Path(trace).resolve())
+@@ -277,6 +279,15 @@ class _OwnedCurrent:
+             (sink.entry if entered else sink.exit)(row)
+         return operands.frame_scan, sink
+ 
++    def checked_source_access(self, composition, source_directory, coordinates, code_witnesses):
++        access = self._bound_source_access
++        if access is not None:
++            _need(access.bound and access.composition is composition and access.coordinates is coordinates
++                  and access.code_witnesses is code_witnesses
++                  and access.report_root == Path(source_directory).resolve(),
++                  "owned checkpoint accessor differs from this exact continuation scope")
++        return access
++
+ 
+ def _require_owned_source_report(composition, report, bindings):
+     """An output declaration cannot grant the installed proof's authority."""
+@@ -293,11 +304,73 @@ def _require_owned_source_report(composition, report, bindings):
+     return None
+ 
+ 
++def _checkpoint_stream(directory, declaration, *, max_bytes=1_000_000_000):
++    """Check retained output bytes/rows, without claiming to replay their meaning."""
++    name = declaration["path"]
++    _need(name in ("invocations.jsonl.gz", "orphan-exits.jsonl.gz")
++          and all(type(declaration[field]) is int and 0 <= declaration[field] <= max_bytes
++                  for field in ("raw_bytes", "compressed_bytes", "rows")),
++          "checkpoint stream declaration exceeds the supported bounded profile")
++    path = directory / name
++    _need(path.is_file() and not path.is_symlink(), "checkpoint stream is not an ordinary file")
++    before = path.stat()
++    _need(before.st_size == declaration["compressed_bytes"], "checkpoint compressed stream size differs")
++    digest, size, rows = hashlib.sha256(), 0, 0
++    with gzip.open(path, "rb") as stream:
++        while True:
++            block = stream.read(min(1_048_576, declaration["raw_bytes"] - size + 1))
++            if not block:
++                break
++            size += len(block); rows += block.count(b"\n"); digest.update(block)
++            _need(size <= declaration["raw_bytes"], "checkpoint decoded stream exceeds its exact declaration")
++    after = path.stat()
++    _need((before.st_dev, before.st_ino, before.st_size, before.st_mtime_ns)
++          == (after.st_dev, after.st_ino, after.st_size, after.st_mtime_ns)
++          and (digest.hexdigest(), size, rows)
++              == (declaration["raw_sha256"], declaration["raw_bytes"], declaration["rows"]),
++          "checkpoint output stream SHA/bytes/rows changed")
++    return {"path": str(path), "compressed_bytes": before.st_size,
++            "raw_sha256": digest.hexdigest(), "raw_bytes": size, "rows": rows,
++            "semantic_row_replay_performed_here": False}
++
++
++def _resume_source(owner, composition, directory, report_sha, bindings_sha, code_witnesses):
++    from scar.analysis.source_body_access import SourceBodyAccess
++    directory = Path(directory).resolve(strict=True)
++    report, report_ref = _read(directory / "report.json", report_sha, schema="scar.source-invocations")
++    bindings, binding_ref = _read(directory / "bindings.json", bindings_sha,
++                                  schema="scar.source-invocation-bindings")
++    _need(_require_owned_source_report(composition, report, bindings) == owner.proof.receipt(),
++          "completed checkpoint has no identical installed original same-Run source proof")
++    _need(report["coordinate_binding"] == encode(owner.coordinates.artifact)
++          and report["call_budget"] == encode(owner.operands.frame_budget)
++          and report["raw_scan_issues"] == encode(owner.operands.frame_scan.issues)
++          and report["current_source_checks"] == owner.proof.guards().records,
++          "completed checkpoint changed coordinates, reader budget/issues or recorded guard scope")
++    access = SourceBodyAccess(composition, directory, owner.coordinates, code_witnesses)
++    _need(access.report_receipt["sha256"] == report_ref.sha256
++          and access.report_receipt["bytes"] == report_ref.size_bytes
++          and access.bindings_receipt["sha256"] == binding_ref.sha256
++          and access.bindings_receipt["bytes"] == binding_ref.size_bytes,
++          "checkpoint documents changed between exact receipt and public accessor validation")
++    access.bind_scan(owner.operands.frame_scan, owner.operands.entries, owner.operands.exits)
++    streams = [_checkpoint_stream(directory, report[name]) for name in ("invocations", "orphan_exits")]
++    owner._bound_source_access = access
++    return report, {"rule": "EXACT_COMPLETED_SOURCE_CHECKPOINT_V1",
++        "source_report": encode(report_ref), "source_bindings": encode(binding_ref),
++        "streams": streams, "current_raw_scan_repeated_independently": True,
++        "source_binder_reexecuted": False, "same_run_source_proof": owner.proof.receipt(),
++        "source_body_accessor_rebound_to_current_owned_scan": True,
++        "guards_refreshed": False, "transformation_authorized": False}
++
++
+ def connect_current_capture(composition, coordinates, trace_directory, out_dir, *,
+                             previous_source_directory, previous_report_sha256, previous_bindings_sha256,
+                             previous_producer, previous_participating_producer, code_witnesses,
+                             dispatch_bridge=None, frame_budget=None, operand_budget=None, route_budget=None,
+-                            include_environments=True, progress=None):
++                            include_environments=True, progress=None,
++                            resume_source_directory=None, resume_source_report_sha256=None,
++                            resume_source_bindings_sha256=None):
+     """Open/verify current raw once, then privately share it across source/SBA."""
+     from scar.analysis.call_operand_reader import read_call_operands
+     from scar.analysis.call_operands import _link_call_operands_owned
+@@ -321,6 +394,9 @@ def connect_current_capture(composition, coordinates, trace_directory, out_dir,
+           and type(route_budget) is OperandRouteBudget and type(include_environments) is bool,
+           "orchestration requires exact typed reader budgets and environment selection")
+     _need(progress is None or callable(progress), "progress must be callable")
++    resume_fields = (resume_source_directory, resume_source_report_sha256, resume_source_bindings_sha256)
++    _need(all(value is None for value in resume_fields) or all(value is not None for value in resume_fields),
++          "completed source checkpoint requires its explicit directory and both exact document SHAs")
+     output = Path(out_dir).resolve()
+     _need(not output.exists(), "orchestration output must be fresh")
+     root = composition.inventory_component("discovery")["project_root"]
+@@ -334,19 +410,30 @@ def connect_current_capture(composition, coordinates, trace_directory, out_dir,
+     composition.install_static_source_proof(proof)
+     output.mkdir(exist_ok=False)
+     if progress is not None: progress({"stage": "OWNED_RAW_READ_VERIFIED", "proof_reuse": proof.receipt()})
+-    source = _bind_source_invocations_owned(owner, composition, coordinates, trace_directory,
+-        output / "source", call_budget=frame_budget, witness_mode="reused_code")
+-    dispatch = (bind_dispatch_sources(output / "source", dispatch_bridge, coordinates,
++    checkpoint = None
++    source_directory = output / "source"
++    if resume_source_directory is None:
++        source = _bind_source_invocations_owned(owner, composition, coordinates, trace_directory,
++            source_directory, call_budget=frame_budget, witness_mode="reused_code")
++    else:
++        source_directory = Path(resume_source_directory).resolve(strict=True)
++        source, checkpoint = _resume_source(owner, composition, source_directory,
++            resume_source_report_sha256, resume_source_bindings_sha256, code_witnesses)
++        if progress is not None: progress({"stage": "COMPLETED_SOURCE_CHECKPOINT_VERIFIED", "checkpoint": checkpoint})
++    dispatch = (bind_dispatch_sources(source_directory, dispatch_bridge, coordinates,
+         output / "dispatch", composition_index=composition) if dispatch_bridge is not None else None)
+     report = _link_call_operands_owned(owner, trace_directory, root, composition=composition,
+-        source_bindings=output / "source", coordinates=coordinates, code_witnesses=code_witnesses,
++        source_bindings=source_directory, coordinates=coordinates, code_witnesses=code_witnesses,
+         frame_budget=frame_budget, operand_budget=operand_budget, route_budget=route_budget,
+         include_environments=include_environments, progress=progress)
+     counts = {"frame_scans": 1, "operand_scans": 1, "environment_scans": int(include_environments),
+         "captured_codes": len(operands.frame_scan.captures), "entries": len(operands.entries),
+         "exits": len(operands.exits), "operand_events": len(operands.events)}
+     return {"source_report": source, "dispatch_report": dispatch, "operand_report": report,
+-            "reader_counts": counts, "proof_reuse": proof.receipt()}
++            "source_directory": str(source_directory), "source_checkpoint": checkpoint,
++            "reader_counts": {**counts, "source_binder_runs": int(checkpoint is None),
++                              "completed_source_checkpoints": int(checkpoint is not None)},
++            "proof_reuse": proof.receipt()}
+ 
+ 
+ __all__ = ["connect_current_capture", "SameRunSourceProof"]
+diff --git a/scar/analysis/dispatch_sources.py b/scar/analysis/dispatch_sources.py
+index fc655db..9514e0f 100644
+--- a/scar/analysis/dispatch_sources.py
++++ b/scar/analysis/dispatch_sources.py
+@@ -303,15 +303,19 @@ class _PartitionedSourceScope:
+             raw_body = self.composition.inventory_body(*key)
+             graph, metadata = self.composition.typed_body(*key)
+             locators = self.composition.inventory_body_locators(*key, raw_body["graph"])
+-            checkpoint_ref = raw_file["bodies"][ref["body_index"]]["checkpoint"]
+-            checkpoint = self.composition.inventory.checkpoint(checkpoint_ref)
++            # CP2 is a reference envelope. The public partition reader follows
++            # its exact SourceProgram5 artifact; CP1 keeps its embedded fields.
++            typed = self.composition.inventory.typed_body(*key)
+             namespace = locators["namespace"]
+             _need(raw_body["definition"] == definition["identity"] and graph.root == region
++                  and typed.body.graph is not None and typed.body.graph.root == region
++                  and typed.body.definition == definition_id and typed.body.metadata == metadata
++                  and typed.namespace == namespace
+                   and encode(metadata.source) == binding["snapshot"]
+                   and namespace["body"]["definition"] == definition["identity"]
+                   and namespace["body"]["entry"] == metadata.entry
+-                  and namespace["body"]["source"] == (checkpoint["structured"]["source"]
+-                      if checkpoint["structured"] is not None else None),
++                  and namespace["body"]["source"] == (encode(typed.structured.source)
++                      if typed.structured is not None else None),
+                   "body root/definition/metadata/namespace differs from its original checkpoint")
+             expected_fields = {"canonical_locator": locators["graph_locator"],
+                 "inventory_locator": locators["inventory_locator"], "metadata_locator": locators["metadata_locator"],
+diff --git a/scar/analysis/source_body_access.py b/scar/analysis/source_body_access.py
+index db4c802..4a7b031 100644
+--- a/scar/analysis/source_body_access.py
++++ b/scar/analysis/source_body_access.py
+@@ -15,6 +15,7 @@ import hashlib
+ import json
+ from pathlib import Path
+ import re
++import time
+ from types import SimpleNamespace
+ 
+ from scar.analysis.code_witness import CodeWitnessStore, CodeWitnessUnavailable
+@@ -273,7 +274,57 @@ class SourceBodyAccess:
+         self.unbound_processes = {pid for pid, family in members.processes
+                                   if members.processes[pid, family] is None}
+         captures = {(row.process_id, row.code.key): row for row in scan.captures}
+-        for key, row in self.by_group.items():
++        self.code_witnesses._notify("SOURCE_BODY_ACCESS_BIND_BEGIN", groups=len(self.by_group),
++                                    captured_codes=len(scan.captures))
++        # The ordinary per-row checks below still establish every original
++        # descriptor, guard, locator and reference equality. Prefetch only the
++        # exact demanded project definitions, grouped by file, so random code
++        # order cannot repeatedly reload/validate a large source graph.
++        demands = defaultdict(set)
++        verified_links = {link.code: link for link in self.original_links
++                          if link.status is CallLinkStatus.VERIFIED}
++        original_codes = {}
++        for original in self.original_captures:
++            previous = original_codes.setdefault(original.code.key, original.code)
++            _need(previous == original.code, "original descriptor key has contradictory complete code records")
++        if self.formal:
++            for key, row in self.by_group.items():
++                if row.get("source_origin") != "INVENTORY" or row["definition"] is None:
++                    continue
++                capture, link = captures.get(key), verified_links.get(row["code"])
++                element = row["composition_element"]
++                reference = decode(SourceDefinitionReference, row["definition"])
++                _need(capture is not None and encode(capture) == row["code_capture"]
++                      and original_codes.get(capture.code.key) == capture.code and link is not None
++                      and type(element) is dict and set(element) == {"file_index", "identity", "body_index"}
++                      and type(element["file_index"]) is int and element["body_index"] is None
++                      and 0 <= element["file_index"] < len(self.composition.document["files"])
++                      and link.code == capture.code.key and link.definition == reference.definition
++                      and link.snapshot == reference.snapshot and link.source == reference.source
++                      and encode(link.definition) == element["identity"]
++                      and encode(link.snapshot) == row["snapshot"] and encode(link.source) == row["source"]
++                      and self.composition.document["files"][element["file_index"]]["snapshot"] == row["snapshot"]
++                      and self.composition.document["files"][element["file_index"]]["context"] == encode(reference.context),
++                      "definition prefetch demand differs from original verified code/source/project scope")
++                demands[element["file_index"]].add(link.definition)
++        self.source_prefetch_counts = {"project_source_files_requested": len(demands),
++            "project_definition_references_requested": sum(map(len, demands.values())),
++            "public_prefetch_file_calls_completed": 0,
++            "physical_source_reads_measured": False, "elapsed_s": 0.0}
++        prefetch_started = time.monotonic()
++        for file_index in sorted(demands):
++            definitions = tuple(sorted(demands[file_index], key=lambda definition: definition.wire))
++            self.code_witnesses._notify("SOURCE_DEFINITION_PREFETCH_FILE_BEGIN", file_index=file_index,
++                definition_requests=len(definitions), counts=dict(self.source_prefetch_counts))
++            self.composition.prefetch_definition_references(tuple((file_index, definition) for definition in definitions))
++            self.source_prefetch_counts["public_prefetch_file_calls_completed"] += 1
++            self.source_prefetch_counts["elapsed_s"] = time.monotonic() - prefetch_started
++            self.code_witnesses._notify("SOURCE_DEFINITION_PREFETCH_FILE_END", file_index=file_index,
++                definition_requests=len(definitions), counts=dict(self.source_prefetch_counts))
++        for group_index, (key, row) in enumerate(self.by_group.items()):
++            if group_index % 64 == 0:
++                self.code_witnesses._notify("SOURCE_BODY_ACCESS_BIND_GROUPS", groups_checked=group_index,
++                                            groups=len(self.by_group))
+             capture = captures.get(key)
+             _need(capture is not None and encode(capture) == row["code_capture"],
+                   "source binding captured descriptor/anchor differs from current raw code")
+@@ -360,6 +411,8 @@ class SourceBodyAccess:
+         self.scan_counts = {"code_captures": len(scan.captures), "entered_code_groups": len(groups),
+                             "invocations": len(entries), "exits": len(exits)}
+         self.bound = True
++        self.code_witnesses._notify("SOURCE_BODY_ACCESS_BIND_END", counts=dict(self.scan_counts),
++                                    source_prefetch=dict(self.source_prefetch_counts))
+ 
+     def code_link(self, captured):
+         _need(self.bound, "a fresh raw scan must bind before source use")
+@@ -480,6 +533,7 @@ class SourceBodyAccess:
+             "source_guard_scope": self.report.get("source_guard_scope", "ORIGINAL_SOURCE_REPORT_BINDING_SCOPE"),
+             "current_source_guards_refreshed_here": False,
+             "current_raw_scan_verified": self.bound, "raw_counts": getattr(self, "scan_counts", {}),
++            "source_definition_prefetch": getattr(self, "source_prefetch_counts", {}),
+             "unbound_processes": sorted(getattr(self, "unbound_processes", ())),
+             "source_invocation_rows_consumed": False,
+             "namespaces": namespaces, "bare_definition_conflicts": sorted(value.wire for value in self.collisions),
+diff --git a/scar/trace/os_fd_source_projection.py b/scar/trace/os_fd_source_projection.py
+index 5317d08..c8cb94d 100644
+--- a/scar/trace/os_fd_source_projection.py
++++ b/scar/trace/os_fd_source_projection.py
+@@ -24,7 +24,7 @@ from scar.ir.record_codec import decode, encode, loads as strict_loads
+ from scar.store.bundle_partitions import BundleBudgets, BundlePartitions, _Chunk, _line
+ from scar.trace import os_resources as parser
+ from scar.trace.os_fd_table_contexts import OSFDTableContexts
+-from scar.trace.os_resource_refinement import OSResourceBase
++from scar.trace.os_resource_refinement import OSResourceBase, OSResourceRefinement
+ 
+ 
+ SCHEMA = "scar.os-fd-source-projection"
+@@ -117,6 +117,8 @@ def _native_tid(entry):
+ def _selected(base, view, path, maximum):
+     _need(type(base) is OSResourceBase and type(view) is OSFDTableContexts
+           and view.base.artifact == base.artifact, "public original base and verified selected view required")
++    _need(getattr(view,'capture_coverage_verified',False) is True and view.document.get('schema_version')==2,
++          "historical context continuity is not capture-coverage-qualified; use explicit FD-values-only R2 mode")
+     doc, artifact = _document(path, maximum)
+     _need(doc == view.document and doc.get("status") == "PUBLISHED"
+           and doc["base"] == encode(base.artifact) and doc["run"] == encode(base.run),
+@@ -611,3 +613,225 @@ class OSFDSourceProjection:
+ 
+ 
+ __all__=["FDSourceInputs","FDSourceBudgets","build_os_fd_source_projection","OSFDSourceProjection"]
++
++
++# Explicitly different qualification from historical schema1 context-dependent
++# views. The immutable schema1 payload is admitted as FD evidence only.
++FD_VALUES_VERSION=2
++FD_VALUES_MODE='FD_VALUES_ONLY_R2'
++
++
++@dataclass(frozen=True)
++class FDValuesInputs:
++    selected_manifest: str | Path  # Public R2, never an old context dictionary.
++    original_projection: str | Path
++    original_selected_manifest: str | Path  # Receipt/provenance only, no context authority.
++    archive: str | Path
++    coordinates: str | Path
++
++
++def _r2_selection(base,view,path,maximum):
++    _need(type(base) is OSResourceBase and type(view) is OSResourceRefinement
++          and view.base.artifact==base.artifact,'FD-values-only requires the public original R2 selection')
++    doc,artifact=_document(path,maximum)
++    _need(doc==view.document and doc['base']==encode(base.artifact) and doc['run']==encode(base.run),
++          'R2 selected manifest receipt/record differs')
++    handles={identity:pair[1] for identity,pair in view.handles.items()}
++    _need(all(type(row.handle) is ProviderHandle and type(row.handle.container) is Unresolved for row in handles.values()),
++          'FD-values-only must not inherit a known container assertion')
++    return artifact,handles
++
++
++def _fd_values_inputs(base,r2,inputs,limits):
++    _need(type(inputs) is FDValuesInputs,'explicit FDValuesInputs required')
++    selected,handles=_r2_selection(base,r2,inputs.selected_manifest,limits.max_metadata_bytes)
++    docs,receipts={}, {'selected_manifest':selected}
++    for name in ('original_projection','original_selected_manifest','archive','coordinates'):
++        docs[name],receipts[name]=_document(getattr(inputs,name),limits.max_metadata_bytes)
++    old=docs['original_projection'];former=docs['original_selected_manifest'];coords=docs['coordinates']
++    _need(old.get('schema')==SCHEMA and old.get('schema_version')==1 and old.get('status')=='PUBLISHED',
++          'only an explicit original schema1 FD evidence payload can be requalified')
++    _need(old['base']==encode(base.artifact) and old['run']==encode(base.run)
++          and old['selected_view']==encode(receipts['original_selected_manifest'])
++          and former['base']==encode(base.artifact) and former['run']==encode(base.run),
++          'original FD payload/capture/R2 provenance differs')
++    _need(old['inputs']['archive']==encode(receipts['archive']) and old['inputs']['coordinates']==encode(receipts['coordinates'])
++          and coords['run']==encode(base.run) and coords['seed']['archive_sha256']==receipts['archive'].sha256,
++          'original raw/coordinate receipts differ')
++    bound=base.manifest['protocol_document']['contract']['coordinate_binding']
++    _need(bound==encode(receipts['coordinates']),'base binds another coordinate artifact')
++    actual={entry['actual_path']:entry for entry in docs['archive']['files']}
++    _need(len(actual)==len(docs['archive']['files']),'retention actual URI mapping is ambiguous')
++    return docs,receipts,handles,actual
++
++
++def _open_payload_only(path,limits,version):
++    """Storage verification only; never instantiate a context-qualified view."""
++    doc,artifact=_document(path,limits.max_manifest_bytes)
++    _need(doc.get('schema')==SCHEMA and doc.get('schema_version')==version and doc.get('status')=='PUBLISHED'
++          and set(doc.get('tables',{}))==set(_TABLES),'unsupported explicit FD payload representation')
++    if version==FD_VALUES_VERSION:
++        _need(doc.get('mode')==FD_VALUES_MODE,'schema2 is not FD_VALUES_ONLY_R2')
++    self=object.__new__(OSFDValuesProjection)
++    self.root,self.manifest,self.artifact=Path(artifact.uri).parent,doc,artifact
++    self.limits,self.cache,self.cached_chunks=_storage(limits),OrderedDict(),2
++    totals={'records':0,'chunks':0,'decoded_bytes':0,'stored_bytes':0}
++    for table in _TABLES:
++        ordinal=0
++        for number,chunk in enumerate(doc['tables'][table]['chunks']):
++            _need(chunk['uri']==f'fd_sources/{table}/{number:06d}.jsonl.gz' and chunk['compression']=='gzip'
++                  and type(chunk['lines']) is int and chunk['lines']>0
++                  and chunk['first_ordinal']==ordinal and chunk['last_ordinal']==ordinal+chunk['lines']-1,
++                  'payload chunk/range descriptor differs')
++            _need(chunk['decoded_bytes']<=self.limits.max_chunk_decoded_bytes
++                  and chunk['physical_bytes']<=self.limits.max_chunk_stored_bytes,'payload chunk exceeds reader budget')
++            ordinal+=chunk['lines'];totals['chunks']+=1
++            totals['decoded_bytes']+=chunk['decoded_bytes'];totals['stored_bytes']+=chunk['physical_bytes']
++        _need(ordinal==doc['tables'][table]['records'],'payload table denominator differs')
++        totals['records']+=ordinal
++    _need(totals==doc['totals'] and totals['decoded_bytes']<=self.limits.max_total_decoded_bytes
++          and totals['stored_bytes']<=self.limits.max_total_stored_bytes,'payload aggregate receipts differ')
++    return self
++
++
++def requalify_os_fd_values(base,r2_view,inputs,fresh_out,*,budgets=None,progress=None):
++    """Publish explicit schema2/R2 qualification, hard-linking exact old chunks.
++
++    No raw scan and no unsafe OSFDTableContexts.read. Context identity is not
++    inherited. Original OFD/ends remain baseline declarations, not proven truth.
++    """
++    limits=budgets or FDSourceBudgets()
++    docs,receipts,retained,actual=_fd_values_inputs(base,r2_view,inputs,limits)
++    payload=_open_payload_only(inputs.original_projection,limits,1)
++    out=Path(fresh_out).absolute();_need(not out.exists(),'output must be fresh')
++    old=payload.manifest
++    former={row['replacement']['id']['wire']:row['replacement'] for row in docs['original_selected_manifest']['handle_refinements']}
++    ports=iter(payload.iter_records('fd_ports'));current=next(ports,None)
++    old_retained={decode(ProviderRecordSelector,row['reference']['selector']).ordinal:row for row in old['retained_handles']}
++    new_retained=[];checked=0;values=0;seen_retained=set()
++    for envelope in base.reader.iter_records('handles'):
++        ordinal,wire=envelope['ordinal'],envelope['record'];checked+=1
++        _need(checked<=limits.max_handles,'handle qualification budget exceeded')
++        identity=decode(HandleBindingID,wire['id'])
++        if identity in retained:
++            original=retained[identity];new=encode(original)
++            _need(r2_view.handles[identity][0]==ordinal and identity.value==wire['id']['value'],'R2 original handle identity differs')
++            reference=old_retained[ordinal]['reference'];_check_reference(base,reference,ordinal,wire)
++            previous=former[identity.wire]
++            _need(_record_sha(previous)==old_retained[ordinal]['selected_record_sha256']
++                  and {k:v for k,v in previous.items() if k!='handle'}=={k:v for k,v in new.items() if k!='handle'}
++                  and {k:v for k,v in previous['handle'].items() if k!='container'}==
++                      {k:v for k,v in new['handle'].items() if k!='container'},
++                  'R2 retained FD value/lifetime/selector/source changed beyond removing container assertion')
++            new_retained.append({'reference':reference,'selected_record_sha256':_record_sha(new)})
++            seen_retained.add(identity);continue
++        if ordinal not in dict(old['handle_index']):
++            continue
++        _need(current is not None,'original FD evidence is missing an indexed port')
++        port=current['record'];reference=port['handle_reference'];_check_reference(base,reference,ordinal,wire)
++        _need(current['ordinal']==dict(old['handle_index'])[ordinal] and port['source']==wire['source']
++              and port['run']==wire['start']['run']==encode(base.run.id) and port['target']==wire['target']
++              and type(port['fd']) is int and port['fd']>=0,'original FD evidence/preimage differs')
++        entry=actual[wire['source']['artifact']['uri']]
++        _need(port['raw_source']==_raw_source(entry,_line_number(wire['source']))
++              and port['extraction_contract'] in ('OPEN_RETURN','DUP_RETURN_EXISTING_TARGET')
++              and port['new_ir_resource_created'] is False and port['original_target_preserved'] is True,
++              'FD scalar raw provenance/contract differs')
++        values+=1;current=next(ports,None)
++        if progress is not None and values%2000==0:progress({'phase':'FD_VALUES_REQUALIFIED','ports':values})
++    _need(current is None and values==old['tables']['fd_ports']['records'] and seen_retained==set(retained)
++          and checked==base.manifest['tables']['handles']['records'],'FD values qualification scope incomplete')
++    # Verify every other payload chunk before making any new logical publication.
++    for table in ('birth_facts','frontiers'):
++        for _ in payload.iter_records(table):pass
++    out.mkdir(mode=0o700,parents=False,exist_ok=False)
++    links=[]
++    for table in _TABLES:
++        for chunk in old['tables'][table]['chunks']:
++            relative=Path(chunk['uri']);_need(not relative.is_absolute() and '..' not in relative.parts,'unsafe payload URI')
++            source=payload.root/relative
++            _need(source.is_file() and not source.is_symlink(),'payload hardlink source absent or symlinked')
++            destination=out/relative;destination.parent.mkdir(parents=True,exist_ok=True)
++            os.link(source,destination)
++            links.append({'original_provider':encode(payload.artifact),'original_uri':chunk['uri'],'new_uri':chunk['uri'],
++                'stored_sha256':chunk['physical_sha256'],'stored_bytes':chunk['physical_bytes'],'retention':'HARDLINK_SAME_VERIFIED_BYTES'})
++    document={'schema':SCHEMA,'schema_version':FD_VALUES_VERSION,'mode':FD_VALUES_MODE,'status':'PUBLISHED',
++        'base':encode(base.artifact),'selected_view':encode(receipts['selected_manifest']),'run':encode(base.run),
++        'inputs':{name:encode(value) for name,value in receipts.items()},'tables':old['tables'],'totals':old['totals'],
++        'handle_index':old['handle_index'],'retained_handles':new_retained,'actor_frontiers':old['actor_frontiers'],
++        'original_extraction':{'artifact':encode(payload.artifact),'counts':old['counts'],'raw_files':old['raw_files']},
++        'payload_retention':links,'counts':{'base_handles':checked,'retained_provider_handles':len(new_retained),
++            'projected_fd_ports':values,'unrefined_legacy_handles':old['counts']['unrefined_legacy_handles'],
++            'raw_bytes_read_during_requalification':0,'new_container_bindings':0},
++        'invalidated_context_assertions':{'artifact':encode(receipts['original_selected_manifest']),
++            'reason':'CAPTURE_FILTER_COVERAGE_NOT_ESTABLISHED','imported_context_resources':0},
++        'validation':{'fd_values':'RECEIPT_BOUND_PRIOR_RAW_EXTRACTION_AND_EXACT_BASE_PREIMAGES',
++            'ofd_target_and_end_semantics':'PRESERVED_BASELINE_DECLARATIONS_NOT_REPROVED',
++            'container_continuity':'UNQUALIFIED_NOT_IMPORTED','new_resources_or_work':0,'full_execution_model_semantics':'OPEN'},
++        'scope':'existing R1 FD scalar evidence only; FD table/OFD coidentity and unobserved producers remain OPEN',
++        'whole_model_established':False,'first_stage_complete':False,'transformation_authorized':False}
++    encoding=replace(_storage(limits),max_record_bytes=limits.max_manifest_bytes,
++        max_chunk_decoded_bytes=max(limits.max_chunk_decoded_bytes,limits.max_manifest_bytes))
++    raw=_line(document,encoding);temporary=out/('.manifest.'+secrets.token_hex(16)+'.tmp')
++    with temporary.open('xb') as stream:stream.write(raw);stream.flush();os.fsync(stream.fileno())
++    os.link(temporary,out/'manifest.json');temporary.unlink()
++    return {'document':document,'manifest_receipt':{'path':str(out/'manifest.json'),
++        'physical_sha256':hashlib.sha256(raw).hexdigest(),'physical_bytes':len(raw)}}
++
++
++class OSFDValuesProjection(OSFDSourceProjection):
++    """Explicit schema2 FD-only view over public R2; no table-context authority."""
++    @classmethod
++    def read(cls,base,r2_view,inputs,manifest,*,budgets=None):
++        limits=budgets or FDSourceBudgets()
++        docs,receipts,retained,actual=_fd_values_inputs(base,r2_view,inputs,limits)
++        self=_open_payload_only(manifest,limits,FD_VALUES_VERSION)
++        _need(self.manifest['mode']==FD_VALUES_MODE and self.manifest['base']==encode(base.artifact)
++              and self.manifest['selected_view']==encode(receipts['selected_manifest'])
++              and self.manifest['inputs']=={name:encode(value) for name,value in receipts.items()}
++              and self.manifest['run']==encode(base.run),'FD-values-only published scope differs')
++        _need(self.manifest['validation']['container_continuity']=='UNQUALIFIED_NOT_IMPORTED'
++              and self.manifest['invalidated_context_assertions']['imported_context_resources']==0,
++              'FD-values-only header imports container authority')
++        self.base,self.selected_view,self._retained,self._actual=base,r2_view,retained,actual
++        self.index=dict(self.manifest['handle_index']);self.retained={}
++        _need(len(self.index)==self.manifest['tables']['fd_ports']['records'],'FD-only index is ambiguous')
++        for row in self.manifest['retained_handles']:
++            selector=decode(ProviderRecordSelector,row['reference']['selector'])
++            identity=decode(HandleBindingID,row['reference']['id'])
++            _need(identity in retained and selector==base.selector('handles',selector.ordinal)
++                  and r2_view.handles[identity][0]==selector.ordinal
++                  and row['selected_record_sha256']==_record_sha(encode(retained[identity])),'FD-only retained selection differs')
++            self.retained[selector.ordinal]=row
++        _need(len(self.retained)==len(retained),'FD-only retained scope incomplete')
++        return self
++
++    def iter_handle_records(self):
++        ports=iter(self.iter_records('fd_ports'));current=next(ports,None);seen=0
++        for envelope in self.base.reader.iter_records('handles'):
++            ordinal,wire=envelope['ordinal'],envelope['record'];identity=decode(HandleBindingID,wire['id'])
++            if identity in self._retained:
++                _check_reference(self.base,self.retained[ordinal]['reference'],ordinal,wire)
++                result=encode(self._retained[identity]);selection='RETAINED_R2_FD_CONTAINER_UNRESOLVED'
++            elif ordinal in self.index:
++                _need(current is not None and current['ordinal']==self.index[ordinal],'FD-only ordered port merge differs')
++                result=self._refine(ordinal,wire,current['record'],current['ordinal']);seen+=1;current=next(ports,None)
++                selection='FD_VALUE_REFINED_CONTAINER_UNRESOLVED'
++            else:result=wire;selection='ORIGINAL_UNRESOLVED_FRONTIER'
++            _need({k:v for k,v in result.items() if k!='handle'}=={k:v for k,v in wire.items() if k!='handle'},'FD-only nonendpoint changed')
++            yield {'ordinal':ordinal,'record':result,'selection':selection,'base_locator':envelope['locator']}
++        _need(current is None and seen==len(self.index),'FD-only merged source scope incomplete')
++
++    def record(self,table,ordinal):
++        if table=='submissions':return self.selected_view.record(table,ordinal)
++        _need(table=='handles','only handles are refined')
++        wire=self.base.resolve(self.base.selector('handles',ordinal))['record'];identity=decode(HandleBindingID,wire['id'])
++        if identity in self._retained:
++            _check_reference(self.base,self.retained[ordinal]['reference'],ordinal,wire)
++            return {'record':encode(self._retained[identity]),'selection':'RETAINED_R2_FD_CONTAINER_UNRESOLVED'}
++        if ordinal not in self.index:return {'record':wire,'selection':'ORIGINAL_UNRESOLVED_FRONTIER'}
++        port_ordinal=self.index[ordinal];port=self.resolve(self.selector('fd_ports',port_ordinal))['record']
++        return {'record':self._refine(ordinal,wire,port,port_ordinal),'selection':'FD_VALUE_REFINED_CONTAINER_UNRESOLVED'}
++
++
++__all__ += ['FDValuesInputs','FD_VALUES_MODE','FD_VALUES_VERSION','requalify_os_fd_values','OSFDValuesProjection']
+diff --git a/scar/trace/os_fd_table_contexts.py b/scar/trace/os_fd_table_contexts.py
+index b5aeea0..89c5b14 100644
+--- a/scar/trace/os_fd_table_contexts.py
++++ b/scar/trace/os_fd_table_contexts.py
+@@ -26,10 +26,11 @@ from scar.ir.record_codec import decode, encode, loads as strict_loads
+ from scar.store.bundle_partitions import BundleBudgets, _line
+ from scar.trace import os_resources as parser
+ from scar.trace.os_resource_refinement import OSResourceBase, OSResourceRefinement
++from scar.trace.os_capture_coverage import require_fd_continuity_coverage
+ 
+ 
+ SCHEMA = "scar.os-fd-table-context-refinement"
+-VERSION = 1
++VERSION = 2
+ _RAW_SCHEMA = "strace.syscalls.text.v1"
+ _RELEVANT = frozenset(("execve", "execveat", "clone", "clone3", "fork", "vfork", "unshare", "close_range"))
+ 
+@@ -106,9 +107,13 @@ def _line_number(source):
+     return int(match[1])
+ 
+ 
+-def _prepare(base, r2_manifest, inputs, limits, progress):
++def _prepare(base, r2_manifest, inputs, limits, progress, capture_coverage=None):
+     _need(type(base) is OSResourceBase and type(inputs) is FDTableContextInputs
+           and type(limits) is FDTableContextBudgets, "explicit base/inputs/budgets required")
++    # Selection coverage is a prerequisite, never inferred from zero counters.
++    # In particular the historical four strace classes omit unshare/close_range.
++    require_fd_continuity_coverage(capture_coverage,run=encode(base.run.id),
++        coordinates=inputs.coordinates,archive=inputs.archive)
+     root = Path(inputs.capture_root).resolve()
+     _need(not Path(inputs.capture_root).is_symlink() and root.is_dir(), "capture root absent or symlinked")
+     names = ("archive", "coordinates", "r1_summary", "r1_audit", "projection_summary", "projection_files",
+@@ -116,6 +121,7 @@ def _prepare(base, r2_manifest, inputs, limits, progress):
+     docs, receipts = {}, {}
+     for name in names:
+         docs[name], receipts[name] = _document(getattr(inputs, name), limits.max_metadata_bytes)
++    receipts["capture_coverage"]=decode(ProviderArtifact,capture_coverage.profile_receipt)
+     base_wire, base_receipt = _document(base.reader.manifest_receipt["path"], limits.max_metadata_bytes, base.artifact.schema)
+     _need(base_wire == base.manifest and base_receipt == base.artifact, "explicit base receipt/document changed")
+     r2_wire, r2_receipt = _document(r2_manifest, limits.max_document_bytes, "scar.os-resource-refinement")
+@@ -406,6 +412,7 @@ class OSFDTableContexts:
+         _need(document == _expected(prepared), "published context refinement differs from independently qualified proof/selection")
+         self = object.__new__(cls)
+         self.base, self.r2 = prepared[:2]
++        self.capture_coverage_verified = True
+         self.document = document
+         self.context_resources = {decode(ResourceInstance, wire).id: decode(ResourceInstance, wire)
+                                   for wire in document["context_resources"]}
+@@ -425,10 +432,12 @@ class OSFDTableContexts:
+         return self
+ 
+     @classmethod
+-    def read(cls, base, r2_manifest, inputs, path, *, budgets=None, progress=None):
++    def read(cls, base, r2_manifest, inputs, path, *, budgets=None, progress=None, capture_coverage=None):
+         limits = budgets or FDTableContextBudgets()
+         document, _ = _document(path, limits.max_document_bytes, SCHEMA)
+-        return cls._qualified(_prepare(base, r2_manifest, inputs, limits, progress), document)
++        _need(document.get("schema_version")==VERSION,
++              "legacy context v1 continuity was not capture-coverage-qualified; original artifact retained, qualification rejected")
++        return cls._qualified(_prepare(base, r2_manifest, inputs, limits, progress,capture_coverage), document)
+ 
+     def record(self, table, ordinal):
+         """R2 public selection, with only an admitted handle.container replaced."""
+@@ -458,9 +467,9 @@ class OSFDTableContexts:
+                 "contexts_selected": len(self.context_resources), "complete_registry": False}
+ 
+ 
+-def build_os_fd_table_contexts(base, r2_manifest, inputs, fresh_out, *, budgets=None, progress=None):
++def build_os_fd_table_contexts(base, r2_manifest, inputs, fresh_out, *, budgets=None, progress=None, capture_coverage=None):
+     limits = budgets or FDTableContextBudgets()
+-    prepared = _prepare(base, r2_manifest, inputs, limits, progress)
++    prepared = _prepare(base, r2_manifest, inputs, limits, progress,capture_coverage)
+     document = _expected(prepared)
+     OSFDTableContexts._qualified(prepared, document)  # Selected typed/FK checks, never a fake full model.
+     encoding = BundleBudgets(max_record_bytes=limits.max_document_bytes,

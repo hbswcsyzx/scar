@@ -1,0 +1,26 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+_ test_conditional_prior_advance_must_false_is_not_proof_that_no_case_advanced_this_iterator _
+
+    def test_conditional_prior_advance_must_false_is_not_proof_that_no_case_advanced_this_iterator():
+        graph, details = prior_advance_case_program()
+        _core_valid(graph)
+        require_valid(graph)
+        context = _context(graph)
+        receiver = OwnedUse(details["send"]["operation"].id, details["send"]["receiver"])
+        source = details["sources"][0]
+        assert context.bind(source, receiver)["match"] is False
+        assert context.bind(source, receiver, guard=details["guards"][0])["match"] is True
+        assert context.bind(source, receiver, guard=details["guards"][1])["match"] is False
+        report = continuation_connections(_context(graph))
+        following = [row for row in report["obligations"]
+                     if row["site"].operation == details["following"]["operation"].id]
+        assert len(following) == 2
+>       assert all(row["status"] != "DECLARED" for row in following)
+E       assert False
+E        +  where False = all(<generator object test_conditional_prior_advance_must_false_is_not_proof_that_no_case_advanced_this_iterator.<locals>.<genexpr> at 0x7f797880cee0>)
+
+tests/unit/test_program_method_lookup_connections.py:210: AssertionError
+=========================== short test summary info ============================
+FAILED tests/unit/test_program_method_lookup_connections.py::test_conditional_prior_advance_must_false_is_not_proof_that_no_case_advanced_this_iterator
+1 failed in 0.82s

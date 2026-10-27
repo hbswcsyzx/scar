@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="4" time="3.318" timestamp="2026-10-19T12:06:50.130682+00:00" hostname="gpu1"><testcase classname="tests.unit.test_execution_await_source_visits" name="test_same_static_get_visits_select_the_actual_own_result_not_latest_or_common_b[latest]" time="1.055" /><testcase classname="tests.unit.test_execution_await_source_visits" name="test_same_static_get_visits_select_the_actual_own_result_not_latest_or_common_b[earlier]" time="0.086"><failure message="ValueError: protocol_continuation_source at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.call.0.scope'), clause=&lt;ProtocolClause.DELEGATE_ADVANCE: 'DELEGATE_ADVANCE'&gt;, operation=OperationID(value='await.resume.call.0'), slot=0): merge formal is not the independently required lookup evaluation">iterator_origin = 'earlier'
+
+    @pytest.mark.parametrize('iterator_origin', ('latest', 'earlier'), ids=('latest', 'earlier'))
+    def test_same_static_get_visits_select_the_actual_own_result_not_latest_or_common_b(iterator_origin):
+&gt;       program, model, details = _source_visit_execution(iterator_origin=iterator_origin)
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_execution_await_source_visits.py:404: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/unit/test_execution_await_source_visits.py:340: in _source_visit_execution
+    model = ExecutionModel(snapshot_for(program),
+                           ^^^^^^^^^^^^^^^^^^^^^
+scar/ir/execution/snapshot.py:11: in snapshot_for
+    wire = program_dumps(program).encode('utf-8')
+           ^^^^^^^^^^^^^^^^^^^^^^
+scar/ir/program/codec.py:242: in dumps
+    _require_record_and_graph_valid(graph)
+scar/ir/program/codec.py:134: in _require_record_and_graph_valid
+    require_valid(graph)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='await.resume.caller'), regions=(Region(id=RegionID(value='await.resume.caller'), lab...), drive=OperationID(value='await.resume.driver.0.driver.drive'), projection=None, guard=None),), exception_matches=())
+
+    def require_valid(graph: ProgramGraph) -&gt; None:
+        issues = validate(graph)
+        if issues:
+&gt;           raise ValueError("; ".join(f"{issue.code} at {issue.path}: {issue.message}" for issue in issues))
+E           ValueError: protocol_continuation_source at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.call.0.scope'), clause=&lt;ProtocolClause.DELEGATE_ADVANCE: 'DELEGATE_ADVANCE'&gt;, operation=OperationID(value='await.resume.call.0'), slot=0): merge formal is not the independently required lookup evaluation
+
+scar/ir/program/validation.py:759: ValueError</failure></testcase><testcase classname="tests.unit.test_execution_await_source_visits" name="test_missing_get1_input_or_selected_transfer_keeps_both_sources_without_borrowing_get0[operand-use]" time="0.735" /><testcase classname="tests.unit.test_execution_await_source_visits" name="test_missing_get1_input_or_selected_transfer_keeps_both_sources_without_borrowing_get0[selected-transfer]" time="0.636" /></testsuite></testsuites>

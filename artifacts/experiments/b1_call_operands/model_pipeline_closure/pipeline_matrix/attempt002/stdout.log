@@ -1,0 +1,8 @@
+...........                                                              [100%]
+=============================== warnings summary ===============================
+tests/integration/test_execution_io_pipeline.py::test_complete_pipeline_uses_one_program_and_exact_dynamic_calls
+  tests/integration/test_execution_io_pipeline.py:28: PytestWarning: record_property is incompatible with junit_family 'xunit2' (use 'legacy' or 'xunit1')
+    def test_complete_pipeline_uses_one_program_and_exact_dynamic_calls(record_property):
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+11 passed, 1 warning in 11.20s

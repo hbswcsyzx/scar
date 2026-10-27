@@ -1,0 +1,9 @@
+{
+  "command": [
+    "/home/zyf/miniconda3/envs/lewm/bin/python",
+    "-B",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/project_dependency_publication_gate_20261025/project/probe.py"
+  ],
+  "returncode": 0,
+  "wall_s": 23.49960819701664
+}

@@ -1,0 +1,13 @@
+{
+  "revision": "8f08bda1d192f7f9b778c06bb51d6509e17fc8ca",
+  "sources": {
+    "encoder": {
+      "path": "scar/ir/program/codec.py",
+      "sha256": "3753c0ac02667e5bc6e816f23e6c624393a04e4e86278aab01861a0f89d09d47"
+    },
+    "fixture": {
+      "path": "tests/fixtures/program_method_lookup_graphs.py",
+      "sha256": "22d1b4c41d6813a24200fa99b9c9ada76affb220c9f5e53fe4bbeb88c2c85412"
+    }
+  }
+}

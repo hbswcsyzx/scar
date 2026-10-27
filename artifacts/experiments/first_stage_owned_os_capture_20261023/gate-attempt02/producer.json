@@ -1,0 +1,62 @@
+{
+  "argv": [
+    "/home/zyf/miniconda3/envs/lewm/bin/python",
+    "-m",
+    "scar.cli",
+    "trace",
+    "--call-operands",
+    "--execution-evidence",
+    "--project-root",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_owned_os_capture_20261023/gate-attempt02",
+    "--out",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_owned_os_capture_20261023/gate-attempt02/capture/trace",
+    "--os-capture-root",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_owned_os_capture_20261023/gate-attempt02/capture",
+    "--max-call-events",
+    "20000",
+    "--max-call-bytes",
+    "16000000",
+    "--max-operand-events",
+    "40000",
+    "--max-operand-bytes",
+    "32000000",
+    "--max-os-bytes",
+    "64000000",
+    "--max-os-lines",
+    "200000",
+    "--max-capture-bytes",
+    "128000000",
+    "--max-archive-bytes",
+    "64000000",
+    "--os-timeout",
+    "120",
+    "--",
+    "/home/zyf/miniconda3/envs/lewm/bin/python",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_owned_os_capture_20261023/gate-attempt02/target.py"
+  ],
+  "cpu_only_environment": {
+    "CUDA_VISIBLE_DEVICES": "",
+    "MKL_NUM_THREADS": "1",
+    "OMP_NUM_THREADS": "1",
+    "OPENBLAS_NUM_THREADS": "1"
+  },
+  "revision": "214e714317e71eb5540c38f1d4014ddaf9eee1d9",
+  "schema": "scar.owned-os-capture-gate-producer",
+  "schema_version": 1,
+  "scope": "ONE own CPU target; offline checks only; no LeWM/historical raw",
+  "script": {
+    "bytes": 7217,
+    "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_owned_os_capture_20261023/gate-attempt02/run.py",
+    "sha256": "b998a46178a724b63976e17f1b08146208a457c7d7387a0ca239527f80c1d0da"
+  },
+  "source_freeze": {
+    "bytes": 3693,
+    "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_owned_os_capture_20261023/static-freeze-guard-revised.json",
+    "sha256": "73e60531ca4560d9c1b10bc0df2edee7d646a7204d90387608cae08d865bc2da"
+  },
+  "target": {
+    "bytes": 664,
+    "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_owned_os_capture_20261023/gate-attempt02/target.py",
+    "sha256": "ed506290487f0a8602a4625504f1c7288bc29f2ecae887291a9d05ecf3cdfcc8"
+  }
+}

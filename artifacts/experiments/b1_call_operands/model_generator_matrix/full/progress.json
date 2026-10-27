@@ -1,0 +1,13 @@
+{
+  "status": "FAIL",
+  "returncode": 1,
+  "finished_at": "2026-10-18T18:09:32.616483+00:00",
+  "duration_seconds": 545.0494930418208,
+  "counts": {
+    "passed": 5672,
+    "failed": 1,
+    "error": 0,
+    "skipped": 0,
+    "total": 5673
+  }
+}

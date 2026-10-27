@@ -1,0 +1,16 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+___ test_internal_source_export_combines_two_simultaneous_call_result_copies ___
+
+    def test_internal_source_export_combines_two_simultaneous_call_result_copies():
+        graph, source, actual = _double_result_program()
+        require_valid(graph)
+        report = ProgramIndex(graph).source_binding(source, actual)
+>       assert report["match"] is True, report
+E       AssertionError: {'match': False, 'routes': ({'source': OperationResult(operation=OperationID(value='return.helper.generate'), index=0)...='return.helper'), 'kind': <ExitKind.NORMAL: 'NORMAL'>, ...},), 'match': False, ...}), 'gaps': (), 'cursor': None, ...}
+E       assert False is True
+
+tests/unit/test_program_call_return_export.py:87: AssertionError
+=========================== short test summary info ============================
+FAILED tests/unit/test_program_call_return_export.py::test_internal_source_export_combines_two_simultaneous_call_result_copies
+1 failed in 0.75s

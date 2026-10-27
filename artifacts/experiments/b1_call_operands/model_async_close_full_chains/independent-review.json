@@ -1,0 +1,48 @@
+{
+  "status": "ACCEPT_CONDITIONAL_F19",
+  "source_sha256": "d5d8919d624b2845f3d30d3023ae646d25a213d2c463286b1773e2f136f66edf",
+  "approval_conditions": [
+    "verified-new has exactly 30 passing nodes on this unchanged source digest",
+    "verified-regression passes the finite affected selection on the same digest",
+    "immutable checkpoint, prior evidence, old test bytes and protected worktrees verify"
+  ],
+  "reviewers": [
+    {
+      "agent": "/root/cleanup_forward_review",
+      "scope": "Final product diff and all three original supplied-model units; dynamic proof budget, same R/current S and missing-instance boundaries",
+      "finding": "New INVOKE endpoint slot scan initially escaped shared accounting; root charged actual edge arity and reviewer confirmed closure",
+      "reviewed_execution_sha256": "35aac3108fc6f7707bf6273f85e8f90b58932456d6b3170afb1a211761cd9695",
+      "reviewed_execution_unit_sha256": "819240f9bcc1a45a2e79b100a58302e50dc3ece5bc04cc37187777765faeb302",
+      "conditional_conclusion": "No further structural blocker found; accept F19 only after final new and affected prior tests pass"
+    },
+    {
+      "agent": "/root/value_resource_review",
+      "scope": "Three classification changes and dynamic receipt correspondence/accounting",
+      "findings": [
+        "ASYNC_YIELD COMPLETE is independent of removable error adapters; no new F inference",
+        "Root moved static receipt derivation out of preparation onto query shared budget",
+        "Missing outcome dereference and repeated BlockArgument path scans corrected",
+        "Repeated static-site visits remain unproved instead of being flattened"
+      ]
+    },
+    {
+      "agent": "/root/await_wrapper_chain",
+      "scope": "Plan/body review and static handler design; author of static receipt module",
+      "findings": [
+        "Fresh handler reply has control dependence, not old-packet copy identity",
+        "No independent expected constructor component implies Unknown, not a named-operation contradiction",
+        "Known False survives missing constructor and budget truncation; native interpretation never proves a rewrite"
+      ]
+    }
+  ],
+  "scope": "Conditionally supplied program/control/capture structure only",
+  "excluded": [
+    "complete native driver implementation",
+    "automatic source or whole-LeWM recovery",
+    "runtime identity verification",
+    "transformation authorization",
+    "LeWM speedup or whole M0-M2 completion"
+  ],
+  "subagents_executed_interpreters_or_git": false,
+  "root_performed_all_execution": true
+}

@@ -1,0 +1,254 @@
+................................FFFFFFF................................. [ 67%]
+...................................                                      [100%]
+=================================== FAILURES ===================================
+_ test_invoke_post_uses_its_exact_selected_completion_and_reordered_state_slots[own-normal] _
+
+raised = False
+
+    @pytest.mark.parametrize('raised', (False, True), ids=('own-normal', 'own-raise'))
+    def test_invoke_post_uses_its_exact_selected_completion_and_reordered_state_slots(raised):
+>       graph, model, details = stored_values_invoke_execution(raised=raised)
+                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_execution_stored_values.py:209: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/fixtures/execution_stored_values.py:343: in stored_values_invoke_execution
+    model, scopes, source = _model(graph, ((graph.root, path, 'stored.invoke.actual'),))
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/fixtures/execution_call_graphs.py:91: in _model
+    model = ExecutionModel(snapshot_for(program), runs=(ExecutionRun(run, source),),
+                           ^^^^^^^^^^^^^^^^^^^^^
+scar/ir/execution/snapshot.py:11: in snapshot_for
+    wire = program_dumps(program).encode('utf-8')
+           ^^^^^^^^^^^^^^^^^^^^^^
+scar/ir/program/codec.py:265: in dumps
+    _require_record_and_graph_valid(graph)
+scar/ir/program/codec.py:150: in _require_record_and_graph_valid
+    require_valid(graph)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='stored.invoke'), regions=(Region(id=RegionID(value='stored.invoke'), label='explicit..., index=0), effect_index=0, result=OperationResult(operation=OperationID(value='stored.invoke.raise.read'), index=0))))
+
+    def require_valid(graph: ProgramGraph) -> None:
+        issues = validate(graph)
+        if issues:
+>           raise ValueError("; ".join(f"{issue.code} at {issue.path}: {issue.message}" for issue in issues))
+E           ValueError: protocol_scope at program_value:stored.invoke.raise.arg.0: protocol values need declared lexical ownership
+
+scar/ir/program/validation.py:768: ValueError
+_ test_invoke_post_uses_its_exact_selected_completion_and_reordered_state_slots[own-raise] _
+
+raised = True
+
+    @pytest.mark.parametrize('raised', (False, True), ids=('own-normal', 'own-raise'))
+    def test_invoke_post_uses_its_exact_selected_completion_and_reordered_state_slots(raised):
+>       graph, model, details = stored_values_invoke_execution(raised=raised)
+                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_execution_stored_values.py:209: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/fixtures/execution_stored_values.py:343: in stored_values_invoke_execution
+    model, scopes, source = _model(graph, ((graph.root, path, 'stored.invoke.actual'),))
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/fixtures/execution_call_graphs.py:91: in _model
+    model = ExecutionModel(snapshot_for(program), runs=(ExecutionRun(run, source),),
+                           ^^^^^^^^^^^^^^^^^^^^^
+scar/ir/execution/snapshot.py:11: in snapshot_for
+    wire = program_dumps(program).encode('utf-8')
+           ^^^^^^^^^^^^^^^^^^^^^^
+scar/ir/program/codec.py:265: in dumps
+    _require_record_and_graph_valid(graph)
+scar/ir/program/codec.py:150: in _require_record_and_graph_valid
+    require_valid(graph)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='stored.invoke'), regions=(Region(id=RegionID(value='stored.invoke'), label='explicit..., index=0), effect_index=0, result=OperationResult(operation=OperationID(value='stored.invoke.raise.read'), index=0))))
+
+    def require_valid(graph: ProgramGraph) -> None:
+        issues = validate(graph)
+        if issues:
+>           raise ValueError("; ".join(f"{issue.code} at {issue.path}: {issue.message}" for issue in issues))
+E           ValueError: protocol_scope at program_value:stored.invoke.raise.arg.0: protocol values need declared lexical ownership
+
+scar/ir/program/validation.py:768: ValueError
+_ test_an_undeclared_raise_post_cannot_borrow_the_declared_normal_establishment _
+
+    def test_an_undeclared_raise_post_cannot_borrow_the_declared_normal_establishment():
+>       graph, model, details = stored_values_invoke_execution(raised=True, declare_raise=False)
+                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_execution_stored_values.py:229: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/fixtures/execution_stored_values.py:343: in stored_values_invoke_execution
+    model, scopes, source = _model(graph, ((graph.root, path, 'stored.invoke.actual'),))
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/fixtures/execution_call_graphs.py:91: in _model
+    model = ExecutionModel(snapshot_for(program), runs=(ExecutionRun(run, source),),
+                           ^^^^^^^^^^^^^^^^^^^^^
+scar/ir/execution/snapshot.py:11: in snapshot_for
+    wire = program_dumps(program).encode('utf-8')
+           ^^^^^^^^^^^^^^^^^^^^^^
+scar/ir/program/codec.py:265: in dumps
+    _require_record_and_graph_valid(graph)
+scar/ir/program/codec.py:150: in _require_record_and_graph_valid
+    require_valid(graph)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='stored.invoke'), regions=(Region(id=RegionID(value='stored.invoke'), label='explicit..., index=0), effect_index=0, result=OperationResult(operation=OperationID(value='stored.invoke.raise.read'), index=0))))
+
+    def require_valid(graph: ProgramGraph) -> None:
+        issues = validate(graph)
+        if issues:
+>           raise ValueError("; ".join(f"{issue.code} at {issue.path}: {issue.message}" for issue in issues))
+E           ValueError: protocol_scope at program_value:stored.invoke.raise.arg.0: protocol values need declared lexical ownership
+
+scar/ir/program/validation.py:768: ValueError
+_ test_two_actual_activations_of_one_callee_keep_the_real_source_and_own_read_completion[load-normal] _
+
+raised = False
+
+    @pytest.mark.parametrize('raised', (False, True), ids=('load-normal', 'load-raise'))
+    def test_two_actual_activations_of_one_callee_keep_the_real_source_and_own_read_completion(raised):
+>       graph, model, details = stored_values_calls_execution(raised=raised, instances=2)
+                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_execution_stored_values.py:241: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/fixtures/execution_stored_values.py:449: in stored_values_calls_execution
+    model, scopes, source = _model(graph, paths)
+                            ^^^^^^^^^^^^^^^^^^^^
+tests/fixtures/execution_call_graphs.py:91: in _model
+    model = ExecutionModel(snapshot_for(program), runs=(ExecutionRun(run, source),),
+                           ^^^^^^^^^^^^^^^^^^^^^
+scar/ir/execution/snapshot.py:11: in snapshot_for
+    wire = program_dumps(program).encode('utf-8')
+           ^^^^^^^^^^^^^^^^^^^^^^
+scar/ir/program/codec.py:265: in dumps
+    _require_record_and_graph_valid(graph)
+scar/ir/program/codec.py:150: in _require_record_and_graph_valid
+    require_valid(graph)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='stored.caller'), regions=(Region(id=RegionID(value='stored.caller'), label='explicit...eReference(operation=OperationID(value='stored.shared.load'), successor_index=1), result=CompletionResult(index=0))),))
+
+    def require_valid(graph: ProgramGraph) -> None:
+        issues = validate(graph)
+        if issues:
+>           raise ValueError("; ".join(f"{issue.code} at {issue.path}: {issue.message}" for issue in issues))
+E           ValueError: protocol_scope at program_value:stored.caller.first.raise.arg.1: protocol values need declared lexical ownership; protocol_scope at program_value:stored.caller.raise.arg.1: protocol values need declared lexical ownership; protocol_scope at program_value:stored.shared.raise.arg.1: protocol values need declared lexical ownership
+
+scar/ir/program/validation.py:768: ValueError
+_ test_two_actual_activations_of_one_callee_keep_the_real_source_and_own_read_completion[load-raise] _
+
+raised = True
+
+    @pytest.mark.parametrize('raised', (False, True), ids=('load-normal', 'load-raise'))
+    def test_two_actual_activations_of_one_callee_keep_the_real_source_and_own_read_completion(raised):
+>       graph, model, details = stored_values_calls_execution(raised=raised, instances=2)
+                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_execution_stored_values.py:241: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/fixtures/execution_stored_values.py:449: in stored_values_calls_execution
+    model, scopes, source = _model(graph, paths)
+                            ^^^^^^^^^^^^^^^^^^^^
+tests/fixtures/execution_call_graphs.py:91: in _model
+    model = ExecutionModel(snapshot_for(program), runs=(ExecutionRun(run, source),),
+                           ^^^^^^^^^^^^^^^^^^^^^
+scar/ir/execution/snapshot.py:11: in snapshot_for
+    wire = program_dumps(program).encode('utf-8')
+           ^^^^^^^^^^^^^^^^^^^^^^
+scar/ir/program/codec.py:265: in dumps
+    _require_record_and_graph_valid(graph)
+scar/ir/program/codec.py:150: in _require_record_and_graph_valid
+    require_valid(graph)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='stored.caller'), regions=(Region(id=RegionID(value='stored.caller'), label='explicit...eReference(operation=OperationID(value='stored.shared.load'), successor_index=1), result=CompletionResult(index=0))),))
+
+    def require_valid(graph: ProgramGraph) -> None:
+        issues = validate(graph)
+        if issues:
+>           raise ValueError("; ".join(f"{issue.code} at {issue.path}: {issue.message}" for issue in issues))
+E           ValueError: protocol_scope at program_value:stored.caller.first.raise.arg.1: protocol values need declared lexical ownership; protocol_scope at program_value:stored.caller.raise.arg.1: protocol values need declared lexical ownership; protocol_scope at program_value:stored.shared.raise.arg.1: protocol values need declared lexical ownership
+
+scar/ir/program/validation.py:768: ValueError
+_ test_cross_call_missing_evidence_is_local_and_never_borrows_the_other_child_activation[association] _
+
+missing = 'association'
+
+    @pytest.mark.parametrize('missing', ('association', 'state'))
+    def test_cross_call_missing_evidence_is_local_and_never_borrows_the_other_child_activation(missing):
+>       graph, model, details = stored_values_calls_execution(instances=2, missing=missing)
+                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_execution_stored_values.py:262: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/fixtures/execution_stored_values.py:449: in stored_values_calls_execution
+    model, scopes, source = _model(graph, paths)
+                            ^^^^^^^^^^^^^^^^^^^^
+tests/fixtures/execution_call_graphs.py:91: in _model
+    model = ExecutionModel(snapshot_for(program), runs=(ExecutionRun(run, source),),
+                           ^^^^^^^^^^^^^^^^^^^^^
+scar/ir/execution/snapshot.py:11: in snapshot_for
+    wire = program_dumps(program).encode('utf-8')
+           ^^^^^^^^^^^^^^^^^^^^^^
+scar/ir/program/codec.py:265: in dumps
+    _require_record_and_graph_valid(graph)
+scar/ir/program/codec.py:150: in _require_record_and_graph_valid
+    require_valid(graph)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='stored.caller'), regions=(Region(id=RegionID(value='stored.caller'), label='explicit...eReference(operation=OperationID(value='stored.shared.load'), successor_index=1), result=CompletionResult(index=0))),))
+
+    def require_valid(graph: ProgramGraph) -> None:
+        issues = validate(graph)
+        if issues:
+>           raise ValueError("; ".join(f"{issue.code} at {issue.path}: {issue.message}" for issue in issues))
+E           ValueError: protocol_scope at program_value:stored.caller.first.raise.arg.1: protocol values need declared lexical ownership; protocol_scope at program_value:stored.caller.raise.arg.1: protocol values need declared lexical ownership; protocol_scope at program_value:stored.shared.raise.arg.1: protocol values need declared lexical ownership
+
+scar/ir/program/validation.py:768: ValueError
+_ test_cross_call_missing_evidence_is_local_and_never_borrows_the_other_child_activation[state] _
+
+missing = 'state'
+
+    @pytest.mark.parametrize('missing', ('association', 'state'))
+    def test_cross_call_missing_evidence_is_local_and_never_borrows_the_other_child_activation(missing):
+>       graph, model, details = stored_values_calls_execution(instances=2, missing=missing)
+                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_execution_stored_values.py:262: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/fixtures/execution_stored_values.py:449: in stored_values_calls_execution
+    model, scopes, source = _model(graph, paths)
+                            ^^^^^^^^^^^^^^^^^^^^
+tests/fixtures/execution_call_graphs.py:91: in _model
+    model = ExecutionModel(snapshot_for(program), runs=(ExecutionRun(run, source),),
+                           ^^^^^^^^^^^^^^^^^^^^^
+scar/ir/execution/snapshot.py:11: in snapshot_for
+    wire = program_dumps(program).encode('utf-8')
+           ^^^^^^^^^^^^^^^^^^^^^^
+scar/ir/program/codec.py:265: in dumps
+    _require_record_and_graph_valid(graph)
+scar/ir/program/codec.py:150: in _require_record_and_graph_valid
+    require_valid(graph)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='stored.caller'), regions=(Region(id=RegionID(value='stored.caller'), label='explicit...eReference(operation=OperationID(value='stored.shared.load'), successor_index=1), result=CompletionResult(index=0))),))
+
+    def require_valid(graph: ProgramGraph) -> None:
+        issues = validate(graph)
+        if issues:
+>           raise ValueError("; ".join(f"{issue.code} at {issue.path}: {issue.message}" for issue in issues))
+E           ValueError: protocol_scope at program_value:stored.caller.first.raise.arg.1: protocol values need declared lexical ownership; protocol_scope at program_value:stored.caller.raise.arg.1: protocol values need declared lexical ownership; protocol_scope at program_value:stored.shared.raise.arg.1: protocol values need declared lexical ownership
+
+scar/ir/program/validation.py:768: ValueError
+=========================== short test summary info ============================
+FAILED tests/unit/test_execution_stored_values.py::test_invoke_post_uses_its_exact_selected_completion_and_reordered_state_slots[own-normal]
+FAILED tests/unit/test_execution_stored_values.py::test_invoke_post_uses_its_exact_selected_completion_and_reordered_state_slots[own-raise]
+FAILED tests/unit/test_execution_stored_values.py::test_an_undeclared_raise_post_cannot_borrow_the_declared_normal_establishment
+FAILED tests/unit/test_execution_stored_values.py::test_two_actual_activations_of_one_callee_keep_the_real_source_and_own_read_completion[load-normal]
+FAILED tests/unit/test_execution_stored_values.py::test_two_actual_activations_of_one_callee_keep_the_real_source_and_own_read_completion[load-raise]
+FAILED tests/unit/test_execution_stored_values.py::test_cross_call_missing_evidence_is_local_and_never_borrows_the_other_child_activation[association]
+FAILED tests/unit/test_execution_stored_values.py::test_cross_call_missing_evidence_is_local_and_never_borrows_the_other_child_activation[state]
+7 failed, 100 passed in 21.93s

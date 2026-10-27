@@ -1,0 +1,594 @@
+FFFFFFFFFF...............F...FFFFFFFFF                                   [100%]
+=================================== FAILURES ===================================
+_ test_known_non_none_async_return_is_rejected_without_its_session_source_attachment _
+
+    def test_known_non_none_async_return_is_rejected_without_its_session_source_attachment():
+        graph, _ = async_driver_program(target='value')
+        original = next(value for value in graph.values if value.id.value == 'async.body.none')
+        changed = replace(original, origin=LiteralOrigin(7))
+        graph = replace(graph, values=tuple(changed if value is original else value for value in graph.values),
+            protocol_bindings=tuple(row for row in graph.protocol_bindings if type(row) is not AsyncSessionOutcome))
+>       assert 'async_return_value' in {issue.code for issue in validate(graph)}
+                                                                ^^^^^^^^^^^^^^^
+
+tests/unit/test_program_async_terminal_inventory.py:20: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+scar/ir/program/validation.py:747: in validate
+    for code, path, message in connection_reports(ctx)["issues"]:
+                               ^^^^^^^^^^^^^^^^^^^^^^^
+scar/ir/program/protocol_connection_validation.py:330: in connection_reports
+    "async": async_connections(ctx),
+             ^^^^^^^^^^^^^^^^^^^^^^
+scar/ir/program/protocol_async.py:978: in async_connections
+    cached = _Analysis(ctx).run()
+             ^^^^^^^^^^^^^^^^^^^^
+scar/ir/program/protocol_async.py:938: in run
+    self.session_outcomes(scopes)
+scar/ir/program/protocol_async.py:581: in session_outcomes
+    self.return_inventory = tuple(source for source in source_inventory(self.ctx)
+                            ^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+.0 = <tuple_iterator object at 0x73f1437019f0>
+
+    self.return_inventory = tuple(source for source in source_inventory(self.ctx)
+>       if source['scope'].profile is ProtocolProfile.ASYNC_GENERATOR_BODY_V1
+           ^^^^^^^^^^^^^^^^^^^^^^^
+        and source['body_source'].terminator.kind is TerminatorKind.RETURN)
+E   AttributeError: 'ProtocolScopeID' object has no attribute 'profile'
+
+scar/ir/program/protocol_async.py:582: AttributeError
+___ test_return_source_denominator_survives_deleted_consumers_and_budget_one ___
+
+    def test_return_source_denominator_survives_deleted_consumers_and_budget_one():
+        graph, _ = async_driver_program(target='value')
+        graph = replace(graph, protocol_bindings=tuple(row for row in graph.protocol_bindings
+                                                      if type(row) is not AsyncSessionOutcome))
+>       require_valid(graph)
+
+tests/unit/test_program_async_terminal_inventory.py:27: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+scar/ir/program/validation.py:761: in require_valid
+    issues = validate(graph)
+             ^^^^^^^^^^^^^^^
+scar/ir/program/validation.py:747: in validate
+    for code, path, message in connection_reports(ctx)["issues"]:
+                               ^^^^^^^^^^^^^^^^^^^^^^^
+scar/ir/program/protocol_connection_validation.py:330: in connection_reports
+    "async": async_connections(ctx),
+             ^^^^^^^^^^^^^^^^^^^^^^
+scar/ir/program/protocol_async.py:978: in async_connections
+    cached = _Analysis(ctx).run()
+             ^^^^^^^^^^^^^^^^^^^^
+scar/ir/program/protocol_async.py:938: in run
+    self.session_outcomes(scopes)
+scar/ir/program/protocol_async.py:581: in session_outcomes
+    self.return_inventory = tuple(source for source in source_inventory(self.ctx)
+                            ^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+.0 = <tuple_iterator object at 0x73f142f23220>
+
+    self.return_inventory = tuple(source for source in source_inventory(self.ctx)
+>       if source['scope'].profile is ProtocolProfile.ASYNC_GENERATOR_BODY_V1
+           ^^^^^^^^^^^^^^^^^^^^^^^
+        and source['body_source'].terminator.kind is TerminatorKind.RETURN)
+E   AttributeError: 'ProtocolScopeID' object has no attribute 'profile'
+
+scar/ir/program/protocol_async.py:582: AttributeError
+_ test_frame_local_conversion_uses_its_own_results_before_body_raise_and_host[stop-iteration] _
+
+route = 'stop-iteration'
+
+    @pytest.mark.parametrize('route', ('stop-iteration', 'stop-async-iteration',
+                                      'ordinary', 'constructor-raise'))
+    def test_frame_local_conversion_uses_its_own_results_before_body_raise_and_host(route):
+        graph, details = async_terminal_program(route=route)
+>       require_valid(_core(graph))
+
+tests/unit/test_program_async_terminal.py:45: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='terminal.caller'), regions=(Region(id=RegionID(value='terminal.caller'), label='decl...ol_call_inputs=(), protocol_result_consumers=(), protocol_bindings=(), exception_matches=(), call_effect_expansions=())
+
+    def require_valid(graph: ProgramGraph) -> None:
+        issues = validate(graph)
+        if issues:
+>           raise ValueError("; ".join(f"{issue.code} at {issue.path}: {issue.message}" for issue in issues))
+E           ValueError: unbound_exit at program_region:terminal.caller: declared exits must be bound to actual control exits
+
+scar/ir/program/validation.py:763: ValueError
+_ test_frame_local_conversion_uses_its_own_results_before_body_raise_and_host[stop-async-iteration] _
+
+route = 'stop-async-iteration'
+
+    @pytest.mark.parametrize('route', ('stop-iteration', 'stop-async-iteration',
+                                      'ordinary', 'constructor-raise'))
+    def test_frame_local_conversion_uses_its_own_results_before_body_raise_and_host(route):
+        graph, details = async_terminal_program(route=route)
+>       require_valid(_core(graph))
+
+tests/unit/test_program_async_terminal.py:45: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='terminal.caller'), regions=(Region(id=RegionID(value='terminal.caller'), label='decl...ol_call_inputs=(), protocol_result_consumers=(), protocol_bindings=(), exception_matches=(), call_effect_expansions=())
+
+    def require_valid(graph: ProgramGraph) -> None:
+        issues = validate(graph)
+        if issues:
+>           raise ValueError("; ".join(f"{issue.code} at {issue.path}: {issue.message}" for issue in issues))
+E           ValueError: unbound_exit at program_region:terminal.caller: declared exits must be bound to actual control exits
+
+scar/ir/program/validation.py:763: ValueError
+_ test_frame_local_conversion_uses_its_own_results_before_body_raise_and_host[ordinary] _
+
+route = 'ordinary'
+
+    @pytest.mark.parametrize('route', ('stop-iteration', 'stop-async-iteration',
+                                      'ordinary', 'constructor-raise'))
+    def test_frame_local_conversion_uses_its_own_results_before_body_raise_and_host(route):
+        graph, details = async_terminal_program(route=route)
+>       require_valid(_core(graph))
+
+tests/unit/test_program_async_terminal.py:45: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='terminal.caller'), regions=(Region(id=RegionID(value='terminal.caller'), label='decl...ol_call_inputs=(), protocol_result_consumers=(), protocol_bindings=(), exception_matches=(), call_effect_expansions=())
+
+    def require_valid(graph: ProgramGraph) -> None:
+        issues = validate(graph)
+        if issues:
+>           raise ValueError("; ".join(f"{issue.code} at {issue.path}: {issue.message}" for issue in issues))
+E           ValueError: unbound_exit at program_region:terminal.caller: declared exits must be bound to actual control exits
+
+scar/ir/program/validation.py:763: ValueError
+_ test_frame_local_conversion_uses_its_own_results_before_body_raise_and_host[constructor-raise] _
+
+route = 'constructor-raise'
+
+    @pytest.mark.parametrize('route', ('stop-iteration', 'stop-async-iteration',
+                                      'ordinary', 'constructor-raise'))
+    def test_frame_local_conversion_uses_its_own_results_before_body_raise_and_host(route):
+        graph, details = async_terminal_program(route=route)
+>       require_valid(_core(graph))
+
+tests/unit/test_program_async_terminal.py:45: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='terminal.caller'), regions=(Region(id=RegionID(value='terminal.caller'), label='decl...ol_call_inputs=(), protocol_result_consumers=(), protocol_bindings=(), exception_matches=(), call_effect_expansions=())
+
+    def require_valid(graph: ProgramGraph) -> None:
+        issues = validate(graph)
+        if issues:
+>           raise ValueError("; ".join(f"{issue.code} at {issue.path}: {issue.message}" for issue in issues))
+E           ValueError: unbound_exit at program_region:terminal.caller: declared exits must be bound to actual control exits
+
+scar/ir/program/validation.py:763: ValueError
+___________ test_matcher_rejects_another_available_same_typed_packet ___________
+
+    def test_matcher_rejects_another_available_same_typed_packet():
+        graph, details = async_terminal_program()
+        matcher = details['intrinsic']['matchers'][0]
+        operation = next(row for row in graph.operations if row.id == matcher.operation)
+        wrong = replace(operation, uses=tuple(replace(use, value=details['intrinsic']['old_packet'])
+            if use.id == matcher.input_use else use for use in operation.uses))
+        bad = replace(graph, operations=tuple(wrong if row.id == wrong.id else row for row in graph.operations))
+>       require_valid(_core(bad))
+
+tests/unit/test_program_async_terminal.py:157: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='terminal.caller'), regions=(Region(id=RegionID(value='terminal.caller'), label='decl...ol_call_inputs=(), protocol_result_consumers=(), protocol_bindings=(), exception_matches=(), call_effect_expansions=())
+
+    def require_valid(graph: ProgramGraph) -> None:
+        issues = validate(graph)
+        if issues:
+>           raise ValueError("; ".join(f"{issue.code} at {issue.path}: {issue.message}" for issue in issues))
+E           ValueError: unbound_exit at program_region:terminal.caller: declared exits must be bound to actual control exits
+
+scar/ir/program/validation.py:763: ValueError
+___ test_chaining_needs_the_original_exception_not_the_new_same_typed_owner ____
+
+    def test_chaining_needs_the_original_exception_not_the_new_same_typed_owner():
+        graph, details = async_terminal_program()
+        intrinsic = details['intrinsic']
+>       index = ProgramIndex(graph)
+                ^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_program_async_terminal.py:164: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <scar.ir.program.queries.ProgramIndex object at 0x73f14249aba0>
+graph = ProgramGraph(root=RegionID(value='terminal.caller'), regions=(Region(id=RegionID(value='terminal.caller'), label='decl...ex=0), ExistingAccess(operation=OperationID(value='terminal.match.stop_async'), index=1)))), call_effect_expansions=())
+
+    def __init__(self, graph: ProgramGraph):
+        # Reuse the validator's canonical CFG/dominators and derived cleanup
+        # result rather than running a second dataflow algorithm for queries.
+        from .validation import validate
+        cleanup, resumption, lifecycle, prepared = [], [], [], []
+        issues = validate(graph, _cleanup_facts=cleanup, _resumption_facts=resumption,
+                          _lifecycle_facts=lifecycle, _prepared_index=prepared)
+        if issues:
+>           raise ValueError("; ".join(f"{i.code} at {i.path}: {i.message}" for i in issues))
+E           ValueError: unbound_exit at program_region:terminal.caller: declared exits must be bound to actual control exits
+
+scar/ir/program/queries.py:279: ValueError
+_ test_raw_packet_is_not_a_body_terminal_publication_before_intrinsic_completion _
+
+    def test_raw_packet_is_not_a_body_terminal_publication_before_intrinsic_completion():
+        graph, details = async_terminal_program()
+        chosen = details['drivers'][-1]['publication']
+        original_pack = next(row for row in graph.values
+                            if row.id == details['intrinsic']['body_packet_definitions'][0].value).origin.operation
+        bad = replace(graph, body_outcome_commits=tuple(replace(row,
+            outcome=DriveOutcomeRef(row.outcome.drive, original_pack)) if row is chosen else row
+            for row in graph.body_outcome_commits))
+>       assert 'publication_outcome' in {issue.code for issue in validate(bad)}
+E       AssertionError: assert 'publication_outcome' in {'unbound_exit'}
+
+tests/unit/test_program_async_terminal.py:183: AssertionError
+_ test_deleting_optional_session_receipts_or_budget_does_not_delete_body_raise_sources _
+
+    def test_deleting_optional_session_receipts_or_budget_does_not_delete_body_raise_sources():
+        graph, details = async_terminal_program()
+>       require_valid(graph)
+
+tests/unit/test_program_async_terminal.py:188: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='terminal.caller'), regions=(Region(id=RegionID(value='terminal.caller'), label='decl...ex=0), ExistingAccess(operation=OperationID(value='terminal.match.stop_async'), index=1)))), call_effect_expansions=())
+
+    def require_valid(graph: ProgramGraph) -> None:
+        issues = validate(graph)
+        if issues:
+>           raise ValueError("; ".join(f"{issue.code} at {issue.path}: {issue.message}" for issue in issues))
+E           ValueError: unbound_exit at program_region:terminal.caller: declared exits must be bound to actual control exits
+
+scar/ir/program/validation.py:763: ValueError
+_ test_unicode_syntaxerror_character_offsets_match_the_original_ast_byte_span __
+
+    def test_unicode_syntaxerror_character_offsets_match_the_original_ast_byte_span():
+        text = "async def body():\n    café = 1; return None\n    yield 1\n"
+        view = source_compilation(_snapshot(text), text=text)
+        assert view["compiled"] is False
+        row, = view["returns"]
+        diagnostic, = view["diagnostics"]
+        assert row["source"].start_column == len("    café = 1; ".encode("utf-8"))
+>       assert diagnostic["offset"] - 1 == len("    café = 1; ")
+E       AssertionError: assert (16 - 1) == 14
+E        +  where 14 = len('    café = 1; ')
+
+tests/unit/test_source_compilation.py:203: AssertionError
+_ test_body_local_async_terminal_conversion_owns_its_current_packet_and_host[stop-iteration] _
+
+route = 'stop-iteration'
+
+    @pytest.mark.parametrize('route', ('stop-iteration', 'stop-async-iteration', 'ordinary', 'constructor-raise'))
+    def test_body_local_async_terminal_conversion_owns_its_current_packet_and_host(route):
+>       program, model, details = async_terminal_execution(route=route, instances=2)
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_execution_async_terminal.py:297: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/fixtures/execution_async_terminal_graphs.py:22: in async_terminal_execution
+    model, details = capture_program(program, static, instances=instances,
+tests/fixtures/native_coroutine_common.py:198: in capture_program
+    model = ExecutionModel(snapshot_for(program), runs=(ExecutionRun(run, source),),
+                           ^^^^^^^^^^^^^^^^^^^^^
+scar/ir/execution/snapshot.py:11: in snapshot_for
+    wire = program_dumps(program).encode('utf-8')
+           ^^^^^^^^^^^^^^^^^^^^^^
+scar/ir/program/codec.py:261: in dumps
+    _require_record_and_graph_valid(graph)
+scar/ir/program/codec.py:146: in _require_record_and_graph_valid
+    require_valid(graph)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='terminal.caller'), regions=(Region(id=RegionID(value='terminal.caller'), label='decl...ex=0), ExistingAccess(operation=OperationID(value='terminal.match.stop_async'), index=1)))), call_effect_expansions=())
+
+    def require_valid(graph: ProgramGraph) -> None:
+        issues = validate(graph)
+        if issues:
+>           raise ValueError("; ".join(f"{issue.code} at {issue.path}: {issue.message}" for issue in issues))
+E           ValueError: unbound_exit at program_region:terminal.caller: declared exits must be bound to actual control exits
+
+scar/ir/program/validation.py:763: ValueError
+_ test_body_local_async_terminal_conversion_owns_its_current_packet_and_host[stop-async-iteration] _
+
+route = 'stop-async-iteration'
+
+    @pytest.mark.parametrize('route', ('stop-iteration', 'stop-async-iteration', 'ordinary', 'constructor-raise'))
+    def test_body_local_async_terminal_conversion_owns_its_current_packet_and_host(route):
+>       program, model, details = async_terminal_execution(route=route, instances=2)
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_execution_async_terminal.py:297: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/fixtures/execution_async_terminal_graphs.py:22: in async_terminal_execution
+    model, details = capture_program(program, static, instances=instances,
+tests/fixtures/native_coroutine_common.py:198: in capture_program
+    model = ExecutionModel(snapshot_for(program), runs=(ExecutionRun(run, source),),
+                           ^^^^^^^^^^^^^^^^^^^^^
+scar/ir/execution/snapshot.py:11: in snapshot_for
+    wire = program_dumps(program).encode('utf-8')
+           ^^^^^^^^^^^^^^^^^^^^^^
+scar/ir/program/codec.py:261: in dumps
+    _require_record_and_graph_valid(graph)
+scar/ir/program/codec.py:146: in _require_record_and_graph_valid
+    require_valid(graph)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='terminal.caller'), regions=(Region(id=RegionID(value='terminal.caller'), label='decl...ex=0), ExistingAccess(operation=OperationID(value='terminal.match.stop_async'), index=1)))), call_effect_expansions=())
+
+    def require_valid(graph: ProgramGraph) -> None:
+        issues = validate(graph)
+        if issues:
+>           raise ValueError("; ".join(f"{issue.code} at {issue.path}: {issue.message}" for issue in issues))
+E           ValueError: unbound_exit at program_region:terminal.caller: declared exits must be bound to actual control exits
+
+scar/ir/program/validation.py:763: ValueError
+_ test_body_local_async_terminal_conversion_owns_its_current_packet_and_host[ordinary] _
+
+route = 'ordinary'
+
+    @pytest.mark.parametrize('route', ('stop-iteration', 'stop-async-iteration', 'ordinary', 'constructor-raise'))
+    def test_body_local_async_terminal_conversion_owns_its_current_packet_and_host(route):
+>       program, model, details = async_terminal_execution(route=route, instances=2)
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_execution_async_terminal.py:297: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/fixtures/execution_async_terminal_graphs.py:22: in async_terminal_execution
+    model, details = capture_program(program, static, instances=instances,
+tests/fixtures/native_coroutine_common.py:198: in capture_program
+    model = ExecutionModel(snapshot_for(program), runs=(ExecutionRun(run, source),),
+                           ^^^^^^^^^^^^^^^^^^^^^
+scar/ir/execution/snapshot.py:11: in snapshot_for
+    wire = program_dumps(program).encode('utf-8')
+           ^^^^^^^^^^^^^^^^^^^^^^
+scar/ir/program/codec.py:261: in dumps
+    _require_record_and_graph_valid(graph)
+scar/ir/program/codec.py:146: in _require_record_and_graph_valid
+    require_valid(graph)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='terminal.caller'), regions=(Region(id=RegionID(value='terminal.caller'), label='decl...ex=0), ExistingAccess(operation=OperationID(value='terminal.match.stop_async'), index=1)))), call_effect_expansions=())
+
+    def require_valid(graph: ProgramGraph) -> None:
+        issues = validate(graph)
+        if issues:
+>           raise ValueError("; ".join(f"{issue.code} at {issue.path}: {issue.message}" for issue in issues))
+E           ValueError: unbound_exit at program_region:terminal.caller: declared exits must be bound to actual control exits
+
+scar/ir/program/validation.py:763: ValueError
+_ test_body_local_async_terminal_conversion_owns_its_current_packet_and_host[constructor-raise] _
+
+route = 'constructor-raise'
+
+    @pytest.mark.parametrize('route', ('stop-iteration', 'stop-async-iteration', 'ordinary', 'constructor-raise'))
+    def test_body_local_async_terminal_conversion_owns_its_current_packet_and_host(route):
+>       program, model, details = async_terminal_execution(route=route, instances=2)
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_execution_async_terminal.py:297: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/fixtures/execution_async_terminal_graphs.py:22: in async_terminal_execution
+    model, details = capture_program(program, static, instances=instances,
+tests/fixtures/native_coroutine_common.py:198: in capture_program
+    model = ExecutionModel(snapshot_for(program), runs=(ExecutionRun(run, source),),
+                           ^^^^^^^^^^^^^^^^^^^^^
+scar/ir/execution/snapshot.py:11: in snapshot_for
+    wire = program_dumps(program).encode('utf-8')
+           ^^^^^^^^^^^^^^^^^^^^^^
+scar/ir/program/codec.py:261: in dumps
+    _require_record_and_graph_valid(graph)
+scar/ir/program/codec.py:146: in _require_record_and_graph_valid
+    require_valid(graph)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='terminal.caller'), regions=(Region(id=RegionID(value='terminal.caller'), label='decl...ex=0), ExistingAccess(operation=OperationID(value='terminal.match.stop_async'), index=1)))), call_effect_expansions=())
+
+    def require_valid(graph: ProgramGraph) -> None:
+        issues = validate(graph)
+        if issues:
+>           raise ValueError("; ".join(f"{issue.code} at {issue.path}: {issue.message}" for issue in issues))
+E           ValueError: unbound_exit at program_region:terminal.caller: declared exits must be bound to actual control exits
+
+scar/ir/program/validation.py:763: ValueError
+_ test_missing_conversion_input_or_exact_call_keeps_the_complete_sibling_independent[intrinsic-call] _
+
+missing = 'intrinsic-call'
+
+    @pytest.mark.parametrize('missing', ('intrinsic-call', 'constructor-input', 'chaining-owner', 'driver-input'))
+    def test_missing_conversion_input_or_exact_call_keeps_the_complete_sibling_independent(missing):
+        keywords = {'intrinsic-call': 'missing_intrinsic_call', 'constructor-input': 'missing_constructor_input',
+                    'chaining-owner': 'missing_chaining_owner', 'driver-input': 'missing_driver_input'}
+>       program, model, details = async_terminal_execution(**{keywords[missing]: 0})
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_execution_async_terminal.py:310: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/fixtures/execution_async_terminal_graphs.py:22: in async_terminal_execution
+    model, details = capture_program(program, static, instances=instances,
+tests/fixtures/native_coroutine_common.py:198: in capture_program
+    model = ExecutionModel(snapshot_for(program), runs=(ExecutionRun(run, source),),
+                           ^^^^^^^^^^^^^^^^^^^^^
+scar/ir/execution/snapshot.py:11: in snapshot_for
+    wire = program_dumps(program).encode('utf-8')
+           ^^^^^^^^^^^^^^^^^^^^^^
+scar/ir/program/codec.py:261: in dumps
+    _require_record_and_graph_valid(graph)
+scar/ir/program/codec.py:146: in _require_record_and_graph_valid
+    require_valid(graph)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='terminal.caller'), regions=(Region(id=RegionID(value='terminal.caller'), label='decl...ex=0), ExistingAccess(operation=OperationID(value='terminal.match.stop_async'), index=1)))), call_effect_expansions=())
+
+    def require_valid(graph: ProgramGraph) -> None:
+        issues = validate(graph)
+        if issues:
+>           raise ValueError("; ".join(f"{issue.code} at {issue.path}: {issue.message}" for issue in issues))
+E           ValueError: unbound_exit at program_region:terminal.caller: declared exits must be bound to actual control exits
+
+scar/ir/program/validation.py:763: ValueError
+_ test_missing_conversion_input_or_exact_call_keeps_the_complete_sibling_independent[constructor-input] _
+
+missing = 'constructor-input'
+
+    @pytest.mark.parametrize('missing', ('intrinsic-call', 'constructor-input', 'chaining-owner', 'driver-input'))
+    def test_missing_conversion_input_or_exact_call_keeps_the_complete_sibling_independent(missing):
+        keywords = {'intrinsic-call': 'missing_intrinsic_call', 'constructor-input': 'missing_constructor_input',
+                    'chaining-owner': 'missing_chaining_owner', 'driver-input': 'missing_driver_input'}
+>       program, model, details = async_terminal_execution(**{keywords[missing]: 0})
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_execution_async_terminal.py:310: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/fixtures/execution_async_terminal_graphs.py:22: in async_terminal_execution
+    model, details = capture_program(program, static, instances=instances,
+tests/fixtures/native_coroutine_common.py:198: in capture_program
+    model = ExecutionModel(snapshot_for(program), runs=(ExecutionRun(run, source),),
+                           ^^^^^^^^^^^^^^^^^^^^^
+scar/ir/execution/snapshot.py:11: in snapshot_for
+    wire = program_dumps(program).encode('utf-8')
+           ^^^^^^^^^^^^^^^^^^^^^^
+scar/ir/program/codec.py:261: in dumps
+    _require_record_and_graph_valid(graph)
+scar/ir/program/codec.py:146: in _require_record_and_graph_valid
+    require_valid(graph)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='terminal.caller'), regions=(Region(id=RegionID(value='terminal.caller'), label='decl...ex=0), ExistingAccess(operation=OperationID(value='terminal.match.stop_async'), index=1)))), call_effect_expansions=())
+
+    def require_valid(graph: ProgramGraph) -> None:
+        issues = validate(graph)
+        if issues:
+>           raise ValueError("; ".join(f"{issue.code} at {issue.path}: {issue.message}" for issue in issues))
+E           ValueError: unbound_exit at program_region:terminal.caller: declared exits must be bound to actual control exits
+
+scar/ir/program/validation.py:763: ValueError
+_ test_missing_conversion_input_or_exact_call_keeps_the_complete_sibling_independent[chaining-owner] _
+
+missing = 'chaining-owner'
+
+    @pytest.mark.parametrize('missing', ('intrinsic-call', 'constructor-input', 'chaining-owner', 'driver-input'))
+    def test_missing_conversion_input_or_exact_call_keeps_the_complete_sibling_independent(missing):
+        keywords = {'intrinsic-call': 'missing_intrinsic_call', 'constructor-input': 'missing_constructor_input',
+                    'chaining-owner': 'missing_chaining_owner', 'driver-input': 'missing_driver_input'}
+>       program, model, details = async_terminal_execution(**{keywords[missing]: 0})
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_execution_async_terminal.py:310: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/fixtures/execution_async_terminal_graphs.py:22: in async_terminal_execution
+    model, details = capture_program(program, static, instances=instances,
+tests/fixtures/native_coroutine_common.py:198: in capture_program
+    model = ExecutionModel(snapshot_for(program), runs=(ExecutionRun(run, source),),
+                           ^^^^^^^^^^^^^^^^^^^^^
+scar/ir/execution/snapshot.py:11: in snapshot_for
+    wire = program_dumps(program).encode('utf-8')
+           ^^^^^^^^^^^^^^^^^^^^^^
+scar/ir/program/codec.py:261: in dumps
+    _require_record_and_graph_valid(graph)
+scar/ir/program/codec.py:146: in _require_record_and_graph_valid
+    require_valid(graph)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='terminal.caller'), regions=(Region(id=RegionID(value='terminal.caller'), label='decl...ex=0), ExistingAccess(operation=OperationID(value='terminal.match.stop_async'), index=1)))), call_effect_expansions=())
+
+    def require_valid(graph: ProgramGraph) -> None:
+        issues = validate(graph)
+        if issues:
+>           raise ValueError("; ".join(f"{issue.code} at {issue.path}: {issue.message}" for issue in issues))
+E           ValueError: unbound_exit at program_region:terminal.caller: declared exits must be bound to actual control exits
+
+scar/ir/program/validation.py:763: ValueError
+_ test_missing_conversion_input_or_exact_call_keeps_the_complete_sibling_independent[driver-input] _
+
+missing = 'driver-input'
+
+    @pytest.mark.parametrize('missing', ('intrinsic-call', 'constructor-input', 'chaining-owner', 'driver-input'))
+    def test_missing_conversion_input_or_exact_call_keeps_the_complete_sibling_independent(missing):
+        keywords = {'intrinsic-call': 'missing_intrinsic_call', 'constructor-input': 'missing_constructor_input',
+                    'chaining-owner': 'missing_chaining_owner', 'driver-input': 'missing_driver_input'}
+>       program, model, details = async_terminal_execution(**{keywords[missing]: 0})
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_execution_async_terminal.py:310: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/fixtures/execution_async_terminal_graphs.py:22: in async_terminal_execution
+    model, details = capture_program(program, static, instances=instances,
+tests/fixtures/native_coroutine_common.py:198: in capture_program
+    model = ExecutionModel(snapshot_for(program), runs=(ExecutionRun(run, source),),
+                           ^^^^^^^^^^^^^^^^^^^^^
+scar/ir/execution/snapshot.py:11: in snapshot_for
+    wire = program_dumps(program).encode('utf-8')
+           ^^^^^^^^^^^^^^^^^^^^^^
+scar/ir/program/codec.py:261: in dumps
+    _require_record_and_graph_valid(graph)
+scar/ir/program/codec.py:146: in _require_record_and_graph_valid
+    require_valid(graph)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='terminal.caller'), regions=(Region(id=RegionID(value='terminal.caller'), label='decl...ex=0), ExistingAccess(operation=OperationID(value='terminal.match.stop_async'), index=1)))), call_effect_expansions=())
+
+    def require_valid(graph: ProgramGraph) -> None:
+        issues = validate(graph)
+        if issues:
+>           raise ValueError("; ".join(f"{issue.code} at {issue.path}: {issue.message}" for issue in issues))
+E           ValueError: unbound_exit at program_region:terminal.caller: declared exits must be bound to actual control exits
+
+scar/ir/program/validation.py:763: ValueError
+_ test_tiny_budget_keeps_both_actual_sources_and_all_terminal_session_targets __
+
+    def test_tiny_budget_keeps_both_actual_sources_and_all_terminal_session_targets():
+>       program, model, details = async_terminal_execution()
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_execution_async_terminal.py:370: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/fixtures/execution_async_terminal_graphs.py:22: in async_terminal_execution
+    model, details = capture_program(program, static, instances=instances,
+tests/fixtures/native_coroutine_common.py:198: in capture_program
+    model = ExecutionModel(snapshot_for(program), runs=(ExecutionRun(run, source),),
+                           ^^^^^^^^^^^^^^^^^^^^^
+scar/ir/execution/snapshot.py:11: in snapshot_for
+    wire = program_dumps(program).encode('utf-8')
+           ^^^^^^^^^^^^^^^^^^^^^^
+scar/ir/program/codec.py:261: in dumps
+    _require_record_and_graph_valid(graph)
+scar/ir/program/codec.py:146: in _require_record_and_graph_valid
+    require_valid(graph)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='terminal.caller'), regions=(Region(id=RegionID(value='terminal.caller'), label='decl...ex=0), ExistingAccess(operation=OperationID(value='terminal.match.stop_async'), index=1)))), call_effect_expansions=())
+
+    def require_valid(graph: ProgramGraph) -> None:
+        issues = validate(graph)
+        if issues:
+>           raise ValueError("; ".join(f"{issue.code} at {issue.path}: {issue.message}" for issue in issues))
+E           ValueError: unbound_exit at program_region:terminal.caller: declared exits must be bound to actual control exits
+
+scar/ir/program/validation.py:763: ValueError
+=========================== short test summary info ============================
+FAILED tests/unit/test_program_async_terminal_inventory.py::test_known_non_none_async_return_is_rejected_without_its_session_source_attachment
+FAILED tests/unit/test_program_async_terminal_inventory.py::test_return_source_denominator_survives_deleted_consumers_and_budget_one
+FAILED tests/unit/test_program_async_terminal.py::test_frame_local_conversion_uses_its_own_results_before_body_raise_and_host[stop-iteration]
+FAILED tests/unit/test_program_async_terminal.py::test_frame_local_conversion_uses_its_own_results_before_body_raise_and_host[stop-async-iteration]
+FAILED tests/unit/test_program_async_terminal.py::test_frame_local_conversion_uses_its_own_results_before_body_raise_and_host[ordinary]
+FAILED tests/unit/test_program_async_terminal.py::test_frame_local_conversion_uses_its_own_results_before_body_raise_and_host[constructor-raise]
+FAILED tests/unit/test_program_async_terminal.py::test_matcher_rejects_another_available_same_typed_packet
+FAILED tests/unit/test_program_async_terminal.py::test_chaining_needs_the_original_exception_not_the_new_same_typed_owner
+FAILED tests/unit/test_program_async_terminal.py::test_raw_packet_is_not_a_body_terminal_publication_before_intrinsic_completion
+FAILED tests/unit/test_program_async_terminal.py::test_deleting_optional_session_receipts_or_budget_does_not_delete_body_raise_sources
+FAILED tests/unit/test_source_compilation.py::test_unicode_syntaxerror_character_offsets_match_the_original_ast_byte_span
+FAILED tests/unit/test_execution_async_terminal.py::test_body_local_async_terminal_conversion_owns_its_current_packet_and_host[stop-iteration]
+FAILED tests/unit/test_execution_async_terminal.py::test_body_local_async_terminal_conversion_owns_its_current_packet_and_host[stop-async-iteration]
+FAILED tests/unit/test_execution_async_terminal.py::test_body_local_async_terminal_conversion_owns_its_current_packet_and_host[ordinary]
+FAILED tests/unit/test_execution_async_terminal.py::test_body_local_async_terminal_conversion_owns_its_current_packet_and_host[constructor-raise]
+FAILED tests/unit/test_execution_async_terminal.py::test_missing_conversion_input_or_exact_call_keeps_the_complete_sibling_independent[intrinsic-call]
+FAILED tests/unit/test_execution_async_terminal.py::test_missing_conversion_input_or_exact_call_keeps_the_complete_sibling_independent[constructor-input]
+FAILED tests/unit/test_execution_async_terminal.py::test_missing_conversion_input_or_exact_call_keeps_the_complete_sibling_independent[chaining-owner]
+FAILED tests/unit/test_execution_async_terminal.py::test_missing_conversion_input_or_exact_call_keeps_the_complete_sibling_independent[driver-input]
+FAILED tests/unit/test_execution_async_terminal.py::test_tiny_budget_keeps_both_actual_sources_and_all_terminal_session_targets
+20 failed, 18 passed in 3.63s

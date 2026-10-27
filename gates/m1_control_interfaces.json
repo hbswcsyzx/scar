@@ -1,0 +1,28 @@
+{
+  "gate": "M1-C0-LEXICAL-CONTROL-AND-PENDING-PROTOCOL-COMPONENT",
+  "scope": "Canonical lexical scope/typed control port declarations, protocol SSA constructors, CFG-derived pending case unions and dispatch projections, with original state/Use/CFG checks and strict versioned capability.",
+  "limitations": [
+    "C0 only validates static declaration composition, not source lexical correspondence, runtime targets or exception/context validity.",
+    "CLEANUP scope declaration does not verify unwinding or finally execution; Enter/Resume/Replace and active exception context state protocols remain C1 work.",
+    "Pending cross-region/boundary case contracts are unsupported, but local pending can survive INVOKE completion edges without being passed to a callee.",
+    "No source lowering, collector, detector, backend, LeWM graph, transformation or speedup is added; complete M1/M2 and the first modeling phase remain unfinished."
+  ],
+  "criteria": [
+    {
+      "id": "strict-protocol-values-scopes-and-records",
+      "tests": ["tests/unit/test_program_control_records.py", "tests/unit/test_program_protocol_values.py"]
+    },
+    {
+      "id": "canonical-ssa-case-union-dispatch-and-current-state",
+      "tests": ["tests/unit/test_program_control_graph.py", "tests/unit/test_pending_invoke_forwarding.py", "tests/unit/test_program_completions_adversarial.py", "tests/unit/test_program_graph.py"]
+    },
+    {
+      "id": "original-v1-to-v5-wire-and-canonical-query-projection",
+      "tests": ["tests/unit/test_program_control_codec.py", "tests/unit/test_program_environment_codec.py", "tests/integration/test_program_graph_roundtrip.py"]
+    },
+    {
+      "id": "public-nonauthorizing-cli-and-old-source-contracts",
+      "tests": ["tests/integration/test_control_program_cli.py", "tests/integration/test_environment_program_cli.py", "tests/integration/test_check_program_cli.py", "tests/integration/test_structured_program_cli.py", "tests/unit/test_structured_program_validation.py", "tests/unit/test_structured_program_execution.py"]
+    }
+  ]
+}

@@ -1,0 +1,29 @@
+{
+  "enabled": true,
+  "status": "Observed",
+  "pid": 1607834,
+  "sample_count": 12,
+  "interval_s": 0.1,
+  "started_ns": 341243950880403,
+  "ended_ns": 341245315425423,
+  "cpu_utilization_percent": {
+    "average": 0.0,
+    "peak": 0.0
+  },
+  "gpu_utilization_percent": {
+    "average": 1.0,
+    "peak": 1.0
+  },
+  "gpu_memory_used_mib": {
+    "peak": 1367.0,
+    "average": 1367.0
+  },
+  "gpu_count_observed": 1,
+  "gpu_query": {
+    "kind": "PERSISTENT_NVIDIA_SMI",
+    "process_launches": 1,
+    "provider_status": "RUNNING",
+    "stale_observations_reused": false
+  },
+  "evidence": "Observed"
+}

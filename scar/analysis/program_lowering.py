@@ -8,21 +8,27 @@ from __future__ import annotations
 
 import ast
 from collections import Counter, defaultdict
-from dataclasses import dataclass
+from copy import deepcopy
+from dataclasses import dataclass, replace
+from functools import cached_property
 import hashlib
 import json
 from pathlib import Path
 import symtable
 import tokenize
+from types import MappingProxyType
 
 from scar.analysis.control_flow_v2 import _build_generated_source_layers, validate_source_control_flow
 from scar.analysis.source_semantics_v2 import validate_source_semantics
-from scar.ir.program.codec import dumps as dump_graph
+from scar.ir.program.codec import dumps as dump_graph, _has_frame_root_capability
 from scar.ir.program.ids import BlockID, LocationID, OperationID, RegionID, UseID, ValueID
 from scar.ir.program.functions import BodyEntryInterface, BodyLoweringProfile, FormalPort
+from scar.ir.program.module_entries import (ModuleBodyOverlay, ModuleEntryProfile,
+    ModulePrefixOverlay, ModuleBodyExpansionProfile, StructuredFrameBodyOverlay, FrameBodyProfile)
 from scar.ir.program.frames import (
     FrameBind, FrameDiscard, FrameEnter, FrameExit, FrameFormal, FrameModel,
 )
+from scar.ir.program.structured import StructuredBodyModel
 from scar.ir.program.model import (
     AccessMode, Behavior, Block, BlockArgument, CompletionResult, CompletionSignature,
     CompletionSuccessor, DataValue, ExitKind, ExitPort, LiteralOrigin, Operation,
@@ -35,6 +41,7 @@ from scar.ir.program.source import (
     LoweringMetadata, OperationSource, SourceRole,
     UseSource, ValueSource,
 )
+from scar.ir.program.source_language import SourceLanguageOverlay, reject_extended_protocols
 from scar.ir.program.validation import require_valid
 from scar.ir.record_codec import encode
 from scar.ir.semantics_v2 import Opcode, SourceExecutionPrecondition
@@ -66,12 +73,59 @@ class SourceProgram:
     semantic: object
     semantics: object
     control: object
-    profile: BodyLoweringProfile = BodyLoweringProfile.LEGACY
+    profile: BodyLoweringProfile | ModuleEntryProfile | ModuleBodyExpansionProfile | FrameBodyProfile = BodyLoweringProfile.LEGACY
     interface: BodyEntryInterface | None = None
     frame: FrameModel | None = None
+    structured: StructuredBodyModel | None = None
+    language: SourceLanguageOverlay | None = None
+    module: ModuleBodyOverlay | ModulePrefixOverlay | StructuredFrameBodyOverlay | None = None
 
     def summary(self):
         """Separate declaration/link counts from program and effect coverage."""
+        if type(self.module) is StructuredFrameBodyOverlay:
+            from scar.ir.record_codec import encode
+            return {'entry_kind':'MAPPING_FRAME','entry':self.metadata.entry,
+                'body_status':self.module.status.value,'graph_present':self.graph is not None,
+                'entry_regions':len(self.graph.regions) if self.graph else 0,
+                'construction_operations':self.module.operations_emitted,
+                'top_level_statement_interfaces_expanded':len(self.module.prefix.statements) if self.module.prefix else 0,
+                'expanded_statement_records':len(self.module.expansions),
+                'remaining_statement_count':len(self.module.remaining.subject.statements) if self.module.remaining else 0,
+                'required_body_expansion':'REQUIRED' if self.module.remaining else 'SOURCE_PROTOCOL_INTERNALS_REMAIN_OPEN',
+                'source_census':encode(self.module.census),'namespace_policy':self.module.namespace_policy.value,
+                'completion_profile':self.module.completion_profile.value,
+                'namespace_content_established':False,'namespace_alias_established':False,
+                'runtime_target_verified':False,'import_module_object_established':False,
+                'whole_program_coverage_established':False,'fine_grained_state_effects_established':False,
+                'transformation_authorized':False}
+        if type(self.module) is ModulePrefixOverlay:
+            from scar.ir.record_codec import encode
+            return {"entry_kind": "MAPPING_FRAME", "entry": self.metadata.entry,
+                "body_status": self.module.status.value, "graph_present": self.graph is not None,
+                "entry_regions": len(self.graph.regions) if self.graph else 0,
+                "source_statement_interfaces_expanded": 1, "body_internal_operations_recovered": 0,
+                "remaining_statement_count": len(self.module.remaining.subject.statements),
+                "required_body_expansion": self.module.remaining.required_expansion.value,
+                "import_internal_expansion": "REQUIRED", "namespace_content_established": False,
+                "source_census": encode(self.module.census), "construction_operations": self.module.operations_emitted,
+                "frontier_counts": dict(sorted(Counter(row.kind for row in self.module.frontiers).items())),
+                "whole_program_coverage_established": False, "runtime_target_verified": False,
+                "namespace_alias_established": False, "import_module_object_established": False,
+                "fine_grained_state_effects_established": False, "transformation_authorized": False}
+        if self.module is not None:
+            from scar.ir.record_codec import encode
+            return {"entry_kind": "MAPPING_FRAME", "entry": self.metadata.entry,
+                "body_status": self.module.status.value, "graph_present": self.graph is not None,
+                "entry_regions": len(self.graph.regions) if self.graph is not None else 0,
+                "body_internal_operations_recovered": 0,
+                "required_body_expansion": (self.module.unexpanded_body.required_expansion.value
+                    if self.module.unexpanded_body is not None else None),
+                "source_census": encode(self.module.census),
+                "construction_operations": self.module.operations_emitted,
+                "frontier_counts": dict(sorted(Counter(row.kind for row in self.module.frontiers).items())),
+                "whole_program_coverage_established": False, "runtime_target_verified": False,
+                "namespace_alias_established": False, "import_module_object_established": False,
+                "fine_grained_state_effects_established": False, "transformation_authorized": False}
         graph = self.graph
         return {
             "entry": self.metadata.entry,
@@ -90,9 +144,16 @@ class SourceProgram:
                 "candidate_calls": len(self.metadata.call_targets),
                 "candidate_interfaces": sum(bool(target.arguments) for target in self.metadata.call_targets),
                 "parsed_source_atoms": len(self.semantic.source_atoms),
+                **({"binding_definitions": len(graph.binding_definitions) if graph else 0,
+                    "binding_reads": len(graph.binding_reads) if graph else 0,
+                    "typed_protocols": len(self.structured.protocols) if self.structured else 0,
+                    "loops": len(self.structured.loops) if self.structured else 0}
+                   if self.profile in (BodyLoweringProfile.STRUCTURED_BODY, BodyLoweringProfile.STRUCTURED_ENV) else {}),
             },
             "gap_counts": dict(sorted(Counter(gap.kind.value for gap in self.metadata.gaps).items())),
-            "source_selection": ("one file parsed; selected bound-frame body only; candidate calls remain interfaces"
+            "source_selection": ("one file parsed; selected structured synchronous body; unsupported protocols remain coverage failures"
+                                 if self.profile in (BodyLoweringProfile.STRUCTURED_BODY, BodyLoweringProfile.STRUCTURED_ENV) else
+                                 "one file parsed; selected bound-frame body only; candidate calls remain interfaces"
                                  if self.profile is BodyLoweringProfile.BOUND_FRAME else
                                  "one file parsed; selected body and available same-file call candidates lowered"),
             "whole_program_coverage_established": False,
@@ -102,25 +163,91 @@ class SourceProgram:
         }
 
     def to_dict(self):
+        if type(self.module) is StructuredFrameBodyOverlay:
+            from scar.ir.program.module_entries import encode_frame_body
+            if (self.profile is not self.module.profile or self.profile not in (
+                    FrameBodyProfile.STRUCTURED_MAPPING_314_V1,FrameBodyProfile.STRUCTURED_MAPPING_PROPAGATION_314_V1) or self.graph is None
+                    or any(value is not None for value in (self.interface,self.frame,self.structured,self.language))):
+                raise ValueError('SP8 requires its explicit core FrameRoot/source overlay only')
+            return {'schema':'scar.source-program','schema_version':8,'entry_kind':'MAPPING_FRAME',
+                'profile':self.profile.value,'status':self.module.status.value,
+                'scope':'structured source mapping frame; exact remaining source and runtime/effect debt retained',
+                'metadata':encode(self.metadata),'module':encode_frame_body(self.module),
+                'graph':json.loads(dump_graph(self.graph)),'semantic':self.semantic.to_dict(),
+                'semantics':self.semantics.to_dict(),'control':self.control.to_dict(),'summary':self.summary(),
+                'runtime_target_verified':False,'transformation_authorized':False}
+        # Every implemented wrapper is historical source1-7. A future source8
+        # must enter its explicit new branch rather than upgrade an old ABI.
+        if self.graph is not None and _has_frame_root_capability(self.graph):
+            raise ValueError("historical source1-7 writer cannot contain frame-root core capability")
+        if type(self.module) is ModulePrefixOverlay:
+            from scar.ir.program.module_entries import encode_module_prefix
+            if (self.profile is not ModuleBodyExpansionProfile.IMPORT_PREFIX_314_V1 or self.interface is not None
+                    or self.frame is not None or self.structured is not None or self.language is not None):
+                raise ValueError("v7 prefix requires its separate capability and unchanged mapping ABI")
+            return {"schema": "scar.source-program", "schema_version": 7,
+                "entry_kind": "MAPPING_FRAME", "profile": self.profile.value,
+                "status": self.module.status.value,
+                "scope": "one original Import interface and exact residual module statement slice; runtime/content/effects remain OPEN",
+                "metadata": encode(self.metadata), "module": encode_module_prefix(self.module),
+                "graph": json.loads(dump_graph(self.graph)) if self.graph is not None else None,
+                "semantic": self.semantic.to_dict(), "semantics": self.semantics.to_dict(),
+                "control": self.control.to_dict(), "summary": self.summary(),
+                "runtime_target_verified": False, "transformation_authorized": False}
+        if self.module is not None:
+            from scar.ir.program.module_entries import encode_module_overlay
+            if (self.profile is not ModuleEntryProfile.EXEC_MAPPING_314_V1 or self.interface is not None
+                    or self.frame is not None or self.structured is not None or self.language is not None):
+                raise ValueError("v6 mapping entry cannot acquire function ABI overlays")
+            return {"schema": "scar.source-program", "schema_version": 6,
+                "entry_kind": "MAPPING_FRAME", "profile": self.profile.value,
+                "status": self.module.status.value,
+                "scope": "selected exec-root mapping frame; body/runtime/effects debt remains explicit",
+                "metadata": encode(self.metadata), "module": encode_module_overlay(self.module),
+                "graph": json.loads(dump_graph(self.graph)) if self.graph is not None else None,
+                "semantic": self.semantic.to_dict(), "semantics": self.semantics.to_dict(),
+                "control": self.control.to_dict(), "summary": self.summary(),
+                "runtime_target_verified": False, "transformation_authorized": False}
+        return self._function_document(include_context=True)
+
+    def _function_document(self, *, include_context):
+        if self.language is None:
+            reject_extended_protocols(self.structured)
+        elif self.profile is not BodyLoweringProfile.STRUCTURED_ENV:
+            raise ValueError("extended language wrapper requires the unchanged environment entry ABI")
         document = {
-            "schema": "scar.source-program", "schema_version": 1 if self.profile is BodyLoweringProfile.LEGACY else 2,
+            "schema": "scar.source-program", "schema_version": (5 if self.language is not None else
+                1 if self.profile is BodyLoweringProfile.LEGACY else
+                4 if self.profile is BodyLoweringProfile.STRUCTURED_ENV else
+                3 if self.profile is BodyLoweringProfile.STRUCTURED_BODY else 2),
             "status": ("UNSUPPORTED" if self.graph is None else
                        "LOWERED_WITH_GAPS" if self.metadata.gaps else "LOWERED"),
             "scope": "selected synchronous function bodies, conservative completion/effect model",
             "metadata": encode(self.metadata),
             "graph": json.loads(dump_graph(self.graph)) if self.graph is not None else None,
-            "semantic": self.semantic.to_dict(), "semantics": self.semantics.to_dict(),
-            "control": self.control.to_dict(),
+            "semantic": self.semantic.to_dict() if include_context else None,
+            "semantics": self.semantics.to_dict() if include_context else None,
+            "control": self.control.to_dict() if include_context else None,
             "summary": self.summary(),
             "runtime_target_verified": False, "transformation_authorized": False,
         }
         if self.profile is not BodyLoweringProfile.LEGACY:
             document.update(profile=self.profile.value, interface=encode(self.interface),
                             frame=encode(self.frame))
+        if self.profile in (BodyLoweringProfile.STRUCTURED_BODY, BodyLoweringProfile.STRUCTURED_ENV):
+            document["structured"] = encode(self.structured)
+        if self.language is not None:
+            from scar.ir.program.source_language import encode_language_overlay
+            document["language"] = encode_language_overlay(self.language)
+        if not include_context:
+            for name in ("semantic", "semantics", "control"):
+                del document[name]
         return document
 
     @classmethod
-    def from_dict(cls, document, *, max_operations=10000):
+    def from_dict(cls, document, *, max_operations=10000, language_options=None, verification="SOURCE_REPLAY",
+                  source_texts: dict[str, str] | None = None, module_code_evidence=None,
+                  _context_session=None, _context_reference=None):
         from scar.ir.program.codec import loads as load_graph
         from scar.ir.record_codec import decode
         from scar.ir.semantics_v2 import SourceSemanticsGraph
@@ -132,33 +259,182 @@ class SourceProgram:
                            "transformation_authorized"}
         if type(document) is not dict:
             raise ValueError("source program fields mismatch")
+        if verification not in ("SOURCE_REPLAY", "STRUCTURE"):
+            raise ValueError("source program verification mode must be explicit")
+        _check_structure_source_texts(verification, source_texts)
         version = document.get("schema_version")
-        if type(version) is not int or version not in (1, 2):
+        if _context_session is not None or _context_reference is not None:
+            from scar.store.source_fragments import SourceContextSession, SourceContextReference
+            if (type(_context_session) is not SourceContextSession
+                    or type(_context_reference) is not SourceContextReference
+                    or type(version) is not int or version != 5 or verification != "STRUCTURE"
+                    or source_texts is not None or language_options is not None or module_code_evidence is not None):
+                raise ValueError("source fragments require a live typed context session and explicit SP5 STRUCTURE")
+            expected_fields -= {"semantic", "semantics", "control"}
+        if type(version) is int and version == 8:
+            from scar.ir.program.module_entries import decode_frame_body
+            if (set(document) != expected_fields | {'entry_kind','profile','module'}
+                    or document['schema'] != 'scar.source-program' or document['entry_kind'] != 'MAPPING_FRAME'
+                    or document['profile'] not in (FrameBodyProfile.STRUCTURED_MAPPING_314_V1.value,
+                        FrameBodyProfile.STRUCTURED_MAPPING_PROPAGATION_314_V1.value)
+                    or language_options is not None or verification != 'STRUCTURE'
+                    or module_code_evidence is None or type(document['graph']) is not dict
+                    or document['graph'].get('schema_version') != 29):
+                raise ValueError('SP8 requires explicit source/core capability and readonly whole-root evidence')
+            result=cls(load_graph(_canonical(document['graph'])),decode(LoweringMetadata,document['metadata']),
+                semantic_from_dict(document['semantic']),None,SourceControlFlowGraph.from_dict(document['control']),
+                FrameBodyProfile(document['profile']),module=decode_frame_body(document['module']))
+            result=replace(result,semantics=SourceSemanticsGraph.from_dict(document['semantics'],result.semantic))
+            if _canonical(result.to_dict()) != _canonical(document):
+                raise ValueError('SP8 canonical source capability/summary differs')
+            checked=validate_source_program(result,max_operations=max_operations,verification=verification,
+                source_texts=source_texts,module_code_evidence=module_code_evidence)
+            if not checked['valid']:raise ValueError('; '.join(checked['errors']))
+            return result
+        if type(version) is int and 1 <= version <= 7:
+            graph_wire = document.get("graph")
+            if type(graph_wire) is dict:
+                core_version = graph_wire.get("schema_version")
+                if ("frame_roots" in graph_wire
+                        or type(core_version) is int and core_version >= 29):
+                    raise ValueError("historical source1-7 reader cannot contain frame-root core capability")
+                scopes = graph_wire.get("control_scopes")
+                for scope in scopes if type(scopes) is list else ():
+                    if type(scope) is not dict:
+                        continue
+                    source = scope.get("source")
+                    if (scope.get("kind") == "FRAME" or type(source) is dict
+                            and (source.get("source_kind") == "MODULE_UNIT" or "snapshot" in source)):
+                        raise ValueError("historical source1-7 reader cannot contain frame-root core capability")
+        if type(version) is int and version == 7:
+            from scar.ir.program.module_entries import decode_module_prefix
+            if (set(document) != expected_fields | {"entry_kind", "profile", "module"}
+                    or document["schema"] != "scar.source-program" or document["entry_kind"] != "MAPPING_FRAME"
+                    or document["profile"] != ModuleBodyExpansionProfile.IMPORT_PREFIX_314_V1.value
+                    or language_options is not None or verification != "STRUCTURE"):
+                raise ValueError("v7 prefix fields/capability/verification differ")
+            result = cls(load_graph(_canonical(document["graph"])) if document["graph"] is not None else None,
+                decode(LoweringMetadata, document["metadata"]), semantic_from_dict(document["semantic"]),
+                None, SourceControlFlowGraph.from_dict(document["control"]), ModuleBodyExpansionProfile.IMPORT_PREFIX_314_V1,
+                module=decode_module_prefix(document["module"]))
+            result = replace(result, semantics=SourceSemanticsGraph.from_dict(document["semantics"], result.semantic))
+            if _canonical(result.to_dict()) != _canonical(document):
+                raise ValueError("v7 prefix scope/status/authority differs")
+            checked = validate_source_program(result, max_operations=max_operations, verification=verification,
+                source_texts=source_texts, module_code_evidence=module_code_evidence)
+            if not checked["valid"]:
+                raise ValueError("; ".join(checked["errors"]))
+            return result
+        if type(version) is int and version == 6:
+            from scar.ir.program.module_entries import decode_module_overlay
+            if (set(document) != expected_fields | {"entry_kind", "profile", "module"}
+                    or document["schema"] != "scar.source-program" or document["entry_kind"] != "MAPPING_FRAME"
+                    or document["profile"] != ModuleEntryProfile.EXEC_MAPPING_314_V1.value
+                    or language_options is not None):
+                raise ValueError("v6 mapping entry fields/capability differ")
+            if verification != "STRUCTURE":
+                raise ValueError("v6 uses explicit retained-source structure plus optional independent root evidence; function replay is unsupported")
+            result = cls(load_graph(_canonical(document["graph"])) if document["graph"] is not None else None,
+                decode(LoweringMetadata, document["metadata"]), semantic_from_dict(document["semantic"]),
+                None, SourceControlFlowGraph.from_dict(document["control"]), ModuleEntryProfile.EXEC_MAPPING_314_V1,
+                module=decode_module_overlay(document["module"]))
+            result = replace(result,
+                semantics=SourceSemanticsGraph.from_dict(document["semantics"], result.semantic))
+            if _canonical(result.to_dict()) != _canonical(document):
+                raise ValueError("v6 mapping entry scope/status/authority differs")
+            checked = validate_source_program(result, max_operations=max_operations, verification=verification,
+                source_texts=source_texts, module_code_evidence=module_code_evidence)
+            if not checked["valid"]:
+                raise ValueError("; ".join(checked["errors"]))
+            return result
+        if module_code_evidence is not None:
+            raise ValueError("module root evidence cannot alter historical function verification")
+        if type(version) is not int or version not in (1, 2, 3, 4, 5):
             raise ValueError("source program schema/version mismatch")
-        if version == 2:
+        if version < 5 and verification != "SOURCE_REPLAY":
+            raise ValueError("historical source program replay policy is unchanged")
+        if version in (2, 3, 4, 5):
             expected_fields |= {"profile", "interface", "frame"}
+        if version in (3, 4, 5):
+            expected_fields.add("structured")
+        if version == 5:
+            expected_fields.add("language")
         if set(document) != expected_fields or document["schema"] != "scar.source-program":
             raise ValueError("source program fields mismatch")
         profile = BodyLoweringProfile.LEGACY
-        interface = frame = None
-        if version == 2:
+        interface = frame = structured = None
+        if version in (2, 3, 4, 5):
             profile = BodyLoweringProfile(document["profile"])
-            if profile is not BodyLoweringProfile.BOUND_FRAME:
-                raise ValueError("source-program v2 requires the bound-frame profile")
+            expected_profile = (BodyLoweringProfile.STRUCTURED_ENV if version in (4, 5) else
+                                BodyLoweringProfile.BOUND_FRAME if version == 2 else
+                                BodyLoweringProfile.STRUCTURED_BODY)
+            if profile is not expected_profile:
+                raise ValueError("source-program version requires its exact lowering profile")
             interface = decode(BodyEntryInterface, document["interface"]) if document["interface"] is not None else None
             frame = FrameModel.from_dict(document["frame"]) if document["frame"] is not None else None
+        if version in (3, 4, 5):
+            structured = decode(StructuredBodyModel, document["structured"]) if document["structured"] is not None else None
+        from scar.ir.program.source_language import decode_language_overlay
+        language = decode_language_overlay(document["language"]) if version == 5 else None
+        if version < 5:
+            reject_extended_protocols(structured)
+            if language_options is not None:
+                raise ValueError("historical source wrapper cannot accept extended language inputs")
         metadata = decode(LoweringMetadata, document["metadata"])
-        semantic = semantic_from_dict(document["semantic"])
-        semantics = SourceSemanticsGraph.from_dict(document["semantics"], semantic)
-        control = SourceControlFlowGraph.from_dict(document["control"])
+        if _context_session is None:
+            semantic = semantic_from_dict(document["semantic"])
+            semantics = SourceSemanticsGraph.from_dict(document["semantics"], semantic)
+            control = SourceControlFlowGraph.from_dict(document["control"])
+        else:
+            owned = _context_session._context(_context_reference)
+            semantic, semantics, control = owned.semantic, owned.semantics, owned.control
         graph = load_graph(_canonical(document["graph"])) if document["graph"] is not None else None
-        result = cls(graph, metadata, semantic, semantics, control, profile, interface, frame)
-        if _canonical(result.to_dict()) != _canonical(document):
+        result = cls(graph, metadata, semantic, semantics, control, profile, interface, frame, structured, language)
+        actual = (result.to_dict() if _context_session is None else
+                  result._function_document(include_context=False))
+        if _canonical(actual) != _canonical(document):
             raise ValueError("source program scope/status/authority or canonical fields differ")
-        checked = validate_source_program(result, max_operations=max_operations)
+        checked = validate_source_program(result, max_operations=max_operations, language_options=language_options,
+            verification=verification, source_texts=source_texts,
+            _context_session=_context_session, _context_reference=_context_reference)
         if not checked["valid"]:
             raise ValueError("; ".join(checked["errors"]))
+        if _context_session is not None:
+            _context_session._claim(result, _context_reference)
+            # Never export the private mutable context through SourceProgram.
+            return LoweredSourceBody(result.graph, result.metadata,
+                len(result.graph.operations) if result.graph is not None else 0,
+                result.interface, result.frame, result.structured, result.language)
         return result
+
+    @classmethod
+    def read_structure_fragment(cls, body_document, *, context_session, context, max_operations=10000):
+        """Read an SP5 body through a live private context; return body only.
+
+        Context source/CFG checks are session-local. Ordinary core, language,
+        structured and source correspondence checks remain on each body.
+        No shared mutable context, runtime or compiler proof is returned.
+        """
+        if type(max_operations) is not int or max_operations < 1:
+            raise ValueError("source fragment operation budget must be positive")
+        graph = body_document.get("graph") if type(body_document) is dict else None
+        if type(graph) is dict and (type(graph.get("operations")) is not list
+                                   or len(graph["operations"]) > max_operations):
+            raise ValueError("source fragment operation budget exceeded")
+        return cls.from_dict(body_document, max_operations=max_operations, verification="STRUCTURE",
+                             _context_session=context_session, _context_reference=context)
+
+    @classmethod
+    def read_structure(cls, document, *, max_operations=10000, source_texts: dict[str, str] | None = None,
+                       module_code_evidence=None):
+        """Read v5; optional retained texts feed the existing source/CFG checks.
+
+        This grants no CodeWitness or runtime proof. Omission preserves the
+        existing source-reader policy; provided texts are fingerprint-checked
+        and replayed by the ordinary semantics/control validators.
+        """
+        return cls.from_dict(document, max_operations=max_operations, verification="STRUCTURE",
+                             source_texts=source_texts, module_code_evidence=module_code_evidence)
 
 
 @dataclass(frozen=True)
@@ -169,6 +445,8 @@ class LoweredSourceBody:
     operations_emitted: int
     interface: BodyEntryInterface | None = None
     frame: FrameModel | None = None
+    structured: StructuredBodyModel | None = None
+    language: SourceLanguageOverlay | None = None
 
 
 @dataclass(frozen=True)
@@ -182,14 +460,156 @@ class PreparedSource:
     tree: ast.Module
     symbol_tables: dict
 
+    @cached_property
+    def _lowering_index(self):
+        # Used only by the isolated, explicitly sealed lowering session.
+        # Ordinary PreparedSource inputs remain mutable and do not reuse it.
+        return _source_lowering_index(self.path, self.tree, self.semantic, self.semantics)
+
+    def seal_for_lowering(self):
+        """Snapshot current source inputs for one isolated construction session.
+
+        The session owns private copies and returns only constructed body
+        records. Later mutation of this PreparedSource does not alter that
+        explicit snapshot; ordinary lower() always checks current source inputs.
+        """
+        return _SealedLoweringSession(self)
+
     def lower(self, entry, *, source: SourceReference | None = None, max_operations=10000,
-              expand_candidates=True, profile=BodyLoweringProfile.LEGACY):
-        _check_arguments(entry, max_operations)
-        builder = _Builder(self.path, entry, self.text, self.semantic, self.semantics,
-                           self.control, max_operations, selected_source=source,
-                           tree=self.tree, symbol_tables=self.symbol_tables,
-                           expand_candidates=expand_candidates, profile=profile)
-        return builder.run()
+              expand_candidates=True, profile=BodyLoweringProfile.LEGACY, language_options=None):
+        return _lower_prepared(self, entry, source=source, max_operations=max_operations,
+                               expand_candidates=expand_candidates, profile=profile, language_options=language_options)
+
+    def lower_entry(self, selection, *, code_evidence, max_operations=10000,
+                    profile=ModuleEntryProfile.EXEC_MAPPING_314_V1):
+        """Explicit mapping-root capability; never changes function defaults."""
+        from scar.analysis.source_module_lowering import lower_module_entry
+        return lower_module_entry(self, selection, code_evidence=code_evidence, max_operations=max_operations,
+                                  profile=profile)
+
+
+def _lower_prepared(context, entry, *, source, max_operations, expand_candidates, profile,
+                    sealed_source=None, language_options=None):
+    _check_arguments(entry, max_operations)
+    if language_options is not None and profile is not BodyLoweringProfile.STRUCTURED_ENV:
+        raise ValueError("extended source language requires environment entry ABI")
+    if profile is BodyLoweringProfile.STRUCTURED_ENV:
+        if expand_candidates:
+            raise ValueError("environment source bodies require root-only expansion")
+        from scar.analysis.environment_lowering import StructuredEnvironmentBuilder
+        builder = StructuredEnvironmentBuilder
+        if language_options is not None:
+            from scar.ir.program.source_language import SourceLanguageCapability
+            if SourceLanguageCapability.FUNCTION_TRY_314_V1 in language_options.capabilities:
+                from scar.analysis.source_function_try_lowering import FunctionTryBuilder
+                builder = FunctionTryBuilder
+            if SourceLanguageCapability.FUNCTION_WITH_314_V1 in language_options.capabilities:
+                if SourceLanguageCapability.FUNCTION_TRY_314_V1 not in language_options.capabilities:
+                    raise ValueError('function With requires the existing paired propagation/C0/C1 capability')
+                from scar.analysis.source_with_lowering import FunctionWithBuilder
+                builder = FunctionWithBuilder
+        return builder(context, entry, source=source, max_operations=max_operations,
+                                             sealed_source=sealed_source, language_options=language_options).run()
+    if profile is BodyLoweringProfile.STRUCTURED_BODY:
+        if expand_candidates:
+            raise ValueError("structured source bodies require root-only expansion")
+        from scar.analysis.structured_lowering import StructuredBuilder
+        return StructuredBuilder(context, entry, source=source, max_operations=max_operations,
+                                 sealed_source=sealed_source).run()
+    builder = _Builder(context.path, entry, context.text, context.semantic, context.semantics,
+                       context.control, max_operations, selected_source=source,
+                       tree=context.tree, symbol_tables=context.symbol_tables,
+                       expand_candidates=expand_candidates, profile=profile)
+    return builder.run()
+
+
+class _SealedLoweringSession:
+    """Private source snapshot, with no public graph getters or graph output.
+
+    Construction executes no target code or callbacks. Builders only read the
+    private source layers; emitted body records contain frozen IDs/references,
+    never mutable source definitions, graph registries or source AST objects.
+    This is local construction validation, not public source replay authority.
+    """
+
+    __slots__ = ("__prepared", "__validated")
+
+    def __init__(self, prepared):
+        self.__validated = False
+        semantic, semantics, control, tree = deepcopy((
+            prepared.semantic, prepared.semantics, prepared.control, prepared.tree))
+        expected_tree = ast.parse(prepared.text, filename=str(prepared.path))
+        if ast.dump(tree, include_attributes=True) != ast.dump(expected_tree, include_attributes=True):
+            raise ValueError("sealed source AST differs from the fixed source text")
+        fingerprint = "sha256:" + hashlib.sha256(prepared.text.encode()).hexdigest()
+        snapshot = semantics.sources.get(str(prepared.path))
+        if snapshot is None or snapshot.fingerprint != fingerprint:
+            raise ValueError("sealed source layers differ from the fixed source text")
+        # Validate every source layer and both cross-layer digests once. These
+        # mutable copies never escape this session, so per-body construction
+        # need not repeat that same source-only work.
+        semantic.assert_valid()
+        semantics.assert_valid(semantic)
+        control.assert_valid(semantic, semantics)
+        self.__prepared = PreparedSource(prepared.path, prepared.root, prepared.text,
+            semantic, semantics, control, tree, _symbol_tables(prepared.text, prepared.path))
+        self.__validated = True
+
+    def lower(self, entry, *, source=None, max_operations=10000, expand_candidates=True,
+              profile=BodyLoweringProfile.LEGACY, language_options=None):
+        if profile not in (BodyLoweringProfile.STRUCTURED_BODY, BodyLoweringProfile.STRUCTURED_ENV):
+            raise ValueError("sealed construction is limited to structured source profiles")
+        return _lower_prepared(self.__prepared, entry, source=source, max_operations=max_operations,
+            expand_candidates=expand_candidates, profile=profile, sealed_source=self,
+            language_options=language_options)
+
+    def _require_inputs(self, semantic, control):
+        if (not self.__validated or semantic is not self.__prepared.semantic
+                or control is not self.__prepared.control):
+            raise ValueError("source validation receipt belongs to a different sealed snapshot")
+
+
+@dataclass(frozen=True)
+class _SourceLoweringIndex:
+    atoms: object
+    by_atom: object
+    old_by_atom: object
+    slots: object
+    functions: object
+    function_candidates: object
+    function_nodes: tuple
+
+
+def _source_lowering_index(path, tree, semantic, semantics):
+    """Build file-wide read-only lookup tables once for each prepared source."""
+    atoms = {_span_atom(atom): atom.reference for atom in semantic.source_atoms.values()
+             if atom.reference.path == str(path)}
+    by_atom, old_by_atom, candidates = defaultdict(list), defaultdict(list), defaultdict(list)
+    for definition in semantic.definitions.values():
+        by_atom[definition.code_id].append(definition)
+    for operation in semantics.operations.values():
+        old_by_atom[operation.source.atom_id].append(operation)
+    functions = {}
+
+    def collect(statements, prefix=""):
+        for node in statements:
+            if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+                name = prefix + node.name
+                candidates[name].append(node)
+                functions[name] = node
+            elif isinstance(node, ast.ClassDef):
+                collect(node.body, prefix + node.name + ".")
+
+    collect(tree.body)
+    return _SourceLoweringIndex(
+        MappingProxyType(atoms),
+        MappingProxyType({key: tuple(value) for key, value in by_atom.items()}),
+        MappingProxyType({key: tuple(value) for key, value in old_by_atom.items()}),
+        MappingProxyType({(slot.owner, slot.name): slot.slot_id for slot in semantic.slots.values()}),
+        MappingProxyType(functions),
+        MappingProxyType({key: tuple(value) for key, value in candidates.items()}),
+        tuple(node for node in ast.walk(tree) if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef))),
+    )
 
 
 def _canonical(document):
@@ -212,7 +632,7 @@ class _Cursor:
 class _Builder:
     def __init__(self, path, entry, text, semantic, semantics, control, max_operations,
                  selected_source=None, tree=None, symbol_tables=None, expand_candidates=True,
-                 profile=BodyLoweringProfile.LEGACY):
+                 profile=BodyLoweringProfile.LEGACY, source_index=None):
         if type(expand_candidates) is not bool:
             raise ValueError("expand_candidates must be an exact boolean")
         self.expand_candidates = expand_candidates
@@ -229,24 +649,17 @@ class _Builder:
         self.snapshot = semantics.sources[str(path)]
         self.tree = tree if tree is not None else ast.parse(text, filename=str(path))
         self.symbol_tables = symbol_tables if symbol_tables is not None else _symbol_tables(text, path)
-        self.atoms = {_span_atom(atom): atom.reference for atom in semantic.source_atoms.values()
-                      if atom.reference.path == str(path)}
-        self.by_atom = defaultdict(list)
-        self.old_by_atom = defaultdict(list)
-        for definition in semantic.definitions.values():
-            self.by_atom[definition.code_id].append(definition)
-        for operation in semantics.operations.values():
-            self.old_by_atom[operation.source.atom_id].append(operation)
-        self.slots = {(slot.owner, slot.name): slot.slot_id for slot in semantic.slots.values()}
-        self.functions = {}
-        self.function_candidates = defaultdict(list)
-        self._collect_functions(self.tree.body)
+        index = source_index if source_index is not None else _source_lowering_index(
+            path, self.tree, semantic, semantics)
+        self.atoms, self.by_atom, self.old_by_atom = index.atoms, index.by_atom, index.old_by_atom
+        self.slots = index.slots
+        # Selecting a nested definition adds an entry alias only to this body.
+        self.functions = dict(index.functions)
+        self.function_candidates = index.function_candidates
         if selected_source is not None:
             if selected_source.path != str(path) or selected_source.fingerprint != self.snapshot.fingerprint:
                 raise ValueError("selected definition source differs from prepared snapshot")
-            selected = [node for node in ast.walk(self.tree)
-                        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef))
-                        and self.source(node) == selected_source]
+            selected = [node for node in index.function_nodes if self.source(node) == selected_source]
             if len(selected) != 1:
                 raise ValueError("selected source must identify exactly one function definition")
             self.functions[entry] = selected[0]
@@ -255,7 +668,9 @@ class _Builder:
         self.regions, self.operations, self.values = [], [], []
         self.operations_emitted = 0
         self.values_by_id = {}
+        self.value_positions = {}
         self.operation_links, self.value_links, self.use_links = [], [], []
+        self.value_link_set = set()
         self.targets, self.gaps = [], []
         self.world = LocationID(_key("python-world", str(path), self.snapshot.fingerprint))
         self.state_type = ValueType(ValueKind.STATE, location=self.world)
@@ -266,15 +681,6 @@ class _Builder:
         self.function_blocks = []
         self.pending_targets = []
 
-    def _collect_functions(self, statements, prefix=""):
-        for node in statements:
-            if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
-                name = prefix + node.name
-                self.function_candidates[name].append(node)
-                self.functions[name] = node
-            elif isinstance(node, ast.ClassDef):
-                self._collect_functions(node.body, prefix + node.name + ".")
-
     def source(self, node):
         try:
             return self.atoms[_span(node)]
@@ -282,13 +688,13 @@ class _Builder:
             raise _Unsupported(GapKind.SOURCE_MAPPING, node, "source atom is not uniquely represented")
 
     def old_operation(self, node):
-        records = self.old_by_atom[self.source(node).atom_id]
+        records = self.old_by_atom.get(self.source(node).atom_id, ())
         if len(records) != 1:
             raise _Unsupported(GapKind.SOURCE_MAPPING, node, "expression needs one source computational record")
         return records[0]
 
     def definition(self, node):
-        choices = [d for d in self.by_atom[self.source(node).atom_id.wire]
+        choices = [d for d in self.by_atom.get(self.source(node).atom_id.wire, ())
                    if d.metadata.get("phase") == "call_time"]
         if len(choices) != 1:
             raise _Unsupported(GapKind.SOURCE_MAPPING, node, "function body needs one versioned source definition")
@@ -305,12 +711,33 @@ class _Builder:
 
     def link_value(self, value, node, role, *, slot=None, semantic_value=None):
         link = ValueSource(value.id, self.source(node), role, slot, semantic_value)
-        if link not in self.value_links:
+        if link not in self.value_link_set:
             self.value_links.append(link)
+            self.value_link_set.add(link)
 
     def add_value(self, value):
+        self.value_positions[value.id] = len(self.values)
         self.values.append(value)
         self.values_by_id[value.id] = value
+
+    def replace_value(self, value):
+        self.values[self.value_positions[value.id]] = value
+        self.values_by_id[value.id] = value
+
+    def pop_value(self):
+        """Remove the trailing value and its trailing correspondence together."""
+        value = self.values.pop()
+        link = self.value_links.pop()
+        if link.value != value.id:
+            raise ValueError("trailing value/source correspondence differs")
+        self.value_link_set.remove(link)
+        del self.value_positions[value.id]
+        del self.values_by_id[value.id]
+        return value
+
+    def clear_value_links(self):
+        self.value_links.clear()
+        self.value_link_set.clear()
 
     def new_block(self, node, *, named=(), role=SourceRole.CONTROL, extra_types=()):
         block = self.fresh(BlockID, "block")
@@ -323,7 +750,12 @@ class _Builder:
             self.add_value(value); args.append(value.id); env[name] = value.id
             self.link_value(value, node, role)
         for kind in extra_types:
-            if kind.kind is ValueKind.REFERENCE:
+            from scar.ir.program.control import ProtocolValueType
+            from scar.ir.program.model import ProtocolValue
+            if type(kind) is ProtocolValueType:
+                value = ProtocolValue(self.fresh(ValueID, 'completion-protocol'), self.function_context,
+                                      BlockArgument(block, len(args)), kind.protocol)
+            elif kind.kind is ValueKind.REFERENCE:
                 value = ReferenceValue(self.fresh(ValueID, "completion-reference"), self.function_context,
                                        BlockArgument(block, len(args)))
             elif kind.kind is ValueKind.DATA:
@@ -456,7 +888,7 @@ class _Builder:
                 raise _Unsupported(GapKind.UNBOUND_LOCAL, node, "local has no definition on every incoming path: " + node.id)
             self.gap(GapKind.EFFECT_SUMMARY, node, "global/builtin name lookup remains an effectful source operation")
             cursor, value, _ = self.invoke(cursor, node, (), old=old)
-            if node.id in self.functions and len(self.function_candidates[node.id]) == 1:
+            if node.id in self.functions and len(self.function_candidates.get(node.id, ())) == 1:
                 self.reference_candidates[value] = node.id
             return cursor, value
 
@@ -648,8 +1080,7 @@ class _Builder:
                                "closure/cell bindings need explicit state-location interfaces")
         cursor = self.new_block(node)
         # Function entry has parameters followed by the explicit world state.
-        state = self.values.pop()
-        self.value_links.pop()
+        state = self.pop_value()
         args, ports = [], []
         cursor.env = {}
         for index, parameter in enumerate(parameters):
@@ -773,7 +1204,7 @@ class _Builder:
             # A rejected body has diagnostics, not dangling links into a graph
             # that was never emitted. Preserve the source layers and all gaps.
             self.operation_links.clear()
-            self.value_links.clear()
+            self.clear_value_links()
             self.use_links.clear()
             self.targets.clear()
             self.interface = None
@@ -823,6 +1254,8 @@ class _Builder:
                 self.operation_links, self.value_links, self.use_links, self.pending_targets, self.gaps), checkpoint):
             del items[length:]
         self.values_by_id = {value.id: value for value in self.values}
+        self.value_positions = {value.id: index for index, value in enumerate(self.values)}
+        self.value_link_set = set(self.value_links)
 
 
 def _span_atom(atom):
@@ -850,10 +1283,50 @@ def prepare_source(path: str | Path, *, project_root=None) -> PreparedSource:
         raise ValueError("source exceeds the existing 4 MB control-model input budget")
     with tokenize.open(path) as stream:
         text = stream.read()
+    return prepare_source_text(path, text, project_root=root,
+                               root_is_package=(root / '__init__.py').is_file())
+
+
+def prepare_source_text(path, text, *, project_root, root_is_package) -> PreparedSource:
+    """Construct ordinary static layers/AST from text, without loaded proof.
+
+    The explicit namespace choice is an input, not evidence of a runtime
+    ModuleObject/import. No source filename is opened, statted or resolved.
+    """
+    original = str(path); path = Path(path); root = Path(project_root)
+    if (type(text) is not str or type(root_is_package) is not bool
+            or not path.is_absolute() or not root.is_absolute()
+            or str(path) != original or '..' in path.parts or '..' in root.parts
+            or not path.is_relative_to(root)):
+        raise ValueError('text preparation needs exact absolute source/namespace and explicit package policy')
+    if len(text.encode('utf8')) > 4_000_000:
+        raise ValueError('source exceeds the existing 4 MB control-model input budget')
     sources = {str(path): text}
-    semantic, semantics, control = _build_generated_source_layers((path,), root, sources=sources)
+    semantic, semantics, control = _build_generated_source_layers((path,), root,
+        sources=sources, _root_is_package=root_is_package)
     tree = ast.parse(text, filename=str(path))
     return PreparedSource(path, root, text, semantic, semantics, control, tree, _symbol_tables(text, path))
+
+
+def prepare_captured_source(source_owner, captured, *, project_root, root_is_package) -> PreparedSource:
+    """Prepare one normal captured source, retaining its original namespace.
+
+    The owner establishes source-byte membership only. Loaded descriptor
+    correspondence remains the normal matcher/CodeWitness responsibility.
+    """
+    from scar.analysis.captured_source_owner import CapturedSourceOwner
+    from scar.ir.program.call_edges import CapturedCode
+    if type(source_owner) is not CapturedSourceOwner or type(captured) is not CapturedCode:
+        raise TypeError('captured preparation requires its normal owner and original typed CodeID')
+    snapshot = source_owner.snapshot(captured)
+    original = source_owner.archived_source(snapshot)
+    prepared = prepare_source_text(snapshot.path, original.text, project_root=project_root,
+                                   root_is_package=root_is_package)
+    if (prepared.semantics.sources.get(snapshot.path) != snapshot
+            or snapshot.fingerprint != 'sha256:' + hashlib.sha256(prepared.text.encode('utf8')).hexdigest()):
+        raise ValueError('generated source layers differ from the captured snapshot/version/encoding')
+    source_owner.require_unchanged()
+    return prepared
 
 
 def _symbol_tables(text, path):
@@ -867,31 +1340,122 @@ def _symbol_tables(text, path):
 
 
 def lower_source(path: str | Path, entry: str, *, max_operations: int = 10000,
-                 profile: BodyLoweringProfile = BodyLoweringProfile.LEGACY) -> SourceProgram:
+                 profile: BodyLoweringProfile = BodyLoweringProfile.LEGACY, language_options=None,
+                 project_root=None) -> SourceProgram:
     _check_arguments(entry, max_operations)
-    if type(profile) is not BodyLoweringProfile or profile not in (BodyLoweringProfile.LEGACY, BodyLoweringProfile.BOUND_FRAME):
-        raise ValueError("standalone source program needs LEGACY or BOUND_FRAME_V1 profile")
-    context = prepare_source(path)
+    if type(profile) is not BodyLoweringProfile or profile not in (BodyLoweringProfile.LEGACY,
+            BodyLoweringProfile.BOUND_FRAME, BodyLoweringProfile.STRUCTURED_BODY, BodyLoweringProfile.STRUCTURED_ENV):
+        raise ValueError("unsupported standalone source profile")
+    context = prepare_source(path, project_root=project_root)
     body = context.lower(entry, max_operations=max_operations,
-                         expand_candidates=profile is BodyLoweringProfile.LEGACY, profile=profile)
+                         expand_candidates=profile is BodyLoweringProfile.LEGACY, profile=profile,
+                         language_options=language_options)
     return SourceProgram(body.graph, body.metadata, context.semantic, context.semantics, context.control,
-                         profile, body.interface, body.frame)
+                         profile, body.interface, body.frame, body.structured, body.language)
 
 
-def validate_source_program(result: SourceProgram, *, max_operations: int = 10000):
+def _check_structure_source_texts(verification, source_texts):
+    if source_texts is not None:
+        if verification != "STRUCTURE":
+            raise ValueError("explicit retained source_texts are only supported for STRUCTURE verification")
+        if type(source_texts) is not dict or any(type(path) is not str or type(text) is not str
+                                                for path, text in source_texts.items()):
+            raise TypeError("source_texts must be an explicit dict[path, str]")
+
+
+def validate_source_program(result: SourceProgram, *, max_operations: int = 10000, language_options=None,
+                            verification="SOURCE_REPLAY", source_texts: dict[str, str] | None = None,
+                            module_code_evidence=None, _context_session=None, _context_reference=None):
     """Rebuild from current source; reported provenance cannot raise this budget."""
     try:
         if type(result) is not SourceProgram:
             raise ValueError("expected SourceProgram")
-        if type(result.profile) is not BodyLoweringProfile or result.profile not in (BodyLoweringProfile.LEGACY, BodyLoweringProfile.BOUND_FRAME):
+        if verification not in ("SOURCE_REPLAY", "STRUCTURE"):
+            raise ValueError("source verification mode differs")
+        _check_structure_source_texts(verification, source_texts)
+        if result.module is not None:
+            if _context_session is not None or _context_reference is not None:
+                raise ValueError("module source context sharing is unsupported")
+            if verification != "STRUCTURE" or language_options is not None:
+                raise ValueError("v6 mapping verification requires explicit retained STRUCTURE inputs")
+            from scar.analysis.source_module_validation import module_validation_report
+            return module_validation_report(result, source_texts=source_texts,
+                code_evidence=module_code_evidence, max_operations=max_operations)
+        if module_code_evidence is not None:
+            raise ValueError("module evidence cannot alter function validation")
+        structural_only = verification == "STRUCTURE"
+        if _context_session is not None or _context_reference is not None:
+            from scar.store.source_fragments import SourceContextSession, SourceContextReference
+            if (not structural_only or type(_context_session) is not SourceContextSession
+                    or type(_context_reference) is not SourceContextReference):
+                raise ValueError("source context reuse requires a live exact STRUCTURE session")
+            # Reject stale private IR before any body checker consumes it.
+            _context_session._claim(result, _context_reference)
+            # Main's Try/call-expansion/function-creation checkers retain
+            # their exact-source STRUCTURE policy under the private owner.
+            source_texts = _context_session._texts
+        if structural_only and result.language is None:
+            raise ValueError("historical source replay policy is unchanged")
+        if result.language is not None:
+            if (type(result.language) is not SourceLanguageOverlay
+                    or result.profile is not BodyLoweringProfile.STRUCTURED_ENV):
+                raise ValueError("extended source-language overlay requires the environment entry ABI")
+            if result.language.source != result.metadata.source:
+                raise ValueError("source-language overlay snapshot differs from metadata")
+        if type(result.profile) is not BodyLoweringProfile or result.profile not in (BodyLoweringProfile.LEGACY,
+                BodyLoweringProfile.BOUND_FRAME, BodyLoweringProfile.STRUCTURED_BODY, BodyLoweringProfile.STRUCTURED_ENV):
             raise ValueError("unsupported standalone source lowering profile")
         if result.profile is BodyLoweringProfile.LEGACY:
-            if result.interface is not None or result.frame is not None:
+            if result.interface is not None or result.frame is not None or result.structured is not None:
                 raise ValueError("historical source-program v1 has no bound-frame overlay")
         elif result.graph is None:
-            if result.interface is not None or result.frame is not None:
+            if result.interface is not None or result.frame is not None or result.structured is not None:
                 raise ValueError("unsupported source body has no frame/interface links")
+        elif result.profile in (BodyLoweringProfile.STRUCTURED_BODY, BodyLoweringProfile.STRUCTURED_ENV):
+            from scar.analysis.structured_lowering import require_valid_structured_body
+            if result.frame is not None or result.interface is None:
+                raise ValueError("structured bodies require a structured interface, not a legacy frame overlay")
+            source_tree = None
+            from scar.ir.program.source_language import SourceLanguageCapability
+            try_source = result.language is not None and SourceLanguageCapability.FUNCTION_TRY_314_V1 in result.language.capabilities
+            call_source = result.language is not None and SourceLanguageCapability.CALL_EXPANSION_314_V1 in result.language.capabilities
+            function_source = result.language is not None and SourceLanguageCapability.NESTED_FUNCTION_314_V1 in result.language.capabilities
+            import_source = result.language is not None and SourceLanguageCapability.FUNCTION_IMPORT_314_V1 in result.language.capabilities
+            creation_source = result.language is not None and SourceLanguageCapability.GENEXPR_CREATION_314_V1 in result.language.capabilities
+            set_source = result.language is not None and SourceLanguageCapability.SET_DISPLAY_314_V1 in result.language.capabilities
+            unpack_source = result.language is not None and SourceLanguageCapability.UNPACK_TARGETS_314_V1 in result.language.capabilities
+            lambda_source = result.language is not None and SourceLanguageCapability.LAMBDA_EXPRESSION_314_V1 in result.language.capabilities
+            comprehension_source = result.language is not None and SourceLanguageCapability.COMPREHENSION_314_V1 in result.language.capabilities
+            display_source = result.language is not None and SourceLanguageCapability.STARRED_DISPLAY_314_V1 in result.language.capabilities
+            if result.language is not None and (not structural_only or try_source or call_source or function_source or import_source or creation_source or set_source or unpack_source or lambda_source or comprehension_source or display_source):
+                if not structural_only and language_options is None:
+                    raise ValueError("v5 source replay requires explicit independently supplied language inputs")
+                if structural_only:
+                    if source_texts is None or result.metadata.source.path not in source_texts:
+                        raise ValueError("function Try STRUCTURE requires its exact retained source text" if try_source
+                                         else "function definition STRUCTURE requires its exact retained source text" if function_source
+                                         else "function import STRUCTURE requires its exact retained source text" if import_source
+                                         else "generator creation STRUCTURE requires its exact retained source text" if creation_source
+                                         else "set display STRUCTURE requires its exact retained source text" if set_source
+                                         else "unpack target STRUCTURE requires its exact retained source text" if unpack_source
+                                         else "starred display STRUCTURE requires its exact retained source text" if display_source
+                                         else "comprehension STRUCTURE requires its exact retained source text" if comprehension_source
+                                         else "Lambda expression STRUCTURE requires its exact retained source text" if lambda_source
+                                         else "expanded call STRUCTURE requires its exact retained source text")
+                    source_text = source_texts[result.metadata.source.path]
+                else:
+                    with tokenize.open(result.metadata.source.path) as stream:
+                        source_text = stream.read()
+                if "sha256:" + hashlib.sha256(source_text.encode()).hexdigest() != result.metadata.source.fingerprint:
+                    raise ValueError("v5 source text changed")
+                source_tree = ast.parse(source_text, filename=result.metadata.source.path)
+            require_valid_structured_body(result.structured, result.graph, result.interface, result.metadata,
+                semantic=result.semantic, control=result.control, language=result.language,
+                source_tree=source_tree, language_options=language_options, structural_only=structural_only,
+                _context_session=_context_session, _context_reference=_context_reference)
         else:
+            if result.structured is not None:
+                raise ValueError("historical frame bodies cannot contain structured protocols")
             from scar.ir.program.frame_validation import require_valid_frame_model
             if result.interface is None or result.interface.profile is not result.profile:
                 raise ValueError("frame source program needs its matching body interface")
@@ -900,13 +1464,15 @@ def validate_source_program(result: SourceProgram, *, max_operations: int = 1000
         errors = record_errors(result.metadata, LoweringMetadata, "metadata")
         if errors:
             return {"valid": False, "errors": errors}
-        result.semantic.assert_valid()
-        source_check = validate_source_semantics(result.semantics, result.semantic)
-        if not source_check["valid"]:
-            return source_check
-        control_check = validate_source_control_flow(result.control, result.semantic, result.semantics)
-        if not control_check["valid"]:
-            return control_check
+        if _context_session is None and _context_reference is None:
+            result.semantic.assert_valid()
+            source_check = validate_source_semantics(result.semantics, result.semantic, sources=source_texts)
+            if not source_check["valid"]:
+                return source_check
+            control_check = validate_source_control_flow(result.control, result.semantic, result.semantics,
+                                                          sources=source_texts)
+            if not control_check["valid"]:
+                return control_check
         if result.graph is not None:
             require_valid(result.graph)
             ops = {op.id: op for op in result.graph.operations}
@@ -918,14 +1484,22 @@ def validate_source_program(result: SourceProgram, *, max_operations: int = 1000
             if {(link.operation, link.use) for link in result.metadata.use_links} != {
                     (op.id, use.id) for op in ops.values() for use in op.uses}:
                 raise ValueError("source use correspondence is incomplete")
-        rebuilt = lower_source(result.metadata.source.path, result.metadata.entry,
-                               max_operations=max_operations, profile=result.profile)
-        if _canonical(result.to_dict()) != _canonical(rebuilt.to_dict()):
-            raise ValueError("program graph or typed source correspondence differs from source replay")
+        if not structural_only:
+            rebuilt = lower_source(result.metadata.source.path, result.metadata.entry,
+                max_operations=max_operations, profile=result.profile, language_options=language_options,
+                project_root=result.language.namespace_root if result.language is not None else None)
+            if _canonical(result.to_dict()) != _canonical(rebuilt.to_dict()):
+                raise ValueError("program graph or typed source correspondence differs from source replay")
     except (ValueError, TypeError, KeyError, AttributeError, OSError, SyntaxError, RecursionError) as error:
         return {"valid": False, "errors": [str(error)]}
-    return {"valid": True, "errors": []}
+    if result.language is None:
+        return {"valid": True, "errors": []}
+    return {"valid": True, "errors": [], "verification": verification,
+            "source_shape_verified": verification == "SOURCE_REPLAY",
+            "code_constant_provenance_verified": bool(result.language and result.language.constants)
+                and verification == "SOURCE_REPLAY",
+            "runtime_code_instance_established": False}
 
 
-__all__ = ["SourceProgram", "PreparedSource", "LoweredSourceBody", "prepare_source",
+__all__ = ["SourceProgram", "PreparedSource", "LoweredSourceBody", "prepare_source", "prepare_source_text", "prepare_captured_source",
            "lower_source", "validate_source_program"]

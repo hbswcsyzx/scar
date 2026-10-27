@@ -1,0 +1,6 @@
+{
+  "error_type": "AssertionError",
+  "error": "no same-source provider-work native host in this shard",
+  "traceback": "Traceback (most recent call last):\n  File \"/home/zyf/AAA/scar-worktrees/native-declaration-resources/artifacts/analysis/native_declaration_resources_20261027/run_connections.py\", line 21, in <module>\n    selected=session.candidate(shard);assert selected is not None,'no same-source provider-work native host in this shard'\n                                             ^^^^^^^^^^^^^^^^^^^^\nAssertionError: no same-source provider-work native host in this shard\n",
+  "elapsed_s": 31.00268028699793
+}

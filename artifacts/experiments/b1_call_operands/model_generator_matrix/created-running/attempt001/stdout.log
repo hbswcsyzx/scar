@@ -1,0 +1,338 @@
+FFFFFFFFFFFFFFF                                                          [100%]
+=================================== FAILURES ===================================
+_ test_all_eight_stage_request_cells_use_actual_predicates_callers_and_current_ports[NEXT-created] _
+
+stage = 'created', kind = <RawRequestKind.NEXT: 'NEXT'>
+
+    @pytest.mark.parametrize("stage", ("created", "running"))
+    @pytest.mark.parametrize("kind", tuple(RawRequestKind))
+    def test_all_eight_stage_request_cells_use_actual_predicates_callers_and_current_ports(stage, kind):
+        graph, details = generator_admission_program(stage=stage, kind=kind)
+>       require_valid(graph)
+
+tests/unit/test_program_generator_admission.py:29: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='matrix.calls'), regions=(Region(id=RegionID(value='matrix.calls'), label='declared d...), source=StaticProtocolGap(reason=<StaticGapReason.NATIVE_APPLICABILITY_UNPROVEN: 'NATIVE_APPLICABILITY_UNPROVEN'>))))
+
+    def require_valid(graph: ProgramGraph) -> None:
+        issues = validate(graph)
+        if issues:
+>           raise ValueError("; ".join(f"{issue.code} at {issue.path}: {issue.message}" for issue in issues))
+E           ValueError: publication_coverage at program_operation:driver.drive: each enabled source edge requires exactly one body publication
+
+scar/ir/program/validation.py:731: ValueError
+_ test_all_eight_stage_request_cells_use_actual_predicates_callers_and_current_ports[NEXT-running] _
+
+stage = 'running', kind = <RawRequestKind.NEXT: 'NEXT'>
+
+    @pytest.mark.parametrize("stage", ("created", "running"))
+    @pytest.mark.parametrize("kind", tuple(RawRequestKind))
+    def test_all_eight_stage_request_cells_use_actual_predicates_callers_and_current_ports(stage, kind):
+        graph, details = generator_admission_program(stage=stage, kind=kind)
+>       require_valid(graph)
+
+tests/unit/test_program_generator_admission.py:29: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='matrix.calls'), regions=(Region(id=RegionID(value='matrix.calls'), label='declared d...), source=StaticProtocolGap(reason=<StaticGapReason.NATIVE_APPLICABILITY_UNPROVEN: 'NATIVE_APPLICABILITY_UNPROVEN'>))))
+
+    def require_valid(graph: ProgramGraph) -> None:
+        issues = validate(graph)
+        if issues:
+>           raise ValueError("; ".join(f"{issue.code} at {issue.path}: {issue.message}" for issue in issues))
+E           ValueError: unbound_exit at program_region:matrix.calls: declared exits must be bound to actual control exits
+
+scar/ir/program/validation.py:731: ValueError
+_ test_all_eight_stage_request_cells_use_actual_predicates_callers_and_current_ports[SEND-created] _
+
+stage = 'created', kind = <RawRequestKind.SEND: 'SEND'>
+
+    @pytest.mark.parametrize("stage", ("created", "running"))
+    @pytest.mark.parametrize("kind", tuple(RawRequestKind))
+    def test_all_eight_stage_request_cells_use_actual_predicates_callers_and_current_ports(stage, kind):
+        graph, details = generator_admission_program(stage=stage, kind=kind)
+>       require_valid(graph)
+
+tests/unit/test_program_generator_admission.py:29: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='matrix.calls'), regions=(Region(id=RegionID(value='matrix.calls'), label='declared d...), source=StaticProtocolGap(reason=<StaticGapReason.NATIVE_APPLICABILITY_UNPROVEN: 'NATIVE_APPLICABILITY_UNPROVEN'>))))
+
+    def require_valid(graph: ProgramGraph) -> None:
+        issues = validate(graph)
+        if issues:
+>           raise ValueError("; ".join(f"{issue.code} at {issue.path}: {issue.message}" for issue in issues))
+E           ValueError: publication_coverage at program_operation:driver.drive: each enabled source edge requires exactly one body publication
+
+scar/ir/program/validation.py:731: ValueError
+_ test_all_eight_stage_request_cells_use_actual_predicates_callers_and_current_ports[SEND-running] _
+
+stage = 'running', kind = <RawRequestKind.SEND: 'SEND'>
+
+    @pytest.mark.parametrize("stage", ("created", "running"))
+    @pytest.mark.parametrize("kind", tuple(RawRequestKind))
+    def test_all_eight_stage_request_cells_use_actual_predicates_callers_and_current_ports(stage, kind):
+        graph, details = generator_admission_program(stage=stage, kind=kind)
+>       require_valid(graph)
+
+tests/unit/test_program_generator_admission.py:29: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='matrix.calls'), regions=(Region(id=RegionID(value='matrix.calls'), label='declared d...), source=StaticProtocolGap(reason=<StaticGapReason.NATIVE_APPLICABILITY_UNPROVEN: 'NATIVE_APPLICABILITY_UNPROVEN'>))))
+
+    def require_valid(graph: ProgramGraph) -> None:
+        issues = validate(graph)
+        if issues:
+>           raise ValueError("; ".join(f"{issue.code} at {issue.path}: {issue.message}" for issue in issues))
+E           ValueError: unbound_exit at program_region:matrix.calls: declared exits must be bound to actual control exits
+
+scar/ir/program/validation.py:731: ValueError
+_ test_all_eight_stage_request_cells_use_actual_predicates_callers_and_current_ports[THROW-created] _
+
+stage = 'created', kind = <RawRequestKind.THROW: 'THROW'>
+
+    @pytest.mark.parametrize("stage", ("created", "running"))
+    @pytest.mark.parametrize("kind", tuple(RawRequestKind))
+    def test_all_eight_stage_request_cells_use_actual_predicates_callers_and_current_ports(stage, kind):
+        graph, details = generator_admission_program(stage=stage, kind=kind)
+>       require_valid(graph)
+
+tests/unit/test_program_generator_admission.py:29: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='matrix.calls'), regions=(Region(id=RegionID(value='matrix.calls'), label='declared d...), source=StaticProtocolGap(reason=<StaticGapReason.NATIVE_APPLICABILITY_UNPROVEN: 'NATIVE_APPLICABILITY_UNPROVEN'>))))
+
+    def require_valid(graph: ProgramGraph) -> None:
+        issues = validate(graph)
+        if issues:
+>           raise ValueError("; ".join(f"{issue.code} at {issue.path}: {issue.message}" for issue in issues))
+E           ValueError: publication_coverage at program_operation:driver.drive: each enabled source edge requires exactly one body publication
+
+scar/ir/program/validation.py:731: ValueError
+_ test_all_eight_stage_request_cells_use_actual_predicates_callers_and_current_ports[THROW-running] _
+
+stage = 'running', kind = <RawRequestKind.THROW: 'THROW'>
+
+    @pytest.mark.parametrize("stage", ("created", "running"))
+    @pytest.mark.parametrize("kind", tuple(RawRequestKind))
+    def test_all_eight_stage_request_cells_use_actual_predicates_callers_and_current_ports(stage, kind):
+        graph, details = generator_admission_program(stage=stage, kind=kind)
+>       require_valid(graph)
+
+tests/unit/test_program_generator_admission.py:29: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='matrix.calls'), regions=(Region(id=RegionID(value='matrix.calls'), label='declared d...), source=StaticProtocolGap(reason=<StaticGapReason.NATIVE_APPLICABILITY_UNPROVEN: 'NATIVE_APPLICABILITY_UNPROVEN'>))))
+
+    def require_valid(graph: ProgramGraph) -> None:
+        issues = validate(graph)
+        if issues:
+>           raise ValueError("; ".join(f"{issue.code} at {issue.path}: {issue.message}" for issue in issues))
+E           ValueError: unbound_exit at program_region:matrix.calls: declared exits must be bound to actual control exits
+
+scar/ir/program/validation.py:731: ValueError
+_ test_all_eight_stage_request_cells_use_actual_predicates_callers_and_current_ports[CLOSE-created] _
+
+stage = 'created', kind = <RawRequestKind.CLOSE: 'CLOSE'>
+
+    @pytest.mark.parametrize("stage", ("created", "running"))
+    @pytest.mark.parametrize("kind", tuple(RawRequestKind))
+    def test_all_eight_stage_request_cells_use_actual_predicates_callers_and_current_ports(stage, kind):
+        graph, details = generator_admission_program(stage=stage, kind=kind)
+>       require_valid(graph)
+
+tests/unit/test_program_generator_admission.py:29: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='matrix.calls'), regions=(Region(id=RegionID(value='matrix.calls'), label='declared d...), source=StaticProtocolGap(reason=<StaticGapReason.NATIVE_APPLICABILITY_UNPROVEN: 'NATIVE_APPLICABILITY_UNPROVEN'>))))
+
+    def require_valid(graph: ProgramGraph) -> None:
+        issues = validate(graph)
+        if issues:
+>           raise ValueError("; ".join(f"{issue.code} at {issue.path}: {issue.message}" for issue in issues))
+E           ValueError: operation_owner at program_operation:driver.gate: operation must occur in exactly one block; operation_owner at program_operation:boundary.helper: operation has no owning block
+
+scar/ir/program/validation.py:731: ValueError
+_ test_all_eight_stage_request_cells_use_actual_predicates_callers_and_current_ports[CLOSE-running] _
+
+stage = 'running', kind = <RawRequestKind.CLOSE: 'CLOSE'>
+
+    @pytest.mark.parametrize("stage", ("created", "running"))
+    @pytest.mark.parametrize("kind", tuple(RawRequestKind))
+    def test_all_eight_stage_request_cells_use_actual_predicates_callers_and_current_ports(stage, kind):
+        graph, details = generator_admission_program(stage=stage, kind=kind)
+>       require_valid(graph)
+
+tests/unit/test_program_generator_admission.py:29: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='matrix.calls'), regions=(Region(id=RegionID(value='matrix.calls'), label='declared d...), source=StaticProtocolGap(reason=<StaticGapReason.NATIVE_APPLICABILITY_UNPROVEN: 'NATIVE_APPLICABILITY_UNPROVEN'>))))
+
+    def require_valid(graph: ProgramGraph) -> None:
+        issues = validate(graph)
+        if issues:
+>           raise ValueError("; ".join(f"{issue.code} at {issue.path}: {issue.message}" for issue in issues))
+E           ValueError: unbound_exit at program_region:matrix.calls: declared exits must be bound to actual control exits
+
+scar/ir/program/validation.py:731: ValueError
+_ test_created_send_none_and_real_rejected_send_retry_have_independent_original_calls[True-False] _
+
+send_none = True, retry = False
+
+    @pytest.mark.parametrize("send_none,retry", ((True, False), (False, True)))
+    def test_created_send_none_and_real_rejected_send_retry_have_independent_original_calls(send_none, retry):
+        graph, details = generator_admission_program(stage="created", kind=RawRequestKind.SEND,
+                                                   send_none=send_none, retry=retry)
+>       require_valid(graph)
+
+tests/unit/test_program_generator_admission.py:70: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='matrix.calls'), regions=(Region(id=RegionID(value='matrix.calls'), label='declared d...), source=StaticProtocolGap(reason=<StaticGapReason.NATIVE_APPLICABILITY_UNPROVEN: 'NATIVE_APPLICABILITY_UNPROVEN'>))))
+
+    def require_valid(graph: ProgramGraph) -> None:
+        issues = validate(graph)
+        if issues:
+>           raise ValueError("; ".join(f"{issue.code} at {issue.path}: {issue.message}" for issue in issues))
+E           ValueError: publication_coverage at program_operation:driver.drive: each enabled source edge requires exactly one body publication
+
+scar/ir/program/validation.py:731: ValueError
+_ test_created_send_none_and_real_rejected_send_retry_have_independent_original_calls[False-True] _
+
+send_none = False, retry = True
+
+    @pytest.mark.parametrize("send_none,retry", ((True, False), (False, True)))
+    def test_created_send_none_and_real_rejected_send_retry_have_independent_original_calls(send_none, retry):
+        graph, details = generator_admission_program(stage="created", kind=RawRequestKind.SEND,
+                                                   send_none=send_none, retry=retry)
+>       require_valid(graph)
+
+tests/unit/test_program_generator_admission.py:70: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='matrix.calls'), regions=(Region(id=RegionID(value='matrix.calls'), label='declared d...), source=StaticProtocolGap(reason=<StaticGapReason.NATIVE_APPLICABILITY_UNPROVEN: 'NATIVE_APPLICABILITY_UNPROVEN'>))))
+
+    def require_valid(graph: ProgramGraph) -> None:
+        issues = validate(graph)
+        if issues:
+>           raise ValueError("; ".join(f"{issue.code} at {issue.path}: {issue.message}" for issue in issues))
+E           ValueError: publication_coverage at program_operation:driver.drive: each enabled source edge requires exactly one body publication; publication_coverage at program_operation:matrix.retry.driver.driver.drive: each enabled source edge requires exactly one body publication
+
+scar/ir/program/validation.py:731: ValueError
+_ test_created_throw_initial_edge_finalizes_without_a_body_ingress_on_that_route[False] _
+
+failure = False
+
+    @pytest.mark.parametrize("failure", (False, True))
+    def test_created_throw_initial_edge_finalizes_without_a_body_ingress_on_that_route(failure):
+        graph, details = generator_admission_program(stage="created", kind=RawRequestKind.THROW,
+                                                   constructor_failure=failure)
+>       require_valid(graph)
+
+tests/unit/test_program_generator_admission.py:95: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='matrix.calls'), regions=(Region(id=RegionID(value='matrix.calls'), label='declared d...), source=StaticProtocolGap(reason=<StaticGapReason.NATIVE_APPLICABILITY_UNPROVEN: 'NATIVE_APPLICABILITY_UNPROVEN'>))))
+
+    def require_valid(graph: ProgramGraph) -> None:
+        issues = validate(graph)
+        if issues:
+>           raise ValueError("; ".join(f"{issue.code} at {issue.path}: {issue.message}" for issue in issues))
+E           ValueError: publication_coverage at program_operation:driver.drive: each enabled source edge requires exactly one body publication
+
+scar/ir/program/validation.py:731: ValueError
+_ test_created_throw_initial_edge_finalizes_without_a_body_ingress_on_that_route[True] _
+
+failure = True
+
+    @pytest.mark.parametrize("failure", (False, True))
+    def test_created_throw_initial_edge_finalizes_without_a_body_ingress_on_that_route(failure):
+        graph, details = generator_admission_program(stage="created", kind=RawRequestKind.THROW,
+                                                   constructor_failure=failure)
+>       require_valid(graph)
+
+tests/unit/test_program_generator_admission.py:95: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='matrix.calls'), regions=(Region(id=RegionID(value='matrix.calls'), label='declared d...), source=StaticProtocolGap(reason=<StaticGapReason.NATIVE_APPLICABILITY_UNPROVEN: 'NATIVE_APPLICABILITY_UNPROVEN'>))))
+
+    def require_valid(graph: ProgramGraph) -> None:
+        issues = validate(graph)
+        if issues:
+>           raise ValueError("; ".join(f"{issue.code} at {issue.path}: {issue.message}" for issue in issues))
+E           ValueError: publication_coverage at program_operation:driver.drive: each enabled source edge requires exactly one body publication
+
+scar/ir/program/validation.py:731: ValueError
+_ test_running_throw_preserves_normalizer_callback_failure_before_reentry_override _
+
+    def test_running_throw_preserves_normalizer_callback_failure_before_reentry_override():
+        graph, details = generator_admission_program(stage="running", kind=RawRequestKind.THROW)
+>       require_valid(graph)
+
+tests/unit/test_program_generator_admission.py:111: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='matrix.calls'), regions=(Region(id=RegionID(value='matrix.calls'), label='declared d...), source=StaticProtocolGap(reason=<StaticGapReason.NATIVE_APPLICABILITY_UNPROVEN: 'NATIVE_APPLICABILITY_UNPROVEN'>))))
+
+    def require_valid(graph: ProgramGraph) -> None:
+        issues = validate(graph)
+        if issues:
+>           raise ValueError("; ".join(f"{issue.code} at {issue.path}: {issue.message}" for issue in issues))
+E           ValueError: unbound_exit at program_region:matrix.calls: declared exits must be bound to actual control exits
+
+scar/ir/program/validation.py:731: ValueError
+_ test_a_same_typed_other_bool_cannot_replace_the_real_running_guard_condition _
+
+    def test_a_same_typed_other_bool_cannot_replace_the_real_running_guard_condition():
+        graph, details = generator_admission_program(stage="running", kind=RawRequestKind.THROW)
+>       require_valid(graph)
+
+tests/unit/test_program_generator_admission.py:135: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='matrix.calls'), regions=(Region(id=RegionID(value='matrix.calls'), label='declared d...), source=StaticProtocolGap(reason=<StaticGapReason.NATIVE_APPLICABILITY_UNPROVEN: 'NATIVE_APPLICABILITY_UNPROVEN'>))))
+
+    def require_valid(graph: ProgramGraph) -> None:
+        issues = validate(graph)
+        if issues:
+>           raise ValueError("; ".join(f"{issue.code} at {issue.path}: {issue.message}" for issue in issues))
+E           ValueError: unbound_exit at program_region:matrix.calls: declared exits must be bound to actual control exits
+
+scar/ir/program/validation.py:731: ValueError
+_______________ test_retry_cannot_reuse_the_pre_rejection_state ________________
+
+    def test_retry_cannot_reuse_the_pre_rejection_state():
+        graph, details = generator_admission_program(stage="created", kind=RawRequestKind.SEND,
+                                                   send_none=False, retry=True)
+>       require_valid(graph)
+
+tests/unit/test_program_generator_admission.py:149: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='matrix.calls'), regions=(Region(id=RegionID(value='matrix.calls'), label='declared d...), source=StaticProtocolGap(reason=<StaticGapReason.NATIVE_APPLICABILITY_UNPROVEN: 'NATIVE_APPLICABILITY_UNPROVEN'>))))
+
+    def require_valid(graph: ProgramGraph) -> None:
+        issues = validate(graph)
+        if issues:
+>           raise ValueError("; ".join(f"{issue.code} at {issue.path}: {issue.message}" for issue in issues))
+E           ValueError: publication_coverage at program_operation:driver.drive: each enabled source edge requires exactly one body publication; publication_coverage at program_operation:matrix.retry.driver.driver.drive: each enabled source edge requires exactly one body publication
+
+scar/ir/program/validation.py:731: ValueError
+=========================== short test summary info ============================
+FAILED tests/unit/test_program_generator_admission.py::test_all_eight_stage_request_cells_use_actual_predicates_callers_and_current_ports[NEXT-created]
+FAILED tests/unit/test_program_generator_admission.py::test_all_eight_stage_request_cells_use_actual_predicates_callers_and_current_ports[NEXT-running]
+FAILED tests/unit/test_program_generator_admission.py::test_all_eight_stage_request_cells_use_actual_predicates_callers_and_current_ports[SEND-created]
+FAILED tests/unit/test_program_generator_admission.py::test_all_eight_stage_request_cells_use_actual_predicates_callers_and_current_ports[SEND-running]
+FAILED tests/unit/test_program_generator_admission.py::test_all_eight_stage_request_cells_use_actual_predicates_callers_and_current_ports[THROW-created]
+FAILED tests/unit/test_program_generator_admission.py::test_all_eight_stage_request_cells_use_actual_predicates_callers_and_current_ports[THROW-running]
+FAILED tests/unit/test_program_generator_admission.py::test_all_eight_stage_request_cells_use_actual_predicates_callers_and_current_ports[CLOSE-created]
+FAILED tests/unit/test_program_generator_admission.py::test_all_eight_stage_request_cells_use_actual_predicates_callers_and_current_ports[CLOSE-running]
+FAILED tests/unit/test_program_generator_admission.py::test_created_send_none_and_real_rejected_send_retry_have_independent_original_calls[True-False]
+FAILED tests/unit/test_program_generator_admission.py::test_created_send_none_and_real_rejected_send_retry_have_independent_original_calls[False-True]
+FAILED tests/unit/test_program_generator_admission.py::test_created_throw_initial_edge_finalizes_without_a_body_ingress_on_that_route[False]
+FAILED tests/unit/test_program_generator_admission.py::test_created_throw_initial_edge_finalizes_without_a_body_ingress_on_that_route[True]
+FAILED tests/unit/test_program_generator_admission.py::test_running_throw_preserves_normalizer_callback_failure_before_reentry_override
+FAILED tests/unit/test_program_generator_admission.py::test_a_same_typed_other_bool_cannot_replace_the_real_running_guard_condition
+FAILED tests/unit/test_program_generator_admission.py::test_retry_cannot_reuse_the_pre_rejection_state
+15 failed in 1.50s

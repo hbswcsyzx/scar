@@ -1,0 +1,40 @@
+{
+  "actual_CLI_exit": 2,
+  "blockers": [
+    "declared calls exceeds G1 budget"
+  ],
+  "declared": {
+    "calls": 271,
+    "codes": 9,
+    "process_id": 1391040,
+    "raw_bytes": 19119646
+  },
+  "metadata_bytes_read": 43954,
+  "next_scope": {
+    "default_calls_ceiling_unchanged": 256,
+    "explicit_calls_ceiling": 512,
+    "same_capture": true
+  },
+  "raw_bytes_read": 0,
+  "retained_producer_sources": [
+    {
+      "bytes": 100916,
+      "path": "scar/cli.py",
+      "sha256": "646633a4f1f71d06e2c7952d04f45bcef7d0d369677775d61c06acd2f719cf41",
+      "snapshot": "artifacts/experiments/model_run_offline_g0_20261025/producer-sources/scar/cli.py",
+      "status": "FROZEN_BYTES_RETAINED_AFTER_GATE"
+    },
+    {
+      "bytes": 14040,
+      "path": "scar/analysis/model_run.py",
+      "sha256": "240e8823ffe909a638c07ebe7bfc00afbbf112e0414ffdf2b403b86e1cc57e8d",
+      "snapshot": "artifacts/experiments/model_run_offline_g0_20261025/producer-sources/scar/analysis/model_run.py",
+      "status": "FROZEN_BYTES_RETAINED_AFTER_GATE"
+    }
+  ],
+  "schema": "scar.model-run-g0-actual-result",
+  "schema_version": 1,
+  "status": "G0_METADATA_VALID_DECLARED_CALL_BUDGET_BLOCKED",
+  "target_or_capture_run": false,
+  "whole_model": "OPEN"
+}

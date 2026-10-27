@@ -1,0 +1,147 @@
+{
+  "counts": {
+    "entities": 437228,
+    "namespaces": 840
+  },
+  "database": {
+    "bytes": 481460224,
+    "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_graph_index_20261023/graph.attempt01.sqlite",
+    "sha256": "5e9a7461b68268a630cf926d59ecfb1e7e498549d8500534f7d309fa81a32fbe"
+  },
+  "elapsed_s": 2.933511893003015,
+  "examples": [
+    {
+      "body_index": 8,
+      "file_index": 66,
+      "namespace": {
+        "artifact": {
+          "decoded_sha256": "69fba1e8ec039bde754368fc1d9c6709da73d218c2c4c2556f7de4a565d5ac48",
+          "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_plain_20261023/checkpoints/00703.json.gz"
+        },
+        "body": {
+          "definition": {
+            "kind": "opdef",
+            "value": "op:60b77bce339015926f73cb98",
+            "wire": "opdef:op:60b77bce339015926f73cb98"
+          },
+          "entry": "Transform.name",
+          "source": {
+            "atom_id": {
+              "kind": "source",
+              "value": "atom:a321cd817aa7394c0cbe7d89",
+              "wire": "source:atom:a321cd817aa7394c0cbe7d89"
+            },
+            "end_column": 38,
+            "end_line": 65,
+            "fingerprint": "sha256:1df32305b18b6f82340f22def1be0cad17b312e09000efaa6138cd2ed71ec4f1",
+            "path": "/home/zyf/AAA/le-wm/stable-pretraining/stable_pretraining/data/transforms.py",
+            "start_column": 4,
+            "start_line": 64
+          }
+        },
+        "record_pointer": "#/graph",
+        "representation": "scar.program-graph/5"
+      },
+      "original_checkpoint": {
+        "decoded_bytes": 82538,
+        "decoded_sha256": "69fba1e8ec039bde754368fc1d9c6709da73d218c2c4c2556f7de4a565d5ac48",
+        "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_plain_20261023/checkpoints/00703.json.gz",
+        "stored_bytes": 7123,
+        "stored_sha256": "3b7923b37bfc1c5da61651f9b8670684434b9d0bb5a2b7832845090d28b952b9"
+      },
+      "original_record": {
+        "extent": null,
+        "id": {
+          "kind": "program_location",
+          "value": "c88563089a563539ac8d623871eebe98",
+          "wire": "program_location:c88563089a563539ac8d623871eebe98"
+        },
+        "label": "coarse Python/external world",
+        "stability": "UNKNOWN"
+      },
+      "original_root": {
+        "kind": "program_region",
+        "value": "b13397dc809d7b0f819135e56a081221",
+        "wire": "program_region:b13397dc809d7b0f819135e56a081221"
+      },
+      "pointer": "#/graph/locations/0"
+    },
+    {
+      "body_index": 9,
+      "file_index": 66,
+      "namespace": {
+        "artifact": {
+          "decoded_sha256": "d8c4062c088413b82f8d0fe5d5d09b4aaf12df8e934ef4d7d92c3f704b32f139",
+          "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_plain_20261023/checkpoints/01262.json.gz"
+        },
+        "body": {
+          "definition": {
+            "kind": "opdef",
+            "value": "op:c2c613c6f71b105d3d3ad853",
+            "wire": "opdef:op:c2c613c6f71b105d3d3ad853"
+          },
+          "entry": "to_image",
+          "source": {
+            "atom_id": {
+              "kind": "source",
+              "value": "atom:a8dbe862cf0455305bcff6e9",
+              "wire": "source:atom:a8dbe862cf0455305bcff6e9"
+            },
+            "end_column": 35,
+            "end_line": 83,
+            "fingerprint": "sha256:1df32305b18b6f82340f22def1be0cad17b312e09000efaa6138cd2ed71ec4f1",
+            "path": "/home/zyf/AAA/le-wm/stable-pretraining/stable_pretraining/data/transforms.py",
+            "start_column": 0,
+            "start_line": 69
+          }
+        },
+        "record_pointer": "#/graph",
+        "representation": "scar.program-graph/15"
+      },
+      "original_checkpoint": {
+        "decoded_bytes": 1224852,
+        "decoded_sha256": "d8c4062c088413b82f8d0fe5d5d09b4aaf12df8e934ef4d7d92c3f704b32f139",
+        "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_plain_20261023/checkpoints/01262.json.gz",
+        "stored_bytes": 111320,
+        "stored_sha256": "7d9e12d54803623e5344810340262ffa7c45911bcce0862a477cd80f7eb6a987"
+      },
+      "original_record": {
+        "extent": null,
+        "id": {
+          "kind": "program_location",
+          "value": "c88563089a563539ac8d623871eebe98",
+          "wire": "program_location:c88563089a563539ac8d623871eebe98"
+        },
+        "label": "coarse Python/external world",
+        "stability": "UNKNOWN"
+      },
+      "original_root": {
+        "kind": "program_region",
+        "value": "4642bffbeef282b73266a83687c9aaa4",
+        "wire": "program_region:4642bffbeef282b73266a83687c9aaa4"
+      },
+      "pointer": "#/graph/locations/0"
+    }
+  ],
+  "maxrss_kib": 35692,
+  "new_program_snapshot_created": false,
+  "producer_sha256": "7bc0c661d76cab32788fa742aa8d1a8954be26818b07363e96be86faaa94d31b",
+  "repeated_local_ids": [
+    {
+      "id_groups": 106,
+      "kind": "StateLocation",
+      "max_namespaces": 66,
+      "occurrences": 830
+    }
+  ],
+  "same_local_id_does_not_authorize_cross_body_or_run_state_equivalence": true,
+  "scar_imported": false,
+  "schema": "scar.composition-identity-audit",
+  "schema_version": 1,
+  "source_program_replayed": false,
+  "sql": "WITH repeated AS (\n SELECT kind,local_id,COUNT(*) AS n FROM entities\n GROUP BY kind,local_id HAVING COUNT(*)>1)\nSELECT kind,COUNT(*) AS id_groups,SUM(n) AS occurrences,MAX(n) AS max_namespaces\nFROM repeated GROUP BY kind",
+  "status": "QUALIFIED_IDENTITY_REQUIREMENT_CONFIRMED",
+  "target_executed": false,
+  "transformation_authorized": false,
+  "whole_model_established": false
+}

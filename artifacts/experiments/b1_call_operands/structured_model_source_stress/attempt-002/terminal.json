@@ -1,0 +1,47 @@
+{
+  "attempt": "attempt-002",
+  "charged_operations": 20465,
+  "classification": "DRIVER_PROJECTION_PREFLIGHT_FAILURE",
+  "command": [
+    "/home/zyf/AAA/scar/artifacts/experiments/b1_call_operands/structured_model_source_stress/attempt-002/driver.py",
+    "--inventory",
+    "/home/zyf/AAA/scar/artifacts/experiments/b1_call_operands/windows_lewm_analysis/inventory.json.gz",
+    "--project-root",
+    "/home/zyf/AAA/le-wm",
+    "--scar-root",
+    "/tmp/scar-structured-model-280qf4mi",
+    "--out",
+    "/home/zyf/AAA/scar/artifacts/experiments/b1_call_operands/structured_model_source_stress/attempt-002"
+  ],
+  "completed_candidates": 32,
+  "driver_errors": [
+    {
+      "definition": "_load_local_checkpoint",
+      "error": "AttributeError: 'Use' object has no attribute 'kind'"
+    },
+    {
+      "definition": "get_config",
+      "error": "AttributeError: 'Use' object has no attribute 'kind'"
+    }
+  ],
+  "driver_path": "/home/zyf/AAA/scar/artifacts/experiments/b1_call_operands/structured_model_source_stress/attempt-002/driver.py",
+  "driver_sha256": "20d561f43b7d17881ec804e218b2d0e05de280e4669318cb8743ae8de2297ab7",
+  "exec_session_id": 41955,
+  "interpretation": "Both exceptions occurred after lower returned, in the driver source-call projection. They are not lowerer outcomes; partial report must not be used as a model result.",
+  "os_pid": 608366,
+  "partial_statuses": {
+    "ERROR_COST_UNKNOWN": 2,
+    "GRAPH_WITH_GAPS": 1,
+    "UNSUPPORTED": 29
+  },
+  "process_exit_code": 143,
+  "progress_path": "/home/zyf/AAA/scar/artifacts/experiments/b1_call_operands/structured_model_source_stress/attempt-002/progress.jsonl",
+  "progress_sha256": "583b611a5eb99fb2d8c47fc7a262b3b69d505e7a58069c0fe7a6c5f79211366f",
+  "schema": "scar.structured-source-stress-terminal-record",
+  "schema_version": 1,
+  "source_calls_collected": 212,
+  "started_utc": "2026-10-16T03:16:18.240587+00:00",
+  "stderr": "No separate stderr stream was exposed; errors are retained in progress rows and this record.",
+  "terminal_utc": "not captured at the time; process was confirmed terminal by session poll",
+  "termination": "SIGTERM sent only to owned driver PID after the projection bug was observed"
+}

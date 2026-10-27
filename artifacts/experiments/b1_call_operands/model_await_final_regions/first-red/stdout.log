@@ -1,0 +1,482 @@
+FFFFFFFFFFFFFFFF                                                         [100%]
+=================================== FAILURES ===================================
+_ test_real_child_extractor_own_results_return_through_each_exact_parent_slot[zero-one-region] _
+
+zero_cut = True, depth = 1
+
+    @pytest.mark.parametrize(('zero_cut', 'depth'), ((True, 1), (True, 2), (False, 1), (False, 2)),
+                             ids=('zero-one-region', 'zero-two-regions',
+                                  'two-cut-one-region', 'two-cut-two-regions'))
+    def test_real_child_extractor_own_results_return_through_each_exact_parent_slot(zero_cut, depth):
+        graph, details = await_final_region_program(zero_cut=zero_cut, depth=depth)
+        report, _, consumer = _query(graph, details)
+        assert consumer['final_rows'] == details['final_rows']
+>       _positive_structure(graph, consumer, details)
+
+tests/unit/test_program_await_final_regions.py:183: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='await.resume.caller'), regions=(Region(id=RegionID(value='await.resume.caller'), lab...), drive=OperationID(value='await.resume.driver.0.driver.drive'), projection=None, guard=None),), exception_matches=())
+consumer = {'actual': OwnedUse(operation=OperationID(value='await.resume.extract'), use=UseID(value='await.resume.extract.packet'...ntory': {'enumerated_frames': 2, 'checked_frames': 0, 'frames_total': None, 'enumerated_consumers': 2, ...}, ...}, ...}
+details = {'caller': Region(id=RegionID(value='await.resume.caller'), label='declared driver fixture', entry=BlockID(value='awai...lue='resume.context')))),), parent=None), 'body_kind': <ResumableKind.GENERATOR_COROUTINE: 'GENERATOR_COROUTINE'>, ...}
+
+    def _positive_structure(graph, consumer, details):
+>       implementation = consumer['implementation']
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       KeyError: 'implementation'
+
+tests/unit/test_program_await_final_regions.py:132: KeyError
+_ test_real_child_extractor_own_results_return_through_each_exact_parent_slot[zero-two-regions] _
+
+zero_cut = True, depth = 2
+
+    @pytest.mark.parametrize(('zero_cut', 'depth'), ((True, 1), (True, 2), (False, 1), (False, 2)),
+                             ids=('zero-one-region', 'zero-two-regions',
+                                  'two-cut-one-region', 'two-cut-two-regions'))
+    def test_real_child_extractor_own_results_return_through_each_exact_parent_slot(zero_cut, depth):
+        graph, details = await_final_region_program(zero_cut=zero_cut, depth=depth)
+        report, _, consumer = _query(graph, details)
+        assert consumer['final_rows'] == details['final_rows']
+>       _positive_structure(graph, consumer, details)
+
+tests/unit/test_program_await_final_regions.py:183: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='await.resume.caller'), regions=(Region(id=RegionID(value='await.resume.caller'), lab...), drive=OperationID(value='await.resume.driver.0.driver.drive'), projection=None, guard=None),), exception_matches=())
+consumer = {'actual': OwnedUse(operation=OperationID(value='await.resume.extract'), use=UseID(value='await.resume.extract.packet'...ntory': {'enumerated_frames': 3, 'checked_frames': 0, 'frames_total': None, 'enumerated_consumers': 3, ...}, ...}, ...}
+details = {'caller': Region(id=RegionID(value='await.resume.caller'), label='declared driver fixture', entry=BlockID(value='awai...lue='resume.context')))),), parent=None), 'body_kind': <ResumableKind.GENERATOR_COROUTINE: 'GENERATOR_COROUTINE'>, ...}
+
+    def _positive_structure(graph, consumer, details):
+>       implementation = consumer['implementation']
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       KeyError: 'implementation'
+
+tests/unit/test_program_await_final_regions.py:132: KeyError
+_ test_real_child_extractor_own_results_return_through_each_exact_parent_slot[two-cut-one-region] _
+
+zero_cut = False, depth = 1
+
+    @pytest.mark.parametrize(('zero_cut', 'depth'), ((True, 1), (True, 2), (False, 1), (False, 2)),
+                             ids=('zero-one-region', 'zero-two-regions',
+                                  'two-cut-one-region', 'two-cut-two-regions'))
+    def test_real_child_extractor_own_results_return_through_each_exact_parent_slot(zero_cut, depth):
+        graph, details = await_final_region_program(zero_cut=zero_cut, depth=depth)
+        report, _, consumer = _query(graph, details)
+        assert consumer['final_rows'] == details['final_rows']
+>       _positive_structure(graph, consumer, details)
+
+tests/unit/test_program_await_final_regions.py:183: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='await.resume.caller'), regions=(Region(id=RegionID(value='await.resume.caller'), lab...0), drive=OperationID(value='await.resume.driver.2.driver.drive'), projection=None, guard=None)), exception_matches=())
+consumer = {'actual': OwnedUse(operation=OperationID(value='await.resume.extract'), use=UseID(value='await.resume.extract.packet'...ntory': {'enumerated_frames': 2, 'checked_frames': 0, 'frames_total': None, 'enumerated_consumers': 2, ...}, ...}, ...}
+details = {'caller': Region(id=RegionID(value='await.resume.caller'), label='declared driver fixture', entry=BlockID(value='awai...alue='resume.context'))))), parent=None), 'body_kind': <ResumableKind.GENERATOR_COROUTINE: 'GENERATOR_COROUTINE'>, ...}
+
+    def _positive_structure(graph, consumer, details):
+>       implementation = consumer['implementation']
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       KeyError: 'implementation'
+
+tests/unit/test_program_await_final_regions.py:132: KeyError
+_ test_real_child_extractor_own_results_return_through_each_exact_parent_slot[two-cut-two-regions] _
+
+zero_cut = False, depth = 2
+
+    @pytest.mark.parametrize(('zero_cut', 'depth'), ((True, 1), (True, 2), (False, 1), (False, 2)),
+                             ids=('zero-one-region', 'zero-two-regions',
+                                  'two-cut-one-region', 'two-cut-two-regions'))
+    def test_real_child_extractor_own_results_return_through_each_exact_parent_slot(zero_cut, depth):
+        graph, details = await_final_region_program(zero_cut=zero_cut, depth=depth)
+        report, _, consumer = _query(graph, details)
+        assert consumer['final_rows'] == details['final_rows']
+>       _positive_structure(graph, consumer, details)
+
+tests/unit/test_program_await_final_regions.py:183: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='await.resume.caller'), regions=(Region(id=RegionID(value='await.resume.caller'), lab...0), drive=OperationID(value='await.resume.driver.2.driver.drive'), projection=None, guard=None)), exception_matches=())
+consumer = {'actual': OwnedUse(operation=OperationID(value='await.resume.extract'), use=UseID(value='await.resume.extract.packet'...ntory': {'enumerated_frames': 3, 'checked_frames': 0, 'frames_total': None, 'enumerated_consumers': 3, ...}, ...}, ...}
+details = {'caller': Region(id=RegionID(value='await.resume.caller'), label='declared driver fixture', entry=BlockID(value='awai...alue='resume.context'))))), parent=None), 'body_kind': <ResumableKind.GENERATOR_COROUTINE: 'GENERATOR_COROUTINE'>, ...}
+
+    def _positive_structure(graph, consumer, details):
+>       implementation = consumer['implementation']
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       KeyError: 'implementation'
+
+tests/unit/test_program_await_final_regions.py:132: KeyError
+_ test_deleting_parent_final_adapter_keeps_regions_stages_outputs_and_real_consumers _
+
+    def test_deleting_parent_final_adapter_keeps_regions_stages_outputs_and_real_consumers():
+        complete, details = await_final_region_program(zero_cut=False, depth=2)
+        missing, removed = await_final_region_program(zero_cut=False, depth=2, final_adapters=False)
+        assert complete.operations == missing.operations and complete.values == missing.values
+        assert complete.regions == missing.regions
+        _, before_outcome, before = _query(complete, details)
+        _, after_outcome, after = _query(missing, removed)
+        assert before_outcome['key'] == after_outcome['key']
+        assert tuple(row['actual'] for row in before_outcome['consumers']) == tuple(
+            row['actual'] for row in after_outcome['consumers'])
+        assert after['final_rows'] == ()
+        assert 'await_final_adapter_missing' in after['gaps']
+>       first = _positive_structure(complete, before, details)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_program_await_final_regions.py:204: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='await.resume.caller'), regions=(Region(id=RegionID(value='await.resume.caller'), lab...0), drive=OperationID(value='await.resume.driver.2.driver.drive'), projection=None, guard=None)), exception_matches=())
+consumer = {'actual': OwnedUse(operation=OperationID(value='await.resume.extract'), use=UseID(value='await.resume.extract.packet'...ntory': {'enumerated_frames': 3, 'checked_frames': 0, 'frames_total': None, 'enumerated_consumers': 3, ...}, ...}, ...}
+details = {'caller': Region(id=RegionID(value='await.resume.caller'), label='declared driver fixture', entry=BlockID(value='awai...alue='resume.context'))))), parent=None), 'body_kind': <ResumableKind.GENERATOR_COROUTINE: 'GENERATOR_COROUTINE'>, ...}
+
+    def _positive_structure(graph, consumer, details):
+>       implementation = consumer['implementation']
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       KeyError: 'implementation'
+
+tests/unit/test_program_await_final_regions.py:132: KeyError
+_ test_rethrowing_old_packet_keeps_false_candidate_without_fabricating_output_coverage _
+
+    def test_rethrowing_old_packet_keeps_false_candidate_without_fabricating_output_coverage():
+        graph, details = await_final_region_program(depth=2, wrong_child_exit=True)
+        _, _, consumer = _query(graph, details)
+>       implementation = consumer['implementation']
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       KeyError: 'implementation'
+
+tests/unit/test_program_await_final_regions.py:217: KeyError
+_ test_child_completion_returns_through_each_exact_call_frame_to_two_parent_consumers[normal-child] _
+
+depth = 1, child_raised = False
+
+    @pytest.mark.parametrize(
+        ("depth", "child_raised"),
+        ((1, False), (2, True)),
+        ids=("normal-child", "nested-raise-child"),
+    )
+    def test_child_completion_returns_through_each_exact_call_frame_to_two_parent_consumers(
+            depth, child_raised):
+        program, model, details = await_final_region_execution(
+            depth=depth, instances=2, child_raised=child_raised)
+        report = _report(program, model, details)
+        kind = ExitKind.RAISE if child_raised else ExitKind.NORMAL
+    
+        for example in details["implementation_instances"]:
+>           implementation = _implementation(report, details, example)
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_execution_await_final_regions.py:66: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+report = {'scope': ProtocolScopeID(value='await.resume.acquisition'), 'jobs': ({'scope': ProtocolScopeID(value='await.resume.ac...call.0')), 'source_candidates': ({...}, {...}), 'matched_sources': ({...},), ...}), 'occurrence_count': 2, ...},), ...}
+details = {'static': {'caller': Region(id=RegionID(value='await.resume.caller'), label='declared driver fixture', entry=BlockID(...ource=MissingEvidence(reason='supplied direct/await multi-cut occurrence associations; no native runtime proof')), ...}
+example = {'caller_activation': RegionActivationID(value='await.resume.instance.0.caller'), 'caller_visits': (BlockVisitID(value...perationOccurrenceID(value='await.resume.instance.0.driver.0.2.await.resume.driver.0.adapter.construct'), ...}),), ...}
+
+    def _implementation(report, details, example):
+        rows = tuple(row for row in report["outcomes"]
+            if row["definition"]["drive_outcome"] == details["drive_outcome"]
+            and row["definition"]["advance_operation"] ==
+                details["static"]["drivers"][-1]["caller_call"].id)
+        assert len(rows) == 1
+        occurrences = tuple(row for row in rows[0]["occurrences"]
+            if row["advance"].id == example["advance"]
+            and row["drive"].id == example["body_drives"][-1].drive)
+        assert len(occurrences) == 1
+        consumers = tuple(row for row in occurrences[0]["consumers"]
+            if row["definition"]["actual"] == details["static"]["extract_input"])
+>       assert len(consumers) == 1
+E       AssertionError: assert 2 == 1
+E        +  where 2 = len(({'definition': {'actual': OwnedUse(operation=OperationID(value='await.resume.extract'), use=UseID(value='await.resume...ValueID(value='await.resume.call.0.raise.arg.0'), origin=BlockVisitID(value='await.resume.instance.0.caller.4')), ...}))
+
+tests/unit/test_execution_await_final_regions.py:39: AssertionError
+_ test_child_completion_returns_through_each_exact_call_frame_to_two_parent_consumers[nested-raise-child] _
+
+depth = 2, child_raised = True
+
+    @pytest.mark.parametrize(
+        ("depth", "child_raised"),
+        ((1, False), (2, True)),
+        ids=("normal-child", "nested-raise-child"),
+    )
+    def test_child_completion_returns_through_each_exact_call_frame_to_two_parent_consumers(
+            depth, child_raised):
+        program, model, details = await_final_region_execution(
+            depth=depth, instances=2, child_raised=child_raised)
+        report = _report(program, model, details)
+        kind = ExitKind.RAISE if child_raised else ExitKind.NORMAL
+    
+        for example in details["implementation_instances"]:
+>           implementation = _implementation(report, details, example)
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_execution_await_final_regions.py:66: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+report = {'scope': ProtocolScopeID(value='await.resume.acquisition'), 'jobs': ({'scope': ProtocolScopeID(value='await.resume.ac...call.0')), 'source_candidates': ({...}, {...}), 'matched_sources': ({...},), ...}), 'occurrence_count': 2, ...},), ...}
+details = {'static': {'caller': Region(id=RegionID(value='await.resume.caller'), label='declared driver fixture', entry=BlockID(...ource=MissingEvidence(reason='supplied direct/await multi-cut occurrence associations; no native runtime proof')), ...}
+example = {'caller_activation': RegionActivationID(value='await.resume.instance.0.caller'), 'caller_visits': (BlockVisitID(value...perationOccurrenceID(value='await.resume.instance.0.driver.0.2.await.resume.driver.0.adapter.construct'), ...}),), ...}
+
+    def _implementation(report, details, example):
+        rows = tuple(row for row in report["outcomes"]
+            if row["definition"]["drive_outcome"] == details["drive_outcome"]
+            and row["definition"]["advance_operation"] ==
+                details["static"]["drivers"][-1]["caller_call"].id)
+        assert len(rows) == 1
+        occurrences = tuple(row for row in rows[0]["occurrences"]
+            if row["advance"].id == example["advance"]
+            and row["drive"].id == example["body_drives"][-1].drive)
+        assert len(occurrences) == 1
+        consumers = tuple(row for row in occurrences[0]["consumers"]
+            if row["definition"]["actual"] == details["static"]["extract_input"])
+>       assert len(consumers) == 1
+E       AssertionError: assert 2 == 1
+E        +  where 2 = len(({'definition': {'actual': OwnedUse(operation=OperationID(value='await.resume.extract'), use=UseID(value='await.resume...ValueID(value='await.resume.call.0.raise.arg.0'), origin=BlockVisitID(value='await.resume.instance.0.caller.4')), ...}))
+
+tests/unit/test_execution_await_final_regions.py:39: AssertionError
+_ test_missing_nested_child_call_keeps_its_frame_and_does_not_borrow_sibling_instance _
+
+    def test_missing_nested_child_call_keeps_its_frame_and_does_not_borrow_sibling_instance():
+        program, model, details = await_final_region_execution(
+            depth=2, instances=2, missing_child_call=(0, 0))
+        report = _report(program, model, details)
+        missing, sibling = details["implementation_instances"]
+    
+>       partial = _implementation(report, details, missing)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_execution_await_final_regions.py:103: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+report = {'scope': ProtocolScopeID(value='await.resume.acquisition'), 'jobs': ({'scope': ProtocolScopeID(value='await.resume.ac...call.0')), 'source_candidates': ({...}, {...}), 'matched_sources': ({...},), ...}), 'occurrence_count': 2, ...},), ...}
+details = {'static': {'caller': Region(id=RegionID(value='await.resume.caller'), label='declared driver fixture', entry=BlockID(...ource=MissingEvidence(reason='supplied direct/await multi-cut occurrence associations; no native runtime proof')), ...}
+example = {'caller_activation': RegionActivationID(value='await.resume.instance.0.caller'), 'caller_visits': (BlockVisitID(value...perationOccurrenceID(value='await.resume.instance.0.driver.0.2.await.resume.driver.0.adapter.construct'), ...}),), ...}
+
+    def _implementation(report, details, example):
+        rows = tuple(row for row in report["outcomes"]
+            if row["definition"]["drive_outcome"] == details["drive_outcome"]
+            and row["definition"]["advance_operation"] ==
+                details["static"]["drivers"][-1]["caller_call"].id)
+        assert len(rows) == 1
+        occurrences = tuple(row for row in rows[0]["occurrences"]
+            if row["advance"].id == example["advance"]
+            and row["drive"].id == example["body_drives"][-1].drive)
+        assert len(occurrences) == 1
+        consumers = tuple(row for row in occurrences[0]["consumers"]
+            if row["definition"]["actual"] == details["static"]["extract_input"])
+>       assert len(consumers) == 1
+E       AssertionError: assert 2 == 1
+E        +  where 2 = len(({'definition': {'actual': OwnedUse(operation=OperationID(value='await.resume.extract'), use=UseID(value='await.resume...ValueID(value='await.resume.call.0.raise.arg.0'), origin=BlockVisitID(value='await.resume.instance.0.caller.4')), ...}))
+
+tests/unit/test_execution_await_final_regions.py:39: AssertionError
+_ test_missing_child_terminal_use_keeps_sibling_and_original_child_result_slot _
+
+    def test_missing_child_terminal_use_keeps_sibling_and_original_child_result_slot():
+        program, model, details = await_final_region_execution(
+            depth=2, instances=2, child_raised=True, missing_child_use=(0, 1))
+        report = _report(program, model, details)
+        missing, sibling = details["implementation_instances"]
+    
+>       partial = _implementation(report, details, missing)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_execution_await_final_regions.py:122: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+report = {'scope': ProtocolScopeID(value='await.resume.acquisition'), 'jobs': ({'scope': ProtocolScopeID(value='await.resume.ac...call.0')), 'source_candidates': ({...}, {...}), 'matched_sources': ({...},), ...}), 'occurrence_count': 2, ...},), ...}
+details = {'static': {'caller': Region(id=RegionID(value='await.resume.caller'), label='declared driver fixture', entry=BlockID(...ource=MissingEvidence(reason='supplied direct/await multi-cut occurrence associations; no native runtime proof')), ...}
+example = {'caller_activation': RegionActivationID(value='await.resume.instance.0.caller'), 'caller_visits': (BlockVisitID(value...perationOccurrenceID(value='await.resume.instance.0.driver.0.2.await.resume.driver.0.adapter.construct'), ...}),), ...}
+
+    def _implementation(report, details, example):
+        rows = tuple(row for row in report["outcomes"]
+            if row["definition"]["drive_outcome"] == details["drive_outcome"]
+            and row["definition"]["advance_operation"] ==
+                details["static"]["drivers"][-1]["caller_call"].id)
+        assert len(rows) == 1
+        occurrences = tuple(row for row in rows[0]["occurrences"]
+            if row["advance"].id == example["advance"]
+            and row["drive"].id == example["body_drives"][-1].drive)
+        assert len(occurrences) == 1
+        consumers = tuple(row for row in occurrences[0]["consumers"]
+            if row["definition"]["actual"] == details["static"]["extract_input"])
+>       assert len(consumers) == 1
+E       AssertionError: assert 2 == 1
+E        +  where 2 = len(({'definition': {'actual': OwnedUse(operation=OperationID(value='await.resume.extract'), use=UseID(value='await.resume...ValueID(value='await.resume.call.0.raise.arg.0'), origin=BlockVisitID(value='await.resume.instance.0.caller.4')), ...}))
+
+tests/unit/test_execution_await_final_regions.py:39: AssertionError
+______ test_missing_outer_return_capture_keeps_the_child_and_sibling_rows ______
+
+    def test_missing_outer_return_capture_keeps_the_child_and_sibling_rows():
+        program, model, details = await_final_region_execution(
+            depth=1, instances=2, missing_return=0)
+        missing_example, sibling = details["implementation_instances"]
+        expected_call = missing_example["implementation_root_call"]
+        assert type(expected_call.completion) is Unresolved
+        report = _report(program, model, details)
+    
+>       partial = _implementation(report, details, missing_example)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_execution_await_final_regions.py:137: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+report = {'scope': ProtocolScopeID(value='await.resume.acquisition'), 'jobs': ({'scope': ProtocolScopeID(value='await.resume.ac...call.0')), 'source_candidates': ({...}, {...}), 'matched_sources': ({...},), ...}), 'occurrence_count': 2, ...},), ...}
+details = {'static': {'caller': Region(id=RegionID(value='await.resume.caller'), label='declared driver fixture', entry=BlockID(...ource=MissingEvidence(reason='supplied direct/await multi-cut occurrence associations; no native runtime proof')), ...}
+example = {'caller_activation': RegionActivationID(value='await.resume.instance.0.caller'), 'caller_visits': (BlockVisitID(value...perationOccurrenceID(value='await.resume.instance.0.driver.0.2.await.resume.driver.0.adapter.construct'), ...}),), ...}
+
+    def _implementation(report, details, example):
+        rows = tuple(row for row in report["outcomes"]
+            if row["definition"]["drive_outcome"] == details["drive_outcome"]
+            and row["definition"]["advance_operation"] ==
+                details["static"]["drivers"][-1]["caller_call"].id)
+        assert len(rows) == 1
+        occurrences = tuple(row for row in rows[0]["occurrences"]
+            if row["advance"].id == example["advance"]
+            and row["drive"].id == example["body_drives"][-1].drive)
+        assert len(occurrences) == 1
+        consumers = tuple(row for row in occurrences[0]["consumers"]
+            if row["definition"]["actual"] == details["static"]["extract_input"])
+>       assert len(consumers) == 1
+E       AssertionError: assert 2 == 1
+E        +  where 2 = len(({'definition': {'actual': OwnedUse(operation=OperationID(value='await.resume.extract'), use=UseID(value='await.resume...ValueID(value='await.resume.call.0.raise.arg.0'), origin=BlockVisitID(value='await.resume.instance.0.caller.4')), ...}))
+
+tests/unit/test_execution_await_final_regions.py:39: AssertionError
+_ test_wrong_child_raise_packet_is_a_failed_candidate_not_an_authorized_override _
+
+    def test_wrong_child_raise_packet_is_a_failed_candidate_not_an_authorized_override():
+        program, model, details = await_final_region_execution(
+            depth=1, instances=1, child_raised=True, wrong_child_exit=True)
+        report = _report(program, model, details)
+        example, = details["implementation_instances"]
+>       implementation = _implementation(report, details, example)
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_execution_await_final_regions.py:150: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+report = {'scope': ProtocolScopeID(value='await.resume.acquisition'), 'jobs': ({'scope': ProtocolScopeID(value='await.resume.ac...sume.call.0')), 'source_candidates': ({...},), 'matched_sources': ({...},), ...},), 'occurrence_count': 1, ...},), ...}
+details = {'static': {'caller': Region(id=RegionID(value='await.resume.caller'), label='declared driver fixture', entry=BlockID(...ource=MissingEvidence(reason='supplied direct/await multi-cut occurrence associations; no native runtime proof')), ...}
+example = {'caller_activation': RegionActivationID(value='await.resume.instance.0.caller'), 'caller_visits': (BlockVisitID(value...perationOccurrenceID(value='await.resume.instance.0.driver.0.2.await.resume.driver.0.adapter.construct'), ...}),), ...}
+
+    def _implementation(report, details, example):
+        rows = tuple(row for row in report["outcomes"]
+            if row["definition"]["drive_outcome"] == details["drive_outcome"]
+            and row["definition"]["advance_operation"] ==
+                details["static"]["drivers"][-1]["caller_call"].id)
+        assert len(rows) == 1
+        occurrences = tuple(row for row in rows[0]["occurrences"]
+            if row["advance"].id == example["advance"]
+            and row["drive"].id == example["body_drives"][-1].drive)
+        assert len(occurrences) == 1
+        consumers = tuple(row for row in occurrences[0]["consumers"]
+            if row["definition"]["actual"] == details["static"]["extract_input"])
+>       assert len(consumers) == 1
+E       AssertionError: assert 2 == 1
+E        +  where 2 = len(({'definition': {'actual': OwnedUse(operation=OperationID(value='await.resume.extract'), use=UseID(value='await.resume...ValueID(value='await.resume.call.0.raise.arg.0'), origin=BlockVisitID(value='await.resume.instance.0.caller.4')), ...}))
+
+tests/unit/test_execution_await_final_regions.py:39: AssertionError
+_ test_budget_one_keeps_all_original_parent_output_slots_and_unchecked_cursor __
+
+    def test_budget_one_keeps_all_original_parent_output_slots_and_unchecked_cursor():
+        program, details = await_final_region_program(depth=2)
+        index = _index(program)
+    
+>       report, budget = _project(index, details, budget=1)
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_program_await_final_region_boundaries.py:71: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+index = <scar.ir.program.queries.ProgramIndex object at 0x733f5d2b3a10>
+details = {'caller': Region(id=RegionID(value='await.resume.caller'), label='declared driver fixture', entry=BlockID(value='awai...lue='resume.context')))),), parent=None), 'body_kind': <ResumableKind.GENERATOR_COROUTINE: 'GENERATOR_COROUTINE'>, ...}
+budget = 1
+
+    def _project(index, details, *, budget=QUERY_BUDGET):
+>       from scar.ir.program.region_implementation import region_implementation
+E       ModuleNotFoundError: No module named 'scar.ir.program.region_implementation'
+
+tests/unit/test_program_await_final_region_boundaries.py:27: ModuleNotFoundError
+___ test_late_budget_cannot_turn_a_partial_output_suffix_into_complete_proof ___
+
+    def test_late_budget_cannot_turn_a_partial_output_suffix_into_complete_proof():
+        program, details = await_final_region_program(depth=2)
+        index = _index(program)
+>       complete, complete_budget = _project(index, details)
+                                    ^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_program_await_final_region_boundaries.py:91: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+index = <scar.ir.program.queries.ProgramIndex object at 0x733f5d2b3a10>
+details = {'caller': Region(id=RegionID(value='await.resume.caller'), label='declared driver fixture', entry=BlockID(value='awai...lue='resume.context')))),), parent=None), 'body_kind': <ResumableKind.GENERATOR_COROUTINE: 'GENERATOR_COROUTINE'>, ...}
+budget = 1048576
+
+    def _project(index, details, *, budget=QUERY_BUDGET):
+>       from scar.ir.program.region_implementation import region_implementation
+E       ModuleNotFoundError: No module named 'scar.ir.program.region_implementation'
+
+tests/unit/test_program_await_final_region_boundaries.py:27: ModuleNotFoundError
+_______ test_public_nested_region_results_and_hop_bindings_are_detached ________
+
+    def test_public_nested_region_results_and_hop_bindings_are_detached():
+        program, details = await_final_region_program(depth=2)
+        index = _index(program)
+>       first = _public_implementation(index, details)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_program_await_final_region_boundaries.py:115: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+index = <scar.ir.program.queries.ProgramIndex object at 0x733f5d2b2f90>
+details = {'caller': Region(id=RegionID(value='await.resume.caller'), label='declared driver fixture', entry=BlockID(value='awai...lue='resume.context')))),), parent=None), 'body_kind': <ResumableKind.GENERATOR_COROUTINE: 'GENERATOR_COROUTINE'>, ...}
+
+    def _public_implementation(index, details):
+        report = index.protocol_obligations(details['acquisition_scope'],
+            budget=QUERY_BUDGET)['connections']['families']['await']
+        outcome, = tuple(row for row in report['outcomes']
+            if row['source'] == details['source']
+            and row['drive_outcome'] == details['drive_outcome']
+            and row['advance_operation'] == details['advance_operation'])
+        consumer, = tuple(row for row in outcome['consumers']
+            if row['actual'] == details['extract_input']
+            and row['requires_final_extraction'] is True)
+>       assert consumer['implementation'] is not None
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       KeyError: 'implementation'
+
+tests/unit/test_program_await_final_region_boundaries.py:57: KeyError
+___ test_unused_same_type_output_candidate_does_not_poison_the_true_witness ____
+
+    def test_unused_same_type_output_candidate_does_not_poison_the_true_witness():
+        program, details = await_final_region_program()
+>       before, before_budget = _project(_index(program), details)
+                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_program_await_final_region_boundaries.py:158: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+index = <scar.ir.program.queries.ProgramIndex object at 0x733f5d2b3a10>
+details = {'caller': Region(id=RegionID(value='await.resume.caller'), label='declared driver fixture', entry=BlockID(value='awai...lue='resume.context')))),), parent=None), 'body_kind': <ResumableKind.GENERATOR_COROUTINE: 'GENERATOR_COROUTINE'>, ...}
+budget = 1048576
+
+    def _project(index, details, *, budget=QUERY_BUDGET):
+>       from scar.ir.program.region_implementation import region_implementation
+E       ModuleNotFoundError: No module named 'scar.ir.program.region_implementation'
+
+tests/unit/test_program_await_final_region_boundaries.py:27: ModuleNotFoundError
+=========================== short test summary info ============================
+FAILED tests/unit/test_program_await_final_regions.py::test_real_child_extractor_own_results_return_through_each_exact_parent_slot[zero-one-region]
+FAILED tests/unit/test_program_await_final_regions.py::test_real_child_extractor_own_results_return_through_each_exact_parent_slot[zero-two-regions]
+FAILED tests/unit/test_program_await_final_regions.py::test_real_child_extractor_own_results_return_through_each_exact_parent_slot[two-cut-one-region]
+FAILED tests/unit/test_program_await_final_regions.py::test_real_child_extractor_own_results_return_through_each_exact_parent_slot[two-cut-two-regions]
+FAILED tests/unit/test_program_await_final_regions.py::test_deleting_parent_final_adapter_keeps_regions_stages_outputs_and_real_consumers
+FAILED tests/unit/test_program_await_final_regions.py::test_rethrowing_old_packet_keeps_false_candidate_without_fabricating_output_coverage
+FAILED tests/unit/test_execution_await_final_regions.py::test_child_completion_returns_through_each_exact_call_frame_to_two_parent_consumers[normal-child]
+FAILED tests/unit/test_execution_await_final_regions.py::test_child_completion_returns_through_each_exact_call_frame_to_two_parent_consumers[nested-raise-child]
+FAILED tests/unit/test_execution_await_final_regions.py::test_missing_nested_child_call_keeps_its_frame_and_does_not_borrow_sibling_instance
+FAILED tests/unit/test_execution_await_final_regions.py::test_missing_child_terminal_use_keeps_sibling_and_original_child_result_slot
+FAILED tests/unit/test_execution_await_final_regions.py::test_missing_outer_return_capture_keeps_the_child_and_sibling_rows
+FAILED tests/unit/test_execution_await_final_regions.py::test_wrong_child_raise_packet_is_a_failed_candidate_not_an_authorized_override
+FAILED tests/unit/test_program_await_final_region_boundaries.py::test_budget_one_keeps_all_original_parent_output_slots_and_unchecked_cursor
+FAILED tests/unit/test_program_await_final_region_boundaries.py::test_late_budget_cannot_turn_a_partial_output_suffix_into_complete_proof
+FAILED tests/unit/test_program_await_final_region_boundaries.py::test_public_nested_region_results_and_hop_bindings_are_detached
+FAILED tests/unit/test_program_await_final_region_boundaries.py::test_unused_same_type_output_candidate_does_not_poison_the_true_witness
+16 failed in 10.53s

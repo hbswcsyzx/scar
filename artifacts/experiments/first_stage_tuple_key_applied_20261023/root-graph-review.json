@@ -1,0 +1,18 @@
+{
+  "status": "PASS_ORIGINAL_PORT_ORDER_AND_EXCEPTION_ELEMENT_RETENTION",
+  "graphs": [
+    {
+      "artifact_sha256": "828a11c5bd201886a52bae68e83df490ae9199e546666af6de9bbfb66181e945",
+      "operations": 65,
+      "tuple_failure_elements_checked": 1
+    },
+    {
+      "artifact_sha256": "605c15aae03d100df6bd1ba63fb5c1507cbdd4d9ff177a6ba6bd058b2dc1d4f3",
+      "operations": 218,
+      "tuple_failure_elements_checked": 2
+    }
+  ],
+  "source_replayed": false,
+  "full_lifetime_verified": false,
+  "whole_program_established": false
+}

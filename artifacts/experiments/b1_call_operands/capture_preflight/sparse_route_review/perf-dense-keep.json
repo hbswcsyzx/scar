@@ -1,0 +1,632 @@
+{
+  "calls": [
+    {
+      "arg0_missing": false,
+      "kind": "EXACT_FUNCTION",
+      "offset": 86,
+      "owner": 1,
+      "qualname": "subject"
+    },
+    {
+      "arg0_missing": false,
+      "kind": "EXACT_FUNCTION",
+      "offset": 86,
+      "owner": 3,
+      "qualname": "subject"
+    },
+    {
+      "arg0_missing": false,
+      "kind": "EXACT_FUNCTION",
+      "offset": 86,
+      "owner": 5,
+      "qualname": "subject"
+    }
+  ],
+  "case": "perf",
+  "code_plans": [
+    {
+      "flags": 3,
+      "handler_targets": [],
+      "instructions": [
+        {
+          "argval": "0",
+          "offset": 0,
+          "opname": "RESUME",
+          "position": [
+            1,
+            1,
+            0,
+            0
+          ]
+        },
+        {
+          "argval": "'left'",
+          "offset": 2,
+          "opname": "LOAD_FAST_BORROW",
+          "position": [
+            2,
+            2,
+            11,
+            15
+          ]
+        },
+        {
+          "argval": "None",
+          "offset": 4,
+          "opname": "RETURN_VALUE",
+          "position": [
+            2,
+            2,
+            4,
+            15
+          ]
+        }
+      ],
+      "jump_targets": [],
+      "qualname": "choose",
+      "rejected": [],
+      "suspended_code": false,
+      "windows": []
+    },
+    {
+      "flags": 3,
+      "handler_targets": [
+        96
+      ],
+      "instructions": [
+        {
+          "argval": "0",
+          "offset": 0,
+          "opname": "RESUME",
+          "position": [
+            3,
+            3,
+            0,
+            0
+          ]
+        },
+        {
+          "argval": "'values'",
+          "offset": 2,
+          "opname": "LOAD_FAST_BORROW",
+          "position": [
+            4,
+            4,
+            42,
+            48
+          ]
+        },
+        {
+          "argval": "None",
+          "offset": 4,
+          "opname": "GET_ITER",
+          "position": [
+            4,
+            4,
+            42,
+            48
+          ]
+        },
+        {
+          "argval": "'value'",
+          "offset": 6,
+          "opname": "LOAD_FAST_AND_CLEAR",
+          "position": [
+            4,
+            4,
+            14,
+            62
+          ]
+        },
+        {
+          "argval": "2",
+          "offset": 8,
+          "opname": "SWAP",
+          "position": [
+            4,
+            4,
+            14,
+            62
+          ]
+        },
+        {
+          "argval": "0",
+          "offset": 10,
+          "opname": "BUILD_LIST",
+          "position": [
+            4,
+            4,
+            14,
+            62
+          ]
+        },
+        {
+          "argval": "2",
+          "offset": 12,
+          "opname": "SWAP",
+          "position": [
+            4,
+            4,
+            14,
+            62
+          ]
+        },
+        {
+          "argval": "72",
+          "offset": 14,
+          "opname": "FOR_ITER",
+          "position": [
+            4,
+            4,
+            42,
+            48
+          ]
+        },
+        {
+          "argval": "('value', 'value')",
+          "offset": 18,
+          "opname": "STORE_FAST_LOAD_FAST",
+          "position": [
+            4,
+            4,
+            33,
+            38
+          ]
+        },
+        {
+          "argval": "2",
+          "offset": 20,
+          "opname": "LOAD_SMALL_INT",
+          "position": [
+            4,
+            4,
+            60,
+            61
+          ]
+        },
+        {
+          "argval": "6",
+          "offset": 22,
+          "opname": "BINARY_OP",
+          "position": [
+            4,
+            4,
+            52,
+            61
+          ]
+        },
+        {
+          "argval": "None",
+          "offset": 34,
+          "opname": "TO_BOOL",
+          "position": [
+            4,
+            4,
+            52,
+            61
+          ]
+        },
+        {
+          "argval": "52",
+          "offset": 42,
+          "opname": "POP_JUMP_IF_TRUE",
+          "position": [
+            4,
+            4,
+            15,
+            28
+          ]
+        },
+        {
+          "argval": "None",
+          "offset": 46,
+          "opname": "NOT_TAKEN",
+          "position": [
+            4,
+            4,
+            15,
+            28
+          ]
+        },
+        {
+          "argval": "14",
+          "offset": 48,
+          "opname": "JUMP_BACKWARD",
+          "position": [
+            4,
+            4,
+            15,
+            28
+          ]
+        },
+        {
+          "argval": "('value', 'value')",
+          "offset": 52,
+          "opname": "LOAD_FAST_BORROW_LOAD_FAST_BORROW",
+          "position": [
+            4,
+            4,
+            15,
+            20
+          ]
+        },
+        {
+          "argval": "5",
+          "offset": 54,
+          "opname": "BINARY_OP",
+          "position": [
+            4,
+            4,
+            15,
+            28
+          ]
+        },
+        {
+          "argval": "2",
+          "offset": 66,
+          "opname": "LIST_APPEND",
+          "position": [
+            4,
+            4,
+            15,
+            28
+          ]
+        },
+        {
+          "argval": "14",
+          "offset": 68,
+          "opname": "JUMP_BACKWARD",
+          "position": [
+            4,
+            4,
+            15,
+            28
+          ]
+        },
+        {
+          "argval": "None",
+          "offset": 72,
+          "opname": "END_FOR",
+          "position": [
+            4,
+            4,
+            42,
+            48
+          ]
+        },
+        {
+          "argval": "None",
+          "offset": 74,
+          "opname": "POP_ITER",
+          "position": [
+            4,
+            4,
+            42,
+            48
+          ]
+        },
+        {
+          "argval": "'created'",
+          "offset": 76,
+          "opname": "STORE_FAST",
+          "position": [
+            4,
+            4,
+            4,
+            11
+          ]
+        },
+        {
+          "argval": "'value'",
+          "offset": 78,
+          "opname": "STORE_FAST",
+          "position": [
+            4,
+            4,
+            14,
+            62
+          ]
+        },
+        {
+          "argval": "'fn'",
+          "offset": 80,
+          "opname": "LOAD_FAST_BORROW",
+          "position": [
+            5,
+            5,
+            11,
+            13
+          ]
+        },
+        {
+          "argval": "None",
+          "offset": 82,
+          "opname": "PUSH_NULL",
+          "position": [
+            5,
+            5,
+            11,
+            13
+          ]
+        },
+        {
+          "argval": "('left', 'right')",
+          "offset": 84,
+          "opname": "LOAD_FAST_BORROW_LOAD_FAST_BORROW",
+          "position": [
+            5,
+            5,
+            14,
+            18
+          ]
+        },
+        {
+          "argval": "2",
+          "offset": 86,
+          "opname": "CALL",
+          "position": [
+            5,
+            5,
+            11,
+            26
+          ]
+        },
+        {
+          "argval": "None",
+          "offset": 94,
+          "opname": "RETURN_VALUE",
+          "position": [
+            5,
+            5,
+            4,
+            26
+          ]
+        },
+        {
+          "argval": "2",
+          "offset": 96,
+          "opname": "SWAP",
+          "position": [
+            null,
+            null,
+            null,
+            null
+          ]
+        },
+        {
+          "argval": "None",
+          "offset": 98,
+          "opname": "POP_TOP",
+          "position": [
+            null,
+            null,
+            null,
+            null
+          ]
+        },
+        {
+          "argval": "2",
+          "offset": 100,
+          "opname": "SWAP",
+          "position": [
+            4,
+            4,
+            14,
+            62
+          ]
+        },
+        {
+          "argval": "'value'",
+          "offset": 102,
+          "opname": "STORE_FAST",
+          "position": [
+            4,
+            4,
+            14,
+            62
+          ]
+        },
+        {
+          "argval": "0",
+          "offset": 104,
+          "opname": "RERAISE",
+          "position": [
+            4,
+            4,
+            14,
+            62
+          ]
+        }
+      ],
+      "jump_targets": [
+        14,
+        52,
+        72
+      ],
+      "qualname": "subject",
+      "rejected": [],
+      "suspended_code": false,
+      "windows": [
+        {
+          "call": 86,
+          "offsets": [
+            80,
+            82,
+            84,
+            86
+          ]
+        }
+      ]
+    }
+  ],
+  "disable_returns": 0,
+  "disabled_offsets": [],
+  "elapsed_seconds": 0.17157239466905594,
+  "entries": [
+    {
+      "offset": 0,
+      "owner": 1,
+      "qualname": "subject"
+    },
+    {
+      "offset": 0,
+      "owner": 2,
+      "qualname": "choose"
+    },
+    {
+      "offset": 0,
+      "owner": 3,
+      "qualname": "subject"
+    },
+    {
+      "offset": 0,
+      "owner": 4,
+      "qualname": "choose"
+    },
+    {
+      "offset": 0,
+      "owner": 5,
+      "qualname": "subject"
+    },
+    {
+      "offset": 0,
+      "owner": 6,
+      "qualname": "choose"
+    }
+  ],
+  "instruction_callback_count": 135051,
+  "load_shapes": [
+    {
+      "kind": "EXACT_FUNCTION",
+      "name": "fn",
+      "offset": 80,
+      "owner": 1,
+      "suboperand": 0
+    },
+    {
+      "kind": "object",
+      "name": "left",
+      "offset": 84,
+      "owner": 1,
+      "suboperand": 0
+    },
+    {
+      "kind": "object",
+      "name": "right",
+      "offset": 84,
+      "owner": 1,
+      "suboperand": 1
+    },
+    {
+      "kind": "EXACT_FUNCTION",
+      "name": "fn",
+      "offset": 80,
+      "owner": 3,
+      "suboperand": 0
+    },
+    {
+      "kind": "object",
+      "name": "left",
+      "offset": 84,
+      "owner": 3,
+      "suboperand": 0
+    },
+    {
+      "kind": "object",
+      "name": "right",
+      "offset": 84,
+      "owner": 3,
+      "suboperand": 1
+    },
+    {
+      "kind": "EXACT_FUNCTION",
+      "name": "fn",
+      "offset": 80,
+      "owner": 5,
+      "suboperand": 0
+    },
+    {
+      "kind": "object",
+      "name": "left",
+      "offset": 84,
+      "owner": 5,
+      "suboperand": 0
+    },
+    {
+      "kind": "object",
+      "name": "right",
+      "offset": 84,
+      "owner": 5,
+      "suboperand": 1
+    }
+  ],
+  "mask_lifecycle": "keep",
+  "missing_owner": 0,
+  "mode": "dense",
+  "oracle_enabled": false,
+  "python": "3.14.7 | packaged by conda-forge | (main, Sep  2 2026, 21:08:32) [GCC 15.3.0]",
+  "selected_instruction_callback_count": 12,
+  "spliced_accepted_windows": [],
+  "windows": [
+    {
+      "call": 86,
+      "oracle_match": null,
+      "oracle_tail": null,
+      "owner": 1,
+      "qualname": "subject",
+      "sparse_match": true,
+      "sparse_tail": [
+        80,
+        82,
+        84,
+        86
+      ],
+      "window": [
+        80,
+        82,
+        84,
+        86
+      ]
+    },
+    {
+      "call": 86,
+      "oracle_match": null,
+      "oracle_tail": null,
+      "owner": 3,
+      "qualname": "subject",
+      "sparse_match": true,
+      "sparse_tail": [
+        80,
+        82,
+        84,
+        86
+      ],
+      "window": [
+        80,
+        82,
+        84,
+        86
+      ]
+    },
+    {
+      "call": 86,
+      "oracle_match": null,
+      "oracle_tail": null,
+      "owner": 5,
+      "qualname": "subject",
+      "sparse_match": true,
+      "sparse_tail": [
+        80,
+        82,
+        84,
+        86
+      ],
+      "window": [
+        80,
+        82,
+        84,
+        86
+      ]
+    }
+  ]
+}

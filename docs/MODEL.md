@@ -1,5 +1,628 @@
 # SCAR execution model
 
+2026-10-26 scope audit: the model exists to support simplification, not to
+reconstruct every implementation layer. Keep adjustable program actions and
+the dependencies necessary for legality/cost; summarize runtime/OS interfaces,
+share definitions across composable fragments, and retain low-level supporting
+evidence on demand. See [MODELING_SCOPE_AUDIT.md](MODELING_SCOPE_AUDIT.md).
+This supersedes older plans that treat complete internal protocol reconstruction
+as a prerequisite. It does not claim whole-program modeling is complete.
+
+## Current first-stage scope (2026-10-20)
+
+The user requires **complete program modeling and automatic LeWM abstraction**
+before any simplification. The governing scope and acceptance are now
+[FIRST_STAGE_MODEL_CONTRACT.md](FIRST_STAGE_MODEL_CONTRACT.md), with actual
+progress in [FIRST_STAGE_MODEL_STATUS.md](FIRST_STAGE_MODEL_STATUS.md).
+The five canonical structures are not the entire identity inventory: code,
+occurrences, objects, logical versions, allocations/materializations and resource
+instances must be connected automatically. Supplied-model protocol acceptance
+does not establish this. F20 is not the automatic next task; it remains deferred
+until an end-to-end modeling gap requires it. Historical entries follow.
+
+Native observation adapters distinguish provider reference tokens from content
+versions and submission associations from completion order. See
+[NATIVE_OBSERVATION_MODEL.md](NATIVE_OBSERVATION_MODEL.md). They populate evidence
+without fabricating static SSA definitions; the full first-stage gate remains open.
+
+Object identity now has its own `ObjectInstance` registry within ValueGraph;
+`ObjectBinding` remains a content association. A known object can therefore
+have no known logical version. Exact marker-slot reference associations are
+conditional observations, not alias, content, direct-call or readiness proofs.
+The [real CPU replay](../artifacts/experiments/first_stage_object_reference_20261020/README.md)
+connects six objects and twelve ordered slots; production and whole-LeWM
+automatic correspondence remain open.
+
+## Async close chains and handler-produced completions (2026-10-20)
+
+Five canonical entities remain unchanged. A fresh handler packet has control
+dependence on the original packet; it is not that packet's copy. The
+[new public API](M1_ASYNC_CLOSE_CHAINS_API.md) separates original copy segments,
+matcher own bool/selected edges, constructor own N/R and the current host packet.
+Static and actual views share query budgets and keep native interpretation,
+object identity and transformation authority separate.
+
+[Conditional F19 acceptance](M1_ASYNC_CLOSE_CHAINS_ACCEPTANCE.md): 30 new and302
+affected prior tests pass on the same922 inputs. All prior tests/fixtures,
+original copy semantics and Program27/Execution8 stay unchanged. Original16
+rows are now10 accepted/6 open; P4/full/P5/M2 original113/196 and complete M0–M2
+remain open. [Next F20](M1_YIELD_FROM_INITIAL_PLAN.md) is a complete first
+delegation inside one parent, not another source helper or optimization backend.
+Automatic whole-LeWM recovery and new speedup remain unverified. Older entries
+below preserve the history and are superseded by this status.
+
+## Conditional value sources reach existing consumers (2026-10-20)
+
+Five canonical entities remain unchanged. A query-local multiedge source graph
+can follow both original copies and declared stored-value relations at the same
+actual value. An accurate load can therefore feed a later store, loaded owner,
+call result or ordinary join without changing original copy ancestry or roots.
+Body history has a separate conditional branch after ordinary Unknown; it keeps
+the original result and does not turn a local source proof into terminal history.
+
+See the [API](M1_VALUE_SOURCE_CONSUMERS_API.md),
+[limited acceptance](M1_VALUE_SOURCE_CONSUMERS_ACCEPTANCE.md) and
+[next original gate](M1_VALUE_SOURCE_CONSUMERS_NEXT_GATE.md). Original read/write
+and occurrence inventories survive budget/depth truncation. Fresh query-local
+caches cannot use ACTIVE cycles, old contexts or a successful checked prefix to
+grant True. Program27, Execution8 and all prior tests/fixtures remain unchanged.
+Automatic recovery, F19/public history, seven families and complete M0–M2 remain
+separate open obligations. No new backend or LeWM speedup is established.
+The final affected selection passes292 tests,21 new, on917 stable fingerprint
+inputs; this is a supplied-model gate, not full-repository or first-stage acceptance.
+
+## Stored payload, state version and own load result (2026-10-20)
+
+The five canonical entities remain Operation / Value / StateLocation / Region /
+Resource. StoredValueWrite/Read attach primitive-slot post/pre value relations
+to original address effects and payload/result ports. `stored_value_sources`
+joins actual occurrences, selected N/R state slots, current versions, address
+support and the original transparent interval; no second heap or copy union.
+Unknown effects/aliases still block old sources, while a later explicit write
+can establish a new one. Object identity remains distinct from data stability.
+
+See the [API](M1_STORED_VALUE_API.md), [acceptance](M1_STORED_VALUE_ACCEPTANCE.md),
+[exact codec migration](M1_STORED_VALUE_MIGRATION.md) and
+[next consumer gate](M1_STORED_VALUE_NEXT_GATE.md).
+961 direct affected tests pass on913 stable sources,40 new; old fixtures remain
+unchanged. Program27 is capability gated and preserves1–26 bytes, checked by an
+independently executed frozen Program26 encoder; Execution8 remains unchanged.
+Only16 legacy codec tests migrate version sentinels/old field projections,
+with seven explicit future-case identities retained as obligations. The query
+does not automatically recover arbitrary raw-slot contracts or connect every
+old consumer. F19, seven families, P4/full/P5/M2 and the whole first stage remain
+open. No automatic whole-LeWM model, trusted transform or new speedup is claimed.
+
+## Current reference identity is distinct from source and content (2026-10-20)
+
+The five entities remain Operation / Value / StateLocation / Region / Resource.
+`object_identity` compares independent scoped declarations at exact Reference
+occurrences; it creates no original copy edge. Conditional same-object support
+can connect the current frame to its own true-terminal F history while leaving
+mutable content, stored-field source and native identity unproved. Different
+candidate objects are local alternatives, not global copy conflicts.
+
+See the [interface](M1_FRAME_IDENTITY_GUARD_API.md),
+[limited acceptance](M1_FRAME_IDENTITY_GUARD_ACCEPTANCE.md) and
+[next design gate](M1_FRAME_IDENTITY_GUARD_NEXT_GATE.md).
+231 direct affected tests pass on907 stable sources:217 existing identities
+(all196 immediately previous cases) and14 new. Prior tests/fixtures and
+Program26/Execution8 remain unchanged; the old unannotated history stays None.
+The current identity branch does not recover store-payload/state/load provenance.
+F19's first unit, seven families, P4/full/P5/M2 and the whole first stage remain
+open. This is not automatic whole-LeWM modeling, transformation or speedup.
+
+## Local request paths and conditional body roles (2026-10-20)
+
+Historical checkpoint; the subsequent current-identity branch is scoped above.
+
+Operation / Value / StateLocation / Region / Resource remain the core entities.
+The independent `request_no_drive_paths` query inventories original interfaces,
+branches, own N/R slots, hosts and Drives before its bounded local CFG walk.
+A completed local no-Drive route does not prove that opaque callees have no
+body effects. A body-only request projection preserves every R/Create recipe;
+missing latent roles and conditional field interpretations do not add copies.
+
+See the [interface](M1_ASYNC_FINISHED_REQUESTS_API.md),
+[limited acceptance](M1_ASYNC_FINISHED_REQUESTS_ACCEPTANCE.md) and
+[remaining work](M1_ASYNC_FINISHED_REQUESTS_NEXT_GATE.md).
+196 direct affected tests pass on904 stable sources, including17 new cases.
+The supplied true-terminal/new-request fragments keep exact packets, catch
+context and current state, while their dynamic same-B/F history bridge and
+nonfinished native arm remain incomplete. F19 and the whole first stage stay
+open. This is neither automatic whole-LeWM modeling nor speedup evidence.
+
+## Async terminal sources and exact current consumers (2026-10-20)
+
+The five core entities remain Operation / Value / StateLocation / Region /
+Resource. Source syntax validity, frame-local exception conversion, the body's
+actual terminal packet and a later helper's own failure are separate facts.
+Static original CFG order and actual dynamic visit order select current ports;
+canonical ID order and optional session attachments cannot select the source.
+Source compilation reuses CPython without executing the target, preserving
+Return inventory and explicit byte/version/parser namespace gaps.
+
+See the [plan](M1_ASYNC_TERMINAL_PLAN.md), [actual attempts](M1_ASYNC_TERMINAL_PROGRESS.md),
+[F18 acceptance](M1_ASYNC_TERMINAL_ACCEPTANCE.md) and [next gate](M1_ASYNC_TERMINAL_NEXT_GATE.md).
+**2104 affected focused tests pass** on899 stable sources: all2058 previous exact
+identities retained,46 new; old tests/fixtures, Program26 and Execution8 unchanged.
+F18 conditionally closes at supplied-model structural scope; nine original
+families are accepted and seven remain open, with P4 component/full/P5 and M2
+original113/196. Native correspondence, automatic whole-LeWM recovery,
+transformation and new speedup remain unproved. Historical checkpoints follow.
+
+## Initial async inputs and joint original control (2026-10-19)
+
+The five core entities remain Operation / Value / StateLocation / Region /
+Resource. Request initial state, associated body phase, stored L and current S
+are independent dependencies. First S uses L only for proved NEXT/None;
+nonNone S overrides L. Unknown input/caller coverage cannot become a Start
+proof. Joint control keeps original branches, caller tuples, all association
+state support, exact ordinal and each rejection helper's own N/R/host.
+Create/association projections remain separate from ordinary copy receipts.
+
+See the [frozen plan](M1_ASYNC_INITIAL_CONTROL_PLAN.md),
+[actual failures and results](M1_ASYNC_INITIAL_CONTROL_PROGRESS.md),
+[original F16 acceptance](M1_ASYNC_INITIAL_CONTROL_ACCEPTANCE.md), and
+[next original scope](M1_ASYNC_INITIAL_CONTROL_NEXT_GATE.md).
+2058 affected focused tests pass on892 stable sources:2010 exact prior IDs
+plus6 explicit future-version migrations retain all2016 prior obligations,
+with42 new tests. Program26 gates the new use of existing subjects; original
+1–25 wire and Execution8 remain. F16 passes conditional supplied-model
+structural acceptance; eight of the original16 families remain open, as do
+P4 component/full/P5/M2 original113/196. Real opaque/write boundaries remain
+unknown. This is not automatic whole-LeWM modeling, transformation or speedup.
+
+## Complete call effects and exact partial intervals (2026-10-19)
+
+The five core entities remain Operation / Value / StateLocation / Region /
+Resource. CallEffectExpansion is a thin original call-to-callee declaration
+that represents all effects in the original implementation CFG. It neither
+asserts purity nor proves automatic source/native recovery. Preservation
+checks the actual suffix, caller and prefix while retaining parent summaries;
+independent writes, opaque primitives, missing ports and budget gaps still block.
+Ordinary CALL state results now advance dynamic current; missing capture kills
+the old current, and INVOKE/BodyDrive keep their original EDGE rules.
+
+See the [plan](M1_CALL_EFFECT_EXPANSION_PLAN.md),
+[actual failures and results](M1_CALL_EFFECT_EXPANSION_PROGRESS.md), and
+[remaining original scope](M1_CALL_EFFECT_EXPANSION_NEXT_GATE.md).
+2016 affected focused tests pass on884 stable sources:1951 exact prior IDs
+plus5 explicit future-version migrations retain all1956 obligations, with45
+new tests and15 newly included existing call-order regressions. Program25 is
+capability-gated; original1–24 wire and Execution8 remain. No family newly
+closes; nine families/P4 component/full/P5/M2 original113/196 stay open.
+Supplied-model queries are not automatic whole-LeWM modeling, transformation
+or speedup evidence.
+
+## One body, independent requests and current occupancy (2026-10-19)
+
+The five core entities remain Operation / Value / StateLocation / Region /
+Resource. Frame phase, active session and a request's initial/complete state
+are independent. The thin SessionOccupancyCondition names an original B Use
+and READ sites; it stores neither truth nor extra mutable state. The supplied
+one-B/two-R pipeline now carries R2's own COMPLETE before its error helper,
+normal/raise fullstate and catch, followed by the original R1 continuation.
+It adds no R2 BodyDrive and never derives B-free from R2-complete.
+
+Static source and full state tuple follow original Create/association and
+BRANCH ports. Dynamic session_occupancy_history separates conditional body
+provenance, current post support, interval preservation and observed bool.
+A complete local interval passes; the main cross-call interval still has
+whole-call summary and real primitive-boundary blockers. These cannot be
+removed by changing an opaque label or treating an observation as proof.
+
+See the [frozen plan](M1_ASYNC_SESSION_OWNERSHIP_PLAN.md),
+[exact codec migration](M1_ASYNC_SESSION_OWNERSHIP_CODEC_MIGRATION.md),
+[actual attempts](M1_ASYNC_SESSION_OWNERSHIP_PROGRESS.md), and
+[next contract review](M1_ASYNC_SESSION_OWNERSHIP_NEXT_GATE.md).
+Program24 is capability-gated; legacy wire meaning and Execution8 remain.
+1956 affected focused tests pass on878 stable sources:1903 previous exact
+identities plus4 explicit future-version migrations retain all1907 prior
+obligations, with49 new cases. This is not component or frozen-full acceptance.
+This is supplied-model progress, not completed F16/M0–M2 or automatic whole
+LeWM modeling. No new backend, trusted transformation or speedup is established.
+
+## Body activity, terminal history and current contents (2026-10-19)
+
+The five entities remain Operation / Value / StateLocation / Region / Resource.
+A new derived body_state_history query joins an exact READ to its active Drive
+interval or actual terminal commit, complete original ports and call ancestry.
+Terminal history uses the original explicit native/no-reset lifecycle contract;
+it does not prove mutable contents or request completion remains unchanged.
+Native self acquisition retains ordinary unknown copy and a separate conditional
+source-first projection receipt. Missing raw Uses or child paths cannot support
+a complete relation. No canonical identity, schema or backend was added.
+
+See the [frozen plan](M1_NATIVE_COROUTINE_PLAN.md),
+[actual failures and results](M1_NATIVE_COROUTINE_PROGRESS.md), and
+[original F14 acceptance](M1_NATIVE_COROUTINE_ACCEPTANCE.md):1907 affected focused
+pass on870 stable sources, retaining all1890 prior identities. F14 completes
+conditional supplied-model structural acceptance; the six prior families/A-H
+remain accepted. Nine families/P4 component/frozen-full/P5/M2 original113/196
+remain open. [Next original gate](M1_NATIVE_COROUTINE_NEXT_GATE.md) credits old
+request reuse/scheduler evidence and isolates real competition/Created-entry
+gaps. Automatic whole-LeWM recovery, transformation and speedup remain unproved.
+
+## State content must survive its original interval (2026-10-19)
+
+A state-version route does not prove that a field's contents survived. The
+new derived state_preservation query inventories each original operation,
+actual call, selected N/R transfer and full state tuple between exact points.
+Incomplete outer effects, opaque child effects, missing original inputs and
+unexcluded writes independently retain unknown. Different LocationIDs and
+address labels do not establish isolation.
+
+The derived request_state_history query joins an original SessionUpdate post,
+its complete support, same-request binding and preservation to this READ.
+The READ's observed bool/branch is separate evidence. Missing post inputs
+cannot be filled from captured outputs; budget1 keeps the full READ-domain
+inventory. See the [finite plan](M1_STATE_FACT_CONTINUATION_PLAN.md),
+[actual failures and results](M1_STATE_FACT_CONTINUATION_PROGRESS.md) and
+[next original obligations](M1_STATE_FACT_NEXT_GATE.md).1890 affected focused
+pass on862 stable sources, retaining all1865 prior identities. Original R3
+still lists four real preservation blockers. F14/F16, the other eight open
+families/P5/M2 and automatic whole-LeWM recovery remain open; no new backend,
+transformation or speedup is established.
+
+## Current scheduler sources are independent of stored requests (2026-10-19)
+
+One async request R can store latent input L while each later invocation has
+its own scheduler input S. A normalized packet must originate at the selected
+source role, at the helper's own NORMAL result, and reach the exact resume
+slot. Interface-copy support, original producer support and complete caller/
+CFG context are separate checks. A later Use cannot be bound backwards as a
+producer. Historical branch selection grants no current phase authority.
+
+Likewise, a COMPLETE post, transmission of a state version, and the contents
+read from that state are separate relations. Supplied captures can verify
+the first two without proving the next boolean. See the
+[finite plan](M1_CURRENT_ASYNC_PACKET_PLAN.md),
+[actual attempts](M1_CURRENT_ASYNC_PACKET_PROGRESS.md) and
+[remaining phase connections](M1_COROUTINE_PHASE_NEXT_GATE.md).
+
+## Exact result content must reach applicability checks (2026-10-19)
+
+A LiteralEvaluation describes known content at an exact existing result port;
+it creates no producer, alias or object identity. Even an opaque operation's
+own NORMAL result may carry that fact. Qualification must consume it through
+the original copy and source paths. UninterpretedConstant remains unknown,
+and a declared unsuitable value is rejected only when an unprotected success
+path actually continues it as an iterator.
+
+The source/consumer model now expresses native self/no-wrapper completion,
+general bad-return qualifications and another real Drive's adapter result
+without new wire types. See the [actual attempts](M1_DIRECT_QUALIFICATION_AND_RESULT_PROGRESS.md)
+and [original-clause acceptance](M1_AWAIT_SOURCE_FAMILY_ACCEPTANCE.md):1854
+affected focused pass on856 stable sources, retaining all1845 prior identities.
+Original await A-H and F12/F13/F15 pass conditional structural acceptance;
+F17/F21/F23 remain accepted. Ten families/P5/M2 and automatic recovery remain
+open; the [next review](M1_COROUTINE_REQUEST_NEXT_REVIEW.md) lists exact phase
+and request-state connections instead of repeating already verified stepping.
+
+## Own-result occurrences and source-evaluated regions (2026-10-19)
+
+One Operation definition may execute repeatedly and return the same object.
+Its own result occurrences remain distinct from that shared identity. Actual
+copy ancestry chooses the evaluated result boundary, including a deliberately
+saved earlier result; latest execution time cannot choose the producer.
+Current state may independently come from the later invocation.
+
+Loop choices from different visits are retained as conditional context, not
+flattened into a proof that the source never existed. Conditional may-consumer
+inventory preserves original guards and bindings; it grants neither must-copy
+seeds nor completeness. Budget-truncated joins keep their unpaid obligations.
+See the [N4 evidence](M1_AWAIT_REEVALUATION_PROGRESS.md) and
+[original E/H structural acceptance](M1_AWAIT_ORIGINAL_SCOPE_ACCEPTANCE.md).
+1845 affected focused pass on853 stable sources, retaining all1807 prior
+identities. E/G/H and F17/F21/F23 are structurally accepted in their original
+scope; other families and automatic whole-program recovery remain open.
+
+## Original control inventory and independently known current values (2026-10-19)
+
+Optional descriptions cannot determine whether an original execution path
+exists. Removing input or consumer declarations leaves its Operation results,
+selected completion edges, StateLocation versions, cleanup actions and host
+ports in the model. The query enumerates that original control inventory and
+reports a missing source separately. It cannot choose an expected source by
+looking at an actual consumer's payload.
+
+An unknown original source and a known later replacement are compatible facts.
+A proved active CleanupReplace may establish a new current value and role,
+including a Return that replaces a Raise. The original source gap and its
+boundary receipt remain. Enter/Resume cannot acquire that permission by
+reading an otherwise unproved payload. Thus current-copy True is distinct
+from original-source preservation True, False or unknown.
+
+An operation may also continue an independently declared input rather than
+return it as an own result. That association requires its exact input source,
+current incoming choice, captured source visit and selected forward Use.
+Same activation and equal type are insufficient. Actual missing Uses and
+explicit Unresolved operands retain evidence gaps without removing canonical
+dependencies. See the [frozen close/C1 plan](M1_DELEGATE_CLOSE_PLAN.md) and
+[actual attempts and acceptance boundary](M1_DELEGATE_CLOSE_PROGRESS.md).
+The final1807 affected focused cases retain all1793 prior identities on851
+stable sources. This completes original F23 conditional structural acceptance;
+the other13 families and automatic whole-program recovery remain open.
+
+## Current values, state posts, and actual uses (2026-10-19)
+
+An async request's COMPLETE state post and its delivered value are independent
+relations. The current body export must reach this adapter's actual input,
+its own selected result, the current packet component, and the host/caller's
+exact packet and state ports. An older typed packet with a real producer does
+not replace that chain. Missing actual Uses keep its evidence PARTIAL even
+when the state post is proved.
+
+The existing Operation / Value / StateLocation / Region / Resource model also
+separates a delegate call's own RAISE from lookup or extraction failures, and
+the loop-carried previous item from the final extracted value. SEND(None) may
+choose NEXT; SEND(nonNone) retains its original argument ordinal. These are
+source and control obligations, independent of equal types or cached values.
+
+Original F17/F21 conditional structural gates pass in1793 affected focused
+cases, retaining all1780 prior identities. See the [frozen plan](M1_ASYNC_DELEGATE_EDGE_PLAN.md),
+[source-bound acceptance](M1_ASYNC_DELEGATE_EDGE_PROGRESS.md), and
+[next close/C1 review](M1_DELEGATE_CLOSE_NEXT_REVIEW.md). Remaining families,
+automatic source recovery and whole-program modeling are still open.
+
+## Source evaluation, current incoming, and shared consumers (2026-10-19)
+
+An original input declaration and the original control-path inventory have
+different roles. One universal tuple declaration can apply to two incoming
+edges without merging those edges or creating two canonical declarations.
+The query derives the closest operand merge from original CFG/SSA, then
+attaches the same declaration separately to each input guard. An unfinished
+walk retains an explicit inventory cursor rather than claiming a total.
+
+Likewise, a result from one of two mutually exclusive calls can reach their
+common terminal. Its necessary source-evaluation prefix must accompany both
+consumer discovery and the subsequent exact payload/state binding. These
+conditions are derived from the original source's control reachability. They
+do not select a producer by inspecting equal values at the target. Static
+calls sharing one Region and actual calls sharing one definition remain
+separate frames and activations.
+
+See the [complete shared-input plan](M1_SHARED_TUPLE_FINAL_PLAN.md),
+[source-bound progress](M1_SHARED_TUPLE_FINAL_PROGRESS.md) and
+[structural versus automatic-recovery accounting](M1_PROTOCOL_SCOPE_RECONCILIATION.md).
+The original G supplied-model structural matrix passes on the final source:
+1780 affected focused cases retain all1747 previous identities. This closes
+that structural obligation; the other original families and whole-program
+automatic recovery remain open.
+
+## An operation result and its enclosing region's exit (2026-10-19)
+
+The same execution has two different connection points: an Operation's own
+typed result, and its enclosing Region's eventual exit. An acquisition can
+complete with RAISE while caller cleanup subsequently completes with RETURN.
+The original result kind, slot and source identity remain unchanged. This is
+one reason a recursive operation/data graph also needs explicit control and
+StateLocation edges before dependency reduction is safe.
+
+The failure view now separates stage packet-to-helper, helper-to-acquisition
+and acquisition-to-current-caller relations. Qualification rejection is a
+control edge to an original packet constructor, rather than a data-copy edge
+from a candidate reference. Original consumers and replacement consumers have
+different sources. Current state Uses reference canonical SSA, without an
+assertion that cleanup leaves earlier state unchanged.
+
+Actual own-result ownership requires the selected CompletionResult ordinal,
+its exact landing formal and ValueOccurrence in this activation. A forwarded
+value or another activation's value cannot obtain that ownership. See the
+[frozen failure continuation plan](M1_FAILURE_CALLER_CONTINUATION_PLAN.md) and
+[source-bound progress / limits](M1_FAILURE_CALLER_CONTINUATION_PROGRESS.md).
+This connection model still carries no automatic transformation authority.
+
+## Original exceptions and current completion (2026-10-19)
+
+A body's original exception and the completion delivered after cleanup are
+different relations. The original DriveResult remains an exact source, even
+when explicit cleanup replaces its payload or changes RAISE to RETURN. The
+current terminal must reach the caller's matching completion kind, full result
+slot and current state versions. This does not create a final-value extraction
+obligation for BodyRaise.
+
+The execution view follows the actual BodyDriveResult index and selected
+landing formal, then the exact call activation and terminal. Source-to-root,
+root preservation, current-source support and consumer delivery have separate
+receipts; missing evidence and interrupted joins stay unknown/PARTIAL. The
+shared budget pays for full-slot scans. See the
+[frozen plan](M1_BODY_RAISE_CONTINUATION_PLAN.md) and
+[evidence / remaining scope](M1_BODY_RAISE_CONTINUATION_PROGRESS.md).
+These supplied-model connections do not establish automatic source recovery,
+native identity or transformation authority.
+
+## Completion identity across cleanup and suspension (2026-10-19)
+
+Operation / Value / StateLocation / Region / Resource remain the five entity
+families. A pending token is not its payload; the original completion source
+and its current replacement source have separate bindings. Cleanup can write
+new state versions: required terminal-to-caller state delivery does not assert
+state invariance. Missing current-source evidence cannot be hidden by a known
+outer copy or a consumer's independent local binding.
+
+Synchronous call completion and future resumable segments are distinct. The
+completion query reuses canonical continuation/copy relations; its dynamic
+projection follows this activation's actual transfers, exact call ancestry,
+Drive outcomes and ResumeIngress. Unknown effects, calls, unsupported source
+kinds and missing captures stay explicit boundaries. These are supplied-model
+relations, not native identity or optimization authority. See the
+[frozen view](M1_COMPLETION_CONTINUATION_VIEW.md) and
+[progress / original remaining scope](M1_AWAIT_POST_CLEANUP_PROGRESS.md).
+
+## Nested result delivery and pending payload evidence (2026-10-19)
+
+The five entity families remain Operation / Value / StateLocation / Region /
+Resource. An internal result can reach an outer call only through original
+callee exits and that call's exact exit kind and full result slot. The existing
+call-return exporter now supports this result endpoint across intermediate
+unambiguous frames. A requested outer result cannot choose one of several
+callers by inspecting their data.
+
+PendingPayload is a typed projection, not token/payload equality: the actual
+dispatch selector follows its own original token ancestry to its constructor,
+then references that occurrence's original payload Use and selected port.
+Fresh scoped identity conflicts reject the projection. Missing identity stays
+explicit even when declared port-copy support holds. Raw original source keys
+survive budget truncation without pretending their associations were checked.
+
+See the [source-to-terminal plan](M1_AWAIT_SOURCE_TO_TERMINAL_PLAN.md),
+[pending relation](M1_PENDING_PAYLOAD_RELATION.md) and
+[progress and original remaining scope](M1_AWAIT_SOURCE_TO_TERMINAL_PROGRESS.md).
+These are supplied-model relations, with automatic source recovery, native
+identity and transformation authority still unproved.
+
+## Region implementation and actual result paths (2026-10-19)
+
+An interface contract and its implementation are separate views of the same
+original Operation/Region records. Each internal produced value has its own
+source, return kind and full slot; selected static call frames connect its
+terminal Uses to parent ports. Source-input support and output-copy support
+are independent obligations. Alternative contributors use OR; required
+original terminals use AND, with explicit local enumeration completeness.
+
+The execution projection follows each caller's exact CallActivation and
+completion. Its outputs contain actual Use/Value occurrences and dynamic
+witnesses, with static definitions retained separately. Missing capture
+cannot inherit a static True or borrow another instance. This is connection
+modeling, with native semantics, automatic source applicability and rewrite
+authority still unproved. See the [plan](M1_AWAIT_FINAL_CHAIN_PLAN.md),
+[source-bound progress](M1_AWAIT_FINAL_CHAIN_PROGRESS.md) and
+[original A–H evidence ledger](M1_AWAIT_A_H_EVIDENCE_LEDGER.md).
+
+## Call-context copy-consumer projection (2026-10-19)
+
+The [D6 query](M1_COPY_CONSUMER_GRAPH_CONTRACT.md) keeps each original Use,
+complete actual/formal tuples and original return slots in separate static
+call-path frames. A frame is not an invocation. May-copy, must-copy and unknown
+membership remain distinct; an unresolved callee cannot erase its boundary or
+authorize reuse. This projection reuses canonical CFG/SSA and return summaries;
+it is not complete provenance or automatic source recovery. See the
+[evidence and remaining scope](M1_COPY_CONSUMER_GRAPH_PROGRESS.md).
+
+## Async source/consumer/occurrence connection (2026-10-19)
+
+A consumer declaration is not an inventory of producer obligations. Original
+Drive/outcome edges define the source denominator independently of supplied
+SessionUpdate rows. For each exact source, selected CFG choices correlate the
+request R, persistent body B and latest current-state inputs as one tuple.
+Shared updates retain every applicable incoming case. AWAIT exports require
+their exact host handoff; item adapters change values and must not be modeled
+as a Reference-to-exception-packet copy.
+
+The five entity families remain unchanged. Static graph and execution evidence
+stay distinct: one B can have a persistent activation with several segments,
+while successive calls have distinct driver activations. An actual selected
+ControlTransfer/BlockVisit path locates this call's update and host occurrence.
+Existing CFG/CALL/body copy recipes and fresh scoped identity checks apply to
+its endpoints and necessary ancestors. Missing capture keeps the original
+source obligation; another same-site occurrence cannot silently replace it.
+
+State operand capture, NORMAL-only post support and per-scope source bindings
+are separate receipts. A post at its original update point grants no lifetime
+across subsequent calls; the existing invalidation rules remain in force.
+This is the bounded model under [review](M1_ASYNC_PIPELINE_PLAN.md); its
+[acceptance record](M1_ASYNC_PIPELINE_PROGRESS.md) distinguishes supplied-IR
+connections from unproved native/source/runtime identity. Whole-program M0–M2,
+automatic LeWM source recovery and transformation remain unfinished.
+
+## Packet continuation connection checkpoint (2026-10-19)
+
+A pending pack and a cleanup action are intermediate operations. A successful
+copy into either does not discharge the rule's eventual consumer obligation.
+The existing five entity families remain unchanged. The missing relationship is
+the selected control path from that intermediate carrier to the actual
+projected Value, parent ingress or terminal Use.
+
+The [continuation plan](M1_PACKET_CONTINUATION_PLAN.md) retains next-frontier
+evidence separately from a full declared-path inventory. Independent pending
+carrier/port possibility selects feasible routing cases; source-relative copy
+support checks their actual payloads. Expected source support must never prune
+a wrong-source branch from the consumer denominator. Dead pending definitions
+are not active consumers merely because they were evaluated.
+
+Typed C1 primitives deliberately have unknown callback effects and explicit
+whole-domain post-state. Following their validated structural successor is
+conditional modeling, not a purity proof. Suspend successor recipes similarly
+describe a possible later activation, not another outcome of the current Drive.
+An ordinary opaque call, incomplete effects, unproved override/handler, cycle or
+truncation remains an explicit boundary. Source/native inventory, runtime
+identity and rewrite authority remain unproved even when the supplied path is
+fully connected. [Acceptance](M1_PACKET_CONTINUATION_PROGRESS.md) records1032
+affected focused passes (previous1018 retained plus14 new),721 stable sources
+and the original failed attempts. Full P4/M0–M2 remain open; this is not whole
+program source recovery or a transformation proof.
+
+## Pending payload provenance checkpoint (2026-10-19)
+
+Pending packing and dispatch are existing typed Operations, not new entities.
+A pending token carries a language destination and an already evaluated payload;
+the token, payload, saved handled context and current state remain separate.
+The source query now interprets the original selector/ControlPort/edge argument
+and landing formal as a semantic projection. It never turns every token into
+its payload alias or treats the same port as the same payload.
+
+Independent port possibility and source-relative payload support are transient
+query facts over original IDs. Same-port paths require all applicable sources;
+different ports are filtered before the meet. Source reevaluation clears old
+support while keeping old-token possibility. Original SavedInput and state/
+context validation govern temporal cuts; provenance witnesses keep constructor,
+owned payload, token path, exact dispatch and caller/CFG context.
+
+This extends the existing source/call-return pipeline without new records or
+wire family. Two connected C1 examples separately exercise old Return payloads
+across two cuts and a new RAISE payload retained by pending across the second
+cut. See the [frozen plan](M1_PENDING_PAYLOAD_PLAN.md) and
+[acceptance record](M1_PENDING_PAYLOAD_PROGRESS.md). Native/source applicability,
+dynamic occurrence identity and transformation authority remain unproved.
+The complete sixteen-group P4 and whole M0–M2 gate remain OPEN.
+
+## Independent packet-route checkpoint (2026-10-18)
+
+Original lookup RAISE, original injection and matcher RAISE are three distinct
+packet sources. A narrow binding in the existing protocol_bindings table names
+the injection; actual matcher completions and bool branch derive true/false/
+failure routes. This adds no entity family or producer/state graph. Each input
+case correlates its complete source/caller/CFG tuple independently; original
+consumer and incoming inventories retain the denominator.
+
+The shared-budget frontier query checks exact original packet consumers and
+active C1 pending tokens. Cycles, reevaluation, opaque effects, normalization,
+native categories and C1 continuation preserve explicit gaps. Finally override
+support does not certify source applicability. All routes remain frontier-only;
+runtime identity and transformation authority remain false. See the
+[plan](M1_LOOKUP_FALLBACK_PLAN.md) and [acceptance](M1_LOOKUP_FALLBACK_PROGRESS.md).
+965 affected focused cases pass; all16 complete P4 groups and M0–M2 remain OPEN.
+
+## Exception matching connection checkpoint (2026-10-18)
+
+The typed program core represents ordinary exception matching as an attachment
+to an existing Operation, with original exception/packet and handler Uses,
+state inputs, its own NORMAL bool/RAISE packet and the bool's real branch.
+Fixed intrinsics invent no handler operand; dynamic class/tuple values retain
+their actual Reference. Matching, handler expression evaluation, handled-context
+installation and cleanup are distinct operations/dependencies.
+
+This adds no fundamental node family or producer/state graph. Known callee
+INVOKEs can expand into their original Region; produced completion slots and
+forwarded state Uses remain distinct. Builtin/category declarations do not
+prove runtime class identity or authorize a missing-method fallback. See the
+[design and gates](M1_EXCEPTION_MATCH_PLAN.md) and [implementation record](M1_EXCEPTION_MATCH_PROGRESS.md).
+Whole-program modeling and automatic source recovery remain incomplete; this
+supplied-model interface does not close M0–M2.
+
+## Whole-program model revision (2026-10-16)
+
+The current complete-model specification is
+[WHOLE_PROGRAM_MODEL.md](WHOLE_PROGRAM_MODEL.md), with Operation, Value,
+StateLocation, Region **and Resource** as independent entity families. The
+four-family ProgramGraph below is the retained control/data projection, not
+the entire model. Typed environment, cleanup/resumption, resource realization
+and readiness interfaces remain incompletely implemented. See the
+[ordered model gates](WHOLE_PROGRAM_MODEL_PLAN.md); whole-program modeling is
+not complete. Later historical sections do not override this scope.
+
 ## Program semantics first (2026-10-13 decision)
 
 [CORE_GRAPH_MODEL.md](CORE_GRAPH_MODEL.md) now defines the intended semantic

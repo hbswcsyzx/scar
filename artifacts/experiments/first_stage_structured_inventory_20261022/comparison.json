@@ -1,0 +1,962 @@
+{
+  "valid": true,
+  "scope": "same-source/raw-input/budget comparison and declared graph ownership; not dependency truth",
+  "baseline_raw_sha256": "1b29ba654226d6c374bebc2fe7ba212f4658b05b57b521c90590ac4d5384c422",
+  "inventory_raw_sha256": "a5911dd8cc0e77ac468a1ee2f06a736cb3174659afebbb4d69bf9b1189486313",
+  "baseline": {
+    "counts": {
+      "files": 151,
+      "definitions": 2217,
+      "source_calls": 10235,
+      "source_atoms": 122323,
+      "core_operations": 1148,
+      "core_values": 1919
+    },
+    "statuses": {
+      "UNSUPPORTED": 206,
+      "NOT_ATTEMPTED": 1961,
+      "LOWERED_WITH_GAPS": 50
+    },
+    "coverage": {
+      "UNSUPPORTED": 14290,
+      "INVENTORY_ONLY": 107351,
+      "CONNECTED": 682
+    },
+    "unsupported_terminal_details": {
+      "expression is not yet connected: Call": 15,
+      "expression is not yet connected: IfExp": 7,
+      "expression is not yet connected: BoolOp": 14,
+      "statement is not yet connected: Assert": 8,
+      "only ordinary local name assignment is connected": 35,
+      "expression is not yet connected: Dict": 9,
+      "expression is not yet connected: Subscript": 7,
+      "statement is not yet connected: FunctionDef": 2,
+      "closure/cell bindings need explicit state-location interfaces": 45,
+      "statement is not yet connected: Global": 1,
+      "statement is not yet connected: Import": 4,
+      "expression is not yet connected: JoinedStr": 7,
+      "statement is not yet connected: AnnAssign": 6,
+      "statement is not yet connected: Raise": 9,
+      "statement is not yet connected: While": 1,
+      "statement is not yet connected: ImportFrom": 5,
+      "statement is not yet connected: For": 15,
+      "statement is not yet connected: Try": 1,
+      "expression is not yet connected: DictComp": 1,
+      "generator invocation/suspension requires a distinct completion and lifetime model": 3,
+      "statement is not yet connected: AugAssign": 1,
+      "literal is outside exact scalar support": 4,
+      "expression is not yet connected: ListComp": 3,
+      "expression is not yet connected: Slice": 3
+    },
+    "not_lowered_reasons": [
+      {
+        "status": "NOT_ATTEMPTED",
+        "reason": "independent body/aggregate operation construction budget exhausted",
+        "count": 1380
+      },
+      {
+        "status": "NOT_ATTEMPTED",
+        "reason": "this scope requires a class/lambda/comprehension interface beyond the current body lowerer",
+        "count": 581
+      },
+      {
+        "status": "UNSUPPORTED",
+        "reason": "closure/cell bindings need explicit state-location interfaces",
+        "count": 45
+      },
+      {
+        "status": "UNSUPPORTED",
+        "reason": "frame lifetime condition is unproved; finalizer/external effects, retention and noncompletion remain unknown; source body version is bound; live function object/code and definition-time effects remain unobserved; only ordinary local name assignment is connected",
+        "count": 11
+      },
+      {
+        "status": "UNSUPPORTED",
+        "reason": "frame lifetime condition is unproved; finalizer/external effects, retention and noncompletion remain unknown; source body version is bound; live function object/code and definition-time effects remain unobserved; source opcode is known; runtime dispatch, effects and exact exceptional behavior remain unverified; source binding candidates are not live runtime target verification; only ordinary local name assignment is connected",
+        "count": 10
+      },
+      {
+        "status": "UNSUPPORTED",
+        "reason": "frame lifetime condition is unproved; finalizer/external effects, retention and noncompletion remain unknown; source body version is bound; live function object/code and definition-time effects remain unobserved; expression is not yet connected: Call",
+        "count": 10
+      },
+      {
+        "status": "UNSUPPORTED",
+        "reason": "frame lifetime condition is unproved; finalizer/external effects, retention and noncompletion remain unknown; source body version is bound; live function object/code and definition-time effects remain unobserved; expression is not yet connected: BoolOp",
+        "count": 7
+      },
+      {
+        "status": "UNSUPPORTED",
+        "reason": "frame lifetime condition is unproved; finalizer/external effects, retention and noncompletion remain unknown; source body version is bound; live function object/code and definition-time effects remain unobserved; statement is not yet connected: For",
+        "count": 6
+      },
+      {
+        "status": "UNSUPPORTED",
+        "reason": "frame lifetime condition is unproved; finalizer/external effects, retention and noncompletion remain unknown; source body version is bound; live function object/code and definition-time effects remain unobserved; global/builtin name lookup remains an effectful source operation; source opcode is known; runtime dispatch, effects and exact exceptional behavior remain unverified; source binding candidates are not live runtime target verification; only ordinary local name assignment is connected",
+        "count": 5
+      },
+      {
+        "status": "UNSUPPORTED",
+        "reason": "frame lifetime condition is unproved; finalizer/external effects, retention and noncompletion remain unknown; source body version is bound; live function object/code and definition-time effects remain unobserved; expression is not yet connected: Dict",
+        "count": 4
+      },
+      {
+        "status": "UNSUPPORTED",
+        "reason": "frame lifetime condition is unproved; finalizer/external effects, retention and noncompletion remain unknown; source body version is bound; live function object/code and definition-time effects remain unobserved; statement is not yet connected: ImportFrom",
+        "count": 4
+      },
+      {
+        "status": "UNSUPPORTED",
+        "reason": "frame lifetime condition is unproved; finalizer/external effects, retention and noncompletion remain unknown; source body version is bound; live function object/code and definition-time effects remain unobserved; literal is outside exact scalar support",
+        "count": 4
+      },
+      {
+        "status": "UNSUPPORTED",
+        "reason": "frame lifetime condition is unproved; finalizer/external effects, retention and noncompletion remain unknown; source body version is bound; live function object/code and definition-time effects remain unobserved; statement is not yet connected: Assert",
+        "count": 3
+      },
+      {
+        "status": "UNSUPPORTED",
+        "reason": "frame lifetime condition is unproved; finalizer/external effects, retention and noncompletion remain unknown; source body version is bound; live function object/code and definition-time effects remain unobserved; statement is not yet connected: AnnAssign",
+        "count": 3
+      },
+      {
+        "status": "UNSUPPORTED",
+        "reason": "generator invocation/suspension requires a distinct completion and lifetime model",
+        "count": 3
+      },
+      {
+        "status": "UNSUPPORTED",
+        "reason": "frame lifetime condition is unproved; finalizer/external effects, retention and noncompletion remain unknown; source body version is bound; live function object/code and definition-time effects remain unobserved; expression is not yet connected: IfExp",
+        "count": 2
+      },
+      {
+        "status": "UNSUPPORTED",
+        "reason": "frame lifetime condition is unproved; finalizer/external effects, retention and noncompletion remain unknown; source body version is bound; live function object/code and definition-time effects remain unobserved; global/builtin name lookup remains an effectful source operation; source opcode is known; runtime dispatch, effects and exact exceptional behavior remain unverified; source binding candidates are not live runtime target verification; Python truth conversion may execute code or raise; no parameter type is assumed; only ordinary local name assignment is connected",
+        "count": 2
+      },
+      {
+        "status": "UNSUPPORTED",
+        "reason": "frame lifetime condition is unproved; finalizer/external effects, retention and noncompletion remain unknown; source body version is bound; live function object/code and definition-time effects remain unobserved; statement is not yet connected: Import",
+        "count": 2
+      },
+      {
+        "status": "UNSUPPORTED",
+        "reason": "frame lifetime condition is unproved; finalizer/external effects, retention and noncompletion remain unknown; source body version is bound; live function object/code and definition-time effects remain unobserved; source opcode is known; runtime dispatch, effects and exact exceptional behavior remain unverified; Python truth conversion may execute code or raise; no parameter type is assumed; statement is not yet connected: Raise",
+        "count": 2
+      },
+      {
+        "status": "UNSUPPORTED",
+        "reason": "frame lifetime condition is unproved; finalizer/external effects, retention and noncompletion remain unknown; source body version is bound; live function object/code and definition-time effects remain unobserved; global/builtin name lookup remains an effectful source operation; source opcode is known; runtime dispatch, effects and exact exceptional behavior remain unverified; source binding candidates are not live runtime target verification; Python truth conversion may execute code or raise; no parameter type is assumed; expression is not yet connected: BoolOp",
+        "count": 2
+      },
+      {
+        "status": "UNSUPPORTED",
+        "reason": "frame lifetime condition is unproved; finalizer/external effects, retention and noncompletion remain unknown; source body version is bound; live function object/code and definition-time effects remain unobserved; source opcode is known; runtime dispatch, effects and exact exceptional behavior remain unverified; statement is not yet connected: For",
+        "count": 2
+      },
+      {
+        "status": "UNSUPPORTED",
+        "reason": "frame lifetime condition is unproved; finalizer/external effects, retention and noncompletion remain unknown; source body version is bound; live function object/code and definition-time effects remain unobserved; global/builtin name lookup remains an effectful source operation; source opcode is known; runtime dispatch, effects and exact exceptional behavior remain unverified; source binding candidates are not live runtime target verification; Python truth conversion may execute code or raise; no parameter type is assumed; statement is not yet connected: Raise",
+        "count": 2
+      },
+      {
+        "status": "UNSUPPORTED",
+        "reason": "frame lifetime condition is unproved; finalizer/external effects, retention and noncompletion remain unknown; source body version is bound; live function object/code and definition-time effects remain unobserved; source opcode is known; runtime dispatch, effects and exact exceptional behavior remain unverified; statement is not yet connected: Assert",
+        "count": 2
+      },
+      {
+        "status": "UNSUPPORTED",
+        "reason": "frame lifetime condition is unproved; finalizer/external effects, retention and noncompletion remain unknown; source body version is bound; live function object/code and definition-time effects remain unobserved; source opcode is known; runtime dispatch, effects and exact exceptional behavior remain unverified; global/builtin name lookup remains an effectful source operation; source binding candidates are not live runtime target verification; only ordinary local name assignment is connected",
+        "count": 2
+      },
+      {
+        "status": "UNSUPPORTED",
+        "reason": "frame lifetime condition is unproved; finalizer/external effects, retention and noncompletion remain unknown; source body version is bound; live function object/code and definition-time effects remain unobserved; global/builtin name lookup remains an effectful source operation; source opcode is known; runtime dispatch, effects and exact exceptional behavior remain unverified; source binding candidates are not live runtime target verification; expression is not yet connected: Subscript",
+        "count": 2
+      },
+      {
+        "status": "UNSUPPORTED",
+        "reason": "frame lifetime condition is unproved; finalizer/external effects, retention and noncompletion remain unknown; source body version is bound; live function object/code and definition-time effects remain unobserved; expression is not yet connected: ListComp",
+        "count": 2
+      },
+      {
+        "status": "UNSUPPORTED",
+        "reason": "frame lifetime condition is unproved; finalizer/external effects, retention and noncompletion remain unknown; source body version is bound; live function object/code and definition-time effects remain unobserved; global/builtin name lookup remains an effectful source operation; source opcode is known; runtime dispatch, effects and exact exceptional behavior remain unverified; source binding candidates are not live runtime target verification; expression is not yet connected: Dict",
+        "count": 2
+      },
+      {
+        "status": "UNSUPPORTED",
+        "reason": "frame lifetime condition is unproved; finalizer/external effects, retention and noncompletion remain unknown; source body version is bound; live function object/code and definition-time effects remain unobserved; global/builtin name lookup remains an effectful source operation; source opcode is known; runtime dispatch, effects and exact exceptional behavior remain unverified; source binding candidates are not live runtime target verification; statement is not yet connected: AnnAssign",
+        "count": 2
+      },
+      {
+        "status": "UNSUPPORTED",
+        "reason": "frame lifetime condition is unproved; finalizer/external effects, retention and noncompletion remain unknown; source body version is bound; live function object/code and definition-time effects remain unobserved; source opcode is known; runtime dispatch, effects and exact exceptional behavior remain unverified; only ordinary local name assignment is connected",
+        "count": 2
+      },
+      {
+        "status": "UNSUPPORTED",
+        "reason": "frame lifetime condition is unproved; finalizer/external effects, retention and noncompletion remain unknown; source body version is bound; live function object/code and definition-time effects remain unobserved; global/builtin name lookup remains an effectful source operation; source opcode is known; runtime dispatch, effects and exact exceptional behavior remain unverified; source binding candidates are not live runtime target verification; statement is not yet connected: For",
+        "count": 2
+      },
+      {
+        "status": "UNSUPPORTED",
+        "reason": "frame lifetime condition is unproved; finalizer/external effects, retention and noncompletion remain unknown; source body version is bound; live function object/code and definition-time effects remain unobserved; global/builtin name lookup remains an effectful source operation; source opcode is known; runtime dispatch, effects and exact exceptional behavior remain unverified; source binding candidates are not live runtime target verification; expression is not yet connected: IfExp",
+        "count": 2
+      },
+      {
+        "status": "UNSUPPORTED",
+        "reason": "frame lifetime condition is unproved; finalizer/external effects, retention and noncompletion remain unknown; source body version is bound; live function object/code and definition-time effects remain unobserved; global/builtin name lookup remains an effectful source operation; source opcode is known; runtime dispatch, effects and exact exceptional behavior remain unverified; source binding candidates are not live runtime target verification; expression is not yet connected: Call",
+        "count": 1
+      },
+      {
+        "status": "UNSUPPORTED",
+        "reason": "frame lifetime condition is unproved; finalizer/external effects, retention and noncompletion remain unknown; source body version is bound; live function object/code and definition-time effects remain unobserved; global/builtin name lookup remains an effectful source operation; expression is not yet connected: BoolOp",
+        "count": 1
+      },
+      {
+        "status": "UNSUPPORTED",
+        "reason": "frame lifetime condition is unproved; finalizer/external effects, retention and noncompletion remain unknown; source body version is bound; live function object/code and definition-time effects remain unobserved; global/builtin name lookup remains an effectful source operation; source opcode is known; runtime dispatch, effects and exact exceptional behavior remain unverified; expression is not yet connected: Dict",
+        "count": 1
+      },
+      {
+        "status": "UNSUPPORTED",
+        "reason": "frame lifetime condition is unproved; finalizer/external effects, retention and noncompletion remain unknown; source body version is bound; live function object/code and definition-time effects remain unobserved; source opcode is known; runtime dispatch, effects and exact exceptional behavior remain unverified; global/builtin name lookup remains an effectful source operation; source binding candidates are not live runtime target verification; Python truth conversion may execute code or raise; no parameter type is assumed; expression is not yet connected: Subscript",
+        "count": 1
+      },
+      {
+        "status": "UNSUPPORTED",
+        "reason": "frame lifetime condition is unproved; finalizer/external effects, retention and noncompletion remain unknown; source body version is bound; live function object/code and definition-time effects remain unobserved; global/builtin name lookup remains an effectful source operation; source opcode is known; runtime dispatch, effects and exact exceptional behavior remain unverified; source binding candidates are not live runtime target verification; statement is not yet connected: FunctionDef",
+        "count": 1
+      },
+      {
+        "status": "UNSUPPORTED",
+        "reason": "frame lifetime condition is unproved; finalizer/external effects, retention and noncompletion remain unknown; source body version is bound; live function object/code and definition-time effects remain unobserved; statement is not yet connected: Global",
+        "count": 1
+      },
+      {
+        "status": "UNSUPPORTED",
+        "reason": "frame lifetime condition is unproved; finalizer/external effects, retention and noncompletion remain unknown; source body version is bound; live function object/code and definition-time effects remain unobserved; global/builtin name lookup remains an effectful source operation; source opcode is known; runtime dispatch, effects and exact exceptional behavior remain unverified; Python truth conversion may execute code or raise; no parameter type is assumed; expression is not yet connected: JoinedStr",
+        "count": 1
+      },
+      {
+        "status": "UNSUPPORTED",
+        "reason": "frame lifetime condition is unproved; finalizer/external effects, retention and noncompletion remain unknown; source body version is bound; live function object/code and definition-time effects remain unobserved; expression is not yet connected: JoinedStr",
+        "count": 1
+      },
+      {
+        "status": "UNSUPPORTED",
+        "reason": "frame lifetime condition is unproved; finalizer/external effects, retention and noncompletion remain unknown; source body version is bound; live function object/code and definition-time effects remain unobserved; global/builtin name lookup remains an effectful source operation; source opcode is known; runtime dispatch, effects and exact exceptional behavior remain unverified; Python truth conversion may execute code or raise; no parameter type is assumed; statement is not yet connected: Raise",
+        "count": 1
+      },
+      {
+        "status": "UNSUPPORTED",
+        "reason": "frame lifetime condition is unproved; finalizer/external effects, retention and noncompletion remain unknown; source body version is bound; live function object/code and definition-time effects remain unobserved; source opcode is known; runtime dispatch, effects and exact exceptional behavior remain unverified; source binding candidates are not live runtime target verification; global/builtin name lookup remains an effectful source operation; only ordinary local name assignment is connected",
+        "count": 1
+      },
+      {
+        "status": "UNSUPPORTED",
+        "reason": "frame lifetime condition is unproved; finalizer/external effects, retention and noncompletion remain unknown; source body version is bound; live function object/code and definition-time effects remain unobserved; source opcode is known; runtime dispatch, effects and exact exceptional behavior remain unverified; Python truth conversion may execute code or raise; no parameter type is assumed; frame/reference-release effects remain conservative at return; global/builtin name lookup remains an effectful source operation; source binding candidates are not live runtime target verification; statement is not yet connected: While",
+        "count": 1
+      },
+      {
+        "status": "UNSUPPORTED",
+        "reason": "frame lifetime condition is unproved; finalizer/external effects, retention and noncompletion remain unknown; source body version is bound; live function object/code and definition-time effects remain unobserved; source opcode is known; runtime dispatch, effects and exact exceptional behavior remain unverified; Python truth conversion may execute code or raise; no parameter type is assumed; frame/reference-release effects remain conservative at return; source binding candidates are not live runtime target verification; statement is not yet connected: ImportFrom",
+        "count": 1
+      },
+      {
+        "status": "UNSUPPORTED",
+        "reason": "frame lifetime condition is unproved; finalizer/external effects, retention and noncompletion remain unknown; source body version is bound; live function object/code and definition-time effects remain unobserved; source opcode is known; runtime dispatch, effects and exact exceptional behavior remain unverified; Python truth conversion may execute code or raise; no parameter type is assumed; global/builtin name lookup remains an effectful source operation; expression is not yet connected: JoinedStr",
+        "count": 1
+      },
+      {
+        "status": "UNSUPPORTED",
+        "reason": "frame lifetime condition is unproved; finalizer/external effects, retention and noncompletion remain unknown; source body version is bound; live function object/code and definition-time effects remain unobserved; global/builtin name lookup remains an effectful source operation; source opcode is known; runtime dispatch, effects and exact exceptional behavior remain unverified; source binding candidates are not live runtime target verification; Python truth conversion may execute code or raise; no parameter type is assumed; expression is not yet connected: JoinedStr",
+        "count": 1
+      },
+      {
+        "status": "UNSUPPORTED",
+        "reason": "frame lifetime condition is unproved; finalizer/external effects, retention and noncompletion remain unknown; source body version is bound; live function object/code and definition-time effects remain unobserved; global/builtin name lookup remains an effectful source operation; source opcode is known; runtime dispatch, effects and exact exceptional behavior remain unverified; source binding candidates are not live runtime target verification; Python truth conversion may execute code or raise; no parameter type is assumed; frame/reference-release effects remain conservative at return; expression is not yet connected: Call",
+        "count": 1
+      },
+      {
+        "status": "UNSUPPORTED",
+        "reason": "frame lifetime condition is unproved; finalizer/external effects, retention and noncompletion remain unknown; source body version is bound; live function object/code and definition-time effects remain unobserved; global/builtin name lookup remains an effectful source operation; source opcode is known; runtime dispatch, effects and exact exceptional behavior remain unverified; source binding candidates are not live runtime target verification; Python truth conversion may execute code or raise; no parameter type is assumed; statement is not yet connected: For",
+        "count": 1
+      },
+      {
+        "status": "UNSUPPORTED",
+        "reason": "frame lifetime condition is unproved; finalizer/external effects, retention and noncompletion remain unknown; source body version is bound; live function object/code and definition-time effects remain unobserved; source opcode is known; runtime dispatch, effects and exact exceptional behavior remain unverified; source binding candidates are not live runtime target verification; statement is not yet connected: For",
+        "count": 1
+      },
+      {
+        "status": "UNSUPPORTED",
+        "reason": "frame lifetime condition is unproved; finalizer/external effects, retention and noncompletion remain unknown; source body version is bound; live function object/code and definition-time effects remain unobserved; source opcode is known; runtime dispatch, effects and exact exceptional behavior remain unverified; expression is not yet connected: Call",
+        "count": 1
+      },
+      {
+        "status": "UNSUPPORTED",
+        "reason": "frame lifetime condition is unproved; finalizer/external effects, retention and noncompletion remain unknown; source body version is bound; live function object/code and definition-time effects remain unobserved; source opcode is known; runtime dispatch, effects and exact exceptional behavior remain unverified; source binding candidates are not live runtime target verification; global/builtin name lookup remains an effectful source operation; statement is not yet connected: For",
+        "count": 1
+      },
+      {
+        "status": "UNSUPPORTED",
+        "reason": "frame lifetime condition is unproved; finalizer/external effects, retention and noncompletion remain unknown; source body version is bound; live function object/code and definition-time effects remain unobserved; source opcode is known; runtime dispatch, effects and exact exceptional behavior remain unverified; source binding candidates are not live runtime target verification; global/builtin name lookup remains an effectful source operation; Python truth conversion may execute code or raise; no parameter type is assumed; only ordinary local name assignment is connected",
+        "count": 1
+      },
+      {
+        "status": "UNSUPPORTED",
+        "reason": "frame lifetime condition is unproved; finalizer/external effects, retention and noncompletion remain unknown; source body version is bound; live function object/code and definition-time effects remain unobserved; source opcode is known; runtime dispatch, effects and exact exceptional behavior remain unverified; Python truth conversion may execute code or raise; no parameter type is assumed; global/builtin name lookup remains an effectful source operation; source binding candidates are not live runtime target verification; frame/reference-release effects remain conservative at return; statement is not yet connected: Raise",
+        "count": 1
+      },
+      {
+        "status": "UNSUPPORTED",
+        "reason": "frame lifetime condition is unproved; finalizer/external effects, retention and noncompletion remain unknown; source body version is bound; live function object/code and definition-time effects remain unobserved; statement is not yet connected: FunctionDef",
+        "count": 1
+      },
+      {
+        "status": "UNSUPPORTED",
+        "reason": "frame lifetime condition is unproved; finalizer/external effects, retention and noncompletion remain unknown; source body version is bound; live function object/code and definition-time effects remain unobserved; Python truth conversion may execute code or raise; no parameter type is assumed; global/builtin name lookup remains an effectful source operation; source opcode is known; runtime dispatch, effects and exact exceptional behavior remain unverified; expression is not yet connected: JoinedStr",
+        "count": 1
+      },
+      {
+        "status": "UNSUPPORTED",
+        "reason": "frame lifetime condition is unproved; finalizer/external effects, retention and noncompletion remain unknown; source body version is bound; live function object/code and definition-time effects remain unobserved; source opcode is known; runtime dispatch, effects and exact exceptional behavior remain unverified; Python truth conversion may execute code or raise; no parameter type is assumed; statement is not yet connected: For",
+        "count": 1
+      },
+      {
+        "status": "UNSUPPORTED",
+        "reason": "frame lifetime condition is unproved; finalizer/external effects, retention and noncompletion remain unknown; source body version is bound; live function object/code and definition-time effects remain unobserved; statement is not yet connected: Raise",
+        "count": 1
+      },
+      {
+        "status": "UNSUPPORTED",
+        "reason": "frame lifetime condition is unproved; finalizer/external effects, retention and noncompletion remain unknown; source body version is bound; live function object/code and definition-time effects remain unobserved; statement is not yet connected: Try",
+        "count": 1
+      },
+      {
+        "status": "UNSUPPORTED",
+        "reason": "frame lifetime condition is unproved; finalizer/external effects, retention and noncompletion remain unknown; source body version is bound; live function object/code and definition-time effects remain unobserved; source opcode is known; runtime dispatch, effects and exact exceptional behavior remain unverified; Python truth conversion may execute code or raise; no parameter type is assumed; statement is not yet connected: Import",
+        "count": 1
+      },
+      {
+        "status": "UNSUPPORTED",
+        "reason": "frame lifetime condition is unproved; finalizer/external effects, retention and noncompletion remain unknown; source body version is bound; live function object/code and definition-time effects remain unobserved; source opcode is known; runtime dispatch, effects and exact exceptional behavior remain unverified; Python truth conversion may execute code or raise; no parameter type is assumed; source binding candidates are not live runtime target verification; only ordinary local name assignment is connected",
+        "count": 1
+      },
+      {
+        "status": "UNSUPPORTED",
+        "reason": "frame lifetime condition is unproved; finalizer/external effects, retention and noncompletion remain unknown; source body version is bound; live function object/code and definition-time effects remain unobserved; source opcode is known; runtime dispatch, effects and exact exceptional behavior remain unverified; Python truth conversion may execute code or raise; no parameter type is assumed; frame/reference-release effects remain conservative at return; source binding candidates are not live runtime target verification; expression is not yet connected: Subscript",
+        "count": 1
+      },
+      {
+        "status": "UNSUPPORTED",
+        "reason": "frame lifetime condition is unproved; finalizer/external effects, retention and noncompletion remain unknown; source body version is bound; live function object/code and definition-time effects remain unobserved; source opcode is known; runtime dispatch, effects and exact exceptional behavior remain unverified; source binding candidates are not live runtime target verification; expression is not yet connected: DictComp",
+        "count": 1
+      },
+      {
+        "status": "UNSUPPORTED",
+        "reason": "frame lifetime condition is unproved; finalizer/external effects, retention and noncompletion remain unknown; source body version is bound; live function object/code and definition-time effects remain unobserved; source opcode is known; runtime dispatch, effects and exact exceptional behavior remain unverified; Python truth conversion may execute code or raise; no parameter type is assumed; statement is not yet connected: AnnAssign",
+        "count": 1
+      },
+      {
+        "status": "UNSUPPORTED",
+        "reason": "frame lifetime condition is unproved; finalizer/external effects, retention and noncompletion remain unknown; source body version is bound; live function object/code and definition-time effects remain unobserved; source opcode is known; runtime dispatch, effects and exact exceptional behavior remain unverified; Python truth conversion may execute code or raise; no parameter type is assumed; expression is not yet connected: Dict",
+        "count": 1
+      },
+      {
+        "status": "UNSUPPORTED",
+        "reason": "frame lifetime condition is unproved; finalizer/external effects, retention and noncompletion remain unknown; source body version is bound; live function object/code and definition-time effects remain unobserved; source opcode is known; runtime dispatch, effects and exact exceptional behavior remain unverified; source binding candidates are not live runtime target verification; global/builtin name lookup remains an effectful source operation; expression is not yet connected: JoinedStr",
+        "count": 1
+      },
+      {
+        "status": "UNSUPPORTED",
+        "reason": "frame lifetime condition is unproved; finalizer/external effects, retention and noncompletion remain unknown; source body version is bound; live function object/code and definition-time effects remain unobserved; source opcode is known; runtime dispatch, effects and exact exceptional behavior remain unverified; Python truth conversion may execute code or raise; no parameter type is assumed; global/builtin name lookup remains an effectful source operation; source binding candidates are not live runtime target verification; expression is not yet connected: IfExp",
+        "count": 1
+      },
+      {
+        "status": "UNSUPPORTED",
+        "reason": "frame lifetime condition is unproved; finalizer/external effects, retention and noncompletion remain unknown; source body version is bound; live function object/code and definition-time effects remain unobserved; global/builtin name lookup remains an effectful source operation; source opcode is known; runtime dispatch, effects and exact exceptional behavior remain unverified; expression is not yet connected: Subscript",
+        "count": 1
+      },
+      {
+        "status": "UNSUPPORTED",
+        "reason": "frame lifetime condition is unproved; finalizer/external effects, retention and noncompletion remain unknown; source body version is bound; live function object/code and definition-time effects remain unobserved; statement is not yet connected: AugAssign",
+        "count": 1
+      },
+      {
+        "status": "UNSUPPORTED",
+        "reason": "frame lifetime condition is unproved; finalizer/external effects, retention and noncompletion remain unknown; source body version is bound; live function object/code and definition-time effects remain unobserved; global/builtin name lookup remains an effectful source operation; source opcode is known; runtime dispatch, effects and exact exceptional behavior remain unverified; source binding candidates are not live runtime target verification; Python truth conversion may execute code or raise; no parameter type is assumed; expression is not yet connected: Subscript",
+        "count": 1
+      },
+      {
+        "status": "UNSUPPORTED",
+        "reason": "frame lifetime condition is unproved; finalizer/external effects, retention and noncompletion remain unknown; source body version is bound; live function object/code and definition-time effects remain unobserved; source opcode is known; runtime dispatch, effects and exact exceptional behavior remain unverified; Python truth conversion may execute code or raise; no parameter type is assumed; expression is not yet connected: Call",
+        "count": 1
+      },
+      {
+        "status": "UNSUPPORTED",
+        "reason": "frame lifetime condition is unproved; finalizer/external effects, retention and noncompletion remain unknown; source body version is bound; live function object/code and definition-time effects remain unobserved; source opcode is known; runtime dispatch, effects and exact exceptional behavior remain unverified; Python truth conversion may execute code or raise; no parameter type is assumed; frame/reference-release effects remain conservative at return; statement is not yet connected: Import",
+        "count": 1
+      },
+      {
+        "status": "UNSUPPORTED",
+        "reason": "frame lifetime condition is unproved; finalizer/external effects, retention and noncompletion remain unknown; source body version is bound; live function object/code and definition-time effects remain unobserved; source opcode is known; runtime dispatch, effects and exact exceptional behavior remain unverified; global/builtin name lookup remains an effectful source operation; source binding candidates are not live runtime target verification; expression is not yet connected: IfExp",
+        "count": 1
+      },
+      {
+        "status": "UNSUPPORTED",
+        "reason": "frame lifetime condition is unproved; finalizer/external effects, retention and noncompletion remain unknown; source body version is bound; live function object/code and definition-time effects remain unobserved; source opcode is known; runtime dispatch, effects and exact exceptional behavior remain unverified; Python truth conversion may execute code or raise; no parameter type is assumed; statement is not yet connected: Assert",
+        "count": 1
+      },
+      {
+        "status": "UNSUPPORTED",
+        "reason": "frame lifetime condition is unproved; finalizer/external effects, retention and noncompletion remain unknown; source body version is bound; live function object/code and definition-time effects remain unobserved; source opcode is known; runtime dispatch, effects and exact exceptional behavior remain unverified; source binding candidates are not live runtime target verification; expression is not yet connected: BoolOp",
+        "count": 1
+      },
+      {
+        "status": "UNSUPPORTED",
+        "reason": "frame lifetime condition is unproved; finalizer/external effects, retention and noncompletion remain unknown; source body version is bound; live function object/code and definition-time effects remain unobserved; source opcode is known; runtime dispatch, effects and exact exceptional behavior remain unverified; source binding candidates are not live runtime target verification; Python truth conversion may execute code or raise; no parameter type is assumed; global/builtin name lookup remains an effectful source operation; expression is not yet connected: JoinedStr",
+        "count": 1
+      },
+      {
+        "status": "UNSUPPORTED",
+        "reason": "frame lifetime condition is unproved; finalizer/external effects, retention and noncompletion remain unknown; source body version is bound; live function object/code and definition-time effects remain unobserved; global/builtin name lookup remains an effectful source operation; source opcode is known; runtime dispatch, effects and exact exceptional behavior remain unverified; source binding candidates are not live runtime target verification; expression is not yet connected: BoolOp",
+        "count": 1
+      },
+      {
+        "status": "UNSUPPORTED",
+        "reason": "frame lifetime condition is unproved; finalizer/external effects, retention and noncompletion remain unknown; source body version is bound; live function object/code and definition-time effects remain unobserved; source opcode is known; runtime dispatch, effects and exact exceptional behavior remain unverified; global/builtin name lookup remains an effectful source operation; source binding candidates are not live runtime target verification; expression is not yet connected: Slice",
+        "count": 1
+      },
+      {
+        "status": "UNSUPPORTED",
+        "reason": "frame lifetime condition is unproved; finalizer/external effects, retention and noncompletion remain unknown; source body version is bound; live function object/code and definition-time effects remain unobserved; source opcode is known; runtime dispatch, effects and exact exceptional behavior remain unverified; Python truth conversion may execute code or raise; no parameter type is assumed; global/builtin name lookup remains an effectful source operation; source binding candidates are not live runtime target verification; statement is not yet connected: Assert",
+        "count": 1
+      },
+      {
+        "status": "UNSUPPORTED",
+        "reason": "frame lifetime condition is unproved; finalizer/external effects, retention and noncompletion remain unknown; source body version is bound; live function object/code and definition-time effects remain unobserved; source opcode is known; runtime dispatch, effects and exact exceptional behavior remain unverified; expression is not yet connected: Slice",
+        "count": 1
+      },
+      {
+        "status": "UNSUPPORTED",
+        "reason": "frame lifetime condition is unproved; finalizer/external effects, retention and noncompletion remain unknown; source body version is bound; live function object/code and definition-time effects remain unobserved; source opcode is known; runtime dispatch, effects and exact exceptional behavior remain unverified; source binding candidates are not live runtime target verification; expression is not yet connected: IfExp",
+        "count": 1
+      },
+      {
+        "status": "UNSUPPORTED",
+        "reason": "frame lifetime condition is unproved; finalizer/external effects, retention and noncompletion remain unknown; source body version is bound; live function object/code and definition-time effects remain unobserved; source opcode is known; runtime dispatch, effects and exact exceptional behavior remain unverified; source binding candidates are not live runtime target verification; Python truth conversion may execute code or raise; no parameter type is assumed; statement is not yet connected: For",
+        "count": 1
+      },
+      {
+        "status": "UNSUPPORTED",
+        "reason": "frame lifetime condition is unproved; finalizer/external effects, retention and noncompletion remain unknown; source body version is bound; live function object/code and definition-time effects remain unobserved; source opcode is known; runtime dispatch, effects and exact exceptional behavior remain unverified; source binding candidates are not live runtime target verification; expression is not yet connected: Slice",
+        "count": 1
+      },
+      {
+        "status": "UNSUPPORTED",
+        "reason": "frame lifetime condition is unproved; finalizer/external effects, retention and noncompletion remain unknown; source body version is bound; live function object/code and definition-time effects remain unobserved; source opcode is known; runtime dispatch, effects and exact exceptional behavior remain unverified; Python truth conversion may execute code or raise; no parameter type is assumed; source binding candidates are not live runtime target verification; statement is not yet connected: Raise",
+        "count": 1
+      },
+      {
+        "status": "UNSUPPORTED",
+        "reason": "frame lifetime condition is unproved; finalizer/external effects, retention and noncompletion remain unknown; source body version is bound; live function object/code and definition-time effects remain unobserved; source opcode is known; runtime dispatch, effects and exact exceptional behavior remain unverified; source binding candidates are not live runtime target verification; Python truth conversion may execute code or raise; no parameter type is assumed; statement is not yet connected: Raise",
+        "count": 1
+      },
+      {
+        "status": "UNSUPPORTED",
+        "reason": "frame lifetime condition is unproved; finalizer/external effects, retention and noncompletion remain unknown; source body version is bound; live function object/code and definition-time effects remain unobserved; source opcode is known; runtime dispatch, effects and exact exceptional behavior remain unverified; Python truth conversion may execute code or raise; no parameter type is assumed; frame/reference-release effects remain conservative at return; global/builtin name lookup remains an effectful source operation; source binding candidates are not live runtime target verification; expression is not yet connected: BoolOp",
+        "count": 1
+      },
+      {
+        "status": "UNSUPPORTED",
+        "reason": "frame lifetime condition is unproved; finalizer/external effects, retention and noncompletion remain unknown; source body version is bound; live function object/code and definition-time effects remain unobserved; source opcode is known; runtime dispatch, effects and exact exceptional behavior remain unverified; source binding candidates are not live runtime target verification; expression is not yet connected: Dict",
+        "count": 1
+      },
+      {
+        "status": "UNSUPPORTED",
+        "reason": "frame lifetime condition is unproved; finalizer/external effects, retention and noncompletion remain unknown; source body version is bound; live function object/code and definition-time effects remain unobserved; Python truth conversion may execute code or raise; no parameter type is assumed; source opcode is known; runtime dispatch, effects and exact exceptional behavior remain unverified; source binding candidates are not live runtime target verification; expression is not yet connected: Call",
+        "count": 1
+      },
+      {
+        "status": "UNSUPPORTED",
+        "reason": "frame lifetime condition is unproved; finalizer/external effects, retention and noncompletion remain unknown; source body version is bound; live function object/code and definition-time effects remain unobserved; source opcode is known; runtime dispatch, effects and exact exceptional behavior remain unverified; Python truth conversion may execute code or raise; no parameter type is assumed; expression is not yet connected: BoolOp",
+        "count": 1
+      },
+      {
+        "status": "UNSUPPORTED",
+        "reason": "frame lifetime condition is unproved; finalizer/external effects, retention and noncompletion remain unknown; source body version is bound; live function object/code and definition-time effects remain unobserved; global/builtin name lookup remains an effectful source operation; source opcode is known; runtime dispatch, effects and exact exceptional behavior remain unverified; source binding candidates are not live runtime target verification; statement is not yet connected: Assert",
+        "count": 1
+      },
+      {
+        "status": "UNSUPPORTED",
+        "reason": "frame lifetime condition is unproved; finalizer/external effects, retention and noncompletion remain unknown; source body version is bound; live function object/code and definition-time effects remain unobserved; global/builtin name lookup remains an effectful source operation; source opcode is known; runtime dispatch, effects and exact exceptional behavior remain unverified; source binding candidates are not live runtime target verification; expression is not yet connected: ListComp",
+        "count": 1
+      },
+      {
+        "status": "UNSUPPORTED",
+        "reason": "frame lifetime condition is unproved; finalizer/external effects, retention and noncompletion remain unknown; source body version is bound; live function object/code and definition-time effects remain unobserved; source opcode is known; runtime dispatch, effects and exact exceptional behavior remain unverified; global/builtin name lookup remains an effectful source operation; source binding candidates are not live runtime target verification; expression is not yet connected: Subscript",
+        "count": 1
+      }
+    ]
+  },
+  "structured": {
+    "counts": {
+      "files": 151,
+      "definitions": 2217,
+      "source_calls": 10235,
+      "source_atoms": 122323,
+      "core_operations": 1486,
+      "core_values": 2283
+    },
+    "statuses": {
+      "UNSUPPORTED": 205,
+      "NOT_ATTEMPTED": 1961,
+      "LOWERED_WITH_GAPS": 51
+    },
+    "coverage": {
+      "UNSUPPORTED": 14289,
+      "INVENTORY_ONLY": 107337,
+      "CONNECTED": 697
+    },
+    "unsupported_terminal_details": {
+      "structured expression protocol still required for Call": 15,
+      "structured expression protocol still required for IfExp": 8,
+      "structured expression protocol still required for BoolOp": 13,
+      "ordinary local has no parsed slot: ep_id": 1,
+      "structured heap/global/destructuring writes require their own typed protocol": 41,
+      "structured expression protocol still required for Dict": 9,
+      "structured expression protocol still required for Subscript": 7,
+      "structured control/effect protocol still required for FunctionDef": 2,
+      "closure cell environment/state interface remains unconnected": 45,
+      "structured control/effect protocol still required for Global": 1,
+      "structured control/effect protocol still required for Import": 3,
+      "structured expression protocol still required for JoinedStr": 7,
+      "structured control/effect protocol still required for AnnAssign": 6,
+      "structured control/effect protocol still required for Raise": 9,
+      "structured control/effect protocol still required for ImportFrom": 5,
+      "structured control/effect protocol still required for AugAssign": 2,
+      "ordinary local has no parsed slot: ep": 1,
+      "structured control/effect protocol still required for Assert": 5,
+      "structured control/effect protocol still required for Try": 1,
+      "ordinary local has no parsed slot: col": 1,
+      "generator enter/yield/resume/close interface is not implemented": 3,
+      "ordinary local has no parsed slot: abs_id": 1,
+      "ordinary local has no parsed slot: v": 4,
+      "literal is outside exact scalar support": 4,
+      "ordinary local has no parsed slot: x": 1,
+      "ordinary local has no parsed slot: _": 1,
+      "structured expression protocol still required for Slice": 3,
+      "ordinary local has no parsed slot: k": 1,
+      "ordinary local has no parsed slot: fn": 1,
+      "ordinary local has no parsed slot: i": 2,
+      "ordinary local has no parsed slot: info": 1,
+      "ordinary local has no parsed slot: p": 1
+    },
+    "not_lowered_reasons": [
+      {
+        "status": "NOT_ATTEMPTED",
+        "reason": "independent body/aggregate operation construction budget exhausted",
+        "count": 1380
+      },
+      {
+        "status": "NOT_ATTEMPTED",
+        "reason": "this scope requires a class/lambda/comprehension interface beyond the current body lowerer",
+        "count": 581
+      },
+      {
+        "status": "UNSUPPORTED",
+        "reason": "closure cell environment/state interface remains unconnected",
+        "count": 45
+      },
+      {
+        "status": "UNSUPPORTED",
+        "reason": "frame interposition, lifetime, finalizers and noncompletion remain explicit unproved conditions; source is fixed; live function object, environment and definition-time effects remain unproved; source operation is connected; runtime dispatch, state accesses and effects remain unproved; candidate source is not verified runtime dispatch; structured heap/global/destructuring writes require their own typed protocol",
+        "count": 16
+      },
+      {
+        "status": "UNSUPPORTED",
+        "reason": "frame interposition, lifetime, finalizers and noncompletion remain explicit unproved conditions; source is fixed; live function object, environment and definition-time effects remain unproved; structured expression protocol still required for Call",
+        "count": 10
+      },
+      {
+        "status": "UNSUPPORTED",
+        "reason": "frame interposition, lifetime, finalizers and noncompletion remain explicit unproved conditions; source is fixed; live function object, environment and definition-time effects remain unproved; global/builtin name lookup remains an effectful source operation; source operation is connected; runtime dispatch, state accesses and effects remain unproved; candidate source is not verified runtime dispatch; structured heap/global/destructuring writes require their own typed protocol",
+        "count": 9
+      },
+      {
+        "status": "UNSUPPORTED",
+        "reason": "frame interposition, lifetime, finalizers and noncompletion remain explicit unproved conditions; source is fixed; live function object, environment and definition-time effects remain unproved; structured heap/global/destructuring writes require their own typed protocol",
+        "count": 9
+      },
+      {
+        "status": "UNSUPPORTED",
+        "reason": "frame interposition, lifetime, finalizers and noncompletion remain explicit unproved conditions; source is fixed; live function object, environment and definition-time effects remain unproved; structured expression protocol still required for BoolOp",
+        "count": 6
+      },
+      {
+        "status": "UNSUPPORTED",
+        "reason": "frame interposition, lifetime, finalizers and noncompletion remain explicit unproved conditions; source is fixed; live function object, environment and definition-time effects remain unproved; global/builtin name lookup remains an effectful source operation; source operation is connected; runtime dispatch, state accesses and effects remain unproved; candidate source is not verified runtime dispatch; structured expression protocol still required for BoolOp",
+        "count": 4
+      },
+      {
+        "status": "UNSUPPORTED",
+        "reason": "frame interposition, lifetime, finalizers and noncompletion remain explicit unproved conditions; source is fixed; live function object, environment and definition-time effects remain unproved; structured control/effect protocol still required for ImportFrom",
+        "count": 4
+      },
+      {
+        "status": "UNSUPPORTED",
+        "reason": "ordinary local has no parsed slot: v",
+        "count": 4
+      },
+      {
+        "status": "UNSUPPORTED",
+        "reason": "frame interposition, lifetime, finalizers and noncompletion remain explicit unproved conditions; source is fixed; live function object, environment and definition-time effects remain unproved; literal is outside exact scalar support",
+        "count": 4
+      },
+      {
+        "status": "UNSUPPORTED",
+        "reason": "frame interposition, lifetime, finalizers and noncompletion remain explicit unproved conditions; source is fixed; live function object, environment and definition-time effects remain unproved; structured control/effect protocol still required for AnnAssign",
+        "count": 3
+      },
+      {
+        "status": "UNSUPPORTED",
+        "reason": "frame interposition, lifetime, finalizers and noncompletion remain explicit unproved conditions; source is fixed; live function object, environment and definition-time effects remain unproved; structured expression protocol still required for Dict",
+        "count": 3
+      },
+      {
+        "status": "UNSUPPORTED",
+        "reason": "frame interposition, lifetime, finalizers and noncompletion remain explicit unproved conditions; source is fixed; live function object, environment and definition-time effects remain unproved; source operation is connected; runtime dispatch, state accesses and effects remain unproved; candidate source is not verified runtime dispatch; global/builtin name lookup remains an effectful source operation; structured heap/global/destructuring writes require their own typed protocol",
+        "count": 3
+      },
+      {
+        "status": "UNSUPPORTED",
+        "reason": "frame interposition, lifetime, finalizers and noncompletion remain explicit unproved conditions; source is fixed; live function object, environment and definition-time effects remain unproved; source operation is connected; runtime dispatch, state accesses and effects remain unproved; global/builtin name lookup remains an effectful source operation; candidate source is not verified runtime dispatch; structured expression protocol still required for IfExp",
+        "count": 3
+      },
+      {
+        "status": "UNSUPPORTED",
+        "reason": "frame interposition, lifetime, finalizers and noncompletion remain explicit unproved conditions; source is fixed; live function object, environment and definition-time effects remain unproved; source operation is connected; runtime dispatch, state accesses and effects remain unproved; structured control/effect protocol still required for Assert",
+        "count": 3
+      },
+      {
+        "status": "UNSUPPORTED",
+        "reason": "generator enter/yield/resume/close interface is not implemented",
+        "count": 3
+      },
+      {
+        "status": "UNSUPPORTED",
+        "reason": "frame interposition, lifetime, finalizers and noncompletion remain explicit unproved conditions; source is fixed; live function object, environment and definition-time effects remain unproved; global/builtin name lookup remains an effectful source operation; source operation is connected; runtime dispatch, state accesses and effects remain unproved; candidate source is not verified runtime dispatch; structured expression protocol still required for Subscript",
+        "count": 3
+      },
+      {
+        "status": "UNSUPPORTED",
+        "reason": "frame interposition, lifetime, finalizers and noncompletion remain explicit unproved conditions; source is fixed; live function object, environment and definition-time effects remain unproved; global/builtin name lookup remains an effectful source operation; source operation is connected; runtime dispatch, state accesses and effects remain unproved; candidate source is not verified runtime dispatch; structured expression protocol still required for Call",
+        "count": 2
+      },
+      {
+        "status": "UNSUPPORTED",
+        "reason": "frame interposition, lifetime, finalizers and noncompletion remain explicit unproved conditions; source is fixed; live function object, environment and definition-time effects remain unproved; structured expression protocol still required for IfExp",
+        "count": 2
+      },
+      {
+        "status": "UNSUPPORTED",
+        "reason": "frame interposition, lifetime, finalizers and noncompletion remain explicit unproved conditions; source is fixed; live function object, environment and definition-time effects remain unproved; source operation is connected; runtime dispatch, state accesses and effects remain unproved; global/builtin name lookup remains an effectful source operation; candidate source is not verified runtime dispatch; structured expression protocol still required for Subscript",
+        "count": 2
+      },
+      {
+        "status": "UNSUPPORTED",
+        "reason": "frame interposition, lifetime, finalizers and noncompletion remain explicit unproved conditions; source is fixed; live function object, environment and definition-time effects remain unproved; global/builtin name lookup remains an effectful source operation; source operation is connected; runtime dispatch, state accesses and effects remain unproved; structured expression protocol still required for JoinedStr",
+        "count": 2
+      },
+      {
+        "status": "UNSUPPORTED",
+        "reason": "frame interposition, lifetime, finalizers and noncompletion remain explicit unproved conditions; source is fixed; live function object, environment and definition-time effects remain unproved; source operation is connected; runtime dispatch, state accesses and effects remain unproved; structured control/effect protocol still required for Raise",
+        "count": 2
+      },
+      {
+        "status": "UNSUPPORTED",
+        "reason": "frame interposition, lifetime, finalizers and noncompletion remain explicit unproved conditions; source is fixed; live function object, environment and definition-time effects remain unproved; source operation is connected; runtime dispatch, state accesses and effects remain unproved; structured expression protocol still required for Call",
+        "count": 2
+      },
+      {
+        "status": "UNSUPPORTED",
+        "reason": "frame interposition, lifetime, finalizers and noncompletion remain explicit unproved conditions; source is fixed; live function object, environment and definition-time effects remain unproved; global/builtin name lookup remains an effectful source operation; source operation is connected; runtime dispatch, state accesses and effects remain unproved; candidate source is not verified runtime dispatch; structured control/effect protocol still required for Raise",
+        "count": 2
+      },
+      {
+        "status": "UNSUPPORTED",
+        "reason": "frame interposition, lifetime, finalizers and noncompletion remain explicit unproved conditions; source is fixed; live function object, environment and definition-time effects remain unproved; source operation is connected; runtime dispatch, state accesses and effects remain unproved; global/builtin name lookup remains an effectful source operation; candidate source is not verified runtime dispatch; structured heap/global/destructuring writes require their own typed protocol",
+        "count": 2
+      },
+      {
+        "status": "UNSUPPORTED",
+        "reason": "frame interposition, lifetime, finalizers and noncompletion remain explicit unproved conditions; source is fixed; live function object, environment and definition-time effects remain unproved; source operation is connected; runtime dispatch, state accesses and effects remain unproved; structured control/effect protocol still required for Import",
+        "count": 2
+      },
+      {
+        "status": "UNSUPPORTED",
+        "reason": "frame interposition, lifetime, finalizers and noncompletion remain explicit unproved conditions; source is fixed; live function object, environment and definition-time effects remain unproved; source operation is connected; runtime dispatch, state accesses and effects remain unproved; candidate source is not verified runtime dispatch; global/builtin name lookup remains an effectful source operation; structured expression protocol still required for JoinedStr",
+        "count": 2
+      },
+      {
+        "status": "UNSUPPORTED",
+        "reason": "frame interposition, lifetime, finalizers and noncompletion remain explicit unproved conditions; source is fixed; live function object, environment and definition-time effects remain unproved; global/builtin name lookup remains an effectful source operation; source operation is connected; runtime dispatch, state accesses and effects remain unproved; candidate source is not verified runtime dispatch; structured expression protocol still required for Dict",
+        "count": 2
+      },
+      {
+        "status": "UNSUPPORTED",
+        "reason": "frame interposition, lifetime, finalizers and noncompletion remain explicit unproved conditions; source is fixed; live function object, environment and definition-time effects remain unproved; global/builtin name lookup remains an effectful source operation; source operation is connected; runtime dispatch, state accesses and effects remain unproved; candidate source is not verified runtime dispatch; structured control/effect protocol still required for AnnAssign",
+        "count": 2
+      },
+      {
+        "status": "UNSUPPORTED",
+        "reason": "frame interposition, lifetime, finalizers and noncompletion remain explicit unproved conditions; source is fixed; live function object, environment and definition-time effects remain unproved; source operation is connected; runtime dispatch, state accesses and effects remain unproved; structured heap/global/destructuring writes require their own typed protocol",
+        "count": 2
+      },
+      {
+        "status": "UNSUPPORTED",
+        "reason": "frame interposition, lifetime, finalizers and noncompletion remain explicit unproved conditions; source is fixed; live function object, environment and definition-time effects remain unproved; source operation is connected; runtime dispatch, state accesses and effects remain unproved; candidate source is not verified runtime dispatch; structured expression protocol still required for IfExp",
+        "count": 2
+      },
+      {
+        "status": "UNSUPPORTED",
+        "reason": "frame interposition, lifetime, finalizers and noncompletion remain explicit unproved conditions; source is fixed; live function object, environment and definition-time effects remain unproved; source operation is connected; runtime dispatch, state accesses and effects remain unproved; candidate source is not verified runtime dispatch; structured control/effect protocol still required for Raise",
+        "count": 2
+      },
+      {
+        "status": "UNSUPPORTED",
+        "reason": "ordinary local has no parsed slot: i",
+        "count": 2
+      },
+      {
+        "status": "UNSUPPORTED",
+        "reason": "frame interposition, lifetime, finalizers and noncompletion remain explicit unproved conditions; source is fixed; live function object, environment and definition-time effects remain unproved; global/builtin name lookup remains an effectful source operation; structured expression protocol still required for BoolOp",
+        "count": 1
+      },
+      {
+        "status": "UNSUPPORTED",
+        "reason": "ordinary local has no parsed slot: ep_id",
+        "count": 1
+      },
+      {
+        "status": "UNSUPPORTED",
+        "reason": "frame interposition, lifetime, finalizers and noncompletion remain explicit unproved conditions; source is fixed; live function object, environment and definition-time effects remain unproved; global/builtin name lookup remains an effectful source operation; source operation is connected; runtime dispatch, state accesses and effects remain unproved; structured expression protocol still required for Dict",
+        "count": 1
+      },
+      {
+        "status": "UNSUPPORTED",
+        "reason": "frame interposition, lifetime, finalizers and noncompletion remain explicit unproved conditions; source is fixed; live function object, environment and definition-time effects remain unproved; global/builtin name lookup remains an effectful source operation; source operation is connected; runtime dispatch, state accesses and effects remain unproved; candidate source is not verified runtime dispatch; structured control/effect protocol still required for FunctionDef",
+        "count": 1
+      },
+      {
+        "status": "UNSUPPORTED",
+        "reason": "frame interposition, lifetime, finalizers and noncompletion remain explicit unproved conditions; source is fixed; live function object, environment and definition-time effects remain unproved; structured control/effect protocol still required for Global",
+        "count": 1
+      },
+      {
+        "status": "UNSUPPORTED",
+        "reason": "frame interposition, lifetime, finalizers and noncompletion remain explicit unproved conditions; source is fixed; live function object, environment and definition-time effects remain unproved; structured control/effect protocol still required for Import",
+        "count": 1
+      },
+      {
+        "status": "UNSUPPORTED",
+        "reason": "frame interposition, lifetime, finalizers and noncompletion remain explicit unproved conditions; source is fixed; live function object, environment and definition-time effects remain unproved; structured expression protocol still required for JoinedStr",
+        "count": 1
+      },
+      {
+        "status": "UNSUPPORTED",
+        "reason": "frame interposition, lifetime, finalizers and noncompletion remain explicit unproved conditions; source is fixed; live function object, environment and definition-time effects remain unproved; global/builtin name lookup remains an effectful source operation; source operation is connected; runtime dispatch, state accesses and effects remain unproved; structured control/effect protocol still required for Raise",
+        "count": 1
+      },
+      {
+        "status": "UNSUPPORTED",
+        "reason": "frame interposition, lifetime, finalizers and noncompletion remain explicit unproved conditions; source is fixed; live function object, environment and definition-time effects remain unproved; source operation is connected; runtime dispatch, state accesses and effects remain unproved; candidate source is not verified runtime dispatch; structured control/effect protocol still required for ImportFrom",
+        "count": 1
+      },
+      {
+        "status": "UNSUPPORTED",
+        "reason": "frame interposition, lifetime, finalizers and noncompletion remain explicit unproved conditions; source is fixed; live function object, environment and definition-time effects remain unproved; source operation is connected; runtime dispatch, state accesses and effects remain unproved; global/builtin name lookup remains an effectful source operation; structured expression protocol still required for JoinedStr",
+        "count": 1
+      },
+      {
+        "status": "UNSUPPORTED",
+        "reason": "frame interposition, lifetime, finalizers and noncompletion remain explicit unproved conditions; source is fixed; live function object, environment and definition-time effects remain unproved; global/builtin name lookup remains an effectful source operation; source operation is connected; runtime dispatch, state accesses and effects remain unproved; candidate source is not verified runtime dispatch; structured expression protocol still required for JoinedStr",
+        "count": 1
+      },
+      {
+        "status": "UNSUPPORTED",
+        "reason": "frame interposition, lifetime, finalizers and noncompletion remain explicit unproved conditions; source is fixed; live function object, environment and definition-time effects remain unproved; source operation is connected; runtime dispatch, state accesses and effects remain unproved; candidate source is not verified runtime dispatch; structured expression protocol still required for Dict",
+        "count": 1
+      },
+      {
+        "status": "UNSUPPORTED",
+        "reason": "frame interposition, lifetime, finalizers and noncompletion remain explicit unproved conditions; source is fixed; live function object, environment and definition-time effects remain unproved; source operation is connected; runtime dispatch, state accesses and effects remain unproved; candidate source is not verified runtime dispatch; global/builtin name lookup remains an effectful source operation; structured control/effect protocol still required for AugAssign",
+        "count": 1
+      },
+      {
+        "status": "UNSUPPORTED",
+        "reason": "frame interposition, lifetime, finalizers and noncompletion remain explicit unproved conditions; source is fixed; live function object, environment and definition-time effects remain unproved; source operation is connected; runtime dispatch, state accesses and effects remain unproved; global/builtin name lookup remains an effectful source operation; candidate source is not verified runtime dispatch; structured control/effect protocol still required for Raise",
+        "count": 1
+      },
+      {
+        "status": "UNSUPPORTED",
+        "reason": "frame interposition, lifetime, finalizers and noncompletion remain explicit unproved conditions; source is fixed; live function object, environment and definition-time effects remain unproved; structured control/effect protocol still required for FunctionDef",
+        "count": 1
+      },
+      {
+        "status": "UNSUPPORTED",
+        "reason": "ordinary local has no parsed slot: ep",
+        "count": 1
+      },
+      {
+        "status": "UNSUPPORTED",
+        "reason": "frame interposition, lifetime, finalizers and noncompletion remain explicit unproved conditions; source is fixed; live function object, environment and definition-time effects remain unproved; structured control/effect protocol still required for Raise",
+        "count": 1
+      },
+      {
+        "status": "UNSUPPORTED",
+        "reason": "frame interposition, lifetime, finalizers and noncompletion remain explicit unproved conditions; source is fixed; live function object, environment and definition-time effects remain unproved; structured control/effect protocol still required for Try",
+        "count": 1
+      },
+      {
+        "status": "UNSUPPORTED",
+        "reason": "frame interposition, lifetime, finalizers and noncompletion remain explicit unproved conditions; source is fixed; live function object, environment and definition-time effects remain unproved; source operation is connected; runtime dispatch, state accesses and effects remain unproved; candidate source is not verified runtime dispatch; structured expression protocol still required for Subscript",
+        "count": 1
+      },
+      {
+        "status": "UNSUPPORTED",
+        "reason": "ordinary local has no parsed slot: col",
+        "count": 1
+      },
+      {
+        "status": "UNSUPPORTED",
+        "reason": "frame interposition, lifetime, finalizers and noncompletion remain explicit unproved conditions; source is fixed; live function object, environment and definition-time effects remain unproved; source operation is connected; runtime dispatch, state accesses and effects remain unproved; structured control/effect protocol still required for AnnAssign",
+        "count": 1
+      },
+      {
+        "status": "UNSUPPORTED",
+        "reason": "ordinary local has no parsed slot: abs_id",
+        "count": 1
+      },
+      {
+        "status": "UNSUPPORTED",
+        "reason": "frame interposition, lifetime, finalizers and noncompletion remain explicit unproved conditions; source is fixed; live function object, environment and definition-time effects remain unproved; source operation is connected; runtime dispatch, state accesses and effects remain unproved; structured expression protocol still required for Dict",
+        "count": 1
+      },
+      {
+        "status": "UNSUPPORTED",
+        "reason": "frame interposition, lifetime, finalizers and noncompletion remain explicit unproved conditions; source is fixed; live function object, environment and definition-time effects remain unproved; global/builtin name lookup remains an effectful source operation; source operation is connected; runtime dispatch, state accesses and effects remain unproved; structured expression protocol still required for Subscript",
+        "count": 1
+      },
+      {
+        "status": "UNSUPPORTED",
+        "reason": "frame interposition, lifetime, finalizers and noncompletion remain explicit unproved conditions; source is fixed; live function object, environment and definition-time effects remain unproved; structured control/effect protocol still required for AugAssign",
+        "count": 1
+      },
+      {
+        "status": "UNSUPPORTED",
+        "reason": "ordinary local has no parsed slot: x",
+        "count": 1
+      },
+      {
+        "status": "UNSUPPORTED",
+        "reason": "ordinary local has no parsed slot: _",
+        "count": 1
+      },
+      {
+        "status": "UNSUPPORTED",
+        "reason": "frame interposition, lifetime, finalizers and noncompletion remain explicit unproved conditions; source is fixed; live function object, environment and definition-time effects remain unproved; structured control/effect protocol still required for Assert",
+        "count": 1
+      },
+      {
+        "status": "UNSUPPORTED",
+        "reason": "frame interposition, lifetime, finalizers and noncompletion remain explicit unproved conditions; source is fixed; live function object, environment and definition-time effects remain unproved; source operation is connected; runtime dispatch, state accesses and effects remain unproved; candidate source is not verified runtime dispatch; structured expression protocol still required for BoolOp",
+        "count": 1
+      },
+      {
+        "status": "UNSUPPORTED",
+        "reason": "frame interposition, lifetime, finalizers and noncompletion remain explicit unproved conditions; source is fixed; live function object, environment and definition-time effects remain unproved; source operation is connected; runtime dispatch, state accesses and effects remain unproved; global/builtin name lookup remains an effectful source operation; candidate source is not verified runtime dispatch; structured expression protocol still required for Slice",
+        "count": 1
+      },
+      {
+        "status": "UNSUPPORTED",
+        "reason": "ordinary local has no parsed slot: k",
+        "count": 1
+      },
+      {
+        "status": "UNSUPPORTED",
+        "reason": "frame interposition, lifetime, finalizers and noncompletion remain explicit unproved conditions; source is fixed; live function object, environment and definition-time effects remain unproved; source operation is connected; runtime dispatch, state accesses and effects remain unproved; structured expression protocol still required for Slice",
+        "count": 1
+      },
+      {
+        "status": "UNSUPPORTED",
+        "reason": "frame interposition, lifetime, finalizers and noncompletion remain explicit unproved conditions; source is fixed; live function object, environment and definition-time effects remain unproved; source operation is connected; runtime dispatch, state accesses and effects remain unproved; candidate source is not verified runtime dispatch; structured expression protocol still required for Slice",
+        "count": 1
+      },
+      {
+        "status": "UNSUPPORTED",
+        "reason": "ordinary local has no parsed slot: fn",
+        "count": 1
+      },
+      {
+        "status": "UNSUPPORTED",
+        "reason": "ordinary local has no parsed slot: info",
+        "count": 1
+      },
+      {
+        "status": "UNSUPPORTED",
+        "reason": "frame interposition, lifetime, finalizers and noncompletion remain explicit unproved conditions; source is fixed; live function object, environment and definition-time effects remain unproved; source operation is connected; runtime dispatch, state accesses and effects remain unproved; candidate source is not verified runtime dispatch; structured expression protocol still required for Call",
+        "count": 1
+      },
+      {
+        "status": "UNSUPPORTED",
+        "reason": "frame interposition, lifetime, finalizers and noncompletion remain explicit unproved conditions; source is fixed; live function object, environment and definition-time effects remain unproved; source operation is connected; runtime dispatch, state accesses and effects remain unproved; structured expression protocol still required for BoolOp",
+        "count": 1
+      },
+      {
+        "status": "UNSUPPORTED",
+        "reason": "frame interposition, lifetime, finalizers and noncompletion remain explicit unproved conditions; source is fixed; live function object, environment and definition-time effects remain unproved; global/builtin name lookup remains an effectful source operation; source operation is connected; runtime dispatch, state accesses and effects remain unproved; candidate source is not verified runtime dispatch; structured control/effect protocol still required for Assert",
+        "count": 1
+      },
+      {
+        "status": "UNSUPPORTED",
+        "reason": "frame interposition, lifetime, finalizers and noncompletion remain explicit unproved conditions; source is fixed; live function object, environment and definition-time effects remain unproved; source operation is connected; runtime dispatch, state accesses and effects remain unproved; global/builtin name lookup remains an effectful source operation; candidate source is not verified runtime dispatch; structured expression protocol still required for Dict",
+        "count": 1
+      },
+      {
+        "status": "UNSUPPORTED",
+        "reason": "ordinary local has no parsed slot: p",
+        "count": 1
+      },
+      {
+        "status": "UNSUPPORTED",
+        "reason": "frame interposition, lifetime, finalizers and noncompletion remain explicit unproved conditions; source is fixed; live function object, environment and definition-time effects remain unproved; global/builtin name lookup remains an effectful source operation; source operation is connected; runtime dispatch, state accesses and effects remain unproved; candidate source is not verified runtime dispatch; structured expression protocol still required for IfExp",
+        "count": 1
+      }
+    ]
+  },
+  "changed_bodies": [
+    {
+      "source": "/home/zyf/AAA/le-wm/stable-worldmodel/stable_worldmodel/utils.py",
+      "definition": "get_in",
+      "old_status": "UNSUPPORTED",
+      "new_status": "LOWERED_WITH_GAPS"
+    }
+  ],
+  "structured_models": 51,
+  "loops": 1,
+  "old_call_source_scope": {
+    "CORE_LINKED": 32,
+    "INDEXED_WITHOUT_BODY": 393
+  },
+  "new_call_source_scope": {
+    "CORE_LINKED": 33,
+    "INDEXED_WITHOUT_BODY": 392
+  },
+  "same_source_contexts_raw_calls_and_budgets": true,
+  "whole_program_graph_established": false,
+  "dynamic_dependencies_established": false,
+  "transformation_authorized": false
+}

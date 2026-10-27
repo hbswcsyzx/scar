@@ -1,0 +1,31 @@
+{
+  "schema": "scar.python-call-target-collection",
+  "schema_version": 2,
+  "capabilities": [
+    "PYTHON_CALL_TARGETS_V2",
+    "OBSERVED_PYTHON_CALLEE_SCOPE_V1"
+  ],
+  "process_id": 2183046,
+  "project_root": "/home/zyf/AAA/le-wm",
+  "scope_policy": "OBSERVED_EXACT_PYTHON_CALLEES_V1",
+  "budget": {
+    "max_records": 200000,
+    "max_bytes": 64000000,
+    "max_selected_codes": 8192
+  },
+  "counts": {
+    "TARGET": 117970,
+    "ENTRY": 24158,
+    "GAP": 539
+  },
+  "stopped": false,
+  "file": {
+    "path": "/home/zyf/AAA/scar-worktrees/collector-noop-events/artifacts/experiments/lewm_python_only_diagnostic_20261027/trace/python-call-targets.2183046.jsonl",
+    "bytes": 57603830,
+    "sha256": "de3ef98a1f726b7a00c861da6eaf8ab613e27301eaabf75710309f2d40ea4e8f",
+    "rows": 142667
+  },
+  "legacy_inputs": null,
+  "receiver_is_separate_from_monitoring_arg0": true,
+  "contents_state_ready_or_complete_program_established": false
+}

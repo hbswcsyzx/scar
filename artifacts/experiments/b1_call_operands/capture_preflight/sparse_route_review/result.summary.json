@@ -1,0 +1,65 @@
+{
+  "empty_narrow_window_cases": [
+    "exception"
+  ],
+  "experiment_kind": "independent prototype control-window review, not production route acceptance",
+  "fresh_processes": 9,
+  "inferred_requirements": [
+    "Require a physically contiguous complete logical-instruction interval ending at CALL, not a filtered set of arbitrary LOADs.",
+    "Reject every internal ordinary jump target and exception-handler target; allow first-offset entry.",
+    "Retain every required LOAD suboperand and CALL INSTRUCTION on every execution; static membership alone is not an execution witness.",
+    "Retain all CALL-family attempt barriers and persistent normal-continuation/handler expiry callbacks even when initially no pending attempt.",
+    "Rebuild windows offline from exactly matched source-compiled CodeType, with capture rule selected per PID.",
+    "Reject suspended caller code under the new narrow rule; do not join generator resumes.",
+    "Keep all original interference, delivery continuity, namespace, source, environment and effect conditions."
+  ],
+  "official_docs": {
+    "monitoring": "https://docs.python.org/3.14/library/sys.monitoring.html",
+    "version_caveat": "Online documentation currently 3.14.8; experiments used local CPython 3.14.7."
+  },
+  "oracle_admitted_windows": 11,
+  "oracle_spliced_accepted_windows": 0,
+  "oracle_trials": 6,
+  "performance_callback_counts": {
+    "dense_keep": {
+      "callbacks": 135051,
+      "disable_returns": 0,
+      "instrumented_body_seconds": 0.17157239466905594,
+      "selected_callbacks": 12
+    },
+    "sparse_keep": {
+      "callbacks": 36,
+      "disable_returns": 24,
+      "instrumented_body_seconds": 0.004119190387427807,
+      "selected_callbacks": 12
+    },
+    "sparse_toggle": {
+      "callbacks": 84,
+      "disable_returns": 72,
+      "instrumented_body_seconds": 0.0035091815516352654,
+      "selected_callbacks": 12
+    }
+  },
+  "python": "3.14.7 | packaged by conda-forge | (main, Sep  2 2026, 21:08:32) [GCC 15.3.0]",
+  "returncodes": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "schema": "scar.sparse-window-independent-review",
+  "schema_version": 1,
+  "total_process_elapsed_seconds": 1.0897557297721505,
+  "unsupported_or_not_proved": [
+    "The unbound-local exception case yielded zero narrow windows; this is an explicit grammar boundary, not successful exception routing.",
+    "Generator control windows were measured only to audit event isolation; this is not permission to route suspended callers.",
+    "No dynamic branch-to-core predecessor selection or whole-program graph closure is proved.",
+    "A monitoring callback can be replaced or disabled and restored without a durable mask difference; static CFG guards cannot prove delivery continuity.",
+    "No LeWM performance claim follows from prototype callback counts."
+  ]
+}

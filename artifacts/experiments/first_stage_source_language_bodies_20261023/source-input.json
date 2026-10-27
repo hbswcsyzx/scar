@@ -1,0 +1,33 @@
+{
+  "file_index": 140,
+  "snapshot": {
+    "path": "/home/zyf/AAA/le-wm/stable-worldmodel/stable_worldmodel/wm/lewm/module.py",
+    "fingerprint": "sha256:3a6209baf30c11f77a5f6637282a1821fc62cea827438a97b23933caab51d8c7",
+    "encoding": "utf-8",
+    "python_version": "3.14"
+  },
+  "context": {
+    "namespace_root": "/home/zyf/AAA/le-wm",
+    "semantic_sha256": "42c2ba9bcd5e2961154dbe08f5dda93ff3ee5f3ac07ac21867b551dc56d7cd8f",
+    "semantics_sha256": "df1db7e4f7363ae176336c6adaab169e77d0f633ee77c59d8faad44504377551",
+    "control_sha256": "51da3a5127c4016ad1a1db60f6fca0c195fdabace13c154c80ba761163e61182"
+  },
+  "source_artifact": {
+    "fine_state_effects_established": false,
+    "source_replay": "REBUILT_AND_MATCHED_INVENTORY_CONTEXT_DIGESTS",
+    "transformation_authorized": false,
+    "whole_program_graph_established": false,
+    "archive_sha256": "25eedf0b31140093cb9d1b9eea0ca83c1d7c87f06ff8344254fc57bafb555a93",
+    "archive_bytes": 7856396,
+    "input_inventory_raw_sha256": "1b29ba654226d6c374bebc2fe7ba212f4658b05b57b521c90590ac4d5384c422",
+    "input_inventory_schema_version": 6,
+    "source_replay_on_load": false
+  },
+  "current_source": {
+    "path": "/home/zyf/AAA/le-wm/stable-worldmodel/stable_worldmodel/wm/lewm/module.py",
+    "sha256": "3a6209baf30c11f77a5f6637282a1821fc62cea827438a97b23933caab51d8c7",
+    "bytes": 8062
+  },
+  "source_prepared": false,
+  "source_ast_and_symtable_parsed": true
+}

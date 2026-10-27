@@ -1,0 +1,1617 @@
+{
+  "schema": "scar.dependency-source-continuation-sizing",
+  "schema_version": 1,
+  "parent_report_raw_sha256": "fc97075aa66a92758938ad8416347d895e6b18ef0e454053fc7f9c1a7d2f0424",
+  "source_files_guarded": 106,
+  "all_current_raw_and_decoded_fingerprints_match": false,
+  "complete_graph_files": 79,
+  "complete_graph_source_bytes": 2976813,
+  "complete_graph_canonical_bytes": 1481646361,
+  "missing_snapshot_files": 20,
+  "missing_snapshot_source_bytes": 881024,
+  "missing_snapshot_exact_canonical_bytes": 2098293,
+  "missing_graph_only_files": 7,
+  "missing_graph_only_source_bytes": 412731,
+  "incomplete_total_source_bytes": 1293755,
+  "observed_graph_bytes_per_raw_byte": {
+    "weighted_ratio": 497.72906830224133,
+    "minimum": 90.36576787807738,
+    "p10_inclusive": 284.4166813270789,
+    "median": 512.9745797766329,
+    "p90_inclusive": 801.1263751240638,
+    "maximum": 1048.8739486851912
+  },
+  "inferred_graph_bytes_for_27_files_not_bound": {
+    "weighted_ratio": 643939471,
+    "p10_ratio": 367965504,
+    "median_ratio": 663663427,
+    "p90_ratio": 1036461253,
+    "maximum_observed_ratio": 1356985915
+  },
+  "current_source_guards": [
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/trace/callable_environment.py",
+      "raw_sha256_matches": true,
+      "raw_bytes_match": true,
+      "decoded_fingerprint_matches": true
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/trace/execution_evidence.py",
+      "raw_sha256_matches": false,
+      "raw_bytes_match": false,
+      "decoded_fingerprint_matches": false
+    },
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/_py_warnings.py",
+      "raw_sha256_matches": true,
+      "raw_bytes_match": true,
+      "decoded_fingerprint_matches": true
+    },
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/_weakrefset.py",
+      "raw_sha256_matches": true,
+      "raw_bytes_match": true,
+      "decoded_fingerprint_matches": true
+    },
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/argparse.py",
+      "raw_sha256_matches": true,
+      "raw_bytes_match": true,
+      "decoded_fingerprint_matches": true
+    },
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/contextlib.py",
+      "raw_sha256_matches": true,
+      "raw_bytes_match": true,
+      "decoded_fingerprint_matches": true
+    },
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/copy.py",
+      "raw_sha256_matches": true,
+      "raw_bytes_match": true,
+      "decoded_fingerprint_matches": true
+    },
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/dataclasses.py",
+      "raw_sha256_matches": true,
+      "raw_bytes_match": true,
+      "decoded_fingerprint_matches": true
+    },
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/enum.py",
+      "raw_sha256_matches": true,
+      "raw_bytes_match": true,
+      "decoded_fingerprint_matches": true
+    },
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/functools.py",
+      "raw_sha256_matches": true,
+      "raw_bytes_match": true,
+      "decoded_fingerprint_matches": true
+    },
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/importlib/__init__.py",
+      "raw_sha256_matches": true,
+      "raw_bytes_match": true,
+      "decoded_fingerprint_matches": true
+    },
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/json/__init__.py",
+      "raw_sha256_matches": true,
+      "raw_bytes_match": true,
+      "decoded_fingerprint_matches": true
+    },
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/logging/__init__.py",
+      "raw_sha256_matches": true,
+      "raw_bytes_match": true,
+      "decoded_fingerprint_matches": true
+    },
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/pathlib/__init__.py",
+      "raw_sha256_matches": true,
+      "raw_bytes_match": true,
+      "decoded_fingerprint_matches": true
+    },
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/random.py",
+      "raw_sha256_matches": true,
+      "raw_bytes_match": true,
+      "decoded_fingerprint_matches": true
+    },
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/re/__init__.py",
+      "raw_sha256_matches": true,
+      "raw_bytes_match": true,
+      "decoded_fingerprint_matches": true
+    },
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/PIL/Image.py",
+      "raw_sha256_matches": true,
+      "raw_bytes_match": true,
+      "decoded_fingerprint_matches": true
+    },
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/PIL/ImageDraw.py",
+      "raw_sha256_matches": true,
+      "raw_bytes_match": true,
+      "decoded_fingerprint_matches": true
+    },
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/PIL/ImageFont.py",
+      "raw_sha256_matches": true,
+      "raw_bytes_match": true,
+      "decoded_fingerprint_matches": true
+    },
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/datasets/utils/logging.py",
+      "raw_sha256_matches": true,
+      "raw_bytes_match": true,
+      "decoded_fingerprint_matches": true
+    },
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/einops/einops.py",
+      "raw_sha256_matches": true,
+      "raw_bytes_match": true,
+      "decoded_fingerprint_matches": true
+    },
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/gymnasium/core.py",
+      "raw_sha256_matches": true,
+      "raw_bytes_match": true,
+      "decoded_fingerprint_matches": true
+    },
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/gymnasium/envs/registration.py",
+      "raw_sha256_matches": true,
+      "raw_bytes_match": true,
+      "decoded_fingerprint_matches": true
+    },
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/gymnasium/spaces/box.py",
+      "raw_sha256_matches": true,
+      "raw_bytes_match": true,
+      "decoded_fingerprint_matches": true
+    },
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/gymnasium/spaces/dict.py",
+      "raw_sha256_matches": true,
+      "raw_bytes_match": true,
+      "decoded_fingerprint_matches": true
+    },
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/gymnasium/spaces/discrete.py",
+      "raw_sha256_matches": true,
+      "raw_bytes_match": true,
+      "decoded_fingerprint_matches": true
+    },
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/gymnasium/wrappers/common.py",
+      "raw_sha256_matches": true,
+      "raw_bytes_match": true,
+      "decoded_fingerprint_matches": true
+    },
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/h5py/_hl/base.py",
+      "raw_sha256_matches": true,
+      "raw_bytes_match": true,
+      "decoded_fingerprint_matches": true
+    },
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/h5py/_hl/dataset.py",
+      "raw_sha256_matches": true,
+      "raw_bytes_match": true,
+      "decoded_fingerprint_matches": true
+    },
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/h5py/_hl/files.py",
+      "raw_sha256_matches": true,
+      "raw_bytes_match": true,
+      "decoded_fingerprint_matches": true
+    },
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/h5py/_hl/group.py",
+      "raw_sha256_matches": true,
+      "raw_bytes_match": true,
+      "decoded_fingerprint_matches": true
+    },
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/hydra/_internal/instantiate/_instantiate2.py",
+      "raw_sha256_matches": true,
+      "raw_bytes_match": true,
+      "decoded_fingerprint_matches": true
+    },
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/hydra/_internal/utils.py",
+      "raw_sha256_matches": true,
+      "raw_bytes_match": true,
+      "decoded_fingerprint_matches": true
+    },
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/hydra/main.py",
+      "raw_sha256_matches": true,
+      "raw_bytes_match": true,
+      "decoded_fingerprint_matches": true
+    },
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/imageio/core/format.py",
+      "raw_sha256_matches": true,
+      "raw_bytes_match": true,
+      "decoded_fingerprint_matches": true
+    },
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/imageio/core/legacy_plugin_wrapper.py",
+      "raw_sha256_matches": true,
+      "raw_bytes_match": true,
+      "decoded_fingerprint_matches": true
+    },
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/imageio/v2.py",
+      "raw_sha256_matches": true,
+      "raw_bytes_match": true,
+      "decoded_fingerprint_matches": true
+    },
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/lightning/fabric/strategies/registry.py",
+      "raw_sha256_matches": true,
+      "raw_bytes_match": true,
+      "decoded_fingerprint_matches": true
+    },
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/loguru/_logger.py",
+      "raw_sha256_matches": true,
+      "raw_bytes_match": true,
+      "decoded_fingerprint_matches": true
+    },
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/numpy/_core/_methods.py",
+      "raw_sha256_matches": true,
+      "raw_bytes_match": true,
+      "decoded_fingerprint_matches": true
+    },
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/numpy/_core/_ufunc_config.py",
+      "raw_sha256_matches": true,
+      "raw_bytes_match": true,
+      "decoded_fingerprint_matches": true
+    },
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/numpy/_core/arrayprint.py",
+      "raw_sha256_matches": true,
+      "raw_bytes_match": true,
+      "decoded_fingerprint_matches": true
+    },
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/numpy/_core/fromnumeric.py",
+      "raw_sha256_matches": true,
+      "raw_bytes_match": true,
+      "decoded_fingerprint_matches": true
+    },
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/numpy/_core/getlimits.py",
+      "raw_sha256_matches": true,
+      "raw_bytes_match": true,
+      "decoded_fingerprint_matches": true
+    },
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/numpy/_core/multiarray.py",
+      "raw_sha256_matches": true,
+      "raw_bytes_match": true,
+      "decoded_fingerprint_matches": true
+    },
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/numpy/_core/numeric.py",
+      "raw_sha256_matches": true,
+      "raw_bytes_match": true,
+      "decoded_fingerprint_matches": true
+    },
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/numpy/_core/shape_base.py",
+      "raw_sha256_matches": true,
+      "raw_bytes_match": true,
+      "decoded_fingerprint_matches": true
+    },
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/numpy/lib/_arraysetops_impl.py",
+      "raw_sha256_matches": true,
+      "raw_bytes_match": true,
+      "decoded_fingerprint_matches": true
+    },
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/numpy/lib/_stride_tricks_impl.py",
+      "raw_sha256_matches": true,
+      "raw_bytes_match": true,
+      "decoded_fingerprint_matches": true
+    },
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/numpy/linalg/_linalg.py",
+      "raw_sha256_matches": true,
+      "raw_bytes_match": true,
+      "decoded_fingerprint_matches": true
+    },
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/omegaconf/basecontainer.py",
+      "raw_sha256_matches": true,
+      "raw_bytes_match": true,
+      "decoded_fingerprint_matches": true
+    },
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/omegaconf/dictconfig.py",
+      "raw_sha256_matches": true,
+      "raw_bytes_match": true,
+      "decoded_fingerprint_matches": true
+    },
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/omegaconf/listconfig.py",
+      "raw_sha256_matches": true,
+      "raw_bytes_match": true,
+      "decoded_fingerprint_matches": true
+    },
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/omegaconf/omegaconf.py",
+      "raw_sha256_matches": true,
+      "raw_bytes_match": true,
+      "decoded_fingerprint_matches": true
+    },
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/pygame/surfarray.py",
+      "raw_sha256_matches": true,
+      "raw_bytes_match": true,
+      "decoded_fingerprint_matches": true
+    },
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/pymunk/__init__.py",
+      "raw_sha256_matches": true,
+      "raw_bytes_match": true,
+      "decoded_fingerprint_matches": true
+    },
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/pymunk/_typing_attr.py",
+      "raw_sha256_matches": true,
+      "raw_bytes_match": true,
+      "decoded_fingerprint_matches": true
+    },
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/pymunk/arbiter.py",
+      "raw_sha256_matches": true,
+      "raw_bytes_match": true,
+      "decoded_fingerprint_matches": true
+    },
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/pymunk/body.py",
+      "raw_sha256_matches": true,
+      "raw_bytes_match": true,
+      "decoded_fingerprint_matches": true
+    },
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/pymunk/pygame_util.py",
+      "raw_sha256_matches": true,
+      "raw_bytes_match": true,
+      "decoded_fingerprint_matches": true
+    },
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/pymunk/shape_filter.py",
+      "raw_sha256_matches": true,
+      "raw_bytes_match": true,
+      "decoded_fingerprint_matches": true
+    },
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/pymunk/shapes.py",
+      "raw_sha256_matches": true,
+      "raw_bytes_match": true,
+      "decoded_fingerprint_matches": true
+    },
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/pymunk/space.py",
+      "raw_sha256_matches": true,
+      "raw_bytes_match": true,
+      "decoded_fingerprint_matches": true
+    },
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/pymunk/space_debug_draw_options.py",
+      "raw_sha256_matches": true,
+      "raw_bytes_match": true,
+      "decoded_fingerprint_matches": true
+    },
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/pymunk/vec2d.py",
+      "raw_sha256_matches": true,
+      "raw_bytes_match": true,
+      "decoded_fingerprint_matches": true
+    },
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/richuru.py",
+      "raw_sha256_matches": true,
+      "raw_bytes_match": true,
+      "decoded_fingerprint_matches": true
+    },
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/sklearn/preprocessing/_data.py",
+      "raw_sha256_matches": true,
+      "raw_bytes_match": true,
+      "decoded_fingerprint_matches": true
+    },
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/sklearn/utils/_set_output.py",
+      "raw_sha256_matches": true,
+      "raw_bytes_match": true,
+      "decoded_fingerprint_matches": true
+    },
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/torch/__init__.py",
+      "raw_sha256_matches": true,
+      "raw_bytes_match": true,
+      "decoded_fingerprint_matches": true
+    },
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/torch/_jit_internal.py",
+      "raw_sha256_matches": true,
+      "raw_bytes_match": true,
+      "decoded_fingerprint_matches": true
+    },
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/torch/_library/simple_registry.py",
+      "raw_sha256_matches": true,
+      "raw_bytes_match": true,
+      "decoded_fingerprint_matches": true
+    },
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/torch/_ops.py",
+      "raw_sha256_matches": true,
+      "raw_bytes_match": true,
+      "decoded_fingerprint_matches": true
+    },
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/torch/_tensor.py",
+      "raw_sha256_matches": true,
+      "raw_bytes_match": true,
+      "decoded_fingerprint_matches": true
+    },
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/torch/autograd/function.py",
+      "raw_sha256_matches": true,
+      "raw_bytes_match": true,
+      "decoded_fingerprint_matches": true
+    },
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/torch/autograd/grad_mode.py",
+      "raw_sha256_matches": true,
+      "raw_bytes_match": true,
+      "decoded_fingerprint_matches": true
+    },
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/torch/cuda/__init__.py",
+      "raw_sha256_matches": true,
+      "raw_bytes_match": true,
+      "decoded_fingerprint_matches": true
+    },
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/torch/distributions/uniform.py",
+      "raw_sha256_matches": true,
+      "raw_bytes_match": true,
+      "decoded_fingerprint_matches": true
+    },
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/torch/functional.py",
+      "raw_sha256_matches": true,
+      "raw_bytes_match": true,
+      "decoded_fingerprint_matches": true
+    },
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/torch/nn/functional.py",
+      "raw_sha256_matches": true,
+      "raw_bytes_match": true,
+      "decoded_fingerprint_matches": true
+    },
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/torch/nn/init.py",
+      "raw_sha256_matches": true,
+      "raw_bytes_match": true,
+      "decoded_fingerprint_matches": true
+    },
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/torch/nn/modules/activation.py",
+      "raw_sha256_matches": true,
+      "raw_bytes_match": true,
+      "decoded_fingerprint_matches": true
+    },
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/torch/nn/modules/batchnorm.py",
+      "raw_sha256_matches": true,
+      "raw_bytes_match": true,
+      "decoded_fingerprint_matches": true
+    },
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/torch/nn/modules/container.py",
+      "raw_sha256_matches": true,
+      "raw_bytes_match": true,
+      "decoded_fingerprint_matches": true
+    },
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/torch/nn/modules/conv.py",
+      "raw_sha256_matches": true,
+      "raw_bytes_match": true,
+      "decoded_fingerprint_matches": true
+    },
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/torch/nn/modules/dropout.py",
+      "raw_sha256_matches": true,
+      "raw_bytes_match": true,
+      "decoded_fingerprint_matches": true
+    },
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/torch/nn/modules/linear.py",
+      "raw_sha256_matches": true,
+      "raw_bytes_match": true,
+      "decoded_fingerprint_matches": true
+    },
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/torch/nn/modules/module.py",
+      "raw_sha256_matches": true,
+      "raw_bytes_match": true,
+      "decoded_fingerprint_matches": true
+    },
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/torch/nn/modules/normalization.py",
+      "raw_sha256_matches": true,
+      "raw_bytes_match": true,
+      "decoded_fingerprint_matches": true
+    },
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/torch/nn/parameter.py",
+      "raw_sha256_matches": true,
+      "raw_bytes_match": true,
+      "decoded_fingerprint_matches": true
+    },
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/torch/serialization.py",
+      "raw_sha256_matches": true,
+      "raw_bytes_match": true,
+      "decoded_fingerprint_matches": true
+    },
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/torch/utils/_contextlib.py",
+      "raw_sha256_matches": true,
+      "raw_bytes_match": true,
+      "decoded_fingerprint_matches": true
+    },
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/torch/utils/_python_dispatch.py",
+      "raw_sha256_matches": true,
+      "raw_bytes_match": true,
+      "decoded_fingerprint_matches": true
+    },
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/torchvision/transforms/v2/_container.py",
+      "raw_sha256_matches": true,
+      "raw_bytes_match": true,
+      "decoded_fingerprint_matches": true
+    },
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/torchvision/transforms/v2/_geometry.py",
+      "raw_sha256_matches": true,
+      "raw_bytes_match": true,
+      "decoded_fingerprint_matches": true
+    },
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/torchvision/transforms/v2/_misc.py",
+      "raw_sha256_matches": true,
+      "raw_bytes_match": true,
+      "decoded_fingerprint_matches": true
+    },
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/torchvision/transforms/v2/_transform.py",
+      "raw_sha256_matches": true,
+      "raw_bytes_match": true,
+      "decoded_fingerprint_matches": true
+    },
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/torchvision/tv_tensors/_image.py",
+      "raw_sha256_matches": true,
+      "raw_bytes_match": true,
+      "decoded_fingerprint_matches": true
+    },
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/torchvision/tv_tensors/_tv_tensor.py",
+      "raw_sha256_matches": true,
+      "raw_bytes_match": true,
+      "decoded_fingerprint_matches": true
+    },
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/transformers/configuration_utils.py",
+      "raw_sha256_matches": true,
+      "raw_bytes_match": true,
+      "decoded_fingerprint_matches": true
+    },
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/transformers/models/vit/configuration_vit.py",
+      "raw_sha256_matches": true,
+      "raw_bytes_match": true,
+      "decoded_fingerprint_matches": true
+    },
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/transformers/models/vit/modeling_vit.py",
+      "raw_sha256_matches": true,
+      "raw_bytes_match": true,
+      "decoded_fingerprint_matches": true
+    },
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/transformers/utils/generic.py",
+      "raw_sha256_matches": true,
+      "raw_bytes_match": true,
+      "decoded_fingerprint_matches": true
+    },
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/wandb/sdk/lib/console_capture.py",
+      "raw_sha256_matches": true,
+      "raw_bytes_match": true,
+      "decoded_fingerprint_matches": true
+    },
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/threading.py",
+      "raw_sha256_matches": true,
+      "raw_bytes_match": true,
+      "decoded_fingerprint_matches": true
+    },
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/typing.py",
+      "raw_sha256_matches": true,
+      "raw_bytes_match": true,
+      "decoded_fingerprint_matches": true
+    },
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/weakref.py",
+      "raw_sha256_matches": true,
+      "raw_bytes_match": true,
+      "decoded_fingerprint_matches": true
+    }
+  ],
+  "missing_snapshots": [
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/torch/nn/modules/container.py",
+      "source_root": "dependency-source-root:e3d802a1bd20a52f4819a1a1046e25b99042788bc1e0855aa2cd6dbfd6493fe9",
+      "raw_bytes": 37393,
+      "raw_sha256": "73417ef19501a3e0fef8c6377ab660aac8c3e9b5034f3e652e6c6c91afd68bb8",
+      "fingerprint": "sha256:73417ef19501a3e0fef8c6377ab660aac8c3e9b5034f3e652e6c6c91afd68bb8",
+      "source_snapshot_canonical_bytes": 89351,
+      "source_snapshot_canonical_sha256": "b3ee453ae31b584022cdbe641a9604ede33af2b5e4427ac4c395bbfb0b049705"
+    },
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/torch/nn/modules/conv.py",
+      "source_root": "dependency-source-root:e3d802a1bd20a52f4819a1a1046e25b99042788bc1e0855aa2cd6dbfd6493fe9",
+      "raw_bytes": 79701,
+      "raw_sha256": "960644e52167a16ba8700badde44ebb53921dc38b1c90e379fc8a4870303fdc0",
+      "fingerprint": "sha256:960644e52167a16ba8700badde44ebb53921dc38b1c90e379fc8a4870303fdc0",
+      "source_snapshot_canonical_bytes": 189436,
+      "source_snapshot_canonical_sha256": "9e89ffbf0bca96699a65436499c3e6bb16db9379826ceb11ac74d0dfa1bcaf58"
+    },
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/torch/nn/modules/module.py",
+      "source_root": "dependency-source-root:e3d802a1bd20a52f4819a1a1046e25b99042788bc1e0855aa2cd6dbfd6493fe9",
+      "raw_bytes": 127918,
+      "raw_sha256": "341153e4099444f923f5b0766e8e41b45fbe909b87f4737cb28c828f297b7baa",
+      "fingerprint": "sha256:341153e4099444f923f5b0766e8e41b45fbe909b87f4737cb28c828f297b7baa",
+      "source_snapshot_canonical_bytes": 303234,
+      "source_snapshot_canonical_sha256": "98a58ee5db6a50e695eac86f5ebd4b49db263b88771eaef00b8af79916aa3452"
+    },
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/torch/nn/modules/normalization.py",
+      "source_root": "dependency-source-root:e3d802a1bd20a52f4819a1a1046e25b99042788bc1e0855aa2cd6dbfd6493fe9",
+      "raw_bytes": 15924,
+      "raw_sha256": "96284b63a2088c7d378716d5114eb5b6a1c072d479116170fcfd284c57e84b4f",
+      "fingerprint": "sha256:96284b63a2088c7d378716d5114eb5b6a1c072d479116170fcfd284c57e84b4f",
+      "source_snapshot_canonical_bytes": 38449,
+      "source_snapshot_canonical_sha256": "d58992ad740a5ef1afb5b50f741682be0b96164a9b91fd3b707de041bf6230a9"
+    },
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/torch/nn/parameter.py",
+      "source_root": "dependency-source-root:e3d802a1bd20a52f4819a1a1046e25b99042788bc1e0855aa2cd6dbfd6493fe9",
+      "raw_bytes": 12322,
+      "raw_sha256": "01ce0e4a10c54b923388d015113b610289b89e7a8ff4809eab65e06b1bc753a2",
+      "fingerprint": "sha256:01ce0e4a10c54b923388d015113b610289b89e7a8ff4809eab65e06b1bc753a2",
+      "source_snapshot_canonical_bytes": 29792,
+      "source_snapshot_canonical_sha256": "d131ea34b134812f64f9ca4c333fbe86972a651ab00ab3496623b91c1c349880"
+    },
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/torch/serialization.py",
+      "source_root": "dependency-source-root:e3d802a1bd20a52f4819a1a1046e25b99042788bc1e0855aa2cd6dbfd6493fe9",
+      "raw_bytes": 88846,
+      "raw_sha256": "482d589d5164babc3da7b801598665a8d32ef22495bbd04cebcbe3ef808249b3",
+      "fingerprint": "sha256:482d589d5164babc3da7b801598665a8d32ef22495bbd04cebcbe3ef808249b3",
+      "source_snapshot_canonical_bytes": 210994,
+      "source_snapshot_canonical_sha256": "b57a5c09bcf1440f5116fc78ec1997d678ee2e8757b47c3ed6a9a00bf5774b9b"
+    },
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/torch/utils/_python_dispatch.py",
+      "source_root": "dependency-source-root:e3d802a1bd20a52f4819a1a1046e25b99042788bc1e0855aa2cd6dbfd6493fe9",
+      "raw_bytes": 39563,
+      "raw_sha256": "b54322ad15a4d2c70bef9a6cb2b65f123e2050c3ebdbb3d182e9d14ce1517618",
+      "fingerprint": "sha256:b54322ad15a4d2c70bef9a6cb2b65f123e2050c3ebdbb3d182e9d14ce1517618",
+      "source_snapshot_canonical_bytes": 94104,
+      "source_snapshot_canonical_sha256": "72715dd71d414e877a45850131e43eb3519bc3849d1f67e882d0e5c5e4b284f2"
+    },
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/torchvision/transforms/v2/_container.py",
+      "source_root": "dependency-source-root:e3d802a1bd20a52f4819a1a1046e25b99042788bc1e0855aa2cd6dbfd6493fe9",
+      "raw_bytes": 6336,
+      "raw_sha256": "7bd60df4a80c4f44851a69c8916b79b015c26131373c9dd8f23ca6b01fc3d98d",
+      "fingerprint": "sha256:7bd60df4a80c4f44851a69c8916b79b015c26131373c9dd8f23ca6b01fc3d98d",
+      "source_snapshot_canonical_bytes": 15666,
+      "source_snapshot_canonical_sha256": "12b3a052a18263d2337bbdf010c74463644aa4b439031f9b59a91e6122eb202f"
+    },
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/torchvision/transforms/v2/_geometry.py",
+      "source_root": "dependency-source-root:e3d802a1bd20a52f4819a1a1046e25b99042788bc1e0855aa2cd6dbfd6493fe9",
+      "raw_bytes": 70033,
+      "raw_sha256": "12b67ffcc30da97783bb70892901c49cc55786c633beb14391e63782f74396aa",
+      "fingerprint": "sha256:12b67ffcc30da97783bb70892901c49cc55786c633beb14391e63782f74396aa",
+      "source_snapshot_canonical_bytes": 165990,
+      "source_snapshot_canonical_sha256": "d7a98df8102211ff61f879547037f1a4c1b1d4fd1b31319005c0a7a57c74a407"
+    },
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/torchvision/transforms/v2/_misc.py",
+      "source_root": "dependency-source-root:e3d802a1bd20a52f4819a1a1046e25b99042788bc1e0855aa2cd6dbfd6493fe9",
+      "raw_bytes": 24107,
+      "raw_sha256": "ab2ea579e066f9b38202ba80cdd8abad259aff0424da0ff7132763377a715014",
+      "fingerprint": "sha256:ab2ea579e066f9b38202ba80cdd8abad259aff0424da0ff7132763377a715014",
+      "source_snapshot_canonical_bytes": 57627,
+      "source_snapshot_canonical_sha256": "133619c23239629737d129a8c46dc4e313237dc2a1e3fc3c39be149df101cded"
+    },
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/torchvision/transforms/v2/_transform.py",
+      "source_root": "dependency-source-root:e3d802a1bd20a52f4819a1a1046e25b99042788bc1e0855aa2cd6dbfd6493fe9",
+      "raw_bytes": 9653,
+      "raw_sha256": "86119f5ce19a07b4284360adf2e19188c900cbe0c01ddd9609ce66637d334bc0",
+      "fingerprint": "sha256:86119f5ce19a07b4284360adf2e19188c900cbe0c01ddd9609ce66637d334bc0",
+      "source_snapshot_canonical_bytes": 23423,
+      "source_snapshot_canonical_sha256": "12e2da2a997f63f5a903c154b400b864f0f4021b6bb0f29452b4dc3d29818182"
+    },
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/torchvision/tv_tensors/_tv_tensor.py",
+      "source_root": "dependency-source-root:e3d802a1bd20a52f4819a1a1046e25b99042788bc1e0855aa2cd6dbfd6493fe9",
+      "raw_bytes": 6361,
+      "raw_sha256": "6f85b66ca1f3bf9cd5f1c03ffea46bf6e88d644e8ad92daf365aa34aa91af32b",
+      "fingerprint": "sha256:6f85b66ca1f3bf9cd5f1c03ffea46bf6e88d644e8ad92daf365aa34aa91af32b",
+      "source_snapshot_canonical_bytes": 15648,
+      "source_snapshot_canonical_sha256": "0def79a1a10f9c85fb46f5ff5fd6f776d9b01159d1f805ce0540f4df8a31d0b7"
+    },
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/transformers/configuration_utils.py",
+      "source_root": "dependency-source-root:e3d802a1bd20a52f4819a1a1046e25b99042788bc1e0855aa2cd6dbfd6493fe9",
+      "raw_bytes": 65603,
+      "raw_sha256": "08a3889c1b8a73d340a37c93f72346ee0e385e339b7a72a03b5c026d4943baf7",
+      "fingerprint": "sha256:08a3889c1b8a73d340a37c93f72346ee0e385e339b7a72a03b5c026d4943baf7",
+      "source_snapshot_canonical_bytes": 155812,
+      "source_snapshot_canonical_sha256": "068f0ebc6219951d3f7093107bc6e1b58276ee7920fa9d0be25751144954440d"
+    },
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/transformers/models/vit/configuration_vit.py",
+      "source_root": "dependency-source-root:e3d802a1bd20a52f4819a1a1046e25b99042788bc1e0855aa2cd6dbfd6493fe9",
+      "raw_bytes": 6290,
+      "raw_sha256": "ab38ea9ddb1173a3f277c6224c5bc06def8e2082724523ce75414a552241d858",
+      "fingerprint": "sha256:ab38ea9ddb1173a3f277c6224c5bc06def8e2082724523ce75414a552241d858",
+      "source_snapshot_canonical_bytes": 15530,
+      "source_snapshot_canonical_sha256": "e81eef9ff3d4e5017f5c66aeccc50f40f0fd9a5a18b0f2233bf511b4097eae4e"
+    },
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/transformers/models/vit/modeling_vit.py",
+      "source_root": "dependency-source-root:e3d802a1bd20a52f4819a1a1046e25b99042788bc1e0855aa2cd6dbfd6493fe9",
+      "raw_bytes": 28910,
+      "raw_sha256": "069e0958c10e806551a2e1d2421cd26e6bff21f7c65aeb9f0f3c0dbde1a88ca5",
+      "fingerprint": "sha256:069e0958c10e806551a2e1d2421cd26e6bff21f7c65aeb9f0f3c0dbde1a88ca5",
+      "source_snapshot_canonical_bytes": 68944,
+      "source_snapshot_canonical_sha256": "6efba07ff8c6cd3073cc8ae2cb516fad76dfe2d5e20439437c2b98e206199f7c"
+    },
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/transformers/utils/generic.py",
+      "source_root": "dependency-source-root:e3d802a1bd20a52f4819a1a1046e25b99042788bc1e0855aa2cd6dbfd6493fe9",
+      "raw_bytes": 41945,
+      "raw_sha256": "94728825190dff491f2e0b93beb59c8246adb0b6049e3203c511405f43bb7e30",
+      "fingerprint": "sha256:94728825190dff491f2e0b93beb59c8246adb0b6049e3203c511405f43bb7e30",
+      "source_snapshot_canonical_bytes": 100255,
+      "source_snapshot_canonical_sha256": "39803dfe1f3c0c27d96a8ee7224bdfd30c1408eace2e170d02c1e00a6bb3913e"
+    },
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/wandb/sdk/lib/console_capture.py",
+      "source_root": "dependency-source-root:e3d802a1bd20a52f4819a1a1046e25b99042788bc1e0855aa2cd6dbfd6493fe9",
+      "raw_bytes": 9389,
+      "raw_sha256": "6b97e484a7a761d2a6c06ad3818bdf57e3b2e5ffa245ca3beb9280f4c24cc7e8",
+      "fingerprint": "sha256:6b97e484a7a761d2a6c06ad3818bdf57e3b2e5ffa245ca3beb9280f4c24cc7e8",
+      "source_snapshot_canonical_bytes": 22916,
+      "source_snapshot_canonical_sha256": "7f8ca5c962d99b79bf08e9e1950e23d34e9f09aa358a63e01cd9d44968786d75"
+    },
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/threading.py",
+      "source_root": "dependency-source-root:6751b5fc5d4a40583574ab3b68d109698e9ef9d8d9608da566e20b30ac829757",
+      "raw_bytes": 56923,
+      "raw_sha256": "5323909624ec2165e70b6d31333e4191b63d383d2dc5a7d7d516a3475ea2b7e3",
+      "fingerprint": "sha256:5323909624ec2165e70b6d31333e4191b63d383d2dc5a7d7d516a3475ea2b7e3",
+      "source_snapshot_canonical_bytes": 135545,
+      "source_snapshot_canonical_sha256": "57b206522f7398373dbdfe1ee1f759903e2ea655888776fa6fc4874ea64c912f"
+    },
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/typing.py",
+      "source_root": "dependency-source-root:6751b5fc5d4a40583574ab3b68d109698e9ef9d8d9608da566e20b30ac829757",
+      "raw_bytes": 136036,
+      "raw_sha256": "de569368c2c4958b7aaddbe755056860a89b1d313f69d437177864f37cb2503b",
+      "fingerprint": "sha256:de569368c2c4958b7aaddbe755056860a89b1d313f69d437177864f37cb2503b",
+      "source_snapshot_canonical_bytes": 322801,
+      "source_snapshot_canonical_sha256": "4cc6b2bd15d38dea520fd926f01c0c0e0e99ce416becb1c4d1e405441e43ade7"
+    },
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/weakref.py",
+      "source_root": "dependency-source-root:6751b5fc5d4a40583574ab3b68d109698e9ef9d8d9608da566e20b30ac829757",
+      "raw_bytes": 17771,
+      "raw_sha256": "5e5f727a19a858cb4c56dbaf3e0a138ded02fb954a9a58a840a0764216ae9522",
+      "fingerprint": "sha256:5e5f727a19a858cb4c56dbaf3e0a138ded02fb954a9a58a840a0764216ae9522",
+      "source_snapshot_canonical_bytes": 42776,
+      "source_snapshot_canonical_sha256": "bf3632979c9ca69ece267b1bee59bd12396665da13176e59c8a83a582f17cc53"
+    }
+  ],
+  "missing_graphs": [
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/torch/nn/functional.py",
+      "source_root": "dependency-source-root:e3d802a1bd20a52f4819a1a1046e25b99042788bc1e0855aa2cd6dbfd6493fe9",
+      "raw_bytes": 277195,
+      "raw_sha256": "990a8b717645fa603b0dd2957b7b3ed68c5fb937fa205048c096ac8bb532510e",
+      "fingerprint": "sha256:990a8b717645fa603b0dd2957b7b3ed68c5fb937fa205048c096ac8bb532510e"
+    },
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/torch/nn/modules/activation.py",
+      "source_root": "dependency-source-root:e3d802a1bd20a52f4819a1a1046e25b99042788bc1e0855aa2cd6dbfd6493fe9",
+      "raw_bytes": 62117,
+      "raw_sha256": "116c0ef075470a794cccefd74f8b38af4fd8d93be3b6861bc11f28c4151c439a",
+      "fingerprint": "sha256:116c0ef075470a794cccefd74f8b38af4fd8d93be3b6861bc11f28c4151c439a"
+    },
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/torch/nn/modules/batchnorm.py",
+      "source_root": "dependency-source-root:e3d802a1bd20a52f4819a1a1046e25b99042788bc1e0855aa2cd6dbfd6493fe9",
+      "raw_bytes": 41172,
+      "raw_sha256": "b59a648fe5d87ea98f953840a75542e0cd1ef89bf98127c9f00b8ed5051f1e07",
+      "fingerprint": "sha256:b59a648fe5d87ea98f953840a75542e0cd1ef89bf98127c9f00b8ed5051f1e07"
+    },
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/torch/nn/modules/dropout.py",
+      "source_root": "dependency-source-root:e3d802a1bd20a52f4819a1a1046e25b99042788bc1e0855aa2cd6dbfd6493fe9",
+      "raw_bytes": 11520,
+      "raw_sha256": "2ac0b163bbdfa5c6c723fadc6637099bf8ee412e386c21502a1222edb68ce167",
+      "fingerprint": "sha256:2ac0b163bbdfa5c6c723fadc6637099bf8ee412e386c21502a1222edb68ce167"
+    },
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/torch/nn/modules/linear.py",
+      "source_root": "dependency-source-root:e3d802a1bd20a52f4819a1a1046e25b99042788bc1e0855aa2cd6dbfd6493fe9",
+      "raw_bytes": 12376,
+      "raw_sha256": "1961ad1a1f650e104b3c7f78d19af2d21bf977e7af6c3fdf2420aad563c9e202",
+      "fingerprint": "sha256:1961ad1a1f650e104b3c7f78d19af2d21bf977e7af6c3fdf2420aad563c9e202"
+    },
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/torch/utils/_contextlib.py",
+      "source_root": "dependency-source-root:e3d802a1bd20a52f4819a1a1046e25b99042788bc1e0855aa2cd6dbfd6493fe9",
+      "raw_bytes": 6388,
+      "raw_sha256": "87ddcd20996e0eef4d91c73a72bf943a49d4a76acc6f01174b101a599cc618ac",
+      "fingerprint": "sha256:87ddcd20996e0eef4d91c73a72bf943a49d4a76acc6f01174b101a599cc618ac"
+    },
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/torchvision/tv_tensors/_image.py",
+      "source_root": "dependency-source-root:e3d802a1bd20a52f4819a1a1046e25b99042788bc1e0855aa2cd6dbfd6493fe9",
+      "raw_bytes": 1963,
+      "raw_sha256": "9e1fa9ed0f516771122dbf208ccef4adad2dea95cb8361c2be5038555520be0f",
+      "fingerprint": "sha256:9e1fa9ed0f516771122dbf208ccef4adad2dea95cb8361c2be5038555520be0f"
+    }
+  ],
+  "complete_graphs": [
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/trace/callable_environment.py",
+      "source_root": "dependency-source-root:39161c70cb0781242f8e628b94aa6ddd60cd1f99cc6510b5cdf1b7f99848f4fe",
+      "raw_bytes": 22036,
+      "raw_sha256": "14e4a319ec9024752eff907422fbc886da1e735db88360b8871c345669c39428",
+      "fingerprint": "sha256:14e4a319ec9024752eff907422fbc886da1e735db88360b8871c345669c39428",
+      "graph_canonical_bytes": 18352955,
+      "graph_bytes_per_raw_byte": 832.8623615901253
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/trace/execution_evidence.py",
+      "source_root": "dependency-source-root:39161c70cb0781242f8e628b94aa6ddd60cd1f99cc6510b5cdf1b7f99848f4fe",
+      "raw_bytes": 18375,
+      "raw_sha256": "cd64d7fbf5d2ccf079d325a3bfba547b90bf272b45f859f38d5010c871293688",
+      "fingerprint": "sha256:cd64d7fbf5d2ccf079d325a3bfba547b90bf272b45f859f38d5010c871293688",
+      "graph_canonical_bytes": 12564122,
+      "graph_bytes_per_raw_byte": 683.7617414965987
+    },
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/_py_warnings.py",
+      "source_root": "dependency-source-root:6751b5fc5d4a40583574ab3b68d109698e9ef9d8d9608da566e20b30ac829757",
+      "raw_bytes": 30631,
+      "raw_sha256": "7728580177727fa3b295478cef4777a9d2a364c5cbd809efcea352db31144f85",
+      "fingerprint": "sha256:7728580177727fa3b295478cef4777a9d2a364c5cbd809efcea352db31144f85",
+      "graph_canonical_bytes": 21478640,
+      "graph_bytes_per_raw_byte": 701.2059678103882
+    },
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/_weakrefset.py",
+      "source_root": "dependency-source-root:6751b5fc5d4a40583574ab3b68d109698e9ef9d8d9608da566e20b30ac829757",
+      "raw_bytes": 3962,
+      "raw_sha256": "2dd7cb459d654fe78b00c5c47ee8e786c037ee77763304603f5e976dd62cbf81",
+      "fingerprint": "sha256:2dd7cb459d654fe78b00c5c47ee8e786c037ee77763304603f5e976dd62cbf81",
+      "graph_canonical_bytes": 3982633,
+      "graph_bytes_per_raw_byte": 1005.2077233720344
+    },
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/argparse.py",
+      "source_root": "dependency-source-root:6751b5fc5d4a40583574ab3b68d109698e9ef9d8d9608da566e20b30ac829757",
+      "raw_bytes": 106825,
+      "raw_sha256": "b9f0fa53be3d7c9c10a71a8eecc538a27c32fbe7abe337818d0d36e138bfc5c5",
+      "fingerprint": "sha256:b9f0fa53be3d7c9c10a71a8eecc538a27c32fbe7abe337818d0d36e138bfc5c5",
+      "graph_canonical_bytes": 74154410,
+      "graph_bytes_per_raw_byte": 694.1671893283408
+    },
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/contextlib.py",
+      "source_root": "dependency-source-root:6751b5fc5d4a40583574ab3b68d109698e9ef9d8d9608da566e20b30ac829757",
+      "raw_bytes": 27801,
+      "raw_sha256": "c1e0d67b2007de11ae93cd36cf6faf38d9ab32656a832d592a49325eec579f96",
+      "fingerprint": "sha256:c1e0d67b2007de11ae93cd36cf6faf38d9ab32656a832d592a49325eec579f96",
+      "graph_canonical_bytes": 12313266,
+      "graph_bytes_per_raw_byte": 442.9073054926082
+    },
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/copy.py",
+      "source_root": "dependency-source-root:6751b5fc5d4a40583574ab3b68d109698e9ef9d8d9608da566e20b30ac829757",
+      "raw_bytes": 8582,
+      "raw_sha256": "15154fde290d6e65b5007905689a47a9a5a724822c5e06eec35d9ffbb2a3aa69",
+      "fingerprint": "sha256:15154fde290d6e65b5007905689a47a9a5a724822c5e06eec35d9ffbb2a3aa69",
+      "graph_canonical_bytes": 7559326,
+      "graph_bytes_per_raw_byte": 880.8350034956886
+    },
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/dataclasses.py",
+      "source_root": "dependency-source-root:6751b5fc5d4a40583574ab3b68d109698e9ef9d8d9608da566e20b30ac829757",
+      "raw_bytes": 71537,
+      "raw_sha256": "e8439c8b111856645a8b31e0dbbba532b494426399bad456079c0e5730ad322e",
+      "fingerprint": "sha256:e8439c8b111856645a8b31e0dbbba532b494426399bad456079c0e5730ad322e",
+      "graph_canonical_bytes": 34394427,
+      "graph_bytes_per_raw_byte": 480.7921355382529
+    },
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/enum.py",
+      "source_root": "dependency-source-root:6751b5fc5d4a40583574ab3b68d109698e9ef9d8d9608da566e20b30ac829757",
+      "raw_bytes": 85450,
+      "raw_sha256": "fd23a7598fa1104ef892abcd4154d3627283e6361eb7a91cd11dc4a7b6fb3a93",
+      "fingerprint": "sha256:fd23a7598fa1104ef892abcd4154d3627283e6361eb7a91cd11dc4a7b6fb3a93",
+      "graph_canonical_bytes": 62811334,
+      "graph_bytes_per_raw_byte": 735.0653481568169
+    },
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/functools.py",
+      "source_root": "dependency-source-root:6751b5fc5d4a40583574ab3b68d109698e9ef9d8d9608da566e20b30ac829757",
+      "raw_bytes": 43564,
+      "raw_sha256": "9db56d38172c4c9e689b21cc58c8538008b09d86b682faf4dd193b529cdd79d5",
+      "fingerprint": "sha256:9db56d38172c4c9e689b21cc58c8538008b09d86b682faf4dd193b529cdd79d5",
+      "graph_canonical_bytes": 30427978,
+      "graph_bytes_per_raw_byte": 698.4661188136994
+    },
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/importlib/__init__.py",
+      "source_root": "dependency-source-root:6751b5fc5d4a40583574ab3b68d109698e9ef9d8d9608da566e20b30ac829757",
+      "raw_bytes": 4767,
+      "raw_sha256": "72b07de4133a7e39b2f6a7920465669aa04626f217e800779587bc0713fe002e",
+      "fingerprint": "sha256:72b07de4133a7e39b2f6a7920465669aa04626f217e800779587bc0713fe002e",
+      "graph_canonical_bytes": 2641756,
+      "graph_bytes_per_raw_byte": 554.1757919026642
+    },
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/json/__init__.py",
+      "source_root": "dependency-source-root:6751b5fc5d4a40583574ab3b68d109698e9ef9d8d9608da566e20b30ac829757",
+      "raw_bytes": 14132,
+      "raw_sha256": "2dd10f1bf4c9ea5478e589216805e7f279d0e4bce134a19efa297404fb87407d",
+      "fingerprint": "sha256:2dd10f1bf4c9ea5478e589216805e7f279d0e4bce134a19efa297404fb87407d",
+      "graph_canonical_bytes": 4245831,
+      "graph_bytes_per_raw_byte": 300.4409142371922
+    },
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/logging/__init__.py",
+      "source_root": "dependency-source-root:6751b5fc5d4a40583574ab3b68d109698e9ef9d8d9608da566e20b30ac829757",
+      "raw_bytes": 84068,
+      "raw_sha256": "e525bc1ea1744fca8d5a3d1639082eac53eaced7a8543691ceeae71649be0975",
+      "fingerprint": "sha256:e525bc1ea1744fca8d5a3d1639082eac53eaced7a8543691ceeae71649be0975",
+      "graph_canonical_bytes": 42939427,
+      "graph_bytes_per_raw_byte": 510.77017414474
+    },
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/pathlib/__init__.py",
+      "source_root": "dependency-source-root:6751b5fc5d4a40583574ab3b68d109698e9ef9d8d9608da566e20b30ac829757",
+      "raw_bytes": 46807,
+      "raw_sha256": "042a4d0a5e1ef66778daa86dc269af205bd42d06e793e53d8b99dff4c45928ca",
+      "fingerprint": "sha256:042a4d0a5e1ef66778daa86dc269af205bd42d06e793e53d8b99dff4c45928ca",
+      "graph_canonical_bytes": 33179768,
+      "graph_bytes_per_raw_byte": 708.8633751361975
+    },
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/random.py",
+      "source_root": "dependency-source-root:6751b5fc5d4a40583574ab3b68d109698e9ef9d8d9608da566e20b30ac829757",
+      "raw_bytes": 37553,
+      "raw_sha256": "cf8e72f887d838e273c274b79758b2bf8630a0927112b8876fa3a9e4b9b1756b",
+      "fingerprint": "sha256:cf8e72f887d838e273c274b79758b2bf8630a0927112b8876fa3a9e4b9b1756b",
+      "graph_canonical_bytes": 25280654,
+      "graph_bytes_per_raw_byte": 673.1993182968072
+    },
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/re/__init__.py",
+      "source_root": "dependency-source-root:6751b5fc5d4a40583574ab3b68d109698e9ef9d8d9608da566e20b30ac829757",
+      "raw_bytes": 17876,
+      "raw_sha256": "741a9de729ed8207bfa19db990f8826f1bf3661f33d0970a80c08cd1338ebc35",
+      "fingerprint": "sha256:741a9de729ed8207bfa19db990f8826f1bf3661f33d0970a80c08cd1338ebc35",
+      "graph_canonical_bytes": 8299345,
+      "graph_bytes_per_raw_byte": 464.2730476616693
+    },
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/PIL/Image.py",
+      "source_root": "dependency-source-root:e3d802a1bd20a52f4819a1a1046e25b99042788bc1e0855aa2cd6dbfd6493fe9",
+      "raw_bytes": 153786,
+      "raw_sha256": "04af3f2db7ffdd61e829fa7aa8f5481d394a0a4129a8fd8aa5b13908928fcd6d",
+      "fingerprint": "sha256:04af3f2db7ffdd61e829fa7aa8f5481d394a0a4129a8fd8aa5b13908928fcd6d",
+      "graph_canonical_bytes": 100286083,
+      "graph_bytes_per_raw_byte": 652.1145162758638
+    },
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/PIL/ImageDraw.py",
+      "source_root": "dependency-source-root:e3d802a1bd20a52f4819a1a1046e25b99042788bc1e0855aa2cd6dbfd6493fe9",
+      "raw_bytes": 35419,
+      "raw_sha256": "e83a5fc1f270e69f243e6cbcdd5cc548e997199aab276fa19a67ded591bb3c9a",
+      "fingerprint": "sha256:e83a5fc1f270e69f243e6cbcdd5cc548e997199aab276fa19a67ded591bb3c9a",
+      "graph_canonical_bytes": 29558350,
+      "graph_bytes_per_raw_byte": 834.5337248369519
+    },
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/PIL/ImageFont.py",
+      "source_root": "dependency-source-root:e3d802a1bd20a52f4819a1a1046e25b99042788bc1e0855aa2cd6dbfd6493fe9",
+      "raw_bytes": 63750,
+      "raw_sha256": "24fa5feeb91b4bf63eaad0ebba08a8161e9c889d9fd056a37c928134097b9649",
+      "fingerprint": "sha256:24fa5feeb91b4bf63eaad0ebba08a8161e9c889d9fd056a37c928134097b9649",
+      "graph_canonical_bytes": 14347760,
+      "graph_bytes_per_raw_byte": 225.0629019607843
+    },
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/datasets/utils/logging.py",
+      "source_root": "dependency-source-root:e3d802a1bd20a52f4819a1a1046e25b99042788bc1e0855aa2cd6dbfd6493fe9",
+      "raw_bytes": 5381,
+      "raw_sha256": "736835825dc85780bb036fa4cb4c9fac766e622e0fe351d14dd4b75c299d31ec",
+      "fingerprint": "sha256:736835825dc85780bb036fa4cb4c9fac766e622e0fe351d14dd4b75c299d31ec",
+      "graph_canonical_bytes": 2289565,
+      "graph_bytes_per_raw_byte": 425.49061512729975
+    },
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/einops/einops.py",
+      "source_root": "dependency-source-root:e3d802a1bd20a52f4819a1a1046e25b99042788bc1e0855aa2cd6dbfd6493fe9",
+      "raw_bytes": 38079,
+      "raw_sha256": "be6c7921675efde3eeceb3c32d9655c3ffb442c6ab7b593c61145a2ade592fef",
+      "fingerprint": "sha256:be6c7921675efde3eeceb3c32d9655c3ffb442c6ab7b593c61145a2ade592fef",
+      "graph_canonical_bytes": 24839831,
+      "graph_bytes_per_raw_byte": 652.3236166916148
+    },
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/gymnasium/core.py",
+      "source_root": "dependency-source-root:e3d802a1bd20a52f4819a1a1046e25b99042788bc1e0855aa2cd6dbfd6493fe9",
+      "raw_bytes": 29727,
+      "raw_sha256": "245745bf21d7b6f6f6d187260c17fd3c19988806ce12fc9c606b2bbe813d37a8",
+      "fingerprint": "sha256:245745bf21d7b6f6f6d187260c17fd3c19988806ce12fc9c606b2bbe813d37a8",
+      "graph_canonical_bytes": 9184830,
+      "graph_bytes_per_raw_byte": 308.9726511252397
+    },
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/gymnasium/envs/registration.py",
+      "source_root": "dependency-source-root:e3d802a1bd20a52f4819a1a1046e25b99042788bc1e0855aa2cd6dbfd6493fe9",
+      "raw_bytes": 42678,
+      "raw_sha256": "0b9213cc2b77d3af390e8b25cee0ac7fbd0795f994b106ef9020a86a19b1a319",
+      "fingerprint": "sha256:0b9213cc2b77d3af390e8b25cee0ac7fbd0795f994b106ef9020a86a19b1a319",
+      "graph_canonical_bytes": 25685802,
+      "graph_bytes_per_raw_byte": 601.8511176718685
+    },
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/gymnasium/spaces/box.py",
+      "source_root": "dependency-source-root:e3d802a1bd20a52f4819a1a1046e25b99042788bc1e0855aa2cd6dbfd6493fe9",
+      "raw_bytes": 19592,
+      "raw_sha256": "d4d291c0a8508828cc893b4a82af30a6c975b713687bec0b450d7d0251c1a2a1",
+      "fingerprint": "sha256:d4d291c0a8508828cc893b4a82af30a6c975b713687bec0b450d7d0251c1a2a1",
+      "graph_canonical_bytes": 14383695,
+      "graph_bytes_per_raw_byte": 734.1616476112699
+    },
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/gymnasium/spaces/dict.py",
+      "source_root": "dependency-source-root:e3d802a1bd20a52f4819a1a1046e25b99042788bc1e0855aa2cd6dbfd6493fe9",
+      "raw_bytes": 11507,
+      "raw_sha256": "78ab5d62cdbc997f1597c5421a708a0fdf14a73dc2b4440a28aa0229fce63809",
+      "fingerprint": "sha256:78ab5d62cdbc997f1597c5421a708a0fdf14a73dc2b4440a28aa0229fce63809",
+      "graph_canonical_bytes": 5858433,
+      "graph_bytes_per_raw_byte": 509.1190579647171
+    },
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/gymnasium/spaces/discrete.py",
+      "source_root": "dependency-source-root:e3d802a1bd20a52f4819a1a1046e25b99042788bc1e0855aa2cd6dbfd6493fe9",
+      "raw_bytes": 8939,
+      "raw_sha256": "ed5cb75621d8f9042cf2ec1ac7346cd834495eafed2b94185ccd62e712db3c98",
+      "fingerprint": "sha256:ed5cb75621d8f9042cf2ec1ac7346cd834495eafed2b94185ccd62e712db3c98",
+      "graph_canonical_bytes": 5332262,
+      "graph_bytes_per_raw_byte": 596.5166125964873
+    },
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/gymnasium/wrappers/common.py",
+      "source_root": "dependency-source-root:e3d802a1bd20a52f4819a1a1046e25b99042788bc1e0855aa2cd6dbfd6493fe9",
+      "raw_bytes": 21286,
+      "raw_sha256": "2a2cd78973296d5871af0ae1334f4c567cacef380bc69b4a759fcc29cbcff51a",
+      "fingerprint": "sha256:2a2cd78973296d5871af0ae1334f4c567cacef380bc69b4a759fcc29cbcff51a",
+      "graph_canonical_bytes": 9231642,
+      "graph_bytes_per_raw_byte": 433.69548059757585
+    },
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/h5py/_hl/base.py",
+      "source_root": "dependency-source-root:e3d802a1bd20a52f4819a1a1046e25b99042788bc1e0855aa2cd6dbfd6493fe9",
+      "raw_bytes": 15701,
+      "raw_sha256": "4c6127fb0f70dbdedb210cbef3ef837de31fe6485ecf26ba94ed5babb2612835",
+      "fingerprint": "sha256:4c6127fb0f70dbdedb210cbef3ef837de31fe6485ecf26ba94ed5babb2612835",
+      "graph_canonical_bytes": 9191593,
+      "graph_bytes_per_raw_byte": 585.4144958919813
+    },
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/h5py/_hl/dataset.py",
+      "source_root": "dependency-source-root:e3d802a1bd20a52f4819a1a1046e25b99042788bc1e0855aa2cd6dbfd6493fe9",
+      "raw_bytes": 45291,
+      "raw_sha256": "573abc414eec2c10e033ceaa3f33638f261b0191111ddae493ac91fbb74e6557",
+      "fingerprint": "sha256:573abc414eec2c10e033ceaa3f33638f261b0191111ddae493ac91fbb74e6557",
+      "graph_canonical_bytes": 35563383,
+      "graph_bytes_per_raw_byte": 785.2196462873419
+    },
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/h5py/_hl/files.py",
+      "source_root": "dependency-source-root:e3d802a1bd20a52f4819a1a1046e25b99042788bc1e0855aa2cd6dbfd6493fe9",
+      "raw_bytes": 25154,
+      "raw_sha256": "926856d56326dbbf8cd6a698169c05e8d6f54932d40dc9989351b308e0358d36",
+      "fingerprint": "sha256:926856d56326dbbf8cd6a698169c05e8d6f54932d40dc9989351b308e0358d36",
+      "graph_canonical_bytes": 15083260,
+      "graph_bytes_per_raw_byte": 599.6366383080226
+    },
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/h5py/_hl/group.py",
+      "source_root": "dependency-source-root:e3d802a1bd20a52f4819a1a1046e25b99042788bc1e0855aa2cd6dbfd6493fe9",
+      "raw_bytes": 34321,
+      "raw_sha256": "eaafd02c318e2c7817970d109abe7a5a543c424f6d6f25727800e016eec65fb7",
+      "fingerprint": "sha256:eaafd02c318e2c7817970d109abe7a5a543c424f6d6f25727800e016eec65fb7",
+      "graph_canonical_bytes": 15754397,
+      "graph_bytes_per_raw_byte": 459.03082660761635
+    },
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/hydra/_internal/instantiate/_instantiate2.py",
+      "source_root": "dependency-source-root:e3d802a1bd20a52f4819a1a1046e25b99042788bc1e0855aa2cd6dbfd6493fe9",
+      "raw_bytes": 14582,
+      "raw_sha256": "9e4d4d947bfee4ce2e2df26e9ccff6b0f222b61e5f4c82096f93e5fa2ae0bff3",
+      "fingerprint": "sha256:9e4d4d947bfee4ce2e2df26e9ccff6b0f222b61e5f4c82096f93e5fa2ae0bff3",
+      "graph_canonical_bytes": 11621897,
+      "graph_bytes_per_raw_byte": 797.0029488410369
+    },
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/hydra/_internal/utils.py",
+      "source_root": "dependency-source-root:e3d802a1bd20a52f4819a1a1046e25b99042788bc1e0855aa2cd6dbfd6493fe9",
+      "raw_bytes": 22368,
+      "raw_sha256": "7d7bfffc8a85ea71f23b82037dd62b023809c3cc946f4fca52ec18b7c007451b",
+      "fingerprint": "sha256:7d7bfffc8a85ea71f23b82037dd62b023809c3cc946f4fca52ec18b7c007451b",
+      "graph_canonical_bytes": 17267085,
+      "graph_bytes_per_raw_byte": 771.9548015021459
+    },
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/hydra/main.py",
+      "source_root": "dependency-source-root:e3d802a1bd20a52f4819a1a1046e25b99042788bc1e0855aa2cd6dbfd6493fe9",
+      "raw_bytes": 3999,
+      "raw_sha256": "b7afd160fce7fa7ae9ffa45a7b7755c4e35756ee0e56034db52f6ad8e28b70e0",
+      "fingerprint": "sha256:b7afd160fce7fa7ae9ffa45a7b7755c4e35756ee0e56034db52f6ad8e28b70e0",
+      "graph_canonical_bytes": 2532790,
+      "graph_bytes_per_raw_byte": 633.3558389597399
+    },
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/imageio/core/format.py",
+      "source_root": "dependency-source-root:e3d802a1bd20a52f4819a1a1046e25b99042788bc1e0855aa2cd6dbfd6493fe9",
+      "raw_bytes": 30916,
+      "raw_sha256": "f8e5ca69ecf2c9833a4abb39ae1b7ca03dbe3ce3bdf6a878e40fd4cfd6f220a5",
+      "fingerprint": "sha256:f8e5ca69ecf2c9833a4abb39ae1b7ca03dbe3ce3bdf6a878e40fd4cfd6f220a5",
+      "graph_canonical_bytes": 13032893,
+      "graph_bytes_per_raw_byte": 421.55818993401476
+    },
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/imageio/core/legacy_plugin_wrapper.py",
+      "source_root": "dependency-source-root:e3d802a1bd20a52f4819a1a1046e25b99042788bc1e0855aa2cd6dbfd6493fe9",
+      "raw_bytes": 12136,
+      "raw_sha256": "0dc6c87dc8d61f83f9c38f1169646eb64a72d60358535f1b70a128abad617289",
+      "fingerprint": "sha256:0dc6c87dc8d61f83f9c38f1169646eb64a72d60358535f1b70a128abad617289",
+      "graph_canonical_bytes": 4848240,
+      "graph_bytes_per_raw_byte": 399.4924192485168
+    },
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/imageio/v2.py",
+      "source_root": "dependency-source-root:e3d802a1bd20a52f4819a1a1046e25b99042788bc1e0855aa2cd6dbfd6493fe9",
+      "raw_bytes": 21563,
+      "raw_sha256": "d4a279cfc262da79c0772fcadef229cac1b62a0eeb21c3e269d346d69c0ac7e1",
+      "fingerprint": "sha256:d4a279cfc262da79c0772fcadef229cac1b62a0eeb21c3e269d346d69c0ac7e1",
+      "graph_canonical_bytes": 11016505,
+      "graph_bytes_per_raw_byte": 510.898529889162
+    },
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/lightning/fabric/strategies/registry.py",
+      "source_root": "dependency-source-root:e3d802a1bd20a52f4819a1a1046e25b99042788bc1e0855aa2cd6dbfd6493fe9",
+      "raw_bytes": 3913,
+      "raw_sha256": "5a7aa471db8c96a695740d815b5b98efa3874d60c1b82e70c855278beb398f28",
+      "fingerprint": "sha256:5a7aa471db8c96a695740d815b5b98efa3874d60c1b82e70c855278beb398f28",
+      "graph_canonical_bytes": 1804298,
+      "graph_bytes_per_raw_byte": 461.1035011500128
+    },
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/loguru/_logger.py",
+      "source_root": "dependency-source-root:e3d802a1bd20a52f4819a1a1046e25b99042788bc1e0855aa2cd6dbfd6493fe9",
+      "raw_bytes": 97856,
+      "raw_sha256": "569946c9f694f27227c06bf108add2dd8866efc562c779a47e5e01aaaa4f6960",
+      "fingerprint": "sha256:569946c9f694f27227c06bf108add2dd8866efc562c779a47e5e01aaaa4f6960",
+      "graph_canonical_bytes": 26973699,
+      "graph_bytes_per_raw_byte": 275.6468586494441
+    },
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/numpy/_core/_methods.py",
+      "source_root": "dependency-source-root:e3d802a1bd20a52f4819a1a1046e25b99042788bc1e0855aa2cd6dbfd6493fe9",
+      "raw_bytes": 9393,
+      "raw_sha256": "724facf7e63c5b8fcc2fac14bf31a02cb048d9e28f516d86502ba5077a425476",
+      "fingerprint": "sha256:724facf7e63c5b8fcc2fac14bf31a02cb048d9e28f516d86502ba5077a425476",
+      "graph_canonical_bytes": 9852073,
+      "graph_bytes_per_raw_byte": 1048.8739486851912
+    },
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/numpy/_core/_ufunc_config.py",
+      "source_root": "dependency-source-root:e3d802a1bd20a52f4819a1a1046e25b99042788bc1e0855aa2cd6dbfd6493fe9",
+      "raw_bytes": 15611,
+      "raw_sha256": "0e938bb63600619bfe9028e8f285f9ddcd925b62d0220690ec4a650a48ac45a5",
+      "fingerprint": "sha256:0e938bb63600619bfe9028e8f285f9ddcd925b62d0220690ec4a650a48ac45a5",
+      "graph_canonical_bytes": 3318512,
+      "graph_bytes_per_raw_byte": 212.5752354109282
+    },
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/numpy/_core/arrayprint.py",
+      "source_root": "dependency-source-root:e3d802a1bd20a52f4819a1a1046e25b99042788bc1e0855aa2cd6dbfd6493fe9",
+      "raw_bytes": 65695,
+      "raw_sha256": "ea1e7577acc4048383d842a628827e33dc544f06842ab5848b3ee3bb298eaea2",
+      "fingerprint": "sha256:ea1e7577acc4048383d842a628827e33dc544f06842ab5848b3ee3bb298eaea2",
+      "graph_canonical_bytes": 37112604,
+      "graph_bytes_per_raw_byte": 564.9228099550955
+    },
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/numpy/_core/fromnumeric.py",
+      "source_root": "dependency-source-root:e3d802a1bd20a52f4819a1a1046e25b99042788bc1e0855aa2cd6dbfd6493fe9",
+      "raw_bytes": 143959,
+      "raw_sha256": "ed6b3fe56e1921ed140c9d8ddd26393faaaa9304846084ae3ce78146bcabe605",
+      "fingerprint": "sha256:ed6b3fe56e1921ed140c9d8ddd26393faaaa9304846084ae3ce78146bcabe605",
+      "graph_canonical_bytes": 21711810,
+      "graph_bytes_per_raw_byte": 150.81939996804647
+    },
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/numpy/_core/getlimits.py",
+      "source_root": "dependency-source-root:e3d802a1bd20a52f4819a1a1046e25b99042788bc1e0855aa2cd6dbfd6493fe9",
+      "raw_bytes": 14614,
+      "raw_sha256": "ec0927f602302ef9b449f2773151deaab480cb5ad8eff4c8bbba59e489daf106",
+      "fingerprint": "sha256:ec0927f602302ef9b449f2773151deaab480cb5ad8eff4c8bbba59e489daf106",
+      "graph_canonical_bytes": 8450969,
+      "graph_bytes_per_raw_byte": 578.2789790611743
+    },
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/numpy/_core/multiarray.py",
+      "source_root": "dependency-source-root:e3d802a1bd20a52f4819a1a1046e25b99042788bc1e0855aa2cd6dbfd6493fe9",
+      "raw_bytes": 56885,
+      "raw_sha256": "afd14181b927aa10800a0c5dab5f456f52e219726847dbef379e313419029d49",
+      "fingerprint": "sha256:afd14181b927aa10800a0c5dab5f456f52e219726847dbef379e313419029d49",
+      "graph_canonical_bytes": 5825535,
+      "graph_bytes_per_raw_byte": 102.40898303594972
+    },
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/numpy/_core/numeric.py",
+      "source_root": "dependency-source-root:e3d802a1bd20a52f4819a1a1046e25b99042788bc1e0855aa2cd6dbfd6493fe9",
+      "raw_bytes": 80583,
+      "raw_sha256": "feb150554b4879d4df7bd0a4ab7b1a6b818de7ba994ed0c73583fee177533417",
+      "fingerprint": "sha256:feb150554b4879d4df7bd0a4ab7b1a6b818de7ba994ed0c73583fee177533417",
+      "graph_canonical_bytes": 26918469,
+      "graph_bytes_per_raw_byte": 334.0464986411526
+    },
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/numpy/_core/shape_base.py",
+      "source_root": "dependency-source-root:e3d802a1bd20a52f4819a1a1046e25b99042788bc1e0855aa2cd6dbfd6493fe9",
+      "raw_bytes": 32712,
+      "raw_sha256": "1d6e897dfdb7edf2d71e8ed75254a6e7106b1a947592f88d91af96d1ad2c469e",
+      "fingerprint": "sha256:1d6e897dfdb7edf2d71e8ed75254a6e7106b1a947592f88d91af96d1ad2c469e",
+      "graph_canonical_bytes": 11217150,
+      "graph_bytes_per_raw_byte": 342.9062729273661
+    },
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/numpy/lib/_arraysetops_impl.py",
+      "source_root": "dependency-source-root:e3d802a1bd20a52f4819a1a1046e25b99042788bc1e0855aa2cd6dbfd6493fe9",
+      "raw_bytes": 37341,
+      "raw_sha256": "9f896cc0ddc2f4f94ed7cf0b28fa5dba777ec77df3c44788afcd6448d55416b4",
+      "fingerprint": "sha256:9f896cc0ddc2f4f94ed7cf0b28fa5dba777ec77df3c44788afcd6448d55416b4",
+      "graph_canonical_bytes": 16890476,
+      "graph_bytes_per_raw_byte": 452.33057497121126
+    },
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/numpy/lib/_stride_tricks_impl.py",
+      "source_root": "dependency-source-root:e3d802a1bd20a52f4819a1a1046e25b99042788bc1e0855aa2cd6dbfd6493fe9",
+      "raw_bytes": 21372,
+      "raw_sha256": "0db57f30a81b00919e7922828cc23c4c32759c07a647639b76d1e157871fe862",
+      "fingerprint": "sha256:0db57f30a81b00919e7922828cc23c4c32759c07a647639b76d1e157871fe862",
+      "graph_canonical_bytes": 6076989,
+      "graph_bytes_per_raw_byte": 284.34348680516564
+    },
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/numpy/linalg/_linalg.py",
+      "source_root": "dependency-source-root:e3d802a1bd20a52f4819a1a1046e25b99042788bc1e0855aa2cd6dbfd6493fe9",
+      "raw_bytes": 114717,
+      "raw_sha256": "fb51e084cbb05b72a571a088299222055f3f176792ea9ea66186327a31ec787f",
+      "fingerprint": "sha256:fb51e084cbb05b72a571a088299222055f3f176792ea9ea66186327a31ec787f",
+      "graph_canonical_bytes": 41635447,
+      "graph_bytes_per_raw_byte": 362.940514483468
+    },
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/omegaconf/basecontainer.py",
+      "source_root": "dependency-source-root:e3d802a1bd20a52f4819a1a1046e25b99042788bc1e0855aa2cd6dbfd6493fe9",
+      "raw_bytes": 33318,
+      "raw_sha256": "1562f63d95916fbc0ff801a978deb9d65fee56736166fcf32e3694743949881f",
+      "fingerprint": "sha256:1562f63d95916fbc0ff801a978deb9d65fee56736166fcf32e3694743949881f",
+      "graph_canonical_bytes": 30191557,
+      "graph_bytes_per_raw_byte": 906.1635452308062
+    },
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/omegaconf/dictconfig.py",
+      "source_root": "dependency-source-root:e3d802a1bd20a52f4819a1a1046e25b99042788bc1e0855aa2cd6dbfd6493fe9",
+      "raw_bytes": 27855,
+      "raw_sha256": "20fb543c7a1a934db943e82f0d5a8c752e3ded76fab6372c6b0ac75efe224366",
+      "fingerprint": "sha256:20fb543c7a1a934db943e82f0d5a8c752e3ded76fab6372c6b0ac75efe224366",
+      "graph_canonical_bytes": 21670734,
+      "graph_bytes_per_raw_byte": 777.9836295099623
+    },
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/omegaconf/listconfig.py",
+      "source_root": "dependency-source-root:e3d802a1bd20a52f4819a1a1046e25b99042788bc1e0855aa2cd6dbfd6493fe9",
+      "raw_bytes": 24671,
+      "raw_sha256": "2f2351ae7f3806a362cfe4e9c2b0c82dab7c1e1955c3033acc5998093500748a",
+      "fingerprint": "sha256:2f2351ae7f3806a362cfe4e9c2b0c82dab7c1e1955c3033acc5998093500748a",
+      "graph_canonical_bytes": 20171505,
+      "graph_bytes_per_raw_byte": 817.6200802561713
+    },
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/omegaconf/omegaconf.py",
+      "source_root": "dependency-source-root:e3d802a1bd20a52f4819a1a1046e25b99042788bc1e0855aa2cd6dbfd6493fe9",
+      "raw_bytes": 39048,
+      "raw_sha256": "8457952f493a3cd46a184ed9529236a7ab1218f91cf4812fb2aaf730d76053fb",
+      "fingerprint": "sha256:8457952f493a3cd46a184ed9529236a7ab1218f91cf4812fb2aaf730d76053fb",
+      "graph_canonical_bytes": 24386381,
+      "graph_bytes_per_raw_byte": 624.5231766031551
+    },
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/pygame/surfarray.py",
+      "source_root": "dependency-source-root:e3d802a1bd20a52f4819a1a1046e25b99042788bc1e0855aa2cd6dbfd6493fe9",
+      "raw_bytes": 14967,
+      "raw_sha256": "d13632e29b7718e707dbc605a28b8e7b3744cf95856f9257e638824a2b83606e",
+      "fingerprint": "sha256:d13632e29b7718e707dbc605a28b8e7b3744cf95856f9257e638824a2b83606e",
+      "graph_canonical_bytes": 4920058,
+      "graph_bytes_per_raw_byte": 328.7270662123338
+    },
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/pymunk/__init__.py",
+      "source_root": "dependency-source-root:e3d802a1bd20a52f4819a1a1046e25b99042788bc1e0855aa2cd6dbfd6493fe9",
+      "raw_bytes": 6428,
+      "raw_sha256": "66e5a5f1ed02693dee3c39f82caf332203dd3b5ef9ced6f30a7d976d39c5de36",
+      "fingerprint": "sha256:66e5a5f1ed02693dee3c39f82caf332203dd3b5ef9ced6f30a7d976d39c5de36",
+      "graph_canonical_bytes": 2474687,
+      "graph_bytes_per_raw_byte": 384.9855320472931
+    },
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/pymunk/_typing_attr.py",
+      "source_root": "dependency-source-root:e3d802a1bd20a52f4819a1a1046e25b99042788bc1e0855aa2cd6dbfd6493fe9",
+      "raw_bytes": 452,
+      "raw_sha256": "ff1965c1f3cf853be8dedc940258e95dc8900976bb179586d629cb8e20687657",
+      "fingerprint": "sha256:ff1965c1f3cf853be8dedc940258e95dc8900976bb179586d629cb8e20687657",
+      "graph_canonical_bytes": 271460,
+      "graph_bytes_per_raw_byte": 600.5752212389381
+    },
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/pymunk/arbiter.py",
+      "source_root": "dependency-source-root:e3d802a1bd20a52f4819a1a1046e25b99042788bc1e0855aa2cd6dbfd6493fe9",
+      "raw_bytes": 10933,
+      "raw_sha256": "32df05b84f8cabc8be7e14878ed9cfbb99c99a722d66f062fcf23346b320c0fb",
+      "fingerprint": "sha256:32df05b84f8cabc8be7e14878ed9cfbb99c99a722d66f062fcf23346b320c0fb",
+      "graph_canonical_bytes": 7174906,
+      "graph_bytes_per_raw_byte": 656.261410408854
+    },
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/pymunk/body.py",
+      "source_root": "dependency-source-root:e3d802a1bd20a52f4819a1a1046e25b99042788bc1e0855aa2cd6dbfd6493fe9",
+      "raw_bytes": 27392,
+      "raw_sha256": "bab9dc81fb14c9cb0d859e0466f150de90d9305531ec10d9805f1219128d0990",
+      "fingerprint": "sha256:bab9dc81fb14c9cb0d859e0466f150de90d9305531ec10d9805f1219128d0990",
+      "graph_canonical_bytes": 11382556,
+      "graph_bytes_per_raw_byte": 415.54307827102804
+    },
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/pymunk/pygame_util.py",
+      "source_root": "dependency-source-root:e3d802a1bd20a52f4819a1a1046e25b99042788bc1e0855aa2cd6dbfd6493fe9",
+      "raw_bytes": 8079,
+      "raw_sha256": "571041b7c364ab91a02133fd97f635978e8a8a9f753bc3b62c6b4cc3f87da21e",
+      "fingerprint": "sha256:571041b7c364ab91a02133fd97f635978e8a8a9f753bc3b62c6b4cc3f87da21e",
+      "graph_canonical_bytes": 5031008,
+      "graph_bytes_per_raw_byte": 622.7265750711722
+    },
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/pymunk/shape_filter.py",
+      "source_root": "dependency-source-root:e3d802a1bd20a52f4819a1a1046e25b99042788bc1e0855aa2cd6dbfd6493fe9",
+      "raw_bytes": 5971,
+      "raw_sha256": "b3aa69adc812ef8f06e1630414d438acfc86315b6e21dd09f18c24ecf907102b",
+      "fingerprint": "sha256:b3aa69adc812ef8f06e1630414d438acfc86315b6e21dd09f18c24ecf907102b",
+      "graph_canonical_bytes": 539574,
+      "graph_bytes_per_raw_byte": 90.36576787807738
+    },
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/pymunk/shapes.py",
+      "source_root": "dependency-source-root:e3d802a1bd20a52f4819a1a1046e25b99042788bc1e0855aa2cd6dbfd6493fe9",
+      "raw_bytes": 24912,
+      "raw_sha256": "6f62411ccc19bd329cb3b55a9aaab2e5ea62c01c9a4be9580abb0dfc77abe8a4",
+      "fingerprint": "sha256:6f62411ccc19bd329cb3b55a9aaab2e5ea62c01c9a4be9580abb0dfc77abe8a4",
+      "graph_canonical_bytes": 12519540,
+      "graph_bytes_per_raw_byte": 502.5505780346821
+    },
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/pymunk/space.py",
+      "source_root": "dependency-source-root:e3d802a1bd20a52f4819a1a1046e25b99042788bc1e0855aa2cd6dbfd6493fe9",
+      "raw_bytes": 43768,
+      "raw_sha256": "8741ab3c3d4a6190853356787d71c72c8c16cf341a34abec5b22d97a19307edc",
+      "fingerprint": "sha256:8741ab3c3d4a6190853356787d71c72c8c16cf341a34abec5b22d97a19307edc",
+      "graph_canonical_bytes": 21713114,
+      "graph_bytes_per_raw_byte": 496.09564065070373
+    },
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/pymunk/space_debug_draw_options.py",
+      "source_root": "dependency-source-root:e3d802a1bd20a52f4819a1a1046e25b99042788bc1e0855aa2cd6dbfd6493fe9",
+      "raw_bytes": 12603,
+      "raw_sha256": "9fbc8478d04709cf120f8071d8cd5d59ed824386ad194de75f9707a19ab13a28",
+      "fingerprint": "sha256:9fbc8478d04709cf120f8071d8cd5d59ed824386ad194de75f9707a19ab13a28",
+      "graph_canonical_bytes": 4584440,
+      "graph_bytes_per_raw_byte": 363.7578354360073
+    },
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/pymunk/vec2d.py",
+      "source_root": "dependency-source-root:e3d802a1bd20a52f4819a1a1046e25b99042788bc1e0855aa2cd6dbfd6493fe9",
+      "raw_bytes": 21048,
+      "raw_sha256": "6ad9ca7bbf4add8b9813ab6bade0a57821c59eb42768ce9392acc7905edabd53",
+      "fingerprint": "sha256:b53b1dbeff876d25263d2d92ce28ada7dc3816a328978aca021a59112d389f70",
+      "graph_canonical_bytes": 8919772,
+      "graph_bytes_per_raw_byte": 423.7824021284683
+    },
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/richuru.py",
+      "source_root": "dependency-source-root:e3d802a1bd20a52f4819a1a1046e25b99042788bc1e0855aa2cd6dbfd6493fe9",
+      "raw_bytes": 5240,
+      "raw_sha256": "58776d695dd4ceb518f96ab5f726756198850e1baf3906241c0bb6fc907ee296",
+      "fingerprint": "sha256:125c4e1b073fb1396b6c57a404af3d1c099acd640027556e47407667d11bc577",
+      "graph_canonical_bytes": 3756980,
+      "graph_bytes_per_raw_byte": 716.9809160305343
+    },
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/sklearn/preprocessing/_data.py",
+      "source_root": "dependency-source-root:e3d802a1bd20a52f4819a1a1046e25b99042788bc1e0855aa2cd6dbfd6493fe9",
+      "raw_bytes": 130712,
+      "raw_sha256": "4e4588e51cf26364c0b28c1ee7694a9029798a6c6e34b1098bcbac1149da0325",
+      "fingerprint": "sha256:4e4588e51cf26364c0b28c1ee7694a9029798a6c6e34b1098bcbac1149da0325",
+      "graph_canonical_bytes": 47355222,
+      "graph_bytes_per_raw_byte": 362.2867219536079
+    },
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/sklearn/utils/_set_output.py",
+      "source_root": "dependency-source-root:e3d802a1bd20a52f4819a1a1046e25b99042788bc1e0855aa2cd6dbfd6493fe9",
+      "raw_bytes": 15334,
+      "raw_sha256": "dcf6bdf45e0b09600ba04a2c8e73743f2661eba7d1f0017764983f9aad78b52a",
+      "fingerprint": "sha256:dcf6bdf45e0b09600ba04a2c8e73743f2661eba7d1f0017764983f9aad78b52a",
+      "graph_canonical_bytes": 7681127,
+      "graph_bytes_per_raw_byte": 500.92128603104214
+    },
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/torch/__init__.py",
+      "source_root": "dependency-source-root:e3d802a1bd20a52f4819a1a1046e25b99042788bc1e0855aa2cd6dbfd6493fe9",
+      "raw_bytes": 111841,
+      "raw_sha256": "cf40c075c95864036e835795756d69b8cccfafa76f3bcde5eba9d06065ccd3d1",
+      "fingerprint": "sha256:cf40c075c95864036e835795756d69b8cccfafa76f3bcde5eba9d06065ccd3d1",
+      "graph_canonical_bytes": 52363882,
+      "graph_bytes_per_raw_byte": 468.1993365581495
+    },
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/torch/_jit_internal.py",
+      "source_root": "dependency-source-root:e3d802a1bd20a52f4819a1a1046e25b99042788bc1e0855aa2cd6dbfd6493fe9",
+      "raw_bytes": 55176,
+      "raw_sha256": "9435668ade300edf01802837a34ab91a6a1214388fe9fd13931c0ea01c5f4d75",
+      "fingerprint": "sha256:9435668ade300edf01802837a34ab91a6a1214388fe9fd13931c0ea01c5f4d75",
+      "graph_canonical_bytes": 32842340,
+      "graph_bytes_per_raw_byte": 595.2287226330288
+    },
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/torch/_library/simple_registry.py",
+      "source_root": "dependency-source-root:e3d802a1bd20a52f4819a1a1046e25b99042788bc1e0855aa2cd6dbfd6493fe9",
+      "raw_bytes": 4605,
+      "raw_sha256": "25e8e297497f3651909a0ee65fdff58a5a07ef303a781d75b8cc28e7d250e231",
+      "fingerprint": "sha256:25e8e297497f3651909a0ee65fdff58a5a07ef303a781d75b8cc28e7d250e231",
+      "graph_canonical_bytes": 2675086,
+      "graph_bytes_per_raw_byte": 580.9090119435397
+    },
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/torch/_ops.py",
+      "source_root": "dependency-source-root:e3d802a1bd20a52f4819a1a1046e25b99042788bc1e0855aa2cd6dbfd6493fe9",
+      "raw_bytes": 64164,
+      "raw_sha256": "f257870f316b84aaa884185f04a63f9f506bfac1c9ce86130cc8950be7132ff2",
+      "fingerprint": "sha256:f257870f316b84aaa884185f04a63f9f506bfac1c9ce86130cc8950be7132ff2",
+      "graph_canonical_bytes": 35453004,
+      "graph_bytes_per_raw_byte": 552.5373106414812
+    },
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/torch/_tensor.py",
+      "source_root": "dependency-source-root:e3d802a1bd20a52f4819a1a1046e25b99042788bc1e0855aa2cd6dbfd6493fe9",
+      "raw_bytes": 69726,
+      "raw_sha256": "748523dec6b390aea5b82548067244a0e2ecba756ba1c35f1170741fba2a5cc5",
+      "fingerprint": "sha256:748523dec6b390aea5b82548067244a0e2ecba756ba1c35f1170741fba2a5cc5",
+      "graph_canonical_bytes": 34314534,
+      "graph_bytes_per_raw_byte": 492.1339815850615
+    },
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/torch/autograd/function.py",
+      "source_root": "dependency-source-root:e3d802a1bd20a52f4819a1a1046e25b99042788bc1e0855aa2cd6dbfd6493fe9",
+      "raw_bytes": 35138,
+      "raw_sha256": "61382c0690a55dad64ade136f6f42f91372426be6b37b5f9776d14e49cc9e694",
+      "fingerprint": "sha256:61382c0690a55dad64ade136f6f42f91372426be6b37b5f9776d14e49cc9e694",
+      "graph_canonical_bytes": 10847212,
+      "graph_bytes_per_raw_byte": 308.7031703568786
+    },
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/torch/autograd/grad_mode.py",
+      "source_root": "dependency-source-root:e3d802a1bd20a52f4819a1a1046e25b99042788bc1e0855aa2cd6dbfd6493fe9",
+      "raw_bytes": 16964,
+      "raw_sha256": "ddc32c2cc2dfa5e2320f8c8e75b7d048c7661c58e1c9f7304914a22744e2177f",
+      "fingerprint": "sha256:ddc32c2cc2dfa5e2320f8c8e75b7d048c7661c58e1c9f7304914a22744e2177f",
+      "graph_canonical_bytes": 4825155,
+      "graph_bytes_per_raw_byte": 284.4349799575572
+    },
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/torch/cuda/__init__.py",
+      "source_root": "dependency-source-root:e3d802a1bd20a52f4819a1a1046e25b99042788bc1e0855aa2cd6dbfd6493fe9",
+      "raw_bytes": 71905,
+      "raw_sha256": "0dd55462968d927ea2dc58da0401688b151354c448c097b12c6e4e0560a66541",
+      "fingerprint": "sha256:0dd55462968d927ea2dc58da0401688b151354c448c097b12c6e4e0560a66541",
+      "graph_canonical_bytes": 42853694,
+      "graph_bytes_per_raw_byte": 595.9765523955218
+    },
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/torch/distributions/uniform.py",
+      "source_root": "dependency-source-root:e3d802a1bd20a52f4819a1a1046e25b99042788bc1e0855aa2cd6dbfd6493fe9",
+      "raw_bytes": 3348,
+      "raw_sha256": "15bef9a3d511d5c7d26fc50fd386a1e8e5c7a69267b0b39a8559090c87a6d98c",
+      "fingerprint": "sha256:15bef9a3d511d5c7d26fc50fd386a1e8e5c7a69267b0b39a8559090c87a6d98c",
+      "graph_canonical_bytes": 3021699,
+      "graph_bytes_per_raw_byte": 902.5385304659499
+    },
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/torch/functional.py",
+      "source_root": "dependency-source-root:e3d802a1bd20a52f4819a1a1046e25b99042788bc1e0855aa2cd6dbfd6493fe9",
+      "raw_bytes": 89830,
+      "raw_sha256": "4a36b10e59119ea1e98d473d38ef9f4fd84082540f68971ed51f168a8c12de1a",
+      "fingerprint": "sha256:4a36b10e59119ea1e98d473d38ef9f4fd84082540f68971ed51f168a8c12de1a",
+      "graph_canonical_bytes": 24739402,
+      "graph_bytes_per_raw_byte": 275.40244907046645
+    },
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/torch/nn/init.py",
+      "source_root": "dependency-source-root:e3d802a1bd20a52f4819a1a1046e25b99042788bc1e0855aa2cd6dbfd6493fe9",
+      "raw_bytes": 26593,
+      "raw_sha256": "59dad5f51cb700bbe3a323a4169e77489470c25582838594f98e8e55f8156f7d",
+      "fingerprint": "sha256:59dad5f51cb700bbe3a323a4169e77489470c25582838594f98e8e55f8156f7d",
+      "graph_canonical_bytes": 13641533,
+      "graph_bytes_per_raw_byte": 512.9745797766329
+    }
+  ],
+  "prepared_or_compiled_sources": false,
+  "continuation_executed": false
+}

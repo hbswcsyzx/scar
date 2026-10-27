@@ -1,0 +1,18 @@
+# Source858 完整运行接线：已批准并实际启动
+
+Root批准PLAN的完整100438 calls范围、原5400s wall/CPU与12GiB AS及frame/operand/route/coordinate预算，
+不缩成prefix，不重lower/compile/capture/目标。独立consumer worktree source858-runtime基于496302ea，
+数据仍使用main原URI，3个kwargs原SP5仅准确额外白名单；各参与方/快照资格不迁移。
+
+实际root工具session11969已启动；freeze fc777491169f41e022fdeb1d6a0c34fea79180c34728dcbcf7e78884c9b41f4a，
+inputs 0e9a1f9c80079362c3a9cecba86c6d674eadb6a465f6b58d75ad517e667294f6。
+1313输入589209240B是唯一stored声明，不是重复stored+decoded总I/O；后者仍OPEN。
+
+当前仅确认：预检查、858元数据/15 CP2/原compiler origin/ancestor及原capture坐标阶段完成，
+真实raw已核，source binder运行中。完整终态未取得，不能把旧6699加权重当新结果。
+runtime二进制执行期pre/post强SHA未核，历史collector/source/runtime条件仍OPEN。
+此文件是启动时记录，不作为日后进程活性或PASS证明；root后继必须轮询11969并核实际终态。
+
+所有执行期consumer源码/runner保持冻结。原改序前freeze为PREPARED_NOT_RUN，先核858输入和
+ancestry再读大raw；原producer资料不倒改。结果保存于独立树
+artifacts/experiments/first_stage_source858_current_20261026，未取得终态前第一阶段仍OPEN。

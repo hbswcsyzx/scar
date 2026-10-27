@@ -1,5 +1,243 @@
 # SCAR v0.1.0
 
+**当前阶段：完整程序自动建模，尚未完成。** 验收包括未修改 LeWM 从加载到推理、
+环境交互及视频保存的源码、依赖、实际值/状态与软硬件资源连接；不进入化简、
+新 detector、backend 或加速比实验。完成后先停止并向用户讲解。
+
+**最新边界：图服务于化简，保留最小充分依赖。** 不还原Linux FD表、驱动或解释器
+内部实现；程序可调整的调用/算子/区域、必要状态及资源接口仍须连接。建图与存图
+按可组合片段组织，原始事件及验证材料按需引用，不全部变成主图节点。
+
+- [建模范围审计及收敛决定](docs/MODELING_SCOPE_AUDIT.md)：当前哪些保留、折叠、移到证据或停止展开。
+- [第一阶段四项核心功能与实施顺序](docs/FIRST_STAGE_IMPLEMENTATION_PLAN.md)：拆解、连图、轻量存取、LeWM全链自动生成；开发者自行验收。
+- [实体、关系及完整性合同](docs/FIRST_STAGE_MODEL_CONTRACT.md)：什么东西需要建模、什么叫连接完整。
+- [图的节点、边与采集职责](docs/GRAPH_MODEL_GUIDE.md)：程序如何对应强类型记录，如何自动连接及递归展开。
+- [轻量采集与后端分离](docs/CAPTURE_PIPELINE.md)：原始事实先入有界 DRAM 队列，后台落盘，停止采集后独立进程编码与建模。
+- [已实现的跨层查询入口](docs/PROGRAM_QUERY.md)：work到源码、跨函数端口和OS文件资源引用。
+- [当前交付与执行顺序](docs/FIRST_STAGE_DELIVERY.md)：真实产物、具体断口及下一项。
+- [实际运行记录](docs/FIRST_STAGE_MODEL_STATUS.md)：Observed / Implemented / Verified 与失败记录。
+- [模型设计](docs/WHOLE_PROGRAM_MODEL.md)、[现成工具与集成](docs/MODELING_INTEGRATION.md)。
+- [通用离线建模入口](docs/MODEL_RUN.md)：`model-run --from-capture`已跑通八阶段串联；
+  当前小样例仍无typed body连接，源码/原生入口及整个模型验收保持OPEN。
+
+工具入口是通用的，LeWM 只提供原始命令和外部验收范围。源码、调用、Tensor
+算子、GPU 与 OS 证据使用独立身份，并通过可核对的来源关系连接；不会把同名、
+同指针、同 shape 或相邻时间当作完整依赖。入口及原始命令见实际运行记录。
+
+## 历史组件记录
+
+以下为此前限定范围的组件结果，保留用于追溯。测试通过数或提供的声明图不代表
+整个程序已经自动建模，也不是当前开发队列；当前顺序由上面的第一阶段合同控制。
+
+The [C2/D3 audit](docs/M1_PROTOCOL_FAMILY_AUDIT.md) now identifies the missing
+protocol-to-CFG obligations and Drive-to-persistent-body occurrence connections.
+Its [plan](docs/M1_PROTOCOL_FAMILY_PLAN.md) preserves28 obligation groups. The
+[P1 joint contract](docs/M1_PROTOCOL_CONTRACT.md) is now frozen after independent
+design review: exact protocol producer/consumer ports, no-entry/host routes and
+per-Drive persistent-body execution associations. One existing-IR blueprint
+checks proposed port connectivity, leaving source/identity/captures unproved.
+P2–P5 implementation remains open; this adds no product capability or full run.
+Initial findings, corrections and the earlier failed native expectation remain.
+
+The [P2 protocol foundation](docs/M1_PROTOCOL_FOUNDATION.md) now implements
+the fixed F records, original-port connections, selected-edge terminal sources
+and bounded obligation queries. The foundation passes scoped acceptance. Program17 preserves
+legacy capability selection; Execution remains7. This is a partial checkpoint:
+the complete synchronous generator matrix and P3–P5 remain open, and supplied
+model checks do not establish automatic program recovery or transformations.
+
+[Acceptance](docs/M1_PROTOCOL_FOUNDATION_ACCEPTANCE.md): **155 focused checks,
+334 component cases /11 criteria, and 5,401 clean frozen full tests** (`8a62a98`).
+All prior 5,294 case identities/78 fixtures survive; 617 source hashes/82 current
+fixtures match. Complete P2, automatic LeWM modeling and speedup remain open.
+
+The [exact literal content/source/evaluation interfaces](docs/M1_LITERAL_INTERFACES.md)
+pass [1,716 component checks /32 criteria and 5,294 clean frozen full tests](docs/M1_LITERAL_ACCEPTANCE.md)
+(`4bc55eb`). Exact abstract Data content and source declarations attach to the
+original producer ports; matching payloads do not establish object identity or
+remove effects. All prior 5,144 case identities/74 fixtures survive; current 603
+source hashes and 78 fixtures match. Complete C2/D3/M2, automatic source/runtime
+correspondence, whole-program recovery and LeWM simplification remain unfinished.
+No new workload speedup was measured.
+
+The earlier [typed state-address interfaces](docs/M1_STATE_ADDRESS_INTERFACES.md)
+pass [1,317 component checks /25 criteria and 5,144 clean frozen full tests](docs/M1_STATE_ADDRESS_ACCEPTANCE.md)
+(`805c670`). Owner/key/selector effects refine original state carriers and actual
+invocation ports; they introduce no separate field state chain or alias proof.
+All prior 5,055 case identities/72 fixtures survive; current 590 source hashes
+and 74 fixtures match. Automatic source/native identity, full literal/C2/D3/M2,
+whole-program recovery and LeWM simplification remain unfinished. No new
+workload speedup was measured.
+
+The earlier [R3.3 generic buffered pipeline model](docs/M1_PIPELINE_CLOSURE_API.md)
+passes [722 component checks /17 criteria and 5,055 clean frozen full tests](docs/M1_PIPELINE_CLOSURE_ACCEPTANCE.md)
+(`6947778`). Exact call order, independent byte extents, buffer→flush→file and
+exception/pending cleanup paths preserve original associations in one model.
+Three real bounded OS cases are separately attributed. All prior 5,011 cases
+and 69 fixtures survive; current 578 source hashes/72 fixtures match. This closes
+the limited R3.3 plan. Full M0–M2, automatic program recovery and LeWM
+simplification remain unfinished; there is no new measured speedup.
+
+The earlier [R3.2 Q and original execution evidence composition](docs/M1_PIPELINE_COMPOSITION_API.md)
+passes [677 component checks / 13 criteria and 5,011 clean frozen full tests](docs/M1_PIPELINE_COMPOSITION_ACCEPTANCE.md)
+(`31bf2e4`). All previous 4,951 case identities and 68 fixtures survive.
+Typed query scopes preserve expected obligations when Q rows are missing;
+original data/control/state/call/source/work associations share one budget and
+one fresh external context. This composes supplied models, not automatic program
+recovery or transformation proof. At that checkpoint, R3.3, full M0–M2 and
+automatic LeWM simplification remained open; no new speedup was measured.
+
+The earlier [R3.1 call activation and work-set connections](docs/M1_CALL_ACTIVATION_API.md)
+pass [591 component checks / 8 criteria and 4,951 clean frozen full tests](docs/M1_CALL_ACTIVATION_ACCEPTANCE.md)
+(`881cbfb`). All previous 4,826 test identities and 65 fixtures survive.
+Original argument/completion/state ports remain canonical; declared routes do
+not prove runtime identity. Execution v7 retains v1–v6 bytes. Whole R3,
+complete M0–M2 and automatic LeWM simplification remain open. Next is complete
+Q-rooted load/consume/save composition at that checkpoint; R3.2 is recorded above.
+
+The [R2.3-V content validity/support interfaces](docs/M1_VALIDITY_API.md)
+now connect source-derived labeled actual/future coverage, exact alternatives,
+original effects, conservative whole-read threats and target lifetimes. Its
+[acceptance](docs/M1_VALIDITY_ACCEPTANCE.md) passes **649 checks / 11 criteria**
+and **4,826 clean frozen full tests** (`550496f`); all prior 4,713 identities and
+59 fixtures survive. Execution v6 preserves v1–v5 bytes. Endpoint protocol
+parsing, native capture, R3 and full M0–M2 remain open. Conditional MATCHED does
+not grant readiness or transformation; no new LeWM speedup was measured.
+
+The earlier [R2.3-P source/write/production interfaces](docs/M1_PRODUCTION_API.md)
+now connect independent raw-source manifests, strict normalization replay,
+scoped endpoint bridges, original writes and actual partial outcomes. Its
+[acceptance](docs/M1_PRODUCTION_ACCEPTANCE.md) passes **477 component checks /
+8 criteria** and **4,713 clean frozen full tests** (`c84fbfe`). All prior 4,568
+test identities and 54 fixtures survive. Execution v5 retains v1–v4 bytes.
+That checkpoint left native complete writer capture, V interval validity/visibility,
+R3 and full M0–M2 open; the bounded V interfaces are described above. Automatic
+LeWM modeling and speedup remain unfinished.
+
+The earlier [R2.3-D content/consumer interfaces](docs/M1_CONTENT_CONNECTION_API.md)
+connect original ports, scoped denotations/materializations, exact work/source
+associations and explicit contract observation roots. Its
+[acceptance](docs/M1_CONTENT_CONNECTION_ACCEPTANCE.md) passes **445 component
+checks / 7 criteria** and **4,568 clean frozen full tests** (`f71740e`).
+Execution v4 preserves v1–v3 bytes. Missing source pairs remain explicit gaps;
+That checkpoint left P production, V stability/visibility, R3 and full M0–M2 open. It does
+not establish automatic LeWM modeling, transformations or a speedup.
+
+The [R2.3 contract](docs/M1_RESOURCE_READY_CONTRACT.md) separates exact consumer
+denotation, source-derived production, read-interval validity and visibility.
+Its [shared geometry prerequisite](docs/M1_RESOURCE_COVERAGE_ACCEPTANCE.md)
+passes **432 component checks / 6 criteria** and **4,427 clean frozen full tests**
+(`aa2b917`).
+The original MatRef query compares budgeted byte coverage only. P/V and
+complete first-stage modeling remain open; it grants no ready/transform authority.
+
+The [R2.2 event/order component](docs/M1_RESOURCE_ORDER_INTERFACES.md) connects
+exact event generations, original state/resource ports and bounded queue profiles
+to conditional producer-end→consumer-start paths. Its
+[acceptance](docs/M1_RESOURCE_ORDER_ACCEPTANCE.md) passes **497 checks / 7 criteria**
+and **4,387 clean frozen full tests** (`e8121f0`). Execution v3 preserves original v1/v2
+bytes. Consumer production/denotation/ready, complete M0–M2 and a verified LeWM
+speedup remain open.
+
+The [R2.1 work foundation](docs/M1_RESOURCE_WORK_INTERFACES.md) now connects
+actual access/INVOKE completion effects, work terminal observations, independent
+quiescence and resource retention. Its [acceptance](docs/M1_RESOURCE_WORK_ACCEPTANCE.md)
+passes **407 checks / 9 criteria** and **4,297 clean frozen full tests** (`bb1b402`).
+Execution v2 retains byte-exact original
+v1 compatibility. [R2 consumer-ready](docs/M1_RESOURCE_WORK_PLAN.md)
+and complete first-stage modeling remain open; no new LeWM speedup is claimed.
+
+The [tooling survey](docs/TOOLING_SURVEY.md) and
+[model integration design](docs/MODELING_INTEGRATION.md) define how SCAR will
+reuse Python compiler interfaces, FX/Export and ETO+Profiler. Current experiments
+verify bounded tool capabilities; the new adapters are not yet integrated.
+
+The [C1 cleanup/context component](docs/M1_CLEANUP_INTERFACES.md) connects pending
+values, saved exception context and current state through canonical CFG routes.
+Its 243 component checks and 3,330 frozen full-repository tests pass. These are
+static declared-IR checks; automatic source recovery, runtime unwinding and the
+complete first modeling stage remain unfinished. The
+[evidence archive](artifacts/experiments/b1_call_operands/model_cleanup_interfaces/README.md)
+retains independent reviews, original failures and the unchanged-source receipt.
+
+The [resumption body component](docs/M1_RESUMPTION_BODY_ACCEPTANCE.md) passes
+499 component checks and 3,542 frozen full tests: saved Uses and fresh ingress
+state, drive-local context, temporal control and cut availability. The
+[full resumption contract](docs/M1_RESUMPTION_INTERFACES.md) still needs creation,
+driver/instance/generation and release interfaces. Body structure alone does not
+establish Python source recovery or runtime resumption.
+
+The [driver model review](docs/M1_DRIVER_INTERFACES.md) uses bounded language
+witnesses to separate raw requests, ingress permits, persistent sessions and
+reference release. Its exact fields remain open. The
+[first-outcome query](docs/M1_BODY_OUTCOME_FRONTIER.md) is implemented as a shared
+relation over the existing body graph. Its 517 component checks and 3,549 frozen
+full tests pass; this introduces no driver/backend or runtime authority.
+The [D1 driver connection component](docs/M1_DRIVER_ACCEPTANCE.md) implements the
+canonical Create/Start/Resume/outcome path, v11 wire and input/output queries.
+All 671 component checks and 3,706 frozen full tests (`382363c`) pass. Lifecycle,
+source/runtime correspondence and complete whole-program modeling remain open.
+The [D2 lifecycle review and gates](docs/M1_DRIVER_LIFECYCLE.md) separate body
+publication, no-body paths, session state and reference drop. The
+[D2.0 contract](docs/M1_DRIVER_LIFECYCLE_CONTRACT.md) now fixes fields and the
+edge-first must analysis. The [D2.1 body publication component](docs/M1_BODY_PUBLICATION_ACCEPTANCE.md)
+passes 741 component checks and 3,776 frozen full tests (`49201e7`).
+Further session/drop and E/F/P components are recorded below; these declarations
+and language observations add no runtime or transformation authority.
+The [D2.2 no-body component](docs/M1_NO_BODY_ACCEPTANCE.md) now passes 836 component
+checks / 21 criteria and 3,871 frozen full tests (`006a0e0`). It connects the real
+bool branch, exact owner and body-only state mark, preserving the original false
+path. Predicate/branch/mark structure is distinct from actual runtime guard execution.
+
+The [D2.3 session/release component](docs/M1_SESSION_RELEASE_ACCEPTANCE.md) passes
+974 component checks / 27 criteria. It derives path-correlated terminal history
+and current session predicates, checks precise owner/state at release, and keeps
+unknown effects and native applicability explicit. Frozen `f67037d` passes 4,009
+full tests. Complete first-stage modeling, source/runtime correspondence and LeWM
+automatic simplification remain unfinished.
+
+The [D2.4 lifecycle composition gate](docs/M1_LIFECYCLE_COMPOSITION_ACCEPTANCE.md)
+passes 1,015 component checks / 32 criteria and 4,050 frozen full tests (`37baeaf`).
+Actual body and driver cleanup paths retain private pending/context and current
+state; detached query points retain the original rule, scope and actual edge.
+Applicability stays UNKNOWN. Resource completion, value provenance and the full
+modeling stage remain open; no new LeWM speedup is claimed.
+
+The [R0 resource relation review](docs/M1_RESOURCE_EXECUTION_DESIGN_ACCEPTANCE.md)
+separates scoped occurrences, resource/handle lifetimes, work outcomes and
+completion versus ordered consumer visibility. Six real stdlib CPU/OS witnesses
+pass. That design checkpoint did not implement R1/R2 or add a new full-suite run.
+The [R1 identity implementation](docs/M1_RESOURCE_IDENTITY_IMPLEMENTATION.md)
+now connects exact canonical execution occurrences, resource/handle lifetimes,
+requirement owners, current-state support and artifact-scoped evidence links.
+Its [accepted gate](docs/M1_RESOURCE_IDENTITY_ACCEPTANCE.md) passes **302 checks /
+14 criteria** and **4,192 frozen full tests** (`6fcac0f`). All 472 source and 44
+fixture hashes match; every previous test identity survives. R2 work/order/ready, complete
+M0–M2 and automatic LeWM simplification remain open. No new speedup is claimed.
+
+The [P1 thin native boundary component](docs/M1_NATIVE_INTERFACES.md) connects
+provider slot declarations to canonical entry/exit ports, retaining repeated Uses,
+all completion sites and explicit cross-representation obligations. Its 168
+component checks and 3,215 frozen full-repository tests pass. Native trees/signatures
+remain authoritative external artifacts, with no adapter, replay or equivalence
+claim. The complete first modeling stage remains unfinished.
+
+The [P0 provider provenance component](docs/M1_PROVIDER_INTERFACES.md) connects
+external graph origins and ordered ports to the canonical core. Its 225 component
+checks and 3,139 frozen full-repository tests passed. Declared coverage and scope
+do not authorize transformations or establish dynamic correspondence.
+
+The [first-stage completion matrix](docs/FIRST_STAGE_COMPLETION_MATRIX.md)
+separates implemented interfaces from remaining modeling work. The latest
+[function environment component](docs/M1_ENVIRONMENT_INTERFACES.md) passed 327
+bounded checks and 2,835 frozen full-repository tests; this is not automatic
+source recovery or optimization authority.
+
+The [C0 control interface component](docs/M1_CONTROL_INTERFACES.md) passed 354
+bounded checks and 3,027 frozen full-repository tests. Lexical scopes, pending
+completion and exception packets now connect through canonical CFG/SSA operands.
+Complete cleanup/context handling and whole-program modeling remain unfinished.
+
 SCAR means **State · Control · Action · Resource**. It is a prototype for
 automatic program modeling and optimization planning for Python/PyTorch.
 The current task is to recover connected value/state/control dependencies,

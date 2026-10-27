@@ -1,0 +1,9 @@
+scar/trace/code_snapshot.py
+scar/trace/call_edges.py
+scar/trace/call_operands.py
+scar/trace/python_call_targets.py
+artifacts/analysis/call_metadata_cache_20261027/REPORT.md
+artifacts/analysis/call_metadata_cache_20261027/RESULT.json
+artifacts/analysis/call_metadata_cache_20261027/SOURCE_RECEIPTS.json
+artifacts/analysis/call_metadata_cache_20261027/run_validation.py
+artifacts/analysis/call_metadata_cache_20261027/stage-paths.txt

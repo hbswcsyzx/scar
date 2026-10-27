@@ -1,0 +1,73 @@
+{
+  "status": "DESIGN_ONLY_NO_SOURCE_CHANGES_OR_GATE",
+  "base_commit": "8078ffdecff2734c5baeac3d6bdf7a6c436c0b55",
+  "files": [
+    {
+      "path": "scar/analysis/program_lowering.py",
+      "bytes": 83281,
+      "sha256": "77b1d7b2ac4c980c7ef922fbcb0fef61b425cc0906de7f9ca835ff53066bf767"
+    },
+    {
+      "path": "scar/analysis/structured_lowering.py",
+      "bytes": 57622,
+      "sha256": "1bf6e192cc268a2d327e5279cccc029be85c7324ef57efdfd6ed195a0593cc20"
+    },
+    {
+      "path": "scar/analysis/source_module_lowering.py",
+      "bytes": 45101,
+      "sha256": "437582148a1c1cf180120254ed30bec5a17798476139c3a6d4166fd8620ea621"
+    },
+    {
+      "path": "scar/analysis/source_module_validation.py",
+      "bytes": 57437,
+      "sha256": "7c300aed1e864f9dae5d7a6b2391421a3ec1808dcbb099b6628ff929de2db4b1"
+    },
+    {
+      "path": "scar/analysis/source_statement_lowering.py",
+      "bytes": 12089,
+      "sha256": "9d6b86482d3d6202534803b095233cc8228aeb54a1e964e85e0e8764d12c8b26"
+    },
+    {
+      "path": "scar/ir/program/module_entries.py",
+      "bytes": 21641,
+      "sha256": "07f423efa81b514aa9a08d7d1ee16d6cd8abcb6a06bf042a06984ae9a2c8c360"
+    },
+    {
+      "path": "scar/ir/program/control.py",
+      "bytes": 9606,
+      "sha256": "d85dc314e3948959d589a4b4bfec27c0f3f30fc221ef8d8fe5b381b6e01a5e51"
+    },
+    {
+      "path": "scar/ir/program/control_validation.py",
+      "bytes": 23538,
+      "sha256": "65867b452e8b118b7deb4e330e12568eb1ea865a9866ad8bb1624dff2ad454f4"
+    },
+    {
+      "path": "scar/ir/program/cleanup.py",
+      "bytes": 6282,
+      "sha256": "79b5888885bf8c4ad50df77e8f6dc7ffff4e5aa8956aca9010a98a055cbd372c"
+    },
+    {
+      "path": "scar/ir/program/cleanup_validation.py",
+      "bytes": 26115,
+      "sha256": "2bc12af79a58a08728196e0a9ec7907da9b16a810a444d46c009f91b63a948c3"
+    },
+    {
+      "path": "scar/ir/program/exception_matches.py",
+      "bytes": 4372,
+      "sha256": "bbdbdbc098da785e6b86713a829f513ebe809ebd28f8cb60be98f62eb7b21bd0"
+    },
+    {
+      "path": "scar/ir/frontend_v2.py",
+      "bytes": 47032,
+      "sha256": "dd258588e3c68f121c7652b6d5c639d3f851f9b401e61920ad15a410867695f9"
+    },
+    {
+      "path": "docs/M1_CLEANUP_INTERFACES.md",
+      "bytes": 12287,
+      "sha256": "c31e9e3b453c286ed5388399e2317e2bf08f470a8ef85663b03fc6143f2a0dde"
+    }
+  ],
+  "fixed_primary_source": "https://github.com/python/cpython/blob/v3.14.7/Python/codegen.c#L2311-L2380",
+  "external_inspection": "Only fixed-version try/except codegen contract; no target/raw/large graphs/compiler execution"
+}

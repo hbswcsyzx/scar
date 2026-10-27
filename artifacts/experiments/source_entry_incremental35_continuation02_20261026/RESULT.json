@@ -1,0 +1,116 @@
+{
+  "status": "PASS_INCREMENTAL35_PUBLICATION196_AND_SELECTED_NORMAL_QUERY",
+  "publication": {
+    "publication": {
+      "uri": "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/source_entry_incremental35_continuation02_20261026/result/manifest.json",
+      "sha256": "a124d78bb5e50e4ff96d1af2858357651cb9eda13918c328fd753a3a4bd4650b",
+      "size_bytes": 5505173,
+      "schema": "scar.source-entry-publication"
+    },
+    "parent_publication": {
+      "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/source_entry_integration_20261026/attempt03/result/publication/manifest.json",
+      "sha256": "e61120885b52e48810d4033975d82bece570b80c8251606df2ae7ae9634a734b",
+      "size_bytes": 4514287,
+      "schema": "scar.source-entry-publication"
+    },
+    "delta_publication": {
+      "uri": "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/source_entry_incremental35_continuation02_20261026/result/delta/manifest.json",
+      "sha256": "9fbca500fc5a2893f61f31300221d7b70acd30e5a6bda366c54d0baa64cd5342",
+      "size_bytes": 1005443,
+      "schema": "scar.source-entry-publication"
+    },
+    "retained_parent_bodies": 161,
+    "normally_admitted_new_bodies": 35,
+    "total_bodies": 196,
+    "resumed_checkpoint_rows": 23,
+    "fresh_admissions": 12,
+    "source_context_costs": {
+      "contexts": {
+        "stored_input_bytes": 20828365,
+        "decoded_input_bytes": 183638955,
+        "stored_output_bytes": 0,
+        "decoded_output_bytes": 0,
+        "existing_output_guard_bytes": 0,
+        "context_reads": 9,
+        "context_validations": 9,
+        "context_hash_guards": 9,
+        "body_reads": 12,
+        "context_identity_guards": 72
+      },
+      "original_sp5_reader": {
+        "stored_input_bytes": 77653969,
+        "decoded_input_bytes": 418001807,
+        "stored_output_bytes": 20828365,
+        "decoded_output_bytes": 183638955,
+        "existing_output_guard_bytes": 28416747,
+        "context_reads": 0,
+        "context_validations": 0,
+        "context_hash_guards": 0,
+        "body_reads": 0
+      }
+    },
+    "parent_bodies_replayed": false,
+    "new_bodies_relowered": false,
+    "full_independent_reader_completed": false,
+    "whole_program_complete": false,
+    "qualification": "normal new-body admission plus exact immutable parent publication references; selected-body qualification remains queryable"
+  },
+  "resumed_checkpoint_rows": 23,
+  "fresh_admissions": 12,
+  "normal_selected_query": "8e387588894572494ea6b3531e35bb6f83b5aaaffbf4f3c4ecde9ce4162fef3e",
+  "selected_graph_operations": 567,
+  "catalog_measurements": {
+    "source_prepare_attempts": 0,
+    "ast_parses": 26,
+    "symtable_parses": 26,
+    "decoded_source_bytes": 1105219,
+    "owners": [
+      {
+        "auxiliary_artifacts_read": 144,
+        "physical_artifact_bytes_read": 133275973,
+        "unique_artifact_canonical_bytes": 554561848,
+        "resolved_code_definitions": 79,
+        "cached_original_definition_records": 79,
+        "cached_source_files": 0,
+        "source_reprepared": false,
+        "source_recompiled": false
+      }
+    ],
+    "resolved_entries": 35,
+    "raw_read": false,
+    "target_executed": false
+  },
+  "readonly_activity": [
+    {
+      "compile_attempts": 0,
+      "module_loads": 0,
+      "complete_descriptor_matches": 0,
+      "source_bytes_read": 0
+    },
+    {
+      "compile_attempts": 0,
+      "module_loads": 1,
+      "complete_descriptor_matches": 3,
+      "source_bytes_read": 0
+    },
+    {
+      "compile_attempts": 0,
+      "module_loads": 3,
+      "complete_descriptor_matches": 5,
+      "source_bytes_read": 0
+    },
+    {
+      "compile_attempts": 0,
+      "module_loads": 21,
+      "complete_descriptor_matches": 28,
+      "source_bytes_read": 0
+    }
+  ],
+  "old161_full_reader_replayed": false,
+  "old161_original_exit1_preserved": true,
+  "new_source_lower": 0,
+  "target_exec": 0,
+  "runtime_binding": false,
+  "elapsed_seconds": 1131.2283563329838,
+  "self_maxrss_kib": 1952640
+}

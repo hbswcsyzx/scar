@@ -1,0 +1,47 @@
+{
+  "phase": "integrated shape + E/F/T/P + terminal premise smoke",
+  "python": "3.14.7 | packaged by conda-forge | (main, Sep  2 2026, 21:08:32) [GCC 15.3.0]",
+  "files": {
+    "scar/ir/program/session_flow.py": "13e90d83f74bd46281a678c778c559ad1d6d52d3d5722137be38848f853a7387",
+    "scar/ir/program/lifecycle_flow.py": "8adaa530a1801949a0706948c9aef2410148782fa95e49da18706ed5c794fae0",
+    "scar/ir/program/session_release_validation.py": "3dd1121494474109a003a984dd18b1d8061e28fceaf465e52b0da01ad08ba770",
+    "tests/fixtures/program_session_release_graphs.py": "747ef6b0a883c68754c9b827d75b24251793721a5945ec6c212cf1e9189e9212"
+  },
+  "cases": [
+    {
+      "args": {},
+      "issues": []
+    },
+    {
+      "args": {
+        "binding": "NORMAL_COMPLETION"
+      },
+      "issues": []
+    },
+    {
+      "args": {
+        "source": "no-body"
+      },
+      "issues": []
+    },
+    {
+      "args": {
+        "callback": true,
+        "repeat_release": true
+      },
+      "issues": []
+    },
+    {
+      "args": {
+        "source": "suspend"
+      },
+      "issues": [
+        {
+          "code": "terminal_release_unfinished",
+          "path": "program_operation:session.release.0",
+          "message": "every actual incoming path must establish terminal history for this exact owner"
+        }
+      ]
+    }
+  ]
+}

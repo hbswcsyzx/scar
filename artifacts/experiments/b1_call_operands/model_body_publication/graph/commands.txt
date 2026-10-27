@@ -1,0 +1,7 @@
+Observed cwd: /tmp/scar-structured-model-280qf4mi
+source /home/zyf/miniconda3/etc/profile.d/conda.sh
+conda activate lewm
+PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=. python - < [the saved smoke.stdin.py content]
+PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=. python -m pytest -q tests/unit/test_program_publication_graph.py
+The original smoke was executed through a heredoc; smoke.stdin.py reconstructs
+that exact stdin from the recorded exec input. No rerun is performed here.

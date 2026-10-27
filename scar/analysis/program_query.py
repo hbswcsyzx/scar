@@ -1,0 +1,257 @@
+"""On-demand traversal of qualified program fragments.
+
+This is a read-only view, not another graph authority. Query-local node keys
+deduplicate exact typed references; their original artifacts and IDs remain in
+``nodes``. A work query uses the ordinary retained-relation validator before
+exposing edges. Index enumeration alone does not validate runtime endpoints.
+"""
+from __future__ import annotations
+
+import re
+
+from scar.ir.execution.fragment_relations import (
+    HostRelationKind, WorkRelations, need, stable_key,
+)
+from scar.ir.execution.fragment_relations_codec import from_dict
+from scar.ir.record_codec import encode, loads as strict_loads
+from scar.store.fragment_relations import Meter, RelationBudgets, RelationPartitions
+
+
+class ProgramQuery:
+    """Bounded access to original work, invocation and source references."""
+
+    def __init__(self, manifest, *, expected_sha256, budgets=None):
+        from pathlib import Path
+
+        self.budgets = budgets or RelationBudgets(
+            max_input_bytes=256_000_000, max_seconds=60)
+        path = Path(manifest).absolute()
+        need(not path.is_symlink() and path.is_file()
+             and path.stat().st_size <= self.budgets.max_metadata_bytes,
+             "relation manifest must be a bounded regular file")
+        self.relations = RelationPartitions(
+            path, expected_sha256=expected_sha256, budgets=self.budgets)
+
+    def list_work(self, *, offset=0, limit=20):
+        """Page the compact index without opening every work/source record."""
+        need(type(offset) is int and offset >= 0, "nonnegative work offset required")
+        need(type(limit) is int and 1 <= limit <= 1000, "work page limit is 1..1000")
+        meter, cache, result, position = Meter(self.budgets), {}, [], 0
+        total = self.relations.manifest["report"]["declared_work_count"]
+        for number, descriptor in enumerate(self.relations.manifest["work_index"]):
+            stop = position + descriptor["rows"]
+            if stop > offset and len(result) < limit:
+                rows = [strict_loads(raw.decode()) for raw in
+                        self.relations._chunk("work_index", number, meter, cache)]
+                ids = [row["id"] for row in rows]
+                need(ids == sorted(set(ids)) and ids[0] == descriptor["first_id"]
+                     and ids[-1] == descriptor["last_id"], "work index bounds/order differ")
+                start = max(0, offset - position)
+                result.extend(ids[start:start + limit - len(result)])
+            position = stop
+            if len(result) == limit:
+                break
+        next_offset = offset + len(result)
+        return {"schema": "scar.program-query", "schema_version": 1,
+                "query": "WORK_INDEX", "work_ids": result, "total": total,
+                "offset": offset, "next_offset": next_offset if next_offset < total else None,
+                "qualification": "CHECKSUM_BOUND_INDEX_ONLY",
+                "runtime_endpoints_validated": False,
+                "whole_program_complete": False, "costs": meter.receipt()}
+
+    def work(self, identity, *, expand_static=False, include_record=False):
+        """Follow work → native/source context → original static body.
+
+        Collector scope, runtime submission and Python direct calls are
+        different relations. This query preserves that distinction.
+        """
+        need(type(identity) is str and re.fullmatch(r"work_relation:[0-9a-f]{64}", identity),
+             "qualified work_relation ID required")
+        meter = Meter(self.budgets)
+        # ID discovery only. The public reader below rechecks the complete
+        # relation and its original endpoints; this lookup is not an admission.
+        document = self.relations._lookup("work", identity, meter, {})
+        if document is None:
+            return {"schema": "scar.program-query", "schema_version": 1,
+                    "query": "WORK", "work_id": identity, "status": "NOT_FOUND",
+                    "whole_program_complete": False, "costs": meter.receipt()}
+        row = from_dict(document)
+        need(type(row) is WorkRelations and row.id == identity,
+             "work index changed original qualified identity")
+        checked = self.relations.work(row.projection.scope, row.projection.work, meter=meter)
+        need(checked["record"] == row, "work changed between discovery and validation")
+        nodes, edges = {}, []
+
+        def node(kind, reference):
+            key = kind + ":" + stable_key(reference)
+            value = {"kind": kind, "reference": encode(reference)}
+            need(key not in nodes or nodes[key] == value, "query reference key collision")
+            nodes[key] = value
+            return key
+
+        def edge(kind, source, target, origin):
+            edges.append({"kind": kind, "source": source, "target": target,
+                          "origin": origin})
+
+        work = node("WORK", row.projection.work)
+        activity = node("ACTIVITY", row.projection.original)
+        edge("WORK_ACTIVITY_PROJECTION", work, activity,
+             {"relation_id": row.projection.id, "receipt": encode(row.projection.receipt)})
+        for index, host in enumerate(row.hosts):
+            current = node("ACTIVITY", host.host)
+            target = work if host.kind is HostRelationKind.SUBMITTED_BY_RUNTIME else activity
+            edge(host.kind.value, current, target,
+                 {"relation_id": host.id, "provider_edges": encode(host.evidence_path)})
+            if host.native is not None:
+                edge("ORIGINAL_EVIDENCE_BINDING", node("NATIVE_OCCURRENCE", host.native),
+                     current, {"relation_pointer": f"#/hosts/{index}/native/binding"})
+        for index, enclosing in enumerate(row.enclosing_native):
+            chain = (enclosing.host,) + enclosing.parents
+            for depth, (child, parent) in enumerate(zip(chain, chain[1:])):
+                edge("COLLECTOR_SCOPE_PARENT", node("ACTIVITY", child), node("ACTIVITY", parent),
+                     {"relation_id": enclosing.id, "depth": depth + 1,
+                      "is_python_direct_call": False})
+            edge("ORIGINAL_EVIDENCE_BINDING", node("NATIVE_OCCURRENCE", enclosing.native),
+                 node("ACTIVITY", chain[-1]),
+                 {"relation_pointer": f"#/enclosing_native/{index}/native/binding"})
+        for context in row.source_contexts:
+            edge(context.kind, node("NATIVE_OCCURRENCE", context.native),
+                 node("INVOCATION", context.invocation),
+                 {"relation_id": context.id, "association": encode(context.association),
+                  "is_python_direct_call": False})
+        bodies = []
+        for binding in row.static_bindings:
+            definition = node("SOURCE_DEFINITION", binding.definition)
+            edge("CODE_SOURCE_BINDING", node("INVOCATION", binding.invocation), definition,
+                 {"relation_id": binding.id, "code_source_link": encode(binding.code_source_link)})
+            if binding.body is not None:
+                body = node("STATIC_BODY", binding.body)
+                edge("HAS_STATIC_BODY", definition, body, {"relation_id": binding.id})
+                if expand_static and body not in bodies:
+                    from scar.analysis.fragment_relations import static_member
+                    expanded = static_member(binding.body, meter=meter)
+                    nodes[body]["member"] = encode(expanded["member"])
+                    nodes[body]["qualification"] = expanded["qualification"]
+                    nodes[body]["runtime_occurrence_implied"] = False
+                    bodies.append(body)
+        result = {"schema": "scar.program-query", "schema_version": 1,
+                  "query": "WORK", "work_id": identity, "status": "FOUND",
+                  "scope": encode(row.projection.scope), "nodes": nodes, "edges": edges,
+                  "node_keys": "QUERY_LOCAL_ONLY; original typed references own identity",
+                  "gaps": encode(row.gaps), "validation": checked["validation"],
+                  "whole_program_complete": False, "transformation_authorized": False,
+                  "costs": meter.receipt()}
+        if include_record:
+            result["record"] = document
+        return result
+
+
+def query_program_cli(args):
+    import json
+    from pathlib import Path
+
+    query = ProgramQuery(args.relations, expected_sha256=args.sha256,
+                         budgets=RelationBudgets(max_input_bytes=args.max_input_bytes,
+                                                 max_seconds=args.max_seconds))
+    result = (query.list_work(offset=args.offset, limit=args.limit) if args.work is None
+              else query.work(args.work, expand_static=args.expand_static,
+                              include_record=args.record))
+    payload = json.dumps(result, ensure_ascii=False, indent=2, allow_nan=False) + "\n"
+    if args.out:
+        with Path(args.out).open("x", encoding="utf-8") as stream:
+            stream.write(payload)
+    else:
+        print(payload, end="")
+    return 1 if result.get("status") == "NOT_FOUND" else 0
+
+
+def query_os_topology_cli(args):
+    import json
+    from pathlib import Path
+    from scar.analysis.os_file_topology import query_os_file_topology
+
+    result = query_os_file_topology(args.manifest, expected_sha256=args.sha256,
+                                    path=args.path, syscall=args.syscall, limit=args.limit)
+    payload = json.dumps(encode(result), ensure_ascii=False, indent=2, allow_nan=False) + "\n"
+    if args.out:
+        with Path(args.out).open("x", encoding="utf-8") as stream:
+            stream.write(payload)
+    else:
+        print(payload, end="")
+    return 0
+
+
+def query_native_read(artifact, *, max_input_bytes=256_000_000, max_seconds=60):
+    """View original input/use/state -> conditional read -> symbolic value.
+
+    Uses the same qualified-reference graph convention as work(). The view
+    creates no second operation/state graph and grants no content equality.
+    """
+    from scar.analysis.native_tensor_reads import read_native_tensor_read_context
+    from scar.ir.execution.work import ActualCompletionState
+
+    record, values, costs, original_input = read_native_tensor_read_context(artifact,
+        max_input_bytes=max_input_bytes, max_seconds=max_seconds)
+    nodes, edges = {}, []
+
+    def node(kind, reference):
+        key = kind + ':' + stable_key(reference)
+        value = {'kind': kind, 'reference': encode(reference)}
+        need(key not in nodes or nodes[key] == value, 'query reference key collision')
+        nodes[key] = value
+        return key
+
+    def edge(kind, source, target, qualification):
+        edges.append({'kind': kind, 'source': source, 'target': target,
+                      'qualification': qualification, 'origin': encode(artifact)})
+
+    def occurrence(kind, identity):
+        return node(kind, {'artifact': record.execution, 'id': identity})
+
+    port = occurrence('NATIVE_INPUT', record.read.basis)
+    argument = occurrence('VALUE_OCCURRENCE', record.input)
+    use = occurrence('USE', record.read.consumer.subject)
+    operation = occurrence('OPERATION_OCCURRENCE', record.read.effect.invocation)
+    read = node('CONTENT_READ', {'artifact': artifact, 'id': record.read.id})
+    result = node('VALUE_VERSION', record.result)
+    allocation = node('ALLOCATION', record.allocation)
+    interval = occurrence('EXECUTION_INTERVAL', record.read.consumer.interval)
+    edge('NATIVE_PORT_VALUE', port, argument, 'ORIGINAL_CANONICAL_INPUT')
+    edge('VALUE_USED_AT', argument, use, 'ORIGINAL_CANONICAL_USE')
+    edge('USE_IN_OPERATION', use, operation, 'ORIGINAL_CANONICAL_USE')
+    edge('READ_INPUT_REFERENCE', argument, read, 'CONDITIONAL_PROTOCOL')
+    edge('READ_IN_OPERATION', read, operation, 'CONDITIONAL_PROTOCOL')
+    edge('READ_PAYLOAD_RESULT', read, result, 'CONDITIONAL_SYMBOLIC_DEFINITION')
+    edge('INPUT_ALLOCATION_OBSERVATION', argument, allocation, 'SAME_CAPTURE_PROVIDER_EPOCH')
+    observed_region = original_input.get('observed_storage_region', {})
+    if observed_region.get('region') is not None:
+        region = node('STORAGE_REGION', {'projection': observed_region['region'],
+            'allocation': record.allocation,
+            'source': observed_region['geometry_source'],
+            'qualification_source': observed_region['qualification_source']})
+        edge('INPUT_VIEW_REGION', argument, region, observed_region['status'])
+        edge('REGION_ALLOCATION', region, allocation, 'SAME_CAPTURE_PROVIDER_EPOCH')
+        edge('CONDITIONAL_READ_REGION', read, region, 'CONDITIONAL_PROTOCOL_NOT_OBSERVED_ACCESS')
+    edge('READ_INTERVAL', read, interval, 'ORIGINAL_INVOKE_TO_NORMAL_INTERFACE')
+    state_use = occurrence('USE', record.read.effect.state_input)
+    edge('STATE_INPUT_USE', state_use, operation, 'ORIGINAL_CANONICAL_STATE_INTERFACE')
+    for state in record.read.support:
+        state_value = occurrence('VALUE_OCCURRENCE', state)
+        edge('STATE_SUPPORT', state_value, read, 'ORIGINAL_STATE_SUPPORT_WITH_CONDITIONAL_READ')
+        edge('VALUE_USED_AT', state_value, state_use, 'ORIGINAL_CANONICAL_STATE_INTERFACE')
+    if type(record.read.effect.post) is ActualCompletionState:
+        state_after = occurrence('VALUE_OCCURRENCE', record.read.effect.post.formal)
+        edge('NORMAL_STATE_INTERFACE', operation, state_after,
+             'STATE_TRANSPORT_ONLY_NOT_HEAP_WRITE_PROOF')
+    conditions = [condition.value for condition in record.conditions]
+    return {'schema': 'scar.program-query', 'schema_version': 1, 'query': 'NATIVE_READ',
+        'qualification': 'CONDITIONAL_READ_RESULT', 'run': encode(record.run),
+        'process': encode(record.process), 'snapshot': encode(record.snapshot),
+        'nodes': nodes, 'edges': edges,
+        'read': encode(record), 'value_graph': values.to_dict(),
+        'observed_eto_geometry': original_input.get('observed_eto_geometry'),
+        'observed_storage_region': original_input.get('observed_storage_region'),
+        'conditions': conditions, 'actor': encode(record.actor), 'costs': costs,
+        'original_reference_is_data_identity': False, 'actual_memory_read_observed': False,
+        'content_equality_established': False, 'readiness_established': False,
+        'whole_program_complete': False}

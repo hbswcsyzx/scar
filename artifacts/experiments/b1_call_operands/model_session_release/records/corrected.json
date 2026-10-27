@@ -1,0 +1,20 @@
+{
+  "command": [
+    "/home/zyf/miniconda3/envs/lewm/bin/python",
+    "-m",
+    "pytest",
+    "-q",
+    "tests/unit/test_session_release_records.py"
+  ],
+  "cwd": "/tmp/scar-structured-model-280qf4mi",
+  "python": "3.14.7 | packaged by conda-forge | (main, Sep  2 2026, 21:08:32) [GCC 15.3.0]",
+  "exit_code": 0,
+  "elapsed_seconds": 0.9852437973022461,
+  "source_hashes": {
+    "scar/ir/program/lifecycle.py": "326422e0b5c0a89fef3abda0f27037928d6c20bfc5adbd9afc875236678d17d7",
+    "scar/ir/program/model.py": "3a72c7692afdb19f74f19df5990527140e360748954c64dde3e335551580b2b1",
+    "scar/ir/program/__init__.py": "849f39246a771e5ad3a98b769764fc0431bb3154238772cf894a53afe9328648",
+    "scar/ir/program/codec.py": "415cd3c7832e00c5ffb9ae7332802514944c98b672136a0d010c640d0c9acec0",
+    "tests/unit/test_session_release_records.py": "482a663588fd8a0f549acf202f2305330b745a124e17de76dfcbd6c3165d2849"
+  }
+}

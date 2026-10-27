@@ -1,0 +1,129 @@
+{
+  "actual_exit_reported_by_root": 0,
+  "actual_session": 57836,
+  "exact_catalog_transport": {
+    "additional_post_report_stored_bytes_read": 2588848,
+    "graph_raw_or_CodeType_read": false,
+    "logical_original": {
+      "bytes": 2588848,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/lewm_external_entry_g0_20261026/catalog.json",
+      "sha256": "e123fe026dc0af2cfd17df4eeda11f332b464b3f0bbdd4e957a091bb4e7807c4"
+    },
+    "representation": "gzip of exact original bytes; not new catalog authority",
+    "schema": "scar.exact-json-transport-receipt/1",
+    "stored_transport": {
+      "bytes": 258912,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/lewm_external_entry_g0_20261026/catalog.json.gz",
+      "sha256": "b86351fbd8fe0f4114cbcd7bfca0f1823f3ba78c80021b761b36f68afee4387d"
+    }
+  },
+  "first_stage_complete": false,
+  "graph_raw_CodeType_reread_for_retention": false,
+  "local_catalog": {
+    "bytes": 2588848,
+    "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/lewm_external_entry_g0_20261026/catalog.json",
+    "sha256": "e123fe026dc0af2cfd17df4eeda11f332b464b3f0bbdd4e957a091bb4e7807c4"
+  },
+  "original_archives_mutated": false,
+  "original_data_dependencies": "exact continuation/parent/144aux/two readonly archive manifests and payload refs stay at original URIs in freeze.json; no provider/source payload copies",
+  "post_report_catalog_transport_read_bytes": 2588848,
+  "post_report_header_reads": {
+    "bytes": 6079404,
+    "count": 3,
+    "scope": "fixed continuation JSON only; separate from G0 actual API read accounting"
+  },
+  "schema": "scar.lewm-external-entry-g0-retention/1",
+  "selected_small_files": [
+    {
+      "bytes": 7323,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/analysis/lewm_external_entry_connection_20261026/PLAN.md",
+      "sha256": "5f85f0568d2b526462193137cc73e4fa3dbdfff19f04b61a93176275bf70d01b"
+    },
+    {
+      "bytes": 2341,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/lewm_external_entry_g0_20261026/README.md",
+      "sha256": "8a63aea10e5167d7795841a44064547d192cbc97aa883dc9218de0d32601227c"
+    },
+    {
+      "bytes": 2942,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/lewm_external_entry_g0_20261026/REPORT.md",
+      "sha256": "62a885b9b5e6e0645246effa3c2b057b79e263abc0fd0f01dd5e9f6460847d0f"
+    },
+    {
+      "bytes": 765,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/lewm_external_entry_g0_20261026/catalog-transport.json",
+      "sha256": "b3b3f42c7b96d12b40283e9f408cf16437cb5339e7fb8a58a1c8764a07fafcdc"
+    },
+    {
+      "bytes": 258912,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/lewm_external_entry_g0_20261026/catalog.json.gz",
+      "sha256": "b86351fbd8fe0f4114cbcd7bfca0f1823f3ba78c80021b761b36f68afee4387d"
+    },
+    {
+      "bytes": 187663,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/lewm_external_entry_g0_20261026/freeze.json",
+      "sha256": "b02adad9007d9df14edb4d3b099b36bb49285ba17e153e831a0e23efc52868ca"
+    },
+    {
+      "bytes": 3211,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/lewm_external_entry_g0_20261026/freeze.py",
+      "sha256": "c2f023c5f4c4f233b1274ba425bf2fa50d73144f8db8c341ad9f7907d1a5709b"
+    },
+    {
+      "bytes": 20813,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/lewm_external_entry_g0_20261026/missing_witness_acquisition_window-sources.json",
+      "sha256": "47419133e461b220aad0008a1dd3b6bb48b6b7ceec81d3fc7c2283ed3fa3d131"
+    },
+    {
+      "bytes": 376,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/lewm_external_entry_g0_20261026/prepare.stdout.json",
+      "sha256": "301473b3b10650b6e3d24e016528431445ec26a6fb95432d90cb57be703a2bdf"
+    },
+    {
+      "bytes": 13419,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/lewm_external_entry_g0_20261026/ready_readonly_window-sources.json",
+      "sha256": "847e85adf95213863e26e209a5a1c0b4f9c322f48cf7bcf841afe8224c3696a4"
+    },
+    {
+      "bytes": 50347,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/lewm_external_entry_g0_20261026/result.json",
+      "sha256": "4fefc46dfd5e47cd30f4a2c00fd118a1f2645ba21c19d6d1b42108d996d8d8e1"
+    },
+    {
+      "bytes": 10296,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/lewm_external_entry_g0_20261026/run.py",
+      "sha256": "ce74d9b044cabc6b9719be5b43f5e8a1a23c2df980ae4ca1b2c1cc41a4eccf02"
+    },
+    {
+      "bytes": 476,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/lewm_external_entry_g0_20261026/run.sh",
+      "sha256": "385eae22cddb9e5966778e411c3cf8d2baa8924b2a4b4cb9802c5c3ff8d125f9"
+    },
+    {
+      "bytes": 0,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/lewm_external_entry_g0_20261026/run.stderr.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 129,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/lewm_external_entry_g0_20261026/run.stdout.txt",
+      "sha256": "73d2e7e992fed7b83cfd688ed18aff0d669f65dc9a66381cbaabaf5b52aab1c1"
+    },
+    {
+      "bytes": 836,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/lewm_external_entry_g0_20261026/run.time.txt",
+      "sha256": "3b78a7e6de150c712b1e52c86bf7fd80101a231c53f0630eea056e2e91734851"
+    },
+    {
+      "bytes": 283,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/lewm_external_entry_g0_20261026/started.json",
+      "sha256": "1120950bc3faba7f80a25f63fe60545f2b77437d4cdd2dd65010155cb8f31a9b"
+    },
+    {
+      "bytes": 331,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/lewm_external_entry_g0_20261026/terminal.json",
+      "sha256": "3edd998ab2cbd9181c0d0edb4842b1113aa30c96c1ba414f4199b6db9ef01d97"
+    }
+  ],
+  "single_artifact_small_rule_bytes": 1000000
+}

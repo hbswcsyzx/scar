@@ -1,0 +1,67 @@
+{
+  "schema": "scar.module-import-prefix-application",
+  "schema_version": 1,
+  "root_postflight_terminal": {
+    "session": 73659,
+    "exit_code": 0
+  },
+  "original_candidate02_exit_code": 1,
+  "postflight_freeze_sha256": "859e3d7dff1f5e9a534f81121577faecbbe92a56a338ce74799f279ee68a18e2",
+  "original_candidate02_freeze_sha256": "c488748534bd0a92763f7b80ac1d28e38ad345d2a6d35d4f0f8e728a76b3127c",
+  "production_sources": [
+    {
+      "bytes": 77617,
+      "path": "/home/zyf/AAA/scar-worktrees/source-call-model/scar/analysis/program_lowering.py",
+      "sha256": "a3cb7da0887d04cb0e449eda406a663cc3438bbf78aa4c0bdc4f8e89dc4804f2",
+      "relative_path": "scar/analysis/program_lowering.py",
+      "main_readonly_baseline": {
+        "exists": true,
+        "bytes": 73290,
+        "sha256": "6f61e9f5d046d9a733aaa6c1c198c20b49c1d3b34f9ef360b9d573e451488bc2"
+      },
+      "application": "exact reviewed delta; preserve main unrelated sourceentryv2/publication changes"
+    },
+    {
+      "bytes": 15826,
+      "path": "/home/zyf/AAA/scar-worktrees/source-call-model/scar/ir/program/module_entries.py",
+      "sha256": "c01e9d27c6a9153991d88ee537e9445a90e4f1cba56239791ae23b12ad075b35",
+      "relative_path": "scar/ir/program/module_entries.py",
+      "main_readonly_baseline": {
+        "exists": true,
+        "bytes": 10307,
+        "sha256": "be6129a40006c2f4e2e2e288c2510ed6d37154f67e8f7f788b73627e96cfe26d"
+      },
+      "application": "exact reviewed delta; preserve main unrelated sourceentryv2/publication changes"
+    },
+    {
+      "bytes": 25226,
+      "path": "/home/zyf/AAA/scar-worktrees/source-call-model/scar/analysis/source_module_lowering.py",
+      "sha256": "0e83aed9da8e72c6d50bb2630bcffa905f10da7104db1d94c31312f8b5fe3d9a",
+      "relative_path": "scar/analysis/source_module_lowering.py",
+      "main_readonly_baseline": {
+        "exists": true,
+        "bytes": 12525,
+        "sha256": "a8cfcbaadf8620f05d618ae3fb27d9ffb3be2cfcd85e2929839248b74723bd5a"
+      },
+      "application": "exact reviewed delta; preserve main unrelated sourceentryv2/publication changes"
+    },
+    {
+      "bytes": 32259,
+      "path": "/home/zyf/AAA/scar-worktrees/source-call-model/scar/analysis/source_module_validation.py",
+      "sha256": "b8c97c4d887dd01a553e37e6b10b0464eef87bec4213bd9583656cdedc3cd8fc",
+      "relative_path": "scar/analysis/source_module_validation.py",
+      "main_readonly_baseline": {
+        "exists": true,
+        "bytes": 15061,
+        "sha256": "efac81700dc67a652d36cf54d9ee7a05ea0eba8f09c01ace2bfffa14f2f5e95c"
+      },
+      "application": "exact reviewed delta; preserve main unrelated sourceentryv2/publication changes"
+    }
+  ],
+  "main_modified_by_this_agent": false,
+  "main_source_runtime": "source858/runtime843 unchanged",
+  "status": "SP7_NORMAL_READER_ACCEPTED_WITH_OPEN_ORIGINAL_WINDOW_STILL_FAILED",
+  "public_nondefault_profile": "ModuleBodyExpansionProfile.IMPORT_PREFIX_314_V1",
+  "old_v6_record_and_validator": "unchanged closed path; observed original consumer reached final phase, not replayed in postflight",
+  "do_not_apply_main_until_pub_gate_terminal": true
+}

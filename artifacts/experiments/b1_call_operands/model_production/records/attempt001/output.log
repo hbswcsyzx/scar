@@ -1,0 +1,34 @@
+...F..                                                                   [100%]
+=================================== FAILURES ===================================
+___ test_raw_record_coordinates_and_frontier_reject_bool_or_malformed_digest ___
+
+    def test_raw_record_coordinates_and_frontier_reject_bool_or_malformed_digest():
+        source = _source_ref()
+        with pytest.raises(TypeError):
+            RawRecordRef(source, True, "c" * 64)
+        with pytest.raises(ValueError):
+            RawRecordRef(source, 1, "g" * 64)
+        with pytest.raises(TypeError):
+>           RawRecordRef(source, 1, "c" * 63)
+
+tests/unit/test_execution_production_records.py:137: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+<string>:6: in __init__
+    ???
+scar/ir/execution/production.py:126: in __post_init__
+    _sha256(self.sha256, "raw-record SHA256")
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+value = 'ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc'
+name = 'raw-record SHA256'
+
+    def _sha256(value: object, name: str) -> None:
+        _exact(value, str, name)
+        if re.fullmatch(r"[0-9a-fA-F]{64}", value) is None:
+>           raise ValueError(f"{name} must be 64 hexadecimal characters")
+E           ValueError: raw-record SHA256 must be 64 hexadecimal characters
+
+scar/ir/execution/production.py:66: ValueError
+=========================== short test summary info ============================
+FAILED tests/unit/test_execution_production_records.py::test_raw_record_coordinates_and_frontier_reject_bool_or_malformed_digest
+1 failed, 5 passed in 0.45s

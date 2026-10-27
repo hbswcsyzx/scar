@@ -1,0 +1,10 @@
+{
+  "tests/fixtures/execution_frame_identity_graphs.py": {
+    "path": "current-object-history-counterexample/source-bytes/tests__fixtures__execution_frame_identity_graphs.py.txt",
+    "sha256": "dfa315bf294e5077fc8917a08e415a9396cbf4418b198870254a74602ca8a571"
+  },
+  "tests/unit/test_execution_frame_identity_history.py": {
+    "path": "current-object-history-counterexample/source-bytes/tests__unit__test_execution_frame_identity_history.py.txt",
+    "sha256": "7963f07c658a6ebc78ca5d751072dad53af161bd37a5676497086692b8d4cc8f"
+  }
+}

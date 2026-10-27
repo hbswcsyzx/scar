@@ -1,0 +1,83 @@
+{
+  "gate": "M1-C2F-SOURCE-RELATIVE-BODY-OUTCOME-FRONTIER",
+  "scope": "Derived source-relative first body outcomes over existing validated IR, stopping at Suspend/Return/Raise without crossing temporal resumption; canonical UseSite views and regressions.",
+  "limitations": [
+    "The frontier is structural reachability over declared ordinary CFG, not observed execution, branch satisfiability or totality. Empty outcomes do not imply no effects or dead work.",
+    "No new schema, driver, Create-to-instance capture, gate/permit/session, release adapter, source recovery or transformation is implemented by this query.",
+    "Full C2D.0/C2.4 and M0-M2 remain open. The revised driver proposal is still subject to field review; language/design probes do not certify a SCAR runtime implementation.",
+    "No LeWM profiling, backend, detector, Tensor snapshot or speedup claim. Prior body/wire/query tests are regression evidence, not new driver authority."
+  ],
+  "criteria": [
+    {
+      "id": "first-outcome-frontier-canonical-payload-and-exact-body-ingress",
+      "tests": [
+        "tests/unit/test_body_outcome_frontier.py"
+      ]
+    },
+    {
+      "id": "strict-body-context-and-indexed-temporal-records",
+      "tests": [
+        "tests/unit/test_resumption_records.py"
+      ]
+    },
+    {
+      "id": "body-current-context-state-and-multiple-availability-cuts",
+      "tests": [
+        "tests/unit/test_program_resumption_graph.py"
+      ]
+    },
+    {
+      "id": "local-binding-original-cleanup-and-fresh-replacement-across-suspension",
+      "tests": [
+        "tests/unit/test_resumption_cleanup.py",
+        "tests/unit/test_resumption_forwarding.py"
+      ]
+    },
+    {
+      "id": "invoke-partial-poststate-and-dedicated-body-ingress-boundary",
+      "tests": [
+        "tests/unit/test_resumption_invoke.py"
+      ]
+    },
+    {
+      "id": "logical-cfg-core-binding-and-c0-c1-regression",
+      "tests": [
+        "tests/unit/test_program_graph.py",
+        "tests/unit/test_program_graph_adversarial.py",
+        "tests/unit/test_program_bindings.py",
+        "tests/unit/test_program_control_graph.py",
+        "tests/unit/test_program_cleanup_graph.py",
+        "tests/unit/test_program_cleanup_invoke.py",
+        "tests/unit/test_cleanup_forward.py",
+        "tests/unit/test_cleanup_nontermination.py",
+        "tests/unit/test_cleanup_integration_regressions.py"
+      ]
+    },
+    {
+      "id": "strict-v10-discriminator-and-original-v1-to-v9-wire",
+      "tests": [
+        "tests/unit/test_program_resumption_codec.py",
+        "tests/unit/test_program_cleanup_codec.py",
+        "tests/unit/test_program_control_codec.py",
+        "tests/unit/test_program_native_codec.py",
+        "tests/unit/test_program_provider_codec.py",
+        "tests/unit/test_record_codec_tags.py",
+        "tests/integration/test_program_graph_roundtrip.py"
+      ]
+    },
+    {
+      "id": "public-structure-without-source-driver-runtime-or-transform-authority",
+      "tests": [
+        "tests/integration/test_resumption_program_cli.py",
+        "tests/integration/test_cleanup_program_cli.py",
+        "tests/unit/test_program_providers.py"
+      ]
+    },
+    {
+      "id": "ordinary-native-exits-keep-existing-port-and-id-contracts",
+      "tests": [
+        "tests/unit/test_native_exit_queries.py"
+      ]
+    }
+  ]
+}

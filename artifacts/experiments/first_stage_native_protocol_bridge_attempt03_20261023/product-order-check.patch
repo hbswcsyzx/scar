@@ -1,0 +1,240 @@
+--- attempt02/native_port_protocol.py
++++ attempt03/native_port_protocol.py
+@@ -193,6 +193,221 @@
+     return interfaces, frontiers
+ 
+ 
++class NativePortOrderError(ValueError):
++    """This pinned adapter's ordered ABI disagrees with the original core."""
++
++
++def _native_port_order_errors(program, model, interfaces, run):
++    """Pure ABI interpretation, not ownership or runtime authority.
++
++    Generic NativeBoundary permits arbitrary representation order. Only this
++    closed adapter declares flat native i == core formal/completion i. Source
++    evidence sessions pass independently replayed original native signatures;
++    a caller invoking this helper alone obtains no owned evidence.
++    """
++    from scar.ir.program.model import (BlockArgument, CompletionResult, DataValue,
++        ExitKind, ReferenceValue, StateVersionValue, TerminatorKind, UseRole)
++    from scar.ir.program.ids import NativeBoundaryID, ProviderID, RegionID
++    from scar.ir.program.providers import (ProviderArtifactKind, ProviderElementKind,
++        ProviderPathIndex, ProviderPathKey, ProviderRegionRelation)
++    from .coordinates import InitialEntry
++    from .content import NativeInputRef, NativeOutputRef
++    errors = []
++
++    def check(ok, code, path, message):
++        if not ok:
++            errors.append((code, str(path), message))
++        return bool(ok)
++
++    regions = {r.id: r for r in program.regions}
++    boundaries = {b.id: b for b in program.native_boundaries}
++    core_values = {v.id: v for v in program.values}
++    operations = {o.id: o for o in program.operations}
++    unique = {}
++    for item in interfaces:
++        signature = item["signature"]
++        sig = sha256(canonical(signature)).hexdigest()
++        if not check(item["signature_id"] == sig, "signature", sig, "raw signature hash changed"):
++            continue
++        if sig in unique:
++            check(unique[sig]["signature"] == signature, "signature", sig, "same signature ID has different native tree")
++        unique[sig] = item
++    # Independently reconstruct this provider profile's declared interface
++    # document, rather than trusting a builder-produced mapping/boolean.
++    definition_doc = {"schema": "scar.pinned-aten-protocol-interface", "schema_version": 1,
++        "profile": PROFILE, "interfaces": {sig: item["signature"] for sig, item in unique.items()},
++        "effect_contract": "UNKNOWN outside partial provider schema annotations", "content_version_claimed": False}
++    definition_bytes = canonical(definition_doc)
++    expected_provider = ProviderID("aten-schema:" + next(iter(unique.values()))["signature"]["provider_revision"]) if unique else None
++    envelope = next((e for e in program.provider_envelopes if e.id == expected_provider), None)
++    check(envelope is not None and envelope.kind is ProviderArtifactKind.DEFINITION_GRAPH
++          and envelope.artifact.schema == definition_doc["schema"]
++          and envelope.artifact.sha256 == sha256(definition_bytes).hexdigest()
++          and envelope.artifact.size_bytes == len(definition_bytes),
++          "definition_artifact", "provider", "definition owner differs from independently reconstructed schema interface")
++    layouts = {}
++    for sig, item in unique.items():
++        path = "interface:" + sig
++        region_id = RegionID("aten-interface:" + sig)
++        region = regions.get(region_id)
++        boundary = boundaries.get(NativeBoundaryID(region_id.value + ":boundary"))
++        if not check(region is not None and boundary is not None and boundary.region == region_id,
++                     "region", path, "original native interface/boundary is absent"):
++            continue
++        check(boundary.provider == expected_provider and envelope is not None
++              and boundary.signature.artifact == envelope.artifact
++              and boundary.signature.locator == "#/interfaces/" + sig
++              and any(r.provider == expected_provider and r.region == region_id
++                      and r.external_region == sig and r.relation is ProviderRegionRelation.DEFINES_REPRESENTATION
++                      for r in program.provider_regions),
++              "definition_owner", path, "native interface owner/signature does not preserve this source definition")
++        entry = next((b for b in region.blocks if b.id == region.entry), None)
++        invocations = ([] if entry is None else [operations[o] for o in entry.operations
++            if o in operations and operations[o].terminator is not None
++            and operations[o].terminator.kind is TerminatorKind.INVOKE])
++        if not check(entry is not None and len(invocations) == 1, "invoke", path,
++                     "flat adapter requires one original opaque invocation in its entry block"):
++            continue
++        invoke = invocations[0]
++        normal_edges = [(i, e) for i, e in enumerate(invoke.terminator.successors) if e.kind is ExitKind.NORMAL]
++        if not check(len(normal_edges) == 1, "normal_edge", path, "native invocation has no unique normal completion"):
++            continue
++        normal_index, edge = normal_edges[0]
++        normal = next((b for b in region.blocks if b.id == edge.block), None)
++        returned = (None if normal is None or not normal.operations else operations.get(normal.operations[-1]))
++        if not check(returned is not None and returned.terminator is not None
++                     and returned.terminator.kind is TerminatorKind.RETURN,
++                     "return", path, "normal completion has no original Return"):
++            continue
++        counts = {d: len(item["signature"][d]) for d in ("inputs", "outputs")}
++        if not check(len(entry.arguments) == counts["inputs"] + 1
++                     and len(normal.arguments) == counts["outputs"] + 1
++                     and len(boundary.inputs) == counts["inputs"] and len(boundary.outputs) == counts["outputs"]
++                     and len(invoke.uses) == len(invoke.invoke_arguments) == len(entry.arguments)
++                     and len(returned.uses) == len(returned.terminator.values) == len(normal.arguments)
++                     and len(edge.arguments) == len(normal.arguments),
++                     "arity", path, "scalar/reference/world native and core arities differ"):
++            continue
++        for direction, block, slots, op, records in (
++                ("inputs", entry, boundary.inputs, invoke, entry.arguments),
++                ("outputs", normal, boundary.outputs, returned, normal.arguments)):
++            for i, formal in enumerate(records):
++                port_path = path + ":" + direction + ":" + str(i)
++                value = core_values.get(formal)
++                check(value is not None and type(value.origin) is BlockArgument
++                      and value.origin.block == block.id and value.origin.index == i,
++                      "formal_order", port_path, "flat slot does not identify its original BlockArgument ordinal")
++                original_use = op.uses[i]
++                use_list = invoke.invoke_arguments if direction == "inputs" else returned.terminator.values
++                check(use_list[i] == original_use.id and original_use.value == formal,
++                      "use_order", port_path, "original invocation/Return Use has another ordered formal")
++                if direction == "outputs":
++                    check(type(edge.arguments[i]) is CompletionResult and edge.arguments[i].index == i,
++                          "completion_order", port_path, "normal edge permutes original CompletionResult ordinal")
++                if i == counts[direction]:
++                    check(type(value) is StateVersionValue and original_use.role is UseRole.STATE_CONTENT,
++                          "world_order", port_path, "opaque world tail changed position/category")
++                    continue
++                native = item["signature"][direction][i]
++                check((type(value) is ReferenceValue and original_use.role is UseRole.REFERENCE) if native["tensor"] else
++                      (type(value) is DataValue and value.data_type == "native.boxed:" + native["type"]
++                       and original_use.role is UseRole.DATA),
++                      "value_type", port_path, "ordered native leaf changed its declared core category/type")
++                slot = slots[i]
++                check(slot.position == i and slot.port.region == region_id and
++                      (slot.port.value == formal if direction == "inputs" else
++                       slot.port.exit_name == returned.terminator.exit and slot.port.index == i),
++                      "native_core_order", port_path, "native slot selects another canonical formal/exit ordinal")
++                expected_path = (ProviderPathKey(direction), ProviderPathIndex(i))
++                kinds = ProviderElementKind.REFERENCE_VALUE if native["tensor"] else ProviderElementKind.DATA_VALUE
++                targets = [(formal, kinds)]
++                if direction == "inputs":
++                    targets.append((original_use.id, ProviderElementKind.USE))
++                for target, kind in targets:
++                    matches = [b for b in program.provider_bindings if b.provider == expected_provider
++                        and b.region == region_id and b.target == target]
++                    check(len(matches) == 1 and matches[0].external.kind is kind
++                          and matches[0].external.key == sig and matches[0].external.path == expected_path,
++                          "provider_path_order", port_path, "provider binding path does not select this exact original ordered endpoint")
++        before_world, after_world = core_values.get(entry.arguments[-1]), core_values.get(normal.arguments[-1])
++        check(type(before_world) is type(after_world) is StateVersionValue and before_world.location == after_world.location,
++              "world_location", path, "normal opaque world does not preserve the declared state domain")
++        layouts[sig] = (region_id, boundary, entry, invoke, normal_index, normal, returned)
++    # Actual coordinates are checked independently of denotation identity and
++    # alongside the normal generic execution-flow validation, never instead.
++    segments = {s.id: s for s in model.segments}
++    visits = {v.id: v for v in model.visits}
++    activations = {a.id: a for a in model.activations}
++    actual_values = {}
++    for value in model.values:
++        actual_values.setdefault((value.origin, value.value), []).append(value)
++    actual_uses = {}
++    for use in model.uses:
++        actual_uses.setdefault((use.operation, use.use), []).append(use)
++    expected_activations = set()
++    for item in interfaces:
++        sig = item["signature_id"]
++        if sig not in layouts:
++            continue
++        region_id, boundary, entry, invoke, normal_index, normal, returned = layouts[sig]
++        expected_id = "native-port:" + run + ":" + str(item["sequence"])
++        candidates = [a for a in model.activations if a.id.value == expected_id]
++        if not check(len(candidates) == 1 and candidates[0].region == region_id,
++                     "activation", expected_id, "source sequence has no unique exact native activation"):
++            continue
++        activation = candidates[0];expected_activations.add(activation.id)
++        owned_segments = [s for s in model.segments if s.activation == activation.id]
++        if not check(len(owned_segments) == 1 and type(owned_segments[0].ingress) is InitialEntry
++                     and activation.entry.run.value == run,
++                     "segment", expected_id, "normal native protocol activation/Run has no exact initial segment"):
++            continue
++        segment = owned_segments[0]
++        entry_visits = [v for v in model.visits if v.segment == segment.id and v.block == entry.id]
++        normal_visits = [v for v in model.visits if v.segment == segment.id and v.block == normal.id]
++        if not check(len(entry_visits) == len(normal_visits) == 1,
++                     "visit", expected_id, "normal native call has no unique entry/completion visits"):
++            continue
++        entry_visit, normal_visit = entry_visits[0], normal_visits[0]
++        invoked = [o for o in model.operations if o.visit == entry_visit.id and o.operation == invoke.id]
++        completed = [o for o in model.operations if o.visit == normal_visit.id and o.operation == returned.id]
++        if not check(len(invoked) == len(completed) == 1, "occurrence", expected_id,
++                     "native invocation/normal Return occurrence missing or ambiguous"):
++            continue
++        invoked, completed = invoked[0], completed[0]
++        transfers = [t for t in model.transfers if t.operation == invoked.id]
++        check(len(transfers) == 1 and transfers[0].successor_index == normal_index
++              and transfers[0].target == normal_visit.id,
++              "actual_completion", expected_id, "actual normal completion does not select its original normal result edge")
++        for direction, block, visit, op, occurrence in (
++                ("inputs", entry, entry_visit, invoke, invoked),
++                ("outputs", normal, normal_visit, returned, completed)):
++            for i, formal in enumerate(block.arguments):
++                path = expected_id + ":" + direction + ":" + str(i)
++                values = actual_values.get((visit.id, formal), [])
++                uses = actual_uses.get((occurrence.id, op.uses[i].id), [])
++                if not check(len(values) == len(uses) == 1 and uses[0].value == values[0].id,
++                             "actual_use_order", path, "actual original Use does not read this exact formal ValueOccurrence"):
++                    continue
++                if i >= len(item["signature"][direction]) or not item["signature"][direction][i]["tensor"]:
++                    continue
++                denotations = [d for d in model.denotations if type(d.basis) is
++                    (NativeInputRef if direction == "inputs" else NativeOutputRef)
++                    and d.basis.boundary == boundary.id and d.basis.position == i
++                    and (d.basis.entry == entry_visit.id if direction == "inputs" else d.basis.operation == completed.id)]
++                check(len(denotations) == 1 and denotations[0].value == values[0].id,
++                      "actual_native_order", path, "native slot/denotation does not preserve the actual original Use value ordinal")
++    check(set(activations) == expected_activations, "activation_inventory", "model",
++          "native window has missing or extra canonical activations")
++    return tuple(errors)
++
++
++def _require_native_port_order(program, model, interfaces, run):
++    errors = _native_port_order_errors(program, model, interfaces, run)
++    if errors:
++        raise NativePortOrderError("native_port_order: " + "; ".join(
++            code + " at " + path + ": " + message for code, path, message in errors))
++
++
+ class _OwnedNativeCapture:
+     __slots__ = ("_payload",)
+ 
+@@ -226,6 +441,7 @@
+         need(type(value_artifact) is type(evidence_artifact) is ProviderArtifact, "projection artifacts are required")
+         self._value_artifact, self._evidence_artifact = value_artifact, evidence_artifact
+         self._interfaces = canonical(replay_interfaces(owned.source())[0])
++        _require_native_port_order(program, model, json.loads(self._interfaces), owned.source()["run"])
+ 
+     def require_scope(self, model, program):
+         from scar.ir.program.codec import dumps as program_dumps
+@@ -233,6 +449,7 @@
+         need(self._program_sha == sha256(program_dumps(program).encode()).hexdigest()
+              and self._model_sha == sha256(dumps(model).encode()).hexdigest(),
+              "owned native port evidence does not apply to this exact program/execution/Run")
++        _require_native_port_order(program, model, json.loads(self._interfaces), self._owned.source()["run"])
+ 
+     def resolve(self, ctx, basis, resolved, identity, path):
+         """Replay original ordered ports independently of builder declarations."""

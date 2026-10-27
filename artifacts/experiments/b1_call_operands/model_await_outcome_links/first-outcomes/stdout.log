@@ -1,0 +1,216 @@
+FFFF..FFFF.FF                                                            [100%]
+=================================== FAILURES ===================================
+_ test_removing_whole_final_adapters_keeps_body_return_consumer_and_all_own_legs[zero-cut] _
+
+zero_cut = True
+
+    @pytest.mark.parametrize('zero_cut', (True, False), ids=('zero-cut', 'two-cut'))
+    def test_removing_whole_final_adapters_keeps_body_return_consumer_and_all_own_legs(zero_cut):
+        complete, details = await_outcome_program(zero_cut=zero_cut)
+        removed, missing = await_outcome_program(zero_cut=zero_cut, final_adapters=False)
+        require_valid(_core(removed))
+        assert complete.operations == removed.operations and complete.values == removed.values
+        assert complete.regions == removed.regions
+        assert all(row not in removed.protocol_operations for row in details['final_rows'])
+        assert all(receipt.site not in details['final_sites'] for receipt in removed.protocol_result_consumers)
+        before, after = _report(complete, details), _report(removed, missing)
+>       assert tuple(row['key'] for row in before['outcomes']) == tuple(row['key'] for row in after['outcomes'])
+                                           ^^^^^^^^^^^^^^^^^^
+E       KeyError: 'outcomes'
+
+tests/unit/test_program_await_outcomes.py:67: KeyError
+_ test_removing_whole_final_adapters_keeps_body_return_consumer_and_all_own_legs[two-cut] _
+
+zero_cut = False
+
+    @pytest.mark.parametrize('zero_cut', (True, False), ids=('zero-cut', 'two-cut'))
+    def test_removing_whole_final_adapters_keeps_body_return_consumer_and_all_own_legs(zero_cut):
+        complete, details = await_outcome_program(zero_cut=zero_cut)
+        removed, missing = await_outcome_program(zero_cut=zero_cut, final_adapters=False)
+        require_valid(_core(removed))
+        assert complete.operations == removed.operations and complete.values == removed.values
+        assert complete.regions == removed.regions
+        assert all(row not in removed.protocol_operations for row in details['final_rows'])
+        assert all(receipt.site not in details['final_sites'] for receipt in removed.protocol_result_consumers)
+        before, after = _report(complete, details), _report(removed, missing)
+>       assert tuple(row['key'] for row in before['outcomes']) == tuple(row['key'] for row in after['outcomes'])
+                                           ^^^^^^^^^^^^^^^^^^
+E       KeyError: 'outcomes'
+
+tests/unit/test_program_await_outcomes.py:67: KeyError
+_ test_conversion_and_extraction_keep_own_normal_and_raised_payloads_separate[zero-cut] _
+
+zero_cut = True
+
+    @pytest.mark.parametrize('zero_cut', (True, False), ids=('zero-cut', 'two-cut'))
+    def test_conversion_and_extraction_keep_own_normal_and_raised_payloads_separate(zero_cut):
+        graph, details = await_outcome_program(zero_cut=zero_cut)
+        report = _report(graph, details)
+>       row = _outcome(report, details)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_program_await_outcomes.py:89: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+report = {'issues': (), 'gaps': ({'code': 'await_acquisition_expansion_unproved', 'site': ProtocolOperationRef(scope=ProtocolSc...ult=CompletionResult(index=0)), ...},), 'source_count': 1, 'known_inventory_complete': True, 'cursor': None, ...}, ...}
+details = {'caller': Region(id=RegionID(value='await.resume.caller'), label='declared driver fixture', entry=BlockID(value='awai...lue='resume.context')))),), parent=None), 'body_kind': <ResumableKind.GENERATOR_COROUTINE: 'GENERATOR_COROUTINE'>, ...}
+
+    def _outcome(report, details):
+>       matches = tuple(row for row in report['outcomes']
+                                       ^^^^^^^^^^^^^^^^^^
+            if row['source'] == details['source']
+            and row['advance_operation'] == details['advance_operation']
+            and row['drive_outcome'] == details['drive_outcome'])
+E       KeyError: 'outcomes'
+
+tests/unit/test_program_await_outcomes.py:26: KeyError
+_ test_conversion_and_extraction_keep_own_normal_and_raised_payloads_separate[two-cut] _
+
+zero_cut = False
+
+    @pytest.mark.parametrize('zero_cut', (True, False), ids=('zero-cut', 'two-cut'))
+    def test_conversion_and_extraction_keep_own_normal_and_raised_payloads_separate(zero_cut):
+        graph, details = await_outcome_program(zero_cut=zero_cut)
+        report = _report(graph, details)
+>       row = _outcome(report, details)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_program_await_outcomes.py:89: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+report = {'issues': (), 'gaps': ({'code': 'await_acquisition_expansion_unproved', 'site': ProtocolOperationRef(scope=ProtocolSc...sult=CompletionResult(index=0)), ...}), 'source_count': 1, 'known_inventory_complete': True, 'cursor': None, ...}, ...}
+details = {'caller': Region(id=RegionID(value='await.resume.caller'), label='declared driver fixture', entry=BlockID(value='awai...alue='resume.context'))))), parent=None), 'body_kind': <ResumableKind.GENERATOR_COROUTINE: 'GENERATOR_COROUTINE'>, ...}
+
+    def _outcome(report, details):
+>       matches = tuple(row for row in report['outcomes']
+                                       ^^^^^^^^^^^^^^^^^^
+            if row['source'] == details['source']
+            and row['advance_operation'] == details['advance_operation']
+            and row['drive_outcome'] == details['drive_outcome'])
+E       KeyError: 'outcomes'
+
+tests/unit/test_program_await_outcomes.py:26: KeyError
+_ test_lookup_call_and_bool_rejection_failures_keep_distinct_prefixes_and_slots _
+
+    def test_lookup_call_and_bool_rejection_failures_keep_distinct_prefixes_and_slots():
+        graph, details = await_outcome_failure_program("qualification_reject")
+        require_valid(graph)
+        report = _report(graph, details["acquisition_scope"])
+    
+>       lookup = _raise_path(report, details, "LOOKUP")
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_program_await_outcome_failures.py:39: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+report = {'issues': (), 'gaps': ({'code': 'await_acquisition_kind_unproved', 'site': ProtocolOperationRef(scope=ProtocolScopeID...general.helper.qualify.input')), ...}), 'source_count': 2, 'known_inventory_complete': True, 'cursor': None, ...}, ...}
+details = {'acquisition_scope': ProtocolScopeID(value='await.self.acquisition'), 'advance_scope': ProtocolScopeID(value='await.s..., UseID(value='factory.call.input.1'), UseID(value='factory.call.input.2'), UseID(value='factory.call.input.3'))), ...}
+stage = 'LOOKUP'
+
+    def _raise_path(report, details, stage):
+>       matches = tuple(path for path in report["failure_paths"]
+                                         ^^^^^^^^^^^^^^^^^^^^^^^
+            if path["scope"] == details["acquisition_scope"]
+            and path["source_operation"] == details["get"].id
+            and _stage(path) == stage)
+E       KeyError: 'failure_paths'
+
+tests/unit/test_program_await_outcome_failures.py:26: KeyError
+______ test_removing_parent_raise_consumer_keeps_the_consumer_obligation _______
+
+    def test_removing_parent_raise_consumer_keeps_the_consumer_obligation():
+        graph, details = await_outcome_failure_program(
+            "qualification_reject", omit_parent_raise_consumer=True)
+        require_valid(graph)
+        report = _report(graph, details["acquisition_scope"])
+>       rejected = _raise_path(report, details, "QUALIFICATION_REJECT")
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_program_await_outcome_failures.py:83: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+report = {'issues': (), 'gaps': ({'code': 'await_acquisition_kind_unproved', 'site': ProtocolOperationRef(scope=ProtocolScopeID...general.helper.qualify.input')), ...}), 'source_count': 2, 'known_inventory_complete': True, 'cursor': None, ...}, ...}
+details = {'acquisition_scope': ProtocolScopeID(value='await.self.acquisition'), 'advance_scope': ProtocolScopeID(value='await.s..., UseID(value='factory.call.input.1'), UseID(value='factory.call.input.2'), UseID(value='factory.call.input.3'))), ...}
+stage = 'QUALIFICATION_REJECT'
+
+    def _raise_path(report, details, stage):
+>       matches = tuple(path for path in report["failure_paths"]
+                                         ^^^^^^^^^^^^^^^^^^^^^^^
+            if path["scope"] == details["acquisition_scope"]
+            and path["source_operation"] == details["get"].id
+            and _stage(path) == stage)
+E       KeyError: 'failure_paths'
+
+tests/unit/test_program_await_outcome_failures.py:26: KeyError
+____ test_get_own_raise_inventory_survives_missing_row_and_advance_metadata ____
+
+    def test_get_own_raise_inventory_survives_missing_row_and_advance_metadata():
+        graph, details = await_outcome_failure_program(
+            "qualification_reject", omit_acquisition_raise_row=True,
+            remove_success_metadata=True)
+>       require_valid(graph)
+
+tests/unit/test_program_await_outcome_failures.py:96: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='factory'), regions=(Region(id=RegionID(value='factory'), label='declared driver fixt...y.branch'), use=UseID(value='await.general.helper.qualify.condition')),))), protocol_bindings=(), exception_matches=())
+
+    def require_valid(graph: ProgramGraph) -> None:
+        issues = validate(graph)
+        if issues:
+>           raise ValueError("; ".join(f"{issue.code} at {issue.path}: {issue.message}" for issue in issues))
+E           ValueError: protocol_connection_site at ProtocolOperationRef(scope=ProtocolScopeID(value='await.self.acquisition'), clause=<ProtocolClause.AWAIT_ACQUISITION: 'AWAIT_ACQUISITION'>, operation=OperationID(value='factory.get_awaitable'), slot=1): connection site must select an exact existing protocol row
+
+scar/ir/program/validation.py:749: ValueError
+____ test_wrapper_constructor_own_raise_is_inventoried_without_a_drive_link ____
+
+    def test_wrapper_constructor_own_raise_is_inventoried_without_a_drive_link():
+        graph, details = await_wrapper_outcome_failure_program(attach_link=False)
+        require_valid(graph)
+        report = _report(graph, details["construction_scope"])
+>       paths = tuple(path for path in report["failure_paths"]
+                                       ^^^^^^^^^^^^^^^^^^^^^^^
+            if path["scope"] == details["construction_scope"]
+            and path["source_operation"] == details["constructor"].id
+            and _stage(path) == "WRAPPER_CONSTRUCTION_RAISE")
+E       KeyError: 'failure_paths'
+
+tests/unit/test_program_await_outcome_failures.py:116: KeyError
+_ test_callee_normal_terminal_cannot_project_to_normal_parent_under_raise_choice _
+
+    def test_callee_normal_terminal_cannot_project_to_normal_parent_under_raise_choice():
+        context, budget, source, result, normal_edge, raised_edge = _general_result_context()
+        assert _result_copy(context, source, result, choices=(normal_edge,))["match"] is True
+    
+        report = _result_copy(context, source, result, choices=(raised_edge,))
+    
+        assert not budget.truncated
+>       assert report["match"] is False
+E       assert True is False
+
+tests/unit/test_program_await_outcome_boundaries.py:50: AssertionError
+______ test_identical_normal_result_cannot_bypass_the_parent_raise_choice ______
+
+    def test_identical_normal_result_cannot_bypass_the_parent_raise_choice():
+        context, budget, _, result, normal_edge, raised_edge = _general_result_context()
+        assert _result_copy(context, result, result, choices=(normal_edge,))["match"] is True
+    
+        report = _result_copy(context, result, result, choices=(raised_edge,))
+    
+        assert not budget.truncated
+>       assert report["match"] is False
+E       assert True is False
+
+tests/unit/test_program_await_outcome_boundaries.py:60: AssertionError
+=========================== short test summary info ============================
+FAILED tests/unit/test_program_await_outcomes.py::test_removing_whole_final_adapters_keeps_body_return_consumer_and_all_own_legs[zero-cut]
+FAILED tests/unit/test_program_await_outcomes.py::test_removing_whole_final_adapters_keeps_body_return_consumer_and_all_own_legs[two-cut]
+FAILED tests/unit/test_program_await_outcomes.py::test_conversion_and_extraction_keep_own_normal_and_raised_payloads_separate[zero-cut]
+FAILED tests/unit/test_program_await_outcomes.py::test_conversion_and_extraction_keep_own_normal_and_raised_payloads_separate[two-cut]
+FAILED tests/unit/test_program_await_outcome_failures.py::test_lookup_call_and_bool_rejection_failures_keep_distinct_prefixes_and_slots
+FAILED tests/unit/test_program_await_outcome_failures.py::test_removing_parent_raise_consumer_keeps_the_consumer_obligation
+FAILED tests/unit/test_program_await_outcome_failures.py::test_get_own_raise_inventory_survives_missing_row_and_advance_metadata
+FAILED tests/unit/test_program_await_outcome_failures.py::test_wrapper_constructor_own_raise_is_inventoried_without_a_drive_link
+FAILED tests/unit/test_program_await_outcome_boundaries.py::test_callee_normal_terminal_cannot_project_to_normal_parent_under_raise_choice
+FAILED tests/unit/test_program_await_outcome_boundaries.py::test_identical_normal_result_cannot_bypass_the_parent_raise_choice
+10 failed, 3 passed in 4.38s

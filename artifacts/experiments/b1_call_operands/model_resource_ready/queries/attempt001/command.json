@@ -1,0 +1,11 @@
+{
+  "command": [
+    "/home/zyf/miniconda3/envs/lewm/bin/python",
+    "-m",
+    "pytest",
+    "-q",
+    "tests/unit/test_execution_materialization_coverage.py",
+    "--junitxml=artifacts/experiments/b1_call_operands/model_resource_ready/queries/attempt001/results.xml"
+  ],
+  "scope": "Original MatRef to exact storage geometry only; no denotation, content, native protocol or ready proof."
+}

@@ -1,0 +1,14 @@
+{
+  "status": "PASS",
+  "scope": "all actual production dispatch marker slots and retained raw ancestry",
+  "dispatches": 39796,
+  "outcomes": {
+    "RETURNED": 39796
+  },
+  "marker_observations": 79592,
+  "retained_ancestor_missing": 480,
+  "unqualified_payload_slots": 383,
+  "exact_slot_associations": 109288,
+  "whole_program_verified": false,
+  "state_versions_or_ready_verified": false
+}

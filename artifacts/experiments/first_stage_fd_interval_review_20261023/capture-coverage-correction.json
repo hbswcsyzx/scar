@@ -1,0 +1,306 @@
+{
+  "capture_command_sha256": "1f8dfcfe46060c392eb9df3faa56f57f273f5cf95b2886814cb072e455fc3ab6",
+  "capture_filter": "%file,%process,%memory,%desc",
+  "capture_strace_version": "strace -- version 6.8\nCopyright (c) 1991-2024 The strace developers <https://strace.io>.\nThis is free software; see the source for copying conditions.  There is NO\nwarranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n\nOptional features enabled: stack-trace=libunwind stack-demangle m32-mpers mx32-mpers\n",
+  "captured_binary_at_run_not_hash_identified": true,
+  "close_range_zero_observed_count_implies_absence": false,
+  "existing_35_continuity_claim": "conditional/unverified where it depends on absence of omitted mutators; old artifacts unchanged",
+  "fd_scalar_projection_gate": "raw output values/record invariants remain valid; not a proof of container continuity",
+  "first_stage_complete": false,
+  "full_execution_model_semantics": "OPEN",
+  "installed_package_observed": "strace 6.8-0ubuntu2 amd64",
+  "installed_strace_binary_sha256": "28f957c227012de0b18d1bd7fff2d396cb693ea60ed8013be68de071e84b5001",
+  "new_interval_container_bindings_approved": 0,
+  "new_raw_reads": 0,
+  "new_target_or_ptrace_runs": 0,
+  "previous_12110_count_means": "exact source/Run/line-range candidates only; required capture coverage is OPEN",
+  "primary_sources": {
+    "amd64_sysent": {
+      "bytes": 17653,
+      "excerpts": [
+        {
+          "line": 279,
+          "text": "[271] = { 5,\tTD,\t\tSEN(ppoll_time64),\t\t\"ppoll\"\t\t\t},"
+        },
+        {
+          "line": 280,
+          "text": "[272] = { 1,\t0,\t\tSEN(unshare),\t\t\t\"unshare\"\t\t},"
+        },
+        {
+          "line": 281,
+          "text": "[273] = { 2,\t0,\t\tSEN(set_robust_list),\t\t\"set_robust_list\"\t},"
+        },
+        {
+          "line": 343,
+          "text": "/* [335 ... 423] - reserved to sync up with other architectures */"
+        },
+        {
+          "line": 344,
+          "text": "#include \"syscallent-common.h\""
+        }
+      ],
+      "sha256": "d381fb1ae2d4a548a1a4a5f0c24f72efcb522d1da75d4b87610af2e7f913ee63",
+      "url": "https://raw.githubusercontent.com/strace/strace/v6.8/src/linux/x86_64/syscallent.h"
+    },
+    "class_definitions": {
+      "bytes": 1256,
+      "excerpts": [
+        {
+          "line": 9,
+          "text": ""
+        },
+        {
+          "line": 10,
+          "text": "# define TD\t0"
+        },
+        {
+          "line": 11,
+          "text": "# define TF\t0"
+        },
+        {
+          "line": 12,
+          "text": "# define TI\t0"
+        },
+        {
+          "line": 13,
+          "text": "# define TN\t0"
+        },
+        {
+          "line": 14,
+          "text": "# define TP\t0"
+        },
+        {
+          "line": 15,
+          "text": "# define TS\t0"
+        },
+        {
+          "line": 16,
+          "text": "# define TM\t0"
+        },
+        {
+          "line": 17,
+          "text": "# define TST\t0"
+        },
+        {
+          "line": 18,
+          "text": "# define TLST\t0"
+        },
+        {
+          "line": 19,
+          "text": "# define TFST\t0"
+        },
+        {
+          "line": 20,
+          "text": "# define TSTA\t0"
+        },
+        {
+          "line": 21,
+          "text": "# define TSF\t0"
+        },
+        {
+          "line": 22,
+          "text": "# define TFSF\t0"
+        },
+        {
+          "line": 23,
+          "text": "# define TSFA\t0"
+        },
+        {
+          "line": 37,
+          "text": ""
+        },
+        {
+          "line": 38,
+          "text": "# define TD\tTRACE_DESC"
+        },
+        {
+          "line": 39,
+          "text": "# define TF\tTRACE_FILE"
+        },
+        {
+          "line": 40,
+          "text": "# define TI\tTRACE_IPC"
+        },
+        {
+          "line": 41,
+          "text": "# define TN\tTRACE_NETWORK"
+        },
+        {
+          "line": 42,
+          "text": "# define TP\tTRACE_PROCESS"
+        },
+        {
+          "line": 43,
+          "text": "# define TS\tTRACE_SIGNAL"
+        },
+        {
+          "line": 44,
+          "text": "# define TM\tTRACE_MEMORY"
+        },
+        {
+          "line": 45,
+          "text": "# define TST\tTRACE_STAT"
+        },
+        {
+          "line": 46,
+          "text": "# define TLST\tTRACE_LSTAT"
+        },
+        {
+          "line": 47,
+          "text": "# define TFST\tTRACE_FSTAT"
+        },
+        {
+          "line": 48,
+          "text": "# define TSTA\tTRACE_STAT_LIKE"
+        },
+        {
+          "line": 49,
+          "text": "# define TSF\tTRACE_STATFS"
+        },
+        {
+          "line": 50,
+          "text": "# define TFSF\tTRACE_FSTATFS"
+        },
+        {
+          "line": 51,
+          "text": "# define TSFA\tTRACE_STATFS_LIKE"
+        }
+      ],
+      "sha256": "0fc70968047e701606a769d361c1fe46f62dd237f410b8697ae9d62f911dd615",
+      "url": "https://raw.githubusercontent.com/strace/strace/v6.8/src/sysent_shorthand_defs.h"
+    },
+    "class_selection": {
+      "bytes": 8239,
+      "excerpts": [
+        {
+          "line": 113,
+          "text": "\tstatic const struct xlat_data syscall_class[] = {"
+        },
+        {
+          "line": 114,
+          "text": "\t\t{ TRACE_DESC,\t\t\"%desc\" },"
+        },
+        {
+          "line": 115,
+          "text": "\t\t{ TRACE_FILE,\t\t\"%file\" },"
+        },
+        {
+          "line": 116,
+          "text": "\t\t{ TRACE_MEMORY,\t\t\"%memory\" },"
+        },
+        {
+          "line": 117,
+          "text": "\t\t{ TRACE_PROCESS,\t\"%process\" },"
+        },
+        {
+          "line": 118,
+          "text": "\t\t{ TRACE_CREDS,\t\t\"%creds\" },"
+        },
+        {
+          "line": 133,
+          "text": "\t\t{ 0,\t\t\t\"all\" },"
+        },
+        {
+          "line": 134,
+          "text": "\t\t{ TRACE_DESC,\t\t\"desc\" },"
+        },
+        {
+          "line": 135,
+          "text": "\t\t{ TRACE_FILE,\t\t\"file\" },"
+        },
+        {
+          "line": 136,
+          "text": "\t\t{ TRACE_MEMORY,\t\t\"memory\" },"
+        },
+        {
+          "line": 137,
+          "text": "\t\t{ TRACE_PROCESS,\t\"process\" },"
+        },
+        {
+          "line": 138,
+          "text": "\t\t{ TRACE_SIGNAL,\t\t\"signal\" },"
+        },
+        {
+          "line": 149,
+          "text": "\t\tif (sysent_vec[p][i].sys_name &&"
+        },
+        {
+          "line": 150,
+          "text": "\t\t    (sysent_vec[p][i].sys_flags & n) == n)"
+        },
+        {
+          "line": 151,
+          "text": "\t\t\tadd_number_to_set_array(i, set, p);"
+        }
+      ],
+      "sha256": "039183fa679f46a816f15c546ff9a396625b5f4b4a9a4e0744404cec487ace9a",
+      "url": "https://raw.githubusercontent.com/strace/strace/v6.8/src/basic_filters.c"
+    },
+    "common_sysent": {
+      "bytes": 2766,
+      "excerpts": [
+        {
+          "line": 22,
+          "text": "[BASE_NR + 435] = { 2,\tTP,\t\tSEN(clone3),\t\t\t\"clone3\"\t\t},"
+        },
+        {
+          "line": 23,
+          "text": "[BASE_NR + 436] = { 3,\t0,\t\tSEN(close_range),\t\t\"close_range\"\t\t},"
+        },
+        {
+          "line": 24,
+          "text": "[BASE_NR + 437] = { 4,\tTD|TF,\t\tSEN(openat2),\t\t\t\"openat2\"\t\t},"
+        }
+      ],
+      "sha256": "01699c19c2089f7dea45234884cc8fc0529293591d882c01dacccc8627252e39",
+      "url": "https://raw.githubusercontent.com/strace/strace/v6.8/src/linux/generic/syscallent-common.h"
+    },
+    "ubuntu_patches": {
+      "bytes": 21776,
+      "patch_target_headers": {
+        "debian/patches/0007-XFAIL-netlink_crypto.patch": [
+          "--- a/tests-m32/netlink_crypto.gen.test",
+          "+++ b/tests-m32/netlink_crypto.gen.test",
+          "--- a/tests-mx32/netlink_crypto.gen.test",
+          "+++ b/tests-mx32/netlink_crypto.gen.test",
+          "--- a/tests/netlink_crypto.gen.test",
+          "+++ b/tests/netlink_crypto.gen.test"
+        ],
+        "debian/patches/0008-XFAIL-nlattr_crypto_user_alg.patch": [
+          "--- a/tests-m32/nlattr_crypto_user_alg.gen.test",
+          "+++ b/tests-m32/nlattr_crypto_user_alg.gen.test",
+          "--- a/tests-mx32/nlattr_crypto_user_alg.gen.test",
+          "+++ b/tests-mx32/nlattr_crypto_user_alg.gen.test",
+          "--- a/tests/nlattr_crypto_user_alg.gen.test",
+          "+++ b/tests/nlattr_crypto_user_alg.gen.test"
+        ],
+        "debian/patches/02-disable_delay_test": [
+          "--- a/tests-m32/delay.test",
+          "+++ b/tests-m32/delay.test",
+          "--- a/tests-mx32/delay.test",
+          "+++ b/tests-mx32/delay.test",
+          "--- a/tests/delay.test",
+          "+++ b/tests/delay.test"
+        ],
+        "debian/patches/fix-time_t-conversion.patch": [
+          "--- a/tests/mq_sendrecv.c",
+          "+++ b/tests/mq_sendrecv.c",
+          "--- a/tests/recvmmsg-timeout.c",
+          "+++ b/tests/recvmmsg-timeout.c",
+          "--- a/tests/xselect.c",
+          "+++ b/tests/xselect.c",
+          "--- a/tests/xutimes.c",
+          "+++ b/tests/xutimes.c"
+        ],
+        "debian/patches/series": []
+      },
+      "sha256": "6efc6fde478f3beb37dbd246f1e9fe4f13e74eef794b5b66d7589f0933bc351b",
+      "url": "https://launchpad.net/ubuntu/+archive/primary/+sourcefiles/strace/6.8-0ubuntu2/strace_6.8-0ubuntu2.debian.tar.xz"
+    }
+  },
+  "production_changed": false,
+  "schema": "scar.capture-filter-coverage-review",
+  "schema_version": 1,
+  "status": "MISSING_MUTATOR_CAPTURE_COVERAGE",
+  "unshare_zero_observed_count_implies_absence": false
+}

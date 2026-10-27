@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="2" time="2.944" timestamp="2026-10-19T18:29:51.198524+00:00" hostname="gpu1"><testcase classname="tests.unit.test_program_async_initial_selection" name="test_unknown_effective_input_cannot_become_a_created_start_proof" time="1.195"><failure message="assert not True&#10; +  where True = any(&lt;generator object test_unknown_effective_input_cannot_become_a_created_start_proof.&lt;locals&gt;.&lt;genexpr&gt; at 0x7d8c68124380&gt;)">def test_unknown_effective_input_cannot_become_a_created_start_proof():
+        graph, details = created_unknown_scheduler_program()
+        joint, paths = _joint(graph, details)
+        assert any(item['view'].get('effective_sources', {}).get('source_inventory_complete') is False
+                   for item in joint['predicates'])
+&gt;       assert not any(path['compatible_at_snapshot'] is True for path in paths)
+E       assert not True
+E        +  where True = any(&lt;generator object test_unknown_effective_input_cannot_become_a_created_start_proof.&lt;locals&gt;.&lt;genexpr&gt; at 0x7d8c68124380&gt;)
+
+tests/unit/test_program_async_initial_selection.py:70: AssertionError</failure></testcase><testcase classname="tests.unit.test_program_async_initial_selection" name="test_association_state_change_cannot_be_dropped_from_the_joint_body_proof" time="0.934" /></testsuite></testsuites>

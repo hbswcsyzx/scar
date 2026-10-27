@@ -1,0 +1,11 @@
+{
+  "scope": "receipt-only finalization after terminal gate; immutable original receipt restored with updated copy preserved",
+  "original_receipt_sha256": "e61fea20622fc040a886a487de046fbb9e31c767f1d5fe4c8bd2d4a2b5f96f6c",
+  "final_receipt_path": "artifacts/experiments/first_stage_tensor_layout_20261023/artifact-receipts.final.json",
+  "final_receipt_sha256": "48974c9f5568e8377c58e0a8cfe70a8dffbbfb7f62628d37cfdbff81175d51b7",
+  "added_receipt_members": [
+    "root-artifact-receipts.json",
+    "staging-list.json"
+  ],
+  "production_or_report_bytes_changed": false
+}

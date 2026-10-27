@@ -1,0 +1,11 @@
+Traceback (most recent call last):
+  File "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_call_protocol_frontiers_20261023/audit.py", line 168, in <module>
+    "captures": [inspect(EXPERIMENTS / name) for name in (
+                 ~~~~~~~^^^^^^^^^^^^^^^^^^^^
+  File "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_call_protocol_frontiers_20261023/audit.py", line 97, in inspect
+    metadata, = rows("operand-meta")
+    ^^^^^^^^^
+  File "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_call_protocol_frontiers_20261023/audit.py", line 65, in rows
+    assert len(matches) == 1
+           ^^^^^^^^^^^^^^^^^
+AssertionError

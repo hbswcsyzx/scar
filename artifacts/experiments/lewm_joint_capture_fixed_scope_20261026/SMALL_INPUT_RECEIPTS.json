@@ -1,0 +1,58 @@
+[
+  {
+    "original_uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/lewm_joint_capture_fixed_scope_20261026/capture/trace/call-meta.1705107.json",
+    "retained_physical_uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/lewm_joint_capture_fixed_scope_20261026/capture/trace/call-meta.1705107.json",
+    "copy": "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/lewm_joint_capture_fixed_scope_20261026/small-inputs/call-meta.1705107.json",
+    "bytes": 1272,
+    "sha256": "aa3f514c518176a94ba1a58100b2e7ba52905c4cc6effd8f38eb7648dcda737f"
+  },
+  {
+    "original_uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/lewm_joint_capture_fixed_scope_20261026/capture/trace/call-operand-meta.1705107.json",
+    "retained_physical_uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/lewm_joint_capture_fixed_scope_20261026/capture/trace/call-operand-meta.1705107.json",
+    "copy": "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/lewm_joint_capture_fixed_scope_20261026/small-inputs/call-operand-meta.1705107.json",
+    "bytes": 2011,
+    "sha256": "0da36ad50b0db6f0b5ef1db9b95d03ece6487e43e4da010462df0011c53e43e0"
+  },
+  {
+    "original_uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/lewm_joint_capture_fixed_scope_20261026/capture/trace/python-call-target-meta.1705107.json",
+    "retained_physical_uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/lewm_joint_capture_fixed_scope_20261026/capture/trace/python-call-target-meta.1705107.json",
+    "copy": "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/lewm_joint_capture_fixed_scope_20261026/small-inputs/python-call-target-meta.1705107.json",
+    "bytes": 2848,
+    "sha256": "5259e2c629e3ceee020f6529460b94cdbff1f39adfc66f45a2a8d8c13a7abac8"
+  },
+  {
+    "original_uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/lewm_joint_capture_fixed_scope_20261026/capture/trace/function-environment-meta.1705107.json",
+    "retained_physical_uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/lewm_joint_capture_fixed_scope_20261026/capture/trace/function-environment-meta.1705107.json",
+    "copy": "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/lewm_joint_capture_fixed_scope_20261026/small-inputs/function-environment-meta.1705107.json",
+    "bytes": 1464,
+    "sha256": "47ce42020a58f40a58472342df8bc50c91bfe9384534fede5042f99f8128f13f"
+  },
+  {
+    "original_uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/lewm_joint_capture_fixed_scope_20261026/capture/trace/execution-evidence.1705107.json",
+    "retained_physical_uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/lewm_joint_capture_fixed_scope_20261026/capture/trace/execution-evidence.1705107.json",
+    "copy": "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/lewm_joint_capture_fixed_scope_20261026/small-inputs/execution-evidence.1705107.json",
+    "bytes": 6942,
+    "sha256": "caf86713ab8f5e0007b02cff8c1bee258a86c893a402c346b36794de284a18ee"
+  },
+  {
+    "original_uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/lewm_joint_capture_fixed_scope_20261026/capture/trace/dispatch-meta.1705107.154a6614602e6c1f18fd5c6d3ebcfdec.json",
+    "retained_physical_uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/lewm_joint_capture_fixed_scope_20261026/capture/trace/dispatch-meta.1705107.154a6614602e6c1f18fd5c6d3ebcfdec.json",
+    "copy": "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/lewm_joint_capture_fixed_scope_20261026/small-inputs/dispatch-meta.1705107.154a6614602e6c1f18fd5c6d3ebcfdec.json",
+    "bytes": 1550,
+    "sha256": "94d41800e69d9576071f2b576ad8e0555af24bd0cd7a47e815b9dbe43b3e6d35"
+  },
+  {
+    "original_uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/lewm_joint_capture_fixed_scope_20261026/capture/trace/tensor-physical-meta.1705107.154a6614602e6c1f18fd5c6d3ebcfdec.json",
+    "retained_physical_uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/lewm_joint_capture_fixed_scope_20261026/capture/trace/tensor-physical-meta.1705107.154a6614602e6c1f18fd5c6d3ebcfdec.json",
+    "copy": "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/lewm_joint_capture_fixed_scope_20261026/small-inputs/tensor-physical-meta.1705107.154a6614602e6c1f18fd5c6d3ebcfdec.json",
+    "bytes": 4290,
+    "sha256": "672360fdb9cc8ba9c831aa07a57f7ee524b136d9657e750842b828c93aae1adc"
+  },
+  {
+    "original_uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/lewm_joint_capture_fixed_scope_20261026/capture/trace/collector-witness.1705107.b062088665664aa78aefa01e723874f8/manifest.json",
+    "retained_physical_uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/lewm_joint_capture_fixed_scope_20261026/capture/trace/collector-witness.1705107.b062088665664aa78aefa01e723874f8/manifest.json",
+    "copy": "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/lewm_joint_capture_fixed_scope_20261026/small-inputs/manifest.json",
+    "bytes": 72248,
+    "sha256": "ac453cbf6c58d85f8c03a91e98bdafa5910fdd109bf03fbd2c1129b407355223"
+  }
+]

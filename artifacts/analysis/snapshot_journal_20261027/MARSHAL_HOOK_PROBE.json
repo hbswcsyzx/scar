@@ -1,0 +1,23 @@
+{
+  "application_hooks": [],
+  "marshal_version": 5,
+  "probes": [
+    {
+      "kind": "app",
+      "rejected": true
+    },
+    {
+      "kind": "dict-subclass",
+      "rejected": true
+    },
+    {
+      "kind": "list-subclass",
+      "rejected": true
+    },
+    {
+      "kind": "code",
+      "rejected": true
+    }
+  ],
+  "runtime": "3.14.7 | packaged by conda-forge | (main, Sep  2 2026, 21:08:32) [GCC 15.3.0]"
+}

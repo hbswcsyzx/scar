@@ -1,0 +1,8 @@
+Traceback (most recent call last):
+  File "/tmp/scar-structured-model-280qf4mi/artifacts/experiments/b1_call_operands/model_remaining_protocols/continuations/loop-diagnosis001/inspect.py", line 2, in <module>
+    from dataclasses import replace
+  File "/home/zyf/miniconda3/envs/lewm/lib/python3.14/dataclasses.py", line 5, in <module>
+    import inspect
+  File "/tmp/scar-structured-model-280qf4mi/artifacts/experiments/b1_call_operands/model_remaining_protocols/continuations/loop-diagnosis001/inspect.py", line 2, in <module>
+    from dataclasses import replace
+ImportError: cannot import name 'replace' from partially initialized module 'dataclasses' (most likely due to a circular import) (/home/zyf/miniconda3/envs/lewm/lib/python3.14/dataclasses.py)

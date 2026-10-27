@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="3" skipped="0" tests="3" time="2.734" timestamp="2026-10-19T08:58:18.018630+00:00" hostname="gpu1"><testcase classname="tests.unit.test_program_await_raise_continuations" name="test_preserved_body_raise_crosses_sync_cleanup_to_current_parent_and_consumer" time="1.512"><failure message="KeyError: 'continuations'">def test_preserved_body_raise_crosses_sync_cleanup_to_current_parent_and_consumer():
+        graph, details = await_raise_cleanup_program(mode='preserve')
+        index = _index(graph)
+        report = _report(index, details)
+        outcome = _outcome(report, details)
+        # The old public view loses these consumers before any new field is read.
+        _consumers(index, graph, outcome)
+&gt;       continuation = _continuation(outcome, details)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_program_await_raise_continuations.py:128: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+outcome = {'key': (ProtocolScopeID(value='await.resume.acquisition'), OperationID(value='await.resume.acquire'), OperationID(val...OperationID(value='await.resume.acquire'), slot=0), 'source_operation': OperationID(value='await.resume.acquire'), ...}
+details = {'caller': Region(id=RegionID(value='await.resume.caller'), label='declared driver fixture', entry=BlockID(value='awai...t=RegionID(value='await.resume.caller')), 'body_kind': &lt;ResumableKind.GENERATOR_COROUTINE: 'GENERATOR_COROUTINE'&gt;, ...}
+
+    def _continuation(outcome, details):
+        definition = details['raise_cleanup']
+&gt;       row, = tuple(row for row in outcome['continuations']
+                                    ^^^^^^^^^^^^^^^^^^^^^^^^
+            if row['packet']['source'] == definition['root_source'])
+E       KeyError: 'continuations'
+
+tests/unit/test_program_await_raise_continuations.py:81: KeyError</failure></testcase><testcase classname="tests.unit.test_program_await_raise_continuations" name="test_legal_replacement_keeps_body_raise_origin_and_delivers_its_current_completion[new-raise]" time="0.214"><failure message="ValueError: protocol_copy at program_operation:await.resume.driver.2.driver.outcome.0.exit: host outcome is neither this body RAISE packet nor its selected adapter result">mode = 'replace_raise', role = 'packet', kind = &lt;ExitKind.RAISE: 'RAISE'&gt;
+
+    @pytest.mark.parametrize(('mode', 'role', 'kind'), (
+        ('replace_raise', 'packet', ExitKind.RAISE),
+        ('replace_return', 'reference', ExitKind.NORMAL),
+    ), ids=('new-raise', 'new-return'))
+    def test_legal_replacement_keeps_body_raise_origin_and_delivers_its_current_completion(mode, role, kind):
+        graph, details = await_raise_cleanup_program(mode=mode)
+        # A legal finally override must pass the existing public validator.  The
+        # old BodyRaise copy rule is exercised before reading added view fields.
+&gt;       index = _index(graph)
+                ^^^^^^^^^^^^^
+
+tests/unit/test_program_await_raise_continuations.py:152: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/unit/test_program_await_raise_continuations.py:30: in _index
+    require_valid(graph)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='await.resume.caller'), regions=(Region(id=RegionID(value='await.resume.caller'), lab...0), drive=OperationID(value='await.resume.driver.2.driver.drive'), projection=None, guard=None)), exception_matches=())
+
+    def require_valid(graph: ProgramGraph) -&gt; None:
+        issues = validate(graph)
+        if issues:
+&gt;           raise ValueError("; ".join(f"{issue.code} at {issue.path}: {issue.message}" for issue in issues))
+E           ValueError: protocol_copy at program_operation:await.resume.driver.2.driver.outcome.0.exit: host outcome is neither this body RAISE packet nor its selected adapter result
+
+scar/ir/program/validation.py:759: ValueError</failure></testcase><testcase classname="tests.unit.test_program_await_raise_continuations" name="test_legal_replacement_keeps_body_raise_origin_and_delivers_its_current_completion[new-return]" time="0.222"><failure message="ValueError: protocol_copy at program_operation:await.resume.driver.2.driver.outcome.0.exit: host outcome is neither this body RAISE packet nor its selected adapter result">mode = 'replace_return', role = 'reference', kind = &lt;ExitKind.NORMAL: 'NORMAL'&gt;
+
+    @pytest.mark.parametrize(('mode', 'role', 'kind'), (
+        ('replace_raise', 'packet', ExitKind.RAISE),
+        ('replace_return', 'reference', ExitKind.NORMAL),
+    ), ids=('new-raise', 'new-return'))
+    def test_legal_replacement_keeps_body_raise_origin_and_delivers_its_current_completion(mode, role, kind):
+        graph, details = await_raise_cleanup_program(mode=mode)
+        # A legal finally override must pass the existing public validator.  The
+        # old BodyRaise copy rule is exercised before reading added view fields.
+&gt;       index = _index(graph)
+                ^^^^^^^^^^^^^
+
+tests/unit/test_program_await_raise_continuations.py:152: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/unit/test_program_await_raise_continuations.py:30: in _index
+    require_valid(graph)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='await.resume.caller'), regions=(Region(id=RegionID(value='await.resume.caller'), lab...1), drive=OperationID(value='await.resume.driver.2.driver.drive'), projection=None, guard=None)), exception_matches=())
+
+    def require_valid(graph: ProgramGraph) -&gt; None:
+        issues = validate(graph)
+        if issues:
+&gt;           raise ValueError("; ".join(f"{issue.code} at {issue.path}: {issue.message}" for issue in issues))
+E           ValueError: protocol_copy at program_operation:await.resume.driver.2.driver.outcome.0.exit: host outcome is neither this body RAISE packet nor its selected adapter result
+
+scar/ir/program/validation.py:759: ValueError</failure></testcase></testsuite></testsuites>

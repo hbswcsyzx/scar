@@ -1,0 +1,27 @@
+{
+  "added_source_files": [
+    "scar/ir/program/async_request_paths.py",
+    "tests/fixtures/program_async_finished_requests_graphs.py",
+    "tests/fixtures/execution_async_finished_requests_graphs.py",
+    "tests/unit/test_program_async_request_path_inventory.py",
+    "tests/unit/test_program_async_finished_requests.py"
+  ],
+  "new_case_count": 17,
+  "attempts": {
+    "original-inventory-counterexample": {"returncode": 1, "rows": 4, "failures": 4, "errors": 0, "skips": 0, "source_count": 900},
+    "first-joint-authored": {"returncode": 2, "rows": 1, "failures": 0, "errors": 1, "skips": 0, "source_count": 904},
+    "initial-query-connected": {"returncode": 0, "rows": 4, "failures": 0, "errors": 0, "skips": 0, "source_count": 904},
+    "joint-current-context": {"returncode": 0, "rows": 17, "failures": 0, "errors": 0, "skips": 0, "source_count": 904},
+    "verified-current": {"returncode": 0, "failures": 0, "errors": 0, "skips": 0, "source_count": 904}
+  },
+  "bound_documents": [
+    "docs/M1_ASYNC_CLOSE_CONTINUATIONS_PLAN.md",
+    "docs/M1_ASYNC_FINISHED_REQUESTS_API.md",
+    "docs/M1_ASYNC_FINISHED_REQUESTS_PROGRESS.md",
+    "docs/M1_ASYNC_FINISHED_REQUESTS_ACCEPTANCE.md",
+    "docs/M1_ASYNC_FINISHED_REQUESTS_NEXT_GATE.md"
+  ],
+  "f19_family_closes": false,
+  "first_stage_closes": false,
+  "prior_2104_full_selection_rerun": false
+}

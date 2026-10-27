@@ -1,0 +1,58 @@
+{
+  "schema": "scar.call-operands-trace",
+  "schema_version": 1,
+  "process_id": 1620231,
+  "project_root": "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/python_call_targets_v2_20261026/candidate01/project",
+  "python": "3.14.7 | packaged by conda-forge | (main, Sep  2 2026, 21:08:32) [GCC 15.3.0]",
+  "implementation": "cpython",
+  "rule": "CPYTHON_CALL_WINDOWS_V1",
+  "limits": {
+    "max_events": 4096,
+    "max_bytes": 2000000,
+    "max_loads": 64,
+    "max_namespace_items": 4096,
+    "max_references": 8192
+  },
+  "events": 22,
+  "event_attempts": 22,
+  "instructions": 13,
+  "call_attempts": 6,
+  "handshakes": 3,
+  "gaps": 0,
+  "loads": 1,
+  "references": 13,
+  "bytes": 7667,
+  "dropped_events": 0,
+  "errors": [],
+  "io_failed": false,
+  "previous_profile": false,
+  "base_manifest": [
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/python_call_targets_v2_20261026/candidate01/capture/call-codes.1620231.jsonl",
+      "family": "codes",
+      "process_id": 1620231,
+      "raw_sha256": "de1ce595d0daf96ee09ffc928a8aef76b3201143da1c848da0727f69f0b18e6b",
+      "raw_bytes": 1516,
+      "lines": 5
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/python_call_targets_v2_20261026/candidate01/capture/call-events.1620231.jsonl",
+      "family": "events",
+      "process_id": 1620231,
+      "raw_sha256": "222987ead7a8456292265051367df239de910ad7e0d9d8728cda3f382d321d70",
+      "raw_bytes": 7790,
+      "lines": 10
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/python_call_targets_v2_20261026/candidate01/capture/call-meta.1620231.json",
+      "family": "meta",
+      "process_id": 1620231,
+      "raw_sha256": "fd55acf7d586b52c28ad11e5a673e610b5b57e4ecc9d50eaf38df000e109455f",
+      "raw_bytes": 1027,
+      "lines": 34
+    }
+  ],
+  "reference_contents_observed": false,
+  "callable_environment_established": false,
+  "transformation_authorized": false
+}

@@ -1,0 +1,20 @@
+{
+  "source_revision": "7dd8c54b8d8cfdb3454b9f3b671f3412d1a914f0",
+  "source_archive": "artifacts/experiments/b1_call_operands/model_protocol_followup/codec/legacy-source-v19.tar",
+  "source_archive_sha256": "a57e394498a8b485260b170b7e29ccfb235bfa699989c55bf7c677adf2ef6bf9",
+  "encoder_source_sha256": "125d0d3e56a6f07abf00633e3c178dcc1ba3ef497a68025b950341ba59bc41fe",
+  "connection_source_sha256": "86ea3d6d5822d14a72680c569baa90c4a91569007c280a33ce25f45975e6fde9",
+  "fixture_source_sha256": "0137c37ebc5d4c101c36f77a1bdd624ce88d987b3b258b25943541f356b43733",
+  "generator_sha256": "7530265a61f773fbb502049c01ffb8799471c5905d384311b7e8a6e37e82e932",
+  "python_version": "3.14.7",
+  "schema_version": 19,
+  "fixture_bytes": 44484,
+  "fixture_sha256": "57fe9feb47f5b186cb1b5c708c1eff56e54a61b43c597a6951a82719cfd0a5f6",
+  "fixture_profile": "continuation_site_program(kind='delegate', request='send', exhaustion=True) + with_continuation_connections",
+  "generated_by": "Independent old source tree extracted from git archive at source_revision; PYTHONPATH and cwd both point to archived tree.",
+  "generation_command": "artifacts/experiments/b1_call_operands/model_protocol_followup/codec/attempt002/command.txt",
+  "source_check": "artifacts/experiments/b1_call_operands/model_protocol_followup/codec/oracle-v19/source-check-command.txt",
+  "source_check_log": "artifacts/experiments/b1_call_operands/model_protocol_followup/codec/oracle-v19/source-check.log",
+  "attempt001": "Retained failed first script: asserted protocol_bindings even though this continuation fixture only populates protocol_call_inputs and protocol_result_consumers; no payload was produced.",
+  "attempt002_exit_code": 0
+}

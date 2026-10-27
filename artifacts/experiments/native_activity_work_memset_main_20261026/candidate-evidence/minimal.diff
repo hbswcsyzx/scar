@@ -1,0 +1,48 @@
+diff --git a/scar/ir/execution/native_work_protocol.py b/scar/ir/execution/native_work_protocol.py
+index ee6972d4..06ec8993 100644
+--- a/scar/ir/execution/native_work_protocol.py
++++ b/scar/ir/execution/native_work_protocol.py
+@@ -133,7 +133,7 @@ class NativeActivityWorkEvidence:
+             from scar.trace.native_import import _ns
+             event = raw["event"]
+             start_ns, duration_ns = _ns(event.get("ts")), _ns(event.get("dur"))
+-            _need(raw["category"] in ("kernel", "gpu_memcpy") and event.get("ph") == "X"
++            _need(raw["category"] in ("kernel", "gpu_memcpy", "gpu_memset") and event.get("ph") == "X"
+                   and start_ns is not None and duration_ns is not None
+                   and start_ns > 0 and duration_ns > 0
+                   and (record["start_ns"], record["end_ns"]) == (start_ns, start_ns + duration_ns)
+diff --git a/scar/trace/native_work_bridge.py b/scar/trace/native_work_bridge.py
+index a20fcf8d..e2a33d41 100644
+--- a/scar/trace/native_work_bridge.py
++++ b/scar/trace/native_work_bridge.py
+@@ -1,7 +1,7 @@
+ """Stream one capture into bounded, unattached existing work-record fragments.
+ 
+ All provider GPU candidates remain in the source inventory.  Only the fixed
+-kernel/copy end contract qualifies quiescence, never success or value ready.
++kernel/copy/memset end contract qualifies quiescence, never success or value ready.
+ No ProgramGraph, ExecutionModel, queue lifetime, or logical value is invented.
+ """
+ from __future__ import annotations
+@@ -217,9 +217,7 @@ def _gpu(category):
+ 
+ def _reason(event):
+     category, args = event["cat"], event.get("args", {})
+-    if category == "gpu_memset":
+-        return "MEMSET_END_CONTRACT_UNSUPPORTED"
+-    if category not in ("kernel", "gpu_memcpy"):
++    if category not in ("kernel", "gpu_memcpy", "gpu_memset"):
+         return "GPU_CATEGORY_END_CONTRACT_UNSUPPORTED"
+     if event.get("ph") != "X":
+         return "GPU_NON_DURATION_RECORD"
+@@ -529,8 +527,9 @@ def acquire_native_activity_work(capture_root, partition_root, output, *, budget
+                     "compile_guard_condition": "declared cu132 implies CUDA_VERSION >= 13010; actual historical build witness OPEN",
+                     "kernel_struct": "CUpti_ActivityKernel11", "copy_struct": "CUpti_ActivityMemcpy5",
+                     "p2p_struct": "CUpti_ActivityMemcpyPtoP4",
++                    "memset_struct": "CUpti_ActivityMemset4",
+                     "typedef_source": "libkineto/src/DeviceProperties.h:25-42 at pinned Kineto",
+-                    "memset_quiescence_qualified": False}}
++                    "memset_quiescence_qualified": True}}
+             _write(output / "manifest.json", _json(report), budget)
+             # The final accounting includes publication/readback of the manifest.
+             final = {**report, "io": budget.report(), "io_scope": "after_manifest_publication"}

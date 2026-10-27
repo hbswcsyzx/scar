@@ -1,0 +1,173 @@
+{
+  "bytes_excluding_self": 1040252,
+  "entries_excluding_self": [
+    {
+      "bytes": 8087,
+      "path": "artifacts/experiments/callee_entry_routing_20261025/ACTUAL_TERMINAL.json",
+      "sha256": "4274cd417f24d5df6af14acf4987f09ca4ecacf289bf715b57c2271a582b6a71"
+    },
+    {
+      "bytes": 3740,
+      "path": "artifacts/experiments/callee_entry_routing_20261025/LOCATOR_CONTRACT.json",
+      "sha256": "ed391b9ca6a81b7f1ca26e718033c0b2b5e1bbfe35d09c4347c2434b1180e4ca"
+    },
+    {
+      "bytes": 1411,
+      "path": "artifacts/experiments/callee_entry_routing_20261025/MAIN_APPLICATION_RECEIPT.json",
+      "sha256": "54db377b059af728bc0f807135e880f89c4b913a72c2234231c0c7b0552ab682"
+    },
+    {
+      "bytes": 4089,
+      "path": "artifacts/experiments/callee_entry_routing_20261025/README.md",
+      "sha256": "a852ef67daa5b7bbd6fd669dc34608bcb8d94d97b96709de0fba9670c0169f9b"
+    },
+    {
+      "bytes": 3119,
+      "path": "artifacts/experiments/callee_entry_routing_20261025/REPORT.md",
+      "sha256": "c216e83d476025532a50ff2a30daa565182b76882adc78201096b37352bd87ae"
+    },
+    {
+      "bytes": 1440,
+      "path": "artifacts/experiments/callee_entry_routing_20261025/RETENTION.md",
+      "sha256": "bfbdbbb555adf4d93e56b5662b725f11e5f3218904d94d394bd532a0d84a68ae"
+    },
+    {
+      "bytes": 812,
+      "path": "artifacts/experiments/callee_entry_routing_20261025/api-check-02.json",
+      "sha256": "dac2dff1a861a9649c1ccfd3a0990bef4cb5a18e94fdd84fb90485b80d66b3c7"
+    },
+    {
+      "bytes": 812,
+      "path": "artifacts/experiments/callee_entry_routing_20261025/api-check-03.json",
+      "sha256": "410ddd7327df6a289ff3fedda71ea9dc7c54b06f8a441967639245d6e6519d78"
+    },
+    {
+      "bytes": 812,
+      "path": "artifacts/experiments/callee_entry_routing_20261025/api-check.json",
+      "sha256": "a50213e3c0058c2d52d6b7820ed2a66658ce7f6915465bfa32f41f7ffa631d54"
+    },
+    {
+      "bytes": 2655,
+      "path": "artifacts/experiments/callee_entry_routing_20261025/attempt01/PREPARATION.json",
+      "sha256": "937740cab4d0b07fd4b86507af002088f64e2ba48aeb84e3863fa94864c4cfed"
+    },
+    {
+      "bytes": 64538,
+      "path": "artifacts/experiments/callee_entry_routing_20261025/attempt01/baseline-source/source_invocations.py",
+      "sha256": "1fd8426bb85933ff0255715ae330730ff8c5122ea12e0a766eae7bf9d2e102af"
+    },
+    {
+      "bytes": 104222,
+      "path": "artifacts/experiments/callee_entry_routing_20261025/attempt01/freeze.json",
+      "sha256": "929a61fb7db6cf4c56718bc30273c94a9775c51319aa11869e04589281f05032"
+    },
+    {
+      "bytes": 14155,
+      "path": "artifacts/experiments/callee_entry_routing_20261025/attempt01/gate.py",
+      "sha256": "0796bf39c0bb0f64df38292be5fd5b939d2965039e8b04222925136fae83b3c1"
+    },
+    {
+      "bytes": 73717,
+      "path": "artifacts/experiments/callee_entry_routing_20261025/attempt01/products/bindings/bindings.json",
+      "sha256": "f5b2aad06a42688722b36a7defab6f7a1c5038b55768b6d0a90ddcba8c380723"
+    },
+    {
+      "bytes": 198782,
+      "path": "artifacts/experiments/callee_entry_routing_20261025/attempt01/products/bindings/capture-coordinates.json",
+      "sha256": "637ce4a82da7aebabea13ed8f6885985115b7dbfc28f5e85dcaf4552ba0696da"
+    },
+    {
+      "bytes": 44395,
+      "path": "artifacts/experiments/callee_entry_routing_20261025/attempt01/products/bindings/entry-parameters.jsonl.gz",
+      "sha256": "6e40789b1481f929d221b30ed338f46791ce285e26cb9e1d14bccaa7adffb3e6"
+    },
+    {
+      "bytes": 61015,
+      "path": "artifacts/experiments/callee_entry_routing_20261025/attempt01/products/bindings/invocations.jsonl.gz",
+      "sha256": "693a56e0c1b9136a708268771b804f1801385588fe3613f4607a6a9f2e133c93"
+    },
+    {
+      "bytes": 20,
+      "path": "artifacts/experiments/callee_entry_routing_20261025/attempt01/products/bindings/orphan-exits.jsonl.gz",
+      "sha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64"
+    },
+    {
+      "bytes": 12650,
+      "path": "artifacts/experiments/callee_entry_routing_20261025/attempt01/products/bindings/report.json",
+      "sha256": "3e532dc1cb2864db1b4859ff835770c1d90d7f84fe7aa88995dac1c3064716de"
+    },
+    {
+      "bytes": 198782,
+      "path": "artifacts/experiments/callee_entry_routing_20261025/attempt01/products/capture-coordinates.json",
+      "sha256": "637ce4a82da7aebabea13ed8f6885985115b7dbfc28f5e85dcaf4552ba0696da"
+    },
+    {
+      "bytes": 69664,
+      "path": "artifacts/experiments/callee_entry_routing_20261025/attempt01/result.json",
+      "sha256": "4c92ee0a69481d25933336d3f8e0ce759426cdc1222e6c709b90ddeebc95e386"
+    },
+    {
+      "bytes": 0,
+      "path": "artifacts/experiments/callee_entry_routing_20261025/attempt01/root-stderr.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 59482,
+      "path": "artifacts/experiments/callee_entry_routing_20261025/attempt01/root-stdout.txt",
+      "sha256": "5f022f7a2f130e7d7c90f2aa534698e38e02333c21c8f3b83f9a1df06885f6c4"
+    },
+    {
+      "bytes": 591,
+      "path": "artifacts/experiments/callee_entry_routing_20261025/attempt01/run.sh",
+      "sha256": "8f06080b60261cfffa1589ad524a2852b5949d1735560cab5645a7fb87700d1f"
+    },
+    {
+      "bytes": 13868,
+      "path": "artifacts/experiments/callee_entry_routing_20261025/attempt01/source_invocations.diff",
+      "sha256": "651bb3cab232683f8297d5f88d4e98a56f1570a3cd09ab684e040ef816504d73"
+    },
+    {
+      "bytes": 867,
+      "path": "artifacts/experiments/callee_entry_routing_20261025/attempt01/time.txt",
+      "sha256": "532fb6799b53550b6cd7682fe3b46d093f212a5a8954646adf1b051b7c63c43e"
+    },
+    {
+      "bytes": 2711,
+      "path": "artifacts/experiments/callee_entry_routing_20261025/check_api.py",
+      "sha256": "cea93e0d0e02ff3572def7ad66665db0e8233391b4ac62a8e7dba67f19ade98b"
+    },
+    {
+      "bytes": 2476,
+      "path": "artifacts/experiments/callee_entry_routing_20261025/stage-paths.txt",
+      "sha256": "019bc8665865ac3055fc7cf79b92e37c77d370a0368bb2983a418d446be6a430"
+    },
+    {
+      "bytes": 6650,
+      "path": "docs/CALLEE_ENTRY_PARAMETER_ROUTING_PLAN.md",
+      "sha256": "fee5fad3be71b9f4151c3c31d1b1126bf5412bc65737476c7c57c54ba65e4784"
+    },
+    {
+      "bytes": 7680,
+      "path": "scar/analysis/source_entry_routing.py",
+      "sha256": "46738db188c3d5be0ab042f10db260e56e09e06deca3a323b44f7dde04cf1b43"
+    },
+    {
+      "bytes": 8487,
+      "path": "scar/analysis/source_entry_routing_validation.py",
+      "sha256": "8ce80f3a4f5f63b51f225ab7986295c10b52081bb75c4b545fe623bb30984f44"
+    },
+    {
+      "bytes": 68523,
+      "path": "scar/analysis/source_invocations.py",
+      "sha256": "4d85853099e8aa8e9c9af2779131b32339369dc7deb11d4dd9194ce75d66ae40"
+    }
+  ],
+  "file_count_including_self": 33,
+  "main_index_touched": false,
+  "new_actual_runs": 0,
+  "opaque_derived_gzip_bytes_hashed_not_decoded": 105430,
+  "original_raw_or_graph_reads_for_delivery": 0,
+  "schema": "scar.callee-entry-routing-delivery",
+  "schema_version": 1,
+  "self_hash": "Git commit retains exact bytes; excluded to avoid recursive hash"
+}

@@ -1,0 +1,14 @@
+{
+  "additional_checked_BytesIO_chunk_decoded_bytes": 79996957,
+  "chunk_decoded_basis": "actual whole-chunk _chunk length/newline/SHA checks; exact verified bytes, not a guessed ceiling",
+  "in_process_summary_RSS_snapshot_KiB": 597568,
+  "path_based_file_api_decoded_bytes": 1809347558,
+  "path_based_stored_bytes": 144424746,
+  "source_summary_sha256": "7ac1f65edbacd34891537448abd54064061907a07b218e7737cf203e769a0f6b",
+  "status": "ACTUAL_COST_SCOPES_RECONCILED",
+  "stored_chunk_bytes_already_in_path_counter": 4344322,
+  "summary_modified": false,
+  "total_decoded_representation_bytes": 1889344515,
+  "whole_gate_max_RSS_GNU_time_KiB": 661672,
+  "whole_gate_wall_GNU_time_seconds": 18.33
+}

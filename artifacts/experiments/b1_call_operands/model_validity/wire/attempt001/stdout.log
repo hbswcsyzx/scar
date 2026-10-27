@@ -1,0 +1,520 @@
+FFFF.....F......FFFFF.........FFFFFF...............F.................... [ 94%]
+....                                                                     [100%]
+=================================== FAILURES ===================================
+__ test_lifetime_and_establishment_keep_distinct_original_targets_and_points ___
+
+    def test_lifetime_and_establishment_keep_distinct_original_targets_and_points():
+>       model = validity_record_model()
+                ^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_execution_validity_records.py:14: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/fixtures/execution_validity_records.py:36: in validity_record_model
+    retired = TargetLifetimeEvent(TargetLifetimeEventID('wire.retired'), target, LifetimeEventKind.RETIRED,
+<string>:11: in __init__
+    ???
+scar/ir/execution/validity.py:93: in __post_init__
+    _record(self.protocol, ProviderFactReference, "lifetime event protocol")
+scar/ir/execution/resources.py:40: in _record
+    _exact(value, expected, name)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+value = MissingEvidence(reason='test declaration, not a collected runtime path')
+expected = <class 'scar.ir.program.providers.ProviderFactReference'>
+name = 'lifetime event protocol'
+
+    def _exact(value, expected, name):
+        if type(value) is not expected:
+>           raise TypeError(f"{name} must be {expected.__name__}")
+E           TypeError: lifetime event protocol must be ProviderFactReference
+
+scar/ir/execution/resources.py:29: TypeError
+________ test_none_means_pending_ordered_only_not_unknown_or_completed _________
+
+    def test_none_means_pending_ordered_only_not_unknown_or_completed():
+>       model = validity_record_model()
+                ^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_execution_validity_records.py:25: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/fixtures/execution_validity_records.py:36: in validity_record_model
+    retired = TargetLifetimeEvent(TargetLifetimeEventID('wire.retired'), target, LifetimeEventKind.RETIRED,
+<string>:11: in __init__
+    ???
+scar/ir/execution/validity.py:93: in __post_init__
+    _record(self.protocol, ProviderFactReference, "lifetime event protocol")
+scar/ir/execution/resources.py:40: in _record
+    _exact(value, expected, name)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+value = MissingEvidence(reason='test declaration, not a collected runtime path')
+expected = <class 'scar.ir.program.providers.ProviderFactReference'>
+name = 'lifetime event protocol'
+
+    def _exact(value, expected, name):
+        if type(value) is not expected:
+>           raise TypeError(f"{name} must be {expected.__name__}")
+E           TypeError: lifetime event protocol must be ProviderFactReference
+
+scar/ir/execution/resources.py:29: TypeError
+_ test_nested_private_mutation_is_rechecked_and_subclasses_are_not_wire_types __
+
+    def test_nested_private_mutation_is_rechecked_and_subclasses_are_not_wire_types():
+>       model = validity_record_model()
+                ^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_execution_validity_records.py:35: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/fixtures/execution_validity_records.py:36: in validity_record_model
+    retired = TargetLifetimeEvent(TargetLifetimeEventID('wire.retired'), target, LifetimeEventKind.RETIRED,
+<string>:11: in __init__
+    ???
+scar/ir/execution/validity.py:93: in __post_init__
+    _record(self.protocol, ProviderFactReference, "lifetime event protocol")
+scar/ir/execution/resources.py:40: in _record
+    _exact(value, expected, name)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+value = MissingEvidence(reason='test declaration, not a collected runtime path')
+expected = <class 'scar.ir.program.providers.ProviderFactReference'>
+name = 'lifetime event protocol'
+
+    def _exact(value, expected, name):
+        if type(value) is not expected:
+>           raise TypeError(f"{name} must be {expected.__name__}")
+E           TypeError: lifetime event protocol must be ProviderFactReference
+
+scar/ir/execution/resources.py:29: TypeError
+_______ test_records_frozen_slotted_and_strict_order_cannot_be_self_loop _______
+
+    def test_records_frozen_slotted_and_strict_order_cannot_be_self_loop():
+>       model = validity_record_model()
+                ^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_execution_validity_records.py:49: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/fixtures/execution_validity_records.py:36: in validity_record_model
+    retired = TargetLifetimeEvent(TargetLifetimeEventID('wire.retired'), target, LifetimeEventKind.RETIRED,
+<string>:11: in __init__
+    ???
+scar/ir/execution/validity.py:93: in __post_init__
+    _record(self.protocol, ProviderFactReference, "lifetime event protocol")
+scar/ir/execution/resources.py:40: in _record
+    _exact(value, expected, name)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+value = MissingEvidence(reason='test declaration, not a collected runtime path')
+expected = <class 'scar.ir.program.providers.ProviderFactReference'>
+name = 'lifetime event protocol'
+
+    def _exact(value, expected, name):
+        if type(value) is not expected:
+>           raise TypeError(f"{name} must be {expected.__name__}")
+E           TypeError: lifetime event protocol must be ProviderFactReference
+
+scar/ir/execution/resources.py:29: TypeError
+____ test_v6_wire_preserves_all_new_capabilities_and_exact_nested_variants _____
+
+    def test_v6_wire_preserves_all_new_capabilities_and_exact_nested_variants():
+>       model = validity_record_model()
+                ^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_execution_validity_codec.py:19: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/fixtures/execution_validity_records.py:36: in validity_record_model
+    retired = TargetLifetimeEvent(TargetLifetimeEventID('wire.retired'), target, LifetimeEventKind.RETIRED,
+<string>:11: in __init__
+    ???
+scar/ir/execution/validity.py:93: in __post_init__
+    _record(self.protocol, ProviderFactReference, "lifetime event protocol")
+scar/ir/execution/resources.py:40: in _record
+    _exact(value, expected, name)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+value = MissingEvidence(reason='test declaration, not a collected runtime path')
+expected = <class 'scar.ir.program.providers.ProviderFactReference'>
+name = 'lifetime event protocol'
+
+    def _exact(value, expected, name):
+        if type(value) is not expected:
+>           raise TypeError(f"{name} must be {expected.__name__}")
+E           TypeError: lifetime event protocol must be ProviderFactReference
+
+scar/ir/execution/resources.py:29: TypeError
+_______________ test_populated_validity_cannot_be_downgraded[1] ________________
+
+version = 1
+
+    @pytest.mark.parametrize('version', range(1, 6))
+    def test_populated_validity_cannot_be_downgraded(version):
+        with pytest.raises(ValueError, match='validity capability'):
+>           dumps(validity_record_model(), schema_version=version)
+                  ^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_execution_validity_codec.py:51: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/fixtures/execution_validity_records.py:36: in validity_record_model
+    retired = TargetLifetimeEvent(TargetLifetimeEventID('wire.retired'), target, LifetimeEventKind.RETIRED,
+<string>:11: in __init__
+    ???
+scar/ir/execution/validity.py:93: in __post_init__
+    _record(self.protocol, ProviderFactReference, "lifetime event protocol")
+scar/ir/execution/resources.py:40: in _record
+    _exact(value, expected, name)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+value = MissingEvidence(reason='test declaration, not a collected runtime path')
+expected = <class 'scar.ir.program.providers.ProviderFactReference'>
+name = 'lifetime event protocol'
+
+    def _exact(value, expected, name):
+        if type(value) is not expected:
+>           raise TypeError(f"{name} must be {expected.__name__}")
+E           TypeError: lifetime event protocol must be ProviderFactReference
+
+scar/ir/execution/resources.py:29: TypeError
+_______________ test_populated_validity_cannot_be_downgraded[2] ________________
+
+version = 2
+
+    @pytest.mark.parametrize('version', range(1, 6))
+    def test_populated_validity_cannot_be_downgraded(version):
+        with pytest.raises(ValueError, match='validity capability'):
+>           dumps(validity_record_model(), schema_version=version)
+                  ^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_execution_validity_codec.py:51: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/fixtures/execution_validity_records.py:36: in validity_record_model
+    retired = TargetLifetimeEvent(TargetLifetimeEventID('wire.retired'), target, LifetimeEventKind.RETIRED,
+<string>:11: in __init__
+    ???
+scar/ir/execution/validity.py:93: in __post_init__
+    _record(self.protocol, ProviderFactReference, "lifetime event protocol")
+scar/ir/execution/resources.py:40: in _record
+    _exact(value, expected, name)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+value = MissingEvidence(reason='test declaration, not a collected runtime path')
+expected = <class 'scar.ir.program.providers.ProviderFactReference'>
+name = 'lifetime event protocol'
+
+    def _exact(value, expected, name):
+        if type(value) is not expected:
+>           raise TypeError(f"{name} must be {expected.__name__}")
+E           TypeError: lifetime event protocol must be ProviderFactReference
+
+scar/ir/execution/resources.py:29: TypeError
+_______________ test_populated_validity_cannot_be_downgraded[3] ________________
+
+version = 3
+
+    @pytest.mark.parametrize('version', range(1, 6))
+    def test_populated_validity_cannot_be_downgraded(version):
+        with pytest.raises(ValueError, match='validity capability'):
+>           dumps(validity_record_model(), schema_version=version)
+                  ^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_execution_validity_codec.py:51: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/fixtures/execution_validity_records.py:36: in validity_record_model
+    retired = TargetLifetimeEvent(TargetLifetimeEventID('wire.retired'), target, LifetimeEventKind.RETIRED,
+<string>:11: in __init__
+    ???
+scar/ir/execution/validity.py:93: in __post_init__
+    _record(self.protocol, ProviderFactReference, "lifetime event protocol")
+scar/ir/execution/resources.py:40: in _record
+    _exact(value, expected, name)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+value = MissingEvidence(reason='test declaration, not a collected runtime path')
+expected = <class 'scar.ir.program.providers.ProviderFactReference'>
+name = 'lifetime event protocol'
+
+    def _exact(value, expected, name):
+        if type(value) is not expected:
+>           raise TypeError(f"{name} must be {expected.__name__}")
+E           TypeError: lifetime event protocol must be ProviderFactReference
+
+scar/ir/execution/resources.py:29: TypeError
+_______________ test_populated_validity_cannot_be_downgraded[4] ________________
+
+version = 4
+
+    @pytest.mark.parametrize('version', range(1, 6))
+    def test_populated_validity_cannot_be_downgraded(version):
+        with pytest.raises(ValueError, match='validity capability'):
+>           dumps(validity_record_model(), schema_version=version)
+                  ^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_execution_validity_codec.py:51: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/fixtures/execution_validity_records.py:36: in validity_record_model
+    retired = TargetLifetimeEvent(TargetLifetimeEventID('wire.retired'), target, LifetimeEventKind.RETIRED,
+<string>:11: in __init__
+    ???
+scar/ir/execution/validity.py:93: in __post_init__
+    _record(self.protocol, ProviderFactReference, "lifetime event protocol")
+scar/ir/execution/resources.py:40: in _record
+    _exact(value, expected, name)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+value = MissingEvidence(reason='test declaration, not a collected runtime path')
+expected = <class 'scar.ir.program.providers.ProviderFactReference'>
+name = 'lifetime event protocol'
+
+    def _exact(value, expected, name):
+        if type(value) is not expected:
+>           raise TypeError(f"{name} must be {expected.__name__}")
+E           TypeError: lifetime event protocol must be ProviderFactReference
+
+scar/ir/execution/resources.py:29: TypeError
+_______________ test_populated_validity_cannot_be_downgraded[5] ________________
+
+version = 5
+
+    @pytest.mark.parametrize('version', range(1, 6))
+    def test_populated_validity_cannot_be_downgraded(version):
+        with pytest.raises(ValueError, match='validity capability'):
+>           dumps(validity_record_model(), schema_version=version)
+                  ^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_execution_validity_codec.py:51: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/fixtures/execution_validity_records.py:36: in validity_record_model
+    retired = TargetLifetimeEvent(TargetLifetimeEventID('wire.retired'), target, LifetimeEventKind.RETIRED,
+<string>:11: in __init__
+    ???
+scar/ir/execution/validity.py:93: in __post_init__
+    _record(self.protocol, ProviderFactReference, "lifetime event protocol")
+scar/ir/execution/resources.py:40: in _record
+    _exact(value, expected, name)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+value = MissingEvidence(reason='test declaration, not a collected runtime path')
+expected = <class 'scar.ir.program.providers.ProviderFactReference'>
+name = 'lifetime event protocol'
+
+    def _exact(value, expected, name):
+        if type(value) is not expected:
+>           raise TypeError(f"{name} must be {expected.__name__}")
+E           TypeError: lifetime event protocol must be ProviderFactReference
+
+scar/ir/execution/resources.py:29: TypeError
+________________ test_v6_nested_forgery_rejected[id-namespace] _________________
+
+corruption = 'id-namespace'
+
+    @pytest.mark.parametrize('corruption', ('id-namespace', 'bool-value', 'unknown-field', 'wrong-domain', 'untyped-production'))
+    def test_v6_nested_forgery_rejected(corruption):
+>       document = to_dict(validity_record_model())
+                           ^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_execution_validity_codec.py:79: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/fixtures/execution_validity_records.py:36: in validity_record_model
+    retired = TargetLifetimeEvent(TargetLifetimeEventID('wire.retired'), target, LifetimeEventKind.RETIRED,
+<string>:11: in __init__
+    ???
+scar/ir/execution/validity.py:93: in __post_init__
+    _record(self.protocol, ProviderFactReference, "lifetime event protocol")
+scar/ir/execution/resources.py:40: in _record
+    _exact(value, expected, name)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+value = MissingEvidence(reason='test declaration, not a collected runtime path')
+expected = <class 'scar.ir.program.providers.ProviderFactReference'>
+name = 'lifetime event protocol'
+
+    def _exact(value, expected, name):
+        if type(value) is not expected:
+>           raise TypeError(f"{name} must be {expected.__name__}")
+E           TypeError: lifetime event protocol must be ProviderFactReference
+
+scar/ir/execution/resources.py:29: TypeError
+_________________ test_v6_nested_forgery_rejected[bool-value] __________________
+
+corruption = 'bool-value'
+
+    @pytest.mark.parametrize('corruption', ('id-namespace', 'bool-value', 'unknown-field', 'wrong-domain', 'untyped-production'))
+    def test_v6_nested_forgery_rejected(corruption):
+>       document = to_dict(validity_record_model())
+                           ^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_execution_validity_codec.py:79: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/fixtures/execution_validity_records.py:36: in validity_record_model
+    retired = TargetLifetimeEvent(TargetLifetimeEventID('wire.retired'), target, LifetimeEventKind.RETIRED,
+<string>:11: in __init__
+    ???
+scar/ir/execution/validity.py:93: in __post_init__
+    _record(self.protocol, ProviderFactReference, "lifetime event protocol")
+scar/ir/execution/resources.py:40: in _record
+    _exact(value, expected, name)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+value = MissingEvidence(reason='test declaration, not a collected runtime path')
+expected = <class 'scar.ir.program.providers.ProviderFactReference'>
+name = 'lifetime event protocol'
+
+    def _exact(value, expected, name):
+        if type(value) is not expected:
+>           raise TypeError(f"{name} must be {expected.__name__}")
+E           TypeError: lifetime event protocol must be ProviderFactReference
+
+scar/ir/execution/resources.py:29: TypeError
+________________ test_v6_nested_forgery_rejected[unknown-field] ________________
+
+corruption = 'unknown-field'
+
+    @pytest.mark.parametrize('corruption', ('id-namespace', 'bool-value', 'unknown-field', 'wrong-domain', 'untyped-production'))
+    def test_v6_nested_forgery_rejected(corruption):
+>       document = to_dict(validity_record_model())
+                           ^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_execution_validity_codec.py:79: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/fixtures/execution_validity_records.py:36: in validity_record_model
+    retired = TargetLifetimeEvent(TargetLifetimeEventID('wire.retired'), target, LifetimeEventKind.RETIRED,
+<string>:11: in __init__
+    ???
+scar/ir/execution/validity.py:93: in __post_init__
+    _record(self.protocol, ProviderFactReference, "lifetime event protocol")
+scar/ir/execution/resources.py:40: in _record
+    _exact(value, expected, name)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+value = MissingEvidence(reason='test declaration, not a collected runtime path')
+expected = <class 'scar.ir.program.providers.ProviderFactReference'>
+name = 'lifetime event protocol'
+
+    def _exact(value, expected, name):
+        if type(value) is not expected:
+>           raise TypeError(f"{name} must be {expected.__name__}")
+E           TypeError: lifetime event protocol must be ProviderFactReference
+
+scar/ir/execution/resources.py:29: TypeError
+________________ test_v6_nested_forgery_rejected[wrong-domain] _________________
+
+corruption = 'wrong-domain'
+
+    @pytest.mark.parametrize('corruption', ('id-namespace', 'bool-value', 'unknown-field', 'wrong-domain', 'untyped-production'))
+    def test_v6_nested_forgery_rejected(corruption):
+>       document = to_dict(validity_record_model())
+                           ^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_execution_validity_codec.py:79: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/fixtures/execution_validity_records.py:36: in validity_record_model
+    retired = TargetLifetimeEvent(TargetLifetimeEventID('wire.retired'), target, LifetimeEventKind.RETIRED,
+<string>:11: in __init__
+    ???
+scar/ir/execution/validity.py:93: in __post_init__
+    _record(self.protocol, ProviderFactReference, "lifetime event protocol")
+scar/ir/execution/resources.py:40: in _record
+    _exact(value, expected, name)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+value = MissingEvidence(reason='test declaration, not a collected runtime path')
+expected = <class 'scar.ir.program.providers.ProviderFactReference'>
+name = 'lifetime event protocol'
+
+    def _exact(value, expected, name):
+        if type(value) is not expected:
+>           raise TypeError(f"{name} must be {expected.__name__}")
+E           TypeError: lifetime event protocol must be ProviderFactReference
+
+scar/ir/execution/resources.py:29: TypeError
+_____________ test_v6_nested_forgery_rejected[untyped-production] ______________
+
+corruption = 'untyped-production'
+
+    @pytest.mark.parametrize('corruption', ('id-namespace', 'bool-value', 'unknown-field', 'wrong-domain', 'untyped-production'))
+    def test_v6_nested_forgery_rejected(corruption):
+>       document = to_dict(validity_record_model())
+                           ^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_execution_validity_codec.py:79: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/fixtures/execution_validity_records.py:36: in validity_record_model
+    retired = TargetLifetimeEvent(TargetLifetimeEventID('wire.retired'), target, LifetimeEventKind.RETIRED,
+<string>:11: in __init__
+    ???
+scar/ir/execution/validity.py:93: in __post_init__
+    _record(self.protocol, ProviderFactReference, "lifetime event protocol")
+scar/ir/execution/resources.py:40: in _record
+    _exact(value, expected, name)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+value = MissingEvidence(reason='test declaration, not a collected runtime path')
+expected = <class 'scar.ir.program.providers.ProviderFactReference'>
+name = 'lifetime event protocol'
+
+    def _exact(value, expected, name):
+        if type(value) is not expected:
+>           raise TypeError(f"{name} must be {expected.__name__}")
+E           TypeError: lifetime event protocol must be ProviderFactReference
+
+scar/ir/execution/resources.py:29: TypeError
+______ test_codec_does_not_open_or_resolve_artifacts_for_validity_records ______
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7102a1a67bb0>
+
+    def test_codec_does_not_open_or_resolve_artifacts_for_validity_records(monkeypatch):
+>       model = validity_record_model()
+                ^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_execution_validity_codec.py:96: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/fixtures/execution_validity_records.py:36: in validity_record_model
+    retired = TargetLifetimeEvent(TargetLifetimeEventID('wire.retired'), target, LifetimeEventKind.RETIRED,
+<string>:11: in __init__
+    ???
+scar/ir/execution/validity.py:93: in __post_init__
+    _record(self.protocol, ProviderFactReference, "lifetime event protocol")
+scar/ir/execution/resources.py:40: in _record
+    _exact(value, expected, name)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+value = MissingEvidence(reason='test declaration, not a collected runtime path')
+expected = <class 'scar.ir.program.providers.ProviderFactReference'>
+name = 'lifetime event protocol'
+
+    def _exact(value, expected, name):
+        if type(value) is not expected:
+>           raise TypeError(f"{name} must be {expected.__name__}")
+E           TypeError: lifetime event protocol must be ProviderFactReference
+
+scar/ir/execution/resources.py:29: TypeError
+_ test_independently_archived_v3_event_work_wire_is_exact_and_old_bytes_unchanged _
+
+    def test_independently_archived_v3_event_work_wire_is_exact_and_old_bytes_unchanged():
+        payload = (FIXTURES / "execution_v3_frozen.json").read_bytes()
+        proof = json.loads((FIXTURES / "execution_v3_frozen.proof.json").read_text())
+        assert proof["source_revision"] == "6efbe272bceb1036eba3725f11c47960fd5dd301"
+        assert proof["codec_schema_version"] == proof["wire_schema_version"] == 3
+        assert proof["payload_sha256"] == hashlib.sha256(payload).hexdigest()
+        assert proof["payload_size_bytes"] == len(payload)
+>       assert SCHEMA_VERSION == 5
+E       assert 6 == 5
+
+tests/unit/test_execution_content_codec.py:89: AssertionError
+=========================== short test summary info ============================
+FAILED tests/unit/test_execution_validity_records.py::test_lifetime_and_establishment_keep_distinct_original_targets_and_points
+FAILED tests/unit/test_execution_validity_records.py::test_none_means_pending_ordered_only_not_unknown_or_completed
+FAILED tests/unit/test_execution_validity_records.py::test_nested_private_mutation_is_rechecked_and_subclasses_are_not_wire_types
+FAILED tests/unit/test_execution_validity_records.py::test_records_frozen_slotted_and_strict_order_cannot_be_self_loop
+FAILED tests/unit/test_execution_validity_codec.py::test_v6_wire_preserves_all_new_capabilities_and_exact_nested_variants
+FAILED tests/unit/test_execution_validity_codec.py::test_populated_validity_cannot_be_downgraded[1]
+FAILED tests/unit/test_execution_validity_codec.py::test_populated_validity_cannot_be_downgraded[2]
+FAILED tests/unit/test_execution_validity_codec.py::test_populated_validity_cannot_be_downgraded[3]
+FAILED tests/unit/test_execution_validity_codec.py::test_populated_validity_cannot_be_downgraded[4]
+FAILED tests/unit/test_execution_validity_codec.py::test_populated_validity_cannot_be_downgraded[5]
+FAILED tests/unit/test_execution_validity_codec.py::test_v6_nested_forgery_rejected[id-namespace]
+FAILED tests/unit/test_execution_validity_codec.py::test_v6_nested_forgery_rejected[bool-value]
+FAILED tests/unit/test_execution_validity_codec.py::test_v6_nested_forgery_rejected[unknown-field]
+FAILED tests/unit/test_execution_validity_codec.py::test_v6_nested_forgery_rejected[wrong-domain]
+FAILED tests/unit/test_execution_validity_codec.py::test_v6_nested_forgery_rejected[untyped-production]
+FAILED tests/unit/test_execution_validity_codec.py::test_codec_does_not_open_or_resolve_artifacts_for_validity_records
+FAILED tests/unit/test_execution_content_codec.py::test_independently_archived_v3_event_work_wire_is_exact_and_old_bytes_unchanged
+17 failed, 59 passed in 2.99s

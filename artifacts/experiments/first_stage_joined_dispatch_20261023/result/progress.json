@@ -1,0 +1,85 @@
+{
+  "schema": "scar.capture-import-progress",
+  "schema_version": 1,
+  "stages": [
+    {
+      "stage": "coordinates",
+      "status": "RUNNING",
+      "elapsed_s": 2.3940010578371584e-06
+    },
+    {
+      "stage": "coordinates",
+      "status": "IMPORTED",
+      "elapsed_s": 5.619707535995985,
+      "verified_raw_bytes": 956845156,
+      "artifact_members": 264,
+      "os_artifacts": 253,
+      "os_lines": 906808,
+      "processes": 5,
+      "threads": 252
+    },
+    {
+      "stage": "native",
+      "status": "RUNNING",
+      "elapsed_s": 5.620311845996184
+    },
+    {
+      "stage": "dispatch_bridge",
+      "status": "RUNNING",
+      "elapsed_s": 143.44288021099783
+    },
+    {
+      "stage": "dispatch_bridge",
+      "status": "IMPORTED",
+      "elapsed_s": 222.97816158099886,
+      "dispatches": 39796,
+      "slot_associations": 109288,
+      "gaps": {
+        "retained_ancestor_missing": 480,
+        "unqualified_payload_slots": 383
+      }
+    },
+    {
+      "stage": "native",
+      "status": "IMPORTED",
+      "elapsed_s": 649.6376450829994,
+      "cpu_rf_matches": 310410,
+      "runtime_gpu_matches": 24082,
+      "lifetime_points": 74574
+    },
+    {
+      "stage": "os_resources",
+      "status": "RUNNING",
+      "elapsed_s": 651.858391556998
+    },
+    {
+      "stage": "os_resources",
+      "status": "IMPORTED",
+      "elapsed_s": 736.0391318580005,
+      "physical_lines": 906808,
+      "tid_artifacts": 253,
+      "classification_counts": {
+        "COMPLETED": 906803,
+        "SIGNAL": 5
+      },
+      "unconnected_line_reasons": {
+        "outside_fd_profile": 131069
+      },
+      "syscall_observations": 775734,
+      "open_file_descriptions": 12573,
+      "handle_generations": 12574,
+      "observed_handle_ends": 501,
+      "connected_io": 934,
+      "source_runtime_verified": false,
+      "transformation_authorized": false,
+      "complete_resource_model": false
+    },
+    {
+      "stage": "capture",
+      "status": "IMPORTED_WITH_OPEN_OBLIGATIONS",
+      "elapsed_s": 736.9827344829973,
+      "coordinate_identity_consistent": true
+    }
+  ],
+  "whole_model_established": false
+}

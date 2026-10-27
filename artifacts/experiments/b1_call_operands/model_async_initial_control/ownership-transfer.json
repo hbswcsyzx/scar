@@ -1,0 +1,11 @@
+{
+  "path": "scar/ir/program/protocol_async.py",
+  "from": "/root/cleanup_forward_review",
+  "to": "/root",
+  "acknowledged_before_root_write": true,
+  "old_author_had_written_path": false,
+  "reason": "Parallelize existing source-selection/report integration while A authors only new async_initial.py.",
+  "new_public_apis_unchanged": true,
+  "other_scope_changes": false,
+  "tests_started": 0
+}

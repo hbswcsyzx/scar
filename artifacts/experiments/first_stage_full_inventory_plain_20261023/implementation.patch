@@ -1,0 +1,16 @@
+diff --git a/artifacts/experiments/first_stage_joined_capture_20261023/audit.py b/artifacts/experiments/first_stage_joined_capture_20261023/audit.py
+index 57c534e..98a1952 100644
+--- a/artifacts/experiments/first_stage_joined_capture_20261023/audit.py
++++ b/artifacts/experiments/first_stage_joined_capture_20261023/audit.py
+@@ -4,9 +4,10 @@ import gzip
+ from hashlib import sha256
+ import json
+ from pathlib import Path
++import sys
+ 
+ 
+-HERE = Path(__file__).resolve().parent
++HERE = Path(sys.argv[1]).resolve() if len(sys.argv) == 2 else Path(__file__).resolve().parent
+ RESULT = HERE / 'result'
+ 
+ 

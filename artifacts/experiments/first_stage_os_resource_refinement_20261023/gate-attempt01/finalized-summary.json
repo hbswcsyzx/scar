@@ -1,0 +1,59 @@
+{
+  "base_manifest": {
+    "bytes": 316803,
+    "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_os_interface_work_20261023/result/interfaces/manifest.json",
+    "sha256": "cbc6dcfd78ccca0961bdabecce94bc747b7b281fdbc3f49228c8b52b9b3aec14"
+  },
+  "codec_boundaries": {
+    "bytes": 925,
+    "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_os_resource_refinement_20261023/gate-attempt01/codec-boundaries.json",
+    "sha256": "8de842a053f27fbae5dc0a15107ec4f4327fabdfcb466c15c93851e9399f004c"
+  },
+  "codec_checks_completed_by_original_script": {
+    "ProviderHandle": 35,
+    "ProviderRecordSelector": 73,
+    "ProviderResourceAccess": 38,
+    "old_capability_rejections": 6,
+    "scope": "existing finite records/negative wire gates, not full ExecutionModel validation"
+  },
+  "fake_program_snapshot_created": false,
+  "finalizer": {
+    "bytes": 4760,
+    "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_os_resource_refinement_20261023/gate-attempt01/finalize_report.py",
+    "sha256": "eb43c16775b8a4803d613cfa68b13962623c0babde8a735f1dd2f51d2365d8fc"
+  },
+  "finalizer_elapsed_seconds": 0.008404542997595854,
+  "finalizer_peak_rss_kib": 18484,
+  "first_stage_complete": false,
+  "full_execution_model_validation": "OPEN_NOT_PERFORMED",
+  "gate_or_importer_rerun": false,
+  "gate_peak_rss_kib": 592948,
+  "gate_process_exit": 1,
+  "gate_reporting_defect": "local negative-wire variable shadowed resource module in metrics footer",
+  "gate_wall_clock": "0:55.03",
+  "original_gate_script_preserved": true,
+  "refinement": {
+    "bytes": 443446,
+    "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_os_resource_refinement_20261023/gate-attempt01/result/manifest.json",
+    "sha256": "6b5e1ae12e2c05364c76364cf1b1cf7859d2f6ddb09380c8940a3980381bde5c"
+  },
+  "scope_checks_completed": {
+    "all_selected_preimages_chunk_line_ordinal_checks_completed": true,
+    "executors": 3,
+    "original_target_and_other_fields_preserved": true,
+    "pipe_pairs": 13,
+    "ports": 35,
+    "producer_work": 22,
+    "provider_accesses": 38
+  },
+  "selector_proofs": {
+    "bytes": 90582,
+    "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_os_resource_refinement_20261023/gate-attempt01/selector-proofs.json",
+    "sha256": "2960ee35cbda0c4738ca7f9ade10f58e866d73b164206ea50744fcb5d388dc95"
+  },
+  "status": "VERIFIED_SCOPE_WITH_ORIGINAL_GATE_REPORTING_FAILURE",
+  "target_or_gpu_executed": false,
+  "transformation_authorized": false,
+  "unresolved_table_containers": 35,
+  "whole_model_established": false
+}

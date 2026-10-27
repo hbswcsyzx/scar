@@ -1,0 +1,34 @@
+{
+  "status": "DIAGNOSTIC_TERMINAL",
+  "cli_returncode": 254,
+  "elapsed_seconds": 134.08422105800128,
+  "hard_total_limit": false,
+  "signals": [
+    {
+      "signal": "SIGINT",
+      "pid": 2183046,
+      "elapsed_seconds": 120.0068284959998,
+      "identity": {
+        "pid": 2183046,
+        "state": "R",
+        "parent_pid": 2183042,
+        "process_group": 2183042,
+        "session": 2183042,
+        "start_ticks": 42258964
+      },
+      "reason": "RECORDING_DIAGNOSTIC_LIMIT"
+    }
+  ],
+  "target": {
+    "pid": 2183046,
+    "state": "R",
+    "parent_pid": 2183042,
+    "process_group": 2183042,
+    "session": 2183042,
+    "start_ticks": 42258964
+  },
+  "source_unchanged": true,
+  "lewm_unchanged": true,
+  "model_complete": false,
+  "clean_baseline_or_speedup": false
+}

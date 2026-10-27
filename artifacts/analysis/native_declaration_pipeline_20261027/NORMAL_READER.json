@@ -1,0 +1,22 @@
+{
+  "elapsed_seconds": 6.814478253014386,
+  "fragment": {
+    "schema": "scar.native-declaration-fragment",
+    "sha256": "397ef1f2c5b80640b11c1b0a8793e8cdcece8c308a18958e6674e19f9506a821",
+    "size_bytes": 2273346,
+    "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/analysis/native_declaration_pipeline_20261027/attempt01/shards/000000/000000/manifest.json"
+  },
+  "occurrences": 256,
+  "inputs": 687,
+  "conditional_outputs": 183,
+  "transfers": 0,
+  "valid": true,
+  "issues": 0,
+  "measurements": {
+    "stored_bytes": 18192210,
+    "decoded_bytes": 54374666,
+    "total_bytes": 72566876,
+    "elapsed_seconds": 6.7449458870105445
+  },
+  "whole_model_established": false
+}

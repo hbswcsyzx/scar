@@ -1,0 +1,12 @@
+{
+  "inputs": [
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.369747.gz",
+      "bytes": 37346,
+      "sha256": "19659b26bbafad8badf63e97839eaf28ba9ba68e293400af8bd4931c1f66e5ef"
+    }
+  ],
+  "basis": "actual archive-index logical\u2192actual physical mapping; no logical raw URI restoration",
+  "logical_uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.369747",
+  "total_bytes": 37346
+}

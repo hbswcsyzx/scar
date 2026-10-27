@@ -1,0 +1,10 @@
+{
+  "returncode": 1,
+  "duration_seconds": 6.571355196647346,
+  "source_sha256_before": "6dadeb293e3b8bf035128d4b356f127897de4e6168439f25727218f5da3461f9",
+  "source_sha256_after": "c780050dad525926c1c1b4e191d3710e1e10d602ae7e7eb4e2d3711218819b58",
+  "source_unchanged": false,
+  "changed_paths": [
+    "tests/fixtures/execution_body_order_graphs.py"
+  ]
+}

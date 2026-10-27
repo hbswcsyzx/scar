@@ -1,0 +1,22 @@
+{
+  "revision": "fdf9d0d37ab043db297f095bfafa685b32b0b058",
+  "command": [
+    "/home/zyf/miniconda3/envs/lewm/bin/python",
+    "-c",
+    "from pathlib import Path\nimport hashlib, json, sys\nimport scar.ir.program.codec as codec\nfrom tests.fixtures.program_session_release_graphs import session_release_program\nsource, output, proof, revision = map(str, sys.argv[1:])\nsource, output, proof = Path(source), Path(output), Path(proof)\nassert Path(codec.__file__).resolve().is_relative_to(source)\nassert codec.SCHEMA_VERSION == 14\nwire = codec.dumps(session_release_program(binding=\"NORMAL_COMPLETION\", strict_subset=True, extra_domain=True))\nassert json.loads(wire)[\"schema_version\"] == 14\nassert codec.dumps(codec.loads(wire)) == wire\noutput.write_text(wire)\nreceipt = {\"source_revision\": revision, \"codec_schema_version\": codec.SCHEMA_VERSION,\n    \"wire_schema_version\": 14, \"factory\": \"session_release_program(binding='NORMAL_COMPLETION', strict_subset=True, extra_domain=True)\",\n    \"codec_path_inside_immutable_archive\": True, \"codec_sha256\": hashlib.sha256(Path(codec.__file__).read_bytes()).hexdigest(),\n    \"fixture_bytes\": len(wire.encode()), \"fixture_sha256\": hashlib.sha256(wire.encode()).hexdigest(),\n    \"python\": sys.version}\nproof.write_bytes(json.dumps(receipt, indent=2).encode() + bytes([10]))\nprint(json.dumps(receipt))\n",
+    "/tmp/scar-session-v14-4tbdnp7z",
+    "/tmp/scar-structured-model-280qf4mi/tests/fixtures/program_graph_v14_frozen.json",
+    "/tmp/scar-structured-model-280qf4mi/tests/fixtures/program_graph_v14_frozen.proof.json",
+    "fdf9d0d37ab043db297f095bfafa685b32b0b058"
+  ],
+  "cwd": "/tmp/scar-session-v14-4tbdnp7z",
+  "environment": {
+    "PATH": "/home/zyf/miniconda3/envs/lewm/bin:/home/zyf/.elan/bin:/home/zyf/.local/bin:/home/zyf/bin:/opt/texlive/bin/x86_64-linux:/home/zyf/.codex/packages/standalone/releases/0.163.0-x86_64-unknown-linux-musl/codex-path:/home/zyf/.codex/tmp/arg0-linux/codex-arg0dIFEXR:/home/zyf/.codex/tmp/arg0/codex-arg01ftxHq:/home/zyf/.codex/packages/standalone/releases/0.162.1-x86_64-unknown-linux-musl/codex-path:/home/zyf/.codex/tmp/arg0/codex-arg0zWlo5j:/home/zyf/.codex/packages/standalone/releases/0.162.0-x86_64-unknown-linux-musl/codex-path:/home/zyf/.codex/tmp/arg0/codex-arg0F575t5:/home/zyf/.codex/packages/standalone/releases/0.161.0-x86_64-unknown-linux-musl/codex-path:/home/zyf/.codex/tmp/arg0/codex-arg0dhuC6B:/home/zyf/.codex/packages/standalone/releases/0.160.1-x86_64-unknown-linux-musl/codex-path:/home/zyf/.codex/tmp/arg0/codex-arg0OA3OA3:/home/zyf/.codex/packages/standalone/releases/0.160.0-x86_64-unknown-linux-musl/codex-path:/home/zyf/.codex/tmp/arg0/codex-arg0bT16DY:/home/zyf/.codex/packages/standalone/releases/0.159.3-x86_64-unknown-linux-musl/codex-path:/home/zyf/.codex/tmp/arg0/codex-arg0eoO1PB:/home/zyf/.codex/packages/standalone/releases/0.159.2-x86_64-unknown-linux-musl/codex-path:/home/zyf/.codex/tmp/arg0/codex-arg0FRRokT:/home/zyf/.codex/packages/standalone/releases/0.159.2-x86_64-unknown-linux-musl/codex-path:/home/zyf/.elan/bin:/home/zyf/.local/bin:/home/zyf/bin:/home/zyf/bin:/home/zyf/.local/bin:/opt/texlive/bin/x86_64-linux:/home/zyf/.elan/bin:/home/zyf/.local/bin:/home/zyf/bin:/home/zyf/bin:/home/zyf/.local/bin:/home/zyf/.nvm/versions/node/v24.16.0/bin:/home/zyf/miniconda3/condabin:/opt/texlive/bin/x86_64-linux:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin",
+    "HOME": "/home/zyf",
+    "CONDA_PREFIX": "/home/zyf/miniconda3/envs/lewm",
+    "CONDA_DEFAULT_ENV": "lewm",
+    "PYTHONPATH": "/tmp/scar-session-v14-4tbdnp7z",
+    "PYTHONDONTWRITEBYTECODE": "1"
+  },
+  "temporary_exclusively_owned": true
+}

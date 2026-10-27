@@ -1,0 +1,10 @@
+source /home/zyf/miniconda3/etc/profile.d/conda.sh
+conda activate lewm
+PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=. python - <<'PY'
+import ast
+from pathlib import Path
+for name in ('scar/ir/program/input_origins.py', 'tests/fixtures/program_input_origin_graphs.py'):
+    path = Path(name)
+    ast.parse(path.read_text(), filename=str(path))
+    print(name + ': AST PASS')
+PY

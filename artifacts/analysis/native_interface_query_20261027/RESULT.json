@@ -1,0 +1,28 @@
+{
+  "exit_code": 0,
+  "elapsed_seconds": 79.45190009201178,
+  "nodes": 47,
+  "edges": 47,
+  "metadata_matches": 1,
+  "metadata_frontiers": 5,
+  "all_endpoints_present": true,
+  "connected_undirected": true,
+  "costs": {
+    "native_fragment": {
+      "stored_bytes": 8039410,
+      "decoded_bytes": 44221866,
+      "total_bytes": 52261276,
+      "elapsed_seconds": 4.142137973045465
+    },
+    "input_metadata": {
+      "metadata_rows": 310410,
+      "metadata_leaves": 420444,
+      "stored_bytes": 47577389,
+      "decoded_bytes": 1149320637,
+      "elapsed_seconds": 64.62211406201823,
+      "temporary_index_bytes": 330141696
+    },
+    "total_elapsed_seconds": 68.85669716499979
+  },
+  "whole_program_complete": false
+}

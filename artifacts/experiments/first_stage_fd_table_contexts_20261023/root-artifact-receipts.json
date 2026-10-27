@@ -1,0 +1,130 @@
+{
+  "file_count": 24,
+  "files": [
+    {
+      "bytes": 849,
+      "path": "artifacts/experiments/first_stage_fd_table_contexts_20261023/README.md",
+      "sha256": "8e67ec68931dcd7a7669d744aec47b90e396b6a3d948e54ef10b03b19ce4bb8f"
+    },
+    {
+      "bytes": 2034,
+      "path": "artifacts/experiments/first_stage_fd_table_contexts_20261023/freeze.py",
+      "sha256": "f8a9d5f595472e917c423b22c10d0011ee346cbdd224d568ccf6ada335696039"
+    },
+    {
+      "bytes": 0,
+      "path": "artifacts/experiments/first_stage_fd_table_contexts_20261023/freeze.stderr.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 275,
+      "path": "artifacts/experiments/first_stage_fd_table_contexts_20261023/freeze.stdout.json",
+      "sha256": "db117d1d32c0e6668b588dcdb6f258652906091fa6fcfb365f1e23cdd6072f26"
+    },
+    {
+      "bytes": 1814,
+      "path": "artifacts/experiments/first_stage_fd_table_contexts_20261023/gate-attempt01/README.md",
+      "sha256": "56dd54b7275a57dca6be309bdfcea03413b80baf1c422c580e1012fec2ba571e"
+    },
+    {
+      "bytes": 355,
+      "path": "artifacts/experiments/first_stage_fd_table_contexts_20261023/gate-attempt01/completion-receipt.json",
+      "sha256": "963e96169bbd71684eb61841be7ede0ad774302bed7a5a882217b2833d4e31d9"
+    },
+    {
+      "bytes": 31957,
+      "path": "artifacts/experiments/first_stage_fd_table_contexts_20261023/gate-attempt01/frozen-implementation.py",
+      "sha256": "506d626a9db35bdfe0a405e58d3826a9f355f421487e50e002f732d9795e8f84"
+    },
+    {
+      "bytes": 23858,
+      "path": "artifacts/experiments/first_stage_fd_table_contexts_20261023/gate-attempt01/imported-sources-after.json",
+      "sha256": "675e5410a61377c21c220e44c222ea5c5809a93cf76222aa514c5460926e2048"
+    },
+    {
+      "bytes": 23858,
+      "path": "artifacts/experiments/first_stage_fd_table_contexts_20261023/gate-attempt01/imported-sources-before.json",
+      "sha256": "675e5410a61377c21c220e44c222ea5c5809a93cf76222aa514c5460926e2048"
+    },
+    {
+      "bytes": 12969,
+      "path": "artifacts/experiments/first_stage_fd_table_contexts_20261023/gate-attempt01/pipe-pairs.json",
+      "sha256": "63cb33b67d3a6c24723200b3fa45f46eafd92eb3fcf0a2577d2a8043def5144c"
+    },
+    {
+      "bytes": 2687,
+      "path": "artifacts/experiments/first_stage_fd_table_contexts_20261023/gate-attempt01/producer.json",
+      "sha256": "54ab1aa293fd64f153a7f0bd8fbf0d3fc2378b09a9757a00fa56705f92525c7e"
+    },
+    {
+      "bytes": 6511,
+      "path": "artifacts/experiments/first_stage_fd_table_contexts_20261023/gate-attempt01/resources.json",
+      "sha256": "241c5cbe8d8d703f2054e7142cb58d1875acc6ad1dbe47ef25b2722285c82552"
+    },
+    {
+      "bytes": 281281,
+      "path": "artifacts/experiments/first_stage_fd_table_contexts_20261023/gate-attempt01/result/manifest.json",
+      "sha256": "6084ad77231fd9790bd4706966ceb7d44370f58b3c5d47bcc3b660ca7941ee8c"
+    },
+    {
+      "bytes": 10666,
+      "path": "artifacts/experiments/first_stage_fd_table_contexts_20261023/gate-attempt01/run.py",
+      "sha256": "b5e149419c9fd8e50569393df43cf749d8216143ffdb6678654335cd8dba52c6"
+    },
+    {
+      "bytes": 480,
+      "path": "artifacts/experiments/first_stage_fd_table_contexts_20261023/gate-attempt01/run.sh",
+      "sha256": "d6ddcdd5723fa0afd59829ab52c68db630d9f85fb669e08f23ac1ab836cbcf04"
+    },
+    {
+      "bytes": 0,
+      "path": "artifacts/experiments/first_stage_fd_table_contexts_20261023/gate-attempt01/run.stderr.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 2047,
+      "path": "artifacts/experiments/first_stage_fd_table_contexts_20261023/gate-attempt01/run.stdout.jsonl",
+      "sha256": "f324db9757f6e81843389e1719c39256230a610df0f4f8d692434280d1a5b2d8"
+    },
+    {
+      "bytes": 849,
+      "path": "artifacts/experiments/first_stage_fd_table_contexts_20261023/gate-attempt01/run.time.txt",
+      "sha256": "8b905808a7ba22bbabcf510988f5b4a29554e7017ca980a3fd4acebca44a8c8b"
+    },
+    {
+      "bytes": 137323,
+      "path": "artifacts/experiments/first_stage_fd_table_contexts_20261023/gate-attempt01/selected-handle-proofs.json",
+      "sha256": "47df74a4e8aacdd244820d5bfe8a26bb2bf02357fbcab442898cd4748f2ee6ba"
+    },
+    {
+      "bytes": 1501,
+      "path": "artifacts/experiments/first_stage_fd_table_contexts_20261023/gate-attempt01/summary.json",
+      "sha256": "36cdfd891199cadcefb87c282397238b8a78c898612eaf28cac7eb9fda0f41b4"
+    },
+    {
+      "bytes": 1374,
+      "path": "artifacts/experiments/first_stage_fd_table_contexts_20261023/gate-attempt01/unselected-query.json",
+      "sha256": "280087c32377ab81901e637a9bee7b5f67db896178e8c2c0690ab65b88323ccf"
+    },
+    {
+      "bytes": 29426,
+      "path": "artifacts/experiments/first_stage_fd_table_contexts_20261023/gate-attempt01/work-receipts.json",
+      "sha256": "2345f4ab400fa34063f49ed86abd5a260a4f8c13744d0efac601ca8d04005387"
+    },
+    {
+      "bytes": 5193,
+      "path": "artifacts/experiments/first_stage_fd_table_contexts_20261023/gate-final-artifact-receipts.json",
+      "sha256": "5f88635bb2cb192ae08befbe48278a940bd780895c2572a65aeeea688064f6b9"
+    },
+    {
+      "bytes": 2752,
+      "path": "artifacts/experiments/first_stage_fd_table_contexts_20261023/static-freeze.json",
+      "sha256": "2cc48ed097cb77eb6b947f8241b95b420084f2bc1a281634f9383c567c820004"
+    }
+  ],
+  "schema": "scar.root-artifact-receipts",
+  "schema_version": 1,
+  "stored_bytes": 580059,
+  "transformation_authorized": false,
+  "whole_model_established": false
+}

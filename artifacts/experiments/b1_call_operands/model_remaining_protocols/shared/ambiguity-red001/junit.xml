@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="2" skipped="0" tests="2" time="0.730" timestamp="2026-10-18T21:05:22.787365+00:00" hostname="gpu1"><testcase classname="tests.unit.test_program_connection_flow" name="test_cross_region_availability_does_not_pick_the_last_of_two_conflicting_helper_merge_visits" time="0.047"><failure message="assert True is None">def test_cross_region_availability_does_not_pick_the_last_of_two_conflicting_helper_merge_visits():
+        graph, details = helper_diamond_program()
+        ctx = ConnectionContext(graph, index=ProgramIndex(graph))
+        result = ctx.available(details["raw"]["left"], details["inputs"][0].operation,
+                               guard=details["helper_guards"])
+&gt;       assert result["match"] is None
+E       assert True is None
+
+tests/unit/test_program_connection_flow.py:265: AssertionError</failure></testcase><testcase classname="tests.unit.test_program_connection_flow" name="test_source_queries_keep_conflicting_helper_incoming_visits_unresolved" time="0.004"><failure message="AssertionError: assert not ({'kind': 'LITERAL_ORIGIN', 'leaf': ReferenceValue(id=ValueID(value='helper.right.value.0'), region=RegionID(value='he...ootprintKind.UNKNOWN: 'UNKNOWN'&gt;, start=None, stop=None)), 'origin': LiteralOrigin(value=None), 'producer': None, ...})">def test_source_queries_keep_conflicting_helper_incoming_visits_unresolved():
+        graph, details = helper_diamond_program()
+        ctx = ConnectionContext(graph, index=ProgramIndex(graph))
+        origin = ctx.origins(details["inputs"][0], guard=details["helper_guards"])
+&gt;       assert not origin["recipes"]
+E       AssertionError: assert not ({'kind': 'LITERAL_ORIGIN', 'leaf': ReferenceValue(id=ValueID(value='helper.right.value.0'), region=RegionID(value='he...ootprintKind.UNKNOWN: 'UNKNOWN'&gt;, start=None, stop=None)), 'origin': LiteralOrigin(value=None), 'producer': None, ...})
+
+tests/unit/test_program_connection_flow.py:273: AssertionError</failure></testcase></testsuite></testsuites>

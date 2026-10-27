@@ -1,0 +1,126 @@
+{
+  "schema": "scar.p1-thin-native-component-acceptance",
+  "schema_version": 1,
+  "created_at": "2026-10-16T07:43:12.218448+00:00",
+  "scope": "Canonical native boundary declarations and cross-representation obligations; not provider capture/import or equivalence",
+  "status": "PASS",
+  "baseline_revision": "126d56eccf9a1b3d20e09af342e729b053193af1",
+  "implementation_revision": "79bf2a95d5817e745b1fe81ac98e0ef6c7cf4a3e",
+  "source_sha256": "7a476a2e161109dc924615cd1c5aeb17fc4ca39176ffade393e15917dbb6fb17",
+  "source_files": 376,
+  "component": {
+    "cases": 168,
+    "seconds": 8.815,
+    "evidence": "component-final.json"
+  },
+  "full": {
+    "cases": {
+      "passed": 3215,
+      "failed": 0,
+      "error": 0,
+      "skipped": 0,
+      "total": 3215
+    },
+    "seconds": 431.0846895026043,
+    "max_rss_kib": 1027692,
+    "evidence": "full/report.json",
+    "source_and_fixture_snapshots_identical": true,
+    "fixture_files": 18,
+    "exclusively_owned_basetemp_removed": true,
+    "retries": 0
+  },
+  "gates": [
+    {
+      "id": "G0",
+      "status": "PASS",
+      "evidence": [
+        "../../../../docs/M1_NATIVE_INTERFACES.md",
+        "review/integration-review.md"
+      ]
+    },
+    {
+      "id": "G1",
+      "status": "PASS",
+      "evidence": [
+        "records/agent-report.json",
+        "component-final.json"
+      ]
+    },
+    {
+      "id": "G2",
+      "status": "PASS",
+      "evidence": [
+        "component-final.json",
+        "root-review-fix.log"
+      ]
+    },
+    {
+      "id": "G3",
+      "status": "PASS",
+      "evidence": [
+        "component-final.json",
+        "review/results.after-fix.json"
+      ]
+    },
+    {
+      "id": "G4",
+      "status": "PASS",
+      "evidence": [
+        "component-final.json",
+        "../../../../tests/fixtures/program_graph_v7_frozen.proof.json"
+      ]
+    },
+    {
+      "id": "G5",
+      "status": "PASS",
+      "evidence": [
+        "review/integration-review.md",
+        "review/closure.md",
+        "review/results.json",
+        "review/results.after-fix.json"
+      ]
+    },
+    {
+      "id": "G6",
+      "status": "PASS",
+      "evidence": [
+        "full/report.json",
+        "full/source.before.json",
+        "full/source.after.json"
+      ]
+    }
+  ],
+  "observed_defect": {
+    "id": "B1",
+    "before": "Validator-valid legacy ID subtype failed new ProgramIndex construction",
+    "after": "Original typed-ID coordinates preserve legacy graphs and leave new records exact",
+    "status": "CLOSED within reviewed component",
+    "initial_component_pass_did_not_cover_defect": true,
+    "old_probe_preserved": true,
+    "same_probe_after_fix_all_pass": true
+  },
+  "verified_scope": [
+    "Entry/exit partition and ownership",
+    "Repeated value uses and all Return/Raise sites",
+    "Partial/many-to-many declared cross-region pairs",
+    "Eight unproved domains",
+    "v8 strict capability; exact v2-v7 wire and v1 migration contract",
+    "Public CLI does not authorize transformation"
+  ],
+  "unverified": [
+    "Native artifact/signature/tree authenticity",
+    "Native raw-role semantics",
+    "Current lifted-state and mutation write-back binding",
+    "Source/runtime correspondence",
+    "Cross-representation equivalence",
+    "Full first-stage program model",
+    "Automatic LeWM graph",
+    "Transformation or speedup"
+  ],
+  "lewm_git_clean": true,
+  "lewm_executed_by_this_component": false,
+  "next_proposals": [
+    "review/next-state-boundary.md",
+    "review/next-model-order.md"
+  ]
+}

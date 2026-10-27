@@ -1,0 +1,5 @@
+Traceback (most recent call last):
+  File "/tmp/scar-structured-model-280qf4mi/artifacts/experiments/b1_call_operands/model_protocol_followup/codec/oracle-v19/generate.py", line 23, in <module>
+    assert document["protocol_bindings"]
+           ~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+AssertionError

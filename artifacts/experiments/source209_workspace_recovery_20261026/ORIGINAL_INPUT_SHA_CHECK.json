@@ -1,0 +1,9 @@
+{
+  "verified_original_input_rows": 446,
+  "input_bytes_read": 19838310,
+  "mismatches": [],
+  "graph_declarations_present": 99,
+  "graph_payload_decoded_or_qualified": false,
+  "original_failed_gate_unchanged": true,
+  "future_freeze_requires_new_physical_stats": true
+}

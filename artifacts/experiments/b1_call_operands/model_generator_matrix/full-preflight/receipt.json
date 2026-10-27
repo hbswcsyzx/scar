@@ -1,0 +1,11 @@
+{
+  "status": "REJECTED_BEFORE_PYTEST",
+  "reason": "Abbreviated --revision did not equal exact40-character HEAD",
+  "source_sha256": "fc6ebabbd4fd670dbe497cfcb61c53e9db83fbf198b3081055134b9da93e0ef0",
+  "actual_revision": "44d56af52d65cd3440f4600fa05ea34fd03ad7f1",
+  "original_output_directory": "artifacts/experiments/b1_call_operands/model_generator_matrix/full",
+  "preserved_at": "artifacts/experiments/b1_call_operands/model_generator_matrix/full-preflight/attempt001",
+  "pytest_process_started": false,
+  "automatic_retry": false,
+  "decision": "Preserve preflight failure; start the first actual frozen pytest run in a fresh output directory using exact HEAD. No source changes."
+}

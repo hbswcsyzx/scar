@@ -1,0 +1,8 @@
+[
+  "git",
+  "archive",
+  "f2b4672d9555348dcd05da62a8cd126711ef22f9",
+  "scar",
+  "tests/fixtures",
+  "tests/unit/test_execution_production_codec.py"
+]

@@ -1,0 +1,14 @@
+.......................F............................                     [100%]
+=================================== FAILURES ===================================
+_____ test_initial_advance_cannot_be_reused_after_a_real_advance_backedge ______
+
+    def test_initial_advance_cannot_be_reused_after_a_real_advance_backedge():
+        graph, _ = continuation_initial_loop_program()
+>       assert "protocol_initial_advance" in _codes(graph)
+E       AssertionError: assert 'protocol_initial_advance' in {'protocol_result_reference'}
+E        +  where {'protocol_result_reference'} = _codes(ProgramGraph(root=RegionID(value='continuation'), regions=(Region(id=RegionID(value='continuation'), label='declared o...), slot=1), targets=(HostTerminal(operation=OperationID(value='continuation.extract.error')),))), protocol_bindings=()))
+
+tests/unit/test_program_continuation_connections.py:149: AssertionError
+=========================== short test summary info ============================
+FAILED tests/unit/test_program_continuation_connections.py::test_initial_advance_cannot_be_reused_after_a_real_advance_backedge
+1 failed, 51 passed in 2.23s

@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="6" skipped="0" tests="6" time="2.187" timestamp="2026-10-20T07:55:01.214497+00:00" hostname="gpu1"><testcase classname="tests.unit.test_program_async_close_chains" name="test_real_close_chain_keeps_same_body_current_session_and_only_terminal_f[graceful-return]" time="0.351"><failure message="ValueError: cleanup_replace_block at program_operation:close.body.cleanup.normal.action: Replace is the first operation followed by its JUMP; cleanup_replace_block at program_operation:close.body.cleanup.packet.action: Replace is the first operation followed by its JUMP">route = 'graceful-return'
+
+    @pytest.mark.parametrize('route', ('graceful-return', 'graceful-ge', 'graceful-ordinary', 'illegal'))
+    def test_real_close_chain_keeps_same_body_current_session_and_only_terminal_f(route):
+        program, details = _graph(route)
+&gt;       index = _checked(program)
+                ^^^^^^^^^^^^^^^^^
+
+tests/unit/test_program_async_close_chains.py:50: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/unit/test_program_async_close_chains.py:26: in _checked
+    require_valid(core)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='close.caller'), regions=(Region(id=RegionID(value='close.caller'), label='declared d..., protocol_bindings=(), exception_matches=(), call_effect_expansions=(), stored_value_writes=(), stored_value_reads=())
+
+    def require_valid(graph: ProgramGraph) -&gt; None:
+        issues = validate(graph)
+        if issues:
+&gt;           raise ValueError("; ".join(f"{issue.code} at {issue.path}: {issue.message}" for issue in issues))
+E           ValueError: cleanup_replace_block at program_operation:close.body.cleanup.normal.action: Replace is the first operation followed by its JUMP; cleanup_replace_block at program_operation:close.body.cleanup.packet.action: Replace is the first operation followed by its JUMP
+
+scar/ir/program/validation.py:768: ValueError</failure></testcase><testcase classname="tests.unit.test_program_async_close_chains" name="test_real_close_chain_keeps_same_body_current_session_and_only_terminal_f[graceful-ge]" time="0.113"><failure message="ValueError: cleanup_replace_block at program_operation:close.body.cleanup.packet.action: Replace is the first operation followed by its JUMP">route = 'graceful-ge'
+
+    @pytest.mark.parametrize('route', ('graceful-return', 'graceful-ge', 'graceful-ordinary', 'illegal'))
+    def test_real_close_chain_keeps_same_body_current_session_and_only_terminal_f(route):
+        program, details = _graph(route)
+&gt;       index = _checked(program)
+                ^^^^^^^^^^^^^^^^^
+
+tests/unit/test_program_async_close_chains.py:50: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/unit/test_program_async_close_chains.py:26: in _checked
+    require_valid(core)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='close.caller'), regions=(Region(id=RegionID(value='close.caller'), label='declared d..., protocol_bindings=(), exception_matches=(), call_effect_expansions=(), stored_value_writes=(), stored_value_reads=())
+
+    def require_valid(graph: ProgramGraph) -&gt; None:
+        issues = validate(graph)
+        if issues:
+&gt;           raise ValueError("; ".join(f"{issue.code} at {issue.path}: {issue.message}" for issue in issues))
+E           ValueError: cleanup_replace_block at program_operation:close.body.cleanup.packet.action: Replace is the first operation followed by its JUMP
+
+scar/ir/program/validation.py:768: ValueError</failure></testcase><testcase classname="tests.unit.test_program_async_close_chains" name="test_real_close_chain_keeps_same_body_current_session_and_only_terminal_f[graceful-ordinary]" time="0.101"><failure message="ValueError: protocol_pack_operation at program_value:close.body.cleanup.normal.fresh_packet: pack only constructs its one control payload; state/effects stay outside">route = 'graceful-ordinary'
+
+    @pytest.mark.parametrize('route', ('graceful-return', 'graceful-ge', 'graceful-ordinary', 'illegal'))
+    def test_real_close_chain_keeps_same_body_current_session_and_only_terminal_f(route):
+        program, details = _graph(route)
+&gt;       index = _checked(program)
+                ^^^^^^^^^^^^^^^^^
+
+tests/unit/test_program_async_close_chains.py:50: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/unit/test_program_async_close_chains.py:26: in _checked
+    require_valid(core)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='close.caller'), regions=(Region(id=RegionID(value='close.caller'), label='declared d..., protocol_bindings=(), exception_matches=(), call_effect_expansions=(), stored_value_writes=(), stored_value_reads=())
+
+    def require_valid(graph: ProgramGraph) -&gt; None:
+        issues = validate(graph)
+        if issues:
+&gt;           raise ValueError("; ".join(f"{issue.code} at {issue.path}: {issue.message}" for issue in issues))
+E           ValueError: protocol_pack_operation at program_value:close.body.cleanup.normal.fresh_packet: pack only constructs its one control payload; state/effects stay outside
+
+scar/ir/program/validation.py:768: ValueError</failure></testcase><testcase classname="tests.unit.test_program_async_close_chains" name="test_real_close_chain_keeps_same_body_current_session_and_only_terminal_f[illegal]" time="0.219"><failure message="ValueError: cleanup_replace_block at program_operation:close.body.cleanup.packet.action: Replace is the first operation followed by its JUMP">route = 'illegal'
+
+    @pytest.mark.parametrize('route', ('graceful-return', 'graceful-ge', 'graceful-ordinary', 'illegal'))
+    def test_real_close_chain_keeps_same_body_current_session_and_only_terminal_f(route):
+        program, details = _graph(route)
+&gt;       index = _checked(program)
+                ^^^^^^^^^^^^^^^^^
+
+tests/unit/test_program_async_close_chains.py:50: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/unit/test_program_async_close_chains.py:26: in _checked
+    require_valid(core)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='close.caller'), regions=(Region(id=RegionID(value='close.caller'), label='declared d..., protocol_bindings=(), exception_matches=(), call_effect_expansions=(), stored_value_writes=(), stored_value_reads=())
+
+    def require_valid(graph: ProgramGraph) -&gt; None:
+        issues = validate(graph)
+        if issues:
+&gt;           raise ValueError("; ".join(f"{issue.code} at {issue.path}: {issue.message}" for issue in issues))
+E           ValueError: cleanup_replace_block at program_operation:close.body.cleanup.packet.action: Replace is the first operation followed by its JUMP
+
+scar/ir/program/validation.py:768: ValueError</failure></testcase><testcase classname="tests.unit.test_program_async_close_chains" name="test_illegal_yield_request_complete_still_rejects_release_before_real_body_terminal" time="0.258"><failure message="ValueError: cleanup_replace_block at program_operation:close.body.cleanup.packet.action: Replace is the first operation followed by its JUMP">def test_illegal_yield_request_complete_still_rejects_release_before_real_body_terminal():
+        program, details = _graph('illegal')
+&gt;       index = _checked(program)
+                ^^^^^^^^^^^^^^^^^
+
+tests/unit/test_program_async_close_chains.py:99: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/unit/test_program_async_close_chains.py:26: in _checked
+    require_valid(core)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='close.caller'), regions=(Region(id=RegionID(value='close.caller'), label='declared d..., protocol_bindings=(), exception_matches=(), call_effect_expansions=(), stored_value_writes=(), stored_value_reads=())
+
+    def require_valid(graph: ProgramGraph) -&gt; None:
+        issues = validate(graph)
+        if issues:
+&gt;           raise ValueError("; ".join(f"{issue.code} at {issue.path}: {issue.message}" for issue in issues))
+E           ValueError: cleanup_replace_block at program_operation:close.body.cleanup.packet.action: Replace is the first operation followed by its JUMP
+
+scar/ir/program/validation.py:768: ValueError</failure></testcase><testcase classname="tests.unit.test_program_async_close_chains" name="test_illegal_source_inventory_survives_missing_post_relation_and_tiny_budget" time="0.297"><failure message="ValueError: cleanup_replace_block at program_operation:close.body.cleanup.packet.action: Replace is the first operation followed by its JUMP">def test_illegal_source_inventory_survives_missing_post_relation_and_tiny_budget():
+        program, details = _graph('illegal')
+&gt;       original = _checked(program)
+                   ^^^^^^^^^^^^^^^^^
+
+tests/unit/test_program_async_close_chains.py:117: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/unit/test_program_async_close_chains.py:26: in _checked
+    require_valid(core)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='close.caller'), regions=(Region(id=RegionID(value='close.caller'), label='declared d..., protocol_bindings=(), exception_matches=(), call_effect_expansions=(), stored_value_writes=(), stored_value_reads=())
+
+    def require_valid(graph: ProgramGraph) -&gt; None:
+        issues = validate(graph)
+        if issues:
+&gt;           raise ValueError("; ".join(f"{issue.code} at {issue.path}: {issue.message}" for issue in issues))
+E           ValueError: cleanup_replace_block at program_operation:close.body.cleanup.packet.action: Replace is the first operation followed by its JUMP
+
+scar/ir/program/validation.py:768: ValueError</failure></testcase></testsuite></testsuites>

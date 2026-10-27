@@ -1,0 +1,31 @@
+{
+  "actual_exit_code": 1,
+  "status": "PUBLISHED_READER_STOPPED_BY_SCOPE_AUDIT",
+  "published_bodies": 161,
+  "publication": {
+    "actual_formal_routing_established": false,
+    "body_count": 161,
+    "construction_cost_known": false,
+    "construction_operations": null,
+    "effects_established": false,
+    "first_stage_complete": false,
+    "function_environment_established": false,
+    "manifest": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/source_entry_integration_20261026/attempt03/result/publication/manifest.json",
+    "runtime_code_instance_established": false,
+    "schema_version": 3,
+    "sha256": "e61120885b52e48810d4033975d82bece570b80c8251606df2ae7ae9634a734b",
+    "source_relowered": false,
+    "state_versions_established": false,
+    "target_executed": false,
+    "transformation_authorized": false,
+    "whole_program_established": false
+  },
+  "independent_full_reader_complete": false,
+  "full_body_queries_complete": false,
+  "elapsed_s": 7121.1991103939945,
+  "error_type": "KeyboardInterrupt",
+  "source_lowering_calls": 0,
+  "target_executions": 0,
+  "whole_program_complete": false,
+  "decision": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/source_entry_integration_20261026/attempt03/SCOPE_AUDIT_STOP.json"
+}

@@ -1,0 +1,11 @@
+
+==================================== ERRORS ====================================
+____ ERROR collecting tests/unit/test_program_protocol_connections_codec.py ____
+tests/unit/test_program_protocol_connections_codec.py:152: in <module>
+    (ProtocolProfile.COROUTINE_BODY_V1, ResumableKind.COROUTINE),
+     ^^^^^^^^^^^^^^^
+E   NameError: name 'ProtocolProfile' is not defined
+=========================== short test summary info ============================
+ERROR tests/unit/test_program_protocol_connections_codec.py - NameError: name...
+!!!!!!!!!!!!!!!!!!!! Interrupted: 1 error during collection !!!!!!!!!!!!!!!!!!!!
+1 error in 0.62s

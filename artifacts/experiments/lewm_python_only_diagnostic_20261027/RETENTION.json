@@ -1,0 +1,73 @@
+{
+  "scope": "small failure/terminal/source identities; no raw data copy",
+  "local_files": [
+    {
+      "uri": "/home/zyf/AAA/scar-worktrees/collector-noop-events/artifacts/experiments/lewm_python_only_diagnostic_20261027/trace/call-codes.2183046.jsonl",
+      "bytes": 0,
+      "retention": "LOCAL_ONLY; not re-read or granted whole-trace qualification"
+    },
+    {
+      "uri": "/home/zyf/AAA/scar-worktrees/collector-noop-events/artifacts/experiments/lewm_python_only_diagnostic_20261027/trace/call-codes.2183046.jsonl.snapshot",
+      "bytes": 346233,
+      "retention": "LOCAL_ONLY; not re-read or granted whole-trace qualification"
+    },
+    {
+      "uri": "/home/zyf/AAA/scar-worktrees/collector-noop-events/artifacts/experiments/lewm_python_only_diagnostic_20261027/trace/call-events.2183046.jsonl",
+      "bytes": 0,
+      "retention": "LOCAL_ONLY; not re-read or granted whole-trace qualification"
+    },
+    {
+      "uri": "/home/zyf/AAA/scar-worktrees/collector-noop-events/artifacts/experiments/lewm_python_only_diagnostic_20261027/trace/call-events.2183046.jsonl.snapshot",
+      "bytes": 31984028,
+      "retention": "LOCAL_ONLY; not re-read or granted whole-trace qualification"
+    },
+    {
+      "uri": "/home/zyf/AAA/scar-worktrees/collector-noop-events/artifacts/experiments/lewm_python_only_diagnostic_20261027/trace/call-operands.2183046.jsonl",
+      "bytes": 0,
+      "retention": "LOCAL_ONLY; not re-read or granted whole-trace qualification"
+    },
+    {
+      "uri": "/home/zyf/AAA/scar-worktrees/collector-noop-events/artifacts/experiments/lewm_python_only_diagnostic_20261027/trace/call-operands.2183046.jsonl.snapshot",
+      "bytes": 63984160,
+      "retention": "LOCAL_ONLY; not re-read or granted whole-trace qualification"
+    },
+    {
+      "uri": "/home/zyf/AAA/scar-worktrees/collector-noop-events/artifacts/experiments/lewm_python_only_diagnostic_20261027/trace/captured-sources.2183046.jsonl",
+      "bytes": 7203464,
+      "retention": "LOCAL_ONLY; not re-read or granted whole-trace qualification"
+    },
+    {
+      "uri": "/home/zyf/AAA/scar-worktrees/collector-noop-events/artifacts/experiments/lewm_python_only_diagnostic_20261027/trace/function-environments.2183046.jsonl",
+      "bytes": 36377464,
+      "retention": "LOCAL_ONLY; not re-read or granted whole-trace qualification"
+    },
+    {
+      "uri": "/home/zyf/AAA/scar-worktrees/collector-noop-events/artifacts/experiments/lewm_python_only_diagnostic_20261027/trace/function-environments.2183046.jsonl.snapshot",
+      "bytes": 27779618,
+      "retention": "LOCAL_ONLY; not re-read or granted whole-trace qualification"
+    },
+    {
+      "uri": "/home/zyf/AAA/scar-worktrees/collector-noop-events/artifacts/experiments/lewm_python_only_diagnostic_20261027/trace/python-call-targets.2183046.jsonl",
+      "bytes": 57603830,
+      "retention": "LOCAL_ONLY; not re-read or granted whole-trace qualification"
+    },
+    {
+      "uri": "/home/zyf/AAA/scar-worktrees/collector-noop-events/artifacts/experiments/lewm_python_only_diagnostic_20261027/trace/python-call-targets.2183046.jsonl.snapshot",
+      "bytes": 53473540,
+      "retention": "LOCAL_ONLY; not re-read or granted whole-trace qualification"
+    },
+    {
+      "uri": "/home/zyf/AAA/scar-worktrees/collector-noop-events/artifacts/experiments/lewm_python_only_diagnostic_20261027/trace/stream-interfaces.2183046.jsonl",
+      "bytes": 130548,
+      "retention": "LOCAL_ONLY; not re-read or granted whole-trace qualification"
+    }
+  ],
+  "collector_copy": {
+    "uri": "/home/zyf/AAA/scar-worktrees/collector-noop-events/artifacts/experiments/lewm_python_only_diagnostic_20261027/collector-source",
+    "git": "312ab664",
+    "source_manifest": "SOURCE.json",
+    "retention": "LOCAL_ONLY; source identity in Git and explicit SHA manifest"
+  },
+  "model_complete": false,
+  "raw_normal_reader_not_run": true
+}

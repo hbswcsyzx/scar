@@ -1,0 +1,35 @@
+{
+  "scope": "main-package actual 7-call SOURCE_REPLAY join, before later Lambda integration",
+  "sources": [
+    {
+      "path": "scar/analysis/source_constant_lowering.py",
+      "sha256": "027ae5225d1903b44c08f92c42000dce5778501f64aa3d7ba0e015135a296ac3",
+      "bytes": 4505
+    },
+    {
+      "path": "scar/analysis/source_stream_interfaces.py",
+      "sha256": "d007890d44b9387dfdc7fb0e9c5cec956c5a64ae0adc0a39081292cf354b2325",
+      "bytes": 24116
+    },
+    {
+      "path": "scar/analysis/environment_lowering.py",
+      "sha256": "20da2a1b76c53933a925cb6cc60dda7dccbd2403160b14a8559dcbe3fab78f6c",
+      "bytes": 25249
+    },
+    {
+      "path": "scar/analysis/source_language_validation.py",
+      "sha256": "6a979034826aa1dc39a0dcb0312606ef7f460c6dc6ec998baaf223a458ca3302",
+      "bytes": 25294
+    },
+    {
+      "path": "scar/ir/program/source_language.py",
+      "sha256": "1844e82fe005c22b39ef16242f4b2d0f77d0fbc91414bbca52cd9d9de7f6de65",
+      "bytes": 8020
+    },
+    {
+      "path": "artifacts/experiments/source_constant_core_20261026/run_source_stream_join.py",
+      "sha256": "797bd681007d0dfa7ee283c606bc94e79bc9816969984fddedf2fd5da399f30d",
+      "bytes": 10779
+    }
+  ]
+}

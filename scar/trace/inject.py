@@ -15,6 +15,7 @@ from functools import wraps
 
 from .session import TraceSession
 from scar.ir import CodeID
+from . import call_edges as _call_edges
 
 SESSION: TraceSession | None = None
 _old_profile = None
@@ -25,6 +26,30 @@ _torch_patched = False
 _torch_patching = False
 _profiler = None
 _dispatch_mode = None
+
+def _forward_target(function, args, kwargs):
+    """Transparent target call only when the genuine V2 owner is installed."""
+    try:
+        recorder = _call_edges._active_process_recorder()
+    except Exception:
+        recorder = None
+    token = None
+    if recorder is not None:
+        try:
+            frame = sys._getframe()
+            token = recorder._begin_target_forward(frame, 'TRACE', adapter_frame=frame.f_back)
+        except Exception:
+            pass
+        finally:
+            frame = None
+    try:
+        return function(*args, **kwargs)
+    finally:
+        if token is not None:
+            try:
+                recorder._end_target_forward(token)
+            except Exception:
+                pass
 
 
 def _profile(frame, event, arg):
@@ -82,7 +107,10 @@ def _patch_torch(torch):
                         import traceback
                         traceback.print_exc()
             started = time.perf_counter_ns()
-            result = original_call(self, *args, **kwargs)
+            if _call_edges._ACTIVE_PROCESS_RECORDER is not None:
+                result = _forward_target(original_call, (self, *args), kwargs)
+            else:
+                result = original_call(self, *args, **kwargs)
             if SESSION is not None:
                 try:
                     code = getattr(self.forward, "__code__", None)
@@ -106,7 +134,10 @@ def _patch_torch(torch):
             @wraps(original)
             def transfer(self, *args, __original=original, __name=name, **kwargs):
                 started = time.perf_counter_ns()
-                result = __original(self, *args, **kwargs)
+                if _call_edges._ACTIVE_PROCESS_RECORDER is not None:
+                    result = _forward_target(__original, (self, *args), kwargs)
+                else:
+                    result = __original(self, *args, **kwargs)
                 if SESSION is not None:
                     try:
                         SESSION.transfer(__name, self, result, time.perf_counter_ns() - started)
@@ -127,7 +158,10 @@ def _install_torch_import_hook():
 
     @wraps(original_import)
     def importing(name, globals=None, locals=None, fromlist=(), level=0):
-        result = original_import(name, globals, locals, fromlist, level)
+        if _call_edges._ACTIVE_PROCESS_RECORDER is not None:
+            result = _forward_target(original_import, (name, globals, locals, fromlist, level), {})
+        else:
+            result = original_import(name, globals, locals, fromlist, level)
         if name == "torch" or name.startswith("torch."):
             try:
                 import torch
@@ -175,7 +209,10 @@ def install(out: str | None = None) -> TraceSession:
                 class RecorderMode(TorchDispatchMode):
                     def __torch_dispatch__(self, func, types, args=(), kwargs=None):
                         started = time.perf_counter_ns()
-                        result = func(*args, **(kwargs or {}))
+                        if _call_edges._ACTIVE_PROCESS_RECORDER is not None:
+                            result = _forward_target(func, args, kwargs or {})
+                        else:
+                            result = func(*args, **(kwargs or {}))
                         if SESSION is not None:
                             SESSION.torch_dispatch(str(func), args, kwargs or {}, result,
                                                     time.perf_counter_ns() - started)

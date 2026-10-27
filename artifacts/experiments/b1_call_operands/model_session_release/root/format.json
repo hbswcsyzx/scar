@@ -1,0 +1,87 @@
+[
+  {
+    "path": "docs/M1_SESSION_RELEASE_ACCEPTANCE.md",
+    "sha256": "6f51f7ea85c2fdfcf1699b6948952ed2d3651162c8b6bfe6b911f88e0d9f49a7",
+    "bytes": 3206
+  },
+  {
+    "path": "docs/M1_SESSION_RELEASE_PLAN.md",
+    "sha256": "2c23e61822ca55b0df9b96e4140d0997ea5b7521d3657b5500a51353d3a7afda",
+    "bytes": 4423
+  },
+  {
+    "path": "gates/m1_session_release.json",
+    "sha256": "e37127f109cce3dce3018821acc09799e6bfffbdb600601548aa7b517c1c7dfd",
+    "bytes": 6627
+  },
+  {
+    "path": "scar/ir/program/lifecycle_analysis.py",
+    "sha256": "153c309f0cd32a6b6b719f0266dbc68209a107c9746bb88c2463194d7d650dd7",
+    "bytes": 1619
+  },
+  {
+    "path": "scar/ir/program/lifecycle_flow.py",
+    "sha256": "8adaa530a1801949a0706948c9aef2410148782fa95e49da18706ed5c794fae0",
+    "bytes": 12985
+  },
+  {
+    "path": "scar/ir/program/session_flow.py",
+    "sha256": "13e90d83f74bd46281a678c778c559ad1d6d52d3d5722137be38848f853a7387",
+    "bytes": 11636
+  },
+  {
+    "path": "scar/ir/program/session_release_validation.py",
+    "sha256": "b96e989a611a518630e2c33bbf61b5f69d4cc015b54166d27f78a6486482e0fc",
+    "bytes": 6687
+  },
+  {
+    "path": "tests/fixtures/program_graph_v13_frozen.json",
+    "sha256": "b833f028476a379e4c178fcfc7ad33d5dfebf2f7423df51593c871589139e6b6",
+    "bytes": 89825
+  },
+  {
+    "path": "tests/fixtures/program_graph_v13_frozen.proof.json",
+    "sha256": "05a9e521c4772f91bdd6f72700d7c8042c0d57a99a06560e82f7997a8a8b403d",
+    "bytes": 554
+  },
+  {
+    "path": "tests/fixtures/program_session_release_graphs.py",
+    "sha256": "149dd6532e6c18b14e4ec0dd8cddd5bcd7a2132df2d182ce81d5336f00813b2d",
+    "bytes": 10414
+  },
+  {
+    "path": "tests/unit/test_lifecycle_flow.py",
+    "sha256": "af4efa34a3fe50337050a6b20f08e32fdc92db47fb0f6d363dffc5414689efff",
+    "bytes": 15779
+  },
+  {
+    "path": "tests/unit/test_program_session_release_codec.py",
+    "sha256": "4e5f7c55083accec0ede2fc837c5ef50334705372c0acf17a55250fc88c5e1a3",
+    "bytes": 6321
+  },
+  {
+    "path": "tests/unit/test_program_session_release_graph.py",
+    "sha256": "be938ecab794588d6aba998352a30d85b9bd054b43e37443e499de2e52367aba",
+    "bytes": 9322
+  },
+  {
+    "path": "tests/unit/test_program_session_release_queries.py",
+    "sha256": "01985ac433023a3ca51b1793b5a5d148971b384c9f671edca0fe3800964b08c8",
+    "bytes": 5774
+  },
+  {
+    "path": "tests/unit/test_session_composition.py",
+    "sha256": "b664bda17dc6acab19c447bdbdeb82a053496abf7bf83ca694744a9949d285df",
+    "bytes": 6632
+  },
+  {
+    "path": "tests/unit/test_session_flow.py",
+    "sha256": "20dae9eb0aae754f9ade1e94bc10c19857cb1ea465b109d6c65aa62670d9ed5f",
+    "bytes": 7596
+  },
+  {
+    "path": "tests/unit/test_session_release_records.py",
+    "sha256": "482a663588fd8a0f549acf202f2305330b745a124e17de76dfcbd6c3165d2849",
+    "bytes": 8489
+  }
+]

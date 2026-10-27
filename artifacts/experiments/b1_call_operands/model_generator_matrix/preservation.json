@@ -1,0 +1,12 @@
+{
+  "preserved_previous_cases": 5401,
+  "preserved_initial_full_cases": 5673,
+  "missing_cases": [],
+  "removed_source_files": [],
+  "changed_previous_fixtures": [],
+  "previous_fixtures": 82,
+  "initial_full_fixtures": 92,
+  "current_fixtures": 92,
+  "initial_full_status": "FAIL",
+  "final_full_status": "PASS"
+}

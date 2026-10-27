@@ -1,0 +1,7 @@
+{
+  "detail": "'structured'",
+  "elapsed_s": 963.193652455011,
+  "first_stage_complete": false,
+  "phase": "same-retained-run-owned-reader-connections",
+  "type": "KeyError"
+}

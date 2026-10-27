@@ -1,0 +1,36 @@
+{
+  "schema": "scar.root-source-revision-archive-review",
+  "schema_version": 1,
+  "status": "PASS_BOUNDED_ARCHIVE_AND_RECORDED_PRODUCER_REVIEW",
+  "canonical_document_sha256": "2f8d567e658eb23a77272975ff2e0c4dd7e6179b09485de9f3be977d9e363d4a",
+  "canonical_document_bytes": 104798011,
+  "archive": {
+    "chunks": 147,
+    "rows": 137243,
+    "decoded_bytes": 104797829,
+    "tables": {
+      "code_links": 855,
+      "entry_parameters": 17097,
+      "environments.bindings": 3372,
+      "environments.files": 2,
+      "environments.metadata": 1,
+      "environments.unresolved": 8962,
+      "routing.argument_routes": 27,
+      "routing.completion_routes": 27,
+      "routing.issues": 100523,
+      "routing.obligations": 77,
+      "routing.returns": 6223,
+      "routing.templates": 77
+    }
+  },
+  "participating_sources_checked": 179,
+  "actual_gate_session": 40820,
+  "actual_gate_exit": 0,
+  "review_scope": "all saved report chunks and canonical reconstruction; exact current and archived participating source bytes; selected terminal/proof invariants",
+  "raw_trace_reopened": false,
+  "source_binder_reexecuted": false,
+  "additional_graph_or_runtime_semantics_verified": false,
+  "target_executed": false,
+  "whole_model_complete": false,
+  "elapsed_seconds": 4.346895057999063
+}

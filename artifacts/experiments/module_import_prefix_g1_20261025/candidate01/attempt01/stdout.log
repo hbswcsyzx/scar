@@ -1,0 +1,4 @@
+{"elapsed_s":0.8940835630055517,"event":"BEGIN","phase":"NORMAL_COMPOSITION_AND_CATALOG","self_rss_kib":44328}
+{"elapsed_s":1.2047992630396038,"event":"BEGIN","phase":"READONLY_COMPILER_ROOT","self_rss_kib":49744}
+{"elapsed_s":1.2118212610366754,"event":"BEGIN","phase":"ONE_FIRST_IMPORT_PREFIX","self_rss_kib":49744}
+{"elapsed_s":1.217026980011724,"error":"first import has no unique original SG definition/output","event":"FAILED","phase":"ONE_FIRST_IMPORT_PREFIX","self_rss_kib":49744}

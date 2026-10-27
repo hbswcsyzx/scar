@@ -1,0 +1,18 @@
+Original tools.exec_command result: exit_code=1, stdout empty.
+The following is the returned traceback transcript, retained without rerunning the witness.
+
+Traceback (most recent call last):
+  File "/tmp/scar-structured-model-280qf4mi/artifacts/experiments/b1_call_operands/model_protocol_families/created_throw_witness.py", line 109, in <module>
+    main()
+    ~~~~^^
+  File "/tmp/scar-structured-model-280qf4mi/artifacts/experiments/b1_call_operands/model_protocol_families/created_throw_witness.py", line 100, in main
+    assert all(cases[index]['after_throw'].endswith('_CREATED')
+           ~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+               and cases[index]['can_start_after_failure'] == 'item' for index in (1, 2))
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError
+
+The actual six observations had already been saved in created_throw_witness.json.
+The first failing assertion wrongly grouped constructor failure with raw-argument
+rejection. The later PEP479 expectation did not execute; the saved observation
+also contradicts that separate expectation. Neither expected result is evidence.

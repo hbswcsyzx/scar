@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="1" failures="0" skipped="0" tests="1" time="0.633" timestamp="2026-10-18T20:36:40.206923+00:00" hostname="gpu1"><testcase classname="" name="tests.unit.test_program_protocol_records" time="0.000"><error message="collection failure">ImportError while importing test module '/tmp/scar-structured-model-280qf4mi/tests/unit/test_program_protocol_records.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/home/zyf/miniconda3/envs/lewm/lib/python3.14/importlib/__init__.py:88: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/unit/test_program_protocol_records.py:8: in &lt;module&gt;
+    from scar.ir.program.model import (
+E   ImportError: cannot import name 'AdmissionPredicate' from 'scar.ir.program.model' (/tmp/scar-structured-model-280qf4mi/scar/ir/program/model.py)</error></testcase></testsuite></testsuites>

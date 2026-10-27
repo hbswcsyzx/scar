@@ -1,0 +1,25 @@
+Traceback (most recent call last):
+  File "<frozen runpy>", line 203, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/native_links_full_retry01_20261027/analyzer-source/scar/cli.py", line 2104, in <module>
+    raise SystemExit(main())
+                     ~~~~^^
+  File "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/native_links_full_retry01_20261027/analyzer-source/scar/cli.py", line 1054, in main
+    return args.func(args)
+           ~~~~~~~~~^^^^^^
+  File "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/native_links_full_retry01_20261027/analyzer-source/scar/analysis/native_declaration_links.py", line 191, in build_native_links_cli
+    ref = publish_native_declaration_links(
+        artifact(args.pipeline, args.pipeline_sha256, 'scar.native-declaration-pipeline'),
+    ...<6 lines>...
+        max_input_bytes=args.max_input_bytes, max_output_bytes=args.max_output_bytes, max_seconds=args.max_seconds,
+        progress=lambda record: print(json.dumps({'schema': SCHEMA, 'progress': record}), flush=True))
+  File "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/native_links_full_retry01_20261027/analyzer-source/scar/analysis/native_declaration_links.py", line 139, in publish_native_declaration_links
+    ports = inputs.join_fragment(view)
+  File "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/native_links_full_retry01_20261027/analyzer-source/scar/analysis/native_declaration_inputs.py", line 521, in join_fragment
+    _need(type(refs) is dict and refs.get("association") == prior_status,
+    ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+          "retained metadata leaf/status differs from its original row")
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/native_links_full_retry01_20261027/analyzer-source/scar/analysis/native_declaration_inputs.py", line 41, in _need
+    raise ValueError(message)
+ValueError: retained metadata leaf/status differs from its original row

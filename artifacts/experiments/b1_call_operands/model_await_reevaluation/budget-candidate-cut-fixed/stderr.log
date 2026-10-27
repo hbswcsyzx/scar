@@ -1,0 +1,3 @@
+ERROR: not found: /tmp/scar-structured-model-280qf4mi/tests/unit/test_execution_await_source_visits.py::test_cyclic_incoming_ambiguity_preserves_independent_acyclic_guard
+(no match in any of [<Module test_execution_await_source_visits.py>])
+

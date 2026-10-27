@@ -1,0 +1,1 @@
+conda run -n lewm --no-capture-output env PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=. python -m pytest -q tests/unit/test_execution_validity_connections.py --junitxml=artifacts/experiments/b1_call_operands/model_validity/review/attempt001/junit.xml

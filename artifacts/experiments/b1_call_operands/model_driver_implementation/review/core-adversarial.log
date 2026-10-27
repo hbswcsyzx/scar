@@ -1,0 +1,175 @@
+{
+  "cases": [
+    {
+      "issues": [],
+      "name": "base_start"
+    },
+    {
+      "issues": [],
+      "name": "create_start"
+    },
+    {
+      "issues": [],
+      "name": "c1_invoke_body"
+    },
+    {
+      "issues": [],
+      "name": "loop_body"
+    },
+    {
+      "expected_codes_present": [
+        "driver_raw_pack"
+      ],
+      "issues": [
+        [
+          "driver_raw_pack",
+          "program_value:raw.request"
+        ]
+      ],
+      "name": "raw_behaviors:WRITE",
+      "returned_issues": true
+    },
+    {
+      "expected_codes_present": [
+        "driver_raw_pack"
+      ],
+      "issues": [
+        [
+          "driver_raw_pack",
+          "program_value:raw.request"
+        ]
+      ],
+      "name": "raw_behaviors:READ",
+      "returned_issues": true
+    },
+    {
+      "expected_codes_present": [
+        "driver_raw_pack"
+      ],
+      "issues": [
+        [
+          "driver_raw_pack",
+          "program_value:raw.request"
+        ]
+      ],
+      "name": "raw_behaviors:MEMORY",
+      "returned_issues": true
+    },
+    {
+      "expected_codes_present": [
+        "driver_raw_pack"
+      ],
+      "issues": [
+        [
+          "driver_raw_pack",
+          "program_value:raw.request"
+        ]
+      ],
+      "name": "raw_behaviors:TRANSFER",
+      "returned_issues": true
+    },
+    {
+      "expected_codes_present": [
+        "driver_raw_pack"
+      ],
+      "issues": [
+        [
+          "driver_raw_pack",
+          "program_value:raw.request"
+        ]
+      ],
+      "name": "raw_behaviors:ORDER",
+      "returned_issues": true
+    },
+    {
+      "expected_codes_present": [],
+      "issues": [],
+      "name": "raw_behaviors:CONTROL",
+      "returned_issues": false
+    },
+    {
+      "expected_codes_present": [
+        "driver_raw_pack"
+      ],
+      "issues": [
+        [
+          "driver_raw_pack",
+          "program_value:raw.request"
+        ]
+      ],
+      "name": "raw_behaviors:",
+      "returned_issues": true
+    },
+    {
+      "expected_codes_present": [],
+      "issues": [
+        [
+          "control_binding",
+          "program_operation:driver.drive"
+        ]
+      ],
+      "name": "missing_body_state_use",
+      "returned_issues": true
+    },
+    {
+      "expected_codes_present": [
+        "driver_target"
+      ],
+      "issues": [
+        [
+          "driver_target",
+          "program_operation:driver.drive"
+        ]
+      ],
+      "name": "resume_case_out_of_range",
+      "returned_issues": true
+    },
+    {
+      "expected_codes_present": [
+        "driver_result"
+      ],
+      "issues": [
+        [
+          "driver_result",
+          "program_operation:factory.create"
+        ]
+      ],
+      "name": "create_result_out_of_range",
+      "returned_issues": true
+    },
+    {
+      "expected_codes_present": [
+        "schema"
+      ],
+      "issues": [
+        [
+          "schema",
+          "graph"
+        ]
+      ],
+      "name": "forged_target_class",
+      "returned_issues": true
+    },
+    {
+      "expected_codes_present": [
+        "schema"
+      ],
+      "issues": [
+        [
+          "schema",
+          "graph"
+        ]
+      ],
+      "name": "bool_result_port",
+      "returned_issues": true
+    }
+  ],
+  "head": "306a789c80ea7dd407b7fc88635056fa99fed1ad",
+  "python": "3.14.7 | packaged by conda-forge | (main, Sep  2 2026, 21:08:32) [GCC 15.3.0]",
+  "source_sha256": {
+    "scar/ir/program/control_validation.py": "deae20c2c5056a5feac096bce4202cf7c646c334267f01c9f73d3a1ab945ed3a",
+    "scar/ir/program/driver_flow.py": "57fb2c403878f751d69d43b7e94a07125a0c647ddc77fdb179b75d8bdaf0ef26",
+    "scar/ir/program/driver_validation.py": "05883c4c05e1f39f00299b70451a4df7683774d23286cd20f69eb163ad60b521",
+    "scar/ir/program/validation.py": "f1ea5e9c3799c341d778a4268fe099ee668aa6e3088620a236343b41c142dfc0"
+  }
+}
