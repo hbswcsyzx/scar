@@ -1,0 +1,41 @@
+{
+  "complete": false,
+  "domain_schema_validated": false,
+  "encoder": {
+    "allow_nan": false,
+    "ensure_ascii": true,
+    "newline": "\n",
+    "separators": [
+      ",",
+      ":"
+    ]
+  },
+  "errors": [
+    {
+      "detail": "partial journal header/frame/payload",
+      "next_record_ordinal": 11,
+      "type": "ValueError"
+    }
+  ],
+  "legacy_meta_allowed": false,
+  "max_output_bytes": 1073741824,
+  "max_output_line_bytes": 1073741824,
+  "output": {
+    "lines": 10,
+    "published": false,
+    "raw_bytes": 540,
+    "sha256": "d111c7f2f73381964642b552ee00d7bed64bcb66cfbc6c5c48159fe58aa4096b",
+    "uri": "/home/zyf/AAA/scar-worktrees/snapshot-journal/artifacts/analysis/snapshot_journal_20261027/truncated.jsonl.partial"
+  },
+  "producer_receipt": null,
+  "rows_validated": false,
+  "source": {
+    "closed_footer": false,
+    "declared_pid": 2134739,
+    "format": "scar.snapshot-journal/1",
+    "raw_bytes": 1776,
+    "sha256": "4d6cce587a59a4c45d67f5456c0faee33669f0ec190f8d94bb9c4cc1f8b4024d",
+    "uri": "/home/zyf/AAA/scar-worktrees/snapshot-journal/artifacts/analysis/snapshot_journal_20261027/truncated.journal"
+  },
+  "status": "INCOMPLETE"
+}
