@@ -8,10 +8,10 @@ from __future__ import annotations
 
 from collections import deque
 
-from scar.analysis.source_dependencies import SourceDependencySession
+from scar.analysis.source_dependencies import _DependencyFrontiers, SourceDependencySession
 from scar.analysis.source_return_bindings import SourceReturnBudget
 from scar.ir.program.ids import UseID
-from scar.ir.program.model import CompletionResult, ProtocolValue, StateVersionValue, UseRole
+from scar.ir.program.model import CompletionResult, ProtocolValue, StateVersionValue, Terminator, UseRole
 from scar.ir.record_codec import encode
 
 
@@ -44,7 +44,8 @@ class SourceDependencyBatchSession(SourceDependencySession):
         if returned is None:
             return {'normal_return': None, 'frontiers': [{'reason': 'NO_NORMAL_RETURN_INTERFACE'}]}
         pending = deque([(returned.caller, returned.caller_body, returned.landing_value, 0)])
-        seen, nodes, routes, frontiers, limits = set(), [], [], [], set()
+        seen, nodes, routes, limits = set(), [], [], set()
+        frontiers = _DependencyFrontiers(max_nodes + max_routes, limits)
         outgoing = {}
         for number, binding in enumerate(self._model.bindings):
             caller, callee = _keys(binding)
@@ -117,6 +118,9 @@ class SourceDependencyBatchSession(SourceDependencySession):
                 term = operation.terminator
                 if term is None:
                     continue
+                if type(term) is not Terminator:
+                    frontiers.append({'at': _endpoint(*key), 'reason': 'SPECIAL_CONTROL_NOT_EXPANDED',
+                                      'operation': encode(operation.id), 'terminator': type(term).__name__})
                 for number, edge in enumerate(term.successors):
                     for position, actual in enumerate(edge.arguments):
                         if type(actual) is UseID and actual != site.use.id:
@@ -137,6 +141,7 @@ class SourceDependencyBatchSession(SourceDependencySession):
         return {'normal_return': encode(returned), 'nodes': nodes, 'routes': routes, 'frontiers': frontiers,
                 'limits_reached': sorted(limits), 'truncated': bool(limits), 'pending_nodes': len(pending),
                 'max_nodes': max_nodes, 'max_depth': max_depth, 'max_routes': max_routes,
+                'max_frontiers': frontiers.maximum,
                 'runtime_occurrence_selected': False, 'content_equivalence_established': False}
 
     def query_bindings(self, binding_indices=None, *, max_bindings=16, max_queries=64,

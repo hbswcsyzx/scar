@@ -12,9 +12,22 @@ from pathlib import Path
 from scar.analysis.source_return_bindings import SourceReturnSession
 from scar.ir.program.bindings import BindingState
 from scar.ir.program.ids import UseID
-from scar.ir.program.model import BlockArgument, CompletionResult, ExitKind, OperationResult, TerminatorKind, UseRole
+from scar.ir.program.model import BlockArgument, CompletionResult, ExitKind, OperationResult, Terminator, TerminatorKind, UseRole
 from scar.ir.program.native import ExitPortRef
 from scar.ir.record_codec import encode
+
+
+class _DependencyFrontiers(list):
+    """Bound diagnostics as well as traversal, without hiding truncation."""
+    def __init__(self, maximum, limits):
+        super().__init__()
+        self.maximum, self.limits = maximum, limits
+
+    def append(self, record):
+        if len(self) >= self.maximum:
+            self.limits.add('FRONTIER_BUDGET')
+        else:
+            super().append(record)
 
 
 class SourceDependencySession(SourceReturnSession):
@@ -128,8 +141,9 @@ class SourceDependencySession(SourceReturnSession):
     def _value_dependencies(self, starts, *, max_nodes, max_depth, max_routes,
                             include_computations):
         pending = deque(starts)
-        seen, nodes, routes, leaves, frontiers = set(), [], [], [], []
+        seen, nodes, routes, leaves = set(), [], [], []
         limits, checked = set(), set()
+        frontiers = _DependencyFrontiers(max_nodes + max_routes, limits)
         local = {}
         incoming_calls, outgoing_calls = {}, {}
         for number, binding in enumerate(self._model.bindings):
@@ -234,6 +248,9 @@ class SourceDependencySession(SourceReturnSession):
                     for op, edge_number, edge in alternatives:
                         actual = edge.arguments[origin.index]
                         condition = self._edge_condition(index, op, edge_number)
+                        if type(op.terminator) is not Terminator:
+                            frontiers.append({'at': current, 'reason': 'SPECIAL_CONTROL_NOT_EXPANDED',
+                                              'edge': condition})
                         if type(actual) is UseID:
                             source = index.use_site(actual)
                             follow('CFG_ARGUMENT', invocation, namespace, source.use.value,
@@ -285,6 +302,7 @@ class SourceDependencySession(SourceReturnSession):
         return {'nodes': nodes, 'routes': routes, 'leaves': leaves, 'frontiers': frontiers,
                 'truncated': bool(pending) or bool(limits), 'pending_nodes': len(pending),
                 'max_nodes': max_nodes, 'max_depth': max_depth, 'max_routes': max_routes,
+                'max_frontiers': frontiers.maximum,
                 'limits_reached': sorted(limits), 'computations_expanded': include_computations,
                 'runtime_occurrence_selected': False}
 
@@ -294,9 +312,13 @@ class SourceDependencySession(SourceReturnSession):
         edge = term.successors[successor_index]
         result = {'operation': encode(operation.id), 'successor_index': successor_index,
                   'kind': encode(getattr(edge, 'kind', None))}
-        if term.condition is not None:
-            site = index.use_site(term.condition)
-            result['guard'] = encode(site)
+        if type(term) is Terminator:
+            if term.condition is not None:
+                site = index.use_site(term.condition)
+                result['guard'] = encode(site)
+        else:
+            result['special_control'] = {'terminator': type(term).__name__,
+                'kind': term.kind.value, 'selection_semantics_expanded': False}
         return result
 
     def _operation_dependencies(self, index, operation, invocation, namespace, current,
@@ -313,6 +335,10 @@ class SourceDependencySession(SourceReturnSession):
         if not operation.uses:
             frontiers.append({'at': current, 'reason': 'OPERATION_WITHOUT_DECLARED_INPUTS',
                               'operation': encode(operation.id)})
+        if operation.terminator is not None and type(operation.terminator) is not Terminator:
+            frontiers.append({'at': current, 'reason': 'SPECIAL_CONTROL_NOT_EXPANDED',
+                              'operation': encode(operation.id),
+                              'terminator': type(operation.terminator).__name__})
         for use in operation.uses:
             state = use.role in (UseRole.STATE_CONTENT, UseRole.STATE_ORDER)
             protocol = use.role is UseRole.PROTOCOL
@@ -330,7 +356,10 @@ class SourceDependencySession(SourceReturnSession):
         # control dependence or a selected dynamic loop iteration.
         for predecessor, number, edge in incoming.get(block, ()):
             term = predecessor.terminator
-            if term.condition is not None:
+            if type(term) is not Terminator:
+                frontiers.append({'at': current, 'reason': 'SPECIAL_CONTROL_NOT_EXPANDED',
+                                  'edge': self._edge_condition(index, predecessor, number)})
+            elif term.condition is not None:
                 site = index.use_site(term.condition)
                 follow('CONTROL_GUARD_DEPENDENCY', invocation, namespace, site.use.value,
                        operation=encode(predecessor.id), use=encode(site.use.id),
