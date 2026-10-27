@@ -1,9 +1,0 @@
-{
-  "logical_uri": "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/python_call_targets_owned_20261026/case01/capture/python-call-targets.1652336.jsonl",
-  "decoded_bytes": 5688,
-  "decoded_sha256": "5bc858aba8b980488887331066848553ea9d096aa787d3a603cf31c1b5cdc01f",
-  "physical_uri": "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/python_call_targets_owned_20261026/case01/capture/python-call-targets.1652336.jsonl.gz",
-  "physical_bytes": 919,
-  "physical_sha256": "8cefafa88fa121440d471bb7db32ade4642c0fd7d7371feeb1fe8965c1d43dc5",
-  "method": "lossless same-logical-URI gzip; raw EOF/SHA/rows kept in original metadata"
-}

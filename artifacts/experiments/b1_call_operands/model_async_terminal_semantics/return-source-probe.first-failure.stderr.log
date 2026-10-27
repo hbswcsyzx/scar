@@ -1,5 +1,0 @@
-Traceback (most recent call last):
-  File "/tmp/scar-structured-model-280qf4mi/artifacts/experiments/b1_call_operands/model_async_terminal_semantics/probe_return_sources.py", line 32, in <module>
-    child, = table.get_children()
-    ^^^^^^
-ValueError: too many values to unpack (expected 1, got 2)

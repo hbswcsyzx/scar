@@ -1,8 +1,0 @@
-{
-  "status": "FAILED",
-  "stage": "api-audit-input-metadata",
-  "reason": "saved coordinates target_process is an ID, not a ProcessInstance; product native reader uses actual owned coordinates.target_process correctly",
-  "exception": "KeyError pid",
-  "target_executions": 0,
-  "raw_replays": 0
-}

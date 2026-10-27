@@ -1,1 +1,0 @@
-git archive add4ba84c9529e1f864e4029bd7c145cfacdfafc scar tests/fixtures tests/__init__.py > artifacts/experiments/b1_call_operands/model_remaining_protocols/records-codec/oracle-v18/source/oracle-source.tar

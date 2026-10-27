@@ -1,9 +1,0 @@
-{
-  "artifact": {
-    "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/native_inputs_full_20261026/native-import/native/bundle-partitions/evidence/edges/000061.jsonl.gz",
-    "sha256": "a5ef78feb630e7bc5729bb025503284fefc19d6cfadb9bce36cab4444badc3a3",
-    "size_bytes": 466221,
-    "schema": "scar.bundle-record-chunk"
-  },
-  "locator": "#/lines/7158/record"
-}

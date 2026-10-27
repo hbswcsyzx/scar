@@ -1,7 +1,0 @@
-{"elapsed_s":1.0175506570376456,"event":"BEGIN","phase":"READONLY_ORIGINAL_COMPILER_ROOT","self_peak_rss_kib":51144}
-{"elapsed_s":1.0293139250134118,"event":"BEGIN","phase":"NORMAL_RETAINED_SP8_READBACK","self_peak_rss_kib":51144}
-{"elapsed_s":2.8014142360189,"event":"BEGIN","phase":"ONE_MODULE_C_TRY_PROPAGATION_LOWER","self_peak_rss_kib":63116}
-{"elapsed_s":8.417475430993363,"event":"BEGIN","phase":"NORMAL_NEW_SP8_FULL_READBACK","self_peak_rss_kib":110404}
-{"elapsed_s":20.005728768010158,"event":"HEARTBEAT","phase":"NORMAL_NEW_SP8_FULL_READBACK","self_peak_rss_kib":164088}
-{"elapsed_s":21.675347464042716,"event":"BEGIN","phase":"FINAL_SOURCE_INPUT_RUNTIME_CHECK","self_peak_rss_kib":164088}
-{"elapsed_s":21.843313730030786,"error":"C runtime participant missing from freeze: ['/home/zyf/miniconda3/envs/lewm/lib/python3.14/lib-dynload/_uuid.cpython-314-x86_64-linux-gnu.so', '/home/zyf/miniconda3/envs/lewm/lib/python3.14/uuid.py']","event":"FAILED","phase":"FINAL_SOURCE_INPUT_RUNTIME_CHECK","self_peak_rss_kib":164088}

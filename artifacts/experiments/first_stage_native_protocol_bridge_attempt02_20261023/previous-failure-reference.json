@@ -1,8 +1,0 @@
-{
-  "directory": "artifacts/experiments/first_stage_native_protocol_bridge_20261023",
-  "failure_sha256": "72eafac7114db312daaddf9ca984af1a256cbba6b0f7395713e4291b1854dbce",
-  "time_sha256": "ad42117ff5ffd87fa1e0e8e1ec27a9c3199c354db3283e877fa6e9ff889e87bf",
-  "full_gate_exit_code": 1,
-  "whole_wall_seconds": 124.33,
-  "terminal_directory_modified": false
-}

@@ -1,1 +1,0 @@
-First report-only shell attempt used python outside activated conda: exit 127, python: command not found; no file or product/test execution occurred. Re-run after conda activate lewm succeeded. Test attempts remain separately preserved.

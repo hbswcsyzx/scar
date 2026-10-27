@@ -1,4 +1,0 @@
-cd /tmp/scar-structured-model-280qf4mi/artifacts/experiments/b1_call_operands/model_remaining_protocols/records-codec/oracle-v18/source
-source /home/zyf/miniconda3/etc/profile.d/conda.sh
-conda activate lewm
-PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=. python /tmp/scar-structured-model-280qf4mi/artifacts/experiments/b1_call_operands/model_remaining_protocols/records-codec/oracle-v18/old_v18_encoder.py

@@ -1,8 +1,0 @@
-Traceback (most recent call last):
-  File "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_joined_capture_20261023/audit.py", line 83, in <module>
-    require(all(row['at']['process'] == coords['target_process']['id']
-            ^^^
-  File "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_joined_capture_20261023/audit.py", line 83, in <genexpr>
-    require(all(row['at']['process'] == coords['target_process']['id']
-                                        ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^
-KeyError: 'id'

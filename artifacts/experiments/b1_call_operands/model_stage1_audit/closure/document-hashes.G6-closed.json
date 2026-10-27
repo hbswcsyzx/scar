@@ -1,9 +1,0 @@
-{
-  "scope": "G1-G5 plus confirmed G6 wording closed only; not whole M2/M1/M3 acceptance",
-  "sha256": {
-    "docs/model/PYTHON_DATA_DEFINITION_PROTOCOLS.md": "1a5f87dce26236a97e41ad24e0085ec2d73a634b9ce0bd709ce9fc693100fb4a",
-    "docs/model/PYTHON_CONTROL_PROTOCOLS.md": "db0269f2fd50e9da3fde14986d4f1e69d19c0751f63f24661b53a1ed62c7707d",
-    "docs/TOOLING_SURVEY.md": "19f22c6dba798d6b29576536f021ad63758a8b337a6806cb0d6324575ea5cae5",
-    "docs/MODELING_INTEGRATION.md": "0e14d3d4163c167dfc80ef660a4a8683637485fe70405864fe4c4f4823e3e304"
-  }
-}

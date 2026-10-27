@@ -1,7 +1,0 @@
-{"phase": "RESOURCES", "records": 4000}
-{"phase": "RESOURCES", "records": 8000}
-{"phase": "RESOURCES", "records": 12000}
-{"phase": "HANDLES", "records": 4000}
-{"phase": "HANDLES", "records": 8000}
-{"phase": "HANDLES", "records": 12000}
-{"groups": 8, "handles": 12684, "phase": "COMPLETE", "resources": 12683, "statuses": {"OUTSIDE_EXISTING_SELECTED_PROOF_INTERVAL": 539, "TYPED_CONTAINER_CONNECTED": 35, "WITHIN_EXISTING_PROOF_INTERVAL_NOT_CONNECTED": 12110}}

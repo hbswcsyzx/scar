@@ -1,1 +1,0 @@
-stat identity format probe

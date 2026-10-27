@@ -1,6 +1,0 @@
-{"elapsed_s":0.897140507993754,"event":"BEGIN","phase":"ORIGINAL_WINDOW_METADATA","self_peak_rss_kib":43604}
-{"elapsed_s":0.9008600339875557,"event":"BEGIN","phase":"SP7_RETAINED_ARTIFACT","self_peak_rss_kib":43604}
-{"elapsed_s":0.9219116289750673,"event":"BEGIN","phase":"NORMAL_COMPOSITION_READONLY_WITNESS","self_peak_rss_kib":46944}
-{"elapsed_s":0.9328437799704261,"event":"BEGIN","phase":"NORMAL_SP7_READBACK_NO_LOWER","self_peak_rss_kib":47392}
-{"elapsed_s":2.0420043260091916,"event":"BEGIN","phase":"FINAL_SOURCE_INPUT_RUNTIME_CHECK","self_peak_rss_kib":54560}
-{"elapsed_s":2.180897849961184,"event":"FINISHED","phase":"FINAL_SOURCE_INPUT_RUNTIME_CHECK","self_peak_rss_kib":54560,"status":"NORMAL_READER_POSTFLIGHT_WITH_OPEN"}

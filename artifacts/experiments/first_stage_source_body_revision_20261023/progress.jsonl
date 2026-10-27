@@ -1,9 +1,0 @@
-{"elapsed_s": 6.746026973007247, "max_rss_kib": 491668, "stage": "PUBLICATION", "status": "BEGIN"}
-{"elapsed_s": 23.618713062998722, "max_rss_kib": 494572, "stage": "admit_source_program", "file_index": 140, "body_index": 26, "definition": "opdef:op:2bbbf0465da144672babb952"}
-{"elapsed_s": 33.044024643008015, "max_rss_kib": 494572, "stage": "admit_source_program", "file_index": 146, "body_index": 18, "definition": "opdef:op:1d383d6df8789be22b301613"}
-{"elapsed_s": 34.328025213995716, "max_rss_kib": 494572, "stage": "COMPOSE", "status": "BEGIN"}
-{"elapsed_s": 84.53881069300405, "max_rss_kib": 566356, "stage": "compose_changed_file", "status": "BEGIN", "file_index": 140}
-{"elapsed_s": 92.02262622900889, "max_rss_kib": 566356, "stage": "compose_changed_file", "status": "END", "file_index": 140}
-{"elapsed_s": 92.02270156700979, "max_rss_kib": 566356, "stage": "compose_changed_file", "status": "BEGIN", "file_index": 146}
-{"elapsed_s": 94.2608334490069, "max_rss_kib": 566356, "stage": "compose_changed_file", "status": "END", "file_index": 146}
-{"elapsed_s": 152.08098982700903, "max_rss_kib": 994884, "stage": "FINISHED", "status": "PASS_WITH_OPEN"}

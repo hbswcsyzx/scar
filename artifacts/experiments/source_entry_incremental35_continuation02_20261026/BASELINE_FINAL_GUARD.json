@@ -1,7 +1,0 @@
-{
-  "method": "post-terminal byte/SHA check of owned immutable code baseline only",
-  "files": 409,
-  "bytes": 8387292,
-  "all_match": true,
-  "new_body_reader_calls": 0
-}

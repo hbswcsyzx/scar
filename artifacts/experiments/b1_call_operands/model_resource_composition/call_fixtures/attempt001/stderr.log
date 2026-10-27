@@ -1,8 +1,0 @@
-Traceback (most recent call last):
-  File "/tmp/scar-structured-model-280qf4mi/artifacts/experiments/b1_call_operands/model_resource_composition/call_fixtures/smoke.py", line 64, in <module>
-    child()
-    ~~~~~^^
-  File "/tmp/scar-structured-model-280qf4mi/artifacts/experiments/b1_call_operands/model_resource_composition/call_fixtures/smoke.py", line 29, in child
-    'core_issues':[(row.code, row.message) for row in core.issues],
-                                                      ^^^^^^^^^^^
-AttributeError: 'tuple' object has no attribute 'issues'

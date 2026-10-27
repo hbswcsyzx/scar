@@ -1,4 +1,0 @@
-{"elapsed_s":0.8965033580316231,"event":"BEGIN","phase":"NORMAL_COMPOSITION_AND_CATALOG","self_rss_kib":42956}
-{"elapsed_s":1.2367918700329028,"event":"BEGIN","phase":"READONLY_COMPILER_ROOT","self_rss_kib":48032}
-{"elapsed_s":1.2437858079792932,"event":"BEGIN","phase":"ONE_MODULE_LOWER","self_rss_kib":48032}
-{"elapsed_s":1.249805974017363,"error":"Region.__init__() got an unexpected keyword argument 'name'","event":"FAILED","phase":"ONE_MODULE_LOWER","self_rss_kib":48032}

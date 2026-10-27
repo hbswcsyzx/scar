@@ -1,7 +1,0 @@
-{
-  "phase": "normal-remaining12-and-recover23-missing-rows",
-  "type": "TypeError",
-  "detail": "program graph JSON payload must be str",
-  "traceback": "Traceback (most recent call last):\n  File \"/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/source_entry_incremental35_continuation_20261026/run.py\", line 72, in <module>\n    result=publish_source_entry_deltas(parent,inputs,target,catalog,ROOT/'result',max_programs=35,resume=resume)\n  File \"/home/zyf/AAA/scar-worktrees/source-entry-project/scar/analysis/source_entry_incremental.py\", line 108, in publish_source_entry_deltas\n    published=_continue_entries(session.target,session.catalog,private_requests,root/'delta',plan,resume,\n        max_operations_per_body,max_record_bytes,max_metadata_bytes)\n  File \"/home/zyf/AAA/scar-worktrees/source-entry-project/scar/analysis/source_entry_incremental.py\", line 225, in _continue_entries\n    graph=core_loads(_canonical(original['graph']))\n  File \"/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/source_entry_incremental35_continuation_20261026/baseline/scar/ir/program/codec.py\", line 464, in loads\n    raise TypeError(\"program graph JSON payload must be str\")\nTypeError: program graph JSON payload must be str\n",
-  "elapsed_seconds": 360.8948849689914
-}

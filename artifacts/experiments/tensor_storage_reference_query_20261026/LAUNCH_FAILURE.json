@@ -1,7 +1,0 @@
-{
-  "actual_exit_code": 1,
-  "elapsed_seconds": 0.951019587,
-  "phase": "runner input receipt before query",
-  "detail": "ProviderArtifact uses slots; use record_codec.encode, not __dict__",
-  "query_called": false
-}

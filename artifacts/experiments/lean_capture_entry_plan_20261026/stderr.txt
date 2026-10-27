@@ -1,5 +1,0 @@
-Traceback (most recent call last):
-  File "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/lean_capture_entry_plan_20261026/derive.py", line 40, in <module>
-    'archives_metadata':archives.metadata(),'source_prepare_or_lower':0,'target_exec':0,'new_capture':False,
-                        ^^^^^^^^^^^^^^^^^
-AttributeError: 'CompilerWitnessArchives' object has no attribute 'metadata'

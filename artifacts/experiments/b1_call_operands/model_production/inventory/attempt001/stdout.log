@@ -1,8 +1,0 @@
-.........................                                                [100%]
-=============================== warnings summary ===============================
-tests/unit/test_execution_inventory.py:55
-  /tmp/scar-structured-model-280qf4mi/tests/unit/test_execution_inventory.py:55: SyntaxWarning: "\u" is an invalid escape sequence. Such sequences will not work in the future. Did you mean "\\u"? A raw string is also an option.
-    raw = b'{ "kind" : "python_line", "metadata":{"line":1}}\r\n\n' + b'\xff\n[]\n{"kind":"opaque\u000b\u000c"}'
-
--- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
-25 passed, 1 warning in 0.66s

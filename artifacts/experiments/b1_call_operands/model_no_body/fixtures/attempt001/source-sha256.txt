@@ -1,2 +1,0 @@
-89bed4144dcb65ff671a88ce50ab12f93d2f4e4bca35f2980de02c68c5ee2e28  tests/fixtures/program_no_body_graphs.py
-86c3f04dc3cf75b0c319ac7db5f97e0a7d1a40413068c4fa10a264f6aa7bc310  tests/fixtures/program_publication_graphs.py

@@ -1,7 +1,0 @@
-{
-  "returncode": 0,
-  "pytest_result": "8 passed in 0.34s",
-  "module_sha256": "302001a0c0ffa7819b5002566639619e4c3055868bf37d4bb08d83318e72a73e",
-  "test_sha256": "6984b048c11086969496ea940aa0cd1baec747594921f2b19d892b5a2f81b101",
-  "scope": "first owned lifecycle-flow attempt; no full/component/runtime test"
-}

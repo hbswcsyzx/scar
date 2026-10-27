@@ -1,8 +1,0 @@
-{
-  "returncode": 0,
-  "archive_sha256": "88a0c7608a6f7ffd12b1c870fd84955a3d90c181bd0abb0d7889348803294c29",
-  "child_cwd": "/tmp/scar-admission-v17-archive-kmqxehte",
-  "child_PYTHONPATH": "/tmp/scar-admission-v17-archive-kmqxehte",
-  "child_source": "child.py",
-  "owned_directory_removed_after_child_exit": "/tmp/scar-admission-v17-archive-kmqxehte"
-}

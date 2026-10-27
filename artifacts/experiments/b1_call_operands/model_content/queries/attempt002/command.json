@@ -1,8 +1,0 @@
-[
-  "/home/zyf/miniconda3/envs/lewm/bin/python",
-  "-m",
-  "pytest",
-  "-q",
-  "tests/unit/test_execution_content_query.py",
-  "--junitxml=artifacts/experiments/b1_call_operands/model_content/queries/attempt002/junit.xml"
-]

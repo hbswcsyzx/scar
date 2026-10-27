@@ -1,1 +1,0 @@
-{"checks":["v7 refuses core29 before accepting a new root authority","v6 refuses explicit frame_roots even empty","v5 refuses FRAME with unknown core version","historical writer refuses nonempty frame_roots","historical writer refuses FRAME without a root record"],"scope":"SYNTHETIC_TYPE_GUARD_ONLY","source_or_runtime_proof":false,"status":"LEGACY_WRAPPER_BOUNDARY_PASS"}

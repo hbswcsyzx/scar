@@ -1,6 +1,0 @@
-source /home/zyf/miniconda3/etc/profile.d/conda.sh
-conda activate lewm
-export PYTHONDONTWRITEBYTECODE=1
-export PYTHONPATH=/tmp/scar-structured-model-280qf4mi/artifacts/experiments/b1_call_operands/model_protocol_followup/codec/legacy-src
-cd /tmp/scar-structured-model-280qf4mi/artifacts/experiments/b1_call_operands/model_protocol_followup/codec/legacy-src
-python /tmp/scar-structured-model-280qf4mi/artifacts/experiments/b1_call_operands/model_protocol_followup/codec/attempt002/generate.py

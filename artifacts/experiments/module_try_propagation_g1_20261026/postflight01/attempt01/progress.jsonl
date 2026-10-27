@@ -1,5 +1,0 @@
-{"elapsed_s":1.1868511869688518,"event":"BEGIN","phase":"READONLY_ORIGINAL_COMPILER_ROOT","self_peak_rss_kib":59740}
-{"elapsed_s":1.1990174209931865,"event":"BEGIN","phase":"NORMAL_RETAINED_SP8_READBACK","self_peak_rss_kib":59740}
-{"elapsed_s":11.291302852972876,"event":"BEGIN","phase":"CURRENT_GRAPH_SOURCE_C0_C1_VALIDATION","self_peak_rss_kib":149188}
-{"elapsed_s":14.28741937695304,"event":"BEGIN","phase":"FINAL_SOURCE_INPUT_RUNTIME_CHECK","self_peak_rss_kib":149188}
-{"elapsed_s":14.428260255954228,"event":"FINISHED","phase":"FINAL_SOURCE_INPUT_RUNTIME_CHECK","self_peak_rss_kib":149188,"status":"NORMAL_READER_POSTFLIGHT_WITH_OPEN"}

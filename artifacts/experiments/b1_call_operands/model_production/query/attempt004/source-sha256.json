@@ -1,5 +1,0 @@
-{
-  "scar/ir/execution/production_query.py": "3d3d2ab7798edbf9b284552587dc7b154fd676e8df39645a913d1c6864256eab",
-  "tests/fixtures/execution_production_queries.py": "92539d2c4d65c1b7a33e6623144c6c2ee5e2234bcb41b9370cdb9300f85ba22b",
-  "tests/unit/test_execution_production_query.py": "5f1790a3b16caefccab0c071dcbbabf0589fb9c6ee00ce069b312ecbec307acf"
-}

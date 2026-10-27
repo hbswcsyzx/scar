@@ -1,3 +1,0 @@
-{"schema": "scar.model-run/1", "source_entry_progress": {"stage": "source_entry_attempt", "entry_key": "19244ad3decd10a3238228d19c5be77a0ce978aac685ef5c2dccd01d3faf01cc", "status": "SUCCEEDED"}}
-{"out": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/model_run_source_entries_gate_20261025/model", "status": "SOURCE_ENTRY_ATTEMPT_WITH_OPEN", "attempt": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/model_run_source_entries_gate_20261025/model/attempts/1792962847383051508-1430458", "whole_model_established": false}
-{"status": "ACTUAL_CLI_SOURCE_ENTRY_WITH_OPEN", "wall_seconds": 7.515232600038871}

@@ -1,22 +1,30 @@
-# Development notes
+# 开发约定
 
-Use the existing `lewm` conda environment. SCAR must not reset or install into
-`le-wm`; profiling is injected from the SCAR process. Keep clean benchmark
-runs separate from instrumented runs because profiler hooks change timings.
-Use `scar trace --resources` when a run needs process CPU and GPU utilization /
-memory evidence; those samples are measurements, not transformation guards.
+## 唯一工作目录
 
-From a source checkout, use `python -m scar.cli` for the CLI. Scripts that import
-the local package use `PYTHONPATH=. python scripts/<name>.py`, after activating
-`lewm`; no editable installation is required. On Linux analysis measurements
-use `/proc/self/status` VmHWM for the current executable and disclose getrusage
-separately, because the latter can retain a launcher's pre-exec high-water mark.
+只在 `~/AAA/scar` 的 `main` 开发。协作任务按文件分工共享这一版本，不创建 worktree、日期版目录或第二份源码。
+正常使用 Git 提交；不 reset、不改写已有历史、不重新保存历史实验副本。只暂存明确修改的文件。
+不修改 `../le-wm`、外部数据/权重、CUDA/driver 或整个 conda 环境。
 
-The minimum quality gate is `python -m pytest -q` and the phase's mapped gate.
-Runtime collector/backend changes also require a real workload trace; source-only
-model changes require fixed source replay and external source pressure. They do
-not need to rerun target execution merely to report source facts.
-Reports must separate `Observed`, `Inferred`, `Proposed`,
-`Implemented`, `Verified`, and `Rejected` claims. A performance result with no
-wall-clock improvement is recorded as `not profitable` and does not become an
-automatic transformation.
+## 当前执行边界
+
+使用 `conda activate lewm`。可以运行 SCAR 分析器、解析源码、进行静态图一致性检查；不能运行或导入被分析程序、执行其配置/初始化/hooks、反序列化会调用用户代码的对象，也不能以“验证”名义运行小型目标 case。
+不启动 trace、profiler、benchmark、动态探针或自动变换。分析器也不得执行用户 `repr`、descriptor、装饰器或自定义算子来推断结果。
+
+现有测试按需要维护；这一阶段不增加大批 gate、全量反复测试或以测试数量表示进展。优先报告实际源码范围、图连接与未决关系。
+
+## 文档与结果
+
+[STATIC_ANALYSIS_PLAN](STATIC_ANALYSIS_PLAN.md) 是唯一任务队列，[STATUS](STATUS.md) 原地更新当前状态，不追加历史流水账。
+设计明确为 Proposed；代码存在为 Implemented；离线建图的具体事实才能写成已确认。不得把静态条件摘要写成运行观察或优化完成。
+生成输出计划只保留 `artifacts/current/static/` 当前结果，采用临时目录完成后替换；该入口尚待实现。大图、原始数据和临时索引不提交 Git。
+文档相对链接必须可达，删除过时文档时同步收敛引用。
+
+## 实现原则
+
+- 先定义实体、端口、关系、语言展开和组合规则，再实现对应 lowering/transfer。
+- 新事实引用现有规范 ID，不以名称或业务字符串选择规则。
+- 静态分析不得依赖真实调用、对象地址或捕获见证才创建源码定义。
+- 循环/递归使用参数化子图和不动点，不无限展开调用树。
+- 未知只影响依赖它的属性/关系；缺材料、未实现和保守未知分开。
+- 每项删除先检查真实引用；当前仍被依赖的兼容代码逐步迁移，不盲删。

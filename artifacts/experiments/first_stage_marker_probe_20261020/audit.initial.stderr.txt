@@ -1,5 +1,0 @@
-Traceback (most recent call last):
-  File "/tmp/scar-structured-model-280qf4mi/artifacts/experiments/first_stage_marker_probe_20261020/audit.py", line 32, in <module>
-    assert len(contexts) == 1
-           ^^^^^^^^^^^^^^^^^^
-AssertionError

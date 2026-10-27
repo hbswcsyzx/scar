@@ -1,2 +1,0 @@
-/tmp/scar-structured-model-280qf4mi/artifacts/experiments/b1_call_operands/model_spec_check/check.py:76: SyntaxWarning: 'return' in a 'finally' block
-  return 2

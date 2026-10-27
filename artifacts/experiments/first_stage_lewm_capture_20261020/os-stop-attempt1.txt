@@ -1,1 +1,0 @@
-No signal sent: this conda Python does not expose os.pidfd_open; use the existing libc pidfd API instead.

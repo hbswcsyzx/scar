@@ -1,1 +1,0 @@
-{"valid": true, "baseline": {"UNSUPPORTED": 205, "NOT_ATTEMPTED": 1961, "LOWERED_WITH_GAPS": 51}, "environment": {"UNSUPPORTED": 202, "NOT_ATTEMPTED": 1961, "LOWERED_WITH_GAPS": 54}, "environment_records": {"environments": 54, "captured_cell_ports": 3, "address_refinements": 60}, "changed_bodies": 3}

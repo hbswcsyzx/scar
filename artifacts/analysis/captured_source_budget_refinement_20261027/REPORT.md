@@ -1,9 +1,0 @@
-# Captured-source budget and close refinement
-
-Implemented after `66ed821b`, not a replay of the prior CPU acceptance. Three production files change: `call_seeds.py`, `model_run.py`, and `captured_source_owner.py`. The global `CapturedSourceBudget` defaults and every existing source/graph transport remain unchanged.
-
-`read_call_source_seeds` / `_read_call_source_seeds` accept an optional exact typed `captured_source_budget`. When absent, it is derived from the caller's typed `CallEdgeBudget`, never capture metadata: code/file membership ceilings use `max_codes`; source rows, code bytes and normalized archive bytes use `max_raw_bytes`; rows use the independent line ceiling. Default metadata stays at most 8 MB. The archive file count differs from selected project context count: the original CPU has ten captured files but only one project source. Model-run explicitly passes its metadata and record ceilings along with its normal call budget. These limits do not claim that a wide capture has actually been consumed.
-
-The source owner always marks itself closed and clears private text even when final unchanged checks fail. Its session preserves the first detected input/namespace failure while attempting cleanup. Model-run also closes the session if producing the final source-input report fails. Cleanup does not convert a failed check to success.
-
-Validation is **IMPLEMENTED_API_CHECKED_ONLY**: syntax/compile without execution, constructor mapping for 65,536 codes and 4,096 selected source contexts, and typed forwarding signatures. No source bootstrap, capture or target reran. `API_CHECK.json` records exact new source SHAs; the prior 2.898-second actual result applies exclusively to its original six source bytes, unchanged in `automatic_captured_source_20261027/SOURCE_RECEIPTS.json`.

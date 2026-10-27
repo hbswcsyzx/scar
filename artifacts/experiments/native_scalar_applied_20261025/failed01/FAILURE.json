@@ -1,8 +1,0 @@
-{
-  "actual_terminal_exit": 1,
-  "actual_tool_session": 28297,
-  "new_native_batch_runs": 0,
-  "production_changed_by_correction": false,
-  "reason": "main compatibility harness confused whole-run root count with one physical shard",
-  "status": "FAILED_PRESERVED"
-}

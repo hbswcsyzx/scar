@@ -1,3 +1,0 @@
-source /home/zyf/miniconda3/etc/profile.d/conda.sh
-conda activate lewm
-PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=. python artifacts/experiments/b1_call_operands/model_protocol_followup/codec/cleanup-legacy-source.py

@@ -1,1 +1,0 @@
-{"out": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/model_run_offline_g0_20261025/model", "status": "BLOCKED", "attempt": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/model_run_offline_g0_20261025/model/attempts/1792954450419665725-1398976", "whole_model_established": false}

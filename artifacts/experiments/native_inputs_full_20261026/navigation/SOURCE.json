@@ -1,7 +1,0 @@
-{
-  "gated_producer_commit": "df7235145f56969b6289d63ea75a7e4c4ff7c1ab",
-  "gated_module_sha256": "d1c92300a6055aba84ce7ae3be661a50d7ea48599dbd02ad12f149b4103aa571",
-  "consumer_module_sha256": "7ae10c062ec5d692b05f66c6c855f07086967742977e86ae9f243e4b1a713dce",
-  "gated_core_prefix_byte_identical": true,
-  "changed_scope": "postgate normal reader hardening and parent navigation only; original attempt05 untouched"
-}

@@ -1,1 +1,0 @@
-PYTHONPATH=. PYTHONDONTWRITEBYTECODE=1 python -m pytest -q tests/unit/test_program_resumption_codec.py tests/integration/test_resumption_program_cli.py --junitxml=artifacts/experiments/b1_call_operands/model_resume_interfaces/body-wire/initial/results.xml

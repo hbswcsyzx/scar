@@ -1,5 +1,0 @@
-{"stage": "COMPOSITION_LOAD_BEGIN", "elapsed_s": 0.625251486999332, "max_rss_kib": 52664}
-{"stage": "COMPOSITION_LOAD_END", "elapsed_s": 18.580116337994696, "max_rss_kib": 711056}
-{"stage": "ANCESTOR_QUERY_BEGIN", "elapsed_s": 18.625283337998553, "max_rss_kib": 711056}
-{"stage": "ANCESTOR_QUERY_END", "elapsed_s": 23.393124606998754, "max_rss_kib": 711056, "counts": {"parent_compositions": 2, "parent_inventories": 2, "decoded_bytes": 154443079}, "depth": 2}
-{"stage": "FINISHED", "elapsed_s": 25.475273638992803, "max_rss_kib": 711056, "status": "PASS_WITH_OPEN"}

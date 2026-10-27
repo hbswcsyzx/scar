@@ -1,4 +1,0 @@
-{
-  "reason": "Independent source review found order-dependent PendingPayload producer assignment for shared landing phis. Stop before fixing tracked source; preserve aborted run.",
-  "driver_pid": 781859
-}

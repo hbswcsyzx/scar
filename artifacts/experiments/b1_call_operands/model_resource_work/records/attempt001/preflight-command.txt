@@ -1,8 +1,0 @@
-Partial original command recovered from the session record:
-
-rg ... && python - <<'PY'
-import ast
-...
-PY
-
-The ellipses denote command/source text that was not retained verbatim by the shell log available in this worktree. The command ran system `python` rather than the required activated `lewm` environment.

@@ -1,9 +1,0 @@
-{
-  "schema": "scar.measurement-note-erratum",
-  "report_sha256": "418ebc69a11864a3fb759e2db5c04bc6c60bcba0c6717e1db7b2d0820d00b172",
-  "field": "measurement_note",
-  "original": "A same-source component gate and an older 8a300eb LeWM offline link run concurrently. Resource contention is expected; wall time is acceptance cost, not a benchmark.",
-  "correction": "The same-source component gate had already terminated. Only part of the older offline query overlapped this regression. The before/after concurrency snapshots are the process evidence. This is acceptance cost, not a performance benchmark.",
-  "raw_report_and_driver_unchanged": true,
-  "effect_on_test_result": "None; JUnit, return code, source/HEAD/status identity, and counts remain valid."
-}

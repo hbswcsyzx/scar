@@ -1,4 +1,0 @@
-Traceback (most recent call last):
-  File "/tmp/scar-structured-model-280qf4mi/artifacts/experiments/b1_call_operands/model_remaining_protocols/continuations/loop-diagnosis002/diagnose.py", line 17, in <module>
-    index = ProgramIndex._from_validated_core(graph)
-TypeError: ProgramIndex._from_validated_core() missing 3 required positional arguments: 'cleanup', 'resumption', and 'lifecycle'

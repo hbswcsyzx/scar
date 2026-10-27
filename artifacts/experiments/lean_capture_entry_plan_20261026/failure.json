@@ -1,5 +1,0 @@
-{
-  "error": "'CompilerWitnessArchives' object has no attribute 'metadata'",
-  "traceback": "Traceback (most recent call last):\n  File \"/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/lean_capture_entry_plan_20261026/derive.py\", line 40, in <module>\n    'archives_metadata':archives.metadata(),'source_prepare_or_lower':0,'target_exec':0,'new_capture':False,\n                        ^^^^^^^^^^^^^^^^^\nAttributeError: 'CompilerWitnessArchives' object has no attribute 'metadata'\n",
-  "elapsed_seconds": 0.19067540601827204
-}

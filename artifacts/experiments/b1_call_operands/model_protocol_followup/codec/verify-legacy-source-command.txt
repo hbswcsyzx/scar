@@ -1,1 +1,0 @@
-bash artifacts/experiments/b1_call_operands/model_protocol_followup/codec/verify-legacy-source.sh

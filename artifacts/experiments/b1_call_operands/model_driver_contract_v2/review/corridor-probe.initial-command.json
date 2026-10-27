@@ -1,9 +1,0 @@
-{
-  "command": [
-    "/home/zyf/miniconda3/envs/lewm/bin/python",
-    "artifacts/experiments/b1_call_operands/model_driver_contract_v2/review/corridor-probe.py"
-  ],
-  "python": "3.14.7 | packaged by conda-forge | (main, Sep  2 2026, 21:08:32) [GCC 15.3.0]",
-  "returncode": 1,
-  "script_sha256": "4d4a64078ce1f0c704249719f18cf5a645b5d6a5110d74ba2ec96d12f8132573"
-}

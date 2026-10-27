@@ -1,1 +1,0 @@
-{"checks": 4, "elapsed_s": 8.157507291994989, "output": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_tuple_key_proposal_20261023/ir-check.json"}

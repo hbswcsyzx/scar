@@ -1,7 +1,0 @@
-{
-  "exit_code": 0,
-  "wall_s": 26.4941796209896,
-  "target": "generic PyTorch CPU->CUDA, nested Python calls, GPU add",
-  "whole_program_established": false,
-  "clean_performance_benchmark": false
-}

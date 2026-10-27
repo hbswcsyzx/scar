@@ -1,4 +1,0 @@
-cd /tmp/scar-structured-model-280qf4mi
-source /home/zyf/miniconda3/etc/profile.d/conda.sh
-conda activate lewm
-/usr/bin/time -f wall_seconds=%e -o artifacts/experiments/b1_call_operands/model_body_publication/review/integration_review_probe.time.txt env PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=. python artifacts/experiments/b1_call_operands/model_body_publication/review/integration_review_probe.py > artifacts/experiments/b1_call_operands/model_body_publication/review/integration_review_probe.log 2>&1

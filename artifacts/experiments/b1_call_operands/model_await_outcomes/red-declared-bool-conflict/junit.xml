@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1" time="0.904" timestamp="2026-10-19T03:54:37.283695+00:00" hostname="gpu1"><testcase classname="tests.unit.test_program_await_qualification_flow" name="test_own_bool_literal_cannot_contradict_the_known_predicate_result" time="0.357"><failure message="AssertionError: assert 'protocol_await_predicate_result' in set()">def test_own_bool_literal_cannot_contradict_the_known_predicate_result():
-        graph, details = predicate_literal_program()
-        _core_valid(graph)
-        assert details['predicate_literal'].site == details['qualification_row'].contract.result
-&gt;       assert 'protocol_await_predicate_result' in {issue.code for issue in validate(graph)}
-E       AssertionError: assert 'protocol_await_predicate_result' in set()
-
-tests/unit/test_program_await_qualification_flow.py:90: AssertionError</failure></testcase></testsuite></testsuites>

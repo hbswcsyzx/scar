@@ -1,4 +1,0 @@
-[W1020 12:01:59.959145767 execution_trace_observer.cpp:989] Enabling Execution Trace Observer
-USDT:2026-10-20 12:01:59 533247:533247 SyncActivityProfilerHandler.cpp:52] profiler_start
-[W1020 12:01:59.967398775 execution_trace_observer.cpp:1001] Disabling Execution Trace Observer
-USDT:2026-10-20 12:01:59 533247:533247 SyncActivityProfilerHandler.cpp:59] profiler_stop

@@ -1,4 +1,4 @@
-# Python build and cache outputs
+# Python/build/editor outputs
 __pycache__/
 *.py[cod]
 .pytest_cache/
@@ -6,26 +6,15 @@ __pycache__/
 .ruff_cache/
 .coverage
 htmlcov/
-
-# Packaging outputs
 build/
 dist/
 *.egg-info/
-
-# SCAR runtime traces, profiler dumps and large experiment graphs
-artifacts/traces/
-artifacts/reports/
-artifacts/experiments/
-# Rebuildable bulk graph fragments; keep small publication indexes/reports.
-artifacts/analysis/**/publication/shards/
-# Dependency views are derived bulk payloads; retain their small query indexes.
-artifacts/analysis/**/views/**/view*.json.gz
-artifacts/analysis/**/views/**/queries/*.json.gz
-artifacts/baseline/*
-!artifacts/baseline/environment.md
-!artifacts/baseline/pip-freeze.txt
-
-# Local editor and environment files
 .venv/
 .env
 .DS_Store
+
+# Generated graphs and measurements are local current outputs, not source.
+artifacts/**
+!artifacts/baseline/
+!artifacts/baseline/environment.md
+!artifacts/baseline/pip-freeze.txt

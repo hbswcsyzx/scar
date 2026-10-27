@@ -1,4 +1,0 @@
-cd /tmp/scar-structured-model-280qf4mi
-source /home/zyf/miniconda3/etc/profile.d/conda.sh
-conda activate lewm
-PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=. python -m pytest -q tests/unit/test_lifecycle_flow.py --junitxml=artifacts/experiments/b1_call_operands/model_session_release/flow/attempt-001/results.xml > artifacts/experiments/b1_call_operands/model_session_release/flow/attempt-001/stdout.log 2> artifacts/experiments/b1_call_operands/model_session_release/flow/attempt-001/stderr.log

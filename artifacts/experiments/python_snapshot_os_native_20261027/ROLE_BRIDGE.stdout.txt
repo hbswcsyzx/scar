@@ -1,1 +1,0 @@
-{"all_five_queries": true, "elapsed_seconds": 4.776403016003314, "frontiers": 0, "positive_roles": 5, "run": "capture:4b80048c87d46c98c84e43a4150456c3f551786432bdfd831064ddb378b8b308", "status": "ROLE_BRIDGE_PASS", "target_pid": 2149392}

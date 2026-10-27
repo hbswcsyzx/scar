@@ -1,3 +1,0 @@
-Result: preflight failed before parsing/import/testing because system `python` was unavailable.
-Exact execution timestamp and omitted command text were not retained. This is a posthoc archive of the known command fragment/output, not a timestamped raw terminal capture.
-Archive written: 2026-10-18 04:56 UTC.

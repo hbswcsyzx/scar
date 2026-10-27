@@ -1,4 +1,0 @@
-command: ['/home/zyf/miniconda3/envs/lewm/bin/python', '-m', 'pytest', '-q', 'tests/unit/test_resumption_forwarding.py', '-k', 'frame_alias']
-returncode: 5
-
-13 deselected in 0.26s

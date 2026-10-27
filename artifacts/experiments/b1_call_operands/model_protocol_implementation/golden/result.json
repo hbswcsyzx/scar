@@ -1,9 +1,0 @@
-{
-  "returncode": 0,
-  "archive_sha256": "5647bd9b6cbd97996cf81c1af3aaac680e724820a3f35d3edf8413246a14ccac",
-  "child_python": "/home/zyf/miniconda3/envs/lewm/bin/python",
-  "child_cwd": "/tmp/scar-protocol-v16-archive-cjzf6pun",
-  "child_PYTHONPATH": "/tmp/scar-protocol-v16-archive-cjzf6pun",
-  "command_source": "child.py",
-  "owned_directory_removed_after_child_exit": "/tmp/scar-protocol-v16-archive-cjzf6pun"
-}

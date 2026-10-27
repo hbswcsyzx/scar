@@ -1,7 +1,0 @@
-{
-  "stage": "shell_redirection_before_python",
-  "actual_exit_code": 1,
-  "detail": "experiment control was initially written under main while stdout pointed at not-yet-existing isolated directory; moved only this new control directory before launch",
-  "python_started": false,
-  "worker_started": false
-}

@@ -1,8 +1,0 @@
-{
-  "status": "FAILED_SELF_CHECK_HARNESS_ASSERTION",
-  "actual_exit": 1,
-  "wall_time_seconds": 0.980743798,
-  "phase": "frozen legacy core2 exact bytes",
-  "actual_difference": "Retained fixture JSON has exactly one terminal LF; codec.dumps returns JSON without LF. v2/v6/v9 differ only by that archive LF.",
-  "production_changed_after_failure": false
-}

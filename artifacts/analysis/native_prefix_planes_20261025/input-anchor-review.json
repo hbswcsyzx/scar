@@ -1,9 +1,0 @@
-{
-  "commit": "31198ff9",
-  "matched_query_inputs": 60,
-  "new_qualification_data_reads": 0,
-  "raw_reads": 0,
-  "status": "ALL_QUERY_INPUTS_MATCH_COMMITTED_TERMINAL_INVENTORY",
-  "terminal_inventory_sha256": "976bfd18a402fe4957b8402132e24467e55a91b7bc56435771c8402c47fe9dd5",
-  "whole_program_model": "OPEN"
-}

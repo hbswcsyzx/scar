@@ -1,6 +1,0 @@
-{
-  "request": "failed",
-  "pid": 456184,
-  "error_type": "PermissionError",
-  "error": "[Errno 1] Operation not permitted"
-}

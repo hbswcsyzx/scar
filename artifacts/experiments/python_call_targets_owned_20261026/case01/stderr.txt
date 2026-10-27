@@ -1,9 +1,0 @@
-Traceback (most recent call last):
-  File "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/python_call_targets_owned_20261026/case01/run.py", line 32, in <module>
-    base=CompositionIndex(ROOT/'composition/index.json')
-  File "/home/zyf/AAA/scar-worktrees/source-entry-project/scar/analysis/program_composition.py", line 713, in __init__
-    self.document, self.index_receipt = _read(Path(index_path), max_input_bytes)
-                                        ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/zyf/AAA/scar-worktrees/source-entry-project/scar/analysis/program_composition.py", line 61, in _read
-    raise ValueError("input is missing, unsafe or exceeds its byte budget")
-ValueError: input is missing, unsafe or exceeds its byte budget

@@ -1,8 +1,0 @@
-{
-  "command": [
-    "python",
-    "artifacts/experiments/first_stage_dispatch_bridge_20261023/case/app.py"
-  ],
-  "returncode": 0,
-  "wall_s": 13.84474241999851
-}

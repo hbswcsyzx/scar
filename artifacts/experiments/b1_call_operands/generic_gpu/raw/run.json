@@ -1,8 +1,0 @@
-{
-  "command": [
-    "/home/zyf/miniconda3/envs/lewm/bin/python",
-    "/home/zyf/AAA/scar/artifacts/experiments/b1_call_operands/generic_gpu/driver.py"
-  ],
-  "returncode": 0,
-  "wall_s": 12.595350746065378
-}

@@ -1,6 +1,0 @@
-{"stage": "SELECTION_READY", "elapsed_s": 13.556996853003511, "max_rss_kib": 469476, "bodies": 2, "files": 2, "source_prepare": 0, "compile": 0}
-{"stage": "LOWER_BEGIN", "elapsed_s": 13.557543656002963, "max_rss_kib": 469476, "sequence": 1, "origin": "AUTOMATIC_SG_ONLY_TUPLE_KEY"}
-{"stage": "LOWER_END", "elapsed_s": 13.715371604004758, "max_rss_kib": 469476, "sequence": 1, "status": "FAILED_RETAINED"}
-{"stage": "LOWER_BEGIN", "elapsed_s": 13.71589457099617, "max_rss_kib": 469476, "sequence": 2, "origin": "ARCHIVED_TUPLE_FAILURE_OWNERSHIP_REPAIR"}
-{"stage": "LOWER_END", "elapsed_s": 23.90067930999794, "max_rss_kib": 469476, "sequence": 2, "status": "RECOVERED"}
-{"stage": "FINISHED", "elapsed_s": 23.9628764000081, "max_rss_kib": 469476, "recovered_graphs": 1}

@@ -1,6 +1,0 @@
-{
-  "status": "REJECTED_BY_TYPED_ACTOR_CLOSURE",
-  "error": "native reference protocol: referenced process declaration unavailable",
-  "removed_original_process": "capture:ca66b69a8cfc3c1b88e0c22e8ec00d58d735fd016d16edf85e8cf0ac51eb5fc3:process:77d2388db95219723de606b529484e14f8b1912e51b6e58930344d911e863036",
-  "seal_rejection": false
-}

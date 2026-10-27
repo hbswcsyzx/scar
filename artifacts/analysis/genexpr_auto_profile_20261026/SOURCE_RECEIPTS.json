@@ -1,1 +1,0 @@
-{"after": {"bytes": 61323, "sha256": "c4304f8ecec745f4cc7e71e7a1415069d59e61b3aed3e48b7cea6b2830c0ccf7"}, "base_commit": "44bde214", "before": {"bytes": 60687, "sha256": "65a4b25b38f460c3a66819fcf9c3ea5aae651dc4c95c795a61704aaf623e1cb0"}, "path": "scar/analysis/source_frontend_worklist.py", "producer_or_IR_changes": false}

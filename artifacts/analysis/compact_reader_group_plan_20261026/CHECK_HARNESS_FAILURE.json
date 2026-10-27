@@ -1,4 +1,0 @@
-{
-  "status": "FAILED_METADATA_ONLY_CHECK",
-  "detail": "text extractor matched the old pre-grouping for-loop rather than the ordinary body-check loop; no model/body reader ran"
-}

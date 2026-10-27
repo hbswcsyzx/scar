@@ -1,6 +1,0 @@
-{
-  "forked_child_cannot_flush_either_parent_buffer": true,
-  "operand_flush_failure_marks_io_failed": true,
-  "target_flush_failure_prevents_final_manifest": true,
-  "uses_application_values": false
-}

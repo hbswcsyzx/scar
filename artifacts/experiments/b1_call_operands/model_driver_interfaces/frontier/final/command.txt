@@ -1,3 +1,0 @@
-source /home/zyf/miniconda3/etc/profile.d/conda.sh
-conda activate lewm
-PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=. pytest -q tests/unit/test_body_outcome_frontier.py --junitxml=artifacts/experiments/b1_call_operands/model_driver_interfaces/frontier/final/junit.xml

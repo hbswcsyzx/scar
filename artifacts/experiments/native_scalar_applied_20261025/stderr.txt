@@ -1,5 +1,0 @@
-Traceback (most recent call last):
-  File "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/native_scalar_applied_20261025/readback.py", line 34, in <module>
-    assert len(graph.logical_values) == len(graph.versions) == len(graph.provenance) == 4
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-AssertionError

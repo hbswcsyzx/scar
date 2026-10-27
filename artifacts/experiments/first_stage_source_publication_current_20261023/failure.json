@@ -1,7 +1,0 @@
-{
-  "detail": "'Operation' object has no attribute 'wire'",
-  "elapsed_s": 102.6286092819937,
-  "first_stage_complete": false,
-  "phase": "formal-source-program-publication",
-  "type": "AttributeError"
-}

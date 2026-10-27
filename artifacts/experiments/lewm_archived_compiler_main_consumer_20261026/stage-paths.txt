@@ -1,5 +1,0 @@
-artifacts/experiments/lewm_archived_compiler_main_consumer_20261026/run.py
-artifacts/experiments/lewm_archived_compiler_main_consumer_20261026/receipt.json
-artifacts/experiments/lewm_archived_compiler_main_consumer_20261026/run.time.txt
-artifacts/experiments/lewm_archived_compiler_main_consumer_20261026/REPORT.md
-artifacts/experiments/lewm_archived_compiler_main_consumer_20261026/stage-paths.txt

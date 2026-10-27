@@ -1,6 +1,0 @@
-{
-  "type": "ValueError",
-  "detail": "Tensor storage query: exact original marker argument is absent/ambiguous",
-  "traceback": "Traceback (most recent call last):\n  File \"/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/tensor_storage_reference_query_20261026/attempt02/run.py\", line 20, in <module>\n    result=module.query_tensor_storage_observation(artifact(fragment,'scar.native-operator-value-interface'),artifact(capture,'scar.capture-model'))\n  File \"/home/zyf/AAA/scar-worktrees/source-entry-project/scar/analysis/tensor_storage_query.py\", line 177, in query_tensor_storage_observation\n    _need(len(rows)==1,'exact original marker argument is absent/ambiguous');port_hint=rows[0]\n    ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/zyf/AAA/scar-worktrees/source-entry-project/scar/analysis/tensor_storage_query.py\", line 30, in _need\n    if not value: raise ValueError('Tensor storage query: '+message)\n                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nValueError: Tensor storage query: exact original marker argument is absent/ambiguous\n",
-  "elapsed_seconds": 1.4353293940075673
-}

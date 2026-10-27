@@ -1,5 +1,0 @@
-[W1023 13:09:41.888397620 execution_trace_observer.cpp:989] Enabling Execution Trace Observer
-USDT:2026-10-23 13:09:41 678903:678903 SyncActivityProfilerHandler.cpp:52] profiler_start
-[W1023 13:09:41.219152808 execution_trace_observer.cpp:1001] Disabling Execution Trace Observer
-USDT:2026-10-23 13:09:41 678903:678903 SyncActivityProfilerHandler.cpp:59] profiler_stop
-ERROR:2026-10-23 13:09:41 678903:678903 DeviceProperties.cpp:50] gpuGetDeviceCount failed with code 100

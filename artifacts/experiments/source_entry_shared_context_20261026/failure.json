@@ -1,6 +1,0 @@
-{
-  "type": "ValueError",
-  "error": "source fragment namespace differs",
-  "traceback": "Traceback (most recent call last):\n  File \"/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/source_entry_shared_context_20261026/run.py\", line 40, in <module>\n    body=session.read(locator,namespace_root='/home/zyf/AAA/le-wm/stable-worldmodel')\n  File \"/home/zyf/AAA/scar-worktrees/source-entry-project/scar/store/source_fragments.py\", line 349, in read\n    _need(context.context.namespace_root == namespace_root, 'source fragment namespace differs')\n    ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/zyf/AAA/scar-worktrees/source-entry-project/scar/store/source_fragments.py\", line 34, in _need\n    raise ValueError(message)\nValueError: source fragment namespace differs\n",
-  "elapsed_seconds": 3.669675607001409
-}

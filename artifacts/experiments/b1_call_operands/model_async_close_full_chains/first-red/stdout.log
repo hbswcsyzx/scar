@@ -1,8 +1,0 @@
-
-==================================== ERRORS ====================================
-_______ ERROR collecting tests/unit/test_execution_async_close_chains.py _______
-tests/unit/test_execution_async_close_chains.py::test_finished_frame_history_and_exact_new_request_reply_share_one_actual_chain: 'request' is a reserved name and cannot be used in @pytest.mark.parametrize
-=========================== short test summary info ============================
-ERROR tests/unit/test_execution_async_close_chains.py - Failed: tests/unit/te...
-!!!!!!!!!!!!!!!!!!!! Interrupted: 1 error during collection !!!!!!!!!!!!!!!!!!!!
-1 error in 1.34s

@@ -1,5 +1,0 @@
-Traceback (most recent call last):
-  File "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/native_inputs_full_20261026/attempt05/publish_navigation.py", line 33, in <module>
-    values=[v for v in execution.values if v.id==d.value and v.visit==d.basis.entry]
-                                                             ^^^^^^^
-AttributeError: 'ValueOccurrence' object has no attribute 'visit'

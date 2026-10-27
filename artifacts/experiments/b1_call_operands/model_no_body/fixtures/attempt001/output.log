@@ -1,7 +1,0 @@
-AST_PARSE_OK tests/fixtures/program_no_body_graphs.py
-CASE_START BODY
-Traceback (most recent call last):
-  File "<stdin>", line 15, in <module>
-  File "/tmp/scar-structured-model-280qf4mi/scar/ir/program/validation.py", line 706, in require_valid
-    raise ValueError("; ".join(f"{issue.code} at {issue.path}: {issue.message}" for issue in issues))
-ValueError: missing_result at program_operation:driver.created_close.test: program_value:driver.created_close.bool; missing_value at program_use:driver.created_close.condition: program_value:driver.created_close.bool

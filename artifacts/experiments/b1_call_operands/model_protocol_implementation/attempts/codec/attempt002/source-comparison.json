@@ -1,7 +1,0 @@
-{
-  "source_before_type": "dict",
-  "source_snapshots_equal": true,
-  "development_not_frozen": true,
-  "note": "Registered source snapshots retain all hashes; shared peers were developing disjoint modules. Final component/full freeze is separate.",
-  "changed_keys": []
-}

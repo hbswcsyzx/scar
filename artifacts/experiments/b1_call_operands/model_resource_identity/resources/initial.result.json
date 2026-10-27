@@ -1,8 +1,0 @@
-{
-  "exit_code": 0,
-  "elapsed_seconds": 0.9851256962865591,
-  "source_hashes": {
-    "scar/ir/execution/resources.py": "657fca489d07fd3e32e5552782e02c6b6b58c8ed061c3c0040313d442a2e3000",
-    "tests/unit/test_execution_resource_records.py": "822f038d5eedf3ac026cec8bb1b5b109636fcd9a1bd944cbc27dc3aba5591a38"
-  }
-}

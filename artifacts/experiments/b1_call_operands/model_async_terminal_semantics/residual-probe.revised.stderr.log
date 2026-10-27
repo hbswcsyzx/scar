@@ -1,5 +1,0 @@
-Traceback (most recent call last):
-  File "/tmp/scar-structured-model-280qf4mi/artifacts/experiments/b1_call_operands/model_async_terminal_semantics/probe_residuals_revised.py", line 33, in <module>
-    index, = prepared
-    ^^^^^^
-ValueError: not enough values to unpack (expected 1, got 0)

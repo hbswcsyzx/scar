@@ -1,9 +1,0 @@
-{
-  "selector": "tests/unit/test_execution_call_order.py",
-  "sha256": "9544b9abc87ba2993e536f3fbad1845cb81768d50490d580ca25155f1856fa6b",
-  "reason": "Existing sibling/nested ordinary-call host-order queries depend on the changed flow result binding; include this concrete affected regression once in the final run.",
-  "expected_cases": 15,
-  "new_implementation_tests": false,
-  "production_changes": false,
-  "tests_started": 0
-}

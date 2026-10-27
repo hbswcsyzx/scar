@@ -1,8 +1,0 @@
-{
-  "command": [
-    "/home/zyf/miniconda3/envs/lewm/bin/python",
-    "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_owned_os_capture_20261023/gate-attempt02/target.py"
-  ],
-  "returncode": 0,
-  "wall_s": 22.24403451899707
-}

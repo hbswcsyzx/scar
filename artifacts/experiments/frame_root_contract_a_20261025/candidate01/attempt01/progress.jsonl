@@ -1,7 +1,0 @@
-{"elapsed_s":0.8718527309829369,"event":"BEGIN","phase":"SYNTHETIC_TYPED_CORE29_CONTRACT","self_peak_rss_kib":43328}
-{"elapsed_s":1.1410261089913547,"event":"BEGIN","phase":"HISTORICAL_SOURCE_WRAPPER_GUARDS","self_peak_rss_kib":43892}
-{"elapsed_s":1.1804815609939396,"event":"BEGIN","phase":"READONLY_ORIGINAL_COMPILER_ROOT","self_peak_rss_kib":51956}
-{"elapsed_s":1.1909098870237358,"event":"BEGIN","phase":"NORMAL_RETAINED_SP6_READBACK","self_peak_rss_kib":52404}
-{"elapsed_s":2.142723409982864,"event":"BEGIN","phase":"NORMAL_RETAINED_SP7_READBACK","self_peak_rss_kib":56884}
-{"elapsed_s":3.1037141400156543,"event":"BEGIN","phase":"FINAL_SOURCE_INPUT_RUNTIME_CHECK","self_peak_rss_kib":58228}
-{"elapsed_s":3.246770193974953,"event":"FINISHED","phase":"FINAL_SOURCE_INPUT_RUNTIME_CHECK","self_peak_rss_kib":58228,"status":"A_TYPED_CONTRACT_AND_OLD_CONSUMERS_WITH_OPEN"}

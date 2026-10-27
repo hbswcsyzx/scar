@@ -1,5 +1,0 @@
-[
-  "/home/zyf/miniconda3/envs/lewm/bin/python",
-  "-c",
-  "import hashlib, importlib.util, json\nfrom pathlib import Path\nimport scar.ir.execution.codec as codec\nspec = importlib.util.spec_from_file_location(\"old_fixture\", \"tests/unit/test_execution_production_codec.py\")\nfixture = importlib.util.module_from_spec(spec)\nspec.loader.exec_module(fixture)\nmodel = fixture.production_model.__wrapped__()\npayload = codec.dumps(model).encode(\"utf-8\")\nPath(\"v5.json\").write_bytes(payload)\nassert codec.SCHEMA_VERSION == 5\nassert codec.loads(payload.decode()) == model\nprint(json.dumps({\"codec_file\":str(Path(codec.__file__).resolve()),\n \"codec_sha256\":hashlib.sha256(Path(codec.__file__).read_bytes()).hexdigest(),\n \"fixture_file\":str(Path(fixture.__file__).resolve()),\n \"fixture_sha256\":hashlib.sha256(Path(fixture.__file__).read_bytes()).hexdigest(),\n \"schema_version\":5,\"payload_sha256\":hashlib.sha256(payload).hexdigest(),\n \"payload_bytes\":len(payload),\"p_table_counts\":{k:len(getattr(model,k)) for k in\n (\"source_inventories\",\"source_bridges\",\"writes\",\"produced\")}},sort_keys=True))\n"
-]

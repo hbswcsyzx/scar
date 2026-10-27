@@ -1,3 +1,0 @@
-source /home/zyf/miniconda3/etc/profile.d/conda.sh
-conda activate lewm
-PYTHONPATH=. python -m pytest -q -o junit_family=legacy --junitxml=artifacts/experiments/b1_call_operands/model_production/produced/attempt002/junit.xml tests/unit/test_execution_produced.py

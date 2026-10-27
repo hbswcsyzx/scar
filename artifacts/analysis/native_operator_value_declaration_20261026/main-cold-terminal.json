@@ -1,7 +1,0 @@
-{
-  "returncode": 0,
-  "elapsed_s": 36.812085671990644,
-  "stderr": "",
-  "stdout": "",
-  "scope": "fresh-process catalog load and one original op on-demand query; not a program benchmark"
-}

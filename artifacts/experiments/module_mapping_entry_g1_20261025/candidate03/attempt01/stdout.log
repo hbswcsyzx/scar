@@ -1,4 +1,0 @@
-{"elapsed_s":0.8890451330225915,"event":"BEGIN","phase":"NORMAL_COMPOSITION_AND_CATALOG","self_rss_kib":43144}
-{"elapsed_s":1.210868895985186,"event":"BEGIN","phase":"READONLY_COMPILER_ROOT","self_rss_kib":47992}
-{"elapsed_s":1.2188949609990232,"event":"BEGIN","phase":"ONE_MODULE_LOWER","self_rss_kib":47992}
-{"elapsed_s":2.0004084240063094,"error":"95atoms/92ops/45CFG/56edges original census differs","event":"FAILED","phase":"ONE_MODULE_LOWER","self_rss_kib":48440}

@@ -1,8 +1,0 @@
-Traceback (most recent call last):
-  File "/tmp/scar-structured-model-280qf4mi/artifacts/experiments/b1_call_operands/model_driver_contract_v2/review/corridor-probe.py", line 152, in <module>
-    main()
-    ~~~~^^
-  File "/tmp/scar-structured-model-280qf4mi/artifacts/experiments/b1_call_operands/model_driver_contract_v2/review/corridor-probe.py", line 130, in main
-    (Behavior.OPAQUE,), effects_complete=False)
-     ^^^^^^^^^^^^^^^
-AttributeError: type object 'Behavior' has no attribute 'OPAQUE'

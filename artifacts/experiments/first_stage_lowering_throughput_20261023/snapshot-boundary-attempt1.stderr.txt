@@ -1,4 +1,0 @@
-Traceback (most recent call last):
-  File "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lowering_throughput_20261023/check_snapshot_boundary.py", line 39, in <module>
-    raise AssertionError("ordinary lower reused a stale source proof")
-AssertionError: ordinary lower reused a stale source proof

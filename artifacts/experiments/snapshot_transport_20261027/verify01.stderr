@@ -1,4 +1,0 @@
-Traceback (most recent call last):
-  File "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/snapshot_transport_20261027/verify.py", line 4, in <module>
-    from scar.analysis.call_operand_reader import read_call_operands
-ModuleNotFoundError: No module named 'scar'

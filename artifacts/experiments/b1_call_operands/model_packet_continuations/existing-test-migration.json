@@ -1,9 +1,0 @@
-{
-  "case_identity_changed": false,
-  "case": "tests.unit.test_program_continuation_connections::test_close_normal_and_raise_merge_into_one_real_fresh_pending_and_current_cleanup_replace",
-  "previous_evidence": "P4-2 local next-frontier close_routes DECLARED at C1; no later path inventory",
-  "new_obligation": "close_routes now includes the continuation; original incomplete-effect transfers require PARTIAL while first_frontier must retain DECLARED and all original C1 token/packet assertions",
-  "removed_obligations": [],
-  "original_fixture_modified": false,
-  "reason": "Preserve first handoff evidence explicitly and stop treating it as the complete consumer path"
-}

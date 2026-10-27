@@ -1,7 +1,0 @@
-{"elapsed_s":0.9747181420098059,"event":"BEGIN","phase":"READONLY_ORIGINAL_COMPILER_ROOT","self_peak_rss_kib":49644}
-{"elapsed_s":0.9896529340185225,"event":"BEGIN","phase":"NORMAL_RETAINED_SP6_READBACK","self_peak_rss_kib":50092}
-{"elapsed_s":2.0825681510032155,"event":"BEGIN","phase":"NORMAL_RETAINED_SP7_READBACK","self_peak_rss_kib":56364}
-{"elapsed_s":3.0860475330264308,"event":"BEGIN","phase":"ONE_MODULE_B_PREFIX_LOWER","self_peak_rss_kib":57708}
-{"elapsed_s":4.3862660030135885,"event":"BEGIN","phase":"NORMAL_NEW_SP8_FULL_READBACK","self_peak_rss_kib":61564}
-{"elapsed_s":6.806089068995789,"event":"BEGIN","phase":"FINAL_SOURCE_INPUT_RUNTIME_CHECK","self_peak_rss_kib":77208}
-{"elapsed_s":6.943130608997308,"event":"FINISHED","phase":"FINAL_SOURCE_INPUT_RUNTIME_CHECK","self_peak_rss_kib":77208,"status":"SP8_MODULE_PREFIX_READBACK_WITH_OPEN"}

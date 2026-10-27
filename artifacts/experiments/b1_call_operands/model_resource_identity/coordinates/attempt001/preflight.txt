@@ -1,2 +1,0 @@
-Command: python --version (without conda activation)
-Result: /bin/bash: python: command not found

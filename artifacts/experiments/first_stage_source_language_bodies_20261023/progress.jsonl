@@ -1,8 +1,0 @@
-{"stage": "imports", "elapsed_s": 0.07944096501159947, "max_rss_kib": 36268, "status": "BEGIN"}
-{"stage": "imports", "elapsed_s": 0.6275239690003218, "max_rss_kib": 39452, "status": "END"}
-{"stage": "one_source", "elapsed_s": 3.1062106099998346, "max_rss_kib": 437276, "status": "BEGIN", "file_index": 140}
-{"stage": "one_source", "elapsed_s": 6.3163335749995895, "max_rss_kib": 437276, "status": "END"}
-{"stage": "body", "elapsed_s": 6.316442712006392, "max_rss_kib": 437276, "status": "BEGIN", "file_index": 140, "body_index": 11}
-{"stage": "body", "elapsed_s": 25.50285614799941, "max_rss_kib": 437276, "status": "END", "body_index": 11, "recovered": true, "operations": 118}
-{"stage": "body", "elapsed_s": 25.50292643099965, "max_rss_kib": 437276, "status": "BEGIN", "file_index": 140, "body_index": 26}
-{"stage": "FAILED", "elapsed_s": 25.951223695999943, "max_rss_kib": 437276, "error_type": "ValueError", "detail": "source environment: unexpected or missing source environment address refinement"}

@@ -1,1 +1,0 @@
-{"bounds": {"first_row": [0, 40], "full": [0, 640], "scalar": [0, 4], "second_row": [40, 80]}, "elapsed_s": 0.34283670999866445, "new_allocations": 0, "new_regions": 4, "overlap": {"first_row_scalar": "OVERLAPS", "first_second_rows": "DISJOINT", "full_first_row": "OVERLAPS", "unknown_layout": "POSSIBLE"}, "status": "PASS"}

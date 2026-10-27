@@ -1,6 +1,0 @@
-{"entry_key": "66e06ddd27b0e83d4c956b17561f095b371ead39266bc8080888253ccb6594e8", "stage": "source_entry_attempt", "status": "SUCCEEDED"}
-{"entry_key": "266213453127bf05c398ce566d699c7ec356b1d17e24ffd43d188cb957ef18ac", "stage": "source_entry_attempt", "status": "UNSUPPORTED"}
-{"entry_key": "d968833b366080cef715d69ed23c3c1007d62e2e967ab8f6689e2fed80e1cf77", "stage": "source_entry_attempt", "status": "SUCCEEDED"}
-{"entry_key": "b425c7831d5987844713e8d277c3cb9d26b381cdca742087dde2babdc9811923", "stage": "source_entry_attempt", "status": "SUCCEEDED"}
-{"entry_key": "f893ea0eeded9252e522ff8a76795985e7f4bfd8a185761d4c698b14b4ddadae", "stage": "source_entry_attempt", "status": "UNSUPPORTED"}
-{"counts": {"SUCCEEDED": 3, "UNSUPPORTED": 2}, "elapsed_seconds": 241.43491630099015, "failure": null, "status": "FUNCTION_IMPORT_SOURCE_RESULTS_WITH_OPEN"}

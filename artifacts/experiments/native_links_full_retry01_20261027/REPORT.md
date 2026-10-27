@@ -1,9 +1,0 @@
-# 全量跨层链接重试：FAILED
-
-冻结beda0d96，CLI实际exit1/77.844136秒，processed operations/inputs/resource
-connections均0。前次memory coordinate URI定位问题已越过；本次正常metadata
-连接器在首个native片中正确停止，但其校验规则有建模错误：把node的
-CANONICAL_BOUNDARY_AVAILABLE与leaf的ASSOCIATED直接判相等。
-这两个字段属于不同维度；旧source17 unavailable案例值碰巧相同而未暴露。
-原数据/失败保持不动，后继应保两字段并按原producer规则校验合法配对，
-不能通过删校验或修改原数据绕过。正在修复，整图关系尚未发布。

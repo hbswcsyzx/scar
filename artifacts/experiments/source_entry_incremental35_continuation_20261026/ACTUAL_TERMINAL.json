@@ -1,9 +1,0 @@
-{
-  "handle": 17703,
-  "actual_exit_code": 1,
-  "elapsed_seconds": 360.8948849689914,
-  "closed_admission_rows": 0,
-  "fresh_checkpoints": 0,
-  "published": false,
-  "detail": "program graph JSON payload must be str"
-}

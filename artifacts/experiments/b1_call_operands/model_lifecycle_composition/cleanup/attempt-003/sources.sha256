@@ -1,2 +1,0 @@
-2c50833ec7571796d9c500e7a43a8daf46ada860676f4bf6203e3662cc841238  tests/fixtures/program_lifecycle_cleanup_graphs.py
-aae51c755e934eeaa43c88a57d4f6af16ab2c5ff779c0b37ca67dd58c7bbf5c5  tests/unit/test_lifecycle_cleanup_composition.py
