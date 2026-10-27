@@ -376,6 +376,7 @@ def reconstruct_source_layers(
     max_files: int = 256,
     max_record_bytes: int = 64_000_000,
     max_total_bytes: int = 512_000_000,
+    captured_source_session=None,
 ) -> dict[str, Any]:
     """Rebuild each inventory file's three canonical source layers once.
 
@@ -390,6 +391,13 @@ def reconstruct_source_layers(
     original source-replay evidence; they are not freshly prepared in this
     call. Missing or gapped cache rows are rebuilt normally.
     """
+    if captured_source_session is not None:
+        from scar.analysis.call_seeds import _CapturedSourceSession
+        if type(captured_source_session) is not _CapturedSourceSession:
+            raise TypeError("source layers require a normal live captured source session")
+        captured_source_session.require_unchanged()
+        if reuse_archive is not None:
+            raise ValueError("captured source replay cannot reuse a live-source sidecar cache")
     _check_budgets(max_input_bytes=max_input_bytes, max_files=max_files,
                    max_record_bytes=max_record_bytes, max_total_bytes=max_total_bytes)
     source_inventory = Path(inventory_path)
@@ -491,7 +499,9 @@ def reconstruct_source_layers(
                         continue
 
             try:
-                prepared = prepare_source(snapshot.path, project_root=context.namespace_root)
+                prepared = (captured_source_session.prepare(snapshot.path, context.namespace_root)
+                    if captured_source_session is not None and captured_source_session.has_path(snapshot.path)
+                    else prepare_source(snapshot.path, project_root=context.namespace_root))
                 rebuilt_snapshot = prepared.semantics.sources.get(snapshot.path)
                 if (str(prepared.path) != snapshot.path or str(prepared.root) != context.namespace_root
                         or rebuilt_snapshot != snapshot):
@@ -532,7 +542,7 @@ def reconstruct_source_layers(
                            gap=None)
                 charged += len(canonical)
             except (OSError, ValueError, TypeError, KeyError, SyntaxError,
-                    RecursionError, UnicodeError) as error:
+                    RecursionError, UnicodeError, LookupError) as error:
                 row["gap"] = {"code": "SOURCE_REPLAY_FAILED",
                               "detail": _safe_detail(error)}
 

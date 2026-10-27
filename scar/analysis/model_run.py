@@ -407,13 +407,13 @@ class _Stages:
         return value, stage
 
 
-def run_model(capture, out, *, plan_only=False, resume=False, budget=ModelRunBudget()):
+def run_model(capture, out, *, plan_only=False, resume=False, budget=ModelRunBudget(), source_only=False):
     """Publish a fresh immutable attempt and a small navigation root.
 
     Resume preserves every old attempt. It currently recomputes the metadata
     plan rather than trusting serialized stage ownership or success booleans.
     """
-    if type(budget) is not ModelRunBudget or type(plan_only) is not bool or type(resume) is not bool:
+    if type(budget) is not ModelRunBudget or type(plan_only) is not bool or type(resume) is not bool or type(source_only) is not bool:
         raise ValueError("typed budget and exact Boolean options required")
     budget.__post_init__()
     root, cap = Path(out).absolute(), Path(capture).absolute()
@@ -444,7 +444,7 @@ def run_model(capture, out, *, plan_only=False, resume=False, budget=ModelRunBud
               "previous_attempt": previous.get("attempt") if previous else None}
     _publish(attempt / "started.json", inputs)
     result = {"schema": SCHEMA, "capture": str(cap), "attempt": str(attempt),
-              "plan_only": plan_only, "whole_model_established": False,
+              "plan_only": plan_only, "source_only": source_only, "whole_model_established": False,
               "target_executed": False, "partial_route": "MONOLITHIC_BOOTSTRAP",
               "stages": [], "implementation": inputs["implementation"],
               "resume_policy": "FRESH_ATTEMPT_REPLAY_NO_SERIALIZED_OWNERSHIP_RESTORED",
@@ -470,7 +470,8 @@ def run_model(capture, out, *, plan_only=False, resume=False, budget=ModelRunBud
         result["open"] = plan["open"]
         result["status"] = plan["status"]
         if not plan_only and not plan["blockers"]:
-            result = _execute_stages(cap, attempt, plan, result, budget)
+            result = (_execute_source_bootstrap(cap, attempt, plan, result, budget) if source_only
+                      else _execute_stages(cap, attempt, plan, result, budget))
     except BaseException as error:
         result.update(status="FAILED", failure={"type": type(error).__name__, "detail": str(error)})
     finally:
@@ -598,25 +599,106 @@ def _execute_stages(capture, attempt, plan, result, budget):
             'persisted_value_graph_records': 0, 'whole_model_established': False}
     else:
         result['native_port_scope'] = 'not generated: this route lacks a lossless ETO archive or partitioned bundle'
+    return _execute_source_stages(capture, attempt, plan, result, budget, stages, products,
+                                  coordinates, link, progress)
+
+
+def _execute_source_bootstrap(capture, attempt, plan, result, budget):
+    """The ordinary source stages without native import or a target execution."""
+    from scar.trace.capture_coordinates import bind_capture_coordinates
+    stages = _Stages(attempt, result, budget)
+    products = result["products"] = {}
+    result["partial_route"] = "SOURCE_BOOTSTRAP_ONLY"
+    def link(name, path):
+        for row in reversed(result['stages']):
+            for receipt in row.get('post_stage', {}).get('stage_outputs', ()):
+                if receipt['uri'] == str(path):
+                    products[name] = receipt
+                    return receipt
+        raise ValueError('normative source stage root was not checked: ' + str(path))
+    def progress(record):
+        print(json.dumps({'schema': SCHEMA, 'producer_progress': record}, allow_nan=False), flush=True)
+    def coordinate_stage(stage):
+        path = stage / 'capture-coordinates.json'
+        coordinates = bind_capture_coordinates(capture, max_bytes=budget.max_raw_bytes,
+                                              max_lines=200_000, profile_uri=str(path))
+        with path.open('xb') as stream:
+            stream.write(coordinates.payload)
+        return coordinates
+    coordinates, directory = stages.call('source-coordinates', bind_capture_coordinates, coordinate_stage)
+    link('source_coordinates', directory / 'capture-coordinates.json')
+    return _execute_source_stages(capture, attempt, plan, result, budget, stages, products,
+                                  coordinates, link, progress, source_only=True)
+
+
+def _execute_source_stages(capture, attempt, plan, result, budget, stages, products,
+                           coordinates, link, progress, *, source_only=False):
+    from scar.analysis.call_seeds import _read_call_source_seeds
+    from scar.analysis.call_demand import _SourceWorkspace, inventory_from_calls
+    from scar.analysis.program_inventory import inventory_program
+    from scar.analysis.source_layers import reconstruct_source_layers
+    from scar.analysis.program_composition import compose_program, CompositionIndex
+    from scar.analysis.source_invocations import bind_source_invocations
+    from scar.analysis.code_witness import CodeWitnessStore, CodeWitnessBudget, CodeWitnessUnavailable
+    from scar.ir.program.call_edges import CallEdgeBudget, CallLinkStatus
+    from scar.ir.program.compilation import CallCompilationProfile
+    from scar.ir.program.expansion import ContextStoreBudget
+    from scar.ir.program.functions import BodyLoweringProfile
+    from scar.ir.program.inventory import InventoryBudget
+    call_budget = CallEdgeBudget(max_raw_bytes=budget.max_raw_bytes,
+        max_lines=budget.max_calls * 4 + budget.max_codes + 128,
+        max_line_bytes=min(budget.max_record_bytes, budget.max_raw_bytes),
+        max_codes=budget.max_codes, max_events=budget.max_calls * 2,
+        max_source_files=budget.max_source_files, max_source_bytes=budget.max_source_bytes)
+    context_budget = ContextStoreBudget(max_compressed_bytes=budget.max_record_bytes,
+                                       max_record_bytes=budget.max_record_bytes)
+    project_root = plan['origins']['project_root']['value']
+    with _SourceWorkspace(project_root, context_budget) as workspace:
+        try:
+            return _build_source_stages(capture, plan, result, budget, stages, products,
+                                        coordinates, link, progress, call_budget, workspace, source_only)
+        finally:
+            if workspace.captured_session is not None:
+                result['source_input_scope'] = workspace.captured_session.report()
+                workspace.captured_session.close()
+
+
+def _build_source_stages(capture, plan, result, budget, stages, products, coordinates,
+                         link, progress, call_budget, workspace, source_only):
+    from scar.analysis.call_seeds import _read_call_source_seeds
+    from scar.analysis.call_demand import inventory_from_calls
+    from scar.analysis.program_inventory import inventory_program
+    from scar.analysis.source_layers import reconstruct_source_layers
+    from scar.analysis.program_composition import compose_program, CompositionIndex
+    from scar.analysis.source_invocations import bind_source_invocations
+    from scar.analysis.code_witness import CodeWitnessStore, CodeWitnessBudget, CodeWitnessUnavailable
+    from scar.ir.program.call_edges import CallLinkStatus
+    from scar.ir.program.compilation import CallCompilationProfile
+    from scar.ir.program.expansion import ContextStoreBudget
+    from scar.ir.program.functions import BodyLoweringProfile
+    from scar.ir.program.inventory import InventoryBudget
     project_root = plan["origins"]["project_root"]["value"]
 
     def seeds_stage(stage):
-        seeds = read_call_source_seeds(capture / "trace", project_root, budget=call_budget,
-            compilation_profile=CallCompilationProfile.RECORDED_FUTURE_FLAGS)
+        seeds = _read_call_source_seeds(capture / "trace", project_root, budget=call_budget,
+            compilation_profile=CallCompilationProfile.RECORDED_FUTURE_FLAGS,
+            _source_workspace=workspace, coordinates=coordinates)
         summary = seeds.summary()
         if summary["counts"]["entered_invocations"] > budget.max_calls:
             raise ValueError("verified seed invocation count exceeds call budget")
         _write_document(stage / "source-seeds.json.gz", seeds.to_dict(), budget.max_record_bytes)
         return seeds
 
-    seeds, seed_stage = stages.call("source-seeds", read_call_source_seeds, seeds_stage)
+    seeds, seed_stage = stages.call("source-seeds", _read_call_source_seeds, seeds_stage)
     link("source_seeds", seed_stage / "source-seeds.json.gz")
     result["source_seed_summary"] = seeds.summary()
     verified_links = tuple(row for row in seeds.model.code_links if row.status is CallLinkStatus.VERIFIED)
     paths = sorted({row.snapshot.path for row in verified_links
                     if row.snapshot is not None and Path(row.snapshot.path).suffix == ".py"
-                    and Path(row.snapshot.path).is_file()
-                    and str(Path(row.snapshot.path).resolve()) == row.snapshot.path})
+                    and ((workspace.captured_session is not None
+                          and workspace.captured_session.has_path(row.snapshot.path))
+                         or (Path(row.snapshot.path).is_file()
+                             and str(Path(row.snapshot.path).resolve()) == row.snapshot.path))})
     result["source_catalog"] = {"qualification": "verified observed code source links; not complete dependency closure",
                                 "paths": paths, "producer": products["source_seeds"]}
     if not paths:
@@ -626,13 +708,24 @@ def _execute_stages(capture, attempt, plan, result, budget):
     result["analysis_seed"] = {"path": analysis_seed, "qualification": "deterministic verified source; not command-entry proof"}
 
     def inventory_stage(stage):
-        inventory = inventory_program(analysis_seed, project_root=project_root, source_roots=(),
-            max_files=budget.max_source_files, max_bytes=budget.max_source_bytes,
-            max_lowered_bodies=budget.max_bodies, max_operations=budget.max_operations,
-            max_call_witnesses=budget.max_calls, calls_trace=capture / "trace", call_budget=call_budget,
-            context_budget=ContextStoreBudget(max_compressed_bytes=budget.max_record_bytes,
-                                             max_record_bytes=budget.max_record_bytes),
-            body_profile=BodyLoweringProfile.STRUCTURED_ENV)
+        if workspace.captured_session is not None:
+            inventory = inventory_from_calls(analysis_seed, project_root=project_root, source_roots=(),
+                budget=InventoryBudget(max_files=budget.max_source_files, max_bytes=budget.max_source_bytes,
+                    max_lowered_bodies=budget.max_bodies, max_operations=budget.max_operations,
+                    max_call_witnesses=budget.max_calls),
+                call_trace=capture / 'trace', call_budget=call_budget,
+                context_budget=ContextStoreBudget(max_compressed_bytes=budget.max_record_bytes,
+                                                 max_record_bytes=budget.max_record_bytes),
+                body_profile=BodyLoweringProfile.STRUCTURED_ENV,
+                _seed_report=seeds, _workspace=workspace, coordinates=coordinates)
+        else:
+            inventory = inventory_program(analysis_seed, project_root=project_root, source_roots=(),
+                max_files=budget.max_source_files, max_bytes=budget.max_source_bytes,
+                max_lowered_bodies=budget.max_bodies, max_operations=budget.max_operations,
+                max_call_witnesses=budget.max_calls, calls_trace=capture / "trace", call_budget=call_budget,
+                context_budget=ContextStoreBudget(max_compressed_bytes=budget.max_record_bytes,
+                                                 max_record_bytes=budget.max_record_bytes),
+                body_profile=BodyLoweringProfile.STRUCTURED_ENV)
         _write_document(stage / "inventory.json.gz", inventory.to_dict(), budget.max_record_bytes)
         return inventory.summary()
 
@@ -644,7 +737,8 @@ def _execute_stages(capture, attempt, plan, result, budget):
     _layer_report, layer_stage = stages.call("source-layers", reconstruct_source_layers,
         lambda stage: reconstruct_source_layers(inventory_path, stage / "layers",
             max_input_bytes=budget.max_record_bytes, max_files=budget.max_source_files,
-            max_record_bytes=budget.max_record_bytes, max_total_bytes=budget.max_output_bytes))
+            max_record_bytes=budget.max_record_bytes, max_total_bytes=budget.max_output_bytes,
+            captured_source_session=workspace.captured_session))
     layers = layer_stage / "layers"
     link("source_layers", layers / "index.json")
     composition_summary, composition_stage = stages.call("source-composition", compose_program,
@@ -656,17 +750,20 @@ def _execute_stages(capture, attempt, plan, result, budget):
     link("source_composition", composition_path)
     result["source_composition_summary"] = composition_summary
 
-    def binding_stage(stage):
-        composition = CompositionIndex(composition_path, max_input_bytes=budget.max_record_bytes,
-                                       max_record_bytes=budget.max_record_bytes)
-        return bind_source_invocations(composition, coordinates, capture / "trace", stage / "bindings",
-                                       call_budget=call_budget, witness_mode="same_capture")
-
-    binding_report, binding_stage_path = stages.call("source-bindings", bind_source_invocations, binding_stage)
-    link("source_bindings", binding_stage_path / "bindings" / "report.json")
-    result["source_binding_summary"] = binding_report["summary"]
-    if binding_report.get("schema") != "scar.source-invocations" or binding_report.get("schema_version") != 1:
-        raise ValueError("monolithic P0 did not produce the expected genuine source-invocations1")
+    if not source_only:
+        def binding_stage(stage):
+            composition = CompositionIndex(composition_path, max_input_bytes=budget.max_record_bytes,
+                                           max_record_bytes=budget.max_record_bytes)
+            return bind_source_invocations(composition, coordinates, capture / "trace", stage / "bindings",
+                                           call_budget=call_budget, witness_mode="same_capture")
+    
+        binding_report, binding_stage_path = stages.call("source-bindings", bind_source_invocations, binding_stage)
+        link("source_bindings", binding_stage_path / "bindings" / "report.json")
+        result["source_binding_summary"] = binding_report["summary"]
+        if binding_report.get("schema") != "scar.source-invocations" or binding_report.get("schema_version") != 1:
+            raise ValueError("monolithic P0 did not produce the expected genuine source-invocations1")
+    else:
+        result['source_binding_scope'] = 'NOT_ATTEMPTED_SOURCE_BOOTSTRAP_ONLY'
 
     def witness_stage(stage):
         witness_budget = CodeWitnessBudget(max_compile_keys=budget.max_compile_keys,
@@ -682,6 +779,9 @@ def _execute_stages(capture, attempt, plan, result, budget):
         acquired, frontiers = [], []
         for row in sorted(verified_links, key=lambda item: item.code):
             try:
+                if workspace.captured_session is not None:
+                    writer.admit_captured_source(row.snapshot, captured=captured[row.code],
+                        source_owner=workspace.captured_session.owner)
                 _code, proof = writer.resolve(captured[row.code], row.snapshot, row.optimize_levels, allow_compile=True)
             except CodeWitnessUnavailable as error:
                 frontiers.append({"code": row.code, "reason": str(error)})
@@ -719,7 +819,7 @@ def _execute_stages(capture, attempt, plan, result, budget):
         if current["sha256"] != receipt["sha256"]:
             raise ValueError("capture metadata changed during modeling")
     result["final_capture_metadata_recheck_bytes"] = checked
-    result.update(status="COMPONENTS_LINKED_WITH_OPEN")
+    result.update(status="SOURCE_BOOTSTRAP_WITH_OPEN" if source_only else "COMPONENTS_LINKED_WITH_OPEN")
     return result
 
 

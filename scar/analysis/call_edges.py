@@ -134,8 +134,13 @@ class _Sources:
                  'captured source construction requires its normal owner, not serialized metadata')
         _require(captured_source_owner is None or type(captured_source_root_is_package) is bool,
                  'CAPTURED_NAMESPACE_POLICY_UNAVAILABLE: original namespace package policy is required')
-        _require(captured_source_owner is None or _source_workspace is None,
-                 'captured source workspace needs an explicit archive-capable adapter')
+        if captured_source_owner is not None and _source_workspace is not None:
+            from scar.analysis.call_demand import _SourceWorkspace
+            _require(type(_source_workspace)is _SourceWorkspace
+                     and _source_workspace.captured_session is not None
+                     and _source_workspace.captured_session.owner is captured_source_owner
+                     and _source_workspace.captured_session.policy['root_is_package']==captured_source_root_is_package,
+                     'captured source workspace requires the same normal owner/namespace policy')
         self.captured_source_owner = captured_source_owner
         self.captured_source_root_is_package = captured_source_root_is_package
         self.source_origins = {}
@@ -209,9 +214,12 @@ class _Sources:
             original = self.captured_source_owner.archived_source(snapshot)
             size = len(original.text.encode('utf8'))
             _require(self.total_source_bytes + size <= self.budget.max_source_bytes, 'source byte budget exceeded')
-            prepared = prepare_captured_source(self.captured_source_owner, captured, project_root=self.root,
-                root_is_package=self.captured_source_root_is_package)
-            indexed, text, tree, signatures = _source_witness_projection(prepared)
+            if self._source_workspace is not None:
+                indexed,text,tree,signatures=self._source_workspace.source_projection(path)
+            else:
+                prepared = prepare_captured_source(self.captured_source_owner,captured,project_root=self.root,
+                    root_is_package=self.captured_source_root_is_package)
+                indexed,text,tree,signatures=_source_witness_projection(prepared)
             if filename in self.inventory_files:
                 existing = self.inventory_files[filename]
                 _require(existing.snapshot == indexed.snapshot
