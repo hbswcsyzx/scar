@@ -766,20 +766,41 @@ def _selected_binding(inputs, operand_metadata, boundary_index, template_cache, 
     positional_parameters = tuple(parameter for parameter in signature.parameters
         if parameter.kind in (ParameterKind.POSITIONAL_ONLY, ParameterKind.POSITIONAL))
     keyword_names = {keyword.arg for keyword in call_node.keywords}
-    receiver_candidate = (isinstance(call_node.func, __import__("ast").Attribute)
-          and not call_node.args and bool(positional_parameters)
-          and positional_parameters[0].name not in keyword_names
-          and not attempt.arg0_missing and attempt.arg0 is not None
-          and callee_entry.parameters
-          and callee_entry.parameters[0].ref == attempt.arg0
-          and positional_parameters[0].default_source is None)
-    if receiver_candidate:
+    is_attribute_call = isinstance(call_node.func, __import__("ast").Attribute)
+    first_formal_reference_matches = (bool(positional_parameters) and bool(callee_entry.parameters)
+        and callee_entry.parameters[0].name == positional_parameters[0].name
+        and not attempt.arg0_missing and attempt.arg0 is not None
+        and callee_entry.parameters[0].ref == attempt.arg0)
+    legacy_fixed_receiver_shape = (is_attribute_call and not call_node.keywords
+        and attempt.dispatch.layout.argcount == len(call_node.args) + 1)
+    legacy_function_shape = (not call_node.keywords and attempt.site.opname == "CALL"
+        and attempt.dispatch.layout.argcount == len(call_node.args))
+    if legacy_fixed_receiver_shape:
+        _need(first_formal_reference_matches,
+              "fixed-arity attribute CALL receiver does not match the captured first formal")
+        receiver_positional = len(call_node.args)
         target_kind = PythonTargetKind.NORMALIZED_RECEIVER_FUNCTION
+    elif (is_attribute_call and not call_node.args and bool(positional_parameters)
+          and positional_parameters[0].name not in keyword_names
+          and positional_parameters[0].default_source is None
+          and first_formal_reference_matches):
+        receiver_positional = 0
+        target_kind = PythonTargetKind.NORMALIZED_RECEIVER_FUNCTION
+    elif (is_attribute_call and call_node.args and first_formal_reference_matches
+          and attempt.dispatch.layout.argcount > len(call_node.args)):
+        raise _NeedError("attribute call with positional actuals has unresolved receiver-versus-function ABI")
+    elif legacy_function_shape:
+        receiver_positional = None
+        target_kind = PythonTargetKind.FUNCTION
+    else:
+        raise _NeedError("source CALL/function positional ABI remains outside the retained rule")
+
+    if target_kind is PythonTargetKind.NORMALIZED_RECEIVER_FUNCTION:
         _need(attempt.dispatch.layout.argcount >= 1
               and tuple(item.name for item in signature.parameters) == attempt.dispatch.layout.parameters,
-              "normalized receiver function layout lacks its required receiver parameter")
+              "normalized receiver function layout lacks its first formal")
         observed = BoundReceiver(ReceiverRole.IMPLICIT_CALL_RECEIVER, attempt.arg0,
-            explicit_positional=0,
+            explicit_positional=receiver_positional,
             conditions=(ReceiverCondition.NO_INTERVENING_CALL_LAYOUT_MUTATION,))
         receiver = SourceReceiverPort(caller.namespace, op.id, callee_use.id, callee_use.value,
             callee.namespace, signature.parameters[0].slot, callee.interface.parameters[0].value,
@@ -788,7 +809,6 @@ def _selected_binding(inputs, operand_metadata, boundary_index, template_cache, 
     else:
         receiver = None
         receiver_formal = None
-        target_kind = PythonTargetKind.FUNCTION
     _need(not attempt.dispatch.layout.kwonlyargcount
           and not attempt.dispatch.layout.flags & (4 | 8)
           and signature.kind.value == "SYNC" and not signature.decorators,
@@ -812,26 +832,44 @@ def _selected_binding(inputs, operand_metadata, boundary_index, template_cache, 
                 parameter.name, route))
         receiver_port = None
     else:
-        _need(not call_node.args,
-              "attribute call with explicit positional actuals has unresolved receiver-versus-argument ABI")
         candidate = None
         ports = []
         assigned = {signature.parameters[0].slot}
-        for i, ((kind, keyword, _), link) in enumerate(zip(actual_specs, actual_links)):
-            _need(kind is ArgumentKind.KEYWORD,
-                  "normalized receiver currently accepts no explicit positional actuals")
-            matches = [parameter for parameter in signature.parameters[1:]
-                if parameter.name == keyword and parameter.kind is ParameterKind.POSITIONAL]
-            _need(len(matches) == 1, "receiver call keyword does not select one positional formal")
-            parameter, = matches
-            _need(parameter.slot not in assigned, "duplicate receiver-call keyword route")
-            assigned.add(parameter.slot)
-            formal_index = signature.parameters.index(parameter)
-            formal = callee.interface.parameters[formal_index]
-            route = ParameterBinding(parameter.slot, BindingOrigin.ARGUMENT, (i,))
-            ports.append(SourceArgumentPort(i, caller.namespace, op.id, link.source, link.use,
-                use_map[link.use].value, callee.namespace, parameter.slot, formal.value,
-                parameter.name, route))
+        if receiver_positional:
+            _need(not call_node.keywords and receiver_positional == len(call_node.args),
+                  "fixed-arity receiver route must preserve its ordered positional operands")
+            for i, link in enumerate(actual_links):
+                parameter_index = i + 1
+                _need(parameter_index < len(signature.parameters),
+                      "fixed-arity receiver route exceeds the original positional signature")
+                parameter = signature.parameters[parameter_index]
+                _need(parameter.kind in (ParameterKind.POSITIONAL_ONLY, ParameterKind.POSITIONAL),
+                      "receiver positional route does not select an original positional formal")
+                _need(parameter.slot not in assigned, "duplicate receiver-call positional route")
+                assigned.add(parameter.slot)
+                formal = callee.interface.parameters[parameter_index]
+                route = ParameterBinding(parameter.slot, BindingOrigin.ARGUMENT, (i,))
+                ports.append(SourceArgumentPort(i, caller.namespace, op.id, link.source, link.use,
+                    use_map[link.use].value, callee.namespace, parameter.slot, formal.value,
+                    parameter.name, route))
+        else:
+            _need(not call_node.args,
+                  "default/keyword receiver route does not accept explicit positional operands")
+            for i, ((kind, keyword, _), link) in enumerate(zip(actual_specs, actual_links)):
+                _need(kind is ArgumentKind.KEYWORD,
+                      "default/keyword receiver route accepts only explicit keyword operands")
+                matches = [parameter for parameter in signature.parameters[1:]
+                    if parameter.name == keyword and parameter.kind is ParameterKind.POSITIONAL]
+                _need(len(matches) == 1, "receiver call keyword does not select one positional formal")
+                parameter, = matches
+                _need(parameter.slot not in assigned, "duplicate receiver-call keyword route")
+                assigned.add(parameter.slot)
+                formal_index = signature.parameters.index(parameter)
+                formal = callee.interface.parameters[formal_index]
+                route = ParameterBinding(parameter.slot, BindingOrigin.ARGUMENT, (i,))
+                ports.append(SourceArgumentPort(i, caller.namespace, op.id, link.source, link.use,
+                    use_map[link.use].value, callee.namespace, parameter.slot, formal.value,
+                    parameter.name, route))
         for parameter in signature.parameters[1:]:
             if parameter.slot not in assigned:
                 _need(parameter.default_source is not None,

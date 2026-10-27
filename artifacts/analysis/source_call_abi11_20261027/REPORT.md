@@ -1,38 +1,23 @@
-# Retained source-call ABI gaps: targeted review
+# Retained source-call ABI follow-up
 
-## Scope and source receipts
+## Scope
 
-This change addresses the 11 open candidates in the existing full candidate publication. It did not rerun the 201 source reader, the full trace reader, a capture, or a target. The prior full publication remains 2,672 selected of 2,683 direct body-linked candidates; this report does not relabel that denominator or publish a merged 2,683-call model.
+This follow-up restores the earlier fixed-arity explicit-positional receiver path and keeps the targeted support for the 11 previously open candidates. It does not rerun the 201 source reader, full trace reader, capture, or target. The existing full publication remains 2,672 selected of 2,683 candidates; these local results are not merged into that denominator.
 
-The candidate manifest is SHA256 `867a8fa08f97977ccf8aba2add85cd2544691f8aff1c61bcc685dc61160bfb8d` (`artifacts/analysis/source_call_port_all_20261027/publication/manifest.json` in the original worktree). The full result records ten `unsupported source CALL/function positional ABI` issues and one issue worded as a missing CALL position/opcode. The bounded row receipt in [issue-event-summary.json](issue-event-summary.json) binds the original operand and frame files to their prior full-scan SHA receipts and confirms the files stayed stable. It did not rehash either full file.
+The source publication manifest is SHA256 `867a8fa08f97977ccf8aba2add85cd2544691f8aff1c61bcc685dc61160bfb8d`. The original old-binding shard is SHA256 `85fe9c44b3ceb7ab8f997312e2672928b7012aa24d7f622862b8206cbe45ebef` stored and `8e9d4c24da191331f401d686acc649345424a1013f88ee5acad3b67da1608b38` decoded.
 
-Targeted reads examined 824 operand rows (296,165 returned bytes) and 1,496 frame rows (1,227,588 returned bytes), plus the two small metadata files. The normal source reader loaded only two source body groups and their existing code witnesses. Total targeted run time, including typed codec readback, was 3.58 seconds. No weak-reference token strings or tensor/value payloads are written into the report artifacts.
+## Change and observed results
 
-## Observed facts
+For an attribute call with no keywords and `argcount == explicit positional count + 1`, the producer again checks that captured `arg0` matches the callee's first formal and maps explicit argument `i` to formal `i + 1`. The static source-call template retains `explicit_positional`, and reused occurrences must satisfy the same declared layout and receiver-reference condition. This preserves the existing rule; the reference and arity observations do not prove Python runtime method binding or receiver identity.
 
-Ten `CALL` sites all resolve to `v.check()` in the retained `Dict.check` body. The original `FunctionSignature` is `check(self, debug=False)`: `self` is required; `debug` has a declared `default_source`. The raw callee-entry layout is `(self, debug)`, and each of the ten attempt `arg0` tokens matches the captured entry reference for `self`. The check is an implicit receiver with zero explicit positional actuals; `debug` is omitted.
+A normal local rebuild of published attempt 59197 exactly matched its old closed typed binding and codec round-tripped. The retained route has one explicit positional argument: original Use `94e8bea5ad3213bce3401f3cb21f9e68` to formal `col` at index 1 (the receiver is index 0). Its source location is `[141,141,15,33]`.
 
-The remaining site is `CALL_KW` at `variation_space.check(debug=True)`. Its source location is present. The old error text called the source position/opcode absent, but the actual blocker was that the producer only accepted opcode `CALL`. The retained core `INVOKE` operation already has the exact `keyword:debug` Use and source expression, and the raw entry `arg0` reference matches the first formal `self`.
+The same run built and codec-round-tripped all 11 local candidates: 10 `CALL` sites with omitted declared default `debug`, and one `CALL_KW` site with the original `keyword:debug` Use. All 11 remain conditional normalized-receiver projections. Combined runner wall time was approximately 4.37 seconds.
 
-The full 201 reader receipt was used as the existing capture-wide boundary receipt. This targeted pass decoded only local intervals, verified their event indices/anchors, and ran the existing normal source/body readers against the receipt-qualified report, bindings, source artifacts, code witnesses, inventory, and signature.
+The bounded local reads returned 3,306 operand bytes and 1,374,145 frame bytes for the old binding, plus 296,165 operand bytes and 1,227,588 frame bytes for the 11 candidates. They were checked against the previously recorded whole-file receipts; the full files were not rehashed. The normal source reader read 4 bodies (29,335,931 decoded bytes), 4 code witnesses, and 2 source files (38,549 bytes).
 
-## Implemented connection
+The reproducible runner is [build_local_bindings.py](build_local_bindings.py); the combined typed result is [local-bindings-final.json](local-bindings-final.json). It uses the existing receipt-qualified source publication and bounded event intervals.
 
-The existing producer now accepts exact `CALL_KW` sites when the original AST call has explicit keywords, resolves each keyword value to the original ordered Use by its `keyword:<name>` role and exact source span, and routes it through the source signature. Existing positional call routing remains in place.
+## Limits
 
-For normalized receiver calls, the producer now requires an attribute call with no explicit positional operands, a required first positional formal not explicitly supplied by keyword, a complete matching entry layout, and equality between the captured `arg0` reference and the first entry-formal reference. Each other formal must be supplied by an exact keyword Use or have a declaration default. Attribute calls with explicit positional operands remain unresolved because a plain function stored on an attribute can have the same observed arity and first-argument layout as a method.
-
-The target record's normalized-receiver arity check now allows declared function parameters beyond the implicit receiver and explicit positional prefix; the source producer admits them only after checking the original signature. This allows the existing shared signature to remain the authority for default declarations rather than copying a second signature into each call record.
-
-The local typed path built all 11 source bindings and decoded them through the existing record codec with exact equality. [local-bindings-final.json](local-bindings-final.json) contains their original operation/Use/formal/source locators and a concise machine summary. Counts: 10 `CALL`, 1 `CALL_KW`; 11 conditional receiver projections; one explicit keyword port; ten declared default omissions.
-
-## Limits retained
-
-The receiver route is conditional; the reference match is not an identity proof. `default_source` identifies the static source location of a default declaration, not its current runtime value. This work establishes no default-value snapshot, selected return, normal completion, ready state, content equality, effects, or tensor payload. It does not establish full attempt coverage or repair the full candidate publication denominator. Starred and double-starred arguments, variadic/keyword-only signatures, decorators, suspended functions, and ambiguous attribute calls with positional actuals remain outside this rule.
-
-## Files
-
-- `scar/analysis/retained_source_call_ports.py`
-- `scar/ir/program/python_call_targets.py`
-- `build_local_bindings.py` and `read_issue_events.py` are bounded, receipt-driven reproduction scripts.
-- The two JSON artifacts contain only the 11 local event/typed results and receipts.
+The prior 2,672 / 2,683 publication was not rebuilt or renumbered. A same-arity plain function stored on an attribute can still be ambiguous with the preserved receiver rule; this follow-up does not establish runtime callable identity. For the 11 new cases, `default_source` denotes a static declaration, not the runtime default value. Neither path proves argument object identity, normal return, readiness, content equality, or full attempt coverage.

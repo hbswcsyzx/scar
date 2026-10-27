@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 from collections import Counter, OrderedDict
+import gzip
 import hashlib
 import json
 from pathlib import Path
@@ -63,6 +64,34 @@ def read_index_range(reader, start_index, end_index):
     return rows
 
 
+def read_through_handshake(reader, attempt_index, *, max_index_gap):
+    located = reader.locate(attempt_index)
+    if located is None or located[1].get("index") != attempt_index:
+        raise ValueError("selected existing attempt is absent from the retained operand file")
+    reader.stream.seek(located[0])
+    rows = []
+    expected = attempt_index
+    handshake_found = False
+    while expected <= attempt_index + max_index_gap:
+        reader.read_calls += 1
+        raw = reader.stream.readline(2_000_001)
+        reader.returned_bytes += len(raw)
+        if not raw or len(raw) > 2_000_000 or reader.returned_bytes > reader.max_returned_bytes:
+            raise ValueError("bounded existing-call read exceeded its byte/line ceiling")
+        row = json.loads(raw.decode("utf-8"))
+        reader.lines_examined += 1
+        if type(row) is not dict or row.get("index") != expected:
+            raise ValueError("existing-call operand indices are not a contiguous local range")
+        rows.append((row, raw))
+        if row.get("kind") == "ENTRY_HANDSHAKE" and row.get("attempt_index") == attempt_index:
+            handshake_found = True
+            break
+        expected += 1
+    if not handshake_found:
+        raise ValueError("selected existing attempt has no local entry handshake")
+    return rows
+
+
 def decode_operand_events(rows, path):
     events = []
     for row, raw in rows:
@@ -94,6 +123,34 @@ def decode_frame_entries(rows, path, code_map):
     return entries
 
 
+def load_prior_binding(manifest_path, manifest, attempt_index):
+    matches = [shard for shard in manifest["shards"]
+        if attempt_index in shard["candidate_scope"]["accepted_attempt_indices"]]
+    if len(matches) != 1:
+        raise ValueError("selected prior attempt does not belong to one existing closed shard")
+    shard = matches[0]
+    shard_path = Path(manifest_path).absolute().parent / shard["path"]
+    stored = load_bound_bytes(shard_path, shard["stored_bytes"], shard["stored_sha256"])
+    if shard.get("representation") != "gzip-json-mtime0-v1":
+        raise ValueError("prior selected shard has an unsupported retained representation")
+    decoded = gzip.decompress(stored)
+    if len(decoded) != shard["decoded_bytes"] or hashlib.sha256(decoded).hexdigest() != shard["decoded_sha256"]:
+        raise ValueError("prior selected shard decoded receipt differs")
+    document = json.loads(decoded.decode("utf-8"))
+    if document.get("schema") != "scar.python-source-port-bindings" or document.get("schema_version") != 2:
+        raise ValueError("prior selected shard has an unexpected source-port model")
+    bindings = [decode(PythonSourcePortBinding, value) for value in document["bindings"]
+        if value.get("target", {}).get("attempt_index") == attempt_index]
+    if len(bindings) != 1:
+        raise ValueError("prior selected shard does not contain one exact typed binding")
+    binding, = bindings
+    if binding.target.receiver is None or binding.target.receiver.explicit_positional <= 0:
+        raise ValueError("selected prior binding does not exercise an explicit positional receiver")
+    return binding, {"path": str(shard_path), "stored_sha256": shard["stored_sha256"],
+        "decoded_sha256": shard["decoded_sha256"], "stored_bytes": shard["stored_bytes"],
+        "decoded_bytes": shard["decoded_bytes"], "shard_index": shard["shard_index"]}
+
+
 def build(args):
     result_path = Path(args.result).absolute()
     manifest_path = Path(args.manifest).absolute()
@@ -111,6 +168,8 @@ def build(args):
     wanted = {item["attempt"]["index"] for item in issues}
     if len(wanted) != 11:
         raise ValueError("expected eleven distinct retained attempts")
+    prior_binding, prior_shard_receipt = load_prior_binding(
+        manifest_path, manifest, args.prior_positional_attempt_index)
 
     source_report_ref = manifest["shared_inputs"]["source_report"]
     bindings_ref = manifest["shared_inputs"]["bindings"]
@@ -160,6 +219,28 @@ def build(args):
         raise ValueError("targeted typed attempt/handshake rows are incomplete")
     boundary_index = _OperandBoundaryIndex(SimpleNamespace(events=operand_events, issues=()))
 
+    prior_operand_reader = IndexedJsonl(operand_ref["path"], expected_bytes=operand_ref["raw_bytes"],
+        expected_lines=operand_ref["lines"], prior_sha256=operand_ref["raw_sha256"],
+        max_returned_bytes=2_000_000)
+    prior_operand_rows = read_through_handshake(prior_operand_reader,
+        args.prior_positional_attempt_index, max_index_gap=1024)
+    prior_operand_events = decode_operand_events(prior_operand_rows, operand_ref["path"])
+    prior_attempts = [event for event in prior_operand_events
+        if event.kind.value == "CALL_ATTEMPT" and event.index == args.prior_positional_attempt_index]
+    prior_handshakes = [event for event in prior_operand_events
+        if event.kind.value == "ENTRY_HANDSHAKE" and event.attempt_index == args.prior_positional_attempt_index]
+    if len(prior_attempts) != 1 or len(prior_handshakes) != 1:
+        raise ValueError("selected prior attempt did not decode as one exact attempt/handshake pair")
+    prior_attempt, = prior_attempts
+    prior_handshake, = prior_handshakes
+    if (prior_attempt.invocation != prior_binding.entry.caller
+            or prior_handshake.invocation != prior_binding.entry.callee
+            or prior_binding.target_anchor.index != prior_attempt.index
+            or prior_binding.entry_anchor.index != prior_handshake.entry_index
+            or prior_binding.call.site != prior_attempt.site):
+        raise ValueError("prior closed binding does not identify the local raw attempt/entry")
+    prior_boundary = _OperandBoundaryIndex(SimpleNamespace(events=prior_operand_events, issues=()))
+
     caller_ids = {item["attempt"]["invocation_id"] for item in issues}
     callee_ids = {item["handshake"]["invocation_id"] for item in issues}
     wanted_invocations = caller_ids | callee_ids
@@ -170,10 +251,17 @@ def build(args):
         expected_lines=frame_event_ref["lines"], prior_sha256=frame_event_ref["raw_sha256"],
         max_returned_bytes=4_000_000)
     frame_rows = read_index_range(frame_reader, frame_seek_index, frame_end_index)
+    prior_frame_start = max(1, prior_attempt.frame_index - args.prior_frame_lookback)
+    prior_frame_reader = IndexedJsonl(frame_event_ref["path"], expected_bytes=frame_event_ref["raw_bytes"],
+        expected_lines=frame_event_ref["lines"], prior_sha256=frame_event_ref["raw_sha256"],
+        max_returned_bytes=4_000_000)
+    prior_frame_rows = read_index_range(prior_frame_reader, prior_frame_start,
+        prior_handshake.entry_index)
     code_map = {}
-    for code in {item["attempt"]["site"]["code"] for item in issues} | {
-        item["attempt"]["dispatch"]["code"] for item in issues
-    }:
+    all_codes = ({item["attempt"]["site"]["code"] for item in issues}
+        | {item["attempt"]["dispatch"]["code"] for item in issues}
+        | {prior_attempt.site.code, prior_attempt.dispatch.code})
+    for code in all_codes:
         group_row = inputs.by_group[pid, code]
         capture = decode(CodeCapture, group_row["code_capture"])
         if capture.process_id != pid or capture.code.key != code:
@@ -182,8 +270,38 @@ def build(args):
     entries = decode_frame_entries(frame_rows, frame_event_ref["path"], code_map)
     if not wanted_invocations <= set(entries):
         raise ValueError("local frame window did not contain all referenced exact entries")
+    prior_entries = decode_frame_entries(prior_frame_rows, frame_event_ref["path"], code_map)
+    if not {prior_attempt.invocation.invocation_id, prior_handshake.invocation.invocation_id} <= set(prior_entries):
+        raise ValueError("local prior frame window did not contain both exact call entries")
 
     template_cache, source_tree_cache = OrderedDict(), OrderedDict()
+    prior_caller_entry = prior_entries[prior_attempt.invocation.invocation_id]
+    prior_callee_entry = prior_entries[prior_handshake.invocation.invocation_id]
+    prior_caller_row = inputs.by_group[pid, prior_caller_entry.code]
+    prior_callee_row = inputs.by_group[pid, prior_callee_entry.code]
+    prior_target, prior_entry, rebuilt_prior_binding = _selected_binding(inputs, (operand_meta,),
+        prior_boundary, template_cache, pid, prior_attempt, prior_handshake,
+        prior_caller_entry, prior_callee_entry, prior_caller_row, prior_callee_row,
+        source_tree_cache)
+    if (prior_target, prior_entry, rebuilt_prior_binding) != (
+            prior_binding.target, prior_binding.entry, prior_binding):
+        raise ValueError("existing explicit-positional receiver binding changed under the updated producer")
+    prior_binding_back = decode(PythonSourcePortBinding, encode(rebuilt_prior_binding))
+    if prior_binding_back != rebuilt_prior_binding:
+        raise ValueError("existing positional receiver binding did not codec-roundtrip exactly")
+    prior_recheck = {
+        "attempt_index": prior_attempt.index,
+        "call_opcode": prior_attempt.site.opname,
+        "source_call_position": list(prior_attempt.site.position),
+        "receiver_explicit_positional": prior_target.receiver.explicit_positional,
+        "argument_ports": [{"index": port.index, "formal_name": port.formal_name,
+            "actual_use": encode(port.actual_use), "formal_slot": encode(port.formal_slot)}
+            for port in rebuilt_prior_binding.arguments],
+        "original_call_operation": encode(rebuilt_prior_binding.call.core_operation),
+        "matches_prior_closed_binding": True,
+        "codec_roundtrip": True,
+        "prior_shard": prior_shard_receipt,
+    }
     output = []
     for issue in issues:
         attempt_index = issue["attempt"]["index"]
@@ -252,6 +370,8 @@ def build(args):
 
     operand_receipt = operand_reader.close_and_check()
     frame_receipt = frame_reader.close_and_check()
+    prior_operand_receipt = prior_operand_reader.close_and_check()
+    prior_frame_receipt = prior_frame_reader.close_and_check()
     payload = {
         "schema": "scar.retained-source-call-abi11-local-bindings",
         "schema_version": 1,
@@ -261,9 +381,12 @@ def build(args):
         "candidate_selected_before_fix": result["totals"]["selected_calls"],
         "candidate_open_issue_total": len(issues),
         "local_bindings": output,
+        "prior_explicit_receiver_recheck": prior_recheck,
         "summary": {
             "issue_count": len(issues),
             "typed_bindings": len(output),
+            "prior_explicit_receiver_rechecks": 1,
+            "prior_explicit_receiver_roundtrip_and_equality": True,
             "call_opcode_counts": dict(Counter(item["call_opcode"] for item in output)),
             "target_kind_counts": dict(Counter(item["target_kind"] for item in output)),
             "explicit_argument_ports": sum(item["explicit_argument_count"] for item in output),
@@ -281,6 +404,8 @@ def build(args):
         "local_read_receipts": {
             "operand": operand_receipt,
             "frame": frame_receipt,
+            "prior_operand": prior_operand_receipt,
+            "prior_frame": prior_frame_receipt,
             "operand_metadata": {"path": operand_meta_ref["path"],
                 "sha256": operand_meta_ref["raw_sha256"], "bytes": len(operand_meta_raw)},
             "frame_metadata": {"path": frame_meta_ref["path"],
@@ -291,7 +416,7 @@ def build(args):
             "bindings": {"path": str(inputs.bindings_path), "sha256": inputs.binding_sha256},
             "source_body_reads": dict(inputs.stats),
         },
-        "scope_note": "Only the eleven prior open candidate records and local frame/operand intervals were reread."
+        "scope_note": "Only the eleven prior open candidates plus one receipt-selected prior explicit-receiver binding and their local intervals were reread."
     }
     out = Path(args.output).absolute()
     out.parent.mkdir(parents=True, exist_ok=True)
@@ -311,10 +436,15 @@ def main():
     parser.add_argument("--expected-manifest-sha256", default="867a8fa08f97977ccf8aba2add85cd2544691f8aff1c61bcc685dc61160bfb8d")
     parser.add_argument("--issue-summary", default=str(Path(__file__).with_name("issue-event-summary.json")))
     parser.add_argument("--frame-lookback", type=int, default=1024)
+    parser.add_argument("--prior-positional-attempt-index", type=int, default=59197)
+    parser.add_argument("--prior-frame-lookback", type=int, default=1024)
     parser.add_argument("--output", default=str(Path(__file__).with_name("local-bindings-replay.json")))
     args = parser.parse_args()
     if args.frame_lookback < 1 or args.frame_lookback > 8192:
         raise ValueError("frame lookback must remain a small bounded local window")
+    if (args.prior_positional_attempt_index < 1 or args.prior_frame_lookback < 1
+            or args.prior_frame_lookback > 8192):
+        raise ValueError("prior selected record and frame lookback must remain positive and bounded")
     build(args)
 
 
