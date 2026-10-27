@@ -1,0 +1,20 @@
+{
+  "status": "FAILED_CAPTURE_RETAINED_LOSSLESSLY",
+  "original_exitcode": 241,
+  "archive": {
+    "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/lewm_snapshot_ports_20261027/capture/partial-archive-index.json",
+    "sha256": "843209b7eda3665d5d6b18955844cac330a7e9c30c8dba3ab8d9ea7ef22c161e",
+    "size_bytes": 42784,
+    "schema": "scar.partial-capture-archive"
+  },
+  "io_accounting": {
+    "compression_workers": 4,
+    "decoded_roundtrip_bytes_read": 10323514714,
+    "os_lines": 1205327,
+    "raw_bytes_read": 10323514714,
+    "stored_bytes_written": 963689027
+  },
+  "elapsed_seconds": 51.924011959985364,
+  "removed_originals": true,
+  "whole_program_complete": false
+}

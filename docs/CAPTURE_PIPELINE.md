@@ -95,10 +95,24 @@ python -m scar.cli trace --out /fresh/trace --project-root /path/to/program \
 
 当前 snapshot 通道覆盖主要 Python 调用流，stream/native provider 还有各自的
 采集路径；不是全部 observer 已经零现场处理。图 lowering 和跨层关联仍为后端工作。
-新的 LeWM snapshot 采集已按原命令启动，冻结源码 7afd39be，源码树 SHA
+新的 LeWM snapshot 采集按原命令执行，冻结源码 7afd39be，源码树 SHA
 17f64b651f02e40e500325277d261a7f6542b6cc375e1ae9c237f5fd3cb555c2。
 时间、event/per-stream byte 上限与前次相同；总 32GB 上限计入暂存+JSONL双表示，
-不是增加调用范围。终态以该目录 ACTUAL_TERMINAL.json 为准，启动不算完成。
-原始 snapshot 也纳入成功/失败归档的原字节回读和 SHA 清单，不静默删除。
+不是增加调用范围。实际仍在 1,801.807 秒触及 provider 上限退出 241，未完成
+初始化/episode，LeWM 原仓库不变；不能把暂存通道改进说成完整采集成功。
+原始 snapshot 已纳入失败归档：10,323,514,714 原始字节经四线程压缩并完整
+解压回读核 SHA，保留 963,689,027 字节；只有本次生成的原始重复文件在清单发布后删除。
+
+进一步的同初始化 import 前缀诊断只运行 69.248 秒有效窗口：249,693 次 target
+on_call 的 inclusive 16.422 秒、913,845 次 Deferred append 的 12.968 秒。它们
+包含子调用，不能相加；诊断没有 native/strace/witness，不是原全流程 A/B。
+据此，target 内部回调已改成直接记录原始 V2 fields，不构造/验证 InvocationKey、
+PythonCallTarget 等 IR 对象；普通 reader 仍完整验证。原有公开 typed emit API 保留。
+小方法负载的同进程 wire 对比通过，新的真实 LeWM 全流程尚未验证。
+
+跨层数据关系新增 `query-native-allocation`：从原 NativeInputRef/ValueOccurrence
+及其原端口，经过同 capture/provider epoch，查询原 AllocationTarget；不生成新
+逻辑值或 Materialization。公开 CLI 已对真实 `aten::lift_fresh` 的 CPU4B 输入通过，
+GPU、内容版本、写入后态和 ready 仍未验证；这不是全图批量接线。
 端到端仍需同 Run 接通加载、推理、环境和保存，以及逻辑版本、物化、ready/lifetime。
 当前不增加 detector/backend，不报告 LeWM 加速比。

@@ -541,6 +541,8 @@ def main(argv=None) -> int:
     source_dependencies.set_defaults(func=query_source_dependencies_cli)
     from scar.analysis.dependency_cli import register_dependency_commands
     register_dependency_commands(sub)
+    from scar.analysis.native_allocation_cli import register_native_allocation_query
+    register_native_allocation_query(sub)
     native_inputs = sub.add_parser("query-native-inputs", help="read original native Tensor input metadata and canonical port references")
     native_inputs.add_argument("--manifest", required=True, help="published native input association manifest")
     native_inputs.add_argument("--sha256", required=True, help="expected manifest SHA256")
