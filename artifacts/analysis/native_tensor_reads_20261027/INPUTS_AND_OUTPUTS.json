@@ -1,0 +1,75 @@
+{
+  "inputs": {
+    "allocation_source": {
+      "artifact": {
+        "schema": "scar.bundle-record-chunk",
+        "sha256": "cdab755272ca43ebc6a4992865f121a807f3b18cfdb27522000abfe58aac8192",
+        "size_bytes": 1202111,
+        "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/native_inputs_full_20261026/native-import/native/bundle-partitions/values/allocations/000003.jsonl.gz"
+      },
+      "locator": "#/lines/105/record"
+    },
+    "execution": {
+      "schema": "scar.execution-model",
+      "sha256": "d58eaa17e99f207f5a7780ab6e7904615e9376ab472dfcdb81ce7922a28f6dbc",
+      "size_bytes": 7846834,
+      "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/native_inputs_full_20261026/attempt05/native-input-connections/shards/000000/execution.json"
+    },
+    "navigation": {
+      "schema": "scar.native-input-port-navigation",
+      "sha256": "4436b171be0dec2782e7843bc097227d675efa5e33155a6e8a2bf2408b4b6f72",
+      "size_bytes": 146783,
+      "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/native_inputs_full_20261026/attempt05/port-navigation/manifest.json"
+    },
+    "program_snapshot": {
+      "artifact": {
+        "schema": "scar.program-graph",
+        "sha256": "d70685d1521bf28527fa32beb319fa0f9d66db257b6df3ce2559f013141d5bc6",
+        "size_bytes": 5273398,
+        "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/native_inputs_full_20261026/attempt05/native-input-connections/program.json"
+      },
+      "schema_version": 8
+    },
+    "storage_index": {
+      "schema": "scar.tensor-storage-locator-index",
+      "sha256": "d127c95a2ff1b1d848288c83ef3cb3785f55f0f2c68d0918f3ef7d280b1de7c2",
+      "size_bytes": 499687,
+      "uri": "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/tensor_gpu_reference_query_20261026/locator-index/manifest.json"
+    }
+  },
+  "output": {
+    "schema": "scar.native-tensor-read",
+    "sha256": "61f1ab043dbc8453210b69c7c18447460da09e825af3f94bb7f4c75ce97ca837",
+    "size_bytes": 11339,
+    "uri": "/home/zyf/AAA/scar-worktrees/native-tensor-reads/artifacts/analysis/native_tensor_reads_20261027/attempt02/read/read.json"
+  },
+  "profile": "PINNED_CPU_COPY_SRC_READ_V1",
+  "protocol": {
+    "schema": "scar.native-tensor-read-protocol",
+    "sha256": "e5800b4beef03420c3e87dd6e5425db0534c74ce0ecb5d71ddffb52cce1a5b16",
+    "size_bytes": 933,
+    "uri": "/home/zyf/AAA/scar-worktrees/native-tensor-reads/artifacts/analysis/native_tensor_reads_20261027/attempt02/read/protocol.json"
+  },
+  "qualification": "CONDITIONAL_READ_RESULT",
+  "source_execution": {
+    "schema": "scar.execution-model",
+    "sha256": "d58eaa17e99f207f5a7780ab6e7904615e9376ab472dfcdb81ce7922a28f6dbc",
+    "size_bytes": 7846834,
+    "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/native_inputs_full_20261026/attempt05/native-input-connections/shards/000000/execution.json"
+  },
+  "source_snapshot": {
+    "artifact": {
+      "schema": "scar.program-graph",
+      "sha256": "d70685d1521bf28527fa32beb319fa0f9d66db257b6df3ce2559f013141d5bc6",
+      "size_bytes": 5273398,
+      "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/native_inputs_full_20261026/attempt05/native-input-connections/program.json"
+    },
+    "schema_version": 8
+  },
+  "version_graph": {
+    "schema": "scar.ir.v2.values",
+    "sha256": "592b146fb3c92243ba64b74893f0f865f8fec0ec81368a9bbcb0d6c1815a08de",
+    "size_bytes": 2769,
+    "uri": "/home/zyf/AAA/scar-worktrees/native-tensor-reads/artifacts/analysis/native_tensor_reads_20261027/attempt02/read/values.json"
+  }
+}
