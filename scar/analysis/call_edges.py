@@ -23,7 +23,7 @@ from scar.analysis.call_compilation import (
 )
 from scar.analysis.function_interfaces import extract_signature
 from scar.analysis.program_inventory import _Inventory
-from scar.analysis.program_lowering import prepare_source
+from scar.analysis.program_lowering import prepare_source, prepare_captured_source
 from scar.ir.program.call_edges import (
     CallEdgeBudget, CallEdgeCondition, CallEdgeIssue, CallEdgeIssueKind,
     CallEdgeModel, CallLinkStatus, CallRecordAnchor, CallSiteLink,
@@ -108,11 +108,13 @@ def _source_witness_projection(prepared):
     """Publish only the source/signature records consumed by this matcher."""
     indexed = _Inventory(prepared, 0, 0).source_witness_index()
     signatures = {}
+    first_nodes = {}
+    for node in ast.walk(prepared.tree):
+        if hasattr(node, 'args') and hasattr(node, 'end_lineno'):
+            first_nodes.setdefault((node.lineno,node.end_lineno,node.col_offset,node.end_col_offset),node)
     for definition in indexed.definitions:
-        node = next((node for node in ast.walk(prepared.tree) if hasattr(node, "args")
-                     and hasattr(node, "end_lineno") and _span(node) == (
-                         definition.source.start_line, definition.source.end_line,
-                         definition.source.start_column, definition.source.end_column)), None)
+        source = definition.source
+        node = first_nodes.get((source.start_line,source.end_line,source.start_column,source.end_column))
         if node is not None:
             signatures[definition.id] = extract_signature(prepared, definition, node=node)
     return indexed, prepared.text, prepared.tree, signatures
@@ -122,10 +124,21 @@ class _Sources:
     def __init__(
         self, root, budget, inventory, *, _source_workspace=None,
         compilation_profile=CallCompilationProfile.LEGACY_ZERO_FLAGS,
+        captured_source_owner=None, captured_source_root_is_package=None,
     ):
         if type(compilation_profile) is not CallCompilationProfile:
             raise ValueError("compilation profile must be a CallCompilationProfile")
         self.root, self.budget, self.inventory = root, budget, inventory
+        from scar.analysis.captured_source_owner import CapturedSourceOwner
+        _require(captured_source_owner is None or type(captured_source_owner) is CapturedSourceOwner,
+                 'captured source construction requires its normal owner, not serialized metadata')
+        _require(captured_source_owner is None or type(captured_source_root_is_package) is bool,
+                 'CAPTURED_NAMESPACE_POLICY_UNAVAILABLE: original namespace package policy is required')
+        _require(captured_source_owner is None or _source_workspace is None,
+                 'captured source workspace needs an explicit archive-capable adapter')
+        self.captured_source_owner = captured_source_owner
+        self.captured_source_root_is_package = captured_source_root_is_package
+        self.source_origins = {}
         self._source_workspace = _source_workspace
         self.compilation_profile = compilation_profile
         self.contexts, self.indexes, self.compiled, self.links, self.objects = {}, {}, {}, {}, {}
@@ -136,6 +149,8 @@ class _Sources:
         from scar.analysis.source_body_access import SourceBodyAccess
         self.source_access = inventory if type(inventory) is SourceBodyAccess else None
         if self.source_access is not None:
+            _require(captured_source_owner is None,
+                     'captured source owner with bound source-body access needs an explicit adapter')
             _require(self.source_access.bound, "partitioned source access has no current raw scan")
             self.inventory_files = {}
             self.bodies, self.signatures = inventory.bodies, inventory.signatures
@@ -157,7 +172,12 @@ class _Sources:
             blocks = {block.id: block for region in body.graph.regions for block in region.blocks}
             self.core[body.definition] = body, operations, uses, blocks
 
-    def context(self, filename):
+    def context(self, filename, *, captured=None):
+        if self.captured_source_owner is not None:
+            # Even cached contexts retain original CodeID/source membership;
+            # a closed/missing owner cannot silently reopen a live filename.
+            snapshot = self.captured_source_owner.snapshot(captured)
+            _require(snapshot.path == filename, 'captured CodeID/context filename differs')
         if filename in self.contexts:
             return self.contexts[filename]
         if filename in self.context_errors:
@@ -183,30 +203,51 @@ class _Sources:
             self.contexts[filename], self.indexes[filename] = context, indexed
             return context
         path = Path(filename)
-        _require(path.is_absolute() and path.resolve().is_relative_to(self.root), "code filename is outside project root")
-        _require(path == path.resolve() and path.is_file(), "code filename is missing or noncanonical")
-        _require(len(self.contexts) < self.budget.max_source_files, "source file budget exceeded")
-        size = path.stat().st_size
-        _require(self.total_source_bytes + size <= self.budget.max_source_bytes, "source byte budget exceeded")
-        self.total_source_bytes += size
-        if filename in self.inventory_files:
-            indexed = self.inventory_files[filename]
-            with tokenize.open(path) as stream:
-                text = stream.read()
-            _require(indexed.snapshot.fingerprint == "sha256:" + hashlib.sha256(text.encode()).hexdigest(),
-                     "inventory source snapshot differs from current code verification")
-            tree = ast.parse(text, filename=filename)
+        if self.captured_source_owner is not None:
+            _require(path.is_absolute() and path.is_relative_to(self.root), 'code filename is outside admitted namespace root')
+            _require(len(self.contexts) < self.budget.max_source_files, 'source file budget exceeded')
+            original = self.captured_source_owner.archived_source(snapshot)
+            size = len(original.text.encode('utf8'))
+            _require(self.total_source_bytes + size <= self.budget.max_source_bytes, 'source byte budget exceeded')
+            prepared = prepare_captured_source(self.captured_source_owner, captured, project_root=self.root,
+                root_is_package=self.captured_source_root_is_package)
+            indexed, text, tree, signatures = _source_witness_projection(prepared)
+            if filename in self.inventory_files:
+                existing = self.inventory_files[filename]
+                _require(existing.snapshot == indexed.snapshot
+                         and existing.definitions == indexed.definitions and existing.calls == indexed.calls
+                         and existing.coverage == indexed.coverage,
+                         'captured static namespace/source differs from the original inventory')
+                indexed = existing
+            self.total_source_bytes += size
+            self.source_origins[filename] = original
+            self.signatures.update((key,value) for key,value in signatures.items() if key not in self.signatures)
         else:
-            # The optional-inventory path builds source records once, then
-            # drops the heavyweight semantic/opcode/control overlays.
-            if self._source_workspace is not None:
-                indexed, text, tree, signatures = self._source_workspace.source_projection(path)
+            path = Path(filename)
+            _require(path.is_absolute() and path.resolve().is_relative_to(self.root), "code filename is outside project root")
+            _require(path == path.resolve() and path.is_file(), "code filename is missing or noncanonical")
+            _require(len(self.contexts) < self.budget.max_source_files, "source file budget exceeded")
+            size = path.stat().st_size
+            _require(self.total_source_bytes + size <= self.budget.max_source_bytes, "source byte budget exceeded")
+            self.total_source_bytes += size
+            if filename in self.inventory_files:
+                indexed = self.inventory_files[filename]
+                with tokenize.open(path) as stream:
+                    text = stream.read()
+                _require(indexed.snapshot.fingerprint == "sha256:" + hashlib.sha256(text.encode()).hexdigest(),
+                         "inventory source snapshot differs from current code verification")
+                tree = ast.parse(text, filename=filename)
             else:
-                prepared = prepare_source(path, project_root=self.root)
-                indexed, text, tree, signatures = _source_witness_projection(prepared)
-                del prepared
-            self.signatures.update((key, value) for key, value in signatures.items()
-                                   if key not in self.signatures)
+                # The optional-inventory path builds source records once, then
+                # drops the heavyweight semantic/opcode/control overlays.
+                if self._source_workspace is not None:
+                    indexed, text, tree, signatures = self._source_workspace.source_projection(path)
+                else:
+                    prepared = prepare_source(path, project_root=self.root)
+                    indexed, text, tree, signatures = _source_witness_projection(prepared)
+                    del prepared
+                self.signatures.update((key, value) for key, value in signatures.items()
+                                       if key not in self.signatures)
         references = {(item.ast_kind, item.source.start_line, item.source.end_line,
                        item.source.start_column, item.source.end_column): item.source for item in indexed.coverage}
         nodes = defaultdict(list)
@@ -235,7 +276,7 @@ class _Sources:
                 code = self.source_access.code_object(captured, result)
                 if code is not None:
                     try:
-                        self.context(captured.filename)
+                        self.context(captured.filename, captured=captured)
                     except (OSError, ValueError, SyntaxError, KeyError, RecursionError) as error:
                         self.context_errors[captured.filename] = str(error)
                         self.source_access.frontiers[captured.key] = "SOURCE_CONTEXT_UNAVAILABLE: " + str(error)
@@ -256,8 +297,8 @@ class _Sources:
             self.links[captured.key] = result
             return result
         try:
-            context = self.context(captured.filename)
-        except (OSError, ValueError, SyntaxError, TypeError, KeyError, RecursionError) as error:
+            context = self.context(captured.filename, captured=captured)
+        except (OSError, ValueError, SyntaxError, TypeError, LookupError, RecursionError) as error:
             self.context_errors[captured.filename] = str(error)
             result = CodeSourceLink(captured.key, CallLinkStatus.INCOMPLETE,
                                     issues=(_issue(CallEdgeIssueKind.SOURCE_BOUNDARY, str(error)),))
@@ -308,7 +349,8 @@ class _Sources:
         if not matches:
             result = CodeSourceLink(captured.key, CallLinkStatus.MISMATCH, snapshot,
                                     issues=(_issue(CallEdgeIssueKind.CODE_MISMATCH,
-                                                   "current source does not reproduce the complete captured code descriptor"),))
+                                                   ("captured source" if self.captured_source_owner is not None else "current source")
+                                                   + " does not reproduce the complete captured code descriptor"),))
         else:
             self.objects[captured.key] = matches[0][1]
             indexed = self.indexes[captured.filename]
@@ -828,7 +870,8 @@ class CallEdgeReport:
                 "transformation_authorized": False}
 
     @classmethod
-    def from_dict(cls, document, *, inventory=None, verification_budget=CallEdgeBudget()):
+    def from_dict(cls, document, *, inventory=None, verification_budget=CallEdgeBudget(),
+                  captured_source_owner=None, captured_source_root_is_package=None):
         _require(isinstance(verification_budget, CallEdgeBudget), "call replay requires a typed independent verifier budget")
         _require(type(document) is dict and set(document) == {
             "schema", "schema_version", "model", "summary", "target_executed_by_linker",
@@ -840,7 +883,9 @@ class CallEdgeReport:
         for name in model.budget.__dataclass_fields__:
             _require(getattr(model.budget, name) <= getattr(verification_budget, name),
                      "call report exceeds independent verifier budget: " + name)
-        rebuilt = link_calls(model.trace, model.project_root, inventory=inventory, budget=model.budget)
+        rebuilt = link_calls(model.trace, model.project_root, inventory=inventory, budget=model.budget,
+            captured_source_owner=captured_source_owner,
+            captured_source_root_is_package=captured_source_root_is_package)
         _require(_canonical(rebuilt.to_dict()) == _canonical(document),
                  "call links differ from current raw trace/source/inventory replay")
         return rebuilt
@@ -915,7 +960,8 @@ class CallEdgeReport:
 def _link_call_model(trace, project_root, inventory=None, budget=CallEdgeBudget(), *,
                      compilation_profile=CallCompilationProfile.LEGACY_ZERO_FLAGS,
                      frame_scan=None, entries=None, exits=None, allow_v6=False,
-                     include_identity_routes=True):
+                     include_identity_routes=True, captured_source_owner=None,
+                     captured_source_root_is_package=None):
     """Compose frame/source links from a local scan, keeping report policy separate.
 
     Only in-process readers supply ``frame_scan``. Public report decoders always
@@ -923,8 +969,13 @@ def _link_call_model(trace, project_root, inventory=None, budget=CallEdgeBudget(
     a substitute for scanning. The legacy wrapper retains its v4/v5 policy.
     """
     _require(isinstance(budget, CallEdgeBudget), "link_calls requires a typed replay budget")
-    root = Path(project_root).resolve()
-    _require(root.is_dir(), "project root must be a directory")
+    if captured_source_owner is None:
+        root = Path(project_root).resolve()
+        _require(root.is_dir(), "project root must be a directory")
+    else:
+        root = Path(project_root)
+        _require(root.is_absolute() and '..' not in root.parts and str(root) == str(project_root),
+                 'captured source namespace must retain its exact original absolute root')
     from scar.analysis.source_body_access import SourceBodyAccess
     partitioned_access = inventory if type(inventory) is SourceBodyAccess else None
     if inventory is not None:
@@ -945,9 +996,9 @@ def _link_call_model(trace, project_root, inventory=None, budget=CallEdgeBudget(
         trace_path, files, captures = frame_scan.directory, frame_scan.files, frame_scan.captures
         metadata, trace_issues = frame_scan.metadata, frame_scan.issues
     descriptors = {capture.code.key: capture.code for capture in captures}
-    sources = (_Sources(root, budget, inventory)
-               if compilation_profile is CallCompilationProfile.LEGACY_ZERO_FLAGS else
-               _Sources(root, budget, inventory, compilation_profile=compilation_profile))
+    sources = _Sources(root, budget, inventory, compilation_profile=compilation_profile,
+        captured_source_owner=captured_source_owner,
+        captured_source_root_is_package=captured_source_root_is_package)
     for descriptor in descriptors.values():
         sources.code(descriptor)
     entry_index = {entry.invocation: entry for entry in entries}
@@ -1072,9 +1123,19 @@ def _link_call_model(trace, project_root, inventory=None, budget=CallEdgeBudget(
     return model, sources
 
 
-def link_calls(trace, project_root, inventory=None, budget=CallEdgeBudget()):
-    """Replay historical v1 frame/source/core links with their original policy."""
-    model, _ = _link_call_model(trace, project_root, inventory, budget)
+def link_calls(trace, project_root, inventory=None, budget=CallEdgeBudget(), *,
+               captured_source_owner=None, captured_source_root_is_package=None):
+    """Replay the original calls; an explicit normal owner selects archive text.
+
+    Historical default source/compile policy and report wire are unchanged.
+    Capture-owner mode uses recorded flags and requires the original explicit
+    static namespace policy; it does not infer loaded module identity.
+    """
+    profile = (CallCompilationProfile.LEGACY_ZERO_FLAGS if captured_source_owner is None
+               else CallCompilationProfile.RECORDED_FUTURE_FLAGS)
+    model, _ = _link_call_model(trace, project_root, inventory, budget, compilation_profile=profile,
+        captured_source_owner=captured_source_owner,
+        captured_source_root_is_package=captured_source_root_is_package)
     return CallEdgeReport(model)
 
 

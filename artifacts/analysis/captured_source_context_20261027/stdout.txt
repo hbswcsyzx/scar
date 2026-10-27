@@ -1,0 +1,167 @@
+{
+  "schema": "scar.captured-source-context-actual",
+  "schema_version": 1,
+  "status": "NORMAL_ARCHIVED_SOURCE_CONTEXT_CODELINK_WITNESS_WITH_OPEN",
+  "new_capture": 0,
+  "target_exec": 0,
+  "body_lower": 0,
+  "failure": null,
+  "original_frame_entries": 177,
+  "original_frame_exits": 177,
+  "source_context_files": 1,
+  "selected": {
+    "key": "pycode-v2:9cc3b9dbd412e1d45e98679410f76c9edf3dcc6134104367112f42b1cdb7ad8c",
+    "filename": "/home/zyf/AAA/scar-worktrees/program-ports-capture/artifacts/experiments/program_ports_cpu_20261027/project/main.py",
+    "qualname": "main",
+    "first_line": 4,
+    "flags": 3,
+    "parameters": []
+  },
+  "code_link": {
+    "code": "pycode-v2:9cc3b9dbd412e1d45e98679410f76c9edf3dcc6134104367112f42b1cdb7ad8c",
+    "status": "VERIFIED",
+    "snapshot": {
+      "path": "/home/zyf/AAA/scar-worktrees/program-ports-capture/artifacts/experiments/program_ports_cpu_20261027/project/main.py",
+      "fingerprint": "sha256:4ff684ac74c395a2de4aabca9c6b1d6872bcad26bc7b3c40c6947eea6209926c",
+      "encoding": "utf-8",
+      "python_version": "3.14"
+    },
+    "definition": {
+      "kind": "opdef",
+      "value": "op:12b35a09c8b8bcee5522919b",
+      "wire": "opdef:op:12b35a09c8b8bcee5522919b"
+    },
+    "source": {
+      "atom_id": {
+        "kind": "source",
+        "value": "atom:ab42f21a3f8a01dfee349faf",
+        "wire": "source:atom:ab42f21a3f8a01dfee349faf"
+      },
+      "path": "/home/zyf/AAA/scar-worktrees/program-ports-capture/artifacts/experiments/program_ports_cpu_20261027/project/main.py",
+      "fingerprint": "sha256:4ff684ac74c395a2de4aabca9c6b1d6872bcad26bc7b3c40c6947eea6209926c",
+      "start_line": 4,
+      "end_line": 7,
+      "start_column": 0,
+      "end_column": 37
+    },
+    "optimize_levels": [
+      0,
+      1,
+      2
+    ],
+    "issues": []
+  },
+  "source": {
+    "artifact": {
+      "uri": "/home/zyf/AAA/scar-worktrees/program-ports-capture/artifacts/experiments/program_ports_cpu_20261027/capture/trace/captured-sources.2026697.jsonl",
+      "sha256": "11a9c3a8cf0ad71d04c690f8eae7ff5d49afc7a03fd79ecfd89e0ac744b8dce0",
+      "size_bytes": 189422,
+      "schema": "scar.captured-python-sources/1"
+    },
+    "locator": "#/lines/1"
+  },
+  "source_declaration": {
+    "artifact": {
+      "uri": "/home/zyf/AAA/scar-worktrees/program-ports-capture/artifacts/experiments/program_ports_cpu_20261027/capture/trace/captured-source-meta.2026697.json",
+      "sha256": "69521cb317c57b9bed3087c5f36d0385e760146c8c5c672c0ad532bc876692e4",
+      "size_bytes": 21841,
+      "schema": "scar.captured-python-sources/1"
+    },
+    "locator": "#/files/0"
+  },
+  "source_snapshot": {
+    "path": "/home/zyf/AAA/scar-worktrees/program-ports-capture/artifacts/experiments/program_ports_cpu_20261027/project/main.py",
+    "fingerprint": "sha256:4ff684ac74c395a2de4aabca9c6b1d6872bcad26bc7b3c40c6947eea6209926c",
+    "encoding": "utf-8",
+    "python_version": "3.14"
+  },
+  "namespace_root": "/home/zyf/AAA/scar-worktrees/program-ports-capture/artifacts/experiments/program_ports_cpu_20261027/project",
+  "root_is_package": false,
+  "namespace_policy_basis": "retained original CPU project script namespace; explicit static policy, not inferred from uncaptured __init__ absence",
+  "ast_nodes": 48,
+  "source_index_definitions": 1,
+  "source_index_calls": 5,
+  "signature_definitions": 1,
+  "source_match_compile_variants": 3,
+  "code_statuses": {
+    "INCOMPLETE": 97,
+    "VERIFIED": 2
+  },
+  "writer_activity": {
+    "compile_attempts": 1,
+    "module_loads": 0,
+    "complete_descriptor_matches": 1,
+    "source_bytes_read": 0
+  },
+  "readonly_activity": {
+    "compile_attempts": 0,
+    "module_loads": 1,
+    "complete_descriptor_matches": 1,
+    "source_bytes_read": 0
+  },
+  "owner_activity": {
+    "stored_bytes_read": 98179,
+    "decoded_bytes_read": 237561,
+    "source_rows": 10,
+    "source_bytes": 137000,
+    "frame_scan_stored_bytes": 0,
+    "frame_scan_decoded_bytes": 0
+  },
+  "archive": {
+    "path": "/home/zyf/AAA/scar-worktrees/captured-source-context/artifacts/analysis/captured_source_context_20261027/archive/manifest.json",
+    "sha256": "e5dd4f509aec49f5de0c7c3925c2586c032c936ad705922e4ecf40f30b9c615e",
+    "bytes": 6875,
+    "runtime": {
+      "implementation": "cpython",
+      "python": "3.14.7 | packaged by conda-forge | (main, Sep  2 2026, 21:08:32) [GCC 15.3.0]",
+      "version": [
+        3,
+        14,
+        7,
+        "final",
+        0
+      ],
+      "cache_tag": "cpython-314",
+      "magic": "2b0e0d0a",
+      "marshal_version": 5
+    },
+    "module_count": 1,
+    "source_count": 1,
+    "code_executed": false,
+    "source_prepared": false
+  },
+  "non_filesystem_frontiers": [
+    [
+      "<frozen runpy>",
+      "NON_FILESYSTEM_CODE_FILENAME"
+    ],
+    [
+      "<string>",
+      "NON_FILESYSTEM_CODE_FILENAME"
+    ],
+    [
+      "<frozen importlib._bootstrap>",
+      "NON_FILESYSTEM_CODE_FILENAME"
+    ],
+    [
+      "<frozen importlib._bootstrap_external>",
+      "NON_FILESYSTEM_CODE_FILENAME"
+    ],
+    [
+      "<frozen posixpath>",
+      "NON_FILESYSTEM_CODE_FILENAME"
+    ]
+  ],
+  "loader_bytes_observed": false,
+  "whole_model_established": false,
+  "elapsed_seconds": 0.5147571649868041,
+  "max_rss_kib": 52340,
+  "live_source_open_attempts": [],
+  "source_sha256": {
+    "scar/analysis/program_lowering.py": "590e55e41decc4e42f64b88394926636a95b7c4ad04e5d8a2d18aa3ea4ac274d",
+    "scar/analysis/call_edges.py": "d0eeb327f5df3a97a5c6303e15860fcc5146b877c6478dd6abeae86b82c7e532",
+    "scar/analysis/control_flow_v2.py": "f301907f4ca37bb3c61a251472047217b807862237dfa90dad2861aeb8fb5448",
+    "scar/ir/frontend_v2.py": "d2ab18c5d396c913c297a56d94782ae1149b8a57ef858310b29f9ce32d04471c"
+  },
+  "source_unchanged": true
+}
