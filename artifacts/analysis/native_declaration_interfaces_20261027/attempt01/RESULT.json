@@ -1,0 +1,416 @@
+{
+  "audit": {
+    "live_source_opens": [],
+    "raw_opens": [],
+    "target_exec": 0
+  },
+  "bundle": {
+    "schema": "scar.partitioned-ir-bundle",
+    "sha256": "3a2a80d64ff7e67d72545aefe0154b0f48fa18a855847005675221c86954c29b",
+    "size_bytes": 73304,
+    "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/native_inputs_full_20261026/native-import/native/bundle-partitions/manifest.json"
+  },
+  "catalog": {
+    "schema": "scar.native-declaration-catalog",
+    "sha256": "8fb15c724b97aaa55c0b694dac293e39c36f0bde5d534a3861f84469d30106a0",
+    "size_bytes": 2047,
+    "uri": "/home/zyf/AAA/scar-worktrees/native-declaration-interfaces/artifacts/analysis/native_declaration_interfaces_20261027/attempt01/catalog/manifest.json"
+  },
+  "coordinates": {
+    "schema": "scar.capture-coordinates",
+    "sha256": "aa387e36be71941bbcc09bed33d99850655e49713c417c98333a08dafe751017",
+    "size_bytes": 5607897,
+    "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/native_inputs_full_20261026/native-import/capture-coordinates.json"
+  },
+  "counts": {
+    "canonical_input_ports": 6,
+    "canonical_operation_occurrences": 1,
+    "completion_selected_count": 0,
+    "conditional_output_ports": 1,
+    "declared_operation_rows": 2545,
+    "processed_operation_rows": 1,
+    "selected_operation_rows": 1
+  },
+  "execution_counts": {
+    "operations": 1,
+    "transfers": 0,
+    "uses": 7,
+    "values": 7
+  },
+  "fragment": {
+    "schema": "scar.native-declaration-fragment",
+    "sha256": "a1fa7695bf904d048d35b289e734977fc9ef7fba4828eb3ef57294fc560c64c8",
+    "size_bytes": 14105,
+    "uri": "/home/zyf/AAA/scar-worktrees/native-declaration-interfaces/artifacts/analysis/native_declaration_interfaces_20261027/attempt01/shard/000000/manifest.json"
+  },
+  "index": {
+    "schema": "scar.native-boxed-port-index",
+    "sha256": "54f9dfbcc8a4e3cfc720c2dfb0c377d61707cde3f70c1360f1f68fd54cbf17b2",
+    "size_bytes": 29901,
+    "uri": "/home/zyf/AAA/scar-worktrees/frame-entry-routing/artifacts/analysis/native_port_sidecar_full_20261026/publication/index.json"
+  },
+  "max_rss_kib": 260284,
+  "old_canonical_status": "CANONICAL_NATIVE_BOUNDARY_UNAVAILABLE",
+  "producer_measurement": {
+    "decoded_bytes": 44102799,
+    "elapsed_seconds": 4.267117609037086,
+    "stored_bytes": 7920343,
+    "total_bytes": 52023142
+  },
+  "reader_measurement": {
+    "decoded_bytes": 44221866,
+    "elapsed_seconds": 4.014214817958418,
+    "stored_bytes": 8039410,
+    "total_bytes": 52261276
+  },
+  "scope_denominators": {
+    "classification_counts": {
+      "REGISTERED_SCHEMA_OPERATION": 190498,
+      "UNKNOWN_NATIVE_BOUNDARY": 2,
+      "UNSCHEMATIZED_CPU_OPERATION": 40320,
+      "USER_ANNOTATION": 79592
+    },
+    "input_ports": 1030969,
+    "metadata_old_associated": 65130,
+    "metadata_old_canonical_boundary_unavailable": 355314,
+    "metadata_tensor_paths": 420444,
+    "operator_rows": 230818,
+    "output_ports": 225532,
+    "source_nodes": 310412
+  },
+  "shard": {
+    "schema": "scar.native-declaration-shard",
+    "sha256": "733aa7139d1220288b9a0fe2632d2ef9b1ab7a85d6aa444de9b1679eca172181",
+    "size_bytes": 2194,
+    "uri": "/home/zyf/AAA/scar-worktrees/native-declaration-interfaces/artifacts/analysis/native_declaration_interfaces_20261027/attempt01/shard/manifest.json"
+  },
+  "source_binding": {
+    "boundary": {
+      "kind": "program_native_boundary",
+      "value": "torch-interface:c15636102ea1087dfb7d387755b18323fa28ea9259b123e61f1e87d7d2bfcc25:boundary",
+      "wire": "program_native_boundary:torch-interface:c15636102ea1087dfb7d387755b18323fa28ea9259b123e61f1e87d7d2bfcc25:boundary"
+    },
+    "completion": {
+      "point": {
+        "process": {
+          "kind": "exec_process_instance",
+          "value": "capture:ca66b69a8cfc3c1b88e0c22e8ec00d58d735fd016d16edf85e8cf0ac51eb5fc3:process:77d2388db95219723de606b529484e14f8b1912e51b6e58930344d911e863036",
+          "wire": "exec_process_instance:capture:ca66b69a8cfc3c1b88e0c22e8ec00d58d735fd016d16edf85e8cf0ac51eb5fc3:process:77d2388db95219723de606b529484e14f8b1912e51b6e58930344d911e863036"
+        },
+        "run": {
+          "kind": "exec_run",
+          "value": "capture:ca66b69a8cfc3c1b88e0c22e8ec00d58d735fd016d16edf85e8cf0ac51eb5fc3",
+          "wire": "exec_run:capture:ca66b69a8cfc3c1b88e0c22e8ec00d58d735fd016d16edf85e8cf0ac51eb5fc3"
+        },
+        "source": {
+          "artifact": {
+            "schema": "pytorch.execution-trace.v1",
+            "sha256": "11960422233619b68d4a42d5b699a34cb57349df04df0bc90b6fd5ef3d8e4684",
+            "size_bytes": 321365939,
+            "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/lewm_joint_capture_20261026/capture/trace/execution-trace.1578961.adfc0475ed50cb37e1c0453142b5fa65.json"
+          },
+          "locator": "#/nodes/17"
+        }
+      },
+      "reason": "declaration-only source does not select NORMAL or RAISE"
+    },
+    "definition": {
+      "artifact": {
+        "schema": "scar.bundle-record-chunk",
+        "sha256": "d7373607550c4656f6238ec07a9fc9183a3bdf039c2c464aa78c1da774872d6c",
+        "size_bytes": 1044470,
+        "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/native_inputs_full_20261026/native-import/native/bundle-partitions/semantic/definitions/000000.jsonl.gz"
+      },
+      "declaration": {
+        "artifact": {
+          "schema": "scar.partitioned-ir-bundle",
+          "sha256": "3a2a80d64ff7e67d72545aefe0154b0f48fa18a855847005675221c86954c29b",
+          "size_bytes": 73304,
+          "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/native_inputs_full_20261026/native-import/native/bundle-partitions/manifest.json"
+        },
+        "locator": "#/graphs/semantic/tables/definitions/chunks/0"
+      },
+      "decoded_bytes": 15999647,
+      "decoded_sha256": "5876f318ad515dc0dcb83b72d2589de424b14c12965689cfe1cd7953bb898864",
+      "encoding": "GZIP_JSONL",
+      "line": 11,
+      "pointer": "#/record"
+    },
+    "execution": {
+      "schema": "scar.execution-model",
+      "sha256": "4c895f9b199e49c542090e12d7852fc98b9bf97720f8127f97dcdb21fedd7518",
+      "size_bytes": 44152,
+      "uri": "/home/zyf/AAA/scar-worktrees/native-declaration-interfaces/artifacts/analysis/native_declaration_interfaces_20261027/attempt01/shard/000000/execution.json"
+    },
+    "inputs": [
+      {
+        "boundary": {
+          "kind": "program_native_boundary",
+          "value": "torch-interface:c15636102ea1087dfb7d387755b18323fa28ea9259b123e61f1e87d7d2bfcc25:boundary",
+          "wire": "program_native_boundary:torch-interface:c15636102ea1087dfb7d387755b18323fa28ea9259b123e61f1e87d7d2bfcc25:boundary"
+        },
+        "entry": {
+          "kind": "exec_block_visit",
+          "value": "native-declaration:595a85e847aa2fd669d0e3e02887f6dd3ad6029283f4bfc89e428977d7fcabf0:entry",
+          "wire": "exec_block_visit:native-declaration:595a85e847aa2fd669d0e3e02887f6dd3ad6029283f4bfc89e428977d7fcabf0:entry"
+        },
+        "position": 0
+      },
+      {
+        "boundary": {
+          "kind": "program_native_boundary",
+          "value": "torch-interface:c15636102ea1087dfb7d387755b18323fa28ea9259b123e61f1e87d7d2bfcc25:boundary",
+          "wire": "program_native_boundary:torch-interface:c15636102ea1087dfb7d387755b18323fa28ea9259b123e61f1e87d7d2bfcc25:boundary"
+        },
+        "entry": {
+          "kind": "exec_block_visit",
+          "value": "native-declaration:595a85e847aa2fd669d0e3e02887f6dd3ad6029283f4bfc89e428977d7fcabf0:entry",
+          "wire": "exec_block_visit:native-declaration:595a85e847aa2fd669d0e3e02887f6dd3ad6029283f4bfc89e428977d7fcabf0:entry"
+        },
+        "position": 1
+      },
+      {
+        "boundary": {
+          "kind": "program_native_boundary",
+          "value": "torch-interface:c15636102ea1087dfb7d387755b18323fa28ea9259b123e61f1e87d7d2bfcc25:boundary",
+          "wire": "program_native_boundary:torch-interface:c15636102ea1087dfb7d387755b18323fa28ea9259b123e61f1e87d7d2bfcc25:boundary"
+        },
+        "entry": {
+          "kind": "exec_block_visit",
+          "value": "native-declaration:595a85e847aa2fd669d0e3e02887f6dd3ad6029283f4bfc89e428977d7fcabf0:entry",
+          "wire": "exec_block_visit:native-declaration:595a85e847aa2fd669d0e3e02887f6dd3ad6029283f4bfc89e428977d7fcabf0:entry"
+        },
+        "position": 2
+      },
+      {
+        "boundary": {
+          "kind": "program_native_boundary",
+          "value": "torch-interface:c15636102ea1087dfb7d387755b18323fa28ea9259b123e61f1e87d7d2bfcc25:boundary",
+          "wire": "program_native_boundary:torch-interface:c15636102ea1087dfb7d387755b18323fa28ea9259b123e61f1e87d7d2bfcc25:boundary"
+        },
+        "entry": {
+          "kind": "exec_block_visit",
+          "value": "native-declaration:595a85e847aa2fd669d0e3e02887f6dd3ad6029283f4bfc89e428977d7fcabf0:entry",
+          "wire": "exec_block_visit:native-declaration:595a85e847aa2fd669d0e3e02887f6dd3ad6029283f4bfc89e428977d7fcabf0:entry"
+        },
+        "position": 3
+      },
+      {
+        "boundary": {
+          "kind": "program_native_boundary",
+          "value": "torch-interface:c15636102ea1087dfb7d387755b18323fa28ea9259b123e61f1e87d7d2bfcc25:boundary",
+          "wire": "program_native_boundary:torch-interface:c15636102ea1087dfb7d387755b18323fa28ea9259b123e61f1e87d7d2bfcc25:boundary"
+        },
+        "entry": {
+          "kind": "exec_block_visit",
+          "value": "native-declaration:595a85e847aa2fd669d0e3e02887f6dd3ad6029283f4bfc89e428977d7fcabf0:entry",
+          "wire": "exec_block_visit:native-declaration:595a85e847aa2fd669d0e3e02887f6dd3ad6029283f4bfc89e428977d7fcabf0:entry"
+        },
+        "position": 4
+      },
+      {
+        "boundary": {
+          "kind": "program_native_boundary",
+          "value": "torch-interface:c15636102ea1087dfb7d387755b18323fa28ea9259b123e61f1e87d7d2bfcc25:boundary",
+          "wire": "program_native_boundary:torch-interface:c15636102ea1087dfb7d387755b18323fa28ea9259b123e61f1e87d7d2bfcc25:boundary"
+        },
+        "entry": {
+          "kind": "exec_block_visit",
+          "value": "native-declaration:595a85e847aa2fd669d0e3e02887f6dd3ad6029283f4bfc89e428977d7fcabf0:entry",
+          "wire": "exec_block_visit:native-declaration:595a85e847aa2fd669d0e3e02887f6dd3ad6029283f4bfc89e428977d7fcabf0:entry"
+        },
+        "position": 5
+      }
+    ],
+    "invocation": {
+      "kind": "exec_operation_occurrence",
+      "value": "native-declaration:595a85e847aa2fd669d0e3e02887f6dd3ad6029283f4bfc89e428977d7fcabf0:invoke",
+      "wire": "exec_operation_occurrence:native-declaration:595a85e847aa2fd669d0e3e02887f6dd3ad6029283f4bfc89e428977d7fcabf0:invoke"
+    },
+    "native": {
+      "instance": {
+        "kind": "opinst",
+        "value": "native:636fde61a45803f11712767bc1cbf0b0ea3de13b14e0b27edc2d6071daea1612:eto:21",
+        "wire": "opinst:native:636fde61a45803f11712767bc1cbf0b0ea3de13b14e0b27edc2d6071daea1612:eto:21"
+      },
+      "locator": {
+        "artifact": {
+          "schema": "scar.bundle-record-chunk",
+          "sha256": "1127cf1444c192096dcaaeb6d5005770499ce5920346d02d55e8748a1d3a9770",
+          "size_bytes": 930500,
+          "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/native_inputs_full_20261026/native-import/native/bundle-partitions/evidence/instances/000000.jsonl.gz"
+        },
+        "declaration": {
+          "artifact": {
+            "schema": "scar.partitioned-ir-bundle",
+            "sha256": "3a2a80d64ff7e67d72545aefe0154b0f48fa18a855847005675221c86954c29b",
+            "size_bytes": 73304,
+            "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/native_inputs_full_20261026/native-import/native/bundle-partitions/manifest.json"
+          },
+          "locator": "#/graphs/evidence/tables/instances/chunks/0"
+        },
+        "decoded_bytes": 15998822,
+        "decoded_sha256": "ed76fec3af9b0cf19a1523b0c8331a19acecd6559ca44c78e2c9de2e9375ef6d",
+        "encoding": "GZIP_JSONL",
+        "line": 18,
+        "pointer": "#/record"
+      }
+    },
+    "output_sources": [
+      {
+        "artifact": {
+          "schema": "pytorch.execution-trace.v1",
+          "sha256": "11960422233619b68d4a42d5b699a34cb57349df04df0bc90b6fd5ef3d8e4684",
+          "size_bytes": 321365939,
+          "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/lewm_joint_capture_20261026/capture/trace/execution-trace.1578961.adfc0475ed50cb37e1c0453142b5fa65.json"
+        },
+        "locator": "#/nodes/17/outputs/values/0"
+      }
+    ],
+    "ports": {
+      "artifact": {
+        "schema": "scar.native-boxed-port-shard",
+        "sha256": "e317b24b7eb8904ea77f017c05c2557102235618133169647e990fd7b652f169",
+        "size_bytes": 131066,
+        "uri": "/home/zyf/AAA/scar-worktrees/frame-entry-routing/artifacts/analysis/native_port_sidecar_full_20261026/publication/shards/nodes-000000000-000004096.json.gz"
+      },
+      "declaration": {
+        "artifact": {
+          "schema": "scar.native-boxed-port-index",
+          "sha256": "54f9dfbcc8a4e3cfc720c2dfb0c377d61707cde3f70c1360f1f68fd54cbf17b2",
+          "size_bytes": 29901,
+          "uri": "/home/zyf/AAA/scar-worktrees/frame-entry-routing/artifacts/analysis/native_port_sidecar_full_20261026/publication/index.json"
+        },
+        "locator": "#/value/shards/0"
+      },
+      "decoded_bytes": 6393228,
+      "decoded_sha256": "966d51b5b6749c38f793dbb9f74dddb78968426ee628e3b68405180cbb7fea6a",
+      "encoding": "GZIP_JSON",
+      "line": null,
+      "pointer": "#/value/rows/10"
+    },
+    "snapshot": {
+      "artifact": {
+        "schema": "scar.program-graph",
+        "sha256": "e638d681b115da5f24da0f900c0eac00fb6175f803b176456b445b320fb6fb7d",
+        "size_bytes": 57849,
+        "uri": "/home/zyf/AAA/scar-worktrees/native-declaration-interfaces/artifacts/analysis/native_declaration_interfaces_20261027/attempt01/catalog/program.json"
+      },
+      "schema_version": 8
+    }
+  },
+  "source_ordinal": 17,
+  "source_sha256": {
+    "scar/analysis/native_declaration_interfaces.py": "e3f9dfb85fd86045426aca5a05c1e90e5d655bcac6758df55eab30166f4c6e48",
+    "scar/ir/execution/native_declarations.py": "241b0f3112e5c33659d2d1cbb6e0205ad51f9e093b8c1f56aaf8c03509951b08",
+    "scar/trace/native_protocol.py": "38e774ff755f55cc4e70d326e70b160823810b0f1d94d6213bef375fb9119c3e"
+  },
+  "status": "PASS",
+  "validation": {
+    "gaps": [
+      {
+        "code": "host_thread_unresolved",
+        "message": "original ETO actor is not an established host-thread mapping",
+        "path": "exec_execution_segment:native-declaration:595a85e847aa2fd669d0e3e02887f6dd3ad6029283f4bfc89e428977d7fcabf0:segment"
+      },
+      {
+        "code": "unresolved",
+        "message": "native port declaration does not establish Python object or payload identity",
+        "path": "model.denotations[0].identity"
+      },
+      {
+        "code": "unresolved",
+        "message": "native port declaration does not establish Python object or payload identity",
+        "path": "model.denotations[1].identity"
+      },
+      {
+        "code": "unresolved",
+        "message": "native port declaration does not establish Python object or payload identity",
+        "path": "model.denotations[2].identity"
+      },
+      {
+        "code": "unresolved",
+        "message": "native port declaration does not establish Python object or payload identity",
+        "path": "model.denotations[3].identity"
+      },
+      {
+        "code": "unresolved",
+        "message": "native port declaration does not establish Python object or payload identity",
+        "path": "model.denotations[4].identity"
+      },
+      {
+        "code": "unresolved",
+        "message": "native port declaration does not establish Python object or payload identity",
+        "path": "model.denotations[5].identity"
+      },
+      {
+        "code": "content_denotation_unresolved",
+        "message": "native port declaration does not establish Python object or payload identity",
+        "path": "denotations[exec_denotation:native-declaration:595a85e847aa2fd669d0e3e02887f6dd3ad6029283f4bfc89e428977d7fcabf0:input:0]"
+      },
+      {
+        "code": "content_native_correspondence_unverified",
+        "message": "native slot association does not prove physical work/input or content correspondence",
+        "path": "denotations[exec_denotation:native-declaration:595a85e847aa2fd669d0e3e02887f6dd3ad6029283f4bfc89e428977d7fcabf0:input:0]"
+      },
+      {
+        "code": "content_denotation_unresolved",
+        "message": "native port declaration does not establish Python object or payload identity",
+        "path": "denotations[exec_denotation:native-declaration:595a85e847aa2fd669d0e3e02887f6dd3ad6029283f4bfc89e428977d7fcabf0:input:1]"
+      },
+      {
+        "code": "content_native_correspondence_unverified",
+        "message": "native slot association does not prove physical work/input or content correspondence",
+        "path": "denotations[exec_denotation:native-declaration:595a85e847aa2fd669d0e3e02887f6dd3ad6029283f4bfc89e428977d7fcabf0:input:1]"
+      },
+      {
+        "code": "content_denotation_unresolved",
+        "message": "native port declaration does not establish Python object or payload identity",
+        "path": "denotations[exec_denotation:native-declaration:595a85e847aa2fd669d0e3e02887f6dd3ad6029283f4bfc89e428977d7fcabf0:input:2]"
+      },
+      {
+        "code": "content_native_correspondence_unverified",
+        "message": "native slot association does not prove physical work/input or content correspondence",
+        "path": "denotations[exec_denotation:native-declaration:595a85e847aa2fd669d0e3e02887f6dd3ad6029283f4bfc89e428977d7fcabf0:input:2]"
+      },
+      {
+        "code": "content_denotation_unresolved",
+        "message": "native port declaration does not establish Python object or payload identity",
+        "path": "denotations[exec_denotation:native-declaration:595a85e847aa2fd669d0e3e02887f6dd3ad6029283f4bfc89e428977d7fcabf0:input:3]"
+      },
+      {
+        "code": "content_native_correspondence_unverified",
+        "message": "native slot association does not prove physical work/input or content correspondence",
+        "path": "denotations[exec_denotation:native-declaration:595a85e847aa2fd669d0e3e02887f6dd3ad6029283f4bfc89e428977d7fcabf0:input:3]"
+      },
+      {
+        "code": "content_denotation_unresolved",
+        "message": "native port declaration does not establish Python object or payload identity",
+        "path": "denotations[exec_denotation:native-declaration:595a85e847aa2fd669d0e3e02887f6dd3ad6029283f4bfc89e428977d7fcabf0:input:4]"
+      },
+      {
+        "code": "content_native_correspondence_unverified",
+        "message": "native slot association does not prove physical work/input or content correspondence",
+        "path": "denotations[exec_denotation:native-declaration:595a85e847aa2fd669d0e3e02887f6dd3ad6029283f4bfc89e428977d7fcabf0:input:4]"
+      },
+      {
+        "code": "content_denotation_unresolved",
+        "message": "native port declaration does not establish Python object or payload identity",
+        "path": "denotations[exec_denotation:native-declaration:595a85e847aa2fd669d0e3e02887f6dd3ad6029283f4bfc89e428977d7fcabf0:input:5]"
+      },
+      {
+        "code": "content_native_correspondence_unverified",
+        "message": "native slot association does not prove physical work/input or content correspondence",
+        "path": "denotations[exec_denotation:native-declaration:595a85e847aa2fd669d0e3e02887f6dd3ad6029283f4bfc89e428977d7fcabf0:input:5]"
+      },
+      {
+        "code": "source_runtime_unverified",
+        "message": "declared occurrence/identity links have not been established by a runtime adapter",
+        "path": "model"
+      }
+    ],
+    "issues": [],
+    "valid": true
+  },
+  "wall_seconds": 8.35540752200177
+}

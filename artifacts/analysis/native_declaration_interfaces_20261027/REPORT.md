@@ -1,0 +1,17 @@
+# Declaration-driven native canonical interfaces
+
+Base `93cf7d90ce990d0869ea3ed0ab3698c81a49543c`。三源：新analysis/native_declaration_interfaces.py、新ir/execution/native_declarations.py、native_protocol._build_program仅加可选真实scope/描述（原default表达式保留）。不改native_completion/geometry/phase6、旧run或EEG动态ID、旧marker producer/强资格guard；没有复制EEG节点到新图。
+
+真实断口：bind_native_capture_batches只枚举owner.groups(dispatch sequences)；replay_batch_interfaces要求BEGIN/OUTPUT/END与marker direct child；旧_build_execution要求dispatch行与sequence且总选normal。共享_build_program的NativeBoundary/Use/Value/world/两completion ABI可复用，新的producer不借旧marker资格。
+
+原完整小根：native ports index SHA54f9dfbcc8a4e3cfc720c2dfb0c377d61707cde3f70c1360f1f68fd54cbf17b2：310412 source nodes，230818 operator rows=190498 registered schema+40320 unschematized CPU；79592 annotations与2unknown另列。input1030969、output225532均不含world。旧input metadata420444 Tensor paths=65130已接+355314缺canonical boundary；旧39796规范边界是另一分母，不与完整ports相减当已测缺口。
+
+首个机械选择来自原metadata首chunk：canonical_status=CANONICAL_NATIVE_BOUNDARY_UNAVAILABLE且有schema及Tensor metadata。实际aten::to.device、node21/source ordinal17、metadata row17，原instance/definition/ports由正常原bundle/port reader核定。不是按LeWM/算子业务名选，生产API默认处理原片全部operator rows，含无schema boxed接口；仅本次有限门选择此原记录。
+
+attempt01自持session70233 **actualexit0/8.355407522s**，RSS260284KiB。producer stored7920343+decoded44102799=52023142B；reader stored8039410+decoded44221866=52261276B，合计104284418B，含普通读取重复，不是磁盘IO/加速测量。真实构建并读回1 canonical invocation、6 inputs、1 conditional output、world input；7动态input/world values和7 Uses；0 ControlTransfer、0 normal Return occurrence。静态ProgramGraph同时保normal/raise/world接口。正常execution validator valid/无issues，具体runtime/identity/completion等gaps原样保留。未读raw/LeWM live源码或执行target，没有全201/230818重建。
+
+静态catalog在session只建一次，各≤256 operator execution fragment共享同ProgramSnapshot/interface artifact。NativeDeclarationOccurrence以现EvidenceInstanceRef/FragmentLocator精确连接原bundle实例/definition/ordered ports与新canonical occurrence；原Output SourceFacts保留，但completion=Unresolved，不伪造NativeOutputRef或normal分支。原Object/内容/alias/effect/ready仍未知；新输入denotation为明确Unresolved，不把provider token当Python引用。不同operator的world不按原ordinal捏造全序。完整跨层图仍OPEN。
+
+API：NativeDeclarationSession(index:ProviderArtifact,bundle_dir:ProviderArtifact|str|Path,coordinates:ProviderArtifact,*,budget=None)。prepare_catalog(out,shard_indices=None,source_ordinals=None)；publish_shard(no,out,source_ordinals=None)→ProviderArtifact('scar.native-declaration-shard')。None表示原source shard全体。manifest收据字段index/bundle/coordinates/catalog，fragments为encode(ProviderArtifact tuple)；counts declared/selected/processed/canonical_operation_occurrences、canonical_input_ports/conditional_output_ports、completion_selected_count0。input_measurements是session累计，不应逐片相加。已有catalog的0-row shard正常写空fragments/全0计数；显式prepare的selection全0会拒绝，orchestrator可记NO_NATIVE_OPERATOR_ROWS，不能造op。
+
+普通reader：read_native_declaration_fragment(artifact,budget=None)→NativeDeclarationView(occurrences,program,execution,validation,measurements)。重核原选中source records/ABI/core/occurrence与gaps，不信manifest.valid，未选catalog source correspondence不重扫。Source所有权仅session内私有原bytes，不缓存外部可变IR的PASS；close终检Source stat后释放。原39796历史wrappers不改；统一导入须按原EvidenceInstanceRef去重/对应，不把两种canonical表示算两次真实调用。Root负责全片orchestrator/model_run与metadata桥，本轮只验证新增1条。

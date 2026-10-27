@@ -1,0 +1,576 @@
+{
+  "bundle": {
+    "bytes": 73304,
+    "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/native_inputs_full_20261026/native-import/native/bundle-partitions/manifest.json",
+    "sha256": "3a2a80d64ff7e67d72545aefe0154b0f48fa18a855847005675221c86954c29b"
+  },
+  "denominators": {
+    "classification_counts": {
+      "REGISTERED_SCHEMA_OPERATION": 190498,
+      "UNKNOWN_NATIVE_BOUNDARY": 2,
+      "UNSCHEMATIZED_CPU_OPERATION": 40320,
+      "USER_ANNOTATION": 79592
+    },
+    "input_ports": 1030969,
+    "metadata_old_associated": 65130,
+    "metadata_old_canonical_boundary_unavailable": 355314,
+    "metadata_tensor_paths": 420444,
+    "operator_rows": 230818,
+    "output_ports": 225532,
+    "source_nodes": 310412
+  },
+  "metadata": {
+    "CPU_bridge": {
+      "artifact": {
+        "schema": "pytorch.kineto.chrome-trace.v1",
+        "sha256": "f2ba7bda8a41b385361373ea5efcbcfcc487a095eaf23cb48ebd4a898d74cebd",
+        "size_bytes": 216693718,
+        "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/lewm_joint_capture_20261026/capture/trace/kineto.1578961.adfc0475ed50cb37e1c0453142b5fa65.json"
+      },
+      "locator": "#/traceEvents/75"
+    },
+    "ETO_parent": 2,
+    "canonical_status": "CANONICAL_NATIVE_BOUNDARY_UNAVAILABLE",
+    "index": 17,
+    "input_availability": "OBSERVED",
+    "metadata": [
+      {
+        "association": "CANONICAL_NATIVE_BOUNDARY_UNAVAILABLE",
+        "metadata": {
+          "device": {
+            "index": null,
+            "text": "cpu",
+            "type": "cpu"
+          },
+          "dtype": "torch.float32",
+          "gaps": [],
+          "impl_ptr": 110368517140400,
+          "layout": "torch.strided",
+          "physical_epoch_reference_observed": true,
+          "provider_allocation_id": 1,
+          "provider_tensor_id": 0,
+          "sizes": [],
+          "status": "OBSERVED",
+          "storage_data_ptr": 110368518774080,
+          "storage_offset": null,
+          "storage_offset_gap": "not_exposed_by_installed_tensor_metadata_binding",
+          "strides": []
+        },
+        "path": [
+          0
+        ],
+        "provider_epoch": {
+          "device": "cpu",
+          "provider_allocation_id": 1,
+          "scope": "same owned profiler/result/process/device allocation ID; no offset/range/alias/content/ready claim",
+          "source": {
+            "artifact": {
+              "schema": "scar.tensor-physical-observation.v1",
+              "sha256": "852de7a088781f2c721dc8e06633fecf9f1c9f6034c54bfde6798f45c31c13c7",
+              "size_bytes": 147144696,
+              "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/lewm_joint_capture_20261026/capture/trace/tensor-physical.1578961.adfc0475ed50cb37e1c0453142b5fa65.jsonl"
+            },
+            "locator": "#/lines/7"
+          },
+          "status": "OBSERVED_PROVIDER_EPOCH_REFERENCE"
+        },
+        "source": {
+          "artifact": {
+            "schema": "scar.native-tensor-input-observation.v1",
+            "sha256": "c7ce4c8aeb6e7576645bdd33a654e6a4c9cca62a37efa42188a2e9fd619e9ed6",
+            "size_bytes": 1132062,
+            "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/lewm_joint_capture_20261026/capture/trace/native-tensor-inputs.1578961.adfc0475ed50cb37e1c0453142b5fa65/000000.jsonl"
+          },
+          "locator": "#/lines/17/inputs/slots/0/metadata"
+        }
+      }
+    ],
+    "native_tensor_paths": 1,
+    "node_id": 21,
+    "original_node": {
+      "artifact": {
+        "schema": "pytorch.execution-trace.v1",
+        "sha256": "11960422233619b68d4a42d5b699a34cb57349df04df0bc90b6fd5ef3d8e4684",
+        "size_bytes": 321365939,
+        "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/lewm_joint_capture_20261026/capture/trace/execution-trace.1578961.adfc0475ed50cb37e1c0453142b5fa65.json"
+      },
+      "locator": "#/nodes/17"
+    },
+    "retained_inputs": [
+      {
+        "kind": "TENSOR",
+        "ordinal": 0,
+        "tensor_paths": [
+          [
+            0
+          ]
+        ]
+      },
+      {
+        "kind": "OPAQUE",
+        "ordinal": 1,
+        "reason": "provider_none_or_unsupported_or_undefined"
+      },
+      {
+        "kind": "SCALAR_OPAQUE",
+        "ordinal": 2,
+        "scalar_kind": "int"
+      },
+      {
+        "kind": "SCALAR_OPAQUE",
+        "ordinal": 3,
+        "scalar_kind": "bool"
+      },
+      {
+        "kind": "SCALAR_OPAQUE",
+        "ordinal": 4,
+        "scalar_kind": "bool"
+      },
+      {
+        "kind": "OPAQUE",
+        "ordinal": 5,
+        "reason": "provider_none_or_unsupported_or_undefined"
+      }
+    ],
+    "schema_text_present": true,
+    "source": {
+      "artifact": {
+        "schema": "scar.native-tensor-input-observation.v1",
+        "sha256": "c7ce4c8aeb6e7576645bdd33a654e6a4c9cca62a37efa42188a2e9fd619e9ed6",
+        "size_bytes": 1132062,
+        "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/lewm_joint_capture_20261026/capture/trace/native-tensor-inputs.1578961.adfc0475ed50cb37e1c0453142b5fa65/000000.jsonl"
+      },
+      "locator": "#/lines/17"
+    },
+    "tree_parent": null,
+    "tree_result": 110368458656864
+  },
+  "metadata_chunk": {
+    "first_ordinal": 0,
+    "first_row": 1,
+    "last_row": 1000,
+    "path": "rows/000000.jsonl.gz",
+    "raw_bytes": 3295889,
+    "raw_sha256": "ad2854a4ca2a4d80e5348321173629982c2f72c2cc2326b2762228ace9a89e39",
+    "rows": 1000,
+    "sha256": "266b68c8fbfaf5069b73ecc78fac7e3cf7d26fcb4432b1828e3e58ea0a0d9804",
+    "size_bytes": 130241
+  },
+  "metadata_index": {
+    "bytes": 115602,
+    "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/native_inputs_full_20261026/attempt05/native-input-connections/input-metadata/manifest.json",
+    "sha256": "7b6be9bd049ad7a6e59bf4f3c1342b085c96d996c77ca02a2017ce82190fc9e3"
+  },
+  "original_definition": {
+    "locator": {
+      "artifact": {
+        "compression": "gzip",
+        "decoded_bytes": 15999647,
+        "decoded_sha256": "5876f318ad515dc0dcb83b72d2589de424b14c12965689cfe1cd7953bb898864",
+        "first_ordinal": 0,
+        "last_ordinal": 16461,
+        "lines": 16462,
+        "physical_bytes": 1044470,
+        "physical_sha256": "d7373607550c4656f6238ec07a9fc9183a3bdf039c2c464aa78c1da774872d6c",
+        "uri": "semantic/definitions/000000.jsonl.gz"
+      },
+      "line": 11,
+      "manifest_receipt": {
+        "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/native_inputs_full_20261026/native-import/native/bundle-partitions/manifest.json",
+        "physical_bytes": 73304,
+        "physical_sha256": "3a2a80d64ff7e67d72545aefe0154b0f48fa18a855847005675221c86954c29b"
+      },
+      "pointer_within_line": "/record"
+    },
+    "ordinal": 10,
+    "record": {
+      "code_id": null,
+      "contract": null,
+      "control_region": null,
+      "effect_summary": {
+        "kind": "effect",
+        "value": "native:636fde61a45803f11712767bc1cbf0b0ea3de13b14e0b27edc2d6071daea1612:symbol:7f4ecb457f5d2688c78a982ed322a7cfae1fa67fa26259164a595bd886cf6137:provider-schema-effects",
+        "wire": "effect:native:636fde61a45803f11712767bc1cbf0b0ea3de13b14e0b27edc2d6071daea1612:symbol:7f4ecb457f5d2688c78a982ed322a7cfae1fa67fa26259164a595bd886cf6137:provider-schema-effects"
+      },
+      "id": {
+        "kind": "opdef",
+        "value": "native:636fde61a45803f11712767bc1cbf0b0ea3de13b14e0b27edc2d6071daea1612:symbol:7f4ecb457f5d2688c78a982ed322a7cfae1fa67fa26259164a595bd886cf6137",
+        "wire": "opdef:native:636fde61a45803f11712767bc1cbf0b0ea3de13b14e0b27edc2d6071daea1612:symbol:7f4ecb457f5d2688c78a982ed322a7cfae1fa67fa26259164a595bd886cf6137"
+      },
+      "input_slots": [
+        {
+          "kind": "slot",
+          "value": "native:636fde61a45803f11712767bc1cbf0b0ea3de13b14e0b27edc2d6071daea1612:symbol:7f4ecb457f5d2688c78a982ed322a7cfae1fa67fa26259164a595bd886cf6137:schema:input_slots:0",
+          "wire": "slot:native:636fde61a45803f11712767bc1cbf0b0ea3de13b14e0b27edc2d6071daea1612:symbol:7f4ecb457f5d2688c78a982ed322a7cfae1fa67fa26259164a595bd886cf6137:schema:input_slots:0"
+        },
+        {
+          "kind": "slot",
+          "value": "native:636fde61a45803f11712767bc1cbf0b0ea3de13b14e0b27edc2d6071daea1612:symbol:7f4ecb457f5d2688c78a982ed322a7cfae1fa67fa26259164a595bd886cf6137:schema:input_slots:1",
+          "wire": "slot:native:636fde61a45803f11712767bc1cbf0b0ea3de13b14e0b27edc2d6071daea1612:symbol:7f4ecb457f5d2688c78a982ed322a7cfae1fa67fa26259164a595bd886cf6137:schema:input_slots:1"
+        },
+        {
+          "kind": "slot",
+          "value": "native:636fde61a45803f11712767bc1cbf0b0ea3de13b14e0b27edc2d6071daea1612:symbol:7f4ecb457f5d2688c78a982ed322a7cfae1fa67fa26259164a595bd886cf6137:schema:input_slots:2",
+          "wire": "slot:native:636fde61a45803f11712767bc1cbf0b0ea3de13b14e0b27edc2d6071daea1612:symbol:7f4ecb457f5d2688c78a982ed322a7cfae1fa67fa26259164a595bd886cf6137:schema:input_slots:2"
+        },
+        {
+          "kind": "slot",
+          "value": "native:636fde61a45803f11712767bc1cbf0b0ea3de13b14e0b27edc2d6071daea1612:symbol:7f4ecb457f5d2688c78a982ed322a7cfae1fa67fa26259164a595bd886cf6137:schema:input_slots:3",
+          "wire": "slot:native:636fde61a45803f11712767bc1cbf0b0ea3de13b14e0b27edc2d6071daea1612:symbol:7f4ecb457f5d2688c78a982ed322a7cfae1fa67fa26259164a595bd886cf6137:schema:input_slots:3"
+        },
+        {
+          "kind": "slot",
+          "value": "native:636fde61a45803f11712767bc1cbf0b0ea3de13b14e0b27edc2d6071daea1612:symbol:7f4ecb457f5d2688c78a982ed322a7cfae1fa67fa26259164a595bd886cf6137:schema:input_slots:4",
+          "wire": "slot:native:636fde61a45803f11712767bc1cbf0b0ea3de13b14e0b27edc2d6071daea1612:symbol:7f4ecb457f5d2688c78a982ed322a7cfae1fa67fa26259164a595bd886cf6137:schema:input_slots:4"
+        },
+        {
+          "kind": "slot",
+          "value": "native:636fde61a45803f11712767bc1cbf0b0ea3de13b14e0b27edc2d6071daea1612:symbol:7f4ecb457f5d2688c78a982ed322a7cfae1fa67fa26259164a595bd886cf6137:schema:input_slots:5",
+          "wire": "slot:native:636fde61a45803f11712767bc1cbf0b0ea3de13b14e0b27edc2d6071daea1612:symbol:7f4ecb457f5d2688c78a982ed322a7cfae1fa67fa26259164a595bd886cf6137:schema:input_slots:5"
+        }
+      ],
+      "kind": "operator",
+      "label": "aten::to",
+      "metadata": {
+        "definition_basis": "observed provider symbol, not original source",
+        "native_schema_contract": {
+          "alias_pair_inventory_complete": false,
+          "alias_symbols_scope": "this schema contract only; symbols are not global storage identities",
+          "declared_is_mutable": false,
+          "gaps": [
+            "registered_alias_analysis_kind_not_recovered_from_schema_text",
+            "schema_does_not_close_rng_external_ordering_exception_or_lifetime_effects",
+            "unlisted_alias_pairs_are_not_proven_disjoint"
+          ],
+          "input_slots": [
+            {
+              "kind": "slot",
+              "value": "native:636fde61a45803f11712767bc1cbf0b0ea3de13b14e0b27edc2d6071daea1612:symbol:7f4ecb457f5d2688c78a982ed322a7cfae1fa67fa26259164a595bd886cf6137:schema:input_slots:0",
+              "wire": "slot:native:636fde61a45803f11712767bc1cbf0b0ea3de13b14e0b27edc2d6071daea1612:symbol:7f4ecb457f5d2688c78a982ed322a7cfae1fa67fa26259164a595bd886cf6137:schema:input_slots:0"
+            },
+            {
+              "kind": "slot",
+              "value": "native:636fde61a45803f11712767bc1cbf0b0ea3de13b14e0b27edc2d6071daea1612:symbol:7f4ecb457f5d2688c78a982ed322a7cfae1fa67fa26259164a595bd886cf6137:schema:input_slots:1",
+              "wire": "slot:native:636fde61a45803f11712767bc1cbf0b0ea3de13b14e0b27edc2d6071daea1612:symbol:7f4ecb457f5d2688c78a982ed322a7cfae1fa67fa26259164a595bd886cf6137:schema:input_slots:1"
+            },
+            {
+              "kind": "slot",
+              "value": "native:636fde61a45803f11712767bc1cbf0b0ea3de13b14e0b27edc2d6071daea1612:symbol:7f4ecb457f5d2688c78a982ed322a7cfae1fa67fa26259164a595bd886cf6137:schema:input_slots:2",
+              "wire": "slot:native:636fde61a45803f11712767bc1cbf0b0ea3de13b14e0b27edc2d6071daea1612:symbol:7f4ecb457f5d2688c78a982ed322a7cfae1fa67fa26259164a595bd886cf6137:schema:input_slots:2"
+            },
+            {
+              "kind": "slot",
+              "value": "native:636fde61a45803f11712767bc1cbf0b0ea3de13b14e0b27edc2d6071daea1612:symbol:7f4ecb457f5d2688c78a982ed322a7cfae1fa67fa26259164a595bd886cf6137:schema:input_slots:3",
+              "wire": "slot:native:636fde61a45803f11712767bc1cbf0b0ea3de13b14e0b27edc2d6071daea1612:symbol:7f4ecb457f5d2688c78a982ed322a7cfae1fa67fa26259164a595bd886cf6137:schema:input_slots:3"
+            },
+            {
+              "kind": "slot",
+              "value": "native:636fde61a45803f11712767bc1cbf0b0ea3de13b14e0b27edc2d6071daea1612:symbol:7f4ecb457f5d2688c78a982ed322a7cfae1fa67fa26259164a595bd886cf6137:schema:input_slots:4",
+              "wire": "slot:native:636fde61a45803f11712767bc1cbf0b0ea3de13b14e0b27edc2d6071daea1612:symbol:7f4ecb457f5d2688c78a982ed322a7cfae1fa67fa26259164a595bd886cf6137:schema:input_slots:4"
+            },
+            {
+              "kind": "slot",
+              "value": "native:636fde61a45803f11712767bc1cbf0b0ea3de13b14e0b27edc2d6071daea1612:symbol:7f4ecb457f5d2688c78a982ed322a7cfae1fa67fa26259164a595bd886cf6137:schema:input_slots:5",
+              "wire": "slot:native:636fde61a45803f11712767bc1cbf0b0ea3de13b14e0b27edc2d6071daea1612:symbol:7f4ecb457f5d2688c78a982ed322a7cfae1fa67fa26259164a595bd886cf6137:schema:input_slots:5"
+            }
+          ],
+          "output_slots": [
+            {
+              "kind": "slot",
+              "value": "native:636fde61a45803f11712767bc1cbf0b0ea3de13b14e0b27edc2d6071daea1612:symbol:7f4ecb457f5d2688c78a982ed322a7cfae1fa67fa26259164a595bd886cf6137:schema:output_slots:0",
+              "wire": "slot:native:636fde61a45803f11712767bc1cbf0b0ea3de13b14e0b27edc2d6071daea1612:symbol:7f4ecb457f5d2688c78a982ed322a7cfae1fa67fa26259164a595bd886cf6137:schema:output_slots:0"
+            }
+          ],
+          "overload_name": "device",
+          "possible_aliases": [
+            {
+              "left": {
+                "kind": "slot",
+                "value": "native:636fde61a45803f11712767bc1cbf0b0ea3de13b14e0b27edc2d6071daea1612:symbol:7f4ecb457f5d2688c78a982ed322a7cfae1fa67fa26259164a595bd886cf6137:schema:input_slots:0",
+                "wire": "slot:native:636fde61a45803f11712767bc1cbf0b0ea3de13b14e0b27edc2d6071daea1612:symbol:7f4ecb457f5d2688c78a982ed322a7cfae1fa67fa26259164a595bd886cf6137:schema:input_slots:0"
+              },
+              "relation": "may_alias",
+              "right": {
+                "kind": "slot",
+                "value": "native:636fde61a45803f11712767bc1cbf0b0ea3de13b14e0b27edc2d6071daea1612:symbol:7f4ecb457f5d2688c78a982ed322a7cfae1fa67fa26259164a595bd886cf6137:schema:output_slots:0",
+                "wire": "slot:native:636fde61a45803f11712767bc1cbf0b0ea3de13b14e0b27edc2d6071daea1612:symbol:7f4ecb457f5d2688c78a982ed322a7cfae1fa67fa26259164a595bd886cf6137:schema:output_slots:0"
+              }
+            }
+          ],
+          "provider_revision": "cf30153c4c131c8164ee7798e5022d810682e2cb",
+          "raw_schema": "aten::to.device(Tensor(a) self, Device device, ScalarType dtype, bool non_blocking=False, bool copy=False, MemoryFormat? memory_format=None) -> Tensor(a)",
+          "schema_name": "aten::to",
+          "schema_sha256": "22b88e10923194f379703d1bd8bbda2aa25078cf71ad38efa56a440f11e9d12b",
+          "source_reference": "sha256:11960422233619b68d4a42d5b699a34cb57349df04df0bc90b6fd5ef3d8e4684#/nodes/17"
+        },
+        "op_schema": "aten::to.device(Tensor(a) self, Device device, ScalarType dtype, bool non_blocking=False, bool copy=False, MemoryFormat? memory_format=None) -> Tensor(a)",
+        "provider": "eto",
+        "provider_revision": "cf30153c4c131c8164ee7798e5022d810682e2cb",
+        "source_correspondence": "UNRESOLVED",
+        "state_effects": "UNKNOWN"
+      },
+      "output_slots": [
+        {
+          "kind": "slot",
+          "value": "native:636fde61a45803f11712767bc1cbf0b0ea3de13b14e0b27edc2d6071daea1612:symbol:7f4ecb457f5d2688c78a982ed322a7cfae1fa67fa26259164a595bd886cf6137:schema:output_slots:0",
+          "wire": "slot:native:636fde61a45803f11712767bc1cbf0b0ea3de13b14e0b27edc2d6071daea1612:symbol:7f4ecb457f5d2688c78a982ed322a7cfae1fa67fa26259164a595bd886cf6137:schema:output_slots:0"
+        }
+      ],
+      "parent_id": null,
+      "resource_requirements": [],
+      "source_atoms": [],
+      "source_end": null,
+      "source_file": null,
+      "source_start": null,
+      "state_slots": []
+    },
+    "verification": {
+      "current_row_ordinal_verified": true,
+      "record_semantics_revalidated": false,
+      "whole_bundle_revalidated": false,
+      "whole_chunk_decoded_sha_verified": true,
+      "whole_chunk_stored_sha_verified": true
+    }
+  },
+  "original_instance": {
+    "locator": {
+      "artifact": {
+        "compression": "gzip",
+        "decoded_bytes": 15998822,
+        "decoded_sha256": "ed76fec3af9b0cf19a1523b0c8331a19acecd6559ca44c78e2c9de2e9375ef6d",
+        "first_ordinal": 0,
+        "last_ordinal": 6355,
+        "lines": 6356,
+        "physical_bytes": 930500,
+        "physical_sha256": "1127cf1444c192096dcaaeb6d5005770499ce5920346d02d55e8748a1d3a9770",
+        "uri": "evidence/instances/000000.jsonl.gz"
+      },
+      "line": 18,
+      "manifest_receipt": {
+        "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/native_inputs_full_20261026/native-import/native/bundle-partitions/manifest.json",
+        "physical_bytes": 73304,
+        "physical_sha256": "3a2a80d64ff7e67d72545aefe0154b0f48fa18a855847005675221c86954c29b"
+      },
+      "pointer_within_line": "/record"
+    },
+    "ordinal": 17,
+    "record": {
+      "control_scope": null,
+      "definition": {
+        "kind": "opdef",
+        "value": "native:636fde61a45803f11712767bc1cbf0b0ea3de13b14e0b27edc2d6071daea1612:symbol:7f4ecb457f5d2688c78a982ed322a7cfae1fa67fa26259164a595bd886cf6137",
+        "wire": "opdef:native:636fde61a45803f11712767bc1cbf0b0ea3de13b14e0b27edc2d6071daea1612:symbol:7f4ecb457f5d2688c78a982ed322a7cfae1fa67fa26259164a595bd886cf6137"
+      },
+      "end_ns": 2145636678918996,
+      "id": {
+        "kind": "opinst",
+        "value": "native:636fde61a45803f11712767bc1cbf0b0ea3de13b14e0b27edc2d6071daea1612:eto:21",
+        "wire": "opinst:native:636fde61a45803f11712767bc1cbf0b0ea3de13b14e0b27edc2d6071daea1612:eto:21"
+      },
+      "iteration": {},
+      "metadata": {
+        "category": "cpu_op",
+        "clock_domain": "kineto",
+        "correlation": null,
+        "cpu_join_assumptions": [
+          "artifacts belong to the same supplied capture"
+        ],
+        "cpu_join_basis": "unique positive RF ID and exact name in supplied capture",
+        "cpu_join_status": "Inferred",
+        "ctrl_deps": 2,
+        "eto_tid": 1,
+        "external_id": 17,
+        "kineto_reference": "sha256:f2ba7bda8a41b385361373ea5efcbcfcc487a095eaf23cb48ebd4a898d74cebd#/traceEvents/75",
+        "node_id": 21,
+        "parent_basis": "ETO ctrl_deps collector stack only",
+        "provider": "ETO",
+        "raw_pid": 1578961,
+        "raw_reference": "sha256:11960422233619b68d4a42d5b699a34cb57349df04df0bc90b6fd5ef3d8e4684#/nodes/17",
+        "raw_resource": {},
+        "raw_tid": 1578961,
+        "rf_id": 17,
+        "tensor_slots": [
+          {
+            "descriptor_id": "d38d15147c00358219c47ec3f7319db1bbd99b1ef205d55879f3096122dbcbd6",
+            "native_schema_binding": {
+              "formal_slot": {
+                "kind": "slot",
+                "value": "native:636fde61a45803f11712767bc1cbf0b0ea3de13b14e0b27edc2d6071daea1612:symbol:7f4ecb457f5d2688c78a982ed322a7cfae1fa67fa26259164a595bd886cf6137:schema:input_slots:0",
+                "wire": "slot:native:636fde61a45803f11712767bc1cbf0b0ea3de13b14e0b27edc2d6071daea1612:symbol:7f4ecb457f5d2688c78a982ed322a7cfae1fa67fa26259164a595bd886cf6137:schema:input_slots:0"
+              },
+              "gap": null,
+              "schema_sha256": "22b88e10923194f379703d1bd8bbda2aa25078cf71ad38efa56a440f11e9d12b",
+              "status": "QUALIFIED"
+            },
+            "ordered_path": [
+              0
+            ],
+            "provider_reference": "native:636fde61a45803f11712767bc1cbf0b0ea3de13b14e0b27edc2d6071daea1612:tensor-token:19",
+            "raw_reference": "sha256:11960422233619b68d4a42d5b699a34cb57349df04df0bc90b6fd5ef3d8e4684#/nodes/17/inputs/values/0",
+            "role": "inputs"
+          },
+          {
+            "descriptor_id": "d38d15147c00358219c47ec3f7319db1bbd99b1ef205d55879f3096122dbcbd6",
+            "native_schema_binding": {
+              "formal_slot": {
+                "kind": "slot",
+                "value": "native:636fde61a45803f11712767bc1cbf0b0ea3de13b14e0b27edc2d6071daea1612:symbol:7f4ecb457f5d2688c78a982ed322a7cfae1fa67fa26259164a595bd886cf6137:schema:output_slots:0",
+                "wire": "slot:native:636fde61a45803f11712767bc1cbf0b0ea3de13b14e0b27edc2d6071daea1612:symbol:7f4ecb457f5d2688c78a982ed322a7cfae1fa67fa26259164a595bd886cf6137:schema:output_slots:0"
+              },
+              "gap": null,
+              "schema_sha256": "22b88e10923194f379703d1bd8bbda2aa25078cf71ad38efa56a440f11e9d12b",
+              "status": "QUALIFIED"
+            },
+            "ordered_path": [
+              0
+            ],
+            "provider_reference": "native:636fde61a45803f11712767bc1cbf0b0ea3de13b14e0b27edc2d6071daea1612:tensor-token:19",
+            "raw_reference": "sha256:11960422233619b68d4a42d5b699a34cb57349df04df0bc90b6fd5ef3d8e4684#/nodes/17/outputs/values/0",
+            "role": "outputs"
+          }
+        ],
+        "thread_namespace": "Kineto host thread"
+      },
+      "parent": {
+        "kind": "opinst",
+        "value": "native:636fde61a45803f11712767bc1cbf0b0ea3de13b14e0b27edc2d6071daea1612:eto:2",
+        "wire": "opinst:native:636fde61a45803f11712767bc1cbf0b0ea3de13b14e0b27edc2d6071daea1612:eto:2"
+      },
+      "process_id": 1578961,
+      "start_ns": 2145636678870216,
+      "status": "Observed",
+      "thread_id": 1578961
+    },
+    "verification": {
+      "current_row_ordinal_verified": true,
+      "record_semantics_revalidated": false,
+      "whole_bundle_revalidated": false,
+      "whole_chunk_decoded_sha_verified": true,
+      "whole_chunk_stored_sha_verified": true
+    }
+  },
+  "port_index": {
+    "bytes": 29901,
+    "path": "/home/zyf/AAA/scar-worktrees/frame-entry-routing/artifacts/analysis/native_port_sidecar_full_20261026/publication/index.json",
+    "sha256": "54f9dfbcc8a4e3cfc720c2dfb0c377d61707cde3f70c1360f1f68fd54cbf17b2"
+  },
+  "port_row": {
+    "definition": {
+      "kind": "opdef",
+      "value": "native:636fde61a45803f11712767bc1cbf0b0ea3de13b14e0b27edc2d6071daea1612:symbol:7f4ecb457f5d2688c78a982ed322a7cfae1fa67fa26259164a595bd886cf6137",
+      "wire": "opdef:native:636fde61a45803f11712767bc1cbf0b0ea3de13b14e0b27edc2d6071daea1612:symbol:7f4ecb457f5d2688c78a982ed322a7cfae1fa67fa26259164a595bd886cf6137"
+    },
+    "input_status": "COMPLETE",
+    "instance": {
+      "kind": "opinst",
+      "value": "native:636fde61a45803f11712767bc1cbf0b0ea3de13b14e0b27edc2d6071daea1612:eto:21",
+      "wire": "opinst:native:636fde61a45803f11712767bc1cbf0b0ea3de13b14e0b27edc2d6071daea1612:eto:21"
+    },
+    "output_status": "COMPLETE",
+    "ports": [
+      {
+        "descriptor_id": "d38d15147c00358219c47ec3f7319db1bbd99b1ef205d55879f3096122dbcbd6",
+        "direction": "input",
+        "formal_slot": {
+          "kind": "slot",
+          "value": "native:636fde61a45803f11712767bc1cbf0b0ea3de13b14e0b27edc2d6071daea1612:symbol:7f4ecb457f5d2688c78a982ed322a7cfae1fa67fa26259164a595bd886cf6137:schema:input_slots:0",
+          "wire": "slot:native:636fde61a45803f11712767bc1cbf0b0ea3de13b14e0b27edc2d6071daea1612:symbol:7f4ecb457f5d2688c78a982ed322a7cfae1fa67fa26259164a595bd886cf6137:schema:input_slots:0"
+        },
+        "formal_status": "QUALIFIED",
+        "kind": "TENSOR",
+        "path": [
+          0
+        ],
+        "provider_reference": "native:636fde61a45803f11712767bc1cbf0b0ea3de13b14e0b27edc2d6071daea1612:tensor-token:19",
+        "provider_type": "Tensor(float)",
+        "source_locator": "/inputs/values/0"
+      },
+      {
+        "descriptor_id": null,
+        "direction": "input",
+        "formal_slot": null,
+        "formal_status": "UNRESOLVED_NON_TENSOR_FORMAL_PATH",
+        "kind": "SCALAR_OR_OPAQUE",
+        "path": [
+          1
+        ],
+        "provider_reference": null,
+        "provider_type": "Device",
+        "source_locator": "/inputs/values/1"
+      },
+      {
+        "descriptor_id": null,
+        "direction": "input",
+        "formal_slot": null,
+        "formal_status": "UNRESOLVED_NON_TENSOR_FORMAL_PATH",
+        "kind": "SCALAR_OR_OPAQUE",
+        "path": [
+          2
+        ],
+        "provider_reference": null,
+        "provider_type": "Int",
+        "source_locator": "/inputs/values/2"
+      },
+      {
+        "descriptor_id": null,
+        "direction": "input",
+        "formal_slot": null,
+        "formal_status": "UNRESOLVED_NON_TENSOR_FORMAL_PATH",
+        "kind": "SCALAR_OR_OPAQUE",
+        "path": [
+          3
+        ],
+        "provider_reference": null,
+        "provider_type": "Bool",
+        "source_locator": "/inputs/values/3"
+      },
+      {
+        "descriptor_id": null,
+        "direction": "input",
+        "formal_slot": null,
+        "formal_status": "UNRESOLVED_NON_TENSOR_FORMAL_PATH",
+        "kind": "SCALAR_OR_OPAQUE",
+        "path": [
+          4
+        ],
+        "provider_reference": null,
+        "provider_type": "Bool",
+        "source_locator": "/inputs/values/4"
+      },
+      {
+        "descriptor_id": null,
+        "direction": "input",
+        "formal_slot": null,
+        "formal_status": "UNRESOLVED_NON_TENSOR_FORMAL_PATH",
+        "kind": "SCALAR_OR_OPAQUE",
+        "path": [
+          5
+        ],
+        "provider_reference": null,
+        "provider_type": "None",
+        "source_locator": "/inputs/values/5"
+      },
+      {
+        "descriptor_id": "d38d15147c00358219c47ec3f7319db1bbd99b1ef205d55879f3096122dbcbd6",
+        "direction": "output",
+        "formal_slot": {
+          "kind": "slot",
+          "value": "native:636fde61a45803f11712767bc1cbf0b0ea3de13b14e0b27edc2d6071daea1612:symbol:7f4ecb457f5d2688c78a982ed322a7cfae1fa67fa26259164a595bd886cf6137:schema:output_slots:0",
+          "wire": "slot:native:636fde61a45803f11712767bc1cbf0b0ea3de13b14e0b27edc2d6071daea1612:symbol:7f4ecb457f5d2688c78a982ed322a7cfae1fa67fa26259164a595bd886cf6137:schema:output_slots:0"
+        },
+        "formal_status": "QUALIFIED",
+        "kind": "TENSOR",
+        "path": [
+          0
+        ],
+        "provider_reference": "native:636fde61a45803f11712767bc1cbf0b0ea3de13b14e0b27edc2d6071daea1612:tensor-token:19",
+        "provider_type": "Tensor(float)",
+        "source_locator": "/outputs/values/0"
+      }
+    ],
+    "source_ordinal": 17
+  },
+  "port_shard_number": 0,
+  "selection": "first original metadata row with missing canonical boundary, actual schema, nonempty metadata; restricted first chunk",
+  "source_ordinal": 17
+}
