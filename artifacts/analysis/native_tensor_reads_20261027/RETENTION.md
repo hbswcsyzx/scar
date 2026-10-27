@@ -1,0 +1,1 @@
+仅Git保留2新生产源与本目录小runner/正常read记录/ValueGraph/协议/actual收据/报告。所有原capture/raw/201body/大native program/execution/EEG/bundle/index只引用原绝对URI+SHA+bytes，不复制。attempt01为原prototype历史，attempt02为固定normal helper最终版。正常helper来自独立00e0e46f依赖，不在本交付重复改写。无main/index/collector改动、无Tensor内容或数值样本存储。
