@@ -36,4 +36,13 @@ cd ~/AAA/scar
 这还不是完整整程序入口：模块/类等入口、部分 Python 协议、跨过程目标与参数绑定、别名/副作用联合推导和 Tensor 属性传播仍需按计划贯通。已有运行见证不能充当纯静态完成依据。
 
 现存 trace、profiler 和 backend 实现当前冻结；这一阶段不调用它们，不新增 detector 或程序变换。
-新统一静态 CLI 尚未交付，不把设计中的命令写成已可执行功能。
+已提供纯静态入口，目标源码不会被导入或执行：
+
+```bash
+python -m scar.cli static ../le-wm --jobs 4
+python -m scar.cli static-query --file solver/cem.py --name solve --dependencies --limit 5
+```
+
+输出只保留 `artifacts/current/static/`：每份源码共享 source/semantic/semantics/CFG/lexical 分片，常量事实和 import 候选索引连接原 ID。
+`--phase sources` 仅建目录；`--phase graph` 为默认源码图；`--phase bodies` 另尝试当前支持的规范 body adapter，所有未展开入口继续计入分母。
+`--refine` 使用已保留源码细化 scope/import，不重建源码图；`--refine --imports-only` 只更新 import 索引。图结构化展开与跨过程固定点仍未完成，命令成功不代表第一阶段完成。

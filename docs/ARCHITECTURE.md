@@ -29,4 +29,12 @@
 
 ## 当前缺口
 
-整程序静态目录和语言覆盖、跨过程候选绑定、抽象堆/别名、自动效果摘要、联合不动点、Tensor 属性/关系传播和统一静态导出尚未贯通。已有局部验证不代表这些能力完成。
+整程序纯源码目录和逐文件源码图已接通，词法作用域与 import 候选索引可查询；完整语言展开、跨过程候选绑定、抽象堆/别名、自动效果摘要、联合不动点、Tensor 属性/关系传播和统一静态导出尚未贯通。已有局部验证不代表这些能力完成。
+
+## 当前静态命令实现
+
+`scar static` 走 `static_program.main`，不进入历史 capture 工作流。
+`static_sources` 管源材料，`static_lexical` 管原 AST/symtable 目录；源材料和目录不是第二套程序图。
+`static_program` 按文件复用原 frontend/source-semantics/CFG，四进程可并行；`static_imports` 连接原 source/unit/initializer 候选；`static_query` 读取原记录。
+源文件文本保存一次，分片附 stored/decoded SHA。细化通过同一 current 目录发布，复用未变化图，不创建历史副本。
+当前 import 索引尚未解析缺少的外部库源码和导出绑定，源码图中的协议缺口也未消除，不能作为全程序 ModRef 或内容等价证明。

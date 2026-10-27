@@ -42,7 +42,9 @@ S0 不设建模覆盖率门槛，不产生额外历史报告或 gate 目录。
 
 ## S1：纯静态源目录、词法定义与语言支持台账
 
-**状态：部分已有，未完成。**`source_discovery` 已能在固定边界内解析源码导入候选；`prepare_source_text`、`source_semantics_v2` 能从文本构造静态层。现有 worklist 仍有以调用捕获和 CodeWitness 选择入口的路径，不能充当静态全集目录。
+**状态：源码目录、词法/编译器作用域及源码图入口已实现；精确语言规则台账仍未完成。**
+新增 `static_sources` 全源根扫描、`static_lexical` 全 AST/定义目录、`static_program` 并行源码图及 `static_imports` 跨文件候选连接。LeWM 已实际离线构建 582 源文件，登记 12,550 个入口/上下文；581 个 `.py` 有源码图，1 个 `.pyi` 保留为声明。没有运行捕获见证或目标代码。
+隐式 scope 的 symtable 目录已保留，但其语言级语义展开与每种构造的规范规则/前提绑定仍未闭合；不能将 `UNEXPANDED` 或 READY_TO_ATTEMPT 写成“支持”。
 
 **实质功能**
 
@@ -162,7 +164,8 @@ S0 不设建模覆盖率门槛，不产生额外历史报告或 gate 目录。
 
 ## 下一项：S1 源码目录
 
-先实现 source-root 驱动的纯静态目录与词法定义账本，并让 worklist 可由该目录调度，不读取捕获调用/CodeWitness 来决定定义是否进入分母。
+纯静态目录和 source-root 调度已落地，目录成员不再由捕获调用/CodeWitness 决定。
+下一项先完成每种 entry 的静态 adapter/规则/前提台账，并用已有整个目录驱动规范 body 构造；补齐模块、类、generator/async 等仍依赖运行见证的入口。随后推进 S2/S3 的端口组合与联合分析。
 
 首个交付包括：固定源根与配置、逐文件 SHA、逐模块/定义 canonical source ref、词法父级、定义类别、导入候选和逐项语言/缺失/预算状态；全部结果继续引用现有 source/definition IDs。
 
