@@ -1,0 +1,45 @@
+{
+  "command": [
+    "/home/zyf/miniconda3/envs/lewm/bin/python",
+    "-B",
+    "-m",
+    "scar.cli",
+    "query-native-interface",
+    "--fragment",
+    "/home/zyf/AAA/scar-worktrees/native-declaration-interfaces/artifacts/analysis/native_declaration_interfaces_20261027/attempt01/shard/000000/manifest.json",
+    "--sha256",
+    "a1fa7695bf904d048d35b289e734977fc9ef7fba4828eb3ef57294fc560c64c8",
+    "--source-ordinal",
+    "17",
+    "--metadata-navigation",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/native_inputs_full_20261026/attempt05/port-navigation/manifest.json",
+    "--metadata-sha256",
+    "4436b171be0dec2782e7843bc097227d675efa5e33155a6e8a2bf2408b4b6f72",
+    "--max-seconds",
+    "180",
+    "--out",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/analysis/native_interface_query_20261027/graph.json"
+  ],
+  "fragment": {
+    "schema": "scar.native-declaration-fragment",
+    "sha256": "a1fa7695bf904d048d35b289e734977fc9ef7fba4828eb3ef57294fc560c64c8",
+    "size_bytes": 14105,
+    "uri": "/home/zyf/AAA/scar-worktrees/native-declaration-interfaces/artifacts/analysis/native_declaration_interfaces_20261027/attempt01/shard/000000/manifest.json"
+  },
+  "navigation": {
+    "schema": "scar.native-input-port-navigation",
+    "sha256": "4436b171be0dec2782e7843bc097227d675efa5e33155a6e8a2bf2408b4b6f72",
+    "size_bytes": 146783,
+    "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/native_inputs_full_20261026/attempt05/port-navigation/manifest.json"
+  },
+  "source_files": [
+    {
+      "path": "scar/analysis/native_declaration_query.py",
+      "sha256": "3174f27b612284b4a86a5eee7d779cfea60bbfe20b9cef90046e596f67cc9475"
+    },
+    {
+      "path": "scar/cli.py",
+      "sha256": "693f3791d9e30f2cddf6aa0dbdf34f535bdb498b48108d5cc0c2f3bac47d9ffa"
+    }
+  ]
+}

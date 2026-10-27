@@ -1,5 +1,22 @@
 # 按需查询跨层程序图
 
+新的原生边界可直接沿真实输入、状态和metadata查询：
+
+```bash
+python -B -m scar.cli query-native-interface \
+  --fragment PATH/manifest.json --sha256 EXPECTED_FRAGMENT_SHA256 \
+  --source-ordinal ORIGINAL_ETO_NODE_ORDINAL \
+  --metadata-navigation PATH/port-navigation/manifest.json \
+  --metadata-sha256 EXPECTED_NAVIGATION_SHA256 --out native-view.json
+```
+
+普通reader核原native source与规范接口；视图保原typed refs，包含operation、输入值、
+Use、interface、region和抽象state location。metadata可选；有则按同ETO源与输入路径
+机械连接原metadata leaf/provider epoch。source ordinal是原节点数组位置，不是node ID。
+静态输出和状态出口保持COMPLETION_UNSELECTED；不造normal return或value ready。
+当前单次metadata查询会扫描整个已保存索引，实际47节点例CLI79.452秒；
+批处理应共享session。见[实际结果](../artifacts/analysis/native_interface_query_20261027/RESULT.json)。
+
 `query-program`读取已有分片关系，沿原始限定引用查询work、runtime/算子、Python调用、
 源码定义和静态函数体。查询结果不是新的可编辑IR；其中节点键仅供本次结果去重，
 每个节点仍保存原类型、ID、artifact版本和命名空间。

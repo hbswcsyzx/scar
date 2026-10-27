@@ -551,6 +551,10 @@ def main(argv=None) -> int:
     register_native_allocation_query(sub)
     from scar.analysis.native_declaration_pipeline import register_native_interface_commands
     register_native_interface_commands(sub)
+    from scar.analysis.native_declaration_query import register_native_declaration_query
+    register_native_declaration_query(sub)
+    from scar.analysis.native_declaration_links import register_native_links_command
+    register_native_links_command(sub)
     native_inputs = sub.add_parser("query-native-inputs", help="read original native Tensor input metadata and canonical port references")
     native_inputs.add_argument("--manifest", required=True, help="published native input association manifest")
     native_inputs.add_argument("--sha256", required=True, help="expected manifest SHA256")

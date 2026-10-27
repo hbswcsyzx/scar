@@ -1,5 +1,25 @@
 # 第一阶段交付：自动恢复整个程序及其资源
 
+2026-10-27 全量原生边界现已实际完成：冻结312ab664，76/76源分片，
+230,818 operations / 1,030,969 inputs / 225,532 conditional outputs，未处理操作0。
+CLI退出0、1705.169秒，输出10,242,234,219B/1942文件；不能称为轻量或完整跨层图。
+原79,592 annotation和2个unknown source节点仍在原evidence分母，未冒充普通算子。
+所有完成分支仍未选择，不把条件输出当实际normal return。见
+[完整实测](../artifacts/experiments/native_declaration_full_20261027/RESULT.json)。
+
+公开 `query-native-interface` 已把一项新边界、输入引用/Use、抽象状态位置、原metadata
+和provider epoch接在同一视图：47节点/47边，CLI79.452秒（含完整metadata索引一次读取）。
+这里只完成一项真实连接；旧355,314个metadata缺项未全部关闭，见
+[结果](../artifacts/analysis/native_interface_query_20261027/RESULT.json)。
+同ca66 Run的24,082个GPU WorkTickets也已另行取得，并有真实native→provider→runtime→
+GPU/stream连接；旧1ddea关系没有混入。批量 `build-native-links` 现已实现，复用同一
+native reader与metadata/resource sessions，关系独立压缩存片，不复制原native图；
+完整批量连接尚待实际执行。加载至输出、Python所有动态接口、内容/状态/ready仍OPEN。
+
+最近有界Python-only采集诊断在120秒中断，尚在Torch/Dynamo import且记录额度已满；
+quota后无效栈遍历及失败转换关闭异常已修复，不能以该失败采集证明性能改善。
+另外generator原profile区间尚未统一接入同一activation，仍是第一阶段的控制依赖缺口。
+
 2026-10-27 后继真实批量结果：`build-native-interfaces --shard 0` 已自动构建整个首片，
 2,545 operations / 11,738 inputs / 1,753 conditional outputs，CLI17.393秒。
 共享一次catalog，10个独立执行片段，总stored116,719,872B；没有normal transfer补造。

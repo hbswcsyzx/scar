@@ -1,5 +1,25 @@
 # 从已有采集自动组织建模
 
+已有原生图的跨层关系可统一批量连接：
+
+```bash
+python -B -m scar.cli build-native-links \
+  --pipeline NATIVE/manifest.json --pipeline-sha256 EXPECTED_PIPELINE_SHA256 \
+  --navigation INPUT/port-navigation/manifest.json --navigation-sha256 EXPECTED_NAVIGATION_SHA256 \
+  --resource-index RESOURCE/manifest.json --resource-sha256 EXPECTED_RESOURCE_INDEX_SHA256 \
+  --work-manifest WORK/manifest.json --work-sha256 EXPECTED_WORK_SHA256 \
+  --out fresh-native-links
+```
+
+默认处理源pipeline全部已发布片段；resource四个参数可一同省略。
+一次metadata原记录扫描、一次活的native reader、可选同Run resource session，
+逐片重核原source/ABI/core，写独立JSONL.gz关系片，根只保存引用/计数。
+source-shard子集不会缩小原分母。没有重建native图、重跑workload或另造值版本。
+`INPUT_METADATA`关系保旧状态及没有metadata leaf的路径；这些状态只回答Tensor
+metadata观测，不把每个非Tensor输入误判为必须有Tensor metadata。`RESOURCE_WORK`
+关系保原provider边与work/resource refs，多条路径到同work仍是一个物理work。
+此批处理入口刚实现，完整批次的实际终态另行记录；不是全程序完成承诺。
+
 原生操作边界现可直接从已发布的完整端口分片构建，不依赖 Python dispatch 标记：
 
 ```bash
