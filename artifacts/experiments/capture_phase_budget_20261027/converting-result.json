@@ -1,0 +1,50 @@
+{
+  "case": "converting",
+  "returncode": 0,
+  "elapsed_seconds": 5.341900622006506,
+  "budget_stop": null,
+  "phase_tracking": {
+    "basis": "pinned collector code/source, exact nonce/intent and live owned provider ancestry; not hostile-process authentication",
+    "events": {
+      "ATEXIT_STOPPING": {
+        "schema": "scar.capture-phase-event",
+        "sha256": "be699d599282cb75ad8a550d39d96f63ab3a2bcbeb983ed4c0cb42e8f6e2829d",
+        "size_bytes": 949,
+        "uri": "/home/zyf/AAA/scar-worktrees/capture-phase-budget/artifacts/experiments/capture_phase_budget_20261027/converting/capture/trace/capture-phase.2e5d3563dad313cfbfdf13323b4623cd.2161870.ATEXIT_STOPPING.json"
+      },
+      "CONVERTING": {
+        "schema": "scar.capture-phase-event",
+        "sha256": "29970e21bf4d8be45153970f836eae29c4126531f7f158a0a7facac31e0ba452",
+        "size_bytes": 1265,
+        "uri": "/home/zyf/AAA/scar-worktrees/capture-phase-budget/artifacts/experiments/capture_phase_budget_20261027/converting/capture/trace/capture-phase.2e5d3563dad313cfbfdf13323b4623cd.2161870.CONVERTING.json"
+      },
+      "owner_binding": {
+        "kernel_sources": [
+          "/proc/2161870/stat"
+        ],
+        "observed_parent_chain": [
+          2161870,
+          2161865
+        ],
+        "owner": {
+          "parent_pid": 2161865,
+          "pid": 2161870,
+          "start_ticks": 41808217
+        }
+      }
+    },
+    "frontiers": [],
+    "postprocess_deadline_monotonic_ns": 418090739987138,
+    "profile": "SCAR_EXIT_PHASES_V1",
+    "qualified_atexit": true,
+    "recording_deadline_monotonic_ns": 418085170881427,
+    "requested_postprocess_seconds": 8,
+    "scope": "main atexit and collector shutdown only; daemon/external completion and GPU ready remain unknown"
+  },
+  "launch": {
+    "uri": "/home/zyf/AAA/scar-worktrees/capture-phase-budget/artifacts/experiments/capture_phase_budget_20261027/converting/capture/os-capture-launch.2e5d3563dad313cfbfdf13323b4623cd.json",
+    "sha256": "27b7c2ca2b6639d278349a38b5da1e55992aa87cc0023957b7198f52414d5f2b",
+    "size_bytes": 9264,
+    "schema": "scar.os-capture-launch"
+  }
+}

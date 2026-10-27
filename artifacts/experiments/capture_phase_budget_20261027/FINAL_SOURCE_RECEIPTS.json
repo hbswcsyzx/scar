@@ -1,0 +1,35 @@
+{
+  "files": [
+    {
+      "path": "scar/trace/capture_phases.py",
+      "sha256": "0cbe766ff05328184f3f2ec60255df48a1216e966f7f569b7d95fcd795053c7c",
+      "bytes": 12226
+    },
+    {
+      "path": "scar/trace/os_capture_launch.py",
+      "sha256": "2ad49eef6096fc5a8741a152f0d5372921f5cb412e14a73bfa3a676d4207e762",
+      "bytes": 27082
+    },
+    {
+      "path": "scar/trace/call_edges.py",
+      "sha256": "50ddb89c1b69cb324e039df9d2de6d9312c10a7a410949d06235efe1acd362d7",
+      "bytes": 37634
+    },
+    {
+      "path": "scar/trace/execution_evidence.py",
+      "sha256": "f19a69df1e9cc7c4e87d035d2e613084961c9b9cf5c97459ecb69296eb716b30",
+      "bytes": 25176
+    },
+    {
+      "path": "scar/cli.py",
+      "sha256": "2c97c2ae9556c220342ba874228f8dae926da9bacb6fb63db579474da26efaed",
+      "bytes": 136592
+    },
+    {
+      "path": "sitecustomize.py",
+      "sha256": "38be28262feb58ae99cdfe75f48f8dd5dbac0e2a3c1790e02bc4733c1a494606",
+      "bytes": 2594
+    }
+  ],
+  "post_case_change": "capture_phases: accepted marker disappearance revokes extension; no third capture case"
+}

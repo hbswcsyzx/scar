@@ -106,7 +106,7 @@ def native_intent(trace_directory,native_nonce):
 
 
 def launch_os_capture(target_argv,*,env,capture_root,strace_executable='strace',budgets=None,
-                      selection_profile='all'):
+                      selection_profile='all',postprocess_seconds=None):
     """Execute exactly one owned provider; no attach, shell, or foreign process."""
     budget=budgets or OSCaptureBudgets();_need(type(budget) is OSCaptureBudgets,'explicit OS budgets required')
     from scar.trace.os_capture_selection import selection_contract
@@ -135,16 +135,28 @@ def launch_os_capture(target_argv,*,env,capture_root,strace_executable='strace',
         'target_argv':target_argv,'provider_precheck':binary_receipt,'budgets':vars(budget),
         'authority':'INTENT_ONLY_NOT_EXECUTION','raw_rendering':list(RAW_DATA_CALLS),
         'selection_contract':selection}
+    phase_budget = None
+    if postprocess_seconds is not None:
+        from scar.trace.capture_phases import phase_request
+        phase_budget = phase_request(postprocess_seconds)
+        intent['phase_budget'] = phase_budget
     intent_path=root/f'os-capture-intent.{nonce}.json';intent_receipt=_publish(intent_path,intent,budget)
     child_env=dict(env);child_env.update(SCAR_OS_CAPTURE_NONCE=nonce,
         SCAR_OS_CAPTURE_INTENT=str(intent_path),SCAR_OS_CAPTURE_INTENT_SHA256=intent_receipt['sha256'])
+    child_env.pop('SCAR_CAPTURE_PHASES',None)
+    if phase_budget is not None:
+        child_env['SCAR_CAPTURE_PHASES'] = phase_budget['profile']
     started=time.monotonic();pid=None;process=None;returncode=None;failure=None;budget_stop=None
+    started_ns=time.monotonic_ns();phases=None
     image={'status':'OPEN','reason':'owned provider not started'}
     stderr_path=root/f'os-provider-stderr.{nonce}.txt'
     try:
         with stderr_path.open('xb') as diagnostic:
             process=subprocess.Popen(argv,env=child_env,stderr=diagnostic,start_new_session=True)
             pid=process.pid
+            if phase_budget is not None:
+                from scar.trace.capture_phases import PhaseDeadline
+                phases=PhaseDeadline(root,nonce,intent_receipt['sha256'],phase_budget,pid,started_ns,budget.max_seconds)
             try:
                 # An explicit kernel symlink is intended here, never a generic
                 # artifact pathname or an unrelated PID lookup.
@@ -170,11 +182,16 @@ def launch_os_capture(target_argv,*,env,capture_root,strace_executable='strace',
                             capture_files+=1;capture_bytes+=path.stat().st_size
                     except FileNotFoundError:
                         continue  # A producer may atomically publish a file.
+                now_ns=time.monotonic_ns()
+                wall_exceeded=(time.monotonic()-started>budget.max_seconds if phases is None
+                               else now_ns>phases.deadline(now_ns))
                 if (os_bytes>budget.max_os_bytes or capture_bytes>budget.max_raw_bytes
-                        or capture_files>budget.max_files or time.monotonic()-started>budget.max_seconds):
+                        or capture_files>budget.max_files or wall_exceeded):
                     budget_stop=('OS_BYTES' if os_bytes>budget.max_os_bytes else
                         'CAPTURE_BYTES' if capture_bytes>budget.max_raw_bytes else
-                        'CAPTURE_FILES' if capture_files>budget.max_files else 'WALL_SECONDS')
+                        'CAPTURE_FILES' if capture_files>budget.max_files else
+                        'WALL_SECONDS' if phases is None else
+                        'POSTPROCESS_SECONDS' if phases.stop is not None and not phases.invalid else 'RECORDING_SECONDS')
                     os.killpg(pid,signal.SIGTERM)
                     try:process.wait(timeout=5)
                     except subprocess.TimeoutExpired:os.killpg(pid,signal.SIGKILL)
@@ -206,6 +223,8 @@ def launch_os_capture(target_argv,*,env,capture_root,strace_executable='strace',
         'selection':selection['expression']+' with follow-forks; raw affects rendering only',
         'selection_profile':selection_profile,'selection_contract':selection,
         'event_loss':'UNKNOWN','effect_completeness':'UNKNOWN','budgets':vars(budget)}
+    if phases is not None:
+        launch['phase_tracking']=phases.report()
     launch_path=root/f'os-capture-launch.{nonce}.json';receipt=_publish(launch_path,launch,budget)
     _need(failure is None,'provider spawn failed; exact launch failure receipt retained')
     return subprocess.CompletedProcess(target_argv,returncode),receipt

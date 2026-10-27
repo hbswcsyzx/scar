@@ -76,6 +76,7 @@ class CallEdgeRecorder:
         self.previous_profile_present = False
         self.closed = False
         self._closing = False
+        self.phase_events = None
         self.io_failed = False
         self.started = time.perf_counter_ns()
         self.event_path = self.out/f"call-events.{self.pid}.jsonl"
@@ -598,6 +599,9 @@ def install(out, project_root, *, lean_plan=None):
         max_references=int(os.environ.get('SCAR_CALL_MAX_REFERENCES',8192)),
         capture_profile=profile, source_limits=source_limits)
     os.environ['SCAR_CALL_TRACE_OWNER_PID'] = str(os.getpid())
+    if os.environ.get('SCAR_CAPTURE_PHASES') is not None:
+        from scar.trace.capture_phases import CapturePhases
+        recorder.phase_events = CapturePhases.from_environment(recorder)
     recorder.collector_witness = None
     if os.environ.get('SCAR_COLLECTOR_EXECUTION_WITNESS') == '1':
         from scar.trace.collector_execution_witness import CollectorExecutionWitness
@@ -652,6 +656,10 @@ def install(out, project_root, *, lean_plan=None):
         observer = recorder.operand_observer
         if recorder.collector_witness is not None:
             recorder.collector_witness.before_close()
+        # All profile/monitoring callbacks reject _closing before emitting.
+        # Remaining stop work settles gaps, disables masks and converts bytes.
+        if recorder.phase_events is not None:
+            recorder.phase_events.converting(sys._getframe())
         if observer is not None:
             observer.stop()
         if sys.getprofile() is profile:
@@ -681,7 +689,11 @@ def install(out, project_root, *, lean_plan=None):
         recorder.closed = True
     if hasattr(os,'register_at_fork'):
         os.register_at_fork(after_in_child=forked)
-    atexit.register(finish)
+    def finish_at_exit():
+        if recorder.phase_events is not None:
+            recorder.phase_events.begin_atexit(sys._getframe())
+        finish()
+    atexit.register(finish_at_exit)
     recorder._collector_finish = finish
     recorder._collector_profile = profile
     if recorder.process_ports:

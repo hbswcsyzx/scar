@@ -407,6 +407,17 @@ class ExecutionEvidence:
                 self._failure("observer_cleanup", error)
             self._observer_owned = False
 
+    def close_at_exit(self):
+        """Registered main-thread exit boundary, before native stop/export.
+
+        Calling close manually still works, but cannot extend a launch budget.
+        The optional emitter verifies the actual C atexit entry frame/owner.
+        """
+        phases = getattr(self._call_recorder, 'phase_events', None)
+        if phases is not None:
+            phases.begin_atexit(sys._getframe())
+        self.close()
+
     def close(self):
         if os.getpid() != self.pid:
             self._after_fork()

@@ -1,0 +1,41 @@
+{
+  "scope": "source bytes of the two actual cases before final missing-marker guard",
+  "files": [
+    {
+      "original_uri": "/home/zyf/AAA/scar-worktrees/capture-phase-budget/scar/trace/capture_phases.py",
+      "snapshot": "artifacts/experiments/capture_phase_budget_20261027/actual-source/scar/trace/capture_phases.py",
+      "sha256": "fdd021d1c346953e3930ea896d2a419512e20fffed23aa728d485b570ff6fa3d",
+      "bytes": 12065
+    },
+    {
+      "original_uri": "/home/zyf/AAA/scar-worktrees/capture-phase-budget/scar/trace/os_capture_launch.py",
+      "sha256": "2ad49eef6096fc5a8741a152f0d5372921f5cb412e14a73bfa3a676d4207e762",
+      "bytes": 27082,
+      "retained_by_final_git_same_bytes": "scar/trace/os_capture_launch.py"
+    },
+    {
+      "original_uri": "/home/zyf/AAA/scar-worktrees/capture-phase-budget/scar/trace/call_edges.py",
+      "sha256": "50ddb89c1b69cb324e039df9d2de6d9312c10a7a410949d06235efe1acd362d7",
+      "bytes": 37634,
+      "retained_by_final_git_same_bytes": "scar/trace/call_edges.py"
+    },
+    {
+      "original_uri": "/home/zyf/AAA/scar-worktrees/capture-phase-budget/scar/trace/execution_evidence.py",
+      "sha256": "f19a69df1e9cc7c4e87d035d2e613084961c9b9cf5c97459ecb69296eb716b30",
+      "bytes": 25176,
+      "retained_by_final_git_same_bytes": "scar/trace/execution_evidence.py"
+    },
+    {
+      "original_uri": "/home/zyf/AAA/scar-worktrees/capture-phase-budget/scar/cli.py",
+      "sha256": "2c97c2ae9556c220342ba874228f8dae926da9bacb6fb63db579474da26efaed",
+      "bytes": 136592,
+      "retained_by_final_git_same_bytes": "scar/cli.py"
+    },
+    {
+      "original_uri": "/home/zyf/AAA/scar-worktrees/capture-phase-budget/sitecustomize.py",
+      "sha256": "38be28262feb58ae99cdfe75f48f8dd5dbac0e2a3c1790e02bc4733c1a494606",
+      "bytes": 2594,
+      "retained_by_final_git_same_bytes": "sitecustomize.py"
+    }
+  ]
+}

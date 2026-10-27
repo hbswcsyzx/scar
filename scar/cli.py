@@ -101,6 +101,7 @@ def _trace(args) -> int:
     env.pop('SCAR_TRACE_LINES',None)
     env.pop('SCAR_CAPTURE_TRANSPORT',None)
     env.pop('SCAR_SNAPSHOT_BUFFER_BYTES',None)
+    env.pop('SCAR_CAPTURE_PHASES',None)
     for key in ('SCAR_OS_CAPTURE_NONCE','SCAR_OS_CAPTURE_INTENT','SCAR_OS_CAPTURE_INTENT_SHA256'):
         env.pop(key,None)
     execution_evidence = getattr(args, "execution_evidence", False)
@@ -184,6 +185,11 @@ def _trace(args) -> int:
     if not cmd:
         raise SystemExit("trace requires '-- command'")
     start = time.perf_counter()
+    postprocess_timeout = getattr(args, 'os_postprocess_timeout', None)
+    if postprocess_timeout is not None and (type(postprocess_timeout) is not int or postprocess_timeout <= 0):
+        raise SystemExit('--os-postprocess-timeout must be positive')
+    if postprocess_timeout is not None and os_capture_root is None:
+        raise SystemExit('--os-postprocess-timeout requires --os-capture-root')
     if os_capture_root is None:
         result = subprocess.run(cmd, env=env)
     else:
@@ -194,7 +200,7 @@ def _trace(args) -> int:
             max_files=getattr(args,'max_archive_files',4096))
         result, _ = launch_os_capture(cmd, env=env, capture_root=os_capture_root,
             strace_executable=args.strace_executable, budgets=os_budgets,
-            selection_profile=args.os_profile)
+            selection_profile=args.os_profile,postprocess_seconds=postprocess_timeout)
     (out / "run.json").write_text(json.dumps({"command": cmd, "returncode": result.returncode,
                                                 "wall_s": time.perf_counter() - start}, indent=2))
     if os_capture_root is not None and result.returncode == 0:
@@ -710,7 +716,10 @@ def main(argv=None) -> int:
     trace.add_argument('--max-archive-bytes',type=int,default=128000000)
     trace.add_argument('--max-archive-files',type=int,default=4096,
                        help='lossless archive transport member count, including per-TID OS files, native chunks and collector members; not event coverage')
-    trace.add_argument('--os-timeout',type=int,default=300,help='owned OS provider wall-time budget in seconds')
+    trace.add_argument('--os-timeout',type=int,default=300,
+        help='recording seconds with --os-postprocess-timeout; otherwise original total provider wall limit')
+    trace.add_argument('--os-postprocess-timeout',type=int,
+        help='explicit finite shutdown/conversion seconds after qualified main atexit; total <= os-timeout + this, plus 5s termination grace; absent keeps old total budget')
     trace.add_argument("command", nargs=argparse.REMAINDER)
     trace.set_defaults(func=_trace)
     optimize_cmd = sub.add_parser("optimize", help="run a command with generic opt-in backends")
