@@ -1,0 +1,38 @@
+{
+  "artifact_schema": "scar.python-tracer-capability-result.v1",
+  "run_status": "prior_tiny_cpu_probe_observed_not_rerun_for_artifact",
+  "raw_stdout_retained": false,
+  "environment_observed": {
+    "python": "3.14.7",
+    "torch": "2.13.0+cu132",
+    "viztracer": "not installed",
+    "yappi": "not installed",
+    "pyinstrument": "not installed"
+  },
+  "observations": [
+    {
+      "configuration": "torch.profiler.profile(with_stack=False)",
+      "probe_result": "Torch operator events were visible; Python nested/leaf call events were not observed"
+    },
+    {
+      "configuration": "torch.profiler.profile(with_stack=True)",
+      "probe_result": "Python call tree nested -> leaf was visible, along with PyCCall and TorchOp events"
+    }
+  ],
+  "reported_public_fields": [
+    "event name/tag",
+    "parent and children",
+    "start/end/duration timing",
+    "thread-related event ID",
+    "Python filename, line, and function name",
+    "PyCall callsite/caller and optional module/optimizer metadata"
+  ],
+  "not_exposed_as_stable_public_join_fields": [
+    "SCAR pycode-v2 CodeID or code-version identity",
+    "bytecode CALL offset",
+    "exact argument-to-formal mapping",
+    "returned object identity",
+    "normal-versus-exception completion"
+  ],
+  "interpretation": "Profiler call-tree/timing sidecar only; not a canonical source-call or operand replacement. No performance comparison was performed."
+}
