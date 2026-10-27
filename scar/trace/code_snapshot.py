@@ -25,6 +25,7 @@ _MAX_DEPTH = 128
 _MAX_CODE_UNITS = 100_000
 _MAX_CACHE_ENTRIES = 128
 _MAX_CACHE_TEXT_BYTES = 512 * 1024
+_MAX_KEY_CACHE_ENTRIES = 2048
 _MAX_CACHED_SITES = 128
 
 _CODE_FIELDS = (
@@ -127,10 +128,18 @@ class _CachedCode:
     parameters: tuple[str, ...]
     text_bytes: int
     limits: tuple[int, int, int]
+
+
+@dataclass(slots=True)
+class _CachedKey:
+    reference: weakref.ReferenceType
+    key: str
+    limits: tuple[int, int, int]
     sites: OrderedDict = field(default_factory=OrderedDict)
 
 
 _CACHE: OrderedDict[int, _CachedCode] = OrderedDict()
+_KEY_CACHE: OrderedDict[int, _CachedKey] = OrderedDict()
 _CACHE_TEXT_BYTES = 0
 _CACHE_LOCK = threading.RLock()
 
@@ -144,6 +153,62 @@ def _forget(identity, reference):
             del _CACHE[identity]
 
 
+def _forget_key(identity, reference):
+    with _CACHE_LOCK:
+        record = _KEY_CACHE.get(identity)
+        if record is not None and record.reference is reference:
+            del _KEY_CACHE[identity]
+
+
+def _key_record(code):
+    if type(code) is not CodeType:
+        raise ValueError("code snapshot requires an exact CodeType")
+    identity = id(code)
+    limits = (_MAX_BYTES, _MAX_NODES, _MAX_DEPTH)
+    with _CACHE_LOCK:
+        cached = _KEY_CACHE.get(identity)
+        if cached is not None and cached.reference() is code and cached.limits == limits:
+            _KEY_CACHE.move_to_end(identity)
+            return cached
+    encoded = bytearray()
+    encoder = _Encoder()
+    try:
+        encoder.write(encoded, _DOMAIN)
+        encoder.encode(code, encoded)
+    except RecursionError as error:
+        raise ValueError("code snapshot nesting budget exceeded") from error
+    key = "pycode-v2:" + hashlib.sha256(encoded).hexdigest()
+    count = code.co_argcount + code.co_kwonlyargcount
+    count += bool(code.co_flags & inspect.CO_VARARGS)
+    count += bool(code.co_flags & inspect.CO_VARKEYWORDS)
+    if count > len(code.co_varnames):
+        raise ValueError("code snapshot parameter layout is inconsistent")
+    reference = weakref.ref(code, lambda ref: _forget_key(identity, ref))
+    record = _CachedKey(reference, key, limits)
+    with _CACHE_LOCK:
+        previous = _KEY_CACHE.get(identity)
+        if previous is not None and previous.reference() is code and previous.limits == limits:
+            _KEY_CACHE.move_to_end(identity)
+            return previous
+        if previous is not None:
+            del _KEY_CACHE[identity]
+        if _MAX_KEY_CACHE_ENTRIES > 0:
+            _KEY_CACHE[identity] = record
+            while len(_KEY_CACHE) > _MAX_KEY_CACHE_ENTRIES:
+                _KEY_CACHE.popitem(last=False)
+    return record
+
+
+def code_key(code: CodeType) -> str:
+    """Return the structural code key without allocating a descriptor mapping.
+
+    Only fully encoded, supported CodeType trees enter the bounded cache. Cache
+    identity is guarded by a weak reference so recycled object addresses cannot
+    inherit a prior code object's key.
+    """
+    return _key_record(code).key
+
+
 def _record(code):
     global _CACHE_TEXT_BYTES
     if type(code) is not CodeType:
@@ -155,14 +220,7 @@ def _record(code):
         if cached is not None and cached.reference() is code and cached.limits == limits:
             _CACHE.move_to_end(identity)
             return cached
-    encoded = bytearray()
-    encoder = _Encoder()
-    try:
-        encoder.write(encoded, _DOMAIN)
-        encoder.encode(code, encoded)
-    except RecursionError as error:
-        raise ValueError("code snapshot nesting budget exceeded") from error
-    key = "pycode-v2:" + hashlib.sha256(encoded).hexdigest()
+    key = _key_record(code).key
     count = code.co_argcount + code.co_kwonlyargcount
     count += bool(code.co_flags & inspect.CO_VARARGS)
     count += bool(code.co_flags & inspect.CO_VARKEYWORDS)
@@ -208,7 +266,7 @@ def site(code: CodeType, offset: int) -> dict:
     """
     if type(offset) is not int:
         raise ValueError("instruction offset must be an exact integer")
-    record = _record(code)
+    record = _key_record(code)
     raw = code.co_code  # Canonical, unquickened bytes, even after specialization.
     if len(raw) // 2 > _MAX_CODE_UNITS:
         raise ValueError("code snapshot instruction budget exceeded")
@@ -235,4 +293,4 @@ def site(code: CodeType, offset: int) -> dict:
             "position": list(position) if position is not None else None}
 
 
-__all__ = ["describe_code", "site"]
+__all__ = ["code_key", "describe_code", "site"]

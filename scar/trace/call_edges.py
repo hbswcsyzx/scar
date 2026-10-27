@@ -11,7 +11,7 @@ import threading
 import time
 import weakref
 
-from scar.trace.code_snapshot import describe_code, site
+from scar.trace.code_snapshot import code_key, describe_code, site
 
 _ACTIVE_PROCESS_RECORDER = None
 _FORWARD_KINDS = ('DISPATCH', 'IMPORT', 'TRACE')
@@ -260,9 +260,12 @@ class CallEdgeRecorder:
             buffer.clear()
 
     def _code(self, code):
-        description = describe_code(code)
-        key = description['key']
+        key = code_key(code)
         if key not in self.codes:
+            # Full descriptors are needed only when this key is first written.
+            description = describe_code(code)
+            if description['key'] != key:
+                raise ValueError("code key changed while describing an immutable code object")
             if len(self.codes) >= self.limits['max_codes'] or not self._write(self.codes_fd,description):
                 self.codes_dropped += 1
                 raise ValueError("call code/byte budget exceeded")
