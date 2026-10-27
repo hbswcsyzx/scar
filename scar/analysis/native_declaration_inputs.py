@@ -7,7 +7,7 @@ input path.
 """
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, fields
 from hashlib import sha256
 from io import BytesIO
 import gzip
@@ -34,6 +34,14 @@ NAVIGATION_SCHEMA = "scar.native-input-port-navigation"
 METADATA_SCHEMA = "scar.native-input-association-index"
 PROFILE = "NATIVE_DECLARATION_INPUT_METADATA_JOIN_V1"
 _NODE_LOCATOR = re.compile(r"^#/nodes/(0|[1-9][0-9]*)$")
+
+
+def _valid_metadata_disposition(canonical_status: str, association: str) -> bool:
+    """Match the two independent dispositions emitted by native_input_index.finalize."""
+    return ((canonical_status == "CANONICAL_BOUNDARY_AVAILABLE"
+             and association == "ASSOCIATED")
+            or (canonical_status == "CANONICAL_NATIVE_BOUNDARY_UNAVAILABLE"
+                and association in ("ASSOCIATED", "CANONICAL_NATIVE_BOUNDARY_UNAVAILABLE")))
 
 
 def _need(condition: bool, message: str) -> None:
@@ -126,6 +134,9 @@ class NativeDeclarationInputMetadataPort:
     metadata_leaf: ProviderFactReference | None
     provider_epoch_status: str | None
     provider_epoch: ProviderFactReference | None
+    # Absent in earlier serialized DTOs; a new match records it separately
+    # from the containing native row's canonical status.
+    prior_metadata_association: str | None = None
 
     def __post_init__(self) -> None:
         for name, cls in (("native_instance", EvidenceInstanceRef),
@@ -151,6 +162,23 @@ class NativeDeclarationInputMetadataPort:
         if matched != (self.metadata_index_row is not None and self.metadata_leaf is not None
                        and self.prior_canonical_status is not None):
             raise ValueError("matched metadata fields disagree with join status")
+        if not matched and self.prior_metadata_association is not None:
+            raise ValueError("unmatched metadata join has a leaf association")
+        if (matched and self.prior_metadata_association is not None
+                and not _valid_metadata_disposition(self.prior_canonical_status,
+                                                    self.prior_metadata_association)):
+            raise ValueError("native row and metadata leaf dispositions are inconsistent")
+
+
+def decode_native_declaration_input_metadata_port(value: dict[str, Any]
+                                                   ) -> NativeDeclarationInputMetadataPort:
+    """Decode the current DTO plus the previous wire shape (association=None)."""
+    names = {item.name for item in fields(NativeDeclarationInputMetadataPort)}
+    _need(type(value) is dict, "native declaration input DTO must be a wire object")
+    if set(value) == names - {"prior_metadata_association"}:
+        value = {**value, "prior_metadata_association": None}
+    _need(set(value) == names, "native declaration input DTO fields differ")
+    return decode(NativeDeclarationInputMetadataPort, value)
 
 
 @dataclass(frozen=True, slots=True)
@@ -518,8 +546,11 @@ class NativeDeclarationInputSession:
                     continue
                 metadata_row, refs_raw, prior_status = found[0]
                 refs = loads(zlib.decompress(bytes(refs_raw)).decode("utf-8"))
-                _need(type(refs) is dict and refs.get("association") == prior_status,
-                      "retained metadata leaf/status differs from its original row")
+                _need(type(refs) is dict and type(refs.get("association")) is str,
+                      "retained metadata leaf association is malformed")
+                leaf_association = refs["association"]
+                _need(_valid_metadata_disposition(prior_status, leaf_association),
+                      "retained canonical status/leaf association pair violates native_input_index.finalize")
                 metadata_source = decode(ProviderFactReference, refs["source"])
                 epoch = refs.get("provider_epoch")
                 _need(type(epoch) is dict and type(epoch.get("status")) is str,
@@ -531,7 +562,8 @@ class NativeDeclarationInputSession:
                     status="MATCHED_EXACT_INPUT_PATH", metadata_index_row=metadata_row,
                     prior_canonical_status=prior_status, metadata_leaf=metadata_source,
                     provider_epoch_status=epoch["status"],
-                    provider_epoch=epoch_source))
+                    provider_epoch=epoch_source,
+                    prior_metadata_association=leaf_association))
         return tuple(joined)
 
     # Kept as a small source-compatible alias for development callers.
