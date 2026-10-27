@@ -491,9 +491,11 @@ class _Inputs:
             decoded_sha256=a["decoded_sha256"], decoded_bytes=a["decoded_bytes"],
             compressed=path.suffix == ".gz", limit=32_000_000)
         document = strict_loads(raw.decode("utf-8"))
+        schema_version = document.get("schema_version")
         _need(document.get("schema") == "scar.partitioned-file-inventory"
-              and type(document.get("schema_version")) is int and document["schema_version"] == 2,
-              "source inventory locator does not name a partitioned file record")
+              and type(schema_version) is int and schema_version in (1, 2)
+              and a.get("representation") == f"scar.partitioned-file-inventory/{schema_version}",
+              "source inventory locator does not name a supported partitioned file record")
         self._file_cache[cache_key] = document
         partition_keys = [key for key in self._file_cache if key != "manifest"]
         while len(partition_keys) > self.max_inventory_partitions:
@@ -502,6 +504,7 @@ class _Inputs:
             partition_keys.remove(oldest)
             self.stats["inventory_partition_cache_evictions"] += 1
         self.stats["inventory_partition_reads"] += 1
+        self.stats[f"inventory_partition_v{schema_version}_reads"] += 1
         self.stats["inventory_partition_stored_bytes"] += a["physical_bytes"]
         self.stats["inventory_partition_decoded_bytes"] += len(raw)
         return document
