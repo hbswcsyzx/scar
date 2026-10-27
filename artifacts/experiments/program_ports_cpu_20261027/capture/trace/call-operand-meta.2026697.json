@@ -1,0 +1,58 @@
+{
+  "schema": "scar.call-operands-trace",
+  "schema_version": 1,
+  "process_id": 2026697,
+  "project_root": "/home/zyf/AAA/scar-worktrees/program-ports-capture/artifacts/experiments/program_ports_cpu_20261027/project",
+  "python": "3.14.7 | packaged by conda-forge | (main, Sep  2 2026, 21:08:32) [GCC 15.3.0]",
+  "implementation": "cpython",
+  "rule": "SCAR_PROGRAM_PORTS_V1",
+  "limits": {
+    "max_events": 100000,
+    "max_bytes": 32000000,
+    "max_loads": 64,
+    "max_namespace_items": 4096,
+    "max_references": 8192
+  },
+  "events": 523,
+  "event_attempts": 523,
+  "instructions": 0,
+  "call_attempts": 400,
+  "handshakes": 121,
+  "gaps": 2,
+  "loads": 0,
+  "references": 764,
+  "bytes": 216015,
+  "dropped_events": 0,
+  "errors": [],
+  "io_failed": false,
+  "previous_profile": false,
+  "base_manifest": [
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/program-ports-capture/artifacts/experiments/program_ports_cpu_20261027/capture/trace/call-codes.2026697.jsonl",
+      "family": "codes",
+      "process_id": 2026697,
+      "raw_sha256": "813a5b8bf1e782db11e66c871dec972f6bbf915cff6f9b66f7bd11511640a7b4",
+      "raw_bytes": 24789,
+      "lines": 99
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/program-ports-capture/artifacts/experiments/program_ports_cpu_20261027/capture/trace/call-events.2026697.jsonl",
+      "family": "events",
+      "process_id": 2026697,
+      "raw_sha256": "7cc0218db0de49474ebf99a809440c9f7d54b93da0b697650d0ad52af3cbe0ed",
+      "raw_bytes": 216240,
+      "lines": 354
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/program-ports-capture/artifacts/experiments/program_ports_cpu_20261027/capture/trace/call-meta.2026697.json",
+      "family": "meta",
+      "process_id": 2026697,
+      "raw_sha256": "91720209c40b6d22f117a7708c2991ce468bfbc55b7616a43b62f74dde8bb089",
+      "raw_bytes": 1509,
+      "lines": 43
+    }
+  ],
+  "reference_contents_observed": false,
+  "callable_environment_established": false,
+  "transformation_authorized": false
+}

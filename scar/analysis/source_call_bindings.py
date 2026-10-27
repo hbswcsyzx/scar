@@ -15,7 +15,7 @@ from scar.analysis.call_operand_reader import CallOperandTrace
 from scar.analysis.call_operand_routes import _Core, _Boundary as _CoreBoundary, _has_index, _layout_matches, _span
 from scar.analysis.function_binding import bind_call
 from scar.ir.program.call_edges import CallEdgeModel, CallLinkStatus, CapturedSite
-from scar.ir.program.call_operands import CALL_WINDOWS_RULE, LOAD_OCCURRENCES_RULE, LEAN_PORTS_RULE, OperandScopedGap, CallableKind
+from scar.ir.program.call_operands import CALL_WINDOWS_RULE, LOAD_OCCURRENCES_RULE, LEAN_PORTS_RULE, PROGRAM_PORTS_RULE, OperandScopedGap, CallableKind
 from scar.ir.program.functions import ArgumentKind, BindingOrigin, CallArgument, CallBindingStatus, ParameterKind
 from scar.ir.program.model import ReferenceValue, StateVersionValue, TerminatorKind, UseRole
 from scar.ir.program.providers import ProviderArtifact, ProviderFactReference
@@ -127,7 +127,7 @@ class _Session:
 
     def bind(self, attempt):
         sources = self.sources
-        _need(self.rules.get(attempt.process_id) in (LOAD_OCCURRENCES_RULE, CALL_WINDOWS_RULE, LEAN_PORTS_RULE)
+        _need(self.rules.get(attempt.process_id) in (LOAD_OCCURRENCES_RULE, CALL_WINDOWS_RULE, LEAN_PORTS_RULE, PROGRAM_PORTS_RULE)
               and attempt.process_id not in self.bad_processes, Issue.CAPTURE_GAP,
               "unsupported/lost/failed/interposed operand capture process")
         matches = self.handshakes[attempt.process_id, attempt.index]

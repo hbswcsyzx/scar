@@ -18,7 +18,7 @@ import weakref
 
 from scar.ir.program.call_edges import CallTraceFile
 from scar.ir.program.call_operands import (
-    CALL_WINDOWS_RULE, LOAD_OCCURRENCES_RULE, LEAN_PORTS_RULE, CallableKind, FunctionLayout,
+    CALL_WINDOWS_RULE, LOAD_OCCURRENCES_RULE, LEAN_PORTS_RULE, PROGRAM_PORTS_RULE, CallableKind, FunctionLayout,
     OperandCollectionLimits, OperandCollectionMetadata,
 )
 from scar.ir.record_codec import encode
@@ -33,10 +33,12 @@ _RULE = LOAD_OCCURRENCES_RULE
 _CAPTURE_INSTRUCTIONS = "instructions"
 _CAPTURE_WINDOWS = "windows"
 _CAPTURE_LEAN = "lean-ports"
+_CAPTURE_PROGRAM = "program-ports"
 _CAPTURE_RULES = {
     _CAPTURE_INSTRUCTIONS: LOAD_OCCURRENCES_RULE,
     _CAPTURE_WINDOWS: CALL_WINDOWS_RULE,
     _CAPTURE_LEAN: LEAN_PORTS_RULE,
+    _CAPTURE_PROGRAM: PROGRAM_PORTS_RULE,
 }
 _MONITOR_NAME = "scar-call-operands"
 _LOCAL_MASK = sys.monitoring.events.INSTRUCTION | sys.monitoring.events.CALL
@@ -104,11 +106,14 @@ class CallOperandObserver:
         self.root_prefix = recorder.root_prefix
         self.capture = capture
         self.lean_plan = getattr(recorder, 'lean_plan', None)
+        self.program_ports = getattr(recorder, 'program_ports', False)
+        if (capture == _CAPTURE_PROGRAM) != self.program_ports:
+            raise ValueError('program ports requires its explicit frame profile')
         if (capture == _CAPTURE_LEAN) != (self.lean_plan is not None):
             raise ValueError('lean capture requires its explicit typed frame plan and lean-ports mode')
-        if capture == _CAPTURE_LEAN and python_targets is not True:
+        if capture in (_CAPTURE_LEAN, _CAPTURE_PROGRAM) and python_targets is not True:
             raise ValueError('lean capture requires explicit Python target interfaces')
-        self._local_mask = sys.monitoring.events.CALL if capture == _CAPTURE_LEAN else _LOCAL_MASK
+        self._local_mask = sys.monitoring.events.CALL if capture in (_CAPTURE_LEAN, _CAPTURE_PROGRAM) else _LOCAL_MASK
         self._stream_enabled = stream_interfaces
         # CPython derives C_RETURN/C_RAISE from CALL. get_local_events returns
         # the normalized CALL mask even when the dependent bits were supplied.
@@ -294,7 +299,7 @@ class CallOperandObserver:
     def _gap(self, reason, owner=None, frame_index=None, *, advance=True):
         if frame_index is None:
             frame_index = self.recorder.index
-        if self.lean_plan is not None and owner is not None:
+        if (self.lean_plan is not None or self.program_ports) and owner is not None:
             key = next((state[1] for state in (*self._frames.values(), *self.recorder.active.values())
                         if state[0] == owner), None)
             if key is not None:
@@ -372,7 +377,7 @@ class CallOperandObserver:
                 if setter_kind is None:
                     return
             elif event == "call":
-                if self.lean_plan is not None:
+                if self.lean_plan is not None or self.program_ports:
                     if self._base_state(frame) is None:return
                 elif not (self._code_inside(frame.f_code) or (self.python_targets is not None
                         and ((self.python_targets.observed_code(frame.f_code) and self._base_state(frame) is not None)
@@ -409,7 +414,7 @@ class CallOperandObserver:
         except BaseException as error:
             if os.getpid() != self.pid:
                 return
-            if self.lean_plan is not None:
+            if self.lean_plan is not None or self.program_ports:
                 state = self._base_state(frame)
                 self._scoped_gap("OBSERVER_CALLBACK_FAILURE_" + type(error).__name__, frame.f_code,
                                  state[0] if state is not None else None)
@@ -425,7 +430,7 @@ class CallOperandObserver:
     def _on_frame_enter(self, frame):
         code = frame.f_code
         target_entry = self.python_targets.on_frame_enter(frame) if self.python_targets is not None else False
-        if self.lean_plan is None and not (self._code_inside(code) or target_entry or (self.python_targets is not None and self.python_targets.observed_code(code))):
+        if self.lean_plan is None and not self.program_ports and not (self._code_inside(code) or target_entry or (self.python_targets is not None and self.python_targets.observed_code(code))):
             return
         if self._event_attempts >= self.limits.max_events:
             self._dropped += 1
@@ -493,7 +498,7 @@ class CallOperandObserver:
         record = self._code_state(code, code_reference)
         if record is None:
             self._frames.pop(identity, None)
-            if self.lean_plan is not None:
+            if self.lean_plan is not None or self.program_ports:
                 self._scoped_gap("CALL_WINDOW_CODE_OBJECT_BUDGET_EXCEEDED", code, invocation)
             else:
                 self._gap("CALL_WINDOW_CODE_OBJECT_BUDGET_EXCEEDED", invocation)
@@ -526,7 +531,7 @@ class CallOperandObserver:
         invocation, _code_key, code_reference = state
         pending = self._pending.pop((threading.get_ident(), invocation), None)
         if pending is not None:
-            if self.lean_plan is not None:self._scoped_gap("PROJECT_FUNCTION_CALL_DID_NOT_ENTER", frame.f_code, invocation)
+            if self.lean_plan is not None or self.program_ports:self._scoped_gap("PROJECT_FUNCTION_CALL_DID_NOT_ENTER", frame.f_code, invocation)
             else:self._gap("PROJECT_FUNCTION_CALL_DID_NOT_ENTER", invocation)
             self.environment_observer.discard(pending[-1])
         code = code_reference()
@@ -852,7 +857,7 @@ class CallOperandObserver:
                         return self._disabled_callback_result(code)
                     owner_info = self._event_owner(frame, code)
                     if owner_info is None:
-                        if self.lean_plan is not None:
+                        if self.lean_plan is not None or self.program_ports:
                             self._scoped_gap("CALL_FRAME_UNAVAILABLE", code)
                             return None
                         self._gap("CALL_FRAME_UNAVAILABLE")
@@ -909,7 +914,7 @@ class CallOperandObserver:
                         self.environment_observer.dispatch(callable_object, attempt_index, owner,
                             self.recorder.index, dispatch["code"],
                             lambda value: self._reference(value, seen, event_index, snapshots))
-                        if self._code_inside(target_code):
+                        if self.program_ports or self._code_inside(target_code):
                             try:
                                 self._pending[pending_key] = (
                                     weakref.ref(callable_object), weakref.ref(target_code),
@@ -922,7 +927,7 @@ class CallOperandObserver:
                         else:
                             self.environment_observer.discard(attempt_index)
                 except BaseException as error:
-                    if self.lean_plan is not None:
+                    if self.lean_plan is not None or self.program_ports:
                         state = self._base_state(frame)
                         self._scoped_gap("CALL_CALLBACK_FAILURE_" + type(error).__name__, code,
                                          state[0] if state is not None else None)
