@@ -1,0 +1,9 @@
+{
+  "status": "EXITED",
+  "exit_code": 241,
+  "elapsed_seconds": 1801.8956859490136,
+  "wrapper_pid": 2114788,
+  "collector_source_tree_sha256": "c25ee6f747be96f4b4d4ffc21c0aed3515ab150007580533a21e6aa48f44d8ef",
+  "lewm_unchanged": true,
+  "whole_program_model_complete": false
+}

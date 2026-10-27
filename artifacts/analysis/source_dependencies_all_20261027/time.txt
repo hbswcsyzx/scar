@@ -1,0 +1,24 @@
+Command exited with non-zero status 1
+	Command being timed: "/usr/bin/timeout 600s python -B -m scar.cli build-source-dependencies --publication artifacts/analysis/source_call_port_all_20261027/publication/manifest.json --sha256 867a8fa08f97977ccf8aba2add85cd2544691f8aff1c61bcc685dc61160bfb8d --workers 4 --max-inflight 8 --out artifacts/analysis/source_dependencies_all_20261027/views"
+	User time (seconds): 898.32
+	System time (seconds): 13.91
+	Percent of CPU this job got: 391%
+	Elapsed (wall clock) time (h:mm:ss or m:ss): 3:52.77
+	Average shared text size (kbytes): 0
+	Average unshared data size (kbytes): 0
+	Average stack size (kbytes): 0
+	Average total size (kbytes): 0
+	Maximum resident set size (kbytes): 407684
+	Average resident set size (kbytes): 0
+	Major (requiring I/O) page faults: 0
+	Minor (reclaiming a frame) page faults: 3390719
+	Voluntary context switches: 633
+	Involuntary context switches: 335179
+	Swaps: 0
+	File system inputs: 0
+	File system outputs: 244952
+	Socket messages sent: 0
+	Socket messages received: 0
+	Signals delivered: 0
+	Page size (bytes): 4096
+	Exit status: 1

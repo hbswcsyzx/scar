@@ -70,6 +70,8 @@ def build_source_dependencies_cli(args):
     result = build_source_dependency_workers(args.publication, args.out,
         expected_manifest_sha256=args.sha256, max_workers=args.workers, max_inflight=args.max_inflight,
         return_budget=SourceReturnBudget(max_bodies=args.max_bodies),
+        view_layout=args.view_layout,
+        shard_indices=None if args.shard_index is None else tuple(args.shard_index),
         max_total_output_bytes=args.max_output_bytes, **_query_limits(args))
     print(json.dumps({key: result[key] for key in
                      ('status', 'index', 'worker_pids', 'wall_seconds', 'whole_program_complete')}, indent=2))
@@ -104,6 +106,10 @@ def register_dependency_commands(sub):
     workers.add_argument('--sha256', required=True)
     workers.add_argument('--workers', type=int, default=4)
     workers.add_argument('--max-inflight', type=int)
+    workers.add_argument('--view-layout', choices=('single', 'queries'), default='single',
+                         help='store a complete batch or one bounded file per dependency query')
+    workers.add_argument('--shard-index', action='append', type=int,
+                         help='process only these original shard ordinals; repeat to select more')
     workers.add_argument('--max-output-bytes', type=int, default=1_000_000_000)
     workers.add_argument('--out', required=True)
     _bounds(workers)

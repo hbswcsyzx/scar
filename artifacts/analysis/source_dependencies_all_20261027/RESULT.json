@@ -1,0 +1,46 @@
+{
+  "status": "PARTIAL_WITH_OPEN",
+  "manifest_sha256": "867a8fa08f97977ccf8aba2add85cd2544691f8aff1c61bcc685dc61160bfb8d",
+  "shards": 84,
+  "worker_pids": [
+    2119203,
+    2119206,
+    2119207,
+    2119208
+  ],
+  "wall_seconds": 231.3896552560036,
+  "shard_states": {
+    "QUERIED_WITH_OPEN": 60,
+    "FAILED_PARTIAL_RETAINED": 24
+  },
+  "failed_shards": [
+    3,
+    4,
+    61,
+    62,
+    63,
+    64,
+    65,
+    66,
+    67,
+    68,
+    69,
+    70,
+    71,
+    72,
+    73,
+    74,
+    75,
+    76,
+    77,
+    78,
+    79,
+    80,
+    81,
+    82
+  ],
+  "failure_kinds": {
+    "source dependency workers: worker decoded view byte ceiling exceeded": 24
+  },
+  "whole_program_complete": false
+}
