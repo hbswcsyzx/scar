@@ -81,14 +81,25 @@ class PythonTargetObserver:
         self._io_failed=False
         self.legacy_inputs=None
     def emit(self,kind,value):
+        """Compatibility path for callers supplying ordinary typed records."""
         if self.closed or self.stopped:return
+        self._emit_fields(kind,_target_record(kind,value)['value'])
+    def _emit_fields(self,kind,fields):
+        """Freeze raw collector facts; the ordinary reader validates the IR.
+
+        Internal callbacks do not build execution/program record objects.
+        Schema, field order, counters and both transports remain unchanged.
+        Current code/default/receiver observations still happen at each CALL.
+        """
+        if self.closed or self.stopped:return
+        document={'schema':'scar.python-call-targets','schema_version':2,'kind':kind,'value':fields}
         if self._deferred is not None:
-            if self.records>=self.budget.max_records or not self._deferred.append(_target_record(kind,value)):
+            if self.records>=self.budget.max_records or not self._deferred.append(document):
                 self.stopped=True;return
             self.bytes=self._deferred.accepted_bytes
             self.records+=1;self.counts[kind]+=1
             return
-        raw=(json.dumps(_target_record(kind,value),ensure_ascii=True,separators=(',',':'),allow_nan=False)+'\n').encode('ascii')
+        raw=(json.dumps(document,ensure_ascii=True,separators=(',',':'),allow_nan=False)+'\n').encode('ascii')
         if self.records>=self.budget.max_records or self.bytes+len(raw)>self.budget.max_bytes:
             self.stopped=True;return
         try:
@@ -112,7 +123,7 @@ class PythonTargetObserver:
             self.bytes=result['output']['raw_bytes']
             return
         if self._buffer:self._write_all(self._buffer);self._buffer.clear()
-    def gap(self,attempt,reason):self.emit('GAP',PythonTargetGap(attempt,reason))
+    def gap(self,attempt,reason):self._emit_fields('GAP',{'attempt_index':attempt,'reason':reason})
     def observed_code(self,code):
         ref=self.codes.get(id(code));return ref is not None and ref() is code
     def select_code(self,code,attempt):
@@ -133,8 +144,11 @@ class PythonTargetObserver:
         elif type(callable_object) is types.BuiltinFunctionType:kind=Kind.NATIVE_BUILTIN
         elif type(callable_object) is types.MethodWrapperType:kind=Kind.NATIVE_WRAPPER
         call_ref=reference(callable_object)
+        caller={'process_id':self.recorder.pid,'thread_id':key[0],'invocation_id':owner}
         if func is None:
-            self.emit('TARGET',PythonCallTarget(attempt,InvocationKey(self.recorder.pid,key[0],owner),kind,call_ref,None,None,None,None,Scope.NO_PYTHON_CODE));return
+            self._emit_fields('TARGET',{'attempt_index':attempt,'caller':caller,'kind':kind.value,
+                'callable_reference':call_ref,'function_reference':None,'code':None,'layout':None,
+                'receiver':None,'scope':Scope.NO_PYTHON_CODE.value});return
         code=func.__code__;code_key=captured_code_key(code);function_ref=reference(func)
         if kind is Kind.FUNCTION and not arg0_missing:
             instruction=call_instruction(caller_code,call_site['offset'])
@@ -149,15 +163,21 @@ class PythonTargetObserver:
                 kind=Kind.NORMALIZED_RECEIVER_FUNCTION;receiver=arg0
         receiver_ref=None if receiver is None else reference(receiver)
         scope=Scope.PROJECT if self.operand._code_inside(code) else Scope.OBSERVED_EXTERNAL_PYTHON if os.path.isabs(code.co_filename) else Scope.NONFILESYSTEM_PYTHON
-        role=None if receiver is None else (BoundReceiver(ReceiverRole.IMPLICIT_CALL_RECEIVER,receiver_ref,instruction[1],(ReceiverCondition.NO_INTERVENING_CALL_LAYOUT_MUTATION,)) if kind is Kind.NORMALIZED_RECEIVER_FUNCTION else BoundReceiver(ReceiverRole.BOUND_METHOD_RECEIVER,receiver_ref))
-        target=PythonCallTarget(attempt,InvocationKey(self.recorder.pid,key[0],owner),kind,call_ref,function_ref,code_key,layout(code),role,scope)
-        self.emit('TARGET',target)
+        normalized=kind is Kind.NORMALIZED_RECEIVER_FUNCTION
+        role=None if receiver is None else {
+            'role':(ReceiverRole.IMPLICIT_CALL_RECEIVER if normalized else ReceiverRole.BOUND_METHOD_RECEIVER).value,
+            'reference':receiver_ref,'explicit_positional':instruction[1] if normalized else None,
+            'conditions':[ReceiverCondition.NO_INTERVENING_CALL_LAYOUT_MUTATION.value] if normalized else []}
+        from scar.trace.call_operands import _layout_record
+        self._emit_fields('TARGET',{'attempt_index':attempt,'caller':caller,'kind':kind.value,
+            'callable_reference':call_ref,'function_reference':function_ref,'code':code_key,
+            'layout':_layout_record(layout(code)),'receiver':role,'scope':scope.value})
         if not self.select_code(code,attempt):return
         try:receiver_weak=None if receiver is None else weakref.ref(receiver)
         except TypeError:receiver_weak=None
         try:method_weak=weakref.ref(callable_object) if kind is Kind.BOUND_METHOD else None
         except TypeError:method_weak=None
-        self.pending[key]={'attempt':attempt,'caller':target.caller,'function':weakref.ref(func),'code':weakref.ref(code),'code_key':code_key,'site':call_site,'receiver':receiver_weak,'method':method_weak,'receiver_ref':receiver_ref,'kind':kind,'defaults_none':func.__defaults__ is None}
+        self.pending[key]={'attempt':attempt,'caller':(self.recorder.pid,key[0],owner),'function':weakref.ref(func),'code':weakref.ref(code),'code_key':code_key,'site':call_site,'receiver':receiver_weak,'method':method_weak,'receiver_ref':receiver_ref,'kind':kind,'defaults_none':func.__defaults__ is None}
     def pending_for(self,frame):
         parent=frame.f_back
         state=self.operand._base_state(parent) if parent is not None else None
@@ -181,7 +201,7 @@ class PythonTargetObserver:
         state=self.operand._base_state(frame)
         if state is None:
             self.gap(pending['attempt'],'PYTHON_ENTRY_NOT_RETAINED_BY_FRAME_RECORDER');return False
-        key=threading.get_ident(),pending['caller'].invocation_id
+        key=threading.get_ident(),pending['caller'][2]
         self.pending.pop(key,None)
         receiver_index=receiver_ref=None
         if pending['kind'] in (Kind.BOUND_METHOD,Kind.NORMALIZED_RECEIVER_FUNCTION):
@@ -199,7 +219,12 @@ class PythonTargetObserver:
         # Project exact-function entry authority remains the original v1
         # ENTRY_HANDSHAKE. v2 adds entries only for methods/external code.
         if pending['kind'] is Kind.FUNCTION and self.operand._code_inside(frame.f_code):return True
-        self.emit('ENTRY',PythonEntryBinding(pending['attempt'],pending['caller'],InvocationKey(self.recorder.pid,threading.get_ident(),state[0]),self.recorder.index,pending['code_key'],receiver_index,receiver_ref))
+        pid,tid,owner=pending['caller']
+        self._emit_fields('ENTRY',{'attempt_index':pending['attempt'],
+            'caller':{'process_id':pid,'thread_id':tid,'invocation_id':owner},
+            'callee':{'process_id':self.recorder.pid,'thread_id':threading.get_ident(),'invocation_id':state[0]},
+            'entry_index':self.recorder.index,'code':pending['code_key'],
+            'receiver_parameter_index':receiver_index,'receiver_reference':receiver_ref})
         return True
     def close(self):
         if self.closed or os.getpid()!=self.recorder.pid:return

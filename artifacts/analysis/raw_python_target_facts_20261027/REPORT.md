@@ -1,0 +1,9 @@
+# Raw Python target facts
+
+One production file changes from main `1d4d681d`: `trace/python_call_targets.py`. Internal CALL/entry/gap callbacks now record the original V2 primitive fields directly, with original field order, counters, digest, budget and JSONL/snapshot branches. They construct no InvocationKey, PythonCallTarget, PythonEntryBinding, BoundReceiver or PythonTargetGap. Public `emit(kind, typed_value)` retains the ordinary typed compatibility/validation path. The normal reader remains the IR validation boundary. The SCAR-private immutable static FunctionLayout projection is reused; code/default/receiver checks and weak lifetime observations are unchanged. Pending callers contain only their original pid/tid/invocation tuple.
+
+Actual same-process before/after check passed in both transports: 6 TARGET + 4 ENTRY + 3 GAP, 5,461 bytes each, byte-identical. These were actual observer calls and actual lightweight Python method entry frames; changed defaults produced the original gap, and two receivers stayed distinct. `read_target_record` decoded every record normally; public typed emit was consumed too. No profile hooks, target episode or LeWM run were used for that check.
+
+The motivating diagnostic was one bounded, interrupted **LeWM import prefix**, not a completed inference: original timer directory `os-postprocessing-roles/artifacts/experiments/lewm_collector_helper_timing_20261027`. Its 69.248s window recorded target `on_call` 249,693 times / 16.422s inclusive, target emit 311,923 / 9.472s, and `_target_record` 311,923 / 3.782s. 70s SIGINT saved timings before close; outer cleanup was killed at 85.005s, exit137. That failed/partial capture remains unchanged. Times overlap and include diagnostic wrapper overhead; native/OS/witness were disabled, no GPU episode ran, and this is not an A/B inference-speed claim.
+
+The subsequent bounded diagnostic will be recorded separately without changing this wire result or production source.
