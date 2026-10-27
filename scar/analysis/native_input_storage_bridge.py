@@ -13,6 +13,9 @@ from io import BytesIO
 
 from scar.analysis.tensor_storage_index import TensorStorageReferenceIndex, _scope
 from scar.analysis.tensor_storage_query import _Meter, _json, _need, _stamp
+from scar.analysis.native_port_geometry import (
+    NativeTensorPortGeometry, connect_observed_input_region,
+)
 from scar.ir.execution.codec import loads as load_execution
 from scar.ir.execution.content import NativeInputRef
 from scar.ir.execution.coordinates import InitialEntry
@@ -20,7 +23,7 @@ from scar.ir.execution.ids import ValueOccurrenceID
 from scar.ir.execution.resources import AllocationTarget
 from scar.ir.program.codec import loads as load_program
 from scar.ir.program.model import TerminatorKind
-from scar.ir.program.providers import ProviderArtifact
+from scar.ir.program.providers import ProviderArtifact, ProviderFactReference
 from scar.ir.provenance import _WIDTHS
 from scar.ir.record_codec import decode, encode
 from scar.ir.v2.ids import StorageAllocationID, StorageRegionID
@@ -200,6 +203,52 @@ def _canonical_input(association, meter, owned_execution=None):
     return execution, operation, occurrences[0], denotation, uses[0], boundary
 
 
+def _qualified_eto_input_geometry(association, denotation, allocation_query, meter):
+    """Read only the exact qualification row already referenced by navigation."""
+    parent = association.get('canonical_parent', {})
+    qualification = parent.get('qualification_row') if type(parent) is dict else None
+    if type(qualification) is not dict:
+        return None, None, 'NAVIGATION_HAS_NO_QUALIFICATION_ROW_REFERENCE'
+    _need(qualification.get('representation') ==
+          'derived port-qualification JSONL transport; not original ETO coordinate',
+          'unsupported original qualification-row representation')
+    artifact = decode(ProviderArtifact, qualification['artifact'])
+    _need(artifact.schema == 'scar.native-capture-row-chunk'
+          and type(qualification.get('line_1_based')) is int
+          and qualification['line_1_based'] > 0,
+          'navigation qualification-row receipt/coordinate differs')
+    raw = meter.artifact(artifact, 8_100_000)
+    meter.charge(decoded=len(raw))
+    lines = raw.splitlines()
+    line_no = qualification['line_1_based']
+    _need(line_no <= len(lines), 'qualified input row is outside the original retained chunk')
+    row = strict_json(lines[line_no - 1])
+    required = {'A', 'B', 'C', 'D', 'denotation', 'direction', 'native_path', 'native_shape',
+                'native_strides', 'native_tensor_tuple', 'native_type', 'position', 'sequence', 'source'}
+    _need(type(row) is dict and set(row) == required and row['A'] == 'QUALIFIED_NATIVE_PORT'
+          and row['direction'] == 'inputs' and row['B'] == 'QUALIFIED_HELD_OBJECT',
+          'original input qualification row is not a qualified held native port')
+    _need(type(denotation.basis) is NativeInputRef
+          and row['denotation'] == encode(denotation)
+          and row['source'] == encode(denotation.source)
+          and row['native_path'] == association['path']
+          and row['position'] == denotation.basis.position,
+          'qualification row differs from original NativeInputRef/denotation/path')
+    tensor = row['native_tensor_tuple']
+    _need(type(tensor) is list and len(tensor) == 6,
+          'qualified ETO Tensor tuple does not have six fields')
+    qualification_source = ProviderFactReference(artifact, '#/lines/' + str(line_no))
+    geometry = NativeTensorPortGeometry(
+        denotation.basis, denotation.source, qualification_source, 'inputs',
+        tuple(row['native_path']), row['native_type'], tensor[0], tensor[1], tensor[2],
+        tensor[3], tensor[4], tensor[5], tuple(row['native_shape']), tuple(row['native_strides']))
+    if not geometry.has_storage:
+        return geometry, None, 'ETO_INPUT_HAS_NO_STORAGE_GEOMETRY'
+    execution_artifact = decode(ProviderArtifact, parent['execution'])
+    connection = connect_observed_input_region(geometry, allocation_query, execution_artifact)
+    return geometry, connection, None
+
+
 def query_native_input_allocation(navigation: ProviderArtifact, storage_index: ProviderArtifact, *,
         native_input: NativeInputRef | None = None, value_occurrence: ValueOccurrenceID | None = None,
         execution: ProviderArtifact | None = None, row: int | None = None,
@@ -213,6 +262,9 @@ def query_native_input_allocation(navigation: ProviderArtifact, storage_index: P
     hard explicit boundary rather than a fabricated allocation or version.
     derive_region opts into the versioned valid-Tensor-bounds static protocol;
     it does not turn the provider's unobserved offset into observed metadata.
+    When the selected navigation row carries its original qualification-row
+    receipt, this same query also returns the exact ETO input geometry and a
+    StorageRegion joined to the same native input and provider allocation.
     """
     _need(type(navigation) is type(storage_index) is ProviderArtifact, 'typed original artifact receipts required')
     navigation.__post_init__(); storage_index.__post_init__()
@@ -306,5 +358,44 @@ def query_native_input_allocation(navigation: ProviderArtifact, storage_index: P
         result['geometry'] = _unique_region(association, allocation)
         result['scope'] = ('exact observed input allocation plus explicitly conditional static geometry; '
             'no observed offset, lifetime extent, contents/version, actual state-write or readiness upgrade')
+    geometry, region_connection, geometry_gap = _qualified_eto_input_geometry(
+        association, denotation, result, meter)
+    if geometry is None:
+        result['observed_eto_geometry'] = {
+            'status': 'OPEN', 'reason': geometry_gap,
+            'source': association['original_input'],
+        }
+    else:
+        result['observed_eto_geometry'] = {
+            'status': 'OBSERVED_EXACT_NATIVE_INPUT_PORT_GEOMETRY',
+            'source': encode(geometry.source),
+            'qualification_source': encode(geometry.qualification_source),
+            'direction': geometry.direction,
+            'native_path': list(geometry.native_path),
+            'native_type': geometry.native_type,
+            'native_tensor_tuple': [geometry.tensor_id, geometry.storage_id,
+                                    geometry.storage_offset, geometry.numel,
+                                    geometry.itemsize, geometry.device],
+            'shape': list(geometry.shape), 'strides': list(geometry.strides),
+            'eto_storage_id_is_provider_epoch': False,
+        }
+    if region_connection is None:
+        result['observed_storage_region'] = {
+            'status': 'OPEN', 'reason': geometry_gap or 'STORAGE_REGION_CONNECTION_UNAVAILABLE',
+            'region': None, 'contents_or_readiness_established': False,
+        }
+    else:
+        result['observed_storage_region'] = {
+            'status': 'DERIVED_FROM_EXACT_ETO_INPUT_GEOMETRY_AND_OBSERVED_PROVIDER_EPOCH',
+            'region': encode(region_connection.region),
+            'allocation_source': encode(region_connection.allocation_source),
+            'provider_epoch_source': encode(region_connection.provider_epoch_source),
+            'geometry_source': encode(region_connection.geometry.source),
+            'qualification_source': encode(region_connection.geometry.qualification_source),
+            'stored_as_new_ir_record': False,
+            'contents_or_readiness_established': False,
+        }
+        result['scope'] = ('exact observed input allocation plus same-port ETO geometry-derived StorageRegion; '
+            'no content/version, actual state-write or readiness claim')
     result['measurements'] = meter.finish()
     return result

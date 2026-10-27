@@ -35,13 +35,13 @@ def query_native_allocation_cli(args):
 
 def register_native_allocation_query(sub):
     parser = sub.add_parser('query-native-allocation',
-        help='connect an original native input to its same-provider allocation; no content identity inference')
+        help='connect an original native input to its allocation and receipt-referenced ETO geometry when available')
     for name in ('navigation', 'navigation-sha256', 'storage-index', 'storage-sha256'):
         parser.add_argument('--' + name, required=True)
     parser.add_argument('--row', type=int, help='original native metadata row ordinal')
     parser.add_argument('--path', help='original input slot path as a JSON list, requires --row')
     parser.add_argument('--derive-region', action='store_true',
-        help='derive a region only when pinned valid-Tensor bounds give a unique offset; keep observed gaps')
+        help='also run the existing pinned valid-Tensor-bounds protocol; ETO-observed geometry is returned independently')
     parser.add_argument('--max-input-bytes', type=int, default=256_000_000)
     parser.add_argument('--max-seconds', type=int, default=60)
     parser.add_argument('--out', help='fresh JSON query result; otherwise stdout')

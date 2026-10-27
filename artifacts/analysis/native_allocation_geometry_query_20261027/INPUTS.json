@@ -1,0 +1,51 @@
+{
+  "base_commit": "955d3b57c94af0c43b04d5d2624b842a16c393b9",
+  "command": [
+    "/home/zyf/miniconda3/envs/lewm/bin/python",
+    "-B",
+    "-m",
+    "scar.cli",
+    "query-native-allocation",
+    "--navigation",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/native_inputs_full_20261026/attempt05/port-navigation/manifest.json",
+    "--navigation-sha256",
+    "4436b171be0dec2782e7843bc097227d675efa5e33155a6e8a2bf2408b4b6f72",
+    "--storage-index",
+    "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/tensor_gpu_reference_query_20261026/locator-index/manifest.json",
+    "--storage-sha256",
+    "d127c95a2ff1b1d848288c83ef3cb3785f55f0c2f68d0918f3ef7d280b1de7c2",
+    "--row",
+    "53",
+    "--path",
+    "[0]",
+    "--out",
+    "/home/zyf/AAA/scar-worktrees/native-input-allocation-geometry/artifacts/analysis/native_allocation_geometry_query_20261027/ACTUAL.json"
+  ],
+  "limits": {
+    "max_input_bytes": 256000000,
+    "max_seconds": 60,
+    "derive_region": false,
+    "raw_eto_read": false,
+    "new_capture": false
+  },
+  "source_receipts": {
+    "program": {
+      "sha256": "d70685d1521bf28527fa32beb319fa0f9d66db257b6df3ce2559f013141d5bc6",
+      "size_bytes": 5273398
+    },
+    "execution": {
+      "sha256": "d58eaa17e99f207f5a7780ab6e7904615e9376ab472dfcdb81ce7922a28f6dbc",
+      "size_bytes": 7846834
+    },
+    "eto": {
+      "sha256": "11960422233619b68d4a42d5b699a34cb57349df04df0bc90b6fd5ef3d8e4684",
+      "size_bytes": 321365939,
+      "opened": false
+    },
+    "qualification_chunk": {
+      "sha256": "455b8631e9b9f9b9669569e8cc07eadfc061c4ff5963728ccb09ced1fbe1c27d",
+      "size_bytes": 1998789,
+      "line_1_based": 10
+    }
+  }
+}
