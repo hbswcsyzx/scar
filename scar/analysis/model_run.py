@@ -659,13 +659,16 @@ def _execute_source_stages(capture, attempt, plan, result, budget, stages, produ
                                         coordinates, link, progress, call_budget, workspace, source_only)
         finally:
             if workspace.captured_session is not None:
-                result['source_input_scope'] = workspace.captured_session.report()
-                workspace.captured_session.close()
+                try:
+                    result['source_input_scope'] = workspace.captured_session.report()
+                finally:
+                    workspace.captured_session.close()
 
 
 def _build_source_stages(capture, plan, result, budget, stages, products, coordinates,
                          link, progress, call_budget, workspace, source_only):
     from scar.analysis.call_seeds import _read_call_source_seeds
+    from scar.analysis.captured_source_owner import CapturedSourceBudget
     from scar.analysis.call_demand import inventory_from_calls
     from scar.analysis.program_inventory import inventory_program
     from scar.analysis.source_layers import reconstruct_source_layers
@@ -682,7 +685,13 @@ def _build_source_stages(capture, plan, result, budget, stages, products, coordi
     def seeds_stage(stage):
         seeds = _read_call_source_seeds(capture / "trace", project_root, budget=call_budget,
             compilation_profile=CallCompilationProfile.RECORDED_FUTURE_FLAGS,
-            _source_workspace=workspace, coordinates=coordinates)
+            _source_workspace=workspace, coordinates=coordinates,
+            captured_source_budget=CapturedSourceBudget(
+                max_metadata_bytes=min(budget.max_metadata_bytes, call_budget.max_raw_bytes),
+                max_rows_bytes=call_budget.max_raw_bytes,
+                max_row_bytes=min(budget.max_record_bytes, call_budget.max_line_bytes),
+                max_files=call_budget.max_codes, max_source_bytes=call_budget.max_raw_bytes,
+                max_codes=call_budget.max_codes, max_code_bytes=call_budget.max_raw_bytes))
         summary = seeds.summary()
         if summary["counts"]["entered_invocations"] > budget.max_calls:
             raise ValueError("verified seed invocation count exceeds call budget")
