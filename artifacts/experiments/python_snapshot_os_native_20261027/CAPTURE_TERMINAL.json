@@ -1,0 +1,8 @@
+{
+  "collector_source_tree_sha256": "17f64b651f02e40e500325277d261a7f6542b6cc375e1ae9c237f5fd3cb555c2",
+  "elapsed_seconds": 39.79506231797859,
+  "exit_code": 0,
+  "status": "EXITED",
+  "whole_model_established": false,
+  "wrapper_pid": 2149382
+}
