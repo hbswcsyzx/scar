@@ -22,6 +22,7 @@ def query_native_allocation_cli(args):
         artifact(args.navigation, args.navigation_sha256, 'scar.native-input-port-navigation'),
         artifact(args.storage_index, args.storage_sha256, 'scar.tensor-storage-locator-index'),
         row=args.row, path=None if path is None else tuple(path),
+        derive_region=args.derive_region,
         max_input_bytes=args.max_input_bytes, max_seconds=args.max_seconds)
     payload = json.dumps(encode(result), ensure_ascii=False, indent=2, allow_nan=False) + '\n'
     if args.out:
@@ -39,6 +40,8 @@ def register_native_allocation_query(sub):
         parser.add_argument('--' + name, required=True)
     parser.add_argument('--row', type=int, help='original native metadata row ordinal')
     parser.add_argument('--path', help='original input slot path as a JSON list, requires --row')
+    parser.add_argument('--derive-region', action='store_true',
+        help='derive a region only when pinned valid-Tensor bounds give a unique offset; keep observed gaps')
     parser.add_argument('--max-input-bytes', type=int, default=256_000_000)
     parser.add_argument('--max-seconds', type=int, default=60)
     parser.add_argument('--out', help='fresh JSON query result; otherwise stdout')

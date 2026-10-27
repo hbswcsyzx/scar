@@ -239,6 +239,35 @@ def import_capture(capture_dir, output_dir, *, max_bytes=1_000_000_000, max_line
             _write(os_out / 'summary.json', os_fragment.summary)
             outputs.extend(_stored(path) for path in sorted(os_out.rglob('*')) if path.is_file())
             os_summary = dict(os_fragment.summary, coordinate_check=os_check)
+            if os_interface_work:
+                # Keep collector work distinguishable without filtering or
+                # relabeling any original OS observation as application work.
+                from scar.analysis.os_postprocessing_roles import bind_snapshot_postprocessor_roles
+                from scar.ir.program.providers import ProviderArtifact
+                pid = coordinates.target_process.pid
+                expected = tuple(capture / 'trace' / (stem + f'.{pid}.jsonl.snapshot-receipt.json')
+                    for stem in ('call-events', 'call-codes', 'call-operands',
+                                 'python-call-targets', 'function-environments'))
+                declared = []
+                for path in expected:
+                    if path.is_file():
+                        if path.stat().st_size > 1_000_000:
+                            raise ValueError('snapshot conversion receipt exceeds metadata ceiling')
+                        raw = path.read_bytes()
+                        declared.append(ProviderArtifact(str(path), sha256(raw).hexdigest(),
+                                                         len(raw), 'application/json'))
+                if declared:
+                    roles = bind_snapshot_postprocessor_roles(coordinates, os_fragment, tuple(declared)).to_dict()
+                    roles['expected_receipts_missing'] = [str(p) for p in expected if not p.is_file()]
+                    role_path = os_out / 'snapshot-postprocessor-roles.json'
+                    _write(role_path, roles)
+                    outputs.append(_stored(role_path))
+                    os_summary['snapshot_postprocessor_roles'] = {
+                        'artifact': _stored(role_path), 'positive_roles': len(roles['roles']),
+                        'frontiers': len(roles['frontiers']),
+                        'missing_receipts': len(roles['expected_receipts_missing']),
+                        'original_observations_filtered': False,
+                        'unclassified_is_application': False}
             stage('os_resources', 'IMPORTED', **os_fragment.summary)
             del os_fragment
             gc.collect()

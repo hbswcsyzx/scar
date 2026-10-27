@@ -110,9 +110,31 @@ on_call 的 inclusive 16.422 秒、913,845 次 Deferred append 的 12.968 秒。
 PythonCallTarget 等 IR 对象；普通 reader 仍完整验证。原有公开 typed emit API 保留。
 小方法负载的同进程 wire 对比通过，新的真实 LeWM 全流程尚未验证。
 
+控制异常也必须保留：已修复回调 fallback 中记录错误后吞掉 KeyboardInterrupt/
+SystemExit 的 BaseException 捕获。真实 sys.monitoring 小循环在旧版吞掉 self-SIGINT
+并继续，新版将 SIGINT 传播给程序；constructor cleanup/原目标异常的重抛路径保持。
+弱回调本身的 unraisable 边界单列，不宣称所有异步边界已经恢复。
+
 跨层数据关系新增 `query-native-allocation`：从原 NativeInputRef/ValueOccurrence
 及其原端口，经过同 capture/provider epoch，查询原 AllocationTarget；不生成新
 逻辑值或 Materialization。公开 CLI 已对真实 `aten::lift_fresh` 的 CPU4B 输入通过，
 GPU、内容版本、写入后态和 ready 仍未验证；这不是全图批量接线。
+
+`--derive-region` 可选择静态范围推导。若 pinned valid-strided-Tensor 协议下，
+原输入 metadata 与同一 allocation 的基址、extent 唯一限制了 offset，返回现有
+StorageRegion 的派生 view。例如原 CPU4B 输入有 4*offset+4<=4、offset>=0，
+所以 offset=0。原 observed_storage_offset=None/gap 保留；更大的8B extent 不唯一，
+返回 OPEN。这个证明有明确协议假设，不是新观测、逻辑版本或完成/ready 证明。
+
+独立 CPU/CUDA/文件往返样例完成 native+OS 采集后，五个 materializer 的角色已由
+同 Run 的父子/exec 来源核对。现有 `import-capture --os-interface-work` 自动发布
+角色导航，`model-run` 复用此路径；公开 CLI 对同一原件一次导入 82.647 秒通过，
+保留全部65,352条 OS observation，5 positive roles、0 role frontiers/missing receipts。
+原事实不被过滤；未分类不等于 application。此小程序不是 LeWM 全程序验收替代。
+
+接下来继续本阶段建模：接本次内容读取/状态版本、跨 copy/transform 的来源与
+Materialization、输出同点 region 及资源 ready/lifetime；符号版本与已知数值分开，
+不为建模逐次保存 Tensor 内容。copy 方案及原断口见
+[read/provenance 方案](../artifacts/analysis/logical_copy_provenance_plan_20261027/PLAN.md)。
 端到端仍需同 Run 接通加载、推理、环境和保存，以及逻辑版本、物化、ready/lifetime。
 当前不增加 detector/backend，不报告 LeWM 加速比。
