@@ -9,6 +9,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
+import re
 
 from scar.analysis.call_edges import _Sources
 from scar.analysis.call_operand_reader import CallOperandTrace
@@ -22,6 +23,8 @@ from scar.ir.program.model import (
     TerminatorKind, UseRole,
 )
 from scar.ir.program.queries import ProgramIndex
+from scar.ir.program.providers import ProviderFactReference
+from scar.trace.stream_backing import StreamBackingObservation
 from scar.ir.v2.common import SourceReference
 from scar.ir.record_codec import decode
 from scar.trace.stream_interfaces import StreamContract, read_stream_interfaces
@@ -47,6 +50,8 @@ class StreamResourceInterface:
     receiver_type: str
     identity_qualified: bool
     contract: StreamContract
+    backing: StreamBackingObservation | None = None
+    backing_source: ProviderFactReference | None = None
 
     def __post_init__(self):
         if type(self.receiver_reference) is not str or not self.receiver_reference:
@@ -63,6 +68,16 @@ class StreamResourceInterface:
                 or type(self.contract.effects_complete) is not bool
                 or self.contract.effects_complete):
             raise ValueError("stream contract must retain its incomplete declared-effects status")
+        if ((self.backing is None)!=(self.backing_source is None)
+                or self.backing is not None and type(self.backing) is not StreamBackingObservation
+                or self.backing_source is not None and type(self.backing_source) is not ProviderFactReference):
+            raise TypeError('stream backing must retain both typed observation and its original SourceFact')
+        if self.backing is not None:
+            if self.backing.chain_types[0]!=self.receiver_type:
+                raise ValueError('stream backing has a different observed receiver type')
+            if (self.backing_source.artifact.schema!='scar.stream-interfaces.events.v2'
+                    or re.fullmatch(r'#/lines/[1-9][0-9]*/backing_observation',self.backing_source.locator) is None):
+                raise ValueError('stream backing source must reference the original BEGIN observation')
 
 
 @dataclass(frozen=True, slots=True)
@@ -162,6 +177,7 @@ class SourceStreamInterfaceView:
     receiver_bound_to_source_value: bool = False
     content_or_readiness_proved: bool = False
     conditions: tuple[str, ...] = (
+        "optional backing facts are non-atomic CALL-time builtin descriptor/fstat observations, not permanent resource/content/lifetime identities",
         "receiver tokens remain observation references; they are not joined to a source Value or ResourceDefinition",
         "C_RETURN/C_RAISE identifies the captured C-call outcome only; it is not a byte count, readiness, or persistence claim",
         "stream read/write roles are declared and incomplete; selected source-body coarse world ports remain the only state carrier",
@@ -396,9 +412,7 @@ def read_source_stream_interfaces(*, trace: CallOperandTrace, source_model,
                      "UNOBSERVED": None}.get(completion)
         if completion not in ("C_RETURN", "C_RAISE", "UNOBSERVED"):
             raise ValueError("unknown original stream completion kind")
-        contract = decode(StreamContract, row["contract"])
-        resource = StreamResourceInterface(row["receiver_reference"], row["receiver_kind"],
-            row["receiver_type"], row["reference_identity_qualified"], contract)
+        resource = stream_resource_interface(row)
         status = (SourceStreamStatus.CORE_CONNECTED if ports is not None else
                   SourceStreamStatus.SOURCE_ONLY if link.status is CallLinkStatus.VERIFIED else
                   SourceStreamStatus.SOURCE_BOUNDARY)
@@ -408,11 +422,23 @@ def read_source_stream_interfaces(*, trace: CallOperandTrace, source_model,
         tuple(calls), any(call.ports is not None for call in calls))
 
 
+def stream_resource_interface(row):
+    """Project a normally read original stream CALL, preserving its SourceFact.
+
+    This immutable interface is a view; constructing it is not independent
+    evidence qualification and never creates a canonical ResourceDefinition.
+    """
+    backing=decode(StreamBackingObservation,row['backing_observation']) if 'backing_observation' in row else None
+    origin=decode(ProviderFactReference,row['backing_source']) if 'backing_source' in row else None
+    return StreamResourceInterface(row['receiver_reference'],row['receiver_kind'],row['receiver_type'],
+        row['reference_identity_qualified'],decode(StreamContract,row['contract']),backing,origin)
+
+
 build_source_stream_interface_view = read_source_stream_interfaces
 
 
 __all__ = [
     "SourceCompletionPort", "SourceStreamCall", "SourceStreamInterfaceView",
     "SourceStreamBodyOrigin", "SourceStreamOperationPorts", "SourceStreamStatus", "StreamResourceInterface",
-    "build_source_stream_interface_view", "read_source_stream_interfaces",
+    "build_source_stream_interface_view", "read_source_stream_interfaces", "stream_resource_interface",
 ]

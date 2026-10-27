@@ -1,0 +1,36 @@
+{
+  "schema": "scar.stream-backing-readback-receipt",
+  "schema_version": 1,
+  "actual_exit_code": 0,
+  "capture_session": 9810,
+  "capture_actual_exit_code": 0,
+  "capture_seconds_reported_by_owner": 33.73,
+  "normal_read_seconds": 0.01352205901639536,
+  "max_rss_kib": 36072,
+  "metadata": {
+    "uri": "/home/zyf/AAA/scar-worktrees/program-ports-capture/artifacts/experiments/program_ports_cpu_20261027/capture/trace/stream-interface-meta.2026697.json",
+    "bytes": 2952,
+    "sha256": "3891db10c334efe8fa8c9e2446f368c19c07157c815098c63135fe54211e7da9"
+  },
+  "counts": {
+    "BEGIN": 7,
+    "C_RETURN": 6,
+    "C_RAISE": 1,
+    "UNOBSERVED": 0
+  },
+  "backing_counts": {
+    "OBSERVED": 6,
+    "MEMORY_STREAM": 0,
+    "UNSUPPORTED_CHAIN": 0,
+    "CHAIN_FAILED": 0,
+    "FILENO_FAILED": 1,
+    "FSTAT_FAILED": 0
+  },
+  "regular_file_observations": 4,
+  "fifo_observations": 2,
+  "fileno_failures": 1,
+  "normal_reader_decoded_input_bytes": 227166,
+  "normal_reader_stored_input_bytes": 25738,
+  "logical_identity_or_contents_or_lifetime_established": false,
+  "whole_model_established": false
+}

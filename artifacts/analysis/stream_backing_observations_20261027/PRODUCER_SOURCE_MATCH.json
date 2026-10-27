@@ -1,0 +1,17 @@
+{
+  "all_equal_to_readback_sources": true,
+  "files": [
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/program-ports-capture/scar/trace/stream_interfaces.py",
+      "sha256": "4eb68e4aa4f6e44229cb79678bc1353e13474cd25a9dfc7863e6ede230701792"
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/program-ports-capture/scar/trace/stream_backing.py",
+      "sha256": "0c6adac2dfed167aea96b14e8e8d66dd05bef42aadfacf49abef191cde37a79b"
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/program-ports-capture/scar/analysis/source_stream_interfaces.py",
+      "sha256": "54fab61449b90e11a1517e3883cb8ce657508ad233b4777b716e17bd21dcbf1c"
+    }
+  ]
+}
