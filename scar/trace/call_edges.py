@@ -615,14 +615,18 @@ def install(out, project_root, *, lean_plan=None):
         if recorder._is_capture_writer is not None and recorder._is_capture_writer():
             return
         observer = recorder.operand_observer
-        if observer is None:
-            recorder.profile(frame,event,arg)
-        else:
-            # Keep the newly retained entry and its sidecar handshake atomic
-            # across threads. Monitoring callbacks use this same outer lock.
-            with recorder.lock:
+        # Both domains immediately ignore these C completion notifications.
+        # Keep the previous profile hook below: it may consume or raise on them.
+        # c_call still takes the original path, including hook-mutation checks.
+        if event not in ('c_return', 'c_exception'):
+            if observer is None:
                 recorder.profile(frame,event,arg)
-                observer.profile(frame,event,arg)
+            else:
+                # Keep entry and handshake atomic across threads. Monitoring
+                # callbacks use this same outer lock.
+                with recorder.lock:
+                    recorder.profile(frame,event,arg)
+                    observer.profile(frame,event,arg)
         old = previous if threading.get_ident() == main_thread else previous_thread
         if old is not None:
             old(frame,event,arg)
