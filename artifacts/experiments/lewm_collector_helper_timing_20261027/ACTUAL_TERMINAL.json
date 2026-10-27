@@ -1,0 +1,8 @@
+{
+  "status": "ACTUAL_TERMINAL",
+  "exit_code": 137,
+  "elapsed_seconds": 85.00460122799268,
+  "wrapper_pid": 2145557,
+  "new_GPU_episode": false,
+  "capture_witness_qualified": false
+}

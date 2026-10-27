@@ -1,0 +1,50 @@
+Traceback (most recent call last):
+  File "/home/zyf/AAA/scar-worktrees/os-postprocessing-roles/artifacts/experiments/lewm_collector_helper_timing_20261027/bootstrap.py", line 142, in <module>
+    runpy.run_path(str(LEWM/'run_inference.py'), run_name='__scar_import_prefix_diagnostic__')
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen runpy>", line 294, in run_path
+  File "<frozen runpy>", line 98, in _run_module_code
+  File "<frozen runpy>", line 88, in _run_code
+  File "/home/zyf/AAA/le-wm/run_inference.py", line 53, in <module>
+    import stable_worldmodel as swm  # noqa: E402
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/zyf/AAA/le-wm/stable-worldmodel/stable_worldmodel/__init__.py", line 1, in <module>
+    from stable_worldmodel import (
+    ...<8 lines>...
+    )
+  File "/home/zyf/AAA/le-wm/stable-worldmodel/stable_worldmodel/data/__init__.py", line 1, in <module>
+    from .utils import *  # noqa: F403
+    ^^^^^^^^^^^^^^^^^^^^
+  File "/home/zyf/AAA/le-wm/stable-worldmodel/stable_worldmodel/data/utils.py", line 7, in <module>
+    import torch
+  File "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/torch/__init__.py", line 2189, in <module>
+    _C._initExtension(_manager_path())
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/torch/cuda/__init__.py", line 1983, in <module>
+    from . import amp, jiterator, nvtx, profiler, sparse, tunable
+  File "<frozen importlib._bootstrap>", line 474, in _lock_unlock_module
+  File "<frozen importlib._bootstrap>", line 311, in acquire
+  File "<frozen importlib._bootstrap>", line 170, in __enter__
+  File "<frozen importlib._bootstrap>", line 132, in setdefault
+  File "<frozen importlib._bootstrap>", line 74, in __new__
+  File "/home/zyf/AAA/scar-worktrees/os-postprocessing-roles/artifacts/experiments/lewm_collector_helper_timing_20261027/diagnostic-source/scar/trace/call_edges.py", line 620, in profile
+    recorder.profile(frame,event,arg)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "/home/zyf/AAA/scar-worktrees/os-postprocessing-roles/artifacts/experiments/lewm_collector_helper_timing_20261027/diagnostic-source/scar/trace/call_edges.py", line 458, in profile
+    if self._write(self.events_fd,row):
+       ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+  File "/home/zyf/AAA/scar-worktrees/os-postprocessing-roles/artifacts/experiments/lewm_collector_helper_timing_20261027/diagnostic-source/scar/trace/call_edges.py", line 238, in _write
+    accepted = self._deferred[fd].append(row)
+  File "/home/zyf/AAA/scar-worktrees/os-postprocessing-roles/artifacts/experiments/lewm_collector_helper_timing_20261027/bootstrap.py", line 72, in measured
+    return function(*args, **kwargs)
+  File "/home/zyf/AAA/scar-worktrees/os-postprocessing-roles/artifacts/experiments/lewm_collector_helper_timing_20261027/diagnostic-source/scar/trace/deferred_jsonl.py", line 58, in append
+    return self.journal.append(row)
+           ~~~~~~~~~~~~~~~~~~~^^^^^
+  File "/home/zyf/AAA/scar-worktrees/os-postprocessing-roles/artifacts/experiments/lewm_collector_helper_timing_20261027/bootstrap.py", line 75, in measured
+    row = counters()[index]
+          ~~~~~~~~^^
+  File "/home/zyf/AAA/scar-worktrees/os-postprocessing-roles/artifacts/experiments/lewm_collector_helper_timing_20261027/bootstrap.py", line 58, in counters
+    rows = getattr(local, 'rows', None)
+  File "/home/zyf/AAA/scar-worktrees/os-postprocessing-roles/artifacts/experiments/lewm_collector_helper_timing_20261027/bootstrap.py", line 139, in interrupted
+    raise KeyboardInterrupt
+KeyboardInterrupt
