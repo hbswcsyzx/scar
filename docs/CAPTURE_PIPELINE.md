@@ -70,8 +70,9 @@ DRAM 有严格 byte 上限。队列满、writer 错误、fork、异常退出和�
   转换进程身份标为 SCAR_OFFLINE_POSTPROCESSING，不作为应用调用或资源使用。
 - 静态 CALL/layout 缓存已接入；动态 defaults/receiver 仍按事件观察。离线依赖
   分析已使用四个实际工作进程。
-- 原 trace 的 2,683 对直接源码候选中，2,672 对已发布条件连接，余 11 对有明确缺口；
-  不是全程序覆盖率。84 个连接分片的依赖视图均已有输出，其中 24 个曾因单文件
+- 原 trace 的 2,683 对直接源码候选现已全部发布条件连接，84 个新分片均经普通
+  reader 回读；旧 2,672 条逐条相同，新增 11 条为默认/关键字调用 ABI 修复。
+  这不是原 100,550 次调用尝试或全程序的覆盖率。旧 84 个连接分片的依赖视图均已有输出，其中 24 个曾因单文件
   解码大小失败，改为逐查询文件后恢复；导航预算截断仍存在。
 - 新真实 LeWM 采集 1,801.896 秒触及上限，未完成 episode；原始 11,558,927,174 字节
   经独立回读核对压缩为 908,380,860 字节保留。LeWM 源仓库未改。不能将此失败的
@@ -94,7 +95,10 @@ python -m scar.cli trace --out /fresh/trace --project-root /path/to/program \
 
 当前 snapshot 通道覆盖主要 Python 调用流，stream/native provider 还有各自的
 采集路径；不是全部 observer 已经零现场处理。图 lowering 和跨层关联仍为后端工作。
-接下来测量代表性工作负载下的采集开销，并修复剩余连接；之后重新选择同一成功
-LeWM 命令的完整采集配置。不能只扩大时长/字节限制再重跑。
+新的 LeWM snapshot 采集已按原命令启动，冻结源码 7afd39be，源码树 SHA
+17f64b651f02e40e500325277d261a7f6542b6cc375e1ae9c237f5fd3cb555c2。
+时间、event/per-stream byte 上限与前次相同；总 32GB 上限计入暂存+JSONL双表示，
+不是增加调用范围。终态以该目录 ACTUAL_TERMINAL.json 为准，启动不算完成。
+原始 snapshot 也纳入成功/失败归档的原字节回读和 SHA 清单，不静默删除。
 端到端仍需同 Run 接通加载、推理、环境和保存，以及逻辑版本、物化、ready/lifetime。
 当前不增加 detector/backend，不报告 LeWM 加速比。
