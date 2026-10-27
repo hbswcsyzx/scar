@@ -1,0 +1,7 @@
+{
+  "actual_status": "FAILED",
+  "elapsed_s": 50.51645896799164,
+  "error_type": "ValueError",
+  "error": "capture coordinates: OS witness line budget exceeded",
+  "traceback": "Traceback (most recent call last):\n  File \"/home/zyf/AAA/scar-worktrees/native-declaration-resources/artifacts/analysis/native_declaration_resources_20261027/run_work.py\", line 10, in <module>\n    result=acquire_native_activity_work(MAIN/'artifacts/experiments/lewm_joint_capture_20261026/capture',MAIN/'artifacts/experiments/native_inputs_full_20261026/native-import/native/bundle-partitions/manifest.json',BASE/'work-attempt01',budgets=NativeWorkBudget())\n  File \"/home/zyf/AAA/scar-worktrees/native-declaration-resources/scar/trace/native_work_bridge.py\", line 418, in acquire_native_activity_work\n    coordinates = bind_capture_coordinates(capture_root, max_bytes=limits.max_input_bytes,\n                                            max_lines=2_000_000)\n  File \"/home/zyf/AAA/scar-worktrees/native-declaration-resources/scar/trace/capture_coordinates.py\", line 663, in bind_capture_coordinates\n    _need(line_count <= max_lines and len(raw) <= 1_000_000, \"OS witness line budget exceeded\")\n    ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/zyf/AAA/scar-worktrees/native-declaration-resources/scar/trace/capture_coordinates.py\", line 37, in _need\n    raise ValueError(\"capture coordinates: \" + message)\nValueError: capture coordinates: OS witness line budget exceeded\n"
+}

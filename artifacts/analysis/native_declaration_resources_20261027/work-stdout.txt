@@ -1,0 +1,2 @@
+{"stage": "ACQUIRE_WORK_LIVE", "elapsed_s": 20.00052576698363}
+{"stage": "ACQUIRE_WORK_LIVE", "elapsed_s": 40.001387658005115}

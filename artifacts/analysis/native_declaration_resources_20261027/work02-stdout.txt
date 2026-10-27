@@ -1,0 +1,8 @@
+{"stage": "ACQUIRE_WORK_LIVE", "elapsed_s": 20.000688741973136}
+{"stage": "ACQUIRE_WORK_LIVE", "elapsed_s": 40.00615348399151}
+{"stage": "ACQUIRE_WORK_LIVE", "elapsed_s": 60.00648490997264}
+{"stage": "ACQUIRE_WORK_LIVE", "elapsed_s": 80.01198666600976}
+{"stage": "ACQUIRE_WORK_LIVE", "elapsed_s": 100.02241324598435}
+{"stage": "ACQUIRE_WORK_LIVE", "elapsed_s": 120.03277211199747}
+{"stage": "ACQUIRE_WORK_LIVE", "elapsed_s": 140.0431398609653}
+{"status": "RETURNED", "qualified": 24082, "candidates": 46142, "io": {"actual_input_reader_returned_bytes": {"stored": 364271637, "decoded_plain": 13982482, "decoded_gzip": 2615708720, "decoded_verified_partition": 1202514611}, "actual_combined_input_bytes": 4196477450, "outstanding_input_reservations": 0, "actual_output_io_bytes": {"written_progress": 52998, "written_stored": 32598976, "readback_stored": 32598976, "readback_decoded": 246769325}, "actual_combined_output_io_bytes": 312020275, "whole_elapsed_s": 147.93027271400206, "max_rss_kib": 291324}}

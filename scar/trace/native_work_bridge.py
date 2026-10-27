@@ -48,10 +48,11 @@ class NativeWorkBudget:
     max_record_bytes: int = 4_000_000
     max_shard_rows: int = 256
     max_shard_decoded_bytes: int = 16_000_000
+    max_os_lines: int = 2_000_000
 
     def __post_init__(self):
         _need(all(type(v) is int and v > 0 for v in vars(self).values()), "invalid work budgets")
-        _need(self.max_input_bytes <= 4_000_000_000
+        _need(self.max_input_bytes <= 8_000_000_000
               and self.max_output_io_bytes <= 512_000_000
               and self.max_shard_rows <= 1000
               and self.max_shard_decoded_bytes <= 16_000_000,
@@ -414,9 +415,10 @@ def acquire_native_activity_work(capture_root, partition_root, output, *, budget
             stream.write(data); budget.out("written_progress", len(data))
 
     try:
-        with _count_input_reads(budget, (capture_root, partition_root)):
+        partition_files = partition_root if partition_root.is_dir() else partition_root.parent
+        with _count_input_reads(budget, (capture_root, partition_files)):
             coordinates = bind_capture_coordinates(capture_root, max_bytes=limits.max_input_bytes,
-                                                    max_lines=2_000_000)
+                                                    max_lines=limits.max_os_lines)
             emit({"stage": "genuine_coordinates_acquired", "run": encode(coordinates.run.id)})
             members = coordinates.report["membership"]
             def member(schema):
