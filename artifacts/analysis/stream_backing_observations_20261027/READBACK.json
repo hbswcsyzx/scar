@@ -1,0 +1,628 @@
+{
+  "actual_exit_code": 0,
+  "backing_counts": {
+    "CHAIN_FAILED": 0,
+    "FILENO_FAILED": 1,
+    "FSTAT_FAILED": 0,
+    "MEMORY_STREAM": 0,
+    "OBSERVED": 6,
+    "UNSUPPORTED_CHAIN": 0
+  },
+  "calls": [
+    {
+      "attempt_index": 353,
+      "attempt_source": {
+        "index": 353,
+        "line_number": 353,
+        "line_sha256": "115082d8db4095a5aaedace974db64ac992009fac69dd94e21c7c053fad0a707",
+        "path": "/home/zyf/AAA/scar-worktrees/program-ports-capture/artifacts/experiments/program_ports_cpu_20261027/capture/trace/call-operands.2026697.jsonl"
+      },
+      "completion": "C_RETURN",
+      "invocation": {
+        "invocation_id": 114,
+        "process_id": 2026697,
+        "thread_id": 125439429191488
+      },
+      "resource": {
+        "backing": {
+          "chain_types": [
+            "_io.BufferedReader",
+            "_io.FileIO"
+          ],
+          "clock": "MONOTONIC_NS",
+          "failure": null,
+          "fd": 17,
+          "finished_ns": 392074036425502,
+          "phase": "CALL_BEFORE_INVOKE",
+          "started_ns": 392074036282467,
+          "stat": {
+            "device": 64517,
+            "inode": 17195359,
+            "mode": 33204,
+            "rdev": 0,
+            "size_bytes": 610
+          },
+          "status": "OBSERVED"
+        },
+        "backing_source": {
+          "artifact": {
+            "schema": "scar.stream-interfaces.events.v2",
+            "sha256": "112a613e5cd45b8859ce69b2012cda30950062920e46cd9c048fc0ddb22ee0c5",
+            "size_bytes": 8199,
+            "uri": "/home/zyf/AAA/scar-worktrees/program-ports-capture/artifacts/experiments/program_ports_cpu_20261027/capture/trace/stream-interfaces.2026697.jsonl"
+          },
+          "locator": "#/lines/1/backing_observation"
+        },
+        "contract": {
+          "effects_complete": false,
+          "labels": [
+            "IO",
+            "STATE"
+          ],
+          "may_raise": true,
+          "may_write": [
+            "CURSOR",
+            "BUFFER"
+          ],
+          "method": "read",
+          "reads": [
+            "CONTENT",
+            "CURSOR",
+            "HANDLE"
+          ],
+          "result_role": "READ_RESULT"
+        },
+        "identity_qualified": true,
+        "receiver_kind": "BUFFERED_STREAM",
+        "receiver_reference": "weak:2026697:610",
+        "receiver_type": "_io.BufferedReader"
+      },
+      "site": {
+        "code": "pycode-v2:e0c76d4f0f22e6f2886cc96babb1cc40d05dce4e939a0109a55a8223c919fe44",
+        "offset": 170,
+        "opname": "CALL",
+        "position": [
+          951,
+          951,
+          23,
+          34
+        ]
+      }
+    },
+    {
+      "attempt_index": 457,
+      "attempt_source": {
+        "index": 457,
+        "line_number": 457,
+        "line_sha256": "00ee7b69aae069dba803d89bf97a37d5a704d22131fa7c8c65e3609024254d88",
+        "path": "/home/zyf/AAA/scar-worktrees/program-ports-capture/artifacts/experiments/program_ports_cpu_20261027/capture/trace/call-operands.2026697.jsonl"
+      },
+      "completion": "C_RETURN",
+      "invocation": {
+        "invocation_id": 126,
+        "process_id": 2026697,
+        "thread_id": 125439429191488
+      },
+      "resource": {
+        "backing": {
+          "chain_types": [
+            "_io.FileIO"
+          ],
+          "clock": "MONOTONIC_NS",
+          "failure": null,
+          "fd": 17,
+          "finished_ns": 392074104472335,
+          "phase": "CALL_BEFORE_INVOKE",
+          "started_ns": 392074104360321,
+          "stat": {
+            "device": 64517,
+            "inode": 17195407,
+            "mode": 33204,
+            "rdev": 0,
+            "size_bytes": 0
+          },
+          "status": "OBSERVED"
+        },
+        "backing_source": {
+          "artifact": {
+            "schema": "scar.stream-interfaces.events.v2",
+            "sha256": "112a613e5cd45b8859ce69b2012cda30950062920e46cd9c048fc0ddb22ee0c5",
+            "size_bytes": 8199,
+            "uri": "/home/zyf/AAA/scar-worktrees/program-ports-capture/artifacts/experiments/program_ports_cpu_20261027/capture/trace/stream-interfaces.2026697.jsonl"
+          },
+          "locator": "#/lines/3/backing_observation"
+        },
+        "contract": {
+          "effects_complete": false,
+          "labels": [
+            "IO",
+            "STATE"
+          ],
+          "may_raise": true,
+          "may_write": [
+            "CONTENT",
+            "CURSOR",
+            "BUFFER"
+          ],
+          "method": "write",
+          "reads": [
+            "ARGUMENT_DATA",
+            "HANDLE",
+            "CURSOR"
+          ],
+          "result_role": "WRITE_RESULT"
+        },
+        "identity_qualified": true,
+        "receiver_kind": "DESCRIPTOR_STREAM",
+        "receiver_reference": "weak:2026697:825",
+        "receiver_type": "_io.FileIO"
+      },
+      "site": {
+        "code": "pycode-v2:ac2fd0f0e40ed537c8772a1c3d85cc63de94312edc291a2036bab549e621f756",
+        "offset": 228,
+        "opname": "CALL",
+        "position": [
+          10,
+          10,
+          8,
+          27
+        ]
+      }
+    },
+    {
+      "attempt_index": 461,
+      "attempt_source": {
+        "index": 461,
+        "line_number": 461,
+        "line_sha256": "f5df6c4984006401569d10939b8627d11de507adb1e806636a3d9ad301068958",
+        "path": "/home/zyf/AAA/scar-worktrees/program-ports-capture/artifacts/experiments/program_ports_cpu_20261027/capture/trace/call-operands.2026697.jsonl"
+      },
+      "completion": "C_RETURN",
+      "invocation": {
+        "invocation_id": 126,
+        "process_id": 2026697,
+        "thread_id": 125439429191488
+      },
+      "resource": {
+        "backing": {
+          "chain_types": [
+            "_io.FileIO"
+          ],
+          "clock": "MONOTONIC_NS",
+          "failure": null,
+          "fd": 17,
+          "finished_ns": 392074106873105,
+          "phase": "CALL_BEFORE_INVOKE",
+          "started_ns": 392074106774677,
+          "stat": {
+            "device": 64517,
+            "inode": 17195407,
+            "mode": 33204,
+            "rdev": 0,
+            "size_bytes": 9
+          },
+          "status": "OBSERVED"
+        },
+        "backing_source": {
+          "artifact": {
+            "schema": "scar.stream-interfaces.events.v2",
+            "sha256": "112a613e5cd45b8859ce69b2012cda30950062920e46cd9c048fc0ddb22ee0c5",
+            "size_bytes": 8199,
+            "uri": "/home/zyf/AAA/scar-worktrees/program-ports-capture/artifacts/experiments/program_ports_cpu_20261027/capture/trace/stream-interfaces.2026697.jsonl"
+          },
+          "locator": "#/lines/5/backing_observation"
+        },
+        "contract": {
+          "effects_complete": false,
+          "labels": [
+            "IO",
+            "STATE"
+          ],
+          "may_raise": true,
+          "may_write": [
+            "CURSOR",
+            "BUFFER"
+          ],
+          "method": "read",
+          "reads": [
+            "CONTENT",
+            "CURSOR",
+            "HANDLE"
+          ],
+          "result_role": "READ_RESULT"
+        },
+        "identity_qualified": true,
+        "receiver_kind": "DESCRIPTOR_STREAM",
+        "receiver_reference": "weak:2026697:835",
+        "receiver_type": "_io.FileIO"
+      },
+      "site": {
+        "code": "pycode-v2:ac2fd0f0e40ed537c8772a1c3d85cc63de94312edc291a2036bab549e621f756",
+        "offset": 322,
+        "opname": "CALL",
+        "position": [
+          12,
+          12,
+          15,
+          28
+        ]
+      }
+    },
+    {
+      "attempt_index": 462,
+      "attempt_source": {
+        "index": 462,
+        "line_number": 462,
+        "line_sha256": "b899f21ad9a9bb48fcd9f603c27136eae87dad508b8493280e692862780e498b",
+        "path": "/home/zyf/AAA/scar-worktrees/program-ports-capture/artifacts/experiments/program_ports_cpu_20261027/capture/trace/call-operands.2026697.jsonl"
+      },
+      "completion": "C_RETURN",
+      "invocation": {
+        "invocation_id": 126,
+        "process_id": 2026697,
+        "thread_id": 125439429191488
+      },
+      "resource": {
+        "backing": {
+          "chain_types": [
+            "_io.FileIO"
+          ],
+          "clock": "MONOTONIC_NS",
+          "failure": null,
+          "fd": 17,
+          "finished_ns": 392074107588776,
+          "phase": "CALL_BEFORE_INVOKE",
+          "started_ns": 392074107497415,
+          "stat": {
+            "device": 64517,
+            "inode": 17195407,
+            "mode": 33204,
+            "rdev": 0,
+            "size_bytes": 9
+          },
+          "status": "OBSERVED"
+        },
+        "backing_source": {
+          "artifact": {
+            "schema": "scar.stream-interfaces.events.v2",
+            "sha256": "112a613e5cd45b8859ce69b2012cda30950062920e46cd9c048fc0ddb22ee0c5",
+            "size_bytes": 8199,
+            "uri": "/home/zyf/AAA/scar-worktrees/program-ports-capture/artifacts/experiments/program_ports_cpu_20261027/capture/trace/stream-interfaces.2026697.jsonl"
+          },
+          "locator": "#/lines/7/backing_observation"
+        },
+        "contract": {
+          "effects_complete": false,
+          "labels": [
+            "IO",
+            "STATE"
+          ],
+          "may_raise": true,
+          "may_write": [
+            "HANDLE",
+            "BUFFER",
+            "BACKING_CONTENT"
+          ],
+          "method": "close",
+          "reads": [
+            "HANDLE",
+            "BUFFER"
+          ],
+          "result_role": "CLOSE_RESULT"
+        },
+        "identity_qualified": true,
+        "receiver_kind": "DESCRIPTOR_STREAM",
+        "receiver_reference": "weak:2026697:835",
+        "receiver_type": "_io.FileIO"
+      },
+      "site": {
+        "code": "pycode-v2:ac2fd0f0e40ed537c8772a1c3d85cc63de94312edc291a2036bab549e621f756",
+        "offset": 354,
+        "opname": "CALL",
+        "position": [
+          13,
+          13,
+          4,
+          18
+        ]
+      }
+    },
+    {
+      "attempt_index": 463,
+      "attempt_source": {
+        "index": 463,
+        "line_number": 463,
+        "line_sha256": "0b886ce9745dd046d02c0d1aed450ccf92ade7bee7e587bb318562f192864e88",
+        "path": "/home/zyf/AAA/scar-worktrees/program-ports-capture/artifacts/experiments/program_ports_cpu_20261027/capture/trace/call-operands.2026697.jsonl"
+      },
+      "completion": "C_RAISE",
+      "invocation": {
+        "invocation_id": 126,
+        "process_id": 2026697,
+        "thread_id": 125439429191488
+      },
+      "resource": {
+        "backing": {
+          "chain_types": [
+            "_io.FileIO"
+          ],
+          "clock": "MONOTONIC_NS",
+          "failure": {
+            "errno": null,
+            "exception_type": "ValueError",
+            "stage": "FILENO"
+          },
+          "fd": null,
+          "finished_ns": 392074108173835,
+          "phase": "CALL_BEFORE_INVOKE",
+          "started_ns": 392074108151266,
+          "stat": null,
+          "status": "FILENO_FAILED"
+        },
+        "backing_source": {
+          "artifact": {
+            "schema": "scar.stream-interfaces.events.v2",
+            "sha256": "112a613e5cd45b8859ce69b2012cda30950062920e46cd9c048fc0ddb22ee0c5",
+            "size_bytes": 8199,
+            "uri": "/home/zyf/AAA/scar-worktrees/program-ports-capture/artifacts/experiments/program_ports_cpu_20261027/capture/trace/stream-interfaces.2026697.jsonl"
+          },
+          "locator": "#/lines/9/backing_observation"
+        },
+        "contract": {
+          "effects_complete": false,
+          "labels": [
+            "IO",
+            "STATE"
+          ],
+          "may_raise": true,
+          "may_write": [
+            "CURSOR",
+            "BUFFER"
+          ],
+          "method": "read",
+          "reads": [
+            "CONTENT",
+            "CURSOR",
+            "HANDLE"
+          ],
+          "result_role": "READ_RESULT"
+        },
+        "identity_qualified": true,
+        "receiver_kind": "DESCRIPTOR_STREAM",
+        "receiver_reference": "weak:2026697:835",
+        "receiver_type": "_io.FileIO"
+      },
+      "site": {
+        "code": "pycode-v2:ac2fd0f0e40ed537c8772a1c3d85cc63de94312edc291a2036bab549e621f756",
+        "offset": 388,
+        "opname": "CALL",
+        "position": [
+          15,
+          15,
+          8,
+          21
+        ]
+      }
+    },
+    {
+      "attempt_index": 469,
+      "attempt_source": {
+        "index": 469,
+        "line_number": 469,
+        "line_sha256": "ec770c76d35e71a9d2e43db931eb62e133525ed7d911d9ce12a7ce7566d3e709",
+        "path": "/home/zyf/AAA/scar-worktrees/program-ports-capture/artifacts/experiments/program_ports_cpu_20261027/capture/trace/call-operands.2026697.jsonl"
+      },
+      "completion": "C_RETURN",
+      "invocation": {
+        "invocation_id": 126,
+        "process_id": 2026697,
+        "thread_id": 125439429191488
+      },
+      "resource": {
+        "backing": {
+          "chain_types": [
+            "_io.FileIO"
+          ],
+          "clock": "MONOTONIC_NS",
+          "failure": null,
+          "fd": 18,
+          "finished_ns": 392074110383164,
+          "phase": "CALL_BEFORE_INVOKE",
+          "started_ns": 392074110292238,
+          "stat": {
+            "device": 15,
+            "inode": 7627864,
+            "mode": 4480,
+            "rdev": 0,
+            "size_bytes": 0
+          },
+          "status": "OBSERVED"
+        },
+        "backing_source": {
+          "artifact": {
+            "schema": "scar.stream-interfaces.events.v2",
+            "sha256": "112a613e5cd45b8859ce69b2012cda30950062920e46cd9c048fc0ddb22ee0c5",
+            "size_bytes": 8199,
+            "uri": "/home/zyf/AAA/scar-worktrees/program-ports-capture/artifacts/experiments/program_ports_cpu_20261027/capture/trace/stream-interfaces.2026697.jsonl"
+          },
+          "locator": "#/lines/11/backing_observation"
+        },
+        "contract": {
+          "effects_complete": false,
+          "labels": [
+            "IO",
+            "STATE"
+          ],
+          "may_raise": true,
+          "may_write": [
+            "CONTENT",
+            "CURSOR",
+            "BUFFER"
+          ],
+          "method": "write",
+          "reads": [
+            "ARGUMENT_DATA",
+            "HANDLE",
+            "CURSOR"
+          ],
+          "result_role": "WRITE_RESULT"
+        },
+        "identity_qualified": true,
+        "receiver_kind": "DESCRIPTOR_STREAM",
+        "receiver_reference": "weak:2026697:844",
+        "receiver_type": "_io.FileIO"
+      },
+      "site": {
+        "code": "pycode-v2:ac2fd0f0e40ed537c8772a1c3d85cc63de94312edc291a2036bab549e621f756",
+        "offset": 596,
+        "opname": "CALL",
+        "position": [
+          20,
+          20,
+          8,
+          27
+        ]
+      }
+    },
+    {
+      "attempt_index": 471,
+      "attempt_source": {
+        "index": 471,
+        "line_number": 471,
+        "line_sha256": "76ab476aebaa571fea20a1fd90caa9bb1bf785e0b1b581e1ce814bae64892c6d",
+        "path": "/home/zyf/AAA/scar-worktrees/program-ports-capture/artifacts/experiments/program_ports_cpu_20261027/capture/trace/call-operands.2026697.jsonl"
+      },
+      "completion": "C_RETURN",
+      "invocation": {
+        "invocation_id": 126,
+        "process_id": 2026697,
+        "thread_id": 125439429191488
+      },
+      "resource": {
+        "backing": {
+          "chain_types": [
+            "_io.FileIO"
+          ],
+          "clock": "MONOTONIC_NS",
+          "failure": null,
+          "fd": 17,
+          "finished_ns": 392074111534985,
+          "phase": "CALL_BEFORE_INVOKE",
+          "started_ns": 392074111444903,
+          "stat": {
+            "device": 15,
+            "inode": 7627864,
+            "mode": 4480,
+            "rdev": 0,
+            "size_bytes": 0
+          },
+          "status": "OBSERVED"
+        },
+        "backing_source": {
+          "artifact": {
+            "schema": "scar.stream-interfaces.events.v2",
+            "sha256": "112a613e5cd45b8859ce69b2012cda30950062920e46cd9c048fc0ddb22ee0c5",
+            "size_bytes": 8199,
+            "uri": "/home/zyf/AAA/scar-worktrees/program-ports-capture/artifacts/experiments/program_ports_cpu_20261027/capture/trace/stream-interfaces.2026697.jsonl"
+          },
+          "locator": "#/lines/13/backing_observation"
+        },
+        "contract": {
+          "effects_complete": false,
+          "labels": [
+            "IO",
+            "STATE"
+          ],
+          "may_raise": true,
+          "may_write": [
+            "CURSOR",
+            "BUFFER"
+          ],
+          "method": "read",
+          "reads": [
+            "CONTENT",
+            "CURSOR",
+            "HANDLE"
+          ],
+          "result_role": "READ_RESULT"
+        },
+        "identity_qualified": true,
+        "receiver_kind": "DESCRIPTOR_STREAM",
+        "receiver_reference": "weak:2026697:841",
+        "receiver_type": "_io.FileIO"
+      },
+      "site": {
+        "code": "pycode-v2:ac2fd0f0e40ed537c8772a1c3d85cc63de94312edc291a2036bab549e621f756",
+        "offset": 648,
+        "opname": "CALL",
+        "position": [
+          21,
+          21,
+          16,
+          39
+        ]
+      }
+    }
+  ],
+  "capture_actual_exit_code": 0,
+  "capture_seconds_reported_by_owner": 33.73,
+  "capture_session": 9810,
+  "counts": {
+    "BEGIN": 7,
+    "C_RAISE": 1,
+    "C_RETURN": 6,
+    "UNOBSERVED": 0
+  },
+  "fifo_observations": 2,
+  "fileno_failures": 1,
+  "logical_identity_or_contents_or_lifetime_established": false,
+  "max_rss_kib": 36072,
+  "metadata": {
+    "bytes": 2952,
+    "sha256": "3891db10c334efe8fa8c9e2446f368c19c07157c815098c63135fe54211e7da9",
+    "uri": "/home/zyf/AAA/scar-worktrees/program-ports-capture/artifacts/experiments/program_ports_cpu_20261027/capture/trace/stream-interface-meta.2026697.json"
+  },
+  "normal_read_seconds": 0.01352205901639536,
+  "normal_reader_decoded_input_bytes": 227166,
+  "normal_reader_stored_input_bytes": 25738,
+  "producer_source_files": [
+    {
+      "base_sha256": "d0d72aa49cee18ca606c2fcf0d7a54b96738370f0021ae0fe6af5ee80ceca25d",
+      "bytes": 17224,
+      "path": "scar/trace/stream_interfaces.py",
+      "sha256": "4eb68e4aa4f6e44229cb79678bc1353e13474cd25a9dfc7863e6ede230701792"
+    },
+    {
+      "base_sha256": null,
+      "bytes": 6328,
+      "path": "scar/trace/stream_backing.py",
+      "sha256": "0c6adac2dfed167aea96b14e8e8d66dd05bef42aadfacf49abef191cde37a79b"
+    },
+    {
+      "base_sha256": "d007890d44b9387dfdc7fb0e9c5cec956c5a64ae0adc0a39081292cf354b2325",
+      "bytes": 25936,
+      "path": "scar/analysis/source_stream_interfaces.py",
+      "sha256": "54fab61449b90e11a1517e3883cb8ce657508ad233b4777b716e17bd21dcbf1c"
+    }
+  ],
+  "reader_inputs": [
+    {
+      "decoded_bytes": 8199,
+      "decoded_sha256": "112a613e5cd45b8859ce69b2012cda30950062920e46cd9c048fc0ddb22ee0c5",
+      "logical_uri": "/home/zyf/AAA/scar-worktrees/program-ports-capture/artifacts/experiments/program_ports_cpu_20261027/capture/trace/stream-interfaces.2026697.jsonl",
+      "physical_uri": "/home/zyf/AAA/scar-worktrees/program-ports-capture/artifacts/experiments/program_ports_cpu_20261027/capture/trace/stream-interfaces.2026697.jsonl.gz",
+      "stored_bytes": 1395
+    },
+    {
+      "decoded_bytes": 216015,
+      "decoded_sha256": "0c0ee318e5c6f3e97bad0b2da955a091fd6993b88d94e1a78906582ef023955c",
+      "logical_uri": "/home/zyf/AAA/scar-worktrees/program-ports-capture/artifacts/experiments/program_ports_cpu_20261027/capture/trace/call-operands.2026697.jsonl",
+      "physical_uri": "/home/zyf/AAA/scar-worktrees/program-ports-capture/artifacts/experiments/program_ports_cpu_20261027/capture/trace/call-operands.2026697.jsonl.gz",
+      "stored_bytes": 21391
+    }
+  ],
+  "regular_file_observations": 4,
+  "schema": "scar.stream-backing-readback-receipt",
+  "schema_version": 1,
+  "whole_model_established": false
+}
