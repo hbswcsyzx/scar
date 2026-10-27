@@ -51,11 +51,13 @@ def _check_expression(node,result,model,graph,metadata,semantic,interface):
     operations={r.id:r for r in graph.operations};values={r.id:r for r in graph.values}
     protocols={r.operation:r for r in model.protocols};links={r.operation:r for r in metadata.operation_links}
     sources={(r.operation,r.use):r for r in metadata.use_links};by_value={}
+    addresses={r.site.operation:r for r in graph.state_address_refinements}
+    need(len(addresses)==len(graph.state_address_refinements),'duplicate child state address refinement')
     for op in operations.values():
         if op.terminator is not None and op.terminator.kind is TerminatorKind.INVOKE:
             for edge in op.terminator.successors:
                 if edge.kind is ExitKind.NORMAL:by_value[edge.block]=op
-    verified=set()
+    verified=set();index_addresses=set()
     def expression(n,value):
         original=values[value]
         need(type(original)is ReferenceValue,'expression result is not a Python reference')
@@ -83,7 +85,28 @@ def _check_expression(node,result,model,graph,metadata,semantic,interface):
         elif isinstance(n,ast.Attribute):
             need(link.opcode is Opcode.ATTRIBUTE,'Attribute lost its source interface');children=[(n.value,'receiver',0)]
         elif isinstance(n,ast.Subscript):
-            need(link.opcode is Opcode.INDEX,'Subscript lost its source interface');children=[(n.value,'receiver',0),(n.slice,'index',1)]
+            need(link.opcode is Opcode.INDEX and isinstance(n.ctx,ast.Load),'Subscript lost its source read interface')
+            children=[(n.value,'receiver',0),(n.slice,'index',1)]
+            from scar.ir.program.state_addresses import AddressCoverage,AddressEffect,Element,InvokeStateOperand,ReferenceOwner
+            from scar.ir.program.state_modes import AccessMode
+            definition=semantic.definitions.get(link.semantic_operation)
+            atom=semantic.source_atoms.get(link.source.atom_id)
+            need(definition is not None and definition.kind is OperationKind.INDEX
+                 and definition.code_id==link.source.atom_id.wire and link.source.atom_id in definition.source_atoms
+                 and atom is not None and atom.kind=='Subscript' and atom.reference==link.source,
+                 'Subscript address lost its original SG/source ownership')
+            need(op.terminator is not None and op.terminator.kind is TerminatorKind.INVOKE
+                 and op.callee is None and not op.effects_complete and len(op.uses)==3
+                 and op.invoke_arguments==tuple(u.id for u in op.uses)
+                 and type(values[op.uses[-1].value])is StateVersionValue
+                 and values[op.uses[-1].value].location==values[interface.world].location,
+                 'Subscript address lost its exact receiver/key/world invoke')
+            row=addresses.get(op.id)
+            expected=AddressEffect(ReferenceOwner(op.uses[0].id),(Element(op.uses[1].id),),AccessMode.READ)
+            need(row is not None and row.site==InvokeStateOperand(op.id,op.uses[-1].id)
+                 and row.coverage is AddressCoverage.PARTIAL and row.protocol is None and row.effects==(expected,),
+                 'Subscript partial address differs from its original receiver/key/world Uses')
+            index_addresses.add(op.id)
         else:raise ValueError('Lambda expression: unsupported original expression entered the body')
         operands=op.uses[:-1]
         need(len(operands)==len(children),'expression operand arity differs from its original AST')
@@ -100,6 +123,7 @@ def _check_expression(node,result,model,graph,metadata,semantic,interface):
         need(op.terminator is not None and op.terminator.kind in(TerminatorKind.RETURN,TerminatorKind.RAISE)
              or marker is not None and marker.kind in(K.FRAME_ENTER,K.FRAME_EXIT,K.FRAME_HOLD_TEMPORARY,K.FRAME_RELEASE_TEMPORARY),
              'unclaimed executable operation in Lambda expression body')
+    return index_addresses
 
 
 def validate_lambda_regions(model,graph,interface,metadata,semantic,control,language,*,
@@ -194,10 +218,6 @@ def validate_lambda_regions(model,graph,interface,metadata,semantic,control,lang
                  'child free-cell interface differs from original code/definition')
         child_model,child_graph,child_metadata=region_projection(model,graph,metadata,region,strip_parent=True)
         child_model=replace(child_model,definition=record.body.definition,source=record.source)
-        from scar.analysis.structured_lowering import _require_valid_structured_body
-        _require_valid_structured_body(child_model,child_graph,record.body,child_metadata,
-            semantic=semantic,control=control,sealed_source=sealed_source,language=None,source_tree=source_tree,
-            structural_only=True)
         normals=[o for o in child_graph.operations if o.terminator is not None and o.terminator.kind is TerminatorKind.RETURN]
         need(len(normals)==1,'ordinary expression body must retain one actual NORMAL return site')
         terminal=normals[0];own={u.id:u for u in terminal.uses}
@@ -205,7 +225,17 @@ def validate_lambda_regions(model,graph,interface,metadata,semantic,control,lang
         need(len(terminal.terminator.values)==2 and type(values[result])is ReferenceValue
              and type(values[own[terminal.terminator.values[1]].value])is StateVersionValue,
              'Lambda normal exit must separate its Python payload from world')
-        _check_expression(node.body,result,child_model,child_graph,child_metadata,semantic,record.body)
+        index_addresses=_check_expression(node.body,result,child_model,child_graph,child_metadata,semantic,record.body)
+        # The expression adapter above owns these exact INDEX refinements.
+        # Hand only those verified rows out of the ordinary environment view;
+        # every other row remains subject to its exact coverage check. This
+        # private projection never changes the original canonical graph.
+        ordinary=replace(child_graph,state_address_refinements=tuple(
+            row for row in child_graph.state_address_refinements if row.site.operation not in index_addresses))
+        from scar.analysis.structured_lowering import _require_valid_structured_body
+        _require_valid_structured_body(child_model,ordinary,record.body,child_metadata,
+            semantic=semantic,control=control,sealed_source=sealed_source,language=None,source_tree=source_tree,
+            structural_only=True)
         atoms={(type(n).__name__,span(n))for n in ast.walk(node.body)if hasattr(n,'end_lineno')and n.end_lineno is not None}
         need(not any(owners[l.operation]==graph.root and(semantic.source_atoms[l.source.atom_id].kind,refspan(l.source))in atoms
                      for l in metadata.operation_links),'creating frame eagerly executed the deferred body expression')

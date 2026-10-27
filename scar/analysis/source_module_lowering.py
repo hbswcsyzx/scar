@@ -14,13 +14,14 @@ import sys
 from scar.analysis.program_lowering import _Unsupported, _key, _REF, LoweringMetadata, SourceProgram
 from scar.analysis.structured_lowering import StructuredBuilder
 from scar.analysis.source_language import SourceCodeEvidence
+from scar.analysis.static_compilation import StaticCodeEvidence
 from scar.ir.program.ids import RegionID, OperationID, UseID, ValueID
 from scar.ir.program.model import (Behavior, ExitKind, Operation, ReferenceValue, StateVersionValue,
     Terminator, TerminatorKind, Use, UseRole)
 from scar.ir.program.module_entries import (ModuleUnitSource, ModuleCodeWitness, ModuleEntryDeclaration,
     ModuleBodyOverlay, ModuleBodyStatus, MappingFrameEntry, ModuleFrontier, ModuleSourceCensus,
     ModuleOperationSource, ModuleValueSource, ModuleUseSource, ModuleProtocol, ModuleProtocolKind,
-    ModuleEntryProfile, UnexpandedModuleBody)
+    ModuleEntryProfile, UnexpandedModuleBody, StaticModuleEntryDeclaration)
 from scar.ir.program.inventory import SourceContextDigest
 from scar.ir.program.providers import ProviderArtifact
 from scar.ir.program.source import SourceRole, GapKind
@@ -55,6 +56,16 @@ def module_unit(context):
 
 
 def require_root_evidence(unit, evidence):
+    if type(evidence) is StaticCodeEvidence:
+        evidence.require_definition(unit.snapshot, unit.initializer, unit)
+        import inspect
+        suspended = inspect.CO_GENERATOR | inspect.CO_COROUTINE | inspect.CO_ASYNC_GENERATOR | inspect.CO_ITERABLE_COROUTINE
+        if (evidence.compiler_implementation != 'cpython' or evidence.compiler_version[:2] != (3,14)
+                or evidence.code_path or evidence.code.co_freevars or evidence.code.co_cellvars
+                or evidence.code.co_argcount or evidence.code.co_kwonlyargcount
+                or evidence.code.co_flags & suspended):
+            raise ValueError('static module requires its exact non-resumable exec root compiler layout')
+        return evidence.to_reference()
     if type(evidence) is not SourceCodeEvidence:
         raise TypeError('module construction requires existing read-only SourceCodeEvidence')
     if sys.implementation.name != 'cpython' or sys.version_info[:2] != (3,14):
@@ -86,7 +97,9 @@ class ModuleBuilder(StructuredBuilder):
                 or ast.dump(context.tree,include_attributes=True) != ast.dump(
                     ast.parse(context.text,filename=str(context.path)),include_attributes=True)):
             raise ValueError('prepared module AST/text differs from the original snapshot')
-        self.declaration = ModuleEntryDeclaration(self.unit, require_root_evidence(self.unit,evidence))
+        root_evidence = require_root_evidence(self.unit,evidence)
+        self.declaration = (StaticModuleEntryDeclaration(self.unit,root_evidence)
+                            if type(evidence) is StaticCodeEvidence else ModuleEntryDeclaration(self.unit,root_evidence))
         self.prepared_source, self.evidence = context,evidence
         self.module_frontiers = []
         super().__init__(context,self.unit.initializer.wire,max_operations=max_operations)
@@ -191,6 +204,9 @@ def lower_module_entry(context,selection,*,code_evidence,max_operations=10000,pr
     if type(max_operations) is not int or not 1<=max_operations<=100000:
         raise ValueError('module operation budget must be in [1,100000]')
     from scar.ir.program.module_entries import ModuleBodyExpansionProfile,FrameBodyProfile
+    if type(code_evidence) is StaticCodeEvidence and profile not in (
+            FrameBodyProfile.STRUCTURED_MAPPING_314_V1, FrameBodyProfile.STRUCTURED_MAPPING_PROPAGATION_314_V1):
+        raise ValueError('static module roots require their explicit structured frame capability')
     if profile is FrameBodyProfile.STRUCTURED_MAPPING_PROPAGATION_314_V1:
         return PropagationModuleBuilder(context,selection,code_evidence,max_operations).run_module()
     if profile is FrameBodyProfile.STRUCTURED_MAPPING_314_V1:
@@ -598,7 +614,7 @@ class StructuredModuleBuilder(ModuleBuilder):
     def run_module(self):
         from scar.ir.program.module_entries import (FrameBodyProfile,StructuredFrameBodyOverlay,
             FrameBodyProtocolKind as K,StatementSequenceField as F,UnexpandedFrameSlice)
-        from scar.ir.program.source_subjects import FrameRoot,FrameKind,MappingFramePorts
+        from scar.ir.program.source_subjects import FrameRoot,SourceCompilationFrameRoot,FrameKind,MappingFramePorts
         from scar.ir.program.control import ControlScope,ControlScopeKind
         remaining=None
         if self.remaining_nodes:
@@ -627,7 +643,9 @@ class StructuredModuleBuilder(ModuleBuilder):
         self.regions.append(self.assemble_region(entry_world))
         graph=self.finish_module_graph(replace(self.make_graph(),root=self.frame_region,state_address_refinements=tuple(self.address_refinements)),
             ControlScope(self.root_scope,self.frame_region,None,ControlScopeKind.FRAME,self.unit,tuple(self.function_blocks)),
-            FrameRoot(self.root_scope,FrameKind.MODULE,self.evidence.captured,abi))
+            (SourceCompilationFrameRoot(self.root_scope,FrameKind.MODULE,self.declaration.compilation,abi)
+             if type(self.declaration) is StaticModuleEntryDeclaration else
+             FrameRoot(self.root_scope,FrameKind.MODULE,self.evidence.captured,abi)))
         self.module_frontiers.extend((ModuleFrontier(self.unit,'ENTRY_PROTOCOL_UNPROVEN','declared source ABI is not an actual namespace/activation/import binding'),
             ModuleFrontier(self.unit,'NAMESPACE_CONTENT_UNPROVEN','mapping access attempts do not establish stored content or alias/effect completeness')))
         if remaining is not None:self.module_frontiers.append(ModuleFrontier(self.source(self.remaining_nodes[0]),'REQUIRED_EXPANSION',

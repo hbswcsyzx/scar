@@ -307,15 +307,21 @@ def validate_function_try_protocols(model, graph, interface, metadata, semantic,
             value=todo.pop()
             if value in seen:continue
             seen.add(value);record=values[value]
-            exact=[r for r in value_sources.get(value,())if (r.start_line,r.end_line,r.start_column,r.end_column)==expected_span]
-            if exact:
+            exact=[r for r in value_sources.get(value,())if (r.path,r.fingerprint)==(source.path,source.fingerprint)
+                   and (r.start_line,r.end_line,r.start_column,r.end_column)==expected_span]
+            # A cleanup landing parameter can carry the Return's source span
+            # without being its literal. Follow its actual incoming Uses until
+            # the original None leaf is reached; a same-span label is no proof.
+            from scar.ir.program.model import LiteralOrigin
+            if exact and (node.value is not None or type(record.origin)is LiteralOrigin):
                 if node.value is None:
-                    from scar.ir.program.model import LiteralOrigin
                     need(type(record.origin)is LiteralOrigin and record.origin.value is None,'empty return changed None')
                 leaves+=1;continue
             need(type(record.origin)is BlockArgument,'return carrier did not originate at its exact source expression')
-            for operation,edge in incoming[record.origin.block]:
-                if hasattr(edge,'port') and edge.port!=port.id:continue
+            carried=[(operation,edge)for operation,edge in incoming[record.origin.block]
+                     if not hasattr(edge,'port') or edge.port==port.id]
+            need(carried,'return carrier has no actual incoming control edge for this completion')
+            for operation,edge in carried:
                 operand=edge.arguments[record.origin.index]
                 own={u.id:u for u in operation.uses}
                 need(operand in own,'return carrier cannot be reconstructed from a guessed completion payload')

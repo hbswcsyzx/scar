@@ -16,7 +16,7 @@ from scar.ir.program.control import (
     ControlPort, ControlScope, ExceptionPacketDefinition, PendingCompletionDefinition,
     PendingDispatchTerminator, ProtocolValueKind, ProtocolValueType,
 )
-from scar.ir.program.source_subjects import FrameRoot
+from scar.ir.program.source_subjects import FrameRoot, SourceCompilationFrameRoot
 from scar.ir.program.cleanup import (
     CleanupEnter, CleanupInterface, CleanupReplace, CleanupResume,
     CleanupRouteTerminator, HandledContextDomain, HandledContextRead,
@@ -873,14 +873,15 @@ class ProgramGraph:
     call_effect_expansions: tuple[CallEffectExpansion, ...] = ()
     stored_value_writes: tuple[StoredValueWrite, ...] = ()
     stored_value_reads: tuple[StoredValueRead, ...] = ()
-    frame_roots: tuple[FrameRoot, ...] = ()
+    frame_roots: tuple[FrameRoot | SourceCompilationFrameRoot, ...] = ()
 
     def __post_init__(self) -> None:
         if not isinstance(self.root, RegionID):
             raise TypeError("ProgramGraph.root must be RegionID")
         roots = _tuple(self.frame_roots, "ProgramGraph.frame_roots")
-        if any(type(row) is not FrameRoot for row in roots):
-            raise TypeError("ProgramGraph.frame_roots requires exact FrameRoot records")
+        root_types = (FrameRoot, SourceCompilationFrameRoot)
+        if any(type(row) not in root_types for row in roots):
+            raise TypeError("ProgramGraph.frame_roots requires exact supported frame-root records")
         for row in roots:
             row.__post_init__()
         _unique(tuple(row.scope for row in roots), "ProgramGraph frame root scopes")

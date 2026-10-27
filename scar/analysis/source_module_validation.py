@@ -202,8 +202,11 @@ def module_validation_report(result, *, source_texts, code_evidence=None, max_op
                 max_operations=max_operations)
     except (ValueError,TypeError,KeyError,AttributeError,OSError,SyntaxError,RecursionError) as error:
         return {'valid':False,'errors':[str(error)]}
+    from scar.analysis.source_language import SourceCodeEvidence
+    from scar.ir.program.module_entries import StaticModuleEntryDeclaration
     return {'valid':True,'errors':[], 'verification':'STRUCTURE',
-        'compiler_root_witness_replayed':code_evidence is not None,
+        'compiler_root_witness_replayed':type(code_evidence) is SourceCodeEvidence,
+        'static_source_compilation_replayed':type(result.module.declaration) is StaticModuleEntryDeclaration,
         'runtime_code_instance_established':False,'namespace_alias_established':False,
         'import_module_object_established':False,'whole_program_coverage_established':False}
 
@@ -442,8 +445,24 @@ def require_valid_structured_module_program(result,*,source_texts,code_evidence=
     context=PreparedSource(Path(unit.snapshot.path),Path(unit.namespace_root),text,result.semantic,result.semantics,result.control,
         ast.parse(text,filename=unit.snapshot.path),{})
     _need(module_unit(context)==unit and module_source_census(context)==overlay.census,'SP8 original MODULE census differs')
-    _need(code_evidence is not None and require_root_evidence(unit,code_evidence)==overlay.declaration.witness,
-          'SP8 requires exact readonly whole-root evidence, not a code-name or report boolean')
+    from scar.ir.program.module_entries import StaticModuleEntryDeclaration
+    from scar.ir.program.source_subjects import SourceCompilationFrameRoot, FrameRoot
+    static_root = type(overlay.declaration) is StaticModuleEntryDeclaration
+    if static_root:
+        # Independently recompile retained text. The declaration is a receipt,
+        # never permission to trust its code path or borrow a runtime witness.
+        from scar.analysis.static_compilation import compile_source_unit, StaticCodeEvidence
+        replayed = compile_source_unit(context).for_module(unit)
+        _need(replayed.to_reference() == overlay.declaration.compilation,
+              'static module declaration differs from independently compiled retained source')
+        if code_evidence is not None:
+            _need(type(code_evidence) is StaticCodeEvidence and
+                  require_root_evidence(unit,code_evidence) == replayed.to_reference(),
+                  'supplied static module compiler input differs')
+        code_evidence = replayed
+    else:
+        _need(code_evidence is not None and require_root_evidence(unit,code_evidence)==overlay.declaration.witness,
+              'SP8 requires exact readonly whole-root evidence, not a code-name or report boolean')
     prefix,tail=mapping_prefix_selection(context,code_evidence,profile=result.profile)
     _need(overlay.prefix==(frame_statement_slice(context,unit,F.BODY,prefix) if prefix else None),'SP8 prefix is not the mechanical maximal supported collection')
     _need((overlay.remaining is not None)==bool(tail),'SP8 missing/extra remaining source collection')
@@ -463,7 +482,9 @@ def require_valid_structured_module_program(result,*,source_texts,code_evidence=
     _need(len(graph.frame_roots)==1,'SP8 has exactly one actual frame authority')
     root=graph.frame_roots[0];scope=next((row for row in graph.control_scopes if row.id==root.scope),None)
     _need(scope is not None,'missing actual frame root scope')
-    _need(root.scope==scope.id==overlay.root_scope and root.kind is FrameKind.MODULE and root.code==code_evidence.captured
+    _need(type(root) is (SourceCompilationFrameRoot if static_root else FrameRoot)
+          and root.scope==scope.id==overlay.root_scope and root.kind is FrameKind.MODULE
+          and root.code==(overlay.declaration.compilation if static_root else code_evidence.captured)
           and scope.kind is ControlScopeKind.FRAME and scope.source==unit and scope.region==graph.root
           and type(root.entry) is MappingFramePorts and not root.entry.closure_cells,
           'SP8 root source/code/namespace ABI differs; empty closure is this source profile only')

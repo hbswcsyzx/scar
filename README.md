@@ -12,7 +12,7 @@ SCAR 面向程序依赖建模与自动化简。当前唯一开发任务是**整�
 - [程序模型](docs/MODEL.md)：实体、身份、边与不确定性。
 - [静态分析架构](docs/STATIC_ANALYSIS_DESIGN.md)：编译器式阶段、联合推导与存储。
 - [程序展开规则](docs/PROGRAM_DECOMPOSITION.md)：每类构造如何成为子图。
-- [唯一实施计划](docs/STATIC_ANALYSIS_PLAN.md)：S0–S5，当前下一项 S1。
+- [唯一实施计划](docs/STATIC_ANALYSIS_PLAN.md)：S0–S5，当前推进 S2 主体与跨层连接。
 - [当前状态](docs/STATUS.md)：已经做到什么、尚未做到什么。
 
 ## 工作区
@@ -41,9 +41,11 @@ cd ~/AAA/scar
 ```bash
 python -m scar.cli static ../le-wm --jobs 4
 python -m scar.cli static ../le-wm --expand --jobs 4
+python -m scar.cli static ../le-wm --link-calls --max-call-bodies 80
 python -m scar.cli static-query --file solver/cem.py --name solve --dependencies --limit 5
 ```
 
 输出只保留 `artifacts/current/static/`：每份源码共享 source/semantic/semantics/CFG/lexical 分片，常量事实和 import 候选索引连接原 ID。
 `--phase sources` 仅建目录；`--phase graph` 为默认源码图；`--phase bodies` 构造源图后继续规范主体展开。对已有图使用 `--expand`，无需重建源图；`--rules-only` 只发布详细规则/前提，`--max-bodies` 与 `--file` 只限制本次派工，全部入口继续计入分母。
 `--refine` 使用已保留源码细化 scope/import，不重建源码图；`--refine --imports-only` 只更新 import 索引。图结构化展开与跨过程固定点仍未完成，命令成功不代表第一阶段完成。
+`--entry lexical:...` 可在 `--expand` 时按原入口 key 精准派工，不改变总目录。`--link-calls` 只在保存的原图上建立条件调用/参数/完成端口关系，预算和未处理范围写入原 manifest；更新主体或目录会废弃旧调用索引。查询 `--dependencies` 可读取这些跨主体端点，不能将单一候选解释为运行目标已确定。

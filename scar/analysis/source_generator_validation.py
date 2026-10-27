@@ -17,7 +17,8 @@ from scar.ir.program.model import (
     Behavior, BlockArgument, CompletionResult, ExitKind, LiteralOrigin, LocalBindingValue,
     ReferenceValue, StateVersionValue, TerminatorKind, value_type,
 )
-from scar.ir.program.resumption import SavedInput, SavedRole, ResumeSlotKind, SuspendTerminator
+from scar.ir.program.resumption import SavedInput, SavedRole, ResumeSlotKind, SuspendTerminator, SuspensionFlavor
+from scar.ir.program.source import SourceRole
 from scar.ir.semantics_v2 import Opcode
 from scar.ir.v2.semantic import SemanticRelation
 from scar.ir.program.source_language import SourceLanguageCapability as Capability
@@ -359,7 +360,34 @@ def validate_generator_regions(model, graph, interface, metadata, semantic, lang
                   "generator target binding must use the original comprehension SG slot")
             elt_ops = [key for key in local_operations if links[key].source.start_line == node.elt.lineno
                        and links[key].source.start_column == node.elt.col_offset]
-            _need(elt_ops, "lazy element source must be connected inside B")
+            if isinstance(node.elt,ast.Constant):
+                # A literal has a source-backed value, not an executable elt
+                # operation. Its actual YIELD export must name that exact
+                # original value and source occurrence inside the lazy Region.
+                exported=[use for use in suspend.uses if use.id==suspend.terminator.exported]
+                _need(suspend.terminator.flavor is SuspensionFlavor.YIELD and len(exported)==1,
+                      'literal element has no unique actual YIELD payload Use')
+                payload=values[exported[0].value]
+                source_uses=[row for row in metadata.use_links
+                             if row.operation==suspend.id and row.use==exported[0].id]
+                _need(len(source_uses)==1 and (source_uses[0].role,source_uses[0].index)==('yield',0),
+                      'literal element lost its original ordered YIELD Use source')
+                source_use=source_uses[0];atom=semantic.source_atoms.get(source_use.source.atom_id)
+                expected=(node.elt.lineno,node.elt.end_lineno,node.elt.col_offset,node.elt.end_col_offset)
+                _need(atom is not None and atom.kind=='Constant' and atom.reference==source_use.source
+                      and (source_use.source.path,source_use.source.fingerprint)==(source.path,source.fingerprint)
+                      and (source_use.source.start_line,source_use.source.end_line,
+                           source_use.source.start_column,source_use.source.end_column)==expected,
+                      'literal element YIELD source differs from the original Constant AST')
+                value_sources=[row for row in metadata.value_links if row.value==payload.id
+                               and row.source==source_use.source and row.role is SourceRole.EXPRESSION]
+                _need(type(payload)is ReferenceValue and payload.region==body.id
+                      and type(payload.origin)is LiteralOrigin
+                      and type(payload.origin.value)is type(node.elt.value) and payload.origin.value==node.elt.value
+                      and len(value_sources)==1,
+                      'literal element is not its exact source-backed lazy reference/value')
+            else:
+                _need(elt_ops, "lazy element source must be connected inside B")
             for p in model.protocols:
                 if p.kind is not Kind.GENEXPR_CONTAINS or owners[p.operation]!=body.id:continue
                 source=p.source

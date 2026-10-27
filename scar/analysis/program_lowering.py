@@ -24,7 +24,8 @@ from scar.ir.program.codec import dumps as dump_graph, _has_frame_root_capabilit
 from scar.ir.program.ids import BlockID, LocationID, OperationID, RegionID, UseID, ValueID
 from scar.ir.program.functions import BodyEntryInterface, BodyLoweringProfile, FormalPort
 from scar.ir.program.module_entries import (ModuleBodyOverlay, ModuleEntryProfile,
-    ModulePrefixOverlay, ModuleBodyExpansionProfile, StructuredFrameBodyOverlay, FrameBodyProfile)
+    ModulePrefixOverlay, ModuleBodyExpansionProfile, StructuredFrameBodyOverlay, FrameBodyProfile,
+    StaticModuleEntryDeclaration)
 from scar.ir.program.frames import (
     FrameBind, FrameDiscard, FrameEnter, FrameExit, FrameFormal, FrameModel,
 )
@@ -169,7 +170,8 @@ class SourceProgram:
                     FrameBodyProfile.STRUCTURED_MAPPING_314_V1,FrameBodyProfile.STRUCTURED_MAPPING_PROPAGATION_314_V1) or self.graph is None
                     or any(value is not None for value in (self.interface,self.frame,self.structured,self.language))):
                 raise ValueError('SP8 requires its explicit core FrameRoot/source overlay only')
-            return {'schema':'scar.source-program','schema_version':8,'entry_kind':'MAPPING_FRAME',
+            static_root = type(self.module.declaration) is StaticModuleEntryDeclaration
+            return {'schema':'scar.source-program','schema_version':9 if static_root else 8,'entry_kind':'MAPPING_FRAME',
                 'profile':self.profile.value,'status':self.module.status.value,
                 'scope':'structured source mapping frame; exact remaining source and runtime/effect debt retained',
                 'metadata':encode(self.metadata),'module':encode_frame_body(self.module),
@@ -271,20 +273,22 @@ class SourceProgram:
                     or source_texts is not None or language_options is not None or module_code_evidence is not None):
                 raise ValueError("source fragments require a live typed context session and explicit SP5 STRUCTURE")
             expected_fields -= {"semantic", "semantics", "control"}
-        if type(version) is int and version == 8:
+        if type(version) is int and version in (8,9):
             from scar.ir.program.module_entries import decode_frame_body
             if (set(document) != expected_fields | {'entry_kind','profile','module'}
                     or document['schema'] != 'scar.source-program' or document['entry_kind'] != 'MAPPING_FRAME'
                     or document['profile'] not in (FrameBodyProfile.STRUCTURED_MAPPING_314_V1.value,
                         FrameBodyProfile.STRUCTURED_MAPPING_PROPAGATION_314_V1.value)
                     or language_options is not None or verification != 'STRUCTURE'
-                    or module_code_evidence is None or type(document['graph']) is not dict
-                    or document['graph'].get('schema_version') != 29):
-                raise ValueError('SP8 requires explicit source/core capability and readonly whole-root evidence')
+                    or version == 8 and module_code_evidence is None or type(document['graph']) is not dict
+                    or document['graph'].get('schema_version') != (30 if version == 9 else 29)):
+                raise ValueError('mapping frame requires its explicit static or captured source/core capability')
             result=cls(load_graph(_canonical(document['graph'])),decode(LoweringMetadata,document['metadata']),
                 semantic_from_dict(document['semantic']),None,SourceControlFlowGraph.from_dict(document['control']),
                 FrameBodyProfile(document['profile']),module=decode_frame_body(document['module']))
             result=replace(result,semantics=SourceSemanticsGraph.from_dict(document['semantics'],result.semantic))
+            if (type(result.module.declaration) is StaticModuleEntryDeclaration) != (version == 9):
+                raise ValueError('source wrapper must distinguish static compilation and captured root evidence')
             if _canonical(result.to_dict()) != _canonical(document):
                 raise ValueError('SP8 canonical source capability/summary differs')
             checked=validate_source_program(result,max_operations=max_operations,verification=verification,

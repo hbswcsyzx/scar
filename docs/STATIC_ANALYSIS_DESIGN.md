@@ -58,6 +58,9 @@ E/F 相互依赖，需要工作队列迭代；这个表不是一遍不可回访�
 静态来源用独立 `SOURCE_COMPILATION` 记录；不能创建假的 CapturedCode/CodeCapture/Invocation 或冒用原运行 CodeWitnessStore。
 源码/编译布局恒定不证明实际加载的 code/function/module 对象相同；读取编译器常量也不证明运行时对象或可变内容相等。
 
+`SourceCompilationCodeRef` 保存原主体引用、definition、编译器 profile、根布局及精确常量路径，不包含 CodeType 或运行 ID。模块使用原 `ModuleUnitSource` 和 initializer、空路径；函数使用原 `SourceReference` 和非空路径。`SourceCompilationFrameRoot` 把该来源接到既有控制 scope 和 ABI：模块用 locals/globals/builtins/world 映射端口，不能伪装成函数形参。静态 class 还缺独立 ABI，不能套用模块入口。
+静态模块的 `StaticModuleEntryDeclaration` 与动态 `ModuleCodeWitness` 分开。规范 core schema 30 / source wrapper 9 明确标记静态来源；普通 reader 从保留源码重新编译并核对引用，不能把声明本身当作证明。模块已支持的顺序前缀和仍需展开的精确源码后缀分别保存，部分图不等于完整主体。
+
 
 ## 5. 展开契约
 
@@ -96,6 +99,10 @@ call graph、points-to/abstract heap、effects 和属性共同求不动点：
 递归调用使用调用图 SCC；循环使用回边、block parameters 和 state joins，不无限展开。
 必要时使用上下文敏感摘要；上下文未区分的输入应安全合并，不能借一次调用的精确事实推断其他调用。
 已解析区域可用 may/must 读写、alias 和 ModRef 查询排除无关状态写；粗 world 只是保守起点。
+
+首个静态 linker 使用 `StaticCallSite/StaticCallTarget` 记录原 caller/callee 的 artifact 命名空间、Use→formal、各返回站点和 completion→landing 关系；它们不是新的操作、值或 Invocation。目标来自原调用候选、函数创建和 reaching/alias/import 关系，单一候选也不提升为真实目标。callee 的粗 world 与 caller world 通过显式接口映射，不能按相同 LocationID 或标签认作同一状态域。defaults、closure cell、G/B 与细粒度 effects 未连接时逐项保留 frontier。
+关系分片与原图共处一个 current root。固定 source-basis receipt 只保存输入身份和原分片声明，解决 manifest 更新后旧 SHA 的自引用问题；后续更新 body 或源码目录时废弃这些派生关系，重新计算。源程序调用总数、已枚举 canonical CALL 与已发布关系分别计数，预算中断不能解释为没有消费者。
+较粗源视图的 OPAQUE 不阻断已证明的规范展开：原 SG 操作、SourceAtom/AST Call 与 canonical callee Use/invoke 端口都准确匹配，而计算 overlay 确实缺失时，记录明确的 source-view refinement，继续保留规范依赖；不能伪造旧计算记录。查询的 caller 是保存图的命名空间，实际操作所属 Region 从原图推导，不能误读为观测到的调用帧。
 
 ## 7. 属性事实与约束
 

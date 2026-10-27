@@ -177,9 +177,14 @@ def _expression_body(owner,node,definition,code,index):
     cursor,result=b.expr(node.body,cursor)
     if cursor is not None:b.finish_exit(cursor,node.body,result,ExitKind.NORMAL)
     blocks=tuple(Block(key,b.block_arguments[key],tuple(b.block_operations[key]))for key in b.function_blocks)
-    b.regions.append(Region(region,'lambda expression',entry,blocks,
-        (ExitPort('normal',ExitKind.NORMAL,(_REF,b.state_type)),ExitPort('raise',ExitKind.RAISE,(_REF,b.state_type))),
-        parent=owner.function_context))
+    # Buffers are shared with the creating frame and sibling bodies. Only
+    # this child's actual terminal sites can declare its exit ports: a literal
+    # or bound-local expression need not have a RAISE site at all.
+    completed={operation.terminator.kind for block in blocks for identity in block.operations
+        if (operation:=b.operation_records[identity]).terminator is not None}
+    exits=tuple(ExitPort(kind.value.lower(),kind,(_REF,b.state_type))for kind,terminal in
+        ((ExitKind.NORMAL,TerminatorKind.RETURN),(ExitKind.RAISE,TerminatorKind.RAISE))if terminal in completed)
+    b.regions.append(Region(region,'lambda expression',entry,blocks,exits,parent=owner.function_context))
     owner.lambda_environments.append(environment);owner.lambda_entries.append(FunctionEntryLayout(environment.id,ports))
     return interface,environment
 

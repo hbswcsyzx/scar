@@ -20,7 +20,10 @@ from .resumption import (
     ResumeInput, SavedInput, SavedRole, SuspendTerminator, saved_actual_use,
 )
 from .drivers import BodyDriveResult
-from .source_subjects import FrameKind, FunctionFrameABI, MappingFramePorts, ModuleUnitSource
+from .source_subjects import (
+    FrameKind, FunctionFrameABI, MappingFramePorts, ModuleUnitSource,
+    SourceCompilationFrameRoot,
+)
 from scar.ir.v2.common import SourceReference
 
 
@@ -172,10 +175,18 @@ def control_errors(graph):
             continue  # Already reported by the scope check.
         region = regions[scope.region]
         entry = blocks[region.entry]
+        static = type(root) is SourceCompilationFrameRoot
         module = root.kind is FrameKind.MODULE
         expected_source = ModuleUnitSource if module else SourceReference
         if type(scope.source) is not expected_source:
             error("frame_root_subject", root.scope, "frame kind needs its exact source-subject category")
+        elif static:
+            if scope.source != root.code.source:
+                error("frame_root_static_source", root.scope,
+                      "source-compilation root must retain the scope's exact original source subject")
+            if module and root.code.definition != scope.source.initializer:
+                error("frame_root_static_definition", root.scope,
+                      "module source-compilation root must retain the original initializer definition")
         else:
             path = scope.source.snapshot.path if module else scope.source.path
             if root.code.filename != path:
@@ -185,6 +196,10 @@ def control_errors(graph):
             if environment is None or environment.region != region.id:
                 error("frame_root_environment", root.scope,
                       "function ABI must reference this region's existing environment")
+            if (static and environment is not None
+                    and environment.code_definition != root.code.definition):
+                error("frame_root_static_definition", root.scope,
+                      "function source-compilation root must match the environment code definition")
             if len([layout for layout in graph.function_entries
                     if layout.environment == root.entry.environment]) != 1:
                 error("frame_root_function_entry", root.scope,

@@ -10,7 +10,7 @@ import ast
 from collections import deque
 import dis
 
-from scar.analysis.source_language import SourceLanguageOptions, require_source_tree
+from scar.analysis.source_language import SourceLanguageOptions, require_source_tree, function_exception_types
 from scar.ir.program.model import (
     Behavior, BlockArgument, CompletionResult, ExitKind, OperationResult,
     ReferenceValue, StateVersionValue, TerminatorKind, ValueKind, ValueType, value_type,
@@ -26,7 +26,7 @@ def _need(condition, detail):
 
 
 def validate_tuple_key_ownership(model, graph, interface, metadata, semantic, *,
-                                 source_tree=None, options=None, structural_only=False):
+                                 source_tree=None, options=None, structural_only=False, language=None):
     """Check exact tuple-key sources/ports and success-only input transfer.
 
     Held instances retain their FRAME_HOLD operation identity and order, even
@@ -92,6 +92,18 @@ def validate_tuple_key_ownership(model, graph, interface, metadata, semantic, *,
     records, operands_by_id = {}, {}
     state_type = value_type(values[interface.world])
     ref_type = ValueType(ValueKind.REFERENCE)
+    from scar.ir.program.source_language import SourceLanguageCapability
+    paired = language is not None and SourceLanguageCapability.FUNCTION_TRY_314_V1 in language.capabilities
+    raise_types = function_exception_types(language, ref_type, state_type)
+    failure_holds = {}
+    if paired:
+        from scar.analysis.source_function_try_validation import (
+            exception_handoff_holds, validate_function_try_protocols)
+        # The public query must not infer packet/cleanup ownership merely
+        # from a three-port shape. Reuse the original paired dataflow and
+        # C0/C1 source checks before following its actual unwind corridor.
+        validate_function_try_protocols(model, graph, interface, metadata, semantic, language,
+                                        source_tree=source_tree)
     for identity in sorted(selected, key=lambda key: key.wire):
         operation, link = operations[identity], links[identity]
         definition = semantic.definitions.get(link.semantic_operation)
@@ -111,11 +123,12 @@ def validate_tuple_key_ownership(model, graph, interface, metadata, semantic, *,
               and type(values[operation.uses[-1].value]) is StateVersionValue
               and values[operation.uses[-1].value].location == values[interface.world].location,
               "tuple references/world do not retain their original typed ports")
-        _need(tuple((row.kind, row.types) for row in operation.completions)
-              == ((ExitKind.NORMAL, (ref_type, state_type)), (ExitKind.RAISE, (ref_type, state_type)))
+        expected = ((ExitKind.NORMAL, (ref_type, state_type)), (ExitKind.RAISE, raise_types))
+        _need(tuple((row.kind, row.types) for row in operation.completions) == expected
               and tuple(edge.kind for edge in operation.terminator.successors) == (ExitKind.NORMAL, ExitKind.RAISE)
-              and all(edge.arguments == (CompletionResult(0), CompletionResult(1))
-                      for edge in operation.terminator.successors),
+              and all(edge.arguments == tuple(CompletionResult(index) for index in range(len(types)))
+                      and tuple(value_type(values[value]) for value in blocks[edge.block].arguments) == types
+                      for edge, (_, types) in zip(operation.terminator.successors, expected)),
               "tuple normal/raise payloads must be their own ordered CompletionResults")
         child_sources = []
         for index, use in enumerate(operands):
@@ -146,13 +159,17 @@ def validate_tuple_key_ownership(model, graph, interface, metadata, semantic, *,
                   "tuple has no unique exact BUILD_TUPLE arity/position witness")
         operands_by_id[identity] = tuple((use.value, source) for use, source in zip(operands, child_sources))
         failure = blocks[operation.terminator.successors[1].block]
-        _need(len(failure.operations) == 2 and protocols.get(failure.operations[0]) is not None
-              and protocols[failure.operations[0]].kind is Kind.FRAME_EXIT
-              and operations[failure.operations[1]].terminator.kind is TerminatorKind.RAISE,
-              "tuple failure must retain the original no-handler FrameExit/RAISE path")
-        cleanup = operations[failure.operations[0]]
-        held = tuple(use.value for use in cleanup.uses
-                     if (row := use_links.get((cleanup.id, use.id))) is not None and row.role == "held-temporary")
+        if paired:
+            held = exception_handoff_holds(failure.id, operations, protocols, blocks, use_links)
+        else:
+            _need(len(failure.operations) == 2 and protocols.get(failure.operations[0]) is not None
+                  and protocols[failure.operations[0]].kind is Kind.FRAME_EXIT
+                  and operations[failure.operations[1]].terminator.kind is TerminatorKind.RAISE,
+                  "tuple failure must retain the original no-handler FrameExit/RAISE path")
+            cleanup = operations[failure.operations[0]]
+            held = tuple(use.value for use in cleanup.uses
+                         if (row := use_links.get((cleanup.id, use.id))) is not None and row.role == "held-temporary")
+        failure_holds[identity] = held
         parts = tuple(use.value for use in operands)
         _need(not parts or len(held) >= len(parts) and held[-len(parts):] == parts,
               "BUILD_TUPLE failure dropped/reordered pending element references before ERROR_NO_POP unwind")
@@ -221,7 +238,7 @@ def validate_tuple_key_ownership(model, graph, interface, metadata, semantic, *,
                 else:
                     token = ("UNRECOVERED_TEMPORARY_RELEASE", identity)
                     unknown |= frozenset((token,)); frontier(*token, affected)
-            elif kind is Kind.FRAME_EXIT:
+            elif kind is Kind.FRAME_EXIT or paired and kind is Kind.FUNCTION_FRAME_EXIT_EXCEPTION_PACKET:
                 held = tuple(use.value for use in operation.uses
                     if (row := use_links.get((identity, use.id))) is not None and row.role == "held-temporary")
                 if affected and not unknown:
@@ -246,11 +263,7 @@ def validate_tuple_key_ownership(model, graph, interface, metadata, semantic, *,
                     normal_stack = stack[:-len(expected)] if expected else stack
                     normal_affected |= frozenset((identity,))
                     if not unknown:
-                        failure = blocks[terminator.successors[1].block]
-                        cleanup = operations[failure.operations[0]]
-                        held = tuple(use.value for use in cleanup.uses
-                            if (link := use_links.get((cleanup.id, use.id))) is not None
-                            and link.role == "held-temporary")
+                        held = failure_holds[identity]
                         _need(held == tuple(item[1] for item in stack),
                               "tuple failure changed its pending outer prefix or element hold instances")
                 elif stack and kind not in preserving:

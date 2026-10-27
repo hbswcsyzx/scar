@@ -16,7 +16,7 @@ from scar.ir.program.ids import BlockID, ControlScopeID, OperationID, RegionID, 
 from scar.ir.program.inventory import SourceContextDigest
 from scar.ir.program.providers import ProviderArtifact
 from scar.ir.program.source import SourceRole
-from scar.ir.program.source_subjects import ModuleUnitSource
+from scar.ir.program.source_subjects import ModuleUnitSource, SourceCompilationCodeRef
 from scar.ir.program.structured import PythonProtocolKind, LoopInterface
 from scar.ir.program.source_language import CodeConstantSource
 from scar.ir.record_codec import decode, encode
@@ -28,6 +28,7 @@ from scar.ir.v2.ids import (OperationDefinitionID, StaticValueID, ValueSlotID,
 
 class ModuleEntryProfile(str, Enum):
     EXEC_MAPPING_314_V1 = "EXEC_MAPPING_314_V1"
+    STATIC_EXEC_MAPPING_314_V1 = "STATIC_EXEC_MAPPING_314_V1"
 
 
 class ModuleBodyStatus(str, Enum):
@@ -96,6 +97,26 @@ class ModuleEntryDeclaration:
               "unsupported mapping frame entry capability")
         _need(type(self.closure_names) is tuple and not self.closure_names,
               "nonempty mapping-frame closure is not connected by this capability")
+
+
+@dataclass(frozen=True, slots=True)
+class StaticModuleEntryDeclaration:
+    """A source-compiled exec root; no captured or loaded-module identity."""
+
+    unit: ModuleUnitSource
+    compilation: SourceCompilationCodeRef
+    closure_names: tuple[str, ...] = ()
+    profile: ModuleEntryProfile = ModuleEntryProfile.STATIC_EXEC_MAPPING_314_V1
+
+    def __post_init__(self):
+        _need(type(self.unit) is ModuleUnitSource and type(self.compilation) is SourceCompilationCodeRef,
+              "static declaration needs its original source unit and compiler provenance")
+        self.compilation.__post_init__()
+        _need(self.compilation.source == self.unit and self.compilation.definition == self.unit.initializer
+              and not self.compilation.code_path, "static declaration must bind the exact module compiler root")
+        _need(self.profile is ModuleEntryProfile.STATIC_EXEC_MAPPING_314_V1
+              and type(self.closure_names) is tuple and not self.closure_names,
+              "unsupported static module entry profile or closure")
 
 
 @dataclass(frozen=True, slots=True)
@@ -478,7 +499,7 @@ class StructuredFrameBodyOverlay:
     supplies no traceback/pending/handled-context proof. Later capabilities
     may connect those existing core relations without another body wire.
     """
-    declaration: ModuleEntryDeclaration
+    declaration: ModuleEntryDeclaration | StaticModuleEntryDeclaration
     census: ModuleSourceCensus
     root_scope: ControlScopeID
     prefix: FrameStatementSlice | None
@@ -502,7 +523,7 @@ class StructuredFrameBodyOverlay:
         return FrameBodyStatus.PARTIAL if self.remaining is not None else FrameBodyStatus.TOPOLOGY_RECOVERED
 
     def __post_init__(self):
-        _need(type(self.declaration) is ModuleEntryDeclaration and type(self.census) is ModuleSourceCensus
+        _need(type(self.declaration) in (ModuleEntryDeclaration, StaticModuleEntryDeclaration) and type(self.census) is ModuleSourceCensus
               and type(self.root_scope) is ControlScopeID, 'structured frame needs original source and its sole core root')
         _need((self.profile,self.completion_profile) in (
                   (FrameBodyProfile.STRUCTURED_MAPPING_314_V1,FrameCompletionProfile.RAW_EXCEPTION_REF_314_V1),

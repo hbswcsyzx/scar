@@ -33,6 +33,7 @@ class _Fragments:
     def __init__(self, root):
         self.root = root
         self.receipts = []
+        self.core_graphs = {}
 
     def read(self, descriptor):
         relative = Path(descriptor["path"])
@@ -100,7 +101,7 @@ def _entry_view(entry, unit, symbols, limit):
     return {**{name: entry.get(name) for name in fields}, "file": unit["path"],
             "namespace_root": unit["namespace_root"], "symbol_table_candidates": candidates,
             "body": None if body is None else {name: body[name] for name in (
-                "status", "reason", "artifact", "gaps", "construction_operations", "issue") if name in body}}
+                "status", "reason", "artifact", "gaps", "construction_operations", "issue", "last_attempt_issue") if name in body}}
 
 
 def _catalog(unit, fragments):
@@ -135,6 +136,8 @@ def _canonical_dependencies(unit, entries, fragments, limit):
             raise ValueError("unsupported canonical body container")
         if document.get("entry_key") != body["entry_key"] or document.get("cache_key") != body.get("cache_key"):
             raise ValueError("body belongs to a different lexical entry")
+        if document.get("status") != body["status"]:
+            raise ValueError("canonical body status differs from its ledger")
         if document.get("inputs") != {name: unit["artifacts"].get(name) for name in
                                        ("source", "semantic", "semantics", "control")}:
             raise ValueError("body shared source fragments differ from the selected unit")
@@ -144,16 +147,40 @@ def _canonical_dependencies(unit, entries, fragments, limit):
             row["issue"] = document.get("issue")
             rows.append(row)
             continue
+        if document["status"] != "LOWERED_WITH_GAPS":
+            raise ValueError("a non-lowered body cannot publish a canonical graph")
         metadata = document["metadata"]
         if (metadata["source"]["path"] != unit["path"] or
                 metadata["source"]["fingerprint"] != "sha256:" + unit["decoded_sha256"]):
             raise ValueError("canonical body source differs from selected source unit")
         # Ordinary canonical structure, rather than a purity or execution test.
         graph = loads(json.dumps(graph_document, allow_nan=False))
+        fragments.core_graphs[body["artifact"]["path"]] = graph
         interface = document.get("interface")
-        if (interface is None or interface.get("definition") not in
-                (selected[body["entry_key"]].get("semantic_definition_ids") or ())
-                or interface.get("region") != graph_document["root"]):
+        module_document = document.get("module")
+        module_view = None
+        if module_document is not None:
+            from scar.ir.program.module_entries import decode_frame_body, StaticModuleEntryDeclaration
+            from scar.ir.program.source_subjects import SourceCompilationFrameRoot
+            overlay = decode_frame_body(module_document)
+            subject = overlay.declaration.unit
+            if (selected[body["entry_key"]]["kind"] != "MODULE" or interface is not None
+                    or type(overlay.declaration) is not StaticModuleEntryDeclaration
+                    or subject.snapshot.path != unit["path"] or subject.namespace_root != unit["namespace_root"]
+                    or subject.snapshot.fingerprint != "sha256:" + unit["decoded_sha256"]
+                    or module_document["declaration"]["unit"]["initializer"] not in
+                       (selected[body["entry_key"]].get("semantic_definition_ids") or ())
+                    or len(graph.frame_roots) != 1 or type(graph.frame_roots[0]) is not SourceCompilationFrameRoot
+                    or graph.frame_roots[0].code != overlay.declaration.compilation):
+                raise ValueError("static module body differs from the original initializer/compiler root")
+            metadata = {**metadata, "operation_links": module_document["operation_links"],
+                        "value_links": module_document["value_links"], "use_links": module_document["use_links"]}
+            module_view = {"declaration": module_document["declaration"], "status": overlay.status.value,
+                           "prefix": module_document["prefix"], "remaining": module_document["remaining"],
+                           "frontiers": _page(module_document["frontiers"], limit)}
+        elif (interface is None or interface.get("definition") not in
+                  (selected[body["entry_key"]].get("semantic_definition_ids") or ())
+                  or interface.get("region") != graph_document["root"]):
             raise ValueError("canonical body interface differs from the selected definition/root")
         row.update(canonical_root=graph_document["root"],
                    canonical_schema=graph_document["schema_version"],
@@ -163,6 +190,9 @@ def _canonical_dependencies(unit, entries, fragments, limit):
                    values=_page(graph_document["values"], limit),
                    state_locations=_page(graph_document["locations"], limit),
                    interface=document.get("interface"),
+                   module=module_view,
+                   frame_roots=graph_document.get("frame_roots", []),
+                   producer=document.get("producer"),
                    targets=_page(metadata.get("call_targets", []), limit),
                    operation_sources=_page(metadata.get("operation_links", []), limit),
                    value_sources=_page(metadata.get("value_links", []), limit),
@@ -203,6 +233,95 @@ def _rule_plans(unit, entries, fragments, limit):
         raise ValueError("rule ledger omits a selected source entry")
     return {"status": "ORIGINAL_STATIC_RULE_PLANS", "plans": plans,
             "language_semantics_complete": document["language_semantics_complete"]}
+
+
+def _call_relations(manifest, unit, entries, fragments, limit):
+    publication = manifest.get("static_calls")
+    if publication is None:
+        return {"status": "STATIC_CALL_LINKS_NOT_BUILT"}
+    from scar.ir.program.static_calls import loads as load_relations
+    from scar.analysis.static_calls import input_basis_unit
+    from scar.ir.program.codec import loads as load_core
+    selected = {entry["entry_key"]: entry for entry in entries}
+    descriptors = {row["path"]: row for row in publication["artifacts"]}
+    bases = [row for row in descriptors.values() if row.get("kind") == "BASIS"]
+    if len(bases) != 1:
+        raise ValueError("static call publication needs one immutable input-basis receipt")
+    basis = bases[0]
+    basis_document = fragments.read(basis)
+    if (basis_document.get("schema") != "scar.static-call-source-basis" or
+            basis_document.get("schema_version") != 1 or
+            basis_document.get("logical_root") != str(fragments.root) or
+            basis_document.get("input_manifest_sha256") != publication.get("input_manifest_sha256") or
+            basis_document.get("units") != [input_basis_unit(row) for row in manifest["units"]]):
+        raise ValueError("static call input namespace/source/body basis differs from the current model")
+    bodies = {body["entry_key"]: body for body in unit.get("bodies", ())}
+    all_bodies = {str(fragments.root / row["artifact"]["path"]): (owner, row)
+                  for owner in manifest["units"] for row in owner["bodies"] if "artifact" in row}
+    def current_graph(row):
+        path = row["artifact"]["path"]
+        if path not in fragments.core_graphs:
+            envelope = fragments.read(row["artifact"])
+            if envelope.get("status") != row["status"] or envelope.get("entry_key") != row["entry_key"] or envelope.get("graph") is None:
+                raise ValueError("call relation endpoint is not a current canonical body")
+            fragments.core_graphs[path] = load_core(json.dumps(envelope["graph"], allow_nan=False))
+        return fragments.core_graphs[path]
+    rows = []
+    for item in publication.get("shards", ()):
+        key = item.get("caller_entry_key")
+        if key not in selected:
+            continue
+        relative = item.get("artifact_path") or item["artifact"]["path"]
+        path = "indexes/calls/" + relative
+        if path not in descriptors:
+            raise ValueError("call shard is not registered in the current model")
+        document = fragments.read(descriptors[path])
+        shard = load_relations(json.dumps(document, allow_nan=False))
+        body = bodies.get(key)
+        if (body is None or "artifact" not in body or
+                shard.caller.graph.artifact.uri != str(fragments.root / body["artifact"]["path"]) or
+                shard.caller.graph.artifact.sha256 != body["artifact"]["sha256"] or
+                shard.caller.graph.decoded_sha256 != body["artifact"]["decoded_sha256"] or
+                shard.caller.definition.as_dict() not in (selected[key].get("semantic_definition_ids") or ()) or
+                shard.source_model.uri != str(fragments.root / basis["path"]) or
+                shard.source_model.sha256 != basis["sha256"]):
+            raise ValueError("static call shard does not retain the selected original caller/input basis")
+        caller_graph = current_graph(body)
+        owners = {operation: region.id for region in caller_graph.regions for block in region.blocks
+                  for operation in block.operations}
+        for call in shard.calls:
+            if call.operation not in owners:
+                raise ValueError("static call operation is absent from its original graph namespace")
+            for target in call.targets:
+                if target.definition.root.artifact.uri != str(fragments.root / basis["path"]) or target.definition.root.artifact.sha256 != basis["sha256"]:
+                    raise ValueError("static target definition belongs to another input basis")
+                if target.body is None:
+                    continue
+                endpoint = all_bodies.get(target.body.graph.artifact.uri)
+                if endpoint is None:
+                    raise ValueError("static callee body is absent from the current model")
+                owner, row = endpoint
+                if (target.body.graph.artifact.sha256 != row["artifact"]["sha256"] or
+                        target.body.graph.decoded_sha256 != row["artifact"]["decoded_sha256"] or
+                        target.definition.context.namespace_root != owner["namespace_root"] or
+                        target.definition.snapshot.path != owner["path"] or
+                        target.definition.snapshot.fingerprint != "sha256:" + owner["decoded_sha256"]):
+                    raise ValueError("static callee receipt/source namespace is stale")
+                graph = current_graph(row)
+                if graph.root != target.body.region:
+                    raise ValueError("static callee does not retain its original root")
+        relations = document["relations"]
+        calls = [{**record, "owning_region": owners[call.operation].as_dict()}
+                 for record, call in zip(relations["calls"], shard.calls)]
+        rows.append({"entry_key": key, "caller": relations["caller"],
+                     "caller_meaning": "original stored graph namespace; owning_region identifies the lexical subgraph, not an observed calling frame",
+                     "calls": _page(calls, limit)})
+    return {"status": "QUALIFIED_CONDITIONAL_STATIC_CALL_RELATIONS", "shards": rows,
+            "enumeration_status": publication.get("status"), "enumeration_complete": publication.get("complete"),
+            "scope": publication.get("scope"), "counts": publication.get("counts"),
+            "frontiers": _page(publication.get("frontiers", []), limit),
+            "source_mapping_revalidated": False, "target_resolution_complete": False,
+            "qualification": "Original caller and immutable input receipts checked; candidate/formal/completion dependencies remain conditional, without invocation, purity or content-equivalence claims."}
 
 
 def _dependencies(unit, entries, fragments, limit):
@@ -352,6 +471,7 @@ def query_static_program(directory, *, file=None, name=None, kind=None, limit=20
                       entries_truncated=False, mode="MANIFEST_SUMMARY")
     if include_dependencies:
         result["dependencies"] = _dependencies(units[0], selected, fragments, limit)
+        result["dependencies"]["static_calls"] = _call_relations(manifest, units[0], selected, fragments, limit)
     if (root / "manifest.json").read_bytes() != manifest_bytes:
         raise ValueError("static manifest changed during query")
     result["verified_fragments"] = fragments.receipts

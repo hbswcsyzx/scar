@@ -249,8 +249,29 @@ def validate_language_body(model, graph, interface, metadata, semantic, language
                   and link.source.atom_id in definition.source_atoms,
                   "index operation lost its exact original source definition")
             node = source_node(link.source, (ast.Subscript,))
-            _need(node is None or isinstance(node.ctx, ast.Load), "load-key capability cannot certify a store")
             operation, operands, _ = invoke(identity, 2, 1)
+            if node is not None and not isinstance(node.ctx, ast.Load):
+                # AugAssign's original AST target is Store, but its first
+                # operation is a read. The function protocol consumer above
+                # already verifies the complete load/in-place/storeback path;
+                # accept only that path's exact left operand, never an
+                # arbitrary Store-context INDEX operation.
+                _need(isinstance(node.ctx, ast.Store)
+                      and Capability.HEAP_AUGASSIGN_314_V1 in language.capabilities,
+                      "load-key capability cannot certify a store")
+                normal = blocks[operation.terminator.successors[0].block]
+                augmented = []
+                for candidate in try_protocols:
+                    if protocols[candidate].kind.value != "FUNCTION_INPLACE_BINARY":
+                        continue
+                    left = operations[candidate].uses[0]
+                    original = source_uses.get((candidate, left.id))
+                    if (left.value == normal.arguments[0] and original is not None
+                            and original.source == link.source
+                            and (original.role, original.index) == ("augassign-left", 0)):
+                        augmented.append(source_node(protocols[candidate].source, (ast.AugAssign,)))
+                _need(len(augmented) == 1 and augmented[0].target is node,
+                      "Store-context index read is not the validated original AugAssign target")
             _need(operation.callee is None and values[operands[-1].value].location == values[interface.world].location,
                   "index invoke does not consume its original coarse world")
             row = addresses.get(identity)
@@ -320,7 +341,7 @@ def validate_language_body(model, graph, interface, metadata, semantic, language
     if Capability.SLICE_KEYS in language.capabilities:
         from scar.analysis.source_tuple_validation import validate_tuple_key_ownership
         tuple_ownership = validate_tuple_key_ownership(model, graph, interface, metadata, semantic,
-            source_tree=source_tree, options=options, structural_only=structural_only)
+            source_tree=source_tree, options=options, structural_only=structural_only, language=language)
     _need(len({row.name for row in language.compiler_locals}) == len(language.compiler_locals),
           "compiler-local names are not uniquely classified")
     for mapping in language.compiler_locals:

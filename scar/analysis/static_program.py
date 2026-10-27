@@ -53,11 +53,88 @@ def _issue(stage, error):
 
 def _artifacts(manifest):
     yield from manifest.get("artifacts", {}).values()
+    yield from manifest.get("static_calls", {}).get("artifacts", ())
     for unit in manifest["units"]:
         yield from unit["artifacts"].values()
         for body in unit["bodies"]:
             if "artifact" in body:
                 yield body["artifact"]
+
+
+def _discard_static_calls(root, manifest):
+    """Drop derived routes before replacing any original endpoint artifact."""
+    calls = manifest.pop("static_calls", None)
+    if calls is None:
+        return
+    for descriptor in calls.get("artifacts", ()):
+        relative = Path(descriptor["path"])
+        if relative.is_absolute() or ".." in relative.parts or relative.parts[:2] != ("indexes", "calls"):
+            raise ValueError("static call artifact must remain in its owned index directory")
+        (root / relative).unlink()
+    directory = root / "indexes" / "calls"
+    if directory.exists():
+        if any(path.is_file() or path.is_symlink() for path in directory.rglob("*")):
+            raise ValueError("static call index contains an unowned file")
+        shutil.rmtree(directory)
+    manifest["completion"]["static_call_links_present"] = False
+
+
+def link_static_program(directory, *, budget=None):
+    """Publish qualified static call relations alongside the original graphs."""
+    from scar.analysis.static_calls import build_static_call_links
+    from scar.analysis.static_body import _stamp, _producer
+    def call_producer():
+        analysis = Path(__file__).parent
+        return {"shared": _producer(), "call_sources": {
+            name: hashlib.sha256((analysis / name).read_bytes()).hexdigest()
+            for name in ("static_calls.py", "function_binding.py", "function_interfaces.py", "source_layers.py")}}
+    producer = call_producer()
+    output = Path(directory).absolute()
+    manifest = read_static_program(output, verify=False)
+    original = (output / "manifest.json").read_bytes()
+    if json.loads(original) != manifest:
+        raise ValueError("current manifest changed during static call read")
+    temporary = Path(tempfile.mkdtemp(prefix=".static-calls-", dir=output.parent))
+    try:
+        shutil.copytree(output, temporary, dirs_exist_ok=True, copy_function=os.link)
+        _discard_static_calls(temporary, manifest)
+        shared = {d["path"]: _stamp(temporary / d["path"]) for d in _artifacts(manifest)}
+        (temporary / "manifest.json").unlink()
+        (temporary / "manifest.json").write_bytes(_json(manifest))
+        input_hash = hashlib.sha256((temporary / "manifest.json").read_bytes()).hexdigest()
+        result = build_static_call_links(temporary, temporary / "indexes" / "calls",
+            expected_manifest_sha256=input_hash, budget=budget, logical_root=output)
+        # Each relation keeps its input namespaces and receipts. The immutable
+        # source-basis receipt avoids making the manifest refer to its own SHA.
+        if call_producer() != producer:
+            raise ValueError("analyzer source changed during static call linking")
+        manifest["static_calls"] = {**result, "producer": producer, "artifacts": [
+            {**descriptor, "path": "indexes/calls/" + descriptor["path"]}
+            for descriptor in result["artifacts"]]}
+        if any(_stamp(temporary / path) != stamp for path, stamp in shared.items()):
+            raise ValueError("an original source/body artifact changed during call linking")
+        manifest["completion"]["static_call_links_present"] = True
+        manifest["completion"]["whole_program_model_complete"] = False
+        manifest["storage"] = {"files": len(list(temporary.rglob("*.gz"))),
+            "compressed_bytes": sum(path.stat().st_size for path in temporary.rglob("*.gz"))}
+        (temporary / "manifest.json").write_bytes(_json(manifest))
+        read_static_program(temporary, verify=False)
+        read_static_program(output, verify=False)
+        if (output / "manifest.json").read_bytes() != original:
+            raise ValueError("current model changed during static call linking")
+        previous = Path(tempfile.mkdtemp(prefix=".static-replacing-", dir=output.parent))
+        previous.rmdir()
+        output.rename(previous)
+        try:
+            temporary.rename(output)
+        except BaseException:
+            previous.rename(output)
+            raise
+        shutil.rmtree(previous)
+        return manifest
+    except BaseException:
+        shutil.rmtree(temporary, ignore_errors=True)
+        raise
 
 
 def read_static_program(directory, *, verify=True):
@@ -109,10 +186,16 @@ def _read_fragment(root, descriptor):
 
 
 def _lowering_route(entry):
+    if entry["kind"] == "MODULE" and len(entry.get("semantic_definition_ids") or ()) == 1:
+        return {"status": "READY_TO_ATTEMPT", "body_supported": None,
+                "adapter": "scar.analysis.source_module_lowering.lower_module_entry",
+                "profile": "STRUCTURED_MAPPING_PROPAGATION_314_V1", "runtime_witness_required": False,
+                "required_inputs": ["original_module_initializer", "prepared_source_layers", "static_exec_compiler_root"],
+                "qualification": "Static mapping prefix and exact residual source; not whole-body support."}
     if entry["kind"] == "FUNCTION" and entry["source_ref"] is not None and not entry.get("generator"):
         return {"status": "READY_TO_ATTEMPT", "body_supported": None,
                 "adapter": "scar.analysis.program_lowering.PreparedSource.lower",
-                "profile": "STRUCTURED_BODY", "runtime_witness_required": False,
+                "profile": "STRUCTURED_ENV_V1", "runtime_witness_required": False,
                 "required_inputs": ["exact_source_reference", "prepared_source_layers"],
                 "qualification": "An available entry route, not a claim that all body constructs are supported."}
     return {"status": "SOURCE_ENTRY_ADAPTER_NOT_CONNECTED", "body_supported": None,
@@ -136,6 +219,7 @@ def refine_static_program(directory, *, refresh_lexical=True):
     temporary = Path(tempfile.mkdtemp(prefix=".static-refining-", dir=output.parent))
     try:
         shutil.copytree(output, temporary, dirs_exist_ok=True, copy_function=os.link)
+        _discard_static_calls(temporary, manifest)
         syntax, kinds, scope_counts, routes = Counter(), Counter(), Counter(), Counter()
         old_graphs = {d["path"]: d["sha256"] for u in manifest["units"]
                       for kind, d in u["artifacts"].items() if kind not in ("lexical", "source")}
@@ -473,31 +557,47 @@ def main(argv=None):
     parser.add_argument("--expand", action="store_true", help="incrementally lower bodies using the current stored source graphs")
     parser.add_argument("--rules-only", action="store_true", help="publish full entry rule ledgers without lowering bodies")
     parser.add_argument("--max-bodies", type=int, help="limit this body dispatch, keeping the full lexical denominator")
+    parser.add_argument("--link-calls", action="store_true", help="link saved canonical CALL ports to conditional source bodies, without rebuilding them")
+    parser.add_argument("--max-call-bodies", type=int, help="limit call-linking body reads, retaining the uncovered frontier")
     parser.add_argument("--file", action="append", default=[], help="body dispatch file selector, exact path or component suffix")
+    parser.add_argument("--entry", action="append", default=[], help="dispatch an original lexical entry key, preserving the whole catalog")
     args = parser.parse_args(argv)
     if args.imports_only and not args.refine:
         parser.error("--imports-only requires --refine")
     if args.expand and args.refine:
         parser.error("--expand and --refine are independent stages")
-    if (args.rules_only or args.max_bodies is not None or args.file) and not args.expand:
-        parser.error("--rules-only, --max-bodies and --file require --expand")
+    if args.link_calls and (args.expand or args.refine or args.phase != "graph"):
+        parser.error("--link-calls is an independent refinement of the current model")
+    if args.max_call_bodies is not None and not args.link_calls:
+        parser.error("--max-call-bodies requires --link-calls")
+    if (args.rules_only or args.max_bodies is not None or args.file or args.entry) and not args.expand:
+        parser.error("--rules-only, --max-bodies, --file and --entry require --expand")
 
     progress_calls = 0
+    progress_stage = "bodies" if args.expand else "sources"
     def progress(done, total, unit):
         nonlocal progress_calls
         progress_calls += 1
         if (total > 0 and done == total) or progress_calls % 25 == 0:
-            print(json.dumps({"files_done": done, "files_total": total,
+            noun = "entries" if progress_stage == "bodies" else "files"
+            print(json.dumps({"stage": progress_stage, noun + "_done": done, noun + "_total": total,
                               "last": unit.get("path")}), file=sys.stderr, flush=True)
 
-    if args.expand:
+    if args.link_calls:
+        from scar.analysis.static_calls import StaticCallBudget
+        existing = read_static_program(args.out, verify=False)
+        if Path(existing["project_root"]).resolve() != Path(args.source).resolve():
+            raise ValueError("call linking source root differs from the current model")
+        budget = None if args.max_call_bodies is None else StaticCallBudget(max_bodies=args.max_call_bodies)
+        result = link_static_program(args.out, budget=budget)
+    elif args.expand:
         from scar.analysis.static_body import expand_static_bodies
         existing = read_static_program(args.out, verify=False)
         if Path(existing["project_root"]).resolve() != Path(args.source).resolve():
             raise ValueError("body expansion source root differs from the current model")
         result = expand_static_bodies(args.out, jobs=args.jobs, max_operations=args.max_body_operations,
                                        max_bodies=0 if args.rules_only else args.max_bodies,
-                                       files=args.file, progress=progress)
+                                       files=args.file, entries=args.entry, progress=progress)
     elif args.refine:
         existing = read_static_program(args.out, verify=False)
         if Path(existing["project_root"]).resolve() != Path(args.source).resolve():
@@ -511,16 +611,22 @@ def main(argv=None):
         result = refine_static_program(args.out)
         if args.phase == "bodies":
             from scar.analysis.static_body import expand_static_bodies
+            progress_stage = "bodies"
+            progress_calls = 0
             result = expand_static_bodies(args.out, jobs=args.jobs,
                                            max_operations=args.max_body_operations, progress=progress)
     print(json.dumps({"summary": result["summary"], "completion": result["completion"],
                       "analyzer_seconds": result["analyzer_seconds"], "storage": result["storage"],
                       "catalog_refinement": result.get("catalog_refinement"),
                       "body_expansion": result.get("body_expansion"),
+                      "static_calls": {key: value for key, value in result.get("static_calls", {}).items()
+                                       if key not in ("artifacts", "shards")},
                       "manifest": str(Path(args.out).absolute() / "manifest.json")}, ensure_ascii=False, indent=2))
     failed = (result["worker_errors"] or result["source_changed"] or
               not result["completion"]["source_scan_complete"] or
-              any(u["status"] in ("ERROR", "SYNTAX_ERROR") for u in result["units"]))
+              any(u["status"] in ("ERROR", "SYNTAX_ERROR") or
+                  any(body["status"] == "ERROR" for body in u["bodies"])
+                  for u in result["units"]))
     return 2 if failed else 0
 
 

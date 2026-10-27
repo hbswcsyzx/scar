@@ -16,6 +16,7 @@ from typing import Any
 
 from scar.ir.record_codec import encode
 from scar.ir.semantics_v2 import SourceSnapshot
+from scar.ir.program.source_subjects import ModuleUnitSource, SourceCompilationCodeRef
 from scar.ir.v2.common import SourceReference
 from scar.ir.v2.ids import OperationDefinitionID
 from scar.trace.code_snapshot import code_key
@@ -135,7 +136,7 @@ class StaticCodeEvidence:
     snapshot: SourceSnapshot
     namespace_root: str
     definition: OperationDefinitionID
-    source: SourceReference
+    source: SourceReference | ModuleUnitSource
     code_path: tuple[int, ...]
     code: CodeType = field(repr=False, compare=False)
     code_layout_key: str
@@ -152,13 +153,20 @@ class StaticCodeEvidence:
 
     def __post_init__(self) -> None:
         if (type(self.snapshot) is not SourceSnapshot or type(self.definition) is not OperationDefinitionID
-                or type(self.source) is not SourceReference or self.source.path != self.snapshot.path
-                or self.source.fingerprint != self.snapshot.fingerprint
+                or type(self.source) not in (SourceReference, ModuleUnitSource)
                 or type(self.namespace_root) is not str or not self.namespace_root.startswith("/")
-                or type(self.code) is not CodeType or not self.code_path
+                or type(self.code) is not CodeType or type(self.code_path) is not tuple
                 or any(type(index) is not int or index < 0 for index in self.code_path)
                 or self.evidence_kind != "SOURCE_COMPILATION"):
             raise ValueError("static code evidence must bind an exact source definition and compiled code path")
+        if type(self.source) is ModuleUnitSource:
+            if (self.source.snapshot != self.snapshot or self.source.namespace_root != self.namespace_root
+                    or self.source.initializer != self.definition or self.code_path
+                    or self.code_layout_key != self.root_code_layout_key):
+                raise ValueError("static module evidence must describe its exact exec compiler root")
+        elif (self.source.path != self.snapshot.path or self.source.fingerprint != self.snapshot.fingerprint
+                or not self.code_path):
+            raise ValueError("static definition evidence must describe its exact lexical child code")
         if self.code_layout_key != code_key(self.code) or self.root_code_layout_key == "":
             raise ValueError("static code evidence compiler layout key differs")
         if (type(self.compiler_version) is not tuple or len(self.compiler_version) != 3
@@ -171,13 +179,21 @@ class StaticCodeEvidence:
         if (snapshot != self.snapshot or definition != self.definition or source != self.source):
             raise ValueError("static compilation evidence identifies a different source definition")
 
+    def to_reference(self) -> SourceCompilationCodeRef:
+        """Persist compiler provenance without a live CodeType or runtime ID."""
+        return SourceCompilationCodeRef(self.source, self.definition, self.code_path,
+            self.code_layout_key, self.root_code_layout_key, self.compiler_implementation,
+            self.compiler_version, self.compiler_python, self.compiler_cache_tag,
+            self.compile_mode, self.compile_flags, self.dont_inherit, self.optimize)
+
     def to_dict(self) -> dict[str, Any]:
         return {
             "evidence_kind": self.evidence_kind,
             "snapshot": encode(self.snapshot),
             "namespace_root": self.namespace_root,
             "definition": encode(self.definition),
-            "source": self.source.as_dict(),
+            "source": (self.source.as_dict() if type(self.source) is SourceReference else
+                       {"source_kind": "MODULE_UNIT", **encode(self.source)}),
             "code_path": list(self.code_path),
             "code_layout_key": self.code_layout_key,
             "root_code_layout_key": self.root_code_layout_key,
@@ -210,6 +226,7 @@ class SourceCompiledUnit:
     compiler_version: tuple[int, int, int]
     compiler_python: str
     compiler_cache_tag: str | None
+    module: ModuleUnitSource
     compile_mode: str = "exec"
     compile_flags: int = 0
     dont_inherit: bool = True
@@ -220,6 +237,9 @@ class SourceCompiledUnit:
                 or self.compile_mode != "exec" or self.compile_flags != 0
                 or self.dont_inherit is not True or self.optimize != 0):
             raise ValueError("source compiled unit has an unsupported compilation profile")
+        if (type(self.module) is not ModuleUnitSource or self.module.snapshot != self.snapshot
+                or self.module.namespace_root != self.namespace_root):
+            raise ValueError("compiled module declaration differs from its original source namespace")
         if self.source_sha256 != self.snapshot.fingerprint.removeprefix("sha256:"):
             raise ValueError("compiled source digest differs from its SourceSnapshot")
         if code_key(self.root_code) == "":
@@ -228,6 +248,16 @@ class SourceCompiledUnit:
     @property
     def root_code_layout_key(self) -> str:
         return code_key(self.root_code)
+
+    def for_module(self, unit: ModuleUnitSource) -> StaticCodeEvidence:
+        """Select the original module initializer, never a function substitute."""
+        if type(unit) is not ModuleUnitSource or unit != self.module:
+            raise StaticCompilationError("module differs from the compiled source unit")
+        return StaticCodeEvidence(self.snapshot, self.namespace_root, unit.initializer, unit,
+            (), self.root_code, self.root_code_layout_key, self.compiler_implementation,
+            self.compiler_version, self.compiler_python, self.compiler_cache_tag,
+            self.compile_mode, self.compile_flags, self.dont_inherit, self.optimize,
+            self.root_code_layout_key)
 
     def for_definition(self, definition: OperationDefinitionID,
                        source: SourceReference) -> StaticCodeEvidence:
@@ -315,9 +345,10 @@ def compile_source_unit(prepared) -> SourceCompiledUnit:
             issues.append({"source_span": _reference_span(reference), "definition": encode(definition_id),
                            "status": "DUPLICATE_DEFINITION_SOURCE_MAPPING", "candidate_count": len(rows)})
 
+    from scar.analysis.source_module_lowering import module_unit
     return SourceCompiledUnit(snapshot, namespace_root, source_sha256, root, clean_entries,
         tuple(issues), sys.implementation.name, tuple(sys.version_info[:3]), sys.version,
-        sys.implementation.cache_tag)
+        sys.implementation.cache_tag, module_unit(prepared))
 
 
 __all__ = ["StaticCompilationError", "StaticCodeEvidence", "SourceCompiledUnit", "compile_source_unit"]

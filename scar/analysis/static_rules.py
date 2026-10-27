@@ -15,6 +15,7 @@ from pathlib import Path
 import re
 
 from scar.ir.program.functions import BodyLoweringProfile
+from scar.ir.program.module_entries import FrameBodyProfile
 from scar.ir.program.source_language import SourceLanguageCapability as C
 
 
@@ -285,7 +286,9 @@ def plan_static_entry(tree, entry, *, path, fingerprint):
         raise ValueError("entry source identity differs")
     node = _at_path(tree, entry["ast_path"])
     kind, phase = entry["kind"], entry["phase"]
-    selected = BodyLoweringProfile.STRUCTURED_ENV.value if kind == "FUNCTION" else None
+    mapping_entry = kind == "MODULE" and isinstance(node, ast.Module)
+    selected = (FrameBodyProfile.STRUCTURED_MAPPING_PROPAGATION_314_V1.value if mapping_entry else
+                BodyLoweringProfile.STRUCTURED_ENV.value if kind == "FUNCTION" else None)
     caps, rules = list(_DEFAULT_CAPS), []
 
     def add(n, ast_path, module, function, chosen=(), needs=(), unsupported=None, status=None):
@@ -305,7 +308,14 @@ def plan_static_entry(tree, entry, *, path, fingerprint):
                       if isinstance(n, (ast.Call, ast.Attribute, ast.Subscript, ast.BinOp, ast.UnaryOp)) else []})
 
     base_needs = [_needs("ORIGINAL_SOURCE_CONTEXT", "Original source/namespace and SG/semantics/CFG mapping must be normally constructed; no dynamic evidence is implied.")]
-    if kind == "FUNCTION" and isinstance(node, ast.FunctionDef):
+    if mapping_entry:
+        caps = []  # Module mapping protocols do not use function fast-local capabilities.
+        base_needs.append(_needs("STATIC_COMPILER_MODULE_ROOT", "Compile retained text without exec; use the original MODULE initializer, empty compiler path and a source-compilation frame root, never CapturedCode."))
+        base_needs.append(_needs("MAPPING_PREFIX_AND_RESIDUAL", "Mechanically select the supported ordered mapping prefix; keep the exact remaining source slice as REQUIRED_EXPANSION with its original namespace and CFG."))
+        add(node, entry["ast_path"], "source_module_lowering", "lower_module_entry",
+            needs=base_needs, status="NEEDS_STATIC_COMPILER")
+        roots = [(child, f"{entry['ast_path']}.body[{index}]") for index, child in enumerate(node.body)]
+    elif kind == "FUNCTION" and isinstance(node, ast.FunctionDef):
         base_needs.append(_needs("STATIC_COMPILER_ENVIRONMENT_LAYOUT", "build_function checks symtable against exact compiled freevars/cellvars and qualified body layout; existing fallback is compiler_environment_layout."))
         add(node, entry["ast_path"], "environment_lowering", "StructuredEnvironmentBuilder.build_function", needs=base_needs)
         roots = [(child, f"{entry['ast_path']}.body[{index}]") for index, child in enumerate(node.body)]
@@ -323,6 +333,11 @@ def plan_static_entry(tree, entry, *, path, fingerprint):
     for root, root_path in roots:
         for child, child_path in _owned(root, root_path):
             if isinstance(child, (ast.stmt, ast.expr, ast.Slice, *_METADATA)):
+                if mapping_entry:
+                    add(child, child_path, "source_module_lowering", "mapping_prefix_selection",
+                        needs=[_needs("MAPPING_PREFIX_ADMISSION", "This predicate checks exact source/compiler mapping in source order; unsupported suffix members remain typed residual source, not function-frame operations.")],
+                        status="REQUIRES_MAPPING_SELECTION")
+                    continue
                 module, function, chosen, needs, unsupported = _rule(child)
                 if selected is None:
                     # A function-frame predicate cannot reject or admit a

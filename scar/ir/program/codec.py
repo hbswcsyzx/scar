@@ -12,7 +12,10 @@ from scar.ir.program.model import LocalBindingValue, Operation, ProgramGraph, Pr
 from scar.ir.program.control import (
     ControlScopeKind, PendingDispatchTerminator, ProtocolValueKind, ProtocolValueType,
 )
-from scar.ir.program.source_subjects import FRAME_ROOT_RECORD_TAGS, ModuleUnitSource
+from scar.ir.program.source_subjects import (
+    FRAME_ROOT_RECORD_TAGS, STATIC_FRAME_ROOT_RECORD_TAGS,
+    ModuleUnitSource, SourceCompilationFrameRoot,
+)
 from scar.ir.program.cleanup import CleanupRouteTerminator
 from scar.ir.program.resumption import (
     ResumeInput, SavedInput, SuspendTerminator,
@@ -41,7 +44,7 @@ from scar.ir.program.resources import ResourceRole
 
 
 SCHEMA = "scar.program-graph"
-SCHEMA_VERSION = 29
+SCHEMA_VERSION = 30
 _GRAPH_FIELDS = frozenset(item.name for item in fields(ProgramGraph))
 _BINDING_FIELDS = frozenset({"binding_definitions", "binding_reads"})
 _RESOURCE_FIELDS = frozenset({"resources", "resource_requirements", "resource_uses",
@@ -71,6 +74,7 @@ _CALL_EFFECT_FIELDS = frozenset({"call_effect_expansions"})
 _STORED_VALUE_FIELDS = frozenset({"stored_value_writes", "stored_value_reads"})
 _FRAME_ROOT_FIELDS = frozenset({"frame_roots"})
 _V29_GRAPH_FIELDS = _GRAPH_FIELDS
+_V30_GRAPH_FIELDS = _V29_GRAPH_FIELDS
 _V28_GRAPH_FIELDS = _V29_GRAPH_FIELDS - _FRAME_ROOT_FIELDS
 _V27_GRAPH_FIELDS = _V28_GRAPH_FIELDS
 _V26_GRAPH_FIELDS = _V27_GRAPH_FIELDS - _STORED_VALUE_FIELDS
@@ -126,6 +130,7 @@ _V26_ENVELOPE_FIELDS = frozenset({"schema", "schema_version"}) | _V26_GRAPH_FIEL
 _V27_ENVELOPE_FIELDS = frozenset({"schema", "schema_version"}) | _V27_GRAPH_FIELDS
 _V28_ENVELOPE_FIELDS = frozenset({"schema", "schema_version"}) | _V28_GRAPH_FIELDS
 _V29_ENVELOPE_FIELDS = frozenset({"schema", "schema_version"}) | _V29_GRAPH_FIELDS
+_V30_ENVELOPE_FIELDS = frozenset({"schema", "schema_version"}) | _V30_GRAPH_FIELDS
 _V19_CONNECTION_RECORD_TAGS = {record: tag for record, tag in PROTOCOL_CONNECTION_RECORD_TAGS.items()
                               if record is not SessionOccupancyCondition}
 _V17_PROTOCOL_RECORD_TAGS = {record: tag for record, tag in PROTOCOL_RECORD_TAGS.items()
@@ -278,6 +283,10 @@ def _has_frame_root_capability(graph: ProgramGraph) -> bool:
                    or type(scope.source) is ModuleUnitSource for scope in graph.control_scopes))
 
 
+def _has_static_frame_root_capability(graph: ProgramGraph) -> bool:
+    return any(type(row) is SourceCompilationFrameRoot for row in graph.frame_roots)
+
+
 def dumps(graph: ProgramGraph) -> str:
     """Select only present capabilities; preserve historical field/tag/byte profiles."""
     _require_record_and_graph_valid(graph)
@@ -308,6 +317,7 @@ def dumps(graph: ProgramGraph) -> str:
     has_admission = _has_admission_capability(graph)
     has_invoke_subset = _has_invoke_subset_capability(graph)
     has_frame_roots = _has_frame_root_capability(graph)
+    has_static_frame_roots = _has_static_frame_root_capability(graph)
     tags = (_V11_RECORD_TAGS if has_driver else
             _V10_RECORD_TAGS if has_resumption else _CLEANUP_RECORD_TAGS)
     if has_addresses or has_protocols or has_exception_matches:
@@ -330,8 +340,13 @@ def dumps(graph: ProgramGraph) -> str:
         tags = {**tags, **STORED_VALUE_RECORD_TAGS}
     if has_frame_roots:
         tags = {**tags, **FRAME_ROOT_RECORD_TAGS}
+    if has_static_frame_roots:
+        tags = {**tags, **STATIC_FRAME_ROOT_RECORD_TAGS}
     encoded = encode(graph, record_tags=tags)
-    if has_frame_roots:
+    if has_static_frame_roots:
+        document = {"schema": SCHEMA, "schema_version": 30,
+                    **{name: encoded[name] for name in _V30_GRAPH_FIELDS}}
+    elif has_frame_roots:
         document = {"schema": SCHEMA, "schema_version": 29,
                     **{name: encoded[name] for name in _V29_GRAPH_FIELDS}}
     elif _has_handle_table_capability(graph):
@@ -459,7 +474,7 @@ def _upgrade_v1_record(record: dict[str, Any]) -> dict[str, Any]:
 
 
 def loads(payload: str) -> ProgramGraph:
-    """Decode exact capability profiles v1–v29 without upgrading old wire."""
+    """Decode exact capability profiles v1–v30 without upgrading old wire."""
     if type(payload) is not str:
         raise TypeError("program graph JSON payload must be str")
     document: Any = _loads(payload)
@@ -470,7 +485,7 @@ def loads(payload: str) -> ProgramGraph:
     if document["schema"] != SCHEMA:
         raise ValueError("unsupported program graph schema")
     version = document["schema_version"]
-    if type(version) is not int or version not in (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29):
+    if type(version) is not int or version not in (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30):
         raise ValueError("unsupported program graph schema version")
     expected_fields = {1: _V1_V2_ENVELOPE_FIELDS, 2: _V1_V2_ENVELOPE_FIELDS,
                        3: _V3_ENVELOPE_FIELDS, 4: _V4_ENVELOPE_FIELDS,
@@ -486,7 +501,7 @@ def loads(payload: str) -> ProgramGraph:
                        23: _V23_ENVELOPE_FIELDS, 24: _V24_ENVELOPE_FIELDS,
                        25: _V25_ENVELOPE_FIELDS, 26: _V26_ENVELOPE_FIELDS,
                        27: _V27_ENVELOPE_FIELDS, 28: _V28_ENVELOPE_FIELDS,
-                       29: _V29_ENVELOPE_FIELDS}[version]
+                       29: _V29_ENVELOPE_FIELDS, 30: _V30_ENVELOPE_FIELDS}[version]
     if set(document) != expected_fields:
         raise ValueError("program graph document has incorrect top-level fields")
     graph_fields = {1: _V1_V2_GRAPH_FIELDS, 2: _V1_V2_GRAPH_FIELDS,
@@ -502,7 +517,7 @@ def loads(payload: str) -> ProgramGraph:
                     23: _V23_GRAPH_FIELDS, 24: _V24_GRAPH_FIELDS,
                     25: _V25_GRAPH_FIELDS, 26: _V26_GRAPH_FIELDS,
                     27: _V27_GRAPH_FIELDS, 28: _V28_GRAPH_FIELDS,
-                    29: _V29_GRAPH_FIELDS}[version]
+                    29: _V29_GRAPH_FIELDS, 30: _V30_GRAPH_FIELDS}[version]
     record = {name: document[name] for name in graph_fields}
     if version < 29:
         record.update({name: [] for name in _FRAME_ROOT_FIELDS})
@@ -639,11 +654,23 @@ def loads(payload: str) -> ProgramGraph:
         tags = {**tags, **STORED_VALUE_RECORD_TAGS}
     if version >= 29:
         tags = {**tags, **FRAME_ROOT_RECORD_TAGS}
+    if version >= 30:
+        tags = {**tags, **STATIC_FRAME_ROOT_RECORD_TAGS}
+    raw_frame_roots = record.get("frame_roots")
+    if version < 30 and type(raw_frame_roots) is list and any(
+            type(item) is dict and item.get("frame_root_kind") == "SOURCE_COMPILATION"
+            for item in raw_frame_roots):
+        raise ValueError("historical schema cannot contain source-compilation frame roots")
     graph = decode(ProgramGraph, record, record_tags=tags)
     if version < 29 and _has_frame_root_capability(graph):
         raise ValueError("historical schema cannot contain frame-root capability")
     if version == 29 and not graph.frame_roots:
         raise ValueError("schema version 29 requires explicit frame-root capability")
+    has_static_frame_roots = _has_static_frame_root_capability(graph)
+    if version < 30 and has_static_frame_roots:
+        raise ValueError("historical schema cannot contain source-compilation frame roots")
+    if version == 30 and not has_static_frame_roots:
+        raise ValueError("schema version 30 requires explicit source-compilation frame-root capability")
     has_handle_table = _has_handle_table_capability(graph)
     if version < 28 and has_handle_table:
         raise ValueError("historical schema cannot contain handle-table resource role")
