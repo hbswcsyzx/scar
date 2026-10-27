@@ -58,8 +58,10 @@ E/F 相互依赖，需要工作队列迭代；这个表不是一遍不可回访�
 静态来源用独立 `SOURCE_COMPILATION` 记录；不能创建假的 CapturedCode/CodeCapture/Invocation 或冒用原运行 CodeWitnessStore。
 源码/编译布局恒定不证明实际加载的 code/function/module 对象相同；读取编译器常量也不证明运行时对象或可变内容相等。
 
-`SourceCompilationCodeRef` 保存原主体引用、definition、编译器 profile、根布局及精确常量路径，不包含 CodeType 或运行 ID。模块使用原 `ModuleUnitSource` 和 initializer、空路径；函数使用原 `SourceReference` 和非空路径。`SourceCompilationFrameRoot` 把该来源接到既有控制 scope 和 ABI：模块用 locals/globals/builtins/world 映射端口，不能伪装成函数形参。静态 class 还缺独立 ABI，不能套用模块入口。
-静态模块的 `StaticModuleEntryDeclaration` 与动态 `ModuleCodeWitness` 分开。规范 core schema 30 / source wrapper 9 明确标记静态来源；普通 reader 从保留源码重新编译并核对引用，不能把声明本身当作证明。模块已支持的顺序前缀和仍需展开的精确源码后缀分别保存，部分图不等于完整主体。
+`SourceCompilationCodeRef` 保存原主体引用、definition、编译器 profile、根布局及精确常量路径，不包含 CodeType 或运行 ID。模块使用原 `ModuleUnitSource` 和 initializer、空路径；函数和类使用原 `SourceReference` 和非空路径。`SourceCompilationFrameRoot` 把该来源接到既有控制 scope 和 ABI：模块用 locals/globals/builtins/world 映射端口，不能伪装成函数形参。类使用独立 `ClassFrameABI`，另含有序外部 closure 引用及编译器局部 cell 角色；prepared namespace 的产生和父级 class statement 的调用连接仍是明确前沿。
+静态模块的 `StaticModuleEntryDeclaration` 与动态 `ModuleCodeWitness` 分开。模块规范 core schema 30 / source wrapper 9 明确标记静态来源；类入口以 core schema 31 显式增加 Class ABI，旧 schema 不能隐式接纳。模块 source reader 可从保留源码重新编译并核对引用；普通图 reader 的结构检查不能替代源码重验。模块已支持的顺序前缀和仍需展开的精确源码后缀分别保存，类 suite 也保留原语句和 required expansion，部分图不等于完整主体。
+
+类 suite 的 normal payload 是 Python 对象引用：编译器可能返回 `__class__` cell，也可能返回 `None`。它不是外层 metaclass/decorator 最终产生的类对象；局部 cell、外部 free cell 与 namespace 引用不可混用。函数的定义期创建同样与共享的调用期 body 分开：装饰器表达式、默认值、factory、逆序装饰器应用和 namespace 写入按真实源码顺序连接，不能将创建函数误作执行函数。
 
 
 ## 5. 展开契约

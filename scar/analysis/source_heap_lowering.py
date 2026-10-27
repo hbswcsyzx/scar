@@ -143,7 +143,18 @@ def expression_for_heap_target(builder, node, cursor, *, parent_definition=None)
         cursor, value = hook(node, cursor, old=None)
         if cursor is not None:
             operation_id = _normal_producer(builder, node, value, first_operation)
-            _associate(builder, operation_id, node, definition, Opcode.READ)
+            links=[link for link in builder.operation_links if link.operation==operation_id]
+            if len(links)==1 and links[0].semantic_operation is not None:
+                # Mapping-frame hooks can own this correspondence themselves.
+                # Accept only the identical original association; two different
+                # source roles are still an error, never merged by name.
+                link=links[0]
+                if (link.source!=builder.source(node) or link.semantic_operation!=definition.id
+                        or link.opcode is not Opcode.READ):
+                    raise _Unsupported(GapKind.SOURCE_MAPPING,node,
+                        'Name-read hook differs from its exact original source association')
+            else:
+                _associate(builder, operation_id, node, definition, Opcode.READ)
         return cursor, value
     if isinstance(node, ast.Constant) and definition.kind is OperationKind.CONSTANT:
         try:

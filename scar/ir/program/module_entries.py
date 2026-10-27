@@ -391,6 +391,7 @@ def decode_module_prefix(value):
 class FrameBodyProfile(str, Enum):
     STRUCTURED_MAPPING_314_V1 = 'STRUCTURED_MAPPING_314_V1'
     STRUCTURED_MAPPING_PROPAGATION_314_V1 = 'STRUCTURED_MAPPING_PROPAGATION_314_V1'
+    STRUCTURED_MAPPING_BODY_314_V1 = 'STRUCTURED_MAPPING_BODY_314_V1'
 
 
 class NamespacePolicy(str, Enum):
@@ -425,6 +426,8 @@ class FrameBodyProtocolKind(str, Enum):
     VALIDATE_EXCEPT_TYPE_314 = 'VALIDATE_EXCEPT_TYPE_314'
     MATCH_EXCEPTION_BORROWED_314 = 'MATCH_EXCEPTION_BORROWED_314'
     FRAME_EXIT_EXCEPTION_PACKET = 'FRAME_EXIT_EXCEPTION_PACKET'
+    MAKE_FUNCTION_314 = 'MAKE_FUNCTION_314'
+    APPLY_DECORATOR_314 = 'APPLY_DECORATOR_314'
 
 
 class FrameBodyStatus(str, Enum):
@@ -527,7 +530,8 @@ class StructuredFrameBodyOverlay:
               and type(self.root_scope) is ControlScopeID, 'structured frame needs original source and its sole core root')
         _need((self.profile,self.completion_profile) in (
                   (FrameBodyProfile.STRUCTURED_MAPPING_314_V1,FrameCompletionProfile.RAW_EXCEPTION_REF_314_V1),
-                  (FrameBodyProfile.STRUCTURED_MAPPING_PROPAGATION_314_V1,FrameCompletionProfile.PROPAGATION_REF_PAIR_314_V1))
+                  (FrameBodyProfile.STRUCTURED_MAPPING_PROPAGATION_314_V1,FrameCompletionProfile.PROPAGATION_REF_PAIR_314_V1),
+                  (FrameBodyProfile.STRUCTURED_MAPPING_BODY_314_V1,FrameCompletionProfile.PROPAGATION_REF_PAIR_314_V1))
               and self.namespace_policy is NamespacePolicy.MODULE_MAPPING_314_V1,
               'unsupported explicit structured mapping/completion profile')
         _need(type(self.operations_emitted) is int and self.operations_emitted > 0

@@ -158,7 +158,9 @@ def _canonical_dependencies(unit, entries, fragments, limit):
         fragments.core_graphs[body["artifact"]["path"]] = graph
         interface = document.get("interface")
         module_document = document.get("module")
+        class_document = document.get("class")
         module_view = None
+        class_view = None
         if module_document is not None:
             from scar.ir.program.module_entries import decode_frame_body, StaticModuleEntryDeclaration
             from scar.ir.program.source_subjects import SourceCompilationFrameRoot
@@ -178,6 +180,31 @@ def _canonical_dependencies(unit, entries, fragments, limit):
             module_view = {"declaration": module_document["declaration"], "status": overlay.status.value,
                            "prefix": module_document["prefix"], "remaining": module_document["remaining"],
                            "frontiers": _page(module_document["frontiers"], limit)}
+        elif class_document is not None:
+            from scar.ir.program.class_entries import (
+                decode_class_entry_overlay, validate_class_entry_core,
+            )
+            from scar.ir.program.source_subjects import SourceCompilationFrameRoot,FrameKind
+            from scar.ir.record_codec import decode, encode
+            from scar.ir.program.source import LoweringMetadata
+            overlay=decode_class_entry_overlay(class_document)
+            typed_metadata=decode(LoweringMetadata,metadata)
+            validate_class_entry_core(overlay,graph,typed_metadata)
+            if (selected[body["entry_key"]]["kind"]!="CLASS" or interface is not None
+                    or encode(overlay.source)!=selected[body["entry_key"]]["source_ref"]
+                    or encode(overlay.definition) not in (selected[body["entry_key"]].get("semantic_definition_ids") or ())
+                    or len(graph.frame_roots)!=1 or type(graph.frame_roots[0]) is not SourceCompilationFrameRoot
+                    or graph.frame_roots[0].kind is not FrameKind.CLASS or graph.frame_roots[0].code!=overlay.compilation
+                    or graph.frame_roots[0].entry!=overlay.interface or graph.frame_roots[0].scope!=overlay.root_scope
+                    or overlay.required_expansion.region!=graph.root):
+                raise ValueError("class body differs from the original source/compiler/frame namespace")
+            required=class_document["required_expansion"]
+            class_view={key:class_document[key] for key in ("definition","parent_definition","source","compilation","interface","status")}
+            class_view.update(inputs=_page(class_document["inputs"],limit),
+                body_statements=_page(required["body_statements"],limit),
+                compiler_stages=_page(required["compiler_stages"],limit),normal_payload=required["normal_payload"],
+                required_expansion={key:required[key] for key in ("region","operation","status")},
+                frontiers=_page(class_document["frontiers"],limit))
         elif (interface is None or interface.get("definition") not in
                   (selected[body["entry_key"]].get("semantic_definition_ids") or ())
                   or interface.get("region") != graph_document["root"]):
@@ -191,6 +218,7 @@ def _canonical_dependencies(unit, entries, fragments, limit):
                    state_locations=_page(graph_document["locations"], limit),
                    interface=document.get("interface"),
                    module=module_view,
+                   class_entry=class_view,
                    frame_roots=graph_document.get("frame_roots", []),
                    producer=document.get("producer"),
                    targets=_page(metadata.get("call_targets", []), limit),

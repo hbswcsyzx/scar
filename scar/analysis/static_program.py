@@ -186,10 +186,16 @@ def _read_fragment(root, descriptor):
 
 
 def _lowering_route(entry):
+    if entry["kind"] == "CLASS" and entry["source_ref"] is not None and len(entry.get("semantic_definition_ids") or ()) == 1:
+        return {"status": "READY_TO_ATTEMPT", "body_supported": None,
+                "adapter": "scar.analysis.source_class_lowering.lower_class_entry",
+                "profile": "STATIC_CLASS_FRAME_WITH_REQUIRED_BODY_EXPANSION", "runtime_witness_required": False,
+                "required_inputs": ["original_class_definition", "prepared_source_layers", "static_class_code_layout"],
+                "qualification": "Class namespace/cell/frame boundary with required source expansion, not complete class-body modeling."}
     if entry["kind"] == "MODULE" and len(entry.get("semantic_definition_ids") or ()) == 1:
         return {"status": "READY_TO_ATTEMPT", "body_supported": None,
                 "adapter": "scar.analysis.source_module_lowering.lower_module_entry",
-                "profile": "STRUCTURED_MAPPING_PROPAGATION_314_V1", "runtime_witness_required": False,
+                "profile": "STRUCTURED_MAPPING_BODY_314_V1", "runtime_witness_required": False,
                 "required_inputs": ["original_module_initializer", "prepared_source_layers", "static_exec_compiler_root"],
                 "qualification": "Static mapping prefix and exact residual source; not whole-body support."}
     if entry["kind"] == "FUNCTION" and entry["source_ref"] is not None and not entry.get("generator"):
@@ -231,13 +237,17 @@ def refine_static_program(directory, *, refresh_lexical=True):
                 raise ValueError("source snapshot differs from source unit")
             previous = _read_fragment(temporary, unit["artifacts"]["lexical"])
             old_entries = {e["entry_key"]: e for e in previous["entries"]}
+            semantic=None
+            if "semantic" in unit["artifacts"] and any(e["kind"]=="CLASS" for e in previous["entries"]):
+                from scar.ir.v2.codec import semantic_from_dict
+                semantic=semantic_from_dict(_read_fragment(temporary,unit["artifacts"]["semantic"]))
             catalog = inspect_lexical(ast.parse(source["text"], filename=unit["path"], type_comments=True),
                                       path=unit["path"], namespace_root=unit["namespace_root"],
                                       fingerprint="sha256:" + unit["decoded_sha256"],
-                                      source_text=source["text"])
+                                      source_text=source["text"],semantic=semantic)
             for entry in catalog["entries"]:
                 old = old_entries.get(entry["entry_key"])
-                if old is not None and old["source_ref"] == entry["source_ref"]:
+                if semantic is None and old is not None and old["source_ref"] == entry["source_ref"]:
                     for field in ("semantic_definition_ids", "semantic_source_candidates", "catalog_status"):
                         entry[field] = old[field]
                 entry["lowering_route"] = _lowering_route(entry)

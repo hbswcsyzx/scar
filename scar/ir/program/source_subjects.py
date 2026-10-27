@@ -84,13 +84,82 @@ class FunctionFrameABI:
             raise TypeError("function frame ABI requires an existing EnvironmentInterfaceID")
 
 
+class ClassCompilerCellRole(str, Enum):
+    """Compiler-owned class-body cells; these are not entry closure cells."""
+
+    CLASS_OBJECT = "CLASS_OBJECT"
+    CLASS_NAMESPACE = "CLASS_NAMESPACE"
+    LOCAL = "LOCAL"
+
+
+@dataclass(frozen=True, slots=True)
+class ClassCompilerCell:
+    name: str
+    position: int
+    role: ClassCompilerCellRole
+
+    def __post_init__(self):
+        if type(self.name) is not str or not self.name:
+            raise ValueError("class compiler cell needs an exact nonempty name")
+        if type(self.position) is not int or self.position < 0:
+            raise ValueError("class compiler cell position must be nonnegative")
+        if type(self.role) is not ClassCompilerCellRole:
+            raise TypeError("class compiler cell needs a typed role")
+        expected = {"__class__": ClassCompilerCellRole.CLASS_OBJECT,
+                    "__classdict__": ClassCompilerCellRole.CLASS_NAMESPACE}.get(
+                        self.name, ClassCompilerCellRole.LOCAL)
+        if self.role is not expected:
+            raise ValueError("class compiler cell role differs from its exact compiler name")
+
+
+@dataclass(frozen=True, slots=True)
+class ClassFrameABI:
+    """Static class-body entry roles, separate from module/function ABIs.
+
+    ``mapping.locals_namespace`` is the class-local mapping role supplied by
+    class construction (normally by metaclass ``__prepare__``). This record
+    does not prove that the parent construction or mapping has been connected.
+    ``mapping.closure_cells`` aligns with ``co_freevars``. ``compiler_cells``
+    instead describes cells created inside the class body from ``co_cellvars``;
+    in particular ``__class__`` and ``__classdict__`` are not entry cells.
+    """
+
+    mapping: MappingFramePorts
+    co_freevars: tuple[str, ...]
+    co_cellvars: tuple[str, ...]
+    compiler_cells: tuple[ClassCompilerCell, ...]
+
+    def __post_init__(self):
+        if type(self.mapping) is not MappingFramePorts:
+            raise TypeError("class frame ABI requires exact mapping namespace/world ports")
+        self.mapping.__post_init__()
+        for name in ("co_freevars", "co_cellvars"):
+            values = getattr(self, name)
+            if (type(values) is not tuple
+                    or any(type(value) is not str or not value for value in values)
+                    or len(set(values)) != len(values)):
+                raise ValueError(f"class frame {name} must be an ordered tuple of unique names")
+        if set(self.co_freevars) & set(self.co_cellvars):
+            raise ValueError("class frame compiler names cannot be both free and local cells")
+        if len(self.co_freevars) != len(self.mapping.closure_cells):
+            raise ValueError("class frame closure ports must align one-for-one with co_freevars")
+        if (type(self.compiler_cells) is not tuple
+                or any(type(cell) is not ClassCompilerCell for cell in self.compiler_cells)):
+            raise TypeError("class frame compiler cells must be an ordered tuple")
+        for cell in self.compiler_cells:
+            cell.__post_init__()
+        if tuple(cell.name for cell in self.compiler_cells) != self.co_cellvars:
+            raise ValueError("class compiler-cell roles must preserve exact co_cellvars order")
+
+
 @dataclass(frozen=True, slots=True)
 class SourceCompilationCodeRef:
     """Static compiler layout for one original source definition.
 
     This record carries no CodeType, runtime code identity, or execution
     witness.  A module root uses its original ModuleUnitSource and the empty
-    code path; a function uses its exact SourceReference and a non-empty path.
+    code path; lexical child code (a function or class) uses its exact
+    SourceReference and a non-empty path.
     """
 
     source: ModuleUnitSource | SourceReference
@@ -121,9 +190,9 @@ class SourceCompilationCodeRef:
             if type(self.definition) is not OperationDefinitionID:
                 raise TypeError("source compilation ref needs an OperationDefinitionID")
             if self.source.end_column is None:
-                raise ValueError("function source compilation ref needs an exact source-span end column")
+                raise ValueError("lexical-child source compilation ref needs an exact source-span end column")
             if type(self.code_path) is not tuple or not self.code_path:
-                raise ValueError("function source compilation ref needs a non-empty code path")
+                raise ValueError("lexical-child source compilation ref needs a non-empty code path")
         else:
             raise TypeError("source compilation ref needs an original source subject")
         if any(type(index) is not int or index < 0 for index in self.code_path):
@@ -161,7 +230,7 @@ class SourceCompilationFrameRoot:
     scope: ControlScopeID
     kind: FrameKind
     code: SourceCompilationCodeRef
-    entry: MappingFramePorts | FunctionFrameABI
+    entry: MappingFramePorts | FunctionFrameABI | ClassFrameABI
 
     def __post_init__(self):
         if type(self.scope) is not ControlScopeID or type(self.kind) is not FrameKind:
@@ -179,8 +248,12 @@ class SourceCompilationFrameRoot:
             if (type(self.code.source) is not SourceReference
                     or type(self.entry) is not FunctionFrameABI):
                 raise TypeError("static FUNCTION root requires SourceReference and FunctionFrameABI")
+        elif self.kind is FrameKind.CLASS:
+            if (type(self.code.source) is not SourceReference
+                    or type(self.entry) is not ClassFrameABI):
+                raise TypeError("static CLASS root requires SourceReference and ClassFrameABI")
         else:
-            raise ValueError("static CLASS frame roots are not implemented")
+            raise ValueError("unsupported source-compilation frame kind")
         self.entry.__post_init__()
 
 
@@ -212,11 +285,19 @@ FRAME_ROOT_RECORD_TAGS = {
 }
 
 
+CLASS_FRAME_ABI_RECORD_TAGS = {
+    ClassCompilerCell: ("cell_kind", "CLASS_COMPILER_CELL"),
+    ClassFrameABI: ("entry_kind", "STATIC_CLASS_FRAME_ABI_314_V1"),
+}
+
+
 STATIC_FRAME_ROOT_RECORD_TAGS = {
     SourceCompilationFrameRoot: ("frame_root_kind", "SOURCE_COMPILATION"),
 }
 
 
 __all__ = ["ModuleUnitSource", "FrameKind", "MappingFramePorts", "FunctionFrameABI",
-           "FrameRoot", "SourceCompilationCodeRef", "SourceCompilationFrameRoot",
-           "FRAME_ROOT_RECORD_TAGS", "STATIC_FRAME_ROOT_RECORD_TAGS"]
+           "ClassCompilerCellRole", "ClassCompilerCell", "ClassFrameABI", "FrameRoot",
+           "SourceCompilationCodeRef", "SourceCompilationFrameRoot",
+           "FRAME_ROOT_RECORD_TAGS", "STATIC_FRAME_ROOT_RECORD_TAGS",
+           "CLASS_FRAME_ABI_RECORD_TAGS"]

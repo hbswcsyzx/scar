@@ -20,6 +20,125 @@ def _need(condition, detail):
         raise ValueError('module source: ' + detail)
 
 
+def _normal_statement_path(expansion, blocks, operations):
+    """Walk this statement's own normal corridor, never construction order."""
+    allowed=set(expansion.operations);cursor=expansion.entry;seen=set();path=[]
+    while cursor not in seen:
+        seen.add(cursor)
+        local=[operations[key] for key in blocks[cursor].operations if key in allowed]
+        path.extend(local)
+        final=local[-1].terminator if local else None
+        if final is None:
+            _need(cursor==expansion.normal,'statement normal corridor fell outside its declared continuation')
+            return path
+        if final.kind is TerminatorKind.INVOKE:
+            edges=[edge for edge in final.successors if edge.kind is ExitKind.NORMAL]
+        else:
+            _need(final.kind is TerminatorKind.JUMP,'expression statement has an unmodeled normal branch')
+            edges=list(final.successors)
+        _need(len(edges)==1,'statement normal corridor has no unique continuation')
+        cursor=edges[0].block
+    raise ValueError('module source: statement normal corridor cycles')
+
+
+def _mapping_exception_holds(block_id, operations, protocols, blocks, use_links):
+    """Read actual pre-handler releases/frame retention on the paired path."""
+    from scar.ir.program.module_entries import FrameBodyProtocolKind as K
+    cursor=(block_id,0);seen=set();released=[]
+    while cursor not in seen:
+        seen.add(cursor);block=blocks[cursor[0]]
+        _need(cursor[1]<len(block.operations),'mapping exception corridor fell out of its block')
+        op=operations[block.operations[cursor[1]]];marker=protocols.get(op.id)
+        kind=marker.kind if marker is not None else None
+        first=use_links.get((op.id,op.uses[0].id)) if op.uses else None
+        if kind is PythonProtocolKind.FRAME_RELEASE_TEMPORARY and first is not None and first.role in (
+                'function-exception-unwind','mapping-function-exception-unwind'):
+            released.append(op.uses[0].value)
+        if kind is K.FRAME_EXIT_EXCEPTION_PACKET:
+            held=tuple(use.value for use in op.uses if (row:=use_links.get((op.id,use.id))) is not None and row.role=='held-temporary')
+            return held+tuple(reversed(released))
+        if kind is PythonProtocolKind.FUNCTION_HANDLED_CONTEXT_ENTER:
+            return tuple(reversed(released))
+        term=op.terminator
+        if term is None:cursor=(block.id,cursor[1]+1)
+        else:
+            _need(term.kind in (TerminatorKind.JUMP,TerminatorKind.PENDING_DISPATCH,TerminatorKind.CLEANUP_ROUTE)
+                  and len(term.successors)==1,'mapping exception handoff lost its canonical continuation')
+            cursor=(term.successors[0].block,0)
+    raise ValueError('module source: mapping exception handoff cycles')
+
+
+def validate_mapping_heap_store(node,target,expansion,*,graph,overlay,semantic,code_evidence,
+                                expression_value,invoke,protocols,blocks,operations,values,refinements):
+    from scar.analysis.source_heap_validation import validate_heap_store
+    from scar.ir.program.structured import PythonProtocolKind as P
+    import dis
+    source=next((link.source for link in overlay.operation_links if type(link.source) is SourceReference
+        and link.source.start_line==target.lineno
+        and link.source.end_line==target.end_lineno and link.source.start_column==target.col_offset
+        and link.source.end_column==target.end_col_offset),None)
+    _need(source is not None,'heap target lost its original source reference')
+    kind=P.STORE_ATTRIBUTE if isinstance(target,ast.Attribute) else P.STORE_SUBSCRIPT
+    matches=[p for p in overlay.protocols if p.kind is kind and p.source==source]
+    _need(len(matches)==1,'heap target has no unique actual store primitive')
+    op=operations[matches[0].operation];links={link.operation:link for link in overlay.operation_links}
+    validate_heap_store(op,kind,links[op.id],refinements.get(op.id),semantic)
+    world_type=ValueType(ValueKind.STATE,location=values[op.uses[-1].value].location)
+    normal,failure=invoke(op,(world_type,))
+    _need(len(op.completions[0].types)==1 and op.completions[0].types[0].kind is ValueKind.STATE,
+          'heap store normal result must be only its post-world')
+    expected=[expression_value(target.value)]
+    if isinstance(target,ast.Subscript):expected.append(expression_value(target.slice))
+    rhs=expression_value(node.value);expected.append(rhs)
+    _need(tuple(use.value for use in op.uses[:-1])==tuple(expected),'heap receiver/key/RHS evaluation graph differs')
+    span=(target.lineno,target.end_lineno,target.col_offset,target.end_col_offset)
+    opcode='STORE_ATTR' if isinstance(target,ast.Attribute) else 'STORE_SUBSCR'
+    code=[i for i in dis.get_instructions(code_evidence.code) if i.opname==opcode and tuple(i.positions)==span]
+    _need(len(code)==1 and (not isinstance(target,ast.Attribute) or code[0].argval==target.attr),
+          'heap store has no exact original compiler target operation')
+    path=_normal_statement_path(expansion,blocks,operations)
+    use_links={(row.operation,row.use):row for row in overlay.use_links}
+    held=[];released=[]
+    for action in path:
+        p=protocols.get(action.id)
+        if p is None or not action.uses:continue
+        first=use_links.get((action.id,action.uses[0].id))
+        if first is None:continue
+        if p.kind is P.FRAME_HOLD_TEMPORARY and first.role=='heap-target-held-reference':held.append(action)
+        if p.kind is P.FRAME_RELEASE_TEMPORARY and first.role=='heap-target-released-reference':released.append(action)
+    references=(rhs,*expected[:-1])
+    _need(tuple(action.uses[0].value for action in held)==references
+          and tuple(action.uses[0].value for action in released)==tuple(reversed(references)),
+          'heap store must retain RHS, receiver, key then release only its own reverse-ordered holds')
+    order={action.id:index for index,action in enumerate(path)}
+    _need(all(order[action.id]<order[op.id] for action in held)
+          and all(order[action.id]>order[op.id] for action in released),
+          'heap temporary retention/release crosses its store completion incorrectly')
+    exceptional=_mapping_exception_holds(failure.id,operations,protocols,blocks,use_links)
+    _need(len(exceptional)>=len(references) and exceptional[-len(references):]==references,
+          'heap store failure lost/reordered its outstanding RHS/receiver/key references')
+
+
+def validate_mapping_if(node,expansion,*,graph,overlay,blocks,operations,expression_value,
+                        ordered_statements,expansions,source_reference):
+    from scar.ir.program.structured import PythonProtocolKind as P
+    source=source_reference(node.test)
+    tests=[operations[p.operation] for p in overlay.protocols if p.kind is P.TRUTH and p.source==source]
+    _need(len(tests)==1 and tests[0].uses[0].value==expression_value(node.test),
+          'mapping If must test its actual expression result once')
+    truth=tests[0];normal=next(edge for edge in truth.terminator.successors if edge.kind is ExitKind.NORMAL)
+    landing=blocks[normal.block];branch=operations[landing.operations[-1]]
+    _need(branch.terminator is not None and branch.terminator.kind is TerminatorKind.BRANCH
+          and len(branch.terminator.successors)==2 and len(branch.uses)>=1
+          and branch.uses[0].value==landing.arguments[0], 'mapping If lost its original truth/branch dependency')
+    for statements,edge in zip((node.body,node.orelse),branch.terminator.successors):
+        end=ordered_statements(statements,edge.block)
+        block=blocks[end];jump=operations[block.operations[-1]]
+        _need(jump.terminator is not None and jump.terminator.kind is TerminatorKind.JUMP
+              and len(jump.terminator.successors)==1 and jump.terminator.successors[0].block==expansion.normal,
+              'mapping If branch must carry its own final world into the same normal join')
+
+
 def require_valid_module_program(result, *, source_texts, code_evidence=None, max_operations=10000):
     from scar.analysis.program_lowering import PreparedSource, _symbol_tables
     from scar.analysis.source_module_lowering import module_unit, module_source_census, require_root_evidence
@@ -426,8 +545,10 @@ def require_valid_structured_module_program(result,*,source_texts,code_evidence=
     from scar.ir.program.validation import require_valid
     overlay=result.module
     _need(type(overlay) is StructuredFrameBodyOverlay and decode_frame_body(encode_frame_body(overlay))==overlay,'SP8 needs its closed typed overlay')
-    paired=result.profile is FrameBodyProfile.STRUCTURED_MAPPING_PROPAGATION_314_V1
-    _need(result.profile in (FrameBodyProfile.STRUCTURED_MAPPING_314_V1,FrameBodyProfile.STRUCTURED_MAPPING_PROPAGATION_314_V1) and overlay.profile is result.profile
+    extended=result.profile is FrameBodyProfile.STRUCTURED_MAPPING_BODY_314_V1
+    paired=result.profile in (FrameBodyProfile.STRUCTURED_MAPPING_PROPAGATION_314_V1,FrameBodyProfile.STRUCTURED_MAPPING_BODY_314_V1)
+    _need(result.profile in (FrameBodyProfile.STRUCTURED_MAPPING_314_V1,FrameBodyProfile.STRUCTURED_MAPPING_PROPAGATION_314_V1,
+          FrameBodyProfile.STRUCTURED_MAPPING_BODY_314_V1) and overlay.profile is result.profile
           and overlay.namespace_policy is NamespacePolicy.MODULE_MAPPING_314_V1
           and overlay.completion_profile is (FrameCompletionProfile.PROPAGATION_REF_PAIR_314_V1 if paired else FrameCompletionProfile.RAW_EXCEPTION_REF_314_V1)
           and all(value is None for value in (result.interface,result.frame,result.structured,result.language)),
@@ -448,6 +569,7 @@ def require_valid_structured_module_program(result,*,source_texts,code_evidence=
     from scar.ir.program.module_entries import StaticModuleEntryDeclaration
     from scar.ir.program.source_subjects import SourceCompilationFrameRoot, FrameRoot
     static_root = type(overlay.declaration) is StaticModuleEntryDeclaration
+    _need(not extended or static_root,'mapping BODY requires source-compilation provenance')
     if static_root:
         # Independently recompile retained text. The declaration is a receipt,
         # never permission to trust its code path or borrow a runtime witness.
@@ -513,9 +635,9 @@ def require_valid_structured_module_program(result,*,source_texts,code_evidence=
                   and definition.code_id==link.source.atom_id.wire and link.source.atom_id in definition.source_atoms,
                   'SP8 SG/source identity join differs')
     for protocol in overlay.protocols:_need(protocol.source==links[protocol.operation].source,'SP8 protocol/source endpoint differs')
-    def invoke(op,normal_types):
+    def invoke(op,normal_types,*,memory=False):
         _need(op.terminator is not None and op.terminator.kind is TerminatorKind.INVOKE and not op.effects_complete
-              and set(op.behaviors)=={Behavior.CONTROL,Behavior.READ,Behavior.WRITE}
+              and set(op.behaviors)=={Behavior.CONTROL,Behavior.READ,Behavior.WRITE} | ({Behavior.MEMORY} if memory else set())
               and op.invoke_arguments==tuple(use.id for use in op.uses)
               and tuple((row.kind,row.types) for row in op.completions)==
               ((ExitKind.NORMAL,normal_types),(ExitKind.RAISE,((ref_type,ref_type,state_type) if paired else (ref_type,state_type))))
@@ -543,6 +665,10 @@ def require_valid_structured_module_program(result,*,source_texts,code_evidence=
         if kind in (K.MATCH_EXCEPTION_BORROWED_314,K.FRAME_EXIT_EXCEPTION_PACKET):
             _need(paired,'RAW profile cannot acquire propagation frame/matcher primitives')
             continue
+        if kind in (K.MAKE_FUNCTION_314,K.APPLY_DECORATOR_314):
+            _need(extended,'function construction requires explicit mapping BODY profile')
+            invoke(op,(ref_type,state_type),memory=True)
+            continue  # Exact code/default/decorator/namespace source checked per definition below.
         normal_types=(state_type,) if kind in (K.STORE_NAME_314,K.DELETE_NAME_314,K.UNEXPANDED_SLICE) else (ref_type,state_type)
         invoke(op,normal_types)
         if kind is K.LOAD_NAME_314:
@@ -556,8 +682,14 @@ def require_valid_structured_module_program(result,*,source_texts,code_evidence=
             node=expression_nodes.get(protocol.source) or nodes.get(protocol.source)
             if isinstance(node,ast.Name):literal(op.uses[1],node.id)
             else:
-                _need(isinstance(node,(ast.Import,ast.ImportFrom)) or paired and isinstance(node,ast.ExceptHandler),'STORE_NAME source must be an original binding/import/handler')
-                allowed=[node.name] if isinstance(node,ast.ExceptHandler) else [alias.asname or alias.name for alias in node.names]
+                from scar.analysis.source_module_lowering import _module_docstring
+                docstring=extended and _module_docstring(context,node)
+                _need(isinstance(node,(ast.Import,ast.ImportFrom)) or paired and isinstance(node,ast.ExceptHandler)
+                      or extended and isinstance(node,(ast.FunctionDef,ast.AsyncFunctionDef)) or docstring,
+                      'STORE_NAME source must be an original binding/import/handler/definition')
+                allowed=(['__doc__'] if docstring else [node.name]
+                    if isinstance(node,(ast.ExceptHandler,ast.FunctionDef,ast.AsyncFunctionDef))
+                    else [alias.asname or alias.name for alias in node.names])
                 _need(type(values[op.uses[1].value].origin) is LiteralOrigin and values[op.uses[1].value].origin.value in allowed,'import alias STORE_NAME key differs')
             expected_addresses.add(op.id);expected=[(0,1,'WRITE')]
         elif kind is K.IMPORT_NAME_314:
@@ -611,7 +743,7 @@ def require_valid_structured_module_program(result,*,source_texts,code_evidence=
     expected_statements=[]
     def descend(node):
         expected_statements.append(node)
-        if isinstance(node,ast.For):
+        if isinstance(node,ast.For) or extended and isinstance(node,ast.If):
             for child in (*node.body,*node.orelse):descend(child)
         if paired and isinstance(node,ast.Try):
             for child in node.body:descend(child)
@@ -624,7 +756,7 @@ def require_valid_structured_module_program(result,*,source_texts,code_evidence=
     for node in expected_statements:
         expansion=expansions[_module_statement_ref(context,node)]
         expected_children=tuple(frame_statement_slice(context,expansion.source,field,getattr(node,name))
-            for name,field in (('body',F.BODY),('orelse',F.ORELSE)) if isinstance(node,ast.For) and getattr(node,name))
+            for name,field in (('body',F.BODY),('orelse',F.ORELSE)) if (isinstance(node,ast.For) or extended and isinstance(node,ast.If)) and getattr(node,name))
         if paired and isinstance(node,ast.Try):
             expected_children=(frame_statement_slice(context,expansion.source,F.BODY,node.body),)+tuple(
                 frame_statement_slice(context,_module_statement_ref(context,handler),F.HANDLER_BODY,handler.body) for handler in node.handlers)
@@ -678,9 +810,41 @@ def require_valid_structured_module_program(result,*,source_texts,code_evidence=
     for node in expected_statements:
         source=_module_statement_ref(context,node)
         if isinstance(node,ast.Assign):
-            store=store_at(_module_statement_ref(context,node.targets[0]))
-            _need(store.uses[2].value==expression_value(node.value),'RHS must feed its exact namespace store')
+            target=node.targets[0]
+            if isinstance(target,ast.Name):
+                store=store_at(_module_statement_ref(context,target))
+                _need(store.uses[2].value==expression_value(node.value),'RHS must feed its exact namespace store')
+            else:
+                _need(extended,'heap assignment requires explicit mapping BODY profile')
+                validate_mapping_heap_store(node,target,expansions[_module_statement_ref(context,node)],
+                    graph=graph,overlay=overlay,semantic=result.semantic,code_evidence=code_evidence,
+                    expression_value=expression_value,invoke=invoke,protocols=protocols,blocks=blocks,
+                    operations=operations,values=values,refinements=refinements)
+        elif isinstance(node,(ast.FunctionDef,ast.AsyncFunctionDef)):
+            _need(extended,'function construction requires explicit mapping BODY profile')
+            from scar.analysis.source_mapping_function_validation import validate_mapping_function
+            validate_mapping_function(node,source=source,graph=graph,overlay=overlay,semantic=result.semantic,
+                code_evidence=code_evidence,globals_namespace=abi.globals_namespace,locals_namespace=abi.locals_namespace)
+        elif isinstance(node,ast.If):
+            _need(extended,'mapping If requires explicit BODY profile')
+            validate_mapping_if(node,expansions[source],graph=graph,overlay=overlay,blocks=blocks,
+                operations=operations,expression_value=expression_value,ordered_statements=ordered_statements,
+                expansions=expansions,source_reference=lambda n:_module_statement_ref(context,n))
         elif isinstance(node,ast.Expr):
+            from scar.analysis.source_module_lowering import _module_docstring
+            if _module_docstring(context,node):
+                _need(extended,'module docstring assignment needs mapping BODY profile')
+                store=store_at(source)
+                _need(store.uses[2].value==expression_value(node.value),
+                      'module docstring must write its original literal into the declared locals namespace')
+                span=(node.lineno,node.end_lineno,node.col_offset,node.end_col_offset)
+                compiled=[i for i in instructions if tuple(i.positions)==span
+                    and i.opname in ('LOAD_CONST','STORE_NAME')]
+                _need(len(compiled)==2 and compiled[0].opname=='LOAD_CONST'
+                      and type(compiled[0].argval) is str and compiled[0].argval==node.value.value
+                      and compiled[1].opname=='STORE_NAME' and compiled[1].argval=='__doc__',
+                      'module docstring needs the exact compiler constant and namespace-write sequence')
+                continue
             discard=[operations[p.operation] for p in overlay.protocols if p.kind is PythonProtocolKind.FRAME_DISCARD and p.source==source]
             _need(len(discard)==1 and discard[0].uses[0].value==expression_value(node.value),'expression result must feed its exact discard')
         elif isinstance(node,ast.For):
@@ -716,16 +880,20 @@ def require_valid_structured_module_program(result,*,source_texts,code_evidence=
         if protocol.kind is K.STORE_NAME_314:
             store=operations[protocol.operation];consumed=store.uses[2].value
             if paired and isinstance(nodes.get(protocol.source),ast.ExceptHandler):continue
+            if extended and isinstance(nodes.get(protocol.source),(ast.FunctionDef,ast.AsyncFunctionDef)):
+                continue  # Definition-specific consumer checks the actual holds/transfer before its STORE_NAME.
             _need([(op.id,use.id) for op in graph.operations for use in op.uses if use.value==consumed]==[(store.id,store.uses[2].id)],
                   'STORE_NAME consumed stack input must not remain pending on either completion')
     # Constant references remain the original typed whole-root code-slot records.
     instructions=tuple(dis.get_instructions(code_evidence.code,adaptive=False,show_caches=False))
     for constant in overlay.constants:
-        _need(constant.code_key==root.code.key and len(constant.constant_path)==1 and constant.operation in operations
+        root_code_key=root.code.code_layout_key if static_root else root.code.key
+        _need(constant.code_key==root_code_key and len(constant.constant_path)==1 and constant.operation in operations
               and protocols[constant.operation].kind is PythonProtocolKind.READ_CODE_CONSTANT,'SP8 code-constant record lost its original identity/primitive')
         matches=[row for row in instructions if row.opname=='LOAD_CONST' and row.arg==constant.constant_path[0]
             and tuple(row.positions)==(constant.source.start_line,constant.source.end_line,constant.source.start_column,constant.source.end_column)]
-        _need(len(matches)==1 and type(matches[0].argval) in (tuple,slice)
+        from types import CodeType
+        _need(len(matches)==1 and type(matches[0].argval) in ((tuple,slice,CodeType) if extended else (tuple,slice))
               and code_evidence.code.co_consts[matches[0].arg] is matches[0].argval,'SP8 whole-root code constant slot/span differs')
         _need(owners[constant.operation]==graph.root,'code constant must belong to this actual module frame')
     _need({row.operation for row in overlay.constants}=={p.operation for p in overlay.protocols if p.kind is PythonProtocolKind.READ_CODE_CONSTANT},'SP8 typed code constant inventory incomplete')

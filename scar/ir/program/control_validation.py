@@ -21,7 +21,7 @@ from .resumption import (
 )
 from .drivers import BodyDriveResult
 from .source_subjects import (
-    FrameKind, FunctionFrameABI, MappingFramePorts, ModuleUnitSource,
+    ClassFrameABI, FrameKind, FunctionFrameABI, MappingFramePorts, ModuleUnitSource,
     SourceCompilationFrameRoot,
 )
 from scar.ir.v2.common import SourceReference
@@ -205,20 +205,36 @@ def control_errors(graph):
                 error("frame_root_function_entry", root.scope,
                       "function ABI needs the unique existing formal/environment partition")
             continue
-        if type(root.entry) is not MappingFramePorts:
+        if type(root.entry) is ClassFrameABI:
+            if not static or root.kind is not FrameKind.CLASS:
+                error("class_frame_root_abi", root.scope,
+                      "ClassFrameABI is reserved for a source-compilation CLASS root")
+                continue
+            mapping = root.entry.mapping
+            if any(environment.region == region.id for environment in graph.environments):
+                error("class_frame_root_entry_authority", root.scope,
+                      "class mapping ABI cannot also declare a function environment entry")
+        elif type(root.entry) is MappingFramePorts:
+            mapping = root.entry
+            if static and root.kind is FrameKind.CLASS:
+                error("class_frame_root_abi", root.scope,
+                      "source-compilation CLASS root requires ClassFrameABI")
+                continue
+        else:
             continue  # Exact ABI/kind discrimination is a record invariant.
-        if any(environment.region == region.id for environment in graph.environments):
+        if type(root.entry) is MappingFramePorts and any(
+                environment.region == region.id for environment in graph.environments):
             error("frame_root_entry_authority", root.scope,
                   "mapping ABI cannot also declare a function environment entry")
-        references = (root.entry.locals_namespace, root.entry.globals_namespace,
-                      root.entry.builtins_namespace) + root.entry.closure_cells
-        expected_ports = references + (root.entry.world,)
+        references = (mapping.locals_namespace, mapping.globals_namespace,
+                      mapping.builtins_namespace) + mapping.closure_cells
+        expected_ports = references + (mapping.world,)
         if set(entry.arguments) != set(expected_ports):
             error("frame_root_partition", root.scope,
                   "mapping ABI must cover exactly this region's entry ports")
         for identity in expected_ports:
             value = values.get(identity)
-            kind = StateVersionValue if identity == root.entry.world else ReferenceValue
+            kind = StateVersionValue if identity == mapping.world else ReferenceValue
             if (not isinstance(value, kind) or value.region != region.id
                     or not isinstance(value.origin, BlockArgument)
                     or value.origin.block != entry.id

@@ -12,6 +12,8 @@
 - 可在不重建原源码图的情况下细化词法 scope 和 import 索引。
 - 全部词法入口的语言规则/前提台账；按原入口 key 精准派工，全部入口继续保留在总目录。
 - 静态模块编译来源、mapping frame 与精确 residual source；静态和运行捕获 root 分别编码，不伪造 CapturedCode。
+- 模块 BODY profile 接通 heap 写入、If、函数创建/默认值/装饰器和首 docstring 的 `__doc__` 写入；comprehension 的递归目标与局部异常清理已接通，融合 store 按原 compiler 槽位/顺序解析。
+- 类使用独立 ClassFrameABI 和 core 31：prepared namespace、外部 closure 与内部 compiler cells 分开；suite 仍保留 required expansion，不能算完整类体。
 
 ## LeWM 当前实际结果
 
@@ -27,9 +29,9 @@
 | 有限常量事实 | 76,788，仍保留原规则/前提 |
 | 首轮源码图构造时间 | 388.13 秒，4 个分析进程 |
 | 首轮 7,055 个普通函数规范构造 | 1,024.41 秒，4 个分析进程；5,908 个有图、85 个构造错误 |
-| 当前有规范图的入口 | 5,994，均保留原 effects/dispatch 等缺口 |
-| 当前明确不支持 | 546 个 lowerer 不支持，516 个规则 shape 不支持 |
-| 当前入口适配缺失 / 未派工 | 5,458 / 36 |
+| 当前已发布有规范图的入口 | 5,998，均保留原 effects/dispatch 等缺口 |
+| 当前已发布明确不支持 | 550 个 lowerer 不支持，510 个规则 shape 不支持 |
+| 当前已发布入口适配缺失 / 未派工 | 5,395 / 97；构造 ERROR 为 0 |
 | 原 85 个构造错误复验 | 全部生成带缺口的图；另构造 eval 模块，共 86 个，113.63 秒 |
 | 原图分片字节回读 | 3,488 片 stored/decoded SHA、JSON 容器通过 |
 | 普通 typed reader | eval.py 的 SG、source-semantics、CFG 解码与交叉结构校验通过 |
@@ -37,11 +39,13 @@
 
 当前输出见 `artifacts/current/static/manifest.json`；大图不提交 Git，仅保留这一版 current。
 细化另外保留 compiler scope 15,471 项的实际分类，以 manifest.catalog_refinement 为准确值，不把 scope 当运行 thunk。
+本轮完整目录细化耗时 462.24 秒，保留 2,906 份原图片、不重建源码图；581 个模块、1,183 个类及 7,055 个普通函数共 8,819 个入口可进入构造尝试，3,731 个其他入口仍缺适配。可尝试不等于已建模。
+当前正在四进程构造全部 581 个模块、1,183 个类及三个已修复的 comprehension 所属函数，共 1,767 个入口；本段表格是该批发布前的最后已保存结果，终态以原 manifest 为准。
 
 ## 仍未完成
 
 **完整静态模型尚未完成。** 原源码图有 69,298 个 opaque 操作、450,176 项语义缺口、16,061 项控制缺口；它们是待分析结构/规则，不能算已完全展开。
-12,550 个入口尚未全部完成 canonical lowering。普通函数已全量尝试；模块可构造受支持前缀和明确要求继续展开的后缀，不能把前缀图算成完整模块；类、resumable 和隐式类型/注解主体等仍需静态适配。
+12,550 个入口尚未全部完成 canonical lowering。普通函数已全量尝试；模块可构造受支持前缀和明确要求继续展开的后缀，不能把前缀图算成完整模块；类入口已有 ABI，但完整 suite、resumable 和隐式类型/注解主体等仍待展开。
 S1 的目录与逐入口规则台账已存在，语言语义完整性仍未闭合；S2 的完整规范子图、S3 调用/别名/效果联合固定点、S4 统一属性约束及 S5 完整导出尚未完成。
 第三方源码/声明、动态目标表达式与别名/副作用仍有可继续静态推导的部分，不把这些缺口统称为“只能动态获取”。
 
@@ -64,11 +68,14 @@ SCAR 源文件语法检查和所选图的普通 typed reader 均通过。生成�
 增量 `--expand` 按文件复用原4源片、一个sealed lowering session和一份静态编译布局；规则明细单独保存在原unit的rules分片，body容器只引用共享源片。已知失败/未派工入口保留，缓存键包含源输入、规则、编译条件与相关producer，不是运行时memoization。
 
 真实 `eval.py:img_transform` 的首次纯静态规范构造通过：3.41秒、92操作、157值、1 Region，normal codec读回通过；32项原effects/dispatch等缺口保留。公开query可同时投影canonical端口、Value→source、原控制图和具体规则/shape缺口，分别标明哪些只是结构校验。这里没有执行该函数。
-全普通函数首轮构造与错误复验已结束。真实 eval.py 模块用静态 source wrapper 9 / core 30 生成 24 个操作，首条语句前缀和其余 16 条待展开语句分别保留；普通 reader 独立重新编译保留源码后往返成功，公开 query 也可读取静态模块端口。这里只验证了部分模块建模，未执行其初始化。
+全普通函数首轮构造与错误复验已结束。真实 eval.py 模块已用静态 source wrapper 9 / core 30 生成 325 个操作，17 条顶层语句、18 项含嵌套语句记录全部展开，没有剩余源码后缀；普通 reader 独立重新编译保留源码后往返成功，公开 query 检查 6 份 receipts。它仍有 49 项原 namespace/effects 等前沿，完整语句拓扑不等于完整导入、调用或效果分析。
+真实 eval.run 和 eval_ff.run 分别构造 2,305、2,080 个操作。三个融合 store 的 comprehension 所属函数在修复后离线构造及 source/compiler/core 读回通过（317、108、437 个操作），尚待当前批次正式发布。eval_wm.run 已通过该 comprehension，后续动态 bound 的 BINARY_SLICE 规则仍未实现，准确保留其源码缺口。
+Costable 与 ConditionalBlock 两个真实类入口均以原 SG DefinitionID 构造并公开查询 core 31；normal payload 分别为 Python None 引用、class cell 引用。required suite 只有三个边界操作，不能据此声称完整类体已展开。源码的 class header、suite 语句和 compiler cell 阶段保留，但父级 metaclass/namespace 供给仍未连接。
+另以真实 CEM 模块检查 docstring 的 __doc__ 写入：192 个操作、11 条语句前缀，仍保留一条 class 后缀；source wrapper 读回和独立静态编译通过。没有执行模块初始化或函数体。
 
 ## 跨主体静态关系
 
-`--link-calls` 已在同一 current 图上发布第一批派生关系，并由 `static-query --dependencies` 读取原端点。读取 80 份主体产物（70 份有图），约 101.52 秒；固定 basis 和 65 份 typed 关系片共约 3.15 MB。源图不复制。当前所有源图/主体/索引分片共 11,194 份、1,460,196,620 bytes（压缩）。
-实际读回 623 个 CALL 记录、14 条条件候选边、31 条实参/形参、54 条 completion、14 个返回站点。原声明有 7,056 份主体产物，本批还有 6,976 份未读取；处理中枚举 628 个 CALL，预算停止时尚未发布的 5 个记录不算已保存。源码目录另外登记 47,135 个 AST 调用点，不能用本批 canonical CALL 数代替源码总分母。
+`--link-calls` 已实现限定原端点的派生关系与 `static-query --dependencies` 查询。更新主体或目录会废弃旧调用索引，当前正在构造的批次不能沿用旧索引；批量发布后再重建。源码目录登记 47,135 个 AST 调用点，不能用有界 canonical CALL 数代替源码总分母。
 已核对 namespace/module mappings、固定 basis、当前 caller/callee 分片 receipts 与 core root，查询同时返回实际 owning Region 和原枚举状态。6 个原 SG 标记 opaque、但规范图已展开的调用，经原 AST/源码锚点/callee Use 核对后作为明确细化保留，不因缺少较粗计算 overlay 拒掉整份主体。
-当前关系尚未证明目标集合闭合、函数环境/defaults/cells 投影或 effects/alias 固定点，模块调用也保留独立 adapter frontier。这是原图之间的条件依赖连接，不能据此授权缓存或其他变换。
+mapping caller 已从原 MappingFramePorts / ClassFrameABI 取得 world，参与相同条件 target/actual/completion 分析，不再仅因 caller 类型退出。真实 eval 模块两处 CALL 目前仍无合格目标：缺少 namespace 写入/读取到函数值的条件关系；run 函数的定向只读枚举有 60 个 CALL、4 条候选边、6 条实参边及 8 条 completion。此结果不是全项目调用闭包，也不能把 decorators/custom mapping 的结果按名称绑定到原函数。
+当前关系尚未证明目标集合闭合、函数环境/defaults/cells 投影或 effects/alias 固定点。这是原图之间的条件依赖连接，不能据此授权缓存或其他变换。

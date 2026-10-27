@@ -74,6 +74,12 @@ S0 不设建模覆盖率门槛，不产生额外历史报告或 gate 目录。
 **状态：部分已有，未完成。**`program_lowering` 与 `structured_lowering` 已能为有限 Python 子集构造 canonical operations、values、uses、control/completion 和源码链接；当前 CALL 目标、heap/global 写入及部分语言协议仍保留缺口。
 首轮全量静态派工 7,055 个普通函数：5,908 个生成规范图（保留缺口），516 个规则 shape 不支持、546 个 lowerer 不支持、85 个构造错误。随后六类错误全部经过原 85 入口纯静态复构，均成功生成带缺口的图；另接通 eval 模块静态前缀，目前共有 5,994 个入口有图。其余入口仍完整保留，不把目录或前缀完整解释为主体完整。
 
+三项主体接线已实现：模块的 heap store、If 和 function creation；comprehension 的递归目标解包与局部异常清理；class 的独立 prepared-namespace/closure/cell ABI 与待展开主体接口。均沿原源码 ID 构造规范图。真实 eval 模块已展开全部 17 条顶层语句、18 项含嵌套语句记录、325 个操作，source wrapper 9 / core 30 读回及独立静态重新编译通过；没有运行模块初始化。完整类体及全部 Python 语法仍未完成。
+模块使用明确的 BODY profile，在既有 paired exception/world 接口上扩展规则；旧前缀 profile 保留原含义。class body 的 normal payload 与外层 class construction result 分开：前者返回编译器 class cell 或 Python None 引用，后者才产生经 metaclass/decorator 处理的对象。两类真实入口的 core 31 读回通过，但当前类 suite 仍为 required expansion。
+
+下一步先按原目录批量构造所有可适配模块和类入口，汇总精确残余；修复真实 comprehension 暴露的编译器融合 store 对应。随后展开真实 class suite：为 prepared mapping、G/saved-B、closure/local cells 建立明确 frame 策略；按原 compiler 核对隐式 namespace prologue/epilogue、私有名映射和方法创建。不能直接套用模块的空 closure ABI，也不能把 implicit stage 清单当成已经存在的 state edges。父级 class construction 的 bases/metaclass/hooks/decorators 另接原端口。
+源码里的 `receiver[:bound]` 还暴露了独立的 `BINARY_SLICE` 规则缺口。后续以 compound invoke 连接 receiver/bounds/world、正常和异常消费，不伪造源码中没有独立产生的 slice 引用或物化；与已有 `BUILD_SLICE` 合同分开。模块首 docstring 按编译器的 `__doc__` mapping 写入建图，不能当普通表达式丢弃。
+
 **实质功能**
 
 - 为 S1 中每个可支持定义构造其模块/函数体 `ProgramGraph`，保持 Operation、Value、Use、Region、Block、Completion 的原始身份。

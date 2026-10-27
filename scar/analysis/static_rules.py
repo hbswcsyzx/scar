@@ -19,7 +19,7 @@ from scar.ir.program.module_entries import FrameBodyProfile
 from scar.ir.program.source_language import SourceLanguageCapability as C
 
 
-_AUTO_PROFILE = "PYTHON_SOURCE_ENTRY_314_CAPS_V11"
+_AUTO_PROFILE = "SCAR_STATIC_SOURCE_CAPS_V2"
 _DEFAULT_CAPS = (C.FIXED_UNPACK, C.SLICE_KEYS, C.LEXICAL_LOCALS)
 _FUNCS = (ast.FunctionDef, ast.AsyncFunctionDef)
 _COMPS = (ast.ListComp, ast.SetComp, ast.DictComp)
@@ -55,7 +55,7 @@ def _at_path(tree, path):
 
 
 def _owned(node, path):
-    """Match automatic V11 feature selection without crossing deferred bodies.
+    """Select source-owned syntax without crossing deferred bodies.
 
     Nested creation/defaults are the enclosing body's work. Generator lazy body
     is a separate lexical entry; its constants must never use parent co_consts.
@@ -144,11 +144,12 @@ def _rule(node):
     elif isinstance(node, _COMPS):
         module, function = "source_comprehension_lowering", "lower_comprehension"
         caps, compiler = [C.COMPREHENSION_314_V1], True
-        if (len(node.generators) != 1 or node.generators[0].is_async or node.generators[0].ifs
-                or not isinstance(node.generators[0].target, ast.Name)
-                or any(isinstance(x, (ast.NamedExpr, ast.Yield, ast.YieldFrom, ast.Await)) for x in ast.walk(node))
-                or any(isinstance(x, (*_COMPS, ast.GeneratorExp)) for child in ast.iter_child_nodes(node) for x in ast.walk(child))):
-            unsupported = "Current comprehension shape requires one synchronous clause, Name target, no filters/nesting/walrus/suspension."
+        from scar.analysis.source_comprehension_lowering import shape
+        if node.generators and not isinstance(node.generators[0].target,ast.Name):
+            caps.extend((C.COMPREHENSION_TARGETS_314_V1,C.FUNCTION_TRY_314_V1))
+        if not shape(node,recursive_targets=True):
+            unsupported = "Current comprehension shape requires one synchronous clause, recursive Tuple/List-to-Name target, no filters/nesting/walrus/suspension."
+        needs.append(_needs("COMPREHENSION_LOCAL_SCOPE_AND_UNWIND", "Recursive target bindings use original comprehension slots; failed partial unpack preserves earlier writes, releases local references and forwards original propagation/world to enclosing cleanup."))
     elif isinstance(node, ast.GeneratorExp):
         module, function = "source_generator_creation_lowering", "lower_creation"
         caps, compiler = [C.GENEXPR_CREATION_314_V1], True
@@ -287,7 +288,9 @@ def plan_static_entry(tree, entry, *, path, fingerprint):
     node = _at_path(tree, entry["ast_path"])
     kind, phase = entry["kind"], entry["phase"]
     mapping_entry = kind == "MODULE" and isinstance(node, ast.Module)
-    selected = (FrameBodyProfile.STRUCTURED_MAPPING_PROPAGATION_314_V1.value if mapping_entry else
+    class_entry = kind == "CLASS" and isinstance(node, ast.ClassDef)
+    selected = (FrameBodyProfile.STRUCTURED_MAPPING_BODY_314_V1.value if mapping_entry else
+                "STATIC_CLASS_FRAME_WITH_REQUIRED_BODY_EXPANSION" if class_entry else
                 BodyLoweringProfile.STRUCTURED_ENV.value if kind == "FUNCTION" else None)
     caps, rules = list(_DEFAULT_CAPS), []
 
@@ -315,6 +318,15 @@ def plan_static_entry(tree, entry, *, path, fingerprint):
         add(node, entry["ast_path"], "source_module_lowering", "lower_module_entry",
             needs=base_needs, status="NEEDS_STATIC_COMPILER")
         roots = [(child, f"{entry['ast_path']}.body[{index}]") for index, child in enumerate(node.body)]
+    elif class_entry:
+        caps=[]
+        base_needs.append(_needs("STATIC_COMPILER_CLASS_LAYOUT", "Original ClassDef child code determines outer freevar inputs, local compiler cell roles and Python-reference normal payload; no runtime class or prepared namespace is established."))
+        base_needs.append(_needs("CLASS_BODY_REQUIRED_EXPANSION", "Preserve every original class-scope statement and compiler-owned cell stage; parent class construction and body internals remain distinct open relations."))
+        add(node,entry["ast_path"],"source_class_lowering","lower_class_entry",needs=base_needs,
+            status="ENTRY_ADAPTER_MISSING" if node.type_params else "NEEDS_STATIC_COMPILER")
+        if node.type_params:
+            rules[0]["prerequisites"].append(_needs("TYPE_PARAMETER_CLASS_ENTRY_ADAPTER", "Generic parameter scope needs its exact parent compiler-code adapter; do not guess a same-name child."))
+        roots=[]  # Class body is explicitly retained by its required-expansion record, not function-frame dispatch.
     elif kind == "FUNCTION" and isinstance(node, ast.FunctionDef):
         base_needs.append(_needs("STATIC_COMPILER_ENVIRONMENT_LAYOUT", "build_function checks symtable against exact compiled freevars/cellvars and qualified body layout; existing fallback is compiler_environment_layout."))
         add(node, entry["ast_path"], "environment_lowering", "StructuredEnvironmentBuilder.build_function", needs=base_needs)
@@ -330,6 +342,11 @@ def plan_static_entry(tree, entry, *, path, fingerprint):
     if isinstance(node, ast.FunctionDef) and getattr(node, "type_params", ()):
         rules[0]["prerequisites"].append(_needs("TYPE_PARAMETER_ENTRY_ADAPTER", "Generic function type-parameter scope must be mapped explicitly before using this function ABI."))
         rules[0]["status"] = "ENTRY_ADAPTER_MISSING"
+    comp_targets=set()
+    for root,root_path in roots:
+        for child,_ in _owned(root,root_path):
+            if isinstance(child,_COMPS) and child.generators:
+                comp_targets.update(id(n) for n in ast.walk(child.generators[0].target))
     for root, root_path in roots:
         for child, child_path in _owned(root, root_path):
             if isinstance(child, (ast.stmt, ast.expr, ast.Slice, *_METADATA)):
@@ -337,6 +354,13 @@ def plan_static_entry(tree, entry, *, path, fingerprint):
                     add(child, child_path, "source_module_lowering", "mapping_prefix_selection",
                         needs=[_needs("MAPPING_PREFIX_ADMISSION", "This predicate checks exact source/compiler mapping in source order; unsupported suffix members remain typed residual source, not function-frame operations.")],
                         status="REQUIRES_MAPPING_SELECTION")
+                    continue
+                if id(child) in comp_targets:
+                    chosen=[C.COMPREHENSION_314_V1]
+                    # Target-tree syntax is consumed by its owning comp. It
+                    # must not accidentally select the outer-frame unpack ABI.
+                    add(child,child_path,"source_comprehension_lowering","lower_comprehension",chosen,
+                        [_needs("COMPREHENSION_OWNED_TARGET", "Original target occurrence belongs to its comprehension scope; the owning producer binds its original slots once.")])
                     continue
                 module, function, chosen, needs, unsupported = _rule(child)
                 if selected is None:
@@ -348,6 +372,12 @@ def plan_static_entry(tree, entry, *, path, fingerprint):
                         status="ENTRY_ADAPTER_MISSING")
                 else:
                     add(child, child_path, module, function, chosen, needs, unsupported)
+    if C.FUNCTION_TRY_314_V1 in caps and C.COMPREHENSION_314_V1 in caps:
+        if C.COMPREHENSION_TARGETS_314_V1 not in caps:caps.append(C.COMPREHENSION_TARGETS_314_V1)
+        for rule in rules:
+            if rule["syntax_kind"] in {"ListComp","SetComp","DictComp"}:
+                for cap in (C.COMPREHENSION_TARGETS_314_V1,C.FUNCTION_TRY_314_V1):
+                    if cap.value not in rule["capabilities"]:rule["capabilities"].append(cap.value)
     statuses = {rule["status"] for rule in rules}
     status = next((value for value in ("ENTRY_ADAPTER_MISSING", "UNSUPPORTED_SHAPE", "NEEDS_STATIC_COMPILER") if value in statuses), "READY")
     if any(rule["syntax_kind"] in {"Yield", "YieldFrom", "Await"} for rule in rules):
@@ -367,7 +397,7 @@ def plan_static_entry(tree, entry, *, path, fingerprint):
             "unsupported_shapes": [{"rule_key": rule["rule_key"], "ast_path": rule["ast_path"],
                                      "detail": rule["unsupported_shape"]} for rule in rules if rule["unsupported_shape"]],
             "body_lowered": False, "whole_body_support_established": False,
-            "policy_reference": _reference("source_frontend_worklist", "_entry_language_capabilities", type(node).__name__, phase),
+            "policy_reference": _reference("static_rules", "plan_static_entry", type(node).__name__, phase),
             "selection_scope": "ORIGINAL_LEXICAL_OWNER_WITH_DEFERRED_CHILD_BODIES_SEPARATE"}
 
 

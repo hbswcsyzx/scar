@@ -205,8 +205,13 @@ def lower_module_entry(context,selection,*,code_evidence,max_operations=10000,pr
         raise ValueError('module operation budget must be in [1,100000]')
     from scar.ir.program.module_entries import ModuleBodyExpansionProfile,FrameBodyProfile
     if type(code_evidence) is StaticCodeEvidence and profile not in (
-            FrameBodyProfile.STRUCTURED_MAPPING_314_V1, FrameBodyProfile.STRUCTURED_MAPPING_PROPAGATION_314_V1):
+            FrameBodyProfile.STRUCTURED_MAPPING_314_V1, FrameBodyProfile.STRUCTURED_MAPPING_PROPAGATION_314_V1,
+            FrameBodyProfile.STRUCTURED_MAPPING_BODY_314_V1):
         raise ValueError('static module roots require their explicit structured frame capability')
+    if profile is FrameBodyProfile.STRUCTURED_MAPPING_BODY_314_V1:
+        if type(code_evidence) is not StaticCodeEvidence:
+            raise ValueError('mapping BODY profile requires explicit source compilation')
+        return MappingBodyBuilder(context,selection,code_evidence,max_operations).run_module()
     if profile is FrameBodyProfile.STRUCTURED_MAPPING_PROPAGATION_314_V1:
         return PropagationModuleBuilder(context,selection,code_evidence,max_operations).run_module()
     if profile is FrameBodyProfile.STRUCTURED_MAPPING_314_V1:
@@ -395,6 +400,12 @@ def frame_statement_slice(context, owner, field, nodes):
         point.suite if point else None,point.id if point else None)
 
 
+def _module_docstring(context, node):
+    return (bool(context.tree.body) and node is context.tree.body[0]
+        and isinstance(node, ast.Expr) and isinstance(node.value, ast.Constant)
+        and type(node.value.value) is str)
+
+
 def mapping_prefix_selection(context, evidence, *, profile=None):
     """Maximal contiguous supported statements; no workload/name allowlist."""
     unit=module_unit(context);require_root_evidence(unit,evidence)
@@ -435,13 +446,33 @@ def mapping_prefix_selection(context, evidence, *, profile=None):
         return False
     def target(node):return isinstance(node,ast.Name) and len([row for row in positioned(node,('STORE_NAME',)) if row.argval==node.id])==1
     from scar.ir.program.module_entries import FrameBodyProfile
+    expanded = profile is FrameBodyProfile.STRUCTURED_MAPPING_BODY_314_V1
+    def heap_target(node):
+        if not expanded:return False
+        if isinstance(node,ast.Attribute):
+            return (not (node.attr.startswith('__') and not node.attr.endswith('__'))
+                and expression(node.value) and len([r for r in positioned(node,('STORE_ATTR',)) if r.argval==node.attr])==1)
+        if isinstance(node,ast.Subscript):
+            return (not isinstance(node.slice,(ast.Slice,ast.Tuple)) and expression(node.value)
+                and expression(node.slice) and len(positioned(node,('STORE_SUBSCR',)))==1)
+        return False
     def statement(node):
         if isinstance(node,ast.Import):return bool(node.names) and all('.' not in alias.name for alias in node.names)
         if isinstance(node,ast.ImportFrom):return bool(node.names) and all(alias.name!='*' for alias in node.names)
-        if isinstance(node,ast.Assign):return len(node.targets)==1 and target(node.targets[0]) and expression(node.value)
-        if isinstance(node,ast.Expr):return expression(node.value)
+        if isinstance(node,ast.Assign):return len(node.targets)==1 and (target(node.targets[0]) or heap_target(node.targets[0])) and expression(node.value)
+        if isinstance(node,ast.Expr):
+            if _module_docstring(context,node):
+                return (expanded and expression(node.value)
+                    and len([r for r in positioned(node,('STORE_NAME',)) if r.argval=='__doc__'])==1)
+            return expression(node.value)
         if isinstance(node,ast.For):return target(node.target) and expression(node.iter) and all(statement(child) for child in (*node.body,*node.orelse))
-        if isinstance(node,ast.Try) and profile is FrameBodyProfile.STRUCTURED_MAPPING_PROPAGATION_314_V1:
+        if expanded and isinstance(node,ast.If):return expression(node.test) and all(statement(child) for child in (*node.body,*node.orelse))
+        if expanded and isinstance(node,(ast.FunctionDef,ast.AsyncFunctionDef)):
+            from scar.analysis.source_mapping_function_lowering import mapping_function_plan
+            try:mapping_function_plan(node,evidence.code)
+            except (ValueError,_Unsupported):return False
+            return all(expression(child) for child in (*node.decorator_list,*node.args.defaults,*(v for v in node.args.kw_defaults if v is not None)))
+        if isinstance(node,ast.Try) and profile in (FrameBodyProfile.STRUCTURED_MAPPING_PROPAGATION_314_V1,FrameBodyProfile.STRUCTURED_MAPPING_BODY_314_V1):
             return (node in context.tree.body and len(node.handlers)==1 and not node.orelse and not node.finalbody
                 and node.handlers[0].type is not None
                 and any(isinstance(child,(ast.Assign,ast.For,ast.Import,ast.ImportFrom))
@@ -881,3 +912,44 @@ class PropagationModuleBuilder(StructuredModuleBuilder):
             handled_context_domains=(HandledContextDomain(self.frame_region,self.world),) if self.cleanup_interfaces else (),
             cleanup_interfaces=tuple(self.cleanup_interfaces),cleanup_enters=tuple(self.cleanup_enters),
             cleanup_resumes=tuple(self.cleanup_resumes),cleanup_replacements=tuple(self.cleanup_replacements),exception_matches=tuple(self.exception_matches))
+
+
+class MappingBodyBuilder(PropagationModuleBuilder):
+    """Module mapping statements, with explicit paired failure and heap writes."""
+
+    def __init__(self,context,selection,evidence,max_operations):
+        super().__init__(context,selection,evidence,max_operations)
+        from scar.ir.program.module_entries import FrameBodyProfile
+        self.frame_body_profile=FrameBodyProfile.STRUCTURED_MAPPING_BODY_314_V1
+        self.prefix_nodes,self.remaining_nodes=mapping_prefix_selection(context,evidence,profile=self.frame_body_profile)
+
+    def store(self,target,value,cursor):
+        if isinstance(target,ast.Name):return super().store(target,value,cursor)
+        from scar.analysis.source_heap_lowering import store_heap_target
+        return store_heap_target(self,target,value,cursor)
+
+    def statements(self,nodes,cursor):
+        from scar.ir.program.module_entries import FrameStatementExpansion,StatementSequenceField as F
+        for node in nodes:
+            if _module_docstring(self.prepared_source,node):
+                start=len(self.operations);entry=cursor.block
+                cursor,value=self.expr(node.value,cursor)
+                cursor=self.store_name(node,'__doc__',value,cursor)
+                self.statement_expansions.append(FrameStatementExpansion(self.source(node),self.frame_region,entry,cursor.block,
+                    tuple(op.id for op in self.operations[start:]),()))
+            elif isinstance(node,(ast.FunctionDef,ast.AsyncFunctionDef)):
+                from scar.analysis.source_mapping_function_lowering import lower_mapping_function
+                start=len(self.operations);entry=cursor.block
+                cursor=lower_mapping_function(self,node,cursor)
+                self.statement_expansions.append(FrameStatementExpansion(self.source(node),self.frame_region,entry,cursor.block,
+                    tuple(op.id for op in self.operations[start:]),()))
+            else:
+                cursor=super().statements((node,),cursor)
+                if isinstance(node,ast.If):
+                    # StructuredBuilder recursively called this same dispatcher;
+                    # the final record is the enclosing statement's record.
+                    last=self.statement_expansions[-1]
+                    children=tuple(frame_statement_slice(self.prepared_source,self.source(node),field,getattr(node,name))
+                        for name,field in (('body',F.BODY),('orelse',F.ORELSE)) if getattr(node,name))
+                    self.statement_expansions[-1]=replace(last,child_slices=children)
+        return cursor

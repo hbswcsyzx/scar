@@ -163,6 +163,8 @@ def validate_language_body(model, graph, interface, metadata, semantic, language
     # Verify normal-path target order and direct original assigned ports. A
     # nested unpack starts only when its outer siblings before it were stored.
     visiting = set()
+    from scar.analysis.source_comprehension_lowering import scoped_target_slots
+    scoped_unpack_slots=scoped_target_slots(semantic,source_tree,language) if isinstance(source_tree,ast.Module) else {}
     def stores(identity):
         _need(identity not in visiting, "unpack target shape is cyclic")
         visiting.add(identity)
@@ -192,7 +194,7 @@ def validate_language_body(model, graph, interface, metadata, semantic, language
                       and len(definition.uses) == 1 and definition.uses[0].value == normal.arguments[index],
                       "local binding token did not retain its assigned original reference")
                 slot = values[definition.results[0]].slot
-                _need(semantic.slots[slot].owner == interface.definition,
+                _need(semantic.slots[slot].owner == interface.definition or scoped_unpack_slots.get(reference)==slot,
                       "unpack introduced a binding in another lexical scope")
                 position += 2
         visiting.remove(identity)

@@ -33,7 +33,7 @@ cd ~/AAA/scar
 
 `scar.analysis.program_lowering.prepare_source_text` 可从源码文本生成 AST、符号表、源码模型和控制流；`lower_source` 可为支持的函数体建立规范 IR。它们读取源码，不导入目标模块。
 
-这还不是完整整程序入口：模块/类等入口、部分 Python 协议、跨过程目标与参数绑定、别名/副作用联合推导和 Tensor 属性传播仍需按计划贯通。已有运行见证不能充当纯静态完成依据。
+这还不是完整整程序建模：模块和类的完整主体、部分 Python 协议、跨过程目标与参数绑定、别名/副作用联合推导和 Tensor 属性传播仍需按计划贯通。模块已有 BODY profile，类已有独立入口 ABI；类体的 required expansion 不能算成主体已展开。已有运行见证不能充当纯静态完成依据。
 
 现存 trace、profiler 和 backend 实现当前冻结；这一阶段不调用它们，不新增 detector 或程序变换。
 已提供纯静态入口，目标源码不会被导入或执行：

@@ -147,6 +147,13 @@ class _Catalog:
         # an unrelated opaque operation which also has no phase declaration.
         exact = [item for item in candidates if phase is not None
                  and item.metadata.get("phase") == phase]
+        if isinstance(node,ast.ClassDef):
+            # Class construction is the existing SG opaque ClassDef record;
+            # its compiled body shares that original source declaration. An
+            # absent phase alone is insufficient for other implicit contexts.
+            exact=[item for item in candidates if item.kind.value=="opaque"
+                and item.label=="class "+node.name and item.output_slots
+                and item.code_id==reference.atom_id.wire and reference.atom_id in item.source_atoms]
         return ([encode(item.id) for item in exact] or None,
                 [{"id": encode(item.id), "phase": item.metadata.get("phase"),
                   "kind": item.kind.value} for item in candidates])

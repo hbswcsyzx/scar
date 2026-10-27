@@ -13,6 +13,9 @@ from scar.ir.program.structured import PythonProtocolKind
 
 
 def _check(builder, target):
+    if builder.has_language('COMPREHENSION_TARGETS_314_V1') and isinstance(target,ast.Name):
+        from scar.analysis.source_comprehension_lowering import scoped_target
+        if scoped_target(builder,target) is not None:return
     if isinstance(target, (ast.Tuple, ast.List)) and isinstance(target.ctx, ast.Store):
         for child in target.elts:
             _check(builder, child)
@@ -83,7 +86,11 @@ def lower_unpack_target(builder, target, rhs, cursor, *, rhs_held=False):
                 from scar.analysis.source_heap_lowering import store_heap_target
                 cursor = store_heap_target(builder,child,value,cursor,rhs_held=True)
             else:
-                cursor = builder.store(child, value, cursor)
+                scoped=None
+                if builder.has_language('COMPREHENSION_TARGETS_314_V1'):
+                    from scar.analysis.source_comprehension_lowering import scoped_target
+                    scoped=scoped_target(builder,child)
+                cursor = scoped.bind(child,value,cursor) if scoped is not None else builder.store(child, value, cursor)
                 _transfer(builder, ((child, value),), child)
             if cursor is None:
                 return None
@@ -114,6 +121,8 @@ def validate_unpack_targets(model, graph, interface, metadata, semantic, languag
     protocols={r.operation:r for r in model.protocols};links={r.operation:r for r in metadata.operation_links}
     use_links={(r.operation,r.use):r for r in metadata.use_links}
     shapes={r.operation:r for r in language.unpackings};visiting=set()
+    from scar.analysis.source_comprehension_lowering import scoped_target_slots
+    scoped_slots=scoped_target_slots(semantic,source_tree,language)
     def kind(key):
         p=protocols.get(key)
         return None if p is None else p.kind
@@ -172,7 +181,8 @@ def validate_unpack_targets(model, graph, interface, metadata, semantic, languag
                 binding=operations[block.operations[position+1]]
                 need(len(binding.results)==1 and type(values[binding.results[0]])is LocalBindingValue
                      and len(binding.uses)==1 and binding.uses[0].value==value
-                     and semantic.slots[values[binding.results[0]].slot].owner==interface.definition,
+                     and (semantic.slots[values[binding.results[0]].slot].owner==interface.definition
+                          or scoped_slots.get(reference)==values[binding.results[0]].slot),
                      'ordinary local target changed its original reference/lexical slot')
                 position+=2
             else:

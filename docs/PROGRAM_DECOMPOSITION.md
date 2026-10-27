@@ -169,7 +169,7 @@ copy 的内容来源需输入读版本及无干扰/语义条件；输出存储�
 - [validation.py](../scar/ir/program/validation.py) 的支配、可用值和接口核验是阶段检查；不是分析求解器。
 - [environments.py](../scar/ir/program/environments.py) 与
   [resumption.py](../scar/ir/program/resumption.py) 分别复用环境和延迟执行接口。
-- [source_subjects.py](../scar/ir/program/source_subjects.py) 将使用 CapturedCode 的 FrameRoot 与使用纯编译来源的 SourceCompilationFrameRoot 分开；模块已接通静态前缀，class ABI 等仍待实现；
+- [source_subjects.py](../scar/ir/program/source_subjects.py) 将使用 CapturedCode 的 FrameRoot 与使用纯编译来源的 SourceCompilationFrameRoot 分开；模块已接通静态前缀和 BODY profile，类已有独立 ClassFrameABI，但 class suite 仍是带原语句的 required expansion；
   静态定义和模块编译来源不再依赖动态 descriptor，其余入口也必须遵守这一边界。
 - 静态 frame 需准确静态 code/source 主体；function/module/class ABI 分开，再另接 loaded-code 关系。
 - [constants_v2.py](../scar/analysis/constants_v2.py) 的有限常量推导可复用；不等于 CFG 执行边上的通用 SCCP。

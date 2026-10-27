@@ -167,10 +167,13 @@ class SourceProgram:
         if type(self.module) is StructuredFrameBodyOverlay:
             from scar.ir.program.module_entries import encode_frame_body
             if (self.profile is not self.module.profile or self.profile not in (
-                    FrameBodyProfile.STRUCTURED_MAPPING_314_V1,FrameBodyProfile.STRUCTURED_MAPPING_PROPAGATION_314_V1) or self.graph is None
+                    FrameBodyProfile.STRUCTURED_MAPPING_314_V1,FrameBodyProfile.STRUCTURED_MAPPING_PROPAGATION_314_V1,
+                    FrameBodyProfile.STRUCTURED_MAPPING_BODY_314_V1) or self.graph is None
                     or any(value is not None for value in (self.interface,self.frame,self.structured,self.language))):
                 raise ValueError('SP8 requires its explicit core FrameRoot/source overlay only')
             static_root = type(self.module.declaration) is StaticModuleEntryDeclaration
+            if self.profile is FrameBodyProfile.STRUCTURED_MAPPING_BODY_314_V1 and not static_root:
+                raise ValueError('mapping BODY profile requires source-compilation root provenance')
             return {'schema':'scar.source-program','schema_version':9 if static_root else 8,'entry_kind':'MAPPING_FRAME',
                 'profile':self.profile.value,'status':self.module.status.value,
                 'scope':'structured source mapping frame; exact remaining source and runtime/effect debt retained',
@@ -278,7 +281,8 @@ class SourceProgram:
             if (set(document) != expected_fields | {'entry_kind','profile','module'}
                     or document['schema'] != 'scar.source-program' or document['entry_kind'] != 'MAPPING_FRAME'
                     or document['profile'] not in (FrameBodyProfile.STRUCTURED_MAPPING_314_V1.value,
-                        FrameBodyProfile.STRUCTURED_MAPPING_PROPAGATION_314_V1.value)
+                        FrameBodyProfile.STRUCTURED_MAPPING_PROPAGATION_314_V1.value,
+                        FrameBodyProfile.STRUCTURED_MAPPING_BODY_314_V1.value)
                     or language_options is not None or verification != 'STRUCTURE'
                     or version == 8 and module_code_evidence is None or type(document['graph']) is not dict
                     or document['graph'].get('schema_version') != (30 if version == 9 else 29)):
@@ -289,6 +293,8 @@ class SourceProgram:
             result=replace(result,semantics=SourceSemanticsGraph.from_dict(document['semantics'],result.semantic))
             if (type(result.module.declaration) is StaticModuleEntryDeclaration) != (version == 9):
                 raise ValueError('source wrapper must distinguish static compilation and captured root evidence')
+            if version == 8 and result.profile is FrameBodyProfile.STRUCTURED_MAPPING_BODY_314_V1:
+                raise ValueError('historical captured mapping wrapper cannot acquire BODY profile')
             if _canonical(result.to_dict()) != _canonical(document):
                 raise ValueError('SP8 canonical source capability/summary differs')
             checked=validate_source_program(result,max_operations=max_operations,verification=verification,

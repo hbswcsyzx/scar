@@ -34,6 +34,7 @@ class SourceLanguageCapability(str, Enum):
     CODE_CONSTANTS_314_V1 = "PYTHON_CODE_CONSTANTS_314_V1"
     LAMBDA_EXPRESSION_314_V1 = "PYTHON_LAMBDA_EXPRESSION_314_V1"
     COMPREHENSION_314_V1 = "PYTHON_COMPREHENSION_314_V1"
+    COMPREHENSION_TARGETS_314_V1 = "PYTHON_COMPREHENSION_TARGETS_314_V1"
     STARRED_DISPLAY_314_V1 = "PYTHON_STARRED_DISPLAY_314_V1"
     HEAP_AUGASSIGN_314_V1 = "PYTHON_HEAP_AUGASSIGN_314_V1"
 
@@ -163,6 +164,11 @@ class SourceLanguageOverlay:
         _need(type(self.capabilities) is tuple and bool(self.capabilities)
               and all(type(row) is SourceLanguageCapability for row in self.capabilities)
               and len(set(self.capabilities)) == len(self.capabilities), "capabilities must be unique typed entries")
+        if SourceLanguageCapability.COMPREHENSION_TARGETS_314_V1 in self.capabilities:
+            _need(all(capability in self.capabilities for capability in (
+                SourceLanguageCapability.COMPREHENSION_314_V1, SourceLanguageCapability.FIXED_UNPACK,
+                SourceLanguageCapability.LEXICAL_LOCALS, SourceLanguageCapability.FUNCTION_TRY_314_V1)),
+                "scoped comprehension targets require original comprehension, unpack, lexical locals and paired propagation capabilities")
         for rows, kind in ((self.unpackings, UnpackShape), (self.slices, SliceShape),
                            (self.constants, CodeConstantSource), (self.compiler_locals, CompilerLocalMapping)):
             _need(type(rows) is tuple and all(type(row) is kind for row in rows), "overlay record type differs")

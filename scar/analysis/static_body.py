@@ -154,7 +154,7 @@ def _run_unit(unit, catalog, selected, output, max_operations, producer):
                 continue
             # A changed producer/input cannot retain stale body authority.
             row.pop("artifact", None)
-            for name in ("metadata", "gaps", "issue", "construction_operations", "reason", "module_frontiers", "last_attempt_issue"):
+            for name in ("metadata", "gaps", "issue", "construction_operations", "reason", "module_frontiers", "class_frontiers", "last_attempt_issue"):
                 row.pop(name, None)
             row.update(cache_key=key, reused=False, status="NOT_ATTEMPTED")
             payload = {"schema": "scar.static-body", "schema_version": 1, "profile": PROFILE,
@@ -212,6 +212,12 @@ def _run_unit(unit, catalog, selected, output, max_operations, producer):
                     evidence = compiled.for_module(unit_source)
                     lowered = lower_module_entry(prepared, unit_source, code_evidence=evidence,
                         max_operations=max_operations, profile=FrameBodyProfile(plan["selected_profile"]))
+                elif entry["kind"] == "CLASS":
+                    from scar.analysis.source_class_lowering import lower_class_entry
+                    reference=decode(SourceReference,entry["source_ref"])
+                    evidence=compiled.for_definition(definition,reference)
+                    lowered=lower_class_entry(prepared,definition,reference,code_evidence=evidence,
+                                              max_operations=max_operations)
                 else:
                     reference = decode(SourceReference, entry["source_ref"])
                     evidence = compiled.for_definition(definition, reference)
@@ -221,17 +227,24 @@ def _run_unit(unit, catalog, selected, output, max_operations, producer):
                                             expand_candidates=False, profile=BodyLoweringProfile.STRUCTURED_ENV,
                                             language_options=options)
                 module_body = lowered.module if entry["kind"] == "MODULE" else None
+                class_body = lowered.overlay if entry["kind"] == "CLASS" else None
                 row.update(status="LOWERED_WITH_GAPS" if lowered.graph is not None else "UNSUPPORTED",
                            gaps=encode(lowered.metadata.gaps), construction_operations=(module_body.operations_emitted
                                if module_body is not None else lowered.operations_emitted))
                 if lowered.graph is not None:
-                    if module_body is None and (lowered.interface is None or lowered.interface.definition != definition):
+                    if module_body is None and class_body is None and (lowered.interface is None or lowered.interface.definition != definition):
                         raise ValueError("lowered interface differs from original selected definition")
                     from scar.ir.program.codec import dumps
-                    payload.update(graph=json.loads(dumps(lowered.graph)), metadata=encode(lowered.metadata),
-                                   interface=encode(lowered.interface), structured=encode(lowered.structured),
-                                   language=None if lowered.language is None else encode_language_overlay(lowered.language),
-                                   frame=encode(lowered.frame), static_compilation=evidence.to_dict())
+                    payload.update(graph=json.loads(dumps(lowered.graph)),metadata=encode(lowered.metadata),
+                                   static_compilation=evidence.to_dict())
+                    if class_body is None:
+                        payload.update(interface=encode(lowered.interface),structured=encode(lowered.structured),
+                            language=None if lowered.language is None else encode_language_overlay(lowered.language),frame=encode(lowered.frame))
+                    else:
+                        from scar.ir.program.class_entries import encode_class_entry_overlay
+                        payload["class"]=encode_class_entry_overlay(class_body)
+                        row["class_frontiers"]=encode(class_body.frontiers)
+                        payload["class_frontiers"]=row["class_frontiers"]
                     if module_body is not None:
                         from scar.ir.program.module_entries import encode_frame_body
                         payload["module"] = encode_frame_body(module_body)

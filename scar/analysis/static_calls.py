@@ -359,7 +359,32 @@ class StaticCallSession:
         graph = load_core(json.dumps(document["graph"], allow_nan=False))
         metadata = decode(LoweringMetadata, document["metadata"])
         index = ProgramIndex(graph)
-        if document.get("module") is not None:
+        class_entry=None
+        if document.get("class") is not None:
+            from scar.ir.program.class_entries import (
+                decode_class_entry_overlay, validate_class_entry_core,
+            )
+            from scar.ir.program.source_subjects import FrameKind,SourceCompilationFrameRoot
+            class_entry=decode_class_entry_overlay(document["class"])
+            validate_class_entry_core(class_entry,graph,metadata)
+            entries=[entry for entry in context.catalog["entries"] if entry["entry_key"]==row["entry_key"]]
+            if (len(entries)!=1 or entries[0]["kind"]!="CLASS"
+                    or encode(class_entry.definition) not in (entries[0].get("semantic_definition_ids") or ())
+                    or encode(class_entry.source)!=entries[0]["source_ref"]
+                    or metadata.source!=context.semantics.sources[context.unit["path"]]
+                    or class_entry.required_expansion.region!=graph.root or len(graph.frame_roots)!=1
+                    or type(graph.frame_roots[0]) is not SourceCompilationFrameRoot
+                    or graph.frame_roots[0].kind is not FrameKind.CLASS
+                    or graph.frame_roots[0].entry!=class_entry.interface
+                    or graph.frame_roots[0].code!=class_entry.compilation):
+                raise ValueError("class frame source/compiler namespace differs from original entry")
+            locator=self._locator(row["artifact"],"scar.static-body/1","#/graph",
+                f"#/units/{context.number}/bodies/{row_number}/artifact")
+            namespace=SourceBodyNamespace(locator,"scar.program-graph/"+str(document["graph"]["schema_version"]),
+                class_entry.definition,class_entry.source,metadata.entry,graph.root)
+            result=SimpleNamespace(index=index,graph=graph,metadata=metadata,interface=None,
+                namespace=namespace,document=document,context=context,module=None)
+        elif document.get("module") is not None:
             from scar.ir.program.module_entries import decode_frame_body, StaticModuleEntryDeclaration
             from scar.ir.program.source_subjects import ModuleUnitSource, FrameKind, SourceCompilationCodeRef
             overlay = decode_frame_body(document["module"])
@@ -389,11 +414,12 @@ class StaticCallSession:
                 namespace=namespace, document=document, context=context, module=overlay)
         else:
             result = self._function_body(context, row_number, row, document, graph, metadata, index)
+        result.class_entry=class_entry
         result.operation_links = tuple(result.module.operation_links) if result.module is not None else metadata.operation_links
         result.use_links = tuple(result.module.use_links) if result.module is not None else metadata.use_links
         self._check_source_references(context, (graph, metadata, result.module,
             document.get("structured"), document.get("language"), document.get("frame"),
-            document.get("static_compilation")))
+            document.get("static_compilation"),class_entry))
         result.links_by_op, result.uses_by_op = defaultdict(list), defaultdict(list)
         declared_calls = {target.operation for target in metadata.call_targets}
         for link in result.operation_links:
@@ -699,6 +725,42 @@ class StaticCallSession:
                     blocks[edge.block].arguments[positions[0]], port, tuple(terminal_ports)))
         return tuple(completions), tuple(dict.fromkeys(returns)), frontiers
 
+    @staticmethod
+    def _caller_world(caller):
+        """Return the caller's original world port across its real frame ABI."""
+        from scar.ir.program.source_subjects import (
+            ClassFrameABI, FrameKind, MappingFramePorts, SourceCompilationFrameRoot,
+        )
+        if caller.module is not None:
+            roots = caller.graph.frame_roots
+            if (len(roots) != 1 or type(roots[0]) is not SourceCompilationFrameRoot
+                    or roots[0].kind is not FrameKind.MODULE
+                    or type(roots[0].entry) is not MappingFramePorts
+                    or roots[0].scope != caller.module.root_scope
+                    or roots[0].code != caller.module.declaration.compilation):
+                return None, "MODULE_CALLER_FRAME_WORLD_UNRESOLVED"
+            world_id = roots[0].entry.world
+        elif caller.class_entry is not None:
+            roots = caller.graph.frame_roots
+            if (len(roots) != 1 or type(roots[0]) is not SourceCompilationFrameRoot
+                    or roots[0].kind is not FrameKind.CLASS
+                    or type(roots[0].entry) is not ClassFrameABI
+                    or roots[0].scope != caller.class_entry.root_scope
+                    or roots[0].entry != caller.class_entry.interface
+                    or roots[0].code != caller.class_entry.compilation):
+                return None, "CLASS_CALLER_FRAME_WORLD_UNRESOLVED"
+            world_id = roots[0].entry.mapping.world
+        elif caller.interface is not None:
+            if caller.interface.region != caller.graph.root:
+                return None, "FUNCTION_CALLER_FRAME_WORLD_UNRESOLVED"
+            world_id = caller.interface.world
+        else:
+            return None, "CALLER_FRAME_WORLD_UNRESOLVED"
+        value = caller.index.values.get(world_id)
+        if type(value) is not StateVersionValue:
+            return None, "CALLER_FRAME_WORLD_NOT_STATE_VERSION"
+        return value, None
+
     def _target(self, caller, operation, source, semantic_call, actuals, number, definition, basis):
         context = caller.context if number == caller.context.number else self._unit(number)
         qualified, signature, entry, body_row = context.definitions[definition]
@@ -729,19 +791,21 @@ class StaticCallSession:
                     formal.slot, formal.value, names[formal.slot], parameter))
         completions, returns, completion_gaps = self._completion_routes(caller, operation, callee)
         frontiers.extend(completion_gaps)
-        caller_entry_world = caller.index.values[caller.interface.world]
-        if type(caller_entry_world) is not StateVersionValue:
-            raise ValueError("caller interface world is not its original state value")
-        states = [use for use in operation.uses
-                  if type(caller.index.values[use.value]) is StateVersionValue
-                  and caller.index.values[use.value].location == caller_entry_world.location
-                  and use.role is UseRole.STATE_CONTENT and use.id in operation.invoke_arguments]
         state_entry = None
-        if len(states) == 1:
-            before, after = caller.index.values[states[0].value], callee.index.values[callee.interface.world]
-            state_entry = StaticStateEntryRoute(states[0].id, before.id, before.location, after.id, after.location)
+        caller_entry_world, world_issue = self._caller_world(caller)
+        if world_issue is not None:
+            frontiers.append(_front(world_issue,
+                "Original caller frame has no unique validated world StateVersion port; state-entry routing is left open.", source))
         else:
-            frontiers.append(_front("CALL_STATE_ENTRY_OPEN", "CALL has no unique STATE_CONTENT invoke argument in its caller's coarse-world location; the current SSA version need not equal the entry version."))
+            states = [use for use in operation.uses
+                      if type(caller.index.values[use.value]) is StateVersionValue
+                      and caller.index.values[use.value].location == caller_entry_world.location
+                      and use.role is UseRole.STATE_CONTENT and use.id in operation.invoke_arguments]
+            if len(states) == 1:
+                before, after = caller.index.values[states[0].value], callee.index.values[callee.interface.world]
+                state_entry = StaticStateEntryRoute(states[0].id, before.id, before.location, after.id, after.location)
+            else:
+                frontiers.append(_front("CALL_STATE_ENTRY_OPEN", "CALL has no unique STATE_CONTENT invoke argument in its caller's coarse-world location; the current SSA version need not equal the entry version."))
         frontiers.append(_front("ENVIRONMENT_PROJECTIONS_OPEN", "Callee function-object/G/saved-B/defaults/cells are existing ports; projections and cell content/state must be linked separately, not borrowed from caller or equated by names."))
         frontiers.append(_front("FINE_EFFECTS_OPEN", "State interface correspondence is not a closed mod/ref, alias, escape or ready summary."))
         return StaticCallTarget(qualified, callee.namespace, tuple(sorted(basis)), binding,
@@ -781,13 +845,15 @@ class StaticCallSession:
                     "Original SG opaque Call/source_operation is refined by the retained canonical CALL; the older computational overlay has no CALL record or invented operand values.", link.source))
                 self.counts["source_view_refined_calls"] += 1
             if body.module is not None:
-                frontier.append(_front("MODULE_CALL_ADAPTER", "Mapping-frame CALL is counted with original Use/source ports; function target/environment/completion linkage is not yet admitted.", link.source))
                 self.counts["module_canonical_calls_processed"] += 1
-                self.counts["canonical_calls_with_adapter_frontier"] += 1
-                yield StaticCallSite(body.namespace, op_id, link.source, link.semantic_operation,
-                    callee_use.id if callee_use else None, callee_use.value if callee_use else None,
-                    (), tuple(dict.fromkeys(frontier)))
-                continue
+                frontier.append(_front("MODULE_CALLER_NAMESPACE_PROJECTIONS_OPEN",
+                    "Original module locals/globals/builtins/world ports remain distinct; no module local is treated as callee globals or loader state.",
+                    link.source))
+            elif body.class_entry is not None:
+                self.counts["class_canonical_calls_processed"] += 1
+                frontier.append(_front("CLASS_CALLER_NAMESPACE_AND_CLOSURE_PROJECTIONS_OPEN",
+                    "Original class locals/globals/builtins and ordered closure-cell ports remain unmapped to callee globals/cells.",
+                    link.source))
             if link.semantic_operation is None:
                 # Keep the original CALL/actual interface in the denominator,
                 # but never invent a semantic-call ID or a name-only target.
