@@ -1,14 +1,14 @@
 """Opt-in v2 targets for observed Python calls; no user getter/target execution."""
 from __future__ import annotations
 from dataclasses import dataclass
-import dis,hashlib,inspect,json,os,sys,threading,types,weakref
+import hashlib,inspect,json,os,sys,threading,types,weakref
 from scar.ir.program.python_call_targets import (
     PythonTargetKind as Kind,PythonCodeScope as Scope,ReceiverRole,ReceiverCondition,BoundReceiver,
     PythonCallTarget,PythonEntryBinding,PythonTargetGap,target_record,
 )
 from scar.ir.program.call_edges import InvocationKey
 from scar.ir.record_codec import encode
-from scar.trace.code_snapshot import describe_code,site
+from scar.trace.code_snapshot import code_key as captured_code_key,call_instruction,site
 
 @dataclass(frozen=True,slots=True)
 class PythonTargetBudget:
@@ -77,21 +77,21 @@ class PythonTargetObserver:
         call_ref=reference(callable_object)
         if func is None:
             self.emit('TARGET',PythonCallTarget(attempt,InvocationKey(self.recorder.pid,key[0],owner),kind,call_ref,None,None,None,None,Scope.NO_PYTHON_CODE));return
-        code=func.__code__;code_key=describe_code(code)['key'];function_ref=reference(func)
+        code=func.__code__;code_key=captured_code_key(code);function_ref=reference(func)
         if kind is Kind.FUNCTION and not arg0_missing:
-            instruction=next((i for i in dis.get_instructions(caller_code) if i.offset==call_site['offset']),None)
+            instruction=call_instruction(caller_code,call_site['offset'])
             unsupported=inspect.CO_VARARGS|inspect.CO_VARKEYWORDS|inspect.CO_GENERATOR|inspect.CO_COROUTINE|inspect.CO_ASYNC_GENERATOR
             # CPython3.14 expands PyMethod before _MONITOR_CALL. CALL n
             # excludes the implicit first parameter. Under this exact finite
             # no-default/nonvariadic ABI a successful matching entry needs n+1.
-            if (instruction is not None and instruction.opname=='CALL'
-                    and type(instruction.arg) is int and code.co_argcount==instruction.arg+1
+            if (instruction is not None and instruction[0]=='CALL'
+                    and type(instruction[1]) is int and code.co_argcount==instruction[1]+1
                     and code.co_kwonlyargcount==0 and not code.co_flags & unsupported
                     and func.__defaults__ is None):
                 kind=Kind.NORMALIZED_RECEIVER_FUNCTION;receiver=arg0
         receiver_ref=None if receiver is None else reference(receiver)
         scope=Scope.PROJECT if self.operand._code_inside(code) else Scope.OBSERVED_EXTERNAL_PYTHON if os.path.isabs(code.co_filename) else Scope.NONFILESYSTEM_PYTHON
-        role=None if receiver is None else (BoundReceiver(ReceiverRole.IMPLICIT_CALL_RECEIVER,receiver_ref,instruction.arg,(ReceiverCondition.NO_INTERVENING_CALL_LAYOUT_MUTATION,)) if kind is Kind.NORMALIZED_RECEIVER_FUNCTION else BoundReceiver(ReceiverRole.BOUND_METHOD_RECEIVER,receiver_ref))
+        role=None if receiver is None else (BoundReceiver(ReceiverRole.IMPLICIT_CALL_RECEIVER,receiver_ref,instruction[1],(ReceiverCondition.NO_INTERVENING_CALL_LAYOUT_MUTATION,)) if kind is Kind.NORMALIZED_RECEIVER_FUNCTION else BoundReceiver(ReceiverRole.BOUND_METHOD_RECEIVER,receiver_ref))
         target=PythonCallTarget(attempt,InvocationKey(self.recorder.pid,key[0],owner),kind,call_ref,function_ref,code_key,layout(code),role,scope)
         self.emit('TARGET',target)
         if not self.select_code(code,attempt):return

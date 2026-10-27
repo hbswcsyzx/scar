@@ -26,6 +26,7 @@ _MAX_CODE_UNITS = 100_000
 _MAX_CACHE_ENTRIES = 128
 _MAX_CACHE_TEXT_BYTES = 512 * 1024
 _MAX_KEY_CACHE_ENTRIES = 2048
+_MAX_PARAMETER_CACHE_BYTES = 512 * 1024
 _MAX_CACHED_SITES = 128
 
 _CODE_FIELDS = (
@@ -136,11 +137,15 @@ class _CachedKey:
     key: str
     limits: tuple[int, int, int]
     sites: OrderedDict = field(default_factory=OrderedDict)
+    calls: OrderedDict = field(default_factory=OrderedDict)
+    parameters: tuple[str, ...] | None = None
+    parameter_bytes: int = 0
 
 
 _CACHE: OrderedDict[int, _CachedCode] = OrderedDict()
 _KEY_CACHE: OrderedDict[int, _CachedKey] = OrderedDict()
 _CACHE_TEXT_BYTES = 0
+_PARAMETER_CACHE_BYTES = 0
 _CACHE_LOCK = threading.RLock()
 
 
@@ -154,13 +159,16 @@ def _forget(identity, reference):
 
 
 def _forget_key(identity, reference):
+    global _PARAMETER_CACHE_BYTES
     with _CACHE_LOCK:
         record = _KEY_CACHE.get(identity)
         if record is not None and record.reference is reference:
+            _PARAMETER_CACHE_BYTES -= record.parameter_bytes
             del _KEY_CACHE[identity]
 
 
 def _key_record(code):
+    global _PARAMETER_CACHE_BYTES
     if type(code) is not CodeType:
         raise ValueError("code snapshot requires an exact CodeType")
     identity = id(code)
@@ -191,11 +199,13 @@ def _key_record(code):
             _KEY_CACHE.move_to_end(identity)
             return previous
         if previous is not None:
+            _PARAMETER_CACHE_BYTES -= previous.parameter_bytes
             del _KEY_CACHE[identity]
         if _MAX_KEY_CACHE_ENTRIES > 0:
             _KEY_CACHE[identity] = record
             while len(_KEY_CACHE) > _MAX_KEY_CACHE_ENTRIES:
-                _KEY_CACHE.popitem(last=False)
+                _, evicted = _KEY_CACHE.popitem(last=False)
+                _PARAMETER_CACHE_BYTES -= evicted.parameter_bytes
     return record
 
 
@@ -207,6 +217,53 @@ def code_key(code: CodeType) -> str:
     inherit a prior code object's key.
     """
     return _key_record(code).key
+
+
+def code_parameters(code: CodeType) -> tuple[str, ...]:
+    """Immutable formal names, cached only for the validated live CodeType."""
+    global _PARAMETER_CACHE_BYTES
+    record = _key_record(code)
+    with _CACHE_LOCK:
+        if record.parameters is not None:
+            return record.parameters
+    count = code.co_argcount + code.co_kwonlyargcount
+    count += bool(code.co_flags & inspect.CO_VARARGS) + bool(code.co_flags & inspect.CO_VARKEYWORDS)
+    if count > len(code.co_varnames):
+        raise ValueError('code snapshot parameter layout is inconsistent')
+    parameters = code.co_varnames[:count]
+    size = 64 + 8*len(parameters) + 4*sum(map(len,parameters))
+    with _CACHE_LOCK:
+        if (_KEY_CACHE.get(id(code)) is record and record.parameters is None
+                and _PARAMETER_CACHE_BYTES + size <= _MAX_PARAMETER_CACHE_BYTES):
+            record.parameters, record.parameter_bytes = parameters, size
+            _PARAMETER_CACHE_BYTES += size
+    return parameters
+
+
+def call_instruction(code: CodeType, offset: int) -> tuple[str, int | None] | None:
+    """Exact static instruction at a CALL site, without retaining argval/repr.
+
+    Reuse the pinned dis decoder on a cold site so EXTENDED_ARG and inline
+    CACHE boundaries retain their old interpretation. Only opcode name/oparg
+    survive; no Instruction, code constant, frame or callable is cached.
+    """
+    if type(offset) is not int:
+        raise ValueError('instruction offset must be an exact integer')
+    record = _key_record(code)
+    if len(code.co_code) // 2 > _MAX_CODE_UNITS:
+        raise ValueError('code snapshot instruction budget exceeded')
+    with _CACHE_LOCK:
+        if offset in record.calls:
+            record.calls.move_to_end(offset)
+            return record.calls[offset]
+    instruction = next((i for i in dis.get_instructions(code) if i.offset == offset), None)
+    value = None if instruction is None else (instruction.opname, instruction.arg)
+    with _CACHE_LOCK:
+        if _MAX_CACHED_SITES > 0:
+            record.calls[offset] = value
+            while len(record.calls) > _MAX_CACHED_SITES:
+                record.calls.popitem(last=False)
+    return value
 
 
 def _record(code):
@@ -293,4 +350,4 @@ def site(code: CodeType, offset: int) -> dict:
             "position": list(position) if position is not None else None}
 
 
-__all__ = ["code_key", "describe_code", "site"]
+__all__ = ["code_key", "code_parameters", "call_instruction", "describe_code", "site"]

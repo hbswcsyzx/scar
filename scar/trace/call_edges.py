@@ -11,7 +11,7 @@ import threading
 import time
 import weakref
 
-from scar.trace.code_snapshot import code_key, describe_code, site
+from scar.trace.code_snapshot import code_key, code_parameters, describe_code, site
 
 _ACTIVE_PROCESS_RECORDER = None
 _FORWARD_KINDS = ('DISPATCH', 'IMPORT', 'TRACE')
@@ -405,7 +405,7 @@ class CallEdgeRecorder:
                     targets = getattr(self.operand_observer, 'python_targets', None)
                     detailed = (self.lean_plan is None or self.lean_plan.match(frame.f_code) is not None
                                 or targets is not None and targets.accepts_frame(frame))
-                    names = describe_code(frame.f_code)['parameters'] if detailed else ()
+                    names = code_parameters(frame.f_code) if detailed else ()
                     parameters, complete = (self._bindings(frame.f_locals,seen,names)
                                             if detailed else ([],False))
                     direct = self.active.get((thread,id(caller))) if caller is not None else None

@@ -1,0 +1,23 @@
+{
+  "status": "STATIC_CACHE_AND_DYNAMIC_TARGET_METADATA_EQUIVALENT",
+  "base_commit": "b5c1c3cc",
+  "target_rows": 6,
+  "serialized_bytes": 2131,
+  "serialized_sha256": "b085a8139c03319c16f80246880478a0a763af385612379f1a3b4c13a86ff5bc",
+  "byte_identical_to_before": true,
+  "observed_target_kinds": [
+    "NORMALIZED_RECEIVER_FUNCTION",
+    "FUNCTION",
+    "FUNCTION"
+  ],
+  "repeated_call_site_requests": 8,
+  "actual_disassembly_scans": 1,
+  "extended_call_arg": 257,
+  "mutable_return_isolation": true,
+  "changed_code_and_stricter_limits_not_reused": true,
+  "dynamic_defaults_and_code_observed_each_event": true,
+  "hook_installed": false,
+  "capture_started": false,
+  "target_executed": false,
+  "runtime_speedup_measured": false
+}

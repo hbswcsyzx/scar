@@ -7,6 +7,7 @@ executes comparison helpers.
 from __future__ import annotations
 
 import hashlib
+from collections import OrderedDict
 import inspect
 import json
 import os
@@ -22,7 +23,7 @@ from scar.ir.program.call_operands import (
     OperandCollectionLimits, OperandCollectionMetadata,
 )
 from scar.ir.record_codec import encode
-from scar.trace.code_snapshot import describe_code, site
+from scar.trace.code_snapshot import code_key, code_parameters, site, _key_record
 from scar.trace.operand_bytecode import (
     call_family_offsets, call_window_selection, load_slots,
 )
@@ -64,14 +65,39 @@ def _raw_site(code, offset):
             "opname": value["opname"], "position": value["position"]}
 
 
+_LAYOUT_CACHE = OrderedDict()
+_LAYOUT_CACHE_LOCK = threading.RLock()
+_MAX_LAYOUT_CACHE_ENTRIES = 2048
+_MAX_LAYOUT_PARAMETER_CHARS = 256
+
+
+def _forget_layout(identity, reference):
+    with _LAYOUT_CACHE_LOCK:
+        cached = _LAYOUT_CACHE.get(identity)
+        if cached is not None and cached[0] is reference:
+            del _LAYOUT_CACHE[identity]
+
+
 def _layout(code):
-    count = code.co_argcount + code.co_kwonlyargcount
-    count += bool(code.co_flags & inspect.CO_VARARGS)
-    count += bool(code.co_flags & inspect.CO_VARKEYWORDS)
-    if count > len(code.co_varnames):
-        raise ValueError("function parameter layout exceeds local slots")
-    return FunctionLayout(code.co_argcount, code.co_posonlyargcount, code.co_kwonlyargcount,
-                          code.co_flags, tuple(code.co_varnames[:count]))
+    # Validate the structural key under the current limits before using a
+    # static ABI cache. No function/default/receiver association is cached.
+    record = _key_record(code)
+    identity = id(code)
+    with _LAYOUT_CACHE_LOCK:
+        cached = _LAYOUT_CACHE.get(identity)
+        if cached is not None and cached[0]() is code and cached[1] == record.limits:
+            _LAYOUT_CACHE.move_to_end(identity)
+            return cached[2]
+    parameters = code_parameters(code)
+    layout = FunctionLayout(code.co_argcount,code.co_posonlyargcount,code.co_kwonlyargcount,
+                            code.co_flags,parameters)
+    if _MAX_LAYOUT_CACHE_ENTRIES > 0 and sum(map(len,parameters)) <= _MAX_LAYOUT_PARAMETER_CHARS:
+        reference = weakref.ref(code,lambda ref:_forget_layout(identity,ref))
+        with _LAYOUT_CACHE_LOCK:
+            _LAYOUT_CACHE[identity] = reference,record.limits,layout
+            while len(_LAYOUT_CACHE) > _MAX_LAYOUT_CACHE_ENTRIES:
+                _LAYOUT_CACHE.popitem(last=False)
+    return layout
 
 
 class CallOperandObserver:
@@ -315,7 +341,7 @@ class CallOperandObserver:
     def _scoped_gap(self, reason, code, owner=None):
         # Actual code is retained even when no invocation was successfully
         # issued. This is not a fabricated activation or a global epoch gap.
-        key = describe_code(code)['key']
+        key = code_key(code)
         return self._emit("SCOPED_GAP", owner, self.recorder.index, {"reason":reason,"code":key})
 
     def _base_state(self, frame):
@@ -670,7 +696,7 @@ class CallOperandObserver:
             try:
                 reference = self._reference(value, seen, event_index, snapshots)
                 function_code = value.__code__ if observed_code is _MISSING else observed_code
-                code = describe_code(function_code)["key"]
+                code = code_key(function_code)
                 return {"kind": CallableKind.EXACT_FUNCTION.value, "reference": reference,
                         "code": code, "layout": encode(_layout(function_code))}
             except BaseException:
@@ -927,7 +953,7 @@ class CallOperandObserver:
                             try:
                                 self._pending[pending_key] = (
                                     weakref.ref(callable_object), weakref.ref(target_code),
-                                    describe_code(target_code)["key"], describe_code(code)["key"],
+                                    code_key(target_code), code_key(code),
                                     row_site, attempt_index,
                                 )
                             except BaseException:
