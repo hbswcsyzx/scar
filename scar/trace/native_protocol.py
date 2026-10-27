@@ -461,7 +461,7 @@ def _prepare_projection_v2(source, interfaces, selected, out, budget):
     return values, evidence, va, ea, geometry, {"source-values.json": vp, "source-evidence.json": ep, "source-projection-receipts.json": rp}
 
 
-def _build_program(interfaces, source, interface_artifact):
+def _build_program(interfaces, source, interface_artifact, *, execution_scope=None, interface_description=None):
     from scar.ir.execution.native_port_protocol import PROFILE_V2
     from scar.ir.program.model import (Behavior, Block, BlockArgument, CompletionResult,
         CompletionSignature, CompletionSuccessor, DataValue, ExitKind, ExitPort, Operation,
@@ -477,13 +477,17 @@ def _build_program(interfaces, source, interface_artifact):
     from scar.ir.program.native import (NativeBoundary, NativeInputSlot, NativeOutputSlot,
         EntryPortRef, ExitPortRef, CoreInputPort, CoreOutputPort)
     from scar.ir.v2.common import Completeness
+    need(execution_scope is None or type(execution_scope) is ProviderRunScope,
+         "static native interfaces require an exact execution scope")
+    need(interface_description is None or (type(interface_description) is str and interface_description),
+         "native interface description must be nonempty text")
     v2 = source.get("reference_profile") == PROFILE_V2
     region_prefix, provider_prefix = ("torch-interface:", "torch-schema:") if v2 else ("aten-interface:", "aten-schema:")
     catalog = RegionID(region_prefix + "catalog")
     catalog_block, catalog_return = BlockID(catalog.value + ":entry"), OperationID(catalog.value + ":return")
     operations = [Operation(catalog_return, "interface catalog; not a runtime invocation", (Behavior.CONTROL,),
                             terminator=Terminator(TerminatorKind.RETURN, exit="normal"))]
-    regions = [Region(catalog, "observed Torch FunctionSchema interfaces" if v2 else "observed ATen interface definitions", catalog_block,
+    regions = [Region(catalog, interface_description or ("observed Torch FunctionSchema interfaces" if v2 else "observed ATen interface definitions"), catalog_block,
                       (Block(catalog_block, (), (catalog_return,)),), (ExitPort("normal", ExitKind.NORMAL, ()),))]
     values, locations, bindings, provider_regions, boundaries, layouts = [], [], [], [], [], {}
     definition_provider, execution_provider = ProviderID(provider_prefix + PROVIDER_REVISION), ProviderID("eto:" + source["native_scope"])
@@ -500,10 +504,10 @@ def _build_program(interfaces, source, interface_artifact):
             tuple(ProviderCollectionObservation(d, None, "instrumentation impact/cost not established") for d in ProviderCollectionDomain))
 
     eto_artifact = decode(ProviderArtifact, source["artifacts"]["eto"])
-    envelopes = (envelope(definition_provider, "observed Torch FunctionSchema ports; implementation identity unknown" if v2 else "pinned ATen schema interface", interface_artifact,
+    envelopes = (envelope(definition_provider, interface_description or ("observed Torch FunctionSchema ports; implementation identity unknown" if v2 else "pinned ATen schema interface"), interface_artifact,
             ProviderArtifactKind.DEFINITION_GRAPH, ProviderCaptureMode.STATIC_ANALYSIS, None),
         envelope(execution_provider, "PyTorch ETO", eto_artifact, ProviderArtifactKind.EXECUTION_EVIDENCE,
-            ProviderCaptureMode.REAL_EXECUTION, ProviderRunScope(source["run"], source["pid"],
+            ProviderCaptureMode.REAL_EXECUTION, execution_scope or ProviderRunScope(source["run"], source["pid"],
                 "dispatch prefix sequences 1.." + str(source["max_sequences"]), "ETO collector ordering; no per-node clock")))
     unique = {i["signature_id"]: i for i in interfaces}
     for sig_id, interface in unique.items():
