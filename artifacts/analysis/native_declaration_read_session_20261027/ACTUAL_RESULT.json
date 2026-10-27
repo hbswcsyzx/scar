@@ -1,0 +1,115 @@
+{
+  "catalog": {
+    "sha256": "b71bf3272f295b1504c1d72fe408d28763ea5d8d5ad33dd1faa3acbeefe3afd4",
+    "size_bytes": 2255,
+    "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/native_declaration_full_20261027/attempt01/catalog/manifest.json"
+  },
+  "fragments": [
+    {
+      "conditional_output_ports": 183,
+      "cumulative_measurements": {
+        "catalog_reads_per_session": 1,
+        "decoded_bytes": 68384403,
+        "elapsed_seconds": 10.826095762022305,
+        "execution_reads": 1,
+        "fragment_reads": 1,
+        "input_path_count": 11,
+        "interface_layouts_rechecked": 19,
+        "interface_reads_per_session": 1,
+        "measurement_scope": "SESSION_CUMULATIVE",
+        "port_shard_cache_loads": 1,
+        "program_reads_per_session": 1,
+        "source_chunk_cache_loads": 2,
+        "stored_bytes": 32201947,
+        "total_bytes": 100586350,
+        "validation_issue_count": 0
+      },
+      "fragment": {
+        "sha256": "a6af356b4888f093388fae9a6b18bfc29f89f923d2388fd6920b7a1363cb9b4b",
+        "size_bytes": 2273088,
+        "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/native_declaration_full_20261027/attempt01/shards/000000/000000/manifest.json"
+      },
+      "input_ports": 687,
+      "measurement_scope": "SESSION_CUMULATIVE",
+      "operation_rows": 256,
+      "validation_issue_count": 0,
+      "validation_valid": true
+    },
+    {
+      "conditional_output_ports": 183,
+      "cumulative_measurements": {
+        "catalog_reads_per_session": 1,
+        "decoded_bytes": 76795256,
+        "elapsed_seconds": 12.384042531019077,
+        "execution_reads": 2,
+        "fragment_reads": 2,
+        "input_path_count": 13,
+        "interface_layouts_rechecked": 19,
+        "interface_reads_per_session": 1,
+        "measurement_scope": "SESSION_CUMULATIVE",
+        "port_shard_cache_loads": 1,
+        "program_reads_per_session": 1,
+        "source_chunk_cache_loads": 2,
+        "stored_bytes": 40612800,
+        "total_bytes": 117408056,
+        "validation_issue_count": 0
+      },
+      "fragment": {
+        "sha256": "f489c9c9f7b1c4aa251897e2b1025380f0b454362f1e839650b8135cf231dfff",
+        "size_bytes": 2285769,
+        "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/native_declaration_full_20261027/attempt01/shards/000000/000001/manifest.json"
+      },
+      "input_ports": 697,
+      "measurement_scope": "SESSION_CUMULATIVE",
+      "operation_rows": 256,
+      "validation_issue_count": 0,
+      "validation_valid": true
+    }
+  ],
+  "publication": {
+    "sha256": "8dba167f8c14df8431b3964b999efa4a11b6f82edd586d5287ecb012f57aae4e",
+    "size_bytes": 27135,
+    "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/native_declaration_full_20261027/attempt01/manifest.json"
+  },
+  "read_session": {
+    "catalog_path_count": 1,
+    "coordinates_path_count": 1,
+    "elapsed_seconds": 12.393250148976222,
+    "interfaces_path_count": 1,
+    "measurements": {
+      "catalog_reads_per_session": 1,
+      "decoded_bytes": 76795256,
+      "elapsed_seconds": 12.393301903037354,
+      "execution_reads": 2,
+      "fragment_reads": 2,
+      "input_path_count": 13,
+      "interface_layouts_rechecked": 19,
+      "interface_reads_per_session": 1,
+      "measurement_scope": "SESSION_CUMULATIVE",
+      "port_shard_cache_loads": 1,
+      "program_reads_per_session": 1,
+      "source_chunk_cache_loads": 2,
+      "stored_bytes": 40612800,
+      "total_bytes": 117408056
+    },
+    "program_path_count": 1,
+    "tracked_path_reads": {
+      "/home/zyf/AAA/scar-worktrees/frame-entry-routing/artifacts/analysis/native_port_sidecar_full_20261026/publication/index.json": 1,
+      "/home/zyf/AAA/scar-worktrees/frame-entry-routing/artifacts/analysis/native_port_sidecar_full_20261026/publication/shards/nodes-000000000-000004096.json.gz": 1,
+      "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/native_declaration_full_20261027/attempt01/catalog/interfaces.json": 1,
+      "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/native_declaration_full_20261027/attempt01/catalog/manifest.json": 1,
+      "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/native_declaration_full_20261027/attempt01/catalog/program.json": 1,
+      "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/native_declaration_full_20261027/attempt01/shards/000000/000000/execution.json": 1,
+      "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/native_declaration_full_20261027/attempt01/shards/000000/000000/manifest.json": 1,
+      "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/native_declaration_full_20261027/attempt01/shards/000000/000001/execution.json": 1,
+      "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/native_declaration_full_20261027/attempt01/shards/000000/000001/manifest.json": 1,
+      "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/native_inputs_full_20261026/native-import/capture-coordinates.json": 1,
+      "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/native_inputs_full_20261026/native-import/native/bundle-partitions/evidence/instances/000000.jsonl.gz": 1,
+      "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/native_inputs_full_20261026/native-import/native/bundle-partitions/manifest.json": 1,
+      "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/native_inputs_full_20261026/native-import/native/bundle-partitions/semantic/definitions/000000.jsonl.gz": 1
+    }
+  },
+  "scope": "Only the first bounded fragments were normally decoded and source-validated; no new native build or raw ETO rescan.",
+  "source_shard": 0,
+  "status": "PASS"
+}

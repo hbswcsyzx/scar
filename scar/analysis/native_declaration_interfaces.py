@@ -89,6 +89,7 @@ class NativeDeclarationSession:
         _need(any(r['artifact']==encode(self.eto)and r['process']==encode(self.process.id)for r in doc['membership']),
               'original ETO is outside this retained Run/process membership')
         self._source_cache={};self._definitions={};self._port_cache=None;self._closed=False
+        self._port_cache_loads=0;self._record_chunk_loads=0
         self._output=0;self._catalog=None;self._prepared=None;self._program=None;self._layouts=None
         self._interfaces={};self._row_signatures={};self._native_scope=None
 
@@ -112,7 +113,7 @@ class NativeDeclarationSession:
         if self._port_cache is None or self._port_cache[0]!=no:
             ref=self.index.shards[no];self.meter.charge(stored=ref.stored_bytes,decoded=ref.decoded_bytes)
             shard=_read_shard(self.root,ref);p=self.root/ref.path;self.meter.inputs.append((p,_stamp(p)))
-            self._port_cache=(no,shard)
+            self._port_cache=(no,shard);self._port_cache_loads+=1
         return self._port_cache[1]
     def _records(self,graph,table,ordinals):
         self._check();result=[]
@@ -129,6 +130,7 @@ class NativeDeclarationSession:
                 # Cache owned immutable source bytes, not mutable validated IR.
                 self._source_cache[key]={r['ordinal']:(canonical(r['record']),r['locator'])for r in rows}
                 p=self.partitions.root/chunk['uri'];self.meter.inputs.append((p,_stamp(p)))
+                self._record_chunk_loads+=1
             for n in wanted:
                 raw,locator=self._source_cache[key][n]
                 result.append({'ordinal':n,'record':strict_json(raw.decode()),'locator':locator})
@@ -295,79 +297,211 @@ class NativeDeclarationView:
     measurements:dict
 
 
-def read_native_declaration_fragment(artifact:ProviderArtifact,*,budget=None):
-    """Ordinary exact-source readback; stored validation booleans grant nothing.
+class NativeDeclarationReadSession:
+    """One ordinary source-bound reader shared by multiple native fragments.
 
-    Whole core is checked, but catalog source correspondence is rechecked only
-    for this fragment's exact original rows, not all unselected native shards.
+    The catalog/program/interface artifacts are read once. Each fragment still
+    rechecks its execution model, original native rows, definition/schema,
+    source stamps, and core validation before it is returned.
     """
-    b=budget or NativeDeclarationBudget();b.__post_init__();meter=_Meter(b.max_input_bytes,b.max_seconds)
-    def read(a,maximum=64_000_000):
-        raw=meter.artifact(a,maximum);meter.charge(decoded=len(raw));return strict_json(raw.decode())
-    _need(type(artifact)is ProviderArtifact and artifact.schema=='scar.native-declaration-fragment','typed native fragment required')
-    doc=read(artifact)
-    _need(set(doc)=={'schema','schema_version','profile','catalog','execution','occurrences','validation',
-        'operation_rows','input_ports','conditional_output_ports','completion_selected_count','whole_model_established'}
-        and doc['schema']==artifact.schema and doc['schema_version']==1 and doc['profile']==PROFILE,
-        'unsupported native declaration fragment')
-    cat_art=decode(ProviderArtifact,doc['catalog']);cat=read(cat_art)
-    _need(cat['schema']=='scar.native-declaration-catalog'and cat['schema_version']==1 and cat['profile']==PROFILE,'unsupported native catalog')
-    with NativeDeclarationSession(decode(ProviderArtifact,cat['index']),decode(ProviderArtifact,cat['bundle']),
-                                  decode(ProviderArtifact,cat['coordinates']),budget=b)as session:
-        session.meter.charge(stored=meter.stored,decoded=meter.decoded)
-        pa=decode(ProviderArtifact,cat['program']);raw=session.meter.artifact(pa,64_000_000);session.meter.charge(decoded=len(raw))
-        program=program_loads(raw.decode());session._prepared=prepare_program_snapshot(program)
-        snapshot=decode(ProgramSnapshot,cat['snapshot'])
-        _need(snapshot.artifact==pa and session._prepared.sha256==pa.sha256,'catalog snapshot differs')
-        iface_art=decode(ProviderArtifact,cat['interfaces']);raw=session.meter.artifact(iface_art,64_000_000);session.meter.charge(decoded=len(raw))
-        interface_doc=strict_json(raw.decode());_need(interface_doc['profile']==PROFILE,'catalog interface profile differs')
-        session._catalog=cat_art;session._snapshot=snapshot;session._program=program;session._interface_artifact=iface_art;session._interface_bytes=raw
-        session._layouts={}
-        execution_art=decode(ProviderArtifact,doc['execution']);raw=session.meter.artifact(execution_art,64_000_000);session.meter.charge(decoded=len(raw))
-        execution=execution_loads(raw.decode());_need(execution.snapshot==snapshot,'native fragment and catalog snapshots differ')
+    def __init__(self,catalog:ProviderArtifact,*,budget=None):
+        self.budget=budget or NativeDeclarationBudget();self.budget.__post_init__()
+        _need(type(catalog)is ProviderArtifact and catalog.schema=='scar.native-declaration-catalog',
+            'typed native declaration catalog required')
+        boot=_Meter(self.budget.max_input_bytes,self.budget.max_seconds)
+        raw=boot.artifact(catalog,16_000_000);boot.charge(decoded=len(raw));doc=strict_json(raw.decode())
+        fields_expected={'schema','schema_version','profile','index','bundle','coordinates','program','snapshot',
+            'interfaces','source_shard_indices','selected_operation_rows','shared_interfaces','whole_model_established'}
+        _need(set(doc)==fields_expected and doc['schema']==catalog.schema and doc['schema_version']==1
+            and doc['profile']==PROFILE and doc['whole_model_established']is False,
+            'unsupported native declaration catalog')
+        self.catalog_artifact=catalog;self.catalog=doc
+        self.index_artifact=decode(ProviderArtifact,doc['index'])
+        self.bundle_artifact=decode(ProviderArtifact,doc['bundle'])
+        self.coordinates_artifact=decode(ProviderArtifact,doc['coordinates'])
+        self.program_artifact=decode(ProviderArtifact,doc['program'])
+        self.snapshot=decode(ProgramSnapshot,doc['snapshot'])
+        self.interface_artifact=decode(ProviderArtifact,doc['interfaces'])
+        _need(self.program_artifact.schema=='scar.program-graph'
+            and self.snapshot.artifact==self.program_artifact
+            and self.interface_artifact.schema=='scar.pinned-torch-protocol-interface',
+            'native catalog artifact references differ')
+        self._source=NativeDeclarationSession(self.index_artifact,self.bundle_artifact,
+            self.coordinates_artifact,budget=self.budget)
+        self.meter=self._source.meter
+        self.meter.charge(stored=boot.stored,decoded=boot.decoded)
+        self.meter.started=min(self.meter.started,boot.started)
+        self.meter.inputs.extend(boot.inputs)
+        _need(self._source.index_artifact==self.index_artifact
+            and self._source.bundle==self.bundle_artifact
+            and self._source.coordinates==self.coordinates_artifact,
+            'native catalog and original source session references differ')
+        shard_scope=doc['source_shard_indices']
+        _need(type(shard_scope)is list and shard_scope and len(shard_scope)==len(set(shard_scope))
+            and all(type(n)is int and 0<=n<len(self._source.index.shards)for n in shard_scope),
+            'native catalog source shard scope differs')
+        self._shard_scope=frozenset(shard_scope)
+        _need(type(doc['selected_operation_rows'])is int and doc['selected_operation_rows']>0
+            and type(doc['shared_interfaces'])is int and doc['shared_interfaces']>0,
+            'native catalog counts are malformed')
+        raw=self.meter.artifact(self.program_artifact,64_000_000);self.meter.charge(decoded=len(raw))
+        self.program=program_loads(raw.decode());self.prepared=prepare_program_snapshot(self.program)
+        _need(self.prepared.sha256==self.program_artifact.sha256
+            and self.snapshot.schema_version==self.prepared.schema_version,
+            'catalog snapshot differs from its program artifact')
+        raw=self.meter.artifact(self.interface_artifact,64_000_000);self.meter.charge(decoded=len(raw))
+        self.interface_doc=strict_json(raw.decode())
+        _need(canonical(self.interface_doc)==raw and self.interface_doc.get('schema')=='scar.pinned-torch-protocol-interface'
+            and self.interface_doc.get('schema_version')==1 and self.interface_doc.get('profile')==PROFILE
+            and type(self.interface_doc.get('interfaces'))is dict
+            and len(self.interface_doc['interfaces'])==doc['shared_interfaces'],
+            'native shared interface artifact differs')
+        self._source._catalog=catalog;self._source._snapshot=self.snapshot;self._source._program=self.program
+        self._source._prepared=self.prepared;self._source._interface_artifact=self.interface_artifact
+        self._source._interface_bytes=raw;self._source._layouts={}
+        self._layout_signatures={};self._row_map_shard=None;self._row_by_instance={}
+        self._fragment_reads=0;self._execution_reads=0;self._closed=False
+
+    def __enter__(self):return self
+    def __exit__(self,*exc):self.close()
+    def close(self):
+        if not self._closed:
+            try:self._source.close()
+            finally:
+                self._closed=True;self._row_by_instance.clear();self._layout_signatures.clear()
+                self.program=None;self.prepared=None;self.interface_doc=None
+
+    def _check(self):_need(not self._closed,'native declaration read session is closed');self._source._check()
+
+    @property
+    def measurements(self):
+        """Cumulative SESSION_CUMULATIVE accounting through the last read."""
+        self._check();return self._measurement_snapshot()
+
+    def _measurement_snapshot(self):
+        measurement=self.meter.finish()
+        measurement.update({'measurement_scope':'SESSION_CUMULATIVE','catalog_reads_per_session':1,
+            'program_reads_per_session':1,'interface_reads_per_session':1,
+            'fragment_reads':self._fragment_reads,'execution_reads':self._execution_reads,
+            'port_shard_cache_loads':self._source._port_cache_loads,
+            'source_chunk_cache_loads':self._source._record_chunk_loads,
+            'input_path_count':len({str(path)for path,_ in self.meter.inputs}),
+            'interface_layouts_rechecked':len(self._layout_signatures)})
+        return measurement
+
+    def _row(self,shard_no,instance_id):
+        shard=self._source._ports(shard_no)
+        if self._row_map_shard!=shard_no:
+            rows={r.instance:r for r in shard.rows}
+            _need(len(rows)==len(shard.rows),'duplicate native instance in port shard')
+            self._row_map_shard=shard_no;self._row_by_instance=rows
+        return self._row_by_instance.get(instance_id)
+
+    def _ensure_layout(self,row,definition,interface):
+        sig=interface['signature_id']
+        _need(self.interface_doc['interfaces'].get(sig)==interface['signature'],
+            'interface differs from original observed ports/schema')
+        prior=self._layout_signatures.get(sig)
+        if prior is not None:
+            _need(prior==interface['signature'],'same interface ID has different source declaration')
+            return
+        inst=decode(OperationInstance,self._source._records('evidence','instances',(row.source_ordinal,))[0]['record'])
+        source={'reference_profile':PROFILE_V2,'native_scope':inst.id.value.rsplit(':eto:',1)[0],
+            'run':self._source.run.id.value,'pid':self._source.process.pid,'artifacts':{'eto':encode(self._source.eto)}}
+        scope=ProviderRunScope(self._source.run.id.value,self._source.process.pid,
+            f'published native source ordinals [{self._source.index.first_source_ordinal},{self._source.index.stop_source_ordinal}); completion unselected',
+            'retained ETO source records; no inferred execution total order')
+        expected,layouts=_build_program([interface],source,self.interface_artifact,execution_scope=scope,
+            interface_description='observed native boxed interfaces with optional pinned schema declarations')
+        actual_ops={r.id:r for r in self.program.operations};actual_values={r.id:r for r in self.program.values}
+        actual_regions={r.id:r for r in self.program.regions};actual_bounds={r.id:r for r in self.program.native_boundaries}
+        _need(all(actual_ops.get(r.id)==r for r in expected.operations)
+            and all(actual_values.get(r.id)==r for r in expected.values)
+            and all(actual_regions.get(r.id)==r for r in expected.regions)
+            and all(actual_bounds.get(r.id)==r for r in expected.native_boundaries),
+            'selected canonical core does not match original native ABI')
+        _need(sig in layouts and sig not in self._source._layouts,'duplicate or missing canonical interface layout')
+        self._source._layouts.update(layouts);self._layout_signatures[sig]=interface['signature']
+
+    def _read_document(self,artifact,doc):
+        self._check();self._fragment_reads+=1
+        _need(type(artifact)is ProviderArtifact and artifact.schema=='scar.native-declaration-fragment',
+            'typed native fragment required')
+        _need(set(doc)=={'schema','schema_version','profile','catalog','execution','occurrences','validation',
+            'operation_rows','input_ports','conditional_output_ports','completion_selected_count','whole_model_established'}
+            and doc['schema']==artifact.schema and doc['schema_version']==1 and doc['profile']==PROFILE,
+            'unsupported native declaration fragment')
+        _need(doc['catalog']==encode(self.catalog_artifact),'fragment references another native catalog')
+        execution_art=decode(ProviderArtifact,doc['execution'])
+        _need(execution_art.schema=='scar.execution-model','native execution artifact schema differs')
+        raw=self.meter.artifact(execution_art,64_000_000);self.meter.charge(decoded=len(raw));self._execution_reads+=1
+        execution=execution_loads(raw.decode());_need(execution.snapshot==self.snapshot,
+            'native fragment and catalog snapshots differ')
         links=tuple(decode(NativeDeclarationOccurrence,v)for v in doc['occurrences'])
-        _need(len(links)==doc['operation_rows']and len({v.invocation for v in links})==len(links),'native fragment occurrence denominator differs')
-        rows=[];shard_no=None
+        _need(len(links)==doc['operation_rows']and len({v.invocation for v in links})==len(links),
+            'native fragment occurrence denominator differs')
+        rows=[];shard_no=None;self._source._row_signatures.clear()
         for link in links:
-            _need(link.execution==execution_art and link.snapshot==snapshot,'native occurrence belongs to another fragment')
-            original=link.native
+            _need(link.execution==execution_art and link.snapshot==self.snapshot,
+                'native occurrence belongs to another fragment')
             suffix=link.ports.declaration.locator.rsplit('/',1)[-1]
             _need(suffix.isdecimal(),'native port declaration shard selector differs')
-            no=int(suffix);_need(shard_no in(None,no),'fragment combines source shards');shard_no=no
-            candidates=[r for r in session._ports(no).rows if r.instance==original.instance]
-            _need(len(candidates)==1,'original native port row missing or ambiguous');row=candidates[0]
-            inst,definition,native,definition_loc=session._source(row)
-            _need(native==original and definition_loc==link.definition,'original native/definition locator differs')
-            interface=session._interface(row,definition);sig=interface['signature_id']
-            _need(interface_doc['interfaces'].get(sig)==interface['signature'],'interface differs from original observed ports/schema')
-            source={'reference_profile':PROFILE_V2,'native_scope':inst.id.value.rsplit(':eto:',1)[0],
-                'run':session.run.id.value,'pid':session.process.pid,'artifacts':{'eto':encode(session.eto)}}
-            scope=ProviderRunScope(session.run.id.value,session.process.pid,
-                f'published native source ordinals [{session.index.first_source_ordinal},{session.index.stop_source_ordinal}); completion unselected',
-                'retained ETO source records; no inferred execution total order')
-            expected,layouts=_build_program([interface],source,iface_art,execution_scope=scope,
-                interface_description='observed native boxed interfaces with optional pinned schema declarations')
-            expected_ops={r.id:r for r in expected.operations};actual_ops={r.id:r for r in program.operations}
-            expected_values={r.id:r for r in expected.values};actual_values={r.id:r for r in program.values}
-            actual_regions={r.id:r for r in program.regions};actual_bounds={r.id:r for r in program.native_boundaries}
-            _need(all(actual_ops.get(k)==v for k,v in expected_ops.items())
-                and all(actual_values.get(k)==v for k,v in expected_values.items())
-                and all(actual_regions.get(v.id)==v for v in expected.regions)
-                and all(actual_bounds.get(v.id)==v for v in expected.native_boundaries),
-                'selected canonical core does not match original native ABI')
-            session._layouts.update(layouts);session._row_signatures[row.source_ordinal]=sig;rows.append(row)
+            no=int(suffix);_need(no in self._shard_scope and shard_no in(None,no),
+                'fragment source shard is outside catalog scope or mixed');shard_no=no
+            row=self._row(no,link.native.instance)
+            _need(row is not None,'original native port row missing')
+            inst,definition,native,definition_loc=self._source._source(row)
+            _need(native==link.native and definition_loc==link.definition,
+                'original native/definition locator differs')
+            native_scope=inst.id.value.rsplit(':eto:',1)[0]
+            _need(self._source._native_scope in(None,native_scope),
+                'native catalog combines distinct original provider scopes')
+            self._source._native_scope=native_scope
+            interface=self._source._interface(row,definition);sig=interface['signature_id']
+            self._ensure_layout(row,definition,interface)
+            self._source._row_signatures[row.source_ordinal]=sig;rows.append(row)
         _need(shard_no is not None,'native fragment has no declared operators')
-        expected_model,sources=session._construct(rows,shard_no)
+        expected_model,sources=self._source._construct(rows,shard_no)
         _need(execution==expected_model,'native occurrences/inputs/world or unselected completion differ')
-        expected_links=tuple(NativeDeclarationOccurrence(n,d,p,execution_art,snapshot,o,bound,i,out,c)
-            for n,d,p,o,bound,i,out,c in sources)
+        expected_links=tuple(NativeDeclarationOccurrence(n,d,p,execution_art,self.snapshot,o,b,i,out,c)
+            for n,d,p,o,b,i,out,c in sources)
         _need(links==expected_links,'native source-to-core association differs')
         _need(doc['input_ports']==sum(len(l.inputs)for l in links)
             and doc['conditional_output_ports']==sum(len(l.output_sources)for l in links)
             and doc['completion_selected_count']==0 and doc['whole_model_established']is False,
             'native fragment scope/completion claims differ')
-        validation=validate(execution,program,prepared_snapshot=session._prepared,
-            artifact_bytes={iface_art.sha256:session._interface_bytes})
-        _need(validation.valid,'native declaration normal readback failed: '+str(validation.issues[:5]))
-        measurement=session.meter.finish();meter.finish()
-        return NativeDeclarationView(links,program,execution,validation,measurement)
+        validation=validate(execution,self.program,prepared_snapshot=self.prepared,
+            artifact_bytes={self.interface_artifact.sha256:self._source._interface_bytes})
+        _need(validation.valid and not validation.issues,
+            'native declaration normal readback failed: '+str(validation.issues[:5]))
+        self._source._row_signatures.clear()
+        measurement=self._measurement_snapshot()
+        measurement['validation_issue_count']=0
+        return NativeDeclarationView(links,self.program,execution,validation,measurement)
+
+    def read_fragment(self,artifact:ProviderArtifact):
+        self._check();_need(type(artifact)is ProviderArtifact and artifact.schema=='scar.native-declaration-fragment',
+            'typed native fragment required')
+        raw=self.meter.artifact(artifact,64_000_000);self.meter.charge(decoded=len(raw))
+        return self._read_document(artifact,strict_json(raw.decode()))
+
+
+def read_native_declaration_fragment(artifact:ProviderArtifact,*,budget=None):
+    """Compatibility single-fragment API backed by the shared-session reader."""
+    b=budget or NativeDeclarationBudget();b.__post_init__()
+    _need(type(artifact)is ProviderArtifact and artifact.schema=='scar.native-declaration-fragment',
+        'typed native fragment required')
+    # Read this fragment once to discover its catalog, then hand the same parsed
+    # document to the sole normal implementation used by multi-fragment callers.
+    meter=_Meter(b.max_input_bytes,b.max_seconds);raw=meter.artifact(artifact,64_000_000)
+    meter.charge(decoded=len(raw));doc=strict_json(raw.decode())
+    _need(set(doc)=={'schema','schema_version','profile','catalog','execution','occurrences','validation',
+        'operation_rows','input_ports','conditional_output_ports','completion_selected_count','whole_model_established'}
+        and doc['schema']==artifact.schema and doc['schema_version']==1 and doc['profile']==PROFILE,
+        'unsupported native declaration fragment')
+    catalog=decode(ProviderArtifact,doc['catalog'])
+    with NativeDeclarationReadSession(catalog,budget=b)as session:
+        session.meter.charge(stored=meter.stored,decoded=meter.decoded)
+        session.meter.started=min(session.meter.started,meter.started)
+        session.meter.inputs.extend(meter.inputs)
+        return session._read_document(artifact,doc)
