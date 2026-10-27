@@ -93,11 +93,16 @@ class SourceDependencySession(SourceReturnSession):
             receiver_port = getattr(selected, 'receiver', None)
             if receiver_port is None:
                 raise ValueError('selected call has no independent receiver port')
-            callee = selected.entry.callee
-            start = callee, selected.callee_body, receiver_port.formal_value, 0
+            selected_port = receiver_port
         else:
             port = ports[actual_index]
-            start = caller, selected.caller_body, port.actual_value, 0
+            selected_port = port
+        callee = getattr(selected, 'callee', None)
+        if callee is None:
+            callee = selected.entry.callee
+        # Begin at the selected formal, so the selected call's own boundary is
+        # part of the route as well as any higher caller layers.
+        start = callee, selected.callee_body, selected_port.formal_value, 0
         pending = deque([start])
         seen, nodes, routes, leaves, frontiers = set(), [], [], [], []
         limits, checked = set(), {binding_index}
@@ -186,13 +191,13 @@ class SourceDependencySession(SourceReturnSession):
                                        argument.actual_value, binding_index=number,
                                        actual_use=encode(argument.actual_use),
                                        conditions=encode(binding.conditions))
-                        receiver = getattr(binding, 'receiver', None)
-                        if receiver is not None and receiver.formal_value == value_id:
+                        receiver_projection = getattr(binding, 'receiver', None)
+                        if receiver_projection is not None and receiver_projection.formal_value == value_id:
                             matched = True
                             follow('BOUND_CALLABLE_RECEIVER_PROJECTION', upstream, binding.caller_body,
-                                   receiver.callable_value, binding_index=number,
-                                   callable_use=encode(receiver.callable_use),
-                                   projection=receiver.projection, observed_receiver=encode(receiver.observed),
+                                   receiver_projection.callable_value, binding_index=number,
+                                   callable_use=encode(receiver_projection.callable_use),
+                                   projection=receiver_projection.projection, observed_receiver=encode(receiver_projection.observed),
                                    is_reference_alias=False, conditions=encode(binding.conditions))
                     if not matched:
                         frontiers.append({'at': current, 'reason': 'ENTRY_NOT_BOUND_IN_SELECTED_OVERLAY'})
@@ -245,6 +250,7 @@ class SourceDependencySession(SourceReturnSession):
                 'model': encode(self._artifact),
                 'selector': {'binding_index': binding_index, 'actual_index': actual_index,
                              'receiver': receiver},
+                'selected_port': encode(selected_port),
                 'qualification': 'CONDITIONAL_ORIGINAL_SOURCE_INTERFACE_ROUTES',
                 'nodes': nodes, 'routes': routes, 'leaves': leaves, 'frontiers': frontiers,
                 'truncated': bool(pending) or bool(limits), 'pending_nodes': len(pending),

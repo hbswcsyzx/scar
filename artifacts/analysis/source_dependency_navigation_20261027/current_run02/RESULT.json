@@ -1,0 +1,57 @@
+{
+  "status": "PASS",
+  "model": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/analysis/source_call_bridge_20261027/attempt03/source_ports.json",
+  "model_sha256": "4a78314ff0c840f37a694150d44fc4f7adfd798d19d3206c5a09f2fc792afde0",
+  "source_sha256": {
+    "scar/analysis/source_dependencies.py": "1dac5bc58f22fdb7bf4b005ef0680d063c88f03187c27f388c79ba81cde5f89e",
+    "scar/analysis/source_return_bindings.py": "de88ee8d1d8db2f39226ae7a7d543e4208d583be80421f867fd068407f293fcf",
+    "scar/analysis/retained_source_call_ports.py": "ef89c5329e87b4dc282d5318623d06678289d4f34b7dd6e480478cb6fd938d10",
+    "scar/cli.py": "3a96cda2a42b06a2df76ec31195044c539e5102612067701e07e80ba33ca024b"
+  },
+  "results": {
+    "explicit": {
+      "nodes": 4,
+      "routes": 3,
+      "route_kinds": {
+        "ACTUAL_TO_FORMAL": 1,
+        "LOCAL_BINDING_READ": 1,
+        "LOCAL_BINDING_PAYLOAD": 1
+      },
+      "frontiers": {
+        "ENTRY_NOT_BOUND_IN_SELECTED_OVERLAY": 1
+      },
+      "caller_result_consumers": 2,
+      "truncated": false,
+      "costs": {
+        "stored_bytes": 9628859,
+        "decoded_bytes": 20420776,
+        "body_codec_reads": 2,
+        "body_index_builds": 2
+      }
+    },
+    "receiver": {
+      "nodes": 2,
+      "routes": 1,
+      "route_kinds": {
+        "BOUND_CALLABLE_RECEIVER_PROJECTION": 1
+      },
+      "frontiers": {
+        "CALL_COMPLETION_NOT_BOUND_IN_SELECTED_OVERLAY": 1
+      },
+      "caller_result_consumers": 1,
+      "truncated": false,
+      "costs": {
+        "stored_bytes": 9647490,
+        "decoded_bytes": 20631693,
+        "body_codec_reads": 3,
+        "body_index_builds": 3
+      }
+    }
+  },
+  "elapsed_seconds": 0.5973256700090133,
+  "peak_rss_kib": 131952,
+  "new_capture_or_target_execution": false,
+  "producer_inputs_replayed": false,
+  "whole_program_complete": false,
+  "transformation_authorized": false
+}

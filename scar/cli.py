@@ -22,6 +22,33 @@ from scar.planner import plan, plan_candidates, select_candidates
 from scar.trace.reader import load
 
 
+def _build_source_ports(args):
+    import gzip
+    from hashlib import sha256
+    from scar.analysis.retained_source_call_ports import build_retained_source_call_ports
+    out = Path(args.out).absolute()
+    report = Path(args.report_out).absolute() if args.report_out else Path(str(out) + '.report.json')
+    if out.exists() or out.is_symlink() or report.exists() or report.is_symlink() or out == report:
+        raise ValueError('source-port model and report require distinct fresh paths')
+    model = build_retained_source_call_ports(
+        source_report_path=args.source_report, bindings_path=args.bindings,
+        expected_report_sha256=args.source_report_sha256, expected_bindings_sha256=args.bindings_sha256,
+        trace_root=args.trace_root, pid=args.pid,
+        max_selected_calls=args.max_selected_calls, build_report_path=report)
+    payload = (json.dumps(model.to_dict(), sort_keys=True, ensure_ascii=False,
+                          separators=(',', ':'), allow_nan=False) + '\n').encode('utf-8')
+    if out.suffix == '.gz':
+        payload = gzip.compress(payload, mtime=0)
+    out.parent.mkdir(parents=True, exist_ok=True)
+    with out.open('xb') as stream:
+        stream.write(payload)
+    print(json.dumps({'summary': model.summary(),
+                      'artifact': {'uri': str(out), 'sha256': sha256(payload).hexdigest(),
+                                   'size_bytes': len(payload)},
+                      'build_report': str(report)}, ensure_ascii=False, indent=2, allow_nan=False))
+    return 0
+
+
 def _trace(args) -> int:
     out = Path(args.out).resolve()
     capture_plan_path = getattr(args, 'capture_plan', None)
@@ -453,6 +480,17 @@ def main(argv=None) -> int:
     source_store.add_argument("--max-seconds", type=int, default=180)
     from scar.store.source_fragments_cli import store_source_fragments_cli
     source_store.set_defaults(func=store_source_fragments_cli)
+    source_port_build = sub.add_parser("build-source-ports", help="connect retained qualified source bodies to same-capture call attempts without replaying the whole publication")
+    source_port_build.add_argument("--source-report", required=True)
+    source_port_build.add_argument("--source-report-sha256", required=True)
+    source_port_build.add_argument("--bindings", required=True)
+    source_port_build.add_argument("--bindings-sha256", required=True)
+    source_port_build.add_argument("--trace-root", required=True)
+    source_port_build.add_argument("--pid", type=int, help="capture process; inferred only when unique")
+    source_port_build.add_argument("--max-selected-calls", type=int, default=1, help="maximum successful bindings in this selected batch; does not claim full trace coverage")
+    source_port_build.add_argument("--out", required=True, help="fresh model output path")
+    source_port_build.add_argument("--report-out", help="fresh report path with selected and full-capture denominators")
+    source_port_build.set_defaults(func=_build_source_ports)
     call_ports = sub.add_parser("query-call-ports", help="follow retained qualified caller Use to callee formal ports")
     call_ports.add_argument("--model", required=True)
     call_ports.add_argument("--sha256", required=True, help="expected stored model SHA256")
@@ -474,6 +512,19 @@ def main(argv=None) -> int:
     source_returns.add_argument("--out", help="write a fresh result")
     from scar.analysis.source_return_bindings import query_source_returns_cli
     source_returns.set_defaults(func=query_source_returns_cli)
+    source_dependencies = sub.add_parser("query-source-dependencies", help="trace original argument routes across local bindings, CFG edges, recorded calls and conditional returns")
+    source_dependencies.add_argument("--model", required=True)
+    source_dependencies.add_argument("--sha256", required=True)
+    source_dependencies.add_argument("--binding-index", required=True, type=int)
+    source_dependency_input = source_dependencies.add_mutually_exclusive_group(required=True)
+    source_dependency_input.add_argument("--actual-index", type=int)
+    source_dependency_input.add_argument("--receiver", action="store_true", help="trace the independent bound-callable receiver projection")
+    source_dependencies.add_argument("--max-nodes", type=int, default=256)
+    source_dependencies.add_argument("--max-depth", type=int, default=64)
+    source_dependencies.add_argument("--max-routes", type=int, default=1024)
+    source_dependencies.add_argument("--out", help="write a fresh result")
+    from scar.analysis.source_dependencies import query_source_dependencies_cli
+    source_dependencies.set_defaults(func=query_source_dependencies_cli)
     native_inputs = sub.add_parser("query-native-inputs", help="read original native Tensor input metadata and canonical port references")
     native_inputs.add_argument("--manifest", required=True, help="published native input association manifest")
     native_inputs.add_argument("--sha256", required=True, help="expected manifest SHA256")

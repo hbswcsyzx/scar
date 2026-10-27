@@ -268,4 +268,41 @@ CPU V1 实际采集与 IO 读回已通过；V2 仅语法/导入/入口检查，�
 匹配。原归档永远只声明 `NOT_CHECKED`/非 loader-time 字节；新匹配见证独立保存。
 owner 按原 call-meta 明确区分 V1/V2 并核 source metadata 的同一 profile，不能混用。
 V1 的离线编译/只读读回已实测；V2 owner 适配尚待该版本的真实输入验证。
-自动 model-run/静态源码接线仍在开发，不能将这个 API 当作全链完成。
+正常 `model-run` 已自动接入归档源码 owner：seed、discovery、inventory、source layers
+共用同次 frame scan 和源码版本；归档缺失不会悄悄回读现场源码来补同次证据。
+未捕获的静态文件另标 `CURRENT_STATIC_UNEXECUTED_SOURCE_VERSION`。一次真实 CPU
+source bootstrap 已完成（2.898s、44 core operations、10 个现场源码 open=0），
+它未运行 native 导入或 invocation binding，不能当作全链完成。
+见 [实际报告](../artifacts/analysis/automatic_captured_source_20261027/REPORT.md)。
+
+## 按需接通跨层源码端口
+
+```bash
+python -B -m scar.cli build-source-ports \
+  --source-report BINDINGS/report.json --source-report-sha256 REPORT_SHA256 \
+  --bindings BINDINGS/bindings.json --bindings-sha256 BINDINGS_SHA256 \
+  --trace-root ORIGINAL_TRACE --max-selected-calls 8 --out fresh-ports.json.gz
+
+python -B -m scar.cli query-source-dependencies \
+  --model fresh-ports.json.gz --sha256 MODEL_SHA256 \
+  --binding-index 0 --actual-index 0 --out fresh-dependencies.json
+```
+
+构建入口针对保留的 v4 source binding，读取同一采集的 attempt/handshake，
+按需核对参与的原函数图及限定源码引用，不再要求重新读取全部发布 body，
+也不从 JSON 恢复活动 proof owner。`--max-selected-calls` 是成功 binding 的上限；
+选定批次与完整 trace 分母分开，不能把有限批次称为整个程序已连通。
+
+导航复用原 body index 和端口 overlay，沿局部绑定 payload/read、CFG 参数、
+实参/形参以及条件正常返回继续追溯，并列出返回结果的直接 consumer。
+`--receiver` 可代替 `--actual-index`，独立追溯方法接收者投影；它不占显式参数下标，
+也不把 callable 与 receiver 当作同一个引用。
+跨分支的边保留条件；异常 completion 不接到正常 return。
+任意计算、未知写入、缺失的调用绑定、resumable 输入以及预算终止均显式留下边界。
+节点数、路径深度和关系数有独立上限。输入模型本身的读取仍受原 transport 预算约束。
+这些是来源路径和依赖接口，不证明内容相等、具体分支选择、purity 或可移动性，
+不授权 cache/hoist。真实 LeWM 选中三层链已接通两处调用，正常返回与粗粒度状态端口
+查询通过；共享会话读取三个函数片段约 0.60 秒，未重读整批源码或原 trace。
+当前仅连接 2/100,550 个调用尝试，仍有未绑定入口和方法查找边界。
+见 [构建结果](../artifacts/analysis/source_call_bridge_20261027/REPORT.md)与
+[导航及 CLI 实测](../artifacts/analysis/source_dependency_navigation_20261027/REPORT.md)。

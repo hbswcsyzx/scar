@@ -1,0 +1,6 @@
+{
+  "status": "FAIL",
+  "reason": "receiver selector variable was shadowed by a SourceReceiverPort during traversal, causing JSON serialization failure",
+  "source_sha256": "e74e09ee635997238ee944be6840ee9eb003bd5bc79f9433fffa41e4b25390c6",
+  "new_capture_or_raw_replay": false
+}
