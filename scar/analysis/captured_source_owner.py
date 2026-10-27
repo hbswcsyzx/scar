@@ -236,7 +236,11 @@ class CapturedSourceOwner:
         return self._frontiers
 
     def close(self):
-        self.require_unchanged();self._closed=True;self._texts.clear()
+        try:
+            self.require_unchanged()
+        finally:
+            self._closed=True
+            self._texts.clear()
 
     def __enter__(self):
         self.require_unchanged();return self

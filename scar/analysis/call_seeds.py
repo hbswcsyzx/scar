@@ -160,9 +160,38 @@ class CallSourceSeedReport:
         return CallSourceSeedModel.from_dict(document["model"])
 
 
+def _captured_source_budget(call_budget, explicit=None):
+    """Bound archive membership separately from selected project analysis."""
+    from scar.analysis.captured_source_owner import CapturedSourceBudget
+    _require(type(call_budget) is CallEdgeBudget, 'typed normal frame budget required')
+    call_budget.__post_init__()
+    ceilings = {
+        'max_metadata_bytes': call_budget.max_raw_bytes,
+        'max_rows_bytes': call_budget.max_raw_bytes,
+        'max_row_bytes': min(call_budget.max_line_bytes, call_budget.max_raw_bytes),
+        # Each captured filename has a code member. max_source_files instead
+        # limits selected project contexts, not all observed archived files.
+        'max_files': call_budget.max_codes,
+        'max_source_bytes': call_budget.max_raw_bytes,
+        'max_codes': call_budget.max_codes,
+        'max_code_bytes': call_budget.max_raw_bytes,
+    }
+    if explicit is None:
+        return CapturedSourceBudget(**{
+            **ceilings,
+            'max_metadata_bytes': min(CapturedSourceBudget().max_metadata_bytes,
+                                      call_budget.max_raw_bytes),
+        })
+    _require(type(explicit) is CapturedSourceBudget, 'typed captured-source budget required')
+    explicit.__post_init__()
+    _require(all(getattr(explicit, name) <= limit for name, limit in ceilings.items()),
+             'captured-source budget exceeds independent frame reader ceilings')
+    return explicit
+
+
 class _CapturedSourceSession:
     """Live normal readers shared by one automatic source construction."""
-    def __init__(self, scanned, root, budget, coordinates=None):
+    def __init__(self, scanned, root, budget, coordinates=None, *, captured_source_budget=None):
         from scar.analysis.captured_source_owner import CapturedSourceOwner
         from scar.analysis.source_discovery import _root_has_initializer
         from scar.ir.program.providers import ProviderArtifact
@@ -182,6 +211,7 @@ class _CapturedSourceSession:
             self.membership=None
         metadata=decode(ProviderArtifact,candidates[0]['captured_sources'])
         self.owner=CapturedSourceOwner(scanned.directory,project_root=str(root),metadata=metadata,
+                                      budget=_captured_source_budget(budget,captured_source_budget),
                                       frame_scan=scanned,frame_budget=budget)
         self.root=Path(root);self.scanned=scanned;self.static_versions={};self.records={};self.codes={}
         _require(self.root.is_dir(),'CAPTURED_NAMESPACE_POLICY_UNAVAILABLE: namespace directory unavailable')
@@ -230,12 +260,23 @@ class _CapturedSourceSession:
             'current_static_files':[dict(r)for _,r in sorted(self.static_versions.items())],
             'frontiers':self.owner.frontiers(),'whole_model_established':False}
 
-    def close(self):self.require_unchanged();self.owner.close()
+    def close(self):
+        try:
+            self.require_unchanged()
+        except BaseException:
+            try:
+                self.owner.close()
+            except BaseException:
+                pass  # Preserve the first detected input/namespace failure.
+            raise
+        else:
+            self.owner.close()
 
 
 def read_call_source_seeds(
     trace, project_root, *, budget=CallEdgeBudget(),
     compilation_profile=CallCompilationProfile.RECORDED_FUTURE_FLAGS, coordinates=None,
+    captured_source_budget=None,
 ):
     """Read bounded collector records and resolve only actually entered codes.
 
@@ -245,17 +286,20 @@ def read_call_source_seeds(
     """
     return _read_call_source_seeds(
         trace, project_root, budget=budget, compilation_profile=compilation_profile,coordinates=coordinates,
+        captured_source_budget=captured_source_budget,
     )
 
 
 def _read_call_source_seeds(
     trace, project_root, *, budget, _source_workspace=None,
     compilation_profile=CallCompilationProfile.RECORDED_FUTURE_FLAGS,coordinates=None,
+    captured_source_budget=None,
 ):
     """Private composition shares locally prepared contexts, never report seeds."""
     _require(isinstance(budget, CallEdgeBudget), "source seeds require a typed replay budget")
     _require(type(compilation_profile) is CallCompilationProfile,
              "source seeds require a typed compilation profile")
+    captured_source_budget = _captured_source_budget(budget, captured_source_budget)
     root = Path(project_root).resolve()
     _require(root.is_dir(), "project root must be a directory")
     sink = _EnteredCodeSink()
@@ -275,7 +319,8 @@ def _read_call_source_seeds(
         else:
             descriptors[group.code] = captured
     from scar.trace.captured_sources import PROGRAM_PORTS_PROFILES
-    captured_session=(_CapturedSourceSession(scanned,root,budget,coordinates)
+    captured_session=(_CapturedSourceSession(scanned,root,budget,coordinates,
+                                           captured_source_budget=captured_source_budget)
         if any(meta.get('capture_profile')in PROGRAM_PORTS_PROFILES for meta in scanned.metadata)else None)
     if _source_workspace is not None:
         if captured_session is not None:_source_workspace.bind_captured_session(captured_session)
