@@ -21,13 +21,66 @@ from scar.ir.execution.resources import AllocationTarget
 from scar.ir.program.codec import loads as load_program
 from scar.ir.program.model import TerminatorKind
 from scar.ir.program.providers import ProviderArtifact
+from scar.ir.provenance import _WIDTHS
 from scar.ir.record_codec import decode, encode
-from scar.ir.v2.ids import StorageAllocationID
-from scar.ir.v2.values import StorageAllocation
+from scar.ir.v2.ids import StorageAllocationID, StorageRegionID
+from scar.ir.v2.values import StorageAllocation, StorageRegion
+from scar.ir.v2._validation import record_errors
 from scar.trace.native_import import _canonical_hash
 from scar.trace.native_input_index import (NAVIGATION_PROFILE, _query_regular_bytes,
                                           query_native_input_associations)
 from scar.trace.native_tensor_inputs import _json as strict_json
+
+
+_REGION_PROTOCOL = 'PINNED_TORCH_VALID_STRIDED_ALLOCATION_BOUNDS_V1'
+
+
+def _unique_region(association, allocation):
+    """A static implication over exact inputs; never an observed offset.
+
+    A valid nonempty strided Tensor addresses elements inside its allocation.
+    If its bounding span exhausts that allocation, no offset other than zero
+    can satisfy the bound. Empty/partial/unsupported geometry stays explicit.
+    """
+    metadata = association['metadata']
+    result = {'protocol': _REGION_PROTOCOL, 'status': 'OPEN', 'region': None,
+        'offset_observed': False, 'observed_storage_offset': metadata['storage_offset'],
+        'original_storage_offset_gap': metadata['storage_offset_gap'],
+        'basis': 'static protocol implication over original input metadata and allocation; not a new runtime observation',
+        'assumptions': ['valid Tensor at the original input observation',
+            'nonempty strided element addressing stays within this exact allocation epoch'],
+        'source': {'metadata': association['metadata_source'], 'epoch_birth': association['provider_epoch']['source']},
+        'record_is_stored': False, 'content_or_readiness_established': False}
+    dtype, shape, strides = metadata['dtype'], metadata['sizes'], metadata['strides']
+    width = _WIDTHS.get(dtype.removeprefix('torch.')) if type(dtype) is str and dtype.startswith('torch.') else None
+    if metadata['layout'] != 'torch.strided' or width is None:
+        return dict(result, reason='STRIDED_DTYPE_WIDTH_UNRESOLVED')
+    if (type(shape) is not list or type(strides) is not list or len(shape) != len(strides)
+            or len(shape) > 64 or any(type(n) is not int or n < 0 or n.bit_length() > 63
+                                    for n in shape + strides)):
+        return dict(result, reason='GEOMETRY_OUTSIDE_NONNEGATIVE_INT64_PROTOCOL')
+    if 0 in shape:
+        return dict(result, reason='EMPTY_TENSOR_HAS_NO_UNIQUE_OFFSET')
+    if type(allocation.nbytes) is not int or allocation.nbytes <= 0:
+        return dict(result, reason='ALLOCATION_EXTENT_UNRESOLVED')
+    span = width * (1 + sum((n - 1) * stride for n, stride in zip(shape, strides)))
+    result['constraints'] = {'element_bytes': width, 'bounding_span_bytes': span,
+        'allocation_extent_bytes': allocation.nbytes, 'offset_elements_minimum': 0,
+        'offset_elements_maximum': (allocation.nbytes - span) // width,
+        'storage_base_matches_allocation_base': metadata['storage_data_ptr'] == allocation.metadata['address']}
+    _need(span <= allocation.nbytes, 'input geometry contradicts valid Tensor allocation bounds protocol')
+    if span != allocation.nbytes:
+        return dict(result, reason='BOUNDING_SPAN_DOES_NOT_EXHAUST_ALLOCATION')
+    _need(result['constraints']['storage_base_matches_allocation_base'], 'derived region storage base differs')
+    scope = {'execution': association['canonical_parent']['execution'],
+        'native_input': association['native_input'], 'metadata': association['metadata_source'],
+        'allocation': encode(allocation.id), 'protocol': _REGION_PROTOCOL}
+    region = StorageRegion(StorageRegionID('native-input-derived-region:' + _canonical_hash(scope)),
+        allocation.id, 0, tuple(shape), tuple(strides), dtype, allocation.device)
+    _need(not record_errors(region, StorageRegion, 'derived input region'), 'invalid derived StorageRegion record')
+    return dict(result, status='DERIVED_UNIQUE_OFFSET_UNDER_VALID_TENSOR_PROTOCOL',
+        region=encode(region), reason='NONNEGATIVE_OFFSET_AND_SATURATED_BOUND_REQUIRE_ZERO',
+        derived_region_records=1)
 
 
 def _association(artifact, meter, row, path, native_input=None, execution=None):
@@ -150,18 +203,22 @@ def _canonical_input(association, meter, owned_execution=None):
 def query_native_input_allocation(navigation: ProviderArtifact, storage_index: ProviderArtifact, *,
         native_input: NativeInputRef | None = None, value_occurrence: ValueOccurrenceID | None = None,
         execution: ProviderArtifact | None = None, row: int | None = None,
-        path: tuple[int, ...] | None = None, max_input_bytes=256_000_000, max_seconds=60):
+        path: tuple[int, ...] | None = None, derive_region: bool = False,
+        max_input_bytes=256_000_000, max_seconds=60):
     """Same-profiler input metadata -> original scoped allocation, not contents.
 
     Without a selector, use the first ordinary canonical navigation record.
     A path selector requires its original row; no file/function-name rules or
     nearest-time/bare-pointer matching is used. An unavailable epoch remains a
     hard explicit boundary rather than a fabricated allocation or version.
+    derive_region opts into the versioned valid-Tensor-bounds static protocol;
+    it does not turn the provider's unobserved offset into observed metadata.
     """
     _need(type(navigation) is type(storage_index) is ProviderArtifact, 'typed original artifact receipts required')
     navigation.__post_init__(); storage_index.__post_init__()
     _need(navigation.schema == 'scar.native-input-port-navigation'
           and storage_index.schema == 'scar.tensor-storage-locator-index', 'original artifact schemas differ')
+    _need(type(derive_region) is bool, 'derive_region must be an explicit boolean option')
     _need(row is None or (type(row) is int and row >= 0), 'exact nonnegative native row required')
     _need(path is None or (row is not None and type(path) is tuple
           and all(type(i) is int and i >= 0 for i in path)), 'path requires a row and exact ordered integer tuple')
@@ -226,7 +283,7 @@ def query_native_input_allocation(navigation: ProviderArtifact, storage_index: P
           and allocation.metadata['address'] == metadata['storage_data_ptr'],
           'original allocation contradicts the actual native input epoch/birth/address')
     target = AllocationTarget(source.artifact, allocation.id)
-    return {'schema': 'scar.native-input-allocation-query', 'schema_version': 1,
+    result = {'schema': 'scar.native-input-allocation-query', 'schema_version': 1,
         'qualification': 'RETAINED_EXACT_NATIVE_INPUT_PROVIDER_EPOCH_ALLOCATION',
         'run': nav['run'], 'process': process, 'capture_model': index.document['capture_model'],
         'navigation': encode(navigation), 'storage_index': encode(storage_index),
@@ -244,5 +301,10 @@ def query_native_input_allocation(navigation: ProviderArtifact, storage_index: P
         'scope': 'exact observed input allocation only; no lifetime extent, region/range, object/content/version or actual state-write upgrade',
         'python_identity_established': False, 'logical_version_established': False,
         'materialization': None, 'actual_state_write_established': False, 'resource_ready_established': False,
-        'new_graph_nodes': 0, 'producer_inputs_replayed': False, 'whole_program_complete': False,
-        'measurements': meter.finish()}
+        'new_graph_nodes': 0, 'producer_inputs_replayed': False, 'whole_program_complete': False}
+    if derive_region:
+        result['geometry'] = _unique_region(association, allocation)
+        result['scope'] = ('exact observed input allocation plus explicitly conditional static geometry; '
+            'no observed offset, lifetime extent, contents/version, actual state-write or readiness upgrade')
+    result['measurements'] = meter.finish()
+    return result

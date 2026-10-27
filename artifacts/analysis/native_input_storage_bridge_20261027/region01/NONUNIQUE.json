@@ -1,0 +1,53 @@
+{
+  "normal_reference": {
+    "sha256": "585a11f3ba770d6e458f76c544bdf170201aa2918033edab8527e9fa97aaacf7",
+    "uri": "/home/zyf/AAA/scar-worktrees/native-input-storage-bridge/artifacts/analysis/native_input_storage_bridge_20261027/region01/QUERY.json"
+  },
+  "result": {
+    "assumptions": [
+      "valid Tensor at the original input observation",
+      "nonempty strided element addressing stays within this exact allocation epoch"
+    ],
+    "basis": "static protocol implication over original input metadata and allocation; not a new runtime observation",
+    "constraints": {
+      "allocation_extent_bytes": 8,
+      "bounding_span_bytes": 4,
+      "element_bytes": 4,
+      "offset_elements_maximum": 1,
+      "offset_elements_minimum": 0,
+      "storage_base_matches_allocation_base": true
+    },
+    "content_or_readiness_established": false,
+    "observed_storage_offset": null,
+    "offset_observed": false,
+    "original_storage_offset_gap": "not_exposed_by_installed_tensor_metadata_binding",
+    "protocol": "PINNED_TORCH_VALID_STRIDED_ALLOCATION_BOUNDS_V1",
+    "reason": "BOUNDING_SPAN_DOES_NOT_EXHAUST_ALLOCATION",
+    "record_is_stored": false,
+    "region": null,
+    "source": {
+      "epoch_birth": {
+        "artifact": {
+          "schema": "scar.tensor-physical-observation.v1",
+          "sha256": "852de7a088781f2c721dc8e06633fecf9f1c9f6034c54bfde6798f45c31c13c7",
+          "size_bytes": 147144696,
+          "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/lewm_joint_capture_20261026/capture/trace/tensor-physical.1578961.adfc0475ed50cb37e1c0453142b5fa65.jsonl"
+        },
+        "locator": "#/lines/7"
+      },
+      "metadata": {
+        "artifact": {
+          "schema": "scar.native-tensor-input-observation.v1",
+          "sha256": "c7ce4c8aeb6e7576645bdd33a654e6a4c9cca62a37efa42188a2e9fd619e9ed6",
+          "size_bytes": 1132062,
+          "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/lewm_joint_capture_20261026/capture/trace/native-tensor-inputs.1578961.adfc0475ed50cb37e1c0453142b5fa65/000000.jsonl"
+        },
+        "locator": "#/lines/21/inputs/slots/0/metadata"
+      }
+    },
+    "status": "OPEN"
+  },
+  "scope": "one hypothetical extent8B counterexample; no retained source/record modified or qualified",
+  "seconds": 0.0001849030377343297,
+  "status": "PASS"
+}
