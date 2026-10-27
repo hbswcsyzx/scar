@@ -560,18 +560,122 @@
       "sha256": "d127c95a2ff1b1d848288c83ef3cb3785f55f0f2c68d0918f3ef7d280b1de7c2",
       "size_bytes": 499687,
       "uri": "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/tensor_gpu_reference_query_20261026/locator-index/manifest.json"
+    },
+    {
+      "schema": "scar.native-capture-table-chunks",
+      "sha256": "c57875f849794a9b8cb3e2a4494b0f6aadf53d41de209f17b8f698be44b52e71",
+      "size_bytes": 1110,
+      "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/native_inputs_full_20261026/attempt05/native-input-connections/shards/000000/port-qualifications/manifest.json"
+    },
+    {
+      "schema": "scar.native-capture-row-chunk",
+      "sha256": "455b8631e9b9f9b9669569e8cc07eadfc061c4ff5963728ccb09ced1fbe1c27d",
+      "size_bytes": 1998789,
+      "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/native_inputs_full_20261026/attempt05/native-input-connections/shards/000000/port-qualifications/000000.jsonl"
     }
   ],
+  "port_geometry_receipt": {
+    "manifest": {
+      "schema": "scar.native-capture-table-chunks",
+      "sha256": "c57875f849794a9b8cb3e2a4494b0f6aadf53d41de209f17b8f698be44b52e71",
+      "size_bytes": 1110,
+      "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/native_inputs_full_20261026/attempt05/native-input-connections/shards/000000/port-qualifications/manifest.json"
+    },
+    "program_snapshot": {
+      "artifact": {
+        "schema": "scar.program-graph",
+        "sha256": "d70685d1521bf28527fa32beb319fa0f9d66db257b6df3ce2559f013141d5bc6",
+        "size_bytes": 5273398,
+        "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/native_inputs_full_20261026/attempt05/native-input-connections/program.json"
+      },
+      "schema_version": 8
+    },
+    "qualification": "RECEIPT_BOUND_ORIGINAL_ETO_PORT_GEOMETRY",
+    "read_seconds": 0.038638,
+    "rows": [
+      {
+        "direction": "inputs",
+        "native_path": [
+          0
+        ],
+        "native_shape": [],
+        "native_strides": [],
+        "native_tensor_tuple": [
+          58,
+          36,
+          0,
+          1,
+          4,
+          "cpu"
+        ],
+        "native_type": "Tensor(float)",
+        "position": 0,
+        "source": {
+          "artifact": {
+            "schema": "pytorch.execution-trace.v1",
+            "sha256": "11960422233619b68d4a42d5b699a34cb57349df04df0bc90b6fd5ef3d8e4684",
+            "size_bytes": 321365939,
+            "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/lewm_joint_capture_20261026/capture/trace/execution-trace.1578961.adfc0475ed50cb37e1c0453142b5fa65.json"
+          },
+          "locator": "#/nodes/50/inputs/values/0"
+        }
+      },
+      {
+        "direction": "outputs",
+        "native_path": [
+          0
+        ],
+        "native_shape": [],
+        "native_strides": [],
+        "native_tensor_tuple": [
+          58,
+          36,
+          0,
+          1,
+          4,
+          "cpu"
+        ],
+        "native_type": "Tensor(float)",
+        "position": 0,
+        "source": {
+          "artifact": {
+            "schema": "pytorch.execution-trace.v1",
+            "sha256": "11960422233619b68d4a42d5b699a34cb57349df04df0bc90b6fd5ef3d8e4684",
+            "size_bytes": 321365939,
+            "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/lewm_joint_capture_20261026/capture/trace/execution-trace.1578961.adfc0475ed50cb37e1c0453142b5fa65.json"
+          },
+          "locator": "#/nodes/50/outputs/values/0"
+        }
+      }
+    ],
+    "source_scan": "bounded retained port-qualification JSONL only; no raw ETO read",
+    "storage_id_semantics": "ETO observer pointer token; not profiler provider_allocation_id or allocation epoch",
+    "verified_chunks": [
+      {
+        "artifact": {
+          "schema": "scar.native-capture-row-chunk",
+          "sha256": "455b8631e9b9f9b9669569e8cc07eadfc061c4ff5963728ccb09ced1fbe1c27d",
+          "size_bytes": 1998789,
+          "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/native_inputs_full_20261026/attempt05/native-input-connections/shards/000000/port-qualifications/000000.jsonl"
+        },
+        "first_row_ordinal": 0,
+        "first_sequence": 4,
+        "last_sequence": 256,
+        "rows": 560
+      }
+    ]
+  },
   "qualification": "ONE_RETAINED_NATIVE_INSTANCE_NORMAL_COMPLETION_AND_SELF_INPUT_ALLOCATION_QUERY",
   "schema": "scar.native-normal-completion-actual",
   "schema_version": 1,
-  "scope": "original capture ca66..., ETO node63 at #/nodes/50, canonical sequence9; no raw ETO scan or new capture",
+  "scope": "original capture ca66..., ETO node63 at #/nodes/50, canonical sequence9; original program/execution and port-qualification receipts; no raw ETO scan or new capture",
   "self_input_allocation": {
     "allocation_id": {
       "kind": "alloc",
       "value": "tensor-physical:44b8f0b49dea1154bdc6896197ecb18e706f6b6f71ce9bc3975f5db7da0508dd:epoch:dc84edf549c8f021c2f0cbb57d0ef0f4352e33b2a78059f308eb02a4a27edfe1",
       "wire": "alloc:tensor-physical:44b8f0b49dea1154bdc6896197ecb18e706f6b6f71ce9bc3975f5db7da0508dd:epoch:dc84edf549c8f021c2f0cbb57d0ef0f4352e33b2a78059f308eb02a4a27edfe1"
     },
+    "companion_offset_gap": "not_exposed_by_installed_tensor_metadata_binding",
     "derived_region_result": {
       "assumptions": [
         "valid Tensor at the original input observation",
@@ -632,8 +736,10 @@
         "storage_base_matches_allocation_base": true
       },
       "content_or_readiness_established": false,
+      "observed_ETO_storage_offset": 0,
       "observed_storage_offset": null,
       "offset_observed": false,
+      "offset_observed_in_ETO": true,
       "original_storage_offset_gap": "not_exposed_by_installed_tensor_metadata_binding",
       "protocol": "PINNED_TORCH_VALID_STRIDED_ALLOCATION_BOUNDS_V1",
       "reason": "BOUNDING_SPAN_DOES_NOT_EXHAUST_ALLOCATION",
@@ -659,6 +765,8 @@
           "locator": "#/lines/53/inputs/slots/0/metadata"
         }
       },
+      "source_completeness_note": "storage_offset=null is specific to native-tensor-inputs companion metadata; same exact ETO input port row reports storage_offset=0",
+      "source_is_not_complete_ETO_geometry": true,
       "status": "OPEN"
     },
     "input_reference": {
@@ -676,8 +784,10 @@
     },
     "limits": [
       "allocation is observed for the original self input before the selected invocation",
-      "the ETO output carries no same-point physical geometry or allocation epoch",
-      "this input allocation is not attached to output solely from shared ObjectIdentity"
+      "the same exact ETO input locator supplies storage offset 0, scalar shape, empty strides, float dtype, and CPU device",
+      "the output port has the same observed ETO geometry and pointer tokens but no profiler allocation epoch was attached at output",
+      "ETO storage_id is a pointer token and is not the profiler provider allocation epoch ID",
+      "no output allocation, materialization, readiness, or content version is asserted"
     ],
     "nbytes": 640,
     "output_allocation_binding": "NOT_ESTABLISHED",
