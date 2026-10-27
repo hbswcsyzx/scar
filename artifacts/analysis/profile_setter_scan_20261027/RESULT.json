@@ -1,0 +1,26 @@
+{
+  "status": "SCOPED_METHOD_PASS",
+  "ordinary_C_callbacks_per_timing": 100000,
+  "rounds": [
+    {
+      "old": 0.171981596,
+      "new": 0.124322119
+    },
+    {
+      "new": 0.109627571,
+      "old": 0.166572668
+    },
+    {
+      "old": 0.166269441,
+      "new": 0.103721887
+    }
+  ],
+  "old_median": 0.166572668,
+  "new_median": 0.109627571,
+  "classifications_equal": true,
+  "checked_interfaces": 17,
+  "live_binding_replacement_checked": true,
+  "profile_hooks_installed": false,
+  "target_executed": false,
+  "whole_program_complete": false
+}

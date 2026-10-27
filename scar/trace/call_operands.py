@@ -387,12 +387,16 @@ class CallOperandObserver:
             return False
 
     def _profile_setter(self, callback):
-        setters = [sys.setprofile, sys.settrace, threading.setprofile, threading.settrace]
-        if hasattr(threading, "setprofile_all_threads"):
-            setters.append(threading.setprofile_all_threads)
-        if hasattr(threading, "settrace_all_threads"):
-            setters.append(threading.settrace_all_threads)
-        if any(callback is item for item in setters):
+        # This executes for every C call. Read current bindings (including
+        # replacements) without building a list and generator each time.
+        if (callback is sys.setprofile or callback is sys.settrace
+                or callback is threading.setprofile or callback is threading.settrace):
+            return "profile"
+        if (hasattr(threading, "setprofile_all_threads")
+                and callback is threading.setprofile_all_threads):
+            return "profile"
+        if (hasattr(threading, "settrace_all_threads")
+                and callback is threading.settrace_all_threads):
             return "profile"
         monitoring = getattr(sys, "monitoring", None)
         if monitoring is not None:
