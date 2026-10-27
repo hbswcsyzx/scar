@@ -187,10 +187,10 @@ def query_native_read(artifact, *, max_input_bytes=256_000_000, max_seconds=60):
     Uses the same qualified-reference graph convention as work(). The view
     creates no second operation/state graph and grants no content equality.
     """
-    from scar.analysis.native_tensor_reads import read_native_tensor_read
+    from scar.analysis.native_tensor_reads import read_native_tensor_read_context
     from scar.ir.execution.work import ActualCompletionState
 
-    record, values, costs = read_native_tensor_read(artifact,
+    record, values, costs, original_input = read_native_tensor_read_context(artifact,
         max_input_bytes=max_input_bytes, max_seconds=max_seconds)
     nodes, edges = {}, []
 
@@ -223,6 +223,15 @@ def query_native_read(artifact, *, max_input_bytes=256_000_000, max_seconds=60):
     edge('READ_IN_OPERATION', read, operation, 'CONDITIONAL_PROTOCOL')
     edge('READ_PAYLOAD_RESULT', read, result, 'CONDITIONAL_SYMBOLIC_DEFINITION')
     edge('INPUT_ALLOCATION_OBSERVATION', argument, allocation, 'SAME_CAPTURE_PROVIDER_EPOCH')
+    observed_region = original_input.get('observed_storage_region', {})
+    if observed_region.get('region') is not None:
+        region = node('STORAGE_REGION', {'projection': observed_region['region'],
+            'allocation': record.allocation,
+            'source': observed_region['geometry_source'],
+            'qualification_source': observed_region['qualification_source']})
+        edge('INPUT_VIEW_REGION', argument, region, observed_region['status'])
+        edge('REGION_ALLOCATION', region, allocation, 'SAME_CAPTURE_PROVIDER_EPOCH')
+        edge('CONDITIONAL_READ_REGION', read, region, 'CONDITIONAL_PROTOCOL_NOT_OBSERVED_ACCESS')
     edge('READ_INTERVAL', read, interval, 'ORIGINAL_INVOKE_TO_NORMAL_INTERFACE')
     state_use = occurrence('USE', record.read.effect.state_input)
     edge('STATE_INPUT_USE', state_use, operation, 'ORIGINAL_CANONICAL_STATE_INTERFACE')
@@ -240,6 +249,8 @@ def query_native_read(artifact, *, max_input_bytes=256_000_000, max_seconds=60):
         'process': encode(record.process), 'snapshot': encode(record.snapshot),
         'nodes': nodes, 'edges': edges,
         'read': encode(record), 'value_graph': values.to_dict(),
+        'observed_eto_geometry': original_input.get('observed_eto_geometry'),
+        'observed_storage_region': original_input.get('observed_storage_region'),
         'conditions': conditions, 'actor': encode(record.actor), 'costs': costs,
         'original_reference_is_data_identity': False, 'actual_memory_read_observed': False,
         'content_equality_established': False, 'readiness_established': False,

@@ -261,7 +261,8 @@ def plan_model_run(capture, *, budget=ModelRunBudget(), _metadata_reader=None):
             "budget": asdict(budget), "io": {"metadata_bytes_read": reader.read_bytes,
                                               "raw_bytes_read": 0},
             "budget_enforcement": _budget_contract(budget),
-            "stages": ["capture-import", "source-seeds", "source-inventory", "source-layers",
+            "stages": ["capture-import", "source-coordinates", "native-ports", "native-interfaces",
+                       "native-reference-flow", "native-operator-values", "source-seeds", "source-inventory", "source-layers",
                        "source-composition", "source-bindings", "workload-witness"],
             "open": ["target exec cwd and command entry are not established",
                      "collector execution-source version and continuous mutation exclusion are not established by G0",
@@ -572,6 +573,26 @@ def _execute_stages(capture, attempt, plan, result, budget):
             'operation_rows': port_index.operation_rows, 'input_ports': port_index.input_ports,
             'output_ports': port_index.output_ports, 'classification_counts': port_index.classification_counts,
             'whole_model_established': False}
+        from scar.analysis.native_declaration_interfaces import NativeDeclarationBudget
+        from scar.analysis.native_declaration_pipeline import publish_native_declaration_pipeline
+        from scar.ir.program.providers import ProviderArtifact
+        native_budget = NativeDeclarationBudget(
+            max_input_bytes=budget.max_raw_bytes, max_output_bytes=budget.max_output_bytes,
+            max_seconds=budget.max_seconds,
+            max_operations_per_fragment=min(256, budget.max_operations),
+            max_fragment_bytes=min(64_000_000, budget.max_record_bytes))
+        interfaces, interface_stage = stages.call('native-interfaces', publish_native_declaration_pipeline,
+            lambda stage: publish_native_declaration_pipeline(
+                ProviderArtifact(port_receipt['uri'], port_receipt['sha256'], port_receipt['size_bytes'],
+                                 'scar.native-boxed-port-index'),
+                Path(native_storage['manifest']).parent, coordinates.artifact,
+                stage / 'interfaces', budget=native_budget, progress=progress))
+        link('native_interfaces', Path(interfaces.uri))
+        native_interface_report = _decode(Path(interfaces.uri).read_bytes())
+        result['native_interface_summary'] = {key: native_interface_report[key] for key in (
+            'declared_operation_rows', 'processed_operation_rows', 'canonical_operation_occurrences',
+            'canonical_input_ports', 'conditional_output_ports', 'completion_selected_count',
+            'all_source_shards_processed', 'unprocessed_operation_rows', 'whole_model_established')}
         from scar.trace.native_reference_flow import build_native_reference_flow_publication
         reference_index, reference_stage = stages.call('native-reference-flow', build_native_reference_flow_publication,
             lambda stage: build_native_reference_flow_publication(port_stage / 'ports',

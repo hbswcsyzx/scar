@@ -1,0 +1,118 @@
+{
+  "command": [
+    "/home/zyf/miniconda3/envs/lewm/bin/python",
+    "-B",
+    "-m",
+    "scar.cli",
+    "query-native-read",
+    "--read",
+    "/home/zyf/AAA/scar-worktrees/native-tensor-reads/artifacts/analysis/native_tensor_reads_20261027/attempt02/read/read.json",
+    "--sha256",
+    "61f1ab043dbc8453210b69c7c18447460da09e825af3f94bb7f4c75ce97ca837",
+    "--out",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/analysis/native_read_region_query_20261027/graph.json"
+  ],
+  "exit_code": 0,
+  "elapsed_seconds": 4.24213755200617,
+  "nodes": 12,
+  "edges": 15,
+  "region": {
+    "status": "DERIVED_FROM_EXACT_ETO_INPUT_GEOMETRY_AND_OBSERVED_PROVIDER_EPOCH",
+    "region": {
+      "id": {
+        "kind": "region",
+        "value": "native-input-observed-region:ea8e364140f205821566f58961fb1b6caf12a86f5a6eaad202df1d8d389bd4f7",
+        "wire": "region:native-input-observed-region:ea8e364140f205821566f58961fb1b6caf12a86f5a6eaad202df1d8d389bd4f7"
+      },
+      "allocation": {
+        "kind": "alloc",
+        "value": "tensor-physical:44b8f0b49dea1154bdc6896197ecb18e706f6b6f71ce9bc3975f5db7da0508dd:epoch:0d2e6ab208290d258461f085d11a31b791b97b8a3f2c07c6183a679858493594",
+        "wire": "alloc:tensor-physical:44b8f0b49dea1154bdc6896197ecb18e706f6b6f71ce9bc3975f5db7da0508dd:epoch:0d2e6ab208290d258461f085d11a31b791b97b8a3f2c07c6183a679858493594"
+      },
+      "offset": 0,
+      "shape": [],
+      "strides": [],
+      "dtype": "torch.float32",
+      "device": "cpu",
+      "layout": "strided",
+      "metadata": {
+        "basis": "DERIVED_FROM_EXACT_ETO_INPUT_PORT_AND_PROVIDER_ALLOCATION",
+        "native_port_source": {
+          "artifact": {
+            "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/lewm_joint_capture_20261026/capture/trace/execution-trace.1578961.adfc0475ed50cb37e1c0453142b5fa65.json",
+            "sha256": "11960422233619b68d4a42d5b699a34cb57349df04df0bc90b6fd5ef3d8e4684",
+            "size_bytes": 321365939,
+            "schema": "pytorch.execution-trace.v1"
+          },
+          "locator": "#/nodes/50/inputs/values/1"
+        },
+        "qualification_source": {
+          "artifact": {
+            "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/native_inputs_full_20261026/attempt05/native-input-connections/shards/000000/port-qualifications/000000.jsonl",
+            "sha256": "455b8631e9b9f9b9669569e8cc07eadfc061c4ff5963728ccb09ced1fbe1c27d",
+            "size_bytes": 1998789,
+            "schema": "scar.native-capture-row-chunk"
+          },
+          "locator": "#/lines/11"
+        },
+        "provider_epoch_source": {
+          "artifact": {
+            "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/lewm_joint_capture_20261026/capture/trace/tensor-physical.1578961.adfc0475ed50cb37e1c0453142b5fa65.jsonl",
+            "sha256": "852de7a088781f2c721dc8e06633fecf9f1c9f6034c54bfde6798f45c31c13c7",
+            "size_bytes": 147144696,
+            "schema": "scar.tensor-physical-observation.v1"
+          },
+          "locator": "#/lines/13"
+        },
+        "observed_storage_offset": 0,
+        "eto_storage_id_is_not_allocation_id": true,
+        "contents_or_readiness_established": false
+      }
+    },
+    "allocation_source": {
+      "artifact": {
+        "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/native_inputs_full_20261026/native-import/native/bundle-partitions/values/allocations/000003.jsonl.gz",
+        "sha256": "cdab755272ca43ebc6a4992865f121a807f3b18cfdb27522000abfe58aac8192",
+        "size_bytes": 1202111,
+        "schema": "scar.bundle-record-chunk"
+      },
+      "locator": "#/lines/107/record"
+    },
+    "provider_epoch_source": {
+      "artifact": {
+        "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/lewm_joint_capture_20261026/capture/trace/tensor-physical.1578961.adfc0475ed50cb37e1c0453142b5fa65.jsonl",
+        "sha256": "852de7a088781f2c721dc8e06633fecf9f1c9f6034c54bfde6798f45c31c13c7",
+        "size_bytes": 147144696,
+        "schema": "scar.tensor-physical-observation.v1"
+      },
+      "locator": "#/lines/13"
+    },
+    "geometry_source": {
+      "artifact": {
+        "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/lewm_joint_capture_20261026/capture/trace/execution-trace.1578961.adfc0475ed50cb37e1c0453142b5fa65.json",
+        "sha256": "11960422233619b68d4a42d5b699a34cb57349df04df0bc90b6fd5ef3d8e4684",
+        "size_bytes": 321365939,
+        "schema": "pytorch.execution-trace.v1"
+      },
+      "locator": "#/nodes/50/inputs/values/1"
+    },
+    "qualification_source": {
+      "artifact": {
+        "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/native_inputs_full_20261026/attempt05/native-input-connections/shards/000000/port-qualifications/000000.jsonl",
+        "sha256": "455b8631e9b9f9b9669569e8cc07eadfc061c4ff5963728ccb09ced1fbe1c27d",
+        "size_bytes": 1998789,
+        "schema": "scar.native-capture-row-chunk"
+      },
+      "locator": "#/lines/11"
+    },
+    "stored_as_new_ir_record": false,
+    "contents_or_readiness_established": false
+  },
+  "costs": {
+    "stored_bytes": 38719306,
+    "decoded_bytes": 59078116,
+    "total_bytes": 97797422,
+    "elapsed_seconds": 3.171627247997094
+  },
+  "qualification": "CONDITIONAL_READ_RESULT"
+}

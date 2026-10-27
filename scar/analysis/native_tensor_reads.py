@@ -183,11 +183,12 @@ def build_native_tensor_read(navigation: ProviderArtifact, storage_index: Provid
     return _write(root/'read.json', doc, SCHEMA)
 
 
-def read_native_tensor_read(artifact: ProviderArtifact, *, max_input_bytes=256_000_000, max_seconds=60):
-    """Strict ordinary typed consumer; recheck original ports/state and guards.
+def read_native_tensor_read_context(artifact: ProviderArtifact, *, max_input_bytes=256_000_000, max_seconds=60):
+    """Strict consumer plus the same-query original input observations.
 
-    Returns (NativeTensorRead, ValueGraph, input_measurements). No live owner or successful-validation
-    cache is accepted from serialized data or exposed for later mutable reuse.
+    Returns (NativeTensorRead, ValueGraph, measurements, allocation_query).
+    The fourth item lets graph views use the already-read geometry and epoch;
+    it is not an owner or a reusable successful-validation capability.
     """
     _need(type(artifact) is ProviderArtifact and artifact.schema == SCHEMA, 'typed native read artifact required')
     meter = _Meter(max_input_bytes, max_seconds)
@@ -213,4 +214,11 @@ def read_native_tensor_read(artifact: ProviderArtifact, *, max_input_bytes=256_0
     actual = values_from_dict(_read_json(record.result.artifact, meter, 1_000_000))
     _need(_canonical(actual.to_dict()) == _canonical(graph.to_dict()), 'read-local ValueGraph differs')
     measurements = meter.finish()
-    return record, actual, measurements
+    return record, actual, measurements, view
+
+
+def read_native_tensor_read(artifact: ProviderArtifact, *, max_input_bytes=256_000_000, max_seconds=60):
+    """Recheck original ports/state/guards; retain the ordinary three-item API."""
+    record, graph, measurements, _ = read_native_tensor_read_context(artifact,
+        max_input_bytes=max_input_bytes, max_seconds=max_seconds)
+    return record, graph, measurements

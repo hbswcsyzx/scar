@@ -1,5 +1,28 @@
 # 从已有采集自动组织建模
 
+原生操作边界现可直接从已发布的完整端口分片构建，不依赖 Python dispatch 标记：
+
+```bash
+python -B -m scar.cli build-native-interfaces \
+  --ports-index PORTS/index.json --ports-sha256 EXPECTED_INDEX_SHA256 \
+  --bundle BUNDLE/manifest.json \
+  --coordinates capture-coordinates.json --coordinates-sha256 EXPECTED_COORDINATES_SHA256 \
+  --out fresh-native-interfaces
+```
+
+默认处理索引的全部分片；可用 `--shard N` 做有界子集处理，但始终保留原完整分母。
+共享一次接口目录，执行和来源关系分片独立保存；根 manifest 只保存引用和进度，
+不是另一套 IR。缺 FunctionSchema 的 CPU 操作用 observed boxed interface 表示，
+effects 保持 UNKNOWN；原输出来源与静态输出端口保留，未知完成不造 normal transfer。
+普通完整 `model-run` 在 native-ports 后自动调用同一生产路径。
+该接入代码已实现；这次实际执行的是上述公共命令的首个完整源分片，尚未实测
+完整 `model-run` 的新阶段组合或全部原生操作。
+
+真实首片 2,545 次操作、11,738 输入、1,753 条件输出，公共 CLI 17.393 秒；
+仍有228,273次原生操作未处理。记录见
+[结果](../artifacts/analysis/native_declaration_pipeline_20261027/RESULT.json)。
+这只增加规范边界；metadata/物理分配接线、内容和状态等关系仍分别完成，不代表全图。
+
 最新source-entry阶段默认自动选择已实现语法，无须逐个指定capability：
 
 ```bash

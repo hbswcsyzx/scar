@@ -1,0 +1,22 @@
+{
+  "exit_code": 0,
+  "elapsed_seconds": 17.392629815032706,
+  "whole_model_established": false,
+  "status": "PUBLISHED",
+  "declared_operation_rows": 230818,
+  "selected_operation_rows": 2545,
+  "processed_operation_rows": 2545,
+  "canonical_operation_occurrences": 2545,
+  "canonical_input_ports": 11738,
+  "conditional_output_ports": 1753,
+  "unprocessed_operation_rows": 228273,
+  "completion_selected_count": 0,
+  "all_source_shards_processed": false,
+  "input_measurements": {
+    "decoded_bytes": 44102799,
+    "elapsed_seconds": 16.247436436999124,
+    "stored_bytes": 7920343,
+    "total_bytes": 52023142
+  },
+  "output_bytes": 116719872
+}

@@ -1,5 +1,13 @@
 # 第一阶段交付：自动恢复整个程序及其资源
 
+2026-10-27 后继真实批量结果：`build-native-interfaces --shard 0` 已自动构建整个首片，
+2,545 operations / 11,738 inputs / 1,753 conditional outputs，CLI17.393秒。
+共享一次catalog，10个独立执行片段，总stored116,719,872B；没有normal transfer补造。
+原230,818操作分母保留，本门尚未处理228,273；不是355,314项metadata缺口全部解决，
+更不是整个程序完成。见[实际终态](../artifacts/analysis/native_declaration_pipeline_20261027/RESULT.json)。
+同轮公开原生读取视图也已连入自动几何投影的StorageRegion→原allocation：12节点/15边，
+仍保conditional read/content/ready限制；见[结果](../artifacts/analysis/native_read_region_query_20261027/RESULT.json)。
+
 2026-10-27 本轮验收要求：**在合理时间内自动采集并建立同一次 LeWM 运行的完整图，
 接通全部必要跨层依赖；之后再优化效率。当前未通过。** 主要断口是部分内部原生算子
 尚无规范调用/端口边界，以及引用、读取内容、版本和物理副本之间的连接不足。
