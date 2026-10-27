@@ -1,0 +1,32 @@
+{
+  "actual_checks": {
+    "checks": "snapshot frozen/no application reference held; child never flushes; incomplete/line/SHA/partial never publish",
+    "fork_child": 2134743,
+    "normal_rows": 10,
+    "thread_count": 2
+  },
+  "max_rss_kib": 47736,
+  "measurement": {
+    "accepted_marshal_payload_bytes": 4086782,
+    "inflight_highwater_bytes": 65286,
+    "journal_append_producer_seconds": 0.03480310895247385,
+    "journal_close_SHA_seconds": 0.020878372015431523,
+    "journal_raw_bytes": 4172887,
+    "json_producer_with_64KiB_buffer_seconds": 0.08045061799930409,
+    "json_raw_bytes": 4794560,
+    "measurement_scope": "single local prebuilt-row transport measurement; not threaded CPU acceleration or workload benchmark",
+    "no_target_or_collector_speedup_claim": true,
+    "offline_validation_JSON_seconds": 0.719296425988432,
+    "output_byte_for_byte_equal": true,
+    "preconstructed_identical_rows": true,
+    "queue_highwater_bytes": 3976684,
+    "rows": 5000
+  },
+  "runtime": "3.14.7 | packaged by conda-forge | (main, Sep  2 2026, 21:08:32) [GCC 15.3.0]",
+  "source_sha256": {
+    "scar/analysis/snapshot_journal.py": "f0a1f93f47a71aad70b59178393a616fb553f59135a50ef8cd5def1a2a8b7b49",
+    "scar/trace/snapshot_journal.py": "02d9ddee34a0970de475847368a7d3dcb2eec9c2d178fe70349f11828cb98c80"
+  },
+  "status": "PASS",
+  "wall_seconds": 0.9435937420348637
+}
