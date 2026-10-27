@@ -281,6 +281,7 @@ class CallOperandObserver:
         if self._event_attempts >= self.limits.max_events:
             self._dropped += 1
             self._stopped = True
+            self.recorder._stop_entries('OPERAND_EVENT_BUDGET')
             self._hook_epoch += 1
             return None
         self._event_attempts += 1
@@ -294,6 +295,7 @@ class CallOperandObserver:
                 if not self._deferred.append(row):
                     self._dropped += 1
                     self._stopped = True
+                    self.recorder._stop_entries('OPERAND_SNAPSHOT_TRANSPORT_REJECTED')
                     self._hook_epoch += 1
                     return None
                 self._bytes = self._deferred.accepted_bytes
@@ -302,6 +304,7 @@ class CallOperandObserver:
                 if len(data) > _MAX_EVENT_LINE_BYTES or self._bytes + len(data) > self.limits.max_bytes:
                     self._dropped += 1
                     self._stopped = True
+                    self.recorder._stop_entries('OPERAND_LINE_OR_BYTE_BUDGET')
                     self._hook_epoch += 1
                     return None
                 if len(self._buffer) + len(data) > self._buffer_limit:
@@ -327,6 +330,7 @@ class CallOperandObserver:
             return index
         except Exception as error:
             self._io_failed = self._stopped = True
+            self.recorder._stop_entries('OPERAND_WRITE_FAILURE')
             self._dropped += 1
             self._remember_error(error)
             return None
@@ -463,6 +467,8 @@ class CallOperandObserver:
                                                 monitoring=setter_kind == "monitoring")
                     return
                 if self._stopped or self._io_failed:
+                    if event == 'return':
+                        self._on_frame_exit(frame)  # Release only originally owned frame/masks.
                     return
                 if event == "call":
                     self._on_frame_enter(frame)
@@ -496,6 +502,7 @@ class CallOperandObserver:
         if self._event_attempts >= self.limits.max_events:
             self._dropped += 1
             self._stopped = True
+            self.recorder._stop_entries('OPERAND_EVENT_BUDGET')
             self._hook_epoch += 1
             return
         state = self._base_state(frame)
@@ -905,7 +912,7 @@ class CallOperandObserver:
         return sys.monitoring.DISABLE
 
     def _on_call(self, code, offset, callable_object, arg0):
-        if self.recorder._closing:
+        if self.recorder._closing or self.recorder._entry_stop_reason is not None:
             return
         writer = self.recorder._is_capture_writer
         if writer is not None and writer():
@@ -926,6 +933,7 @@ class CallOperandObserver:
                     if self._event_attempts >= self.limits.max_events:
                         self._dropped += 1
                         self._stopped = True
+                        self.recorder._stop_entries('OPERAND_EVENT_BUDGET')
                         self._hook_epoch += 1
                         return self._disabled_callback_result(code)
                     owner_info = self._event_owner(frame, code)
@@ -1165,6 +1173,12 @@ class CallOperandObserver:
             self.stop()
         if not self.recorder.closed:
             self._remember_error(RuntimeError("base frame recorder must close before operand metadata"))
+        materialized = self._deferred is None or self._deferred.result is not None
+        if not materialized:
+            self._io_failed = True
+            if len(self._errors) < 16:
+                self._errors.append('OPERAND_MATERIALIZATION_UNAVAILABLE')
+        legacy_inputs = ()
         try:
             manifest = tuple(self._manifest(path, family, self.pid) for path, family in (
                 (self.recorder.code_path, "codes"),
@@ -1195,26 +1209,40 @@ class CallOperandObserver:
                     position += written
             finally:
                 os.close(fd)
-            if self.python_targets is not None:
-                self.python_targets.legacy_inputs = (*manifest,
+            if self.python_targets is not None and materialized:
+                legacy_inputs = (*manifest,
                     CallTraceFile(str(self._event_path), "operands", self.pid,
                         (self._target_event_digest.hexdigest() if self._deferred is None
                          else self._deferred.result['output']['sha256']), self._bytes, self._event_count),
                     CallTraceFile(str(self._metadata_path), "operand-meta", self.pid,
                         hashlib.sha256(data).hexdigest(), len(data), data.count(b"\n")))
-                if self.stream_interfaces is not None:
-                    self.stream_interfaces.close(self.python_targets.legacy_inputs)
         except BaseException as error:
             self._remember_error(error)
             raise
         finally:
-            if self.environment_observer is not None:
-                self.environment_observer.close()
+            # A failed conversion has no verified operand hash/handoff. Keep
+            # its original error, publish failed metadata, and close every
+            # sibling even if another close raises (including process control).
             if self.python_targets is not None:
-                self.python_targets.close()
-            self._closed = True
-            if self.recorder.operand_observer is self:
-                self.recorder.operand_observer = None
+                self.python_targets.legacy_inputs = legacy_inputs
+            try:
+                if self.stream_interfaces is not None:
+                    if not legacy_inputs:
+                        self.stream_interfaces.errors.append('OPERAND_INPUT_HANDOFF_UNAVAILABLE')
+                        self.stream_interfaces.stopped = True
+                    self.stream_interfaces.close(legacy_inputs)
+            finally:
+                try:
+                    if self.environment_observer is not None:
+                        self.environment_observer.close()
+                finally:
+                    try:
+                        if self.python_targets is not None:
+                            self.python_targets.close()
+                    finally:
+                        self._closed = True
+                        if self.recorder.operand_observer is self:
+                            self.recorder.operand_observer = None
 
 
 def _environment_limit(name, default):

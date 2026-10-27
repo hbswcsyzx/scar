@@ -76,6 +76,8 @@ class CallEdgeRecorder:
         self.previous_profile_present = False
         self.closed = False
         self._closing = False
+        self._entry_stop_reason = None
+        self._skipped_entries = 0
         self.phase_events = None
         self.io_failed = False
         self.started = time.perf_counter_ns()
@@ -238,9 +240,12 @@ class CallEdgeRecorder:
         if fd in self._deferred:
             accepted = self._deferred[fd].append(row)
             self.bytes = sum(writer.accepted_bytes for writer in self._deferred.values())
+            if not accepted:
+                self._stop_entries('SNAPSHOT_TRANSPORT_REJECTED')
             return accepted
         data = (json.dumps(row,ensure_ascii=True,separators=(",",":"),allow_nan=False)+"\n").encode()
         if self.bytes + len(data) > self.limits['max_bytes']:
+            self._stop_entries('BYTE_BUDGET')
             return False
         try:
             buffer = self._buffers[fd]
@@ -255,6 +260,7 @@ class CallEdgeRecorder:
             # A partial JSON row is invalid evidence. Stop this recorder;
             # retries must not append uncharged fragments or fabricate rows.
             self.io_failed = True
+            self._stop_entries('WRITE_FAILURE')
             raise
         return True
 
@@ -286,11 +292,18 @@ class CallEdgeRecorder:
                 raise ValueError("code key changed while describing an immutable code object")
             if len(self.codes) >= self.limits['max_codes'] or not self._write(self.codes_fd,description):
                 self.codes_dropped += 1
+                self._stop_entries('CODE_OR_BYTE_BUDGET')
                 raise ValueError("call code/byte budget exceeded")
             self.codes.add(key)
             if self.source_archive is not None:
                 self.source_archive.observe(description)
         return key
+
+    def _stop_entries(self, reason):
+        # A running quota frontier is not shutdown: accepted frames may still
+        # return, and the prior profile hook must continue. Never emit a phase.
+        if self._entry_stop_reason is None:
+            self._entry_stop_reason = reason
 
     def _site(self, frame):
         self._code(frame.f_code)
@@ -380,6 +393,12 @@ class CallEdgeRecorder:
     def profile(self, frame, event, arg):
         if self.closed or self.io_failed or event not in ('call','return'):
             return
+        if event == 'call' and self._entry_stop_reason is not None:
+            if os.getpid() == self.pid:
+                with self.lock:
+                    self._skipped_entries += 1
+                    self.dropped += 1
+            return  # No entry can be published; do not walk an unretained stack.
         if self.program_ports and self._instrumentation_barrier(frame, event):
             return
         if frame.f_code.co_filename in self.observer_files:
@@ -408,10 +427,18 @@ class CallEdgeRecorder:
         with self.lock:
             try:
                 if event == 'call':
+                    if self._entry_stop_reason is not None:
+                        self._skipped_entries += 1
+                        self.dropped += 1
+                        return
                     caller = frame.f_back
                     if not self._observe_entry(frame):
                         return
-                    if self.index >= self.limits['max_events']:
+                    # Reserve one event for each already accepted frame's
+                    # return, including this potential new entry. Byte/IO
+                    # failure may still prevent a return and remains explicit.
+                    if self.index + self.unclosed_written + 2 > self.limits['max_events']:
+                        self._stop_entries('EVENT_BUDGET_RETURN_RESERVE')
                         self.dropped += 1
                         return
                     self.index += 1
@@ -545,6 +572,10 @@ class CallEdgeRecorder:
                 wall_ns=time.perf_counter_ns()-self.started,
                 scope='initial process and newly profiled threads; native calls/child processes/existing threads not complete',
                 reference_contents_observed=False,callable_environment_established=False)
+            if self._entry_stop_reason is not None:
+                metadata['recording_stop'] = dict(reason=self._entry_stop_reason,
+                    skipped_entries=self._skipped_entries, retained_returns_still_attempted=True,
+                    scope_complete=False, atexit_or_conversion_boundary=False)
             if self.lean_plan is not None:
                 from scar.ir.record_codec import encode
                 from scar.trace.lean_capture import PROFILE
