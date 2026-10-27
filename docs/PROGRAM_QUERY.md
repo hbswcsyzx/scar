@@ -36,6 +36,22 @@ python -m scar.cli query-program \
 输入/状态内容、逻辑版本、ready和跨调用数据流由各自原关系提供，不能从这条路径
 补猜。缺失关系保留在`gaps`；查询成功不表示全程序完成或允许优化。
 
+原生 Tensor 的条件读取也可在同一种只读视图中查询：
+
+```bash
+python -m scar.cli query-native-read \
+  --read PATH/read.json --sha256 EXPECTED_SHA256 --out read-view.json
+```
+
+普通 reader 重核原端口、调用状态、分配和协议来源。视图连接原引用 occurrence、
+Use、operation、状态输入/正常状态接口、allocation、读取区间和新符号值版本，
+复用原 artifact/ID，不复制成第二套权威图。`CONDITIONAL_READ_RESULT` 仍带全部条件；
+不把对象引用当数据身份，不宣称已观察实际读内存、内容相同或 value ready。
+当前 producer 只有固定 PyTorch 版本的 CPU `copy_` 源端口协议，不是全部算子的内容恢复。
+真实 LeWM 旧采集的一项读回为 11 节点/12 边、CLI 4.731 秒，累计读取93,799,844字节
+（stored+decoded），不是全程序建图时间。见
+[真实结果](../artifacts/analysis/native_read_query_20261027/RESULT.json)。
+
 ## 本次真实运行
 
 结果保存在`artifacts/experiments/program_query_20261026/`。使用既有LeWM的24,082个

@@ -1,0 +1,34 @@
+{
+  "command": [
+    "python",
+    "-m",
+    "scar.cli",
+    "query-native-read",
+    "--read",
+    "/home/zyf/AAA/scar-worktrees/native-tensor-reads/artifacts/analysis/native_tensor_reads_20261027/attempt02/read/read.json",
+    "--sha256",
+    "61f1ab043dbc8453210b69c7c18447460da09e825af3f94bb7f4c75ce97ca837",
+    "--out",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/analysis/native_read_query_20261027/graph.json"
+  ],
+  "exit_code": 0,
+  "elapsed_seconds": 4.731202271010261,
+  "input": {
+    "schema": "scar.native-tensor-read",
+    "sha256": "61f1ab043dbc8453210b69c7c18447460da09e825af3f94bb7f4c75ce97ca837",
+    "size_bytes": 11339,
+    "uri": "/home/zyf/AAA/scar-worktrees/native-tensor-reads/artifacts/analysis/native_tensor_reads_20261027/attempt02/read/read.json"
+  },
+  "nodes": 11,
+  "edges": 12,
+  "all_endpoints_present": true,
+  "connected_undirected": true,
+  "qualification": "CONDITIONAL_READ_RESULT",
+  "costs": {
+    "stored_bytes": 36720517,
+    "decoded_bytes": 57079327,
+    "total_bytes": 93799844,
+    "elapsed_seconds": 3.2407689450192265
+  },
+  "graph_bytes": 39282
+}

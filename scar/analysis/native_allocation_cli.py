@@ -46,3 +46,26 @@ def register_native_allocation_query(sub):
     parser.add_argument('--max-seconds', type=int, default=60)
     parser.add_argument('--out', help='fresh JSON query result; otherwise stdout')
     parser.set_defaults(func=query_native_allocation_cli)
+    read = sub.add_parser('query-native-read',
+        help='query original native input/use/state, conditional read, symbolic payload and allocation together')
+    read.add_argument('--read', required=True, help='closed native tensor read artifact')
+    read.add_argument('--sha256', required=True)
+    read.add_argument('--max-input-bytes', type=int, default=256_000_000)
+    read.add_argument('--max-seconds', type=int, default=60)
+    read.add_argument('--out', help='fresh graph view JSON; otherwise stdout')
+    read.set_defaults(func=query_native_read_cli)
+
+
+def query_native_read_cli(args):
+    from scar.analysis.program_query import query_native_read
+    from scar.ir.program.providers import ProviderArtifact
+    path = Path(args.read).absolute()
+    artifact = ProviderArtifact(str(path), args.sha256, path.stat().st_size, 'scar.native-tensor-read')
+    result = query_native_read(artifact, max_input_bytes=args.max_input_bytes, max_seconds=args.max_seconds)
+    payload = json.dumps(result, ensure_ascii=False, indent=2, allow_nan=False) + '\n'
+    if args.out:
+        with Path(args.out).open('x', encoding='utf-8') as stream:
+            stream.write(payload)
+    else:
+        print(payload, end='')
+    return 0

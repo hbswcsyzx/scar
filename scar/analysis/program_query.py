@@ -179,3 +179,68 @@ def query_os_topology_cli(args):
     else:
         print(payload, end="")
     return 0
+
+
+def query_native_read(artifact, *, max_input_bytes=256_000_000, max_seconds=60):
+    """View original input/use/state -> conditional read -> symbolic value.
+
+    Uses the same qualified-reference graph convention as work(). The view
+    creates no second operation/state graph and grants no content equality.
+    """
+    from scar.analysis.native_tensor_reads import read_native_tensor_read
+    from scar.ir.execution.work import ActualCompletionState
+
+    record, values, costs = read_native_tensor_read(artifact,
+        max_input_bytes=max_input_bytes, max_seconds=max_seconds)
+    nodes, edges = {}, []
+
+    def node(kind, reference):
+        key = kind + ':' + stable_key(reference)
+        value = {'kind': kind, 'reference': encode(reference)}
+        need(key not in nodes or nodes[key] == value, 'query reference key collision')
+        nodes[key] = value
+        return key
+
+    def edge(kind, source, target, qualification):
+        edges.append({'kind': kind, 'source': source, 'target': target,
+                      'qualification': qualification, 'origin': encode(artifact)})
+
+    def occurrence(kind, identity):
+        return node(kind, {'artifact': record.execution, 'id': identity})
+
+    port = occurrence('NATIVE_INPUT', record.read.basis)
+    argument = occurrence('VALUE_OCCURRENCE', record.input)
+    use = occurrence('USE', record.read.consumer.subject)
+    operation = occurrence('OPERATION_OCCURRENCE', record.read.effect.invocation)
+    read = node('CONTENT_READ', {'artifact': artifact, 'id': record.read.id})
+    result = node('VALUE_VERSION', record.result)
+    allocation = node('ALLOCATION', record.allocation)
+    interval = occurrence('EXECUTION_INTERVAL', record.read.consumer.interval)
+    edge('NATIVE_PORT_VALUE', port, argument, 'ORIGINAL_CANONICAL_INPUT')
+    edge('VALUE_USED_AT', argument, use, 'ORIGINAL_CANONICAL_USE')
+    edge('USE_IN_OPERATION', use, operation, 'ORIGINAL_CANONICAL_USE')
+    edge('READ_INPUT_REFERENCE', argument, read, 'CONDITIONAL_PROTOCOL')
+    edge('READ_IN_OPERATION', read, operation, 'CONDITIONAL_PROTOCOL')
+    edge('READ_PAYLOAD_RESULT', read, result, 'CONDITIONAL_SYMBOLIC_DEFINITION')
+    edge('INPUT_ALLOCATION_OBSERVATION', argument, allocation, 'SAME_CAPTURE_PROVIDER_EPOCH')
+    edge('READ_INTERVAL', read, interval, 'ORIGINAL_INVOKE_TO_NORMAL_INTERFACE')
+    state_use = occurrence('USE', record.read.effect.state_input)
+    edge('STATE_INPUT_USE', state_use, operation, 'ORIGINAL_CANONICAL_STATE_INTERFACE')
+    for state in record.read.support:
+        state_value = occurrence('VALUE_OCCURRENCE', state)
+        edge('STATE_SUPPORT', state_value, read, 'ORIGINAL_STATE_SUPPORT_WITH_CONDITIONAL_READ')
+        edge('VALUE_USED_AT', state_value, state_use, 'ORIGINAL_CANONICAL_STATE_INTERFACE')
+    if type(record.read.effect.post) is ActualCompletionState:
+        state_after = occurrence('VALUE_OCCURRENCE', record.read.effect.post.formal)
+        edge('NORMAL_STATE_INTERFACE', operation, state_after,
+             'STATE_TRANSPORT_ONLY_NOT_HEAP_WRITE_PROOF')
+    conditions = [condition.value for condition in record.conditions]
+    return {'schema': 'scar.program-query', 'schema_version': 1, 'query': 'NATIVE_READ',
+        'qualification': 'CONDITIONAL_READ_RESULT', 'run': encode(record.run),
+        'process': encode(record.process), 'snapshot': encode(record.snapshot),
+        'nodes': nodes, 'edges': edges,
+        'read': encode(record), 'value_graph': values.to_dict(),
+        'conditions': conditions, 'actor': encode(record.actor), 'costs': costs,
+        'original_reference_is_data_identity': False, 'actual_memory_read_observed': False,
+        'content_equality_established': False, 'readiness_established': False,
+        'whole_program_complete': False}
