@@ -7,12 +7,13 @@ replayed or inferred here.
 """
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 import gzip
 from hashlib import sha256
 from io import BytesIO
 import json
 from pathlib import Path
+import re
 
 from scar.ir.program.codec import loads as load_graph
 from scar.ir.program.drivers import NormalResultPort
@@ -159,6 +160,57 @@ class SourceReturnSession:
                   and receipt['decoded_bytes'] == namespace.graph.decoded_bytes
                   and receipt['representation'] == a.schema,
                   'composition checkpoint declaration differs from the original qualified body')
+        elif artifact.schema == 'scar.source-invocation-bindings/4':
+            # Retained v4 source-invocation rows are a static source/body
+            # association. They do not recreate the producer's former proof
+            # owner or promote the row to a fresh invocation binding.
+            match = re.fullmatch(r"#/bindings/(0|[1-9][0-9]*)/body/canonical_locator",
+                                declaration.locator)
+            _need(match is not None, 'v4 source-body declaration must select one original group locator')
+            ordinal = int(match.group(1))
+            document = self._files[key]
+            _need(type(document) is dict and document.get('schema') == 'scar.source-invocation-bindings'
+                  and type(document.get('schema_version')) is int and document['schema_version'] == 4
+                  and document.get('transformation_authorized') is False,
+                  'v4 source-invocation declaration header differs')
+            rows = document.get('bindings')
+            _need(type(rows) is list and ordinal < len(rows), 'v4 source-invocation group is absent')
+            row = rows[ordinal]
+            _need(row.get('binding_index') == ordinal
+                  and row.get('status') == 'BODY_LINKED_REUSED_WITNESS'
+                  and row.get('complete_descriptor_match') is True
+                  and type(row.get('body')) is dict,
+                  'v4 group is not an original qualified body association')
+            original_locator = replace(namespace.graph, declaration=None)
+            retained_locator = row['body'].get('canonical_locator')
+            exact_typed_locator = retained_locator == encode(original_locator)
+            legacy_locator = (type(retained_locator) is dict
+                and set(retained_locator) == {'artifact', 'namespace', 'pointer'}
+                and type(retained_locator.get('artifact')) is dict
+                and set(retained_locator['artifact']) == {
+                    'uri', 'physical_sha256', 'physical_bytes', 'decoded_sha256',
+                    'decoded_bytes', 'representation'
+                })
+            if legacy_locator:
+                a = retained_locator['artifact']
+                legacy_locator = (retained_locator.get('pointer') == original_locator.pointer
+                    and retained_locator.get('namespace') == namespace.original_namespace()
+                    and a.get('uri') == original_locator.artifact.uri
+                    and a.get('physical_sha256') == original_locator.artifact.sha256
+                    and a.get('physical_bytes') == original_locator.artifact.size_bytes
+                    and a.get('decoded_sha256') == original_locator.decoded_sha256
+                    and a.get('decoded_bytes') == original_locator.decoded_bytes
+                    and a.get('representation') == original_locator.artifact.schema)
+            _need((exact_typed_locator or legacy_locator)
+                  and row['body'].get('namespace') == namespace.original_namespace(),
+                  'v4 group declares a different original source-program/checkpoint namespace')
+            from scar.ir.program.source_references import SourceDefinitionReference
+            original = decode(SourceDefinitionReference, row['definition'])
+            _need(original.definition == namespace.definition and original.source == namespace.source
+                  and row['body']['namespace']['body']['entry'] == namespace.entry
+                  and row['body']['namespace']['artifact']['uri'] == a.uri
+                  and row['body']['namespace']['artifact']['decoded_sha256'] == namespace.graph.decoded_sha256,
+                  'v4 source definition/body locator differs from the qualified namespace')
         else:
             _need(type(value) is dict and value.get('uri') == a.uri
                   and value.get('physical_sha256') == a.sha256 and value.get('physical_bytes') == a.size_bytes
