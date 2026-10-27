@@ -85,8 +85,8 @@ class _StoredWriter:
         self.stream.flush()
 
 
-def _write_view(directory, document, decoded_limit, stored_limit):
-    partial, final = directory / 'view.partial.json.gz', directory / 'view.json.gz'
+def _write_view(directory, document, decoded_limit, stored_limit, *, name='view'):
+    partial, final = directory / (name + '.partial.json.gz'), directory / (name + '.json.gz')
     decoded, digest = 0, sha256()
     with partial.open('xb') as raw:
         stored = _StoredWriter(raw, stored_limit)
@@ -103,6 +103,39 @@ def _write_view(directory, document, decoded_limit, stored_limit):
             'decoded_sha256': digest.hexdigest(), 'decoded_bytes': decoded, 'representation': 'gzip-json-mtime0-v1'}
 
 
+def _write_queries(directory, document, decoded_limit, stored_limit):
+    """Keep the existing query JSON, changing only its storage granularity."""
+    # Reserve the query index (1 MB), worker terminal (1 MB) and started
+    # metadata (100 KB) inside the unchanged whole-shard stored ceiling.
+    remaining = stored_limit - 2_100_000
+    _need(remaining > 0, 'shard stored budget cannot reserve query metadata')
+    header = {key: value for key, value in document.items() if key != 'queries'}
+    records, decoded, stored = [], 0, 0
+    for ordinal, query in enumerate(document['queries']):
+        selector = {key: value for key, value in query.items() if key != 'view'}
+        try:
+            receipt = _write_view(directory, query, decoded_limit, remaining,
+                                  name=f'query-{ordinal:06d}')
+        except BaseException as error:
+            _write_document(directory / 'query-index.partial.json', {
+                'view_layout': 'queries', 'status': 'FAILED_PARTIAL_RETAINED',
+                'batch_header': header, 'queries': records,
+                'failed_query_index': ordinal, 'failed_query_selector': selector,
+                'failure': {'type': type(error).__name__, 'detail': str(error)}})
+            raise ValueError(f'query {ordinal} {selector} failed: {error}') from error
+        records.append({'query_index': ordinal, 'selector': selector, 'output': receipt})
+        stored += receipt['stored_bytes']
+        decoded += receipt['decoded_bytes']
+        remaining -= receipt['stored_bytes']
+    receipt = _write_document(directory / 'query-index.json', {
+        'view_layout': 'queries', 'status': 'QUERIED_WITH_OPEN',
+        'batch_header': header, 'queries': records,
+        'max_query_decoded_bytes': decoded_limit, 'max_shard_stored_bytes': stored_limit})
+    return {**receipt, 'view_layout': 'queries', 'representation': 'canonical-json',
+            'query_count': len(records), 'query_payload_stored_bytes': stored,
+            'query_payload_decoded_bytes': decoded}
+
+
 def _run_shard(task):
     """A spawn-safe top-level entry receiving paths, receipts and ceilings only."""
     from scar.analysis.retained_source_call_publication import (
@@ -114,7 +147,8 @@ def _run_shard(task):
     started = {'shard_index': task['shard_index'], 'worker_pid': os.getpid(),
                'parent_pid': os.getppid(), 'start_method': multiprocessing.get_start_method(),
                'manifest_path': task['manifest_path'], 'manifest_sha256': task['manifest_sha256']}
-    _write_document(directory / 'started.json', started)
+    _write_document(directory / 'started.json', started,
+                    100_000 if task['view_layout'] == 'queries' else 1_000_000)
     record = dict(started)
     try:
         _check_implementation(task['implementation'])
@@ -123,6 +157,8 @@ def _run_shard(task):
         shard = read_retained_source_call_shard(index, task['shard_index'],
                     max_stored_bytes=task['return_budget']['max_model_stored_bytes'],
                     max_decoded_bytes=task['return_budget']['max_model_decoded_bytes'])
+        record.update(view_layout=task['view_layout'], candidate_scope=shard.candidate_scope,
+                      namespace_refs=list(shard.namespace_refs))
         budget = SourceReturnBudget(**task['return_budget'])
         session = SourceDependencyBatchSession(shard.path, expected_sha256=shard.stored_sha256, budget=budget)
         # Both ordinary readers must refer to exactly the same closed model.
@@ -133,12 +169,15 @@ def _run_shard(task):
             'candidate_scope': shard.candidate_scope, 'namespace_refs': list(shard.namespace_refs),
             'cross_shard_scope': index.manifest.get('cross_shard_scope'),
             'cross_shard_paths_selected': False}
-        output = _write_view(directory, view, task['max_view_decoded_bytes'], task['max_view_stored_bytes'])
+        output = (_write_queries(directory, view, task['max_view_decoded_bytes'], task['max_view_stored_bytes'])
+                  if task['view_layout'] == 'queries' else
+                  _write_view(directory, view, task['max_view_decoded_bytes'], task['max_view_stored_bytes']))
         _check_implementation(task['implementation'])
         read_retained_source_call_publication(task['manifest_path'],
             expected_manifest_sha256=task['manifest_sha256'], max_bytes=task['max_manifest_bytes'])
         session._check()
-        record.update(status='QUERIED_WITH_OPEN', output=output, candidate_scope=shard.candidate_scope,
+        record.update(status='QUERIED_WITH_OPEN', output=output, view_layout=task['view_layout'],
+            candidate_scope=shard.candidate_scope,
             namespace_refs=list(shard.namespace_refs), query_count=len(view['queries']),
             query_truncated=view['truncated'], body_query_costs=view['costs'],
             normal_metadata_reads={'manifest_reads': 2, 'manifest_bytes_per_read': Path(index.manifest_path).stat().st_size,
@@ -155,6 +194,9 @@ def _run_shard(task):
     terminal = _write_document(directory / 'result.json', record)
     record['terminal'] = terminal
     record['output_stored_bytes'] = sum(p.stat().st_size for p in directory.iterdir() if p.is_file())
+    if task['view_layout'] == 'queries':
+        _need(record['output_stored_bytes'] <= task['max_view_stored_bytes'],
+              'whole shard stored byte ceiling exceeded')
     return record
 
 
@@ -163,7 +205,7 @@ def build_source_dependency_workers(publication_path, output_dir, *, expected_ma
         max_bindings=64, max_queries=512, max_nodes=128, max_depth=32, max_routes=512,
         max_shards=4096, max_manifest_bytes=32_000_000, max_view_decoded_bytes=64_000_000,
         max_view_stored_bytes=64_000_000, max_total_output_bytes=1_000_000_000,
-        max_index_bytes=16_000_000, progress=None):
+        max_index_bytes=16_000_000, progress=None, view_layout='single', shard_indices=None):
     """Read closed metadata, then independently query every published model shard.
 
     Failed/missing shard results are retained, never automatically retried. A
@@ -185,9 +227,20 @@ def build_source_dependency_workers(publication_path, output_dir, *, expected_ma
     _need(type(return_budget) is SourceReturnBudget, 'typed independent body reader budget required')
     return_budget.__post_init__()
     _need(progress is None or callable(progress), 'progress must be a metadata callback')
+    _need(type(view_layout) is str and view_layout in ('single', 'queries'), 'unsupported view layout')
     index = read_retained_source_call_publication(publication_path,
         expected_manifest_sha256=expected_manifest_sha256, max_bytes=max_manifest_bytes)
     _need(index.publication_closed and len(index.shard_refs) <= max_shards, 'closed publication/shard ceiling required')
+    if shard_indices is None:
+        selected_refs = index.shard_refs
+    else:
+        _need(type(shard_indices) is tuple
+              and all(type(i) is int and 0 <= i < len(index.shard_refs) for i in shard_indices)
+              and len(set(shard_indices)) == len(shard_indices),
+              'selector needs distinct original shard ordinals')
+        selected_refs = tuple(index.shard_refs[i] for i in shard_indices)
+    selected_indices = {ref.shard_index for ref in selected_refs}
+    unselected_refs = tuple(ref for ref in index.shard_refs if ref.shard_index not in selected_indices)
     root = Path(output_dir).absolute()
     _need(root == root.resolve() and not root.exists() and not root.is_symlink(), 'fresh canonical output directory required')
     root.mkdir(parents=True)
@@ -196,13 +249,15 @@ def build_source_dependency_workers(publication_path, output_dir, *, expected_ma
     parent_pid, start = os.getpid(), time.monotonic()
     # Each inflight worker gets a disjoint reservation. The metadata reserve
     # includes its terminal and the final index, not an unbounded success log.
-    per_shard_reserve = max_view_stored_bytes + 1_100_000
+    per_shard_reserve = (max_view_stored_bytes if view_layout == 'queries'
+                         else max_view_stored_bytes + 1_100_000)
     _need(max_total_output_bytes > max_index_bytes + per_shard_reserve, 'output budget cannot reserve one shard')
     query_limits = dict(max_bindings=max_bindings, max_queries=max_queries, max_nodes=max_nodes,
                         max_depth=max_depth, max_routes=max_routes)
     _write_document(root / 'started.json', {'manifest_path': index.manifest_path,
         'manifest_sha256': index.manifest_sha256, 'parent_pid': parent_pid, 'max_workers': max_workers,
         'max_inflight': max_inflight, 'start_method': 'spawn', 'shards': len(index.shard_refs),
+        'view_layout': view_layout, 'selected_shard_indices': [ref.shard_index for ref in selected_refs],
         'query_limits': query_limits, 'return_budget': asdict(return_budget), 'implementation': implementation})
     results, pending, cursor, pool_failure = {}, {}, 0, None
     completed_output, reserved_index = (root / 'started.json').stat().st_size, max_index_bytes
@@ -210,16 +265,17 @@ def build_source_dependency_workers(publication_path, output_dir, *, expected_ma
         if progress is not None:
             progress(value)
     with ProcessPoolExecutor(max_workers=max_workers, mp_context=multiprocessing.get_context('spawn')) as executor:
-        while cursor < len(index.shard_refs) or pending:
-            while pool_failure is None and cursor < len(index.shard_refs) and len(pending) < max_inflight:
+        while cursor < len(selected_refs) or pending:
+            while pool_failure is None and cursor < len(selected_refs) and len(pending) < max_inflight:
                 if completed_output + reserved_index + (len(pending) + 1) * per_shard_reserve > max_total_output_bytes:
                     break
-                ref = index.shard_refs[cursor]
+                ref = selected_refs[cursor]
                 task = {'manifest_path': index.manifest_path, 'manifest_sha256': index.manifest_sha256,
                     'shard_index': ref.shard_index, 'directory': str(root / 'shards' / f'{ref.shard_index:06d}'),
                     'return_budget': asdict(return_budget), 'query_limits': query_limits,
                     'max_manifest_bytes': max_manifest_bytes, 'max_view_decoded_bytes': max_view_decoded_bytes,
-                    'max_view_stored_bytes': max_view_stored_bytes, 'implementation': implementation}
+                    'max_view_stored_bytes': max_view_stored_bytes, 'implementation': implementation,
+                    'view_layout': view_layout}
                 try:
                     future = executor.submit(_run_shard, task)
                 except BaseException as error:
@@ -249,14 +305,14 @@ def build_source_dependency_workers(publication_path, output_dir, *, expected_ma
                 completed_output += record['output_stored_bytes']
                 emit({'phase': 'SHARD_TERMINAL', 'shard_index': ordinal, 'status': record['status'],
                       'worker_pid': record.get('worker_pid'), 'finished_shards': len(results)})
-    for ref in index.shard_refs[cursor:]:
+    for ref in selected_refs[cursor:]:
         results[ref.shard_index] = {'shard_index': ref.shard_index,
             'status': 'NOT_ATTEMPTED_PROCESS_POOL_FAILURE' if pool_failure else 'NOT_ATTEMPTED_OUTPUT_BUDGET',
             'candidate_scope': ref.candidate_scope, 'failure': pool_failure}
     _check_implementation(implementation)
     read_retained_source_call_publication(index.manifest_path,
         expected_manifest_sha256=index.manifest_sha256, max_bytes=max_manifest_bytes)
-    ordered = [results[ref.shard_index] for ref in index.shard_refs]
+    ordered = [results[ref.shard_index] for ref in selected_refs]
     report = {'schema': 'scar.source-dependency-worker-publication', 'schema_version': 1,
         'status': ('NO_MODEL_SHARDS_WITH_OPEN' if not ordered else
                    'QUERIED_WITH_OPEN' if all(r['status'] == 'QUERIED_WITH_OPEN' for r in ordered) else 'PARTIAL_WITH_OPEN'),
@@ -264,6 +320,10 @@ def build_source_dependency_workers(publication_path, output_dir, *, expected_ma
         'expected_manifest_sha256_supplied': expected_manifest_sha256 is not None,
         'parent_pid': parent_pid, 'worker_pids': sorted({r['worker_pid'] for r in ordered if 'worker_pid' in r}),
         'max_workers': max_workers, 'max_inflight': max_inflight, 'start_method': 'spawn',
+        'view_layout': view_layout, 'selected_shard_indices': [ref.shard_index for ref in selected_refs],
+        'unselected_shards': [{'shard_index': ref.shard_index, 'status': 'NOT_SELECTED_THIS_RUN',
+                               'candidate_scope': ref.candidate_scope} for ref in unselected_refs],
+        'all_publication_shards_selected': not unselected_refs,
         'capture_denominators': index.manifest.get('capture_denominators'),
         'candidate_funnel': index.manifest.get('candidate_funnel'), 'candidate_scope': index.manifest.get('candidate_scope'),
         'publication_totals': index.manifest.get('totals'), 'windows': index.manifest.get('windows'),

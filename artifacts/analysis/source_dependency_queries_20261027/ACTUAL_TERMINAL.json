@@ -1,0 +1,49 @@
+{
+  "actual_exit_code": 0,
+  "gnu_wall_seconds": 119.09,
+  "navigation_truncated_shards": [
+    3,
+    4,
+    61,
+    62,
+    63,
+    64,
+    65,
+    66,
+    67,
+    68,
+    69,
+    70,
+    71,
+    72,
+    73,
+    74,
+    75,
+    76,
+    77,
+    78,
+    79,
+    80,
+    81,
+    82
+  ],
+  "output_index": {
+    "stored_bytes": 568114,
+    "stored_sha256": "cd0af70a2d4a76a438bc255ad9b97ca443e394ea75d5337b853b5589d27d19ab",
+    "uri": "/home/zyf/AAA/scar-worktrees/source-dependency-query-layout/artifacts/analysis/source_dependency_queries_20261027/attempt01/views/index.json"
+  },
+  "parent_builder_wall_seconds": 117.84491287497804,
+  "runner_wall_seconds": 117.91985303600086,
+  "selected_shards": 24,
+  "session": 62964,
+  "source_sha256": "30ad56482ec92671390807418ec3b4b3dee500fcf917f3107f78659290b2cf26",
+  "storage_result": "24_SELECTED_SHARDS_WRITTEN",
+  "unselected_shards": 60,
+  "whole_program_complete": false,
+  "worker_pids": [
+    2123774,
+    2123777,
+    2123778,
+    2123779
+  ]
+}
