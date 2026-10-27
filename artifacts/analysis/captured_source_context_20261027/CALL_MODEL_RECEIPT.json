@@ -1,0 +1,10 @@
+{
+  "decoded_bytes": 1710394,
+  "decoded_sha256": "5c5dff95e13e97ce64ddf2e421447eee05c2970352d5d83884f4860d4113222f",
+  "logical_uri": "/home/zyf/AAA/scar-worktrees/captured-source-context/artifacts/analysis/captured_source_context_20261027/call-model.json",
+  "schema": "scar.call-edge-links",
+  "schema_version": 1,
+  "stored_bytes": 107137,
+  "stored_sha256": "9be0909c8704f401c91b2e39e41d80b77bea200d42eb92cb00bd8aeda8e05f25",
+  "stored_uri": "/home/zyf/AAA/scar-worktrees/captured-source-context/artifacts/analysis/captured_source_context_20261027/call-model.json.gz"
+}

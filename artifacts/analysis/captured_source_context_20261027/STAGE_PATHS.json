@@ -1,0 +1,26 @@
+{
+  "paths": [
+    "scar/analysis/program_lowering.py",
+    "scar/analysis/call_edges.py",
+    "scar/analysis/control_flow_v2.py",
+    "scar/ir/frontend_v2.py",
+    "artifacts/analysis/captured_source_context_20261027/CALL_MODEL_RECEIPT.json",
+    "artifacts/analysis/captured_source_context_20261027/HANDOFF.md",
+    "artifacts/analysis/captured_source_context_20261027/PRODUCTION.diff.gz",
+    "artifacts/analysis/captured_source_context_20261027/REPORT.md",
+    "artifacts/analysis/captured_source_context_20261027/RESULT.json",
+    "artifacts/analysis/captured_source_context_20261027/RETENTION.json",
+    "artifacts/analysis/captured_source_context_20261027/SOURCE_RECEIPTS.json",
+    "artifacts/analysis/captured_source_context_20261027/archive/8c55324baad1b805b69fb4936065d334618f52d34deaced7be85a4b96e713612.marshal",
+    "artifacts/analysis/captured_source_context_20261027/archive/9012749e14882e3964c27aa9c0ae1e86c0a1e537baf472aeff25f9cb03663b06.source.utf8",
+    "artifacts/analysis/captured_source_context_20261027/archive/manifest.json",
+    "artifacts/analysis/captured_source_context_20261027/call-model.json.gz",
+    "artifacts/analysis/captured_source_context_20261027/run.py",
+    "artifacts/analysis/captured_source_context_20261027/stderr.txt",
+    "artifacts/analysis/captured_source_context_20261027/stdout.txt",
+    "artifacts/analysis/captured_source_context_20261027/STAGE_PATHS.json"
+  ],
+  "source_files": 4,
+  "count": 19,
+  "large_plain_model_retained_local": "/home/zyf/AAA/scar-worktrees/captured-source-context/artifacts/analysis/captured_source_context_20261027/call-model.json"
+}

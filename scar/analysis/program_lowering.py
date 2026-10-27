@@ -1283,10 +1283,50 @@ def prepare_source(path: str | Path, *, project_root=None) -> PreparedSource:
         raise ValueError("source exceeds the existing 4 MB control-model input budget")
     with tokenize.open(path) as stream:
         text = stream.read()
+    return prepare_source_text(path, text, project_root=root,
+                               root_is_package=(root / '__init__.py').is_file())
+
+
+def prepare_source_text(path, text, *, project_root, root_is_package) -> PreparedSource:
+    """Construct ordinary static layers/AST from text, without loaded proof.
+
+    The explicit namespace choice is an input, not evidence of a runtime
+    ModuleObject/import. No source filename is opened, statted or resolved.
+    """
+    original = str(path); path = Path(path); root = Path(project_root)
+    if (type(text) is not str or type(root_is_package) is not bool
+            or not path.is_absolute() or not root.is_absolute()
+            or str(path) != original or '..' in path.parts or '..' in root.parts
+            or not path.is_relative_to(root)):
+        raise ValueError('text preparation needs exact absolute source/namespace and explicit package policy')
+    if len(text.encode('utf8')) > 4_000_000:
+        raise ValueError('source exceeds the existing 4 MB control-model input budget')
     sources = {str(path): text}
-    semantic, semantics, control = _build_generated_source_layers((path,), root, sources=sources)
+    semantic, semantics, control = _build_generated_source_layers((path,), root,
+        sources=sources, _root_is_package=root_is_package)
     tree = ast.parse(text, filename=str(path))
     return PreparedSource(path, root, text, semantic, semantics, control, tree, _symbol_tables(text, path))
+
+
+def prepare_captured_source(source_owner, captured, *, project_root, root_is_package) -> PreparedSource:
+    """Prepare one normal captured source, retaining its original namespace.
+
+    The owner establishes source-byte membership only. Loaded descriptor
+    correspondence remains the normal matcher/CodeWitness responsibility.
+    """
+    from scar.analysis.captured_source_owner import CapturedSourceOwner
+    from scar.ir.program.call_edges import CapturedCode
+    if type(source_owner) is not CapturedSourceOwner or type(captured) is not CapturedCode:
+        raise TypeError('captured preparation requires its normal owner and original typed CodeID')
+    snapshot = source_owner.snapshot(captured)
+    original = source_owner.archived_source(snapshot)
+    prepared = prepare_source_text(snapshot.path, original.text, project_root=project_root,
+                                   root_is_package=root_is_package)
+    if (prepared.semantics.sources.get(snapshot.path) != snapshot
+            or snapshot.fingerprint != 'sha256:' + hashlib.sha256(prepared.text.encode('utf8')).hexdigest()):
+        raise ValueError('generated source layers differ from the captured snapshot/version/encoding')
+    source_owner.require_unchanged()
+    return prepared
 
 
 def _symbol_tables(text, path):
@@ -1461,5 +1501,5 @@ def validate_source_program(result: SourceProgram, *, max_operations: int = 1000
             "runtime_code_instance_established": False}
 
 
-__all__ = ["SourceProgram", "PreparedSource", "LoweredSourceBody", "prepare_source",
+__all__ = ["SourceProgram", "PreparedSource", "LoweredSourceBody", "prepare_source", "prepare_source_text", "prepare_captured_source",
            "lower_source", "validate_source_program"]
