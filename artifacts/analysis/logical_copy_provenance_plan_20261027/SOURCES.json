@@ -1,0 +1,71 @@
+{
+  "primary_source_revision": "cf30153c4c131c8164ee7798e5022d810682e2cb",
+  "primary_urls": [
+    "https://github.com/pytorch/pytorch/blob/cf30153c4c131c8164ee7798e5022d810682e2cb/aten/src/ATen/native/TensorFactories.cpp#L2084",
+    "https://github.com/pytorch/pytorch/blob/cf30153c4c131c8164ee7798e5022d810682e2cb/aten/src/ATen/native/Copy.cpp#L125"
+  ],
+  "scope": "read-only design; original accepted canonical port codecs and metadata only; no raw/201/target/capture",
+  "sources": [
+    {
+      "bytes": 31738,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/docs/WHOLE_PROGRAM_MODEL.md",
+      "sha256": "cb73ac186d272b09529d055853a0a0a44477e59e14803e3d4e784ac977555883"
+    },
+    {
+      "bytes": 22415,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/v2/values.py",
+      "sha256": "e12586470c294701c315d6108a80746f08a14ba26a4ca6dcf6374f458d1078b5"
+    },
+    {
+      "bytes": 10997,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/execution/content.py",
+      "sha256": "1eee1822056e59a0be9f4f3a1524f97948df91497ad57072c7c0ca53c670cf9e"
+    },
+    {
+      "bytes": 39939,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/execution/content_validation.py",
+      "sha256": "7bafa81925f16b6f1b5374b68313c8d766ca37a88467f291413763d6efc442fc"
+    },
+    {
+      "bytes": 10458,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/execution/production.py",
+      "sha256": "abd9700207262eed121af4a7edb064c01afe903cbd3898f99d8d4653bee24097"
+    },
+    {
+      "bytes": 16236,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/execution/production_validation.py",
+      "sha256": "63f55ef4c4270f137d62799874ee51b783f562fc5086005e3f1769e8571158aa"
+    },
+    {
+      "bytes": 76747,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/execution/native_port_protocol.py",
+      "sha256": "6e30bb657916abd617c02ccfd6969148a9f87935336f5a7571c0f5358c93776c"
+    },
+    {
+      "bytes": 81047,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/trace/native_operator_value_interface.py",
+      "sha256": "0719561288a7aa8da021f9337d92a661d902894a937d816e59c7cee2e25dd901"
+    },
+    {
+      "bytes": 17141,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/trace/native_schema.py",
+      "sha256": "b407a61322183e74e140682d32c2de779d595b8468655ec21e8ba3bea8294aee"
+    },
+    {
+      "bytes": 317,
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/torch/version.py",
+      "sha256": "aef3753721b655fb4e1369862a57652bde68009ba2cad63668b98288482542bf"
+    },
+    {
+      "bytes": 2132,
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/torch/include/ATen/ops/clone_ops.h",
+      "sha256": "002a3ab5f7bb994e61152d749ec4c41fe9dc20597bd9adf2a0c7c3cbb7ff0564"
+    },
+    {
+      "bytes": 2729,
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/torch/include/ATen/ops/copy_ops.h",
+      "sha256": "4aaa2289384a161b35f82baee483f205dd019c1a636363649ed8b53d65e2b61e"
+    }
+  ],
+  "status": "DESIGN_ONLY"
+}
