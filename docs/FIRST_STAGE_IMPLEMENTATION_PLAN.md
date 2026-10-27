@@ -17,7 +17,7 @@
 
 1. **先使现有产物可靠可读。** 已保存的 196 项发布引用有 161 个检查点被稀疏工作树排除；已从 Git 按原压缩/解码 SHA 与字节数恢复，并保留精确路径。正常 reader 已实现文件可用性预检，以及全局父输入/CAS 始末校验，逐函数检查保留，避免每个文件重复解析全局目录。恢复文件不代表已完成运行绑定。
 2. **接入新恢复的源码。** 原外部窗口 243 项已有 202 个完整 body、40 个保存的未支持项、1 个 resumable 适配缺口；201已纳入发布根，最新属性AugAssign的131操作图待增量接入。后补五项已完成正常准入并写出 201 项根；发布进程的最后父文件检查因上述缺件失败。独立复核已通过：原196引用不变、新五项检查点一致，并正常查询一个92操作的新body。原writer失败状态保留；不重新生成源码图，也不重做整批发布。
-3. **优先接通跨层数据依赖。** PID272038 的 201 项正常读取及同 Run 绑定已通过：100,438 次调用中，93,237 次找到完整 body，2,251 次只找到源码，4,950 次未解决。这些是调用到源码的对应。现已依据同次原始 attempt/handshake、保留的源码定位及原 body，接通首条三层链的两处调用：`Use → formal`、独立 receiver 投影、`RETURN → caller normal result → consumer`，以及条件粗粒度 world 状态端口。正常构建选中 2/100,550 个调用尝试；其余 100,548 个未物化，不能计入连通覆盖。共享局部查询读取 3 个函数片段约 0.60 秒。下一步扩大相连批次并补方法查找、环境、细状态等边界；只按需读函数片段，不重跑整批 201 项，保留静态条件路径与实际执行证据的区别。
+3. **优先接通跨层数据依赖。** PID272038 的 201 项正常读取及同 Run 绑定已通过：100,438 次调用中，93,237 次找到完整 body，2,251 次只找到源码，4,950 次未解决。这些是调用到源码的对应。首条三层链已扩到一次读取后的分片 Session：检查 512/2,683 个直接候选，449 个条件端口连接存为 15 片，约 417KB；原始 CALL attempts 为 100,550。另 63 个有明确输入/ABI边界，其中 52 个来自 v1 inventory 版本门；通用 v1/v2 读取修正及局部读取已通过，但没有重建旧 52 项，不能增加 449 分子。未检查的 2,171 个直接候选仍单列。106 个 normalized receiver 的运行时 defaults/target 状态未记录，不提升为实际 bound receiver。已连 `Use → formal`、条件 receiver 投影、`RETURN → caller result → consumer` 及粗粒度 world 端口；操作输入和局部控制条件也可继续导航。下一步是完整相连范围、环境与细状态/资源接线，不重跑整批 201 项。
 4. **并行补必要关系。** 已有 CPU 和 GPU Tensor 观察→view/storage/allocation 的真实查询；GPU 原始引用索引已接公共 CLI，局部查询约 1 秒。仍须连接实际算子端口、逻辑来源/版本、原位写入、必要 IO/backing 与 ready；不能据观察点关系断定全过程内容或生命周期。
 5. **补剩余通用结构并集成全链。** 属性AugAssign已按原状态/异常协议恢复一个真实入口；剩余嵌套清理等结构继续补齐。显式 `program-ports`、`process-ports`、逐文件源码归档及程序 stream backing 已实现；冻结源码 4f23a6d6 对未修改 LeWM 的一次真实 `process-ports` 采集因上限失败，未完成 episode。捕获源码 owner 已自动接入正常 `model-run`，避免归档之外的现场源码被悄悄当成本次版本；一次真实 CPU 源段构建通过，完整 native/binding 路径仍待集成。先减轻采集开销，再查询同 Run 的加载到保存全链。历史记录缺少必要事实时才定向补采。
 
@@ -29,9 +29,11 @@
 
 已测成本：上述 201 项正常 source reader 用时 4,709.45 秒，source invocation binder 用时 2,752.00 秒，总计 7,470.32 秒；进程累计读取约 8.57 GB，物理读盘计数为 0。这是分析成本，不能计作 LeWM 性能。尚无并行加速实测，不能据线程数承诺速度。目前先消除跨层连接必须重读整个发布根的接口耦合，再对独立分片增加有界 worker；不把整个共享 graph 或活动 proof owner 直接扔进线程池。
 
-具体并行边界已审查：source entry 的同 file 多 body 共用一个 context，适合作为进程任务；native 用闭合 shard 作任务。严格 trace reader 可把有界 batch 的 JSON/typed 解码放到 worker，但父进程必须按原 PID、行号、index 顺序执行 stack、pending、epoch、预算和错误检查。不能按 worker 完成顺序拼接，也不能把活动 owner/SQLite 连接 pickle 到子进程充当验证。现有 reader 仍主要串行，这些 worker 尚未实现。
+闭合 source-port 分片的依赖构建已实现 spawn 进程池：4 个独立 PID 完成 15 片、2,077 项查询，父进程不加载全图，约 32.08 秒；没有同任务串行 A/B，不声称加速。派生 view 输出 18.6MB，expanded JSON 有重复引用；原核心函数图仍共享引用。采集关闭后的压缩/回读也已实现有界线程并行。
 
-真实 `process-ports` 采集已于 3,601.876 秒失败退出（OS provider 的 3,600 秒上限，exit241），保留约 8.03 GB 原始与旁路输出；LeWM 未改动，episode 未完成。`trace=all` 会同时跟踪采集器的日志写入等系统调用；本次观测到约 8,270 万次 voluntary context switches，但未测不同因素的时间占比。环境日志批写已实现并通过字节一致检查：1,000 行对应 write 从 1,001 次降至 5 次，仅证明 transport 调用减少。下一次全程采集前还需因子化重复静态元数据，并显式收窄 OS 观察范围及其 coverage 声明；不能直接以更大预算重跑。
+其他并行边界仍需实施：source entry 同 file 多 body 共用 context，native 用闭合 shard 作任务。严格 trace reader 仍主要串行；将来只能并行有界 JSON/typed batch，按原 PID/index 顺序折叠 stack、pending、epoch、预算和错误。不能按 worker 完成顺序拼接或把活动 owner/SQLite 连接送入子进程充当验证。运行中的异步分片图构建尚未实现。
+
+原 `process-ports` 采集于 3,601.876 秒失败退出（上限 3,600 秒，exit241），LeWM 未改、episode 未完成。约 8.03GB 已由 4 个归档线程无损压为 677MB，回读 SHA 后才清理重复原件，失败状态保留。`trace=all` 放大了采集器日志与 getpid 等调用，观测约 8,270 万次 voluntary context switches；未测各因素占比。环境日志批写使 1,000 行对应 write 从 1,001 次降至 5 次；静态 CALL/参数布局缓存移除了逐 CALL 反汇编/整描述构造，动态 defaults/code/receiver 仍逐次观察，字节一致微检查通过。OS 新显式接口范围请求 seccomp-bpf 并保留原 identity/argv/coverage 核验；provider/归档路径已验证，下一次真实 LeWM 才验证组合后的全程采集，不能预称收益。
 
 前端恢复、依赖接线和分片查询可以按不重叠源码并行。运行中的任务使用固定源码；失败保留，不因已有产物而改写退出状态。每个功能用一条真实正常路径验证，具体缺陷才增加最小检查；不扩展测试矩阵、重复 episode 或繁琐 gate。
 

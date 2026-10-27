@@ -306,3 +306,43 @@ python -B -m scar.cli query-source-dependencies \
 当前仅连接 2/100,550 个调用尝试，仍有未绑定入口和方法查找边界。
 见 [构建结果](../artifacts/analysis/source_call_bridge_20261027/REPORT.md)与
 [导航及 CLI 实测](../artifacts/analysis/source_dependency_navigation_20261027/REPORT.md)。
+
+## 分片连接与独立进程的依赖构建
+
+```bash
+python -B -m scar.cli build-source-port-shards \
+  --source-report BINDINGS/report.json --source-report-sha256 REPORT_SHA256 \
+  --bindings BINDINGS/bindings.json --bindings-sha256 BINDINGS_SHA256 \
+  --max-candidate-pairs 512 --shard-calls 32 --out fresh-ports
+
+python -B -m scar.cli build-source-dependencies \
+  --publication fresh-ports/manifest.json --sha256 MANIFEST_SHA256 \
+  --workers 4 --out fresh-dependencies
+```
+
+Session 只读一次原 trace，按原候选顺序分批；静态 Use/Value ID、源码与图定义可以复用，
+动态 attempt、entry、receiver/arg0 和环境观察不能当静态数据缓存。每个模型片只引用原
+函数图，不内嵌复制 body。构图进程接收路径、SHA、ordinal 和预算，独立读取闭合分片；
+父进程不加载全部图或传递活动 owner。进程数、在途任务和输出字节均有上限，失败保留。
+
+实际窗口检查 512/2,683 个直接调用候选，输出 449 个条件连接，15 个模型片共 416,923B。
+原始 100,550 个 CALL attempts 分母保留；没有检查的 2,171 个直接候选与其他 CALL
+分别保留。四个进程完成 15 片、2,077 项依赖查询，约 32.08s；未做同任务串行 A/B，
+不能据此声称加速。派生 view 18.6MB gzip / 584.9MB expanded JSON，包含重复引用，
+不能把它们称为紧凑核心图。原函数图与数据内容没有重复保存。
+
+依赖导航可使用 `query-source-dependency-batch`；单输入查询用 `--include-computations`
+继续经过操作输入。计算依赖、控制 guard、状态和 protocol 角色均保留；它们不意味着
+同值、alias、纯函数或选定动态循环。旧 trace 中 106 个 normalized receiver 缺少运行时
+defaults/target 状态，只能作为条件端点，不能提升为已观察的 bound receiver。
+见 [分片构建](../artifacts/analysis/source_call_port_session_20261027/REPORT.md)、
+[四进程实测](../artifacts/analysis/source_dependency_workers_20261027/REPORT.md)。
+
+## 显式 OS 范围与归档
+
+`trace --os-capture-root ROOT --os-profile program-interfaces --archive-workers 4`
+观察程序资源接口，排除未列出的 OS 内部调用；`--os-profile all` 保留原全 syscall 选项。
+接口模式请求 seccomp-bpf，实际启用和事件完整性仍未证明。Scope/argv/Run/归档校验
+没有降低，也不能据未观察到 syscall 推断无副作用。归档在采集关闭后并行压缩与回读
+核验；这已经实现，运行中的异步图构建尚未实现。见
+[实际 provider 与归档报告](../artifacts/analysis/os_program_interfaces_20261027/REPORT.md)。

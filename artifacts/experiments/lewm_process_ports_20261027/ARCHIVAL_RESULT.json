@@ -1,0 +1,20 @@
+{
+  "status": "PARTIAL_BYTES_ARCHIVED_NOT_A_SUCCESSFUL_CAPTURE",
+  "archive": {
+    "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/lewm_process_ports_20261027/capture/partial-archive-index.json",
+    "sha256": "dd86daae2bfba37829119ca6b90f0c26191df9ecae68ce917284b1d2d072c66f",
+    "size_bytes": 108498,
+    "schema": "scar.partial-capture-archive"
+  },
+  "elapsed_seconds": 38.74623163003707,
+  "io_accounting": {
+    "compression_workers": 4,
+    "decoded_roundtrip_bytes_read": 8027996678,
+    "os_lines": 21497263,
+    "raw_bytes_read": 8027996678,
+    "stored_bytes_written": 677057591
+  },
+  "removed_originals": true,
+  "original_capture_exitcode": 241,
+  "whole_program_model_complete": false
+}

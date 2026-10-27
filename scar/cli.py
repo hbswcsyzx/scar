@@ -71,6 +71,8 @@ def _trace(args) -> int:
     operands = getattr(args, 'call_operands', False) or python_targets
     os_capture_root = getattr(args, 'os_capture_root', None)
     if os_capture_root is not None:
+        if not 1 <= args.archive_workers <= 32:
+            raise SystemExit('--archive-workers must be between 1 and 32')
         os_capture_root = Path(os_capture_root).absolute()
         if os_capture_root.exists() or out != os_capture_root / 'trace':
             raise SystemExit('--os-capture-root requires a fresh root and explicit --out ROOT/trace')
@@ -124,6 +126,9 @@ def _trace(args) -> int:
             lean_plan.namespace_root if lean_plan is not None else Path.cwd())).resolve())
         env['SCAR_CALL_MAX_EVENTS'] = str(args.max_call_events)
         env['SCAR_CALL_MAX_BYTES'] = str(args.max_call_bytes)
+        if args.max_call_references < 1:
+            raise SystemExit('call reference limit must be positive')
+        env['SCAR_CALL_MAX_REFERENCES'] = str(args.max_call_references)
         if args.max_call_codes < 1:
             raise SystemExit('call code limit must be positive')
         env['SCAR_CALL_MAX_CODES'] = str(args.max_call_codes)
@@ -182,13 +187,14 @@ def _trace(args) -> int:
             max_os_lines=args.max_os_lines, max_seconds=args.os_timeout,
             max_files=getattr(args,'max_archive_files',4096))
         result, _ = launch_os_capture(cmd, env=env, capture_root=os_capture_root,
-            strace_executable=args.strace_executable, budgets=os_budgets)
+            strace_executable=args.strace_executable, budgets=os_budgets,
+            selection_profile=args.os_profile)
     (out / "run.json").write_text(json.dumps({"command": cmd, "returncode": result.returncode,
                                                 "wall_s": time.perf_counter() - start}, indent=2))
     if os_capture_root is not None and result.returncode == 0:
         from scar.trace.os_capture_launch import archive_owned_capture, publish_bytes
         from scar.trace.capture_coordinates import bind_capture_coordinates
-        archive_owned_capture(os_capture_root, budgets=os_budgets)
+        archive_owned_capture(os_capture_root, budgets=os_budgets,workers=args.archive_workers)
         coordinate_path = os_capture_root / 'capture-coordinates.json'
         coordinates = bind_capture_coordinates(os_capture_root, max_bytes=os_budgets.max_raw_bytes,
             max_lines=os_budgets.max_os_lines, profile_uri=str(coordinate_path), publish_os_profile=True)
@@ -522,9 +528,13 @@ def main(argv=None) -> int:
     source_dependencies.add_argument("--max-nodes", type=int, default=256)
     source_dependencies.add_argument("--max-depth", type=int, default=64)
     source_dependencies.add_argument("--max-routes", type=int, default=1024)
+    source_dependencies.add_argument("--include-computations", action="store_true",
+        help="follow conservative operation inputs while keeping state/control/opaque qualifications")
     source_dependencies.add_argument("--out", help="write a fresh result")
     from scar.analysis.source_dependencies import query_source_dependencies_cli
     source_dependencies.set_defaults(func=query_source_dependencies_cli)
+    from scar.analysis.dependency_cli import register_dependency_commands
+    register_dependency_commands(sub)
     native_inputs = sub.add_parser("query-native-inputs", help="read original native Tensor input metadata and canonical port references")
     native_inputs.add_argument("--manifest", required=True, help="published native input association manifest")
     native_inputs.add_argument("--sha256", required=True, help="expected manifest SHA256")
@@ -672,9 +682,14 @@ def main(argv=None) -> int:
     trace.add_argument('--max-call-events',type=int,default=100000)
     trace.add_argument('--max-call-bytes',type=int,default=64000000)
     trace.add_argument('--max-call-codes',type=int,default=4096)
+    trace.add_argument('--max-call-references',type=int,default=8192,
+        help='bounded active weak identities shared by frame/operand observers; no application contents')
     trace.add_argument('--max-operand-events',type=int,default=100000)
     trace.add_argument('--max-operand-bytes',type=int,default=32000000)
-    trace.add_argument('--os-capture-root',help='opt in to owned trace=all strace, lossless retention and final coordinates; requires fresh ROOT and --out ROOT/trace')
+    trace.add_argument('--os-capture-root',help='opt in to owned syscall observation, lossless retention and final coordinates; requires fresh ROOT and --out ROOT/trace')
+    trace.add_argument('--os-profile',choices=('program-interfaces','all'),default='program-interfaces',
+        help='explicit OS scope; program-interfaces requests seccomp filtering and excludes unlisted internals')
+    trace.add_argument('--archive-workers',type=int,default=4,help='1..32 bounded compression/IO workers after capture closes')
     trace.add_argument('--strace-executable',default='strace',help='strace executable for the owned opt-in OS capture')
     trace.add_argument('--max-os-bytes',type=int,default=128000000)
     trace.add_argument('--stream-interfaces', action='store_true', help='observe builtin stream calls and C completion without reading contents or wrapping objects')

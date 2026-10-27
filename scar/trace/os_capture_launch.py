@@ -5,7 +5,6 @@ and coverage is a later Run/archive-bound derivation. None proves event/effect
 completeness. Existing raw providers retain their original schemas and bytes.
 """
 from dataclasses import dataclass
-import gzip
 import hashlib
 import os
 from pathlib import Path
@@ -17,7 +16,7 @@ import subprocess
 import time
 
 from scar.ir.record_codec import loads as strict_loads
-from scar.store.bundle_partitions import BundleBudgets, _Sink, _line
+from scar.store.bundle_partitions import BundleBudgets, _line
 
 
 INTENT_SCHEMA='scar.os-capture-intent'
@@ -106,9 +105,12 @@ def native_intent(trace_directory,native_nonce):
         'basis':'owned launcher environment and exact intent bytes; intent alone is not execution'}
 
 
-def launch_os_capture(target_argv,*,env,capture_root,strace_executable='strace',budgets=None):
+def launch_os_capture(target_argv,*,env,capture_root,strace_executable='strace',budgets=None,
+                      selection_profile='all'):
     """Execute exactly one owned provider; no attach, shell, or foreign process."""
     budget=budgets or OSCaptureBudgets();_need(type(budget) is OSCaptureBudgets,'explicit OS budgets required')
+    from scar.trace.os_capture_selection import selection_contract
+    selection=selection_contract(selection_profile)
     root=Path(capture_root).absolute()
     _need(root.is_dir() and not root.is_symlink() and (root/'trace').is_dir(),'fresh capture/trace root required')
     _need(not (root/'os').exists(),'fresh OS output required')
@@ -121,15 +123,18 @@ def launch_os_capture(target_argv,*,env,capture_root,strace_executable='strace',
     _need(len(version_text)<=16_384 and 'strace -- version' in version_text,'unrecognized provider version')
     nonce=secrets.token_hex(16);(root/'os').mkdir(mode=0o700)
     string_limit='4096' if env.get('SCAR_PROCESS_IMAGE_RECEIPTS')=='1' else '256'
-    options=['-ff','-ttt','-T','-s',string_limit,'-e','trace=all','-e','raw='+','.join(RAW_DATA_CALLS),
+    options=['-ff','-ttt','-T','-s',string_limit,'-e',selection['expression'],'-e','raw='+','.join(RAW_DATA_CALLS),
              '-o',str(root/'os/syscalls')]
+    if selection['kernel_filter']=='REQUESTED_NOT_VERIFIED':
+        options+=['--seccomp-bpf']
     if env.get('SCAR_PROCESS_IMAGE_RECEIPTS')=='1':
         options+=['-e',STAT_DETAIL_EXPRESSION]
     argv=[str(binary),*options,*target_argv];boundary=1+len(options)
     intent={'schema':INTENT_SCHEMA,'schema_version':1,'nonce':nonce,'capture_root':str(root),
         'trace_directory':str(root/'trace'),'actual_exec_argv_planned':argv,'target_argv_index':boundary,
         'target_argv':target_argv,'provider_precheck':binary_receipt,'budgets':vars(budget),
-        'authority':'INTENT_ONLY_NOT_EXECUTION','raw_rendering':list(RAW_DATA_CALLS)}
+        'authority':'INTENT_ONLY_NOT_EXECUTION','raw_rendering':list(RAW_DATA_CALLS),
+        'selection_contract':selection}
     intent_path=root/f'os-capture-intent.{nonce}.json';intent_receipt=_publish(intent_path,intent,budget)
     child_env=dict(env);child_env.update(SCAR_OS_CAPTURE_NONCE=nonce,
         SCAR_OS_CAPTURE_INTENT=str(intent_path),SCAR_OS_CAPTURE_INTENT_SHA256=intent_receipt['sha256'])
@@ -154,8 +159,22 @@ def launch_os_capture(target_argv,*,env,capture_root,strace_executable='strace',
             while process.poll() is None:
                 os_bytes=sum(p.stat().st_size for p in (root/'os').iterdir() if p.is_file())
                 diagnostic_bytes=stderr_path.stat().st_size
-                if os_bytes>budget.max_os_bytes or diagnostic_bytes>budget.max_raw_bytes or time.monotonic()-started>budget.max_seconds:
-                    budget_stop='OS_BYTES' if os_bytes>budget.max_os_bytes else 'DIAGNOSTIC_BYTES' if diagnostic_bytes>budget.max_raw_bytes else 'WALL_SECONDS'
+                # Sidecars can dwarf syscall output. Bound the whole owned raw
+                # capture while it runs, rather than discover overflow only at
+                # post-run archival. Do not read application data or contents.
+                capture_bytes=os_bytes+diagnostic_bytes
+                capture_files=0
+                for path in (root/'trace').rglob('*'):
+                    try:
+                        if path.is_file():
+                            capture_files+=1;capture_bytes+=path.stat().st_size
+                    except FileNotFoundError:
+                        continue  # A producer may atomically publish a file.
+                if (os_bytes>budget.max_os_bytes or capture_bytes>budget.max_raw_bytes
+                        or capture_files>budget.max_files or time.monotonic()-started>budget.max_seconds):
+                    budget_stop=('OS_BYTES' if os_bytes>budget.max_os_bytes else
+                        'CAPTURE_BYTES' if capture_bytes>budget.max_raw_bytes else
+                        'CAPTURE_FILES' if capture_files>budget.max_files else 'WALL_SECONDS')
                     os.killpg(pid,signal.SIGTERM)
                     try:process.wait(timeout=5)
                     except subprocess.TimeoutExpired:os.killpg(pid,signal.SIGKILL)
@@ -184,7 +203,8 @@ def launch_os_capture(target_argv,*,env,capture_root,strace_executable='strace',
         'diagnostic_scope':'mixed inherited tracer/target stderr; no loss-free claim',
         'producer':{'entrypoint':'scar.trace.os_capture_launch.launch_os_capture',
             'source':_receipt(__file__,'text/x-python',2_000_000)},
-        'selection':'trace=all with follow-forks; raw affects rendering only',
+        'selection':selection['expression']+' with follow-forks; raw affects rendering only',
+        'selection_profile':selection_profile,'selection_contract':selection,
         'event_loss':'UNKNOWN','effect_completeness':'UNKNOWN','budgets':vars(budget)}
     launch_path=root/f'os-capture-launch.{nonce}.json';receipt=_publish(launch_path,launch,budget)
     _need(failure is None,'provider spawn failed; exact launch failure receipt retained')
@@ -257,7 +277,7 @@ def _collector_witness_archive_paths(root,budget):
     return [Path(x['uri']) for x in members]
 
 
-def archive_owned_capture(capture_root,*,budgets=None):
+def archive_owned_capture(capture_root,*,budgets=None,workers=4):
     """Existing lossless archive v1, bounded store sink, no new graph format."""
     budget=budgets or OSCaptureBudgets();root=Path(capture_root).absolute()
     launches=list(root.glob('os-capture-launch.*.json'));_need(len(launches)==1,'one owned closed launch required')
@@ -273,32 +293,13 @@ def archive_owned_capture(capture_root,*,budgets=None):
     paths+=_native_input_archive_paths(root,budget)
     collector_paths=_collector_witness_archive_paths(root,budget)
     paths+=collector_paths
-    _need(len(set(paths))==len(paths),'duplicate declared archive member')
-    _need(paths and len(paths)<=budget.max_files,'raw archive file budget exceeded')
-    totals={'stored_bytes':0};raw_total=0;os_lines=0;rows=[]
-    for path in paths:
-        _need(path.is_file() and not path.is_symlink() and path.suffix!='.gz' and path.resolve().is_relative_to(root),'unsafe generated artifact')
-        target=path.with_name(path.name+'.gz');digest=hashlib.sha256();size=0;lines=0
-        with path.open('rb') as source,target.open('xb') as output:
-            sink=_Sink(output,totals,_limits(budget))
-            with gzip.GzipFile(filename='',fileobj=sink,mode='wb',mtime=0,compresslevel=1) as compressed:
-                while block:=source.read(1_048_576):
-                    size+=len(block);raw_total+=len(block);lines+=block.count(b'\n')
-                    _need(raw_total<=budget.max_raw_bytes,'raw archive byte budget exceeded')
-                    compressed.write(block);digest.update(block)
-        if path.parent==root/'os':os_lines+=lines
-        _need(os_lines<=budget.max_os_lines,'OS line budget exceeded')
-        check=hashlib.sha256();check_size=0
-        with gzip.open(target,'rb') as source:
-            while block:=source.read(1_048_576):
-                check_size+=len(block);_need(check_size<=size,'roundtrip exceeds original byte count');check.update(block)
-        _need((check_size,check.hexdigest())==(size,digest.hexdigest()),'lossless roundtrip failed')
-        rows.append({'logical_path':str(path),'actual_path':str(target),'raw_sha256':digest.hexdigest(),
-            'raw_bytes':size,'compressed_bytes':sink.size,'gzip_sha256':sink.digest.hexdigest()})
+    from scar.store.capture_compression import compress_capture_members,remove_verified_originals
+    rows,accounting,stamps=compress_capture_members(paths,root=root,limits=_limits(budget),
+        max_raw_bytes=budget.max_raw_bytes,max_files=budget.max_files,os_directory=root/'os',
+        max_os_lines=budget.max_os_lines,workers=workers)
     document={'schema':'scar.lossless-capture-archive','schema_version':1,'verified_roundtrip':True,'files':rows,
         'producer':'owned OS capture; existing lossless archive profile',
-        'io_accounting':{'raw_bytes_read':raw_total,'decoded_roundtrip_bytes_read':raw_total,
-            'stored_bytes_written':totals['stored_bytes'],'os_lines':os_lines},
+        'io_accounting':accounting,
         'runtime_observation_completeness':'UNKNOWN'}
     if collector_paths:
         document['capabilities']=['COLLECTOR_WITNESS_MEMBERS_V2']
@@ -306,8 +307,41 @@ def archive_owned_capture(capture_root,*,budgets=None):
         document['retained_plain_basis']='exact witness declarations; unchanged CodeWitnessStore needs original plain files'
     receipt=_publish(index,document,budget)
     # Only our generated duplicate originals, after all roundtrips + manifest.
-    for row in rows:
-        if Path(row['logical_path']) not in collector_paths:Path(row['logical_path']).unlink()
+    remove_verified_originals(rows,stamps,retain=collector_paths)
+    return receipt
+
+
+def archive_stopped_capture(capture_root,*,budgets=None,workers=4,remove_originals=False):
+    """Retain failed owned bytes compactly, without minting a successful Run.
+
+    The separate partial schema/path cannot be substituted for archive-index
+    in normal capture coverage. Small launch/native/terminal metadata stay put.
+    """
+    _need(type(remove_originals) is bool,'explicit original retention option required')
+    budget=budgets or OSCaptureBudgets();root=Path(capture_root).absolute()
+    launches=list(root.glob('os-capture-launch.*.json'))
+    _need(len(launches)==1,'one owned closed launch required')
+    launch,launch_receipt=_document(launches[0],budget.max_metadata_bytes)
+    _need(launch.get('schema')==LAUNCH_SCHEMA and launch.get('schema_version')==VERSION
+          and launch.get('capture_root')==str(root) and launch.get('status')=='CLOSED'
+          and (launch.get('returncode')!=0 or launch.get('budget_stop') is not None
+               or launch.get('failure') is not None),'closed incomplete owned capture required')
+    index=root/'partial-archive-index.json';_need(not index.exists(),'fresh partial archive required')
+    paths=sorted((root/'os').glob('syscalls.*'))
+    paths+=sorted((root/'trace').glob('*.jsonl'))
+    paths+=sorted((root/'trace').glob('execution-trace.*.json'))
+    paths+=sorted((root/'trace').glob('kineto.*.json'))
+    from scar.store.capture_compression import compress_capture_members,remove_verified_originals
+    rows,accounting,stamps=compress_capture_members(paths,root=root,limits=_limits(budget),
+        max_raw_bytes=budget.max_raw_bytes,max_files=budget.max_files,os_directory=root/'os',
+        max_os_lines=budget.max_os_lines,workers=workers)
+    document={'schema':'scar.partial-capture-archive','schema_version':1,'launch':launch_receipt,
+        'verified_roundtrip':True,'files':rows,'io_accounting':accounting,
+        'original_retention':'REMOVE_AFTER_VERIFIED_ARCHIVE' if remove_originals else 'RETAIN',
+        'original_returncode':launch.get('returncode'),'original_budget_stop':launch.get('budget_stop'),
+        'runtime_observation_completeness':'UNKNOWN','whole_model_established':False}
+    receipt=_publish(index,document,budget)
+    if remove_originals:remove_verified_originals(rows,stamps)
     return receipt
 
 
@@ -337,6 +371,9 @@ def bind_os_capture_provider(root,*,run,native,native_artifact,command,archive,p
           and launch['budget_stop'] is None,'closed successful capture required')
     from scar.trace.os_capture_coverage import _explicit_all
     _explicit_all(launch['actual_exec_argv'][1:launch['target_argv_index']])
+    from scar.trace.os_capture_selection import validate_launch_selection
+    selection=validate_launch_selection(intent,launch,
+        launch['actual_exec_argv'][1:launch['target_argv_index']])
     gaps=[{'code':'os_event_loss_not_established','basis':'selection/roundtrip/exit do not prove an event-complete stream'}]
     if launch['running_image'].get('status')!='OBSERVED':gaps.append({'code':'os_running_provider_image_unverified'})
     if archive is None:
@@ -351,6 +388,9 @@ def bind_os_capture_provider(root,*,run,native,native_artifact,command,archive,p
         'stream_scope':'CAPTURE_BOUND_REQUIRED_ACTORS','known_selection_gaps':[],
         'observation_completeness':'UNKNOWN','observation_frontiers':gaps,
         'basis':'owned actual Popen receipt + native intent/exec membership + explicit selection; not an absence oracle'}
+    if selection is not None:
+        profile['selection_contract']=selection
+        profile['selection_profile']=selection['profile']
     path=root/f'os-capture-coverage.{nonce}.json'
     if path.exists():
         previous,receipt=_document(path);_need(previous==profile,'existing profile differs; never overwrite')
@@ -361,5 +401,5 @@ def bind_os_capture_provider(root,*,run,native,native_artifact,command,archive,p
         'selection_qualification':'EXPLICIT_ARGV','observation_completeness':'UNKNOWN'},gaps
 
 
-__all__=['OSCaptureBudgets','launch_os_capture','archive_owned_capture','native_intent',
+__all__=['OSCaptureBudgets','launch_os_capture','archive_owned_capture','archive_stopped_capture','native_intent',
          'bind_os_capture_provider','publish_bytes']

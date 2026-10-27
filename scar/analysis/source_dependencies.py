@@ -394,7 +394,8 @@ def query_source_dependencies_cli(args):
     result = session.argument_origins(args.binding_index, args.actual_index,
                                      receiver=args.receiver,
                                      max_nodes=args.max_nodes, max_depth=args.max_depth,
-                                     max_routes=args.max_routes)
+                                     max_routes=args.max_routes,
+                                     include_computations=getattr(args, 'include_computations', False))
     payload = json.dumps(result, ensure_ascii=False, indent=2, allow_nan=False) + '\n'
     if args.out:
         with Path(args.out).open('x', encoding='utf-8') as stream:

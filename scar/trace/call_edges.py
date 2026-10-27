@@ -565,6 +565,7 @@ def install(out, project_root, *, lean_plan=None):
         max_events=int(os.environ.get('SCAR_CALL_MAX_EVENTS',100000)),
         max_bytes=int(os.environ.get('SCAR_CALL_MAX_BYTES',64000000)), lean_plan=lean_plan,
         max_codes=int(os.environ.get('SCAR_CALL_MAX_CODES',4096)),
+        max_references=int(os.environ.get('SCAR_CALL_MAX_REFERENCES',8192)),
         capture_profile=profile, source_limits=source_limits)
     os.environ['SCAR_CALL_TRACE_OWNER_PID'] = str(os.getpid())
     recorder.collector_witness = None
