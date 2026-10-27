@@ -15,6 +15,7 @@ from pathlib import Path
 import struct
 import sys
 import threading
+import weakref
 
 MAGIC = b'SCAR-SNAPSHOT-JOURNAL\x00\x01'
 HEADER_LENGTH = struct.Struct('<I')
@@ -24,11 +25,24 @@ FORMAT = 'scar.snapshot-journal/1'
 HEADER_LIMIT = 65_536
 FOOTER_RESERVE = 16_384
 _writer_local = threading.local()
+_owned_threads = {}
+
+
+def _register_writer(thread):
+    key = id(thread)
+    def discard(reference):
+        if _owned_threads.get(key) is reference:
+            _owned_threads.pop(key, None)
+    _owned_threads[key] = weakref.ref(thread, discard)
 
 
 def is_journal_writer_thread():
     """Exclude this entire IO-thread stack in collector callbacks."""
-    return getattr(_writer_local, 'active', False) is True
+    if getattr(_writer_local, 'active', False) is True:
+        return True
+    current = dict.get(threading._active, threading.get_ident())
+    reference = _owned_threads.get(id(current))
+    return reference is not None and reference() is current
 
 
 def _json(value):
@@ -104,7 +118,10 @@ class SnapshotJournal:
             raise
         self._thread = threading.Thread(target=self._writer_main,
             name='SCAR-snapshot-journal-io', daemon=True)
+        self._ready = threading.Event()
+        _register_writer(self._thread)
         self._thread.start()
+        self._ready.wait()  # Installation only; append never waits for space.
 
     @property
     def accepted_bytes(self):
@@ -175,6 +192,7 @@ class SnapshotJournal:
 
     def _writer_main(self):
         _writer_local.active = True
+        self._ready.set()
         try:
             while True:
                 with self._condition:
@@ -205,7 +223,9 @@ class SnapshotJournal:
                     self._written_records += len(batch)
                     self._written_frame_bytes += size
         finally:
-            _writer_local.active = False
+            # Keep excluding threading's bootstrap tail after _active removes
+            # this Thread. CPython clears threading.local at OS-thread exit.
+            pass
 
     def _counts(self):
         return {'append_calls': self._attempts, 'accepted_records': self._accepted_records,
