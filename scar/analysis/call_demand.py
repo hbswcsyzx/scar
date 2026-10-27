@@ -40,6 +40,15 @@ class _SourceWorkspace:
         self._observed_paths = set()
         self.entry, self.source_roots, self.inventory_budget = entry, source_roots, inventory_budget
         self.entry_frontier = None
+        self.captured_session = None
+
+    def bind_captured_session(self, session):
+        from scar.analysis.call_seeds import _CapturedSourceSession
+        if type(session) is not _CapturedSourceSession or session.root != self.root:
+            raise TypeError('workspace requires the same normal captured source session')
+        if self.captured_session is not None and self.captured_session is not session:
+            raise ValueError('workspace captured source owner changed')
+        self.captured_session = session
 
     def prime_sources(self, descriptors):
         """Give the entry closure first claim on the private context budget.
@@ -48,6 +57,7 @@ class _SourceWorkspace:
         source projections survive a full-context spool failure, so lack of
         scratch space does not turn an otherwise verifiable code into a match.
         """
+        self._observed_paths = {code.filename for code in descriptors}
         if self.entry is None:
             return
         from scar.analysis.program_inventory import _ordered_files
@@ -57,7 +67,7 @@ class _SourceWorkspace:
         self.entry_frontier = _discover_sources_from_call_sources(self.entry,
             project_root=self.root, source_roots=self.source_roots, source_witnesses=(),
             max_files=budget.max_files, max_bytes=budget.max_bytes,
-            max_directories=budget.max_directories)
+            max_directories=budget.max_directories,_captured_source_session=self.captured_session)
         for file in _ordered_files(self.entry_frontier):
             try:
                 context = self.prepare(file.snapshot.path)
@@ -67,8 +77,9 @@ class _SourceWorkspace:
                 # The normal inventory path publishes the concrete boundary.
                 pass
 
-    @staticmethod
-    def _current_fingerprint(path):
+    def _current_fingerprint(self,path):
+        if self.captured_session is not None and self.captured_session.has_path(path):
+            return self.captured_session.archived(path).snapshot.fingerprint
         from scar.analysis.source_discovery import _read_source
         try:
             text, _, _ = _read_source(Path(path), 4_000_000)
@@ -121,7 +132,8 @@ class _SourceWorkspace:
             return context
         self.preparations[key] += 1
         try:
-            context = prepare_source(path, project_root=self.root)
+            context = (self.captured_session.prepare(path) if self.captured_session is not None
+                       and self.captured_session.has_path(path) else prepare_source(path,project_root=self.root))
         except (OSError, ValueError, TypeError, KeyError, SyntaxError, RecursionError) as error:
             self._source_errors[key] = _fresh_failure(error)
             raise
@@ -151,7 +163,8 @@ class _SourceWorkspace:
 def inventory_from_calls(entry, *, project_root, source_roots, budget, call_trace,
                          call_budget, context_budget, expected_call_sources=None,
                          compilation_profile=CallCompilationProfile.RECORDED_FUTURE_FLAGS,
-                         body_profile=BodyLoweringProfile.BOUND_FRAME):
+                         body_profile=BodyLoweringProfile.BOUND_FRAME,_seed_report=None,_workspace=None,
+                         coordinates=None):
     from scar.analysis.call_seeds import _read_call_source_seeds
     from scar.analysis.program_expansion import expand_inventory
     from scar.analysis.program_inventory import ProgramInventory, _canonical
@@ -163,16 +176,26 @@ def inventory_from_calls(entry, *, project_root, source_roots, budget, call_trac
         raise ValueError("call-source inventory requires a frame or structured body profile")
 
     root = Path(project_root).resolve() if project_root is not None else Path(entry).absolute().parent.resolve()
-    with _SourceWorkspace(root, context_budget, entry=entry, source_roots=source_roots,
-                          inventory_budget=budget) as workspace:
-        report = _read_call_source_seeds(call_trace, root, budget=call_budget,
-            _source_workspace=workspace, compilation_profile=compilation_profile)
+    from contextlib import nullcontext
+    scope=(nullcontext(_workspace) if _workspace is not None else
+           _SourceWorkspace(root,context_budget,entry=entry,source_roots=source_roots,inventory_budget=budget))
+    with scope as workspace:
+        if _seed_report is None:
+            report = _read_call_source_seeds(call_trace,root,budget=call_budget,
+                _source_workspace=workspace,compilation_profile=compilation_profile,coordinates=coordinates)
+        else:
+            from scar.analysis.call_seeds import CallSourceSeedReport,_CapturedSourceSession
+            if (type(_seed_report)is not CallSourceSeedReport or
+                    type(_seed_report._captured_session)is not _CapturedSourceSession or
+                    workspace.captured_session is not _seed_report._captured_session):
+                raise ValueError('inventory seed reuse requires this live normal workspace/session')
+            report=_seed_report
         if expected_call_sources is not None and _canonical(report.to_dict()) != _canonical(expected_call_sources):
             raise ValueError("call seeds differ from current raw trace/source replay")
         discovery = _discover_sources_from_call_sources(entry, project_root=root,
             source_roots=source_roots, source_witnesses=report.eligible_code_links(),
             max_files=budget.max_files, max_bytes=budget.max_bytes,
-            max_directories=budget.max_directories)
+            max_directories=budget.max_directories,_captured_source_session=workspace.captured_session)
         files, schedule, measurements, interfaces, frames, structured = expand_inventory(
             discovery, None, budget, context_budget, discovery.files, interface_model=True,
             body_profile=body_profile, call_source_report=report,

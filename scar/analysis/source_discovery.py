@@ -644,7 +644,7 @@ def discover_sources(entry, *, project_root=None, source_roots=(), max_files=128
 def _discover_sources_from_call_sources(entry, *, source_witnesses,
                                        project_root=None, source_roots=(),
                                        max_files=128, max_bytes=8_000_000,
-                                       max_directories=4096) -> SourceDiscovery:
+                                       max_directories=4096, _captured_source_session=None) -> SourceDiscovery:
     """Discover the entry closure before independent replayed call sources.
 
     The v6 coordinator supplies complete CodeSourceLinks from a replayed D0
@@ -657,6 +657,7 @@ def _discover_sources_from_call_sources(entry, *, source_witnesses,
         entry, project_root=project_root, source_roots=source_roots,
         max_files=max_files, max_bytes=max_bytes, max_directories=max_directories,
         _call_source_witnesses=source_witnesses,
+        _captured_source_session=_captured_source_session,
     )
 
 
@@ -694,7 +695,7 @@ def _call_source_fingerprints(witnesses, root):
 def _discover_sources_from_entries(entry, *, additional_entries=(), project_root=None,
                                   source_roots=(), max_files=128,
                                   max_bytes=8_000_000, max_directories=4096,
-                                  _call_source_witnesses=None) -> SourceDiscovery:
+                                  _call_source_witnesses=None, _captured_source_session=None) -> SourceDiscovery:
     """Discover one candidate closure with a shared budget and fixed boundary.
 
     Additional entries are absolute paths selected by an internal evidence
@@ -706,6 +707,11 @@ def _discover_sources_from_entries(entry, *, additional_entries=(), project_root
             type(path) is not str or not Path(path).is_absolute()
             for path in additional_entries):
         raise ValueError("additional_entries must be a tuple of absolute path strings")
+    if _captured_source_session is not None:
+        from scar.analysis.call_seeds import _CapturedSourceSession
+        if type(_captured_source_session) is not _CapturedSourceSession:
+            raise TypeError("discovery requires a normal live captured source session")
+        _captured_source_session.require_unchanged()
     max_files = _positive_limit(max_files, "max_files")
     max_bytes = _positive_limit(max_bytes, "max_bytes")
     max_directories = _positive_limit(max_directories, "max_directories")
@@ -819,26 +825,38 @@ def _discover_sources_from_entries(entry, *, additional_entries=(), project_root
                 "Candidate source traverses a symbolic link and was not read.",
                 source=trigger_source, path=str(path)))
             continue
-        if not path.is_file():
+        captured = (_captured_source_session is not None
+                    and _captured_source_session.has_path(path))
+        if not captured and not path.is_file():
             gaps.append(DiscoveryGap(DiscoveryGapKind.FILE_UNAVAILABLE,
                 "Candidate source file is unavailable.", source=trigger_source, path=str(path)))
             continue
         remaining = max_bytes - total_bytes
         try:
-            source_size = path.stat().st_size
-            if source_size > remaining:
-                raise OverflowError("source byte budget reached")
-            # Charge bytes once the source has been admitted to the read
-            # frontier, including a later decode or syntax failure.
-            total_bytes += source_size
-            text, encoding, byte_count = _read_source(path, remaining)
+            if captured:
+                original = _captured_source_session.archived(path)
+                source_size = original.raw_bytes
+                if source_size > remaining:
+                    raise OverflowError("source byte budget reached")
+                total_bytes += source_size
+                text, encoding, byte_count = original.text, original.snapshot.encoding, source_size
+            else:
+                source_size = path.stat().st_size
+                if source_size > remaining:
+                    raise OverflowError("source byte budget reached")
+                total_bytes += source_size
+                text, encoding, byte_count = _read_source(path, remaining)
+                if _captured_source_session is not None:
+                    _captured_source_session.record_static(path, text, encoding, byte_count)
         except OverflowError:
             gaps.append(DiscoveryGap(DiscoveryGapKind.BYTE_BUDGET,
                 f"Source discovery reached max_bytes={max_bytes}; this source frontier was not read.",
                 source=trigger_source, path=str(path)))
             continue
         except (OSError, UnicodeError, SyntaxError, LookupError) as exc:
-            kind = DiscoveryGapKind.DECODE_ERROR if isinstance(exc, (UnicodeError, SyntaxError, LookupError)) else DiscoveryGapKind.FILE_UNAVAILABLE
+            kind = (DiscoveryGapKind.FILE_UNAVAILABLE if captured else
+                    DiscoveryGapKind.DECODE_ERROR if isinstance(exc, (UnicodeError, SyntaxError, LookupError))
+                    else DiscoveryGapKind.FILE_UNAVAILABLE)
             gaps.append(DiscoveryGap(kind,
                 f"Could not read/decode source: {type(exc).__name__}: {exc}",
                 source=trigger_source, path=str(path)))
