@@ -1,0 +1,8 @@
+{
+  "status": "RUNNING",
+  "wrapper_pid": 2139685,
+  "collector_source_tree_sha256": "17f64b651f02e40e500325277d261a7f6542b6cc375e1ae9c237f5fd3cb555c2",
+  "observation": "wrapper and target confirmed live via ps at startup",
+  "target_pid": 2139697,
+  "provider_pid": 2139692
+}

@@ -1,0 +1,3 @@
+# LeWM raw snapshot capture
+
+PREPARED; no outcome yet. Original unmodified pusht configuration, 1 episode, budget25, goal-offset25; frozen collector 7afd39bef3d180ab24278999068a26efb4b88e58. Snapshot transport replaces callback JSON encoding; all-call capture remains instrumented and is not a benchmark. Same 1800s provider/2100s outer timeout and per-stream event/byte limits as the prior failed run. Total32GB accounts for retained binary journals plus post-run JSONL (not a larger event scope); archive6GB and five8MiB queues. Native/process-image/topology/OS evidence enabled. Read ACTUAL_TERMINAL, never infer completion from this prepared report. Whole graph remains OPEN.
