@@ -1,0 +1,26 @@
+{
+  "decoded_bytes": 5625987,
+  "navigation": {
+    "schema": "scar.native-input-port-navigation",
+    "sha256": "4436b171be0dec2782e7843bc097227d675efa5e33155a6e8a2bf2408b4b6f72",
+    "size_bytes": 146783,
+    "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/native_inputs_full_20261026/attempt05/port-navigation/manifest.json"
+  },
+  "rows_checked": 1000,
+  "scope": "candidate only; original endpoint/epoch/allocation normal verification follows",
+  "selected": null,
+  "selection": "first original order row with typed device cuda and observed exact provider epoch; one chunk only",
+  "source_chunk": {
+    "first_ordinal": 0,
+    "first_row": 21,
+    "last_row": 8163,
+    "path": "associations/000000.jsonl.gz",
+    "raw_bytes": 5479204,
+    "raw_sha256": "c415d6fa9db91b959d47919514ad92c2bcd3b26e9be7664824a4f4054d6036d2",
+    "rows": 1000,
+    "sha256": "ee4e7f4802c44ae67ac4a558a3d3324257f76e4938ebd8122e52e0bae1916f12",
+    "size_bytes": 260779
+  },
+  "status": "NO_CUDA_IN_SELECTED_CHUNK",
+  "stored_bytes": 407562
+}

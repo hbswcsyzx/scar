@@ -17,14 +17,14 @@
       "sha256": "ae590d9d2a81302130cdd318f0b5cd29ce7d4ab9ebf180bebf9bd92e6403393e"
     },
     {
-      "bytes": 6294,
+      "bytes": 6965,
       "path": "artifacts/analysis/native_input_storage_bridge_20261027/REPORT.md",
-      "sha256": "776eb0518a7afe16542f6c3c179d2eb5d4ce0c705ba0f1f1a95eece0bf5aa02b"
+      "sha256": "e1a0ab8b978857127dc657967cb116c636149b03d2059b6328d95343dfbbb94f"
     },
     {
-      "bytes": 367,
+      "bytes": 549,
       "path": "artifacts/analysis/native_input_storage_bridge_20261027/RETENTION.md",
-      "sha256": "973c021509f7632c6141f21b3bfafc5ce40b13ab6954eb2a344c79c57a1d0b6a"
+      "sha256": "4854bdd1ff0838278b456fedfeeda62bebbfbf9a0537020e9747bc6ef770d433"
     },
     {
       "bytes": 15736,
@@ -102,6 +102,11 @@
       "sha256": "4db4f0fe6e0a13fa1a46433903e482014448d5319d0161bdbaf7b461c32d4537"
     },
     {
+      "bytes": 1063,
+      "path": "artifacts/analysis/native_input_storage_bridge_20261027/gpu01/SELECTION.json",
+      "sha256": "6c4a736ae79b2ce34f3ed548e33845e9cfa5f182235fe205f98644e79fda4bbc"
+    },
+    {
       "bytes": 3406,
       "path": "artifacts/analysis/native_input_storage_bridge_20261027/read_operator_scope.py",
       "sha256": "44168761e666547ff4d940ba218d5845c2c9e4a851935b126697693fefec84c1"
@@ -120,6 +125,11 @@
       "bytes": 3598,
       "path": "artifacts/analysis/native_input_storage_bridge_20261027/run_qualified.py",
       "sha256": "499672fc6d36ad1d005bf3a98c3a861d4b69b59e504159fa9b0e91adea0488b2"
+    },
+    {
+      "bytes": 2192,
+      "path": "artifacts/analysis/native_input_storage_bridge_20261027/select_gpu.py",
+      "sha256": "b40877094c99ff8ba238502fcb1230265dd573b901c4d4417b1da2772b49e3de"
     }
   ]
 }
