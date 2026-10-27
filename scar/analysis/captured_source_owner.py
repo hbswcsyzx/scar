@@ -17,8 +17,9 @@ from scar.ir.program.call_edges import CallEdgeBudget, CapturedCode
 from scar.ir.program.providers import ProviderArtifact, ProviderFactReference
 from scar.ir.record_codec import encode, loads as strict_loads
 from scar.ir.semantics_v2 import SourceSnapshot
-from scar.trace.captured_sources import (PROGRAM_PORTS_PROFILE, SOURCE_SCHEMA, SOURCE_SCOPE,
-    validate_source_metadata, validate_source_row)
+from scar.trace.captured_sources import (
+    PROGRAM_PORTS_PROFILE, PROGRAM_PORTS_PROFILES, SOURCE_SCHEMA, SOURCE_SCOPE,
+    PROCESS_SOURCE_SCOPE, validate_source_metadata, validate_source_row)
 from scar.trace.files import open_binary, resolve
 
 
@@ -110,9 +111,11 @@ class CapturedSourceOwner:
         self._frame_files=tuple(frame_scan.files)
         call_artifact=ProviderArtifact(call_meta.path,call_meta.raw_sha256,call_meta.raw_bytes,'scar.call-edge-trace')
         caller=strict_loads(self._read(call_artifact,budget.max_metadata_bytes).decode('utf8'))
+        profile=caller.get('capture_profile')
+        scope=SOURCE_SCOPE if profile==PROGRAM_PORTS_PROFILE else PROCESS_SOURCE_SCOPE
         _need(caller in frame_scan.metadata and caller.get('process_id')==pid
-              and caller.get('project_root')==str(project_root) and caller.get('capture_profile')==PROGRAM_PORTS_PROFILE
-              and caller.get('scope_policy')==SOURCE_SCOPE and caller.get('instruction_monitoring') is False
+              and caller.get('project_root')==str(project_root) and profile in PROGRAM_PORTS_PROFILES
+              and caller.get('scope_policy')==scope and caller.get('instruction_monitoring') is False
               and caller.get('captured_sources')==encode(metadata),
               'closed original call/source membership differs or unsupported profile')
         version=re.match(r'([0-9]+\.[0-9]+)\.[0-9]+(?:\s|$)',caller.get('python',''))
@@ -135,7 +138,8 @@ class CapturedSourceOwner:
             actual[captured.key]=captured
         _need(len(actual)==codes.lines and actual=={key:r.code for key,r in captures.items()},
               'original code membership/row count differs')
-        by_path=validate_source_metadata(document,pid,{key:code.filename for key,code in actual.items()})
+        by_path=validate_source_metadata(document,pid,{key:code.filename for key,code in actual.items()},
+                                         profile=profile)
         _need(len(by_path)<=budget.max_files,'source inventory count budget exceeded')
         declared=document['file']
         _need(declared['uri']==str(directory/f'captured-sources.{pid}.jsonl'),

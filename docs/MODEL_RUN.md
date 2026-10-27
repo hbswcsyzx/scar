@@ -247,3 +247,25 @@ view 和 allocation，不复制图记录、不保存 Tensor 内容。实际 LeWM
 
 这些是原观察点的物理关系，不证明不同操作点之间内容未变、logical version、
 持久驻留、Materialization 或 ready；source context 也不提升为 direct-call 关系。
+
+
+## 进程范围的轻量调用与源码采集
+
+`trace --capture-profile program-ports` 保留项目入口及其实际 Python 后代；
+`trace --capture-profile process-ports` 使用独立 V2 合同，采集已安装 hook 的目标进程
+Python 线程入口/退出与 CALL，排除采集器子树。两者均不开 INSTRUCTION，不保存
+Tensor 内容。V2 透明转发真实 import/Torch 调用；进入未知/native 转发边界的首个
+Python 调用不伪造直接 caller。probe/cleanup 触发的调用仍属于采集器。
+
+V2 对已有帧没有补造 entry，不保证后起裸 native/_thread Python 线程，fork/exec
+子进程 Python 也未采；这些范围在 metadata 明确保留，不能把 V2 标签当完整覆盖。
+CPU V1 实际采集与 IO 读回已通过；V2 仅语法/导入/入口检查，待真实 LeWM 运行验证。
+见 [原 CPU 结果](../artifacts/experiments/program_ports_cpu_20261027/REPORT.md)和
+[V2 实现边界](../artifacts/analysis/program_ports_v2_20261027/REPORT.md)。
+
+`CapturedSourceOwner` 正常核闭合 code/source 原件，再提供不可变归档文本；
+`CodeWitnessStore.admit_captured_source` 不读 live 源文件，仍需普通编译与完整 descriptor
+匹配。原归档永远只声明 `NOT_CHECKED`/非 loader-time 字节；新匹配见证独立保存。
+owner 按原 call-meta 明确区分 V1/V2 并核 source metadata 的同一 profile，不能混用。
+V1 的离线编译/只读读回已实测；V2 owner 适配尚待该版本的真实输入验证。
+自动 model-run/静态源码接线仍在开发，不能将这个 API 当作全链完成。
