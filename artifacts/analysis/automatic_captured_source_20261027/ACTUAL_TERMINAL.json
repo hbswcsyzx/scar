@@ -1,0 +1,12 @@
+{
+  "session": 50789,
+  "actual_exit_code": 0,
+  "runner_wall_seconds": 2.8982601140160114,
+  "model_status": "SOURCE_BOOTSTRAP_WITH_OPEN",
+  "scope": "SOURCE_BOOTSTRAP_ONLY",
+  "target_exec": 0,
+  "capture": 0,
+  "native_import": 0,
+  "source_bindings": "NOT_ATTEMPTED_SOURCE_BOOTSTRAP_ONLY",
+  "source_receipts": "SOURCE_RECEIPTS.json"
+}

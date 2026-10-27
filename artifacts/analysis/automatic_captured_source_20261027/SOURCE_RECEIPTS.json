@@ -1,0 +1,36 @@
+{
+  "base": "b28e129e",
+  "production": [
+    {
+      "path": "scar/analysis/call_seeds.py",
+      "bytes": 14905,
+      "sha256": "f6a4da1db9de03b6f64d0a52c33fcca1baba8193117578563cb99d5c54be9cd1"
+    },
+    {
+      "path": "scar/analysis/call_demand.py",
+      "bytes": 20263,
+      "sha256": "b0fc524e24460a8d61310788fd0b3d3038140b5733af3232f4b0352db838b6f3"
+    },
+    {
+      "path": "scar/analysis/call_edges.py",
+      "bytes": 70157,
+      "sha256": "8decf8cd51463491f3c933c678d6c1b15e829e5f3c7cee9465cebedc72f50ede"
+    },
+    {
+      "path": "scar/analysis/source_discovery.py",
+      "bytes": 47892,
+      "sha256": "d793810d82a254862e5504e321576d861c0152532b316f6fef7288555c33dcce"
+    },
+    {
+      "path": "scar/analysis/source_layers.py",
+      "bytes": 44455,
+      "sha256": "4f6fecf59463e8c1a2741e197ed7fba139ea16aed5afdc81be899bf405398455"
+    },
+    {
+      "path": "scar/analysis/model_run.py",
+      "bytes": 70211,
+      "sha256": "3265cab3774e1f929e4e784792aefe683ed40e7393a5ee87db07b0655d888d9e"
+    }
+  ],
+  "same_bytes_as_actual_attempt01": true
+}
