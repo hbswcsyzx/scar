@@ -12,7 +12,8 @@ LOAD_OCCURRENCES_RULE = "CPYTHON_LOAD_OCCURRENCES_V1"
 CALL_WINDOWS_RULE = "CPYTHON_CALL_WINDOWS_V1"
 LEAN_PORTS_RULE = "SCAR_LEAN_PORTS_V1"
 PROGRAM_PORTS_RULE = "SCAR_PROGRAM_PORTS_V1"
-OPERAND_CAPTURE_RULES = frozenset((LOAD_OCCURRENCES_RULE, CALL_WINDOWS_RULE, LEAN_PORTS_RULE, PROGRAM_PORTS_RULE))
+PROCESS_PORTS_RULE = "SCAR_PROGRAM_PORTS_V2"
+OPERAND_CAPTURE_RULES = frozenset((LOAD_OCCURRENCES_RULE, CALL_WINDOWS_RULE, LEAN_PORTS_RULE, PROGRAM_PORTS_RULE, PROCESS_PORTS_RULE))
 
 
 def _require(condition, detail):
@@ -390,7 +391,7 @@ def operand_references(event):
     return ()
 
 
-__all__ = ["LOAD_OCCURRENCES_RULE", "CALL_WINDOWS_RULE", "PROGRAM_PORTS_RULE", "OPERAND_CAPTURE_RULES",
+__all__ = ["LOAD_OCCURRENCES_RULE", "CALL_WINDOWS_RULE", "PROGRAM_PORTS_RULE", "PROCESS_PORTS_RULE", "OPERAND_CAPTURE_RULES",
            "CallOperandBudget", "CallableKind", "FunctionLayout", "CallableShape", "LoadNamespace",
            "LoadObservation", "OperandEventKind", "OperandInstruction", "OperandCallAttempt",
            "OperandEntryHandshake", "OperandGap", "OperandEvent", "OperandCollectionLimits",

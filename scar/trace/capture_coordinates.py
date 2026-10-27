@@ -370,7 +370,7 @@ def _program_source_members(files, trace_root, pid, members, calls, operands):
           'program source metadata namespace/schema differs')
     doc, metadata = files.document(metadata_name, SOURCE_SCHEMA+'/1', limit=8_000_000)
     _need(encode(metadata) == declaration, 'program source metadata receipt differs')
-    by_path = validate_source_metadata(doc, pid)
+    by_path = validate_source_metadata(doc, pid, profile=calls['capture_profile'])
     events_name = trace_root / f'captured-sources.{pid}.jsonl'
     _need(doc['file']['uri'] == str(events_name), 'program source archive namespace differs')
     artifact = files.verify(events_name, SOURCE_SCHEMA+'.rows.v1')
@@ -392,10 +392,15 @@ def _program_source_members(files, trace_root, pid, members, calls, operands):
     _need(rows == doc['file']['rows'], 'captured source row denominator differs')
     members[str(metadata_name)] = metadata
     members[str(events_name)] = artifact
-    return dict(capability='SCAR_CAPTURED_PYTHON_SOURCES_MEMBERSHIP_V1',
+    result = dict(capability='SCAR_CAPTURED_PYTHON_SOURCES_MEMBERSHIP_V1',
         manifest=encode(metadata), events=encode(artifact),
         files=len(by_path), archived_files=rows, code_descriptors=len(doc['code_sources']),
-        compiler_match='NOT_CHECKED', loader_bytes_observed=False), [str(metadata_name),str(events_name)]
+        compiler_match='NOT_CHECKED', loader_bytes_observed=False)
+    from scar.trace.captured_sources import PROCESS_PORTS_PROFILE
+    if calls['capture_profile'] == PROCESS_PORTS_PROFILE:
+        result.update(profile=PROCESS_PORTS_PROFILE, scope_policy=calls['scope_policy'],
+                      scope_frontiers=calls['scope_frontiers'])
+    return result, [str(metadata_name),str(events_name)]
 
 
 def bind_capture_coordinates(capture_dir, *, max_bytes=1_000_000_000, max_lines=2_000_000, profile_uri=None,

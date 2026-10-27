@@ -26,9 +26,10 @@ def _trace(args) -> int:
     out = Path(args.out).resolve()
     capture_plan_path = getattr(args, 'capture_plan', None)
     capture_plan_sha256 = getattr(args, 'capture_plan_sha256', None)
-    program_ports = getattr(args, 'capture_profile', None) == 'program-ports'
+    port_profile = getattr(args, 'capture_profile', None)
+    program_ports = port_profile in ('program-ports','process-ports')
     if program_ports and capture_plan_path is not None:
-        raise SystemExit('--capture-profile program-ports and --capture-plan are independent, exclusive scopes')
+        raise SystemExit('--capture-profile and --capture-plan are independent, exclusive scopes')
     if (capture_plan_path is None) != (capture_plan_sha256 is None):
         raise SystemExit('--capture-plan and --capture-plan-sha256 are required together')
     lean_plan = None
@@ -104,9 +105,9 @@ def _trace(args) -> int:
         if operands:
             if args.max_operand_events < 1 or args.max_operand_bytes < 1:
                 raise SystemExit("operand budgets must be positive")
-            capture = ('program-ports' if program_ports else 'lean-ports' if lean_plan is not None
+            capture = (port_profile if program_ports else 'lean-ports' if lean_plan is not None
                        else getattr(args, 'operand_capture', 'windows'))
-            if capture not in ('windows', 'instructions', 'lean-ports', 'program-ports'):
+            if capture not in ('windows', 'instructions', 'lean-ports', 'program-ports', 'process-ports'):
                 raise SystemExit("operand capture must be windows or instructions")
             env['SCAR_CALL_OPERANDS'] = '1'
             if python_targets:
@@ -117,8 +118,9 @@ def _trace(args) -> int:
             env['SCAR_OPERAND_MAX_EVENTS'] = str(args.max_operand_events)
             env['SCAR_OPERAND_MAX_BYTES'] = str(args.max_operand_bytes)
             if program_ports:
-                from scar.trace.captured_sources import PROGRAM_PORTS_PROFILE
-                env['SCAR_PYTHON_CAPTURE_PROFILE'] = PROGRAM_PORTS_PROFILE
+                from scar.trace.captured_sources import PROGRAM_PORTS_PROFILE, PROCESS_PORTS_PROFILE
+                env['SCAR_PYTHON_CAPTURE_PROFILE'] = (PROCESS_PORTS_PROFILE if port_profile == 'process-ports'
+                                                      else PROGRAM_PORTS_PROFILE)
                 env['SCAR_STREAM_BACKING_OBSERVATIONS'] = '1'
                 for name, value in (('FILES', args.max_source_files), ('FILE_BYTES', args.max_source_file_bytes),
                                     ('BYTES', args.max_source_bytes)):
@@ -603,12 +605,12 @@ def main(argv=None) -> int:
                        help='record explicit v2 Python callee and receiver roles; implies call-operands (CPython 3.14.7)')
     trace.add_argument('--capture-plan', help='use a source-derived lean interface capture plan; implies Python call targets')
     trace.add_argument('--capture-plan-sha256', help='expected capture plan SHA256')
-    trace.add_argument('--capture-profile', choices=('program-ports',),
-                       help='record project entries and actual Python descendants with CALL-only monitoring and source bytes')
+    trace.add_argument('--capture-profile', choices=('program-ports','process-ports'),
+                       help='CALL-only monitoring and source bytes: project descendants (V1), or installed target-process Python threads (V2)')
     trace.add_argument('--max-source-files',type=int,default=1024)
     trace.add_argument('--max-source-file-bytes',type=int,default=2_000_000)
     trace.add_argument('--max-source-bytes',type=int,default=64_000_000,
-                       help='raw source bytes read, once per observed original file (program-ports only)')
+                       help='raw source bytes read once per observed original file (ports profiles only)')
     trace.add_argument('--execution-evidence',action='store_true',
                        help='collect native ETO/Kineto evidence alongside the call recorder when the target imports Torch; requires calls-only or call-operands')
     trace.add_argument('--tensor-physical',action='store_true',

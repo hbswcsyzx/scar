@@ -13,6 +13,17 @@ import weakref
 
 from scar.trace.code_snapshot import describe_code, site
 
+_ACTIVE_PROCESS_RECORDER = None
+_FORWARD_KINDS = ('DISPATCH', 'IMPORT', 'TRACE')
+
+
+def _active_process_recorder():
+    """An existing live owner only; never reconstruct one from saved metadata."""
+    recorder = _ACTIVE_PROCESS_RECORDER() if _ACTIVE_PROCESS_RECORDER is not None else None
+    return (recorder if type(recorder) is CallEdgeRecorder and recorder.process_ports
+            and not recorder.closed and recorder.pid == os.getpid()
+            and sys.getprofile() is recorder._collector_profile else None)
+
 
 class CallEdgeRecorder:
     def __init__(self, out, project_root, *, max_events=100000, max_bytes=64000000,
@@ -28,13 +39,20 @@ class CallEdgeRecorder:
         self.root_prefix = self.root.rstrip(os.sep)+os.sep
         self.observer_files = {CallEdgeRecorder.profile.__code__.co_filename,describe_code.__code__.co_filename}
         self.pid = os.getpid()
-        from scar.trace.captured_sources import PROGRAM_PORTS_PROFILE
-        if capture_profile not in (None, PROGRAM_PORTS_PROFILE) or capture_profile is not None and lean_plan is not None:
+        from scar.trace.captured_sources import PROGRAM_PORTS_PROFILES, PROCESS_PORTS_PROFILE
+        if capture_profile not in (None, *PROGRAM_PORTS_PROFILES) or capture_profile is not None and lean_plan is not None:
             raise ValueError('program ports requires its explicit profile and no lean plan')
-        self.program_ports = capture_profile == PROGRAM_PORTS_PROFILE
+        self.capture_profile = capture_profile
+        self.program_ports = capture_profile in PROGRAM_PORTS_PROFILES
+        self.process_ports = capture_profile == PROCESS_PORTS_PROFILE
+        self.thread_hook_installation = None
         self._instrumentation_prefix = str(Path(__file__).resolve().parent) + os.sep
         self._instrumentation_loader = str(Path(__file__).resolve().parents[2] / 'sitecustomize.py')
         self._instrumentation_barriers = {}
+        self._target_forward_stacks = {}
+        self._target_forward_roots = []
+        self._target_forward_seen = self._target_forward_bytes = 0
+        self._target_forward_frontiers = set()
         self.source_archive = None
         self.lean_plan = lean_plan
         self.lean_plan_artifact = None
@@ -75,7 +93,7 @@ class CallEdgeRecorder:
         if self.program_ports:
             from scar.trace.captured_sources import CapturedSources
             try:
-                self.source_archive = CapturedSources(self.out, self.pid, **(source_limits or {}))
+                self.source_archive = CapturedSources(self.out, self.pid, profile=capture_profile, **(source_limits or {}))
             except BaseException:
                 os.close(self.events_fd); os.close(self.codes_fd)
                 raise
@@ -91,6 +109,8 @@ class CallEdgeRecorder:
             filename = frame.f_code.co_filename
             if filename.startswith(self._instrumentation_prefix) or filename == self._instrumentation_loader:
                 return False
+            if self.process_ports:
+                return True
             parent = frame.f_back
             return (self._inside(frame) or parent is not None and
                     (threading.get_ident(), id(parent)) in self.active)
@@ -130,7 +150,78 @@ class CallEdgeRecorder:
                                or filename == self._instrumentation_loader):
             self._instrumentation_barriers[thread] = id(frame)
             return True
+        if self.process_ports and event == 'call':
+            parent = frame.f_back
+            if parent is None or (thread,id(parent)) not in self.active:
+                # Attaching to existing threads can first see a call below an
+                # already-active collector/bootstrap frame. No entry event for
+                # that ancestor was delivered. Seed the barrier at its real
+                # outermost frame, without inventing a target invocation.
+                ancestor, root = parent, None
+                stack = self._target_forward_stacks.get(thread, ())
+                floor = stack[-1]['floor'] if stack else None
+                while ancestor is not None:
+                    if id(ancestor) == floor:
+                        break  # The original target is running below this transparent boundary.
+                    name = ancestor.f_code.co_filename
+                    if name.startswith(self._instrumentation_prefix) or name == self._instrumentation_loader:
+                        root = id(ancestor)
+                    ancestor = ancestor.f_back
+                if root is not None:
+                    self._instrumentation_barriers[thread] = root
+                    return True
         return False
+
+    def _begin_target_forward(self, frame, kind, *, adapter_frame=None):
+        """Temporarily leave collector scope for exactly one original target call."""
+        if not self.process_ports or self.closed:
+            return None
+        try:
+            if (frame is not sys._getframe(1) or kind not in _FORWARD_KINDS
+                    or not frame.f_code.co_filename.startswith(self._instrumentation_prefix)):
+                raise ValueError('forward boundary must be its actual collector caller frame')
+            thread = threading.get_ident()
+            adapter = frame if adapter_frame is None else adapter_frame
+            ancestor = frame
+            while ancestor is not None and ancestor is not adapter:
+                ancestor = ancestor.f_back
+            if ancestor is None:
+                raise ValueError('transparent adapter is not on the actual caller stack')
+            # An import/dispatch can also be triggered by an observer probe.
+            # Only the barrier belonging to this real transparent adapter may
+            # be left. An enclosing observer barrier remains in force.
+            if self._instrumentation_barriers.get(thread) != id(adapter):
+                return None
+            token = dict(thread=thread, floor=id(frame), kind=_FORWARD_KINDS.index(kind),
+                         barrier=self._instrumentation_barriers.get(thread), seen=False)
+            self._target_forward_stacks.setdefault(thread, []).append(token)
+            self._instrumentation_barriers.pop(thread, None)
+            return token
+        except Exception:
+            self._target_forward_frontiers.add('TARGET_FORWARD_BEGIN_FAILED')
+            return None
+
+    def _end_target_forward(self, token):
+        if token is None:
+            return
+        try:
+            thread = threading.get_ident()
+            stack = self._target_forward_stacks.get(thread)
+            if token['thread'] != thread or not stack or stack[-1] is not token:
+                raise ValueError('forward scope is not the live thread LIFO token')
+            stack.pop()
+            if not stack:
+                self._target_forward_stacks.pop(thread)
+            if token['barrier'] is None:
+                self._instrumentation_barriers.pop(thread, None)
+            else:
+                self._instrumentation_barriers[thread] = token['barrier']
+        except Exception:
+            self._target_forward_frontiers.add('TARGET_FORWARD_END_FAILED')
+
+    def _is_target_forward_root(self, invocation):
+        stack = self._target_forward_stacks.get(threading.get_ident(), ())
+        return bool(stack and stack[-1].get('root_invocation') == invocation)
 
     def _write(self, fd, row):
         data = (json.dumps(row,ensure_ascii=True,separators=(",",":"),allow_nan=False)+"\n").encode()
@@ -315,6 +406,13 @@ class CallEdgeRecorder:
                     parameters, complete = (self._bindings(frame.f_locals,seen,names)
                                             if detailed else ([],False))
                     direct = self.active.get((thread,id(caller))) if caller is not None else None
+                    forwards = self._target_forward_stacks.get(thread, ())
+                    forward_root = forwards[-1] if forwards and not forwards[-1]['seen'] else None
+                    if forward_root is not None:
+                        # The helper/native boundary is not a proven Python
+                        # caller. Preserve raw caller site/path/ancestor only
+                        # as context; source-call handshakes cannot skip it.
+                        direct = None
                     path, ancestor, walker, path_failed = [], None, caller, False
                     while walker is not None and len(path) < self.limits['max_path']:
                         try:
@@ -342,6 +440,17 @@ class CallEdgeRecorder:
                         self.entered += 1
                         self.unclosed_written += 1
                         self.active[thread,id(frame)] = invocation,code,suspended
+                        if forward_root is not None:
+                            forward_root['seen'] = True
+                            forward_root['root_invocation'] = invocation
+                            self._target_forward_seen += 1
+                            reference = [invocation,forward_root['kind']]
+                            size = len(json.dumps(reference,separators=(',',':')))+1
+                            if self._target_forward_bytes + size <= 1_000_000:
+                                self._target_forward_roots.append(reference)
+                                self._target_forward_bytes += size
+                            else:
+                                self._target_forward_frontiers.add('TARGET_FORWARD_CONTEXT_METADATA_BUDGET')
                     else:
                         self.dropped += 1
                 else:
@@ -409,18 +518,36 @@ class CallEdgeRecorder:
                     unplanned_bodies_expanded=False,
                     scope=PROFILE + ': planned roots/direct thin boundaries; unplanned interiors/imports unexpanded')
             if self.program_ports:
-                from scar.trace.captured_sources import PROGRAM_PORTS_PROFILE, SOURCE_SCOPE
-                metadata.update(capture_profile=PROGRAM_PORTS_PROFILE, scope_policy=SOURCE_SCOPE,
+                from scar.trace.captured_sources import SOURCE_SCOPE, PROCESS_SOURCE_SCOPE
+                metadata.update(capture_profile=self.capture_profile,
+                    scope_policy=PROCESS_SOURCE_SCOPE if self.process_ports else SOURCE_SCOPE,
                     instruction_monitoring=False, captured_sources=self.source_archive.close(),
                     instrumentation_excluded=dict(package_root=self._instrumentation_prefix[:-1],
                                                   loader=self._instrumentation_loader),
                     scope='project entries and actual Python descendants in the owner process; native interiors unexpanded')
-            (self.out/f"call-meta.{self.pid}.json").write_text(json.dumps(metadata,indent=2)+'\n')
+                if self.process_ports:
+                    if self._target_forward_stacks:
+                        self._target_forward_frontiers.add('TARGET_FORWARD_SCOPES_UNCLOSED')
+                    metadata.update(thread_hooks=self.thread_hook_installation,
+                        target_forwarding=dict(kinds=list(_FORWARD_KINDS),
+                            roots=self._target_forward_roots, roots_seen=self._target_forward_seen,
+                            max_metadata_bytes=1_000_000,
+                            frontiers=sorted(self._target_forward_frontiers),
+                            context='original entry caller site/path/ancestor; not direct-call or submission proof'),
+                        scope='actual Python calls delivered by installed owner-process thread hooks; no inferred thread submission',
+                        scope_frontiers=['FUTURE_NON_THREADING_PYTHON_THREADS_NOT_GUARANTEED',
+                            'PREINSTALL_ACTIVE_FRAMES_HAVE_NO_RETROACTIVE_ENTRY',
+                            'FORK_AND_EXEC_CHILD_PYTHON_NOT_CAPTURED',
+                            'PREEXISTING_OTHER_THREAD_HOOK_HISTORY_NOT_OBSERVED'])
+            encoded = (json.dumps(metadata,separators=(',',':')) if self.process_ports
+                       else json.dumps(metadata,indent=2))
+            (self.out/f"call-meta.{self.pid}.json").write_text(encoded+'\n')
             if self.lean_plan is not None:
                 self.lean_plan.clear_runtime_cache()
 
 
 def install(out, project_root, *, lean_plan=None):
+    global _ACTIVE_PROCESS_RECORDER
     owner = os.environ.get('SCAR_CALL_TRACE_OWNER_PID')
     if owner is not None and owner != str(os.getpid()):
         return None
@@ -445,6 +572,8 @@ def install(out, project_root, *, lean_plan=None):
     previous, previous_thread = sys.getprofile(),threading.getprofile()
     recorder.previous_profile_present = previous is not None or previous_thread is not None
     def profile(frame,event,arg):
+        if recorder.process_ports and recorder.closed:
+            return
         observer = recorder.operand_observer
         if observer is None:
             recorder.profile(frame,event,arg)
@@ -457,8 +586,22 @@ def install(out, project_root, *, lean_plan=None):
         old = previous if threading.get_ident() == main_thread else previous_thread
         if old is not None:
             old(frame,event,arg)
-    sys.setprofile(profile)
-    threading.setprofile(profile)
+    if recorder.process_ports:
+        # Capture IDs only; do not retain frames from sys._current_frames().
+        threads_at_install = tuple(sys._current_frames())
+        recorder.thread_hook_installation = dict(api='threading.setprofile_all_threads',
+            enumeration_api='sys._current_frames',
+            python_threads_at_install=len(threads_at_install),
+            python_thread_identifiers_at_install=list(threads_at_install),
+            installing_python_ident=main_thread, installing_native_tid=threading.get_native_id(),
+            known_current_hook_present=previous is not None,
+            known_future_threading_hook_present=previous_thread is not None,
+            existing_other_thread_hook_history='NOT_OBSERVED',
+            other_thread_hook_restoration='NOT_ENUMERABLE; CLOSED_COLLECTOR_NOOP_IF_STILL_INSTALLED')
+        threading.setprofile_all_threads(profile)
+    else:
+        sys.setprofile(profile)
+        threading.setprofile(profile)
     if recorder.collector_witness is not None:
         recorder.collector_witness.register_profile(profile)
     sampler = None
@@ -495,9 +638,15 @@ def install(out, project_root, *, lean_plan=None):
         threading.setprofile(previous_thread)
         for fd in (recorder.events_fd,recorder.codes_fd):
             os.close(fd)
+        if recorder.source_archive is not None and not recorder.source_archive.closed:
+            os.close(recorder.source_archive.fd)
+            recorder.source_archive.closed = True
         recorder.closed = True
     if hasattr(os,'register_at_fork'):
         os.register_at_fork(after_in_child=forked)
     atexit.register(finish)
     recorder._collector_finish = finish
+    recorder._collector_profile = profile
+    if recorder.process_ports:
+        _ACTIVE_PROCESS_RECORDER = weakref.ref(recorder)
     return recorder

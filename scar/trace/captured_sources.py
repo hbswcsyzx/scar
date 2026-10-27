@@ -17,8 +17,11 @@ import sys
 import tokenize
 
 PROGRAM_PORTS_PROFILE = 'SCAR_PROGRAM_PORTS_V1'
+PROCESS_PORTS_PROFILE = 'SCAR_PROGRAM_PORTS_V2'
+PROGRAM_PORTS_PROFILES = (PROGRAM_PORTS_PROFILE, PROCESS_PORTS_PROFILE)
 SOURCE_SCHEMA = 'scar.captured-python-sources'
 SOURCE_SCOPE = 'PROJECT_ROOT_AND_ACTUAL_PYTHON_DESCENDANTS_V1'
+PROCESS_SOURCE_SCOPE = 'TARGET_PROCESS_INSTALLED_PYTHON_THREADS_V1'
 
 
 def _wire(value):
@@ -31,10 +34,13 @@ def _stamp(value):
 
 class CapturedSources:
     def __init__(self, out, pid, *, max_files=1024, max_file_bytes=2_000_000,
-                 max_total_bytes=64_000_000):
+                 max_total_bytes=64_000_000, profile=PROGRAM_PORTS_PROFILE):
         if any(type(x) is not int or x < 1 for x in (pid, max_files, max_file_bytes, max_total_bytes)):
             raise ValueError('captured source budgets must be positive integers')
         self.pid, self.out = pid, Path(out)
+        if profile not in PROGRAM_PORTS_PROFILES:
+            raise ValueError('unsupported captured-source scope profile')
+        self.profile = profile
         self.limits = dict(max_files=max_files, max_file_bytes=max_file_bytes, max_total_bytes=max_total_bytes)
         self.path = self.out / f'captured-sources.{pid}.jsonl'
         self.meta = self.out / f'captured-source-meta.{pid}.json'
@@ -121,7 +127,7 @@ class CapturedSources:
             item['unchanged_at_close'] = unchanged
             if not unchanged:
                 item['frontier'] = 'SOURCE_CHANGED_AFTER_OBSERVATION'
-        doc = dict(schema=SOURCE_SCHEMA, schema_version=1, profile=PROGRAM_PORTS_PROFILE,
+        doc = dict(schema=SOURCE_SCHEMA, schema_version=1, profile=self.profile,
             process_id=self.pid, limits=self.limits, files=list(self.files.values()),
             code_sources=[dict(code=key, path=path) for key, path in self.codes.items()],
             file=dict(uri=str(self.path), sha256=self.digest.hexdigest(), size_bytes=self.written,
@@ -140,27 +146,66 @@ class CapturedSources:
 
 def validate_program_profile(calls, operands):
     """Metadata contract only; source bytes and code matching remain separate."""
-    from scar.ir.program.call_operands import PROGRAM_PORTS_RULE
-    requested = calls.get('capture_profile') == PROGRAM_PORTS_PROFILE
-    if requested != (operands.get('rule') == PROGRAM_PORTS_RULE):
+    from scar.ir.program.call_operands import PROGRAM_PORTS_RULE, PROCESS_PORTS_RULE
+    profile = calls.get('capture_profile')
+    requested = profile in PROGRAM_PORTS_PROFILES
+    expected = PROGRAM_PORTS_RULE if profile == PROGRAM_PORTS_PROFILE else PROCESS_PORTS_RULE
+    if requested != (operands.get('rule') in (PROGRAM_PORTS_RULE, PROCESS_PORTS_RULE)) or requested and operands['rule'] != expected:
         raise ValueError('program ports frame/operand profile differs')
     if not requested:
         return None
-    if (calls.get('scope_policy') != SOURCE_SCOPE or calls.get('instruction_monitoring') is not False
+    scope = SOURCE_SCOPE if profile == PROGRAM_PORTS_PROFILE else PROCESS_SOURCE_SCOPE
+    if (calls.get('scope_policy') != scope or calls.get('instruction_monitoring') is not False
             or 'capture_plan' in calls or operands.get('instructions') != 0
             or type(calls.get('captured_sources')) is not dict):
         raise ValueError('program ports scope/source declaration differs')
+    if profile == PROCESS_PORTS_PROFILE:
+        hooks = calls.get('thread_hooks')
+        ids = hooks.get('python_thread_identifiers_at_install') if type(hooks) is dict else None
+        if (type(hooks) is not dict or hooks.get('api') != 'threading.setprofile_all_threads'
+                or hooks.get('enumeration_api') != 'sys._current_frames'
+                or type(ids) is not list or not ids or len(set(ids)) != len(ids)
+                or any(type(x) is not int or x < 1 for x in ids)
+                or type(hooks.get('python_threads_at_install')) is not int
+                or hooks['python_threads_at_install'] != len(ids)
+                or hooks.get('installing_python_ident') not in ids
+                or type(hooks.get('installing_native_tid')) is not int or hooks['installing_native_tid'] < 1
+                or any(type(hooks.get(x)) is not bool for x in
+                       ('known_current_hook_present','known_future_threading_hook_present'))
+                or hooks.get('existing_other_thread_hook_history') != 'NOT_OBSERVED'
+                or hooks.get('other_thread_hook_restoration') != 'NOT_ENUMERABLE; CLOSED_COLLECTOR_NOOP_IF_STILL_INSTALLED'
+                or calls.get('scope_frontiers') != ['FUTURE_NON_THREADING_PYTHON_THREADS_NOT_GUARANTEED',
+                    'PREINSTALL_ACTIVE_FRAMES_HAVE_NO_RETROACTIVE_ENTRY',
+                    'FORK_AND_EXEC_CHILD_PYTHON_NOT_CAPTURED',
+                    'PREEXISTING_OTHER_THREAD_HOOK_HISTORY_NOT_OBSERVED']):
+            raise ValueError('process ports thread hook contract differs')
+        forwarding = calls.get('target_forwarding')
+        roots = forwarding.get('roots') if type(forwarding) is dict else None
+        if (type(forwarding) is not dict or forwarding.get('kinds') != ['DISPATCH','IMPORT','TRACE']
+                or type(roots) is not list
+                or any(type(x) is not list or len(x) != 2 or type(x[0]) is not int or x[0] < 1
+                       or type(x[1]) is not int or not 0 <= x[1] < 3 for x in roots)
+                or len({x[0] for x in roots}) != len(roots)
+                or type(forwarding.get('roots_seen')) is not int or forwarding['roots_seen'] < len(roots)
+                or forwarding.get('max_metadata_bytes') != 1_000_000
+                or sum(len(json.dumps(x,separators=(',',':')))+1 for x in roots) > 1_000_000
+                or type(forwarding.get('frontiers')) is not list
+                or any(type(x) is not str or not x for x in forwarding['frontiers'])
+                or forwarding.get('context') != 'original entry caller site/path/ancestor; not direct-call or submission proof'):
+            raise ValueError('process ports target forwarding declaration differs')
     return calls['captured_sources']
 
 
-def validate_source_metadata(doc, pid, code_sources=None):
+def validate_source_metadata(doc, pid, code_sources=None, *, profile=None):
     """Validate provenance metadata without promoting it to compiler evidence."""
     if (set(doc) != {'schema','schema_version','profile','process_id','limits','files','code_sources',
                      'file','source_raw_bytes_read','compiler_match','loader_bytes_observed',
                      'runtime_optimize','compile_flags_and_per_code_optimize'}
             or doc.get('schema') != SOURCE_SCHEMA or type(doc.get('schema_version')) is not int or doc['schema_version'] != 1
             or type(doc.get('process_id')) is not int or doc['process_id'] != pid
-            or doc.get('profile') != PROGRAM_PORTS_PROFILE or doc.get('compiler_match') != 'NOT_CHECKED'
+            or doc.get('profile') not in PROGRAM_PORTS_PROFILES
+            or profile is not None and doc['profile'] != profile
+            or doc.get('compiler_match') != 'NOT_CHECKED'
             or doc.get('loader_bytes_observed') is not False
             or doc.get('compile_flags_and_per_code_optimize') != 'NOT_OBSERVED'):
         raise ValueError('captured source schema/issuer/qualification differs')

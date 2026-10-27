@@ -18,7 +18,7 @@ import weakref
 
 from scar.ir.program.call_edges import CallTraceFile
 from scar.ir.program.call_operands import (
-    CALL_WINDOWS_RULE, LOAD_OCCURRENCES_RULE, LEAN_PORTS_RULE, PROGRAM_PORTS_RULE, CallableKind, FunctionLayout,
+    CALL_WINDOWS_RULE, LOAD_OCCURRENCES_RULE, LEAN_PORTS_RULE, PROGRAM_PORTS_RULE, PROCESS_PORTS_RULE, CallableKind, FunctionLayout,
     OperandCollectionLimits, OperandCollectionMetadata,
 )
 from scar.ir.record_codec import encode
@@ -34,11 +34,13 @@ _CAPTURE_INSTRUCTIONS = "instructions"
 _CAPTURE_WINDOWS = "windows"
 _CAPTURE_LEAN = "lean-ports"
 _CAPTURE_PROGRAM = "program-ports"
+_CAPTURE_PROCESS = "process-ports"
 _CAPTURE_RULES = {
     _CAPTURE_INSTRUCTIONS: LOAD_OCCURRENCES_RULE,
     _CAPTURE_WINDOWS: CALL_WINDOWS_RULE,
     _CAPTURE_LEAN: LEAN_PORTS_RULE,
     _CAPTURE_PROGRAM: PROGRAM_PORTS_RULE,
+    _CAPTURE_PROCESS: PROCESS_PORTS_RULE,
 }
 _MONITOR_NAME = "scar-call-operands"
 _LOCAL_MASK = sys.monitoring.events.INSTRUCTION | sys.monitoring.events.CALL
@@ -107,13 +109,14 @@ class CallOperandObserver:
         self.capture = capture
         self.lean_plan = getattr(recorder, 'lean_plan', None)
         self.program_ports = getattr(recorder, 'program_ports', False)
-        if (capture == _CAPTURE_PROGRAM) != self.program_ports:
+        if ((capture in (_CAPTURE_PROGRAM, _CAPTURE_PROCESS)) != self.program_ports
+                or (capture == _CAPTURE_PROCESS) != getattr(recorder,'process_ports',False)):
             raise ValueError('program ports requires its explicit frame profile')
         if (capture == _CAPTURE_LEAN) != (self.lean_plan is not None):
             raise ValueError('lean capture requires its explicit typed frame plan and lean-ports mode')
-        if capture in (_CAPTURE_LEAN, _CAPTURE_PROGRAM) and python_targets is not True:
+        if capture in (_CAPTURE_LEAN, _CAPTURE_PROGRAM, _CAPTURE_PROCESS) and python_targets is not True:
             raise ValueError('lean capture requires explicit Python target interfaces')
-        self._local_mask = sys.monitoring.events.CALL if capture in (_CAPTURE_LEAN, _CAPTURE_PROGRAM) else _LOCAL_MASK
+        self._local_mask = sys.monitoring.events.CALL if capture in (_CAPTURE_LEAN, _CAPTURE_PROGRAM, _CAPTURE_PROCESS) else _LOCAL_MASK
         self._stream_enabled = stream_interfaces
         # CPython derives C_RETURN/C_RAISE from CALL. get_local_events returns
         # the normalized CALL mask even when the dependent bits were supplied.
@@ -429,7 +432,11 @@ class CallOperandObserver:
 
     def _on_frame_enter(self, frame):
         code = frame.f_code
-        target_entry = self.python_targets.on_frame_enter(frame) if self.python_targets is not None else False
+        retained = self._base_state(frame)
+        forward_root = (getattr(self.recorder,'process_ports',False) and retained is not None
+                        and self.recorder._is_target_forward_root(retained[0]))
+        target_entry = (self.python_targets.on_frame_enter(frame)
+                        if self.python_targets is not None and not forward_root else False)
         if self.lean_plan is None and not self.program_ports and not (self._code_inside(code) or target_entry or (self.python_targets is not None and self.python_targets.observed_code(code))):
             return
         if self._event_attempts >= self.limits.max_events:
@@ -444,6 +451,8 @@ class CallOperandObserver:
         invocation, code_key = state
         parent = frame.f_back
         parent_state = self._base_state(parent) if parent is not None else None
+        if forward_root:
+            parent_state = None  # A native/transparent boundary is not an observed Python CALL handshake.
         if parent_state is not None:
             pending_key = (threading.get_ident(), parent_state[0])
             pending = self._pending.get(pending_key)

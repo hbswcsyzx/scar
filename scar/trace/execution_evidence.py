@@ -146,7 +146,21 @@ class ExecutionEvidence:
             self._previous_import = builtins.__import__
 
             def importing(name, globals=None, locals=None, fromlist=(), level=0):
-                result = self._previous_import(name, globals, locals, fromlist, level)
+                token = None
+                recorder = self._call_recorder
+                if recorder is not None and getattr(recorder,'process_ports',False):
+                    try:
+                        token = recorder._begin_target_forward(sys._getframe(), 'IMPORT')
+                    except Exception as error:
+                        self._failure('import_forward_begin', error)
+                try:
+                    result = self._previous_import(name, globals, locals, fromlist, level)
+                finally:
+                    if token is not None:
+                        try:
+                            recorder._end_target_forward(token)
+                        except Exception as error:
+                            self._failure('import_forward_end', error)
                 # Original import exceptions and return values are untouched.
                 try:
                     self._maybe_start()

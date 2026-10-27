@@ -155,20 +155,50 @@ class DispatchEvidence:
             def __torch_dispatch__(self, func, types, args=(), kwargs=None):
                 return owner._dispatch(func, args, kwargs)
         self._mode = Observe()
+        self._forward_adapter_code = Observe.__torch_dispatch__.__code__
         self._mode.__enter__()
         self._installed = True
         witness = getattr(self.recorder, 'collector_witness', None)
         if witness is not None:
-            witness.register('dispatch', self, ('_dispatch','_leaves'), hook=Observe.__torch_dispatch__)
+            callbacks = ('_dispatch','_leaves','_call_target') if getattr(self.recorder,'process_ports',False) else ('_dispatch','_leaves')
+            witness.register('dispatch', self, callbacks, hook=Observe.__torch_dispatch__)
         return True
+
+    def _call_target(self, func, args, kwargs):
+        token = None
+        if getattr(self.recorder,'process_ports',False):
+            try:
+                frame = sys._getframe()
+                adapter = frame.f_back
+                while adapter is not None and adapter.f_code is not self._forward_adapter_code:
+                    adapter = adapter.f_back
+                if adapter is not None:
+                    token = self.recorder._begin_target_forward(frame, 'DISPATCH', adapter_frame=adapter)
+            except Exception as error:
+                self._error('target_forward_begin', error)
+            finally:
+                frame = adapter = None  # No frame/Tensor lifetime extension through a frame-local cycle.
+        try:
+            # Exactly one original call, including on observation failure.
+            return func(*args, **({} if kwargs is None else kwargs))
+        finally:
+            if token is not None:
+                try:
+                    self.recorder._end_target_forward(token)
+                except Exception as error:
+                    self._error('target_forward_end', error)
 
     def _dispatch(self, func, args, kwargs):
         if (self._stopped or self._closed or os.getpid() != self.pid
                 or threading.get_ident() != self.owner_ident):
+            if getattr(self.recorder,'process_ports',False):
+                return self._call_target(func, args, kwargs)
             return func(*args, **({} if kwargs is None else kwargs))
         witness = getattr(self.recorder, 'collector_witness', None)
         if witness is not None and not witness.guard('dispatch', sys._getframe().f_code):
             self._stopped = True
+            if getattr(self.recorder,'process_ports',False):
+                return self._call_target(func, args, kwargs)
             return func(*args, **({} if kwargs is None else kwargs))
         with self._lock:
             self._sequence += 1
@@ -192,7 +222,10 @@ class DispatchEvidence:
         except Exception as error:
             self._error("input_observation", error)
         try:
-            result = func(*args, **({} if kwargs is None else kwargs))
+            if getattr(self.recorder,'process_ports',False):
+                result = self._call_target(func, args, kwargs)
+            else:
+                result = func(*args, **({} if kwargs is None else kwargs))
         except BaseException:
             self._emit("DISPATCH_END", {"sequence": sequence, "outcome": "RAISED",
                        "span_enter_returned": handle is not None, "output_marker": None})
