@@ -1,0 +1,6 @@
+{"elapsed_seconds": 0.0, "event": "phase", "phase": "VERIFY_SOURCE_SNAPSHOT"}
+{"elapsed_seconds": 0.049, "event": "phase", "phase": "VERIFY_PUBLICATION_RECEIPT"}
+{"archive_count": 4, "body_rows": 201, "elapsed_seconds": 0.134, "event": "phase", "phase": "COMPOSITION_PUBLIC_READER_STARTED", "selected_decode_budget_bytes": 8000000000}
+{"capture_bytes_limit": 2000000000, "capture_line_limit": 2000000, "elapsed_seconds": 4712.606, "event": "phase", "phase": "CAPTURE_COORDINATES_STARTED"}
+{"elapsed_seconds": 4718.176, "event": "phase", "expected_calls": 100438, "expected_groups": 817, "phase": "SOURCE_INVOCATION_BINDER_STARTED", "process_id": 272038, "witness_mode": "same_capture"}
+{"binder_elapsed_seconds": 2751.9974703788757, "elapsed_seconds": 7470.316, "event": "phase", "phase": "PASS", "result": "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/analysis/source_entry_full_binding_20261026/ACTUAL_RESULT_201.json"}
