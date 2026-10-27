@@ -1,0 +1,13 @@
+{
+  "status": "IMPLEMENTED_COMPONENT_ONLY",
+  "base_commit": "1d4d681d14e9d6e640f6f71f4b39ddb8bcc8bae5",
+  "source": "scar/analysis/os_postprocessing_roles.py",
+  "source_sha256": "40ee3ad0a207eee57d5888b01caef291e0841cbf518aee4bc502125c5c01f34b",
+  "source_bytes": 17597,
+  "syntax_import": "PASS",
+  "argv_and_other_module_rejection_component": "PASS",
+  "empty_query_is_unclassified": "PASS",
+  "normal_same_run_binding_executed": false,
+  "new_capture": false,
+  "main_written": false
+}
