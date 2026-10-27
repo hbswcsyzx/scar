@@ -110,8 +110,18 @@ def publish_native_declaration_links(pipeline: ProviderArtifact, navigation: Pro
             if resource_index is not None:
                 from scar.analysis.native_declaration_resources import NativeResourceBudget, NativeDeclarationResourceSession
                 work = _document(work_manifest)
+                coordinates = decode(ProviderArtifact, work['coordinates'])
+                if not Path(coordinates.uri).is_absolute():
+                    # A work factory can retain a memory: locator for the
+                    # same coordinate bytes already published by this native
+                    # pipeline. Reuse that exact receipt, never invent a file.
+                    retained = decode(ProviderArtifact, parent['coordinates'])
+                    if (retained.sha256, retained.size_bytes, retained.schema) != (
+                            coordinates.sha256, coordinates.size_bytes, coordinates.schema):
+                        raise ValueError('work memory coordinates have no identical retained pipeline artifact')
+                    coordinates = retained
                 resources = stack.enter_context(NativeDeclarationResourceSession(resource_index, work_manifest,
-                    decode(ProviderArtifact, work['coordinates']),
+                    coordinates,
                     budget=NativeResourceBudget(max_input_bytes=max_input_bytes,
                         max_seconds=max_seconds, max_connections=100_000)))
                 result['resource_index'], result['work_manifest'] = encode(resource_index), encode(work_manifest)
