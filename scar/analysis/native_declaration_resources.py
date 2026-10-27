@@ -5,12 +5,13 @@ occurrence and work row is read normally from its exact original artifact. No
 ProgramGraph/ExecutionModel/WorkTicket or resource identity is minted here.
 """
 from dataclasses import dataclass, fields
+from collections import OrderedDict
 from hashlib import sha256
 from pathlib import Path
 import gzip, io, json, sqlite3
 
 from scar.analysis.native_declaration_interfaces import (
-    NativeDeclarationBudget, read_native_declaration_fragment, _locator)
+    NativeDeclarationBudget, NativeDeclarationView, read_native_declaration_fragment, _locator)
 from scar.analysis.tensor_storage_index import _decode_edge
 from scar.analysis.tensor_storage_query import _Meter, _need
 from scar.ir.execution.content import WorkEvidenceBinding
@@ -64,7 +65,8 @@ class _Records:
     def chunk(self, graph, table, number):
         d=self.partitions.manifest['graphs'][graph]['tables'][table]['chunks'][number]
         key=(graph,table)
-        if key not in self.cache or self.cache[key][0]!=number:
+        table_cache=self.cache.setdefault(key,OrderedDict())
+        if number not in table_cache:
             a=ProviderArtifact(str(self.partitions.root/d['uri']),d['physical_sha256'],
                                d['physical_bytes'],'scar.bundle-record-chunk')
             raw=self.meter.artifact(a,17_000_000)
@@ -72,17 +74,19 @@ class _Records:
             self.meter.charge(decoded=len(payload))
             _need(len(payload)==d['decoded_bytes'] and sha256(payload).hexdigest()==d['decoded_sha256']
                   and payload.endswith(b'\n') and payload.count(b'\n')==d['lines'],'original chunk EOF/bytes/SHA/lines differ')
-            # One immutable verified byte chunk per table, not every chunk or
-            # mutable IR validation. This avoids edge/instance/resource thrash.
-            self.cache[key]=(number,payload)
-        return d,self.cache[key][1]
+            # Three immutable line tuples per table. No parsed mutable IR or
+            # qualification is cached; EOF/SHA checks ran on the exact bytes.
+            table_cache[number]=tuple(payload.splitlines())
+            if len(table_cache)>3:table_cache.popitem(last=False)
+        table_cache.move_to_end(number)
+        return d,table_cache[number]
 
     def row(self, graph, table, ordinal):
         chunks=self.partitions.manifest['graphs'][graph]['tables'][table]['chunks']
         no=next((i for i,d in enumerate(chunks)if d['first_ordinal']<=ordinal<=d['last_ordinal']),None)
         _need(no is not None,'original table ordinal absent')
-        d,payload=self.chunk(graph,table,no)
-        line=payload.splitlines()[ordinal-d['first_ordinal']]
+        d,lines=self.chunk(graph,table,no)
+        line=lines[ordinal-d['first_ordinal']]
         row=loads(line.decode());_need(set(row)=={'ordinal','record'} and row['ordinal']==ordinal,'original row envelope differs')
         row={**row,'locator':{'artifact':d,'line':ordinal-d['first_ordinal']+1}}
         return row,_locator(self.partitions,graph,table,row)
@@ -90,8 +94,8 @@ class _Records:
     def iter_edges(self):
         table=self.partitions.manifest['graphs']['evidence']['tables']['edges'];visited=0
         for no in range(len(table['chunks'])):
-            d,payload=self.chunk('evidence','edges',no)
-            for local,line in enumerate(payload.splitlines()):
+            d,lines=self.chunk('evidence','edges',no)
+            for local,line in enumerate(lines):
                 row=loads(line.decode());ordinal=d['first_ordinal']+local
                 _need(set(row)=={'ordinal','record'} and row['ordinal']==ordinal,'original edge ordinal differs')
                 visited+=1;yield ordinal,row['record']
@@ -218,8 +222,8 @@ class NativeDeclarationResourceSession:
         table=self.records.partitions.manifest['graphs']['semantic']['tables']['resources']
         found=[]
         for no,d in enumerate(table['chunks']):
-            _,payload=self.records.chunk('semantic','resources',no)
-            for offset,line in enumerate(payload.splitlines()):
+            _,lines=self.records.chunk('semantic','resources',no)
+            for offset,line in enumerate(lines):
                 row=loads(line.decode());ordinal=d['first_ordinal']+offset
                 _need(row['ordinal']==ordinal,'resource requirement ordinal differs')
                 if row['record']['id']['wire']==identity.wire:
@@ -281,12 +285,29 @@ class NativeDeclarationResourceSession:
             LegacyOperationRef(ea,instance.id),EvidenceInstanceRef(loc,instance.id),rl)
         return projection,submission,binding,quiet
     def query(self,fragment:ProviderArtifact,*,source_instances=None):
+        """Normal fragment read followed by query_view; reader I/O charged once."""
         self._check()
         if source_instances is not None:_need(type(source_instances)is tuple and all(type(x)is OperationInstanceID for x in source_instances),'typed original native selectors required')
         view=read_native_declaration_fragment(fragment,budget=NativeDeclarationBudget(
             max_input_bytes=self.budget.max_input_bytes-self.meter.stored-self.meter.decoded,
             max_seconds=self.budget.max_seconds))
         self.meter.charge(stored=view.measurements['stored_bytes'],decoded=view.measurements['decoded_bytes'])
+        return self.query_view(view,source_instances=source_instances)
+    def query_view(self,view:NativeDeclarationView,*,source_instances=None):
+        """Join an unchanged live normal-reader view without rereading its core.
+
+        No serialized validation/PASS field is accepted or inspected. The
+        caller owns the view and its normal-reader qualification and accounts
+        that reader's I/O. Original native/work/edge checks below still run.
+        measurements is session cumulative; query_measurements is this join's
+        artifact-I/O difference, excluding initialization and the input reader.
+        """
+        self._check()
+        _need(type(view)is NativeDeclarationView,'live NativeDeclarationView required')
+        if source_instances is not None:_need(type(source_instances)is tuple and all(type(x)is OperationInstanceID for x in source_instances),'typed original native selectors required')
+        before_stored,before_decoded=self.meter.stored,self.meter.decoded
+        from time import monotonic
+        started=monotonic()
         _need(any(r.id==self.scope.run for r in view.execution.runs)
               and any(p.id==self.scope.process for p in view.execution.processes),'canonical fragment crosses Run/process')
         links=view.occurrences if source_instances is None else tuple(x for x in view.occurrences if x.native.instance in source_instances)
@@ -319,6 +340,12 @@ class NativeDeclarationResourceSession:
                     resources.append(NativeResourceReference(edge.target.reference,locator,requirement_locator,requirement))
                 _need(len(result)<self.budget.max_connections,'native work connection budget exceeded')
                 result.append(NativeDeclarationWorkConnection(native,projection,relation,submission,binding,quiet,tuple(resources)))
+        measured=self.meter.finish()
+        stored,decoded=self.meter.stored-before_stored,self.meter.decoded-before_decoded
         return {'connections':tuple(result),'selected_native_occurrences':len(links),'declared_work_count':self.work_denominator,
-            'measurements':self.meter.finish(),'scope':'EXACT_ORIGINAL_PROVIDER_SCOPE_PATH',
+            'measurements':measured,'measurement_scope':'SESSION_CUMULATIVE_ARTIFACT_IO',
+            'query_measurements':{'stored_bytes':stored,'decoded_bytes':decoded,'total_bytes':stored+decoded,
+                                  'elapsed_seconds':monotonic()-started},
+            'query_measurement_scope':'RESOURCE_JOIN_ONLY_EXCLUDES_INITIALIZATION_AND_VIEW_READER',
+            'scope':'EXACT_ORIGINAL_PROVIDER_SCOPE_PATH',
             'direct_call_established':False,'normal_completion_established':False,'state_content_ready_established':False}
