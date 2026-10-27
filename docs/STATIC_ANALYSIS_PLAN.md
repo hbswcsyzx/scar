@@ -79,6 +79,7 @@ S0 不设建模覆盖率门槛，不产生额外历史报告或 gate 目录。
 
 下一步先按原目录批量构造所有可适配模块和类入口，汇总精确残余；修复真实 comprehension 暴露的编译器融合 store 对应。随后展开真实 class suite：为 prepared mapping、G/saved-B、closure/local cells 建立明确 frame 策略；按原 compiler 核对隐式 namespace prologue/epilogue、私有名映射和方法创建。不能直接套用模块的空 closure ABI，也不能把 implicit stage 清单当成已经存在的 state edges。父级 class construction 的 bases/metaclass/hooks/decorators 另接原端口。
 源码里的 `receiver[:bound]` 还暴露了独立的 `BINARY_SLICE` 规则缺口。后续以 compound invoke 连接 receiver/bounds/world、正常和异常消费，不伪造源码中没有独立产生的 slice 引用或物化；与已有 `BUILD_SLICE` 合同分开。模块首 docstring 按编译器的 `__doc__` mapping 写入建图，不能当普通表达式丢弃。
+本批中已精准定位的模块 root 错误是 compiler-owned `__conditional_annotations__` cell：七份源码都能静态编译，实际 `co_cellvars` 非空、freevars/参数/挂起标志均为空。先表示模块自有 cell 的有序槽位与编译器 prologue（MAKE_CELL、annotation factory、namespace setup），再连接正常/异常 world；不把自有 cell 当入口 closure，不直接移除空 cell gate。prologue 的未展开部分须附原编译来源与精确展开义务。最终错误分母以本批发布结果为准。
 
 **实质功能**
 
@@ -106,6 +107,7 @@ S0 不设建模覆盖率门槛，不产生额外历史报告或 gate 目录。
 
 **状态：基础类型与局部候选部分已有，联合静态分析未完成。**`CallTarget` 可表达局部条件候选；`effects_v2` 有 effect 维度和 coverage 类型，但现有闭包器面向显式 scope，不能替代静态调用图或静态定义摘要。
 已实现 source-only linker 与限定命名空间的原端口关系。当前有界读取 80 份实际主体产物，发布 623 个 CALL 记录、14 条条件候选边、31 条实参/形参、54 条 completion 和 14 个返回站点，typed codec 与公开 query 通过。该批仍有 6,976 份产物未读；目标集合、环境投影和 effects 等 frontier 未消除，不能称为联合固定点完成。
+旧有界索引已随主体更新废弃，不能当作当前调用索引。mapping caller 已接入同一分析，但 module `STORE_NAME → LOAD_NAME → CALL` 的条件值流仍缺失：下一项在原 frame protocol、StateAddress、NORMAL CompletionResult 和 CFG 上建立 typed namespace 关系，保存原 owner/key/assigned-reference Use、读结果、world 与到达路径。只在已有源码/契约允许时提升为精确内容关系；custom mapping、重入、未知覆盖、L/G/saved-B 查找优先级分别保留条件。MAKE 的正常函数引用接原 code slot / declaration / 共享 body；APPLY 的结果独立，不能借同一 source atom 认成原函数。先接通未装饰函数与 namespace 的原依赖，再由通用返回/闭包规则分析装饰器。
 
 **实质功能**
 

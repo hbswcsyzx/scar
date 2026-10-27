@@ -41,6 +41,7 @@
 细化另外保留 compiler scope 15,471 项的实际分类，以 manifest.catalog_refinement 为准确值，不把 scope 当运行 thunk。
 本轮完整目录细化耗时 462.24 秒，保留 2,906 份原图片、不重建源码图；581 个模块、1,183 个类及 7,055 个普通函数共 8,819 个入口可进入构造尝试，3,731 个其他入口仍缺适配。可尝试不等于已建模。
 当前正在四进程构造全部 581 个模块、1,183 个类及三个已修复的 comprehension 所属函数，共 1,767 个入口；本段表格是该批发布前的最后已保存结果，终态以原 manifest 为准。
+批次中的七个同族模块 root 错误已通过原源码 SHA 与纯编译字段定位：都是 `co_cellvars=('__conditional_annotations__',)`，入口 gate 尚不支持模块自有 compiler cell。不是源码编译失败或运行问题。具体 prologue 为 MAKE_CELL 以及 annotation/namespace setup；下一修复需建模这段结构，不能简单删 gate 或伪装成外部 closure。
 
 ## 仍未完成
 
