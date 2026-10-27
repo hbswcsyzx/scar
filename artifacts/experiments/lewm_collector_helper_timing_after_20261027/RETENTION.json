@@ -1,0 +1,26 @@
+{
+  "status": "FAILED_DIAGNOSTIC_RETAINED",
+  "source_reference": [
+    {
+      "uri": "/home/zyf/AAA/scar-worktrees/os-postprocessing-roles/artifacts/experiments/lewm_collector_helper_timing_20261027/HELPER_TIMINGS.json",
+      "sha256": "0a0258352068568a3462e99792f806a1b5cf5452c3e212ec40f7a59b5ba2b957",
+      "bytes": 9024
+    },
+    {
+      "uri": "/home/zyf/AAA/scar-worktrees/os-postprocessing-roles/artifacts/experiments/lewm_collector_helper_timing_20261027/ACTUAL_TERMINAL.json",
+      "sha256": "068175cd7b8f0cc092a721fcb3d17f6581abe48df7d6ebc6e6756ab1f1a43646",
+      "bytes": 186
+    },
+    {
+      "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/lewm_snapshot_ports_20261027/COLLECTOR_SOURCE.json",
+      "sha256": "f31adc29425a480e66d811402b1efb3f8de977857c2bbc1d54349791bfa123cf",
+      "bytes": 74159
+    }
+  ],
+  "helper_table_saved": false,
+  "root": "/home/zyf/AAA/scar-worktrees/call-raw-facts/artifacts/experiments/lewm_collector_helper_timing_after_20261027",
+  "raw_and_collector_copy": "LOCAL_ONLY; no captured model/publication qualification",
+  "local_files_declared_stored_bytes": 575387884,
+  "raw_payload_hash_verification": false,
+  "third_LeWM_prefix_run": false
+}
