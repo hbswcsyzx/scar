@@ -323,41 +323,6 @@ def _build_file(source, output, phase, max_body_operations):
             result["counts"]["constant_facts"] = sum(f.status.value == "CONSTANT" for f in constants.facts.values())
         except (ValueError, TypeError, KeyError, AttributeError, RecursionError) as error:
             result["issues"].append(_issue("constants", error))
-    if phase == "bodies" and control is not None:
-        from scar.analysis.program_lowering import PreparedSource, _symbol_tables
-        from scar.ir.program.functions import BodyLoweringProfile
-        from scar.ir.program.codec import dumps
-
-        prepared = PreparedSource(Path(source.path), Path(source.namespace_root), source.text,
-                                  semantic, semantics, control,
-                                  ast.parse(source.text, filename=source.path),
-                                  _symbol_tables(source.text, source.path))
-        try:
-            session = prepared.seal_for_lowering()
-            # Every lexical body stays in the denominator, including entry
-            # kinds not yet handled by the source-only canonical adapter.
-            for entry, body in zip(catalog["entries"], result["bodies"]):
-                if entry["kind"] not in ("FUNCTION", "ASYNC_FUNCTION") or entry["source_ref"] is None:
-                    continue
-                from scar.ir.record_codec import decode
-                from scar.ir.v2.common import SourceReference
-                ref = decode(SourceReference, entry["source_ref"])
-                try:
-                    lowered = session.lower(entry["name"], source=ref,
-                                            max_operations=max_body_operations,
-                                            expand_candidates=False,
-                                            profile=BodyLoweringProfile.STRUCTURED_BODY)
-                    body.update(status="LOWERED_WITH_GAPS" if lowered.graph else "UNSUPPORTED",
-                                gaps=encode(lowered.metadata.gaps),
-                                construction_operations=lowered.operations_emitted)
-                    if lowered.graph is not None:
-                        artifact = prefix + "bodies/" + hashlib.sha256(entry["entry_key"].encode()).hexdigest()[:24] + ".json.gz"
-                        body["artifact"] = _write(root, artifact, json.loads(dumps(lowered.graph)))
-                        body["metadata"] = encode(lowered.metadata)
-                except (ValueError, TypeError, KeyError, SyntaxError, RecursionError) as error:
-                    body.update(status="ERROR", issue=_issue("body", error))
-        except (ValueError, TypeError, KeyError, SyntaxError, RecursionError) as error:
-            result["issues"].append(_issue("body-preparation", error))
     if semantic is not None and semantics is not None and control is not None:
         result["status"] = "SOURCE_LAYERS_WITH_GAPS"
     result["analysis_seconds"] = time.monotonic() - started
@@ -505,16 +470,35 @@ def main(argv=None):
                         help="refine current retained source catalogs/imports without rebuilding source graphs")
     parser.add_argument("--imports-only", action="store_true",
                         help="with --refine: rebuild only import relations, retain lexical/source graphs")
+    parser.add_argument("--expand", action="store_true", help="incrementally lower bodies using the current stored source graphs")
+    parser.add_argument("--rules-only", action="store_true", help="publish full entry rule ledgers without lowering bodies")
+    parser.add_argument("--max-bodies", type=int, help="limit this body dispatch, keeping the full lexical denominator")
+    parser.add_argument("--file", action="append", default=[], help="body dispatch file selector, exact path or component suffix")
     args = parser.parse_args(argv)
     if args.imports_only and not args.refine:
         parser.error("--imports-only requires --refine")
+    if args.expand and args.refine:
+        parser.error("--expand and --refine are independent stages")
+    if (args.rules_only or args.max_bodies is not None or args.file) and not args.expand:
+        parser.error("--rules-only, --max-bodies and --file require --expand")
 
+    progress_calls = 0
     def progress(done, total, unit):
-        if done == total or done % 25 == 0:
+        nonlocal progress_calls
+        progress_calls += 1
+        if (total > 0 and done == total) or progress_calls % 25 == 0:
             print(json.dumps({"files_done": done, "files_total": total,
                               "last": unit.get("path")}), file=sys.stderr, flush=True)
 
-    if args.refine:
+    if args.expand:
+        from scar.analysis.static_body import expand_static_bodies
+        existing = read_static_program(args.out, verify=False)
+        if Path(existing["project_root"]).resolve() != Path(args.source).resolve():
+            raise ValueError("body expansion source root differs from the current model")
+        result = expand_static_bodies(args.out, jobs=args.jobs, max_operations=args.max_body_operations,
+                                       max_bodies=0 if args.rules_only else args.max_bodies,
+                                       files=args.file, progress=progress)
+    elif args.refine:
         existing = read_static_program(args.out, verify=False)
         if Path(existing["project_root"]).resolve() != Path(args.source).resolve():
             raise ValueError("refinement source root differs from the current model")
@@ -525,9 +509,14 @@ def main(argv=None):
                                       max_bytes=args.max_bytes, max_directories=args.max_directories,
                                       max_body_operations=args.max_body_operations, progress=progress)
         result = refine_static_program(args.out)
+        if args.phase == "bodies":
+            from scar.analysis.static_body import expand_static_bodies
+            result = expand_static_bodies(args.out, jobs=args.jobs,
+                                           max_operations=args.max_body_operations, progress=progress)
     print(json.dumps({"summary": result["summary"], "completion": result["completion"],
                       "analyzer_seconds": result["analyzer_seconds"], "storage": result["storage"],
                       "catalog_refinement": result.get("catalog_refinement"),
+                      "body_expansion": result.get("body_expansion"),
                       "manifest": str(Path(args.out).absolute() / "manifest.json")}, ensure_ascii=False, indent=2))
     failed = (result["worker_errors"] or result["source_changed"] or
               not result["completion"]["source_scan_complete"] or

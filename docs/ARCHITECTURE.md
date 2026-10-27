@@ -38,3 +38,5 @@
 `static_program` 按文件复用原 frontend/source-semantics/CFG，四进程可并行；`static_imports` 连接原 source/unit/initializer 候选；`static_query` 读取原记录。
 源文件文本保存一次，分片附 stored/decoded SHA。细化通过同一 current 目录发布，复用未变化图，不创建历史副本。
 当前 import 索引尚未解析缺少的外部库源码和导出绑定，源码图中的协议缺口也未消除，不能作为全程序 ModRef 或内容等价证明。
+
+`static_compilation` 是不执行目标的编译布局来源，`static_rules` 从原AST选择已有规则及前提；`static_body` 复用原源片增量构造canonical子图。静态编译与捕获见证是有标签的独立来源，语言overlay的普通validator仍校验对应接口和协议，不把编译器布局当成运行身份或纯性。

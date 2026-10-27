@@ -53,6 +53,12 @@ E/F 相互依赖，需要工作队列迭代；这个表不是一遍不可回访�
 
 源码身份绑定 snapshot/context/definition/source position；名称和行号只辅助导航。分析条件/上下文可以细化事实，不随事实收窄重建整套结构 ID。
 
+静态编译是语义前端的一部分：`compile(source, filename, "exec", flags=0, dont_inherit=True, optimize=0)` 可产生 compiler CodeType/常量槽、closure 顺序和指令位置，但不执行目标模块、默认参数、装饰器或函数体。
+编译单元必须绑定源码快照、namespace、准确 compiler profile 和常量路径。每个主体以源码跨度、词法 qualname、编译位置与常量父子关系机械匹配，歧义不靠函数名猜。
+静态来源用独立 `SOURCE_COMPILATION` 记录；不能创建假的 CapturedCode/CodeCapture/Invocation 或冒用原运行 CodeWitnessStore。
+源码/编译布局恒定不证明实际加载的 code/function/module 对象相同；读取编译器常量也不证明运行时对象或可变内容相等。
+
+
 ## 5. 展开契约
 
 一个复合操作的展开记录必须说明：
@@ -148,3 +154,10 @@ import 值恒定可由依赖图推导；删除初始化操作还需要其 effect
 - [MLIR DataFlow](https://mlir.llvm.org/docs/Tutorials/DataFlowAnalysis/)：抽象域、合流与迭代传播。
 - [LLVM Alias Analysis](https://llvm.org/docs/AliasAnalysis.html) 与 [MemorySSA](https://llvm.org/docs/MemorySSA.html)：读写、别名和状态依赖。
 - [MLIR Side Effects](https://mlir.llvm.org/docs/Rationale/SideEffectsAndSpeculation/)：效果、资源和可移动性的独立建模。
+
+## 13. 主体增量构造
+
+已保存的 source/semantic/source-semantics/CFG 是主体构造的共享输入。增量步骤按文件解码一次并核原 descriptor，构造一个私有 prepared/sealed session，再按完整词法目录逐入口派工。
+每个 canonical body 使用单独容器引用上述共享源片，保存原规范图及 metadata/interface/structured/language；不把全份源码图复制进每个函数。
+缓存键包含源片、精确 entry、规则/能力/编译条件、实现 producer 和预算；成功缓存只能用于这些条件未变的原主体，不能升级为运行时 memoization。
+未支持、准备失败和未派工的入口仍保留在整个目录分母。模块/类/async/generator 的静态 entry adapter 必须明确实现，不能通过伪造运行 frame 使它们进入已完成集合。

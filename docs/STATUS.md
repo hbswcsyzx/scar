@@ -48,3 +48,13 @@ S1 的精确语言规则/前提台账、S2 的完整规范子图、S3 调用/别
 582 项源目录重复扫描身份稳定，保留源码指纹与原文件一致。将文件预算设为 2 时，准确保留剩余 580 项，没有从分母删除。
 458 个 SCAR 源文件语法解析通过，文档本地链接无缺失，LeWM Git 工作树仍干净。生成的 import 索引 receipts 通过，索引构造问题为 0；外部源码、导出和 namespace 候选仍是明确 frontier，未据此声称 import 已全部解析。
 规范 body 路径已对现有 source_motion 源码作一次纯静态构造：函数生成规范图，模块入口明确 UNEXPANDED；该源码没有被导入或执行。未将此局部结果提升为全 LeWM 主体覆盖。
+
+## 规范主体静态展开
+
+已增加独立 `SOURCE_COMPILATION` 证据：按固定源码与 compiler profile 仅 compile、不 exec；准确匹配定义位置/词法 qualname/父级常量路径/装饰器首行，不创建假的捕获见证。
+已有 call-expansion、try/with、nested function、lambda/comprehension、constant 等 lowerer/validator 共用编译布局接口，动态旧证据保留原含义；模块 frame 的原 CapturedCode 接口仍待解耦。
+
+增量 `--expand` 按文件复用原4源片、一个sealed lowering session和一份静态编译布局；规则明细单独保存在原unit的rules分片，body容器只引用共享源片。已知失败/未派工入口保留，缓存键包含源输入、规则、编译条件与相关producer，不是运行时memoization。
+
+真实 `eval.py:img_transform` 的首次纯静态规范构造通过：3.41秒、92操作、157值、1 Region，normal codec读回通过；32项原effects/dispatch等缺口保留。公开query可同时投影canonical端口、Value→source、原控制图和具体规则/shape缺口，分别标明哪些只是结构校验。这里没有执行该函数。
+详细台账和全7,055个普通函数的规范构造正在按同一目录推进；当前单例成功不代表全量完成。

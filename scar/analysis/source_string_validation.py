@@ -9,7 +9,7 @@ from __future__ import annotations
 import ast
 import dis
 
-from scar.analysis.source_language import SourceLanguageOptions, require_source_tree
+from scar.analysis.source_language import SourceLanguageOptions, require_source_tree, supports_cpython_compiler
 from scar.ir.program.model import ExitKind, LiteralOrigin, TerminatorKind
 from scar.ir.program.structured import PythonProtocolKind as Kind
 from scar.ir.v2.semantic import OperationKind
@@ -232,7 +232,7 @@ def validate_string_source(model, graph, interface, metadata, semantic, *,
     instructions = ()
     if evidence is not None:
         evidence.require_definition(metadata.source, interface.definition, model.source)
-        _need(evidence.store.document["runtime"]["version"][:3] == [3, 14, 7],
+        _need(supports_cpython_compiler(evidence),
               "string contract requires pinned CPython 3.14.7")
         instructions = tuple(dis.get_instructions(evidence.code))
     parents = {child: parent for parent in ast.walk(source_tree) for child in ast.iter_child_nodes(parent)}

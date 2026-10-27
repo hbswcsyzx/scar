@@ -57,7 +57,7 @@ def _constant(builder, node, cursor):
     builder.emit(cursor, operation, node, SourceRole.EXPRESSION)
     builder.protocol(operation_id, PythonProtocolKind.READ_CODE_CONSTANT, node)
     builder.language_constants.append(CodeConstantSource(operation_id, builder.source(node),
-        evidence.captured.key, (instruction.arg,)))
+        evidence.code_layout_key, (instruction.arg,)))
     builder.gap(GapKind.CODE_VERSION, node,
         "code constant slot is witnessed; active CodeType/constant object instance identity remains unproved")
     return cursor, result.id

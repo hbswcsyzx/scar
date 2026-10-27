@@ -7,6 +7,7 @@ from dataclasses import replace
 from types import CodeType
 
 from scar.analysis.program_lowering import _Unsupported
+from scar.analysis.source_language import supports_cpython_compiler
 from scar.analysis.source_call_lowering import _constant, _invoke
 from scar.analysis.source_heap_lowering import expression_for_heap_target
 from scar.analysis.source_mapping_lowering import _transfer
@@ -120,7 +121,7 @@ def _code_reference(builder, node, cursor, instruction, role):
 
 def lower_function_definition(builder, node, cursor):
     evidence = builder.language_options.code_evidence
-    if evidence is None or evidence.store.document['runtime']['version'][:3] != [3, 14, 7]:
+    if not supports_cpython_compiler(evidence):
         unsupported(node, 'READONLY_CPYTHON_3147_CODE_REQUIRED')
     evidence.require_definition(builder.snapshot, builder.function_definition.id, builder.source(builder.functions[builder.entry]))
     stages, child, annotation = compiler_plan(node, evidence.code)

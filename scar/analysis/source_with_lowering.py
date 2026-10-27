@@ -11,6 +11,7 @@ import ast
 import dis
 
 from scar.analysis.program_lowering import _Unsupported, _BOOL, _REF
+from scar.analysis.source_language import supports_cpython_compiler
 from scar.analysis.source_function_try_lowering import FunctionTryBuilder
 from scar.ir.program.control import ControlPort, ControlScopeKind as S, LanguageCompletionKind as L, ProtocolValueKind as P, ProtocolValueType
 from scar.ir.program.cleanup import CleanupInterface
@@ -49,7 +50,7 @@ class FunctionWithBuilder(FunctionTryBuilder):
         if self.try_depth:
             raise _Unsupported(GapKind.UNSUPPORTED_SYNTAX, node, 'FUNCTION_WITH_NESTED_CLEANUP_ROUTING_UNIMPLEMENTED')
         evidence = self.language_options.code_evidence
-        if evidence is None or evidence.store.document['runtime']['version'][:3] != [3, 14, 7]:
+        if not supports_cpython_compiler(evidence):
             raise _Unsupported(GapKind.CODE_VERSION, node, 'FUNCTION_WITH_READONLY_3147_CODE_REQUIRED')
         check_compiler_with(node, evidence.code)
         item = node.items[0]

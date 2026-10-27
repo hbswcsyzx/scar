@@ -94,7 +94,8 @@ def _entry_view(entry, unit, symbols, limit):
         raise ValueError("duplicate body status for one original entry")
     fields = ("entry_key", "kind", "name", "qualname", "phase", "definition_phase", "span",
               "lexical_parent", "source_ref", "semantic_definition_ids", "semantic_source_candidates",
-              "catalog_status", "support_status", "language_version_dependent", "closure_names", "closure_status")
+              "catalog_status", "support_status", "language_version_dependent", "closure_names", "closure_status",
+              "subject_entry_key", "lowering_route")
     body = bodies[0] if bodies else None
     return {**{name: entry.get(name) for name in fields}, "file": unit["path"],
             "namespace_root": unit["namespace_root"], "symbol_table_candidates": candidates,
@@ -116,10 +117,99 @@ def _catalog(unit, fragments):
     return catalog
 
 
+def _canonical_dependencies(unit, entries, fragments, limit):
+    """Project selected canonical bodies, retaining original typed IDs/ports."""
+    from scar.ir.program.codec import loads
+    selected = {entry["entry_key"]: entry for entry in entries}
+    rows = []
+    for body in unit.get("bodies", ()):
+        if body["entry_key"] not in selected:
+            continue
+        row = {key: body.get(key) for key in
+               ("entry_key", "status", "reason", "plan", "cache_key", "construction_operations")}
+        if "artifact" not in body:
+            rows.append(row)
+            continue
+        document = fragments.read(body["artifact"])
+        if document.get("schema") != "scar.static-body" or document.get("schema_version") != 1:
+            raise ValueError("unsupported canonical body container")
+        if document.get("entry_key") != body["entry_key"] or document.get("cache_key") != body.get("cache_key"):
+            raise ValueError("body belongs to a different lexical entry")
+        if document.get("inputs") != {name: unit["artifacts"].get(name) for name in
+                                       ("source", "semantic", "semantics", "control")}:
+            raise ValueError("body shared source fragments differ from the selected unit")
+        graph_document = document.get("graph")
+        if graph_document is None:
+            row["canonical_graph"] = None
+            row["issue"] = document.get("issue")
+            rows.append(row)
+            continue
+        metadata = document["metadata"]
+        if (metadata["source"]["path"] != unit["path"] or
+                metadata["source"]["fingerprint"] != "sha256:" + unit["decoded_sha256"]):
+            raise ValueError("canonical body source differs from selected source unit")
+        # Ordinary canonical structure, rather than a purity or execution test.
+        graph = loads(json.dumps(graph_document, allow_nan=False))
+        interface = document.get("interface")
+        if (interface is None or interface.get("definition") not in
+                (selected[body["entry_key"]].get("semantic_definition_ids") or ())
+                or interface.get("region") != graph_document["root"]):
+            raise ValueError("canonical body interface differs from the selected definition/root")
+        row.update(canonical_root=graph_document["root"],
+                   canonical_schema=graph_document["schema_version"],
+                   regions=_page(graph_document["regions"], limit),
+                   operations=_page(graph_document["operations"], limit),
+                   operation_order="storage tuple; execution order follows each Region's CFG blocks",
+                   values=_page(graph_document["values"], limit),
+                   state_locations=_page(graph_document["locations"], limit),
+                   interface=document.get("interface"),
+                   targets=_page(metadata.get("call_targets", []), limit),
+                   operation_sources=_page(metadata.get("operation_links", []), limit),
+                   value_sources=_page(metadata.get("value_links", []), limit),
+                   use_sources=_page(metadata.get("use_links", []), limit),
+                   source_gaps=_page(metadata.get("gaps", []), limit),
+                   language_capabilities=(document.get("language") or {}).get("capabilities", []),
+                   core_structure_checked=True, source_snapshot_match=True,
+                   source_mapping_revalidated=False, source_language_revalidated=False,
+                   independent_compiler_replayed=False,
+                   counts={"regions": len(graph.regions), "operations": len(graph.operations),
+                           "values": len(graph.values), "state_locations": len(graph.locations)},
+                   projection_closed=False)
+        rows.append(row)
+    return {"bodies": rows, "qualification": "Ordinary canonical structure checked; original ports, source links and state versions projected, without purity or execution claims."}
+
+
+def _rule_plans(unit, entries, fragments, limit):
+    descriptor = unit.get("artifacts", {}).get("rules")
+    if descriptor is None:
+        return {"status": "RULE_LEDGER_NOT_BUILT"}
+    document = fragments.read(descriptor)
+    source = document.get("source", {})
+    if (document.get("schema") != "scar.static-rule-ledger" or document.get("schema_version") != 1
+            or source.get("path") != unit["path"] or source.get("namespace_root") != unit["namespace_root"]
+            or source.get("fingerprint") != "sha256:" + unit["decoded_sha256"]
+            or source.get("artifact") != unit["artifacts"]["source"]):
+        raise ValueError("rule ledger belongs to another source unit")
+    selected = {entry["entry_key"] for entry in entries}
+    plans = []
+    for plan in document["plans"]:
+        if plan["entry_key"] in selected:
+            plans.append({**{key: plan.get(key) for key in
+                              ("entry_key", "kind", "status", "selected_profile", "capabilities")},
+                          "rules": _page(plan.get("rules", []), limit),
+                          "prerequisites": _page(plan.get("prerequisites", []), limit),
+                          "unsupported_shapes": _page(plan.get("unsupported_shapes", []), limit)})
+    if {plan["entry_key"] for plan in plans} != selected:
+        raise ValueError("rule ledger omits a selected source entry")
+    return {"status": "ORIGINAL_STATIC_RULE_PLANS", "plans": plans,
+            "language_semantics_complete": document["language_semantics_complete"]}
+
+
 def _dependencies(unit, entries, fragments, limit):
     artifacts = unit.get("artifacts", {})
     if "semantic" not in artifacts:
-        return {"status": "SEMANTIC_FRAGMENT_UNAVAILABLE", "source_unit_status": unit["status"]}
+        return {"status": "SEMANTIC_FRAGMENT_UNAVAILABLE", "source_unit_status": unit["status"],
+                "language_rules": _rule_plans(unit, entries, fragments, limit)}
     semantic = fragments.read(artifacts["semantic"])
     if semantic.get("schema") != "scar.ir.v2.semantic":
         raise ValueError("unsupported semantic fragment")
@@ -199,6 +289,8 @@ def _dependencies(unit, entries, fragments, limit):
             "bindings": _page(bindings, limit), "binding_uses": _page(uses, limit),
             "file_semantic_gaps": _page(semantic_gaps, limit), "control_status": control_status,
             "suites": _page(suites, limit), "cfg_nodes": _page(nodes, limit), "cfg_edges": _page(control_edges, limit),
+            "canonical": _canonical_dependencies(unit, entries, fragments, limit),
+            "language_rules": _rule_plans(unit, entries, fragments, limit),
             "closed_graph_projection": False,
             "qualification": "Original fragment records/IDs only; limits can omit endpoint descriptions. No producer/state reconstruction or execution claim."}
 

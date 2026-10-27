@@ -88,7 +88,7 @@ def lower_code_constant(builder, node, cursor):
     builder.emit(cursor, operation, node, SourceRole.EXPRESSION)
     builder.protocol(operation_id, PythonProtocolKind.READ_CODE_CONSTANT, node)
     builder.language_constants.append(CodeConstantSource(operation_id, builder.source(node),
-        evidence.captured.key, (index,)))
+        evidence.code_layout_key, (index,)))
     builder.gap(GapKind.CODE_VERSION, node,
         'source and code constant slot are witnessed; active code/constant object identity remains unproved')
     return cursor, result.id

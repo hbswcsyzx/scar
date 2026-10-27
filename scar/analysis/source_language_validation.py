@@ -48,10 +48,10 @@ def validate_language_body(model, graph, interface, metadata, semantic, language
     _need(type(structural_only) is bool, "verification mode must be explicit")
     if not structural_only:
         _need(isinstance(source_tree, ast.Module) and type(options) is SourceLanguageOptions,
-              "exact source/CodeWitness verification requires explicit source AST and independent options")
+              "exact source/compiler-layout verification requires explicit source AST and independent options")
         _need(options.capabilities == language.capabilities, "requested and reported language capabilities differ")
         expected_evidence = options.code_evidence.to_dict() if options.code_evidence is not None else None
-        _need(language.code_evidence == expected_evidence, "code provenance differs from the independent archive inputs")
+        _need(language.code_evidence == expected_evidence, "code provenance differs from independent compiler inputs")
         if options.code_evidence is not None:
             options.code_evidence.require_definition(metadata.source, interface.definition, model.source)
     operations = {row.id: row for row in graph.operations}
@@ -295,7 +295,7 @@ def validate_language_body(model, graph, interface, metadata, semantic, language
         _need(operation.behaviors == (Behavior.READ,), "constant table read cannot claim fresh allocation or mutation")
         if not structural_only:
             evidence = options.code_evidence
-            _need(evidence is not None and evidence.captured.key == constant.code_key,
+            _need(evidence is not None and evidence.code_layout_key == constant.code_key,
                   "constant provenance is not backed by the independently loaded CodeWitness")
             _need(len(constant.constant_path) == 1, "this capability only indexes direct code constants")
             if literal_constant:

@@ -134,7 +134,7 @@ def lower_creation(builder, node, cursor):
     builder.emit(cursor,Operation(identity,'child code reference',(Behavior.READ,),(before,),(value.id,),
         (StateAccess(builder.world,before.id,AccessMode.READ),),effects_complete=False),node,SourceRole.EXPRESSION)
     builder.protocol(identity,K.READ_CODE_CONSTANT,node)
-    builder.language_constants.append(CodeConstantSource(identity,builder.source(node),evidence.captured.key,(index,)))
+    builder.language_constants.append(CodeConstantSource(identity,builder.source(node),evidence.code_layout_key,(index,)))
     cells=tuple(builder.cell_references[name]for name in code.co_freevars)
     inputs=(value.id,builder.environment_references[_PREFIX[1]],*cells)
     cursor,function_env,identity=builder.invoke_results(cursor,node,

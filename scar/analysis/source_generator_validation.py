@@ -338,7 +338,7 @@ def validate_generator_regions(model, graph, interface, metadata, semantic, lang
                 from scar.analysis.source_generator_creation_lowering import creation_code_sources
                 index, code, _sites = creation_code_sources(options.code_evidence.code, node)
             else: index, code = child_code(options.code_evidence.code, node)
-            _need(constant.code_key == options.code_evidence.captured.key and constant.constant_path == (index,),
+            _need(constant.code_key == options.code_evidence.code_layout_key and constant.constant_path == (index,),
                   "childCode does not match the exact original readonly parent witness")
             _need(len(node.generators) == 1 and not node.generators[0].ifs and not node.generators[0].is_async
                   and isinstance(node.generators[0].target, ast.Name), "unsupported generator clause")

@@ -6,7 +6,7 @@ frame prefix, runtime code identity, actual mapping items or full call cleanup.
 """
 from __future__ import annotations
 
-from scar.analysis.source_language import function_exception_types
+from scar.analysis.source_language import function_exception_types, supports_cpython_compiler
 
 import ast
 import dis
@@ -200,7 +200,7 @@ def validate_call_protocols(model, graph, interface, metadata, semantic, languag
               and options.code_evidence is not None, "exact kwargs checking requires independent source/code inputs")
         evidence = options.code_evidence
         evidence.require_definition(metadata.source, interface.definition, model.source)
-        _need(evidence.store.document["runtime"]["version"][:3] == [3, 14, 7], "kwargs contract requires pinned CPython 3.14.7")
+        _need(supports_cpython_compiler(evidence), "kwargs contract requires pinned CPython 3.14.7 compiler layout")
     operations = {row.id: row for row in graph.operations}
     values = {row.id: row for row in graph.values}
     blocks = {block.id: block for region in graph.regions for block in region.blocks}
@@ -391,7 +391,7 @@ def _check_source_and_code(node, group, operations, protocols, uses, constants, 
         operation, kind = operations[identity], protocols[identity].kind
         if kind is Kind.READ_CODE_CONSTANT:
             source = constants[identity]
-            _need(source.code_key == evidence.captured.key and len(source.constant_path) == 1,
+            _need(source.code_key == evidence.code_layout_key and len(source.constant_path) == 1,
                   "call constant uses a different compiler witness")
             value = evidence.code.co_consts[source.constant_path[0]]
             actual.append(("PACK" if type(value) is tuple and not value else "KEY", value, identity))

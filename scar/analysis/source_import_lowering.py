@@ -11,7 +11,7 @@ import dis
 from collections import defaultdict
 
 from scar.analysis.program_lowering import _Unsupported, _REF
-from scar.analysis.source_language import function_exception_types, require_source_tree
+from scar.analysis.source_language import function_exception_types, require_source_tree, supports_cpython_compiler
 from scar.ir.program.environments import EnvironmentRole as E
 from scar.ir.program.model import (AccessMode, CompletionResult, ExitKind, LiteralOrigin,
     OperationResult, ReferenceValue, StateVersionValue, TerminatorKind, value_type)
@@ -48,7 +48,7 @@ def compiler_import(node, code):
 
 def lower_import(builder, node, cursor):
     evidence = builder.language_options.code_evidence
-    if evidence is None or evidence.store.document['runtime']['version'][:3] != [3, 14, 7]:
+    if not supports_cpython_compiler(evidence):
         raise _Unsupported(GapKind.CODE_VERSION, node, 'FUNCTION_IMPORT_READONLY_3147_CODE_REQUIRED')
     names = compiler_import(node, evidence.code)
     if any(name not in builder.locals or name in builder.cell_references for name in names):

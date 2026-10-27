@@ -153,7 +153,7 @@ class _ExpressionBody(_Nested):
 def _expression_body(owner,node,definition,code,index):
     if code.co_cellvars:
         raise _Unsupported(GapKind.UNSUPPORTED_SYNTAX,node,'LAMBDA_EXPRESSION_OWN_CELL_ALLOCATION_UNIMPLEMENTED')
-    region=RegionID(_key('lambda-expression-body',definition.id.wire,owner.language_options.code_evidence.captured.key,index,VERSION))
+    region=RegionID(_key('lambda-expression-body',definition.id.wire,owner.language_options.code_evidence.code_layout_key,index,VERSION))
     b=_ExpressionBody(owner,node,region,definition);b.language_options=None
     parameters=tuple(a for a,_ in formal_nodes(node));b.locals={a.arg for a in parameters}
     b.free_cells=frozenset(code.co_freevars);b.global_names=set(code.co_names)

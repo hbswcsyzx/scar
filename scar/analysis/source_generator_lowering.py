@@ -298,7 +298,7 @@ class _Nested(StructuredEnvironmentBuilder):
 
 def _body(owner, node, definition, code, index):
     region_id = RegionID(_key("genexpr-lazy-body", definition.id.wire,
-                             owner.language_options.code_evidence.captured.key, index, VERSION))
+                             owner.language_options.code_evidence.code_layout_key, index, VERSION))
     b = _Nested(owner, node, region_id, definition)
     b.lazy = True
     b.locals = {node.generators[0].target.id}
@@ -313,7 +313,7 @@ def _body(owner, node, definition, code, index):
             environment_refs[len(_PREFIX) + position], (b.world,), captured_cell_slot(definition.id, name), position))
     environment = EnvironmentInterface(EnvironmentInterfaceID(_key("genexpr-environment", region_id.wire)),
                                        region_id, definition.id, tuple(members))
-    port = FormalPort(compiler_entry_slot(definition.id, owner.language_options.code_evidence.captured.key, index), iterator)
+    port = FormalPort(compiler_entry_slot(definition.id, owner.language_options.code_evidence.code_layout_key, index), iterator)
     owner.generator_records["environments"].append(environment)
     owner.generator_records["function_entries"].append(FunctionEntryLayout(environment.id, (port,)))
     owner.generator_records["resumable_bodies"].append(ResumableBody(region_id, ResumableKind.GENERATOR, b.world))
@@ -469,7 +469,7 @@ def lower_generator(builder, node, cursor):
     builder.emit(cursor, Operation(operation, "child code reference", (Behavior.READ,), (before,), (value.id,),
         (StateAccess(builder.world, before.id, AccessMode.READ),), effects_complete=False), node, SourceRole.EXPRESSION)
     builder.protocol(operation, Kind.READ_CODE_CONSTANT, node)
-    builder.language_constants.append(CodeConstantSource(operation, builder.source(node), evidence.captured.key, (index,)))
+    builder.language_constants.append(CodeConstantSource(operation, builder.source(node), evidence.code_layout_key, (index,)))
     captures = tuple(builder.cell_references[name] for name in code.co_freevars)
     inputs = (value.id, builder.environment_references[_PREFIX[1]], *captures)
     cursor, function_env, make = builder.invoke_results(cursor, node,

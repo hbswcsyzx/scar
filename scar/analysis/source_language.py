@@ -10,6 +10,7 @@ import json
 from dataclasses import dataclass, field
 from types import CodeType
 
+from scar.analysis.static_compilation import StaticCodeEvidence
 from scar.ir.program.call_edges import CapturedCode, CodeSourceLink, CodeCapture, CallLinkStatus
 from scar.ir.program.source_language import SourceLanguageCapability
 from scar.ir.record_codec import decode, encode
@@ -98,20 +99,44 @@ class SourceCodeEvidence:
         return {"captured": encode(self.captured), "source_link": encode(self.source_link),
                 "witness": self.witness, "runtime_code_instance_established": False}
 
+    @property
+    def code_layout_key(self):
+        """Structural code key; this remains distinct from active code identity."""
+        return self.captured.key
+
+    @property
+    def compiler_version(self):
+        return tuple(self.store.document["runtime"]["version"][:3])
+
+    @property
+    def compiler_implementation(self):
+        return self.store.document["runtime"]["implementation"]
+
 
 @dataclass(frozen=True)
 class SourceLanguageOptions:
     capabilities: tuple[SourceLanguageCapability, ...] = (
         SourceLanguageCapability.FIXED_UNPACK, SourceLanguageCapability.SLICE_KEYS,
         SourceLanguageCapability.LEXICAL_LOCALS)
-    code_evidence: SourceCodeEvidence | None = None
+    code_evidence: SourceCodeEvidence | StaticCodeEvidence | None = None
 
     def __post_init__(self):
         if (type(self.capabilities) is not tuple or not self.capabilities
                 or any(type(row) is not SourceLanguageCapability for row in self.capabilities)
                 or len(set(self.capabilities)) != len(self.capabilities)
-                or self.code_evidence is not None and type(self.code_evidence) is not SourceCodeEvidence):
+                or self.code_evidence is not None and not _is_code_layout_evidence(self.code_evidence)):
             raise ValueError("invalid explicit source-language inputs")
+
+
+def _is_code_layout_evidence(value):
+    return type(value) in (SourceCodeEvidence, StaticCodeEvidence)
+
+
+def supports_cpython_compiler(evidence, version=(3, 14, 7)):
+    """Whether exact compiler-layout protocols are supported by this input."""
+    return (evidence is not None
+            and evidence.compiler_implementation == "cpython"
+            and evidence.compiler_version == tuple(version))
 
 
 def require_source_tree(tree, snapshot, source_reference):
@@ -131,4 +156,5 @@ def function_exception_types(language, reference_type, world_type):
             else (reference_type, world_type))
 
 
-__all__ = ["SourceCodeEvidence", "SourceLanguageOptions", "require_source_tree"]
+__all__ = ["SourceCodeEvidence", "SourceLanguageOptions", "require_source_tree",
+           "supports_cpython_compiler"]

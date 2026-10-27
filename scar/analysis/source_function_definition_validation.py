@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import ast
 
-from scar.analysis.source_language import function_exception_types, require_source_tree
+from scar.analysis.source_language import function_exception_types, require_source_tree, supports_cpython_compiler
 from scar.ir.program.bindings import BindingState
 from scar.ir.program.environments import EnvironmentRole
 from scar.ir.program.model import (AccessMode, Behavior, CompletionResult, ExitKind, LocalBindingValue,
@@ -54,7 +54,7 @@ def validate_function_definitions(model, graph, interface, metadata, semantic, l
     if not structural_only:
         from scar.analysis.environment_lowering import captured_cell_slot
         evidence = options.code_evidence
-        need(evidence is not None and evidence.store.document['runtime']['version'][:3] == [3, 14, 7],
+        need(supports_cpython_compiler(evidence),
              'independent pinned readonly parent compiler witness required')
         transient = {r.name for r in language.compiler_locals if r.category == 'COMPREHENSION_TRANSIENT'}
         names = tuple(n for n in evidence.code.co_cellvars if n not in transient)

@@ -22,6 +22,7 @@ from scar.ir.program.source_language import CodeConstantSource
 from scar.ir.program.structured import PythonProtocolKind as Kind
 from scar.ir.semantics_v2 import Opcode
 from scar.analysis.source_call_validation import is_original_call_definition
+from scar.analysis.source_language import supports_cpython_compiler
 
 
 def _span(node):
@@ -87,7 +88,7 @@ def _witness_plan(node, instructions):
 
 def _instructions(builder, node):
     evidence = builder.language_options.code_evidence
-    if evidence is None or evidence.store.document["runtime"]["version"][:3] != [3, 14, 7]:
+    if not supports_cpython_compiler(evidence):
         raise _Unsupported(GapKind.CODE_VERSION, node, "KWARGS_CPYTHON_3147_CODE_WITNESS_REQUIRED")
     evidence.require_definition(builder.snapshot, builder.function_definition.id, builder.source(builder.functions[builder.entry]))
     return tuple(dis.get_instructions(evidence.code))
@@ -199,7 +200,7 @@ def _constant(builder, node, cursor, instruction):
         (StateAccess(builder.world, before.id, AccessMode.READ),), effects_complete=False)
     builder.emit(cursor, operation, node, SourceRole.EXPRESSION)
     builder.protocol(identity, Kind.READ_CODE_CONSTANT, node)
-    builder.language_constants.append(CodeConstantSource(identity, builder.source(node), evidence.captured.key,
+    builder.language_constants.append(CodeConstantSource(identity, builder.source(node), evidence.code_layout_key,
                                                          (instruction.arg,)))
     return value.id
 

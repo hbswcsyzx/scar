@@ -182,7 +182,7 @@ def validate_lambda_regions(model,graph,interface,metadata,semantic,control,lang
             evidence=options.code_evidence
             need(evidence is not None,'independent readonly parent CodeWitness required')
             load,child=compiler_lambda(node,evidence.code)
-            need(constant.code_key==evidence.captured.key and constant.constant_path==(load.arg,),
+            need(constant.code_key==evidence.code_layout_key and constant.constant_path==(load.arg,),
                  'Lambda code constant differs from original parent slot')
             transient={r.name for r in language.compiler_locals if r.category=='COMPREHENSION_TRANSIENT'}
             names=tuple(n for n in evidence.code.co_cellvars if n not in transient)
