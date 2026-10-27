@@ -578,6 +578,7 @@ class _ReceiverTemplate:
     formal_slot: object
     formal_value: object
     formal_name: str
+    explicit_positional: int
 
 
 @dataclass(frozen=True, slots=True)
@@ -606,7 +607,8 @@ def _make_template(binding):
     receiver = binding.receiver
     receiver_template = None if receiver is None else _ReceiverTemplate(
         receiver.actual_body, receiver.operation, receiver.callable_use, receiver.callable_value,
-        receiver.formal_body, receiver.formal_slot, receiver.formal_value, receiver.formal_name)
+        receiver.formal_body, receiver.formal_slot, receiver.formal_value, receiver.formal_name,
+        receiver.observed.explicit_positional)
     return _SourcePortTemplate(binding.target.kind, binding.target.layout, binding.target.scope,
         binding.caller_code, binding.callee_code, binding.call, binding.caller_body,
         binding.callee_body, receiver_template, binding.arguments, binding.candidate,
@@ -614,7 +616,7 @@ def _make_template(binding):
 
 
 def _reuse_binding_template(template, attempt, caller_entry, callee_entry):
-    _need(attempt.site.position is not None and attempt.site.opname == "CALL"
+    _need(attempt.site.position is not None and attempt.site.opname in ("CALL", "CALL_KW")
           and template.call.site == attempt.site
           and template.caller_code.code == attempt.site.code
           and template.callee_code.code == attempt.dispatch.code == callee_entry.code
@@ -626,12 +628,12 @@ def _reuse_binding_template(template, attempt, caller_entry, callee_entry):
     if template.receiver is not None:
         _need(template.kind is PythonTargetKind.NORMALIZED_RECEIVER_FUNCTION
               and not attempt.arg0_missing and attempt.arg0 is not None
-              and attempt.dispatch.layout.argcount == len(template.arguments) + 1
+              and attempt.dispatch.layout.argcount >= template.receiver.explicit_positional + 1
               and callee_entry.parameters
               and callee_entry.parameters[0].ref == attempt.arg0,
               "current observed receiver does not satisfy the cached method layout")
         observed = BoundReceiver(ReceiverRole.IMPLICIT_CALL_RECEIVER, attempt.arg0,
-            explicit_positional=len(template.arguments),
+            explicit_positional=template.receiver.explicit_positional,
             conditions=(ReceiverCondition.NO_INTERVENING_CALL_LAYOUT_MUTATION,))
         receiver = SourceReceiverPort(template.receiver.actual_body, template.receiver.operation,
             template.receiver.callable_use, template.receiver.callable_value,
@@ -640,7 +642,7 @@ def _reuse_binding_template(template, attempt, caller_entry, callee_entry):
         receiver_parameter_index, receiver_reference = 0, attempt.arg0
     else:
         _need(template.kind is PythonTargetKind.FUNCTION
-              and attempt.dispatch.layout.argcount == len(template.arguments),
+              and attempt.dispatch.layout.argcount >= len(template.arguments),
               "current observed function layout differs from cached source call")
         observed, receiver = None, None
         receiver_parameter_index, receiver_reference = None, None
@@ -657,7 +659,7 @@ def _reuse_binding_template(template, attempt, caller_entry, callee_entry):
     return target, entry, binding
 
 
-def _selected_binding(inputs, operands, boundary_index, template_cache, pid, attempt, handshake,
+def _selected_binding(inputs, operand_metadata, boundary_index, template_cache, pid, attempt, handshake,
                       caller_entry, callee_entry, caller_row, callee_row, source_tree_cache):
     _need(attempt.dispatch.kind is CallableKind.EXACT_FUNCTION
           and attempt.dispatch.code == callee_entry.code
@@ -672,15 +674,15 @@ def _selected_binding(inputs, operands, boundary_index, template_cache, pid, att
     _need(callee_entry.path_complete and callee_entry.caller == attempt.site
           and not caller_entry.suspended and not callee_entry.suspended,
           "suspended/incomplete frame path is outside the synchronous source-call rule")
-    process_meta = next(item for item in operands.metadata if item.process_id == pid)
+    process_meta = next(item for item in operand_metadata if item.process_id == pid)
     _need(not process_meta.errors and not process_meta.io_failed
           and not process_meta.dropped_events and not process_meta.previous_profile,
           "operand process capture has errors, dropped events or previous profile")
     invocations = {attempt.invocation, callee_entry.invocation}
     code_keys = {caller_entry.code, callee_entry.code}
     boundary_index.check_interval(pid, invocations, code_keys, attempt.index, handshake.index)
-    _need(attempt.site.position is not None and attempt.site.opname == "CALL",
-          "captured CALL site lacks the original source position/opcode")
+    _need(attempt.site.position is not None and attempt.site.opname in ("CALL", "CALL_KW"),
+          "captured CALL/CALL_KW site lacks the original source position/opcode")
     template_key = _call_template_key(attempt, caller_entry, callee_entry)
     template = template_cache.get(template_key)
     if template is not None:
@@ -689,7 +691,7 @@ def _selected_binding(inputs, operands, boundary_index, template_cache, pid, att
         return _reuse_binding_template(template, attempt, caller_entry, callee_entry)
     caller = inputs.body(pid, caller_row)
     callee = inputs.body(pid, callee_row)
-    _need(attempt.site.position is not None and attempt.site.opname == "CALL"
+    _need(attempt.site.position is not None and attempt.site.opname in ("CALL", "CALL_KW")
           and attempt.site.code == caller.code_link.code
           and callee.code_link.code == callee_entry.code,
           "raw CALL site/CodeSourceLink scope differs")
@@ -699,8 +701,11 @@ def _selected_binding(inputs, operands, boundary_index, template_cache, pid, att
     _need(len(calls) == 1, "original source inventory must identify one exact owner CALL")
     source_call, = calls
     call_node = _find_call(inputs.source_text(caller, source_tree_cache), source_call.source)
-    _need(not call_node.keywords and not any(isinstance(arg, __import__("ast").Starred) for arg in call_node.args),
-          "only explicit fixed positional source arguments are supported")
+    _need(not any(isinstance(arg, __import__("ast").Starred) for arg in call_node.args)
+          and all(item.arg is not None for item in call_node.keywords),
+          "starred or double-starred source arguments are outside this ABI rule")
+    _need(attempt.site.opname == ("CALL_KW" if call_node.keywords else "CALL"),
+          "captured CALL opcode does not match the original source keyword shape")
     call_links = [link for link in caller.metadata.operation_links
         if link.source == source_call.source and link.opcode is Opcode.CALL
         and link.semantic_operation == source_call.semantic_operation]
@@ -710,8 +715,10 @@ def _selected_binding(inputs, operands, boundary_index, template_cache, pid, att
     op_map = {op.id: op for op in caller.graph.operations}
     use_map = {use.id: use for op in caller.graph.operations for use in op.uses}
     op = op_map[call_link.operation]
+    actual_specs = [(ArgumentKind.POSITIONAL, None, node) for node in call_node.args]
+    actual_specs.extend((ArgumentKind.KEYWORD, item.arg, item.value) for item in call_node.keywords)
     _need(op.terminator is not None and op.terminator.kind is TerminatorKind.INVOKE
-          and len(op.invoke_arguments) == len(call_node.args) + 2,
+          and len(op.invoke_arguments) == len(actual_specs) + 2,
           "canonical caller Operation must expose exact callee/actual/world Use partition")
     callee_use_links = [link for link in caller.metadata.use_links
         if link.operation == op.id and link.role == "callee"]
@@ -726,15 +733,21 @@ def _selected_binding(inputs, operands, boundary_index, template_cache, pid, att
           and all(use_map[u].role is UseRole.REFERENCE and type(value_map[use_map[u].value]) is ReferenceValue
                   for u in op.invoke_arguments[:-1]),
           "caller actuals/world do not retain the source CALL reference/state roles")
-    actual_links = sorted((link for link in caller.metadata.use_links
-        if link.operation == op.id and link.role == "argument"), key=lambda item: item.index)
-    _need(len(actual_links) == len(call_node.args)
-          and tuple(link.index for link in actual_links) == tuple(range(len(actual_links)))
+    candidate_actual_links = [link for link in caller.metadata.use_links
+        if link.operation == op.id and (link.role == "argument" or link.role.startswith("keyword:"))]
+    actual_links = []
+    for index, (kind, keyword, node) in enumerate(actual_specs):
+        expected_role = "argument" if kind is ArgumentKind.POSITIONAL else "keyword:" + keyword
+        expected_span = _span(node)
+        matches = [link for link in candidate_actual_links
+            if link.role == expected_role and _source_positions(link.source) == expected_span]
+        _need(len(matches) == 1,
+              "original caller Use/source link must uniquely identify each positional or keyword expression")
+        actual_links.append(matches[0])
+    actual_links = tuple(actual_links)
+    _need(len(candidate_actual_links) == len(actual_links)
           and tuple(link.use for link in actual_links) == tuple(op.invoke_arguments[1:-1]),
-          "original ordered actual Use/source links differ from the AST CALL")
-    _need(tuple(_source_positions(link.source) for link in actual_links)
-          == tuple(_span(arg) for arg in call_node.args),
-          "ordered caller actual Uses do not name the original source argument occurrences")
+          "original ordered positional/keyword Uses differ from the AST CALL")
 
     signature = inputs.signature(callee.definition.definition)
     _need(signature.source == callee.definition.source and signature.definition == callee.definition.definition
@@ -750,35 +763,42 @@ def _selected_binding(inputs, operands, boundary_index, template_cache, pid, att
         {v.id: v for v in callee.graph.values},
         {b.id: b for region in callee.graph.regions for b in region.blocks},
         callee.definition.definition)
-    arity = attempt.dispatch.layout.argcount
-    if arity == len(call_node.args):
-        target_kind = PythonTargetKind.FUNCTION
-        receiver = None
-        receiver_formal = None
-    elif (arity == len(call_node.args) + 1 and isinstance(call_node.func, __import__("ast").Attribute)
-          and not attempt.arg0_missing and callee.interface.parameters):
+    positional_parameters = tuple(parameter for parameter in signature.parameters
+        if parameter.kind in (ParameterKind.POSITIONAL_ONLY, ParameterKind.POSITIONAL))
+    keyword_names = {keyword.arg for keyword in call_node.keywords}
+    receiver_candidate = (isinstance(call_node.func, __import__("ast").Attribute)
+          and not call_node.args and bool(positional_parameters)
+          and positional_parameters[0].name not in keyword_names
+          and not attempt.arg0_missing and attempt.arg0 is not None
+          and callee_entry.parameters
+          and callee_entry.parameters[0].ref == attempt.arg0
+          and positional_parameters[0].default_source is None)
+    if receiver_candidate:
         target_kind = PythonTargetKind.NORMALIZED_RECEIVER_FUNCTION
-        _need(attempt.arg0 is not None and callee_entry.parameters[0].ref == attempt.arg0,
-              "captured CALL arg0 does not match the callee's first observed receiver parameter")
+        _need(attempt.dispatch.layout.argcount >= 1
+              and tuple(item.name for item in signature.parameters) == attempt.dispatch.layout.parameters,
+              "normalized receiver function layout lacks its required receiver parameter")
         observed = BoundReceiver(ReceiverRole.IMPLICIT_CALL_RECEIVER, attempt.arg0,
-            explicit_positional=len(call_node.args),
+            explicit_positional=0,
             conditions=(ReceiverCondition.NO_INTERVENING_CALL_LAYOUT_MUTATION,))
         receiver = SourceReceiverPort(caller.namespace, op.id, callee_use.id, callee_use.value,
             callee.namespace, signature.parameters[0].slot, callee.interface.parameters[0].value,
             signature.parameters[0].name, observed)
         receiver_formal = signature.parameters[0]
     else:
-        raise _NeedError("unsupported source CALL/function positional ABI")
+        receiver = None
+        receiver_formal = None
+        target_kind = PythonTargetKind.FUNCTION
     _need(not attempt.dispatch.layout.kwonlyargcount
           and not attempt.dispatch.layout.flags & (4 | 8)
           and signature.kind.value == "SYNC" and not signature.decorators,
           "variadic, keyword-only, decorated or suspended target remains outside this rule")
     if target_kind is PythonTargetKind.FUNCTION:
-        args = tuple(CallArgument(i, link.source, ArgumentKind.POSITIONAL, use=link.use)
-                     for i, link in enumerate(actual_links))
+        args = tuple(CallArgument(i, link.source, kind, keyword=keyword, use=link.use)
+                     for i, ((kind, keyword, _), link) in enumerate(zip(actual_specs, actual_links)))
         candidate = bind_call(signature, call=source_call.operation,
             target=callee.definition.definition, source=source_call.source, arguments=args)
-        _need(candidate.status.value == "CONDITIONAL", "original source signature has no conditional positional binding")
+        _need(candidate.status.value == "CONDITIONAL", "original source signature has no conditional explicit-argument binding")
         routes = {route.slot: route for route in candidate.routes}
         param_positions = {parameter.slot: parameter for parameter in signature.parameters}
         mapped = [(param_positions[r.slot], r) for r in candidate.routes]
@@ -792,15 +812,30 @@ def _selected_binding(inputs, operands, boundary_index, template_cache, pid, att
                 parameter.name, route))
         receiver_port = None
     else:
+        _need(not call_node.args,
+              "attribute call with explicit positional actuals has unresolved receiver-versus-argument ABI")
         candidate = None
         ports = []
-        for i, link in enumerate(actual_links):
-            parameter = signature.parameters[i + 1]
-            formal = callee.interface.parameters[i + 1]
+        assigned = {signature.parameters[0].slot}
+        for i, ((kind, keyword, _), link) in enumerate(zip(actual_specs, actual_links)):
+            _need(kind is ArgumentKind.KEYWORD,
+                  "normalized receiver currently accepts no explicit positional actuals")
+            matches = [parameter for parameter in signature.parameters[1:]
+                if parameter.name == keyword and parameter.kind is ParameterKind.POSITIONAL]
+            _need(len(matches) == 1, "receiver call keyword does not select one positional formal")
+            parameter, = matches
+            _need(parameter.slot not in assigned, "duplicate receiver-call keyword route")
+            assigned.add(parameter.slot)
+            formal_index = signature.parameters.index(parameter)
+            formal = callee.interface.parameters[formal_index]
             route = ParameterBinding(parameter.slot, BindingOrigin.ARGUMENT, (i,))
             ports.append(SourceArgumentPort(i, caller.namespace, op.id, link.source, link.use,
                 use_map[link.use].value, callee.namespace, parameter.slot, formal.value,
                 parameter.name, route))
+        for parameter in signature.parameters[1:]:
+            if parameter.slot not in assigned:
+                _need(parameter.default_source is not None,
+                      "receiver call omits a required formal without a default declaration")
         receiver_port = receiver
     call_site = __import__("scar.ir.program.call_edges", fromlist=["CallSiteLink"]).CallSiteLink(
         attempt.site, CallLinkStatus.VERIFIED, source_call.source, source_call.operation,
@@ -1033,7 +1068,7 @@ class RetainedSourceCallPortSession:
                     capture = self.captures.get((self.captured_pid, entry_record.code))
                     _need(capture is not None and encode(capture) == group_row["code_capture"],
                           "current complete captured descriptor differs from the retained source group")
-                target, entry, binding = _selected_binding(self.inputs, self.operands,
+                target, entry, binding = _selected_binding(self.inputs, self.operands.metadata,
                     self.boundary_index, self.static_template_cache, self.captured_pid,
                     candidate.attempt, candidate.handshake, candidate.caller_entry,
                     candidate.callee_entry, candidate.caller_row, candidate.callee_row,

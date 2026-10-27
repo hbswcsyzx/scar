@@ -93,8 +93,8 @@ class PythonCallTarget:
         if self.receiver is not None:self.receiver.__post_init__()
         if self.kind is PythonTargetKind.NORMALIZED_RECEIVER_FUNCTION:
             _need(self.function_reference==self.callable_reference
-                and self.layout.argcount==self.receiver.explicit_positional+1 and self.layout.kwonlyargcount==0,
-                'normalized CALL receiver finite arity differs')
+                and self.layout.argcount>=self.receiver.explicit_positional+1 and self.layout.kwonlyargcount==0,
+                'normalized CALL receiver layout omits its receiver or positional prefix')
 
 @dataclass(frozen=True,slots=True)
 class PythonEntryBinding:
