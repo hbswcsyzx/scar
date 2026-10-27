@@ -71,6 +71,10 @@ class PythonTargetObserver:
         self.path=self.recorder.out/f'python-call-targets.{self.recorder.pid}.jsonl'
         self.meta=self.recorder.out/f'python-call-target-meta.{self.recorder.pid}.json'
         self.fd=os.open(self.path,os.O_WRONLY|os.O_CREAT|os.O_EXCL,0o600)
+        self._deferred=None
+        from scar.trace.deferred_jsonl import DeferredJsonl,snapshot_transport_enabled
+        if snapshot_transport_enabled():
+            self._deferred=DeferredJsonl(self.path,max_bytes=budget.max_bytes)
         self.pending={};self.codes={};self.records=self.bytes=0;self.closed=self.stopped=False
         self.counts={'TARGET':0,'ENTRY':0,'GAP':0};self.digest=hashlib.sha256()
         self._buffer=bytearray();self._buffer_limit=65536
@@ -78,6 +82,12 @@ class PythonTargetObserver:
         self.legacy_inputs=None
     def emit(self,kind,value):
         if self.closed or self.stopped:return
+        if self._deferred is not None:
+            if self.records>=self.budget.max_records or not self._deferred.append(_target_record(kind,value)):
+                self.stopped=True;return
+            self.bytes=self._deferred.accepted_bytes
+            self.records+=1;self.counts[kind]+=1
+            return
         raw=(json.dumps(_target_record(kind,value),ensure_ascii=True,separators=(',',':'),allow_nan=False)+'\n').encode('ascii')
         if self.records>=self.budget.max_records or self.bytes+len(raw)>self.budget.max_bytes:
             self.stopped=True;return
@@ -97,6 +107,10 @@ class PythonTargetObserver:
             if n<=0:raise OSError('Python target sidecar made no write progress')
             offset+=n
     def _flush(self):
+        if self._deferred is not None:
+            result=self._deferred.finalize()
+            self.bytes=result['output']['raw_bytes']
+            return
         if self._buffer:self._write_all(self._buffer);self._buffer.clear()
     def gap(self,attempt,reason):self.emit('GAP',PythonTargetGap(attempt,reason))
     def observed_code(self,code):
@@ -197,6 +211,9 @@ class PythonTargetObserver:
             self.stopped=self._io_failed=True
             raise
         finally:
+            if self._deferred is not None:self._deferred.close_capture()
             self.pending.clear();self._buffer.clear();os.close(self.fd);self.closed=True
-        document={'schema':'scar.python-call-target-collection','schema_version':2,'capabilities':['PYTHON_CALL_TARGETS_V2','OBSERVED_PYTHON_CALLEE_SCOPE_V1'],'process_id':self.recorder.pid,'project_root':self.recorder.root,'scope_policy':'OBSERVED_EXACT_PYTHON_CALLEES_V1','budget':encode(self.budget),'counts':self.counts,'stopped':self.stopped,'file':{'path':str(self.path),'bytes':self.bytes,'sha256':self.digest.hexdigest(),'rows':self.records},'legacy_inputs':encode(self.legacy_inputs),'receiver_is_separate_from_monitoring_arg0':True,'contents_state_ready_or_complete_program_established':False}
+        digest=(self.digest.hexdigest() if self._deferred is None
+                else self._deferred.result['output']['sha256'])
+        document={'schema':'scar.python-call-target-collection','schema_version':2,'capabilities':['PYTHON_CALL_TARGETS_V2','OBSERVED_PYTHON_CALLEE_SCOPE_V1'],'process_id':self.recorder.pid,'project_root':self.recorder.root,'scope_policy':'OBSERVED_EXACT_PYTHON_CALLEES_V1','budget':encode(self.budget),'counts':self.counts,'stopped':self.stopped,'file':{'path':str(self.path),'bytes':self.bytes,'sha256':digest,'rows':self.records},'legacy_inputs':encode(self.legacy_inputs),'receiver_is_separate_from_monitoring_arg0':True,'contents_state_ready_or_complete_program_established':False}
         with self.meta.open('x') as stream:json.dump(document,stream,indent=2);stream.write('\n')

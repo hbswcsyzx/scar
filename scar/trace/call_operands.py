@@ -167,6 +167,7 @@ class CallOperandObserver:
         self.tool_name = f"{_MONITOR_NAME}-{self.pid}-{id(self):x}"
         self._lock = threading.RLock()
         self._fd = None
+        self._deferred = None
         self._buffer = bytearray()
         self._buffer_limit = 65536
         self._event_path = recorder.out / f"call-operands.{self.pid}.jsonl"
@@ -201,6 +202,9 @@ class CallOperandObserver:
         self._acquire_tool()
         try:
             self._fd = os.open(self._event_path, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
+            from scar.trace.deferred_jsonl import DeferredJsonl, snapshot_transport_enabled
+            if snapshot_transport_enabled():
+                self._deferred = DeferredJsonl(self._event_path, max_bytes=max_bytes)
             from scar.trace.callable_environment import CallableEnvironmentObserver
             self.environment_observer = CallableEnvironmentObserver(
                 recorder.out, self.pid, max_events=max_events, max_bytes=max_bytes,
@@ -286,26 +290,29 @@ class CallOperandObserver:
                "thread_id": threading.get_ident(), "invocation_id": owner,
                "frame_index": frame_index, "hook_epoch": self._hook_epoch, **fields}
         try:
-            data = (json.dumps(row, ensure_ascii=True, separators=(",", ":"), allow_nan=False) + "\n").encode("ascii")
-            if len(data) > _MAX_EVENT_LINE_BYTES:
-                self._dropped += 1
-                self._stopped = True
-                self._hook_epoch += 1
-                return None
-            if self._bytes + len(data) > self.limits.max_bytes:
-                self._dropped += 1
-                self._stopped = True
-                self._hook_epoch += 1
-                return None
-            if len(self._buffer) + len(data) > self._buffer_limit:
-                self._flush()
-            if len(data) >= self._buffer_limit:
-                self._write_all(data)
+            if self._deferred is not None:
+                if not self._deferred.append(row):
+                    self._dropped += 1
+                    self._stopped = True
+                    self._hook_epoch += 1
+                    return None
+                self._bytes = self._deferred.accepted_bytes
             else:
-                self._buffer.extend(data)
-            self._bytes += len(data)
-            if self._target_event_digest is not None:
-                self._target_event_digest.update(data)
+                data = (json.dumps(row, ensure_ascii=True, separators=(",", ":"), allow_nan=False) + "\n").encode("ascii")
+                if len(data) > _MAX_EVENT_LINE_BYTES or self._bytes + len(data) > self.limits.max_bytes:
+                    self._dropped += 1
+                    self._stopped = True
+                    self._hook_epoch += 1
+                    return None
+                if len(self._buffer) + len(data) > self._buffer_limit:
+                    self._flush()
+                if len(data) >= self._buffer_limit:
+                    self._write_all(data)
+                else:
+                    self._buffer.extend(data)
+                self._bytes += len(data)
+                if self._target_event_digest is not None:
+                    self._target_event_digest.update(data)
             self._event_count += 1
             if kind == "INSTRUCTION":
                 self._instruction_count += 1
@@ -335,6 +342,9 @@ class CallOperandObserver:
             offset += written
 
     def _flush(self):
+        if self._deferred is not None:
+            self._bytes = self._deferred.finalize()['output']['raw_bytes']
+            return
         if self._buffer:
             self._write_all(self._buffer)
             self._buffer.clear()
@@ -758,6 +768,11 @@ class CallOperandObserver:
         return None, None, "GLOBAL_NAME_UNBOUND"
 
     def _on_instruction(self, code, offset):
+        if self.recorder._closing:
+            return
+        writer = self.recorder._is_capture_writer
+        if writer is not None and writer():
+            return
         try:
             frame = sys._getframe(1)
         except BaseException:
@@ -886,6 +901,11 @@ class CallOperandObserver:
         return sys.monitoring.DISABLE
 
     def _on_call(self, code, offset, callable_object, arg0):
+        if self.recorder._closing:
+            return
+        writer = self.recorder._is_capture_writer
+        if writer is not None and writer():
+            return
         try:
             frame = sys._getframe(1)
         except BaseException:
@@ -988,11 +1008,17 @@ class CallOperandObserver:
                         return self._disabled_callback_result(code)
 
     def _on_stream_return(self, code, offset, target, arg0):
+        writer = self.recorder._is_capture_writer
+        if self.recorder._closing or writer is not None and writer():
+            return
         if self.stream_interfaces is not None and not self._stopped:
             with self.recorder.lock, self._lock:
                 self.stream_interfaces.complete(code, offset, target, sys._getframe(1), 'C_RETURN')
 
     def _on_stream_raise(self, code, offset, target, arg0):
+        writer = self.recorder._is_capture_writer
+        if self.recorder._closing or writer is not None and writer():
+            return
         if self.stream_interfaces is not None and not self._stopped:
             with self.recorder.lock, self._lock:
                 self.stream_interfaces.complete(code, offset, target, sys._getframe(1), 'C_RAISE')
@@ -1052,6 +1078,12 @@ class CallOperandObserver:
                         self._io_failed = True
                         self._remember_error(error)
                     finally:
+                        if self._deferred is not None:
+                            try:
+                                self._deferred.close_capture()
+                            except OSError as error:
+                                self._io_failed = True
+                                self._remember_error(error)
                         self._buffer.clear()
                     try:
                         os.close(self._fd)
@@ -1162,7 +1194,8 @@ class CallOperandObserver:
             if self.python_targets is not None:
                 self.python_targets.legacy_inputs = (*manifest,
                     CallTraceFile(str(self._event_path), "operands", self.pid,
-                        self._target_event_digest.hexdigest(), self._bytes, self._event_count),
+                        (self._target_event_digest.hexdigest() if self._deferred is None
+                         else self._deferred.result['output']['sha256']), self._bytes, self._event_count),
                     CallTraceFile(str(self._metadata_path), "operand-meta", self.pid,
                         hashlib.sha256(data).hexdigest(), len(data), data.count(b"\n")))
                 if self.stream_interfaces is not None:

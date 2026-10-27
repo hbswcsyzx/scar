@@ -1,0 +1,58 @@
+{
+  "schema": "scar.call-operands-trace",
+  "schema_version": 1,
+  "process_id": 2132014,
+  "project_root": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/snapshot_transport_20261027",
+  "python": "3.14.7 | packaged by conda-forge | (main, Sep  2 2026, 21:08:32) [GCC 15.3.0]",
+  "implementation": "cpython",
+  "rule": "SCAR_PROGRAM_PORTS_V2",
+  "limits": {
+    "max_events": 20000,
+    "max_bytes": 64000000,
+    "max_loads": 64,
+    "max_namespace_items": 4096,
+    "max_references": 8192
+  },
+  "events": 1811,
+  "event_attempts": 1811,
+  "instructions": 0,
+  "call_attempts": 1024,
+  "handshakes": 787,
+  "gaps": 0,
+  "loads": 0,
+  "references": 1990,
+  "bytes": 717473,
+  "dropped_events": 0,
+  "errors": [],
+  "io_failed": false,
+  "previous_profile": false,
+  "base_manifest": [
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/snapshot_transport_20261027/process_snapshot/call-codes.2132014.jsonl",
+      "family": "codes",
+      "process_id": 2132014,
+      "raw_sha256": "cfe307e9593da9b131b710be04dc4e949cdaee882dd23ee3c4da2455c17351b9",
+      "raw_bytes": 20019,
+      "lines": 81
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/snapshot_transport_20261027/process_snapshot/call-events.2132014.jsonl",
+      "family": "events",
+      "process_id": 2132014,
+      "raw_sha256": "14ad59769ea25db62ef2cb678865bb178810cfca2f28818dc0678627d8470046",
+      "raw_bytes": 1003088,
+      "lines": 1644
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/snapshot_transport_20261027/process_snapshot/call-meta.2132014.json",
+      "family": "meta",
+      "process_id": 2132014,
+      "raw_sha256": "5e5c5a42ffe99d341e5bed3982d5f9a177defd25ef7693f09b100120589c62f5",
+      "raw_bytes": 2479,
+      "lines": 1
+    }
+  ],
+  "reference_contents_observed": false,
+  "callable_environment_established": false,
+  "transformation_authorized": false
+}

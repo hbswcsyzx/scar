@@ -78,6 +78,10 @@ class CallableEnvironmentObserver:
         if self.metadata_path.exists() or self.metadata_path.is_symlink():
             raise ValueError("environment metadata output must be fresh")
         self._fd = os.open(self.event_path, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
+        self._deferred = None
+        from scar.trace.deferred_jsonl import DeferredJsonl, snapshot_transport_enabled
+        if snapshot_transport_enabled():
+            self._deferred = DeferredJsonl(self.event_path, max_bytes=max_bytes)
         self._buffer = bytearray()
         self._buffer_limit = 65536
         self._lock = threading.RLock()
@@ -126,6 +130,10 @@ class CallableEnvironmentObserver:
             position += written
 
     def _flush(self):
+        if self._deferred is not None:
+            result = self._deferred.finalize()
+            self._bytes = result['output']['raw_bytes']
+            return
         if self._buffer:
             self._write_all(self._buffer)
             self._buffer.clear()
@@ -164,19 +172,26 @@ class CallableEnvironmentObserver:
             return None
         row = {"index": self._index, "kind": kind, "process_id": self.pid,
                "thread_id": threading.get_ident(), **fields}
-        data = (json.dumps(row, ensure_ascii=True, separators=(",", ":"),
-                           allow_nan=False) + "\n").encode("ascii")
-        if len(data) > _MAX_LINE_BYTES or self._bytes + len(self._buffer) + len(data) > self.limits["max_bytes"]:
-            self._dropped += 1
-            self._stop("LINE_BYTE_BUDGET" if len(data) > _MAX_LINE_BYTES else "BYTE_BUDGET")
-            return None
         try:
-            if len(self._buffer) + len(data) > self._buffer_limit:
-                self._flush()
-            if len(data) >= self._buffer_limit:
-                self._write_all(data)
+            if self._deferred is not None:
+                if not self._deferred.append(row):
+                    self._dropped += 1
+                    self._stop('SNAPSHOT_TRANSPORT_REJECTED')
+                    return None
+                self._bytes = self._deferred.accepted_bytes
             else:
-                self._buffer.extend(data)
+                data = (json.dumps(row, ensure_ascii=True, separators=(",", ":"),
+                                   allow_nan=False) + "\n").encode("ascii")
+                if len(data) > _MAX_LINE_BYTES or self._bytes + len(self._buffer) + len(data) > self.limits["max_bytes"]:
+                    self._dropped += 1
+                    self._stop("LINE_BYTE_BUDGET" if len(data) > _MAX_LINE_BYTES else "BYTE_BUDGET")
+                    return None
+                if len(self._buffer) + len(data) > self._buffer_limit:
+                    self._flush()
+                if len(data) >= self._buffer_limit:
+                    self._write_all(data)
+                else:
+                    self._buffer.extend(data)
         except BaseException as error:
             self._io_failed = True
             self._dropped += 1
@@ -424,6 +439,12 @@ class CallableEnvironmentObserver:
                         self._remember_error(error)
                         self._stop('WRITE_FAILURE')
                     finally:
+                        if self._deferred is not None:
+                            try:
+                                self._deferred.close_capture()
+                            except BaseException as error:
+                                self._io_failed = True
+                                self._remember_error(error)
                         self._buffer.clear()
                     try:
                         os.close(self._fd)
@@ -431,6 +452,8 @@ class CallableEnvironmentObserver:
                         self._io_failed = True
                         self._remember_error(error)
                     self._fd = None
+                digest = (self._digest.hexdigest() if self._deferred is None
+                          else self._deferred.result['output']['sha256'] if self._deferred.result is not None else None)
                 metadata = {
                     "schema": "scar.function-environment-trace", "schema_version": 1,
                     "process_id": self.pid, "python": sys.version, "implementation": "cpython",
@@ -445,7 +468,7 @@ class CallableEnvironmentObserver:
                     "scope": "exact-function dispatch fields and supplied entry readonly-association checks only",
                     "identity_continuity": "live readonly owner checked by is; no anchors means unknown continuity",
                     "owner_contract": "Python-level readonly exact-function fields; native owner mutation is not closed",
-                    "file": {"path": str(self.event_path), "raw_sha256": self._digest.hexdigest(),
+                    "file": {"path": str(self.event_path), "raw_sha256": digest,
                              "raw_bytes": self._bytes, "lines": self._events},
                     **_AUTHORITY,
                 }

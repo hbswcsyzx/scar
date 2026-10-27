@@ -99,6 +99,8 @@ def _trace(args) -> int:
     env.pop('SCAR_RESOURCE_SAMPLER',None)
     env.pop('SCAR_RESOURCE_INTERVAL',None)
     env.pop('SCAR_TRACE_LINES',None)
+    env.pop('SCAR_CAPTURE_TRANSPORT',None)
+    env.pop('SCAR_SNAPSHOT_BUFFER_BYTES',None)
     for key in ('SCAR_OS_CAPTURE_NONCE','SCAR_OS_CAPTURE_INTENT','SCAR_OS_CAPTURE_INTENT_SHA256'):
         env.pop(key,None)
     execution_evidence = getattr(args, "execution_evidence", False)
@@ -108,6 +110,10 @@ def _trace(args) -> int:
     if execution_evidence and not (getattr(args, "calls_only", False) or operands):
         raise SystemExit("--execution-evidence requires --calls-only or --call-operands")
     if getattr(args,"calls_only",False) or operands:
+        if args.snapshot_buffer_bytes < 1:
+            raise SystemExit('--snapshot-buffer-bytes must be positive')
+        env['SCAR_CAPTURE_TRANSPORT'] = args.capture_transport
+        env['SCAR_SNAPSHOT_BUFFER_BYTES'] = str(args.snapshot_buffer_bytes)
         if args.lines:
             raise SystemExit("calls-only does not collect line tracing; use a separate trace")
         if (any(out.glob('call-events.*.jsonl*')) or any(out.glob('call-codes.*.jsonl*'))
@@ -684,6 +690,10 @@ def main(argv=None) -> int:
     trace.add_argument('--max-call-codes',type=int,default=4096)
     trace.add_argument('--max-call-references',type=int,default=8192,
         help='bounded active weak identities shared by frame/operand observers; no application contents')
+    trace.add_argument('--capture-transport',choices=('jsonl','snapshot'),default='jsonl',
+        help='JSONL in callbacks, or bounded raw snapshots with JSONL conversion after collection stops')
+    trace.add_argument('--snapshot-buffer-bytes',type=int,default=8 * 1024 * 1024,
+        help='DRAM byte ceiling per snapshot stream; writer threads perform IO only')
     trace.add_argument('--max-operand-events',type=int,default=100000)
     trace.add_argument('--max-operand-bytes',type=int,default=32000000)
     trace.add_argument('--os-capture-root',help='opt in to owned syscall observation, lossless retention and final coordinates; requires fresh ROOT and --out ROOT/trace')

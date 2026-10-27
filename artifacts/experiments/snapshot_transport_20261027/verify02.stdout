@@ -1,0 +1,21 @@
+{
+  "status": "VERIFIED_SCOPED_CAPTURE_TRANSPORT",
+  "capture_profile": "process-ports",
+  "frame_entries": 822,
+  "frame_exits": 822,
+  "attempts": 1024,
+  "handshakes": 787,
+  "observation_issues": 0,
+  "targets": 1024,
+  "target_entries": 787,
+  "target_gaps": 0,
+  "writer_threads_observed_as_application": false,
+  "all_writers_closed": true,
+  "program_output": [
+    46950,
+    645
+  ],
+  "baseline_windows_had_observation_gap": "INSTRUCTION_FRAME_UNAVAILABLE",
+  "micro_performance_or_lewm_speedup_measured": false,
+  "whole_program_complete": false
+}

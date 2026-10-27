@@ -9,6 +9,8 @@ Operation、Value、StateLocation、Region、Resource 是规范程序模型的�
 操作规则；输入和输出是端口角色。值定义、对象身份、可变位置和物理资源不能合并。
 动态 invocation、value occurrence、allocation/materialization、事件和来源证据有各自
 身份，分别连接上述程序定义；不把一次 kernel 事件当成静态函数定义。
+这里的 Region 是程序子图；内存访问的 offset/shape/stride/footprint 是另一种
+带类型的范围描述，不能因为都叫 region 就混用。
 
 这五类是否足够，应由真实程序的表达和连接验证，而不是由分类数量证明。例如：
 
@@ -55,8 +57,17 @@ DRAM 有严格 byte 上限。队列满、writer 错误、fork、异常退出和�
 
 ## 当前事实与本轮顺序
 
-- 现有 recorder 有 64 KiB 字节缓冲，但 JSON 编码及部分记录构造仍在回调中；
-  这只减少写盘次数，没有完成上述分离。
+- 原 JSONL 模式有 64 KiB 字节缓冲，JSON 编码及部分记录构造仍在回调中。
+  新增可选 snapshot 模式：四个主要 observer 的五条流用 marshal C 路径现场冻结，
+  五个独立有界队列的后台线程只批量 IO。默认每流 8 MiB（队列合计 40 MiB，另有
+  有界单条记录、in-flight batch 和现有身份表）；不保留应用对象来延后观察。
+- 采集停止后，独立进程完成每条流的 JSON 编码/结构校验，并在成功后生成原有
+  reader 的 metadata。父进程等输出完成，退出时长包含后处理；不属于 clean benchmark。
+  原始暂存和规范图格式分开；暂存绑定准确 CPython/marshal 版本。
+- 现场执行的是暂存字节上限，原 JSONL 行/总字节上限由离线转换再验证。队列满、
+  raw quota 或写入失败的日志标为 incomplete，不能生成成功的旧 reader 输入。
+  每条关闭收据记录 SHA、接受/写出数量、拒绝原因、队列峰值和 writer 存活状态。
+  转换进程身份标为 SCAR_OFFLINE_POSTPROCESSING，不作为应用调用或资源使用。
 - 静态 CALL/layout 缓存已接入；动态 defaults/receiver 仍按事件观察。离线依赖
   分析已使用四个实际工作进程。
 - 原 trace 的 2,683 对直接源码候选中，2,672 对已发布条件连接，余 11 对有明确缺口；
@@ -66,8 +77,24 @@ DRAM 有严格 byte 上限。队列满、writer 错误、fork、异常退出和�
   经独立回读核对压缩为 908,380,860 字节保留。LeWM 源仓库未改。不能将此失败的
   插桩运行用于原程序性能或完整图结论。
 
-接下来先实装原始快照日志并接入 recorder，以自有真实调用负载测量 producer 开销、
-顺序和变更事实保持；同时定位记录构造中的可测开销和 11 项连接缺口。之后才重新
-选择同一成功 LeWM 命令的完整采集配置。不能只扩大时长/字节限制再重跑。
+固定字段编码的独立 5,000-call 微负载中，三对交替测量中位 1.047196 秒降至
+0.871064 秒，原 TARGET/environment 字节和 operand shape hash 相同；动态 defaults
+和 receiver 持续变化。这是特定采集路径约 16.8% 耗时下降，不是 LeWM 加速比。
+
+公开 CLI 的 process-ports + snapshot 真实小程序（主/子线程、变化的 defaults、
+交替 receiver）已得到 822 enter/822 exit、1,024 attempts，普通 operand/target
+reader 通过且无 observation issue；五条流均接受=写出、无拒绝、关闭后 writer
+不存活。早先 JSONL windows 对照有一次 INSTRUCTION_FRAME_UNAVAILABLE，保留其
+失败，不能拿不同 scope/Run 的计数比较恢复率。详见本轮实验报告。
+
+```bash
+python -m scar.cli trace --out /fresh/trace --project-root /path/to/program \
+  --capture-profile process-ports --capture-transport snapshot -- python program.py
+```
+
+当前 snapshot 通道覆盖主要 Python 调用流，stream/native provider 还有各自的
+采集路径；不是全部 observer 已经零现场处理。图 lowering 和跨层关联仍为后端工作。
+接下来测量代表性工作负载下的采集开销，并修复剩余连接；之后重新选择同一成功
+LeWM 命令的完整采集配置。不能只扩大时长/字节限制再重跑。
 端到端仍需同 Run 接通加载、推理、环境和保存，以及逻辑版本、物化、ready/lifetime。
 当前不增加 detector/backend，不报告 LeWM 加速比。

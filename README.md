@@ -12,6 +12,7 @@
 - [第一阶段四项核心功能与实施顺序](docs/FIRST_STAGE_IMPLEMENTATION_PLAN.md)：拆解、连图、轻量存取、LeWM全链自动生成；开发者自行验收。
 - [实体、关系及完整性合同](docs/FIRST_STAGE_MODEL_CONTRACT.md)：什么东西需要建模、什么叫连接完整。
 - [图的节点、边与采集职责](docs/GRAPH_MODEL_GUIDE.md)：程序如何对应强类型记录，如何自动连接及递归展开。
+- [轻量采集与后端分离](docs/CAPTURE_PIPELINE.md)：原始事实先入有界 DRAM 队列，后台落盘，停止采集后独立进程编码与建模。
 - [已实现的跨层查询入口](docs/PROGRAM_QUERY.md)：work到源码、跨函数端口和OS文件资源引用。
 - [当前交付与执行顺序](docs/FIRST_STAGE_DELIVERY.md)：真实产物、具体断口及下一项。
 - [实际运行记录](docs/FIRST_STAGE_MODEL_STATUS.md)：Observed / Implemented / Verified 与失败记录。

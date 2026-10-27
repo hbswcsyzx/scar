@@ -75,6 +75,7 @@ class CallEdgeRecorder:
         self.operand_observer = None
         self.previous_profile_present = False
         self.closed = False
+        self._closing = False
         self.io_failed = False
         self.started = time.perf_counter_ns()
         self.event_path = self.out/f"call-events.{self.pid}.jsonl"
@@ -90,6 +91,15 @@ class CallEdgeRecorder:
         # flush a parent's buffered records after a raw fork.
         self._buffers = {self.events_fd: bytearray(), self.codes_fd: bytearray()}
         self._buffer_limit = 65536
+        self._deferred = {}
+        self._is_capture_writer = None
+        from scar.trace.deferred_jsonl import DeferredJsonl, snapshot_transport_enabled
+        if snapshot_transport_enabled():
+            from scar.trace.snapshot_journal import is_journal_writer_thread
+            self._is_capture_writer = is_journal_writer_thread
+            self._deferred = {fd: DeferredJsonl(path, max_bytes=max_bytes)
+                              for fd, path in ((self.events_fd, self.event_path),
+                                               (self.codes_fd, self.code_path))}
         if self.program_ports:
             from scar.trace.captured_sources import CapturedSources
             try:
@@ -224,6 +234,10 @@ class CallEdgeRecorder:
         return bool(stack and stack[-1].get('root_invocation') == invocation)
 
     def _write(self, fd, row):
+        if fd in self._deferred:
+            accepted = self._deferred[fd].append(row)
+            self.bytes = sum(writer.accepted_bytes for writer in self._deferred.values())
+            return accepted
         data = (json.dumps(row,ensure_ascii=True,separators=(",",":"),allow_nan=False)+"\n").encode()
         if self.bytes + len(data) > self.limits['max_bytes']:
             return False
@@ -254,6 +268,9 @@ class CallEdgeRecorder:
             position += written
 
     def _flush(self, fd):
+        if fd in self._deferred:
+            self._deferred[fd].finalize()
+            return
         buffer = self._buffers[fd]
         if buffer:
             self._write_all(fd, buffer)
@@ -501,8 +518,21 @@ class CallEdgeRecorder:
                     if len(self.errors) < 16:
                         self.errors.append(type(error).__name__)
                 finally:
+                    if fd in self._deferred:
+                        try:
+                            self._deferred[fd].close_capture()
+                        except OSError as error:
+                            self.io_failed = True
+                            if len(self.errors) < 16:
+                                self.errors.append(type(error).__name__)
                     self._buffers[fd].clear()
                     os.close(fd)
+            if self._deferred and not self.io_failed:
+                self.bytes = sum(writer.result['output']['raw_bytes']
+                                 for writer in self._deferred.values())
+                if self.bytes > self.limits['max_bytes']:
+                    self.io_failed = True
+                    self.errors.append('MATERIALIZED_JSON_BYTE_BUDGET')
             metadata = dict(schema='scar.call-edge-trace',schema_version=1,process_id=self.pid,
                 project_root=self.root,python=sys.version,limits=self.limits,events=self.written,event_attempts=self.index,
                 invocations=self.entered,invocation_attempts=self.invocation,codes=len(self.codes),bytes=self.bytes,
@@ -576,7 +606,9 @@ def install(out, project_root, *, lean_plan=None):
     previous, previous_thread = sys.getprofile(),threading.getprofile()
     recorder.previous_profile_present = previous is not None or previous_thread is not None
     def profile(frame,event,arg):
-        if recorder.process_ports and recorder.closed:
+        if recorder._closing or recorder.process_ports and recorder.closed:
+            return
+        if recorder._is_capture_writer is not None and recorder._is_capture_writer():
             return
         observer = recorder.operand_observer
         if observer is None:
@@ -616,6 +648,7 @@ def install(out, project_root, *, lean_plan=None):
     def finish():
         if os.getpid() != recorder.pid:
             return
+        recorder._closing = True
         observer = recorder.operand_observer
         if recorder.collector_witness is not None:
             recorder.collector_witness.before_close()
