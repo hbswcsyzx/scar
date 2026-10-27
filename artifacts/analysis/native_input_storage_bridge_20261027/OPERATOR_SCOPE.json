@@ -1,0 +1,229 @@
+{
+  "classification": "actual retained aten::lift_fresh cpu_op, not scar-dispatch input marker",
+  "decoded_bytes": 19272121,
+  "interface": {
+    "inputs": [
+      {
+        "path": [
+          0
+        ],
+        "tensor": true,
+        "type": "Tensor(float)"
+      }
+    ],
+    "outputs": [
+      {
+        "path": [
+          0
+        ],
+        "tensor": true,
+        "type": "Tensor(float)"
+      }
+    ],
+    "provider_revision": "cf30153c4c131c8164ee7798e5022d810682e2cb",
+    "schema": "aten::lift_fresh(Tensor(a) self) -> Tensor(a)"
+  },
+  "interface_source": {
+    "artifact": {
+      "schema": "scar.pinned-torch-protocol-interface",
+      "sha256": "25fe9fc2750d3a379671aadcc85bc5ea6db4d0318cb43f80144a34d62bcfb146",
+      "size_bytes": 64328,
+      "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/native_inputs_full_20261026/attempt05/native-input-connections/native-interface.json"
+    },
+    "locator": "#/interfaces/eea46e4b57cb43151f946de1c4bead67eae620f9f180105253ccb186752ca701"
+  },
+  "native_instance": {
+    "control_scope": null,
+    "definition": {
+      "kind": "opdef",
+      "value": "native:636fde61a45803f11712767bc1cbf0b0ea3de13b14e0b27edc2d6071daea1612:symbol:93b4a88ab6f4429816d54309069829396c5b38aad73152de2381fb2fca9f7274",
+      "wire": "opdef:native:636fde61a45803f11712767bc1cbf0b0ea3de13b14e0b27edc2d6071daea1612:symbol:93b4a88ab6f4429816d54309069829396c5b38aad73152de2381fb2fca9f7274"
+    },
+    "end_ns": 2145636681248030,
+    "id": {
+      "kind": "opinst",
+      "value": "native:636fde61a45803f11712767bc1cbf0b0ea3de13b14e0b27edc2d6071daea1612:eto:25",
+      "wire": "opinst:native:636fde61a45803f11712767bc1cbf0b0ea3de13b14e0b27edc2d6071daea1612:eto:25"
+    },
+    "iteration": {},
+    "metadata": {
+      "category": "cpu_op",
+      "clock_domain": "kineto",
+      "correlation": null,
+      "cpu_join_assumptions": [
+        "artifacts belong to the same supplied capture"
+      ],
+      "cpu_join_basis": "unique positive RF ID and exact name in supplied capture",
+      "cpu_join_status": "Inferred",
+      "ctrl_deps": 24,
+      "eto_tid": 1,
+      "external_id": 21,
+      "kineto_reference": "sha256:f2ba7bda8a41b385361373ea5efcbcfcc487a095eaf23cb48ebd4a898d74cebd#/traceEvents/79",
+      "node_id": 25,
+      "parent_basis": "ETO ctrl_deps collector stack only",
+      "provider": "ETO",
+      "raw_pid": 1578961,
+      "raw_reference": "sha256:11960422233619b68d4a42d5b699a34cb57349df04df0bc90b6fd5ef3d8e4684#/nodes/18",
+      "raw_resource": {},
+      "raw_tid": 1578961,
+      "rf_id": 21,
+      "tensor_slots": [
+        {
+          "descriptor_id": "d38d15147c00358219c47ec3f7319db1bbd99b1ef205d55879f3096122dbcbd6",
+          "native_schema_binding": {
+            "formal_slot": {
+              "kind": "slot",
+              "value": "native:636fde61a45803f11712767bc1cbf0b0ea3de13b14e0b27edc2d6071daea1612:symbol:93b4a88ab6f4429816d54309069829396c5b38aad73152de2381fb2fca9f7274:schema:input_slots:0",
+              "wire": "slot:native:636fde61a45803f11712767bc1cbf0b0ea3de13b14e0b27edc2d6071daea1612:symbol:93b4a88ab6f4429816d54309069829396c5b38aad73152de2381fb2fca9f7274:schema:input_slots:0"
+            },
+            "gap": null,
+            "schema_sha256": "694a3316d0063e18b94deaf91b21fa4e345d02aeeabcd923b010db523cd1283c",
+            "status": "QUALIFIED"
+          },
+          "ordered_path": [
+            0
+          ],
+          "provider_reference": "native:636fde61a45803f11712767bc1cbf0b0ea3de13b14e0b27edc2d6071daea1612:tensor-token:19",
+          "raw_reference": "sha256:11960422233619b68d4a42d5b699a34cb57349df04df0bc90b6fd5ef3d8e4684#/nodes/18/inputs/values/0",
+          "role": "inputs"
+        },
+        {
+          "descriptor_id": "d38d15147c00358219c47ec3f7319db1bbd99b1ef205d55879f3096122dbcbd6",
+          "native_schema_binding": {
+            "formal_slot": {
+              "kind": "slot",
+              "value": "native:636fde61a45803f11712767bc1cbf0b0ea3de13b14e0b27edc2d6071daea1612:symbol:93b4a88ab6f4429816d54309069829396c5b38aad73152de2381fb2fca9f7274:schema:output_slots:0",
+              "wire": "slot:native:636fde61a45803f11712767bc1cbf0b0ea3de13b14e0b27edc2d6071daea1612:symbol:93b4a88ab6f4429816d54309069829396c5b38aad73152de2381fb2fca9f7274:schema:output_slots:0"
+            },
+            "gap": null,
+            "schema_sha256": "694a3316d0063e18b94deaf91b21fa4e345d02aeeabcd923b010db523cd1283c",
+            "status": "QUALIFIED"
+          },
+          "ordered_path": [
+            0
+          ],
+          "provider_reference": "native:636fde61a45803f11712767bc1cbf0b0ea3de13b14e0b27edc2d6071daea1612:tensor-token:19",
+          "raw_reference": "sha256:11960422233619b68d4a42d5b699a34cb57349df04df0bc90b6fd5ef3d8e4684#/nodes/18/outputs/values/0",
+          "role": "outputs"
+        }
+      ],
+      "thread_namespace": "Kineto host thread"
+    },
+    "parent": {
+      "kind": "opinst",
+      "value": "native:636fde61a45803f11712767bc1cbf0b0ea3de13b14e0b27edc2d6071daea1612:eto:24",
+      "wire": "opinst:native:636fde61a45803f11712767bc1cbf0b0ea3de13b14e0b27edc2d6071daea1612:eto:24"
+    },
+    "process_id": 1578961,
+    "start_ns": 2145636681207733,
+    "status": "Observed",
+    "thread_id": 1578961
+  },
+  "native_instance_artifact": {
+    "schema": "scar.ir.v2.evidence",
+    "sha256": "465f4b2aca85aac6479a097e362f038e84ea13fc4d12fe03ea81e693961648f9",
+    "size_bytes": 3525928,
+    "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/native_inputs_full_20261026/attempt05/native-input-connections/shards/000000/source-evidence.json"
+  },
+  "original_parent_row": {
+    "actor": {
+      "name": "aten::lift_fresh",
+      "process_id": 1578961,
+      "record_function_thread_token": 1,
+      "rf_id": 21,
+      "scope": 0,
+      "thread_namespace": "ETO_RECORD_FUNCTION_THREAD_TOKEN"
+    },
+    "direct_missing_parent_edge": false,
+    "missing_chain_origin_node": null,
+    "missing_parent_id": null,
+    "node_id": 25,
+    "original_ordinal": 18,
+    "original_parent": 24,
+    "parent_edge_source": {
+      "artifact": {
+        "schema": "pytorch.execution-trace.v1",
+        "sha256": "11960422233619b68d4a42d5b699a34cb57349df04df0bc90b6fd5ef3d8e4684",
+        "size_bytes": 321365939,
+        "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/lewm_joint_capture_20261026/capture/trace/execution-trace.1578961.adfc0475ed50cb37e1c0453142b5fa65.json"
+      },
+      "locator": "#/nodes/18/ctrl_deps"
+    },
+    "source": {
+      "artifact": {
+        "schema": "pytorch.execution-trace.v1",
+        "sha256": "11960422233619b68d4a42d5b699a34cb57349df04df0bc90b6fd5ef3d8e4684",
+        "size_bytes": 321365939,
+        "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/lewm_joint_capture_20261026/capture/trace/execution-trace.1578961.adfc0475ed50cb37e1c0453142b5fa65.json"
+      },
+      "locator": "#/nodes/18"
+    },
+    "status": "ORIGINAL_ROOTED_PARENT_CLOSURE_VERIFIED"
+  },
+  "qualification": "retained original parent scope and normal program/evidence codecs; no original raw ETO replay",
+  "read_inputs": [
+    {
+      "schema": "scar.native-input-port-navigation",
+      "sha256": "4436b171be0dec2782e7843bc097227d675efa5e33155a6e8a2bf2408b4b6f72",
+      "size_bytes": 146783,
+      "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/native_inputs_full_20261026/attempt05/port-navigation/manifest.json"
+    },
+    {
+      "schema": "scar.native-capture-batch",
+      "sha256": "6d4c8fbf2e2a186e8b10d4a3cddfd32694e6cd0bfed77ed555282a42b6a222a7",
+      "size_bytes": 1115068,
+      "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/native_inputs_full_20261026/attempt05/native-input-connections/report.json"
+    },
+    {
+      "schema": "scar.native-capture-table-chunks",
+      "sha256": "8bda057ce4a3623022a7c2550b246dc5c2c1c98cb9777371d1e9999cc91f9e7d",
+      "size_bytes": 145121,
+      "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/native_inputs_full_20261026/attempt05/native-input-connections/native-parent-inventory/manifest.json"
+    },
+    {
+      "schema": "scar.native-capture-row-chunk",
+      "sha256": "5221b82c23e27323ef7c58386d54f3ddf7c7af1d330803d0dac763f78ff3f361",
+      "size_bytes": 1154661,
+      "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/native_inputs_full_20261026/attempt05/native-input-connections/native-parent-inventory/000000.jsonl"
+    },
+    {
+      "schema": "scar.program-graph",
+      "sha256": "d70685d1521bf28527fa32beb319fa0f9d66db257b6df3ce2559f013141d5bc6",
+      "size_bytes": 5273398,
+      "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/native_inputs_full_20261026/attempt05/native-input-connections/program.json"
+    },
+    {
+      "schema": "scar.pinned-torch-protocol-interface",
+      "sha256": "25fe9fc2750d3a379671aadcc85bc5ea6db4d0318cb43f80144a34d62bcfb146",
+      "size_bytes": 64328,
+      "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/native_inputs_full_20261026/attempt05/native-input-connections/native-interface.json"
+    },
+    {
+      "schema": "scar.execution-model",
+      "sha256": "d58eaa17e99f207f5a7780ab6e7904615e9376ab472dfcdb81ce7922a28f6dbc",
+      "size_bytes": 7846834,
+      "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/native_inputs_full_20261026/attempt05/native-input-connections/shards/000000/execution.json"
+    },
+    {
+      "schema": "scar.ir.v2.evidence",
+      "sha256": "465f4b2aca85aac6479a097e362f038e84ea13fc4d12fe03ea81e693961648f9",
+      "size_bytes": 3525928,
+      "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/native_inputs_full_20261026/attempt05/native-input-connections/shards/000000/source-evidence.json"
+    }
+  ],
+  "selected": {
+    "path": [
+      0
+    ],
+    "row": 21
+  },
+  "static_operation": {
+    "kind": "program_operation",
+    "value": "torch-interface:eea46e4b57cb43151f946de1c4bead67eae620f9f180105253ccb186752ca701:invoke",
+    "wire": "program_operation:torch-interface:eea46e4b57cb43151f946de1c4bead67eae620f9f180105253ccb186752ca701:invoke"
+  },
+  "static_operator_schema": "aten::lift_fresh(Tensor(a) self) -> Tensor(a)",
+  "status": "PASS",
+  "stored_bytes": 19272121,
+  "wall_seconds": 1.7664895099587739
+}
