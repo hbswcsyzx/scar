@@ -288,6 +288,9 @@ def archive_owned_capture(capture_root,*,budgets=None,workers=4):
     index=root/'archive-index.json';_need(not index.exists(),'fresh archive required')
     paths=sorted((root/'os').glob('syscalls.*'))
     paths+=sorted((root/'trace').glob('*.jsonl'))
+    # Temporary snapshot bytes are evidence too, including a stopped prefix.
+    # Archival preserves bytes; it does not grant journal/graph completeness.
+    paths+=sorted((root/'trace').glob('*.jsonl.snapshot'))
     paths+=sorted((root/'trace').glob('execution-trace.*.json'))
     paths+=sorted((root/'trace').glob('kineto.*.json'))
     paths+=_native_input_archive_paths(root,budget)
@@ -329,6 +332,7 @@ def archive_stopped_capture(capture_root,*,budgets=None,workers=4,remove_origina
     index=root/'partial-archive-index.json';_need(not index.exists(),'fresh partial archive required')
     paths=sorted((root/'os').glob('syscalls.*'))
     paths+=sorted((root/'trace').glob('*.jsonl'))
+    paths+=sorted((root/'trace').glob('*.jsonl.snapshot'))
     paths+=sorted((root/'trace').glob('execution-trace.*.json'))
     paths+=sorted((root/'trace').glob('kineto.*.json'))
     from scar.store.capture_compression import compress_capture_members,remove_verified_originals
