@@ -14,7 +14,7 @@ from scar.ir.program.call_edges import (
 from scar.ir.program.call_operands import (
     CallOperandBudget, CallableKind, OperandCallAttempt, OperandCollectionMetadata,
     OperandEntryHandshake, OperandEvent, OperandEventKind, OperandGap, OperandScopedGap, OperandInstruction,
-    LEAN_PORTS_RULE,
+    LEAN_PORTS_RULE, PROGRAM_PORTS_RULE,
     operand_references,
 )
 from scar.ir.record_codec import decode
@@ -169,6 +169,21 @@ def read_call_operands(trace, root, *, budget=CallOperandBudget(), frame_budget=
         expected = {family: base_files[process, family] for family in ("codes", "events", "meta")}
         _require({item.family: item for item in meta.base_manifest} == expected,
                  "operand metadata does not bind the original frame file manifest")
+        from scar.trace.captured_sources import validate_program_profile, validate_source_metadata
+        program_source = validate_program_profile(base_meta[process], {'rule':meta.rule, 'instructions':meta.instructions})
+        if program_source is not None:
+            source_path = trace_path / f'captured-source-meta.{process}.json'
+            _require(program_source.get('uri') == str(source_path) and source_path.is_file()
+                     and not source_path.is_symlink() and source_path.stat().st_size <= budget.max_metadata_bytes,
+                     'program source metadata path/size differs')
+            with source_path.open('rb') as stream:
+                source_raw = stream.read(budget.max_metadata_bytes+1)
+            _require(len(source_raw) == program_source.get('size_bytes')
+                     and hashlib.sha256(source_raw).hexdigest() == program_source.get('sha256'),
+                     'program source metadata SHA/size differs')
+            sources = _json_object(source_raw, path=str(source_path), line_number=1)
+            validate_source_metadata(sources, process,
+                {x.code.key:x.code.filename for x in frame_scan.captures if x.process_id == process})
         if meta.rule == LEAN_PORTS_RULE:
             from scar.trace.lean_capture import LeanCapturePlan, PROFILE
             from scar.ir.program.providers import ProviderArtifact
@@ -210,7 +225,7 @@ def read_call_operands(trace, root, *, budget=CallOperandBudget(), frame_budget=
             _require(type(kind) is str and kind in _TYPES, "unknown operand event kind")
             anchor = CallRecordAnchor(logical, line, hashlib.sha256(raw).hexdigest(), row.get("index"))
             _require("anchor" not in row, "raw operand events cannot supply their own anchors")
-            _require(kind != 'SCOPED_GAP' or meta.rule == LEAN_PORTS_RULE,
+            _require(kind != 'SCOPED_GAP' or meta.rule in (LEAN_PORTS_RULE, PROGRAM_PORTS_RULE),
                      'scoped gaps require the explicit lean profile')
             event = decode(_TYPES[kind], {**row, "anchor": {
                 "path": anchor.path, "line_number": anchor.line_number,

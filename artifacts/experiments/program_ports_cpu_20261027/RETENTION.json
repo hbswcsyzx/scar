@@ -1,0 +1,980 @@
+{
+  "status": "SMALL_CANONICAL_HEADERS_AND_REFERENCE_CHANNELS_RETAINED",
+  "retained": [
+    {
+      "path": "artifacts/experiments/program_ports_cpu_20261027/READBACK.json",
+      "size_bytes": 5487,
+      "sha256": "474d6c91fbb1b303f22399a4d9fe6a6a4499b13dd6bac00c182c57aff5b41d79"
+    },
+    {
+      "path": "artifacts/experiments/program_ports_cpu_20261027/REPORT.md",
+      "size_bytes": 3735,
+      "sha256": "c646efff649fdc744736c0ef0fe694628642c93c34b798b97d1d6bd2f29516c2"
+    },
+    {
+      "path": "artifacts/experiments/program_ports_cpu_20261027/SOURCE_RECEIPTS.json",
+      "size_bytes": 6477,
+      "sha256": "ab255ec6785c46e2bcc1a6cd917d3ba94d9bbd041ca7451ac45216a3046b3d72"
+    },
+    {
+      "path": "artifacts/experiments/program_ports_cpu_20261027/capture/archive-index.json",
+      "size_bytes": 64817,
+      "sha256": "5f528a97e2ee051c6d7fcfb73a1f732571509745889dc8906fc887fa796baa00"
+    },
+    {
+      "path": "artifacts/experiments/program_ports_cpu_20261027/capture/capture-coordinates.json",
+      "size_bytes": 268272,
+      "sha256": "0e1b190e7ca6f99ec61b33e447cdb6ad2be0e008e21fe2d1e98230f57d326bb9"
+    },
+    {
+      "path": "artifacts/experiments/program_ports_cpu_20261027/capture/os-capture-coverage.5d12846d4cf95a2ac9a7ec5a8a177ed2.json",
+      "size_bytes": 3035,
+      "sha256": "5f30a6093e908e0f9fad8db90bac4ddf3cde75e335838c9c38d06e3b19e1de54"
+    },
+    {
+      "path": "artifacts/experiments/program_ports_cpu_20261027/capture/os-capture-intent.5d12846d4cf95a2ac9a7ec5a8a177ed2.json",
+      "size_bytes": 1971,
+      "sha256": "6c86c116ec7c183855a9109ea92f0040dc582e4a4edafa5f7bc5bb79308b8bc6"
+    },
+    {
+      "path": "artifacts/experiments/program_ports_cpu_20261027/capture/os-capture-launch.5d12846d4cf95a2ac9a7ec5a8a177ed2.json",
+      "size_bytes": 3284,
+      "sha256": "c6133c2f56d9e0d698406d2fa29753990e041ed54ab00b77fe58ddeb82ec1a64"
+    },
+    {
+      "path": "artifacts/experiments/program_ports_cpu_20261027/capture/trace/call-codes.2026697.jsonl.gz",
+      "size_bytes": 7460,
+      "sha256": "5a8bf7e01fb3232c570fffc5fdbd42abb96b4c961059d6ccc63b02f8f7ee4cdd"
+    },
+    {
+      "path": "artifacts/experiments/program_ports_cpu_20261027/capture/trace/call-events.2026697.jsonl.gz",
+      "size_bytes": 21742,
+      "sha256": "a6ba951bdd296031796cf9f5f2c577f1e6af55ca73128839b2682cbaa8e80eb2"
+    },
+    {
+      "path": "artifacts/experiments/program_ports_cpu_20261027/capture/trace/call-meta.2026697.json",
+      "size_bytes": 1509,
+      "sha256": "91720209c40b6d22f117a7708c2991ce468bfbc55b7616a43b62f74dde8bb089"
+    },
+    {
+      "path": "artifacts/experiments/program_ports_cpu_20261027/capture/trace/call-operand-meta.2026697.json",
+      "size_bytes": 2010,
+      "sha256": "415daa50d65f93287607a4aa2ac10a90523e5197765ddbc1eccbebd230633fe8"
+    },
+    {
+      "path": "artifacts/experiments/program_ports_cpu_20261027/capture/trace/call-operands.2026697.jsonl.gz",
+      "size_bytes": 21391,
+      "sha256": "68447db44032721c2b23af7726a2347289e2d32286674589565d8ef13ce76c05"
+    },
+    {
+      "path": "artifacts/experiments/program_ports_cpu_20261027/capture/trace/captured-source-meta.2026697.json",
+      "size_bytes": 21841,
+      "sha256": "69521cb317c57b9bed3087c5f36d0385e760146c8c5c672c0ad532bc876692e4"
+    },
+    {
+      "path": "artifacts/experiments/program_ports_cpu_20261027/capture/trace/captured-sources.2026697.jsonl.gz",
+      "size_bytes": 67369,
+      "sha256": "a23573d761216f9595e2e2207a2cda00e7609f7fb879dfcefac1ed594e1b6f79"
+    },
+    {
+      "path": "artifacts/experiments/program_ports_cpu_20261027/capture/trace/collector-witness.2026697.877f556b80f54ed9a451a67ff6c946c5/code-witnesses/091120615fb48ce4a3f34b1a65a2fecb657d6b9241d43d0943aa26cdff908f73.source.utf8",
+      "size_bytes": 2586,
+      "sha256": "13f8185a2b73b9547157a6629aec3b769decc657f222ca0fd7ed74ac076efe2d"
+    },
+    {
+      "path": "artifacts/experiments/program_ports_cpu_20261027/capture/trace/collector-witness.2026697.877f556b80f54ed9a451a67ff6c946c5/code-witnesses/091120615fb48ce4a3f34b1a65a2fecb657d6b9241d43d0943aa26cdff908f73.source.utf8.gz",
+      "size_bytes": 929,
+      "sha256": "21b0cfb8cb507d56f19d8ea97f69b1daf9d43ffb71b803cab64079e5d4c43d3e"
+    },
+    {
+      "path": "artifacts/experiments/program_ports_cpu_20261027/capture/trace/collector-witness.2026697.877f556b80f54ed9a451a67ff6c946c5/code-witnesses/0c15bcd2d1fd0003d48aa2bbd24801619dbd5e2e895068ce8ab5a034b9cad7cb.marshal",
+      "size_bytes": 39854,
+      "sha256": "cb884734c0d39e8202bbc2b58cb6c4cef4fa29821d1e06070e07f3fd181d7d1e"
+    },
+    {
+      "path": "artifacts/experiments/program_ports_cpu_20261027/capture/trace/collector-witness.2026697.877f556b80f54ed9a451a67ff6c946c5/code-witnesses/0c15bcd2d1fd0003d48aa2bbd24801619dbd5e2e895068ce8ab5a034b9cad7cb.marshal.gz",
+      "size_bytes": 19859,
+      "sha256": "a5b34fd7ee2502928ca511841fcf1c419c7fe482d73076c77b29e66b5d575ba4"
+    },
+    {
+      "path": "artifacts/experiments/program_ports_cpu_20261027/capture/trace/collector-witness.2026697.877f556b80f54ed9a451a67ff6c946c5/code-witnesses/2856feafedc4624737f943fe7ed8cb429658651402fcb724773c996c3f9d0140.source.utf8",
+      "size_bytes": 60915,
+      "sha256": "97ba4ff5e0daf9b6c08d2c3a21b6dc488a25c76adbe941741302f8b40ec01d57"
+    },
+    {
+      "path": "artifacts/experiments/program_ports_cpu_20261027/capture/trace/collector-witness.2026697.877f556b80f54ed9a451a67ff6c946c5/code-witnesses/2856feafedc4624737f943fe7ed8cb429658651402fcb724773c996c3f9d0140.source.utf8.gz",
+      "size_bytes": 15268,
+      "sha256": "813ff7ef7cc6f77e631b3ac78cf23287f5abb73da495ddec0ecad43de4f8a932"
+    },
+    {
+      "path": "artifacts/experiments/program_ports_cpu_20261027/capture/trace/collector-witness.2026697.877f556b80f54ed9a451a67ff6c946c5/code-witnesses/30ed36314122cc54f2d05858ee36745daca3c112235238c5c50b6a1b148458a0.marshal",
+      "size_bytes": 2969,
+      "sha256": "4b47b5ecaf20b2f097063a0d95eacb0d6043906ac8caba921152faaab5b37ff6"
+    },
+    {
+      "path": "artifacts/experiments/program_ports_cpu_20261027/capture/trace/collector-witness.2026697.877f556b80f54ed9a451a67ff6c946c5/code-witnesses/30ed36314122cc54f2d05858ee36745daca3c112235238c5c50b6a1b148458a0.marshal.gz",
+      "size_bytes": 1602,
+      "sha256": "c8b1d4cd42cf9421a11c87a390d2fcd9d060329667dc5e97f9ed96358313046a"
+    },
+    {
+      "path": "artifacts/experiments/program_ports_cpu_20261027/capture/trace/collector-witness.2026697.877f556b80f54ed9a451a67ff6c946c5/code-witnesses/3375a849cca8286f4ec2b4c4e6931c8b7c1af894f6e3d21c95bbbf0c94468291.marshal",
+      "size_bytes": 34881,
+      "sha256": "70824b490350802973332dfed6d1842c5baacbc9c5f92fca8dd1b449cadf07f9"
+    },
+    {
+      "path": "artifacts/experiments/program_ports_cpu_20261027/capture/trace/collector-witness.2026697.877f556b80f54ed9a451a67ff6c946c5/code-witnesses/3375a849cca8286f4ec2b4c4e6931c8b7c1af894f6e3d21c95bbbf0c94468291.marshal.gz",
+      "size_bytes": 17253,
+      "sha256": "f49e0636075c41aca6cd1c9709c3902c89cd199b252697b4d531eba4ab0d3a82"
+    },
+    {
+      "path": "artifacts/experiments/program_ports_cpu_20261027/capture/trace/collector-witness.2026697.877f556b80f54ed9a451a67ff6c946c5/code-witnesses/4bea5b5e3c947a391351fdf0588895fc6e96ea72ada11de1691d9902961b90b1.source.utf8",
+      "size_bytes": 22358,
+      "sha256": "ae33773b011bde55a6e1a4a6222b3dfd0cd84af353255e365dd61a00296fb12e"
+    },
+    {
+      "path": "artifacts/experiments/program_ports_cpu_20261027/capture/trace/collector-witness.2026697.877f556b80f54ed9a451a67ff6c946c5/code-witnesses/4bea5b5e3c947a391351fdf0588895fc6e96ea72ada11de1691d9902961b90b1.source.utf8.gz",
+      "size_bytes": 7530,
+      "sha256": "c93bea99797539f16b276736deb2d4b13b299aa6f9798bc8d1cf314893bc5d4a"
+    },
+    {
+      "path": "artifacts/experiments/program_ports_cpu_20261027/capture/trace/collector-witness.2026697.877f556b80f54ed9a451a67ff6c946c5/code-witnesses/561ed8561a3413ac0313a5459f81057375e2c5b6edc82b9f8ccc4a6a1cb3337c.marshal",
+      "size_bytes": 25389,
+      "sha256": "e0a6d0f4433c207c6c6418131c5c7e7c94e983de85a36448115d7daf82a6117a"
+    },
+    {
+      "path": "artifacts/experiments/program_ports_cpu_20261027/capture/trace/collector-witness.2026697.877f556b80f54ed9a451a67ff6c946c5/code-witnesses/561ed8561a3413ac0313a5459f81057375e2c5b6edc82b9f8ccc4a6a1cb3337c.marshal.gz",
+      "size_bytes": 12885,
+      "sha256": "a8c6a4127318b51a5363945f957cbae185d7e99862ec7f81605f0ce977d91f97"
+    },
+    {
+      "path": "artifacts/experiments/program_ports_cpu_20261027/capture/trace/collector-witness.2026697.877f556b80f54ed9a451a67ff6c946c5/code-witnesses/78e46f28f491572d5cf7609f75485c1d33e484b7f8d6808d507c87629bfabf68.marshal",
+      "size_bytes": 53110,
+      "sha256": "def9e45ede4923d217ace6241a2e8e44afae9b513c0cb78028d8242cff6fcc75"
+    },
+    {
+      "path": "artifacts/experiments/program_ports_cpu_20261027/capture/trace/collector-witness.2026697.877f556b80f54ed9a451a67ff6c946c5/code-witnesses/78e46f28f491572d5cf7609f75485c1d33e484b7f8d6808d507c87629bfabf68.marshal.gz",
+      "size_bytes": 26710,
+      "sha256": "5919ddec16368de3abd4385f1844a392b4af779ef0b71f903a7912e44b1ab35f"
+    },
+    {
+      "path": "artifacts/experiments/program_ports_cpu_20261027/capture/trace/collector-witness.2026697.877f556b80f54ed9a451a67ff6c946c5/code-witnesses/7ecc0e4cd463563094c1f52648c53fece756bfa330d2577dbcbdafc723f673e8.source.utf8",
+      "size_bytes": 24260,
+      "sha256": "6b315b278f625b9765ad25ce3c3dca33cb0f449016b329c4bbd21292b0437cb1"
+    },
+    {
+      "path": "artifacts/experiments/program_ports_cpu_20261027/capture/trace/collector-witness.2026697.877f556b80f54ed9a451a67ff6c946c5/code-witnesses/7ecc0e4cd463563094c1f52648c53fece756bfa330d2577dbcbdafc723f673e8.source.utf8.gz",
+      "size_bytes": 7556,
+      "sha256": "0366ac4b3828e1a1e64e03d528d2cd7d6410cd87b72fa64191871300e1458245"
+    },
+    {
+      "path": "artifacts/experiments/program_ports_cpu_20261027/capture/trace/collector-witness.2026697.877f556b80f54ed9a451a67ff6c946c5/code-witnesses/9c40670a7babb6b1109847bbb9e07197444f463ef1ad0ad5ada0ffdfef92bbbb.source.utf8",
+      "size_bytes": 22036,
+      "sha256": "14e4a319ec9024752eff907422fbc886da1e735db88360b8871c345669c39428"
+    },
+    {
+      "path": "artifacts/experiments/program_ports_cpu_20261027/capture/trace/collector-witness.2026697.877f556b80f54ed9a451a67ff6c946c5/code-witnesses/9c40670a7babb6b1109847bbb9e07197444f463ef1ad0ad5ada0ffdfef92bbbb.source.utf8.gz",
+      "size_bytes": 6659,
+      "sha256": "434d1c1aae04bb7c95c59d610f7d22d4e4b238ffe3fdc5a7093e5cb282f4d0fe"
+    },
+    {
+      "path": "artifacts/experiments/program_ports_cpu_20261027/capture/trace/collector-witness.2026697.877f556b80f54ed9a451a67ff6c946c5/code-witnesses/a84008a80e87b2ec42af4f11ad9e99d4bd360ce44ee46ba622fdf2b9229589c2.source.utf8",
+      "size_bytes": 24033,
+      "sha256": "334db776b16e722166b2b6f400376b86989bbfed9d08890014a49ea87ff89cb8"
+    },
+    {
+      "path": "artifacts/experiments/program_ports_cpu_20261027/capture/trace/collector-witness.2026697.877f556b80f54ed9a451a67ff6c946c5/code-witnesses/a84008a80e87b2ec42af4f11ad9e99d4bd360ce44ee46ba622fdf2b9229589c2.source.utf8.gz",
+      "size_bytes": 7647,
+      "sha256": "fcb1bc659e2b1c36462dd5d291707bba04aee762bda0705789ee72a8ef7d2519"
+    },
+    {
+      "path": "artifacts/experiments/program_ports_cpu_20261027/capture/trace/collector-witness.2026697.877f556b80f54ed9a451a67ff6c946c5/code-witnesses/cbb05a7320816be0ddb3932fc5654ca8b8005f1a2946a1a1c2180a10f75d5328.source.utf8",
+      "size_bytes": 30464,
+      "sha256": "16d0d1d375df582e1aab849180f2c97d3534dfa8a55376245872ee88fa2595d7"
+    },
+    {
+      "path": "artifacts/experiments/program_ports_cpu_20261027/capture/trace/collector-witness.2026697.877f556b80f54ed9a451a67ff6c946c5/code-witnesses/cbb05a7320816be0ddb3932fc5654ca8b8005f1a2946a1a1c2180a10f75d5328.source.utf8.gz",
+      "size_bytes": 9914,
+      "sha256": "874ce3d17445de957a4714616cdca2213fc20a9e5f2d15d009e30d21d3973a5f"
+    },
+    {
+      "path": "artifacts/experiments/program_ports_cpu_20261027/capture/trace/collector-witness.2026697.877f556b80f54ed9a451a67ff6c946c5/code-witnesses/d7bd201d5cfa86e5787dee2710851280a465c4ccbb90bf31c15249b73e19ac23.source.utf8",
+      "size_bytes": 15518,
+      "sha256": "809f7a723996e163dc30216d759bbaee2a466c6f53960929d490fcba1edfb668"
+    },
+    {
+      "path": "artifacts/experiments/program_ports_cpu_20261027/capture/trace/collector-witness.2026697.877f556b80f54ed9a451a67ff6c946c5/code-witnesses/d7bd201d5cfa86e5787dee2710851280a465c4ccbb90bf31c15249b73e19ac23.source.utf8.gz",
+      "size_bytes": 4804,
+      "sha256": "8fc8a8c847faf15947470489b8ea1ebb4134449311f4b8b29ecb3f8cb0f49b43"
+    },
+    {
+      "path": "artifacts/experiments/program_ports_cpu_20261027/capture/trace/collector-witness.2026697.877f556b80f54ed9a451a67ff6c946c5/code-witnesses/dd1c4a3600a9da2c82bf3751f59e548094145fa2f993abbed822aefa0051b4e1.marshal",
+      "size_bytes": 81981,
+      "sha256": "aad7cd57695b41687a20ce632ac1ab96d4cda7ab8d72fde7880c4408e834911f"
+    },
+    {
+      "path": "artifacts/experiments/program_ports_cpu_20261027/capture/trace/collector-witness.2026697.877f556b80f54ed9a451a67ff6c946c5/code-witnesses/dd1c4a3600a9da2c82bf3751f59e548094145fa2f993abbed822aefa0051b4e1.marshal.gz",
+      "size_bytes": 37056,
+      "sha256": "7257485899d9f2f777a20f7324e106dc364ee975a2ffefb4c614ef3152b25eb1"
+    },
+    {
+      "path": "artifacts/experiments/program_ports_cpu_20261027/capture/trace/collector-witness.2026697.877f556b80f54ed9a451a67ff6c946c5/code-witnesses/e9bc421f3766a4e2be080001717878938884beea32ad069b9089fd2321e65e11.marshal",
+      "size_bytes": 31069,
+      "sha256": "7611733ff9b643447ad363653f3dc7290f722dd0a56b0025575427484149e11c"
+    },
+    {
+      "path": "artifacts/experiments/program_ports_cpu_20261027/capture/trace/collector-witness.2026697.877f556b80f54ed9a451a67ff6c946c5/code-witnesses/e9bc421f3766a4e2be080001717878938884beea32ad069b9089fd2321e65e11.marshal.gz",
+      "size_bytes": 15508,
+      "sha256": "a3bcd0b9ec8cc52692fb6e1c0626d0ad6997ffa0b77c5886d8be151f131e4ad0"
+    },
+    {
+      "path": "artifacts/experiments/program_ports_cpu_20261027/capture/trace/collector-witness.2026697.877f556b80f54ed9a451a67ff6c946c5/code-witnesses/ef0072c741cca2979c19313e4d420e71c48b57eb50be93857c1746bebb546529.marshal",
+      "size_bytes": 31659,
+      "sha256": "eedf139f059780cac5018e5cd8c18d21d610c9f9cdd2e83f2b6eb19f4e07d6bd"
+    },
+    {
+      "path": "artifacts/experiments/program_ports_cpu_20261027/capture/trace/collector-witness.2026697.877f556b80f54ed9a451a67ff6c946c5/code-witnesses/ef0072c741cca2979c19313e4d420e71c48b57eb50be93857c1746bebb546529.marshal.gz",
+      "size_bytes": 15898,
+      "sha256": "c3d1f4202151ddd12a5e7e2891dcecf8e1785db0fded847bf098c83542b6e88a"
+    },
+    {
+      "path": "artifacts/experiments/program_ports_cpu_20261027/capture/trace/collector-witness.2026697.877f556b80f54ed9a451a67ff6c946c5/code-witnesses/manifest.json",
+      "size_bytes": 17800,
+      "sha256": "f1b4ae59f86f0b5abcc6892ad213a587225ef77757c1bb6e4495c8072fefd325"
+    },
+    {
+      "path": "artifacts/experiments/program_ports_cpu_20261027/capture/trace/collector-witness.2026697.877f556b80f54ed9a451a67ff6c946c5/code-witnesses/manifest.json.gz",
+      "size_bytes": 3365,
+      "sha256": "a546ac9c40088c34cee11d54e70fd36b4f7eab912aabd0e7cb3b2f1b36991831"
+    },
+    {
+      "path": "artifacts/experiments/program_ports_cpu_20261027/capture/trace/collector-witness.2026697.877f556b80f54ed9a451a67ff6c946c5/manifest.json",
+      "size_bytes": 74521,
+      "sha256": "49005f63ff674eb67ca7a82df87a97602d8654da7cb4dc64085d752717876491"
+    },
+    {
+      "path": "artifacts/experiments/program_ports_cpu_20261027/capture/trace/collector-witness.2026697.877f556b80f54ed9a451a67ff6c946c5/manifest.json.gz",
+      "size_bytes": 9267,
+      "sha256": "b1bc15b932a087a8a99e928160917eade9ee95c371f7b91ec728a2bbd65d1900"
+    },
+    {
+      "path": "artifacts/experiments/program_ports_cpu_20261027/capture/trace/collector-witness.2026697.877f556b80f54ed9a451a67ff6c946c5/process-images/manifest.json",
+      "size_bytes": 51242,
+      "sha256": "fe876f933c607dde16496bab4b2a83a5d078584006b3315243378c6de12280de"
+    },
+    {
+      "path": "artifacts/experiments/program_ports_cpu_20261027/capture/trace/collector-witness.2026697.877f556b80f54ed9a451a67ff6c946c5/process-images/manifest.json.gz",
+      "size_bytes": 9268,
+      "sha256": "ebdfd7d2a442819024337faa534adab417a74b960106a7305f3aaced13a9700d"
+    },
+    {
+      "path": "artifacts/experiments/program_ports_cpu_20261027/capture/trace/collector-witness.2026697.877f556b80f54ed9a451a67ff6c946c5/process-images/maps-0000.jsonl",
+      "size_bytes": 150951,
+      "sha256": "df5448c73aacd5a5a7f632f4ece93a7f86992ddb1f88862ce3fe516201d72dc6"
+    },
+    {
+      "path": "artifacts/experiments/program_ports_cpu_20261027/capture/trace/collector-witness.2026697.877f556b80f54ed9a451a67ff6c946c5/process-images/maps-0000.jsonl.gz",
+      "size_bytes": 11934,
+      "sha256": "5405eaea44ea012a2703d081b22d621a780f7281d80add560606ca49566dfabf"
+    },
+    {
+      "path": "artifacts/experiments/program_ports_cpu_20261027/capture/trace/collector-witness.2026697.877f556b80f54ed9a451a67ff6c946c5/process-images/maps-0000.raw",
+      "size_bytes": 16569,
+      "sha256": "ad3d6e8761f59f3a31fd72e3acaed63947511442a450ae6d06a3edde3aa2ada7"
+    },
+    {
+      "path": "artifacts/experiments/program_ports_cpu_20261027/capture/trace/collector-witness.2026697.877f556b80f54ed9a451a67ff6c946c5/process-images/maps-0000.raw.gz",
+      "size_bytes": 2168,
+      "sha256": "e01195c25f11ad014a4caf6eb7c98603aa85646dc1f43ab1179b4ea759573057"
+    },
+    {
+      "path": "artifacts/experiments/program_ports_cpu_20261027/capture/trace/collector-witness.2026697.877f556b80f54ed9a451a67ff6c946c5/process-images/maps-0001.jsonl",
+      "size_bytes": 754614,
+      "sha256": "1d727b4160312b0cf58bdc1ce30a1a0ec2dc7f829658bbcc7d877ce5a1cc4909"
+    },
+    {
+      "path": "artifacts/experiments/program_ports_cpu_20261027/capture/trace/collector-witness.2026697.877f556b80f54ed9a451a67ff6c946c5/process-images/maps-0001.jsonl.gz",
+      "size_bytes": 58712,
+      "sha256": "b7d5583990356b2a8c08e8b4816a3515b8bb384b8efeeb35cf8c0fd8fb4c1ff8"
+    },
+    {
+      "path": "artifacts/experiments/program_ports_cpu_20261027/capture/trace/collector-witness.2026697.877f556b80f54ed9a451a67ff6c946c5/process-images/maps-0001.raw",
+      "size_bytes": 88882,
+      "sha256": "0c26a42db2d7ad388b544d29d31f9152e83149fc7696562e638fd79940440631"
+    },
+    {
+      "path": "artifacts/experiments/program_ports_cpu_20261027/capture/trace/collector-witness.2026697.877f556b80f54ed9a451a67ff6c946c5/process-images/maps-0001.raw.gz",
+      "size_bytes": 10644,
+      "sha256": "a431dd666338caa7551c69d67790634a342390707d33735fa30d668ada487627"
+    },
+    {
+      "path": "artifacts/experiments/program_ports_cpu_20261027/capture/trace/collector-witness.2026697.877f556b80f54ed9a451a67ff6c946c5/process-images/maps-0002.jsonl",
+      "size_bytes": 858274,
+      "sha256": "7898f41f7c979ddbbcbab54fde536b5aa9fe366c9475d361340fb4f80f5e29e7"
+    },
+    {
+      "path": "artifacts/experiments/program_ports_cpu_20261027/capture/trace/collector-witness.2026697.877f556b80f54ed9a451a67ff6c946c5/process-images/maps-0002.jsonl.gz",
+      "size_bytes": 66179,
+      "sha256": "e52a07dff04421e0f64e90b8e5a37487cbc0f58de7bf44362f9fb8bf0dc5ae50"
+    },
+    {
+      "path": "artifacts/experiments/program_ports_cpu_20261027/capture/trace/collector-witness.2026697.877f556b80f54ed9a451a67ff6c946c5/process-images/maps-0002.raw",
+      "size_bytes": 102094,
+      "sha256": "5ae2921e1fc1bdefaba9827917918a3daed33555ed6860112f166873ee4f6956"
+    },
+    {
+      "path": "artifacts/experiments/program_ports_cpu_20261027/capture/trace/collector-witness.2026697.877f556b80f54ed9a451a67ff6c946c5/process-images/maps-0002.raw.gz",
+      "size_bytes": 11951,
+      "sha256": "ef40c0b31a4bea17ba614251269976a206761fdb4974e3ac8eb33829b5ab8c86"
+    },
+    {
+      "path": "artifacts/experiments/program_ports_cpu_20261027/capture/trace/collector-witness.2026697.877f556b80f54ed9a451a67ff6c946c5/process-images/maps-0003.jsonl",
+      "size_bytes": 858274,
+      "sha256": "add0f51b36739b9f00f32a7a471043b0dab159060e6bf2f9e3130992fb99bea4"
+    },
+    {
+      "path": "artifacts/experiments/program_ports_cpu_20261027/capture/trace/collector-witness.2026697.877f556b80f54ed9a451a67ff6c946c5/process-images/maps-0003.jsonl.gz",
+      "size_bytes": 66159,
+      "sha256": "73e121f1c34327ea34612135666169dbf64d1e9a7b6aa6839ca2b51e7d4b180b"
+    },
+    {
+      "path": "artifacts/experiments/program_ports_cpu_20261027/capture/trace/collector-witness.2026697.877f556b80f54ed9a451a67ff6c946c5/process-images/maps-0003.raw",
+      "size_bytes": 102094,
+      "sha256": "c509623a55b65031484c6d00434cb1ba7b882f17fa098c190c15157bf867d0fc"
+    },
+    {
+      "path": "artifacts/experiments/program_ports_cpu_20261027/capture/trace/collector-witness.2026697.877f556b80f54ed9a451a67ff6c946c5/process-images/maps-0003.raw.gz",
+      "size_bytes": 11950,
+      "sha256": "ce2d7f388262be49464edca245d7dcc19a60f61cdda11f83c631123a654d84be"
+    },
+    {
+      "path": "artifacts/experiments/program_ports_cpu_20261027/capture/trace/collector-witness.2026697.877f556b80f54ed9a451a67ff6c946c5/resource-topology/facts.jsonl",
+      "size_bytes": 546831,
+      "sha256": "547c3529add3c04e6a8ed0d0c5d23d43329cbb94ff590c16b9e366523428e362"
+    },
+    {
+      "path": "artifacts/experiments/program_ports_cpu_20261027/capture/trace/collector-witness.2026697.877f556b80f54ed9a451a67ff6c946c5/resource-topology/facts.jsonl.gz",
+      "size_bytes": 84803,
+      "sha256": "0e0909d35682adb5c82470862d54e20eeca2766f3901bbc951b6d979f0967575"
+    },
+    {
+      "path": "artifacts/experiments/program_ports_cpu_20261027/capture/trace/collector-witness.2026697.877f556b80f54ed9a451a67ff6c946c5/resource-topology/manifest.json",
+      "size_bytes": 2449,
+      "sha256": "7dd15bbb452ca5a93dcca59701dc0fec53352038cd753c2cea6cf6c08f36bfea"
+    },
+    {
+      "path": "artifacts/experiments/program_ports_cpu_20261027/capture/trace/collector-witness.2026697.877f556b80f54ed9a451a67ff6c946c5/resource-topology/manifest.json.gz",
+      "size_bytes": 1416,
+      "sha256": "d912932d52d254e0fa45772cc822d3e247084952cc282fa55b8ca0bb3eb235c8"
+    },
+    {
+      "path": "artifacts/experiments/program_ports_cpu_20261027/capture/trace/collector-witness.2026697.877f556b80f54ed9a451a67ff6c946c5/resource-topology/observations.json",
+      "size_bytes": 239593,
+      "sha256": "6b9ebae49e87f4dfbc222c8ef2da96724ed3c2bbc088a34d59b120359347e7d3"
+    },
+    {
+      "path": "artifacts/experiments/program_ports_cpu_20261027/capture/trace/collector-witness.2026697.877f556b80f54ed9a451a67ff6c946c5/resource-topology/observations.json.gz",
+      "size_bytes": 28500,
+      "sha256": "34bbc99b7c04da65ebb81e60e5e2f6c83920f5d1e9ec44d720ecb41c8f6322d5"
+    },
+    {
+      "path": "artifacts/experiments/program_ports_cpu_20261027/capture/trace/dispatch-meta.2026697.dbd6018217bbe88a870c1580adcc63ae.json",
+      "size_bytes": 1496,
+      "sha256": "e398d1aba42f338d56efbb3d71080b726a61f0a261aa05d1f137dd86a816055b"
+    },
+    {
+      "path": "artifacts/experiments/program_ports_cpu_20261027/capture/trace/execution-evidence.2026697.json",
+      "size_bytes": 6743,
+      "sha256": "0adeb49c214af5c28021b55937c844065fd248e87c29820a591dd8585e5df78f"
+    },
+    {
+      "path": "artifacts/experiments/program_ports_cpu_20261027/capture/trace/function-environment-meta.2026697.json",
+      "size_bytes": 1426,
+      "sha256": "11e064bd1a534585f201373dcd4d6457b108c4f218664f118db0586092e976bf"
+    },
+    {
+      "path": "artifacts/experiments/program_ports_cpu_20261027/capture/trace/function-environments.2026697.jsonl.gz",
+      "size_bytes": 12581,
+      "sha256": "81208660a17f9e00dd0dbfc31fb8853277842af97c186c6e61d01d3111b7f115"
+    },
+    {
+      "path": "artifacts/experiments/program_ports_cpu_20261027/capture/trace/python-call-target-meta.2026697.json",
+      "size_bytes": 2807,
+      "sha256": "60fc1d68f8d6f742b41c65419486875eb7030ca8add8bd49c5f0d5617fd1e366"
+    },
+    {
+      "path": "artifacts/experiments/program_ports_cpu_20261027/capture/trace/python-call-targets.2026697.jsonl.gz",
+      "size_bytes": 14553,
+      "sha256": "e67164c4d1b817159d7ec5827f133fd8fd9b26c33a914c67c80d0a5e31ab6672"
+    },
+    {
+      "path": "artifacts/experiments/program_ports_cpu_20261027/capture/trace/run.json",
+      "size_bytes": 291,
+      "sha256": "eab47e2457d0f11c7907c2db7bd94ae9057da059d55372c2dce47f6776d8fad8"
+    },
+    {
+      "path": "artifacts/experiments/program_ports_cpu_20261027/capture/trace/stream-interface-meta.2026697.json",
+      "size_bytes": 2952,
+      "sha256": "3891db10c334efe8fa8c9e2446f368c19c07157c815098c63135fe54211e7da9"
+    },
+    {
+      "path": "artifacts/experiments/program_ports_cpu_20261027/capture/trace/stream-interfaces.2026697.jsonl.gz",
+      "size_bytes": 1395,
+      "sha256": "7ff044bb6d59063555c51f2ce7a940f7aa0c82de26b6f39fd38a235cbec4a7ce"
+    },
+    {
+      "path": "artifacts/experiments/program_ports_cpu_20261027/capture/trace/tensor-physical-meta.2026697.dbd6018217bbe88a870c1580adcc63ae.json",
+      "size_bytes": 4167,
+      "sha256": "d675d4d9cae106f00ba46aeb36c97dbaad93f71f92075bce3b6f5f334e7ec257"
+    },
+    {
+      "path": "artifacts/experiments/program_ports_cpu_20261027/dependency/cpu_dependency.py",
+      "size_bytes": 610,
+      "sha256": "de853e92d27c63b5759ef3fe3aaa4e48f54e0be7d92984e63de1d8a9807ef040"
+    },
+    {
+      "path": "artifacts/experiments/program_ports_cpu_20261027/lewm-command.sh",
+      "size_bytes": 2004,
+      "sha256": "992825f59fba512cfcba3df3005926bd9c90483b9212211656e9ddf96021fbe3"
+    },
+    {
+      "path": "artifacts/experiments/program_ports_cpu_20261027/project/main.py",
+      "size_bytes": 192,
+      "sha256": "4ff684ac74c395a2de4aabca9c6b1d6872bcad26bc7b3c40c6947eea6209926c"
+    },
+    {
+      "path": "artifacts/experiments/program_ports_cpu_20261027/readback.py",
+      "size_bytes": 2984,
+      "sha256": "4ae88fb156ce9391db92fe75ac9e542cb11734d81882c95ff309993e7d2fbb1b"
+    },
+    {
+      "path": "artifacts/experiments/program_ports_cpu_20261027/stderr.txt",
+      "size_bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/experiments/program_ports_cpu_20261027/stdout.txt",
+      "size_bytes": 1122,
+      "sha256": "bd35ed32eecc0e1555d805f54bed6b0d977455dac01c3ce233696468b9f5f66a"
+    },
+    {
+      "path": "artifacts/experiments/program_ports_cpu_20261027/time.txt",
+      "size_bytes": 1679,
+      "sha256": "2c32993f2461bc577cc264e95d08c64726321db96fc9952cf68aa8db139200ec"
+    }
+  ],
+  "local_only_provider_members": [
+    {
+      "actual_path": "/home/zyf/AAA/scar-worktrees/program-ports-capture/artifacts/experiments/program_ports_cpu_20261027/capture/os/syscalls.2026697.gz",
+      "compressed_bytes": 2094341,
+      "gzip_sha256": "76df40366ee596078ef79805cd0c066d37cbfcee510da0d6c87f96f6cca2d7e1",
+      "logical_path": "/home/zyf/AAA/scar-worktrees/program-ports-capture/artifacts/experiments/program_ports_cpu_20261027/capture/os/syscalls.2026697",
+      "raw_bytes": 26549618,
+      "raw_sha256": "9c0cfefc969587d2d634544c5d4c8627481842310468d38688d6f42dc00cdf2b"
+    },
+    {
+      "actual_path": "/home/zyf/AAA/scar-worktrees/program-ports-capture/artifacts/experiments/program_ports_cpu_20261027/capture/os/syscalls.2026728.gz",
+      "compressed_bytes": 435,
+      "gzip_sha256": "cedfc41196e548d6337eb456c11f7ba224207dc53613b4ae0e3618c83691877f",
+      "logical_path": "/home/zyf/AAA/scar-worktrees/program-ports-capture/artifacts/experiments/program_ports_cpu_20261027/capture/os/syscalls.2026728",
+      "raw_bytes": 862,
+      "raw_sha256": "826b78f35447d6e87320c6602b80a169506e15d6787323bc34dda0c1c4ba3c80"
+    },
+    {
+      "actual_path": "/home/zyf/AAA/scar-worktrees/program-ports-capture/artifacts/experiments/program_ports_cpu_20261027/capture/os/syscalls.2026729.gz",
+      "compressed_bytes": 371,
+      "gzip_sha256": "fbc33ec89aef48f5d399973ecf893cc68880b92928b55e5926e4c73e97428db6",
+      "logical_path": "/home/zyf/AAA/scar-worktrees/program-ports-capture/artifacts/experiments/program_ports_cpu_20261027/capture/os/syscalls.2026729",
+      "raw_bytes": 675,
+      "raw_sha256": "cb4107de803999436f5f13a85515026e48f6f61bc01ca7ece6ce3c5dca862627"
+    },
+    {
+      "actual_path": "/home/zyf/AAA/scar-worktrees/program-ports-capture/artifacts/experiments/program_ports_cpu_20261027/capture/os/syscalls.2026730.gz",
+      "compressed_bytes": 375,
+      "gzip_sha256": "9aa4c611a41a8c05a6309a0e391228a3f64956d8310c2f68bd592fd242837ba2",
+      "logical_path": "/home/zyf/AAA/scar-worktrees/program-ports-capture/artifacts/experiments/program_ports_cpu_20261027/capture/os/syscalls.2026730",
+      "raw_bytes": 675,
+      "raw_sha256": "9e8372da6b941f58f671c19223a2019cb8ef2b97c611ea466835dbc49d8dd119"
+    },
+    {
+      "actual_path": "/home/zyf/AAA/scar-worktrees/program-ports-capture/artifacts/experiments/program_ports_cpu_20261027/capture/os/syscalls.2026731.gz",
+      "compressed_bytes": 376,
+      "gzip_sha256": "16f2cb0dd0d8fe4a91f16afc9fcdfead9d5d57b1c7f3f538144a3bd1d808ac39",
+      "logical_path": "/home/zyf/AAA/scar-worktrees/program-ports-capture/artifacts/experiments/program_ports_cpu_20261027/capture/os/syscalls.2026731",
+      "raw_bytes": 675,
+      "raw_sha256": "ad3d3e33234340aa8e25f31606780a6e36cfd59a99dd7fb2ec34309cfa2b2ed6"
+    },
+    {
+      "actual_path": "/home/zyf/AAA/scar-worktrees/program-ports-capture/artifacts/experiments/program_ports_cpu_20261027/capture/os/syscalls.2026732.gz",
+      "compressed_bytes": 374,
+      "gzip_sha256": "7c92df072818d1e01244cd3716f2a2e399096ea1e49ee565305277e12f356a6e",
+      "logical_path": "/home/zyf/AAA/scar-worktrees/program-ports-capture/artifacts/experiments/program_ports_cpu_20261027/capture/os/syscalls.2026732",
+      "raw_bytes": 675,
+      "raw_sha256": "887b905c09811b4a5b9b71be0bc85b97cf81681c92d001785eb4c589c05cef1e"
+    },
+    {
+      "actual_path": "/home/zyf/AAA/scar-worktrees/program-ports-capture/artifacts/experiments/program_ports_cpu_20261027/capture/os/syscalls.2026733.gz",
+      "compressed_bytes": 374,
+      "gzip_sha256": "3cc8d6f8d4a431c2238bccfeeb60a87dffead703538826ae9b034d7a2cb07d82",
+      "logical_path": "/home/zyf/AAA/scar-worktrees/program-ports-capture/artifacts/experiments/program_ports_cpu_20261027/capture/os/syscalls.2026733",
+      "raw_bytes": 675,
+      "raw_sha256": "c7aa60a49a3d4ddc662ea0f1364e9b706f6ce093266da0b5ecc737814bb27186"
+    },
+    {
+      "actual_path": "/home/zyf/AAA/scar-worktrees/program-ports-capture/artifacts/experiments/program_ports_cpu_20261027/capture/os/syscalls.2026734.gz",
+      "compressed_bytes": 376,
+      "gzip_sha256": "2c18e96c375d87bb2dad33bd86e31973a984af9089b5df5643f0beea92d910e4",
+      "logical_path": "/home/zyf/AAA/scar-worktrees/program-ports-capture/artifacts/experiments/program_ports_cpu_20261027/capture/os/syscalls.2026734",
+      "raw_bytes": 675,
+      "raw_sha256": "7768baba996b2c68126298a4e629f31b2a97ad9272cc2bd9cf98cbea66088e08"
+    },
+    {
+      "actual_path": "/home/zyf/AAA/scar-worktrees/program-ports-capture/artifacts/experiments/program_ports_cpu_20261027/capture/os/syscalls.2026735.gz",
+      "compressed_bytes": 374,
+      "gzip_sha256": "6acd2e28793fe3a9b4033fd69955c9b226b694dca9d32303d26246e41d133f9a",
+      "logical_path": "/home/zyf/AAA/scar-worktrees/program-ports-capture/artifacts/experiments/program_ports_cpu_20261027/capture/os/syscalls.2026735",
+      "raw_bytes": 675,
+      "raw_sha256": "5534d3631b1eee7bd9ca8465b69ad8397ed2354a762c899b87de9d6c2e7c7a36"
+    },
+    {
+      "actual_path": "/home/zyf/AAA/scar-worktrees/program-ports-capture/artifacts/experiments/program_ports_cpu_20261027/capture/os/syscalls.2026736.gz",
+      "compressed_bytes": 373,
+      "gzip_sha256": "d6196acf6aba9a1c534d99585bbafffb5c5cef148ff7925ee29ddd117057b466",
+      "logical_path": "/home/zyf/AAA/scar-worktrees/program-ports-capture/artifacts/experiments/program_ports_cpu_20261027/capture/os/syscalls.2026736",
+      "raw_bytes": 675,
+      "raw_sha256": "95df13b8bc07788051dd8acec7b63ae69d63e0650fcec505b6118d741e94fcb0"
+    },
+    {
+      "actual_path": "/home/zyf/AAA/scar-worktrees/program-ports-capture/artifacts/experiments/program_ports_cpu_20261027/capture/os/syscalls.2026737.gz",
+      "compressed_bytes": 374,
+      "gzip_sha256": "878e4394772748fc2b9a19ccaf5c8b8c31822a5fcfa6db76960f1561309118ee",
+      "logical_path": "/home/zyf/AAA/scar-worktrees/program-ports-capture/artifacts/experiments/program_ports_cpu_20261027/capture/os/syscalls.2026737",
+      "raw_bytes": 675,
+      "raw_sha256": "71f0a8cdcb90a16e9295214eacd875d68c63d7d9b9c99432787a948de6dcd2fa"
+    },
+    {
+      "actual_path": "/home/zyf/AAA/scar-worktrees/program-ports-capture/artifacts/experiments/program_ports_cpu_20261027/capture/os/syscalls.2026738.gz",
+      "compressed_bytes": 373,
+      "gzip_sha256": "3e7b34f087f128ff39b1ee04070c6ccc6498e17226b68d4ad21f90197c3b137c",
+      "logical_path": "/home/zyf/AAA/scar-worktrees/program-ports-capture/artifacts/experiments/program_ports_cpu_20261027/capture/os/syscalls.2026738",
+      "raw_bytes": 675,
+      "raw_sha256": "463d7e8183764aaff9b1904282bf076709571a8c10f8ad112995cd1b75ca8394"
+    },
+    {
+      "actual_path": "/home/zyf/AAA/scar-worktrees/program-ports-capture/artifacts/experiments/program_ports_cpu_20261027/capture/os/syscalls.2026739.gz",
+      "compressed_bytes": 374,
+      "gzip_sha256": "b2055879c3ac65e0e82239f1383a4580966c33f783a32d93d7cb755ab25cbe65",
+      "logical_path": "/home/zyf/AAA/scar-worktrees/program-ports-capture/artifacts/experiments/program_ports_cpu_20261027/capture/os/syscalls.2026739",
+      "raw_bytes": 675,
+      "raw_sha256": "e1af89e662d8f90ef9d72e7e475198bd9d0794d122fd6722ebe0cdb569ee0d96"
+    },
+    {
+      "actual_path": "/home/zyf/AAA/scar-worktrees/program-ports-capture/artifacts/experiments/program_ports_cpu_20261027/capture/os/syscalls.2026740.gz",
+      "compressed_bytes": 376,
+      "gzip_sha256": "cf7ab3d03722ddd402059c1a6fa151d7ed13e6704ffc114181798327363925ee",
+      "logical_path": "/home/zyf/AAA/scar-worktrees/program-ports-capture/artifacts/experiments/program_ports_cpu_20261027/capture/os/syscalls.2026740",
+      "raw_bytes": 675,
+      "raw_sha256": "4b26b68b1fcd12c34c7815b71c5cd0c36d8fb0cb8d22f62cfa6221480fdfb405"
+    },
+    {
+      "actual_path": "/home/zyf/AAA/scar-worktrees/program-ports-capture/artifacts/experiments/program_ports_cpu_20261027/capture/os/syscalls.2026741.gz",
+      "compressed_bytes": 372,
+      "gzip_sha256": "133b5b70f9dbf18fd466e4426d20957eaa7dce14fcc3d98d026b70fcf5581ad1",
+      "logical_path": "/home/zyf/AAA/scar-worktrees/program-ports-capture/artifacts/experiments/program_ports_cpu_20261027/capture/os/syscalls.2026741",
+      "raw_bytes": 675,
+      "raw_sha256": "84218e11a5fcded9d32a86986af1ce0a77a90d96e045ea0a1f321ffc8ed0eb9e"
+    },
+    {
+      "actual_path": "/home/zyf/AAA/scar-worktrees/program-ports-capture/artifacts/experiments/program_ports_cpu_20261027/capture/os/syscalls.2026742.gz",
+      "compressed_bytes": 375,
+      "gzip_sha256": "92eb61442727e78d35f2dcf45518bb3e540614980124c48307f0207456823523",
+      "logical_path": "/home/zyf/AAA/scar-worktrees/program-ports-capture/artifacts/experiments/program_ports_cpu_20261027/capture/os/syscalls.2026742",
+      "raw_bytes": 675,
+      "raw_sha256": "5f4066729ba8efd62915041e3259911a3642618e69a12e46543df4287be5db0d"
+    },
+    {
+      "actual_path": "/home/zyf/AAA/scar-worktrees/program-ports-capture/artifacts/experiments/program_ports_cpu_20261027/capture/os/syscalls.2026743.gz",
+      "compressed_bytes": 373,
+      "gzip_sha256": "f42e2f48490c63da64b98e60e69420ee07b6ebe1125c2d20ce28dfd9a2114d62",
+      "logical_path": "/home/zyf/AAA/scar-worktrees/program-ports-capture/artifacts/experiments/program_ports_cpu_20261027/capture/os/syscalls.2026743",
+      "raw_bytes": 675,
+      "raw_sha256": "a0e8ef2a879af32a68058c16f7a52738c59b9f651c9460a1e521b31b141fcd92"
+    },
+    {
+      "actual_path": "/home/zyf/AAA/scar-worktrees/program-ports-capture/artifacts/experiments/program_ports_cpu_20261027/capture/os/syscalls.2026744.gz",
+      "compressed_bytes": 376,
+      "gzip_sha256": "73f69f58b874ed2e4ce6c2317a04b243296bf45841422392427009d14a7ddf58",
+      "logical_path": "/home/zyf/AAA/scar-worktrees/program-ports-capture/artifacts/experiments/program_ports_cpu_20261027/capture/os/syscalls.2026744",
+      "raw_bytes": 675,
+      "raw_sha256": "9e9e8fc7fd4e5db42749b74cf91efe9aee3816e3040d78eadaf47b51c71acf08"
+    },
+    {
+      "actual_path": "/home/zyf/AAA/scar-worktrees/program-ports-capture/artifacts/experiments/program_ports_cpu_20261027/capture/os/syscalls.2026745.gz",
+      "compressed_bytes": 373,
+      "gzip_sha256": "86e6b3e98bf42623c220b3ee1994fdc6e3220591c6bd02f9345a5598a1ab7dd1",
+      "logical_path": "/home/zyf/AAA/scar-worktrees/program-ports-capture/artifacts/experiments/program_ports_cpu_20261027/capture/os/syscalls.2026745",
+      "raw_bytes": 675,
+      "raw_sha256": "94b22b609b4e8d6665f77750e577bc4a177da8d2770b531bd801f8063d99cdc1"
+    },
+    {
+      "actual_path": "/home/zyf/AAA/scar-worktrees/program-ports-capture/artifacts/experiments/program_ports_cpu_20261027/capture/os/syscalls.2026746.gz",
+      "compressed_bytes": 374,
+      "gzip_sha256": "4ec6ed7d4a08216a9d6e564d5a458684aefeeb8936189c3b7dab73272147acac",
+      "logical_path": "/home/zyf/AAA/scar-worktrees/program-ports-capture/artifacts/experiments/program_ports_cpu_20261027/capture/os/syscalls.2026746",
+      "raw_bytes": 675,
+      "raw_sha256": "c0bf8a2f039cbc289bfce3673994d530cd2c25aab769976031888cfdf4998565"
+    },
+    {
+      "actual_path": "/home/zyf/AAA/scar-worktrees/program-ports-capture/artifacts/experiments/program_ports_cpu_20261027/capture/os/syscalls.2026747.gz",
+      "compressed_bytes": 375,
+      "gzip_sha256": "41941defc7d893622b3fe43d8279db65140696eb3d132b8054eea17e0428a665",
+      "logical_path": "/home/zyf/AAA/scar-worktrees/program-ports-capture/artifacts/experiments/program_ports_cpu_20261027/capture/os/syscalls.2026747",
+      "raw_bytes": 675,
+      "raw_sha256": "3b9b0fa2f65ce9375e732b0979681dedba1d8404fd7ec910a2c29b9c8fe7bd5a"
+    },
+    {
+      "actual_path": "/home/zyf/AAA/scar-worktrees/program-ports-capture/artifacts/experiments/program_ports_cpu_20261027/capture/os/syscalls.2026748.gz",
+      "compressed_bytes": 373,
+      "gzip_sha256": "91b85009480363158b4e221d2d7743112707af608865cdb494a631b42ce04a31",
+      "logical_path": "/home/zyf/AAA/scar-worktrees/program-ports-capture/artifacts/experiments/program_ports_cpu_20261027/capture/os/syscalls.2026748",
+      "raw_bytes": 675,
+      "raw_sha256": "97d99327f44f1ca9bd8fbc3e54221c6ed79e0553d3609ec530ce36541032d1f7"
+    },
+    {
+      "actual_path": "/home/zyf/AAA/scar-worktrees/program-ports-capture/artifacts/experiments/program_ports_cpu_20261027/capture/os/syscalls.2026749.gz",
+      "compressed_bytes": 375,
+      "gzip_sha256": "44b514771545f7c3709facea9165dd68503112e0b383474c047a161d8758e2e2",
+      "logical_path": "/home/zyf/AAA/scar-worktrees/program-ports-capture/artifacts/experiments/program_ports_cpu_20261027/capture/os/syscalls.2026749",
+      "raw_bytes": 675,
+      "raw_sha256": "464531d48d5b6a99041d09a930d55e91f90c3199f45e3f29f234d49d75e03d56"
+    },
+    {
+      "actual_path": "/home/zyf/AAA/scar-worktrees/program-ports-capture/artifacts/experiments/program_ports_cpu_20261027/capture/os/syscalls.2026750.gz",
+      "compressed_bytes": 373,
+      "gzip_sha256": "0a3c1b050ce2ee39a1e838eb96b42af583dccbca621dcc7f6929139c5ffee7e5",
+      "logical_path": "/home/zyf/AAA/scar-worktrees/program-ports-capture/artifacts/experiments/program_ports_cpu_20261027/capture/os/syscalls.2026750",
+      "raw_bytes": 675,
+      "raw_sha256": "7372d66b79ccff8b60ef3dd637da793beeab6fe92ee2e023839e8d31ad68aefb"
+    },
+    {
+      "actual_path": "/home/zyf/AAA/scar-worktrees/program-ports-capture/artifacts/experiments/program_ports_cpu_20261027/capture/os/syscalls.2026751.gz",
+      "compressed_bytes": 375,
+      "gzip_sha256": "eeed13fefc6c69ca2ce3c7fc2a413dd755b384cdaf5bbbd33f402a45c729b3a1",
+      "logical_path": "/home/zyf/AAA/scar-worktrees/program-ports-capture/artifacts/experiments/program_ports_cpu_20261027/capture/os/syscalls.2026751",
+      "raw_bytes": 675,
+      "raw_sha256": "722395b27fe34b53079a6ba86572ee50cee7fadf97fcc7a3e8c81a1631a982ba"
+    },
+    {
+      "actual_path": "/home/zyf/AAA/scar-worktrees/program-ports-capture/artifacts/experiments/program_ports_cpu_20261027/capture/os/syscalls.2026752.gz",
+      "compressed_bytes": 376,
+      "gzip_sha256": "0886477bcebf1e0b3bb8e7248f7af7f1408bfec2596c9c542c638d56fd0ae1cf",
+      "logical_path": "/home/zyf/AAA/scar-worktrees/program-ports-capture/artifacts/experiments/program_ports_cpu_20261027/capture/os/syscalls.2026752",
+      "raw_bytes": 675,
+      "raw_sha256": "0de234073d18b3cadb93a573c50d60aaf5439f260da776eb065fed6b8eac2cec"
+    },
+    {
+      "actual_path": "/home/zyf/AAA/scar-worktrees/program-ports-capture/artifacts/experiments/program_ports_cpu_20261027/capture/os/syscalls.2026753.gz",
+      "compressed_bytes": 371,
+      "gzip_sha256": "eee6d2c25a90cdc31320c3a513ef4615ed9acd09d6a746428812dc8263f375e1",
+      "logical_path": "/home/zyf/AAA/scar-worktrees/program-ports-capture/artifacts/experiments/program_ports_cpu_20261027/capture/os/syscalls.2026753",
+      "raw_bytes": 675,
+      "raw_sha256": "33e0edd32d29d955985a87d4d8bb7b0c77ea8de2a60caf7d9786fbb10847b58f"
+    },
+    {
+      "actual_path": "/home/zyf/AAA/scar-worktrees/program-ports-capture/artifacts/experiments/program_ports_cpu_20261027/capture/os/syscalls.2026754.gz",
+      "compressed_bytes": 375,
+      "gzip_sha256": "45d48e00670a1dce41a2e792fbf2c0e64f4145ef1cec6a4fede51312b03058aa",
+      "logical_path": "/home/zyf/AAA/scar-worktrees/program-ports-capture/artifacts/experiments/program_ports_cpu_20261027/capture/os/syscalls.2026754",
+      "raw_bytes": 675,
+      "raw_sha256": "91eb90fe620f9800b2570e8cb9b03519d1c05272de19432ef427e5b61544bdc2"
+    },
+    {
+      "actual_path": "/home/zyf/AAA/scar-worktrees/program-ports-capture/artifacts/experiments/program_ports_cpu_20261027/capture/os/syscalls.2026755.gz",
+      "compressed_bytes": 375,
+      "gzip_sha256": "6b7b0e6798de26dfdfb0e43e37dafd41c79615a83b23aeb696326799b466394b",
+      "logical_path": "/home/zyf/AAA/scar-worktrees/program-ports-capture/artifacts/experiments/program_ports_cpu_20261027/capture/os/syscalls.2026755",
+      "raw_bytes": 675,
+      "raw_sha256": "daf7a5d366ef9d13a618778754e00d86e14916dc0b2db1259246a0b870c7bd31"
+    },
+    {
+      "actual_path": "/home/zyf/AAA/scar-worktrees/program-ports-capture/artifacts/experiments/program_ports_cpu_20261027/capture/os/syscalls.2026757.gz",
+      "compressed_bytes": 373,
+      "gzip_sha256": "fd72c4e05917f3508c256be0b883c3bb5ae43fcf6f8054ee821340abe08ffb93",
+      "logical_path": "/home/zyf/AAA/scar-worktrees/program-ports-capture/artifacts/experiments/program_ports_cpu_20261027/capture/os/syscalls.2026757",
+      "raw_bytes": 675,
+      "raw_sha256": "fd51f5453114ae510a5b2a8ad0c6f49b6e610de2626e519aa58080054b603dd4"
+    },
+    {
+      "actual_path": "/home/zyf/AAA/scar-worktrees/program-ports-capture/artifacts/experiments/program_ports_cpu_20261027/capture/os/syscalls.2026758.gz",
+      "compressed_bytes": 372,
+      "gzip_sha256": "af35114096206ab41b424a65ac20abf61caa05d284e159d9dfd94d0f98766738",
+      "logical_path": "/home/zyf/AAA/scar-worktrees/program-ports-capture/artifacts/experiments/program_ports_cpu_20261027/capture/os/syscalls.2026758",
+      "raw_bytes": 675,
+      "raw_sha256": "23ce517982023c4ccc46369a41229a96ec870a2518ba897a63e7a5167292c918"
+    },
+    {
+      "actual_path": "/home/zyf/AAA/scar-worktrees/program-ports-capture/artifacts/experiments/program_ports_cpu_20261027/capture/os/syscalls.2026759.gz",
+      "compressed_bytes": 375,
+      "gzip_sha256": "b4ed27d3389f855ce2fd42cb20cf67c82e9a50e4971b7a61a27d0d21460ad449",
+      "logical_path": "/home/zyf/AAA/scar-worktrees/program-ports-capture/artifacts/experiments/program_ports_cpu_20261027/capture/os/syscalls.2026759",
+      "raw_bytes": 675,
+      "raw_sha256": "ca8a29745f81f7911f63537e52f6400676d6548f8d08ebd01c92003d4fac6521"
+    },
+    {
+      "actual_path": "/home/zyf/AAA/scar-worktrees/program-ports-capture/artifacts/experiments/program_ports_cpu_20261027/capture/os/syscalls.2026760.gz",
+      "compressed_bytes": 373,
+      "gzip_sha256": "8f56a90f616132ce56d87efb8e2bb5827f213017b6f13ba8b213afa240d33c3b",
+      "logical_path": "/home/zyf/AAA/scar-worktrees/program-ports-capture/artifacts/experiments/program_ports_cpu_20261027/capture/os/syscalls.2026760",
+      "raw_bytes": 675,
+      "raw_sha256": "6a29af3ac03398b5d648546f5da14adb27beabff5d814bdc24a0335aa502d2bb"
+    },
+    {
+      "actual_path": "/home/zyf/AAA/scar-worktrees/program-ports-capture/artifacts/experiments/program_ports_cpu_20261027/capture/os/syscalls.2026761.gz",
+      "compressed_bytes": 376,
+      "gzip_sha256": "4701ab3b4aac1401126cf7add4f0c997e11fd57846ad5002fd9d8381c810a560",
+      "logical_path": "/home/zyf/AAA/scar-worktrees/program-ports-capture/artifacts/experiments/program_ports_cpu_20261027/capture/os/syscalls.2026761",
+      "raw_bytes": 675,
+      "raw_sha256": "6000920a867bd50d6ac9226b3514602af39fb5c92fa4e107a3e6d5c5e817862c"
+    },
+    {
+      "actual_path": "/home/zyf/AAA/scar-worktrees/program-ports-capture/artifacts/experiments/program_ports_cpu_20261027/capture/os/syscalls.2026762.gz",
+      "compressed_bytes": 375,
+      "gzip_sha256": "19616cf53c4ef0b9c5f2b7f0087c51e23c3f59eeee7b8e33796a5a8ac8f6067b",
+      "logical_path": "/home/zyf/AAA/scar-worktrees/program-ports-capture/artifacts/experiments/program_ports_cpu_20261027/capture/os/syscalls.2026762",
+      "raw_bytes": 675,
+      "raw_sha256": "cd2381cac1c19b7119551ceadbea7b61031fdd0bb5bf598e0da2f9793f42933f"
+    },
+    {
+      "actual_path": "/home/zyf/AAA/scar-worktrees/program-ports-capture/artifacts/experiments/program_ports_cpu_20261027/capture/os/syscalls.2026763.gz",
+      "compressed_bytes": 371,
+      "gzip_sha256": "8ed2f6370e437769626a26a4d0ff00192d00c151c0de84206ae5000632ce6848",
+      "logical_path": "/home/zyf/AAA/scar-worktrees/program-ports-capture/artifacts/experiments/program_ports_cpu_20261027/capture/os/syscalls.2026763",
+      "raw_bytes": 675,
+      "raw_sha256": "44df101b9eadd315d03b8660b4ba487eb1d844105eb2d531784d4671d51ebfc5"
+    },
+    {
+      "actual_path": "/home/zyf/AAA/scar-worktrees/program-ports-capture/artifacts/experiments/program_ports_cpu_20261027/capture/os/syscalls.2026764.gz",
+      "compressed_bytes": 370,
+      "gzip_sha256": "c4300c966d6057bfbfc05641cb880800cdf8a78e6fe0c2be59f67d953003a0ee",
+      "logical_path": "/home/zyf/AAA/scar-worktrees/program-ports-capture/artifacts/experiments/program_ports_cpu_20261027/capture/os/syscalls.2026764",
+      "raw_bytes": 675,
+      "raw_sha256": "7fc120b84126fb1088b84bc9a4a690f7255c259c4db02b5d7dca0f34b2bf767a"
+    },
+    {
+      "actual_path": "/home/zyf/AAA/scar-worktrees/program-ports-capture/artifacts/experiments/program_ports_cpu_20261027/capture/os/syscalls.2026765.gz",
+      "compressed_bytes": 373,
+      "gzip_sha256": "fb28352efe13eef58c7c1ace83b98af2aea2a8ea641d0207eabebc31b5356ba0",
+      "logical_path": "/home/zyf/AAA/scar-worktrees/program-ports-capture/artifacts/experiments/program_ports_cpu_20261027/capture/os/syscalls.2026765",
+      "raw_bytes": 675,
+      "raw_sha256": "2cb99d77f01c76f4f3f989e01e61bfd88c772813e18540f12d6789423257a748"
+    },
+    {
+      "actual_path": "/home/zyf/AAA/scar-worktrees/program-ports-capture/artifacts/experiments/program_ports_cpu_20261027/capture/os/syscalls.2026766.gz",
+      "compressed_bytes": 376,
+      "gzip_sha256": "dc2e0c22f1d0b92603a75be0b6aed0b149c69aee05cbeb72d2fd335cbd871c50",
+      "logical_path": "/home/zyf/AAA/scar-worktrees/program-ports-capture/artifacts/experiments/program_ports_cpu_20261027/capture/os/syscalls.2026766",
+      "raw_bytes": 675,
+      "raw_sha256": "49f928e5580588c3f1987a31827b9bbf4a54cac7ccf6d603c0e7947062757590"
+    },
+    {
+      "actual_path": "/home/zyf/AAA/scar-worktrees/program-ports-capture/artifacts/experiments/program_ports_cpu_20261027/capture/os/syscalls.2026767.gz",
+      "compressed_bytes": 372,
+      "gzip_sha256": "1890ef6c8827aa3a9810e7fb54d06d8ff2fbbba0fa7398cfce9f42653bc20b6b",
+      "logical_path": "/home/zyf/AAA/scar-worktrees/program-ports-capture/artifacts/experiments/program_ports_cpu_20261027/capture/os/syscalls.2026767",
+      "raw_bytes": 675,
+      "raw_sha256": "b406c32c8aca64b238bb14dd7dad95287b06db78910e9c3702dbd132eab37be7"
+    },
+    {
+      "actual_path": "/home/zyf/AAA/scar-worktrees/program-ports-capture/artifacts/experiments/program_ports_cpu_20261027/capture/os/syscalls.2026768.gz",
+      "compressed_bytes": 372,
+      "gzip_sha256": "d043dcfa8a06659ad4a3544c3071d591ad84f939cd6dcac89e93ed8e0d8e45d4",
+      "logical_path": "/home/zyf/AAA/scar-worktrees/program-ports-capture/artifacts/experiments/program_ports_cpu_20261027/capture/os/syscalls.2026768",
+      "raw_bytes": 675,
+      "raw_sha256": "4505f83599bc8c54af55f0ca906b844ff13cd702014dd11dde08daf68fadb576"
+    },
+    {
+      "actual_path": "/home/zyf/AAA/scar-worktrees/program-ports-capture/artifacts/experiments/program_ports_cpu_20261027/capture/os/syscalls.2026769.gz",
+      "compressed_bytes": 373,
+      "gzip_sha256": "a2e22083777100801b4eb7c55611a11ca0788ad4d5703fd973cc56f239c30f93",
+      "logical_path": "/home/zyf/AAA/scar-worktrees/program-ports-capture/artifacts/experiments/program_ports_cpu_20261027/capture/os/syscalls.2026769",
+      "raw_bytes": 675,
+      "raw_sha256": "ae2fc121f56e5db12b15d13b7bf39e7ec4ddefc9dbcea3d7df6e07c0544a1c40"
+    },
+    {
+      "actual_path": "/home/zyf/AAA/scar-worktrees/program-ports-capture/artifacts/experiments/program_ports_cpu_20261027/capture/os/syscalls.2026770.gz",
+      "compressed_bytes": 368,
+      "gzip_sha256": "219ed0c2b35126d73305d5e89b82f1f28f021b373468b8ebe716c2a6d9fd9745",
+      "logical_path": "/home/zyf/AAA/scar-worktrees/program-ports-capture/artifacts/experiments/program_ports_cpu_20261027/capture/os/syscalls.2026770",
+      "raw_bytes": 675,
+      "raw_sha256": "9f7c07f95069e246d9a008b1d2589c30567692a3e066a8663d35002fb0c0a3c4"
+    },
+    {
+      "actual_path": "/home/zyf/AAA/scar-worktrees/program-ports-capture/artifacts/experiments/program_ports_cpu_20261027/capture/os/syscalls.2026771.gz",
+      "compressed_bytes": 375,
+      "gzip_sha256": "d4bda6346c59d8188ebf6815eed19559bf83cc2d89e7dd42fb2fcb418b6a4f87",
+      "logical_path": "/home/zyf/AAA/scar-worktrees/program-ports-capture/artifacts/experiments/program_ports_cpu_20261027/capture/os/syscalls.2026771",
+      "raw_bytes": 675,
+      "raw_sha256": "aa0ebdd8ad2132b82a9833cf7ecf989ddd2de920f9fedc665d54d407287d69d5"
+    },
+    {
+      "actual_path": "/home/zyf/AAA/scar-worktrees/program-ports-capture/artifacts/experiments/program_ports_cpu_20261027/capture/os/syscalls.2026772.gz",
+      "compressed_bytes": 371,
+      "gzip_sha256": "59be71a8c8c41b635724e9ed18b99d0da3efbfa9fc3f8f8a5a9d92fa7609862a",
+      "logical_path": "/home/zyf/AAA/scar-worktrees/program-ports-capture/artifacts/experiments/program_ports_cpu_20261027/capture/os/syscalls.2026772",
+      "raw_bytes": 675,
+      "raw_sha256": "061194bf21def5690c336cff7df42f7018821ac1e979ea2020706a7438c5c9c1"
+    },
+    {
+      "actual_path": "/home/zyf/AAA/scar-worktrees/program-ports-capture/artifacts/experiments/program_ports_cpu_20261027/capture/os/syscalls.2026773.gz",
+      "compressed_bytes": 377,
+      "gzip_sha256": "fe0bb7dc2058e25b9e2643b5abc9e7d7f0a4b2351b6e58c7f1c25b8c86a49a57",
+      "logical_path": "/home/zyf/AAA/scar-worktrees/program-ports-capture/artifacts/experiments/program_ports_cpu_20261027/capture/os/syscalls.2026773",
+      "raw_bytes": 675,
+      "raw_sha256": "4c0c3198544f7e894012b405ef42e2c629bab0d1c797fcc28d260e50bdb300d8"
+    },
+    {
+      "actual_path": "/home/zyf/AAA/scar-worktrees/program-ports-capture/artifacts/experiments/program_ports_cpu_20261027/capture/os/syscalls.2026774.gz",
+      "compressed_bytes": 375,
+      "gzip_sha256": "e0d8d1cbe6e0aa5f8307dc85684b087e9db86b63034c2fa66e55479f57328de0",
+      "logical_path": "/home/zyf/AAA/scar-worktrees/program-ports-capture/artifacts/experiments/program_ports_cpu_20261027/capture/os/syscalls.2026774",
+      "raw_bytes": 675,
+      "raw_sha256": "9091a87f838c8e9658b2f348be1ca00cb145b9cb3cc540be3774450755c38066"
+    },
+    {
+      "actual_path": "/home/zyf/AAA/scar-worktrees/program-ports-capture/artifacts/experiments/program_ports_cpu_20261027/capture/os/syscalls.2026775.gz",
+      "compressed_bytes": 373,
+      "gzip_sha256": "30a20b4f9b53ac17a3ff9efb04aa09f25daf7099f2c02bd324e8515630af2712",
+      "logical_path": "/home/zyf/AAA/scar-worktrees/program-ports-capture/artifacts/experiments/program_ports_cpu_20261027/capture/os/syscalls.2026775",
+      "raw_bytes": 675,
+      "raw_sha256": "bd8e01b43ff9518a977386f72bc299960c831c728fd2315c1ad431d5f29f3991"
+    },
+    {
+      "actual_path": "/home/zyf/AAA/scar-worktrees/program-ports-capture/artifacts/experiments/program_ports_cpu_20261027/capture/os/syscalls.2026776.gz",
+      "compressed_bytes": 374,
+      "gzip_sha256": "afae52bdebd0b7c988982318376f863fd0565759559dd7cbc9d1c7640971a9d5",
+      "logical_path": "/home/zyf/AAA/scar-worktrees/program-ports-capture/artifacts/experiments/program_ports_cpu_20261027/capture/os/syscalls.2026776",
+      "raw_bytes": 675,
+      "raw_sha256": "48e853360bf364f9ffde887937647b4557db7ed209be7d34b1f300062ce5386e"
+    },
+    {
+      "actual_path": "/home/zyf/AAA/scar-worktrees/program-ports-capture/artifacts/experiments/program_ports_cpu_20261027/capture/os/syscalls.2026777.gz",
+      "compressed_bytes": 379,
+      "gzip_sha256": "3fe2fc10a811fd08b753a07d62f15e8322c13dde5c499a2f728a51de78ce41b8",
+      "logical_path": "/home/zyf/AAA/scar-worktrees/program-ports-capture/artifacts/experiments/program_ports_cpu_20261027/capture/os/syscalls.2026777",
+      "raw_bytes": 675,
+      "raw_sha256": "68e48c3eaef7d544c64622a96cc75198e66d1e557b2ad1142d5ae5e6143e2810"
+    },
+    {
+      "actual_path": "/home/zyf/AAA/scar-worktrees/program-ports-capture/artifacts/experiments/program_ports_cpu_20261027/capture/os/syscalls.2026778.gz",
+      "compressed_bytes": 380,
+      "gzip_sha256": "ac8f95254c6db2d68b9e6329bbdd97f853b4180cac83f82728e6c78583617bcf",
+      "logical_path": "/home/zyf/AAA/scar-worktrees/program-ports-capture/artifacts/experiments/program_ports_cpu_20261027/capture/os/syscalls.2026778",
+      "raw_bytes": 675,
+      "raw_sha256": "457ceecdce2f83eb16dc71c063ecd7ee5617cbb6e7991d048901273531e9d2e8"
+    },
+    {
+      "actual_path": "/home/zyf/AAA/scar-worktrees/program-ports-capture/artifacts/experiments/program_ports_cpu_20261027/capture/os/syscalls.2026779.gz",
+      "compressed_bytes": 375,
+      "gzip_sha256": "2665422dd2c2ff1431d6ddf3b779d04077115d3ad06648f038d8c82c8db0ad18",
+      "logical_path": "/home/zyf/AAA/scar-worktrees/program-ports-capture/artifacts/experiments/program_ports_cpu_20261027/capture/os/syscalls.2026779",
+      "raw_bytes": 675,
+      "raw_sha256": "32c25e06e558ce8757fa4490d7ebe35f1f5112f9a5418da14d793a201c090923"
+    },
+    {
+      "actual_path": "/home/zyf/AAA/scar-worktrees/program-ports-capture/artifacts/experiments/program_ports_cpu_20261027/capture/os/syscalls.2026780.gz",
+      "compressed_bytes": 376,
+      "gzip_sha256": "de1b8b7e758f55f85f7c8278c8ba3e593878b9bb9018848ebbc0fa072905b0af",
+      "logical_path": "/home/zyf/AAA/scar-worktrees/program-ports-capture/artifacts/experiments/program_ports_cpu_20261027/capture/os/syscalls.2026780",
+      "raw_bytes": 675,
+      "raw_sha256": "97c7b111f8be4ff4f75db2e7bcdd846106b8a9854d10d2a7ec3e4dd9567b114c"
+    },
+    {
+      "actual_path": "/home/zyf/AAA/scar-worktrees/program-ports-capture/artifacts/experiments/program_ports_cpu_20261027/capture/os/syscalls.2026781.gz",
+      "compressed_bytes": 379,
+      "gzip_sha256": "b86c96db78f19c6110ddc767d6a14b775fcf788e71b9894a69f8ced5059cc98c",
+      "logical_path": "/home/zyf/AAA/scar-worktrees/program-ports-capture/artifacts/experiments/program_ports_cpu_20261027/capture/os/syscalls.2026781",
+      "raw_bytes": 675,
+      "raw_sha256": "b9b8ed8919341234eefb0fe89adccc46384ed0dac1ae5f21131b118169a064dc"
+    },
+    {
+      "actual_path": "/home/zyf/AAA/scar-worktrees/program-ports-capture/artifacts/experiments/program_ports_cpu_20261027/capture/os/syscalls.2026782.gz",
+      "compressed_bytes": 374,
+      "gzip_sha256": "aaadd99c3b3998bc6fbaab91615ddb9d4870db8633a12da2d6cd8ed5b4a954fa",
+      "logical_path": "/home/zyf/AAA/scar-worktrees/program-ports-capture/artifacts/experiments/program_ports_cpu_20261027/capture/os/syscalls.2026782",
+      "raw_bytes": 675,
+      "raw_sha256": "1a53b8aa021eb0e93d7d37c46710e674bb7ac4ed6e2989219636c48fdeafc696"
+    },
+    {
+      "actual_path": "/home/zyf/AAA/scar-worktrees/program-ports-capture/artifacts/experiments/program_ports_cpu_20261027/capture/os/syscalls.2026783.gz",
+      "compressed_bytes": 377,
+      "gzip_sha256": "ad9d867d3bc1cf882ee5309eb484efe73ee63ba52d7f0b3167b0f3ea5030c6dc",
+      "logical_path": "/home/zyf/AAA/scar-worktrees/program-ports-capture/artifacts/experiments/program_ports_cpu_20261027/capture/os/syscalls.2026783",
+      "raw_bytes": 675,
+      "raw_sha256": "b97c4d9cad849cdfc5a24953d391bb04309a5933a602dbf2120f0a5c7f861629"
+    },
+    {
+      "actual_path": "/home/zyf/AAA/scar-worktrees/program-ports-capture/artifacts/experiments/program_ports_cpu_20261027/capture/os/syscalls.2026785.gz",
+      "compressed_bytes": 3511,
+      "gzip_sha256": "d95eaabe73e7596a6d6b775dcd5595287e71f6e87cc213dc543862dd2fd21229",
+      "logical_path": "/home/zyf/AAA/scar-worktrees/program-ports-capture/artifacts/experiments/program_ports_cpu_20261027/capture/os/syscalls.2026785",
+      "raw_bytes": 17889,
+      "raw_sha256": "997c43ec6748872a3d467b812e7900ebdcd08e27f846a7dadc9fac999be55c6d"
+    },
+    {
+      "actual_path": "/home/zyf/AAA/scar-worktrees/program-ports-capture/artifacts/experiments/program_ports_cpu_20261027/capture/os/syscalls.2026856.gz",
+      "compressed_bytes": 506,
+      "gzip_sha256": "c96dc9a69a85274bb087ee6833474bc405c6e0b85ab822504446ef48d2cd8696",
+      "logical_path": "/home/zyf/AAA/scar-worktrees/program-ports-capture/artifacts/experiments/program_ports_cpu_20261027/capture/os/syscalls.2026856",
+      "raw_bytes": 1005,
+      "raw_sha256": "505d9385daa90fb8d31fdb5e4b3f530a1f4209a4495326de6aded979dc09b4dc"
+    },
+    {
+      "actual_path": "/home/zyf/AAA/scar-worktrees/program-ports-capture/artifacts/experiments/program_ports_cpu_20261027/capture/os/syscalls.2026920.gz",
+      "compressed_bytes": 634,
+      "gzip_sha256": "514ccb2406069f1f5e942cb7addf36e2d7170ea75289c5b7b8d9b3b9db3ee6a3",
+      "logical_path": "/home/zyf/AAA/scar-worktrees/program-ports-capture/artifacts/experiments/program_ports_cpu_20261027/capture/os/syscalls.2026920",
+      "raw_bytes": 1220,
+      "raw_sha256": "35eea7e9df14af2fa5a843a6c8118865212ccf84460c2fb26d2181edaccc21ce"
+    },
+    {
+      "actual_path": "/home/zyf/AAA/scar-worktrees/program-ports-capture/artifacts/experiments/program_ports_cpu_20261027/capture/trace/dispatch-observations.2026697.dbd6018217bbe88a870c1580adcc63ae.jsonl.gz",
+      "compressed_bytes": 759,
+      "gzip_sha256": "43f78daacb0a6cdfb753dba9e533c819eda5805c9986eb318842ba82a891bc10",
+      "logical_path": "/home/zyf/AAA/scar-worktrees/program-ports-capture/artifacts/experiments/program_ports_cpu_20261027/capture/trace/dispatch-observations.2026697.dbd6018217bbe88a870c1580adcc63ae.jsonl",
+      "raw_bytes": 3896,
+      "raw_sha256": "543331ef9cf7fe690104d857cf582bb95ccab3676cfa6063e08b6afc83235f6a"
+    },
+    {
+      "actual_path": "/home/zyf/AAA/scar-worktrees/program-ports-capture/artifacts/experiments/program_ports_cpu_20261027/capture/trace/tensor-physical.2026697.dbd6018217bbe88a870c1580adcc63ae.jsonl.gz",
+      "compressed_bytes": 1479,
+      "gzip_sha256": "9dcfb1918c74e3868ec1f526e99acde4b2c6527d5a91c7148939b566c9850f2f",
+      "logical_path": "/home/zyf/AAA/scar-worktrees/program-ports-capture/artifacts/experiments/program_ports_cpu_20261027/capture/trace/tensor-physical.2026697.dbd6018217bbe88a870c1580adcc63ae.jsonl",
+      "raw_bytes": 10057,
+      "raw_sha256": "44c817967fec80822045cff31134118ae8bf3f07fab8742500df708cdceaf1d7"
+    },
+    {
+      "actual_path": "/home/zyf/AAA/scar-worktrees/program-ports-capture/artifacts/experiments/program_ports_cpu_20261027/capture/trace/execution-trace.2026697.dbd6018217bbe88a870c1580adcc63ae.json.gz",
+      "compressed_bytes": 1360,
+      "gzip_sha256": "7648feefcc25edf8698440763355fccc739640d879906ac46bb3b763b5ac31f4",
+      "logical_path": "/home/zyf/AAA/scar-worktrees/program-ports-capture/artifacts/experiments/program_ports_cpu_20261027/capture/trace/execution-trace.2026697.dbd6018217bbe88a870c1580adcc63ae.json",
+      "raw_bytes": 14414,
+      "raw_sha256": "740033429f88601815dc15049fe8efd9e35287f0efbc9b3e183a16ddbbe44085"
+    },
+    {
+      "actual_path": "/home/zyf/AAA/scar-worktrees/program-ports-capture/artifacts/experiments/program_ports_cpu_20261027/capture/trace/kineto.2026697.dbd6018217bbe88a870c1580adcc63ae.json.gz",
+      "compressed_bytes": 1918,
+      "gzip_sha256": "81c91a8b45a5ef34542d66e07670d36ef69bbfc2b332f20a697a25cba96f609b",
+      "logical_path": "/home/zyf/AAA/scar-worktrees/program-ports-capture/artifacts/experiments/program_ports_cpu_20261027/capture/trace/kineto.2026697.dbd6018217bbe88a870c1580adcc63ae.json",
+      "raw_bytes": 10840,
+      "raw_sha256": "4df03598399faf85b98a269c6b64fdba9d9fdded65d95129fab68694b51c5d2d"
+    },
+    {
+      "actual_path": "/home/zyf/AAA/scar-worktrees/program-ports-capture/artifacts/experiments/program_ports_cpu_20261027/capture/trace/native-tensor-inputs.2026697.dbd6018217bbe88a870c1580adcc63ae/000000.jsonl.gz",
+      "compressed_bytes": 1669,
+      "gzip_sha256": "747170aa1feaf010096f345b32e85809be55ca30a5cfb60149aed9342be47248",
+      "logical_path": "/home/zyf/AAA/scar-worktrees/program-ports-capture/artifacts/experiments/program_ports_cpu_20261027/capture/trace/native-tensor-inputs.2026697.dbd6018217bbe88a870c1580adcc63ae/000000.jsonl",
+      "raw_bytes": 15671,
+      "raw_sha256": "9bbfcbf6b626408addd56c524cf191de7b5ce87ca8e6b76d0278a42be80467f1"
+    }
+  ],
+  "qualification": "CPU pre-barrier run; post-barrier producer implemented only; not a LeWM episode or whole model"
+}

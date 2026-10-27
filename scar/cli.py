@@ -26,6 +26,9 @@ def _trace(args) -> int:
     out = Path(args.out).resolve()
     capture_plan_path = getattr(args, 'capture_plan', None)
     capture_plan_sha256 = getattr(args, 'capture_plan_sha256', None)
+    program_ports = getattr(args, 'capture_profile', None) == 'program-ports'
+    if program_ports and capture_plan_path is not None:
+        raise SystemExit('--capture-profile program-ports and --capture-plan are independent, exclusive scopes')
     if (capture_plan_path is None) != (capture_plan_sha256 is None):
         raise SystemExit('--capture-plan and --capture-plan-sha256 are required together')
     lean_plan = None
@@ -35,8 +38,8 @@ def _trace(args) -> int:
         lean_plan = read_plan(capture_plan_path, expected_sha256=capture_plan_sha256)
         if args.project_root is not None and str(Path(args.project_root).resolve()) != lean_plan.namespace_root:
             raise SystemExit('--project-root differs from the capture plan namespace')
-    stream_interfaces = getattr(args, 'stream_interfaces', False)
-    python_targets = getattr(args, 'python_call_targets', False) or lean_plan is not None or stream_interfaces
+    stream_interfaces = getattr(args, 'stream_interfaces', False) or program_ports
+    python_targets = getattr(args, 'python_call_targets', False) or lean_plan is not None or stream_interfaces or program_ports
     operands = getattr(args, 'call_operands', False) or python_targets
     os_capture_root = getattr(args, 'os_capture_root', None)
     if os_capture_root is not None:
@@ -55,9 +58,12 @@ def _trace(args) -> int:
     env.pop('SCAR_CALL_OPERANDS',None)
     env.pop('SCAR_PYTHON_CALL_TARGETS',None)
     env.pop('SCAR_STREAM_INTERFACES',None)
+    env.pop('SCAR_STREAM_BACKING_OBSERVATIONS',None)
     env.pop('SCAR_OPERAND_CAPTURE',None)
     env.pop('SCAR_CAPTURE_PLAN',None)
     env.pop('SCAR_CAPTURE_PLAN_SHA256',None)
+    for key in ('SCAR_PYTHON_CAPTURE_PROFILE','SCAR_SOURCE_MAX_FILES','SCAR_SOURCE_MAX_FILE_BYTES','SCAR_SOURCE_MAX_BYTES','SCAR_CALL_MAX_CODES'):
+        env.pop(key,None)
     env.pop('SCAR_EXECUTION_EVIDENCE',None)
     env.pop('SCAR_TENSOR_PHYSICAL',None)
     env.pop('SCAR_RESOURCE_SAMPLER',None)
@@ -90,13 +96,17 @@ def _trace(args) -> int:
             lean_plan.namespace_root if lean_plan is not None else Path.cwd())).resolve())
         env['SCAR_CALL_MAX_EVENTS'] = str(args.max_call_events)
         env['SCAR_CALL_MAX_BYTES'] = str(args.max_call_bytes)
+        if args.max_call_codes < 1:
+            raise SystemExit('call code limit must be positive')
+        env['SCAR_CALL_MAX_CODES'] = str(args.max_call_codes)
         if args.max_call_events < 1 or args.max_call_bytes < 1:
             raise SystemExit("call budgets must be positive")
         if operands:
             if args.max_operand_events < 1 or args.max_operand_bytes < 1:
                 raise SystemExit("operand budgets must be positive")
-            capture = 'lean-ports' if lean_plan is not None else getattr(args, 'operand_capture', 'windows')
-            if capture not in ('windows', 'instructions', 'lean-ports'):
+            capture = ('program-ports' if program_ports else 'lean-ports' if lean_plan is not None
+                       else getattr(args, 'operand_capture', 'windows'))
+            if capture not in ('windows', 'instructions', 'lean-ports', 'program-ports'):
                 raise SystemExit("operand capture must be windows or instructions")
             env['SCAR_CALL_OPERANDS'] = '1'
             if python_targets:
@@ -106,6 +116,15 @@ def _trace(args) -> int:
             env['SCAR_OPERAND_CAPTURE'] = capture
             env['SCAR_OPERAND_MAX_EVENTS'] = str(args.max_operand_events)
             env['SCAR_OPERAND_MAX_BYTES'] = str(args.max_operand_bytes)
+            if program_ports:
+                from scar.trace.captured_sources import PROGRAM_PORTS_PROFILE
+                env['SCAR_PYTHON_CAPTURE_PROFILE'] = PROGRAM_PORTS_PROFILE
+                env['SCAR_STREAM_BACKING_OBSERVATIONS'] = '1'
+                for name, value in (('FILES', args.max_source_files), ('FILE_BYTES', args.max_source_file_bytes),
+                                    ('BYTES', args.max_source_bytes)):
+                    if type(value) is not int or value < 1:
+                        raise SystemExit('source archive limits must be positive integers')
+                    env['SCAR_SOURCE_MAX_' + name] = str(value)
             if lean_plan is not None:
                 env['SCAR_CAPTURE_PLAN'] = str(capture_plan_path)
                 env['SCAR_CAPTURE_PLAN_SHA256'] = capture_plan_sha256
@@ -584,6 +603,12 @@ def main(argv=None) -> int:
                        help='record explicit v2 Python callee and receiver roles; implies call-operands (CPython 3.14.7)')
     trace.add_argument('--capture-plan', help='use a source-derived lean interface capture plan; implies Python call targets')
     trace.add_argument('--capture-plan-sha256', help='expected capture plan SHA256')
+    trace.add_argument('--capture-profile', choices=('program-ports',),
+                       help='record project entries and actual Python descendants with CALL-only monitoring and source bytes')
+    trace.add_argument('--max-source-files',type=int,default=1024)
+    trace.add_argument('--max-source-file-bytes',type=int,default=2_000_000)
+    trace.add_argument('--max-source-bytes',type=int,default=64_000_000,
+                       help='raw source bytes read, once per observed original file (program-ports only)')
     trace.add_argument('--execution-evidence',action='store_true',
                        help='collect native ETO/Kineto evidence alongside the call recorder when the target imports Torch; requires calls-only or call-operands')
     trace.add_argument('--tensor-physical',action='store_true',
@@ -593,6 +618,7 @@ def main(argv=None) -> int:
     trace.add_argument('--project-root',help='source boundary for lightweight call-site recording; defaults to target cwd')
     trace.add_argument('--max-call-events',type=int,default=100000)
     trace.add_argument('--max-call-bytes',type=int,default=64000000)
+    trace.add_argument('--max-call-codes',type=int,default=4096)
     trace.add_argument('--max-operand-events',type=int,default=100000)
     trace.add_argument('--max-operand-bytes',type=int,default=32000000)
     trace.add_argument('--os-capture-root',help='opt in to owned trace=all strace, lossless retention and final coordinates; requires fresh ROOT and --out ROOT/trace')

@@ -283,7 +283,8 @@ def _stream_interface_members(files, trace_root, pid, members, project_root):
         return None, []
     doc, declaration = files.document(metadata, 'scar.stream-interface-collection')
     _need(doc.get('schema') == 'scar.stream-interface-collection' and type(doc.get('schema_version')) is int
-          and doc['schema_version'] == 1 and doc.get('profile') == 'SCAR_BUILTIN_STREAM_INTERFACES_V1'
+          and (doc['schema_version'],doc.get('profile')) in (
+              (1,'SCAR_BUILTIN_STREAM_INTERFACES_V1'),(2,'SCAR_BUILTIN_STREAM_BACKING_OBSERVATIONS_V1'))
           and type(doc.get('process_id')) is int and doc['process_id'] == pid
           and doc.get('project_root') == project_root and type(doc.get('stopped')) is bool
           and type(doc.get('errors')) is list and doc.get('tensor_or_stream_contents_read') is False
@@ -293,7 +294,14 @@ def _stream_interface_members(files, trace_root, pid, members, project_root):
     counts = doc.get('counts')
     _need(type(counts) is dict and set(counts) == {'BEGIN', 'C_RETURN', 'C_RAISE', 'UNOBSERVED'}
           and all(_integer(v) for v in counts.values()), 'stream interface counts differ')
-    artifact = files.verify(events, 'scar.stream-interfaces.events.v1')
+    if doc['schema_version'] == 2:
+        backing = doc.get('backing_counts')
+        _need(type(backing) is dict and set(backing) == {'OBSERVED','MEMORY_STREAM','UNSUPPORTED_CHAIN',
+              'CHAIN_FAILED','FILENO_FAILED','FSTAT_FAILED'} and all(_integer(v) for v in backing.values())
+              and sum(backing.values()) == counts['BEGIN'], 'stream backing observation denominator differs')
+    else:
+        _need('backing_counts' not in doc, 'V1 cannot silently acquire backing observations')
+    artifact = files.verify(events, 'scar.stream-interfaces.events.v'+str(doc['schema_version']))
     ref = doc['file']
     _need(ref.get('uri') == str(events) and ref.get('sha256') == artifact.sha256
           and ref.get('size_bytes') == artifact.size_bytes and ref.get('rows') == sum(counts.values()),
@@ -311,7 +319,8 @@ def _stream_interface_members(files, trace_root, pid, members, project_root):
               and (row['raw_sha256'], row['raw_bytes']) == (original.sha256, original.size_bytes),
               'stream sidecar refers to different original CALL/frame inputs')
     members[str(events)], members[str(metadata)] = artifact, declaration
-    return {'capability': 'SCAR_STREAM_INTERFACE_MEMBERSHIP_V1', 'manifest': encode(declaration),
+    return {'capability': ('SCAR_STREAM_INTERFACE_MEMBERSHIP_V1' if doc['schema_version'] == 1
+                          else 'SCAR_STREAM_BACKING_OBSERVATION_MEMBERSHIP_V1'), 'manifest': encode(declaration),
             'events': encode(artifact), 'declared_counts': counts,
             'collector_stopped': doc['stopped'], 'source_or_contents_established': False}, [str(events), str(metadata)]
 
@@ -347,6 +356,46 @@ def _lean_plan_member(files, trace_root, pid, members, calls, operands):
             "plan": encode(artifact), "planned_codes": len(plan.bodies), "scope": scope,
             "unplanned_bodies_expanded": False,
             "source_compiler_runtime_contents_proved": False}, [str(expected)]
+
+
+def _program_source_members(files, trace_root, pid, members, calls, operands):
+    from scar.trace.captured_sources import (
+        SOURCE_SCHEMA, validate_program_profile, validate_source_metadata, validate_source_row,
+    )
+    declaration = validate_program_profile(calls, operands)
+    if declaration is None:
+        return None, []
+    metadata_name = trace_root / f'captured-source-meta.{pid}.json'
+    _need(declaration.get('uri') == str(metadata_name) and declaration.get('schema') == SOURCE_SCHEMA+'/1',
+          'program source metadata namespace/schema differs')
+    doc, metadata = files.document(metadata_name, SOURCE_SCHEMA+'/1', limit=8_000_000)
+    _need(encode(metadata) == declaration, 'program source metadata receipt differs')
+    by_path = validate_source_metadata(doc, pid)
+    events_name = trace_root / f'captured-sources.{pid}.jsonl'
+    _need(doc['file']['uri'] == str(events_name), 'program source archive namespace differs')
+    artifact = files.verify(events_name, SOURCE_SCHEMA+'.rows.v1')
+    _need((artifact.sha256, artifact.size_bytes) == (doc['file']['sha256'],doc['file']['size_bytes']),
+          'program source archive receipt differs')
+    # Bounded per-row decode retains at most one original source file. Reading
+    # archived bytes is not a compiler match or proof of the original loader.
+    local,_ = files.local(events_name)
+    opener = gzip.open if local.suffix == '.gz' else open
+    rows = 0
+    maximum_line = 4*((doc['limits']['max_file_bytes']+2)//3)+32_768
+    with opener(local,'rb') as stream:
+        while raw := stream.readline(maximum_line+1):
+            files.total += len(raw)
+            _need(files.total <= files.maximum and len(raw) <= maximum_line and raw.endswith(b'\n'),
+                  'captured source row/total decoded budget exceeded')
+            rows += 1
+            validate_source_row(_json(raw),doc,rows,by_path)
+    _need(rows == doc['file']['rows'], 'captured source row denominator differs')
+    members[str(metadata_name)] = metadata
+    members[str(events_name)] = artifact
+    return dict(capability='SCAR_CAPTURED_PYTHON_SOURCES_MEMBERSHIP_V1',
+        manifest=encode(metadata), events=encode(artifact),
+        files=len(by_path), archived_files=rows, code_descriptors=len(doc['code_sources']),
+        compiler_match='NOT_CHECKED', loader_bytes_observed=False), [str(metadata_name),str(events_name)]
 
 
 def bind_capture_coordinates(capture_dir, *, max_bytes=1_000_000_000, max_lines=2_000_000, profile_uri=None,
@@ -434,6 +483,7 @@ def bind_capture_coordinates(capture_dir, *, max_bytes=1_000_000_000, max_lines=
     stream_membership, stream_names = _stream_interface_members(
         files, trace_root, pid, members, operands['project_root'])
     lean_plan_membership, lean_plan_names = _lean_plan_member(files, trace_root, pid, members, calls, operands)
+    program_source_membership, program_source_names = _program_source_members(files, trace_root, pid, members, calls, operands)
     environment_name = trace_root / ("function-environments." + str(pid) + ".jsonl")
     environment_meta_name = trace_root / ("function-environment-meta." + str(pid) + ".json")
     environment_present = files.contains(environment_name)
@@ -673,6 +723,7 @@ def bind_capture_coordinates(capture_dir, *, max_bytes=1_000_000_000, max_lines=
                         str(trace_root / ("call-operand-meta." + str(pid) + ".json"))]
     exclusive_names += python_target_names
     exclusive_names += lean_plan_names
+    exclusive_names += program_source_names
     exclusive_names += stream_names
     if environment_present:
         exclusive_names += [str(environment_name), str(environment_meta_name)]
@@ -825,6 +876,10 @@ def bind_capture_coordinates(capture_dir, *, max_bytes=1_000_000_000, max_lines=
         report['lean_capture_plan_membership'] = lean_plan_membership
         report['open'].append({'code': 'lean_unplanned_bodies_and_interfaces_remain_unexpanded',
                                'source': lean_plan_membership['plan']})
+    if program_source_membership is not None:
+        report['captured_python_source_membership'] = program_source_membership
+        report['open'].append({'code':'captured_source_bytes_not_loader_or_compiler_match',
+                               'source':program_source_membership['manifest']})
     if stream_membership is not None:
         report['stream_interface_membership'] = stream_membership
         report['open'].append({'code': 'stream_interface_source_contents_and_backing_resources_unverified',
