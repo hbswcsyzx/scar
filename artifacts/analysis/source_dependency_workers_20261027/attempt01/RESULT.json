@@ -1,0 +1,82 @@
+{
+  "accepted_attempts": 449,
+  "actual_worker_process_count": 4,
+  "audit": {
+    "capture": 0,
+    "parent_body_open_attempts": [],
+    "parent_raw_open_attempts": [],
+    "target_exec": 0
+  },
+  "configured_workers": 4,
+  "index": {
+    "stored_bytes": 159949,
+    "stored_sha256": "748561d69d23c185c30ab8e138cfeaf032d6627b1b1f1cf8243b5fb2fcd329ae",
+    "uri": "/home/zyf/AAA/scar-worktrees/source-dependency-navigation/artifacts/analysis/source_dependency_workers_20261027/attempt01/views/index.json"
+  },
+  "manifest_path": "/home/zyf/AAA/scar-worktrees/retained-call-session/artifacts/analysis/source_call_port_session_20261027/publication/manifest.json",
+  "manifest_sha256": "118a189761ddefe33d03b548e5ba8c699a1c3fe35baa34f82832ff6519b50c36",
+  "missing_attempts": 63,
+  "output_stored_bytes_before_index": 18682061,
+  "parent_peak_rss_kib": 45736,
+  "parent_pid": 2104914,
+  "parent_report_wall_seconds": 32.08022191602504,
+  "query_count": 2077,
+  "reader_costs": {
+    "body_codec_reads": 49,
+    "body_index_builds": 49,
+    "decoded_bytes": 312595248,
+    "stored_bytes": 143439450
+  },
+  "remaining_direct_candidates": 2171,
+  "runner_sha256": "dd77f439fec6247beb39e36538259428d531f39bececbac35dc2be08f0b6d754",
+  "runtime_occurrence_selected": false,
+  "separate_metadata_preflight_bytes": 160512,
+  "shards": 15,
+  "speedup_measured": false,
+  "status": "PASS",
+  "total_output_bytes": 18842010,
+  "truncated_query_shards": [],
+  "wall_seconds": 32.09707499202341,
+  "whole_program_complete": false,
+  "worker_peak_rss_kib": [
+    143684,
+    170892,
+    158460,
+    192980,
+    192980,
+    165372,
+    170892,
+    164356,
+    192980,
+    165372,
+    170892,
+    164356,
+    192980,
+    165372,
+    170892
+  ],
+  "worker_pids": [
+    2104920,
+    2104923,
+    2104924,
+    2104925
+  ],
+  "worker_source_sha256": "020c8362e39e7e848ab9e37fe62b79a07e6b0d726face7dadafbe95e3fd23bc6",
+  "worker_wall_seconds": [
+    3.7037051600054838,
+    5.4337555399979465,
+    5.632991329999641,
+    3.3939320709905587,
+    8.69008499395568,
+    8.739232639956754,
+    9.169344460009597,
+    8.923678916995414,
+    8.798838877992239,
+    9.074837024032604,
+    8.706317181000486,
+    8.836025142983999,
+    8.93411713198293,
+    9.094899361021817,
+    6.270526205014903
+  ]
+}
