@@ -249,9 +249,10 @@ def bind_snapshot_postprocessor_roles(coordinates, fragment, receipt_artifacts, 
                       'selected worker OS byte budget exceeded')
                 wanted = {r[s]['line'] for r in execs for s in ('source', 'entry_source')
                           if fragment.artifacts[r[s]['artifact']] == key}
-                digest, size, lines = hashlib.sha256(), 0, {}
+                digest, size, lines, retained_lines = hashlib.sha256(), 0, {}, 0
                 with open_binary(_local(key.uri, coordinates)) as stream:
                     for line_number, raw in enumerate(iter(lambda: stream.readline(limits.max_line_bytes + 1), b''), 1):
+                        retained_lines = line_number
                         size += len(raw); selected_bytes += len(raw); digest.update(raw)
                         _need(len(raw) <= limits.max_line_bytes and selected_bytes <= limits.max_worker_os_bytes,
                               'selected worker OS line/aggregate byte budget exceeded')
@@ -259,9 +260,9 @@ def bind_snapshot_postprocessor_roles(coordinates, fragment, receipt_artifacts, 
                             lines[line_number] = raw.decode('utf-8').rstrip('\r\n')
                 _need(size == key.size_bytes and digest.hexdigest() == key.sha256,
                       'selected original worker artifact changed')
-                cache[key] = lines
+                cache[key] = lines, retained_lines
             try:
-                flags = _exec_arguments(cache[key][row['entry_source']['line']], cache[key][row['source']['line']], row['syscall'])
+                flags = _exec_arguments(cache[key][0][row['entry_source']['line']], cache[key][0][row['source']['line']], row['syscall'])
             except (ValueError, KeyError, UnicodeError):
                 continue  # A different/abbreviated argv cannot authorize a role.
             if (flags['--journal'] == doc['source']['uri'] and flags['--sha256'] == doc['source']['sha256']
@@ -284,8 +285,9 @@ def bind_snapshot_postprocessor_roles(coordinates, fragment, receipt_artifacts, 
             'run': encode(fragment.run.id), 'process': encode(child.id), 'parent_process': encode(parent_process.id),
             'birth': encode(birth_source), 'exec': encode(_fact(fragment, row['source'])),
             'interval': {'artifact': encode(artifact), 'first_line': start,
-                         'end_line_exclusive': None if boundary is None else boundary[0]},
-            'boundary': None if boundary is None else {'source': encode(boundary[1]), 'kind': boundary[2]},
+                         'end_line_exclusive': cache[artifact][1] + 1 if boundary is None else boundary[0]},
+            'boundary': {'source': encode(ProviderFactReference(artifact, '#')), 'kind': 'RETAINED_EOF_NOT_PROCESS_EXIT'}
+                        if boundary is None else {'source': encode(boundary[1]), 'kind': boundary[2]},
             'unknown': ['other threads/descendants and pre-exec work are not classified',
                         'code image equivalence and complete effects are not established']})
     return SnapshotPostprocessorRoles({'schema': 'scar.os-postprocessing-role-navigation', 'schema_version': 1,
