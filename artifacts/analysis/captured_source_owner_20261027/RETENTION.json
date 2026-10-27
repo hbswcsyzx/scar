@@ -1,0 +1,163 @@
+{
+  "artifacts": [
+    {
+      "bytes": 3370,
+      "path": "/home/zyf/AAA/scar-worktrees/captured-source-owner/artifacts/analysis/captured_source_owner_20261027/HANDOFF.md",
+      "sha256": "fe3d5787d501a4d757ce43e19e3bc391a02024a6e2562b34bd99b99c6fbf18d4"
+    },
+    {
+      "bytes": 5327,
+      "path": "/home/zyf/AAA/scar-worktrees/captured-source-owner/artifacts/analysis/captured_source_owner_20261027/PRODUCTION.diff.gz",
+      "sha256": "420fd89c08d5de36ba1da0f29277a75ca0533a19869922c969faa014e6006d1f"
+    },
+    {
+      "bytes": 4190,
+      "path": "/home/zyf/AAA/scar-worktrees/captured-source-owner/artifacts/analysis/captured_source_owner_20261027/REPORT.md",
+      "sha256": "30c5ea33c62f25006c1f2ecb29aa95e7579a4b9b52cc62c42cc0457c9a1b0a2e"
+    },
+    {
+      "bytes": 446,
+      "path": "/home/zyf/AAA/scar-worktrees/captured-source-owner/artifacts/analysis/captured_source_owner_20261027/SOURCE_RECEIPTS.json",
+      "sha256": "cc9b665b11fad863a0a1b364f1a96192c36201b0aea5988697a3958352b888e2"
+    },
+    {
+      "bytes": 14933,
+      "path": "/home/zyf/AAA/scar-worktrees/captured-source-owner/artifacts/analysis/captured_source_owner_20261027/attempt01/RESULT.json",
+      "sha256": "612a3d0beb166e496806bab0cdb9e41b995b47b270b1c8425139465fec8a6966"
+    },
+    {
+      "bytes": 643,
+      "path": "/home/zyf/AAA/scar-worktrees/captured-source-owner/artifacts/analysis/captured_source_owner_20261027/attempt01/archive/8c55324baad1b805b69fb4936065d334618f52d34deaced7be85a4b96e713612.marshal",
+      "sha256": "92777970471417bfefe3c5766b09013a4a17206e9de1822a9c763f0a67b7757b"
+    },
+    {
+      "bytes": 192,
+      "path": "/home/zyf/AAA/scar-worktrees/captured-source-owner/artifacts/analysis/captured_source_owner_20261027/attempt01/archive/9012749e14882e3964c27aa9c0ae1e86c0a1e537baf472aeff25f9cb03663b06.source.utf8",
+      "sha256": "4ff684ac74c395a2de4aabca9c6b1d6872bcad26bc7b3c40c6947eea6209926c"
+    },
+    {
+      "bytes": 6870,
+      "path": "/home/zyf/AAA/scar-worktrees/captured-source-owner/artifacts/analysis/captured_source_owner_20261027/attempt01/archive/manifest.json",
+      "sha256": "79d3beef16cecfaa298050e1b5864d93577ae6ce626721536ce8cb281746cee3"
+    },
+    {
+      "bytes": 13239,
+      "path": "/home/zyf/AAA/scar-worktrees/captured-source-owner/artifacts/analysis/captured_source_owner_20261027/attempt01/production/scar/analysis/captured_source_owner.py",
+      "sha256": "124d8c29eb2dc395a33e30cde774a65972f584450907adab853775f14c7e1d18"
+    },
+    {
+      "bytes": 23177,
+      "path": "/home/zyf/AAA/scar-worktrees/captured-source-owner/artifacts/analysis/captured_source_owner_20261027/attempt01/production/scar/analysis/code_witness.py",
+      "sha256": "51ae8bf77a0a73a0473b40bc1ad880c0dd74cb587bcf93b7d9307532948f7047"
+    },
+    {
+      "bytes": 5071,
+      "path": "/home/zyf/AAA/scar-worktrees/captured-source-owner/artifacts/analysis/captured_source_owner_20261027/attempt01/run.py",
+      "sha256": "6f9f174b61e7550dc4084fb3b374ede0ef153ee34884a0a2b1856e23a80f0181"
+    },
+    {
+      "bytes": 820,
+      "path": "/home/zyf/AAA/scar-worktrees/captured-source-owner/artifacts/analysis/captured_source_owner_20261027/attempt01/stderr.txt",
+      "sha256": "52fe7b0cfe4f8f96a11e35a2972f94786aea2e3963e7b91dadbd846fccc302c6"
+    },
+    {
+      "bytes": 4113,
+      "path": "/home/zyf/AAA/scar-worktrees/captured-source-owner/artifacts/analysis/captured_source_owner_20261027/attempt01/stdout.txt",
+      "sha256": "eeb1e9b4bc88d7c53342f785f97b4b5f42aa3b1aa28020b05b5b98a2aa3116ea"
+    },
+    {
+      "bytes": 14962,
+      "path": "/home/zyf/AAA/scar-worktrees/captured-source-owner/artifacts/analysis/captured_source_owner_20261027/attempt02/RESULT.json",
+      "sha256": "22eafffb6631fb9da845c3485a70a519c33a658572ef807314b41aa89f5a5145"
+    },
+    {
+      "bytes": 643,
+      "path": "/home/zyf/AAA/scar-worktrees/captured-source-owner/artifacts/analysis/captured_source_owner_20261027/attempt02/archive/8c55324baad1b805b69fb4936065d334618f52d34deaced7be85a4b96e713612.marshal",
+      "sha256": "92777970471417bfefe3c5766b09013a4a17206e9de1822a9c763f0a67b7757b"
+    },
+    {
+      "bytes": 192,
+      "path": "/home/zyf/AAA/scar-worktrees/captured-source-owner/artifacts/analysis/captured_source_owner_20261027/attempt02/archive/9012749e14882e3964c27aa9c0ae1e86c0a1e537baf472aeff25f9cb03663b06.source.utf8",
+      "sha256": "4ff684ac74c395a2de4aabca9c6b1d6872bcad26bc7b3c40c6947eea6209926c"
+    },
+    {
+      "bytes": 6876,
+      "path": "/home/zyf/AAA/scar-worktrees/captured-source-owner/artifacts/analysis/captured_source_owner_20261027/attempt02/archive/manifest.json",
+      "sha256": "bdec7d7f20b0ffbe43a388b1954d6e0bba5b9352ed55f2222166bec6ff68170d"
+    },
+    {
+      "bytes": 5071,
+      "path": "/home/zyf/AAA/scar-worktrees/captured-source-owner/artifacts/analysis/captured_source_owner_20261027/attempt02/run.py",
+      "sha256": "6e70b698cd13506de6462d8a17f31ee7cbd31e51afe1c4a827a0ce89b10531b6"
+    },
+    {
+      "bytes": 830,
+      "path": "/home/zyf/AAA/scar-worktrees/captured-source-owner/artifacts/analysis/captured_source_owner_20261027/attempt02/stderr.txt",
+      "sha256": "f2a57922806817de472716b5468842d8438acf4b1c41d0d4342f7681ac5aa15c"
+    },
+    {
+      "bytes": 4124,
+      "path": "/home/zyf/AAA/scar-worktrees/captured-source-owner/artifacts/analysis/captured_source_owner_20261027/attempt02/stdout.txt",
+      "sha256": "a175d50e381f1ac5719b4320829bc7a5d93145b56bc1c67734bc5737ac733620"
+    }
+  ],
+  "existing_inputs_not_copied_again": {
+    "compiler_match": "NOT_CHECKED",
+    "frame_files": [
+      {
+        "family": "codes",
+        "lines": 99,
+        "path": "/home/zyf/AAA/scar-worktrees/program-ports-capture/artifacts/experiments/program_ports_cpu_20261027/capture/trace/call-codes.2026697.jsonl",
+        "process_id": 2026697,
+        "raw_bytes": 24789,
+        "raw_sha256": "813a5b8bf1e782db11e66c871dec972f6bbf915cff6f9b66f7bd11511640a7b4"
+      },
+      {
+        "family": "events",
+        "lines": 354,
+        "path": "/home/zyf/AAA/scar-worktrees/program-ports-capture/artifacts/experiments/program_ports_cpu_20261027/capture/trace/call-events.2026697.jsonl",
+        "process_id": 2026697,
+        "raw_bytes": 216240,
+        "raw_sha256": "7cc0218db0de49474ebf99a809440c9f7d54b93da0b697650d0ad52af3cbe0ed"
+      },
+      {
+        "family": "meta",
+        "lines": 43,
+        "path": "/home/zyf/AAA/scar-worktrees/program-ports-capture/artifacts/experiments/program_ports_cpu_20261027/capture/trace/call-meta.2026697.json",
+        "process_id": 2026697,
+        "raw_bytes": 1509,
+        "raw_sha256": "91720209c40b6d22f117a7708c2991ce468bfbc55b7616a43b62f74dde8bb089"
+      }
+    ],
+    "inputs": [
+      {
+        "schema": "scar.captured-python-sources/1",
+        "sha256": "69521cb317c57b9bed3087c5f36d0385e760146c8c5c672c0ad532bc876692e4",
+        "size_bytes": 21841,
+        "uri": "/home/zyf/AAA/scar-worktrees/program-ports-capture/artifacts/experiments/program_ports_cpu_20261027/capture/trace/captured-source-meta.2026697.json"
+      },
+      {
+        "schema": "scar.call-edge-trace",
+        "sha256": "91720209c40b6d22f117a7708c2991ce468bfbc55b7616a43b62f74dde8bb089",
+        "size_bytes": 1509,
+        "uri": "/home/zyf/AAA/scar-worktrees/program-ports-capture/artifacts/experiments/program_ports_cpu_20261027/capture/trace/call-meta.2026697.json"
+      },
+      {
+        "schema": "scar.call-edge-codes.v1",
+        "sha256": "813a5b8bf1e782db11e66c871dec972f6bbf915cff6f9b66f7bd11511640a7b4",
+        "size_bytes": 24789,
+        "uri": "/home/zyf/AAA/scar-worktrees/program-ports-capture/artifacts/experiments/program_ports_cpu_20261027/capture/trace/call-codes.2026697.jsonl"
+      },
+      {
+        "schema": "scar.captured-python-sources/1",
+        "sha256": "11a9c3a8cf0ad71d04c690f8eae7ff5d49afc7a03fd79ecfd89e0ac744b8dce0",
+        "size_bytes": 189422,
+        "uri": "/home/zyf/AAA/scar-worktrees/program-ports-capture/artifacts/experiments/program_ports_cpu_20261027/capture/trace/captured-sources.2026697.jsonl"
+      }
+    ],
+    "loader_bytes_observed": false
+  },
+  "new_capture": 0,
+  "original_capture_immutable": true,
+  "target_exec": 0
+}

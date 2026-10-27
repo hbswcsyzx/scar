@@ -260,6 +260,60 @@ class CodeWitnessStore:
         return {"snapshot": encode(snapshot), "artifact": dict(declaration),
                 "archived_source_origin": provenance}
 
+    def admit_captured_source(self, snapshot, *, captured, source_owner):
+        """Admit capture-observed bytes without claiming a compiler match.
+
+        The normal owner establishes exact original rows/CodeID membership.
+        Only resolve's actual compilation plus complete descriptor comparison
+        can subsequently create a CodeWitness. No live text fallback is used.
+        """
+        from scar.analysis.captured_source_owner import CapturedSourceOwner
+        from scar.ir.semantics_v2 import SourceSnapshot
+        _need(self.writable and self.compile_missing and type(snapshot) is SourceSnapshot
+              and type(captured) is CapturedCode and type(source_owner) is CapturedSourceOwner,
+              "captured source admission requires a new writer and normal captured-source owner")
+        _need(source_owner.snapshot(captured) == snapshot,
+              "captured CodeID does not select this exact archived source snapshot")
+        original = source_owner.archived_source(snapshot)
+        text = original.text
+        _need(original.snapshot == snapshot and type(text) is str
+              and snapshot.fingerprint == "sha256:" + _sha(text.encode("utf8"))
+              and original.compiler_match == 'NOT_CHECKED' and original.loader_bytes_observed is False,
+              "captured source text/observation qualification differs")
+        _need(original.observed_python == sys.version,
+              "captured interpreter build differs from this compiler witness runtime")
+        provenance = {"kind": "CAPTURED_SOURCE_OBSERVATION",
+            "snapshot": encode(snapshot), "source": encode(original.source),
+            "declaration": encode(original.declaration), "code_sources": encode(original.code_sources),
+            "owner": source_owner.receipts(), "raw_bytes": original.raw_bytes,
+            "unchanged_at_close": original.unchanged_at_close,
+            "observation_frontier": original.observation_frontier,
+            "compiler_match": 'NOT_CHECKED', "loader_bytes_observed": False}
+        key = _sha(_bytes(encode(snapshot)))
+        existing = self.document['sources'].get(key)
+        if existing is not None:
+            _need(existing.get('captured_source_origin') == provenance
+                  and existing['original_encoding'] == original.original_encoding
+                  and existing['original_raw_sha256'] == original.raw_sha256 and self.text(snapshot) == text,
+                  "existing writer source conflicts with its original captured provenance")
+            declaration = existing['artifact']
+        else:
+            normalized = text.encode('utf8')
+            _need(len(self.document['sources']) < self.budget.max_source_files
+                  and sum(row['artifact']['bytes'] for row in self.document['sources'].values())
+                      + len(normalized) <= self.budget.max_source_bytes,
+                  "captured source-file/byte budget exceeded")
+            declaration = self._write(key + '.source.utf8', normalized)
+            self.document['sources'][key] = {'snapshot': encode(snapshot), 'artifact': declaration,
+                'original_encoding': original.original_encoding, 'original_raw_sha256': original.raw_sha256,
+                'captured_source_origin': provenance}
+            self.texts[key] = text
+            self._publish()
+        source_owner.require_unchanged()
+        return {'snapshot': encode(snapshot), 'artifact': dict(declaration),
+                'captured_source_origin': provenance,
+                'code_membership': source_owner.code_membership(captured)}
+
     def _walk(self, module):
         pending, count = [(module, ())], 0
         while pending:
