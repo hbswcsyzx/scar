@@ -1,0 +1,16 @@
+{
+  "manifest_path": "/home/zyf/AAA/scar-worktrees/retained-call-abi11/artifacts/analysis/source_call_port_all_20261027_abi11/publication/manifest.json",
+  "manifest_sha256": "32b84dae11ae3d1e5a0b7b7c9dc4461def8dc59ae8c8e8b2ad31c80cc1667afe",
+  "manifest_bytes": 749531,
+  "totals": {
+    "direct_candidate_pairs_total": 2683,
+    "direct_candidate_pairs_examined": 2683,
+    "direct_candidate_pairs_remaining": 0,
+    "selected_calls": 2683,
+    "shards": 84,
+    "windows": 84,
+    "max_candidate_pairs": 2683,
+    "max_selected_calls_per_shard": 32,
+    "max_candidate_pairs_per_shard": 64
+  }
+}

@@ -1,0 +1,202 @@
+{
+  "execution": {
+    "actual_stdout": "/home/zyf/AAA/scar-worktrees/retained-call-abi11/artifacts/analysis/source_call_port_all_20261027_abi11/stdout.txt",
+    "actual_time_stderr": "/home/zyf/AAA/scar-worktrees/retained-call-abi11/artifacts/analysis/source_call_port_all_20261027_abi11/time-stderr.txt",
+    "exit_status": 0,
+    "gnu_time_system_seconds": 1.39,
+    "gnu_time_user_seconds": 143.39,
+    "gnu_time_wall_seconds": 145.14,
+    "maximum_resident_set_kib": 1029036,
+    "publication_seconds_after_raw_read": 16.91356756701134,
+    "raw_reader_seconds": 125.32091981801204
+  },
+  "initial_argument_validation_attempt": {
+    "detail": "The first manually entered source-report SHA did not match the retained report. The exact original SHA was then used for the single full scan.",
+    "exit_status": 1,
+    "raw_trace_opened_or_scanned": false,
+    "terminal_path": "/home/zyf/AAA/scar-worktrees/retained-call-abi11/artifacts/analysis/source_call_port_all_20261027_abi11/attempt01_stderr_time.txt"
+  },
+  "inputs": {
+    "bindings": {
+      "bytes": 8285312,
+      "path": "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/analysis/source_entry_full_binding_20261026/actual_201/bindings.json",
+      "schema_version": 4,
+      "sha256": "096c5a53213bae9f480ba813c240a277220ce6ac636390c0edff3bde9a91f449"
+    },
+    "full_source_201_reader_replay": false,
+    "new_target_or_capture": false,
+    "source_report": {
+      "path": "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/analysis/source_entry_full_binding_20261026/actual_201/report.json",
+      "schema_version": 4,
+      "sha256": "88e0ad71244ba59a455eb8bcd3a369fbe579e7c2e95bb3498d123bd4a965aa6f"
+    },
+    "trace_receipts": {
+      "frame_files": [
+        {
+          "family": "codes",
+          "lines": 855,
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_dispatch_20261023/trace/call-codes.272038.jsonl",
+          "process_id": 272038,
+          "raw_bytes": 226156,
+          "raw_sha256": "4d1f4c2b675481a1af7bc65f7ad6073796e2f1e85695d3538ecdc92988d8eff4"
+        },
+        {
+          "family": "events",
+          "lines": 200876,
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_dispatch_20261023/trace/call-events.272038.jsonl",
+          "process_id": 272038,
+          "raw_bytes": 187485595,
+          "raw_sha256": "f44ee6c7616566f8cf670b51de23afd0cae33cd4929cd18443af177d4e463ff9"
+        },
+        {
+          "family": "meta",
+          "lines": 34,
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_dispatch_20261023/trace/call-meta.272038.json",
+          "process_id": 272038,
+          "raw_bytes": 956,
+          "raw_sha256": "297df87ea99ff7fce1ce6ba1522878675ccdea4434bcd2d132eb713045c96747"
+        }
+      ],
+      "operand_files": [
+        {
+          "family": "operand-meta",
+          "lines": 58,
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_dispatch_20261023/trace/call-operand-meta.272038.json",
+          "process_id": 272038,
+          "raw_bytes": 1963,
+          "raw_sha256": "d9d01e797311105ea680e4a9537c89e19e8d31800601a6f9b963dfc594cbfd84"
+        },
+        {
+          "family": "operands",
+          "lines": 312812,
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_dispatch_20261023/trace/call-operands.272038.jsonl",
+          "process_id": 272038,
+          "raw_bytes": 114238539,
+          "raw_sha256": "d696aea3ee00564e8d27b645fa4bf09d446640b75df33f237fe0afb6fb8c1002"
+        }
+      ]
+    },
+    "trace_root": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_dispatch_20261023/trace"
+  },
+  "normal_shard_readback": {
+    "abi11_inclusion": {
+      "included_attempt_indices": [
+        173577,
+        173717,
+        173750,
+        173867,
+        173969,
+        173993,
+        174002,
+        174142,
+        174175,
+        174292,
+        174394
+      ],
+      "included_count": 11,
+      "local_case_count": 11,
+      "missing_attempt_indices": [],
+      "missing_count": 0
+    },
+    "body_replay_performed": false,
+    "full_attempt_coverage_established": false,
+    "new_publication": {
+      "candidate_coverage_complete": true,
+      "candidate_issues": [],
+      "candidate_totals": {
+        "direct_candidate_pairs_examined": 2683,
+        "direct_candidate_pairs_remaining": 0,
+        "direct_candidate_pairs_total": 2683,
+        "max_candidate_pairs": 2683,
+        "max_candidate_pairs_per_shard": 64,
+        "max_selected_calls_per_shard": 32,
+        "selected_calls": 2683,
+        "shards": 84,
+        "windows": 84
+      },
+      "manifest_path": "/home/zyf/AAA/scar-worktrees/retained-call-abi11/artifacts/analysis/source_call_port_all_20261027_abi11/publication/manifest.json",
+      "manifest_sha256": "32b84dae11ae3d1e5a0b7b7c9dc4461def8dc59ae8c8e8b2ad31c80cc1667afe",
+      "readback": {
+        "bindings_read": 2683,
+        "normal_reader_seconds": 16.09074714500457,
+        "shard_decoded_bytes": 63875141,
+        "shard_stored_bytes": 2572965,
+        "shards_read": 84
+      }
+    },
+    "old_publication": {
+      "manifest_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/analysis/source_call_port_all_20261027/publication/manifest.json",
+      "manifest_sha256": "867a8fa08f97977ccf8aba2add85cd2544691f8aff1c61bcc685dc61160bfb8d",
+      "readback": {
+        "bindings_read": 2672,
+        "normal_reader_seconds": 16.703311898978427,
+        "shard_decoded_bytes": 63716703,
+        "shard_stored_bytes": 2566781,
+        "shards_read": 84
+      }
+    },
+    "prior_binding_preservation": {
+      "changed_attempt_indices": [],
+      "changed_binding_count": 0,
+      "missing_attempt_count": 0,
+      "missing_attempt_indices": [],
+      "old_binding_count": 2672
+    },
+    "schema": "scar.source-call-port-publication-reconcile",
+    "schema_version": 1,
+    "status": "PASS_ALL_SHARD_READBACK_AND_PRIOR_PRESERVATION",
+    "whole_program_complete": false
+  },
+  "producer_commit": "f2c1056ba5132aabc53d63880cb0c951a29af376",
+  "producer_source_sha256": "fa67dffa773f06752fb15327d2149a21d2ed729b6f3ba2d288735e39bf007554",
+  "publication": {
+    "attempt_coverage_established": false,
+    "candidate_funnel": {
+      "attempts_in_process": 100550,
+      "direct_body_linked_candidates": 2683,
+      "missing_or_ambiguous_entry_handshake": 96481,
+      "source_body_not_linked_in_retained_catalog": 1386
+    },
+    "candidate_issues": [],
+    "candidate_scope": {
+      "bounded_candidate_limit": 2683,
+      "candidate_limit_is_complete": true,
+      "next_candidate_ordinal": 2683,
+      "remaining_candidate_attempt_index_range": null,
+      "remaining_direct_candidates_total": 0,
+      "remaining_outside_session_candidate_bound": 0,
+      "total_direct_body_linked_candidates": 2683
+    },
+    "capture_denominators": {
+      "attempts": 100550,
+      "code_captures": 855,
+      "frame_entries": 100438,
+      "frame_exits": 100438,
+      "handshakes": 4069,
+      "operand_events": 312812,
+      "operand_gaps": 945,
+      "operand_instructions": 207248
+    },
+    "compressed_shard_bytes": 2572965,
+    "compressed_shard_count": 84,
+    "decoded_shard_bytes": 63875141,
+    "manifest": "/home/zyf/AAA/scar-worktrees/retained-call-abi11/artifacts/analysis/source_call_port_all_20261027_abi11/publication/manifest.json",
+    "manifest_bytes": 749531,
+    "manifest_sha256": "32b84dae11ae3d1e5a0b7b7c9dc4461def8dc59ae8c8e8b2ad31c80cc1667afe",
+    "totals": {
+      "direct_candidate_pairs_examined": 2683,
+      "direct_candidate_pairs_remaining": 0,
+      "direct_candidate_pairs_total": 2683,
+      "max_candidate_pairs": 2683,
+      "max_candidate_pairs_per_shard": 64,
+      "max_selected_calls_per_shard": 32,
+      "selected_calls": 2683,
+      "shards": 84,
+      "windows": 84
+    },
+    "whole_program_complete": false
+  },
+  "schema": "scar.actual-source-call-port-publication-result",
+  "schema_version": 1,
+  "status": "ALL_DIRECT_CANDIDATES_SCANNED"
+}

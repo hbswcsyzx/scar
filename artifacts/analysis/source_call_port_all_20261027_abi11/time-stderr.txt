@@ -1,0 +1,23 @@
+	Command being timed: "/home/zyf/miniconda3/envs/lewm/bin/python -B -m scar.cli build-source-port-shards --source-report /home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/analysis/source_entry_full_binding_20261026/actual_201/report.json --source-report-sha256 88e0ad71244ba59a455eb8bcd3a369fbe579e7c2e95bb3498d123bd4a965aa6f --bindings /home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/analysis/source_entry_full_binding_20261026/actual_201/bindings.json --bindings-sha256 096c5a53213bae9f480ba813c240a277220ce6ac636390c0edff3bde9a91f449 --all-candidates --out artifacts/analysis/source_call_port_all_20261027_abi11/publication"
+	User time (seconds): 143.39
+	System time (seconds): 1.39
+	Percent of CPU this job got: 99%
+	Elapsed (wall clock) time (h:mm:ss or m:ss): 2:25.14
+	Average shared text size (kbytes): 0
+	Average unshared data size (kbytes): 0
+	Average stack size (kbytes): 0
+	Average total size (kbytes): 0
+	Maximum resident set size (kbytes): 1029036
+	Average resident set size (kbytes): 0
+	Major (requiring I/O) page faults: 0
+	Minor (reclaiming a frame) page faults: 366519
+	Voluntary context switches: 1
+	Involuntary context switches: 53230
+	Swaps: 0
+	File system inputs: 0
+	File system outputs: 6760
+	Socket messages sent: 0
+	Socket messages received: 0
+	Signals delivered: 0
+	Page size (bytes): 4096
+	Exit status: 0
