@@ -1,0 +1,61 @@
+{
+  "artifacts": [
+    {
+      "bytes": 2361,
+      "path": "/home/zyf/AAA/scar-worktrees/stream-backing-observations/artifacts/analysis/stream_backing_observations_20261027/ORIGINAL_JOINT03_VERIFICATION.json",
+      "sha256": "d79ecee8355a26d9d8f5be8d6a889fc5509b609b31ed757860f5f484eca18bde"
+    },
+    {
+      "bytes": 1395,
+      "path": "/home/zyf/AAA/scar-worktrees/stream-backing-observations/artifacts/analysis/stream_backing_observations_20261027/ORIGINAL_STREAM_EVENTS.jsonl.gz",
+      "sha256": "7ff044bb6d59063555c51f2ce7a940f7aa0c82de26b6f39fd38a235cbec4a7ce"
+    },
+    {
+      "bytes": 2952,
+      "path": "/home/zyf/AAA/scar-worktrees/stream-backing-observations/artifacts/analysis/stream_backing_observations_20261027/ORIGINAL_STREAM_META.json",
+      "sha256": "3891db10c334efe8fa8c9e2446f368c19c07157c815098c63135fe54211e7da9"
+    },
+    {
+      "bytes": 1280,
+      "path": "/home/zyf/AAA/scar-worktrees/stream-backing-observations/artifacts/analysis/stream_backing_observations_20261027/PREPARATION.json",
+      "sha256": "73eb9c24af39dbf92b007c5949828f4825fad76272cfcb6d6547cc246f076238"
+    },
+    {
+      "bytes": 656,
+      "path": "/home/zyf/AAA/scar-worktrees/stream-backing-observations/artifacts/analysis/stream_backing_observations_20261027/PRODUCER_SOURCE_MATCH.json",
+      "sha256": "05357653d070363f12c41c6969fddf9db002853886c8bd3d94a02f3f7240d03b"
+    },
+    {
+      "bytes": 6467,
+      "path": "/home/zyf/AAA/scar-worktrees/stream-backing-observations/artifacts/analysis/stream_backing_observations_20261027/PRODUCTION.diff.gz",
+      "sha256": "bc9599ba2e696bfac432efa5aecbac703755e27090041ae0b04513369902cde0"
+    },
+    {
+      "bytes": 19708,
+      "path": "/home/zyf/AAA/scar-worktrees/stream-backing-observations/artifacts/analysis/stream_backing_observations_20261027/READBACK.json",
+      "sha256": "81bd8f293f4cfaa088728815ceb6a3563e0d119477090fa26a5c7faf5d8111c6"
+    },
+    {
+      "bytes": 4733,
+      "path": "/home/zyf/AAA/scar-worktrees/stream-backing-observations/artifacts/analysis/stream_backing_observations_20261027/REPORT.md",
+      "sha256": "0b1e60c3a4540c6a07ea9ae7b5f917feb33c96cb2b7fe8926301193fb8628f20"
+    },
+    {
+      "bytes": 0,
+      "path": "/home/zyf/AAA/scar-worktrees/stream-backing-observations/artifacts/analysis/stream_backing_observations_20261027/normal-reader-stderr.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 1099,
+      "path": "/home/zyf/AAA/scar-worktrees/stream-backing-observations/artifacts/analysis/stream_backing_observations_20261027/normal-reader-stdout.txt",
+      "sha256": "38c479db8445726e766da528153fbedbb7c07130b14964ddaea01564be5f8eae"
+    },
+    {
+      "bytes": 3863,
+      "path": "/home/zyf/AAA/scar-worktrees/stream-backing-observations/artifacts/analysis/stream_backing_observations_20261027/read_once.py",
+      "sha256": "6d318c42c28cb5f35cfaf367cf6b34c2eb6c5c441c0af7a96437b1175f7d30e9"
+    }
+  ],
+  "original_logical_uris_preserved": true,
+  "second_capture": false
+}

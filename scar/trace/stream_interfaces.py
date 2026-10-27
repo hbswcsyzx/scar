@@ -2,7 +2,9 @@
 
 This optional channel attaches resource/effect interfaces to existing CALL
 attempts. It reads no stream contents, descriptor table, cursor, or file name;
-it never calls fileno/tell/flush on behalf of the program. C_RETURN is language
+the historical profile never calls fileno/tell/flush on behalf of the program.
+An explicit backing profile probes only saved builtin FileIO fileno plus fstat.
+C_RETURN is language
 completion only, not byte count, visibility, persistence or GPU readiness.
 """
 from __future__ import annotations
@@ -21,6 +23,7 @@ from scar.ir.program.call_edges import CapturedSite, InvocationKey
 from scar.ir.record_codec import decode, encode
 
 PROFILE = 'SCAR_BUILTIN_STREAM_INTERFACES_V1'
+BACKING_PROFILE = 'SCAR_BUILTIN_STREAM_BACKING_OBSERVATIONS_V1'
 SCHEMA = 'scar.stream-interface-collection'
 _TYPES = {io.BytesIO: 'MEMORY_BYTES', io.StringIO: 'MEMORY_TEXT',
           io.FileIO: 'DESCRIPTOR_STREAM', io.BufferedReader: 'BUFFERED_STREAM',
@@ -77,11 +80,11 @@ def _receiver(target, arg0, missing):
     """Recognize the actual C target and receiver; invoke no user getter."""
     if type(target) is types.MethodDescriptorType:
         receiver = None if missing else arg0
-        if type(receiver) in _DESCRIPTORS.get(target, ()):
+        if any(type(receiver) is cls for cls in _DESCRIPTORS.get(target, ())):
             return receiver, target.__name__
     elif type(target) is types.BuiltinFunctionType:
         receiver, name = target.__self__, target.__name__
-        if type(receiver) in _TYPES and name in _NAMES:
+        if any(type(receiver) is cls for cls in _TYPES) and name in _NAMES:
             descriptor = inspect.getattr_static(type(receiver), name, None)
             if (descriptor in _DESCRIPTORS
                     and target.__qualname__ == descriptor.__qualname__):
@@ -91,7 +94,17 @@ def _receiver(target, arg0, missing):
 
 class StreamInterfaceObserver:
     """Small optional sibling channel; canonical calls keep their original IDs."""
-    def __init__(self, operand):
+    def __init__(self, operand, *, backing_observations=None):
+        if backing_observations is None:
+            selection=os.environ.get('SCAR_STREAM_BACKING_OBSERVATIONS','0')
+            if selection not in ('0','1'):
+                raise ValueError('SCAR_STREAM_BACKING_OBSERVATIONS must be 0 or 1')
+            backing_observations=selection=='1'
+        if type(backing_observations) is not bool:
+            raise TypeError('stream backing observations must be an explicit bool')
+        self.backing_observations=backing_observations
+        from scar.trace.stream_backing import BackingStatus
+        self.backing_counts={status.value:0 for status in BackingStatus} if backing_observations else None
         self.operand, self.recorder = operand, operand.recorder
         self.path = self.recorder.out / f'stream-interfaces.{self.recorder.pid}.jsonl'
         self.meta = self.recorder.out / f'stream-interface-meta.{self.recorder.pid}.json'
@@ -148,9 +161,15 @@ class StreamInterfaceObserver:
                 'contract': encode(stream_contract(name)),
                 'reference_identity_qualified': token.startswith('weak:'),
                 'arguments_and_results_observed': False, 'backing_resource_identity_established': False}
+            if self.backing_observations:
+                from scar.trace.stream_backing import observe_stream_backing
+                observation=observe_stream_backing(receiver)
+                row['backing_observation']=encode(observation)
             # Retain normalized IDs and metadata only, never receiver/target/frame.
             self._emit('BEGIN', row)
             if not self.stopped:
+                if self.backing_observations:
+                    self.backing_counts[observation.status.value]+=1
                 self.pending[key] = (id(target), row)
         except Exception as error:
             self.errors.append(type(error).__name__)
@@ -195,6 +214,8 @@ class StreamInterfaceObserver:
                 'scope': 'exact builtin stream calls at retained CALL sites; unplanned interiors and implicit IO unexpanded',
                 'tensor_or_stream_contents_read': False, 'file_descriptor_table_replayed': False,
                 'source_body_or_content_proof_established': False}
+            if self.backing_observations:
+                document.update(schema_version=2,profile=BACKING_PROFILE,backing_counts=self.backing_counts)
             with self.meta.open('x', encoding='utf-8') as stream:
                 json.dump(document, stream, ensure_ascii=True, indent=2, allow_nan=False)
                 stream.write('\n')
@@ -212,7 +233,9 @@ def read_stream_interfaces(metadata, *, expected_sha256, max_bytes=64_000_000):
     if len(raw) > 2_000_000 or sha256(raw).hexdigest() != expected_sha256:
         raise ValueError('stream metadata size/hash differs')
     doc = json.loads(raw)
-    if doc.get('schema') != SCHEMA or doc.get('schema_version') != 1 or doc.get('profile') != PROFILE:
+    backing=doc.get('schema_version')==2 and doc.get('profile')==BACKING_PROFILE
+    if (doc.get('schema') != SCHEMA or type(doc.get('schema_version')) is not int
+            or not (backing or doc.get('schema_version')==1 and doc.get('profile')==PROFILE)):
         raise ValueError('unsupported stream interface metadata')
     ref = doc['file']
     if ref['uri'] != str(path.parent / f"stream-interfaces.{doc['process_id']}.jsonl"):
@@ -231,6 +254,27 @@ def read_stream_interfaces(metadata, *, expected_sha256, max_bytes=64_000_000):
         raise ValueError('stream event sequence differs')
     if dict(Counter(row['kind'] for row in rows)) != {k: v for k, v in doc['counts'].items() if v}:
         raise ValueError('stream event kinds/counts differ from closed metadata')
+    if backing:
+        from scar.trace.stream_backing import StreamBackingObservation,BackingStatus
+        declared=doc.get('backing_counts')
+        if (type(declared) is not dict or set(declared)!={status.value for status in BackingStatus}
+                or any(type(n) is not int or n<0 for n in declared.values())
+                or sum(declared.values())!=doc['counts']['BEGIN']):
+            raise ValueError('stream backing counts differ')
+        observations={}
+        for row in rows:
+            if row['kind']=='BEGIN':
+                actual=decode(StreamBackingObservation,row['backing_observation'])
+                if actual.chain_types[0]!=row['receiver_type']:
+                    raise ValueError('stream backing receiver differs from original BEGIN')
+                observations[row['sequence']]=actual
+            elif 'backing_observation' in row:
+                raise ValueError('stream backing observation is not at original BEGIN')
+        counted=Counter(actual.status.value for actual in observations.values())
+        if any(counted[status]!=n for status,n in declared.items()):
+            raise ValueError('stream backing status/count differs from actual records')
+    elif 'backing_counts' in doc or any('backing_observation' in row for row in rows):
+        raise ValueError('historical stream profile cannot contain backing observations')
     calls = {row['attempt_index']: row for row in rows if row['kind'] == 'BEGIN'}
     if len(calls) != doc['counts']['BEGIN']:
         raise ValueError('duplicate stream BEGIN or count mismatch')
@@ -264,10 +308,18 @@ def read_stream_interfaces(metadata, *, expected_sha256, max_bytes=64_000_000):
         if any(row[k] != calls[index][k] for k in ('invocation', 'receiver_reference')):
             raise ValueError('stream completion receiver/invocation differs')
         completed[index] = row['kind']
-    return {'schema': 'scar.stream-interface-query', 'schema_version': 1,
+    if backing:
+        from scar.ir.program.providers import ProviderArtifact,ProviderFactReference
+        artifact=ProviderArtifact(ref['uri'],ref['sha256'],ref['size_bytes'],'scar.stream-interfaces.events.v2')
+        calls={index:{**row,'backing_source':encode(ProviderFactReference(artifact,
+            '#/lines/'+str(row['sequence'])+'/backing_observation'))}for index,row in calls.items()}
+    result = {'schema': 'scar.stream-interface-query', 'schema_version': 2 if backing else 1,
         'metadata': {'uri': str(path), 'sha256': expected_sha256}, 'counts': doc['counts'],
         'errors': doc['errors'], 'stopped': doc['stopped'],
         'calls': [{**call, 'attempt_source': verified[index], 'completion': completed.get(index, 'UNOBSERVED')}
                   for index, call in calls.items()],
         'qualification': 'RETAINED_CALL_RESOURCE_AND_DECLARED_STREAM_EFFECT_INTERFACE',
         'effect_implementation_or_contents_proved': False, 'whole_model_established': False}
+    if backing:
+        result['backing_counts']=doc['backing_counts']
+    return result

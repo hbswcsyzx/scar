@@ -1,0 +1,32 @@
+{
+  "actual_validation": "await the single shared source_revision_current CPU file+pipe session; no independent second capture",
+  "base_commit": "18be4ffd32b0f8232066afb0237a1d128bd21c4e",
+  "own_capture_not_started": true,
+  "reference_report": {
+    "blob_oid": "e8ddd241b5210db89dbbbc54d420f6e4cf4417c5",
+    "bytes": 2361,
+    "git_commit": "18be4ffd",
+    "git_path": "artifacts/experiments/stream_interfaces_main_20261026/joint03/verification.json",
+    "sha256": "d79ecee8355a26d9d8f5be8d6a889fc5509b609b31ed757860f5f484eca18bde"
+  },
+  "source_files": [
+    {
+      "base_sha256": "d0d72aa49cee18ca606c2fcf0d7a54b96738370f0021ae0fe6af5ee80ceca25d",
+      "bytes": 17224,
+      "path": "scar/trace/stream_interfaces.py",
+      "sha256": "4eb68e4aa4f6e44229cb79678bc1353e13474cd25a9dfc7863e6ede230701792"
+    },
+    {
+      "base_sha256": null,
+      "bytes": 6328,
+      "path": "scar/trace/stream_backing.py",
+      "sha256": "0c6adac2dfed167aea96b14e8e8d66dd05bef42aadfacf49abef191cde37a79b"
+    },
+    {
+      "base_sha256": "d007890d44b9387dfdc7fb0e9c5cec956c5a64ae0adc0a39081292cf354b2325",
+      "bytes": 25936,
+      "path": "scar/analysis/source_stream_interfaces.py",
+      "sha256": "54fab61449b90e11a1517e3883cb8ce657508ad233b4777b716e17bd21dcbf1c"
+    }
+  ]
+}
