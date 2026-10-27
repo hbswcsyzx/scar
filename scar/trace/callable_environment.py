@@ -21,7 +21,7 @@ import types
 import weakref
 
 from scar.ir.program.environments import EnvironmentRole
-from scar.trace.code_snapshot import describe_code
+from scar.trace.code_snapshot import code_key as captured_code_key
 
 
 _MAX_LINE_BYTES = 2_000_000
@@ -305,7 +305,7 @@ class CallableEnvironmentObserver:
                 if type(code_key) is not str or re.fullmatch(r"pycode-v2:[0-9a-f]{64}", code_key) is None:
                     return self._gap("INVALID_DISPATCH_CODE", attempt_index, invocation, frame_index)
                 code = function.__code__
-                if describe_code(code)["key"] != code_key:
+                if captured_code_key(code) != code_key:
                     return self._gap("DISPATCH_CODE_CHANGED", attempt_index, invocation, frame_index)
                 names, closure = code.co_freevars, function.__closure__
                 if (type(names) is not tuple or any(type(name) is not str for name in names)

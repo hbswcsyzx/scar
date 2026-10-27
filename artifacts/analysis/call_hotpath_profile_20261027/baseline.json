@@ -1,0 +1,462 @@
+{
+  "base": "75ee9dcf",
+  "python": "3.14.7 | packaged by conda-forge | (main, Sep  2 2026, 21:08:32) [GCC 15.3.0]",
+  "count": 5000,
+  "scope": "actual metadata methods; no installed hooks or run attribution",
+  "before": {
+    "elapsed_seconds": 2.7749855080037378,
+    "result": {
+      "target_sha256": "e2dc21f2980d3db350fb958793824f05d059421d4f8f0785ffff9bb3eee0c036",
+      "environment_sha256": "eda35c2a0e2cc28f40e18ea8f40fe7a15f6e4a76d3517b9aa4e1d9882d29d4e8",
+      "shape_sha256": "27113c2180bb1de62cfbaf5df6c75eadd057cb0807c81d3a64667557b53d0d19",
+      "target_rows": 5000,
+      "environment_rows": 10000,
+      "target_bytes": 2958163,
+      "environment_bytes": 7192801,
+      "environment_gaps": 0,
+      "checksum": 12497500
+    },
+    "functions": [
+      {
+        "file": "/home/zyf/AAA/scar-worktrees/call-hotpath-profile/scar/trace/python_call_targets.py",
+        "line": 66,
+        "function": "on_call",
+        "calls": 5000,
+        "own_seconds": 0.090971244,
+        "cumulative_seconds": 1.5696549110000002
+      },
+      {
+        "file": "/home/zyf/AAA/scar-worktrees/call-hotpath-profile/scar/trace/python_call_targets.py",
+        "line": 35,
+        "function": "emit",
+        "calls": 5000,
+        "own_seconds": 0.038174337,
+        "cumulative_seconds": 1.0012985570000001
+      },
+      {
+        "file": "/home/zyf/AAA/scar-worktrees/call-hotpath-profile/scar/ir/program/python_call_targets.py",
+        "line": 128,
+        "function": "target_record",
+        "calls": 5000,
+        "own_seconds": 0.011283319,
+        "cumulative_seconds": 0.8207534820000001
+      },
+      {
+        "file": "/home/zyf/AAA/scar-worktrees/call-hotpath-profile/scar/ir/record_codec.py",
+        "line": 44,
+        "function": "encode",
+        "calls": 7502,
+        "own_seconds": 0.009702514,
+        "cumulative_seconds": 0.746437478
+      },
+      {
+        "file": "/home/zyf/AAA/scar-worktrees/call-hotpath-profile/scar/ir/record_codec.py",
+        "line": 53,
+        "function": "_encode",
+        "calls": 134175,
+        "own_seconds": 0.361040209,
+        "cumulative_seconds": 0.734686409
+      },
+      {
+        "file": "/home/zyf/AAA/scar-worktrees/call-hotpath-profile/scar/trace/callable_environment.py",
+        "line": 295,
+        "function": "dispatch",
+        "calls": 5000,
+        "own_seconds": 0.14662528500000002,
+        "cumulative_seconds": 0.6452629000000001
+      },
+      {
+        "file": "/home/zyf/AAA/scar-worktrees/call-hotpath-profile/scar/ir/program/python_call_targets.py",
+        "line": 75,
+        "function": "__post_init__",
+        "calls": 10000,
+        "own_seconds": 0.058413598000000004,
+        "cumulative_seconds": 0.406704656
+      },
+      {
+        "file": "/home/zyf/AAA/scar-worktrees/call-hotpath-profile/scar/trace/callable_environment.py",
+        "line": 149,
+        "function": "_emit",
+        "calls": 10000,
+        "own_seconds": 0.08327988900000001,
+        "cumulative_seconds": 0.354853103
+      },
+      {
+        "file": "/home/zyf/AAA/scar-worktrees/call-hotpath-profile/scar/trace/call_operands.py",
+        "line": 694,
+        "function": "_shape",
+        "calls": 5000,
+        "own_seconds": 0.021654913,
+        "cumulative_seconds": 0.206472802
+      },
+      {
+        "file": "/home/zyf/AAA/scar-worktrees/call-hotpath-profile/scar/ir/program/call_operands.py",
+        "line": 102,
+        "function": "__post_init__",
+        "calls": 10001,
+        "own_seconds": 0.075378894,
+        "cumulative_seconds": 0.179640811
+      },
+      {
+        "file": "/home/zyf/AAA/scar-worktrees/call-hotpath-profile/scar/trace/callable_environment.py",
+        "line": 377,
+        "function": "entry",
+        "calls": 5000,
+        "own_seconds": 0.034081673,
+        "cumulative_seconds": 0.17767775600000002
+      },
+      {
+        "file": "/home/zyf/AAA/scar-worktrees/call-hotpath-profile/scar/ir/program/call_operands.py",
+        "line": 37,
+        "function": "_reference",
+        "calls": 30002,
+        "own_seconds": 0.034639055,
+        "cumulative_seconds": 0.13060580000000002
+      },
+      {
+        "file": "/home/zyf/AAA/scar-worktrees/call-hotpath-profile/scar/trace/code_snapshot.py",
+        "line": 171,
+        "function": "_key_record",
+        "calls": 17504,
+        "own_seconds": 0.047898811000000006,
+        "cumulative_seconds": 0.075928385
+      },
+      {
+        "file": "/home/zyf/AAA/scar-worktrees/call-hotpath-profile/scar/trace/callable_environment.py",
+        "line": 230,
+        "function": "_anchored_reference",
+        "calls": 10000,
+        "own_seconds": 0.048575668,
+        "cumulative_seconds": 0.067988197
+      },
+      {
+        "file": "/home/zyf/AAA/scar-worktrees/call-hotpath-profile/scar/trace/call_operands.py",
+        "line": 81,
+        "function": "_layout",
+        "calls": 7500,
+        "own_seconds": 0.023450572000000003,
+        "cumulative_seconds": 0.063345945
+      },
+      {
+        "file": "/home/zyf/AAA/scar-worktrees/call-hotpath-profile/scar/ir/program/python_call_targets.py",
+        "line": 54,
+        "function": "__post_init__",
+        "calls": 10002,
+        "own_seconds": 0.016725956,
+        "cumulative_seconds": 0.062544955
+      },
+      {
+        "file": "/home/zyf/AAA/scar-worktrees/call-hotpath-profile/scar/ir/program/call_operands.py",
+        "line": 24,
+        "function": "_integer",
+        "calls": 40004,
+        "own_seconds": 0.039593457000000006,
+        "cumulative_seconds": 0.045392321
+      },
+      {
+        "file": "/home/zyf/AAA/scar-worktrees/call-hotpath-profile/scar/trace/code_snapshot.py",
+        "line": 213,
+        "function": "code_key",
+        "calls": 7501,
+        "own_seconds": 0.007837041000000001,
+        "cumulative_seconds": 0.044365987
+      },
+      {
+        "file": "/home/zyf/AAA/scar-worktrees/call-hotpath-profile/scar/trace/callable_environment.py",
+        "line": 290,
+        "function": "_member",
+        "calls": 25000,
+        "own_seconds": 0.024245472,
+        "cumulative_seconds": 0.042750545
+      },
+      {
+        "file": "/home/zyf/AAA/scar-worktrees/call-hotpath-profile/scar/trace/code_snapshot.py",
+        "line": 315,
+        "function": "describe_code",
+        "calls": 5000,
+        "own_seconds": 0.011326743,
+        "cumulative_seconds": 0.036594480000000006
+      },
+      {
+        "file": "/home/zyf/AAA/scar-worktrees/call-hotpath-profile/scar/ir/program/call_edges.py",
+        "line": 49,
+        "function": "__post_init__",
+        "calls": 15000,
+        "own_seconds": 0.019969083000000002,
+        "cumulative_seconds": 0.035522001000000004
+      },
+      {
+        "file": "/home/zyf/AAA/scar-worktrees/call-hotpath-profile/scar/ir/program/call_operands.py",
+        "line": 43,
+        "function": "_tuple",
+        "calls": 10001,
+        "own_seconds": 0.024752157,
+        "cumulative_seconds": 0.035060131
+      },
+      {
+        "file": "/home/zyf/AAA/scar-worktrees/call-hotpath-profile/scar/trace/callable_environment.py",
+        "line": 133,
+        "function": "_live",
+        "calls": 20000,
+        "own_seconds": 0.016961297,
+        "cumulative_seconds": 0.035059048
+      },
+      {
+        "file": "/home/zyf/AAA/scar-worktrees/call-hotpath-profile/scar/trace/callable_environment.py",
+        "line": 330,
+        "function": "snapshot",
+        "calls": 10000,
+        "own_seconds": 0.024270413,
+        "cumulative_seconds": 0.028999463000000003
+      },
+      {
+        "file": "/home/zyf/AAA/scar-worktrees/call-hotpath-profile/scar/trace/callable_environment.py",
+        "line": 128,
+        "function": "_flush",
+        "calls": 111,
+        "own_seconds": 0.000242866,
+        "cumulative_seconds": 0.028478452
+      },
+      {
+        "file": "/home/zyf/AAA/scar-worktrees/call-hotpath-profile/scar/trace/callable_environment.py",
+        "line": 118,
+        "function": "_write_all",
+        "calls": 111,
+        "own_seconds": 0.0017311730000000001,
+        "cumulative_seconds": 0.028154373000000003
+      },
+      {
+        "file": "/home/zyf/AAA/scar-worktrees/call-hotpath-profile/scar/trace/code_snapshot.py",
+        "line": 280,
+        "function": "_record",
+        "calls": 5000,
+        "own_seconds": 0.016386986000000003,
+        "cumulative_seconds": 0.025267737000000002
+      },
+      {
+        "file": "/home/zyf/AAA/scar-worktrees/call-hotpath-profile/scar/trace/code_snapshot.py",
+        "line": 244,
+        "function": "call_instruction",
+        "calls": 2500,
+        "own_seconds": 0.0124802,
+        "cumulative_seconds": 0.024499266000000002
+      },
+      {
+        "file": "/home/zyf/AAA/scar-worktrees/call-hotpath-profile/scar/ir/program/call_operands.py",
+        "line": 19,
+        "function": "_require",
+        "calls": 110010,
+        "own_seconds": 0.016226702000000003,
+        "cumulative_seconds": 0.016226702000000003
+      },
+      {
+        "file": "/home/zyf/AAA/scar-worktrees/call-hotpath-profile/scar/ir/program/call_edges.py",
+        "line": 15,
+        "function": "_integer",
+        "calls": 45000,
+        "own_seconds": 0.015552918,
+        "cumulative_seconds": 0.015552918
+      },
+      {
+        "file": "/home/zyf/AAA/scar-worktrees/call-hotpath-profile/scar/trace/python_call_targets.py",
+        "line": 60,
+        "function": "select_code",
+        "calls": 5000,
+        "own_seconds": 0.0037879100000000002,
+        "cumulative_seconds": 0.014591692000000002
+      },
+      {
+        "file": "/home/zyf/AAA/scar-worktrees/call-hotpath-profile/scar/trace/python_call_targets.py",
+        "line": 58,
+        "function": "observed_code",
+        "calls": 5000,
+        "own_seconds": 0.007079951,
+        "cumulative_seconds": 0.010802906000000001
+      },
+      {
+        "file": "/home/zyf/AAA/scar-worktrees/call-hotpath-profile/scar/ir/program/call_operands.py",
+        "line": 44,
+        "function": "<genexpr>",
+        "calls": 30003,
+        "own_seconds": 0.008868917,
+        "cumulative_seconds": 0.008868917
+      },
+      {
+        "file": "/home/zyf/AAA/scar-worktrees/call-hotpath-profile/scar/trace/callable_environment.py",
+        "line": 204,
+        "function": "_owned",
+        "calls": 9998,
+        "own_seconds": 0.00523777,
+        "cumulative_seconds": 0.00523777
+      },
+      {
+        "file": "/home/zyf/AAA/scar-worktrees/call-hotpath-profile/scar/trace/python_call_targets.py",
+        "line": 55,
+        "function": "_flush",
+        "calls": 46,
+        "own_seconds": 9.9906e-05,
+        "cumulative_seconds": 0.0028483280000000002
+      },
+      {
+        "file": "/home/zyf/AAA/scar-worktrees/call-hotpath-profile/scar/trace/python_call_targets.py",
+        "line": 48,
+        "function": "_write_all",
+        "calls": 46,
+        "own_seconds": 0.0006070380000000001,
+        "cumulative_seconds": 0.002704937
+      },
+      {
+        "file": "/home/zyf/AAA/scar-worktrees/call-hotpath-profile/scar/ir/record_codec.py",
+        "line": 21,
+        "function": "_record_tags",
+        "calls": 7502,
+        "own_seconds": 0.002048555,
+        "cumulative_seconds": 0.002048555
+      },
+      {
+        "file": "/home/zyf/AAA/scar-worktrees/call-hotpath-profile/scar/trace/callable_environment.py",
+        "line": 62,
+        "function": "__init__",
+        "calls": 1,
+        "own_seconds": 4.1232e-05,
+        "cumulative_seconds": 0.001480311
+      },
+      {
+        "file": "/home/zyf/AAA/scar-worktrees/call-hotpath-profile/scar/trace/callable_environment.py",
+        "line": 311,
+        "function": "<genexpr>",
+        "calls": 5000,
+        "own_seconds": 0.001319847,
+        "cumulative_seconds": 0.001319847
+      },
+      {
+        "file": "/home/zyf/AAA/scar-worktrees/call-hotpath-profile/scar/trace/callable_environment.py",
+        "line": 314,
+        "function": "<genexpr>",
+        "calls": 5000,
+        "own_seconds": 0.001035602,
+        "cumulative_seconds": 0.001035602
+      },
+      {
+        "file": "/home/zyf/AAA/scar-worktrees/call-hotpath-profile/scar/trace/code_snapshot.py",
+        "line": 55,
+        "function": "encode",
+        "calls": 80,
+        "own_seconds": 0.000215404,
+        "cumulative_seconds": 0.00060813
+      },
+      {
+        "file": "/home/zyf/AAA/scar-worktrees/call-hotpath-profile/scar/trace/python_call_targets.py",
+        "line": 146,
+        "function": "close",
+        "calls": 1,
+        "own_seconds": 3.846e-05,
+        "cumulative_seconds": 0.000549972
+      },
+      {
+        "file": "/home/zyf/AAA/scar-worktrees/call-hotpath-profile/scar/trace/code_snapshot.py",
+        "line": 328,
+        "function": "site",
+        "calls": 1,
+        "own_seconds": 1.9165e-05,
+        "cumulative_seconds": 0.000412297
+      },
+      {
+        "file": "/home/zyf/AAA/scar-worktrees/call-hotpath-profile/scar/trace/callable_environment.py",
+        "line": 406,
+        "function": "close",
+        "calls": 1,
+        "own_seconds": 3.9134e-05,
+        "cumulative_seconds": 0.00033217800000000003
+      },
+      {
+        "file": "/home/zyf/AAA/scar-worktrees/call-hotpath-profile/scar/ir/program/source_call_bindings.py",
+        "line": 18,
+        "function": "_need",
+        "calls": 1668,
+        "own_seconds": 0.000300822,
+        "cumulative_seconds": 0.000300822
+      },
+      {
+        "file": "/home/zyf/AAA/scar-worktrees/call-hotpath-profile/scar/trace/code_snapshot.py",
+        "line": 46,
+        "function": "write",
+        "calls": 228,
+        "own_seconds": 0.000170957,
+        "cumulative_seconds": 0.00027389900000000003
+      },
+      {
+        "file": "/home/zyf/AAA/scar-worktrees/call-hotpath-profile/scar/trace/code_snapshot.py",
+        "line": 52,
+        "function": "length",
+        "calls": 79,
+        "own_seconds": 4.9977000000000006e-05,
+        "cumulative_seconds": 0.000164036
+      },
+      {
+        "file": "/home/zyf/AAA/scar-worktrees/call-hotpath-profile/scar/trace/python_call_targets.py",
+        "line": 23,
+        "function": "__init__",
+        "calls": 1,
+        "own_seconds": 1.9218e-05,
+        "cumulative_seconds": 0.000105915
+      },
+      {
+        "file": "/home/zyf/AAA/scar-worktrees/call-hotpath-profile/scar/trace/code_snapshot.py",
+        "line": 223,
+        "function": "code_parameters",
+        "calls": 1,
+        "own_seconds": 9.873e-06,
+        "cumulative_seconds": 1.6231e-05
+      },
+      {
+        "file": "/home/zyf/AAA/scar-worktrees/call-hotpath-profile/scar/trace/python_call_targets.py",
+        "line": 18,
+        "function": "__post_init__",
+        "calls": 2,
+        "own_seconds": 5.2720000000000005e-06,
+        "cumulative_seconds": 8.651e-06
+      },
+      {
+        "file": "/home/zyf/AAA/scar-worktrees/call-hotpath-profile/scar/trace/python_call_targets.py",
+        "line": 19,
+        "function": "<genexpr>",
+        "calls": 8,
+        "own_seconds": 3.379e-06,
+        "cumulative_seconds": 3.379e-06
+      },
+      {
+        "file": "/home/zyf/AAA/scar-worktrees/call-hotpath-profile/scar/trace/code_snapshot.py",
+        "line": 298,
+        "function": "<genexpr>",
+        "calls": 5,
+        "own_seconds": 2.249e-06,
+        "cumulative_seconds": 2.819e-06
+      },
+      {
+        "file": "/home/zyf/AAA/scar-worktrees/call-hotpath-profile/scar/trace/callable_environment.py",
+        "line": 53,
+        "function": "_positive",
+        "calls": 4,
+        "own_seconds": 2.717e-06,
+        "cumulative_seconds": 2.717e-06
+      },
+      {
+        "file": "/home/zyf/AAA/scar-worktrees/call-hotpath-profile/scar/trace/code_snapshot.py",
+        "line": 43,
+        "function": "__init__",
+        "calls": 2,
+        "own_seconds": 1.32e-06,
+        "cumulative_seconds": 1.32e-06
+      },
+      {
+        "file": "/home/zyf/AAA/scar-worktrees/call-hotpath-profile/scar/trace/code_snapshot.py",
+        "line": 351,
+        "function": "<genexpr>",
+        "calls": 5,
+        "own_seconds": 1.068e-06,
+        "cumulative_seconds": 1.068e-06
+      }
+    ]
+  }
+}

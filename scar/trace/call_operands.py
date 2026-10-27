@@ -100,6 +100,20 @@ def _layout(code):
     return layout
 
 
+def _layout_record(layout):
+    """Fresh wire projection of an already validated immutable FunctionLayout.
+
+    Keep the public generic codec unchanged. The CALL hot path has this exact
+    closed record type; recursively discovering its five fields every time is
+    unnecessary. No mutable dict/list or runtime association is cached.
+    """
+    if type(layout) is not FunctionLayout:
+        raise TypeError('exact FunctionLayout required')
+    return {'argcount': layout.argcount, 'posonlyargcount': layout.posonlyargcount,
+            'kwonlyargcount': layout.kwonlyargcount, 'flags': layout.flags,
+            'parameters': list(layout.parameters)}
+
+
 class CallOperandObserver:
     """One per-process monitor attached to an existing CallEdgeRecorder."""
 
@@ -698,7 +712,7 @@ class CallOperandObserver:
                 function_code = value.__code__ if observed_code is _MISSING else observed_code
                 code = code_key(function_code)
                 return {"kind": CallableKind.EXACT_FUNCTION.value, "reference": reference,
-                        "code": code, "layout": encode(_layout(function_code))}
+                        "code": code, "layout": _layout_record(_layout(function_code))}
             except BaseException:
                 deferred_gaps.append("EXACT_FUNCTION_CODE_UNAVAILABLE")
                 return {"kind": CallableKind.UNAVAILABLE.value, "reference": None,

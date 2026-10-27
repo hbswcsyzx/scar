@@ -10,6 +10,50 @@ from scar.ir.program.call_edges import InvocationKey
 from scar.ir.record_codec import encode
 from scar.trace.code_snapshot import code_key as captured_code_key,call_instruction,site
 
+
+def _invocation_record(invocation):
+    return {'process_id': invocation.process_id, 'thread_id': invocation.thread_id,
+            'invocation_id': invocation.invocation_id}
+
+
+def _target_record(kind, value):
+    """Exact V2 projection, retaining target_record's full typed validation.
+
+    Records/layouts are frozen, but mutable wire containers are always fresh.
+    This avoids generic dataclass/enum discovery on every CALL. Runtime fields
+    (including receiver/default-dependent category) still come from this event.
+    Unknown kind/type takes the ordinary public error path.
+    """
+    expected = {'TARGET': PythonCallTarget, 'ENTRY': PythonEntryBinding,
+                'GAP': PythonTargetGap}.get(kind)
+    if expected is None or type(value) is not expected:
+        return target_record(kind, value)
+    value.__post_init__()
+    if kind == 'TARGET':
+        from scar.trace.call_operands import _layout_record
+        receiver = value.receiver
+        receiver_record = None if receiver is None else {
+            'role': receiver.role.value, 'reference': receiver.reference,
+            'explicit_positional': receiver.explicit_positional,
+            'conditions': [condition.value for condition in receiver.conditions]}
+        fields = {'attempt_index': value.attempt_index,
+            'caller': _invocation_record(value.caller), 'kind': value.kind.value,
+            'callable_reference': value.callable_reference,
+            'function_reference': value.function_reference, 'code': value.code,
+            'layout': None if value.layout is None else _layout_record(value.layout),
+            'receiver': receiver_record, 'scope': value.scope.value}
+    elif kind == 'ENTRY':
+        fields = {'attempt_index': value.attempt_index,
+            'caller': _invocation_record(value.caller),
+            'callee': _invocation_record(value.callee), 'entry_index': value.entry_index,
+            'code': value.code, 'receiver_parameter_index': value.receiver_parameter_index,
+            'receiver_reference': value.receiver_reference}
+    else:
+        fields = {'attempt_index': value.attempt_index, 'reason': value.reason}
+    return {'schema': 'scar.python-call-targets', 'schema_version': 2,
+            'kind': kind, 'value': fields}
+
+
 @dataclass(frozen=True,slots=True)
 class PythonTargetBudget:
     max_records:int=100_000
@@ -34,7 +78,7 @@ class PythonTargetObserver:
         self.legacy_inputs=None
     def emit(self,kind,value):
         if self.closed or self.stopped:return
-        raw=(json.dumps(target_record(kind,value),ensure_ascii=True,separators=(',',':'),allow_nan=False)+'\n').encode('ascii')
+        raw=(json.dumps(_target_record(kind,value),ensure_ascii=True,separators=(',',':'),allow_nan=False)+'\n').encode('ascii')
         if self.records>=self.budget.max_records or self.bytes+len(raw)>self.budget.max_bytes:
             self.stopped=True;return
         try:
