@@ -14,6 +14,7 @@ import hashlib
 import inspect
 from itertools import islice
 import struct
+import sys
 import threading
 from types import CodeType
 import weakref
@@ -243,12 +244,14 @@ def code_parameters(code: CodeType) -> tuple[str, ...]:
 def call_instruction(code: CodeType, offset: int) -> tuple[str, int | None] | None:
     """Exact static instruction at a CALL site, without retaining argval/repr.
 
-    Reuse the pinned dis decoder on a cold site so EXTENDED_ARG and inline
-    CACHE boundaries retain their old interpretation. Only opcode name/oparg
-    survive; no Instruction, code constant, frame or callable is cached.
+    The fixed CPython 3.14.7 byte-only decoder retains EXTENDED_ARG and inline
+    CACHE boundaries without resolving any argval or calling application repr.
+    Only opcode name/oparg survive; no Instruction, constant or frame is cached.
     """
     if type(offset) is not int:
         raise ValueError('instruction offset must be an exact integer')
+    if sys.implementation.name != 'cpython' or sys.version_info[:3] != (3,14,7):
+        raise RuntimeError('CALL instruction metadata requires pinned CPython 3.14.7')
     record = _key_record(code)
     if len(code.co_code) // 2 > _MAX_CODE_UNITS:
         raise ValueError('code snapshot instruction budget exceeded')
@@ -256,8 +259,16 @@ def call_instruction(code: CodeType, offset: int) -> tuple[str, int | None] | No
         if offset in record.calls:
             record.calls.move_to_end(offset)
             return record.calls[offset]
-    instruction = next((i for i in dis.get_instructions(code) if i.offset == offset), None)
-    value = None if instruction is None else (instruction.opname, instruction.arg)
+    # In this pinned ABI _unpack_opargs yields (offset, start, opcode, oparg),
+    # skips inline CACHE units and assembles signed EXTENDED_ARG operands. It
+    # reads bytes only. get_instructions would also format LOAD_CONST argrepr.
+    value = None
+    for instruction_offset, _start, opcode, argument in dis._unpack_opargs(code.co_code):
+        if instruction_offset == offset:
+            value = (dis._all_opname[opcode], argument)
+            break
+        if instruction_offset > offset:
+            break
     with _CACHE_LOCK:
         if _MAX_CACHED_SITES > 0:
             record.calls[offset] = value
