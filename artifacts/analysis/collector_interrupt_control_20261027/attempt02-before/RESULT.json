@@ -1,0 +1,8 @@
+{
+  "sigint_sent": true,
+  "loop_completed": true,
+  "keyboard_interrupt_reached_program": false,
+  "only_owned_process_signalled": true,
+  "Torch_or_LeWM_imported": false,
+  "operand_errors": []
+}

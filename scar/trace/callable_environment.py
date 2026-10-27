@@ -146,7 +146,7 @@ class CallableEnvironmentObserver:
             try:
                 name = type(error).__name__
                 self._errors.append(name if type(name) is str and name else "CAPTURE_ERROR")
-            except BaseException:
+            except Exception:
                 self._errors.append("CAPTURE_ERROR")
 
     def _stop(self, reason):
@@ -192,7 +192,7 @@ class CallableEnvironmentObserver:
                     self._write_all(data)
                 else:
                     self._buffer.extend(data)
-        except BaseException as error:
+        except Exception as error:
             self._io_failed = True
             self._dropped += 1
             self._remember_error(error)
@@ -372,12 +372,12 @@ class CallableEnvironmentObserver:
                     self._dispatches[key] = (weakref.ref(function), function_ref, index)
                     self._pending_peak = max(self._pending_peak, len(self._dispatches))
                 return index
-        except BaseException as error:
+        except Exception as error:
             try:
                 with self._lock:
                     self._remember_error(error)
                     return self._gap("DISPATCH_CAPTURE_FAILED", attempt_index, invocation, frame_index)
-            except BaseException:
+            except Exception:
                 self._stop("CALLBACK_FAILURE")
                 return None
 
@@ -409,17 +409,17 @@ class CallableEnvironmentObserver:
                     "globals_match": same and function.__globals__ is frame_globals,
                     "builtins_match": same and function.__builtins__ is frame_builtins,
                     "readonly_association_checks_only": True}, references=1)
-        except BaseException as error:
+        except Exception as error:
             try:
                 with self._lock:
                     self._remember_error(error)
                     return self._gap("ENTRY_CAPTURE_FAILED", attempt_index, invocation, frame_index)
-            except BaseException:
+            except Exception:
                 self._stop("CALLBACK_FAILURE")
                 return None
 
     def close(self):
-        """Close once, publishing bounded metadata; never propagate to target."""
+        """Close once; suppress capture errors, not process-control exceptions."""
         if os.getpid() != self.pid:
             # A child must not write a parent manifest or keep its inherited FD.
             self._after_fork()
@@ -434,7 +434,7 @@ class CallableEnvironmentObserver:
                     try:
                         if not self._io_failed:
                             self._flush()
-                    except BaseException as error:
+                    except Exception as error:
                         self._io_failed = True
                         self._remember_error(error)
                         self._stop('WRITE_FAILURE')
@@ -442,13 +442,13 @@ class CallableEnvironmentObserver:
                         if self._deferred is not None:
                             try:
                                 self._deferred.close_capture()
-                            except BaseException as error:
+                            except Exception as error:
                                 self._io_failed = True
                                 self._remember_error(error)
                         self._buffer.clear()
                     try:
                         os.close(self._fd)
-                    except BaseException as error:
+                    except Exception as error:
                         self._io_failed = True
                         self._remember_error(error)
                     self._fd = None
@@ -489,7 +489,7 @@ class CallableEnvironmentObserver:
                         position += written
                 finally:
                     os.close(descriptor)
-        except BaseException as error:
+        except Exception as error:
             self._remember_error(error)
             self._stop("CLOSE_FAILURE")
 

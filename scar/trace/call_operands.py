@@ -258,7 +258,7 @@ class CallOperandObserver:
             monitoring = sys.monitoring
             if monitoring.get_tool(self.tool_id) == self.tool_name and monitoring.get_events(self.tool_id) == 0:
                 monitoring.free_tool_id(self.tool_id)
-        except BaseException:
+        except Exception:
             pass
         self.tool_id = None
 
@@ -325,7 +325,7 @@ class CallOperandObserver:
                 self._gap_count += 1
             self._references += self._row_reference_count(kind, fields)
             return index
-        except BaseException as error:
+        except Exception as error:
             self._io_failed = self._stopped = True
             self._dropped += 1
             self._remember_error(error)
@@ -383,7 +383,7 @@ class CallOperandObserver:
             return (sys.monitoring.get_tool(self.tool_id) == self.tool_name
                     and sys.monitoring.get_events(self.tool_id) == 0
                     and sys.monitoring.get_local_events(self.tool_id, code) == self._local_mask)
-        except BaseException:
+        except Exception:
             return False
 
     def _profile_setter(self, callback):
@@ -418,7 +418,7 @@ class CallOperandObserver:
         self._stopped = True
 
     def profile(self, frame, event, arg):
-        """Called by the existing profile wrapper after its frame event."""
+        """Called after the frame event; process-control exceptions propagate."""
         if self._closed:
             return
         try:
@@ -464,7 +464,7 @@ class CallOperandObserver:
                     self._on_frame_enter(frame)
                 elif event == "return":
                     self._on_frame_exit(frame)
-        except BaseException as error:
+        except Exception as error:
             if os.getpid() != self.pid:
                 return
             if self.lean_plan is not None or self.program_ports:
@@ -476,7 +476,7 @@ class CallOperandObserver:
             try:
                 with self.recorder.lock:
                     self._gap("OBSERVER_CALLBACK_FAILURE_" + type(error).__name__)
-            except BaseException:
+            except Exception:
                 pass
             self._stopped = True
 
@@ -511,7 +511,7 @@ class CallOperandObserver:
                 target, target_code = target_ref(), target_code_ref()
                 try:
                     caller_site = site(parent.f_code, parent.f_lasti)
-                except BaseException:
+                except Exception:
                     caller_site = None
                 matches = (target is not None and target_code is code and target.__code__ is code
                            and expected_code == code_key and caller_key == parent_state[1]
@@ -541,7 +541,7 @@ class CallOperandObserver:
         if self.capture == _CAPTURE_WINDOWS:
             try:
                 window_plan = self._window_plan(code, code_key)
-            except BaseException as error:
+            except Exception as error:
                 self._remember_error(error)
                 self._gap("CALL_WINDOW_PLAN_FAILED_" + type(error).__name__, invocation)
                 self._stopped = True
@@ -578,7 +578,7 @@ class CallOperandObserver:
             else:
                 sys.monitoring.set_local_events(self.tool_id, code, self._local_mask)
                 record["installed"] = True
-        except BaseException as error:
+        except Exception as error:
             self._gap("MONITORINGself._local_mask_INSTALL_FAILED_" + type(error).__name__, invocation)
             self._stopped = True
 
@@ -607,7 +607,7 @@ class CallOperandObserver:
                     self._gap("MONITORING_MASK_OR_TOOL_CHANGED_AT_FRAME_EXIT", invocation)
                     self._interfered = self._stopped = True
                     self._monitoring_interfered = True
-            except BaseException as error:
+            except Exception as error:
                 self._remember_error(error)
             return
         if entry["active"] <= 0:
@@ -622,7 +622,7 @@ class CallOperandObserver:
                     self._gap("MONITORING_MASK_OR_TOOL_CHANGED_AT_FRAME_EXIT", invocation)
                     self._interfered = self._stopped = True
                     self._monitoring_interfered = True
-            except BaseException as error:
+            except Exception as error:
                 self._remember_error(error)
 
     def _plan(self, code, code_key):
@@ -723,7 +723,7 @@ class CallOperandObserver:
                 code = code_key(function_code)
                 return {"kind": CallableKind.EXACT_FUNCTION.value, "reference": reference,
                         "code": code, "layout": _layout_record(_layout(function_code))}
-            except BaseException:
+            except Exception:
                 deferred_gaps.append("EXACT_FUNCTION_CODE_UNAVAILABLE")
                 return {"kind": CallableKind.UNAVAILABLE.value, "reference": None,
                         "code": None, "layout": None}
@@ -747,7 +747,7 @@ class CallOperandObserver:
                 identities.append((id(key), id(value)))
                 if key == name:
                     found = value
-        except BaseException:
+        except Exception:
             return None, None, "GLOBAL_NAMESPACE_LOOKUP_FAILED"
         return identities, found, None
 
@@ -775,7 +775,7 @@ class CallOperandObserver:
             return
         try:
             frame = sys._getframe(1)
-        except BaseException:
+        except Exception:
             return
         with self.recorder.lock:
             with self._lock:
@@ -879,7 +879,7 @@ class CallOperandObserver:
                                {"site": row_site, "loads": loads})
                     for reason in deferred_gaps:
                         self._gap(reason, owner, advance=False)
-                except BaseException as error:
+                except Exception as error:
                     self._remember_error(error)
                     self._gap("INSTRUCTION_CALLBACK_FAILURE_" + type(error).__name__)
                     if self.capture == _CAPTURE_WINDOWS:
@@ -896,7 +896,7 @@ class CallOperandObserver:
                 return None
             if code is not None and sys.monitoring.get_local_events(self.tool_id, code) != self._local_mask:
                 return None
-        except BaseException:
+        except Exception:
             return None
         return sys.monitoring.DISABLE
 
@@ -908,7 +908,7 @@ class CallOperandObserver:
             return
         try:
             frame = sys._getframe(1)
-        except BaseException:
+        except Exception:
             return
         with self.recorder.lock:
             with self._lock:
@@ -990,12 +990,12 @@ class CallOperandObserver:
                                     code_key(target_code), code_key(code),
                                     row_site, attempt_index,
                                 )
-                            except BaseException:
+                            except Exception:
                                 self._gap("EXPECTED_FUNCTION_ENTRY_CANNOT_BE_TRACKED", owner)
                                 self.environment_observer.discard(attempt_index)
                         else:
                             self.environment_observer.discard(attempt_index)
-                except BaseException as error:
+                except Exception as error:
                     if self.lean_plan is not None or self.program_ports:
                         state = self._base_state(frame)
                         self._scoped_gap("CALL_CALLBACK_FAILURE_" + type(error).__name__, code,
@@ -1062,7 +1062,7 @@ class CallOperandObserver:
                                 self._errors.append("MONITORING_MASK_OR_TOOL_CHANGED_AT_STOP")
                             self._interfered = True
                             self._monitoring_interfered = True
-                    except BaseException as error:
+                    except Exception as error:
                         self._remember_error(error)
                         self._interfered = True
                         self._monitoring_interfered = True
@@ -1129,7 +1129,7 @@ class CallOperandObserver:
                     # partially clear masks or free the shared tool slot.
                     self._interfered = True
                     self._monitoring_interfered = True
-            except BaseException:
+            except Exception:
                 self._interfered = True
                 self._monitoring_interfered = True
         if self._fd is not None:
