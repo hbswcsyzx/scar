@@ -92,8 +92,10 @@ def materialize_snapshot_journal(path, output_jsonl, *, expected_sha256=None,
     with source.open('rb') as raw, os.fdopen(fd, 'wb') as destination:
         def read(size):
             nonlocal read_bytes
-            _need(size >= 0 and read_bytes + size <= max_total_bytes, 'journal read byte ceiling exceeded')
-            data = raw.read(size)
+            _need(size >= 0, 'negative journal read length')
+            # A request may straddle EOF at the exact byte ceiling. Bound the
+            # bytes actually read, without rejecting a zero-byte EOF probe.
+            data = raw.read(min(size, max_total_bytes - read_bytes))
             read_bytes += len(data); source_hash.update(data)
             return data
         def exact(size):
