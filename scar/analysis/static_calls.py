@@ -362,7 +362,7 @@ class StaticCallSession:
         class_entry=None
         if document.get("class") is not None:
             from scar.ir.program.class_entries import (
-                decode_class_entry_overlay, validate_class_entry_core,
+                decode_class_entry_overlay, validate_class_entry_core, ClassSuiteOverlay,
             )
             from scar.ir.program.source_subjects import FrameKind,SourceCompilationFrameRoot
             class_entry=decode_class_entry_overlay(document["class"])
@@ -372,7 +372,8 @@ class StaticCallSession:
                     or encode(class_entry.definition) not in (entries[0].get("semantic_definition_ids") or ())
                     or encode(class_entry.source)!=entries[0]["source_ref"]
                     or metadata.source!=context.semantics.sources[context.unit["path"]]
-                    or class_entry.required_expansion.region!=graph.root or len(graph.frame_roots)!=1
+                    or type(class_entry) is not ClassSuiteOverlay and class_entry.required_expansion.region!=graph.root
+                    or len(graph.frame_roots)!=1
                     or type(graph.frame_roots[0]) is not SourceCompilationFrameRoot
                     or graph.frame_roots[0].kind is not FrameKind.CLASS
                     or graph.frame_roots[0].entry!=class_entry.interface
@@ -567,14 +568,93 @@ class StaticCallSession:
                     found.append((number, definition, "IMPORT_CANDIDATE_NOT_LOADER_PROOF"))
         return found
 
+    def _class_function_creation(self, body, operation, value, normal_edge):
+        """Join a class-suite factory through its original lexical code path.
+
+        Annotation factories without a user DefinitionID retain their compiler
+        provenance, but cannot manufacture a SourceDefinitionReference. The
+        returned route is only the creation relation, not closure/default state
+        or evidence that any decorator returned this function unchanged.
+        """
+        from scar.ir.program.class_entries import ClassSuiteOverlay
+        from scar.analysis.static_compilation import _scope_nodes
+        from scar.trace.code_snapshot import code_key
+        from scar.analysis.static_namespace import normal_reference
+        overlay=body.class_entry
+        if type(overlay) is not ClassSuiteOverlay:return None
+        factories=[record for record in overlay.factories if record.operation==operation.id]
+        if len(factories)!=1:raise ValueError('class factory lacks its unique original creation record')
+        factory=factories[0]
+        if factory.definition is None:return None
+        context=body.context
+        if factory.definition not in context.definitions:
+            return None  # A source declaration without a qualified function interface stays open.
+        links=body.links_by_op.get(operation.id,())
+        qualified,_,_,_=context.definitions[factory.definition]
+        source=factory.source
+        normal=normal_reference(body.index,operation.id)
+        if (len(links)!=1 or links[0].source!=source or qualified.source!=source
+                or factory.reference!=value or normal!=(normal_edge,value)):
+            raise ValueError('class factory source/normal result differs from its original qualified body')
+        declarations=[d for d in context.semantic.definitions.values()
+            if d.id==links[0].semantic_operation and d.metadata.get('phase')=='definition_time'
+            and d.code_id==source.atom_id.wire and source.atom_id in d.source_atoms]
+        definition=context.semantic.definitions.get(factory.definition)
+        if (len(declarations)!=1 or definition is None or definition.metadata.get('phase')!='call_time'
+                or definition.code_id!=source.atom_id.wire or source.atom_id not in definition.source_atoms):
+            raise ValueError('class factory did not retain its original declaration/call-time definition')
+        codes=[row for row in body.uses_by_op.get(operation.id,())if row.role=='function-code']
+        if len(codes)!=1:raise ValueError('class factory lacks its actual code Use')
+        code_use=body.index.use_site(codes[0].use).use
+        origin=body.index.values[code_use.value].origin
+        records=[r for r in overlay.constants if isinstance(origin,OperationResult)
+                 and r.operation==origin.operation and r.reference==code_use.value]
+        if (code_use.value!=factory.code_reference or len(records)!=1
+                or records[0].constant_path!=factory.constant_path or len(factory.constant_path)!=1):
+            raise ValueError('class factory code does not come from its original constant slot')
+        parent=getattr(context,'compiled_module_for_namespace',None)
+        if parent is None:
+            parent=compile(context.docs['source']['text'],context.unit['path'],'exec',
+                           flags=0,dont_inherit=True,optimize=0)
+            context.compiled_module_for_namespace=parent
+            context.compiled_module_layout_for_namespace=code_key(parent)
+        if context.compiled_module_layout_for_namespace!=overlay.compilation.root_code_layout_key:
+            raise ValueError('class factory module layout differs from retained source compilation')
+        scopes=getattr(context,'compiled_scope_paths_for_namespace',None)
+        if scopes is None:
+            found={};issues=[]
+            _scope_nodes(context.tree,parent,(),ast.Module,found,issues)
+            scopes={span:tuple(rows)for span,rows in found.items()}
+            context.compiled_scope_paths_for_namespace=scopes
+        class_span=(overlay.source.start_line,overlay.source.end_line,overlay.source.start_column,overlay.source.end_column)
+        parents=[row for row in scopes.get(class_span,())
+                 if row[0]==overlay.compilation.code_path and isinstance(row[2],ast.ClassDef)]
+        if len(parents)!=1 or code_key(parents[0][1])!=overlay.compilation.code_layout_key:
+            raise ValueError('class factory parent code is not its original ClassDef compiler scope')
+        span=(source.start_line,source.end_line,source.start_column,source.end_column)
+        full_path=overlay.compilation.code_path+factory.constant_path
+        children=[row for row in scopes.get(span,())if row[0]==full_path
+                  and isinstance(row[2],(ast.FunctionDef,ast.AsyncFunctionDef))]
+        if len(children)!=1:
+            raise ValueError('class factory child is not a unique original lexical source function')
+        child_path,child,node=children[0]
+        parent_code=parents[0][1]
+        if (parent_code.co_consts[factory.constant_path[0]] is not child
+                or child.co_name!=node.name or child.co_qualname!=parent_code.co_qualname+'.'+node.name
+                or child.co_firstlineno!=min([node.lineno]+[d.lineno for d in node.decorator_list])
+                or tuple(child.co_freevars)!=factory.free_names):
+            raise ValueError('class factory child slot/name/qualname/firstline/closure layout differs')
+        return StaticFunctionCreationRoute(operation.id,normal_edge,value,code_use.id,
+            origin.operation,overlay.compilation.code_layout_key,factory.constant_path,qualified)
+
     def _function_creation(self, body, operation, value, normal_edge):
-        """Join an explicit module factory's code slot to its original shared body.
+        """Join an explicit factory's code slot to its original shared body.
 
         This never treats APPLY_DECORATOR or an arbitrary same-source result as
         the original function. Compilation is of retained text, never exec.
         """
         if body.module is None:
-            return None
+            return self._class_function_creation(body,operation,value,normal_edge)
         from scar.analysis.source_mapping_function_lowering import mapping_function_plan
         from scar.trace.code_snapshot import code_key
         from scar.ir.program.model import OperationResult
@@ -733,6 +813,10 @@ class StaticCallSession:
                         if creation is not None:
                             creations.append(creation)
                             admit(context.number, creation.definition.definition, "VERIFIED_SOURCE_COMPILATION_FACTORY")
+                        elif body.class_entry is not None:
+                            frontiers.append(_front("CLASS_FUNCTION_CREATION_BODY_OPEN",
+                                "The original class factory/code-slot result has no qualified user source body; generated or unmapped child provenance is retained without inventing a function definition.",
+                                body.links_by_op[primitive.id][0].source))
                 for edge in incoming[value.origin.block]:
                     if value.origin.index < len(edge.arguments):
                         argument = edge.arguments[value.origin.index]

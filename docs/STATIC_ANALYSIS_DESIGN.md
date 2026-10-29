@@ -63,7 +63,9 @@ E/F 相互依赖，需要工作队列迭代；这个表不是一遍不可回访�
 
 类 suite 的 normal payload 是 Python 对象引用：编译器可能返回 `__class__` cell，也可能返回 `None`。它不是外层 metaclass/decorator 最终产生的类对象；局部 cell、外部 free cell 与 namespace 引用不可混用。函数的定义期创建同样与共享的调用期 body 分开：装饰器表达式、默认值、factory、逆序装饰器应用和 namespace 写入按真实源码顺序连接，不能将创建函数误作执行函数。
 
-module compiler profile 使用显式 source wrapper 10，在原 core 30 mapping entry 内先调用独立 compiler-prologue Region，再连接原 AST 主体。typed 前导记录 compiler-owned cell slots、指令范围和生成 child/global-read 事实，内部仍要求展开；不把局部 cells 添成 entry closure。生成 factory 必须由原 module-owned annotation 与编译布局共同确定，不能仅凭 `__annotate__` 名称识别。静态布局字段在 body 构造失败时也保存，普通查询明确区分 receipts/结构核验与独立源码重验。
+module compiler profile 的旧 source wrapper 10 保留原 required 边界；新 wrapper 11 在相同 core 30 entry 下逐 macro 建立 cell 分配、code-slot read、factory、namespace set/store/setup。cell handles 经 child NORMAL 输出到父 frame，正常继续传给剩余源代码，失败只由已拥有它们的一层逆序清理；不得双重持有/释放。Frame entry 不增加 closure cells，cell slot 与同名 namespace 对象分开。deferred child body 仍明确开放，prefix 展开不能冒称整模块分析完成。
+
+类 suite 使用新 typed overlay（core 31 不变），以原 ClassDef 和编译路径建立 namespace/cell/value/state/factory 操作。私有名与 cell/global/class-deref 按编译布局选择，方法与 annotation factory 的 closure refs 来自原 own/free cell；class L 不充当 method G。装饰器求值 CALL 与 application 分开。不支持的指令/ABI 在修改 stack 前停下，以真实 offset 和已求值 stack 输入保留 continuation，不能重放整条语句或退回整个类的空边界。
 
 
 ## 5. 展开契约

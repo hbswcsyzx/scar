@@ -206,8 +206,12 @@ def lower_module_entry(context,selection,*,code_evidence,max_operations=10000,pr
     from scar.ir.program.module_entries import ModuleBodyExpansionProfile,FrameBodyProfile
     if type(code_evidence) is StaticCodeEvidence and profile not in (
             FrameBodyProfile.STRUCTURED_MAPPING_314_V1, FrameBodyProfile.STRUCTURED_MAPPING_PROPAGATION_314_V1,
-            FrameBodyProfile.STRUCTURED_MAPPING_BODY_314_V1,FrameBodyProfile.STRUCTURED_MAPPING_COMPILER_314_V1):
+            FrameBodyProfile.STRUCTURED_MAPPING_BODY_314_V1,FrameBodyProfile.STRUCTURED_MAPPING_COMPILER_314_V1,FrameBodyProfile.STRUCTURED_MAPPING_COMPILER_OPS_314_V1):
         raise ValueError('static module roots require their explicit structured frame capability')
+    if profile is FrameBodyProfile.STRUCTURED_MAPPING_COMPILER_OPS_314_V1:
+        if type(code_evidence) is not StaticCodeEvidence:
+            raise ValueError("expanded compiler profile requires source compilation")
+        return ExpandedCompilerMappingBodyBuilder(context,selection,code_evidence,max_operations).run_module()
     if profile is FrameBodyProfile.STRUCTURED_MAPPING_COMPILER_314_V1:
         if type(code_evidence) is not StaticCodeEvidence:
             raise ValueError('compiler mapping profile requires source compilation')
@@ -414,7 +418,7 @@ def mapping_prefix_selection(context, evidence, *, profile=None):
     """Maximal contiguous supported statements; no workload/name allowlist."""
     unit=module_unit(context)
     from scar.ir.program.module_entries import FrameBodyProfile
-    require_root_evidence(unit,evidence,allow_compiler_locals=profile is FrameBodyProfile.STRUCTURED_MAPPING_COMPILER_314_V1)
+    require_root_evidence(unit,evidence,allow_compiler_locals=profile in (FrameBodyProfile.STRUCTURED_MAPPING_COMPILER_314_V1,FrameBodyProfile.STRUCTURED_MAPPING_COMPILER_OPS_314_V1))
     import dis
     instructions=tuple(dis.get_instructions(evidence.code,adaptive=False,show_caches=False))
     def positioned(node,opnames):
@@ -452,7 +456,7 @@ def mapping_prefix_selection(context, evidence, *, profile=None):
         return False
     def target(node):return isinstance(node,ast.Name) and len([row for row in positioned(node,('STORE_NAME',)) if row.argval==node.id])==1
     from scar.ir.program.module_entries import FrameBodyProfile
-    expanded = profile in (FrameBodyProfile.STRUCTURED_MAPPING_BODY_314_V1,FrameBodyProfile.STRUCTURED_MAPPING_COMPILER_314_V1)
+    expanded = profile in (FrameBodyProfile.STRUCTURED_MAPPING_BODY_314_V1,FrameBodyProfile.STRUCTURED_MAPPING_COMPILER_314_V1,FrameBodyProfile.STRUCTURED_MAPPING_COMPILER_OPS_314_V1)
     def heap_target(node):
         if not expanded:return False
         if isinstance(node,ast.Attribute):
@@ -478,7 +482,7 @@ def mapping_prefix_selection(context, evidence, *, profile=None):
             try:mapping_function_plan(node,evidence.code)
             except (ValueError,_Unsupported):return False
             return all(expression(child) for child in (*node.decorator_list,*node.args.defaults,*(v for v in node.args.kw_defaults if v is not None)))
-        if isinstance(node,ast.Try) and profile in (FrameBodyProfile.STRUCTURED_MAPPING_PROPAGATION_314_V1,FrameBodyProfile.STRUCTURED_MAPPING_BODY_314_V1,FrameBodyProfile.STRUCTURED_MAPPING_COMPILER_314_V1):
+        if isinstance(node,ast.Try) and profile in (FrameBodyProfile.STRUCTURED_MAPPING_PROPAGATION_314_V1,FrameBodyProfile.STRUCTURED_MAPPING_BODY_314_V1,FrameBodyProfile.STRUCTURED_MAPPING_COMPILER_314_V1,FrameBodyProfile.STRUCTURED_MAPPING_COMPILER_OPS_314_V1):
             return (node in context.tree.body and len(node.handlers)==1 and not node.orelse and not node.finalbody
                 and node.handlers[0].type is not None
                 and any(isinstance(child,(ast.Assign,ast.For,ast.Import,ast.ImportFrom))
@@ -657,14 +661,19 @@ class StructuredModuleBuilder(ModuleBuilder):
         compiler_child=None;compiler_prologue=None
         if getattr(self,'supports_compiler_prologue',False):
             from scar.analysis.source_module_compiler_lowering import build_compiler_region,invoke_compiler_region
-            compiler_child=build_compiler_region(self)
+            if getattr(self,"supports_expanded_compiler",False):
+                from scar.analysis.source_module_compiler_lowering import build_expanded_compiler_region,invoke_expanded_compiler_region
+                compiler_child=build_expanded_compiler_region(self)
+            else:compiler_child=build_compiler_region(self)
         remaining=None
         if self.remaining_nodes:
             self.function_context=RegionID(_key('module-exact-suffix',self.unit.initializer.wire,
                 _module_statement_ref(self.prepared_source,self.remaining_nodes[0]).atom_id.wire))
-            self.function_blocks=[];child=self.new_block(self.tree,extra_types=(_REF,_REF,_REF));child_world=child.state
+            self.function_blocks=[]
+            compiler_cell_count=(len(self.compiler_plan.cells) if getattr(self,"supports_expanded_compiler",False) and compiler_child is not None else 0)
+            child=self.new_block(self.tree,extra_types=(_REF,)*(3+compiler_cell_count));child_world=child.state
             refs=self.block_arguments[child.block][:-1]
-            normal,_,identity=self.invoke_results(child,self.tree,tuple((value,self.tree,'borrowed-slice-namespace',i,None) for i,value in enumerate(refs)),
+            normal,_,identity=self.invoke_results(child,self.tree,tuple((value,self.tree,'borrowed-slice-namespace' if i<3 else 'borrowed-slice-compiler-cell',i if i<3 else i-3,None) for i,value in enumerate(refs)),
                 result_types=(),failure_handler=lambda failed,error:self.body_exit(failed,error,ExitKind.RAISE))
             self.protocol(identity,K.UNEXPANDED_SLICE,self.tree);self.body_exit(normal,self.literal(self.tree,None),ExitKind.NORMAL)
             self.regions.append(replace(self.assemble_region(child_world),label='exact required module statement slice',parent=self.frame_region))
@@ -675,10 +684,12 @@ class StructuredModuleBuilder(ModuleBuilder):
         abi=MappingFramePorts(*self.entry_references,(),entry_world)
         self.frame_transition(cursor,self.tree,tuple((value,self.tree,'borrowed-namespace') for value in self.entry_references),PythonProtocolKind.FRAME_ENTER)
         if getattr(self,'supports_compiler_prologue',False):
-            cursor,compiler_prologue=invoke_compiler_region(self,cursor,compiler_child)
+            if getattr(self,"supports_expanded_compiler",False):
+                cursor,compiler_prologue=invoke_expanded_compiler_region(self,cursor,compiler_child)
+            else:cursor,compiler_prologue=invoke_compiler_region(self,cursor,compiler_child)
         cursor=self.statements(self.prefix_nodes,cursor)
         if remaining is not None:
-            cursor,payload,identity=self.invoke(cursor,self.tree,tuple((value,self.tree,'slice-namespace',i,None) for i,value in enumerate(self.entry_references)))
+            cursor,payload,identity=self.invoke(cursor,self.tree,tuple((value,self.tree,'slice-namespace' if i<3 else 'slice-compiler-cell',i if i<3 else i-3,None) for i,value in enumerate((*self.entry_references,*(compiler_prologue.cell_values if getattr(self,'supports_expanded_compiler',False) and compiler_prologue else ())))))
             operation=replace(self.operation_records[identity],callee=remaining.region)
             self.operations[self.operations.index(self.operation_records[identity])]=operation;self.operation_records[identity]=operation
             self.protocol(identity,K.INVOKE_REMAINING,self.tree)
@@ -697,7 +708,11 @@ class StructuredModuleBuilder(ModuleBuilder):
         overlay_type=StructuredFrameBodyOverlay;extra={}
         if getattr(self,'supports_compiler_prologue',False):
             from scar.ir.program.module_entries import CompilerStructuredFrameBodyOverlay
-            overlay_type=CompilerStructuredFrameBodyOverlay;extra={'compiler_prologue':compiler_prologue}
+            overlay_type=CompilerStructuredFrameBodyOverlay
+            if getattr(self,'supports_expanded_compiler',False):
+                from scar.ir.program.module_entries import ExpandedCompilerFrameBodyOverlay
+                overlay_type=ExpandedCompilerFrameBodyOverlay
+            extra={'compiler_prologue':compiler_prologue}
         overlay=overlay_type(self.declaration,module_source_census(self.prepared_source),self.root_scope,
             frame_statement_slice(self.prepared_source,self.unit,F.BODY,self.prefix_nodes) if self.prefix_nodes else None,
             tuple(self.statement_expansions),remaining,tuple(self.module_frontiers),self.operations_emitted,
@@ -980,3 +995,15 @@ class CompilerMappingBodyBuilder(MappingBodyBuilder):
         from scar.analysis.source_module_compiler_lowering import compiler_prelude_plan
         self.compiler_plan=compiler_prelude_plan(evidence.code,context.tree)
         super().__init__(context,selection,evidence,max_operations)
+
+
+class ExpandedCompilerMappingBodyBuilder(CompilerMappingBodyBuilder):
+    """Known compiler operations and explicit same-frame owned-cell handles."""
+    supports_expanded_compiler=True
+    supports_expanded_compiler_prologue=True
+
+    def __init__(self,context,selection,evidence,max_operations):
+        super().__init__(context,selection,evidence,max_operations)
+        from scar.ir.program.module_entries import FrameBodyProfile
+        self.frame_body_profile=FrameBodyProfile.STRUCTURED_MAPPING_COMPILER_OPS_314_V1
+        self.prefix_nodes,self.remaining_nodes=mapping_prefix_selection(context,evidence,profile=self.frame_body_profile)

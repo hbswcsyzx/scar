@@ -289,8 +289,8 @@ def plan_static_entry(tree, entry, *, path, fingerprint):
     kind, phase = entry["kind"], entry["phase"]
     mapping_entry = kind == "MODULE" and isinstance(node, ast.Module)
     class_entry = kind == "CLASS" and isinstance(node, ast.ClassDef)
-    selected = (FrameBodyProfile.STRUCTURED_MAPPING_COMPILER_314_V1.value if mapping_entry else
-                "STATIC_CLASS_FRAME_WITH_REQUIRED_BODY_EXPANSION" if class_entry else
+    selected = (FrameBodyProfile.STRUCTURED_MAPPING_COMPILER_OPS_314_V1.value if mapping_entry else
+                "STATIC_CLASS_SUITE_314_V1" if class_entry else
                 BodyLoweringProfile.STRUCTURED_ENV.value if kind == "FUNCTION" else None)
     caps, rules = list(_DEFAULT_CAPS), []
 
@@ -322,7 +322,7 @@ def plan_static_entry(tree, entry, *, path, fingerprint):
         caps=[]
         base_needs.append(_needs("STATIC_COMPILER_CLASS_LAYOUT", "Original ClassDef child code determines outer freevar inputs, local compiler cell roles and Python-reference normal payload; no runtime class or prepared namespace is established."))
         base_needs.append(_needs("CLASS_BODY_REQUIRED_EXPANSION", "Preserve every original class-scope statement and compiler-owned cell stage; parent class construction and body internals remain distinct open relations."))
-        add(node,entry["ast_path"],"source_class_lowering","lower_class_entry",needs=base_needs,
+        add(node,entry["ast_path"],"source_class_body_lowering","lower_class_suite",needs=base_needs,
             status="ENTRY_ADAPTER_MISSING" if node.type_params else "NEEDS_STATIC_COMPILER")
         if node.type_params:
             rules[0]["prerequisites"].append(_needs("TYPE_PARAMETER_CLASS_ENTRY_ADAPTER", "Generic parameter scope needs its exact parent compiler-code adapter; do not guess a same-name child."))

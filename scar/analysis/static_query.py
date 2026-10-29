@@ -204,7 +204,7 @@ def _canonical_dependencies(unit, entries, fragments, limit):
                 module_view["compiler_prologue_source_replayed"] = False
         elif class_document is not None:
             from scar.ir.program.class_entries import (
-                decode_class_entry_overlay, validate_class_entry_core,
+                decode_class_entry_overlay, validate_class_entry_core, ClassSuiteOverlay,
             )
             from scar.ir.program.source_subjects import SourceCompilationFrameRoot,FrameKind
             from scar.ir.record_codec import decode, encode
@@ -218,15 +218,23 @@ def _canonical_dependencies(unit, entries, fragments, limit):
                     or len(graph.frame_roots)!=1 or type(graph.frame_roots[0]) is not SourceCompilationFrameRoot
                     or graph.frame_roots[0].kind is not FrameKind.CLASS or graph.frame_roots[0].code!=overlay.compilation
                     or graph.frame_roots[0].entry!=overlay.interface or graph.frame_roots[0].scope!=overlay.root_scope
-                    or overlay.required_expansion.region!=graph.root):
+                    or type(overlay) is not ClassSuiteOverlay and overlay.required_expansion.region!=graph.root):
                 raise ValueError("class body differs from the original source/compiler/frame namespace")
-            required=class_document["required_expansion"]
             class_view={key:class_document[key] for key in ("definition","parent_definition","source","compilation","interface","status")}
-            class_view.update(inputs=_page(class_document["inputs"],limit),
-                body_statements=_page(required["body_statements"],limit),
-                compiler_stages=_page(required["compiler_stages"],limit),normal_payload=required["normal_payload"],
-                required_expansion={key:required[key] for key in ("region","operation","status")},
-                frontiers=_page(class_document["frontiers"],limit))
+            class_view.update(inputs=_page(class_document["inputs"],limit),frontiers=_page(class_document["frontiers"],limit))
+            if type(overlay) is ClassSuiteOverlay:
+                class_view.update(profile=overlay.profile,normal_payload=overlay.normal_payload.value,
+                    body_statements=_page(class_document["statements"],limit),
+                    compiler_instructions=_page(class_document["instructions"],limit),
+                    protocols=_page(class_document["protocols"],limit),
+                    cells=_page(class_document["cells"],limit),factories=_page(class_document["factories"],limit),
+                    constants=_page(class_document["constants"],limit),remaining=class_document["remaining"],
+                    core_checked=True,source_replayed=False)
+            else:
+                required=class_document["required_expansion"]
+                class_view.update(body_statements=_page(required["body_statements"],limit),
+                    compiler_stages=_page(required["compiler_stages"],limit),normal_payload=required["normal_payload"],
+                    required_expansion={key:required[key] for key in ("region","operation","status")})
         elif (interface is None or interface.get("definition") not in
                   (selected[body["entry_key"]].get("semantic_definition_ids") or ())
                   or interface.get("region") != graph_document["root"]):
@@ -361,11 +369,25 @@ def _call_relations(manifest, unit, entries, fragments, limit):
                 if code.operation != creation.factory:
                     raise ValueError("creation code Use is not owned by its original factory")
                 origin = namespace_dependencies.index.values[code.use.value].origin
-                constants = (envelope.get("module") or {}).get("constants", ())
+                module_constants=(envelope.get("module") or {}).get("constants", ())
+                class_overlay=envelope.get("class") or {}
+                class_constants=class_overlay.get("constants", ()) if class_overlay.get('class_record')=='STATIC_CLASS_SUITE_OVERLAY' else ()
+                original_constant=any(record["operation"] == creation.code_constant_operation.as_dict()
+                    and record["code_key"] == creation.code_layout_key
+                    and tuple(record["constant_path"]) == creation.constant_path for record in module_constants)
+                if class_constants:
+                    original_constant=(class_overlay['compilation']['code_layout_key']==creation.code_layout_key
+                        and any(record['operation']==creation.code_constant_operation.as_dict()
+                            and record['reference']==code.use.value.as_dict()
+                            and tuple(record['constant_path'])==creation.constant_path for record in class_constants)
+                        and any(factory['operation']==creation.factory.as_dict()
+                            and factory['reference']==creation.normal_value.as_dict()
+                            and factory['definition']==creation.definition.definition.as_dict()
+                            and factory['code_reference']==code.use.value.as_dict()
+                            and tuple(factory['constant_path'])==creation.constant_path
+                            for factory in class_overlay['factories']))
                 if (type(origin) is not OperationResult or origin.operation != creation.code_constant_operation
-                        or not any(record["operation"] == creation.code_constant_operation.as_dict()
-                            and record["code_key"] == creation.code_layout_key
-                            and tuple(record["constant_path"]) == creation.constant_path for record in constants)
+                        or not original_constant
                         or creation.definition.root.artifact.uri != str(fragments.root / basis["path"])
                         or creation.definition.root.artifact.sha256 != basis["sha256"]):
                     raise ValueError("creation code slot/qualified definition differs from its original caller/basis")

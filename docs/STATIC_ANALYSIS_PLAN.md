@@ -77,9 +77,14 @@ S0 不设建模覆盖率门槛，不产生额外历史报告或 gate 目录。
 三项主体接线已实现：模块的 heap store、If 和 function creation；comprehension 的递归目标解包与局部异常清理；class 的独立 prepared-namespace/closure/cell ABI 与待展开主体接口。均沿原源码 ID 构造规范图。真实 eval 模块已展开全部 17 条顶层语句、18 项含嵌套语句记录、325 个操作，source wrapper 9 / core 30 读回及独立静态重新编译通过；没有运行模块初始化。完整类体及全部 Python 语法仍未完成。
 模块使用明确的 BODY profile，在既有 paired exception/world 接口上扩展规则；旧前缀 profile 保留原含义。class body 的 normal payload 与外层 class construction result 分开：前者返回编译器 class cell 或 Python None 引用，后者才产生经 metaclass/decorator 处理的对象。两类真实入口的 core 31 读回通过，但当前类 suite 仍为 required expansion。
 
-原目录的全模块/类批次与融合 store 修复已经完成，错误入口均已精准复构通过。下一步展开真实 class suite 与 compiler 前导内部：为 prepared mapping、G/saved-B、closure/local cells 建立明确 frame 策略；按原 compiler 核对隐式 namespace prologue/epilogue、私有名映射和方法创建。不能直接套用模块的空 closure ABI，也不能把 implicit stage 清单当成已经存在的 state edges。父级 class construction 的 bases/metaclass/hooks/decorators 另接原端口。
+原目录的全模块/类边界批次与融合 store 修复已完成。class suite 与 compiler 前导已实现实际操作展开，小批 22 项正式构造通过；全部 1,183 个类已增量发布（473.28 秒，0构造错误）：1,118 个无 suite continuation、65 个精确 continuation。继续补齐以下结构与未支持协议：为 prepared mapping、G/saved-B、closure/local cells 建立明确 frame 策略；按原 compiler 核对隐式 namespace prologue/epilogue、私有名映射和方法创建。不能直接套用模块的空 closure ABI，也不能把 implicit stage 清单当成已经存在的 state edges。父级 class construction 的 bases/metaclass/hooks/decorators 另接原端口。
 源码里的 `receiver[:bound]` 还暴露了独立的 `BINARY_SLICE` 规则缺口。后续以 compound invoke 连接 receiver/bounds/world、正常和异常消费，不伪造源码中没有独立产生的 slice 引用或物化；与已有 `BUILD_SLICE` 合同分开。模块首 docstring 按编译器的 `__doc__` mapping 写入建图，不能当普通表达式丢弃。
-全批及错误修复已发布：12 个模块自有 annotation cell 使用新 compiler profile/source wrapper 10，原 core 30 entry ABI 不变；前导子 Region 与精确布局记录已接上正常/异常 world，内部仍 REQUIRED_EXPANSION。另一个 tuple-key MEMORY 校验已修复。当前构造 ERROR 为 0，不能据此认定语义完整。compiler layout 已作为来源事实保存，后续继续展开已知 prefix 阶段和生成 child，不能永久停在前导边界。
+全批及错误修复已发布：12 个模块自有 annotation cell 使用新 compiler profile/source wrapper 10，原 core 30 entry ABI 不变；前导子 Region 与精确布局记录已接上正常/异常 world；新 wrapper 11 又将已知 macro 拆为真实操作，cell handles 返回父 frame/后缀并保持到 frame exit，deferred child 仍待展开。另一个 tuple-key MEMORY 校验已修复。当前构造 ERROR 为 0，不能据此认定语义完整。compiler layout 已作为来源事实保存，后续继续展开已知 prefix 阶段和生成 child，不能永久停在前导边界。
+
+**已核实的实现欠账（全类批次发布前的函数台账）**
+
+547 个函数 lowerer 不支持项中，86 个为 combined slice、76 个缺唯一 computational record、70 个 slice store、60 个 nested with cleanup、41 个 comprehension parent cleanup、28 个常量槽对应、26 个 target-child BinOp、16 个 Compare。它们不是已证明的运行时不可判定。下一轮优先按通用语言规则消除这些族，不能只修单个函数或把错误转成 UNKNOWN。
+3,731 个缺 adapter 项中，annotation context 2,482、listcomp 583、lambda 235、genexpr 210、dictcomp 146、setcomp 22、function 52、module stub 1。目录、内联 scope 和独立主体需要按实际 compiler 布局连接，不可机械地为每个 comprehension 造 Python frame。
 
 **实质功能**
 
@@ -106,7 +111,7 @@ S0 不设建模覆盖率门槛，不产生额外历史报告或 gate 目录。
 ## S3：调用图、points-to、状态与 effects 联合固定点
 
 **状态：基础类型与局部候选部分已有，联合静态分析未完成。**`CallTarget` 可表达局部条件候选；`effects_v2` 有 effect 维度和 coverage 类型，但现有闭包器面向显式 scope，不能替代静态调用图或静态定义摘要。
-source-only linker 已在原端口上发布 v2 条件 namespace 关系与 factory→共享 body 关联。当前有界 80 份产物发布 491 个 CALL、20 条候选、19 条 namespace flow、9 条创建关联、37 条实参边、52 条 completion，typed codec 与 public query 通过；8,739 份产物未读，不能称整程序固定点完成。
+source-only linker 已在原端口上发布 v2 条件 namespace 关系与 factory→共享 body 关联。当前有界 80 份产物发布 493 个 CALL、20 条候选、19 条 namespace flow、9 条创建关联、37 条实参边、52 条 completion，typed codec 与 public query 通过；8,739 份产物未读，不能称整程序固定点完成。
 STORE/LOAD/world/CFG、查找优先及中间效果保留明确条件；正常覆盖仅在 mapping 提交输入等 guard 下成立。MAKE 的原 code slot/declaration/正常结果可连共享 body，APPLY 的结果独立，真实 eval.run 的装饰器返回关系仍开放。下一步用通用返回/环境/alias/effect 分析解决这些条件与未知调用，不按名字补目标，也不把当前条件边当成已证明的 must-flow。
 
 **实质功能**

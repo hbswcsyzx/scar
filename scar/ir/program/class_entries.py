@@ -11,9 +11,10 @@ from enum import Enum
 import dis
 from types import CodeType
 
-from scar.ir.program.ids import ControlScopeID, OperationID, RegionID
+from scar.ir.program.ids import ControlScopeID, OperationID, RegionID, ValueID
 from scar.ir.program.model import ProgramGraph
 from scar.ir.program.source import LoweringMetadata
+from scar.ir.program.frames import FrameRules
 from scar.ir.program.source_subjects import ClassFrameABI, SourceCompilationCodeRef
 from scar.ir.v2.common import SourceReference
 from scar.ir.v2.ids import OperationDefinitionID
@@ -204,16 +205,176 @@ class ClassEntryOverlay:
 
 
 @dataclass(frozen=True, slots=True)
+class ClassSuiteProtocol:
+    operation: OperationID
+    kind: str
+    source: SourceReference
+    offset: int
+
+    def __post_init__(self):
+        if type(self.operation) is not OperationID or type(self.source) is not SourceReference:
+            raise TypeError('class suite protocol requires original core/source endpoints')
+        kinds={'FRAME_ENTER','FRAME_EXIT_NORMAL','FRAME_EXIT_EXCEPTION','FRAME_DISCARD',
+               'READ_CODE_CONSTANT','MAKE_CELL','LOAD_DEREF','LOAD_FROM_DICT_OR_DEREF','STORE_CELL',
+               'LOAD_NAME_314','LOAD_GLOBAL','STORE_NAME_314','STORE_GLOBAL','DELETE_NAME',
+               'BUILD_TUPLE','BUILD_LIST','BUILD_SET','BUILD_MAP','MAKE_FUNCTION_314',
+               'SET_FUNCTION_ATTRIBUTE','LOAD_ATTRIBUTE','CALL','APPLY_DECORATOR_314',
+               'BINARY_OP','UNARY_NEGATIVE','UNARY_INVERT','UNARY_NOT','REQUIRED_CLASS_CONTINUATION'}
+        if type(self.kind) is not str or self.kind not in kinds or type(self.offset) is not int or self.offset < -1:
+            raise ValueError('class suite protocol kind/compiler offset invalid')
+
+
+@dataclass(frozen=True, slots=True)
+class ClassSuiteInstruction:
+    offset: int
+    opcode: str
+    argument: int | None
+    positions: tuple[int | None, ...]
+    source: SourceReference
+    operation: OperationID | None
+    stack_before: tuple[ValueID | None, ...]
+    stack_after: tuple[ValueID | None, ...]
+
+    def __post_init__(self):
+        if type(self.offset)is not int or self.offset<0 or type(self.opcode)is not str or not self.opcode:
+            raise ValueError('class compiler witness needs an exact offset/opcode')
+        if self.argument is not None and (type(self.argument)is not int or self.argument<0):
+            raise ValueError('class compiler argument invalid')
+        if type(self.positions)is not tuple or len(self.positions)!=4 or any(x is not None and type(x)is not int for x in self.positions):
+            raise ValueError('class compiler witness must retain its actual position tuple')
+        if type(self.source)is not SourceReference or self.operation is not None and type(self.operation)is not OperationID:
+            raise TypeError('class compiler witness source/core endpoint invalid')
+        for row in (self.stack_before,self.stack_after):
+            if type(row)is not tuple or any(x is not None and type(x)is not ValueID for x in row):
+                raise TypeError('class compiler stack must contain original SSA references or NULL marker')
+
+
+@dataclass(frozen=True, slots=True)
+class ClassSuiteCell:
+    name: str
+    ordinal: int
+    reference: ValueID
+    operation: OperationID
+
+    def __post_init__(self):
+        if type(self.name)is not str or not self.name or type(self.ordinal)is not int or self.ordinal<0:
+            raise ValueError('class own cell needs its compiler name/ordinal')
+        if type(self.reference)is not ValueID or type(self.operation)is not OperationID:
+            raise TypeError('class own cell must refer to an actual allocation result')
+
+
+@dataclass(frozen=True, slots=True)
+class ClassSuiteConstant:
+    operation: OperationID
+    reference: ValueID
+    constant_path: tuple[int, ...]
+
+    def __post_init__(self):
+        if type(self.operation)is not OperationID or type(self.reference)is not ValueID:
+            raise TypeError('class constant must refer to original core endpoints')
+        if type(self.constant_path)is not tuple or not self.constant_path or any(type(n)is not int or n<0 for n in self.constant_path):
+            raise ValueError('class constant needs its exact compiler constant path')
+
+
+@dataclass(frozen=True, slots=True)
+class ClassSuiteFactory:
+    operation: OperationID
+    reference: ValueID
+    code_reference: ValueID
+    constant_path: tuple[int, ...]
+    definition: OperationDefinitionID | None
+    source: SourceReference
+    free_names: tuple[str, ...]
+
+    def __post_init__(self):
+        if type(self.operation)is not OperationID or any(type(v)is not ValueID for v in (self.reference,self.code_reference)):
+            raise TypeError('class factory needs its actual core/result/code-reference endpoints')
+        if self.definition is not None and type(self.definition)is not OperationDefinitionID:
+            raise TypeError('factory body reference must be an original definition or explicitly unassociated')
+        if type(self.source)is not SourceReference or type(self.free_names)is not tuple or any(type(n)is not str for n in self.free_names):
+            raise TypeError('class factory source/free-name table invalid')
+        if type(self.constant_path)is not tuple or not self.constant_path or any(type(n)is not int or n<0 for n in self.constant_path):
+            raise ValueError('class factory must keep original code constant path')
+
+
+@dataclass(frozen=True, slots=True)
+class ClassSuiteResidual:
+    operation: OperationID
+    first_offset: int
+    statements: tuple[ClassBodyStatement, ...]
+    stack_inputs: tuple[ValueID | None, ...]
+    reason: str
+    status: str = 'REQUIRED_COMPILER_CONTINUATION'
+
+    def __post_init__(self):
+        if type(self.operation)is not OperationID or type(self.first_offset)is not int or self.first_offset<0:
+            raise ValueError('class residual must identify its exact compiler continuation')
+        if type(self.statements)is not tuple or any(type(x)is not ClassBodyStatement for x in self.statements):
+            raise TypeError('class residual requires original source statement rows')
+        if type(self.stack_inputs)is not tuple or any(x is not None and type(x)is not ValueID for x in self.stack_inputs):
+            raise TypeError('class residual must carry the actual partial evaluation stack')
+        if type(self.reason)is not str or not self.reason or self.status!='REQUIRED_COMPILER_CONTINUATION':
+            raise ValueError('class residual cannot discharge its continuation obligation')
+
+
+@dataclass(frozen=True, slots=True)
+class ClassSuiteOverlay:
+    definition: OperationDefinitionID
+    parent_definition: OperationDefinitionID | None
+    source: SourceReference
+    compilation: SourceCompilationCodeRef
+    root_scope: ControlScopeID
+    interface: ClassFrameABI
+    inputs: tuple[ClassEntryInput, ...]
+    normal_payload: ClassNormalPayloadKind
+    statements: tuple[ClassBodyStatement, ...]
+    instructions: tuple[ClassSuiteInstruction, ...]
+    protocols: tuple[ClassSuiteProtocol, ...]
+    cells: tuple[ClassSuiteCell, ...]
+    constants: tuple[ClassSuiteConstant, ...]
+    factories: tuple[ClassSuiteFactory, ...]
+    remaining: ClassSuiteResidual | None
+    frontiers: tuple[ClassEntryFrontier, ...]
+    operations_emitted: int
+    frame_rules: FrameRules = FrameRules()
+    profile: str = 'STATIC_CLASS_SUITE_314_V1'
+    status: str = 'CLASS_SUITE_TOPOLOGY_WITH_OPEN_EFFECTS'
+
+    def __post_init__(self):
+        if (type(self.definition) is not OperationDefinitionID or type(self.source) is not SourceReference
+                or type(self.compilation) is not SourceCompilationCodeRef
+                or self.compilation.definition != self.definition or self.compilation.source != self.source
+                or type(self.interface) is not ClassFrameABI or type(self.root_scope) is not ControlScopeID):
+            raise TypeError('class suite requires its original source, compiler and class ABI')
+        for rows,kind in ((self.inputs,ClassEntryInput),(self.statements,ClassBodyStatement),
+                (self.instructions,ClassSuiteInstruction),(self.protocols,ClassSuiteProtocol),
+                (self.cells,ClassSuiteCell),(self.constants,ClassSuiteConstant),
+                (self.factories,ClassSuiteFactory),(self.frontiers,ClassEntryFrontier)):
+            if type(rows) is not tuple or any(type(row) is not kind for row in rows):
+                raise TypeError('class suite ordered record table has invalid types')
+        if type(self.normal_payload) is not ClassNormalPayloadKind:
+            raise TypeError('class suite must preserve its Python-reference return mode')
+        if self.remaining is not None and type(self.remaining) is not ClassSuiteResidual:
+            raise TypeError('class suite residual must be a typed exact continuation')
+        if self.profile != 'STATIC_CLASS_SUITE_314_V1' or self.status != 'CLASS_SUITE_TOPOLOGY_WITH_OPEN_EFFECTS':
+            raise ValueError('class suite cannot claim closed effects or parent construction')
+        if type(self.operations_emitted) is not int or self.operations_emitted <= 0:
+            raise ValueError('class suite must contain actual canonical operations')
+        if type(self.frame_rules)is not FrameRules:
+            raise TypeError('class suite must retain conditional frame lifetime rules')
+
+
+@dataclass(frozen=True, slots=True)
 class ClassEntryResult:
     graph: ProgramGraph
     metadata: LoweringMetadata
-    overlay: ClassEntryOverlay
+    overlay: ClassEntryOverlay | ClassSuiteOverlay
     operations_emitted: int
 
     def __post_init__(self):
         if type(self.graph) is not ProgramGraph or type(self.metadata) is not LoweringMetadata:
             raise TypeError("class entry result needs canonical graph and source metadata")
-        if type(self.overlay) is not ClassEntryOverlay:
+        if type(self.overlay) not in (ClassEntryOverlay, ClassSuiteOverlay):
             raise TypeError("class entry result needs a typed source overlay")
         if type(self.operations_emitted) is not int or self.operations_emitted != len(self.graph.operations):
             raise ValueError("class entry operation count differs from its canonical graph")
@@ -228,6 +389,13 @@ CLASS_ENTRY_RECORD_TAGS = {
     ClassEntryFrontier: ("class_record", "CLASS_ENTRY_FRONTIER"),
     RequiredClassBodyExpansion: ("class_record", "REQUIRED_CLASS_BODY_EXPANSION"),
     ClassEntryOverlay: ("class_record", "STATIC_CLASS_ENTRY_OVERLAY"),
+    ClassSuiteProtocol: ('class_record','CLASS_SUITE_PROTOCOL'),
+    ClassSuiteInstruction: ('class_record','CLASS_SUITE_INSTRUCTION'),
+    ClassSuiteCell: ('class_record','CLASS_SUITE_CELL'),
+    ClassSuiteConstant: ('class_record','CLASS_SUITE_CONSTANT'),
+    ClassSuiteFactory: ('class_record','CLASS_SUITE_FACTORY'),
+    ClassSuiteResidual: ('class_record','CLASS_SUITE_RESIDUAL'),
+    ClassSuiteOverlay: ('class_record','STATIC_CLASS_SUITE_OVERLAY'),
 }
 
 
@@ -343,7 +511,8 @@ def encode_class_entry_overlay(value: ClassEntryOverlay) -> dict:
 def decode_class_entry_overlay(value) -> ClassEntryOverlay:
     from scar.ir.program.source_subjects import CLASS_FRAME_ABI_RECORD_TAGS
     from scar.ir.record_codec import decode
-    return decode(ClassEntryOverlay, value,
+    kind=ClassSuiteOverlay if type(value) is dict and value.get('class_record')=='STATIC_CLASS_SUITE_OVERLAY' else ClassEntryOverlay
+    return decode(kind, value,
                   record_tags={**CLASS_FRAME_ABI_RECORD_TAGS, **CLASS_ENTRY_RECORD_TAGS})
 
 
@@ -354,6 +523,8 @@ def validate_class_entry_core(overlay: ClassEntryOverlay, graph: ProgramGraph, m
     source links already supplied by the caller; it does not replay source
     compilation or revalidate every source mapping.
     """
+    if type(overlay) is ClassSuiteOverlay:
+        return validate_class_suite_core(overlay,graph,metadata)
     from scar.ir.program.control import ControlScopeKind
     from scar.ir.program.model import (
         BlockArgument, CompletionResult, CompletionSignature, ExitKind,
@@ -468,9 +639,85 @@ def validate_class_entry_core(overlay: ClassEntryOverlay, graph: ProgramGraph, m
          "required body does not link uniquely to the original opaque ClassDef operation")
 
 
+def validate_class_suite_core(overlay,graph,metadata):
+    """Join suite declarations to existing core ports, without source replay."""
+    from scar.ir.program.model import (
+        BlockArgument,CompletionResult,ExitKind,OperationResult,ReferenceValue,StateVersionValue,
+        TerminatorKind,ValueKind,ValueType,
+    )
+    from scar.ir.program.source_subjects import SourceCompilationFrameRoot,FrameKind
+    def need(ok,why):
+        if not ok:raise ValueError('class suite core: '+why)
+    need(type(overlay)is ClassSuiteOverlay,'wrong explicit suite variant')
+    overlay.__post_init__()
+    roots=graph.frame_roots
+    need(len(roots)==1 and type(roots[0])is SourceCompilationFrameRoot and roots[0].kind is FrameKind.CLASS
+         and roots[0].scope==overlay.root_scope and roots[0].entry==overlay.interface
+         and roots[0].code==overlay.compilation,'original CLASS frame/compiler ABI differs')
+    need(metadata.entry==overlay.definition.wire and metadata.source.path==overlay.source.path
+         and metadata.source.fingerprint==overlay.source.fingerprint,'source snapshot/entry differs')
+    need(overlay.operations_emitted==len(graph.operations),'operation count differs')
+    ops={x.id:x for x in graph.operations};values={x.id:x for x in graph.values}
+    regions={r.id:r for r in graph.regions};root=regions[graph.root]
+    blocks={b.id:b for r in graph.regions for b in r.blocks};entry=blocks[root.entry]
+    mapping=overlay.interface.mapping
+    inputs=(mapping.locals_namespace,mapping.globals_namespace,mapping.builtins_namespace,*mapping.closure_cells,mapping.world)
+    need(entry.arguments==inputs,'suite entry partition differs')
+    world=values[mapping.world].location;state=ValueType(ValueKind.STATE,location=world);ref=ValueType(ValueKind.REFERENCE)
+    links={r.operation:r for r in metadata.operation_links}
+    need(len(links)==len(metadata.operation_links) and set(links)==set(ops),'source/core operation coverage differs')
+    need({r.value for r in metadata.value_links}==set(values),'value source coverage differs')
+    need({(r.operation,r.use)for r in metadata.use_links}=={(o.id,u.id)for o in graph.operations for u in o.uses},'Use correspondence differs')
+    protocols={p.operation:p for p in overlay.protocols}
+    need(len(protocols)==len(overlay.protocols),'duplicate suite protocol')
+    for identity,p in protocols.items():
+        need(identity in ops and links[identity].source==p.source,'protocol source/core link differs')
+        op=ops[identity]
+        if op.terminator is not None and op.terminator.kind is TerminatorKind.INVOKE:
+            need(not op.effects_complete and op.callee is None and op.invoke_arguments==tuple(u.id for u in op.uses)
+                and tuple(c.kind for c in op.completions)==(ExitKind.NORMAL,ExitKind.RAISE)
+                and op.completions[-1].types==(ref,ref,state)
+                and op.completions[0].types[-1:]==(state,),'suite invocation/paired completion differs')
+            need(tuple(e.kind for e in op.terminator.successors)==(ExitKind.NORMAL,ExitKind.RAISE)
+                and all(e.arguments==tuple(CompletionResult(i)for i in range(len(c.types)))
+                    for e,c in zip(op.terminator.successors,op.completions)),'produced completion ports differ')
+            failed=blocks[op.terminator.successors[1].block]
+            need(len(failed.arguments)==3 and len(failed.operations)==2,'failure must retain one frame handoff and original paired exit')
+            cleanup=ops[failed.operations[0]];raised=ops[failed.operations[1]]
+            need(cleanup.id in protocols and protocols[cleanup.id].kind=='FRAME_EXIT_EXCEPTION'
+                 and cleanup.uses[-1].value==failed.arguments[-1]
+                 and tuple(u.value for u in cleanup.uses[-3:-1])==failed.arguments[:2]
+                 and len(cleanup.results)==1,'failure cleanup lost original exception/traceback/post-world')
+            need(raised.terminator is not None and raised.terminator.kind is TerminatorKind.RAISE
+                 and tuple(u.value for u in raised.uses)==(*failed.arguments[:2],cleanup.results[0]),
+                 'failure exit substituted the pair or stale world')
+    for cell in overlay.cells:
+        need(cell.ordinal<len(overlay.interface.co_cellvars)
+             and overlay.interface.co_cellvars[cell.ordinal]==cell.name
+             and cell.operation in protocols and protocols[cell.operation].kind=='MAKE_CELL','owned cell layout/operation differs')
+        op=ops[cell.operation];normal=blocks[op.terminator.successors[0].block]
+        need(normal.arguments[0]==cell.reference and type(values[cell.reference])is ReferenceValue,'own cell allocation result differs')
+    for c in overlay.constants:
+        need(c.operation in protocols and protocols[c.operation].kind=='READ_CODE_CONSTANT'
+             and ops[c.operation].results==(c.reference,)
+             and values[c.reference].origin==OperationResult(c.operation,0),
+             'constant code-slot result differs')
+    for f in overlay.factories:
+        need(f.operation in protocols and protocols[f.operation].kind=='MAKE_FUNCTION_314','factory protocol differs')
+        op=ops[f.operation];normal=blocks[op.terminator.successors[0].block]
+        need(tuple(u.value for u in op.uses[:2])==(f.code_reference,mapping.globals_namespace)
+             and normal.arguments[0]==f.reference,'method factory must borrow G and its actual code slot')
+    if overlay.remaining is not None:
+        need(overlay.remaining.operation in protocols and protocols[overlay.remaining.operation].kind=='REQUIRED_CLASS_CONTINUATION',
+             'remaining continuation operation differs')
+    need((overlay.normal_payload is ClassNormalPayloadKind.CLASS_CELL)==('__class__'in overlay.interface.co_cellvars),
+         'Python-reference normal mode differs from compiler cell layout')
+
+
 __all__ = ["ClassEntryInputRole", "ClassNormalPayloadKind", "ClassFrontierKind",
            "ClassEntryInput", "ClassBodyStatement", "ClassCompilerStage", "ClassEntryFrontier",
            "RequiredClassBodyExpansion", "ClassEntryOverlay", "ClassEntryResult",
            "CLASS_ENTRY_RECORD_TAGS", "compiler_cell_protocol",
            "encode_class_entry_overlay", "decode_class_entry_overlay",
-           "validate_class_entry_core"]
+           "validate_class_entry_core", "ClassSuiteOverlay", "ClassSuiteProtocol", "ClassSuiteInstruction",
+           "ClassSuiteCell", "ClassSuiteConstant", "ClassSuiteFactory", "ClassSuiteResidual", "validate_class_suite_core"]

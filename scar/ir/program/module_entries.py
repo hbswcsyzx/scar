@@ -393,6 +393,7 @@ class FrameBodyProfile(str, Enum):
     STRUCTURED_MAPPING_PROPAGATION_314_V1 = 'STRUCTURED_MAPPING_PROPAGATION_314_V1'
     STRUCTURED_MAPPING_BODY_314_V1 = 'STRUCTURED_MAPPING_BODY_314_V1'
     STRUCTURED_MAPPING_COMPILER_314_V1 = 'STRUCTURED_MAPPING_COMPILER_314_V1'
+    STRUCTURED_MAPPING_COMPILER_OPS_314_V1 = 'STRUCTURED_MAPPING_COMPILER_OPS_314_V1'
 
 
 class NamespacePolicy(str, Enum):
@@ -431,6 +432,15 @@ class FrameBodyProtocolKind(str, Enum):
     APPLY_DECORATOR_314 = 'APPLY_DECORATOR_314'
     INVOKE_COMPILER_PROLOGUE = 'INVOKE_COMPILER_PROLOGUE'
     REQUIRED_COMPILER_PROLOGUE = 'REQUIRED_COMPILER_PROLOGUE'
+    COMPILER_MAKE_CELL = 'COMPILER_MAKE_CELL'
+    COMPILER_READ_CODE_CONSTANT = 'COMPILER_READ_CODE_CONSTANT'
+    COMPILER_MAKE_FUNCTION = 'COMPILER_MAKE_FUNCTION'
+    COMPILER_BUILD_SET = 'COMPILER_BUILD_SET'
+    COMPILER_STORE_NAME = 'COMPILER_STORE_NAME'
+    COMPILER_SETUP_ANNOTATIONS = 'COMPILER_SETUP_ANNOTATIONS'
+    COMPILER_RETAIN_OWNED = 'COMPILER_RETAIN_OWNED'
+    COMPILER_RELEASE_OWNED = 'COMPILER_RELEASE_OWNED'
+    INVOKE_EXPANDED_COMPILER_PROLOGUE = 'INVOKE_EXPANDED_COMPILER_PROLOGUE'
 
 
 class FrameBodyStatus(str, Enum):
@@ -535,7 +545,8 @@ class StructuredFrameBodyOverlay:
                   (FrameBodyProfile.STRUCTURED_MAPPING_314_V1,FrameCompletionProfile.RAW_EXCEPTION_REF_314_V1),
                   (FrameBodyProfile.STRUCTURED_MAPPING_PROPAGATION_314_V1,FrameCompletionProfile.PROPAGATION_REF_PAIR_314_V1),
                   (FrameBodyProfile.STRUCTURED_MAPPING_BODY_314_V1,FrameCompletionProfile.PROPAGATION_REF_PAIR_314_V1),
-                  (FrameBodyProfile.STRUCTURED_MAPPING_COMPILER_314_V1,FrameCompletionProfile.PROPAGATION_REF_PAIR_314_V1))
+                  (FrameBodyProfile.STRUCTURED_MAPPING_COMPILER_314_V1,FrameCompletionProfile.PROPAGATION_REF_PAIR_314_V1),
+                  (FrameBodyProfile.STRUCTURED_MAPPING_COMPILER_OPS_314_V1,FrameCompletionProfile.PROPAGATION_REF_PAIR_314_V1))
               and self.namespace_policy is NamespacePolicy.MODULE_MAPPING_314_V1,
               'unsupported explicit structured mapping/completion profile')
         _need(type(self.operations_emitted) is int and self.operations_emitted > 0
@@ -543,8 +554,9 @@ class StructuredFrameBodyOverlay:
               and (self.remaining is None or type(self.remaining) is UnexpandedFrameSlice), 'invalid frame construction/partition')
         _need(type(self.frame_rules) is FrameRules, 'frame must preserve conditional lifetime contract')
         self.frame_rules.__post_init__()
-        _need((self.profile is FrameBodyProfile.STRUCTURED_MAPPING_COMPILER_314_V1)
-              == (type(self) is CompilerStructuredFrameBodyOverlay),
+        expected={FrameBodyProfile.STRUCTURED_MAPPING_COMPILER_314_V1:CompilerStructuredFrameBodyOverlay,
+                  FrameBodyProfile.STRUCTURED_MAPPING_COMPILER_OPS_314_V1:ExpandedCompilerFrameBodyOverlay}
+        _need(type(self) is expected.get(self.profile,StructuredFrameBodyOverlay),
               'compiler prologue profile requires its explicit source overlay variant')
 
 
@@ -670,11 +682,103 @@ class CompilerStructuredFrameBodyOverlay(StructuredFrameBodyOverlay):
 MODULE_RECORD_TAGS[CompilerStructuredFrameBodyOverlay] = ('frame_overlay_kind', 'COMPILER_MAPPING_314_V1')
 
 
+@dataclass(frozen=True,slots=True)
+class ModuleCompilerOperation:
+    role: str
+    offsets: tuple[int,...]
+    operation: OperationID
+
+    def __post_init__(self):
+        _need(type(self.role) is str and bool(self.role) and type(self.operation) is OperationID,
+              'compiler operation needs its role and original canonical operation')
+        _need(type(self.offsets) is tuple and bool(self.offsets)
+              and all(type(x) is int and x>=0 for x in self.offsets)
+              and tuple(sorted(set(self.offsets)))==self.offsets,
+              'compiler operation must retain ordered original offsets')
+
+
+@dataclass(frozen=True,slots=True)
+class ModuleCompilerConstant:
+    operation: OperationID
+    constant_path: tuple[int,...]
+    code_key: str
+
+    def __post_init__(self):
+        _need(type(self.operation) is OperationID and type(self.code_key) is str and bool(self.code_key)
+              and type(self.constant_path) is tuple and bool(self.constant_path)
+              and all(type(x) is int and x>=0 for x in self.constant_path),
+              'compiler constant needs its exact original code slot and producer')
+
+
+@dataclass(frozen=True,slots=True)
+class ExpandedModuleCompilerPrologue:
+    compilation: SourceCompilationCodeRef
+    cells: tuple[ModuleCompilerCellSlot,...]
+    instructions: tuple[ModuleCompilerInstruction,...]
+    children: tuple[ModuleCompilerChild,...]
+    first_source_offset: int
+    region: RegionID
+    invocation: OperationID
+    normal: BlockID
+    cell_values: tuple[ValueID,...]
+    operations: tuple[ModuleCompilerOperation,...]
+    constant_reads: tuple[ModuleCompilerConstant,...]
+
+    def __post_init__(self):
+        _need(type(self.compilation) is SourceCompilationCodeRef and not self.compilation.code_path,
+              'expanded compiler prefix requires its original module compilation')
+        for rows,kind in ((self.cells,ModuleCompilerCellSlot),(self.instructions,ModuleCompilerInstruction),
+                          (self.children,ModuleCompilerChild),(self.cell_values,ValueID),
+                          (self.operations,ModuleCompilerOperation),(self.constant_reads,ModuleCompilerConstant)):
+            _need(type(rows) is tuple and all(type(x) is kind for x in rows),'expanded compiler record table differs')
+        _need(tuple(x.ordinal for x in self.cells)==tuple(range(len(self.cells)))
+              and len({x.name for x in self.cells})==len(self.cells)
+              and len(self.cell_values)==len(self.cells) and len(set(self.cell_values))==len(self.cell_values),
+              'compiler slots and parent completion handles must correspond by ordinal')
+        _need(bool(self.instructions) and type(self.first_source_offset) is int
+              and tuple(x.offset for x in self.instructions)==tuple(sorted({x.offset for x in self.instructions}))
+              and self.first_source_offset>self.instructions[-1].offset,
+              'expanded prefix lost its original ordered compiler boundary')
+        _need(type(self.region) is RegionID and type(self.invocation) is OperationID
+              and type(self.normal) is BlockID and bool(self.operations)
+              and len({x.operation for x in self.operations})==len(self.operations),
+              'expanded prefix needs actual distinct operations and its real call ports')
+        offsets={x.offset for x in self.instructions}
+        _need(all(set(x.offsets)<=offsets for x in self.operations)
+              and len({x.operation for x in self.constant_reads})==len(self.constant_reads)
+              and {x.operation for x in self.constant_reads}<={x.operation for x in self.operations}
+              and len({x.code_path for x in self.children})==len(self.children),
+              'compiler operation/constant/child references differ from their source layout')
+
+
+@dataclass(frozen=True,slots=True,kw_only=True)
+class ExpandedCompilerFrameBodyOverlay(StructuredFrameBodyOverlay):
+    compiler_prologue: ExpandedModuleCompilerPrologue | None
+
+    @property
+    def status(self):
+        return (FrameBodyStatus.PARTIAL if self.remaining is not None
+                or self.compiler_prologue is not None and self.compiler_prologue.children
+                else FrameBodyStatus.TOPOLOGY_RECOVERED)
+
+    def __post_init__(self):
+        StructuredFrameBodyOverlay.__post_init__(self)
+        _need(type(self.declaration) is StaticModuleEntryDeclaration
+              and self.profile is FrameBodyProfile.STRUCTURED_MAPPING_COMPILER_OPS_314_V1
+              and (self.compiler_prologue is None or type(self.compiler_prologue) is ExpandedModuleCompilerPrologue
+                   and self.compiler_prologue.compilation==self.declaration.compilation),
+              'expanded compiler overlay needs its explicit profile and original provenance')
+
+
+MODULE_RECORD_TAGS[ExpandedCompilerFrameBodyOverlay]=('frame_overlay_kind','COMPILER_OPS_MAPPING_314_V1')
+
+
 def encode_frame_body(value):
     return encode(value, record_tags=MODULE_RECORD_TAGS)
 
 
 def decode_frame_body(value):
-    kind = (CompilerStructuredFrameBodyOverlay if type(value) is dict
-            and value.get('frame_overlay_kind') == 'COMPILER_MAPPING_314_V1' else StructuredFrameBodyOverlay)
+    kinds={'COMPILER_MAPPING_314_V1':CompilerStructuredFrameBodyOverlay,
+           'COMPILER_OPS_MAPPING_314_V1':ExpandedCompilerFrameBodyOverlay}
+    kind=kinds.get(value.get('frame_overlay_kind'),StructuredFrameBodyOverlay) if type(value) is dict else StructuredFrameBodyOverlay
     return decode(kind, value, record_tags=MODULE_RECORD_TAGS)

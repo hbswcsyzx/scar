@@ -545,11 +545,12 @@ def require_valid_structured_module_program(result,*,source_texts,code_evidence=
     from scar.ir.program.validation import require_valid
     overlay=result.module
     _need(isinstance(overlay,StructuredFrameBodyOverlay) and decode_frame_body(encode_frame_body(overlay))==overlay,'SP8 needs its closed typed overlay')
-    compiler=result.profile is FrameBodyProfile.STRUCTURED_MAPPING_COMPILER_314_V1
-    extended=result.profile in (FrameBodyProfile.STRUCTURED_MAPPING_BODY_314_V1,FrameBodyProfile.STRUCTURED_MAPPING_COMPILER_314_V1)
-    paired=result.profile in (FrameBodyProfile.STRUCTURED_MAPPING_PROPAGATION_314_V1,FrameBodyProfile.STRUCTURED_MAPPING_BODY_314_V1,FrameBodyProfile.STRUCTURED_MAPPING_COMPILER_314_V1)
+    expanded_compiler=result.profile is FrameBodyProfile.STRUCTURED_MAPPING_COMPILER_OPS_314_V1
+    compiler=result.profile in (FrameBodyProfile.STRUCTURED_MAPPING_COMPILER_314_V1,FrameBodyProfile.STRUCTURED_MAPPING_COMPILER_OPS_314_V1)
+    extended=result.profile in (FrameBodyProfile.STRUCTURED_MAPPING_BODY_314_V1,FrameBodyProfile.STRUCTURED_MAPPING_COMPILER_314_V1,FrameBodyProfile.STRUCTURED_MAPPING_COMPILER_OPS_314_V1)
+    paired=result.profile in (FrameBodyProfile.STRUCTURED_MAPPING_PROPAGATION_314_V1,FrameBodyProfile.STRUCTURED_MAPPING_BODY_314_V1,FrameBodyProfile.STRUCTURED_MAPPING_COMPILER_314_V1,FrameBodyProfile.STRUCTURED_MAPPING_COMPILER_OPS_314_V1)
     _need(result.profile in (FrameBodyProfile.STRUCTURED_MAPPING_314_V1,FrameBodyProfile.STRUCTURED_MAPPING_PROPAGATION_314_V1,
-          FrameBodyProfile.STRUCTURED_MAPPING_BODY_314_V1,FrameBodyProfile.STRUCTURED_MAPPING_COMPILER_314_V1) and overlay.profile is result.profile
+          FrameBodyProfile.STRUCTURED_MAPPING_BODY_314_V1,FrameBodyProfile.STRUCTURED_MAPPING_COMPILER_314_V1,FrameBodyProfile.STRUCTURED_MAPPING_COMPILER_OPS_314_V1) and overlay.profile is result.profile
           and overlay.namespace_policy is NamespacePolicy.MODULE_MAPPING_314_V1
           and overlay.completion_profile is (FrameCompletionProfile.PROPAGATION_REF_PAIR_314_V1 if paired else FrameCompletionProfile.RAW_EXCEPTION_REF_314_V1)
           and all(value is None for value in (result.interface,result.frame,result.structured,result.language)),
@@ -663,6 +664,11 @@ def require_valid_structured_module_program(result,*,source_texts,code_evidence=
     for protocol in overlay.protocols:
         op=operations[protocol.operation];kind=protocol.kind
         if type(kind) is not K:continue
+        if kind in (K.COMPILER_MAKE_CELL,K.COMPILER_READ_CODE_CONSTANT,K.COMPILER_MAKE_FUNCTION,
+                    K.COMPILER_BUILD_SET,K.COMPILER_STORE_NAME,K.COMPILER_SETUP_ANNOTATIONS,
+                    K.COMPILER_RETAIN_OWNED,K.COMPILER_RELEASE_OWNED,K.INVOKE_EXPANDED_COMPILER_PROLOGUE):
+            _need(expanded_compiler,"compiler operations require their explicit expanded profile")
+            continue  # The source/compiler validator checks every prefix operation and lifetime port below.
         if kind in (K.MATCH_EXCEPTION_BORROWED_314,K.FRAME_EXIT_EXCEPTION_PACKET):
             _need(paired,'RAW profile cannot acquire propagation frame/matcher primitives')
             continue
@@ -781,7 +787,10 @@ def require_valid_structured_module_program(result,*,source_texts,code_evidence=
     compiler_prologue=None
     if compiler:
         from scar.analysis.source_module_compiler_lowering import validate_compiler_prologue
-        compiler_prologue=validate_compiler_prologue(result,code_evidence,context)
+        if expanded_compiler:
+            from scar.analysis.source_module_compiler_lowering import validate_expanded_compiler_prologue
+            compiler_prologue=validate_expanded_compiler_prologue(result,code_evidence,context)
+        else:compiler_prologue=validate_compiler_prologue(result,code_evidence,context)
     source_start=compiler_prologue.normal if compiler_prologue is not None else entry.id
     last_normal=ordered_statements(prefix,source_start)
     # Index tuples use the slice/key producer, whose packing interface owns
@@ -932,6 +941,18 @@ def require_valid_structured_module_program(result,*,source_texts,code_evidence=
         _need(len(calls)==1 and calls[0].callee==residual.region and protocols[calls[0].id].kind is K.INVOKE_REMAINING,
               'remaining source must run once after the actual prefix, not a duplicate whole body')
         if last_normal is not None:_need(calls[0].id in blocks[last_normal].operations,'remaining source must begin at prefix normal continuation')
+        if expanded_compiler:
+            cells=compiler_prologue.cell_values if compiler_prologue else ()
+            expected=(*refs,*cells)
+            call=calls[0]
+            _need(tuple(u.value for u in call.uses[:-1])==expected,
+                  'remaining source lost its namespace/compiler-owned cell arguments')
+            residual_region=regions[residual.region];residual_entry=blocks[residual_region.entry]
+            _need(len(residual_entry.arguments)==len(expected)+1,
+                  'remaining source entry must retain every compiler slot handle')
+            opaque=operations[residual.operation]
+            _need(tuple(u.value for u in opaque.uses[:-1])==residual_entry.arguments[:-1],
+                  'remaining source compiler slots must reach the actual required body operation')
     else:_need(len(regions)==1+(compiler_prologue is not None)
         and not any(op.callee is not None and not (compiler_prologue is not None and op.id==compiler_prologue.invocation)
                     for op in graph.operations),'extra source computation Region')

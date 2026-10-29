@@ -34,7 +34,7 @@ K/Σ/A/R/Q/M 是正交视角。当前 M 不收集实际测量，Q 保留语言�
 静态定义不要求真实 InvocationID，也不能伪造 CapturedCode 来创建定义。
 静态编译的 CodeType 是分析器产生的编译产物，不是观察到的运行对象。其布局 key/常量路径必须通过独立 SOURCE_COMPILATION 来源绑定编译器 profile、源码和原定义；只能支撑编译语义，不支撑实际加载身份。
 编译器的参数计数、flags、local/name/cell/free 表是可保存的静态事实。表项按编译器索引保留，不能按名称集合去重或合并；相对导入的 name 表可以有空字符串。compiler-owned cell、入口 closure cell、namespace 中同名绑定是不同角色，不能仅凭拼写相同建立别名。
-没有直接 AST 语句的编译器前导用原编译来源、常量路径和 offset 描述，不伪造源码行或函数定义。它通过独立 Region 的正常/异常 world 端口接到原模块主体之前；尚未展开的内部行为保留明确 required expansion，不能算完整建模。
+没有直接 AST 语句的编译器前导用原编译来源、常量路径和 offset 描述，不伪造源码行或函数定义。它通过独立 Region 的正常/异常 world 端口接到原模块主体之前。已知 cell allocation、code read、factory、namespace set/store/setup 现在有各自的操作和 world；owned cell handles 通过 normal ports 返回父 frame，继续传给后缀，并保留到 frame exit。deferred child 等尚未展开部分仍明确标记，不算完整建模。
 
 DATA、REFERENCE、STATE 分开：局部引用绑定未变，不代表其对象内容未变。
 State SSA 表达静态读写依赖；循环/分支版本是符号版本，不是运行观察到的时间戳。

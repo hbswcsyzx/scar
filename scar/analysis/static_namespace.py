@@ -32,7 +32,7 @@ class NamespaceAccess:
 
 def protocol_kinds(document):
     result = {}
-    for key in ('module', 'structured'):
+    for key in ('module', 'structured', 'class'):
         for row in (document.get(key) or {}).get('protocols', ()):
             operation = decode(OperationID, row['operation'])
             kind = row['kind']
@@ -73,7 +73,7 @@ class NamespaceDependencies:
         self._cache = {}
         for op in graph.operations:
             kind = self.protocols.get(op.id)
-            writing = kind in ('STORE_NAME_314', 'STORE_GLOBAL')
+            writing = kind in ('STORE_NAME_314', 'STORE_GLOBAL','COMPILER_STORE_NAME')
             if not writing and kind not in ('LOAD_NAME_314', 'LOAD_GLOBAL'):
                 continue
             if op.terminator is None or op.terminator.kind is not TerminatorKind.INVOKE:
