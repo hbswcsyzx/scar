@@ -53,6 +53,22 @@
 S1 的目录与逐入口规则台账已存在，语言语义完整性仍未闭合；S2 的完整规范子图、S3 调用/别名/效果联合固定点、S4 统一属性约束及 S5 完整导出尚未完成。
 第三方源码/声明、动态目标表达式与别名/副作用仍有可继续静态推导的部分，不把这些缺口统称为“只能动态获取”。
 
+### 缺口复审：为什么不能宣称静态分析已经完成
+
+当前 manifest 的 `LOWERED_WITH_GAPS` 由“是否生成规范图”决定，**不是逐主体穷尽推理后的结论**。同样，0 个构造 ERROR 只说明分析器没有报告构造异常。二者都不能用作完整性证明。
+
+- **实现欠账**：547 个 lowerer 不支持项、510 个规则 shape 不支持项。仅 combined slice 86 项、slice store 70 项、nested with cleanup 60 项就有明确源码和编译语义，缺的是 SCAR 的展开规则，不能归因于必须动态捕获。
+- **入口与内联展开尚未核齐**：3,731 个目录项没有独立入口适配，其中 2,482 个 annotation context、961 个 comprehension/generator expression、235 个 lambda、52 个函数、1 个 stub 模块。部分表达式已经在父图内展开，因此不能把该数字直接解释成同等数量完全缺失的运行帧；仍须逐项核对其实际归属和缺失结构。
+- **跨过程推理未完成**：当前只处理 8,819 份主体产物中的 80 份；已发布 493 个 CALL。目标闭包、返回、defaults/closure/global 环境、别名与 effects 联合固定点尚未贯通。不能将尚未推导的调用关系直接称为语言本身不可知。
+- **材料范围不足**：当前包含 LeWM 源树和两个本地依赖项目，没有环境中全部第三方实现的源码闭包。源码缺失与已有源码但未分析必须分别报告。
+- **静态边界与结构缺失混列**：例如 module 的常量槽/函数创建结构已经连接，但运行时 code 对象身份仍开放；该身份不应成为“缺少函数体结构”的依据。现有原始 gap 总数还混有这种证明前沿，不能用它衡量结构缺失率。类的前沿还被投影为统一 EFFECT_SUMMARY，查询时须结合原 class frontier 才能知道具体欠账。
+
+上述分类是本次读取 current manifest 和实际 lowerer/linker 的审计结论，不是宣称已实现了新的自动缺口分类器。后续应分别闭合结构、跨过程关系和字段事实；未知地址等运行字段允许保持符号化，已有源码中尚未实现的规则继续作为实现欠账。
+
+更关键的未闭环部分是 S2 产生的操作/Use/状态端点尚未充分进入 S3/S4：namespace flow 仍附带 mapping 提交、读取返回绑定及中间 effects 保持等条件，linker 对每个 CALL 都保留 TARGET_SET_CLOSURE_OPEN。缺少把源码上下文、类型/对象来源、返回和状态摘要反复传播以消解这些条件的过程。即使继续补齐局部语法，也不会自动获得全程序依赖图；受支持子集的联合推理应与语言欠账的修复衔接推进，而非等待所有语法实现后才开始。
+
+已查到并修复一个真实消费断口：函数 lowerer 发出 `LOOKUP_GLOBAL`，namespace 分析原来只接收 `LOAD_GLOBAL` 等协议，跳过了已有 G/saved-B/key/world 端点。修复后，从 current 中现有 `eval.img_transform`、`eval.run` 的规范图重新解码并建立 namespace 索引，分别接回 7、32 个函数 global read，原正常结果与两个 namespace owner 均保持；耗时约 0.50、21.64 秒。仅运行静态图 reader/分析器，没有执行函数；此检查没有重发 current 的调用索引，也没有证明跨主体 G 投影或任何缓存合法性。
+
 ## 下一项
 
 按 [唯一计划](STATIC_ANALYSIS_PLAN.md) 接通父级 class construction、65 项 class continuation；补齐 resumable/隐式入口及已分类的 slice/with 等语言缺口，在已有条件 namespace/调用关系上推进返回、环境、别名和 effects 联合固定点，再接统一类型/Tensor 属性。

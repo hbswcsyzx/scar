@@ -182,6 +182,16 @@ STORE/LOAD/world/CFG、查找优先及中间效果保留明确条件；正常覆
 纯静态目录和 source-root 调度已落地，目录成员不再由捕获调用/CodeWitness 决定。
 已有整个目录驱动规范 body 构造。当前补齐模块、类、generator/async 等静态入口和具体语言展开，修复真实源码触发的构造错误；同时将原调用 Use/形参/完成端口接到原主体命名空间，随后推进 S3 的联合分析，不以存在同名函数代替目标解析。
 
+**优先接通已有结构的静态传递，而非仅继续增加局部 lowerer。** 已核实的连接欠账按以下依赖推进，均不需要目标运行身份：
+
+1. 函数 `LOOKUP_GLOBAL` 的 G/saved-B/key/world 与 namespace 读分析衔接；不能因 producer 和 consumer 协议拼写不同漏掉现有端点。保持真正缺键才回退 builtins 的条件。
+2. 原 factory 的 function-globals、默认值/关键字默认值、closure Uses → 函数状态 → 被调用环境/缺省形参。状态可能后改时保留读点/版本和条件，不直接断言创建时值永远不变。
+3. 已有 decorator application 的 callable/argument/normal result → 通用调用与返回传递。源码可见的恒等 decorator 应通过 actual→formal→return 推出关系；不能无条件跳过 decorator。
+4. import module value → namespace/export attribute → callable 候选。对已有源码继续按导出和状态规则传播，不能因为不是 `from ... import ...` 就停止；缺源码和动态 import hook 另保留边界。
+5. 分解 namespace flow 的路径、mapping、fallback 和中间 effects 条件；能由类型/对象来源及 ModRef 证明的逐项消解，其余条件保留。不得删除条件假装已经证明。
+
+以上不是已实现的联合固定点。当前 bounded resolver 对每个 CALL 仍报告 TARGET_SET_CLOSURE_OPEN；修复一条协议消费断口也不意味着跨主体 G 投影或整程序调用闭包已经完成。
+
 首个交付包括：固定源根与配置、逐文件 SHA、逐模块/定义 canonical source ref、词法父级、定义类别、导入候选和逐项语言/缺失/预算状态；全部结果继续引用现有 source/definition IDs。
 
 S1 停止条件：输入边界和预算明确；边界内每个解析文件和词法定义均有唯一目录项或具体解析缺口；导入候选与动态/外部边界可查询；重复静态构建的目录身份稳定；入口不调用目标代码，也不以 CapturedCode/CodeWitness 筛除定义。

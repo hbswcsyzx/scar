@@ -74,7 +74,11 @@ class NamespaceDependencies:
         for op in graph.operations:
             kind = self.protocols.get(op.id)
             writing = kind in ('STORE_NAME_314', 'STORE_GLOBAL','COMPILER_STORE_NAME')
-            if not writing and kind not in ('LOAD_NAME_314', 'LOAD_GLOBAL'):
+            # Function lowering names this two-namespace primitive LOOKUP_GLOBAL;
+            # compiler-backed class lowering uses LOAD_GLOBAL. Both retain the
+            # declared globals-then-builtins owner/key Uses below. This joins
+            # their existing ports; it does not discharge mapping/effect guards.
+            if not writing and kind not in ('LOAD_NAME_314', 'LOAD_GLOBAL', 'LOOKUP_GLOBAL'):
                 continue
             if op.terminator is None or op.terminator.kind is not TerminatorKind.INVOKE:
                 raise ValueError('namespace primitive has no actual INVOKE')
