@@ -13,7 +13,7 @@ import json
 from scar.ir.record_codec import decode, encode, loads as strict_loads
 from scar.ir.v2.common import SourceReference
 from scar.ir.v2.ids import OperationDefinitionID
-from .functions import CandidateBinding
+from .functions import CandidateBinding, CallBindingStatus
 from .ids import BlockID, EnvironmentInterfaceID, LocationID, OperationID, UseID, ValueID
 from .environments import EnvironmentMember, EnvironmentRole
 from .model import ExitKind, ValueKind
@@ -127,6 +127,7 @@ class StaticCallTarget:
     frontiers: tuple[StaticCallFrontier, ...] = ()
     qualification: str = "CONDITIONAL_STATIC_CANDIDATE"
     environment_routes: tuple[StaticFunctionEnvironmentRoute, ...] = ()
+    requirement_paths: tuple[tuple[StaticCallContext, ...], ...] = ((),)
 
     def __post_init__(self):
         _exact(self.definition, SourceDefinitionReference)
@@ -146,6 +147,14 @@ class StaticCallTarget:
         if self.state_entry is not None:
             _exact(self.state_entry, StaticStateEntryRoute)
         _rows(self.environment_routes, StaticFunctionEnvironmentRoute)
+        if type(self.requirement_paths) is not tuple or not self.requirement_paths:
+            raise ValueError("static target needs explicit caller-context alternatives")
+        for path in self.requirement_paths:
+            _rows(path, StaticCallContext)
+            if any(before.callee != after.caller for before, after in zip(path, path[1:])):
+                raise ValueError("static target context alternative is not an ordered call chain")
+        if len(set(self.requirement_paths)) != len(self.requirement_paths):
+            raise ValueError("static target repeats a caller-context alternative")
         if self.body is None and (self.arguments or self.normal_returns or self.completions or self.state_entry or self.environment_routes):
             raise ValueError("missing body cannot supply invented ports")
         if self.body is not None:
@@ -528,6 +537,110 @@ class StaticCrossBodyNamespaceFlow:
 
 
 @dataclass(frozen=True, slots=True)
+class StaticCallContext:
+    """An original static callsite and selected target, never an invocation."""
+    caller: SourceBodyNamespace
+    operation: OperationID
+    callee_use: UseID
+    callee_value: ValueID
+    definition: SourceDefinitionReference
+    callee: SourceBodyNamespace
+
+    def __post_init__(self):
+        for value, kind in ((self.caller, SourceBodyNamespace), (self.operation, OperationID),
+                            (self.callee_use, UseID), (self.callee_value, ValueID),
+                            (self.definition, SourceDefinitionReference), (self.callee, SourceBodyNamespace)):
+            _exact(value, kind)
+        if self.callee.definition != self.definition.definition or self.callee.source != self.definition.source:
+            raise ValueError("static call context target differs from its original qualified callee")
+
+
+class ValueFlowCondition(str, Enum):
+    CALL_TARGET_SELECTED = "CALL_TARGET_SELECTED"
+    CALL_ENTRY_BINDING_VALID = "CALL_ENTRY_BINDING_VALID"
+    CONTEXT_REQUIREMENTS_SATISFIED = "CONTEXT_REQUIREMENTS_SATISFIED"
+    ACTUAL_REFERENCE_BOUND_TO_FORMAL = "ACTUAL_REFERENCE_BOUND_TO_FORMAL"
+    CALLEE_COMPLETES_NORMALLY = "CALLEE_COMPLETES_NORMALLY"
+    CALL_NORMAL_EDGE_SELECTED = "CALL_NORMAL_EDGE_SELECTED"
+    CALLEE_RETURN_SITE_SELECTED = "CALLEE_RETURN_SITE_SELECTED"
+
+
+def _value_flow_requirements(context, requirements):
+    _rows(requirements, StaticCallContext)
+    if any(before.callee != after.caller for before, after in zip(requirements, requirements[1:])):
+        raise ValueError("value-flow context requirements must preserve an ordered original call chain")
+    if requirements and requirements[-1].callee != context.caller:
+        raise ValueError("value-flow requirements do not end in its original caller body")
+
+
+@dataclass(frozen=True, slots=True)
+class StaticArgumentValueFlow:
+    """Conditional reference binding; contents and effects remain independent."""
+    context: StaticCallContext
+    binding: CandidateBinding
+    argument: SourceArgumentPort
+    conditions: tuple[ValueFlowCondition, ...] = (
+        ValueFlowCondition.CALL_TARGET_SELECTED, ValueFlowCondition.CALL_ENTRY_BINDING_VALID,
+        ValueFlowCondition.CONTEXT_REQUIREMENTS_SATISFIED, ValueFlowCondition.ACTUAL_REFERENCE_BOUND_TO_FORMAL)
+    requirements: tuple[StaticCallContext, ...] = ()
+    qualification: str = "CONDITIONAL_ARGUMENT_REFERENCE_BINDING"
+
+    def __post_init__(self):
+        _exact(self.context, StaticCallContext)
+        _exact(self.binding, CandidateBinding)
+        _exact(self.argument, SourceArgumentPort)
+        _rows(self.conditions, ValueFlowCondition)
+        context, port = self.context, self.argument
+        if (self.binding.status is not CallBindingStatus.CONDITIONAL
+                or self.binding.target != context.definition.definition
+                or port.actual_body != context.caller or port.operation != context.operation
+                or port.formal_body != context.callee or port.parameter not in self.binding.routes
+                or port.index >= len(self.binding.arguments)):
+            raise ValueError("argument value flow changed its qualified original binding ports")
+        actual = self.binding.arguments[port.index]
+        if actual.use != port.actual_use or actual.source != port.actual_source:
+            raise ValueError("argument value flow differs from its original candidate actual")
+        required = (ValueFlowCondition.CALL_TARGET_SELECTED, ValueFlowCondition.CALL_ENTRY_BINDING_VALID,
+                    ValueFlowCondition.CONTEXT_REQUIREMENTS_SATISFIED, ValueFlowCondition.ACTUAL_REFERENCE_BOUND_TO_FORMAL)
+        if self.conditions != required or self.qualification != "CONDITIONAL_ARGUMENT_REFERENCE_BINDING":
+            raise ValueError("argument reference flow cannot claim unconditioned contents or effects")
+        _value_flow_requirements(context, self.requirements)
+
+
+@dataclass(frozen=True, slots=True)
+class StaticReturnValueFlow:
+    """One real normal reference terminal, selected under this call context."""
+    context: StaticCallContext
+    completion: StaticCompletionRoute
+    terminal: StaticTerminalPort
+    conditions: tuple[ValueFlowCondition, ...] = (
+        ValueFlowCondition.CALL_TARGET_SELECTED, ValueFlowCondition.CALL_ENTRY_BINDING_VALID,
+        ValueFlowCondition.CONTEXT_REQUIREMENTS_SATISFIED, ValueFlowCondition.CALLEE_COMPLETES_NORMALLY,
+        ValueFlowCondition.CALL_NORMAL_EDGE_SELECTED, ValueFlowCondition.CALLEE_RETURN_SITE_SELECTED)
+    requirements: tuple[StaticCallContext, ...] = ()
+    qualification: str = "CONDITIONAL_NORMAL_RETURN_REFERENCE_BINDING"
+
+    def __post_init__(self):
+        _exact(self.context, StaticCallContext)
+        _exact(self.completion, StaticCompletionRoute)
+        _exact(self.terminal, StaticTerminalPort)
+        _rows(self.conditions, ValueFlowCondition)
+        route = self.completion
+        if (route.kind is not ExitKind.NORMAL or route.value_kind is not ValueKind.REFERENCE
+                or route.completion_index != 0 or route.callee_port.index != 0
+                or route.caller_edge.operation != self.context.operation
+                or route.callee_port.region != self.context.callee.region
+                or self.terminal not in route.terminals):
+            raise ValueError("return value flow needs an original normal reference payload0 terminal")
+        required = (ValueFlowCondition.CALL_TARGET_SELECTED, ValueFlowCondition.CALL_ENTRY_BINDING_VALID,
+                    ValueFlowCondition.CONTEXT_REQUIREMENTS_SATISFIED, ValueFlowCondition.CALLEE_COMPLETES_NORMALLY,
+                    ValueFlowCondition.CALL_NORMAL_EDGE_SELECTED, ValueFlowCondition.CALLEE_RETURN_SITE_SELECTED)
+        if self.conditions != required or self.qualification != "CONDITIONAL_NORMAL_RETURN_REFERENCE_BINDING":
+            raise ValueError("return reference flow cannot claim unconditioned contents or effects")
+        _value_flow_requirements(self.context, self.requirements)
+
+
+@dataclass(frozen=True, slots=True)
 class StaticCallSite:
     caller: SourceBodyNamespace
     operation: OperationID
@@ -543,6 +656,8 @@ class StaticCallSite:
     qualified_namespace_flows: tuple[StaticQualifiedNamespaceFlow, ...] = ()
     qualified_function_creations: tuple[StaticQualifiedFunctionCreation, ...] = ()
     cross_body_namespace_flows: tuple[StaticCrossBodyNamespaceFlow, ...] = ()
+    argument_value_flows: tuple[StaticArgumentValueFlow, ...] = ()
+    return_value_flows: tuple[StaticReturnValueFlow, ...] = ()
 
     def __post_init__(self):
         _exact(self.caller, SourceBodyNamespace)
@@ -562,7 +677,11 @@ class StaticCallSite:
         _rows(self.qualified_namespace_flows, StaticQualifiedNamespaceFlow)
         _rows(self.qualified_function_creations, StaticQualifiedFunctionCreation)
         _rows(self.cross_body_namespace_flows, StaticCrossBodyNamespaceFlow)
+        _rows(self.argument_value_flows, StaticArgumentValueFlow)
+        _rows(self.return_value_flows, StaticReturnValueFlow)
         for target in self.targets:
+            if any(path and path[-1].callee != self.caller for path in target.requirement_paths):
+                raise ValueError("target context alternative does not end in its original caller body")
             if any(port.actual_body != self.caller or port.operation != self.operation for port in target.arguments):
                 raise ValueError("actual port belongs to another original caller")
             if any(route.caller!=self.caller or route.call_operation!=self.operation
@@ -591,7 +710,7 @@ class StaticCallShard:
 
 def dumps(shard: StaticCallShard) -> str:
     _exact(shard, StaticCallShard)
-    return json.dumps({"schema": "scar.static-calls", "schema_version": 4,
+    return json.dumps({"schema": "scar.static-calls", "schema_version": 5,
                        "relations": encode(shard)}, sort_keys=True, separators=(",", ":"), allow_nan=False)
 
 
@@ -599,17 +718,20 @@ def loads(payload: str) -> StaticCallShard:
     document = strict_loads(payload)
     if (type(document) is not dict or set(document) != {"schema", "schema_version", "relations"}
             or document["schema"] != "scar.static-calls" or type(document["schema_version"]) is not int
-            or document["schema_version"] not in (1, 2, 3, 4)):
+            or document["schema_version"] not in (1, 2, 3, 4, 5)):
         raise ValueError("unsupported static call relation shard")
     relations = document["relations"]
-    if document["schema_version"] in (1, 2, 3):
+    if document["schema_version"] in (1, 2, 3, 4):
         # A closed historical wire must not silently carry new relationships.
         relations = copy.deepcopy(relations)
         v4_fields = {"qualified_namespace_flows", "qualified_function_creations", "cross_body_namespace_flows"}
-        old_fields = set(StaticCallSite.__dataclass_fields__) - v4_fields
+        v5_fields = {"argument_value_flows", "return_value_flows"}
+        old_fields = set(StaticCallSite.__dataclass_fields__) - v5_fields
+        if document["schema_version"] < 4:
+            old_fields -= v4_fields
         if document["schema_version"] == 1:
             old_fields -= {"namespace_flows", "function_creations"}
-        old_target_fields = set(StaticCallTarget.__dataclass_fields__)
+        old_target_fields = set(StaticCallTarget.__dataclass_fields__) - {"requirement_paths"}
         if document["schema_version"] < 3:
             old_target_fields -= {"environment_routes"}
         if type(relations) is not dict or type(relations.get("calls")) is not list:
@@ -617,7 +739,7 @@ def loads(payload: str) -> StaticCallShard:
         for call in relations["calls"]:
             if type(call) is not dict or set(call) != old_fields:
                 raise ValueError("historical call record cannot contain newer relationships")
-            if document["schema_version"] > 1:
+            if document["schema_version"] in (2, 3):
                 if type(call['namespace_flows']) is not list:
                     raise ValueError("historical namespace relationships are malformed")
                 for flow in call['namespace_flows']:
@@ -631,9 +753,12 @@ def loads(payload: str) -> StaticCallShard:
                     raise ValueError("historical target has unsupported relationship fields")
                 if document["schema_version"] < 3:
                     target['environment_routes']=[]
+                target['requirement_paths']=[[]]
             if document["schema_version"] == 1:
                 call.update(namespace_flows=[], function_creations=[])
-            call.update(qualified_namespace_flows=[], qualified_function_creations=[], cross_body_namespace_flows=[])
+            if document["schema_version"] < 4:
+                call.update(qualified_namespace_flows=[], qualified_function_creations=[], cross_body_namespace_flows=[])
+            call.update(argument_value_flows=[], return_value_flows=[])
     return decode(StaticCallShard, relations)
 
 
@@ -643,5 +768,6 @@ __all__ = ["StaticCallFrontier", "StaticTerminalPort", "StaticCompletionRoute",
            "StaticQualifiedNamespaceWrite", "StaticQualifiedNamespaceRead", "NamespacePathStart",
            "StaticNamespacePathSegment", "CrossBodyNamespaceCondition", "StaticNamespaceCallBridge",
            "StaticCrossBodyNamespaceFlow",
+           "StaticCallContext", "ValueFlowCondition", "StaticArgumentValueFlow", "StaticReturnValueFlow",
            "FunctionEnvironmentRouteKind", "FunctionEnvironmentCondition", "StaticFunctionEnvironmentRoute",
            "StaticFunctionCreationRoute", "StaticCallTarget", "StaticCallSite", "StaticCallShard", "dumps", "loads"]

@@ -73,8 +73,18 @@ S1 的目录与逐入口规则台账已存在，语言语义完整性仍未闭�
 
 ## 下一项
 
-按 [唯一计划](STATIC_ANALYSIS_PLAN.md) 接通函数环境/默认参数的读点、返回与装饰器/模块属性传递，推进别名和 effects 联合固定点；并补齐父级 class construction、45 项 class continuation、resumable/隐式入口、target-child expression/with 等语言缺口，随后接统一类型/Tensor 属性。
+按 [唯一计划](STATIC_ANALYSIS_PLAN.md) 继续默认参数的实际字段/元素读点、装饰器 application 与模块属性传递，推进别名和 effects 联合固定点；并补齐父级 class construction、45 项 class continuation、resumable/隐式入口、target-child expression/with 等语言缺口，随后接统一类型/Tensor 属性。
 本轮没有导入或执行 LeWM，没有运行目标样例、trace、benchmark、优化或动态验证。仅运行分析器、解析源材料与读取/校验生成的静态图。
+
+### 新实现与正在进行的 LeWM 实测
+
+schema v5 已将显式实参→形参、正常 reference 返回→caller landing 接入同一 qualified 来源工作队列。求解分别保存原 CALL/目标构成的上下文链：返回时压栈、formal 读取时只沿匹配调用出栈；明确上下文不退回无上下文并集。最终展示可以合并同一静态 CALL，不能拿该并集反向激活目标。新事实会重新调度跨主体的原 requester；context/depth/fact 预算在索引写入前统一检查，拒绝新事实不清除已接通事实。
+
+纯静态独立源码的 14 个 CALL 产生 15 个条件目标、17 条参数来源和 29 条返回来源展示记录；六个 identity/apply/relay 最终调用点均保持 a/b 隔离，31 次队列处理后稳定。其全局唯一事实为 4 条 namespace、28 条参数/返回，不将多处展示的支持关系重复当作新事实。局部 typed facts 复用前后，该同一输入的 clean 分析器链接耗时分别为 93.67 秒和 44.132 秒（各一次测量）；带 cProfile 的 363.12 秒只用于定位分析器重复解码，不作为对照性能。以上不是 LeWM 执行或加速数据。
+
+唯一新增 integration 回归已通过（117.75 秒）：identity、回调、多层返回、局部覆盖写入、无种子递归和非空上下文的公开 query；样例源码没有执行。schema v1–4 严格迁移及字段夹带拒绝检查通过；读取真实旧 v4 publication 时，新值流标为 NOT_RECORDED，不因新 reader 存在而假称旧图已有 v5 证明。独立 public validator 每次仍从原输入验证，局部复用的不是跨输入“已验证”标志。
+
+LeWM 新一轮链接已启动，输入仍为 current 中的完整源边界，尝试全部 8,819 份主体产物，不再限定前 400 份；时间上限 7,200 秒，其他上下文/事实/输入预算仍明确保留。每完成一个源 unit 就处理已接通的队列，后来的来源继续触发重算，避免只枚举到耗尽时间才开始传播。输出采用原子发布；运行结束前，上面的 LeWM v4 数量仍是最后已发布结果，不能将独立样例的 v5 数量冒充 LeWM 结果。本次全量尝试结束后必须核对实际处理范围、剩余项、构造/读取错误和公开查询；即使覆盖全部现有主体，也不等于剩余语言入口、第三方源码、points-to/effects 和类型属性已经完成。
 
 ## 当前离线检查
 
@@ -105,4 +115,4 @@ Costable 与 ConditionalBlock 两个真实类入口均以原 SG DefinitionID 构
 stub 候选先前错误地中止 `_config` 中两个正常函数的 CALL 枚举；现保留 IMPORT_DECLARATION_ONLY 并继续其它候选，两函数分别保留 3、4 个 CALL。最终发布只保留 stub 声明边界和预算前沿，没有 CANONICAL_BODY_UNREADABLE；没有把 `.pyi` 当作已构造的运行主体。
 关系引用原 owner/key/payload Uses、读结果、world、CFG 与 factory/code slot；按明确 mapping/path/effect 条件成立，不是内容恒等或无副作用证明。三个独立纯静态 case 通过：正常覆盖、分支保留多候选、装饰器结果截断；临时材料已删除，没有执行这些程序。
 真实 eval 模块的 run() 已接通一条 STORE→LOAD 条件流，并准确停在 APPLY 结果，保留 DECORATOR_RETURN_RELATION_OPEN；没有伪造原 run body 候选。public query 复核原 receipts、端点和 CFG，并与普通 compiler-prologue core join 分开标记；没有声称查询重放源码或运行目标。
-目标集合、actual/formal 与 return 来源消费、defaults 读点、saved-B/cells 及类后置字段初始化、effects/alias 联合固定点仍未闭合。下一步把已有参数/返回等关系接入同一 qualified 来源工作队列，而非从 arbitrary computation 的任意输入猜输出别名。这批关系不能授权缓存或其他变换。
+这份已发布 v4 的目标集合、actual/formal 与 return 来源消费、defaults 读点、saved-B/cells 及类后置字段初始化、effects/alias 联合固定点仍未闭合。新增 v5 已接入显式参数/返回引用，独立验收与 LeWM 全量尝试状态见上文；其他欠账继续沿同一 qualified 队列推进，不从 arbitrary computation 的任意输入猜输出别名。这批条件关系不能授权缓存或其他变换。

@@ -79,7 +79,7 @@ def _discard_static_calls(root, manifest):
     manifest["completion"]["static_call_links_present"] = False
 
 
-def link_static_program(directory, *, budget=None):
+def link_static_program(directory, *, budget=None, progress=None):
     """Publish qualified static call relations alongside the original graphs."""
     from scar.analysis.static_calls import build_static_call_links
     from scar.analysis.static_body import _stamp, _producer
@@ -89,7 +89,7 @@ def link_static_program(directory, *, budget=None):
             name: hashlib.sha256((analysis / name).read_bytes()).hexdigest()
             for name in ("static_calls.py", "static_namespace.py", "static_function_environment.py",
                          "static_interprocedural.py", "static_crossbody_namespace.py",
-                         "static_nested_creation.py",
+                         "static_nested_creation.py", "static_value_flows.py",
                          "function_binding.py", "function_interfaces.py", "source_layers.py")}}
     producer = call_producer()
     output = Path(directory).absolute()
@@ -106,7 +106,7 @@ def link_static_program(directory, *, budget=None):
         (temporary / "manifest.json").write_bytes(_json(manifest))
         input_hash = hashlib.sha256((temporary / "manifest.json").read_bytes()).hexdigest()
         result = build_static_call_links(temporary, temporary / "indexes" / "calls",
-            expected_manifest_sha256=input_hash, budget=budget, logical_root=output)
+            expected_manifest_sha256=input_hash, budget=budget, logical_root=output, progress=progress)
         # Each relation keeps its input namespaces and receipts. The immutable
         # source-basis receipt avoids making the manifest refer to its own SHA.
         if call_producer() != producer:

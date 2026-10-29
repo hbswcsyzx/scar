@@ -297,7 +297,7 @@ def _rule_plans(unit, entries, fragments, limit):
 
 
 def _call_relations(manifest, unit, entries, fragments, limit):
-    """Read qualified v1-v4 relations and replay their original endpoint joins."""
+    """Read qualified v1-v5 relations and replay their original endpoint joins."""
     from collections import OrderedDict
     from types import SimpleNamespace
     from scar.analysis.static_calls import input_basis_unit
@@ -343,6 +343,7 @@ def _call_relations(manifest, unit, entries, fragments, limit):
     # Foreign graph/index lifetimes are bounded. Selected canonical graphs
     # already owned by the enclosing query can be reused without recopying.
     cache, catalogs, source_facts = OrderedDict(), OrderedDict(), OrderedDict()
+    source_texts, signature_contexts, signatures = OrderedDict(), OrderedDict(), OrderedDict()
     cached_bytes = 0
     cache_limit = 128 * 1024 * 1024
     def catalog_for(owner):
@@ -550,17 +551,212 @@ def _call_relations(manifest, unit, entries, fragments, limit):
         # ports. In particular foreign factory IDs never index the caller.
         return load_body(route.creation_body)
 
+    def source_text(owner):
+        key = owner["key"]
+        if key not in source_texts:
+            original = fragments.read(owner["artifacts"]["source"])
+            text = original.get("text")
+            if (original.get("schema") != "scar.static-source-text" or original.get("schema_version") != 1
+                    or original.get("path") != owner["path"] or original.get("namespace_root") != owner["namespace_root"]
+                    or original.get("raw_sha256") != owner["raw_sha256"]
+                    or original.get("decoded_sha256") != owner["decoded_sha256"]
+                    or type(text) is not str or hashlib.sha256(text.encode()).hexdigest() != owner["decoded_sha256"]):
+                raise ValueError("value-flow caller text differs from its original source unit")
+            source_texts[key] = text
+            while (len(source_texts) > 4 or sum(len(value.encode()) for value in source_texts.values()) > 16 * 1024 * 1024):
+                source_texts.popitem(last=False)
+            return text
+        source_texts.move_to_end(key)
+        return source_texts[key]
+
+    def signature_for(definition, body):
+        """Extract from the original SG slots/AST; never compile another graph."""
+        check_definition(definition, body.unit)
+        if definition in signatures:
+            signatures.move_to_end(definition)
+            return signatures[definition]
+        key = body.unit["key"]
+        if key not in signature_contexts:
+            import ast
+            from scar.ir.v2.codec import semantic_from_dict
+            original = fragments.read(body.unit["artifacts"]["semantic"])
+            context = SimpleNamespace(tree=ast.parse(source_text(body.unit), filename=body.unit["path"]),
+                                      semantic=semantic_from_dict(original))
+            signature_contexts[key] = context, body.unit["artifacts"]["semantic"]["decoded_bytes"]
+            while (len(signature_contexts) > 2 or
+                   sum(size for _, size in signature_contexts.values()) > 32 * 1024 * 1024):
+                signature_contexts.popitem(last=False)
+        else:
+            signature_contexts.move_to_end(key)
+            context = signature_contexts[key][0]
+        from scar.analysis.function_interfaces import extract_signature
+        # check_definition already verified this qualified id/source/context.
+        # The local adapter is only extract_signature's input, no new source,
+        # definition, body, parameter slot or inventory record is constructed.
+        adapter = SimpleNamespace(id=definition.definition, source=definition.source)
+        signature = extract_signature(context, adapter)
+        signatures[definition] = signature
+        if len(signatures) > 128:
+            signatures.popitem(last=False)
+        return signature
+
+    checked_calls, call_shards = OrderedDict(), OrderedDict()
+    call_shard_bytes = 0
+    shards_by_entry = {}
+    for item in publication.get("shards", ()):
+        shards_by_entry.setdefault(item.get("caller_entry_key"), []).append(item)
+
+    def read_call_shard(item):
+        nonlocal call_shard_bytes
+        relative = item.get("artifact_path") or item["artifact"]["path"]
+        path = "indexes/calls/" + relative
+        if path not in descriptors:
+            raise ValueError("call shard is not registered in the current model")
+        if path in call_shards:
+            document, shard, _ = call_shards[path]
+            call_shards.move_to_end(path)
+            return document, shard
+        document = fragments.read(descriptors[path])
+        shard = load_relations(json.dumps(document, allow_nan=False))
+        caller = load_body(shard.caller)
+        if (caller.row["entry_key"] != item.get("caller_entry_key")
+                or item.get("caller") is not None and item["caller"] != encode(shard.caller)
+                or not basis_artifact(shard.source_model)):
+            raise ValueError("call shard differs from its original qualified caller/input basis")
+        size = descriptors[path]["decoded_bytes"]
+        call_shards[path] = document, shard, size
+        call_shard_bytes += size
+        while call_shards and (len(call_shards) > 8 or call_shard_bytes > 16 * 1024 * 1024):
+            _, (_, _, removed) = call_shards.popitem(last=False)
+            call_shard_bytes -= removed
+        return document, shard
+
+    def check_call_dependencies(call, caller):
+        key = caller.namespace, call.operation
+        digest = hashlib.sha256(json.dumps(encode(call), sort_keys=True, separators=(",", ":"),
+                                           allow_nan=False).encode()).hexdigest()
+        if key in checked_calls:
+            if checked_calls[key] != digest:
+                raise ValueError("the same qualified CALL has conflicting published relationships")
+            checked_calls.move_to_end(key)
+            return
+        owners = caller.index.operations
+        if call.operation not in owners:
+            raise ValueError("static call operation is absent from its original graph namespace")
+        if call.callee_use is not None:
+            site = caller.index.use_site(call.callee_use)
+            if (site.operation != call.operation or site.use.value != call.callee_value
+                    or call.callee_use not in caller.index.operations[call.operation].invoke_arguments):
+                raise ValueError("static call callee Use/value differs from its original invoke")
+        for flow in call.namespace_flows:
+            caller.dependencies.validate(flow)
+        for creation in call.function_creations:
+            check_creation(caller.namespace, creation)
+        for qualified in call.qualified_namespace_flows:
+            load_body(qualified.body).dependencies.validate(qualified.flow)
+        for qualified in call.qualified_function_creations:
+            check_creation(qualified.body, qualified.creation)
+        for flow in call.cross_body_namespace_flows:
+            from scar.analysis.static_crossbody_namespace import (
+                StaticNamespaceBody, validate_cross_body_namespace_flow,
+            )
+            namespaces = {flow.write.body, flow.read.body, *(segment.body for segment in flow.segments)}
+            for bridge in flow.bridges:
+                route = bridge.environment
+                check_environment_creation(route)
+                namespaces.update((route.caller, route.callee, route.creation_body))
+                for incoming in bridge.caller_owner_routes:
+                    check_environment_creation(incoming)
+                    namespaces.update((incoming.caller, incoming.callee, incoming.creation_body))
+            endpoints = {}
+            for namespace in namespaces:
+                body = load_body(namespace)
+                endpoints[namespace] = StaticNamespaceBody(
+                    body.graph, body.document, namespace, body.index, body.dependencies)
+            validate_cross_body_namespace_flow(flow, bodies=endpoints)
+        for target in call.targets:
+            if target.body is None:
+                # The source definition remains qualified even when no
+                # canonical body exists; do not invent a body to check it.
+                candidates = [owner for owner in manifest["units"]
+                    if owner["path"] == target.definition.snapshot.path
+                    and owner["namespace_root"] == target.definition.context.namespace_root]
+                if len(candidates) != 1:
+                    raise ValueError("unlowered target definition has no original source unit")
+                check_definition(target.definition, candidates[0])
+                continue
+            callee = load_body(target.body)
+            check_definition(target.definition, callee.unit)
+            if target.environment_routes:
+                for route in target.environment_routes:
+                    check_environment_creation(route)
+                original_routes, _ = derive_function_environment_routes(
+                    caller_graph=caller.graph, caller_document=caller.document, caller_namespace=caller.namespace,
+                    callee_graph=callee.graph, callee_document=callee.document, callee_namespace=callee.namespace,
+                    definition=target.definition, call_operation=call.operation, callee_use=call.callee_use,
+                    creations=call.function_creations, qualified_creations=call.qualified_function_creations,
+                    load_creation_body=load_body, caller_index=caller.index, callee_index=callee.index)
+                if any(route not in original_routes for route in target.environment_routes):
+                    raise ValueError("function environment route differs from original qualified factory/call/member ports")
+        checked_calls[key] = digest
+        if len(checked_calls) > 512:
+            checked_calls.popitem(last=False)
+
+    def context_target(context, requirements):
+        """Read this context's own recorded CALL/target; no open-context fallback."""
+        caller = load_body(context.caller)
+        matches = []
+        for item in shards_by_entry.get(caller.row["entry_key"], ()):
+            _, shard = read_call_shard(item)
+            if shard.caller != context.caller:
+                continue
+            matches.extend(call for call in shard.calls if call.operation == context.operation)
+        if len(matches) != 1:
+            raise ValueError("value-flow context has no unique published original CALL; evidence is unavailable")
+        call, = matches
+        check_call_dependencies(call, caller)
+        if call.callee_use != context.callee_use or call.callee_value != context.callee_value:
+            raise ValueError("value-flow context changed its original CALL callee Use/value")
+        targets = [target for target in call.targets
+                   if target.definition == context.definition and target.body == context.callee]
+        if len(targets) != 1:
+            raise ValueError("value-flow context has no unique original qualified target")
+        target, = targets
+        if requirements not in target.requirement_paths:
+            raise ValueError("value-flow requirements are not an original target context alternative")
+        return target
+
+    def check_value_flow(flow, validator):
+        # A supporting flow can belong to a foreign call context. Each raw ID
+        # is resolved only in its own original qualified caller/callee graph.
+        contexts = (*flow.requirements, flow.context)
+        definitions = {}
+        for position, context in enumerate(contexts):
+            load_body(context.caller)
+            callee = load_body(context.callee)
+            check_definition(context.definition, callee.unit)
+            context_target(context, flow.requirements[:position])
+            previous = definitions.setdefault(context.callee, context.definition)
+            if previous != context.definition:
+                raise ValueError("value-flow contexts relabel the same qualified callee definition")
+        def load_signature(namespace):
+            definition = definitions.get(namespace)
+            if definition is None:
+                raise ValueError("value-flow signature has no original qualified context definition")
+            return signature_for(definition, load_body(namespace))
+        caller, callee = load_body(flow.context.caller), load_body(flow.context.callee)
+        signature = signature_for(flow.context.definition, callee)
+        target = context_target(flow.context, flow.requirements)
+        validator(flow, caller=caller, callee=callee, signature=signature,
+                  caller_source_text=source_text(caller.unit), load_body=load_body,
+                  load_signature=load_signature, target=target)
+
     rows = []
     for item in publication.get("shards", ()):
         key = item.get("caller_entry_key")
         if key not in selected:
             continue
-        relative = item.get("artifact_path") or item["artifact"]["path"]
-        path = "indexes/calls/" + relative
-        if path not in descriptors:
-            raise ValueError("call shard is not registered in the current model")
-        document = fragments.read(descriptors[path])
-        shard = load_relations(json.dumps(document, allow_nan=False))
+        document, shard = read_call_shard(item)
         caller = load_body(shard.caller)
         if (caller.unit is not unit or caller.row["entry_key"] != key
                 or encode(shard.caller.definition) not in (selected[key].get("semantic_definition_ids") or ())
@@ -568,63 +764,13 @@ def _call_relations(manifest, unit, entries, fragments, limit):
             raise ValueError("static call shard differs from its selected original caller/input basis")
         owners = {op: region.id for region in caller.graph.regions for block in region.blocks for op in block.operations}
         for call in shard.calls:
-            if call.operation not in owners:
-                raise ValueError("static call operation is absent from its original graph namespace")
-            if call.callee_use is not None:
-                site = caller.index.use_site(call.callee_use)
-                if (site.operation != call.operation or site.use.value != call.callee_value
-                        or call.callee_use not in caller.index.operations[call.operation].invoke_arguments):
-                    raise ValueError("static call callee Use/value differs from its original invoke")
-            for flow in call.namespace_flows:
-                caller.dependencies.validate(flow)
-            for creation in call.function_creations:
-                check_creation(caller.namespace, creation)
-            for qualified in call.qualified_namespace_flows:
-                load_body(qualified.body).dependencies.validate(qualified.flow)
-            for qualified in call.qualified_function_creations:
-                check_creation(qualified.body, qualified.creation)
-            for flow in call.cross_body_namespace_flows:
-                from scar.analysis.static_crossbody_namespace import (
-                    StaticNamespaceBody, validate_cross_body_namespace_flow,
-                )
-                namespaces = {flow.write.body, flow.read.body, *(segment.body for segment in flow.segments)}
-                for bridge in flow.bridges:
-                    route = bridge.environment
-                    check_environment_creation(route)
-                    namespaces.update((route.caller, route.callee, route.creation_body))
-                    for incoming in bridge.caller_owner_routes:
-                        check_environment_creation(incoming)
-                        namespaces.update((incoming.caller, incoming.callee, incoming.creation_body))
-                endpoints = {}
-                for namespace in namespaces:
-                    body = load_body(namespace)
-                    endpoints[namespace] = StaticNamespaceBody(
-                        body.graph, body.document, namespace, body.index, body.dependencies)
-                validate_cross_body_namespace_flow(flow, bodies=endpoints)
-            for target in call.targets:
-                if target.body is None:
-                    # The source definition remains qualified even when no
-                    # canonical body exists; do not invent a body to check it.
-                    candidates = [owner for owner in manifest["units"]
-                        if owner["path"] == target.definition.snapshot.path
-                        and owner["namespace_root"] == target.definition.context.namespace_root]
-                    if len(candidates) != 1:
-                        raise ValueError("unlowered target definition has no original source unit")
-                    check_definition(target.definition, candidates[0])
-                    continue
-                callee = load_body(target.body)
-                check_definition(target.definition, callee.unit)
-                if target.environment_routes:
-                    for route in target.environment_routes:
-                        check_environment_creation(route)
-                    original_routes, _ = derive_function_environment_routes(
-                        caller_graph=caller.graph, caller_document=caller.document, caller_namespace=caller.namespace,
-                        callee_graph=callee.graph, callee_document=callee.document, callee_namespace=callee.namespace,
-                        definition=target.definition, call_operation=call.operation, callee_use=call.callee_use,
-                        creations=call.function_creations, qualified_creations=call.qualified_function_creations,
-                        load_creation_body=load_body, caller_index=caller.index, callee_index=callee.index)
-                    if any(route not in original_routes for route in target.environment_routes):
-                        raise ValueError("function environment route differs from original qualified factory/call/member ports")
+            check_call_dependencies(call, caller)
+            if document["schema_version"] >= 5:
+                from scar.analysis.static_value_flows import validate_argument_value_flow, validate_return_value_flow
+                for flow in call.argument_value_flows:
+                    check_value_flow(flow, validate_argument_value_flow)
+                for flow in call.return_value_flows:
+                    check_value_flow(flow, validate_return_value_flow)
         relations = document["relations"]
         calls = [{**record, "owning_region": encode(owners[call.operation]),
                   "namespace_flows": _page(encode(call.namespace_flows), limit),
@@ -632,12 +778,19 @@ def _call_relations(manifest, unit, entries, fragments, limit):
                   "qualified_namespace_flows": _page(encode(call.qualified_namespace_flows), limit),
                   "qualified_function_creations": _page(encode(call.qualified_function_creations), limit),
                   "cross_body_namespace_flows": _page(encode(call.cross_body_namespace_flows), limit),
+                  "argument_value_flows": (_page(encode(call.argument_value_flows), limit)
+                      if document["schema_version"] >= 5 else None),
+                  "return_value_flows": (_page(encode(call.return_value_flows), limit)
+                      if document["schema_version"] >= 5 else None),
+                  "value_flow_status": ("RECORDED_CONDITIONAL_REFERENCE_PORT_RELATIONS"
+                      if document["schema_version"] >= 5 else "NOT_RECORDED_IN_STORAGE_SCHEMA"),
                   "targets": [{**target_record, "environment_routes": _page(encode(target.environment_routes), limit)}
                               for target_record, target in zip(record["targets"], call.targets)]}
                  for record, call in zip(relations["calls"], shard.calls)]
         rows.append({"entry_key": key, "caller": relations["caller"],
                      "storage_schema_version": document["schema_version"],
-                     "v4_dependencies_checked": document["schema_version"] == 4,
+                     "v4_dependencies_checked": document["schema_version"] >= 4,
+                     "v5_value_flows_checked": document["schema_version"] >= 5,
                      "caller_meaning": "original stored graph namespace; owning_region identifies the lexical subgraph, not an observed calling frame",
                      "calls": _page(calls, limit)})
     return {"status": "QUALIFIED_CONDITIONAL_STATIC_CALL_RELATIONS", "shards": rows,

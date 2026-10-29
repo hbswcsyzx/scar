@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import ast
 from collections import Counter, OrderedDict, defaultdict
-from dataclasses import dataclass, fields, is_dataclass
+from dataclasses import dataclass, fields, is_dataclass, replace
 import gzip
 import hashlib
 import io
@@ -115,10 +115,13 @@ class StaticCallSession:
     ``iter_calls`` visits each admitted canonical caller body once. Cache entries
     are private typed reads; they are never serialized successful validations.
     """
-    def __init__(self, directory, *, out, logical_root=None, expected_manifest_sha256=None, budget=None):
+    def __init__(self, directory, *, out, logical_root=None, expected_manifest_sha256=None, budget=None, progress=None):
         self.budget = budget or StaticCallBudget()
         if type(self.budget) is not StaticCallBudget:
             raise TypeError("budget must be StaticCallBudget")
+        if progress is not None and not callable(progress):
+            raise TypeError("static call progress must be callable")
+        self.progress = progress
         self.started = time.monotonic()
         self.root = Path(directory).absolute()
         self.logical_root = Path(logical_root).absolute() if logical_root is not None else self.root
@@ -140,6 +143,11 @@ class StaticCallSession:
         self._finalizing = False
         self._interprocedural = None
         self._call_records = {}
+        # Exact analysis contexts feed the solver. The per-CALL table is only
+        # a publication view; feeding its union back would mix identity(a)
+        # with identity(b), or unrelated callback activations.
+        self._context_call_records = {}
+        self._call_context_keys = defaultdict(dict)
         self._worklist_iterations = 0
         self._worklist_stable = False
         self._enumeration_complete = False
@@ -753,12 +761,13 @@ class StaticCallSession:
         return StaticFunctionCreationRoute(operation.id, normal_edge, value, code_use.id,
             origin.operation, record.code_key, record.constant_path, context.definitions[definition][0])
 
-    def _source_candidates(self, body, operation, source, semantic_call):
+    def _source_candidates(self, body, operation, source, semantic_call, *, requirements=()):
         context = body.context
         candidates, frontiers = {}, []
         hints = {}
         namespace_flows, creations = [], []
         qualified_flows, qualified_creations, crossflows = [], [], []
+        argument_flows, return_flows = [], []
         mapping_caller = body.module is not None or body.class_entry is not None
         def admit(number, definition, basis):
             if len(candidates) >= self.budget.max_candidates_per_call and (number, definition) not in candidates:
@@ -821,11 +830,11 @@ class StaticCallSession:
         from scar.ir.program.static_calls import StaticQualifiedNamespaceFlow, StaticQualifiedFunctionCreation
         callee_uses = {row.use for row in body.uses_by_op.get(operation.id, ()) if row.role == "callee"}
         callee = next((use.value for use in operation.uses if use.id in callee_uses), None)
-        pending, seen = [(body, callee)] if callee is not None else [], set()
+        pending, seen = [(body, callee, requirements)] if callee is not None else [], set()
         while pending:
             self._check()
-            current, value_id = pending.pop()
-            key = current.namespace, value_id
+            current, value_id, current_requirements = pending.pop()
+            key = current.namespace, value_id, current_requirements
             if key in seen:
                 continue
             seen.add(key)
@@ -851,10 +860,17 @@ class StaticCallSession:
                 alias = current.qualified_alias_index = reads, bindings, incoming, normal_producers
             reads, bindings, incoming, normal_producers = alias
             value = current.index.values[value_id]
+            for inherited in self._dependencies().sources(current, value.id,
+                    requirements=current_requirements, requester=(body.namespace, operation.id)):
+                origin_body = self._load_body_namespace(inherited.body_namespace)
+                crossflows.extend(inherited.crossflows)
+                argument_flows.extend(inherited.argflows)
+                return_flows.extend(inherited.returnflows)
+                pending.append((origin_body, inherited.value, inherited.requirements))
             if value_id in reads:
-                pending.append((current, current.index.use_site(reads[value_id].binding).use.value))
+                pending.append((current, current.index.use_site(reads[value_id].binding).use.value, current_requirements))
             elif value_id in bindings and bindings[value_id].payload is not None:
-                pending.append((current, current.index.use_site(bindings[value_id].payload).use.value))
+                pending.append((current, current.index.use_site(bindings[value_id].payload).use.value, current_requirements))
             elif isinstance(value.origin, BlockArgument):
                 routes = namespace.flows(value.id)
                 for flow in routes:
@@ -863,11 +879,7 @@ class StaticCallSession:
                         namespace_flows.append(flow)
                     else:
                         qualified_flows.append(StaticQualifiedNamespaceFlow(current.namespace, flow))
-                    pending.append((current, current.index.use_site(flow.assigned_reference).use.value))
-                for inherited in self._dependencies().sources(current, value.id):
-                    origin_body = self._load_body_namespace(inherited.body_namespace)
-                    crossflows.extend(inherited.crossflows)
-                    pending.append((origin_body, inherited.value))
+                    pending.append((current, current.index.use_site(flow.assigned_reference).use.value, current_requirements))
                 producer = normal_producers.get(value.id)
                 if producer is not None:
                     primitive, edge = producer
@@ -894,7 +906,7 @@ class StaticCallSession:
                     if value.origin.index < len(edge.arguments):
                         argument = edge.arguments[value.origin.index]
                         if not isinstance(argument, CompletionResult):
-                            pending.append((current, current.index.use_site(argument).use.value))
+                            pending.append((current, current.index.use_site(argument).use.value, current_requirements))
             elif isinstance(value.origin, OperationResult) and current.module is None and current.class_entry is None:
                 for link in current.links_by_op.get(value.origin.operation, ()):
                     if type(link.source) is SourceReference:
@@ -912,7 +924,8 @@ class StaticCallSession:
                     "Original declaration hint " + key[1].wire + " (" + ", ".join(sorted(bases)) +
                     ") has no joined callee binding/factory provenance; it cannot supply target argument, state or return ports.", source))
         return (candidates, frontiers, tuple(dict.fromkeys(namespace_flows)), tuple(dict.fromkeys(creations)),
-                tuple(dict.fromkeys(qualified_flows)), tuple(dict.fromkeys(qualified_creations)), tuple(dict.fromkeys(crossflows)))
+                tuple(dict.fromkeys(qualified_flows)), tuple(dict.fromkeys(qualified_creations)), tuple(dict.fromkeys(crossflows)),
+                tuple(dict.fromkeys(argument_flows)), tuple(dict.fromkeys(return_flows)))
 
     def _actuals(self, body, operation, node):
         if node is None:
@@ -1018,7 +1031,7 @@ class StaticCallSession:
         return value, None
 
     def _target(self, caller, operation, source, semantic_call, actuals, number, definition, basis, *,
-                creations=(), qualified_creations=()):
+                creations=(), qualified_creations=(), requirements=()):
         context = caller.context if number == caller.context.number else self._unit(number)
         qualified, signature, entry, body_row = context.definitions[definition]
         from scar.analysis.function_binding import bind_call
@@ -1035,7 +1048,8 @@ class StaticCallSession:
         callee = self._body(context, *body_row) if body_row is not None else None
         if callee is None:
             frontiers.append(_front("CALLEE_BODY_UNAVAILABLE", "Original definition is cataloged, but no canonical body is available.", qualified.source))
-            return StaticCallTarget(qualified, None, tuple(sorted(basis)), binding, frontiers=tuple(frontiers))
+            return StaticCallTarget(qualified, None, tuple(sorted(basis)), binding, frontiers=tuple(frontiers),
+                                    requirement_paths=(requirements,))
         arguments = []
         if binding is not None and binding.status is CallBindingStatus.CONDITIONAL:
             formals = {port.slot: port for port in callee.interface.parameters}
@@ -1083,9 +1097,9 @@ class StaticCallSession:
         frontiers.append(_front("FINE_EFFECTS_OPEN", "State interface correspondence is not a closed mod/ref, alias, escape or ready summary."))
         return StaticCallTarget(qualified, callee.namespace, tuple(sorted(basis)), binding,
             tuple(arguments), returns, completions, state_entry, tuple(frontiers),
-            environment_routes=environment_routes)
+            environment_routes=environment_routes, requirement_paths=(requirements,))
 
-    def _calls(self, body, *, operations=None):
+    def _calls(self, body, *, operations=None, requirements=()):
         selected = {}
         for link in body.operation_links:
             if link.opcode is Opcode.CALL:
@@ -1136,10 +1150,11 @@ class StaticCallSession:
             if link.semantic_operation is None:
                 # Keep the original CALL/actual interface in the denominator,
                 # but never invent a semantic-call ID or a name-only target.
-                resolved = self._source_candidates(body, operation, link.source, None)
+                resolved = self._source_candidates(body, operation, link.source, None, requirements=requirements)
             else:
-                resolved = self._source_candidates(body, operation, link.source, link.semantic_operation)
-            candidates, issues, namespace_flows, creations, qualified_flows, qualified_creations, crossflows = resolved
+                resolved = self._source_candidates(body, operation, link.source, link.semantic_operation, requirements=requirements)
+            (candidates, issues, namespace_flows, creations, qualified_flows,
+             qualified_creations, crossflows, argument_flows, return_flows) = resolved
             if link.semantic_operation is None:
                 issues.append(_front("CALL_SEMANTIC_LINK_UNAVAILABLE",
                     "Canonical CALL has no exact retained semantic CALL link; canonical namespace ports remain independently eligible.", link.source))
@@ -1148,9 +1163,9 @@ class StaticCallSession:
             for (number, definition), basis in sorted(candidates.items(), key=lambda item: (item[0][0], item[0][1].wire)):
                 targets.append(self._target(body, operation, link.source, link.semantic_operation,
                                             actuals, number, definition, basis, creations=creations,
-                                            qualified_creations=qualified_creations))
+                                            qualified_creations=qualified_creations, requirements=requirements))
             if not targets:
-                frontier.append(_front("TARGET_SET_UNRESOLVED", "No qualified function candidate follows from retained reaching/creation/import facts; no global name-only fallback.", link.source))
+                frontier.append(_front("TARGET_SET_UNRESOLVED", "No qualified function candidate follows from retained reaching/creation/import facts in this analyzed caller context; no global name-only fallback.", link.source))
             frontier.append(_front("TARGET_SET_CLOSURE_OPEN", "Qualified namespace propagation does not establish whole-program points-to, function-state or effects closure.", link.source))
             self.counts["calls_with_candidates"] += bool(targets)
             self.counts["candidate_edges"] += len(targets)
@@ -1164,16 +1179,45 @@ class StaticCallSession:
                 callee_use.id if callee_use else None, callee_use.value if callee_use else None,
                 tuple(targets), tuple(dict.fromkeys(frontier)), namespace_flows=namespace_flows, function_creations=creations,
                 qualified_namespace_flows=qualified_flows, qualified_function_creations=qualified_creations,
-                cross_body_namespace_flows=crossflows)
+                cross_body_namespace_flows=crossflows, argument_value_flows=argument_flows,
+                return_value_flows=return_flows)
 
-    def _store_call(self, call):
+    def _store_call(self, call, *, requirements=()):
         key = call.caller, call.operation
-        if self._call_records.get(key) == call:
-            return False
-        self._call_records[key] = call
         if call.callee_use is not None:
+            args, returns = list(call.argument_value_flows), list(call.return_value_flows)
             for target in call.targets:
-                self._dependencies().activate_target(key, target)
+                # Never activate the display union of targets: each fact is
+                # qualified by precisely the context that derived it.
+                if self._dependencies().activate_target(key, target, requirements=requirements):
+                    self._worklist_stable = False
+                new_args, new_returns = self._dependencies().get_value_flows(key, target, requirements=requirements)
+                args.extend(new_args)
+                returns.extend(new_returns)
+            call = replace(call, argument_value_flows=tuple(dict.fromkeys(args)),
+                           return_value_flows=tuple(dict.fromkeys(returns)))
+        context_key = key, requirements
+        if self._context_call_records.get(context_key) == call:
+            return False
+        self._context_call_records[context_key] = call
+        self._call_context_keys[key][requirements] = None
+        records = [self._context_call_records[key, path] for path in self._call_context_keys[key]]
+        grouped = defaultdict(list)
+        for record in records:
+            for target in record.targets:
+                grouped[target.definition, target.body, target.binding, target.state_entry].append(target)
+        targets = []
+        for versions in grouped.values():
+            target = versions[0]
+            updates = {name: tuple(dict.fromkeys(row for version in versions for row in getattr(version, name)))
+                       for name in ("basis", "arguments", "normal_returns", "completions", "frontiers",
+                                    "environment_routes", "requirement_paths")}
+            targets.append(replace(target, **updates))
+        updates = {name: tuple(dict.fromkeys(row for record in records for row in getattr(record, name)))
+                   for name in ("frontiers", "namespace_flows", "function_creations", "qualified_namespace_flows",
+                                "qualified_function_creations", "cross_body_namespace_flows",
+                                "argument_value_flows", "return_value_flows")}
+        self._call_records[key] = replace(records[0], targets=tuple(targets), **updates)
         return True
 
     def _seed_calls(self):
@@ -1215,6 +1259,19 @@ class StaticCallSession:
                 except (ValueError, KeyError, TypeError) as error:
                     self.frontiers.append({"kind": "CANONICAL_BODY_UNREADABLE", "unit": number,
                                            "body": row_number, "entry_key": row["entry_key"], "detail": str(error)})
+            # Settle the admitted prefix while scanning, rather than spending
+            # the whole deadline on enumeration and leaving every cross-body
+            # demand untouched until the final source file. Later incoming
+            # facts still invalidate and revisit these exact contexts.
+            self._settle_namespace_calls()
+            if self.progress is not None:
+                self.progress({"stage": "STATIC_CALL_RELATIONS", "source_units_processed": number + 1,
+                    "source_units_declared": len(self.units), "body_artifacts_processed": self.counts["body_artifacts_processed"],
+                    "declared_body_artifacts": self.counts["declared_body_artifacts"],
+                    "canonical_calls_retained": len(self._call_records),
+                    "qualified_context_records": len(self._context_call_records),
+                    "worklist_iterations": self._worklist_iterations,
+                    "seconds": round(time.monotonic() - self.started, 3)})
         self._enumeration_complete = not any(row["kind"] in ("SOURCE_UNIT_UNREADABLE", "CANONICAL_BODY_UNREADABLE")
                                              for row in self.frontiers)
 
@@ -1222,6 +1279,7 @@ class StaticCallSession:
         if self._interprocedural is None:
             self._worklist_stable = True
             return
+        self._worklist_stable = False
         while True:
             self._check()
             key = self._interprocedural.pop_affected()
@@ -1234,15 +1292,18 @@ class StaticCallSession:
                 raise OverflowError("qualified namespace worklist step budget exhausted")
             self._worklist_iterations += 1
             body = self._load_body_namespace(key[0])
-            for call in self._calls(body, operations=(key[1],)):
-                self._store_call(call)
+            paths = ((), *self._interprocedural.entry_requirements(body))
+            for requirements in dict.fromkeys(paths):
+                for call in self._calls(body, operations=(key[1],), requirements=requirements):
+                    self._store_call(call, requirements=requirements)
 
     def _recount_relations(self):
         # Refinement visits are analysis work, never additional source CALLs.
         names = ("canonical_calls_processed", "calls_with_candidates", "candidate_edges", "namespace_flow_edges",
                  "function_creation_routes", "qualified_namespace_flow_edges", "qualified_function_creation_routes",
                  "cross_body_namespace_flows", "argument_port_edges", "normal_return_sites", "completion_routes",
-                 "function_environment_routes", "source_view_refined_calls", "module_canonical_calls_processed",
+                 "function_environment_routes", "argument_value_flows", "return_value_flows",
+                 "source_view_refined_calls", "module_canonical_calls_processed",
                  "class_canonical_calls_processed")
         for name in names:
             self.counts[name] = 0
@@ -1256,6 +1317,8 @@ class StaticCallSession:
             self.counts["qualified_namespace_flow_edges"] += len(call.qualified_namespace_flows)
             self.counts["qualified_function_creation_routes"] += len(call.qualified_function_creations)
             self.counts["cross_body_namespace_flows"] += len(call.cross_body_namespace_flows)
+            self.counts["argument_value_flows"] += len(call.argument_value_flows)
+            self.counts["return_value_flows"] += len(call.return_value_flows)
             self.counts["source_view_refined_calls"] += any(row.kind == "SOURCE_VIEW_REFINEMENT" for row in call.frontiers)
             number, position = self._body_locations[call.caller.graph.artifact.uri]
             kind = self.units[number]["bodies"][position]["kind"]
@@ -1313,7 +1376,7 @@ class StaticCallSession:
         self.close()
 
 
-def build_static_call_links(directory, out, *, logical_root=None, expected_manifest_sha256=None, budget=None):
+def build_static_call_links(directory, out, *, logical_root=None, expected_manifest_sha256=None, budget=None, progress=None):
     """Write relationship-only gzip shards and return registry descriptors.
 
     Descriptor paths are relative to ``out``. The caller registers them in the
@@ -1321,7 +1384,7 @@ def build_static_call_links(directory, out, *, logical_root=None, expected_manif
     There is deliberately no second graph root or self-referential manifest URI.
     """
     session = StaticCallSession(directory, out=out, logical_root=logical_root,
-                                expected_manifest_sha256=expected_manifest_sha256, budget=budget)
+                                expected_manifest_sha256=expected_manifest_sha256, budget=budget, progress=progress)
     shards, pending, caller, issue = [], [], None, None
     def flush():
         nonlocal pending
@@ -1346,7 +1409,7 @@ def build_static_call_links(directory, out, *, logical_root=None, expected_manif
         # Already closed relationship shards remain published. The incomplete
         # caller in memory is not silently counted as a completed shard.
     published_calls = sum(shard["calls"] for shard in shards)
-    return {"schema": "scar.static-call-publication", "schema_version": 4,
+    return {"schema": "scar.static-call-publication", "schema_version": 5,
             "source_model": encode(session.basis), "input_manifest_sha256": session.manifest_sha256,
             "artifacts": session.artifacts, "shards": shards, "counts": dict(session.counts),
             "published_calls": published_calls,
@@ -1361,7 +1424,10 @@ def build_static_call_links(directory, out, *, logical_root=None, expected_manif
                       "canonical_call_denominator_complete": issue is None and session._enumeration_complete,
                       "namespace_worklist_quiescent_for_processed_scope": session._worklist_stable,
                       "namespace_worklist_iterations": session._worklist_iterations,
-                      "namespace_cross_body_fact_count": session._interprocedural.fact_count if session._interprocedural else 0,
+                      "qualified_call_context_records": len(session._context_call_records),
+                      "value_worklist_quiescent_for_processed_scope": session._worklist_stable,
+                      "namespace_cross_body_fact_count": session._interprocedural.namespace_fact_count if session._interprocedural else 0,
+                      "interprocedural_value_fact_count": session._interprocedural.value_fact_count if session._interprocedural else 0,
                       "target_resolution_complete": False, "whole_program_model_complete": False},
             "denominators": {"source_call_sites_declared": session.source_call_sites_declared,
                              "source_call_sites_cataloged": session.counts["source_call_sites_cataloged"],

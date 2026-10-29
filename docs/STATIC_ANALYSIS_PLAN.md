@@ -114,7 +114,7 @@ S0 不设建模覆盖率门槛，不产生额外历史报告或 gate 目录。
 source-only linker 已发布 v4 qualified namespace/factory/environment 关系。有界扫描 400 份产物（365 有图），269 份分片实际保存 2,069 个 CALL、41 条有绑定来源的条件目标、123 条跨主体 namespace flow、8 条 qualified factory、76 条环境依赖。123 条 flow 中 5 条经两次真实调用桥，工作队列处理 77 次后在该范围内稳定；8,419 份产物未扫描，不能称整程序固定点完成。未接通真实callee来源的旧声明提示单独保留，不再独立生成目标端口；默认字段初始化依赖也不等同于调用时 formal 的完整传播。
 STORE/LOAD/world/CFG、查找优先及中间效果保留明确条件；正常覆盖仅在 mapping 提交输入等 guard 下成立。MAKE 的原 code slot/declaration/正常结果可连共享 body，APPLY 的结果独立，真实 eval.run 的装饰器返回关系仍开放。下一步用通用返回/环境/alias/effect 分析解决这些条件与未知调用，不按名字补目标，也不把当前条件边当成已证明的 must-flow。
 
-**跨主体 namespace 闭环：已实现并在 LeWM 源树的有界产物上发布；完整 S3 仍未完成。** 候选队列已使用 qualified body/value 来源，环境激活会失效并重新求解相关 callee/下游读取。factory 带其原 body，不能拿 module 的 OperationID 到 callee index 中查找。当前实现只求条件 namespace 依赖的有限工作队列，不称为 points-to/effects 联合固定点已经完成。
+**跨主体 namespace 闭环：已实现并在 LeWM 源树的有界产物上发布；完整 S3 仍未完成。** 候选队列已使用 qualified body/value 来源，环境激活会失效并重新求解相关 callee/下游读取。factory 带其原 body，不能拿 module 的 OperationID 到 callee index 中查找。已发布 v4 只消费条件 namespace 依赖；新增 v5 在同一队列继续消费显式参数与返回，不称为 points-to/effects 联合固定点已经完成。
 
 - 为 namespace 分析增加 `bindings_at(owner, key, operation, world_use)`，查询真实控制点的可能定义，不伪造一次 LOAD。
 - 组合原 STORE→外层 CALL 路径、G environment/state-entry 路由及 callee entry→LOAD 路径，产生引用原端点的条件跨主体 namespace flow。module 的 STORE_NAME 写 L、factory 取 G；只有 loader 合同证明 L=G 或保留显式 owner-alias 条件时才相连，不能直接合并两个端口。
@@ -123,7 +123,9 @@ STORE/LOAD/world/CFG、查找优先及中间效果保留明确条件；正常覆
 
 正常 CLI 纯源码多层链已真正得到 4 条目标边、3 条跨图依赖，最长 3 个调用桥；公开 query 同时验证原 factory/namespace/Use/world/CFG。覆盖反例不再得到旧 factory 目标；递归有种子收敛、无种子不循环自证。预算停止前的有效 CALL 记录保留。旧 metadata/CALLS 中没有实际 callee 来源支持的提示不再独立生成目标端口；真实 nested factory 通过原 parent code path/CodeKey/slot 校验，避免以丢弃合法调用来消除假阳性。LeWM 实际批次的数量与剩余缺口以 current 发布结果为准。
 
-**下一步消费的数据关系仍待实现：** SourceArgumentPort 的 actual→formal、正常 completion 的 terminal→caller landing、decorator application 的 actual→formal→return，以及 defaults 字段/元素→缺省 formal。它们应进入同一 qualified 来源工作队列；不能把 arbitrary computation 的所有输入都当作输出的引用别名。类型/常量/ModRef 分析继续用于消解条件，callee body、shape、地址等属性各自保留已知部分与具体缺口。
+**显式参数与返回引用已接入，完整 S3 仍未完成：** schema v5 消费 SourceArgumentPort 的 actual→formal 和正常 reference completion 的 terminal→caller landing。每条来源携带原 CALL/目标组成的调用上下文链，返回压栈、formal 按原调用匹配并出栈；非空上下文不能借用空上下文候选并集。跨主体 requester 会因新返回/参数/环境事实重新排队。导出的目标有独立 requirement_paths，不把展示并集反馈给求解器。独立纯源码的 identity/apply/relay 隔离、局部覆盖与无种子递归及非空上下文公开 query 已验证；LeWM 新一轮按全部 8,819 份主体产物尝试，最后已发布与正在运行的结果分别见 STATUS，不能据样例宣布全程序完成。
+
+**继续接通：** decorator application 的 actual→formal→return，以及 defaults 当前字段/元素→缺省 formal。初始化 scalar 不是 defaults tuple；默认参数绑定还缺字段版本、packing、元素选择和调用时读点。saved builtins/cells、import module→export attribute、类构造和可变对象读写继续沿原端点接入。不能把 arbitrary computation 的所有输入当作输出别名。类型/常量/ModRef 分析继续用于消解条件，callee body、shape、地址等属性各自保留已知部分与具体缺口。
 
 这些工作与剩余 S2 语言实现并行推进，不等待所有语法补齐；单纯存在新边或 reader 通过都不等于全程序模型已完成。
 
