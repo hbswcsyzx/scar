@@ -13,7 +13,8 @@
 - 全部词法入口的语言规则/前提台账；按原入口 key 精准派工，全部入口继续保留在总目录。
 - 静态模块编译来源、mapping frame 与精确 residual source；静态和运行捕获 root 分别编码，不伪造 CapturedCode。
 - 模块 BODY profile 接通 heap 写入、If、函数创建/默认值/装饰器和首 docstring 的 `__doc__` 写入；comprehension 的递归目标与局部异常清理已接通，融合 store 按原 compiler 槽位/顺序解析。
-- 类使用独立 ClassFrameABI 和 core 31：prepared namespace、外部 closure 与内部 compiler cells 分开。新 ClassSuite 已建立真实 namespace/cell/factory/state 操作。全部 1,183 个类已正式构造：1,118 个无 suite continuation、65 个保留精确 continuation；父级构造与 effects 等仍开放。
+- 类使用独立 ClassFrameABI 和 core 31：prepared namespace、外部 closure 与内部 compiler cells 分开。全部 1,183 个类已正式构造：1,138 个无 suite continuation、45 个保留精确 continuation；父级构造与 effects 等仍开放。新 method profile 明确 callable、optional-self 与 boolean selector，NULL 不伪装成 Python None 实参。
+- 新 slice capability 连接 combined read/store 和 stepped/tuple slice store；receiver/bounds/RHS、partial 地址、正常/异常清理都有原端点。combined slice 不伪造独立 slice Value。嵌套函数 SOURCE_REPLAY 使用原 SourceReference 选择，不以短名作为身份。
 
 ## LeWM 当前实际结果
 
@@ -29,8 +30,9 @@
 | 有限常量事实 | 76,788，仍保留原规则/前提 |
 | 首轮源码图构造时间 | 388.13 秒，4 个分析进程 |
 | 首轮 7,055 个普通函数规范构造 | 1,024.41 秒，4 个分析进程；5,908 个有图、85 个构造错误 |
-| 当前已发布有规范图的入口 | 7,762：581 个模块、1,183 个类 suite、5,998 个普通函数；均保留缺口 |
-| 当前已发布明确不支持 | 547 个 lowerer 不支持，510 个规则 shape 不支持 |
+| 当前已发布有规范图的入口 | 7,922：581 个模块、1,183 个类 suite、6,158 个普通函数；有图不等于完整 |
+| 当前已发布规范操作 | 1,100,313 |
+| 当前已发布明确不支持 | 417 个 lowerer 不支持，480 个规则 shape 不支持 |
 | 当前已发布入口适配缺失 / 未派工 | 3,731 / 0；构造 ERROR 为 0 |
 | 原 85 个构造错误复验 | 全部生成带缺口的图；另构造 eval 模块，共 86 个，113.63 秒 |
 | 原图分片字节回读 | 3,488 片 stored/decoded SHA、JSON 容器通过 |
@@ -43,13 +45,13 @@
 全批四进程构造已结束并发布：1,767 个入口，耗时 1,639.52 秒；随后按原 key 修复 13 个错误并增量发布（15 项 68.94 秒，最终规则刷新 14 项 62.32 秒），没有重建原源码图。这是分析器建图时间，不是 LeWM 执行时间。
 12 个 compiler-owned annotation cell 入口先以 source wrapper 10 接独立前导，后以 wrapper 11 将已知部分拆为真实 macro：cell 分配、code-slot读取、factory、set allocation、namespace store/setup。cell handles 正常经出口交父 frame/后缀、失败逆序清理并保留原 exception/traceback/world；原 entry ABI 不添 closure。deferred child body 仍开放，不能称完整模块。
 小批 22 个入口正式发布通过（70.43 秒、4进程），没有重建原源图。七个 ClassSuite：PlanConfig 83、WorldModelPolicy 136、CEMSolver 262、两个 Costable 各74、两个 ConditionalBlock 各63操作，均无 suite continuation；有原 cell/closure/method/annotation factory 关系。另有同名生成 factory/装饰器 CALL 与 application 区分、不支持ABI保留原 stack continuation 的纯静态检查；没有执行这些程序。
-当前有图分母仍为 7,762。全 1,183 类的 suite 构造已四进程完成并发布，473.28 秒（1,176 重新构造、7 复用）。1,118 个无剩余 suite 后缀；65 个明确局部 continuation，其中 42 个 method-lookup 双结果 ABI、23 个 class control/compiler protocol。类操作合计 98,992，全规范操作 1,034,767，构造 ERROR 为 0。数字不变但原来的整类 3-op 边界已被实际结构替换；没有把后缀、effects 或父级构造欠账算成完成。调用索引已按最新主体重建。
+全 1,183 类首轮 suite 构造四进程耗时 473.28 秒，替换了整类 3-op 边界；当时有 65 个 continuation。本轮对 42 个 method continuation、156 个 slice lowerer 拒绝、35 个旧 slice shape 项做 233 项增量构造，261.83 秒；随后修复并正式重发 5 个异常清理/协议校验错误，70.62 秒。最终新增 160 个有规范图的函数，20 个类消除 suite 后缀，另 22 个 method 类推进到下一个明确 control/compiler 缺口。当前共 45 个 class continuation、0 个构造 ERROR；没有重建原源码图。上述均为分析器耗时，不是 LeWM 执行时间。
 静态 compiler layout 记录 names/flags/参数计数/local/cell/free 表，原索引与空名称均保留；不保存 Tensor 值或地址。body 失败时仍保存已有编译事实，公开 query 将其标为 SOURCE_COMPILATION_FACTS，而非运行观察。
 
 ## 仍未完成
 
 **完整静态模型尚未完成。** 原源码图有 69,298 个 opaque 操作、450,176 项语义缺口、16,061 项控制缺口；它们是待分析结构/规则，不能算已完全展开。
-12,550 个入口尚未全部完成 canonical lowering。普通函数已全量尝试；模块可构造受支持前缀和明确要求继续展开的后缀，不能把前缀图算成完整模块；类入口已有实际 suite；65 项续接协议、父级 class construction、resumable 和隐式类型/注解主体等仍待展开。
+12,550 个入口尚未全部完成 canonical lowering。普通函数已全量尝试；模块可构造受支持前缀和明确要求继续展开的后缀，不能把前缀图算成完整模块；类入口已有实际 suite；45 项续接协议、父级 class construction、resumable 和隐式类型/注解主体等仍待展开。
 S1 的目录与逐入口规则台账已存在，语言语义完整性仍未闭合；S2 的完整规范子图、S3 调用/别名/效果联合固定点、S4 统一属性约束及 S5 完整导出尚未完成。
 第三方源码/声明、动态目标表达式与别名/副作用仍有可继续静态推导的部分，不把这些缺口统称为“只能动态获取”。
 
@@ -57,9 +59,9 @@ S1 的目录与逐入口规则台账已存在，语言语义完整性仍未闭�
 
 当前 manifest 的 `LOWERED_WITH_GAPS` 由“是否生成规范图”决定，**不是逐主体穷尽推理后的结论**。同样，0 个构造 ERROR 只说明分析器没有报告构造异常。二者都不能用作完整性证明。
 
-- **实现欠账**：547 个 lowerer 不支持项、510 个规则 shape 不支持项。仅 combined slice 86 项、slice store 70 项、nested with cleanup 60 项就有明确源码和编译语义，缺的是 SCAR 的展开规则，不能归因于必须动态捕获。
+- **实现欠账**：当前 417 个 lowerer 不支持项、480 个规则 shape 不支持项；包括 78 项缺唯一 computational record、60 项 nested with cleanup、42 项 target-child BinOp、41 项 comprehension parent cleanup。combined slice/store 的旧拒绝已推进，不能将推进后暴露的下一处实现欠账说成必须动态捕获。
 - **入口与内联展开尚未核齐**：3,731 个目录项没有独立入口适配，其中 2,482 个 annotation context、961 个 comprehension/generator expression、235 个 lambda、52 个函数、1 个 stub 模块。部分表达式已经在父图内展开，因此不能把该数字直接解释成同等数量完全缺失的运行帧；仍须逐项核对其实际归属和缺失结构。
-- **跨过程推理未完成**：当前只处理 8,819 份主体产物中的 80 份；已发布 493 个 CALL。目标闭包、返回、defaults/closure/global 环境、别名与 effects 联合固定点尚未贯通。不能将尚未推导的调用关系直接称为语言本身不可知。
+- **跨过程推理未完成**：当前 v3 索引只处理 8,819 份主体产物中的 400 份，另 8,419 份尚未处理；目标闭包、返回、defaults/closure/global 环境、别名与 effects 联合固定点尚未贯通。不能将尚未推导的调用关系直接称为语言本身不可知。
 - **材料范围不足**：当前包含 LeWM 源树和两个本地依赖项目，没有环境中全部第三方实现的源码闭包。源码缺失与已有源码但未分析必须分别报告。
 - **静态边界与结构缺失混列**：例如 module 的常量槽/函数创建结构已经连接，但运行时 code 对象身份仍开放；该身份不应成为“缺少函数体结构”的依据。现有原始 gap 总数还混有这种证明前沿，不能用它衡量结构缺失率。类的前沿还被投影为统一 EFFECT_SUMMARY，查询时须结合原 class frontier 才能知道具体欠账。
 
@@ -71,7 +73,7 @@ S1 的目录与逐入口规则台账已存在，语言语义完整性仍未闭�
 
 ## 下一项
 
-按 [唯一计划](STATIC_ANALYSIS_PLAN.md) 接通父级 class construction、65 项 class continuation；补齐 resumable/隐式入口及已分类的 slice/with 等语言缺口，在已有条件 namespace/调用关系上推进返回、环境、别名和 effects 联合固定点，再接统一类型/Tensor 属性。
+按 [唯一计划](STATIC_ANALYSIS_PLAN.md) 接通函数环境/默认参数的读点、返回与装饰器/模块属性传递，推进别名和 effects 联合固定点；并补齐父级 class construction、45 项 class continuation、resumable/隐式入口、target-child expression/with 等语言缺口，随后接统一类型/Tensor 属性。
 本轮没有导入或执行 LeWM，没有运行目标样例、trace、benchmark、优化或动态验证。仅运行分析器、解析源材料与读取/校验生成的静态图。
 
 ## 当前离线检查
@@ -89,13 +91,16 @@ SCAR 源文件语法检查和所选图的普通 typed reader 均通过。生成�
 
 真实 `eval.py:img_transform` 的首次纯静态规范构造通过：3.41秒、92操作、157值、1 Region，normal codec读回通过；32项原effects/dispatch等缺口保留。公开query可同时投影canonical端口、Value→source、原控制图和具体规则/shape缺口，分别标明哪些只是结构校验。这里没有执行该函数。
 全普通函数首轮构造与错误复验已结束。真实 eval.py 模块已用静态 source wrapper 9 / core 30 生成 325 个操作，17 条顶层语句、18 项含嵌套语句记录全部展开，没有剩余源码后缀；普通 reader 独立重新编译保留源码后往返成功，公开 query 检查 6 份 receipts。它仍有 49 项原 namespace/effects 等前沿，完整语句拓扑不等于完整导入、调用或效果分析。
-真实 eval.run 和 eval_ff.run 分别构造 2,305、2,080 个操作。三个融合 store 的 comprehension 所属函数在修复后离线构造及 source/compiler/core 读回通过（317、108、437 个操作），已在全批正式发布。eval_wm.run 已通过该 comprehension，后续动态 bound 的 BINARY_SLICE 规则仍未实现，准确保留其源码缺口。
+真实 eval.run 和 eval_ff.run 分别构造 2,305、2,080 个操作。三个融合 store 的 comprehension 所属函数在修复后离线构造及 source/compiler/core 读回通过（317、108、437 个操作）。eval_wm.run 现在生成 3,216 个操作并接通两个 BINARY_SLICE；同一已发布 payload 的独立整图 SOURCE_REPLAY 已通过。其 `ep_id` comprehension 词法候选关系先前受字典插入顺序影响，现按原 SlotID 规范化，编译器 name/local/cell/free 表仍保留原顺序。另两个真实 slice 函数分别以 75、241 个操作通过完整重放；没有执行函数。
 Costable 与 ConditionalBlock 两个真实类入口均以原 SG DefinitionID 构造并公开查询 core 31；normal payload 分别为 Python None 引用、class cell 引用。新 suite 分别有 74、63 个实际操作并无 suite 后缀，cells、closures、code reads、factories 和 namespace 读写都有原端点；生成 child body 与父级 metaclass/namespace 供给仍未闭合。
 另以真实 CEM 模块检查 docstring 的 __doc__ 写入：192 个操作、11 条语句前缀，仍保留一条 class 后缀；source wrapper 读回和独立静态编译通过。没有执行模块初始化或函数体。
 
 ## 跨主体静态关系
 
-`--link-calls` 已在当前图上发布 v2 派生关系。读取 80 份主体（77 份有图），118.80 秒；当前发布 493 个 CALL、20 条条件目标、19 条 namespace flow、9 条函数创建关联、37 条实参边、52 条 completion。枚举了 494 个 CALL，最后一项未发布，不能算已保存。仍有 8,739 份主体产物未处理；源码目录总共 47,135 个 AST 调用点，不能把本批视为整程序调用闭包。
+`--link-calls` 已在当前图上发布 v3 派生关系。读取 400 份主体产物（365 份有图），链接与发布 410.62 秒；268 份关系分片经普通 typed reader 全量读回，共实际保存 2,059 个 CALL、92 条条件目标、52 条 namespace flow、26 条函数创建关联、86 条实参边、260 条 completion、121 个 normal return 和 50 条函数环境依赖。枚举了 2,069 个 CALL，末尾 10 项未发布，不能算已保存。另 8,419 份主体产物未处理；本批 source call 目录涉及 95 个文件、4,710 项，整树为 47,135 个 AST 调用点，不能把该批视为整程序调用闭包。
+50 条真实环境边分别是 25 条 FUNCTION_OBJECT、25 条 GLOBALS_NAMESPACE，均为条件引用绑定。默认参数的 FIELD_INITIALIZER_DEPENDENCE 已用纯源码 `def f(x=17): return x; f()` 端到端构图、codec 和公开 query 验证，产生 3 条环境边、核 11 份 receipts；本批 LeWM 产物没有保存 DEFAULTS 环境边，不能用该样例宣称 LeWM 默认参数已经贯通。
+真实 `barlow-vit-small.py` 模块的两条环境边已通过公开 query 核原 namespace、factory、源码定义、Use/world 和 callee member。旧 v1/v2 wire 正常迁移并拒绝夹带新字段；错误 namespace entry/pointer、factory f 错配 g 定义的负例均被拒绝。查询不是独立源码语义重放，条件仍保留。
+stub 候选先前错误地中止 `_config` 中两个正常函数的 CALL 枚举；现保留 IMPORT_DECLARATION_ONLY 并继续其它候选，两函数分别保留 3、4 个 CALL。最终发布只保留 stub 声明边界和预算前沿，没有 CANONICAL_BODY_UNREADABLE；没有把 `.pyi` 当作已构造的运行主体。
 关系引用原 owner/key/payload Uses、读结果、world、CFG 与 factory/code slot；按明确 mapping/path/effect 条件成立，不是内容恒等或无副作用证明。三个独立纯静态 case 通过：正常覆盖、分支保留多候选、装饰器结果截断；临时材料已删除，没有执行这些程序。
 真实 eval 模块的 run() 已接通一条 STORE→LOAD 条件流，并准确停在 APPLY 结果，保留 DECORATOR_RETURN_RELATION_OPEN；没有伪造原 run body 候选。public query 复核原 receipts、端点和 CFG，并与普通 compiler-prologue core join 分开标记；没有声称查询重放源码或运行目标。
-目标集合、defaults/G/saved-B/cells 投影、effects/alias 固定点仍未闭合；这批关系不能授权缓存或其他变换。
+目标集合、defaults 读点、saved-B/cells 及类后置字段初始化、effects/alias 固定点仍未闭合。当前 linker 输出 G 环境边后尚未重新求解 callee 的 global reads；下一步按 qualified worklist 真正消费这些边，而非仅增加记录。这批关系不能授权缓存或其他变换。
