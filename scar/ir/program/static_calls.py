@@ -165,6 +165,7 @@ class NamespaceFlowCondition(str, Enum):
     NORMAL_READ_RETURNS_MAPPING_BINDING = "NORMAL_READ_RETURNS_MAPPING_BINDING"
     INTERVENING_EFFECTS_PRESERVE_BINDING = "INTERVENING_EFFECTS_PRESERVE_BINDING"
     PRIOR_LOOKUP_NAMESPACES_MISSING = "PRIOR_LOOKUP_NAMESPACES_MISSING"
+    NAMESPACE_OWNERS_ALIAS = "NAMESPACE_OWNERS_ALIAS"
 
 
 @dataclass(frozen=True, slots=True)
@@ -234,6 +235,27 @@ class StaticFunctionCreationRoute:
             raise ValueError("creation needs its source-compiled layout key")
         if type(self.constant_path) is not tuple or not self.constant_path or any(type(i) is not int or i < 0 for i in self.constant_path):
             raise ValueError("creation needs an exact original child constant path")
+
+
+@dataclass(frozen=True, slots=True)
+class StaticQualifiedNamespaceFlow:
+    """A local dependence whose endpoint IDs retain their original body."""
+    body: SourceBodyNamespace
+    flow: StaticNamespaceFlow
+
+    def __post_init__(self):
+        _exact(self.body, SourceBodyNamespace)
+        _exact(self.flow, StaticNamespaceFlow)
+
+
+@dataclass(frozen=True, slots=True)
+class StaticQualifiedFunctionCreation:
+    body: SourceBodyNamespace
+    creation: StaticFunctionCreationRoute
+
+    def __post_init__(self):
+        _exact(self.body, SourceBodyNamespace)
+        _exact(self.creation, StaticFunctionCreationRoute)
 
 
 class FunctionEnvironmentRouteKind(str, Enum):
@@ -323,6 +345,189 @@ class StaticFunctionEnvironmentRoute:
 
 
 @dataclass(frozen=True, slots=True)
+class StaticQualifiedNamespaceWrite:
+    body: SourceBodyNamespace
+    operation: OperationID
+    owner: UseID
+    key: UseID
+    assigned_reference: UseID
+    world: UseID
+    normal: ControlEdgeReference
+
+    def __post_init__(self):
+        for value, kind in ((self.body, SourceBodyNamespace), (self.operation, OperationID),
+                            (self.owner, UseID), (self.key, UseID), (self.assigned_reference, UseID),
+                            (self.world, UseID), (self.normal, ControlEdgeReference)):
+            _exact(value, kind)
+        if self.normal.operation != self.operation:
+            raise ValueError("namespace write normal edge belongs to another operation")
+
+
+@dataclass(frozen=True, slots=True)
+class StaticQualifiedNamespaceRead:
+    body: SourceBodyNamespace
+    operation: OperationID
+    owner: UseID
+    key: UseID
+    world: UseID
+    normal: ControlEdgeReference
+    result: ValueID
+    prior_lookup_owners: tuple[UseID, ...] = ()
+
+    def __post_init__(self):
+        for value, kind in ((self.body, SourceBodyNamespace), (self.operation, OperationID),
+                            (self.owner, UseID), (self.key, UseID), (self.world, UseID),
+                            (self.normal, ControlEdgeReference), (self.result, ValueID)):
+            _exact(value, kind)
+        _rows(self.prior_lookup_owners, UseID)
+        if self.normal.operation != self.operation:
+            raise ValueError("namespace read normal edge belongs to another operation")
+
+
+class NamespacePathStart(str, Enum):
+    WRITE_NORMAL = "WRITE_NORMAL"
+    ENTRY = "ENTRY"
+
+
+@dataclass(frozen=True, slots=True)
+class StaticNamespacePathSegment:
+    """Original local CFG witness, ending immediately before a real operation.
+
+    ``key`` is the query's builtin string value, not a fabricated graph Use.
+    An entry segment starts at the original region entry, not a fake LOAD.
+    """
+    body: SourceBodyNamespace
+    start_kind: NamespacePathStart
+    start_block: BlockID
+    start_operation: OperationID | None
+    start_owner: ValueID
+    query_operation: OperationID
+    query_owner: ValueID
+    query_world: UseID
+    key: str
+    path: tuple[ControlEdgeReference, ...]
+    intervening_operations: tuple[OperationID, ...]
+    conditions: tuple[NamespaceFlowCondition, ...]
+
+    def __post_init__(self):
+        for value, kind in ((self.body, SourceBodyNamespace), (self.start_kind, NamespacePathStart),
+                            (self.start_block, BlockID), (self.start_owner, ValueID),
+                            (self.query_operation, OperationID), (self.query_owner, ValueID),
+                            (self.query_world, UseID)):
+            _exact(value, kind)
+        if self.start_operation is not None:
+            _exact(self.start_operation, OperationID)
+        if (self.start_kind is NamespacePathStart.WRITE_NORMAL) != (self.start_operation is not None):
+            raise ValueError("only write-normal paths have an original start operation")
+        if type(self.key) is not str:
+            raise TypeError("namespace path key must be its builtin string value")
+        for rows, kind in ((self.path, ControlEdgeReference), (self.intervening_operations, OperationID),
+                           (self.conditions, NamespaceFlowCondition)):
+            _rows(rows, kind)
+        required = {NamespaceFlowCondition.PATH_TAKEN, NamespaceFlowCondition.INTERVENING_EFFECTS_PRESERVE_BINDING}
+        if self.start_kind is NamespacePathStart.WRITE_NORMAL:
+            required.add(NamespaceFlowCondition.ALL_NORMAL_NAMESPACE_STORES_COMMIT_INPUT)
+        if self.start_owner != self.query_owner:
+            required.add(NamespaceFlowCondition.NAMESPACE_OWNERS_ALIAS)
+        if not required <= set(self.conditions) or len(set(self.conditions)) != len(self.conditions):
+            raise ValueError("namespace path must retain path/effect/owner conditions")
+
+
+class CrossBodyNamespaceCondition(str, Enum):
+    CALL_SELECTS_ENVIRONMENT_ROUTE = "CALL_SELECTS_ENVIRONMENT_ROUTE"
+    CALLER_OWNER_ALIASES_FACTORY_GLOBALS = "CALLER_OWNER_ALIASES_FACTORY_GLOBALS"
+    CALL_ENTRY_PRESERVES_NAMESPACE_BINDING = "CALL_ENTRY_PRESERVES_NAMESPACE_BINDING"
+
+
+@dataclass(frozen=True, slots=True)
+class StaticNamespaceCallBridge:
+    """Call-entry dependence; never equates namespace contents or locations."""
+    environment: StaticFunctionEnvironmentRoute
+    state_entry: StaticStateEntryRoute
+    caller_owner: ValueID
+    callee_owner: ValueID
+    conditions: tuple[CrossBodyNamespaceCondition, ...]
+    caller_owner_routes: tuple[StaticFunctionEnvironmentRoute, ...] = ()
+
+    def __post_init__(self):
+        for value, kind in ((self.environment, StaticFunctionEnvironmentRoute),
+                            (self.state_entry, StaticStateEntryRoute),
+                            (self.caller_owner, ValueID), (self.callee_owner, ValueID)):
+            _exact(value, kind)
+        _rows(self.conditions, CrossBodyNamespaceCondition)
+        _rows(self.caller_owner_routes, StaticFunctionEnvironmentRoute)
+        route = self.environment
+        if (route.member.role is not EnvironmentRole.GLOBALS_NAMESPACE
+                or route.kind is not FunctionEnvironmentRouteKind.REFERENCE_BINDING
+                or self.callee_owner != route.member.reference):
+            raise ValueError("namespace call bridge needs its existing callee globals reference member")
+        if self.state_entry.caller_use != route.call_world or self.state_entry.caller_value != route.call_world_value:
+            raise ValueError("namespace call bridge world differs from its original call world")
+        required = {CrossBodyNamespaceCondition.CALL_SELECTS_ENVIRONMENT_ROUTE,
+                    CrossBodyNamespaceCondition.CALL_ENTRY_PRESERVES_NAMESPACE_BINDING}
+        owner_body, owner = route.caller, self.caller_owner
+        for incoming in self.caller_owner_routes:
+            if (incoming.callee != owner_body or incoming.member.reference != owner
+                    or incoming.member.role is not EnvironmentRole.GLOBALS_NAMESPACE
+                    or incoming.kind is not FunctionEnvironmentRouteKind.REFERENCE_BINDING):
+                raise ValueError("caller globals provenance is not an ordered qualified environment chain")
+            owner_body, owner = incoming.creation_body, incoming.source_value
+        if owner_body != route.creation_body or owner != route.source_value:
+            required.add(CrossBodyNamespaceCondition.CALLER_OWNER_ALIASES_FACTORY_GLOBALS)
+        if not required <= set(self.conditions) or len(set(self.conditions)) != len(self.conditions):
+            raise ValueError("namespace call bridge must retain target/entry/qualified-owner conditions")
+
+
+@dataclass(frozen=True, slots=True)
+class StaticCrossBodyNamespaceFlow:
+    """Ordered conditional reaching binding across any number of call entries.
+
+    The source reference reaches a namespace read under the listed path,
+    owner, mapping and effect premises. This is not content equality, a unique
+    runtime function instance or an unconditional reaching-definition proof.
+    """
+    write: StaticQualifiedNamespaceWrite
+    read: StaticQualifiedNamespaceRead
+    segments: tuple[StaticNamespacePathSegment, ...]
+    bridges: tuple[StaticNamespaceCallBridge, ...]
+    conditions: tuple[NamespaceFlowCondition, ...]
+    qualification: str = "CONDITIONAL_CROSS_BODY_REACHING_NAMESPACE_BINDING"
+
+    def __post_init__(self):
+        _exact(self.write, StaticQualifiedNamespaceWrite)
+        _exact(self.read, StaticQualifiedNamespaceRead)
+        _rows(self.segments, StaticNamespacePathSegment)
+        _rows(self.bridges, StaticNamespaceCallBridge)
+        _rows(self.conditions, NamespaceFlowCondition)
+        if not self.bridges or len(self.segments) != len(self.bridges) + 1:
+            raise ValueError("cross-body flow needs one ordered local segment per call boundary plus its final read")
+        first, last = self.segments[0], self.segments[-1]
+        if (first.body != self.write.body or first.start_kind is not NamespacePathStart.WRITE_NORMAL
+                or first.start_operation != self.write.operation or last.body != self.read.body
+                or last.query_operation != self.read.operation or last.query_world != self.read.world):
+            raise ValueError("cross-body flow endpoints differ from its original first/last segment")
+        if any(segment.key != first.key for segment in self.segments):
+            raise ValueError("cross-body namespace flow must query the same builtin key value")
+        for position, bridge in enumerate(self.bridges):
+            before, after = self.segments[position:position + 2]
+            route = bridge.environment
+            if (before.body != route.caller or before.query_operation != route.call_operation
+                    or before.query_owner != bridge.caller_owner or before.query_world != route.call_world
+                    or after.body != route.callee or after.start_kind is not NamespacePathStart.ENTRY
+                    or after.start_owner != bridge.callee_owner):
+                raise ValueError("cross-body namespace bridges are not ordered qualified segment joins")
+        required = {NamespaceFlowCondition.PATH_TAKEN, NamespaceFlowCondition.ALL_NORMAL_NAMESPACE_STORES_COMMIT_INPUT,
+                    NamespaceFlowCondition.NORMAL_READ_RETURNS_MAPPING_BINDING,
+                    NamespaceFlowCondition.INTERVENING_EFFECTS_PRESERVE_BINDING}
+        if not required <= set(self.conditions) or len(set(self.conditions)) != len(self.conditions):
+            raise ValueError("cross-body flow must retain path/mapping/effect conditions")
+        if bool(self.read.prior_lookup_owners) != (NamespaceFlowCondition.PRIOR_LOOKUP_NAMESPACES_MISSING in self.conditions):
+            raise ValueError("cross-body flow lost its original read lookup-priority condition")
+        if self.qualification != "CONDITIONAL_CROSS_BODY_REACHING_NAMESPACE_BINDING":
+            raise ValueError("cross-body namespace flow cannot claim unconditional contents or identity")
+
+
+@dataclass(frozen=True, slots=True)
 class StaticCallSite:
     caller: SourceBodyNamespace
     operation: OperationID
@@ -335,6 +540,9 @@ class StaticCallSite:
     target_set_complete: bool = False
     namespace_flows: tuple[StaticNamespaceFlow, ...] = ()
     function_creations: tuple[StaticFunctionCreationRoute, ...] = ()
+    qualified_namespace_flows: tuple[StaticQualifiedNamespaceFlow, ...] = ()
+    qualified_function_creations: tuple[StaticQualifiedFunctionCreation, ...] = ()
+    cross_body_namespace_flows: tuple[StaticCrossBodyNamespaceFlow, ...] = ()
 
     def __post_init__(self):
         _exact(self.caller, SourceBodyNamespace)
@@ -351,6 +559,9 @@ class StaticCallSite:
         _rows(self.frontiers, StaticCallFrontier)
         _rows(self.namespace_flows, StaticNamespaceFlow)
         _rows(self.function_creations, StaticFunctionCreationRoute)
+        _rows(self.qualified_namespace_flows, StaticQualifiedNamespaceFlow)
+        _rows(self.qualified_function_creations, StaticQualifiedFunctionCreation)
+        _rows(self.cross_body_namespace_flows, StaticCrossBodyNamespaceFlow)
         for target in self.targets:
             if any(port.actual_body != self.caller or port.operation != self.operation for port in target.arguments):
                 raise ValueError("actual port belongs to another original caller")
@@ -380,7 +591,7 @@ class StaticCallShard:
 
 def dumps(shard: StaticCallShard) -> str:
     _exact(shard, StaticCallShard)
-    return json.dumps({"schema": "scar.static-calls", "schema_version": 3,
+    return json.dumps({"schema": "scar.static-calls", "schema_version": 4,
                        "relations": encode(shard)}, sort_keys=True, separators=(",", ":"), allow_nan=False)
 
 
@@ -388,33 +599,49 @@ def loads(payload: str) -> StaticCallShard:
     document = strict_loads(payload)
     if (type(document) is not dict or set(document) != {"schema", "schema_version", "relations"}
             or document["schema"] != "scar.static-calls" or type(document["schema_version"]) is not int
-            or document["schema_version"] not in (1, 2, 3)):
+            or document["schema_version"] not in (1, 2, 3, 4)):
         raise ValueError("unsupported static call relation shard")
     relations = document["relations"]
-    if document["schema_version"] in (1, 2):
+    if document["schema_version"] in (1, 2, 3):
         # A closed historical wire must not silently carry new relationships.
         relations = copy.deepcopy(relations)
-        old_fields = set(StaticCallSite.__dataclass_fields__)
+        v4_fields = {"qualified_namespace_flows", "qualified_function_creations", "cross_body_namespace_flows"}
+        old_fields = set(StaticCallSite.__dataclass_fields__) - v4_fields
         if document["schema_version"] == 1:
             old_fields -= {"namespace_flows", "function_creations"}
-        old_target_fields = set(StaticCallTarget.__dataclass_fields__) - {"environment_routes"}
+        old_target_fields = set(StaticCallTarget.__dataclass_fields__)
+        if document["schema_version"] < 3:
+            old_target_fields -= {"environment_routes"}
         if type(relations) is not dict or type(relations.get("calls")) is not list:
             raise ValueError("historical call shard is malformed")
         for call in relations["calls"]:
             if type(call) is not dict or set(call) != old_fields:
                 raise ValueError("historical call record cannot contain newer relationships")
+            if document["schema_version"] > 1:
+                if type(call['namespace_flows']) is not list:
+                    raise ValueError("historical namespace relationships are malformed")
+                for flow in call['namespace_flows']:
+                    if (type(flow) is not dict or type(flow.get('conditions')) is not list
+                            or NamespaceFlowCondition.NAMESPACE_OWNERS_ALIAS.value in flow['conditions']):
+                        raise ValueError("historical namespace flow cannot carry v4 owner-alias conditions")
             if type(call['targets']) is not list:
                 raise ValueError("historical static call targets are malformed")
             for target in call['targets']:
                 if type(target) is not dict or set(target)!=old_target_fields:
-                    raise ValueError("historical target cannot contain v3 environment relationships")
-                target['environment_routes']=[]
+                    raise ValueError("historical target has unsupported relationship fields")
+                if document["schema_version"] < 3:
+                    target['environment_routes']=[]
             if document["schema_version"] == 1:
                 call.update(namespace_flows=[], function_creations=[])
+            call.update(qualified_namespace_flows=[], qualified_function_creations=[], cross_body_namespace_flows=[])
     return decode(StaticCallShard, relations)
 
 
 __all__ = ["StaticCallFrontier", "StaticTerminalPort", "StaticCompletionRoute",
            "StaticStateEntryRoute", "NamespaceFlowCondition", "StaticNamespaceFlow",
+           "StaticQualifiedNamespaceFlow", "StaticQualifiedFunctionCreation",
+           "StaticQualifiedNamespaceWrite", "StaticQualifiedNamespaceRead", "NamespacePathStart",
+           "StaticNamespacePathSegment", "CrossBodyNamespaceCondition", "StaticNamespaceCallBridge",
+           "StaticCrossBodyNamespaceFlow",
            "FunctionEnvironmentRouteKind", "FunctionEnvironmentCondition", "StaticFunctionEnvironmentRoute",
            "StaticFunctionCreationRoute", "StaticCallTarget", "StaticCallSite", "StaticCallShard", "dumps", "loads"]

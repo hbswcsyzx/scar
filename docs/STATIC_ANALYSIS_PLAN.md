@@ -111,17 +111,21 @@ S0 不设建模覆盖率门槛，不产生额外历史报告或 gate 目录。
 ## S3：调用图、points-to、状态与 effects 联合固定点
 
 **状态：基础类型与局部候选部分已有，联合静态分析未完成。**`CallTarget` 可表达局部条件候选；`effects_v2` 有 effect 维度和 coverage 类型，但现有闭包器面向显式 scope，不能替代静态调用图或静态定义摘要。
-source-only linker 已在原端口上发布 v3 条件 namespace/factory/environment 关系。有界读取 400 份产物（365 有图），268 份分片实际保存 2,059 个 CALL、92 条候选、52 条 namespace flow、26 条创建关联、50 条函数对象/G 环境边、86 条实参边、260 条 completion。全部 typed codec 和所选真实模块 public query 通过；8,419 份产物未读，不能称整程序固定点完成。默认字段初始化依赖另有纯源码端到端正例，不能等同于 LeWM 全默认参数传播。
+source-only linker 已发布 v4 qualified namespace/factory/environment 关系。有界扫描 400 份产物（365 有图），269 份分片实际保存 2,069 个 CALL、41 条有绑定来源的条件目标、123 条跨主体 namespace flow、8 条 qualified factory、76 条环境依赖。123 条 flow 中 5 条经两次真实调用桥，工作队列处理 77 次后在该范围内稳定；8,419 份产物未扫描，不能称整程序固定点完成。未接通真实callee来源的旧声明提示单独保留，不再独立生成目标端口；默认字段初始化依赖也不等同于调用时 formal 的完整传播。
 STORE/LOAD/world/CFG、查找优先及中间效果保留明确条件；正常覆盖仅在 mapping 提交输入等 guard 下成立。MAKE 的原 code slot/declaration/正常结果可连共享 body，APPLY 的结果独立，真实 eval.run 的装饰器返回关系仍开放。下一步用通用返回/环境/alias/effect 分析解决这些条件与未知调用，不按名字补目标，也不把当前条件边当成已证明的 must-flow。
 
-**下一闭环：消费跨主体环境依赖，尚未实现。** 目前即使已输出 environment route，callee 内部的 global read 也不会因此重新求解。下一步将候选队列从当前 body 的裸 ValueID 改为 qualified `(body, value, call context, supporting facts)`；factory 也携带其原 body，不能拿 module 的 OperationID 到 callee index 中查找。
+**跨主体 namespace 闭环：已实现并在 LeWM 源树的有界产物上发布；完整 S3 仍未完成。** 候选队列已使用 qualified body/value 来源，环境激活会失效并重新求解相关 callee/下游读取。factory 带其原 body，不能拿 module 的 OperationID 到 callee index 中查找。当前实现只求条件 namespace 依赖的有限工作队列，不称为 points-to/effects 联合固定点已经完成。
 
 - 为 namespace 分析增加 `bindings_at(owner, key, operation, world_use)`，查询真实控制点的可能定义，不伪造一次 LOAD。
 - 组合原 STORE→外层 CALL 路径、G environment/state-entry 路由及 callee entry→LOAD 路径，产生引用原端点的条件跨主体 namespace flow。module 的 STORE_NAME 写 L、factory 取 G；只有 loader 合同证明 L=G 或保留显式 owner-alias 条件时才相连，不能直接合并两个端口。
 - 新环境边激活相关 namespace reads，新 reaching binding 激活目标解析，新目标再传播参数/返回/环境和摘要。按调用图 SCC 与有限符号上下文单调迭代，稳定后发布；不能把当前一次 `_calls()` 后 yield 当作固定点。
 - 自验收使用纯源码的 `module 定义 h/f → module 调用 f → f 内 global h 调用`：应真正得到 h 的 qualified factory/body 目标；插入同 key 写入时保留正确覆盖/分支条件；递归必须终止且不循环自证。随后用同一工作队列接 decorator actual→formal→return，以及 defaults 初始化→字段/元素读取→缺省 formal，不另造业务规则。
 
-这项开发与剩余 S2 语言实现并行推进，不等待所有语法补齐；当前新边的存在、端点读回通过都不算该验收已完成。
+正常 CLI 纯源码多层链已真正得到 4 条目标边、3 条跨图依赖，最长 3 个调用桥；公开 query 同时验证原 factory/namespace/Use/world/CFG。覆盖反例不再得到旧 factory 目标；递归有种子收敛、无种子不循环自证。预算停止前的有效 CALL 记录保留。旧 metadata/CALLS 中没有实际 callee 来源支持的提示不再独立生成目标端口；真实 nested factory 通过原 parent code path/CodeKey/slot 校验，避免以丢弃合法调用来消除假阳性。LeWM 实际批次的数量与剩余缺口以 current 发布结果为准。
+
+**下一步消费的数据关系仍待实现：** SourceArgumentPort 的 actual→formal、正常 completion 的 terminal→caller landing、decorator application 的 actual→formal→return，以及 defaults 字段/元素→缺省 formal。它们应进入同一 qualified 来源工作队列；不能把 arbitrary computation 的所有输入都当作输出的引用别名。类型/常量/ModRef 分析继续用于消解条件，callee body、shape、地址等属性各自保留已知部分与具体缺口。
+
+这些工作与剩余 S2 语言实现并行推进，不等待所有语法补齐；单纯存在新边或 reader 通过都不等于全程序模型已完成。
 
 **实质功能**
 

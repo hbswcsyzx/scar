@@ -150,7 +150,8 @@ def _factory(index, document, protocols, route):
 
 def derive_function_environment_routes(*, caller_graph, caller_document, caller_namespace,
         callee_graph, callee_document, callee_namespace, definition, call_operation,
-        callee_use, creations, caller_index=None, callee_index=None):
+        callee_use, creations=(), caller_index=None, callee_index=None,
+        qualified_creations=(), load_creation_body=None):
     """Return (typed routes, precise frontiers), with no new graph identities.
 
     ``creations`` must be the source-verified routes actually traversed while
@@ -159,7 +160,7 @@ def derive_function_environment_routes(*, caller_graph, caller_document, caller_
     """
     from scar.ir.program.static_calls import (
         FunctionEnvironmentCondition as C, FunctionEnvironmentRouteKind as K,
-        StaticFunctionEnvironmentRoute,
+        StaticFunctionEnvironmentRoute, StaticQualifiedFunctionCreation,
     )
     caller=_index(caller_graph,caller_index);callee=_index(callee_graph,callee_index)
     validate_static_body_namespace(caller_graph,caller_document,caller_namespace)
@@ -184,31 +185,51 @@ def derive_function_environment_routes(*, caller_graph, caller_document, caller_
     if site.operation!=operation.id or callee_use not in operation.invoke_arguments or type(caller.values[site.use.value])is not ReferenceValue:
         raise ValueError('function environment callee Use is not this invoke callable reference')
     call_world=_world(caller,operation)
-    selected=tuple(r for r in creations if r.definition==definition)
+    selected=[StaticQualifiedFunctionCreation(caller_namespace,r) for r in creations if r.definition==definition]
+    for qualified in qualified_creations:
+        if type(qualified)is not StaticQualifiedFunctionCreation:
+            raise TypeError('foreign factory requires its original qualified creation relation')
+        if qualified.creation.definition==definition and qualified not in selected:
+            selected.append(qualified)
     if not selected:
         return (), (StaticCallFrontier('VERIFIED_FUNCTION_CREATION_UNAVAILABLE',
             'No source-verified factory occurrence is connected to this call target; a common code definition cannot choose a function object.',definition.source),)
-    protocols=protocol_kinds(caller_document);members={m.role:m for m in environment.members if m.role is not EnvironmentRole.CAPTURED_CELL}
+    members={m.role:m for m in environment.members if m.role is not EnvironmentRole.CAPTURED_CELL}
     captured=tuple(m for m in environment.members if m.role is EnvironmentRole.CAPTURED_CELL)
     routes=[];frontiers=[]
     base=(C.TARGET_SELECTS_THIS_CREATION,C.FACTORY_COMPLETED_NORMALLY,
           C.CALLEE_DERIVES_FROM_THIS_FACTORY_OCCURRENCE,C.FUNCTION_CODE_MATCHES_CREATION)
-    for creation in selected:
-        factory=_factory(caller,caller_document,protocols,creation);factory_world=_world(caller,factory)
-        roles=_roles(caller_document,caller,factory)
+    for qualified in selected:
+        creation,creation_namespace=qualified.creation,qualified.body
+        if creation_namespace==caller_namespace:
+            creator,creator_document,creator_graph=caller,caller_document,caller_graph
+        else:
+            if load_creation_body is None:
+                frontiers.append(StaticCallFrontier('QUALIFIED_FACTORY_BODY_UNAVAILABLE',
+                    'Foreign factory namespace is retained, but no source-qualified body loader was supplied.',definition.source))
+                continue
+            loaded=load_creation_body(creation_namespace)
+            if loaded is None or loaded.namespace!=creation_namespace:
+                raise ValueError('factory body loader changed its original qualified namespace')
+            creator_graph,creator_document=loaded.graph,loaded.document
+            creator=_index(creator_graph,loaded.index)
+        validate_static_body_namespace(creator_graph,creator_document,creation_namespace)
+        factory=_factory(creator,creator_document,protocol_kinds(creator_document),creation)
+        factory_world=_world(creator,factory)
+        roles=_roles(creator_document,creator,factory)
         if roles.get(creation.code_use)!=('function-code',0):
             raise ValueError('function environment factory code role differs from its verified creation')
         edge=factory.terminator.successors[creation.normal_edge.successor_index]
-        blocks={b.id:b for r in caller_graph.regions for b in r.blocks}
+        blocks={b.id:b for r in creator_graph.regions for b in r.blocks}
         normal_world=[formal for formal,actual in zip(blocks[edge.block].arguments,edge.arguments)
-            if type(actual)is CompletionResult and type(caller.values[formal])is StateVersionValue]
+            if type(actual)is CompletionResult and type(creator.values[formal])is StateVersionValue]
         if len(normal_world)!=1:
             raise ValueError('function environment factory lacks its actual normal post-world')
         def append(member,source_value,source_use,source_role,source_index,kind,conditions):
-            if type(caller.values[source_value])is not ReferenceValue or type(callee.values[member.reference])is not ReferenceValue:
+            if type(creator.values[source_value])is not ReferenceValue or type(callee.values[member.reference])is not ReferenceValue:
                 raise ValueError('function environment relation must connect existing reference endpoints')
             routes.append(StaticFunctionEnvironmentRoute(caller_namespace,operation.id,callee_use,site.use.value,
-                call_world.id,call_world.value,caller_namespace,creation,factory_world.id,factory_world.value,
+                call_world.id,call_world.value,creation_namespace,creation,factory_world.id,factory_world.value,
                 normal_world[0],source_use,source_value,source_role,source_index,callee_namespace,
                 environment.id,member,kind,conditions))
         member=members.get(EnvironmentRole.FUNCTION_OBJECT)

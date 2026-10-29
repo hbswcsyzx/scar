@@ -297,41 +297,259 @@ def _rule_plans(unit, entries, fragments, limit):
 
 
 def _call_relations(manifest, unit, entries, fragments, limit):
+    """Read qualified v1-v4 relations and replay their original endpoint joins."""
+    from collections import OrderedDict
+    from types import SimpleNamespace
+    from scar.analysis.static_calls import input_basis_unit
+    from scar.analysis.static_function_environment import (
+        derive_function_environment_routes, validate_static_body_namespace, _source_reference,
+    )
+    from scar.analysis.static_namespace import NamespaceDependencies, normal_reference
+    from scar.ir.program.codec import loads as load_core
+    from scar.ir.program.model import OperationResult
+    from scar.ir.program.queries import ProgramIndex
+    from scar.ir.program.static_calls import loads as load_relations
+    from scar.ir.record_codec import encode
+
     publication = manifest.get("static_calls")
     if publication is None:
         return {"status": "STATIC_CALL_LINKS_NOT_BUILT"}
-    from scar.ir.program.static_calls import loads as load_relations
-    from scar.analysis.static_calls import input_basis_unit
-    from scar.ir.program.codec import loads as load_core
-    from scar.ir.record_codec import encode
     selected = {entry["entry_key"]: entry for entry in entries}
-    catalog = _catalog(unit, fragments)
     descriptors = {row["path"]: row for row in publication["artifacts"]}
+    if len(descriptors) != len(publication["artifacts"]):
+        raise ValueError("duplicate static call artifact declaration")
     bases = [row for row in descriptors.values() if row.get("kind") == "BASIS"]
     if len(bases) != 1:
         raise ValueError("static call publication needs one immutable input-basis receipt")
     basis = bases[0]
     basis_document = fragments.read(basis)
-    if (basis_document.get("schema") != "scar.static-call-source-basis" or
-            basis_document.get("schema_version") != 1 or
-            basis_document.get("logical_root") != str(fragments.root) or
-            basis_document.get("input_manifest_sha256") != publication.get("input_manifest_sha256") or
-            basis_document.get("units") != [input_basis_unit(row) for row in manifest["units"]]):
+    if (basis_document.get("schema") != "scar.static-call-source-basis"
+            or basis_document.get("schema_version") != 1
+            or basis_document.get("logical_root") != str(fragments.root)
+            or basis_document.get("input_manifest_sha256") != publication.get("input_manifest_sha256")
+            or basis_document.get("units") != [input_basis_unit(row) for row in manifest["units"]]):
         raise ValueError("static call input namespace/source/body basis differs from the current model")
-    bodies = {body["entry_key"]: body for body in unit.get("bodies", ())}
-    all_bodies = {str(fragments.root / row["artifact"]["path"]): (owner, row)
-                  for owner in manifest["units"] for row in owner["bodies"] if "artifact" in row}
-    current_envelopes = {}
-    endpoint_indexes = {}
-    def current_graph(row):
-        path = row["artifact"]["path"]
-        if path not in fragments.core_graphs:
-            envelope = fragments.read(row["artifact"])
-            if envelope.get("status") != row["status"] or envelope.get("entry_key") != row["entry_key"] or envelope.get("graph") is None:
-                raise ValueError("call relation endpoint is not a current canonical body")
-            fragments.core_graphs[path] = load_core(json.dumps(envelope["graph"], allow_nan=False))
-            current_envelopes[path] = envelope
-        return fragments.core_graphs[path]
+    basis_uri = str(fragments.root / basis["path"])
+    registry = {}
+    for number, owner in enumerate(manifest["units"]):
+        for position, row in enumerate(owner["bodies"]):
+            if "artifact" not in row:
+                continue
+            uri = str(fragments.root / row["artifact"]["path"])
+            if uri in registry:
+                raise ValueError("qualified body artifact has multiple manifest owners")
+            registry[uri] = number, position, owner, row
+
+    # Foreign graph/index lifetimes are bounded. Selected canonical graphs
+    # already owned by the enclosing query can be reused without recopying.
+    cache, catalogs, source_facts = OrderedDict(), OrderedDict(), OrderedDict()
+    cached_bytes = 0
+    cache_limit = 128 * 1024 * 1024
+    def catalog_for(owner):
+        key = owner["key"]
+        if key not in catalogs:
+            catalogs[key] = _catalog(owner, fragments)
+            if len(catalogs) > 8:
+                catalogs.popitem(last=False)
+        else:
+            catalogs.move_to_end(key)
+        return catalogs[key]
+
+    def basis_artifact(artifact):
+        return (artifact.uri == basis_uri and artifact.sha256 == basis["sha256"]
+                and artifact.size_bytes == basis["bytes"]
+                and artifact.schema == "scar.static-call-source-basis/1")
+
+    def load_body(namespace):
+        nonlocal cached_bytes
+        namespace.__post_init__()
+        location = registry.get(namespace.graph.artifact.uri)
+        if location is None:
+            raise ValueError("qualified body is absent from the current model")
+        number, position, owner, row = location
+        descriptor = row["artifact"]
+        locator = namespace.graph
+        if (locator.artifact.sha256 != descriptor["sha256"]
+                or locator.artifact.size_bytes != descriptor["bytes"]
+                or locator.artifact.schema != "scar.static-body/1"
+                or locator.decoded_sha256 != descriptor["decoded_sha256"]
+                or locator.decoded_bytes != descriptor["decoded_bytes"]
+                or locator.representation != "gzip-canonical-json" or locator.pointer != "#/graph"
+                or locator.declaration is None
+                or not basis_artifact(locator.declaration.artifact)
+                or locator.declaration.locator != f"#/units/{number}/bodies/{position}/artifact"):
+            raise ValueError("qualified body stored/decoded receipt or original declaration differs")
+        uri = locator.artifact.uri
+        if uri in cache:
+            loaded, _ = cache[uri]
+            cache.move_to_end(uri)
+            validate_static_body_namespace(loaded.graph, loaded.document, namespace)
+            if loaded.namespace != namespace:
+                raise ValueError("qualified namespace relabels an already read original body")
+            return loaded
+        document = fragments.read(descriptor)
+        if (document.get("schema") != "scar.static-body" or document.get("schema_version") != 1
+                or document.get("entry_key") != row["entry_key"]
+                or document.get("cache_key") != row.get("cache_key")
+                or document.get("status") != row["status"] or row["status"] != "LOWERED_WITH_GAPS"
+                or document.get("graph") is None
+                or document.get("inputs") != {name: owner["artifacts"].get(name)
+                                             for name in ("source", "semantic", "semantics", "control")}):
+            raise ValueError("qualified endpoint differs from its original body ledger/shared inputs")
+        graph = fragments.core_graphs.get(descriptor["path"])
+        if graph is None:
+            graph = load_core(json.dumps(document["graph"], allow_nan=False))
+        metadata = validate_static_body_namespace(graph, document, namespace)
+        if (metadata.source.path != owner["path"]
+                or metadata.source.fingerprint != "sha256:" + owner["decoded_sha256"]):
+            raise ValueError("qualified endpoint snapshot differs from its original source unit")
+        catalog = catalog_for(owner)
+        original = [e for e in (catalog or {}).get("entries", ()) if e["entry_key"] == row["entry_key"]]
+        if (len(original) != 1
+                or encode(namespace.definition) not in (original[0].get("semantic_definition_ids") or ())
+                or original[0]["kind"] != "MODULE" and encode(namespace.source) != original[0].get("source_ref")):
+            raise ValueError("qualified endpoint differs from its original lexical definition/source")
+        index = ProgramIndex(graph)
+        loaded = SimpleNamespace(graph=graph, index=index, document=document, namespace=namespace,
+            unit=owner, row=row, unit_number=number, body_position=position, catalog=catalog,
+            dependencies=NamespaceDependencies(graph, document, index=index))
+        cache[uri] = loaded, descriptor["decoded_bytes"]
+        cached_bytes += descriptor["decoded_bytes"]
+        while cache and (len(cache) > 16 or cached_bytes > cache_limit):
+            _, (_, size) = cache.popitem(last=False)
+            cached_bytes -= size
+        return loaded
+
+    def check_definition(definition, owner):
+        if (not basis_artifact(definition.root.artifact)
+                or definition.root.decoded_sha256 != basis["decoded_sha256"]
+                or definition.root.decoded_bytes != basis["decoded_bytes"]
+                or definition.root.representation != "gzip-canonical-json"
+                or definition.context.namespace_root != owner["namespace_root"]
+                or definition.snapshot.path != owner["path"]
+                or definition.snapshot.fingerprint != "sha256:" + owner["decoded_sha256"]):
+            raise ValueError("qualified definition belongs to another source namespace/basis")
+        number = next(n for n, candidate in enumerate(manifest["units"]) if candidate is owner)
+        if definition.root.pointer != f"#/units/{number}":
+            raise ValueError("qualified definition root points to another source unit")
+        descriptor = owner["artifacts"]["semantic"]
+        locator = definition.graph
+        if (locator.artifact.uri != str(fragments.root / descriptor["path"])
+                or locator.artifact.sha256 != descriptor["sha256"]
+                or locator.artifact.size_bytes != descriptor["bytes"]
+                or locator.artifact.schema != "scar.ir.v2.semantic"
+                or locator.decoded_sha256 != descriptor["decoded_sha256"]
+                or locator.decoded_bytes != descriptor["decoded_bytes"]
+                or locator.representation != "gzip-canonical-json"
+                or locator.declaration is None or not basis_artifact(locator.declaration.artifact)
+                or locator.declaration.locator != f"#/units/{number}/artifacts/semantic"):
+            raise ValueError("qualified definition semantic artifact/declaration differs from its source unit")
+        if owner["key"] not in source_facts:
+            from scar.analysis.source_layers import _digest
+            contexts, definitions = [], None
+            for name in ("semantic", "semantics", "control"):
+                original = fragments.read(owner["artifacts"][name])
+                contexts.append(_digest(original))
+                if name == "semantic":
+                    definitions = {_wire(row["id"]): (position, row["code_id"], row["source_atoms"],
+                        row.get("metadata", {}).get("phase"))
+                        for position, row in enumerate(original["definitions"])}
+            source_facts[owner["key"]] = tuple(contexts), definitions
+            if len(source_facts) > 8:
+                source_facts.popitem(last=False)
+        else:
+            source_facts.move_to_end(owner["key"])
+        contexts, definitions = source_facts[owner["key"]]
+        if contexts != tuple(getattr(definition.context, name) for name in
+                             ("semantic_sha256", "semantics_sha256", "control_sha256")):
+            raise ValueError("qualified definition source context differs from the original fragments")
+        original = definitions.get(definition.definition.wire)
+        if (original is None or locator.pointer != f"#/definitions/{original[0]}"
+                or original[1] != definition.source.atom_id.wire
+                or encode(definition.source.atom_id) not in original[2] or original[3] != "call_time"):
+            raise ValueError("qualified definition does not point to its original semantic source record")
+        declarations = [e for e in (catalog_for(owner) or {}).get("entries", ())
+            if e["kind"] in ("FUNCTION", "ASYNC_FUNCTION", "LAMBDA")
+            and e.get("source_ref") == encode(definition.source)
+            and encode(definition.definition) in (e.get("semantic_definition_ids") or ())]
+        if len(declarations) != 1:
+            raise ValueError("qualified definition has no unique original lexical source declaration")
+
+    checked_creations = set()
+    def check_creation(namespace, creation):
+        key = namespace, creation
+        if key in checked_creations:
+            return
+        body = load_body(namespace)
+        dependencies, document = body.dependencies, body.document
+        check_definition(creation.definition, body.unit)
+        if dependencies.protocols.get(creation.factory) not in ("MAKE_FUNCTION_314", "MAKE_NESTED_FUNCTION"):
+            raise ValueError("creation relation is not its original factory protocol")
+        normal = normal_reference(body.index, creation.factory, blocks=dependencies.blocks)
+        if normal != (creation.normal_edge, creation.normal_value):
+            raise ValueError("creation relation changed its original NORMAL reference port")
+        code = body.index.use_site(creation.code_use)
+        factory = body.index.operations[creation.factory]
+        if code.operation != creation.factory or code.use.id not in factory.invoke_arguments:
+            raise ValueError("creation code Use is not an original factory input")
+        source_rows = (document.get("module") or document["metadata"]).get("use_links", ())
+        source_code = [r for r in source_rows if r["operation"] == encode(creation.factory)
+                       and r["use"] == encode(creation.code_use)]
+        if len(source_code) != 1 or (source_code[0]["role"], source_code[0]["index"]) != ("function-code", 0):
+            raise ValueError("creation code Use lost its original source role")
+        links = (document.get("module") or document["metadata"]).get("operation_links", ())
+        factory_links = [link for link in links if link["operation"] == encode(creation.factory)]
+        if (len(factory_links) != 1
+                or _source_reference(factory_links[0].get("source")) != creation.definition.source
+                or encode(creation.definition.snapshot) != document["metadata"]["source"]):
+            raise ValueError("factory creation does not retain its original source function definition")
+        declaration = source_facts[body.unit["key"]][1].get(_wire(factory_links[0].get("semantic_operation")))
+        if (declaration is None or declaration[3] != "definition_time"
+                or declaration[1] != creation.definition.source.atom_id.wire
+                or encode(creation.definition.source.atom_id) not in declaration[2]):
+            raise ValueError("factory source lost its original definition-time declaration")
+        origin = body.index.values[code.use.value].origin
+        if type(origin) is not OperationResult or origin.operation != creation.code_constant_operation:
+            raise ValueError("factory code is not its original constant operation result")
+        module_constants = (document.get("module") or {}).get("constants", ())
+        original_constant = any(record["operation"] == encode(creation.code_constant_operation)
+            and record["code_key"] == creation.code_layout_key
+            and tuple(record["constant_path"]) == creation.constant_path for record in module_constants)
+        class_overlay = document.get("class") or {}
+        if class_overlay.get("class_record") in ("STATIC_CLASS_SUITE_OVERLAY", "STATIC_CLASS_SUITE_METHOD_OVERLAY"):
+            original_constant = (class_overlay["compilation"]["code_layout_key"] == creation.code_layout_key
+                and any(record["operation"] == encode(creation.code_constant_operation)
+                        and record["reference"] == encode(code.use.value)
+                        and tuple(record["constant_path"]) == creation.constant_path
+                        for record in class_overlay["constants"])
+                and any(record["operation"] == encode(creation.factory)
+                        and record["reference"] == encode(creation.normal_value)
+                        and record["definition"] == encode(creation.definition.definition)
+                        and record["code_reference"] == encode(code.use.value)
+                        and tuple(record["constant_path"]) == creation.constant_path
+                        for record in class_overlay["factories"]))
+        if dependencies.protocols[creation.factory] == "MAKE_NESTED_FUNCTION":
+            from scar.analysis.static_nested_creation import validate_nested_function_creation
+            source = fragments.read(body.unit["artifacts"]["source"])
+            if (source.get("path") != body.unit["path"]
+                    or source.get("namespace_root") != body.unit["namespace_root"]
+                    or type(source.get("text")) is not str
+                    or hashlib.sha256(source["text"].encode()).hexdigest() != body.unit["decoded_sha256"]):
+                raise ValueError("nested factory source text differs from its original source unit")
+            validate_nested_function_creation(creation, graph=body.graph, index=body.index,
+                document=document, namespace=body.namespace, source_text=source["text"])
+            original_constant = True  # Shared source/compiler rule proved the exact parent/child code slot.
+        constant = body.index.operations.get(creation.code_constant_operation)
+        if not original_constant or constant is None or code.use.value not in constant.results:
+            raise ValueError("creation code slot/qualified definition differs from its original creator")
+        checked_creations.add(key)
+
+    def check_environment_creation(route):
+        check_creation(route.creation_body, route.creation)
+        # The common environment validator replays caller/callee and creator
+        # ports. In particular foreign factory IDs never index the caller.
+        return load_body(route.creation_body)
+
     rows = []
     for item in publication.get("shards", ()):
         key = item.get("caller_entry_key")
@@ -343,132 +561,92 @@ def _call_relations(manifest, unit, entries, fragments, limit):
             raise ValueError("call shard is not registered in the current model")
         document = fragments.read(descriptors[path])
         shard = load_relations(json.dumps(document, allow_nan=False))
-        body = bodies.get(key)
-        if (body is None or "artifact" not in body or
-                shard.caller.graph.artifact.uri != str(fragments.root / body["artifact"]["path"]) or
-                shard.caller.graph.artifact.sha256 != body["artifact"]["sha256"] or
-                shard.caller.graph.decoded_sha256 != body["artifact"]["decoded_sha256"] or
-                shard.caller.definition.as_dict() not in (selected[key].get("semantic_definition_ids") or ()) or
-                shard.source_model.uri != str(fragments.root / basis["path"]) or
-                shard.source_model.sha256 != basis["sha256"]):
-            raise ValueError("static call shard does not retain the selected original caller/input basis")
-        caller_graph = current_graph(body)
-        owners = {operation: region.id for region in caller_graph.regions for block in region.blocks
-                  for operation in block.operations}
-        from scar.analysis.static_namespace import NamespaceDependencies, normal_reference
-        envelope = current_envelopes.get(body["artifact"]["path"])
-        if envelope is None:
-            envelope = fragments.read(body["artifact"])
-        from scar.analysis.static_function_environment import validate_static_body_namespace, _source_reference
-        validate_static_body_namespace(caller_graph, envelope, shard.caller)
-        namespace_dependencies = (NamespaceDependencies(caller_graph, envelope)
-            if any(call.namespace_flows or call.function_creations or
-                   any(target.environment_routes for target in call.targets) for call in shard.calls) else None)
+        caller = load_body(shard.caller)
+        if (caller.unit is not unit or caller.row["entry_key"] != key
+                or encode(shard.caller.definition) not in (selected[key].get("semantic_definition_ids") or ())
+                or not basis_artifact(shard.source_model)):
+            raise ValueError("static call shard differs from its selected original caller/input basis")
+        owners = {op: region.id for region in caller.graph.regions for block in region.blocks for op in block.operations}
         for call in shard.calls:
-            for flow in call.namespace_flows:
-                namespace_dependencies.validate(flow)
-            for creation in call.function_creations:
-                if namespace_dependencies.protocols.get(creation.factory) != "MAKE_FUNCTION_314":
-                    raise ValueError("creation relation is not its original factory protocol")
-                normal = normal_reference(namespace_dependencies.index, creation.factory, blocks=namespace_dependencies.blocks)
-                if normal != (creation.normal_edge, creation.normal_value):
-                    raise ValueError("creation relation changed its original NORMAL reference port")
-                code = namespace_dependencies.index.use_site(creation.code_use)
-                from scar.ir.program.model import OperationResult
-                if code.operation != creation.factory:
-                    raise ValueError("creation code Use is not owned by its original factory")
-                links = (envelope.get("module") or envelope.get("metadata") or {}).get("operation_links", ())
-                factory_links = [link for link in links if link["operation"] == creation.factory.as_dict()]
-                original_source = encode(creation.definition.source)
-                original_definition = creation.definition.definition.as_dict()
-                declarations = [entry for entry in (catalog or {}).get("entries", ())
-                                if entry["kind"] in ("FUNCTION", "ASYNC_FUNCTION")
-                                and entry.get("source_ref") == original_source
-                                and original_definition in (entry.get("semantic_definition_ids") or ())]
-                if (len(factory_links) != 1 or _source_reference(factory_links[0].get("source")) != creation.definition.source
-                        or len(declarations) != 1
-                        or encode(creation.definition.snapshot) != envelope["metadata"]["source"]):
-                    raise ValueError("factory creation does not retain its original source function definition")
-                origin = namespace_dependencies.index.values[code.use.value].origin
-                module_constants=(envelope.get("module") or {}).get("constants", ())
-                class_overlay=envelope.get("class") or {}
-                class_constants=class_overlay.get("constants", ()) if class_overlay.get('class_record') in ('STATIC_CLASS_SUITE_OVERLAY','STATIC_CLASS_SUITE_METHOD_OVERLAY') else ()
-                original_constant=any(record["operation"] == creation.code_constant_operation.as_dict()
-                    and record["code_key"] == creation.code_layout_key
-                    and tuple(record["constant_path"]) == creation.constant_path for record in module_constants)
-                if class_constants:
-                    original_constant=(class_overlay['compilation']['code_layout_key']==creation.code_layout_key
-                        and any(record['operation']==creation.code_constant_operation.as_dict()
-                            and record['reference']==code.use.value.as_dict()
-                            and tuple(record['constant_path'])==creation.constant_path for record in class_constants)
-                        and any(factory['operation']==creation.factory.as_dict()
-                            and factory['reference']==creation.normal_value.as_dict()
-                            and factory['definition']==creation.definition.definition.as_dict()
-                            and factory['code_reference']==code.use.value.as_dict()
-                            and tuple(factory['constant_path'])==creation.constant_path
-                            for factory in class_overlay['factories']))
-                if (type(origin) is not OperationResult or origin.operation != creation.code_constant_operation
-                        or not original_constant
-                        or creation.definition.root.artifact.uri != str(fragments.root / basis["path"])
-                        or creation.definition.root.artifact.sha256 != basis["sha256"]):
-                    raise ValueError("creation code slot/qualified definition differs from its original caller/basis")
             if call.operation not in owners:
                 raise ValueError("static call operation is absent from its original graph namespace")
+            if call.callee_use is not None:
+                site = caller.index.use_site(call.callee_use)
+                if (site.operation != call.operation or site.use.value != call.callee_value
+                        or call.callee_use not in caller.index.operations[call.operation].invoke_arguments):
+                    raise ValueError("static call callee Use/value differs from its original invoke")
+            for flow in call.namespace_flows:
+                caller.dependencies.validate(flow)
+            for creation in call.function_creations:
+                check_creation(caller.namespace, creation)
+            for qualified in call.qualified_namespace_flows:
+                load_body(qualified.body).dependencies.validate(qualified.flow)
+            for qualified in call.qualified_function_creations:
+                check_creation(qualified.body, qualified.creation)
+            for flow in call.cross_body_namespace_flows:
+                from scar.analysis.static_crossbody_namespace import (
+                    StaticNamespaceBody, validate_cross_body_namespace_flow,
+                )
+                namespaces = {flow.write.body, flow.read.body, *(segment.body for segment in flow.segments)}
+                for bridge in flow.bridges:
+                    route = bridge.environment
+                    check_environment_creation(route)
+                    namespaces.update((route.caller, route.callee, route.creation_body))
+                    for incoming in bridge.caller_owner_routes:
+                        check_environment_creation(incoming)
+                        namespaces.update((incoming.caller, incoming.callee, incoming.creation_body))
+                endpoints = {}
+                for namespace in namespaces:
+                    body = load_body(namespace)
+                    endpoints[namespace] = StaticNamespaceBody(
+                        body.graph, body.document, namespace, body.index, body.dependencies)
+                validate_cross_body_namespace_flow(flow, bodies=endpoints)
             for target in call.targets:
-                if target.definition.root.artifact.uri != str(fragments.root / basis["path"]) or target.definition.root.artifact.sha256 != basis["sha256"]:
-                    raise ValueError("static target definition belongs to another input basis")
                 if target.body is None:
+                    # The source definition remains qualified even when no
+                    # canonical body exists; do not invent a body to check it.
+                    candidates = [owner for owner in manifest["units"]
+                        if owner["path"] == target.definition.snapshot.path
+                        and owner["namespace_root"] == target.definition.context.namespace_root]
+                    if len(candidates) != 1:
+                        raise ValueError("unlowered target definition has no original source unit")
+                    check_definition(target.definition, candidates[0])
                     continue
-                endpoint = all_bodies.get(target.body.graph.artifact.uri)
-                if endpoint is None:
-                    raise ValueError("static callee body is absent from the current model")
-                owner, row = endpoint
-                if (target.body.graph.artifact.sha256 != row["artifact"]["sha256"] or
-                        target.body.graph.decoded_sha256 != row["artifact"]["decoded_sha256"] or
-                        target.definition.context.namespace_root != owner["namespace_root"] or
-                        target.definition.snapshot.path != owner["path"] or
-                        target.definition.snapshot.fingerprint != "sha256:" + owner["decoded_sha256"]):
-                    raise ValueError("static callee receipt/source namespace is stale")
-                graph = current_graph(row)
-                if graph.root != target.body.region:
-                    raise ValueError("static callee does not retain its original root")
-                path = row["artifact"]["path"]
-                callee_document = current_envelopes.get(path)
-                if callee_document is None:
-                    callee_document = fragments.read(row["artifact"])
-                    current_envelopes[path] = callee_document
-                validate_static_body_namespace(graph, callee_document, target.body)
+                callee = load_body(target.body)
+                check_definition(target.definition, callee.unit)
                 if target.environment_routes:
-                    from scar.analysis.static_function_environment import derive_function_environment_routes
-                    from scar.ir.program.queries import ProgramIndex
-                    if path not in endpoint_indexes:
-                        endpoint_indexes[path] = ProgramIndex(graph)
+                    for route in target.environment_routes:
+                        check_environment_creation(route)
                     original_routes, _ = derive_function_environment_routes(
-                        caller_graph=caller_graph, caller_document=envelope, caller_namespace=shard.caller,
-                        callee_graph=graph, callee_document=callee_document, callee_namespace=target.body,
+                        caller_graph=caller.graph, caller_document=caller.document, caller_namespace=caller.namespace,
+                        callee_graph=callee.graph, callee_document=callee.document, callee_namespace=callee.namespace,
                         definition=target.definition, call_operation=call.operation, callee_use=call.callee_use,
-                        creations=call.function_creations, caller_index=namespace_dependencies.index,
-                        callee_index=endpoint_indexes[path])
+                        creations=call.function_creations, qualified_creations=call.qualified_function_creations,
+                        load_creation_body=load_body, caller_index=caller.index, callee_index=callee.index)
                     if any(route not in original_routes for route in target.environment_routes):
                         raise ValueError("function environment route differs from original qualified factory/call/member ports")
         relations = document["relations"]
-        from scar.ir.record_codec import encode
-        calls = [{**record, "owning_region": owners[call.operation].as_dict(),
+        calls = [{**record, "owning_region": encode(owners[call.operation]),
                   "namespace_flows": _page(encode(call.namespace_flows), limit),
                   "function_creations": _page(encode(call.function_creations), limit),
-                  "targets": [{**target_record,
-                               "environment_routes": _page(encode(target.environment_routes), limit)}
+                  "qualified_namespace_flows": _page(encode(call.qualified_namespace_flows), limit),
+                  "qualified_function_creations": _page(encode(call.qualified_function_creations), limit),
+                  "cross_body_namespace_flows": _page(encode(call.cross_body_namespace_flows), limit),
+                  "targets": [{**target_record, "environment_routes": _page(encode(target.environment_routes), limit)}
                               for target_record, target in zip(record["targets"], call.targets)]}
                  for record, call in zip(relations["calls"], shard.calls)]
         rows.append({"entry_key": key, "caller": relations["caller"],
+                     "storage_schema_version": document["schema_version"],
+                     "v4_dependencies_checked": document["schema_version"] == 4,
                      "caller_meaning": "original stored graph namespace; owning_region identifies the lexical subgraph, not an observed calling frame",
                      "calls": _page(calls, limit)})
     return {"status": "QUALIFIED_CONDITIONAL_STATIC_CALL_RELATIONS", "shards": rows,
             "enumeration_status": publication.get("status"), "enumeration_complete": publication.get("complete"),
             "scope": publication.get("scope"), "counts": publication.get("counts"),
             "frontiers": _page(publication.get("frontiers", []), limit),
+            "qualified_dependencies_revalidated": True,
             "source_mapping_revalidated": False, "target_resolution_complete": False,
-            "qualification": "Original caller and immutable input receipts checked; candidate/formal/completion dependencies remain conditional, without invocation, purity or content-equivalence claims."}
+            "qualification": "Original qualified body receipts, factory/source/code-slot and conditional namespace/entry routes checked; no execution, purity, content equality or target-set closure claim."}
 
 
 def _dependencies(unit, entries, fragments, limit):

@@ -61,7 +61,7 @@ S1 的目录与逐入口规则台账已存在，语言语义完整性仍未闭�
 
 - **实现欠账**：当前 417 个 lowerer 不支持项、480 个规则 shape 不支持项；包括 78 项缺唯一 computational record、60 项 nested with cleanup、42 项 target-child BinOp、41 项 comprehension parent cleanup。combined slice/store 的旧拒绝已推进，不能将推进后暴露的下一处实现欠账说成必须动态捕获。
 - **入口与内联展开尚未核齐**：3,731 个目录项没有独立入口适配，其中 2,482 个 annotation context、961 个 comprehension/generator expression、235 个 lambda、52 个函数、1 个 stub 模块。部分表达式已经在父图内展开，因此不能把该数字直接解释成同等数量完全缺失的运行帧；仍须逐项核对其实际归属和缺失结构。
-- **跨过程推理未完成**：当前 v3 索引只处理 8,819 份主体产物中的 400 份，另 8,419 份尚未处理；目标闭包、返回、defaults/closure/global 环境、别名与 effects 联合固定点尚未贯通。不能将尚未推导的调用关系直接称为语言本身不可知。
+- **跨过程推理未完成**：当前 v4 索引只扫描 8,819 份主体产物中的 400 份，另 8,419 份尚未扫描；已消费跨主体 globals/状态接口，但 actual→formal、返回、defaults/cells、别名与 effects 联合固定点尚未贯通。不能将尚未推导的调用关系直接称为语言本身不可知。
 - **材料范围不足**：当前包含 LeWM 源树和两个本地依赖项目，没有环境中全部第三方实现的源码闭包。源码缺失与已有源码但未分析必须分别报告。
 - **静态边界与结构缺失混列**：例如 module 的常量槽/函数创建结构已经连接，但运行时 code 对象身份仍开放；该身份不应成为“缺少函数体结构”的依据。现有原始 gap 总数还混有这种证明前沿，不能用它衡量结构缺失率。类的前沿还被投影为统一 EFFECT_SUMMARY，查询时须结合原 class frontier 才能知道具体欠账。
 
@@ -97,10 +97,12 @@ Costable 与 ConditionalBlock 两个真实类入口均以原 SG DefinitionID 构
 
 ## 跨主体静态关系
 
-`--link-calls` 已在当前图上发布 v3 派生关系。读取 400 份主体产物（365 份有图），链接与发布 410.62 秒；268 份关系分片经普通 typed reader 全量读回，共实际保存 2,059 个 CALL、92 条条件目标、52 条 namespace flow、26 条函数创建关联、86 条实参边、260 条 completion、121 个 normal return 和 50 条函数环境依赖。枚举了 2,069 个 CALL，末尾 10 项未发布，不能算已保存。另 8,419 份主体产物未处理；本批 source call 目录涉及 95 个文件、4,710 项，整树为 47,135 个 AST 调用点，不能把该批视为整程序调用闭包。
-50 条真实环境边分别是 25 条 FUNCTION_OBJECT、25 条 GLOBALS_NAMESPACE，均为条件引用绑定。默认参数的 FIELD_INITIALIZER_DEPENDENCE 已用纯源码 `def f(x=17): return x; f()` 端到端构图、codec 和公开 query 验证，产生 3 条环境边、核 11 份 receipts；本批 LeWM 产物没有保存 DEFAULTS 环境边，不能用该样例宣称 LeWM 默认参数已经贯通。
-真实 `barlow-vit-small.py` 模块的两条环境边已通过公开 query 核原 namespace、factory、源码定义、Use/world 和 callee member。旧 v1/v2 wire 正常迁移并拒绝夹带新字段；错误 namespace entry/pointer、factory f 错配 g 定义的负例均被拒绝。查询不是独立源码语义重放，条件仍保留。
+`--link-calls` 已在当前图上发布 v4 派生关系。扫描 400 份主体产物（365 份有图，依赖来源另按需读取），链接与发布 521.93 秒；269 份关系分片经普通 typed reader 全量读回，共实际保存 2,069 个 CALL、41 条有来源支持的条件目标、52 条同主体 namespace flow、29 条本地 factory、8 条 qualified factory、123 条跨主体 namespace flow、20 条实参边、85 条 completion、70 个 normal return 和 76 条函数环境依赖。预算停止前已验证的 CALL 全部保留，不再丢弃末尾 10 项。另 8,419 份主体产物未扫描；本批 source call 目录涉及 95 个文件、4,710 项，整树为 47,135 个 AST 调用点，不能把该批视为整程序调用闭包。
+跨主体 flow 中 118 条经过一个原 CALL bridge、5 条经过两个；77 次工作队列处理后在本次范围内稳定。它们实际连接外层 STORE、环境/状态接口和内层 READ/CALL，不是仅计数未消费的环境边。当前 41 条有绑定来源的条件目标，与前一版混合提示的 92 条统计口径不同；本版另有 51 项未接通 callee 来源的声明提示，保留为 SOURCE_TARGET_HINT_UNCONNECTED，不生成目标端口。不能只用目标数量变化判断优化损失或加速。
+真实 `profile_phases.py::run` 的同一 CALL 已通过公开 dependencies reader：1 个有来源目标、1 条双桥 flow、1 个 qualified factory，stored schema 4、v4_dependencies_checked=true。路径是原 module→main→run，最终 factory 回到同文件模块中 `build` 的原 code slot `[3]`；原 namespace、factory normal/code Use、environment owner routes 与 CFG 全部读回核对。此查询耗时 89.033 秒，仍偏重，是当前效率限制；它不是目标程序执行时间，也不是优化性能数据。
+正常 CLI 纯源码链 `module→f→g→h→leaf` 实际产生 4 个目标、3 条跨主体依赖，最长 3 个调用桥；公开 query 验证原 factory/namespace/Use/world/CFG。覆盖 `h=9` 后旧 factory 不再成为目标；正确 nested factory 仍可产生目标，被 shadow 后无目标。低层编译 verifier 支持任意深 parent code path，真实早期 body 缺少 layout 字段时从本次静态 compile 重建，不丢整图或假称旧数据曾保存该事实；原 CodeKey/source/namespace/compiler 字段仍全部严格核对。
+默认参数初始化依赖另有纯源码端到端正例；不等同于 defaults 字段/元素到调用时 formal 的完整传播。旧 v1/v2/v3 wire 严格迁移并拒绝夹带 v4 字段；错误 namespace、factory、constant slot 及已覆盖 alias 路径均有拒绝验证。公开 query 的原端点核验不等于独立源码语义重放，条件仍保留。
 stub 候选先前错误地中止 `_config` 中两个正常函数的 CALL 枚举；现保留 IMPORT_DECLARATION_ONLY 并继续其它候选，两函数分别保留 3、4 个 CALL。最终发布只保留 stub 声明边界和预算前沿，没有 CANONICAL_BODY_UNREADABLE；没有把 `.pyi` 当作已构造的运行主体。
 关系引用原 owner/key/payload Uses、读结果、world、CFG 与 factory/code slot；按明确 mapping/path/effect 条件成立，不是内容恒等或无副作用证明。三个独立纯静态 case 通过：正常覆盖、分支保留多候选、装饰器结果截断；临时材料已删除，没有执行这些程序。
 真实 eval 模块的 run() 已接通一条 STORE→LOAD 条件流，并准确停在 APPLY 结果，保留 DECORATOR_RETURN_RELATION_OPEN；没有伪造原 run body 候选。public query 复核原 receipts、端点和 CFG，并与普通 compiler-prologue core join 分开标记；没有声称查询重放源码或运行目标。
-目标集合、defaults 读点、saved-B/cells 及类后置字段初始化、effects/alias 固定点仍未闭合。当前 linker 输出 G 环境边后尚未重新求解 callee 的 global reads；下一步按 qualified worklist 真正消费这些边，而非仅增加记录。这批关系不能授权缓存或其他变换。
+目标集合、actual/formal 与 return 来源消费、defaults 读点、saved-B/cells 及类后置字段初始化、effects/alias 联合固定点仍未闭合。下一步把已有参数/返回等关系接入同一 qualified 来源工作队列，而非从 arbitrary computation 的任意输入猜输出别名。这批关系不能授权缓存或其他变换。

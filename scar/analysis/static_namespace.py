@@ -7,10 +7,11 @@ intervening effects stay explicit conditions of every derived binding route.
 from __future__ import annotations
 
 from collections import defaultdict, deque
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
+from enum import Enum
 
 from scar.ir.record_codec import decode
-from scar.ir.program.ids import OperationID
+from scar.ir.program.ids import BlockID, OperationID, RegionID, UseID, ValueID
 from scar.ir.program.model import (AccessMode, BlockArgument, CompletionResult, ExitKind,
     LiteralOrigin, ReferenceValue, StateVersionValue, TerminatorKind)
 from scar.ir.program.queries import ProgramIndex
@@ -28,6 +29,75 @@ class NamespaceAccess:
     payload: object
     normal_edge: ControlEdgeReference
     normal_value: object
+
+
+class NamespaceOwnerRelation(str, Enum):
+    SAME_REFERENCE = 'SAME_REFERENCE'
+    CONDITIONAL_REFERENCE_ALIAS = 'CONDITIONAL_REFERENCE_ALIAS'
+
+
+def _witness_types(owner, operation, world, key, path, intervening, conditions):
+    if (type(owner) is not ValueID or type(operation) is not OperationID or type(world) is not UseID
+            or type(key) is not str or type(path) is not tuple
+            or any(type(row) is not ControlEdgeReference for row in path)
+            or type(intervening) is not tuple or any(type(row) is not OperationID for row in intervening)
+            or type(conditions) is not tuple or any(type(row) is not C for row in conditions)
+            or len(set(conditions)) != len(conditions)):
+        raise ValueError('namespace witness requires original typed query/path/condition records')
+
+
+@dataclass(frozen=True, slots=True)
+class NamespaceBindingWitness:
+    """One conditional normal-store definition at an existing operation input."""
+    write: NamespaceAccess
+    query_owner: ValueID
+    query_operation: OperationID
+    query_world: UseID
+    key: str
+    owner_relation: NamespaceOwnerRelation
+    path: tuple[ControlEdgeReference, ...]
+    intervening_operations: tuple[OperationID, ...]
+    conditions: tuple[C, ...]
+
+    def __post_init__(self):
+        if type(self.write) is not NamespaceAccess or type(self.owner_relation) is not NamespaceOwnerRelation:
+            raise ValueError('namespace binding needs its original access and explicit owner relation')
+        _witness_types(self.query_owner, self.query_operation, self.query_world, self.key,
+                       self.path, self.intervening_operations, self.conditions)
+
+
+@dataclass(frozen=True, slots=True)
+class NamespaceEntryPathWitness:
+    """An original region-entry binding can survive to this real query point."""
+    region: RegionID
+    entry: BlockID
+    query_owner: ValueID
+    query_operation: OperationID
+    query_world: UseID
+    key: str
+    path: tuple[ControlEdgeReference, ...]
+    intervening_operations: tuple[OperationID, ...]
+    conditions: tuple[C, ...]
+    read: NamespaceAccess | None = None
+    read_slot: int | None = None
+    entry_owner: ValueID | None = None
+
+    def __post_init__(self):
+        if type(self.region) is not RegionID or type(self.entry) is not BlockID:
+            raise ValueError('namespace entry path needs its original region/entry')
+        _witness_types(self.query_owner, self.query_operation, self.query_world, self.key,
+                       self.path, self.intervening_operations, self.conditions)
+        if self.entry_owner is None:
+            object.__setattr__(self, 'entry_owner', self.query_owner)
+        if type(self.entry_owner) is not ValueID:
+            raise ValueError('namespace entry owner must retain its original reference ID')
+        if ((self.read is None) != (self.read_slot is None)
+                or self.read is not None and (type(self.read) is not NamespaceAccess
+                    or type(self.read_slot) is not int or not 0 <= self.read_slot < len(self.read.owners))):
+            raise ValueError('namespace read path needs its exact original access/owner ordinal')
+
+
+EntryPathWitness = NamespaceEntryPathWitness
 
 
 def protocol_kinds(document):
@@ -73,6 +143,7 @@ class NamespaceDependencies:
         self.reads, self.writes = {}, {}
         self.by_result = {}
         self._cache = {}
+        self._binding_cache, self._entry_cache = {}, {}
         for op in graph.operations:
             kind = self.protocols.get(op.id)
             writing = kind in ('STORE_NAME_314', 'STORE_GLOBAL','COMPILER_STORE_NAME')
@@ -153,10 +224,39 @@ class NamespaceDependencies:
         return (other is not None and self._value(other.owners[0]) == self._value(write.owners[0])
                 and self._string(other.keys[0]) == self._string(write.keys[0]))
 
-    def _path(self, write, read):
-        start = self._edge(write.normal_edge).block
-        target = self.owners[read.operation][1]
-        queue = deque([(start, (), ())]); seen = set(); steps = 0
+    def _query(self, owner, key, operation, world_use):
+        if (type(owner) is not ValueID or type(key) is not str or type(operation) is not OperationID
+                or type(world_use) is not UseID or owner not in self.index.values
+                or type(self.index.values[owner]) is not ReferenceValue or operation not in self.owners):
+            raise ValueError('namespace query needs an original reference, key and operation')
+        try:
+            point = self.index.use_site(world_use)
+        except KeyError as error:
+            raise ValueError('namespace query world is not an original Use') from error
+        op = self.index.operations[operation]
+        if (point.operation != operation or type(self.index.values[point.use.value]) is not StateVersionValue
+                or op.terminator is not None and op.terminator.kind is TerminatorKind.INVOKE
+                and world_use not in op.invoke_arguments):
+            raise ValueError('namespace query world must be this original operation input Use')
+        region, block, offset = self.owners[operation]
+        if self.index.values[owner].region != region:
+            raise ValueError('namespace query owner belongs to a different original region')
+        return region, block, offset
+
+    def _replacement(self, operation, key, equivalent_owners):
+        write = self.writes.get(operation)
+        return (write is not None and self._string(write.keys[0]) == key
+                and self._value(write.owners[0]) in equivalent_owners)
+
+    def _find_path(self, start, operation, key, equivalent_owners):
+        """One original CFG witness for this candidate, with edge-aware kills.
+
+        A RAISE edge remains traversable: custom namespace stores can mutate
+        before raising. INTERVENING_EFFECTS_PRESERVE_BINDING stays mandatory,
+        so such an edge is never interpreted as an empty write effect.
+        """
+        region, target, offset = self.owners[operation]
+        queue, seen, steps = deque(((start, (), ()),)), set(), 0
         while queue:
             self.check()
             block_id, path, intervening = queue.popleft()
@@ -166,24 +266,172 @@ class NamespaceDependencies:
             if steps > self.max_steps:
                 raise OverflowError('namespace CFG reachability budget exhausted')
             block = self.blocks[block_id]
-            local = block.operations[:self.owners[read.operation][2]] if block_id == target else block.operations
-            # This is conditional on declared mapping stores committing input.
-            # A later same-key store then replaces this definition on the path.
+            local = block.operations[:offset] if block_id == target else block.operations
             operations = intervening + tuple(local)
             if block_id == target:
-                if any(self._kills(op, write) for op in local):
-                    continue
-                return path, operations
+                if not any(self._replacement(identity, key, equivalent_owners) for identity in local):
+                    return path, operations
+                continue
             if not block.operations:
                 continue
-            op = self.index.operations[block.operations[-1]]
-            if op.terminator is not None:
-                for n, edge in enumerate(op.terminator.successors):
-                    if self._kills(op.id, write) and edge.kind is ExitKind.NORMAL:
-                        continue
-                    if self.owners.get(op.id, (None,))[0] == self.owners[read.operation][0]:
-                        queue.append((edge.block, path + (ControlEdgeReference(op.id, n),), operations))
+            last = self.index.operations[block.operations[-1]]
+            if last.terminator is None:
+                continue
+            for ordinal, edge in enumerate(last.terminator.successors):
+                if (self._replacement(last.id, key, equivalent_owners) and edge.kind is ExitKind.NORMAL):
+                    continue
+                if edge.block not in self.blocks or self.index._blocks[edge.block] != region:
+                    continue
+                queue.append((edge.block, path + (ControlEdgeReference(last.id, ordinal),), operations))
         return None
+
+    def _validate_path(self, start, operation, key, equivalent_owners, path, intervening):
+        if len(path) > self.max_steps:
+            raise OverflowError('namespace CFG witness budget exhausted')
+        region, target, offset = self.owners[operation]
+        current, operations = start, []
+        if current not in self.blocks or self.index._blocks[current] != region:
+            raise ValueError('namespace path starts outside its original query region')
+        for reference in path:
+            self.check()
+            block = self.blocks[current]
+            if not block.operations or reference.operation != block.operations[-1]:
+                raise ValueError('namespace witness is not a contiguous original CFG path')
+            edge = self._edge(reference)
+            if self._replacement(reference.operation, key, equivalent_owners) and edge.kind is ExitKind.NORMAL:
+                raise ValueError('namespace path crosses a committed replacement under its owner relation')
+            if edge.block not in self.blocks or self.index._blocks[edge.block] != region:
+                raise ValueError('namespace path crossed a different original region')
+            operations.extend(block.operations)
+            current = edge.block
+        if current != target:
+            raise ValueError('namespace witness does not reach its original query block')
+        tail = self.blocks[current].operations[:offset]
+        operations.extend(tail)
+        if tuple(operations) != intervening or any(self._replacement(identity, key, equivalent_owners) for identity in tail):
+            raise ValueError('namespace witness changed original operations or crosses a replacement')
+        return True
+
+    @staticmethod
+    def _conditions(*, alias=False, read_slot=None):
+        conditions = (C.PATH_TAKEN, C.ALL_NORMAL_NAMESPACE_STORES_COMMIT_INPUT,
+                      C.INTERVENING_EFFECTS_PRESERVE_BINDING)
+        if alias:
+            conditions += (C.NAMESPACE_OWNERS_ALIAS,)
+        if read_slot is not None:
+            conditions += (C.NORMAL_READ_RETURNS_MAPPING_BINDING,)
+            if read_slot:
+                conditions += (C.PRIOR_LOOKUP_NAMESPACES_MISSING,)
+        return conditions
+
+    def bindings_at(self, owner: ValueID, key: str, operation: OperationID, world_use: UseID,
+                    *, allow_owner_alias=False):
+        """Possible normal-store definitions before an existing CALL/LOAD/op.
+
+        Owner aliasing is only a conditional candidate. The caller must justify
+        whether that guard is applicable; this method never equates module L/G
+        or function/class namespaces merely because they are namespace ports.
+        """
+        region, _, _ = self._query(owner, key, operation, world_use)
+        if type(allow_owner_alias) is not bool:
+            raise ValueError('namespace owner-alias policy must be an explicit bool')
+        cache_key = owner, key, operation, world_use, allow_owner_alias
+        if cache_key in self._binding_cache:
+            return self._binding_cache[cache_key]
+        rows = []
+        for write in self.writes.values():
+            self.check()
+            if self.owners[write.operation][0] != region or self._string(write.keys[0]) != key:
+                continue
+            write_owner = self._value(write.owners[0])
+            alias = write_owner != owner
+            if alias and not allow_owner_alias:
+                continue
+            relation = (NamespaceOwnerRelation.CONDITIONAL_REFERENCE_ALIAS if alias
+                        else NamespaceOwnerRelation.SAME_REFERENCE)
+            path = self._find_path(self._edge(write.normal_edge).block, operation, key, {owner, write_owner})
+            if path is not None:
+                rows.append(NamespaceBindingWitness(write, owner, operation, world_use, key,
+                    relation, path[0], path[1], self._conditions(alias=alias)))
+        result = tuple(rows)
+        self._binding_cache[cache_key] = result
+        return result
+
+    def _entry_owner(self, region, owner):
+        if (type(owner) is not ValueID or owner not in self.index.values
+                or type(self.index.values[owner]) is not ReferenceValue
+                or self.index.values[owner].region != region):
+            raise ValueError('namespace entry owner is not an original reference in this region')
+        return owner
+
+    def entry_paths_to(self, owner: ValueID, key: str, operation: OperationID, world_use: UseID,
+                       *, entry_owner: ValueID | None = None):
+        """Existing region entry to any real point, with no known overwrite."""
+        region, _, _ = self._query(owner, key, operation, world_use)
+        entry_owner = self._entry_owner(region, owner if entry_owner is None else entry_owner)
+        cache_key = owner, key, operation, world_use, entry_owner
+        if cache_key not in self._entry_cache:
+            entry = self.index.regions[region].entry
+            path = self._find_path(entry, operation, key, {owner, entry_owner})
+            self._entry_cache[cache_key] = (() if path is None else (NamespaceEntryPathWitness(
+                region, entry, owner, operation, world_use, key, path[0], path[1],
+                self._conditions(alias=entry_owner != owner), entry_owner=entry_owner),))
+        return self._entry_cache[cache_key]
+
+    entry_paths_at = entry_paths_to
+
+    def entry_paths_to_read(self, read: NamespaceAccess, slot=0, *, entry_owner: ValueID | None = None):
+        if (type(read) is not NamespaceAccess or self.reads.get(read.operation) != read
+                or type(slot) is not int or not 0 <= slot < len(read.owners)):
+            raise ValueError('namespace entry/read query needs its original access/owner ordinal')
+        key = self._string(read.keys[slot])
+        if key is None:
+            return ()
+        owner = self._value(read.owners[slot])
+        return tuple(replace(row, read=read, read_slot=slot,
+                            conditions=self._conditions(alias=row.entry_owner != owner, read_slot=slot))
+            for row in self.entry_paths_to(owner, key, read.operation, read.world, entry_owner=entry_owner))
+
+    def validate_binding(self, witness):
+        if type(witness) is not NamespaceBindingWitness:
+            raise ValueError('namespace binding validation needs its typed local witness')
+        witness.__post_init__()
+        region, _, _ = self._query(witness.query_owner, witness.key, witness.query_operation, witness.query_world)
+        write = self.writes.get(witness.write.operation)
+        if write != witness.write or self.owners[write.operation][0] != region or self._string(write.keys[0]) != witness.key:
+            raise ValueError('namespace binding changed its original write/key/region endpoint')
+        owner = self._value(write.owners[0])
+        alias = owner != witness.query_owner
+        expected_relation = NamespaceOwnerRelation.CONDITIONAL_REFERENCE_ALIAS if alias else NamespaceOwnerRelation.SAME_REFERENCE
+        if witness.owner_relation is not expected_relation or witness.conditions != self._conditions(alias=alias):
+            raise ValueError('namespace binding dropped or changed an explicit owner/path/effect condition')
+        return self._validate_path(self._edge(write.normal_edge).block, witness.query_operation, witness.key,
+            {owner, witness.query_owner}, witness.path, witness.intervening_operations)
+
+    def validate_entry_path(self, witness, *, entry_owner: ValueID | None = None):
+        if type(witness) is not NamespaceEntryPathWitness:
+            raise ValueError('namespace entry validation needs its typed local witness')
+        witness.__post_init__()
+        region, _, _ = self._query(witness.query_owner, witness.key, witness.query_operation, witness.query_world)
+        if witness.region != region or witness.entry != self.index.regions[region].entry:
+            raise ValueError('namespace entry witness changed its original region entry')
+        original_owner = self._entry_owner(region, witness.entry_owner)
+        if entry_owner is not None and entry_owner != original_owner:
+            raise ValueError('namespace entry witness changed the externally qualified entry owner')
+        if witness.read is not None:
+            read, slot = witness.read, witness.read_slot
+            if (self.reads.get(read.operation) != read or read.operation != witness.query_operation
+                    or read.world != witness.query_world or self._value(read.owners[slot]) != witness.query_owner
+                    or self._string(read.keys[slot]) != witness.key):
+                raise ValueError('namespace entry witness changed its original read owner/key/world')
+        if witness.conditions != self._conditions(alias=original_owner != witness.query_owner, read_slot=witness.read_slot):
+            raise ValueError('namespace entry witness changed its path/read/effect conditions')
+        return self._validate_path(witness.entry, witness.query_operation, witness.key, {witness.query_owner, original_owner},
+                                   witness.path, witness.intervening_operations)
+
+    def _path(self, write, read):
+        return self._find_path(self._edge(write.normal_edge).block, read.operation,
+                               self._string(write.keys[0]), {self._value(write.owners[0])})
 
     def flows(self, value):
         if value in self._cache:
@@ -225,23 +473,10 @@ class NamespaceDependencies:
                     read.keys[slot], read.world, read.normal_edge, read.normal_value, read.owners[:slot])
         if exact != expected or not self._same(write, read, slot):
             raise ValueError('namespace relation changed an original owner/key/value/world port')
-        current = self._edge(write.normal_edge).block; operations = []
-        for edge in flow.path:
-            block = self.blocks[current]
-            if not block.operations or edge.operation != block.operations[-1]:
-                raise ValueError('namespace witness is not a contiguous original CFG path')
-            successor = self._edge(edge)
-            if self._kills(edge.operation, write) and successor.kind is ExitKind.NORMAL:
-                raise ValueError('namespace path crosses a committed replacement write')
-            operations.extend(block.operations)
-            current = successor.block
-        if current != self.owners[read.operation][1]:
-            raise ValueError('namespace witness does not reach its original read block')
-        tail = self.blocks[current].operations[:self.owners[read.operation][2]]
-        operations.extend(tail)
-        if tuple(operations) != flow.intervening_operations or any(self._kills(op, write) for op in tail):
-            raise ValueError('namespace witness changed operations or crosses a replacement write')
-        return True
+        return self._validate_path(self._edge(write.normal_edge).block, read.operation,
+            self._string(write.keys[0]), {self._value(write.owners[0])}, flow.path, flow.intervening_operations)
 
 
-__all__ = ['NamespaceDependencies', 'normal_reference', 'protocol_kinds']
+__all__ = ['NamespaceDependencies', 'NamespaceAccess', 'NamespaceOwnerRelation',
+           'NamespaceBindingWitness', 'NamespaceEntryPathWitness', 'EntryPathWitness',
+           'normal_reference', 'protocol_kinds']
