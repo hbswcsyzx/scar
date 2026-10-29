@@ -210,17 +210,20 @@ def _run_unit(unit, catalog, selected, output, max_operations, producer):
                     if unit_source.initializer != definition:
                         raise ValueError("module entry differs from the original initializer")
                     evidence = compiled.for_module(unit_source)
+                    payload["static_compilation"] = evidence.to_dict()
                     lowered = lower_module_entry(prepared, unit_source, code_evidence=evidence,
                         max_operations=max_operations, profile=FrameBodyProfile(plan["selected_profile"]))
                 elif entry["kind"] == "CLASS":
                     from scar.analysis.source_class_lowering import lower_class_entry
                     reference=decode(SourceReference,entry["source_ref"])
                     evidence=compiled.for_definition(definition,reference)
+                    payload["static_compilation"] = evidence.to_dict()
                     lowered=lower_class_entry(prepared,definition,reference,code_evidence=evidence,
                                               max_operations=max_operations)
                 else:
                     reference = decode(SourceReference, entry["source_ref"])
                     evidence = compiled.for_definition(definition, reference)
+                    payload["static_compilation"] = evidence.to_dict()
                     capabilities = tuple(SourceLanguageCapability(value) for value in plan["capabilities"])
                     options = SourceLanguageOptions(capabilities=capabilities, code_evidence=evidence)
                     lowered = session.lower(entry["name"], source=reference, max_operations=max_operations,

@@ -6,6 +6,8 @@ Every target is conditional. A sole candidate is not a verified dynamic target.
 from __future__ import annotations
 
 from dataclasses import dataclass
+from enum import Enum
+import copy
 import json
 
 from scar.ir.record_codec import decode, encode, loads as strict_loads
@@ -152,6 +154,83 @@ class StaticCallTarget:
             raise ValueError("static target cannot claim an observed or unconditional dispatch")
 
 
+class NamespaceFlowCondition(str, Enum):
+    PATH_TAKEN = "PATH_TAKEN"
+    ALL_NORMAL_NAMESPACE_STORES_COMMIT_INPUT = "ALL_NORMAL_NAMESPACE_STORES_COMMIT_INPUT"
+    NORMAL_READ_RETURNS_MAPPING_BINDING = "NORMAL_READ_RETURNS_MAPPING_BINDING"
+    INTERVENING_EFFECTS_PRESERVE_BINDING = "INTERVENING_EFFECTS_PRESERVE_BINDING"
+    PRIOR_LOOKUP_NAMESPACES_MISSING = "PRIOR_LOOKUP_NAMESPACES_MISSING"
+
+
+@dataclass(frozen=True, slots=True)
+class StaticNamespaceFlow:
+    """Conditional binding dependence, not a mapping-content or alias proof.
+
+    The two key Uses are separate references whose builtin string values agree.
+    All endpoint IDs and path edges belong to the enclosing caller namespace.
+    """
+    write_operation: OperationID
+    write_owner: UseID
+    write_key: UseID
+    assigned_reference: UseID
+    write_world: UseID
+    write_normal: ControlEdgeReference
+    read_operation: OperationID
+    read_owner: UseID
+    read_key: UseID
+    read_world: UseID
+    read_normal: ControlEdgeReference
+    read_result: ValueID
+    prior_lookup_owners: tuple[UseID, ...]
+    path: tuple[ControlEdgeReference, ...]
+    intervening_operations: tuple[OperationID, ...]
+    conditions: tuple[NamespaceFlowCondition, ...]
+    qualification: str = "CONDITIONAL_NAMESPACE_BINDING_FLOW"
+
+    def __post_init__(self):
+        for value, kind in ((self.write_operation, OperationID), (self.read_operation, OperationID),
+                            (self.write_owner, UseID), (self.write_key, UseID),
+                            (self.assigned_reference, UseID), (self.write_world, UseID),
+                            (self.read_owner, UseID), (self.read_key, UseID), (self.read_world, UseID),
+                            (self.write_normal, ControlEdgeReference), (self.read_normal, ControlEdgeReference),
+                            (self.read_result, ValueID)):
+            _exact(value, kind)
+        for rows, kind in ((self.prior_lookup_owners, UseID), (self.path, ControlEdgeReference),
+                           (self.intervening_operations, OperationID), (self.conditions, NamespaceFlowCondition)):
+            _rows(rows, kind)
+        required = {NamespaceFlowCondition.PATH_TAKEN, NamespaceFlowCondition.ALL_NORMAL_NAMESPACE_STORES_COMMIT_INPUT,
+                    NamespaceFlowCondition.NORMAL_READ_RETURNS_MAPPING_BINDING,
+                    NamespaceFlowCondition.INTERVENING_EFFECTS_PRESERVE_BINDING}
+        if not required <= set(self.conditions) or len(set(self.conditions)) != len(self.conditions):
+            raise ValueError("namespace dependence must retain mapping/path/effect conditions")
+        if bool(self.prior_lookup_owners) != (NamespaceFlowCondition.PRIOR_LOOKUP_NAMESPACES_MISSING in self.conditions):
+            raise ValueError("lookup priority condition differs from its original preceding owner Uses")
+        if self.qualification != "CONDITIONAL_NAMESPACE_BINDING_FLOW":
+            raise ValueError("namespace dependence cannot claim unconditional content identity")
+
+
+@dataclass(frozen=True, slots=True)
+class StaticFunctionCreationRoute:
+    factory: OperationID
+    normal_edge: ControlEdgeReference
+    normal_value: ValueID
+    code_use: UseID
+    code_constant_operation: OperationID
+    code_layout_key: str
+    constant_path: tuple[int, ...]
+    definition: SourceDefinitionReference
+
+    def __post_init__(self):
+        for value, kind in ((self.factory, OperationID), (self.normal_edge, ControlEdgeReference),
+                            (self.normal_value, ValueID), (self.code_use, UseID),
+                            (self.code_constant_operation, OperationID), (self.definition, SourceDefinitionReference)):
+            _exact(value, kind)
+        if type(self.code_layout_key) is not str or not self.code_layout_key:
+            raise ValueError("creation needs its source-compiled layout key")
+        if type(self.constant_path) is not tuple or not self.constant_path or any(type(i) is not int or i < 0 for i in self.constant_path):
+            raise ValueError("creation needs an exact original child constant path")
+
+
 @dataclass(frozen=True, slots=True)
 class StaticCallSite:
     caller: SourceBodyNamespace
@@ -163,6 +242,8 @@ class StaticCallSite:
     targets: tuple[StaticCallTarget, ...] = ()
     frontiers: tuple[StaticCallFrontier, ...] = ()
     target_set_complete: bool = False
+    namespace_flows: tuple[StaticNamespaceFlow, ...] = ()
+    function_creations: tuple[StaticFunctionCreationRoute, ...] = ()
 
     def __post_init__(self):
         _exact(self.caller, SourceBodyNamespace)
@@ -177,6 +258,8 @@ class StaticCallSite:
             _exact(self.callee_value, ValueID)
         _rows(self.targets, StaticCallTarget)
         _rows(self.frontiers, StaticCallFrontier)
+        _rows(self.namespace_flows, StaticNamespaceFlow)
+        _rows(self.function_creations, StaticFunctionCreationRoute)
         for target in self.targets:
             if any(port.actual_body != self.caller or port.operation != self.operation for port in target.arguments):
                 raise ValueError("actual port belongs to another original caller")
@@ -202,7 +285,7 @@ class StaticCallShard:
 
 def dumps(shard: StaticCallShard) -> str:
     _exact(shard, StaticCallShard)
-    return json.dumps({"schema": "scar.static-calls", "schema_version": 1,
+    return json.dumps({"schema": "scar.static-calls", "schema_version": 2,
                        "relations": encode(shard)}, sort_keys=True, separators=(",", ":"), allow_nan=False)
 
 
@@ -210,10 +293,22 @@ def loads(payload: str) -> StaticCallShard:
     document = strict_loads(payload)
     if (type(document) is not dict or set(document) != {"schema", "schema_version", "relations"}
             or document["schema"] != "scar.static-calls" or type(document["schema_version"]) is not int
-            or document["schema_version"] != 1):
+            or document["schema_version"] not in (1, 2)):
         raise ValueError("unsupported static call relation shard")
-    return decode(StaticCallShard, document["relations"])
+    relations = document["relations"]
+    if document["schema_version"] == 1:
+        # A closed historical wire must not silently carry new relationships.
+        relations = copy.deepcopy(relations)
+        old_fields = set(StaticCallSite.__dataclass_fields__) - {"namespace_flows", "function_creations"}
+        if type(relations) is not dict or type(relations.get("calls")) is not list:
+            raise ValueError("historical call shard is malformed")
+        for call in relations["calls"]:
+            if type(call) is not dict or set(call) != old_fields:
+                raise ValueError("historical call record cannot contain v2 relationships")
+            call.update(namespace_flows=[], function_creations=[])
+    return decode(StaticCallShard, relations)
 
 
 __all__ = ["StaticCallFrontier", "StaticTerminalPort", "StaticCompletionRoute",
-           "StaticStateEntryRoute", "StaticCallTarget", "StaticCallSite", "StaticCallShard", "dumps", "loads"]
+           "StaticStateEntryRoute", "NamespaceFlowCondition", "StaticNamespaceFlow",
+           "StaticFunctionCreationRoute", "StaticCallTarget", "StaticCallSite", "StaticCallShard", "dumps", "loads"]

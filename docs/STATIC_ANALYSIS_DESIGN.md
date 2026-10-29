@@ -63,6 +63,8 @@ E/F 相互依赖，需要工作队列迭代；这个表不是一遍不可回访�
 
 类 suite 的 normal payload 是 Python 对象引用：编译器可能返回 `__class__` cell，也可能返回 `None`。它不是外层 metaclass/decorator 最终产生的类对象；局部 cell、外部 free cell 与 namespace 引用不可混用。函数的定义期创建同样与共享的调用期 body 分开：装饰器表达式、默认值、factory、逆序装饰器应用和 namespace 写入按真实源码顺序连接，不能将创建函数误作执行函数。
 
+module compiler profile 使用显式 source wrapper 10，在原 core 30 mapping entry 内先调用独立 compiler-prologue Region，再连接原 AST 主体。typed 前导记录 compiler-owned cell slots、指令范围和生成 child/global-read 事实，内部仍要求展开；不把局部 cells 添成 entry closure。生成 factory 必须由原 module-owned annotation 与编译布局共同确定，不能仅凭 `__annotate__` 名称识别。静态布局字段在 body 构造失败时也保存，普通查询明确区分 receipts/结构核验与独立源码重验。
+
 
 ## 5. 展开契约
 
@@ -103,6 +105,7 @@ call graph、points-to/abstract heap、effects 和属性共同求不动点：
 已解析区域可用 may/must 读写、alias 和 ModRef 查询排除无关状态写；粗 world 只是保守起点。
 
 首个静态 linker 使用 `StaticCallSite/StaticCallTarget` 记录原 caller/callee 的 artifact 命名空间、Use→formal、各返回站点和 completion→landing 关系；它们不是新的操作、值或 Invocation。目标来自原调用候选、函数创建和 reaching/alias/import 关系，单一候选也不提升为真实目标。callee 的粗 world 与 caller world 通过显式接口映射，不能按相同 LocationID 或标签认作同一状态域。defaults、closure cell、G/B 与细粒度 effects 未连接时逐项保留 frontier。
+调用关系 v2 另外保存原 namespace write/read 的 owner/key/payload Uses、normal 结果、world 和 CFG 路径，以及 MAKE 的原 code-slot→共享 body 关系。它们是带明确条件的 binding flow：正常写入提交输入、查找优先级、所选路径和中间效果保持绑定都必须成立，不是 custom mapping 的内容证明。APPLY 返回值独立，不能按同源 atom 透传到原函数；旧 v1 关系不能隐式带入新字段。
 关系分片与原图共处一个 current root。固定 source-basis receipt 只保存输入身份和原分片声明，解决 manifest 更新后旧 SHA 的自引用问题；后续更新 body 或源码目录时废弃这些派生关系，重新计算。源程序调用总数、已枚举 canonical CALL 与已发布关系分别计数，预算中断不能解释为没有消费者。
 较粗源视图的 OPAQUE 不阻断已证明的规范展开：原 SG 操作、SourceAtom/AST Call 与 canonical callee Use/invoke 端口都准确匹配，而计算 overlay 确实缺失时，记录明确的 source-view refinement，继续保留规范依赖；不能伪造旧计算记录。查询的 caller 是保存图的命名空间，实际操作所属 Region 从原图推导，不能误读为观测到的调用帧。
 

@@ -289,7 +289,7 @@ def plan_static_entry(tree, entry, *, path, fingerprint):
     kind, phase = entry["kind"], entry["phase"]
     mapping_entry = kind == "MODULE" and isinstance(node, ast.Module)
     class_entry = kind == "CLASS" and isinstance(node, ast.ClassDef)
-    selected = (FrameBodyProfile.STRUCTURED_MAPPING_BODY_314_V1.value if mapping_entry else
+    selected = (FrameBodyProfile.STRUCTURED_MAPPING_COMPILER_314_V1.value if mapping_entry else
                 "STATIC_CLASS_FRAME_WITH_REQUIRED_BODY_EXPANSION" if class_entry else
                 BodyLoweringProfile.STRUCTURED_ENV.value if kind == "FUNCTION" else None)
     caps, rules = list(_DEFAULT_CAPS), []

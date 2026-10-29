@@ -130,6 +130,70 @@ def _scope_nodes(node: ast.AST, parent_code: CodeType, parent_path: tuple[int, .
 
 
 @dataclass(frozen=True, slots=True)
+class StaticCompilerLayout:
+    """Known compiler fields, not a loaded frame or runtime object identity.
+
+    Compiler-local names and cells remain separate tables. In particular a
+    compiler-owned cell is not an incoming closure and need not be a source
+    local. No constant contents, target values or physical addresses are kept.
+    """
+
+    name: str
+    qualname: str
+    flags: int
+    positional_count: int
+    positional_only_count: int
+    keyword_only_count: int
+    local_names: tuple[str, ...]
+    referenced_names: tuple[str, ...]
+    cell_names: tuple[str, ...]
+    free_names: tuple[str, ...]
+
+    def __post_init__(self):
+        if any(type(value) is not str or not value for value in (self.name,self.qualname)):
+            raise ValueError('compiler layout requires exact code names')
+        if any(type(value) is not int or value < 0 for value in (
+                self.flags,self.positional_count,self.positional_only_count,self.keyword_only_count)):
+            raise ValueError('compiler flags and argument counts must be nonnegative integers')
+        for names in (self.local_names,self.referenced_names,self.cell_names,self.free_names):
+            # These are compiler-indexed tables, not source symbol sets.
+            # Empty IMPORT_NAME entries and repeated spellings must survive;
+            # neither spelling nor set intersection proves slot identity.
+            if type(names) is not tuple or any(type(name) is not str for name in names):
+                raise ValueError('compiler name tables must retain ordered strings')
+        if (self.positional_only_count > self.positional_count
+                or self.positional_count+self.keyword_only_count > len(self.local_names)):
+            raise ValueError('compiler argument partition differs')
+
+    @classmethod
+    def from_code(cls, code):
+        if type(code) is not CodeType:
+            raise TypeError('compiler layout requires a source-compiled CodeType')
+        return cls(code.co_name,code.co_qualname,code.co_flags,code.co_argcount,
+                   code.co_posonlyargcount,code.co_kwonlyargcount,code.co_varnames,
+                   code.co_names,code.co_cellvars,code.co_freevars)
+
+    def to_dict(self):
+        from dataclasses import asdict
+        return {'schema':'scar.static-compiler-layout','schema_version':1,**asdict(self)}
+
+    @classmethod
+    def from_dict(cls, document):
+        fields={'name','qualname','flags','positional_count','positional_only_count',
+                'keyword_only_count','local_names','referenced_names','cell_names','free_names'}
+        if (type(document) is not dict or set(document) != fields | {'schema','schema_version'}
+                or document['schema'] != 'scar.static-compiler-layout'
+                or type(document['schema_version']) is not int or document['schema_version'] != 1):
+            raise ValueError('unsupported static compiler layout')
+        values={name:document[name] for name in fields}
+        for name in ('local_names','referenced_names','cell_names','free_names'):
+            if type(values[name]) not in (list,tuple):
+                raise ValueError('compiler name table must be a JSON sequence')
+            values[name]=tuple(values[name])
+        return cls(**values)
+
+
+@dataclass(frozen=True, slots=True)
 class StaticCodeEvidence:
     """One exact source definition's compiler layout, with static provenance."""
 
@@ -197,6 +261,7 @@ class StaticCodeEvidence:
             "code_path": list(self.code_path),
             "code_layout_key": self.code_layout_key,
             "root_code_layout_key": self.root_code_layout_key,
+            "layout": StaticCompilerLayout.from_code(self.code).to_dict(),
             "compiler": {
                 "implementation": self.compiler_implementation,
                 "version": list(self.compiler_version),
@@ -351,4 +416,4 @@ def compile_source_unit(prepared) -> SourceCompiledUnit:
         sys.implementation.cache_tag, module_unit(prepared))
 
 
-__all__ = ["StaticCompilationError", "StaticCodeEvidence", "SourceCompiledUnit", "compile_source_unit"]
+__all__ = ["StaticCompilationError", "StaticCompilerLayout", "StaticCodeEvidence", "SourceCompiledUnit", "compile_source_unit"]

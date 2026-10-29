@@ -34,7 +34,7 @@ from scar.ir.program.source_call_bindings import SourceArgumentPort, SourceBodyN
 from scar.ir.program.source_references import SourceArtifactLocator, SourceDefinitionReference
 from scar.ir.program.source_returns import SourceReturnSite
 from scar.ir.program.static_calls import (StaticCallFrontier, StaticCallShard, StaticCallSite,
-    StaticCallTarget, StaticCompletionRoute, StaticStateEntryRoute, StaticTerminalPort,
+    StaticCallTarget, StaticCompletionRoute, StaticStateEntryRoute, StaticTerminalPort, StaticFunctionCreationRoute,
     dumps as dump_relations)
 from scar.ir.program.structured import ControlEdgeReference
 from scar.ir.semantics_v2 import Opcode, SourceSemanticsGraph
@@ -388,6 +388,10 @@ class StaticCallSession:
             from scar.ir.program.module_entries import decode_frame_body, StaticModuleEntryDeclaration
             from scar.ir.program.source_subjects import ModuleUnitSource, FrameKind, SourceCompilationCodeRef
             overlay = decode_frame_body(document["module"])
+            from scar.ir.program.module_entries import CompilerStructuredFrameBodyOverlay
+            if type(overlay) is CompilerStructuredFrameBodyOverlay:
+                from scar.analysis.source_module_compiler_lowering import validate_compiler_prologue_core
+                validate_compiler_prologue_core(overlay, graph)
             roots = [module.initializer for module in context.semantic.modules.values()
                      if module.path == context.unit["path"] and module.fingerprint == metadata.source.fingerprint]
             if len(roots) != 1 or metadata.source != context.semantics.sources[context.unit["path"]]:
@@ -563,9 +567,63 @@ class StaticCallSession:
                     found.append((number, definition, "IMPORT_CANDIDATE_NOT_LOADER_PROOF"))
         return found
 
+    def _function_creation(self, body, operation, value, normal_edge):
+        """Join an explicit module factory's code slot to its original shared body.
+
+        This never treats APPLY_DECORATOR or an arbitrary same-source result as
+        the original function. Compilation is of retained text, never exec.
+        """
+        if body.module is None:
+            return None
+        from scar.analysis.source_mapping_function_lowering import mapping_function_plan
+        from scar.trace.code_snapshot import code_key
+        from scar.ir.program.model import OperationResult
+        context = body.context
+        links = body.links_by_op.get(operation.id, ())
+        if len(links) != 1 or type(links[0].source) is not SourceReference:
+            raise ValueError("module factory lacks its unique original declaration source")
+        source = links[0].source
+        declarations = [d for d in context.semantic.definitions.values()
+                        if d.id == links[0].semantic_operation and d.metadata.get("phase") == "definition_time"
+                        and d.code_id == source.atom_id.wire and source.atom_id in d.source_atoms]
+        definitions = [definition for definition in context.defs_by_atom.get(source.atom_id, ())
+                       if context.semantic.definitions[definition].metadata.get("phase") == "call_time"]
+        nodes = [n for n in ast.walk(context.tree) if isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef))
+                 and (n.lineno,n.end_lineno,n.col_offset,n.end_col_offset) ==
+                 (source.start_line,source.end_line,source.start_column,source.end_column)]
+        if len(declarations) != 1 or len(definitions) != 1 or len(nodes) != 1:
+            raise ValueError("module factory declaration/body source join is not exact")
+        codes = [row for row in body.uses_by_op.get(operation.id, ()) if row.role == "function-code"]
+        if len(codes) != 1:
+            raise ValueError("module factory does not have its original code Use")
+        code_use = body.index.use_site(codes[0].use).use
+        origin = body.index.values[code_use.value].origin
+        if type(origin) is not OperationResult:
+            raise ValueError("module factory code is not its original constant operation result")
+        records = [row for row in body.module.constants if row.operation == origin.operation]
+        if len(records) != 1 or len(records[0].constant_path) != 1 or records[0].source != source:
+            raise ValueError("module factory code constant does not retain its exact slot/source")
+        parent = getattr(context, "compiled_module_for_namespace", None)
+        if parent is None:
+            parent = compile(context.docs["source"]["text"], context.unit["path"], "exec",
+                             flags=0, dont_inherit=True, optimize=0)
+            context.compiled_module_for_namespace = parent
+            context.compiled_module_layout_for_namespace = code_key(parent)
+        record = records[0]
+        if context.compiled_module_layout_for_namespace != record.code_key or record.code_key != body.module.declaration.compilation.code_layout_key:
+            raise ValueError("module factory code-slot layout differs from retained source compilation")
+        plan = mapping_function_plan(nodes[0], parent)
+        if record.constant_path != (plan.child.arg,) or parent.co_consts[plan.child.arg] is not plan.child.argval:
+            raise ValueError("module factory code slot does not select this source function's compiled child")
+        definition = definitions[0]
+        return StaticFunctionCreationRoute(operation.id, normal_edge, value, code_use.id,
+            origin.operation, record.code_key, record.constant_path, context.definitions[definition][0])
+
     def _source_candidates(self, body, operation, source, semantic_call):
         context = body.context
         candidates, frontiers = {}, []
+        namespace_flows, creations = [], []
+        mapping_caller = body.module is not None or body.class_entry is not None
         def admit(number, definition, basis):
             if len(candidates) >= self.budget.max_candidates_per_call and (number, definition) not in candidates:
                 frontiers.append(_front("CANDIDATE_BUDGET", "Candidate set was truncated; it remains open.", source))
@@ -576,7 +634,7 @@ class StaticCallSession:
         for target in body.metadata.call_targets:
             if target.operation == operation.id and target.source_definition is not None:
                 admit(context.number, target.source_definition, "ORIGINAL_CALL_TARGET_METADATA")
-        if semantic_call is not None:
+        if semantic_call is not None and not mapping_caller:
             old = context.semantics.operations.get(semantic_call)
             if old is not None and (old.opcode is not Opcode.CALL or old.source != source):
                 raise ValueError("candidate resolution requires its exact existing CALL overlay")
@@ -626,6 +684,20 @@ class StaticCallSession:
             if term is not None and term.kind in (TerminatorKind.JUMP, TerminatorKind.BRANCH):
                 for edge in term.successors:
                     incoming[edge.block].append(edge)
+        from scar.analysis.static_namespace import NamespaceDependencies, normal_reference
+        namespace = getattr(body, "namespace_dependencies", None)
+        if namespace is None:
+            namespace = NamespaceDependencies(body.graph, body.document,
+                max_steps=self.budget.max_resolution_steps, check=self._check)
+            body.namespace_dependencies = namespace
+        normal_producers = getattr(body, "namespace_normal_producers", None)
+        if normal_producers is None:
+            normal_producers = {}
+            for producer in body.graph.operations:
+                normal = normal_reference(body.index, producer.id, blocks=namespace.blocks)
+                if normal is not None:
+                    normal_producers[normal[1]] = (producer, normal[0])
+            body.namespace_normal_producers = normal_producers
         callee_uses = {row.use for row in body.uses_by_op.get(operation.id, ()) if row.role == "callee"}
         callee = next((use.value for use in operation.uses if use.id in callee_uses), None)
         pending, seen = [callee] if callee is not None else [], set()
@@ -643,12 +715,30 @@ class StaticCallSession:
             elif value_id in bindings and bindings[value_id].payload is not None:
                 pending.append(body.index.use_site(bindings[value_id].payload).use.value)
             elif isinstance(value.origin, BlockArgument):
+                routes = namespace.flows(value.id)
+                for flow in routes:
+                    namespace.validate(flow)
+                    namespace_flows.append(flow)
+                    pending.append(body.index.use_site(flow.assigned_reference).use.value)
+                producer = normal_producers.get(value.id)
+                if producer is not None:
+                    primitive, edge = producer
+                    kind = namespace.protocols.get(primitive.id)
+                    if kind == "APPLY_DECORATOR_314":
+                        frontiers.append(_front("DECORATOR_RETURN_RELATION_OPEN",
+                            "The actual decorator result is a distinct value; no code/body alias follows from a shared definition source.",
+                            body.links_by_op[primitive.id][0].source))
+                    elif kind == "MAKE_FUNCTION_314":
+                        creation = self._function_creation(body, primitive, value.id, edge)
+                        if creation is not None:
+                            creations.append(creation)
+                            admit(context.number, creation.definition.definition, "VERIFIED_SOURCE_COMPILATION_FACTORY")
                 for edge in incoming[value.origin.block]:
                     if value.origin.index < len(edge.arguments):
                         argument = edge.arguments[value.origin.index]
                         if not isinstance(argument, CompletionResult):
                             pending.append(body.index.use_site(argument).use.value)
-            elif isinstance(value.origin, OperationResult):
+            elif isinstance(value.origin, OperationResult) and not mapping_caller:
                 for link in links.get(value.origin.operation, ()):
                     if type(link.source) is SourceReference:
                         for definition in context.defs_by_atom.get(link.source.atom_id, ()):
@@ -656,7 +746,10 @@ class StaticCallSession:
         if body.call_source_bases.get(operation.id) == "OPAQUE_SOURCE_REFINEMENT":
             for bases in candidates.values():
                 bases.add("VERIFIED_CANONICAL_CALL_REFINES_OPAQUE_SOURCE")
-        return candidates, frontiers
+        if namespace_flows:
+            frontiers.append(_front("CONDITIONAL_NAMESPACE_FLOW",
+                "Original write/read ports and CFG paths are connected under explicit mapping, lookup and intervening-effect conditions; not content equality.", source))
+        return candidates, frontiers, tuple(dict.fromkeys(namespace_flows)), tuple(dict.fromkeys(creations))
 
     def _actuals(self, body, operation, node):
         if node is None:
@@ -857,10 +950,11 @@ class StaticCallSession:
             if link.semantic_operation is None:
                 # Keep the original CALL/actual interface in the denominator,
                 # but never invent a semantic-call ID or a name-only target.
-                candidates, issues = {}, [_front("CALL_SEMANTIC_LINK_UNAVAILABLE",
-                    "Canonical CALL has no exact retained semantic CALL link; candidate/binding derivation is deferred.", link.source)]
+                candidates, issues, namespace_flows, creations = self._source_candidates(body, operation, link.source, None)
+                issues.append(_front("CALL_SEMANTIC_LINK_UNAVAILABLE",
+                    "Canonical CALL has no exact retained semantic CALL link; canonical namespace ports remain independently eligible.", link.source))
             else:
-                candidates, issues = self._source_candidates(body, operation, link.source, link.semantic_operation)
+                candidates, issues, namespace_flows, creations = self._source_candidates(body, operation, link.source, link.semantic_operation)
             frontier.extend(issues)
             targets = []
             for (number, definition), basis in sorted(candidates.items(), key=lambda item: (item[0][0], item[0][1].wire)):
@@ -871,12 +965,14 @@ class StaticCallSession:
             frontier.append(_front("TARGET_SET_CLOSURE_OPEN", "This bounded direct/alias resolver is not whole-program points-to/effects closure.", link.source))
             self.counts["calls_with_candidates"] += bool(targets)
             self.counts["candidate_edges"] += len(targets)
+            self.counts["namespace_flow_edges"] += len(namespace_flows)
+            self.counts["function_creation_routes"] += len(creations)
             self.counts["argument_port_edges"] += sum(len(target.arguments) for target in targets)
             self.counts["normal_return_sites"] += sum(len(target.normal_returns) for target in targets)
             self.counts["completion_routes"] += sum(len(target.completions) for target in targets)
             yield StaticCallSite(body.namespace, op_id, link.source, link.semantic_operation,
                 callee_use.id if callee_use else None, callee_use.value if callee_use else None,
-                tuple(targets), tuple(dict.fromkeys(frontier)))
+                tuple(targets), tuple(dict.fromkeys(frontier)), namespace_flows=namespace_flows, function_creations=creations)
 
     def iter_calls(self):
         self._check()
@@ -972,7 +1068,7 @@ def build_static_call_links(directory, out, *, logical_root=None, expected_manif
         # Already closed relationship shards remain published. The incomplete
         # caller in memory is not silently counted as a completed shard.
     published_calls = sum(shard["calls"] for shard in shards)
-    return {"schema": "scar.static-call-publication", "schema_version": 1,
+    return {"schema": "scar.static-call-publication", "schema_version": 2,
             "source_model": encode(session.basis), "input_manifest_sha256": session.manifest_sha256,
             "artifacts": session.artifacts, "shards": shards, "counts": dict(session.counts),
             "published_calls": published_calls,

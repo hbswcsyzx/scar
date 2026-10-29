@@ -24,7 +24,7 @@ from scar.ir.program.codec import dumps as dump_graph, _has_frame_root_capabilit
 from scar.ir.program.ids import BlockID, LocationID, OperationID, RegionID, UseID, ValueID
 from scar.ir.program.functions import BodyEntryInterface, BodyLoweringProfile, FormalPort
 from scar.ir.program.module_entries import (ModuleBodyOverlay, ModuleEntryProfile,
-    ModulePrefixOverlay, ModuleBodyExpansionProfile, StructuredFrameBodyOverlay, FrameBodyProfile,
+    ModulePrefixOverlay, ModuleBodyExpansionProfile, StructuredFrameBodyOverlay, CompilerStructuredFrameBodyOverlay, FrameBodyProfile,
     StaticModuleEntryDeclaration)
 from scar.ir.program.frames import (
     FrameBind, FrameDiscard, FrameEnter, FrameExit, FrameFormal, FrameModel,
@@ -83,7 +83,7 @@ class SourceProgram:
 
     def summary(self):
         """Separate declaration/link counts from program and effect coverage."""
-        if type(self.module) is StructuredFrameBodyOverlay:
+        if isinstance(self.module,StructuredFrameBodyOverlay):
             from scar.ir.record_codec import encode
             return {'entry_kind':'MAPPING_FRAME','entry':self.metadata.entry,
                 'body_status':self.module.status.value,'graph_present':self.graph is not None,
@@ -92,13 +92,18 @@ class SourceProgram:
                 'top_level_statement_interfaces_expanded':len(self.module.prefix.statements) if self.module.prefix else 0,
                 'expanded_statement_records':len(self.module.expansions),
                 'remaining_statement_count':len(self.module.remaining.subject.statements) if self.module.remaining else 0,
-                'required_body_expansion':'REQUIRED' if self.module.remaining else 'SOURCE_PROTOCOL_INTERNALS_REMAIN_OPEN',
+                'required_body_expansion':'REQUIRED' if self.module.remaining or
+                    type(self.module) is CompilerStructuredFrameBodyOverlay and self.module.compiler_prologue is not None
+                    else 'SOURCE_PROTOCOL_INTERNALS_REMAIN_OPEN',
                 'source_census':encode(self.module.census),'namespace_policy':self.module.namespace_policy.value,
                 'completion_profile':self.module.completion_profile.value,
                 'namespace_content_established':False,'namespace_alias_established':False,
                 'runtime_target_verified':False,'import_module_object_established':False,
                 'whole_program_coverage_established':False,'fine_grained_state_effects_established':False,
-                'transformation_authorized':False}
+                'transformation_authorized':False,
+                **({'compiler_prologue_required':self.module.compiler_prologue is not None,
+                    'compiler_owned_cell_slots':len(self.module.compiler_prologue.cells) if self.module.compiler_prologue else 0}
+                   if type(self.module) is CompilerStructuredFrameBodyOverlay else {})}
         if type(self.module) is ModulePrefixOverlay:
             from scar.ir.record_codec import encode
             return {"entry_kind": "MAPPING_FRAME", "entry": self.metadata.entry,
@@ -164,17 +169,17 @@ class SourceProgram:
         }
 
     def to_dict(self):
-        if type(self.module) is StructuredFrameBodyOverlay:
+        if isinstance(self.module,StructuredFrameBodyOverlay):
             from scar.ir.program.module_entries import encode_frame_body
             if (self.profile is not self.module.profile or self.profile not in (
                     FrameBodyProfile.STRUCTURED_MAPPING_314_V1,FrameBodyProfile.STRUCTURED_MAPPING_PROPAGATION_314_V1,
-                    FrameBodyProfile.STRUCTURED_MAPPING_BODY_314_V1) or self.graph is None
+                    FrameBodyProfile.STRUCTURED_MAPPING_BODY_314_V1,FrameBodyProfile.STRUCTURED_MAPPING_COMPILER_314_V1) or self.graph is None
                     or any(value is not None for value in (self.interface,self.frame,self.structured,self.language))):
                 raise ValueError('SP8 requires its explicit core FrameRoot/source overlay only')
             static_root = type(self.module.declaration) is StaticModuleEntryDeclaration
-            if self.profile is FrameBodyProfile.STRUCTURED_MAPPING_BODY_314_V1 and not static_root:
+            if self.profile in (FrameBodyProfile.STRUCTURED_MAPPING_BODY_314_V1,FrameBodyProfile.STRUCTURED_MAPPING_COMPILER_314_V1) and not static_root:
                 raise ValueError('mapping BODY profile requires source-compilation root provenance')
-            return {'schema':'scar.source-program','schema_version':9 if static_root else 8,'entry_kind':'MAPPING_FRAME',
+            return {'schema':'scar.source-program','schema_version':10 if type(self.module) is CompilerStructuredFrameBodyOverlay else 9 if static_root else 8,'entry_kind':'MAPPING_FRAME',
                 'profile':self.profile.value,'status':self.module.status.value,
                 'scope':'structured source mapping frame; exact remaining source and runtime/effect debt retained',
                 'metadata':encode(self.metadata),'module':encode_frame_body(self.module),
@@ -276,23 +281,26 @@ class SourceProgram:
                     or source_texts is not None or language_options is not None or module_code_evidence is not None):
                 raise ValueError("source fragments require a live typed context session and explicit SP5 STRUCTURE")
             expected_fields -= {"semantic", "semantics", "control"}
-        if type(version) is int and version in (8,9):
+        if type(version) is int and version in (8,9,10):
             from scar.ir.program.module_entries import decode_frame_body
             if (set(document) != expected_fields | {'entry_kind','profile','module'}
                     or document['schema'] != 'scar.source-program' or document['entry_kind'] != 'MAPPING_FRAME'
                     or document['profile'] not in (FrameBodyProfile.STRUCTURED_MAPPING_314_V1.value,
                         FrameBodyProfile.STRUCTURED_MAPPING_PROPAGATION_314_V1.value,
-                        FrameBodyProfile.STRUCTURED_MAPPING_BODY_314_V1.value)
+                        FrameBodyProfile.STRUCTURED_MAPPING_BODY_314_V1.value,
+                        FrameBodyProfile.STRUCTURED_MAPPING_COMPILER_314_V1.value)
                     or language_options is not None or verification != 'STRUCTURE'
                     or version == 8 and module_code_evidence is None or type(document['graph']) is not dict
-                    or document['graph'].get('schema_version') != (30 if version == 9 else 29)):
+                    or document['graph'].get('schema_version') != (30 if version in (9,10) else 29)):
                 raise ValueError('mapping frame requires its explicit static or captured source/core capability')
             result=cls(load_graph(_canonical(document['graph'])),decode(LoweringMetadata,document['metadata']),
                 semantic_from_dict(document['semantic']),None,SourceControlFlowGraph.from_dict(document['control']),
                 FrameBodyProfile(document['profile']),module=decode_frame_body(document['module']))
             result=replace(result,semantics=SourceSemanticsGraph.from_dict(document['semantics'],result.semantic))
-            if (type(result.module.declaration) is StaticModuleEntryDeclaration) != (version == 9):
+            if (type(result.module.declaration) is StaticModuleEntryDeclaration) != (version in (9,10)):
                 raise ValueError('source wrapper must distinguish static compilation and captured root evidence')
+            if (version == 10) != (type(result.module) is CompilerStructuredFrameBodyOverlay):
+                raise ValueError('compiler module overlay needs source wrapper10 exclusively')
             if version == 8 and result.profile is FrameBodyProfile.STRUCTURED_MAPPING_BODY_314_V1:
                 raise ValueError('historical captured mapping wrapper cannot acquire BODY profile')
             if _canonical(result.to_dict()) != _canonical(document):

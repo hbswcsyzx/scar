@@ -87,7 +87,7 @@ def link_static_program(directory, *, budget=None):
         analysis = Path(__file__).parent
         return {"shared": _producer(), "call_sources": {
             name: hashlib.sha256((analysis / name).read_bytes()).hexdigest()
-            for name in ("static_calls.py", "function_binding.py", "function_interfaces.py", "source_layers.py")}}
+            for name in ("static_calls.py", "static_namespace.py", "function_binding.py", "function_interfaces.py", "source_layers.py")}}
     producer = call_producer()
     output = Path(directory).absolute()
     manifest = read_static_program(output, verify=False)
@@ -195,7 +195,7 @@ def _lowering_route(entry):
     if entry["kind"] == "MODULE" and len(entry.get("semantic_definition_ids") or ()) == 1:
         return {"status": "READY_TO_ATTEMPT", "body_supported": None,
                 "adapter": "scar.analysis.source_module_lowering.lower_module_entry",
-                "profile": "STRUCTURED_MAPPING_BODY_314_V1", "runtime_witness_required": False,
+                "profile": "STRUCTURED_MAPPING_COMPILER_314_V1", "runtime_witness_required": False,
                 "required_inputs": ["original_module_initializer", "prepared_source_layers", "static_exec_compiler_root"],
                 "qualification": "Static mapping prefix and exact residual source; not whole-body support."}
     if entry["kind"] == "FUNCTION" and entry["source_ref"] is not None and not entry.get("generator"):

@@ -315,7 +315,7 @@ def require_valid_module_program(result, *, source_texts, code_evidence=None, ma
 def module_validation_report(result, *, source_texts, code_evidence=None, max_operations=10000):
     try:
         from scar.ir.program.module_entries import ModulePrefixOverlay,StructuredFrameBodyOverlay
-        checker = (require_valid_structured_module_program if type(result.module) is StructuredFrameBodyOverlay
+        checker = (require_valid_structured_module_program if isinstance(result.module,StructuredFrameBodyOverlay)
                    else require_valid_module_prefix if type(result.module) is ModulePrefixOverlay else require_valid_module_program)
         checker(result, source_texts=source_texts, code_evidence=code_evidence,
                 max_operations=max_operations)
@@ -544,11 +544,12 @@ def require_valid_structured_module_program(result,*,source_texts,code_evidence=
     from scar.ir.program.state_addresses import (InvokeStateOperand,ReferenceOwner,NamespaceKey,AddressCoverage)
     from scar.ir.program.validation import require_valid
     overlay=result.module
-    _need(type(overlay) is StructuredFrameBodyOverlay and decode_frame_body(encode_frame_body(overlay))==overlay,'SP8 needs its closed typed overlay')
-    extended=result.profile is FrameBodyProfile.STRUCTURED_MAPPING_BODY_314_V1
-    paired=result.profile in (FrameBodyProfile.STRUCTURED_MAPPING_PROPAGATION_314_V1,FrameBodyProfile.STRUCTURED_MAPPING_BODY_314_V1)
+    _need(isinstance(overlay,StructuredFrameBodyOverlay) and decode_frame_body(encode_frame_body(overlay))==overlay,'SP8 needs its closed typed overlay')
+    compiler=result.profile is FrameBodyProfile.STRUCTURED_MAPPING_COMPILER_314_V1
+    extended=result.profile in (FrameBodyProfile.STRUCTURED_MAPPING_BODY_314_V1,FrameBodyProfile.STRUCTURED_MAPPING_COMPILER_314_V1)
+    paired=result.profile in (FrameBodyProfile.STRUCTURED_MAPPING_PROPAGATION_314_V1,FrameBodyProfile.STRUCTURED_MAPPING_BODY_314_V1,FrameBodyProfile.STRUCTURED_MAPPING_COMPILER_314_V1)
     _need(result.profile in (FrameBodyProfile.STRUCTURED_MAPPING_314_V1,FrameBodyProfile.STRUCTURED_MAPPING_PROPAGATION_314_V1,
-          FrameBodyProfile.STRUCTURED_MAPPING_BODY_314_V1) and overlay.profile is result.profile
+          FrameBodyProfile.STRUCTURED_MAPPING_BODY_314_V1,FrameBodyProfile.STRUCTURED_MAPPING_COMPILER_314_V1) and overlay.profile is result.profile
           and overlay.namespace_policy is NamespacePolicy.MODULE_MAPPING_314_V1
           and overlay.completion_profile is (FrameCompletionProfile.PROPAGATION_REF_PAIR_314_V1 if paired else FrameCompletionProfile.RAW_EXCEPTION_REF_314_V1)
           and all(value is None for value in (result.interface,result.frame,result.structured,result.language)),
@@ -579,7 +580,7 @@ def require_valid_structured_module_program(result,*,source_texts,code_evidence=
               'static module declaration differs from independently compiled retained source')
         if code_evidence is not None:
             _need(type(code_evidence) is StaticCodeEvidence and
-                  require_root_evidence(unit,code_evidence) == replayed.to_reference(),
+                  require_root_evidence(unit,code_evidence,allow_compiler_locals=compiler) == replayed.to_reference(),
                   'supplied static module compiler input differs')
         code_evidence = replayed
     else:
@@ -669,8 +670,10 @@ def require_valid_structured_module_program(result,*,source_texts,code_evidence=
             _need(extended,'function construction requires explicit mapping BODY profile')
             invoke(op,(ref_type,state_type),memory=True)
             continue  # Exact code/default/decorator/namespace source checked per definition below.
-        normal_types=(state_type,) if kind in (K.STORE_NAME_314,K.DELETE_NAME_314,K.UNEXPANDED_SLICE) else (ref_type,state_type)
-        invoke(op,normal_types)
+        normal_types=(state_type,) if kind in (K.STORE_NAME_314,K.DELETE_NAME_314,K.UNEXPANDED_SLICE,K.REQUIRED_COMPILER_PROLOGUE) else (ref_type,state_type)
+        if kind in (K.REQUIRED_COMPILER_PROLOGUE,K.INVOKE_COMPILER_PROLOGUE):
+            _need(compiler,'compiler prefix primitive requires its explicit profile')
+        invoke(op,normal_types,memory=kind in (K.REQUIRED_COMPILER_PROLOGUE,K.INVOKE_COMPILER_PROLOGUE))
         if kind is K.LOAD_NAME_314:
             node=expression_nodes.get(protocol.source)
             _need(isinstance(node,ast.Name) and len(op.uses)==5 and tuple(use.value for use in op.uses[:3])==refs,
@@ -775,7 +778,16 @@ def require_valid_structured_module_program(result,*,source_texts,code_evidence=
             if previous is not None:_need(expansion.entry==previous,'source statement normal continuation is reordered/disconnected')
             previous=expansion.normal
         return previous
-    last_normal=ordered_statements(prefix,entry.id)
+    compiler_prologue=None
+    if compiler:
+        from scar.analysis.source_module_compiler_lowering import validate_compiler_prologue
+        compiler_prologue=validate_compiler_prologue(result,code_evidence,context)
+    source_start=compiler_prologue.normal if compiler_prologue is not None else entry.id
+    last_normal=ordered_statements(prefix,source_start)
+    # Index tuples use the slice/key producer, whose packing interface owns
+    # memory effects. Ordinary tuple expressions use the expression producer.
+    index_tuples={id(node.slice) for node in ast.walk(context.tree)
+                  if isinstance(node,ast.Subscript) and isinstance(node.slice,ast.Tuple)}
     # Derive expression results only from actual producer ports/literals.
     def expression_value(node):
         source=_module_statement_ref(context,node)
@@ -794,7 +806,14 @@ def require_valid_structured_module_program(result,*,source_texts,code_evidence=
             and (links[op.id].semantic_operation is not None
                  or op.id in protocols and protocols[op.id].kind is K.LOAD_NAME_314)]
         _need(len(candidates)==1,'source expression needs its unique canonical invocation')
-        op=candidates[0];normal,_=invoke(op,(ref_type,state_type))
+        op=candidates[0]
+        packed_key=isinstance(node,ast.Tuple) and id(node) in index_tuples
+        normal,_=invoke(op,(ref_type,state_type),memory=packed_key)
+        if packed_key:
+            span=(node.lineno,node.end_lineno,node.col_offset,node.end_col_offset)
+            packing=[row for row in instructions if row.opname=='BUILD_TUPLE'
+                     and row.arg==len(node.elts) and tuple(row.positions)==span]
+            _need(len(packing)==1,'index tuple lost its exact compiler packing operation')
         if isinstance(node,ast.Name):return normal.arguments[0]
         children=([node.left,node.right] if isinstance(node,ast.BinOp) else [node.operand] if isinstance(node,ast.UnaryOp)
             else [node.left,node.comparators[0]] if isinstance(node,ast.Compare) else [node.value] if isinstance(node,ast.Attribute)
@@ -839,6 +858,7 @@ def require_valid_structured_module_program(result,*,source_texts,code_evidence=
                       'module docstring must write its original literal into the declared locals namespace')
                 span=(node.lineno,node.end_lineno,node.col_offset,node.end_col_offset)
                 compiled=[i for i in instructions if tuple(i.positions)==span
+                    and (compiler_prologue is None or i.offset>=compiler_prologue.first_source_offset)
                     and i.opname in ('LOAD_CONST','STORE_NAME')]
                 _need(len(compiled)==2 and compiled[0].opname=='LOAD_CONST'
                       and type(compiled[0].argval) is str and compiled[0].argval==node.value.value
@@ -903,15 +923,18 @@ def require_valid_structured_module_program(result,*,source_texts,code_evidence=
         for edge in loop.backedges:_need(edge.operation in operations,'loop backedge must refer to existing CFG')
     if tail:
         residual=overlay.remaining
-        _need(len(regions)==2 and residual.region!=graph.root and regions[residual.region].parent==graph.root,
+        _need(len(regions)==2+(compiler_prologue is not None) and residual.region!=graph.root and regions[residual.region].parent==graph.root,
               'remaining slice is a computation Region, not another Python frame')
         _need(residual.operation in protocols and protocols[residual.operation].kind is K.UNEXPANDED_SLICE,
               'remaining exact source interface missing')
-        calls=[op for op in graph.operations if op.callee is not None]
+        calls=[op for op in graph.operations if op.callee is not None
+            and not (compiler_prologue is not None and op.id==compiler_prologue.invocation)]
         _need(len(calls)==1 and calls[0].callee==residual.region and protocols[calls[0].id].kind is K.INVOKE_REMAINING,
               'remaining source must run once after the actual prefix, not a duplicate whole body')
         if last_normal is not None:_need(calls[0].id in blocks[last_normal].operations,'remaining source must begin at prefix normal continuation')
-    else:_need(len(regions)==1 and not any(op.callee is not None for op in graph.operations),'extra source computation Region')
+    else:_need(len(regions)==1+(compiler_prologue is not None)
+        and not any(op.callee is not None and not (compiler_prologue is not None and op.id==compiler_prologue.invocation)
+                    for op in graph.operations),'extra source computation Region')
     _need(any(frontier.kind=='ENTRY_PROTOCOL_UNPROVEN' for frontier in overlay.frontiers)
           and any(frontier.kind=='NAMESPACE_CONTENT_UNPROVEN' for frontier in overlay.frontiers)
           and (not tail or any(frontier.kind=='REQUIRED_EXPANSION' for frontier in overlay.frontiers)),

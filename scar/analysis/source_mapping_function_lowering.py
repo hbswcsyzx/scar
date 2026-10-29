@@ -146,7 +146,8 @@ def lower_mapping_function(builder, node, cursor):
     from scar.ir.program.module_entries import FrameBodyProtocolKind as K
     from scar.ir.v2.semantic import OperationKind
     evidence = builder.evidence
-    require_root_evidence(builder.unit, evidence)
+    require_root_evidence(builder.unit, evidence,
+                          allow_compiler_locals=getattr(builder,'supports_compiler_prologue',False))
     plan = mapping_function_plan(node, evidence.code)
     source = builder.source(node)
     declarations = [d for d in builder.by_atom.get(source.atom_id.wire, ())

@@ -72,14 +72,14 @@ S0 不设建模覆盖率门槛，不产生额外历史报告或 gate 目录。
 ## S2：结构化 canonical lowering、层次展开与跨层端口
 
 **状态：部分已有，未完成。**`program_lowering` 与 `structured_lowering` 已能为有限 Python 子集构造 canonical operations、values、uses、control/completion 和源码链接；当前 CALL 目标、heap/global 写入及部分语言协议仍保留缺口。
-首轮全量静态派工 7,055 个普通函数：5,908 个生成规范图（保留缺口），516 个规则 shape 不支持、546 个 lowerer 不支持、85 个构造错误。随后六类错误全部经过原 85 入口纯静态复构，均成功生成带缺口的图；另接通 eval 模块静态前缀，目前共有 5,994 个入口有图。其余入口仍完整保留，不把目录或前缀完整解释为主体完整。
+首轮全量静态派工 7,055 个普通函数：5,908 个生成规范图（保留缺口），516 个规则 shape 不支持、546 个 lowerer 不支持、85 个构造错误。随后六类错误全部经过原 85 入口纯静态复构，均成功生成带缺口的图；另接通 eval 模块静态前缀，当前累计 7,762 个入口有图，其中类/前导仍含精确展开义务。其余入口仍完整保留，不把目录或前缀完整解释为主体完整。
 
 三项主体接线已实现：模块的 heap store、If 和 function creation；comprehension 的递归目标解包与局部异常清理；class 的独立 prepared-namespace/closure/cell ABI 与待展开主体接口。均沿原源码 ID 构造规范图。真实 eval 模块已展开全部 17 条顶层语句、18 项含嵌套语句记录、325 个操作，source wrapper 9 / core 30 读回及独立静态重新编译通过；没有运行模块初始化。完整类体及全部 Python 语法仍未完成。
 模块使用明确的 BODY profile，在既有 paired exception/world 接口上扩展规则；旧前缀 profile 保留原含义。class body 的 normal payload 与外层 class construction result 分开：前者返回编译器 class cell 或 Python None 引用，后者才产生经 metaclass/decorator 处理的对象。两类真实入口的 core 31 读回通过，但当前类 suite 仍为 required expansion。
 
-下一步先按原目录批量构造所有可适配模块和类入口，汇总精确残余；修复真实 comprehension 暴露的编译器融合 store 对应。随后展开真实 class suite：为 prepared mapping、G/saved-B、closure/local cells 建立明确 frame 策略；按原 compiler 核对隐式 namespace prologue/epilogue、私有名映射和方法创建。不能直接套用模块的空 closure ABI，也不能把 implicit stage 清单当成已经存在的 state edges。父级 class construction 的 bases/metaclass/hooks/decorators 另接原端口。
+原目录的全模块/类批次与融合 store 修复已经完成，错误入口均已精准复构通过。下一步展开真实 class suite 与 compiler 前导内部：为 prepared mapping、G/saved-B、closure/local cells 建立明确 frame 策略；按原 compiler 核对隐式 namespace prologue/epilogue、私有名映射和方法创建。不能直接套用模块的空 closure ABI，也不能把 implicit stage 清单当成已经存在的 state edges。父级 class construction 的 bases/metaclass/hooks/decorators 另接原端口。
 源码里的 `receiver[:bound]` 还暴露了独立的 `BINARY_SLICE` 规则缺口。后续以 compound invoke 连接 receiver/bounds/world、正常和异常消费，不伪造源码中没有独立产生的 slice 引用或物化；与已有 `BUILD_SLICE` 合同分开。模块首 docstring 按编译器的 `__doc__` mapping 写入建图，不能当普通表达式丢弃。
-本批中已精准定位的模块 root 错误是 compiler-owned `__conditional_annotations__` cell：七份源码都能静态编译，实际 `co_cellvars` 非空、freevars/参数/挂起标志均为空。先表示模块自有 cell 的有序槽位与编译器 prologue（MAKE_CELL、annotation factory、namespace setup），再连接正常/异常 world；不把自有 cell 当入口 closure，不直接移除空 cell gate。prologue 的未展开部分须附原编译来源与精确展开义务。最终错误分母以本批发布结果为准。
+全批及错误修复已发布：12 个模块自有 annotation cell 使用新 compiler profile/source wrapper 10，原 core 30 entry ABI 不变；前导子 Region 与精确布局记录已接上正常/异常 world，内部仍 REQUIRED_EXPANSION。另一个 tuple-key MEMORY 校验已修复。当前构造 ERROR 为 0，不能据此认定语义完整。compiler layout 已作为来源事实保存，后续继续展开已知 prefix 阶段和生成 child，不能永久停在前导边界。
 
 **实质功能**
 
@@ -106,8 +106,8 @@ S0 不设建模覆盖率门槛，不产生额外历史报告或 gate 目录。
 ## S3：调用图、points-to、状态与 effects 联合固定点
 
 **状态：基础类型与局部候选部分已有，联合静态分析未完成。**`CallTarget` 可表达局部条件候选；`effects_v2` 有 effect 维度和 coverage 类型，但现有闭包器面向显式 scope，不能替代静态调用图或静态定义摘要。
-已实现 source-only linker 与限定命名空间的原端口关系。当前有界读取 80 份实际主体产物，发布 623 个 CALL 记录、14 条条件候选边、31 条实参/形参、54 条 completion 和 14 个返回站点，typed codec 与公开 query 通过。该批仍有 6,976 份产物未读；目标集合、环境投影和 effects 等 frontier 未消除，不能称为联合固定点完成。
-旧有界索引已随主体更新废弃，不能当作当前调用索引。mapping caller 已接入同一分析，但 module `STORE_NAME → LOAD_NAME → CALL` 的条件值流仍缺失：下一项在原 frame protocol、StateAddress、NORMAL CompletionResult 和 CFG 上建立 typed namespace 关系，保存原 owner/key/assigned-reference Use、读结果、world 与到达路径。只在已有源码/契约允许时提升为精确内容关系；custom mapping、重入、未知覆盖、L/G/saved-B 查找优先级分别保留条件。MAKE 的正常函数引用接原 code slot / declaration / 共享 body；APPLY 的结果独立，不能借同一 source atom 认成原函数。先接通未装饰函数与 namespace 的原依赖，再由通用返回/闭包规则分析装饰器。
+source-only linker 已在原端口上发布 v2 条件 namespace 关系与 factory→共享 body 关联。当前有界 80 份产物发布 491 个 CALL、20 条候选、19 条 namespace flow、9 条创建关联、37 条实参边、52 条 completion，typed codec 与 public query 通过；8,739 份产物未读，不能称整程序固定点完成。
+STORE/LOAD/world/CFG、查找优先及中间效果保留明确条件；正常覆盖仅在 mapping 提交输入等 guard 下成立。MAKE 的原 code slot/declaration/正常结果可连共享 body，APPLY 的结果独立，真实 eval.run 的装饰器返回关系仍开放。下一步用通用返回/环境/alias/effect 分析解决这些条件与未知调用，不按名字补目标，也不把当前条件边当成已证明的 must-flow。
 
 **实质功能**
 

@@ -141,6 +141,22 @@ def _canonical_dependencies(unit, entries, fragments, limit):
         if document.get("inputs") != {name: unit["artifacts"].get(name) for name in
                                        ("source", "semantic", "semantics", "control")}:
             raise ValueError("body shared source fragments differ from the selected unit")
+        compilation = document.get("static_compilation")
+        row["static_compilation"] = compilation
+        if compilation is None or "layout" not in compilation:
+            row["compiler_layout"] = {"status": "NOT_RECORDED", "runtime_facts": False}
+        else:
+            from scar.analysis.static_compilation import StaticCompilerLayout
+            layout = StaticCompilerLayout.from_dict(compilation["layout"])
+            if (compilation.get("evidence_kind") != "SOURCE_COMPILATION"
+                    or compilation.get("runtime_code_instance_established") is not False
+                    or compilation.get("snapshot", {}).get("path") != unit["path"]
+                    or compilation.get("snapshot", {}).get("fingerprint") != "sha256:"+unit["decoded_sha256"]
+                    or compilation.get("namespace_root") != unit["namespace_root"]):
+                raise ValueError("compiler facts differ from the original static source provenance")
+            row["compiler_layout"] = {"status": "SOURCE_COMPILATION_FACTS", "layout": layout.to_dict(),
+                "code_layout_key": compilation["code_layout_key"], "runtime_facts": False,
+                "independent_compiler_replayed": False}
         graph_document = document.get("graph")
         if graph_document is None:
             row["canonical_graph"] = None
@@ -180,6 +196,12 @@ def _canonical_dependencies(unit, entries, fragments, limit):
             module_view = {"declaration": module_document["declaration"], "status": overlay.status.value,
                            "prefix": module_document["prefix"], "remaining": module_document["remaining"],
                            "frontiers": _page(module_document["frontiers"], limit)}
+            if "compiler_prologue" in module_document:
+                from scar.analysis.source_module_compiler_lowering import validate_compiler_prologue_core
+                validate_compiler_prologue_core(overlay, graph)
+                module_view["compiler_prologue"] = module_document["compiler_prologue"]
+                module_view["compiler_prologue_core_checked"] = True
+                module_view["compiler_prologue_source_replayed"] = False
         elif class_document is not None:
             from scar.ir.program.class_entries import (
                 decode_class_entry_overlay, validate_class_entry_core,
@@ -286,6 +308,7 @@ def _call_relations(manifest, unit, entries, fragments, limit):
     bodies = {body["entry_key"]: body for body in unit.get("bodies", ())}
     all_bodies = {str(fragments.root / row["artifact"]["path"]): (owner, row)
                   for owner in manifest["units"] for row in owner["bodies"] if "artifact" in row}
+    current_envelopes = {}
     def current_graph(row):
         path = row["artifact"]["path"]
         if path not in fragments.core_graphs:
@@ -293,6 +316,7 @@ def _call_relations(manifest, unit, entries, fragments, limit):
             if envelope.get("status") != row["status"] or envelope.get("entry_key") != row["entry_key"] or envelope.get("graph") is None:
                 raise ValueError("call relation endpoint is not a current canonical body")
             fragments.core_graphs[path] = load_core(json.dumps(envelope["graph"], allow_nan=False))
+            current_envelopes[path] = envelope
         return fragments.core_graphs[path]
     rows = []
     for item in publication.get("shards", ()):
@@ -317,7 +341,34 @@ def _call_relations(manifest, unit, entries, fragments, limit):
         caller_graph = current_graph(body)
         owners = {operation: region.id for region in caller_graph.regions for block in region.blocks
                   for operation in block.operations}
+        from scar.analysis.static_namespace import NamespaceDependencies, normal_reference
+        envelope = current_envelopes.get(body["artifact"]["path"])
+        if envelope is None:
+            envelope = fragments.read(body["artifact"])
+        namespace_dependencies = (NamespaceDependencies(caller_graph, envelope)
+            if any(call.namespace_flows or call.function_creations for call in shard.calls) else None)
         for call in shard.calls:
+            for flow in call.namespace_flows:
+                namespace_dependencies.validate(flow)
+            for creation in call.function_creations:
+                if namespace_dependencies.protocols.get(creation.factory) != "MAKE_FUNCTION_314":
+                    raise ValueError("creation relation is not its original factory protocol")
+                normal = normal_reference(namespace_dependencies.index, creation.factory, blocks=namespace_dependencies.blocks)
+                if normal != (creation.normal_edge, creation.normal_value):
+                    raise ValueError("creation relation changed its original NORMAL reference port")
+                code = namespace_dependencies.index.use_site(creation.code_use)
+                from scar.ir.program.model import OperationResult
+                if code.operation != creation.factory:
+                    raise ValueError("creation code Use is not owned by its original factory")
+                origin = namespace_dependencies.index.values[code.use.value].origin
+                constants = (envelope.get("module") or {}).get("constants", ())
+                if (type(origin) is not OperationResult or origin.operation != creation.code_constant_operation
+                        or not any(record["operation"] == creation.code_constant_operation.as_dict()
+                            and record["code_key"] == creation.code_layout_key
+                            and tuple(record["constant_path"]) == creation.constant_path for record in constants)
+                        or creation.definition.root.artifact.uri != str(fragments.root / basis["path"])
+                        or creation.definition.root.artifact.sha256 != basis["sha256"]):
+                    raise ValueError("creation code slot/qualified definition differs from its original caller/basis")
             if call.operation not in owners:
                 raise ValueError("static call operation is absent from its original graph namespace")
             for target in call.targets:
@@ -339,7 +390,10 @@ def _call_relations(manifest, unit, entries, fragments, limit):
                 if graph.root != target.body.region:
                     raise ValueError("static callee does not retain its original root")
         relations = document["relations"]
-        calls = [{**record, "owning_region": owners[call.operation].as_dict()}
+        from scar.ir.record_codec import encode
+        calls = [{**record, "owning_region": owners[call.operation].as_dict(),
+                  "namespace_flows": _page(encode(call.namespace_flows), limit),
+                  "function_creations": _page(encode(call.function_creations), limit)}
                  for record, call in zip(relations["calls"], shard.calls)]
         rows.append({"entry_key": key, "caller": relations["caller"],
                      "caller_meaning": "original stored graph namespace; owning_region identifies the lexical subgraph, not an observed calling frame",

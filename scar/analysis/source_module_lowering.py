@@ -55,13 +55,13 @@ def module_unit(context):
     return ModuleUnitSource(snapshot, str(context.root), module.initializer)
 
 
-def require_root_evidence(unit, evidence):
+def require_root_evidence(unit, evidence, *, allow_compiler_locals=False):
     if type(evidence) is StaticCodeEvidence:
         evidence.require_definition(unit.snapshot, unit.initializer, unit)
         import inspect
         suspended = inspect.CO_GENERATOR | inspect.CO_COROUTINE | inspect.CO_ASYNC_GENERATOR | inspect.CO_ITERABLE_COROUTINE
         if (evidence.compiler_implementation != 'cpython' or evidence.compiler_version[:2] != (3,14)
-                or evidence.code_path or evidence.code.co_freevars or evidence.code.co_cellvars
+                or evidence.code_path or evidence.code.co_freevars or evidence.code.co_cellvars and not allow_compiler_locals
                 or evidence.code.co_argcount or evidence.code.co_kwonlyargcount
                 or evidence.code.co_flags & suspended):
             raise ValueError('static module requires its exact non-resumable exec root compiler layout')
@@ -97,7 +97,7 @@ class ModuleBuilder(StructuredBuilder):
                 or ast.dump(context.tree,include_attributes=True) != ast.dump(
                     ast.parse(context.text,filename=str(context.path)),include_attributes=True)):
             raise ValueError('prepared module AST/text differs from the original snapshot')
-        root_evidence = require_root_evidence(self.unit,evidence)
+        root_evidence = require_root_evidence(self.unit,evidence,allow_compiler_locals=getattr(self,'supports_compiler_prologue',False))
         self.declaration = (StaticModuleEntryDeclaration(self.unit,root_evidence)
                             if type(evidence) is StaticCodeEvidence else ModuleEntryDeclaration(self.unit,root_evidence))
         self.prepared_source, self.evidence = context,evidence
@@ -206,8 +206,12 @@ def lower_module_entry(context,selection,*,code_evidence,max_operations=10000,pr
     from scar.ir.program.module_entries import ModuleBodyExpansionProfile,FrameBodyProfile
     if type(code_evidence) is StaticCodeEvidence and profile not in (
             FrameBodyProfile.STRUCTURED_MAPPING_314_V1, FrameBodyProfile.STRUCTURED_MAPPING_PROPAGATION_314_V1,
-            FrameBodyProfile.STRUCTURED_MAPPING_BODY_314_V1):
+            FrameBodyProfile.STRUCTURED_MAPPING_BODY_314_V1,FrameBodyProfile.STRUCTURED_MAPPING_COMPILER_314_V1):
         raise ValueError('static module roots require their explicit structured frame capability')
+    if profile is FrameBodyProfile.STRUCTURED_MAPPING_COMPILER_314_V1:
+        if type(code_evidence) is not StaticCodeEvidence:
+            raise ValueError('compiler mapping profile requires source compilation')
+        return CompilerMappingBodyBuilder(context,selection,code_evidence,max_operations).run_module()
     if profile is FrameBodyProfile.STRUCTURED_MAPPING_BODY_314_V1:
         if type(code_evidence) is not StaticCodeEvidence:
             raise ValueError('mapping BODY profile requires explicit source compilation')
@@ -408,7 +412,9 @@ def _module_docstring(context, node):
 
 def mapping_prefix_selection(context, evidence, *, profile=None):
     """Maximal contiguous supported statements; no workload/name allowlist."""
-    unit=module_unit(context);require_root_evidence(unit,evidence)
+    unit=module_unit(context)
+    from scar.ir.program.module_entries import FrameBodyProfile
+    require_root_evidence(unit,evidence,allow_compiler_locals=profile is FrameBodyProfile.STRUCTURED_MAPPING_COMPILER_314_V1)
     import dis
     instructions=tuple(dis.get_instructions(evidence.code,adaptive=False,show_caches=False))
     def positioned(node,opnames):
@@ -446,7 +452,7 @@ def mapping_prefix_selection(context, evidence, *, profile=None):
         return False
     def target(node):return isinstance(node,ast.Name) and len([row for row in positioned(node,('STORE_NAME',)) if row.argval==node.id])==1
     from scar.ir.program.module_entries import FrameBodyProfile
-    expanded = profile is FrameBodyProfile.STRUCTURED_MAPPING_BODY_314_V1
+    expanded = profile in (FrameBodyProfile.STRUCTURED_MAPPING_BODY_314_V1,FrameBodyProfile.STRUCTURED_MAPPING_COMPILER_314_V1)
     def heap_target(node):
         if not expanded:return False
         if isinstance(node,ast.Attribute):
@@ -472,7 +478,7 @@ def mapping_prefix_selection(context, evidence, *, profile=None):
             try:mapping_function_plan(node,evidence.code)
             except (ValueError,_Unsupported):return False
             return all(expression(child) for child in (*node.decorator_list,*node.args.defaults,*(v for v in node.args.kw_defaults if v is not None)))
-        if isinstance(node,ast.Try) and profile in (FrameBodyProfile.STRUCTURED_MAPPING_PROPAGATION_314_V1,FrameBodyProfile.STRUCTURED_MAPPING_BODY_314_V1):
+        if isinstance(node,ast.Try) and profile in (FrameBodyProfile.STRUCTURED_MAPPING_PROPAGATION_314_V1,FrameBodyProfile.STRUCTURED_MAPPING_BODY_314_V1,FrameBodyProfile.STRUCTURED_MAPPING_COMPILER_314_V1):
             return (node in context.tree.body and len(node.handlers)==1 and not node.orelse and not node.finalbody
                 and node.handlers[0].type is not None
                 and any(isinstance(child,(ast.Assign,ast.For,ast.Import,ast.ImportFrom))
@@ -494,12 +500,13 @@ class StructuredModuleBuilder(ModuleBuilder):
         super().__init__(context,selection,evidence,max_operations)
         from scar.analysis.source_language import SourceLanguageOptions
         from scar.ir.program.source_language import SourceLanguageCapability
+        from scar.ir.program.module_entries import FrameBodyProfile
         from scar.ir.program.ids import ControlScopeID
         self.language_options=SourceLanguageOptions((SourceLanguageCapability.SLICE_KEYS,),evidence)
         self.instructions=None;self.address_refinements=[];self.statement_expansions=[]
         self.root_scope=ControlScopeID(_key('module-frame-scope',self.unit.initializer.wire,self.unit.snapshot.fingerprint))
         self.frame_region=RegionID(_key('module-structured-frame',self.unit.initializer.wire,self.unit.snapshot.fingerprint))
-        self.prefix_nodes,self.remaining_nodes=mapping_prefix_selection(context,evidence)
+        self.prefix_nodes,self.remaining_nodes=mapping_prefix_selection(context,evidence,profile=(FrameBodyProfile.STRUCTURED_MAPPING_COMPILER_314_V1 if getattr(self,'supports_compiler_prologue',False) else None))
         from scar.ir.program.module_entries import FrameBodyProfile,FrameCompletionProfile
         self.frame_body_profile=FrameBodyProfile.STRUCTURED_MAPPING_314_V1
         self.frame_completion_profile=FrameCompletionProfile.RAW_EXCEPTION_REF_314_V1
@@ -647,6 +654,10 @@ class StructuredModuleBuilder(ModuleBuilder):
             FrameBodyProtocolKind as K,StatementSequenceField as F,UnexpandedFrameSlice)
         from scar.ir.program.source_subjects import FrameRoot,SourceCompilationFrameRoot,FrameKind,MappingFramePorts
         from scar.ir.program.control import ControlScope,ControlScopeKind
+        compiler_child=None;compiler_prologue=None
+        if getattr(self,'supports_compiler_prologue',False):
+            from scar.analysis.source_module_compiler_lowering import build_compiler_region,invoke_compiler_region
+            compiler_child=build_compiler_region(self)
         remaining=None
         if self.remaining_nodes:
             self.function_context=RegionID(_key('module-exact-suffix',self.unit.initializer.wire,
@@ -663,6 +674,8 @@ class StructuredModuleBuilder(ModuleBuilder):
         self.entry_references=self.block_arguments[cursor.block][:-1]
         abi=MappingFramePorts(*self.entry_references,(),entry_world)
         self.frame_transition(cursor,self.tree,tuple((value,self.tree,'borrowed-namespace') for value in self.entry_references),PythonProtocolKind.FRAME_ENTER)
+        if getattr(self,'supports_compiler_prologue',False):
+            cursor,compiler_prologue=invoke_compiler_region(self,cursor,compiler_child)
         cursor=self.statements(self.prefix_nodes,cursor)
         if remaining is not None:
             cursor,payload,identity=self.invoke(cursor,self.tree,tuple((value,self.tree,'slice-namespace',i,None) for i,value in enumerate(self.entry_references)))
@@ -681,11 +694,15 @@ class StructuredModuleBuilder(ModuleBuilder):
             ModuleFrontier(self.unit,'NAMESPACE_CONTENT_UNPROVEN','mapping access attempts do not establish stored content or alias/effect completeness')))
         if remaining is not None:self.module_frontiers.append(ModuleFrontier(self.source(self.remaining_nodes[0]),'REQUIRED_EXPANSION',
             'exact remaining statement collection starts at unsupported '+type(self.remaining_nodes[0]).__name__))
-        overlay=StructuredFrameBodyOverlay(self.declaration,module_source_census(self.prepared_source),self.root_scope,
+        overlay_type=StructuredFrameBodyOverlay;extra={}
+        if getattr(self,'supports_compiler_prologue',False):
+            from scar.ir.program.module_entries import CompilerStructuredFrameBodyOverlay
+            overlay_type=CompilerStructuredFrameBodyOverlay;extra={'compiler_prologue':compiler_prologue}
+        overlay=overlay_type(self.declaration,module_source_census(self.prepared_source),self.root_scope,
             frame_statement_slice(self.prepared_source,self.unit,F.BODY,self.prefix_nodes) if self.prefix_nodes else None,
             tuple(self.statement_expansions),remaining,tuple(self.module_frontiers),self.operations_emitted,
             tuple(self.operation_links),tuple(self.value_links),tuple(self.use_links),tuple(self.protocols),tuple(self.loops),tuple(self.language_constants),
-            completion_profile=self.frame_completion_profile,profile=self.frame_body_profile)
+            completion_profile=self.frame_completion_profile,profile=self.frame_body_profile,**extra)
         result=SourceProgram(graph,LoweringMetadata(self.entry,self.snapshot),self.semantic,self.semantics,self.control,
             self.frame_body_profile,module=overlay)
         from scar.analysis.source_module_validation import require_valid_structured_module_program
@@ -712,7 +729,7 @@ class PropagationModuleBuilder(StructuredModuleBuilder):
         super().__init__(context,selection,evidence,max_operations)
         from scar.ir.program.module_entries import FrameBodyProfile,FrameCompletionProfile
         from scar.ir.program.control import ControlScopeKind
-        self.frame_body_profile=FrameBodyProfile.STRUCTURED_MAPPING_PROPAGATION_314_V1
+        self.frame_body_profile=(FrameBodyProfile.STRUCTURED_MAPPING_COMPILER_314_V1 if getattr(self,'supports_compiler_prologue',False) else FrameBodyProfile.STRUCTURED_MAPPING_PROPAGATION_314_V1)
         self.frame_completion_profile=FrameCompletionProfile.PROPAGATION_REF_PAIR_314_V1
         self.prefix_nodes,self.remaining_nodes=mapping_prefix_selection(context,evidence,profile=self.frame_body_profile)
         self.current_owner=self.root_scope;self.block_owners={}
@@ -920,7 +937,7 @@ class MappingBodyBuilder(PropagationModuleBuilder):
     def __init__(self,context,selection,evidence,max_operations):
         super().__init__(context,selection,evidence,max_operations)
         from scar.ir.program.module_entries import FrameBodyProfile
-        self.frame_body_profile=FrameBodyProfile.STRUCTURED_MAPPING_BODY_314_V1
+        self.frame_body_profile=(FrameBodyProfile.STRUCTURED_MAPPING_COMPILER_314_V1 if getattr(self,'supports_compiler_prologue',False) else FrameBodyProfile.STRUCTURED_MAPPING_BODY_314_V1)
         self.prefix_nodes,self.remaining_nodes=mapping_prefix_selection(context,evidence,profile=self.frame_body_profile)
 
     def store(self,target,value,cursor):
@@ -953,3 +970,13 @@ class MappingBodyBuilder(PropagationModuleBuilder):
                         for name,field in (('body',F.BODY),('orelse',F.ORELSE)) if getattr(node,name))
                     self.statement_expansions[-1]=replace(last,child_slices=children)
         return cursor
+
+
+class CompilerMappingBodyBuilder(MappingBodyBuilder):
+    """Explicit source-only module profile with its compiler-owned prelude."""
+    supports_compiler_prologue=True
+
+    def __init__(self,context,selection,evidence,max_operations):
+        from scar.analysis.source_module_compiler_lowering import compiler_prelude_plan
+        self.compiler_plan=compiler_prelude_plan(evidence.code,context.tree)
+        super().__init__(context,selection,evidence,max_operations)
