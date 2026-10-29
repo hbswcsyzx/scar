@@ -48,7 +48,7 @@ from scar.ir.v2.semantic import OperationKind, SemanticRelation
 class StaticCallBudget:
     max_input_bytes: int = 8_000_000_000
     max_record_bytes: int = 256_000_000
-    max_manifest_bytes: int = 128_000_000
+    max_manifest_bytes: int = 256_000_000
     max_bodies: int = 10000
     max_calls: int = 1_000_000
     max_candidates_per_call: int = 64
@@ -362,7 +362,7 @@ class StaticCallSession:
         class_entry=None
         if document.get("class") is not None:
             from scar.ir.program.class_entries import (
-                decode_class_entry_overlay, validate_class_entry_core, ClassSuiteOverlay,
+                decode_class_entry_overlay, validate_class_entry_core, ClassSuiteOverlay, ClassSuiteMethodOverlay,
             )
             from scar.ir.program.source_subjects import FrameKind,SourceCompilationFrameRoot
             class_entry=decode_class_entry_overlay(document["class"])
@@ -372,7 +372,7 @@ class StaticCallSession:
                     or encode(class_entry.definition) not in (entries[0].get("semantic_definition_ids") or ())
                     or encode(class_entry.source)!=entries[0]["source_ref"]
                     or metadata.source!=context.semantics.sources[context.unit["path"]]
-                    or type(class_entry) is not ClassSuiteOverlay and class_entry.required_expansion.region!=graph.root
+                    or type(class_entry) not in (ClassSuiteOverlay, ClassSuiteMethodOverlay) and class_entry.required_expansion.region!=graph.root
                     or len(graph.frame_roots)!=1
                     or type(graph.frame_roots[0]) is not SourceCompilationFrameRoot
                     or graph.frame_roots[0].kind is not FrameKind.CLASS
@@ -548,7 +548,7 @@ class StaticCallSession:
         return SimpleNamespace(index=index, graph=graph, metadata=metadata, interface=interface,
                                namespace=namespace, document=document, context=context, module=None)
 
-    def _import_candidates(self, context, spec):
+    def _import_candidates(self, context, spec, *, source=None):
         names = [spec.requested]
         if spec.relative_level:
             names = []
@@ -558,15 +558,21 @@ class StaticCallSession:
                 if spec.relative_level <= len(parts):
                     prefix = parts[:len(parts) - spec.relative_level + 1]
                     names.append(".".join((*prefix, spec.requested)) if spec.requested else ".".join(prefix))
-        found = []
+        found, frontiers = [], []
         if spec.symbol is None or spec.symbol == "*":
-            return found
+            return found, frontiers
         for name in names:
             for number in self._module_units.get(name, ()):
+                unit = self.units[number]
+                if any(key not in unit["artifacts"] for key in ("source", "lexical", "semantic", "semantics", "control")):
+                    kind = "IMPORT_DECLARATION_ONLY" if Path(unit["path"]).suffix == ".pyi" else "IMPORT_SOURCE_CONTEXT_UNAVAILABLE"
+                    frontiers.append(_front(kind,
+                        "Import candidate retains source/declarations but has no canonical execution context: " + unit["path"], source))
+                    continue
                 target = self._unit(number)
                 for definition in target.exports.get(spec.symbol, ()):
                     found.append((number, definition, "IMPORT_CANDIDATE_NOT_LOADER_PROOF"))
-        return found
+        return found, frontiers
 
     def _class_function_creation(self, body, operation, value, normal_edge):
         """Join a class-suite factory through its original lexical code path.
@@ -576,12 +582,12 @@ class StaticCallSession:
         returned route is only the creation relation, not closure/default state
         or evidence that any decorator returned this function unchanged.
         """
-        from scar.ir.program.class_entries import ClassSuiteOverlay
+        from scar.ir.program.class_entries import ClassSuiteOverlay, ClassSuiteMethodOverlay
         from scar.analysis.static_compilation import _scope_nodes
         from scar.trace.code_snapshot import code_key
         from scar.analysis.static_namespace import normal_reference
         overlay=body.class_entry
-        if type(overlay) is not ClassSuiteOverlay:return None
+        if type(overlay) not in (ClassSuiteOverlay, ClassSuiteMethodOverlay):return None
         factories=[record for record in overlay.factories if record.operation==operation.id]
         if len(factories)!=1:raise ValueError('class factory lacks its unique original creation record')
         factory=factories[0]
@@ -748,8 +754,10 @@ class StaticCallSession:
                 elif producer.opcode is Opcode.ALIAS:
                     pending.extend(operand.value for operand in producer.operands)
                 elif producer.opcode is Opcode.IMPORT and producer.import_spec is not None:
-                    for number, definition, basis in self._import_candidates(context, producer.import_spec):
+                    imported, import_frontiers = self._import_candidates(context, producer.import_spec, source=producer.source)
+                    for number, definition, basis in imported:
                         admit(number, definition, basis)
+                    frontiers.extend(import_frontiers)
                     frontiers.append(_front("IMPORT_ENVIRONMENT_OPEN", "Import candidates retain loader/package/export mutation conditions.", producer.source))
         # Follow only canonical binding payload/phi/creation references, never
         # every input of arbitrary computation as an alias to its result.
@@ -768,7 +776,7 @@ class StaticCallSession:
         namespace = getattr(body, "namespace_dependencies", None)
         if namespace is None:
             namespace = NamespaceDependencies(body.graph, body.document,
-                max_steps=self.budget.max_resolution_steps, check=self._check)
+                max_steps=self.budget.max_resolution_steps, check=self._check, index=body.index)
             body.namespace_dependencies = namespace
         normal_producers = getattr(body, "namespace_normal_producers", None)
         if normal_producers is None:
@@ -938,12 +946,18 @@ class StaticCallSession:
             return None, "CALLER_FRAME_WORLD_NOT_STATE_VERSION"
         return value, None
 
-    def _target(self, caller, operation, source, semantic_call, actuals, number, definition, basis):
+    def _target(self, caller, operation, source, semantic_call, actuals, number, definition, basis, *, creations=()):
         context = caller.context if number == caller.context.number else self._unit(number)
         qualified, signature, entry, body_row = context.definitions[definition]
         from scar.analysis.function_binding import bind_call
-        binding = bind_call(signature, call=semantic_call, target=definition, source=source, arguments=actuals) if semantic_call is not None and source is not None else None
+        normalized_method = any(record.operation == operation.id
+                                for record in getattr(caller.class_entry, "method_calls", ()))
+        binding = (bind_call(signature, call=semantic_call, target=definition, source=source, arguments=actuals)
+                   if semantic_call is not None and source is not None and not normalized_method else None)
         frontiers = [_front("TARGET_AND_FUNCTION_STATE_CONDITIONAL", "Raw function identity/code/defaults, no external namespace mutation and argument completion conditions are not discharged.", qualified.source)]
+        if normalized_method:
+            frontiers.append(_front("METHOD_SELF_SELECTION_ADAPTER_OPEN",
+                "Original callable/optional-self/boolean ports are retained. Conditional implicit self must be adapted before binding explicit AST arguments to this signature.", source))
         if binding is None or binding.status is not CallBindingStatus.CONDITIONAL:
             frontiers.append(_front("ARGUMENT_BINDING_INCOMPLETE", "Signature/layout/expansion has no complete conditional parameter plan.", source))
         callee = self._body(context, *body_row) if body_row is not None else None
@@ -983,10 +997,20 @@ class StaticCallSession:
                 state_entry = StaticStateEntryRoute(states[0].id, before.id, before.location, after.id, after.location)
             else:
                 frontiers.append(_front("CALL_STATE_ENTRY_OPEN", "CALL has no unique STATE_CONTENT invoke argument in its caller's coarse-world location; the current SSA version need not equal the entry version."))
-        frontiers.append(_front("ENVIRONMENT_PROJECTIONS_OPEN", "Callee function-object/G/saved-B/defaults/cells are existing ports; projections and cell content/state must be linked separately, not borrowed from caller or equated by names."))
+        from scar.analysis.static_function_environment import derive_function_environment_routes
+        callee_uses = [row.use for row in caller.uses_by_op.get(operation.id, ()) if row.role == "callee"]
+        environment_routes, environment_frontiers = derive_function_environment_routes(
+            caller_graph=caller.graph, caller_document=caller.document, caller_namespace=caller.namespace,
+            callee_graph=callee.graph, callee_document=callee.document, callee_namespace=callee.namespace,
+            definition=qualified, call_operation=operation.id,
+            callee_use=callee_uses[0] if len(callee_uses) == 1 else None,
+            creations=tuple(creations), caller_index=caller.index, callee_index=callee.index)
+        frontiers.extend(environment_frontiers)
+        frontiers.append(_front("ENVIRONMENT_PROJECTIONS_OPEN", "Emitted function-environment routes retain their explicit creation, target and field-state conditions; saved-builtins selection, mutable field contents and remaining environment projections are not closed."))
         frontiers.append(_front("FINE_EFFECTS_OPEN", "State interface correspondence is not a closed mod/ref, alias, escape or ready summary."))
         return StaticCallTarget(qualified, callee.namespace, tuple(sorted(basis)), binding,
-            tuple(arguments), returns, completions, state_entry, tuple(frontiers))
+            tuple(arguments), returns, completions, state_entry, tuple(frontiers),
+            environment_routes=environment_routes)
 
     def _calls(self, body):
         selected = {}
@@ -1043,7 +1067,7 @@ class StaticCallSession:
             targets = []
             for (number, definition), basis in sorted(candidates.items(), key=lambda item: (item[0][0], item[0][1].wire)):
                 targets.append(self._target(body, operation, link.source, link.semantic_operation,
-                                            actuals, number, definition, basis))
+                                            actuals, number, definition, basis, creations=creations))
             if not targets:
                 frontier.append(_front("TARGET_SET_UNRESOLVED", "No qualified function candidate follows from retained reaching/creation/import facts; no global name-only fallback.", link.source))
             frontier.append(_front("TARGET_SET_CLOSURE_OPEN", "This bounded direct/alias resolver is not whole-program points-to/effects closure.", link.source))
@@ -1054,6 +1078,7 @@ class StaticCallSession:
             self.counts["argument_port_edges"] += sum(len(target.arguments) for target in targets)
             self.counts["normal_return_sites"] += sum(len(target.normal_returns) for target in targets)
             self.counts["completion_routes"] += sum(len(target.completions) for target in targets)
+            self.counts["function_environment_routes"] += sum(len(target.environment_routes) for target in targets)
             yield StaticCallSite(body.namespace, op_id, link.source, link.semantic_operation,
                 callee_use.id if callee_use else None, callee_use.value if callee_use else None,
                 tuple(targets), tuple(dict.fromkeys(frontier)), namespace_flows=namespace_flows, function_creations=creations)
@@ -1065,6 +1090,11 @@ class StaticCallSession:
         self._iterated = True
         for number, unit in enumerate(self.units):
             self._check()
+            if (Path(unit["path"]).suffix == ".pyi"
+                    and any(key not in unit["artifacts"] for key in ("semantic", "semantics", "control"))):
+                self.frontiers.append({"kind": "SOURCE_DECLARATION_ONLY", "unit": number,
+                    "detail": "Stub source remains in the catalog; no execution body is asserted."})
+                continue
             try:
                 context = self._unit(number)
             except (OverflowError, TimeoutError):
@@ -1152,7 +1182,7 @@ def build_static_call_links(directory, out, *, logical_root=None, expected_manif
         # Already closed relationship shards remain published. The incomplete
         # caller in memory is not silently counted as a completed shard.
     published_calls = sum(shard["calls"] for shard in shards)
-    return {"schema": "scar.static-call-publication", "schema_version": 2,
+    return {"schema": "scar.static-call-publication", "schema_version": 3,
             "source_model": encode(session.basis), "input_manifest_sha256": session.manifest_sha256,
             "artifacts": session.artifacts, "shards": shards, "counts": dict(session.counts),
             "published_calls": published_calls,

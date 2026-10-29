@@ -15,7 +15,7 @@ from scar.ir.program.source_language import CodeConstantSource, SliceShape
 from scar.ir.program.structured import PythonProtocolKind
 from scar.ir.semantics_v2 import Opcode
 from scar.ir.v2.semantic import OperationKind
-from scar.ir.program.state_addresses import AddressEffect, Element, ReferenceOwner
+from scar.ir.program.state_addresses import AddressEffect, Element, ReferenceOwner, Slice
 
 
 def _constant_slice(node):
@@ -64,7 +64,7 @@ def _constant(builder, node, cursor):
 
 
 def _invoke(builder, cursor, node, inputs, normal_consumed, *, raise_consumed=None,
-            old=None, kind=None, memory=False):
+            old=None, kind=None, memory=False, result_type=_REF, role=SourceRole.EXPRESSION):
     # Most existing slice/index primitives consume the same input holds in both
     # completions. BUILD_TUPLE steals only on success (CPython 3.14.7). Keeping
     # the exceptional contract explicit avoids a second release before unwind.
@@ -78,7 +78,7 @@ def _invoke(builder, cursor, node, inputs, normal_consumed, *, raise_consumed=No
         finally:
             builder.active_temporaries[:] = pending
     cursor, value, operation = builder.invoke(cursor, node, tuple(inputs), old=old,
-                                             failure_handler=failed)
+        failure_handler=failed, result_type=result_type, role=role)
     if kind is not None:
         builder.protocol(operation, kind, node)
     if memory:
@@ -104,8 +104,12 @@ def lower_slice(builder, node, cursor):
     try:
         for index, (role, child) in enumerate((('slice-lower', node.lower), ('slice-upper', node.upper),
                                               ('slice-step', node.step))[:count]):
-            cursor, value = (builder.expr(child, cursor) if child is not None
-                             else (cursor, builder.literal(node, None)))
+            if child is None:
+                cursor, value = cursor, builder.literal(node, None)
+            elif builder.has_language('SLICE_ACCESS_314_V1'):
+                cursor, value = expression_for_heap_target(builder, child, cursor)
+            else:
+                cursor, value = builder.expr(child, cursor)
             if cursor is None:
                 return None, None
             origin = child or node
@@ -129,7 +133,8 @@ def lower_key(builder, node, cursor):
     if isinstance(node, ast.Slice):
         return lower_slice(builder, node, cursor)
     if not isinstance(node, ast.Tuple):
-        return builder.expr(node, cursor)
+        return (expression_for_heap_target(builder, node, cursor)
+                if builder.has_language('SLICE_ACCESS_314_V1') else builder.expr(node, cursor))
     if any(isinstance(child, ast.Starred) for child in node.elts):
         raise _Unsupported(GapKind.UNSUPPORTED_SYNTAX, node, "starred index key requires a separate construction rule")
     instructions = _instructions(builder, node)
@@ -176,15 +181,19 @@ def lower_key(builder, node, cursor):
 def lower_subscript(builder, node, cursor):
     if not isinstance(node, ast.Subscript) or not isinstance(node.ctx, ast.Load):
         raise _Unsupported(GapKind.SOURCE_MAPPING, node, "subscript read requires Load context")
-    if (isinstance(node.slice, ast.Slice) and not _constant_slice(node.slice)
+    expanded = builder.has_language("SLICE_ACCESS_314_V1")
+    if (expanded and isinstance(node.slice, ast.Slice)
+            and any(row.opname == 'BINARY_SLICE' for row in _instructions(builder, node))):
+        return _combined_read(builder, node, cursor)
+    if (not expanded and isinstance(node.slice, ast.Slice) and not _constant_slice(node.slice)
             and node.slice.step is None):
         raise _Unsupported(GapKind.UNSUPPORTED_SYNTAX, node, "COMBINED_SLICE_LIFETIME_UNRECOVERED")
-    old = builder.old_operation(node)
-    if len(old.operands) != 2:
+    old, definition = _index_source(builder, node) if expanded else (builder.old_operation(node), None)
+    if old is not None and len(old.operands) != 2:
         raise _Unsupported(GapKind.SOURCE_MAPPING, node, "subscript source operands differ")
     baseline, held, inputs = len(builder.active_temporaries), [], []
     try:
-        cursor, receiver = builder.expr(node.value, cursor)
+        cursor, receiver = expression_for_heap_target(builder, node.value, cursor) if expanded else builder.expr(node.value, cursor)
         if cursor is None:
             return None, None
         _hold(builder, cursor, node.value, receiver); held.append((node.value, receiver))
@@ -192,9 +201,13 @@ def lower_subscript(builder, node, cursor):
         if cursor is None:
             return None, None
         _hold(builder, cursor, node.slice, key); held.append((node.slice, key))
-        for value, child, operand in zip((receiver, key), (node.value, node.slice), old.operands):
-            inputs.append((value, child, operand.role, operand.index, operand.value))
+        for index, (value, child, role) in enumerate(((receiver, node.value, 'receiver'), (key, node.slice, 'index'))):
+            operand = old.operands[index] if old is not None else None
+            inputs.append((value, child, operand.role if operand else role,
+                           operand.index if operand else index, operand.value if operand else None))
         cursor, result, operation = _invoke(builder, cursor, node, inputs, tuple(held), old=old)
+        if definition is not None:
+            _associate(builder, operation, node, definition, Opcode.INDEX)
         uses = builder.operation_records[operation].uses
         builder._addresses(operation, (AddressEffect(ReferenceOwner(uses[0].id),
             (Element(uses[1].id),), AccessMode.READ),))
@@ -205,4 +218,117 @@ def lower_subscript(builder, node, cursor):
         del builder.active_temporaries[baseline:]
 
 
-__all__ = ["lower_slice", "lower_key", "lower_subscript"]
+def _index_source(builder, node):
+    """Original SG ownership, with an optional existing computational overlay."""
+    records = builder.old_by_atom.get(builder.source(node).atom_id, ())
+    if len(records) > 1:
+        raise _Unsupported(GapKind.SOURCE_MAPPING, node, 'slice index has ambiguous computational records')
+    definition = _source_definition(builder, node)
+    if definition.kind is not OperationKind.INDEX or len(definition.output_slots) != 1:
+        raise _Unsupported(GapKind.SOURCE_MAPPING, node, 'slice read requires its exact original SG INDEX/output')
+    if records:
+        old, = records
+        if old.operation != definition.id or old.opcode is not Opcode.INDEX or len(old.operands) != 2:
+            raise _Unsupported(GapKind.SOURCE_MAPPING, node, 'slice read differs from original SG index operands')
+        return old, None
+    return None, definition
+
+
+def _bound_inputs(builder, node, cursor, held):
+    """Evaluate only existing lower/upper children; omissions are exact None."""
+    inputs = []
+    for index, (role, child) in enumerate((('slice-lower', node.slice.lower), ('slice-upper', node.slice.upper))):
+        origin = child or node.slice
+        cursor, value = (expression_for_heap_target(builder, child, cursor) if child is not None
+                         else (cursor, builder.literal(node.slice, None)))
+        if cursor is None:
+            return None, None
+        _hold(builder, cursor, origin, value); held.append((origin, value))
+        # A bound is not the old whole-key StaticValue. Its source and core Use
+        # suffice until a real SG value for this exact child is available.
+        inputs.append((value, origin, role, index, None))
+    return cursor, inputs
+
+
+def _combined_read(builder, node, cursor):
+    if node.slice.step is not None or sum(row.opname == 'BINARY_SLICE' for row in _instructions(builder, node)) != 1:
+        raise _Unsupported(GapKind.CODE_VERSION, node, 'slice read has no unique exact BINARY_SLICE witness')
+    old, definition = _index_source(builder, node)
+    baseline, held = len(builder.active_temporaries), []
+    try:
+        cursor, receiver = expression_for_heap_target(builder, node.value, cursor)
+        if cursor is None:
+            return None, None
+        _hold(builder, cursor, node.value, receiver); held.append((node.value, receiver))
+        cursor, bounds = _bound_inputs(builder, node, cursor, held)
+        if cursor is None:
+            return None, None
+        inputs = [(receiver, node.value, 'receiver', 0, old.operands[0].value if old is not None else None), *bounds]
+        cursor, result, operation = _invoke(builder, cursor, node, inputs, tuple(held),
+            old=old, kind=PythonProtocolKind.BINARY_SLICE)
+        if definition is not None:
+            _associate(builder, operation, node, definition, Opcode.INDEX)
+        uses = builder.operation_records[operation].uses
+        builder._addresses(operation, (AddressEffect(ReferenceOwner(uses[0].id),
+            (Slice(uses[1].id, uses[2].id),), AccessMode.READ),))
+        builder.link_value(builder.values_by_id[result], node, SourceRole.EXPRESSION,
+                           semantic_value=old.result if old is not None else None)
+        builder.gap(GapKind.DYNAMIC_DISPATCH, node,
+            'compound slice receiver/bounds/world and consuming completions are connected; '
+            'internal temporary slice, dispatch, aliasing and complete effects remain unproved')
+        return cursor, result
+    finally:
+        del builder.active_temporaries[baseline:]
+
+
+def lower_slice_store(builder, node, rhs, cursor, *, rhs_held=False):
+    """CPython slice assignment: RHS, receiver, bounds/key, consuming store."""
+    if not isinstance(node, ast.Subscript) or not isinstance(node.ctx, ast.Store):
+        raise _Unsupported(GapKind.SOURCE_MAPPING, node, 'slice store requires original Subscript Store')
+    combined = isinstance(node.slice, ast.Slice) and any(row.opname == 'STORE_SLICE' for row in _instructions(builder, node))
+    expected = 'STORE_SLICE' if combined else 'STORE_SUBSCR'
+    if sum(row.opname == expected for row in _instructions(builder, node)) != 1:
+        raise _Unsupported(GapKind.CODE_VERSION, node, 'slice assignment has no unique exact consuming compiler operation')
+    if combined and node.slice.step is not None:
+        raise _Unsupported(GapKind.CODE_VERSION, node, 'STORE_SLICE cannot have a step')
+    definition = _source_definition(builder, node, binding=True)
+    if rhs_held and (not builder.active_temporaries or builder.active_temporaries[-1] != rhs):
+        raise _Unsupported(GapKind.SOURCE_MAPPING, node, 'slice store lost original pending unpack result')
+    baseline = len(builder.active_temporaries) - int(rhs_held)
+    held = [(node, rhs)]
+    try:
+        if not rhs_held:
+            _hold(builder, cursor, node, rhs)
+        cursor, receiver = expression_for_heap_target(builder, node.value, cursor)
+        if cursor is None:
+            return None
+        _hold(builder, cursor, node.value, receiver); held.append((node.value, receiver))
+        inputs = [(rhs, node, 'assigned-reference', 0, None), (receiver, node.value, 'heap-owner', 0, None)]
+        if combined:
+            cursor, bounds = _bound_inputs(builder, node, cursor, held)
+            if cursor is None:
+                return None
+            inputs.extend(bounds)
+            kind = PythonProtocolKind.STORE_SLICE
+        else:
+            cursor, key = lower_key(builder, node.slice, cursor)
+            if cursor is None:
+                return None
+            _hold(builder, cursor, node.slice, key); held.append((node.slice, key))
+            inputs.append((key, node.slice, 'element-key', 0, None))
+            kind = PythonProtocolKind.STORE_SLICE_SUBSCRIPT
+        cursor, _, operation = _invoke(builder, cursor, node, inputs, tuple(held), kind=kind,
+            result_type=None, role=SourceRole.LOCAL_BINDING)
+        _associate(builder, operation, node, definition, Opcode.OPAQUE)
+        uses = builder.operation_records[operation].uses
+        selector = Slice(uses[2].id, uses[3].id) if combined else Element(uses[2].id)
+        builder._addresses(operation, (AddressEffect(ReferenceOwner(uses[1].id), (selector,), AccessMode.WRITE),))
+        builder.gap(GapKind.DYNAMIC_DISPATCH, node,
+            'slice assignment retains RHS-first evaluation, original receiver/bounds/key Uses, '
+            'world and consuming normal/raise outcomes; runtime dispatch and complete effects remain unproved')
+        return cursor
+    finally:
+        del builder.active_temporaries[baseline:]
+
+
+__all__ = ["lower_slice", "lower_key", "lower_subscript", "lower_slice_store"]

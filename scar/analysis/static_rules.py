@@ -194,13 +194,19 @@ def _rule(node):
         if isinstance(node, ast.Attribute) and node.attr.startswith("__") and not node.attr.endswith("__"):
             unsupported = "Private heap assignment requires an unavailable exact compiler-class mangling rule."
         if isinstance(node, ast.Subscript) and isinstance(node.slice, ast.Slice):
-            unsupported = "Slice assignment lifetime is not implemented."
+            caps.append(C.SLICE_ACCESS_314_V1)
+            compiler = True
+        elif isinstance(node, ast.Subscript) and any(isinstance(child, ast.Slice) for child in ast.walk(node.slice)):
+            caps.append(C.SLICE_ACCESS_314_V1)
+            compiler = True
     elif isinstance(node, ast.Slice) or isinstance(node, ast.Subscript):
         module = "source_slice_lowering"
         function = "lower_slice" if isinstance(node, ast.Slice) else "lower_subscript"
         # Ordinary non-tuple keys never call _instructions. Slice and extended
         # tuple keys do; capability presence alone is not a compiler dependency.
         compiler = isinstance(node, ast.Slice) or isinstance(node.slice, (ast.Slice, ast.Tuple))
+        if isinstance(node, ast.Subscript) and isinstance(node.slice, ast.Slice):
+            caps.append(C.SLICE_ACCESS_314_V1)
         if isinstance(node, ast.Subscript) and isinstance(node.slice, ast.Slice) and node.slice.step is None and not all(x is None or isinstance(x, ast.Constant) for x in (node.slice.lower, node.slice.upper)):
             needs.append(_needs("STATIC_SLICE_SEQUENCE", "Compiler must select a supported BINARY_SLICE/BUILD_SLICE protocol; source shape alone cannot decide."))
     elif isinstance(node, ast.Dict):
@@ -290,7 +296,7 @@ def plan_static_entry(tree, entry, *, path, fingerprint):
     mapping_entry = kind == "MODULE" and isinstance(node, ast.Module)
     class_entry = kind == "CLASS" and isinstance(node, ast.ClassDef)
     selected = (FrameBodyProfile.STRUCTURED_MAPPING_COMPILER_OPS_314_V1.value if mapping_entry else
-                "STATIC_CLASS_SUITE_314_V1" if class_entry else
+                "STATIC_CLASS_SUITE_METHOD_314_V1" if class_entry else
                 BodyLoweringProfile.STRUCTURED_ENV.value if kind == "FUNCTION" else None)
     caps, rules = list(_DEFAULT_CAPS), []
 

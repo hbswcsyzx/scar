@@ -20,6 +20,7 @@ from scar.ir.v2.ids import ValueSlotID
 class SourceLanguageCapability(str, Enum):
     FIXED_UNPACK = "PYTHON_FIXED_LOCAL_UNPACK_V1"
     SLICE_KEYS = "PYTHON_SLICE_KEYS_314_V1"
+    SLICE_ACCESS_314_V1 = "PYTHON_SLICE_ACCESS_314_V1"
     LEXICAL_LOCALS = "PYTHON_LEXICAL_LOCALS_314_V1"
     CALL_KWARGS_314_V1 = "PYTHON_CALL_KWARGS_314_V1"
     CALL_EXPANSION_314_V1 = "PYTHON_CALL_EXPANSION_314_V1"
@@ -64,6 +65,8 @@ COMPREHENSION_PROTOCOLS = frozenset(('COMPREHENSION_BUILD','COMPREHENSION_NEXT',
 EXTENDED_PROTOCOLS = EXTENDED_PROTOCOLS | COMPREHENSION_PROTOCOLS
 LAMBDA_PROTOCOLS = frozenset(('MAKE_LAMBDA_FUNCTION',))
 EXTENDED_PROTOCOLS = EXTENDED_PROTOCOLS | LAMBDA_PROTOCOLS
+SLICE_ACCESS_PROTOCOLS = frozenset(('BINARY_SLICE', 'STORE_SLICE', 'STORE_SLICE_SUBSCRIPT'))
+EXTENDED_PROTOCOLS = EXTENDED_PROTOCOLS | SLICE_ACCESS_PROTOCOLS
 
 
 def _need(condition, detail):
@@ -125,6 +128,12 @@ class CodeConstantSource:
 
 @dataclass(frozen=True, slots=True)
 class CompilerLocalMapping:
+    """Compiler local -> original lexical candidates, not compiler-slot order.
+
+    ``lexical_slots`` for a comprehension transient is a candidate set stored
+    in stable ID order by the producer. The ordered compiler-local/name/cell
+    tables retain their independent meanings and are never sorted here.
+    """
     name: str
     category: str
     lexical_slots: tuple[ValueSlotID, ...]
@@ -169,6 +178,9 @@ class SourceLanguageOverlay:
                 SourceLanguageCapability.COMPREHENSION_314_V1, SourceLanguageCapability.FIXED_UNPACK,
                 SourceLanguageCapability.LEXICAL_LOCALS, SourceLanguageCapability.FUNCTION_TRY_314_V1)),
                 "scoped comprehension targets require original comprehension, unpack, lexical locals and paired propagation capabilities")
+        if SourceLanguageCapability.SLICE_ACCESS_314_V1 in self.capabilities:
+            _need(SourceLanguageCapability.SLICE_KEYS in self.capabilities,
+                  "slice access requires its explicit key construction capability")
         for rows, kind in ((self.unpackings, UnpackShape), (self.slices, SliceShape),
                            (self.constants, CodeConstantSource), (self.compiler_locals, CompilerLocalMapping)):
             _need(type(rows) is tuple and all(type(row) is kind for row in rows), "overlay record type differs")

@@ -7,7 +7,9 @@ from types import CodeType
 
 from scar.analysis.static_compilation import compile_source_unit
 from scar.analysis.source_class_validation import _source_semantics,_expected_header_inputs,_expected_body_statements
-from scar.ir.program.class_entries import ClassNormalPayloadKind,validate_class_suite_core
+from scar.ir.program.class_entries import (
+    ClassNormalPayloadKind,ClassSuiteMethodOverlay,validate_class_suite_core,
+)
 from scar.ir.program.model import (
     BlockArgument,ExitKind,LiteralOrigin,OperationResult,ReferenceValue,
     StateVersionValue,TerminatorKind,
@@ -42,6 +44,10 @@ def require_valid_class_suite(prepared,definition,source,*,code_evidence,result)
     free=dict(zip(overlay.interface.co_freevars,mapping.closure_cells));cells={}
     constants={c.operation:c for c in overlay.constants};constant_values={};code_values={};tuples={};functions={}
     factories={f.operation:f for f in overlay.factories};stack=[]
+    method_profile=type(overlay)is ClassSuiteMethodOverlay
+    method_lookups={x.operation:x for x in overlay.method_lookups}if method_profile else{}
+    method_calls={x.operation:x for x in overlay.method_calls}if method_profile else{}
+    method_carriers={}
     rows=tuple(dis.get_instructions(evidence.code,adaptive=False,show_caches=False))
     applications=set()
     from scar.analysis.source_class_validation import _source_reference
@@ -73,6 +79,17 @@ def require_valid_class_suite(prepared,definition,source,*,code_evidence,result)
     def literal(v,expected):
         origin=values[v].origin
         need(type(origin)is LiteralOrigin and type(origin.value)is type(expected) and origin.value==expected,'literal operand differs')
+    def consumed_cleanup(op):
+        # Independently replay the frame's still-owned references after the
+        # original compiler pops. Consumed lookup/call inputs must not be
+        # retained until frame cleanup, unless another actual stack/frame
+        # binding independently owns that reference.
+        refs=(*namespace,*free.values(),*cells.values(),*(v for v in stack if v is not None))
+        expected=tuple(dict.fromkeys(v for v in refs if type(values[v])is ReferenceValue))
+        failure=next(e for e in op.terminator.successors if e.kind is ExitKind.RAISE)
+        cleanup=operations[blocks[failure.block].operations[0]]
+        need(tuple(u.value for u in cleanup.uses[:-3])==expected,
+             'consumed lookup/call input retained past its primitive or frame references lost')
     for row,witness in zip(rows,overlay.instructions):
         need((row.offset,row.opname,row.arg,tuple(row.positions))==
              (witness.offset,witness.opcode,witness.argument,witness.positions),'compiler opcode/order/position changed')
@@ -83,7 +100,13 @@ def require_valid_class_suite(prepared,definition,source,*,code_evidence,result)
         kind={'LOAD_CONST':'READ_CODE_CONSTANT','LOAD_NAME':'LOAD_NAME_314','STORE_NAME':'STORE_NAME_314',
               'STORE_DEREF':'STORE_CELL','MAKE_FUNCTION':'MAKE_FUNCTION_314','LOAD_ATTR':'LOAD_ATTRIBUTE',
               'RETURN_VALUE':'FRAME_EXIT_NORMAL','POP_TOP':'FRAME_DISCARD'}.get(name,name)
-        if name in ('CALL','CALL_KW'):kind='APPLY_DECORATOR_314'if row.offset in applications else 'CALL'
+        if name=='LOAD_ATTR'and row.arg&1:
+            need(method_profile,'historical suite admitted method-mode LOAD_ATTR')
+            kind='LOAD_METHOD_314'
+        if name in ('CALL','CALL_KW'):
+            receiver_index=len(stack)-row.arg-(1 if name=='CALL_KW'else 0)-1
+            method=method_carriers.get(stack[receiver_index])if method_profile else None
+            kind='CALL_METHOD_314'if method is not None else 'APPLY_DECORATOR_314'if row.offset in applications else 'CALL'
         if op is not None:need(p.kind==kind,'compiler/source protocol classification differs')
         if name in ('RESUME','COPY_FREE_VARS','NOP','EXTENDED_ARG'):
             need(op is None,'encoding-only instruction became a program operation')
@@ -147,12 +170,30 @@ def require_valid_class_suite(prepared,definition,source,*,code_evidence,result)
                 need(None not in expected and tuples.get(value)==expected,'closure field captures wrong/order cell references')
             stack.append(function)
         elif name=='LOAD_ATTR':
-            owner=stack.pop();actual=operands(op);need(actual[0]==owner,'attribute owner differs');literal(actual[1],arg);stack.append(normal(op)[0])
+            owner=stack.pop();actual=operands(op)
+            need(len(actual)==2 and actual[0]==owner,'attribute owner differs');literal(actual[1],arg)
+            if row.arg&1:
+                lookup=method_lookups.get(op.id);returned=normal(op)
+                need(lookup is not None and returned==(lookup.callable,lookup.optional_self,lookup.has_self),
+                     'method lookup lost its callable/self/boolean completion interface')
+                consumed_cleanup(op)
+                method_carriers[lookup.optional_self]=lookup
+                stack.extend(returned[:2])
+            else:stack.append(normal(op)[0])
         elif name in ('CALL','CALL_KW'):
             keyword=stack.pop()if name=='CALL_KW'else None
             args=tuple(stack.pop()for _ in range(row.arg))[::-1];receiver=stack.pop();callee=stack.pop()
-            if receiver is not None:args=(receiver,*args)
-            need(operands(op)==(callee,*args,*((keyword,)if keyword is not None else ())), 'callable/receiver/arguments were reordered')
+            method=method_carriers.get(receiver)if method_profile else None
+            if method is not None:
+                record=method_calls.get(op.id)
+                need(record is not None and record.lookup==method.operation and callee==method.callable,
+                     'method CALL lost its original lookup/callable association')
+                expected=(callee,receiver,method.has_self,*args,*((keyword,)if keyword is not None else ()))
+            else:
+                if receiver is not None:args=(receiver,*args)
+                expected=(callee,*args,*((keyword,)if keyword is not None else ()))
+            need(operands(op)==expected,'callable/receiver/arguments/selector were reordered')
+            if method_profile:consumed_cleanup(op)
             link=next(x for x in metadata.operation_links if x.operation==op.id)
             from scar.ir.semantics_v2 import Opcode
             if row.offset in applications:
@@ -185,6 +226,10 @@ def require_valid_class_suite(prepared,definition,source,*,code_evidence,result)
         need(len(overlay.instructions)<len(rows) and rows[len(overlay.instructions)].offset==overlay.remaining.first_offset,
              'remaining compiler continuation starts at wrong offset')
         need(tuple(stack)==overlay.remaining.stack_inputs,'remaining compiler continuation lost partial-evaluation inputs')
+        selectors=tuple(dict.fromkeys(method_carriers[v].has_self for v in stack if v in method_carriers))
+        expected=(*namespace,*free.values(),*cells.values(),*(v for v in stack if v is not None),*selectors)
+        need(operands(operations[overlay.remaining.operation])==expected,
+             'remaining continuation lost its exact frame/stack/method-selector inputs')
     need(set(cells)==set(overlay.interface.co_cellvars),'compiler-owned cells not allocated before suite completion')
     return {'valid':True,'source_compilation_replayed':True,'runtime_target_executed':False,
             'suite_complete':overlay.remaining is None,'effects_complete':False}

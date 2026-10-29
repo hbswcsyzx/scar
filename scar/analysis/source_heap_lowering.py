@@ -111,6 +111,12 @@ def expression_for_heap_target(builder, node, cursor, *, parent_definition=None)
             and isinstance(node, (ast.Slice, ast.Tuple))):
         from scar.analysis.source_slice_lowering import lower_key
         return lower_key(builder, node, cursor)
+    if (getattr(builder, "has_language", lambda _: False)("SLICE_ACCESS_314_V1")
+            and isinstance(node, ast.Subscript) and isinstance(node.ctx, ast.Load)):
+        if parent_definition is not None:
+            _source_definition(builder, node, parent=parent_definition)
+        from scar.analysis.source_slice_lowering import lower_subscript
+        return lower_subscript(builder, node, cursor)
     records = builder.old_by_atom.get(builder.source(node).atom_id, ())
     definition = _source_definition(builder, node, parent=parent_definition) if parent_definition is not None else None
     if len(records) == 1:
@@ -280,6 +286,10 @@ def store_heap_target(builder, target, rhs, cursor, *, rhs_held=False):
     if not isinstance(target.ctx, ast.Store):
         raise _Unsupported(GapKind.SOURCE_MAPPING, target, "heap assignment target lacks Store context")
     if isinstance(target, ast.Subscript):
+        if (getattr(builder, "has_language", lambda _: False)("SLICE_ACCESS_314_V1")
+                and any(isinstance(child, ast.Slice) for child in ast.walk(target.slice))):
+            from scar.analysis.source_slice_lowering import lower_slice_store
+            return lower_slice_store(builder, target, rhs, cursor, rhs_held=rhs_held)
         if getattr(builder, "has_language", lambda _: False)("SLICE_KEYS"):
             if any(isinstance(child, ast.Slice) for child in ast.walk(target.slice)):
                 # The capability proves load-key construction only. Reusing

@@ -219,7 +219,8 @@ def _run_unit(unit, catalog, selected, output, max_operations, producer):
                     evidence=compiled.for_definition(definition,reference)
                     payload["static_compilation"] = evidence.to_dict()
                     lowered=lower_class_suite(prepared,definition,reference,code_evidence=evidence,
-                                              max_operations=max_operations)
+                                              max_operations=max_operations,
+                                              profile=plan["selected_profile"])
                 else:
                     reference = decode(SourceReference, entry["source_ref"])
                     evidence = compiled.for_definition(definition, reference)

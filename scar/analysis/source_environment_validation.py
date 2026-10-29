@@ -86,6 +86,12 @@ def validate_environment_body(model, graph, interface, metadata, semantic, *, la
     for protocol in model.protocols:
         operation, kind = operations[protocol.operation], protocol.kind
         link = links[operation.id]
+        if kind in (Kind.BINARY_SLICE, Kind.STORE_SLICE, Kind.STORE_SLICE_SUBSCRIPT):
+            from scar.ir.program.source_language import SourceLanguageCapability
+            need(language is not None and SourceLanguageCapability.SLICE_ACCESS_314_V1 in language.capabilities,
+                 'slice access has no distinct opt-in capability')
+            expected_rows.add(operation.id)
+            continue  # Original SG/ports/address/consuming completions are checked by the slice validator.
         if kind.value in STARRED_DISPLAY_PROTOCOLS:
             need(language is not None and DisplayCapability.STARRED_DISPLAY_314_V1 in language.capabilities
                  and semantic.source_atoms[link.source.atom_id].kind in ('Tuple','List'),
@@ -228,11 +234,19 @@ def validate_environment_body(model, graph, interface, metadata, semantic, *, la
     if language is not None:
         from scar.ir.program.source_language import SourceLanguageCapability
         if SourceLanguageCapability.HEAP_AUGASSIGN_314_V1 in language.capabilities:
-            # Attribute AugAssign reads use the same saved target address as
-            # its ordinary store. INDEX refinements retain the old rule below.
+            # Attribute/ordinary INDEX reads retain their original address
+            # interface. Compound slices have receiver/lower/upper/world,
+            # independently checked by the dedicated slice validator; enabling
+            # heap AugAssign elsewhere cannot reinterpret them as key reads.
             for link in metadata.operation_links:
                 if link.opcode not in (Opcode.ATTRIBUTE,Opcode.INDEX) or link.operation not in rows:
                     continue
+                marker = protocols.get(link.operation)
+                if marker is not None and marker.kind is Kind.BINARY_SLICE:
+                    need(link.opcode is Opcode.INDEX
+                         and SourceLanguageCapability.SLICE_ACCESS_314_V1 in language.capabilities,
+                         'compound slice read lacks its original INDEX/capability')
+                    continue  # Exact source/ports/Slice address/completions belong to the slice validator.
                 operation = operations[link.operation]
                 source = semantic.definitions.get(link.semantic_operation)
                 atom = semantic.source_atoms.get(link.source.atom_id)
@@ -258,6 +272,9 @@ def validate_environment_body(model, graph, interface, metadata, semantic, *, la
             for link in metadata.operation_links:
                 if link.opcode is not Opcode.INDEX:
                     continue
+                marker = protocols.get(link.operation)
+                if marker is not None and marker.kind is Kind.BINARY_SLICE:
+                    continue  # The compound lower/upper address is validated independently.
                 operation = operations[link.operation]
                 source = semantic.definitions.get(link.semantic_operation)
                 atom = semantic.source_atoms.get(link.source.atom_id)

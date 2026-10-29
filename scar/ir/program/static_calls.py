@@ -14,7 +14,8 @@ from scar.ir.record_codec import decode, encode, loads as strict_loads
 from scar.ir.v2.common import SourceReference
 from scar.ir.v2.ids import OperationDefinitionID
 from .functions import CandidateBinding
-from .ids import BlockID, LocationID, OperationID, UseID, ValueID
+from .ids import BlockID, EnvironmentInterfaceID, LocationID, OperationID, UseID, ValueID
+from .environments import EnvironmentMember, EnvironmentRole
 from .model import ExitKind, ValueKind
 from .native import ExitPortRef
 from .providers import ProviderArtifact
@@ -125,6 +126,7 @@ class StaticCallTarget:
     state_entry: StaticStateEntryRoute | None = None
     frontiers: tuple[StaticCallFrontier, ...] = ()
     qualification: str = "CONDITIONAL_STATIC_CANDIDATE"
+    environment_routes: tuple[StaticFunctionEnvironmentRoute, ...] = ()
 
     def __post_init__(self):
         _exact(self.definition, SourceDefinitionReference)
@@ -143,13 +145,16 @@ class StaticCallTarget:
             _rows(rows, kind)
         if self.state_entry is not None:
             _exact(self.state_entry, StaticStateEntryRoute)
-        if self.body is None and (self.arguments or self.normal_returns or self.completions or self.state_entry):
+        _rows(self.environment_routes, StaticFunctionEnvironmentRoute)
+        if self.body is None and (self.arguments or self.normal_returns or self.completions or self.state_entry or self.environment_routes):
             raise ValueError("missing body cannot supply invented ports")
         if self.body is not None:
             if any(port.formal_body != self.body for port in self.arguments):
                 raise ValueError("formal belongs to another body namespace")
             if any(route.callee_port.region != self.body.region for route in self.completions):
                 raise ValueError("completion belongs to another callee region")
+            if any(route.callee != self.body or route.creation.definition != self.definition for route in self.environment_routes):
+                raise ValueError("function environment belongs to another qualified callee or factory definition")
         if self.qualification != "CONDITIONAL_STATIC_CANDIDATE":
             raise ValueError("static target cannot claim an observed or unconditional dispatch")
 
@@ -231,6 +236,92 @@ class StaticFunctionCreationRoute:
             raise ValueError("creation needs an exact original child constant path")
 
 
+class FunctionEnvironmentRouteKind(str, Enum):
+    REFERENCE_BINDING = "REFERENCE_BINDING"
+    FIELD_INITIALIZER_DEPENDENCE = "FIELD_INITIALIZER_DEPENDENCE"
+
+
+class FunctionEnvironmentCondition(str, Enum):
+    TARGET_SELECTS_THIS_CREATION = "TARGET_SELECTS_THIS_CREATION"
+    FACTORY_COMPLETED_NORMALLY = "FACTORY_COMPLETED_NORMALLY"
+    CALLEE_DERIVES_FROM_THIS_FACTORY_OCCURRENCE = "CALLEE_DERIVES_FROM_THIS_FACTORY_OCCURRENCE"
+    FUNCTION_CODE_MATCHES_CREATION = "FUNCTION_CODE_MATCHES_CREATION"
+    FUNCTION_FIELD_PRESERVED_SINCE_CREATION = "FUNCTION_FIELD_PRESERVED_SINCE_CREATION"
+    PACKED_INITIALIZER_RELATION_REQUIRED = "PACKED_INITIALIZER_RELATION_REQUIRED"
+
+
+@dataclass(frozen=True, slots=True)
+class StaticFunctionEnvironmentRoute:
+    """Original reference/member ports under a selected factory occurrence.
+
+    Factory sites may execute repeatedly. These conditions select the callable
+    reaching this call, rather than equating all instances with common code.
+    Locations and cell contents are not identified by reference routing. A
+    FIELD_INITIALIZER_DEPENDENCE is never a scalar-to-aggregate alias claim.
+    """
+    caller: SourceBodyNamespace
+    call_operation: OperationID
+    callee_use: UseID
+    callee_value: ValueID
+    call_world: UseID
+    call_world_value: ValueID
+    creation_body: SourceBodyNamespace
+    creation: StaticFunctionCreationRoute
+    factory_world: UseID
+    factory_world_value: ValueID
+    factory_post_world: ValueID
+    source_use: UseID | None
+    source_value: ValueID
+    source_role: str
+    source_index: int | None
+    callee: SourceBodyNamespace
+    environment: EnvironmentInterfaceID
+    member: EnvironmentMember
+    kind: FunctionEnvironmentRouteKind
+    conditions: tuple[FunctionEnvironmentCondition, ...]
+    qualification: str = "CONDITIONAL_FACTORY_ENVIRONMENT_DEPENDENCE"
+
+    def __post_init__(self):
+        for value,kind in ((self.caller,SourceBodyNamespace),(self.creation_body,SourceBodyNamespace),
+                          (self.callee,SourceBodyNamespace),(self.call_operation,OperationID),
+                          (self.callee_use,UseID),(self.callee_value,ValueID),(self.call_world,UseID),
+                          (self.call_world_value,ValueID),(self.creation,StaticFunctionCreationRoute),
+                          (self.factory_world,UseID),(self.factory_world_value,ValueID),
+                          (self.factory_post_world,ValueID),(self.source_value,ValueID),
+                          (self.environment,EnvironmentInterfaceID),(self.member,EnvironmentMember),
+                          (self.kind,FunctionEnvironmentRouteKind)):
+            _exact(value,kind)
+        _rows(self.conditions,FunctionEnvironmentCondition)
+        required={FunctionEnvironmentCondition.TARGET_SELECTS_THIS_CREATION,
+                  FunctionEnvironmentCondition.FACTORY_COMPLETED_NORMALLY,
+                  FunctionEnvironmentCondition.CALLEE_DERIVES_FROM_THIS_FACTORY_OCCURRENCE,
+                  FunctionEnvironmentCondition.FUNCTION_CODE_MATCHES_CREATION}
+        if not required<=set(self.conditions) or len(set(self.conditions))!=len(self.conditions):
+            raise ValueError("function environment must retain selected occurrence/code/normal conditions")
+        if self.callee.definition!=self.creation.definition.definition or self.callee.source!=self.creation.definition.source:
+            raise ValueError("environment target differs from the original factory source definition")
+        if self.member.role is EnvironmentRole.FUNCTION_OBJECT:
+            if (self.source_use is not None or self.source_index is not None
+                    or self.source_value!=self.creation.normal_value
+                    or self.source_role!='factory-normal-function'
+                    or self.kind is not FunctionEnvironmentRouteKind.REFERENCE_BINDING):
+                raise ValueError("function-object projection must use the original factory normal reference")
+        else:
+            _exact(self.source_use,UseID)
+            if type(self.source_role)is not str or not self.source_role or type(self.source_index)is not int or self.source_index<0:
+                raise ValueError("factory input projection needs its actual source role/index")
+        if self.member.role in (EnvironmentRole.DEFAULTS,EnvironmentRole.KEYWORD_DEFAULTS):
+            if (self.kind is not FunctionEnvironmentRouteKind.FIELD_INITIALIZER_DEPENDENCE
+                    or FunctionEnvironmentCondition.FUNCTION_FIELD_PRESERVED_SINCE_CREATION not in self.conditions):
+                raise ValueError("mutable default fields only have conditional initializer dependence")
+        elif self.kind is not FunctionEnvironmentRouteKind.REFERENCE_BINDING:
+            raise ValueError("nondefault environment role requires reference binding")
+        if self.member.role is EnvironmentRole.BUILTINS_NAMESPACE:
+            raise ValueError("saved builtins requires a separate creation-time selection relation")
+        if self.qualification!='CONDITIONAL_FACTORY_ENVIRONMENT_DEPENDENCE':
+            raise ValueError("environment route cannot claim runtime identity or unconditional field equality")
+
+
 @dataclass(frozen=True, slots=True)
 class StaticCallSite:
     caller: SourceBodyNamespace
@@ -263,6 +354,10 @@ class StaticCallSite:
         for target in self.targets:
             if any(port.actual_body != self.caller or port.operation != self.operation for port in target.arguments):
                 raise ValueError("actual port belongs to another original caller")
+            if any(route.caller!=self.caller or route.call_operation!=self.operation
+                   or route.callee_use!=self.callee_use or route.callee_value!=self.callee_value
+                   for route in target.environment_routes):
+                raise ValueError("environment route belongs to another original call/callee Use")
         if self.target_set_complete is not False:
             raise ValueError("the initial linker does not prove target-set closure")
 
@@ -285,7 +380,7 @@ class StaticCallShard:
 
 def dumps(shard: StaticCallShard) -> str:
     _exact(shard, StaticCallShard)
-    return json.dumps({"schema": "scar.static-calls", "schema_version": 2,
+    return json.dumps({"schema": "scar.static-calls", "schema_version": 3,
                        "relations": encode(shard)}, sort_keys=True, separators=(",", ":"), allow_nan=False)
 
 
@@ -293,22 +388,33 @@ def loads(payload: str) -> StaticCallShard:
     document = strict_loads(payload)
     if (type(document) is not dict or set(document) != {"schema", "schema_version", "relations"}
             or document["schema"] != "scar.static-calls" or type(document["schema_version"]) is not int
-            or document["schema_version"] not in (1, 2)):
+            or document["schema_version"] not in (1, 2, 3)):
         raise ValueError("unsupported static call relation shard")
     relations = document["relations"]
-    if document["schema_version"] == 1:
+    if document["schema_version"] in (1, 2):
         # A closed historical wire must not silently carry new relationships.
         relations = copy.deepcopy(relations)
-        old_fields = set(StaticCallSite.__dataclass_fields__) - {"namespace_flows", "function_creations"}
+        old_fields = set(StaticCallSite.__dataclass_fields__)
+        if document["schema_version"] == 1:
+            old_fields -= {"namespace_flows", "function_creations"}
+        old_target_fields = set(StaticCallTarget.__dataclass_fields__) - {"environment_routes"}
         if type(relations) is not dict or type(relations.get("calls")) is not list:
             raise ValueError("historical call shard is malformed")
         for call in relations["calls"]:
             if type(call) is not dict or set(call) != old_fields:
-                raise ValueError("historical call record cannot contain v2 relationships")
-            call.update(namespace_flows=[], function_creations=[])
+                raise ValueError("historical call record cannot contain newer relationships")
+            if type(call['targets']) is not list:
+                raise ValueError("historical static call targets are malformed")
+            for target in call['targets']:
+                if type(target) is not dict or set(target)!=old_target_fields:
+                    raise ValueError("historical target cannot contain v3 environment relationships")
+                target['environment_routes']=[]
+            if document["schema_version"] == 1:
+                call.update(namespace_flows=[], function_creations=[])
     return decode(StaticCallShard, relations)
 
 
 __all__ = ["StaticCallFrontier", "StaticTerminalPort", "StaticCompletionRoute",
            "StaticStateEntryRoute", "NamespaceFlowCondition", "StaticNamespaceFlow",
+           "FunctionEnvironmentRouteKind", "FunctionEnvironmentCondition", "StaticFunctionEnvironmentRoute",
            "StaticFunctionCreationRoute", "StaticCallTarget", "StaticCallSite", "StaticCallShard", "dumps", "loads"]

@@ -338,9 +338,12 @@ class StructuredEnvironmentBuilder(StructuredBuilder):
                     slots = (self.slots[self.function_definition.id, name],)
                     category = "LEXICAL_FUNCTION"
                 elif comp_iter or comp_cell:
-                    slots = tuple(slot.slot_id for slot in self.semantic.slots.values()
+                    # This is a set of original lexical candidates, not a
+                    # compiler index table. Saved SG dictionaries and a fresh
+                    # source frontend can have different insertion orders.
+                    slots = tuple(sorted((slot.slot_id for slot in self.semantic.slots.values()
                                   if slot.name == name and slot.metadata.get("scope_kind") == "comprehension"
-                                  and comprehension_in_this_function(slot.owner))
+                                  and comprehension_in_this_function(slot.owner)), key=lambda slot: slot.wire))
                     if not slots:
                         raise _Unsupported(GapKind.SOURCE_MAPPING, node,
                             "COMPILER_COMPREHENSION_SLOT_UNRECOVERED: " + name)

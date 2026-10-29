@@ -800,6 +800,8 @@ def _require_valid_structured_body(model, graph, interface, metadata, *, semanti
             pass
         elif language is not None and protocol.kind in (
                 PythonProtocolKind.UNPACK_FIXED, PythonProtocolKind.BUILD_SLICE,
+                PythonProtocolKind.BINARY_SLICE, PythonProtocolKind.STORE_SLICE,
+                PythonProtocolKind.STORE_SLICE_SUBSCRIPT,
                 PythonProtocolKind.READ_CODE_CONSTANT, PythonProtocolKind.BUILD_CALL_POSITIONALS,
                 PythonProtocolKind.DICT_MERGE, PythonProtocolKind.CALL_FUNCTION_EX,
                 PythonProtocolKind.BUILD_CALL_POSITIONAL_LIST, PythonProtocolKind.EXTEND_CALL_POSITIONALS,

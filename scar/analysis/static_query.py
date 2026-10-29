@@ -204,7 +204,7 @@ def _canonical_dependencies(unit, entries, fragments, limit):
                 module_view["compiler_prologue_source_replayed"] = False
         elif class_document is not None:
             from scar.ir.program.class_entries import (
-                decode_class_entry_overlay, validate_class_entry_core, ClassSuiteOverlay,
+                decode_class_entry_overlay, validate_class_entry_core, ClassSuiteOverlay, ClassSuiteMethodOverlay,
             )
             from scar.ir.program.source_subjects import SourceCompilationFrameRoot,FrameKind
             from scar.ir.record_codec import decode, encode
@@ -218,11 +218,11 @@ def _canonical_dependencies(unit, entries, fragments, limit):
                     or len(graph.frame_roots)!=1 or type(graph.frame_roots[0]) is not SourceCompilationFrameRoot
                     or graph.frame_roots[0].kind is not FrameKind.CLASS or graph.frame_roots[0].code!=overlay.compilation
                     or graph.frame_roots[0].entry!=overlay.interface or graph.frame_roots[0].scope!=overlay.root_scope
-                    or type(overlay) is not ClassSuiteOverlay and overlay.required_expansion.region!=graph.root):
+                    or type(overlay) not in (ClassSuiteOverlay, ClassSuiteMethodOverlay) and overlay.required_expansion.region!=graph.root):
                 raise ValueError("class body differs from the original source/compiler/frame namespace")
             class_view={key:class_document[key] for key in ("definition","parent_definition","source","compilation","interface","status")}
             class_view.update(inputs=_page(class_document["inputs"],limit),frontiers=_page(class_document["frontiers"],limit))
-            if type(overlay) is ClassSuiteOverlay:
+            if type(overlay) in (ClassSuiteOverlay, ClassSuiteMethodOverlay):
                 class_view.update(profile=overlay.profile,normal_payload=overlay.normal_payload.value,
                     body_statements=_page(class_document["statements"],limit),
                     compiler_instructions=_page(class_document["instructions"],limit),
@@ -230,6 +230,9 @@ def _canonical_dependencies(unit, entries, fragments, limit):
                     cells=_page(class_document["cells"],limit),factories=_page(class_document["factories"],limit),
                     constants=_page(class_document["constants"],limit),remaining=class_document["remaining"],
                     core_checked=True,source_replayed=False)
+                if type(overlay) is ClassSuiteMethodOverlay:
+                    class_view.update(method_lookups=_page(class_document["method_lookups"],limit),
+                                      method_calls=_page(class_document["method_calls"],limit))
             else:
                 required=class_document["required_expansion"]
                 class_view.update(body_statements=_page(required["body_statements"],limit),
@@ -300,7 +303,9 @@ def _call_relations(manifest, unit, entries, fragments, limit):
     from scar.ir.program.static_calls import loads as load_relations
     from scar.analysis.static_calls import input_basis_unit
     from scar.ir.program.codec import loads as load_core
+    from scar.ir.record_codec import encode
     selected = {entry["entry_key"]: entry for entry in entries}
+    catalog = _catalog(unit, fragments)
     descriptors = {row["path"]: row for row in publication["artifacts"]}
     bases = [row for row in descriptors.values() if row.get("kind") == "BASIS"]
     if len(bases) != 1:
@@ -317,6 +322,7 @@ def _call_relations(manifest, unit, entries, fragments, limit):
     all_bodies = {str(fragments.root / row["artifact"]["path"]): (owner, row)
                   for owner in manifest["units"] for row in owner["bodies"] if "artifact" in row}
     current_envelopes = {}
+    endpoint_indexes = {}
     def current_graph(row):
         path = row["artifact"]["path"]
         if path not in fragments.core_graphs:
@@ -353,8 +359,11 @@ def _call_relations(manifest, unit, entries, fragments, limit):
         envelope = current_envelopes.get(body["artifact"]["path"])
         if envelope is None:
             envelope = fragments.read(body["artifact"])
+        from scar.analysis.static_function_environment import validate_static_body_namespace, _source_reference
+        validate_static_body_namespace(caller_graph, envelope, shard.caller)
         namespace_dependencies = (NamespaceDependencies(caller_graph, envelope)
-            if any(call.namespace_flows or call.function_creations for call in shard.calls) else None)
+            if any(call.namespace_flows or call.function_creations or
+                   any(target.environment_routes for target in call.targets) for call in shard.calls) else None)
         for call in shard.calls:
             for flow in call.namespace_flows:
                 namespace_dependencies.validate(flow)
@@ -368,10 +377,22 @@ def _call_relations(manifest, unit, entries, fragments, limit):
                 from scar.ir.program.model import OperationResult
                 if code.operation != creation.factory:
                     raise ValueError("creation code Use is not owned by its original factory")
+                links = (envelope.get("module") or envelope.get("metadata") or {}).get("operation_links", ())
+                factory_links = [link for link in links if link["operation"] == creation.factory.as_dict()]
+                original_source = encode(creation.definition.source)
+                original_definition = creation.definition.definition.as_dict()
+                declarations = [entry for entry in (catalog or {}).get("entries", ())
+                                if entry["kind"] in ("FUNCTION", "ASYNC_FUNCTION")
+                                and entry.get("source_ref") == original_source
+                                and original_definition in (entry.get("semantic_definition_ids") or ())]
+                if (len(factory_links) != 1 or _source_reference(factory_links[0].get("source")) != creation.definition.source
+                        or len(declarations) != 1
+                        or encode(creation.definition.snapshot) != envelope["metadata"]["source"]):
+                    raise ValueError("factory creation does not retain its original source function definition")
                 origin = namespace_dependencies.index.values[code.use.value].origin
                 module_constants=(envelope.get("module") or {}).get("constants", ())
                 class_overlay=envelope.get("class") or {}
-                class_constants=class_overlay.get("constants", ()) if class_overlay.get('class_record')=='STATIC_CLASS_SUITE_OVERLAY' else ()
+                class_constants=class_overlay.get("constants", ()) if class_overlay.get('class_record') in ('STATIC_CLASS_SUITE_OVERLAY','STATIC_CLASS_SUITE_METHOD_OVERLAY') else ()
                 original_constant=any(record["operation"] == creation.code_constant_operation.as_dict()
                     and record["code_key"] == creation.code_layout_key
                     and tuple(record["constant_path"]) == creation.constant_path for record in module_constants)
@@ -411,11 +432,33 @@ def _call_relations(manifest, unit, entries, fragments, limit):
                 graph = current_graph(row)
                 if graph.root != target.body.region:
                     raise ValueError("static callee does not retain its original root")
+                path = row["artifact"]["path"]
+                callee_document = current_envelopes.get(path)
+                if callee_document is None:
+                    callee_document = fragments.read(row["artifact"])
+                    current_envelopes[path] = callee_document
+                validate_static_body_namespace(graph, callee_document, target.body)
+                if target.environment_routes:
+                    from scar.analysis.static_function_environment import derive_function_environment_routes
+                    from scar.ir.program.queries import ProgramIndex
+                    if path not in endpoint_indexes:
+                        endpoint_indexes[path] = ProgramIndex(graph)
+                    original_routes, _ = derive_function_environment_routes(
+                        caller_graph=caller_graph, caller_document=envelope, caller_namespace=shard.caller,
+                        callee_graph=graph, callee_document=callee_document, callee_namespace=target.body,
+                        definition=target.definition, call_operation=call.operation, callee_use=call.callee_use,
+                        creations=call.function_creations, caller_index=namespace_dependencies.index,
+                        callee_index=endpoint_indexes[path])
+                    if any(route not in original_routes for route in target.environment_routes):
+                        raise ValueError("function environment route differs from original qualified factory/call/member ports")
         relations = document["relations"]
         from scar.ir.record_codec import encode
         calls = [{**record, "owning_region": owners[call.operation].as_dict(),
                   "namespace_flows": _page(encode(call.namespace_flows), limit),
-                  "function_creations": _page(encode(call.function_creations), limit)}
+                  "function_creations": _page(encode(call.function_creations), limit),
+                  "targets": [{**target_record,
+                               "environment_routes": _page(encode(target.environment_routes), limit)}
+                              for target_record, target in zip(record["targets"], call.targets)]}
                  for record, call in zip(relations["calls"], shard.calls)]
         rows.append({"entry_key": key, "caller": relations["caller"],
                      "caller_meaning": "original stored graph namespace; owning_region identifies the lexical subgraph, not an observed calling frame",

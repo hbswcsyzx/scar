@@ -1364,13 +1364,13 @@ def _symbol_tables(text, path):
 
 def lower_source(path: str | Path, entry: str, *, max_operations: int = 10000,
                  profile: BodyLoweringProfile = BodyLoweringProfile.LEGACY, language_options=None,
-                 project_root=None) -> SourceProgram:
+                 project_root=None, source: SourceReference | None = None) -> SourceProgram:
     _check_arguments(entry, max_operations)
     if type(profile) is not BodyLoweringProfile or profile not in (BodyLoweringProfile.LEGACY,
             BodyLoweringProfile.BOUND_FRAME, BodyLoweringProfile.STRUCTURED_BODY, BodyLoweringProfile.STRUCTURED_ENV):
         raise ValueError("unsupported standalone source profile")
     context = prepare_source(path, project_root=project_root)
-    body = context.lower(entry, max_operations=max_operations,
+    body = context.lower(entry, source=source, max_operations=max_operations,
                          expand_candidates=profile is BodyLoweringProfile.LEGACY, profile=profile,
                          language_options=language_options)
     return SourceProgram(body.graph, body.metadata, context.semantic, context.semantics, context.control,
@@ -1508,9 +1508,15 @@ def validate_source_program(result: SourceProgram, *, max_operations: int = 1000
                     (op.id, use.id) for op in ops.values() for use in op.uses}:
                 raise ValueError("source use correspondence is incomplete")
         if not structural_only:
+            # A short entry label is not a definition identity. In particular,
+            # nested and same-named functions must replay the original source
+            # selection already validated by their structured/language model.
+            selected_source = (result.structured.source if result.structured is not None else
+                               result.language.source if result.language is not None else None)
             rebuilt = lower_source(result.metadata.source.path, result.metadata.entry,
                 max_operations=max_operations, profile=result.profile, language_options=language_options,
-                project_root=result.language.namespace_root if result.language is not None else None)
+                project_root=result.language.namespace_root if result.language is not None else None,
+                source=selected_source)
             if _canonical(result.to_dict()) != _canonical(rebuilt.to_dict()):
                 raise ValueError("program graph or typed source correspondence differs from source replay")
     except (ValueError, TypeError, KeyError, AttributeError, OSError, SyntaxError, RecursionError) as error:

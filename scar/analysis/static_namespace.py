@@ -61,8 +61,10 @@ def normal_reference(index, operation, *, blocks=None):
 
 
 class NamespaceDependencies:
-    def __init__(self, graph, document, *, max_steps=4096, check=None):
-        self.graph, self.index = graph, ProgramIndex(graph)
+    def __init__(self, graph, document, *, max_steps=4096, check=None, index=None):
+        if index is not None and (type(index) is not ProgramIndex or index.graph is not graph):
+            raise ValueError('namespace index belongs to another original graph')
+        self.graph, self.index = graph, ProgramIndex(graph) if index is None else index
         self.max_steps, self.check = max_steps, check or (lambda: None)
         self.protocols = protocol_kinds(document)
         self.blocks = {b.id: b for r in graph.regions for b in r.blocks}

@@ -7,6 +7,7 @@ It grants no runtime, effect completeness, CLOSE or optimizer authority.
 from __future__ import annotations
 
 import ast
+import dis
 from dataclasses import replace
 
 from scar.analysis.program_lowering import _REF, _BOOL
@@ -15,7 +16,7 @@ from scar.ir.program.drivers import BodyStart, BodyResume, RawRequestKind
 from scar.ir.program.environments import EnvironmentRole
 from scar.ir.program.model import (
     Behavior, BlockArgument, CompletionResult, ExitKind, LiteralOrigin, LocalBindingValue,
-    ReferenceValue, StateVersionValue, TerminatorKind, value_type,
+    ReferenceValue, StateVersionValue, TerminatorKind, ProtocolValue, value_type,
 )
 from scar.ir.program.resumption import SavedInput, SavedRole, ResumeSlotKind, SuspendTerminator, SuspensionFlavor
 from scar.ir.program.source import SourceRole
@@ -164,6 +165,14 @@ def validate_generator_regions(model, graph, interface, metadata, semantic, lang
               and len(saved) == len(environment.members) + 3,
               "suspend must retain frame, target binding, environment and iterator")
         local_operations = {key for key, owner in owners.items() if owner == body.id}
+        lazy_code = None
+        if not structural_only:
+            _need(options is not None and options.code_evidence is not None,
+                  'lazy string/compiler validation requires independent parent code evidence')
+            lazy_code = options.code_evidence.code.co_consts[constant.constant_path[0]]
+        string_operations, string_results = _validate_lazy_strings(
+            body, local_operations, model, graph, metadata, semantic, source_tree, lazy_code,
+            operations, values, blocks, protocols, links, positions)
         _need([key for key in local_operations if type(operations[key].terminator) is SuspendTerminator] == [suspend.id],
               "one-clause generator must have its unique actual yield boundary")
         semantic_operations = [links[key].semantic_operation for key in local_operations if links[key].semantic_operation is not None]
@@ -249,7 +258,7 @@ def validate_generator_regions(model, graph, interface, metadata, semantic, lang
                           Kind.FRAME_HOLD_TEMPORARY, Kind.FRAME_RELEASE_TEMPORARY, Kind.MATCH_STOP_ITERATION),
                       "unclassified ordinary primitive in lazy B")
             elif operation.terminator.kind is TerminatorKind.INVOKE:
-                _need(protocol is not None and protocol.kind in (
+                _need(key in string_operations or protocol is not None and protocol.kind in (
                     Kind.ADVANCE_ITERATOR, Kind.GENERATOR_ESCAPE_STOPITER_TO_RUNTIME_ERROR),
                       "unclassified effectful primitive in lazy B")
             if operation.terminator is not None and operation.terminator.kind is TerminatorKind.RAISE:
@@ -386,6 +395,10 @@ def validate_generator_regions(model, graph, interface, metadata, semantic, lang
                       and type(payload.origin.value)is type(node.elt.value) and payload.origin.value==node.elt.value
                       and len(value_sources)==1,
                       'literal element is not its exact source-backed lazy reference/value')
+            elif isinstance(node.elt, ast.JoinedStr) and _node_span(node.elt) in string_results:
+                exported = [use.value for use in suspend.uses if use.id == suspend.terminator.exported]
+                _need(exported == [string_results[_node_span(node.elt)]],
+                      'lazy string result does not reach its original YIELD payload')
             else:
                 _need(elt_ops, "lazy element source must be connected inside B")
             for p in model.protocols:
@@ -416,6 +429,274 @@ def validate_generator_regions(model, graph, interface, metadata, semantic, lang
     _need(used_makes == {key for key, row in protocols.items() if row.kind is Kind.MAKE_GENEXPR_FUNCTION},
           "orphan function construction")
     return root_primitives
+
+
+def _node_span(node):
+    return node.lineno, node.end_lineno, node.col_offset, node.end_col_offset
+
+
+def _validate_lazy_strings(body, local_operations, model, graph, metadata, semantic, tree, code,
+                           operations, values, blocks, protocols, links, positions):
+    """Consume existing string contracts under the real lazy caller/PEP479 ABI.
+
+    This is a validator view over original IDs, never a second program graph.
+    Only the argument-inspection view omits the separately checked caller-edge
+    Uses; all CFG, state, releases and escape adapters remain the real records.
+    """
+    from scar.analysis.source_language import require_source_tree
+    from scar.analysis.source_string_validation import _ordered_next, _pending_group
+    from scar.ir.program.control import ProtocolValueKind as P
+    from types import SimpleNamespace
+    kinds = (Kind.FSTRING_CONVERT, Kind.FSTRING_FORMAT, Kind.BUILD_STRING)
+    selected = {identity for identity in local_operations if protocols.get(identity) is not None
+                and protocols[identity].kind in kinds}
+    if not selected:
+        return set(), {}
+    _need(isinstance(tree, ast.Module), 'lazy strings require their retained original AST')
+    uses = {(row.operation, row.use): row for row in metadata.use_links}
+    value_sources = {(row.value, row.source.atom_id) for row in metadata.value_links}
+    parents = {child: parent for parent in ast.walk(tree) for child in ast.iter_child_nodes(parent)}
+    by_source, normalized, failures = {}, dict(operations), {}
+
+    def args(operation):
+        indexed = {use.id: use for use in operation.uses}
+        return tuple(indexed[key] for key in operation.invoke_arguments)
+
+    def invocation(operation):
+        operands = args(operation)
+        _need(operation.terminator is not None and operation.terminator.kind is TerminatorKind.INVOKE
+              and operation.callee is None and not operation.effects_complete and len(operands) >= 2
+              and all(type(values[use.value]) is ReferenceValue for use in operands[:-1])
+              and type(values[operands[-1].value]) is StateVersionValue
+              and values[operands[-1].value].region == body.id
+              and tuple(operation.uses[:len(operands)]) == operands and len(operation.uses) == len(operands) + 2,
+              'lazy string/escape must retain its original reference/world invoke and two caller edges')
+        world_type = value_type(values[operands[-1].value])
+        _need(tuple((row.kind, row.types) for row in operation.completions)
+              == ((ExitKind.NORMAL, (_REF, world_type)), (ExitKind.RAISE, (_REF, world_type)))
+              and tuple(edge.kind for edge in operation.terminator.successors) == (ExitKind.NORMAL, ExitKind.RAISE),
+              'lazy string/escape changed its raw exception completion contract')
+        extra = operation.uses[len(operands):]
+        _need(extra[0].value == extra[1].value and all(type(values[use.value]) is ProtocolValue
+              and values[use.value].protocol is P.DRIVE_CALLER_CONTEXT for use in extra),
+              'lazy string/escape lost its original forwarded caller context')
+        for edge, forward in zip(operation.terminator.successors, extra):
+            landing = blocks[edge.block]
+            _need(len(landing.arguments) == 3 and values[landing.arguments[0]].region == body.id
+                  and value_type(values[landing.arguments[0]]) == _REF
+                  and type(values[landing.arguments[1]]) is ProtocolValue
+                  and values[landing.arguments[1]].protocol is P.DRIVE_CALLER_CONTEXT
+                  and value_type(values[landing.arguments[2]]) == world_type
+                  and edge.arguments == (CompletionResult(0), forward.id, CompletionResult(1)),
+                  'lazy completion must forward its own result/caller/post-world ports')
+        return operands[:-1]
+
+    def frame_pending(block, exception, world):
+        _need(bool(block.operations), 'lazy string escape has no frame cleanup')
+        cleanup = operations[block.operations[0]]
+        _need(protocols.get(cleanup.id) is not None and protocols[cleanup.id].kind is Kind.FRAME_EXIT
+              and cleanup.terminator is None and cleanup.uses[-1].value == world
+              and [use.value for use in cleanup.uses if uses[cleanup.id, use.id].role == 'held-payload'] == [exception],
+              'PEP479 outcome must clean the same lazy frame with its own exception/post-world')
+        _need(len(block.operations) == 3 and len(cleanup.results) == 1, 'lazy frame cleanup has an unclassified continuation')
+        detach, terminal = (operations[key] for key in block.operations[1:])
+        records = [row for row in graph.frame_context_detaches if row.operation == detach.id]
+        _need(len(records) == 1 and detach.terminator is None and len(detach.uses) == 2
+              and detach.uses[-1].value == cleanup.results[0] and len(detach.results) == 2
+              and terminal.terminator is not None and terminal.terminator.kind is TerminatorKind.RAISE
+              and tuple(use.value for use in terminal.uses) == (exception, detach.results[-1])
+              and terminal.terminator.values == tuple(use.id for use in terminal.uses),
+              'lazy exception lost its original frame-detach/terminal world corridor')
+        return tuple(use.value for use in cleanup.uses if uses[cleanup.id, use.id].role == 'held-temporary')
+
+    for identity in selected:
+        operation, protocol = operations[identity], protocols[identity]
+        operands = invocation(operation)
+        atom = semantic.source_atoms.get(protocol.source.atom_id)
+        expected = ast.JoinedStr if protocol.kind is Kind.BUILD_STRING else ast.FormattedValue
+        candidates = [node for node in require_source_tree(tree, metadata.source, protocol.source) if isinstance(node, expected)]
+        definitions = [row for row in semantic.definitions.values() if row.code_id == protocol.source.atom_id.wire
+                       and protocol.source.atom_id in row.source_atoms and row.kind is OperationKind.OPERATOR
+                       and row.metadata.get('ast_type') == expected.__name__ and len(row.output_slots) == 1]
+        _need(atom is not None and atom.reference == protocol.source == links[identity].source
+              and atom.kind == expected.__name__ and len(candidates) == len(definitions) == 1
+              and links[identity].semantic_operation is None and Behavior.MEMORY in operation.behaviors
+              and (2 <= len(operands) <= 30 if protocol.kind is Kind.BUILD_STRING else len(operands) == 2),
+              'lazy string lost its original AST/SG operator or exact reference arity')
+        key = protocol.kind, protocol.source.atom_id
+        _need(key not in by_source, 'lazy string duplicated an original stage')
+        by_source[key] = identity
+        # This is only the pure pending-query's argument view. Constructing an
+        # Operation with its caller Uses removed would be invalid canonical IR;
+        # the original operation/edges remain unchanged and independently checked.
+        normalized[identity] = SimpleNamespace(id=identity, uses=args(operation), terminator=operation.terminator)
+        refs = tuple(use.value for use in operands)
+        consumed = (refs if protocol.kind is Kind.BUILD_STRING else refs[:1]
+                    if protocol.kind is Kind.FSTRING_CONVERT or type(values[refs[1]].origin) is LiteralOrigin
+                    and values[refs[1]].origin.value is None else refs)
+        retained = None
+        for edge in operation.terminator.successors:
+            landing = blocks[edge.block]
+            _need(len(landing.operations) > len(consumed), 'lazy string lost its input release corridor')
+            world = landing.arguments[-1]
+            for key, reference in zip(landing.operations, reversed(consumed)):
+                release = operations[key]
+                _need(protocols.get(key) is not None and protocols[key].kind is Kind.FRAME_RELEASE_TEMPORARY
+                      and len(release.uses) == 2 and release.uses[0].value == reference
+                      and uses[key, release.uses[0].id].role == 'fstring-consumed-reference'
+                      and release.uses[-1].value == world and len(release.results) == 1,
+                      'lazy string completion lost/reordered its original input releases')
+                world = release.results[0]
+            following = operations[landing.operations[len(consumed)]]
+            _need(not following.uses or uses[following.id, following.uses[0].id].role != 'fstring-consumed-reference',
+                  'lazy string releases an additional input')
+            if edge.kind is ExitKind.RAISE:
+                _need(protocols.get(following.id) is not None
+                      and protocols[following.id].kind is Kind.GENERATOR_ESCAPE_STOPITER_TO_RUNTIME_ERROR
+                      and tuple(use.value for use in invocation(following)) == (landing.arguments[0],)
+                      and args(following)[-1].value == world,
+                      'lazy string exception bypassed its original PEP479 adapter')
+                for escaped in following.terminator.successors:
+                    terminal = blocks[escaped.block]
+                    actual = frame_pending(terminal, terminal.arguments[0], terminal.arguments[-1])
+                    _need(retained is None or retained == actual, 'PEP479 outcomes changed the retained pending prefix')
+                    retained = actual
+        failures[identity] = retained
+
+    def reference(node):
+        matches = [row.reference for row in semantic.source_atoms.values() if row.kind == type(node).__name__
+                   and (row.reference.start_line, row.reference.end_line, row.reference.start_column,
+                        row.reference.end_column) == _node_span(node)]
+        _need(len(matches) == 1, 'lazy string child lacks its exact original source atom')
+        return matches[0]
+
+    def literal(value, expected):
+        origin = values[value].origin
+        return type(origin) is LiteralOrigin and type(origin.value) is type(expected) and origin.value == expected
+
+    def match_value(value, node):
+        source = reference(node)
+        matched = (value, source.atom_id) in value_sources
+        if not matched and type(values[value].origin) is BlockArgument and values[value].origin.index == 0:
+            # Nested invoke ports retain the GeneratorExp entry source. Recover
+            # the exact child result from its real NORMAL edge and original SG
+            # producer instead of inventing a missing ValueSource annotation.
+            origin = values[value].origin
+            producers = [identity for identity in local_operations
+                if operations[identity].terminator is not None
+                and operations[identity].terminator.kind is TerminatorKind.INVOKE
+                and links[identity].source == source
+                and any(edge.kind is ExitKind.NORMAL and edge.block == origin.block
+                        and edge.arguments[0] == CompletionResult(0)
+                        for edge in operations[identity].terminator.successors)
+                and (definition := semantic.definitions.get(links[identity].semantic_operation)) is not None
+                and definition.code_id == source.atom_id.wire and source.atom_id in definition.source_atoms
+                and len(definition.output_slots) == 1]
+            matched = len(producers) == 1 and blocks[origin.block].arguments[0] == value
+        _need(matched and (not isinstance(node, ast.Constant) or literal(value, node.value)),
+              'lazy string input lost its original source/literal value')
+
+    def result(identity):
+        return blocks[operations[identity].terminator.successors[0].block].arguments[0]
+
+    roots = set()
+    for identity in selected:
+        source = protocols[identity].source
+        node, = [node for node in require_source_tree(tree, metadata.source, source)
+                 if isinstance(node, ast.JoinedStr if protocols[identity].kind is Kind.BUILD_STRING else ast.FormattedValue)]
+        if isinstance(node, ast.FormattedValue): node = parents.get(node)
+        _need(isinstance(node, ast.JoinedStr), 'lazy string stage has no JoinedStr owner')
+        while isinstance(parents.get(node), ast.FormattedValue) and parents[node].format_spec is node:
+            node = parents.get(parents[node])
+        roots.add(node)
+    covered, root_results = set(), {}
+    for root in sorted(roots, key=_node_span):
+        stages = []
+        def stage(node, kind):
+            identity = by_source.get((kind, reference(node).atom_id))
+            _need(identity is not None, 'lazy string AST is missing a required stage')
+            stages.append(identity)
+            return identity
+        def formatted(node, expected=None):
+            identity = by_source.get((Kind.FSTRING_FORMAT, reference(node).atom_id))
+            _need(identity is not None, 'lazy FormattedValue has no format stage')
+            refs = tuple(use.value for use in args(operations[identity])[:-1])
+            if node.conversion == -1:
+                match_value(refs[0], node.value)
+                _need((Kind.FSTRING_CONVERT, reference(node).atom_id) not in by_source,
+                      'lazy string inserted a conversion absent from source')
+            else:
+                conversion = stage(node, Kind.FSTRING_CONVERT)
+                operands = args(operations[conversion])
+                match_value(operands[0].value, node.value)
+                _need(literal(operands[1].value, node.conversion) and refs[0] == result(conversion),
+                      'lazy conversion selector/result differs from exact source')
+            if node.format_spec is None:
+                _need(literal(refs[1], None), 'lazy simple format gained an explicit specification')
+            else:
+                joined(node.format_spec, refs[1])
+            stage(node, Kind.FSTRING_FORMAT)
+            _need(expected is None or result(identity) == expected, 'lazy consumer changed the formatted result')
+            return result(identity)
+        def joined(node, expected=None):
+            _need(isinstance(node, ast.JoinedStr) and len(node.values) <= 30, 'unsupported original lazy string shape')
+            if len(node.values) > 1:
+                identity = by_source.get((Kind.BUILD_STRING, reference(node).atom_id))
+                _need(identity is not None, 'lazy JoinedStr lost its join')
+                refs = tuple(use.value for use in args(operations[identity])[:-1])
+                _need(len(refs) == len(node.values), 'lazy join piece count differs')
+            else:
+                identity, refs = None, (expected,)
+                _need((Kind.BUILD_STRING, reference(node).atom_id) not in by_source, 'lazy one-piece string gained a join')
+            value = expected
+            for offset, child in enumerate(node.values):
+                value = refs[offset]
+                if isinstance(child, ast.FormattedValue):
+                    value = formatted(child, value)
+                else:
+                    _need(isinstance(child, ast.Constant) and type(child.value) is str, 'lazy string piece changed source type')
+                    if value is None:
+                        choices = {value for value, atom in value_sources if atom == reference(child).atom_id and literal(value, child.value)}
+                        _need(len(choices) == 1, 'lazy string literal lacks its unique reference')
+                        value, = choices
+                    match_value(value, child)
+            if identity is not None:
+                stage(node, Kind.BUILD_STRING); value = result(identity)
+            _need((bool(node.values) or expected is not None and literal(expected, ''))
+                  and (expected is None or value == expected), 'lazy JoinedStr result differs from its actual consumer')
+            return value
+        value = joined(root)
+        _need(stages and not covered.intersection(stages), 'lazy string stages have duplicate owners')
+        covered.update(stages); root_results[_node_span(root)] = value
+        for current, following in zip(stages, stages[1:]):
+            _ordered_next(current, following, set(stages), operations, blocks, positions)
+        if code is not None:
+            rows = tuple(dis.get_instructions(code)); offsets = []
+            for identity in stages:
+                kind, source = protocols[identity].kind, protocols[identity].source
+                node, = [node for node in require_source_tree(tree, metadata.source, source)
+                         if isinstance(node, ast.JoinedStr if kind is Kind.BUILD_STRING else ast.FormattedValue)]
+                name = ('BUILD_STRING' if kind is Kind.BUILD_STRING else 'CONVERT_VALUE' if kind is Kind.FSTRING_CONVERT
+                        else 'FORMAT_SIMPLE' if node.format_spec is None else 'FORMAT_WITH_SPEC')
+                matches = [row for row in rows if row.opname == name and tuple(row.positions) == _node_span(node)]
+                _need(len(matches) == 1, 'lazy string lost its exact child compiler opcode/position')
+                row, = matches
+                _need(name != 'BUILD_STRING' or row.arg == len(node.values), 'lazy compiler join arity differs')
+                _need(name != 'CONVERT_VALUE' or row.arg == {115: 1, 114: 2, 97: 3}.get(node.conversion),
+                      'lazy compiler conversion differs')
+                offsets.append(row.offset)
+            _need(offsets == sorted(set(offsets)), 'lazy compiler stage order differs from source')
+        held = set()
+        for node in ast.walk(root):
+            if isinstance(node, ast.JoinedStr) and len(node.values) > 1: held.update(node.values)
+            elif isinstance(node, ast.FormattedValue):
+                held.add(node.value)
+                if node.conversion != -1: held.add(node)
+                if node.format_spec is not None: held.add(node.format_spec)
+        _pending_group(stages, {reference(node).atom_id for node in held}, normalized, protocols,
+                       blocks, positions, uses, values, failures)
+    _need(covered == selected, 'lazy string protocol has no original AST construction owner')
+    return selected, root_results
 
 
 def root_projection(model, graph, metadata, language, delegated):

@@ -51,7 +51,12 @@ def validate_language_body(model, graph, interface, metadata, semantic, language
               "exact source/compiler-layout verification requires explicit source AST and independent options")
         _need(options.capabilities == language.capabilities, "requested and reported language capabilities differ")
         expected_evidence = options.code_evidence.to_dict() if options.code_evidence is not None else None
-        _need(language.code_evidence == expected_evidence, "code provenance differs from independent compiler inputs")
+        from scar.ir.record_codec import encode
+        # Compiler name tables are ordered tuples in memory and JSON arrays on
+        # the wire. Compare the exact same canonical receipt representation;
+        # no key, index, spelling, compiler option or source claim is omitted.
+        _need(encode(language.code_evidence) == encode(expected_evidence),
+              "code provenance differs from independent compiler inputs")
         if options.code_evidence is not None:
             options.code_evidence.require_definition(metadata.source, interface.definition, model.source)
     operations = {row.id: row for row in graph.operations}
@@ -87,9 +92,12 @@ def validate_language_body(model, graph, interface, metadata, semantic, language
     from scar.analysis.source_display_lowering import validate_starred_displays
     displays=validate_starred_displays(model,graph,interface,metadata,semantic,language,
         source_tree=source_tree,options=options,structural_only=structural_only)
-    indexed = displays | comprehensions | set(unpack) | set(slices) | set(constants) | calls | try_protocols | functions | imports | withs | sets
+    from scar.analysis.source_slice_validation import validate_slice_access
+    slice_access = validate_slice_access(model, graph, interface, metadata, semantic, language,
+        source_tree=source_tree, options=options, structural_only=structural_only)
+    indexed = slice_access | displays | comprehensions | set(unpack) | set(slices) | set(constants) | calls | try_protocols | functions | imports | withs | sets
     actual = {key for key, row in protocols.items() if row.kind.value in EXTENDED_PROTOCOLS}
-    _need(indexed == actual and len(indexed) == len(unpack) + len(slices) + len(constants) + len(calls) + len(try_protocols) + len(functions) + len(imports) + len(withs) + len(sets) + len(comprehensions) + len(displays),
+    _need(indexed == actual and len(indexed) == len(slice_access) + len(unpack) + len(slices) + len(constants) + len(calls) + len(try_protocols) + len(functions) + len(imports) + len(withs) + len(sets) + len(comprehensions) + len(displays),
           "new language operations must have one exact shape/provenance record")
 
     def source_node(reference, classes):
@@ -245,6 +253,8 @@ def validate_language_body(model, graph, interface, metadata, semantic, language
         for identity, link in links.items():
             if link.opcode is not Opcode.INDEX:
                 continue
+            if identity in slice_access:
+                continue  # Distinct compound receiver/lower/upper interface was checked above.
             definition = semantic.definitions.get(link.semantic_operation)
             _need(definition is not None and definition.kind is OperationKind.INDEX
                   and definition.code_id == link.source.atom_id.wire

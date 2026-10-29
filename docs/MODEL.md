@@ -43,6 +43,19 @@ State SSA 表达静态读写依赖；循环/分支版本是符号版本，不是
 物理地址不是逻辑值身份。确切地址未知时仍可推导符号基址、偏移、别名和范围。
 复制保留什么、变换产生什么，由具体操作规则决定；相同内容不证明对象相同。
 
+## 函数创建与调用环境
+
+函数的源码定义、创建操作产生的函数引用、调用者当前使用的 callable 引用，以及共享函数体的环境端口分别建模。重复执行同一个 factory 可能产生多个实例，不能因 code 相同合并其默认值或闭包状态。
+
+跨主体关系引用原 body namespace、factory 正常出口、原输入 Use/Value、call 的 callee Use/world，以及 callee 已存在的 EnvironmentInterface member。关系本身不创建新的调用、对象、Value 或状态位置。
+
+- `REFERENCE_BINDING` 表示在明确的目标/创建来源条件下，函数对象或 globals 等引用如何进入被调用环境；它不证明 namespace 内容不变。
+- `FIELD_INITIALIZER_DEPENDENCE` 表示创建输入对 defaults/keyword-defaults 初始字段的依赖。一个 scalar 默认参数不是 defaults tuple 的别名；若要将初始值传到调用时，仍须跟踪 packing、字段修改与实际读取点。
+- saved builtins 来自函数创建时的选择，不能直接借用 caller 当前 builtins，也不能等于当前 globals 中的同名项。
+- 捕获的是有序 closure cell 引用；cell 引用一致不证明内容版本一致。类在 factory 之后写入的 closure/default 字段，要沿后续状态操作连接，不能假称 factory 已携带这些输入。
+
+这些条件依赖是静态图中可继续分析的关系，不是缓存许可。原端点/来源校验通过、条件由后续推理消解、最终效果闭合，是三件不同的事。
+
 ## 属性事实与未知
 
 事实锚定已有实体/Use ID、程序位置、状态版本和分析上下文，包含依据及成立条件。

@@ -11,7 +11,7 @@ from enum import Enum
 import dis
 from types import CodeType
 
-from scar.ir.program.ids import ControlScopeID, OperationID, RegionID, ValueID
+from scar.ir.program.ids import ControlScopeID, OperationID, RegionID, ValueID, UseID
 from scar.ir.program.model import ProgramGraph
 from scar.ir.program.source import LoweringMetadata
 from scar.ir.program.frames import FrameRules
@@ -219,6 +219,7 @@ class ClassSuiteProtocol:
                'LOAD_NAME_314','LOAD_GLOBAL','STORE_NAME_314','STORE_GLOBAL','DELETE_NAME',
                'BUILD_TUPLE','BUILD_LIST','BUILD_SET','BUILD_MAP','MAKE_FUNCTION_314',
                'SET_FUNCTION_ATTRIBUTE','LOAD_ATTRIBUTE','CALL','APPLY_DECORATOR_314',
+               'LOAD_METHOD_314','CALL_METHOD_314',
                'BINARY_OP','UNARY_NEGATIVE','UNARY_INVERT','UNARY_NOT','REQUIRED_CLASS_CONTINUATION'}
         if type(self.kind) is not str or self.kind not in kinds or type(self.offset) is not int or self.offset < -1:
             raise ValueError('class suite protocol kind/compiler offset invalid')
@@ -356,8 +357,11 @@ class ClassSuiteOverlay:
             raise TypeError('class suite must preserve its Python-reference return mode')
         if self.remaining is not None and type(self.remaining) is not ClassSuiteResidual:
             raise TypeError('class suite residual must be a typed exact continuation')
-        if self.profile != 'STATIC_CLASS_SUITE_314_V1' or self.status != 'CLASS_SUITE_TOPOLOGY_WITH_OPEN_EFFECTS':
+        expected=('STATIC_CLASS_SUITE_METHOD_314_V1' if type(self)is ClassSuiteMethodOverlay else 'STATIC_CLASS_SUITE_314_V1')
+        if self.profile != expected or self.status != 'CLASS_SUITE_TOPOLOGY_WITH_OPEN_EFFECTS':
             raise ValueError('class suite cannot claim closed effects or parent construction')
+        if type(self)is ClassSuiteOverlay and any(p.kind in ('LOAD_METHOD_314','CALL_METHOD_314')for p in self.protocols):
+            raise ValueError('historical class suite cannot acquire normalized method-call protocols')
         if type(self.operations_emitted) is not int or self.operations_emitted <= 0:
             raise ValueError('class suite must contain actual canonical operations')
         if type(self.frame_rules)is not FrameRules:
@@ -365,16 +369,88 @@ class ClassSuiteOverlay:
 
 
 @dataclass(frozen=True, slots=True)
+class ClassSuiteMethodLookup:
+    """Normalized CPython method lookup, without a NULL-valued PyObject.
+
+    ``has_self`` selects the physical second stack slot. False means its Ref
+    holds Py_None padding; it must never become an explicit None argument.
+    The lookup primitive steals the original owner on normal and raise paths,
+    transferring it into self/bound-callable ownership or releasing it there.
+    This says nothing about destruction if another alias still owns the object.
+    """
+    operation: OperationID
+    owner: UseID
+    attribute_key: UseID
+    callable: ValueID
+    optional_self: ValueID
+    has_self: ValueID
+    absent_self: str = 'PY_NONE_PADDING_NOT_ARGUMENT'
+    ownership: str = 'OWNER_CONSUMED_BY_LOOKUP_BOTH_OUTCOMES'
+
+    def __post_init__(self):
+        if type(self.operation)is not OperationID or any(type(u)is not UseID for u in (self.owner,self.attribute_key)):
+            raise TypeError('method lookup requires original operation/owner/key Uses')
+        if any(type(v)is not ValueID for v in (self.callable,self.optional_self,self.has_self)):
+            raise TypeError('method lookup requires its actual normalized completion Values')
+        if self.absent_self!='PY_NONE_PADDING_NOT_ARGUMENT' or self.ownership!='OWNER_CONSUMED_BY_LOOKUP_BOTH_OUTCOMES':
+            raise ValueError('method lookup cannot confuse NULL, None or borrowed owner lifetime')
+
+
+@dataclass(frozen=True, slots=True)
+class ClassSuiteMethodCall:
+    """Consume a normalized callable/self carrier and original actuals.
+
+    The compound primitive passes optional_self iff has_self is true, releases
+    padding otherwise, and consumes its call references on both outcomes.
+    Dynamic descriptor selection and effects remain open evidence.
+    """
+    operation: OperationID
+    lookup: OperationID
+    callable: UseID
+    optional_self: UseID
+    has_self: UseID
+    arguments: tuple[UseID, ...]
+    keyword_names: UseID | None = None
+    selection: str = 'PASS_SELF_IFF_HAS_SELF'
+    ownership: str = 'CALL_INPUTS_CONSUMED_BOTH_OUTCOMES'
+
+    def __post_init__(self):
+        if any(type(o)is not OperationID for o in (self.operation,self.lookup)):
+            raise TypeError('method CALL requires its original call and lookup operations')
+        if any(type(u)is not UseID for u in (self.callable,self.optional_self,self.has_self)):
+            raise TypeError('method CALL must retain its exact normalized operand Uses')
+        if type(self.arguments)is not tuple or any(type(u)is not UseID for u in self.arguments):
+            raise TypeError('method CALL arguments must be ordered original Uses')
+        if self.keyword_names is not None and type(self.keyword_names)is not UseID:
+            raise TypeError('method CALL keyword names must be an actual Use')
+        if self.selection!='PASS_SELF_IFF_HAS_SELF' or self.ownership!='CALL_INPUTS_CONSUMED_BOTH_OUTCOMES':
+            raise ValueError('method CALL cannot pass padding or retain consumed call inputs')
+
+
+@dataclass(frozen=True, slots=True)
+class ClassSuiteMethodOverlay(ClassSuiteOverlay):
+    method_lookups: tuple[ClassSuiteMethodLookup, ...] = ()
+    method_calls: tuple[ClassSuiteMethodCall, ...] = ()
+    profile: str = 'STATIC_CLASS_SUITE_METHOD_314_V1'
+
+    def __post_init__(self):
+        super(ClassSuiteMethodOverlay,self).__post_init__()
+        for rows,kind in ((self.method_lookups,ClassSuiteMethodLookup),(self.method_calls,ClassSuiteMethodCall)):
+            if type(rows)is not tuple or any(type(row)is not kind for row in rows):
+                raise TypeError('method-capable suite requires typed ordered call/lookup tables')
+
+
+@dataclass(frozen=True, slots=True)
 class ClassEntryResult:
     graph: ProgramGraph
     metadata: LoweringMetadata
-    overlay: ClassEntryOverlay | ClassSuiteOverlay
+    overlay: ClassEntryOverlay | ClassSuiteOverlay | ClassSuiteMethodOverlay
     operations_emitted: int
 
     def __post_init__(self):
         if type(self.graph) is not ProgramGraph or type(self.metadata) is not LoweringMetadata:
             raise TypeError("class entry result needs canonical graph and source metadata")
-        if type(self.overlay) not in (ClassEntryOverlay, ClassSuiteOverlay):
+        if type(self.overlay) not in (ClassEntryOverlay, ClassSuiteOverlay, ClassSuiteMethodOverlay):
             raise TypeError("class entry result needs a typed source overlay")
         if type(self.operations_emitted) is not int or self.operations_emitted != len(self.graph.operations):
             raise ValueError("class entry operation count differs from its canonical graph")
@@ -396,6 +472,9 @@ CLASS_ENTRY_RECORD_TAGS = {
     ClassSuiteFactory: ('class_record','CLASS_SUITE_FACTORY'),
     ClassSuiteResidual: ('class_record','CLASS_SUITE_RESIDUAL'),
     ClassSuiteOverlay: ('class_record','STATIC_CLASS_SUITE_OVERLAY'),
+    ClassSuiteMethodLookup: ('class_record','CLASS_SUITE_METHOD_LOOKUP'),
+    ClassSuiteMethodCall: ('class_record','CLASS_SUITE_METHOD_CALL'),
+    ClassSuiteMethodOverlay: ('class_record','STATIC_CLASS_SUITE_METHOD_OVERLAY'),
 }
 
 
@@ -511,7 +590,9 @@ def encode_class_entry_overlay(value: ClassEntryOverlay) -> dict:
 def decode_class_entry_overlay(value) -> ClassEntryOverlay:
     from scar.ir.program.source_subjects import CLASS_FRAME_ABI_RECORD_TAGS
     from scar.ir.record_codec import decode
-    kind=ClassSuiteOverlay if type(value) is dict and value.get('class_record')=='STATIC_CLASS_SUITE_OVERLAY' else ClassEntryOverlay
+    kind=({'STATIC_CLASS_SUITE_OVERLAY':ClassSuiteOverlay,
+           'STATIC_CLASS_SUITE_METHOD_OVERLAY':ClassSuiteMethodOverlay}.get(value.get('class_record'),ClassEntryOverlay)
+          if type(value)is dict else ClassEntryOverlay)
     return decode(kind, value,
                   record_tags={**CLASS_FRAME_ABI_RECORD_TAGS, **CLASS_ENTRY_RECORD_TAGS})
 
@@ -523,7 +604,7 @@ def validate_class_entry_core(overlay: ClassEntryOverlay, graph: ProgramGraph, m
     source links already supplied by the caller; it does not replay source
     compilation or revalidate every source mapping.
     """
-    if type(overlay) is ClassSuiteOverlay:
+    if type(overlay) in (ClassSuiteOverlay,ClassSuiteMethodOverlay):
         return validate_class_suite_core(overlay,graph,metadata)
     from scar.ir.program.control import ControlScopeKind
     from scar.ir.program.model import (
@@ -648,7 +729,7 @@ def validate_class_suite_core(overlay,graph,metadata):
     from scar.ir.program.source_subjects import SourceCompilationFrameRoot,FrameKind
     def need(ok,why):
         if not ok:raise ValueError('class suite core: '+why)
-    need(type(overlay)is ClassSuiteOverlay,'wrong explicit suite variant')
+    need(type(overlay)in(ClassSuiteOverlay,ClassSuiteMethodOverlay),'wrong explicit suite variant')
     overlay.__post_init__()
     roots=graph.frame_roots
     need(len(roots)==1 and type(roots[0])is SourceCompilationFrameRoot and roots[0].kind is FrameKind.CLASS
@@ -710,6 +791,63 @@ def validate_class_suite_core(overlay,graph,metadata):
     if overlay.remaining is not None:
         need(overlay.remaining.operation in protocols and protocols[overlay.remaining.operation].kind=='REQUIRED_CLASS_CONTINUATION',
              'remaining continuation operation differs')
+    if type(overlay)is ClassSuiteMethodOverlay:
+        from scar.ir.program.model import UseRole,value_type
+        lookups={x.operation:x for x in overlay.method_lookups}
+        calls={x.operation:x for x in overlay.method_calls}
+        witnesses={w.operation:w for w in overlay.instructions if w.operation is not None}
+        need(len(lookups)==len(overlay.method_lookups)and len(calls)==len(overlay.method_calls),'duplicate normalized method endpoints')
+        need(set(lookups)=={p.operation for p in overlay.protocols if p.kind=='LOAD_METHOD_314'}
+             and set(calls)=={p.operation for p in overlay.protocols if p.kind=='CALL_METHOD_314'},
+             'normalized method interfaces lack their exact protocol operations')
+        for lookup in overlay.method_lookups:
+            op=ops[lookup.operation];normal=blocks[op.terminator.successors[0].block]
+            need(tuple(u.id for u in op.uses[:-1])==(lookup.owner,lookup.attribute_key)
+                 and normal.arguments[:-1]==(lookup.callable,lookup.optional_self,lookup.has_self)
+                 and tuple(value_type(values[v])for v in normal.arguments[:-1])==
+                    (ref,ref,ValueType(ValueKind.DATA,data_type='builtins.bool')),
+                 'lookup must expose callable/optional-self/boolean selector, never NULL as PyObject')
+            witness=witnesses.get(op.id)
+            need(witness is not None and witness.opcode=='LOAD_ATTR'and witness.argument is not None
+                 and witness.argument&1 and bool(witness.stack_before)
+                 and witness.stack_before[-1]==op.uses[0].value
+                 and witness.stack_after==(*witness.stack_before[:-1],lookup.callable,lookup.optional_self),
+                 'method lookup does not match the exact owner/two-slot compiler stack transition')
+            selector_uses=[(other,u)for other in graph.operations for u in other.uses if u.value==lookup.has_self]
+            need(all(u.role is UseRole.DATA and
+                     (other.id in calls and calls[other.id].has_self==u.id
+                      or overlay.remaining is not None and other.id==overlay.remaining.operation)
+                     for other,u in selector_uses),
+                 'method selector escaped into a reference argument or non-carrier operation')
+        for call in overlay.method_calls:
+            op=ops[call.operation];lookup=lookups.get(call.lookup)
+            need(lookup is not None and tuple(u.id for u in op.uses[:-1])==
+                 (call.callable,call.optional_self,call.has_self,*call.arguments,*((call.keyword_names,)if call.keyword_names is not None else())),
+                 'method call normalized operand shape differs')
+            need(tuple(u.value for u in op.uses[:3])==(lookup.callable,lookup.optional_self,lookup.has_self)
+                 and op.uses[2].role is UseRole.DATA,
+                 'method CALL changed lookup selector or treated selector as a reference')
+            witness=witnesses.get(op.id)
+            need(witness is not None and witness.opcode in ('CALL','CALL_KW')
+                 and witness.argument==len(call.arguments)
+                 and (witness.opcode=='CALL_KW')==(call.keyword_names is not None),
+                 'method CALL changed its actual argument/keyword compiler layout')
+        # New-profile lookup and CALL primitives consume their input slots.
+        # Check the saved witness/frame tables too, so a core-only reader
+        # cannot silently reintroduce a delayed owner/call-input lifetime.
+        for identity,protocol in protocols.items():
+            if protocol.kind not in ('LOAD_METHOD_314','CALL_METHOD_314','CALL','APPLY_DECORATOR_314'):continue
+            op=ops[identity];witness=witnesses.get(identity)
+            need(witness is not None,'consuming primitive lacks its compiler witness')
+            before=witness.stack_before
+            consumed=1 if protocol.kind=='LOAD_METHOD_314'else witness.argument+2+(witness.opcode=='CALL_KW')
+            need(len(before)>=consumed,'consuming primitive compiler stack underflow')
+            active_cells=tuple(c.reference for c in overlay.cells if protocols[c.operation].offset<protocol.offset)
+            remaining=(*inputs[:-1],*active_cells,*(v for v in before[:-consumed]if v is not None))
+            expected=tuple(dict.fromkeys(v for v in remaining if type(values[v])is ReferenceValue))
+            failure=blocks[op.terminator.successors[1].block];cleanup=ops[failure.operations[0]]
+            need(tuple(u.value for u in cleanup.uses[:-3])==expected,
+                 'consumed owner/call inputs were retained past the primitive or live frame bindings lost')
     need((overlay.normal_payload is ClassNormalPayloadKind.CLASS_CELL)==('__class__'in overlay.interface.co_cellvars),
          'Python-reference normal mode differs from compiler cell layout')
 
@@ -720,4 +858,5 @@ __all__ = ["ClassEntryInputRole", "ClassNormalPayloadKind", "ClassFrontierKind",
            "CLASS_ENTRY_RECORD_TAGS", "compiler_cell_protocol",
            "encode_class_entry_overlay", "decode_class_entry_overlay",
            "validate_class_entry_core", "ClassSuiteOverlay", "ClassSuiteProtocol", "ClassSuiteInstruction",
-           "ClassSuiteCell", "ClassSuiteConstant", "ClassSuiteFactory", "ClassSuiteResidual", "validate_class_suite_core"]
+           "ClassSuiteCell", "ClassSuiteConstant", "ClassSuiteFactory", "ClassSuiteResidual", "validate_class_suite_core",
+           "ClassSuiteMethodOverlay", "ClassSuiteMethodLookup", "ClassSuiteMethodCall"]

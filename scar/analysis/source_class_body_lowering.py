@@ -19,12 +19,13 @@ from scar.analysis.source_class_lowering import (
 from scar.ir.program.class_entries import (
     ClassSuiteOverlay,ClassSuiteProtocol,ClassSuiteInstruction,ClassSuiteCell,
     ClassSuiteConstant,ClassSuiteFactory,ClassSuiteResidual,ClassEntryResult,
+    ClassSuiteMethodOverlay,ClassSuiteMethodLookup,ClassSuiteMethodCall,
     ClassFrontierKind,compiler_cell_protocol,
 )
 from scar.ir.program.ids import BlockID,OperationID,RegionID,ValueID,UseID,LocationID,ControlScopeID
 from scar.ir.program.model import (
     AccessMode,Behavior,Block,BlockArgument,CompletionResult,CompletionSignature,
-    CompletionSuccessor,ExitKind,ExitPort,LiteralOrigin,Operation,OperationResult,
+    CompletionSuccessor,DataValue,ExitKind,ExitPort,LiteralOrigin,Operation,OperationResult,
     ProgramGraph,ReferenceValue,Region,Stability,StateAccess,StateLocation,
     StateVersionValue,Terminator,TerminatorKind,Use,UseRole,ValueKind,ValueType,
 )
@@ -41,6 +42,7 @@ from scar.ir.program.state_addresses import (
 )
 
 REF=ValueType(ValueKind.REFERENCE)
+BOOL=ValueType(ValueKind.DATA,data_type='builtins.bool')
 SUPPORTED=frozenset(('RESUME','COPY_FREE_VARS','MAKE_CELL','LOAD_CONST','LOAD_SMALL_INT',
     'LOAD_NAME','LOAD_GLOBAL','LOAD_LOCALS','STORE_NAME','DELETE_NAME','STORE_GLOBAL',
     'LOAD_DEREF','STORE_DEREF','LOAD_FROM_DICT_OR_DEREF','LOAD_FAST_BORROW',
@@ -50,7 +52,11 @@ SUPPORTED=frozenset(('RESUME','COPY_FREE_VARS','MAKE_CELL','LOAD_CONST','LOAD_SM
 
 
 class ClassSuiteBuilder:
-    def __init__(self,prepared,definition,source,evidence,limit):
+    def __init__(self,prepared,definition,source,evidence,limit,*,profile='STATIC_CLASS_SUITE_314_V1'):
+        if profile not in ('STATIC_CLASS_SUITE_314_V1','STATIC_CLASS_SUITE_METHOD_314_V1'):
+            raise ValueError('class suite requires an explicit supported source profile')
+        self.method_profile=profile=='STATIC_CLASS_SUITE_METHOD_314_V1'
+        self.method_lookups=[];self.method_calls=[];self.method_carriers={}
         self.prepared,self.definition,self.source,self.evidence=prepared,definition,source,evidence
         self.snapshot,self.semantic_definition,self.node=_resolve_class(prepared,definition,source)
         evidence.require_definition(self.snapshot,definition,source)
@@ -105,8 +111,9 @@ class ClassSuiteBuilder:
         block=self.fresh(BlockID,'block');values=[]
         for index,t in enumerate(types):
             identity=self.fresh(ValueID,'argument')
-            value=(ReferenceValue(identity,self.region,BlockArgument(block,index)) if t.kind is ValueKind.REFERENCE
-                   else StateVersionValue(identity,self.region,BlockArgument(block,index),self.world))
+            value=(ReferenceValue(identity,self.region,BlockArgument(block,index)) if t.kind is ValueKind.REFERENCE else
+                   DataValue(identity,self.region,BlockArgument(block,index),t.data_type) if t.kind is ValueKind.DATA else
+                   StateVersionValue(identity,self.region,BlockArgument(block,index),self.world))
             self.add_value(value,self.source,SourceRole.PARAMETER);values.append(identity)
         self.blocks.append(block);self.args[block]=tuple(values);self.block_ops[block]=[]
         return block
@@ -118,7 +125,8 @@ class ClassSuiteBuilder:
         result=[]
         for index,value in enumerate(values):
             identity=self.fresh(UseID,'use');record=self.records[value]
-            result.append(Use(identity,value,UseRole.STATE_CONTENT if type(record)is StateVersionValue else UseRole.REFERENCE))
+            result.append(Use(identity,value,UseRole.STATE_CONTENT if type(record)is StateVersionValue else
+                              UseRole.DATA if type(record)is DataValue else UseRole.REFERENCE))
             self.use_links.append(UseSource(op,identity,sources[index] if sources else source,roles[index] if roles else 'operand',index))
         return tuple(result)
 
@@ -154,12 +162,13 @@ class ClassSuiteBuilder:
 
     def live(self,extra=()):
         refs=(*self.namespaces,*self.free.values(),*self.cell_refs.values(),*(x for x in self.stack if x is not None),*extra)
-        return tuple(dict.fromkeys(refs))
+        return tuple(dict.fromkeys(v for v in refs if type(self.records[v])is ReferenceValue))
 
-    def invoke(self,kind,operands,source,offset,results=1,address=None,definition=None,roles=None,use_sources=None):
+    def invoke(self,kind,operands,source,offset,results=1,address=None,definition=None,roles=None,use_sources=None,
+               result_types=None,consumed_on_raise=False):
         identity=self.fresh(OperationID,kind);uses=self.uses(identity,(*operands,self.state),source,
             (*roles,'world') if roles is not None else None,(*use_sources,source) if use_sources is not None else None)
-        normal_types=(REF,)*results+(self.state_type,)
+        normal_types=(tuple(result_types)if result_types is not None else(REF,)*results)+(self.state_type,)
         normal=self.new_block(normal_types);failure=self.new_block((REF,REF,self.state_type))
         signatures=(CompletionSignature(ExitKind.NORMAL,normal_types),CompletionSignature(ExitKind.RAISE,(REF,REF,self.state_type)))
         op=Operation(identity,kind,(Behavior.CONTROL,Behavior.READ,Behavior.WRITE,Behavior.MEMORY),uses,
@@ -172,11 +181,12 @@ class ClassSuiteBuilder:
                 (NamespaceKey(uses[key].id) if type(key)is int else key,),mode)for owner,key,mode in address)
             self.addresses.append(StateAddressRefinement(InvokeStateOperand(identity,uses[-1].id),effects,AddressCoverage.PARTIAL))
         # Frame cleanup receives the original pair and post-operation world.
-        # Inputs to these compound primitives are borrowed by this interface;
-        # their consuming/packing internals remain conditional frame effects.
+        # Historical compounds borrow their inputs. The method-capable
+        # profile explicitly consumes lookup owners/call inputs internally;
+        # those must not be kept alive solely by exceptional frame cleanup.
         prior_current,prior_state=self.current,self.state
         self.current=failure;exception,traceback,self.state=self.args[failure]
-        self.transition('FRAME_EXIT_EXCEPTION',(*self.live(operands),exception,traceback),source,offset)
+        self.transition('FRAME_EXIT_EXCEPTION',(*self.live(()if consumed_on_raise else operands),exception,traceback),source,offset)
         self.exit((exception,traceback),ExitKind.RAISE,source)
         self.current=normal;self.state=self.args[normal][-1]
         return tuple(self.args[normal][:-1]),identity
@@ -277,32 +287,51 @@ class ClassSuiteBuilder:
             _,identity=self.invoke('SET_FUNCTION_ATTRIBUTE',(function,value),source,i.offset,results=0,
                 address=((0,ObjectField(field),AccessMode.WRITE),));self.stack.append(function)
         elif name=='LOAD_ATTR':
-            if i.arg&1:raise ValueError('class method-lookup two-result ABI requires expansion')
             owner=self.pop();key=self.literal(arg,source)
-            result,identity=self.invoke('LOAD_ATTRIBUTE',(owner,key),source,i.offset,address=((0,ObjectField(arg),AccessMode.READ),))
-            self.stack.append(result[0])
+            if i.arg&1:
+                result,identity=self.invoke('LOAD_METHOD_314',(owner,key),source,i.offset,
+                    result_types=(REF,REF,BOOL),consumed_on_raise=True,
+                    address=((0,ObjectField(arg),AccessMode.READ),),roles=('method-owner','attribute-key'))
+                op=next(o for o in self.ops if o.id==identity)
+                record=ClassSuiteMethodLookup(identity,op.uses[0].id,op.uses[1].id,*result)
+                self.method_lookups.append(record);self.method_carriers[result[1]]=record
+                self.stack.extend(result[:2])
+            else:
+                result,identity=self.invoke('LOAD_ATTRIBUTE',(owner,key),source,i.offset,address=((0,ObjectField(arg),AccessMode.READ),))
+                self.stack.append(result[0])
         elif name in ('CALL','CALL_KW'):
             keyword=self.pop() if name=='CALL_KW' else None
             args=tuple(self.pop()for _ in range(i.arg))[::-1];receiver=self.pop();callee=self.pop()
             if callee is None:raise ValueError('class CALL lacks a callable reference')
-            if receiver is not None:args=(receiver,*args)
-            operands=(callee,*args,*((keyword,)if keyword is not None else ()))
+            method=self.method_carriers.get(receiver)if self.method_profile else None
+            if receiver is not None and method is None:args=(receiver,*args)
+            operands=((callee,receiver,method.has_self,*args,*((keyword,)if keyword is not None else ()))if method is not None
+                      else(callee,*args,*((keyword,)if keyword is not None else ())))
             application=i.offset in self.decorator_offsets
             call_nodes=[n for n in self.owner_nodes if isinstance(n,ast.Call)and tuple(i.positions)==
                 (n.lineno,n.end_lineno,n.col_offset,n.end_col_offset)]
             actual_call=call_nodes[0]if len(call_nodes)==1 and not application and i.offset not in self.unclassified_applications else None
-            operand_sources=None;semantic=None;roles=('callee',*('argument'for _ in operands[1:]))
-            if actual_call is not None and receiver is None and not any(isinstance(a,ast.Starred)for a in actual_call.args):
+            operand_sources=None;semantic=None
+            roles=(('callee','method-self-or-padding','method-has-self',*('argument'for _ in args),*(('keyword-names',)if keyword is not None else()))if method is not None
+                   else('callee',*('argument'for _ in operands[1:])))
+            if actual_call is not None and(receiver is None or method is not None)and not any(isinstance(a,ast.Starred)for a in actual_call.args):
                 exprs=(actual_call.func,*actual_call.args,*(k.value for k in actual_call.keywords))
                 if len(exprs)==1+len(args):
-                    operand_sources=tuple(_node_reference(self.prepared,n)for n in exprs)+((source,)if keyword is not None else ())
+                    expression_sources=tuple(_node_reference(self.prepared,n)for n in exprs)
+                    operand_sources=((expression_sources[0],source,source,*expression_sources[1:])if method is not None else expression_sources)+((source,)if keyword is not None else ())
                     definitions=[d for d in self.prepared.semantic.definitions.values()if d.code_id==source.atom_id.wire
                         and d.output_slots and d.metadata.get('role')!='binding'
                         and (d.metadata.get('ast_type')=='Call' or d.id in self.prepared.semantics.operations
                              and self.prepared.semantics.operations[d.id].opcode is Opcode.CALL)]
                     if len(definitions)==1:semantic=definitions[0].id
-            kind='APPLY_DECORATOR_314'if application else 'CALL'
-            result,identity=self.invoke(kind,operands,source,i.offset,roles=roles,use_sources=operand_sources,definition=semantic)
+            kind='CALL_METHOD_314'if method is not None else 'APPLY_DECORATOR_314'if application else 'CALL'
+            result,identity=self.invoke(kind,operands,source,i.offset,roles=roles,use_sources=operand_sources,definition=semantic,
+                                        consumed_on_raise=self.method_profile)
+            if method is not None:
+                op=next(o for o in self.ops if o.id==identity)
+                self.method_calls.append(ClassSuiteMethodCall(identity,method.operation,
+                    op.uses[0].id,op.uses[1].id,op.uses[2].id,
+                    tuple(u.id for u in op.uses[3:3+len(args)]),op.uses[-2].id if keyword is not None else None))
             if actual_call is not None and operand_sources is not None:
                 link_index=next(n for n,link in enumerate(self.op_links)if link.operation==identity)
                 self.op_links[link_index]=replace(self.op_links[link_index],opcode=Opcode.CALL)
@@ -324,7 +353,7 @@ class ClassSuiteBuilder:
         """Admission is read-only; a debt starts with the unmodified stack."""
         name,arg=i.opname,i.argval
         if name not in SUPPORTED:return 'class compiler/control protocol requires expansion'
-        if name=='LOAD_ATTR'and i.arg&1:return 'method-lookup two-result ABI requires expansion'
+        if name=='LOAD_ATTR'and i.arg&1 and not self.method_profile:return 'method-lookup two-result ABI requires expansion'
         if name=='LOAD_FAST_BORROW'and arg not in self.cell_refs and arg not in self.free:
             return 'class compiler local borrow requires its scoped local interface'
         if name in ('LOAD_DEREF','LOAD_FROM_DICT_OR_DEREF','STORE_DEREF')and arg not in self.cell_refs and arg not in self.free:
@@ -341,6 +370,9 @@ class ClassSuiteBuilder:
         if name in ('CALL','CALL_KW'):
             start=len(self.stack)-i.arg-(1 if name=='CALL_KW'else 0)-2
             if start<0 or self.stack[start]is None:return 'class CALL requires its exact callable/receiver ABI'
+            if self.method_profile and self.stack[start+1]in self.method_carriers:
+                carrier=self.method_carriers[self.stack[start+1]]
+                if self.stack[start]!=carrier.callable:return 'method CALL requires its matching lookup callable/self carrier'
         return None
 
     def run(self):
@@ -371,15 +403,19 @@ class ClassSuiteBuilder:
         gaps=tuple(LoweringGap(GapKind.EFFECT_SUMMARY,f.source or self.source,f.kind.value+': '+f.detail)for f in frontiers)
         metadata=LoweringMetadata(self.definition.wire,self.snapshot,tuple(self.op_links),tuple(self.value_links),
                                  gaps=gaps,use_links=tuple(self.use_links))
-        overlay=ClassSuiteOverlay(self.definition,self.semantic_definition.parent_id,self.source,self.evidence.to_reference(),
+        overlay_type=ClassSuiteMethodOverlay if self.method_profile else ClassSuiteOverlay
+        extra={'method_lookups':tuple(self.method_lookups),'method_calls':tuple(self.method_calls)}if self.method_profile else{}
+        overlay=overlay_type(self.definition,self.semantic_definition.parent_id,self.source,self.evidence.to_reference(),
             self.scope,self.interface,_class_header_inputs(self.prepared,self.node),self.normal_mode,
             _class_scope_statements(self.prepared,self.node),tuple(self.witnesses),tuple(self.protocols),tuple(self.cells),
-            tuple(self.constants),tuple(self.factories),self.remaining,frontiers,len(self.ops))
+            tuple(self.constants),tuple(self.factories),self.remaining,frontiers,len(self.ops),**extra)
         return ClassEntryResult(graph,metadata,overlay,len(self.ops))
 
     def continuation(self,i,reason):
-        operands=(*self.namespaces,*self.free.values(),*self.cell_refs.values(),*(v for v in self.stack if v is not None))
-        results,identity=self.invoke('REQUIRED_CLASS_CONTINUATION',operands,self.source_for(i),i.offset)
+        selectors=tuple(dict.fromkeys(self.method_carriers[v].has_self for v in self.stack if v in self.method_carriers))
+        operands=(*self.namespaces,*self.free.values(),*self.cell_refs.values(),*(v for v in self.stack if v is not None),*selectors)
+        results,identity=self.invoke('REQUIRED_CLASS_CONTINUATION',operands,self.source_for(i),i.offset,
+            consumed_on_raise=self.method_profile)
         statements=_class_scope_statements(self.prepared,self.node)
         position=i.positions.lineno or self.node.lineno
         remaining=tuple(replace(row,order=n)for n,row in enumerate(
@@ -389,10 +425,10 @@ class ClassSuiteBuilder:
         self.exit((results[0],),ExitKind.NORMAL,self.source);self.returned=True
 
 
-def lower_class_suite(prepared,definition,source,*,code_evidence,max_operations=10000):
+def lower_class_suite(prepared,definition,source,*,code_evidence,max_operations=10000,profile='STATIC_CLASS_SUITE_314_V1'):
     from scar.analysis.source_language import supports_cpython_compiler
     if not supports_cpython_compiler(code_evidence):raise ValueError('class suite requires exact CPython 3.14.7 source compilation')
-    result=ClassSuiteBuilder(prepared,definition,source,code_evidence,max_operations).run()
+    result=ClassSuiteBuilder(prepared,definition,source,code_evidence,max_operations,profile=profile).run()
     from scar.analysis.source_class_body_validation import require_valid_class_suite
     require_valid_class_suite(prepared,definition,source,code_evidence=code_evidence,result=result)
     return result

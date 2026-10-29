@@ -87,7 +87,8 @@ def link_static_program(directory, *, budget=None):
         analysis = Path(__file__).parent
         return {"shared": _producer(), "call_sources": {
             name: hashlib.sha256((analysis / name).read_bytes()).hexdigest()
-            for name in ("static_calls.py", "static_namespace.py", "function_binding.py", "function_interfaces.py", "source_layers.py")}}
+            for name in ("static_calls.py", "static_namespace.py", "static_function_environment.py",
+                         "function_binding.py", "function_interfaces.py", "source_layers.py")}}
     producer = call_producer()
     output = Path(directory).absolute()
     manifest = read_static_program(output, verify=False)
@@ -189,9 +190,9 @@ def _lowering_route(entry):
     if entry["kind"] == "CLASS" and entry["source_ref"] is not None and len(entry.get("semantic_definition_ids") or ()) == 1:
         return {"status": "READY_TO_ATTEMPT", "body_supported": None,
                 "adapter": "scar.analysis.source_class_body_lowering.lower_class_suite",
-                "profile": "STATIC_CLASS_SUITE_314_V1", "runtime_witness_required": False,
+                "profile": "STATIC_CLASS_SUITE_METHOD_314_V1", "runtime_witness_required": False,
                 "required_inputs": ["original_class_definition", "prepared_source_layers", "static_class_code_layout"],
-                "qualification": "Class namespace/cell/frame boundary with required source expansion, not complete class-body modeling."}
+                "qualification": "Class suite namespace/cell/frame and conditional method-call protocols; explicit continuations and open effects remain, not a claim of complete class construction."}
     if entry["kind"] == "MODULE" and len(entry.get("semantic_definition_ids") or ()) == 1:
         return {"status": "READY_TO_ATTEMPT", "body_supported": None,
                 "adapter": "scar.analysis.source_module_lowering.lower_module_entry",
