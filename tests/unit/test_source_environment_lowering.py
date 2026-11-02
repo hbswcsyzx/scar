@@ -59,6 +59,151 @@ def _reference_uses(operation, values):
     return [use for use in operation.uses if isinstance(values[use.value], ReferenceValue)]
 
 
+def test_factory_entry_origins_are_conditional_reference_ports_without_call_or_state(tmp_path):
+    import subprocess
+    import sys
+    from copy import deepcopy
+    from scar.analysis.static_program import link_static_program
+    from scar.analysis.program_dependency_session import ProgramDependencySession
+    from scar.analysis.static_function_origins import (
+        derive_factory_entry_origins,validate_factory_entry_origin,factory_entry_origin_evidence,factory_entry_origin_ports,
+    )
+    from scar.analysis.program_function_origin_dependencies import FactoryEntryOriginDependencyProvider
+    from scar.ir.program.dependencies import DependencyPoint,DependencyStrength,GraphNamespace
+    from scar.ir.record_codec import decode,encode
+
+    source=tmp_path/'source';source.mkdir();path=source/'application.py';model=tmp_path/'model'
+    text=('G = 1\ndef f(x):\n    return G + x\ndef sibling(x):\n    return x\n'
+        'class Box:\n    def method(self, x):\n        return G + x\n'
+        'answer = f(2)\nraise RuntimeError("never execute")\n')
+    path.write_text(text)
+    built=subprocess.run([sys.executable,'-B','-m','scar.cli','static',str(source),'--out',str(model),
+        '--jobs','1','--phase','bodies'],capture_output=True,text=True)
+    assert built.returncode==0,built.stdout+built.stderr
+    link_static_program(model)
+    with ProgramDependencySession(model)as session:
+        namespace,=session.select_bodies(file=str(path),entry='<module>')
+        shard,=tuple(shard for shard,_ in session.relation_shards(namespace))
+        call=next(call for call in shard.calls if call.source.start_line==text.splitlines().index('answer = f(2)')+1)
+        target,=call.targets
+        creation=next(row for row in call.function_creations if row.definition==target.definition)
+        creator=session.load_body(call.caller);body=session.load_body(target.body)
+        inputs=dict(creator_graph=creator.graph,creator_document=creator.document,creator_namespace=creator.namespace,
+            body_graph=body.graph,body_document=body.document,body_namespace=body.namespace,
+            creator_index=creator.index,body_index=body.index,source_text=text)
+        origins=derive_factory_entry_origins(creation=creation,**inputs)
+        assert {origin.member.role for origin in origins}=={EnvironmentRole.FUNCTION_OBJECT,EnvironmentRole.GLOBALS_NAMESPACE}
+        for origin in origins:
+            assert validate_factory_entry_origin(origin,**inputs)
+            assert decode(type(origin),encode(origin))==origin
+            assert not any(hasattr(origin,name)for name in('caller','call_operation','context','entry_world','factory_post_world'))
+        globals_origin=next(origin for origin in origins if origin.member.role is EnvironmentRole.GLOBALS_NAMESPACE)
+        replays=[]
+        def validate(origin):
+            replays.append(origin)
+            return validate_factory_entry_origin(origin,**inputs)
+        def scope(point,outgoing):
+            original=creator if point.namespace==GraphNamespace.from_source(creator.namespace)else body
+            ports=factory_entry_origin_ports(graph=original.graph,document=original.document,
+                namespace=original.namespace,index=original.index)
+            return point.node in ports[1 if outgoing else 0]
+        provider=FactoryEntryOriginDependencyProvider(origins_for=lambda point:((origin,
+            factory_entry_origin_evidence(origin,creator_document=creator.document,body_document=body.document))
+            for origin in origins),load_index=session.index,validate_origin=validate,interface_scope=scope)
+        point=DependencyPoint(GraphNamespace.from_source(body.namespace),globals_origin.member.reference)
+        incoming=provider.incoming(point);edge,=incoming.edges
+        assert edge.strength is DependencyStrength.MAY and edge.source.node==globals_origin.source_use
+        assert edge.source.context is None and edge.target==point and not incoming.enumerated
+        assert any(frontier.kind=='FUNCTION_ENTRY_ORIGIN_SET_OPEN'for frontier in incoming.frontiers)
+        selected=next(c for c in edge.conditions if c.name=='ENTRY_CALLABLE_FROM_THIS_FACTORY_OCCURRENCE')
+        callable_member=next(m for m in body.graph.environments[0].members if m.role is EnvironmentRole.FUNCTION_OBJECT)
+        assert selected.subject.node==callable_member.reference and selected.subject.context==point.context
+        assert tuple(p.node for p in selected.operands)==(creation.normal_value,creation.factory)
+        from scar.analysis.static_namespace import normal_reference,protocol_kinds
+        other_factory=next(op for op in creator.graph.operations if op.id!=creation.factory
+            and protocol_kinds(creator.document).get(op.id)=='MAKE_FUNCTION_314')
+        _,other_normal=normal_reference(creator.index,other_factory.id)
+        other_guard=replace(selected,operands=(DependencyPoint(edge.source.namespace,other_normal,None),
+            DependencyPoint(edge.source.namespace,other_factory.id,None)))
+        assert other_guard.subject==selected.subject and len({other_guard,selected})==2
+        from scar.analysis.program_dependencies import DependencyWalk
+        from scar.analysis.program_dependency_export import export_dependency_walk
+        from scar.ir.program.dependencies import DependencyKind
+        wire=export_dependency_walk(DependencyWalk((point,),(point,edge.source),(edge,),incoming.frontiers,
+            'incoming',False,(DependencyKind.ENVIRONMENT,)))
+        guard=next(c for c in wire['conditions']if c['name']==selected.name)
+        assert [wire['points'][i]['node']for i in guard['operands']]==[
+            creation.normal_value.wire,creation.factory.wire]
+        assert all('/origins'not in locator.pointer for locator in edge.evidence[0].sources)
+        reverse=provider.outgoing(edge.source)
+        assert reverse.edges and all(row.target.context is None for row in reverse.edges)
+        assert len(replays)>=4  # Fresh callback replay, not a remembered PASS.
+        empty=FactoryEntryOriginDependencyProvider(origins_for=lambda point:(),load_index=session.index,
+            validate_origin=validate,interface_scope=scope)
+        unknown=empty.outgoing(DependencyPoint(GraphNamespace.from_source(creator.namespace),creation.normal_value,None))
+        assert not unknown.edges and not unknown.enumerated
+        assert any(f.kind=='FUNCTION_ENTRY_ORIGIN_SET_OPEN'for f in unknown.frontiers)
+        literal=next(v for v in creator.graph.values if type(v)is ReferenceValue
+            and hasattr(v.origin,'value')and v.id!=creation.normal_value)
+        unrelated=empty.outgoing(DependencyPoint(GraphNamespace.from_source(creator.namespace),literal.id,None))
+        assert unrelated.enumerated and not unrelated.frontiers
+        builtins=next(member for member in body.graph.environments[0].members if member.role is EnvironmentRole.BUILTINS_NAMESPACE)
+        assert not provider.incoming(DependencyPoint(point.namespace,builtins.reference)).edges
+        assert not provider.incoming(DependencyPoint(point.namespace,body.interface.world)).edges
+        with pytest.raises(ValueError,match='only FUNCTION_OBJECT'):
+            replace(globals_origin,member=builtins)
+        with pytest.raises(ValueError,match='captured/member'):
+            validate_factory_entry_origin(replace(globals_origin,source_use=creation.code_use,
+                source_value=creator.index.use_site(creation.code_use).use.value),**inputs)
+        from scar.ir.program.queries import ProgramIndex
+        factory_op=creator.index.operations[creation.factory]
+        frame_builtins=creator.graph.frame_roots[0].entry.builtins_namespace
+        wrong=replace(factory_op,uses=tuple(replace(use,value=frame_builtins)
+            if use.id==globals_origin.source_use else use for use in factory_op.uses))
+        bad_graph=replace(creator.graph,operations=tuple(wrong if op.id==wrong.id else op for op in creator.graph.operations))
+        with pytest.raises(ValueError,match='authoritative globals'):
+            derive_factory_entry_origins(creation=creation,**{**inputs,'creator_graph':bad_graph,'creator_index':ProgramIndex(bad_graph)})
+        with pytest.raises(ValueError,match='retained text'):
+            derive_factory_entry_origins(creation=creation,**{**inputs,'source_text':text.replace('G = 1','G = 2')})
+        bad=deepcopy(body.document);bad['static_compilation']['code_path']=[999999]
+        with pytest.raises(ValueError,match='compiler path'):
+            derive_factory_entry_origins(creation=creation,**{**inputs,'body_document':bad})
+
+        # Class creators use their original ClassSuite constants/CodeRef and
+        # an ordered operand ABI.  They do not have a function language overlay.
+        from scar.analysis.static_calls import StaticCallSession
+        from scar.analysis.static_namespace import normal_reference
+        from scar.ir.program.class_entries import decode_class_entry_overlay
+        from scar.ir.program.static_calls import StaticFunctionCreationRoute
+        class_ns,=session.select_bodies(file=str(path),entry='<module>.Box')
+        method_ns,=session.select_bodies(file=str(path),entry='<module>.Box.method')
+        class_body=session.load_body(class_ns);method_body=session.load_body(method_ns)
+        overlay=decode_class_entry_overlay(class_body.document['class'])
+        factory=next(row for row in overlay.factories if row.definition==method_ns.definition)
+        code_use=next(row.use for row in class_body.metadata.use_links
+            if row.operation==factory.operation and row.role=='function-code')
+        constant_op=class_body.index.values[class_body.index.use_site(code_use).use.value].origin.operation
+        constant=next(row for row in overlay.constants if row.operation==constant_op)
+        edge,value=normal_reference(class_body.index,factory.operation)
+        with StaticCallSession(model,out=tmp_path/'origin-source-basis')as original_source:
+            qualified=original_source._unit(0).definitions[method_ns.definition][0]
+            class_creation=StaticFunctionCreationRoute(factory.operation,edge,value,code_use,
+                constant.operation,overlay.compilation.code_layout_key,constant.constant_path,qualified)
+            class_inputs=dict(creator_graph=class_body.graph,creator_document=class_body.document,
+                creator_namespace=class_ns,creator_index=class_body.index,body_graph=method_body.graph,
+                body_document=method_body.document,body_namespace=method_ns,body_index=method_body.index,source_text=text)
+            class_origins=derive_factory_entry_origins(creation=class_creation,**class_inputs)
+            assert len(class_origins)==2
+            for origin in class_origins:assert validate_factory_entry_origin(origin,**class_inputs)
+            bad=deepcopy(class_body.document)
+            capture=next(row for row in bad['metadata']['use_links']
+                if row['operation']==encode(factory.operation)and row['role']=='function-globals')
+            assert capture['index']==1
+            capture['index']=0
+            with pytest.raises(ValueError,match='role index'):
+                derive_factory_entry_origins(creation=class_creation,**{**class_inputs,'creator_document':bad})
+
+
 def test_environment_entry_is_complete_and_free_cells_have_their_own_interface_slots(tmp_path):
     body, context = _lower(tmp_path,
         "must_never_execute_source()\n"

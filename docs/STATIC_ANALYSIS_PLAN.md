@@ -30,6 +30,11 @@ CEM solve 的 48 个原 CALL 均无目标候选。先按原 callee/receiver/name
 每项都在共同图保留原端点与条件；只补创建关系不能宣布 CEM targets 已解决。module
 注解属于并行主体覆盖工作，不能说完成它就能修复上述 CEM 断点。
 
+首个 factory-origin 组件现已实现，原 CEM 两图的显式 API 双向查询已核验；自动发现、
+默认 Session 接入和全范围发布尚未实现。下一项先将原 factory/body 编译及作用域对应
+机械派工并注册到共同查询，而后消费 entry 状态与 IMPORT_FROM。不能靠调用者手工提供
+origin 列表完成第一阶段验收；只有组件接口通过不代表该项已经自动贯通。
+
 IMPORT_FROM 的最小下一步：保存 IMPORT_NAME 的原 name/level/fromlist 请求及返回模式，
 各成员保存自己的 receiver/key/world/normal result；从所选源码模块 namespace 的实际
 reaching binding payload 接到 IMPORT_FROM 结果，不按导入名直接跳到函数定义。plain
