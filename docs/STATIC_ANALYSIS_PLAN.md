@@ -22,7 +22,7 @@ SCAR 的目标是为合法代码化简建立尽可能完整、可查询的程序
 
 优先解决主体之间的依赖连接：先修复现有构造错误，再接父级类构造、module export、defaults、decorator 和 closure 的原端口。同步按共同阻塞原因补齐模块后缀和语言组合，不按单个函数逐一打补丁。随后对全部已有主体重建调用/值来源关系，让别名、状态、效果和属性相互反馈；依赖源码与库契约共同纳入这一过程。
 
-完成标准是：声明范围内的源码结构可展开，跨层输入、结果、状态、控制和资源依赖可追溯；未决项准确区分字段未知、缺材料、未实现和预算未处理。不能用“有图”、操作数增加或构造零错误代替这个标准。原 7 个构造错误及一个嵌套算术漏选项已经按原 ID 修复发布；当前转向上述跨层接口。
+完成标准是：声明范围内的源码结构可展开，跨层输入、结果、状态、控制和资源依赖可追溯；未决项准确区分字段未知、缺材料、未实现和预算未处理。不能用“有图”、操作数增加或构造零错误代替这个标准。parent 类构造已发布 1,065 份原端口记录，v6 模块属性来源已实现并通过静态回归；两者都不等于 prepared namespace/suite、模块 G/state 或整程序别名/效果已经接通。最新范围见 STATUS。
 
 ## 进度状态约定
 
@@ -80,7 +80,7 @@ S0 不设建模覆盖率门槛，不产生额外历史报告或 gate 目录。
 ## S2：结构化 canonical lowering、层次展开与跨层端口
 
 **状态：部分已有，未完成。**`program_lowering` 与 `structured_lowering` 已能为有限 Python 子集构造 canonical operations、values、uses、control/completion 和源码链接；当前 CALL 目标、heap/global 写入及部分语言协议仍保留缺口。
-首轮全量静态派工 7,055 个普通函数：5,908 个生成规范图（保留缺口），516 个规则 shape 不支持、546 个 lowerer 不支持、85 个构造错误。后续修复并接通模块/类/协议，当前累计 8,025 个入口有图，构造 ERROR 为 0，其中类/前导仍含精确展开义务，详见 STATUS。其余入口仍完整保留，不把目录或前缀完整解释为主体完整。
+首轮全量静态派工 7,055 个普通函数：5,908 个生成规范图（保留缺口），516 个规则 shape 不支持、546 个 lowerer 不支持、85 个构造错误。后续修复并接通模块/类/协议，当前累计 8,089 个入口有图，构造 ERROR 为 0，其中类/前导仍含精确展开义务，详见 STATUS。其余入口仍完整保留，不把目录或前缀完整解释为主体完整。
 
 三项主体接线已实现：模块的 heap store、If 和 function creation；comprehension 的递归目标解包与局部异常清理；class 的独立 prepared-namespace/closure/cell ABI 与待展开主体接口。均沿原源码 ID 构造规范图。真实 eval 模块已展开全部 17 条顶层语句、18 项含嵌套语句记录、325 个操作，source wrapper 9 / core 30 读回及独立静态重新编译通过；没有运行模块初始化。完整类体及全部 Python 语法仍未完成。
 模块使用明确的 BODY profile，在既有 paired exception/world 接口上扩展规则；旧前缀 profile 保留原含义。class body 的 normal payload 与外层 class construction result 分开：前者返回编译器 class cell 或 Python None 引用，后者才产生经 metaclass/decorator 处理的对象。真实入口的 core 31 读回通过；suite 的局部 continuation 与父级 construction 仍分别记录，不能以返回了 class cell 当作已建好最终类对象。
@@ -91,7 +91,7 @@ S0 不设建模覆盖率门槛，不产生额外历史报告或 gate 目录。
 
 **已核实的当前实现欠账**
 
-当前 314 个函数 lowerer 不支持项中，60 个 nested with cleanup、41 个 comprehension parent cleanup、28 个常量槽对应，并有多种表达式组合接口缺失；另有 480 个规则 shape 不支持。已有的常量/二元运算/单次比较桥不能代表所有表达式上下文均已支持。它们不是已证明的运行时不可判定；不能只修单个函数或把错误转成 UNKNOWN。局部表达式的 source/SG 连接继续补齐，同时推进已有主体的跨过程传递。
+当前 326 个函数 lowerer 不支持项中，60 个 nested with cleanup、41 个 comprehension parent cleanup、28 个常量槽对应，并有多种表达式组合接口缺失；另有 404 个规则 shape 不支持。已有的常量/二元运算/单次比较桥不能代表所有表达式上下文均已支持。它们不是已证明的运行时不可判定；不能只修单个函数或把错误转成 UNKNOWN。局部表达式的 source/SG 连接继续补齐，同时推进已有主体的跨过程传递。
 3,731 个缺 adapter 项中，annotation context 2,482、listcomp 583、lambda 235、genexpr 210、dictcomp 146、setcomp 22、function 52、module stub 1。目录、内联 scope 和独立主体需要按实际 compiler 布局连接，不可机械地为每个 comprehension 造 Python frame。
 
 **实质功能**
@@ -137,7 +137,7 @@ STORE/LOAD/world/CFG、查找优先及中间效果保留明确条件；正常覆
 
 这些工作与剩余 S2 语言实现并行推进，不等待所有语法补齐；单纯存在新边或 reader 通过都不等于全程序模型已完成。
 
-本轮 module dotted import 与原 SG 常量/算术/单次比较桥已用于 682 项主体增量构造，随后修复并重新发布原 7 个构造错误及一个嵌套算术漏选项；会话内有界 typed 原输入复用不能替代新的 LeWM 全范围链接证据。下一步按本文件开头的连接优先顺序推进，再重新运行全部已有主体的调用求解和公开查询。独立 public verifier 仍须从原输入 fresh 核验，不缓存跨输入的“已验证”标志。链式比较还需明确 stage/merge 来源及短路结构，不能将每个 primitive 都冒充原整条 Compare。
+当前 v6 已从真实 import 返回引用和 source module NORMAL 快照推导属性来源，并接 caller 字段覆盖、qualified 参数/返回与 0 CALL 记录；没有使用 exports 同名表替代实际值来源。parent 类声明已经展开 builder lookup、code/factory/closure、header、隐式调用、装饰器及绑定，但 suite 只有编译来源引用。下一步先运行全部已有主体的调用求解和公开查询，再分别连接 imported function 的原模块 G/state、标准 builder 条件子 Region/prepare/suite ABI、defaults 当前字段/元素、decorator 和 closure。独立 public verifier 从原输入 fresh 核验，不缓存跨输入的“已验证”标志；链式比较等剩余语言规则仍继续修复。
 
 **实质功能**
 

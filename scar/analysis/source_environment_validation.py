@@ -86,6 +86,13 @@ def validate_environment_body(model, graph, interface, metadata, semantic, *, la
     for protocol in model.protocols:
         operation, kind = operations[protocol.operation], protocol.kind
         link = links[operation.id]
+        from scar.ir.program.class_construction import CLASS_CONSTRUCTION_PROTOCOLS
+        if kind.value in CLASS_CONSTRUCTION_PROTOCOLS:
+            need(language is not None and DisplayCapability.CLASS_CONSTRUCTION_314_V1 in language.capabilities,
+                 'class construction has no explicit capability')
+            if kind.value in ('LOAD_BUILD_CLASS_314','STORE_CLASS_CELL_314','STORE_CLASS_GLOBAL_314'):
+                expected_rows.add(operation.id)
+            continue  # Independently replayed by the class construction validator.
         if kind in (Kind.SOURCE_BINARY, Kind.SOURCE_COMPARE, Kind.SOURCE_INDEX, Kind.FRAME_FORWARD_TEMPORARY):
             need(language is not None and DisplayCapability.SOURCE_EXPRESSIONS_314_V1 in language.capabilities,
                  'source expression has no distinct opt-in capability')

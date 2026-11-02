@@ -136,7 +136,11 @@ def _rule(node):
         if isinstance(node, ast.AsyncFunctionDef) or node.decorator_list or getattr(node, "type_params", ()) or any(x is not None for x in node.args.kw_defaults):
             unsupported = "Nested creation currently rejects async/decorators/type parameters/keyword defaults (compiler_plan)."
     elif isinstance(node, ast.ClassDef):
-        return "environment_lowering", "StructuredEnvironmentBuilder.statements", caps, needs, "Nested class construction has no structured-environment statement adapter."
+        module, function = 'source_class_construction_lowering', 'lower_class_construction'
+        caps, compiler = [C.CLASS_CONSTRUCTION_314_V1, C.FUNCTION_TRY_314_V1], True
+        if node.type_params or any(isinstance(base, ast.Starred) for base in node.bases) or any(
+                keyword.arg is None for keyword in node.keywords):
+            unsupported = 'Class type parameters, starred bases and expanded keywords require a later explicit profile.'
     elif isinstance(node, ast.Lambda):
         module, function = "source_lambda_lowering", "lower_lambda"
         caps, compiler = [C.LAMBDA_EXPRESSION_314_V1], True
@@ -311,7 +315,7 @@ def plan_static_entry(tree, entry, *, path, fingerprint):
     kind, phase = entry["kind"], entry["phase"]
     mapping_entry = kind == "MODULE" and isinstance(node, ast.Module)
     class_entry = kind == "CLASS" and isinstance(node, ast.ClassDef)
-    selected = (FrameBodyProfile.STRUCTURED_MAPPING_COMPILER_OPS_314_V1.value if mapping_entry else
+    selected = (FrameBodyProfile.STRUCTURED_MAPPING_CLASS_314_V1.value if mapping_entry else
                 "STATIC_CLASS_SUITE_METHOD_314_V1" if class_entry else
                 BodyLoweringProfile.STRUCTURED_ENV.value if kind == "FUNCTION" else None)
     caps, rules = list(_DEFAULT_CAPS), []

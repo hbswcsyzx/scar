@@ -12,12 +12,14 @@ from typing import Any
 
 from scar.ir.program.ids import OperationID
 from scar.ir.program.lambda_bodies import LambdaBodyDefinition
+from scar.ir.program.class_construction import ClassConstruction, CLASS_CONSTRUCTION_PROTOCOLS
 from scar.ir.semantics_v2 import SourceSnapshot
 from scar.ir.v2.common import SourceReference
 from scar.ir.v2.ids import ValueSlotID
 
 
 class SourceLanguageCapability(str, Enum):
+    CLASS_CONSTRUCTION_314_V1 = "PYTHON_CLASS_CONSTRUCTION_314_V1"
     FIXED_UNPACK = "PYTHON_FIXED_LOCAL_UNPACK_V1"
     SLICE_KEYS = "PYTHON_SLICE_KEYS_314_V1"
     SLICE_ACCESS_314_V1 = "PYTHON_SLICE_ACCESS_314_V1"
@@ -71,6 +73,7 @@ SLICE_ACCESS_PROTOCOLS = frozenset(('BINARY_SLICE', 'STORE_SLICE', 'STORE_SLICE_
 EXTENDED_PROTOCOLS = EXTENDED_PROTOCOLS | SLICE_ACCESS_PROTOCOLS
 SOURCE_EXPRESSION_PROTOCOLS = frozenset(('SOURCE_BINARY', 'SOURCE_COMPARE', 'SOURCE_INDEX', 'FRAME_FORWARD_TEMPORARY'))
 EXTENDED_PROTOCOLS = EXTENDED_PROTOCOLS | SOURCE_EXPRESSION_PROTOCOLS
+EXTENDED_PROTOCOLS = EXTENDED_PROTOCOLS | CLASS_CONSTRUCTION_PROTOCOLS
 
 
 def _need(condition, detail):
@@ -166,9 +169,10 @@ class SourceLanguageOverlay:
     version: str = "PYTHON_SOURCE_LANGUAGE_V1"
     namespace_root: str | None = None
     lambda_bodies: tuple[LambdaBodyDefinition, ...] = ()
+    class_constructions: tuple[ClassConstruction, ...] = ()
 
     def __post_init__(self):
-        _need(type(self.source) is SourceSnapshot and self.version in ("PYTHON_SOURCE_LANGUAGE_V1", "PYTHON_SOURCE_LANGUAGE_V2"),
+        _need(type(self.source) is SourceSnapshot and self.version in ("PYTHON_SOURCE_LANGUAGE_V1", "PYTHON_SOURCE_LANGUAGE_V2", "PYTHON_SOURCE_LANGUAGE_V3"),
               "overlay needs its pinned source/version")
         from pathlib import PurePosixPath
         _need(type(self.namespace_root) is str and PurePosixPath(self.namespace_root).is_absolute()
@@ -188,6 +192,9 @@ class SourceLanguageOverlay:
         if SourceLanguageCapability.SOURCE_REFERENCE_LIFETIME_314_V1 in self.capabilities:
             _need(SourceLanguageCapability.SOURCE_EXPRESSIONS_314_V1 in self.capabilities,
                   'source reference ownership requires the explicit source expression capability')
+        if SourceLanguageCapability.CLASS_CONSTRUCTION_314_V1 in self.capabilities:
+            _need(SourceLanguageCapability.FUNCTION_TRY_314_V1 in self.capabilities,
+                  'parent class construction requires paired function propagation')
         for rows, kind in ((self.unpackings, UnpackShape), (self.slices, SliceShape),
                            (self.constants, CodeConstantSource), (self.compiler_locals, CompilerLocalMapping)):
             _need(type(rows) is tuple and all(type(row) is kind for row in rows), "overlay record type differs")
@@ -195,9 +202,16 @@ class SourceLanguageOverlay:
               "code evidence must be a receipt projection, never a CodeType")
         _need(type(self.lambda_bodies) is tuple and all(type(row) is LambdaBodyDefinition for row in self.lambda_bodies),
               'Lambda body interfaces require their exact typed source record')
-        _need((self.version == 'PYTHON_SOURCE_LANGUAGE_V2') == (SourceLanguageCapability.LAMBDA_EXPRESSION_314_V1 in self.capabilities),
+        _need(self.version == 'PYTHON_SOURCE_LANGUAGE_V3' or
+              ((self.version == 'PYTHON_SOURCE_LANGUAGE_V2') == (SourceLanguageCapability.LAMBDA_EXPRESSION_314_V1 in self.capabilities)),
               'Lambda expression bodies require their distinct language version/capability')
-        _need(not self.lambda_bodies or self.version == 'PYTHON_SOURCE_LANGUAGE_V2', 'historical source language has no Lambda body table')
+        _need(not self.lambda_bodies or (self.version in ('PYTHON_SOURCE_LANGUAGE_V2', 'PYTHON_SOURCE_LANGUAGE_V3')
+              and SourceLanguageCapability.LAMBDA_EXPRESSION_314_V1 in self.capabilities), 'historical source language has no Lambda body table')
+        _need((self.version == 'PYTHON_SOURCE_LANGUAGE_V3') == (SourceLanguageCapability.CLASS_CONSTRUCTION_314_V1 in self.capabilities),
+              'class construction requires its explicit language version/capability')
+        _need(type(self.class_constructions) is tuple and all(type(row) is ClassConstruction for row in self.class_constructions)
+              and (not self.class_constructions or self.version == 'PYTHON_SOURCE_LANGUAGE_V3'),
+              'class construction table requires its exact typed V3 capability')
 
 
 def encode_language_overlay(language):
@@ -206,6 +220,8 @@ def encode_language_overlay(language):
     document = encode(language)
     if language.version == 'PYTHON_SOURCE_LANGUAGE_V1':
         document.pop('lambda_bodies')
+    if language.version != 'PYTHON_SOURCE_LANGUAGE_V3':
+        document.pop('class_constructions')
     return document
 
 
@@ -216,6 +232,9 @@ def decode_language_overlay(document):
     if document.get('version') == 'PYTHON_SOURCE_LANGUAGE_V1':
         _need('lambda_bodies' not in document,'historical V1 wire cannot contain a Lambda body field')
         document={**document,'lambda_bodies':[]}
+    if document.get('version') in ('PYTHON_SOURCE_LANGUAGE_V1', 'PYTHON_SOURCE_LANGUAGE_V2'):
+        _need('class_constructions' not in document, 'historical language cannot contain a class construction table')
+        document={**document,'class_constructions':[]}
     return decode(SourceLanguageOverlay,document)
 
 

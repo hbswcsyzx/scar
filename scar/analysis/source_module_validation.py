@@ -643,12 +643,13 @@ def require_valid_structured_module_program(result,*,source_texts,code_evidence=
     from scar.ir.program.validation import require_valid
     overlay=result.module
     _need(isinstance(overlay,StructuredFrameBodyOverlay) and decode_frame_body(encode_frame_body(overlay))==overlay,'SP8 needs its closed typed overlay')
-    expanded_compiler=result.profile is FrameBodyProfile.STRUCTURED_MAPPING_COMPILER_OPS_314_V1
-    compiler=result.profile in (FrameBodyProfile.STRUCTURED_MAPPING_COMPILER_314_V1,FrameBodyProfile.STRUCTURED_MAPPING_COMPILER_OPS_314_V1)
-    extended=result.profile in (FrameBodyProfile.STRUCTURED_MAPPING_BODY_314_V1,FrameBodyProfile.STRUCTURED_MAPPING_COMPILER_314_V1,FrameBodyProfile.STRUCTURED_MAPPING_COMPILER_OPS_314_V1)
-    paired=result.profile in (FrameBodyProfile.STRUCTURED_MAPPING_PROPAGATION_314_V1,FrameBodyProfile.STRUCTURED_MAPPING_BODY_314_V1,FrameBodyProfile.STRUCTURED_MAPPING_COMPILER_314_V1,FrameBodyProfile.STRUCTURED_MAPPING_COMPILER_OPS_314_V1)
+    expanded_compiler=result.profile in (FrameBodyProfile.STRUCTURED_MAPPING_COMPILER_OPS_314_V1,FrameBodyProfile.STRUCTURED_MAPPING_CLASS_314_V1)
+    class_profile=result.profile is FrameBodyProfile.STRUCTURED_MAPPING_CLASS_314_V1
+    compiler=result.profile in (FrameBodyProfile.STRUCTURED_MAPPING_COMPILER_314_V1,FrameBodyProfile.STRUCTURED_MAPPING_COMPILER_OPS_314_V1,FrameBodyProfile.STRUCTURED_MAPPING_CLASS_314_V1)
+    extended=result.profile in (FrameBodyProfile.STRUCTURED_MAPPING_BODY_314_V1,FrameBodyProfile.STRUCTURED_MAPPING_COMPILER_314_V1,FrameBodyProfile.STRUCTURED_MAPPING_COMPILER_OPS_314_V1,FrameBodyProfile.STRUCTURED_MAPPING_CLASS_314_V1)
+    paired=result.profile in (FrameBodyProfile.STRUCTURED_MAPPING_PROPAGATION_314_V1,FrameBodyProfile.STRUCTURED_MAPPING_BODY_314_V1,FrameBodyProfile.STRUCTURED_MAPPING_COMPILER_314_V1,FrameBodyProfile.STRUCTURED_MAPPING_COMPILER_OPS_314_V1,FrameBodyProfile.STRUCTURED_MAPPING_CLASS_314_V1)
     _need(result.profile in (FrameBodyProfile.STRUCTURED_MAPPING_314_V1,FrameBodyProfile.STRUCTURED_MAPPING_PROPAGATION_314_V1,
-          FrameBodyProfile.STRUCTURED_MAPPING_BODY_314_V1,FrameBodyProfile.STRUCTURED_MAPPING_COMPILER_314_V1,FrameBodyProfile.STRUCTURED_MAPPING_COMPILER_OPS_314_V1) and overlay.profile is result.profile
+          FrameBodyProfile.STRUCTURED_MAPPING_BODY_314_V1,FrameBodyProfile.STRUCTURED_MAPPING_COMPILER_314_V1,FrameBodyProfile.STRUCTURED_MAPPING_COMPILER_OPS_314_V1,FrameBodyProfile.STRUCTURED_MAPPING_CLASS_314_V1) and overlay.profile is result.profile
           and overlay.namespace_policy is NamespacePolicy.MODULE_MAPPING_314_V1
           and overlay.completion_profile is (FrameCompletionProfile.PROPAGATION_REF_PAIR_314_V1 if paired else FrameCompletionProfile.RAW_EXCEPTION_REF_314_V1)
           and all(value is None for value in (result.interface,result.frame,result.structured,result.language)),
@@ -758,9 +759,19 @@ def require_valid_structured_module_program(result,*,source_texts,code_evidence=
             except ValueError:continue  # Unvisited source gaps do not acquire fabricated atoms.
             (expression_nodes if isinstance(node,ast.expr) else nodes)[reference]=node
     instructions=tuple(dis.get_instructions(code_evidence.code,adaptive=False,show_caches=False))
+    from scar.ir.program.class_construction import CLASS_CONSTRUCTION_PROTOCOLS
+    from scar.analysis.source_class_construction_validation import validate_class_constructions
+    class_ops=validate_class_constructions(graph=graph,metadata=result.metadata,
+        records=getattr(overlay,'class_constructions',()),protocols=protocols,code_evidence=code_evidence,
+        source_tree=context.tree,semantic=result.semantic,module_overlay=overlay,structural_only=True)
+    _need(not class_ops or class_profile,'class operations require their explicit mapping profile')
     imports_by_source={}
     for protocol in overlay.protocols:
         op=operations[protocol.operation];kind=protocol.kind
+        if kind.value in CLASS_CONSTRUCTION_PROTOCOLS:
+            _need(op.id in class_ops,'class primitive lacks its original construction record')
+            if kind.value in ('LOAD_BUILD_CLASS_314','STORE_CLASS_CELL_314','STORE_CLASS_GLOBAL_314'):expected_addresses.add(op.id)
+            continue
         if type(kind) is not K:continue
         if kind in (K.COMPILER_MAKE_CELL,K.COMPILER_READ_CODE_CONSTANT,K.COMPILER_MAKE_FUNCTION,
                     K.COMPILER_BUILD_SET,K.COMPILER_STORE_NAME,K.COMPILER_SETUP_ANNOTATIONS,
@@ -792,10 +803,10 @@ def require_valid_structured_module_program(result,*,source_texts,code_evidence=
                 from scar.analysis.source_module_lowering import _module_docstring
                 docstring=extended and _module_docstring(context,node)
                 _need(isinstance(node,(ast.Import,ast.ImportFrom)) or paired and isinstance(node,ast.ExceptHandler)
-                      or extended and isinstance(node,(ast.FunctionDef,ast.AsyncFunctionDef)) or docstring,
+                      or extended and isinstance(node,(ast.FunctionDef,ast.AsyncFunctionDef)) or class_profile and isinstance(node,ast.ClassDef) or docstring,
                       'STORE_NAME source must be an original binding/import/handler/definition')
                 allowed=(['__doc__'] if docstring else [node.name]
-                    if isinstance(node,(ast.ExceptHandler,ast.FunctionDef,ast.AsyncFunctionDef))
+                    if isinstance(node,(ast.ExceptHandler,ast.FunctionDef,ast.AsyncFunctionDef,ast.ClassDef))
                     else [alias.asname or (alias.name.split('.')[0] if isinstance(node,ast.Import) else alias.name)
                           for alias in node.names])
                 _need(type(values[op.uses[1].value].origin) is LiteralOrigin and values[op.uses[1].value].origin.value in allowed,'import alias STORE_NAME key differs')
@@ -947,6 +958,9 @@ def require_valid_structured_module_program(result,*,source_texts,code_evidence=
                     graph=graph,overlay=overlay,semantic=result.semantic,code_evidence=code_evidence,
                     expression_value=expression_value,invoke=invoke,protocols=protocols,blocks=blocks,
                     operations=operations,values=values,refinements=refinements)
+        elif isinstance(node,ast.ClassDef):
+            _need(class_profile and any(record.source==source for record in overlay.class_constructions),
+                  'class statement has no checked parent construction')
         elif isinstance(node,(ast.FunctionDef,ast.AsyncFunctionDef)):
             _need(extended,'function construction requires explicit mapping BODY profile')
             from scar.analysis.source_mapping_function_validation import validate_mapping_function
@@ -995,10 +1009,14 @@ def require_valid_structured_module_program(result,*,source_texts,code_evidence=
             if paired and isinstance(nodes.get(protocol.source),ast.ExceptHandler):continue
             if extended and isinstance(nodes.get(protocol.source),(ast.FunctionDef,ast.AsyncFunctionDef)):
                 continue  # Definition-specific consumer checks the actual holds/transfer before its STORE_NAME.
+            if class_profile and any(record.binding==store.id for record in overlay.class_constructions):
+                continue  # Class-specific consumer checked this exact hold/transfer and both completions.
             _need([(op.id,use.id) for op in graph.operations for use in op.uses if use.value==consumed]==[(store.id,store.uses[2].id)],
                   'STORE_NAME consumed stack input must not remain pending on either completion')
     # Constant references remain the original typed whole-root code-slot records.
     instructions=tuple(dis.get_instructions(code_evidence.code,adaptive=False,show_caches=False))
+    class_name_constants={values[operations[record.builder_call.operation].uses[2].value].origin.operation
+        for record in getattr(overlay,'class_constructions',())}
     for constant in overlay.constants:
         root_code_key=root.code.code_layout_key if static_root else root.code.key
         _need(constant.code_key==root_code_key and len(constant.constant_path)==1 and constant.operation in operations
@@ -1006,7 +1024,8 @@ def require_valid_structured_module_program(result,*,source_texts,code_evidence=
         matches=[row for row in instructions if row.opname=='LOAD_CONST' and row.arg==constant.constant_path[0]
             and tuple(row.positions)==(constant.source.start_line,constant.source.end_line,constant.source.start_column,constant.source.end_column)]
         from types import CodeType
-        _need(len(matches)==1 and type(matches[0].argval) in ((tuple,slice,CodeType) if extended else (tuple,slice))
+        allowed=(str,) if constant.operation in class_name_constants else (tuple,slice,CodeType) if extended else (tuple,slice)
+        _need(len(matches)==1 and type(matches[0].argval) in allowed
               and code_evidence.code.co_consts[matches[0].arg] is matches[0].argval,'SP8 whole-root code constant slot/span differs')
         _need(owners[constant.operation]==graph.root,'code constant must belong to this actual module frame')
     _need({row.operation for row in overlay.constants}=={p.operation for p in overlay.protocols if p.kind is PythonProtocolKind.READ_CODE_CONSTANT},'SP8 typed code constant inventory incomplete')

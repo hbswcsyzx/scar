@@ -25,7 +25,7 @@ from scar.ir.program.ids import BlockID, LocationID, OperationID, RegionID, UseI
 from scar.ir.program.functions import BodyEntryInterface, BodyLoweringProfile, FormalPort
 from scar.ir.program.module_entries import (ModuleBodyOverlay, ModuleEntryProfile,
     ModulePrefixOverlay, ModuleBodyExpansionProfile, StructuredFrameBodyOverlay, CompilerStructuredFrameBodyOverlay, ExpandedCompilerFrameBodyOverlay, FrameBodyProfile,
-    StaticModuleEntryDeclaration)
+    StaticModuleEntryDeclaration, ClassConstructionFrameBodyOverlay)
 from scar.ir.program.frames import (
     FrameBind, FrameDiscard, FrameEnter, FrameExit, FrameFormal, FrameModel,
 )
@@ -176,13 +176,13 @@ class SourceProgram:
             from scar.ir.program.module_entries import encode_frame_body
             if (self.profile is not self.module.profile or self.profile not in (
                     FrameBodyProfile.STRUCTURED_MAPPING_314_V1,FrameBodyProfile.STRUCTURED_MAPPING_PROPAGATION_314_V1,
-                    FrameBodyProfile.STRUCTURED_MAPPING_BODY_314_V1,FrameBodyProfile.STRUCTURED_MAPPING_COMPILER_314_V1,FrameBodyProfile.STRUCTURED_MAPPING_COMPILER_OPS_314_V1) or self.graph is None
+                    FrameBodyProfile.STRUCTURED_MAPPING_BODY_314_V1,FrameBodyProfile.STRUCTURED_MAPPING_COMPILER_314_V1,FrameBodyProfile.STRUCTURED_MAPPING_COMPILER_OPS_314_V1,FrameBodyProfile.STRUCTURED_MAPPING_CLASS_314_V1) or self.graph is None
                     or any(value is not None for value in (self.interface,self.frame,self.structured,self.language))):
                 raise ValueError('SP8 requires its explicit core FrameRoot/source overlay only')
             static_root = type(self.module.declaration) is StaticModuleEntryDeclaration
-            if self.profile in (FrameBodyProfile.STRUCTURED_MAPPING_BODY_314_V1,FrameBodyProfile.STRUCTURED_MAPPING_COMPILER_314_V1,FrameBodyProfile.STRUCTURED_MAPPING_COMPILER_OPS_314_V1) and not static_root:
+            if self.profile in (FrameBodyProfile.STRUCTURED_MAPPING_BODY_314_V1,FrameBodyProfile.STRUCTURED_MAPPING_COMPILER_314_V1,FrameBodyProfile.STRUCTURED_MAPPING_COMPILER_OPS_314_V1,FrameBodyProfile.STRUCTURED_MAPPING_CLASS_314_V1) and not static_root:
                 raise ValueError('mapping BODY profile requires source-compilation root provenance')
-            return {'schema':'scar.source-program','schema_version':11 if type(self.module) is ExpandedCompilerFrameBodyOverlay else 10 if type(self.module) is CompilerStructuredFrameBodyOverlay else 9 if static_root else 8,'entry_kind':'MAPPING_FRAME',
+            return {'schema':'scar.source-program','schema_version':12 if type(self.module) is ClassConstructionFrameBodyOverlay else 11 if type(self.module) is ExpandedCompilerFrameBodyOverlay else 10 if type(self.module) is CompilerStructuredFrameBodyOverlay else 9 if static_root else 8,'entry_kind':'MAPPING_FRAME',
                 'profile':self.profile.value,'status':self.module.status.value,
                 'scope':'structured source mapping frame; exact remaining source and runtime/effect debt retained',
                 'metadata':encode(self.metadata),'module':encode_frame_body(self.module),
@@ -284,24 +284,27 @@ class SourceProgram:
                     or source_texts is not None or language_options is not None or module_code_evidence is not None):
                 raise ValueError("source fragments require a live typed context session and explicit SP5 STRUCTURE")
             expected_fields -= {"semantic", "semantics", "control"}
-        if type(version) is int and version in (8,9,10,11):
+        if type(version) is int and version in (8,9,10,11,12):
             from scar.ir.program.module_entries import decode_frame_body
             if (set(document) != expected_fields | {'entry_kind','profile','module'}
                     or document['schema'] != 'scar.source-program' or document['entry_kind'] != 'MAPPING_FRAME'
                     or document['profile'] not in (FrameBodyProfile.STRUCTURED_MAPPING_314_V1.value,
                         FrameBodyProfile.STRUCTURED_MAPPING_PROPAGATION_314_V1.value,
                         FrameBodyProfile.STRUCTURED_MAPPING_BODY_314_V1.value,
-                        FrameBodyProfile.STRUCTURED_MAPPING_COMPILER_314_V1.value,FrameBodyProfile.STRUCTURED_MAPPING_COMPILER_OPS_314_V1.value)
+                        FrameBodyProfile.STRUCTURED_MAPPING_COMPILER_314_V1.value,FrameBodyProfile.STRUCTURED_MAPPING_COMPILER_OPS_314_V1.value,
+                        FrameBodyProfile.STRUCTURED_MAPPING_CLASS_314_V1.value)
                     or language_options is not None or verification != 'STRUCTURE'
                     or version == 8 and module_code_evidence is None or type(document['graph']) is not dict
-                    or document['graph'].get('schema_version') != (30 if version in (9,10,11) else 29)):
+                    or document['graph'].get('schema_version') != (30 if version in (9,10,11,12) else 29)):
                 raise ValueError('mapping frame requires its explicit static or captured source/core capability')
             result=cls(load_graph(_canonical(document['graph'])),decode(LoweringMetadata,document['metadata']),
                 semantic_from_dict(document['semantic']),None,SourceControlFlowGraph.from_dict(document['control']),
                 FrameBodyProfile(document['profile']),module=decode_frame_body(document['module']))
             result=replace(result,semantics=SourceSemanticsGraph.from_dict(document['semantics'],result.semantic))
-            if (type(result.module.declaration) is StaticModuleEntryDeclaration) != (version in (9,10,11)):
+            if (type(result.module.declaration) is StaticModuleEntryDeclaration) != (version in (9,10,11,12)):
                 raise ValueError('source wrapper must distinguish static compilation and captured root evidence')
+            if (version == 12) != (type(result.module) is ClassConstructionFrameBodyOverlay):
+                raise ValueError('class construction module overlay requires source wrapper12')
             if (version == 11) != (type(result.module) is ExpandedCompilerFrameBodyOverlay):
                 raise ValueError('expanded compiler module overlay requires source wrapper11')
             if (version == 10) != (type(result.module) is CompilerStructuredFrameBodyOverlay):
@@ -1451,7 +1454,8 @@ def validate_source_program(result: SourceProgram, *, max_operations: int = 1000
             comprehension_source = result.language is not None and SourceLanguageCapability.COMPREHENSION_314_V1 in result.language.capabilities
             display_source = result.language is not None and SourceLanguageCapability.STARRED_DISPLAY_314_V1 in result.language.capabilities
             expression_source = result.language is not None and SourceLanguageCapability.SOURCE_EXPRESSIONS_314_V1 in result.language.capabilities
-            if result.language is not None and (not structural_only or try_source or call_source or function_source or import_source or creation_source or set_source or unpack_source or lambda_source or comprehension_source or display_source or expression_source):
+            class_source = result.language is not None and SourceLanguageCapability.CLASS_CONSTRUCTION_314_V1 in result.language.capabilities
+            if result.language is not None and (not structural_only or try_source or call_source or function_source or import_source or creation_source or set_source or unpack_source or lambda_source or comprehension_source or display_source or expression_source or class_source):
                 if not structural_only and language_options is None:
                     raise ValueError("v5 source replay requires explicit independently supplied language inputs")
                 if structural_only:
@@ -1474,6 +1478,16 @@ def validate_source_program(result: SourceProgram, *, max_operations: int = 1000
                 if "sha256:" + hashlib.sha256(source_text.encode()).hexdigest() != result.metadata.source.fingerprint:
                     raise ValueError("v5 source text changed")
                 source_tree = ast.parse(source_text, filename=result.metadata.source.path)
+                if class_source and language_options is None:
+                    from scar.analysis.static_compilation import compile_source_unit
+                    from scar.analysis.source_language import SourceLanguageOptions
+                    # Reuse the original qualified source graph; recompilation
+                    # needs source/compiler facts, not a second SG namespace.
+                    prepared = PreparedSource(Path(result.metadata.source.path),Path(result.language.namespace_root),
+                        source_text,result.semantic,result.semantics,result.control,source_tree,
+                        _symbol_tables(source_text,result.metadata.source.path))
+                    evidence = compile_source_unit(prepared).for_definition(result.interface.definition,result.structured.source)
+                    language_options = SourceLanguageOptions(result.language.capabilities,evidence)
             require_valid_structured_body(result.structured, result.graph, result.interface, result.metadata,
                 semantic=result.semantic, control=result.control, language=result.language,
                 source_tree=source_tree, language_options=language_options, structural_only=structural_only,

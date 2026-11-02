@@ -19,6 +19,7 @@ from scar.ir.program.source import SourceRole
 from scar.ir.program.source_subjects import ModuleUnitSource, SourceCompilationCodeRef
 from scar.ir.program.structured import PythonProtocolKind, LoopInterface
 from scar.ir.program.source_language import CodeConstantSource
+from scar.ir.program.class_construction import ClassConstruction
 from scar.ir.record_codec import decode, encode
 from scar.ir.semantics_v2 import Opcode
 from scar.ir.v2.common import SourceReference
@@ -389,6 +390,7 @@ def decode_module_prefix(value):
 
 
 class FrameBodyProfile(str, Enum):
+    STRUCTURED_MAPPING_CLASS_314_V1 = 'STRUCTURED_MAPPING_CLASS_314_V1'
     STRUCTURED_MAPPING_314_V1 = 'STRUCTURED_MAPPING_314_V1'
     STRUCTURED_MAPPING_PROPAGATION_314_V1 = 'STRUCTURED_MAPPING_PROPAGATION_314_V1'
     STRUCTURED_MAPPING_BODY_314_V1 = 'STRUCTURED_MAPPING_BODY_314_V1'
@@ -546,7 +548,8 @@ class StructuredFrameBodyOverlay:
                   (FrameBodyProfile.STRUCTURED_MAPPING_PROPAGATION_314_V1,FrameCompletionProfile.PROPAGATION_REF_PAIR_314_V1),
                   (FrameBodyProfile.STRUCTURED_MAPPING_BODY_314_V1,FrameCompletionProfile.PROPAGATION_REF_PAIR_314_V1),
                   (FrameBodyProfile.STRUCTURED_MAPPING_COMPILER_314_V1,FrameCompletionProfile.PROPAGATION_REF_PAIR_314_V1),
-                  (FrameBodyProfile.STRUCTURED_MAPPING_COMPILER_OPS_314_V1,FrameCompletionProfile.PROPAGATION_REF_PAIR_314_V1))
+                  (FrameBodyProfile.STRUCTURED_MAPPING_COMPILER_OPS_314_V1,FrameCompletionProfile.PROPAGATION_REF_PAIR_314_V1),
+                  (FrameBodyProfile.STRUCTURED_MAPPING_CLASS_314_V1,FrameCompletionProfile.PROPAGATION_REF_PAIR_314_V1))
               and self.namespace_policy is NamespacePolicy.MODULE_MAPPING_314_V1,
               'unsupported explicit structured mapping/completion profile')
         _need(type(self.operations_emitted) is int and self.operations_emitted > 0
@@ -555,7 +558,8 @@ class StructuredFrameBodyOverlay:
         _need(type(self.frame_rules) is FrameRules, 'frame must preserve conditional lifetime contract')
         self.frame_rules.__post_init__()
         expected={FrameBodyProfile.STRUCTURED_MAPPING_COMPILER_314_V1:CompilerStructuredFrameBodyOverlay,
-                  FrameBodyProfile.STRUCTURED_MAPPING_COMPILER_OPS_314_V1:ExpandedCompilerFrameBodyOverlay}
+                  FrameBodyProfile.STRUCTURED_MAPPING_COMPILER_OPS_314_V1:ExpandedCompilerFrameBodyOverlay,
+                  FrameBodyProfile.STRUCTURED_MAPPING_CLASS_314_V1:ClassConstructionFrameBodyOverlay}
         _need(type(self) is expected.get(self.profile,StructuredFrameBodyOverlay),
               'compiler prologue profile requires its explicit source overlay variant')
 
@@ -773,12 +777,31 @@ class ExpandedCompilerFrameBodyOverlay(StructuredFrameBodyOverlay):
 MODULE_RECORD_TAGS[ExpandedCompilerFrameBodyOverlay]=('frame_overlay_kind','COMPILER_OPS_MAPPING_314_V1')
 
 
+@dataclass(frozen=True, slots=True, kw_only=True)
+class ClassConstructionFrameBodyOverlay(ExpandedCompilerFrameBodyOverlay):
+    class_constructions: tuple[ClassConstruction, ...]
+
+    def __post_init__(self):
+        StructuredFrameBodyOverlay.__post_init__(self)
+        _need(type(self.declaration) is StaticModuleEntryDeclaration
+              and self.profile is FrameBodyProfile.STRUCTURED_MAPPING_CLASS_314_V1
+              and (self.compiler_prologue is None or type(self.compiler_prologue) is ExpandedModuleCompilerPrologue
+                   and self.compiler_prologue.compilation == self.declaration.compilation),
+              'class construction mapping overlay requires its static compiler profile')
+        _need(type(self.class_constructions) is tuple and all(type(row) is ClassConstruction for row in self.class_constructions),
+              'class construction mapping table needs original typed ports')
+
+
+MODULE_RECORD_TAGS[ClassConstructionFrameBodyOverlay] = ('frame_overlay_kind', 'CLASS_CONSTRUCTION_MAPPING_314_V1')
+
+
 def encode_frame_body(value):
     return encode(value, record_tags=MODULE_RECORD_TAGS)
 
 
 def decode_frame_body(value):
     kinds={'COMPILER_MAPPING_314_V1':CompilerStructuredFrameBodyOverlay,
-           'COMPILER_OPS_MAPPING_314_V1':ExpandedCompilerFrameBodyOverlay}
+           'COMPILER_OPS_MAPPING_314_V1':ExpandedCompilerFrameBodyOverlay,
+           'CLASS_CONSTRUCTION_MAPPING_314_V1':ClassConstructionFrameBodyOverlay}
     kind=kinds.get(value.get('frame_overlay_kind'),StructuredFrameBodyOverlay) if type(value) is dict else StructuredFrameBodyOverlay
     return decode(kind, value, record_tags=MODULE_RECORD_TAGS)

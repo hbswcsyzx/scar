@@ -75,6 +75,7 @@ class StructuredBuilder(_Builder):
         self.language_slices = []
         self.language_constants = []
         self.language_compiler_locals = []
+        self.class_constructions = []
 
     def has_language(self, name):
         return self.language_options is not None and any(
@@ -91,8 +92,10 @@ class StructuredBuilder(_Builder):
             tuple(self.language_compiler_locals),
             self.language_options.code_evidence.to_dict() if self.language_options.code_evidence else None,
             namespace_root=self.language_namespace_root,
-            version='PYTHON_SOURCE_LANGUAGE_V2' if self.has_language('LAMBDA_EXPRESSION_314_V1') else 'PYTHON_SOURCE_LANGUAGE_V1',
-            lambda_bodies=tuple(getattr(self,'lambda_bodies',())) if graph is not None else ())
+            version='PYTHON_SOURCE_LANGUAGE_V3' if self.has_language('CLASS_CONSTRUCTION_314_V1') else
+                    'PYTHON_SOURCE_LANGUAGE_V2' if self.has_language('LAMBDA_EXPRESSION_314_V1') else 'PYTHON_SOURCE_LANGUAGE_V1',
+            lambda_bodies=tuple(getattr(self,'lambda_bodies',())) if graph is not None else (),
+            class_constructions=tuple(self.class_constructions) if graph is not None else ())
 
     def emit(self, cursor, operation, node, role, old=None):
         super().emit(cursor, operation, node, role, old=old)
@@ -701,6 +704,7 @@ def _require_valid_structured_body(model, graph, interface, metadata, *, semanti
             delegated.update(validate_generator_regions(model, graph, interface, metadata, semantic, language,
                 source_tree=source_tree, options=language_options, structural_only=structural_only))
             model, graph, metadata, language = root_projection(model, graph, metadata, language, delegated)
+    from scar.ir.program.class_construction import CLASS_CONSTRUCTION_PROTOCOLS
     environment_profile = interface.profile is BodyLoweringProfile.STRUCTURED_ENV
     if (interface.profile not in (BodyLoweringProfile.STRUCTURED_BODY, BodyLoweringProfile.STRUCTURED_ENV) or model.region != graph.root
             or model.definition != interface.definition or model.region != interface.region):
@@ -814,7 +818,7 @@ def _require_valid_structured_body(model, graph, interface, metadata, *, semanti
                 PythonProtocolKind.BUILD_CALL_POSITIONAL_LIST, PythonProtocolKind.EXTEND_CALL_POSITIONALS,
                 PythonProtocolKind.APPEND_CALL_POSITIONAL, PythonProtocolKind.CALL_POSITIONALS_TO_TUPLE):
             pass  # Exact shapes, source, payloads and lifetime are checked below.
-        elif language is not None and protocol.kind.value in FUNCTION_TRY_PROTOCOLS | NESTED_FUNCTION_PROTOCOLS | FUNCTION_IMPORT_PROTOCOLS | FUNCTION_WITH_PROTOCOLS | FUNCTION_SET_PROTOCOLS | COMPREHENSION_PROTOCOLS | STARRED_DISPLAY_PROTOCOLS:
+        elif language is not None and protocol.kind.value in FUNCTION_TRY_PROTOCOLS | NESTED_FUNCTION_PROTOCOLS | FUNCTION_IMPORT_PROTOCOLS | FUNCTION_WITH_PROTOCOLS | FUNCTION_SET_PROTOCOLS | COMPREHENSION_PROTOCOLS | STARRED_DISPLAY_PROTOCOLS | CLASS_CONSTRUCTION_PROTOCOLS:
             pass  # Exact canonical C0/C1/source checks belong to the opt-in Try adapter.
         else:
             raise ValueError("opaque protocol has no implemented structured control interface")

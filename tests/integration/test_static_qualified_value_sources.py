@@ -66,7 +66,7 @@ def test_static_call_contexts_preserve_values_and_stop_unseeded_cycles():
 
         manifest = json.loads((model / "manifest.json").read_text())
         publication = manifest["static_calls"]
-        assert publication["schema_version"] == 5
+        assert publication["schema_version"] == 6
         assert publication["scope"]["value_worklist_quiescent_for_processed_scope"]
         assert not publication["scope"]["whole_program_model_complete"]
         names = {definition["wire"]: body["name"]

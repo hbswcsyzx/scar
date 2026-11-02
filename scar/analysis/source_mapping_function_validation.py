@@ -33,8 +33,24 @@ def validate_mapping_function(node, *, source, graph, overlay, semantic, code_ev
                               globals_namespace, locals_namespace):
     """Check one original definition; return its claimed factory/apply/store IDs."""
     from scar.analysis.source_module_lowering import require_root_evidence
+    from scar.ir.program.module_entries import (CompilerStructuredFrameBodyOverlay,
+        ExpandedCompilerFrameBodyOverlay, ClassConstructionFrameBodyOverlay, FrameBodyProfile)
     unit = overlay.declaration.unit
-    require_root_evidence(unit, code_evidence)
+    compiler_profiles = {
+        CompilerStructuredFrameBodyOverlay: FrameBodyProfile.STRUCTURED_MAPPING_COMPILER_314_V1,
+        ExpandedCompilerFrameBodyOverlay: FrameBodyProfile.STRUCTURED_MAPPING_COMPILER_OPS_314_V1,
+        ClassConstructionFrameBodyOverlay: FrameBodyProfile.STRUCTURED_MAPPING_CLASS_314_V1,
+    }
+    compiler = type(overlay) in compiler_profiles and overlay.profile is compiler_profiles[type(overlay)]
+    root_reference = require_root_evidence(unit, code_evidence, allow_compiler_locals=compiler)
+    if compiler:
+        from scar.analysis.source_module_compiler_lowering import validate_compiler_prologue_core
+        _need(overlay.declaration.compilation == root_reference,
+              'function factory must retain this exact source-compiled module root')
+        prefix = validate_compiler_prologue_core(overlay, graph)
+        _need(not code_evidence.code.co_cellvars or prefix is not None
+              and tuple(cell.name for cell in prefix.cells) == tuple(code_evidence.code.co_cellvars),
+              'module compiler-owned cells require their actual checked prologue allocations')
     plan = mapping_function_plan(node, code_evidence.code)
     _need(type(source) is SourceReference, "function definition requires its original statement SourceReference")
     atom = semantic.source_atoms.get(source.atom_id)

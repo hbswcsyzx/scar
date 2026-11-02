@@ -206,8 +206,12 @@ def lower_module_entry(context,selection,*,code_evidence,max_operations=10000,pr
     from scar.ir.program.module_entries import ModuleBodyExpansionProfile,FrameBodyProfile
     if type(code_evidence) is StaticCodeEvidence and profile not in (
             FrameBodyProfile.STRUCTURED_MAPPING_314_V1, FrameBodyProfile.STRUCTURED_MAPPING_PROPAGATION_314_V1,
-            FrameBodyProfile.STRUCTURED_MAPPING_BODY_314_V1,FrameBodyProfile.STRUCTURED_MAPPING_COMPILER_314_V1,FrameBodyProfile.STRUCTURED_MAPPING_COMPILER_OPS_314_V1):
+            FrameBodyProfile.STRUCTURED_MAPPING_BODY_314_V1,FrameBodyProfile.STRUCTURED_MAPPING_COMPILER_314_V1,FrameBodyProfile.STRUCTURED_MAPPING_COMPILER_OPS_314_V1,FrameBodyProfile.STRUCTURED_MAPPING_CLASS_314_V1):
         raise ValueError('static module roots require their explicit structured frame capability')
+    if profile is FrameBodyProfile.STRUCTURED_MAPPING_CLASS_314_V1:
+        if type(code_evidence) is not StaticCodeEvidence:
+            raise ValueError('class construction profile requires static source compilation')
+        return ClassConstructionMappingBodyBuilder(context,selection,code_evidence,max_operations).run_module()
     if profile is FrameBodyProfile.STRUCTURED_MAPPING_COMPILER_OPS_314_V1:
         if type(code_evidence) is not StaticCodeEvidence:
             raise ValueError("expanded compiler profile requires source compilation")
@@ -418,7 +422,7 @@ def mapping_prefix_selection(context, evidence, *, profile=None):
     """Maximal contiguous supported statements; no workload/name allowlist."""
     unit=module_unit(context)
     from scar.ir.program.module_entries import FrameBodyProfile
-    require_root_evidence(unit,evidence,allow_compiler_locals=profile in (FrameBodyProfile.STRUCTURED_MAPPING_COMPILER_314_V1,FrameBodyProfile.STRUCTURED_MAPPING_COMPILER_OPS_314_V1))
+    require_root_evidence(unit,evidence,allow_compiler_locals=profile in (FrameBodyProfile.STRUCTURED_MAPPING_COMPILER_314_V1,FrameBodyProfile.STRUCTURED_MAPPING_COMPILER_OPS_314_V1,FrameBodyProfile.STRUCTURED_MAPPING_CLASS_314_V1))
     import dis
     instructions=tuple(dis.get_instructions(evidence.code,adaptive=False,show_caches=False))
     def positioned(node,opnames):
@@ -456,7 +460,7 @@ def mapping_prefix_selection(context, evidence, *, profile=None):
         return False
     def target(node):return isinstance(node,ast.Name) and len([row for row in positioned(node,('STORE_NAME',)) if row.argval==node.id])==1
     from scar.ir.program.module_entries import FrameBodyProfile
-    expanded = profile in (FrameBodyProfile.STRUCTURED_MAPPING_BODY_314_V1,FrameBodyProfile.STRUCTURED_MAPPING_COMPILER_314_V1,FrameBodyProfile.STRUCTURED_MAPPING_COMPILER_OPS_314_V1)
+    expanded = profile in (FrameBodyProfile.STRUCTURED_MAPPING_BODY_314_V1,FrameBodyProfile.STRUCTURED_MAPPING_COMPILER_314_V1,FrameBodyProfile.STRUCTURED_MAPPING_COMPILER_OPS_314_V1,FrameBodyProfile.STRUCTURED_MAPPING_CLASS_314_V1)
     def heap_target(node):
         if not expanded:return False
         if isinstance(node,ast.Attribute):
@@ -467,6 +471,11 @@ def mapping_prefix_selection(context, evidence, *, profile=None):
                 and expression(node.slice) and len(positioned(node,('STORE_SUBSCR',)))==1)
         return False
     def statement(node):
+        if profile is FrameBodyProfile.STRUCTURED_MAPPING_CLASS_314_V1 and isinstance(node,ast.ClassDef):
+            from scar.analysis.source_class_construction_lowering import class_construction_plan
+            try:class_construction_plan(node,evidence.code)
+            except (ValueError,_Unsupported):return False
+            return all(expression(child) for child in (*node.decorator_list,*node.bases,*(kw.value for kw in node.keywords)))
         if isinstance(node,(ast.Import,ast.ImportFrom)):
             try:mapping_import_plan(node,evidence.code,instructions=instructions)
             except (ValueError,_Unsupported):return False
@@ -484,7 +493,7 @@ def mapping_prefix_selection(context, evidence, *, profile=None):
             try:mapping_function_plan(node,evidence.code)
             except (ValueError,_Unsupported):return False
             return all(expression(child) for child in (*node.decorator_list,*node.args.defaults,*(v for v in node.args.kw_defaults if v is not None)))
-        if isinstance(node,ast.Try) and profile in (FrameBodyProfile.STRUCTURED_MAPPING_PROPAGATION_314_V1,FrameBodyProfile.STRUCTURED_MAPPING_BODY_314_V1,FrameBodyProfile.STRUCTURED_MAPPING_COMPILER_314_V1,FrameBodyProfile.STRUCTURED_MAPPING_COMPILER_OPS_314_V1):
+        if isinstance(node,ast.Try) and profile in (FrameBodyProfile.STRUCTURED_MAPPING_PROPAGATION_314_V1,FrameBodyProfile.STRUCTURED_MAPPING_BODY_314_V1,FrameBodyProfile.STRUCTURED_MAPPING_COMPILER_314_V1,FrameBodyProfile.STRUCTURED_MAPPING_COMPILER_OPS_314_V1,FrameBodyProfile.STRUCTURED_MAPPING_CLASS_314_V1):
             return (node in context.tree.body and len(node.handlers)==1 and not node.orelse and not node.finalbody
                 and node.handlers[0].type is not None
                 and any(isinstance(child,(ast.Assign,ast.For,ast.Import,ast.ImportFrom))
@@ -799,6 +808,10 @@ class StructuredModuleBuilder(ModuleBuilder):
                 from scar.ir.program.module_entries import ExpandedCompilerFrameBodyOverlay
                 overlay_type=ExpandedCompilerFrameBodyOverlay
             extra={'compiler_prologue':compiler_prologue}
+        if getattr(self,'supports_class_construction',False):
+            from scar.ir.program.module_entries import ClassConstructionFrameBodyOverlay
+            overlay_type=ClassConstructionFrameBodyOverlay
+            extra['class_constructions']=tuple(self.class_constructions)
         overlay=overlay_type(self.declaration,module_source_census(self.prepared_source),self.root_scope,
             frame_statement_slice(self.prepared_source,self.unit,F.BODY,self.prefix_nodes) if self.prefix_nodes else None,
             tuple(self.statement_expansions),remaining,tuple(self.module_frontiers),self.operations_emitted,
@@ -1093,3 +1106,29 @@ class ExpandedCompilerMappingBodyBuilder(CompilerMappingBodyBuilder):
         from scar.ir.program.module_entries import FrameBodyProfile
         self.frame_body_profile=FrameBodyProfile.STRUCTURED_MAPPING_COMPILER_OPS_314_V1
         self.prefix_nodes,self.remaining_nodes=mapping_prefix_selection(context,evidence,profile=self.frame_body_profile)
+
+
+class ClassConstructionMappingBodyBuilder(ExpandedCompilerMappingBodyBuilder):
+    supports_class_construction=True
+
+    def __init__(self,context,selection,evidence,max_operations):
+        super().__init__(context,selection,evidence,max_operations)
+        from scar.ir.program.module_entries import FrameBodyProfile
+        from scar.analysis.source_language import SourceLanguageOptions
+        from scar.ir.program.source_language import SourceLanguageCapability as C
+        self.class_constructions=[]
+        self.language_options=SourceLanguageOptions((C.SLICE_KEYS,C.CLASS_CONSTRUCTION_314_V1),evidence)
+        self.frame_body_profile=FrameBodyProfile.STRUCTURED_MAPPING_CLASS_314_V1
+        self.prefix_nodes,self.remaining_nodes=mapping_prefix_selection(context,evidence,profile=self.frame_body_profile)
+
+    def statements(self,nodes,cursor):
+        from scar.ir.program.module_entries import FrameStatementExpansion
+        from scar.analysis.source_class_construction_lowering import lower_class_construction
+        for node in nodes:
+            if isinstance(node,ast.ClassDef):
+                start=len(self.operations);entry=cursor.block
+                cursor=lower_class_construction(self,node,cursor)
+                self.statement_expansions.append(FrameStatementExpansion(self.source(node),self.frame_region,entry,cursor.block,
+                    tuple(op.id for op in self.operations[start:]),()))
+            else:cursor=super().statements((node,),cursor)
+        return cursor

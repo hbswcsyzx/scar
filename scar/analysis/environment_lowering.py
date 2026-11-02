@@ -264,6 +264,9 @@ class StructuredEnvironmentBuilder(StructuredBuilder):
                 continue
             if cursor is None:
                 cursor = super().statements((node,), cursor)
+            elif isinstance(node, ast.ClassDef) and self.has_language('CLASS_CONSTRUCTION_314_V1'):
+                from scar.analysis.source_class_construction_lowering import lower_class_construction
+                cursor = lower_class_construction(self, node, cursor)
             elif isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)) and self.has_language('NESTED_FUNCTION_314_V1'):
                 from scar.analysis.source_function_definition_lowering import lower_function_definition
                 cursor = lower_function_definition(self, node, cursor)

@@ -751,6 +751,88 @@ def _call_relations(manifest, unit, entries, fragments, limit):
                   caller_source_text=source_text(caller.unit), load_body=load_body,
                   load_signature=load_signature, target=target)
 
+    from scar.analysis.static_module_attributes import (
+        ModuleAttributeDependencies, validate_import_module_route, validate_module_attribute_flow)
+    from scar.ir.program.static_calls import (
+        StaticArgumentValueFlow, StaticReturnValueFlow, StaticCrossBodyNamespaceFlow,
+        StaticModuleAttributeFlow)
+    module_source_cache=OrderedDict()
+    def module_source_context(body):
+        key=body.unit['key']
+        if key not in module_source_cache:
+            import ast
+            from scar.ir.v2.codec import semantic_from_dict
+            text=source_text(body.unit)
+            module_source_cache[key]=(ast.parse(text,filename=body.unit['path'],type_comments=True),
+                semantic_from_dict(fragments.read(body.unit['artifacts']['semantic'])),text)
+            while len(module_source_cache)>2:module_source_cache.popitem(last=False)
+        module_source_cache.move_to_end(key)
+        return module_source_cache[key]
+    def module_bodies(name):
+        for owner in manifest['units']:
+            if name not in owner.get('module_names',()):continue
+            for row in owner.get('bodies',()):
+                if row.get('kind')=='MODULE' and row.get('status')=='LOWERED_WITH_GAPS':
+                    # This original namespace is already present in the body
+                    # envelope and is independently receipt/source checked.
+                    document=fragments.read(row['artifact'])
+                    from scar.ir.program.source import LoweringMetadata
+                    from scar.ir.program.source_call_bindings import SourceBodyNamespace
+                    from scar.ir.program.source_references import SourceArtifactLocator
+                    from scar.ir.program.providers import ProviderArtifact,ProviderFactReference
+                    from scar.ir.record_codec import decode
+                    metadata=decode(LoweringMetadata,document['metadata'])
+                    number=next(n for n,u in enumerate(manifest['units'])if u is owner)
+                    position=owner['bodies'].index(row);descriptor=row['artifact']
+                    locator=SourceArtifactLocator(ProviderArtifact(str(fragments.root/descriptor['path']),
+                        descriptor['sha256'],descriptor['bytes'],'scar.static-body/1'),
+                        descriptor['decoded_sha256'],descriptor['decoded_bytes'],'gzip-canonical-json','#/graph',
+                        ProviderFactReference(ProviderArtifact(basis_uri,basis['sha256'],basis['bytes'],'scar.static-call-source-basis/1'),
+                            f'#/units/{number}/bodies/{position}/artifact'))
+                    from scar.ir.v2.ids import OperationDefinitionID
+                    from scar.ir.program.ids import RegionID
+                    namespace=SourceBodyNamespace(locator,'scar.program-graph/'+str(document['graph']['schema_version']),
+                        decode(OperationDefinitionID,row['definitions'][0]),None,metadata.entry,
+                        decode(RegionID,document['graph']['root']))
+                    yield load_body(namespace)
+    module_engine=ModuleAttributeDependencies(load_body=load_body,source_context=module_source_context,
+        module_bodies=module_bodies,namespace_for=lambda body:body.dependencies)
+    def check_module_context(context,requirements):
+        callee=load_body(context.callee)
+        check_definition(context.definition,callee.unit)
+        context_target(context,requirements)
+        from scar.analysis.static_value_flows import validate_call_context
+        validate_call_context(context,caller=load_body(context.caller),callee=callee,
+            signature=signature_for(context.definition,callee))
+    checked_module=set()
+    def check_module_support(flow):
+        if type(flow)is StaticArgumentValueFlow:
+            from scar.analysis.static_value_flows import validate_argument_value_flow
+            check_value_flow(flow,validate_argument_value_flow)
+        elif type(flow)is StaticReturnValueFlow:
+            from scar.analysis.static_value_flows import validate_return_value_flow
+            check_value_flow(flow,validate_return_value_flow)
+        elif type(flow)is StaticCrossBodyNamespaceFlow:
+            from scar.analysis.static_crossbody_namespace import StaticNamespaceBody,validate_cross_body_namespace_flow
+            namespaces={flow.write.body,flow.read.body,*(s.body for s in flow.segments)}
+            for bridge in flow.bridges:
+                route=bridge.environment;check_environment_creation(route)
+                namespaces.update((route.caller,route.callee,route.creation_body))
+                for incoming in bridge.caller_owner_routes:
+                    check_environment_creation(incoming)
+                    namespaces.update((incoming.caller,incoming.callee,incoming.creation_body))
+            endpoints={}
+            for namespace in namespaces:
+                body=load_body(namespace)
+                endpoints[namespace]=StaticNamespaceBody(body.graph,body.document,namespace,body.index,body.dependencies)
+            validate_cross_body_namespace_flow(flow,bodies=endpoints)
+        elif type(flow)is StaticModuleAttributeFlow:
+            if flow in checked_module:return
+            validate_module_attribute_flow(flow,engine=module_engine,check_support=check_module_support,
+                check_context=check_module_context)
+            checked_module.add(flow)
+        else:raise ValueError('unrecognized module reference provenance support')
+
     rows = []
     for item in publication.get("shards", ()):
         key = item.get("caller_entry_key")
@@ -771,6 +853,10 @@ def _call_relations(manifest, unit, entries, fragments, limit):
                     check_value_flow(flow, validate_argument_value_flow)
                 for flow in call.return_value_flows:
                     check_value_flow(flow, validate_return_value_flow)
+        if document['schema_version']>=6:
+            for route in shard.import_routes:
+                validate_import_module_route(route,engine=module_engine,check_context=check_module_context)
+            for flow in shard.module_attribute_flows:check_module_support(flow)
         relations = document["relations"]
         calls = [{**record, "owning_region": encode(owners[call.operation]),
                   "namespace_flows": _page(encode(call.namespace_flows), limit),
@@ -791,6 +877,12 @@ def _call_relations(manifest, unit, entries, fragments, limit):
                      "storage_schema_version": document["schema_version"],
                      "v4_dependencies_checked": document["schema_version"] >= 4,
                      "v5_value_flows_checked": document["schema_version"] >= 5,
+                     "v6_module_provenance_checked": document['schema_version']>=6,
+                     "import_routes": (_page(encode(shard.import_routes),limit) if document['schema_version']>=6 else None),
+                     "module_attribute_flows": (_page(encode(shard.module_attribute_flows),limit) if document['schema_version']>=6 else None),
+                     "module_frontiers": (_page(encode(shard.module_frontiers),limit) if document['schema_version']>=6 else None),
+                     "module_flow_status": ('RECORDED_CONDITIONAL_MODULE_VALUE_RELATIONS' if document['schema_version']>=6
+                         else 'NOT_RECORDED_IN_STORAGE_SCHEMA'),
                      "caller_meaning": "original stored graph namespace; owning_region identifies the lexical subgraph, not an observed calling frame",
                      "calls": _page(calls, limit)})
     return {"status": "QUALIFIED_CONDITIONAL_STATIC_CALL_RELATIONS", "shards": rows,

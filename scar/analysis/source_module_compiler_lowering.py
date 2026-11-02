@@ -160,7 +160,7 @@ def validate_compiler_prologue(result,code_evidence,context):
     from scar.ir.program.module_entries import RequiredModuleExpansion
     overlay=result.module
     from scar.ir.program import module_entries as module_ir
-    if type(overlay) is getattr(module_ir,'ExpandedCompilerFrameBodyOverlay',None):
+    if type(overlay) in (getattr(module_ir,'ExpandedCompilerFrameBodyOverlay',None),getattr(module_ir,'ClassConstructionFrameBodyOverlay',None)):
         return validate_expanded_compiler_prologue(result,code_evidence,context)
     if type(overlay)is not CompilerStructuredFrameBodyOverlay:
         raise ValueError('compiler prologue requires its explicit overlay variant')
@@ -179,7 +179,7 @@ def validate_compiler_prologue(result,code_evidence,context):
 def validate_compiler_prologue_core(overlay,graph):
     """Join stored declarations to real graph ports; no source replay claim."""
     from scar.ir.program import module_entries as module_ir
-    if type(overlay) is getattr(module_ir,'ExpandedCompilerFrameBodyOverlay',None):
+    if type(overlay) in (getattr(module_ir,'ExpandedCompilerFrameBodyOverlay',None),getattr(module_ir,'ClassConstructionFrameBodyOverlay',None)):
         return validate_expanded_compiler_prologue_core(overlay,graph)
     from scar.ir.program.model import ReferenceValue,StateVersionValue,LiteralOrigin
     from scar.ir.program.source_subjects import SourceCompilationFrameRoot,FrameKind,MappingFramePorts
@@ -404,9 +404,9 @@ def invoke_expanded_compiler_region(builder,cursor,child):
 
 def validate_expanded_compiler_prologue(result,code_evidence,context):
     """Check generated source layout independently of recorded operation joins."""
-    from scar.ir.program.module_entries import ExpandedCompilerFrameBodyOverlay
+    from scar.ir.program.module_entries import ExpandedCompilerFrameBodyOverlay, ClassConstructionFrameBodyOverlay
     overlay=result.module
-    if type(overlay) is not ExpandedCompilerFrameBodyOverlay:
+    if type(overlay) not in (ExpandedCompilerFrameBodyOverlay,ClassConstructionFrameBodyOverlay):
         raise ValueError('expanded compiler prefix needs its explicit source profile')
     plan=compiler_prelude_plan(code_evidence.code,context.tree);prefix=overlay.compiler_prologue
     if (prefix is not None)!=plan.required:
@@ -425,7 +425,7 @@ def validate_expanded_compiler_prologue_core(overlay,graph):
     which needs source semantics must also run the independent source-plan
     check above. It does not turn partial namespace effects into content facts.
     """
-    from scar.ir.program.module_entries import ExpandedCompilerFrameBodyOverlay
+    from scar.ir.program.module_entries import ExpandedCompilerFrameBodyOverlay, ClassConstructionFrameBodyOverlay
     from scar.ir.program.model import (AccessMode,BlockArgument,CompletionResult,LiteralOrigin,
         OperationResult,ReferenceValue,StateVersionValue,ValueKind,ValueType,value_type)
     from scar.ir.program.source_subjects import FrameKind,MappingFramePorts,SourceCompilationFrameRoot
@@ -433,7 +433,7 @@ def validate_expanded_compiler_prologue_core(overlay,graph):
 
     def need(condition,detail):
         if not condition:raise ValueError('expanded compiler prefix: '+detail)
-    need(type(overlay) is ExpandedCompilerFrameBodyOverlay,'explicit overlay missing')
+    need(type(overlay) in (ExpandedCompilerFrameBodyOverlay,ClassConstructionFrameBodyOverlay),'explicit overlay missing')
     need(len(graph.frame_roots)==1,'root frame is not unique')
     frame=graph.frame_roots[0]
     need(type(frame) is SourceCompilationFrameRoot and frame.kind is FrameKind.MODULE

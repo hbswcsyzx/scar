@@ -102,9 +102,15 @@ def validate_language_body(model, graph, interface, metadata, semantic, language
     expressions = validate_source_expressions(model, graph, interface, metadata, semantic, language,
         source_tree=source_tree, options=options, structural_only=structural_only,
         pending_protocols=pending_protocols)
-    indexed = expressions | slice_access | displays | comprehensions | set(unpack) | set(slices) | set(constants) | calls | try_protocols | functions | imports | withs | sets
+    from scar.analysis.source_class_construction_validation import validate_class_constructions
+    _need(not language.class_constructions or options is not None,
+          'class construction requires original independently reconstructed compiler inputs')
+    classes = validate_class_constructions(graph=graph,metadata=metadata,records=language.class_constructions,
+        protocols=protocols,code_evidence=options.code_evidence if options is not None else None,
+        source_tree=source_tree,semantic=semantic,interface=interface,structural_only=structural_only,constants=language.constants)
+    indexed = classes | expressions | slice_access | displays | comprehensions | set(unpack) | set(slices) | set(constants) | calls | try_protocols | functions | imports | withs | sets
     actual = {key for key, row in protocols.items() if row.kind.value in EXTENDED_PROTOCOLS}
-    _need(indexed == actual and len(indexed) == len(expressions) + len(slice_access) + len(unpack) + len(slices) + len(constants) + len(calls) + len(try_protocols) + len(functions) + len(imports) + len(withs) + len(sets) + len(comprehensions) + len(displays),
+    _need(indexed == actual and len(indexed) == len(classes) + len(expressions) + len(slice_access) + len(unpack) + len(slices) + len(constants) + len(calls) + len(try_protocols) + len(functions) + len(imports) + len(withs) + len(sets) + len(comprehensions) + len(displays),
           "new language operations must have one exact shape/provenance record")
 
     def source_node(reference, classes):
@@ -317,12 +323,13 @@ def validate_language_body(model, graph, interface, metadata, semantic, language
         literal_constant = atom is not None and atom.kind == "Constant"
         call_constant = atom is not None and atom.kind == "Call"
         function_constant = atom is not None and atom.kind == 'FunctionDef'
+        class_constant = atom is not None and atom.kind == 'ClassDef'
         import_constant = atom is not None and atom.kind == 'ImportFrom'
-        capability = (Capability.CODE_CONSTANTS_314_V1 if literal_constant else Capability.FUNCTION_IMPORT_314_V1 if import_constant else Capability.NESTED_FUNCTION_314_V1
+        capability = (Capability.CLASS_CONSTRUCTION_314_V1 if class_constant else Capability.CODE_CONSTANTS_314_V1 if literal_constant else Capability.FUNCTION_IMPORT_314_V1 if import_constant else Capability.NESTED_FUNCTION_314_V1
             if function_constant else Capability.CALL_KWARGS_314_V1 if call_constant else Capability.SLICE_KEYS)
         _need(capability in language.capabilities and protocols[identity].kind.value == "READ_CODE_CONSTANT"
               and constant.source == protocols[identity].source, "code constant kind/capability differs")
-        node = source_node(constant.source, (ast.Constant,) if literal_constant else (ast.ImportFrom,) if import_constant else (ast.FunctionDef,)
+        node = source_node(constant.source, (ast.ClassDef,) if class_constant else (ast.Constant,) if literal_constant else (ast.ImportFrom,) if import_constant else (ast.FunctionDef,)
             if function_constant else (ast.Call,) if call_constant else (ast.Slice, ast.Tuple))
         operation = operations[identity]
         _need(operation.terminator is None and not operation.effects_complete and len(operation.results) == 1
@@ -345,7 +352,7 @@ def validate_language_body(model, graph, interface, metadata, semantic, language
             candidates = [row for row in dis.get_instructions(evidence.code)
                 if row.opname == "LOAD_CONST" and row.arg == constant.constant_path[0]
                 and tuple(row.positions) == (node.lineno, node.end_lineno, node.col_offset, node.end_col_offset)]
-            allowed = (CodeType, tuple) if function_constant else (str, tuple) if call_constant else (slice, tuple)
+            allowed = (CodeType, str, tuple) if class_constant else (CodeType, tuple) if function_constant else (str, tuple) if call_constant else (slice, tuple)
             _need(len(candidates) == 1 and type(candidates[0].argval) in allowed
                   and (not import_constant or type(candidates[0].argval) is tuple
                        and candidates[0].argval == tuple(alias.name for alias in node.names))

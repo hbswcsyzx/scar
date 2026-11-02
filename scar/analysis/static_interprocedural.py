@@ -64,7 +64,7 @@ class InterproceduralDependencies:
     point before publishing final call records.
     """
     def __init__(self, *, load_body, namespace_for, max_contexts=65536,
-                 max_depth=64, max_facts=262144, check=None):
+                 max_depth=64, max_facts=262144, check=None, on_invalidate=None, external_fact_count=None):
         if not callable(load_body) or not callable(namespace_for):
             raise TypeError('interprocedural dependencies require bounded body/index loaders')
         if any(type(n)is not int or n<1 for n in (max_contexts,max_depth,max_facts)):
@@ -72,6 +72,10 @@ class InterproceduralDependencies:
         self.load_body,self.namespace_for=load_body,namespace_for
         self.max_contexts,self.max_depth,self.max_facts=max_contexts,max_depth,max_facts
         self.check=check or (lambda:None)
+        if on_invalidate is not None and not callable(on_invalidate):
+            raise TypeError('static value invalidation callback must be callable')
+        self.on_invalidate=on_invalidate
+        self.external_fact_count=external_fact_count or(lambda:0)
         self._bodies=set();self._calls={};self._calls_by_body=defaultdict(set)
         self._incoming=defaultdict(dict);self._outgoing=defaultdict(set)
         self._affected=deque();self._queued=set();self._cache={}
@@ -141,6 +145,7 @@ class InterproceduralDependencies:
             self.check();current=pending.pop()
             if current in seen:continue
             seen.add(current)
+            if self.on_invalidate is not None:self.on_invalidate(current)
             for key in self._calls_by_body.get(current,()):self._enqueue(key)
             pending.extend(self._outgoing.get(current,()))
         for key in tuple(self._cache):
@@ -228,7 +233,7 @@ class InterproceduralDependencies:
         if any(flow.context!=context or flow.requirements!=requirements for flow in (*args,*returns)):
             raise ValueError('argument/return derivation changed its original call context')
         new_facts=set((*args,*returns))-self._facts
-        if len(self._facts)+len(new_facts)>self.max_facts:
+        if len(self._facts)+len(new_facts)+self.external_fact_count()>self.max_facts:
             # Atomic rejection: none of this activation's new value facts,
             # entry stacks or globals bridges has been committed yet.
             extra=StaticCallFrontier('INTERPROCEDURAL_VALUE_FACT_BUDGET',
@@ -395,7 +400,7 @@ class InterproceduralDependencies:
                             'Conditional namespace contexts exceeded the explicit finite context budget.',namespace.source)
                         return
                     flow=self._compose(current,binding,bridges,paths,body,read,slot)
-                    if flow not in self._facts and len(self._facts)>=self.max_facts:
+                    if flow not in self._facts and len(self._facts)+self.external_fact_count()>=self.max_facts:
                         note('INTERPROCEDURAL_NAMESPACE_FACT_BUDGET',
                             'Qualified namespace relationship budget exhausted; remaining demands stay open.',namespace.source)
                         continue

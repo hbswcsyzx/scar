@@ -34,6 +34,10 @@ K/Σ/A/R/Q/M 是正交视角。当前 M 不收集实际测量，Q 保留语言�
 
 import 返回的 module 引用、module namespace 和初始化状态分别建模；对象不是其 dict，源码 initializer 定义也不是一次已经发生的初始化。module 属性、decorator 隐式调用和 defaults 字段/元素应连接各自原操作、Use、状态与读取位置，不能靠名称跳过中间关系。
 
+属性访问使用原 receiver Use、字段选择器、world、正常结果或赋值 Use 表示；属性名是协议配置，不要求程序另外创建一个字符串对象。原 AST/SG 已能确定字段时，即使旧 core 没有精细地址声明，也可保留这部分已知接口；已有地址声明必须与原接口一致。引用绑定令牌可出现在来源路径中，但不因此成为 Python 对象引用。跨层 module 属性来源由真实 import 结果、所选源模块正常出口的 reaching binding，以及 consumer 的原控制路径组合；属性覆盖同时记录写入端口和 receiver 来源。所有这些关系附带加载、lookup、写入提交、上下文及效果保持条件，不是缓存许可。没有 CALL 的属性读取同样保存关系。
+
+类声明与共享类体分开。父级构造保存装饰器求值、builtins 中的 builder 查找、类体 code/factory/closure、name/bases/keywords、builder INVOKE、逆序装饰器 application 和当前 frame 的绑定写入。隐式调用有自己的真实输入/normal/raise/world 端口，不伪造 AST Call 或 CallID。共享 suite 的编译来源引用只证明对应哪份代码；prepared namespace 必须由 prepare 调用或明确的 mapping allocation 产生，不能从一个派生关系中凭空创建。suite 的 cell/None 正常 payload 不等于最终类对象。
+
 ## 身份和版本
 
 源码身份包含源码指纹、命名空间/编译上下文及定义位置，不能只用函数名或行号。
@@ -73,6 +77,8 @@ State SSA 表达静态读写依赖；循环/分支版本是符号版本，不是
 源码目录中的声明、旧 CALLS 关系及按同名声明生成的 metadata 只能提供搜索提示。只有与本 CALL 的真实 callee Value、绑定路径和编译来源接通后，才生成目标参数、状态、返回或环境端口。提示没有接通时仍保存在原 metadata/明确前沿中，不能绕过已经发生的覆盖写入，复活旧 factory。
 
 调用目录枚举是否完成、处理范围内的 namespace 队列是否稳定，以及整程序 points-to/effects 是否闭合分别记录。范围内队列稳定不证明所有入口、所有目标和所有属性已经确定。
+
+从外部模块取得的函数可以拥有 caller 图中根本不存在的 globals 引用。此时应通过原模块状态、函数创建环境、真实调用的 world 和 callee 环境端口连接依赖；不能借用 caller 当前 G，也不能为了满足某个桥的字段要求制造 caller 中的 namespace Value。这条状态桥尚待实现。
 
 实参、形参和正常返回的引用来源必须按调用上下文连接。`StaticCallContext` 引用原 caller、CALL、callee Use 和所选目标，不代表一次运行调用。沿返回结果进入 callee 时压入该上下文；从 formal 回到 actual 时，只能消费栈顶匹配的原调用，再回到其 caller 上下文。已有明确上下文而缺少来源时，不得退回无上下文的候选并集。否则 `identity(a)`、`identity(b)` 或多层 callback 的返回值会错误混合。
 
