@@ -709,8 +709,9 @@ def require_valid_structured_module_program(result,*,source_texts,code_evidence=
     # Historical conservative prefixes without it replay their historical
     # admission rules rather than being silently enlarged by a new producer.
     literal_bool_elision=any(row.compiler_elision is not None for row in overlay.expansions)
+    module_annotations=any(row.compiler_annotation is not None for row in overlay.expansions)
     prefix,tail=mapping_prefix_selection(context,code_evidence,profile=result.profile,
-        literal_bool_elision=literal_bool_elision)
+        literal_bool_elision=literal_bool_elision,module_annotations=module_annotations)
     _need(overlay.prefix==(frame_statement_slice(context,unit,F.BODY,prefix) if prefix else None),'SP8 prefix is not the mechanical maximal supported collection')
     _need((overlay.remaining is not None)==bool(tail),'SP8 missing/extra remaining source collection')
     if tail:
@@ -782,6 +783,16 @@ def require_valid_structured_module_program(result,*,source_texts,code_evidence=
             try:reference=_module_statement_ref(context,node)
             except ValueError:continue  # Unvisited source gaps do not acquire fabricated atoms.
             (expression_nodes if isinstance(node,ast.expr) else nodes)[reference]=node
+    annotation_plans={}
+    if module_annotations:
+        from scar.analysis.source_module_annotation_lowering import module_annotation_plan
+        for expansion in overlay.expansions:
+            if expansion.compiler_annotation is None:continue
+            node=nodes.get(expansion.source)
+            _need(isinstance(node,ast.AnnAssign),'annotation compiler receipt requires its original statement')
+            plan=module_annotation_plan(context,code_evidence,node,profile=result.profile)
+            _need(plan.witness==expansion.compiler_annotation,'annotation compiler receipt changed')
+            annotation_plans[expansion.source]=plan
     instructions=_mapping_source_instructions(context,code_evidence,profile=result.profile)
     from scar.ir.program.class_construction import CLASS_CONSTRUCTION_PROTOCOLS
     from scar.analysis.source_class_construction_validation import validate_class_constructions
@@ -809,16 +820,23 @@ def require_valid_structured_module_program(result,*,source_texts,code_evidence=
             _need(extended,'function construction requires explicit mapping BODY profile')
             invoke(op,(ref_type,state_type),memory=True)
             continue  # Exact code/default/decorator/namespace source checked per definition below.
+        if kind is K.SET_ADD_314:
+            _need(protocol.source in annotation_plans,'SET_ADD requires its exact module annotation plan')
+            continue  # The statement validator checks operands, both worlds and cleanup.
         normal_types=(state_type,) if kind in (K.STORE_NAME_314,PythonProtocolKind.STORE_GLOBAL,K.DELETE_NAME_314,K.UNEXPANDED_SLICE,K.REQUIRED_COMPILER_PROLOGUE) else (ref_type,state_type)
         if kind in (K.REQUIRED_COMPILER_PROLOGUE,K.INVOKE_COMPILER_PROLOGUE):
             _need(compiler,'compiler prefix primitive requires its explicit profile')
         invoke(op,normal_types,memory=kind in (K.REQUIRED_COMPILER_PROLOGUE,K.INVOKE_COMPILER_PROLOGUE))
         if kind is K.LOAD_NAME_314:
             node=expression_nodes.get(protocol.source)
-            _need(isinstance(node,ast.Name) and len(op.uses)==5 and tuple(use.value for use in op.uses[:3])==refs,
-                  'LOAD_NAME must retain named L/G/savedB and exact Name source')
-            literal(op.uses[3],node.id);expected_addresses.add(op.id)
-            _need(mapping_name_opcode(code_evidence.code,node,node.id)=='LOAD_NAME','LOAD_NAME disagrees with original root opcode')
+            annotation=annotation_plans.get(protocol.source)
+            _need((isinstance(node,ast.Name) or annotation is not None)
+                  and len(op.uses)==5 and tuple(use.value for use in op.uses[:3])==refs,
+                  'LOAD_NAME must retain original L/G/savedB and source/compiler ownership')
+            literal(op.uses[3],annotation.lookup.argval if annotation is not None else node.id);expected_addresses.add(op.id)
+            _need(annotation is not None and annotation.lookup.opname=='LOAD_NAME'
+                  or isinstance(node,ast.Name) and mapping_name_opcode(code_evidence.code,node,node.id)=='LOAD_NAME',
+                  'LOAD_NAME disagrees with original root opcode')
             expected=[(i,3,'READ') for i in range(3)]
         elif kind is PythonProtocolKind.LOOKUP_GLOBAL:
             node=expression_nodes.get(protocol.source)
@@ -938,6 +956,10 @@ def require_valid_structured_module_program(result,*,source_texts,code_evidence=
               'SP8 statement/recursive slice operations differ')
         _need(expansion.compiler_elision==elisions.get(expansion.source),
               'statement compiler-elision receipt is missing, extra or changed')
+        _need(expansion.compiler_annotation==(annotation_plans[expansion.source].witness
+                  if expansion.source in annotation_plans else None)
+              and (not isinstance(node,ast.AnnAssign) or expansion.source in annotation_plans),
+              'statement annotation compiler receipt is missing or changed')
         if expansion.source in elisions:
             # A compiler-elided If with an empty selected suite is a valid
             # zero-runtime mapping.  Nonempty suites are checked recursively.
@@ -974,6 +996,14 @@ def require_valid_structured_module_program(result,*,source_texts,code_evidence=
     # Derive expression results only from actual producer ports/literals.
     def expression_value(node):
         source=_module_statement_ref(context,node)
+        if isinstance(node,ast.Dict):
+            matches=[plan for statement,plan in annotation_plans.items()
+                     if nodes[statement].value is node and plan.empty_dict is not None]
+            _need(len(matches)==1,'dictionary expression needs its exact annotation RHS compiler plan')
+            from scar.analysis.source_module_annotation_validation import empty_dict_result
+            return empty_dict_result(node,matches[0],source_reference=lambda n:_module_statement_ref(context,n),
+                overlay=overlay,protocols=protocols,operations=operations,invoke=invoke,
+                ref_type=ref_type,state_type=state_type)
         if isinstance(node,ast.Constant):
             candidates={row.value for row in overlay.value_links if row.source==source
                 and isinstance(values[row.value],ReferenceValue) and type(values[row.value].origin) is LiteralOrigin
@@ -1011,7 +1041,14 @@ def require_valid_structured_module_program(result,*,source_texts,code_evidence=
         return found[0]
     for node in expected_statements:
         source=_module_statement_ref(context,node)
-        if isinstance(node,ast.Assign):
+        if isinstance(node,ast.AnnAssign):
+            from scar.analysis.source_module_annotation_validation import validate_module_annotation
+            validate_module_annotation(node,expansions[source],annotation_plans[source],
+                overlay=overlay,blocks=blocks,operations=operations,values=values,protocols=protocols,
+                expression_value=expression_value,invoke=invoke,source_reference=lambda n:_module_statement_ref(context,n),
+                normal_path=_normal_statement_path,exception_holds=_mapping_exception_holds,
+                namespace_refs=refs,ref_type=ref_type,state_type=state_type,refinements=refinements)
+        elif isinstance(node,ast.Assign):
             target=node.targets[0]
             if isinstance(target,ast.Name):
                 store=store_at(_module_statement_ref(context,target))
@@ -1082,6 +1119,13 @@ def require_valid_structured_module_program(result,*,source_texts,code_evidence=
     instructions=_mapping_source_instructions(context,code_evidence,profile=result.profile)
     class_name_constants={values[operations[record.builder_call.operation].uses[2].value].origin.operation
         for record in getattr(overlay,'class_constructions',())}
+    annotation_constants={}
+    for source,plan in annotation_plans.items():
+        node=nodes[source]
+        for instruction,reference in ((plan.value,_module_statement_ref(context,node.annotation)
+                if plan.key is not None else source),(plan.key,source)):
+            if instruction is not None and instruction.opname=='LOAD_CONST':
+                annotation_constants[reference,instruction.arg]=type(instruction.argval)
     for constant in overlay.constants:
         root_code_key=root.code.code_layout_key if static_root else root.code.key
         _need(constant.code_key==root_code_key and len(constant.constant_path)==1 and constant.operation in operations
@@ -1089,7 +1133,8 @@ def require_valid_structured_module_program(result,*,source_texts,code_evidence=
         matches=[row for row in instructions if row.opname=='LOAD_CONST' and row.arg==constant.constant_path[0]
             and tuple(row.positions)==(constant.source.start_line,constant.source.end_line,constant.source.start_column,constant.source.end_column)]
         from types import CodeType
-        allowed=(str,) if constant.operation in class_name_constants else (tuple,slice,CodeType) if extended else (tuple,slice)
+        annotation_type=annotation_constants.get((constant.source,constant.constant_path[0]))
+        allowed=(annotation_type,) if annotation_type is not None else (str,) if constant.operation in class_name_constants else (tuple,slice,CodeType) if extended else (tuple,slice)
         _need(len(matches)==1 and type(matches[0].argval) in allowed
               and code_evidence.code.co_consts[matches[0].arg] is matches[0].argval,'SP8 whole-root code constant slot/span differs')
         _need(owners[constant.operation]==graph.root,'code constant must belong to this actual module frame')

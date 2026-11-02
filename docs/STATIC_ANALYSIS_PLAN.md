@@ -33,7 +33,7 @@ CEM solve 的 48 个原 CALL 均无目标候选。先按原 callee/receiver/name
 下一轮分三项并行准备、按依赖顺序验收：
 
 - **接线审计**：保存原调用→callee来源→首次缺边的证据路径，分清缺主体、缺协议、缺状态关系与真正未绑定输入。验收是精确原端点可定位，不能只汇总 frontier。
-- **主体覆盖**：模块字面 bool If 的 source/compiler 映射已实现并独立读回；下一项 module AnnAssign、class annotation，复用原 compiler prelude/lazy factory/namespace/world。真实两份模块已分别推进至第 11/9 行注解赋值；只在定点重建后更新覆盖。
+- **主体覆盖**：模块字面 bool If 和简单名称 AnnAssign 已实现并独立读回；真实两份模块定点重建的语句残留均为 0，deferred child 仍未展开。继续 class annotation 和后续主体缺口，复用原 compiler prelude/lazy factory/namespace/world。主图尚未替换，不改变其旧覆盖分母。
 - **同图推理**：控制必要条件到值路由已接入同一工作队列；保留原图/条件/反证。进一步将 receiver、字段读取和 reaching writes 回馈调用解析，避免专项 reader 各自得到事实而互不消费。
 
 全范围任务已于 2026-11-02 21:42 UTC PUBLISHED，producer 不再受该任务冻结。不要为

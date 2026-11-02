@@ -129,6 +129,11 @@ namespace 替代路径需要单独状态前提，不准把一个捕获引用边�
 记录而不制造运行时 Nop。编译器前导与源码 import 共用位置时，必须沿已验证的 compiler
 profile/offset 分界，不能按 source span 把前导误认为 import，也不能任意跳过未知指令。
 
+模块 AnnAssign 也不等于普通赋值：默认 3.14 的 annotation registration 与延迟 child，
+future 模式的原字符串槽与 `__annotations__` 更新分别表示。RHS/store 成功后才能登记；
+实际 namespace lookup 的结果才是更新 owner，同名 compiler cell 不能替代它。原索引、
+正常/异常的引用消费、world 和源码见证独立核对；未展开 child 不因顶层完成而消失。
+
 该状态桥区分：`fn=p.f; p.a=p.b; fn()` 的函数引用来自早先的 `p.f` 读点，G 内容却在真实 `fn` CALL/world 查询；`p.f=q.f` 后所选函数的 G 属于实际 factory 的 q，不能按表面 receiver p 判断；`p.a=p.b; p.b=other` 中 a 的来源是赋值当时的 payload/读点，不是未来的 b。callee 内同 key 的 STORE_GLOBAL 先参与覆盖，只有 entry binding 仍可到达 READ 的路径继续向外层状态查询。新版初始化条件域已有通用静态验证并随 v8 调用索引发布；当前真实索引的 module globals flow 仍为 0，完整接线不能由专项样例推定。
 
 实参、形参和正常返回的引用来源必须按调用上下文连接。`StaticCallContext` 引用原 caller、CALL、callee Use 和所选目标，不代表一次运行调用。沿返回结果进入 callee 时压入该上下文；从 formal 回到 actual 时，只能消费栈顶匹配的原调用，再回到其 caller 上下文。已有明确上下文而缺少来源时，不得退回无上下文的候选并集。否则 `identity(a)`、`identity(b)` 或多层 callback 的返回值会错误混合。

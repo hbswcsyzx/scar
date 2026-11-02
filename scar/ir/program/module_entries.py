@@ -443,6 +443,7 @@ class FrameBodyProtocolKind(str, Enum):
     COMPILER_RETAIN_OWNED = 'COMPILER_RETAIN_OWNED'
     COMPILER_RELEASE_OWNED = 'COMPILER_RELEASE_OWNED'
     INVOKE_EXPANDED_COMPILER_PROLOGUE = 'INVOKE_EXPANDED_COMPILER_PROLOGUE'
+    SET_ADD_314 = 'SET_ADD_314'
 
 
 class FrameBodyStatus(str, Enum):
@@ -507,6 +508,32 @@ class ModuleLiteralBoolIfElision:
               'compiler-elided If needs distinct original ordered test offsets')
 
 
+class ModuleAnnotationMode(str, Enum):
+    LAZY_SET = 'LAZY_SET_314'
+    FUTURE_STRING = 'FUTURE_STRING_314'
+
+
+@dataclass(frozen=True, slots=True)
+class ModuleAnnotationCompilerWitness:
+    """Original module annotation stages, without evaluating an annotation."""
+    mode: ModuleAnnotationMode
+    root_code_layout_key: str
+    statement_instruction_offsets: tuple[int, ...]
+    rhs_empty_dict_offset: int | None = None
+
+    def __post_init__(self):
+        _need(type(self.mode) is ModuleAnnotationMode, 'annotation compiler mode must be explicit')
+        _need(type(self.root_code_layout_key) is str
+              and re.fullmatch(r'pycode-v2:[0-9a-f]{64}',self.root_code_layout_key) is not None,
+              'annotation statement needs its original root code layout')
+        _need(type(self.statement_instruction_offsets) is tuple and bool(self.statement_instruction_offsets)
+              and all(type(offset) is int and offset >= 0 for offset in self.statement_instruction_offsets)
+              and tuple(sorted(set(self.statement_instruction_offsets))) == self.statement_instruction_offsets,
+              'annotation statement needs exact ordered original stage offsets')
+        _need(self.rhs_empty_dict_offset is None or type(self.rhs_empty_dict_offset) is int
+              and self.rhs_empty_dict_offset >= 0, 'empty dict needs its original allocation offset')
+
+
 @dataclass(frozen=True, slots=True)
 class FrameStatementExpansion:
     source: SourceReference
@@ -516,6 +543,7 @@ class FrameStatementExpansion:
     operations: tuple[OperationID, ...]
     child_slices: tuple[FrameStatementSlice, ...] = ()
     compiler_elision: ModuleLiteralBoolIfElision | None = None
+    compiler_annotation: ModuleAnnotationCompilerWitness | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -829,8 +857,9 @@ def encode_frame_body(value):
     # Keep historical statement records unchanged when no compiler-elision
     # capability is claimed.  The generic record codec remains exact-field.
     for row in document['expansions']:
-        if row['compiler_elision'] is None:
-            del row['compiler_elision']
+        for capability in ('compiler_elision','compiler_annotation'):
+            if row[capability] is None:
+                del row[capability]
     return document
 
 
@@ -840,10 +869,10 @@ def decode_frame_body(value):
            'CLASS_CONSTRUCTION_MAPPING_314_V1':ClassConstructionFrameBodyOverlay}
     kind=kinds.get(value.get('frame_overlay_kind'),StructuredFrameBodyOverlay) if type(value) is dict else StructuredFrameBodyOverlay
     if type(value) is dict and type(value.get('expansions')) is list:
-        # This one additive, statement-local capability does not upgrade an
+        # These additive, statement-local capabilities do not upgrade an
         # old conservative prefix.  Validation still replays the old mapping
-        # rules if no statement carries a compiler-elision witness.
+        # rules when their corresponding compiler witnesses are absent.
         value={**value,'expansions':[
-            {**row,'compiler_elision':None} if type(row) is dict and 'compiler_elision' not in row else row
+            {'compiler_elision':None,'compiler_annotation':None,**row} if type(row) is dict else row
             for row in value['expansions']]}
     return decode(kind, value, record_tags=MODULE_RECORD_TAGS)

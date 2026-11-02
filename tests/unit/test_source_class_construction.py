@@ -124,7 +124,7 @@ def test_module_literal_bool_if_maps_compiler_elision_without_executing_source(t
     # Emit a historical conservative prefix using its unchanged admission
     # mode, then independently read that old wire after restoring new rules.
     original_selection=lowering.mapping_prefix_selection
-    def old_selection(context,evidence,*,profile=None,literal_bool_elision=False):
+    def old_selection(context,evidence,*,profile=None,literal_bool_elision=False,module_annotations=False):
         return original_selection(context,evidence,profile=profile,literal_bool_elision=False)
     text='sentinel = 0\nif True:\n    value = kept()\nelse:\n    value = dead()\nafter = 1\n'
     with monkeypatch.context() as patch:
@@ -134,6 +134,67 @@ def test_module_literal_bool_if_maps_compiler_elision_without_executing_source(t
     assert all('compiler_elision' not in row for row in wire['module']['expansions'])
     reread=SourceProgram.read_structure(wire,source_texts={str(prepared.path):text})
     assert reread.module.remaining.subject.statements[0].start_line==2
+
+    # Module annotation indices belong to original compilation, including
+    # source in a compiler-elided arm; they must not be renumbered at runtime.
+    from scar.ir.program.module_entries import ModuleAnnotationMode as AM,FrameBodyProtocolKind as MK
+    from scar.ir.program.model import ExitKind
+    for future in (False,True):
+        text=('from __future__ import annotations\n' if future else '')+(
+            'if False:\n    skipped: never_evaluate() = never_execute()\n'
+            'first: annotation_one() = {}\nsecond: annotation_two()\nafter = 1\n')
+        prepared,evidence,result,wire=construct(text,'live_annotation_'+str(future))
+        assert result.module.remaining is None
+        declarations=[row for row in result.module.expansions if row.compiler_annotation]
+        assert len(declarations)==2
+        assert all(row.compiler_annotation.mode is (AM.FUTURE_STRING if future else AM.LAZY_SET)
+                   for row in declarations)
+        assert declarations[0].compiler_annotation.rhs_empty_dict_offset is not None
+        assert declarations[1].compiler_annotation.rhs_empty_dict_offset is None
+        values={row.id:row for row in result.graph.values}
+        operations={row.id:row for row in result.graph.operations}
+        blocks={row.id:row for region in result.graph.regions for row in region.blocks}
+        markers=[row for row in result.module.protocols if row.source in {s.source for s in declarations}
+                 and row.kind is (P.STORE_SUBSCRIPT if future else MK.SET_ADD_314)]
+        assert len(markers)==2
+        if not future:
+            assert [values[operations[row.operation].uses[1].value].origin.value for row in markers]==[1,2]
+        for marker in markers:
+            update=operations[marker.operation]
+            lookup,=[operations[row.operation] for row in result.module.protocols
+                     if row.kind is MK.LOAD_NAME_314 and row.source==marker.source]
+            landing=blocks[next(edge.block for edge in lookup.terminator.successors if edge.kind is ExitKind.NORMAL)]
+            assert update.uses[0].value==landing.arguments[0]
+            assert update.uses[0].value not in result.module.compiler_prologue.cell_values
+            assert not update.effects_complete
+        marker=markers[0];update=operations[marker.operation]
+        for index,replacement in ((0,result.module.compiler_prologue.cell_values[0]),
+                                  (-1,result.graph.frame_roots[0].entry.world)):
+            selected=update.uses[index].id
+            changed_op=replace(update,uses=tuple(replace(use,value=replacement) if use.id==selected else use
+                                                for use in update.uses))
+            changed=replace(result,graph=replace(result.graph,operations=tuple(
+                changed_op if op.id==update.id else op for op in result.graph.operations)))
+            with pytest.raises(ValueError):
+                SourceProgram.read_structure(changed.to_dict(),source_texts={str(prepared.path):text})
+        changed=deepcopy(wire)
+        receipt=next(row['compiler_annotation'] for row in changed['module']['expansions']
+                     if row.get('compiler_annotation'))
+        receipt['statement_instruction_offsets']=[999999]
+        with pytest.raises(ValueError):
+            SourceProgram.read_structure(changed,source_texts={str(prepared.path):text})
+
+    # Adding this capability must not reinterpret an older annotation suffix.
+    text='before = 1\nvalue: NotEvaluated = {}\nafter = 2\n'
+    with monkeypatch.context() as patch:
+        patch.setattr(lowering,'mapping_prefix_selection',old_selection)
+        prepared,_,_,wire=construct(text,'legacy_annotation')
+    reread=SourceProgram.read_structure(wire,source_texts={str(prepared.path):text})
+    assert reread.module.remaining.subject.statements[0].start_line==2
+    assert all('compiler_annotation' not in row for row in wire['module']['expansions'])
+    for index,text in enumerate(('value: T = {1: 2}\n','(value): T = rhs()\n')):
+        _,_,result,_=construct(text,'unsupported_annotation_'+str(index))
+        assert result.module.prefix is None and result.module.remaining is not None
 
 
 MODULE = """@first()
@@ -207,8 +268,9 @@ def test_parent_class_ports_roundtrip_without_running_and_reject_substitutions(t
         first_import_module = lower_module_entry(first_import_prepared, first_import_unit,
             code_evidence=first_import_evidence, profile=FrameBodyProfile.STRUCTURED_MAPPING_CLASS_314_V1)
         assert first_import_module.module.compiler_prologue is not None
-        assert [row.source.start_line for row in first_import_module.module.expansions] == [1, 2, 3]
-        assert first_import_module.module.remaining.subject.statements[0].start_line == 4
+        assert [row.source.start_line for row in first_import_module.module.expansions] == [1, 2, 3, 4]
+        assert first_import_module.module.remaining is None
+        assert first_import_module.module.expansions[-1].compiler_annotation is not None
         assert SourceProgram.read_structure(first_import_module.to_dict(),
             source_texts={str(first_import_path): first_import_source}).graph == first_import_module.graph
         assert not first_import_path.exists()

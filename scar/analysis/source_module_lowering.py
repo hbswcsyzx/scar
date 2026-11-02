@@ -558,7 +558,8 @@ def mapping_literal_bool_if_plan(context, evidence, node, *, profile=None):
         tuple(row.offset for row in tests))
 
 
-def mapping_prefix_selection(context, evidence, *, profile=None, literal_bool_elision=False):
+def mapping_prefix_selection(context, evidence, *, profile=None, literal_bool_elision=False,
+                             module_annotations=False):
     """Maximal contiguous supported statements; no workload/name allowlist."""
     unit=module_unit(context)
     from scar.ir.program.module_entries import FrameBodyProfile
@@ -610,6 +611,11 @@ def mapping_prefix_selection(context, evidence, *, profile=None, literal_bool_el
                 and expression(node.slice) and len(positioned(node,('STORE_SUBSCR',)))==1)
         return False
     def statement(node):
+        if expanded and module_annotations and isinstance(node,ast.AnnAssign):
+            from scar.analysis.source_module_annotation_lowering import module_annotation_plan
+            try:plan=module_annotation_plan(context,evidence,node,profile=profile)
+            except (ValueError,_Unsupported):return False
+            return node.value is None or plan.empty_dict is not None or expression(node.value)
         if profile is FrameBodyProfile.STRUCTURED_MAPPING_CLASS_314_V1 and isinstance(node,ast.ClassDef):
             from scar.analysis.source_class_construction_lowering import class_construction_plan
             try:class_construction_plan(node,evidence.code)
@@ -1212,7 +1218,7 @@ class MappingBodyBuilder(PropagationModuleBuilder):
         from scar.ir.program.module_entries import FrameBodyProfile
         self.frame_body_profile=(FrameBodyProfile.STRUCTURED_MAPPING_COMPILER_314_V1 if getattr(self,'supports_compiler_prologue',False) else FrameBodyProfile.STRUCTURED_MAPPING_BODY_314_V1)
         self.prefix_nodes,self.remaining_nodes=mapping_prefix_selection(context,evidence,
-            profile=self.frame_body_profile,literal_bool_elision=True)
+            profile=self.frame_body_profile,literal_bool_elision=True,module_annotations=True)
 
     def store(self,target,value,cursor):
         if isinstance(target,ast.Name):return super().store(target,value,cursor)
@@ -1222,7 +1228,14 @@ class MappingBodyBuilder(PropagationModuleBuilder):
     def statements(self,nodes,cursor):
         from scar.ir.program.module_entries import FrameStatementExpansion,StatementSequenceField as F
         for node in nodes:
-            if isinstance(node,ast.If) and isinstance(node.test,ast.Constant) and type(node.test.value) is bool:
+            if isinstance(node,ast.AnnAssign):
+                from scar.analysis.source_module_annotation_lowering import module_annotation_plan,lower_module_annotation
+                plan=module_annotation_plan(self.prepared_source,self.evidence,node,profile=self.frame_body_profile)
+                start=len(self.operations);entry=cursor.block
+                cursor=lower_module_annotation(self,node,cursor,plan)
+                self.statement_expansions.append(FrameStatementExpansion(self.source(node),self.frame_region,
+                    entry,cursor.block,tuple(op.id for op in self.operations[start:]),compiler_annotation=plan.witness))
+            elif isinstance(node,ast.If) and isinstance(node.test,ast.Constant) and type(node.test.value) is bool:
                 witness=mapping_literal_bool_if_plan(self.prepared_source,self.evidence,node,
                     profile=self.frame_body_profile)
                 start=len(self.operations);entry=cursor.block
@@ -1275,7 +1288,7 @@ class ExpandedCompilerMappingBodyBuilder(CompilerMappingBodyBuilder):
         from scar.ir.program.module_entries import FrameBodyProfile
         self.frame_body_profile=FrameBodyProfile.STRUCTURED_MAPPING_COMPILER_OPS_314_V1
         self.prefix_nodes,self.remaining_nodes=mapping_prefix_selection(context,evidence,
-            profile=self.frame_body_profile,literal_bool_elision=True)
+            profile=self.frame_body_profile,literal_bool_elision=True,module_annotations=True)
 
 
 class ClassConstructionMappingBodyBuilder(ExpandedCompilerMappingBodyBuilder):
@@ -1290,7 +1303,7 @@ class ClassConstructionMappingBodyBuilder(ExpandedCompilerMappingBodyBuilder):
         self.language_options=SourceLanguageOptions((C.SLICE_KEYS,C.CLASS_CONSTRUCTION_314_V1),evidence)
         self.frame_body_profile=FrameBodyProfile.STRUCTURED_MAPPING_CLASS_314_V1
         self.prefix_nodes,self.remaining_nodes=mapping_prefix_selection(context,evidence,
-            profile=self.frame_body_profile,literal_bool_elision=True)
+            profile=self.frame_body_profile,literal_bool_elision=True,module_annotations=True)
 
     def statements(self,nodes,cursor):
         from scar.ir.program.module_entries import FrameStatementExpansion

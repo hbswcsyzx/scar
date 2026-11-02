@@ -75,7 +75,11 @@ Root 独立双向读回 29.93 秒，1 条参数边、2 个 namespace，raw 路�
 
 **Implemented / Verified，尚未重建 current 主体**：模块 `if True/False` 通过原源码与独立重编译 CFG 见证展开；保留两臂源码，仅为选中臂建立执行结构，不制造 TRUTH/BRANCH。死分支仍影响的 compiler annotation factory/cell/prelude/global scope 不丢弃。旧保守 wire 独立读回，不静默升级覆盖。
 
-实际 `envs/utils.py`、`callbacks/registry.py` 的前导/import/Global 修复已有新鲜静态重建，分别推进至第 11/9 行 AnnAssign；current 原主体尚未替换，107/45 后缀分母不变。**下一项是 module AnnAssign 与 class annotation 协议贯通**，不是继续添加 detector。
+**Implemented / Verified（真实源码定点重建，未替换 current）**：module 的简单名称 AnnAssign 已接默认 lazy registration 与 future 字符串模式，保留原 RHS→store→lookup→set/subscript 更新、world 和正常/异常清理；注解表达式不执行。整数索引/字符串来自原编译器槽，不按已展开语句重编号；隐式操作仍引用原 AnnAssign，不伪造 AST。只接精确 BUILD_MAP0 空 dict RHS，其它 Dict/复杂目标维持原边界。
+
+真实 `envs/utils.py` 前缀 7→15/15、语句残留 8→0（321 ops）；`callbacks/registry.py` 前缀 6→15/15、残留 9→0（425 ops）。构建与独立读回约 16.28/10.51 秒，原图与模块接口逐对象相等。唯一扩展短验通过 13.00 秒，Root 原 class/compiler/import 回归通过 7.47 秒。旧 wire 没有新见证时仍重放旧覆盖，没有静默升级。
+
+原 source/producer 收据、两个压缩样本及未闭合项在 `queries/module-annotation/summary.json`。两模块仍 PARTIAL：生成的延迟注解子主体和 namespace/alias/effects 未闭合。current 主体尚未替换，107/45 后缀分母不变；class annotation 协议仍待补。这项覆盖修复不解决 CEM 的 G-origin/IMPORT_FROM 断边。
 
 ### 库/原生材料：输入层完成一部分，整程序连接未完成
 
@@ -89,7 +93,7 @@ C++ source 前端复用 Tree-sitter，实际 53,705-byte template 中机械枚�
 
 1. 盘点真实未解析 CALL 的第一处断边，优先修 module/class 初始化、receiver 与字段来源；先证明通用关系，再在原 LeWM 端点核对。保留候选和明确条件，不按名称猜目标。
    已定位 CEM 的两个独立实现缺口：①函数 G 入口来源只在 CALL target 激活后建立，缺少原 factory→body 的条件捕获关系；②IMPORT_FROM 原端口未参与模块来源求解。相关两份模块实际已完整展开，不能把这两个问题归因于模块后缀。一般 self/descriptor 来源是另一项欠账。先接引用，再分析 entry 状态内容；不制造 CALL，也不复用创建 world 冒充 entry world。
-2. 补 module AnnAssign、class annotation 及随后的实际主体阻断；保留默认 lazy annotation、future annotations、namespace/world 和异常语义。定点重建后才更新覆盖。
+2. module AnnAssign 首个范围已定点核验；继续 class annotation、deferred child 及实际主体阻断，保留 lazy/future、namespace/world 和异常语义。发布主图时才更新其覆盖分母。
 3. 将原调用、逐地址 reaching writes、alias/effects、binding/容器与 Tensor 属性在共同固定点中反馈；把源码可推而缺规则与真正未绑定字段分开。
 4. 完成按需依赖材料和 Python/native 绑定、资源契约，覆盖加载→规划/推理→保存路径。CPU/GPU/DRAM/HBM/storage/stream 建模到可控制边界，不展开 OS FD 表或指令。
 5. 有关主体/关系改动再原子重建并公开读回完整范围。唯一主图仍为 `artifacts/current/static/`，queries 是带原收据的派生核验，不是第二份程序。
