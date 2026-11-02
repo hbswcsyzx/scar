@@ -124,6 +124,10 @@ start_ticks 2075508、Root handle 52351；身份已核对 RUNNING。保持 862 u
 artifacts 分母和 128 GiB input、8 GiB cache、7,200 秒预算；producer/current 重新冻结。
 旧任务不是因观察超时重启，新任务尚未发布，不能宣布整范围调用或第一阶段完成。
 
+同一 corrected task 在 1,857.3 秒已推进至 **1,958/8,819 artifacts、unit210**
+`methods/maskfeat.py`，确认越过旧 unit204/body18 的具体阻塞点。此为实际全范围运行中的
+进展证据；仍 RUNNING，不能把越过单个热点当作整批发布成功，也不以不同运行计算加速比。
+
 
 共同查询会话新增按 namespace 的 shard 元数据邻接索引，不再每端点扫描/解码所有 header。
 class 短检查通过（9.53 秒）；同一 current LeWM 三层查询的新旧规范化节点、边、条件、

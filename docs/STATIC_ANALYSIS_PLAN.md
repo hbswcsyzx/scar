@@ -121,6 +121,11 @@ native 候选符号和符号资源要求，再谈 kernel 选择；不能按函�
 stub 当作已展开 kernel 主体。Python binding 需分别沿真实方法表/函数体、参数转换、
 C++ wrapper 与 `_ops` 声明建立有条件关系；只有 stub/未展开生成规则的地方明确列缺材料。
 
+已核对的通用输入材料包括 `torchgen/packaged/autograd/templates/python_variable_methods.cpp`
+的真实方法表/手工 binding，`torch/include/torch/csrc/autograd/utils/python_arg_parsing.h`
+的参数规范化，以及 `torch/include/ATen/core/TensorBody.h` 的 `_ops` 调用。模板占位与实际
+函数体分开；安装包材料只支持条件化构建来源，不自动证明当前 native binary 的运行绑定。
+
 **自行验收**：每项已推导字段及关系有来源、条件和失效依赖；不同对象/调用/状态版本不被错误合并。沿真实 LeWM 的加载、预处理、规划/模型调用到输出/保存路径能查到已知的值、状态、库接口与资源依赖，而不只是查到一串 Python 名称。
 
 ### 5. 全范围构建、读回与交付
