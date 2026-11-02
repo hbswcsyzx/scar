@@ -180,7 +180,9 @@ def validate_slice_access(model, graph, interface, metadata, semantic, language,
     return selected
 
 
-def _validate_local_transfer(target, operations, protocols, blocks, values, links, uses, language):
+def _validate_local_transfer(target, operations, protocols, blocks, values, links, uses, language,
+                             *, target_operands=None, target_failure_consumes=True,
+                             failure_pending=None):
     """Follow actual normal CFG corridors from input holds through this macro.
 
     Exceptional corridors retain their original raw/paired payload and world.
@@ -191,7 +193,7 @@ def _validate_local_transfer(target, operations, protocols, blocks, values, link
     from scar.analysis.source_function_try_validation import exception_handoff_holds
     ordered = list(operations)
     end = ordered.index(target)
-    operands = operations[target].uses[:-1]
+    operands = operations[target].uses[:-1] if target_operands is None else target_operands
     starts = []
     for use in operands:
         origin = uses[target, use.id].source
@@ -223,7 +225,7 @@ def _validate_local_transfer(target, operations, protocols, blocks, values, link
             if kind is K.FRAME_HOLD_TEMPORARY:
                 _need(len(refs) == 1, 'temporary hold lost its reference')
                 stack += ((identity, refs[0]),)
-            elif kind is K.FRAME_RELEASE_TEMPORARY:
+            elif kind in (K.FRAME_RELEASE_TEMPORARY, K.FRAME_FORWARD_TEMPORARY):
                 stack = _pop_suffix(stack, refs)
             term = operation.terminator
             if term is None:
@@ -233,10 +235,21 @@ def _validate_local_transfer(target, operations, protocols, blocks, values, link
                 consumed, success_only = (), False
                 if kind is not None and kind.value in SLICE_ACCESS_PROTOCOLS:
                     consumed = refs
+                elif kind in (K.SOURCE_BINARY, K.SOURCE_COMPARE, K.SOURCE_INDEX):
+                    consumed, success_only = refs, kind in (K.SOURCE_BINARY, K.SOURCE_INDEX)
                 elif kind is K.BUILD_SLICE or links[identity].opcode is Opcode.INDEX:
                     consumed = refs
                 elif kind is K.BUILD_MAP:
                     consumed = refs
+                elif kind is K.BUILD_SET_DISPLAY:
+                    consumed = refs
+                elif kind is K.GET_ITERATOR:
+                    consumed = refs
+                elif kind is K.CREATE_GENEXPR:
+                    # The creation interface also carries environment/cell
+                    # references. Only its held function and eager iterator
+                    # transfer ownership; these are not all input Uses.
+                    consumed = (refs[0], refs[-1])
                 elif kind in (K.MAP_ADD,):
                     consumed = refs[-2:]
                 elif kind in (K.DICT_UPDATE, K.DICT_MERGE, K.APPEND_CALL_POSITIONAL,
@@ -252,14 +265,17 @@ def _validate_local_transfer(target, operations, protocols, blocks, values, link
                     normal = _pop_suffix(stack, consumed)
                     failure = stack if success_only else normal
                 failed = blocks[term.successors[1].block]
-                if C.FUNCTION_TRY_314_V1 in language.capabilities:
+                if failure_pending is not None:
+                    actual = failure_pending(operation, failed)
+                elif C.FUNCTION_TRY_314_V1 in language.capabilities:
                     actual = exception_handoff_holds(failed.id, operations, protocols, blocks, uses)
                 else:
                     _need(bool(failed.operations), 'raise lost its frame cleanup')
                     actual = _raw_handoff_holds(failed, operation, operations, protocols, values, uses)
                 if identity == target:
                     _need(tuple(value for _, value in stack) == tuple(use.value for use in operands)
-                          and not normal and not failure, 'macro did not consume exactly its ordered held input instances')
+                          and not normal and (not failure if target_failure_consumes else failure == stack),
+                          'macro did not preserve its exact normal/raise input-consumption contract')
                     prefix = _check_failure_pending(actual, failure, prefix)
                     reached = True
                 else:

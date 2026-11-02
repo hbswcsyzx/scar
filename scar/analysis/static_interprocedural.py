@@ -7,7 +7,7 @@ unknown incoming state and bounded recursive contexts remain explicit gaps.
 """
 from __future__ import annotations
 
-from collections import defaultdict, deque
+from collections import OrderedDict, defaultdict, deque
 from dataclasses import dataclass
 
 from scar.ir.program.environments import EnvironmentRole
@@ -78,6 +78,9 @@ class InterproceduralDependencies:
         self._facts=set();self._contexts=set();self._demand_frontiers={}
         self._entry_stacks=defaultdict(dict);self._arguments=defaultdict(dict);self._returns=defaultdict(dict)
         self._value_flows={};self._value_frontiers={};self._watchers=defaultdict(set)
+        self._derived_values=OrderedDict()
+        from scar.analysis.static_function_environment import _EnvironmentFacts
+        self._environment_facts=_EnvironmentFacts()
 
     @property
     def frontiers(self):
@@ -209,10 +212,19 @@ class InterproceduralDependencies:
             if target.state_entry is not None:
                 activation=_Activation(route,target.state_entry,context,requirements)
                 if activation not in self._incoming.get(target.body,{}):activations.append(activation)
-        from scar.analysis.static_value_flows import derive_static_value_flows
-        args,returns,frontiers=derive_static_value_flows(caller=caller,callee=callee,
-            call_operation=call.operation,callee_use=call.callee_use,target=target,requirements=requirements,
-            load_body=self._body)
+        # Only admitted typed tuples are reused, under the original qualified
+        # call/target/context and exact immutable binding/port inputs. Scope,
+        # budgets and newly supplied globals routes are checked on every use.
+        derived_key=key,target.binding,target.arguments,target.completions
+        derived=self._derived_values.get(derived_key)
+        if derived is None:
+            from scar.analysis.static_value_flows import derive_static_value_flows
+            args,returns,frontiers=derive_static_value_flows(caller=caller,callee=callee,
+                call_operation=call.operation,callee_use=call.callee_use,target=target,requirements=requirements,
+                load_body=self._body)
+        else:
+            args,returns,frontiers=derived
+            self._derived_values.move_to_end(derived_key)
         if any(flow.context!=context or flow.requirements!=requirements for flow in (*args,*returns)):
             raise ValueError('argument/return derivation changed its original call context')
         new_facts=set((*args,*returns))-self._facts
@@ -240,6 +252,9 @@ class InterproceduralDependencies:
             self._entry_stacks[target.body][stack]=stack;self._contexts.add(stack);changed=True
         for activation in activations:
             self._incoming[target.body][activation]=activation;changed=True
+        self._derived_values[derived_key]=(args,returns,frontiers)
+        self._derived_values.move_to_end(derived_key)
+        while len(self._derived_values)>128:self._derived_values.popitem(last=False)
         if changed:
             self._outgoing[call.body].add(target.body)
             self._invalidate(target.body)
@@ -330,10 +345,11 @@ class InterproceduralDependencies:
         bodies={}
         for namespace in namespaces:
             body=write_body if namespace==write_body.namespace else read_body if namespace==read_body.namespace else self._body(namespace)
-            bodies[namespace]=StaticNamespaceBody(body.graph,body.document,namespace,body.index,self.namespace_for(body))
+            bodies[namespace]=StaticNamespaceBody(body.graph,body.document,namespace,body.index,self.namespace_for(body),
+                                                 _facts=self._environment_facts)
         return compose_cross_body_namespace_flow(write_body=bodies[write_body.namespace],binding=binding,
             bridges=bridges,entry_paths=paths,read_body=bodies[read_body.namespace],read=read,
-            read_slot=slot,bodies=bodies)
+            read_slot=slot,bodies=bodies,_facts=self._environment_facts)
 
     def _namespace_sources(self,body,value,requirements):
         """Return real qualified STORE payloads feeding this namespace read.

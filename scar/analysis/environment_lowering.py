@@ -27,6 +27,8 @@ from scar.ir.program.state_addresses import (
     ReferenceOwner, StateAddressRefinement,
 )
 from scar.ir.program.structured import PythonProtocolKind
+from scar.ir.semantics_v2 import Opcode
+from scar.ir.v2.semantic import SemanticRelation
 from scar.ir.v2.ids import ValueSlotID
 
 
@@ -45,6 +47,18 @@ def captured_cell_slot(definition, name):
 
 
 def dispatch_source_expression(builder, node, cursor):
+    if (builder.has_language('SOURCE_REFERENCE_LIFETIME_314_V1') and isinstance(node, ast.Subscript)
+            and isinstance(node.ctx, ast.Load) and not isinstance(node.slice, (ast.Slice, ast.Tuple))):
+        from scar.analysis.source_slice_lowering import lower_subscript
+        return lower_subscript(builder, node, cursor, source_expression=True)
+    if builder.has_language('SOURCE_EXPRESSIONS_314_V1'):
+        from scar.analysis.source_expression_lowering import lower_source_expression, lower_source_literal
+        if isinstance(node, (ast.BinOp, ast.Compare)):
+            return lower_source_expression(builder, node, cursor)
+        if isinstance(node, ast.Constant):
+            from scar.analysis.source_constant_lowering import needs_code_constant
+            if not needs_code_constant(node):
+                return lower_source_literal(builder, node, cursor)
     if (builder.has_language("STARRED_DISPLAY_314_V1") and isinstance(node,(ast.Tuple,ast.List))
             and isinstance(node.ctx,ast.Load) and any(isinstance(n,ast.Starred)for n in node.elts)):
         from scar.analysis.source_display_lowering import lower_starred_display
@@ -206,10 +220,22 @@ class StructuredEnvironmentBuilder(StructuredBuilder):
             from scar.analysis.source_heap_lowering import store_heap_target
             return store_heap_target(self, target, value, cursor)
         if isinstance(target, ast.Name) and target.id in self.cell_references:
+            records = self.old_by_atom.get(self.source(target).atom_id, ())
+            recovered = self.has_language('SOURCE_EXPRESSIONS_314_V1') and not records
+            if recovered:
+                from scar.analysis.source_heap_lowering import _source_definition, _associate
+                definition = _source_definition(self, target, binding=True)
+                writes = [edge for edge in self.semantic.edges.values()
+                    if edge.source.id == definition.id and edge.relation is SemanticRelation.WRITES_SLOT]
+                if len(writes) != 1 or self.semantic.slots[writes[0].target.id].name != target.id:
+                    raise _Unsupported(GapKind.SOURCE_MAPPING, target,
+                        'recovered cell store requires its exact original SG binding/write slot')
             cursor, _, operation_id = self.invoke(cursor, target, (
                 (self.cell_references[target.id], target, "cell-owner", 0, None),
                 (value, target, "assigned-reference", 0, None),
-            ), role=SourceRole.LOCAL_BINDING, old=self.old_operation(target), result_type=None)
+            ), role=SourceRole.LOCAL_BINDING, old=None if recovered else self.old_operation(target), result_type=None)
+            if recovered:
+                _associate(self, operation_id, target, definition, Opcode.ALIAS)
             self.protocol(operation_id, PythonProtocolKind.STORE_CELL, target)
             operation = self.operation_records[operation_id]
             self._addresses(operation_id, (AddressEffect(

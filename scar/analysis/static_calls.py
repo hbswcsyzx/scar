@@ -1032,6 +1032,27 @@ class StaticCallSession:
 
     def _target(self, caller, operation, source, semantic_call, actuals, number, definition, basis, *,
                 creations=(), qualified_creations=(), requirements=()):
+        # Target interfaces are functions of these immutable source ports.
+        # Re-analysis can add a caller context or resolution basis without
+        # changing the signature, formal/world/return ports or factory inputs.
+        # Keep actual typed relations on the bounded caller body, not a
+        # cross-input validation flag or an unqualified definition-name cache.
+        templates = getattr(caller, "target_templates", None)
+        if templates is None:
+            templates = caller.target_templates = OrderedDict()
+        template_key = (operation.id, source, semantic_call, tuple(actuals), number, definition,
+                        tuple(creations), tuple(qualified_creations))
+        template = templates.pop(template_key, None)
+        if template is not None:
+            templates[template_key] = template
+            return replace(template, basis=tuple(sorted(basis)), requirement_paths=(requirements,))
+
+        def retain(target):
+            templates[template_key] = target
+            while len(templates) > 128:
+                templates.popitem(last=False)
+            return target
+
         context = caller.context if number == caller.context.number else self._unit(number)
         qualified, signature, entry, body_row = context.definitions[definition]
         from scar.analysis.function_binding import bind_call
@@ -1048,8 +1069,8 @@ class StaticCallSession:
         callee = self._body(context, *body_row) if body_row is not None else None
         if callee is None:
             frontiers.append(_front("CALLEE_BODY_UNAVAILABLE", "Original definition is cataloged, but no canonical body is available.", qualified.source))
-            return StaticCallTarget(qualified, None, tuple(sorted(basis)), binding, frontiers=tuple(frontiers),
-                                    requirement_paths=(requirements,))
+            return retain(StaticCallTarget(qualified, None, tuple(sorted(basis)), binding, frontiers=tuple(frontiers),
+                                          requirement_paths=(requirements,)))
         arguments = []
         if binding is not None and binding.status is CallBindingStatus.CONDITIONAL:
             formals = {port.slot: port for port in callee.interface.parameters}
@@ -1095,9 +1116,9 @@ class StaticCallSession:
         frontiers.extend(environment_frontiers)
         frontiers.append(_front("ENVIRONMENT_PROJECTIONS_OPEN", "Emitted function-environment routes retain their explicit creation, target and field-state conditions; saved-builtins selection, mutable field contents and remaining environment projections are not closed."))
         frontiers.append(_front("FINE_EFFECTS_OPEN", "State interface correspondence is not a closed mod/ref, alias, escape or ready summary."))
-        return StaticCallTarget(qualified, callee.namespace, tuple(sorted(basis)), binding,
+        return retain(StaticCallTarget(qualified, callee.namespace, tuple(sorted(basis)), binding,
             tuple(arguments), returns, completions, state_entry, tuple(frontiers),
-            environment_routes=environment_routes, requirement_paths=(requirements,))
+            environment_routes=environment_routes, requirement_paths=(requirements,)))
 
     def _calls(self, body, *, operations=None, requirements=()):
         selected = {}

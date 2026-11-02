@@ -86,6 +86,12 @@ def validate_environment_body(model, graph, interface, metadata, semantic, *, la
     for protocol in model.protocols:
         operation, kind = operations[protocol.operation], protocol.kind
         link = links[operation.id]
+        if kind in (Kind.SOURCE_BINARY, Kind.SOURCE_COMPARE, Kind.SOURCE_INDEX, Kind.FRAME_FORWARD_TEMPORARY):
+            need(language is not None and DisplayCapability.SOURCE_EXPRESSIONS_314_V1 in language.capabilities,
+                 'source expression has no distinct opt-in capability')
+            if kind is Kind.SOURCE_INDEX:
+                expected_rows.add(operation.id)
+            continue  # Exact DATA selector, SG operand ports and pending transfers are checked independently.
         if kind in (Kind.BINARY_SLICE, Kind.STORE_SLICE, Kind.STORE_SLICE_SUBSCRIPT):
             from scar.ir.program.source_language import SourceLanguageCapability
             need(language is not None and SourceLanguageCapability.SLICE_ACCESS_314_V1 in language.capabilities,

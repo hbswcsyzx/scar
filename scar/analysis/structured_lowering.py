@@ -682,6 +682,11 @@ def _require_valid_structured_body(model, graph, interface, metadata, *, semanti
     # Every newly constructed core, interface, protocol and correspondence is
     # still checked below. Only the unchanged private source layer is reused.
     require_valid(graph)
+    # A verifier projection delegates generator construction checking, but
+    # enclosing expressions still cross those same real creation operations.
+    # Retain their original protocol records for pending-reference queries;
+    # do not infer erased contracts from an opcode or source name.
+    pending_protocols = model.protocols
     delegated = set()
     if language is not None:
         if language.lambda_bodies:
@@ -730,7 +735,8 @@ def _require_valid_structured_body(model, graph, interface, metadata, *, semanti
         inputs = [use for use in operation.uses if not isinstance(values[use.value], StateVersionValue)]
         frame_kinds = (PythonProtocolKind.FRAME_ENTER, PythonProtocolKind.FRAME_BIND,
                        PythonProtocolKind.FRAME_DISCARD, PythonProtocolKind.FRAME_EXIT,
-                       PythonProtocolKind.FRAME_HOLD_TEMPORARY, PythonProtocolKind.FRAME_RELEASE_TEMPORARY)
+                       PythonProtocolKind.FRAME_HOLD_TEMPORARY, PythonProtocolKind.FRAME_RELEASE_TEMPORARY,
+                       PythonProtocolKind.FRAME_FORWARD_TEMPORARY)
         if protocol.kind in frame_kinds:
             if (operation.terminator is not None or operation.callee is not None
                     or set(operation.behaviors) != {Behavior.READ, Behavior.WRITE, Behavior.MEMORY}
@@ -751,7 +757,7 @@ def _require_valid_structured_body(model, graph, interface, metadata, *, semanti
                         or not isinstance(values[inputs[1].value], ReferenceValue)):
                     raise ValueError("frame bind needs previous binding and assigned reference")
             elif protocol.kind in (PythonProtocolKind.FRAME_DISCARD, PythonProtocolKind.FRAME_HOLD_TEMPORARY,
-                                    PythonProtocolKind.FRAME_RELEASE_TEMPORARY):
+                                    PythonProtocolKind.FRAME_RELEASE_TEMPORARY, PythonProtocolKind.FRAME_FORWARD_TEMPORARY):
                 if len(inputs) != 1 or not isinstance(values[inputs[0].value], ReferenceValue):
                     raise ValueError("frame discard needs one temporary reference")
             elif protocol.kind is PythonProtocolKind.FRAME_EXIT:
@@ -802,6 +808,7 @@ def _require_valid_structured_body(model, graph, interface, metadata, *, semanti
                 PythonProtocolKind.UNPACK_FIXED, PythonProtocolKind.BUILD_SLICE,
                 PythonProtocolKind.BINARY_SLICE, PythonProtocolKind.STORE_SLICE,
                 PythonProtocolKind.STORE_SLICE_SUBSCRIPT,
+                PythonProtocolKind.SOURCE_BINARY, PythonProtocolKind.SOURCE_COMPARE, PythonProtocolKind.SOURCE_INDEX,
                 PythonProtocolKind.READ_CODE_CONSTANT, PythonProtocolKind.BUILD_CALL_POSITIONALS,
                 PythonProtocolKind.DICT_MERGE, PythonProtocolKind.CALL_FUNCTION_EX,
                 PythonProtocolKind.BUILD_CALL_POSITIONAL_LIST, PythonProtocolKind.EXTEND_CALL_POSITIONALS,
@@ -824,7 +831,7 @@ def _require_valid_structured_body(model, graph, interface, metadata, *, semanti
         from scar.analysis.source_language_validation import validate_language_body
         validate_language_body(model, graph, interface, metadata, semantic, language,
                                source_tree=source_tree, options=language_options, structural_only=structural_only,
-                               control=control,sealed_source=sealed_source)
+                               control=control,sealed_source=sealed_source,pending_protocols=pending_protocols)
     expected_loops = {link.source.atom_id for link in metadata.operation_links
         if semantic.source_atoms[link.source.atom_id].kind in ("While", "For")
         and operations[link.operation].terminator is not None

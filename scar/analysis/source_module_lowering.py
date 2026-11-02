@@ -467,8 +467,10 @@ def mapping_prefix_selection(context, evidence, *, profile=None):
                 and expression(node.slice) and len(positioned(node,('STORE_SUBSCR',)))==1)
         return False
     def statement(node):
-        if isinstance(node,ast.Import):return bool(node.names) and all('.' not in alias.name for alias in node.names)
-        if isinstance(node,ast.ImportFrom):return bool(node.names) and all(alias.name!='*' for alias in node.names)
+        if isinstance(node,(ast.Import,ast.ImportFrom)):
+            try:mapping_import_plan(node,evidence.code,instructions=instructions)
+            except (ValueError,_Unsupported):return False
+            return True
         if isinstance(node,ast.Assign):return len(node.targets)==1 and (target(node.targets[0]) or heap_target(node.targets[0])) and expression(node.value)
         if isinstance(node,ast.Expr):
             if _module_docstring(context,node):
@@ -496,6 +498,48 @@ def mapping_prefix_selection(context, evidence, *, profile=None):
         if not statement(node):break
         end+=1
     return tuple(context.tree.body[:end]),tuple(context.tree.body[end:])
+
+
+def mapping_import_plan(node, code, *, instructions=None):
+    """Exact mapping-frame import stack window, never module execution.
+
+    Each returned pair is (bound name, ordered IMPORT_FROM traversal). A plain
+    dotted import binds its top-level name; an explicit dotted alias traverses
+    the original returned owner before storing its final child reference.
+    """
+    import dis
+    if not isinstance(node,(ast.Import,ast.ImportFrom)) or not node.names or any(a.name=='*' for a in node.names):
+        raise _Unsupported(GapKind.UNSUPPORTED_SYNTAX,node,'MAPPING_IMPORT_STATEMENT_SHAPE_UNIMPLEMENTED')
+    expected=[];plans=[]
+    def start(requested,level,fromlist):
+        expected.extend((('LEVEL',level),('LOAD_CONST',fromlist),('IMPORT_NAME',requested)))
+    if isinstance(node,ast.Import):
+        for alias in node.names:
+            parts=alias.name.split('.');traversal=tuple(parts[1:]) if alias.asname else ()
+            bound=alias.asname or parts[0];plans.append((bound,traversal));start(alias.name,0,None)
+            for index,name in enumerate(traversal):
+                expected.append(('IMPORT_FROM',name))
+                if index+1<len(traversal):expected.extend((('SWAP',2),('POP_TOP',None)))
+            expected.append(('STORE_NAME',bound))
+            if traversal:expected.append(('POP_TOP',None))
+    else:
+        start(node.module or '',node.level,tuple(alias.name for alias in node.names))
+        for alias in node.names:
+            bound=alias.asname or alias.name;plans.append((bound,(alias.name,)))
+            expected.extend((('IMPORT_FROM',alias.name),('STORE_NAME',bound)))
+        expected.append(('POP_TOP',None))
+    position=(node.lineno,node.end_lineno,node.col_offset,node.end_col_offset)
+    original=(tuple(dis.get_instructions(code,adaptive=False,show_caches=False)) if instructions is None else instructions)
+    own=[row for row in original
+         if tuple(row.positions)==position and row.opname not in ('EXTENDED_ARG','NOP')]
+    def matches(row,token):
+        name,value=token
+        if name=='LEVEL':return row.opname in ('LOAD_SMALL_INT','LOAD_CONST') and type(row.argval)is int and row.argval==value
+        if name=='LOAD_CONST':return row.opname==name and type(row.argval)is type(value) and row.argval==value
+        return row.opname==name and (row.arg==value if name=='SWAP' else row.argval==value)
+    if len(own)<len(expected) or not all(matches(row,token) for row,token in zip(own,expected)):
+        raise _Unsupported(GapKind.CODE_VERSION,node,'MAPPING_IMPORT_EXACT_COMPILER_SEQUENCE_UNAVAILABLE')
+    return tuple(plans)
 
 
 class StructuredModuleBuilder(ModuleBuilder):
@@ -552,13 +596,14 @@ class StructuredModuleBuilder(ModuleBuilder):
         self.gap(GapKind.EFFECT_SUMMARY,node,'LOAD_NAME: missing-only locals/globals/saved-builtins fallback; mapping effects/content/activation remain open')
         return cursor,value
 
-    def store_name(self,node,name,value,cursor):
+    def store_name(self,node,name,value,cursor,*,failure_handler=None):
         from scar.ir.program.module_entries import FrameBodyProtocolKind as K
         from scar.ir.program.state_addresses import AddressEffect,ReferenceOwner,NamespaceKey
         from scar.ir.program.model import AccessMode
         key=self.literal(node,name)
         cursor,_,identity=self.invoke(cursor,node,((self.entry_references[0],node,'locals-owner',0,None),
-            (key,node,'namespace-key',0,None),(value,node,'assigned-reference',0,None)),result_type=None)
+            (key,node,'namespace-key',0,None),(value,node,'assigned-reference',0,None)),result_type=None,
+            failure_handler=failure_handler)
         self.protocol(identity,K.STORE_NAME_314,node);operation=self.operation_records[identity]
         self._addresses(identity,(AddressEffect(ReferenceOwner(operation.uses[0].id),
             (NamespaceKey(operation.uses[1].id),),AccessMode.WRITE),))
@@ -613,30 +658,71 @@ class StructuredModuleBuilder(ModuleBuilder):
         from scar.ir.program.state_addresses import AddressEffect,ReferenceOwner,NamespaceKey
         from scar.ir.program.model import AccessMode
         from scar.analysis.source_slice_lowering import _constant
+        if not hasattr(self,'language_instructions'):
+            import dis
+            self.language_instructions=tuple(dis.get_instructions(self.evidence.code,adaptive=False,show_caches=False))
+        plans=mapping_import_plan(node,self.evidence.code,instructions=self.language_instructions)
+        baseline=len(self.active_temporaries)
+        def failed(failure,payload):
+            saved=tuple(self.active_temporaries)
+            try:
+                for owner in reversed(self.active_temporaries[baseline:]):
+                    self.frame_transition(failure,node,((owner,node,'mapping-import-exception-unwind'),),
+                        PythonProtocolKind.FRAME_RELEASE_TEMPORARY)
+                del self.active_temporaries[baseline:]
+                self.finish_exit(failure,node,payload,ExitKind.RAISE)
+            finally:self.active_temporaries[:]=saved
+        def hold(owner):
+            self.frame_transition(cursor,node,((owner,node,'import-from-owner'),),PythonProtocolKind.FRAME_HOLD_TEMPORARY)
+            self.active_temporaries.append(owner)
+        def release(owner):
+            if not self.active_temporaries or self.active_temporaries[-1]!=owner:
+                raise ValueError('mapping import receiver ownership is not the compiler stack order')
+            self.active_temporaries.pop()
+            self.frame_transition(cursor,node,((owner,node,'import-from-owner'),),PythonProtocolKind.FRAME_RELEASE_TEMPORARY)
         imports=node.names if isinstance(node,ast.Import) else (None,)
-        for alias in imports:
+        for ordinal,alias in enumerate(imports):
             name=alias.name if alias is not None else (node.module or '')
             requested=self.literal(node,name);level=self.literal(node,0 if alias is not None else node.level)
             if alias is None:cursor,fromlist=_constant(self,node,cursor)
             else:fromlist=self.literal(node,None)
             lookup=self.literal(node,'__import__')
             inputs=(*reversed(self.entry_references),requested,level,fromlist,lookup)
-            cursor,imported,identity=self.invoke(cursor,node,tuple((value,node,'import-input',index,None) for index,value in enumerate(inputs)))
+            cursor,imported,identity=self.invoke(cursor,node,tuple((value,node,'import-input',index,None) for index,value in enumerate(inputs)),
+                failure_handler=failed)
             self.protocol(identity,K.IMPORT_NAME_314,node);operation=self.operation_records[identity]
             self._addresses(identity,(AddressEffect(ReferenceOwner(operation.uses[0].id),
                 (NamespaceKey(operation.uses[6].id),),AccessMode.READ),))
             if alias is not None:
-                cursor=self.store_name(node,alias.asname or alias.name,imported,cursor)
+                bound,traversal=plans[ordinal]
+                if not traversal:
+                    cursor=self.store_name(node,bound,imported,cursor,failure_handler=failed)
+                else:
+                    owner=imported;hold(owner)
+                    for index,name in enumerate(traversal):
+                        key=self.literal(node,name)
+                        cursor,value,identity=self.invoke(cursor,node,((owner,node,'from-owner',0,None),
+                            (key,node,'from-key',0,None)),failure_handler=failed)
+                        self.protocol(identity,K.IMPORT_FROM_314,node)
+                        if index+1==len(traversal):
+                            cursor=self.store_name(node,bound,value,cursor,failure_handler=failed)
+                            release(owner)
+                        else:
+                            # IMPORT_FROM retains its receiver; SWAP/POP_TOP
+                            # then releases that old receiver while the new
+                            # child remains held for the following traversal.
+                            hold(value)
+                            self.active_temporaries[-2:]=[value,owner]
+                            release(owner);owner=value
             else:
-                self.frame_transition(cursor,node,((imported,node,'import-from-owner'),),PythonProtocolKind.FRAME_HOLD_TEMPORARY)
-                self.active_temporaries.append(imported)
+                hold(imported)
                 for member in node.names:
                     key=self.literal(node,member.name)
-                    cursor,value,identity=self.invoke(cursor,node,((imported,node,'from-owner',0,None),(key,node,'from-key',0,None)))
+                    cursor,value,identity=self.invoke(cursor,node,((imported,node,'from-owner',0,None),(key,node,'from-key',0,None)),
+                        failure_handler=failed)
                     self.protocol(identity,K.IMPORT_FROM_314,node)
-                    cursor=self.store_name(node,member.asname or member.name,value,cursor)
-                self.active_temporaries.pop()
-                self.frame_transition(cursor,node,((imported,node,'import-from-owner'),),PythonProtocolKind.FRAME_RELEASE_TEMPORARY)
+                    cursor=self.store_name(node,member.asname or member.name,value,cursor,failure_handler=failed)
+                release(imported)
             self.gap(GapKind.EFFECT_SUMMARY,node,'import lookup/call/from access internals and runtime objects/effects require expansion')
         return cursor
 

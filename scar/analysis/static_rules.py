@@ -143,7 +143,8 @@ def _rule(node):
         needs.append(_needs("STATIC_CHILD_CODE_AND_CELLS", "Use this lambda's exact child code/constants and closure layout; do not substitute parent co_consts."))
     elif isinstance(node, _COMPS):
         module, function = "source_comprehension_lowering", "lower_comprehension"
-        caps, compiler = [C.COMPREHENSION_314_V1], True
+        caps, compiler = [C.COMPREHENSION_314_V1, C.SOURCE_EXPRESSIONS_314_V1,
+                          C.SOURCE_REFERENCE_LIFETIME_314_V1], True
         from scar.analysis.source_comprehension_lowering import shape
         if node.generators and not isinstance(node.generators[0].target,ast.Name):
             caps.extend((C.COMPREHENSION_TARGETS_314_V1,C.FUNCTION_TRY_314_V1))
@@ -152,7 +153,12 @@ def _rule(node):
         needs.append(_needs("COMPREHENSION_LOCAL_SCOPE_AND_UNWIND", "Recursive target bindings use original comprehension slots; failed partial unpack preserves earlier writes, releases local references and forwards original propagation/world to enclosing cleanup."))
     elif isinstance(node, ast.GeneratorExp):
         module, function = "source_generator_creation_lowering", "lower_creation"
-        caps, compiler = [C.GENEXPR_CREATION_314_V1], True
+        # Its deferred elt has its own SG/source children, intentionally not
+        # traversed as eager parent code by _owned. The lazy builder still
+        # needs the generic expression capability, even when the outer body
+        # contains no scalar literal/Store/BinOp selecting it independently.
+        caps, compiler = [C.GENEXPR_CREATION_314_V1, C.SOURCE_EXPRESSIONS_314_V1,
+                          C.SOURCE_REFERENCE_LIFETIME_314_V1], True
         if len(node.generators) != 1 or node.generators[0].is_async or node.generators[0].ifs or not isinstance(node.generators[0].target, ast.Name):
             unsupported = "Generator creation requires one synchronous clause, Name target and no filters."
         needs.append(_needs("STATIC_CHILD_CODE_AND_CELLS", "Creation and lazy body remain distinct; child .0/freevars/constant slot must match. Drive/close are not selected by creation."))
@@ -169,7 +175,8 @@ def _rule(node):
         needs.append(_needs("STATIC_BINDING_CLASSIFICATION", "Name leaves must resolve to original local/cell/global slots; heap leaves obey _check and exact ordered compiler consumption."))
     elif isinstance(node, (ast.Tuple, ast.List)) and any(isinstance(x, ast.Starred) for x in node.elts):
         module, function = "source_display_lowering", "lower_starred_display"
-        caps, compiler = [C.STARRED_DISPLAY_314_V1], True
+        caps, compiler = [C.STARRED_DISPLAY_314_V1, C.SOURCE_EXPRESSIONS_314_V1,
+                          C.SOURCE_REFERENCE_LIFETIME_314_V1], True
         if len(node.elts) > 30:
             unsupported = "Current starred display supports at most 30 elements."
     elif isinstance(node, ast.Call):
@@ -184,11 +191,14 @@ def _rule(node):
             caps, compiler = [C.CODE_CONSTANTS_314_V1], True
             needs.append(_needs("STATIC_CODE_CONSTANT_SLOT", "Exact original LOAD_CONST position/index/content is required; no active object identity is inferred."))
         else:
-            module, function = "program_lowering", "_Builder.expr"
+            module, function = "source_expression_lowering", "lower_source_literal"
+            caps = [C.SOURCE_EXPRESSIONS_314_V1]
     elif isinstance(node, ast.Name):
         module, function = "environment_lowering", "StructuredEnvironmentBuilder.read_source_name" if isinstance(node.ctx, ast.Load) else "StructuredEnvironmentBuilder.store"
         if isinstance(node.ctx, ast.Del):
             unsupported = "General Delete has no structured statement rule."
+        elif isinstance(node.ctx, ast.Store):
+            caps = [C.SOURCE_EXPRESSIONS_314_V1]
     elif isinstance(node, (ast.Attribute, ast.Subscript)) and isinstance(node.ctx, ast.Store):
         module, function = "source_heap_lowering", "store_heap_target"
         if isinstance(node, ast.Attribute) and node.attr.startswith("__") and not node.attr.endswith("__"):
@@ -211,6 +221,7 @@ def _rule(node):
             needs.append(_needs("STATIC_SLICE_SEQUENCE", "Compiler must select a supported BINARY_SLICE/BUILD_SLICE protocol; source shape alone cannot decide."))
     elif isinstance(node, ast.Dict):
         module, function = "source_mapping_lowering", "lower_dictionary"
+        caps = [C.SOURCE_EXPRESSIONS_314_V1, C.SOURCE_REFERENCE_LIFETIME_314_V1]
     elif isinstance(node, ast.JoinedStr):
         module, function = "source_string_lowering", "lower_joined_string"
         if len(node.values) > 30:
@@ -222,9 +233,14 @@ def _rule(node):
     elif isinstance(node, (ast.BoolOp, ast.IfExp)):
         module = "source_conditional_lowering"
         function = "lower_bool_expression" if isinstance(node, ast.BoolOp) else "lower_if_expression"
-    elif isinstance(node, (ast.BinOp, ast.UnaryOp, ast.Attribute, ast.Tuple, ast.List)):
+    elif isinstance(node, ast.BinOp):
+        module, function = "source_expression_lowering", "lower_source_expression"
+        caps, compiler = [C.SOURCE_EXPRESSIONS_314_V1], True
+    elif isinstance(node, (ast.UnaryOp, ast.Attribute, ast.Tuple, ast.List)):
         pass
     elif isinstance(node, ast.Compare):
+        module, function = "source_expression_lowering", "lower_source_expression"
+        caps, compiler = [C.SOURCE_EXPRESSIONS_314_V1], True
         if len(node.ops) != 1:
             unsupported = "Current StructuredBuilder.expr has no chained comparison lowering."
     elif isinstance(node, ast.Try):

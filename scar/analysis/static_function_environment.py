@@ -6,6 +6,9 @@ and mutable-field initializer dependencies are deliberately different kinds.
 """
 from __future__ import annotations
 
+from collections import OrderedDict
+from types import SimpleNamespace
+
 from scar.ir.record_codec import decode, encode
 from scar.ir.program.environments import EnvironmentRole
 from scar.ir.program.ids import OperationID, UseID, ValueID
@@ -40,7 +43,7 @@ def _source_reference(value):
     return decode(SourceReference,value)
 
 
-def validate_static_body_namespace(graph, document, namespace):
+def _namespace_inputs(graph, document, namespace):
     """Validate body ownership against its envelope, without source replay.
 
     Physical/decoded receipt verification belongs to the enclosing reader.
@@ -64,11 +67,12 @@ def validate_static_body_namespace(graph, document, namespace):
             or namespace.graph.artifact.schema!='scar.static-body/1'):
         raise ValueError('body namespace graph/root/pointer/representation differs from its envelope')
     metadata=decode(LoweringMetadata,document['metadata'])
+    sources=metadata;interface=None
     if namespace.entry!=metadata.entry:
         raise ValueError('body namespace entry differs from original metadata')
     if document.get('module') is not None:
         from scar.ir.program.module_entries import decode_frame_body
-        overlay=decode_frame_body(document['module']);unit=overlay.declaration.unit
+        overlay=decode_frame_body(document['module']);unit=overlay.declaration.unit;sources=overlay
         if (namespace.definition!=unit.initializer or namespace.source is not None
                 or metadata.source!=unit.snapshot or metadata.entry!=unit.initializer.wire):
             raise ValueError('module namespace source/definition differs from its original initializer')
@@ -95,7 +99,55 @@ def validate_static_body_namespace(graph, document, namespace):
                 raise ValueError('function namespace lacks its original entry-world source anchor')
     if namespace.source is not None and (namespace.source.path!=metadata.source.path or namespace.source.fingerprint!=metadata.source.fingerprint):
         raise ValueError('body namespace source differs from its retained snapshot')
-    return metadata
+    return metadata,sources,interface
+
+
+def validate_static_body_namespace(graph, document, namespace):
+    """Freshly check the original namespace and decode its typed source facts."""
+    return _namespace_inputs(graph,document,namespace)[0]
+
+
+class _EnvironmentFacts:
+    """Bounded original typed inputs owned by one derive/consumer session.
+
+    Qualified namespace receipts and strong object references prevent bare-ID
+    reuse. Reloaded graph/index/document objects are decoded again. These are
+    source snapshots, not remembered verification results: each route's ports,
+    conditions and state endpoints are still replayed against them.
+    """
+    def __init__(self, *, max_bodies=16, max_bytes=64*1024*1024):
+        if any(type(n)is not int or n<1 for n in (max_bodies,max_bytes)):
+            raise ValueError('environment fact input bounds must be positive integers')
+        self.max_bodies,self.max_bytes=max_bodies,max_bytes
+        self.bodies=OrderedDict();self.bytes=0
+
+    def body(self,graph,document,namespace,index=None):
+        found=self.bodies.get(namespace)
+        if index is None and found is not None and found.graph is graph:
+            index=found.index
+        index=_index(graph,index)
+        fields=tuple(document.get(name)for name in ('graph','metadata','module','class','interface','structured'))
+        if (found is not None and found.graph is graph and found.document is document
+                and found.index is index):
+            if any(a is not b for a,b in zip(found.wire_fields,fields)):
+                raise ValueError('environment source inputs changed within their private snapshot scope')
+            self.bodies.move_to_end(namespace)
+            return found
+        if found is not None:
+            self.bytes-=found.bytes;del self.bodies[namespace]
+        metadata,sources,interface=_namespace_inputs(graph,document,namespace)
+        operations={};uses={}
+        for row in sources.operation_links:operations.setdefault(row.operation,[]).append(row)
+        for row in sources.use_links:uses.setdefault(row.operation,[]).append(row)
+        found=SimpleNamespace(graph=graph,document=document,namespace=namespace,index=index,
+            metadata=metadata,sources=sources,interface=interface,wire_fields=fields,
+            operation_links=operations,use_links=uses,protocols=protocol_kinds(document),
+            blocks={b.id:b for r in graph.regions for b in r.blocks},bytes=namespace.graph.decoded_bytes)
+        if found.bytes<=self.max_bytes:
+            self.bodies[namespace]=found;self.bytes+=found.bytes
+            while len(self.bodies)>self.max_bodies or self.bytes>self.max_bytes:
+                _,old=self.bodies.popitem(last=False);self.bytes-=old.bytes
+        return found
 
 
 def _world(index, operation):
@@ -106,31 +158,32 @@ def _world(index, operation):
     return found[0]
 
 
-def _roles(document, index, operation):
+def _roles(document, index, operation, *, inputs=None):
     overlay=document.get('module')
-    rows=(overlay if overlay is not None else document.get('metadata') or {}).get('use_links',())
+    rows=(inputs.use_links.get(operation.id,())if inputs is not None else
+          (overlay if overlay is not None else document.get('metadata') or {}).get('use_links',()))
     found={}
     for row in rows:
-        if decode(OperationID,row['operation'])!=operation.id:
+        if (row.operation if inputs is not None else decode(OperationID,row['operation']))!=operation.id:
             continue
-        use=decode(UseID,row['use'])
+        use=row.use if inputs is not None else decode(UseID,row['use'])
         site=index.use_site(use)
         if site.operation!=operation.id or use in found:
             raise ValueError('function environment source Use is duplicated or owned by another operation')
-        role,position=row['role'],row['index']
+        role,position=(row.role,row.index)if inputs is not None else(row['role'],row['index'])
         if type(role)is not str or not role or type(position)is not int or position<0:
             raise ValueError('function environment source role/index is malformed')
         found[use]=(role,position)
     return found
 
 
-def _factory(index, document, protocols, route):
+def _factory(index, document, protocols, route, *, inputs=None):
     if type(route)is not StaticFunctionCreationRoute:
         raise TypeError('function environment needs an existing verified factory relation')
     operation=index.operations.get(route.factory)
     if operation is None or protocols.get(route.factory) not in ('MAKE_FUNCTION_314','MAKE_NESTED_FUNCTION'):
         raise ValueError('function environment creation does not name its original supported factory')
-    normal=normal_reference(index,route.factory)
+    normal=normal_reference(index,route.factory,blocks=inputs.blocks if inputs is not None else None)
     if normal!=(route.normal_edge,route.normal_value):
         raise ValueError('function environment creation normal endpoints differ')
     code=index.use_site(route.code_use)
@@ -139,19 +192,20 @@ def _factory(index, document, protocols, route):
     origin=index.values[code.use.value].origin
     if type(origin)is not OperationResult or origin.operation!=route.code_constant_operation:
         raise ValueError('function environment code does not come from the original constant operation')
-    links=(document.get('module') if document.get('module') is not None else document['metadata']).get('operation_links',())
-    links=[row for row in links if decode(OperationID,row['operation'])==operation.id]
-    metadata=decode(LoweringMetadata,document['metadata'])
-    if (len(links)!=1 or _source_reference(links[0]['source'])!=route.definition.source
+    links=(inputs.operation_links.get(operation.id,())if inputs is not None else
+           [row for row in(document.get('module') if document.get('module') is not None else document['metadata']).get('operation_links',())
+            if decode(OperationID,row['operation'])==operation.id])
+    metadata=inputs.metadata if inputs is not None else decode(LoweringMetadata,document['metadata'])
+    if (len(links)!=1 or (links[0].source if inputs is not None else _source_reference(links[0]['source']))!=route.definition.source
             or metadata.source!=route.definition.snapshot):
         raise ValueError('function factory source/snapshot differs from its original qualified definition')
     return operation
 
 
-def derive_function_environment_routes(*, caller_graph, caller_document, caller_namespace,
+def _derive_function_environment_routes(*, caller_graph, caller_document, caller_namespace,
         callee_graph, callee_document, callee_namespace, definition, call_operation,
         callee_use, creations=(), caller_index=None, callee_index=None,
-        qualified_creations=(), load_creation_body=None):
+        qualified_creations=(), load_creation_body=None, facts):
     """Return (typed routes, precise frontiers), with no new graph identities.
 
     ``creations`` must be the source-verified routes actually traversed while
@@ -162,9 +216,10 @@ def derive_function_environment_routes(*, caller_graph, caller_document, caller_
         FunctionEnvironmentCondition as C, FunctionEnvironmentRouteKind as K,
         StaticFunctionEnvironmentRoute, StaticQualifiedFunctionCreation,
     )
-    caller=_index(caller_graph,caller_index);callee=_index(callee_graph,callee_index)
-    validate_static_body_namespace(caller_graph,caller_document,caller_namespace)
-    callee_metadata=validate_static_body_namespace(callee_graph,callee_document,callee_namespace)
+    caller_inputs=facts.body(caller_graph,caller_document,caller_namespace,caller_index)
+    callee_inputs=facts.body(callee_graph,callee_document,callee_namespace,callee_index)
+    caller,callee=caller_inputs.index,callee_inputs.index
+    callee_metadata=callee_inputs.metadata
     if callee_metadata.source!=definition.snapshot:
         raise ValueError('function environment target snapshot differs from its original body metadata')
     if callee_namespace.definition!=definition.definition or callee_namespace.source!=definition.source:
@@ -203,6 +258,7 @@ def derive_function_environment_routes(*, caller_graph, caller_document, caller_
         creation,creation_namespace=qualified.creation,qualified.body
         if creation_namespace==caller_namespace:
             creator,creator_document,creator_graph=caller,caller_document,caller_graph
+            creator_inputs=caller_inputs
         else:
             if load_creation_body is None:
                 frontiers.append(StaticCallFrontier('QUALIFIED_FACTORY_BODY_UNAVAILABLE',
@@ -213,14 +269,14 @@ def derive_function_environment_routes(*, caller_graph, caller_document, caller_
                 raise ValueError('factory body loader changed its original qualified namespace')
             creator_graph,creator_document=loaded.graph,loaded.document
             creator=_index(creator_graph,loaded.index)
-        validate_static_body_namespace(creator_graph,creator_document,creation_namespace)
-        factory=_factory(creator,creator_document,protocol_kinds(creator_document),creation)
+            creator_inputs=facts.body(creator_graph,creator_document,creation_namespace,creator)
+        factory=_factory(creator,creator_document,creator_inputs.protocols,creation,inputs=creator_inputs)
         factory_world=_world(creator,factory)
-        roles=_roles(creator_document,creator,factory)
+        roles=_roles(creator_document,creator,factory,inputs=creator_inputs)
         if roles.get(creation.code_use)!=('function-code',0):
             raise ValueError('function environment factory code role differs from its verified creation')
         edge=factory.terminator.successors[creation.normal_edge.successor_index]
-        blocks={b.id:b for r in creator_graph.regions for b in r.blocks}
+        blocks=creator_inputs.blocks
         normal_world=[formal for formal,actual in zip(blocks[edge.block].arguments,edge.arguments)
             if type(actual)is CompletionResult and type(creator.values[formal])is StateVersionValue]
         if len(normal_world)!=1:
@@ -277,8 +333,24 @@ def derive_function_environment_routes(*, caller_graph, caller_document, caller_
     return tuple(dict.fromkeys(routes)),tuple(dict.fromkeys(frontiers))
 
 
-def validate_function_environment_route(route, **inputs):
-    """Replay original reference/Use/member joins, without semantic execution."""
-    routes,_=derive_function_environment_routes(**inputs)
+def derive_function_environment_routes(*, caller_graph, caller_document, caller_namespace,
+        callee_graph, callee_document, callee_namespace, definition, call_operation,
+        callee_use, creations=(), caller_index=None, callee_index=None,
+        qualified_creations=(), load_creation_body=None):
+    """Fresh standalone derive; typed input reuse lasts only for this call."""
+    return _derive_function_environment_routes(caller_graph=caller_graph,caller_document=caller_document,
+        caller_namespace=caller_namespace,callee_graph=callee_graph,callee_document=callee_document,
+        callee_namespace=callee_namespace,definition=definition,call_operation=call_operation,
+        callee_use=callee_use,creations=creations,caller_index=caller_index,callee_index=callee_index,
+        qualified_creations=qualified_creations,load_creation_body=load_creation_body,facts=_EnvironmentFacts())
+
+
+def _validate_function_environment_route(route, *, facts, **inputs):
+    routes,_=_derive_function_environment_routes(**inputs,facts=facts)
     if route not in routes:
         raise ValueError('stored function environment route differs from original qualified factory/call/member endpoints')
+
+
+def validate_function_environment_route(route, **inputs):
+    """Fresh replay; no previous consumer's input scope is accepted here."""
+    return _validate_function_environment_route(route,facts=_EnvironmentFacts(),**inputs)

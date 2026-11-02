@@ -42,14 +42,12 @@ def _body(body, facts=None):
 def _sources(body, metadata, facts=None):
     if facts is not None:
         return facts.body(body).sources
-    # Mapping/class bodies retain source ports in their explicit overlays;
-    # their generic LoweringMetadata intentionally carries only the snapshot.
+    # Module mapping bodies retain source ports in their explicit overlay;
+    # class suites retain them in LoweringMetadata. Class entry overlays carry
+    # the class ABI/compiler protocols, not operation_links/use_links.
     if body.document.get('module') is not None:
         from scar.ir.program.module_entries import decode_frame_body
         return decode_frame_body(body.document['module'])
-    if body.document.get('class') is not None:
-        from scar.ir.program.class_entries import decode_class_entry_overlay
-        return decode_class_entry_overlay(body.document['class'])
     return metadata
 
 

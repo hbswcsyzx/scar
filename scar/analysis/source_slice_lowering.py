@@ -178,26 +178,31 @@ def lower_key(builder, node, cursor):
         del builder.active_temporaries[baseline:]
 
 
-def lower_subscript(builder, node, cursor):
+def lower_subscript(builder, node, cursor, *, source_expression=False):
     if not isinstance(node, ast.Subscript) or not isinstance(node.ctx, ast.Load):
         raise _Unsupported(GapKind.SOURCE_MAPPING, node, "subscript read requires Load context")
     expanded = builder.has_language("SLICE_ACCESS_314_V1")
+    if source_expression and (not builder.has_language('SOURCE_REFERENCE_LIFETIME_314_V1')
+            or isinstance(node.slice, (ast.Slice, ast.Tuple))):
+        raise _Unsupported(GapKind.SOURCE_MAPPING, node,
+            'source index lifetime requires its explicit ordinary-key capability')
     if (expanded and isinstance(node.slice, ast.Slice)
             and any(row.opname == 'BINARY_SLICE' for row in _instructions(builder, node))):
         return _combined_read(builder, node, cursor)
     if (not expanded and isinstance(node.slice, ast.Slice) and not _constant_slice(node.slice)
             and node.slice.step is None):
         raise _Unsupported(GapKind.UNSUPPORTED_SYNTAX, node, "COMBINED_SLICE_LIFETIME_UNRECOVERED")
-    old, definition = _index_source(builder, node) if expanded else (builder.old_operation(node), None)
+    old, definition = _index_source(builder, node) if expanded or source_expression else (builder.old_operation(node), None)
     if old is not None and len(old.operands) != 2:
         raise _Unsupported(GapKind.SOURCE_MAPPING, node, "subscript source operands differ")
     baseline, held, inputs = len(builder.active_temporaries), [], []
     try:
-        cursor, receiver = expression_for_heap_target(builder, node.value, cursor) if expanded else builder.expr(node.value, cursor)
+        cursor, receiver = expression_for_heap_target(builder, node.value, cursor) if expanded or source_expression else builder.expr(node.value, cursor)
         if cursor is None:
             return None, None
         _hold(builder, cursor, node.value, receiver); held.append((node.value, receiver))
-        cursor, key = lower_key(builder, node.slice, cursor)
+        cursor, key = (expression_for_heap_target(builder, node.slice, cursor) if source_expression
+                       else lower_key(builder, node.slice, cursor))
         if cursor is None:
             return None, None
         _hold(builder, cursor, node.slice, key); held.append((node.slice, key))
@@ -205,7 +210,9 @@ def lower_subscript(builder, node, cursor):
             operand = old.operands[index] if old is not None else None
             inputs.append((value, child, operand.role if operand else role,
                            operand.index if operand else index, operand.value if operand else None))
-        cursor, result, operation = _invoke(builder, cursor, node, inputs, tuple(held), old=old)
+        cursor, result, operation = _invoke(builder, cursor, node, inputs, tuple(held), old=old,
+            raise_consumed=() if source_expression else None,
+            kind=PythonProtocolKind.SOURCE_INDEX if source_expression else None)
         if definition is not None:
             _associate(builder, operation, node, definition, Opcode.INDEX)
         uses = builder.operation_records[operation].uses

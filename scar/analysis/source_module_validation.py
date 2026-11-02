@@ -52,7 +52,7 @@ def _mapping_exception_holds(block_id, operations, protocols, blocks, use_links)
         kind=marker.kind if marker is not None else None
         first=use_links.get((op.id,op.uses[0].id)) if op.uses else None
         if kind is PythonProtocolKind.FRAME_RELEASE_TEMPORARY and first is not None and first.role in (
-                'function-exception-unwind','mapping-function-exception-unwind'):
+                'function-exception-unwind','mapping-function-exception-unwind','mapping-import-exception-unwind'):
             released.append(op.uses[0].value)
         if kind is K.FRAME_EXIT_EXCEPTION_PACKET:
             held=tuple(use.value for use in op.uses if (row:=use_links.get((op.id,use.id))) is not None and row.role=='held-temporary')
@@ -66,6 +66,104 @@ def _mapping_exception_holds(block_id, operations, protocols, blocks, use_links)
                   and len(term.successors)==1,'mapping exception handoff lost its canonical continuation')
             cursor=(term.successors[0].block,0)
     raise ValueError('module source: mapping exception handoff cycles')
+
+
+def validate_mapping_import_statement(node,expansion,*,overlay,code_evidence,invoke,protocols,blocks,operations,values,instructions):
+    """Replay original import receiver stack and normal/exception world ports."""
+    from scar.analysis.source_module_lowering import mapping_import_plan
+    from scar.ir.program.module_entries import FrameBodyProtocolKind as K
+    P=PythonProtocolKind
+    plans=mapping_import_plan(node,code_evidence.code,instructions=instructions)
+    source=expansion.source
+    path=_normal_statement_path(expansion,blocks,operations)
+    kinds={K.IMPORT_NAME_314,K.IMPORT_FROM_314,K.STORE_NAME_314,P.FRAME_HOLD_TEMPORARY,P.FRAME_RELEASE_TEMPORARY}
+    actions=[op for op in path if op.id in protocols and protocols[op.id].kind in kinds]
+    links={(row.operation,row.use):row for row in overlay.use_links}
+    position=0;state=None;held=[]
+    def literal(use,expected):
+        value=values[use.value]
+        _need(type(value.origin)is LiteralOrigin and type(value.origin.value)is type(expected)
+              and value.origin.value==expected,'import statement changed an original compiler name/key')
+    def transition(op,before):
+        _need(op.terminator is None and len(op.accesses)==1 and op.accesses[0].before==op.uses[-1].id
+              and op.accesses[0].after is not None and op.results==(op.accesses[0].after,)
+              and op.uses[-1].value==before and type(values[op.results[0]])is StateVersionValue,
+              'import owner transition lost its actual incoming/post world')
+        return op.results[0]
+    def failure_prefix(block):
+        current=block.arguments[-1]
+        for index,owner in enumerate(reversed(held)):
+            _need(index<len(block.operations),'import exception lost a held receiver before its handler/frame exit')
+            op=operations[block.operations[index]];p=protocols.get(op.id)
+            row=links.get((op.id,op.uses[0].id)) if op.uses else None
+            _need(p is not None and p.kind is P.FRAME_RELEASE_TEMPORARY and p.source==source
+                  and row is not None and row.role=='mapping-import-exception-unwind'
+                  and len(op.uses)==2 and op.uses[0].value==owner,
+                  'import exception must release exactly its own retained receivers before handoff')
+            current=transition(op,current)
+        remaining=block.operations[len(held):]
+        _need(bool(remaining),'import exception has no original propagation/handler handoff')
+        first=operations[remaining[0]]
+        row=links.get((first.id,first.uses[0].id)) if first.uses else None
+        _need(row is None or row.role!='mapping-import-exception-unwind',
+              'import exception released an unowned or already released receiver')
+        for identity in remaining:
+            op=operations[identity]
+            worlds=[use.value for use in op.uses if type(values[use.value])is StateVersionValue]
+            if worlds:
+                _need(all(world==current for world in worlds),'import exception handoff bypassed receiver-release post-world')
+                break
+    def take(kind):
+        nonlocal position,state
+        _need(position<len(actions),'import normal receiver/alias sequence ended early')
+        op=actions[position];position+=1
+        _need(protocols[op.id].kind is kind and protocols[op.id].source==source,
+              'import normal path differs from compiler alias/traversal/ownership order')
+        if state is None:state=op.uses[-1].value
+        _need(op.uses[-1].value==state,'import action bypassed its preceding normal post-world')
+        if kind in (P.FRAME_HOLD_TEMPORARY,P.FRAME_RELEASE_TEMPORARY):
+            _need(len(op.uses)==2 and links[op.id,op.uses[0].id].role=='import-from-owner',
+                  'import owner hold/release lost its original source port')
+            state=transition(op,state)
+            return op,None
+        normal,failure=invoke(op,((ValueType(ValueKind.STATE,location=values[op.uses[-1].value].location),)
+            if kind is K.STORE_NAME_314 else (ValueType(ValueKind.REFERENCE),ValueType(ValueKind.STATE,location=values[op.uses[-1].value].location))))
+        failure_prefix(failure)
+        state=normal.arguments[-1]
+        return op,(None if kind is K.STORE_NAME_314 else normal.arguments[0])
+    def hold(owner):
+        op,_=take(P.FRAME_HOLD_TEMPORARY)
+        _need(op.uses[0].value==owner,'import must retain the actual receiver until its compiler POP_TOP')
+        held.append(owner)
+    def release(owner):
+        op,_=take(P.FRAME_RELEASE_TEMPORARY)
+        _need(bool(held) and held[-1]==owner and op.uses[0].value==owner,
+              'import receiver POP_TOP changed compiler stack ownership')
+        held.pop()
+    def from_owner(owner,key):
+        op,value=take(K.IMPORT_FROM_314)
+        _need(op.uses[0].value==owner,'import traversal reloaded or substituted its actual preceding module owner')
+        literal(op.uses[1],key)
+        return value
+    def store(bound,value):
+        op,_=take(K.STORE_NAME_314)
+        literal(op.uses[1],bound)
+        _need(op.uses[2].value==value,'import alias store must consume the actual final traversal result')
+    if isinstance(node,ast.Import):
+        for alias,(bound,traversal) in zip(node.names,plans):
+            imp,owner=take(K.IMPORT_NAME_314);literal(imp.uses[3],alias.name)
+            if not traversal:store(bound,owner);continue
+            hold(owner)
+            for index,name in enumerate(traversal):
+                value=from_owner(owner,name)
+                if index+1==len(traversal):store(bound,value);release(owner)
+                else:
+                    hold(value);held[-2:]=[value,owner];release(owner);owner=value
+    else:
+        imp,owner=take(K.IMPORT_NAME_314);hold(owner)
+        for member,(bound,_) in zip(node.names,plans):store(bound,from_owner(owner,member.name))
+        release(owner)
+    _need(position==len(actions) and not held,'import statement retained extra alias/owner operations')
 
 
 def validate_mapping_heap_store(node,target,expansion,*,graph,overlay,semantic,code_evidence,
@@ -698,7 +796,8 @@ def require_valid_structured_module_program(result,*,source_texts,code_evidence=
                       'STORE_NAME source must be an original binding/import/handler/definition')
                 allowed=(['__doc__'] if docstring else [node.name]
                     if isinstance(node,(ast.ExceptHandler,ast.FunctionDef,ast.AsyncFunctionDef))
-                    else [alias.asname or alias.name for alias in node.names])
+                    else [alias.asname or (alias.name.split('.')[0] if isinstance(node,ast.Import) else alias.name)
+                          for alias in node.names])
                 _need(type(values[op.uses[1].value].origin) is LiteralOrigin and values[op.uses[1].value].origin.value in allowed,'import alias STORE_NAME key differs')
             expected_addresses.add(op.id);expected=[(0,1,'WRITE')]
         elif kind is K.IMPORT_NAME_314:
@@ -725,7 +824,7 @@ def require_valid_structured_module_program(result,*,source_texts,code_evidence=
                   'import interface has no matching original root opcode/source span')
             expected_addresses.add(op.id);expected=[(0,6,'READ')]
         elif kind is K.IMPORT_FROM_314:
-            _need(isinstance(nodes.get(protocol.source),ast.ImportFrom) and len(op.uses)==3 and op.callee is None,
+            _need(isinstance(nodes.get(protocol.source),(ast.Import,ast.ImportFrom)) and len(op.uses)==3 and op.callee is None,
                   'IMPORT_FROM must keep its original source and dynamic receiver/key')
             expected=None
         elif kind is K.DELETE_NAME_314:
@@ -888,23 +987,8 @@ def require_valid_structured_module_program(result,*,source_texts,code_evidence=
             _need(target.uses[2].value==item,'for item must feed its exact mapping target store')
             ordered_statements(node.body,body_entry.id)
         elif isinstance(node,(ast.Import,ast.ImportFrom)):
-            imported=[operations[p.operation] for p in overlay.protocols if p.kind is K.IMPORT_NAME_314 and p.source==source]
-            stores=[operations[p.operation] for p in overlay.protocols if p.kind is K.STORE_NAME_314 and p.source==source]
-            _need(len(imported)==(len(node.names) if isinstance(node,ast.Import) else 1) and len(stores)==len(node.names),
-                  'import alias/protocol inventory differs')
-            if isinstance(node,ast.Import):
-                for imp,store in zip(imported,stores):
-                    normal,_=invoke(imp,(ref_type,state_type))
-                    _need(store.uses[2].value==normal.arguments[0] and store.uses[-1].value==normal.arguments[-1],
-                          'import result/post-world must feed its own alias store')
-            else:
-                receiver=invoke(imported[0],(ref_type,state_type))[0].arguments[0]
-                froms=[operations[p.operation] for p in overlay.protocols if p.kind is K.IMPORT_FROM_314 and p.source==source]
-                _need(len(froms)==len(node.names),'IMPORT_FROM alias inventory differs')
-                for member,frm,store in zip(node.names,froms,stores):
-                    literal(frm.uses[1],member.name);normal,_=invoke(frm,(ref_type,state_type))
-                    _need(frm.uses[0].value==receiver and store.uses[2].value==normal.arguments[0]
-                          and store.uses[-1].value==normal.arguments[-1],'from receiver/result/store sequencing differs')
+            validate_mapping_import_statement(node,expansions[source],overlay=overlay,code_evidence=code_evidence,
+                invoke=invoke,protocols=protocols,blocks=blocks,operations=operations,values=values,instructions=instructions)
     for protocol in overlay.protocols:
         if protocol.kind is K.STORE_NAME_314:
             store=operations[protocol.operation];consumed=store.uses[2].value

@@ -7,11 +7,9 @@ ports are checked by the shared factory/environment reader.
 """
 from __future__ import annotations
 
-from dataclasses import dataclass, replace
+from dataclasses import InitVar, dataclass, replace
 
-from scar.ir.record_codec import decode
 from scar.ir.program.environments import EnvironmentRole
-from scar.ir.program.functions import BodyEntryInterface
 from scar.ir.program.model import ReferenceValue, StateVersionValue, UseRole
 from scar.ir.program.queries import ProgramIndex
 from scar.ir.program.static_calls import (
@@ -20,7 +18,7 @@ from scar.ir.program.static_calls import (
     StaticQualifiedFunctionCreation, StaticQualifiedNamespaceRead, StaticQualifiedNamespaceWrite,
 )
 from scar.analysis.static_function_environment import (
-    validate_function_environment_route, validate_static_body_namespace,
+    _EnvironmentFacts, _validate_function_environment_route, validate_static_body_namespace,
 )
 from scar.analysis.static_namespace import NamespaceDependencies
 
@@ -33,12 +31,18 @@ class StaticNamespaceBody:
     namespace: object
     index: ProgramIndex | None = None
     dependencies: NamespaceDependencies | None = None
+    _facts: InitVar[object] = None
 
-    def __post_init__(self):
+    def __post_init__(self,_facts):
         index = ProgramIndex(self.graph) if self.index is None else self.index
         if type(index) is not ProgramIndex or index.graph is not self.graph:
             raise ValueError('cross-body namespace index belongs to another original graph')
-        validate_static_body_namespace(self.graph, self.document, self.namespace)
+        if _facts is None:
+            validate_static_body_namespace(self.graph,self.document,self.namespace)
+        elif type(_facts)is not _EnvironmentFacts:
+            raise TypeError('namespace body input reuse requires its private typed environment scope')
+        else:
+            _facts.body(self.graph,self.document,self.namespace,index)
         dependencies = self.dependencies
         if dependencies is None:
             dependencies = NamespaceDependencies(self.graph, self.document, index=index)
@@ -66,9 +70,9 @@ def _conditions(*groups):
     return tuple(dict.fromkeys(condition for group in groups for condition in group))
 
 
-def _validate_environment(route, bodies):
+def _validate_environment(route, bodies, facts):
     caller, callee = _body(bodies, route.caller), _body(bodies, route.callee)
-    validate_function_environment_route(route,
+    _validate_function_environment_route(route,facts=facts,
         caller_graph=caller.graph, caller_document=caller.document, caller_namespace=caller.namespace,
         callee_graph=callee.graph, callee_document=callee.document, callee_namespace=callee.namespace,
         definition=route.creation.definition, call_operation=route.call_operation,
@@ -78,7 +82,7 @@ def _validate_environment(route, bodies):
         caller_index=caller.index, callee_index=callee.index)
 
 
-def _validate_bridge(bridge, bodies):
+def _validate_bridge(bridge, bodies, facts):
     if type(bridge) is not StaticNamespaceCallBridge:
         raise TypeError('cross-body namespace composition needs typed call bridges')
     bridge.__post_init__()
@@ -86,9 +90,9 @@ def _validate_bridge(bridge, bodies):
     caller, callee = _body(bodies, route.caller), _body(bodies, route.callee)
     _reference(caller, bridge.caller_owner)
     _reference(callee, bridge.callee_owner)
-    _validate_environment(route, bodies)
+    _validate_environment(route,bodies,facts)
     for incoming in bridge.caller_owner_routes:
-        _validate_environment(incoming, bodies)
+        _validate_environment(incoming,bodies,facts)
     site = caller.index.use_site(state.caller_use)
     before, after = caller.index.values.get(state.caller_value), callee.index.values.get(state.callee_value)
     operation = caller.index.operations[route.call_operation]
@@ -99,7 +103,7 @@ def _validate_bridge(bridge, bodies):
         raise ValueError('namespace call state bridge changed an original caller state Use/location')
     if callee.document.get('interface') is None:
         raise ValueError('namespace call bridge has no original function entry interface')
-    interface = decode(BodyEntryInterface, callee.document['interface'])
+    interface=facts.body(callee.graph,callee.document,callee.namespace,callee.index).interface
     if (interface.region != callee.namespace.region or interface.world != state.callee_value
             or interface.definition != callee.namespace.definition):
         raise ValueError('namespace call state bridge does not reach the exact original callee entry world')
@@ -153,7 +157,7 @@ def _guard_entry_path(dependencies, witness, entry_owner):
 
 
 def compose_cross_body_namespace_flow(*, write_body, binding, bridges, entry_paths,
-        read_body, read, read_slot=0, bodies):
+        read_body, read, read_slot=0, bodies, _facts=None):
     """Compose verified local witnesses and ordered original call-entry routes.
 
     ``binding`` reaches the first CALL from the source write. ``entry_paths``
@@ -161,6 +165,9 @@ def compose_cross_body_namespace_flow(*, write_body, binding, bridges, entry_pat
     ``bodies`` contains every qualified body used by the bridges and factories.
     """
     from scar.analysis.static_namespace import NamespaceBindingWitness
+    facts=_EnvironmentFacts()if _facts is None else _facts
+    if type(facts)is not _EnvironmentFacts:
+        raise TypeError('cross-body composition requires its private typed environment input scope')
     if type(binding) is not NamespaceBindingWitness:
         raise TypeError('cross-body source requires a typed original point-binding witness')
     if (type(bridges) is not tuple or not bridges or type(entry_paths) is not tuple
@@ -179,7 +186,7 @@ def compose_cross_body_namespace_flow(*, write_body, binding, bridges, entry_pat
         binding.query_operation, binding.query_owner, binding.query_world, binding.key,
         binding.path, binding.intervening_operations, first_conditions)]
     for bridge, witness in zip(bridges, entry_paths):
-        _validate_bridge(bridge, bodies)
+        _validate_bridge(bridge,bodies,facts)
         body = _body(bodies, bridge.environment.callee)
         witness = _guard_entry_path(body.dependencies, witness, bridge.callee_owner)
         segments.append(StaticNamespacePathSegment(body.namespace, NamespacePathStart.ENTRY,
@@ -237,7 +244,7 @@ def validate_cross_body_namespace_flow(flow, *, bodies):
             entry_owner=segment.start_owner))
     replay = compose_cross_body_namespace_flow(write_body=source, binding=binding,
         bridges=flow.bridges, entry_paths=tuple(witnesses), read_body=target, read=read,
-        read_slot=slot, bodies=bodies)
+        read_slot=slot, bodies=bodies, _facts=_EnvironmentFacts())
     if replay != flow:
         raise ValueError('cross-body namespace relation changed original ordered source/entry/path endpoints')
     return True

@@ -172,6 +172,8 @@ def lower_dictionary(builder, node, cursor):
                 return None, None
         if receiver is None:
             cursor, receiver = _empty(builder, node, cursor)
+        from scar.analysis.source_expression_lowering import forward_source_reference
+        forward_source_reference(builder, cursor, node, receiver)
         _transfer(builder, ((node, receiver),), node)
         records = builder.old_by_atom.get(builder.source(node).atom_id, ())
         if len(records) > 1:

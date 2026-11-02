@@ -84,6 +84,8 @@ def lower_starred_display(builder,node,cursor):
                 K.DISPLAY_LIST_TO_TUPLE,((node,container),),result=True)
             _associate(builder,identity,node,definition,Opcode.BUILD_TUPLE)
         else:
+            from scar.analysis.source_expression_lowering import forward_source_reference
+            forward_source_reference(builder,cursor,node,container)
             result=container;_transfer(builder,((node,container),),node)
             _associate(builder,build,node,definition,Opcode.BUILD_LIST)
         builder.link_value(builder.values_by_id[result],node,SourceRole.EXPRESSION)

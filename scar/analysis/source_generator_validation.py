@@ -173,6 +173,10 @@ def validate_generator_regions(model, graph, interface, metadata, semantic, lang
         string_operations, string_results = _validate_lazy_strings(
             body, local_operations, model, graph, metadata, semantic, source_tree, lazy_code,
             operations, values, blocks, protocols, links, positions)
+        from scar.analysis.source_expression_validation import validate_source_expressions
+        expression_operations = validate_source_expressions(model, graph, interface, metadata, semantic, language,
+            source_tree=source_tree, options=options, structural_only=structural_only,
+            selected_operations=local_operations)
         _need([key for key in local_operations if type(operations[key].terminator) is SuspendTerminator] == [suspend.id],
               "one-clause generator must have its unique actual yield boundary")
         semantic_operations = [links[key].semantic_operation for key in local_operations if links[key].semantic_operation is not None]
@@ -255,7 +259,8 @@ def validate_generator_regions(model, graph, interface, metadata, semantic, lang
                 _need(key in bindings | binding_reads | context_actions
                       or protocol is not None and protocol.kind in (
                           Kind.FRAME_ENTER, Kind.FRAME_BIND, Kind.FRAME_EXIT, Kind.FRAME_DISCARD,
-                          Kind.FRAME_HOLD_TEMPORARY, Kind.FRAME_RELEASE_TEMPORARY, Kind.MATCH_STOP_ITERATION),
+                          Kind.FRAME_HOLD_TEMPORARY, Kind.FRAME_RELEASE_TEMPORARY,
+                          Kind.FRAME_FORWARD_TEMPORARY, Kind.MATCH_STOP_ITERATION),
                       "unclassified ordinary primitive in lazy B")
             elif operation.terminator.kind is TerminatorKind.INVOKE:
                 _need(key in string_operations or protocol is not None and protocol.kind in (

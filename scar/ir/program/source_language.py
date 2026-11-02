@@ -21,6 +21,8 @@ class SourceLanguageCapability(str, Enum):
     FIXED_UNPACK = "PYTHON_FIXED_LOCAL_UNPACK_V1"
     SLICE_KEYS = "PYTHON_SLICE_KEYS_314_V1"
     SLICE_ACCESS_314_V1 = "PYTHON_SLICE_ACCESS_314_V1"
+    SOURCE_EXPRESSIONS_314_V1 = "PYTHON_SOURCE_EXPRESSIONS_314_V1"
+    SOURCE_REFERENCE_LIFETIME_314_V1 = "PYTHON_SOURCE_REFERENCE_LIFETIME_314_V1"
     LEXICAL_LOCALS = "PYTHON_LEXICAL_LOCALS_314_V1"
     CALL_KWARGS_314_V1 = "PYTHON_CALL_KWARGS_314_V1"
     CALL_EXPANSION_314_V1 = "PYTHON_CALL_EXPANSION_314_V1"
@@ -67,6 +69,8 @@ LAMBDA_PROTOCOLS = frozenset(('MAKE_LAMBDA_FUNCTION',))
 EXTENDED_PROTOCOLS = EXTENDED_PROTOCOLS | LAMBDA_PROTOCOLS
 SLICE_ACCESS_PROTOCOLS = frozenset(('BINARY_SLICE', 'STORE_SLICE', 'STORE_SLICE_SUBSCRIPT'))
 EXTENDED_PROTOCOLS = EXTENDED_PROTOCOLS | SLICE_ACCESS_PROTOCOLS
+SOURCE_EXPRESSION_PROTOCOLS = frozenset(('SOURCE_BINARY', 'SOURCE_COMPARE', 'SOURCE_INDEX', 'FRAME_FORWARD_TEMPORARY'))
+EXTENDED_PROTOCOLS = EXTENDED_PROTOCOLS | SOURCE_EXPRESSION_PROTOCOLS
 
 
 def _need(condition, detail):
@@ -181,6 +185,9 @@ class SourceLanguageOverlay:
         if SourceLanguageCapability.SLICE_ACCESS_314_V1 in self.capabilities:
             _need(SourceLanguageCapability.SLICE_KEYS in self.capabilities,
                   "slice access requires its explicit key construction capability")
+        if SourceLanguageCapability.SOURCE_REFERENCE_LIFETIME_314_V1 in self.capabilities:
+            _need(SourceLanguageCapability.SOURCE_EXPRESSIONS_314_V1 in self.capabilities,
+                  'source reference ownership requires the explicit source expression capability')
         for rows, kind in ((self.unpackings, UnpackShape), (self.slices, SliceShape),
                            (self.constants, CodeConstantSource), (self.compiler_locals, CompilerLocalMapping)):
             _need(type(rows) is tuple and all(type(row) is kind for row in rows), "overlay record type differs")

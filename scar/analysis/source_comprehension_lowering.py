@@ -194,6 +194,10 @@ def _target_read(builder, node, cursor, old=None):
 def expression(builder, node, cursor):
     """Original SG children absent from the old opaque comprehension overlay."""
     definition = _source_definition(builder, node)
+    if (builder.has_language('SOURCE_REFERENCE_LIFETIME_314_V1') and isinstance(node, ast.Subscript)
+            and isinstance(node.ctx, ast.Load) and not isinstance(node.slice, (ast.Slice, ast.Tuple))):
+        from scar.analysis.source_slice_lowering import lower_subscript
+        return lower_subscript(builder, node, cursor, source_expression=True)
     if isinstance(node, ast.Name):
         first = len(builder.operations)
         cursor, value = builder.read_source_name(node, cursor, None)
@@ -201,7 +205,15 @@ def expression(builder, node, cursor):
             _associate(builder, _normal_producer(builder, node, value, first), node, definition, Opcode.READ)
         return cursor, value
     if isinstance(node, ast.Constant):
+        if builder.has_language('SOURCE_EXPRESSIONS_314_V1'):
+            from scar.analysis.source_expression_lowering import lower_source_literal
+            return lower_source_literal(builder, node, cursor, definition=definition)
         return builder.expr(node, cursor)
+    if (builder.has_language('SOURCE_EXPRESSIONS_314_V1')
+            and isinstance(node, (ast.BinOp, ast.Compare))):
+        from scar.analysis.source_expression_lowering import lower_source_expression
+        return lower_source_expression(builder, node, cursor, definition=definition,
+            evaluate=lambda child, at: expression(builder, child, at))
     if isinstance(node, ast.JoinedStr):
         from scar.analysis.source_string_lowering import lower_joined_string
         return lower_joined_string(builder, node, cursor, recover_missing_children=True)
@@ -421,6 +433,8 @@ def _lower_targets(builder,node,cursor):
         body=_update(builder,node,body,container,children)
         if body is not None:builder.jump(body,header,names,node)
         scope.leave(natural,failure=False)
+        from scar.analysis.source_expression_lowering import forward_source_reference
+        forward_source_reference(builder,natural,node,container)
         _transfer(builder,((node,iterator),(node,container)),node)
         builder.link_value(builder.values_by_id[container],node,SourceRole.EXPRESSION)
         builder.gap(GapKind.EFFECT_SUMMARY,node,'recursive comp target/partial-unpack/paired cleanup interfaces are explicit; object aliasing, contents, finalizers, iteration count and full effects remain open')
@@ -494,6 +508,8 @@ def lower_comprehension(builder,node,cursor):
         # bindings remain held. The physical save/restore staging is folded.
         builder.frame_transition(natural,node,((natural.env[alias],target,'scoped-binding'),(iterator,node,'exhausted-iterator')),K.COMPREHENSION_LEAVE)
         natural.env.pop(alias)
+        from scar.analysis.source_expression_lowering import forward_source_reference
+        forward_source_reference(builder,natural,node,container)
         _transfer(builder,((node,iterator),(node,container)),node)
         builder.link_value(builder.values_by_id[container],node,SourceRole.EXPRESSION)
         builder.gap(GapKind.EFFECT_SUMMARY,node,'comprehension scoped iteration/container dependencies are explicit; dispatch, contents, identity, iteration count and complete effects remain unproved')

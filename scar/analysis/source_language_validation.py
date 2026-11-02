@@ -29,7 +29,10 @@ def _need(condition, detail):
 
 
 def validate_language_body(model, graph, interface, metadata, semantic, language,
-                           *, source_tree=None, options=None, structural_only=False,control=None,sealed_source=None):
+                           *, source_tree=None, options=None, structural_only=False,control=None,sealed_source=None,
+                           pending_protocols=None):
+    if pending_protocols is None:
+        pending_protocols = model.protocols
     if language is not None and language.lambda_bodies:
         from scar.analysis.source_lambda_validation import validate_lambda_regions,root_projection as lambda_projection
         _need(control is not None,'Lambda body checking requires the original control context, not a fabricated suite')
@@ -95,9 +98,13 @@ def validate_language_body(model, graph, interface, metadata, semantic, language
     from scar.analysis.source_slice_validation import validate_slice_access
     slice_access = validate_slice_access(model, graph, interface, metadata, semantic, language,
         source_tree=source_tree, options=options, structural_only=structural_only)
-    indexed = slice_access | displays | comprehensions | set(unpack) | set(slices) | set(constants) | calls | try_protocols | functions | imports | withs | sets
+    from scar.analysis.source_expression_validation import validate_source_expressions
+    expressions = validate_source_expressions(model, graph, interface, metadata, semantic, language,
+        source_tree=source_tree, options=options, structural_only=structural_only,
+        pending_protocols=pending_protocols)
+    indexed = expressions | slice_access | displays | comprehensions | set(unpack) | set(slices) | set(constants) | calls | try_protocols | functions | imports | withs | sets
     actual = {key for key, row in protocols.items() if row.kind.value in EXTENDED_PROTOCOLS}
-    _need(indexed == actual and len(indexed) == len(slice_access) + len(unpack) + len(slices) + len(constants) + len(calls) + len(try_protocols) + len(functions) + len(imports) + len(withs) + len(sets) + len(comprehensions) + len(displays),
+    _need(indexed == actual and len(indexed) == len(expressions) + len(slice_access) + len(unpack) + len(slices) + len(constants) + len(calls) + len(try_protocols) + len(functions) + len(imports) + len(withs) + len(sets) + len(comprehensions) + len(displays),
           "new language operations must have one exact shape/provenance record")
 
     def source_node(reference, classes):

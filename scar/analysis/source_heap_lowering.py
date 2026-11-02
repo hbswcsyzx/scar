@@ -112,11 +112,20 @@ def expression_for_heap_target(builder, node, cursor, *, parent_definition=None)
         from scar.analysis.source_slice_lowering import lower_key
         return lower_key(builder, node, cursor)
     if (getattr(builder, "has_language", lambda _: False)("SLICE_ACCESS_314_V1")
-            and isinstance(node, ast.Subscript) and isinstance(node.ctx, ast.Load)):
+            and isinstance(node, ast.Subscript) and isinstance(node.ctx, ast.Load)
+            and not (getattr(builder, 'has_language', lambda _: False)('SOURCE_REFERENCE_LIFETIME_314_V1')
+                     and not isinstance(node.slice, (ast.Slice, ast.Tuple)))):
         if parent_definition is not None:
             _source_definition(builder, node, parent=parent_definition)
         from scar.analysis.source_slice_lowering import lower_subscript
         return lower_subscript(builder, node, cursor)
+    if (getattr(builder, 'has_language', lambda _: False)('SOURCE_REFERENCE_LIFETIME_314_V1')
+            and isinstance(node, ast.Subscript) and isinstance(node.ctx, ast.Load)
+            and not isinstance(node.slice, (ast.Slice, ast.Tuple))):
+        if parent_definition is not None:
+            _source_definition(builder, node, parent=parent_definition)
+        from scar.analysis.source_slice_lowering import lower_subscript
+        return lower_subscript(builder, node, cursor, source_expression=True)
     records = builder.old_by_atom.get(builder.source(node).atom_id, ())
     definition = _source_definition(builder, node, parent=parent_definition) if parent_definition is not None else None
     if len(records) == 1:
@@ -128,6 +137,10 @@ def expression_for_heap_target(builder, node, cursor, *, parent_definition=None)
         raise _Unsupported(GapKind.SOURCE_MAPPING, node,
             "heap target child has ambiguous legacy computational records")
     definition = definition or _source_definition(builder, node)
+    if (getattr(builder, 'has_language', lambda _: False)('SOURCE_EXPRESSIONS_314_V1')
+            and isinstance(node, (ast.BinOp, ast.Compare))):
+        from scar.analysis.source_expression_lowering import lower_source_expression
+        return lower_source_expression(builder, node, cursor, definition=definition)
     if isinstance(node, ast.JoinedStr):
         if (definition.kind is not OperationKind.OPERATOR
                 or definition.metadata.get("ast_type") != "JoinedStr"
