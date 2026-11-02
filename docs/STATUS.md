@@ -65,7 +65,9 @@ Root 独立双向读回 29.93 秒，1 条参数边、2 个 namespace，raw 路�
 
 **Implemented / Verified**：从原 Use owner、result producer 或 block argument 追踪原入口 edge-dominance 必要条件，沿最近 controller 递归；与 MAY postdom 控制影响分开。稳定的分支/绑定证明可反证值路由，并从原 seeds 重算，原图与异常/效果边保留。报告新增 occurrence、infeasibility 和 route_refutations，不把结构证据当作值相等。
 
-同一批通用真实源码查询推得唯一不可变 tuple `(7,99,5)`：128 points、268 edges、1,003 steps、2 branch proofs、5 binding proofs、6 route refutations。未知/custom 区域没有污染独立已知字段。原 core 同步 region 的两层上下文、未知/循环/部分接口与预算边界已核验；**保存的 Python candidate frame 入口范围仍 open**，不能说全部跨函数控制已闭合。验证源码未执行。
+同一批通用真实源码查询推得唯一不可变 tuple `(7,99,5)`；刷新后的 15-root 机器记录为 128 points、268 edges、999 steps、2 branch proofs、5 binding proofs、6 route refutations。未知/custom 区域没有污染独立已知字段。原 core 同步 region 的两层上下文、未知/循环/部分接口与预算边界已核验；**保存的 Python candidate frame 入口范围仍 open**，不能说全部跨函数控制已闭合。验证源码未执行。
+
+当前 `queries/binding-knowledge/` 的源码、小模型与 proofs 收据一致，静态建模约 1.96 秒、查询 2.13 秒；主 current/static 未改变。此目录只是通用规则核验，不是 LeWM 或另一份权威程序。
 
 已有独立 binding state field、normal/raise slot0 隔离和原 TRUTH 合同推理继续保留；worklist 稳定与原查询覆盖完整分别报告。源码常量只来自静态 builtin literal/原编译常量表，不保存 Tensor 内容，不执行用户协议。
 
@@ -86,6 +88,7 @@ C++ source 前端复用 Tree-sitter，实际 53,705-byte template 中机械枚�
 ## 下一步，按实际依赖缺口推进
 
 1. 盘点真实未解析 CALL 的第一处断边，优先修 module/class 初始化、receiver 与字段来源；先证明通用关系，再在原 LeWM 端点核对。保留候选和明确条件，不按名称猜目标。
+   已定位 CEM 的两个独立实现缺口：①函数 G 入口来源只在 CALL target 激活后建立，缺少原 factory→body 的条件捕获关系；②IMPORT_FROM 原端口未参与模块来源求解。相关两份模块实际已完整展开，不能把这两个问题归因于模块后缀。一般 self/descriptor 来源是另一项欠账。先接引用，再分析 entry 状态内容；不制造 CALL，也不复用创建 world 冒充 entry world。
 2. 补 module AnnAssign、class annotation 及随后的实际主体阻断；保留默认 lazy annotation、future annotations、namespace/world 和异常语义。定点重建后才更新覆盖。
 3. 将原调用、逐地址 reaching writes、alias/effects、binding/容器与 Tensor 属性在共同固定点中反馈；把源码可推而缺规则与真正未绑定字段分开。
 4. 完成按需依赖材料和 Python/native 绑定、资源契约，覆盖加载→规划/推理→保存路径。CPU/GPU/DRAM/HBM/storage/stream 建模到可控制边界，不展开 OS FD 表或指令。

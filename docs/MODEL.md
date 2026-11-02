@@ -85,6 +85,24 @@ State SSA 表达静态读写依赖；循环/分支版本是符号版本，不是
 
 这些条件依赖是静态图中可继续分析的关系，不是缓存许可。原端点/来源校验通过、条件由后续推理消解、最终效果闭合，是三件不同的事。
 
+当前发现的接线欠账：上述环境关系主要在 CALL target 已知后建立，但分析函数内部全局
+读取又需要该环境。原源码已有 MAKE_FUNCTION 时，捕获关系应先于调用目标解析成为图中
+可用的条件关系，不能等待某个实例方法的 dispatch 已解决后才表示。
+
+下一项的 factory-entry origin 规则分开处理三件事（实现状态见 STATUS）：
+
+| 关系 | 可以表达什么 | 不能据此推出什么 |
+|---|---|---|
+| 原 factory 的捕获端口 | 产生函数时捕获哪个 globals 引用 | 该 dict 的内容保持不变 |
+| 原 body 的环境 formal | 若进入函数来自该 factory 产物，formal 对应哪个对象引用 | 已经发生调用、只有这个来源、所有 factory 实例相同 |
+| entry world 上的 namespace read | 指定 key 在此位置有哪些 reaching writes | 创建时 world 等于调用时 world |
+
+前两项只传引用来源，不需要伪造 caller CALL 或 Invocation；代码来源、factory 正常完成、
+entry callable 选择及字段保持条件必须显式保留。相同 code 可由不同 globals 创建，也可
+被装到别的函数对象上，不能按 CodeID 合并其环境。saved builtins 还涉及创建时选择，
+不能直接借用 creator/caller 当前 B。第三项继续走实际状态关系；无已知 caller 时的初始
+namespace 替代路径需要单独状态前提，不准把一个捕获引用边升级为内容证明。
+
 ## 跨主体值来源与名称绑定
 
 跨图的 ValueID、OperationID、UseID 始终附带其原 body namespace。外层模块的 factory 即使成为深层函数的调用目标，仍在原模块图中读取、校验和保存；不能拿深层函数的 index 查外层裸 ID，也不复制被调函数体。

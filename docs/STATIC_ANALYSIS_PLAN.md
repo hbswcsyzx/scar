@@ -19,6 +19,17 @@ AST 是输入，局部 canonical 已有 CFG/SSA/状态图。原结构性缺口�
 CEM solve 的 48 个原 CALL 均无目标候选。先按原 callee/receiver/namespace/state 端口
 逐条定位第一处断边，按共同原因修复，不以同名定义填充候选。
 
+首个具体断点已定位：solve 的 G/B namespace read 没有激活的入口环境来源；现有来源
+又依赖先解析 CALL target，形成 bootstrap 缺口。原 class suite 的函数 factory、捕获 G
+和 parent/provider/suite 输入链均已存在；该 CEM 模块与工具模块的主体后缀均完整，
+不能误归因为 AnnAssign/模块未展开。另一个独立缺口是 IMPORT_FROM 尚未参与模块来源
+求解；原 IMPORT_NAME/IMPORT_FROM/STORE_NAME 都有端口，不能用 ATTRIBUTE 冒充它。
+
+修复顺序：先增加不伪造 CALL 的有条件 factory→body 环境引用关系，再单独处理 entry
+时刻 namespace 内容和 IMPORT_FROM 协议，最后推进一般实例 receiver/descriptor 来源。
+每项都在共同图保留原端点与条件；只补创建关系不能宣布 CEM targets 已解决。module
+注解属于并行主体覆盖工作，不能说完成它就能修复上述 CEM 断点。
+
 下一轮分三项并行准备、按依赖顺序验收：
 
 - **接线审计**：保存原调用→callee来源→首次缺边的证据路径，分清缺主体、缺协议、缺状态关系与真正未绑定输入。验收是精确原端点可定位，不能只汇总 frontier。
