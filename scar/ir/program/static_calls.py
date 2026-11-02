@@ -659,6 +659,7 @@ class StaticCallSite:
     cross_body_namespace_flows: tuple[StaticCrossBodyNamespaceFlow, ...] = ()
     argument_value_flows: tuple[StaticArgumentValueFlow, ...] = ()
     return_value_flows: tuple[StaticReturnValueFlow, ...] = ()
+    module_globals_flows: tuple[StaticModuleGlobalsFlow, ...] = ()
 
     def __post_init__(self):
         _exact(self.caller, SourceBodyNamespace)
@@ -680,6 +681,7 @@ class StaticCallSite:
         _rows(self.cross_body_namespace_flows, StaticCrossBodyNamespaceFlow)
         _rows(self.argument_value_flows, StaticArgumentValueFlow)
         _rows(self.return_value_flows, StaticReturnValueFlow)
+        _rows(self.module_globals_flows, StaticModuleGlobalsFlow)
         for target in self.targets:
             if any(path and path[-1].callee != self.caller for path in target.requirement_paths):
                 raise ValueError("target context alternative does not end in its original caller body")
@@ -716,6 +718,7 @@ class StaticReferenceSourcePath:
     argument_flows: tuple[StaticArgumentValueFlow, ...] = ()
     return_flows: tuple[StaticReturnValueFlow, ...] = ()
     module_attribute_flows: tuple[StaticModuleAttributeFlow, ...] = ()
+    module_globals_flows: tuple[StaticModuleGlobalsFlow, ...] = ()
 
     def __post_init__(self):
         _rows(self.points, StaticReferencePoint)
@@ -724,7 +727,8 @@ class StaticReferenceSourcePath:
         for rows, kind in ((self.namespace_flows, StaticQualifiedNamespaceFlow),
                 (self.cross_body_namespace_flows, StaticCrossBodyNamespaceFlow),
                 (self.argument_flows, StaticArgumentValueFlow), (self.return_flows, StaticReturnValueFlow),
-                (self.module_attribute_flows, StaticModuleAttributeFlow)):
+                (self.module_attribute_flows, StaticModuleAttributeFlow),
+                (self.module_globals_flows, StaticModuleGlobalsFlow)):
             _rows(rows, kind)
 
 
@@ -864,6 +868,148 @@ class StaticModuleAttributeFlow:
 
 
 @dataclass(frozen=True, slots=True)
+class StaticFunctionOwnerRoute:
+    """One original environment-owner edge, with its selected factory path.
+
+    The path's first context is the caller context; its last context is the
+    creation context. These need not be the same body or call stack.
+    """
+    environment: StaticFunctionEnvironmentRoute
+    callable_source: StaticReferenceSourcePath
+
+    def __post_init__(self):
+        _exact(self.environment, StaticFunctionEnvironmentRoute)
+        _exact(self.callable_source, StaticReferenceSourcePath)
+        route=self.environment;first,last=self.callable_source.points[0],self.callable_source.points[-1]
+        if (route.member.role is not EnvironmentRole.GLOBALS_NAMESPACE
+                or first.body!=route.caller or first.value!=route.callee_value
+                or last.body!=route.creation_body or last.value!=route.creation.normal_value):
+            raise ValueError('owner route must retain its original selected factory reference path')
+
+
+@dataclass(frozen=True, slots=True)
+class StaticModuleNamespaceAtCall:
+    """Conditional AddressView/Reaches witness at a real CALL input world.
+
+    No caller dictionary Value, attribute read, or invocation is synthesized.
+    The selected function reference and the current namespace state have
+    separate original source and query points.
+    """
+    environment: StaticFunctionEnvironmentRoute
+    state_entry: StaticStateEntryRoute
+    callable_source: StaticReferenceSourcePath
+    owner_routes: tuple[StaticFunctionOwnerRoute, ...]
+    module: StaticImportModuleRoute
+    key: str
+    source_body: SourceBodyNamespace
+    source_operation: OperationID
+    source_owner: UseID
+    source_payload: UseID
+    source_world: UseID
+    source_normal: ControlEdgeReference
+    source_value: ValueID
+    source_key: UseID | None
+    snapshot_operation: OperationID
+    snapshot_world: UseID
+    source_path: tuple[ControlEdgeReference, ...]
+    source_operations: tuple[OperationID, ...]
+    consumer_path: tuple[ControlEdgeReference, ...]
+    consumer_operations: tuple[OperationID, ...]
+    write: StaticAttributeAccess | None = None
+    write_receiver_path: StaticReferenceSourcePath | None = None
+    overwrites: tuple[StaticAttributeAccess, ...] = ()
+    overwrite_receiver_paths: tuple[StaticReferenceSourcePath, ...] = ()
+    source_requirements: tuple[StaticCallContext, ...] = ()
+    conditions: tuple[ModuleFlowCondition, ...] = tuple(ModuleFlowCondition)
+
+    def __post_init__(self):
+        for value,kind in ((self.environment,StaticFunctionEnvironmentRoute),(self.state_entry,StaticStateEntryRoute),
+                (self.callable_source,StaticReferenceSourcePath),(self.module,StaticImportModuleRoute),
+                (self.source_body,SourceBodyNamespace),(self.source_operation,OperationID),
+                (self.source_owner,UseID),(self.source_payload,UseID),(self.source_world,UseID),
+                (self.source_normal,ControlEdgeReference),(self.source_value,ValueID),
+                (self.snapshot_operation,OperationID),(self.snapshot_world,UseID)):_exact(value,kind)
+        _rows(self.owner_routes,StaticFunctionOwnerRoute)
+        route=self.environment
+        if route.member.role is not EnvironmentRole.GLOBALS_NAMESPACE or type(self.key)is not str:
+            raise ValueError('module state projection requires a globals owner and a known namespace key')
+        StaticFunctionOwnerRoute(route,self.callable_source)
+        if self.state_entry.caller_use!=route.call_world or self.state_entry.caller_value!=route.call_world_value:
+            raise ValueError('namespace projection must query its real CALL input world')
+        point=StaticReferencePoint(route.creation_body,route.source_value,self.callable_source.points[-1].requirements)
+        for step in self.owner_routes:
+            incoming=step.environment;ctx=StaticCallContext(incoming.caller,incoming.call_operation,
+                incoming.callee_use,incoming.callee_value,incoming.creation.definition,incoming.callee)
+            expected=(*step.callable_source.points[0].requirements,ctx)
+            if (point.body!=incoming.callee or point.value!=incoming.member.reference
+                    or point.requirements and point.requirements!=expected):
+                raise ValueError('nested creator globals owner route changed its ordered original context')
+            point=StaticReferencePoint(incoming.creation_body,incoming.source_value,
+                step.callable_source.points[-1].requirements)
+        if point.body!=self.module.module_body or point.value!=self.module.globals_namespace:
+            raise ValueError('globals owner route does not end at the selected source module G')
+        if self.source_normal.operation!=self.source_operation:
+            raise ValueError('module source normal edge changed its original writer')
+        StaticReferencePoint(self.source_body,self.source_value,self.source_requirements)
+        for rows,kind in ((self.source_path,ControlEdgeReference),(self.source_operations,OperationID),
+                (self.consumer_path,ControlEdgeReference),(self.consumer_operations,OperationID),
+                (self.overwrites,StaticAttributeAccess),(self.overwrite_receiver_paths,StaticReferenceSourcePath)):_rows(rows,kind)
+        if len(self.overwrites)!=len(self.overwrite_receiver_paths):
+            raise ValueError('module state overwrite needs its original receiver provenance')
+        if self.write is None:
+            _exact(self.source_key,UseID)
+            if self.source_body!=self.module.module_body or self.write_receiver_path is not None:
+                raise ValueError('initial namespace source belongs to another module')
+        else:
+            _exact(self.write,StaticAttributeAccess);_exact(self.write_receiver_path,StaticReferenceSourcePath)
+            if (self.source_key is not None or self.write.body!=route.caller or self.write.field!=self.key
+                    or self.write.operation!=self.source_operation or self.write.assigned!=self.source_payload):
+                raise ValueError('module CALL state changed its original field setter/payload')
+        if self.conditions!=tuple(ModuleFlowCondition):
+            raise ValueError('module namespace projection cannot drop lookup/state/effect conditions')
+
+
+@dataclass(frozen=True, slots=True)
+class StaticModuleGlobalsFlow:
+    """ReadAt connected to WriteAt through original state-entry projections."""
+    projection: StaticModuleNamespaceAtCall
+    read: StaticQualifiedNamespaceRead
+    segments: tuple[StaticNamespacePathSegment, ...]
+    bridges: tuple[StaticNamespaceCallBridge, ...] = ()
+    requirements: tuple[StaticCallContext, ...] = ()
+    qualification: str = 'CONDITIONAL_MODULE_GLOBALS_STATE_DEPENDENCE'
+
+    def __post_init__(self):
+        _exact(self.projection,StaticModuleNamespaceAtCall);_exact(self.read,StaticQualifiedNamespaceRead)
+        _rows(self.segments,StaticNamespacePathSegment);_rows(self.bridges,StaticNamespaceCallBridge)
+        _rows(self.requirements,StaticCallContext)
+        if len(self.segments)!=len(self.bridges)+1:
+            raise ValueError('module state flow requires one original entry path per call entry')
+        route=self.projection.environment;first,last=self.segments[0],self.segments[-1]
+        if (first.body!=route.callee or first.start_owner!=route.member.reference
+                or last.body!=self.read.body or last.query_operation!=self.read.operation
+                or last.query_world!=self.read.world or any(s.key!=self.projection.key for s in self.segments)
+                or self.qualification!='CONDITIONAL_MODULE_GLOBALS_STATE_DEPENDENCE'):
+            raise ValueError('module state flow changed its original globals/read/entry endpoints')
+        if any(s.start_kind is not NamespacePathStart.ENTRY or s.start_operation is not None for s in self.segments):
+            raise ValueError('module state projection segments must start at original region entries')
+        for before,bridge,after in zip(self.segments,self.bridges,self.segments[1:]):
+            incoming=bridge.environment
+            if (before.body!=incoming.caller or before.query_operation!=incoming.call_operation
+                    or before.query_world!=incoming.call_world or before.query_owner!=bridge.caller_owner
+                    or after.body!=incoming.callee or after.start_owner!=bridge.callee_owner):
+                raise ValueError('module state segment does not meet its next original call/owner/world interface')
+        contexts=[StaticCallContext(route.caller,route.call_operation,route.callee_use,route.callee_value,
+            route.creation.definition,route.callee)]
+        contexts.extend(StaticCallContext(b.environment.caller,b.environment.call_operation,
+            b.environment.callee_use,b.environment.callee_value,b.environment.creation.definition,
+            b.environment.callee)for b in self.bridges)
+        if self.requirements!=(*self.projection.callable_source.points[0].requirements,*contexts):
+            raise ValueError('module state flow changed its exact ordered caller contexts')
+        StaticReferencePoint(self.read.body,self.read.result,self.requirements)
+
+
+@dataclass(frozen=True, slots=True)
 class StaticCallShard:
     source_model: ProviderArtifact
     caller: SourceBodyNamespace
@@ -871,6 +1017,7 @@ class StaticCallShard:
     import_routes: tuple[StaticImportModuleRoute, ...] = ()
     module_attribute_flows: tuple[StaticModuleAttributeFlow, ...] = ()
     module_frontiers: tuple[StaticCallFrontier, ...] = ()
+    module_globals_flows: tuple[StaticModuleGlobalsFlow, ...] = ()
 
     def __post_init__(self):
         _exact(self.source_model, ProviderArtifact)
@@ -879,6 +1026,9 @@ class StaticCallShard:
         _rows(self.import_routes, StaticImportModuleRoute)
         _rows(self.module_attribute_flows, StaticModuleAttributeFlow)
         _rows(self.module_frontiers, StaticCallFrontier)
+        _rows(self.module_globals_flows, StaticModuleGlobalsFlow)
+        if any(f.read.body!=self.caller for f in self.module_globals_flows):
+            raise ValueError('globals state relation belongs to another original read body')
         if any(r.body != self.caller for r in self.import_routes) or any(f.read.body != self.caller for f in self.module_attribute_flows):
             raise ValueError('body relation shard cannot relabel module relation ownership')
         if any(call.caller != self.caller for call in self.calls):
@@ -889,7 +1039,7 @@ class StaticCallShard:
 
 def dumps(shard: StaticCallShard) -> str:
     _exact(shard, StaticCallShard)
-    return json.dumps({"schema": "scar.static-calls", "schema_version": 6,
+    return json.dumps({"schema": "scar.static-calls", "schema_version": 7,
                        "relations": encode(shard)}, sort_keys=True, separators=(",", ":"), allow_nan=False)
 
 
@@ -897,9 +1047,22 @@ def loads(payload: str) -> StaticCallShard:
     document = strict_loads(payload)
     if (type(document) is not dict or set(document) != {"schema", "schema_version", "relations"}
             or document["schema"] != "scar.static-calls" or type(document["schema_version"]) is not int
-            or document["schema_version"] not in (1, 2, 3, 4, 5, 6)):
+            or document["schema_version"] not in (1, 2, 3, 4, 5, 6, 7)):
         raise ValueError("unsupported static call relation shard")
     relations = document["relations"]
+    if document['schema_version']<7:
+        relations=copy.deepcopy(relations)
+        old_path_fields={'points','namespace_flows','cross_body_namespace_flows',
+                         'argument_flows','return_flows','module_attribute_flows'}
+        def migrate_paths(value):
+            if type(value)is dict:
+                if 'module_globals_flows'in value:
+                    raise ValueError('historical wire cannot carry module globals state relations')
+                for item in tuple(value.values()):migrate_paths(item)
+                if set(value)==old_path_fields:value['module_globals_flows']=[]
+            elif type(value)is list:
+                for item in value:migrate_paths(item)
+        migrate_paths(relations)
     if document['schema_version'] < 6:
         if type(relations) is not dict or set(relations) != {'source_model', 'caller', 'calls'}:
             raise ValueError('historical shard cannot contain module provenance tables')
@@ -909,7 +1072,7 @@ def loads(payload: str) -> StaticCallShard:
         relations = copy.deepcopy(relations)
         v4_fields = {"qualified_namespace_flows", "qualified_function_creations", "cross_body_namespace_flows"}
         v5_fields = {"argument_value_flows", "return_value_flows"}
-        old_fields = set(StaticCallSite.__dataclass_fields__) - v5_fields
+        old_fields = set(StaticCallSite.__dataclass_fields__) - v5_fields - {'module_globals_flows'}
         if document["schema_version"] < 4:
             old_fields -= v4_fields
         if document["schema_version"] == 1:
@@ -942,12 +1105,16 @@ def loads(payload: str) -> StaticCallShard:
             if document["schema_version"] < 4:
                 call.update(qualified_namespace_flows=[], qualified_function_creations=[], cross_body_namespace_flows=[])
             call.update(argument_value_flows=[], return_value_flows=[])
+    if document['schema_version']<7:
+        relations['module_globals_flows']=[]
+        for call in relations['calls']:call['module_globals_flows']=[]
     return decode(StaticCallShard, relations)
 
 
 __all__ = ["StaticCallFrontier", "StaticTerminalPort", "StaticCompletionRoute",
            "StaticReferencePoint", "StaticReferenceSourcePath", "ModuleFlowCondition",
            "StaticImportModuleRoute", "StaticAttributeAccess", "StaticModuleAttributeFlow",
+           "StaticFunctionOwnerRoute", "StaticModuleNamespaceAtCall", "StaticModuleGlobalsFlow",
            "StaticStateEntryRoute", "NamespaceFlowCondition", "StaticNamespaceFlow",
            "StaticQualifiedNamespaceFlow", "StaticQualifiedFunctionCreation",
            "StaticQualifiedNamespaceWrite", "StaticQualifiedNamespaceRead", "NamespacePathStart",

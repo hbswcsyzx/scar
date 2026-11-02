@@ -79,10 +79,81 @@ def _discard_static_calls(root, manifest):
     manifest["completion"]["static_call_links_present"] = False
 
 
+def _discard_static_dependencies(root, manifest):
+    """Import/source changes invalidate this derived material view."""
+    descriptor = manifest.get("artifacts", {}).pop("dependencies", None)
+    if descriptor is not None:
+        if descriptor["path"] != "indexes/dependencies.json.gz":
+            raise ValueError("dependency inventory must remain at its owned index path")
+        (root / descriptor["path"]).unlink()
+    manifest.pop("dependency_inventory", None)
+    manifest.setdefault("completion", {})["dependency_inventory_present"] = False
+
+
+def inventory_static_program(directory, *, search_roots, max_modules=4096, max_files=4096,
+                             max_bytes=64 * 1024 * 1024, max_file_bytes=8 * 1024 * 1024,
+                             native_suffixes=None):
+    """Atomically attach import-derived material candidates to the current graph.
+
+    Only the new inventory/manifest are written. Original graph fragments keep
+    their bytes and IDs; external material availability is not graph coverage.
+    """
+    from scar.analysis.static_dependencies import inventory_static_dependencies
+    from scar.analysis.static_body import _stamp
+
+    output = Path(directory).absolute()
+    manifest = read_static_program(output, verify=False)
+    original = (output / "manifest.json").read_bytes()
+    if json.loads(original) != manifest:
+        raise ValueError("current manifest changed during dependency inventory read")
+    started = time.monotonic()
+    inventory = inventory_static_dependencies(output, search_roots=search_roots,
+        max_modules=max_modules, max_files=max_files, max_bytes=max_bytes,
+        max_file_bytes=max_file_bytes, native_suffixes=native_suffixes)
+    if (output / "manifest.json").read_bytes() != original:
+        raise ValueError("current model changed during dependency inventory")
+    temporary = Path(tempfile.mkdtemp(prefix=".static-dependencies-", dir=output.parent))
+    try:
+        shutil.copytree(output, temporary, dirs_exist_ok=True, copy_function=os.link)
+        shared = {d["path"]: _stamp(temporary / d["path"]) for d in _artifacts(manifest)
+                  if d["path"] != "indexes/dependencies.json.gz"}
+        manifest.setdefault("artifacts", {})["dependencies"] = _write(
+            temporary, "indexes/dependencies.json.gz", inventory.to_dict())
+        manifest["dependency_inventory"] = {"summary": inventory.summary(),
+            "search_roots": list(inventory.search_roots),
+            "analyzer_seconds": time.monotonic() - started}
+        manifest.setdefault("completion", {}).update(dependency_inventory_present=True,
+            dependency_closure_complete=False, whole_program_model_complete=False)
+        manifest["storage"] = {"files": len(list(temporary.rglob("*.gz"))),
+            "compressed_bytes": sum(path.stat().st_size for path in temporary.rglob("*.gz"))}
+        (temporary / "manifest.json").unlink()
+        (temporary / "manifest.json").write_bytes(_json(manifest))
+        if any(_stamp(temporary / path) != stamp for path, stamp in shared.items()):
+            raise ValueError("an original source/body artifact changed during dependency inventory")
+        read_static_program(temporary, verify=False)
+        read_static_program(output, verify=False)
+        if (output / "manifest.json").read_bytes() != original:
+            raise ValueError("current model changed before dependency inventory publication")
+        previous = Path(tempfile.mkdtemp(prefix=".static-replacing-", dir=output.parent))
+        previous.rmdir()
+        output.rename(previous)
+        try:
+            temporary.rename(output)
+        except BaseException:
+            previous.rename(output)
+            raise
+        shutil.rmtree(previous)
+        return manifest
+    except BaseException:
+        shutil.rmtree(temporary, ignore_errors=True)
+        raise
+
+
 def link_static_program(directory, *, budget=None, progress=None):
     """Publish qualified static call relations alongside the original graphs."""
-    from scar.analysis.static_calls import build_static_call_links
+    from scar.analysis.static_calls import build_static_call_links, StaticCallBudget
     from scar.analysis.static_body import _stamp, _producer
+    from scar.analysis.static_jobs import StaticLinkTask
     def call_producer():
         analysis = Path(__file__).parent
         return {"shared": _producer(), "call_sources": {
@@ -90,6 +161,7 @@ def link_static_program(directory, *, budget=None, progress=None):
             for name in ("static_calls.py", "static_namespace.py", "static_function_environment.py",
                          "static_interprocedural.py", "static_crossbody_namespace.py",
                          "static_nested_creation.py", "static_value_flows.py", "static_module_attributes.py", "static_fields.py",
+                         "static_module_state.py",
                          "function_binding.py", "function_interfaces.py", "source_layers.py")}}
     producer = call_producer()
     output = Path(directory).absolute()
@@ -97,6 +169,12 @@ def link_static_program(directory, *, budget=None, progress=None):
     original = (output / "manifest.json").read_bytes()
     if json.loads(original) != manifest:
         raise ValueError("current manifest changed during static call read")
+    budget = budget or StaticCallBudget()
+    task = StaticLinkTask(output, input_manifest_sha256=hashlib.sha256(original).hexdigest(), budget=budget)
+    def report(event):
+        task.activity(event)
+        if progress is not None:
+            progress(event)
     temporary = Path(tempfile.mkdtemp(prefix=".static-calls-", dir=output.parent))
     try:
         shutil.copytree(output, temporary, dirs_exist_ok=True, copy_function=os.link)
@@ -106,7 +184,8 @@ def link_static_program(directory, *, budget=None, progress=None):
         (temporary / "manifest.json").write_bytes(_json(manifest))
         input_hash = hashlib.sha256((temporary / "manifest.json").read_bytes()).hexdigest()
         result = build_static_call_links(temporary, temporary / "indexes" / "calls",
-            expected_manifest_sha256=input_hash, budget=budget, logical_root=output, progress=progress)
+            expected_manifest_sha256=input_hash, budget=budget, logical_root=output,
+            progress=report, activity=task.activity)
         # Each relation keeps its input namespaces and receipts. The immutable
         # source-basis receipt avoids making the manifest refer to its own SHA.
         if call_producer() != producer:
@@ -116,6 +195,8 @@ def link_static_program(directory, *, budget=None, progress=None):
             for descriptor in result["artifacts"]]}
         if any(_stamp(temporary / path) != stamp for path, stamp in shared.items()):
             raise ValueError("an original source/body artifact changed during call linking")
+        task.activity({"stage": "PUBLICATION", "published_calls": result["published_calls"],
+                       "enumeration_complete": result["complete"]})
         manifest["completion"]["static_call_links_present"] = True
         manifest["completion"]["whole_program_model_complete"] = False
         manifest["storage"] = {"files": len(list(temporary.rglob("*.gz"))),
@@ -134,9 +215,11 @@ def link_static_program(directory, *, budget=None, progress=None):
             previous.rename(output)
             raise
         shutil.rmtree(previous)
+        task.published(manifest, hashlib.sha256((output / "manifest.json").read_bytes()).hexdigest())
         return manifest
-    except BaseException:
+    except BaseException as error:
         shutil.rmtree(temporary, ignore_errors=True)
+        task.failed(error)
         raise
 
 
@@ -229,6 +312,7 @@ def refine_static_program(directory, *, refresh_lexical=True):
     try:
         shutil.copytree(output, temporary, dirs_exist_ok=True, copy_function=os.link)
         _discard_static_calls(temporary, manifest)
+        _discard_static_dependencies(temporary, manifest)
         syntax, kinds, scope_counts, routes = Counter(), Counter(), Counter(), Counter()
         old_graphs = {d["path"]: d["sha256"] for u in manifest["units"]
                       for kind, d in u["artifacts"].items() if kind not in ("lexical", "source")}
@@ -572,6 +656,14 @@ def main(argv=None):
     parser.add_argument("--max-bodies", type=int, help="limit this body dispatch, keeping the full lexical denominator")
     parser.add_argument("--link-calls", action="store_true", help="link saved canonical CALL ports to conditional source bodies, without rebuilding them")
     parser.add_argument("--max-call-bodies", type=int, help="limit call-linking body reads, retaining the uncovered frontier")
+    parser.add_argument("--inventory-dependencies", action="store_true",
+                        help="locate versioned import materials without importing or analyzing their implementations")
+    parser.add_argument("--expand-dependencies", action="store_true",
+                        help="feed available source/stub materials into the existing static frontend and refresh imports")
+    parser.add_argument("--dependency-root", action="append", default=[],
+                        help="explicit additional import-root candidate for dependency material lookup")
+    parser.add_argument("--max-dependency-modules", type=int, default=4096)
+    parser.add_argument("--max-dependency-file-bytes", type=int, default=8 * 1024 * 1024)
     parser.add_argument("--file", action="append", default=[], help="body dispatch file selector, exact path or component suffix")
     parser.add_argument("--entry", action="append", default=[], help="dispatch an original lexical entry key, preserving the whole catalog")
     args = parser.parse_args(argv)
@@ -583,6 +675,12 @@ def main(argv=None):
         parser.error("--link-calls is an independent refinement of the current model")
     if args.max_call_bodies is not None and not args.link_calls:
         parser.error("--max-call-bodies requires --link-calls")
+    if args.inventory_dependencies and (args.expand or args.refine or args.link_calls or args.expand_dependencies or args.phase != "graph"):
+        parser.error("--inventory-dependencies is an independent refinement of the current model")
+    if args.expand_dependencies and (args.expand or args.refine or args.link_calls or args.phase != "graph"):
+        parser.error("--expand-dependencies is an independent refinement of the current model")
+    if args.dependency_root and not args.inventory_dependencies:
+        parser.error("--dependency-root requires --inventory-dependencies")
     if (args.rules_only or args.max_bodies is not None or args.file or args.entry) and not args.expand:
         parser.error("--rules-only, --max-bodies, --file and --entry require --expand")
 
@@ -596,7 +694,22 @@ def main(argv=None):
             print(json.dumps({"stage": progress_stage, noun + "_done": done, noun + "_total": total,
                               "last": unit.get("path")}), file=sys.stderr, flush=True)
 
-    if args.link_calls:
+    if args.expand_dependencies:
+        from scar.analysis.static_dependency_publication import expand_static_dependency_program
+        existing = read_static_program(args.out, verify=False)
+        if Path(existing["project_root"]).resolve() != Path(args.source).resolve():
+            raise ValueError("dependency expansion source root differs from the current model")
+        result = expand_static_dependency_program(args.out, max_files=args.max_files,
+            max_bytes=args.max_bytes, jobs=args.jobs, progress=progress)
+    elif args.inventory_dependencies:
+        existing = read_static_program(args.out, verify=False)
+        if Path(existing["project_root"]).resolve() != Path(args.source).resolve():
+            raise ValueError("dependency inventory source root differs from the current model")
+        result = inventory_static_program(args.out,
+            search_roots=(*existing["source_roots"], *args.source_root, *args.dependency_root),
+            max_modules=args.max_dependency_modules, max_files=args.max_files,
+            max_bytes=args.max_bytes, max_file_bytes=args.max_dependency_file_bytes)
+    elif args.link_calls:
         from scar.analysis.static_calls import StaticCallBudget
         existing = read_static_program(args.out, verify=False)
         if Path(existing["project_root"]).resolve() != Path(args.source).resolve():
@@ -632,6 +745,8 @@ def main(argv=None):
                       "analyzer_seconds": result["analyzer_seconds"], "storage": result["storage"],
                       "catalog_refinement": result.get("catalog_refinement"),
                       "body_expansion": result.get("body_expansion"),
+                      "dependency_inventory": result.get("dependency_inventory"),
+                      "dependency_expansion": result.get("dependency_expansion"),
                       "static_calls": {key: value for key, value in result.get("static_calls", {}).items()
                                        if key not in ("artifacts", "shards")},
                       "manifest": str(Path(args.out).absolute() / "manifest.json")}, ensure_ascii=False, indent=2))

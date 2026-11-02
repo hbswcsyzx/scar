@@ -418,6 +418,22 @@ def _module_docstring(context, node):
         and type(node.value.value) is str)
 
 
+def mapping_name_opcode(code,node,name,*,writing=False):
+    """Select namespace semantics from the original root opcode and source.
+
+    Nested ``global`` declarations can change root binding opcodes too. The
+    AST Name/FunctionDef spelling alone cannot choose L rather than G.
+    """
+    import dis
+    kinds=('STORE_NAME','STORE_GLOBAL')if writing else('LOAD_NAME','LOAD_GLOBAL')
+    span=(node.lineno,node.end_lineno,node.col_offset,node.end_col_offset)
+    matches={row.opname for row in dis.get_instructions(code,adaptive=False,show_caches=False)
+        if row.opname in kinds and row.argval==name and tuple(row.positions)==span}
+    if len(matches)!=1:
+        raise _Unsupported(GapKind.CODE_VERSION,node,'MAPPING_ORIGINAL_NAMESPACE_OPCODE_UNAVAILABLE')
+    return next(iter(matches))
+
+
 def mapping_prefix_selection(context, evidence, *, profile=None):
     """Maximal contiguous supported statements; no workload/name allowlist."""
     unit=module_unit(context)
@@ -439,7 +455,7 @@ def mapping_prefix_selection(context, evidence, *, profile=None):
             and row.kind not in (OperationKind.FUNCTION,OperationKind.METHOD)]
         if len(definitions)!=1:return False
         if isinstance(node,ast.Name):
-            return len([row for row in positioned(node,('LOAD_NAME',)) if row.argval==node.id])==1
+            return len([row for row in positioned(node,('LOAD_NAME','LOAD_GLOBAL')) if row.argval==node.id])==1
         if isinstance(node,ast.Constant):
             import math
             return (node.value is None or type(node.value) in (bool,int,str)
@@ -458,7 +474,7 @@ def mapping_prefix_selection(context, evidence, *, profile=None):
             and all(keyword.arg is not None for keyword in node.keywords)
             and all(expression(child) for child in (node.func,*node.args,*(keyword.value for keyword in node.keywords))))
         return False
-    def target(node):return isinstance(node,ast.Name) and len([row for row in positioned(node,('STORE_NAME',)) if row.argval==node.id])==1
+    def target(node):return isinstance(node,ast.Name) and len([row for row in positioned(node,('STORE_NAME','STORE_GLOBAL')) if row.argval==node.id])==1
     from scar.ir.program.module_entries import FrameBodyProfile
     expanded = profile in (FrameBodyProfile.STRUCTURED_MAPPING_BODY_314_V1,FrameBodyProfile.STRUCTURED_MAPPING_COMPILER_314_V1,FrameBodyProfile.STRUCTURED_MAPPING_COMPILER_OPS_314_V1,FrameBodyProfile.STRUCTURED_MAPPING_CLASS_314_V1)
     def heap_target(node):
@@ -594,33 +610,41 @@ class StructuredModuleBuilder(ModuleBuilder):
         from scar.ir.program.module_entries import FrameBodyProtocolKind as K
         from scar.ir.program.state_addresses import AddressEffect,ReferenceOwner,NamespaceKey
         from scar.ir.program.model import AccessMode
+        from scar.ir.program.structured import PythonProtocolKind as P
+        opcode=mapping_name_opcode(self.evidence.code,node,node.id)
+        references=self.entry_references if opcode=='LOAD_NAME'else self.entry_references[1:]
+        roles=('locals-owner','globals-owner','saved-builtins-owner','namespace-key')if opcode=='LOAD_NAME'else('globals-owner','saved-builtins-owner','namespace-key')
         key=self.literal(node,node.id)
         cursor,value,identity=self.invoke(cursor,node,tuple((ref,node,role,index,None)
-            for index,(ref,role) in enumerate(zip((*self.entry_references,key),('locals-owner','globals-owner','saved-builtins-owner','namespace-key')))),old=old)
-        self.protocol(identity,K.LOAD_NAME_314,node)
+            for index,(ref,role) in enumerate(zip((*references,key),roles))),old=old)
+        self.protocol(identity,K.LOAD_NAME_314 if opcode=='LOAD_NAME'else P.LOOKUP_GLOBAL,node)
         operation=self.operation_records[identity]
         self._addresses(identity,tuple(AddressEffect(ReferenceOwner(operation.uses[index].id),
-            (NamespaceKey(operation.uses[3].id),),AccessMode.READ) for index in range(3)))
+            (NamespaceKey(operation.uses[len(references)].id),),AccessMode.READ) for index in range(len(references))))
         if old is None:self.associate_expression(identity,node,None)
         self.gap(GapKind.EFFECT_SUMMARY,node,'LOAD_NAME: missing-only locals/globals/saved-builtins fallback; mapping effects/content/activation remain open')
         return cursor,value
 
-    def store_name(self,node,name,value,cursor,*,failure_handler=None):
+    def store_name(self,node,name,value,cursor,*,failure_handler=None,opcode=None):
         from scar.ir.program.module_entries import FrameBodyProtocolKind as K
         from scar.ir.program.state_addresses import AddressEffect,ReferenceOwner,NamespaceKey
         from scar.ir.program.model import AccessMode
+        from scar.ir.program.structured import PythonProtocolKind as P
+        opcode=opcode or mapping_name_opcode(self.evidence.code,node,name,writing=True)
+        if opcode not in ('STORE_NAME','STORE_GLOBAL'):raise ValueError('unsupported original module name store')
+        owner=self.entry_references[0 if opcode=='STORE_NAME'else 1]
         key=self.literal(node,name)
-        cursor,_,identity=self.invoke(cursor,node,((self.entry_references[0],node,'locals-owner',0,None),
+        cursor,_,identity=self.invoke(cursor,node,((owner,node,'locals-owner'if opcode=='STORE_NAME'else'globals-owner',0,None),
             (key,node,'namespace-key',0,None),(value,node,'assigned-reference',0,None)),result_type=None,
             failure_handler=failure_handler)
-        self.protocol(identity,K.STORE_NAME_314,node);operation=self.operation_records[identity]
+        self.protocol(identity,K.STORE_NAME_314 if opcode=='STORE_NAME'else P.STORE_GLOBAL,node);operation=self.operation_records[identity]
         self._addresses(identity,(AddressEffect(ReferenceOwner(operation.uses[0].id),
             (NamespaceKey(operation.uses[1].id),),AccessMode.WRITE),))
-        self.gap(GapKind.EFFECT_SUMMARY,node,'STORE_NAME is a partial mapping attempt; normal completion grants no stored-content or disjointness proof')
+        self.gap(GapKind.EFFECT_SUMMARY,node,opcode+' is a partial mapping attempt; normal completion grants no stored-content or disjointness proof')
         return cursor
 
     def store(self,target,value,cursor):
-        if not isinstance(target,ast.Name):raise _Unsupported(GapKind.UNSUPPORTED_SYNTAX,target,'mapping profile supports only compiler STORE_NAME targets')
+        if not isinstance(target,ast.Name):raise _Unsupported(GapKind.UNSUPPORTED_SYNTAX,target,'mapping profile requires original compiler namespace-store targets')
         return self.store_name(target,target.id,value,cursor)
 
     def ordered_expression_inputs(self,node,children,old):

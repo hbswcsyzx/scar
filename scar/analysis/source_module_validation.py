@@ -631,7 +631,7 @@ def require_valid_structured_module_program(result,*,source_texts,code_evidence=
     import dis
     from scar.analysis.program_lowering import PreparedSource
     from scar.analysis.source_module_lowering import (module_unit,module_source_census,module_source_context,
-        require_root_evidence,mapping_prefix_selection,frame_statement_slice,_module_statement_ref)
+        require_root_evidence,mapping_prefix_selection,frame_statement_slice,_module_statement_ref,mapping_name_opcode)
     from scar.analysis.source_semantics_v2 import validate_source_semantics
     from scar.analysis.control_flow_v2 import validate_source_control_flow
     from scar.ir.program.module_entries import (StructuredFrameBodyOverlay,FrameBodyProfile,
@@ -772,7 +772,7 @@ def require_valid_structured_module_program(result,*,source_texts,code_evidence=
             _need(op.id in class_ops,'class primitive lacks its original construction record')
             if kind.value in ('LOAD_BUILD_CLASS_314','STORE_CLASS_CELL_314','STORE_CLASS_GLOBAL_314'):expected_addresses.add(op.id)
             continue
-        if type(kind) is not K:continue
+        if type(kind) is not K and kind not in (PythonProtocolKind.LOOKUP_GLOBAL,PythonProtocolKind.STORE_GLOBAL):continue
         if kind in (K.COMPILER_MAKE_CELL,K.COMPILER_READ_CODE_CONSTANT,K.COMPILER_MAKE_FUNCTION,
                     K.COMPILER_BUILD_SET,K.COMPILER_STORE_NAME,K.COMPILER_SETUP_ANNOTATIONS,
                     K.COMPILER_RETAIN_OWNED,K.COMPILER_RELEASE_OWNED,K.INVOKE_EXPANDED_COMPILER_PROLOGUE):
@@ -785,7 +785,7 @@ def require_valid_structured_module_program(result,*,source_texts,code_evidence=
             _need(extended,'function construction requires explicit mapping BODY profile')
             invoke(op,(ref_type,state_type),memory=True)
             continue  # Exact code/default/decorator/namespace source checked per definition below.
-        normal_types=(state_type,) if kind in (K.STORE_NAME_314,K.DELETE_NAME_314,K.UNEXPANDED_SLICE,K.REQUIRED_COMPILER_PROLOGUE) else (ref_type,state_type)
+        normal_types=(state_type,) if kind in (K.STORE_NAME_314,PythonProtocolKind.STORE_GLOBAL,K.DELETE_NAME_314,K.UNEXPANDED_SLICE,K.REQUIRED_COMPILER_PROLOGUE) else (ref_type,state_type)
         if kind in (K.REQUIRED_COMPILER_PROLOGUE,K.INVOKE_COMPILER_PROLOGUE):
             _need(compiler,'compiler prefix primitive requires its explicit profile')
         invoke(op,normal_types,memory=kind in (K.REQUIRED_COMPILER_PROLOGUE,K.INVOKE_COMPILER_PROLOGUE))
@@ -794,9 +794,19 @@ def require_valid_structured_module_program(result,*,source_texts,code_evidence=
             _need(isinstance(node,ast.Name) and len(op.uses)==5 and tuple(use.value for use in op.uses[:3])==refs,
                   'LOAD_NAME must retain named L/G/savedB and exact Name source')
             literal(op.uses[3],node.id);expected_addresses.add(op.id)
+            _need(mapping_name_opcode(code_evidence.code,node,node.id)=='LOAD_NAME','LOAD_NAME disagrees with original root opcode')
             expected=[(i,3,'READ') for i in range(3)]
-        elif kind is K.STORE_NAME_314:
-            _need(len(op.uses)==4 and op.uses[0].value==abi.locals_namespace,'STORE_NAME must target declared L, not fast locals/G')
+        elif kind is PythonProtocolKind.LOOKUP_GLOBAL:
+            node=expression_nodes.get(protocol.source)
+            _need(isinstance(node,ast.Name)and len(op.uses)==4
+                  and tuple(use.value for use in op.uses[:2])==refs[1:]
+                  and mapping_name_opcode(code_evidence.code,node,node.id)=='LOAD_GLOBAL',
+                  'module LOAD_GLOBAL must retain original opcode and G/savedB, never L')
+            literal(op.uses[2],node.id);expected_addresses.add(op.id);expected=[(i,2,'READ')for i in range(2)]
+        elif kind in (K.STORE_NAME_314,PythonProtocolKind.STORE_GLOBAL):
+            opcode='STORE_GLOBAL'if kind is PythonProtocolKind.STORE_GLOBAL else'STORE_NAME'
+            owner=abi.globals_namespace if opcode=='STORE_GLOBAL'else abi.locals_namespace
+            _need(len(op.uses)==4 and op.uses[0].value==owner,'namespace write must target its original compiler-selected L/G')
             node=expression_nodes.get(protocol.source) or nodes.get(protocol.source)
             if isinstance(node,ast.Name):literal(op.uses[1],node.id)
             else:
@@ -810,6 +820,9 @@ def require_valid_structured_module_program(result,*,source_texts,code_evidence=
                     else [alias.asname or (alias.name.split('.')[0] if isinstance(node,ast.Import) else alias.name)
                           for alias in node.names])
                 _need(type(values[op.uses[1].value].origin) is LiteralOrigin and values[op.uses[1].value].origin.value in allowed,'import alias STORE_NAME key differs')
+            name=values[op.uses[1].value].origin.value
+            _need(mapping_name_opcode(code_evidence.code,node,name,writing=True)==opcode,
+                  'module namespace write disagrees with its original root opcode/source')
             expected_addresses.add(op.id);expected=[(0,1,'WRITE')]
         elif kind is K.IMPORT_NAME_314:
             node=nodes.get(protocol.source)
@@ -923,7 +936,7 @@ def require_valid_structured_module_program(result,*,source_texts,code_evidence=
         candidates=[op for op in graph.operations if owners[op.id]==graph.root and links[op.id].source==source
             and op.terminator is not None and op.terminator.kind is TerminatorKind.INVOKE
             and (links[op.id].semantic_operation is not None
-                 or op.id in protocols and protocols[op.id].kind is K.LOAD_NAME_314)]
+                 or op.id in protocols and protocols[op.id].kind in (K.LOAD_NAME_314,PythonProtocolKind.LOOKUP_GLOBAL))]
         _need(len(candidates)==1,'source expression needs its unique canonical invocation')
         op=candidates[0]
         packed_key=isinstance(node,ast.Tuple) and id(node) in index_tuples
@@ -942,7 +955,7 @@ def require_valid_structured_module_program(result,*,source_texts,code_evidence=
               'source expression ordered operand graph differs')
         return normal.arguments[0]
     def store_at(source):
-        found=[operations[p.operation] for p in overlay.protocols if p.kind is K.STORE_NAME_314 and p.source==source]
+        found=[operations[p.operation] for p in overlay.protocols if p.kind in (K.STORE_NAME_314,PythonProtocolKind.STORE_GLOBAL) and p.source==source]
         _need(len(found)==1,'source binding has no unique mapping store attempt')
         return found[0]
     for node in expected_statements:

@@ -755,7 +755,7 @@ def _call_relations(manifest, unit, entries, fragments, limit):
         ModuleAttributeDependencies, validate_import_module_route, validate_module_attribute_flow)
     from scar.ir.program.static_calls import (
         StaticArgumentValueFlow, StaticReturnValueFlow, StaticCrossBodyNamespaceFlow,
-        StaticModuleAttributeFlow)
+        StaticModuleAttributeFlow,StaticModuleGlobalsFlow)
     module_source_cache=OrderedDict()
     def module_source_context(body):
         key=body.unit['key']
@@ -800,11 +800,15 @@ def _call_relations(manifest, unit, entries, fragments, limit):
     def check_module_context(context,requirements):
         callee=load_body(context.callee)
         check_definition(context.definition,callee.unit)
-        context_target(context,requirements)
+        target=context_target(context,requirements)
         from scar.analysis.static_value_flows import validate_call_context
         validate_call_context(context,caller=load_body(context.caller),callee=callee,
             signature=signature_for(context.definition,callee))
+        return target
+    from scar.analysis.static_module_state import ModuleGlobalsDependencies,validate_module_globals_flow
+    module_state_engine=ModuleGlobalsDependencies(modules=module_engine)
     checked_module=set()
+    checking_module=set()
     def check_module_support(flow):
         if type(flow)is StaticArgumentValueFlow:
             from scar.analysis.static_value_flows import validate_argument_value_flow
@@ -828,9 +832,22 @@ def _call_relations(manifest, unit, entries, fragments, limit):
             validate_cross_body_namespace_flow(flow,bodies=endpoints)
         elif type(flow)is StaticModuleAttributeFlow:
             if flow in checked_module:return
-            validate_module_attribute_flow(flow,engine=module_engine,check_support=check_module_support,
-                check_context=check_module_context)
-            checked_module.add(flow)
+            if flow in checking_module:raise ValueError('cyclic module provenance cannot validate itself')
+            checking_module.add(flow)
+            try:
+                validate_module_attribute_flow(flow,engine=module_engine,check_support=check_module_support,
+                    check_context=check_module_context)
+                checked_module.add(flow)
+            finally:checking_module.remove(flow)
+        elif type(flow)is StaticModuleGlobalsFlow:
+            if flow in checked_module:return
+            if flow in checking_module:raise ValueError('cyclic globals provenance cannot validate itself')
+            checking_module.add(flow)
+            try:
+                validate_module_globals_flow(flow,engine=module_state_engine,check_support=check_module_support,
+                    check_context=check_module_context)
+                checked_module.add(flow)
+            finally:checking_module.remove(flow)
         else:raise ValueError('unrecognized module reference provenance support')
 
     rows = []
@@ -853,10 +870,12 @@ def _call_relations(manifest, unit, entries, fragments, limit):
                     check_value_flow(flow, validate_argument_value_flow)
                 for flow in call.return_value_flows:
                     check_value_flow(flow, validate_return_value_flow)
+            for flow in call.module_globals_flows:check_module_support(flow)
         if document['schema_version']>=6:
             for route in shard.import_routes:
                 validate_import_module_route(route,engine=module_engine,check_context=check_module_context)
             for flow in shard.module_attribute_flows:check_module_support(flow)
+        for flow in shard.module_globals_flows:check_module_support(flow)
         relations = document["relations"]
         calls = [{**record, "owning_region": encode(owners[call.operation]),
                   "namespace_flows": _page(encode(call.namespace_flows), limit),
@@ -868,6 +887,8 @@ def _call_relations(manifest, unit, entries, fragments, limit):
                       if document["schema_version"] >= 5 else None),
                   "return_value_flows": (_page(encode(call.return_value_flows), limit)
                       if document["schema_version"] >= 5 else None),
+                  "module_globals_flows": (_page(encode(call.module_globals_flows),limit)
+                      if document['schema_version']>=7 else None),
                   "value_flow_status": ("RECORDED_CONDITIONAL_REFERENCE_PORT_RELATIONS"
                       if document["schema_version"] >= 5 else "NOT_RECORDED_IN_STORAGE_SCHEMA"),
                   "targets": [{**target_record, "environment_routes": _page(encode(target.environment_routes), limit)}
@@ -878,6 +899,9 @@ def _call_relations(manifest, unit, entries, fragments, limit):
                      "v4_dependencies_checked": document["schema_version"] >= 4,
                      "v5_value_flows_checked": document["schema_version"] >= 5,
                      "v6_module_provenance_checked": document['schema_version']>=6,
+                     "v7_module_globals_state_checked": document['schema_version']>=7,
+                     "module_globals_flows": (_page(encode(shard.module_globals_flows),limit)
+                         if document['schema_version']>=7 else None),
                      "import_routes": (_page(encode(shard.import_routes),limit) if document['schema_version']>=6 else None),
                      "module_attribute_flows": (_page(encode(shard.module_attribute_flows),limit) if document['schema_version']>=6 else None),
                      "module_frontiers": (_page(encode(shard.module_frontiers),limit) if document['schema_version']>=6 else None),

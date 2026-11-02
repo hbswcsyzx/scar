@@ -254,11 +254,13 @@ def validate_mapping_function(node, *, source, graph, overlay, semantic, code_ev
         _need(current not in result_holds,"factory/decorator NORMAL results must retain distinct original ValueIDs")
         result_holds[current]=stages[-1]
         boundaries.append((identity, tuple(v for _,v,_ in decorators[:index])))
-    stores = [p.operation for p in overlay.protocols if p.kind is K.STORE_NAME_314 and p.source == source]
+    store_kind=K.STORE_NAME_314 if plan.store.opname=='STORE_NAME'else P.STORE_GLOBAL
+    stores = [p.operation for p in overlay.protocols if p.kind is store_kind and p.source == source]
     _need(len(stores) == 1, "definition requires one final mapping name write")
     store=stores[0];write,_=invoke(store,3,0,memory=False)
-    _need(write.uses[0].value==locals_namespace and write.uses[2].value==current,
-          "STORE_NAME must consume the final decorated reference and original locals mapping")
+    owner=locals_namespace if plan.store.opname=='STORE_NAME'else globals_namespace
+    _need(write.uses[0].value==owner and write.uses[2].value==current,
+          "definition binding must consume the final reference and its original compiler-selected L/G")
     assigned=uses.get((store,write.uses[2].id))
     _need(assigned is not None and assigned.source==source
           and (assigned.role,assigned.index)==("assigned-reference",0),

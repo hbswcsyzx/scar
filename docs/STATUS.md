@@ -1,69 +1,60 @@
 # 当前状态
 
-唯一任务是整程序纯静态分析与建图。工作目录为 `~/AAA/scar`，分支为 `main`。第一阶段尚未完成。本次按用户要求先核查问题、整理实施顺序，仅更新文档，没有新增分析代码或运行 LeWM。
+当前唯一任务：整程序纯静态建模与建图。第一阶段未完成；目标程序未执行，LeWM 未修改。唯一 checkout 为 `~/AAA/scar`，分支 `main`。
 
-## 当前产物的实际范围
+## 当前首要问题
 
-依据 `artifacts/current/static/manifest.json`，SHA-256 为 `48a601517be424356eb28c17f4898a9c93da9663de11fd4b963baab53275acb6`。这是主体发布版本；新的整范围调用索引尚待构建。
+经代码和三个分工审查交叉核对，局部 canonical 已是 CFG/SSA/状态图，AST 只是解析输入。未贯通的核心原因是：`ProgramIndex` 只导航一份 ProgramGraph；跨主体参数、返回、环境、namespace 和 provider/class 关系分别由专项 loader/solver 解释，尚无统一跨分片依赖接口及一般数据/状态/控制/effects 联合求解。
 
-| 项目 | 实际结果 |
+部分引用和 G/state 关系已经被专项 solver 消费，不能说全部只是显示；同样，专用 reader 能读回这些关系，也不能算所有分析都能穿越主图。class provider 的原端口关系尚未进入通用 callee/effects 工作队列。具体设计与代码事实见 [程序分解 §3.4](PROGRAM_DECOMPOSITION.md#34-主图决策与当前结构性缺口)。
+
+当前暂缓继续扩大材料和语法覆盖，优先接通统一逻辑依赖图。物理上仍分片、共享定义，使用原 namespace/ID，不合并成巨型文件或复制 callee。
+
+## 当前已发布产物
+
+`artifacts/current/static/manifest.json` SHA-256：
+`a2b922efccbde55853a53fa75a1f3e74349d8af7c30252e84222b7d58b8d9ee3`。
+
+| 项目 | 当前结果 |
 |---|---:|
-| 源文件 | 582：581 `.py`、1 `.pyi` |
-| 源根 | LeWM 及其两个本地依赖项目；未包含环境第三方实现的完整源码闭包 |
-| 原始源码 | 5,718,464 bytes |
-| AST occurrence / 词法入口和上下文 | 762,839 / 12,550 |
-| 原源码操作 / 关系 | 469,005 / 2,057,190 |
-| CFG 节点 / 边 | 239,097 / 285,316 |
-| 有限常量事实 | 76,788 |
-| 有规范图的入口 | 8,089：581 MODULE、1,183 CLASS、6,325 FUNCTION |
+| 源码单位 / 实际文件 | 862 / 862 |
+| 原始源码 | 12,447,536 bytes |
+| AST occurrence / 词法入口及上下文 | 1,493,620 / 36,164 |
+| 源码操作 / 关系 | 835,725 / 3,738,042 |
+| CFG 节点 / 边 | 478,899 / 569,425 |
+| 有限常量事实 | 124,535 |
+| 有规范图的入口 | 8,089，原有主体未因材料扩展重建 |
 | 规范操作 | 1,262,346 |
-| lowerer 不支持 / 规则 shape 不支持 | 326 / 404 |
-| 构造 ERROR | 0；不代表主体或推理完整 |
-| 缺独立入口适配 | 3,731；部分已经内联在父图，不能等同于全部缺失 |
-| 当前调用关系索引 | 不存在；主体重建已使旧派生索引失效 |
-| 已保存 parent ClassConstruction | 1,065：MODULE 内 991、FUNCTION 内 74；不是 suite 执行已连接 |
-| 模块精确剩余后缀 | 107 项 REQUIRED_EXPANSION；另有 8 项 deferred-child 展开义务 |
+| lowerer / shape 不支持 | 326 / 404 |
+| 缺独立适配 / 新单位未派工入口 | 3,731 / 23,614 |
+| 当前调用索引 / class 接线索引 | 均未发布到 current |
+| 压缩分片 | 14,511 个，2,399,531,667 bytes |
 
-最近按 AST 自动定位 365 个 MODULE、84 个 FUNCTION 父级入口，449 项增量命令耗时 660.282 秒，8 个进程，未重建原源码图。新增类构造推进后暴露一个模块 compiler-cell 能力未被后续 function validator 消费的错误；按明确 compiler profile、真实前导和 allocation 表修复后，仅重发原入口，22.480 秒。原 root 严格校验没有放宽。规则 shape 不支持从 480 降到 404；有些入口推进后遇到下一项 lowerer 缺口，因此 UNSUPPORTED 从 314 增到 326，不是这些入口全部完成。以上均为分析器时间，不是 LeWM 性能；当前静态产物约 1.9 GiB。
+新一轮沿原 import 关系，自动把 264 份外部 Python 源码、16 份 stub 送回原前端，共 280 个正常 units；新源层没有读取或构造失败。阶段记录的 analyzer_seconds 为 207.190 秒，8 个进程；该字段在随后材料刷新前记录，不能当全过程 wall-clock。原 source/canonical 分片没有重建或改写。
 
-`LOWERED_WITH_GAPS` 仅表示存在规范图，不代表主体完整或推理穷尽。manifest 明确记录 `body_expansion_complete=false`、`static_call_links_present=false`、`whole_program_model_complete=false`。
+`--inventory-dependencies` 定点盘点材料，`--expand-dependencies` 将材料送回现有前端并更新全范围索引。原 import/material 证明输入内容寻址去重，作为当前图的必要依据保留，不保存旧 checkout 或旧 manifest。源码、stub、native 和 namespace 候选以及运行选择条件分别保留，不把找到文件算成已证明实际 import。
 
-## 第一阶段真正还缺什么
+扩展后有 42,074 条 import 关系、9,843 个模块查询。本轮材料刷新只处理 4,096 个，5,747 个是明确预算未处理；不能当作不存在。当前仍有 725 份外部源码和 135 份 stub 候选待处理，依赖闭包未完成。材料盘点的 external_source_analyzed=false 描述盘点步骤本身；前端已分析的新增单位另见 dependency_expansion。
 
-1. **主体与层次结构没有完整接上。** 模块剩余后缀从 418 降到 107 项，另有 8 项 deferred-child 义务。已保存 1,065 个 parent 类构造及共享 suite 编译来源，但 prepared namespace → suite ABI → metaclass 的执行/状态接口尚未连接；不能据此删除 1,183 份独立类体中的原入口前沿。45 个 suite 本身仍有剩余主体；类内那个嵌套 ClassDef 尚未接入新 parent profile。lambda、comprehension、generator/async、注解等仍须核对内联与独立主体。
-2. **跨层值来源尚未闭合。** v6 已实现普通 import → 模块 namespace 条件快照 → 属性值、caller 属性覆盖、参数/返回透传及 0 CALL 来源分片。但这还没有在新 LeWM 整范围索引上发布；imported function 的原模块 G/state 到内部 global 读取仍缺状态桥，不能借 caller G。默认参数当前字段/元素、闭包内容、通用 implicit-call/decorator application、ImportFrom/submodule 来源等也未完整贯通。
-3. **别名、状态和效果尚未联合推理。** 引用传递不等于内容不变；尚缺完整的 points-to、对象字段/容器/Tensor 状态版本和 may-read/write/escape/RNG/external/order 摘要传播。当前不少关系仍附带尚未消解的条件，不能据此证明整个子图可以移除或外提。
-4. **可推导属性与库/资源边界尚未贯通。** 常量推导已有局部能力，类型、Tensor shape/dtype/device/stride、逻辑来源和存储别名还没有在整程序上统一传播。第三方 Python 源码与 native/PyTorch 操作需接入版本化源码或契约；资源要求、潜在分配/搬运/等待应连回原操作和值。静态图表达符号资源及候选实现，不冒充观察到的真实 kernel、地址或传输。
-5. **完成度还没有可靠的统一解释。** 原源码视图的 gap 与规范主体前沿不在同一层，不能直接相减。模块来源的需求前沿已按 body/原 Value/精确调用上下文重算刷新，预算中断保留证据，避免旧提示永久累计；其他整程序覆盖仍需继续区分缺结构、缺连接、未实现、缺材料、预算和静态信息不足。非 module 属性的 receiver 未接提示只表示这项特定来源关系尚未确定，不能解释成 ATTRIBUTE 结构缺失。
+当前保留 37 条早期 BrokenProcessPool 的 unit/body-worker 记录；对应样本主体后来已有规范图。这是遗留问题记录，不是本轮 280 份源码新增失败。其终态归属仍需统一，不以 summary 的旧零计数掩盖。
 
-本次另核对了当前发布的 cem 模块、policy 模块、训练模块及训练 run 四份规范图：各自的 resources、resource_requirements、resource_uses 均为 0。这是这四份图的实际结果，不是全树统计；它直接说明“已有 Resource 类型”不能作为软件到硬件资源已经接通的证明。第一阶段还须落实从 Python/PyTorch 操作到原生接口及 CPU/GPU/内存/storage 等资源的关系。
+## 本轮代码和实际核验
 
-326 个 lowerer 不支持项中，主要阻塞包括 nested-with cleanup 60 项、comprehension parent cleanup 41 项、常量槽对应 28 项及表达式组合。另已定位无 docstring 的模块 compiler 前导与首条 future import 源位置重合时，import-plan 扫描尚未排除前导的具体规则欠账。它们不是必须动态探测的证明。
+- **调用点 G/state 投影**：schema v7，跨模块 factory、嵌套 creator、setter 原 payload、多层调用及上下文隔离；成功重算按 demand 原子替换事实和前沿，中断保留旧证据。唯一综合静态案例通过，241.37 秒；临时图有 16 个 CALL、16 条候选边、8 条 globals flow、5 个零 CALL 关系主体。另在新进程读回 7 个 shards，并核对 schema 1–6 迁移和篡改拒绝。lookup、加载及未知 effects 仍有条件；初始化的 G 写及显式 L/G 对应尚未完整，不能宣布状态语义闭合或可优化。
+- **module 原 STORE_GLOBAL/LOAD_GLOBAL**：必要临时静态案例通过，FunctionDef、Assign 和 Name 使用原编译 opcode 选择 G，未误写 L；对应 lowerer/validator 一致。没有继续补初始化求解或把 L/G 默认合并。
+- **class builder/suite**：有条件 provider 为普通 ProgramGraph，prepared namespace 为实际 prepare 结果，当前 G/saved B/closure 和 suite 的 cell/None 与最终 class 对象分别处理。唯一综合静态测试通过，3.92 秒。真实 CEM 原图接线约 7.08 秒；整范围有界 helper 读 6 个 body，产 3 个绑定及 1 份共享 provider，40.12 秒并通过公开读回。达到 max_bodies=6 后明确未枚举完成，完整 class 分母 2,306；未写 current，未进入通用 solver。
+- **依赖材料与前端发布**：两条综合静态测试通过，1.94 秒；验证原指针、版本、namespace 分离、正常 units、原 lowerer 消费、原子发布与公开读回。随后与 class 接线合并复验，3 条通过、4.62 秒。LeWM 原材料上的实际全批发布见上表；新版 current 的公开依赖 reader 已核对 42,074 条原关系及 1,480 份材料。
+- **长任务元信息**：调用链接记录单份 static-link-task.json，核对 PID 启动身份；微核查验证运行、最新失败 body、PID 重用和中断。进程消失但未写终态报告 STOPPED_WITHOUT_TERMINAL_RECORD。当前没有新的整范围调用链接任务在后台运行。
 
-四项相关回归通过，170.13 秒：qualified value sources、module attributes、expression lifetime、class construction。模块回归覆盖 import/属性/参数/局部绑定/返回/最终调用、覆盖后仅选择新值、0 CALL 常量来源、公开 fresh 查询及 selector/receiver/world 篡改拒绝；随后需求前沿刷新复验通过，127.74 秒，故意 Timeout 继续抛出并保留旧证据，成功重算仅清除该精确上下文的旧提示。最后 class 回归加入 compiler-cell + ClassDef 后 function 的组合，4.48 秒。没有新增大规模测试或执行目标源码。
+上述时间均为分析器或验证时间，不是 LeWM 性能/加速比。检测器、planner 和 backend 当前冻结，不执行目标、trace、profiling、benchmark 或改写。
 
-另一次只读两文件核查确认现有补偿调度有效：先分析 provider 的 `discard(module)`（0 CALL、属性值没有返回或消费者），后分析 application 并激活参数；最终 discard 保存 2 条 NUMBER 来源，分别为空/深度 1 上下文，均指向原 LiteralOrigin(7)，公开查询通过。没有为了假定的缺口再写一套调度器。
+## 尚需完成
 
-## 整范围链接的实际尝试
+1. 统一 qualified 端点、关系导航及跨主体接口，使一般分析可穿过已有调用、返回、状态和条件实现，而非逐特例解释。
+2. 以原节点抽取区域切片，机械列出完整输入、消费者、状态版本、控制/异常/cleanup、逃逸及效果边界。
+3. 统一调用、别名、逐地址 reaching writes、effects、常量/类型/Tensor 属性的联合求解与失效；显式处理 module L/G 条件。
+4. 补齐原有主体结构：107 项模块后缀、8 项 deferred-child、45 项 class suite 后缀及其余规则缺口；新增依赖主体仍未派工。统一查询层不等于这些结构已完成。
+5. 完成按需依赖闭包、库/native 接口及 CPU/GPU/DRAM/HBM/storage/stream 等资源关系。已有 Resource 类型不代表已填实；此前抽查的四份原图资源表仍为空。
+6. 对完整范围构建、保存、读回与跨层查询。各预算/未支持/未定字段逐项保留；完成条件不缩小为测试样例通过或目录建完。
 
-新 v6 链接曾按全部 8,819 份主体尝试，设置输入 128 GB、缓存 4 GB、7,200 秒上限，未限定前 400 份。最后报告进度为 74/582 个 source unit、260/8,819 份主体、1,676 个 CALL 和 2,677 份具体上下文记录；随后在 `examples/multi_layer_probe.py` 遇到 `TypeIgnore` 只有起始行、没有结束位置的 AST 元数据，导入位置索引错误地把它当普通语句处理，进程退出码 1。这不是预算停止或静态不可知，也没有发布这批内存关系。
-
-修复将导入位置索引限定到真正的 Import 节点，TypeIgnore 仍留在原 AST/源码中；现有模块回归加入该注释后通过，130.34 秒。对实际原源片 multi_layer_probe.py 的 3 个 TypeIgnore 节点和模块导入索引重新核对通过，5.231 秒。原子临时目录已清理，主体 manifest 保持本页 SHA；新的整范围重试仍须核对真实覆盖与公开查询，不能把此前进程计数当已保存结果。
-
-本次检查时，后续重试的工具句柄已不存在，原 PID 也不存在；current manifest 仍为本页 SHA，static_call_links_present=false，没有新调用索引发布。遗留 `.static-calls-gojab8j8` 只是临时目录，不是活进程或完成证明。退出原因目前没有可靠终态记录，不能猜测为成功、超时或某个异常；也不能继续报告它在后台运行。下一次长任务之前先补齐可核查的终态和失败定位。
-
-## 已有能力与当前限制
-
-`scar static` 可纯源根扫描、解析 AST/symtable、登记全部源码定义和编译上下文，并行构造分片源码图和受支持的规范子图。静态编译与反汇编只生成语言/编译器事实，不执行模块初始化。`scar static-query` 可按原定义、操作、Value、Use、控制和来源导航。
-
-核心实体仍为 Operation、Value、StateLocation、Region、Resource。包含关系组织层次，数据、绑定、控制、状态、别名和资源关系连接依赖；实体类别存在不代表所有关系已经构造。函数体共享保存，调用点保留自己的端口与静态上下文，不复制整份 callee。
-
-schema v6 继续保留 v5 的上下文隔离参数/返回来源，同时保存 import、属性值和覆盖写的原端口关系；schema 1–5 严格迁移，旧 wire 不得夹带新表。语言 overlay V3/模块 wrapper 12 保存 parent ClassConstruction 与真实 ImplicitCallPorts，没有伪造 ast.Call/CallID；旧版也严格拒绝新表。新的 LeWM 整范围 publication 尚未完成。
-
-未知必须落在具体字段或关系上：地址不明不妨碍保留已知类型和 shape；不能解析的调用仍须保存 callee 表达式、输入、可能出口和保守效果。已有源码但缺实现的子图不能用 UNKNOWN 叶子计作完整展开。
-
-## 后续顺序
-
-按 [唯一计划](STATIC_ANALYSIS_PLAN.md) 推进：先明确输入/依赖、具体缺口和任务终态；接通现有子图的值与状态接口；按共同原因补齐语言结构；联合求解引用、状态、效果、属性和资源；最后完成整范围发布、读回和查询。结构欠账与跨层推理按依赖衔接，已有子集的推理不必等所有语法规则补完才开始。
-
-第一项实际接线优先处理 imported function 的原模块 G/state，其次为 prepared namespace/suite ABI、defaults、decorator/implicit-call 和 closure。每次改动需明确补哪条关系、用哪些原端口证明接通，并回写其实际覆盖与剩余项。进入化简阶段之前不增加 detector、backend 或动态采集。
+完整实施顺序见 [唯一计划](STATIC_ANALYSIS_PLAN.md)。第一阶段结束前不进入化简或优化。

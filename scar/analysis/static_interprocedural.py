@@ -32,6 +32,7 @@ class QualifiedSource:
     argflows: tuple = ()
     returnflows: tuple = ()
     requirements: tuple = ()
+    globalsflows: tuple = ()
 
 
 @dataclass(frozen=True, slots=True)
@@ -64,7 +65,8 @@ class InterproceduralDependencies:
     point before publishing final call records.
     """
     def __init__(self, *, load_body, namespace_for, max_contexts=65536,
-                 max_depth=64, max_facts=262144, check=None, on_invalidate=None, external_fact_count=None):
+                 max_depth=64, max_facts=262144, check=None, on_invalidate=None, external_fact_count=None,
+                 module_state_sources=None):
         if not callable(load_body) or not callable(namespace_for):
             raise TypeError('interprocedural dependencies require bounded body/index loaders')
         if any(type(n)is not int or n<1 for n in (max_contexts,max_depth,max_facts)):
@@ -76,6 +78,7 @@ class InterproceduralDependencies:
             raise TypeError('static value invalidation callback must be callable')
         self.on_invalidate=on_invalidate
         self.external_fact_count=external_fact_count or(lambda:0)
+        self.module_state_sources=module_state_sources
         self._bodies=set();self._calls={};self._calls_by_body=defaultdict(set)
         self._incoming=defaultdict(dict);self._outgoing=defaultdict(set)
         self._affected=deque();self._queued=set();self._cache={}
@@ -167,6 +170,11 @@ class InterproceduralDependencies:
     def entry_requirements(self,body):
         namespace=body if type(body)is SourceBodyNamespace else body.namespace
         return tuple(self._entry_stacks.get(namespace,{}))
+
+    def owner_activations(self,point):
+        """Original incoming owner routes, selected by the creation context."""
+        return tuple(a for a in self._incoming.get(point.body,{}).values()
+            if a.environment.member.reference==point.value and self._activation_matches(a,point.requirements))
 
     @staticmethod
     def _target_key(callkey,target,requirements):
@@ -427,6 +435,17 @@ class InterproceduralDependencies:
                 owner_paths=self._owner_paths(caller,(route.creation_body,route.source_value),required,
                                              note=note,call_requirements=caller_requirements)
                 if not owner_paths:
+                    projected=()
+                    if self.module_state_sources is not None:
+                        projected=tuple(flow for entry in entries for flow in self.module_state_sources(
+                            activation,read_body=body,read=read,slot=slot,
+                            entry_paths=(entry,*paths),bridges=bridges))
+                    for flow in projected:
+                        source=flow.projection
+                        qualified=QualifiedSource(source.source_body,source.source_value,(),(),
+                            requirements=source.source_requirements,globalsflows=(flow,))
+                        outputs.setdefault(qualified,qualified)
+                    if projected:continue
                     note('CALLER_GLOBALS_PROVENANCE_OPEN',
                         'Foreign factory globals has no connected original caller-owner provenance; caller locals/current builtins are not substituted.',current_namespace.source)
                     continue

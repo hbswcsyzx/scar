@@ -69,12 +69,12 @@ def _local_parents(body, value):
 
 
 def _merge_path(path, point, *, namespace_flows=(), cross_body_namespace_flows=(),
-                argument_flows=(),return_flows=(),module_attribute_flows=()):
+                argument_flows=(),return_flows=(),module_attribute_flows=(),module_globals_flows=()):
     if point in path.points:return None
     changes={name:tuple(dict.fromkeys((*getattr(path,name),*new))) for name,new in (
         ('namespace_flows',namespace_flows),('cross_body_namespace_flows',cross_body_namespace_flows),
         ('argument_flows',argument_flows),('return_flows',return_flows),
-        ('module_attribute_flows',module_attribute_flows))}
+        ('module_attribute_flows',module_attribute_flows),('module_globals_flows',module_globals_flows))}
     return replace(path,points=(*path.points,point),**changes)
 
 
@@ -255,7 +255,7 @@ class ModuleAttributeDependencies:
                     source=self._body(inherited.body_namespace)
                     next_path=_merge_path(path,StaticReferencePoint(inherited.body_namespace,inherited.value,inherited.requirements),
                         cross_body_namespace_flows=inherited.crossflows,argument_flows=inherited.argflows,
-                        return_flows=inherited.returnflows)
+                        return_flows=inherited.returnflows,module_globals_flows=getattr(inherited,'globalsflows',()))
                     if next_path is not None:pending.append((source,next_path))
             for flow in self.sources(current,point.value,point.requirements,requester):
                 source=self._body(flow.source_body)
@@ -275,9 +275,18 @@ class ModuleAttributeDependencies:
             right.body,right.operation,right.result,right.module_body,right.requirements)
 
     def _write_routes(self,body,read,route,requirements,requester):
+        return self.write_routes_at(body,read.field,route,requirements,requester)
+
+    def write_routes_at(self,body,key,route,requirements,requester=None):
+        """Original WriteAt receiver/payload facts for an address selector.
+
+        A namespace-state demand has no synthetic ATTRIBUTE read. Matching
+        receiver sources retain conditional module identity; this is not a
+        closed points-to or unconditional must-alias declaration.
+        """
         rows=[]
         for write in self._index(body).writes:
-            if write.field!=read.field:continue
+            if write.field!=key:continue
             receiver=body.index.use_site(write.receiver).use.value
             found=self.receiver_routes(body,receiver,requirements,requester)
             if not found:continue
@@ -384,7 +393,8 @@ def validate_reference_source_path(path, *, load_body, namespace_for, check_supp
     path.__post_init__()
     for flow in path.namespace_flows:
         namespace_for(load_body(flow.body)).validate(flow.flow)
-    for flow in (*path.cross_body_namespace_flows,*path.argument_flows,*path.return_flows,*path.module_attribute_flows):
+    for flow in (*path.cross_body_namespace_flows,*path.argument_flows,*path.return_flows,
+                 *path.module_attribute_flows,*path.module_globals_flows):
         check_support(flow)
     for before,after in zip(path.points,path.points[1:]):
         left,right=load_body(before.body),load_body(after.body)
@@ -420,6 +430,12 @@ def validate_reference_source_path(path, *, load_body, namespace_for, check_supp
             if (flow.read.body==before.body and flow.read.result==before.value and flow.source_body==after.body
                     and flow.source_value==after.value and before.requirements==flow.requirements
                     and after.requirements==flow.source_requirements):matched=True
+        for flow in path.module_globals_flows:
+            source=flow.projection
+            if (flow.read.body==before.body and flow.read.result==before.value
+                    and source.source_body==after.body and source.source_value==after.value
+                    and (not before.requirements or before.requirements==flow.requirements)
+                    and after.requirements==source.source_requirements):matched=True
         _need(matched,'reference-source hop is not supported by an original binding/phi/qualified value relation')
     return True
 
@@ -464,9 +480,12 @@ def validate_module_attribute_flow(flow, *, engine, check_support, check_context
                 returns=tuple(f for f in path.return_flows if f.context.caller==before.body
                     and f.completion.landing_value==before.value and f.context.callee==after.body
                     and f.terminal.value==after.value)
-                if cross or args or returns:
+                globalsflows=tuple(f for f in path.module_globals_flows if f.read.body==before.body
+                    and f.read.result==before.value and f.projection.source_body==after.body
+                    and f.projection.source_value==after.value)
+                if cross or args or returns or globalsflows:
                     yield SimpleNamespace(body_namespace=after.body,value=after.value,requirements=after.requirements,
-                        crossflows=cross,argflows=args,returnflows=returns)
+                        crossflows=cross,argflows=args,returnflows=returns,globalsflows=globalsflows)
     fresh=ModuleAttributeDependencies(load_body=engine.load_body,source_context=engine.source_context,
         module_bodies=engine.module_bodies,namespace_for=engine.namespace_for,reference_sources=sources,
         max_steps=engine.max_steps,max_facts=engine.max_facts,check=engine.check)

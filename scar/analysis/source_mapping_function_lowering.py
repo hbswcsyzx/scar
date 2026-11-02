@@ -65,7 +65,7 @@ def mapping_function_plan(node, parent_code):
         _unsupported(node, "CHILD_ASYNC_KIND_DIFFERS")
     if child.argval.co_freevars:
         _unsupported(node, "CHILD_CLOSURE_BINDING_UNIMPLEMENTED")
-    stores = [row for row in own if row.offset > child.offset and row.opname == "STORE_NAME"
+    stores = [row for row in own if row.offset > child.offset and row.opname in ("STORE_NAME","STORE_GLOBAL")
               and row.argval == node.name]
     if len(stores) != 1:
         _unsupported(node, "ORIGINAL_MAPPING_STORE_UNAVAILABLE")
@@ -119,7 +119,7 @@ def mapping_function_plan(node, parent_code):
     attributes = tuple(flag for present, flag in ((annotated, 16), (bool(keyword), 2),
                                                   (bool(node.args.defaults), 1)) if present)
     expected.extend(("SET_FUNCTION_ATTRIBUTE", flag) for flag in attributes)
-    expected.append(("STORE_NAME", store.arg))
+    expected.append((store.opname, store.arg))
     actual = [(row.opname, row.arg) for row in own]
     if actual != expected:
         _unsupported(node, "EXACT_PACK_FACTORY_ATTRIBUTE_SEQUENCE_UNAVAILABLE")
@@ -232,7 +232,7 @@ def lower_mapping_function(builder, node, cursor):
         # modeled pending hold before its invoke, never release it a second
         # time on the failing mapping-write arm.
         _transfer(builder, ((node, function),), node)
-        cursor = builder.store_name(node, node.name, function, cursor)
+        cursor = builder.store_name(node, node.name, function, cursor,opcode=plan.store.opname)
         builder.gap(GapKind.EFFECT_SUMMARY, node,
             "function construction/default attributes, decorators and mapping name write retain ordered source/world; "
             "child/annotation bodies remain deferred shared definitions, with runtime fields/identity/effects unresolved")

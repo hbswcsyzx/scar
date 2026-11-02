@@ -115,13 +115,17 @@ class StaticCallSession:
     ``iter_calls`` visits each admitted canonical caller body once. Cache entries
     are private typed reads; they are never serialized successful validations.
     """
-    def __init__(self, directory, *, out, logical_root=None, expected_manifest_sha256=None, budget=None, progress=None):
+    def __init__(self, directory, *, out, logical_root=None, expected_manifest_sha256=None, budget=None, progress=None,
+                 activity=None):
         self.budget = budget or StaticCallBudget()
         if type(self.budget) is not StaticCallBudget:
             raise TypeError("budget must be StaticCallBudget")
         if progress is not None and not callable(progress):
             raise TypeError("static call progress must be callable")
         self.progress = progress
+        if activity is not None and not callable(activity):
+            raise TypeError("static call activity must be callable")
+        self.activity = activity
         self.started = time.monotonic()
         self.root = Path(directory).absolute()
         self.logical_root = Path(logical_root).absolute() if logical_root is not None else self.root
@@ -143,6 +147,7 @@ class StaticCallSession:
         self._finalizing = False
         self._interprocedural = None
         self._module_attributes = None
+        self._module_state = None
         self._module_dirty = set()
         self._call_records = {}
         # Exact analysis contexts feed the solver. The per-CALL table is only
@@ -298,7 +303,9 @@ class StaticCallSession:
                 namespace_for=self._namespace_for, max_contexts=self.budget.max_contexts,
                 max_depth=self.budget.max_context_depth, max_facts=self.budget.max_namespace_facts,
                 check=self._check,on_invalidate=self._module_dirty.add,
-                external_fact_count=lambda:self._module_attributes.fact_count if self._module_attributes is not None else 0)
+                external_fact_count=lambda:((self._module_attributes.fact_count if self._module_attributes is not None else 0)
+                    +(self._module_state.fact_count if self._module_state is not None else 0)),
+                module_state_sources=lambda activation,**kw:self._module_state_dependencies().sources(activation,**kw))
         return self._interprocedural
 
     def _module_dependencies(self):
@@ -320,15 +327,32 @@ class StaticCallSession:
                 reference_sources=lambda body,value,requirements,requester:self._dependencies().sources(
                     body,value,requirements=requirements,requester=requester),
                 max_steps=self.budget.max_resolution_steps,max_facts=self.budget.max_namespace_facts,
-                check=self._check,external_fact_count=lambda:self._interprocedural.fact_count if self._interprocedural is not None else 0,
+                check=self._check,external_fact_count=lambda:((self._interprocedural.fact_count if self._interprocedural is not None else 0)
+                    +(self._module_state.fact_count if self._module_state is not None else 0)),
                 max_cached_bytes=min(self.budget.max_cached_bytes,64_000_000))
         return self._module_attributes
+
+    def _module_state_dependencies(self):
+        if self._module_state is None:
+            from scar.analysis.static_module_state import ModuleGlobalsDependencies
+            self._module_state=ModuleGlobalsDependencies(modules=self._module_dependencies(),
+                incoming=lambda point:self._dependencies().owner_activations(point),
+                max_depth=self.budget.max_context_depth,max_facts=self.budget.max_namespace_facts,
+                external_fact_count=lambda:self._dependencies().fact_count+self._module_dependencies().fact_count,
+                check=self._check)
+        return self._module_state
 
     def _collect_module_body(self,body,requirements=()):
         dependencies=self._module_dependencies()
         before=len(dependencies.flows.get(body.namespace,()))
+        globals_before=self._module_state.revision if self._module_state is not None else 0
         dependencies.collect_body(body,requirements=requirements)
-        if len(dependencies.flows.get(body.namespace,()))!=before:
+        # State reads are graph entities even in a function with no CALLs.
+        namespace=self._namespace_for(body)
+        for value in namespace.by_result:
+            self._dependencies().sources(body,value,requirements=requirements)
+        if (len(dependencies.flows.get(body.namespace,()))!=before
+                or (self._module_state.revision if self._module_state is not None else 0)!=globals_before):
             self._dependencies()._invalidate(body.namespace)
 
     def _unit(self, number):
@@ -800,7 +824,7 @@ class StaticCallSession:
         hints = {}
         namespace_flows, creations = [], []
         qualified_flows, qualified_creations, crossflows = [], [], []
-        argument_flows, return_flows = [], []
+        argument_flows, return_flows, globals_flows = [], [], []
         mapping_caller = body.module is not None or body.class_entry is not None
         def admit(number, definition, basis):
             if len(candidates) >= self.budget.max_candidates_per_call and (number, definition) not in candidates:
@@ -902,6 +926,7 @@ class StaticCallSession:
                 crossflows.extend(inherited.crossflows)
                 argument_flows.extend(inherited.argflows)
                 return_flows.extend(inherited.returnflows)
+                globals_flows.extend(inherited.globalsflows)
                 pending.append((origin_body, inherited.value, inherited.requirements))
             if value_id in reads:
                 pending.append((current, current.index.use_site(reads[value_id].binding).use.value, current_requirements))
@@ -961,7 +986,7 @@ class StaticCallSession:
                     ") has no joined callee binding/factory provenance; it cannot supply target argument, state or return ports.", source))
         return (candidates, frontiers, tuple(dict.fromkeys(namespace_flows)), tuple(dict.fromkeys(creations)),
                 tuple(dict.fromkeys(qualified_flows)), tuple(dict.fromkeys(qualified_creations)), tuple(dict.fromkeys(crossflows)),
-                tuple(dict.fromkeys(argument_flows)), tuple(dict.fromkeys(return_flows)))
+                tuple(dict.fromkeys(argument_flows)), tuple(dict.fromkeys(return_flows)),tuple(dict.fromkeys(globals_flows)))
 
     def _actuals(self, body, operation, node):
         if node is None:
@@ -1211,7 +1236,7 @@ class StaticCallSession:
             else:
                 resolved = self._source_candidates(body, operation, link.source, link.semantic_operation, requirements=requirements)
             (candidates, issues, namespace_flows, creations, qualified_flows,
-             qualified_creations, crossflows, argument_flows, return_flows) = resolved
+             qualified_creations, crossflows, argument_flows, return_flows, globals_flows) = resolved
             if link.semantic_operation is None:
                 issues.append(_front("CALL_SEMANTIC_LINK_UNAVAILABLE",
                     "Canonical CALL has no exact retained semantic CALL link; canonical namespace ports remain independently eligible.", link.source))
@@ -1237,7 +1262,7 @@ class StaticCallSession:
                 tuple(targets), tuple(dict.fromkeys(frontier)), namespace_flows=namespace_flows, function_creations=creations,
                 qualified_namespace_flows=qualified_flows, qualified_function_creations=qualified_creations,
                 cross_body_namespace_flows=crossflows, argument_value_flows=argument_flows,
-                return_value_flows=return_flows)
+                return_value_flows=return_flows,module_globals_flows=globals_flows)
 
     def _store_call(self, call, *, requirements=()):
         key = call.caller, call.operation
@@ -1273,13 +1298,16 @@ class StaticCallSession:
         updates = {name: tuple(dict.fromkeys(row for record in records for row in getattr(record, name)))
                    for name in ("frontiers", "namespace_flows", "function_creations", "qualified_namespace_flows",
                                 "qualified_function_creations", "cross_body_namespace_flows",
-                                "argument_value_flows", "return_value_flows")}
+                                "argument_value_flows", "return_value_flows", "module_globals_flows")}
         self._call_records[key] = replace(records[0], targets=tuple(targets), **updates)
         return True
 
     def _seed_calls(self):
         for number, unit in enumerate(self.units):
             self._check()
+            if self.activity is not None:
+                self.activity({"stage": "SOURCE_UNIT", "unit": number, "path": unit["path"],
+                               "source_units_declared": len(self.units)})
             if (Path(unit["path"]).suffix == ".pyi"
                     and any(key not in unit["artifacts"] for key in ("semantic", "semantics", "control"))):
                 self.frontiers.append({"kind": "SOURCE_DECLARATION_ONLY", "unit": number,
@@ -1299,6 +1327,10 @@ class StaticCallSession:
                 if self.counts["body_artifacts_processed"] >= self.budget.max_bodies:
                     raise OverflowError("body count budget exhausted")
                 self.counts["body_artifacts_processed"] += 1
+                if self.activity is not None:
+                    self.activity({"stage": "CANONICAL_BODY", "unit": number, "path": unit["path"],
+                        "body": row_number, "entry_key": row["entry_key"],
+                        "body_artifacts_processed": self.counts["body_artifacts_processed"]})
                 try:
                     body = self._body(context, row_number, row)
                     if body is None:
@@ -1382,6 +1414,11 @@ class StaticCallSession:
         if self._module_attributes is not None:
             for rows in self._module_attributes.frontiers.values():
                 self.relation_frontier_counts.update(row.kind for row in rows.values())
+        if self._module_state is not None:
+            self.counts['module_globals_state_flows']=self._module_state.fact_count
+            self.counts['module_globals_state_demands']=len(self._module_state._demands)
+            for rows in self._module_state.frontiers.values():
+                self.relation_frontier_counts.update(row.kind for row in rows.values())
         for call in self._call_records.values():
             self.counts["canonical_calls_processed"] += 1
             self.counts["calls_with_candidates"] += bool(call.targets)
@@ -1450,7 +1487,8 @@ class StaticCallSession:
         self.close()
 
 
-def build_static_call_links(directory, out, *, logical_root=None, expected_manifest_sha256=None, budget=None, progress=None):
+def build_static_call_links(directory, out, *, logical_root=None, expected_manifest_sha256=None, budget=None, progress=None,
+                            activity=None):
     """Write relationship-only gzip shards and return registry descriptors.
 
     Descriptor paths are relative to ``out``. The caller registers them in the
@@ -1458,7 +1496,8 @@ def build_static_call_links(directory, out, *, logical_root=None, expected_manif
     There is deliberately no second graph root or self-referential manifest URI.
     """
     session = StaticCallSession(directory, out=out, logical_root=logical_root,
-                                expected_manifest_sha256=expected_manifest_sha256, budget=budget, progress=progress)
+                                expected_manifest_sha256=expected_manifest_sha256, budget=budget, progress=progress,
+                                activity=activity)
     shards, pending, caller, issue = [], [], None, None
     written_bodies=set()
     def flush(owner=None):
@@ -1468,14 +1507,18 @@ def build_static_call_links(directory, out, *, logical_root=None, expected_manif
         imports=tuple(modules.import_routes.get(owner,())) if modules is not None else ()
         flows=tuple(modules.flows.get(owner,())) if modules is not None else ()
         frontiers=tuple(modules.frontiers.get(owner,())) if modules is not None else ()
-        if owner is None or not (pending or imports or flows or frontiers):
+        state=session._module_state
+        globals_flows=tuple(state.flows.get(owner,()))if state is not None else ()
+        if state is not None:frontiers=tuple(dict.fromkeys((*frontiers,*state.frontiers.get(owner,()))))
+        if owner is None or not (pending or imports or flows or frontiers or globals_flows):
             return
-        shard = StaticCallShard(session.basis,owner,tuple(pending),imports,flows,frontiers)
+        shard = StaticCallShard(session.basis,owner,tuple(pending),imports,flows,frontiers,globals_flows)
         descriptor = session._write(f"calls/{len(shards):06d}.json.gz", dump_relations(shard).encode() + b"\n")
         shards.append({"artifact": descriptor, "artifact_path": descriptor["path"],
                        "caller_entry_key": session._caller_keys[shard.caller],
                        "caller": encode(shard.caller), "calls": len(pending),
                        "import_routes":len(imports),"module_attribute_flows":len(flows),
+                       "module_globals_flows":len(globals_flows),
                        "module_frontiers":len(frontiers)})
         written_bodies.add(owner)
         pending = []
@@ -1491,6 +1534,9 @@ def build_static_call_links(directory, out, *, logical_root=None, expected_manif
                 modules=session._module_attributes
                 for owner in dict.fromkeys((*modules.import_routes,*modules.flows,*modules.frontiers)):
                     if owner not in written_bodies:flush(owner)
+            if session._module_state is not None:
+                for owner in dict.fromkeys((*session._module_state.flows,*session._module_state.frontiers)):
+                    if owner not in written_bodies:flush(owner)
     except (OverflowError, TimeoutError) as error:
         issue = {"kind": type(error).__name__, "detail": str(error)}
         # Already closed relationship shards remain published. The incomplete
@@ -1498,11 +1544,12 @@ def build_static_call_links(directory, out, *, logical_root=None, expected_manif
     published_calls = sum(shard["calls"] for shard in shards)
     session.counts['published_import_module_routes']=sum(s['import_routes']for s in shards)
     session.counts['published_module_attribute_flows']=sum(s['module_attribute_flows']for s in shards)
+    session.counts['published_module_globals_flows']=sum(s['module_globals_flows']for s in shards)
     session.counts['published_module_frontiers']=sum(s['module_frontiers']for s in shards)
     session.counts['published_relation_bodies']=len(shards)
     session.counts['published_zero_call_relation_bodies']=sum(s['calls']==0 for s in shards)
     modules=session._module_attributes
-    return {"schema": "scar.static-call-publication", "schema_version": 6,
+    return {"schema": "scar.static-call-publication", "schema_version": 7,
             "source_model": encode(session.basis), "input_manifest_sha256": session.manifest_sha256,
             "artifacts": session.artifacts, "shards": shards, "counts": dict(session.counts),
             "published_calls": published_calls,

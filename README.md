@@ -42,6 +42,11 @@ cd ~/AAA/scar
 python -m scar.cli static ../le-wm --jobs 4
 python -m scar.cli static ../le-wm --expand --jobs 4
 python -m scar.cli static ../le-wm --link-calls --max-call-bodies 80
+python -m scar.cli static ../le-wm --inventory-dependencies \
+  --dependency-root "$CONDA_PREFIX/lib/python3.14" \
+  --dependency-root "$CONDA_PREFIX/lib/python3.14/site-packages" \
+  --dependency-root "$CONDA_PREFIX/lib/python3.14/lib-dynload"
+python -m scar.cli static ../le-wm --expand-dependencies --jobs 8
 python -m scar.cli static-query --file solver/cem.py --name solve --dependencies --limit 5
 ```
 
@@ -49,3 +54,9 @@ python -m scar.cli static-query --file solver/cem.py --name solve --dependencies
 `--phase sources` 仅建目录；`--phase graph` 为默认源码图；`--phase bodies` 构造源图后继续规范主体展开。对已有图使用 `--expand`，无需重建源图；`--rules-only` 只发布详细规则/前提，`--max-bodies` 与 `--file` 只限制本次派工，全部入口继续计入分母。
 `--refine` 使用已保留源码细化 scope/import，不重建源码图；`--refine --imports-only` 只更新 import 索引。图结构化展开与跨过程固定点仍未完成，命令成功不代表第一阶段完成。
 `--entry lexical:...` 可在 `--expand` 时按原入口 key 精准派工，不改变总目录。`--link-calls` 只在保存的原图上建立条件调用/参数/完成端口关系，预算和未处理范围写入原 manifest；更新主体或目录会废弃旧调用索引。查询 `--dependencies` 可读取这些跨主体端点，不能将单一候选解释为运行目标已确定。
+
+`--inventory-dependencies` 沿原 import 关系，在显式根下定点查找源码、stub、native 和 namespace 候选，保存为 `indexes/dependencies.json.gz`；不执行 import/hook，不扫描整个环境。`from` 导出备选、内建模块或未提供文件分别保留，不能将未找到独立文件统一叫缺依赖。该步骤只定位并版本化材料，后续仍须把源码送回前端，不能算依赖图已展开。公开读回使用 `scar.analysis.static_dependencies.read_static_dependencies`。
+
+`--expand-dependencies` 消费已发布材料，把外部 source/stub 候选按 namespace 分别送回同一静态前端，保留原证明输入并原子更新 import/material 索引。它扩展源码图范围，不证明运行实现已选定、canonical 主体已展开或整程序依赖已贯通。当前主图接线的结构性缺口与最高优先级见 [程序分解 §3.4](docs/PROGRAM_DECOMPOSITION.md#34-主图决策与当前结构性缺口)。
+
+调用链接将当前任务进度及成功/失败终态保存到模型旁的 `artifacts/current/static-link-task.json`，与程序图分开。`scar.analysis.static_jobs.read_static_link_task` 会核对 PID 的启动身份；进程消失且没有终态时明确报告 `STOPPED_WITHOUT_TERMINAL_RECORD`，不当作仍在运行或已经发布。`PUBLISHED` 还须区分关系枚举完成与整程序模型完成。

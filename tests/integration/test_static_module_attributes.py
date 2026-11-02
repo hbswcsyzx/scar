@@ -85,7 +85,7 @@ raise RuntimeError("this application must never execute")
             assert result.returncode==0,result.stdout+result.stderr
             if args==('--phase','bodies'):_check_read_frontier_recomputation(root,model,app)
         manifest=json.loads((model/'manifest.json').read_text());publication=manifest['static_calls']
-        assert publication['schema_version']==6
+        assert publication['schema_version']==7
         assert publication['complete'],publication['frontiers']
         names={d['wire']:b['name']for u in manifest['units']for b in u['bodies']for d in b.get('definitions',())}
         shards=[];wires=[]
@@ -131,6 +131,13 @@ raise RuntimeError("this application must never execute")
             shard_path.write_bytes(original_bytes);(model/'manifest.json').write_bytes(original_manifest)
         old=wires[0];old['schema_version']=5
         with pytest.raises(ValueError):loads(json.dumps(old))
+        def remove_v7(value):
+            if type(value)is dict:
+                value.pop('module_globals_flows',None)
+                for child in value.values():remove_v7(child)
+            elif type(value)is list:
+                for child in value:remove_v7(child)
+        remove_v7(old)
         for field in ('import_routes','module_attribute_flows','module_frontiers'):old['relations'].pop(field)
         migrated=loads(json.dumps(old))
         assert not migrated.import_routes and not migrated.module_attribute_flows
