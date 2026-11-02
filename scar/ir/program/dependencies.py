@@ -157,11 +157,18 @@ class DependencyStrength(str, Enum):
 
 @dataclass(frozen=True, slots=True)
 class DependencyCondition:
-    """A named original predicate, never a claim it has been discharged."""
+    """A predicate signature over original endpoints, never a proof.
+
+    ``subject`` is its primary endpoint; ordered ``operands`` bind the other
+    participants.  Evidence is not part of a predicate's truth identity.
+    Empty operands preserve existing unary signatures, not an implicit
+    permission to ignore arguments supplied by a newer predicate rule.
+    """
     domain: str
     name: str
     subject: DependencyPoint | None = None
     index: int | None = None
+    operands: tuple[DependencyPoint, ...] = ()
 
     def __post_init__(self):
         if any(type(value) is not str or not value for value in (self.domain, self.name)):
@@ -170,6 +177,9 @@ class DependencyCondition:
             raise TypeError("condition subject must be a qualified original endpoint")
         if self.index is not None and (type(self.index) is not int or self.index < 0):
             raise ValueError("condition index must be an original nonnegative ordinal")
+        if (type(self.operands) is not tuple
+                or any(type(operand) is not DependencyPoint for operand in self.operands)):
+            raise TypeError("condition operands must be ordered qualified original endpoints")
 
     @classmethod
     def from_enum(cls, value):

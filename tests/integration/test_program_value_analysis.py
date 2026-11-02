@@ -130,7 +130,7 @@ tuple_bool_index = tuple_item((2, 3), True)
         exported = export_value_analysis(report)
         json.dumps(exported, allow_nan=False)
         assert not exported['whole_program_complete'] and not exported['transformation_authorized']
-        assert exported['schema_version']==2
+        assert exported['schema_version']==3
         assert all('immutable_tuple'in f['fields']for f in exported['facts'])
         assert exported['fixed_point_reached'] == report.worklist_stable
         assert exported['query_scope_complete'] == report.exhausted
@@ -417,6 +417,29 @@ def test_original_local_result_coverage_does_not_close_candidate_dispatch(tmp_pa
     frames=tuple(DependencyFrame(namespace,op.id,None,None,namespace,entry=phi)for op in direct)
     assert {(p.branch.context,p.selected_index)for p in report.branch_proofs}=={((frames[0],),0),((frames[1],),1)}
     assert all(p.predicate.node==phi_uses[2].id and p.branch.node==branch.id for p in report.branch_proofs)
+    # Predicate names do not authorize a different signature. This opaque
+    # binary relation deliberately shares a known unary name/subject/index.
+    extended_selection=DependencyCondition('canonical','SUCCESSOR_SELECTED',
+        P(namespace,branch.id,(frames[0],)),1,operands=(P(namespace,call_x.id),))
+    extended_source=P(namespace,literal.id,(frames[0],))
+    extended_edge=DependencyEdge(extended_source,direct_points[0],K.STATE_VALUE,M.VALUE,
+        (DependencyEvidence('UNSUPPORTED_EXTENDED_PREDICATE_V1',(locator,),(extended_source,direct_points[0])),),
+        (extended_selection,))
+    assert analysis._condition_evidence(extended_selection)is None
+    assert analysis._edge_selected(extended_edge)and not analysis._edge_branch_proofs(extended_edge)
+    analysis._freeze_refutations((extended_edge,))
+    assert extended_edge not in analysis._route_refutations
+    with pytest.raises(TypeError,match='branch proof'):
+        original=report.branch_proofs[0]
+        replace(original,alternatives=tuple(replace(a,conditions=(extended_selection,))for a in original.alternatives))
+    class ExtendedPredicate:
+        def incoming(self,point):return DependencyNeighborhood((extended_edge,)if point==extended_edge.target else())
+        def outgoing(self,point):return DependencyNeighborhood((extended_edge,)if point==extended_edge.source else())
+    extended_report=ProgramValueAnalysis(session,ProgramDependencyGraph(lambda _:index,providers=(ExtendedPredicate(),))).analyze((direct_points[0],))
+    assert {a.value for a in extended_report.for_point(direct_points[0]).scalar_constant.alternatives}=={
+        PythonLiteral.from_python(41),PythonLiteral.from_python(7)}
+    assert any(extended_selection in a.conditions for a in extended_report.for_point(direct_points[0]).scalar_constant.alternatives)
+    assert all(p.route!=extended_edge for p in extended_report.route_refutations)
     assert any(f.kind=='BRANCH_PREDICATE_GUARDS_OPEN'and f.point.context==(frames[3],)for f in report.frontiers)
     assert any(edge.kind is K.CONTROL_CONDITION for edge in report.edges)
     assert {c.index for edge in report.edges if edge.target.context==(frames[0],)for c in edge.conditions
@@ -424,6 +447,11 @@ def test_original_local_result_coverage_does_not_close_candidate_dispatch(tmp_pa
     import json
     from scar.analysis.program_dependency_export import export_value_analysis
     exported=export_value_analysis(report);json.dumps(exported,allow_nan=False)
+    extended_public=export_value_analysis(extended_report);json.dumps(extended_public,allow_nan=False)
+    assert extended_public['schema_version']==3
+    opaque=next(c for c in extended_public['conditions']if c['operands'])
+    assert len(opaque['operands'])==1 and extended_public['points'][opaque['operands'][0]]['node']==call_x.id.wire
+    assert extended_selection!=replace(extended_selection,operands=(extended_source,))
     proof=next(p for p in exported['branch_proofs']if p['selected_index']==0)
     branch_ref=proof['branch']['point'];predicate_ref=proof['predicate']['point']
     assert exported['points'][branch_ref]['node']==branch.id.wire
@@ -553,6 +581,16 @@ def test_original_local_result_coverage_does_not_close_candidate_dispatch(tmp_pa
     assert any(len(proof.branch.context)==2 and proof.branch.node==jump_branch.id for proof in jump_report.branch_proofs)
     assert any(proof.route.kind is K.BLOCK_ARGUMENT and proof.route.source.node in{u.id for u in jump_sources}
         for proof in jump_report.route_refutations)
+    necessity=next(row for fact in jump_report.facts for row in fact.occurrence.requirements)
+    with pytest.raises(TypeError,match='control necessity'):
+        replace(necessity,choice=replace(necessity.choice,operands=(necessity.scope.entry,)))
+    original_control=necessity.chain[0]
+    extended_control=replace(original_control,conditions=tuple(replace(c,operands=(necessity.scope.entry,))
+        if c==necessity.choice else c for c in original_control.conditions))
+    assert analysis._necessary_control(extended_control)is None
+    extended_scope=replace(original_control,conditions=tuple(replace(c,operands=(necessity.scope.entry,))
+        if c.domain=='control.analysis'else c for c in original_control.conditions))
+    assert analysis._necessary_control(extended_scope)is None
     impossible=jump_report.for_point(P(namespace,new_values[5].id))
     assert impossible.feasible is False and impossible.infeasibility
     assert impossible.scalar_constant.precision is FieldPrecision.NOT_APPLICABLE
@@ -713,6 +751,12 @@ def flags():
             field=positive.for_point(proof.binding).binding_state
             assert field.precision in(FieldPrecision.EXACT,FieldPrecision.CONDITIONAL)
             assert not field.unknown_paths and {a.state for a in field.alternatives}=={BindingState.BOUND}
+        binding_proof=positive.binding_proofs[0]
+        extended_bound=replace(binding_proof.condition,operands=(binding_proof.binding,))
+        assert source_analysis._binding_input(extended_bound)is None
+        assert source_analysis._condition_evidence(extended_bound)is None
+        with pytest.raises(TypeError,match='binding-read proof'):
+            replace(binding_proof,condition=extended_bound)
         assert all(any(e.rule=='READ_BINDING_DEFINITELY_BOUND_V1'for a in proof.alternatives for e in a.evidence)
             for proof in positive.branch_proofs)
         assert any(fact['binding_state']['precision']=='EXACT'and fact['binding_states']==['BOUND']
@@ -755,6 +799,14 @@ def flags():
         legacy_wrong=replace(add_edge,conditions=(*add_edge.conditions,
             DependencyCondition('canonical','COMPLETION_SLOT',add_edge.source,1)))
         assert not source_analysis._normal_result_zero(add_normal_point,legacy_wrong)
+        extended_slot=replace(add_edge,conditions=(*add_edge.conditions,
+            DependencyCondition('canonical','COMPLETION_SLOT',add_edge.source,0,operands=(add_normal_point,))))
+        assert not source_analysis._normal_result_zero(add_normal_point,extended_slot)
+        line,normal,failure,operation=pairs[0]
+        extended_normal=DependencyCondition('canonical','SUCCESSOR_SELECTED',operation,
+            source_analysis._truth_contract(operation)[2],operands=(normal,))
+        assert source_analysis._necessary_normal_entry(extended_normal,by_branch[line],
+            P(ns,body.index.operations[by_branch[line].node].terminator.condition))is None
         assert all(any(e.rule=='BRANCH_ENTRY_REQUIRES_ORIGINAL_TRUTH_NORMAL_V1'for a in p.alternatives for e in a.evidence)
             and any(c.name=='SUCCESSOR_SELECTED'and c.subject not in(by_branch[6],by_branch[11])
                 for a in p.alternatives for c in a.conditions)for p in positive.branch_proofs)

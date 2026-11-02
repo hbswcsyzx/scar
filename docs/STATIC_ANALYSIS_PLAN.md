@@ -30,6 +30,13 @@ CEM solve 的 48 个原 CALL 均无目标候选。先按原 callee/receiver/name
 每项都在共同图保留原端点与条件；只补创建关系不能宣布 CEM targets 已解决。module
 注解属于并行主体覆盖工作，不能说完成它就能修复上述 CEM 断点。
 
+IMPORT_FROM 的最小下一步：保存 IMPORT_NAME 的原 name/level/fromlist 请求及返回模式，
+各成员保存自己的 receiver/key/world/normal result；从所选源码模块 namespace 的实际
+reaching binding payload 接到 IMPORT_FROM 结果，不按导入名直接跳到函数定义。plain
+import、fromlist 返回模块、属性读取和注册表 fallback 分开；relative/package、hook、
+动态 getattr、循环初始化与中间覆盖继续保留条件和字段前沿。旧 wire 维持旧 plain-import
+解释，新协议和 source-path 支持需要显式升级并独立读回，不伪造 ATTRIBUTE 或调用。
+
 下一轮分三项并行准备、按依赖顺序验收：
 
 - **接线审计**：保存原调用→callee来源→首次缺边的证据路径，分清缺主体、缺协议、缺状态关系与真正未绑定输入。验收是精确原端点可定位，不能只汇总 frontier。

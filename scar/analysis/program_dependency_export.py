@@ -61,7 +61,8 @@ class _Tables:
 
     def condition(self, value):
         return self.put('conditions', value, lambda: {'domain': value.domain, 'name': value.name,
-            'subject': None if value.subject is None else self.point(value.subject), 'index': value.index})
+            'subject': None if value.subject is None else self.point(value.subject), 'index': value.index,
+            'operands': [self.point(operand) for operand in value.operands]})
 
     def evidence(self, value):
         return self.put('evidence', value, lambda: {'rule': value.rule,
@@ -120,7 +121,7 @@ def export_dependency_walk(walk):
     for edge in walk.edges:
         table.edge(edge)
     frontiers = [table.frontier(item) for item in walk.frontiers]
-    return {'schema': 'scar.program-dependency-query', 'schema_version': 1,
+    return {'schema': 'scar.program-dependency-query', 'schema_version': 2,
         'direction': walk.direction, 'roots': roots, **table.tables, 'frontiers': frontiers,
         'relation_scope': [kind.value for kind in walk.kinds],
         'summary': {'visited_points': len(walk.points), 'referenced_points': len(table.tables['points']),
@@ -161,7 +162,7 @@ def export_value_analysis(result):
     branch_proofs = [table.pack(item) for item in result.branch_proofs]
     binding_proofs = [table.pack(item) for item in result.binding_proofs]
     route_refutations = [table.pack(item) for item in result.route_refutations]
-    return {'schema': 'scar.program-value-analysis', 'schema_version': 2, 'roots': roots,
+    return {'schema': 'scar.program-value-analysis', 'schema_version': 3, 'roots': roots,
         **table.tables, 'facts': facts, 'frontiers': frontiers, 'branch_proofs': branch_proofs,
         'binding_proofs': binding_proofs,
         'route_refutations': route_refutations,
@@ -187,7 +188,7 @@ def export_boundary_analysis(result):
     records['reads'] = [number for number, state in enumerate(result.state) if state in reads]
     records['writes'] = [number for number, state in enumerate(result.state) if state in writes]
     records['control_dependencies'] = [table.edge(edge) for edge in result.control_dependencies]
-    return {'schema': 'scar.program-region-boundary', 'schema_version': 1,
+    return {'schema': 'scar.program-region-boundary', 'schema_version': 2,
         **table.tables, 'boundary': records, 'whole_program_complete': False,
         'transformation_authorized': False,
         'qualification': 'A cut of original operations and field-wise interface/effect knowledge. '

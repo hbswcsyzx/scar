@@ -28,6 +28,14 @@ from scar.analysis.program_value_control import (ControlEntryScope,ControlNecess
     OccurrenceField,TypedRouteRefutation)
 
 
+def _extended_unary(condition):
+    """A known unary name with additional operands is an unknown signature."""
+    return condition.operands!=()and(condition.domain,condition.name)in{
+        ('canonical','SUCCESSOR_SELECTED'),('canonical','COMPLETION_SLOT'),
+        ('canonical.binding','READ_NORMAL_REQUIRES_BOUND'),
+        ('control.analysis','ORIGINAL_EDGE_REQUIRED_FOR_ENTRY_REACHABILITY')}
+
+
 class FieldPrecision(str,Enum):
     EXACT='EXACT'
     CONDITIONAL='CONDITIONAL'
@@ -214,7 +222,8 @@ class BranchSelectionProof:
                 or type(self.alternatives)is not tuple or not self.alternatives
                 or any(type(a)is not ValueAlternative or a.strength is not Strength.EXACT
                     or type(a.value)is not PythonLiteral or a.value.kind is not LiteralKind.BOOL
-                    or a.value.payload is not(self.selected_index==0)for a in self.alternatives)
+                    or a.value.payload is not(self.selected_index==0)
+                    or any(_extended_unary(c)for c in a.conditions)for a in self.alternatives)
                 or type(self.evidence)is not Evidence):
             raise TypeError('branch proof needs an original branch/predicate context and stable builtin bool alternatives')
 
@@ -233,9 +242,11 @@ class BindingReadProof:
                 or self.read.namespace!=self.binding.namespace or self.read.context!=self.binding.context
                 or type(self.condition)is not Condition or self.condition.subject!=self.read
                 or self.condition.domain!='canonical.binding' or self.condition.name!='READ_NORMAL_REQUIRES_BOUND'
-                or self.condition.index is not None or type(self.alternatives)is not tuple or not self.alternatives
+                or self.condition.operands!=()or self.condition.index is not None
+                or type(self.alternatives)is not tuple or not self.alternatives
                 or any(type(a)is not BindingStateAlternative or a.state is not BindingState.BOUND
-                    or a.strength is not Strength.EXACT for a in self.alternatives)
+                    or a.strength is not Strength.EXACT or any(_extended_unary(c)for c in a.conditions)
+                    for a in self.alternatives)
                 or type(self.evidence)is not Evidence):
             raise TypeError('binding-read proof needs the original read/input scope and complete BOUND alternatives')
 
@@ -341,9 +352,9 @@ class ProgramValueAnalysis:
         scope=self._entry_scope(edge.target)
         if scope is None:return None
         selectors=[c for c in edge.conditions if c.domain=='canonical'and c.name=='SUCCESSOR_SELECTED'
-            and c.subject==edge.source]
+            and c.operands==()and c.subject==edge.source]
         qualifiers=[c for c in edge.conditions if c.domain=='control.analysis'
-            and c.name=='ORIGINAL_EDGE_REQUIRED_FOR_ENTRY_REACHABILITY'and c.subject==scope.region]
+            and c.name=='ORIGINAL_EDGE_REQUIRED_FOR_ENTRY_REACHABILITY'and c.operands==()and c.subject==scope.region]
         operation=self.session.index(edge.source.namespace).operations[edge.source.node]
         if (len(selectors)!=1 or len(qualifiers)!=1 or len(edge.conditions)!=2 or operation.terminator is None
                 or selectors[0].index is None or selectors[0].index>=len(operation.terminator.successors)):
@@ -689,7 +700,7 @@ class ProgramValueAnalysis:
 
     def _binding_input(self,condition):
         if (condition.domain!='canonical.binding' or condition.name!='READ_NORMAL_REQUIRES_BOUND'
-                or condition.index is not None or condition.subject is None
+                or condition.operands!=()or condition.index is not None or condition.subject is None
                 or type(condition.subject.node)is not OperationID):return None
         read=condition.subject
         index=self.session.index(read.namespace)
@@ -704,6 +715,7 @@ class ProgramValueAnalysis:
         return binding,result
 
     def _condition_evidence(self,condition):
+        if condition.operands!=():return None
         prior=(self._branch_proofs.get(condition.subject)if condition.domain=='canonical'
             and condition.name=='SUCCESSOR_SELECTED'else None)
         if prior is not None and condition.index==prior.selected_index:return prior.evidence
@@ -763,7 +775,7 @@ class ProgramValueAnalysis:
                         expected.add((Point(point.namespace,actual,point.context),Condition('canonical',
                             'SUCCESSOR_SELECTED',Point(point.namespace,operation.id,point.context),ordinal)))
                 observed={(e.source,c)for e in suppliers for c in e.conditions if c.domain=='canonical'
-                    and c.name=='SUCCESSOR_SELECTED'}
+                    and c.name=='SUCCESSOR_SELECTED'and c.operands==()}
                 if expected and expected==observed and len(suppliers)==len(expected):selected=suppliers
             elif type(value.origin)is BlockArgument and point.context and all(e.kind is K.ARGUMENT for e in suppliers):
                 frame=point.context[-1];operation=index.operations.get(frame.operation)
@@ -793,6 +805,7 @@ class ProgramValueAnalysis:
         for point,fact in self._facts.items():
             proofs=list(fact.infeasibility if fact.feasible is False else())
             for requirement in fact.occurrence.requirements:
+                if requirement.choice.operands!=():continue
                 branch=self._branch_proofs.get(requirement.choice.subject)
                 if branch is None or branch.selected_index==requirement.choice.index:continue
                 # Required edge traversals may belong to different iterations.
@@ -810,7 +823,7 @@ class ProgramValueAnalysis:
             if not sources:
                 rejected=[self._branch_proofs[c.subject].evidence for c in edge.conditions
                     if c.domain=='canonical'and c.name=='SUCCESSOR_SELECTED'and c.subject in self._branch_proofs
-                    and c.index!=self._branch_proofs[c.subject].selected_index]
+                    and c.operands==()and c.index!=self._branch_proofs[c.subject].selected_index]
                 if not rejected:continue
                 sources=tuple(rejected)
             evidence=Evidence('ORIGINAL_VALUE_ROUTE_SOURCE_INFEASIBLE_V1',tuple(dict.fromkeys(
@@ -1037,7 +1050,7 @@ class ProgramValueAnalysis:
                     or frame.entry!=operation.callee or frame.callee_use is not None
                     or frame.callee_value is not None or incoming.source.node not in terminals):return False
             if operation.terminator is not None and not any(c.domain=='canonical'and c.name=='SUCCESSOR_SELECTED'
-                    and c.subject==producer.source and c.index==successor for c in incoming.conditions):return False
+                    and c.operands==()and c.subject==producer.source and c.index==successor for c in incoming.conditions):return False
             matched.add(incoming.source.node)
         return matched==terminals
 
@@ -1048,8 +1061,9 @@ class ProgramValueAnalysis:
         from scar.ir.program.model import CompletionResult,ExitKind,TerminatorKind
         index=self.session.index(point.namespace);operation=index.operations[edge.source.node]
         origin=index.values[point.node].origin
+        if any(_extended_unary(c)and c.subject==edge.source for c in edge.conditions):return False
         slots=[c.index for c in edge.conditions if c.domain=='canonical'and c.name=='COMPLETION_SLOT'
-            and c.subject==edge.source]
+            and c.operands==()and c.subject==edge.source]
         if slots not in([],[0]):return False
         if operation.terminator is None:
             return (type(origin)is OperationResult and origin.operation==operation.id and origin.index==0
@@ -1063,7 +1077,7 @@ class ProgramValueAnalysis:
                 if type(actual)is CompletionResult and actual.index==0:matches.append(ordinal)
         if len(matches)!=1:return False
         choices=[c.index for c in edge.conditions if c.domain=='canonical'and c.name=='SUCCESSOR_SELECTED'
-            and c.subject==edge.source]
+            and c.operands==()and c.subject==edge.source]
         return choices==matches
 
     @staticmethod
@@ -1179,11 +1193,11 @@ class ProgramValueAnalysis:
 
     def _edge_branch_proofs(self,edge):
         return tuple(dict.fromkeys(self._branch_proofs[c.subject]for c in edge.conditions
-            if c.domain=='canonical'and c.name=='SUCCESSOR_SELECTED'and c.subject in self._branch_proofs))
+            if c.domain=='canonical'and c.name=='SUCCESSOR_SELECTED'and c.operands==()and c.subject in self._branch_proofs))
 
     def _edge_selected(self,edge):
         return all(c.index==self._branch_proofs[c.subject].selected_index for c in edge.conditions
-            if c.domain=='canonical'and c.name=='SUCCESSOR_SELECTED'and c.subject in self._branch_proofs)
+            if c.domain=='canonical'and c.name=='SUCCESSOR_SELECTED'and c.operands==()and c.subject in self._branch_proofs)
 
     def _necessary_normal_entry(self,condition,branch,predicate):
         """An original normal completion required to reach this exact branch.
@@ -1192,7 +1206,7 @@ class ProgramValueAnalysis:
         or remove its exception edge, and does not accept a runtime guard.
         """
         if (condition.domain!='canonical'or condition.name!='SUCCESSOR_SELECTED'
-                or condition.subject is None or type(condition.subject.node)is not OperationID
+                or condition.operands!=()or condition.subject is None or type(condition.subject.node)is not OperationID
                 or condition.subject.namespace!=branch.namespace or condition.subject.context!=branch.context):return None
         producer=condition.subject;truth=self._truth_contract(producer)
         if truth is None or condition.index!=truth[2]:return None
@@ -1250,7 +1264,8 @@ class ProgramValueAnalysis:
             if self._point_unknown.get(branch):continue
             inputs=[edge for edge in self._incoming.get(branch,())if edge.kind is K.CONTROL_CONDITION]
             if (len(inputs)!=1 or inputs[0].source!=predicate or inputs[0].target!=branch
-                    or inputs[0].strength is not Strength.EXACT):continue
+                    or inputs[0].strength is not Strength.EXACT
+                    or any(_extended_unary(c)for c in inputs[0].conditions)):continue
             fact=self._facts[predicate];field=fact.scalar_constant
             if (fact.feasible is False or not field.applicable or not field.alternatives or field.unknown_paths
                     or any(a.strength is not Strength.EXACT or type(a.value)is not PythonLiteral
@@ -1459,7 +1474,7 @@ class ProgramValueAnalysis:
                             for source in binding:pending.append(source)
                             self._dependents[binding[0]].add(point)
                         if (condition.domain!='canonical'or condition.name!='SUCCESSOR_SELECTED'
-                                or condition.subject is None):continue
+                                or condition.operands!=()or condition.subject is None):continue
                         predicate=self._branch_predicate(condition.subject)
                         if predicate is None:continue
                         if condition.index not in(0,1):raise ValueError('BRANCH selection changed its original successor ordinal')

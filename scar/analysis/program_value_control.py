@@ -38,7 +38,7 @@ class ControlNecessity:
     def __post_init__(self):
         if (type(self.choice)is not Condition or self.choice.domain!='canonical'
                 or self.choice.name!='SUCCESSOR_SELECTED' or self.choice.subject is None
-                or type(self.choice.subject.node)is not OperationID or self.choice.index is None
+                or self.choice.operands!=()or type(self.choice.subject.node)is not OperationID or self.choice.index is None
                 or type(self.scope)is not ControlEntryScope or type(self.chain)is not tuple or not self.chain
                 or any(type(e)is not DependencyEdge or e.strength is not Strength.EXACT for e in self.chain)
                 or self.chain[0].source!=self.choice.subject or type(self.evidence)is not Evidence):
@@ -48,6 +48,12 @@ class ControlNecessity:
                     or any(p.namespace!=self.scope.region.namespace or p.context!=self.scope.region.context
                         for p in(edge.source,edge.target))):
                 raise ValueError('control chain changed its original scope or relation kind')
+            if any(c.operands!=()and(c.domain,c.name)in{
+                    ('canonical','SUCCESSOR_SELECTED'),('canonical','COMPLETION_SLOT'),
+                    ('canonical.binding','READ_NORMAL_REQUIRES_BOUND'),
+                    ('control.analysis','ORIGINAL_EDGE_REQUIRED_FOR_ENTRY_REACHABILITY')}
+                    for c in edge.conditions):
+                raise ValueError('a known unary control prerequisite cannot accept additional operands')
         if any(a.target!=b.source for a,b in zip(self.chain,self.chain[1:])):
             raise ValueError('control necessity chain is disconnected')
 
