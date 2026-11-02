@@ -472,7 +472,93 @@ def mapping_global_declaration(context, evidence, node):
     return all(table.lookup(name).is_declared_global() for name in node.names)
 
 
-def mapping_prefix_selection(context, evidence, *, profile=None):
+def mapping_literal_bool_if_plan(context, evidence, node, *, profile=None):
+    """Check one literal-bool If against the exact module compiler layout.
+
+    This maps source to compilation; it neither evaluates a target expression
+    nor implements constant folding in SCAR.  In particular, a folded BinOp is
+    not admitted by this rule.  Compiler prelude and deferred annotation code
+    have independent ownership even if they share this If's source span.
+    """
+    import dis
+    from scar.ir.program.module_entries import ModuleLiteralBoolIfElision, StatementSequenceField as F
+    if (type(evidence) is not StaticCodeEvidence or not isinstance(node,ast.If)
+            or not isinstance(node.test,ast.Constant) or type(node.test.value) is not bool):
+        raise ValueError('literal-bool If mapping requires original static module compilation')
+    require_root_evidence(module_unit(context),evidence,allow_compiler_locals=True)
+    pending=list(context.tree.body);owned=False
+    while pending:
+        current=pending.pop()
+        if current is node:
+            owned=True;break
+        if not isinstance(current,(ast.FunctionDef,ast.AsyncFunctionDef,ast.ClassDef,ast.Lambda)):
+            pending.extend(ast.iter_child_nodes(current))
+    if not owned:
+        raise ValueError('literal-bool If is not owned by this original module scope')
+    source=_module_statement_ref(context,node.test)
+    rows=tuple(dis.get_instructions(evidence.code,adaptive=False,show_caches=False))
+    source_rows=_mapping_source_instructions(context,evidence,profile=profile)
+    offsets={row.offset for row in rows}
+    # Derive the original compiler CFG including exception-table edges.  This
+    # is a conservative instruction-level source-mapping check, not a new
+    # canonical program graph or a claim that an exception will occur.
+    successors={row.offset:set() for row in rows}
+    terminal={'RETURN_VALUE','RETURN_CONST','RAISE_VARARGS','RERAISE'}
+    unconditional={'JUMP_FORWARD','JUMP_BACKWARD','JUMP_BACKWARD_NO_INTERRUPT','JUMP'}
+    for index,row in enumerate(rows):
+        if row.opcode in dis.hasjump:
+            if type(row.argval) is not int or row.argval not in offsets:
+                raise ValueError('literal-bool If compiler CFG has a missing original jump target')
+            successors[row.offset].add(row.argval)
+        if row.opname not in terminal|unconditional and index+1<len(rows):
+            successors[row.offset].add(rows[index+1].offset)
+    for handler in dis.Bytecode(evidence.code).exception_entries:
+        if handler.target not in offsets:
+            raise ValueError('literal-bool If compiler exception target is absent')
+        for row in rows:
+            if handler.start<=row.offset<handler.end:
+                successors[row.offset].add(handler.target)
+    reachable=set();pending=[rows[0].offset]
+    while pending:
+        offset=pending.pop()
+        if offset not in reachable:
+            reachable.add(offset);pending.extend(successors[offset])
+    span=lambda n:(n.lineno,n.end_lineno,n.col_offset,n.end_col_offset)
+    def inside(position,owner):
+        start,end,column,last=position
+        if any(type(x) is not int for x in position):return False
+        first_line,last_line,first_column,last_column=span(owner)
+        return ((first_line,first_column)<=(start,column)
+                and (end,last)<=(last_line,last_column))
+    selected=F.BODY if node.test.value else F.ORELSE
+    dead=node.orelse if node.test.value else node.body
+    dead_rows=[row for row in source_rows if any(inside(tuple(row.positions),child) for child in dead)]
+    if dead_rows:
+        # Even unreachable compiler instructions must not silently become a
+        # source-elided suite.  Other source/compiler rules can cover them.
+        qualifier='reachable ' if any(row.offset in reachable for row in dead_rows) else ''
+        raise ValueError('literal-bool If dead suite retains '+qualifier+'original compiler instructions')
+    tests=tuple(row for row in source_rows if tuple(row.positions)==span(node.test))
+    for row in tests:
+        if row.opname=='NOP':continue
+        # A trailing empty literal If can own the compiler's implicit module
+        # return positions.  That return is still emitted by frame completion,
+        # never by evaluating the condition or by executing the dead suite.
+        index=next(i for i,candidate in enumerate(rows) if candidate.offset==row.offset)
+        if (row.opname=='LOAD_CONST' and row.argval is None and index+1<len(rows)
+                and rows[index+1].opname=='RETURN_VALUE'
+                and tuple(rows[index+1].positions)==span(node.test)
+                and successors[row.offset]=={rows[index+1].offset}):continue
+        if (row.opname=='RETURN_VALUE' and index>0 and rows[index-1].opname=='LOAD_CONST'
+                and rows[index-1].argval is None
+                and tuple(rows[index-1].positions)==span(node.test)
+                and not successors[row.offset]):continue
+        raise ValueError('literal-bool If test retains an unmodeled compiler action or branch')
+    return ModuleLiteralBoolIfElision(source,selected,evidence.root_code_layout_key,
+        tuple(row.offset for row in tests))
+
+
+def mapping_prefix_selection(context, evidence, *, profile=None, literal_bool_elision=False):
     """Maximal contiguous supported statements; no workload/name allowlist."""
     unit=module_unit(context)
     from scar.ir.program.module_entries import FrameBodyProfile
@@ -540,7 +626,12 @@ def mapping_prefix_selection(context, evidence, *, profile=None):
                     and len([r for r in positioned(node,('STORE_NAME',)) if r.argval=='__doc__'])==1)
             return expression(node.value)
         if isinstance(node,ast.For):return target(node.target) and expression(node.iter) and all(statement(child) for child in (*node.body,*node.orelse))
-        if expanded and isinstance(node,ast.If):return expression(node.test) and all(statement(child) for child in (*node.body,*node.orelse))
+        if expanded and isinstance(node,ast.If):
+            if literal_bool_elision and isinstance(node.test,ast.Constant) and type(node.test.value) is bool:
+                try:mapping_literal_bool_if_plan(context,evidence,node,profile=profile)
+                except (ValueError,_Unsupported):return False
+                return all(statement(child) for child in (node.body if node.test.value else node.orelse))
+            return expression(node.test) and all(statement(child) for child in (*node.body,*node.orelse))
         if expanded and isinstance(node,(ast.FunctionDef,ast.AsyncFunctionDef)):
             from scar.analysis.source_mapping_function_lowering import mapping_function_plan
             try:mapping_function_plan(node,evidence.code)
@@ -1120,7 +1211,8 @@ class MappingBodyBuilder(PropagationModuleBuilder):
         super().__init__(context,selection,evidence,max_operations)
         from scar.ir.program.module_entries import FrameBodyProfile
         self.frame_body_profile=(FrameBodyProfile.STRUCTURED_MAPPING_COMPILER_314_V1 if getattr(self,'supports_compiler_prologue',False) else FrameBodyProfile.STRUCTURED_MAPPING_BODY_314_V1)
-        self.prefix_nodes,self.remaining_nodes=mapping_prefix_selection(context,evidence,profile=self.frame_body_profile)
+        self.prefix_nodes,self.remaining_nodes=mapping_prefix_selection(context,evidence,
+            profile=self.frame_body_profile,literal_bool_elision=True)
 
     def store(self,target,value,cursor):
         if isinstance(target,ast.Name):return super().store(target,value,cursor)
@@ -1130,7 +1222,16 @@ class MappingBodyBuilder(PropagationModuleBuilder):
     def statements(self,nodes,cursor):
         from scar.ir.program.module_entries import FrameStatementExpansion,StatementSequenceField as F
         for node in nodes:
-            if _module_docstring(self.prepared_source,node):
+            if isinstance(node,ast.If) and isinstance(node.test,ast.Constant) and type(node.test.value) is bool:
+                witness=mapping_literal_bool_if_plan(self.prepared_source,self.evidence,node,
+                    profile=self.frame_body_profile)
+                start=len(self.operations);entry=cursor.block
+                cursor=self.statements(node.body if node.test.value else node.orelse,cursor)
+                children=tuple(frame_statement_slice(self.prepared_source,self.source(node),field,getattr(node,name))
+                    for name,field in (('body',F.BODY),('orelse',F.ORELSE)) if getattr(node,name))
+                self.statement_expansions.append(FrameStatementExpansion(self.source(node),self.frame_region,
+                    entry,cursor.block,tuple(op.id for op in self.operations[start:]),children,witness))
+            elif _module_docstring(self.prepared_source,node):
                 start=len(self.operations);entry=cursor.block
                 cursor,value=self.expr(node.value,cursor)
                 cursor=self.store_name(node,'__doc__',value,cursor)
@@ -1173,7 +1274,8 @@ class ExpandedCompilerMappingBodyBuilder(CompilerMappingBodyBuilder):
         super().__init__(context,selection,evidence,max_operations)
         from scar.ir.program.module_entries import FrameBodyProfile
         self.frame_body_profile=FrameBodyProfile.STRUCTURED_MAPPING_COMPILER_OPS_314_V1
-        self.prefix_nodes,self.remaining_nodes=mapping_prefix_selection(context,evidence,profile=self.frame_body_profile)
+        self.prefix_nodes,self.remaining_nodes=mapping_prefix_selection(context,evidence,
+            profile=self.frame_body_profile,literal_bool_elision=True)
 
 
 class ClassConstructionMappingBodyBuilder(ExpandedCompilerMappingBodyBuilder):
@@ -1187,7 +1289,8 @@ class ClassConstructionMappingBodyBuilder(ExpandedCompilerMappingBodyBuilder):
         self.class_constructions=[]
         self.language_options=SourceLanguageOptions((C.SLICE_KEYS,C.CLASS_CONSTRUCTION_314_V1),evidence)
         self.frame_body_profile=FrameBodyProfile.STRUCTURED_MAPPING_CLASS_314_V1
-        self.prefix_nodes,self.remaining_nodes=mapping_prefix_selection(context,evidence,profile=self.frame_body_profile)
+        self.prefix_nodes,self.remaining_nodes=mapping_prefix_selection(context,evidence,
+            profile=self.frame_body_profile,literal_bool_elision=True)
 
     def statements(self,nodes,cursor):
         from scar.ir.program.module_entries import FrameStatementExpansion

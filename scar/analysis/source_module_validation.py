@@ -218,8 +218,26 @@ def validate_mapping_heap_store(node,target,expansion,*,graph,overlay,semantic,c
 
 
 def validate_mapping_if(node,expansion,*,graph,overlay,blocks,operations,expression_value,
-                        ordered_statements,expansions,source_reference):
+                        ordered_statements,expansions,source_reference,compiler_elision=None):
     from scar.ir.program.structured import PythonProtocolKind as P
+    if compiler_elision is not None:
+        _need(expansion.compiler_elision==compiler_elision,
+              'mapping If compiler-elision receipt differs from original source/compiler CFG')
+        active=node.body if node.test.value else node.orelse
+        end=ordered_statements(active,expansion.entry)
+        _need(end==expansion.normal,
+              'compiler-elided If must preserve the active suite normal world without a truth/branch/join')
+        active_operations=tuple(identity for child in active for identity in expansions[source_reference(child)].operations)
+        _need(expansion.operations==active_operations,
+              'compiler-elided If contains operations outside its original active suite')
+        _need(not any(row.source==compiler_elision.test for rows in (
+                  overlay.operation_links,overlay.value_links,overlay.use_links) for row in rows),
+              'compiler-elided If test cannot acquire runtime operations or value ports')
+        if not active_operations:
+            _need(expansion.entry==expansion.normal,
+                  'compiler-elided empty suite cannot create a runtime control transfer')
+        return
+    _need(expansion.compiler_elision is None,'dynamic If cannot acquire a compiler-elision receipt')
     source=source_reference(node.test)
     tests=[operations[p.operation] for p in overlay.protocols if p.kind is P.TRUTH and p.source==source]
     _need(len(tests)==1 and tests[0].uses[0].value==expression_value(node.test),
@@ -632,7 +650,7 @@ def require_valid_structured_module_program(result,*,source_texts,code_evidence=
     from scar.analysis.program_lowering import PreparedSource
     from scar.analysis.source_module_lowering import (module_unit,module_source_census,module_source_context,
         require_root_evidence,mapping_prefix_selection,frame_statement_slice,_module_statement_ref,mapping_name_opcode,
-        _mapping_source_instructions,mapping_global_declaration)
+        _mapping_source_instructions,mapping_global_declaration,mapping_literal_bool_if_plan)
     from scar.analysis.source_semantics_v2 import validate_source_semantics
     from scar.analysis.control_flow_v2 import validate_source_control_flow
     from scar.ir.program.module_entries import (StructuredFrameBodyOverlay,FrameBodyProfile,
@@ -687,7 +705,12 @@ def require_valid_structured_module_program(result,*,source_texts,code_evidence=
     else:
         _need(code_evidence is not None and require_root_evidence(unit,code_evidence)==overlay.declaration.witness,
               'SP8 requires exact readonly whole-root evidence, not a code-name or report boolean')
-    prefix,tail=mapping_prefix_selection(context,code_evidence,profile=result.profile)
+    # The statement-local receipt is an explicit new mapping capability.
+    # Historical conservative prefixes without it replay their historical
+    # admission rules rather than being silently enlarged by a new producer.
+    literal_bool_elision=any(row.compiler_elision is not None for row in overlay.expansions)
+    prefix,tail=mapping_prefix_selection(context,code_evidence,profile=result.profile,
+        literal_bool_elision=literal_bool_elision)
     _need(overlay.prefix==(frame_statement_slice(context,unit,F.BODY,prefix) if prefix else None),'SP8 prefix is not the mechanical maximal supported collection')
     _need((overlay.remaining is not None)==bool(tail),'SP8 missing/extra remaining source collection')
     if tail:
@@ -873,9 +896,22 @@ def require_valid_structured_module_program(result,*,source_texts,code_evidence=
                       and effect.path[0].key==op.uses[key].id and effect.mode.value==mode,'SP8 attempted namespace role/key differs')
     _need(set(refinements)>=expected_addresses,'SP8 namespace attempted addresses missing')
     # Exact original prefix/nested statement coverage, with actual owned operations.
-    expected_statements=[]
+    expected_statements=[];elisions={};elided_sources=set()
     def descend(node):
         expected_statements.append(node)
+        if (literal_bool_elision and extended and isinstance(node,ast.If)
+                and isinstance(node.test,ast.Constant) and type(node.test.value) is bool):
+            source=_module_statement_ref(context,node)
+            elisions[source]=mapping_literal_bool_if_plan(context,code_evidence,node,profile=result.profile)
+            active=node.body if node.test.value else node.orelse
+            dead=node.orelse if node.test.value else node.body
+            for statement in dead:
+                for child in ast.walk(statement):
+                    if not hasattr(child,'lineno'):continue
+                    try:elided_sources.add(_module_statement_ref(context,child))
+                    except ValueError:pass  # Original source gaps do not acquire fabricated atoms.
+            for child in active:descend(child)
+            return
         if isinstance(node,ast.For) or extended and isinstance(node,ast.If):
             for child in (*node.body,*node.orelse):descend(child)
         if paired and isinstance(node,ast.Try):
@@ -900,12 +936,21 @@ def require_valid_structured_module_program(result,*,source_texts,code_evidence=
               and len(set(expansion.operations))==len(expansion.operations)
               and all(identity in operations and owners[identity]==graph.root for identity in expansion.operations),
               'SP8 statement/recursive slice operations differ')
-        if isinstance(node,ast.Global):
+        _need(expansion.compiler_elision==elisions.get(expansion.source),
+              'statement compiler-elision receipt is missing, extra or changed')
+        if expansion.source in elisions:
+            # A compiler-elided If with an empty selected suite is a valid
+            # zero-runtime mapping.  Nonempty suites are checked recursively.
+            pass
+        elif isinstance(node,ast.Global):
             _need(mapping_global_declaration(context,code_evidence,node)
                   and not expansion.operations and expansion.entry==expansion.normal,
                   'module Global must retain its original compiler scope declaration without runtime operations')
         elif not isinstance(node,ast.Pass):
             _need(bool(expansion.operations),'expanded runtime statement has no data/control operations')
+    _need(not any(link.source in elided_sources for rows in (
+              overlay.operation_links,overlay.value_links,overlay.use_links) for link in rows),
+          'compiler-elided source suite cannot acquire runtime operations or value ports')
     def ordered_statements(nodes,initial=None):
         previous=initial
         for node in nodes:
@@ -989,7 +1034,8 @@ def require_valid_structured_module_program(result,*,source_texts,code_evidence=
             _need(extended,'mapping If requires explicit BODY profile')
             validate_mapping_if(node,expansions[source],graph=graph,overlay=overlay,blocks=blocks,
                 operations=operations,expression_value=expression_value,ordered_statements=ordered_statements,
-                expansions=expansions,source_reference=lambda n:_module_statement_ref(context,n))
+                expansions=expansions,source_reference=lambda n:_module_statement_ref(context,n),
+                compiler_elision=elisions.get(source))
         elif isinstance(node,ast.Expr):
             from scar.analysis.source_module_lowering import _module_docstring
             if _module_docstring(context,node):

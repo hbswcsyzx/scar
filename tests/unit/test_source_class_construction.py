@@ -19,6 +19,123 @@ from scar.ir.v2.common import SourceReference
 from scar.ir.v2.ids import OperationDefinitionID
 
 
+def test_module_literal_bool_if_maps_compiler_elision_without_executing_source(tmp_path, monkeypatch):
+    import ast
+    import dis
+    import scar.analysis.source_module_lowering as lowering
+    from scar.ir.program.module_entries import StatementSequenceField as F
+    from scar.ir.program.structured import PythonProtocolKind as P
+
+    profile=FrameBodyProfile.STRUCTURED_MAPPING_CLASS_314_V1
+    def construct(text,name):
+        path=tmp_path/(name+'.py')
+        prepared=prepare_source_text(path,text,project_root=tmp_path,root_is_package=False)
+        unit=module_unit(prepared);evidence=compile_source_unit(prepared).for_module(unit)
+        result=lower_module_entry(prepared,unit,code_evidence=evidence,profile=profile)
+        wire=result.to_dict()
+        assert SourceProgram.read_structure(wire,source_texts={str(path):text}).graph==result.graph
+        assert not path.exists()  # Compilation and independent replay never exec the source.
+        return prepared,evidence,result,wire
+
+    # Unsupported dead syntax stays in original source suites, not runtime
+    # expansions.  Both choices are obtained from the original compiler rule.
+    for choice in (True,False):
+        active='    result = must_not_execute()\n'
+        dead='    raise must_not_execute_dead()\n'
+        body,orelse=(active,dead) if choice else (dead,active)
+        text=f'if {choice}:\n'+body+'else:\n'+orelse+'after = 1\n'
+        prepared,evidence,result,wire=construct(text,'literal_'+str(choice))
+        assert result.module.remaining is None
+        enclosing=next(row for row in result.module.expansions if row.source.start_line==1)
+        witness=enclosing.compiler_elision
+        assert witness.selected is (F.BODY if choice else F.ORELSE)
+        assert witness.root_code_layout_key==evidence.root_code_layout_key
+        assert tuple(row.field for row in enclosing.child_slices)==(F.BODY,F.ORELSE)
+        selected_line=2 if choice else 4;dead_line=4 if choice else 2
+        assert {row.source.start_line for row in result.module.expansions}=={1,selected_line,5}
+        assert not any(row.source.start_line==dead_line for row in result.module.operation_links
+                       if isinstance(row.source,SourceReference))
+        assert not any(row.kind is P.TRUTH for row in result.module.protocols)
+        assert not any(op.terminator and op.terminator.kind.value=='BRANCH' for op in result.graph.operations)
+        assert {row.offset for row in dis.get_instructions(evidence.code)
+                if tuple(row.positions)==(1,1,3,3+len(str(choice)))}==set(witness.test_instruction_offsets)
+
+        if choice:
+            for field,value in (('selected',F.ORELSE.value),
+                    ('root_code_layout_key','pycode-v2:'+'0'*64),
+                    ('test_instruction_offsets',[999999])):
+                changed=deepcopy(wire)
+                row=next(row for row in changed['module']['expansions'] if row.get('compiler_elision'))
+                row['compiler_elision'][field]=value
+                with pytest.raises(ValueError):
+                    SourceProgram.read_structure(changed,source_texts={str(prepared.path):text})
+            changed=deepcopy(wire)
+            next(row for row in changed['module']['expansions'] if row.get('compiler_elision')).pop('compiler_elision')
+            with pytest.raises(ValueError):
+                SourceProgram.read_structure(changed,source_texts={str(prepared.path):text})
+
+    # A dead annotation still causes compiler-owned state/factory setup.  A
+    # source global declaration in that same dead suite still changes scope.
+    for future in (False,True):
+        text=('from __future__ import annotations\n' if future else '')+(
+            'if False:\n    global after\n    unreachable: annotation() = rhs()\nafter = 1\n')
+        prepared,evidence,result,wire=construct(text,'dead_annotation_'+str(future))
+        assert result.module.remaining is None
+        prologue=result.module.compiler_prologue
+        assert prologue is not None and prologue.cells
+        assert len(prologue.children)==(0 if future else 1)
+        if not future:
+            witness=next(row.compiler_elision for row in result.module.expansions if row.compiler_elision)
+            assert witness.test_instruction_offsets==()  # Compiler can eliminate even the NOP.
+        assert any(row.kind is P.STORE_GLOBAL and row.source.start_line==(5 if future else 4)
+                   for row in result.module.protocols)
+        assert not any(row.source.start_line==(4 if future else 3) for row in result.module.operation_links
+                       if isinstance(row.source,SourceReference))
+        changed=deepcopy(wire)
+        # Keep duplicated declaration/prelude receipts internally consistent;
+        # only independent recompilation can establish their true provenance.
+        for receipt in (changed['module']['declaration']['compilation'],
+                        changed['module']['compiler_prologue']['compilation']):
+            for key in ('code_layout_key','root_code_layout_key'):
+                receipt[key]='pycode-v2:'+'0'*64
+        with pytest.raises(ValueError,match='independently compiled retained source'):
+            SourceProgram.read_structure(changed,source_texts={str(prepared.path):text})
+
+    # Nested selection and an empty selected suite need no invented join or
+    # runtime no-op.  Implicit module completion may own the test positions.
+    text='if True:\n    if False:\n        dead()\n    else:\n        pass\nelse:\n    dead_outer()\n'
+    _,_,result,_=construct(text,'nested_empty')
+    assert result.module.remaining is None
+    assert len([row for row in result.module.expansions if row.compiler_elision])==2
+    assert all(not row.operations and row.entry==row.normal for row in result.module.expansions)
+    _,_,result,_=construct('if False:\n    dead()\n','empty_tail')
+    assert result.module.remaining is None and not result.module.expansions[0].operations
+
+    # Ordinary Ifs and compiler-foldable arithmetic keep their prior path.
+    for test in ('flag','1+1'):
+        _,_,result,_=construct(f'if {test}:\n    value = one()\nelse:\n    value = two()\n','dynamic_'+str(len(test)))
+        assert not any(row.compiler_elision for row in result.module.expansions)
+        assert any(row.kind is P.TRUTH for row in result.module.protocols)
+    prepared,evidence,_,_=construct('def child():\n    if True: return 1\n','foreign_scope')
+    child_if=next(node for node in ast.walk(prepared.tree) if isinstance(node,ast.If))
+    with pytest.raises(ValueError,match='module scope'):
+        lowering.mapping_literal_bool_if_plan(prepared,evidence,child_if,profile=profile)
+
+    # Emit a historical conservative prefix using its unchanged admission
+    # mode, then independently read that old wire after restoring new rules.
+    original_selection=lowering.mapping_prefix_selection
+    def old_selection(context,evidence,*,profile=None,literal_bool_elision=False):
+        return original_selection(context,evidence,profile=profile,literal_bool_elision=False)
+    text='sentinel = 0\nif True:\n    value = kept()\nelse:\n    value = dead()\nafter = 1\n'
+    with monkeypatch.context() as patch:
+        patch.setattr(lowering,'mapping_prefix_selection',old_selection)
+        prepared,_,legacy,wire=construct(text,'legacy_prefix')
+    assert [row.start_line for row in legacy.module.prefix.statements]==[1]
+    assert all('compiler_elision' not in row for row in wire['module']['expansions'])
+    reread=SourceProgram.read_structure(wire,source_texts={str(prepared.path):text})
+    assert reread.module.remaining.subject.statements[0].start_line==2
+
+
 MODULE = """@first()
 @second
 class C(Base, other(), metaclass=Meta, flag=value):

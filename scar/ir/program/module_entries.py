@@ -480,6 +480,34 @@ class FrameStatementSlice:
 
 
 @dataclass(frozen=True, slots=True)
+class ModuleLiteralBoolIfElision:
+    """A source/compiler mapping receipt, never a runtime branch operation.
+
+    The containing overlay owns the source/compiler provenance.  Offsets may
+    be empty: CPython can remove even the condition's source-position NOP.
+    Both original source suites remain in the expansion's child_slices.
+    """
+    test: SourceReference
+    selected: StatementSequenceField
+    root_code_layout_key: str
+    test_instruction_offsets: tuple[int, ...]
+
+    def __post_init__(self):
+        _need(type(self.test) is SourceReference and self.test.end_column is not None,
+              'compiler-elided If needs its exact original test')
+        _need(self.selected in (StatementSequenceField.BODY, StatementSequenceField.ORELSE)
+              and type(self.selected) is StatementSequenceField,
+              'compiler-elided If selects its original body or orelse collection')
+        _need(type(self.root_code_layout_key) is str
+              and re.fullmatch(r'pycode-v2:[0-9a-f]{64}', self.root_code_layout_key) is not None,
+              'compiler-elided If needs its original root code layout key')
+        _need(type(self.test_instruction_offsets) is tuple
+              and all(type(offset) is int and offset >= 0 for offset in self.test_instruction_offsets)
+              and tuple(sorted(set(self.test_instruction_offsets))) == self.test_instruction_offsets,
+              'compiler-elided If needs distinct original ordered test offsets')
+
+
+@dataclass(frozen=True, slots=True)
 class FrameStatementExpansion:
     source: SourceReference
     region: RegionID
@@ -487,6 +515,7 @@ class FrameStatementExpansion:
     normal: BlockID | None
     operations: tuple[OperationID, ...]
     child_slices: tuple[FrameStatementSlice, ...] = ()
+    compiler_elision: ModuleLiteralBoolIfElision | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -796,7 +825,13 @@ MODULE_RECORD_TAGS[ClassConstructionFrameBodyOverlay] = ('frame_overlay_kind', '
 
 
 def encode_frame_body(value):
-    return encode(value, record_tags=MODULE_RECORD_TAGS)
+    document = encode(value, record_tags=MODULE_RECORD_TAGS)
+    # Keep historical statement records unchanged when no compiler-elision
+    # capability is claimed.  The generic record codec remains exact-field.
+    for row in document['expansions']:
+        if row['compiler_elision'] is None:
+            del row['compiler_elision']
+    return document
 
 
 def decode_frame_body(value):
@@ -804,4 +839,11 @@ def decode_frame_body(value):
            'COMPILER_OPS_MAPPING_314_V1':ExpandedCompilerFrameBodyOverlay,
            'CLASS_CONSTRUCTION_MAPPING_314_V1':ClassConstructionFrameBodyOverlay}
     kind=kinds.get(value.get('frame_overlay_kind'),StructuredFrameBodyOverlay) if type(value) is dict else StructuredFrameBodyOverlay
+    if type(value) is dict and type(value.get('expansions')) is list:
+        # This one additive, statement-local capability does not upgrade an
+        # old conservative prefix.  Validation still replays the old mapping
+        # rules if no statement carries a compiler-elision witness.
+        value={**value,'expansions':[
+            {**row,'compiler_elision':None} if type(row) is dict and 'compiler_elision' not in row else row
+            for row in value['expansions']]}
     return decode(kind, value, record_tags=MODULE_RECORD_TAGS)
