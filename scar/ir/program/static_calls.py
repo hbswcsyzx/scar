@@ -742,6 +742,24 @@ class ModuleFlowCondition(str, Enum):
     PATH_TAKEN = 'PATH_TAKEN'
     INTERVENING_EFFECTS_PRESERVE_BINDING = 'INTERVENING_EFFECTS_PRESERVE_BINDING'
     CONTEXT_REQUIREMENTS_SATISFIED = 'CONTEXT_REQUIREMENTS_SATISFIED'
+    SOURCE_IMPORT_INITIALIZER_USES_MODULE_DICT = 'SOURCE_IMPORT_INITIALIZER_USES_MODULE_DICT'
+
+
+# The import-initializer contract is an explicit extra premise, not a new
+# default assumption for field setters or historical namespace witnesses.
+MODULE_FLOW_BASE_CONDITIONS = (
+    ModuleFlowCondition.IMPORT_SELECTS_SOURCE_MODULE,
+    ModuleFlowCondition.IMPORT_NORMAL_RETURNS_MODULE_REFERENCE,
+    ModuleFlowCondition.MODULE_REFERENCE_USES_SOURCE_NAMESPACE,
+    ModuleFlowCondition.MODULE_INITIALIZED_FROM_SOURCE,
+    ModuleFlowCondition.MODULE_ATTRIBUTE_USES_NAMESPACE_BINDING,
+    ModuleFlowCondition.MODULE_ATTRIBUTE_STORE_COMMITS_INPUT,
+    ModuleFlowCondition.PATH_TAKEN,
+    ModuleFlowCondition.INTERVENING_EFFECTS_PRESERVE_BINDING,
+    ModuleFlowCondition.CONTEXT_REQUIREMENTS_SATISFIED,
+)
+MODULE_IMPORT_INITIALIZER_CONDITIONS = (*MODULE_FLOW_BASE_CONDITIONS,
+    ModuleFlowCondition.SOURCE_IMPORT_INITIALIZER_USES_MODULE_DICT)
 
 
 @dataclass(frozen=True, slots=True)
@@ -760,7 +778,7 @@ class StaticImportModuleRoute:
     globals_namespace: ValueID
     entry_world: ValueID
     requirements: tuple[StaticCallContext, ...] = ()
-    conditions: tuple[ModuleFlowCondition, ...] = tuple(ModuleFlowCondition)[:4]
+    conditions: tuple[ModuleFlowCondition, ...] = MODULE_FLOW_BASE_CONDITIONS[:4]
 
     def __post_init__(self):
         for value, kind in ((self.body, SourceBodyNamespace), (self.operation, OperationID),
@@ -773,7 +791,7 @@ class StaticImportModuleRoute:
                 or self.normal.operation != self.operation or self.module_body.source is not None):
             raise ValueError('module import route needs original import/source-module endpoints')
         StaticReferencePoint(self.body, self.result, self.requirements)
-        if self.conditions != tuple(ModuleFlowCondition)[:4]:
+        if self.conditions != MODULE_FLOW_BASE_CONDITIONS[:4]:
             raise ValueError('module import route cannot claim a loader or runtime identity proof')
 
 
@@ -826,7 +844,7 @@ class StaticModuleAttributeFlow:
     write_receiver_path: StaticReferenceSourcePath | None = None
     requirements: tuple[StaticCallContext, ...] = ()
     source_requirements: tuple[StaticCallContext, ...] = ()
-    conditions: tuple[ModuleFlowCondition, ...] = tuple(ModuleFlowCondition)
+    conditions: tuple[ModuleFlowCondition, ...] = MODULE_FLOW_BASE_CONDITIONS
     overwrites: tuple[StaticAttributeAccess, ...] = ()
     overwrite_receiver_paths: tuple[StaticReferenceSourcePath, ...] = ()
 
@@ -855,7 +873,9 @@ class StaticModuleAttributeFlow:
             if (self.source_key is not None or self.write.assigned != self.source_payload
                     or self.write.body != self.source_body or self.write.operation != self.source_operation):
                 raise ValueError('module attribute overwrite changed its original assigned endpoint')
-        if self.conditions != tuple(ModuleFlowCondition):
+        allowed = ((MODULE_FLOW_BASE_CONDITIONS, MODULE_IMPORT_INITIALIZER_CONDITIONS)
+                   if self.write is None else (MODULE_FLOW_BASE_CONDITIONS,))
+        if self.conditions not in allowed:
             raise ValueError('module attribute provenance cannot drop lookup/state/context conditions')
         _rows(self.overwrites,StaticAttributeAccess)
         _rows(self.overwrite_receiver_paths,StaticReferenceSourcePath)
@@ -920,7 +940,7 @@ class StaticModuleNamespaceAtCall:
     overwrites: tuple[StaticAttributeAccess, ...] = ()
     overwrite_receiver_paths: tuple[StaticReferenceSourcePath, ...] = ()
     source_requirements: tuple[StaticCallContext, ...] = ()
-    conditions: tuple[ModuleFlowCondition, ...] = tuple(ModuleFlowCondition)
+    conditions: tuple[ModuleFlowCondition, ...] = MODULE_FLOW_BASE_CONDITIONS
 
     def __post_init__(self):
         for value,kind in ((self.environment,StaticFunctionEnvironmentRoute),(self.state_entry,StaticStateEntryRoute),
@@ -965,7 +985,9 @@ class StaticModuleNamespaceAtCall:
             if (self.source_key is not None or self.write.body!=route.caller or self.write.field!=self.key
                     or self.write.operation!=self.source_operation or self.write.assigned!=self.source_payload):
                 raise ValueError('module CALL state changed its original field setter/payload')
-        if self.conditions!=tuple(ModuleFlowCondition):
+        allowed=((MODULE_FLOW_BASE_CONDITIONS,MODULE_IMPORT_INITIALIZER_CONDITIONS)
+                 if self.write is None else(MODULE_FLOW_BASE_CONDITIONS,))
+        if self.conditions not in allowed:
             raise ValueError('module namespace projection cannot drop lookup/state/effect conditions')
 
 
@@ -1039,7 +1061,7 @@ class StaticCallShard:
 
 def dumps(shard: StaticCallShard) -> str:
     _exact(shard, StaticCallShard)
-    return json.dumps({"schema": "scar.static-calls", "schema_version": 7,
+    return json.dumps({"schema": "scar.static-calls", "schema_version": 8,
                        "relations": encode(shard)}, sort_keys=True, separators=(",", ":"), allow_nan=False)
 
 
@@ -1047,9 +1069,20 @@ def loads(payload: str) -> StaticCallShard:
     document = strict_loads(payload)
     if (type(document) is not dict or set(document) != {"schema", "schema_version", "relations"}
             or document["schema"] != "scar.static-calls" or type(document["schema_version"]) is not int
-            or document["schema_version"] not in (1, 2, 3, 4, 5, 6, 7)):
+            or document["schema_version"] not in (1, 2, 3, 4, 5, 6, 7, 8)):
         raise ValueError("unsupported static call relation shard")
     relations = document["relations"]
+    if document['schema_version']<8:
+        def reject_new_initializer_contract(value):
+            if type(value)is dict:
+                conditions=value.get('conditions')
+                if (type(conditions)is list and
+                        ModuleFlowCondition.SOURCE_IMPORT_INITIALIZER_USES_MODULE_DICT.value in conditions):
+                    raise ValueError('historical wire cannot carry the v8 source import initializer contract')
+                for item in value.values():reject_new_initializer_contract(item)
+            elif type(value)is list:
+                for item in value:reject_new_initializer_contract(item)
+        reject_new_initializer_contract(relations)
     if document['schema_version']<7:
         relations=copy.deepcopy(relations)
         old_path_fields={'points','namespace_flows','cross_body_namespace_flows',

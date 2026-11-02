@@ -679,6 +679,9 @@ def main(argv=None):
     parser.add_argument("--max-call-bodies", type=int, help="limit call-linking body reads, retaining the uncovered frontier")
     parser.add_argument("--link-classes", action="store_true", help="connect original class builder/provider/suite ports without rebuilding bodies")
     parser.add_argument("--max-class-bodies", type=int, help="bound class-link body reads while retaining the full source-class denominator")
+    parser.add_argument("--max-link-input-bytes", type=int, help="stored plus decoded input budget for --link-calls/--link-classes")
+    parser.add_argument("--max-link-cache-bytes", type=int, help="bounded decoded input cache for --link-calls/--link-classes")
+    parser.add_argument("--max-link-seconds", type=int, help="analysis deadline for --link-calls/--link-classes, before retained-fact publication")
     parser.add_argument("--inventory-dependencies", action="store_true",
                         help="locate versioned import materials without importing or analyzing their implementations")
     parser.add_argument("--expand-dependencies", action="store_true",
@@ -702,6 +705,11 @@ def main(argv=None):
         parser.error("--link-classes is an independent refinement of the current model")
     if args.max_class_bodies is not None and not args.link_classes:
         parser.error("--max-class-bodies requires --link-classes")
+    link_limits = {name: getattr(args, argument) for argument, name in (
+        ('max_link_input_bytes', 'max_input_bytes'), ('max_link_cache_bytes', 'max_cached_bytes'),
+        ('max_link_seconds', 'max_seconds')) if getattr(args, argument) is not None}
+    if link_limits and not (args.link_calls or args.link_classes):
+        parser.error("link resource limits require --link-calls or --link-classes")
     if args.inventory_dependencies and (args.expand or args.refine or args.link_calls or args.link_classes or args.expand_dependencies or args.phase != "graph"):
         parser.error("--inventory-dependencies is an independent refinement of the current model")
     if args.expand_dependencies and (args.expand or args.refine or args.link_calls or args.link_classes or args.phase != "graph"):
@@ -727,7 +735,7 @@ def main(argv=None):
         existing = read_static_program(args.out, verify=False)
         if Path(existing["project_root"]).resolve() != Path(args.source).resolve():
             raise ValueError("class linking source root differs from the current model")
-        budget = None if args.max_class_bodies is None else StaticCallBudget(max_bodies=args.max_class_bodies)
+        budget = StaticCallBudget(**link_limits, **({} if args.max_class_bodies is None else {'max_bodies': args.max_class_bodies}))
         result = link_static_class_program(args.out, budget=budget)
     elif args.expand_dependencies:
         from scar.analysis.static_dependency_publication import expand_static_dependency_program
@@ -749,7 +757,7 @@ def main(argv=None):
         existing = read_static_program(args.out, verify=False)
         if Path(existing["project_root"]).resolve() != Path(args.source).resolve():
             raise ValueError("call linking source root differs from the current model")
-        budget = None if args.max_call_bodies is None else StaticCallBudget(max_bodies=args.max_call_bodies)
+        budget = StaticCallBudget(**link_limits, **({} if args.max_call_bodies is None else {'max_bodies': args.max_call_bodies}))
         result = link_static_program(args.out, budget=budget)
     elif args.expand:
         from scar.analysis.static_body import expand_static_bodies

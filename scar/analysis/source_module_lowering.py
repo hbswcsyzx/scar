@@ -434,13 +434,50 @@ def mapping_name_opcode(code,node,name,*,writing=False):
     return next(iter(matches))
 
 
+def _mapping_source_instructions(context, evidence, *, profile=None):
+    """Keep source instructions separate from the witnessed compiler prelude.
+
+    Compiler-generated annotation setup can carry the first statement's exact
+    source positions. Only a profile which models that prelude may exclude its
+    independently classified instruction prefix; positions alone cannot do so.
+    """
+    import dis
+    from scar.ir.program.module_entries import FrameBodyProfile
+    instructions=tuple(dis.get_instructions(evidence.code,adaptive=False,show_caches=False))
+    if profile in (FrameBodyProfile.STRUCTURED_MAPPING_COMPILER_314_V1,
+            FrameBodyProfile.STRUCTURED_MAPPING_COMPILER_OPS_314_V1,
+            FrameBodyProfile.STRUCTURED_MAPPING_CLASS_314_V1):
+        from scar.analysis.source_module_compiler_lowering import compiler_prelude_plan
+        plan=compiler_prelude_plan(evidence.code,context.tree)
+        return tuple(row for row in instructions if row.offset>=plan.first_source_offset)
+    return instructions
+
+
+def mapping_global_declaration(context, evidence, node):
+    """A source-owned root scope declaration, with no runtime operation."""
+    if not isinstance(node,ast.Global) or not node.names:
+        return False
+    pending=list(context.tree.body);owned=False
+    while pending:
+        current=pending.pop()
+        if current is node:
+            owned=True;break
+        if not isinstance(current,(ast.FunctionDef,ast.AsyncFunctionDef,ast.ClassDef,ast.Lambda)):
+            pending.extend(ast.iter_child_nodes(current))
+    if not owned:
+        return False
+    require_root_evidence(module_unit(context),evidence,allow_compiler_locals=True)
+    import symtable
+    table=symtable.symtable(context.text,str(context.path),'exec')
+    return all(table.lookup(name).is_declared_global() for name in node.names)
+
+
 def mapping_prefix_selection(context, evidence, *, profile=None):
     """Maximal contiguous supported statements; no workload/name allowlist."""
     unit=module_unit(context)
     from scar.ir.program.module_entries import FrameBodyProfile
     require_root_evidence(unit,evidence,allow_compiler_locals=profile in (FrameBodyProfile.STRUCTURED_MAPPING_COMPILER_314_V1,FrameBodyProfile.STRUCTURED_MAPPING_COMPILER_OPS_314_V1,FrameBodyProfile.STRUCTURED_MAPPING_CLASS_314_V1))
-    import dis
-    instructions=tuple(dis.get_instructions(evidence.code,adaptive=False,show_caches=False))
+    instructions=_mapping_source_instructions(context,evidence,profile=profile)
     def positioned(node,opnames):
         span=(node.lineno,node.end_lineno,node.col_offset,node.end_col_offset)
         return [row for row in instructions if row.opname in opnames and tuple(row.positions)==span]
@@ -517,6 +554,7 @@ def mapping_prefix_selection(context, evidence, *, profile=None):
                 and all(not isinstance(child,ast.Try) and statement(child) for child in node.body)
                 and (node.handlers[0].type is None or expression(node.handlers[0].type))
                 and all(not isinstance(child,ast.Try) and statement(child) for child in node.handlers[0].body))
+        if isinstance(node,ast.Global):return mapping_global_declaration(context,evidence,node)
         return isinstance(node,ast.Pass)
     end=0
     for node in context.tree.body:
@@ -577,9 +615,12 @@ class StructuredModuleBuilder(ModuleBuilder):
         from scar.ir.program.ids import ControlScopeID
         self.language_options=SourceLanguageOptions((SourceLanguageCapability.SLICE_KEYS,),evidence)
         self.instructions=None;self.address_refinements=[];self.statement_expansions=[]
+        source_profile=(FrameBodyProfile.STRUCTURED_MAPPING_COMPILER_314_V1
+            if getattr(self,'supports_compiler_prologue',False) else None)
+        self.language_instructions=_mapping_source_instructions(context,evidence,profile=source_profile)
         self.root_scope=ControlScopeID(_key('module-frame-scope',self.unit.initializer.wire,self.unit.snapshot.fingerprint))
         self.frame_region=RegionID(_key('module-structured-frame',self.unit.initializer.wire,self.unit.snapshot.fingerprint))
-        self.prefix_nodes,self.remaining_nodes=mapping_prefix_selection(context,evidence,profile=(FrameBodyProfile.STRUCTURED_MAPPING_COMPILER_314_V1 if getattr(self,'supports_compiler_prologue',False) else None))
+        self.prefix_nodes,self.remaining_nodes=mapping_prefix_selection(context,evidence,profile=source_profile)
         from scar.ir.program.module_entries import FrameBodyProfile,FrameCompletionProfile
         self.frame_body_profile=FrameBodyProfile.STRUCTURED_MAPPING_314_V1
         self.frame_completion_profile=FrameCompletionProfile.RAW_EXCEPTION_REF_314_V1
@@ -765,6 +806,9 @@ class StructuredModuleBuilder(ModuleBuilder):
             if cursor is None:raise _Unsupported(GapKind.CONTROL_FLOW,node,'mapping prefix lost its normal continuation')
             start=len(self.operations);entry=cursor.block
             if isinstance(node,(ast.Import,ast.ImportFrom)):cursor=self.import_statement(node,cursor)
+            elif isinstance(node,ast.Global):
+                if not mapping_global_declaration(self.prepared_source,self.evidence,node):
+                    raise _Unsupported(GapKind.CODE_VERSION,node,'MODULE_GLOBAL_DECLARATION_UNVERIFIED')
             else:cursor=super().statements((node,),cursor)
             children=tuple(frame_statement_slice(self.prepared_source,self.source(node),field,getattr(node,name))
                 for name,field in (('body',F.BODY),('orelse',F.ORELSE)) if isinstance(node,ast.For) and getattr(node,name))

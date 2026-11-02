@@ -85,7 +85,7 @@ raise RuntimeError("this application must never execute")
             assert result.returncode==0,result.stdout+result.stderr
             if args==('--phase','bodies'):_check_read_frontier_recomputation(root,model,app)
         manifest=json.loads((model/'manifest.json').read_text());publication=manifest['static_calls']
-        assert publication['schema_version']==7
+        assert publication['schema_version']==8
         assert publication['complete'],publication['frontiers']
         names={d['wire']:b['name']for u in manifest['units']for b in u['bodies']for d in b.get('definitions',())}
         shards=[];wires=[]
@@ -134,6 +134,8 @@ raise RuntimeError("this application must never execute")
         def remove_v7(value):
             if type(value)is dict:
                 value.pop('module_globals_flows',None)
+                if type(value.get('conditions'))is list:
+                    value['conditions']=[c for c in value['conditions']if c!='SOURCE_IMPORT_INITIALIZER_USES_MODULE_DICT']
                 for child in value.values():remove_v7(child)
             elif type(value)is list:
                 for child in value:remove_v7(child)

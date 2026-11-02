@@ -16,7 +16,8 @@ from scar.ir.program.model import (BlockArgument, CompletionResult, ExitKind, Li
 from scar.ir.program.source import LoweringMetadata
 from scar.ir.program.static_calls import (StaticCallFrontier, StaticImportModuleRoute,
     StaticModuleAttributeFlow, StaticQualifiedNamespaceFlow, StaticReferencePoint,
-    StaticReferenceSourcePath)
+    StaticReferenceSourcePath,StaticModuleGlobalsFlow,ModuleFlowCondition,
+    MODULE_FLOW_BASE_CONDITIONS,MODULE_IMPORT_INITIALIZER_CONDITIONS)
 from scar.ir.program.structured import ControlEdgeReference
 from scar.analysis.static_namespace import normal_reference, protocol_kinds
 
@@ -78,6 +79,42 @@ def _merge_path(path, point, *, namespace_flows=(), cross_body_namespace_flows=(
     return replace(path,points=(*path.points,point),**changes)
 
 
+def _import_initializer_bindings(dependencies,route,key,operation,world,*,contract):
+    """Project one standard-import initializer under its explicit premise.
+
+    The raw source-compiled exec frame retains independent L/G ports. Only
+    this import interpretation supplies an exact conditional owner domain;
+    STORE_NAME and STORE_GLOBAL then replace each other in original CFG order.
+    Historical witnesses retain their original L-only interpretation.
+    """
+    _need(type(contract)is bool,'initializer namespace contract must be explicit')
+    owner=route.globals_namespace if contract else route.locals_namespace
+    domain=tuple(dict.fromkeys((route.locals_namespace,route.globals_namespace)))if contract else()
+    return dependencies.bindings_at(owner,key,operation,world,equivalent_owners=domain)
+
+
+def _uses_import_initializer_contract(flow):
+    """Read only saved conditions, including this witness's support paths."""
+    pending=[flow];seen=set()
+    while pending:
+        item=pending.pop()
+        if id(item)in seen:continue
+        seen.add(id(item))
+        if type(item)is StaticModuleGlobalsFlow:
+            item=item.projection
+        if ModuleFlowCondition.SOURCE_IMPORT_INITIALIZER_USES_MODULE_DICT in item.conditions:return True
+        paths=[]
+        if type(item)is StaticModuleAttributeFlow:
+            paths.append(item.receiver_path)
+        else:
+            paths.append(item.callable_source)
+            paths.extend(step.callable_source for step in item.owner_routes)
+        if item.write_receiver_path is not None:paths.append(item.write_receiver_path)
+        paths.extend(item.overwrite_receiver_paths)
+        for path in paths:pending.extend((*path.module_attribute_flows,*path.module_globals_flows))
+    return False
+
+
 class ModuleAttributeDependencies:
     """Per-analysis bounded original-body indexes and derived value relations.
 
@@ -87,12 +124,15 @@ class ModuleAttributeDependencies:
     """
     def __init__(self, *, load_body, source_context, module_bodies, namespace_for,
                  reference_sources=None, max_steps=4096, max_facts=262144, check=None,
-                 external_fact_count=None, max_cached_bytes=64_000_000):
+                 external_fact_count=None, max_cached_bytes=64_000_000,
+                 import_initialization_contract=True):
         self.load_body,self.source_context,self.module_bodies=load_body,source_context,module_bodies
         self.namespace_for,self.reference_sources=namespace_for,reference_sources
         self.max_steps,self.max_facts=max_steps,max_facts;self.check=check or(lambda:None)
         self.external_fact_count=external_fact_count or(lambda:0)
         self.max_cached_bytes=max_cached_bytes;self._fact_count=0
+        _need(type(import_initialization_contract)is bool,'import initializer mode must be explicit')
+        self.import_initialization_contract=import_initialization_contract
         self._facts=OrderedDict();self._active=set()
         self.import_routes=defaultdict(dict);self.flows=defaultdict(dict);self.frontiers=defaultdict(dict)
         self.attribute_counts={};self.analyzed_reads=set()
@@ -296,10 +336,12 @@ class ModuleAttributeDependencies:
             if matches and len(matches)==len(found):rows.extend((write,p)for r,p in matches)
         return tuple(rows)
 
-    def sources(self,body,value,requirements=(),requester=None):
+    def sources(self,body,value,requirements=(),requester=None,*,initializer_contract=None):
         point=StaticReferencePoint(body.namespace,value,requirements)
         facts=self._index(body);read=facts.reads.get(value)
         if read is None:return ()
+        contract=self.import_initialization_contract if initializer_contract is None else initializer_contract
+        _need(type(contract)is bool,'initializer namespace contract must be explicit')
         if point in self._active:
             self._note(body,'RECURSIVE_MODULE_VALUE_SOURCE_OPEN',
                 'A source-property cycle cannot establish its own import/module reference.',read.source,demand=point)
@@ -352,13 +394,14 @@ class ModuleAttributeDependencies:
                     worlds=[u for u in terminal.uses if type(module.index.values[u.value])is StateVersionValue]
                     if len(worlds)!=1:continue
                     world=worlds[0]
-                    for binding in dependencies.bindings_at(route.locals_namespace,read.field,terminal.id,world.id):
+                    for binding in _import_initializer_bindings(dependencies,route,read.field,terminal.id,world.id,contract=contract):
                         dependencies.validate_binding(binding);write=binding.write
                         payload=module.index.use_site(write.payload).use.value
                         flow=StaticModuleAttributeFlow(read,route,receiver_path,module.namespace,write.operation,
                             write.owners[0],write.payload,write.world,write.normal_edge,payload,write.keys[0],
                             terminal.id,world.id,binding.path,binding.intervening_operations,*path,
-                            requirements=requirements,source_requirements=())
+                            requirements=requirements,source_requirements=(),conditions=(MODULE_IMPORT_INITIALIZER_CONDITIONS
+                                if contract else MODULE_FLOW_BASE_CONDITIONS))
                         flow=replace(flow,overwrites=tuple(w for w,p in writes),
                             overwrite_receiver_paths=tuple(p for w,p in writes))
                         self._admit(self.flows[body.namespace],flow);outputs.append(flow)
@@ -488,9 +531,11 @@ def validate_module_attribute_flow(flow, *, engine, check_support, check_context
                         crossflows=cross,argflows=args,returnflows=returns,globalsflows=globalsflows)
     fresh=ModuleAttributeDependencies(load_body=engine.load_body,source_context=engine.source_context,
         module_bodies=engine.module_bodies,namespace_for=engine.namespace_for,reference_sources=sources,
-        max_steps=engine.max_steps,max_facts=engine.max_facts,check=engine.check)
+        max_steps=engine.max_steps,max_facts=engine.max_facts,check=engine.check,
+        import_initialization_contract=_uses_import_initializer_contract(flow))
     validate_import_module_route(flow.module,engine=fresh,check_context=check_context)
     body=fresh._body(flow.read.body)
-    _need(flow in fresh.sources(body,flow.read.result,flow.requirements),
+    _need(flow in fresh.sources(body,flow.read.result,flow.requirements,initializer_contract=
+        ModuleFlowCondition.SOURCE_IMPORT_INITIALIZER_USES_MODULE_DICT in flow.conditions),
           'attribute source/receiver/field/world/control/overwrite provenance differs from original inputs')
     return True

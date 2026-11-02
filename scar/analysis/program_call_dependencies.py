@@ -385,7 +385,7 @@ class StaticCallDependencyProvider:
             target=point(flow.read.body,flow.read.result,self._context(flow.requirements))
             if query not in (source,target):continue
             guards=enums(flow.conditions)
-            if flow.write is None:
+            if flow.write is None and not any(c.name=='SOURCE_IMPORT_INITIALIZER_USES_MODULE_DICT'for c in guards):
                 owner=self.session.load_body(flow.source_body).index.use_site(flow.source_owner).use.value
                 if owner==flow.module.locals_namespace and owner!=flow.module.globals_namespace:
                     guards+=(Condition('scar.module-namespace','MODULE_LOCALS_ALIASES_GLOBALS'),)
@@ -441,9 +441,9 @@ class StaticCallDependencyProvider:
         anchors=[Point(self._namespace(route.caller),route.call_world,caller_context)]
         guards=tuple(Condition.from_enum(c)for c in projection.conditions)
         guards+=tuple(dict.fromkeys(Condition.from_enum(c)for segment in flow.segments for c in segment.conditions))
-        # v7's existing initializer witness does not prove module L == G.
-        # Preserve a pending predicate rather than silently granting identity.
-        if projection.write is None:
+        # Legacy witnesses do not carry v8's explicit import-interpretation
+        # premise. Preserve their pending alias rather than upgrading them.
+        if projection.write is None and not any(c.name=='SOURCE_IMPORT_INITIALIZER_USES_MODULE_DICT'for c in guards):
             owner=self.session.load_body(projection.source_body).index.use_site(projection.source_owner).use.value
             if owner==projection.module.locals_namespace and owner!=projection.module.globals_namespace:
                 guards+=(Condition('scar.module-namespace','MODULE_LOCALS_ALIASES_GLOBALS'),)

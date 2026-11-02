@@ -74,6 +74,45 @@ def test_parent_class_ports_roundtrip_without_running_and_reject_substitutions(t
         source_texts={str(annotation_path): annotation_source}).graph == annotation_module.graph
     assert not annotation_path.exists()
 
+    # In 3.14 generated annotation setup shares the first import's source
+    # position. Its already modeled compiler prefix must run before the real
+    # import, without making that import or the subsequent definitions residual.
+    for first_import in ('import never_execute_target',
+                         'from never_execute_target import exported',
+                         'from __future__ import annotations'):
+        first_import_source = (first_import + '\nclass C: pass\n'
+                               'def f(): return 1\ncache: int = 1\n')
+        first_import_path = tmp_path / 'first_import_application.py'
+        first_import_prepared = prepare_source_text(first_import_path, first_import_source,
+            project_root=tmp_path, root_is_package=False)
+        first_import_unit = module_unit(first_import_prepared)
+        first_import_evidence = compile_source_unit(first_import_prepared).for_module(first_import_unit)
+        first_import_module = lower_module_entry(first_import_prepared, first_import_unit,
+            code_evidence=first_import_evidence, profile=FrameBodyProfile.STRUCTURED_MAPPING_CLASS_314_V1)
+        assert first_import_module.module.compiler_prologue is not None
+        assert [row.source.start_line for row in first_import_module.module.expansions] == [1, 2, 3]
+        assert first_import_module.module.remaining.subject.statements[0].start_line == 4
+        assert SourceProgram.read_structure(first_import_module.to_dict(),
+            source_texts={str(first_import_path): first_import_source}).graph == first_import_module.graph
+        assert not first_import_path.exists()
+
+    global_source = 'global value\nvalue = 1\nvalue = 11\ndef read(): return value\n'
+    global_path = tmp_path / 'global_application.py'
+    global_prepared = prepare_source_text(global_path, global_source,
+        project_root=tmp_path, root_is_package=False)
+    global_unit = module_unit(global_prepared)
+    global_evidence = compile_source_unit(global_prepared).for_module(global_unit)
+    global_module = lower_module_entry(global_prepared, global_unit, code_evidence=global_evidence,
+        profile=FrameBodyProfile.STRUCTURED_MAPPING_CLASS_314_V1)
+    assert global_module.module.remaining is None
+    declaration = next(row for row in global_module.module.expansions if row.source.start_line == 1)
+    assert declaration.operations == () and declaration.entry == declaration.normal
+    stores = [row for row in global_module.module.protocols if row.kind.value == 'STORE_GLOBAL']
+    assert {row.source.start_line for row in stores} == {2, 3}
+    assert SourceProgram.read_structure(global_module.to_dict(),
+        source_texts={str(global_path): global_source}).graph == global_module.graph
+    assert not global_path.exists()
+
     function_path = tmp_path / 'function_application.py'
     parent = prepare_source_text(function_path, FUNCTION, project_root=tmp_path, root_is_package=False)
     fingerprint = parent.semantics.sources[str(function_path)].fingerprint

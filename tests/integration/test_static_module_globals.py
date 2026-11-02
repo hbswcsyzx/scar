@@ -131,7 +131,7 @@ raise RuntimeError("SCAR must never execute this application")
     monkeypatch.setattr(StaticCallSession,'_recount_relations',recount)
     link_static_program(model)
     manifest=json.loads((model/'manifest.json').read_text());publication=manifest['static_calls']
-    assert publication['schema_version']==7
+    assert publication['schema_version']==8
     assert publication['complete'],publication['frontiers']
     names={d['wire']:b['name']for u in manifest['units']for b in u['bodies']for d in b.get('definitions',())}
     shards=[];wires=[]
@@ -193,6 +193,8 @@ raise RuntimeError("SCAR must never execute this application")
     def strip_v7(value):
         if isinstance(value,dict):
             value.pop('module_globals_flows',None)
+            if isinstance(value.get('conditions'),list):
+                value['conditions']=[c for c in value['conditions']if c!='SOURCE_IMPORT_INITIALIZER_USES_MODULE_DICT']
             for child in value.values():strip_v7(child)
         elif isinstance(value,list):
             for child in value:strip_v7(child)

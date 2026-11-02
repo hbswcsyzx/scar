@@ -30,13 +30,14 @@
 | CFG 节点 / 边 | 478,899 / 569,425 |
 | 有限常量事实 | 124,535 |
 | 有规范图的入口 | 8,089，原有主体未因材料扩展重建 |
+| 所有主体产物 / 无产物声明 | 8,819 / 27,345；产物含 326 unsupported 与 404 shape 拒绝 |
 | 规范操作 | 1,262,346 |
 | lowerer / shape 不支持 | 326 / 404 |
 | 缺独立适配 / 新单位未派工入口 | 3,731 / 23,614 |
 | 当前调用索引 / class 接线索引 | calls 未发布；class 已发布 1,065 bindings、400 parent shards、15 共享 provider |
 | 压缩分片 | 14,927 个，2,409,074,599 bytes |
 
-清单已去掉重复诊断数组：逐份核对 8,415 个 body artifact 后，改为原分片内 count/pointer 引用。
+清单已去掉重复诊断数组：逐份核对 8,415 个带诊断的 body artifact 后，改为原分片内 count/pointer 引用。
 当时 manifest 从 153,148,270 降到 35,455,247 bytes（减少 76.85%）；原图/源码分片字节与原 ID
 未改，原声明指针和证明输入投影不变。处理 28.017 秒、8 个有界 worker；这只是分析器
 存储整理，不是目标程序加速。旧 inline 格式仍可读回；未有可核对原分片的诊断不删除。随后新增 class 索引元数据，当前清单为 36,669,534 bytes。
@@ -48,6 +49,31 @@
 扩展后有 42,074 条 import 关系、9,843 个模块查询。本轮材料刷新只处理 4,096 个，5,747 个是明确预算未处理；不能当作不存在。当前仍有 725 份外部源码和 135 份 stub 候选待处理，依赖闭包未完成。材料盘点的 external_source_analyzed=false 描述盘点步骤本身；前端已分析的新增单位另见 dependency_expansion。
 
 当前保留 37 条早期 BrokenProcessPool 的 unit/body-worker 记录；对应样本主体后来已有规范图。这是遗留问题记录，不是本轮 280 份源码新增失败。其终态归属仍需统一，不以 summary 的旧零计数掩盖。
+
+## 新一轮实现：初始化状态与模块源码展开
+
+- **Implemented / Verified（通用静态案例）**：v8 显式 import 初始化条件与精确 `{L,G}`
+  owner 域，联合选择 writer/kill，并在原输入上 fresh replay。源码 G 写、L 写的双向覆盖、
+  任意 exec 独立 owner、篡改拒绝和 v7 不获升级都已核查。真实小源码保存 A 函数后替换
+  module 字段为 B 函数，共同图及同一值队列分别推导 11/22；其条件与其它未闭合项保留。
+- **Implemented / Verified（原源码静态重建）**：修 compiler prelude 与首 import 共用 span
+  导致的错误阻断，并补 module Global 的编译期零操作展开。`envs/utils.py` 从 0 条推进至
+  7 条 import（164 ops），`callbacks/registry.py` 从 0 条推进至 5 条 import 和 Lock 调用
+  （224 ops）；独立结构读回通过。剩余分别为第 11/9 行 AnnAssign，未隐藏或算作已展开。
+  此为新鲜重建验证，尚未替换 current 的原主体，原 107/45 suffix 分母不改写。
+- **Implemented / Verified（调用派工）**：没有 body artifact 的单位先核原 lexical receipt，
+  保留原声明、范围、候选和按需 source context；无 MODULE canonical 时不提前解完整上下文。
+  单条静态检查同时验证 census、后续按需定义/签名可用和目标未执行。新增 session cache
+  hit/reread 字节统计；function-environment typed 输入在同一只读会话内有界共享，不缓存跨输入 PASS。
+- **Observed（实际输入）**：当前 8,819 份主体产物、581 个有产物单位；另 264 个完整 source-only
+  Python 单位与 17 个 stub。按新版 reader 的 stored+decoded 计费，单次冷 seed 下界
+  **19,471,402,455 bytes**，尚不含按需材料及缓存重读。原默认 8 GB 必然不足，不能再把
+  预算未处理写成源码未知；CLI 已提供 `--max-link-input-bytes/cache-bytes/seconds`。
+- **Verified（相关合并检查）**：source-only seeding、初始化状态与 compiler/class 构造三项
+  合并通过，16.03 秒。没有重跑原长 G 综合；只同步其 v8/旧 fixture 兼容约束。
+
+下一项按完整 862 units / 8,819 artifacts 发布 v8 calls；使用明确输入/缓存/时间预算，
+单任务进度和终态独立保存。代码与 current 在该任务期间冻结，不用首 N 个范围代替完整分母。
 
 ## 本轮代码和实际核验
 

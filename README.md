@@ -86,4 +86,17 @@ scalar/type/来源字段；重复 `--boundary-operation program_operation:...` �
 
 调用链接将当前任务进度及成功/失败终态保存到模型旁的 `artifacts/current/static-link-task.json`，与程序图分开。`scar.analysis.static_jobs.read_static_link_task` 会核对 PID 的启动身份；进程消失且没有终态时明确报告 `STOPPED_WITHOUT_TERMINAL_RECORD`，不当作仍在运行或已经发布。`PUBLISHED` 还须区分关系枚举完成与整程序模型完成。
 
+调用/类链接共享 `--max-link-input-bytes`、`--max-link-cache-bytes`、`--max-link-seconds`。
+输入预算累计 stored 与 decoded；当前模型单次冷 call seed 下界约 19.47 GB，默认 8 GB
+只适合有界分析，不足以完整枚举。全范围运行可显式给足预算（缓存仍单独有界）：
+
+```bash
+python -m scar.cli static ../le-wm --link-calls --max-call-bodies 10000 \
+  --max-link-input-bytes 137438953472 --max-link-cache-bytes 8589934592 \
+  --max-link-seconds 7200
+```
+
+预算不是耗时或完整性承诺；原范围、实际处理、未闭合项与终态均须读回核对。
+v8 初始化条件、源码展开修复和当前产物尚存的欠账见 [STATUS](docs/STATUS.md)。
+
 `--link-classes` 独立发布当前原图的 parent/provider/suite 接线，不执行 builder 或用户代码。类链接任务记录为 `artifacts/current/static-class-link-task.json`。主体变更使旧调用和 class 接线失效；单纯调用重链接保留不受影响的 class 索引。

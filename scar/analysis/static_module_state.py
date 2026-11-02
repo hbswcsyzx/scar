@@ -15,8 +15,10 @@ from scar.ir.program.static_calls import (
     NamespacePathStart, StaticCallContext, StaticCallFrontier,
     StaticFunctionOwnerRoute, StaticModuleGlobalsFlow, StaticModuleNamespaceAtCall,
     StaticNamespacePathSegment, StaticReferencePoint,
+    ModuleFlowCondition,MODULE_FLOW_BASE_CONDITIONS,MODULE_IMPORT_INITIALIZER_CONDITIONS,
 )
-from scar.analysis.static_module_attributes import _need, validate_reference_source_path
+from scar.analysis.static_module_attributes import (_need,validate_reference_source_path,
+    _import_initializer_bindings,_uses_import_initializer_contract)
 
 
 def _context(route):
@@ -46,11 +48,13 @@ class ModuleGlobalsDependencies:
     a repeated factory never supplies its own provenance.
     """
     def __init__(self,*,modules,incoming=None,max_depth=64,max_facts=262144,
-                 external_fact_count=None,check=None):
+                 external_fact_count=None,check=None,initializer_contract=None):
         self.modules=modules;self.incoming=incoming or(lambda point:())
         self.max_depth=max_depth;self.max_facts=max_facts
         self.external_fact_count=external_fact_count or(lambda:0)
         self.check=check or(lambda:None)
+        _need(initializer_contract is None or type(initializer_contract)is bool,'initializer contract must be explicit or inherited')
+        self.initializer_contract=initializer_contract
         self.flows=defaultdict(dict);self.frontiers=defaultdict(dict)
         self._demands={};self._active=set();self._stack=[]
         self._flow_counts={};self._fact_count=0;self.revision=0
@@ -187,7 +191,9 @@ class ModuleGlobalsDependencies:
                                 or mf.paths.owners[terminal.id][0]!=module.graph.root):continue
                         worlds=[u for u in terminal.uses if type(module.index.values[u.value])is StateVersionValue]
                         if len(worlds)!=1:continue
-                        for binding in dependencies.bindings_at(module_route.locals_namespace,key,terminal.id,worlds[0].id):
+                        contract=(self.modules.import_initialization_contract if self.initializer_contract is None
+                            else self.initializer_contract)
+                        for binding in _import_initializer_bindings(dependencies,module_route,key,terminal.id,worlds[0].id,contract=contract):
                             dependencies.validate_binding(binding);write=binding.write
                             yield StaticModuleNamespaceAtCall(**common,source_body=module.namespace,
                                 source_operation=write.operation,source_owner=write.owners[0],source_payload=write.payload,
@@ -195,7 +201,8 @@ class ModuleGlobalsDependencies:
                                 source_value=module.index.use_site(write.payload).use.value,source_key=write.keys[0],
                                 snapshot_operation=terminal.id,snapshot_world=worlds[0].id,
                                 source_path=binding.path,source_operations=binding.intervening_operations,
-                                consumer_path=path[0],consumer_operations=path[1])
+                                consumer_path=path[0],consumer_operations=path[1],conditions=(
+                                    MODULE_IMPORT_INITIALIZER_CONDITIONS if contract else MODULE_FLOW_BASE_CONDITIONS))
 
     def sources(self,activation,*,read_body,read,slot,entry_paths,bridges=(),requester=None):
         route=activation.environment
@@ -313,7 +320,8 @@ def validate_module_globals_flow(flow,*,engine,check_support,check_context=None)
     from scar.analysis.static_module_attributes import ModuleAttributeDependencies,validate_import_module_route
     fresh_modules=ModuleAttributeDependencies(load_body=modules.load_body,source_context=modules.source_context,
         module_bodies=modules.module_bodies,namespace_for=modules.namespace_for,reference_sources=reference_sources,
-        max_steps=modules.max_steps,max_facts=modules.max_facts,check=modules.check)
+        max_steps=modules.max_steps,max_facts=modules.max_facts,check=modules.check,
+        import_initialization_contract=_uses_import_initializer_contract(flow))
     validate_import_module_route(projection.module,engine=fresh_modules,check_context=check_context)
     def incoming(point):
         for step in projection.owner_routes:
@@ -321,7 +329,8 @@ def validate_module_globals_flow(flow,*,engine,check_support,check_context=None)
             if r.callee==point.body and r.member.reference==point.value:
                 yield SimpleNamespace(environment=r,requirements=requirements,context=_context(r))
     fresh=ModuleGlobalsDependencies(modules=fresh_modules,incoming=incoming,
-        max_depth=engine.max_depth,max_facts=engine.max_facts,check=engine.check)
+        max_depth=engine.max_depth,max_facts=engine.max_facts,check=engine.check,
+        initializer_contract=ModuleFlowCondition.SOURCE_IMPORT_INITIALIZER_USES_MODULE_DICT in projection.conditions)
     activation=SimpleNamespace(environment=route,state_entry=projection.state_entry,
         context=_context(route),requirements=projection.callable_source.points[0].requirements)
     _need(projection in fresh.projections(activation,projection.key),

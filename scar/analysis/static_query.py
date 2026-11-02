@@ -911,6 +911,7 @@ def _call_relations(manifest, unit, entries, fragments, limit, *, body_loader=No
                      "v5_value_flows_checked": document["schema_version"] >= 5,
                      "v6_module_provenance_checked": document['schema_version']>=6,
                      "v7_module_globals_state_checked": document['schema_version']>=7,
+                     "v8_initializer_namespace_contract_checked": document['schema_version']>=8,
                      "module_globals_flows": (_page(encode(shard.module_globals_flows),limit)
                          if document['schema_version']>=7 else None),
                      "import_routes": (_page(encode(shard.import_routes),limit) if document['schema_version']>=6 else None),

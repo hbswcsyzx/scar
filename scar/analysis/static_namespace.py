@@ -58,12 +58,17 @@ class NamespaceBindingWitness:
     path: tuple[ControlEdgeReference, ...]
     intervening_operations: tuple[OperationID, ...]
     conditions: tuple[C, ...]
+    equivalent_owners: tuple[ValueID, ...] = ()
 
     def __post_init__(self):
         if type(self.write) is not NamespaceAccess or type(self.owner_relation) is not NamespaceOwnerRelation:
             raise ValueError('namespace binding needs its original access and explicit owner relation')
         _witness_types(self.query_owner, self.query_operation, self.query_world, self.key,
                        self.path, self.intervening_operations, self.conditions)
+        if (type(self.equivalent_owners)is not tuple or any(type(v)is not ValueID for v in self.equivalent_owners)
+                or len(set(self.equivalent_owners))!=len(self.equivalent_owners)
+                or self.equivalent_owners and self.query_owner not in self.equivalent_owners):
+            raise ValueError('namespace binding equivalence must retain distinct original owners including its query owner')
 
 
 @dataclass(frozen=True, slots=True)
@@ -325,7 +330,7 @@ class NamespaceDependencies:
         return conditions
 
     def bindings_at(self, owner: ValueID, key: str, operation: OperationID, world_use: UseID,
-                    *, allow_owner_alias=False):
+                    *, allow_owner_alias=False, equivalent_owners=()):
         """Possible normal-store definitions before an existing CALL/LOAD/op.
 
         Owner aliasing is only a conditional candidate. The caller must justify
@@ -335,7 +340,12 @@ class NamespaceDependencies:
         region, _, _ = self._query(owner, key, operation, world_use)
         if type(allow_owner_alias) is not bool:
             raise ValueError('namespace owner-alias policy must be an explicit bool')
-        cache_key = owner, key, operation, world_use, allow_owner_alias
+        if (type(equivalent_owners)is not tuple or any(type(v)is not ValueID for v in equivalent_owners)
+                or len(set(equivalent_owners))!=len(equivalent_owners)
+                or equivalent_owners and(owner not in equivalent_owners or allow_owner_alias)):
+            raise ValueError('explicit owner equivalence must include its query and cannot imply arbitrary aliases')
+        for candidate in equivalent_owners:self._entry_owner(region,candidate)
+        cache_key = owner, key, operation, world_use, allow_owner_alias, equivalent_owners
         if cache_key in self._binding_cache:
             return self._binding_cache[cache_key]
         rows = []
@@ -345,14 +355,17 @@ class NamespaceDependencies:
                 continue
             write_owner = self._value(write.owners[0])
             alias = write_owner != owner
-            if alias and not allow_owner_alias:
+            if equivalent_owners and write_owner not in equivalent_owners:
+                continue
+            if alias and not(allow_owner_alias or equivalent_owners):
                 continue
             relation = (NamespaceOwnerRelation.CONDITIONAL_REFERENCE_ALIAS if alias
                         else NamespaceOwnerRelation.SAME_REFERENCE)
-            path = self._find_path(self._edge(write.normal_edge).block, operation, key, {owner, write_owner})
+            domain=set(equivalent_owners)if equivalent_owners else{owner,write_owner}
+            path = self._find_path(self._edge(write.normal_edge).block, operation, key, domain)
             if path is not None:
                 rows.append(NamespaceBindingWitness(write, owner, operation, world_use, key,
-                    relation, path[0], path[1], self._conditions(alias=alias)))
+                    relation, path[0], path[1], self._conditions(alias=alias or len(domain)>1),equivalent_owners))
         result = tuple(rows)
         self._binding_cache[cache_key] = result
         return result
@@ -402,11 +415,14 @@ class NamespaceDependencies:
             raise ValueError('namespace binding changed its original write/key/region endpoint')
         owner = self._value(write.owners[0])
         alias = owner != witness.query_owner
+        domain=set(witness.equivalent_owners)if witness.equivalent_owners else{owner,witness.query_owner}
+        for candidate in domain:self._entry_owner(region,candidate)
+        if owner not in domain:raise ValueError('namespace binding writer is outside its explicit owner equivalence')
         expected_relation = NamespaceOwnerRelation.CONDITIONAL_REFERENCE_ALIAS if alias else NamespaceOwnerRelation.SAME_REFERENCE
-        if witness.owner_relation is not expected_relation or witness.conditions != self._conditions(alias=alias):
+        if witness.owner_relation is not expected_relation or witness.conditions != self._conditions(alias=alias or len(domain)>1):
             raise ValueError('namespace binding dropped or changed an explicit owner/path/effect condition')
         return self._validate_path(self._edge(write.normal_edge).block, witness.query_operation, witness.key,
-            {owner, witness.query_owner}, witness.path, witness.intervening_operations)
+            domain, witness.path, witness.intervening_operations)
 
     def validate_entry_path(self, witness, *, entry_owner: ValueID | None = None):
         if type(witness) is not NamespaceEntryPathWitness:

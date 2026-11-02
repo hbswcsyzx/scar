@@ -99,6 +99,18 @@ State SSA 表达静态读写依赖；循环/分支版本是符号版本，不是
 
 从外部模块取得的函数可以拥有 caller 图中根本不存在的 globals 引用。此时通过原模块状态、函数创建环境、真实调用的 world 和 callee 环境端口连接依赖；不能借用 caller 当前 G，也不能为了满足某个桥的字段要求制造 caller 中的 namespace Value。`ModuleGlobalsDependencies` 已实现条件状态投影及专项求解/公开读回；现在也由共同依赖接口投影到原 qualified 端点。完整逐地址状态/alias/effects 联合推理与模块初始化 L/G 对应仍未闭合。
 
+新版 v8 的标准 import 初始化投影携带
+`SOURCE_IMPORT_INITIALIZER_USES_MODULE_DICT`：在该明确条件下，以原 G 为查询点、
+用精确的原 `{L,G}` 端口集合统一选择 reaching writer 和处理覆盖。源码 `STORE_GLOBAL`
+与 `STORE_NAME` 因而按同一条件地址域的实际控制/world 顺序合流，而不是分别读取再合并。
+这仍是条件，没有运行来证明 import hook/loader/cache/后续效果。任意 `exec` 不获此条件，
+原 L/G 各自查询互不覆盖。v7 及更早记录保留原 L-only 语义和未知别名，不自动授予新条件；
+带新条件伪装成旧 wire 会被拒绝。相应规则、kill 集合及重放必须使用同一个明确 owner 域。
+
+模块 `global` 是编译期作用域声明；原 AST、符号表和编译来源足以确定时，保留源码展开
+记录而不制造运行时 Nop。编译器前导与源码 import 共用位置时，必须沿已验证的 compiler
+profile/offset 分界，不能按 source span 把前导误认为 import，也不能任意跳过未知指令。
+
 该状态桥区分：`fn=p.f; p.a=p.b; fn()` 的函数引用来自早先的 `p.f` 读点，G 内容却在真实 `fn` CALL/world 查询；`p.f=q.f` 后所选函数的 G 属于实际 factory 的 q，不能按表面 receiver p 判断；`p.a=p.b; p.b=other` 中 a 的来源是赋值当时的 payload/读点，不是未来的 b。callee 内同 key 的 STORE_GLOBAL 先参与覆盖，只有 entry binding 仍可到达 READ 的路径继续向外层状态查询。v7 的专项静态样例已覆盖上述关系、嵌套 creator、多层桥和上下文隔离；当前 LeWM 主体上尚未发布新版整范围索引，模块初始化的 G 写及显式 L/G 条件仍未完成。
 
 实参、形参和正常返回的引用来源必须按调用上下文连接。`StaticCallContext` 引用原 caller、CALL、callee Use 和所选目标，不代表一次运行调用。沿返回结果进入 callee 时压入该上下文；从 formal 回到 actual 时，只能消费栈顶匹配的原调用，再回到其 caller 上下文。已有明确上下文而缺少来源时，不得退回无上下文的候选并集。否则 `identity(a)`、`identity(b)` 或多层 callback 的返回值会错误混合。

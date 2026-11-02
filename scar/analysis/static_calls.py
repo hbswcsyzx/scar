@@ -86,6 +86,38 @@ def _front(kind, detail, source=None):
     return StaticCallFrontier(kind, detail, source)
 
 
+def static_call_input_scope(manifest, *, manifest_bytes=0):
+    """Declared cold-read floor, not a time estimate or a completeness proof.
+
+    Counts stored plus decoded bytes, just as the bounded reader does. Source
+    contexts demanded later and cache eviction rereads can only add cost.
+    """
+    required = ('source', 'lexical', 'semantic', 'semantics', 'control')
+    descriptors = {}
+    artifacts = source_only = declarations = 0
+    for unit in manifest['units']:
+        bodies = [row['artifact'] for row in unit['bodies'] if 'artifact' in row]
+        artifacts += len(bodies)
+        if bodies:
+            selected = [unit['artifacts'][name] for name in required if name in unit['artifacts']]
+            selected += bodies
+        elif Path(unit['path']).suffix == '.pyi':
+            declarations += 1
+            selected = []
+        else:
+            source_only += 1
+            selected = [unit['artifacts']['lexical']] if 'lexical' in unit['artifacts'] else []
+        for descriptor in selected:
+            previous = descriptors.setdefault(descriptor['path'], descriptor)
+            if previous != descriptor:
+                raise ValueError('one call input path has conflicting original receipts')
+    total = manifest_bytes + sum(d['bytes'] + d['decoded_bytes'] for d in descriptors.values())
+    return {'body_artifacts': artifacts, 'source_only_units': source_only,
+        'declaration_only_units': declarations, 'cold_seed_input_bytes': total,
+        'qualification': 'One read of declared call-enumeration inputs; excludes demanded source contexts, '
+            'cache eviction rereads and unresolved expansion. Original input/coverage denominators remain unchanged.'}
+
+
 def input_basis_unit(unit):
     """Pure projection of every per-unit input consumed by this linker.
 
@@ -142,6 +174,9 @@ class StaticCallSession:
         self.input_bytes = self.output_bytes = 0
         self._stamps, self._cache = {}, OrderedDict()
         self._cache_bytes = 0
+        from scar.analysis.static_function_environment import _EnvironmentFacts
+        self._environment_facts = _EnvironmentFacts(max_bodies=16,
+            max_bytes=max(1, min(64 * 1024 * 1024, self.budget.max_cached_bytes // 8)))
         self._closed = False
         self._iterated = False
         self._finalizing = False
@@ -174,6 +209,7 @@ class StaticCallSession:
                 or self.manifest.get("schema_version") != 1 or type(self.manifest.get("units")) is not list):
             raise ValueError("unsupported source-only model manifest")
         self.units = self.manifest["units"]
+        self.input_scope = static_call_input_scope(self.manifest, manifest_bytes=len(raw))
         self._body_locations = {str(self.logical_root / row["artifact"]["path"]): (number, position)
             for number, unit in enumerate(self.units) for position, row in enumerate(unit.get("bodies", ()))
             if "artifact" in row}
@@ -186,6 +222,8 @@ class StaticCallSession:
         declared_calls = [unit.get("lexical_summary", {}).get("calls") for unit in self.units]
         self.source_call_sites_declared = sum(declared_calls) if all(type(value) is int for value in declared_calls) else None
         self.counts["declared_body_artifacts"] = sum("artifact" in body for unit in self.units for body in unit.get("bodies", ()))
+        self.counts["declared_bodies_without_artifact"] = sum("artifact" not in body
+            for unit in self.units for body in unit.get("bodies", ()))
         self.out.mkdir(parents=True, exist_ok=True)
         basis_units = [input_basis_unit(unit) for unit in self.units]
         basis = {"schema": "scar.static-call-source-basis", "schema_version": 1,
@@ -225,7 +263,9 @@ class StaticCallSession:
         relative = Path(descriptor["path"])
         if relative.is_absolute() or ".." in relative.parts:
             raise ValueError("source fragment escapes model")
-        stored = self._read_file(self.root / relative, self.budget.max_record_bytes)
+        path = self.root / relative
+        reread = path in self._stamps
+        stored = self._read_file(path, self.budget.max_record_bytes)
         if len(stored) != descriptor["bytes"] or hashlib.sha256(stored).hexdigest() != descriptor["sha256"]:
             raise ValueError("original stored receipt differs")
         maximum = descriptor["decoded_bytes"]
@@ -238,7 +278,12 @@ class StaticCallSession:
         self.input_bytes += len(raw)
         if len(raw) != maximum or hashlib.sha256(raw).hexdigest() != descriptor["decoded_sha256"]:
             raise ValueError("original decoded receipt differs")
-        return strict_loads(raw.decode())
+        result = strict_loads(raw.decode())
+        self.counts['fragment_reads'] += 1
+        self.counts['fragment_rereads'] += int(reread)
+        self.counts['fragment_stored_bytes_read'] += len(stored)
+        self.counts['fragment_decoded_bytes_read'] += len(raw)
+        return result
 
     def _write(self, relative, raw):
         self._check()
@@ -316,11 +361,14 @@ class StaticCallSession:
                     unit=self.units[number]
                     if any(key not in unit['artifacts'] for key in ('source','lexical','semantic','semantics','control')):
                         continue
+                    selected=[(position,row) for position,row in enumerate(unit['bodies'])
+                        if row['kind']=='MODULE' and row.get('status')=='LOWERED_WITH_GAPS' and 'artifact' in row]
+                    if not selected:
+                        continue
                     context=self._unit(number)
-                    for position,row in enumerate(unit['bodies']):
-                        if row['kind']=='MODULE' and row.get('status')=='LOWERED_WITH_GAPS' and 'artifact' in row:
-                            body=self._body(context,position,row)
-                            if body is not None:yield body
+                    for position,row in selected:
+                        body=self._body(context,position,row)
+                        if body is not None:yield body
             self._module_attributes=ModuleAttributeDependencies(load_body=self._load_body_namespace,
                 source_context=lambda body:(body.context.tree,body.context.semantic,body.context.docs['source']['text']),
                 module_bodies=module_bodies,namespace_for=self._namespace_for,
@@ -355,16 +403,39 @@ class StaticCallSession:
                 or (self._module_state.revision if self._module_state is not None else 0)!=globals_before):
             self._dependencies()._invalidate(body.namespace)
 
+    def _catalog(self, number):
+        """Check the original lexical receipt without decoding unrelated IR.
+
+        A source-only unit remains available to on-demand definition/import
+        lookup. Seeding has no executable ports to visit in that unit, but
+        must still account for its declared syntax and missing body scope.
+        """
+        unit = self.units[number]
+        catalog = self._read(unit['artifacts']['lexical'])
+        if (catalog.get('schema') != 'scar.static-lexical-catalog' or catalog.get('schema_version') != 1
+                or catalog.get('path') != unit['path'] or catalog.get('namespace_root') != unit['namespace_root']
+                or catalog.get('fingerprint') != 'sha256:' + unit['decoded_sha256']
+                or type(catalog.get('calls')) is not list or type(catalog.get('entries')) is not list):
+            raise ValueError('lexical catalog namespace/schema differs from original unit')
+        if number not in self._catalog_counted_units:
+            self._catalog_counted_units.add(number)
+            self.counts['source_call_sites_cataloged'] += len(catalog['calls'])
+            self.counts['source_call_units_cataloged'] += 1
+        return catalog
+
     def _unit(self, number):
         key = ("unit", number)
         if key in self._cache:
             self._cache.move_to_end(key)
+            self.counts['unit_cache_hits'] += 1
             return self._cache[key][0]
+        self.counts['unit_context_load_attempts'] += 1
         unit = self.units[number]
         required = ("source", "lexical", "semantic", "semantics", "control")
         if any(name not in unit["artifacts"] for name in required):
             raise ValueError("source unit lacks retained source/context fragments")
-        docs = {name: self._read(unit["artifacts"][name]) for name in required}
+        docs = {name: self._catalog(number) if name == 'lexical' else self._read(unit['artifacts'][name])
+                for name in required}
         source = docs["source"]
         fp = "sha256:" + unit["decoded_sha256"]
         if (source["path"] != unit["path"] or source["namespace_root"] != unit["namespace_root"]
@@ -377,10 +448,6 @@ class StaticCallSession:
         catalog = docs["lexical"]
         if catalog["path"] != unit["path"] or catalog["fingerprint"] != fp or catalog["namespace_root"] != unit["namespace_root"]:
             raise ValueError("lexical catalog namespace differs")
-        if number not in self._catalog_counted_units:
-            self._catalog_counted_units.add(number)
-            self.counts["source_call_sites_cataloged"] += len(catalog["calls"])
-            self.counts["source_call_units_cataloged"] += 1
         tree = ast.parse(source["text"], filename=unit["path"], type_comments=True)
         refs = {(a.kind, a.reference.start_line, a.reference.end_line, a.reference.start_column, a.reference.end_column): a.reference
                 for a in semantic.source_atoms.values()}
@@ -451,6 +518,7 @@ class StaticCallSession:
         key = ("body", context.number, row_number)
         if key in self._cache:
             self._cache.move_to_end(key)
+            self.counts['body_cache_hits'] += 1
             return self._cache[key][0]
         if "artifact" not in row:
             return None
@@ -1165,15 +1233,16 @@ class StaticCallSession:
                 state_entry = StaticStateEntryRoute(states[0].id, before.id, before.location, after.id, after.location)
             else:
                 frontiers.append(_front("CALL_STATE_ENTRY_OPEN", "CALL has no unique STATE_CONTENT invoke argument in its caller's coarse-world location; the current SSA version need not equal the entry version."))
-        from scar.analysis.static_function_environment import derive_function_environment_routes
+        from scar.analysis.static_function_environment import _derive_function_environment_routes
         callee_uses = [row.use for row in caller.uses_by_op.get(operation.id, ()) if row.role == "callee"]
-        environment_routes, environment_frontiers = derive_function_environment_routes(
+        environment_routes, environment_frontiers = _derive_function_environment_routes(
             caller_graph=caller.graph, caller_document=caller.document, caller_namespace=caller.namespace,
             callee_graph=callee.graph, callee_document=callee.document, callee_namespace=callee.namespace,
             definition=qualified, call_operation=operation.id,
             callee_use=callee_uses[0] if len(callee_uses) == 1 else None,
             creations=tuple(creations), caller_index=caller.index, callee_index=callee.index,
-            qualified_creations=tuple(qualified_creations), load_creation_body=self._load_body_namespace)
+            qualified_creations=tuple(qualified_creations), load_creation_body=self._load_body_namespace,
+            facts=self._environment_facts)
         frontiers.extend(environment_frontiers)
         frontiers.append(_front("ENVIRONMENT_PROJECTIONS_OPEN", "Emitted function-environment routes retain their explicit creation, target and field-state conditions; saved-builtins selection, mutable field contents and remaining environment projections are not closed."))
         frontiers.append(_front("FINE_EFFECTS_OPEN", "State interface correspondence is not a closed mod/ref, alias, escape or ready summary."))
@@ -1302,7 +1371,22 @@ class StaticCallSession:
         self._call_records[key] = replace(records[0], targets=tuple(targets), **updates)
         return True
 
+    def _seed_progress(self, number):
+        self.counts['source_units_enumerated'] += 1
+        if self.progress is not None:
+            self.progress({"stage": "STATIC_CALL_RELATIONS", "source_units_processed": number + 1,
+                "source_units_declared": len(self.units), "body_artifacts_processed": self.counts["body_artifacts_processed"],
+                "declared_body_artifacts": self.counts["declared_body_artifacts"],
+                "canonical_calls_retained": len(self._call_records),
+                "qualified_context_records": len(self._context_call_records),
+                "worklist_iterations": self._worklist_iterations,
+                "seconds": round(time.monotonic() - self.started, 3)})
+
     def _seed_calls(self):
+        if self.activity is not None:
+            self.activity({'stage': 'CALL_INPUT_SCOPE', **self.input_scope,
+                'input_budget_bytes': self.budget.max_input_bytes,
+                'cold_floor_fits_input_budget': self.input_scope['cold_seed_input_bytes'] <= self.budget.max_input_bytes})
         for number, unit in enumerate(self.units):
             self._check()
             if self.activity is not None:
@@ -1312,13 +1396,27 @@ class StaticCallSession:
                     and any(key not in unit["artifacts"] for key in ("semantic", "semantics", "control"))):
                 self.frontiers.append({"kind": "SOURCE_DECLARATION_ONLY", "unit": number,
                     "detail": "Stub source remains in the catalog; no execution body is asserted."})
+                self.counts['declaration_only_units'] += 1
+                self.counts['bodies_without_artifact'] += sum('artifact' not in row for row in unit['bodies'])
+                self._seed_progress(number)
                 continue
             try:
+                if not any('artifact' in row for row in unit['bodies']):
+                    self._catalog(number)
+                    self.counts['source_only_units_deferred'] += 1
+                    self.counts['bodies_without_artifact'] += len(unit['bodies'])
+                    self.frontiers.append({'kind': 'CANONICAL_BODIES_NOT_BUILT', 'unit': number,
+                        'body_declarations': len(unit['bodies']),
+                        'detail': 'Original source declarations retained; no saved executable ports to seed. '
+                            'Definition/import lookup may still demand this source context.'})
+                    self._seed_progress(number)
+                    continue
                 context = self._unit(number)
             except (OverflowError, TimeoutError):
                 raise
             except (ValueError, KeyError, TypeError, SyntaxError) as error:
                 self.frontiers.append({"kind": "SOURCE_UNIT_UNREADABLE", "unit": number, "detail": str(error)})
+                self._seed_progress(number)
                 continue
             for row_number, row in enumerate(unit["bodies"]):
                 if "artifact" not in row:
@@ -1354,16 +1452,11 @@ class StaticCallSession:
             # demand untouched until the final source file. Later incoming
             # facts still invalidate and revisit these exact contexts.
             self._settle_namespace_calls()
-            if self.progress is not None:
-                self.progress({"stage": "STATIC_CALL_RELATIONS", "source_units_processed": number + 1,
-                    "source_units_declared": len(self.units), "body_artifacts_processed": self.counts["body_artifacts_processed"],
-                    "declared_body_artifacts": self.counts["declared_body_artifacts"],
-                    "canonical_calls_retained": len(self._call_records),
-                    "qualified_context_records": len(self._context_call_records),
-                    "worklist_iterations": self._worklist_iterations,
-                    "seconds": round(time.monotonic() - self.started, 3)})
-        self._enumeration_complete = not any(row["kind"] in ("SOURCE_UNIT_UNREADABLE", "CANONICAL_BODY_UNREADABLE")
-                                             for row in self.frontiers)
+            self._seed_progress(number)
+        self._enumeration_complete = (
+            self.counts['body_artifacts_processed'] == self.counts['declared_body_artifacts']
+            and not any(row['kind'] in ('SOURCE_UNIT_UNREADABLE', 'CANONICAL_BODY_UNREADABLE')
+                        for row in self.frontiers))
 
     def _settle_namespace_calls(self):
         if self._interprocedural is None:
@@ -1477,6 +1570,8 @@ class StaticCallSession:
         finally:
             self._cache.clear()
             self._cache_bytes = 0
+            self._environment_facts.bodies.clear()
+            self._environment_facts.bytes = 0
             self._closed = True
 
     def __enter__(self):
@@ -1549,10 +1644,11 @@ def build_static_call_links(directory, out, *, logical_root=None, expected_manif
     session.counts['published_relation_bodies']=len(shards)
     session.counts['published_zero_call_relation_bodies']=sum(s['calls']==0 for s in shards)
     modules=session._module_attributes
-    return {"schema": "scar.static-call-publication", "schema_version": 7,
+    return {"schema": "scar.static-call-publication", "schema_version": 8,
             "source_model": encode(session.basis), "input_manifest_sha256": session.manifest_sha256,
             "artifacts": session.artifacts, "shards": shards, "counts": dict(session.counts),
             "published_calls": published_calls,
+            "input_scope": session.input_scope,
             "complete": issue is None and session._enumeration_complete,
             "status": "ENUMERATED_WITH_RELATION_FRONTIERS" if issue is None and session._enumeration_complete else "PARTIAL_ENUMERATION",
             "frontiers": session.frontiers + ([issue] if issue else []),

@@ -631,7 +631,8 @@ def require_valid_structured_module_program(result,*,source_texts,code_evidence=
     import dis
     from scar.analysis.program_lowering import PreparedSource
     from scar.analysis.source_module_lowering import (module_unit,module_source_census,module_source_context,
-        require_root_evidence,mapping_prefix_selection,frame_statement_slice,_module_statement_ref,mapping_name_opcode)
+        require_root_evidence,mapping_prefix_selection,frame_statement_slice,_module_statement_ref,mapping_name_opcode,
+        _mapping_source_instructions,mapping_global_declaration)
     from scar.analysis.source_semantics_v2 import validate_source_semantics
     from scar.analysis.control_flow_v2 import validate_source_control_flow
     from scar.ir.program.module_entries import (StructuredFrameBodyOverlay,FrameBodyProfile,
@@ -758,7 +759,7 @@ def require_valid_structured_module_program(result,*,source_texts,code_evidence=
             try:reference=_module_statement_ref(context,node)
             except ValueError:continue  # Unvisited source gaps do not acquire fabricated atoms.
             (expression_nodes if isinstance(node,ast.expr) else nodes)[reference]=node
-    instructions=tuple(dis.get_instructions(code_evidence.code,adaptive=False,show_caches=False))
+    instructions=_mapping_source_instructions(context,code_evidence,profile=result.profile)
     from scar.ir.program.class_construction import CLASS_CONSTRUCTION_PROTOCOLS
     from scar.analysis.source_class_construction_validation import validate_class_constructions
     class_ops=validate_class_constructions(graph=graph,metadata=result.metadata,
@@ -899,7 +900,12 @@ def require_valid_structured_module_program(result,*,source_texts,code_evidence=
               and len(set(expansion.operations))==len(expansion.operations)
               and all(identity in operations and owners[identity]==graph.root for identity in expansion.operations),
               'SP8 statement/recursive slice operations differ')
-        if not isinstance(node,ast.Pass):_need(bool(expansion.operations),'expanded non-Pass statement has no data/control operations')
+        if isinstance(node,ast.Global):
+            _need(mapping_global_declaration(context,code_evidence,node)
+                  and not expansion.operations and expansion.entry==expansion.normal,
+                  'module Global must retain its original compiler scope declaration without runtime operations')
+        elif not isinstance(node,ast.Pass):
+            _need(bool(expansion.operations),'expanded runtime statement has no data/control operations')
     def ordered_statements(nodes,initial=None):
         previous=initial
         for node in nodes:
@@ -1027,7 +1033,7 @@ def require_valid_structured_module_program(result,*,source_texts,code_evidence=
             _need([(op.id,use.id) for op in graph.operations for use in op.uses if use.value==consumed]==[(store.id,store.uses[2].id)],
                   'STORE_NAME consumed stack input must not remain pending on either completion')
     # Constant references remain the original typed whole-root code-slot records.
-    instructions=tuple(dis.get_instructions(code_evidence.code,adaptive=False,show_caches=False))
+    instructions=_mapping_source_instructions(context,code_evidence,profile=result.profile)
     class_name_constants={values[operations[record.builder_call.operation].uses[2].value].origin.operation
         for record in getattr(overlay,'class_constructions',())}
     for constant in overlay.constants:
