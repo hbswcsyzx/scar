@@ -61,6 +61,93 @@ StateLocation 的 SSA 值、逻辑内容版本、对象身份、storage 和物�
 提供能力选择和逐 body 构造；动态 catalog 选集不能充当纯静态入口闭包。
 编译器式分析必须显式遍历静态可达定义与未解析边，不要求先捕获执行帧。
 
+### 3.1 建造对象：带类型、端口和层次的图
+
+本节是统一构造规范；现有记录提供骨架，不代表下列所有语言规则和分析已实现。
+SCAR 保留 Python AST 作为语法来源，再建立显式依赖的程序 IR；不另写 Python parser，
+也不把 AST 的 parent/child 指针直接当作数据依赖。解析复用 `ast`，词法作用域复用
+`symtable`，准确语言版本的求值、绑定和协议规则负责从语法翻译到 IR。
+
+形式上，将主图记为 `G = (O, V, U, B, R, L, H; E)`：
+
+- `O`：Operation，静态操作及协议步骤；一行源码可对应多个操作。
+- `V`：Value，操作/适用 completion 的结果或 block/region 参数；DATA、REFERENCE、STATE
+  以及既有 binding/control 协议类型分别保持其含义。
+- `U`：Use，有顺序、角色和类型约束的输入出现；两个端口可以消费同一个 Value。
+- `B`：Block，顺序执行的操作及明确的控制出口。
+- `R`：Region，共享主体或局部结构，声明入口、出口、环境和状态接口。
+- `L`：StateLocation，按符号 owner、selector、范围等继续细化的状态位置。
+- `H`：Resource，资源定义、需求和静态约束，不是假定已存在的运行设备/分配。
+
+`E` 是有各自签名的关系族：definition/use、containment、control successor、
+call/interface mapping、state access、alias、resource 和 source correspondence。
+这些不是一种无类型 `depends_on` 边。主图外的派生事实引用原 ID，带规则、前提、
+上下文和输入版本；不能为了得到新结论复制一份程序节点。
+
+展示时可以收缩为 `producer Operation --Value--> consumer Operation`。
+规范记录仍保留输入 Use，所以 `f(x, x)` 的两个参数出现不会被去重；只有证明两次读取
+来自同一绑定/状态版本时，才可让它们引用同一 Value。普通计算的输入和输出有数据依赖，
+不因此是同一引用、同一逻辑内容或同一 storage。
+
+每个主体按原 namespace 分片，跨主体端点使用 `(namespace, original ID)`。
+一个函数体只保存一份；调用点保留自己的 Use、completion、环境和状态映射。
+包含关系可递归展开，调用/状态/数据关系允许成环；不能把整个程序强行保存成一棵树。
+
+### 3.2 构造规则：从 AST 到端口图的机械翻译
+
+每个 AST 构造选择准确语言 profile 下的一条构造规则。规则统一接受原节点和 source ID、
+作用域绑定环境、当前 block、可用值及输入状态；产出局部子图、正常续接点与结果（如适用），
+以及各异常/return/break/continue/suspend 等适用出口的 payload 和状态。简记为：
+
+```text
+lower_profile(node, bindings, block, state)
+    -> (subgraph, normal?, other_completions)
+normal? = (next_block, result_ports, next_state) | absent
+completion = (kind, payload_ports, next_state, destination)
+```
+
+这是分析器的**建图接口**，不是解释执行目标代码。`state` 是符号依赖；输入缺少精确信息时
+保留保守状态域和原接口，后续通过地址/alias/effect 分析细化。
+不能按 AST 字段的遍历顺序代替 Python 求值顺序，也不能在所有后继上统一传递成功后的状态。
+
+例如，给简单名称赋值的规则组合为：先翻译 RHS；仅在正常续接点，按作用域绑定规则写入名称；
+RHS 的失败出口原样接入对应异常路径。属性赋值、增强赋值和解包有各自规则，不能套用这个简式。
+调用规则先构造 callee、参数求值/展开/绑定及调用出口，再接目标主体；目标未确定时仍有完整的
+调用边界，目标集合和效果保持未闭合。`if` 构造 truth 协议、两个分支及值/状态的合流；
+循环构造 header/body/exit 与携带值/状态的回边，不按迭代次数复制节点。
+
+函数定义同时涉及父图中的定义时求值/创建/绑定，以及预声明的共享函数体；定义函数不等于调用它。
+类、import、with、try、生成器和 async 也必须通过各自协议规则构造，不能仅给一个 AST 节点加标签
+就算完成展开。具体规则族见第 5 节。
+
+规范化的可检查条件至少包括：
+
+1. 每个值有一个准确的定义来源；跨 block/region 传递走原参数/出口映射。
+2. 每个 Use 指向有效值，角色、顺序、类型及可用性满足原操作接口。
+3. 每个控制边的参数与目标 block 参数匹配，合流同时处理值和状态。
+4. 调用实参、环境、结果和各 completion 分别连接，不能按同名变量直接连线。
+5. 读写保留原程序点、地址/范围和状态接口；未知 effects 不得省略为无 effects。
+6. 原 executable 源码构造有展开规则或明确未完成义务；元数据/注释不伪装成可执行操作。
+
+### 3.3 构造与推理分开推进，但使用同一批原端点
+
+建造顺序是：预声明定义和接口 → 递归翻译局部语法 → 连接跨主体约束 → 工作队列联合推理。
+递归下降用于有限的语法/包含结构；调用、状态和返回值求解使用工作队列与 SCC，
+不能靠递归内联整个调用图。循环和互递归因此不要求无限展开。
+
+事实规则形如 `premises -> fact | guards`。例如，原实参/形参端口、选定目标和匹配上下文
+共同支持引用来源；原读点、地址、控制路径及覆盖关系共同支持 reaching write。
+owner 引用同源不证明其内容不变，函数引用取得时的状态也不能代替实际调用时的状态。
+规则输出继续挂在原端点上，未知字段不妨碍已知结构存在。
+
+字段的精确值、符号约束、可能集合和未知分别表示；尚未分析、缺材料、规则未实现及预算中止
+另作处理状态。事实及其失效依赖可增量处理，不能以“单次队列稳定”宣称所有静态行为都已确定。
+
+该结构借鉴 [Python AST](https://docs.python.org/3/library/ast.html)、
+[MLIR 的 operation/block/region/SSA 组织](https://mlir.llvm.org/docs/LangRef/)
+及 [LLVM MemorySSA 的内存读写依赖](https://llvm.org/docs/MemorySSA.html)。
+借鉴的是表示和分析原则；不据此宣称 SCAR 已接入 MLIR 或可直接复用 LLVM 的 Python 状态分析。
+
 ## 4. 每次展开的统一接口
 
 展开不是附加一串 children 标签，而是把原边界与内部实现精确对应。
