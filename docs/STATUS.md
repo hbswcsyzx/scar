@@ -40,6 +40,14 @@
 
 四项相关回归通过，170.13 秒：qualified value sources、module attributes、expression lifetime、class construction。模块回归覆盖 import/属性/参数/局部绑定/返回/最终调用、覆盖后仅选择新值、0 CALL 常量来源、公开 fresh 查询及 selector/receiver/world 篡改拒绝；随后需求前沿刷新复验通过，127.74 秒，故意 Timeout 继续抛出并保留旧证据，成功重算仅清除该精确上下文的旧提示。最后 class 回归加入 compiler-cell + ClassDef 后 function 的组合，4.48 秒。没有新增大规模测试或执行目标源码。
 
+另一次只读两文件核查确认现有补偿调度有效：先分析 provider 的 `discard(module)`（0 CALL、属性值没有返回或消费者），后分析 application 并激活参数；最终 discard 保存 2 条 NUMBER 来源，分别为空/深度 1 上下文，均指向原 LiteralOrigin(7)，公开查询通过。没有为了假定的缺口再写一套调度器。
+
+## 整范围链接的实际尝试
+
+新 v6 链接曾按全部 8,819 份主体尝试，设置输入 128 GB、缓存 4 GB、7,200 秒上限，未限定前 400 份。最后报告进度为 74/582 个 source unit、260/8,819 份主体、1,676 个 CALL 和 2,677 份具体上下文记录；随后在 `examples/multi_layer_probe.py` 遇到 `TypeIgnore` 只有起始行、没有结束位置的 AST 元数据，导入位置索引错误地把它当普通语句处理，进程退出码 1。这不是预算停止或静态不可知，也没有发布这批内存关系。
+
+修复将导入位置索引限定到真正的 Import 节点，TypeIgnore 仍留在原 AST/源码中；现有模块回归加入该注释后通过，130.34 秒。对实际原源片 multi_layer_probe.py 的 3 个 TypeIgnore 节点和模块导入索引重新核对通过，5.231 秒。原子临时目录已清理，主体 manifest 保持本页 SHA；新的整范围重试仍须核对真实覆盖与公开查询，不能把此前进程计数当已保存结果。
+
 ## 已有能力与当前限制
 
 `scar static` 可纯源根扫描、解析 AST/symtable、登记全部源码定义和编译上下文，并行构造分片源码图和受支持的规范子图。静态编译与反汇编只生成语言/编译器事实，不执行模块初始化。`scar static-query` 可按原定义、操作、Value、Use、控制和来源导航。

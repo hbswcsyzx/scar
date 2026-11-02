@@ -80,6 +80,8 @@ State SSA 表达静态读写依赖；循环/分支版本是符号版本，不是
 
 从外部模块取得的函数可以拥有 caller 图中根本不存在的 globals 引用。此时应通过原模块状态、函数创建环境、真实调用的 world 和 callee 环境端口连接依赖；不能借用 caller 当前 G，也不能为了满足某个桥的字段要求制造 caller 中的 namespace Value。这条状态桥尚待实现。
 
+该状态桥的后续实现需满足：`fn=p.f; p.a=p.b; fn()` 的函数引用来自早先的 `p.f` 读点，G 内容却在真实 `fn` CALL/world 查询；`p.f=q.f` 后所选函数的 G 属于实际 factory 的 q，不能按表面 receiver p 判断；`p.a=p.b; p.b=other` 中 a 的来源是赋值当时的 payload/读点，不是未来的 b。callee 内同 key 的 STORE_GLOBAL 先参与覆盖，只有 entry binding 仍可到达 READ 的路径继续向外层状态查询。这些是 Proposed 状态投影约束，当前 v6 尚未实现该桥。
+
 实参、形参和正常返回的引用来源必须按调用上下文连接。`StaticCallContext` 引用原 caller、CALL、callee Use 和所选目标，不代表一次运行调用。沿返回结果进入 callee 时压入该上下文；从 formal 回到 actual 时，只能消费栈顶匹配的原调用，再回到其 caller 上下文。已有明确上下文而缺少来源时，不得退回无上下文的候选并集。否则 `identity(a)`、`identity(b)` 或多层 callback 的返回值会错误混合。
 
 求解器分别维护各上下文的关系，导出时才合并同一静态 CALL 的展示记录；展示并集不能反向激活目标。参数/返回引用边不证明内容不变、逻辑版本相同或无副作用。默认参数还需要函数当前 defaults 字段、容器元素和读取时状态，初始化输入不能直接当作缺省 formal 的引用。

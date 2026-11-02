@@ -57,7 +57,7 @@ def test_static_module_attributes_preserve_sources_and_caller_overwrites():
     from scar.analysis.static_query import query_static_program
 
     provider='NUMBER = 7\ndef a():\n    return 11\ndef b():\n    return 22\ndef identity(value):\n    return value\n'
-    application='''import provider as p
+    application='''import provider as p  # type: ignore[import-not-found]
 x = p.identity(p.a)
 x()
 p.a = p.b

@@ -154,7 +154,10 @@ class ModuleAttributeDependencies:
         links=module.operation_links if module is not None else metadata.operation_links
         by_source=defaultdict(list)
         for node in ast.walk(tree):
-            if hasattr(node,'lineno'):
+            # This index serves plain-import occurrences only. Source metadata
+            # such as TypeIgnore has a line but no expression end/column; it
+            # stays in the retained AST without becoming an executable import.
+            if isinstance(node,ast.Import):
                 by_source[(type(node).__name__,node.lineno,node.end_lineno,node.col_offset,node.end_col_offset)].append(node)
         protocols=protocol_kinds(body.document)
         imports=[];normal_producers={}
