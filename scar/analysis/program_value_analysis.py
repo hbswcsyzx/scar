@@ -195,6 +195,7 @@ class ProgramValueAnalysis:
         self._compiled_units=OrderedDict();self._constant_tables={};self._code_literals={}
         self._compiled_bytes=0
         self._branch_conditions={};self._branch_proofs={}
+        self._truth_tables={};self._truth_contracts={}
 
     def _note(self,point,kind,detail):
         item=Frontier(point,kind,detail);self._frontiers[item]=item
@@ -445,6 +446,9 @@ class ProgramValueAnalysis:
     def _operator(self,point):
         if point in self._operators:return self._operators[point]
         body=self.session.load(point.namespace);operation=body.index.operations[point.node]
+        truth=self._truth_contract(point)
+        if truth is not None:
+            result=('TRUTH',(truth[0],));self._operators[point]=result;return result
         sources=body.module if getattr(body,'module',None)is not None else getattr(body,'metadata',None)
         if sources is None:
             self._operators[point]=None;return None
@@ -499,6 +503,79 @@ class ProgramValueAnalysis:
                             result=opcode,tuple(operands)
         self._operators[point]=result
         return result
+
+    def _truth_contract(self,point):
+        """An original Python TRUTH interface, not a name/label heuristic."""
+        if point in self._truth_contracts:return self._truth_contracts[point]
+        body=self.session.load(point.namespace)
+        if not hasattr(body,'document'):
+            self._truth_contracts[point]=None;return None
+        table=self._truth_tables.get(point.namespace)
+        if table is None:
+            from scar.ir.record_codec import decode
+            from scar.ir.v2.common import SourceReference
+            table=defaultdict(list)
+            for key in('module','structured','class'):
+                for row in(body.document.get(key)or{}).get('protocols',()):
+                    if row['kind']=='TRUTH':
+                        table[decode(OperationID,row['operation'])].append(decode(SourceReference,row['source']))
+            self._truth_tables[point.namespace]=table
+        declared=table.get(point.node,())
+        if len(declared)!=1:
+            self._truth_contracts[point]=None;return None
+        from scar.ir.program.model import ExitKind,TerminatorKind,CompletionResult,ValueType,ValueKind,UseRole
+        operation=body.index.operations[point.node];term=operation.terminator
+        source=declared[0];sources=body.module if getattr(body,'module',None)is not None else body.metadata
+        links=[l for l in sources.operation_links if l.operation==point.node]
+        refs=[u for u in operation.uses if type(body.index.values[u.value])is ReferenceValue]
+        worlds=[u for u in operation.uses if type(body.index.values[u.value])is StateVersionValue]
+        result=None
+        if (term is not None and term.kind is TerminatorKind.INVOKE and operation.callee is None
+                and len(refs)==len(worlds)==1 and len(operation.uses)==2
+                and refs[0].role is UseRole.REFERENCE and worlds[0].role is UseRole.STATE_CONTENT
+                and tuple(operation.invoke_arguments)==tuple(u.id for u in operation.uses)
+                and {c.kind for c in operation.completions}=={ExitKind.NORMAL,ExitKind.RAISE}
+                and len(links)==1 and links[0].source==source):
+            use_links=[u for u in sources.use_links if u.operation==point.node and u.use==refs[0].id]
+            normal=[(n,e)for n,e in enumerate(term.successors)if e.kind is ExitKind.NORMAL]
+            signature=next(c for c in operation.completions if c.kind is ExitKind.NORMAL)
+            before=body.index.values[worlds[0].value]
+            if (len(use_links)==1 and use_links[0].role=='protocol-input'and use_links[0].index==0
+                    and use_links[0].source==source and len(normal)==1 and len(signature.types)==2
+                    and type(signature.types[0])is ValueType and signature.types[0].kind is ValueKind.DATA
+                    and signature.types[0].data_type=='builtins.bool'and type(signature.types[1])is ValueType
+                    and signature.types[1].kind is ValueKind.STATE and signature.types[1].location==before.location):
+                n,edge=normal[0];block=body.index._block_records[edge.block]
+                outputs=[v for v,a in zip(block.arguments,edge.arguments)if type(a)is CompletionResult
+                    and a.index==0 and type(body.index.values[v])is DataValue
+                    and body.index.values[v].data_type=='builtins.bool']
+                tree,semantic,text=self.session.source_context(body);atom=semantic.source_atoms.get(source.atom_id)
+                nodes=[v for v in ast.walk(tree)if isinstance(v,ast.expr)and atom is not None and type(v).__name__==atom.kind
+                    and(v.lineno,v.end_lineno,v.col_offset,v.end_col_offset)==
+                        (source.start_line,source.end_line,source.start_column,source.end_column)]
+                if (len(outputs)==1 and len(nodes)==1 and atom.reference==source
+                        and source.path==body.metadata.source.path and source.fingerprint==body.metadata.source.fingerprint):
+                    result=refs[0].id,worlds[0].id,n,outputs[0],source
+        self._truth_contracts[point]=result
+        return result
+
+    @staticmethod
+    def _literal_truth(literal):
+        # Inspect only validated immutable builtin representations. No host
+        # bool/len dispatch runs on a program reference or its elements.
+        _preflight_literal(literal)
+        kind=literal.kind
+        if kind is LiteralKind.BOOL:return literal.payload
+        if kind is LiteralKind.NONE:return False
+        if kind is LiteralKind.INT:return literal.payload!='0'
+        if kind is LiteralKind.FLOAT64:return int(literal.payload,16)&0x7fffffffffffffff!=0
+        if kind is LiteralKind.COMPLEX128:
+            return (int(literal.payload[:16],16)&0x7fffffffffffffff!=0
+                or int(literal.payload[16:],16)&0x7fffffffffffffff!=0)
+        if kind is LiteralKind.ELLIPSIS:return True
+        if kind in(LiteralKind.STR,LiteralKind.STR_CODEPOINTS,LiteralKind.BYTES):return literal.payload!=''
+        if kind is LiteralKind.TUPLE:return len(literal.items)!=0
+        raise _Unsupported('no closed builtin truth rule for this literal kind')
 
     def _closed_local_result(self,point,producer):
         """Whether original synchronous region ports fully explain this slot.
@@ -561,6 +638,31 @@ class ProgramValueAnalysis:
             matched.add(incoming.source.node)
         return matched==terminals
 
+    def _normal_result_zero(self,point,edge):
+        """Route a checked operation's normal value, never exception slot 0."""
+        if (point.namespace!=edge.source.namespace or point.context!=edge.source.context
+                or type(point.node)is not ValueID):return False
+        from scar.ir.program.model import CompletionResult,ExitKind,TerminatorKind
+        index=self.session.index(point.namespace);operation=index.operations[edge.source.node]
+        origin=index.values[point.node].origin
+        slots=[c.index for c in edge.conditions if c.domain=='canonical'and c.name=='COMPLETION_SLOT'
+            and c.subject==edge.source]
+        if slots not in([],[0]):return False
+        if operation.terminator is None:
+            return (type(origin)is OperationResult and origin.operation==operation.id and origin.index==0
+                and len(operation.results)>0 and operation.results[0]==point.node)
+        if operation.terminator.kind is not TerminatorKind.INVOKE or type(origin)is not BlockArgument:return False
+        matches=[]
+        for ordinal,successor in enumerate(operation.terminator.successors):
+            if (successor.kind is ExitKind.NORMAL and successor.block==origin.block
+                    and origin.index<len(successor.arguments)):
+                actual=successor.arguments[origin.index]
+                if type(actual)is CompletionResult and actual.index==0:matches.append(ordinal)
+        if len(matches)!=1:return False
+        choices=[c.index for c in edge.conditions if c.domain=='canonical'and c.name=='SUCCESSOR_SELECTED'
+            and c.subject==edge.source]
+        return choices==matches
+
     @staticmethod
     def _content(fields):
         # Alternative content domains are disjoint fields, not separate
@@ -580,18 +682,20 @@ class ProgramValueAnalysis:
         unknown=tuple(dict.fromkeys(gap for field in fields for gap in field.unknown_paths))
         alternatives=[];tuples=[];types=[];references=[]
         contract=Evidence('CANONICAL_IMMUTABLE_BUILTIN_OPERATOR_V1',(point.namespace.graph,),(point,*parents))
-        if opcode=='BUILD_TUPLE':
-            references.append(ValueAlternative(point,evidence=(contract,)))
-            types.append(ValueAlternative('builtins.tuple',evidence=(contract,)))
+        if opcode in('BUILD_TUPLE','TRUTH'):
+            if opcode=='BUILD_TUPLE':references.append(ValueAlternative(point,evidence=(contract,)))
+            types.append(ValueAlternative('builtins.tuple'if opcode=='BUILD_TUPLE'else'builtins.bool',evidence=(contract,)))
         if any(not field.alternatives for field in fields):
             if unknown:
                 kind=('IMMUTABLE_TUPLE_ELEMENT_OPEN'if opcode=='BUILD_TUPLE'else
                     'IMMUTABLE_INDEX_KEY_OPEN'if opcode=='INDEX'and not fields[1].alternatives else
-                    'IMMUTABLE_INDEX_RECEIVER_OPEN'if opcode=='INDEX'else'BUILTIN_INPUT_CONTENT_OPEN')
+                    'IMMUTABLE_INDEX_RECEIVER_OPEN'if opcode=='INDEX'else
+                    'BUILTIN_TRUTH_CONTENT_OPEN'if opcode=='TRUTH'else'BUILTIN_INPUT_CONTENT_OPEN')
                 unknown=(*unknown,self._note(point,kind,'Original operand content is not a proved immutable builtin literal; no user protocol or mutable contents are evaluated.'))
             gap=ValueField(unknown_paths=unknown)
-            return ValueFields(ValueField(tuple(references))if references else gap,
-                _NA if opcode=='BUILD_TUPLE'else gap,ValueField(tuple(types))if types else gap,gap)
+            return ValueFields(_NA if opcode=='TRUTH'else ValueField(tuple(references))if references else gap,
+                _NA if opcode=='BUILD_TUPLE'else gap,ValueField(tuple(types))if types else gap,
+                _NA if opcode=='TRUTH'else gap)
         budget=self._evaluation_budget()
         combinations=product(*(field.alternatives for field in fields))
         for number,items in enumerate(combinations):
@@ -604,7 +708,10 @@ class ProgramValueAnalysis:
                 if cached is None:
                     sizes=tuple(self._literal_size(literal,budget)for literal in literals)
                     state={'work':self._usage['work'],'output_bytes':self._usage['output_bytes']}
-                    if opcode=='BUILD_TUPLE':
+                    if opcode=='TRUTH':
+                        value=self._literal_truth(literals[0]);literal=PythonLiteral.from_python(value)
+                        _reserve(_Size(8,0,1),state,budget);_work(1,state,budget);floating=False
+                    elif opcode=='BUILD_TUPLE':
                         estimate=_Size(8*len(literals)+sum(s.bytes for s in sizes),
                             len(literals)+sum(s.items for s in sizes),1+max((s.depth for s in sizes),default=0),
                             max((s.bits for s in sizes),default=0))
@@ -626,25 +733,31 @@ class ProgramValueAnalysis:
                     self._evaluations[key]=cached
                 literal,type_name,is_float=cached
                 guards=tuple(dict.fromkeys((*[c for item in items for c in item.conditions],
-                    Condition.from_enum(ConstantRuntimeRequirement.BUILTIN_RUNTIME_MATCH),
+                    *(()if opcode=='TRUTH'else(Condition.from_enum(ConstantRuntimeRequirement.BUILTIN_RUNTIME_MATCH),)),
                     *([Condition.from_enum(ConstantRuntimeRequirement.FLOATING_ENVIRONMENT_MATCH)]if is_float else[]))))
                 if len(guards)>self.budget.max_conditions:
                     unknown=(*unknown,self._note(point,'VALUE_CONDITION_BUDGET','Builtin premise predicates exceed the finite guard bound.'));continue
                 evidence=tuple(dict.fromkeys(e for item in items for e in item.evidence))
-                evidence=(*evidence,Evidence('BOUNDED_BUILTIN_SCALAR_V1',(point.namespace.graph,),(point,*parents)))
+                anchors=(point,*parents)
+                if opcode=='TRUTH':
+                    truth=self._truth_contract(point)
+                    anchors=(*anchors,Point(point.namespace,truth[1],point.context),Point(point.namespace,truth[3],point.context))
+                evidence=(*evidence,Evidence('BOUNDED_BUILTIN_TRUTH_NORMAL_V1'if opcode=='TRUTH'else'BOUNDED_BUILTIN_SCALAR_V1',
+                    (point.namespace.graph,),anchors))
                 alternative=ValueAlternative(literal,guards,evidence,tuple(parents),
                     Strength.MAY if any(item.strength is Strength.MAY for item in items)else Strength.EXACT)
                 (tuples if literal.kind is LiteralKind.TUPLE else alternatives).append(alternative)
                 types.append(replace(alternative,value=type_name))
-                references.append(replace(alternative,value=point))
+                if opcode!='TRUTH':references.append(replace(alternative,value=point))
             except (_BudgetExceeded,_Unsupported,ArithmeticError,LookupError,ValueError,TypeError)as error:
                 kind=('IMMUTABLE_INDEX_OUT_OF_RANGE'if isinstance(error,IndexError)else
-                    'IMMUTABLE_INDEX_KEY_UNSUPPORTED'if opcode=='INDEX'and isinstance(error,_Unsupported)else'BUILTIN_SCALAR_RULE_OPEN')
+                    'IMMUTABLE_INDEX_KEY_UNSUPPORTED'if opcode=='INDEX'and isinstance(error,_Unsupported)else
+                    'BUILTIN_TRUTH_CONTENT_UNSUPPORTED'if opcode=='TRUTH'else'BUILTIN_SCALAR_RULE_OPEN')
                 unknown=(*unknown,self._note(point,kind,type(error).__name__+': '+str(error)))
-        return ValueFields(reference_sources=ValueField(tuple(references),unknown),
+        return ValueFields(reference_sources=_NA if opcode=='TRUTH'else ValueField(tuple(references),unknown),
             scalar_constant=_NA if opcode=='BUILD_TUPLE'or tuples and not alternatives and not unknown else ValueField(tuple(alternatives),unknown),
-            builtin_type=ValueField(tuple(types))if opcode=='BUILD_TUPLE'else ValueField(tuple(types),unknown),
-            immutable_tuple=_NA if alternatives and not tuples and not unknown else ValueField(tuple(tuples),unknown))
+            builtin_type=ValueField(tuple(types))if opcode in('BUILD_TUPLE','TRUTH')else ValueField(tuple(types),unknown),
+            immutable_tuple=_NA if opcode=='TRUTH'or alternatives and not tuples and not unknown else ValueField(tuple(tuples),unknown))
 
     def _branch_predicate(self,branch):
         if branch in self._branch_conditions:return self._branch_conditions[branch]
@@ -669,6 +782,37 @@ class ProgramValueAnalysis:
         return all(c.index==self._branch_proofs[c.subject].selected_index for c in edge.conditions
             if c.domain=='canonical'and c.name=='SUCCESSOR_SELECTED'and c.subject in self._branch_proofs)
 
+    def _necessary_normal_entry(self,condition,branch,predicate):
+        """An original normal completion required to reach this exact branch.
+
+        This is an entering-point premise. It does not make an INVOKE succeed
+        or remove its exception edge, and does not accept a runtime guard.
+        """
+        if (condition.domain!='canonical'or condition.name!='SUCCESSOR_SELECTED'
+                or condition.subject is None or type(condition.subject.node)is not OperationID
+                or condition.subject.namespace!=branch.namespace or condition.subject.context!=branch.context):return None
+        producer=condition.subject;truth=self._truth_contract(producer)
+        if truth is None or condition.index!=truth[2]:return None
+        index=self.session.index(branch.namespace);block=index._operation_blocks[branch.node]
+        if (predicate.namespace!=branch.namespace or predicate.context!=branch.context
+                or predicate.node!=index.operations[branch.node].terminator.condition
+                or index.use_site(predicate.node).operation!=branch.node):return None
+        region=index._blocks[block]
+        before=index.values[index.use_site(predicate.node).use.value]
+        if (block==index.regions[region].entry or type(before.origin)is not BlockArgument
+                or before.origin.block!=block or before.id!=truth[3]):return None
+        predecessors=[(op.id,n)for op in index.graph.operations if op.terminator is not None
+            for n,edge in enumerate(op.terminator.successors)if edge.block==block]
+        if predecessors!=[(producer.node,truth[2])]:return None
+        if (any(port.block==block for port in index.graph.control_ports)
+                or any(row.region==region for row in index.graph.resumable_bodies)
+                or any(row.region==region for row in index.graph.native_boundaries)
+                or any(row.region==region or row.body==region for row in index.graph.driver_interfaces)
+                or any(row.body==region for row in index.graph.resumable_creates)):
+            return None
+        return Evidence('BRANCH_ENTRY_REQUIRES_ORIGINAL_TRUTH_NORMAL_V1',(branch.namespace.graph,),
+            (branch,predicate,producer,Point(branch.namespace,block,branch.context)))
+
     def _freeze_branches(self):
         # A stopped worklist is not a closed predicate. In particular, an
         # early singleton can still acquire another value through a backedge.
@@ -690,17 +834,26 @@ class ProgramValueAnalysis:
             # Do not silently accept runtime/dispatch/code-instance guards.
             # An earlier frozen BRANCH can justify its own selected edge;
             # all other predicate scopes remain conditional and unfiltered.
-            if any(c.domain!='canonical'or c.name!='SUCCESSOR_SELECTED'
-                    or c.subject not in self._branch_proofs
-                    or c.index!=self._branch_proofs[c.subject].selected_index
-                    for a in field.alternatives for c in a.conditions):
+            alternatives=[];closed=True
+            for alternative in field.alternatives:
+                premises=[]
+                for condition in alternative.conditions:
+                    prior=(self._branch_proofs.get(condition.subject)if condition.domain=='canonical'
+                        and condition.name=='SUCCESSOR_SELECTED'else None)
+                    if prior is not None and condition.index==prior.selected_index:continue
+                    necessary=self._necessary_normal_entry(condition,branch,predicate)
+                    if necessary is None:closed=False;break
+                    premises.append(necessary)
+                if not closed:break
+                alternatives.append(replace(alternative,evidence=tuple(dict.fromkeys((*alternative.evidence,*premises)))))
+            if not closed:
                 self._note(branch,'BRANCH_PREDICATE_GUARDS_OPEN',
                     'A builtin-bool candidate retains undischarged original guards; both value paths remain.')
                 continue
             selected=0 if next(iter(values))else 1
             evidence=Evidence('STABLE_BUILTIN_BOOL_SELECTS_SUCCESSOR_'+str(selected)+'_V1',
                 (branch.namespace.graph,),(branch,predicate))
-            added.append(BranchSelectionProof(branch,predicate,selected,field.alternatives,evidence))
+            added.append(BranchSelectionProof(branch,predicate,selected,tuple(alternatives),evidence))
         return tuple(added)
 
     def _compute(self,point):
@@ -729,8 +882,7 @@ class ProgramValueAnalysis:
             elif edge.kind is K.RESULT and type(edge.source.node)is OperationID:
                 # Producer selection is not identity. Only a checked opcode's
                 # normal result0 may use the arithmetic field computed above.
-                slots=[c.index for c in edge.conditions if c.domain=='canonical'and c.name=='COMPLETION_SLOT']
-                if self._operator(edge.source)is not None and(not slots or slots==[0]):
+                if self._operator(edge.source)is not None and self._normal_result_zero(point,edge):
                     fields=self._join(point,fields,self._transfer(parent.fields,edge));possible.append(parent.feasible)
                 elif not any(e.kind in(K.BINDING_READ,K.STATE_VALUE)for e in self._incoming[point]):
                     if not self._closed_local_result(point,edge):
@@ -812,6 +964,7 @@ class ProgramValueAnalysis:
                 self._note(point,'VALUE_POINT_BUDGET','Unvisited original dependency point is retained.');self._exhausted=False;continue
             try:
                 self.session.check();self._facts[point]=self._seed(point)
+                if type(point.node)is OperationID:self._branch_predicate(point)
                 neighborhood=self.graph.incoming(point,kinds=(K.CONTROL_CONDITION,)
                     if point in self._branch_conditions else selected)
                 self._exhausted&=neighborhood.enumerated

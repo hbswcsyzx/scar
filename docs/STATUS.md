@@ -65,7 +65,18 @@ C++ 前端选型已做真实最小实验：SCAR 私有工具环境 19 MiB，未�
 0 missing，原文件和工具都有收据。证据保存在 `artifacts/current/queries/cpp-front-end-probe.json`。
 这些是源码输入层验证，不是已接通 C++ 类型/ABI/重载/binary；完整方法表关系 reader 正在实现。
 
-正在修复值分析 normal/raise slot0 路由，并补原 TRUTH 合同推理。最小源码实验还发现
+**Implemented / Verified**：已修复值分析 normal/raise slot0 路由，并补原 TRUTH 合同推理。
+非终结操作核实际 OperationResult0；INVOKE 核原 NORMAL 的 CompletionResult0 和条件。
+端口 index 不再误作运行 guard，改由原 successor.arguments 的精确证据指针提供。
+ADD/TRUTH 的 RAISE slot0 均保留未知，正常常量不再混入异常值。闭合 builtin literal
+按表示规则推 bool，未知/custom 不执行；同一真实函数源码中 True/False 已到 BRANCH
+谓词，但 READ_NORMAL_REQUIRES_BOUND 尚未证明，故 source branch_proofs 仍为 0。
+完整原 normal/raise 边继续保留；原 IR 的闭合 bool 两项证明仍通过。
+控制/区域/值分析/C++ 输入层合并短验 **4 passed / 5.35 秒**，未运行目标或长 fixture。
+绑定状态 plain tuple 目前不足以一般安全消解 guard：MAY、缺种子和预算未知未独立记录，
+下一步补带条件/证据的独立 state field，同队列传播后再证明 bound，不能直接用 tuple 放行。
+
+最小源码实验还发现
 编译器常量折叠的 If 仍被前端 REQUIRED_EXPANSION 阻断；必须后续补静态展开，不能把
 编译产物里没有对应指令误称为源码信息必须动态获得。producer/current 冻结期间不改 lowerer。
 

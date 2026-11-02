@@ -316,7 +316,7 @@ class LocalDependencyProvider:
                             (DependencyCondition("canonical", "DECLARED_POINTS_TO", point(value.id)),), DependencyStrength.MAY)
                 else:
                     frontiers[value.id].append(("ALIAS_TARGETS_OPEN", "Reference and producer are known; mutable-location alias targets are not closed."))
-        for operation in graph.operations:
+        for operation_position, operation in enumerate(graph.operations):
             for use in operation.uses:
                 kind = K.ORDER if use.role is UseRole.STATE_ORDER else K.STATE_INPUT if use.role is UseRole.STATE_CONTENT else K.VALUE_USE
                 meaning = M.ORDER if kind is K.ORDER else M.STATE_INTERFACE if kind is K.STATE_INPUT else M.VALUE
@@ -334,14 +334,20 @@ class LocalDependencyProvider:
                 conditions = control_condition(operation.id, number)
                 edge(operation.id, successor.block, K.CONTROL_FLOW, M.STRUCTURE, conditions)
                 block = index._block_records[successor.block]
-                for actual, formal in zip(successor.arguments, block.arguments):
+                for argument_position, (actual, formal) in enumerate(zip(successor.arguments, block.arguments)):
                     if type(actual) is UseID:
                         meaning = M.STATE_INTERFACE if type(index.values[formal]) is StateVersionValue else M.VALUE
                         edge(actual, formal, K.BLOCK_ARGUMENT, meaning, conditions)
                     elif type(actual) is CompletionResult:
                         kind = K.STATE_OUTPUT if type(index.values[formal]) is StateVersionValue else K.RESULT
-                        slot = DependencyCondition("canonical", "COMPLETION_SLOT", point(operation.id), actual.index)
-                        edge(operation.id, formal, kind, M.DEPENDENCE, (*conditions, slot))
+                        # The result slot is an original static port mapping,
+                        # not an unresolved execution predicate. Keep its
+                        # exact record as evidence; the selected successor is
+                        # the actual path condition.
+                        projection = 'operations/' + str(operation_position) + '/terminator/successors/' + str(number) + '/arguments/' + str(argument_position)
+                        edge(operation.id, formal, kind, M.DEPENDENCE, conditions,
+                            provenance=declaration('CANONICAL_COMPLETION_RESULT_PROJECTION_V1', projection,
+                                anchors=(operation.id, formal)))
                     else:
                         frontiers[formal].append(("SPECIAL_SUCCESSOR_INPUT_OPEN", "Resumption or driver input retains its original protocol interface; transfer rule is pending."))
         for ordering in graph.ordering:edge(ordering.before, ordering.after, K.ORDER, M.ORDER)

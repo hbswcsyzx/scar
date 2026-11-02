@@ -154,6 +154,14 @@ locator。环境 state domain 不是 points-to，声明的控制目的地不是�
 source role 和人类标签也不等于操作合同。例如源角色为 EXPRESSION 的操作仍可有原
 TRUTH 协议；分析必须消费准确协议/端口及来源，而不是按 label 或 role 猜行为。
 
+已知端口结构也不是待消解的运行条件：`CompletionResult.index` 通过原 successor.arguments
+记录和目标 block argument 直接核对，并保存精确证据 locator；不再把槽号塞进 guard。
+值转移同时核 normal kind、原 producer、实际 mapping、ordinal 和同一 namespace/context，
+不能因异常出口也有 slot0 就复制正常计算值。TRUTH 合同可对闭合 builtin literal 的表示
+推导 normal bool（含浮点/complex 位模式、tuple 长度），不执行目标对象协议；原 world、
+异常出口、effects 和输入条件继续保留。绑定是否 BOUND 是独立状态性质，已知 payload
+或可行 normal 路径不能替代 definite-bound 证明。
+
 NativeBoundary/provider 也按原声明进入共同导航：native/core-only 输入、正常/异常
 出口的全部原 Use、representation ownership 和来源映射都有精确记录 locator。它们是
 STRUCTURE，不是值传递、ABI 等价、must-alias 或已选实现。共同遍历默认排除结构含义，

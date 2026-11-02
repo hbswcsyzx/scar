@@ -400,3 +400,103 @@ def test_original_local_result_coverage_does_not_close_candidate_dispatch(tmp_pa
     typed_report=ProgramValueAnalysis(session,view).analyze((merged_point,))
     assert typed_report.for_point(merged_point).immutable_tuple.precision is FieldPrecision.NOT_APPLICABLE
     assert typed_report.for_point(merged_point).scalar_constant.unknown_paths
+
+    # A tiny real source chain exercises the existing TRUTH contract rather
+    # than assigning a synthetic Opcode to it. The Custom body would raise
+    # if anybody executed the target; only SCAR parses/compiles this source.
+    from scar.analysis.program_dependency_session import ProgramDependencySession,ProgramDependencyBudget
+    truth_source=tmp_path/'truth_source';truth_source.mkdir();truth_model=tmp_path/'truth_model'
+    truth_text='''class Custom:
+    def __bool__(self):
+        raise RuntimeError("SCAR must never call this method")
+def flags():
+    flag = True
+    if flag:
+        yes = 7
+    else:
+        yes = 99
+    flag = False
+    if flag:
+        no = 7
+    else:
+        no = 99
+    if unknown_value:
+        unknown = 7
+    else:
+        unknown = 99
+    if Custom():
+        custom = 7
+    else:
+        custom = 99
+    arithmetic = 2 + 3
+    return arithmetic
+'''
+    (truth_source/'program.py').write_text(truth_text)
+    built=subprocess.run([sys.executable,'-B','-m','scar.cli','static',str(truth_source),'--out',str(truth_model),
+        '--jobs','1','--phase','bodies'],capture_output=True,text=True)
+    assert built.returncode==0,built.stdout+built.stderr
+    with ProgramDependencySession(truth_model,budget=ProgramDependencyBudget(max_seconds=60,max_graphs=16))as scoped:
+        original,=scoped.select_bodies(file='program.py',entry='<module>.flags');body=scoped.load_body(original)
+        ns=GraphNamespace.from_source(original);roots=[];pairs=[];branches=[]
+        from scar.ir.record_codec import decode
+        for protocol in body.document['structured']['protocols']:
+            if protocol['kind']!='TRUTH':continue
+            operation=body.index.operations[decode(O,protocol['operation'])]
+            normal=next(e for e in operation.terminator.successors if e.kind is ExitKind.NORMAL)
+            failure=next(e for e in operation.terminator.successors if e.kind is ExitKind.RAISE)
+            normal_value=body.index._block_records[normal.block].arguments[0]
+            raised_value=body.index._block_records[failure.block].arguments[0]
+            owner=body.index.operations[body.index._block_records[normal.block].operations[-1]]
+            assert owner.terminator.kind is TerminatorKind.BRANCH
+            roots.extend((P(ns,owner.id),P(ns,normal_value),P(ns,raised_value)))
+            pairs.append((protocol['source']['start_line'],P(ns,normal_value),P(ns,raised_value),P(ns,operation.id)))
+            branches.append((protocol['source']['start_line'],P(ns,owner.id)))
+        assert {line for line,*rest in pairs}=={6,11,15,19}
+        add_link,=[l for l in body.metadata.operation_links if l.opcode is not None and l.opcode.name=='ADD']
+        add=body.index.operations[add_link.operation]
+        add_normal=next(e for e in add.terminator.successors if e.kind is ExitKind.NORMAL)
+        add_raise=next(e for e in add.terminator.successors if e.kind is ExitKind.RAISE)
+        add_normal_point=P(ns,body.index._block_records[add_normal.block].arguments[0])
+        add_raise_point=P(ns,body.index._block_records[add_raise.block].arguments[0])
+        roots.extend((add_normal_point,add_raise_point))
+        source_analysis=ProgramValueAnalysis(scoped)
+        truth_report=source_analysis.analyze(roots)
+        by_branch=dict(branches)
+        assert {(p.branch,p.selected_index)for p in truth_report.branch_proofs}<={(by_branch[6],0),(by_branch[11],1)}
+        for line,normal,failure,operation in pairs:
+            normal_fact=truth_report.for_point(normal);failure_fact=truth_report.for_point(failure)
+            if line in(6,11):
+                assert {a.value for a in normal_fact.scalar_constant.alternatives}=={PythonLiteral.from_python(line==6)}
+            else:assert not normal_fact.scalar_constant.alternatives and normal_fact.scalar_constant.unknown_paths
+            assert not failure_fact.scalar_constant.alternatives and failure_fact.scalar_constant.unknown_paths
+            assert any(e.source==operation and e.target==failure and e.kind is K.RESULT for e in truth_report.edges)
+        assert {a.value for a in truth_report.for_point(add_normal_point).scalar_constant.alternatives}=={PythonLiteral.from_python(5)}
+        assert not truth_report.for_point(add_raise_point).scalar_constant.alternatives
+        assert truth_report.for_point(add_raise_point).scalar_constant.unknown_paths
+        add_edge=next(e for e in truth_report.edges if e.kind is K.RESULT and e.source.node==add.id and e.target==add_normal_point)
+        raise_edge=next(e for e in truth_report.edges if e.kind is K.RESULT and e.source.node==add.id and e.target==add_raise_point)
+        assert source_analysis._normal_result_zero(add_normal_point,add_edge)
+        assert not source_analysis._normal_result_zero(add_raise_point,raise_edge)
+        assert not any(c.name=='COMPLETION_SLOT'for c in add_edge.conditions)
+        assert any('/terminator/successors/'in locator.pointer and'/arguments/'in locator.pointer
+            for evidence in add_edge.evidence for locator in evidence.sources)
+        legacy_zero=replace(add_edge,conditions=(*add_edge.conditions,
+            DependencyCondition('canonical','COMPLETION_SLOT',add_edge.source,0)))
+        assert source_analysis._normal_result_zero(add_normal_point,legacy_zero)
+        legacy_wrong=replace(add_edge,conditions=(*add_edge.conditions,
+            DependencyCondition('canonical','COMPLETION_SLOT',add_edge.source,1)))
+        assert not source_analysis._normal_result_zero(add_normal_point,legacy_wrong)
+        assert all(any(e.rule=='BRANCH_ENTRY_REQUIRES_ORIGINAL_TRUTH_NORMAL_V1'for a in p.alternatives for e in a.evidence)
+            and any(c.name=='SUCCESSOR_SELECTED'and c.subject not in(by_branch[6],by_branch[11])
+                for a in p.alternatives for c in a.conditions)for p in truth_report.branch_proofs)
+        assert all(source_analysis._necessary_normal_entry(
+            DependencyCondition('canonical','SUCCESSOR_SELECTED',operation,source_analysis._truth_contract(operation)[2]),
+            by_branch[line],P(ns,body.index.operations[by_branch[line].node].terminator.condition))is not None
+            for line,normal,failure,operation in pairs)
+        # No host protocol dispatch is needed even for nonfinite/negative-zero
+        # bit patterns; all inputs here are test-owned immutable literals.
+        for value,expected in((False,False),(True,True),(0,False),(-2,True),(-0.0,False),
+                (float('nan'),True),(float('inf'),True),('',False),('x',True),(b'',False),(b'x',True),
+                ((),False),((0,),True),(None,False),(complex(-0.0,-0.0),False),
+                (complex(0.0,float('nan')),True),(Ellipsis,True)):
+            assert source_analysis._literal_truth(PythonLiteral.from_python(value,exact=True))is expected

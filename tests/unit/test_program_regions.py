@@ -141,6 +141,17 @@ def test_boundary_keeps_direct_and_invoke_state_interfaces_and_separates_escape(
     assert any(e.source == P(namespace, root) for e in external_resource.edges)
     assert any(f.kind == 'EXTERNAL_RESOURCE_INPUT' for f in external_resource.frontiers)
     assert any(e.source.node == mutate.id and e.target.node == invoke.id for e in analysis.ordering)
+    # CompletionResult.index is known port structure, not a runtime guard.
+    # Normal and exception slot0 keep their own original successor mapping.
+    normal_projection = next(e for e in view.incoming(P(namespace, V('normal-ref'))).edges
+        if e.source.node == invoke.id and e.kind.value == 'RESULT')
+    assert [c.name for c in normal_projection.conditions] == ['SUCCESSOR_SELECTED']
+    projection_source = normal_projection.evidence[0].sources[0]
+    import json
+    original_slot = json.loads(payload)
+    for segment in projection_source.pointer.removeprefix('#/').split('/'):
+        original_slot = original_slot[int(segment)] if isinstance(original_slot, list) else original_slot[segment]
+    assert original_slot == {'index': 0}
     assert any(e.kind == 'DECLARED_STATE_SLOT_STORE' for e in analysis.escapes)
     frame = DependencyFrame(namespace, invoke.id, None, None, namespace, entry=callee)
     branch_boundary = analyze_boundary(view, (P(namespace, branch.id, (frame,)),))
