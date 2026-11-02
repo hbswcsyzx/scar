@@ -185,8 +185,19 @@ builtin bool，再从原 seeds 重算条件值边。完整原边与上下文证�
 未知、循环 widening 和预算未闭合不筛路；这只细化事实，不改写程序或删图。
 
 这些实现解决了基础接口问题，**尚未解决完整联合分析**：精细 reaching writes/alias/effects、
-module 初始化 L/G、全部 Python 协议、容器/Tensor 属性与 native/资源契约仍不完整；真实
-current 的全范围调用关系也尚未发布。class 已全批枚举发布（1,065 条连接，余项有明确边界），不能混称整程序已贯通。
+module 初始化 L/G、全部 Python 协议、容器/Tensor 属性与 native/资源契约仍不完整。
+current 已发布 35,747 个规范调用的关系枚举，其中仅 270 个有已连接候选；真实 CEM solve
+的 48 个 CALL 仍无目标候选。class 也已枚举发布（1,065 条连接，余项有明确边界），
+这些数字不能混称整程序已贯通。当前数量及原收据见 STATUS。
+
+共同值队列进一步沿原 Use owner、producer 和 block 参数追踪入口必要性；稳定分支证明
+可以反证相反路径上的值路由。发生条件是独立字段，结构桥只提供 occurrence 依据，不传递
+常量或对象身份。反证与原边同时保存，按原 seeds 重算；只有原输入族完整且全部确证不可行
+时才标无正常值。普通 MAY 影响、恢复/外入口、未验证 Python candidate frame 与预算仍 open。
+
+outgoing 检索使用有界 raw namespace→shard 上界路由，原收据先核对，命中分片才独立
+typed 重放。先返回已知本地接口，后续全局预算不抹掉它；路由完整只覆盖已保存关系，
+不是目标集或全程序 consumer/effects 闭合，也不是另一份权威图。
 
 已安装 ATen schema/header 的自动读取及 canonical 接口构造已有真实材料验证，但尚未
 发布进 current 整程序，也未接通 Python callable→native overload。后者必须读取真实

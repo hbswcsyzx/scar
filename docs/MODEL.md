@@ -111,7 +111,7 @@ State SSA 表达静态读写依赖；循环/分支版本是符号版本，不是
 记录而不制造运行时 Nop。编译器前导与源码 import 共用位置时，必须沿已验证的 compiler
 profile/offset 分界，不能按 source span 把前导误认为 import，也不能任意跳过未知指令。
 
-该状态桥区分：`fn=p.f; p.a=p.b; fn()` 的函数引用来自早先的 `p.f` 读点，G 内容却在真实 `fn` CALL/world 查询；`p.f=q.f` 后所选函数的 G 属于实际 factory 的 q，不能按表面 receiver p 判断；`p.a=p.b; p.b=other` 中 a 的来源是赋值当时的 payload/读点，不是未来的 b。callee 内同 key 的 STORE_GLOBAL 先参与覆盖，只有 entry binding 仍可到达 READ 的路径继续向外层状态查询。v7 的专项静态样例已覆盖上述关系、嵌套 creator、多层桥和上下文隔离；当前 LeWM 主体上尚未发布新版整范围索引，模块初始化的 G 写及显式 L/G 条件仍未完成。
+该状态桥区分：`fn=p.f; p.a=p.b; fn()` 的函数引用来自早先的 `p.f` 读点，G 内容却在真实 `fn` CALL/world 查询；`p.f=q.f` 后所选函数的 G 属于实际 factory 的 q，不能按表面 receiver p 判断；`p.a=p.b; p.b=other` 中 a 的来源是赋值当时的 payload/读点，不是未来的 b。callee 内同 key 的 STORE_GLOBAL 先参与覆盖，只有 entry binding 仍可到达 READ 的路径继续向外层状态查询。新版初始化条件域已有通用静态验证并随 v8 调用索引发布；当前真实索引的 module globals flow 仍为 0，完整接线不能由专项样例推定。
 
 实参、形参和正常返回的引用来源必须按调用上下文连接。`StaticCallContext` 引用原 caller、CALL、callee Use 和所选目标，不代表一次运行调用。沿返回结果进入 callee 时压入该上下文；从 formal 回到 actual 时，只能消费栈顶匹配的原调用，再回到其 caller 上下文。已有明确上下文而缺少来源时，不得退回无上下文的候选并集。否则 `identity(a)`、`identity(b)` 或多层 callback 的返回值会错误混合。
 
@@ -150,6 +150,12 @@ locator。环境 state domain 不是 points-to，声明的控制目的地不是�
 必要性查询覆盖非循环区域，每个 block 仅保留最近必要选择，再沿 controller 递归查询，
 不物化全部传递祖先。exact 必要关系仍受原入口范围限制，不证明调用结束，也不抹去
 挂起/恢复、外部入口及效果前沿。普通 CONTROL 不能直接用作值传播的路径筛选条件。
+
+值事实的 `occurrence` 字段独立记录进入原位置所需的选择及入口范围。结构 ownership
+边只把 producer/block 的发生条件交给原结果/Use，不传递内容或引用身份。固定点后若
+均匀 branch proof 与必要选择冲突，可记录原 route 的反证；原边保留，派生值从 seeds 重算。
+完整原正常返回族全部被反证才允许标无正常值；缺来源、MAY、未知目标或范围未完成不允许。
+保存的 Python candidate frame 尚不自动获得原同步入口证明，继续保留字段级 open。
 
 source role 和人类标签也不等于操作合同。例如源角色为 EXPRESSION 的操作仍可有原
 TRUTH 协议；分析必须消费准确协议/端口及来源，而不是按 label 或 role 猜行为。

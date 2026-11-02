@@ -4,7 +4,7 @@
 
 第一阶段只做一件事：不运行目标程序，从源码、配置、依赖实现、语言和库契约中取得可静态确定的信息，建立可展开、可查询、跨层依赖接通的程序图。之后才讨论化简。
 
-当前**未完成**。已实现共同跨分片依赖接口、首版值推理和区域边界查询。尚无新版整范围调用索引；完整状态/alias/effects 联合推理、依赖和资源映射均未闭合。最新事实和数量以 [STATUS](STATUS.md) 与 current manifest 为准。
+当前**未完成**。已实现共同跨分片依赖接口、首版值推理和区域边界查询。新版整范围调用索引已发布，但 35,747 个规范 CALL 仅 270 个有已连接候选；完整状态/alias/effects 联合推理、依赖和资源映射均未闭合。最新事实和数量以 [STATUS](STATUS.md) 与 current manifest 为准。
 
 按本计划自行验收，结果回写现有 STATUS，代码使用 Git 管理；不新增历史目录、worktree 或一套 gate 报告。
 
@@ -15,36 +15,27 @@ AST 是输入，局部 canonical 已有 CFG/SSA/状态图。原结构性缺口�
 
 按以下顺序推进，自行核查后写入 STATUS，不等待用户逐项审批：
 
-本轮先修两项源码阻断（compiler prelude/import 和编译期 Global），完成 v8 初始化状态域、
-无 artifact 按需派工及预算计量；短核验完成后做一次整范围调用发布。真实两份模块的新
-重建已推进至 AnnAssign；其后将继续该通用注解协议与 class SETUP_ANNOTATIONS，而不为
-样本文件写规则。当前已发布图的旧主体不因此自动算新覆盖。
+当前问题已经由全范围结果定位：不是未发布调用目录，而是已有调用的来源关系仍断开。
+CEM solve 的 48 个原 CALL 均无目标候选。先按原 callee/receiver/namespace/state 端口
+逐条定位第一处断边，按共同原因修复，不以同名定义填充候选。
 
-当前立即执行的三个修复单位：①同一 live task 继续全范围 calls 发布，先确认越过已定位的
-大主体缓存热点，不因观察超时重启；②原 BRANCH 谓词闭合后按证据重算值路径，保留原图；
-③复用原生声明工具补 native 接口与共同导航，下一步补真实 Python binding/参数转换到
-完整 overload 的连接。②③已有短核验；①运行中，③的整程序连接仍未完成。之后再恢复
-AnnAssign/主体覆盖和联合状态推理，不跳到 detector/backend。
+下一轮分三项并行准备、按依赖顺序验收：
 
-新增明确修复项：计算 normal result0 只传到原 NORMAL landing，不能因 RAISE 也有
-slot0 就复用；TRUTH 从原协议合同识别，并按已知 builtin literal 表示推导正常 bool，
-原异常/效果和外部 guard 保留。原编译器折叠的 `if True/False` 无对应 bytecode 时，目前
-前端仍保持 REQUIRED_EXPANSION；需补静态折叠/零指令语法展开，不能列作必须动态观察。
-producer/current 冻结结束后与 AnnAssign 一起推进。
+- **接线审计**：保存原调用→callee来源→首次缺边的证据路径，分清缺主体、缺协议、缺状态关系与真正未绑定输入。验收是精确原端点可定位，不能只汇总 frontier。
+- **主体覆盖**：模块字面 bool If 的 source/compiler 映射已实现并独立读回；下一项 module AnnAssign、class annotation，复用原 compiler prelude/lazy factory/namespace/world。真实两份模块已分别推进至第 11/9 行注解赋值；只在定点重建后更新覆盖。
+- **同图推理**：控制必要条件到值路由已接入同一工作队列；保留原图/条件/反证。进一步将 receiver、字段读取和 reaching writes 回馈调用解析，避免专项 reader 各自得到事实而互不消费。
 
-绑定状态独立 domain 与原 read guard 证明已实现；不动点收敛/原 scope 完整分开。
-接下来的共同推理任务是：把原 JUMP/RETURN 等 source occurrence 的必要入口条件接到
-同一值队列，而不是只识别 BRANCH 的选择。查询原 Use owner 的 exact entry-necessity
-关系，并沿 controller 继续追踪；普通 postdom/MAY 影响不能作路径前提。跨 frame、恢复/
-外入口、未证 guard 和预算保留范围，所有候选路径被确证反证时才可标 infeasible；不另
-建 solver/图、不删原 source edges，也不按源码行或业务 label 推 reachability。
+全范围任务已于 2026-11-02 21:42 UTC PUBLISHED，producer 不再受该任务冻结。不要为
+核验小修复反复启动 107 分钟全范围 linker；先做原主体/接口检查，输入改变后再原子更新
+有关关系，明确索引和主体版本边界。outgoing 原始路由及 typed 重放已分离，预算不足
+保留已知边；它没有弥补未建模的关系。
 
 1. **共同依赖图（已实现，完整覆盖待核对）**：qualified 原端点、上下文、typed 关系、原证据、
    共享只读加载；接局部、call/env/G、class provider 和控制依赖，公开遍历。
 2. **首版共同分析（已实现）**：原操作 cut 的字段级边界；跨参数/返回/绑定的有限常量、
    builtin 类型和定义来源工作队列。覆盖赋值不能借用旧值，预算不能抹掉已知字段。
-3. **真实全范围接线（class 已枚举发布，calls 待发布）**：核对公开共同图穿越真实
-   parent/provider/suite，再发布新版 calls。任务运行与成功发布分开，不重启仍推进的长任务。
+3. **真实全范围接线（class/calls 已枚举发布，关系仍不完整）**：公开共同图已读回真实
+   parent/provider/suite 和跨文件参数接口；继续核对实际规划/model 路径，枚举完整不能代替依赖闭包。
 4. **消除推理欠账（持续）**：module 初始化 L/G 已有 v8 条件地址域与通用验证；继续补 binding/容器字段及
    逐地址状态关系，将 alias/effects、类型/常量/Tensor 属性接入同一固定点；不能从一般
    依赖直接推身份，不能通过删除条件让 CANDIDATE 伪装成 EXACT。
@@ -71,9 +62,9 @@ producer/current 冻结结束后与 AnnAssign 一起推进。
 |---|---|---|
 | 输入材料 | 当前含 862 份源码/声明文件；已送前端 280 份外部材料，依赖实现、配置事实、原生算子契约仍未完整接入 | Python 调用之后还不能完整追到库、runtime API/kernel 接口和资源 |
 | 主体展开 | 107 项模块后缀、45 项 class suite 后缀、326 项 lowerer 不支持、404 项规则形态不支持；3,731 个入口适配项待核对独立/内联归属 | 一些已知源码仍未形成完整规范子图 |
-| 跨层连接 | 共同接口已接 parent/provider/suite 和条件 G/state；class 已全批枚举发布且缺口显式，calls 未发布，初始化 L/G 已实现条件域但新版真实 calls 待发布，defaults/容器和隐式协议仍不完整 | 已有子图仍不能组成完整的数据与状态依赖图 |
+| 跨层连接 | 共同接口已接 parent/provider/suite 和条件 G/state；class/calls 已枚举发布，目标解析、module globals、receiver、defaults/容器和隐式协议仍不完整 | 已有子图仍不能组成完整的数据与状态依赖图 |
 | 联合推理 | 首版 scalar/type/定义来源已消费共同图；完整 points-to、逐位置状态、effects 与容器/Tensor 属性尚未联合求解 | 条件无法充分消解，已知局部性质无法贯穿整程序 |
-| 全量交付 | 新版调用索引未发布；长任务已有 PID 身份、进度和终态记录，须完成全批发布与公开读回 | 局部回归和进程内计数不能证明整范围完成 |
+| 全量交付 | 新版调用索引已发布并公开读回；真实 CEM 链仍未接通，主体和关系范围未闭合 | 局部回归和进程内计数不能证明整范围完成 |
 
 3,731 个缺适配目录项中有部分已在父图内联，不能机械地理解为缺少同等数量的 Python frame。库摘要可以作为有版本、来源、接口和效果范围的抽象边界，不能以一个没有内容的 OPAQUE 计作库内部已经恢复。
 

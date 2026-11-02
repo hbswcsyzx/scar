@@ -69,7 +69,9 @@ python -m scar.cli static-query --program-graph --file solver/cem.py \
   --direction outgoing --relation ARGUMENT --max-points 4 --max-edges 8 --max-depth 2
 ```
 
-这是当前保存图的一次有界查询，不代表完整闭包。对其它主体，用普通 `static-query` 或
+当前 class/calls 已枚举发布；35,747 个规范 CALL 中仅 270 个有已连接候选，第一阶段未完成。
+真实跨文件参数边的双向读回见 `artifacts/current/queries/lewm-call-interface-outgoing.json`；
+CEM 规划/model 链尚未贯通。这是当前保存图的一次有界查询，不代表完整闭包。对其它主体，用普通 `static-query` 或
 `ProgramDependencySession.index` 获取其原 ID。`--infer-values --node ...` 推导支持的不可变
 scalar/type/来源字段；重复 `--boundary-operation program_operation:...` 查询操作集合的区域边界。
 三个入口都不执行目标，导出复用 namespace/上下文/条件/证据。遍历耗尽、字段精度、未闭合项
