@@ -5,6 +5,68 @@ import subprocess
 import sys
 
 
+def test_outgoing_routes_all_saved_interfaces_without_replaying_unrelated_graphs(tmp_path):
+    import pytest
+    from scar.analysis.program_dependencies import ProgramDependencyGraph
+    from scar.analysis.program_call_dependencies import StaticCallDependencyProvider
+    from scar.analysis.program_dependency_session import ProgramDependencyBudget,ProgramDependencySession
+    from scar.analysis.static_program import link_static_program
+    from scar.ir.program.dependencies import DependencyKind as K,DependencyPoint,GraphNamespace
+
+    source=tmp_path/'source';source.mkdir();path=source/'program.py';model=tmp_path/'model'
+    path.write_text('def identity(value):\n    return value\n'
+        'def caller(value):\n    return identity(value)\n'
+        'def spare(value):\n    return identity(value)\nresult = caller(7)\n')
+    built=subprocess.run([sys.executable,'-B','-m','scar.cli','static',str(source),'--out',str(model),
+        '--jobs','1','--phase','bodies'],capture_output=True,text=True)
+    assert built.returncode==0,built.stdout+built.stderr
+    manifest=link_static_program(model)
+    assert len(manifest['static_calls']['shards'])>=3
+
+    def selected(session):
+        namespace,=session.select_bodies(file=str(path),entry='<module>.caller')
+        shard,=tuple(shard for shard,_ in session.relation_shards(namespace))
+        call,=shard.calls;target,=call.targets;argument,=target.arguments
+        return DependencyPoint(GraphNamespace.from_source(namespace),argument.actual_use),argument
+
+    with ProgramDependencySession(model)as session:
+        point,argument=selected(session)
+        graph=ProgramDependencyGraph(session.index,providers=(StaticCallDependencyProvider(session),))
+        out=graph.outgoing(point,kinds=(K.ARGUMENT,));edge,=out.edges
+        assert edge.target.node==argument.formal_value and len(edge.target.context)==1
+        assert out.enumerated and not any(f.kind=='OUTGOING_RELATION_INDEX_PARTIAL'for f in out.frontiers)
+        assert edge in graph.incoming(edge.target,kinds=(K.ARGUMENT,)).edges
+        measurements=session.measurements()
+        assert measurements['routing_complete']
+        assert measurements['routing_shards_read']==len(manifest['static_calls']['shards'])
+        # The spare caller was routed by raw receipt, not loaded as a core graph.
+        assert measurements['relationship_shards_read']<measurements['routing_shards_read']
+
+    # A bounded raw prefix cannot remove the already known local interface,
+    # and cannot be advertised as a closed set of potential consumers.
+    with ProgramDependencySession(model,budget=ProgramDependencyBudget(max_routing_shards=1))as session:
+        point,argument=selected(session)
+        graph=ProgramDependencyGraph(session.index,providers=(StaticCallDependencyProvider(session),))
+        out=graph.outgoing(point,kinds=(K.ARGUMENT,))
+        assert any(e.target.node==argument.formal_value for e in out.edges)
+        assert not out.enumerated and any(f.kind=='OUTGOING_RELATION_INDEX_PARTIAL'for f in out.frontiers)
+
+    # Even an unrelated producer's corrupted raw shard must reject routing;
+    # a receipt error is not an empty consumer list or an ordinary frontier.
+    spare=next(row for row in manifest['static_calls']['shards']if row['caller']['entry']=='spare')
+    descriptor=next(d for d in manifest['static_calls']['artifacts']
+        if d['path'].endswith(spare['artifact_path']))
+    artifact=model/descriptor['path'];original=artifact.read_bytes();artifact.write_bytes(original+b'bad')
+    try:
+        with pytest.raises(ValueError,match='(receipt|size|stored|SHA|bytes)'):
+            with ProgramDependencySession(model)as session:
+                point,_=selected(session)
+                graph=ProgramDependencyGraph(session.index,providers=(StaticCallDependencyProvider(session),))
+                graph.outgoing(point,kinds=(K.ARGUMENT,))
+    finally:
+        artifact.write_bytes(original)
+
+
 def test_saved_call_relationships_are_queryable_as_one_contextual_graph(tmp_path):
     from scar.analysis.program_call_dependencies import StaticCallDependencyProvider,dependency_context
     from scar.analysis.program_dependencies import ProgramDependencyGraph

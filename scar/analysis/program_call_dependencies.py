@@ -186,22 +186,41 @@ class StaticCallDependencyProvider:
         edges={};frontiers={};locators={};enumerated=True
         def note(kind,detail):
             row=Frontier(point,kind,detail);frontiers[row]=None
+        def emit(source,target,kind,meaning,locator,conditions=(),anchors=(),rule='STATIC_RELATION_EDGE_V1'):
+            if (source if outgoing else target)!=point:return
+            self._validate_point(source,indices);self._validate_point(target,indices)
+            sources=tuple(dict.fromkeys((locator,source.namespace.graph,target.namespace.graph)))
+            edge=Edge(source,target,kind,meaning,(Evidence(rule,sources,tuple(anchors)),),tuple(dict.fromkeys(conditions)))
+            edges[edge]=None
+            if source.context is None or target.context is None:
+                note('RELATION_CONTEXT_UNRESOLVED','Original endpoint is known, but its creation or caller context is not recorded.')
         try:
             for shard,locator in self.session.call_shards_for(point):
                 self._creation_sources(shard);locators[locator]=None
+                # A later global-routing budget cannot erase a known original
+                # interface.  Project the selected local/caller shards first.
+                self._project(shard,locator,point,outgoing,emit,note)
             if outgoing:
-                self._ensure_outbound_index()
-                locators.update(self._outbound.get((point.namespace,point.node),{}))
-                if self._index_issue:
-                    note('OUTGOING_RELATION_INDEX_PARTIAL',self._index_issue);enumerated=False
-            def emit(source,target,kind,meaning,locator,conditions=(),anchors=(),rule='STATIC_RELATION_EDGE_V1'):
-                if (source if outgoing else target)!=point:return
-                self._validate_point(source,indices);self._validate_point(target,indices)
-                sources=tuple(dict.fromkeys((locator,source.namespace.graph,target.namespace.graph)))
-                edge=Edge(source,target,kind,meaning,(Evidence(rule,sources,tuple(anchors)),),tuple(dict.fromkeys(conditions)))
-                edges[edge]=None
-                if source.context is None or target.context is None:
-                    note('RELATION_CONTEXT_UNRESOLVED','Original endpoint is known, but its creation or caller context is not recorded.')
+                routing=getattr(self.session,'outbound_call_locators',None)
+                if routing is not None:
+                    routed,complete,issue=routing(point)
+                    locators.update((locator,None)for locator in routed)
+                    if not complete:
+                        note('OUTGOING_RELATION_INDEX_PARTIAL',issue or 'Saved raw relationship routing is not fully enumerated.')
+                        enumerated=False
+                else:
+                    # Older/fake sessions retain their conservative typed
+                    # prefix behavior; they cannot assert a raw closed index.
+                    self._ensure_outbound_index()
+                    locators.update(self._outbound.get((point.namespace,point.node),{}))
+                    if self._index_issue:
+                        note('OUTGOING_RELATION_INDEX_PARTIAL',self._index_issue);enumerated=False
+            # Replaying an already projected local shard is intentional:
+            # selected foreign witnesses can refine a creator context.  Edges
+            # are deduplicated and every selected shard remains fresh-checked.
+            for locator in locators:
+                self.session.check()
+                self._creation_sources(self.session.load_call_shard(locator))
             for locator in locators:
                 self.session.check()
                 shard=self.session.load_call_shard(locator)

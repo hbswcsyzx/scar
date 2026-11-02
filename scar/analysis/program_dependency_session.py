@@ -31,6 +31,8 @@ class ProgramDependencyBudget:
     max_cached_bytes: int = 128 * 1024 * 1024
     max_graphs: int = 16
     max_shards: int = 256
+    max_routing_shards: int = 10000
+    max_routing_references: int = 1000000
     max_seconds: int = 60
 
     def __post_init__(self):
@@ -80,6 +82,7 @@ class ProgramDependencySession:
         self._descriptor_aliases = {}
         self._cache, self._cache_bytes = OrderedDict(), 0
         self._seen_graphs, self._seen_shards = set(), set()
+        self._call_routing = None
         from scar.analysis.static_function_environment import _EnvironmentFacts
         self._environment_facts = _EnvironmentFacts(max_bodies=self.budget.max_graphs,
             max_bytes=max(1, min(32 * 1024 * 1024, self.budget.max_cached_bytes // 4)))
@@ -234,7 +237,7 @@ class ProgramDependencySession:
                 self._cache_bytes -= removed
         return value
 
-    def _read_registered(self, key):
+    def _read_registered(self, key, *, cache_document=True):
         self.check()
         from scar.analysis.static_query import _Fragments
         physical, descriptor = self._artifacts[key]
@@ -258,7 +261,7 @@ class ProgramDependencySession:
         document = _Fragments.read(reader, {**descriptor, "path": physical.name})
         if _stamp(physical) != before:
             raise ValueError("dependency artifact changed during read")
-        return self._put(cache_key, document, descriptor["decoded_bytes"])
+        return self._put(cache_key, document, descriptor["decoded_bytes"]) if cache_document else document
 
     def read(self, descriptor):
         relative = Path(descriptor["path"])
@@ -624,6 +627,26 @@ class ProgramDependencySession:
 
     iter_call_shards = relation_shards
 
+    def outbound_call_locators(self, point):
+        """Route over every saved raw interface; fresh-check selected shards.
+
+        Raw routing consumes its own bounded shard/reference counts plus the
+        ordinary input/time budgets.  It does not consume a typed graph/shard
+        admission or retain 6697 decoded documents in the graph cache.
+        """
+        from scar.analysis.program_relation_routing import RawCallRelationRouting
+        if self.call_publication is None:
+            raise ValueError("CALL_RELATIONS_NOT_PUBLISHED: no saved call relationships were supplied")
+        if self._call_routing is None:
+            self._call_routing = RawCallRelationRouting(items=self._call_items,
+                source_model=self.call_publication["source_model"], version=self.call_publication["schema_version"],
+                read=lambda uri: self._read_registered(self._logical[uri], cache_document=False), check=self.check,
+                max_shards=self.budget.max_routing_shards, max_references=self.budget.max_routing_references)
+        result = self._call_routing.lookup(point.namespace)
+        locators = tuple(self._locator(uri, "scar.static-call-shard/" + str(self.call_publication["schema_version"]),
+            "#/relations") for uri in result.uris)
+        return locators, result.complete, result.issue
+
     def call_shards_for(self, point):
         selected = {point.namespace}
         for frame in point.context or ():
@@ -762,8 +785,12 @@ class ProgramDependencySession:
         return point.node in scope[0 if incoming else 1]
 
     def measurements(self):
+        routing = self._call_routing
         return {"input_bytes": self.input_bytes, "cache_accounted_bytes": self._cache_bytes + self._environment_facts.bytes,
                 "graphs_read": len(self._seen_graphs), "relationship_shards_read": len(self._seen_shards),
+                "routing_shards_read": routing.shards if routing is not None else 0,
+                "routing_references": routing.references if routing is not None else 0,
+                "routing_complete": routing.complete if routing is not None else False,
                 "seconds": time.monotonic() - self.started, "target_executed": False}
 
     def close(self):
@@ -778,6 +805,7 @@ class ProgramDependencySession:
             self._cache_bytes = 0
             self._environment_facts.bodies.clear()
             self._environment_facts.bytes = 0
+            self._call_routing = None
             self.closed = True
 
     def __enter__(self):
