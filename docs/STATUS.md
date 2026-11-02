@@ -72,10 +72,43 @@
 - **Verified（相关合并检查）**：source-only seeding、初始化状态与 compiler/class 构造三项
   合并通过，16.03 秒。没有重跑原长 G 综合；只同步其 v8/旧 fixture 兼容约束。
 
-下一项按完整 862 units / 8,819 artifacts 发布 v8 calls；使用明确输入/缓存/时间预算，
-单任务进度和终态独立保存。代码与 current 在该任务期间冻结，不用首 N 个范围代替完整分母。
+第一次 v8 全范围任务 `5999061b31aa4e74b797e03ac6fadd15` 已由 Root **有原因地取消**，
+终态 INTERRUPTED / exit130，3,319.5 秒，已进入 1,909/8,819 artifacts。不是观察超时：
+原 65,027,047-byte body 超过写死的 64,000,000-byte 派生缓存，每次构造即淘汰；终止栈
+确实落在 `_index` 重复 metadata decode/hash。取消前未发布，已验证 current SHA 不变；
+未发布内存事实需要重算。此任务 PID 与监控均已退出，没有杀其它进程或改 LeWM。
 
-## 本轮代码和实际核验
+已修复：派生缓存服从显式 session/record 预算，复用 loader 的已校验 typed metadata/module；
+单体超过缓存预算会在构造前显式拒绝，不再构造后立即丢弃而反复重算。相关 public reader
+使用其会话预算，默认独立 reader 上限 256 MB。原输入和 namespace/source 检查保留。
+同一原 DINOv3.forward 主体新冷读/校验 29.079 秒，连续索引查询 0.047 秒，属性收集
+0.129 秒，1 次 build / 732 次 hit / 1 次 metadata reuse，83 个读接口。机器证据保存为
+`artifacts/current/queries/module-index-regression.json`。这不是完整上下文工作队列或目标加速比。
+相关初始化/派工/小 IR 合并 3 项通过，8.34 秒。修复提交后再启动一次完整范围发布，
+保持 862 units / 8,819 artifacts 分母与 128 GiB input、8 GiB cache、7,200 秒预算。
+
+共同查询会话新增按 namespace 的 shard 元数据邻接索引，不再每端点扫描/解码所有 header。
+class 短检查通过（9.53 秒）；同一 current LeWM 三层查询的新旧规范化节点、边、条件、
+证据与前沿逐字段相等，本次查询 5.561 秒。先前 9.065 秒与本次系统状态不同，只是成本
+样本，不据此计算 LeWM 或分析器加速比。索引为会话内派生结构，不是第二份程序图。
+
+共同值分析新增独立 immutable_tuple 字段（report schema 2），支持原 tuple 构造、跨层
+参数/返回和 int/bool/负索引；保持 literal 位模式，不保存 Tensor 数值。原静态源码已推导
+`(4,(8,16))`、嵌套索引 16、bool 索引 3；未知/覆盖/mutable/越界反例仍保留前沿。
+READ_CODE_CONSTANT 复用原静态编译证据并保持 active-code 条件；编译缓存限 4 units，
+按源码与 CodeType/co_consts 闭包计量上限 16 MiB，不是分析进程 RSS 限制。扩展原集成
+2 项通过（47.61 秒），最终小 IR 类型边界与 MAY/N/A 未知路径检查通过（0.95 秒）。
+
+声明导航补齐 EnvironmentInterface 成员/状态域与 ControlPort 的原 block/具名 exit；
+原精确 locator 与上下文保留，不造 scope/exit ID，不把声明/结构边当身份或实际 transfer。
+区域、v8 初始化和小 IR 值分析合并 3 项通过（9.65 秒）；native/provider 其它关系欠账仍保留。
+
+长计算热点的进一步诊断仅作用于分析器：原记录约 65 MB（metadata 约 37 MB），
+15 秒限时 core decoder 探针显示递归 record_errors 有明显成本；另一采样分离出 core约11.6秒、
+metadata约4.5秒、index再校验约6.8秒。它们不能解释二十多分钟反复重建；精确 cache-thrash
+控制流和取消时调用栈才定位了本次根因。外部调试附加不可用，未修改系统权限。
+
+## 已有统一图的核验
 
 - **共同图/调用**：原 actual/formal、normal/raise、world、环境和 G/state 进入同一接口；
   匹配静态接口栈进出，不回退到不同调用并集。唯一跨模块综合检查通过，222.42 秒；独立

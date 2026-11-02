@@ -806,8 +806,12 @@ def _call_relations(manifest, unit, entries, fragments, limit, *, body_loader=No
                         decode(OperationDefinitionID,row['definitions'][0]),None,metadata.entry,
                         decode(RegionID,document['graph']['root']))
                     yield load_body(namespace)
+    reader_budget=getattr(getattr(fragments,'owner',None),'budget',None)
+    module_cache=(min(reader_budget.max_cached_bytes,reader_budget.max_record_bytes)
+        if reader_budget is not None else 256_000_000)
     module_engine=ModuleAttributeDependencies(load_body=load_body,source_context=module_source_context,
-        module_bodies=module_bodies,namespace_for=lambda body:body.dependencies)
+        module_bodies=module_bodies,namespace_for=lambda body:body.dependencies,
+        max_cached_bytes=module_cache)
     def check_module_context(context,requirements):
         callee=load_body(context.callee)
         check_definition(context.definition,callee.unit)

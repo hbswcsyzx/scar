@@ -149,17 +149,17 @@ def export_value_analysis(result):
             'unknown_paths': [table.frontier(item) for item in value.unknown_paths]}
     def fields_of(value):
         return {name: field(getattr(value, name)) for name in
-                ('reference_sources', 'scalar_constant', 'builtin_type')}
+                ('reference_sources', 'scalar_constant', 'builtin_type', 'immutable_tuple')}
     facts = [{'point': table.point(fact.point), 'role': fact.role, 'feasible': fact.feasible,
         'fields': fields_of(fact.fields),
         'binding_payload': None if fact.binding_payload is None else fields_of(fact.binding_payload),
         'binding_states': [item.value for item in fact.binding_states]} for fact in result.facts]
     frontiers = [table.frontier(item) for item in result.frontiers]
-    return {'schema': 'scar.program-value-analysis', 'schema_version': 1, 'roots': roots,
+    return {'schema': 'scar.program-value-analysis', 'schema_version': 2, 'roots': roots,
         **table.tables, 'facts': facts, 'frontiers': frontiers, 'usage': result.usage,
         'fixed_point_reached': result.exhausted, 'whole_program_complete': False,
         'transformation_authorized': False,
-        'qualification': 'Field-wise definition provenance and supported immutable builtin scalar facts. '
+        'qualification': 'Field-wise definition provenance and supported immutable builtin scalar/tuple content facts. '
             'A source Point is not an ObjectID or content identity; conditions and unknown paths remain explicit.'}
 
 

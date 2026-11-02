@@ -220,3 +220,67 @@ def test_boundary_keeps_direct_and_invoke_state_interfaces_and_separates_escape(
     assert any(edge.kind is DK.BINDING_PAYLOAD and edge.target.node == V('binding')
         for edge in binding_view.outgoing(P(binding_namespace, U('bind.payload'))).edges)
     assert path.read_bytes() == payload
+
+    # Declaration membership is navigable without becoming value equality,
+    # points-to or an executed language-completion transfer.
+    from types import SimpleNamespace
+    from test_program_environments import _environment_graph
+    from tests.fixtures.program_control_graphs import _source
+    from scar.analysis.program_value_analysis import ProgramValueAnalysis
+    from scar.ir.program.control import ControlPort, ControlScope, ControlScopeKind, LanguageCompletionKind
+    from scar.ir.program.dependencies import DependencyMeaning as DM
+    from scar.ir.program.ids import ControlPortID, ControlScopeID
+    env_graph = _environment_graph(invoke=True, unknown_targets=True)
+    environment = env_graph.environments[0]
+    owner = next(r for r in env_graph.regions if r.id == environment.region)
+    scope = ControlScope(ControlScopeID('environment.function'), owner.id, None,
+        ControlScopeKind.FUNCTION, _source('environment-declaration'), tuple(b.id for b in owner.blocks))
+    block_port = ControlPort(ControlPortID('declared.block'), scope.id,
+        LanguageCompletionKind.FALLTHROUGH, block=owner.entry)
+    exit_port = ControlPort(ControlPortID('declared.exit'), scope.id,
+        LanguageCompletionKind.RETURN, exit='normal')
+    env_graph = replace(env_graph, control_scopes=(scope,), control_ports=(block_port, exit_port))
+    env_index = ProgramIndex(env_graph)
+    env_document = {'graph': json.loads(dumps(env_graph))}
+    env_payload = json.dumps(env_document, sort_keys=True).encode()
+    env_path = tmp_path / 'declarations.json'; env_path.write_bytes(env_payload)
+    env_sha = hashlib.sha256(env_payload).hexdigest()
+    env_locator = SourceArtifactLocator(ProviderArtifact(str(env_path), env_sha, len(env_payload), 'scar.program-graph'),
+        env_sha, len(env_payload), 'canonical-json', pointer='#/graph')
+    env_namespace = GraphNamespace(env_locator, namespace.representation, env_graph.root)
+    env_view = ProgramDependencyGraph(lambda ns: env_index)
+    env_point = P(env_namespace, environment.id)
+    member = environment.members[-1]
+    member_point = P(env_namespace, member.reference)
+    declaration_edges = env_view.outgoing(env_point).edges
+    assert {edge.target.node for edge in declaration_edges} == {m.reference for m in environment.members}
+    assert all(edge.kind is DK.CONTAINS and edge.meaning is DM.STRUCTURE and not edge.conditions for edge in declaration_edges)
+    member_edge = next(edge for edge in declaration_edges if edge.target == member_point)
+    assert member_edge.evidence[0].sources[0].pointer == '#/graph/environments/0/members/5'
+    assert member_edge.evidence[0].anchors == (env_point, member_point)
+    assert env_document['graph']['environments'][0]['members'][5]['role'] == 'CAPTURED_CELL'
+    assert env_document['graph']['environments'][0]['members'][5]['cell_position'] == 0
+    member_inputs = env_view.incoming(member_point)
+    assert any(edge.source.node == env_graph.locations[0].id and edge.kind is DK.STATE_LOCATION
+        and edge.meaning is DM.STRUCTURE for edge in member_inputs.edges)
+    assert not any(edge.kind is DK.ALIAS for edge in member_inputs.edges)
+    assert any(edge.source.node == owner.id for edge in env_view.incoming(env_point).edges)
+    block_declaration = env_view.outgoing(P(env_namespace, block_port.id))
+    assert any(edge.target.node == owner.entry and edge.kind is DK.CONTROL_FLOW
+        and edge.meaning is DM.STRUCTURE for edge in block_declaration.edges)
+    named_exit = env_view.outgoing(P(env_namespace, exit_port.id))
+    assert any(edge.target.node == owner.id and edge.kind is DK.CONTROL_FLOW
+        and edge.meaning is DM.STRUCTURE
+        and any(source.pointer == '#/graph/regions/1/exits/0' for source in edge.evidence[0].sources)
+        for edge in named_exit.edges)
+    assert any(f.kind == 'CONTROL_PORT_TRANSFER_RELATIONS_OPEN' for f in named_exit.frontiers)
+    assert not any(f.kind == 'PROTOCOL_ENTITY_RELATIONS_OPEN' for f in env_view.outgoing(env_point).frontiers)
+    env_caller = next(op for op in env_graph.operations if op.callee == owner.id)
+    env_frame = DependencyFrame(env_namespace, env_caller.id, None, None, env_namespace, entry=owner.id)
+    contextual_edge = next(edge for edge in env_view.outgoing(P(env_namespace, environment.id, (env_frame,))).edges
+        if edge.target.node == member.reference)
+    assert all(anchor.context == (env_frame,) for anchor in contextual_edge.evidence[0].anchors)
+    env_session = SimpleNamespace(index=lambda ns: env_index, check=lambda: None)
+    value_result = ProgramValueAnalysis(env_session, env_view).analyze((env_point, member_point))
+    assert not value_result.edges  # Structural declaration edges never enter the value solver.
+    assert not value_result.for_point(member_point).fields.reference_sources.alternatives

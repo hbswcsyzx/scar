@@ -70,6 +70,16 @@ def test_import_initializer_globals_reach_shared_graph_without_alias_invention(t
         # IR variant, not the source model or any saved source receipt.
         projection=next(p for name,owner,p in owners if name=='a_provider.py')
         body=session.load_body(projection.source_body);original=NamespaceDependencies(body.graph,body.document,index=body.index)
+        from scar.analysis.static_module_attributes import ModuleAttributeDependencies
+        options=dict(load_body=session.load_body,source_context=session.source_context,
+            module_bodies=lambda name:(),namespace_for=session.namespace_for)
+        indexes=ModuleAttributeDependencies(**options,max_cached_bytes=body.namespace.graph.decoded_bytes)
+        indexed=indexes._index(body)
+        assert indexes._index(body) is indexed and indexed.metadata is body.metadata
+        assert indexes.index_metrics=={'builds':1,'hits':1,'metadata_reuses':1,'oversize_rejections':0}
+        tiny=ModuleAttributeDependencies(**options,max_cached_bytes=1)
+        with pytest.raises(OverflowError,match='explicit cache budget'):tiny._index(body)
+        assert tiny.index_metrics['builds']==0 and tiny.index_metrics['oversize_rejections']==1
         writes=sorted((w for w in original.writes.values()if original._string(w.keys[0])=='value'),
             key=lambda w:list(body.index.operations).index(w.operation))
         assert len(writes)==2

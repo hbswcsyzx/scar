@@ -377,7 +377,9 @@ class StaticCallSession:
                 max_steps=self.budget.max_resolution_steps,max_facts=self.budget.max_namespace_facts,
                 check=self._check,external_fact_count=lambda:((self._interprocedural.fact_count if self._interprocedural is not None else 0)
                     +(self._module_state.fact_count if self._module_state is not None else 0)),
-                max_cached_bytes=min(self.budget.max_cached_bytes,64_000_000))
+                # A reader-admitted body must fit the derived-input cache.
+                # A fixed 64 MB cap made a 65 MB body rebuild on every query.
+                max_cached_bytes=min(self.budget.max_cached_bytes,self.budget.max_record_bytes))
         return self._module_attributes
 
     def _module_state_dependencies(self):
@@ -1680,6 +1682,7 @@ def build_static_call_links(directory, out, *, logical_root=None, expected_manif
                              "canonical_calls_published": published_calls,
                              "qualification": "Source syntax includes defaults/annotations/decorators and unlowered bodies; canonical CALL scope is separate and does not cover all source calls."},
             "measurements": {"input_bytes": session.input_bytes, "output_bytes": session.output_bytes,
+                             "module_index": dict(modules.index_metrics) if modules is not None else None,
                              "seconds": time.monotonic() - session.started},
             "qualification": "Conditional source relations over original qualified ports. SOURCE_VIEW_REFINEMENT identifies canonical CALL refinement of an original SG opaque Call, not a preexisting computational CALL overlay. No invocation, content identity, independent language replay, closed effects or runtime completion is established."}
 

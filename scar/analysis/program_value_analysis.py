@@ -7,14 +7,14 @@ not an identity rule; only the explicit port/field rules below transfer facts.
 from __future__ import annotations
 
 import ast
-from collections import defaultdict,deque
+from collections import defaultdict,deque,OrderedDict
 from dataclasses import dataclass,replace
 from enum import Enum
 from itertools import product
 from typing import Literal
 from scar.analysis.constants_v2 import _BudgetExceeded,_Unsupported
 
-from scar.ir.literals import PythonLiteral,LiteralKind,literal_builtin_type
+from scar.ir.literals import PythonLiteral,LiteralKind,literal_builtin_type,_preflight_literal
 from scar.ir.program.bindings import BindingState
 from scar.ir.program.dependencies import (DependencyCondition as Condition,
     DependencyEvidence as Evidence,DependencyFrontier as Frontier,
@@ -42,7 +42,7 @@ class ValueAlternative:
     strength: Strength = Strength.EXACT
 
     def __post_init__(self):
-        if type(self.value)not in(PythonLiteral,Point,str):raise TypeError('value alternative must be a scalar literal, original reference point or builtin type name')
+        if type(self.value)not in(PythonLiteral,Point,str):raise TypeError('value alternative must be an immutable literal, original reference point or builtin type name')
         for rows,kind in((self.conditions,Condition),(self.evidence,Evidence),(self.premises,Point)):
             if type(rows)is not tuple or any(type(item)is not kind for item in rows):raise TypeError('value proof requires typed immutable predicates, evidence and premises')
         if type(self.strength)is not Strength:raise TypeError('value proof needs DependencyStrength')
@@ -81,6 +81,7 @@ class ValueFields:
     reference_sources: ValueField = ValueField()
     scalar_constant: ValueField = ValueField()
     builtin_type: ValueField = ValueField()
+    immutable_tuple: ValueField = ValueField()
 
     def __post_init__(self):
         if any(type(a.value)is not Point for a in self.reference_sources.alternatives):
@@ -89,12 +90,20 @@ class ValueFields:
             raise TypeError('scalar constant contains only supported immutable builtin scalar literals')
         if any(type(a.value)is not str or not a.value.startswith('builtins.')for a in self.builtin_type.alternatives):
             raise TypeError('builtin type field contains only builtin type names')
+        if any(type(a.value)is not PythonLiteral or a.value.kind is not LiteralKind.TUPLE for a in self.immutable_tuple.alternatives):
+            raise TypeError('immutable tuple content contains only recursively immutable builtin tuple literals')
+        for alternative in self.immutable_tuple.alternatives:
+            # Frozen dataclass syntax does not protect externally forged
+            # children. Reuse the bounded, iterative literal grammar check:
+            # only builtin scalar payloads and exact tuple children survive.
+            _preflight_literal(alternative.value)
 
 
 _NA=ValueField(applicable=False)
-_TOKEN=ValueFields(_NA,_NA,_NA)
+_TOKEN=ValueFields(_NA,_NA,_NA,_NA)
 _SCALARS=frozenset((LiteralKind.NONE,LiteralKind.BOOL,LiteralKind.INT,LiteralKind.FLOAT64,
     LiteralKind.COMPLEX128,LiteralKind.STR,LiteralKind.STR_CODEPOINTS,LiteralKind.BYTES,LiteralKind.ELLIPSIS))
+_FIELDS=('reference_sources','scalar_constant','builtin_type','immutable_tuple')
 
 
 @dataclass(frozen=True,slots=True)
@@ -112,6 +121,8 @@ class ValueFact:
     def scalar_constant(self):return self.fields.scalar_constant
     @property
     def builtin_type(self):return self.fields.builtin_type
+    @property
+    def immutable_tuple(self):return self.fields.immutable_tuple
 
 
 @dataclass(frozen=True,slots=True)
@@ -124,6 +135,10 @@ class ValueAnalysisBudget:
     max_int_bits: int = 4096
     max_bytes: int = 65536
     max_work: int = 1000000
+    max_sequence_items: int = 4096
+    max_literal_depth: int = 64
+    max_compiled_units: int = 4
+    max_compiled_bytes: int = 16777216
 
     def __post_init__(self):
         if any(type(getattr(self,k))is not int or getattr(self,k)<1 for k in self.__dataclass_fields__):
@@ -154,6 +169,8 @@ class ProgramValueAnalysis:
         self._evaluations={}
         self._point_unknown=defaultdict(tuple)
         self._unsettled={}
+        self._compiled_units=OrderedDict();self._constant_tables={};self._code_literals={}
+        self._compiled_bytes=0
 
     def _note(self,point,kind,detail):
         item=Frontier(point,kind,detail);self._frontiers[item]=item
@@ -165,21 +182,150 @@ class ProgramValueAnalysis:
         if type(node)is UseID:node=index.use_site(node).use.value
         return index.values.get(node),index
 
+    def _evaluation_budget(self):
+        from scar.analysis.constants_v2 import EvaluationBudget
+        return EvaluationBudget(max_int_bits=self.budget.max_int_bits,max_bytes=self.budget.max_bytes,
+            max_work=self.budget.max_work,max_total_output_bytes=self.budget.max_bytes*16,
+            max_sequence_items=self.budget.max_sequence_items,max_literal_depth=self.budget.max_literal_depth)
+
+    @staticmethod
+    def _literal_size(literal,budget):
+        from scar.analysis.constants_v2 import _literal_size
+        # The legacy evaluator's envelope predates exact complex/codepoint
+        # literal kinds. Keep its bounds and add their conservative payload
+        # sizes without round-tripping the original exact bits/codepoints.
+        size=_literal_size(literal,budget);extra=0;pending=[literal]
+        while pending:
+            item=pending.pop()
+            if item.kind is LiteralKind.TUPLE:pending.extend(item.items)
+            elif item.kind is LiteralKind.COMPLEX128:extra+=8
+            elif item.kind is LiteralKind.STR_CODEPOINTS:extra+=max(0,len(item.payload)//2-8)
+        if size.bytes+extra>budget.max_bytes:raise _BudgetExceeded('exact literal payload budget exceeded')
+        return replace(size,bytes=size.bytes+extra)
+
     def _literal(self,point,literal,evidence,*,reference=False):
-        from scar.analysis.constants_v2 import _literal_size,EvaluationBudget
-        if literal.kind not in _SCALARS:
-            builtin=literal_builtin_type(literal)
-            return ValueFields(ValueField((ValueAlternative(point,evidence=(evidence,)),))if reference else _NA,
-                _NA,ValueField((ValueAlternative(builtin.__module__+'.'+builtin.__qualname__,evidence=(evidence,)),)))
-        _literal_size(literal,EvaluationBudget(max_int_bits=self.budget.max_int_bits,max_bytes=self.budget.max_bytes))
+        self._literal_size(literal,self._evaluation_budget())
         alternative=ValueAlternative(literal,evidence=(evidence,))
         builtin=literal_builtin_type(literal)
         return ValueFields(ValueField((ValueAlternative(point,evidence=(evidence,)),))if reference else _NA,
-            ValueField((alternative,)),ValueField((replace(alternative,value=builtin.__module__+'.'+builtin.__qualname__),)))
+            ValueField((alternative,))if literal.kind in _SCALARS else _NA,
+            ValueField((replace(alternative,value=builtin.__module__+'.'+builtin.__qualname__),)),
+            ValueField((alternative,))if literal.kind is LiteralKind.TUPLE else _NA)
 
     def _unknown(self,point,kind,detail):
         note=self._note(point,kind,detail);field=ValueField(unknown_paths=(note,))
-        return ValueFields(field,field,field)
+        return ValueFields(field,field,field,field)
+
+    def _compiled_constant(self,point,value):
+        """Read an existing constant-table contract from static compile output.
+
+        This never imports or executes the program. The original compiler
+        declaration and code path must reproduce exactly; a separate guard
+        keeps active runtime code identity unproved.
+        """
+        if type(value.origin)is not OperationResult or value.origin.index!=0:return None
+        body=self.session.load(point.namespace)
+        if not hasattr(body,'document'):return None
+        table=self._constant_tables.get(point.namespace)
+        if table is None:
+            from scar.ir.record_codec import decode
+            from scar.ir.program.source_language import CodeConstantSource
+            from scar.analysis.static_namespace import protocol_kinds
+            owner='module'if getattr(body,'module',None)is not None else'language'
+            rows=(getattr(body,'module',None).constants if owner=='module'else
+                tuple(decode(CodeConstantSource,row)for row in(body.document.get('language')or{}).get('constants',())))
+            protocols=protocol_kinds(body.document)
+            table={row.operation:(row,owner,n)for n,row in enumerate(rows)
+                if protocols.get(row.operation)=='READ_CODE_CONSTANT'}
+            self._constant_tables[point.namespace]=table
+        selected=table.get(value.origin.operation)
+        if selected is None:return None
+        row,owner,ordinal=selected;cache_key=point.namespace,value.id
+        literal=self._code_literals.get(cache_key)
+        if literal is None:
+            from pathlib import Path
+            import dis,json
+            from scar.ir.record_codec import encode
+            from scar.analysis.program_lowering import PreparedSource
+            from scar.analysis.static_compilation import compile_source_unit
+            from scar.ir.semantics_v2 import SourceSemanticsGraph
+            compilation=body.document.get('static_compilation')
+            if type(compilation)is not dict or compilation.get('evidence_kind')!='SOURCE_COMPILATION':
+                return self._unknown(point,'CODE_CONSTANT_PROVENANCE_OPEN','Constant-table read lacks its original static compiler declaration; runtime code is not substituted.')
+            tree,semantic,text=self.session.source_context(body)
+            key=(body.metadata.source.path,body.metadata.source.fingerprint,body.unit['namespace_root'],
+                json.dumps(compilation.get('compiler'),sort_keys=True))
+            cached_unit=self._compiled_units.get(key)
+            if cached_unit is None:
+                if len(text)>self.budget.max_compiled_bytes:raise _BudgetExceeded('compiler source exceeds its byte budget')
+                source_bytes=len(text.encode('utf-8'))
+                if source_bytes>self.budget.max_compiled_bytes:raise _BudgetExceeded('compiler source exceeds its byte budget')
+                semantics=SourceSemanticsGraph.from_dict(self.session.read(body.unit['artifacts']['semantics']),semantic)
+                # Compilation only consumes the original semantic/snapshot
+                # and AST fields; it does not need another CFG or symbol walk.
+                prepared=PreparedSource(Path(body.metadata.source.path),Path(body.unit['namespace_root']),
+                    text,semantic,semantics,None,tree,{})
+                from scar.analysis.static_compilation import StaticCompilationError
+                try:compiled=compile_source_unit(prepared)
+                except StaticCompilationError as error:
+                    return self._unknown(point,'CODE_CONSTANT_PROVENANCE_OPEN',str(error))
+                import sys
+                from types import CodeType
+                pending=[compiled.root_code];seen=set();size=source_bytes+len(compiled.entries)*256
+                while pending:
+                    item=pending.pop()
+                    if id(item)in seen:continue
+                    seen.add(id(item));size+=sys.getsizeof(item)
+                    if size>self.budget.max_compiled_bytes:raise _BudgetExceeded('static compiler products exceed their byte budget')
+                    if type(item)is CodeType:
+                        pending.extend((item.co_code,item.co_consts,item.co_names,item.co_varnames,item.co_freevars,
+                            item.co_cellvars,item.co_linetable,item.co_exceptiontable,item.co_filename,item.co_name,item.co_qualname))
+                    elif type(item)in(tuple,frozenset):pending.extend(item)
+                while self._compiled_units and(len(self._compiled_units)>=self.budget.max_compiled_units
+                        or self._compiled_bytes+size>self.budget.max_compiled_bytes):
+                    _,(_,released)=self._compiled_units.popitem(last=False);self._compiled_bytes-=released
+                self._compiled_units[key]=(compiled,size);self._compiled_bytes+=size
+                self._usage['compiled_cache_bytes']=self._compiled_bytes
+            else:compiled=cached_unit[0]
+            self._compiled_units.move_to_end(key)
+            source_body=point.namespace.source_body
+            evidence=(compiled.for_module(body.module.declaration.unit)if getattr(body,'module',None)is not None else
+                compiled.for_definition(source_body.definition,source_body.source)if source_body is not None and source_body.source is not None else None)
+            if evidence is None or encode(evidence.to_dict())!=compilation or row.code_key!=evidence.code_layout_key:
+                return self._unknown(point,'CODE_CONSTANT_PROVENANCE_OPEN','Original source/compiler/code path does not reproduce this declared constant table.')
+            if body.graph.frame_roots:
+                from scar.ir.program.source_subjects import SourceCompilationFrameRoot
+                scopes={scope.id:scope for scope in body.graph.control_scopes}
+                roots=[root for root in body.graph.frame_roots if scopes[root.scope].region==value.region]
+                if len(roots)!=1 or type(roots[0])is not SourceCompilationFrameRoot or roots[0].code!=evidence.to_reference():
+                    return self._unknown(point,'CODE_CONSTANT_PROVENANCE_OPEN','Constant table is not owned by this original source-compilation frame/root.')
+            atom=semantic.source_atoms.get(row.source.atom_id)
+            nodes=[n for n in ast.walk(tree)if atom is not None and type(n).__name__==atom.kind and
+                (getattr(n,'lineno',None),getattr(n,'end_lineno',None),getattr(n,'col_offset',None),getattr(n,'end_col_offset',None))==
+                (row.source.start_line,row.source.end_line,row.source.start_column,row.source.end_column)]
+            if (atom is None or atom.reference!=row.source or row.source.path!=body.metadata.source.path
+                    or row.source.fingerprint!=body.metadata.source.fingerprint or len(nodes)!=1
+                    or len(row.constant_path)!=1):
+                return self._unknown(point,'CODE_CONSTANT_PROVENANCE_OPEN','Constant source/atom/slot has no supported exact literal correspondence.')
+            instructions=[i for i in dis.get_instructions(evidence.code,adaptive=False,show_caches=False)
+                if i.opname=='LOAD_CONST'and i.arg==row.constant_path[0]and tuple(i.positions)==
+                    (row.source.start_line,row.source.end_line,row.source.start_column,row.source.end_column)]
+            if len(instructions)!=1 or type(instructions[0].argval)not in(tuple,str,bytes,int,bool,float,complex,type(None),type(Ellipsis)):
+                return self._unknown(point,'CODE_CONSTANT_CONTENT_UNSUPPORTED','This exact compiler table slot is not a supported immutable builtin literal.')
+            try:literal=PythonLiteral.from_python(instructions[0].argval,exact=True)
+            except (TypeError,ValueError)as error:raise _Unsupported('compiler constant is outside bounded immutable content: '+str(error))from error
+            size=self._literal_size(literal,self._evaluation_budget())
+            from scar.analysis.constants_v2 import _reserve
+            _reserve(size,self._usage,self._evaluation_budget());self._usage['output_bytes']+=size.bytes
+            self._code_literals[cache_key]=literal
+        source=replace(point.namespace.graph,pointer='#/'+owner+'/constants/'+str(ordinal))
+        compilation_source=replace(point.namespace.graph,pointer='#/static_compilation')
+        evidence=Evidence('SOURCE_COMPILED_IMMUTABLE_BUILTIN_V1',(source,compilation_source),(point,))
+        fields=self._literal(point,literal,evidence,reference=type(value)is ReferenceValue)
+        condition=Condition('scar.static-compilation','ACTIVE_CODE_MATCHES_SOURCE_COMPILATION',
+            Point(point.namespace,value.origin.operation,point.context))
+        return ValueFields(*(replace(getattr(fields,name),alternatives=tuple(replace(a,
+            conditions=(*a.conditions,condition))for a in getattr(fields,name).alternatives))for name in _FIELDS))
 
     def _seed(self,point):
         value,index=self._value(point)
@@ -211,8 +357,16 @@ class ProgramValueAnalysis:
                     try:return ValueFact(point,self._literal(point,evaluation.literal,evidence,reference=type(value)is ReferenceValue),feasible=True,role='LITERAL')
                     except (ValueError,TypeError,OverflowError,_BudgetExceeded,_Unsupported)as error:
                         return ValueFact(point,self._unknown(point,'LITERAL_FIELD_BUDGET',str(error)))
-        if type(value)is DataValue and value.data_type in ('builtins.int','builtins.bool','builtins.float','builtins.str','builtins.bytes','builtins.complex','builtins.NoneType'):
-            return ValueFact(point,ValueFields(reference_sources=_NA,builtin_type=ValueField((ValueAlternative(value.data_type,evidence=(evidence,)),))))
+            try:
+                constant=self._compiled_constant(point,value)
+                if constant is not None:return ValueFact(point,constant,feasible=True,role='LITERAL')
+            except (_BudgetExceeded,_Unsupported)as error:
+                return ValueFact(point,self._unknown(point,'CODE_CONSTANT_CONTENT_BUDGET',str(error)))
+        if type(value)is DataValue and value.data_type in ('builtins.int','builtins.bool','builtins.float','builtins.str','builtins.bytes','builtins.complex','builtins.NoneType','builtins.tuple'):
+            return ValueFact(point,ValueFields(reference_sources=_NA,
+                scalar_constant=_NA if value.data_type=='builtins.tuple'else ValueField(),
+                immutable_tuple=ValueField()if value.data_type=='builtins.tuple'else _NA,
+                builtin_type=ValueField((ValueAlternative(value.data_type,evidence=(evidence,)),))))
         if type(value)is DataValue:return ValueFact(point,ValueFields(reference_sources=_NA))
         return ValueFact(point)
 
@@ -238,7 +392,7 @@ class ProgramValueAnalysis:
 
     def _join(self,point,old,new,prefix=''):
         return ValueFields(*(self._join_field(point,prefix+name,getattr(old,name),getattr(new,name))
-            for name in ('reference_sources','scalar_constant','builtin_type')))
+            for name in _FIELDS))
 
     def _transfer(self,fields,edge):
         def field(value):
@@ -252,8 +406,12 @@ class ProgramValueAnalysis:
                     tuple(dict.fromkeys((*item.premises,edge.source))),strength))
             if edge.strength is Strength.MAY:
                 unknown.append(self._note(edge.target,'MAY_VALUE_SOURCE_OPEN','A may-dependence source does not close the other possible value paths.'))
-            return ValueField(tuple(alternatives),tuple(dict.fromkeys(unknown)),value.applicable)
-        return ValueFields(*(field(getattr(fields,name))for name in ('reference_sources','scalar_constant','builtin_type')))
+            # A possible source does not close the target's other possible
+            # types. Keep that open path even when this source's particular
+            # field is N/A; a declared target DataValue type is enforced later.
+            return ValueField(tuple(alternatives),tuple(dict.fromkeys(unknown)),
+                value.applicable or edge.strength is Strength.MAY)
+        return ValueFields(*(field(getattr(fields,name))for name in _FIELDS))
 
     def _operator(self,point):
         if point in self._operators:return self._operators[point]
@@ -266,13 +424,13 @@ class ProgramValueAnalysis:
         if len(links)==1 and links[0].opcode is not None:
             opcode=links[0].opcode.name
             from scar.analysis.constants_v2 import _BINARY,_UNARY
-            if opcode in _BINARY or opcode in _UNARY:
+            if opcode in _BINARY or opcode in _UNARY or opcode in('INDEX','BUILD_TUPLE'):
                 tree,semantic,text=self.session.source_context(body);source=links[0].source
                 atom=semantic.source_atoms.get(source.atom_id)
                 if (source.path!=body.metadata.source.path or source.fingerprint!=body.metadata.source.fingerprint
                         or atom is None or atom.reference!=source):
                     self._operators[point]=None;return None
-                nodes=[n for n in ast.walk(tree)if isinstance(n,(ast.BinOp,ast.UnaryOp))
+                nodes=[n for n in ast.walk(tree)if isinstance(n,(ast.BinOp,ast.UnaryOp,ast.Subscript,ast.Tuple))
                     and (n.lineno,n.end_lineno,n.col_offset,n.end_col_offset)==
                         (source.start_line,source.end_line,source.start_column,source.end_column)]
                 if len(nodes)==1:
@@ -280,22 +438,35 @@ class ProgramValueAnalysis:
                     node=nodes[0]
                     if atom.kind!=type(node).__name__:
                         self._operators[point]=None;return None
-                    expected=(BINARY_AST if isinstance(node,ast.BinOp)else UNARY_AST).get(type(node.op))
+                    if isinstance(node,ast.BinOp):
+                        expected=BINARY_AST.get(type(node.op));children=(node.left,node.right);names=('left','right','operand')
+                    elif isinstance(node,ast.UnaryOp):
+                        expected=UNARY_AST.get(type(node.op));children=(node.operand,);names=('operand',)
+                    elif isinstance(node,ast.Subscript)and isinstance(node.ctx,ast.Load)and not isinstance(node.slice,ast.Slice):
+                        expected='INDEX';children=(node.value,node.slice);names=('receiver','index')
+                    elif isinstance(node,ast.Tuple)and isinstance(node.ctx,ast.Load)and not any(isinstance(c,ast.Starred)for c in node.elts):
+                        expected='BUILD_TUPLE';children=tuple(node.elts);names=('element',)
+                    else:
+                        self._operators[point]=None;return None
                     if expected==opcode:
                         roles={u.use:u for u in sources.use_links if u.operation==point.node}
+                        if len(roles)!=sum(u.operation==point.node for u in sources.use_links):
+                            self._operators[point]=None;return None
                         operands=[]
                         for use in operation.uses:
                             role=roles.get(use.id)
-                            if role is not None and role.role in ('left','right','operand'):
+                            if role is not None and role.role in names:
                                 operands.append(use.id)
-                        count=2 if isinstance(node,ast.BinOp)else 1
-                        children=(node.left,node.right)if isinstance(node,ast.BinOp)else(node.operand,)
-                        if len(operands)==count and all(
+                        expected_roles=(('receiver','index')if opcode=='INDEX'else('element',)*len(children))
+                        precise_roles=(opcode not in('INDEX','BUILD_TUPLE')or
+                            tuple(roles[use].role for use in operands)==expected_roles)
+                        if len(operands)==len(children)and precise_roles and all(
                             (roles[use].source.start_line,roles[use].source.end_line,
                              roles[use].source.start_column,roles[use].source.end_column)==
                             (child.lineno,child.end_lineno,child.col_offset,child.end_col_offset)
                             and roles[use].source.path==source.path and roles[use].source.fingerprint==source.fingerprint
-                            for use,child in zip(operands,children)):
+                            and(opcode not in('INDEX','BUILD_TUPLE')or roles[use].index==i)
+                            for i,(use,child)in enumerate(zip(operands,children))):
                             result=opcode,tuple(operands)
         self._operators[point]=result
         return result
@@ -361,19 +532,38 @@ class ProgramValueAnalysis:
             matched.add(incoming.source.node)
         return matched==terminals
 
+    @staticmethod
+    def _content(fields):
+        # Alternative content domains are disjoint fields, not separate
+        # dependency paths. A scalar's nonapplicable tuple field adds no gap.
+        parts=(fields.scalar_constant,fields.immutable_tuple)
+        return ValueField(tuple(a for field in parts for a in field.alternatives),
+            tuple(dict.fromkeys(gap for field in parts for gap in field.unknown_paths)))
+
     def _evaluate_operator(self,point,operator):
-        from scar.analysis.constants_v2 import (_builtin,_python_value,_literal,_literal_size,
-            EvaluationBudget,ConstantRuntimeRequirement,_BudgetExceeded,_Unsupported)
+        from scar.analysis.constants_v2 import (_builtin,_python_value,_literal,
+            _reserve,_work,_Size,ConstantRuntimeRequirement,_BudgetExceeded,_Unsupported)
         opcode,operands=operator
         parents=[Point(point.namespace,use,point.context)for use in operands]
         if any(p not in self._facts for p in parents):
             return self._unknown(point,'VALUE_OPERAND_UNVISITED','A checked original operand lies beyond the discovered graph scope.')
-        fields=[self._facts[p].scalar_constant for p in parents]
+        fields=[self._content(self._facts[p].fields)for p in parents]
         unknown=tuple(dict.fromkeys(gap for field in fields for gap in field.unknown_paths))
-        alternatives=[];types=[];references=[]
-        if any(not field.alternatives for field in fields):return ValueFields(scalar_constant=ValueField(unknown_paths=unknown))
-        budget=EvaluationBudget(max_int_bits=self.budget.max_int_bits,max_bytes=self.budget.max_bytes,
-            max_work=self.budget.max_work,max_total_output_bytes=self.budget.max_bytes*16)
+        alternatives=[];tuples=[];types=[];references=[]
+        contract=Evidence('CANONICAL_IMMUTABLE_BUILTIN_OPERATOR_V1',(point.namespace.graph,),(point,*parents))
+        if opcode=='BUILD_TUPLE':
+            references.append(ValueAlternative(point,evidence=(contract,)))
+            types.append(ValueAlternative('builtins.tuple',evidence=(contract,)))
+        if any(not field.alternatives for field in fields):
+            if unknown:
+                kind=('IMMUTABLE_TUPLE_ELEMENT_OPEN'if opcode=='BUILD_TUPLE'else
+                    'IMMUTABLE_INDEX_KEY_OPEN'if opcode=='INDEX'and not fields[1].alternatives else
+                    'IMMUTABLE_INDEX_RECEIVER_OPEN'if opcode=='INDEX'else'BUILTIN_INPUT_CONTENT_OPEN')
+                unknown=(*unknown,self._note(point,kind,'Original operand content is not a proved immutable builtin literal; no user protocol or mutable contents are evaluated.'))
+            gap=ValueField(unknown_paths=unknown)
+            return ValueFields(ValueField(tuple(references))if references else gap,
+                _NA if opcode=='BUILD_TUPLE'else gap,ValueField(tuple(types))if types else gap,gap)
+        budget=self._evaluation_budget()
         combinations=product(*(field.alternatives for field in fields))
         for number,items in enumerate(combinations):
             if number>=self.budget.max_alternatives:
@@ -383,14 +573,27 @@ class ProgramValueAnalysis:
                 key=opcode,literals
                 cached=self._evaluations.get(key)
                 if cached is None:
-                    sizes=tuple(_literal_size(literal,budget)for literal in literals)
-                    values=tuple(_python_value(literal)for literal in literals)
+                    sizes=tuple(self._literal_size(literal,budget)for literal in literals)
                     state={'work':self._usage['work'],'output_bytes':self._usage['output_bytes']}
-                    value=_builtin(opcode,values,sizes,budget,state,literals)
-                    literal=_literal(value)
-                    if literal.kind not in _SCALARS:raise _Unsupported('result is not an immutable scalar')
-                    size=_literal_size(literal,budget);self._usage['work']=state['work'];self._usage['output_bytes']+=size.bytes
-                    builtin=literal_builtin_type(literal);cached=literal,builtin.__module__+'.'+builtin.__qualname__,type(value)is float
+                    if opcode=='BUILD_TUPLE':
+                        estimate=_Size(8*len(literals)+sum(s.bytes for s in sizes),
+                            len(literals)+sum(s.items for s in sizes),1+max((s.depth for s in sizes),default=0),
+                            max((s.bits for s in sizes),default=0))
+                        _reserve(estimate,state,budget);_work(max(1,estimate.items),state,budget)
+                        literal=PythonLiteral(LiteralKind.TUPLE,items=literals);floating=False
+                    elif opcode=='INDEX'and literals[0].kind is LiteralKind.TUPLE:
+                        if literals[1].kind not in(LiteralKind.INT,LiteralKind.BOOL):
+                            raise _Unsupported('immutable tuple indexing currently supports exact builtin int/bool keys, not arbitrary __index__ or slices')
+                        index=_python_value(literals[1]);sequence=literals[0].items
+                        _work(1,state,budget)
+                        if index < -len(sequence)or index>=len(sequence):raise IndexError('immutable tuple index is out of range')
+                        literal=sequence[index];_reserve(self._literal_size(literal,budget),state,budget);floating=False
+                    else:
+                        values=tuple(_python_value(literal)for literal in literals)
+                        value=_builtin(opcode,values,sizes,budget,state,literals)
+                        literal=_literal(value);floating=type(value)is float and opcode!='INDEX'
+                    size=self._literal_size(literal,budget);self._usage['work']=state['work'];self._usage['output_bytes']+=size.bytes
+                    builtin=literal_builtin_type(literal);cached=literal,builtin.__module__+'.'+builtin.__qualname__,floating
                     self._evaluations[key]=cached
                 literal,type_name,is_float=cached
                 guards=tuple(dict.fromkeys((*[c for item in items for c in item.conditions],
@@ -402,12 +605,17 @@ class ProgramValueAnalysis:
                 evidence=(*evidence,Evidence('BOUNDED_BUILTIN_SCALAR_V1',(point.namespace.graph,),(point,*parents)))
                 alternative=ValueAlternative(literal,guards,evidence,tuple(parents),
                     Strength.MAY if any(item.strength is Strength.MAY for item in items)else Strength.EXACT)
-                alternatives.append(alternative);types.append(replace(alternative,value=type_name))
+                (tuples if literal.kind is LiteralKind.TUPLE else alternatives).append(alternative)
+                types.append(replace(alternative,value=type_name))
                 references.append(replace(alternative,value=point))
-            except (_BudgetExceeded,_Unsupported,ArithmeticError,ValueError,TypeError)as error:
-                unknown=(*unknown,self._note(point,'BUILTIN_SCALAR_RULE_OPEN',type(error).__name__+': '+str(error)))
+            except (_BudgetExceeded,_Unsupported,ArithmeticError,LookupError,ValueError,TypeError)as error:
+                kind=('IMMUTABLE_INDEX_OUT_OF_RANGE'if isinstance(error,IndexError)else
+                    'IMMUTABLE_INDEX_KEY_UNSUPPORTED'if opcode=='INDEX'and isinstance(error,_Unsupported)else'BUILTIN_SCALAR_RULE_OPEN')
+                unknown=(*unknown,self._note(point,kind,type(error).__name__+': '+str(error)))
         return ValueFields(reference_sources=ValueField(tuple(references),unknown),
-            scalar_constant=ValueField(tuple(alternatives),unknown),builtin_type=ValueField(tuple(types),unknown))
+            scalar_constant=_NA if opcode=='BUILD_TUPLE'or tuples and not alternatives and not unknown else ValueField(tuple(alternatives),unknown),
+            builtin_type=ValueField(tuple(types))if opcode=='BUILD_TUPLE'else ValueField(tuple(types),unknown),
+            immutable_tuple=_NA if alternatives and not tuples and not unknown else ValueField(tuple(tuples),unknown))
 
     def _compute(self,point):
         seed=self._seed(point);fields=seed.fields;payload=seed.binding_payload;states=set(seed.binding_states)
@@ -453,11 +661,13 @@ class ProgramValueAnalysis:
                 fields.builtin_type.alternatives))and seed.role not in('BINDING_PAYLOAD','NONVALUE'):
             fields=self._join(point,fields,self._unknown(point,'VALUE_SOURCE_OPEN','No supported original value-source rule supplies this field.'))
         if self._point_unknown.get(point):
-            unknown=ValueField(unknown_paths=self._point_unknown[point]);gap=ValueFields(unknown,unknown,unknown)
+            unknown=ValueField(unknown_paths=self._point_unknown[point]);gap=ValueFields(unknown,unknown,unknown,unknown)
             if payload is not None:payload=self._join(point,payload,gap,'binding_payload.')
             else:fields=self._join(point,fields,gap)
         if type(value)is DataValue and seed.builtin_type.alternatives:
-            fields=replace(fields,builtin_type=seed.builtin_type)
+            fields=replace(fields,builtin_type=seed.builtin_type,
+                scalar_constant=fields.scalar_constant if seed.scalar_constant.applicable else _NA,
+                immutable_tuple=fields.immutable_tuple if seed.immutable_tuple.applicable else _NA)
         if type(value)is DataValue:fields=replace(fields,reference_sources=_NA)
         if seed.role in('BINDING_PAYLOAD','NONVALUE'):fields=_TOKEN
         return replace(seed,fields=fields,binding_payload=payload,binding_states=tuple(sorted(states,key=lambda s:s.value)),feasible=feasible)
@@ -515,7 +725,7 @@ class ProgramValueAnalysis:
                 for point,fact in tuple(self._facts.items()):
                     if fact.feasible is False or fact.role in('BINDING_PAYLOAD','NONVALUE','NO_NORMAL_RESULT'):continue
                     fields=fact.fields
-                    for name in('reference_sources','scalar_constant','builtin_type'):
+                    for name in _FIELDS:
                         field=getattr(fields,name)
                         if field.applicable and not field.alternatives and not field.unknown_paths:
                             gap=self._note(point,'VALUE_FIELD_UNRESOLVED',name+' has no seeded finite proof; other known fields are retained.')
@@ -556,7 +766,7 @@ class ProgramValueAnalysis:
                 def opened(fields):
                     return ValueFields(*(replace(getattr(fields,n),unknown_paths=tuple(dict.fromkeys(
                         (*getattr(fields,n).unknown_paths,gap))))if getattr(fields,n).applicable else getattr(fields,n)
-                        for n in('reference_sources','scalar_constant','builtin_type')))
+                        for n in _FIELDS))
                 self._facts[point]=replace(fact,fields=opened(fact.fields),
                     binding_payload=opened(fact.binding_payload)if fact.binding_payload is not None else None)
             pending.extend((dependent,gap)for dependent in self._dependents.get(point,()))

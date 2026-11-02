@@ -124,7 +124,7 @@ class ModuleAttributeDependencies:
     """
     def __init__(self, *, load_body, source_context, module_bodies, namespace_for,
                  reference_sources=None, max_steps=4096, max_facts=262144, check=None,
-                 external_fact_count=None, max_cached_bytes=64_000_000,
+                 external_fact_count=None, max_cached_bytes=256_000_000,
                  import_initialization_contract=True):
         self.load_body,self.source_context,self.module_bodies=load_body,source_context,module_bodies
         self.namespace_for,self.reference_sources=namespace_for,reference_sources
@@ -134,6 +134,7 @@ class ModuleAttributeDependencies:
         _need(type(import_initialization_contract)is bool,'import initializer mode must be explicit')
         self.import_initialization_contract=import_initialization_contract
         self._facts=OrderedDict();self._active=set()
+        self.index_metrics={'builds':0,'hits':0,'metadata_reuses':0,'oversize_rejections':0}
         self.import_routes=defaultdict(dict);self.flows=defaultdict(dict);self.frontiers=defaultdict(dict)
         self.attribute_counts={};self.analyzed_reads=set()
         # Static interface/source-scope notes survive all demand refinements.
@@ -180,17 +181,30 @@ class ModuleAttributeDependencies:
 
     def _index(self,body):
         key=body.namespace
+        if key.graph.decoded_bytes>self.max_cached_bytes:
+            self.index_metrics['oversize_rejections']+=1
+            raise OverflowError('module-derived input exceeds its explicit cache budget; '
+                'refusing repeated uncached index construction')
         saved=self._facts.get(key)
         if saved is not None and saved[0] is body.graph and saved[1] is body.document:
+            self.index_metrics['hits']+=1
             self._facts.move_to_end(key);return saved[2]
         from types import SimpleNamespace
         from scar.analysis.static_fields import derive_attribute_accesses,FieldCFGPaths
         tree,semantic,text=self.source_context(body)
-        module=None
-        if body.document.get('module') is not None:
+        module=getattr(body,'module',None)
+        if module is None and body.document.get('module') is not None:
             from scar.ir.program.module_entries import decode_frame_body
             module=decode_frame_body(body.document['module'])
-        metadata=decode(LoweringMetadata,body.document['metadata'])
+        metadata=getattr(body,'metadata',None)
+        if metadata is None:
+            metadata=decode(LoweringMetadata,body.document['metadata'])
+        else:
+            _need(type(metadata)is LoweringMetadata,'body loader supplied noncanonical typed metadata')
+            self.index_metrics['metadata_reuses']+=1
+        _need(metadata.entry==body.namespace.entry and (body.namespace.source is None or
+            metadata.source.path==body.namespace.source.path and metadata.source.fingerprint==body.namespace.source.fingerprint),
+            'module-derived metadata differs from its original namespace/source')
         links=module.operation_links if module is not None else metadata.operation_links
         by_source=defaultdict(list)
         for node in ast.walk(tree):
@@ -226,6 +240,7 @@ class ModuleAttributeDependencies:
             reads={a.result:a for a in accesses if a.result is not None},
             writes=tuple(a for a in accesses if a.assigned is not None),
             paths=FieldCFGPaths(body,max_steps=self.max_steps,check=self.check))
+        self.index_metrics['builds']+=1
         self._facts[key]=(body.graph,body.document,result);self._facts.move_to_end(key)
         while (len(self._facts)>16 or sum(n.graph.decoded_bytes for n in self._facts)>self.max_cached_bytes):
             self._facts.popitem(last=False)

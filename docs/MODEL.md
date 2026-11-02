@@ -129,6 +129,16 @@ profile/offset 分界，不能按 source span 把前导误认为 import，也不
 地址未知不影响已知 dtype；shape 未完全确定仍可保留每个已知维度和维度等式。
 读取或修改引起的失效只传播到相关事实；不能因为一项未知就将整个节点或子图标为未知。
 
+已知内容现在分别进入 `scalar_constant` 与 `immutable_tuple`，后者只允许递归不可变的
+builtin literal，不表示 Python 对象身份、storage 或 Tensor 内容。原 tuple 构造、参数/返回、
+绑定和索引按原 AST/Opcode/Use 及上下文传播；未知索引、mutable 元素、覆盖和越界保留
+精确前沿。编译常量只在原源码、CodeKey、constant path、frame 和 LOAD_CONST 对应后读取
+静态编译产物，并附 `ACTIVE_CODE_MATCHES_SOURCE_COMPILATION`，不冒充运行 code 对象。
+
+EnvironmentInterface 成员与 ControlPort 目的地也已有声明导航，使用结构边和原记录
+locator。环境 state domain 不是 points-to，声明的控制目的地不是一次实际 transfer；
+结构不能被值引擎当作等值传递。具体运行绑定和协议转移仍有独立前沿。
+
 ## 效果
 
 至少保留 reads/writes/allocates/frees/aliases/escapes、RNG、may_raise、external、ordering，以及必要的生命周期和完成语义。效果可多标签，不互斥。

@@ -11,7 +11,7 @@ from dataclasses import dataclass, replace
 from scar.ir.program.dependencies import (DependencyCondition, DependencyEdge,
     DependencyEvidence, DependencyFrame, DependencyFrontier, DependencyKind as K,
     DependencyMeaning as M, DependencyNeighborhood, DependencyPoint, DependencyStrength, GraphNamespace)
-from scar.ir.program.ids import (BlockID, LocationID, OperationID, RegionID,
+from scar.ir.program.ids import (BlockID, ControlPortID, EnvironmentInterfaceID, LocationID, OperationID, RegionID,
     ResourceDefinitionID, ResourceRequirementID, UseID, ValueID)
 from scar.ir.program.model import (BlockArgument, CompletionResult, OperationResult,
     ReferenceValue, StateVersionValue, TerminatorKind, UseRole)
@@ -249,6 +249,8 @@ class LocalDependencyProvider:
         def contextual(endpoint):
             return replace(endpoint, context=point.context)
         edges = tuple(replace(edge, source=contextual(edge.source), target=contextual(edge.target),
+            evidence=tuple(replace(item, anchors=tuple(contextual(anchor) for anchor in item.anchors))
+                for item in edge.evidence),
             conditions=tuple(replace(condition, subject=contextual(condition.subject))
                 if condition.subject is not None else condition for condition in edge.conditions)) for edge in templates)
         notes = tuple(DependencyFrontier(point, kind, detail) for kind, detail in frontiers.get(point.node, ()))
@@ -274,9 +276,14 @@ class LocalDependencyProvider:
             *graph.environments, *graph.control_ports, *graph.provider_envelopes, *graph.native_boundaries))
         def point(node):return DependencyPoint(namespace, node)
         evidence = DependencyEvidence("CANONICAL_PROGRAM_RELATIONS_V1", (namespace.graph,))
-        def edge(source, target, kind, meaning=M.DEPENDENCE, conditions=(), strength=DependencyStrength.EXACT):
-            item = DependencyEdge(point(source), point(target), kind, meaning, (evidence,), conditions, strength)
+        def edge(source, target, kind, meaning=M.DEPENDENCE, conditions=(), strength=DependencyStrength.EXACT, *, provenance=None):
+            item = DependencyEdge(point(source), point(target), kind, meaning,
+                (evidence,) if provenance is None else provenance, conditions, strength)
             before[target].append(item); after[source].append(item)
+        def declaration(rule, *paths, anchors):
+            return (DependencyEvidence(rule, tuple(replace(namespace.graph,
+                pointer=namespace.graph.pointer + '/' + path) for path in paths),
+                tuple(point(anchor) for anchor in anchors)),)
         def control_condition(operation, number):
             return (DependencyCondition("canonical", "SUCCESSOR_SELECTED", point(operation), number),)
         for region in graph.regions:
@@ -336,6 +343,49 @@ class LocalDependencyProvider:
                     else:
                         frontiers[formal].append(("SPECIAL_SUCCESSOR_INPUT_OPEN", "Resumption or driver input retains its original protocol interface; transfer rule is pending."))
         for ordering in graph.ordering:edge(ordering.before, ordering.after, K.ORDER, M.ORDER)
+        for ordinal, environment in enumerate(graph.environments):
+            path='environments/'+str(ordinal)
+            edge(environment.region, environment.id, K.CONTAINS, M.STRUCTURE,
+                provenance=declaration('CANONICAL_ENVIRONMENT_DECLARATION_V1',path,
+                    anchors=(environment.region,environment.id)))
+            for position, member in enumerate(environment.members):
+                member_path=path+'/members/'+str(position)
+                member_evidence=declaration('CANONICAL_ENVIRONMENT_MEMBER_V1',member_path,
+                    anchors=(environment.id,member.reference))
+                edge(environment.id, member.reference, K.CONTAINS, M.STRUCTURE,
+                    provenance=member_evidence)
+                for location_position, location in enumerate(member.locations):
+                    edge(location, member.reference, K.STATE_LOCATION, M.STRUCTURE,
+                        provenance=declaration('CANONICAL_ENVIRONMENT_STATE_DOMAIN_V1',member_path,
+                            member_path+'/locations/'+str(location_position),
+                            anchors=(environment.id,member.reference,location)))
+            frontiers[environment.id].extend((
+                ('ENVIRONMENT_BINDING_IDENTITY_OPEN',
+                    'Original code definition and ordered member ports are declared; active function/environment identity is not established.'),
+                ('ENVIRONMENT_STATE_COVERAGE_OPEN',
+                    'Member locations are declared necessary state domains; they do not close reads, aliases or mutable contents.')))
+        scopes={scope.id:(ordinal,scope) for ordinal,scope in enumerate(graph.control_scopes)}
+        region_positions={region.id:ordinal for ordinal,region in enumerate(graph.regions)}
+        for ordinal, port in enumerate(graph.control_ports):
+            scope_position,scope=scopes[port.scope]
+            path='control_ports/'+str(ordinal)
+            scope_path='control_scopes/'+str(scope_position)
+            edge(scope.region,port.id,K.CONTAINS,M.STRUCTURE,
+                provenance=declaration('CANONICAL_CONTROL_PORT_DECLARATION_V1',path,scope_path,
+                    anchors=(scope.region,port.id)))
+            if port.block is not None:
+                edge(port.id,port.block,K.CONTROL_FLOW,M.STRUCTURE,
+                    provenance=declaration('CANONICAL_CONTROL_PORT_BLOCK_DESTINATION_V1',path,scope_path,
+                        anchors=(port.id,port.block)))
+            else:
+                region=index.regions[scope.region]
+                exit_position=next(i for i,item in enumerate(region.exits) if item.name==port.exit)
+                exit_path='regions/'+str(region_positions[scope.region])+'/exits/'+str(exit_position)
+                edge(port.id,scope.region,K.CONTROL_FLOW,M.STRUCTURE,
+                    provenance=declaration('CANONICAL_CONTROL_PORT_NAMED_EXIT_DESTINATION_V1',path,scope_path,exit_path,
+                        anchors=(port.id,scope.region)))
+            frontiers[port.id].append(('CONTROL_PORT_TRANSFER_RELATIONS_OPEN',
+                'The original completion destination is declared; pending/cleanup transfer relations are not projected by this declaration-only interface.'))
         # A binding token is not its Python object payload. These typed
         # projections retain that distinction instead of declaring alias.
         for binding in graph.binding_definitions:
@@ -372,7 +422,7 @@ class LocalDependencyProvider:
         for location in graph.resource_locations:edge(location.resource, location.location, K.RESOURCE)
         for identity in members:
             if type(identity) not in (OperationID, ValueID, UseID, BlockID, RegionID, LocationID,
-                    ResourceDefinitionID, ResourceRequirementID):
+                    ResourceDefinitionID, ResourceRequirementID, EnvironmentInterfaceID, ControlPortID):
                 frontiers[identity].append(("PROTOCOL_ENTITY_RELATIONS_OPEN", "Original typed entity is present; its protocol-specific relation projection remains open."))
         return before, after, frontiers, members
 

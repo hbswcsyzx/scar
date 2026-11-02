@@ -98,6 +98,18 @@ G/state 桥须区分函数引用来源与调用时内容：`fn=p.f; p.a=p.b; fn(
 
 通过有版本的 Python/PyTorch/native 契约连接分配、搬运、IO、enqueue/wait 与执行/存储资源，覆盖 CPU/GPU、DRAM/HBM、文件/storage/SSD/NVMe、stream/线程角色。表示可静态确定的要求、候选和依赖；实际地址、传输是否发生、确切 kernel 和完成时刻不伪装为已观察事实。.to() 可能不复制、expand() 可能是 view、eval() 不证明纯性、推理也不默认关闭梯度。
 
+静态 native 材料已定点核对，后续直接复用安装包提供的 ATen `*_ops.h` 与
+`torchgen/packaged/ATen/native/native_functions.yaml`，不自行编造算子语义。当前材料声明
+版本为 2.13.0+cu132（不是目标运行观测）；材料需由 dist-info RECORD/源码 git/schema
+指纹定位，operator key 必须包括 overload。先从已解析 callable 接到有条件的 ATen overload、
+native 候选符号和符号资源要求，再谈 kernel 选择；不能按函数名相同直接认定身份。
+
+`to/copy_/empty/expand` 的少量原 header/schema 已核对参数、默认值、SymInt、alias/mutation
+和 dispatch 候选；自动抽取及其图连接仍未实现。schema alias 是允许共享的声明，不能
+推出相同对象；`empty_cuda` 不是实际 cudaMalloc，`.to` 不是传输，`expand` 不表示完整分配。
+设备/stream、实际 kernel、物理地址和搬运等未绑定信息保留在准确字段与契约条件中。
+不运行 torchgen/目标初始化，也不把 native stub 当作已展开 kernel 主体。
+
 **自行验收**：每项已推导字段及关系有来源、条件和失效依赖；不同对象/调用/状态版本不被错误合并。沿真实 LeWM 的加载、预处理、规划/模型调用到输出/保存路径能查到已知的值、状态、库接口与资源依赖，而不只是查到一串 Python 名称。
 
 ### 5. 全范围构建、读回与交付

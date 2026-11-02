@@ -119,6 +119,8 @@ class ProgramDependencySession:
         self.call_publication = call_publication if call_publication is not None else self.manifest.get("static_calls")
         self.class_publication = class_publication if class_publication is not None else self.manifest.get("static_classes")
         self._call_items, self._class_items = {}, {}
+        self._call_by_namespace, self._class_by_namespace = {}, {}
+        self._class_shard_order = {}
         if self.call_publication is not None:
             self._register_publication(self.call_publication, call_index_directory, "calls")
         if self.class_publication is not None:
@@ -179,6 +181,7 @@ class ProgramDependencySession:
             raise ValueError("relationship source basis differs from original current units")
         self._bases[artifact] = basis
         items = self._call_items if family == "calls" else self._class_items
+        adjacency = self._call_by_namespace if family == 'calls' else self._class_by_namespace
         for item in publication.get("shards", ()):
             relative = item.get("artifact_path") or item["artifact"]["path"]
             if relative not in by_relative:
@@ -190,6 +193,13 @@ class ProgramDependencySession:
             uri = by_relative.get(relative)
             if uri is None:
                 raise ValueError("relationship shard is absent from publication artifacts")
+            if uri in items:
+                raise ValueError('duplicate original relationship shard header')
+            owner = decode(SourceBodyNamespace, item['caller' if family == 'calls' else 'parent'])
+            namespace = GraphNamespace.from_source(owner)
+            adjacency.setdefault(namespace, []).append(uri)
+            if family == 'classes':
+                self._class_shard_order[uri] = len(items)
             items[uri] = item
             if family == "calls":
                 # The existing verifier addresses shards through this display
@@ -603,11 +613,12 @@ class ProgramDependencySession:
     def relation_shards(self, namespace=None):
         if self.call_publication is None:
             raise ValueError("CALL_RELATIONS_NOT_PUBLISHED: no saved call relationships were supplied")
-        for uri, item in self._call_items.items():
-            caller = decode(SourceBodyNamespace, item["caller"])
-            if namespace is not None and GraphNamespace.from_source(caller) != (
-                    GraphNamespace.from_source(namespace) if type(namespace) is SourceBodyNamespace else namespace):
-                continue
+        if type(namespace) is SourceBodyNamespace:
+            namespace = GraphNamespace.from_source(namespace)
+        if namespace is not None and type(namespace) is not GraphNamespace:
+            raise TypeError('relationship lookup needs an original graph namespace')
+        uris = self._call_items if namespace is None else self._call_by_namespace.get(namespace, ())
+        for uri in uris:
             locator = self._locator(uri, "scar.static-call-shard/" + str(self.call_publication["schema_version"]), "#/relations")
             yield self.load_call_shard(locator), locator
 
@@ -637,10 +648,11 @@ class ProgramDependencySession:
         selected = {point.namespace}
         for frame in point.context or ():
             selected.update((frame.caller, frame.target))
-        for uri, item in self._class_items.items():
+        selected_uris = dict.fromkeys(uri for namespace in selected
+            for uri in self._class_by_namespace.get(namespace, ()))
+        for uri in sorted(selected_uris, key=self._class_shard_order.__getitem__):
+            item = self._class_items[uri]
             parent = decode(SourceBodyNamespace, item["parent"])
-            if GraphNamespace.from_source(parent) not in selected:
-                continue
             self._admit_shard(uri)
             locator = self._locator(uri, "scar.static-class-bindings/1")
             document = self.read_artifact(locator)
