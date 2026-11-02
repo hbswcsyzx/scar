@@ -158,8 +158,9 @@ class ModuleAttributeDependencies:
                 by_source[(type(node).__name__,node.lineno,node.end_lineno,node.col_offset,node.end_col_offset)].append(node)
         protocols=protocol_kinds(body.document)
         imports=[];normal_producers={}
+        blocks={block.id:block for region in body.graph.regions for block in region.blocks}
         for op in body.graph.operations:
-            result=normal_reference(body.index,op.id)
+            result=normal_reference(body.index,op.id,blocks=blocks)
             if result is not None:normal_producers[result[1]]=op.id
             if protocols.get(op.id) in ('IMPORT_NAME_314','FUNCTION_IMPORT_NAME'):
                 own=[l for l in links if l.operation==op.id]
@@ -334,7 +335,7 @@ class ModuleAttributeDependencies:
                 dependencies=self.namespace_for(module)
                 for terminal in module.graph.operations:
                     if (terminal.terminator is None or terminal.terminator.kind is not TerminatorKind.RETURN
-                            or module.index._blocks.get(next((b.id for r in module.graph.regions for b in r.blocks if terminal.id in b.operations),None))!=module.graph.root):
+                            or mf.paths.owners[terminal.id][0]!=module.graph.root):
                         continue
                     worlds=[u for u in terminal.uses if type(module.index.values[u.value])is StateVersionValue]
                     if len(worlds)!=1:continue
