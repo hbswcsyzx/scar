@@ -84,8 +84,12 @@
 同一原 DINOv3.forward 主体新冷读/校验 29.079 秒，连续索引查询 0.047 秒，属性收集
 0.129 秒，1 次 build / 732 次 hit / 1 次 metadata reuse，83 个读接口。机器证据保存为
 `artifacts/current/queries/module-index-regression.json`。这不是完整上下文工作队列或目标加速比。
-相关初始化/派工/小 IR 合并 3 项通过，8.34 秒。修复提交后再启动一次完整范围发布，
-保持 862 units / 8,819 artifacts 分母与 128 GiB input、8 GiB cache、7,200 秒预算。
+相关初始化/派工/小 IR 合并 3 项通过，8.34 秒。修复已提交/推送 `38b06e42`。
+修复后的整范围任务已实际启动：task `22e44842ba63409b97867674ac6da292`，PID 51564、
+start_ticks 2075508、Root handle 52351；身份已核对 RUNNING。保持 862 units / 8,819
+artifacts 分母和 128 GiB input、8 GiB cache、7,200 秒预算；producer/current 重新冻结。
+旧任务不是因观察超时重启，新任务尚未发布，不能宣布整范围调用或第一阶段完成。
+
 
 共同查询会话新增按 namespace 的 shard 元数据邻接索引，不再每端点扫描/解码所有 header。
 class 短检查通过（9.53 秒）；同一 current LeWM 三层查询的新旧规范化节点、边、条件、
