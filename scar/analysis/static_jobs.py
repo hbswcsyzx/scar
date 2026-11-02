@@ -61,9 +61,12 @@ def read_static_link_task(path):
 class StaticLinkTask:
     """Throttle activity writes; always flush publication, failure or interrupt."""
 
-    def __init__(self, directory, *, input_manifest_sha256, budget):
+    def __init__(self, directory, *, input_manifest_sha256, budget, family="calls"):
         output = Path(directory).absolute()
-        self.path = output.parent / "static-link-task.json"
+        if family not in ("calls", "classes"):
+            raise ValueError("unknown static relation task family")
+        self.family = family
+        self.path = output.parent / ("static-link-task.json" if family == "calls" else "static-class-link-task.json")
         if self.path.parent.resolve() != self.path.parent or self.path.is_symlink():
             raise ValueError("static task record must remain in its owned parent")
         if self.path.exists():
@@ -77,6 +80,7 @@ class StaticLinkTask:
         self.last_write = float("-inf")
         self.record = {"schema": SCHEMA, "schema_version": 1,
             "task_id": uuid.uuid4().hex, "process": identity,
+            "family": family,
             "model": str(output), "input_manifest_sha256": input_manifest_sha256,
             "state": "RUNNING", "started_at": _now(), "activity": {"stage": "PREPARING"},
             "budget": asdict(budget) if is_dataclass(budget) else budget}
@@ -103,11 +107,17 @@ class StaticLinkTask:
         self._write()
 
     def published(self, manifest, output_manifest_sha256):
-        calls = manifest["static_calls"]
+        publication = manifest["static_" + self.family]
+        if self.family == "calls":
+            result = {key: publication[key] for key in ("complete", "status", "scope", "counts", "published_calls")}
+        else:
+            complete = publication["scope"]["enumeration_complete"]
+            result = {"complete": complete,
+                "status": "ENUMERATED_WITH_RELATION_FRONTIERS" if complete else "PARTIAL_ENUMERATION",
+                "scope": publication["scope"], "counts": publication["counts"], "issue": publication["issue"]}
         self.record.update(state="PUBLISHED", ended_at=_now(),
             output_manifest_sha256=output_manifest_sha256,
-            result={**{key: calls[key] for key in ("complete", "status", "scope", "counts", "published_calls")},
-                "frontier_counts": dict(Counter(row["kind"] for row in calls["frontiers"]))},
+            result={**result, "frontier_counts": dict(Counter(row["kind"] for row in publication["frontiers"]))},
             whole_program_model_complete=False)
         self._write(force=True)
 

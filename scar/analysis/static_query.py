@@ -101,7 +101,7 @@ def _entry_view(entry, unit, symbols, limit):
     return {**{name: entry.get(name) for name in fields}, "file": unit["path"],
             "namespace_root": unit["namespace_root"], "symbol_table_candidates": candidates,
             "body": None if body is None else {name: body[name] for name in (
-                "status", "reason", "artifact", "gaps", "construction_operations", "issue", "last_attempt_issue") if name in body}}
+                "status", "reason", "artifact", "gaps", "diagnostics", "construction_operations", "issue", "last_attempt_issue") if name in body}}
 
 
 def _catalog(unit, fragments):
@@ -296,7 +296,7 @@ def _rule_plans(unit, entries, fragments, limit):
             "language_semantics_complete": document["language_semantics_complete"]}
 
 
-def _call_relations(manifest, unit, entries, fragments, limit):
+def _call_relations(manifest, unit, entries, fragments, limit, *, body_loader=None):
     """Read qualified v1-v5 relations and replay their original endpoint joins."""
     from collections import OrderedDict
     from types import SimpleNamespace
@@ -380,6 +380,17 @@ def _call_relations(manifest, unit, entries, fragments, limit):
                 or not basis_artifact(locator.declaration.artifact)
                 or locator.declaration.locator != f"#/units/{number}/bodies/{position}/artifact"):
             raise ValueError("qualified body stored/decoded receipt or original declaration differs")
+        if body_loader is not None:
+            # The owning read session supplies its immutable original inputs,
+            # not a remembered PASS. Keep namespace/basis checks above and
+            # replay every relationship below against the shared typed index.
+            loaded = body_loader(namespace)
+            if (loaded.namespace != namespace or loaded.unit is not owner or loaded.row is not row
+                    or loaded.index.graph is not loaded.graph
+                    or loaded.metadata.source.path != owner["path"]
+                    or loaded.metadata.source.fingerprint != "sha256:" + owner["decoded_sha256"]):
+                raise ValueError("shared original body loader changed its checked namespace/owner/index")
+            return loaded
         uri = locator.artifact.uri
         if uri in cache:
             loaded, _ = cache[uri]
@@ -1081,9 +1092,65 @@ def main(argv=None):
     parser.add_argument("--kind", help="case-insensitive exact lexical entry kind")
     parser.add_argument("--limit", type=int, default=20)
     parser.add_argument("--dependencies", action="store_true")
+    parser.add_argument("--program-graph", action="store_true",
+                        help="traverse one shared typed dependency view across original fragments")
+    parser.add_argument("--node", help="complete original canonical ID wire for --program-graph")
+    parser.add_argument("--infer-values", action="store_true",
+                        help="infer guarded immutable scalar/type/provenance fields over the shared graph")
+    parser.add_argument("--boundary-operation", action="append", default=[],
+                        help="original OperationID wire to include in a boundary query; repeat for a region")
+    parser.add_argument("--direction", choices=("incoming", "outgoing"), default="incoming")
+    parser.add_argument("--relation", action="append", default=[],
+                        help="original DependencyKind name; repeat to restrict traversal")
+    parser.add_argument("--max-points", type=int, default=4096)
+    parser.add_argument("--max-edges", type=int, default=16384)
+    parser.add_argument("--max-depth", type=int, default=128)
+    parser.add_argument("--include-structure", action="store_true",
+                        help="also traverse containment, CFG and sequence; these are not required dependency proofs")
     args = parser.parse_args(argv)
-    result = query_static_program(args.model, file=args.file, name=args.name, kind=args.kind,
-                                  limit=args.limit, include_dependencies=args.dependencies)
+    if args.program_graph:
+        if args.infer_values and args.boundary_operation:
+            parser.error("value inference and operation boundary are independent queries")
+        if args.boundary_operation and args.node is not None:
+            parser.error("select boundary operations without --node")
+        if (args.infer_values or args.boundary_operation) and (args.relation or args.include_structure
+                or args.direction != "incoming"):
+            parser.error("relation, structure and direction selectors apply to dependency walks")
+        if args.node is None and not args.boundary_operation:
+            parser.error("--program-graph requires --node with an original typed ID")
+        from scar.analysis.program_dependency_session import query_program_dependencies
+        from scar.analysis.program_dependency_export import export_dependency_walk
+        from scar.ir.program.dependencies import DependencyKind
+        import time
+        try:
+            kinds = tuple(DependencyKind(name) for name in args.relation) if args.relation else None
+        except ValueError as error:
+            parser.error(str(error))
+        started = time.monotonic()
+        if args.infer_values:
+            from scar.analysis.program_queries import query_program_values
+            from scar.analysis.program_value_analysis import ValueAnalysisBudget
+            from scar.analysis.program_dependency_export import export_value_analysis
+            report = query_program_values(args.model, file=args.file, entry=args.name, kind=args.kind,
+                node=args.node, value_budget=ValueAnalysisBudget(max_points=args.max_points, max_edges=args.max_edges))
+            result = export_value_analysis(report)
+        elif args.boundary_operation:
+            from scar.analysis.program_queries import query_program_boundary
+            from scar.analysis.program_dependency_export import export_boundary_analysis
+            report = query_program_boundary(args.model, file=args.file, entry=args.name, kind=args.kind,
+                nodes=args.boundary_operation, max_members=args.max_points)
+            result = export_boundary_analysis(report)
+        else:
+            walk = query_program_dependencies(args.model, file=args.file, entry=args.name, kind=args.kind,
+                node=args.node, direction=args.direction, kinds=kinds, max_points=args.max_points,
+                max_edges=args.max_edges, max_depth=args.max_depth, include_structure=args.include_structure)
+            result = export_dependency_walk(walk)
+        result["analyzer_seconds"] = time.monotonic() - started
+    else:
+        if args.node is not None or args.relation or args.include_structure or args.infer_values or args.boundary_operation:
+            parser.error("node, relation, value and boundary selectors require --program-graph")
+        result = query_static_program(args.model, file=args.file, name=args.name, kind=args.kind,
+                                      limit=args.limit, include_dependencies=args.dependencies)
     print(json.dumps(result, ensure_ascii=False, indent=2, allow_nan=False))
     return 0
 

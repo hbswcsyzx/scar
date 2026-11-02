@@ -155,26 +155,33 @@ AST 仅为解析输入和源码对应依据；包含层次只组织定义，不�
 数据部分可以视为一个定义到多个输入出现的有向超边；规范存储保留 Value/Use 记录，
 不要求更换文件格式或引入另一份物理图。整个程序允许循环、递归、共享及跨层连接，不限定为 DAG。
 
-现有代码已经有局部图，但不能据此宣称整程序已贯通。此次代码审查的具体结果是：
+此次审查定位的原问题是：`ProgramIndex` 只索引单份 `ProgramGraph`，跨主体和 class
+关系由各专项 reader/引用 solver 解释，一般分析没有共同导航接口。本轮已经接入：
 
-- `ProgramIndex` 索引一份 `ProgramGraph`，其 `producer/consumers` 是局部导航。
-- `Operation.callee` 为本图 `RegionID`；跨独立主体的目标和端口依赖另由 static-call 关系表达。
-- 参数、返回和部分 namespace/G-state 关系已被专项引用求解器消费，并非全部只是显示数据。
-  但一般数据计算、状态、控制、异常、资源与 provider/class 关系尚未共享同一跨分片依赖接口。
-- class provider 内部是正常 CFG/SSA 图；parent/provider/suite 接线目前仍为专项 typed 关系，
-  通用 callee/alias/effects 求解尚未消费。保存或读回该关系不等于主图可统一穿越。
-- 现有 source dependency 查询仍把部分 state/protocol 接口作为展开边界；引用来源固定点
-  不能代替一般的值、逐地址状态、控制、effects 和属性联合求解。
+- `GraphNamespace + 原 typed ID + 静态 context` 定位端点。context 是选定的调用接口栈，
+  不是 Invocation；未知上下文与空上下文不同。共享主体不复制，不把不同调用的参数并集激活。
+- `ProgramDependencyGraph` 按需投影原 Value/Use、result、绑定 payload/read、状态接口、
+  CFG/控制依赖、资源、实参/形参、completion、环境/G 和 parent/provider/suite 关系。
+  依赖、值传递、引用、绑定、状态接口、顺序及结构分别有类型；条件和原证据继续保留。
+- `ProgramDependencySession` 以同一组有界只读分片/typed 缓存服务导航与分析；核对原 receipt、
+  声明、namespace 和跨主体关系，不把缓存中的某次成功当作其它输入的证明。
+- `ProgramValueAnalysis` 实际消费共同图，传播定义来源、受支持的不可变 scalar 常量和 builtin
+  类型，并区分 binding token 与 payload；循环/递归不展开运行迭代，使用有限合流、工作队列和 widening。
+- `analyze_boundary` 在原操作集合上列出 cut 输入/外部消费者、实现接口、正常/异常和控制载荷、
+  状态地址/版本、资源/顺序、引用和效果知识。未闭合效果按字段保留，不授予替换许可。`consumers` 表示跨 cut 的数据关系；binding 结果接口不必是实际外部消费，
+  必须连同原 kind/meaning 解释，不能自动推导可观察 escape。
 
-因此，下一项核心工作是把**已有分片和关系组成同一逻辑依赖图**，不是继续更换图的名称。
-物理上仍分片、共享定义；逻辑端点按原 namespace 和 ID 寻址。统一接口必须能返回：
-原 producer/consumer、实参/形参和 completion 映射、状态读取/到达写入、控制依赖、
-条件实现/展开、别名和资源关系，以及每条边的上下文、路径条件、依据和未闭合部分。
-不把这些关系统统压成无类型 `depends_on`，也不在查询时靠变量拼写跨文件接线。
+控制依赖由 CFG 后支配与必要分支关系计算；语句先后、包含和普通 CFG 边不被当作依赖证明。
+循环、未知调用终止和挂起等范围保留 may/前沿。过滤关系、预算截断和未发布接口也须显式报告。
+统一查询导出使用规范化引用表，复用 namespace、上下文、条件和证据；它不是第二份程序事实权威。
 
-静态事实和 witness 是依赖关系的依据，仍使用原端点；各专项分析通过共同接口订阅输入变化、
-提交输出和失效依赖。只让统一查询显示一条新边还不够，相关联合求解器也必须消费它。
+这些实现解决了基础接口问题，**尚未解决完整联合分析**：精细 reaching writes/alias/effects、
+module 初始化 L/G、全部 Python 协议、容器/Tensor 属性与 native/资源契约仍不完整；真实
+current 的全范围调用关系也尚未发布。class 已全批枚举发布（1,065 条连接，余项有明确边界），不能混称整程序已贯通。
+
 统一视图不复制源程序实体、不重复保存 callee，不要求把所有图先解压到内存或合并为单文件。
+物理上仍分片、共享定义；规则在原端点提交依据、条件和未闭合项。后续联合分析必须实际消费
+这些关系并反馈新约束，不能只增加展示边或用专项样例代替完整范围验证。
 
 面向后续化简，任意区域切片（不必等于语法 Region）必须可机械取得完整 cut interface：
 外部输入、外部消费者、读写位置和版本、正常/异常等出口、逃逸、外部及顺序/资源效果。

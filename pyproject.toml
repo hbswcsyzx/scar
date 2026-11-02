@@ -7,7 +7,7 @@ name = "scar"
 version = "0.1.0"
 description = "State-Control-Action-Resource execution analysis and optimization prototype"
 requires-python = ">=3.10"
-dependencies = ["torch>=2.0", "numpy>=1.24"]
+dependencies = ["torch>=2.0", "numpy>=1.24", "networkx>=3.0,<4"]
 
 [project.scripts]
 scar = "scar.cli:main"

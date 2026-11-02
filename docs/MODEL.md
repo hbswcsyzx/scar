@@ -38,6 +38,25 @@ import 返回的 module 引用、module namespace 和初始化状态分别建模
 
 类声明与共享类体分开。父级构造保存装饰器求值、builtins 中的 builder 查找、类体 code/factory/closure、name/bases/keywords、builder INVOKE、逆序装饰器 application 和当前 frame 的绑定写入。隐式调用有自己的真实输入/normal/raise/world 端口，不伪造 AST Call 或 CallID。共享 suite 的编译来源引用只证明对应哪份代码；prepared namespace 必须由 prepare 调用或明确的 mapping allocation 产生，不能从一个派生关系中凭空创建。suite 的 cell/None 正常 payload 不等于最终类对象。
 
+## 跨分片共同依赖接口
+
+`scar.ir.program.dependencies` 的端点由原 artifact namespace、原 typed ID 和静态接口栈组成。
+跨层只是边跨过 namespace/接口，不是创建一份 callee 或运行实例。关系保留原条件、依据和
+EXACT/MAY；EXACT 表示在所列条件下关系准确，不表示条件已被证明成立。
+
+`ProgramDependencyGraph` 提供共同的邻接、遍历和 cut；`ProgramDependencySession` 共享有界
+只读原图与关系缓存。调用、class、环境、状态和局部图由 provider 适配到同一端点类型，
+分析只沿适用关系转移事实：一般 OPERAND/STATE_INTERFACE 依赖不等于值/对象身份相同。
+绑定 token、其 payload、scalar 内容和引用定义来源是不同字段。
+
+完全声明的本地同步调用可按原 result slot、normal terminal 集合与精确上下文闭合值传递；
+只找到候选 completion 不足以闭合其它正常路径。未知字段必须在工作队列中继续传播，
+例如 `未知 int ∪ 7` 的内容不能变成确定的 7，而类型可仍为 int。
+
+已实现的值分析目前只覆盖有限 scalar/type/定义来源规则；区域边界只列接口与知识状态，
+不证明效果闭合。字段未知、未实现、缺材料、未发布关系和预算分别保留。相关入口和覆盖见
+[程序分解 §3.4](PROGRAM_DECOMPOSITION.md#34-主图决策与当前结构性缺口)。
+
 ## 身份和版本
 
 源码身份包含源码指纹、命名空间/编译上下文及定义位置，不能只用函数名或行号。
@@ -78,7 +97,7 @@ State SSA 表达静态读写依赖；循环/分支版本是符号版本，不是
 
 调用目录枚举是否完成、处理范围内的 namespace 队列是否稳定，以及整程序 points-to/effects 是否闭合分别记录。范围内队列稳定不证明所有入口、所有目标和所有属性已经确定。
 
-从外部模块取得的函数可以拥有 caller 图中根本不存在的 globals 引用。此时通过原模块状态、函数创建环境、真实调用的 world 和 callee 环境端口连接依赖；不能借用 caller 当前 G，也不能为了满足某个桥的字段要求制造 caller 中的 namespace Value。`ModuleGlobalsDependencies` 已实现条件状态投影及专项求解/公开读回，但未形成统一全图查询与联合推理，模块初始化 L/G 对应也仍需明确条件，不能视为整个状态模型已闭合。
+从外部模块取得的函数可以拥有 caller 图中根本不存在的 globals 引用。此时通过原模块状态、函数创建环境、真实调用的 world 和 callee 环境端口连接依赖；不能借用 caller 当前 G，也不能为了满足某个桥的字段要求制造 caller 中的 namespace Value。`ModuleGlobalsDependencies` 已实现条件状态投影及专项求解/公开读回；现在也由共同依赖接口投影到原 qualified 端点。完整逐地址状态/alias/effects 联合推理与模块初始化 L/G 对应仍未闭合。
 
 该状态桥区分：`fn=p.f; p.a=p.b; fn()` 的函数引用来自早先的 `p.f` 读点，G 内容却在真实 `fn` CALL/world 查询；`p.f=q.f` 后所选函数的 G 属于实际 factory 的 q，不能按表面 receiver p 判断；`p.a=p.b; p.b=other` 中 a 的来源是赋值当时的 payload/读点，不是未来的 b。callee 内同 key 的 STORE_GLOBAL 先参与覆盖，只有 entry binding 仍可到达 READ 的路径继续向外层状态查询。v7 的专项静态样例已覆盖上述关系、嵌套 creator、多层桥和上下文隔离；当前 LeWM 主体上尚未发布新版整范围索引，模块初始化的 G 写及显式 L/G 条件仍未完成。
 

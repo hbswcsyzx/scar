@@ -54,6 +54,7 @@ def _issue(stage, error):
 def _artifacts(manifest):
     yield from manifest.get("artifacts", {}).values()
     yield from manifest.get("static_calls", {}).get("artifacts", ())
+    yield from manifest.get("static_classes", {}).get("artifacts", ())
     for unit in manifest["units"]:
         yield from unit["artifacts"].values()
         for body in unit["bodies"]:
@@ -61,8 +62,28 @@ def _artifacts(manifest):
                 yield body["artifact"]
 
 
-def _discard_static_calls(root, manifest):
+def _discard_static_classes(root, manifest):
+    """Source/body replacements invalidate derived class/provider interfaces."""
+    publication = manifest.pop("static_classes", None)
+    if publication is None:
+        return
+    for descriptor in publication.get("artifacts", ()):
+        relative = Path(descriptor["path"])
+        if relative.is_absolute() or ".." in relative.parts or relative.parts[:2] != ("indexes", "classes"):
+            raise ValueError("static class artifact must remain in its owned index directory")
+        (root / relative).unlink()
+    directory = root / "indexes" / "classes"
+    if directory.exists():
+        if any(path.is_file() or path.is_symlink() for path in directory.rglob("*")):
+            raise ValueError("static class index contains an unowned file")
+        shutil.rmtree(directory)
+    manifest.setdefault("completion", {})["static_class_links_present"] = False
+
+
+def _discard_static_calls(root, manifest, *, keep_classes=False):
     """Drop derived routes before replacing any original endpoint artifact."""
+    if not keep_classes:
+        _discard_static_classes(root, manifest)
     calls = manifest.pop("static_calls", None)
     if calls is None:
         return
@@ -178,7 +199,7 @@ def link_static_program(directory, *, budget=None, progress=None):
     temporary = Path(tempfile.mkdtemp(prefix=".static-calls-", dir=output.parent))
     try:
         shutil.copytree(output, temporary, dirs_exist_ok=True, copy_function=os.link)
-        _discard_static_calls(temporary, manifest)
+        _discard_static_calls(temporary, manifest, keep_classes=True)
         shared = {d["path"]: _stamp(temporary / d["path"]) for d in _artifacts(manifest)}
         (temporary / "manifest.json").unlink()
         (temporary / "manifest.json").write_bytes(_json(manifest))
@@ -656,6 +677,8 @@ def main(argv=None):
     parser.add_argument("--max-bodies", type=int, help="limit this body dispatch, keeping the full lexical denominator")
     parser.add_argument("--link-calls", action="store_true", help="link saved canonical CALL ports to conditional source bodies, without rebuilding them")
     parser.add_argument("--max-call-bodies", type=int, help="limit call-linking body reads, retaining the uncovered frontier")
+    parser.add_argument("--link-classes", action="store_true", help="connect original class builder/provider/suite ports without rebuilding bodies")
+    parser.add_argument("--max-class-bodies", type=int, help="bound class-link body reads while retaining the full source-class denominator")
     parser.add_argument("--inventory-dependencies", action="store_true",
                         help="locate versioned import materials without importing or analyzing their implementations")
     parser.add_argument("--expand-dependencies", action="store_true",
@@ -671,13 +694,17 @@ def main(argv=None):
         parser.error("--imports-only requires --refine")
     if args.expand and args.refine:
         parser.error("--expand and --refine are independent stages")
-    if args.link_calls and (args.expand or args.refine or args.phase != "graph"):
+    if args.link_calls and (args.expand or args.refine or args.link_classes or args.phase != "graph"):
         parser.error("--link-calls is an independent refinement of the current model")
     if args.max_call_bodies is not None and not args.link_calls:
         parser.error("--max-call-bodies requires --link-calls")
-    if args.inventory_dependencies and (args.expand or args.refine or args.link_calls or args.expand_dependencies or args.phase != "graph"):
+    if args.link_classes and (args.expand or args.refine or args.inventory_dependencies or args.expand_dependencies or args.phase != "graph"):
+        parser.error("--link-classes is an independent refinement of the current model")
+    if args.max_class_bodies is not None and not args.link_classes:
+        parser.error("--max-class-bodies requires --link-classes")
+    if args.inventory_dependencies and (args.expand or args.refine or args.link_calls or args.link_classes or args.expand_dependencies or args.phase != "graph"):
         parser.error("--inventory-dependencies is an independent refinement of the current model")
-    if args.expand_dependencies and (args.expand or args.refine or args.link_calls or args.phase != "graph"):
+    if args.expand_dependencies and (args.expand or args.refine or args.link_calls or args.link_classes or args.phase != "graph"):
         parser.error("--expand-dependencies is an independent refinement of the current model")
     if args.dependency_root and not args.inventory_dependencies:
         parser.error("--dependency-root requires --inventory-dependencies")
@@ -694,7 +721,15 @@ def main(argv=None):
             print(json.dumps({"stage": progress_stage, noun + "_done": done, noun + "_total": total,
                               "last": unit.get("path")}), file=sys.stderr, flush=True)
 
-    if args.expand_dependencies:
+    if args.link_classes:
+        from scar.analysis.static_class_publication import link_static_class_program
+        from scar.analysis.static_calls import StaticCallBudget
+        existing = read_static_program(args.out, verify=False)
+        if Path(existing["project_root"]).resolve() != Path(args.source).resolve():
+            raise ValueError("class linking source root differs from the current model")
+        budget = None if args.max_class_bodies is None else StaticCallBudget(max_bodies=args.max_class_bodies)
+        result = link_static_class_program(args.out, budget=budget)
+    elif args.expand_dependencies:
         from scar.analysis.static_dependency_publication import expand_static_dependency_program
         existing = read_static_program(args.out, verify=False)
         if Path(existing["project_root"]).resolve() != Path(args.source).resolve():
@@ -749,6 +784,8 @@ def main(argv=None):
                       "dependency_expansion": result.get("dependency_expansion"),
                       "static_calls": {key: value for key, value in result.get("static_calls", {}).items()
                                        if key not in ("artifacts", "shards")},
+                      "static_classes": {key: value for key, value in result.get("static_classes", {}).items()
+                                         if key not in ("artifacts", "shards", "frontiers")},
                       "manifest": str(Path(args.out).absolute() / "manifest.json")}, ensure_ascii=False, indent=2))
     failed = (result["worker_errors"] or result["source_changed"] or
               not result["completion"]["source_scan_complete"] or

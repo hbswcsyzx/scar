@@ -12,7 +12,7 @@ SCAR 面向程序依赖建模与自动化简。当前唯一开发任务是**整�
 - [程序模型](docs/MODEL.md)：实体、身份、边与不确定性。
 - [静态分析架构](docs/STATIC_ANALYSIS_DESIGN.md)：编译器式阶段、联合推导与存储。
 - [程序展开规则](docs/PROGRAM_DECOMPOSITION.md)：每类构造如何成为子图。
-- [唯一实施计划](docs/STATIC_ANALYSIS_PLAN.md)：S0–S5，当前推进 S2 主体与跨层连接。
+- [唯一实施计划](docs/STATIC_ANALYSIS_PLAN.md)：当前优先统一跨分片图、共同推理和全范围接线。
 - [当前状态](docs/STATUS.md)：已经做到什么、尚未做到什么。
 
 ## 工作区
@@ -33,6 +33,8 @@ cd ~/AAA/scar
 
 `scar.analysis.program_lowering.prepare_source_text` 可从源码文本生成 AST、符号表、源码模型和控制流；`lower_source` 可为支持的函数体建立规范 IR。它们读取源码，不导入目标模块。
 
+已有共同跨分片依赖导航、首版 scalar/type/定义来源工作队列和原操作区域边界查询，保留原 ID、静态上下文、条件和证据。查询可跨已发布 call、环境/G 和 class provider 接口，不复制 callee。
+
 这还不是完整整程序建模：模块和类的完整主体、部分 Python 协议、跨过程目标与参数绑定、别名/副作用联合推导和 Tensor 属性传播仍需按计划贯通。模块已有 BODY profile，类已有独立入口 ABI；类体的 required expansion 不能算成主体已展开。已有运行见证不能充当纯静态完成依据。
 
 现存 trace、profiler 和 backend 实现当前冻结；这一阶段不调用它们，不新增 detector 或程序变换。
@@ -42,6 +44,7 @@ cd ~/AAA/scar
 python -m scar.cli static ../le-wm --jobs 4
 python -m scar.cli static ../le-wm --expand --jobs 4
 python -m scar.cli static ../le-wm --link-calls --max-call-bodies 80
+python -m scar.cli static ../le-wm --link-classes --max-class-bodies 40000
 python -m scar.cli static ../le-wm --inventory-dependencies \
   --dependency-root "$CONDA_PREFIX/lib/python3.14" \
   --dependency-root "$CONDA_PREFIX/lib/python3.14/site-packages" \
@@ -49,6 +52,28 @@ python -m scar.cli static ../le-wm --inventory-dependencies \
 python -m scar.cli static ../le-wm --expand-dependencies --jobs 8
 python -m scar.cli static-query --file solver/cem.py --name solve --dependencies --limit 5
 ```
+
+统一图查询使用完整原 ID，`--file/--name/--kind` 需选中唯一规范主体：
+
+```bash
+python -m scar.cli static-query --program-graph --file solver/cem.py \
+  --name solve --kind FUNCTION --node program_value:88861ecb4513a932687daf0cb519ba4b \
+  --max-points 96 --max-edges 256 --max-depth 20
+```
+
+真实已发布 class 接口也可查询（同一 `--file`，父 module）：
+
+```bash
+python -m scar.cli static-query --program-graph --file solver/cem.py \
+  --name '<module>' --kind MODULE --node program_use:b88799427b898a642ea4e7c4e1d17161 \
+  --direction outgoing --relation ARGUMENT --max-points 4 --max-edges 8 --max-depth 2
+```
+
+这是当前保存图的一次有界查询，不代表完整闭包。对其它主体，用普通 `static-query` 或
+`ProgramDependencySession.index` 获取其原 ID。`--infer-values --node ...` 推导支持的不可变
+scalar/type/来源字段；重复 `--boundary-operation program_operation:...` 查询操作集合的区域边界。
+三个入口都不执行目标，导出复用 namespace/上下文/条件/证据。遍历耗尽、字段精度、未闭合项
+和整程序完整性分别报告；UNKNOWN/effects 未闭合不自动变成无副作用。
 
 输出只保留 `artifacts/current/static/`：每份源码共享 source/semantic/semantics/CFG/lexical 分片，常量事实和 import 候选索引连接原 ID。
 `--phase sources` 仅建目录；`--phase graph` 为默认源码图；`--phase bodies` 构造源图后继续规范主体展开。对已有图使用 `--expand`，无需重建源图；`--rules-only` 只发布详细规则/前提，`--max-bodies` 与 `--file` 只限制本次派工，全部入口继续计入分母。
@@ -60,3 +85,5 @@ python -m scar.cli static-query --file solver/cem.py --name solve --dependencies
 `--expand-dependencies` 消费已发布材料，把外部 source/stub 候选按 namespace 分别送回同一静态前端，保留原证明输入并原子更新 import/material 索引。它扩展源码图范围，不证明运行实现已选定、canonical 主体已展开或整程序依赖已贯通。当前主图接线的结构性缺口与最高优先级见 [程序分解 §3.4](docs/PROGRAM_DECOMPOSITION.md#34-主图决策与当前结构性缺口)。
 
 调用链接将当前任务进度及成功/失败终态保存到模型旁的 `artifacts/current/static-link-task.json`，与程序图分开。`scar.analysis.static_jobs.read_static_link_task` 会核对 PID 的启动身份；进程消失且没有终态时明确报告 `STOPPED_WITHOUT_TERMINAL_RECORD`，不当作仍在运行或已经发布。`PUBLISHED` 还须区分关系枚举完成与整程序模型完成。
+
+`--link-classes` 独立发布当前原图的 parent/provider/suite 接线，不执行 builder 或用户代码。类链接任务记录为 `artifacts/current/static-class-link-task.json`。主体变更使旧调用和 class 接线失效；单纯调用重链接保留不受影响的 class 索引。

@@ -41,7 +41,7 @@ def _constructions(body):
 
 
 def build_static_class_links(directory, out, *, logical_root=None, expected_manifest_sha256=None,
-                             budget=None, progress=None):
+                             budget=None, progress=None, activity=None):
     """Write provider and parent-owned relation shards, never copy a suite.
 
     Descriptor paths are relative to ``out``. ``logical_root`` follows the
@@ -54,11 +54,15 @@ def build_static_class_links(directory, out, *, logical_root=None, expected_mani
     started = monotonic()
     counts, frontiers, shards, providers = Counter(), [], [], {}
     session = StaticCallSession(directory, out=out, logical_root=logical_root,
-        expected_manifest_sha256=expected_manifest_sha256, budget=budget)
+        expected_manifest_sha256=expected_manifest_sha256, budget=budget, activity=activity)
     counts["declared_class_bodies"] = sum(row["kind"] == "CLASS" for u in session.units for row in u["bodies"])
     visited, issue, enumeration_complete = set(), None, False
 
     def body(context, number, row):
+        if activity is not None:
+            activity({"stage": "STATIC_CLASS_BODY", "source_unit": context.number,
+                "path": context.unit["path"], "entry_key": row["entry_key"], "body_kind": row["kind"],
+                "body_records_read": len(visited), "connected_class_constructions": counts["connected_class_constructions"]})
         key = context.number, number
         if key not in visited:
             if len(visited) >= session.budget.max_bodies:
@@ -66,23 +70,68 @@ def build_static_class_links(directory, out, *, logical_root=None, expected_mani
             visited.add(key)
         return session._body(context, number, row)
 
-    def gap(kind, detail, unit, entry, definition=None):
+    def gap(kind, detail, unit, entry, definition=None, source=None):
         counts["frontier_" + kind] += 1
         frontiers.append({"kind": kind, "detail": detail, "unit_key": unit["key"],
-                          "entry_key": entry, "definition": encode(definition) if definition is not None else None})
+                          "entry_key": entry, "definition": encode(definition) if definition is not None else None,
+                          "source": source})
+
+    def finish_unit(number, unit):
+        counts["source_units_processed"] += 1
+        if progress is not None:
+            progress({"stage": "STATIC_CLASS_RELATIONS", "source_units_processed": number + 1,
+                "source_units_total": len(session.units), "last_source_path": unit["path"],
+                "class_declarations_cataloged": counts["class_declarations_cataloged"],
+                "connected_class_constructions": counts["connected_class_constructions"]})
 
     try:
         with session:
             for number, unit in enumerate(session.units):
                 session._check()
+                if activity is not None:
+                    activity({"stage": "STATIC_CLASS_SOURCE_UNIT", "source_unit": number,
+                        "path": unit["path"], "source_units_processed": counts["source_units_processed"],
+                        "source_units_total": len(session.units),
+                        "connected_class_constructions": counts["connected_class_constructions"]})
                 if not any(row["kind"] == "CLASS" for row in unit["bodies"]):
-                    counts["source_units_processed"] += 1
+                    finish_unit(number, unit)
+                    continue
+                if "lexical" not in unit["artifacts"]:
+                    for row in unit["bodies"]:
+                        if row["kind"] == "CLASS":
+                            gap("CLASS_LEXICAL_CONTEXT_UNAVAILABLE", "Original class body declaration has no saved lexical catalog.",
+                                unit, row["entry_key"], source=row.get("source"))
+                    finish_unit(number, unit)
                     continue
                 catalog = session._read(unit["artifacts"]["lexical"])
+                if (catalog.get("schema") != "scar.static-lexical-catalog" or catalog.get("schema_version") != 1
+                        or catalog.get("path") != unit["path"] or catalog.get("namespace_root") != unit["namespace_root"]
+                        or catalog.get("fingerprint") != "sha256:" + unit["decoded_sha256"]):
+                    raise ValueError("class lexical catalog differs from its original source unit")
                 entries = {row["entry_key"]: row for row in catalog["entries"]}
+                if len(entries) != len(catalog["entries"]):
+                    raise ValueError("class catalog has duplicate original entry identities")
                 children = [row for row in entries.values() if row["kind"] == "CLASS"]
-                child_by_definition = {json.dumps(identity, sort_keys=True): child for child in children
-                    for identity in child.get("semantic_definition_ids", ())}
+                counts["class_declarations_cataloged"] += len(children)
+                missing = [name for name in ("source", "semantic", "semantics", "control") if name not in unit["artifacts"]]
+                if missing:
+                    kind = "CLASS_STUB_DECLARATION_ONLY" if Path(unit["path"]).suffix == ".pyi" else "CLASS_SOURCE_CONTEXT_UNAVAILABLE"
+                    for child in children:
+                        gap(kind, "Original declaration retained; executable source context is not supplied: " + ", ".join(missing),
+                            unit, child["entry_key"], source=child.get("source_ref"))
+                    finish_unit(number, unit)
+                    continue
+                child_by_definition = {}
+                for child in children:
+                    identities = child.get("semantic_definition_ids") or ()
+                    if not identities:
+                        gap("CLASS_SEMANTIC_DEFINITION_UNAVAILABLE", "Original class declaration has no source-backed semantic definition ID.",
+                            unit, child["entry_key"], source=child.get("source_ref"))
+                    for identity in identities:
+                        key = json.dumps(identity, sort_keys=True)
+                        if key in child_by_definition:
+                            raise ValueError("one original class definition belongs to multiple lexical declarations")
+                        child_by_definition[key] = child
                 parents = dict.fromkeys(child["lexical_parent"] for child in children)
                 rows = {row["entry_key"]: (i, row) for i, row in enumerate(unit["bodies"])}
                 context = session._unit(number)
@@ -145,11 +194,7 @@ def build_static_class_links(directory, out, *, logical_root=None, expected_mani
                     if identity not in seen_definitions:
                         gap("PARENT_CONSTRUCTION_UNEXPANDED", "No original construction record for this lexical class.",
                             unit, child["entry_key"])
-                counts["source_units_processed"] += 1
-                if progress is not None:
-                    progress({"stage": "STATIC_CLASS_RELATIONS", "source_units_processed": number + 1,
-                        "source_units_total": len(session.units), "last_source_path": unit["path"],
-                        "connected_class_constructions": counts["connected_class_constructions"]})
+                finish_unit(number, unit)
             enumeration_complete = True
     except (TimeoutError, OverflowError) as error:
         issue = {"kind": type(error).__name__, "detail": str(error)}

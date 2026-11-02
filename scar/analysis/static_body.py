@@ -154,7 +154,7 @@ def _run_unit(unit, catalog, selected, output, max_operations, producer):
                 continue
             # A changed producer/input cannot retain stale body authority.
             row.pop("artifact", None)
-            for name in ("metadata", "gaps", "issue", "construction_operations", "reason", "module_frontiers", "class_frontiers", "last_attempt_issue"):
+            for name in ("metadata", "gaps", "issue", "construction_operations", "reason", "module_frontiers", "class_frontiers", "diagnostics", "last_attempt_issue"):
                 row.pop(name, None)
             row.update(cache_key=key, reused=False, status="NOT_ATTEMPTED")
             payload = {"schema": "scar.static-body", "schema_version": 1, "profile": PROFILE,
@@ -260,6 +260,12 @@ def _run_unit(unit, catalog, selected, output, max_operations, producer):
                 row.update(status="ERROR", issue={"stage": "body", "kind": type(error).__name__, "detail": str(error)})
             payload.update({name: row[name] for name in ("status", "gaps", "construction_operations", "issue") if name in row})
             row["artifact"] = _write(root, relative, payload)
+            from scar.analysis.static_diagnostics import _diagnostic_refs, DIAGNOSTIC_FIELDS
+            references = _diagnostic_refs(payload)
+            if references:
+                row["diagnostics"] = references
+                for field in DIAGNOSTIC_FIELDS:
+                    row.pop(field, None)
             finished.add(entry["entry_key"])
     except Exception as error:
         for row in unit["bodies"]:
