@@ -50,6 +50,25 @@
 opaque world 和可能正常/异常 completion，alias/write/dispatch 为声明，resource/实际
 copy/allocation/kernel 与 effects closure 均未证明。第一阶段仍未完成，未进入化简。
 
+后续进展：共同控制图已把原 CFG entry-edge dominance 必要选择扩到非循环 block，
+与可能 postdom 影响分别保存；只保留最近必要选择，沿 controller 继续追踪，避免图中
+物化全部祖先及逐 block 二次爬链。循环/未知 INVOKE 的终止性仍 open。原控制综合短验
+**1 passed / 1.00 秒**。真实 `cem.py:276` 的原 TRUTH.NORMAL→BRANCH 必要关系已在
+共同图读回：32 访问端点、64 CONTROL 边、1 条直接 exact 必要前提，冷查询 15.532 秒，
+端点预算/效果/终止性前沿仍在；机器记录为 `artifacts/current/queries/lewm-control-necessity.json`。
+TRUTH 以原 structured.protocols 合同定位，该操作的 source role 实为 EXPRESSION，不能
+仅凭 role 标签判断行为。此为静态依赖核验，不是分支删除、完整闭包或目标加速比。
+
+C++ 前端选型已做真实最小实验：SCAR 私有工具环境 19 MiB，未改 LeWM 环境。原 template
+解析返回正常，但该版本 Point.row 属性遍历可 exit139；已隔离定位，未调整全局环境。
+改用原字节偏移定位后，两次完整结果一致：7,955 CST 节点、83 个函数、6 个 ERROR、
+0 missing，原文件和工具都有收据。证据保存在 `artifacts/current/queries/cpp-front-end-probe.json`。
+这些是源码输入层验证，不是已接通 C++ 类型/ABI/重载/binary；完整方法表关系 reader 正在实现。
+
+正在修复值分析 normal/raise slot0 路由，并补原 TRUTH 合同推理。最小源码实验还发现
+编译器常量折叠的 If 仍被前端 REQUIRED_EXPANSION 阻断；必须后续补静态展开，不能把
+编译产物里没有对应指令误称为源码信息必须动态获得。producer/current 冻结期间不改 lowerer。
+
 ## 当前已发布产物
 
 `artifacts/current/static/manifest.json` SHA-256：

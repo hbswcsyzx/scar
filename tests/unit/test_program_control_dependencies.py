@@ -79,6 +79,10 @@ def test_postdom_control_diamond_loop_raise_closed_scc_and_bounded_cache(tmp_pat
         'entry': ('invoke', ('normal', 'handled')), 'normal': ('jump', ('join',)),
         'handled': ('jump', ('join',)), 'join': ('return', ()),
     }, parent=root)
+    region('gatedcall', {
+        'entry': ('branch', ('invoke', 'other')), 'invoke': ('invoke', ('normal', 'error')),
+        'normal': ('return', ()), 'error': ('raise', ()), 'other': ('return', ()),
+    }, parent=root)
     graph = ProgramGraph(root, tuple(regions), tuple(operations), tuple(values))
     index = ProgramIndex(graph)
     payload = dumps(graph).encode()
@@ -120,7 +124,11 @@ def test_postdom_control_diamond_loop_raise_closed_scc_and_bounded_cache(tmp_pat
     assert any(edge.source.node == OperationID('loop:header:term')
         and edge.conditions[0].index == 1 for edge in after.edges)
     assert any(note.kind == 'CONTROL_TERMINATION_OPEN' for note in after.frontiers)
-    assert all(edge.strength is DependencyStrength.MAY for edge in after.edges)
+    assert all(edge.strength is DependencyStrength.MAY for edge in after.edges
+        if edge.evidence[0].rule == 'CFG_POSTDOM_DIVERGENCE_EXTENDED_CONTROL_V1')
+    assert any(edge.strength is DependencyStrength.EXACT
+        and edge.evidence[0].rule == 'CFG_ENTRY_EDGE_DOMINANCE_CONTROL_NECESSITY_V1'
+        and edge.conditions[0].index == 1 for edge in after.edges)
     assert any(edge.source.node == OperationID('closed:entry:term')
         for edge in incoming(OperationID('closed:a:work')).edges)
     assert any(note.kind == 'CONTROL_TERMINATION_OPEN'
@@ -134,6 +142,25 @@ def test_postdom_control_diamond_loop_raise_closed_scc_and_bounded_cache(tmp_pat
     assert any(edge.source.node == OperationID('native:entry:term') for edge in native_join.edges)
     assert all(edge.strength is DependencyStrength.MAY for edge in native_join.edges)
     assert any(note.kind == 'CONTROL_INVOKE_TERMINATION_OPEN' for note in native_join.frontiers)
+
+    # An acyclic normal landing requires its original NORMAL edge even when
+    # the producer might diverge. This exact *necessary* entry predicate is
+    # not a proof the invocation completes, or that a shared join chose it.
+    required = incoming(OperationID('gatedcall:normal:work'))
+    necessities = [edge for edge in required.edges
+        if edge.evidence[0].rule == 'CFG_ENTRY_EDGE_DOMINANCE_CONTROL_NECESSITY_V1']
+    assert len(necessities) == 1
+    assert necessities[0].source.node == OperationID('gatedcall:invoke:term')
+    assert necessities[0].strength is DependencyStrength.EXACT
+    assert necessities[0].conditions[0].index == 0
+    assert necessities[0].conditions[1].name == 'ORIGINAL_EDGE_REQUIRED_FOR_ENTRY_REACHABILITY'
+    outer = incoming(OperationID('gatedcall:invoke:term'))
+    assert any(edge.source.node == OperationID('gatedcall:entry:term')
+        and edge.evidence[0].rule == 'CFG_ENTRY_EDGE_DOMINANCE_CONTROL_NECESSITY_V1'
+        for edge in outer.edges)
+    assert not any(edge.evidence[0].rule == 'CFG_ENTRY_EDGE_DOMINANCE_CONTROL_NECESSITY_V1'
+        for edge in native_join.edges)
+    assert any(note.kind == 'CONTROL_INVOKE_TERMINATION_OPEN' for note in required.frontiers)
 
     # Same original local graph, selected through an existing region-call
     # frame. Context belongs on edge endpoints, guards and witness anchors.

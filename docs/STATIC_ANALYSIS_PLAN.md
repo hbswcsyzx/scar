@@ -26,6 +26,12 @@ AST 是输入，局部 canonical 已有 CFG/SSA/状态图。原结构性缺口�
 完整 overload 的连接。②③已有短核验；①运行中，③的整程序连接仍未完成。之后再恢复
 AnnAssign/主体覆盖和联合状态推理，不跳到 detector/backend。
 
+新增明确修复项：计算 normal result0 只传到原 NORMAL landing，不能因 RAISE 也有
+slot0 就复用；TRUTH 从原协议合同识别，并按已知 builtin literal 表示推导正常 bool，
+原异常/效果和外部 guard 保留。原编译器折叠的 `if True/False` 无对应 bytecode 时，目前
+前端仍保持 REQUIRED_EXPANSION；需补静态折叠/零指令语法展开，不能列作必须动态观察。
+producer/current 冻结结束后与 AnnAssign 一起推进。
+
 1. **共同依赖图（已实现，完整覆盖待核对）**：qualified 原端点、上下文、typed 关系、原证据、
    共享只读加载；接局部、call/env/G、class provider 和控制依赖，公开遍历。
 2. **首版共同分析（已实现）**：原操作 cut 的字段级边界；跨参数/返回/绑定的有限常量、
@@ -125,6 +131,16 @@ C++ wrapper 与 `_ops` 声明建立有条件关系；只有 stub/未展开生成
 的真实方法表/手工 binding，`torch/include/torch/csrc/autograd/utils/python_arg_parsing.h`
 的参数规范化，以及 `torch/include/ATen/core/TensorBody.h` 的 `_ops` 调用。模板占位与实际
 函数体分开；安装包材料只支持条件化构建来源，不自动证明当前 native binary 的运行绑定。
+
+C++ 源码输入层优先复用 [Tree-sitter](https://tree-sitter.github.io/py-tree-sitter/) 与
+[C++ grammar](https://github.com/tree-sitter/tree-sitter-cpp)，不另造词法器。项目已在
+`.venv/native-source` 隔离安装 0.26.0/0.23.4，约 19 MiB，LeWM 环境未改。
+实际 template 可解析；当前组合的 `Point.row` 属性访问可崩溃，使用原 byte offsets 与
+换行索引推导位置已两次完整遍历一致，准确复验证据保留在当前 query。不能把这次工具
+API 失败写成源码不可解析。CST occurrence/SourceReference 是源输入层，最终程序仍由
+现有 canonical IR 表达；不把未知 C++ 表达式强填为 ReferenceValue 或 DataValue。
+下一步机械接整张方法表→callback/wrapper 表达式→原定义候选→body 调用/参数/条件，
+模板孔、预处理条件、overload 和缺 body 逐字段保留，再接 native header/接口契约。
 
 **自行验收**：每项已推导字段及关系有来源、条件和失效依赖；不同对象/调用/状态版本不被错误合并。沿真实 LeWM 的加载、预处理、规划/模型调用到输出/保存路径能查到已知的值、状态、库接口与资源依赖，而不只是查到一串 Python 名称。
 

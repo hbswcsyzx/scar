@@ -145,6 +145,15 @@ locator。环境 state domain 不是 points-to，声明的控制目的地不是�
 仍保留；`branch_proofs` 引用原 branch、谓词 Use、常量依据和所选 ordinal。不能凭临时
 单值、未收敛循环或 INVOKE 的正常/异常 ordinal 筛掉另一条路径。这不是代码变换。
 
+控制影响与必要路径前提分开：postdom 控制影响可能是 MAY；原 successor edge 对入口
+可达性的支配，才支持“若从该入口执行到此处，必须经过该选择”。共同图保留两类原依据，
+必要性查询覆盖非循环区域，每个 block 仅保留最近必要选择，再沿 controller 递归查询，
+不物化全部传递祖先。exact 必要关系仍受原入口范围限制，不证明调用结束，也不抹去
+挂起/恢复、外部入口及效果前沿。普通 CONTROL 不能直接用作值传播的路径筛选条件。
+
+source role 和人类标签也不等于操作合同。例如源角色为 EXPRESSION 的操作仍可有原
+TRUTH 协议；分析必须消费准确协议/端口及来源，而不是按 label 或 role 猜行为。
+
 NativeBoundary/provider 也按原声明进入共同导航：native/core-only 输入、正常/异常
 出口的全部原 Use、representation ownership 和来源映射都有精确记录 locator。它们是
 STRUCTURE，不是值传递、ABI 等价、must-alias 或已选实现。共同遍历默认排除结构含义，

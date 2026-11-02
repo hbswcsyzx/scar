@@ -181,10 +181,12 @@ class ControlDependencyProvider:
             augmented = bool(cyclic or invokes or temporal or native)
             bounded = False
 
-            def emit(controller, ordinal, block, rule, scope):
+            def emit(controller, ordinal, block, rule, scope, *, necessary=False):
                 nonlocal edge_count, bounded
                 for controlled in (block.id, *block.operations):
-                    key = controller, ordinal, controlled
+                    # A possible postdom influence and an entry-reachability
+                    # prerequisite are different facts, even at the same IDs.
+                    key = controller, ordinal, controlled, rule
                     if key in emitted:
                         continue
                     if edge_count >= self.max_control_edges:
@@ -198,7 +200,7 @@ class ControlDependencyProvider:
                     )
                     edge = DependencyEdge(point(controller), point(controlled), DependencyKind.CONTROL,
                         DependencyMeaning.DEPENDENCE, (evidence,), conditions,
-                        strength=DependencyStrength.MAY if augmented else DependencyStrength.EXACT)
+                        strength=DependencyStrength.MAY if augmented and not necessary else DependencyStrength.EXACT)
                     before[controlled].append(edge)
                     after[controller].append(edge)
                     emitted.add(key)
@@ -224,12 +226,13 @@ class ControlDependencyProvider:
                 if bounded:
                     break
 
-            # SCC divergence candidates can weaken postdom precision. Retain
-            # an additional necessary-control relation where an *original*
-            # successor edge dominates entry reachability of a block. Split
-            # edge vertices are analysis objects, not new program nodes. This
-            # is not ordinary CFG adjacency and it does not assert termination.
-            if cyclic and not bounded:
+            # Postdom influence (especially with may-diverge exits) is not a
+            # necessary path predicate. Separately retain an original edge
+            # that dominates entry reachability, including acyclic INVOKEs and
+            # ordinary diamonds. Split vertices never become program IDs.
+            # Scope is explicitly original-entry reachability: this neither
+            # guarantees completion nor closes protocol/resumption entrances.
+            if not bounded:
                 if cfg_count + len(original_edges) > self.max_cfg_nodes:
                     notes[region.id].append(("CONTROL_EDGE_DOMINANCE_NODE_BUDGET",
                         "Additional entry-edge dominance relations exceeded the explicit analysis node budget."))
@@ -244,26 +247,23 @@ class ControlDependencyProvider:
                         if len(original_successors[source]) >= 2:
                             selections[selected] = controller, ordinal
                     dominators = nx.immediate_dominators(forward, region.entry)
-                    for controlled_block in region.blocks:
-                        if controlled_block.id not in cyclic:
-                            continue
-                        cursor = controlled_block.id
-                        while cursor in dominators:
-                            if cursor in selections:
-                                controller, ordinal = selections[cursor]
-                                emit(controller, ordinal, controlled_block,
-                                    "CFG_ENTRY_EDGE_DOMINANCE_CONTROL_NECESSITY_V1",
-                                    "ORIGINAL_EDGE_REQUIRED_FOR_ENTRY_REACHABILITY")
-                                # Retain the nearest necessary selection. Its
-                                # own controller has its own predecessors; do
-                                # not materialize every transitive ancestor.
-                                break
-                            parent = dominators[cursor]
-                            if bounded or parent == cursor:
-                                break
-                            cursor = parent
-                        if bounded:
-                            break
+                    children = defaultdict(list)
+                    for node, parent in dominators.items():
+                        if node != parent:
+                            children[parent].append(node)
+                    # One walk of the dominator tree avoids quadratic climbs
+                    # in long straight-line CFGs. Keep only the nearest
+                    # selection; its controller has its own prerequisite.
+                    pending = [(region.entry, None)]
+                    while pending and not bounded:
+                        node, nearest = pending.pop()
+                        nearest = selections.get(node, nearest)
+                        if type(node) is BlockID and nearest is not None:
+                            controller, ordinal = nearest
+                            emit(controller, ordinal, index._block_records[node],
+                                "CFG_ENTRY_EDGE_DOMINANCE_CONTROL_NECESSITY_V1",
+                                "ORIGINAL_EDGE_REQUIRED_FOR_ENTRY_REACHABILITY", necessary=True)
+                        pending.extend((child, nearest) for child in children[node])
             if bounded:
                 notes[region.id].append(("CONTROL_EDGE_BUDGET",
                     "Additional control dependencies in this Region were not materialized within the explicit edge budget."))
