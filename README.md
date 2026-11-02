@@ -100,3 +100,28 @@ python -m scar.cli static ../le-wm --link-calls --max-call-bodies 10000 \
 v8 初始化条件、源码展开修复和当前产物尚存的欠账见 [STATUS](docs/STATUS.md)。
 
 `--link-classes` 独立发布当前原图的 parent/provider/suite 接线，不执行 builder 或用户代码。类链接任务记录为 `artifacts/current/static-class-link-task.json`。主体变更使旧调用和 class 接线失效；单纯调用重链接保留不受影响的 class 索引。
+
+C++ 绑定源码已有独立输入层 API，复用社区 parser，不执行源程序。解析工具使用 SCAR 私有
+venv，避免改动目标环境（依赖版本也列在 `native-source` extra）：
+
+```bash
+python -m venv .venv/native-source
+.venv/native-source/bin/python -m pip install tree-sitter==0.26.0 tree-sitter-cpp==0.23.4
+```
+
+```python
+from scar.analysis.static_cpp_source import (
+    read_static_cpp_source, cpp_source_to_document, cpp_source_from_document,
+)
+
+model = read_static_cpp_source(
+    cpp_file, tool_python=scar_tool_python, template_grammar=code_template_file,
+)
+index = model.index()  # 原 SourceAtomID、SourceReference 和 SOURCE/STRUCTURE 关系
+document = cpp_source_to_document(model)  # 单位内整数引用；原 ID/收据无损保留
+assert cpp_source_from_document(document) == model
+```
+
+普通 C++ 输入可省略 `template_grammar`；CodeTemplate 输入传入其原定义文件。模板孔、
+解析错误、同名定义候选和未确定字段不会被吞掉。此 API 是源码前端，不证明 C++ 类型、
+重载、Python/native ABI 或 wheel binary 对应；接入整程序 canonical 图仍在推进。

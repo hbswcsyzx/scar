@@ -174,6 +174,13 @@ ATen header/YAML，核对版本、完整 overload、文件/字节/行与 parser 
 alias/write/dispatch 仍是原 schema 声明，不提升为物理资源或已选 kernel。材料接口、
 Python callable 绑定、native 实现主体、当前整程序发布是四个分别核查的层次。
 
+C++ 输入层也保存原 occurrence，而非将 CST 当成最终程序 IR。SourceAtomID 引用被原
+source receipt/SourceReference 限定，函数完整 declarator、表项 callback/wrapper、call 的
+有序参数、原条件与模板孔形成 SOURCE/STRUCTURE 图；同名 overload 为不同原定义候选。
+没有类型/ABI 证明时，不把 C++ 表达式伪造为 canonical DataValue/ReferenceValue。物理
+保存按源单位分片，source path/hash 和原 occurrence ID 表只存一次，其它边使用单位内
+整数引用；索引只是存储坐标。读回恢复原强类型记录，不改变 source/program 身份。
+
 ## 效果
 
 至少保留 reads/writes/allocates/frees/aliases/escapes、RNG、may_raise、external、ordering，以及必要的生命周期和完成语义。效果可多标签，不互斥。

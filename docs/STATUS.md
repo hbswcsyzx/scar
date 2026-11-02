@@ -63,7 +63,21 @@ C++ 前端选型已做真实最小实验：SCAR 私有工具环境 19 MiB，未�
 解析返回正常，但该版本 Point.row 属性遍历可 exit139；已隔离定位，未调整全局环境。
 改用原字节偏移定位后，两次完整结果一致：7,955 CST 节点、83 个函数、6 个 ERROR、
 0 missing，原文件和工具都有收据。证据保存在 `artifacts/current/queries/cpp-front-end-probe.json`。
-这些是源码输入层验证，不是已接通 C++ 类型/ABI/重载/binary；完整方法表关系 reader 正在实现。
+这些是源码输入层验证，不是已接通 C++ 类型/ABI/重载/binary。
+
+**Implemented / Verified（真实 C++ 输入层）**：方法表 reader 已完成。原 53,705-byte
+template 的 79 个显式方法条目全部机械枚举，83 个函数、563 个调用，保留 5,661 个相关
+occurrence、12,576 条 SOURCE/STRUCTURE 关系及 4 个模板孔、6 个 ERROR。表→callback
+完整表达式→本文件定义候选→body→各调用可达，别名/共享 wrapper/重载不按名字合并。
+此层不是 canonical Value/ProgramGraph；类型、宏、模板生成和 binary 对应仍 open。
+原工具进程 `-I -S`、包/so 收据、禁目标导入，位置只用 bytes 推导。
+
+当前材料保存为 `artifacts/current/queries/native-static-model/binding-source.json.gz`，
+source/path/hash 与原 ID 表一次保存，其余用单位内索引。与完全展开的同一 typed 模型
+相等；当前 2,975,325 bytes JSON / 382,779 bytes gzip，分别较重复格式减少约 73.2% /
+65.5%。旧产物已在同一路径被替换，无历史副本；收据在 `binding-source-summary.json`。
+真实 reader 原短验 0.84 秒；含规范化 roundtrip 与索引/原 ID 拒绝项的同一检查 8.39 秒。
+这些仅为分析器/存储数据，不是 LeWM 性能。公开 API 和隔离工具安装见 README。
 
 **Implemented / Verified**：已修复值分析 normal/raise slot0 路由，并补原 TRUTH 合同推理。
 非终结操作核实际 OperationResult0；INVOKE 核原 NORMAL 的 CompletionResult0 和条件。

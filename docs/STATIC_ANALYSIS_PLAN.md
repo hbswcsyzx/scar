@@ -139,8 +139,10 @@ C++ 源码输入层优先复用 [Tree-sitter](https://tree-sitter.github.io/py-t
 换行索引推导位置已两次完整遍历一致，准确复验证据保留在当前 query。不能把这次工具
 API 失败写成源码不可解析。CST occurrence/SourceReference 是源输入层，最终程序仍由
 现有 canonical IR 表达；不把未知 C++ 表达式强填为 ReferenceValue 或 DataValue。
-下一步机械接整张方法表→callback/wrapper 表达式→原定义候选→body 调用/参数/条件，
-模板孔、预处理条件、overload 和缺 body 逐字段保留，再接 native header/接口契约。
+整张显式方法表→callback/wrapper 表达式→原定义候选→body 调用/参数/条件的 source
+reader 已实现；模板孔、预处理条件、overload 和缺 body 逐字段保留。无损的单位内规范化
+存储/读回已核对。下一步接 native header/接口契约；C++ 类型/绑定/实参转换仍需继续分析，
+不能把 SOURCE 候选边直接升级为 canonical 值或实现等价边。
 
 **自行验收**：每项已推导字段及关系有来源、条件和失效依赖；不同对象/调用/状态版本不被错误合并。沿真实 LeWM 的加载、预处理、规划/模型调用到输出/保存路径能查到已知的值、状态、库接口与资源依赖，而不只是查到一串 Python 名称。
 
