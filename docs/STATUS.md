@@ -1,6 +1,6 @@
 # 当前状态
 
-唯一任务是整程序纯静态分析与建图。工作目录为 `~/AAA/scar`，分支为 `main`。第一阶段尚未完成；当前继续接通父级类构造和跨模块属性来源，没有运行 LeWM。
+唯一任务是整程序纯静态分析与建图。工作目录为 `~/AAA/scar`，分支为 `main`。第一阶段尚未完成。本次按用户要求先核查问题、整理实施顺序，仅更新文档，没有新增分析代码或运行 LeWM。
 
 ## 当前产物的实际范围
 
@@ -36,6 +36,8 @@
 4. **可推导属性与库/资源边界尚未贯通。** 常量推导已有局部能力，类型、Tensor shape/dtype/device/stride、逻辑来源和存储别名还没有在整程序上统一传播。第三方 Python 源码与 native/PyTorch 操作需接入版本化源码或契约；资源要求、潜在分配/搬运/等待应连回原操作和值。静态图表达符号资源及候选实现，不冒充观察到的真实 kernel、地址或传输。
 5. **完成度还没有可靠的统一解释。** 原源码视图的 gap 与规范主体前沿不在同一层，不能直接相减。模块来源的需求前沿已按 body/原 Value/精确调用上下文重算刷新，预算中断保留证据，避免旧提示永久累计；其他整程序覆盖仍需继续区分缺结构、缺连接、未实现、缺材料、预算和静态信息不足。非 module 属性的 receiver 未接提示只表示这项特定来源关系尚未确定，不能解释成 ATTRIBUTE 结构缺失。
 
+本次另核对了当前发布的 cem 模块、policy 模块、训练模块及训练 run 四份规范图：各自的 resources、resource_requirements、resource_uses 均为 0。这是这四份图的实际结果，不是全树统计；它直接说明“已有 Resource 类型”不能作为软件到硬件资源已经接通的证明。第一阶段还须落实从 Python/PyTorch 操作到原生接口及 CPU/GPU/内存/storage 等资源的关系。
+
 326 个 lowerer 不支持项中，主要阻塞包括 nested-with cleanup 60 项、comprehension parent cleanup 41 项、常量槽对应 28 项及表达式组合。另已定位无 docstring 的模块 compiler 前导与首条 future import 源位置重合时，import-plan 扫描尚未排除前导的具体规则欠账。它们不是必须动态探测的证明。
 
 四项相关回归通过，170.13 秒：qualified value sources、module attributes、expression lifetime、class construction。模块回归覆盖 import/属性/参数/局部绑定/返回/最终调用、覆盖后仅选择新值、0 CALL 常量来源、公开 fresh 查询及 selector/receiver/world 篡改拒绝；随后需求前沿刷新复验通过，127.74 秒，故意 Timeout 继续抛出并保留旧证据，成功重算仅清除该精确上下文的旧提示。最后 class 回归加入 compiler-cell + ClassDef 后 function 的组合，4.48 秒。没有新增大规模测试或执行目标源码。
@@ -47,6 +49,8 @@
 新 v6 链接曾按全部 8,819 份主体尝试，设置输入 128 GB、缓存 4 GB、7,200 秒上限，未限定前 400 份。最后报告进度为 74/582 个 source unit、260/8,819 份主体、1,676 个 CALL 和 2,677 份具体上下文记录；随后在 `examples/multi_layer_probe.py` 遇到 `TypeIgnore` 只有起始行、没有结束位置的 AST 元数据，导入位置索引错误地把它当普通语句处理，进程退出码 1。这不是预算停止或静态不可知，也没有发布这批内存关系。
 
 修复将导入位置索引限定到真正的 Import 节点，TypeIgnore 仍留在原 AST/源码中；现有模块回归加入该注释后通过，130.34 秒。对实际原源片 multi_layer_probe.py 的 3 个 TypeIgnore 节点和模块导入索引重新核对通过，5.231 秒。原子临时目录已清理，主体 manifest 保持本页 SHA；新的整范围重试仍须核对真实覆盖与公开查询，不能把此前进程计数当已保存结果。
+
+本次检查时，后续重试的工具句柄已不存在，原 PID 也不存在；current manifest 仍为本页 SHA，static_call_links_present=false，没有新调用索引发布。遗留 `.static-calls-gojab8j8` 只是临时目录，不是活进程或完成证明。退出原因目前没有可靠终态记录，不能猜测为成功、超时或某个异常；也不能继续报告它在后台运行。下一次长任务之前先补齐可核查的终态和失败定位。
 
 ## 已有能力与当前限制
 
@@ -60,6 +64,6 @@ schema v6 继续保留 v5 的上下文隔离参数/返回来源，同时保存 i
 
 ## 后续顺序
 
-按 [唯一计划](STATIC_ANALYSIS_PLAN.md) 对全部已有主体重建调用/值来源索引，核对真实范围、读取错误、预算、保存关系及公开查询。随后接 imported function 的模块 G/state、标准 builder 的 prepared namespace/suite 绑定、defaults、decorator/implicit-call 与 closure。语言欠账按共同阻塞原因修复，不按 LeWM 名称或单个函数补丁。
+按 [唯一计划](STATIC_ANALYSIS_PLAN.md) 推进：先明确输入/依赖、具体缺口和任务终态；接通现有子图的值与状态接口；按共同原因补齐语言结构；联合求解引用、状态、效果、属性和资源；最后完成整范围发布、读回和查询。结构欠账与跨层推理按依赖衔接，已有子集的推理不必等所有语法规则补完才开始。
 
-随后将 points-to、状态、效果与类型/常量/Tensor 属性放入相互反馈的工作队列，补足依赖源码/契约，并核对整范围导出、查询和具体前沿。验收关注可追溯的完整结构与依赖，不能用操作数、图数或零 ERROR 代替。进入化简阶段之前不增加 detector、backend 或动态采集。
+第一项实际接线优先处理 imported function 的原模块 G/state，其次为 prepared namespace/suite ABI、defaults、decorator/implicit-call 和 closure。每次改动需明确补哪条关系、用哪些原端口证明接通，并回写其实际覆盖与剩余项。进入化简阶段之前不增加 detector、backend 或动态采集。
