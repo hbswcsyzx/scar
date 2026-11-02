@@ -12,6 +12,7 @@ import pytest
 
 from scar.analysis.static_cpp_source import (CppRelationKind, CppSourceError,
     cpp_source_from_document, cpp_source_to_document, read_static_cpp_source)
+from scar.ir.v2.ids import SourceAtomID
 
 
 def test_original_binding_template_source_relations_and_open_fields(tmp_path):
@@ -75,6 +76,17 @@ def test_original_binding_template_source_relations_and_open_fields(tmp_path):
     assert any('return-expression' in n.roles for n in model.occurrences)
     assert any('method-name' in n.roles and 'expression-structure' in n.roles for n in model.occurrences)
     assert model.open_fields and model.holes and model.errors
+    for query in (index.incoming, index.outgoing):
+        with pytest.raises(CppSourceError, match='absent from this unit'):
+            query(SourceAtomID('different-source-occurrence'))
+    macro_source = tmp_path / 'unexpanded.cpp'
+    macro_source.write_text('PyMethodDef methods[] = {\n'
+        ' {"visible", callback, METH_NOARGS, nullptr},\n'
+        ' MISSING_METHODS,\n {nullptr}\n};\n')
+    macro_model = read_static_cpp_source(macro_source, tool_python=tool)
+    macro_table, = macro_model.tables
+    assert macro_table.unclassified and not macro_table.holes
+    assert not macro_table.explicit_entries_enumerated and not macro_table.generated_complete
     with pytest.raises(CppSourceError,match='MISSING_ANALYZER_TOOL'):
         read_static_cpp_source(source,tool_python=tmp_path/'missing-python')
     document = cpp_source_to_document(model)

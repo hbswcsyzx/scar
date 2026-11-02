@@ -79,6 +79,11 @@ source/path/hash 与原 ID 表一次保存，其余用单位内索引。与完�
 真实 reader 原短验 0.84 秒；含规范化 roundtrip 与索引/原 ID 拒绝项的同一检查 8.39 秒。
 这些仅为分析器/存储数据，不是 LeWM 性能。公开 API 和隔离工具安装见 README。
 
+随后收口两个源码查询边界：非本单位 ID 查询明确拒绝，不能用空邻接冒充无依赖；表的
+未分类/错误范围只有全部属于已知模板孔时，才允许声明显式项已枚举。其它未知宏和不支持
+项维持未完整，生成部分另计。真实表 79 项仍完整，新增短宏片段保留 incomplete；同一
+检查 1 passed / 8.27 秒。原完整模型和 native ABI/binary 是否已接通仍分别判断。
+
 **Implemented / Verified**：已修复值分析 normal/raise slot0 路由，并补原 TRUTH 合同推理。
 非终结操作核实际 OperationResult0；INVOKE 核原 NORMAL 的 CompletionResult0 和条件。
 端口 index 不再误作运行 guard，改由原 successor.arguments 的精确证据指针提供。

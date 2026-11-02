@@ -169,9 +169,13 @@ class CppSourceIndex:
             self._before[edge.target].append(edge); self._after[edge.source].append(edge)
 
     def incoming(self, occurrence):
+        if type(occurrence) is not SourceAtomID or occurrence not in self.occurrences:
+            raise CppSourceError('source occurrence is absent from this unit')
         return tuple(self._before.get(occurrence, ()))
 
     def outgoing(self, occurrence):
+        if type(occurrence) is not SourceAtomID or occurrence not in self.occurrences:
+            raise CppSourceError('source occurrence is absent from this unit')
         return tuple(self._after.get(occurrence, ()))
 
 

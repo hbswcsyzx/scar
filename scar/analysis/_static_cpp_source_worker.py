@@ -223,18 +223,26 @@ def main():
                     try:python_name = json.loads(text(items[0]))
                     except (ValueError, TypeError):pass
                 fields = ['RUNTIME_DESCRIPTOR_AND_RECEIVER_BINDING', 'CALLBACK_WRAPPER_AND_CPP_TYPES', 'SOURCE_TO_BINARY_CORRESPONDENCE']
-                if len(items) != 4:fields.append('UNSUPPORTED_METHOD_ENTRY_SHAPE')
+                if len(items) != 4:
+                    fields.append('UNSUPPORTED_METHOD_ENTRY_SHAPE')
+                    unclassified.append(row_id)
                 if python_name is None:fields.append('NON_LITERAL_METHOD_NAME')
                 refs = references(items[1]) if len(items)>1 else []
                 if any(not ref['candidates'] for ref in refs):fields.append('CALLBACK_BODY_NOT_SUPPLIED_FOR_SOME_REFERENCES')
                 entries.append(dict(id=row_id, name=name, python_name=python_name, callback=callback, flags=flags,
                     documentation=documentation, references=refs, open_fields=fields))
-            table_holes = [identity for identity in holes if declarator.start_byte<=occurrences[identity]['start']<declarator.end_byte]
+            table_holes = [identity for identity in holes if declarator.start_byte<=occurrences[identity]['start']
+                and occurrences[identity]['end']<=declarator.end_byte]
             for hole in table_holes:relation(table_id, hole, 'unexpanded-template-item')
             for item in unclassified:relation(table_id, item, 'unclassified-table-item')
+            table_errors = [identity for identity in errors if declarator.start_byte<=occurrences[identity]['start']
+                and occurrences[identity]['end']<=declarator.end_byte]
+            explicit_enumerated = all(any(occurrences[hole]['start']<=occurrences[item]['start']
+                and occurrences[item]['end']<=occurrences[hole]['end'] for hole in table_holes)
+                for item in (*unclassified, *table_errors))
             tables.append(dict(id=table_id, name=name_id, entries=table_entries, terminators=terminators,
                 holes=table_holes, unclassified=unclassified,
-                explicit_entries_enumerated=True, generated_complete=not(table_holes or unclassified or declarator.has_error)))
+                explicit_entries_enumerated=explicit_enumerated, generated_complete=not(table_holes or unclassified or declarator.has_error)))
 
     calls = []
     for node in nodes:
