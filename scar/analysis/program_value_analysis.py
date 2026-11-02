@@ -146,6 +146,28 @@ class ValueAnalysisBudget:
 
 
 @dataclass(frozen=True,slots=True)
+class BranchSelectionProof:
+    """Stable normal-value fact for one original contextual BRANCH."""
+    branch: Point
+    predicate: Point
+    selected_index: int
+    alternatives: tuple[ValueAlternative,...]
+    evidence: Evidence
+
+    def __post_init__(self):
+        if (type(self.branch)is not Point or type(self.branch.node)is not OperationID
+                or type(self.predicate)is not Point or type(self.predicate.node)is not UseID
+                or self.branch.namespace!=self.predicate.namespace or self.branch.context!=self.predicate.context
+                or type(self.selected_index)is not int or self.selected_index not in(0,1)
+                or type(self.alternatives)is not tuple or not self.alternatives
+                or any(type(a)is not ValueAlternative or a.strength is not Strength.EXACT
+                    or type(a.value)is not PythonLiteral or a.value.kind is not LiteralKind.BOOL
+                    or a.value.payload is not(self.selected_index==0)for a in self.alternatives)
+                or type(self.evidence)is not Evidence):
+            raise TypeError('branch proof needs an original branch/predicate context and stable builtin bool alternatives')
+
+
+@dataclass(frozen=True,slots=True)
 class ValueAnalysisResult:
     roots: tuple[Point,...]
     facts: tuple[ValueFact,...]
@@ -153,6 +175,7 @@ class ValueAnalysisResult:
     frontiers: tuple[Frontier,...]
     usage: dict[str,int]
     exhausted: bool
+    branch_proofs: tuple[BranchSelectionProof,...] = ()
 
     def for_point(self,point):
         return next((fact for fact in self.facts if fact.point==point),None)
@@ -171,6 +194,7 @@ class ProgramValueAnalysis:
         self._unsettled={}
         self._compiled_units=OrderedDict();self._constant_tables={};self._code_literals={}
         self._compiled_bytes=0
+        self._branch_conditions={};self._branch_proofs={}
 
     def _note(self,point,kind,detail):
         item=Frontier(point,kind,detail);self._frontiers[item]=item
@@ -331,6 +355,10 @@ class ProgramValueAnalysis:
         value,index=self._value(point)
         evidence=Evidence('CANONICAL_IMMUTABLE_LITERAL_V1',(point.namespace.graph,),(point,))
         if type(point.node)is OperationID:
+            from scar.ir.program.model import TerminatorKind
+            operation=index.operations[point.node]
+            if operation.terminator is not None and operation.terminator.kind is TerminatorKind.BRANCH:
+                return ValueFact(point,_TOKEN,role='NONVALUE')
             if any(read.operation==point.node and read.normal_result is None for read in index.graph.binding_reads):
                 return ValueFact(point,_TOKEN,feasible=False,role='NO_NORMAL_RESULT')
             return ValueFact(point,role='NORMAL_RESULT_0')
@@ -402,7 +430,8 @@ class ProgramValueAnalysis:
                 if len(conditions)>self.budget.max_conditions:
                     unknown.append(self._note(edge.target,'VALUE_CONDITION_BUDGET','Guard alternatives exceed the explicit condition budget.'));continue
                 strength=Strength.MAY if edge.strength is Strength.MAY or item.strength is Strength.MAY else Strength.EXACT
-                alternatives.append(ValueAlternative(item.value,conditions,tuple(dict.fromkeys((*item.evidence,*edge.evidence))),
+                proofs=tuple(proof.evidence for proof in self._edge_branch_proofs(edge))
+                alternatives.append(ValueAlternative(item.value,conditions,tuple(dict.fromkeys((*item.evidence,*edge.evidence,*proofs))),
                     tuple(dict.fromkeys((*item.premises,edge.source))),strength))
             if edge.strength is Strength.MAY:
                 unknown.append(self._note(edge.target,'MAY_VALUE_SOURCE_OPEN','A may-dependence source does not close the other possible value paths.'))
@@ -617,6 +646,63 @@ class ProgramValueAnalysis:
             builtin_type=ValueField(tuple(types))if opcode=='BUILD_TUPLE'else ValueField(tuple(types),unknown),
             immutable_tuple=_NA if alternatives and not tuples and not unknown else ValueField(tuple(tuples),unknown))
 
+    def _branch_predicate(self,branch):
+        if branch in self._branch_conditions:return self._branch_conditions[branch]
+        if type(branch.node)is not OperationID:return None
+        from scar.ir.program.model import TerminatorKind
+        index=self.session.index(branch.namespace);operation=index.operations[branch.node]
+        term=operation.terminator
+        if term is None or term.kind is not TerminatorKind.BRANCH:return None
+        use=index.use_site(term.condition)
+        value=index.values[use.use.value]
+        if use.operation!=operation.id or type(value)is not DataValue or value.data_type!='builtins.bool':
+            raise ValueError('canonical BRANCH must retain its original builtin-bool condition Use')
+        predicate=Point(branch.namespace,term.condition,branch.context)
+        self._branch_conditions[branch]=predicate
+        return predicate
+
+    def _edge_branch_proofs(self,edge):
+        return tuple(dict.fromkeys(self._branch_proofs[c.subject]for c in edge.conditions
+            if c.domain=='canonical'and c.name=='SUCCESSOR_SELECTED'and c.subject in self._branch_proofs))
+
+    def _edge_selected(self,edge):
+        return all(c.index==self._branch_proofs[c.subject].selected_index for c in edge.conditions
+            if c.domain=='canonical'and c.name=='SUCCESSOR_SELECTED'and c.subject in self._branch_proofs)
+
+    def _freeze_branches(self):
+        # A stopped worklist is not a closed predicate. In particular, an
+        # early singleton can still acquire another value through a backedge.
+        if not self._exhausted or self._unsettled:return ()
+        added=[]
+        for branch,predicate in self._branch_conditions.items():
+            if branch in self._branch_proofs or predicate not in self._facts:continue
+            inputs=[edge for edge in self._incoming.get(branch,())if edge.kind is K.CONTROL_CONDITION]
+            if (len(inputs)!=1 or inputs[0].source!=predicate or inputs[0].target!=branch
+                    or inputs[0].strength is not Strength.EXACT):continue
+            fact=self._facts[predicate];field=fact.scalar_constant
+            if (fact.feasible is False or not field.applicable or not field.alternatives or field.unknown_paths
+                    or any(a.strength is not Strength.EXACT or type(a.value)is not PythonLiteral
+                        or a.value.kind is not LiteralKind.BOOL or type(a.value.payload)is not bool
+                        for a in field.alternatives)):
+                continue
+            values={a.value.payload for a in field.alternatives}
+            if len(values)!=1:continue
+            # Do not silently accept runtime/dispatch/code-instance guards.
+            # An earlier frozen BRANCH can justify its own selected edge;
+            # all other predicate scopes remain conditional and unfiltered.
+            if any(c.domain!='canonical'or c.name!='SUCCESSOR_SELECTED'
+                    or c.subject not in self._branch_proofs
+                    or c.index!=self._branch_proofs[c.subject].selected_index
+                    for a in field.alternatives for c in a.conditions):
+                self._note(branch,'BRANCH_PREDICATE_GUARDS_OPEN',
+                    'A builtin-bool candidate retains undischarged original guards; both value paths remain.')
+                continue
+            selected=0 if next(iter(values))else 1
+            evidence=Evidence('STABLE_BUILTIN_BOOL_SELECTS_SUCCESSOR_'+str(selected)+'_V1',
+                (branch.namespace.graph,),(branch,predicate))
+            added.append(BranchSelectionProof(branch,predicate,selected,field.alternatives,evidence))
+        return tuple(added)
+
     def _compute(self,point):
         seed=self._seed(point);fields=seed.fields;payload=seed.binding_payload;states=set(seed.binding_states)
         if seed.role in('LITERAL','NO_NORMAL_RESULT'):return seed
@@ -625,6 +711,7 @@ class ProgramValueAnalysis:
         if operator is not None:
             fields=self._join(point,fields,self._evaluate_operator(point,operator))
         for edge in self._incoming[point]:
+            if not self._edge_selected(edge):continue
             parent=self._facts[edge.source]
             if edge.strength is Strength.MAY:normal_open=True
             if edge.kind is K.BINDING_PAYLOAD:
@@ -672,48 +759,7 @@ class ProgramValueAnalysis:
         if seed.role in('BINDING_PAYLOAD','NONVALUE'):fields=_TOKEN
         return replace(seed,fields=fields,binding_payload=payload,binding_states=tuple(sorted(states,key=lambda s:s.value)),feasible=feasible)
 
-    def analyze(self,roots):
-        roots=tuple(roots)
-        if not roots or any(type(p)is not Point for p in roots):raise TypeError('value analysis needs qualified DependencyPoint roots')
-        if self._facts:raise ValueError('a value-analysis scope is used once')
-        selected=frozenset((K.VALUE_USE,K.OPERAND,K.RESULT,K.BLOCK_ARGUMENT,K.ARGUMENT,K.COMPLETION,
-            K.STATE_VALUE,K.ENVIRONMENT,K.BINDING_PAYLOAD,K.BINDING_READ))
-        pending=deque(roots);edges={}
-        while pending:
-            point=pending.popleft()
-            if point in self._facts:continue
-            if len(self._facts)>=self.budget.max_points:
-                self._note(point,'VALUE_POINT_BUDGET','Unvisited original dependency point is retained.');self._exhausted=False;continue
-            try:
-                self.session.check();self._facts[point]=self._seed(point)
-                neighborhood=self.graph.incoming(point,kinds=selected)
-                self._exhausted&=neighborhood.enumerated
-                self._frontiers.update((f,f)for f in neighborhood.frontiers)
-                blockers=tuple(f for f in neighborhood.frontiers if f.kind in(
-                    'STATIC_RELATION_SCOPE_OPEN','UNBOUND_CALL_CONTEXT','RELATION_CONTEXT_UNRESOLVED',
-                    'CALL_RELATIONS_NOT_PUBLISHED','NAMESPACE_STATE_CLOSURE_OPEN','MODULE_L_G_ALIAS_CONTRACT_OPEN',
-                    'LOCAL_BINDING_PAYLOAD_OPEN','CALL_CONTEXT_UNKNOWN'))
-                if not neighborhood.enumerated:
-                    blockers=(*blockers,self._note(point,'VALUE_RELATION_ENUMERATION_OPEN','The shared graph did not enumerate every relevant original dependency.'))
-                self._point_unknown[point]=tuple(dict.fromkeys(blockers))
-                retained=[]
-                for edge in neighborhood.edges:
-                    if len(edges)>=self.budget.max_edges:
-                        self._note(point,'VALUE_EDGE_BUDGET','Additional original input edges remain unprocessed.');self._exhausted=False;break
-                    edges[edge]=edge;retained.append(edge);self._dependents[edge.source].add(point);pending.append(edge.source)
-                self._incoming[point]=tuple(retained)
-            except (OverflowError,TimeoutError)as error:
-                gap=self._note(point,'VALUE_DISCOVERY_BUDGET',str(error));self._exhausted=False
-                if point in self._facts:
-                    self._incoming.setdefault(point,());self._unsettled[point]=gap
-                    self._point_unknown[point]=tuple(dict.fromkeys((*self._point_unknown[point],gap)))
-                break
-        self._usage['points']=len(self._facts);self._usage['edges']=len(edges)
-        # Edges cut by the discovery budget keep their explicit unknown path.
-        for point,incoming in tuple(self._incoming.items()):
-            self._incoming[point]=tuple(e for e in incoming if e.source in self._facts)
-            if len(self._incoming[point])!=len(incoming):
-                self._facts[point]=replace(self._facts[point],fields=self._unknown(point,'VALUE_DEPENDENCY_UNVISITED','Original source endpoint lies beyond discovery budget.'))
+    def _settle(self):
         work=deque(self._facts);queued=set(work);unseeded_opened=False
         while work or not unseeded_opened:
             if not work:
@@ -751,6 +797,79 @@ class ProgramValueAnalysis:
                 self._facts[point]=merged
                 for dependent in self._dependents.get(point,()):
                     if dependent not in queued:queued.add(dependent);work.append(dependent)
+
+    def analyze(self,roots):
+        roots=tuple(roots)
+        if not roots or any(type(p)is not Point for p in roots):raise TypeError('value analysis needs qualified DependencyPoint roots')
+        if self._facts:raise ValueError('a value-analysis scope is used once')
+        selected=frozenset((K.VALUE_USE,K.OPERAND,K.RESULT,K.BLOCK_ARGUMENT,K.ARGUMENT,K.COMPLETION,
+            K.STATE_VALUE,K.ENVIRONMENT,K.BINDING_PAYLOAD,K.BINDING_READ,K.CONTROL_CONDITION))
+        pending=deque(roots);edges={}
+        while pending:
+            point=pending.popleft()
+            if point in self._facts:continue
+            if len(self._facts)>=self.budget.max_points:
+                self._note(point,'VALUE_POINT_BUDGET','Unvisited original dependency point is retained.');self._exhausted=False;continue
+            try:
+                self.session.check();self._facts[point]=self._seed(point)
+                neighborhood=self.graph.incoming(point,kinds=(K.CONTROL_CONDITION,)
+                    if point in self._branch_conditions else selected)
+                self._exhausted&=neighborhood.enumerated
+                self._frontiers.update((f,f)for f in neighborhood.frontiers)
+                blockers=tuple(f for f in neighborhood.frontiers if f.kind in(
+                    'STATIC_RELATION_SCOPE_OPEN','UNBOUND_CALL_CONTEXT','RELATION_CONTEXT_UNRESOLVED',
+                    'CALL_RELATIONS_NOT_PUBLISHED','NAMESPACE_STATE_CLOSURE_OPEN','MODULE_L_G_ALIAS_CONTRACT_OPEN',
+                    'LOCAL_BINDING_PAYLOAD_OPEN','CALL_CONTEXT_UNKNOWN'))
+                if not neighborhood.enumerated:
+                    blockers=(*blockers,self._note(point,'VALUE_RELATION_ENUMERATION_OPEN','The shared graph did not enumerate every relevant original dependency.'))
+                self._point_unknown[point]=tuple(dict.fromkeys(blockers))
+                retained=[]
+                for edge in neighborhood.edges:
+                    if len(edges)>=self.budget.max_edges:
+                        self._note(point,'VALUE_EDGE_BUDGET','Additional original input edges remain unprocessed.');self._exhausted=False;break
+                    edges[edge]=edge;retained.append(edge);self._dependents[edge.source].add(point);pending.append(edge.source)
+                    for condition in edge.conditions:
+                        if (condition.domain!='canonical'or condition.name!='SUCCESSOR_SELECTED'
+                                or condition.subject is None):continue
+                        predicate=self._branch_predicate(condition.subject)
+                        if predicate is None:continue
+                        if condition.index not in(0,1):raise ValueError('BRANCH selection changed its original successor ordinal')
+                        # The subject and its actual CONTROL_CONDITION edge
+                        # are discovered through the same original graph.
+                        pending.append(condition.subject)
+                        self._dependents[predicate].add(point)
+                self._incoming[point]=tuple(retained)
+            except (OverflowError,TimeoutError)as error:
+                gap=self._note(point,'VALUE_DISCOVERY_BUDGET',str(error));self._exhausted=False
+                if point in self._facts:
+                    self._incoming.setdefault(point,());self._unsettled[point]=gap
+                    self._point_unknown[point]=tuple(dict.fromkeys((*self._point_unknown[point],gap)))
+                break
+        self._usage['points']=len(self._facts);self._usage['edges']=len(edges)
+        # Edges cut by the discovery budget keep their explicit unknown path.
+        for point,incoming in tuple(self._incoming.items()):
+            self._incoming[point]=tuple(e for e in incoming if e.source in self._facts)
+            if len(self._incoming[point])!=len(incoming):
+                self._facts[point]=replace(self._facts[point],fields=self._unknown(point,'VALUE_DEPENDENCY_UNVISITED','Original source endpoint lies beyond discovery budget.'))
+        discovery_frontiers=dict(self._frontiers)
+        self._usage['branch_refinements']=0;self._usage['branches_proved']=0
+        while True:
+            self._settle()
+            added=self._freeze_branches()
+            if not added:break
+            # Closed proofs only grow across rounds. Derived field facts are
+            # recomputed from their original seeds: no stale value/unknown
+            # from a refuted arm survives an in-place cumulative join.
+            try:
+                seeds={}
+                for point in self._facts:
+                    self.session.check();seeds[point]=self._seed(point)
+            except (OverflowError,TimeoutError)as error:
+                self._note(point,'BRANCH_REFINEMENT_BUDGET',str(error));self._exhausted=False
+                break  # Previous completed round remains a sound fallback.
+            self._branch_proofs.update((proof.branch,proof)for proof in added)
+            self._usage['branch_refinements']+=1;self._usage['branches_proved']=len(self._branch_proofs)
+            self._facts=seeds;self._frontiers=dict(discovery_frontiers);self._widened.clear()
         for point,fact in tuple(self._facts.items()):
             if fact.feasible is False:
                 self._facts[point]=replace(fact,fields=_TOKEN)
@@ -770,8 +889,8 @@ class ProgramValueAnalysis:
                 self._facts[point]=replace(fact,fields=opened(fact.fields),
                     binding_payload=opened(fact.binding_payload)if fact.binding_payload is not None else None)
             pending.extend((dependent,gap)for dependent in self._dependents.get(point,()))
-        return ValueAnalysisResult(roots,tuple(self._facts.values()),tuple(edges),tuple(self._frontiers),dict(self._usage),self._exhausted)
+        return ValueAnalysisResult(roots,tuple(self._facts.values()),tuple(edges),tuple(self._frontiers),dict(self._usage),self._exhausted,tuple(self._branch_proofs.values()))
 
 
 __all__=['ProgramValueAnalysis','ValueAnalysisBudget','ValueAnalysisResult','ValueFact',
-    'ValueFields','ValueField','ValueAlternative','FieldPrecision']
+    'ValueFields','ValueField','ValueAlternative','FieldPrecision','BranchSelectionProof']

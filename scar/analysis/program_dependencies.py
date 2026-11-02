@@ -12,7 +12,7 @@ from scar.ir.program.dependencies import (DependencyCondition, DependencyEdge,
     DependencyEvidence, DependencyFrame, DependencyFrontier, DependencyKind as K,
     DependencyMeaning as M, DependencyNeighborhood, DependencyPoint, DependencyStrength, GraphNamespace)
 from scar.ir.program.ids import (BlockID, ControlPortID, EnvironmentInterfaceID, LocationID, OperationID, RegionID,
-    ResourceDefinitionID, ResourceRequirementID, UseID, ValueID)
+    NativeBoundaryID, ProviderID, ResourceDefinitionID, ResourceRequirementID, UseID, ValueID)
 from scar.ir.program.model import (BlockArgument, CompletionResult, OperationResult,
     ReferenceValue, StateVersionValue, TerminatorKind, UseRole)
 from scar.ir.program.bindings import BindingState
@@ -141,6 +141,8 @@ class ProgramDependencyGraph:
             exhausted = exhausted and neighborhood.enumerated
             frontiers.update((item, item) for item in neighborhood.frontiers)
             for edge in neighborhood.edges:
+                if not include_structure and edge.meaning is M.STRUCTURE:
+                    continue
                 if edge not in edges and len(edges) >= max_edges:
                     item = DependencyFrontier(point, "DEPENDENCY_EDGE_BUDGET", "Additional original dependencies were not traversed.")
                     frontiers[item] = item; exhausted = False
@@ -193,7 +195,7 @@ class ProgramDependencyGraph:
                         "The selected " + direction + " neighborhood was not fully enumerated.")
                     notes[item] = item
                 for edge in neighborhood.edges:
-                    if edge.kind in STRUCTURAL_KINDS:
+                    if edge.kind in STRUCTURAL_KINDS or edge.meaning is M.STRUCTURE:
                         continue
                     if edge.source in members and edge.target in members:
                         continue
@@ -420,9 +422,16 @@ class LocalDependencyProvider:
             if use.definition is not None:edge(use.definition, use.requirement, K.RESOURCE)
             if use.handle is not None:edge(use.handle, use.requirement, K.RESOURCE)
         for location in graph.resource_locations:edge(location.resource, location.location, K.RESOURCE)
+        from scar.analysis.program_native_dependencies import native_declaration_relations
+        native_edges, native_frontiers = native_declaration_relations(namespace, index)
+        for item in native_edges:
+            before[item.target.node].append(item); after[item.source.node].append(item)
+        for item in native_frontiers:
+            frontiers[item.point.node].append((item.kind, item.detail))
         for identity in members:
             if type(identity) not in (OperationID, ValueID, UseID, BlockID, RegionID, LocationID,
-                    ResourceDefinitionID, ResourceRequirementID, EnvironmentInterfaceID, ControlPortID):
+                    ResourceDefinitionID, ResourceRequirementID, EnvironmentInterfaceID, ControlPortID,
+                    NativeBoundaryID, ProviderID):
                 frontiers[identity].append(("PROTOCOL_ENTITY_RELATIONS_OPEN", "Original typed entity is present; its protocol-specific relation projection remains open."))
         return before, after, frontiers, members
 

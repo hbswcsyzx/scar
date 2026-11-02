@@ -175,9 +175,24 @@ AST 仅为解析输入和源码对应依据；包含层次只组织定义，不�
 循环、未知调用终止和挂起等范围保留 may/前沿。过滤关系、预算截断和未发布接口也须显式报告。
 统一查询导出使用规范化引用表，复用 namespace、上下文、条件和证据；它不是第二份程序事实权威。
 
+共同图新增 native/provider 原声明投影：所有 ordered native/core-only 端口都能到原
+entry Value 或各 Return/Raise Use；跨表示 pair 只引用原逻辑端口记录，不做两侧多个
+Return 站点的笛卡尔积。provider 的来源绑定是结构依据，不是一次执行的实现选择。
+结构含义与 relation kind 分开过滤，不能让 IMPLEMENTATION 的声明边混入值传播或 cut。
+
+值队列现在实际消费 BRANCH 的原 CONTROL_CONDITION，先完成有限固定点、证明一致
+builtin bool，再从原 seeds 重算条件值边。完整原边与上下文证明同时导出，外部 guard、
+未知、循环 widening 和预算未闭合不筛路；这只细化事实，不改写程序或删图。
+
 这些实现解决了基础接口问题，**尚未解决完整联合分析**：精细 reaching writes/alias/effects、
 module 初始化 L/G、全部 Python 协议、容器/Tensor 属性与 native/资源契约仍不完整；真实
 current 的全范围调用关系也尚未发布。class 已全批枚举发布（1,065 条连接，余项有明确边界），不能混称整程序已贯通。
+
+已安装 ATen schema/header 的自动读取及 canonical 接口构造已有真实材料验证，但尚未
+发布进 current 整程序，也未接通 Python callable→native overload。后者必须读取真实
+binding/参数转换/receiver 与 override 条件，不能按名称或 stub overload 同位对接。
+例如包里的手工 binding 会先把 Python `to(other)` 转为 device/dtype 再选择 C++ 调用，
+还包含直接返回 self 的分支。该例只说明连接必须保留转换图，不是业务专用规则。
 
 统一视图不复制源程序实体、不重复保存 callee，不要求把所有图先解压到内存或合并为单文件。
 物理上仍分片、共享定义；规则在原端点提交依据、条件和未闭合项。后续联合分析必须实际消费

@@ -102,6 +102,74 @@ def test_entry_query_resolves_only_the_named_existing_entry_port():
         index.entry_port(EntryPortRef(RegionID("native.rep"), ValueID("native.missing")))
 
 
+def test_common_graph_navigates_native_declarations_without_value_or_abi_proof(tmp_path):
+    import hashlib
+    import json
+    from scar.analysis.program_dependencies import ProgramDependencyGraph
+    from scar.analysis.program_dependency_export import export_dependency_walk
+    from scar.ir.program.codec import SCHEMA_VERSION
+    from scar.ir.program.dependencies import (
+        DependencyKind as K, DependencyMeaning as M, DependencyPoint as P, GraphNamespace,
+    )
+    from scar.ir.program.providers import ProviderArtifact
+    from scar.ir.program.source_references import SourceArtifactLocator
+
+    graph = native_boundary_graph()
+    index = ProgramIndex(graph)
+    document = {'graph': json.loads(dumps(graph))}
+    payload = json.dumps(document, sort_keys=True).encode()
+    path = tmp_path / 'native.json'
+    path.write_bytes(payload)
+    sha = hashlib.sha256(payload).hexdigest()
+    locator = SourceArtifactLocator(ProviderArtifact(str(path), sha, len(payload), 'scar.program-graph'),
+        sha, len(payload), 'canonical-json', '#/graph')
+    namespace = GraphNamespace(locator, 'scar.program-graph/' + str(SCHEMA_VERSION), graph.root)
+    view = ProgramDependencyGraph(lambda ns: index)
+    boundary = _boundary(graph)
+    root = P(namespace, boundary.id)
+    neighborhood = view.outgoing(root)
+    assert all(edge.meaning is M.STRUCTURE for edge in neighborhood.edges)
+    assert any(edge.target.node == boundary.region and edge.kind is K.IMPLEMENTATION
+        for edge in neighborhood.edges)
+    assert {ValueID('native.ref'), ValueID('native.flag'), ValueID('native.world')} <= {
+        edge.target.node for edge in neighborhood.edges if edge.kind is K.CONTAINS}
+    # Both Return occurrences and both distinct slots survive, as do raise and
+    # core-only world ports.  Slot order is evidence, never inferred from core.
+    output_edges = [edge for edge in neighborhood.edges
+        if edge.target.node == UseID('native.return.a.out0')]
+    assert len(output_edges) == 1
+    assert any(edge.target.node == UseID('native.return.b.out0') for edge in neighborhood.edges)
+    assert any(edge.target.node == UseID('native.return.a.out1') for edge in neighborhood.edges)
+    assert any(edge.target.node == UseID('native.raise.world.use') for edge in neighborhood.edges)
+    original = output_edges[0].evidence[0].sources[0]
+    assert original.pointer == '#/graph/native_boundaries/1/outputs/0'
+    assert output_edges[0].evidence[0].anchors == (root, P(namespace, UseID('native.return.a.out0')))
+    assert {f.kind for f in neighborhood.frontiers} >= {
+        'NATIVE_SIGNATURE_BINDING_OPEN', 'NATIVE_CORRESPONDENCE_OBLIGATIONS_OPEN'}
+    assert not any(f.kind == 'PROTOCOL_ENTITY_RELATIONS_OPEN' for f in neighborhood.frontiers)
+
+    declaration_only = view.walk((root,), direction='outgoing', max_points=100, max_edges=300)
+    assert declaration_only.points == (root,) and not declaration_only.edges
+    structural = view.walk((root,), direction='outgoing', max_points=100, max_edges=300,
+        include_structure=True)
+    assert any(edge.target.node == boundary.region for edge in structural.edges)
+    assert not structural.dependence_closed
+    exported = export_dependency_walk(structural)
+    json.dumps(exported, allow_nan=False)
+    assert any(edge['meaning'] == 'STRUCTURE' and edge['kind'] == 'IMPLEMENTATION'
+        for edge in exported['edges'])
+    # A provider provenance edge into a core operation is not an input,
+    # implementation transfer or observable escape of an operation cut.
+    original_calls = {op.id: op for op in graph.operations if op.id in (OperationID('call1'), OperationID('call2'))}
+    provider_target = graph.provider_bindings[0].target
+    assert any(edge.source.node == graph.provider_bindings[0].provider
+        and edge.meaning is M.STRUCTURE for edge in view.incoming(P(namespace, provider_target)).edges)
+    cut = view.cut((P(namespace, OperationID('call1')),))
+    assert not any(edge.meaning is M.STRUCTURE for edge in (*cut.inputs, *cut.outputs, *cut.interfaces))
+    assert {op.id: op for op in graph.operations if op.id in original_calls} == original_calls
+    assert path.read_bytes() == payload
+
+
 def test_a_boundary_must_cover_each_entry_and_exit_exactly_once():
     graph = native_boundary_graph()
     boundary = _boundary(graph)

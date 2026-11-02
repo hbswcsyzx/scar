@@ -152,7 +152,7 @@ def test_original_local_result_coverage_does_not_close_candidate_dispatch(tmp_pa
     import pytest
     from types import SimpleNamespace
     from scar.analysis.program_dependencies import ProgramDependencyGraph
-    from scar.analysis.program_value_analysis import ProgramValueAnalysis,FieldPrecision,ValueFields,ValueField,ValueAlternative
+    from scar.analysis.program_value_analysis import ProgramValueAnalysis,ValueAnalysisBudget,FieldPrecision,ValueFields,ValueField,ValueAlternative
     from scar.ir.program import (Behavior,BindingDefinition,BindingRead,BindingState,
         Block,BlockArgument,CompletionResult,CompletionSignature,CompletionSuccessor,
         DataValue,ExitKind,ExitPort,LocalBindingValue,LiteralOrigin,ExactLiteralOrigin,Operation,OperationResult,
@@ -251,6 +251,47 @@ def test_original_local_result_coverage_does_not_close_candidate_dispatch(tmp_pa
         (ExitPort('normal',ExitKind.NORMAL,(ValueType(ValueKind.DATA,data_type='builtins.int'),)),),parent=root)
     graph=replace(graph,regions=(*graph.regions,phi_region),operations=(*graph.operations,branch,phi_return),
         values=(*graph.values,unknown,predicate,literal,merged))
+    # One original callee has three separate static activation contexts:
+    # true, false and an unknown builtin bool. Closed facts never union them.
+    call_x=DataValue(V('call-x'),root,LiteralOrigin(41),'builtins.int')
+    call_true=DataValue(V('call-true'),root,LiteralOrigin(True),'builtins.bool')
+    call_false=DataValue(V('call-false'),root,LiteralOrigin(False),'builtins.bool')
+    call_unknown=DataValue(V('call-unknown'),root,BlockArgument(B('entry'),0),'builtins.bool')
+    call_guarded=DataValue(V('call-guarded'),root,OperationResult(O('guarded-source'),0),'builtins.bool')
+    guarded_source=Operation(O('guarded-source'),'conditional provider field',(Behavior.COMPUTE,),
+        results=(call_guarded.id,),effects_complete=True)
+    direct=[];direct_values=[]
+    for name,flag in(('true',call_true),('false',call_false),('unknown',call_unknown),('guarded',call_guarded)):
+        uses=(Use(U('call-'+name+'-x'),call_x.id),Use(U('call-'+name+'-flag'),flag.id))
+        value=DataValue(V('call-'+name+'-result'),root,OperationResult(O('call-'+name),0),'builtins.int')
+        direct.append(Operation(O('call-'+name),'declared phi call',(Behavior.CONTROL,),uses,(value.id,),
+            effects_complete=True,callee=phi,call_arguments=tuple(u.id for u in uses)))
+        direct_values.append(value)
+    root_region=replace(graph.regions[0],blocks=(replace(graph.regions[0].blocks[0],arguments=(call_unknown.id,),
+        operations=(declared.id,candidate.id,guarded_source.id,*(op.id for op in direct),returned.id)),))
+    graph=replace(graph,regions=(root_region,*graph.regions[1:]),operations=(*graph.operations,guarded_source,*direct),
+        values=(*graph.values,call_x,call_true,call_false,call_unknown,call_guarded,*direct_values))
+
+    # A loop-carried predicate starts at True and can acquire False. It must
+    # settle (or widen) before any branch choice is considered proved.
+    loop=R('bool-loop')
+    loop_true=DataValue(V('loop-true'),loop,LiteralOrigin(True),'builtins.bool')
+    loop_false=DataValue(V('loop-false'),loop,LiteralOrigin(False),'builtins.bool')
+    loop_phi=DataValue(V('loop-phi'),loop,BlockArgument(B('loop-header'),0),'builtins.bool')
+    loop_seed_use=Use(U('loop-seed'),loop_true.id)
+    loop_jump=Operation(O('loop-jump'),'initial loop edge',(Behavior.CONTROL,),(loop_seed_use,),effects_complete=True,
+        terminator=Terminator(TerminatorKind.JUMP,(Successor(B('loop-header'),(loop_seed_use.id,)),)))
+    loop_condition=Use(U('loop-condition'),loop_phi.id);loop_next=Use(U('loop-next'),loop_false.id)
+    loop_branch=Operation(O('loop-branch'),'loop selection',(Behavior.CONTROL,),(loop_condition,loop_next),effects_complete=True,
+        terminator=Terminator(TerminatorKind.BRANCH,(Successor(B('loop-header'),(loop_next.id,)),
+            Successor(B('loop-exit'),())),condition=loop_condition.id))
+    loop_return=Operation(O('loop-return'),'loop return',(Behavior.CONTROL,),effects_complete=True,
+        terminator=Terminator(TerminatorKind.RETURN,exit='normal'))
+    loop_region=Region(loop,'bool loop',B('loop-entry'),(Block(B('loop-entry'),(),(loop_jump.id,)),
+        Block(B('loop-header'),(loop_phi.id,),(loop_branch.id,)),Block(B('loop-exit'),(),(loop_return.id,))),
+        (ExitPort('normal',ExitKind.NORMAL,()),),parent=root)
+    graph=replace(graph,regions=(*graph.regions,loop_region),operations=(*graph.operations,loop_jump,loop_branch,loop_return),
+        values=(*graph.values,loop_true,loop_false,loop_phi))
     assert validate(graph)==()
     index=ProgramIndex(graph);payload=dumps(graph).encode();path=tmp_path/'original.json';path.write_bytes(payload)
     sha=hashlib.sha256(payload).hexdigest()
@@ -262,10 +303,14 @@ def test_original_local_result_coverage_does_not_close_candidate_dispatch(tmp_pa
     condition=DependencyCondition('test.dispatch','TARGET_SELECTED',P(namespace,candidate.id))
     evidence=DependencyEvidence('POSSIBLE_TARGET_INTERFACE_V1',(locator,),(possible_source,possible_result))
     completion=DependencyEdge(possible_source,possible_result,K.COMPLETION,M.VALUE,(evidence,),(condition,),DependencyStrength.EXACT)
+    guarded_input=P(namespace,U('call-true-flag'));guarded_value=P(namespace,call_guarded.id)
+    guarded_edge=DependencyEdge(guarded_input,guarded_value,K.STATE_VALUE,M.VALUE,
+        (DependencyEvidence('DECLARED_CONDITIONAL_FIELD_V1',(locator,),(guarded_input,guarded_value)),),
+        (DependencyCondition('test.runtime','ACTIVE_FLAG_CONTRACT',P(namespace,guarded_source.id)),))
 
     class PossibleTarget:
-        def incoming(self,point):return DependencyNeighborhood((completion,)if point==possible_result else())
-        def outgoing(self,point):return DependencyNeighborhood((completion,)if point==possible_source else())
+        def incoming(self,point):return DependencyNeighborhood(tuple(e for e in(completion,guarded_edge)if e.target==point))
+        def outgoing(self,point):return DependencyNeighborhood(tuple(e for e in(completion,guarded_edge)if e.source==point))
 
     view=ProgramDependencyGraph(lambda ns:index,providers=(PossibleTarget(),))
     # This original non-source fragment has no Python opcode metadata; an
@@ -276,7 +321,8 @@ def test_original_local_result_coverage_does_not_close_candidate_dispatch(tmp_pa
     merged_point=P(namespace,merged.id)
     exact_point=P(namespace,V('exact-tuple-bits'))
     analysis=ProgramValueAnalysis(session,view)
-    report=analysis.analyze((known,possible_result,merged_point,exact_point))
+    direct_points=tuple(P(namespace,v.id)for v in direct_values)
+    report=analysis.analyze((known,possible_result,merged_point,exact_point,*direct_points))
     exact=report.for_point(known);uncertain=report.for_point(possible_result)
     assert exact.scalar_constant.precision is FieldPrecision.EXACT
     assert {a.value for a in exact.scalar_constant.alternatives}=={PythonLiteral.from_python(7)}
@@ -295,6 +341,44 @@ def test_original_local_result_coverage_does_not_close_candidate_dispatch(tmp_pa
     assert report.for_point(exact_point).immutable_tuple.precision is FieldPrecision.EXACT
     assert report.for_point(exact_point).immutable_tuple.alternatives[0].value==exact_literal
     assert report.for_point(exact_point).scalar_constant.precision is FieldPrecision.NOT_APPLICABLE
+    for point,expected in zip(direct_points,(41,7,None,None)):
+        fact=report.for_point(point);values={a.value for a in fact.scalar_constant.alternatives}
+        assert values==({PythonLiteral.from_python(expected)}if expected is not None else
+            {PythonLiteral.from_python(41),PythonLiteral.from_python(7)})
+        if expected is not None:
+            assert not fact.scalar_constant.unknown_paths
+            assert any(e.rule.startswith('STABLE_BUILTIN_BOOL_SELECTS_SUCCESSOR_')
+                for a in fact.scalar_constant.alternatives for e in a.evidence)
+    assert len(report.branch_proofs)==2
+    frames=tuple(DependencyFrame(namespace,op.id,None,None,namespace,entry=phi)for op in direct)
+    assert {(p.branch.context,p.selected_index)for p in report.branch_proofs}=={((frames[0],),0),((frames[1],),1)}
+    assert all(p.predicate.node==phi_uses[2].id and p.branch.node==branch.id for p in report.branch_proofs)
+    assert any(f.kind=='BRANCH_PREDICATE_GUARDS_OPEN'and f.point.context==(frames[3],)for f in report.frontiers)
+    assert any(edge.kind is K.CONTROL_CONDITION for edge in report.edges)
+    assert {c.index for edge in report.edges if edge.target.context==(frames[0],)for c in edge.conditions
+        if c.name=='SUCCESSOR_SELECTED'and c.subject.node==branch.id}=={0,1},'original false-arm edges remain auditable'
+    import json
+    from scar.analysis.program_dependency_export import export_value_analysis
+    exported=export_value_analysis(report);json.dumps(exported,allow_nan=False)
+    proof=next(p for p in exported['branch_proofs']if p['selected_index']==0)
+    branch_ref=proof['branch']['point'];predicate_ref=proof['predicate']['point']
+    assert exported['points'][branch_ref]['node']==branch.id.wire
+    assert exported['points'][predicate_ref]['node']==phi_uses[2].id.wire
+    proof_evidence=exported['evidence'][proof['evidence']['evidence']]
+    assert proof_evidence['rule']=='STABLE_BUILTIN_BOOL_SELECTS_SUCCESSOR_0_V1'
+    assert branch_ref in proof_evidence['anchors']and predicate_ref in proof_evidence['anchors']
+    rejected=next(e for e in exported['edges']if e['kind']=='BLOCK_ARGUMENT'and any(
+        exported['conditions'][c]['subject']==branch_ref and exported['conditions'][c]['index']==1
+        and exported['conditions'][c]['name']=='SUCCESSOR_SELECTED'for c in e['conditions']))
+    rejected_fact=next(f for f in exported['facts']if f['point']==rejected['source'])
+    assert {a['value']['literal']['payload']for a in rejected_fact['fields']['scalar_constant']['alternatives']}=={'7'}
+    selected_fact=next(f for f in exported['facts']if f['point']==exported['roots'][4])
+    assert {a['value']['literal']['payload']for a in selected_fact['fields']['scalar_constant']['alternatives']}=={'41'}
+    stopped=ProgramValueAnalysis(session,view,budget=ValueAnalysisBudget(max_steps=1)).analyze((direct_points[0],))
+    assert not stopped.exhausted and not stopped.branch_proofs
+    assert any(f.kind=='VALUE_FIXED_POINT_BUDGET'for f in stopped.frontiers)
+    widened=ProgramValueAnalysis(session,view,budget=ValueAnalysisBudget(max_alternatives=1)).analyze((P(namespace,loop_condition.id),))
+    assert not widened.branch_proofs and any(f.kind=='VALUE_FIELD_WIDENED'for f in widened.frontiers)
     scalar_source=next(f for f in report.facts if f.role=='LITERAL'and f.scalar_constant.alternatives)
     may=replace(completion,source=scalar_source.point,strength=DependencyStrength.MAY,
         evidence=(DependencyEvidence('DECLARED_MAY_VALUE_ALTERNATIVE_V1',(locator,),

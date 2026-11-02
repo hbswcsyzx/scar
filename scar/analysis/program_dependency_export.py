@@ -155,8 +155,10 @@ def export_value_analysis(result):
         'binding_payload': None if fact.binding_payload is None else fields_of(fact.binding_payload),
         'binding_states': [item.value for item in fact.binding_states]} for fact in result.facts]
     frontiers = [table.frontier(item) for item in result.frontiers]
+    branch_proofs = [table.pack(item) for item in result.branch_proofs]
     return {'schema': 'scar.program-value-analysis', 'schema_version': 2, 'roots': roots,
-        **table.tables, 'facts': facts, 'frontiers': frontiers, 'usage': result.usage,
+        **table.tables, 'facts': facts, 'frontiers': frontiers, 'branch_proofs': branch_proofs,
+        'usage': result.usage,
         'fixed_point_reached': result.exhausted, 'whole_program_complete': False,
         'transformation_authorized': False,
         'qualification': 'Field-wise definition provenance and supported immutable builtin scalar/tuple content facts. '

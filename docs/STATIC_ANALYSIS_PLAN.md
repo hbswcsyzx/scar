@@ -20,6 +20,12 @@ AST 是输入，局部 canonical 已有 CFG/SSA/状态图。原结构性缺口�
 重建已推进至 AnnAssign；其后将继续该通用注解协议与 class SETUP_ANNOTATIONS，而不为
 样本文件写规则。当前已发布图的旧主体不因此自动算新覆盖。
 
+当前立即执行的三个修复单位：①同一 live task 继续全范围 calls 发布，先确认越过已定位的
+大主体缓存热点，不因观察超时重启；②原 BRANCH 谓词闭合后按证据重算值路径，保留原图；
+③复用原生声明工具补 native 接口与共同导航，下一步补真实 Python binding/参数转换到
+完整 overload 的连接。②③已有短核验；①运行中，③的整程序连接仍未完成。之后再恢复
+AnnAssign/主体覆盖和联合状态推理，不跳到 detector/backend。
+
 1. **共同依赖图（已实现，完整覆盖待核对）**：qualified 原端点、上下文、typed 关系、原证据、
    共享只读加载；接局部、call/env/G、class provider 和控制依赖，公开遍历。
 2. **首版共同分析（已实现）**：原操作 cut 的字段级边界；跨参数/返回/绑定的有限常量、
@@ -105,10 +111,15 @@ G/state 桥须区分函数引用来源与调用时内容：`fn=p.f; p.a=p.b; fn(
 native 候选符号和符号资源要求，再谈 kernel 选择；不能按函数名相同直接认定身份。
 
 `to/copy_/empty/expand` 的少量原 header/schema 已核对参数、默认值、SymInt、alias/mutation
-和 dispatch 候选；自动抽取及其图连接仍未实现。schema alias 是允许共享的声明，不能
+和 dispatch 候选；自动抽取、canonical NativeBoundary 接口及其共同声明导航已实现，
+已有 6 个实际 overload 的静态核验。它们尚未发布到 current 整程序；Python callable
+绑定和具体 native 实现仍缺连接。schema alias 是允许共享的声明，不能
 推出相同对象；`empty_cuda` 不是实际 cudaMalloc，`.to` 不是传输，`expand` 不表示完整分配。
 设备/stream、实际 kernel、物理地址和搬运等未绑定信息保留在准确字段与契约条件中。
-不运行 torchgen/目标初始化，也不把 native stub 当作已展开 kernel 主体。
+只在 `-I -S`、原文件收据和受限工具导入链下执行 torchgen 的纯 schema parser，
+作为分析器工具复用语法；不导入 torch、运行生成器/目标初始化或执行默认值，不把 native
+stub 当作已展开 kernel 主体。Python binding 需分别沿真实方法表/函数体、参数转换、
+C++ wrapper 与 `_ops` 声明建立有条件关系；只有 stub/未展开生成规则的地方明确列缺材料。
 
 **自行验收**：每项已推导字段及关系有来源、条件和失效依赖；不同对象/调用/状态版本不被错误合并。沿真实 LeWM 的加载、预处理、规划/模型调用到输出/保存路径能查到已知的值、状态、库接口与资源依赖，而不只是查到一串 Python 名称。
 

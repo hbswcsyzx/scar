@@ -16,6 +16,40 @@
 当前优先完成真实全范围接线，再补共同推理缺口与主体覆盖。不会继续增加 detector/backend。
 主图设计和关系边界见 [程序分解 §3.4](PROGRAM_DECOMPOSITION.md#34-主图决策与当前结构性缺口)。
 
+## 本轮明确的问题、修复和下一步
+
+当前不是缺另一套图格式，而是已有结构的关系/推理覆盖仍有缺口。按以下顺序继续：
+
+1. **Observed / Implemented / Verified**：全范围 calls 曾被大主体派生索引反复淘汰阻断。
+   缓存修复已生效于原大主体短核验；同一 corrected task 继续运行，尚未发布，详见下文。
+2. **Implemented / Verified**：值分析已通过共同图消费原 BRANCH 的 CONTROL_CONDITION。
+   完整固定点后才冻结无 unknown/MAY/外部 guard 的 builtin bool，并从原 seeds 重算；
+   原边不删，schema2 新增 `branch_proofs`，保留选择及被排除路径的原证据。通用原 IR 中
+   同一 callee 四个上下文分别得到 41、7、{41,7}、{41,7}，仅前两者产出证明；循环 widening、
+   预算未闭合、外部 guard 和 INVOKE 均不冒充已选择分支。不是目标程序变换。
+3. **Implemented / Verified**：共同图可导航既存 provider/native 原声明，含 native/core-only
+   输入及所有正常/异常出口 Use、来源映射和逻辑端口 pair。使用 STRUCTURE、精确 locator
+   和原 ID；默认遍历/cut 不把它们当值或实现传递，不制造多 Return 站点的笛卡尔积。
+   current 的 class provider 样本内没有 ProviderEnvelope，不能拿它冒充此项真实 native
+   验证；本项原声明导航用既有完整 IR 核验，真实材料验证如下。
+4. **Implemented / Verified（实际安装材料）**：新增受限静态材料入口，复用已审计的
+   torchgen FunctionSchema parser 与纯 Python SafeLoader，核对原 header/YAML、完整
+   overload、版本、文件/字节/行和工具收据。`-I -S` 隔离、禁 torch/目标导入，默认值只
+   保存原文；不运行生成器。6 个实际 overload 已构造现有 ProgramGraph/NativeBoundary，
+   共 18 个操作，压缩图 15,734 bytes，抽取/构图/读回约 1.788 秒；这是静态分析器成本。
+   机器材料、6 个独立接口分片及共同图查询存于
+   `artifacts/current/queries/native-static-model/`，`summary.json` 明确它们尚未发布到
+   current 整程序、Python binding 未建立、whole_program_complete=false。
+5. **Observed / Proposed（下一步连接）**：安装包确有 `to`/`copy_` 的完整手工 Python
+   binding 模板，可沿方法表→参数 parser/override→C++ wrapper→`_ops` 精确 overload
+   建立有条件关系；`empty`/`expand` 的具体生成 Python binding 成品未提供，stub 与生成
+   规则只能给候选。Python `to(other)` 先提取 device/dtype，可能调用 to.device 或直接
+   返回 self，不能按同名或 stub 位置猜 ABI。下一步实现通用材料/转换连接，不按例名写规则。
+
+上述新增语义合并短核验 **4 passed / 4.43 秒**，未重跑大源码 fixture。新 native 接口保留
+opaque world 和可能正常/异常 completion，alias/write/dispatch 为声明，resource/实际
+copy/allocation/kernel 与 effects closure 均未证明。第一阶段仍未完成，未进入化简。
+
 ## 当前已发布产物
 
 `artifacts/current/static/manifest.json` SHA-256：
@@ -163,7 +197,7 @@ trace/profiling/benchmark、detector、planner 或 backend 工作。
 ## 尚需完成
 
 1. 发布新版调用关系。已发布 class 的真实公开跨图查询已通过；先处理已定位的无 artifact
-   预检和重复解码成本，避免直接重跑耗时整树；不放宽 schema/receipt/语义校验。
+   预检和重复解码成本已修，corrected task 持续运行；不放宽 schema/receipt/语义校验。
 2. 补有限值推理残留的生产者契约、binding/容器读取和 module 初始化 L/G；不能删掉未知路径
    来伪造确定性，也不能把已有完备接口重复当作未知生产者。
 3. 将调用、alias、逐地址 reaching writes、effects、常量/类型/Tensor 属性接入共同固定点，
@@ -171,6 +205,7 @@ trace/profiling/benchmark、detector、planner 或 backend 工作。
 4. 补主体结构：107 项模块后缀、8 项 deferred-child、45 项 class suite 后缀、其余规则缺口；
    23,614 个新依赖入口尚未派工。统一查询层不等于这些结构已完成。
 5. 完成按需依赖闭包、库/native 契约及 CPU/GPU/DRAM/HBM/storage/stream 等资源关系。
+   已有实际 native 材料/接口验证，尚缺 Python callable/参数转换到 native 实现的通用连接。
    有 Resource 类型不代表已填实；此前抽查四份原图资源表仍为空。
 6. 核对完整范围构建、保存、读回与跨层推理；未支持、预算和未定字段继续按实际范围报告。
    完成条件不缩小为小型检查通过或目录建完。

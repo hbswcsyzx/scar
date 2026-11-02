@@ -139,6 +139,24 @@ EnvironmentInterface 成员与 ControlPort 目的地也已有声明导航，使�
 locator。环境 state domain 不是 points-to，声明的控制目的地不是一次实际 transfer；
 结构不能被值引擎当作等值传递。具体运行绑定和协议转移仍有独立前沿。
 
+原 BRANCH 的 CONTROL_CONDITION 是可推理依赖，而不只是 CFG 展示信息。只有一次完整
+有限固定点得到无 unknown/MAY、无未消解外部 guard 的一致 builtin bool 后，才冻结该
+上下文的 successor 选择，并从原 seeds 重算受条件限制的值传递。原图的两个分支与边
+仍保留；`branch_proofs` 引用原 branch、谓词 Use、常量依据和所选 ordinal。不能凭临时
+单值、未收敛循环或 INVOKE 的正常/异常 ordinal 筛掉另一条路径。这不是代码变换。
+
+NativeBoundary/provider 也按原声明进入共同导航：native/core-only 输入、正常/异常
+出口的全部原 Use、representation ownership 和来源映射都有精确记录 locator。它们是
+STRUCTURE，不是值传递、ABI 等价、must-alias 或已选实现。共同遍历默认排除结构含义，
+区域 cut 也不将其当成输入/消费者；不能仅根据关系 kind 判断是不是数据依赖。
+
+静态 native 材料复用安装包的 schema parser 作为分析器工具，在隔离进程中解析原
+ATen header/YAML，核对版本、完整 overload、文件/字节/行与 parser 收据；不导入 torch，
+不运行目标、生成器或默认值。结果能构造现有 ProgramGraph/NativeBoundary 的接口，
+保留 opaque native world 和正常/异常端口。Tensor/List/Optional 端口不展平为虚构 ABI；
+alias/write/dispatch 仍是原 schema 声明，不提升为物理资源或已选 kernel。材料接口、
+Python callable 绑定、native 实现主体、当前整程序发布是四个分别核查的层次。
+
 ## 效果
 
 至少保留 reads/writes/allocates/frees/aliases/escapes、RNG、may_raise、external、ordering，以及必要的生命周期和完成语义。效果可多标签，不互斥。
