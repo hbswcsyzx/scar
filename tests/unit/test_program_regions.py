@@ -293,5 +293,11 @@ def test_boundary_keeps_direct_and_invoke_state_interfaces_and_separates_escape(
     assert all(anchor.context == (env_frame,) for anchor in contextual_edge.evidence[0].anchors)
     env_session = SimpleNamespace(index=lambda ns: env_index, check=lambda: None)
     value_result = ProgramValueAnalysis(env_session, env_view).analyze((env_point, member_point))
-    assert not value_result.edges  # Structural declaration edges never enter the value solver.
+    # The report retains original ownership evidence for occurrence analysis.
+    # Such structure never becomes a value-transfer edge or an identity proof.
+    assert all(edge.meaning is DM.STRUCTURE for edge in value_result.edges)
+    assert not value_result.for_point(env_point).occurrence.applicable
+    assert not value_result.for_point(member_point).occurrence.requirements
+    assert not value_result.branch_proofs and not value_result.binding_proofs
+    assert not value_result.route_refutations
     assert not value_result.for_point(member_point).fields.reference_sources.alternatives

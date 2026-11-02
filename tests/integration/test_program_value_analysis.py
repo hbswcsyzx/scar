@@ -294,6 +294,68 @@ def test_original_local_result_coverage_does_not_close_candidate_dispatch(tmp_pa
         (ExitPort('normal',ExitKind.NORMAL,()),),parent=root)
     graph=replace(graph,regions=(*graph.regions,loop_region),operations=(*graph.operations,loop_jump,loop_branch,loop_return),
         values=(*graph.values,loop_true,loop_false,loop_phi))
+    # Original diamonds carry values via JUMP Uses, not BRANCH actuals.
+    # A wrapper adds a second genuine direct-call frame without cloning nodes.
+    jump_region=R('jump-phi');jump_flag=DataValue(V('jump-flag'),jump_region,BlockArgument(B('jump-entry'),0),'builtins.bool')
+    jump_yes=DataValue(V('jump-seven'),jump_region,LiteralOrigin(7),'builtins.int')
+    jump_no=DataValue(V('jump-ninety-nine'),jump_region,LiteralOrigin(99),'builtins.int')
+    jump_merged=DataValue(V('jump-merged'),jump_region,BlockArgument(B('jump-join'),0),'builtins.int')
+    jump_condition=Use(U('jump-condition'),jump_flag.id)
+    jump_branch=Operation(O('jump-branch'),'original selection',(Behavior.CONTROL,),(jump_condition,),effects_complete=True,
+        terminator=Terminator(TerminatorKind.BRANCH,(Successor(B('jump-yes'),()),Successor(B('jump-no'),())),condition=jump_condition.id))
+    jump_sources=[];jump_terms=[]
+    for name,value in(('yes',jump_yes),('no',jump_no)):
+        carried=Use(U('jump-'+name+'-value'),value.id);jump_sources.append(carried)
+        jump_terms.append(Operation(O('jump-'+name),'original carry',(Behavior.CONTROL,),(carried,),effects_complete=True,
+            terminator=Terminator(TerminatorKind.JUMP,(Successor(B('jump-join'),(carried.id,)),))))
+    jump_return_use=Use(U('jump-return-value'),jump_merged.id)
+    jump_return=Operation(O('jump-return'),'return original phi',(Behavior.CONTROL,),(jump_return_use,),effects_complete=True,
+        terminator=Terminator(TerminatorKind.RETURN,exit='normal',values=(jump_return_use.id,)))
+    int_port=ValueType(ValueKind.DATA,data_type='builtins.int')
+    jump_body=Region(jump_region,'JUMP phi',B('jump-entry'),(Block(B('jump-entry'),(jump_flag.id,),(jump_branch.id,)),
+        Block(B('jump-yes'),(),(jump_terms[0].id,)),Block(B('jump-no'),(),(jump_terms[1].id,)),
+        Block(B('jump-join'),(jump_merged.id,),(jump_return.id,))),(ExitPort('normal',ExitKind.NORMAL,(int_port,)),),parent=root)
+    wrapper=R('jump-wrapper');wrapper_flag=DataValue(V('wrapper-flag'),wrapper,BlockArgument(B('wrapper-entry'),0),'builtins.bool')
+    wrapper_argument=Use(U('wrapper-argument'),wrapper_flag.id)
+    wrapper_value=DataValue(V('wrapper-result'),wrapper,OperationResult(O('wrapper-call'),0),'builtins.int')
+    wrapper_call=Operation(O('wrapper-call'),'original nested call',(Behavior.CONTROL,),(wrapper_argument,),(wrapper_value.id,),
+        effects_complete=True,callee=jump_region,call_arguments=(wrapper_argument.id,))
+    wrapper_use=Use(U('wrapper-return-value'),wrapper_value.id)
+    wrapper_return=Operation(O('wrapper-return'),'return original nested result',(Behavior.CONTROL,),(wrapper_use,),effects_complete=True,
+        terminator=Terminator(TerminatorKind.RETURN,exit='normal',values=(wrapper_use.id,)))
+    wrapper_body=Region(wrapper,'nested caller',B('wrapper-entry'),(
+        Block(B('wrapper-entry'),(wrapper_flag.id,),(wrapper_call.id,wrapper_return.id)),),
+        (ExitPort('normal',ExitKind.NORMAL,(int_port,)),),parent=root)
+    # True enters an infinite CFG cycle; its only NORMAL exit is statically
+    # unreachable. Proving that normal value absent is not proving termination.
+    never=R('never-normal');never_flag=DataValue(V('never-flag'),never,BlockArgument(B('never-entry'),0),'builtins.bool')
+    never_literal=DataValue(V('never-seven'),never,LiteralOrigin(7),'builtins.int')
+    never_condition=Use(U('never-condition'),never_flag.id)
+    never_branch=Operation(O('never-branch'),'entry choice',(Behavior.CONTROL,),(never_condition,),effects_complete=True,
+        terminator=Terminator(TerminatorKind.BRANCH,(Successor(B('never-cycle'),()),Successor(B('never-exit'),())),condition=never_condition.id))
+    never_cycle=Operation(O('never-cycle-jump'),'original cycle',(Behavior.CONTROL,),effects_complete=True,
+        terminator=Terminator(TerminatorKind.JUMP,(Successor(B('never-cycle'),()),)))
+    never_use=Use(U('never-return-value'),never_literal.id)
+    never_return=Operation(O('never-return'),'only normal exit',(Behavior.CONTROL,),(never_use,),effects_complete=True,
+        terminator=Terminator(TerminatorKind.RETURN,exit='normal',values=(never_use.id,)))
+    never_body=Region(never,'normal completion may not exist',B('never-entry'),(
+        Block(B('never-entry'),(never_flag.id,),(never_branch.id,)),Block(B('never-cycle'),(),(never_cycle.id,)),
+        Block(B('never-exit'),(),(never_return.id,))),(ExitPort('normal',ExitKind.NORMAL,(int_port,)),),parent=root)
+    new_calls=[];new_values=[]
+    for name,target,flag in(('jump-true',jump_region,call_true),('jump-false',jump_region,call_false),
+            ('jump-unknown',jump_region,call_unknown),('nested-true',wrapper,call_true),('nested-false',wrapper,call_false),
+            ('never-true',never,call_true),('never-unknown',never,call_unknown)):
+        argument=Use(U(name+'-argument'),flag.id)
+        result=DataValue(V(name+'-result'),root,OperationResult(O(name+'-call'),0),'builtins.int')
+        new_calls.append(Operation(O(name+'-call'),'original typed call',(Behavior.CONTROL,),(argument,),(result.id,),
+            effects_complete=True,callee=target,call_arguments=(argument.id,)))
+        new_values.append(result)
+    root_region=replace(graph.regions[0],blocks=(replace(graph.regions[0].blocks[0],operations=(
+        *graph.regions[0].blocks[0].operations[:-1],*(op.id for op in new_calls),returned.id)),))
+    graph=replace(graph,regions=(root_region,*graph.regions[1:],jump_body,wrapper_body,never_body),
+        operations=(*graph.operations,jump_branch,*jump_terms,jump_return,wrapper_call,wrapper_return,
+            never_branch,never_cycle,never_return,*new_calls),values=(*graph.values,jump_flag,jump_yes,jump_no,jump_merged,
+                wrapper_flag,wrapper_value,never_flag,never_literal,*new_values))
     assert validate(graph)==()
     index=ProgramIndex(graph);payload=dumps(graph).encode();path=tmp_path/'original.json';path.write_bytes(payload)
     sha=hashlib.sha256(payload).hexdigest()
@@ -482,6 +544,47 @@ def test_original_local_result_coverage_does_not_close_candidate_dispatch(tmp_pa
     partial_control=ProgramValueAnalysis(session,partial_control_view).analyze(direct_points[:2])
     assert partial_control.worklist_stable and not partial_control.exhausted
     assert {(proof.branch.context,proof.selected_index)for proof in partial_control.branch_proofs}=={((frames[1],),1)}
+    jump_report=ProgramValueAnalysis(session,ProgramDependencyGraph(lambda _:index)).analyze(tuple(P(namespace,v.id)for v in new_values))
+    assert jump_report.worklist_stable
+    for value,expected in zip(new_values[:5],(7,99,None,7,99)):
+        fact=jump_report.for_point(P(namespace,value.id))
+        assert {a.value for a in fact.scalar_constant.alternatives}==({PythonLiteral.from_python(expected)}
+            if expected is not None else{PythonLiteral.from_python(7),PythonLiteral.from_python(99)})
+    assert any(len(proof.branch.context)==2 and proof.branch.node==jump_branch.id for proof in jump_report.branch_proofs)
+    assert any(proof.route.kind is K.BLOCK_ARGUMENT and proof.route.source.node in{u.id for u in jump_sources}
+        for proof in jump_report.route_refutations)
+    impossible=jump_report.for_point(P(namespace,new_values[5].id))
+    assert impossible.feasible is False and impossible.infeasibility
+    assert impossible.scalar_constant.precision is FieldPrecision.NOT_APPLICABLE
+    assert jump_report.for_point(P(namespace,new_values[6].id)).feasible is not False
+    assert any(f.kind=='CONTROL_TERMINATION_OPEN'for f in jump_report.frontiers)
+    # A known argument does not authorize an unverified activation/entry.
+    # Its branch value is known, but entry-relative CONTROL cannot prune it.
+    external_frame=DependencyFrame(namespace,candidate.id,None,None,namespace,entry=jump_region)
+    external_formal=P(namespace,jump_flag.id,(external_frame,));external_actual=P(namespace,U('call-true-flag'))
+    external_argument=DependencyEdge(external_actual,external_formal,K.ARGUMENT,M.VALUE,
+        (DependencyEvidence('DECLARED_EXTERNAL_ARGUMENT_V1',(locator,),(external_actual,external_formal)),))
+    class ExternalEntry:
+        def incoming(self,point):return DependencyNeighborhood((external_argument,)if point==external_formal else())
+        def outgoing(self,point):return DependencyNeighborhood((external_argument,)if point==external_actual else())
+    external_view=ProgramDependencyGraph(lambda _:index,providers=(ExternalEntry(),))
+    external=ProgramValueAnalysis(session,external_view).analyze((P(namespace,jump_merged.id,(external_frame,)),))
+    assert {a.value for a in external.for_point(P(namespace,jump_merged.id,(external_frame,))).scalar_constant.alternatives}=={
+        PythonLiteral.from_python(7),PythonLiteral.from_python(99)}
+    assert any(f.kind=='CONTROL_ENTRY_SCOPE_OPEN'for f in external.frontiers)
+    assert not external.route_refutations
+    absent_normal=P(namespace,new_values[5].id)
+    class IncompleteNormalFamily:
+        def incoming(self,point):return DependencyNeighborhood(enumerated=point!=absent_normal)
+        def outgoing(self,point):return DependencyNeighborhood()
+    partial_normal=ProgramValueAnalysis(session,ProgramDependencyGraph(lambda _:index,
+        providers=(IncompleteNormalFamily(),))).analyze((absent_normal,))
+    assert partial_normal.worklist_stable and not partial_normal.exhausted
+    assert partial_normal.for_point(absent_normal).feasible is not False
+    assert partial_normal.for_point(absent_normal).scalar_constant.unknown_paths
+    stopped_jump=ProgramValueAnalysis(session,ProgramDependencyGraph(lambda _:index),
+        budget=ValueAnalysisBudget(max_steps=1)).analyze((P(namespace,new_values[0].id),))
+    assert not stopped_jump.worklist_stable and not stopped_jump.route_refutations
     stopped_unbound=ProgramValueAnalysis(session,ProgramDependencyGraph(lambda _:index),
         budget=ValueAnalysisBudget(max_steps=7)).analyze((P(namespace,V('dormant-normal')),))
     assert not stopped_unbound.exhausted and not stopped_unbound.worklist_stable
@@ -544,7 +647,7 @@ def flags():
     else:
         custom = 99
     arithmetic = 2 + 3
-    return arithmetic
+    return (yes, no, arithmetic)
 '''
     (truth_source/'program.py').write_text(truth_text)
     built=subprocess.run([sys.executable,'-B','-m','scar.cli','static',str(truth_source),'--out',str(truth_model),
@@ -574,6 +677,9 @@ def flags():
         add_normal_point=P(ns,body.index._block_records[add_normal.block].arguments[0])
         add_raise_point=P(ns,body.index._block_records[add_raise.block].arguments[0])
         roots.extend((add_normal_point,add_raise_point))
+        returned,=[operation for operation in body.graph.operations if operation.terminator is not None
+            and operation.terminator.kind is TerminatorKind.RETURN]
+        returned_point=P(ns,returned.terminator.values[0]);roots.append(returned_point)
         source_analysis=ProgramValueAnalysis(scoped)
         truth_report=source_analysis.analyze(roots)
         by_branch=dict(branches)
@@ -584,10 +690,10 @@ def flags():
         positive=truth_report
         assert {(p.branch,p.selected_index)for p in positive.branch_proofs}=={
             (by_branch[6],0),(by_branch[11],1)}
-        assert len(positive.binding_proofs)==2
+        assert len(positive.binding_proofs)==5
         truth_export=export_value_analysis(positive);json.dumps(truth_export,allow_nan=False)
         assert truth_export['fixed_point_reached'] and not truth_export['query_scope_complete']
-        assert len(truth_export['binding_proofs'])==2
+        assert len(truth_export['binding_proofs'])==5
         for public in truth_export['binding_proofs']:
             read_ref=public['read']['point'];binding_ref=public['binding']['point']
             read_row=truth_export['points'][read_ref];binding_row=truth_export['points'][binding_ref]
@@ -604,11 +710,28 @@ def flags():
             assert proof.condition in next(e.conditions for e in positive.edges if e.kind is K.BINDING_READ
                 and e.source==proof.binding)
             assert proof.read in proof.evidence.anchors and proof.binding in proof.evidence.anchors
-            assert positive.for_point(proof.binding).binding_state.precision is FieldPrecision.EXACT
+            field=positive.for_point(proof.binding).binding_state
+            assert field.precision in(FieldPrecision.EXACT,FieldPrecision.CONDITIONAL)
+            assert not field.unknown_paths and {a.state for a in field.alternatives}=={BindingState.BOUND}
         assert all(any(e.rule=='READ_BINDING_DEFINITELY_BOUND_V1'for a in proof.alternatives for e in a.evidence)
             for proof in positive.branch_proofs)
         assert any(fact['binding_state']['precision']=='EXACT'and fact['binding_states']==['BOUND']
             for fact in truth_export['facts'])
+        actual_return=truth_report.for_point(returned_point)
+        assert {a.value for a in actual_return.immutable_tuple.alternatives}=={
+            PythonLiteral.from_python((7,99,5),exact=True)}
+        assert all(c.name!='SUCCESSOR_SELECTED'or c.index==0 for a in actual_return.immutable_tuple.alternatives
+            for c in a.conditions if c.domain=='canonical'and source_analysis._condition_evidence(c)is not None
+            and c.subject not in(by_branch[6],by_branch[11]))
+        assert truth_report.route_refutations
+        assert any(row['rule']=='NECESSARY_ENTRY_CHOICE_REFUTED_V1'for row in truth_export['evidence'])
+        assert len(truth_export['route_refutations'])==len(truth_report.route_refutations)
+        for public in truth_export['route_refutations']:
+            route=truth_export['edges'][public['route']['edge']]
+            assert route['strength']=='EXACT'and public['source_evidence']
+            witness=truth_export['evidence'][public['evidence']['evidence']]
+            assert route['source']in witness['anchors']and route['target']in witness['anchors']
+        assert any(row['kind']=='CONTROL'for row in truth_export['edges'])
         for line,normal,failure,operation in pairs:
             normal_fact=truth_report.for_point(normal);failure_fact=truth_report.for_point(failure)
             if line in(6,11):

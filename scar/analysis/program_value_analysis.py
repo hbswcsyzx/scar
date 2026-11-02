@@ -21,8 +21,11 @@ from scar.ir.program.dependencies import (DependencyCondition as Condition,
     DependencyKind as K,DependencyMeaning as M,DependencyPoint as Point,
     DependencyStrength as Strength,DependencyEdge)
 from scar.ir.program.ids import OperationID,UseID,ValueID
+from scar.ir.program.ids import BlockID,RegionID
 from scar.ir.program.model import (DataValue,ReferenceValue,LocalBindingValue,StateVersionValue,
     LiteralOrigin,ExactLiteralOrigin,OperationResult,BlockArgument)
+from scar.analysis.program_value_control import (ControlEntryScope,ControlNecessity,
+    OccurrenceField,TypedRouteRefutation)
 
 
 class FieldPrecision(str,Enum):
@@ -157,6 +160,8 @@ class ValueFact:
     binding_state: BindingStateField = _NO_BINDING
     feasible: bool | None = None
     role: Literal['VALUE','LITERAL','NORMAL_RESULT_0','BINDING_PAYLOAD','NONVALUE','NO_NORMAL_RESULT'] = 'VALUE'
+    occurrence: OccurrenceField = OccurrenceField()
+    infeasibility: tuple[Evidence,...] = ()
 
     @property
     def reference_sources(self):return self.fields.reference_sources
@@ -246,6 +251,7 @@ class ValueAnalysisResult:
     branch_proofs: tuple[BranchSelectionProof,...] = ()
     binding_proofs: tuple[BindingReadProof,...] = ()
     worklist_stable: bool = False
+    route_refutations: tuple[TypedRouteRefutation,...] = ()
 
     def for_point(self,point):
         return next((fact for fact in self.facts if fact.point==point),None)
@@ -268,6 +274,9 @@ class ProgramValueAnalysis:
         self._branch_conditions={};self._branch_proofs={}
         self._binding_guards={};self._binding_proofs={}
         self._truth_tables={};self._truth_contracts={}
+        self._control_inputs={};self._control_unknown=defaultdict(tuple);self._entry_scopes={}
+        self._point_refutations={};self._route_refutations={};self._jump_proofs={}
+        self._refuted_inputs=defaultdict(list)
 
     def _note(self,point,kind,detail):
         item=Frontier(point,kind,detail);self._frontiers[item]=item
@@ -278,6 +287,142 @@ class ProgramValueAnalysis:
         node=point.node
         if type(node)is UseID:node=index.use_site(node).use.value
         return index.values.get(node),index
+
+    def _control_owner(self,point):
+        index=self.session.index(point.namespace);node=point.node
+        if type(node)in(OperationID,BlockID):return point
+        if type(node)is UseID:return Point(point.namespace,index.use_site(node).operation,point.context)
+        if type(node)is ValueID:
+            origin=index.values[node].origin
+            if type(origin)is OperationResult:return Point(point.namespace,origin.operation,point.context)
+            if type(origin)is BlockArgument:return Point(point.namespace,origin.block,point.context)
+        return None
+
+    def _entry_scope(self,point):
+        index=self.session.index(point.namespace)
+        block=point.node if type(point.node)is BlockID else index._operation_blocks.get(point.node)
+        region=index._blocks.get(block)
+        if region is None:return None
+        key=point.namespace,region,point.context
+        if key in self._entry_scopes:return self._entry_scopes[key]
+        original=index.regions[region];blocks={b.id for b in original.blocks};graph=index.graph
+        opaque=(point.context is None or any(port.block in blocks and port.block!=original.entry for port in graph.control_ports)
+            or any(row.region==region for row in graph.resumable_bodies)
+            or any(row.region==region for row in graph.native_boundaries)
+            or any(row.region==region or row.body==region for row in graph.driver_interfaces)
+            or any(row.body==region for row in graph.resumable_creates))
+        from scar.ir.program.model import TerminatorKind
+        opaque|=any(index.operations[op].terminator is not None and index.operations[op].terminator.kind
+            in(TerminatorKind.SUSPEND,TerminatorKind.BODY_DRIVE)for b in original.blocks for op in b.operations)
+        anchors=(Point(point.namespace,region,point.context),Point(point.namespace,original.entry,point.context))
+        sources=(point.namespace.graph,)
+        if point.context:
+            frame=point.context[-1]
+            # This first adapter supports the original synchronous direct
+            # region interface. A saved Python candidate frame is not by
+            # itself a proof of synchronous body activation or entry scope.
+            caller=self.session.index(frame.caller);operation=caller.operations.get(frame.operation)
+            opaque|=(frame.target!=point.namespace or frame.caller!=point.namespace or frame.entry!=region
+                or frame.callee_use is not None or operation is None or operation.callee!=region)
+            anchors=(*anchors,Point(frame.caller,frame.operation,point.context[:-1]))
+            sources=tuple(dict.fromkeys((*sources,frame.caller.graph)))
+        else:opaque|=region!=point.namespace.root
+        scope=None if opaque else ControlEntryScope(anchors[0],anchors[1],
+            Evidence('SELECTED_ORIGINAL_REGION_ENTRY_SCOPE_V1',sources,anchors))
+        self._entry_scopes[key]=scope
+        return scope
+
+    def _necessary_control(self,edge):
+        if (edge.kind is not K.CONTROL or edge.strength is not Strength.EXACT
+                or edge.source.namespace!=edge.target.namespace or edge.source.context!=edge.target.context
+                or type(edge.source.node)is not OperationID or type(edge.target.node)not in(OperationID,BlockID)
+                or not any(e.rule=='CFG_ENTRY_EDGE_DOMINANCE_CONTROL_NECESSITY_V1'for e in edge.evidence)):
+            return None
+        scope=self._entry_scope(edge.target)
+        if scope is None:return None
+        selectors=[c for c in edge.conditions if c.domain=='canonical'and c.name=='SUCCESSOR_SELECTED'
+            and c.subject==edge.source]
+        qualifiers=[c for c in edge.conditions if c.domain=='control.analysis'
+            and c.name=='ORIGINAL_EDGE_REQUIRED_FOR_ENTRY_REACHABILITY'and c.subject==scope.region]
+        operation=self.session.index(edge.source.namespace).operations[edge.source.node]
+        if (len(selectors)!=1 or len(qualifiers)!=1 or len(edge.conditions)!=2 or operation.terminator is None
+                or selectors[0].index is None or selectors[0].index>=len(operation.terminator.successors)):
+            return None
+        evidence=Evidence('ORIGINAL_ENTRY_EDGE_NECESSITY_V1',tuple(dict.fromkeys(
+            source for row in edge.evidence for source in row.sources)),(edge.source,edge.target,scope.region,scope.entry))
+        return ControlNecessity(selectors[0],scope,(edge,),evidence)
+
+    def _join_occurrence(self,point,old,new):
+        if not old.applicable:return new
+        if not new.applicable:return old
+        # Retain one original proof chain per necessary choice. Keeping the
+        # shortest/first witness avoids exponential paths and cyclic growth.
+        rows={}
+        for row in(*old.requirements,*new.requirements):
+            key=row.choice,row.scope.region
+            if key not in rows:rows[key]=row
+        unknown=tuple(dict.fromkeys((*old.unknown_paths,*new.unknown_paths)))
+        if len(rows)>self.budget.max_conditions:
+            unknown=tuple(dict.fromkeys((*unknown,self._note(point,'CONTROL_REQUIREMENT_BUDGET',
+                'Additional original necessary choices exceed the finite requirement domain.'))))
+        return OccurrenceField(tuple(rows.values())[:self.budget.max_conditions],unknown,True)
+
+    def _compute_occurrence(self,point):
+        owner=self._control_owner(point)
+        if owner is None:return OccurrenceField()
+        result=OccurrenceField(unknown_paths=self._control_unknown[point],applicable=True)
+        for edge in self._control_inputs.get(point,()):
+            if edge.source not in self._facts:continue
+            source=self._facts[edge.source].occurrence
+            rows=[]
+            if edge.kind is K.CONTROL:
+                direct=self._necessary_control(edge)
+                if direct is None:continue
+                rows.append(direct)
+            for requirement in source.requirements:
+                if requirement.chain[-1].target!=edge.source:continue
+                chain=(*requirement.chain,edge)
+                if edge in requirement.chain:continue
+                rows.append(replace(requirement,chain=chain,evidence=Evidence(
+                    'ORIGINAL_CONTROL_NECESSITY_CHAIN_V1',tuple(dict.fromkeys(
+                        (*requirement.evidence.sources,*(s for row in edge.evidence for s in row.sources)))),
+                    (requirement.choice.subject,point,requirement.scope.region,edge.source))))
+            result=self._join_occurrence(point,result,OccurrenceField(tuple(rows),source.unknown_paths,True))
+        return result
+
+    def _discover_control(self,point,pending,edges):
+        owner=self._control_owner(point)
+        if owner is None:self._control_inputs[point]=();return
+        if owner==point:
+            neighborhood=self.graph.incoming(point,kinds=(K.CONTROL,))
+        else:
+            value=self.session.index(point.namespace).values.get(point.node)
+            kind=(K.RESULT if value is not None and type(value.origin)is OperationResult
+                and type(value)is not StateVersionValue else K.STATE_OUTPUT if value is not None
+                and type(value.origin)is OperationResult else K.CONTAINS)
+            neighborhood=self.graph.incoming(point,kinds=(kind,))
+        self._exhausted&=neighborhood.enumerated
+        self._frontiers.update((f,f)for f in neighborhood.frontiers)
+        notes=[];inputs=[]
+        if not neighborhood.enumerated:
+            notes.append(self._note(point,'CONTROL_RELATION_ENUMERATION_OPEN',
+                'Additional control/ownership relations were not enumerated; no absence-of-path claim is made.'))
+        if owner==point and self._entry_scope(point)is None:
+            notes.append(self._note(point,'CONTROL_ENTRY_SCOPE_OPEN',
+                'Original-entry reachability is not established for this context/native/resumption/external-entry scope.'))
+        for edge in neighborhood.edges:
+            if edge not in edges and len(edges)>=self.budget.max_edges:
+                notes.append(self._note(point,'CONTROL_DISCOVERY_BUDGET','Further original control inputs remain unvisited.'))
+                self._exhausted=False;break
+            edges[edge]=edge
+            relevant=(self._necessary_control(edge)is not None if owner==point else
+                edge.source==owner and edge.target==point and edge.strength is Strength.EXACT)
+            if relevant:
+                inputs.append(edge);pending.append(edge.source);self._dependents[edge.source].add(point)
+        if owner!=point and not inputs:
+            notes.append(self._note(point,'CONTROL_OWNER_INTERFACE_OPEN','The original occurrence owner interface was not supplied.'))
+        self._control_inputs[point]=tuple(inputs)
+        self._control_unknown[point]=tuple(dict.fromkeys(notes))
 
     def _evaluation_budget(self):
         from scar.analysis.constants_v2 import EvaluationBudget
@@ -563,7 +708,117 @@ class ProgramValueAnalysis:
             and condition.name=='SUCCESSOR_SELECTED'else None)
         if prior is not None and condition.index==prior.selected_index:return prior.evidence
         binding=self._binding_proofs.get(condition)
-        return binding.evidence if binding is not None else None
+        if binding is not None:return binding.evidence
+        if (condition.domain=='canonical'and condition.name=='SUCCESSOR_SELECTED'
+                and condition.subject is not None and type(condition.subject.node)is OperationID):
+            from scar.ir.program.model import TerminatorKind
+            operation=self.session.index(condition.subject.namespace).operations[condition.subject.node]
+            term=operation.terminator
+            if term is not None and term.kind is TerminatorKind.JUMP and len(term.successors)==1 and condition.index==0:
+                evidence=self._jump_proofs.get(condition)
+                if evidence is None:
+                    evidence=Evidence('ORIGINAL_SINGLE_SUCCESSOR_JUMP_ROUTE_PREMISE_V1',
+                        (condition.subject.namespace.graph,),(condition.subject,
+                            Point(condition.subject.namespace,term.successors[0].block,condition.subject.context)))
+                    self._jump_proofs[condition]=evidence
+                return evidence
+        return None
+
+    def _value_route(self,edge):
+        if (edge.kind is K.RESULT and type(edge.source.node)is OperationID
+                and self._operator(edge.source)is not None):
+            # Operation facts describe normal result0, not an exception or
+            # every completion slot of that same producer.
+            return self._normal_result_zero(edge.target,edge)
+        return (edge.kind in(K.VALUE_USE,K.ARGUMENT,K.COMPLETION,K.STATE_VALUE,K.ENVIRONMENT,K.BLOCK_ARGUMENT,
+                K.BINDING_PAYLOAD,K.BINDING_READ)and edge.meaning in(M.VALUE,M.REFERENCE,M.BINDING))
+
+    def _all_routes_refuted(self,point):
+        """Close only a complete original family of normal value ports."""
+        if self._point_unknown.get(point):return None
+        value,index=self._value(point);incoming=self._incoming.get(point,())
+        suppliers=[e for e in incoming if self._value_route(e)]
+        if not suppliers or any(e.strength is Strength.MAY for e in suppliers):return None
+        selected=None
+        if type(point.node)is UseID:
+            original=index.use_site(point.node).use
+            matches=[e for e in suppliers if e.kind is K.VALUE_USE
+                and e.source==Point(point.namespace,original.value,point.context)]
+            if len(matches)==1 and suppliers==matches:selected=matches
+        elif type(point.node)is ValueID:
+            reads=[r for r in index.graph.binding_reads if r.normal_result==point.node]
+            if len(reads)==1:
+                matches=[e for e in suppliers if e.kind is K.BINDING_READ and
+                    e.source==Point(point.namespace,reads[0].binding,point.context)]
+                if len(matches)==1 and suppliers==matches:selected=matches
+            elif type(value.origin)is BlockArgument and all(e.kind is K.BLOCK_ARGUMENT for e in suppliers):
+                if self._entry_scope(Point(point.namespace,value.origin.block,point.context))is None:return None
+                expected=set()
+                for operation in index.graph.operations:
+                    if operation.terminator is None:continue
+                    for ordinal,successor in enumerate(operation.terminator.successors):
+                        if successor.block!=value.origin.block:continue
+                        actual=successor.arguments[value.origin.index]
+                        if type(actual)is not UseID:return None
+                        expected.add((Point(point.namespace,actual,point.context),Condition('canonical',
+                            'SUCCESSOR_SELECTED',Point(point.namespace,operation.id,point.context),ordinal)))
+                observed={(e.source,c)for e in suppliers for c in e.conditions if c.domain=='canonical'
+                    and c.name=='SUCCESSOR_SELECTED'}
+                if expected and expected==observed and len(suppliers)==len(expected):selected=suppliers
+            elif type(value.origin)is BlockArgument and point.context and all(e.kind is K.ARGUMENT for e in suppliers):
+                frame=point.context[-1];operation=index.operations.get(frame.operation)
+                if (frame.caller==point.namespace and frame.target==point.namespace and frame.entry==value.region
+                        and operation is not None and operation.callee==value.region
+                        and value.origin.block==index.regions[value.region].entry):
+                    arguments=operation.invoke_arguments if operation.terminator is not None else operation.call_arguments
+                    if value.origin.index<len(arguments):
+                        expected=Point(point.namespace,arguments[value.origin.index],point.context[:-1])
+                        matches=[e for e in suppliers if e.source==expected]
+                        if len(matches)==1 and matches==suppliers:selected=matches
+            if selected is None:
+                producers=[e for e in incoming if e.kind is K.RESULT and type(e.source.node)is OperationID]
+                if len(producers)==1:
+                    if suppliers==producers and self._value_route(producers[0]):selected=producers
+                    elif self._closed_local_result(point,producers[0]):
+                        matches=[e for e in suppliers if e.kind is K.COMPLETION]
+                        if matches and matches==suppliers:selected=matches
+        if selected is None or any(edge not in self._route_refutations for edge in selected):return None
+        evidence=Evidence('COMPLETE_ORIGINAL_VALUE_ROUTES_REFUTED_V1',(point.namespace.graph,),
+            (point,*tuple(dict.fromkeys(e.source for e in selected))))
+        return tuple(dict.fromkeys((evidence,*(self._route_refutations[e].evidence for e in selected))))
+
+    def _freeze_refutations(self,edges):
+        if not self._worklist_stable:return False
+        changed=False
+        for point,fact in self._facts.items():
+            proofs=list(fact.infeasibility if fact.feasible is False else())
+            for requirement in fact.occurrence.requirements:
+                branch=self._branch_proofs.get(requirement.choice.subject)
+                if branch is None or branch.selected_index==requirement.choice.index:continue
+                # Required edge traversals may belong to different iterations.
+                # Compare only to one already stable, uniform contextual bool
+                # proof; opposite static requirements alone are not a conflict.
+                proofs.extend((requirement.evidence,requirement.scope.evidence,branch.evidence,
+                    Evidence('NECESSARY_ENTRY_CHOICE_REFUTED_V1',(point.namespace.graph,),
+                        (point,requirement.choice.subject,requirement.scope.region,requirement.scope.entry))))
+            if proofs and point not in self._point_refutations:
+                self._point_refutations[point]=tuple(dict.fromkeys(proofs));changed=True
+        for edge in edges:
+            if (not self._value_route(edge)or edge.strength is not Strength.EXACT
+                    or edge in self._route_refutations):continue
+            sources=self._point_refutations.get(edge.source,())
+            if not sources:
+                rejected=[self._branch_proofs[c.subject].evidence for c in edge.conditions
+                    if c.domain=='canonical'and c.name=='SUCCESSOR_SELECTED'and c.subject in self._branch_proofs
+                    and c.index!=self._branch_proofs[c.subject].selected_index]
+                if not rejected:continue
+                sources=tuple(rejected)
+            evidence=Evidence('ORIGINAL_VALUE_ROUTE_SOURCE_INFEASIBLE_V1',tuple(dict.fromkeys(
+                (*[s for row in edge.evidence for s in row.sources],*[s for row in sources for s in row.sources]))),
+                (edge.source,edge.target))
+            proof=TypedRouteRefutation(edge,sources,evidence)
+            self._route_refutations[edge]=proof;self._refuted_inputs[edge.target].append(proof);changed=True
+        return changed
 
     def _binding_definite(self,field,state):
         return (field.applicable and bool(field.alternatives) and not field.unknown_paths
@@ -973,6 +1228,7 @@ class ProgramValueAnalysis:
                     and edge.source==binding and edge.target==result and condition in edge.conditions
                     and edge.strength is Strength.EXACT for edge in self._incoming.get(result,())):continue
             field=self._facts[binding].binding_state
+            if self._facts[binding].feasible is False:continue
             if not self._binding_definite(field,BindingState.BOUND):continue
             alternatives=tuple(replace(a,evidence=tuple(dict.fromkeys((*a.evidence,
                 *(self._condition_evidence(c)for c in a.conditions)))))for a in field.alternatives)
@@ -1028,14 +1284,23 @@ class ProgramValueAnalysis:
         return tuple(added)
 
     def _compute(self,point):
-        seed=self._seed(point);fields=seed.fields;payload=seed.binding_payload;binding_state=seed.binding_state
+        seed=replace(self._seed(point),occurrence=self._compute_occurrence(point))
+        impossible=self._point_refutations.get(point)or self._all_routes_refuted(point)
+        if impossible:return replace(seed,fields=_TOKEN,feasible=False,infeasibility=impossible)
+        fields=seed.fields;payload=seed.binding_payload;binding_state=seed.binding_state
         if seed.role in('LITERAL','NO_NORMAL_RESULT'):return seed
         possible=[];read_state=_NO_BINDING;normal_open=bool(self._point_unknown.get(point))
         operator=self._operator(point)if type(point.node)is OperationID else None
         if operator is not None:
+            operands=[Point(point.namespace,u,point.context)for u in operator[1]]
+            absent=[p for p in operands if p in self._facts and self._facts[p].feasible is False]
+            if absent:
+                evidence=Evidence('CHECKED_NORMAL_OPERATOR_REQUIRES_ORIGINAL_OPERANDS_V1',
+                    (point.namespace.graph,),(point,*absent))
+                return replace(seed,fields=_TOKEN,feasible=False,infeasibility=(evidence,))
             fields=self._join(point,fields,self._evaluate_operator(point,operator))
         for edge in self._incoming[point]:
-            if not self._edge_selected(edge):continue
+            if not self._edge_selected(edge)or edge in self._route_refutations:continue
             parent=self._facts[edge.source]
             if edge.strength is Strength.MAY:normal_open=True
             if edge.kind is K.BINDING_PAYLOAD:
@@ -1070,7 +1335,11 @@ class ProgramValueAnalysis:
         if any(e.kind is K.BINDING_READ for e in self._incoming[point]):
             feasible=(False if not normal_open and self._binding_definite(read_state,BindingState.UNBOUND)
                 else True if not normal_open and self._binding_definite(read_state,BindingState.BOUND)else None)
-        elif possible:feasible=True if True in possible else False if not normal_open and all(p is False for p in possible)else None
+        elif possible:feasible=True if True in possible else None
+        infeasibility=()
+        if feasible is False:
+            infeasibility=(Evidence('ORIGINAL_BINDING_READ_HAS_NO_BOUND_NORMAL_INPUT_V1',
+                (point.namespace.graph,),(point,*tuple(e.source for e in self._incoming[point]if e.kind is K.BINDING_READ))),)
         # Opaque producers and missing bindings leave an unknown path rather
         # than converting the absence of a constant into a purity assertion.
         if not self._incoming[point]and not any((fields.reference_sources.alternatives,fields.scalar_constant.alternatives,
@@ -1088,7 +1357,18 @@ class ProgramValueAnalysis:
                 immutable_tuple=fields.immutable_tuple if seed.immutable_tuple.applicable else _NA)
         if type(value)is DataValue:fields=replace(fields,reference_sources=_NA)
         if seed.role in('BINDING_PAYLOAD','NONVALUE'):fields=_TOKEN
-        return replace(seed,fields=fields,binding_payload=payload,binding_state=binding_state,feasible=feasible)
+        excluded=tuple(proof.evidence for proof in self._refuted_inputs.get(point,()))
+        if excluded:
+            def annotated(current):
+                return ValueFields(*(replace(getattr(current,name),alternatives=tuple(replace(a,
+                    evidence=tuple(dict.fromkeys((*a.evidence,*excluded))))for a in getattr(current,name).alternatives))
+                    for name in _FIELDS))
+            fields=annotated(fields)
+            if payload is not None:payload=annotated(payload)
+            if binding_state.applicable:binding_state=replace(binding_state,alternatives=tuple(replace(a,
+                evidence=tuple(dict.fromkeys((*a.evidence,*excluded))))for a in binding_state.alternatives))
+        return replace(seed,fields=fields,binding_payload=payload,binding_state=binding_state,feasible=feasible,
+            infeasibility=infeasibility)
 
     def _settle(self):
         self._worklist_stable=False
@@ -1132,7 +1412,8 @@ class ProgramValueAnalysis:
             old=self._facts[point]
             merged=replace(new,fields=self._join(point,old.fields,new.fields),
                 binding_payload=self._join(point,old.binding_payload or ValueFields(),new.binding_payload,'binding_payload.')if new.binding_payload is not None else old.binding_payload,
-                binding_state=self._join_binding(point,old.binding_state,new.binding_state))
+                binding_state=self._join_binding(point,old.binding_state,new.binding_state),
+                occurrence=self._join_occurrence(point,old.occurrence,new.occurrence))
             if merged!=old:
                 self._facts[point]=merged
                 for dependent in self._dependents.get(point,()):
@@ -1167,7 +1448,7 @@ class ProgramValueAnalysis:
                 self._point_unknown[point]=tuple(dict.fromkeys(blockers))
                 retained=[]
                 for edge in neighborhood.edges:
-                    if len(edges)>=self.budget.max_edges:
+                    if edge not in edges and len(edges)>=self.budget.max_edges:
                         gap=self._note(point,'VALUE_EDGE_BUDGET','Additional original input edges remain unprocessed.')
                         self._point_unknown[point]=tuple(dict.fromkeys((*self._point_unknown[point],gap)))
                         self._exhausted=False;break
@@ -1187,6 +1468,7 @@ class ProgramValueAnalysis:
                         pending.append(condition.subject)
                         self._dependents[predicate].add(point)
                 self._incoming[point]=tuple(retained)
+                self._discover_control(point,pending,edges)
             except (OverflowError,TimeoutError)as error:
                 gap=self._note(point,'VALUE_DISCOVERY_BUDGET',str(error));self._exhausted=False
                 if point in self._facts:
@@ -1200,8 +1482,14 @@ class ProgramValueAnalysis:
             if len(self._incoming[point])!=len(incoming):
                 gap=self._note(point,'VALUE_DEPENDENCY_UNVISITED','Original source endpoint lies beyond discovery budget.')
                 self._point_unknown[point]=tuple(dict.fromkeys((*self._point_unknown[point],gap)))
+        for point,incoming in tuple(self._control_inputs.items()):
+            self._control_inputs[point]=tuple(e for e in incoming if e.source in self._facts)
+            if len(self._control_inputs[point])!=len(incoming):
+                gap=self._note(point,'CONTROL_DEPENDENCY_UNVISITED','An original controller/owner lies beyond the shared discovery budget.')
+                self._control_unknown[point]=tuple(dict.fromkeys((*self._control_unknown[point],gap)))
         discovery_frontiers=dict(self._frontiers)
         self._usage['branch_refinements']=0;self._usage['branches_proved']=0;self._usage['bindings_proved']=0
+        self._usage['route_refinements']=0;self._usage['routes_refuted']=0
         while True:
             self._settle()
             try:
@@ -1211,9 +1499,13 @@ class ProgramValueAnalysis:
                     self._binding_proofs.update((proof.condition,proof)for proof in bindings)
                     self._usage['bindings_proved']=len(self._binding_proofs)
                 added=self._freeze_branches()
+                self._branch_proofs.update((proof.branch,proof)for proof in added)
+                self._usage['branches_proved']=len(self._branch_proofs)
+                refuted=self._freeze_refutations(edges)
+                self._usage['routes_refuted']=len(self._route_refutations)
             except (OverflowError,TimeoutError)as error:
                 self._note(roots[0],'BINDING_PROOF_BUDGET',str(error));self._exhausted=False;break
-            if not added:break
+            if not added and not refuted:break
             # Closed proofs only grow across rounds. Derived field facts are
             # recomputed from their original seeds: no stale value/unknown
             # from a refuted arm survives an in-place cumulative join.
@@ -1223,9 +1515,10 @@ class ProgramValueAnalysis:
                     self.session.check();seeds[point]=self._seed(point)
             except (OverflowError,TimeoutError)as error:
                 self._note(point,'BRANCH_REFINEMENT_BUDGET',str(error));self._exhausted=False
+                self._worklist_stable=False
                 break  # Previous completed round remains a sound fallback.
-            self._branch_proofs.update((proof.branch,proof)for proof in added)
-            self._usage['branch_refinements']+=1;self._usage['branches_proved']=len(self._branch_proofs)
+            self._usage['branch_refinements']+=bool(added)
+            self._usage['route_refinements']+=bool(refuted)
             self._facts=seeds;self._frontiers=dict(discovery_frontiers);self._widened.clear()
         # A stopped queue is an open path, not a completed conditional proof.
         # Only affected dependents are marked; independent literals retain
@@ -1235,6 +1528,10 @@ class ProgramValueAnalysis:
             point,gap=pending.popleft()
             if point in seen:continue
             seen.add(point);fact=self._facts[point]
+            if fact.occurrence.applicable:
+                fact=replace(fact,occurrence=replace(fact.occurrence,unknown_paths=tuple(dict.fromkeys(
+                    (*fact.occurrence.unknown_paths,gap)))))
+                self._facts[point]=fact
             if fact.role!='LITERAL':
                 def opened(fields):
                     return ValueFields(*(replace(getattr(fields,n),unknown_paths=tuple(dict.fromkeys(
@@ -1249,7 +1546,8 @@ class ProgramValueAnalysis:
         for point,fact in tuple(self._facts.items()):
             if fact.feasible is False:self._facts[point]=replace(fact,fields=_TOKEN)
         return ValueAnalysisResult(roots,tuple(self._facts.values()),tuple(edges),tuple(self._frontiers),dict(self._usage),self._exhausted,
-            tuple(self._branch_proofs.values()),tuple(self._binding_proofs.values()),self._worklist_stable)
+            tuple(self._branch_proofs.values()),tuple(self._binding_proofs.values()),self._worklist_stable,
+            tuple(self._route_refutations.values()))
 
 
 __all__=['ProgramValueAnalysis','ValueAnalysisBudget','ValueAnalysisResult','ValueFact',
