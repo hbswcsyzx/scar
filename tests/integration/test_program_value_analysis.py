@@ -132,7 +132,8 @@ tuple_bool_index = tuple_item((2, 3), True)
         assert not exported['whole_program_complete'] and not exported['transformation_authorized']
         assert exported['schema_version']==2
         assert all('immutable_tuple'in f['fields']for f in exported['facts'])
-        assert exported['fixed_point_reached'] == report.exhausted
+        assert exported['fixed_point_reached'] == report.worklist_stable
+        assert exported['query_scope_complete'] == report.exhausted
         assert len(exported['facts']) == len(report.facts)
         assert all(0 <= fact['point'] < len(exported['points']) for fact in exported['facts'])
         exported_roots = {fact['point']: fact for fact in exported['facts']}
@@ -152,7 +153,8 @@ def test_original_local_result_coverage_does_not_close_candidate_dispatch(tmp_pa
     import pytest
     from types import SimpleNamespace
     from scar.analysis.program_dependencies import ProgramDependencyGraph
-    from scar.analysis.program_value_analysis import ProgramValueAnalysis,ValueAnalysisBudget,FieldPrecision,ValueFields,ValueField,ValueAlternative
+    from scar.analysis.program_value_analysis import (ProgramValueAnalysis,ValueAnalysisBudget,FieldPrecision,
+        ValueFields,ValueField,ValueAlternative,BindingStateAlternative)
     from scar.ir.program import (Behavior,BindingDefinition,BindingRead,BindingState,
         Block,BlockArgument,CompletionResult,CompletionSignature,CompletionSuccessor,
         DataValue,ExitKind,ExitPort,LocalBindingValue,LiteralOrigin,ExactLiteralOrigin,Operation,OperationResult,
@@ -401,6 +403,119 @@ def test_original_local_result_coverage_does_not_close_candidate_dispatch(tmp_pa
     assert typed_report.for_point(merged_point).immutable_tuple.precision is FieldPrecision.NOT_APPLICABLE
     assert typed_report.for_point(merged_point).scalar_constant.unknown_paths
 
+    # Independent binding-state facts must not inherit payload precision, or
+    # lose missing/MAY paths behind a convenient singleton state projection.
+    with pytest.raises(TypeError,match='unknown paths'):
+        BindingStateAlternative(BindingState.UNKNOWN)
+    unbound_fact=report.for_point(P(namespace,binding.id,(frame,)))
+    assert unbound_fact.binding_states==(BindingState.UNBOUND,)
+    assert unbound_fact.binding_state.precision is FieldPrecision.EXACT
+    assert not report.binding_proofs
+    bound_payload=ReferenceValue(V('binding-true'),bad,LiteralOrigin(True),targets=())
+    bound_use=Use(U('bind-payload'),bound_payload.id,UseRole.REFERENCE)
+    bound_definition=replace(unbind,uses=(bound_use,))
+    bound_graph=replace(graph,
+        operations=tuple(bound_definition if op.id==unbind.id else op for op in graph.operations),
+        values=(*graph.values,bound_payload),
+        binding_definitions=(BindingDefinition(V('unbound'),BindingState.BOUND,bound_use.id),))
+
+    def binding_scope(original,name):
+        assert validate(original)==()
+        encoded=dumps(original).encode();saved=tmp_path/(name+'.json');saved.write_bytes(encoded)
+        digest=hashlib.sha256(encoded).hexdigest()
+        source=SourceArtifactLocator(ProviderArtifact(str(saved),digest,len(encoded),'scar.program-graph'),
+            digest,len(encoded),'canonical-json')
+        ns=GraphNamespace(source,'scar.program-graph/'+str(SCHEMA_VERSION),root)
+        original_index=ProgramIndex(original);body=SimpleNamespace(graph=original,index=original_index)
+        scoped=SimpleNamespace(index=lambda _:original_index,load=lambda _:body,check=lambda:None)
+        return ns,scoped,ProgramDependencyGraph(lambda _:original_index)
+
+    bound_ns,bound_session,bound_view=binding_scope(bound_graph,'binding-states')
+    bound_frame=DependencyFrame(bound_ns,candidate.id,None,None,bound_ns,entry=bad)
+    normal_bound=P(bound_ns,V('dormant-normal'));normal_may=P(bound_ns,V('dormant-normal'),(bound_frame,))
+    may_binding=DependencyEdge(P(bound_ns,V('unbound'),(bound_frame,)),P(bound_ns,binding.id,(bound_frame,)),
+        K.STATE_VALUE,M.BINDING,(DependencyEvidence('POSSIBLE_BINDING_INPUT_V1',(bound_ns.graph,),
+            (P(bound_ns,V('unbound'),(bound_frame,)),P(bound_ns,binding.id,(bound_frame,)))),),
+        strength=DependencyStrength.MAY)
+    class MaybeBinding:
+        def incoming(self,point):return DependencyNeighborhood((may_binding,)if point==may_binding.target else())
+        def outgoing(self,point):return DependencyNeighborhood((may_binding,)if point==may_binding.source else())
+    bound_view.register(MaybeBinding())
+    bound_report=ProgramValueAnalysis(bound_session,bound_view).analyze((normal_bound,normal_may))
+    assert bound_report.exhausted and bound_report.for_point(normal_bound).feasible is True
+    assert bound_report.for_point(normal_may).feasible is None
+    may_state=bound_report.for_point(may_binding.target)
+    assert may_state.binding_states==(BindingState.BOUND,)and may_state.binding_state.unknown_paths
+    assert {proof.read.context for proof in bound_report.binding_proofs}=={()}
+    bound_stopped=ProgramValueAnalysis(bound_session,bound_view,budget=ValueAnalysisBudget(max_steps=1)).analyze((P(bound_ns,binding.id),))
+    assert not bound_stopped.exhausted and not bound_stopped.binding_proofs
+    assert bound_stopped.for_point(P(bound_ns,binding.id)).binding_state.unknown_paths
+    # A singleton UNBOUND projection with a MAY/open source must not make
+    # the normal port infeasible. The full independent field is authoritative.
+    unbound_may=replace(may_binding,source=P(namespace,V('unbound'),(frame,)),
+        target=P(namespace,binding.id,(frame,)))
+    class MayUnbound:
+        def incoming(self,point):return DependencyNeighborhood((unbound_may,)if point==unbound_may.target else())
+        def outgoing(self,point):return DependencyNeighborhood((unbound_may,)if point==unbound_may.source else())
+    may_unbound_view=ProgramDependencyGraph(lambda _:index,providers=(MayUnbound(),))
+    unbound_open=ProgramValueAnalysis(session,may_unbound_view).analyze((P(namespace,V('dormant-normal'),(frame,)),))
+    assert unbound_open.for_point(unbound_may.target).binding_states==(BindingState.UNBOUND,)
+    assert unbound_open.for_point(unbound_may.target).binding_state.unknown_paths
+    assert unbound_open.for_point(P(namespace,V('dormant-normal'),(frame,))).feasible is None
+    class IncompleteBinding:
+        def incoming(self,point):return DependencyNeighborhood(enumerated=point!=P(bound_ns,binding.id))
+        def outgoing(self,point):return DependencyNeighborhood()
+    partial_view=ProgramDependencyGraph(lambda _:bound_session.index(bound_ns),providers=(IncompleteBinding(),))
+    partial=ProgramValueAnalysis(bound_session,partial_view).analyze((normal_bound,))
+    assert not partial.exhausted and partial.worklist_stable and not partial.binding_proofs
+    assert partial.for_point(P(bound_ns,binding.id)).binding_state.unknown_paths
+    mixed=analysis._join_binding(known,bound_report.for_point(P(bound_ns,binding.id)).binding_state,
+        unbound_fact.binding_state)
+    assert {a.state for a in mixed.alternatives}=={BindingState.BOUND,BindingState.UNBOUND}
+    assert not analysis._binding_definite(mixed,BindingState.BOUND)
+    assert not analysis._binding_definite(mixed,BindingState.UNBOUND)
+    partial_branch=P(namespace,branch.id,(frames[0],))
+    class IncompletePredicate:
+        def incoming(self,point):return DependencyNeighborhood(enumerated=point!=partial_branch)
+        def outgoing(self,point):return DependencyNeighborhood()
+    partial_control_view=ProgramDependencyGraph(lambda _:index,providers=(IncompletePredicate(),))
+    partial_control=ProgramValueAnalysis(session,partial_control_view).analyze(direct_points[:2])
+    assert partial_control.worklist_stable and not partial_control.exhausted
+    assert {(proof.branch.context,proof.selected_index)for proof in partial_control.branch_proofs}=={((frames[1],),1)}
+    stopped_unbound=ProgramValueAnalysis(session,ProgramDependencyGraph(lambda _:index),
+        budget=ValueAnalysisBudget(max_steps=7)).analyze((P(namespace,V('dormant-normal')),))
+    assert not stopped_unbound.exhausted and not stopped_unbound.worklist_stable
+    assert stopped_unbound.for_point(P(namespace,V('dormant-normal'))).feasible is None
+
+    # An imprecise write kills the prior BOUND token independently of the
+    # prior payload's known True. No target function or method executes.
+    from scar.ir.program import StateAccess,AccessMode
+    previous=LocalBindingValue(V('binding-previous'),bad,OperationResult(O('binding-initial'),0),ValueSlotID('missing'))
+    previous_use=Use(U('binding-previous-use'),previous.id,UseRole.LOCAL_BINDING)
+    update_world=Use(U('binding-update-world'),V('world-in'),UseRole.STATE_CONTENT)
+    after_world=StateVersionValue(V('binding-after-world'),bad,OperationResult(unbind.id,1),world)
+    initial=Operation(O('binding-initial'),'initial binding',(Behavior.COMPUTE,),(bound_use,),
+        (previous.id,),effects_complete=True)
+    update=Operation(unbind.id,'imprecise binding update',(Behavior.READ,Behavior.WRITE),
+        (previous_use,update_world),(V('unbound'),after_world.id),
+        accesses=(StateAccess(world,update_world.id,AccessMode.READ_WRITE,after_world.id),),effects_complete=False)
+    unknown_read=replace(read,uses=(binding,replace(before,value=after_world.id)))
+    unknown_regions=tuple(replace(region,blocks=tuple(replace(block,operations=(initial.id,update.id,read.id))
+        if block.id==B('bad-entry')else block for block in region.blocks))if region.id==bad else region for region in bound_graph.regions)
+    unknown_graph=replace(bound_graph,regions=unknown_regions,operations=tuple(update if op.id==unbind.id else
+        unknown_read if op.id==read.id else op for op in bound_graph.operations)+(initial,),
+        values=(*bound_graph.values,previous,after_world),binding_definitions=(
+            BindingDefinition(previous.id,BindingState.BOUND,bound_use.id),
+            BindingDefinition(V('unbound'),BindingState.UNKNOWN,previous=previous_use.id)))
+    unknown_ns,unknown_session,unknown_view=binding_scope(unknown_graph,'binding-unknown')
+    unknown_point=P(unknown_ns,V('dormant-normal'))
+    unknown_report=ProgramValueAnalysis(unknown_session,unknown_view).analyze((unknown_point,))
+    assert unknown_report.exhausted and unknown_report.for_point(unknown_point).feasible is None
+    unknown_token=unknown_report.for_point(P(unknown_ns,V('unbound')))
+    assert not unknown_token.binding_states and unknown_token.binding_state.unknown_paths
+    assert not unknown_token.binding_payload.scalar_constant.alternatives
+    assert not unknown_report.binding_proofs
+
     # A tiny real source chain exercises the existing TRUTH contract rather
     # than assigning a synthetic Opcode to it. The Custom body would raise
     # if anybody executed the target; only SCAR parses/compiles this source.
@@ -462,7 +577,38 @@ def flags():
         source_analysis=ProgramValueAnalysis(scoped)
         truth_report=source_analysis.analyze(roots)
         by_branch=dict(branches)
-        assert {(p.branch,p.selected_index)for p in truth_report.branch_proofs}<={(by_branch[6],0),(by_branch[11],1)}
+        # Custom dispatch has no published call scope. Its open paths remain
+        # local to its fields: a stable queue can still prove the independent
+        # original predicates in this very same demand scope.
+        assert not truth_report.exhausted and truth_report.worklist_stable
+        positive=truth_report
+        assert {(p.branch,p.selected_index)for p in positive.branch_proofs}=={
+            (by_branch[6],0),(by_branch[11],1)}
+        assert len(positive.binding_proofs)==2
+        truth_export=export_value_analysis(positive);json.dumps(truth_export,allow_nan=False)
+        assert truth_export['fixed_point_reached'] and not truth_export['query_scope_complete']
+        assert len(truth_export['binding_proofs'])==2
+        for public in truth_export['binding_proofs']:
+            read_ref=public['read']['point'];binding_ref=public['binding']['point']
+            read_row=truth_export['points'][read_ref];binding_row=truth_export['points'][binding_ref]
+            assert read_row['namespace']==binding_row['namespace']and read_row['context']==binding_row['context']
+            anchors=truth_export['evidence'][public['evidence']['evidence']]['anchors']
+            assert read_ref in anchors and binding_ref in anchors
+            guard=public['condition']['condition']
+            assert truth_export['conditions'][guard]['name']=='READ_NORMAL_REQUIRES_BOUND'
+            assert truth_export['conditions'][guard]['subject']==read_ref
+            assert any(guard in edge['conditions']and edge['source']==binding_ref
+                and edge['kind']=='BINDING_READ'for edge in truth_export['edges'])
+        for proof in positive.binding_proofs:
+            assert proof.binding.context==proof.read.context==()
+            assert proof.condition in next(e.conditions for e in positive.edges if e.kind is K.BINDING_READ
+                and e.source==proof.binding)
+            assert proof.read in proof.evidence.anchors and proof.binding in proof.evidence.anchors
+            assert positive.for_point(proof.binding).binding_state.precision is FieldPrecision.EXACT
+        assert all(any(e.rule=='READ_BINDING_DEFINITELY_BOUND_V1'for a in proof.alternatives for e in a.evidence)
+            for proof in positive.branch_proofs)
+        assert any(fact['binding_state']['precision']=='EXACT'and fact['binding_states']==['BOUND']
+            for fact in truth_export['facts'])
         for line,normal,failure,operation in pairs:
             normal_fact=truth_report.for_point(normal);failure_fact=truth_report.for_point(failure)
             if line in(6,11):
@@ -488,7 +634,7 @@ def flags():
         assert not source_analysis._normal_result_zero(add_normal_point,legacy_wrong)
         assert all(any(e.rule=='BRANCH_ENTRY_REQUIRES_ORIGINAL_TRUTH_NORMAL_V1'for a in p.alternatives for e in a.evidence)
             and any(c.name=='SUCCESSOR_SELECTED'and c.subject not in(by_branch[6],by_branch[11])
-                for a in p.alternatives for c in a.conditions)for p in truth_report.branch_proofs)
+                for a in p.alternatives for c in a.conditions)for p in positive.branch_proofs)
         assert all(source_analysis._necessary_normal_entry(
             DependencyCondition('canonical','SUCCESSOR_SELECTED',operation,source_analysis._truth_contract(operation)[2]),
             by_branch[line],P(ns,body.index.operations[by_branch[line].node].terminator.condition))is not None

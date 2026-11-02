@@ -153,16 +153,22 @@ def export_value_analysis(result):
     facts = [{'point': table.point(fact.point), 'role': fact.role, 'feasible': fact.feasible,
         'fields': fields_of(fact.fields),
         'binding_payload': None if fact.binding_payload is None else fields_of(fact.binding_payload),
+        'binding_state': field(fact.binding_state),
         'binding_states': [item.value for item in fact.binding_states]} for fact in result.facts]
     frontiers = [table.frontier(item) for item in result.frontiers]
     branch_proofs = [table.pack(item) for item in result.branch_proofs]
+    binding_proofs = [table.pack(item) for item in result.binding_proofs]
     return {'schema': 'scar.program-value-analysis', 'schema_version': 2, 'roots': roots,
         **table.tables, 'facts': facts, 'frontiers': frontiers, 'branch_proofs': branch_proofs,
+        'binding_proofs': binding_proofs,
         'usage': result.usage,
-        'fixed_point_reached': result.exhausted, 'whole_program_complete': False,
+        'fixed_point_reached': result.worklist_stable, 'query_scope_complete': result.exhausted,
+        'whole_program_complete': False,
         'transformation_authorized': False,
         'qualification': 'Field-wise definition provenance and supported immutable builtin scalar/tuple content facts. '
-            'A source Point is not an ObjectID or content identity; conditions and unknown paths remain explicit.'}
+            'Binding state knowledge is separate from payload; binding_states is only a convenience projection. '
+            'Fixed-point convergence describes represented field constraints, separately from original query scope completeness. '
+            'A source Point is not an ObjectID or content identity; conditions, proofs and unknown paths remain explicit.'}
 
 
 def export_boundary_analysis(result):

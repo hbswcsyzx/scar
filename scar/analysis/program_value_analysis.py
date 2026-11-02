@@ -107,11 +107,54 @@ _FIELDS=('reference_sources','scalar_constant','builtin_type','immutable_tuple')
 
 
 @dataclass(frozen=True,slots=True)
+class BindingStateAlternative:
+    """One possible binding state, independently of its Python payload."""
+    state: BindingState
+    conditions: tuple[Condition,...] = ()
+    evidence: tuple[Evidence,...] = ()
+    premises: tuple[Point,...] = ()
+    strength: Strength = Strength.EXACT
+
+    def __post_init__(self):
+        if type(self.state)is not BindingState or self.state is BindingState.UNKNOWN:
+            raise TypeError('binding alternatives assert only BOUND or UNBOUND; unknown paths are separate')
+        for rows,kind in((self.conditions,Condition),(self.evidence,Evidence),(self.premises,Point)):
+            if type(rows)is not tuple or any(type(item)is not kind for item in rows):
+                raise TypeError('binding proof requires typed immutable predicates, evidence and premises')
+        if type(self.strength)is not Strength:raise TypeError('binding proof needs DependencyStrength')
+
+
+@dataclass(frozen=True,slots=True)
+class BindingStateField:
+    alternatives: tuple[BindingStateAlternative,...] = ()
+    unknown_paths: tuple[Frontier,...] = ()
+    applicable: bool = True
+
+    def __post_init__(self):
+        if (type(self.alternatives)is not tuple or any(type(a)is not BindingStateAlternative for a in self.alternatives)
+                or type(self.unknown_paths)is not tuple or any(type(f)is not Frontier for f in self.unknown_paths)
+                or type(self.applicable)is not bool):
+            raise TypeError('binding field requires typed states, explicit unknown paths and applicability')
+
+    @property
+    def precision(self):
+        if not self.applicable:return FieldPrecision.NOT_APPLICABLE
+        if not self.alternatives:return FieldPrecision.UNKNOWN
+        if self.unknown_paths or len({a.state for a in self.alternatives})>1 or any(
+                a.strength is Strength.MAY for a in self.alternatives):return FieldPrecision.CANDIDATE
+        if any(a.conditions for a in self.alternatives):return FieldPrecision.CONDITIONAL
+        return FieldPrecision.EXACT
+
+
+_NO_BINDING=BindingStateField(applicable=False)
+
+
+@dataclass(frozen=True,slots=True)
 class ValueFact:
     point: Point
     fields: ValueFields = ValueFields()
     binding_payload: ValueFields | None = None
-    binding_states: tuple[BindingState,...] = ()
+    binding_state: BindingStateField = _NO_BINDING
     feasible: bool | None = None
     role: Literal['VALUE','LITERAL','NORMAL_RESULT_0','BINDING_PAYLOAD','NONVALUE','NO_NORMAL_RESULT'] = 'VALUE'
 
@@ -123,6 +166,10 @@ class ValueFact:
     def builtin_type(self):return self.fields.builtin_type
     @property
     def immutable_tuple(self):return self.fields.immutable_tuple
+    @property
+    def binding_states(self):
+        """Convenient known-state projection; it does not assert closure."""
+        return tuple(sorted({a.state for a in self.binding_state.alternatives},key=lambda state:state.value))
 
 
 @dataclass(frozen=True,slots=True)
@@ -168,6 +215,27 @@ class BranchSelectionProof:
 
 
 @dataclass(frozen=True,slots=True)
+class BindingReadProof:
+    read: Point
+    binding: Point
+    condition: Condition
+    alternatives: tuple[BindingStateAlternative,...]
+    evidence: Evidence
+
+    def __post_init__(self):
+        if (type(self.read)is not Point or type(self.read.node)is not OperationID
+                or type(self.binding)is not Point or type(self.binding.node)is not UseID
+                or self.read.namespace!=self.binding.namespace or self.read.context!=self.binding.context
+                or type(self.condition)is not Condition or self.condition.subject!=self.read
+                or self.condition.domain!='canonical.binding' or self.condition.name!='READ_NORMAL_REQUIRES_BOUND'
+                or self.condition.index is not None or type(self.alternatives)is not tuple or not self.alternatives
+                or any(type(a)is not BindingStateAlternative or a.state is not BindingState.BOUND
+                    or a.strength is not Strength.EXACT for a in self.alternatives)
+                or type(self.evidence)is not Evidence):
+            raise TypeError('binding-read proof needs the original read/input scope and complete BOUND alternatives')
+
+
+@dataclass(frozen=True,slots=True)
 class ValueAnalysisResult:
     roots: tuple[Point,...]
     facts: tuple[ValueFact,...]
@@ -176,6 +244,8 @@ class ValueAnalysisResult:
     usage: dict[str,int]
     exhausted: bool
     branch_proofs: tuple[BranchSelectionProof,...] = ()
+    binding_proofs: tuple[BindingReadProof,...] = ()
+    worklist_stable: bool = False
 
     def for_point(self,point):
         return next((fact for fact in self.facts if fact.point==point),None)
@@ -189,12 +259,14 @@ class ProgramValueAnalysis:
         self._facts={};self._incoming={};self._dependents=defaultdict(set);self._frontiers={}
         self._operators={};self._roles={};self._usage={'points':0,'edges':0,'steps':0,'work':0,'output_bytes':0}
         self._widened=set();self._exhausted=True
+        self._worklist_stable=False
         self._evaluations={}
         self._point_unknown=defaultdict(tuple)
         self._unsettled={}
         self._compiled_units=OrderedDict();self._constant_tables={};self._code_literals={}
         self._compiled_bytes=0
         self._branch_conditions={};self._branch_proofs={}
+        self._binding_guards={};self._binding_proofs={}
         self._truth_tables={};self._truth_contracts={}
 
     def _note(self,point,kind,detail):
@@ -364,11 +436,22 @@ class ProgramValueAnalysis:
                 return ValueFact(point,_TOKEN,feasible=False,role='NO_NORMAL_RESULT')
             return ValueFact(point,role='NORMAL_RESULT_0')
         if type(value)is LocalBindingValue:
-            definition=next((b for b in index.graph.binding_definitions if b.value==value.id),None)
-            state=(definition.state,)if definition is not None else ()
+            definition=next(((n,b)for n,b in enumerate(index.graph.binding_definitions)if b.value==value.id),None)
+            state=BindingStateField()
             payload=ValueFields()
-            if definition is not None and definition.state is BindingState.UNKNOWN:
-                payload=self._unknown(point,'LOCAL_BINDING_PAYLOAD_OPEN','UNKNOWN update does not retain its previous payload.')
+            # A Use receives its state through the original VALUE_USE edge;
+            # its source definition is not a shortcut around that interface.
+            if type(point.node)is ValueID and definition is not None:
+                ordinal,definition=definition
+                if definition.state is BindingState.UNKNOWN:
+                    payload=self._unknown(point,'LOCAL_BINDING_PAYLOAD_OPEN','UNKNOWN update does not retain its previous payload.')
+                    state=BindingStateField(unknown_paths=(self._note(point,'LOCAL_BINDING_STATE_OPEN',
+                        'An UNKNOWN binding update asserts neither BOUND nor UNBOUND; its previous token is not an unchanged-state proof.'),))
+                else:
+                    source=replace(point.namespace.graph,pointer=point.namespace.graph.pointer.rstrip('/')+'/binding_definitions/'+str(ordinal))
+                    evidence=Evidence('CANONICAL_BINDING_DEFINITION_STATE_V1',(source,),(point,))
+                    state=BindingStateField((BindingStateAlternative(definition.state,evidence=(evidence,)),))
+                    if definition.state is BindingState.UNBOUND:payload=_TOKEN
             return ValueFact(point,_TOKEN,payload,state,role='BINDING_PAYLOAD')
         if type(value)is StateVersionValue or value is None:
             return ValueFact(point,_TOKEN,role='NONVALUE')
@@ -422,6 +505,71 @@ class ProgramValueAnalysis:
     def _join(self,point,old,new,prefix=''):
         return ValueFields(*(self._join_field(point,prefix+name,getattr(old,name),getattr(new,name))
             for name in _FIELDS))
+
+    def _join_binding(self,point,old,new):
+        if not old.applicable:return new
+        if not new.applicable:return old
+        alternatives={}
+        for item in (*old.alternatives,*new.alternatives):
+            key=item.state,frozenset(item.conditions),item.strength
+            previous=alternatives.get(key)
+            if previous is None:alternatives[key]=item
+            else:alternatives[key]=replace(previous,evidence=tuple(dict.fromkeys((*previous.evidence,*item.evidence))),
+                premises=tuple(dict.fromkeys((*previous.premises,*item.premises))))
+        unknown=tuple(dict.fromkeys((*old.unknown_paths,*new.unknown_paths)))
+        if len(alternatives)>self.budget.max_alternatives:
+            unknown=tuple(dict.fromkeys((*unknown,self._note(point,'BINDING_STATE_WIDENED',
+                'Binding-state alternatives exceed the finite proof bound; remaining paths stay unknown.'))))
+        return BindingStateField(tuple(alternatives.values())[:self.budget.max_alternatives],unknown)
+
+    def _transfer_binding(self,field,edge):
+        if not field.applicable:
+            return BindingStateField(unknown_paths=(self._note(edge.target,'BINDING_SOURCE_NOT_TOKEN',
+                'An input to the original binding-token interface has no binding-state proof.'),))
+        alternatives=[];unknown=list(field.unknown_paths)
+        for item in field.alternatives:
+            conditions=tuple(dict.fromkeys((*item.conditions,*edge.conditions)))
+            if len(conditions)>self.budget.max_conditions:
+                unknown.append(self._note(edge.target,'BINDING_CONDITION_BUDGET',
+                    'Binding-state guards exceed the explicit condition budget.'));continue
+            strength=Strength.MAY if edge.strength is Strength.MAY or item.strength is Strength.MAY else Strength.EXACT
+            proofs=tuple(proof.evidence for proof in self._edge_branch_proofs(edge))
+            alternatives.append(BindingStateAlternative(item.state,conditions,
+                tuple(dict.fromkeys((*item.evidence,*edge.evidence,*proofs))),
+                tuple(dict.fromkeys((*item.premises,edge.source))),strength))
+        if edge.strength is Strength.MAY:
+            unknown.append(self._note(edge.target,'MAY_BINDING_STATE_OPEN',
+                'A may-dependence binding source does not close other possible states.'))
+        return BindingStateField(tuple(alternatives),tuple(dict.fromkeys(unknown)))
+
+    def _binding_input(self,condition):
+        if (condition.domain!='canonical.binding' or condition.name!='READ_NORMAL_REQUIRES_BOUND'
+                or condition.index is not None or condition.subject is None
+                or type(condition.subject.node)is not OperationID):return None
+        read=condition.subject
+        index=self.session.index(read.namespace)
+        rows=[row for row in index.graph.binding_reads if row.operation==read.node and row.normal_result is not None]
+        if len(rows)!=1:return None
+        row=rows[0]
+        value=index.values.get(index.use_site(row.binding).use.value)
+        if type(value)is not LocalBindingValue:return None
+        result=Point(read.namespace,row.normal_result,read.context)
+        binding=Point(read.namespace,row.binding,read.context)
+        self._binding_guards[condition]=(binding,result)
+        return binding,result
+
+    def _condition_evidence(self,condition):
+        prior=(self._branch_proofs.get(condition.subject)if condition.domain=='canonical'
+            and condition.name=='SUCCESSOR_SELECTED'else None)
+        if prior is not None and condition.index==prior.selected_index:return prior.evidence
+        binding=self._binding_proofs.get(condition)
+        return binding.evidence if binding is not None else None
+
+    def _binding_definite(self,field,state):
+        return (field.applicable and bool(field.alternatives) and not field.unknown_paths
+            and all(a.state is state and a.strength is Strength.EXACT
+                and all(self._condition_evidence(c)is not None for c in a.conditions)
+                for a in field.alternatives))
 
     def _transfer(self,fields,edge):
         def field(value):
@@ -813,13 +961,37 @@ class ProgramValueAnalysis:
         return Evidence('BRANCH_ENTRY_REQUIRES_ORIGINAL_TRUTH_NORMAL_V1',(branch.namespace.graph,),
             (branch,predicate,producer,Point(branch.namespace,block,branch.context)))
 
+    def _freeze_bindings(self):
+        if not self._worklist_stable:return ()
+        added=[]
+        for condition,(binding,result)in self._binding_guards.items():
+            if condition in self._binding_proofs or binding not in self._facts or binding.context is None:continue
+            self.session.check()
+            # Recheck the original read interface, not just a condition name
+            # propagated by an unrelated provider or activation.
+            if not any(edge.kind is K.BINDING_READ and edge.meaning is M.BINDING
+                    and edge.source==binding and edge.target==result and condition in edge.conditions
+                    and edge.strength is Strength.EXACT for edge in self._incoming.get(result,())):continue
+            field=self._facts[binding].binding_state
+            if not self._binding_definite(field,BindingState.BOUND):continue
+            alternatives=tuple(replace(a,evidence=tuple(dict.fromkeys((*a.evidence,
+                *(self._condition_evidence(c)for c in a.conditions)))))for a in field.alternatives)
+            value=self.session.index(binding.namespace).use_site(binding.node).use.value
+            evidence=Evidence('READ_BINDING_DEFINITELY_BOUND_V1',(binding.namespace.graph,),
+                (condition.subject,binding,Point(binding.namespace,value,binding.context)))
+            added.append(BindingReadProof(condition.subject,binding,condition,alternatives,evidence))
+        return tuple(added)
+
     def _freeze_branches(self):
         # A stopped worklist is not a closed predicate. In particular, an
         # early singleton can still acquire another value through a backedge.
-        if not self._exhausted or self._unsettled:return ()
+        if not self._worklist_stable:return ()
         added=[]
         for branch,predicate in self._branch_conditions.items():
             if branch in self._branch_proofs or predicate not in self._facts:continue
+            # BRANCH is a NONVALUE point: an incomplete predicate interface
+            # cannot be represented by opening its N/A scalar fields.
+            if self._point_unknown.get(branch):continue
             inputs=[edge for edge in self._incoming.get(branch,())if edge.kind is K.CONTROL_CONDITION]
             if (len(inputs)!=1 or inputs[0].source!=predicate or inputs[0].target!=branch
                     or inputs[0].strength is not Strength.EXACT):continue
@@ -838,9 +1010,8 @@ class ProgramValueAnalysis:
             for alternative in field.alternatives:
                 premises=[]
                 for condition in alternative.conditions:
-                    prior=(self._branch_proofs.get(condition.subject)if condition.domain=='canonical'
-                        and condition.name=='SUCCESSOR_SELECTED'else None)
-                    if prior is not None and condition.index==prior.selected_index:continue
+                    proven=self._condition_evidence(condition)
+                    if proven is not None:premises.append(proven);continue
                     necessary=self._necessary_normal_entry(condition,branch,predicate)
                     if necessary is None:closed=False;break
                     premises.append(necessary)
@@ -857,9 +1028,9 @@ class ProgramValueAnalysis:
         return tuple(added)
 
     def _compute(self,point):
-        seed=self._seed(point);fields=seed.fields;payload=seed.binding_payload;states=set(seed.binding_states)
+        seed=self._seed(point);fields=seed.fields;payload=seed.binding_payload;binding_state=seed.binding_state
         if seed.role in('LITERAL','NO_NORMAL_RESULT'):return seed
-        possible=[];normal_open=bool(self._point_unknown.get(point))
+        possible=[];read_state=_NO_BINDING;normal_open=bool(self._point_unknown.get(point))
         operator=self._operator(point)if type(point.node)is OperationID else None
         if operator is not None:
             fields=self._join(point,fields,self._evaluate_operator(point,operator))
@@ -868,15 +1039,20 @@ class ProgramValueAnalysis:
             parent=self._facts[edge.source]
             if edge.strength is Strength.MAY:normal_open=True
             if edge.kind is K.BINDING_PAYLOAD:
-                payload=self._join(point,payload or ValueFields(),self._transfer(parent.fields,edge),'binding_payload.');states.add(BindingState.BOUND)
+                payload=self._join(point,payload or ValueFields(),self._transfer(parent.fields,edge),'binding_payload.')
             elif edge.kind is K.BINDING_READ:
-                states.update(parent.binding_states)
+                # The read's own BOUND guard is not an assumption usable to
+                # establish its input state or prove its NORMAL impossible.
+                state_edge=replace(edge,conditions=tuple(c for c in edge.conditions
+                    if self._binding_guards.get(c)!=(edge.source,edge.target)))
+                read_state=self._join_binding(point,read_state,self._transfer_binding(parent.binding_state,state_edge))
                 if parent.binding_payload is not None:
                     fields=self._join(point,fields,self._transfer(parent.binding_payload,edge));possible.append(parent.feasible)
             elif edge.kind in (K.VALUE_USE,K.ARGUMENT,K.COMPLETION,K.STATE_VALUE,K.ENVIRONMENT,K.BLOCK_ARGUMENT)and edge.meaning in(M.VALUE,M.REFERENCE,M.BINDING):
                 if parent.binding_payload is not None:
                     payload=self._join(point,payload or ValueFields(),self._transfer(parent.binding_payload,edge),'binding_payload.')
-                    states.update(parent.binding_states)
+                    if binding_state.applicable:
+                        binding_state=self._join_binding(point,binding_state,self._transfer_binding(parent.binding_state,edge))
                 else:fields=self._join(point,fields,self._transfer(parent.fields,edge))
                 possible.append(parent.feasible)
             elif edge.kind is K.RESULT and type(edge.source.node)is OperationID:
@@ -892,7 +1068,8 @@ class ProgramValueAnalysis:
         value,index=self._value(point)
         feasible=seed.feasible
         if any(e.kind is K.BINDING_READ for e in self._incoming[point]):
-            feasible=False if states=={BindingState.UNBOUND}else True if BindingState.BOUND in states else None
+            feasible=(False if not normal_open and self._binding_definite(read_state,BindingState.UNBOUND)
+                else True if not normal_open and self._binding_definite(read_state,BindingState.BOUND)else None)
         elif possible:feasible=True if True in possible else False if not normal_open and all(p is False for p in possible)else None
         # Opaque producers and missing bindings leave an unknown path rather
         # than converting the absence of a constant into a purity assertion.
@@ -903,15 +1080,18 @@ class ProgramValueAnalysis:
             unknown=ValueField(unknown_paths=self._point_unknown[point]);gap=ValueFields(unknown,unknown,unknown,unknown)
             if payload is not None:payload=self._join(point,payload,gap,'binding_payload.')
             else:fields=self._join(point,fields,gap)
+            if binding_state.applicable:
+                binding_state=self._join_binding(point,binding_state,BindingStateField(unknown_paths=self._point_unknown[point]))
         if type(value)is DataValue and seed.builtin_type.alternatives:
             fields=replace(fields,builtin_type=seed.builtin_type,
                 scalar_constant=fields.scalar_constant if seed.scalar_constant.applicable else _NA,
                 immutable_tuple=fields.immutable_tuple if seed.immutable_tuple.applicable else _NA)
         if type(value)is DataValue:fields=replace(fields,reference_sources=_NA)
         if seed.role in('BINDING_PAYLOAD','NONVALUE'):fields=_TOKEN
-        return replace(seed,fields=fields,binding_payload=payload,binding_states=tuple(sorted(states,key=lambda s:s.value)),feasible=feasible)
+        return replace(seed,fields=fields,binding_payload=payload,binding_state=binding_state,feasible=feasible)
 
     def _settle(self):
+        self._worklist_stable=False
         work=deque(self._facts);queued=set(work);unseeded_opened=False
         while work or not unseeded_opened:
             if not work:
@@ -921,34 +1101,43 @@ class ProgramValueAnalysis:
                 # fact through the same bounded queue before publishing.
                 unseeded_opened=True
                 for point,fact in tuple(self._facts.items()):
-                    if fact.feasible is False or fact.role in('BINDING_PAYLOAD','NONVALUE','NO_NORMAL_RESULT'):continue
+                    if fact.feasible is False or fact.role in('NONVALUE','NO_NORMAL_RESULT'):continue
+                    binding_state=fact.binding_state;payload=fact.binding_payload
+                    if binding_state.applicable and not binding_state.alternatives and not binding_state.unknown_paths:
+                        binding_state=BindingStateField(unknown_paths=(self._note(point,'BINDING_STATE_UNRESOLVED',
+                            'The binding-token demand has no seeded state proof; a cycle or missing input is not definitely bound.'),))
                     fields=fact.fields
-                    for name in _FIELDS:
-                        field=getattr(fields,name)
-                        if field.applicable and not field.alternatives and not field.unknown_paths:
-                            gap=self._note(point,'VALUE_FIELD_UNRESOLVED',name+' has no seeded finite proof; other known fields are retained.')
-                            fields=replace(fields,**{name:replace(field,unknown_paths=(gap,))})
-                    if fields!=fact.fields:
-                        self._facts[point]=replace(fact,fields=fields)
+                    for prefix,current in(('',fields),('binding_payload.',payload)):
+                        if current is None:continue
+                        for name in _FIELDS:
+                            field=getattr(current,name)
+                            if field.applicable and not field.alternatives and not field.unknown_paths:
+                                gap=self._note(point,'VALUE_FIELD_UNRESOLVED',prefix+name+' has no seeded finite proof; other known fields are retained.')
+                                current=replace(current,**{name:replace(field,unknown_paths=(gap,))})
+                        if prefix:payload=current
+                        else:fields=current
+                    if fields!=fact.fields or payload!=fact.binding_payload or binding_state!=fact.binding_state:
+                        self._facts[point]=replace(fact,fields=fields,binding_payload=payload,binding_state=binding_state)
                         for dependent in self._dependents.get(point,()):
                             if dependent not in queued:queued.add(dependent);work.append(dependent)
                 if not work:break
             if self._usage['steps']>=self.budget.max_steps:
                 for point in work:
                     self._unsettled[point]=self._note(point,'VALUE_FIXED_POINT_BUDGET','Unsettled original dependency demand remains open.')
-                self._exhausted=False;break
+                self._exhausted=False;return
             point=work.popleft();queued.remove(point);self._usage['steps']+=1
             try:new=self._compute(point)
             except (OverflowError,TimeoutError)as error:
-                self._unsettled[point]=self._note(point,'VALUE_EVALUATION_BUDGET',str(error));self._exhausted=False;break
+                self._unsettled[point]=self._note(point,'VALUE_EVALUATION_BUDGET',str(error));self._exhausted=False;return
             old=self._facts[point]
             merged=replace(new,fields=self._join(point,old.fields,new.fields),
                 binding_payload=self._join(point,old.binding_payload or ValueFields(),new.binding_payload,'binding_payload.')if new.binding_payload is not None else old.binding_payload,
-                binding_states=tuple(sorted(set((*old.binding_states,*new.binding_states)),key=lambda s:s.value)))
+                binding_state=self._join_binding(point,old.binding_state,new.binding_state))
             if merged!=old:
                 self._facts[point]=merged
                 for dependent in self._dependents.get(point,()):
                     if dependent not in queued:queued.add(dependent);work.append(dependent)
+        self._worklist_stable=True
 
     def analyze(self,roots):
         roots=tuple(roots)
@@ -979,9 +1168,15 @@ class ProgramValueAnalysis:
                 retained=[]
                 for edge in neighborhood.edges:
                     if len(edges)>=self.budget.max_edges:
-                        self._note(point,'VALUE_EDGE_BUDGET','Additional original input edges remain unprocessed.');self._exhausted=False;break
+                        gap=self._note(point,'VALUE_EDGE_BUDGET','Additional original input edges remain unprocessed.')
+                        self._point_unknown[point]=tuple(dict.fromkeys((*self._point_unknown[point],gap)))
+                        self._exhausted=False;break
                     edges[edge]=edge;retained.append(edge);self._dependents[edge.source].add(point);pending.append(edge.source)
                     for condition in edge.conditions:
+                        binding=self._binding_input(condition)
+                        if binding is not None:
+                            for source in binding:pending.append(source)
+                            self._dependents[binding[0]].add(point)
                         if (condition.domain!='canonical'or condition.name!='SUCCESSOR_SELECTED'
                                 or condition.subject is None):continue
                         predicate=self._branch_predicate(condition.subject)
@@ -1003,12 +1198,21 @@ class ProgramValueAnalysis:
         for point,incoming in tuple(self._incoming.items()):
             self._incoming[point]=tuple(e for e in incoming if e.source in self._facts)
             if len(self._incoming[point])!=len(incoming):
-                self._facts[point]=replace(self._facts[point],fields=self._unknown(point,'VALUE_DEPENDENCY_UNVISITED','Original source endpoint lies beyond discovery budget.'))
+                gap=self._note(point,'VALUE_DEPENDENCY_UNVISITED','Original source endpoint lies beyond discovery budget.')
+                self._point_unknown[point]=tuple(dict.fromkeys((*self._point_unknown[point],gap)))
         discovery_frontiers=dict(self._frontiers)
-        self._usage['branch_refinements']=0;self._usage['branches_proved']=0
+        self._usage['branch_refinements']=0;self._usage['branches_proved']=0;self._usage['bindings_proved']=0
         while True:
             self._settle()
-            added=self._freeze_branches()
+            try:
+                while True:
+                    bindings=self._freeze_bindings()
+                    if not bindings:break
+                    self._binding_proofs.update((proof.condition,proof)for proof in bindings)
+                    self._usage['bindings_proved']=len(self._binding_proofs)
+                added=self._freeze_branches()
+            except (OverflowError,TimeoutError)as error:
+                self._note(roots[0],'BINDING_PROOF_BUDGET',str(error));self._exhausted=False;break
             if not added:break
             # Closed proofs only grow across rounds. Derived field facts are
             # recomputed from their original seeds: no stale value/unknown
@@ -1023,9 +1227,6 @@ class ProgramValueAnalysis:
             self._branch_proofs.update((proof.branch,proof)for proof in added)
             self._usage['branch_refinements']+=1;self._usage['branches_proved']=len(self._branch_proofs)
             self._facts=seeds;self._frontiers=dict(discovery_frontiers);self._widened.clear()
-        for point,fact in tuple(self._facts.items()):
-            if fact.feasible is False:
-                self._facts[point]=replace(fact,fields=_TOKEN)
         # A stopped queue is an open path, not a completed conditional proof.
         # Only affected dependents are marked; independent literals retain
         # their exact content/type fields.
@@ -1040,10 +1241,17 @@ class ProgramValueAnalysis:
                         (*getattr(fields,n).unknown_paths,gap))))if getattr(fields,n).applicable else getattr(fields,n)
                         for n in _FIELDS))
                 self._facts[point]=replace(fact,fields=opened(fact.fields),
-                    binding_payload=opened(fact.binding_payload)if fact.binding_payload is not None else None)
+                    binding_payload=opened(fact.binding_payload)if fact.binding_payload is not None else None,
+                    binding_state=replace(fact.binding_state,unknown_paths=tuple(dict.fromkeys(
+                        (*fact.binding_state.unknown_paths,gap))))if fact.binding_state.applicable else fact.binding_state,
+                    feasible=None if fact.role!='NO_NORMAL_RESULT'else fact.feasible)
             pending.extend((dependent,gap)for dependent in self._dependents.get(point,()))
-        return ValueAnalysisResult(roots,tuple(self._facts.values()),tuple(edges),tuple(self._frontiers),dict(self._usage),self._exhausted,tuple(self._branch_proofs.values()))
+        for point,fact in tuple(self._facts.items()):
+            if fact.feasible is False:self._facts[point]=replace(fact,fields=_TOKEN)
+        return ValueAnalysisResult(roots,tuple(self._facts.values()),tuple(edges),tuple(self._frontiers),dict(self._usage),self._exhausted,
+            tuple(self._branch_proofs.values()),tuple(self._binding_proofs.values()),self._worklist_stable)
 
 
 __all__=['ProgramValueAnalysis','ValueAnalysisBudget','ValueAnalysisResult','ValueFact',
-    'ValueFields','ValueField','ValueAlternative','FieldPrecision','BranchSelectionProof']
+    'ValueFields','ValueField','ValueAlternative','FieldPrecision','BranchSelectionProof',
+    'BindingStateAlternative','BindingStateField','BindingReadProof']

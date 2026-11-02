@@ -32,6 +32,13 @@ slot0 就复用；TRUTH 从原协议合同识别，并按已知 builtin literal 
 前端仍保持 REQUIRED_EXPANSION；需补静态折叠/零指令语法展开，不能列作必须动态观察。
 producer/current 冻结结束后与 AnnAssign 一起推进。
 
+绑定状态独立 domain 与原 read guard 证明已实现；不动点收敛/原 scope 完整分开。
+接下来的共同推理任务是：把原 JUMP/RETURN 等 source occurrence 的必要入口条件接到
+同一值队列，而不是只识别 BRANCH 的选择。查询原 Use owner 的 exact entry-necessity
+关系，并沿 controller 继续追踪；普通 postdom/MAY 影响不能作路径前提。跨 frame、恢复/
+外入口、未证 guard 和预算保留范围，所有候选路径被确证反证时才可标 infeasible；不另
+建 solver/图、不删原 source edges，也不按源码行或业务 label 推 reachability。
+
 1. **共同依赖图（已实现，完整覆盖待核对）**：qualified 原端点、上下文、typed 关系、原证据、
    共享只读加载；接局部、call/env/G、class provider 和控制依赖，公开遍历。
 2. **首版共同分析（已实现）**：原操作 cut 的字段级边界；跨参数/返回/绑定的有限常量、

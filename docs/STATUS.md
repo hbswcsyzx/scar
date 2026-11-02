@@ -74,7 +74,7 @@ occurrence、12,576 条 SOURCE/STRUCTURE 关系及 4 个模板孔、6 个 ERROR�
 
 当前材料保存为 `artifacts/current/queries/native-static-model/binding-source.json.gz`，
 source/path/hash 与原 ID 表一次保存，其余用单位内索引。与完全展开的同一 typed 模型
-相等；当前 2,975,325 bytes JSON / 382,779 bytes gzip，分别较重复格式减少约 73.2% /
+相等；当前约 2.98 MB JSON / 0.383 MB gzip，分别较重复格式减少约 73.2% /
 65.5%。旧产物已在同一路径被替换，无历史副本；收据在 `binding-source-summary.json`。
 真实 reader 原短验 0.84 秒；含规范化 roundtrip 与索引/原 ID 拒绝项的同一检查 8.39 秒。
 这些仅为分析器/存储数据，不是 LeWM 性能。公开 API 和隔离工具安装见 README。
@@ -92,8 +92,23 @@ ADD/TRUTH 的 RAISE slot0 均保留未知，正常常量不再混入异常值。
 谓词，但 READ_NORMAL_REQUIRES_BOUND 尚未证明，故 source branch_proofs 仍为 0。
 完整原 normal/raise 边继续保留；原 IR 的闭合 bool 两项证明仍通过。
 控制/区域/值分析/C++ 输入层合并短验 **4 passed / 5.35 秒**，未运行目标或长 fixture。
-绑定状态 plain tuple 目前不足以一般安全消解 guard：MAY、缺种子和预算未知未独立记录，
-下一步补带条件/证据的独立 state field，同队列传播后再证明 bound，不能直接用 tuple 放行。
+**Implemented / Verified**：绑定状态已从 plain tuple 改为独立 state field，带原条件、
+EXACT/MAY、证据和 unknown paths；tuple 只作便利投影。已处理 UNKNOWN 覆盖、MAY
+单例、不同 Ctx、未完整输入/谓词和预算，只有完整 definite-bound 输入才证明 read guard。
+预算造成的暂态 infeasible 不再误删 normal 路径。
+
+同时修复全局未知污染：工作队列收敛与原查询 scope 完整分别报告，未知/custom 只打开
+受影响字段，不阻止其它独立的静态证明。含四个源 TRUTH 的同一批查询（不是缩到正例）
+已获得 2 个绑定证明、2 个分支证明，未知/custom 仍保留前沿；原条件、normal/raise 边和
+world/effects 未删除。跨函数、值、控制与区域合并 **4 passed / 51.39 秒**，包括一次原
+跨函数 fixture；未扩成大批全量测试，目标未执行。
+
+当前机器证据在 `artifacts/current/queries/binding-knowledge/proofs.json`，其保存源码与
+离线建图位于同一验证目录，目标 `Custom.__bool__` 从未调用。原四组 TRUTH normal/raise
+及 BRANCH roots 一批查询为 55 points / 57 edges / 238 steps，2 binding proofs、2 branch
+proofs；fixed_point_reached=true、query_scope_complete=false。整轮建图/查询约 3.565 秒，
+不是 LeWM 性能。JUMP/return 的必要条件向数据流传播仍待接通，不能把证明计数
+当成所有源码 phi 已精化或已经化简。
 
 最小源码实验还发现
 编译器常量折叠的 If 仍被前端 REQUIRED_EXPANSION 阻断；必须后续补静态展开，不能把

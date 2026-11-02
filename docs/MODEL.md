@@ -162,6 +162,17 @@ TRUTH 协议；分析必须消费准确协议/端口及来源，而不是按 lab
 异常出口、effects 和输入条件继续保留。绑定是否 BOUND 是独立状态性质，已知 payload
 或可行 normal 路径不能替代 definite-bound 证明。
 
+绑定状态现有独立 `BindingStateField`：BOUND/UNBOUND alternatives 带原条件、证据、
+前提和 EXACT/MAY，另有 unknown paths 和不适用。UNKNOWN 更新不能借用旧 token，
+payload 已知与否不决定 boundness；旧 `binding_states` 只是便利投影。原 BindingRead
+输入在同一上下文中所有来源均确证 BOUND 后，才能给出 `BindingReadProof`；原 guard
+和边保留。MAY、缺种子、未枚举、预算与循环的未知沿同一队列传播。
+
+有限不动点收敛与输入覆盖完整也分开。`worklist_stable` 表示当前已表示约束和 UNKNOWN
+传播已稳定，`exhausted`/导出的 `query_scope_complete` 继续描述查询范围是否完整处理。
+无关未枚举区域不能把其它已闭合字段和证明一并拒绝；受其影响的字段仍必须保持未知。
+步数/求值早停未收敛时不冻结新证明。这个区分不是整程序完成或变换许可。
+
 NativeBoundary/provider 也按原声明进入共同导航：native/core-only 输入、正常/异常
 出口的全部原 Use、representation ownership 和来源映射都有精确记录 locator。它们是
 STRUCTURE，不是值传递、ABI 等价、must-alias 或已选实现。共同遍历默认排除结构含义，
