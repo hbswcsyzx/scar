@@ -51,20 +51,55 @@ import、fromlist 返回模块、属性读取和注册表 fallback 分开；rela
 - **主体覆盖**：模块字面 bool If 和简单名称 AnnAssign 已实现并独立读回；真实两份模块定点重建的语句残留均为 0，deferred child 仍未展开。继续 class annotation 和后续主体缺口，复用原 compiler prelude/lazy factory/namespace/world。主图尚未替换，不改变其旧覆盖分母。
 - **同图推理**：控制必要条件到值路由已接入同一工作队列；保留原图/条件/反证。进一步将 receiver、字段读取和 reaching writes 回馈调用解析，避免专项 reader 各自得到事实而互不消费。
 
-入口状态的具体修复边界：现有 `_namespace_sources()` 依赖已激活 CALL，而
+本轮已处理的入口状态断点：旧 `_namespace_sources()` 依赖已激活 CALL，而
 `activate_target()` 又依赖先解析目标，构成 bootstrap 循环。不能用自动 factory 来源
-伪造 activation。后续需增加独立于 CALL 的 entry namespace projection：分别引用原
+伪造 activation。现已增加独立于 CALL 的 entry namespace projection：分别引用原
 G member、函数 entry world、原 read owner/key/world/result、模块 snapshot writer 与
 payload/world，附原来源路径及跨 snapshot→entry 的正常完成、先后与未覆盖条件。
 先用原 `entry_paths_to_read()` 检查函数内覆盖，再用 `bindings_at()` 查询候选源绑定；
 没有标准 import 初始化前提时，module L/G 仍独立。真实 CALL 已存在时保留原精确
-`StaticModuleNamespaceAtCall` 路径。新投影要让共同值来源和调用解析实际消费，保留
+`StaticModuleNamespaceAtCall` 路径。新 contextual 消费者已让共同来源参与选中 CALL 的解析，保留
 Open/None context，不能塞入只支持闭合 CALL 链的旧 requirements 字段。
 
-该修复自行验收：无 CALL publication 时，通用方法的原 G read 也能得到带条件的初始化
+该修复通用与真实定点验收已完成：无 CALL publication 时，通用方法的原 G read 也能得到带条件的初始化
 来源；函数内同 key 的后来写入覆盖旧来源；外部写入仍留开放项；不同 factory/context
 不能混合，普通 exec 的独立 L/G 不能借用 import 条件。随后从真实原 G read 查询到
 导入写入，再让调用解析消费同一来源证据；不能只增加记录类型或手工指定目标。
+
+当前真实范围仅验证 `cem.py:134` 一个条件目标及参数/正常返回接口，未重算其它 47 个
+CALL，旧全范围 v8 队列未迁移，不算完整程序图。继续开发前先按以下层次定位新缺口：
+
+| 层次 | 先核对的已有事实 | 何时才改该层 |
+|---|---|---|
+| 词法/语法识别 | CPython AST/CST、原 occurrence/span/源码版本 | 原构造未识别或源码关联不正确 |
+| 作用域/协议识别 | 符号绑定、AST Attribute/import/call、compiler scope/slot 与 typed read | 已知字段没有被识别或记录 |
+| 局部降低 | 原 receiver/key/world、值/状态/normal/raise/控制端口及地址域 | 识别记录没有准确进入局部规范图 |
+| 跨层连接 | 原参数/返回/owner/字段/调用上下文及候选实现 | 局部端口已知而缺相应关系 |
+| 联合推理 | 当前 reaching writes、类型/别名/控制约束与固定点 | 关系已存在而未传播或错误合流 |
+
+每项修复先列原源码、原识别记录、第一处缺边/缺字段与负责规则，再实施同类通用修改。
+不以候选数量派发补丁，不用增加新实体掩盖连接欠账。当前保存的 48 CALL 形式分类中，
+22 个 local/produced-object attribute 最大，但形式分类不证明 22 个都缺同一规则。
+本轮接下来只审计代表 Attribute 与 receiver 来源；审计定位前不新增识别/连接规则。
+
+已完成四点前端审计：`self.init_action_distrib`、`mean.to`、
+`v_batch.is_floating_point`、`self.model.get_cost` 的 AST/SG 及 typed AttributeAccess
+都已识别 field/receiver，且 result 对应原 CALL callee；canonical producer 却只保留
+generic EXPRESSION/coarse world/normal/raise，没有 lookup 协议或精细接口。
+证据在 `queries/attribute-front-end-audit.json`。这里先修识别事实到规范图的降低契约，
+不重新发明识别器，也不直接跳到 Tensor/native dispatch 推断。
+
+后续修改必须先明确 Attribute **lookup 接口**：原 source/version、operation、receiver
+Use、已知 selector、world 与各 completion，继续引用原节点。不把 lookup 无条件
+解释成 `__dict__` 或实际 ObjectField READ；自定义 `__getattribute__`、descriptor、MRO
+及 native 副作用仍需要各自的条件展开。先定清接口和现有 state-address 契约的区别，
+再改对应 lowerer/validator/公共图投影；该通用关系通过后才继续 receiver 来源与类型推理。
+
+receiver 审计显示 mean/var 的双槽 UNPACK_FIXED→CALL 正常结果、v_batch 的
+slice→unpack→iterator item→items CALL→info_dict formal 均有原端口。它们不需要重造
+绑定/解包节点；在 lookup 降低之后按明确协议补 product/iterator/slice 的抽象传递，
+并从实际 caller 的参数边取得输入条件。不能把任意计算的 operand 直接当 result 身份，
+不能从参数命名或注解强行确定 runtime 类型。
 
 全范围任务已于 2026-11-02 21:42 UTC PUBLISHED，producer 不再受该任务冻结。不要为
 核验小修复反复启动 107 分钟全范围 linker；先做原主体/接口检查，输入改变后再原子更新

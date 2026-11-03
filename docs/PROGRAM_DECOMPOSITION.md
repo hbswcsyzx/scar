@@ -143,6 +143,13 @@ owner 引用同源不证明其内容不变，函数引用取得时的状态也�
 字段的精确值、符号约束、可能集合和未知分别表示；尚未分析、缺材料、规则未实现及预算中止
 另作处理状态。事实及其失效依赖可增量处理，不能以“单次队列稳定”宣称所有静态行为都已确定。
 
+每个缺口先核原识别记录，再核降低接口和跨层关系，最后核转移规则。真实 Attribute
+审计已证明 AST/SG 与 typed reader 可有完整 field/receiver，而 canonical 仍只有粗
+EXPRESSION/world：应修其 lookup 接口降低，不能宣称语法未识别。反之，解包、迭代
+和切片的原输入/输出槽已经存在时，应补相应抽象传递与 caller 条件；普通输入依赖不
+自动等于引用身份。属性 lookup 接口与直接 ObjectField 存取分开，自定义查找/descriptor
+的未知副作用不能由细化 selector 字段而被消除。
+
 该结构借鉴 [Python AST](https://docs.python.org/3/library/ast.html)、
 [MLIR 的 operation/block/region/SSA 组织](https://mlir.llvm.org/docs/LangRef/)
 及 [LLVM MemorySSA 的内存读写依赖](https://llvm.org/docs/MemorySSA.html)。

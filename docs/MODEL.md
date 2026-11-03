@@ -144,6 +144,30 @@ entry callable 选择及字段保持条件必须显式保留。相同 code 可�
 不能直接借用 creator/caller 当前 B。第三项继续走实际状态关系；无已知 caller 时的初始
 namespace 替代路径需要单独状态前提，不准把一个捕获引用边升级为内容证明。
 
+`EntryNamespaceProjection` 现把这两种关系分开组合：原 module G→entry G 的引用路径，
+原 entry world→read 的存活路径，以及原模块 writer→normal snapshot 的 reaching-binding
+见证。source snapshot、创建和 entry/read 的 world 分别保留。snapshot 正常完成、早于
+入口和期间该 key 未被覆盖，是带两侧 owner/key/world 端点的条件；输出恒为 MAY。
+独立的 G-only 分支只查 G writer；另一个 L/G 条件别名分支只在具名 alias 前提下使用联合
+kill 域。两端口本身仍独立，不凭模块源码身份授予标准 import 契约。默认公共图还直接
+接同体 namespace writer→read，函数内覆盖先截断旧 entry 来源，已知新写入不会随之丢失。
+
+调用消费使用独立的 `StaticCallInterface`、`ContextualFunctionSource` 和
+`ContextualCallTarget`：接口只声明原签名/实参/形参/completion/state 端口；来源保存一条
+连续 factory→callee Use 路径；目标将这条来源与原 CALL 关联。caller context 与 factory
+context 是两条独立坐标，不把未知 factory 前缀塞进旧的闭合 CALL requirements。
+沿真实 CALL frame 的 push/pop 生成带条件的 ARGUMENT 和正常 reference payload0
+COMPLETION 边；异常和 world 不当作值，入口状态不当作内容相等。每个来源 alternative
+独立保留，全部路径条件和证据继承到接口边。没有匹配 caller 的 formal/return 保留开放
+前沿；已知调用后缀达到预算时保留已找到的候选，并停止继续展开。
+
+无 CALL 依赖的 import/attribute 结构见证可按原点上下文实例化，原 cross-body source
+module 保持未知前缀。同一规则拒绝套用带闭合 argument/return/activation 支持的见证；
+机械上下文映射属于 evidence，尚未证明的 lookup/cache/状态保持条件继续保留。
+`StaticCallDependencyView` 共享 linker 原 graph/index/document 与读缓存，独立核查原
+authority；它不加载旧 CALL publication。module 派生索引保留原对象引用，拥有单列的
+保留配额与计量，不能把 reader cache 数字当作全部进程内存。
+
 class 的创建捕获与 provider 的当前字段读取也分开：原 body-function factory 的 G Use
 通过 `CURRENT_FUNCTION_GLOBALS_EQUALS_FACTORY_CAPTURE` 条件，连接到原
 READ_FUNCTION_FRAME 的正常 G 结果；条件绑定 body function、捕获 Use、读取 world 和

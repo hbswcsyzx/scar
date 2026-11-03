@@ -183,6 +183,7 @@ class StaticCallSession:
         self._interprocedural = None
         self._module_attributes = None
         self._module_state = None
+        self._contextual_resolver = None
         self._module_dirty = set()
         self._call_records = {}
         # Exact analysis contexts feed the solver. The per-CALL table is only
@@ -1037,8 +1038,28 @@ class StaticCallSession:
             return None, "CALLER_FRAME_WORLD_NOT_STATE_VERSION"
         return value, None
 
+    def contextual_resolver(self):
+        """Share this reader with the contextual graph's source-call solver.
+
+        Unlike the historical closed activation queue, this API retains the
+        separate factory context and every source condition on interface edges.
+        It does not overwrite or consume a saved CALL publication.
+        """
+        self._check()
+        if self._contextual_resolver is None:
+            from scar.analysis.contextual_call_resolution import ContextualCallResolver
+            self._contextual_resolver = ContextualCallResolver(self)
+        return self._contextual_resolver
+
+    def resolve_contextual_calls(self, body, *, operations=None, context=()):
+        from scar.ir.program.dependencies import DependencyPoint, GraphNamespace
+        resolver=self.contextual_resolver()
+        for identity in resolver._calls(body):
+            if operations is None or identity in operations:
+                yield resolver.resolve(DependencyPoint(GraphNamespace.from_source(body.namespace),identity,context))
+
     def _target(self, caller, operation, source, semantic_call, actuals, number, definition, basis, *,
-                creations=(), qualified_creations=(), requirements=()):
+                creations=(), qualified_creations=(), requirements=(), interface_only=False):
         # Target interfaces are functions of these immutable source ports.
         # Re-analysis can add a caller context or resolution basis without
         # changing the signature, formal/world/return ports or factory inputs.
@@ -1048,11 +1069,21 @@ class StaticCallSession:
         if templates is None:
             templates = caller.target_templates = OrderedDict()
         template_key = (operation.id, source, semantic_call, tuple(actuals), number, definition,
-                        tuple(creations), tuple(qualified_creations))
+                        tuple(creations), tuple(qualified_creations), interface_only)
         template = templates.pop(template_key, None)
         if template is not None:
             templates[template_key] = template
-            return replace(template, basis=tuple(sorted(basis)), requirement_paths=(requirements,))
+            return (replace(template, basis=tuple(sorted(basis))) if interface_only else
+                replace(template, basis=tuple(sorted(basis)), requirement_paths=(requirements,)))
+
+        def record(*args, **kwargs):
+            if interface_only:
+                from scar.ir.program.contextual_calls import StaticCallInterface
+                # These are context-independent port declarations. No closed
+                # caller requirement or dispatch fact is constructed here.
+                kwargs.pop('requirement_paths', None)
+                return StaticCallInterface(*args, **kwargs)
+            return StaticCallTarget(*args, **kwargs)
 
         def retain(target):
             templates[template_key] = target
@@ -1076,7 +1107,7 @@ class StaticCallSession:
         callee = self._body(context, *body_row) if body_row is not None else None
         if callee is None:
             frontiers.append(_front("CALLEE_BODY_UNAVAILABLE", "Original definition is cataloged, but no canonical body is available.", qualified.source))
-            return retain(StaticCallTarget(qualified, None, tuple(sorted(basis)), binding, frontiers=tuple(frontiers),
+            return retain(record(qualified, None, tuple(sorted(basis)), binding, frontiers=tuple(frontiers),
                                           requirement_paths=(requirements,)))
         arguments = []
         if binding is not None and binding.status is CallBindingStatus.CONDITIONAL:
@@ -1124,7 +1155,7 @@ class StaticCallSession:
         frontiers.extend(environment_frontiers)
         frontiers.append(_front("ENVIRONMENT_PROJECTIONS_OPEN", "Emitted function-environment routes retain their explicit creation, target and field-state conditions; saved-builtins selection, mutable field contents and remaining environment projections are not closed."))
         frontiers.append(_front("FINE_EFFECTS_OPEN", "State interface correspondence is not a closed mod/ref, alias, escape or ready summary."))
-        return retain(StaticCallTarget(qualified, callee.namespace, tuple(sorted(basis)), binding,
+        return retain(record(qualified, callee.namespace, tuple(sorted(basis)), binding,
             tuple(arguments), returns, completions, state_entry, tuple(frontiers),
             environment_routes=environment_routes, requirement_paths=(requirements,)))
 
@@ -1445,6 +1476,8 @@ class StaticCallSession:
         if self._closed:
             return
         try:
+            if self._contextual_resolver is not None:
+                self._contextual_resolver.close()
             for path, stamp in self._stamps.items():
                 if not path.is_file() or path.is_symlink() or _stamp(path) != stamp:
                     raise ValueError("original static input changed: " + str(path))

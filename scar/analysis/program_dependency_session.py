@@ -35,6 +35,9 @@ class ProgramDependencyBudget:
     max_routing_references: int = 1000000
     max_origin_candidates: int = 256
     max_origin_depth: int = 32
+    max_entry_owner_edges: int = 128
+    max_entry_snapshots: int = 128
+    max_entry_projections: int = 256
     max_seconds: int = 60
 
     def __post_init__(self):
@@ -86,6 +89,7 @@ class ProgramDependencySession:
         self._seen_graphs, self._seen_shards = set(), set()
         self._call_routing = None
         self._origin_discovery = None
+        self._entry_namespace_provider = None
         from scar.analysis.static_function_environment import _EnvironmentFacts
         self._environment_facts = _EnvironmentFacts(max_bodies=self.budget.max_graphs,
             max_bytes=max(1, min(32 * 1024 * 1024, self.budget.max_cached_bytes // 4)))
@@ -742,6 +746,7 @@ class ProgramDependencySession:
         from scar.analysis.program_class_dependencies import ClassDependencyProvider
         from scar.analysis.program_function_origin_discovery import AutomaticFactoryEntryOrigins
         from scar.analysis.program_function_origin_dependencies import FactoryEntryOriginDependencyProvider
+        from scar.analysis.program_entry_namespace_dependencies import EntryNamespaceDependencyProvider
         graph = getattr(self, "_view", None)
         if graph is None:
             calls = StaticCallDependencyProvider(self)
@@ -757,8 +762,14 @@ class ProgramDependencySession:
                 load_index=self.index, validate_origin=origins.validate_origin,
                 interface_scope=origins.interface_scope, contexts_for=origins.contexts_for,
                 discovery_frontiers=origins.frontiers_for)
-            graph = self._view = ProgramDependencyGraph(self.index, providers=(calls, classes, factories))
+            entries = self._entry_namespace_provider = EntryNamespaceDependencyProvider(self)
+            graph = self._view = ProgramDependencyGraph(self.index, providers=(calls, classes, factories, entries))
         return graph
+
+    def entry_namespace_projections(self, point):
+        """Demand conditional entry-state candidates over the default graph."""
+        self.graph()
+        return self._entry_namespace_provider.projections_for(point)
 
     def _class_relation_coverage(self, point, *, incoming, bindings):
         """Missing published class mappings are not empty dependency proofs.
@@ -831,6 +842,8 @@ class ProgramDependencySession:
                 "routing_complete": routing.complete if routing is not None else False,
                 "factory_origin_discovery": (self._origin_discovery.measurements()
                     if self._origin_discovery is not None else None),
+                "entry_namespace_discovery": (self._entry_namespace_provider.measurements()
+                    if self._entry_namespace_provider is not None else None),
                 "seconds": time.monotonic() - self.started, "target_executed": False}
 
     def close(self):
@@ -849,6 +862,9 @@ class ProgramDependencySession:
             if self._origin_discovery is not None:
                 self._origin_discovery.clear()
                 self._origin_discovery = None
+            if self._entry_namespace_provider is not None:
+                self._entry_namespace_provider.clear()
+                self._entry_namespace_provider = None
             self.closed = True
 
     def __enter__(self):

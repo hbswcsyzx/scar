@@ -449,12 +449,17 @@ def main(argv=None) -> int:
     if cli_argv and cli_argv[0] == "static-query":
         from scar.analysis.static_query import main as static_query_main
         return static_query_main(cli_argv[1:])
+    if cli_argv and cli_argv[0] == "static-calls":
+        from scar.analysis.contextual_call_cli import main as contextual_calls_main
+        return contextual_calls_main(cli_argv[1:])
     parser = argparse.ArgumentParser(prog="scar")
     sub = parser.add_subparsers(dest="subcommand", required=True)
     static_cmd = sub.add_parser("static", help="build source-root program graphs without executing the target")
     static_cmd.set_defaults(func=lambda _: 0)
     static_query = sub.add_parser("static-query", help="query stored static definitions and original graph dependencies")
     static_query.set_defaults(func=lambda _: 0)
+    contextual_calls = sub.add_parser("static-calls", help="resolve guarded source-call interfaces over the shared static graph")
+    contextual_calls.set_defaults(func=lambda _: 0)
     program_query = sub.add_parser("query-program", help="traverse qualified work, native, invocation and static source references")
     program_query.add_argument("--relations", required=True, help="published fragment-relation manifest")
     program_query.add_argument("--sha256", required=True, help="expected manifest SHA256")

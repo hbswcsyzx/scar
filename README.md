@@ -83,9 +83,24 @@ scalar/type/来源字段；重复 `--boundary-operation program_operation:...` �
 `artifacts/current/queries/factory-entry-origins-automatic.json`，约 32.76 秒；入口字典内容、
 调用目标尚未解决。绝对 IMPORT_FROM 已接真实 request/namespace binding 并在公共图独立
 读回，真实定点查询记录在 `artifacts/current/queries/import-from/summary.json`；主发布仍为
-v8，入口状态、相对导入与完整调用链待接通。未知前缀＋已核接口后缀使用独立 Open context，不能
+v8，入口状态投影和新调用接口属于按需派生查询；相对导入与完整调用链待接通。未知前缀＋已核接口后缀使用独立 Open context，不能
 变成闭合空栈。walk/value/boundary 查询格式当前为 3/4/3，保留 `unknown_prefix` 与
 条件的有序 `operands` 引用；不能用旧格式忽略这些字段消解条件。
+
+新增 `static-calls` 在同一原图上解析带条件的函数来源与参数/正常返回接口，不运行目标：
+
+```bash
+python -B -m scar.cli static-calls --model artifacts/current/static \
+  --file /path/to/program.py --name '<module>.Class.method' --kind FUNCTION \
+  --out /path/to/fresh-query --max-seconds 180
+```
+
+可用 `--call-line` 或重复 `--operation` 选原 CALL；没有这些筛选时处理选中主体的调用。
+输出一份共享 source basis、按 caller/CALL 分片的 gzip 关系、小 summary 和实际 task 状态；
+v2 复用 namespace/context/point/condition/evidence 引用表，强类型读回由
+`read_contextual_call()` 完成。查询不会覆盖旧调用发布。真实 `cem.py:134` 已得到 1 个
+条件目标及 6 条参数/5 条正常返回边，见 `queries/contextual-call/`。其它 CALL 与全范围
+发布仍待完成；入口 snapshot 只是条件来源，不能宣布当前绑定/效果闭合。
 
 权威程序图只保留 `artifacts/current/static/`：每份源码共享 source/semantic/semantics/CFG/lexical 分片，常量事实和 import 候选索引连接原 ID。`queries/` 只保存引用这些原分片的派生查询及核验收据。
 `--phase sources` 仅建目录；`--phase graph` 为默认源码图；`--phase bodies` 构造源图后继续规范主体展开。对已有图使用 `--expand`，无需重建源图；`--rules-only` 只发布详细规则/前提，`--max-bodies` 与 `--file` 只限制本次派工，全部入口继续计入分母。
