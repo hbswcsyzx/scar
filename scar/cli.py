@@ -462,6 +462,9 @@ def main(argv=None) -> int:
     if cli_argv and cli_argv[0] == 'source-symbols':
         from scar.analysis.source_symbol_materials import main as source_symbols_main
         return source_symbols_main(cli_argv[1:])
+    if cli_argv and cli_argv[0] == 'source-roles':
+        from scar.analysis.source_role_materials import main as source_roles_main
+        return source_roles_main(cli_argv[1:])
     if cli_argv and cli_argv[0] == "static":
         from scar.analysis.static_program import main as static_main
         return static_main(cli_argv[1:])
@@ -487,6 +490,8 @@ def main(argv=None) -> int:
     source_syntax.set_defaults(func=lambda _: 0)
     source_symbols = sub.add_parser('source-symbols', help='F3-A: preserve the official compiler symbol view without AST binding claims')
     source_symbols.set_defaults(func=lambda _: 0)
+    source_roles = sub.add_parser('source-roles', help='F3-B: classify original AST field slots without scope binding claims')
+    source_roles.set_defaults(func=lambda _: 0)
     static_cmd = sub.add_parser("static", help="build source-root program graphs without executing the target")
     static_cmd.set_defaults(func=lambda _: 0)
     static_query = sub.add_parser("static-query", help="query stored static definitions and original graph dependencies")

@@ -38,6 +38,18 @@ collect-only是独立材料store，fresh核验绑定必需源码收据。PUBLIC_
 当前/home只读时，命令前缀改为`python -B /var/tmp/scar-f2-recovery-7w7nd_0z/run_overlay.py`；
 它只加载同一main的变更源码缓冲，不创建checkout。恢复写入后按RECOVERY.json同步，普通入口即可使用。
 
+F3-B（只分类字段角色，不执行symtable或目标）：
+
+```bash
+python -B -m scar.cli source-roles --model /path/to/model --out /path/to/roles --collect-only --jobs 8
+python -B -m scar.cli source-roles --model /path/to/model --materials /path/to/roles --out /path/to/check --verify --jobs 8
+```
+
+每store只保存一份`source_roles/catalog.json.gz`，每源为稀疏原槽ports和484条计数；
+`--max-ports/--max-slots`限制本层，`--max-nodes/--max-tokens`同时约束上游重放。
+默认capture向可写模型只追加source_roles；collect-only不改模型，verify重新计算角色与计数。
+纯API以`read_source_syntax_material`取得验证后的不可变F2材料，用`SyntaxRoleView(material)`复用索引查询。
+
 ## 已有建图入口（前端形式验收尚未完成）
 
 ```bash

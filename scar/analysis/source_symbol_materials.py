@@ -12,38 +12,16 @@ from pathlib import Path
 import re
 import time
 
-from scar.analysis.source_materials import _matches, _source_envelope, _stamps
+from scar.analysis.source_materials import _stamps
 from scar.analysis.source_stage import SourceStage
+from scar.analysis.source_store import (
+    REQUIRED_SOURCE_ARTIFACTS as _REQUIRED, source_input_basis as _basis,
+    check_replay_limit as _upper, read_source_prerequisites as _prerequisites,
+    material_store_members as _store_members, read_material_manifest,
+    pin_material_store, check_material_store,
+)
 from scar.analysis.static_program import _json, _write
 from scar.analysis.static_query import _Fragments
-
-
-_REQUIRED = ('source', 'source_bytes', 'source_tokens', 'source_syntax')
-
-
-def _basis(units):
-    return [{**{name: unit[name] for name in ('key', 'path', 'namespace_root', 'raw_sha256',
-        'decoded_sha256', 'encoding', 'size_bytes', 'source_bytes') if name in unit},
-        'artifacts': {name: unit['artifacts'][name] for name in _REQUIRED}} for unit in units]
-
-
-def _upper(document, name, limit, stage):
-    value = document[name]
-    if type(value) is not int or not 0 <= value <= limit:
-        raise ValueError(stage + ' replay budget exceeds the requested ' + name + ' limit')
-
-
-def _prerequisites(reader, unit, max_nodes, max_tokens):
-    source = reader.read(unit['artifacts']['source'])
-    size = _source_envelope(unit, source)
-    f0 = reader.read(unit['artifacts']['source_bytes'])
-    if not _matches(unit, source, f0, size):
-        raise ValueError('F3-A requires matching original F0 bytes/text')
-    f1 = reader.read(unit['artifacts']['source_tokens'])
-    f2 = reader.read(unit['artifacts']['source_syntax'])
-    _upper(f1, 'max_tokens', max_tokens, 'F1')
-    _upper(f2, 'max_nodes', max_nodes, 'F2')
-    return f0, f1, f2
 
 
 def _row(unit, descriptor, document, f1, f2):
@@ -137,29 +115,8 @@ def _check_summary(document, rows, *, file=False):
     return limits
 
 
-def _store_members(root, descriptors, *, result=True):
-    expected = {d['path'] for d in descriptors} | ({'result.json'} if result else set())
-    actual = set()
-    for path in root.rglob('*'):
-        if path.is_symlink():
-            raise ValueError('F3-A material store cannot traverse symlinks')
-        if path.is_file():
-            actual.add(path.relative_to(root).as_posix())
-    if actual != expected:
-        raise ValueError('F3-A material store has unowned or missing files')
-
-
 def _read_store(store, out):
-    root = Path(store).absolute()
-    if root.resolve() != root or not root.is_dir() or out.is_relative_to(root):
-        raise ValueError('F3-A requires a canonical material store and independent report directory')
-    if (root / 'result.json').is_symlink() or (root / 'result.json').resolve() != root / 'result.json':
-        raise ValueError('F3-A material manifest cannot traverse a symlink')
-    before = _stamps(root, ({'path': 'result.json'},))
-    raw = (root / 'result.json').read_bytes()
-    if _stamps(root, ({'path': 'result.json'},)) != before:
-        raise ValueError('F3-A material manifest changed during read')
-    document = json.loads(raw)
+    root, document, raw = read_material_manifest(store, out)
     if (document.get('schema') != 'scar.source-symbol-materials'
             or type(document.get('schema_version')) is not int or document['schema_version'] != 1
             or document.get('stage') != 'F3-A' or document.get('collect_only') is not True
@@ -169,8 +126,7 @@ def _read_store(store, out):
     rows = document['results']
     _check_summary(document, rows)
     descriptors = [row['artifact'] for row in rows]
-    _store_members(root, descriptors)
-    pins = _stamps(root, (*descriptors, {'path': 'result.json'}))
+    pins = pin_material_store(root, descriptors, raw)
     return root, document, raw, pins
 
 
@@ -215,10 +171,7 @@ def model_source_symbols(model, out, *, jobs=4, max_scopes=100_000, max_symbols=
                 rows = list(pool.map(_symbol_unit, tasks, chunksize=1))
         if stored is not None:
             _check_summary(stored, rows)
-            _store_members(store_root, [row['artifact'] for row in rows])
-            if (_stamps(store_root, (*[row['artifact'] for row in rows], {'path': 'result.json'})) != store_pins
-                    or (store_root / 'result.json').read_bytes() != store_raw):
-                raise ValueError('F3-A material store changed during verification')
+            check_material_store(store_root, [row['artifact'] for row in rows], store_raw, store_pins)
         schema = ('scar.source-symbol-material-verification' if stored is not None else
             'scar.source-symbol-verification' if verify else
             'scar.source-symbol-materials' if collect_only else 'scar.source-symbol-gate')

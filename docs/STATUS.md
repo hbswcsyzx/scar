@@ -1,7 +1,7 @@
 # 当前状态
 
 **第一阶段未完成。当前按形式阶段重新验收：F0 → F1 → F2 → F3 → F4 → F5 → F6。**
-阶段定义见 [ARCHITECTURE](ARCHITECTURE.md)。F0/F1/F2已按声明输入域验收；下一层为F3，组合cleanup开发暂缓。
+阶段定义见 [ARCHITECTURE](ARCHITECTURE.md)。F0/F1/F2和F3-A/F3-B已按声明输入域分别验收；当前进入F3-C设计，组合cleanup开发暂缓。
 现有后层代码及成果保留，但不能代替前端完整性证明。
 
 ## F0：原始材料
@@ -70,9 +70,21 @@ PUBLIC_COMPILER_VIEW/UNJOINED始终显式；这不是完整lexical scope、名�
 /home仍emergency_ro；通过同一main的变更源码缓冲运行，原模型manifest和消费分片不变。
 真实模型尚未注册新材料（canonical_model_published=false）；fixture已验证追加端点保持及canonical fresh读回。
 
+## F3-B字段角色（已验收，尚不含绑定）
+
+113个constructor、196个field和288个attribute的484条共享规则全部核对。
+866/866源码CLASSIFIED；6,483,173槽精确对应F2的2,551,189个field和3,931,984个attribute，四分区计数闭合。
+保存563,522稀疏ports；867个分片含唯一catalog，共6,462,596压缩bytes，不重复保存文本、字面量或坐标。
+8进程采集167.00秒、独立fresh核验170.78秒（含完整F0/F1/F2重验）；无预算前沿，不执行symtable或目标。
+最终5个聚焦检查10.00秒通过，另4个F2 reader回归3.15秒通过；规则/实例覆盖分开核对。
+修正literal None与optional None投影混同；增量赋值/仅注解/import派生binder等均按原字段和ctx机械分类。
+`SyntaxRoleView`一次构建索引后复用查询任意原槽；runtime_effects=NOT_CLAIMED，scope_binding=NOT_COMPUTED_IN_F3B。
+证据：`/var/tmp/scar-f2-recovery-7w7nd_0z/f3b/{materials,verification,run.json}`。
+原模型与全部消费收据不变；因/home只读，实际模型尚未注册F3-B材料，canonical_model_published=false。
+
 ## 下一层
 
-F3-B：完整constructor×field×context角色表 → F3-C：源码scope/phase与名字存储绑定 → F3-D：全量独立验收。
+F3-C先确定源码scope/phase及名字→存储接口的封闭输入域、规则和独立验收，再实现；随后F3-D全量验收。
 旧15个公开标志已全存，349组name+line冲突及内联/annotation共享证明不能据此直接接AST。
 字段角色和source/compiled/runtime三种scope必须分开，F3通过后才进入F4；不增加优化backend。
 先前审计及LibCST能力反例保存在`f3-audit/`；现成库仅按已验证能力使用。

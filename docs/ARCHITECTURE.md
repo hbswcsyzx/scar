@@ -60,6 +60,13 @@ F3-A已实现类型化编译器视图与独立材料store；显式flags、原序
 原生compiler错误、adapter协议错误、资源与预算分别处理；外部store摘要需由fresh事实重新计算校核。
 collect-only保留原模型，只写新分片并绑定必需四种源码收据；无关manifest元数据变化不使其失效。
 
+F3-B以113个constructor的196个field和288个attribute建立484条共享规则。
+全槽按ABSENT/None/空列表/有值分区计数；名字、属性标签、keyword标签、import规格分别分类。
+增量赋值、仅注解、普通赋值、walrus等使用原父字段和ctx选择角色，不声称运行时读写。
+实例只存F2槽引用、角色和必要上下文；字面量、文本、坐标仍只在F2保存，catalog每store一份。
+`SyntaxRoleView`一次建立父槽索引，查询任意原槽，包括不落稀疏port的字段；循环查询不重复扫AST。
+schema未覆盖则拒绝；预算停止不发布部分角色表。F3-B通过也不代表scope/名字存储绑定完成。
+
 ## 共享子图与可组合接口
 
 源码 AST/CST 是识别输入；执行依赖由可共享、可成环的规范图表示。
