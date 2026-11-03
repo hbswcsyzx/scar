@@ -22,9 +22,12 @@ python -B -m scar.cli static /path/to/program --out /path/to/model --link-calls 
 ```bash
 python -B -m scar.cli trace --calls-only \
   --capture-plan /path/to/plan.json --capture-plan-sha256 PLAN_SHA256 \
-  --capture-transport snapshot --out /path/to/fresh-trace -- python /path/to/program.py
+  --capture-transport snapshot --project-root /path/to/program-root \
+  --out /path/to/fresh-trace -- python /path/to/program.py
 python -B -m scar.cli observed-calls --model /path/to/model \
   --trace /path/to/fresh-trace --out /path/to/fresh-bindings --expand-missing
+python -B -m scar.cli observed-graph --model /path/to/model \
+  --trace /path/to/fresh-trace --out /path/to/fresh-observed-graph
 ```
 
 采集计划由 `scar.trace.lean_capture.LeanCapturePlan` 对原源码/代码身份生成；具体接口以源码为准。
@@ -49,6 +52,8 @@ with ProgramDependencySession('/path/to/model') as session:
 不存在的 structured/主体信息保留准确缺口，不当成空子图。`ProgramDependencyBudget`
 控制时间、输入、缓存和关系读取；边界查询完成仍须检查前沿和字段覆盖。
 CLI 的 `static-query --program-graph` 使用原 typed ID，不按名称制造依赖。
+动态接口用 `session.attach_observations(trace)` 接入，再由 `session.graph().observed_incoming/outgoing(port)`
+查询；作用域与端口由返回的provider提供。原trace重验后才授边，DTO读回不是证明。
 
 ## 维护
 

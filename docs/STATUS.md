@@ -8,7 +8,7 @@
 - 版本化源码、AST/符号表、协议识别、规范 CFG/SSA/状态及分片存储。
 - 共享函数主体、循环构件展开、初始/回边/world 端口和词法嵌套，不复制调用或迭代。
 - 统一跨分片依赖查询、条件调用/环境/导入/class 关系、有限值推理及区域边界查询。
-- 按需 CALL 采集、原代码身份对应、观测参数/返回接口，以及缺主体自动增补。
+- 按需 CALL 采集、原代码身份对应、实例限定的共同图接口查询，以及缺主体自动增补。
 
 ## 当前权威图
 
@@ -29,7 +29,7 @@
 `body_expansion.relationship_coverage=PRIOR_BODY_BASIS_ONLY`，不能用旧索引代表最新闭包。
 图规模、调用枚举结束都不证明完整建模。
 
-## 本轮实际核验
+## 实际核验
 
 选中原 CEM `solve` 的189行循环：492个操作、6,343个成员端点；30个内部回边端口、
 121个异常终止、231条输入、30条消费者边、469条状态记录、123条控制路由均保留。
@@ -39,19 +39,24 @@
 证据：`artifacts/current/queries/lewm-observed-calls/loop-boundary-result.json`、
 `loop-boundary.json.gz`；7个循环的成员展开另见同目录 `loop-construct-result.json`。
 
-本轮消除重复core验证、metadata/namespace解码及factory输入重建，保留原收据、源码/compiler、
-namespace和关系核验。预算中断时不再丢弃已知边界，覆盖明确为PARTIAL。
-相关codec、输入复用、路由、factory、边界及循环用例通过；最后两项为2 passed / 8.99秒。
+读取复用原输入，保留收据、源码/compiler、namespace和关系核验；预算中断时保留已知边界，覆盖为PARTIAL。
 
 已有真实 CEM probe 使用人工 quadratic cost、2轮×4候选、CUDA输出 `[1,2,2]`，
 不是训练模型或episode。保存81次观测、59条原CALL绑定、2条函数接口/7个参数端口；
-原采集286,403 bytes。本轮没有重跑采集、episode或目标性能实验，没有新的加速比结论。
+原采集286,403 bytes。未重跑LeWM采集、episode或目标性能实验，没有新的加速比结论。
+
+`observed-graph` 重新读取原trace，在同一session接通59个CALL作用域和2个函数接口：
+59条callee Use依赖、2条目标、7条参数、4条world接口、2条选中返回，共74边。
+离线35.56秒、规范化gzip 42,313 bytes；fresh重放相等且74边公共双向查询通过，原图未改。
+证据在同目录 `graph/summary.json`、`observations.json.gz`、`validation.json`。
+通用单案例通过（11.14秒）：同caller重复CALL按attempt/callee隔离；静态异常保留；
+typed读回一致；原trace截断后，已有查询、close和新接入均拒绝。未生成caller落点的虚假观测。
 
 ## 缺口与接下来的顺序
 
-1. **第4层动静接线**：2条观测函数接口目前仍是独立DTO，未进入共同图查询。
-   下一项用原静态端口＋run scope＋InvocationKey＋attempt/event anchor接线，重验原trace、
-   实际目标/入口/退出及源码端口；不注册裸context=None全局边，不猜loop迭代号。
+1. **第4层接口扩展**：仍有22次观测未对应原静态CALL。59条绑定含4次FUNCTION调用，仅2次有接口；
+   另2次分别无同步entry、参数映射不完整。2次normalized receiver、4次TYPE、20次native及29次其它
+   callable调用仍缺相应接口。下一项保留可接的部分参数，定位receiver/native原协议与材料，不按包名补规则。
 2. **主体及跨层关系**：补未展开构造/主体、receiver/default/variadic、类产物来源、
    循环实例与携带状态、正常/异常/清理出口；动态未覆盖路径继续保留静态条件。
 3. **第5层联合推理**：接通逐地址状态、别名、效果、逻辑值provenance与Tensor属性反馈，

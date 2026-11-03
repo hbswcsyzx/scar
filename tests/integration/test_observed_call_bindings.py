@@ -14,9 +14,13 @@ import pytest
     reason='the existing lean CALL collector uses the CPython 3.14.7 contract')
 def test_two_actual_classes_bind_one_static_call_without_claiming_class_origin(tmp_path):
     from scar.analysis.observed_call_bindings import build_observed_call_bindings
+    from scar.analysis.observed_dependency_export import export_observed_dependencies, read_observed_dependencies
     from scar.analysis.observed_function_interfaces import read_observed_function_interfaces
+    from scar.analysis.program_dependency_session import ProgramDependencySession
     from scar.ir.program.call_edges import FrameCompletion
+    from scar.ir.program.dependencies import DependencyKind as K
     from scar.ir.program.model import ExitKind
+    from scar.ir.program.observed_dependencies import ObservedPortPhase as Phase
     from scar.trace.lean_capture import LeanCapturePlan
     from scar.trace.python_call_targets import _is_type_object
 
@@ -48,7 +52,11 @@ def test_two_actual_classes_bind_one_static_call_without_claiming_class_origin(t
     # The existing module lowerer stops at Assert. Keep that source boundary;
     # this test binds CALLs in its canonical prefix, not Assert or its suffix.
     text = (prefix + '\n\ndef select(first, second):\n    return second\n\n'
-        'mixed = select(11, second=29)\n' + assertion + suffix + 'assert mixed == 29\n')
+        'mixed = select(11, second=29)\n\n'
+        'def identity(value):\n    return value\n\n'
+        'def twice(left, right, fn):\n    for value in (left, right):\n'
+        '        result = fn(value)\n    return result\n\n'
+        'repeated = twice(11, 29, identity)\n' + assertion + suffix + 'assert mixed == 29\n')
     program.write_text(text)
     original = hashlib.sha256(program.read_bytes()).hexdigest()
     model = tmp_path / 'model'
@@ -148,6 +156,67 @@ def test_two_actual_classes_bind_one_static_call_without_claiming_class_origin(t
     assert all(port.operation == keyword.binding.call.node
         and port.formal_body == keyword.interface.body for port in keyword.interface.arguments)
     assert any(route.kind is ExitKind.NORMAL for route in keyword.interface.completions)
+
+    # The same caller activation executes one static CALL twice. Both data
+    # interfaces need the attempt axis, independently of the shared template.
+    with ProgramDependencySession(model) as session:
+        graph = session.graph()
+        static_providers = tuple(graph.providers)
+        provider = session.attach_observations(trace)
+        assert tuple(graph.providers) == static_providers
+        repeated_line = text.splitlines().index('        result = fn(value)') + 1
+        scopes = tuple(scope for scope in provider.scopes
+            if provider.binding(scope).source.start_line == repeated_line)
+        assert len(scopes) == 2 and scopes[0].caller == scopes[1].caller
+        assert scopes[0].attempt_index != scopes[1].attempt_index
+        assert all(scope.callee is not None for scope in scopes)
+        assert len({scope.callee for scope in scopes}) == 2
+        bindings = tuple(provider.binding(scope) for scope in scopes)
+        assert bindings[0].call == bindings[1].call
+        original_call = session.index(bindings[0].call.namespace).operations[bindings[0].call.node]
+        declared_completions = original_call.completions
+        assert ExitKind.RAISE in {completion.kind for completion in declared_completions}
+        occurrences = []
+        for scope in scopes:
+            ports = provider.ports(scope)
+            selected = [port for port in ports if port.phase in (Phase.ENTRY_INTERFACE, Phase.NORMAL_INTERFACE)]
+            edges = tuple(edge for port in selected
+                for edge in graph.observed_incoming(port, kinds=(K.ARGUMENT, K.COMPLETION)).edges)
+            assert {edge.kind for edge in edges} == {K.ARGUMENT, K.COMPLETION}
+            for edge in edges:
+                assert edge.source.scope == edge.target.scope == scope
+                expected = (scope.caller, scope.callee) if edge.kind is K.ARGUMENT else (scope.callee, scope.caller)
+                assert (edge.source.invocation, edge.target.invocation) == expected
+                assert edge in graph.observed_outgoing(edge.source, kinds=(edge.kind,)).edges
+                assert edge.template not in graph.outgoing(edge.source.original, kinds=(edge.kind,)).edges
+                assert edge.template.conditions
+            occurrences.append(edges)
+        assert {edge.template for edge in occurrences[0]} == {edge.template for edge in occurrences[1]}
+        assert not set(occurrences[0]).intersection(occurrences[1])
+        assert original_call.completions == declared_completions
+        document = export_observed_dependencies(provider)
+        snapshot = read_observed_dependencies(json.dumps(document))
+        assert snapshot.scopes == provider.scopes and snapshot.edges == provider.edges
+        assert snapshot.bindings == provider.bindings and snapshot.interfaces == provider.interfaces
+        with pytest.raises(ValueError):
+            read_observed_dependencies(dict(document, transformation_authorized=True))
+
+    # Corrupt only this test's synthetic capture, after its positive checks.
+    # Both a live view and a fresh admission must reject changed raw inputs;
+    # a successfully decoded/saved DTO cannot lend them its prior authority.
+    live = ProgramDependencySession(model)
+    replay = live.attach_observations(trace)
+    port = replay.ports(replay.scopes[0])[0]
+    stream = Path(replay.binding(replay.scopes[0]).target_anchor.path)
+    stream.write_bytes(stream.read_bytes()[:-1])
+    with pytest.raises(ValueError, match='observed capture inputs changed'):
+        live.graph().observed_outgoing(port)
+    with pytest.raises(ValueError, match='observed capture inputs changed'):
+        live.close()
+    with ProgramDependencySession(model) as fresh:
+        with pytest.raises(ValueError):
+            fresh.attach_observations(trace)
+
     assert hashlib.sha256(program.read_bytes()).hexdigest() == original
     assert hashlib.sha256((model / 'manifest.json').read_bytes()).hexdigest() == manifest_hash
     assert not tuple(trace.glob('torch-profiler.*'))

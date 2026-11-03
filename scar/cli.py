@@ -455,12 +455,17 @@ def main(argv=None) -> int:
     if cli_argv and cli_argv[0] == "observed-calls":
         from scar.analysis.observed_call_bindings import main as observed_calls_main
         return observed_calls_main(cli_argv[1:])
+    if cli_argv and cli_argv[0] == 'observed-graph':
+        from scar.analysis.program_observed_dependencies import main as observed_graph_main
+        return observed_graph_main(cli_argv[1:])
     parser = argparse.ArgumentParser(prog="scar")
     sub = parser.add_subparsers(dest="subcommand", required=True)
     static_cmd = sub.add_parser("static", help="build source-root program graphs without executing the target")
     static_cmd.set_defaults(func=lambda _: 0)
     static_query = sub.add_parser("static-query", help="query stored static definitions and original graph dependencies")
     static_query.set_defaults(func=lambda _: 0)
+    observed_graph = sub.add_parser('observed-graph', help='join raw observed interfaces to shared original program ports')
+    observed_graph.set_defaults(func=lambda _: 0)
     contextual_calls = sub.add_parser("static-calls", help="resolve guarded source-call interfaces over the shared static graph")
     contextual_calls.set_defaults(func=lambda _: 0)
     observed_calls = sub.add_parser("observed-calls", help="bind captured actual callees to original static CALL ports")

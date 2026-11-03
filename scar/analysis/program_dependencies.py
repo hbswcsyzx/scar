@@ -68,6 +68,7 @@ class ProgramDependencyGraph:
         from scar.analysis.program_control_dependencies import ControlDependencyProvider
         self.control = ControlDependencyProvider(load_index)
         self.providers = [self.local, self.control]
+        self._observations = {}
         for provider in providers:
             self.register(provider)
 
@@ -76,6 +77,49 @@ class ProgramDependencyGraph:
             raise TypeError("dependency provider must implement incoming/outgoing")
         self.providers.append(provider)
         return provider
+
+    def _register_observations(self, provider):
+        """Keep runtime occurrences on an explicit axis, outside static edges."""
+        from scar.analysis.program_observed_dependencies import ObservedDependencyProvider
+        if type(provider) is not ObservedDependencyProvider or provider.session.graph() is not self:
+            raise TypeError('observed interfaces must belong to this original graph session')
+        provider.check()
+        if provider.run_scope in self._observations:
+            raise ValueError('this original observed run is already attached')
+        self._observations[provider.run_scope] = provider
+        return provider
+
+    def observed_scopes(self, run_scope=None):
+        result = []
+        for run, provider in self._observations.items():
+            if run_scope is None or run == run_scope:
+                provider.check()
+                result.extend(provider.scopes)
+        return tuple(result)
+
+    def _observed_provider(self, scope):
+        from scar.ir.program.observed_dependencies import ObservedCallScope
+        if type(scope) is not ObservedCallScope:
+            raise TypeError('observed query requires an explicit run/CALL occurrence')
+        provider = self._observations.get(scope.run_scope)
+        if provider is None:
+            raise ValueError('the original observed run is not attached')
+        return provider
+
+    def observed_ports(self, scope):
+        return self._observed_provider(scope).ports(scope)
+
+    def observed_incoming(self, point, *, kinds=None):
+        from scar.ir.program.observed_dependencies import ObservedPortPoint
+        if type(point) is not ObservedPortPoint:
+            raise TypeError('observed query requires an explicit scoped port')
+        return self._observed_provider(point.scope).neighborhood(point, kinds=kinds)
+
+    def observed_outgoing(self, point, *, kinds=None):
+        from scar.ir.program.observed_dependencies import ObservedPortPoint
+        if type(point) is not ObservedPortPoint:
+            raise TypeError('observed query requires an explicit scoped port')
+        return self._observed_provider(point.scope).neighborhood(point, outgoing=True, kinds=kinds)
 
     def neighborhood(self, point, *, direction="incoming", kinds=None):
         if type(point) is not DependencyPoint or direction not in ("incoming", "outgoing"):

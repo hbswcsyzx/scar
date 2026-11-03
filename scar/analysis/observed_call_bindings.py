@@ -8,7 +8,8 @@ checked using complete descriptors and original compiler and CALL records.
 from __future__ import annotations
 
 import argparse
-from collections import Counter
+import ast
+from collections import Counter, defaultdict
 from dataclasses import dataclass, replace
 import gzip
 import hashlib
@@ -27,7 +28,7 @@ from scar.ir.program.call_edges import CallRecordAnchor, CapturedCode, CapturedS
 from scar.ir.program.dependencies import DependencyPoint as Point, GraphNamespace
 from scar.ir.program.ids import OperationID, UseID
 from scar.ir.program.model import ReferenceValue
-from scar.ir.program.python_call_targets import PythonCallTarget
+from scar.ir.program.python_call_targets import ObservedPythonCallGraph, PythonCallTarget
 from scar.ir.record_codec import decode, encode
 from scar.ir.semantics_v2 import Opcode
 from scar.ir.v2.common import SourceReference
@@ -63,6 +64,28 @@ class ObservedCallBinding:
                 or self.captured_code.filename != self.source.path
                 or self.class_origin_verified is not False):
             raise ValueError('observed CALL changed original ports/code or claimed class origin')
+
+
+@dataclass(frozen=True, slots=True)
+class ObservedRawEvidence:
+    """Original bounded reader results, never a serialized validation token."""
+    trace: CallOperandTrace
+    targets: ObservedPythonCallGraph
+
+    def __post_init__(self):
+        if (type(self.trace) is not CallOperandTrace or type(self.targets) is not ObservedPythonCallGraph
+                or self.trace.directory != self.targets.source):
+            raise ValueError('observed evidence requires the same original trace/target collection')
+        self.targets.__post_init__()
+
+
+def _dependency_session(owner):
+    from scar.analysis.program_dependency_session import ProgramDependencySession
+    return type(owner) is ProgramDependencySession
+
+
+def _check_owner(owner):
+    (owner.check if _dependency_session(owner) else owner._check)()
 
 
 def _json(value):
@@ -137,8 +160,81 @@ def _candidate(entry, captured):
     return name == captured.qualname.replace('.<locals>.', '.')
 
 
+def _session_body(session, number, position, cache):
+    """A small source adapter over this session's original graph/index only."""
+    session.check()
+    original = session._base_body(number, position)
+    original = session.load_body(original.namespace)  # Recheck supplied authority/namespace.
+    key = 'observed-session-source-context', number
+    context = cache.get(key)
+    if context is None:
+        tree, semantic, text = session.source_context(original)
+        refs = {(atom.kind, atom.reference.start_line, atom.reference.end_line,
+            atom.reference.start_column, atom.reference.end_column): atom.reference
+            for atom in semantic.source_atoms.values()}
+        nodes = {}
+        for node in ast.walk(tree):
+            if type(node) is ast.Call:
+                reference = refs.get((type(node).__name__, node.lineno, node.end_lineno,
+                                      node.col_offset, node.end_col_offset))
+                if reference is not None:
+                    nodes[reference.atom_id] = node
+        context = SimpleNamespace(number=number, unit=original.unit, tree=tree, semantic=semantic,
+            refs=refs, call_nodes=nodes, docs={'source': {'text': text}})
+        cache[key] = context
+    links = original.module.operation_links if original.module is not None else original.metadata.operation_links
+    uses = original.module.use_links if original.module is not None else original.metadata.use_links
+    by_operation = defaultdict(list)
+    for use in uses:
+        if original.index.use_site(use.use).operation != use.operation:
+            raise ValueError('observed source Use belongs to another original operation')
+        by_operation[use.operation].append(use)
+    # This existing routine reads only the supplied source atoms/records; no
+    # StaticCallSession fields, constructor, body cache or basis are borrowed.
+    StaticCallSession._check_source_references(session, context, (original.metadata, links, uses))
+    return SimpleNamespace(**{**vars(original), 'context': context,
+        'operation_links': links, 'use_links': uses, 'uses_by_op': by_operation})
+
+
+def _locate_session_body(session, captured, issues, cache):
+    key = 'observed-code-body', captured
+    if key in cache:
+        body = _session_body(session, *cache[key], cache)
+        return body, _compiler(body)
+    matches = []
+    numbers = [number for number, unit in enumerate(session.units) if unit['path'] == captured.filename]
+    if not numbers:
+        raise LookupError('CALLER_SOURCE_UNIT_UNAVAILABLE: captured filename has no supplied source unit')
+    for number in numbers:
+        session.check()
+        unit = session.units[number]
+        rows = {row['entry_key']: (position, row) for position, row in enumerate(unit['bodies'])}
+        for entry in session._catalog(number)['entries']:
+            if not _candidate(entry, captured):
+                continue
+            pair = rows.get(entry['entry_key'])
+            if pair is None or 'artifact' not in pair[1]:
+                issues.append({'kind': 'CALLER_CANONICAL_BODY_UNAVAILABLE',
+                    'entry': entry['entry_key'], 'file': captured.filename})
+                continue
+            try:
+                body = _session_body(session, number, pair[0], cache)
+                if describe_code(_compiler(body)) == encode(captured):
+                    matches.append((number, pair[0]))
+            except (ValueError, LookupError, TypeError, SyntaxError) as error:
+                issues.append({'kind': 'CALLER_SOURCE_OR_INTERFACE_OPEN', 'entry': entry['entry_key'],
+                    'file': captured.filename, 'detail': type(error).__name__ + ': ' + str(error)})
+    if len(matches) != 1:
+        raise LookupError('CAPTURED_CODE_BODY_NOT_UNIQUE: ' + str(len(matches)) + ' complete matches')
+    cache[key] = matches[0]
+    body = _session_body(session, *matches[0], cache)
+    return body, _compiler(body)
+
+
 def _locate_body(owner, captured, issues, cache):
     """Share original body coordinates, never a second graph or code owner."""
+    if _dependency_session(owner):
+        return _locate_session_body(owner, captured, issues, cache)
     key = 'observed-code-body', captured
     if key in cache:
         number, position = cache[key]
@@ -195,16 +291,68 @@ def _locate(owner, captured, selected_site, issues, cache):
     if len(links) != 1:
         raise LookupError('ORIGINAL_CANONICAL_CALL_NOT_UNIQUE')
     link, = links
-    uses = [item.use for item in body.uses_by_op[link.operation] if item.role == 'callee']
+    atom = body.context.semantic.source_atoms.get(link.source.atom_id)
+    if atom is None or atom.reference != link.source or atom.kind != 'Call':
+        raise ValueError('observed CALL source is not its exact original semantic source atom')
+    if link.semantic_operation is not None:
+        definition = body.context.semantic.definitions.get(link.semantic_operation)
+        if (definition is None or definition.code_id != link.source.atom_id.wire
+                or link.source.atom_id not in definition.source_atoms):
+            raise ValueError('observed CALL names another original semantic definition')
+    node = body.context.call_nodes.get(link.source.atom_id)
+    expected = None if node is None else body.context.refs.get((type(node.func).__name__,
+        node.func.lineno, node.func.end_lineno, node.func.col_offset, node.func.end_col_offset))
+    callee_links = [item for item in body.uses_by_op[link.operation] if item.role == 'callee']
+    uses = [item.use for item in callee_links]
     if len(uses) != 1:
         raise LookupError('ORIGINAL_CALL_CALLEE_USE_NOT_UNIQUE')
     use = body.index.use_site(uses[0])
-    if use.operation != link.operation or type(body.index.values[use.use.value]) is not ReferenceValue:
+    operation = body.index.operations[link.operation]
+    if (use.operation != link.operation or type(body.index.values[use.use.value]) is not ReferenceValue
+            or expected is None or callee_links[0].source != expected or callee_links[0].index != 0
+            or not operation.invoke_arguments or operation.invoke_arguments[0] != use.use.id):
         raise ValueError('original CALL callee is not its owned reference Use')
     namespace = GraphNamespace.from_source(body.namespace)
     result = Point(namespace, link.operation, None), Point(namespace, uses[0], None), link.source
     cache[key] = result
     return result
+
+
+def derive_observed_interfaces(session, trace):
+    """Replay original evidence using one read-only dependency-session owner.
+
+    No existing observed DTO is accepted as evidence. The ordinary readers
+    recheck raw EOF/rows/hashes/entries; static bodies, indices and source facts
+    belong to the supplied current manifest. No basis, graph or file is written.
+    """
+    if not _dependency_session(session):
+        raise TypeError('observed replay requires the current ProgramDependencySession')
+    session.check()
+    raw = _read_trace(trace)
+    observed = read_python_call_targets(raw)
+    evidence = ObservedRawEvidence(raw, observed)
+    attempts = {(item.process_id, item.index): item for item in raw.attempts}
+    captures = {(item.process_id, item.code.key): item.code for item in raw.frame_scan.captures}
+    bindings, issues, cache = [], [], {}
+    for target, anchor in zip(observed.targets, observed.target_anchors):
+        attempt = attempts[target.caller.process_id, target.attempt_index]
+        try:
+            session.check()
+            captured = captures.get((attempt.process_id, attempt.site.code))
+            if captured is None:
+                raise LookupError('CALLER_CAPTURED_CODE_UNAVAILABLE')
+            call, callable_point, source = _locate(session, captured, attempt.site, issues, cache)
+            bindings.append(ObservedCallBinding(observed.source_sha256, call, callable_point,
+                source, captured, attempt.site, attempt.anchor, anchor, target))
+        except (LookupError, ValueError, TypeError, OverflowError, TimeoutError) as error:
+            issues.append({'kind': 'OBSERVED_CALL_UNBOUND', 'process_id': attempt.process_id,
+                'attempt_index': attempt.index, 'detail': type(error).__name__ + ': ' + str(error)})
+            if isinstance(error, (OverflowError, TimeoutError)):
+                break
+    from scar.analysis.observed_function_interfaces import derive_observed_function_interfaces
+    interfaces, interface_issues = derive_observed_function_interfaces(
+        session, raw, observed, tuple(bindings), cache)
+    return tuple(bindings), interfaces, evidence, tuple((*issues, *interface_issues))
 
 
 def build_observed_call_bindings(model, trace, out, budget=None):
@@ -351,4 +499,5 @@ def main(argv=None):
     return 0
 
 
-__all__ = ['ObservedCallBinding', 'build_observed_call_bindings', 'read_observed_call_bindings', 'main']
+__all__ = ['ObservedCallBinding', 'ObservedRawEvidence', 'derive_observed_interfaces',
+           'build_observed_call_bindings', 'read_observed_call_bindings', 'main']

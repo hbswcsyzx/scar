@@ -945,6 +945,17 @@ class ProgramDependencySession:
                 providers=(calls, classes, factories, entries, self._unpack_projection_provider))
         return graph
 
+    def attach_observations(self, trace):
+        """Replay raw capture and attach scoped interfaces to the shared graph.
+
+        No saved DTO is accepted as authority; no target or new capture is
+        run. Runtime scope does not change ordinary static neighborhoods.
+        """
+        from scar.analysis.program_observed_dependencies import ObservedDependencyProvider
+        self.check()
+        provider = ObservedDependencyProvider(self, trace)
+        return self.graph()._register_observations(provider)
+
     def entry_namespace_projections(self, point):
         """Demand conditional entry-state candidates over the default graph."""
         self.graph()
@@ -1040,6 +1051,10 @@ class ProgramDependencySession:
         if self.closed:
             return
         try:
+            view = getattr(self, '_view', None)
+            if view is not None:
+                for provider in view._observations.values():
+                    provider.check_inputs()
             for path, stamp in self._stamps.items():
                 if not path.is_file() or path.is_symlink() or path.resolve() != path or _stamp(path) != stamp:
                     raise ValueError("original dependency input changed during query")

@@ -10,13 +10,18 @@ import ast
 from dataclasses import dataclass
 import inspect
 
-from scar.analysis.observed_call_bindings import ObservedCallBinding, _locate_body
+from scar.analysis.observed_call_bindings import (
+    ObservedCallBinding, _check_owner, _dependency_session, _locate_body,
+)
 from scar.analysis.program_dependency_export import _Tables
 from scar.ir.program.call_edges import CallRecordAnchor, CapturedSite, FrameCompletion, FrameExit
 from scar.ir.program.contextual_calls import StaticCallInterface
 from scar.ir.program.functions import BindingOrigin, CallBindingStatus, ParameterKind
+from scar.ir.program.model import StateVersionValue, UseRole
 from scar.ir.program.python_call_targets import PythonEntryBinding, PythonTargetKind
+from scar.ir.program.source_call_bindings import SourceArgumentPort
 from scar.ir.program.source_returns import SourceReturnSite
+from scar.ir.program.static_calls import StaticCallFrontier, StaticStateEntryRoute
 from scar.ir.record_codec import decode
 from scar.trace.code_snapshot import site as code_site
 
@@ -89,6 +94,72 @@ def _return_site(body, code, exit_, interface):
     return selected[0] if len(selected) == 1 else None
 
 
+def _definition(owner, callee):
+    if not _dependency_session(owner):
+        qualified, signature, _, _ = callee.context.definitions[callee.namespace.definition]
+        return qualified, signature
+    qualified = owner.source_definition_reference(callee.namespace)
+    signature = owner.signature_for(qualified, callee)
+    from scar.analysis.function_interfaces import validate_body_interface
+    validate_body_interface(callee, callee.interface, signature)
+    return qualified, signature
+
+
+def _dependency_interface(session, caller, operation, source, semantic_call, actuals,
+                          callee, qualified, signature):
+    """Port assembly over the same original session bodies, without _target.
+
+    The two reused StaticCallSession routines below are pure algorithms over
+    their supplied bodies/AST; they read no owner fields. No StaticCallSession
+    instance, constructor state, source basis or duplicate body is manufactured.
+    """
+    from scar.analysis.static_calls import StaticCallSession
+    from scar.analysis.function_binding import bind_call
+    if semantic_call is None:
+        raise LookupError('ORIGINAL_SEMANTIC_CALL_UNAVAILABLE')
+    binding = bind_call(signature, call=semantic_call, target=qualified.definition,
+        source=source, arguments=actuals)
+    if (binding.status is not CallBindingStatus.CONDITIONAL
+            or any(route.origin is not BindingOrigin.ARGUMENT for route in binding.routes)):
+        raise LookupError('FULLY_SUPPLIED_PARAMETER_PLAN_UNAVAILABLE')
+    formals = {formal.slot: formal for formal in callee.interface.parameters}
+    names = {parameter.slot: parameter.name for parameter in signature.parameters}
+    arguments = []
+    for route in binding.routes:
+        if len(route.argument_indices) != 1 or route.slot not in formals:
+            raise LookupError('FORMAL_ARGUMENT_ROUTE_UNAVAILABLE')
+        actual = actuals[route.argument_indices[0]]
+        if actual.use is None:
+            raise LookupError('ACTUAL_ARGUMENT_USE_UNAVAILABLE')
+        formal = formals[route.slot]
+        use = caller.index.use_site(actual.use)
+        arguments.append(SourceArgumentPort(actual.index, caller.namespace, operation.id,
+            actual.source, actual.use, use.use.value, callee.namespace,
+            formal.slot, formal.value, names[formal.slot], route))
+    completions, returns, frontiers = StaticCallSession._completion_routes(session, caller, operation, callee)
+    before, issue = StaticCallSession._caller_world(caller)
+    state = None
+    if issue is None:
+        worlds = [use for use in operation.uses if use.id in operation.invoke_arguments
+            and use.role is UseRole.STATE_CONTENT
+            and type(caller.index.values[use.value]) is StateVersionValue
+            and caller.index.values[use.value].location == before.location]
+        if len(worlds) == 1:
+            after = callee.index.values[callee.interface.world]
+            state = StaticStateEntryRoute(worlds[0].id, worlds[0].value, before.location,
+                after.id, after.location)
+        else:
+            issue = 'CALL_STATE_ENTRY_OPEN'
+    if issue is not None:
+        frontiers.append(StaticCallFrontier(issue, 'Original coarse CALL world interface remains unresolved.', source))
+    frontiers.extend((StaticCallFrontier('OBSERVED_FUNCTION_ENVIRONMENT_OPEN',
+        'Observed code/entry selects this interface only; function environment fields and their contents remain open.', source),
+        StaticCallFrontier('FINE_EFFECTS_OPEN',
+            'Parameter/return/state port correspondence does not close mod/ref, alias, escape or readiness.', source)))
+    return StaticCallInterface(qualified, callee.namespace, ('OBSERVED_ENTRY_CODE_INTERFACE',),
+        binding, tuple(arguments), returns, completions, state, tuple(frontiers))
+
+
 def derive_observed_function_interfaces(owner, trace, observed, bindings, cache):
     """Reuse one live static owner and original raw entry evidence, no lowering."""
     entries = {(item.caller.process_id, item.attempt_index): (item, anchor)
@@ -114,7 +185,7 @@ def derive_observed_function_interfaces(owner, trace, observed, bindings, cache)
                   'Only exact ordinary Python functions are supported; class/method/native dispatch retains its own boundary.')
             continue
         try:
-            owner._check()
+            _check_owner(owner)
             if key not in entries:
                 raise LookupError('ACTUAL_PYTHON_ENTRY_UNAVAILABLE')
             entry, entry_anchor = entries[key]
@@ -135,7 +206,7 @@ def derive_observed_function_interfaces(owner, trace, observed, bindings, cache)
                     or tuple(code.co_varnames[:code.co_argcount]) != layout.parameters
                     or code.co_argcount != layout.argcount):
                 raise LookupError('VARIADIC_KEYWORD_ONLY_OR_SUSPENDED_LAYOUT_OPEN')
-            qualified, signature, _, _ = callee.context.definitions[callee.namespace.definition]
+            qualified, signature = _definition(owner, callee)
             if (signature is None or tuple(item.name for item in signature.parameters) != layout.parameters
                     or any(item.kind not in (ParameterKind.POSITIONAL, ParameterKind.POSITIONAL_ONLY)
                            for item in signature.parameters)):
@@ -150,12 +221,20 @@ def derive_observed_function_interfaces(owner, trace, observed, bindings, cache)
             if (type(node) is not ast.Call or any(type(arg) is ast.Starred for arg in node.args)
                     or any(keyword.arg is None for keyword in node.keywords)):
                 raise LookupError('EXPANDED_ARGUMENT_LAYOUT_OPEN')
-            actuals, actual_issues = owner._actuals(caller, operation, node)
+            if _dependency_session(owner):
+                from scar.analysis.static_calls import StaticCallSession
+                actuals, actual_issues = StaticCallSession._actuals(owner, caller, operation, node)
+            else:
+                actuals, actual_issues = owner._actuals(caller, operation, node)
             if actual_issues or len(actuals) != layout.argcount:
                 raise LookupError('FULLY_SUPPLIED_ARGUMENT_PORTS_UNAVAILABLE')
-            interface = owner._target(caller, operation, binding.source, link.semantic_operation,
-                actuals, callee.context.number, qualified.definition,
-                ('OBSERVED_ENTRY_CODE_INTERFACE',), interface_only=True)
+            if _dependency_session(owner):
+                interface = _dependency_interface(owner, caller, operation, binding.source,
+                    link.semantic_operation, actuals, callee, qualified, signature)
+            else:
+                interface = owner._target(caller, operation, binding.source, link.semantic_operation,
+                    actuals, callee.context.number, qualified.definition,
+                    ('OBSERVED_ENTRY_CODE_INTERFACE',), interface_only=True)
             plan = interface.binding
             if (plan is None or plan.status is not CallBindingStatus.CONDITIONAL
                     or any(route.origin is not BindingOrigin.ARGUMENT for route in plan.routes)

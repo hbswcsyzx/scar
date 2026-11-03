@@ -59,11 +59,12 @@ artifacts/current/queries/ 保存派生查询证据，不是第二份权威程�
 ## 当前接通范围与下一项
 
 已具备源码层、局部规范图、共同依赖查询、部分条件属性推理和循环边界查询。
-已保存两条真实 CEM 函数观测接口；当前仍是独立报告，尚未作为实例限定关系接入共同图。
-对应离线 owner 是 [observed_function_interfaces.py](../scar/analysis/observed_function_interfaces.py)。
+真实 CEM 的59个CALL实例及2条函数接口已接入共同图的显式观测端口查询，静态邻接不变。
+实例端口引用原点及run/Invocation/attempt/事件作用域；只有实际选中的return形成返回接口。
+对应 owner 是 [program_observed_dependencies.py](../scar/analysis/program_observed_dependencies.py)。
 选中 CEM 循环的边界查询已在原预算内完成；这不证明状态、效果、资源或整个程序闭合。
 
-下一项先将上述观测接口接入共同图的显式实例端口查询，再补循环迭代/状态和其它缺接口。
+下一项按真实缺口补部分参数/receiver/native接口，再补循环迭代/状态与共同推理消费。
 不得把裸 context=None 的观测边注册为全局事实，也不得丢弃未执行的异常路径。
 Python→native/runtime/kernel、Tensor 属性、alias/effects 与资源连接仍需按实际缺口补齐。
 第一阶段只有在实体、结构、连接、属性和覆盖均经核查后才完成。
