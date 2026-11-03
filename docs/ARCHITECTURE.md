@@ -1,42 +1,69 @@
-# 当前架构与迁移边界
+# 建图架构
 
-唯一开发主线是纯静态程序建图，流程及展开规则分别以 [STATIC_ANALYSIS_DESIGN](STATIC_ANALYSIS_DESIGN.md) 和 [PROGRAM_DECOMPOSITION](PROGRAM_DECOMPOSITION.md) 为准。
+第一阶段只完成程序建模与建图；化简、改写和性能优化在后续阶段。
+实体和关系定义见 [MODEL](MODEL.md)，实测范围与剩余缺口见 [STATUS](STATUS.md)。
+LeWM 是外部 testcase；通用规则由语言协议、原端口和证据派发，不按业务名称选择。
 
-## 复用现有代码
+## 六层流水线
 
-| 模块 | 当前用途 | 需补齐的边界 |
+| 层 | 输入 → 输出 | 主要代码 owner |
 |---|---|---|
-| `scar/analysis/source_discovery.py` | 不执行目标的源码/import 候选发现 | 从源材料形成完整静态目录，不以捕获调用入选 |
-| `scar/ir/frontend_v2.py`、`source_semantics_v2.py`、`control_flow_v2.py` | 版本化源码、绑定/操作语义、CFG 与查询 | 源码层与规范图之间保持显式对应 |
-| `program_lowering.py`、`structured_lowering.py`、`source_*_lowering.py` | 源码文本到规范结构化 IR | 扩展纯静态入口与语言构造，不强制运行见证 |
-| `scar/ir/program/` | Operation/Use/Value/State/Region/Resource、验证、查询、codec | 作为唯一规范程序结构；不创建平行权威图 |
-| `constants_v2.py`、`import_values_v2.py` | 有限静态常量与导入值推导 | 扩展到上下文相关的抽象事实与约束传播 |
-| `effects_v2.py` | 已有效果维度与显式摘要组合 | 增加以静态定义为范围的自动摘要推导，不伪造运行 ObservationScope |
-| `scar/store/` | 分片、ID 引用和已有序列化能力 | 复用可用部分，不要求数据库或巨型单文件 |
+| 1 材料与版本 | 入口、源码/配置、依赖实现/stub/契约 → 材料身份、依赖请求、可用与缺失范围 | [static_sources.py](../scar/analysis/static_sources.py)、[static_program.py](../scar/analysis/static_program.py) |
+| 2 识别与作用域/协议 | 版本化材料，经 CPython AST、符号表、编译布局 → 定义、occurrence、名称角色、调用/控制/异常协议 | [static_lexical.py](../scar/analysis/static_lexical.py)、[source_semantics_v2.py](../scar/analysis/source_semantics_v2.py)、[static_compilation.py](../scar/analysis/static_compilation.py) |
+| 3 局部类型化子图 | 已识别构造与协议 → 原 Operation/Use/Value/状态/资源、typed CFG/SSA 及各完成端口 | [static_body.py](../scar/analysis/static_body.py)、[program_lowering.py](../scar/analysis/program_lowering.py)、[structured_lowering.py](../scar/analysis/structured_lowering.py) |
+| 4 跨子图接线 | 原子图端口、来源路径及可选运行观察 → 实参/环境/字段/返回/异常/world 关系和实例绑定 | [program_dependencies.py](../scar/analysis/program_dependencies.py)、[static_calls.py](../scar/analysis/static_calls.py)、[observed_call_bindings.py](../scar/analysis/observed_call_bindings.py) |
+| 5 条件固定点推理 | 第3/4层原关系、路径条件与效果前提 → 常量、类型、shape/dtype、身份/版本等属性及未定字段 | [program_value_analysis.py](../scar/analysis/program_value_analysis.py)、[static_namespace.py](../scar/analysis/static_namespace.py) |
+| 6 发布与覆盖审计 | 原分片、ID 引用、关系和前沿 → 统一可查询图及明确覆盖范围 | [static_program.py](../scar/analysis/static_program.py)、[program_dependency_session.py](../scar/analysis/program_dependency_session.py)、[static_query.py](../scar/analysis/static_query.py) |
 
-源码层、规范程序图和分析事实是不同职责的视图/记录，通过明确 ID 对应，不能各自重建互相矛盾的 producer/state 图。
+第5层的新事实回馈相关识别/接线任务，不重新扫描或复制无关主体。
+先定位第一处缺失的是材料、识别、降低、连接还是推理，再修改对应 owner。
+未支持的语法、缺实现、预算截断和实际运行字段未绑定分别记录，不能统一解释为动态未知。
 
-## 冻结的实现
+## 共享子图与可组合接口
 
-`scar/trace/`、运行证据图、旧 candidate/planner/backends 当前不开发、不调用，也不作为静态完成前置。当前仍被 CLI、规范模型或兼容接口引用的实现不能仅凭文件名批量删除；删除需先查清依赖。
-历史 gate 配置、实验脚本副本、旧报告和额外 worktree 已清除。通用 `scripts/run_gate.py` 仍被已有工具导入，因此保留其有效代码，而不保留失效的 gate 清单。
+源码 AST/CST 是识别输入；执行依赖由可共享、可成环的规范图表示。
+模块、函数、类体使用各自的原主体身份；未建主体保留缺口。
+分支、循环和异常保留控制结构、合流及适用出口。
+每个定义主体保存一份，调用与循环迭代引用它，不复制函数或按迭代展开节点。
+循环视图引用原成员、header 参数、初始边和回边；它不另造一份 CFG。
 
-## 静态入口的关键改动
+接口必须保留输入、环境、正常/异常等完成的 payload 与前后状态。
+数据返回、引用返回和状态返回分别连接；引用相同不证明可变内容不变。
+每条关系携带原 namespace/typed ID、上下文、条件与证据；缺边不证明无依赖。
+字段可以是已知、符号值、候选或 UNKNOWN；一个字段未知不能抹掉整个节点。
+区域 cut 只描述输入、消费者、状态、效果与资源，不授权替换区域。
 
-`prepare_source_text` 已不需要目标执行。现有 source-entry worklist 的 CapturedCode/CodeWitness 入选规则属于运行对应路径，不应被新静态目录继承。
-静态定义来自源码及显式上下文；纯源码可推导的编译结构直接记录，实际加载身份留空。
-现有受支持语言 lowerer 优先复用；要求真实代码对象身份的路径必须拆出源码规则，不能靠伪造运行见证通过。
+## 静态模板与动态实例
 
-## 当前缺口
+静态侧建立子图和可组合端口；动态侧观察实际选择，再对应到原端口。
+运行绑定必须限定 run scope、process/thread、InvocationKey、attempt 及事件锚点。
+静态 context 是接口选择；None、闭合栈和 Open 后缀有不同含义，均不是 Invocation。
+同一调用点的不同 attempt、同一函数的不同激活不能因共用模板而合并。
 
-整程序纯源码目录和逐文件源码图已接通，词法作用域与 import 候选索引可查询；已有首批跨主体条件端口连接。完整语言展开、跨过程目标闭包、抽象堆/别名、自动效果摘要、联合不动点、Tensor 属性/关系传播和完整静态导出尚未贯通。已有局部验证不代表这些能力完成。
+[call_operands.py](../scar/trace/call_operands.py) 复用 CALL 事件采集；
+[python_call_targets.py](../scar/trace/python_call_targets.py) 记录实际 callable，
+[code_snapshot.py](../scar/trace/code_snapshot.py) 提供完整代码身份及指令位置。
+采集仅保存必要原事实；静态对应、接口建图和推理在离线侧完成。
+代码对应核源码版本、完整 CodeID、编译路径和原位置；名称或行号只用于筛选。
+实际类对象的调用证据不证明它来自某条类声明；创建来源须另有证据。
+一次观察只限定该运行事实，未覆盖路径与未知状态继续保留。
 
-## 当前静态命令实现
+## 分片存储与统一读取
 
-`scar static` 走 `static_program.main`，不进入历史 capture 工作流。
-`static_sources` 管源材料，`static_lexical` 管原 AST/symtable 目录；源材料和目录不是第二套程序图。
-`static_program` 按文件复用原 frontend/source-semantics/CFG，四进程可并行；`static_imports` 连接原 source/unit/initializer 候选；`static_query` 读取原记录。
-源文件文本保存一次，分片附 stored/decoded SHA。细化通过同一 current 目录发布，复用未变化图，不创建历史副本。
-当前 import 索引尚未解析缺少的外部库源码和导出绑定，源码图中的协议缺口也未消除，不能作为全程序 ModRef 或内容等价证明。
+artifacts/current/static/ 是唯一当前程序模型；源码/主体/关系按分片保存。
+每片附 stored/decoded SHA 与原 ID 引用，跨片引用不复制原图。
+共同 reader 共享有界缓存、校核原收据；原输入稳定期间复用解码结果。
+增补缺失主体保持已有主体和关系原样；旧关系仍只覆盖其原输入范围。
+artifacts/current/queries/ 保存派生查询证据，不是第二份权威程序。
 
-`static_compilation` 是不执行目标的编译布局来源，`static_rules` 从原AST选择已有规则及前提；`static_body` 复用原源片增量构造canonical子图。静态编译与捕获见证是有标签的独立来源，语言overlay的普通validator仍校验对应接口和协议，不把编译器布局当成运行身份或纯性。
+## 当前接通范围与下一项
+
+已具备源码层、局部规范图、共同依赖查询、部分条件属性推理和循环边界查询。
+已保存两条真实 CEM 函数观测接口；当前仍是独立报告，尚未作为实例限定关系接入共同图。
+对应离线 owner 是 [observed_function_interfaces.py](../scar/analysis/observed_function_interfaces.py)。
+选中 CEM 循环的边界查询已在原预算内完成；这不证明状态、效果、资源或整个程序闭合。
+
+下一项先将上述观测接口接入共同图的显式实例端口查询，再补循环迭代/状态和其它缺接口。
+不得把裸 context=None 的观测边注册为全局事实，也不得丢弃未执行的异常路径。
+Python→native/runtime/kernel、Tensor 属性、alias/effects 与资源连接仍需按实际缺口补齐。
+第一阶段只有在实体、结构、连接、属性和覆盖均经核查后才完成。

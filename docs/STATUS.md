@@ -1,258 +1,62 @@
 # 当前状态
 
-当前任务是程序建模与动静态协同建图。**第一阶段未完成**；静态入口不执行目标，用户现已授权显式动态采集以补充实际实例与连接。不做化简、detector/backend 或性能实验。唯一 checkout 为 `~/AAA/scar`，分支 `main`。LeWM 是外部 testcase，通用规则不按业务名称派发。
+**第一阶段未完成：仅做程序建模与动静协同建图，不做化简或目标变换。**
+当前步骤按 [六层流程](ARCHITECTURE.md) 执行，LeWM 仅是外部 testcase。
 
-## 核心结构与真正的问题
+## 已有能力
 
-主表示是层次化、有类型、有端口、带状态版本的程序依赖图。Operation、Value、StateLocation、Region、Resource 是实体主干，Use、绑定、状态地址、completion、控制和环境接口为强类型记录；不是五种互斥的源码标签。AST/CST 是输入，包含树只组织定义；数据、状态、调用和控制边可以跨层、共享和成环。
+- 版本化源码、AST/符号表、协议识别、规范 CFG/SSA/状态及分片存储。
+- 共享函数主体、循环构件展开、初始/回边/world 端口和词法嵌套，不复制调用或迭代。
+- 统一跨分片依赖查询、条件调用/环境/导入/class 关系、有限值推理及区域边界查询。
+- 按需 CALL 采集、原代码身份对应、观测参数/返回接口，以及缺主体自动增补。
 
-`ProgramDependencyGraph` 以原 namespace、typed ID 和静态 context 统一局部、call/env/G、class/provider、控制与资源导航。共享主体不复制，静态 context 不冒充 Invocation。值队列与区域 cut 已实际消费该接口。
+## 当前权威图
 
-**目前主要缺口是识别事实向规范接口的降低、关系覆盖和联合推理。** 全范围 calls 已发布，但大部分真实调用仍没有接通目标；module/class 主体后缀、receiver 来源、状态/alias/effects、Tensor 属性及 Python→native 仍不完整。不能用枚举完成或节点总数宣称整程序贯通。
-
-## 当前唯一已发布图
-
-`artifacts/current/static/manifest.json` SHA-256：
+`artifacts/current/static/manifest.json` 的 SHA-256：
 `026a200526cc34964e39c61075a5a8fc73e0e9e491f32c7ad1543cff1d3a8158`。
 
-| 项目 | 当前结果 |
+| 范围 | 数量 |
 |---|---:|
-| 源码/声明单位 | 862 |
-| 原始源码 | 12,447,536 bytes |
-| AST occurrence / 词法入口及上下文 | 1,493,620 / 36,164 |
-| 源码操作 / 关系 | 835,725 / 3,738,042 |
-| CFG 节点 / 边 | 478,899 / 569,425 |
-| 有限常量事实 | 124,535 |
-| 有规范图的入口 / 所有主体产物 | 8,092 / 8,822 |
+| 源码单位 / 词法入口 | 862 / 36,164 |
+| 有规范图的入口 / 主体产物 | 8,092 / 8,822 |
 | 无主体产物声明 | 27,342 |
 | 规范操作 | 1,262,939 |
-| lowerer / shape 不支持 | 326 / 420 |
-| 缺独立适配 / 尚未派工入口 | 3,925 / 23,401 |
-| 模块 / class suite 未展开后缀 | 107 / 45 |
-| calls 分片 / 已枚举规范调用 | 6,697 / 35,747 |
-| 有条件目标候选的调用 / 无目标候选调用 | 270 / 35,477 |
-| class bindings / parent shards / 共享 provider | 1,065 / 400 / 15 |
-| manifest / 全部压缩分片 | 59,008,279 / 2,440,159,572 bytes |
-| 压缩分片数 | 21,631 |
-
-本轮仅补缺失主体，source graphs 重建数为 0。旧 CALL/class 索引完整保留，表中其覆盖仍是原 `18aab515...` basis，未包含新主体；不能当作新全范围链接。`body_expansion.relationship_coverage` 显式标注 `PRIOR_BODY_BASIS_ONLY`。
-
-源码/主体覆盖没有因发布 calls 而自动扩大。3,925 个适配项含父图已内联部分，不能全部当作缺独立 frame；另有16个无主体产物的 shape 项，包含在420中。当前 source-only Python 单位 264 个，stub 17 个；按需依赖闭包仍未完成。补建所涉及单位的未派工项已按当前规则重新分类，不能把状态重分类当作主体已生成。
-
-### 调用发布已经结束，范围内枚举不等于目标解析完成
-
-任务 `22e44842ba63409b97867674ac6da292` 于 2026-11-02 21:42:25 UTC 终态 **PUBLISHED**，约 6,446.07 秒。处理 862/862 units、8,819/8,819 主体条目，其中 8,089 有规范图、730 无图，剩余条目 0。producer/current 已解除本次发布冻结，没有遗留此任务的运行进程。
-
-- 发布 317 条 argument port edges、412 条 argument value flows、343 条 return flows、676 条 completion routes。
-- 193 条 cross-body namespace flows、184 条 import routes、8 条 module attribute flows；**module globals flows 为 0**。
-- 596 份零 CALL 主体仍保存其它关系，不能只分析有 CALL 的主体。
-- receiver 未连接 41,398 项，SOURCE_BINDING_OPEN 11,916 项；所有 35,747 个 CALL 的目标集闭合仍 open。计数覆盖多种关系，不应直接相加作为调用分母。
-- **Observed**：CEM `solve` 已枚举 48 个 CALL，当前均无已连接目标候选；其它已检查 CEM 方法也未接通候选。因此尚不能沿实际规划/model 链获得完整依赖闭包。
-
-本次读入按 stored+decoded 计费 19,793,911,750 bytes；module 派生索引 8,203 builds、624,606 hits、8,203 metadata reuses，0 oversize rejects。前次 64 MB 缓存反复淘汰 65,027,047-byte 主体的错误已修；前次取消原因和本次终态可由当前 task/result 记录核对。这里的时间是分析器成本，不是 LeWM 性能。
-
-`complete=true` 只表示保存的 canonical 分母已枚举；`whole_program_model_complete=false`、target resolution/source attribute scope 未闭合。manifest 根 `worker_errors` 当前为空，源码记录中仍保留 37 条早期 BrokenProcessPool 文本，不能说历史记录已消除或当成本轮新失败。
-
-## 本轮已实现并核验
-
-### 共同查询不再因全局重放漏掉已知接口
-
-**Observed / Implemented / Verified**：原默认 outgoing 为查一个 actual Use，会重放全部 typed call shards，耗尽预算后漏掉已有参数边。现改为有界、核收据的 raw namespace→原 shard 路由，仅对命中 shard 严格重放；先投影已知本地关系，后续预算不能抹掉它们。raw 路由完整只证明保存记录的检索范围，不证明 target、alias 或效果闭合。
-
-真实 `cli.py:179`→`data/utils.py` 的原 actual/formal 已双向核对，静态 frame 深度 1，保留 `ALIAS_TARGETS_OPEN`。原 outgoing 73.39 秒返回 0 参数边；修复后 agent 冷查约 29.01 秒，raw 路由 6,697 shards / 7,123 references，仅 typed 1 shard / 2 graphs。机器记录为 `queries/lewm-call-interface-outgoing.json` 和 `queries/lewm-call-interface-incoming.json`；这是接口查询，不是 CEM 闭包或目标加速。
-
-Root 独立双向读回 29.93 秒，1 条参数边、2 个 namespace，raw 路由完整，双向合计 typed 2 shards / 2 graphs、387,120,180 bytes 输入；目标未执行。针对调用路由、原值分析和字面 If 的合并检查通过；区域旧检查把所有证据边误要求为空，已改为核对结构边不传递值/身份，并独立通过。没有扩成全量长测试。
-
-### 控制必要性接入同一值队列
-
-**Implemented / Verified**：从原 Use owner、result producer 或 block argument 追踪原入口 edge-dominance 必要条件，沿最近 controller 递归；与 MAY postdom 控制影响分开。稳定的分支/绑定证明可反证值路由，并从原 seeds 重算，原图与异常/效果边保留。报告新增 occurrence、infeasibility 和 route_refutations，不把结构证据当作值相等。
-
-同一批通用真实源码查询推得唯一不可变 tuple `(7,99,5)`；最新 15-root 机器记录为 135 points、281 edges、1,039 steps、2 branch proofs、5 binding proofs、6 route refutations。新增默认 factory 来源的开放前沿单列；未知/custom 区域没有污染独立已知字段。原 core 同步 region 的两层上下文、未知/循环/部分接口与预算边界已核验；**保存的 Python candidate frame 入口范围仍 open**，不能说全部跨函数控制已闭合。验证源码未执行。
-
-当前 `queries/binding-knowledge/` 的源码、小模型与 proofs 收据一致。最新 schema4 仅重查询约 3.114 秒，context 显式保存 `unknown_prefix`，condition 保留 operands；原建模 1.96 秒未重测，单列旧测量。查询处理 2 graphs / 0 shards，输入计费 1,919,427 bytes；工作队列稳定与查询范围未闭合分别报告。源码、模型全部 14 个文件和主 current/static 均未改变。此目录只是通用规则核验，不是 LeWM 或另一份权威程序。
-
-已有独立 binding state field、normal/raise slot0 隔离和原 TRUTH 合同推理继续保留；worklist 稳定与原查询覆盖完整分别报告。源码常量只来自静态 builtin literal/原编译常量表，不保存 Tensor 内容，不执行用户协议。
-
-### 函数创建来源与条件身份
-
-**Implemented / Verified（默认 Session 自动发现，尚未发布独立 origin 索引）**：`StaticFactoryEntryOrigin`、独立源码/编译重放与共同图 provider 现在由默认 Session 按需接入。不依赖已识别 caller CALL，也无需调用者提供 factory、SourceDefinitionReference 或 origin 列表，就可表示原 FUNCTION_OBJECT/G 捕获到原 body 环境端口。不映射 entry world、B、defaults 或 namespace 内容。
-
-源码 hash、原 child slot/path/layout、词法 source 和两个原接口联合核对；捕获 G 还须等于原 module/class/nested ABI 的 G，不只信 role 标签。class 的 operand index1 与 module/nested 的 role index0 分别校验。已确定的编译槽对应进入 evidence，不挂成未知运行条件；入口来源、factory 正常完成和入口当前 code 匹配仍是条件。
-
-审查还修复了条件键碰撞：`DependencyCondition.operands` 保留关系的其它 qualified 端点，entry callable 与不同 factory 不能共享同一个条件键。只懂一元签名的证明规则遇额外参数保持 open；empty origins 不能宣称完整，无关 literal 不产生假 factory 前沿。当前 walk/value/boundary 导出版本为 **3/4/3**，context 显式保存 `unknown_prefix`，原主图分片不改版本。
-
-原显式 API 的两图核验仍保存在 `queries/factory-entry-origins.json`，仅为该组件较早的输入/读回记录，不能当作默认自动流程。
-
-**Verified（真实 CEM 默认自动流程）**：默认 `session.graph()` 从 `solve` 的原 G formal 自动找到 class factory，并经 class suite→provider 的当前 G 读取→父级捕获 Use，连续 **6 条引用边**到达原 module G。没有手工构造 factory、定义引用、origin 列表或注入 provider。约 **32.76 秒**，9 个访问端点、8 条边、4 个 namespace/graph、4 个关系分片；只索引 **1 个 unit catalog、检查 1 个匹配 factory**，没有全局路由或扫描所有主体。输入计费 153,450,632 bytes；这是分析器成本，不是 LeWM 性能。
-
-代码和机器证据：`queries/factory-entry-origins-automatic.json` 保存默认查询、规范化连续路径、原输入收据与后读校核；旁边 task 终态 COMPLETE/exit0。source/main manifest 前后不变。创建侧保留 `None` fallback 和已核 Open 两帧后缀，沿 provider 退为一帧，再回到 module 的未知外层；没有把未知补成 `()`。新增 class 捕获桥使用 `CURRENT_FUNCTION_GLOBALS_EQUALS_FACTORY_CAPTURE`，绑定原 bodyfn、捕获 G、读取 world 和 G 结果，仍为 MAY/REFERENCE。**48 个原 CALL 的目标仍为 0，入口 namespace 内容、IMPORT_FROM 及完整 CEM 未完成**。
-
-通用静态案例同时覆盖无任何 call/class publication 的 module/nested/class 方法自动来源；增加 class publication 后才使用其原接口后缀追到 module G。原 canonical 分片 hash 不变；额外参数/开放前缀不授闭合证明，坏原定义引用拒绝，预算截断保已知边和具体原因。相关核验按修改范围运行，没有重跑长 fixture 或全范围 linker。
-
-### 真实 IMPORT_FROM 接入同一依赖图
-
-**Observed**：原端口早已存在，旧模块来源索引却只识别 `ast.Import`，因此 `ImportFrom`
-没有进入模块来源/reaching-binding 分析。另一个独立问题是 `_namespace_sources()`
-要求先有 CALL activation，`activate_target()` 又先要求目标，导致 G 绑定与调用解析互相等待。
-
-**Implemented / Verified**：v9 新增原请求/读取的 typed records，复用原 module flow 表；
-模块和函数中的绝对 FROM 经原 request → 返回模块 → namespace writer payload → FROM
-normal result 连接。fromlist 来自原 `CodeConstantSource`，独立重编译核 CodeRef、常量槽、
-成员 CFG 顺序及真实 receiver/key/world。非空 fromlist 返回完整模块；不伪造 Attribute，
-不按名字跳定义。旧 v8 仍按旧契约读回，递归支持路径不能夹带新请求/读取/条件。
-独立 reader、公共图 provider、v9 raw routing 和 producer 收据已接线；Attribute 与 FROM
-的接口/处理计数分别保存。class import 的专用编译适配尚未实现，明确留前沿，原端口保留。
-
-通用集成案例覆盖模块/函数、别名、多成员和完整包路径，约 19.02 秒；已有属性覆盖、
-初始化 L/G 状态和双向调用路由三项回归通过，约 142.78 秒。未运行目标，没有扩大全量测试。
-
-**Verified（真实源码）**：`cem.py:12` 的原 FROM 自动找到 `solver/utils.py` 的绑定及原
-函数创建，成功推导/独立重放约 **5.01 秒**；索引 2 个主体，输入计费 72,331,914 bytes，
-记录 6 个 FROM member，其中 2 个相对请求保留具体前沿。随后将这一条原关系保存成
-**局部、明确不完整的 v9 关系分片**，由公共 `ProgramDependencySession` 独立读回，
-得到 1 条 `STATE_VALUE/REFERENCE/MAY` 边，约 **7.18 秒**、2 graphs / 1 shard。
-typed neighborhood 再编码/读回相等。没有手工构造函数目标或依赖边。
-
-记录在 `queries/import-from/summary.json`、`relations.json`、`task.json`；后者 COMPLETE，
-公共图核验为 true。它们只引用原规范主体，不是另一份程序模型；唯一 current 主发布仍为
-v8、manifest SHA 不变，未重跑全范围 linker。查询脚本的行号/API 误用已纠正，以上成本
-仅计成功分析和独立读回，不能当作目标运行性能。
-
-**本节当时尚未完成**：入口时刻的 namespace projection 及调用求解器消费；本轮进展见下。
-相对 package 来源、class import adapter、hook/fallback/跨主体覆盖仍有欠账。缓存/动态属性等保持条件，
-`enumerated=false`。没有重新计算或发布 CEM CALL targets，原 48 个调用仍为 0 个目标。
-这次接通绝对导入，不代表完整 CEM 或第一阶段完成。
-
-### 入口状态和调用接口已由共同图实际消费
-
-**Implemented / Verified**：默认 Session 增加不依赖 CALL activation 的
-`EntryNamespaceProjection`。原 G 引用路径、函数 entry→read 的存活路径与模块
-writer→normal snapshot 的 reaching binding 分开验证；snapshot/entry worlds 不合并。
-L/G 只有独立的有条件 alias 分支，没有假定标准 import。函数内覆盖会 kill 旧 entry
-来源；默认图同时保留新的同体 namespace writer→read，module/class 零 CALL 读也适用。
-通用整例约 7.15 秒，含 codec、fresh 重放及原分片不变校核。
-
-真实 `solve` 的原全局 read 已自动得到 **1 个投影 / 1 条公共 STATE_VALUE 边**，
-owner 路径 6 边；21 个条件、7 份证据，仍为 MAY。None/Open 上下文与初始化/入口
-world 分开。推导、typed 读回与公共边独立再对齐约 **79.85 秒**，4 graphs / 4 shards，
-输入 153,450,632 bytes。记录在 `queries/entry-namespace/`，任务 COMPLETE/exit0，
-原源码及 manifest SHA 不变；不代表所有 entry binding 已闭合。
-
-新的 contextual 调用消费者沿共同图的引用/绑定字段边到真实 factory，生成独立的
-`StaticCallInterface` 与 `ContextualCallTarget`。caller 与 factory context 各自保留，
-真实 CALL push/pop 生成参数和正常 reference 返回边；所有来源条件继承，未知外层
-保留 Open，不进入旧闭合 activation。共享 facade 的 graph/index/document 与 owner
-原对象相同；不读旧 CALL publication，module 索引另列保留预算。无匹配 caller 的
-formal/return 保留开放前沿，递归已知后缀受深度预算限制。通用闭环、篡改拒绝及原
-CALL 路由兼容两项合并核验约 18.74 秒通过，没有重跑全量测试。
-
-**Verified（实际通用 CLI）**：`scar static-calls` 对 `cem.py:134` 原 CALL，自动经
-entry read→模块导入写入→工具模块 factory 找到 **1 个条件目标**，建立 **6 条
-ARGUMENT / 5 条正常 reference COMPLETION 边**，约 **45.74 秒**。源路径 5 边、
-38 个条件全部继承到接口边，caller/factory 均保留未知前缀，callee 为 Open context。
-结果 typed 解码、接口边重算精确相等，所有边为 MAY。输入计费 241,802,513 bytes，
-共享 4 个主体，只读 1 个 class 关系分片。任务 `COMPLETED_WITH_FRONTIERS`，记录在
-`queries/contextual-call/`；没有执行目标、重算其它 47 个 CALL 或更新主发布。
-
-**边界**：这是选中 CALL 的条件源码关系，当前字典内容、函数可变字段、其它目标和
-effects 仍未闭合。旧全量 v8 索引的 48/0 统计保持历史发布原值；新查询不能直接覆盖
-它。legacy 全范围队列尚未迁移到 contextual 域，完整 SCC/receiver/descriptor/defaults
-与 shape/资源连接继续欠账，第一阶段仍未完成。
-
-派生调用记录现为规范化 v2：复用原 namespace/context/point/condition/evidence/edge
-表，每条仍引用原 ID，不复制 ProgramGraph。已用上述真实结果离线转换并强类型读回，
-resolution 与 11 条派生边逐对象相等；decoded **17,560,258→128,382 bytes**，gzip
-**664,538→23,264 bytes**。v1 raw 兼容读回，bool 索引与错误 node type 拒绝；这只是
-记录完整性，不替代基于原输入的 fresh 来源验证。转换没有重跑 LeWM 或分析查询，
-原报告与 chunk 收据已同步，唯一当前记录保留 v2。
-
-### 先定位再改：Attribute 前端分层审计
-
-按用户最新要求暂停新增规则，先核对识别、降低、连接、推理的具体职责。保存的 48
-CALL 形式分类中，local/produced-object attribute 有 22 个、global/builtin 10 个、
-imported-module attribute 7 个；这只是导航分类，不能据此声称同组全部缺同一规则。
-
-**Observed / Verified**：在原 `solve` 图上只读审查 144/145/166/210 四个点，AST/SG
-及 `derive_attribute_accesses` 都已识别 field/receiver，typed access 的 result 与原 callee
-Value 4/4 一致。原 producer 为 EXPRESSION，protocol/refinement 均为空、effects 未闭合，
-只保 coarse world 和 normal/raise。第一处已证缺口在降低后的 lookup/state 接口，
-不属于 AST 未识别；也不能直接归咎动态 Tensor 类型。原 graph/source/Use/world 收据
-与阶段归属存 `queries/attribute-front-end-audit.json`，约 20.10 秒，未运行 resolver/目标、
-未修改源码或图。结论不扩大到未查的其它点。
-
-receiver 审计也已完成，见 `queries/receiver-source-audit.json`：mean/var 经原 binding→
-同一个 UNPACK_FIXED 的 component0/1→144 CALL NORMAL0；v_batch 经 slice、binding、
-unpack、iterator item→162 items CALL NORMAL0，并能追到原 info_dict formal。相关端口
-和本地绑定已经存在，普通 operand/result 依赖不能当对象身份。此处欠的是 product/
-iterator/slice 抽象事实转移与真实 caller 输入条件；self/info_dict 的未知来源不能靠
-词法类名或注解补成确定对象。该审计无 resolver/目标/建图/代码改动。
-
-**Implemented / Verified**：typed lookup 接口已保留原 selector/receiver/world 与正常/异常端口；
-固定解包的逐成员来源、独立 receiver 查询、类语句最终产物来源和条件构造协议已接入共同图。
-本轮进一步接通共享 receiver 路径→原 import→模块 RETURN snapshot 的字段绑定→当前读取，
-相对 FROM 的原 spelling/level/fromlist 不变，绝对模块名只作为有声明证据的 package 候选。
-snapshot 的绑定不是当前值证明；所有关系保留调用上下文、world、已知写入、lookup/hooks 和状态保持条件。
-
-通用静态案例通过（1 case，5.68 秒）；真实 `eval.py:93` 从此前 0 个类来源，得到 **2 条条件路径**，
-都指向 `policy.py:18` 同一类声明的装饰后最终产物，不是两个不同类。对应 2 个条件构造协议、
-40 条接口边，分析与序列化 **119.03 秒**；3 份查询产物合计 gzip **56,738 bytes**，
-规范调用记录强类型读回相等，输入收据稳定。结果在 `queries/contextual-module-type-call/summary.json`。
-目标未执行，主发布及旧全量计数未更新。runtime class/metaclass 选择、构造 slot 的 Python 回调、
-descriptor/隐式 receiver、effects 及其它主体仍未贯通；**第一阶段未完成**。
-
-### 源码覆盖：编译器已消去的字面 bool If
-
-**Implemented / Verified，尚未重建 current 主体**：模块 `if True/False` 通过原源码与独立重编译 CFG 见证展开；保留两臂源码，仅为选中臂建立执行结构，不制造 TRUTH/BRANCH。死分支仍影响的 compiler annotation factory/cell/prelude/global scope 不丢弃。旧保守 wire 独立读回，不静默升级覆盖。
-
-**Implemented / Verified（真实源码定点重建，未替换 current）**：module 的简单名称 AnnAssign 已接默认 lazy registration 与 future 字符串模式，保留原 RHS→store→lookup→set/subscript 更新、world 和正常/异常清理；注解表达式不执行。整数索引/字符串来自原编译器槽，不按已展开语句重编号；隐式操作仍引用原 AnnAssign，不伪造 AST。只接精确 BUILD_MAP0 空 dict RHS，其它 Dict/复杂目标维持原边界。
-
-真实 `envs/utils.py` 前缀 7→15/15、语句残留 8→0（321 ops）；`callbacks/registry.py` 前缀 6→15/15、残留 9→0（425 ops）。构建与独立读回约 16.28/10.51 秒，原图与模块接口逐对象相等。唯一扩展短验通过 13.00 秒，Root 原 class/compiler/import 回归通过 7.47 秒。旧 wire 没有新见证时仍重放旧覆盖，没有静默升级。
-
-原 source/producer 收据、两个压缩样本及未闭合项在 `queries/module-annotation/summary.json`。两模块仍 PARTIAL：生成的延迟注解子主体和 namespace/alias/effects 未闭合。current 主体尚未替换，107/45 后缀分母不变；class annotation 协议仍待补。这项覆盖修复不解决 CEM 的入口 namespace 状态与调用解析问题。
-
-### 库/原生材料：输入层完成一部分，整程序连接未完成
-
-**Implemented / Verified**：隔离复用 torchgen schema parser，6 个实际 ATen overload 构造现有 NativeBoundary 接口，共 18 ops；版本/文件/工具收据、正常/异常与 opaque world 保留。原 schema alias/write/dispatch 不冒充 must-alias、物理 copy 或已选 kernel。
-
-C++ source 前端复用 Tree-sitter，实际 53,705-byte template 中机械枚举 79 个显式方法项、83 个函数、563 个调用、5,661 个相关 occurrence / 12,576 条 SOURCE/STRUCTURE 边；保留 4 个模板孔、6 个 ERROR。原 ID 表规范化保存约 2.98 MB JSON / 0.383 MB gzip，读回相等。私有工具环境约 19 MiB，未修改 LeWM 环境。
-
-这些材料和验证在 `queries/native-static-model/`；**尚未发布进 current canonical 整程序，Python callable→参数转换→native overload 与具体 runtime/kernel/resource 连接未完成**。CST 是源码输入层，不冒充 C++ 类型/ABI 证明。
-
-## 动静态协同：共享子图与实际调用绑定
-
-**Implemented / Verified**：复用已有 lean CALL 监控、weak token/生命周期 epoch、DRAM snapshot 缓冲与离线转换，新增实际 `TYPE_OBJECT` 分类和 `observed-calls` 离线连接。分类不读取用户 `__class__` 或调用元类 getter。连接核原 body CodeRef、完整代码描述、offset/opcode/span、原 CALL 与 callee Use，不按类名或行号单独配对；定义子图不复制，run/process/thread/invocation/attempt 单独限定运行观察。
-
-单个通用集成案例通过（7.89 秒）。持久案例 `queries/observed-call-demo/result.json` 中，同一个静态 `cls(3)` CALL/callee Use 对应两个不同实际类对象和调用实例；共 4 条绑定（另含 2 条函数调用），规范化产物强类型读回通过。静态构建 2.58 秒、启动至采集/转换完成 3.54 秒、离线 CLI 连接 1.69 秒；采集目录 60,362 bytes，绑定 gzip 2,693 bytes。这是小案例的工具成本，未测真实应用采集开销或加速比；现有 frame profile hooks 仍在使用，不能称零干扰或只有 CALL 回调。
-
-**Implemented / Verified（真实 LeWM 路径）**：新 plan 支持 `CALL_KW` 的实际 callable/entry 观测，`CALL_FUNCTION_EX` 等仍明确 unsupported。离线连接复用原 `StaticCallInterface`，每条记录限定真实 caller/callee activation；完全提供的位置/普通关键字参数可接原参数、状态入口、completion 和实际正常返回，不把实例关系灌成全局 None-context 无条件边。新增 `function-interfaces.json.gz` 及强类型读回。
-
-未修改的 LeWM CEM 在 RTX 4090 上运行 2 轮、每轮 4 个候选，使用外部 testcase 的人工 quadratic cost，输出形状 `[1,2,2]`，不是训练模型或完整 episode。81 次观测中 59 次接原 CALL；`cem.py:134` 的 `CALL_KW` 接实际 `solver/utils.py` 函数入口、6 个参数、3 条 completion payload 路由及实际正常返回。采集目录 **286,403 bytes**，两份连接 gzip 共 **33,290 bytes**；原收据稳定、产物收据和强类型读回通过。唯一通用集成用例通过（8.26 秒）。
-
-证据在 `queries/lewm-observed-calls/result.json`。采集含启动/导入/转换 **49.28 秒**，离线连接 **33.57 秒**；未采集的单次正确性 probe 含启动/导入 **7.90 秒**。这不是重复 overhead benchmark，不能宣称低干扰；当前 frame profile hooks 仍使启动导入昂贵。历史数据/权重路径当前不存在，未运行 episode。主发布及原静态覆盖分母未改。
-
-**边界**：实际类对象身份不等于源码类声明来源；类构造回调、隐式 receiver/default/variadic、完整对象/Tensor 状态和 GPU/kernel 连接仍缺。22 次未绑定 CALL 分别保留源单位未提供或原 CALL 不唯一等理由；部分已观测函数缺规范主体。通用案例还定位到模块 `Assert` 未展开后缀，该欠账没有通过删语句或造端口掩盖。
-
-## 下一步，按实际依赖缺口推进
-
-**Implemented / Verified**：`observed-calls --expand-missing` 已自动将原 trace 的完整代码身份对应到原 lexical occurrence/唯一 compiler path，补建 `json.dumps`、`typing._ProtocolMeta.__instancecheck__`、`torch.is_tensor` 共3个主体。原21,619份 artifact 的 inode/size/mtime 保持；已有主体、CALL/class publication 不变。新增主体可由公共 reader 查询，旧调用参数边和类绑定已各 fresh 读回1项。精确旧 provider 缺 attribute_lookups 时保留 NOT_RECORDED，未更改其文件或宽松化通用 codec。
-
-同一 LeWM trace 离线重连后，函数接口 **1→2**、参数端口 **6→7**、实际正常返回 **1→2**，新接通 `cem.py:164`→`torch.is_tensor`。观测数/原 CALL 绑定仍为81/59，没有重跑采集。自动展开约84.36秒，展开＋重连总计121.71秒；这是工具成本。证据在 `queries/lewm-observed-calls/expand-and-join.json`、`expanded-bindings-expansion/` 与 `incremental-public-readback.json`。
-
-**Implemented / Verified（循环接口）**：真实 `solve` 仍只有1个Region、7个循环模板；`loop_views()` 公开初始与回边映射，每个header为29个绑定槽＋1个world槽，词法嵌套和强类型读回通过。未展开运行迭代，未证明内容不变；当前只是精确接口视图，成员/出口闭包与动态迭代坐标仍待完成，见同一目录 `loop-views.json`。
-
-**Implemented / Verified（源码循环构件展开）**：新增 `loop_constructs()` 和 `LoopConstructView.expand()`，从原 metadata 机械选择同函数中的操作；直接成员排除嵌套循环，内部 phi/world 参数引用原 ID。不复制主体，不永久展开迭代。通用静态案例通过（7.45秒），覆盖混合基本块、嵌套、continue/break、提前 RETURN/RAISE、回边内部端口和原来源保持；没有执行被分析函数。
-
-真实原 CEM 的7个循环分别引用28/208/30/57/492/879/55个操作；其中5个需要在同一基本块内区分循环与外部操作。189行的构件保留121个异常终止，不用 SCC 丢掉不回到 header 的路径。加载、展开、序列化及强类型读回共 **21.87秒**，gzip视图 **176,091 bytes**；仍只有原1个Region/1,282个操作，主manifest不变。证据在 `queries/lewm-observed-calls/loop-construct-result.json` 和 `loop-constructs.json.gz`。这里只验证原记录成员，不证明完整控制/效果范围或内容不变。
-
-**未完成**：真实 CEM `loop_boundary()` 在180秒预算内未完成。单独45秒 cProfile 在会话初始化和首主体解码阶段耗尽，尚未进入 cut，不能据此把逐成员查询认定为实测热点。已定位同一 core 的重复验证、metadata重复解码及两次 publication 的全表 basis 核验；先在同一输入/收据所有者内消重，再测实际切边。诊断在同目录 `loop-boundary-analysis-profile.{json,txt,pstats}`，只分析 SCAR 自身，未重跑目标。通用边界能处理内部 block arguments，不等于真实完整查询已通过。
-
-下一步优先完成公共可组合边界查询，再接通跨迭代状态、效果与出口，补 receiver/default 等接口；类最终产物来源单独补证。只补所需字段，不采 Tensor 数值或启用整套目标 profiler。静态已知连接保留，未执行路径仍按静态条件表示；动态观察不能删除其它合法候选。以下整程序静态覆盖欠账继续有效。
-
-1. 默认 factory-origin、入口状态投影、contextual 调用接口和模块 receiver 桥接已在选中真实 CALL 接通；下一步沿已识别类产物核对 slot 的 Python 回调、descriptor/隐式 receiver，仍按 **原 48 个 CALL 的第一处断边**归因。相对导入仅补了有声明 package 的模块候选；class FROM 编译适配、函数字段/defaults、循环与递归摘要仍欠账。保留条件/未知前缀，不能退回名字提示填目标。origin 和 contextual 关系的全范围发布仍待完成；旧发布计数不能冒充最新闭包。
-   CEM 模块与工具模块均已完整展开；不能误归因为主体后缀。创建 G 的引用不证明入口内容；不制造 CALL，不复用 creation world，不由局部 1 个目标推定全部 48 个已经解决。原分类与收据在 `queries/lewm-call-gaps.json`。
-2. module AnnAssign 首个范围已定点核验；继续 class annotation、deferred child 及实际主体阻断，保留 lazy/future、namespace/world 和异常语义。发布主图时才更新其覆盖分母。
-3. 将原调用、逐地址 reaching writes、alias/effects、binding/容器与 Tensor 属性在共同固定点中反馈；把源码可推而缺规则与真正未绑定字段分开。
-4. 完成按需依赖材料和 Python/native 绑定、资源契约，覆盖加载→规划/推理→保存路径。CPU/GPU/DRAM/HBM/storage/stream 建模到可控制边界，不展开 OS FD 表或指令。
-5. 有关主体/关系改动再原子重建并公开读回完整范围。唯一主图仍为 `artifacts/current/static/`，queries 是带原收据的派生核验，不是第二份程序。
-
-验收看实体、关系、推理和覆盖四项同时成立。未达成则继续第一阶段，不以小样例或队列收敛替代整程序完成。完整计划见 [STATIC_ANALYSIS_PLAN](STATIC_ANALYSIS_PLAN.md)。
+| CALL 分片 / 已枚举调用 | 6,697 / 35,747 |
+| 有条件目标候选的调用 | 270 |
+| 压缩分片 / 总大小 | 21,631 / 2,440,159,572 bytes |
+
+旧 CALL/class 发布仍只覆盖原 basis；3个新增主体未重跑全量链接。
+`body_expansion.relationship_coverage=PRIOR_BODY_BASIS_ONLY`，不能用旧索引代表最新闭包。
+图规模、调用枚举结束都不证明完整建模。
+
+## 本轮实际核验
+
+选中原 CEM `solve` 的189行循环：492个操作、6,343个成员端点；30个内部回边端口、
+121个异常终止、231条输入、30条消费者边、469条状态记录、123条控制路由均保留。
+原180秒预算内完成，启动准备15.35秒、边界查询113.39秒，总计含导出129.63秒。
+这是一次 SCAR 工具耗时，不是 LeWM benchmark；所有预算前沿为0，但状态/效果/资源等仍未闭合。
+规范化导出281,209 bytes，JSON读回相等；主图和LeWM源码未改。
+证据：`artifacts/current/queries/lewm-observed-calls/loop-boundary-result.json`、
+`loop-boundary.json.gz`；7个循环的成员展开另见同目录 `loop-construct-result.json`。
+
+本轮消除重复core验证、metadata/namespace解码及factory输入重建，保留原收据、源码/compiler、
+namespace和关系核验。预算中断时不再丢弃已知边界，覆盖明确为PARTIAL。
+相关codec、输入复用、路由、factory、边界及循环用例通过；最后两项为2 passed / 8.99秒。
+
+已有真实 CEM probe 使用人工 quadratic cost、2轮×4候选、CUDA输出 `[1,2,2]`，
+不是训练模型或episode。保存81次观测、59条原CALL绑定、2条函数接口/7个参数端口；
+原采集286,403 bytes。本轮没有重跑采集、episode或目标性能实验，没有新的加速比结论。
+
+## 缺口与接下来的顺序
+
+1. **第4层动静接线**：2条观测函数接口目前仍是独立DTO，未进入共同图查询。
+   下一项用原静态端口＋run scope＋InvocationKey＋attempt/event anchor接线，重验原trace、
+   实际目标/入口/退出及源码端口；不注册裸context=None全局边，不猜loop迭代号。
+2. **主体及跨层关系**：补未展开构造/主体、receiver/default/variadic、类产物来源、
+   循环实例与携带状态、正常/异常/清理出口；动态未覆盖路径继续保留静态条件。
+3. **第5层联合推理**：接通逐地址状态、别名、效果、逻辑值provenance与Tensor属性反馈，
+   不把同对象/同Storage或SSA转发当作内容不变证明。
+4. **资源及整图覆盖**：补Python→native/runtime/kernel和CPU/GPU/DRAM/HBM/storage/stream
+   的可控制边界，覆盖加载→推理/规划→保存；不展开OS FD表或指令。
+
+验收必须同时覆盖实体、结构、跨层连接及字段/效果精度；不能用一次局部查询或某次运行代替整程序完成。

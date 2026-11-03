@@ -1,31 +1,58 @@
-# 开发约定
+# 开发与用法
 
-## 唯一工作目录
+使用现有 `conda activate lewm`，只在 `~/AAA/scar` 的 `main` 开发。
+不创建 worktree、日期版源码或历史实验副本；正常提交 Git，不 reset。
+不修改外部 LeWM、数据/权重、CUDA/driver 或整套环境。删除实现前先查引用。
 
-只在 `~/AAA/scar` 的 `main` 开发。协作任务按文件分工共享这一版本，不创建 worktree、日期版目录或第二份源码。
-正常使用 Git 提交；不 reset、不改写已有历史、不重新保存历史实验副本。只暂存明确修改的文件。
-废弃实现删除，不以旧版目录、备份文件或复制源码的方式存档；尚被当前入口依赖的模块先迁移引用，再删除。文件名带版本号不代表存在第二份开发版本，以实际依赖为准。
-不修改 `../le-wm`、外部数据/权重、CUDA/driver 或整个 conda 环境。
+## 建图入口
 
-## 当前执行边界
+```bash
+python -B -m scar.cli static /path/to/program --out /path/to/model --phase bodies --jobs 4
+python -B -m scar.cli static /path/to/program --out /path/to/model --expand --jobs 4
+python -B -m scar.cli static /path/to/program --out /path/to/model --link-calls --max-call-bodies 80
+```
 
-使用 `conda activate lewm`。静态命令仍不运行或导入目标，不通过执行配置、初始化或 hooks 推断结果。
-用户现已授权动静态协同：可以显式运行小型目标，复用已有按需 CALL 采集与离线连接；运行观察单独保存，不能覆盖静态事实或冒充所有路径证明。当前不启动 GPU profiler、全量逐行/指令探针或自动变换。采集器不得额外执行用户 `repr`、descriptor、装饰器或自定义算子来检查对象。
+`--phase sources/graph` 为材料目录/源码图，`--phase bodies` 继续构建规范主体；
+`--expand` 增量补主体。显式预算仅限本次工作，不缩小完整性分母。
+依赖材料可用 `--inventory-dependencies --dependency-root PATH` 定位，
+再用 `--expand-dependencies` 送回同一前端；这些命令均不执行目标。
 
-现有测试按需要维护；这一阶段不增加大批 gate、全量反复测试或以测试数量表示进展。优先报告实际源码范围、图连接与未决关系。
+## 动态采集及离线连接
 
-## 文档与结果
+```bash
+python -B -m scar.cli trace --calls-only \
+  --capture-plan /path/to/plan.json --capture-plan-sha256 PLAN_SHA256 \
+  --capture-transport snapshot --out /path/to/fresh-trace -- python /path/to/program.py
+python -B -m scar.cli observed-calls --model /path/to/model \
+  --trace /path/to/fresh-trace --out /path/to/fresh-bindings --expand-missing
+```
 
-[STATIC_ANALYSIS_PLAN](STATIC_ANALYSIS_PLAN.md) 是唯一任务队列，[STATUS](STATUS.md) 原地更新当前状态，不追加历史流水账。
-设计明确为 Proposed；代码存在为 Implemented；离线建图的具体事实才能写成已确认。不得把静态条件摘要写成运行观察或优化完成。
-生成输出只保留 `artifacts/current/static/` 当前结果，构造期间使用临时目录，完成后替换当前结果并清理临时目录；不保留历史结果目录。大图、原始数据和临时索引不提交 Git。
-文档相对链接必须可达，删除过时文档时同步收敛引用。
+采集计划由 `scar.trace.lean_capture.LeanCapturePlan` 对原源码/代码身份生成；具体接口以源码为准。
+采集不额外执行用户 repr、descriptor 或 hook 来探测对象，不保存每次 Tensor 的完整数值。
+优先复用已保存 trace；`observed-calls` 只离线连接，缺主体按完整代码身份请求原前端补建。
+采集仍含 frame profile hooks，不能宣称零干扰；性能测量与建图采集分开。
 
-## 实现原则
+## 共享图查询
 
-- 先定义实体、端口、关系、语言展开和组合规则，再实现对应 lowering/transfer。
-- 新事实引用现有规范 ID，不以名称或业务字符串选择规则。
-- 静态分析不得依赖真实调用、对象地址或捕获见证才创建源码定义。
-- 循环/递归使用参数化子图和不动点，不无限展开调用树。
-- 未知只影响依赖它的属性/关系；缺材料、未实现和保守未知分开。
-- 每项删除先检查真实引用；当前仍被依赖的兼容代码逐步迁移，不盲删。
+```python
+from scar.analysis.program_dependency_session import ProgramDependencySession
+
+with ProgramDependencySession('/path/to/model') as session:
+    ns, = session.select_bodies(file='program.py', entry='function_name', kind='FUNCTION')
+    body = session.load(ns)                 # 原共享函数图及 index
+    loops = session.loop_constructs(ns)     # 原成员 ID、嵌套、初始/回边端口
+    if loops:
+        operations = loops[0].expand(session.graph())
+        boundary = session.loop_boundary(ns, loops[0])
+```
+
+不存在的 structured/主体信息保留准确缺口，不当成空子图。`ProgramDependencyBudget`
+控制时间、输入、缓存和关系读取；边界查询完成仍须检查前沿和字段覆盖。
+CLI 的 `static-query --program-graph` 使用原 typed ID，不按名称制造依赖。
+
+## 维护
+
+当前任务及验收结果只更新 [STATUS](STATUS.md)，结构变化更新 [MODEL](MODEL.md) 或
+[ARCHITECTURE](ARCHITECTURE.md)；不新增专题、版本或 gate 文档。
+先定位缺失的识别事实、端口、连接或推理规则，再修改负责层；只运行相关检查。
+生成图仅发布到 `artifacts/current/static/`，查询只引用原 ID/收据，不另建权威程序。

@@ -1,341 +1,108 @@
-# 程序模型
+# SCAR 程序模型
 
-当前目标是程序建模与动静态协同。静态子图不执行目标；显式动态采集补充实际调用、实例和绑定，观察范围与静态事实分别保留。静态结构不依赖 trace 才存在，运行一次也不证明其它路径不存在。
+SCAR 用有类型、可展开的依赖图描述程序，为后续化简保留必要结构与正确性条件。
+当前阶段到自动建模、建图和查询为止；图中出现重复或候选，不构成变换许可。
+范围、已知关系及缺口必须如实列出；缺口存在不算相应部分已完成。
+当前没有做到所有 Python 行为的精确静态求解。
 
-## 实体与角色
+## 五类核心实体
 
 | 实体 | 含义 | 对应程序部分 |
 |---|---|---|
-| Operation | 有明确规则、操作数、结果及效果的操作 | 调用、绑定、计算、状态读写、分配、物化、IO、等待 |
-| Value | 某次静态定义或区域参数产生的值 | 数据、对象引用、状态版本；既有局部绑定/控制令牌保持独立类型 |
-| StateLocation | 可读写的位置或抽象状态域 | 对象字段、容器元素、Tensor 内容、module/closure/RNG/文件状态 |
-| Region | 有入口、出口和内部结构的程序子图 | 模块、类体、函数体、分支、循环、异常处理、可展开复合操作 |
-| Resource | 承载状态或执行操作的资源定义及要求 | CPU/GPU、DRAM/HBM、文件、SSD/NVMe、stream、线程角色 |
-
-输入/输出是端口角色；常量、不变量是有范围的性质；shape/dtype 是属性，不是互斥节点类型。
-K/Σ/A/R/Q/M 是正交视角。当前 M 不收集实际测量，Q 保留语言、目标环境和观察边界的明确前提。
-
-## 连接
-
-- 包含关系：模块/定义/Region 的层次归属。它组织代码，不代表值来源。
-- 数据关系：结果或参数经有序 Use 连接到消费者；`f(x,x)` 保留两个端口。
-- 绑定关系：名称/槽位的定义、读取、实参到形参、返回值到调用结果。
-- 控制关系：可能执行的分支、循环回边、调用及正常/异常/挂起等适用出口。
-- 状态关系：指定位置和范围的 read/write、前后版本、合流及必要顺序。
-- 身份/存储关系：引用指向、must/may alias、view、offset、生命周期与逃逸。
-- 资源关系：操作所需的执行/存储资源、潜在搬运及静态顺序约束。
-- 对应关系：版本化源码/语言规则/库契约到原 Operation、Value 和 Use。
-
-每条关系应区分必然与可能、路径条件和依据；没有边不能自行解释成没有依赖。
-
-条件本身也是有类型的谓词项：`P(domain, name, subject, operands, ordinal)`。
-subject 与有序 operands 都引用原 qualified 端点，ordinal 只表示原有序位置，不编码或
-哈希对象 ID。二元关系不能退化为一个无参数的名字：相同 entry 来自不同 factory 的
-条件必须有不同身份；不同创建/入口上下文也须分别保留。证据说明为什么有该关系，
-不替代谓词参数或参与真值键。只懂一元签名的规则遇额外 operands 必须保持 open。
-
-共同查询导出使用端点引用表保存 operands。当前 dependency walk / value analysis /
-region boundary 的导出版本分别为 3 / 4 / 3，context 还显式保存 `unknown_prefix`。
-旧报告按原版本解释，不能忽略新版字段来消解条件。原 canonical/source/calls 分片
-版本和当前主图不因查询表示升级而改写。
-
-原 SG 已有精确表达式定义和输入/输出，而旧计算 overlay 缺少记录时，应继续由原 AST、作用域、读写角色和原端口展开 canonical IR。不能伪造旧 overlay record，也不能将已知常量或算术结构整块变成 UNKNOWN。具体算术/比较运算符属于操作契约或 DATA 配置，不应伪装成程序另外创建的 Python 字符串对象；自定义比较的结果仍可能是对象，不能预设为 bool。
-
-复合表达式 helper 交出结果引用时，转交既有所有权与释放引用是不同操作：转交不执行 decref、不分配新对象，不应使同一引用在父子两层被重复持有或清理。操作消费输入、异常出口的已消费部分及外层待清理引用须沿原端口组合，不能以“看起来是同一个值”去重引用或放宽清理顺序。
-
-import 返回的 module 引用、module namespace 和初始化状态分别建模；对象不是其 dict，源码 initializer 定义也不是一次已经发生的初始化。module 属性、decorator 隐式调用和 defaults 字段/元素应连接各自原操作、Use、状态与读取位置，不能靠名称跳过中间关系。
-
-属性访问使用原 receiver Use、字段选择器、world、正常结果或赋值 Use 表示；属性名是协议配置，不要求程序另外创建一个字符串对象。原 AST/SG 已能确定字段时，即使旧 core 没有精细地址声明，也可保留这部分已知接口；已有地址声明必须与原接口一致。引用绑定令牌可出现在来源路径中，但不因此成为 Python 对象引用。跨层 module 属性来源由真实 import 结果、所选源模块正常出口的 reaching binding，以及 consumer 的原控制路径组合；属性覆盖同时记录写入端口和 receiver 来源。所有这些关系附带加载、lookup、写入提交、上下文及效果保持条件，不是缓存许可。没有 CALL 的属性读取同样保存关系。
-
-属性降低使用 `ProgramGraph.attribute_lookups`：typed 记录关联原
-operation/source/version、receiver/world Uses、静态 selector 及 NORMAL/RAISE 的原
-有序 payload/world 端口。它描述 lookup **请求**，不声明实际读写 `__dict__` 或某个
-ObjectField；原 opaque world 与未闭合 effects 保留，地址 refinement 可以继续缺失。
-source spelling 与实际 lookup name 分开，private-name 改写由词法 ClassDef/编译来源
-决定，不按 receiver 的名字或推测类型决定。普通 getter 与编译器 LOAD_METHOD 形式
-分开，后者保留 callable/optional-self/has-self 原三槽，不捏成单一 bound-method 结果。
-旧图表为 `None/NOT_RECORDED`，新 core capability 显式存表；读取旧图不自动升级。
-接口表仍引用原 ID，公共图仅增加端口说明/依据，不授 receiver→result 身份。
-
-固定解包的成员依赖用原 RHS Use→NORMAL 第 i 个输出的 `PROJECTION` 边表示；
-序号来自原 completion/UnpackShape，异常与 world 独立保留。只有已证 builtin tuple
-内容或构造来源才能按 i 传递成员事实，不能直接把容器来源当作元素来源，未知 iterable 保留边界。
-
-属性的 receiver 来源沿同一图单独查询，保留参数、返回、绑定、状态和调用上下文边；
-这条路径解释 lookup 的输入，不是 lookup 结果或 callable 的身份。入口形参未绑定、
-CALL 产物和尚未展开的属性读取分别记录停止位置，不能凭变量名或词法所属类推实例类型。
-
-类语句来源取 `ClassConstruction.result`（最后一层 decorator 返回值），不等于 suite
-的 cell/None，也不保证是 runtime class。标准构造协议另作条件实现图：原 CALL 输入
-→逻辑参数视图→`tp_new`→内部 subtype 分支→实际返回对象类型的 `tp_init`→返回/异常
-清理；`tp_new` 产物不保证新分配或属于请求类。原调用保留，物理 ABI 与 Python callback
-映射仍开放。协议参照 [CPython 3.14.7 typeobject.c](https://github.com/python/cpython/blob/v3.14.7/Objects/typeobject.c)，
-图中操作是协议层静态模型，不是已观测的物理调用或参数 tuple 分配。
-
-`IMPORT_FROM` 也是原 Operation，不转换成虚构的 Attribute AST。`StaticImportFromRequest`
-记录原 name/level/fromlist Use 和 fromlist 的 `CodeConstantSource`；`StaticImportFromRead`
-记录原 receiver/key/world、成员序号及 normal result。两者只是描述原端口的强类型关系，
-不新增执行节点。依赖路径复用同一 module flow 表，以 read 联合类型区分协议。
-[Python 导入契约](https://docs.python.org/3.14/library/functions.html#import__)
-区分 plain import 的顶层返回与非空 fromlist 的完整模块返回；实现还须从保存源码独立
-编译，核对原 CodeRef、常量槽和成员 CFG 顺序。读取命名空间绑定只是其中一条条件路径，
-不证明 hook/cache、动态属性或 submodule fallback 已被排除。新版关系 wire 为 v9，旧
-v8 的 plain-import 解释保持，旧记录不能夹带新请求、读取或条件。相对 package 上下文
-及尚未适配的作用域必须明确列出，不能从同名文件猜导入身份。
-
-类声明与共享类体分开。父级构造保存装饰器求值、builtins 中的 builder 查找、类体 code/factory/closure、name/bases/keywords、builder INVOKE、逆序装饰器 application 和当前 frame 的绑定写入。隐式调用有自己的真实输入/normal/raise/world 端口，不伪造 AST Call 或 CallID。共享 suite 的编译来源引用只证明对应哪份代码；prepared namespace 必须由 prepare 调用或明确的 mapping allocation 产生，不能从一个派生关系中凭空创建。suite 的 cell/None 正常 payload 不等于最终类对象。
-
-## 跨分片共同依赖接口
-
-`scar.ir.program.dependencies` 的端点由原 artifact namespace、原 typed ID 和静态接口栈组成。
-跨层只是边跨过 namespace/接口，不是创建一份 callee 或运行实例。关系保留原条件、依据和
-EXACT/MAY；EXACT 表示在所列条件下关系准确，不表示条件已被证明成立。
-
-上下文是静态接口选择，分三种知识状态：
-
-| 表示 | 含义 |
-|---|---|
-| `None` | 没有已选的接口栈；外层未知 |
-| 闭合 tuple，包括 `()` | 已选的完整接口栈；空栈表示未选 caller |
-| `OpenDependencyContext(suffix)` | 任意兼容的未知前缀＋已核的非空接口后缀 |
-
-开放前缀可能为空，但不能被认定为空。Open 与同 frames 的闭合 tuple 不相等；类不提供
-普通迭代/切片，统一通过 context helpers 处理。push 保留开放性；精确 pop 弹尽已知后缀
-得到 `None`，匹配失败另有显式标记，不能从未知前缀猜补帧。Frame 全来自原调用/实现接口，
-不创造 Invocation。一个上下文族也不表示同一个动态对象或数据版本。
-
-Local/Class 可沿已核后缀追踪；旧 call publication 的闭合 state witness 不能因后缀
-相同就适用于 Open。值字段仍保留已知 literal/type/绑定状态，当前证明规则对未闭合入口、
-guard 和完整来源族保持具体前沿，不把整个节点的其它字段抹成 UNKNOWN。
-
-`ProgramDependencyGraph` 提供共同的邻接、遍历和 cut；`ProgramDependencySession` 共享有界
-只读原图与关系缓存。调用、class、环境、状态和局部图由 provider 适配到同一端点类型，
-分析只沿适用关系转移事实：一般 OPERAND/STATE_INTERFACE 依赖不等于值/对象身份相同。
-绑定 token、其 payload、scalar 内容和引用定义来源是不同字段。
-
-完全声明的本地同步调用可按原 result slot、normal terminal 集合与精确上下文闭合值传递；
-只找到候选 completion 不足以闭合其它正常路径。未知字段必须在工作队列中继续传播，
-例如 `未知 int ∪ 7` 的内容不能变成确定的 7，而类型可仍为 int。
-
-已实现的值分析目前只覆盖有限 scalar/type/定义来源规则；区域边界只列接口与知识状态，
-不证明效果闭合。字段未知、未实现、缺材料、未发布关系和预算分别保留。相关入口和覆盖见
-[程序分解 §3.4](PROGRAM_DECOMPOSITION.md#34-主图决策与当前结构性缺口)。
-
-## 身份和版本
-
-源码身份包含源码指纹、命名空间/编译上下文及定义位置，不能只用函数名或行号。
-静态定义不要求真实 InvocationID，也不能伪造 CapturedCode 来创建定义。
-静态编译的 CodeType 是分析器产生的编译产物，不是观察到的运行对象。其布局 key/常量路径必须通过独立 SOURCE_COMPILATION 来源绑定编译器 profile、源码和原定义；只能支撑编译语义，不支撑实际加载身份。
-编译器的参数计数、flags、local/name/cell/free 表是可保存的静态事实。表项按编译器索引保留，不能按名称集合去重或合并；相对导入的 name 表可以有空字符串。compiler-owned cell、入口 closure cell、namespace 中同名绑定是不同角色，不能仅凭拼写相同建立别名。
-没有直接 AST 语句的编译器前导用原编译来源、常量路径和 offset 描述，不伪造源码行或函数定义。它通过独立 Region 的正常/异常 world 端口接到原模块主体之前。已知 cell allocation、code read、factory、namespace set/store/setup 现在有各自的操作和 world；owned cell handles 通过 normal ports 返回父 frame，继续传给后缀，并保留到 frame exit。deferred child 等尚未展开部分仍明确标记，不算完整建模。
-
-DATA、REFERENCE、STATE 分开：局部引用绑定未变，不代表其对象内容未变。
-State SSA 表达静态读写依赖；循环/分支版本是符号版本，不是运行观察到的时间戳。
-
-函数、循环等复合节点采用共享模板和端口映射，可逐层查看内部结构；每次调用或迭代只增加实例坐标与绑定，不复制模板。递归引用已有主体，使用循环依赖求解，不无限内联。函数的共享 Region 及 CALL_TARGET/参数/completion 已接入；未建主体仍有展开义务，不能宣称所有函数已经可展开。
-
-循环区分外部捕获、跨迭代状态、轮内临时值和出口。递推 `X[t+1] = F(X[t], U[t], State[t])` 中，X 是同一状态角色，X[t] 是不同版本；同名变量、相同对象或相同 Storage 都不代表版本相同。循环外引用相同也不证明被引用内容不变。
-
-**Implemented / Verified**：`session.loop_views(namespace)` 暴露原 LoopInterface、初始/回边所有槽（含 world）、词法父子来源。`loop_constructs(namespace)` 进一步给出原操作成员、直接成员和内部 block arguments；`view.expand(session.graph())` 读取原操作，嵌套模板继续引用同一函数图，不复制 CFG 或迭代。成员按原源码映射选择，包含初始化、条件、body、else 和有来源的清理；它是源码构件视图，不等于单轮 body 或完整控制/效果闭包。缺来源或来源混合时明确保留前沿。
-
-`loop_boundary()` 在原切边查询中纳入已完全选中 block 的参数，避免把内部 phi/world 回边误报成外部依赖；保留正常/异常/提前返回和已知边界。通用嵌套案例通过，真实 CEM 完整边界查询在180秒预算内未完成，不能声称整程序可组合边界已验收。FORWARDED/REDEFINED 仅说明 SSA 端口是否直接转发，换 ID 不证明数值改变；内容不变性单列 UNPROVED。未采集迭代坐标，不按重复 CALL 次数猜迭代号；后续先接通状态、效果和出口边界，再讨论外提。
-
-逻辑来源、对象、存储、表示/物化不合并。分配站点加符号调用/迭代上下文表示潜在对象；同一站点的不同实例不自动相同。view 可共享存储而有不同几何范围。
-物理地址不是逻辑值身份。确切地址未知时仍可推导符号基址、偏移、别名和范围。
-复制保留什么、变换产生什么，由具体操作规则决定；相同内容不证明对象相同。
-
-## 函数创建与调用环境
-
-函数的源码定义、创建操作产生的函数引用、调用者当前使用的 callable 引用，以及共享函数体的环境端口分别建模。重复执行同一个 factory 可能产生多个实例，不能因 code 相同合并其默认值或闭包状态。
-
-跨主体关系引用原 body namespace、factory 正常出口、原输入 Use/Value、call 的 callee Use/world，以及 callee 已存在的 EnvironmentInterface member。关系本身不创建新的调用、对象、Value 或状态位置。
-
-- `REFERENCE_BINDING` 表示在明确的目标/创建来源条件下，函数对象或 globals 等引用如何进入被调用环境；它不证明 namespace 内容不变。
-- `FIELD_INITIALIZER_DEPENDENCE` 表示创建输入对 defaults/keyword-defaults 初始字段的依赖。一个 scalar 默认参数不是 defaults tuple 的别名；若要将初始值传到调用时，仍须跟踪 packing、字段修改与实际读取点。
-- saved builtins 来自函数创建时的选择，不能直接借用 caller 当前 builtins，也不能等于当前 globals 中的同名项。
-- 捕获的是有序 closure cell 引用；cell 引用一致不证明内容版本一致。类在 factory 之后写入的 closure/default 字段，要沿后续状态操作连接，不能假称 factory 已携带这些输入。
-
-这些条件依赖是静态图中可继续分析的关系，不是缓存许可。原端点/来源校验通过、条件由后续推理消解、最终效果闭合，是三件不同的事。
-
-此前发现的接线欠账是：环境关系主要在 CALL target 已知后建立，但分析函数内部全局
-读取又需要该环境。现已将 module/class/nested 的原创建证明抽成共享 extractor；默认
-Session 按当前 unit 的原词法 owner、DefinitionID、CodeRef 路径及 factory 端口自动配对，
-不再等待实例方法 dispatch。没有调用 publication 时，原 manifest 与源码碎片也足以
-构造/独立核对 SourceDefinitionReference，无需另写 basis。范围和实际核验见 STATUS。
-
-factory-entry origin 规则分开处理三件事：
-
-| 关系 | 可以表达什么 | 不能据此推出什么 |
-|---|---|---|
-| 原 factory 的捕获端口 | 产生函数时捕获哪个 globals 引用 | 该 dict 的内容保持不变 |
-| 原 body 的环境 formal | 若进入函数来自该 factory 产物，formal 对应哪个对象引用 | 已经发生调用、只有这个来源、所有 factory 实例相同 |
-| entry world 上的 namespace read | 指定 key 在此位置有哪些 reaching writes | 创建时 world 等于调用时 world |
-
-前两项只传引用来源，不需要伪造 caller CALL 或 Invocation；代码来源、factory 正常完成、
-entry callable 选择及字段保持条件必须显式保留。相同 code 可由不同 globals 创建，也可
-被装到别的函数对象上，不能按 CodeID 合并其环境。saved builtins 还涉及创建时选择，
-不能直接借用 creator/caller 当前 B。第三项继续走实际状态关系；无已知 caller 时的初始
-namespace 替代路径需要单独状态前提，不准把一个捕获引用边升级为内容证明。
-
-`EntryNamespaceProjection` 现把这两种关系分开组合：原 module G→entry G 的引用路径，
-原 entry world→read 的存活路径，以及原模块 writer→normal snapshot 的 reaching-binding
-见证。source snapshot、创建和 entry/read 的 world 分别保留。snapshot 正常完成、早于
-入口和期间该 key 未被覆盖，是带两侧 owner/key/world 端点的条件；输出恒为 MAY。
-独立的 G-only 分支只查 G writer；另一个 L/G 条件别名分支只在具名 alias 前提下使用联合
-kill 域。两端口本身仍独立，不凭模块源码身份授予标准 import 契约。默认公共图还直接
-接同体 namespace writer→read，函数内覆盖先截断旧 entry 来源，已知新写入不会随之丢失。
-
-调用消费使用独立的 `StaticCallInterface`、`ContextualFunctionSource` 和
-`ContextualCallTarget`：接口只声明原签名/实参/形参/completion/state 端口；来源保存一条
-连续 factory→callee Use 路径；目标将这条来源与原 CALL 关联。caller context 与 factory
-context 是两条独立坐标，不把未知 factory 前缀塞进旧的闭合 CALL requirements。
-沿真实 CALL frame 的 push/pop 生成带条件的 ARGUMENT 和正常 reference payload0
-COMPLETION 边；异常和 world 不当作值，入口状态不当作内容相等。每个来源 alternative
-独立保留，全部路径条件和证据继承到接口边。没有匹配 caller 的 formal/return 保留开放
-前沿；已知调用后缀达到预算时保留已找到的候选，并停止继续展开。
-
-无 CALL 依赖的 import/attribute 结构见证可按原点上下文实例化，原 cross-body source
-module 保持未知前缀。同一规则拒绝套用带闭合 argument/return/activation 支持的见证；
-机械上下文映射属于 evidence，尚未证明的 lookup/cache/状态保持条件继续保留。
-`StaticCallDependencyView` 共享 linker 原 graph/index/document 与读缓存，独立核查原
-authority；它不加载旧 CALL publication。module 派生索引保留原对象引用，拥有单列的
-保留配额与计量，不能把 reader cache 数字当作全部进程内存。
-
-class 的创建捕获与 provider 的当前字段读取也分开：原 body-function factory 的 G Use
-通过 `CURRENT_FUNCTION_GLOBALS_EQUALS_FACTORY_CAPTURE` 条件，连接到原
-READ_FUNCTION_FRAME 的正常 G 结果；条件绑定 body function、捕获 Use、读取 world 和
-读取结果。此前的任意准备 callback 不能被跳过。此边是 MAY/REFERENCE，不连接 parent B，
-不传递 namespace 内容，也不新建 world。后续再经原 EVAL_SUITE 输入映射进入 class G。
-
-## 跨主体值来源与名称绑定
-
-跨图的 ValueID、OperationID、UseID 始终附带其原 body namespace。外层模块的 factory 即使成为深层函数的调用目标，仍在原模块图中读取、校验和保存；不能拿深层函数的 index 查外层裸 ID，也不复制被调函数体。
-
-名称状态的跨层来源由原 STORE、原控制路径、真实 CALL 的环境/状态接口，以及下一层 entry 到 READ/CALL 的路径组合。多个调用桥可以串接；中间层的同 key 写入必须参与覆盖判定，不能仅沿 globals 引用跳回最初模块、忽略中间状态。module 的 L/G 与函数的 saved builtins 仍分别处理，未证明的 owner alias 必须作为显式条件。
-
-写入失败可能已改变状态，异常路径不能视为未发生写入；正常提交、查找优先级和中间 effects 保持等条件仍保留。递归需求由有限工作队列求解，不能由环自身生成来源；预算和未解析入口单独报告。
-
-源码目录中的声明、旧 CALLS 关系及按同名声明生成的 metadata 只能提供搜索提示。只有与本 CALL 的真实 callee Value、绑定路径和编译来源接通后，才生成目标参数、状态、返回或环境端口。提示没有接通时仍保存在原 metadata/明确前沿中，不能绕过已经发生的覆盖写入，复活旧 factory。
-
-调用目录枚举是否完成、处理范围内的 namespace 队列是否稳定，以及整程序 points-to/effects 是否闭合分别记录。范围内队列稳定不证明所有入口、所有目标和所有属性已经确定。
-
-从外部模块取得的函数可以拥有 caller 图中根本不存在的 globals 引用。此时通过原模块状态、函数创建环境、真实调用的 world 和 callee 环境端口连接依赖；不能借用 caller 当前 G，也不能为了满足某个桥的字段要求制造 caller 中的 namespace Value。`ModuleGlobalsDependencies` 已实现条件状态投影及专项求解/公开读回；现在也由共同依赖接口投影到原 qualified 端点。完整逐地址状态/alias/effects 联合推理与模块初始化 L/G 对应仍未闭合。
-
-新版 v8 的标准 import 初始化投影携带
-`SOURCE_IMPORT_INITIALIZER_USES_MODULE_DICT`：在该明确条件下，以原 G 为查询点、
-用精确的原 `{L,G}` 端口集合统一选择 reaching writer 和处理覆盖。源码 `STORE_GLOBAL`
-与 `STORE_NAME` 因而按同一条件地址域的实际控制/world 顺序合流，而不是分别读取再合并。
-这仍是条件，没有运行来证明 import hook/loader/cache/后续效果。任意 `exec` 不获此条件，
-原 L/G 各自查询互不覆盖。v7 及更早记录保留原 L-only 语义和未知别名，不自动授予新条件；
-带新条件伪装成旧 wire 会被拒绝。相应规则、kill 集合及重放必须使用同一个明确 owner 域。
-
-模块 `global` 是编译期作用域声明；原 AST、符号表和编译来源足以确定时，保留源码展开
-记录而不制造运行时 Nop。编译器前导与源码 import 共用位置时，必须沿已验证的 compiler
-profile/offset 分界，不能按 source span 把前导误认为 import，也不能任意跳过未知指令。
-
-模块 AnnAssign 也不等于普通赋值：默认 3.14 的 annotation registration 与延迟 child，
-future 模式的原字符串槽与 `__annotations__` 更新分别表示。RHS/store 成功后才能登记；
-实际 namespace lookup 的结果才是更新 owner，同名 compiler cell 不能替代它。原索引、
-正常/异常的引用消费、world 和源码见证独立核对；未展开 child 不因顶层完成而消失。
-
-该状态桥区分：`fn=p.f; p.a=p.b; fn()` 的函数引用来自早先的 `p.f` 读点，G 内容却在真实 `fn` CALL/world 查询；`p.f=q.f` 后所选函数的 G 属于实际 factory 的 q，不能按表面 receiver p 判断；`p.a=p.b; p.b=other` 中 a 的来源是赋值当时的 payload/读点，不是未来的 b。callee 内同 key 的 STORE_GLOBAL 先参与覆盖，只有 entry binding 仍可到达 READ 的路径继续向外层状态查询。新版初始化条件域已有通用静态验证并随 v8 调用索引发布；当前真实索引的 module globals flow 仍为 0，完整接线不能由专项样例推定。
-
-实参、形参和正常返回的引用来源必须按调用上下文连接。`StaticCallContext` 引用原 caller、CALL、callee Use 和所选目标，不代表一次运行调用。沿返回结果进入 callee 时压入该上下文；从 formal 回到 actual 时，只能消费栈顶匹配的原调用，再回到其 caller 上下文。已有明确上下文而缺少来源时，不得退回无上下文的候选并集。否则 `identity(a)`、`identity(b)` 或多层 callback 的返回值会错误混合。
-
-求解器分别维护各上下文的关系，导出时才合并同一静态 CALL 的展示记录；展示并集不能反向激活目标。参数/返回引用边不证明内容不变、逻辑版本相同或无副作用。默认参数还需要函数当前 defaults 字段、容器元素和读取时状态，初始化输入不能直接当作缺省 formal 的引用。
-
-分析会话中的原图、原 metadata/document 和源快照只读；传播新增关系和属性事实，不能原地改写这些原输入后继续复用派生记录。主体重建产生新的 artifact receipt/namespace。内部有界缓存可复用原 typed 记录和按明确输入派生的关系，不跨输入保存“验证已通过”的布尔标记；独立 public reader 仍从原输入重新核验。
-
-## 属性事实与未知
-
-事实锚定已有实体/Use ID、程序位置、状态版本和分析上下文，包含依据及成立条件。
-每个属性可为精确值、符号表达式、受限候选/约束或未知；这些状态分别传播。
-尚未分析、已分析但不确定、缺材料、未支持和预算截断分开记录，不伪装成程序事实。
-不适用的属性不填 UNKNOWN；不可达也不等于未分析。
-
-地址未知不影响已知 dtype；shape 未完全确定仍可保留每个已知维度和维度等式。
-读取或修改引起的失效只传播到相关事实；不能因为一项未知就将整个节点或子图标为未知。
-
-已知内容现在分别进入 `scalar_constant` 与 `immutable_tuple`，后者只允许递归不可变的
-builtin literal，不表示 Python 对象身份、storage 或 Tensor 内容。原 tuple 构造、参数/返回、
-绑定和索引按原 AST/Opcode/Use 及上下文传播；未知索引、mutable 元素、覆盖和越界保留
-精确前沿。编译常量只在原源码、CodeKey、constant path、frame 和 LOAD_CONST 对应后读取
-静态编译产物，并附 `ACTIVE_CODE_MATCHES_SOURCE_COMPILATION`，不冒充运行 code 对象。
-
-EnvironmentInterface 成员与 ControlPort 目的地也已有声明导航，使用结构边和原记录
-locator。环境 state domain 不是 points-to，声明的控制目的地不是一次实际 transfer；
-结构不能被值引擎当作等值传递。具体运行绑定和协议转移仍有独立前沿。
-
-原 BRANCH 的 CONTROL_CONDITION 是可推理依赖，而不只是 CFG 展示信息。只有一次完整
-有限固定点得到无 unknown/MAY、无未消解外部 guard 的一致 builtin bool 后，才冻结该
-上下文的 successor 选择，并从原 seeds 重算受条件限制的值传递。原图的两个分支与边
-仍保留；`branch_proofs` 引用原 branch、谓词 Use、常量依据和所选 ordinal。不能凭临时
-单值、未收敛循环或 INVOKE 的正常/异常 ordinal 筛掉另一条路径。这不是代码变换。
-
-控制影响与必要路径前提分开：postdom 控制影响可能是 MAY；原 successor edge 对入口
-可达性的支配，才支持“若从该入口执行到此处，必须经过该选择”。共同图保留两类原依据，
-必要性查询覆盖非循环区域，每个 block 仅保留最近必要选择，再沿 controller 递归查询，
-不物化全部传递祖先。exact 必要关系仍受原入口范围限制，不证明调用结束，也不抹去
-挂起/恢复、外部入口及效果前沿。普通 CONTROL 不能直接用作值传播的路径筛选条件。
-
-值事实的 `occurrence` 字段独立记录进入原位置所需的选择及入口范围。结构 ownership
-边只把 producer/block 的发生条件交给原结果/Use，不传递内容或引用身份。固定点后若
-均匀 branch proof 与必要选择冲突，可记录原 route 的反证；原边保留，派生值从 seeds 重算。
-完整原正常返回族全部被反证才允许标无正常值；缺来源、MAY、未知目标或范围未完成不允许。
-保存的 Python candidate frame 尚不自动获得原同步入口证明，继续保留字段级 open。
-
-source role 和人类标签也不等于操作合同。例如源角色为 EXPRESSION 的操作仍可有原
-TRUTH 协议；分析必须消费准确协议/端口及来源，而不是按 label 或 role 猜行为。
-
-已知端口结构也不是待消解的运行条件：`CompletionResult.index` 通过原 successor.arguments
-记录和目标 block argument 直接核对，并保存精确证据 locator；不再把槽号塞进 guard。
-值转移同时核 normal kind、原 producer、实际 mapping、ordinal 和同一 namespace/context，
-不能因异常出口也有 slot0 就复制正常计算值。TRUTH 合同可对闭合 builtin literal 的表示
-推导 normal bool（含浮点/complex 位模式、tuple 长度），不执行目标对象协议；原 world、
-异常出口、effects 和输入条件继续保留。绑定是否 BOUND 是独立状态性质，已知 payload
-或可行 normal 路径不能替代 definite-bound 证明。
-
-绑定状态现有独立 `BindingStateField`：BOUND/UNBOUND alternatives 带原条件、证据、
-前提和 EXACT/MAY，另有 unknown paths 和不适用。UNKNOWN 更新不能借用旧 token，
-payload 已知与否不决定 boundness；旧 `binding_states` 只是便利投影。原 BindingRead
-输入在同一上下文中所有来源均确证 BOUND 后，才能给出 `BindingReadProof`；原 guard
-和边保留。MAY、缺种子、未枚举、预算与循环的未知沿同一队列传播。
-
-有限不动点收敛与输入覆盖完整也分开。`worklist_stable` 表示当前已表示约束和 UNKNOWN
-传播已稳定，`exhausted`/导出的 `query_scope_complete` 继续描述查询范围是否完整处理。
-无关未枚举区域不能把其它已闭合字段和证明一并拒绝；受其影响的字段仍必须保持未知。
-步数/求值早停未收敛时不冻结新证明。这个区分不是整程序完成或变换许可。
-
-NativeBoundary/provider 也按原声明进入共同导航：native/core-only 输入、正常/异常
-出口的全部原 Use、representation ownership 和来源映射都有精确记录 locator。它们是
-STRUCTURE，不是值传递、ABI 等价、must-alias 或已选实现。共同遍历默认排除结构含义，
-区域 cut 也不将其当成输入/消费者；不能仅根据关系 kind 判断是不是数据依赖。
-
-静态 native 材料复用安装包的 schema parser 作为分析器工具，在隔离进程中解析原
-ATen header/YAML，核对版本、完整 overload、文件/字节/行与 parser 收据；不导入 torch，
-不运行目标、生成器或默认值。结果能构造现有 ProgramGraph/NativeBoundary 的接口，
-保留 opaque native world 和正常/异常端口。Tensor/List/Optional 端口不展平为虚构 ABI；
-alias/write/dispatch 仍是原 schema 声明，不提升为物理资源或已选 kernel。材料接口、
-Python callable 绑定、native 实现主体、当前整程序发布是四个分别核查的层次。
-
-C++ 输入层也保存原 occurrence，而非将 CST 当成最终程序 IR。SourceAtomID 引用被原
-source receipt/SourceReference 限定，函数完整 declarator、表项 callback/wrapper、call 的
-有序参数、原条件与模板孔形成 SOURCE/STRUCTURE 图；同名 overload 为不同原定义候选。
-没有类型/ABI 证明时，不把 C++ 表达式伪造为 canonical DataValue/ReferenceValue。物理
-保存按源单位分片，source path/hash 和原 occurrence ID 表只存一次，其它边使用单位内
-整数引用；索引只是存储坐标。读回恢复原强类型记录，不改变 source/program 身份。
-
-## 效果
-
-至少保留 reads/writes/allocates/frees/aliases/escapes、RNG、may_raise、external、ordering，以及必要的生命周期和完成语义。效果可多标签，不互斥。
-未知调用的可能效果不能写成 NONE；已解析源码和契约应继续推导，而非永久放弃。
-整体 world 状态可作保守起点，别名/ModRef 查询负责排除无关写，不无限细分 OS 内部。
-
-## 完整性的含义
-
-分别报告源码/定义覆盖、结构展开覆盖、跨层连接、效果覆盖及属性精度。
-缺函数体不能用一个 UNKNOWN 叶子顶替后计作已完整展开；地址未知也不能让已恢复函数体退出结构覆盖。
-静态分析保留范围内全部可能路径，包括未实际执行的定义与分支。
-一般程序的全部行为无法静态精确判定；目标是健全的结构与关系表达及尽可能精确的可推导事实，不宣称任意程序的唯一最优实现。
-
-具体流程见 [静态架构](STATIC_ANALYSIS_DESIGN.md)，展开规则见 [程序分解](PROGRAM_DECOMPOSITION.md)。
+| Operation | 消费端口、产生结果并具有效果的操作 | 调用、计算、绑定、读写、分配、搬运、IO、等待 |
+| Value | 原定义或区域参数产生的值 | 数据、对象引用、状态版本；局部绑定和协议令牌使用独立类型 |
+| StateLocation | 可读写的位置或抽象状态域 | 对象字段、容器内容、Tensor 内容、module、RNG、文件状态 |
+| Region | 有入口、出口和内部结构的子图 | 模块、类体、函数体及受支持的控制结构 |
+| Resource | 执行或承载状态所需的资源 | CPU/GPU、内存、存储端点、文件、队列、stream/event |
+
+这是实体分类，不是把每行源码划入一个互斥类别。一行代码可展开为多个操作与关系。
+输入/输出是端口角色；常量/不变量是限定范围的性质；shape/dtype 是属性。
+Block、Use、控制出口等是连接上述实体的强类型记录，不能合并成无类型字符串边。
+实际定义见 [核心 IR](../scar/ir/program/model.py) 与 [资源 IR](../scar/ir/program/resources.py)。
+
+K / Σ / A / R / Q / M 分别观察控制、状态、动作、资源、契约和证据，彼此正交。
+Action 的 VAL / REP / MEM / XFER / STATE / CTRL / ORDER / IO / OPAQUE 也是可重叠标签，
+并非五类实体或底层 `Behavior` 枚举的替代品。Q 保留假设；M 区分静态依据与运行证据。
+
+## 图、端口与层次
+
+图用规范化记录和 ID 引用保存；源码对应、包含、数据、引用、状态、控制及资源关系分别表示。
+结果/参数通过有序 Use 连接消费者，`f(x, x)` 的两个实参端口不可去重。
+端点以原 artifact/namespace、版本、类型 ID 和适用上下文定位；名字或行号不能单独证明身份。
+静态调用上下文不是动态 Invocation；未知外层上下文也不能冒充已闭合的调用链。
+条件保留主体、有序操作数和依据；“在条件成立时精确”不等于条件已经获证。
+
+函数体共享一个原始模板，调用点通过实参、形参、环境、状态及返回/异常接口连接。
+展开查询返回原 Operation/Value/Use，而不是为每个调用复制整份源码图。
+循环也可作为整体展开：当前 `LoopTemplateView` / `LoopConstructView` 是原图的投影视图，
+保留成员、嵌套关系、初始输入、header 参数、回边、正常退出、break/continue 及来源缺口；
+它们尚不是独立 canonical Region，也不把每次迭代静态展开成一份新图。
+见 [循环模板](../scar/analysis/program_loop_views.py) 与 [循环成员](../scar/analysis/program_loop_regions.py)。
+
+跨边界接口必须保留正常返回、异常、挂起及适用的状态输入/输出，不只连接返回 Tensor。
+循环外引用可以指向可变对象；引用不变不能证明对象内容跨迭代不变。
+初始化输入、循环携带值、迭代局部值和退出值须沿原端口区分。
+区域 cut 查询列出已有跨边界依赖，不自动证明可外提、复用、删除或整体替换。
+见 [公共依赖查询](../scar/analysis/program_dependencies.py) 与 [边界分析](../scar/analysis/program_regions.py)。
+
+## 身份、版本与不确定性
+
+CodeID 指向代码版本与位置；InvocationID 指向一次真实调用，两者不能混同。
+对象身份、storage/allocation 身份、内容版本和逻辑来源也互不等价。
+同一对象可以被原地改写；不同对象可以复制相同内容；同一 storage 可以有多个 view。
+地址复用需要 allocation/epoch 约束，view 需要 offset/shape/strides；地址相等不证明同一分配。
+引用来源路径解释“引用如何传入”，不自动证明读取结果、实际 callable 或数据内容相同。
+
+[逻辑值 IR](../scar/ir/v2/values.py) 已定义 LogicalValue、ValueVersion、ProvenanceRecord、
+Materialization 和等价声明，用于分开逻辑来源、推导关系、版本及物理表示。
+这些类型的存在不代表任意 deepcopy、transform、CPU/GPU materialization 已自动统一溯源；
+当前静态值/引用分析与运行观测也尚未全面接通到该逻辑值体系。
+不能以 Tensor ID + `_version` 作为通用内容证明：NumPy 共享写入和 inference tensor 等需另行约束。
+
+UNKNOWN 应落在确实未知的字段、效果或关系上，不能吞掉已知操作、端口及 shape/dtype 等属性。
+已知、条件成立时已知、符号值、候选集、未知事实，与未分析/不支持/材料缺失/预算耗尽分开报告。
+求解达到不动点只表示当前规则不再产生事实，不证明整个程序已覆盖或所有目标已解析。
+未见消费者不证明无用；未见异常不证明不会抛错；没有记录写入不等于 NONE。
+
+效果至少区分 reads、writes、allocates、frees、aliases、escapes、RNG、异常、外部及顺序影响。
+未知效果保持开放；异常前已经发生的写入、IO 和清理不可回滚成“无效果”。
+`.eval()` 不证明纯函数，推理也不默认无 autograd；模式、hooks、buffers 和可变参数属于相关状态。
+见 [效果模型](../scar/ir/effects.py) 与 [状态地址](../scar/ir/program/state_addresses.py)。
+
+## 静态结构与动态证据
+
+静态前端依据保存源码、语言版本、编译来源和受支持的库契约建立结构、可能路径及条件关系。
+动态层只补必须运行才知道的实际 callable、entry、实例、运行路径或资源事件；两者保留不同依据。
+一次观测可以选择该次调用的目标，不能关闭其它路径、将动态目标集合当全集或授权优化。
+运行 code 与原实现图的连接须核完整 code descriptor、源码和 compiler path，不能靠 qualname/行号猜测。
+缺失 body 可由真实 code 证据驱动按需静态展开；已有规范图、原 ID 和端口继续复用。
+见 [调用观测](../scar/analysis/observed_call_bindings.py)、[函数接口](../scar/analysis/observed_function_interfaces.py)
+与 [按需展开](../scar/analysis/observed_body_demands.py)。这些接口不是静态全程序闭合证明。
+
+## 语言、native 与资源边界
+
+Python 建模遵守求值顺序，区分定义阶段与调用阶段、绑定与对象内容、全局/闭包/类命名空间。
+import 的 module 引用、namespace 和初始化状态分别表示；属性访问描述 lookup 请求，
+不能直接当作 `__dict__` 读取或推断其结果身份。类定义最终产物取 decorator 链返回值，不保证是类。
+短路、比较、索引、赋值、调用及解包都可能调用用户代码、产生部分效果或抛错。
+受支持的 try/finally/with 保留 pending completion 和清理顺序；generator/async 创建与恢复分开。
+复杂异常组、模式匹配、动态生成代码及部分异步/委托协议仍可能有明确前沿，不能宣称全语言闭合。
+见 [源码降低](../scar/analysis/program_lowering.py)、[控制结构](../scar/ir/program/structured.py)
+与 [恢复协议](../scar/ir/program/resumption.py)。
+
+PyTorch/native 边界可以声明参数、结果、状态和可能效果；这不等于已证明 ABI、alias 或 kernel dispatch。
+Python → operator → runtime API → kernel 的每条跨层连接需要对应契约或真实证据，当前尚未完整覆盖。
+不能将 native 节点无依据展开为物理调用，也不能因缺实现源码就删除已有输入/输出与状态接口。
+见 [native 接口](../scar/ir/program/native.py)；目标止于可指导程序改写的 runtime/kernel 边界，不下钻指令。
+
+资源要求与真实资源实例分开：静态 CPU/GPU、主机/设备内存、文件/存储端点、stream/event 约束，
+不证明实际设备型号、DRAM/HBM 容量、SSD/NVMe 拓扑、allocation 或数据搬运已经发生。
+同设备 `.to()` 可能不复制，`expand()` 可能是零步长 view；host 返回不等于 GPU 完成或结果已可见。
+queue/enqueue、执行、完成和跨 stream 可见性不能合并；没有证据不能补造同步。
+保存视频与保存 Tensor 都沿 buffer、表示转换、编码/序列化、写入及 finalize 等操作表达，
+不需要人类用途分类；只在已支持的协议范围内声明相应读写、生命周期和异常效果。
+OS FD/OFD 表、驱动内部结构和硬件指令不是当前要求重建的实体，原生效果边界仍须保留。
+
+已实现的是上述强类型基础、受支持源码降低、共享层次查询及部分静动连接；尚未完成的是
+全 Python/native 协议覆盖、统一逻辑溯源和所有跨层依赖的自动闭合。实际验收范围见 [STATUS](STATUS.md)。
+架构组织见 [ARCHITECTURE](ARCHITECTURE.md)，后续只能在这些边界内扩展，不把设计目标当成现有能力。
