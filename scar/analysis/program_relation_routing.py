@@ -70,7 +70,7 @@ class RawCallRelationRouting:
     def ensure(self):
         if self.complete:
             return
-        if self.version != 8:
+        if self.version not in (8, 9):
             self.issue = "Raw routing does not assert completeness for historical call wire profiles."
             return
         try:

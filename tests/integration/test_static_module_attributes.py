@@ -85,7 +85,7 @@ raise RuntimeError("this application must never execute")
             assert result.returncode==0,result.stdout+result.stderr
             if args==('--phase','bodies'):_check_read_frontier_recomputation(root,model,app)
         manifest=json.loads((model/'manifest.json').read_text());publication=manifest['static_calls']
-        assert publication['schema_version']==8
+        assert publication['schema_version']==9
         assert publication['complete'],publication['frontiers']
         names={d['wire']:b['name']for u in manifest['units']for b in u['bodies']for d in b.get('definitions',())}
         shards=[];wires=[]
@@ -133,6 +133,8 @@ raise RuntimeError("this application must never execute")
         with pytest.raises(ValueError):loads(json.dumps(old))
         def remove_v7(value):
             if type(value)is dict:
+                if 'request'in value:
+                    assert value.pop('request')is None
                 value.pop('module_globals_flows',None)
                 if type(value.get('conditions'))is list:
                     value['conditions']=[c for c in value['conditions']if c!='SOURCE_IMPORT_INITIALIZER_USES_MODULE_DICT']
@@ -144,3 +146,78 @@ raise RuntimeError("this application must never execute")
         migrated=loads(json.dumps(old))
         assert not migrated.import_routes and not migrated.module_attribute_flows
         assert app.read_text()==application
+
+
+def test_from_imports_keep_original_requests_member_ports_and_conditional_sources(tmp_path):
+    from dataclasses import replace
+    from scar.analysis.static_program import link_static_program
+    from scar.analysis.program_dependency_session import ProgramDependencySession
+    from scar.analysis.static_query import query_static_program
+    from scar.analysis.static_module_attributes import ModuleAttributeDependencies, validate_module_attribute_flow
+    from scar.ir.program.static_calls import (
+        StaticImportFromRead, ModuleFlowCondition as C, dumps, loads,
+    )
+    from scar.ir.program.dependencies import DependencyPoint as P, GraphNamespace, DependencyKind as K
+
+    source=tmp_path/'source';source.mkdir();model=tmp_path/'model'
+    provider=source/'provider.py'
+    provider.write_text('NUMBER = 7\ndef selected(value):\n    return value\n')
+    package=source/'package';package.mkdir()
+    (package/'__init__.py').write_text('def selected(value):\n    return None\n')
+    (package/'member.py').write_text('def selected(value):\n    return value\n')
+    app=source/'application.py'
+    application=('from provider import selected as renamed, NUMBER\nfirst = renamed(1)\n'
+        'def local():\n    from provider import selected as callback\n    return callback(2)\n'
+        'second = local()\nfrom package.member import selected as nested\nthird = nested(3)\n'
+        'raise RuntimeError("application must never execute")\n')
+    app.write_text(application)
+    built=subprocess.run([sys.executable,'-B','-m','scar.cli','static',str(source),'--out',str(model),
+        '--jobs','1','--phase','bodies'],capture_output=True,text=True)
+    assert built.returncode==0,built.stdout+built.stderr
+    manifest=json.loads((model/'manifest.json').read_bytes())
+    originals={row['artifact']['path']:hashlib.sha256((model/row['artifact']['path']).read_bytes()).hexdigest()
+        for unit in manifest['units']for row in unit['bodies']if 'artifact'in row}
+    manifest=link_static_program(model)
+    assert manifest['static_calls']['schema_version']==9
+    with ProgramDependencySession(model)as session:
+        module,=session.select_bodies(file=str(app),entry='<module>')
+        local,=session.select_bodies(file=str(app),entry='<module>.local')
+        shards=[shard for namespace in (module,local)for shard,_ in session.relation_shards(namespace)]
+        lines=application.splitlines()
+        for expression,filename in (('first = renamed(1)',provider),
+                ('    return callback(2)',provider),('third = nested(3)',package/'member.py')):
+            call,=[call for shard in shards for call in shard.calls
+                if call.source.start_line==lines.index(expression)+1]
+            assert {t.definition.source.path for t in call.targets}=={str(filename)}
+        flows=[flow for shard in shards for flow in shard.module_attribute_flows
+            if type(flow.read)is StaticImportFromRead]
+        assert flows and {f.read.field for f in flows}>={'selected','NUMBER'}
+        assert any(f.read.member_index==1 and f.read.field=='NUMBER'for f in flows)
+        assert any(f.module.returned_module=='package.member'for f in flows)
+        assert all(f.module.request is not None and C.IMPORT_FROM_FALLBACKS_NOT_SELECTED in f.conditions
+            for f in flows)
+        flow=next(f for f in flows if f.read.field=='NUMBER')
+        incoming=session.graph().incoming(P(GraphNamespace.from_source(flow.read.body),flow.read.result),
+            kinds=(K.STATE_VALUE,))
+        assert any(e.source.node==flow.source_payload and any(
+            ev.rule=='STATIC_MODULE_IMPORT_FROM_VALUE_V1'for ev in e.evidence)for e in incoming.edges)
+        assert any(f.kind=='NAMESPACE_STATE_CLOSURE_OPEN'for f in incoming.frontiers)
+        routes=[r for shard in shards for r in shard.import_routes]
+        def module_bodies(name):
+            yield from (session.load_body(r.module_body)for r in routes if r.returned_module==name)
+        engine=ModuleAttributeDependencies(load_body=session.load_body,source_context=session.source_context,
+            module_bodies=module_bodies,namespace_for=session.namespace_for)
+        assert validate_module_attribute_flow(flow,engine=engine,check_support=lambda support:None)
+        with pytest.raises(ValueError):
+            validate_module_attribute_flow(replace(flow,read=replace(flow.read,member_index=0)),
+                engine=engine,check_support=lambda support:None)
+        shard=next(shard for shard in shards if flow in shard.module_attribute_flows)
+        assert loads(dumps(shard))==shard
+        old=json.loads(dumps(shard));old['schema_version']=8
+        with pytest.raises(ValueError,match='v9'):
+            loads(json.dumps(old))
+    result=query_static_program(model,file=str(app),name='<module>',limit=100,include_dependencies=True)
+    checked=result['dependencies']['static_calls']['shards']
+    assert checked and all(s['v9_from_import_ports_and_constants_checked']for s in checked)
+    assert app.read_text()==application
+    assert all(hashlib.sha256((model/path).read_bytes()).hexdigest()==digest for path,digest in originals.items())

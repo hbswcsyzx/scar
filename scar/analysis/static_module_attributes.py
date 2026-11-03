@@ -17,7 +17,8 @@ from scar.ir.program.source import LoweringMetadata
 from scar.ir.program.static_calls import (StaticCallFrontier, StaticImportModuleRoute,
     StaticModuleAttributeFlow, StaticQualifiedNamespaceFlow, StaticReferencePoint,
     StaticReferenceSourcePath,StaticModuleGlobalsFlow,ModuleFlowCondition,
-    MODULE_FLOW_BASE_CONDITIONS,MODULE_IMPORT_INITIALIZER_CONDITIONS)
+    MODULE_FLOW_BASE_CONDITIONS,MODULE_IMPORT_INITIALIZER_CONDITIONS,
+    StaticImportFromRead)
 from scar.ir.program.structured import ControlEdgeReference
 from scar.analysis.static_namespace import normal_reference, protocol_kinds
 
@@ -115,6 +116,17 @@ def _uses_import_initializer_contract(flow):
     return False
 
 
+def _flow_conditions(route,read,*,initializer=False):
+    """Keep historical attribute contracts and append only actual FROM rules."""
+    rows=MODULE_IMPORT_INITIALIZER_CONDITIONS if initializer else MODULE_FLOW_BASE_CONDITIONS
+    if route.request is not None:
+        rows=(*rows,ModuleFlowCondition.FROM_IMPORT_RETURNS_REQUESTED_MODULE)
+    if type(read)is StaticImportFromRead:
+        rows=(*rows,ModuleFlowCondition.IMPORT_FROM_READ_USES_NAMESPACE_BINDING,
+              ModuleFlowCondition.IMPORT_FROM_FALLBACKS_NOT_SELECTED)
+    return rows
+
+
 class ModuleAttributeDependencies:
     """Per-analysis bounded original-body indexes and derived value relations.
 
@@ -136,7 +148,8 @@ class ModuleAttributeDependencies:
         self._facts=OrderedDict();self._active=set()
         self.index_metrics={'builds':0,'hits':0,'metadata_reuses':0,'oversize_rejections':0}
         self.import_routes=defaultdict(dict);self.flows=defaultdict(dict);self.frontiers=defaultdict(dict)
-        self.attribute_counts={};self.analyzed_reads=set()
+        self.attribute_counts={};self.import_from_counts={}
+        self.analyzed_reads=set();self.analyzed_import_from_reads=set()
         # Static interface/source-scope notes survive all demand refinements.
         # Demand notes are replaced only after this exact qualified read and
         # context finish recomputation; an in-flight attempt has its own map.
@@ -216,6 +229,11 @@ class ModuleAttributeDependencies:
         protocols=protocol_kinds(body.document)
         imports=[];normal_producers={}
         blocks={block.id:block for region in body.graph.regions for block in region.blocks}
+        from scar.analysis.static_import_from import derive_import_from_interfaces
+        from_requests,from_reads,from_frontiers=derive_import_from_interfaces(body,text=text,semantic=semantic,
+            module=module,metadata=metadata,links=links,protocols=protocols,blocks=blocks)
+        for frontier in from_frontiers:
+            self._note(body,frontier.kind,frontier.detail,frontier.source)
         for op in body.graph.operations:
             result=normal_reference(body.index,op.id,blocks=blocks)
             if result is not None:normal_producers[result[1]]=op.id
@@ -223,6 +241,7 @@ class ModuleAttributeDependencies:
                 own=[l for l in links if l.operation==op.id]
                 _need(len(own)==1,'import protocol lost its original source link')
                 source=own[0].source
+                if op.id in from_requests:continue
                 nodes=by_source.get(('Import',source.start_line,source.end_line,source.start_column,source.end_column),())
                 if len(nodes)!=1:
                     self._note(body,'IMPORT_MODULE_VALUE_PROTOCOL_OPEN',
@@ -235,9 +254,11 @@ class ModuleAttributeDependencies:
         accesses=derive_attribute_accesses(body,source_text=text,semantic=semantic)
         self.attribute_counts[body.namespace]=(sum(a.result is not None for a in accesses),
             sum(a.assigned is not None for a in accesses))
+        self.import_from_counts[body.namespace]=len(from_reads)
         result=SimpleNamespace(module=module,metadata=metadata,links=links,protocols=protocols,
-            imports=aliases,normal_producers=normal_producers,accesses=accesses,
-            reads={a.result:a for a in accesses if a.result is not None},
+            imports=aliases,from_requests=from_requests,from_reads=from_reads,
+            normal_producers=normal_producers,accesses=accesses,
+            reads={a.result:a for a in (*accesses,*from_reads) if a.result is not None},
             writes=tuple(a for a in accesses if a.assigned is not None),
             paths=FieldCFGPaths(body,max_steps=self.max_steps,check=self.check))
         self.index_metrics['builds']+=1
@@ -250,29 +271,43 @@ class ModuleAttributeDependencies:
         StaticReferencePoint(body.namespace,value,requirements)
         facts=self._index(body);operation=facts.normal_producers.get(value)
         selected=facts.imports.get(operation)
-        if selected is None:return ()
-        node,source,ordinal=selected
-        _need(ordinal<len(node.names),'import ordinal exceeds exact source aliases')
-        alias=node.names[ordinal]
-        op=body.index.operations[operation]
-        operands=[u for u in op.uses if type(body.index.values[u.value]) is not StateVersionValue]
-        offset=3 if facts.protocols[operation]=='IMPORT_NAME_314' else 2
-        _need(len(operands)==offset+4,'import protocol has unexpected original argument layout')
-        def literal(use):
-            origin=body.index.values[use.value].origin
-            _need(type(origin)is LiteralOrigin,'import argument is not its original literal')
-            return origin.value
-        _need(literal(operands[offset])==alias.name and literal(operands[offset+1])==0
-              and literal(operands[offset+2]) is None and literal(operands[offset+3])=='__import__',
-              'import alias/requested/level/fromlist differs from original source')
-        returned=alias.name.split('.')[0];rows=[]
+        from_selected=facts.from_requests.get(operation)
+        if selected is None and from_selected is None:return ()
+        request=None
+        conditions=MODULE_FLOW_BASE_CONDITIONS[:4]
+        if from_selected is not None:
+            node,source,request=from_selected
+            if node.level!=0 or not node.module:
+                self._note(body,'RELATIVE_IMPORT_PACKAGE_CONTEXT_OPEN',
+                    'Original requested/level/fromlist and IMPORT_FROM member ports are retained; '
+                    'the package context needed to resolve this relative request is not supplied.',source)
+                return ()
+            ordinal=0;requested=returned=node.module
+            conditions=(*conditions,ModuleFlowCondition.FROM_IMPORT_RETURNS_REQUESTED_MODULE)
+        else:
+            node,source,ordinal=selected
+            _need(ordinal<len(node.names),'import ordinal exceeds exact source aliases')
+            alias=node.names[ordinal]
+            op=body.index.operations[operation]
+            operands=[u for u in op.uses if type(body.index.values[u.value]) is not StateVersionValue]
+            offset=3 if facts.protocols[operation]=='IMPORT_NAME_314' else 2
+            _need(len(operands)==offset+4,'import protocol has unexpected original argument layout')
+            def literal(use):
+                origin=body.index.values[use.value].origin
+                _need(type(origin)is LiteralOrigin,'import argument is not its original literal')
+                return origin.value
+            _need(literal(operands[offset])==alias.name and literal(operands[offset+1])==0
+                  and literal(operands[offset+2]) is None and literal(operands[offset+3])=='__import__',
+                  'import alias/requested/level/fromlist differs from original source')
+            requested=alias.name;returned=requested.split('.')[0]
+        rows=[]
         for module in self.module_bodies(returned):
             mf=self._index(module)
             if mf.module is None:continue
             frame=module.graph.frame_roots[0].entry
-            route=StaticImportModuleRoute(body.namespace,operation,source,ordinal,alias.name,returned,
+            route=StaticImportModuleRoute(body.namespace,operation,source,ordinal,requested,returned,
                 _world(body,operation).id,_normal(body,operation),value,module.namespace,
-                frame.locals_namespace,frame.globals_namespace,frame.world,requirements)
+                frame.locals_namespace,frame.globals_namespace,frame.world,requirements,conditions,request)
             self._admit(self.import_routes[body.namespace],route)
             rows.append(route)
         if not rows:
@@ -367,16 +402,28 @@ class ModuleAttributeDependencies:
             return ()
         self._active.add(point)
         self.analyzed_reads.add(point)
+        if type(read)is StaticImportFromRead:self.analyzed_import_from_reads.add(point)
         previous_frontiers=dict(self._read_frontiers.get(point,{}))
         self._pending_read_frontiers[point]={}
         try:
             outputs=[];receiver=body.index.use_site(read.receiver).use.value
+            if type(read)is StaticImportFromRead:
+                self._note(body,'IMPORT_FROM_LOOKUP_ALTERNATIVES_OPEN',
+                    'The namespace-binding path is conditional: custom import/module lookup, '
+                    '__getattr__, cache/submodule fallback and external mutations are not resolved '
+                    'or selected by the retained IMPORT_FROM read.',read.source,demand=point)
             routes=self.receiver_routes(body,receiver,requirements,requester)
             if not routes:
-                self._note(body,'MODULE_ATTRIBUTE_RECEIVER_UNCONNECTED',
-                    'Original ATTRIBUTE field/receiver/world/result are known. This module-origin relation '
-                    'has no connected import source in this context; other object kinds or native contracts '
-                    'may apply. This does not mark the ATTRIBUTE structure missing.',read.source,demand=point)
+                if type(read)is StaticImportFromRead:
+                    self._note(body,'IMPORT_FROM_SOURCE_MODULE_UNCONNECTED',
+                        'Original IMPORT_FROM receiver/key/world/normal/result and its exact request '
+                        'are known; no supplied source-module namespace is connected in this context.',
+                        read.source,demand=point)
+                else:
+                    self._note(body,'MODULE_ATTRIBUTE_RECEIVER_UNCONNECTED',
+                        'Original ATTRIBUTE field/receiver/world/result are known. This module-origin relation '
+                        'has no connected import source in this context; other object kinds or native contracts '
+                        'may apply. This does not mark the ATTRIBUTE structure missing.',read.source,demand=point)
             for route,receiver_path in routes:
                 writes=self._write_routes(body,read,route,requirements,requester)
                 kills={w.operation for w,p in writes}
@@ -387,7 +434,8 @@ class ModuleAttributeDependencies:
                     payload=body.index.use_site(write.assigned).use.value
                     flow=StaticModuleAttributeFlow(read,route,receiver_path,body.namespace,write.operation,
                         write.receiver,write.assigned,write.world,write.normal,payload,None,
-                        read.operation,read.world,(),(),*path,write,write_path,requirements,requirements)
+                        read.operation,read.world,(),(),*path,write,write_path,requirements,requirements,
+                        conditions=_flow_conditions(route,read))
                     flow=replace(flow,overwrites=tuple(w for w,p in writes),
                         overwrite_receiver_paths=tuple(p for w,p in writes))
                     self._admit(self.flows[body.namespace],flow);outputs.append(flow)
@@ -415,8 +463,8 @@ class ModuleAttributeDependencies:
                         flow=StaticModuleAttributeFlow(read,route,receiver_path,module.namespace,write.operation,
                             write.owners[0],write.payload,write.world,write.normal_edge,payload,write.keys[0],
                             terminal.id,world.id,binding.path,binding.intervening_operations,*path,
-                            requirements=requirements,source_requirements=(),conditions=(MODULE_IMPORT_INITIALIZER_CONDITIONS
-                                if contract else MODULE_FLOW_BASE_CONDITIONS))
+                            requirements=requirements,source_requirements=(),
+                            conditions=_flow_conditions(route,read,initializer=contract))
                         flow=replace(flow,overwrites=tuple(w for w,p in writes),
                             overwrite_receiver_paths=tuple(p for w,p in writes))
                         self._admit(self.flows[body.namespace],flow);outputs.append(flow)

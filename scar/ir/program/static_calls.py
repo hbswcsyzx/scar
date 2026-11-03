@@ -24,6 +24,7 @@ from .source_call_bindings import SourceArgumentPort, SourceBodyNamespace
 from .source_references import SourceDefinitionReference
 from .source_returns import SourceReturnSite
 from .structured import ControlEdgeReference
+from .source_language import CodeConstantSource
 
 
 def _exact(value, kind):
@@ -743,6 +744,9 @@ class ModuleFlowCondition(str, Enum):
     INTERVENING_EFFECTS_PRESERVE_BINDING = 'INTERVENING_EFFECTS_PRESERVE_BINDING'
     CONTEXT_REQUIREMENTS_SATISFIED = 'CONTEXT_REQUIREMENTS_SATISFIED'
     SOURCE_IMPORT_INITIALIZER_USES_MODULE_DICT = 'SOURCE_IMPORT_INITIALIZER_USES_MODULE_DICT'
+    FROM_IMPORT_RETURNS_REQUESTED_MODULE = 'FROM_IMPORT_RETURNS_REQUESTED_MODULE'
+    IMPORT_FROM_READ_USES_NAMESPACE_BINDING = 'IMPORT_FROM_READ_USES_NAMESPACE_BINDING'
+    IMPORT_FROM_FALLBACKS_NOT_SELECTED = 'IMPORT_FROM_FALLBACKS_NOT_SELECTED'
 
 
 # The import-initializer contract is an explicit extra premise, not a new
@@ -763,6 +767,22 @@ MODULE_IMPORT_INITIALIZER_CONDITIONS = (*MODULE_FLOW_BASE_CONDITIONS,
 
 
 @dataclass(frozen=True, slots=True)
+class StaticImportFromRequest:
+    """Original IMPORT_NAME operands, including its witnessed fromlist slot."""
+    requested_use: UseID
+    level_use: UseID
+    fromlist_use: UseID
+    fromlist_constant: CodeConstantSource
+
+    def __post_init__(self):
+        for value,kind in ((self.requested_use,UseID),(self.level_use,UseID),
+                (self.fromlist_use,UseID),(self.fromlist_constant,CodeConstantSource)):
+            _exact(value,kind)
+        if len({self.requested_use,self.level_use,self.fromlist_use})!=3:
+            raise ValueError('FROM request needs distinct original operand occurrences')
+
+
+@dataclass(frozen=True, slots=True)
 class StaticImportModuleRoute:
     body: SourceBodyNamespace
     operation: OperationID
@@ -779,6 +799,7 @@ class StaticImportModuleRoute:
     entry_world: ValueID
     requirements: tuple[StaticCallContext, ...] = ()
     conditions: tuple[ModuleFlowCondition, ...] = MODULE_FLOW_BASE_CONDITIONS[:4]
+    request: StaticImportFromRequest | None = None
 
     def __post_init__(self):
         for value, kind in ((self.body, SourceBodyNamespace), (self.operation, OperationID),
@@ -791,7 +812,11 @@ class StaticImportModuleRoute:
                 or self.normal.operation != self.operation or self.module_body.source is not None):
             raise ValueError('module import route needs original import/source-module endpoints')
         StaticReferencePoint(self.body, self.result, self.requirements)
-        if self.conditions != MODULE_FLOW_BASE_CONDITIONS[:4]:
+        if self.request is not None:_exact(self.request,StaticImportFromRequest)
+        expected=(*MODULE_FLOW_BASE_CONDITIONS[:4],ModuleFlowCondition.FROM_IMPORT_RETURNS_REQUESTED_MODULE) if self.request is not None else MODULE_FLOW_BASE_CONDITIONS[:4]
+        if (self.conditions != expected or self.request is not None and
+                (self.alias_index!=0 or self.request.fromlist_constant.source!=self.source
+                 or self.returned_module!=self.requested)):
             raise ValueError('module import route cannot claim a loader or runtime identity proof')
 
 
@@ -821,9 +846,35 @@ class StaticAttributeAccess:
 
 
 @dataclass(frozen=True, slots=True)
+class StaticImportFromRead:
+    """Actual IMPORT_FROM ports, not a fabricated Attribute expression."""
+    body: SourceBodyNamespace
+    operation: OperationID
+    source: SourceReference
+    member_index: int
+    field: str
+    receiver: UseID
+    key: UseID
+    world: UseID
+    normal: ControlEdgeReference
+    result: ValueID
+    request_operation: OperationID
+
+    def __post_init__(self):
+        for value,kind in ((self.body,SourceBodyNamespace),(self.operation,OperationID),
+                (self.source,SourceReference),(self.receiver,UseID),(self.key,UseID),
+                (self.world,UseID),(self.normal,ControlEdgeReference),(self.result,ValueID),
+                (self.request_operation,OperationID)):_exact(value,kind)
+        if (type(self.member_index)is not int or self.member_index<0
+                or type(self.field)is not str or not self.field or self.field=='*'
+                or self.normal.operation!=self.operation or len({self.receiver,self.key,self.world})!=3):
+            raise ValueError('IMPORT_FROM read needs its original member and distinct actual ports')
+
+
+@dataclass(frozen=True, slots=True)
 class StaticModuleAttributeFlow:
     """Conditional value provenance across import/namespace/attribute ports."""
-    read: StaticAttributeAccess
+    read: StaticAttributeAccess | StaticImportFromRead
     module: StaticImportModuleRoute
     receiver_path: StaticReferenceSourcePath
     source_body: SourceBodyNamespace
@@ -849,7 +900,10 @@ class StaticModuleAttributeFlow:
     overwrite_receiver_paths: tuple[StaticReferenceSourcePath, ...] = ()
 
     def __post_init__(self):
-        for value, kind in ((self.read, StaticAttributeAccess), (self.module, StaticImportModuleRoute),
+        if type(self.read) not in (StaticAttributeAccess,StaticImportFromRead):
+            raise TypeError('module flow needs an original Attribute or IMPORT_FROM read')
+        self.read.__post_init__()
+        for value, kind in ((self.module, StaticImportModuleRoute),
                 (self.receiver_path, StaticReferenceSourcePath), (self.source_body, SourceBodyNamespace),
                 (self.source_operation, OperationID), (self.source_owner, UseID), (self.source_payload, UseID),
                 (self.source_world, UseID), (self.source_normal, ControlEdgeReference),
@@ -875,6 +929,15 @@ class StaticModuleAttributeFlow:
                 raise ValueError('module attribute overwrite changed its original assigned endpoint')
         allowed = ((MODULE_FLOW_BASE_CONDITIONS, MODULE_IMPORT_INITIALIZER_CONDITIONS)
                    if self.write is None else (MODULE_FLOW_BASE_CONDITIONS,))
+        extra=()
+        if self.module.request is not None:extra+=(ModuleFlowCondition.FROM_IMPORT_RETURNS_REQUESTED_MODULE,)
+        if type(self.read)is StaticImportFromRead:
+            if (self.module.request is None or self.read.request_operation!=self.module.operation
+                    or self.read.body!=self.module.body or self.read.source!=self.module.source):
+                raise ValueError('IMPORT_FROM read must retain its original FROM request selection')
+            extra+=(ModuleFlowCondition.IMPORT_FROM_READ_USES_NAMESPACE_BINDING,
+                ModuleFlowCondition.IMPORT_FROM_FALLBACKS_NOT_SELECTED)
+        allowed=tuple((*base,*extra) for base in allowed)
         if self.conditions not in allowed:
             raise ValueError('module attribute provenance cannot drop lookup/state/context conditions')
         _rows(self.overwrites,StaticAttributeAccess)
@@ -1061,7 +1124,7 @@ class StaticCallShard:
 
 def dumps(shard: StaticCallShard) -> str:
     _exact(shard, StaticCallShard)
-    return json.dumps({"schema": "scar.static-calls", "schema_version": 8,
+    return json.dumps({"schema": "scar.static-calls", "schema_version": 9,
                        "relations": encode(shard)}, sort_keys=True, separators=(",", ":"), allow_nan=False)
 
 
@@ -1069,9 +1132,30 @@ def loads(payload: str) -> StaticCallShard:
     document = strict_loads(payload)
     if (type(document) is not dict or set(document) != {"schema", "schema_version", "relations"}
             or document["schema"] != "scar.static-calls" or type(document["schema_version"]) is not int
-            or document["schema_version"] not in (1, 2, 3, 4, 5, 6, 7, 8)):
+            or document["schema_version"] not in (1, 2, 3, 4, 5, 6, 7, 8, 9)):
         raise ValueError("unsupported static call relation shard")
     relations = document["relations"]
+    if document['schema_version']<9:
+        new_conditions={ModuleFlowCondition.FROM_IMPORT_RETURNS_REQUESTED_MODULE.value,
+            ModuleFlowCondition.IMPORT_FROM_READ_USES_NAMESPACE_BINDING.value,
+            ModuleFlowCondition.IMPORT_FROM_FALLBACKS_NOT_SELECTED.value}
+        route_fields={'alias_index','requested','returned_module','module_body',
+            'locals_namespace','globals_namespace','entry_world'}
+        relations=copy.deepcopy(relations)
+        def migrate_import_requests(value):
+            if type(value)is dict:
+                if ({'request_operation','member_index','receiver','key','result'}<=set(value)
+                        or {'requested_use','level_use','fromlist_use','fromlist_constant'}<=set(value)
+                        or new_conditions.intersection(value.get('conditions',()) if type(value.get('conditions'))is list else ())):
+                    raise ValueError('historical wire cannot carry v9 IMPORT_FROM requests/reads/contracts')
+                if route_fields<=set(value):
+                    if value.get('request')is not None:
+                        raise ValueError('historical wire cannot carry a v9 FROM request')
+                    value.setdefault('request',None)
+                for child in value.values():migrate_import_requests(child)
+            elif type(value)is list:
+                for child in value:migrate_import_requests(child)
+        migrate_import_requests(relations)
     if document['schema_version']<8:
         def reject_new_initializer_contract(value):
             if type(value)is dict:
@@ -1146,7 +1230,7 @@ def loads(payload: str) -> StaticCallShard:
 
 __all__ = ["StaticCallFrontier", "StaticTerminalPort", "StaticCompletionRoute",
            "StaticReferencePoint", "StaticReferenceSourcePath", "ModuleFlowCondition",
-           "StaticImportModuleRoute", "StaticAttributeAccess", "StaticModuleAttributeFlow",
+           "StaticImportModuleRoute", "StaticImportFromRequest", "StaticImportFromRead", "StaticAttributeAccess", "StaticModuleAttributeFlow",
            "StaticFunctionOwnerRoute", "StaticModuleNamespaceAtCall", "StaticModuleGlobalsFlow",
            "StaticStateEntryRoute", "NamespaceFlowCondition", "StaticNamespaceFlow",
            "StaticQualifiedNamespaceFlow", "StaticQualifiedFunctionCreation",

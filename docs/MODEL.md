@@ -47,6 +47,17 @@ import 返回的 module 引用、module namespace 和初始化状态分别建模
 
 属性访问使用原 receiver Use、字段选择器、world、正常结果或赋值 Use 表示；属性名是协议配置，不要求程序另外创建一个字符串对象。原 AST/SG 已能确定字段时，即使旧 core 没有精细地址声明，也可保留这部分已知接口；已有地址声明必须与原接口一致。引用绑定令牌可出现在来源路径中，但不因此成为 Python 对象引用。跨层 module 属性来源由真实 import 结果、所选源模块正常出口的 reaching binding，以及 consumer 的原控制路径组合；属性覆盖同时记录写入端口和 receiver 来源。所有这些关系附带加载、lookup、写入提交、上下文及效果保持条件，不是缓存许可。没有 CALL 的属性读取同样保存关系。
 
+`IMPORT_FROM` 也是原 Operation，不转换成虚构的 Attribute AST。`StaticImportFromRequest`
+记录原 name/level/fromlist Use 和 fromlist 的 `CodeConstantSource`；`StaticImportFromRead`
+记录原 receiver/key/world、成员序号及 normal result。两者只是描述原端口的强类型关系，
+不新增执行节点。依赖路径复用同一 module flow 表，以 read 联合类型区分协议。
+[Python 导入契约](https://docs.python.org/3.14/library/functions.html#import__)
+区分 plain import 的顶层返回与非空 fromlist 的完整模块返回；实现还须从保存源码独立
+编译，核对原 CodeRef、常量槽和成员 CFG 顺序。读取命名空间绑定只是其中一条条件路径，
+不证明 hook/cache、动态属性或 submodule fallback 已被排除。新版关系 wire 为 v9，旧
+v8 的 plain-import 解释保持，旧记录不能夹带新请求、读取或条件。相对 package 上下文
+及尚未适配的作用域必须明确列出，不能从同名文件猜导入身份。
+
 类声明与共享类体分开。父级构造保存装饰器求值、builtins 中的 builder 查找、类体 code/factory/closure、name/bases/keywords、builder INVOKE、逆序装饰器 application 和当前 frame 的绑定写入。隐式调用有自己的真实输入/normal/raise/world 端口，不伪造 AST Call 或 CallID。共享 suite 的编译来源引用只证明对应哪份代码；prepared namespace 必须由 prepare 调用或明确的 mapping allocation 产生，不能从一个派生关系中凭空创建。suite 的 cell/None 正常 payload 不等于最终类对象。
 
 ## 跨分片共同依赖接口

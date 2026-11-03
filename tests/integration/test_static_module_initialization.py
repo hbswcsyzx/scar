@@ -104,11 +104,13 @@ def test_import_initializer_globals_reach_shared_graph_without_alias_invention(t
         # New contracts cannot be smuggled into v7. Legacy records retain
         # their old condition set; decoding never grants the new premise.
         shard=next(shard for shard,locator in session.relation_shards(app)if shard.module_attribute_flows)
-        wire=json.loads(dumps(shard));assert wire['schema_version']==8
+        wire=json.loads(dumps(shard));assert wire['schema_version']==9
         wire['schema_version']=7
         with pytest.raises(ValueError,match='v8 source import initializer'):loads(json.dumps(wire))
         def legacy(item):
             if type(item)is dict:
+                if 'request'in item:
+                    assert item.pop('request')is None
                 if type(item.get('conditions'))is list:
                     item['conditions']=[c for c in item['conditions']if c!=C.SOURCE_IMPORT_INITIALIZER_USES_MODULE_DICT.value]
                 for child in item.values():legacy(child)

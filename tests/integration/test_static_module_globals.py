@@ -131,7 +131,7 @@ raise RuntimeError("SCAR must never execute this application")
     monkeypatch.setattr(StaticCallSession,'_recount_relations',recount)
     link_static_program(model)
     manifest=json.loads((model/'manifest.json').read_text());publication=manifest['static_calls']
-    assert publication['schema_version']==8
+    assert publication['schema_version']==9
     assert publication['complete'],publication['frontiers']
     names={d['wire']:b['name']for u in manifest['units']for b in u['bodies']for d in b.get('definitions',())}
     shards=[];wires=[]

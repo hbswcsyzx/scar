@@ -87,6 +87,40 @@ Root 独立双向读回 29.93 秒，1 条参数边、2 个 namespace，raw 路�
 
 通用静态案例同时覆盖无任何 call/class publication 的 module/nested/class 方法自动来源；增加 class publication 后才使用其原接口后缀追到 module G。原 canonical 分片 hash 不变；额外参数/开放前缀不授闭合证明，坏原定义引用拒绝，预算截断保已知边和具体原因。相关核验按修改范围运行，没有重跑长 fixture 或全范围 linker。
 
+### 真实 IMPORT_FROM 接入同一依赖图
+
+**Observed**：原端口早已存在，旧模块来源索引却只识别 `ast.Import`，因此 `ImportFrom`
+没有进入模块来源/reaching-binding 分析。另一个独立问题是 `_namespace_sources()`
+要求先有 CALL activation，`activate_target()` 又先要求目标，导致 G 绑定与调用解析互相等待。
+
+**Implemented / Verified**：v9 新增原请求/读取的 typed records，复用原 module flow 表；
+模块和函数中的绝对 FROM 经原 request → 返回模块 → namespace writer payload → FROM
+normal result 连接。fromlist 来自原 `CodeConstantSource`，独立重编译核 CodeRef、常量槽、
+成员 CFG 顺序及真实 receiver/key/world。非空 fromlist 返回完整模块；不伪造 Attribute，
+不按名字跳定义。旧 v8 仍按旧契约读回，递归支持路径不能夹带新请求/读取/条件。
+独立 reader、公共图 provider、v9 raw routing 和 producer 收据已接线；Attribute 与 FROM
+的接口/处理计数分别保存。class import 的专用编译适配尚未实现，明确留前沿，原端口保留。
+
+通用集成案例覆盖模块/函数、别名、多成员和完整包路径，约 19.02 秒；已有属性覆盖、
+初始化 L/G 状态和双向调用路由三项回归通过，约 142.78 秒。未运行目标，没有扩大全量测试。
+
+**Verified（真实源码）**：`cem.py:12` 的原 FROM 自动找到 `solver/utils.py` 的绑定及原
+函数创建，成功推导/独立重放约 **5.01 秒**；索引 2 个主体，输入计费 72,331,914 bytes，
+记录 6 个 FROM member，其中 2 个相对请求保留具体前沿。随后将这一条原关系保存成
+**局部、明确不完整的 v9 关系分片**，由公共 `ProgramDependencySession` 独立读回，
+得到 1 条 `STATE_VALUE/REFERENCE/MAY` 边，约 **7.18 秒**、2 graphs / 1 shard。
+typed neighborhood 再编码/读回相等。没有手工构造函数目标或依赖边。
+
+记录在 `queries/import-from/summary.json`、`relations.json`、`task.json`；后者 COMPLETE，
+公共图核验为 true。它们只引用原规范主体，不是另一份程序模型；唯一 current 主发布仍为
+v8、manifest SHA 不变，未重跑全范围 linker。查询脚本的行号/API 误用已纠正，以上成本
+仅计成功分析和独立读回，不能当作目标运行性能。
+
+**尚未完成**：入口时刻的 namespace projection 及调用求解器消费、相对 package 来源、
+class import adapter、hook/fallback/跨主体覆盖仍有欠账。缓存/动态属性等保持条件，
+`enumerated=false`。没有重新计算或发布 CEM CALL targets，原 48 个调用仍为 0 个目标。
+这次接通绝对导入，不代表完整 CEM 或第一阶段完成。
+
 ### 源码覆盖：编译器已消去的字面 bool If
 
 **Implemented / Verified，尚未重建 current 主体**：模块 `if True/False` 通过原源码与独立重编译 CFG 见证展开；保留两臂源码，仅为选中臂建立执行结构，不制造 TRUTH/BRANCH。死分支仍影响的 compiler annotation factory/cell/prelude/global scope 不丢弃。旧保守 wire 独立读回，不静默升级覆盖。
@@ -95,7 +129,7 @@ Root 独立双向读回 29.93 秒，1 条参数边、2 个 namespace，raw 路�
 
 真实 `envs/utils.py` 前缀 7→15/15、语句残留 8→0（321 ops）；`callbacks/registry.py` 前缀 6→15/15、残留 9→0（425 ops）。构建与独立读回约 16.28/10.51 秒，原图与模块接口逐对象相等。唯一扩展短验通过 13.00 秒，Root 原 class/compiler/import 回归通过 7.47 秒。旧 wire 没有新见证时仍重放旧覆盖，没有静默升级。
 
-原 source/producer 收据、两个压缩样本及未闭合项在 `queries/module-annotation/summary.json`。两模块仍 PARTIAL：生成的延迟注解子主体和 namespace/alias/effects 未闭合。current 主体尚未替换，107/45 后缀分母不变；class annotation 协议仍待补。这项覆盖修复不解决 CEM 的 G-origin/IMPORT_FROM 断边。
+原 source/producer 收据、两个压缩样本及未闭合项在 `queries/module-annotation/summary.json`。两模块仍 PARTIAL：生成的延迟注解子主体和 namespace/alias/effects 未闭合。current 主体尚未替换，107/45 后缀分母不变；class annotation 协议仍待补。这项覆盖修复不解决 CEM 的入口 namespace 状态与调用解析问题。
 
 ### 库/原生材料：输入层完成一部分，整程序连接未完成
 
@@ -107,8 +141,8 @@ C++ source 前端复用 Tree-sitter，实际 53,705-byte template 中机械枚�
 
 ## 下一步，按实际依赖缺口推进
 
-1. 默认 Session 的 factory-origin 自动来源与 class 引用路径已核验；下一步补 **entry 时刻 namespace 状态投影与 IMPORT_FROM**，再供调用解析/共同固定点消费。origin 全范围独立发布、其它未支持作用域仍须补齐。不能以名称猜目标。CEM 48 个调用的分类、三条原端点断边和收据在 `queries/lewm-call-gaps.json`。
-   该 CEM 模块和工具模块实际已完整展开，不能把其 G-origin/IMPORT_FROM 问题归因于模块后缀。一般 self/descriptor 来源另行补齐。创建 G 的引用关系不证明调用时内容；不制造 CALL，也不复用创建 world 冒充 entry world。
+1. 默认 factory-origin 与 class 引用链、绝对 IMPORT_FROM 已核验；下一步集中补 **不依赖已解析 CALL 的 entry namespace 状态投影**，让共同值来源与调用解析实际消费，打破 bootstrap 循环；保留原 key/world、初始化与后续覆盖条件。随后补相对 package/class import 与一般 self/descriptor。origin 全范围发布仍待完成。CEM 原 48 个调用的分类、断边和收据在 `queries/lewm-call-gaps.json`。
+   CEM 模块与工具模块均已完整展开；不能误归因为主体后缀。创建 G 的引用关系不证明入口内容；不制造 CALL，也不复用创建 world 冒充 entry world。局部 v9 关系核验不更新主发布的目标计数。
 2. module AnnAssign 首个范围已定点核验；继续 class annotation、deferred child 及实际主体阻断，保留 lazy/future、namespace/world 和异常语义。发布主图时才更新其覆盖分母。
 3. 将原调用、逐地址 reaching writes、alias/effects、binding/容器与 Tensor 属性在共同固定点中反馈；把源码可推而缺规则与真正未绑定字段分开。
 4. 完成按需依赖材料和 Python/native 绑定、资源契约，覆盖加载→规划/推理→保存路径。CPU/GPU/DRAM/HBM/storage/stream 建模到可控制边界，不展开 OS FD 表或指令。

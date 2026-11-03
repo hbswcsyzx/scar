@@ -297,7 +297,12 @@ def _rule_plans(unit, entries, fragments, limit):
 
 
 def _call_relations(manifest, unit, entries, fragments, limit, *, body_loader=None):
-    """Read qualified v1-v5 relations and replay their original endpoint joins."""
+    """Read qualified relations and replay their original endpoint joins.
+
+    IMPORT_FROM keeps its own request/read ports.  The module validators
+    replay their source/compiler constants; supporting newer protocols never
+    adds fields or conditions to an older stored witness.
+    """
     from collections import OrderedDict
     from types import SimpleNamespace
     from scar.analysis.static_calls import input_basis_unit
@@ -766,6 +771,7 @@ def _call_relations(manifest, unit, entries, fragments, limit, *, body_loader=No
         ModuleAttributeDependencies, validate_import_module_route, validate_module_attribute_flow)
     from scar.ir.program.static_calls import (
         StaticArgumentValueFlow, StaticReturnValueFlow, StaticCrossBodyNamespaceFlow,
+        StaticAttributeAccess, StaticImportFromRead,
         StaticModuleAttributeFlow,StaticModuleGlobalsFlow)
     module_source_cache=OrderedDict()
     def module_source_context(body):
@@ -916,6 +922,15 @@ def _call_relations(manifest, unit, entries, fragments, limit, *, body_loader=No
                      "v6_module_provenance_checked": document['schema_version']>=6,
                      "v7_module_globals_state_checked": document['schema_version']>=7,
                      "v8_initializer_namespace_contract_checked": document['schema_version']>=8,
+                     "v9_from_import_ports_and_constants_checked": document['schema_version']>=9,
+                     "import_request_protocols": ({
+                         "plain_import": sum(route.request is None for route in shard.import_routes),
+                         "from_import": sum(route.request is not None for route in shard.import_routes),
+                     } if document['schema_version']>=6 else None),
+                     "module_read_protocols": ({
+                         "attribute": sum(type(flow.read) is StaticAttributeAccess for flow in shard.module_attribute_flows),
+                         "import_from": sum(type(flow.read) is StaticImportFromRead for flow in shard.module_attribute_flows),
+                     } if document['schema_version']>=6 else None),
                      "module_globals_flows": (_page(encode(shard.module_globals_flows),limit)
                          if document['schema_version']>=7 else None),
                      "import_routes": (_page(encode(shard.import_routes),limit) if document['schema_version']>=6 else None),

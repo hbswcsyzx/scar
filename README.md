@@ -81,11 +81,13 @@ scalar/type/来源字段；重复 `--boundary-operation program_operation:...` �
 函数对象/G 引用来源，无需调用者提供 origins 或已有 CALL targets。真实 CEM `solve.G`
 到 module G 的 6 条连续条件引用边记录在
 `artifacts/current/queries/factory-entry-origins-automatic.json`，约 32.76 秒；入口字典内容、
-IMPORT_FROM 和调用目标尚未解决。未知前缀＋已核接口后缀使用独立 Open context，不能
+调用目标尚未解决。绝对 IMPORT_FROM 已接真实 request/namespace binding 并在公共图独立
+读回，真实定点查询记录在 `artifacts/current/queries/import-from/summary.json`；主发布仍为
+v8，入口状态、相对导入与完整调用链待接通。未知前缀＋已核接口后缀使用独立 Open context，不能
 变成闭合空栈。walk/value/boundary 查询格式当前为 3/4/3，保留 `unknown_prefix` 与
 条件的有序 `operands` 引用；不能用旧格式忽略这些字段消解条件。
 
-输出只保留 `artifacts/current/static/`：每份源码共享 source/semantic/semantics/CFG/lexical 分片，常量事实和 import 候选索引连接原 ID。
+权威程序图只保留 `artifacts/current/static/`：每份源码共享 source/semantic/semantics/CFG/lexical 分片，常量事实和 import 候选索引连接原 ID。`queries/` 只保存引用这些原分片的派生查询及核验收据。
 `--phase sources` 仅建目录；`--phase graph` 为默认源码图；`--phase bodies` 构造源图后继续规范主体展开。对已有图使用 `--expand`，无需重建源图；`--rules-only` 只发布详细规则/前提，`--max-bodies` 与 `--file` 只限制本次派工，全部入口继续计入分母。
 `--refine` 使用已保留源码细化 scope/import，不重建源码图；`--refine --imports-only` 只更新 import 索引。图结构化展开与跨过程固定点仍未完成，命令成功不代表第一阶段完成。
 `--entry lexical:...` 可在 `--expand` 时按原入口 key 精准派工，不改变总目录。`--link-calls` 只在保存的原图上建立条件调用/参数/完成端口关系，预算和未处理范围写入原 manifest；更新主体或目录会废弃旧调用索引。查询 `--dependencies` 可读取这些跨主体端点，不能将单一候选解释为运行目标已确定。

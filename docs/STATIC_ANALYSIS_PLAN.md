@@ -22,8 +22,9 @@ CEM solve 的 48 个原 CALL 均无目标候选。先按原 callee/receiver/name
 首个具体断点已定位：solve 的 G/B namespace read 没有激活的入口环境来源；现有来源
 又依赖先解析 CALL target，形成 bootstrap 缺口。原 class suite 的函数 factory、捕获 G
 和 parent/provider/suite 输入链均已存在；该 CEM 模块与工具模块的主体后缀均完整，
-不能误归因为 AnnAssign/模块未展开。另一个独立缺口是 IMPORT_FROM 尚未参与模块来源
-求解；原 IMPORT_NAME/IMPORT_FROM/STORE_NAME 都有端口，不能用 ATTRIBUTE 冒充它。
+不能误归因为 AnnAssign/模块未展开。本轮开始时 IMPORT_FROM 也尚未参与模块来源
+求解；现已补绝对 FROM 的 request/常量/read/reaching-binding 与公共图读回，原
+IMPORT_NAME/IMPORT_FROM/STORE_NAME 端口继续保留，不用 ATTRIBUTE 冒充它。
 
 修复顺序：先增加不伪造 CALL 的有条件 factory→body 环境引用关系，再单独处理 entry
 时刻 namespace 内容和 IMPORT_FROM 协议，最后推进一般实例 receiver/descriptor 来源。
@@ -36,18 +37,34 @@ publication 的通用程序也能自动找到 module/nested/method 的原 factor
 分片未重建，仍没有全范围 origin 发布。下一项消费 **entry 状态与 IMPORT_FROM**；引用
 路径已连通不表示当前字典内容、调用目标或 effects 已闭合，也不表示第一阶段完成。
 
-IMPORT_FROM 的最小下一步：保存 IMPORT_NAME 的原 name/level/fromlist 请求及返回模式，
+IMPORT_FROM 首个范围已实现并在通用案例、真实定点查询中核验：保存原 name/level/fromlist 请求及返回模式，
 各成员保存自己的 receiver/key/world/normal result；从所选源码模块 namespace 的实际
 reaching binding payload 接到 IMPORT_FROM 结果，不按导入名直接跳到函数定义。plain
 import、fromlist 返回模块、属性读取和注册表 fallback 分开；relative/package、hook、
-动态 getattr、循环初始化与中间覆盖继续保留条件和字段前沿。旧 wire 维持旧 plain-import
-解释，新协议和 source-path 支持需要显式升级并独立读回，不伪造 ATTRIBUTE 或调用。
+动态 getattr、循环初始化与中间覆盖继续保留条件和字段前沿。v9 支持新协议和 source-path；
+旧 wire 维持原 plain-import 解释。真实查询的局部 v9 关系没有更新主发布；后续仍须补
+相对 package 的静态候选、class import 适配和当前状态消费，不将缺规则称为动态不可知。
 
 下一轮分三项并行准备、按依赖顺序验收：
 
 - **接线审计**：G 引用已自动追至原 module；接着把原 namespace read 的 key/world、entry state、初始化/后续 reaching writes 接起来，并接真实 IMPORT_FROM 结果。保留覆盖、hook、fallback 和未知写入的条件；不能从 G 引用推其内容。
 - **主体覆盖**：模块字面 bool If 和简单名称 AnnAssign 已实现并独立读回；真实两份模块定点重建的语句残留均为 0，deferred child 仍未展开。继续 class annotation 和后续主体缺口，复用原 compiler prelude/lazy factory/namespace/world。主图尚未替换，不改变其旧覆盖分母。
 - **同图推理**：控制必要条件到值路由已接入同一工作队列；保留原图/条件/反证。进一步将 receiver、字段读取和 reaching writes 回馈调用解析，避免专项 reader 各自得到事实而互不消费。
+
+入口状态的具体修复边界：现有 `_namespace_sources()` 依赖已激活 CALL，而
+`activate_target()` 又依赖先解析目标，构成 bootstrap 循环。不能用自动 factory 来源
+伪造 activation。后续需增加独立于 CALL 的 entry namespace projection：分别引用原
+G member、函数 entry world、原 read owner/key/world/result、模块 snapshot writer 与
+payload/world，附原来源路径及跨 snapshot→entry 的正常完成、先后与未覆盖条件。
+先用原 `entry_paths_to_read()` 检查函数内覆盖，再用 `bindings_at()` 查询候选源绑定；
+没有标准 import 初始化前提时，module L/G 仍独立。真实 CALL 已存在时保留原精确
+`StaticModuleNamespaceAtCall` 路径。新投影要让共同值来源和调用解析实际消费，保留
+Open/None context，不能塞入只支持闭合 CALL 链的旧 requirements 字段。
+
+该修复自行验收：无 CALL publication 时，通用方法的原 G read 也能得到带条件的初始化
+来源；函数内同 key 的后来写入覆盖旧来源；外部写入仍留开放项；不同 factory/context
+不能混合，普通 exec 的独立 L/G 不能借用 import 条件。随后从真实原 G read 查询到
+导入写入，再让调用解析消费同一来源证据；不能只增加记录类型或手工指定目标。
 
 全范围任务已于 2026-11-02 21:42 UTC PUBLISHED，producer 不再受该任务冻结。不要为
 核验小修复反复启动 107 分钟全范围 linker；先做原主体/接口检查，输入改变后再原子更新

@@ -1380,7 +1380,10 @@ class StaticCallSession:
             self.counts['module_attribute_flows']=sum(len(t)for t in modules.flows.values())
             self.counts['attribute_read_interfaces_cataloged']=sum(n[0]for n in modules.attribute_counts.values())
             self.counts['attribute_write_interfaces_cataloged']=sum(n[1]for n in modules.attribute_counts.values())
-            self.counts['attribute_read_contexts_processed']=len(modules.analyzed_reads)
+            self.counts['attribute_read_contexts_processed']=len(modules.analyzed_reads)-len(modules.analyzed_import_from_reads)
+            self.counts['import_from_read_interfaces_cataloged']=sum(modules.import_from_counts.values())
+            self.counts['import_from_read_contexts_processed']=len(modules.analyzed_import_from_reads)
+            self.counts['module_read_contexts_processed']=len(modules.analyzed_reads)
         self.relation_frontier_counts.clear()
         if self._module_attributes is not None:
             for rows in self._module_attributes.frontiers.values():
@@ -1522,7 +1525,7 @@ def build_static_call_links(directory, out, *, logical_root=None, expected_manif
     session.counts['published_relation_bodies']=len(shards)
     session.counts['published_zero_call_relation_bodies']=sum(s['calls']==0 for s in shards)
     modules=session._module_attributes
-    return {"schema": "scar.static-call-publication", "schema_version": 8,
+    return {"schema": "scar.static-call-publication", "schema_version": 9,
             "source_model": encode(session.basis), "input_manifest_sha256": session.manifest_sha256,
             "artifacts": session.artifacts, "shards": shards, "counts": dict(session.counts),
             "published_calls": published_calls,

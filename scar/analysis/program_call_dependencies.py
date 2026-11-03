@@ -19,9 +19,9 @@ from scar.ir.program.dependencies import (
 )
 from scar.ir.program.functions import FunctionKind
 from scar.ir.program.ids import OperationID, RegionID, UseID, ValueID
-from scar.ir.program.model import ValueKind
+from scar.ir.program.model import ExitKind, ValueKind
 from scar.ir.program.static_calls import (
-    FunctionEnvironmentRouteKind, StaticCallContext, ValueFlowCondition,
+    FunctionEnvironmentRouteKind, StaticCallContext, ValueFlowCondition, StaticImportFromRead,
 )
 
 
@@ -263,10 +263,14 @@ class StaticCallDependencyProvider:
         sources=body.module if getattr(body,'module',None)is not None else body.metadata
         call_operations={row.operation for row in sources.use_links if row.role=='callee'}
         call_operations.update(row.operation for row in body.metadata.call_targets)
+        import_operations={operation:kind for operation,kind in dependencies.protocols.items()
+            if kind in ('IMPORT_NAME_314','FUNCTION_IMPORT_NAME','IMPORT_FROM_314','FUNCTION_IMPORT_FROM')}
         if type(node)is OperationID and node in call_operations:roles.add('CALL_OPERATION')
+        if type(node)is OperationID and node in import_operations:roles.add('IMPORT_OPERATION')
         if type(node)is UseID:
             site=body.index.use_site(node)
             if site.operation in call_operations:roles.add('CALL_OPERAND')
+            if site.operation in import_operations:roles.add('IMPORT_OPERAND')
             if (site.operation in dependencies.writes and dependencies.writes[site.operation].payload==node
                     or any(row.use==node and row.role=='assigned-reference'for row in sources.use_links)):
                 roles.add('STATE_PAYLOAD')
@@ -277,10 +281,16 @@ class StaticCallDependencyProvider:
             origin=body.index.values[node].origin
             if type(origin)is BlockArgument:
                 for operation in body.graph.operations:
-                    if operation.id not in call_operations or operation.terminator is None:continue
+                    if (operation.id not in call_operations and operation.id not in import_operations
+                            or operation.terminator is None):continue
                     for edge in operation.terminator.successors:
                         if (edge.block==origin.block and origin.index<len(edge.arguments)
-                                and type(edge.arguments[origin.index])is CompletionResult):roles.add('CALL_COMPLETION')
+                                and type(edge.arguments[origin.index])is CompletionResult):
+                            if operation.id in call_operations:roles.add('CALL_COMPLETION')
+                            elif edge.kind is ExitKind.NORMAL and edge.arguments[origin.index].index==0:
+                                roles.add('IMPORT_COMPLETION')
+                                if import_operations[operation.id] in ('IMPORT_FROM_314','FUNCTION_IMPORT_FROM'):
+                                    roles.add('IMPORT_FROM_READ')
         if not roles:return False
         publication=getattr(self.session,'call_publication',None)
         scope=(publication or{}).get('scope',{})
@@ -300,7 +310,7 @@ class StaticCallDependencyProvider:
             note('UNBOUND_CALL_CONTEXT','Original entry/environment port has no selected caller frame; input identity is preserved without a caller union.')
         if outgoing and 'STATE_PAYLOAD'in roles and not scope.get('source_attribute_scope_complete',False):
             note('STATIC_RELATION_SCOPE_OPEN','Potential consumers of this original state payload depend on unclosed alias/escape/attribute scope.')
-        if not outgoing and 'NAMESPACE_READ'in roles and not scope.get('source_attribute_scope_complete',False):
+        if not outgoing and roles&{'NAMESPACE_READ','IMPORT_FROM_READ'} and not scope.get('source_attribute_scope_complete',False):
             note('NAMESPACE_STATE_CLOSURE_OPEN','Stored reaching bindings remain conditional on lookup, owner alias and intervening effects; enumeration is distinct from state closure.')
         return True
 
@@ -417,7 +427,9 @@ class StaticCallDependencyProvider:
                     if query in (source,target):note('MODULE_L_G_ALIAS_CONTRACT_OPEN',
                         'Original module L binding feeds a module attribute only under an unresolved module namespace alias contract.')
             emit(source,target,Kind.STATE_VALUE,Meaning.REFERENCE,_pointer(locator,'module_attribute_flows/'+str(ni)),
-                guards,(point(flow.read.body,flow.read.world,target.context),),rule='STATIC_MODULE_ATTRIBUTE_VALUE_V1')
+                guards,(point(flow.read.body,flow.read.world,target.context),),rule=(
+                    'STATIC_MODULE_IMPORT_FROM_VALUE_V1' if type(flow.read)is StaticImportFromRead
+                    else 'STATIC_MODULE_ATTRIBUTE_VALUE_V1'))
         for ni,flow in enumerate(shard.module_globals_flows):
             self._globals(flow,_pointer(locator,'module_globals_flows/'+str(ni)),emit,note,query)
 
