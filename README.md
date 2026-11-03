@@ -2,8 +2,9 @@
 
 State · Control · Action · Resource：通过程序依赖图支持自动化简。
 
-当前只完成第一阶段：**静态建立共享子图，动态补充实际实例和绑定，接通跨层依赖**。
+当前只开发第一阶段：**静态建立共享子图，动态补充实际实例和绑定，接通跨层依赖**。
 第一阶段尚未完成，不启用目标程序变换，也没有 LeWM 加速比结论。
+形式前端按F0→F1→F2逐层验收；声明材料的F0/F1已通过，下一项是F2完整语法记录。
 LeWM 是外部 testcase；通用规则不按业务名称选择处理方式。
 
 ## 使用
@@ -21,7 +22,7 @@ python -B -m scar.cli static /path/to/program --out /path/to/model --phase bodie
 ## 文档
 
 - [模型](docs/MODEL.md)：实体、身份、边、可展开结构与正确性约束。
-- [流程](docs/ARCHITECTURE.md)：六层建图流水线及动静分工。
+- [流程](docs/ARCHITECTURE.md)：形式前端、建图流水线及动静分工。
 - [开发用法](docs/DEVELOPMENT.md)：命令、查询接口和工作区约定。
 - [当前状态](docs/STATUS.md)：真实结果、缺口与下一步。
 

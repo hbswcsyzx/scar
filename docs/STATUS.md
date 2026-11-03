@@ -1,7 +1,7 @@
 # 当前状态
 
 **第一阶段未完成。当前按形式阶段重新验收：F0 → F1 → F2 → F3 → F4 → F5 → F6。**
-阶段定义见 [ARCHITECTURE](ARCHITECTURE.md)。前层未验收前不新增后层实现；组合cleanup开发暂缓。
+阶段定义见 [ARCHITECTURE](ARCHITECTURE.md)。F0/F1已按声明输入域验收；下一层为F2，组合cleanup开发暂缓。
 现有后层代码及成果保留，但不能代替前端完整性证明。
 
 ## F0：原始材料
@@ -30,22 +30,30 @@ partial不覆盖当前模型；归档仅追加owned材料，保所有旧端点�
 并行归档改用spawn隔离。3例通过；866份补充fresh核验4.72秒，材料与manifest未变。
 补验：`artifacts/current/queries/formal-frontend-f0/warning-policy-verification/result.json`。
 
-## 仍未通过的形式层
+## F1验收与下一层
 
-1. **F1词法**：尚无完整token/exact_type/trivia/EOF产物。下一项先实现并逐文件对照官方tokenizer，
-   明确字符、UTF-8字节坐标及错误前缀，完整分区原文；验收前不开发F2。
-2. **F2语法**：现static_lexical实际是AST/作用域导航。访问数量相等不证明所有字段已保留；
+**F1词法已验收**：866份声明源码共1,961,177个token，全部真实EOF；4个spawn进程采集44.41秒，
+独立fresh重放109.73秒。866个词法分片共82,316,986压缩bytes；没有运行parser/symtable或目标。
+保存全部TokenInfo字段、exact_type、可逆换行视图、三种坐标、source gap、native错误参数、warnings及预算状态。
+闭合schema含69个terminal与48个exact operator；实际源码观察13种terminal，不能混作69种均实际执行。
+7个聚焦检查通过（2.57秒），有限族独立核源码引用/覆盖区间，并覆盖全部48操作符和140个前缀引号组合。
+捕获后去掉新增词法收据可精确还原F0 manifest SHA；旧22,532分片及端点保持，fresh核验不改模型。
+证据：`artifacts/current/queries/formal-frontend-f1/{run.json,acquisition/result.json,verification/result.json}`。
+验收限本机profile与声明目录，不证明依赖发现完整，也不是穷举任意输入字符串或错误消息。
+
+1. **F2语法**：现static_lexical实际是AST/作用域导航。访问数量相等不证明所有字段已保留；
    scalar、None槽、空列表、字段存在性仍有缺口。parser的type_comments参数也不统一，同源Name ID可错位。
-3. **F3绑定**：官方symtable存在，但AST→scope仍有候选对应，(name,line)不能作为唯一身份。
+   下一项固定parser参数、按constructor×field无损保存/还原，再对全部声明源码验收；不先改绑定或规范IR。
+2. **F3绑定**：官方symtable存在，但AST→scope仍有候选对应，(name,line)不能作为唯一身份。
    后续需按固定constructor+field上下文覆盖每个名字来源字段，而非凭功能样例通过。
 
 ## 当前模型与已有后层证据
 
 `artifacts/current/static/manifest.json` SHA-256：
-`8b2f6b5743de13a068a9c233d254a44fef7df430f968ab29def3eeb4205bf564`。
-22532个压缩分片、2,463,543,281 bytes；包含材料、索引和诊断，不能全算实现图。
+`55e18833d6f7c41d862fe1b15f749f2bfba5c559a74dcc0ae7945cd303db47ff`。
+23398个压缩分片、2,545,860,267 bytes；包含材料、索引和诊断，不能全算实现图。
 规范主体仍8098个、1,264,142操作；无图诊断与未展开声明继续单列。
-旧CALL/class/import关系仍仅覆盖原basis，F0追加不能升级这些覆盖范围。
+旧CALL/class/import关系仍仅覆盖原basis，F0/F1追加不能升级这些覆盖范围。
 
 先前保存的CEM probe（人工quadratic cost、2轮×4候选）已有81次CALL、9条Python返回、580条双向核查边；
 不是完整模型或episode。证据在`artifacts/current/queries/lewm-native-callables/graph-cleanup-returns/validation.json`，

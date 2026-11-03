@@ -453,6 +453,9 @@ def main(argv=None) -> int:
     if cli_argv and cli_argv[0] == 'source-bytes':
         from scar.analysis.source_materials import main as source_materials_main
         return source_materials_main(cli_argv[1:])
+    if cli_argv and cli_argv[0] == 'source-tokens':
+        from scar.analysis.source_lexing import main as source_lexing_main
+        return source_lexing_main(cli_argv[1:])
     if cli_argv and cli_argv[0] == "static":
         from scar.analysis.static_program import main as static_main
         return static_main(cli_argv[1:])
@@ -472,6 +475,8 @@ def main(argv=None) -> int:
     sub = parser.add_subparsers(dest="subcommand", required=True)
     source_materials = sub.add_parser('source-bytes', help='F0: preserve source bytes without lexing, parsing or execution')
     source_materials.set_defaults(func=lambda _: 0)
+    source_tokens = sub.add_parser('source-tokens', help='F1: lex retained F0 bytes without parsing or execution')
+    source_tokens.set_defaults(func=lambda _: 0)
     static_cmd = sub.add_parser("static", help="build source-root program graphs without executing the target")
     static_cmd.set_defaults(func=lambda _: 0)
     static_query = sub.add_parser("static-query", help="query stored static definitions and original graph dependencies")

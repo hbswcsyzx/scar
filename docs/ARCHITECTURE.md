@@ -12,7 +12,7 @@ LeWM 是外部 testcase；通用规则由语言协议、原端口和证据派发
 | 阶段 | 封闭输入 → 机械输出 | 验收对象 |
 |---|---|---|
 | F0 材料 | 原始bytes、来源/版本 → 原字节blob、编码结果或结构化错误 | SHA/长度/精确还原；不调用lexer/parser |
-| F1 词法 | F0可解码材料 → 官方全部token/exact_type、源切片、trivia、EOF或词法错误前缀 | 与官方token流逐项相等，文本无漏无重分区 |
+| F1 词法 | F0材料 → 官方全部token字段/exact_type、源码区间与gap、EOF或错误前缀 | 与官方流逐项相等；源码覆盖并集+gap无漏无重分区 |
 | F2 语法 | 同源词法输入、固定parser参数 → 完整constructor/有序字段/子节点槽/带类型标量/坐标 | 无损还原官方AST，含None、空列表及字段存在性 |
 | F3 绑定 | F2 occurrence及官方symtable → scope树、全部名字来源字段的角色/绑定关系 | 全scope/symbol/namespace链及名字字段分母；不按名称+行号猜 |
 | F4 规范IR | F2/F3及版本化语言规则 → Operation/Value/StateLocation/Region/Resource、CFG/SSA/完成端口 | 每个语法类别×上下文有构造规则，控制/状态/效果约束成立 |
@@ -25,6 +25,11 @@ F1/F2使用官方前端，不重造Python lexer/parser；AST是语法输入，�
 F0当前是独立命令，旧static入口不能视为已经自动执行它；现有AST目录计数不证明F1/F2通过。
 F0的V1解释规则忽略codec警告（原bytes保留），不继承调用方warnings-as-error；
 串行解释或spawn进程隔离，避免共享warning过滤器相互干扰。
+F1固定官方token表和实现指纹，通过显式CRLF/CR→LF视图调用generate_tokens，不增加末尾换行。
+原生行列、原decoded字符区间及view UTF-8字节区间分开；虚拟EOF不裁剪，gap不全是trivia。
+string/line以共享精确文本引用存储；相同文本引用不代表同一源位置，原token extent另存。
+TOKENIZED、TOKENIZER_ERROR、BUDGET_STOPPED、UPSTREAM_DECODING_ERROR分开；真ENDMARKER并确认耗尽才算EOF。
+词法warnings单独记录；spawn进程隔离过滤器。budget前缀不覆盖当前模型，fresh读取逐字段重放。
 
 ## 共享子图与可组合接口
 
@@ -80,7 +85,7 @@ artifacts/current/queries/ 保存派生查询证据，不是第二份权威程�
 选中 CEM 循环的边界查询已在原预算内完成；这不证明状态、效果、资源或整个程序闭合。
 
 可证明的线性编译栈来源已接原cleanup返回；跨跳转合流继续保留候选，不按None猜来源。
-这些是已有局部结果，不证明形式前端完备。当前从F0重新逐层验收；F1完成前不新增F2及后层实现。
+这些是已有局部结果，不证明形式前端完备。F0/F1已对声明材料验收；下一层只做F2无损语法，验收前不新增F3及后层实现。
 不得把裸 context=None 的观测边注册为全局事实，也不得丢弃未执行的异常路径。
 Python→native/runtime/kernel、Tensor 属性、alias/effects 与资源连接仍需按实际缺口补齐。
 第一阶段只有在实体、结构、连接、属性和覆盖均经核查后才完成。

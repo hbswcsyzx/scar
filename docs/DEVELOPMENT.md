@@ -10,10 +10,16 @@
 python -B -m scar.cli source-bytes --file /path/to/program.py --out /path/to/fresh-material
 python -B -m scar.cli source-bytes --model /path/to/model --out /path/to/fresh-f0 --jobs 4
 python -B -m scar.cli source-bytes --model /path/to/model --out /path/to/fresh-check --verify
+python -B -m scar.cli source-tokens --model /path/to/model --out /path/to/fresh-f1 --jobs 4
+python -B -m scar.cli source-tokens --model /path/to/model --out /path/to/fresh-lexical-check --verify --jobs 4
 ```
 
 F0只保原始bytes与编码结果。解码失败仍存原bytes；文件不可用/预算停止准确报错，不给后层授权。
-现有模型仅追加raw材料；旧源码和IR保持。下一阶段是F1，前层验收完成前不新增后层功能。
+现有模型只追加每源raw/token分片；旧源码和IR保持。F1也可用`--file PATH`独立采集（先执行F0）。
+`--max-tokens`是每源上限；verify按原工件预算重放，原预算超过本次上限则拒绝，不会静默忽略限制。
+F1只转录词法，不证明语法有效；原生错误保prefix，预算停止不发布partial模型。
+F0/F1声明材料验收已通过，下一阶段是F2完整AST字段，前层未验收不新增后层功能。
+当前profile固定本机CPython及tokenizer源码/静态解释器二进制指纹；内置tokenizer的shared Python暂不接纳。
 
 ## 已有建图入口（前端形式验收尚未完成）
 
