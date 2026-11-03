@@ -137,10 +137,13 @@ def _candidate(entry, captured):
     return name == captured.qualname.replace('.<locals>.', '.')
 
 
-def _locate(owner, captured, selected_site, issues, cache):
-    key = captured, selected_site
+def _locate_body(owner, captured, issues, cache):
+    """Share original body coordinates, never a second graph or code owner."""
+    key = 'observed-code-body', captured
     if key in cache:
-        return cache[key]
+        number, position = cache[key]
+        body = owner._body(owner._unit(number), position, owner.units[number]['bodies'][position])
+        return body, _compiler(body)
     matches = []
     numbers = [i for i, unit in enumerate(owner.units) if unit['path'] == captured.filename]
     if not numbers:
@@ -164,34 +167,44 @@ def _locate(owner, captured, selected_site, issues, cache):
                 code = _compiler(body)
                 if describe_code(code) != encode(captured):
                     continue
-                if decode(CapturedSite, code_site(code, selected_site.offset)) != selected_site:
-                    raise LookupError('CAPTURED_CALL_SITE_MISMATCH')
-                if selected_site.opname is None or not selected_site.opname.startswith('CALL'):
-                    raise LookupError('CAPTURED_SITE_IS_NOT_CALL')
-                links = [link for link in body.operation_links if link.opcode is Opcode.CALL
-                    and type(link.source) is SourceReference and
-                    (link.source.start_line, link.source.end_line, link.source.start_column,
-                     link.source.end_column) == selected_site.position]
-                if len(links) != 1:
-                    raise LookupError('ORIGINAL_CANONICAL_CALL_NOT_UNIQUE')
-                link, = links
-                uses = [item.use for item in body.uses_by_op[link.operation] if item.role == 'callee']
-                if len(uses) != 1:
-                    raise LookupError('ORIGINAL_CALL_CALLEE_USE_NOT_UNIQUE')
-                use = body.index.use_site(uses[0])
-                if (use.operation != link.operation
-                        or type(body.index.values[use.use.value]) is not ReferenceValue):
-                    raise ValueError('original CALL callee is not its owned reference Use')
-                namespace = GraphNamespace.from_source(body.namespace)
-                matches.append((Point(namespace, link.operation, None),
-                                Point(namespace, uses[0], None), link.source))
+                matches.append((number, position))
             except (ValueError, LookupError, TypeError, SyntaxError) as error:
                 issues.append({'kind': 'CALLER_SOURCE_OR_INTERFACE_OPEN', 'entry': entry['entry_key'],
                                'file': captured.filename, 'detail': type(error).__name__ + ': ' + str(error)})
     if len(matches) != 1:
-        raise LookupError('CALLER_CODE_OR_PORT_NOT_UNIQUE: ' + str(len(matches)) + ' complete matches')
+        raise LookupError('CAPTURED_CODE_BODY_NOT_UNIQUE: ' + str(len(matches)) + ' complete matches')
     cache[key] = matches[0]
-    return matches[0]
+    number, position = matches[0]
+    body = owner._body(owner._unit(number), position, owner.units[number]['bodies'][position])
+    return body, _compiler(body)
+
+
+def _locate(owner, captured, selected_site, issues, cache):
+    key = captured, selected_site
+    if key in cache:
+        return cache[key]
+    body, code = _locate_body(owner, captured, issues, cache)
+    if decode(CapturedSite, code_site(code, selected_site.offset)) != selected_site:
+        raise LookupError('CAPTURED_CALL_SITE_MISMATCH')
+    if selected_site.opname is None or not selected_site.opname.startswith('CALL'):
+        raise LookupError('CAPTURED_SITE_IS_NOT_CALL')
+    links = [link for link in body.operation_links if link.opcode is Opcode.CALL
+        and type(link.source) is SourceReference and
+        (link.source.start_line, link.source.end_line, link.source.start_column,
+         link.source.end_column) == selected_site.position]
+    if len(links) != 1:
+        raise LookupError('ORIGINAL_CANONICAL_CALL_NOT_UNIQUE')
+    link, = links
+    uses = [item.use for item in body.uses_by_op[link.operation] if item.role == 'callee']
+    if len(uses) != 1:
+        raise LookupError('ORIGINAL_CALL_CALLEE_USE_NOT_UNIQUE')
+    use = body.index.use_site(uses[0])
+    if use.operation != link.operation or type(body.index.values[use.use.value]) is not ReferenceValue:
+        raise ValueError('original CALL callee is not its owned reference Use')
+    namespace = GraphNamespace.from_source(body.namespace)
+    result = Point(namespace, link.operation, None), Point(namespace, uses[0], None), link.source
+    cache[key] = result
+    return result
 
 
 def build_observed_call_bindings(model, trace, out, budget=None):
@@ -214,6 +227,7 @@ def build_observed_call_bindings(model, trace, out, budget=None):
     captures = {(capture.process_id, capture.code.key): capture.code for capture in raw.frame_scan.captures}
     attempts = {(attempt.process_id, attempt.index): attempt for attempt in raw.attempts}
     bindings, issues, cache = [], [], {}
+    function_interfaces, function_issues = (), ()
     owner = StaticCallSession(model, out=out / 'source-basis', budget=limits)
     stable = False
     try:
@@ -234,6 +248,9 @@ def build_observed_call_bindings(model, trace, out, budget=None):
                     'attempt_index': attempt.index, 'detail': type(error).__name__ + ': ' + str(error)})
                 if isinstance(error, (OverflowError, TimeoutError)):
                     break
+        from scar.analysis.observed_function_interfaces import derive_observed_function_interfaces
+        function_interfaces, function_issues = derive_observed_function_interfaces(
+            owner, raw, observed, tuple(bindings), cache)
     finally:
         owner.close()
         stable = True
@@ -250,6 +267,14 @@ def build_observed_call_bindings(model, trace, out, budget=None):
     out.mkdir(parents=True, exist_ok=True)
     with (out / 'bindings.json.gz').open('xb') as stream:
         stream.write(stored)
+    from scar.analysis.observed_function_interfaces import export_observed_function_interfaces
+    function_raw = _json(export_observed_function_interfaces(function_interfaces))
+    function_stored = gzip.compress(function_raw, compresslevel=3, mtime=0)
+    if (len(function_raw) > limits.max_record_bytes
+            or len(function_stored) + len(stored) > limits.max_output_bytes):
+        raise OverflowError('observed function interface output byte budget exhausted')
+    with (out / 'function-interfaces.json.gz').open('xb') as stream:
+        stream.write(function_stored)
     report = {'schema': 'scar.observed-call-binding-summary', 'schema_version': 1,
         'model': str(owner.root), 'input_manifest_sha256': owner.manifest_sha256,
         'trace': raw.directory, 'run_scope': observed.source_sha256,
@@ -262,11 +287,19 @@ def build_observed_call_bindings(model, trace, out, budget=None):
             'attempt_index': binding.target.attempt_index, 'class_origin_verified': False}
             for binding in bindings],
         'target_kinds': dict(Counter(binding.target.kind.value for binding in bindings)),
+        'function_interface_count': len(function_interfaces),
+        'function_argument_ports': sum(len(item.interface.arguments) for item in function_interfaces),
+        'function_completion_routes': sum(len(item.interface.completions) for item in function_interfaces),
+        'function_selected_returns': sum(item.selected_return is not None for item in function_interfaces),
+        'function_interface_issues': function_issues,
         'issues': issues, 'input_receipts_stable_at_close': stable,
         'raw_capture_files': encode((*raw.frame_scan.files, *raw.files)),
         'artifacts': [{'path': 'bindings.json.gz', 'bytes': len(stored),
             'sha256': hashlib.sha256(stored).hexdigest(), 'decoded_bytes': len(decoded),
-            'decoded_sha256': hashlib.sha256(decoded).hexdigest()}],
+            'decoded_sha256': hashlib.sha256(decoded).hexdigest()},
+            {'path': 'function-interfaces.json.gz', 'schema': 'scar.observed-function-interfaces/1',
+            'bytes': len(function_stored), 'sha256': hashlib.sha256(function_stored).hexdigest(),
+            'decoded_bytes': len(function_raw), 'decoded_sha256': hashlib.sha256(function_raw).hexdigest()}],
         'measurements': dict(owner.counts), 'analyzer_seconds': time.monotonic() - started,
         'target_executed': False, 'trace_represents_observed_execution': True,
         'observation_only': True, 'class_origin_verified': False,

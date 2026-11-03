@@ -11,6 +11,10 @@ from scar.ir.semantics_v2 import SourceSnapshot
 from scar.trace.code_snapshot import describe_code
 
 PROFILE='SCAR_LEAN_PORTS_V1'
+# Both opcodes expose their actual callable through sys.monitoring.CALL.
+# This permits target/entry observation, not keyword argument-role inference.
+# CALL_FUNCTION_EX and intrinsic families retain their unsupported locations.
+_OBSERVABLE_CALLS=('CALL','CALL_KW')
 
 def _need(value,message):
     if not value:raise ValueError(message)
@@ -69,7 +73,7 @@ class LeanCapturePlan:
                 sources[str(path)]=SourceSnapshot(str(path),'sha256:'+hashlib.sha256(text.encode()).hexdigest(),'utf-8',f'{sys.version_info.major}.{sys.version_info.minor}')
             instructions=tuple(dis.get_instructions(code))
             calls=tuple(i.offset for i in instructions if i.opname.startswith('CALL'))
-            unsupported=tuple(i.offset for i in instructions if i.opname.startswith('CALL') and i.opname!='CALL')
+            unsupported=tuple(i.offset for i in instructions if i.opname.startswith('CALL') and i.opname not in _OBSERVABLE_CALLS)
             bodies.append(LeanBodyPlan(sources[str(path)],decode(CapturedCode,describe_code(code)),calls,unsupported))
         return cls(str(Path(namespace_root).resolve()),tuple(bodies),max_codes)
     @classmethod
@@ -95,7 +99,7 @@ class LeanCapturePlan:
             instructions=tuple(dis.get_instructions(code))
             body=LeanBodyPlan(entry.reference.snapshot,entry.captured,
                 tuple(i.offset for i in instructions if i.opname.startswith('CALL')),
-                tuple(i.offset for i in instructions if i.opname.startswith('CALL') and i.opname!='CALL'))
+                tuple(i.offset for i in instructions if i.opname.startswith('CALL') and i.opname not in _OBSERVABLE_CALLS))
             previous=bodies.setdefault(body.code.key,body)
             _need(previous==body,'one selector key has conflicting source/code variants')
             _need(len(bodies)<=max_codes,'lean plan code budget exceeded')

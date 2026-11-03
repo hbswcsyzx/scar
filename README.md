@@ -113,10 +113,14 @@ python -B -m scar.cli observed-calls --model /path/to/static-model \
   --trace /path/to/fresh-trace --out /path/to/fresh-bindings
 ```
 
-`observed-calls` 只离线连接，不执行目标。输出规范化 `bindings.json.gz` 与 summary；
-`read_observed_call_bindings()` 提供强类型读回。实际 callable 绑定原 CALL/callee Use，
+`observed-calls` 只离线连接，不执行目标。输出规范化 `bindings.json.gz`、
+`function-interfaces.json.gz` 与 summary；对应 `read_observed_call_bindings()`、
+`read_observed_function_interfaces()` 提供强类型读回。实际 callable 绑定原 CALL/callee Use，
 运行实例与共享定义分别表示；类对象身份不等于源码类声明来源证明。通用多态案例及成本见
 `artifacts/current/queries/observed-call-demo/result.json`。frame profile hooks 仍存在，未宣称零干扰。
+新计划支持 `CALL_KW` 身份观测；完全提供的位置/普通关键字参数可接原函数接口，
+receiver/default/variadic 及未展开主体仍报告具体缺口。真实 LeWM 求解器（人工 cost、非 episode）
+的参数/返回核验见 `artifacts/current/queries/lewm-observed-calls/result.json`。
 
 权威程序图只保留 `artifacts/current/static/`：每份源码共享 source/semantic/semantics/CFG/lexical 分片，常量事实和 import 候选索引连接原 ID。`queries/` 只保存引用这些原分片的派生查询及核验收据。
 `--phase sources` 仅建目录；`--phase graph` 为默认源码图；`--phase bodies` 构造源图后继续规范主体展开。对已有图使用 `--expand`，无需重建源图；`--rules-only` 只发布详细规则/前提，`--max-bodies` 与 `--file` 只限制本次派工，全部入口继续计入分母。

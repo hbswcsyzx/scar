@@ -1,5 +1,6 @@
 """CALL-only observations bind instances to shared original static ports."""
 import hashlib
+import gzip
 import json
 from pathlib import Path
 import subprocess
@@ -13,6 +14,9 @@ import pytest
     reason='the existing lean CALL collector uses the CPython 3.14.7 contract')
 def test_two_actual_classes_bind_one_static_call_without_claiming_class_origin(tmp_path):
     from scar.analysis.observed_call_bindings import build_observed_call_bindings
+    from scar.analysis.observed_function_interfaces import read_observed_function_interfaces
+    from scar.ir.program.call_edges import FrameCompletion
+    from scar.ir.program.model import ExitKind
     from scar.trace.lean_capture import LeanCapturePlan
     from scar.trace.python_call_targets import _is_type_object
 
@@ -39,6 +43,12 @@ def test_two_actual_classes_bind_one_static_call_without_claiming_class_origin(t
     source.mkdir()
     program = source / 'program.py'
     text = (repository / 'examples/python_observed_calls/program.py').read_text()
+    prefix, assertion, suffix = text.partition('assert first.value == second.value == 3')
+    assert assertion
+    # The existing module lowerer stops at Assert. Keep that source boundary;
+    # this test binds CALLs in its canonical prefix, not Assert or its suffix.
+    text = (prefix + '\n\ndef select(first, second):\n    return second\n\n'
+        'mixed = select(11, second=29)\n' + assertion + suffix + 'assert mixed == 29\n')
     program.write_text(text)
     original = hashlib.sha256(program.read_bytes()).hexdigest()
     model = tmp_path / 'model'
@@ -89,6 +99,55 @@ def test_two_actual_classes_bind_one_static_call_without_claiming_class_origin(t
     assert len({binding['invocation_id'] for binding in calls}) == 2
     assert all(binding['class_origin_verified'] is False for binding in calls)
     assert sum(binding['kind'] == 'FUNCTION' for binding in report['bindings']) >= 2
+
+    # The same raw run supplies entry/exit instances. Static interface ports
+    # remain shared declarations; an observed normal return does not delete
+    # the function's other completion alternatives.
+    interfaces = read_observed_function_interfaces(gzip.decompress(
+        (tmp_path / 'bindings' / 'function-interfaces.json.gz').read_bytes()))
+    assert report['function_interface_count'] == len(interfaces)
+    assert all(item.binding.target.kind.value == 'FUNCTION' for item in interfaces)
+    build_lines = {text.splitlines().index(statement) + 1
+        for statement in ('first = build(Left)', 'second = build(Right)')}
+    builds = [item for item in interfaces if item.binding.source.start_line in build_lines]
+    assert len(builds) == 2
+    assert builds[0].interface.body == builds[1].interface.body
+    assert len({item.entry.callee for item in builds}) == 2
+    assert {item.entry.callee.invocation_id for item in builds} == {
+        binding['invocation_id'] for binding in calls}
+    for item in builds:
+        assert item.entry.caller == item.binding.target.caller
+        assert item.entry.caller != item.entry.callee
+        assert item.observed_exit is not None
+        assert item.observed_exit.invocation == item.entry.callee
+        assert item.observed_exit.completion is FrameCompletion.NORMAL
+        assert item.selected_return in item.interface.normal_returns
+        assert item.interface.qualification == 'STATIC_CALL_INTERFACE_NOT_DISPATCH'
+        completion_kinds = {route.kind for route in item.interface.completions}
+        assert ExitKind.NORMAL in completion_kinds
+        # A declared exception packet can require an ABI adapter before a
+        # route is connected. Observing NORMAL does not prove RAISE impossible.
+        if ExitKind.RAISE not in completion_kinds:
+            assert any(frontier.kind == 'COMPLETION_PAYLOAD_ADAPTER_REQUIRED'
+                for frontier in item.interface.frontiers)
+        port, = item.interface.arguments
+        assert port.operation == item.binding.call.node
+        assert port.actual_body == item.binding.call.namespace.source_body
+        assert port.formal_body == item.interface.body
+        assert port.formal_name == 'cls'
+
+    keyword_line = text.splitlines().index('mixed = select(11, second=29)') + 1
+    keyword, = (item for item in interfaces if item.binding.source.start_line == keyword_line)
+    assert keyword.binding.captured_site.opname == 'CALL_KW'
+    assert keyword.entry.caller == keyword.binding.target.caller
+    assert keyword.observed_exit.invocation == keyword.entry.callee
+    assert keyword.observed_exit.completion is FrameCompletion.NORMAL
+    assert keyword.selected_return in keyword.interface.normal_returns
+    assert {port.formal_name for port in keyword.interface.arguments} == {'first', 'second'}
+    assert len({port.actual_use for port in keyword.interface.arguments}) == 2
+    assert all(port.operation == keyword.binding.call.node
+        and port.formal_body == keyword.interface.body for port in keyword.interface.arguments)
+    assert any(route.kind is ExitKind.NORMAL for route in keyword.interface.completions)
     assert hashlib.sha256(program.read_bytes()).hexdigest() == original
     assert hashlib.sha256((model / 'manifest.json').read_bytes()).hexdigest() == manifest_hash
     assert not tuple(trace.glob('torch-profiler.*'))

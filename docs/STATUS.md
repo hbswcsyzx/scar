@@ -222,11 +222,17 @@ C++ source 前端复用 Tree-sitter，实际 53,705-byte template 中机械枚�
 
 单个通用集成案例通过（7.89 秒）。持久案例 `queries/observed-call-demo/result.json` 中，同一个静态 `cls(3)` CALL/callee Use 对应两个不同实际类对象和调用实例；共 4 条绑定（另含 2 条函数调用），规范化产物强类型读回通过。静态构建 2.58 秒、启动至采集/转换完成 3.54 秒、离线 CLI 连接 1.69 秒；采集目录 60,362 bytes，绑定 gzip 2,693 bytes。这是小案例的工具成本，未测真实应用采集开销或加速比；现有 frame profile hooks 仍在使用，不能称零干扰或只有 CALL 回调。
 
-**边界**：实际类对象身份已知，不等于已证明它来自哪个源码类声明；`class_origin_verified=false`，没有将静态候选改为无条件事实。未据此接通构造回调、完整参数/返回/状态依赖或 GPU/kernel；本轮没有动态运行 LeWM，原 LeWM 静态核验和主发布保持原值。
+**Implemented / Verified（真实 LeWM 路径）**：新 plan 支持 `CALL_KW` 的实际 callable/entry 观测，`CALL_FUNCTION_EX` 等仍明确 unsupported。离线连接复用原 `StaticCallInterface`，每条记录限定真实 caller/callee activation；完全提供的位置/普通关键字参数可接原参数、状态入口、completion 和实际正常返回，不把实例关系灌成全局 None-context 无条件边。新增 `function-interfaces.json.gz` 及强类型读回。
+
+未修改的 LeWM CEM 在 RTX 4090 上运行 2 轮、每轮 4 个候选，使用外部 testcase 的人工 quadratic cost，输出形状 `[1,2,2]`，不是训练模型或完整 episode。81 次观测中 59 次接原 CALL；`cem.py:134` 的 `CALL_KW` 接实际 `solver/utils.py` 函数入口、6 个参数、3 条 completion payload 路由及实际正常返回。采集目录 **286,403 bytes**，两份连接 gzip 共 **33,290 bytes**；原收据稳定、产物收据和强类型读回通过。唯一通用集成用例通过（8.26 秒）。
+
+证据在 `queries/lewm-observed-calls/result.json`。采集含启动/导入/转换 **49.28 秒**，离线连接 **33.57 秒**；未采集的单次正确性 probe 含启动/导入 **7.90 秒**。这不是重复 overhead benchmark，不能宣称低干扰；当前 frame profile hooks 仍使启动导入昂贵。历史数据/权重路径当前不存在，未运行 episode。主发布及原静态覆盖分母未改。
+
+**边界**：实际类对象身份不等于源码类声明来源；类构造回调、隐式 receiver/default/variadic、完整对象/Tensor 状态和 GPU/kernel 连接仍缺。22 次未绑定 CALL 分别保留源单位未提供或原 CALL 不唯一等理由；部分已观测函数缺规范主体。通用案例还定位到模块 `Assert` 未展开后缀，该欠账没有通过删语句或造端口掩盖。
 
 ## 下一步，按实际依赖缺口推进
 
-先将已观察调用绑定用于原参数/返回接口的实例化查询，再补类最终产物的来源证据与隐式 receiver；只补所需字段，不采 Tensor 数值或启用整套 profiler。静态已知连接保留，未执行路径仍按静态条件表示；动态观察不能删除其它合法候选。以下整程序静态覆盖欠账继续有效。
+下一步按已观测 CodeID/原 catalog entry 触发按需主体展开，并处理隐式 receiver/default 等接口缺口；类最终产物来源单独补证。只补所需字段，不采 Tensor 数值或启用整套 profiler。静态已知连接保留，未执行路径仍按静态条件表示；动态观察不能删除其它合法候选。以下整程序静态覆盖欠账继续有效。
 
 1. 默认 factory-origin、入口状态投影、contextual 调用接口和模块 receiver 桥接已在选中真实 CALL 接通；下一步沿已识别类产物核对 slot 的 Python 回调、descriptor/隐式 receiver，仍按 **原 48 个 CALL 的第一处断边**归因。相对导入仅补了有声明 package 的模块候选；class FROM 编译适配、函数字段/defaults、循环与递归摘要仍欠账。保留条件/未知前缀，不能退回名字提示填目标。origin 和 contextual 关系的全范围发布仍待完成；旧发布计数不能冒充最新闭包。
    CEM 模块与工具模块均已完整展开；不能误归因为主体后缀。创建 G 的引用不证明入口内容；不制造 CALL，不复用 creation world，不由局部 1 个目标推定全部 48 个已经解决。原分类与收据在 `queries/lewm-call-gaps.json`。

@@ -166,6 +166,10 @@ class PythonTargetObserver:
                 'callable_reference':call_ref,'function_reference':None,'code':None,'layout':None,
                 'receiver':None,'scope':Scope.NO_PYTHON_CODE.value});return
         code=func.__code__;code_key=captured_code_key(code);function_ref=reference(func)
+        # CALL_KW observes the callable but arg0 alone does not distinguish
+        # its first explicit value from an implicit method receiver. Preserve
+        # target/entry identity without extending the positional CALL ABI.
+        keyword_roles_open=kind is Kind.FUNCTION and call_site['opname']=='CALL_KW'
         if kind is Kind.FUNCTION and not arg0_missing:
             instruction=call_instruction(caller_code,call_site['offset'])
             unsupported=inspect.CO_VARARGS|inspect.CO_VARKEYWORDS|inspect.CO_GENERATOR|inspect.CO_COROUTINE|inspect.CO_ASYNC_GENERATOR
@@ -188,6 +192,7 @@ class PythonTargetObserver:
         self._emit_fields('TARGET',{'attempt_index':attempt,'caller':caller,'kind':kind.value,
             'callable_reference':call_ref,'function_reference':function_ref,'code':code_key,
             'layout':_layout_record(layout(code)),'receiver':role,'scope':scope.value})
+        if keyword_roles_open:self.gap(attempt,'CALL_KW_ARGUMENT_ROLES_NOT_INFERRED')
         if not self.select_code(code,attempt):return
         try:receiver_weak=None if receiver is None else weakref.ref(receiver)
         except TypeError:receiver_weak=None
