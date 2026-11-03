@@ -3,7 +3,10 @@ from __future__ import annotations
 
 from dataclasses import fields
 import json
-from typing import Any
+from typing import Any, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from scar.ir.program.queries import ProgramIndex
 
 from scar.ir.record_codec import decode, encode, loads as _loads
 from scar.ir.v2._validation import record_errors
@@ -154,12 +157,16 @@ _DRIVER_RECORD_TAGS = {
 _V11_RECORD_TAGS = {**_V10_RECORD_TAGS, **_DRIVER_RECORD_TAGS}
 
 
-def _require_record_and_graph_valid(graph: ProgramGraph) -> None:
+def _require_record_valid(graph: ProgramGraph) -> None:
     if type(graph) is not ProgramGraph:
         raise TypeError("program graph must be ProgramGraph")
     errors = record_errors(graph, ProgramGraph, "ProgramGraph")
     if errors:
         raise ValueError("invalid program graph record: " + "; ".join(errors))
+
+
+def _require_record_and_graph_valid(graph: ProgramGraph) -> None:
+    _require_record_valid(graph)
     # Keep the record vocabulary importable separately from graph queries.
     # Serialization always runs the complete bounded graph validator.
     from scar.ir.program.validation import require_valid
@@ -493,8 +500,8 @@ def _upgrade_v1_record(record: dict[str, Any]) -> dict[str, Any]:
     return upgraded_record
 
 
-def loads(payload: str) -> ProgramGraph:
-    """Decode exact capability profiles v1–v32 without upgrading old wire."""
+def _decode_program_graph(payload: str) -> ProgramGraph:
+    """Shared exact v1–v32 wire decoding; callers must validate the graph."""
     if type(payload) is not str:
         raise TypeError("program graph JSON payload must be str")
     document: Any = _loads(payload)
@@ -812,8 +819,28 @@ def loads(payload: str) -> ProgramGraph:
         raise ValueError("schema version 14 requires explicit session/release capability")
     if version == 15 and not graph.state_address_refinements:
         raise ValueError("schema version 15 requires explicit state-address capability")
+    return graph
+
+
+def loads(payload: str) -> ProgramGraph:
+    """Decode exact capability profiles v1–v32 without upgrading old wire."""
+    graph = _decode_program_graph(payload)
     _require_record_and_graph_valid(graph)
     return graph
+
+
+def _loads_with_index(payload: str) -> tuple[ProgramGraph, "ProgramIndex"]:
+    """Strictly load one graph and its index with one semantic validation.
+
+    Both readers share every original schema, record and capability check.
+    ProgramIndex runs the full graph validator and consumes its internally
+    prepared index/facts. No caller can supply a validation verdict or reuse
+    an index from different input bytes; nothing is cached globally here.
+    """
+    graph = _decode_program_graph(payload)
+    _require_record_valid(graph)
+    from scar.ir.program.queries import ProgramIndex
+    return graph, ProgramIndex(graph)
 
 
 __all__ = ["SCHEMA", "SCHEMA_VERSION", "dumps", "loads"]

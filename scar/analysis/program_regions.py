@@ -196,9 +196,21 @@ def analyze_boundary(view, operations, *, internal_values=(), max_members=16384)
     only when their entire original block is selected. Phi/loop state ports
     retain their original Value identities.
     """
+    operations = tuple(dict.fromkeys(operations))
+    if not operations or any(type(point) is not Point or type(point.node) is not OperationID
+                             for point in operations):
+        raise TypeError('dependency cut needs qualified original Operation endpoints')
+    if type(max_members) is not int or max_members < 1:
+        raise ValueError('dependency cut needs a positive membership bound')
+    if len(operations) > max_members:
+        raise OverflowError('dependency cut membership budget exhausted')
+    # Pin original inputs before a bounded cross-body query can run out of
+    # time. Its known edges/frontiers must still produce a partial boundary,
+    # rather than being discarded by a second, post-cut graph read.
+    indexes = {namespace: view.load_index(namespace)
+               for namespace in dict.fromkeys(point.namespace for point in operations)}
     cut = view.cut(operations, internal_values=internal_values, max_members=max_members)
     selected, members = set(cut.operations), set(cut.members)
-    indexes = {namespace: view.load_index(namespace) for namespace in dict.fromkeys(p.namespace for p in cut.operations)}
     stored_writes = {}
     for namespace, index in indexes.items():
         by_operation = {}

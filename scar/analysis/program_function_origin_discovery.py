@@ -106,7 +106,8 @@ class AutomaticFactoryEntryOrigins:
         found = self.session._get(key)
         if found is None:
             found = factory_entry_origin_ports(graph=body.graph, document=body.document,
-                namespace=body.namespace, index=body.index)
+                namespace=body.namespace, index=body.index,
+                _facts=self.session._environment_facts, _inputs=getattr(body,'environment_inputs',None))
             self.session._put(key, found, 128 + 64 * sum(map(len, found)))
             self._counts["port_indexes_built"] += 1
         else:
@@ -293,7 +294,9 @@ class AutomaticFactoryEntryOrigins:
                         origins = derive_factory_entry_origins(creator_graph=creator.graph, creator_document=creator.document,
                             creator_namespace=creator.namespace, creator_index=creator.index, body_graph=child.graph,
                             body_document=child.document, body_namespace=child.namespace, body_index=child.index,
-                            creation=creation, source_text=text)
+                            creation=creation, source_text=text, _facts=self.session._environment_facts,
+                            _creator_inputs=getattr(creator,'environment_inputs',None),
+                            _body_inputs=getattr(child,'environment_inputs',None))
                     except SourceDefinitionUnavailable as error:
                         self._note(point, outgoing, "FACTORY_ORIGIN_CHILD_SCOPE_UNAVAILABLE",
                             operation.id.wire + ": " + error.kind + ": " + error.detail)
@@ -353,7 +356,10 @@ class AutomaticFactoryEntryOrigins:
         self._counts["fresh_origin_validations"] += 1
         return validate_factory_entry_origin(origin, creator_graph=creator.graph, creator_document=creator.document,
             creator_namespace=creator.namespace, creator_index=creator.index, body_graph=body.graph,
-            body_document=body.document, body_namespace=body.namespace, body_index=body.index, source_text=text)
+            body_document=body.document, body_namespace=body.namespace, body_index=body.index, source_text=text,
+            _facts=self.session._environment_facts,
+            _creator_inputs=getattr(creator,'environment_inputs',None),
+            _body_inputs=getattr(body,'environment_inputs',None))
 
     def _class_contexts(self, creator, query, depth, seen):
         namespace = GraphNamespace.from_source(creator.namespace)

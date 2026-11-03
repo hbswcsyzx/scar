@@ -406,14 +406,8 @@ class ProgramDependencySession:
         return self._put(key, value, unit["artifacts"]["lexical"]["decoded_bytes"])
 
     def _base_body(self, number, position):
-        from scar.analysis.static_function_environment import validate_static_body_namespace
         from scar.analysis.static_namespace import NamespaceDependencies
-        from scar.ir.program.codec import loads as load_core
-        from scar.ir.program.queries import ProgramIndex
-        from scar.ir.program.source import LoweringMetadata
-        from scar.ir.program.module_entries import decode_frame_body
-        from scar.ir.program.class_entries import decode_class_entry_overlay
-        from scar.ir.program.functions import BodyEntryInterface
+        from scar.ir.program.codec import _loads_with_index
         from scar.ir.v2.common import SourceReference
         key = "body", number, position
         cached = self._get(key)
@@ -433,16 +427,16 @@ class ProgramDependencySession:
         if key not in self._seen_graphs and len(self._seen_graphs) >= self.budget.max_graphs:
             raise OverflowError("dependency graph-read budget exhausted")
         self._seen_graphs.add(key)
-        graph = load_core(json.dumps(document["graph"], allow_nan=False))
-        metadata = decode(LoweringMetadata, document["metadata"])
+        graph, index = _loads_with_index(json.dumps(document["graph"], allow_nan=False))
+        inputs = self._environment_facts.inputs(graph, document, index=index,
+            size_bytes=descriptor['decoded_bytes'])
+        metadata = inputs.metadata
         catalog = self._catalog(number)
         matches = [entry for entry in catalog["entries"] if entry["entry_key"] == row["entry_key"]]
         if len(matches) != 1:
             raise ValueError("canonical graph lacks its original lexical entry")
         entry = matches[0]
-        module = decode_frame_body(document["module"]) if document.get("module") is not None else None
-        class_entry = decode_class_entry_overlay(document["class"]) if document.get("class") is not None else None
-        interface = decode(BodyEntryInterface, document["interface"]) if module is None and class_entry is None else None
+        module, class_entry, interface = inputs.module, inputs.class_entry, inputs.interface
         definition = (module.declaration.unit.initializer if module is not None else
                       class_entry.definition if class_entry is not None else interface.definition)
         source = None if module is not None else decode(SourceReference, entry["source_ref"])
@@ -453,13 +447,13 @@ class ProgramDependencySession:
                                         definition, source, metadata.entry, graph.root)
         if encode(definition) not in (entry.get("semantic_definition_ids") or ()):
             raise ValueError("canonical graph differs from original lexical definition")
-        validate_static_body_namespace(graph, document, namespace)
+        self._environment_facts.body(graph, document, namespace, index=index, inputs=inputs)
         if metadata.source.path != unit["path"] or metadata.source.fingerprint != "sha256:" + unit["decoded_sha256"]:
             raise ValueError("canonical graph uses another source snapshot")
-        index = ProgramIndex(graph)
         body = SimpleNamespace(graph=graph, index=index, document=document, namespace=namespace, metadata=metadata,
             unit=unit, row=row, unit_number=number, body_position=position, catalog=catalog, module=module,
-            class_entry=class_entry, interface=interface, dependencies=NamespaceDependencies(graph, document, index=index))
+            class_entry=class_entry, interface=interface, environment_inputs=inputs,
+            dependencies=NamespaceDependencies(graph, document, index=index))
         return self._put(key, body, 2 * descriptor["decoded_bytes"])
 
     def load_body(self, namespace):
@@ -473,7 +467,8 @@ class ProgramDependencySession:
         self._declaration(namespace, number, position)
         self.read_artifact(namespace.graph)
         body = self._base_body(number, position)
-        self._environment_facts.body(body.graph, body.document, namespace, index=body.index)
+        self._environment_facts.body(body.graph, body.document, namespace, index=body.index,
+            inputs=body.environment_inputs)
         while self._cache and self._cache_bytes + self._environment_facts.bytes > self.budget.max_cached_bytes:
             _, (_, size) = self._cache.popitem(last=False)
             self._cache_bytes -= size

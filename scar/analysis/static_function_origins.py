@@ -153,7 +153,7 @@ def _source_proof(creator, body, creation, source_text):
 
 def derive_factory_entry_origins(*, creator_graph, creator_document, creator_namespace,
         body_graph, body_document, body_namespace, creation, source_text,
-        creator_index=None, body_index=None):
+        creator_index=None, body_index=None, _facts=None, _creator_inputs=None, _body_inputs=None):
     """Derive only object/G reference origins, without selecting a caller.
 
     The supplied definition/namespace locators must already be verified by the
@@ -163,9 +163,14 @@ def derive_factory_entry_origins(*, creator_graph, creator_document, creator_nam
     if type(creation) is not StaticFunctionCreationRoute:
         raise TypeError("factory origin needs its original typed creation record")
     creation.__post_init__()
-    facts = _EnvironmentFacts()
-    creator = facts.body(creator_graph, creator_document, creator_namespace, creator_index)
-    body = facts.body(body_graph, body_document, body_namespace, body_index)
+    if _facts is None and (_creator_inputs is not None or _body_inputs is not None):
+        raise ValueError('factory origin owned inputs require their original private owner')
+    facts = _EnvironmentFacts() if _facts is None else _facts
+    if type(facts) is not _EnvironmentFacts:
+        raise TypeError('factory origin input owner must be _EnvironmentFacts')
+    creator = facts.body(creator_graph, creator_document, creator_namespace, creator_index,
+                         inputs=_creator_inputs)
+    body = facts.body(body_graph, body_document, body_namespace, body_index, inputs=_body_inputs)
     if (body_namespace.definition != creation.definition.definition
             or body_namespace.source != creation.definition.source):
         raise ValueError("factory origin target differs from its original qualified definition")
@@ -247,14 +252,19 @@ def factory_entry_origin_evidence(origin, *, creator_document, body_document):
         replace(origin.creator.graph, pointer=compiler), replace(origin.body.graph, pointer="#/static_compilation"))
 
 
-def factory_entry_origin_ports(*, graph, document, namespace, index=None):
+def factory_entry_origin_ports(*, graph, document, namespace, index=None, _facts=None, _inputs=None):
     """Identify this adapter's original interface scope, not successful origins.
 
     An empty explicit origin list cannot close a real MAKE normal/capture port.
     Unsupported/unselected factory sources remain interfaces with open origins.
     """
     from scar.analysis.static_namespace import normal_reference
-    facts = _EnvironmentFacts().body(graph, document, namespace, index)
+    if _facts is None and _inputs is not None:
+        raise ValueError('factory origin ports need the original private input owner')
+    owner = _EnvironmentFacts() if _facts is None else _facts
+    if type(owner) is not _EnvironmentFacts:
+        raise TypeError('factory origin port owner must be _EnvironmentFacts')
+    facts = owner.body(graph, document, namespace, index, inputs=_inputs)
     incoming = frozenset(member.reference for environment in graph.environments
         if environment.region == graph.root and environment.code_definition == namespace.definition
         for member in environment.members if member.role in (

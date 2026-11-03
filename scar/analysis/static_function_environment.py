@@ -7,6 +7,7 @@ and mutable-field initializer dependencies are deliberately different kinds.
 from __future__ import annotations
 
 from collections import OrderedDict
+from dataclasses import dataclass
 from types import SimpleNamespace
 
 from scar.ir.record_codec import decode, encode
@@ -43,7 +44,25 @@ def _source_reference(value):
     return decode(SourceReference,value)
 
 
-def _namespace_inputs(graph, document, namespace):
+def _decoded_source_inputs(document):
+    """Decode source records once; these records alone grant no namespace."""
+    if type(document) is not dict:
+        raise TypeError('static body namespace requires its original envelope object')
+    metadata=decode(LoweringMetadata,document['metadata'])
+    module=class_entry=interface=None
+    if document.get('module') is not None:
+        from scar.ir.program.module_entries import decode_frame_body
+        module=decode_frame_body(document['module'])
+    elif document.get('class') is not None:
+        from scar.ir.program.class_entries import decode_class_entry_overlay
+        class_entry=decode_class_entry_overlay(document['class'])
+    else:
+        from scar.ir.program.functions import BodyEntryInterface
+        interface=decode(BodyEntryInterface,document['interface'])
+    return metadata,module,class_entry,interface
+
+
+def _check_namespace(graph, document, namespace, decoded):
     """Validate body ownership against its envelope, without source replay.
 
     Physical/decoded receipt verification belongs to the enclosing reader.
@@ -66,25 +85,22 @@ def _namespace_inputs(graph, document, namespace):
             or namespace.graph.representation!='gzip-canonical-json'
             or namespace.graph.artifact.schema!='scar.static-body/1'):
         raise ValueError('body namespace graph/root/pointer/representation differs from its envelope')
-    metadata=decode(LoweringMetadata,document['metadata'])
+    metadata,module,class_entry,interface=decoded
     sources=metadata;interface=None
     if namespace.entry!=metadata.entry:
         raise ValueError('body namespace entry differs from original metadata')
     if document.get('module') is not None:
-        from scar.ir.program.module_entries import decode_frame_body
-        overlay=decode_frame_body(document['module']);unit=overlay.declaration.unit;sources=overlay
+        overlay=module;unit=overlay.declaration.unit;sources=overlay
         if (namespace.definition!=unit.initializer or namespace.source is not None
                 or metadata.source!=unit.snapshot or metadata.entry!=unit.initializer.wire):
             raise ValueError('module namespace source/definition differs from its original initializer')
     elif document.get('class') is not None:
-        from scar.ir.program.class_entries import decode_class_entry_overlay
-        overlay=decode_class_entry_overlay(document['class'])
+        overlay=class_entry
         if (namespace.definition!=overlay.definition or namespace.source!=overlay.source
                 or metadata.entry!=overlay.definition.wire):
             raise ValueError('class namespace source/definition differs from original ClassDef')
     else:
-        from scar.ir.program.functions import BodyEntryInterface
-        interface=decode(BodyEntryInterface,document['interface'])
+        interface=decoded[3]
         if namespace.definition!=interface.definition or namespace.region!=interface.region or namespace.source is None:
             raise ValueError('function namespace differs from original source interface')
         structured=document.get('structured')
@@ -102,9 +118,35 @@ def _namespace_inputs(graph, document, namespace):
     return metadata,sources,interface
 
 
+def _namespace_inputs(graph, document, namespace):
+    return _check_namespace(graph,document,namespace,_decoded_source_inputs(document))
+
+
 def validate_static_body_namespace(graph, document, namespace):
     """Freshly check the original namespace and decode its typed source facts."""
     return _namespace_inputs(graph,document,namespace)[0]
+
+
+_WIRE_FIELDS=('graph','metadata','module','class','interface','structured')
+
+
+@dataclass(frozen=True,slots=True)
+class _OwnedInputs:
+    """Decoded inputs issued by one private owner, never a PASS boolean."""
+    owner: object
+    graph: object
+    document: dict
+    index: ProgramIndex
+    wire_fields: tuple
+    metadata: LoweringMetadata
+    module: object
+    class_entry: object
+    interface: object
+    operation_links: dict
+    use_links: dict
+    protocols: dict
+    blocks: dict
+    bytes: int
 
 
 class _EnvironmentFacts:
@@ -121,33 +163,63 @@ class _EnvironmentFacts:
         self.max_bodies,self.max_bytes=max_bodies,max_bytes
         self.bodies=OrderedDict();self.bytes=0
 
-    def body(self,graph,document,namespace,index=None):
-        found=self.bodies.get(namespace)
-        if index is None and found is not None and found.graph is graph:
-            index=found.index
+    def _owned(self,inputs,graph,document,index):
+        if (type(inputs)is not _OwnedInputs or inputs.owner is not self
+                or inputs.graph is not graph or inputs.document is not document
+                or inputs.index is not index or index.graph is not graph):
+            raise ValueError('decoded environment inputs belong to another owner/graph/document/index')
+        if any(old is not document.get(name) for name,old in zip(_WIRE_FIELDS,inputs.wire_fields)):
+            raise ValueError('environment source inputs changed within their private snapshot scope')
+        return inputs
+
+    def inputs(self,graph,document,*,index,size_bytes):
+        """Strictly decode the owner's original wire once, before namespace creation.
+
+        The reader may retain this small source bundle alongside its original
+        body. Reuse still binds all three original objects and wire fields;
+        receipt checks and namespace admission remain separate operations.
+        """
         index=_index(graph,index)
-        fields=tuple(document.get(name)for name in ('graph','metadata','module','class','interface','structured'))
-        if (found is not None and found.graph is graph and found.document is document
-                and found.index is index):
-            if any(a is not b for a,b in zip(found.wire_fields,fields)):
-                raise ValueError('environment source inputs changed within their private snapshot scope')
-            self.bodies.move_to_end(namespace)
-            return found
+        if type(document)is not dict or type(size_bytes)is not int or size_bytes<1:
+            raise TypeError('decoded environment inputs need an original document and positive receipt size')
+        key=id(graph),id(document),id(index)
+        found=self.bodies.get(key)
         if found is not None:
-            self.bytes-=found.bytes;del self.bodies[namespace]
-        metadata,sources,interface=_namespace_inputs(graph,document,namespace)
+            self._owned(found,graph,document,index)
+            self.bodies.move_to_end(key)
+            return found
+        metadata,module,class_entry,interface=_decoded_source_inputs(document)
+        sources=module if module is not None else metadata
         operations={};uses={}
         for row in sources.operation_links:operations.setdefault(row.operation,[]).append(row)
         for row in sources.use_links:uses.setdefault(row.operation,[]).append(row)
-        found=SimpleNamespace(graph=graph,document=document,namespace=namespace,index=index,
-            metadata=metadata,sources=sources,interface=interface,wire_fields=fields,
-            operation_links=operations,use_links=uses,protocols=protocol_kinds(document),
-            blocks={b.id:b for r in graph.regions for b in r.blocks},bytes=namespace.graph.decoded_bytes)
-        if found.bytes<=self.max_bytes:
-            self.bodies[namespace]=found;self.bytes+=found.bytes
+        found=_OwnedInputs(self,graph,document,index,tuple(document.get(name)for name in _WIRE_FIELDS),
+            metadata,module,class_entry,interface,operations,uses,protocol_kinds(document),
+            {b.id:b for r in graph.regions for b in r.blocks},size_bytes)
+        if size_bytes<=self.max_bytes:
+            self.bodies[key]=found;self.bytes+=size_bytes
             while len(self.bodies)>self.max_bodies or self.bytes>self.max_bytes:
                 _,old=self.bodies.popitem(last=False);self.bytes-=old.bytes
         return found
+
+    def body(self,graph,document,namespace,index=None,*,inputs=None):
+        if index is None:
+            if type(inputs)is _OwnedInputs:
+                index=inputs.index
+            else:
+                found=next((row for row in self.bodies.values()
+                    if row.graph is graph and row.document is document),None)
+                if found is not None:index=found.index
+        index=_index(graph,index)
+        if inputs is None:
+            inputs=self.inputs(graph,document,index=index,size_bytes=namespace.graph.decoded_bytes)
+        self._owned(inputs,graph,document,index)
+        decoded=inputs.metadata,inputs.module,inputs.class_entry,inputs.interface
+        metadata,sources,interface=_check_namespace(graph,document,namespace,decoded)
+        return SimpleNamespace(graph=graph,document=document,namespace=namespace,index=index,
+            metadata=metadata,sources=sources,interface=interface,wire_fields=inputs.wire_fields,
+            operation_links=inputs.operation_links,use_links=inputs.use_links,protocols=inputs.protocols,
+            blocks=inputs.blocks,bytes=inputs.bytes,environment_inputs=inputs)
 
 
 def _world(index, operation):

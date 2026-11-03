@@ -301,3 +301,28 @@ def test_boundary_keeps_direct_and_invoke_state_interfaces_and_separates_escape(
     assert not value_result.branch_proofs and not value_result.binding_proofs
     assert not value_result.route_refutations
     assert not value_result.for_point(member_point).fields.reference_sources.alternatives
+
+    # The session can expire after returning a known dependency prefix. The
+    # already loaded control/state facts must survive, with partial coverage.
+    from dataclasses import replace
+    from scar.ir.program.dependencies import DependencyFrontier
+    expired = False
+    def bounded_index(ns):
+        if expired:
+            raise TimeoutError('original query budget exhausted')
+        return index
+    bounded = ProgramDependencyGraph(bounded_index)
+    original_cut = bounded.cut
+    selected_point = P(namespace, invoke.id)
+    def expire_after_cut(*args, **kwargs):
+        nonlocal expired
+        cut = original_cut(*args, **kwargs)
+        expired = True
+        return replace(cut, frontiers=(*cut.frontiers, DependencyFrontier(selected_point,
+            'DEPENDENCY_PROVIDER_BUDGET', 'Remaining interfaces were not enumerated.')))
+    bounded.cut = expire_after_cut
+    partial = analyze_boundary(bounded, (selected_point,))
+    assert partial.cut.operations == (selected_point,) and partial.state and partial.control
+    assert partial.field('inputs').knowledge is BoundaryKnowledge.PARTIAL
+    assert any(frontier.kind == 'DEPENDENCY_PROVIDER_BUDGET' for frontier in partial.frontiers)
+    assert not partial.transformation_authorized

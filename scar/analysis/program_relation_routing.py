@@ -9,6 +9,7 @@ therefore closes the *serialized lookup*, not target sets or program effects.
 from __future__ import annotations
 
 from dataclasses import dataclass
+import json
 
 from scar.ir.program.dependencies import GraphNamespace
 from scar.ir.program.source_call_bindings import SourceBodyNamespace
@@ -27,10 +28,35 @@ class RelationRoutingResult:
     issue: str | None = None
 
 
+def _namespace_wire_key(value, check):
+    """An exact JSON key; no tuple/key coercions may borrow a valid record."""
+    pending, containers = [value], set()
+    visits = 0
+    while pending:
+        current = pending.pop()
+        visits += 1
+        if visits % 256 == 0:
+            check()
+        kind = type(current)
+        if kind in (dict, list):
+            if kind is dict and any(type(key) is not str for key in current):
+                raise TypeError('raw namespace wire requires exact JSON string keys')
+            identity = id(current)
+            if identity not in containers:
+                containers.add(identity)
+                pending.extend(current.values() if kind is dict else current)
+        elif kind not in (str, int, float, bool, type(None)):
+            raise TypeError('raw namespace wire requires exact JSON value types')
+    return json.dumps(value, sort_keys=True, separators=(',', ':'), allow_nan=False)
+
+
 def _namespace_identities(document, check):
     """Visit all wire fields, retaining no document or second program graph."""
     pending = [document]
     found = set()
+    # Only this shard's exact wire records are reused. A namespace identity
+    # omits declaration/source fields, so it cannot be the validation key.
+    identities_by_wire = {}
     visits = 0
     while pending:
         value = pending.pop()
@@ -41,10 +67,15 @@ def _namespace_identities(document, check):
             if "graph_representation" in value:
                 if set(value) != _BODY_FIELDS:
                     raise ValueError("raw relationship routing found a malformed source-body namespace")
-                # Decode the small namespace record, never its referenced graph.
-                # This also checks the typed region/wire, locator and declaration.
-                namespace = GraphNamespace.from_source(decode(SourceBodyNamespace, value))
-                found.add(namespace.identity)
+                wire_key = _namespace_wire_key(value, check)
+                identity = identities_by_wire.get(wire_key)
+                if identity is None:
+                    # Decode the whole record, never its referenced graph.
+                    # Distinct declarations/source fields still get checked.
+                    namespace = GraphNamespace.from_source(decode(SourceBodyNamespace, value))
+                    identity = namespace.identity
+                    identities_by_wire[wire_key] = identity
+                found.add(identity)
                 continue
             pending.extend(value.values())
         elif type(value) is list:
