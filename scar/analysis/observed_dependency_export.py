@@ -16,9 +16,10 @@ from scar.analysis.observed_call_bindings import ObservedCallBinding
 from scar.analysis.observed_function_interfaces import ObservedFunctionInterface
 from scar.analysis.program_dependency_export import _Tables
 from scar.ir.program.call_edges import CallTraceFile
+from scar.ir.program.native_callables import NativeCallableMetadata
 from scar.ir.program.observed_dependencies import (
     ObservedCallLayout, ObservedCallScope, ObservedDependencyEdge, ObservedDependencyFrontier,
-    ObservedPortPhase, ObservedPortPoint,
+    ObservedNativeCallable, ObservedNativeCallableFrontier, ObservedPortPhase, ObservedPortPoint,
 )
 from scar.ir.record_codec import decode, encode, loads
 
@@ -39,6 +40,9 @@ class ObservedDependencySnapshot:
     frontiers: tuple[ObservedDependencyFrontier, ...]
     capture_files: tuple[CallTraceFile, ...]
     layouts: tuple[ObservedCallLayout, ...] | None = None
+    native_callables: tuple[ObservedNativeCallable, ...] | None = None
+    native_frontiers: tuple[ObservedNativeCallableFrontier, ...] | None = None
+    native_metadata: tuple[NativeCallableMetadata, ...] | None = None
 
     def __post_init__(self):
         if type(self.run_scope) is not str or re.fullmatch(r'[0-9a-f]{64}', self.run_scope) is None:
@@ -85,6 +89,7 @@ class ObservedDependencySnapshot:
                 frontier.point.scope not in scope_set for frontier in self.frontiers):
             raise ValueError('observed relation references an undeclared CALL scope')
         _validate_layouts(self.layouts, scope_set, self.bindings, self.edges)
+        _validate_native(self, scopes)
         for item in self.capture_files:
             if (any(type(value) is not str or not value for value in (item.path, item.family))
                     or type(item.raw_sha256) is not str
@@ -93,6 +98,58 @@ class ObservedDependencySnapshot:
                     or any(type(value) is not int or value < 0
                            for value in (item.raw_bytes, item.lines))):
                 raise ValueError('observed capture receipt has invalid typed fields')
+
+
+def _validate_native(snapshot, scopes):
+    rows = (snapshot.native_callables, snapshot.native_frontiers, snapshot.native_metadata)
+    if all(value is None for value in rows):
+        return  # Legacy NOT_RECORDED, not an empty capture or a native ABI choice.
+    if any(type(value) is not tuple for value in rows):
+        raise TypeError('recorded native companion needs all immutable fact/frontier/metadata collections')
+    bindings = {(binding.target.caller, binding.target.attempt_index): binding
+                for binding in snapshot.bindings}
+    seen = set()
+    for item in snapshot.native_callables:
+        if type(item) is not ObservedNativeCallable:
+            raise TypeError('observed snapshot requires exact ObservedNativeCallable')
+        item.__post_init__()
+        key = item.fact.caller, item.fact.attempt_index
+        binding = bindings.get(key)
+        if (key in seen or scopes.get(key) != item.scope or binding is None
+                or item.call.original != binding.call or item.callable.original != binding.callable
+                or item.fact.callable_reference != binding.target.callable_reference):
+            raise ValueError('native callable fact changed its original static binding/target token')
+        seen.add(key)
+    for item in snapshot.native_frontiers:
+        if type(item) is not ObservedNativeCallableFrontier:
+            raise TypeError('observed snapshot requires exact ObservedNativeCallableFrontier')
+        item.__post_init__()
+        key = item.fact.caller, item.fact.attempt_index
+        if item.run_scope != snapshot.run_scope or key in seen or key in scopes:
+            raise ValueError('unbound native fact changed its original run or discarded a retained CALL binding')
+        seen.add(key)
+    metadata_by_process = {}
+    for metadata in snapshot.native_metadata:
+        if type(metadata) is not NativeCallableMetadata:
+            raise TypeError('observed native metadata must retain its exact typed receipt record')
+        metadata.__post_init__()
+        if (metadata.process_id in metadata_by_process
+                or metadata.counts.rows != metadata.file.rows):
+            raise ValueError('native callable metadata changed its original process/row denominator')
+        metadata_by_process[metadata.process_id] = metadata
+    if not metadata_by_process:
+        raise ValueError('a recorded native companion needs its original process metadata')
+    counts = dict.fromkeys(metadata_by_process, 0)
+    for item in (*snapshot.native_callables, *snapshot.native_frontiers):
+        process = item.fact.caller.process_id
+        metadata = metadata_by_process.get(process)
+        if (metadata is None or item.anchor.path != metadata.file.path
+                or item.anchor.line_number != item.fact.event_index):
+            raise ValueError('native callable fact changed its original process/file/line namespace')
+        counts[process] += 1
+    if any(counts[process] != metadata.counts.rows
+           for process, metadata in metadata_by_process.items()):
+        raise ValueError('native callable snapshot omitted an original fact without a frontier')
 
 
 def _validate_layouts(layouts, scopes, bindings, edges):
@@ -192,12 +249,13 @@ def export_observed_dependencies(provider):
     provider.check()
     snapshot = ObservedDependencySnapshot(provider.run_scope, provider.scopes,
         provider.bindings, provider.interfaces, provider.edges, provider.frontiers,
-        provider.capture_files, provider.layouts)
+        provider.capture_files, provider.layouts, provider.native_callables,
+        provider.native_frontiers, provider.native_metadata)
     if snapshot.layouts is None:
-        raise ValueError('v2 observed dependency export requires explicit CALL layouts')
+        raise ValueError('observed dependency export requires explicit CALL layouts')
     table = _ObservedTables()
     packed = table.pack(snapshot)
-    return {'schema': 'scar.observed-dependencies', 'schema_version': 2,
+    return {'schema': 'scar.observed-dependencies', 'schema_version': 3,
         'snapshot': packed, **table.tables, **_FLAGS}
 
 
@@ -211,18 +269,21 @@ def read_observed_dependencies(document):
     _object(document, {'schema', 'schema_version', 'snapshot', *_FLAGS,
         *_TABLES, *_OBSERVED_TABLES}, 'observed dependencies')
     if (document['schema'] != 'scar.observed-dependencies'
-            or type(document['schema_version']) is not int or document['schema_version'] not in (1, 2)
+            or type(document['schema_version']) is not int or document['schema_version'] not in (1, 2, 3)
             or any(document[name] is not value for name, value in _FLAGS.items())):
         raise ValueError('unsupported observed dependency schema/claims')
     wire = document['snapshot']
+    missing = {'native_callables', 'native_frontiers', 'native_metadata'}
     if document['schema_version'] == 1:
+        missing.add('layouts')
+    if document['schema_version'] in (1, 2):
         _object(wire, {'record_type', *(field.name for field in fields(ObservedDependencySnapshot)
-                                      if field.name != 'layouts')}, 'legacy observed snapshot')
-        wire = {**wire, 'layouts': None}
+                                      if field.name not in missing)}, 'legacy observed snapshot')
+        wire = {**wire, **dict.fromkeys(missing)}
     reader = _ObservedReader(document)
     result = reader.unpack(ObservedDependencySnapshot, wire)
-    if document['schema_version'] == 2 and result.layouts is None:
-        raise ValueError('v2 observed dependency snapshot cannot omit CALL layouts')
+    if document['schema_version'] in (2, 3) and result.layouts is None:
+        raise ValueError('observed dependency snapshot cannot omit recorded CALL layouts')
     reader.validate_tables()
     return result
 

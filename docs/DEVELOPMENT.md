@@ -34,6 +34,8 @@ python -B -m scar.cli observed-graph --model /path/to/model \
 采集不额外执行用户 repr、descriptor 或 hook 来探测对象，不保存每次 Tensor 的完整数值。
 优先复用已保存 trace；`observed-calls` 只离线连接，缺主体按完整代码身份请求原前端补建。
 采集仍含 frame profile hooks，不能宣称零干扰；性能测量与建图采集分开。
+需要实际 callable 类型/owner/ABI 时加 `trace --native-callables`：仅在新 trace 内隔离编译小 C probe，
+不安装环境依赖；当前限 CPython 3.14.7/GIL/Linux x86-64，不执行用户 getter 或读取 Tensor 数值。
 
 ## 共享图查询
 
@@ -55,6 +57,9 @@ CLI 的 `static-query --program-graph` 使用原 typed ID，不按名称制造�
 动态接口用 `session.attach_observations(trace)` 接入，再由 `session.graph().observed_incoming/outgoing(port)`
 查询；作用域与端口由返回的provider提供。原trace重验后才授边，DTO读回不是证明。
 `graph.observed_layouts(scope)` 返回条件ABI布局；v2显式保存布局，v1读回为NOT_RECORDED而非空布局。
+`graph.observed_native_callables(scope)` 查询附着原 CALL/Use 的实际类型、owner、self、flags 和地址事实；
+未对应静态 CALL 的记录保留 frontier。导出为v3，v1/v2的这些字段读回为None=NOT_RECORDED。
+类型名称只是描述标签，地址只适用该进程事件；它们不单独证明源码实现、kernel、copy 或效果。
 
 ## 维护
 

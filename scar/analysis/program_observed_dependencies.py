@@ -6,6 +6,7 @@ accepted as proofs. Ordinary static neighborhoods are not modified.
 from __future__ import annotations
 
 from collections import defaultdict
+from hashlib import sha256
 from pathlib import Path
 import re
 
@@ -15,13 +16,14 @@ from scar.ir.program.dependencies import (DependencyCondition, DependencyEdge,
     DependencyEvidence, DependencyKind as K, DependencyMeaning as M,
     DependencyPoint as P, DependencyStrength, GraphNamespace)
 from scar.ir.program.model import ExitKind, ValueKind
+from scar.ir.program.native_callables import NativeCarrier
 from scar.ir.program.observed_dependencies import (ObservedCallLayout, ObservedCallScope, ObservedDependencyEdge,
     ObservedDependencyFrontier, ObservedDependencyNeighborhood, ObservedPortPhase as Phase,
-    ObservedPortPoint)
+    ObservedNativeCallable, ObservedNativeCallableFrontier, ObservedPortPoint)
 
 
 _INPUT = re.compile(r'(?:call-(?:codes|events|meta|operands|operand-meta)|'
-    r'python-call-(?:targets|target-meta)|lean-plan|captured-source-meta)'
+    r'python-call-(?:targets|target-meta)|native-callables|native-callable-meta|lean-plan|captured-source-meta)'
     r'\.[1-9][0-9]*\.(?:jsonl|json)(?:\.gz)?$')
 
 
@@ -37,6 +39,47 @@ def _inputs(directory):
     return result
 
 
+def _native_inputs(capture):
+    """Pin all companion dependencies, including the external probe receipts."""
+    from scar.analysis.program_dependency_session import _stamp
+    result, receipts = {}, {}
+    for metadata in capture.metadata:
+        for receipt in (metadata.probe_source, metadata.probe_binary, metadata.target_meta):
+            path = Path(receipt.path)
+            expected = receipt.bytes, receipt.sha256
+            if path in receipts and receipts[path] != expected:
+                raise ValueError('native callable dependencies have conflicting original receipts')
+            receipts[path] = expected
+        for receipt in metadata.legacy_inputs:
+            path = Path(receipt.path)
+            if not path.exists():
+                path = Path(str(path) + '.gz')
+            if not path.is_absolute() or path.resolve() != path or path.is_symlink() or not path.is_file():
+                raise ValueError('native callable legacy input is not an original canonical file')
+            result[path] = _stamp(path)
+    for path, (size, expected_sha256) in receipts.items():
+        if not path.is_absolute() or path.resolve() != path or path.is_symlink() or not path.is_file():
+            raise ValueError('native callable dependency is not an original canonical file')
+        before = _stamp(path)
+        if before[2] != size:
+            raise ValueError('native callable dependency byte receipt changed')
+        digest = sha256()
+        with path.open('rb') as stream:
+            remaining = size
+            while remaining:
+                block = stream.read(min(1_048_576, remaining))
+                if not block:
+                    raise ValueError('native callable dependency was truncated')
+                digest.update(block)
+                remaining -= len(block)
+            if stream.read(1):
+                raise ValueError('native callable dependency grew')
+        if before != _stamp(path) or digest.hexdigest() != expected_sha256:
+            raise ValueError('native callable dependency changed since the original capture')
+        result[path] = before
+    return result
+
+
 class ObservedDependencyProvider:
     def __init__(self, session, trace):
         directory = Path(getattr(trace, 'directory', trace)).absolute()
@@ -46,13 +89,20 @@ class ObservedDependencyProvider:
         argument_layouts = {}
         bindings, interfaces, evidence, issues = derive_observed_interfaces(session, trace,
             argument_layouts=argument_layouts)
+        from scar.analysis.native_callables import read_native_callables
+        native = read_native_callables(evidence.trace)
+        native_stamps = {} if native is None else _native_inputs(native)
         after = _inputs(directory)
         if before != after:
             raise ValueError('observed capture inputs changed during admission')
         self.session, self.directory, self._stamps = session, directory, after
+        self._native_stamps = native_stamps
         self.run_scope = evidence.targets.source_sha256
+        if native is not None and (native.run_scope != self.run_scope or native.directory != str(directory)):
+            raise ValueError('native callable companion belongs to another original trace/run')
         self.bindings, self.interfaces, self.issues = bindings, interfaces, issues
-        self.capture_files = (*evidence.trace.frame_scan.files, *evidence.trace.files)
+        self.capture_files = (*evidence.trace.frame_scan.files, *evidence.trace.files,
+            *(() if native is None else native.files))
         self.target_count = len(evidence.targets.targets)
         self._bindings, self._interfaces = {}, {}
         self._before, self._after = defaultdict(dict), defaultdict(dict)
@@ -97,13 +147,39 @@ class ObservedDependencyProvider:
                 raise ValueError('observed interface changed the original direct entry/exit occurrence')
             self._interfaces[scope] = item
             self._join(scope, item, argument_layouts.get((target.caller, target.attempt_index), ()))
+        self.native_metadata = None if native is None else native.metadata
+        self.native_callables = self.native_frontiers = None
+        if native is not None:
+            joined, unbound = [], []
+            scopes = {(scope.caller, scope.attempt_index): scope for scope in self._bindings}
+            for fact, anchor in zip(native.facts, native.anchors):
+                scope = scopes.get((fact.caller, fact.attempt_index))
+                if scope is None:
+                    unbound.append(ObservedNativeCallableFrontier(self.run_scope, fact, anchor,
+                        'NATIVE_CALLABLE_STATIC_BINDING_OPEN',
+                        'The original callable fact has no retained static CALL binding; no program port is invented.'))
+                    continue
+                binding = self._bindings[scope]
+                if fact.callable_reference != binding.target.callable_reference:
+                    raise ValueError('native callable fact changed its original target token')
+                call = self._point(scope, binding.call, Phase.CALL_SITE)
+                callable_ = self._point(scope, binding.callable, Phase.CALL_SITE)
+                joined.append(ObservedNativeCallable(scope, call, callable_, fact, anchor))
+                if fact.carrier is NativeCarrier.UNKNOWN:
+                    self._note(call, 'CALLABLE_CARRIER_DETAILS_OPEN',
+                        'The actual callable type is recorded; the probe did not identify a native carrier. '
+                        'This does not imply native execution or weaken a separately established Python interface.')
+                else:
+                    self._note(call, 'OBSERVED_NATIVE_IMPLEMENTATION_OPEN',
+                        'Captured callable-carrier/ABI facts do not establish execution, a source body, kernel, copy or effects.')
+            self.native_callables, self.native_frontiers = tuple(joined), tuple(unbound)
         self.scopes = tuple(self._bindings)
         self.layouts = tuple(self._layouts)
         self.edges = tuple(dict.fromkeys(edge for rows in self._after.values() for edge in rows))
         self.frontiers = tuple(note for rows in self._notes.values() for note in rows)
         # The same session checks these original inputs again at close. A
         # query additionally checks trace membership and stamps before reuse.
-        for path, stamp in after.items():
+        for path, stamp in (*after.items(), *native_stamps.items()):
             previous = session._stamps.setdefault(path, stamp)
             if previous != stamp:
                 raise ValueError('observed capture changed within the owning session')
@@ -223,8 +299,13 @@ class ObservedDependencyProvider:
         self.check_inputs()
 
     def check_inputs(self):
+        from scar.analysis.program_dependency_session import _stamp
         if _inputs(self.directory) != self._stamps:
             raise ValueError('observed capture inputs changed within this read session')
+        for path, stamp in self._native_stamps.items():
+            if (path.is_symlink() or path.resolve() != path or not path.is_file()
+                    or _stamp(path) != stamp):
+                raise ValueError('native callable dependency changed within this read session')
 
     def _scope(self, scope):
         self.check()
@@ -243,6 +324,13 @@ class ObservedDependencyProvider:
     def ports(self, scope):
         self._scope(scope)
         return tuple(self._ports[scope])
+
+    def native_callables_for(self, scope):
+        """None means NOT_RECORDED; an empty tuple means no fact in this scope."""
+        self._scope(scope)
+        if self.native_callables is None:
+            return None
+        return tuple(item for item in self.native_callables if item.scope == scope)
 
     def neighborhood(self, point, *, outgoing=False, kinds=None):
         if type(point) is not ObservedPortPoint:
@@ -300,6 +388,11 @@ def main(argv=None):
                 for edge in provider.edges),
             'packing_dependency_edges': sum(edge.kind is K.ARGUMENT and edge.meaning is M.DEPENDENCE
                 for edge in provider.edges),
+            'callable_carrier_capture': None if provider.native_metadata is None else {
+                'bound': len(provider.native_callables),
+                'unbound': len(provider.native_frontiers),
+                'carriers': dict(Counter(item.fact.carrier.value for item in
+                    (*provider.native_callables, *provider.native_frontiers)))},
             'frontiers': dict(Counter(note.kind for note in provider.frontiers)), 'issues': provider.issues,
             'measurements': session.measurements(), 'target_executed': False,
             'whole_program_complete': False, 'normal_landing_observed': False,
@@ -315,5 +408,6 @@ def main(argv=None):
         stream.write('\n')
     print(json.dumps({key: summary[key] for key in ('bound_calls', 'function_interfaces', 'scopes',
         'edges', 'argument_layouts', 'ambiguous_call_layouts', 'conditional_argument_edges',
+        'callable_carrier_capture',
         'gzip_bytes', 'analyzer_seconds', 'target_executed', 'whole_program_complete')}, ensure_ascii=False))
     return 0

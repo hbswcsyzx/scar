@@ -95,6 +95,17 @@ class PythonTargetObserver:
         self._buffer=bytearray();self._buffer_limit=65536
         self._io_failed=False
         self.legacy_inputs=None
+        self.native_callables = None
+        probe_path = os.environ.get('SCAR_NATIVE_CALLABLE_PROBE')
+        if probe_path:
+            try:
+                from scar.trace.native_callables import NativeCallableObserver
+                self.native_callables = NativeCallableObserver(self, probe_path)
+            except BaseException:
+                if self._deferred is not None:self._deferred.close_capture()
+                os.close(self.fd)
+                self.closed = True
+                raise
     def emit(self,kind,value):
         """Compatibility path for callers supplying ordinary typed records."""
         if self.closed or self.stopped:return
@@ -161,6 +172,8 @@ class PythonTargetObserver:
         elif _is_type_object(callable_object):kind=Kind.TYPE_OBJECT
         call_ref=reference(callable_object)
         caller={'process_id':self.recorder.pid,'thread_id':key[0],'invocation_id':owner}
+        if self.native_callables is not None:
+            self.native_callables.on_call(callable_object, caller, attempt, call_ref, reference)
         if func is None:
             self._emit_fields('TARGET',{'attempt_index':attempt,'caller':caller,'kind':kind.value,
                 'callable_reference':call_ref,'function_reference':None,'code':None,'layout':None,

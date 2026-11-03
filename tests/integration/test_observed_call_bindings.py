@@ -241,11 +241,21 @@ def test_two_actual_classes_bind_one_static_call_without_claiming_class_origin(t
             _code_layout(wrong_order, pair.binding.target.layout, pair_code)
 
         document = export_observed_dependencies(provider)
-        assert document['schema_version'] == 2
+        assert document['schema_version'] == 3
         snapshot = read_observed_dependencies(json.dumps(document))
         assert snapshot.scopes == provider.scopes and snapshot.edges == provider.edges
         assert snapshot.bindings == provider.bindings and snapshot.interfaces == provider.interfaces
         assert snapshot.layouts == provider.layouts
+        assert snapshot.native_callables is snapshot.native_frontiers is snapshot.native_metadata is None
+        assert all(graph.observed_native_callables(scope) is None for scope in provider.scopes)
+        # Older formats did not record the optional carrier facts. Their
+        # absence is retained without inventing an empty observation set.
+        import copy
+        legacy = copy.deepcopy(document)
+        legacy['schema_version'] = 2
+        for name in ('native_callables', 'native_frontiers', 'native_metadata'):
+            legacy['snapshot'].pop(name)
+        assert read_observed_dependencies(legacy) == snapshot
         with pytest.raises(ValueError):
             read_observed_dependencies(dict(document, transformation_authorized=True))
 

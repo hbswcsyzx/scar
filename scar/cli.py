@@ -67,7 +67,8 @@ def _trace(args) -> int:
         if args.project_root is not None and str(Path(args.project_root).resolve()) != lean_plan.namespace_root:
             raise SystemExit('--project-root differs from the capture plan namespace')
     stream_interfaces = getattr(args, 'stream_interfaces', False) or program_ports
-    python_targets = getattr(args, 'python_call_targets', False) or lean_plan is not None or stream_interfaces or program_ports
+    native_callables = getattr(args, 'native_callables', False)
+    python_targets = getattr(args, 'python_call_targets', False) or lean_plan is not None or stream_interfaces or program_ports or native_callables
     operands = getattr(args, 'call_operands', False) or python_targets
     os_capture_root = getattr(args, 'os_capture_root', None)
     if os_capture_root is not None:
@@ -87,6 +88,7 @@ def _trace(args) -> int:
     env.pop('SCAR_CALL_TRACE_OWNER_PID',None)
     env.pop('SCAR_CALL_OPERANDS',None)
     env.pop('SCAR_PYTHON_CALL_TARGETS',None)
+    env.pop('SCAR_NATIVE_CALLABLE_PROBE',None)
     env.pop('SCAR_STREAM_INTERFACES',None)
     env.pop('SCAR_STREAM_BACKING_OBSERVATIONS',None)
     env.pop('SCAR_OPERAND_CAPTURE',None)
@@ -123,6 +125,8 @@ def _trace(args) -> int:
                 or any(out.glob('function-environment-meta.*.json*'))
                 or any(out.glob('python-call-targets.*.jsonl*'))
                 or any(out.glob('python-call-target-meta.*.json*'))
+                or any(out.glob('native-callables.*.jsonl*'))
+                or any(out.glob('native-callable-meta.*.json*'))
                 or any(out.glob('lean-plan.*.json'))
                 or any(out.glob('stream-interfaces.*.jsonl*'))
                 or any(out.glob('stream-interface-meta.*.json*'))
@@ -151,6 +155,9 @@ def _trace(args) -> int:
             env['SCAR_CALL_OPERANDS'] = '1'
             if python_targets:
                 env['SCAR_PYTHON_CALL_TARGETS'] = 'PYTHON_CALL_TARGETS_V2'
+            if native_callables:
+                from scar.trace.native_callable_probe import build_probe
+                env['SCAR_NATIVE_CALLABLE_PROBE'] = str(build_probe(out / 'native-probe'))
             if stream_interfaces:
                 env['SCAR_STREAM_INTERFACES'] = '1'
             env['SCAR_OPERAND_CAPTURE'] = capture
@@ -709,6 +716,8 @@ def main(argv=None) -> int:
     trace.add_argument('--call-operands',action='store_true',help='record bounded instruction/load/call evidence; implies calls-only (CPython 3.14)')
     trace.add_argument('--python-call-targets', action='store_true',
                        help='record explicit v2 Python callee and receiver roles; implies call-operands (CPython 3.14.7)')
+    trace.add_argument('--native-callables', action='store_true',
+                       help='capture actual native callable type/owner/ABI with an isolated optional C probe; implies Python call targets (CPython 3.14.7)')
     trace.add_argument('--capture-plan', help='use a source-derived lean interface capture plan; implies Python call targets')
     trace.add_argument('--capture-plan-sha256', help='expected capture plan SHA256')
     trace.add_argument('--capture-profile', choices=('program-ports','process-ports'),

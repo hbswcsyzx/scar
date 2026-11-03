@@ -1238,7 +1238,11 @@ class CallOperandObserver:
                 finally:
                     try:
                         if self.python_targets is not None:
-                            self.python_targets.close()
+                            try:
+                                self.python_targets.close()
+                            finally:
+                                if self.python_targets.native_callables is not None:
+                                    self.python_targets.native_callables.close()
                     finally:
                         self._closed = True
                         if self.recorder.operand_observer is self:

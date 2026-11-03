@@ -114,6 +114,10 @@ class ProgramDependencyGraph:
         provider.binding(scope)
         return tuple(layout for layout in provider.layouts if layout.scope == scope)
 
+    def observed_native_callables(self, scope):
+        """Captured carrier/ABI facts; None preserves an unrecorded companion."""
+        return self._observed_provider(scope).native_callables_for(scope)
+
     def observed_incoming(self, point, *, kinds=None):
         from scar.ir.program.observed_dependencies import ObservedPortPoint
         if type(point) is not ObservedPortPoint:

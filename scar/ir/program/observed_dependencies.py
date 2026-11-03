@@ -14,6 +14,7 @@ import re
 from .call_edges import CallRecordAnchor, InvocationKey
 from .dependencies import DependencyCondition, DependencyEdge, DependencyPoint
 from .ids import OperationID, RegionID, UseID, ValueID
+from .native_callables import NativeCallableFact
 
 
 @dataclass(frozen=True, slots=True)
@@ -169,6 +170,59 @@ class ObservedCallLayout:
                         or port.phase is not ObservedPortPhase.ENTRY_INTERFACE
                         or type(port.original.node) is not ValueID):
                     raise ValueError('CALL layout obligation changed its original callee parameter')
+
+
+@dataclass(frozen=True, slots=True)
+class ObservedNativeCallable:
+    """Actual callable-carrier facts at one original CALL, without a native body.
+
+    These facts identify the captured object/ABI. They do not prove the
+    callable ran, establish a source implementation, or create a callee frame.
+    """
+    scope: ObservedCallScope
+    call: ObservedPortPoint
+    callable: ObservedPortPoint
+    fact: NativeCallableFact
+    anchor: CallRecordAnchor
+
+    def __post_init__(self):
+        for value, kind in ((self.scope, ObservedCallScope), (self.call, ObservedPortPoint),
+                (self.callable, ObservedPortPoint), (self.fact, NativeCallableFact),
+                (self.anchor, CallRecordAnchor)):
+            if type(value) is not kind:
+                raise TypeError('observed native callable requires exact ' + kind.__name__)
+            value.__post_init__()
+        if (self.call.scope != self.scope or self.callable.scope != self.scope
+                or self.call.phase is not ObservedPortPhase.CALL_SITE
+                or self.callable.phase is not ObservedPortPhase.CALL_SITE
+                or type(self.call.original.node) is not OperationID
+                or type(self.callable.original.node) is not UseID
+                or self.call.original.namespace != self.callable.original.namespace
+                or self.fact.caller != self.scope.caller
+                or self.fact.attempt_index != self.scope.attempt_index
+                or self.anchor.index != self.fact.event_index):
+            raise ValueError('native callable facts changed the original CALL occurrence/ports')
+
+
+@dataclass(frozen=True, slots=True)
+class ObservedNativeCallableFrontier:
+    """Retain a captured fact whose original static CALL is not yet connected."""
+    run_scope: str
+    fact: NativeCallableFact
+    anchor: CallRecordAnchor
+    kind: str
+    detail: str
+
+    def __post_init__(self):
+        if (type(self.run_scope) is not str or re.fullmatch(r'[0-9a-f]{64}', self.run_scope) is None
+                or type(self.fact) is not NativeCallableFact
+                or type(self.anchor) is not CallRecordAnchor
+                or any(type(value) is not str or not value for value in (self.kind, self.detail))):
+            raise ValueError('unbound native fact requires its run, original record and explicit gap')
+        self.fact.__post_init__()
+        self.anchor.__post_init__()
+        if self.anchor.index != self.fact.event_index:
+            raise ValueError('unbound native fact changed its original event anchor')
 
 
 @dataclass(frozen=True, slots=True)
