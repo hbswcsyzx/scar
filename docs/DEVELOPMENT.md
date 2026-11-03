@@ -4,7 +4,18 @@
 不创建 worktree、日期版源码或历史实验副本；正常提交 Git，不 reset。
 不修改外部 LeWM、数据/权重、CUDA/driver 或整套环境。删除实现前先查引用。
 
-## 建图入口
+## 当前形式前端入口
+
+```bash
+python -B -m scar.cli source-bytes --file /path/to/program.py --out /path/to/fresh-material
+python -B -m scar.cli source-bytes --model /path/to/model --out /path/to/fresh-f0 --jobs 4
+python -B -m scar.cli source-bytes --model /path/to/model --out /path/to/fresh-check --verify
+```
+
+F0只保原始bytes与编码结果。解码失败仍存原bytes；文件不可用/预算停止准确报错，不给后层授权。
+现有模型仅追加raw材料；旧源码和IR保持。下一阶段是F1，前层验收完成前不新增后层功能。
+
+## 已有建图入口（前端形式验收尚未完成）
 
 ```bash
 python -B -m scar.cli static /path/to/program --out /path/to/model --phase bodies --jobs 4

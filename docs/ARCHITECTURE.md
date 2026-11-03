@@ -4,20 +4,25 @@
 实体和关系定义见 [MODEL](MODEL.md)，实测范围与剩余缺口见 [STATUS](STATUS.md)。
 LeWM 是外部 testcase；通用规则由语言协议、原端口和证据派发，不按业务名称选择。
 
-## 六层流水线
+## 形式阶段与顺序
 
-| 层 | 输入 → 输出 | 主要代码 owner |
+先验收前层的输入域、全部类型/字段及转换不变量，再开发后层。已有后层代码保留，当前冻结新增功能；
+功能样例通过不能证明前层完备。当前 Python 前端按本机 CPython 3.14.7 的版本化接口核对。
+
+| 阶段 | 封闭输入 → 机械输出 | 验收对象 |
 |---|---|---|
-| 1 材料与版本 | 入口、源码/配置、依赖实现/stub/契约 → 材料身份、依赖请求、可用与缺失范围 | [static_sources.py](../scar/analysis/static_sources.py)、[static_program.py](../scar/analysis/static_program.py) |
-| 2 识别与作用域/协议 | 版本化材料，经 CPython AST、符号表、编译布局 → 定义、occurrence、名称角色、调用/控制/异常协议 | [static_lexical.py](../scar/analysis/static_lexical.py)、[source_semantics_v2.py](../scar/analysis/source_semantics_v2.py)、[static_compilation.py](../scar/analysis/static_compilation.py) |
-| 3 局部类型化子图 | 已识别构造与协议 → 原 Operation/Use/Value/状态/资源、typed CFG/SSA 及各完成端口 | [static_body.py](../scar/analysis/static_body.py)、[program_lowering.py](../scar/analysis/program_lowering.py)、[structured_lowering.py](../scar/analysis/structured_lowering.py) |
-| 4 跨子图接线 | 原子图端口、来源路径及可选运行观察 → 实参/环境/字段/返回/异常/world 关系和实例绑定 | [program_dependencies.py](../scar/analysis/program_dependencies.py)、[static_calls.py](../scar/analysis/static_calls.py)、[observed_call_bindings.py](../scar/analysis/observed_call_bindings.py) |
-| 5 条件固定点推理 | 第3/4层原关系、路径条件与效果前提 → 常量、类型、shape/dtype、身份/版本等属性及未定字段 | [program_value_analysis.py](../scar/analysis/program_value_analysis.py)、[static_namespace.py](../scar/analysis/static_namespace.py) |
-| 6 发布与覆盖审计 | 原分片、ID 引用、关系和前沿 → 统一可查询图及明确覆盖范围 | [static_program.py](../scar/analysis/static_program.py)、[program_dependency_session.py](../scar/analysis/program_dependency_session.py)、[static_query.py](../scar/analysis/static_query.py) |
+| F0 材料 | 原始bytes、来源/版本 → 原字节blob、编码结果或结构化错误 | SHA/长度/精确还原；不调用lexer/parser |
+| F1 词法 | F0可解码材料 → 官方全部token/exact_type、源切片、trivia、EOF或词法错误前缀 | 与官方token流逐项相等，文本无漏无重分区 |
+| F2 语法 | 同源词法输入、固定parser参数 → 完整constructor/有序字段/子节点槽/带类型标量/坐标 | 无损还原官方AST，含None、空列表及字段存在性 |
+| F3 绑定 | F2 occurrence及官方symtable → scope树、全部名字来源字段的角色/绑定关系 | 全scope/symbol/namespace链及名字字段分母；不按名称+行号猜 |
+| F4 规范IR | F2/F3及版本化语言规则 → Operation/Value/StateLocation/Region/Resource、CFG/SSA/完成端口 | 每个语法类别×上下文有构造规则，控制/状态/效果约束成立 |
+| F5 接线 | 原定义和端口、静态契约及可选运行事实 → 跨区域/函数/库/资源关系 | 原端口、条件与作用域逐项对应，动态仅补实际选择 |
+| F6 推理与发布 | 已连接关系 → 条件固定点事实、分片及完整覆盖清单 | 来源可重验；字段未知、预算前沿与缺实现分开 |
 
-第5层的新事实回馈相关识别/接线任务，不重新扫描或复制无关主体。
-先定位第一处缺失的是材料、识别、降低、连接还是推理，再修改对应 owner。
-未支持的语法、缺实现、预算截断和实际运行字段未绑定分别记录，不能统一解释为动态未知。
+每层都须对其全部输入给出有效记录、准确StageError或BudgetFrontier；失败不能改名为UNKNOWN或悄悄跳过。
+记录实例覆盖与实现规则覆盖分别核查；新发现材料仍从已验收前层进入，不能绕过前层。
+F1/F2使用官方前端，不重造Python lexer/parser；AST是语法输入，最终程序图仍可共享、成环和展开。
+F0当前是独立命令，旧static入口不能视为已经自动执行它；现有AST目录计数不证明F1/F2通过。
 
 ## 共享子图与可组合接口
 
@@ -63,7 +68,7 @@ artifacts/current/static/ 是唯一当前程序模型；源码/主体/关系按�
 既有规范/partial图不走此替换口；实际支持尚缺时报告static rule，不消耗无效的补建请求。
 artifacts/current/queries/ 保存派生查询证据，不是第二份权威程序。
 
-## 当前接通范围与下一项
+## 已有后层能力与当前开发边界
 
 已具备源码层、局部规范图、共同依赖查询、部分条件属性推理和循环边界查询。
 真实 CEM 的81个CALL实例及9条函数接口已接入共同图的显式观测端口查询，静态邻接不变。
@@ -73,7 +78,7 @@ artifacts/current/queries/ 保存派生查询证据，不是第二份权威程�
 选中 CEM 循环的边界查询已在原预算内完成；这不证明状态、效果、资源或整个程序闭合。
 
 可证明的线性编译栈来源已接原cleanup返回；跨跳转合流继续保留候选，不按None猜来源。
-下一项先补组合cleanup和generator创建/恢复入口，再接native接口与状态/资源推理。
+这些是已有局部结果，不证明形式前端完备。当前从F0重新逐层验收；F1完成前不新增F2及后层实现。
 不得把裸 context=None 的观测边注册为全局事实，也不得丢弃未执行的异常路径。
 Python→native/runtime/kernel、Tensor 属性、alias/effects 与资源连接仍需按实际缺口补齐。
 第一阶段只有在实体、结构、连接、属性和覆盖均经核查后才完成。

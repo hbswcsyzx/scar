@@ -88,7 +88,7 @@ def _module_name(path, root):
     return ".".join(parts) if parts else root.name
 
 
-def _read_source(path, byte_limit):
+def _read_raw_source(path, byte_limit):
     """Read one stable regular file, rejecting symlink replacement and growth."""
     before_path = path.lstat()
     if stat.S_ISLNK(before_path.st_mode) or not stat.S_ISREG(before_path.st_mode):
@@ -118,6 +118,11 @@ def _read_source(path, byte_limit):
             raise _ByteBudget(len(raw))
     finally:
         os.close(descriptor)
+    return raw
+
+
+def _read_source(path, byte_limit):
+    raw = _read_raw_source(path, byte_limit)
     encoding, _ = tokenize.detect_encoding(io.BytesIO(raw).readline)
     text = raw.decode(encoding)
     return raw, text, encoding
