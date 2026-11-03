@@ -45,6 +45,8 @@ class ContextualCallResolver:
         self.owner = owner
         self.session = StaticCallDependencyView(owner)
         self._active = set()
+        self._resolve_depth = 0
+        self._last_receiver_evidence = None
         self.counts = Counter()
         self.modules = ModuleAttributeDependencies(load_body=owner._load_body_namespace,
             source_context=lambda body:(body.context.tree,body.context.semantic,body.context.docs['source']['text']),
@@ -119,7 +121,24 @@ class ContextualCallResolver:
         creation=self.owner._function_creation(body,pair[0],point.node,pair[1])
         return (body,StaticQualifiedFunctionCreation(body.namespace,creation)) if creation is not None else None
 
+    def receiver_evidence(self, call):
+        """Only the last completed outer query owns these ephemeral walks."""
+        saved = self._last_receiver_evidence
+        return saved[1] if saved is not None and saved[0] == call else None
+
     def resolve(self, call):
+        receivers = {}
+        outermost = self._resolve_depth == 0
+        self._resolve_depth += 1
+        try:
+            result = self._resolve(call, receivers)
+            if outermost:
+                self._last_receiver_evidence = (call, tuple(receivers.values()))
+            return result
+        finally:
+            self._resolve_depth -= 1
+
+    def _resolve(self, call, receivers):
         if type(call)is not Point or type(call.node)is not OperationID:
             raise TypeError('contextual resolution needs an original CALL operation point')
         self.owner._check()
@@ -173,6 +192,16 @@ class ContextualCallResolver:
                     if target.frame is not None and len(context_frames(call.context))>=self.owner.budget.max_context_depth:
                         note('CONTEXTUAL_CALL_INTERFACE_DEPTH_BUDGET','The source candidate is retained; entering another CALL would exceed the known-context suffix budget.')
                     continue
+                from scar.analysis.contextual_receiver_sources import (
+                    attribute_read_at, collect_receiver_evidence,
+                )
+                read = attribute_read_at(self, point)
+                if read is not None:
+                    key = (point.namespace, read.operation, point.context)
+                    if key not in receivers:
+                        evidence = collect_receiver_evidence(self, read, point.context)
+                        receivers[key] = evidence
+                        notes.update((frontier, None) for frontier in evidence.walk.frontiers)
                 neighborhood=self.session.graph().incoming(point,kinds=REFERENCE_KINDS)
                 notes.update((frontier,None)for frontier in neighborhood.frontiers)
                 for edge in neighborhood.edges:
@@ -256,6 +285,7 @@ class ContextualCallResolver:
     def outgoing(self, point):return self._neighbors(point,True)
 
     def close(self):
+        self._last_receiver_evidence = None
         self.modules._facts.clear()
         self.session.close()
 

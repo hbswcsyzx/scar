@@ -114,6 +114,13 @@ Verified：固定解包已按原 slot 接入共同图和同一值推理队列；
 `queries/unpack-projections/summary.json`。下一断点是上游 receiver→方法目标→返回
 来源；一般 iterator/slice/native 契约及未展开主体仍未完成。
 
+Verified：receiver 独立来源查询已接入默认 contextual resolver；通用用例经真实
+ARGUMENT 追到调用者 import，缺上下文时明确停在原 formal。真实第144行查询自动保存
+1 个 receiver 子图、5 条原边（20.12 秒，gzip 2456 字节），见
+`queries/contextual-receiver-call/summary.json`；当前独立查询无调用者帧，目标仍为0。
+后续按类语句结果来源→类对象调用/实例创建→descriptor与隐式receiver绑定→decorator
+返回对象推进；这些是不同层，类suite正常值、类对象、实例和raw function不能混用。
+
 全范围任务已于 2026-11-02 21:42 UTC PUBLISHED，producer 不再受该任务冻结。不要为
 核验小修复反复启动 107 分钟全范围 linker；先做原主体/接口检查，输入改变后再原子更新
 有关关系，明确索引和主体版本边界。outgoing 原始路由及 typed 重放已分离，预算不足

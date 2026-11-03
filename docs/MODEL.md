@@ -61,6 +61,10 @@ source spelling 与实际 lookup name 分开，private-name 改写由词法 Clas
 序号来自原 completion/UnpackShape，异常与 world 独立保留。只有已证 builtin tuple
 内容或构造来源才能按 i 传递成员事实，不能直接把容器来源当作元素来源，未知 iterable 保留边界。
 
+属性的 receiver 来源沿同一图单独查询，保留参数、返回、绑定、状态和调用上下文边；
+这条路径解释 lookup 的输入，不是 lookup 结果或 callable 的身份。入口形参未绑定、
+CALL 产物和尚未展开的属性读取分别记录停止位置，不能凭变量名或词法所属类推实例类型。
+
 `IMPORT_FROM` 也是原 Operation，不转换成虚构的 Attribute AST。`StaticImportFromRequest`
 记录原 name/level/fromlist Use 和 fromlist 的 `CodeConstantSource`；`StaticImportFromRead`
 记录原 receiver/key/world、成员序号及 normal result。两者只是描述原端口的强类型关系，

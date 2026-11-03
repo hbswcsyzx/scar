@@ -106,6 +106,7 @@ def main(argv=None):
     frontiers, interfaces = Counter(), Counter()
     requested, found_operations = frozenset(args.operation), set()
     calls = targets = output_bytes = selected_calls = 0
+    receiver_queries = receiver_edges = 0
     matched_bodies = eligible_bodies = processed_bodies = 0
     scope_complete, inputs_stable, state = False, False, "FAILED"
     error = None
@@ -114,17 +115,14 @@ def main(argv=None):
     def issue(kind, detail):
         issues.append({"kind": kind, "detail": detail})
 
-    def persist(resolution, caller_number, call_number):
+    def persist_document(document, relative, schema, **metadata):
         nonlocal output_bytes
-        from scar.analysis.contextual_call_export import export_contextual_call
-        edges = tuple(edge for target in resolution.targets for edge in target.dependency_edges())
-        raw = _json(export_contextual_call(resolution))
+        raw = _json(document)
         if len(raw) > budget.max_record_bytes:
             raise OverflowError("contextual result decoded record exceeds its byte ceiling")
         stored = gzip.compress(raw, compresslevel=3, mtime=0)
         if owner.output_bytes + output_bytes + len(stored) > budget.max_output_bytes:
             raise OverflowError("contextual result output-byte budget exhausted")
-        relative = f"callers/{caller_number:06d}/{call_number:06d}.json.gz"
         path = out / relative
         path.parent.mkdir(parents=True, exist_ok=True)
         with path.open("xb") as stream:
@@ -133,10 +131,35 @@ def main(argv=None):
         descriptor = {"path": relative, "bytes": len(stored),
             "sha256": hashlib.sha256(stored).hexdigest(), "decoded_bytes": len(raw),
             "decoded_sha256": hashlib.sha256(raw).hexdigest(),
-            "schema": "scar.contextual-calls/2", "call": resolution.call.node.wire,
-            "targets": len(resolution.targets), "interface_edges": len(edges)}
+            "schema": schema, **metadata}
         artifacts.append(descriptor)
+        return descriptor
+
+    def persist(resolution, caller_number, call_number):
+        from scar.analysis.contextual_call_export import export_contextual_call
+        edges = tuple(edge for target in resolution.targets for edge in target.dependency_edges())
+        descriptor = persist_document(export_contextual_call(resolution),
+            f"callers/{caller_number:06d}/{call_number:06d}.json.gz", "scar.contextual-calls/2",
+            call=resolution.call.node.wire, targets=len(resolution.targets), interface_edges=len(edges))
         interfaces.update(edge.kind.value for edge in edges)
+        return descriptor
+
+    def persist_receiver(evidence, resolution, caller_number, call_number, lookup_number):
+        nonlocal receiver_queries, receiver_edges
+        from scar.analysis.program_dependency_export import export_dependency_walk
+        lookup, walk = evidence.lookup, evidence.walk
+        document = {"schema": "scar.attribute-receiver-query", "schema_version": 1,
+            "call_operation": resolution.call.node.wire,
+            "lookup_operation": lookup.operation.wire,
+            "lookup_source": encode(lookup.source), "source_spelling": lookup.field,
+            "graph": export_dependency_walk(walk),
+            "target_executed": False, "whole_program_complete": False}
+        descriptor = persist_document(document,
+            f"receivers/{caller_number:06d}/{call_number:06d}/{lookup_number:06d}.json.gz",
+            "scar.attribute-receiver-query/1", call_operation=resolution.call.node.wire,
+            lookup_operation=lookup.operation.wire, receiver_edges=len(walk.edges))
+        receiver_queries += 1
+        receiver_edges += len(walk.edges)
         return descriptor
 
     try:
@@ -176,9 +199,10 @@ def main(argv=None):
                 and (args.call_line is None or link.source.start_line == args.call_line))
             found_operations.update(operations)
             selected_calls += len(operations)
-            receipts = []
+            receipts, receiver_receipts = [], []
             caller = {"source": unit["path"], "entry_key": row["entry_key"],
-                "caller_graph": encode(body.namespace.graph), "matched_calls": len(operations), "artifacts": receipts}
+                "caller_graph": encode(body.namespace.graph), "matched_calls": len(operations),
+                "artifacts": receipts, "receiver_artifacts": receiver_receipts}
             callers.append(caller)
             for operation in operations:
                 if calls >= args.max_calls:
@@ -190,12 +214,27 @@ def main(argv=None):
                 # Invoke the public owner consumer. No hand-built target,
                 # SourceDefinitionReference, factory list or injected proof.
                 for resolution in owner.resolve_contextual_calls(body, operations=(operation,), context=None):
-                    descriptor = persist(resolution, caller_number, len(receipts))
+                    call_number = len(receipts)
+                    descriptor = persist(resolution, caller_number, call_number)
                     receipts.append(descriptor["path"])
                     calls += 1
                     targets += len(resolution.targets)
+                    # Read the just-completed scope before any later resolve
+                    # can replace its ephemeral receiver evidence. Its graph
+                    # is independent evidence, never a callee identity path.
+                    receivers = resolver.receiver_evidence(resolution.call)
+                    if receivers is None:
+                        issue("ATTRIBUTE_RECEIVER_EPHEMERAL_UNAVAILABLE",
+                            "The completed CALL " + resolution.call.node.wire
+                            + " has no matching completed receiver-evidence scope; it is not an analyzed empty receiver set.")
+                    else:
+                        for lookup_number, evidence in enumerate(receivers):
+                            receiver_descriptor = persist_receiver(evidence, resolution,
+                                caller_number, call_number, lookup_number)
+                            receiver_receipts.append(receiver_descriptor["path"])
                     frontiers.update(frontier.kind for frontier in resolution.frontiers)
-                    task.write(force=True, calls_persisted=calls, targets_persisted=targets)
+                    task.write(force=True, calls_persisted=calls, targets_persisted=targets,
+                        receiver_queries=receiver_queries, receiver_edges=receiver_edges)
                     if any("BUDGET" in frontier.kind for frontier in resolution.frontiers):
                         issue("CONTEXTUAL_RESOLUTION_BUDGET", "The saved typed result retains the accepted prefix and its specific budget frontiers.")
                         stopped = True
@@ -242,6 +281,7 @@ def main(argv=None):
             "processed_caller_bodies": processed_bodies, "calls_matched_in_processed_bodies": selected_calls,
             "calls_persisted": calls, "selected_call_enumeration_complete": scope_complete},
         "target_alternatives": targets, "interface_edges": dict(interfaces),
+        "receiver_queries": receiver_queries, "receiver_edges": receiver_edges,
         "argument_edges": interfaces.get("ARGUMENT", 0),
         "normal_return_edges": interfaces.get("COMPLETION", 0),
         "frontier_counts": dict(frontiers), "issues": issues, "error": error,
@@ -257,6 +297,7 @@ def main(argv=None):
     _atomic(out / "summary.json", summary)
     task.write(force=True, state=state, stage="TERMINAL", ended_at=_now(), error=error,
         calls_persisted=calls, targets_persisted=targets, selected_call_enumeration_complete=scope_complete,
+        receiver_queries=receiver_queries, receiver_edges=receiver_edges,
         first_stage_complete=False, summary="summary.json")
     print(json.dumps({"state": state, "out": str(out), "calls": calls, "targets": targets,
         "interface_edges": dict(interfaces), "analyzer_seconds": summary["analyzer_seconds"],
