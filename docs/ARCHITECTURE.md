@@ -59,6 +59,8 @@ artifacts/current/static/ 是唯一当前程序模型；源码/主体/关系按�
 每片附 stored/decoded SHA 与原 ID 引用，跨片引用不复制原图。
 共同 reader 共享有界缓存、校核原收据；原输入稳定期间复用解码结果。
 增补缺失主体保持已有主体和关系原样；旧关系仍只覆盖其原输入范围。
+无图诊断不是已完成主体；仅fresh读取确认原收据内无图/端口、源身份不变，才允许补建并保留诊断输入。
+既有规范/partial图不走此替换口；实际支持尚缺时报告static rule，不消耗无效的补建请求。
 artifacts/current/queries/ 保存派生查询证据，不是第二份权威程序。
 
 ## 当前接通范围与下一项
@@ -70,7 +72,8 @@ artifacts/current/queries/ 保存派生查询证据，不是第二份权威程�
 对应 owner 是 [program_observed_dependencies.py](../scar/analysis/program_observed_dependencies.py)。
 选中 CEM 循环的边界查询已在原预算内完成；这不证明状态、效果、资源或整个程序闭合。
 
-下一项按真实缺口补受保护返回、延迟入口和native接口，再补循环迭代/状态与共同推理消费。
+可证明的线性编译栈来源已接原cleanup返回；跨跳转合流继续保留候选，不按None猜来源。
+下一项先补组合cleanup和generator创建/恢复入口，再接native接口与状态/资源推理。
 不得把裸 context=None 的观测边注册为全局事实，也不得丢弃未执行的异常路径。
 Python→native/runtime/kernel、Tensor 属性、alias/effects 与资源连接仍需按实际缺口补齐。
 第一阶段只有在实体、结构、连接、属性和覆盖均经核查后才完成。

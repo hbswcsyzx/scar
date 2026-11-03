@@ -13,12 +13,15 @@ import pytest
 
 @pytest.mark.skipif(sys.implementation.name != 'cpython' or sys.version_info[:3] != (3, 14, 7),
     reason='the existing lean CALL collector uses the CPython 3.14.7 contract')
-def test_observed_missing_body_preserves_original_call_publication_and_shards(tmp_path):
+@pytest.mark.parametrize('initial_diagnostic', (False, True))
+def test_observed_missing_body_preserves_original_call_publication_and_shards(tmp_path, monkeypatch, initial_diagnostic):
     from scar.analysis.observed_body_demands import expand_observed_bodies
     from scar.analysis.observed_call_bindings import build_observed_call_bindings
     from scar.analysis.observed_function_interfaces import read_observed_function_interfaces
     from scar.analysis.program_dependency_session import ProgramDependencySession
-    from scar.analysis.static_basis_compatibility import units_basis_compatible
+    from scar.analysis.static_basis_compatibility import units_basis_compatible, published_units_basis_compatible
+    from scar.analysis.static_body_materialization import diagnostic_materializations
+    from scar.analysis.static_query import _Fragments
     from scar.analysis.static_body import expand_static_bodies
     from scar.analysis.static_calls import input_basis_unit
     from scar.analysis.static_program import link_static_program
@@ -45,17 +48,29 @@ def test_observed_missing_body_preserves_original_call_publication_and_shards(tm
     f_key, = (row['entry_key'] for row in unit['bodies'] if row['name'] == '<module>.f')
     g_key, = (row['entry_key'] for row in unit['bodies'] if row['name'] == '<module>.g')
     expand_static_bodies(model, jobs=1, entries=(module_key, f_key))
+    if initial_diagnostic:
+        # A prior construction failed without any core ports. Retrying the
+        # very same producer/cache key must keep that diagnostic immutable.
+        from scar.analysis.program_lowering import _SealedLoweringSession
+        def unavailable(*args, **kwargs):
+            raise RuntimeError('temporary construction failure')
+        with monkeypatch.context() as patch:
+            patch.setattr(_SealedLoweringSession, 'lower', unavailable)
+            expand_static_bodies(model, jobs=1, entries=(g_key,), additive_only=True)
     before = link_static_program(model)
     unit, = before['units']
-    original_rows = {row['entry_key']: row for row in unit['bodies'] if 'artifact' in row}
+    original_rows = {row['entry_key']: row for row in unit['bodies'] if row['status'] == 'LOWERED_WITH_GAPS'}
     assert set(original_rows) == {module_key, f_key}
-    assert not next(row for row in unit['bodies'] if row['entry_key'] == g_key).get('artifact')
+    old_g, = (row for row in unit['bodies'] if row['entry_key'] == g_key)
+    assert bool(old_g.get('artifact')) is initial_diagnostic
     assert before['static_calls']['counts']['argument_port_edges'] > 0
     basis = [input_basis_unit(unit) for unit in before['units']]
     descriptors = [*before.get('artifacts', {}).values(), *before['static_calls']['artifacts'],
         *(descriptor for name, descriptor in unit['artifacts'].items()
           if name in ('source', 'lexical', 'semantic', 'semantics', 'control')),
         *(row['artifact'] for row in original_rows.values())]
+    if initial_diagnostic:
+        descriptors.append(old_g['artifact'])
     retained = {descriptor['path']: (model / descriptor['path']).read_bytes() for descriptor in descriptors}
 
     def original_calls_and_argument_edges():
@@ -112,6 +127,12 @@ def test_observed_missing_body_preserves_original_call_publication_and_shards(tm
     rows = {row['entry_key']: row for row in after_unit['bodies']}
     assert all(rows[key] == row for key, row in original_rows.items())
     assert rows[g_key]['artifact'] and rows[g_key]['status'] == 'LOWERED_WITH_GAPS'
+    if initial_diagnostic:
+        assert rows[g_key]['diagnostic_input'] == old_g['artifact']
+        assert rows[g_key]['cache_key'] == old_g['cache_key']
+        assert rows[g_key]['artifact']['path'] != old_g['artifact']['path']
+        assert after['body_expansion']['diagnostic_retries'] == [
+            {'entry_key': g_key, 'status': 'LOWERED_WITH_GAPS', 'materialized': True}]
     assert after['static_calls'] == before['static_calls']
     assert all((model / path).read_bytes() == contents for path, contents in retained.items())
     coverage = after['body_expansion']['relationship_coverage']
@@ -119,18 +140,28 @@ def test_observed_missing_body_preserves_original_call_publication_and_shards(tm
     assert original_calls_and_argument_edges() == (old_shards, old_edges)
 
     current_basis = [input_basis_unit(unit) for unit in after['units']]
-    assert units_basis_compatible(basis, current_basis)
+    def compatible(candidate):
+        return published_units_basis_compatible(basis, candidate,
+            diagnostic_body=diagnostic_materializations(after, _Fragments(model).read))
+    assert compatible(current_basis)
+    assert units_basis_compatible(basis, current_basis) is not initial_diagnostic
+    if initial_diagnostic:
+        # Same status/manifest claims cannot authorize replacing a real graph.
+        def forged_graph(descriptor):
+            return {**_Fragments(model).read(descriptor), 'graph': {}}
+        assert not published_units_basis_compatible(basis, current_basis,
+            diagnostic_body=diagnostic_materializations(after, forged_graph))
     # These lightweight comparisons cannot bless replaced artifacts or
     # different source/declaration identities as merely filling a body hole.
     changed = deepcopy(current_basis)
     next(row for row in changed[0]['bodies'] if row['entry_key'] == f_key)['artifact']['sha256'] = '0' * 64
-    assert not units_basis_compatible(basis, changed)
+    assert not compatible(changed)
     changed = deepcopy(current_basis)
     changed[0]['artifacts']['source']['sha256'] = '0' * 64
-    assert not units_basis_compatible(basis, changed)
+    assert not compatible(changed)
     changed = deepcopy(current_basis)
     next(row for row in changed[0]['bodies'] if row['entry_key'] == g_key)['definitions'] = []
-    assert not units_basis_compatible(basis, changed)
+    assert not compatible(changed)
 
     bound = tmp_path / 'bindings'
     joined = build_observed_call_bindings(model, trace, bound)

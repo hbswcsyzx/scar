@@ -122,6 +122,8 @@ class ProgramDependencySession:
             for descriptor in unit["artifacts"].values():
                 self._register_model(descriptor)
             for position, row in enumerate(unit.get("bodies", ())):
+                if 'diagnostic_input' in row:
+                    self._register_model(row['diagnostic_input'])
                 if "artifact" in row:
                     self._register_model(row["artifact"])
                     uri = str(self.root / row["artifact"]["path"])
@@ -169,6 +171,7 @@ class ProgramDependencySession:
     def _register_publication(self, publication, index_directory, family):
         from scar.analysis.static_calls import input_basis_unit
         from scar.analysis.static_basis_compatibility import published_units_basis_compatible
+        from scar.analysis.static_body_materialization import diagnostic_materializations
         expected = "scar.static-call-publication" if family == "calls" else "scar.static-class-publication"
         if publication.get("schema") != expected:
             raise ValueError("unsupported " + family + " dependency publication")
@@ -195,7 +198,8 @@ class ProgramDependencySession:
                 or basis.get("logical_root") != str(self.root)
                 or not published_units_basis_compatible(basis.get("units"),
                     [input_basis_unit(unit) for unit in self.units],
-                    source_expansion=self.manifest.get('source_expansion'))):
+                    source_expansion=self.manifest.get('source_expansion'),
+                    diagnostic_body=diagnostic_materializations(self.manifest, self.read))):
             raise ValueError("relationship source basis differs from original current units")
         self._bases[artifact] = basis
         items = self._call_items if family == "calls" else self._class_items

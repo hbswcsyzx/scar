@@ -60,6 +60,8 @@ def _artifacts(manifest):
         for body in unit["bodies"]:
             if "artifact" in body:
                 yield body["artifact"]
+            if 'diagnostic_input' in body:
+                yield body['diagnostic_input']
 
 
 def _discard_static_classes(root, manifest):

@@ -163,8 +163,14 @@ def _rule(node):
         # contains no scalar literal/Store/BinOp selecting it independently.
         caps, compiler = [C.GENEXPR_CREATION_314_V1, C.SOURCE_EXPRESSIONS_314_V1,
                           C.SOURCE_REFERENCE_LIFETIME_314_V1], True
-        if len(node.generators) != 1 or node.generators[0].is_async or node.generators[0].ifs or not isinstance(node.generators[0].target, ast.Name):
-            unsupported = "Generator creation requires one synchronous clause, Name target and no filters."
+        if len(node.generators) != 1 or node.generators[0].is_async or not isinstance(node.generators[0].target, ast.Name):
+            unsupported = "Generator creation requires one synchronous clause and a Name target."
+        elif any(isinstance(child, ast.BoolOp)
+                 for expression in (node.elt, *node.generators[0].ifs)
+                 for child, _ in _owned(expression, "$")):
+            unsupported = "Generator lazy BoolOp requires a checked target-child expression adapter."
+            needs.append(_needs("GENEXPR_LAZY_BOOL_OP_ADAPTER",
+                "The lazy target-child dispatcher has no BoolOp adapter; enclosing creation does not execute deferred lambda or generator bodies."))
         needs.append(_needs("STATIC_CHILD_CODE_AND_CELLS", "Creation and lazy body remain distinct; child .0/freevars/constant slot must match. Drive/close are not selected by creation."))
     elif isinstance(node, ast.Set):
         module, function = "source_set_lowering", "lower_set_display"

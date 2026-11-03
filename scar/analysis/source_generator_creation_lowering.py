@@ -2,7 +2,6 @@
 
 Reuse the existing exact child-code/body construction. No driver, request or
 body activation is introduced merely because a reference can escape to CALL.
-The V1 fixed-unpack producer is unchanged, including its implementation hash.
 """
 from __future__ import annotations
 
@@ -115,7 +114,7 @@ def lower_creation(builder, node, cursor):
     evidence = builder.language_options.code_evidence
     if evidence is None:
         raise _Unsupported(GapKind.CODE_VERSION,node,'GENEXPR_READONLY_CHILD_CODE_WITNESS_REQUIRED')
-    if (len(node.generators)!=1 or node.generators[0].is_async or node.generators[0].ifs
+    if (len(node.generators)!=1 or node.generators[0].is_async
             or not isinstance(node.generators[0].target,ast.Name)):
         raise _Unsupported(GapKind.UNSUPPORTED_SYNTAX,node,'GENEXPR_CLAUSE_INTERFACE_UNIMPLEMENTED')
     definition = _source_definition(builder,node)

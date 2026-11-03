@@ -134,15 +134,11 @@ def _cleanup_returns(root, protected=False):
         yield from _cleanup_returns(child, protected)
 
 
-def _implicit_terminal(body, terminal, structured):
-    source = body.namespace.source
+def _frame_terminal(body, terminal, structured, source):
     if (not any(link.operation == terminal.operation and link.source == source
                 for link in body.operation_links)
             or not any(link.operation == terminal.operation and link.use == terminal.use
                 and link.source == source and link.role == 'result' for link in body.use_links)):
-        return False
-    value = body.index.values[terminal.value]
-    if type(value) is not ReferenceValue or type(value.origin) is not LiteralOrigin or value.origin.value is not None:
         return False
     block, = (block for region in body.graph.regions for block in region.blocks if block.id == terminal.block)
     position = block.operations.index(terminal.operation)
@@ -158,6 +154,34 @@ def _implicit_terminal(body, terminal, structured):
     operation = body.index.operations[terminal.operation]
     world = body.index.values[body.index.use_site(operation.terminator.values[1]).use.value]
     return type(world.origin) is OperationResult and world.origin.operation == frame
+
+
+def _implicit_terminal(body, terminal, structured):
+    value = body.index.values[terminal.value]
+    return (type(value) is ReferenceValue and type(value.origin) is LiteralOrigin
+        and value.origin.value is None
+        and _frame_terminal(body, terminal, structured, body.namespace.source))
+
+
+def _protected_return_site(body, code, exit_, returns, protected, interface):
+    from scar.analysis.observed_return_routes import compiler_return_producer, cleanup_continuation
+    producer = compiler_return_producer(code, exit_.return_site.offset)
+    if producer is None or body.document.get('structured') is None:
+        return None
+    nodes = [node for node in returns if node in protected
+        and tuple(producer.positions) == _positions(node.value if node.value is not None else node)]
+    if len(nodes) != 1:
+        return None
+    source = body.context.refs.get(('Return', *_positions(nodes[0])))
+    if source is None:
+        return None
+    structured = decode(StructuredBodyModel, body.document['structured'])
+    if (structured.definition != body.namespace.definition or structured.region != body.namespace.region
+            or structured.source != body.namespace.source):
+        raise ValueError('protected return changed its original structured body identity')
+    selected = [terminal for terminal in interface.normal_returns
+        if cleanup_continuation(body, terminal, source) and _frame_terminal(body, terminal, structured, source)]
+    return selected[0] if len(selected) == 1 else None
 
 
 def _return_site(body, code, exit_, interface, *, issue=None):
@@ -185,8 +209,9 @@ def _return_site(body, code, exit_, interface, *, issue=None):
             return None
         node, = nodes
         if node in protected:
-            return opened('OBSERVED_RETURN_CONTROL_PATH_OPEN',
-                'This explicit return crosses cleanup; its compiler/control route remains open.')
+            selected = _protected_return_site(body, code, exit_, returns, protected, interface)
+            return selected if selected is not None else opened('OBSERVED_RETURN_CONTROL_PATH_OPEN',
+                'The compiler stack slice or original typed cleanup continuation does not uniquely select this return.')
         positions = {_positions(node)}
         if node.value is not None:
             positions.add(_positions(node.value))
@@ -196,8 +221,9 @@ def _return_site(body, code, exit_, interface, *, issue=None):
                 if link.operation == terminal.operation)]
         return selected[0] if len(selected) == 1 else None
     if protected:
-        return opened('OBSERVED_RETURN_CONTROL_PATH_OPEN',
-            'An unmatched compiler return may belong to a protected explicit return; fallthrough is not selected from None or source position.')
+        selected = _protected_return_site(body, code, exit_, returns, protected, interface)
+        return selected if selected is not None else opened('OBSERVED_RETURN_CONTROL_PATH_OPEN',
+            'The compiler value/cleanup route remains ambiguous; fallthrough is not selected from None or source position.')
     instructions = tuple(dis.get_instructions(code))
     number, = (number for number, instruction in enumerate(instructions)
                if instruction.offset == exit_.return_site.offset)

@@ -38,6 +38,10 @@ def units_basis_compatible(original_units, current_units):
     their exact original presence, types and values. Invalid inputs return
     False rather than granting compatibility from a partial comparison.
     """
+    return _units_basis_compatible(original_units, current_units)
+
+
+def _units_basis_compatible(original_units, current_units, diagnostic_body=None):
     if (type(original_units) is not list
             or type(current_units) is not list
             or len(original_units) != len(current_units)):
@@ -60,7 +64,11 @@ def units_basis_compatible(original_units, current_units):
                 return False
             if 'artifact' in old:
                 if not _same(old, new):
-                    return False
+                    if (diagnostic_body is None
+                            or not _same({key: value for key, value in old.items() if key not in mutable},
+                                {key: value for key, value in new.items() if key not in mutable})
+                            or not diagnostic_body(before, old, after, new)):
+                        return False
             elif (not _same({key: value for key, value in old.items() if key not in mutable},
                     {key: value for key, value in new.items() if key not in mutable})
                     or not _same(new, new)):
@@ -126,18 +134,19 @@ def _source_expansion_valid(ledger, current):
     return previous == len(current)
 
 
-def published_units_basis_compatible(original_units, current_units, *, source_expansion=None):
+def published_units_basis_compatible(original_units, current_units, *, source_expansion=None,
+                                     diagnostic_body=None):
     """Retain prior relationship scope across an explicit append-only ledger.
 
     Every original source/body endpoint is still checked by the strict normal
     comparison. Additional units are accepted only at recorded append borders;
     their relationships are not asserted to have been covered by the old basis.
     """
-    if units_basis_compatible(original_units, current_units):
+    if _units_basis_compatible(original_units, current_units, diagnostic_body):
         return True
     if (type(original_units) is not list or type(current_units) is not list
             or len(original_units) >= len(current_units)
-            or not units_basis_compatible(original_units, current_units[:len(original_units)])):
+            or not _units_basis_compatible(original_units, current_units[:len(original_units)], diagnostic_body)):
         return False
     try:
         if not _source_expansion_valid(source_expansion, current_units):

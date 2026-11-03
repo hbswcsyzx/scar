@@ -76,6 +76,19 @@ def test_two_actual_classes_bind_one_static_call_without_claiming_class_origin(t
         'def return_before_with(flag, value, manager):\n    if flag:\n        return value\n'
         '    with manager:\n        value = None\n\n'
         'before_cleanup = return_before_with(True, 17, None)\n'
+        'class CleanupManager:\n    def __enter__(receiver):\n        return None\n'
+        '    def __exit__(receiver, *exception):\n        return False\n\n'
+        'manager = CleanupManager()\n'
+        'def with_forward(manager, callback, value):\n    with manager:\n        return callback(value)\n\n'
+        'def finally_forward(value, callback):\n    try:\n        return value\n'
+        '    finally:\n        callback(None)\n\n'
+        # Unconditional finally overrides still expose an unreachable-shim
+        # lowering defect. Keep both declared routes reachable in this case.
+        'def finally_override(value, replacement, flag):\n    try:\n        return value\n'
+        '    finally:\n        if flag:\n            return replacement\n\n'
+        'with_value = with_forward(manager, identity, 23)\n'
+        'forwarded_value = finally_forward(31, identity)\n'
+        'overridden_value = finally_override(41, 53, True)\n'
         'chain = (" scar ".strip()\n    .ｕｐｐｅｒ()\n    .replace("S", "s"))\n'
         + assertion + suffix + 'assert mixed == 29\n')
     program.write_text(text)
@@ -293,7 +306,10 @@ def test_two_actual_classes_bind_one_static_call_without_claiming_class_origin(t
 
         selected_returns = []
         for statement in ('none_result = fallthrough(11)', 'branch_true = branch_none(True)',
-                'branch_false = branch_none(False)', 'before_cleanup = return_before_with(True, 17, None)'):
+                'branch_false = branch_none(False)', 'before_cleanup = return_before_with(True, 17, None)',
+                'with_value = with_forward(manager, identity, 23)',
+                'forwarded_value = finally_forward(31, identity)',
+                'overridden_value = finally_override(41, 53, True)'):
             line = text.splitlines().index(statement) + 1
             item, = (item for item in provider.interfaces if item.binding.source.start_line == line)
             assert item.selected_return in item.interface.normal_returns
@@ -309,6 +325,16 @@ def test_two_actual_classes_bind_one_static_call_without_claiming_class_origin(t
         assert explicit.interface.body == implicit.interface.body
         assert explicit.selected_return.operation != implicit.selected_return.operation
         assert explicit.observed_exit.return_site.offset != implicit.observed_exit.return_site.offset
+        # With/finally compiler RETURN positions belong to cleanup code. The
+        # preserved/overriding value's stack route selects the source terminal.
+        for item in selected_returns[4:]:
+            body = session.load_body(item.interface.body)
+            link, = (link for link in body.metadata.operation_links
+                if link.operation == item.selected_return.operation)
+            if item.interface.body.entry == 'finally_override':
+                assert link.source.start_line == text.splitlines().index('            return replacement') + 1
+            else:
+                assert link.source.start_line != item.observed_exit.return_site.position[0]
 
         protected = []
         for statement in ('cleaned_true = cleaned_none(True)', 'cleaned_false = cleaned_none(False)'):

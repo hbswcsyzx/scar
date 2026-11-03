@@ -37,6 +37,7 @@ def _producer():
     paths.update(analysis.glob("source_*validation.py"))
     paths.update(analysis / name for name in (
         "static_body.py", "static_program.py", "static_rules.py", "static_compilation.py",
+        "static_body_materialization.py",
         "program_lowering.py", "structured_lowering.py", "environment_lowering.py",
         "source_attribute_lookup.py", "attribute_selector.py",
         "source_language.py", "source_environment_layout.py", "function_interfaces.py",
@@ -73,6 +74,7 @@ def _plan_summary(plan):
 
 def _clean_body_files(root, unit):
     retained = {row["artifact"]["path"] for row in unit["bodies"] if "artifact" in row}
+    retained.update(row['diagnostic_input']['path'] for row in unit['bodies'] if 'diagnostic_input' in row)
     for path in (root / "units" / unit["key"] / "bodies").glob("*.json.gz"):
         if path.relative_to(root).as_posix() not in retained:
             path.unlink()
@@ -166,6 +168,13 @@ def _run_unit(unit, catalog, selected, output, max_operations, producer):
                                   ("source", "semantic", "semantics", "control")},
                        "target_executed": False, "runtime_identity_established": False}
             relative = "units/" + unit["key"] + "/bodies/" + key[:32] + ".json.gz"
+            if 'diagnostic_input' in row:
+                # A recoverable failure may have the very same cache key.
+                # Its receipt stays immutable even when the retry succeeds.
+                relative = ('units/' + unit['key'] + '/bodies/' + key[:32]
+                    + '-materialized-' + _digest(row['diagnostic_input'])[:16] + '.json.gz')
+                if relative == row['diagnostic_input']['path']:
+                    relative = relative.removesuffix('.json.gz') + '-body.json.gz'
             if plan["status"] not in ("READY", "NEEDS_STATIC_COMPILER") or plan.get("selected_profile") is None:
                 row.update(status=plan["status"], reason="Static entry rule or adapter is not available.")
                 payload.update(status=row["status"], reason=row["reason"])
@@ -286,19 +295,23 @@ def _run_unit(unit, catalog, selected, output, max_operations, producer):
 
 
 def expand_static_bodies(directory, *, jobs=4, max_operations=10000, max_bodies=None, files=(), entries=(), progress=None,
-                         additive_only=False):
+                         additive_only=False, retry_diagnostics=False):
     """Refine only saved source bodies, preserving the complete lexical ledger.
 
     max_bodies/files/entries constrain dispatch, never the published denominator.
     Sources, imports and code are not executed. One process owns each source.
     additive_only fills missing artifact rows without replacing existing bodies;
     retained call/class relationships still cover their original basis only.
+    retry_diagnostics may materialize an original graph=None diagnostic while
+    retaining its receipt as input. Existing canonical/partial graphs are fixed.
     """
     from scar.analysis.static_program import read_static_program, _read_fragment, _json, _lowering_route, _discard_static_calls
     if type(jobs) is not int or not 1 <= jobs <= 32:
         raise ValueError("jobs must be in [1,32]")
     if type(additive_only) is not bool:
         raise TypeError("additive_only must be a bool")
+    if type(retry_diagnostics) is not bool or retry_diagnostics and not additive_only:
+        raise ValueError('diagnostic retries require additive_only=True')
     if type(max_operations) is not int or max_operations < 1:
         raise ValueError("max_operations must be positive")
     if max_bodies is not None and (type(max_bodies) is not int or max_bodies < 0):
@@ -323,7 +336,8 @@ def expand_static_bodies(directory, *, jobs=4, max_operations=10000, max_bodies=
     if additive_only:
         from copy import deepcopy
         from scar.analysis.static_calls import input_basis_unit
-        from scar.analysis.static_basis_compatibility import units_basis_compatible
+        from scar.analysis.static_basis_compatibility import _units_basis_compatible
+        from scar.analysis.static_body_materialization import diagnostic_materializations, null_body_diagnostic
         original_basis = deepcopy([input_basis_unit(unit) for unit in manifest['units']])
     started = time.monotonic()
     producer = _producer()
@@ -338,7 +352,10 @@ def expand_static_bodies(directory, *, jobs=4, max_operations=10000, max_bodies=
         if additive_only:
             inputs.update((row['artifact']['path'], _stamp(temporary/row['artifact']['path']))
                 for unit in manifest['units'] for row in unit['bodies'] if 'artifact' in row)
+            inputs.update((row['diagnostic_input']['path'], _stamp(temporary/row['diagnostic_input']['path']))
+                for unit in manifest['units'] for row in unit['bodies'] if 'diagnostic_input' in row)
         tasks = []
+        diagnostic_retries, diagnostic_results = {}, []
         allocated = 0
         found_entries = set()
         for index in sorted(range(len(manifest["units"])), key=lambda i: (manifest["units"][i]["path"], manifest["units"][i]["key"])):
@@ -360,12 +377,19 @@ def expand_static_bodies(directory, *, jobs=4, max_operations=10000, max_bodies=
                 if selected_entries and entry["entry_key"] not in selected_entries:
                     continue
                 if additive_only and 'artifact' in rows_by_entry[entry['entry_key']]:
-                    raise ValueError('additive expansion cannot replace an existing body artifact: '
-                        + entry['entry_key'])
+                    row = rows_by_entry[entry['entry_key']]
+                    if (not retry_diagnostics or not null_body_diagnostic(unit, row,
+                            _read_fragment(temporary, row['artifact']))):
+                        raise ValueError('additive expansion cannot replace an existing body graph: '
+                            + entry['entry_key'])
                 if _lowering_route(entry)["status"] != "READY_TO_ATTEMPT":
                     continue
                 if max_bodies is None or allocated < max_bodies:
                     selected.append(entry["entry_key"])
+                    row = rows_by_entry[entry['entry_key']]
+                    if additive_only and 'artifact' in row:
+                        diagnostic_retries[index, entry['entry_key']] = deepcopy(row)
+                        row['diagnostic_input'] = dict(row['artifact'])
                     allocated += 1
             tasks.append((index, unit, catalog, selected))
         if files and not any(_matches(unit["path"], files) for unit in manifest["units"]):
@@ -376,6 +400,17 @@ def expand_static_bodies(directory, *, jobs=4, max_operations=10000, max_bodies=
         completed = 0
         def accept(index, unit):
             nonlocal completed
+            for row in unit['bodies']:
+                old = diagnostic_retries.get((index, row['entry_key']))
+                if old is None:
+                    continue
+                diagnostic_results.append({'entry_key': row['entry_key'], 'status': row['status'],
+                    'materialized': row['status'] == 'LOWERED_WITH_GAPS'})
+                if row['status'] != 'LOWERED_WITH_GAPS':
+                    row.clear()
+                    row.update(old)  # Another failure cannot replace the retained diagnostic input.
+            if diagnostic_retries:
+                _clean_body_files(temporary, unit)
             manifest["units"][index] = unit
             completed += selected_counts[index]
             if progress is not None:
@@ -394,7 +429,8 @@ def expand_static_bodies(directory, *, jobs=4, max_operations=10000, max_bodies=
                     except Exception as error:
                         # Do not lose either the source unit or its ledger on a
                         # process-level failure. Unreturned writes are removed.
-                        old = {row["artifact"]["path"] for row in unit["bodies"] if "artifact" in row}
+                        old = {row[name]['path'] for row in unit['bodies']
+                               for name in ('artifact', 'diagnostic_input') if name in row}
                         prefix = temporary / "units" / unit["key"] / "bodies"
                         for path in prefix.glob("*.gz") if prefix.exists() else ():
                             if str(path.relative_to(temporary)) not in old:
@@ -408,11 +444,18 @@ def expand_static_bodies(directory, *, jobs=4, max_operations=10000, max_bodies=
                         if "rules" in unit["artifacts"]:
                             os.link(output / unit["artifacts"]["rules"]["path"], rules)
                         for row in unit["bodies"]:
-                            if "artifact" in row:
-                                path = temporary / row["artifact"]["path"]
+                            for name in ('artifact', 'diagnostic_input'):
+                                if name not in row:
+                                    continue
+                                path = temporary / row[name]['path']
+                                original_path = output / row[name]['path']
+                                if path.exists():
+                                    current_info, original_info = path.stat(), original_path.stat()
+                                    if (current_info.st_dev, current_info.st_ino) == (original_info.st_dev, original_info.st_ino):
+                                        continue
                                 if path.exists():
                                     path.unlink()
-                                os.link(output / row["artifact"]["path"], path)
+                                os.link(original_path, path)
                             if row["entry_key"] in selected:
                                 issue = {"stage": "worker", "kind": type(error).__name__, "detail": str(error)}
                                 if "artifact" in row:
@@ -428,8 +471,9 @@ def expand_static_bodies(directory, *, jobs=4, max_operations=10000, max_bodies=
             raise ValueError("shared source fragment changed during body expansion")
         if _producer() != producer:
             raise ValueError("analyzer source changed during body expansion")
-        if additive_only and not units_basis_compatible(original_basis,
-                [input_basis_unit(unit) for unit in manifest['units']]):
+        if additive_only and not _units_basis_compatible(original_basis,
+                [input_basis_unit(unit) for unit in manifest['units']],
+                diagnostic_materializations(manifest, lambda descriptor: _read_fragment(temporary, descriptor))):
             raise ValueError('body expansion is not an additive extension of the original input basis')
         counts = Counter(row["status"] for unit in manifest["units"] for row in unit["bodies"])
         manifest["summary"]["body_statuses"] = dict(counts)
@@ -449,6 +493,7 @@ def expand_static_bodies(directory, *, jobs=4, max_operations=10000, max_bodies=
             "qualification": "Static source construction only; failed/unsupported and undispatched entries remain in the full ledger."}
         if additive_only:
             manifest['body_expansion'].update(additive_only=True,
+                diagnostic_retries=diagnostic_results,
                 relationship_coverage={
                     'scope': 'PRIOR_BODY_BASIS_ONLY',
                     'original_manifest_sha256': hashlib.sha256(original).hexdigest(),

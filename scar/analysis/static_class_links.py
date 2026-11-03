@@ -245,6 +245,8 @@ def read_static_class_links(directory, publication, *, index_directory=None, log
     """
     from scar.analysis.static_calls import input_basis_unit
     from scar.analysis.static_basis_compatibility import published_units_basis_compatible
+    from scar.analysis.static_body_materialization import diagnostic_materializations
+    from scar.analysis.static_query import _Fragments
     from scar.analysis.static_program import read_static_program
     root = Path(directory).absolute()
     manifest = read_static_program(root, verify=False)
@@ -268,7 +270,8 @@ def read_static_class_links(directory, publication, *, index_directory=None, log
             or basis["logical_root"] != str(logical_model)
             or not published_units_basis_compatible(basis["units"],
                 [input_basis_unit(u) for u in manifest["units"]],
-                source_expansion=manifest.get('source_expansion'))):
+                source_expansion=manifest.get('source_expansion'),
+                diagnostic_body=diagnostic_materializations(manifest, _Fragments(root).read))):
         raise ValueError("class source basis differs from current original inputs")
     cache, providers, catalogs = {}, {}, {}
 

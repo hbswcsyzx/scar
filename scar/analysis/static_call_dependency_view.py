@@ -41,12 +41,14 @@ class _BasisInputs(MutableMapping):
     def __setitem__(self, artifact, document):
         from scar.analysis.static_calls import input_basis_unit
         from scar.analysis.static_basis_compatibility import published_units_basis_compatible
+        from scar.analysis.static_body_materialization import diagnostic_materializations
         if (document.get("schema") != "scar.static-call-source-basis"
                 or document.get("schema_version") != 1
                 or document.get("logical_root") != str(self.view.root)
                 or not published_units_basis_compatible(document.get("units"),
                     [input_basis_unit(unit) for unit in self.view.units],
-                    source_expansion=self.view.manifest.get('source_expansion'))):
+                    source_expansion=self.view.manifest.get('source_expansion'),
+                    diagnostic_body=diagnostic_materializations(self.view.manifest, self.view.read))):
             raise ValueError("dependency-view source basis differs from owner inputs")
         locator = self.view._locator(artifact.uri, artifact.schema)
         if locator.artifact != artifact:
@@ -137,6 +139,8 @@ class StaticCallDependencyView(ProgramDependencySession):
                 uri = str(self.root / descriptor["path"])
                 self._input_parts.setdefault(uri, []).append((number, name))
             for row in unit.get("bodies", ()):
+                if 'diagnostic_input' in row:
+                    self._register_model(row['diagnostic_input'])
                 if "artifact" in row:
                     self._register_model(row["artifact"])
         for descriptor in self.manifest.get("artifacts", {}).values():

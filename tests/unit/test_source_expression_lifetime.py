@@ -24,7 +24,7 @@ SOURCE = """def mapping_compare(row):
 def comprehension(items):
     return [item for item in items]
 def lazy(items):
-    return any(s + '://' for s in items)
+    return any(s + '://' for s in items if accepted(s) if retained(s) is not None)
 def formatting(path, item):
     return path / f'{item.name}_weights'
 raise RuntimeError('the application must never execute')
@@ -62,6 +62,28 @@ def test_source_expression_handoffs_preserve_identity_and_reject_substituted_ref
         bodies[entry['name'].rsplit('.', 1)[-1]] = body
     assert len(bodies) == 4 and not path.exists()
 
+    lazy = bodies['lazy']
+    operations = {row.id: row for row in lazy.graph.operations}
+    blocks = {block.id: block for region in lazy.graph.regions for block in region.blocks}
+    predicates = [operations[row.operation] for row in lazy.structured.protocols if row.kind is K.TRUTH]
+    assert len(predicates) == 2 and len(lazy.graph.resumable_bodies) == 1
+    owners = {identity: region.id for region in lazy.graph.regions for block in region.blocks
+              for identity in block.operations}
+    assert all(owners[row.id] == lazy.graph.resumable_bodies[0].region for row in predicates)
+    assert sum(row.kind is K.GET_ITERATOR for row in lazy.structured.protocols) == 1
+    assert not lazy.graph.body_drives and not lazy.graph.driver_interfaces
+    from scar.ir.program.model import ExitKind
+    normal = blocks[next(edge.block for edge in predicates[0].terminator.successors if edge.kind is ExitKind.NORMAL)]
+    branch = operations[normal.operations[-1]]
+    swapped = replace(branch, terminator=replace(branch.terminator,
+        successors=tuple(reversed(branch.terminator.successors))))
+    wrong_flow = replace(lazy.graph, operations=tuple(swapped if row.id == branch.id else row
+        for row in lazy.graph.operations))
+    from scar.analysis.source_generator_validation import validate_generator_regions
+    with pytest.raises(ValueError, match='rejected filter'):
+        validate_generator_regions(lazy.structured, wrong_flow, lazy.interface, lazy.metadata,
+            prepared.semantic, lazy.language, source_tree=prepared.tree, structural_only=True)
+
     body = bodies['mapping_compare']
     forwards = [marker for marker in body.structured.protocols if marker.kind is K.FRAME_FORWARD_TEMPORARY]
     assert len(forwards) == 1
@@ -81,3 +103,25 @@ def test_source_expression_handoffs_preserve_identity_and_reject_substituted_ref
         validate_source_expressions(body.structured, body.graph, body.interface, body.metadata,
             prepared.semantic, historical, source_tree=prepared.tree, structural_only=True,
             selected_operations={forward.id})
+
+    # The ordinary parent supports short circuiting, but this deferred
+    # target-child dispatcher still needs its own adapter. Planning must
+    # expose the same gap before anyone attempts body construction.
+    short_text = SOURCE.replace('if accepted(s) if retained(s) is not None',
+                                'if accepted(s) and retained(s)')
+    short = prepare_source_text(path, short_text, project_root=tmp_path, root_is_package=False)
+    short_catalog = inspect_lexical(short.tree, path=str(path), namespace_root=str(tmp_path),
+        fingerprint=short.semantics.sources[str(path)].fingerprint,
+        semantic=short.semantic, source_text=short_text)
+    entry, = (entry for entry in short_catalog['entries'] if entry['kind'] == 'FUNCTION' and entry['name'] == 'lazy')
+    plan = plan_static_entry(short.tree, entry, path=str(path), fingerprint=entry['fingerprint'])
+    assert plan['status'] == 'UNSUPPORTED_SHAPE'
+    assert any(need['kind'] == 'GENEXPR_LAZY_BOOL_OP_ADAPTER' for need in plan['prerequisites'])
+    definition = decode(OperationDefinitionID, entry['semantic_definition_ids'][0])
+    reference = decode(SourceReference, entry['source_ref'])
+    rejected = short.lower(entry['name'], source=reference, expand_candidates=False,
+        profile=BodyLoweringProfile.STRUCTURED_ENV, language_options=SourceLanguageOptions(
+            tuple(C(value) for value in plan['capabilities']),
+            compile_source_unit(short).for_definition(definition, reference)))
+    assert rejected.graph is None
+    assert any('checked rule for BoolOp' in gap.detail for gap in rejected.metadata.gaps)

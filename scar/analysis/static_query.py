@@ -307,6 +307,7 @@ def _call_relations(manifest, unit, entries, fragments, limit, *, body_loader=No
     from types import SimpleNamespace
     from scar.analysis.static_calls import input_basis_unit
     from scar.analysis.static_basis_compatibility import published_units_basis_compatible
+    from scar.analysis.static_body_materialization import diagnostic_materializations
     from scar.analysis.static_function_environment import (
         derive_function_environment_routes, validate_static_body_namespace, _source_reference,
     )
@@ -335,7 +336,8 @@ def _call_relations(manifest, unit, entries, fragments, limit, *, body_loader=No
             or basis_document.get("input_manifest_sha256") != publication.get("input_manifest_sha256")
             or not published_units_basis_compatible(basis_document.get("units"),
                 [input_basis_unit(row) for row in manifest["units"]],
-                source_expansion=manifest.get('source_expansion'))):
+                source_expansion=manifest.get('source_expansion'),
+                diagnostic_body=diagnostic_materializations(manifest, fragments.read))):
         raise ValueError("static call input namespace/source/body basis differs from the current model")
     basis_uri = str(fragments.root / basis["path"])
     registry = {}

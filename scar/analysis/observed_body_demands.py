@@ -21,6 +21,8 @@ from scar.analysis.python_call_targets import read_python_call_targets
 from scar.analysis.static_calls import StaticCallBudget, StaticCallSession
 from scar.analysis.static_compilation import StaticCodeEvidence, _scope_nodes
 from scar.analysis.static_rules import _at_path
+from scar.analysis.static_rules import plan_static_entry
+from scar.analysis.static_body_materialization import null_body_diagnostic
 from scar.ir.program.call_edges import CodeCapture
 from scar.ir.program.source_references import SourceArtifactLocator
 from scar.ir.program.source_subjects import ModuleUnitSource, SourceCompilationCodeRef
@@ -200,7 +202,24 @@ def expand_observed_bodies(model, trace, out, budget=None, max_bodies=32, *,
                             if row is None or row.get('definitions') != entry.get('semantic_definition_ids'):
                                 raise ValueError('original body ledger changed the selected lexical definition')
                             if 'artifact' in row:
-                                already[entry['entry_key']] = None
+                                if row['status'] == 'LOWERED_WITH_GAPS':
+                                    already[entry['entry_key']] = None
+                                    continue
+                                if not null_body_diagnostic(unit, row, owner._read(row['artifact'])):
+                                    issues.append({'kind': 'CAPTURE_EXISTING_BODY_REFINEMENT_REQUIRED',
+                                        'code': capture.code.key, 'entry': entry['entry_key'],
+                                        'detail': 'Existing core ports cannot be replaced by diagnostic materialization.'})
+                                    continue
+                            current_plan = plan_static_entry(tree, entry, path=unit['path'],
+                                fingerprint='sha256:' + unit['decoded_sha256'])
+                            if (current_plan['status'] not in ('READY', 'NEEDS_STATIC_COMPILER')
+                                    or current_plan.get('selected_profile') is None):
+                                issues.append({'kind': 'CAPTURE_BODY_STATIC_RULE_OPEN',
+                                    'code': capture.code.key, 'entry': entry['entry_key'],
+                                    'status': current_plan['status'],
+                                    'unsupported_shapes': current_plan['unsupported_shapes'],
+                                    'entry_requirements': current_plan['rules'][0]['prerequisites'],
+                                    'detail': 'Material and code match; the current static adapter still cannot build this body.'})
                                 continue
                             evidence = StaticCodeEvidence(snapshot, unit['namespace_root'], definition, source,
                                 path, code, code_key(code), sys.implementation.name, tuple(sys.version_info[:3]),
@@ -270,7 +289,7 @@ def expand_observed_bodies(model, trace, out, budget=None, max_bodies=32, *,
     if selected:
         from scar.analysis.static_body import expand_static_bodies
         updated = expand_static_bodies(model, jobs=1, entries=tuple(selected),
-                                       max_bodies=len(selected), additive_only=True)
+                                       max_bodies=len(selected), additive_only=True, retry_diagnostics=True)
         wanted = set(selected)
         results = [dict(row) for unit in updated['units'] for row in unit['bodies'] if row['entry_key'] in wanted]
     published = hashlib.sha256((model / 'manifest.json').read_bytes()).hexdigest()

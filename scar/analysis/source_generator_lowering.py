@@ -3,7 +3,7 @@
 The nested regions are canonical ProgramGraph regions.  Construction does not
 call B. NEXT drives share B and its one suspension; effects/close stay open.
 The policy deliberately excludes generator arguments with guarded duplicated
-creation, filters, async generators and nested comprehension clauses.
+creation, async generators and nested comprehension clauses.
 """
 from __future__ import annotations
 
@@ -271,20 +271,21 @@ class _Nested(StructuredEnvironmentBuilder):
             terminator=Terminator(TerminatorKind.JUMP,
                 (Successor(target.block, tuple(use.id for use in uses)),))), self.node, SourceRole.CONTROL)
 
-    def branch_to(self, cursor, boolean, yes, no):
+    def branch_to(self, cursor, boolean, yes, no, *, node=None):
+        node = self.node if node is None else node
         identity = self.fresh(OperationID, "branch")
-        test = self.use(identity, boolean, self.node, "predicate", 0)
+        test = self.use(identity, boolean, node, "predicate", 0)
         edges, uses = [], [test]
         for target in (yes, no):
             forwarded = []
             if self.lazy:
-                forwarded.append(self.use(identity, self.callers[cursor.block], self.node, "caller-edge", len(edges)))
-            forwarded.append(self.use(identity, cursor.state, self.node, "state-edge", len(edges)))
+                forwarded.append(self.use(identity, self.callers[cursor.block], node, "caller-edge", len(edges)))
+            forwarded.append(self.use(identity, cursor.state, node, "state-edge", len(edges)))
             uses.extend(forwarded)
             edges.append(Successor(target.block, tuple(use.id for use in forwarded)))
             target.env = dict(cursor.env)
         self.emit(cursor, Operation(identity, "branch", (Behavior.CONTROL,), tuple(uses),
-            terminator=Terminator(TerminatorKind.BRANCH, tuple(edges), condition=test.id)), self.node, SourceRole.CONTROL)
+            terminator=Terminator(TerminatorKind.BRANCH, tuple(edges), condition=test.id)), node, SourceRole.CONTROL)
 
     def close_region(self, entry, normal_types, *, parent):
         blocks = tuple(Block(block, self.block_arguments[block], tuple(self.block_operations[block]))
@@ -352,6 +353,33 @@ def _body(owner, node, definition, code, index):
         b.finish_exit(natural, node, b.literal(node, None), ExitKind.NORMAL)
     body, item, _ = b.invoke_protocol(header, node, (h_iterator,), Kind.ADVANCE_ITERATOR, failure_handler=exhausted)
     body = b.store(target, item, body)
+    for condition in node.generators[0].ifs:
+        body, value = expression_for_heap_target(b, condition, body)
+        if body is None:
+            raise _Unsupported(GapKind.SOURCE_MAPPING, condition, "GENEXPR_FILTER_HAS_NO_NORMAL_COMPLETION")
+        _hold(b, body, condition, value)
+
+        def release(at):
+            _transfer(b, ((condition, value),), condition)
+            b.frame_transition(at, condition, ((value, condition, "genexpr-filter-reference"),),
+                               Kind.FRAME_RELEASE_TEMPORARY)
+
+        def truth_failed(at, exception):
+            pending = tuple(b.active_temporaries)
+            try:
+                release(at)
+                b.finish_exit(at, condition, exception, ExitKind.RAISE)
+            finally:
+                b.active_temporaries[:] = pending
+
+        body, boolean, _ = b.invoke_protocol(body, condition, (value,), Kind.TRUTH,
+                                             result_type=_BOOL, failure_handler=truth_failed)
+        release(body)
+        accepted, _ = b.ports(())
+        rejected, _ = b.ports(())
+        b.branch_to(body, boolean, accepted, rejected, node=condition)
+        b.jump_ports(rejected, header, (rejected.env[target.id], *h_env, h_iterator))
+        body = accepted
     body, yielded = expression_for_heap_target(b, node.elt, body)
     if body is None:
         raise _Unsupported(GapKind.SOURCE_MAPPING, node, "GENEXPR_ELT_HAS_NO_NORMAL_YIELD")
@@ -447,7 +475,7 @@ def lower_generator(builder, node, cursor):
     if (len(parents) != 1 or not isinstance(parents[0], ast.Assign) or parents[0].value is not node
             or len(parents[0].targets) != 1 or not isinstance(parents[0].targets[0], (ast.Tuple, ast.List))):
         raise _Unsupported(GapKind.UNSUPPORTED_SYNTAX, node, "GENEXPR_CONSUMER_GUARD_OR_DRIVE_INTERFACE_UNRECOVERED")
-    if (len(node.generators) != 1 or node.generators[0].is_async or node.generators[0].ifs
+    if (len(node.generators) != 1 or node.generators[0].is_async
             or not isinstance(node.generators[0].target, ast.Name)):
         raise _Unsupported(GapKind.UNSUPPORTED_SYNTAX, node, "GENEXPR_CLAUSE_INTERFACE_UNIMPLEMENTED")
     definition = _source_definition(builder, node)

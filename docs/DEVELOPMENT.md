@@ -36,6 +36,8 @@ python -B -m scar.cli observed-graph --model /path/to/model --expand-missing \
 `--expand-missing` 先核完整Code/profile及已有plan文件指纹；无历史指纹时可补当前源码候选，
 再按匹配Code作用域补body并fresh接线，不将父模块/环境认作历史事实；
 不执行源码、不猜import名，旧分片保留但覆盖仍限旧basis。文件/字节预算用`--max-source-files/bytes`。
+已有graph=None诊断按当前静态规则判是否可重试；成功补建保留旧收据，已有规范图不覆盖。
+尚缺static adapter时明确报告形状/入口需求，不能把artifact文件当已建图。
 采集仍含 frame profile hooks，不能宣称零干扰；性能测量与建图采集分开。
 需要实际 callable 类型/owner/ABI 时加 `trace --native-callables`：仅在新 trace 内隔离编译小 C probe，
 不安装环境依赖；当前限 CPython 3.14.7/GIL/Linux x86-64，不执行用户 getter 或读取 Tensor 数值。

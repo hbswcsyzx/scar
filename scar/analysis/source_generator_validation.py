@@ -199,6 +199,9 @@ def validate_generator_regions(model, graph, interface, metadata, semantic, lang
         iterator_copies = _must_forward({layout.parameters[0].value}, incoming)
         advance = operations[advances[0]]
         _need(advance.uses[0].value in iterator_copies, "lazy iteration lost the captured .0 iterator")
+        filter_operations = _validate_lazy_filters(body, source, local_operations, suspend, advance,
+            metadata, language, source_tree, operations, values, blocks, protocols, links, positions,
+            graph.binding_definitions)
         bindings = {values[row.value].origin.operation for row in graph.binding_definitions if values[row.value].region == body.id}
         binding_reads = {row.operation for row in graph.binding_reads if owners[row.operation] == body.id}
         context_actions = {row.operation for rows in (graph.frame_context_initials, graph.frame_context_attaches,
@@ -263,7 +266,7 @@ def validate_generator_regions(model, graph, interface, metadata, semantic, lang
                           Kind.FRAME_FORWARD_TEMPORARY, Kind.MATCH_STOP_ITERATION),
                       "unclassified ordinary primitive in lazy B")
             elif operation.terminator.kind is TerminatorKind.INVOKE:
-                _need(key in string_operations or protocol is not None and protocol.kind in (
+                _need(key in string_operations or key in filter_operations or protocol is not None and protocol.kind in (
                     Kind.ADVANCE_ITERATOR, Kind.GENERATOR_ESCAPE_STOPITER_TO_RUNTIME_ERROR),
                       "unclassified effectful primitive in lazy B")
             if operation.terminator is not None and operation.terminator.kind is TerminatorKind.RAISE:
@@ -355,7 +358,7 @@ def validate_generator_regions(model, graph, interface, metadata, semantic, lang
             else: index, code = child_code(options.code_evidence.code, node)
             _need(constant.code_key == options.code_evidence.code_layout_key and constant.constant_path == (index,),
                   "childCode does not match the exact original readonly parent witness")
-            _need(len(node.generators) == 1 and not node.generators[0].ifs and not node.generators[0].is_async
+            _need(len(node.generators) == 1 and not node.generators[0].is_async
                   and isinstance(node.generators[0].target, ast.Name), "unsupported generator clause")
             from scar.analysis.environment_lowering import captured_cell_slot
             _need(tuple(member.cell_slot for member in cell_members)
@@ -417,10 +420,11 @@ def validate_generator_regions(model, graph, interface, metadata, semantic, lang
                             (link.source for link in links.values())
                             if any((ref.start_line, ref.end_line, ref.start_column, ref.end_column)
                                    == (child.lineno, child.end_lineno, child.col_offset, child.end_col_offset)
-                                   for child in ast.walk(node.elt) if hasattr(child, "end_lineno"))}
+                                   for expression in (node.elt, *node.generators[0].ifs)
+                                   for child in ast.walk(expression) if hasattr(child, "end_lineno"))}
             _need(all(owners[key] == body.id for key, link in links.items()
                       if link.source in lazy_sources and link.semantic_operation is not None),
-                  "element or attribute lookup executed eagerly outside B")
+                  "element/filter or attribute lookup executed eagerly outside B")
         else:
             from scar.analysis.source_generator_creation_lowering import VERSION as CREATION_VERSION
             _need(create.rule.implementation.artifact.schema == (CREATION_VERSION if creation_only else VERSION),
@@ -438,6 +442,128 @@ def validate_generator_regions(model, graph, interface, metadata, semantic, lang
 
 def _node_span(node):
     return node.lineno, node.end_lineno, node.col_offset, node.end_col_offset
+
+
+def _validate_lazy_filters(body, source, local_operations, suspend, advance, metadata, language,
+                           tree, operations, values, blocks, protocols, links, positions, bindings):
+    """Check ordered filter predicates over the existing iterator/caller/world ports."""
+    selected = {identity for identity in local_operations if protocols.get(identity) is not None
+                and protocols[identity].kind is Kind.TRUTH}
+    if not isinstance(tree, ast.Module):
+        _need(not selected, 'lazy filters require the retained original source AST')
+        return set()
+    from scar.analysis.source_language import require_source_tree
+    from scar.analysis.source_string_validation import _ordered_next
+    from scar.ir.program.control import ProtocolValueKind as P
+    nodes = [node for node in require_source_tree(tree, language.source, source)
+             if isinstance(node, ast.GeneratorExp)]
+    _need(len(nodes) == 1, 'lazy filters lost their original GeneratorExp')
+    node, = nodes
+    _need(len(node.generators) == 1, 'lazy filters require one original clause')
+    conditions = node.generators[0].ifs
+    by_span = {_node_span(condition): condition for condition in conditions}
+    truths = {}
+    for identity in selected:
+        reference = protocols[identity].source
+        span = (reference.start_line, reference.end_line, reference.start_column, reference.end_column)
+        _need(span in by_span and span not in truths and links[identity].source == reference,
+              'lazy TRUTH is not one unique original ordered filter')
+        truths[span] = identity
+    _need(set(truths) == set(by_span), 'lazy filter predicates were omitted or duplicated')
+    ordered = [truths[_node_span(condition)] for condition in conditions]
+    if not ordered:
+        return selected
+    header = blocks[positions[advance.id][0]]
+    bound = [row.value for row in bindings
+             if values[row.value].region == body.id and row.state is BindingState.BOUND]
+    _need(len(bound) == 1 and type(values[bound[0]]) is LocalBindingValue,
+          'lazy filter lost its actual target store')
+    use_sources = {(row.operation, row.use): row for row in metadata.use_links}
+    value_sources = {(row.value, row.source.atom_id) for row in metadata.value_links}
+    stages = {advance.id, suspend.id, *ordered}
+    _ordered_next(advance.id, ordered[0], stages, operations, blocks, positions)
+    for index, identity in enumerate(ordered):
+        operation = operations[identity]
+        own = {use.id: use for use in operation.uses}
+        args = tuple(own[key] for key in operation.invoke_arguments)
+        _need(len(args) == 2 and type(values[args[0].value]) is ReferenceValue
+              and type(values[args[1].value]) is StateVersionValue
+              and operation.terminator.kind is TerminatorKind.INVOKE and operation.callee is None
+              and not operation.effects_complete and links[identity].semantic_operation is None
+              and tuple(row.kind for row in operation.completions) == (ExitKind.NORMAL, ExitKind.RAISE)
+              and tuple(row.kind for row in operation.terminator.successors) == (ExitKind.NORMAL, ExitKind.RAISE)
+              and operation.completions[0].types == (_BOOL, value_type(values[args[1].value]))
+              and operation.completions[1].types == (_REF, value_type(values[args[1].value])),
+              'lazy filter TRUTH changed its incomplete boolean/exception/world interface')
+        reference = protocols[identity].source
+        input_source = use_sources[identity, args[0].id]
+        value = values[args[0].value]
+        matched = (value.id, reference.atom_id) in value_sources
+        if not matched and type(value.origin) is BlockArgument:
+            matched = any(links[key].source == reference and links[key].semantic_operation is not None
+                and operations[key].terminator is not None
+                and operations[key].terminator.kind is TerminatorKind.INVOKE
+                and any(edge.kind is ExitKind.NORMAL and edge.block == value.origin.block
+                        and blocks[edge.block].arguments[0] == value.id
+                        for edge in operations[key].terminator.successors) for key in local_operations)
+        _need(matched and input_source.source == reference and input_source.role == 'protocol-input'
+              and input_source.index == 0, 'lazy filter TRUTH lost its original expression result')
+        before_block, before_index = positions[identity]
+        hold = operations[blocks[before_block].operations[before_index - 1]] if before_index else None
+        _need(hold is not None and protocols.get(hold.id) is not None
+              and protocols[hold.id].kind is Kind.FRAME_HOLD_TEMPORARY
+              and hold.uses[0].value == value.id and args[-1].value == hold.results[0],
+              'lazy filter reference is not retained across truth conversion')
+        _need(len(operation.uses) == 4 and all(type(values[use.value]) is ProtocolValue
+              and values[use.value].protocol is P.DRIVE_CALLER_CONTEXT for use in operation.uses[2:])
+              and operation.uses[2].value == operation.uses[3].value,
+              'lazy filter lost its drive caller context')
+        normal = None
+        for edge, forwarded in zip(operation.terminator.successors, operation.uses[2:]):
+            landing = blocks[edge.block]
+            _need(len(landing.arguments) == 3
+                  and edge.arguments == (CompletionResult(0), forwarded.id, CompletionResult(1))
+                  and len(landing.operations) == 2,
+                  'lazy filter completion lost its result/caller/world corridor')
+            release, following = (operations[key] for key in landing.operations)
+            _need(protocols.get(release.id) is not None
+                  and protocols[release.id].kind is Kind.FRAME_RELEASE_TEMPORARY
+                  and tuple(use.value for use in release.uses) == (value.id, landing.arguments[-1])
+                  and use_sources[release.id, release.uses[0].id].role == 'genexpr-filter-reference',
+                  'lazy filter completion lost its consumed-reference release')
+            if edge.kind is ExitKind.NORMAL:
+                normal = following
+                _need(following.terminator.kind is TerminatorKind.BRANCH
+                      and _own_value(following, following.terminator.condition) == landing.arguments[0]
+                      and tuple(use.value for use in following.uses[1:])
+                          == (landing.arguments[1], release.results[0]) * 2
+                      and tuple(tuple(_own_value(following, key) for key in route.arguments)
+                                for route in following.terminator.successors)
+                          == ((landing.arguments[1], release.results[0]),) * 2
+                      and links[following.id].source == reference,
+                      'lazy filter must branch on its own truth/caller/post-world result')
+            else:
+                _need(protocols.get(following.id) is not None
+                      and protocols[following.id].kind is Kind.GENERATOR_ESCAPE_STOPITER_TO_RUNTIME_ERROR
+                      and tuple(use.value for use in following.uses[:2])
+                          == (landing.arguments[0], release.results[0]),
+                      'lazy filter exception bypasses release or the original PEP479 adapter')
+        _need(normal is not None, 'lazy filter lost its normal branch')
+        rejected = blocks[normal.terminator.successors[1].block]
+        _need(len(rejected.operations) == 1, 'rejected filter must return directly to the iterator header')
+        jump = operations[rejected.operations[0]]
+        _need(jump.terminator.kind is TerminatorKind.JUMP and len(jump.terminator.successors) == 1
+              and jump.terminator.successors[0].block == header.id
+              and tuple(_own_value(jump, key) for key in jump.terminator.successors[0].arguments)
+                  == (bound[0], *header.arguments[1:-2], *rejected.arguments),
+              'rejected filter changed the target/environment/iterator/caller/world backedge')
+        _ordered_next(normal.id, ordered[index + 1] if index + 1 < len(ordered) else suspend.id,
+                      stages, operations, blocks, positions)
+    return selected
+
+
+def _own_value(operation, identity):
+    return next(use.value for use in operation.uses if use.id == identity)
 
 
 def _validate_lazy_strings(body, local_operations, model, graph, metadata, semantic, tree, code,
