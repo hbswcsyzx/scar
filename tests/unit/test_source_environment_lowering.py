@@ -137,7 +137,9 @@ def test_factory_entry_origins_are_conditional_reference_ports_without_call_or_s
         assert all('/origins'not in locator.pointer for locator in edge.evidence[0].sources)
         reverse=provider.outgoing(edge.source)
         assert reverse.edges and all(row.target.context is None for row in reverse.edges)
-        assert len(replays)>=4  # Fresh callback replay, not a remembered PASS.
+        assert len(replays)==2  # Only the two queried relations were replayed.
+        provider.incoming(point)
+        assert len(replays)==3  # A repeated query must not reuse a cached PASS.
         empty=FactoryEntryOriginDependencyProvider(origins_for=lambda point:(),load_index=session.index,
             validate_origin=validate,interface_scope=scope)
         unknown=empty.outgoing(DependencyPoint(GraphNamespace.from_source(creator.namespace),creation.normal_value,None))
@@ -202,6 +204,94 @@ def test_factory_entry_origins_are_conditional_reference_ports_without_call_or_s
             capture['index']=0
             with pytest.raises(ValueError,match='role index'):
                 derive_factory_entry_origins(creation=class_creation,**{**class_inputs,'creator_document':bad})
+
+
+def test_session_discovers_factory_origins_without_call_targets_and_keeps_open_class_path(tmp_path):
+    import hashlib
+    import json
+    import subprocess
+    import sys
+    from scar.analysis.program_dependency_session import ProgramDependencySession
+    from scar.analysis.static_class_publication import link_static_class_program
+    from scar.analysis.program_dependency_export import export_dependency_walk
+    from scar.ir.program.dependencies import (
+        DependencyKind as K, DependencyPoint as P, DependencyStrength, GraphNamespace,
+        OpenDependencyContext, context_frames,
+    )
+
+    source=tmp_path/'source';source.mkdir();path=source/'application.py';model=tmp_path/'model'
+    text=('G = 7\ndef direct(x):\n    return G + x\n'
+        'def outer(x):\n    def inner(y):\n        return G + x + y\n    return inner\n'
+        'class Box:\n    def method(self, x: int):\n        return G + x\n'
+        'raise RuntimeError("application must never execute")\n')
+    path.write_text(text)
+    built=subprocess.run([sys.executable,'-B','-m','scar.cli','static',str(source),'--out',str(model),
+        '--jobs','1','--phase','bodies'],capture_output=True,text=True)
+    assert built.returncode==0,built.stdout+built.stderr
+    manifest=json.loads((model/'manifest.json').read_bytes())
+    assert 'static_calls' not in manifest and 'static_classes' not in manifest
+    original_graphs={row['artifact']['path']:hashlib.sha256((model/row['artifact']['path']).read_bytes()).hexdigest()
+        for unit in manifest['units']for row in unit['bodies']if 'artifact'in row}
+
+    # Ordinary callers provide only a body/port. No source definition,
+    # factory, origin list or target publication is supplied by the test.
+    with ProgramDependencySession(model)as session:
+        graph=session.graph()
+        for name in ('<module>.direct','<module>.outer.inner','<module>.Box.method'):
+            namespace,=session.select_bodies(file=str(path),entry=name)
+            body=session.load_body(namespace)
+            definition=session.source_definition_reference(namespace)
+            assert definition.definition==namespace.definition
+            assert definition.root.representation=='canonical-json'
+            assert session.validate_source_definition_reference(definition,namespace)
+            with pytest.raises(ValueError):
+                session.validate_source_definition_reference(replace(definition,
+                    graph=replace(definition.graph,pointer='#/definitions/999999')),namespace)
+            member=next(member for env in body.graph.environments for member in env.members
+                if member.role is EnvironmentRole.GLOBALS_NAMESPACE)
+            point=P(GraphNamespace.from_source(namespace),member.reference)
+            neighborhood=graph.incoming(point,kinds=(K.ENVIRONMENT,))
+            origins=[edge for edge in neighborhood.edges if any(e.rule=='STATIC_FACTORY_ENTRY_REFERENCE_ORIGIN_V1'
+                for e in edge.evidence)]
+            assert origins,name
+            assert all(edge.strength is DependencyStrength.MAY and edge.target==point for edge in origins)
+            assert all(edge.source.context is None for edge in origins)
+            for edge in origins:
+                reverse=graph.outgoing(edge.source,kinds=(K.ENVIRONMENT,))
+                assert any(other.source==edge.source and other.target.namespace==edge.target.namespace
+                    and other.target.node==edge.target.node and other.target.context is None
+                    for other in reverse.edges)
+            assert not neighborhood.enumerated
+        assert not (model/'indexes/calls').exists()
+        assert session.measurements()['relationship_shards_read']==0
+
+    # Existing class interfaces give the known suffix. Their unknown outer
+    # prefix stays unknown all the way back to the original module G port.
+    link_static_class_program(model)
+    with ProgramDependencySession(model)as session:
+        namespace,=session.select_bodies(file=str(path),entry='<module>.Box.method')
+        body=session.load_body(namespace)
+        member=next(member for env in body.graph.environments for member in env.members
+            if member.role is EnvironmentRole.GLOBALS_NAMESPACE)
+        root=P(GraphNamespace.from_source(namespace),member.reference)
+        module_namespace,=session.select_bodies(file=str(path),entry='<module>')
+        module_body=session.load_body(module_namespace)
+        destination=P(GraphNamespace.from_source(module_namespace),module_body.graph.frame_roots[0].entry.globals_namespace,None)
+        graph=session.graph();walk=graph.walk((root,),kinds=(K.ENVIRONMENT,K.ARGUMENT,K.VALUE_USE),
+            max_points=48,max_edges=96,max_depth=16)
+        assert destination in walk.points
+        assert any(type(point.context)is OpenDependencyContext and len(context_frames(point.context))==2
+            for point in walk.points)
+        assert any(type(point.context)is OpenDependencyContext and len(context_frames(point.context))==1
+            for point in walk.points)
+        assert not walk.dependence_closed
+        exported=export_dependency_walk(walk)
+        assert exported['schema_version']==3
+        assert any(row['unknown_prefix'] for row in exported['contexts'])
+        assert any(not row['unknown_prefix'] for row in exported['contexts'])
+        assert any(point['context'] is None for point in exported['points'])
+    assert all(hashlib.sha256((model/name).read_bytes()).hexdigest()==sha
+        for name,sha in original_graphs.items())
 
 
 def test_environment_entry_is_complete_and_free_cells_have_their_own_interface_slots(tmp_path):

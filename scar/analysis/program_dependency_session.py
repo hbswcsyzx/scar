@@ -16,7 +16,7 @@ from pathlib import Path
 import time
 from types import SimpleNamespace
 
-from scar.ir.program.dependencies import GraphNamespace
+from scar.ir.program.dependencies import GraphNamespace, context_frames
 from scar.ir.program.providers import ProviderArtifact, ProviderFactReference
 from scar.ir.program.source_call_bindings import SourceBodyNamespace
 from scar.ir.program.source_references import SourceArtifactLocator
@@ -33,6 +33,8 @@ class ProgramDependencyBudget:
     max_shards: int = 256
     max_routing_shards: int = 10000
     max_routing_references: int = 1000000
+    max_origin_candidates: int = 256
+    max_origin_depth: int = 32
     max_seconds: int = 60
 
     def __post_init__(self):
@@ -83,6 +85,7 @@ class ProgramDependencySession:
         self._cache, self._cache_bytes = OrderedDict(), 0
         self._seen_graphs, self._seen_shards = set(), set()
         self._call_routing = None
+        self._origin_discovery = None
         from scar.analysis.static_function_environment import _EnvironmentFacts
         self._environment_facts = _EnvironmentFacts(max_bodies=self.budget.max_graphs,
             max_bytes=max(1, min(32 * 1024 * 1024, self.budget.max_cached_bytes // 4)))
@@ -289,6 +292,21 @@ class ProgramDependencySession:
     def read_artifact(self, locator):
         locator.__post_init__()
         uri = locator.artifact.uri
+        if uri == self.manifest_artifact.uri:
+            # The pinned plain manifest is already an original input. Source
+            # references must not require a synthetic gzip basis or an
+            # existing call publication just to identify a definition.
+            if (locator.artifact != self.manifest_artifact
+                    or locator.decoded_sha256 != self.manifest_artifact.sha256
+                    or locator.decoded_bytes != self.manifest_artifact.size_bytes
+                    or locator.representation != "canonical-json"):
+                raise ValueError("dependency manifest locator differs from its original plain receipt")
+            physical = Path(uri)
+            if (physical.is_symlink() or physical.resolve() != physical
+                    or not physical.is_file() or _stamp(physical) != self._stamps[physical]):
+                raise ValueError("original dependency manifest changed during query")
+            self._artifact_declaration(locator)
+            return self.manifest
         if uri not in self._logical:
             raise ValueError("dependency artifact is outside registered original inputs")
         descriptor = self._artifacts[self._logical[uri]][1]
@@ -542,6 +560,15 @@ class ProgramDependencySession:
             self._put(key, found, body.unit["artifacts"]["semantic"]["decoded_bytes"] + len(text.encode()))
         return found
 
+    def source_definition_reference(self, namespace):
+        """Identify an original function without requiring any resolved CALL."""
+        from scar.analysis.program_source_definitions import source_definition_reference
+        return source_definition_reference(self, namespace)
+
+    def validate_source_definition_reference(self, reference, namespace):
+        from scar.analysis.program_source_definitions import validate_source_definition_reference
+        return validate_source_definition_reference(self, reference, namespace)
+
     def signature_for(self, definition, body):
         from scar.analysis.function_interfaces import extract_signature
         if (definition.context.namespace_root != body.unit["namespace_root"]
@@ -649,7 +676,7 @@ class ProgramDependencySession:
 
     def call_shards_for(self, point):
         selected = {point.namespace}
-        for frame in point.context or ():
+        for frame in context_frames(point.context):
             selected.update((frame.caller, frame.target))
         seen = set()
         for namespace in selected:
@@ -669,7 +696,7 @@ class ProgramDependencySession:
                 self._class_interface_point(point, True) or self._class_interface_point(point, False)):
             return
         selected = {point.namespace}
-        for frame in point.context or ():
+        for frame in context_frames(point.context):
             selected.update((frame.caller, frame.target))
         selected_uris = dict.fromkeys(uri for namespace in selected
             for uri in self._class_by_namespace.get(namespace, ()))
@@ -709,10 +736,12 @@ class ProgramDependencySession:
                 yield binding, replace(locator, pointer="#/bindings/" + str(number))
 
     def graph(self):
-        """Return the shared local/call/class dependency interface, without I/O."""
+        """Return the shared dependency interface, with lazy source discovery."""
         from scar.analysis.program_dependencies import ProgramDependencyGraph
         from scar.analysis.program_call_dependencies import StaticCallDependencyProvider
         from scar.analysis.program_class_dependencies import ClassDependencyProvider
+        from scar.analysis.program_function_origin_discovery import AutomaticFactoryEntryOrigins
+        from scar.analysis.program_function_origin_dependencies import FactoryEntryOriginDependencyProvider
         graph = getattr(self, "_view", None)
         if graph is None:
             calls = StaticCallDependencyProvider(self)
@@ -721,7 +750,14 @@ class ProgramDependencySession:
                 if self.class_publication is not None else _UnavailableRelations("CLASS_RELATIONS_NOT_PUBLISHED",
                     "No saved class relationships were supplied for this original class interface.",
                     self._class_interface_point, relation_kinds=ClassDependencyProvider.relation_kinds))
-            graph = self._view = ProgramDependencyGraph(self.index, providers=(calls, classes))
+            if self._origin_discovery is None:
+                self._origin_discovery = AutomaticFactoryEntryOrigins(self)
+            origins = self._origin_discovery
+            factories = FactoryEntryOriginDependencyProvider(origins_for=origins.origins_for,
+                load_index=self.index, validate_origin=origins.validate_origin,
+                interface_scope=origins.interface_scope, contexts_for=origins.contexts_for,
+                discovery_frontiers=origins.frontiers_for)
+            graph = self._view = ProgramDependencyGraph(self.index, providers=(calls, classes, factories))
         return graph
 
     def _class_relation_coverage(self, point, *, incoming, bindings):
@@ -747,7 +783,8 @@ class ProgramDependencySession:
             if incoming:
                 ports = (call.result, call.normal_world, call.exception, call.traceback, call.raised_world)
             else:
-                ports = (call.operation, call.callee, call.world, *(arg.use for arg in call.arguments), call.keyword_names)
+                ports = (call.operation, call.callee, call.world, *(arg.use for arg in call.arguments),
+                         call.keyword_names, construction.factory_globals)
             if point.node in ports and construction not in known:
                 missing.append(DependencyFrontier(point, "CLASS_RELATION_INTERFACE_OPEN",
                     "This original builder interface has no published parent/provider/suite mapping."))
@@ -768,6 +805,7 @@ class ProgramDependencySession:
             for construction in _constructions(body):
                 call = construction.builder_call
                 inputs.update((call.operation, call.callee, call.world, *(arg.use for arg in call.arguments)))
+                inputs.add(construction.factory_globals)
                 if call.keyword_names is not None:
                     inputs.add(call.keyword_names)
                 outputs.update((call.result, call.normal_world, call.exception, call.traceback, call.raised_world))
@@ -791,6 +829,8 @@ class ProgramDependencySession:
                 "routing_shards_read": routing.shards if routing is not None else 0,
                 "routing_references": routing.references if routing is not None else 0,
                 "routing_complete": routing.complete if routing is not None else False,
+                "factory_origin_discovery": (self._origin_discovery.measurements()
+                    if self._origin_discovery is not None else None),
                 "seconds": time.monotonic() - self.started, "target_executed": False}
 
     def close(self):
@@ -806,6 +846,9 @@ class ProgramDependencySession:
             self._environment_facts.bodies.clear()
             self._environment_facts.bytes = 0
             self._call_routing = None
+            if self._origin_discovery is not None:
+                self._origin_discovery.clear()
+                self._origin_discovery = None
             self.closed = True
 
     def __enter__(self):

@@ -14,9 +14,11 @@ from scar.ir.program.class_builder import (
 from scar.ir.program.dependencies import (
     DependencyCondition, DependencyEdge, DependencyEvidence, DependencyFrame,
     DependencyFrontier, DependencyKind as K, DependencyMeaning as M,
-    DependencyNeighborhood, DependencyPoint as Point, GraphNamespace,
+    DependencyNeighborhood, DependencyPoint as Point, DependencyStrength, GraphNamespace,
+    context_frames, context_is_closed, context_push, context_pop,
 )
-from scar.ir.program.model import ExitKind, StateVersionValue, TerminatorKind
+from scar.ir.program.model import (CompletionResult, ExitKind, OperationResult,
+    ReferenceValue, StateVersionValue, TerminatorKind)
 from scar.ir.program.source_references import SourceArtifactLocator
 from scar.ir.program.source_subjects import ClassFrameABI
 
@@ -97,30 +99,36 @@ class ClassDependencyProvider:
             if point.namespace not in (parent, implementation, suite):
                 continue
             context = point.context
-            if context is None:
+            if point.namespace == parent:
+                # An original parent port can project its explicitly supplied
+                # guarded interfaces even with an unknown enclosing prefix.
+                parent_context = context
+            elif context is None:
                 frontiers.append(DependencyFrontier(point, "CLASS_INTERFACE_CONTEXT_UNKNOWN",
                     "The query has no selected interface stack; unknown is not a root activation."))
                 continue
-            if point.namespace == parent:
-                parent_context = context
-            elif point.namespace == implementation and context and context[-1] == outer:
-                parent_context = context[:-1]
-            elif point.namespace == suite and len(context) >= 2 and context[-2:] == (outer, inner):
-                parent_context = context[:-2]
             else:
-                # Another class can share the same provider graph and eval
-                # operation. It must not inherit this binding's suite edges.
-                unmatched_context = True
-                continue
-            if parent_context and parent_context[-1].target != parent:
+                suffix=(outer,) if point.namespace==implementation else (outer,inner)
+                popped=context_pop(context,suffix)
+                if not popped.matched:
+                    # Never consume an unknown prefix to complete a guessed
+                    # selection of this shared provider/suite's creator.
+                    unmatched_context=True;continue
+                parent_context=popped.remaining
+            parent_frames=context_frames(parent_context)
+            if parent_frames and parent_frames[-1].target != parent:
                 frontiers.append(DependencyFrontier(point, "CLASS_PARENT_CONTEXT_UNMATCHED",
                     "The enclosing interface stack does not enter this original parent graph."))
                 continue
             matched_context = True
             generated, missing = self._edges(binding, locator, provider, parent, implementation, suite,
                                                outer, inner, parent_context)
-            edges.extend(edge for edge in generated if (edge.target if incoming else edge.source) == point)
+            selected=[edge for edge in generated if (edge.target if incoming else edge.source) == point]
+            edges.extend(selected)
             frontiers.extend(f for f in missing if f.point == point)
+            if selected and not context_is_closed(context):
+                frontiers.append(DependencyFrontier(point,"CLASS_INTERFACE_CONTEXT_PREFIX_OPEN",
+                    "Original class interface selections are retained; their enclosing prefix is not selected."))
         if unmatched_context and not matched_context:
             frontiers.append(DependencyFrontier(point, "CLASS_INTERFACE_CONTEXT_UNMATCHED",
                 "This shared implementation/suite interface requires its original outer and inner selections."))
@@ -141,7 +149,7 @@ class ClassDependencyProvider:
                                *mapping.closure_cells, mapping.world)
             if point.node in formals or is_class and point.node == point.namespace.root:
                 kind = ("CLASS_INTERFACE_CONTEXT_UNKNOWN" if point.context is None else
-                    "CLASS_INTERFACE_CONTEXT_UNBOUND" if not point.context else "CLASS_INTERFACE_CONTEXT_UNMATCHED")
+                    "CLASS_INTERFACE_CONTEXT_UNBOUND" if not context_frames(point.context) else "CLASS_INTERFACE_CONTEXT_UNMATCHED")
                 frontiers.append(DependencyFrontier(point, kind,
                     "An original class/provider entry has no matching selected enclosing builder interface."))
         enumerated = True
@@ -154,8 +162,8 @@ class ClassDependencyProvider:
         return DependencyNeighborhood(tuple(dict.fromkeys(edges)), tuple(dict.fromkeys(frontiers)), enumerated)
 
     def _edges(self, binding, locator, provider, parent, implementation, suite, outer, inner, parent_context):
-        contexts = {parent: parent_context, implementation: (*parent_context, outer),
-                    suite: (*parent_context, outer, inner)}
+        contexts = {parent: parent_context, implementation: context_push(parent_context,outer),
+                    suite: context_push(parent_context,outer,inner)}
         indexes = {ns: self.load_index(ns) for ns in (parent, implementation, suite)}
         edges, frontiers = [], []
         conditions = tuple(DependencyCondition.from_enum(guard) for guard in binding.guards)
@@ -198,6 +206,9 @@ class ClassDependencyProvider:
             input_edge(parent, implementation, mapping, "/inputs/" + str(i))
         for i, mapping in enumerate(binding.suite_inputs):
             input_edge(implementation, suite, mapping, "/suite_inputs/" + str(i), environment=True)
+
+        edges.append(self._globals_capture_edge(binding,locator,provider,parent,implementation,suite,
+            contexts,indexes,conditions))
 
         def complete(source_namespace, target_namespace, route, exit_name, target_block, target_values, path):
             source_index, target_index = indexes[source_namespace], indexes[target_namespace]
@@ -242,3 +253,114 @@ class ClassDependencyProvider:
             complete(implementation, parent, route, route.provider_exit, route.parent_block, route.parent_values,
                      "/completions/" + str(i))
         return edges, frontiers
+
+    @staticmethod
+    def _globals_capture_edge(binding,locator,provider,parent,implementation,suite,contexts,indexes,conditions):
+        """A guarded function-field reference projection, not operand equality.
+
+        The provider reads current fields after arbitrary preparation callbacks.
+        Original code provenance does not prove that current field state.  The
+        explicit read-world predicate below is therefore never discharged here.
+        No namespace contents, saved builtins, code or closure identity follows.
+        """
+        from scar.analysis.static_namespace import normal_reference
+        def need(ok,detail):
+            if not ok:raise ValueError('class function globals capture: '+detail)
+        def point(namespace,node):return Point(namespace,node,contexts[namespace])
+        construction=binding.construction
+        pindex=indexes[parent];vindex=indexes[implementation];sindex=indexes[suite]
+        factory=pindex.operations.get(construction.factory)
+        need(factory is not None and factory.terminator is not None
+             and factory.terminator.kind is TerminatorKind.INVOKE
+             and factory.invoke_arguments==tuple(use.id for use in factory.uses)
+             and tuple(use.id for use in factory.uses[:-1])==(
+                 construction.factory_code,construction.factory_globals,*construction.factory_closure),
+             'original factory code/globals/closure operand ports changed')
+        code=pindex.use_site(construction.factory_code)
+        capture=pindex.use_site(construction.factory_globals)
+        need(code.operation==capture.operation==factory.id
+             and type(pindex.values[code.use.value]) is ReferenceValue
+             and type(pindex.values[capture.use.value]) is ReferenceValue,
+             'code or captured globals is not the original factory reference Use')
+        code_origin=pindex.values[code.use.value].origin
+        need(type(code_origin) is OperationResult and code_origin.index==0
+             and code_origin.operation in pindex.operations
+             and pindex.operations[code_origin.operation].results==(code.use.value,),
+             'factory code lost its original code-reference producer')
+        suite_roots=sindex.graph.frame_roots
+        need(len(suite_roots)==1 and suite_roots[0].code==construction.suite
+             and type(suite_roots[0].entry) is ClassFrameABI,
+             'shared suite no longer has the original code provenance and class frame ABI')
+        normal=normal_reference(pindex,factory.id,blocks=pindex._block_records)
+        need(normal is not None and normal[1]==construction.body_function,
+             'body function is not the original factory NORMAL reference')
+        call=construction.builder_call
+        need(bool(call.arguments),'builder has no original body-function actual')
+        body_actual=pindex.use_site(call.arguments[0].use)
+        function_inputs=[mapping for mapping in binding.inputs if mapping.formal==provider.body_function]
+        need(body_actual.operation==call.operation and body_actual.use.value==construction.body_function
+             and len(function_inputs)==1 and function_inputs[0].actual_use==body_actual.use.id
+             and function_inputs[0].actual_value==construction.body_function,
+             'provider body function is not the original builder argument from this factory')
+        reads=[(ordinal,stage) for ordinal,stage in enumerate(provider.stages)
+               if stage.kind is ClassBuilderStageKind.READ_FUNCTION_FRAME]
+        evals=[stage for stage in provider.stages if stage.kind is ClassBuilderStageKind.EVAL_SUITE]
+        need(len(reads)==len(evals)==1,'provider needs its unique original field-read and suite-eval stages')
+        read_ordinal,read=reads[0];evaluate=evals[0]
+        operation=vindex.operations.get(read.operation)
+        need(operation is not None and operation.terminator is not None
+             and operation.terminator.kind is TerminatorKind.INVOKE
+             and len(read.inputs)==1 and len(read.results)==3+len(provider.freevars)
+             and tuple(use.id for use in operation.uses)==(*read.inputs,read.world)
+             and operation.invoke_arguments==tuple(use.id for use in operation.uses),
+             'field-read stage changed its original function/world/result ports')
+        actual=vindex.use_site(read.inputs[0]);world=vindex.use_site(read.world)
+        need(actual.operation==world.operation==read.operation
+             and actual.use.value==provider.body_function
+             and type(vindex.values[actual.use.value]) is ReferenceValue
+             and type(vindex.values[world.use.value]) is StateVersionValue,
+             'field-read is not on this provider body function and current world')
+        for kind,block_id,expected in (
+                (ExitKind.NORMAL,read.normal,(*read.results,read.normal_world)),
+                (ExitKind.RAISE,read.raised,(read.exception,read.traceback,read.raised_world))):
+            selected=[edge for edge in operation.terminator.successors if edge.kind is kind]
+            need(len(selected)==1 and selected[0].block==block_id
+                 and vindex._block_records[block_id].arguments==expected
+                 and selected[0].arguments==tuple(CompletionResult(i) for i in range(len(expected))),
+                 'field-read NORMAL/RAISE landing ports changed')
+        need(type(vindex.values[read.results[1]]) is ReferenceValue,
+             'field-read globals slot is not its original reference result')
+        need(len(evaluate.inputs)>=5,'suite evaluation lost its function/code/namespace/G/B inputs')
+        eval_sites=[vindex.use_site(use) for use in evaluate.inputs]
+        eval_world=vindex.use_site(evaluate.world)
+        eval_operation=vindex.operations.get(evaluate.operation)
+        need(all(site.operation==evaluate.operation for site in eval_sites)
+             and eval_world.operation==evaluate.operation and eval_operation is not None
+             and tuple(use.id for use in eval_operation.uses)==(*evaluate.inputs,evaluate.world)
+             and eval_sites[0].use.value==provider.body_function
+             and eval_sites[1].use.value==read.results[0]
+             and eval_sites[3].use.value==read.results[1]
+             and eval_sites[4].use.value==read.results[2]
+             and eval_world.use.value==read.normal_world,
+             'suite evaluation does not use the current field-read code/G/savedB and post-world')
+        globals_inputs=[mapping for mapping in binding.suite_inputs if mapping.role=='globals']
+        need(len(globals_inputs)==1 and globals_inputs[0].actual_use==evaluate.inputs[3]
+             and globals_inputs[0].actual_value==read.results[1]
+             and globals_inputs[0].formal==suite_roots[0].entry.mapping.globals_namespace,
+             'suite globals mapping does not select this exact field-read output')
+        source=point(parent,construction.factory_globals)
+        target=point(implementation,read.results[1])
+        body_function=point(parent,construction.body_function)
+        read_world=point(implementation,read.world)
+        predicate=DependencyCondition('scar.class-function-frame',
+            'CURRENT_FUNCTION_GLOBALS_EQUALS_FACTORY_CAPTURE',body_function,
+            operands=(source,read_world,target))
+        evidence=DependencyEvidence('CLASS_BODY_FUNCTION_GLOBALS_CAPTURE_V1',
+            (replace(locator,pointer=locator.pointer+'/construction/factory_globals'),
+             replace(locator,pointer=locator.pointer+'/construction/factory_code'),
+             replace(binding.provider,pointer=binding.provider.pointer+'/stages/'+str(read_ordinal)),
+             parent.graph,implementation.graph,suite.graph),
+            (point(parent,factory.id),body_function,point(parent,construction.factory_code),
+             point(parent,body_actual.use.id),point(implementation,read.inputs[0]),read_world,target))
+        return DependencyEdge(source,target,K.ENVIRONMENT,M.REFERENCE,(evidence,),
+            (*conditions,predicate),DependencyStrength.MAY)
