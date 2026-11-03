@@ -181,7 +181,7 @@ def link_static_program(directory, *, budget=None, progress=None):
             name: hashlib.sha256((analysis / name).read_bytes()).hexdigest()
             for name in ("static_calls.py", "static_namespace.py", "static_function_environment.py",
                          "static_interprocedural.py", "static_crossbody_namespace.py",
-                         "static_nested_creation.py", "static_value_flows.py", "static_module_attributes.py", "static_fields.py",
+                         "static_nested_creation.py", "static_function_creation.py", "static_value_flows.py", "static_module_attributes.py", "static_fields.py",
                          "static_module_state.py",
                          "function_binding.py", "function_interfaces.py", "source_layers.py")}}
     producer = call_producer()
