@@ -11,6 +11,7 @@ from dataclasses import dataclass
 from scar.ir.program.dependencies import (DependencyCondition as Condition,
     DependencyEdge,DependencyEvidence as Evidence,DependencyFrontier as Frontier,
     DependencyKind as K,DependencyPoint as Point,DependencyStrength as Strength)
+from scar.ir.program.dependencies import context_is_closed
 from scar.ir.program.ids import BlockID,OperationID,RegionID
 
 
@@ -24,7 +25,7 @@ class ControlEntryScope:
         if (type(self.region)is not Point or type(self.region.node)is not RegionID
                 or type(self.entry)is not Point or type(self.entry.node)is not BlockID
                 or self.region.namespace!=self.entry.namespace or self.region.context!=self.entry.context
-                or self.region.context is None or type(self.evidence)is not Evidence):
+                or not context_is_closed(self.region.context)or type(self.evidence)is not Evidence):
             raise TypeError('entry scope requires original same-context region/entry and evidence')
 
 
@@ -79,6 +80,7 @@ class TypedRouteRefutation:
 
     def __post_init__(self):
         if (type(self.route)is not DependencyEdge or self.route.strength is not Strength.EXACT
+                or not context_is_closed(self.route.source.context)or not context_is_closed(self.route.target.context)
                 or type(self.source_evidence)is not tuple or not self.source_evidence
                 or any(type(e)is not Evidence for e in self.source_evidence)
                 or type(self.evidence)is not Evidence):

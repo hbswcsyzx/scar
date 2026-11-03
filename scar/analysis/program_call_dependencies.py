@@ -15,6 +15,7 @@ from scar.ir.program.dependencies import (
     DependencyFrontier as Frontier, DependencyKind as Kind,
     DependencyMeaning as Meaning, DependencyNeighborhood as Neighborhood,
     DependencyPoint as Point, GraphNamespace as Namespace,
+    context_frames, context_is_closed, context_push, context_pop,
 )
 from scar.ir.program.functions import FunctionKind
 from scar.ir.program.ids import OperationID, RegionID, UseID, ValueID
@@ -162,7 +163,8 @@ class StaticCallDependencyProvider:
             if node not in index.operations:raise ValueError('static dependency operation is absent from its original graph')
         elif type(node)is RegionID:
             if node not in index.regions:raise ValueError('static dependency region is absent from its original graph')
-        if point.context and point.context[-1].target!=point.namespace:
+        frames=context_frames(point.context)
+        if frames and frames[-1].target!=point.namespace:
             raise ValueError('static dependency context does not end at its original endpoint body')
         return index
 
@@ -192,8 +194,8 @@ class StaticCallDependencyProvider:
             sources=tuple(dict.fromkeys((locator,source.namespace.graph,target.namespace.graph)))
             edge=Edge(source,target,kind,meaning,(Evidence(rule,sources,tuple(anchors)),),tuple(dict.fromkeys(conditions)))
             edges[edge]=None
-            if source.context is None or target.context is None:
-                note('RELATION_CONTEXT_UNRESOLVED','Original endpoint is known, but its creation or caller context is not recorded.')
+            if not context_is_closed(source.context) or not context_is_closed(target.context):
+                note('RELATION_CONTEXT_UNRESOLVED','Original endpoints/suffixes are known; their complete creation or caller prefix is not selected.')
         try:
             for shard,locator in self.session.call_shards_for(point):
                 self._creation_sources(shard);locators[locator]=None
@@ -226,6 +228,7 @@ class StaticCallDependencyProvider:
                 shard=self.session.load_call_shard(locator)
                 self._project(shard,locator,point,outgoing,emit,note)
             relevant=self._scope_frontier(point,outgoing,tuple(edges),note)
+            if relevant and not context_is_closed(point.context):enumerated=False
             publication=getattr(self.session,'call_publication',None)
             if relevant and (not publication or publication.get('complete')is not True
                     or publication.get('scope',{}).get('canonical_call_denominator_complete',publication.get('complete'))is not True):
@@ -289,7 +292,11 @@ class StaticCallDependencyProvider:
         elif not edges and (not outgoing or 'CALL_OPERATION'in roles or'STATE_PAYLOAD'in roles):
             note('STATIC_RELATION_SCOPE_OPEN','No saved interface relationship supplies this exact '+
                 '/'.join(sorted(roles))+' point/context; complete CALL enumeration does not close bindings, state or aliases.')
-        if not outgoing and roles&{'ENTRY_INTERFACE','ENVIRONMENT_INTERFACE','CALL_BODY_ENTRY'}and point.context in(None,()):
+        if not context_is_closed(point.context):
+            note('STATIC_RELATION_CONTEXT_PREFIX_OPEN',
+                'Known interface suffixes do not select the closed requirement paths of saved call/state witnesses.')
+        if (not outgoing and roles&{'ENTRY_INTERFACE','ENVIRONMENT_INTERFACE','CALL_BODY_ENTRY'}
+                and not context_frames(point.context)):
             note('UNBOUND_CALL_CONTEXT','Original entry/environment port has no selected caller frame; input identity is preserved without a caller union.')
         if outgoing and 'STATE_PAYLOAD'in roles and not scope.get('source_attribute_scope_complete',False):
             note('STATIC_RELATION_SCOPE_OPEN','Potential consumers of this original state payload depend on unclosed alias/escape/attribute scope.')
@@ -316,7 +323,7 @@ class StaticCallDependencyProvider:
                 frame=self._frame(call,target)
                 # Each stored requirement path is an independent alternative.
                 for requirements in target.requirement_paths:
-                    caller_context=self._context(requirements);callee_context=(*caller_context,frame)
+                    caller_context=self._context(requirements);callee_context=context_push(caller_context,frame)
                     call_point=point(call.caller,call.operation,caller_context)
                     callee_point=point(target.body,target.body.region,callee_context)
                     guards=(Condition.from_enum(ValueFlowCondition.CALL_TARGET_SELECTED),
@@ -349,7 +356,7 @@ class StaticCallDependencyProvider:
                         source=point(argument.actual_body,argument.actual_use,caller_context)
                         destination=point(argument.formal_body,argument.formal_value,callee_context)
                         if (not outgoing and query.namespace==destination.namespace
-                                and query.node==destination.node and query.context in (None,())):
+                                and query.node==destination.node and not context_frames(query.context)):
                             note('UNBOUND_CALL_CONTEXT','A formal has no selected caller frame; other call contexts are not unioned into its source.')
                         emit(source,destination,Kind.ARGUMENT,Meaning.REFERENCE,
                             _pointer(target_locator,'arguments/'+str(ai)),
@@ -377,7 +384,6 @@ class StaticCallDependencyProvider:
                                 Condition('scar.static-state-entry',state.basis)),(call_point,),rule='STATIC_CALL_STATE_ENTRY_V1')
                     for ei,route in enumerate(target.environment_routes):
                         contexts=self._creation_contexts.get((self._environment_key(route),caller_context),{})
-                        if not contexts and route.creation_body.source is None:contexts={():None}
                         if not contexts:contexts={None:None}
                         for creation_context in contexts:
                             source=point(route.creation_body,route.source_use or route.source_value,creation_context)
@@ -427,23 +433,29 @@ class StaticCallDependencyProvider:
     def _cross_namespace(self,flow,locator,query,outgoing,emit,note):
         source_namespace=self._namespace(flow.write.body);target_namespace=self._namespace(flow.read.body)
         frames=tuple(self._route_frame(bridge.environment)for bridge in flow.bridges)
+        selected_endpoint=(source_namespace,flow.write.assigned_reference) if outgoing else (target_namespace,flow.read.result)
+        if (query.namespace,query.node)!=selected_endpoint:return
+        if query.context is not None and not context_is_closed(query.context):
+            note('STATIC_RELATION_CONTEXT_PREFIX_OPEN',
+                'An open interface suffix cannot authorize this saved cross-body state witness.')
+            return
         if outgoing:
-            if (query.namespace,query.node)!=(source_namespace,flow.write.assigned_reference):return
             source_context=query.context
-            target_context=None if source_context is None else(*source_context,*frames)
+            target_context=None if source_context is None else context_push(source_context,*frames)
         else:
-            if (query.namespace,query.node)!=(target_namespace,flow.read.result):return
             target_context=query.context
             if target_context is None:source_context=None
-            elif len(target_context)<len(frames)or target_context[-len(frames):]!=frames:
-                if not target_context:note('UNBOUND_CALL_CONTEXT','Cross-body namespace dependence requires its ordered original caller frames.')
-                return
-            else:source_context=target_context[:-len(frames)]
+            else:
+                popped=context_pop(target_context,frames)
+                if not popped.matched:
+                    if not context_frames(target_context):note('UNBOUND_CALL_CONTEXT','Cross-body namespace dependence requires its ordered original caller frames.')
+                    return
+                source_context=popped.remaining
         source=Point(source_namespace,flow.write.assigned_reference,source_context)
         target=Point(target_namespace,flow.read.result,target_context)
         anchors=[]
         for n,bridge in enumerate(flow.bridges):
-            context=None if source_context is None else(*source_context,*frames[:n])
+            context=None if source_context is None else context_push(source_context,*frames[:n])
             anchors.append(Point(self._namespace(bridge.environment.caller),bridge.environment.call_world,context))
         emit(source,target,Kind.STATE_VALUE,Meaning.REFERENCE,locator,
             tuple(Condition.from_enum(c)for c in flow.conditions),tuple(anchors),rule='STATIC_CROSS_BODY_NAMESPACE_VALUE_V1')
@@ -453,7 +465,8 @@ class StaticCallDependencyProvider:
         source=Point(self._namespace(projection.source_body),projection.source_payload,
             self._context(projection.source_requirements))
         target=Point(self._namespace(flow.read.body),flow.read.result,self._context(flow.requirements))
-        if (query.namespace,query.node)==(target.namespace,target.node)and query.context in (None,()):
+        if ((query.namespace,query.node)==(target.namespace,target.node)
+                and (not context_is_closed(query.context) or not context_frames(query.context))):
             note('UNBOUND_CALL_CONTEXT','The recorded globals demand belongs to an exact caller stack; no unbound-context union is used.')
         if query not in (source,target):return
         route=projection.environment;caller_context=self._context(projection.callable_source.points[0].requirements)

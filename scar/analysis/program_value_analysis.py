@@ -19,7 +19,8 @@ from scar.ir.program.bindings import BindingState
 from scar.ir.program.dependencies import (DependencyCondition as Condition,
     DependencyEvidence as Evidence,DependencyFrontier as Frontier,
     DependencyKind as K,DependencyMeaning as M,DependencyPoint as Point,
-    DependencyStrength as Strength,DependencyEdge)
+    DependencyStrength as Strength,DependencyEdge,OpenDependencyContext,
+    context_frames,context_is_closed,context_pop)
 from scar.ir.program.ids import OperationID,UseID,ValueID
 from scar.ir.program.ids import BlockID,RegionID
 from scar.ir.program.model import (DataValue,ReferenceValue,LocalBindingValue,StateVersionValue,
@@ -34,6 +35,13 @@ def _extended_unary(condition):
         ('canonical','SUCCESSOR_SELECTED'),('canonical','COMPLETION_SLOT'),
         ('canonical.binding','READ_NORMAL_REQUIRES_BOUND'),
         ('control.analysis','ORIGINAL_EDGE_REQUIRED_FOR_ENTRY_REACHABILITY')}
+
+
+def _closed_proof_inputs(alternative):
+    return (all(context_is_closed(point.context)for point in alternative.premises)
+        and all((condition.subject is None or context_is_closed(condition.subject.context))
+            and all(context_is_closed(point.context)for point in condition.operands)
+            for condition in alternative.conditions))
 
 
 class FieldPrecision(str,Enum):
@@ -218,12 +226,13 @@ class BranchSelectionProof:
         if (type(self.branch)is not Point or type(self.branch.node)is not OperationID
                 or type(self.predicate)is not Point or type(self.predicate.node)is not UseID
                 or self.branch.namespace!=self.predicate.namespace or self.branch.context!=self.predicate.context
+                or not context_is_closed(self.branch.context)
                 or type(self.selected_index)is not int or self.selected_index not in(0,1)
                 or type(self.alternatives)is not tuple or not self.alternatives
                 or any(type(a)is not ValueAlternative or a.strength is not Strength.EXACT
                     or type(a.value)is not PythonLiteral or a.value.kind is not LiteralKind.BOOL
                     or a.value.payload is not(self.selected_index==0)
-                    or any(_extended_unary(c)for c in a.conditions)for a in self.alternatives)
+                    or not _closed_proof_inputs(a)or any(_extended_unary(c)for c in a.conditions)for a in self.alternatives)
                 or type(self.evidence)is not Evidence):
             raise TypeError('branch proof needs an original branch/predicate context and stable builtin bool alternatives')
 
@@ -240,12 +249,14 @@ class BindingReadProof:
         if (type(self.read)is not Point or type(self.read.node)is not OperationID
                 or type(self.binding)is not Point or type(self.binding.node)is not UseID
                 or self.read.namespace!=self.binding.namespace or self.read.context!=self.binding.context
+                or not context_is_closed(self.read.context)
                 or type(self.condition)is not Condition or self.condition.subject!=self.read
                 or self.condition.domain!='canonical.binding' or self.condition.name!='READ_NORMAL_REQUIRES_BOUND'
                 or self.condition.operands!=()or self.condition.index is not None
                 or type(self.alternatives)is not tuple or not self.alternatives
                 or any(type(a)is not BindingStateAlternative or a.state is not BindingState.BOUND
-                    or a.strength is not Strength.EXACT or any(_extended_unary(c)for c in a.conditions)
+                    or a.strength is not Strength.EXACT or not _closed_proof_inputs(a)
+                    or any(_extended_unary(c)for c in a.conditions)
                     for a in self.alternatives)
                 or type(self.evidence)is not Evidence):
             raise TypeError('binding-read proof needs the original read/input scope and complete BOUND alternatives')
@@ -299,6 +310,12 @@ class ProgramValueAnalysis:
         if type(node)is UseID:node=index.use_site(node).use.value
         return index.values.get(node),index
 
+    def _context_closed(self,point):
+        if type(point.context)is OpenDependencyContext:
+            self._note(point,'OPEN_CONTEXT_PROOF_SCOPE',
+                'The original known suffix is retained, but its unknown outer prefix prevents entry, guard and complete-normal-route proofs in this analysis profile.')
+        return context_is_closed(point.context)
+
     def _control_owner(self,point):
         index=self.session.index(point.namespace);node=point.node
         if type(node)in(OperationID,BlockID):return point
@@ -310,6 +327,7 @@ class ProgramValueAnalysis:
         return None
 
     def _entry_scope(self,point):
+        if not self._context_closed(point):return None
         index=self.session.index(point.namespace)
         block=point.node if type(point.node)is BlockID else index._operation_blocks.get(point.node)
         region=index._blocks.get(block)
@@ -327,15 +345,17 @@ class ProgramValueAnalysis:
             in(TerminatorKind.SUSPEND,TerminatorKind.BODY_DRIVE)for b in original.blocks for op in b.operations)
         anchors=(Point(point.namespace,region,point.context),Point(point.namespace,original.entry,point.context))
         sources=(point.namespace.graph,)
-        if point.context:
-            frame=point.context[-1]
+        known=context_frames(point.context)
+        if known:
+            frame=known[-1]
             # This first adapter supports the original synchronous direct
             # region interface. A saved Python candidate frame is not by
             # itself a proof of synchronous body activation or entry scope.
             caller=self.session.index(frame.caller);operation=caller.operations.get(frame.operation)
             opaque|=(frame.target!=point.namespace or frame.caller!=point.namespace or frame.entry!=region
                 or frame.callee_use is not None or operation is None or operation.callee!=region)
-            anchors=(*anchors,Point(frame.caller,frame.operation,point.context[:-1]))
+            parent=context_pop(point.context,(frame,))
+            anchors=(*anchors,Point(frame.caller,frame.operation,parent.remaining))
             sources=tuple(dict.fromkeys((*sources,frame.caller.graph)))
         else:opaque|=region!=point.namespace.root
         scope=None if opaque else ControlEntryScope(anchors[0],anchors[1],
@@ -589,7 +609,7 @@ class ProgramValueAnalysis:
             if operation.terminator is not None and operation.terminator.kind is TerminatorKind.BRANCH:
                 return ValueFact(point,_TOKEN,role='NONVALUE')
             if any(read.operation==point.node and read.normal_result is None for read in index.graph.binding_reads):
-                return ValueFact(point,_TOKEN,feasible=False,role='NO_NORMAL_RESULT')
+                return ValueFact(point,_TOKEN,feasible=False if context_is_closed(point.context)else None,role='NO_NORMAL_RESULT')
             return ValueFact(point,role='NORMAL_RESULT_0')
         if type(value)is LocalBindingValue:
             definition=next(((n,b)for n,b in enumerate(index.graph.binding_definitions)if b.value==value.id),None)
@@ -716,6 +736,7 @@ class ProgramValueAnalysis:
 
     def _condition_evidence(self,condition):
         if condition.operands!=():return None
+        if condition.subject is not None and not self._context_closed(condition.subject):return None
         prior=(self._branch_proofs.get(condition.subject)if condition.domain=='canonical'
             and condition.name=='SUCCESSOR_SELECTED'else None)
         if prior is not None and condition.index==prior.selected_index:return prior.evidence
@@ -747,6 +768,7 @@ class ProgramValueAnalysis:
 
     def _all_routes_refuted(self,point):
         """Close only a complete original family of normal value ports."""
+        if not self._context_closed(point):return None
         if self._point_unknown.get(point):return None
         value,index=self._value(point);incoming=self._incoming.get(point,())
         suppliers=[e for e in incoming if self._value_route(e)]
@@ -777,14 +799,14 @@ class ProgramValueAnalysis:
                 observed={(e.source,c)for e in suppliers for c in e.conditions if c.domain=='canonical'
                     and c.name=='SUCCESSOR_SELECTED'and c.operands==()}
                 if expected and expected==observed and len(suppliers)==len(expected):selected=suppliers
-            elif type(value.origin)is BlockArgument and point.context and all(e.kind is K.ARGUMENT for e in suppliers):
-                frame=point.context[-1];operation=index.operations.get(frame.operation)
+            elif type(value.origin)is BlockArgument and context_frames(point.context)and all(e.kind is K.ARGUMENT for e in suppliers):
+                frame=context_frames(point.context)[-1];operation=index.operations.get(frame.operation)
                 if (frame.caller==point.namespace and frame.target==point.namespace and frame.entry==value.region
                         and operation is not None and operation.callee==value.region
                         and value.origin.block==index.regions[value.region].entry):
                     arguments=operation.invoke_arguments if operation.terminator is not None else operation.call_arguments
                     if value.origin.index<len(arguments):
-                        expected=Point(point.namespace,arguments[value.origin.index],point.context[:-1])
+                        expected=Point(point.namespace,arguments[value.origin.index],context_pop(point.context,(frame,)).remaining)
                         matches=[e for e in suppliers if e.source==expected]
                         if len(matches)==1 and matches==suppliers:selected=matches
             if selected is None:
@@ -803,6 +825,7 @@ class ProgramValueAnalysis:
         if not self._worklist_stable:return False
         changed=False
         for point,fact in self._facts.items():
+            if not context_is_closed(point.context):continue
             proofs=list(fact.infeasibility if fact.feasible is False else())
             for requirement in fact.occurrence.requirements:
                 if requirement.choice.operands!=():continue
@@ -818,6 +841,7 @@ class ProgramValueAnalysis:
                 self._point_refutations[point]=tuple(dict.fromkeys(proofs));changed=True
         for edge in edges:
             if (not self._value_route(edge)or edge.strength is not Strength.EXACT
+                    or not context_is_closed(edge.source.context)or not context_is_closed(edge.target.context)
                     or edge in self._route_refutations):continue
             sources=self._point_refutations.get(edge.source,())
             if not sources:
@@ -836,6 +860,7 @@ class ProgramValueAnalysis:
     def _binding_definite(self,field,state):
         return (field.applicable and bool(field.alternatives) and not field.unknown_paths
             and all(a.state is state and a.strength is Strength.EXACT
+                and _closed_proof_inputs(a)
                 and all(self._condition_evidence(c)is not None for c in a.conditions)
                 for a in field.alternatives))
 
@@ -1001,7 +1026,7 @@ class ProgramValueAnalysis:
         original normal exit Use in the exact direct-region call frame.
         It closes value routing, never effects, purity or state contents.
         """
-        if (point.context is None or point.namespace!=producer.source.namespace
+        if (not self._context_closed(point)or not context_is_closed(producer.source.context)or point.namespace!=producer.source.namespace
                 or point.context!=producer.source.context):return False
         if self._point_unknown.get(point):return False
         index=self.session.index(point.namespace);operation=index.operations[producer.source.node]
@@ -1044,8 +1069,10 @@ class ProgramValueAnalysis:
             context=incoming.source.context
             if (incoming.meaning is not M.VALUE or incoming.strength is not Strength.EXACT
                     or incoming.source.namespace!=point.namespace
-                    or context is None or len(context)!=len(point.context)+1 or context[:-1]!=point.context):return False
-            frame=context[-1]
+                    or not context_is_closed(context)or not context_frames(context)):return False
+            frame=context_frames(context)[-1]
+            parent=context_pop(context,(frame,))
+            if not parent.matched or parent.remaining!=point.context:return False
             if (frame.caller!=point.namespace or frame.target!=point.namespace or frame.operation!=operation.id
                     or frame.entry!=operation.callee or frame.callee_use is not None
                     or frame.callee_value is not None or incoming.source.node not in terminals):return False
@@ -1192,10 +1219,12 @@ class ProgramValueAnalysis:
         return predicate
 
     def _edge_branch_proofs(self,edge):
+        if not context_is_closed(edge.source.context)or not context_is_closed(edge.target.context):return ()
         return tuple(dict.fromkeys(self._branch_proofs[c.subject]for c in edge.conditions
             if c.domain=='canonical'and c.name=='SUCCESSOR_SELECTED'and c.operands==()and c.subject in self._branch_proofs))
 
     def _edge_selected(self,edge):
+        if not context_is_closed(edge.source.context)or not context_is_closed(edge.target.context):return True
         return all(c.index==self._branch_proofs[c.subject].selected_index for c in edge.conditions
             if c.domain=='canonical'and c.name=='SUCCESSOR_SELECTED'and c.operands==()and c.subject in self._branch_proofs)
 
@@ -1207,6 +1236,8 @@ class ProgramValueAnalysis:
         """
         if (condition.domain!='canonical'or condition.name!='SUCCESSOR_SELECTED'
                 or condition.operands!=()or condition.subject is None or type(condition.subject.node)is not OperationID
+                or not self._context_closed(branch)or not context_is_closed(predicate.context)
+                or not context_is_closed(condition.subject.context)
                 or condition.subject.namespace!=branch.namespace or condition.subject.context!=branch.context):return None
         producer=condition.subject;truth=self._truth_contract(producer)
         if truth is None or condition.index!=truth[2]:return None
@@ -1234,7 +1265,7 @@ class ProgramValueAnalysis:
         if not self._worklist_stable:return ()
         added=[]
         for condition,(binding,result)in self._binding_guards.items():
-            if condition in self._binding_proofs or binding not in self._facts or binding.context is None:continue
+            if condition in self._binding_proofs or binding not in self._facts or not self._context_closed(binding):continue
             self.session.check()
             # Recheck the original read interface, not just a condition name
             # propagated by an unrelated provider or activation.
@@ -1259,6 +1290,7 @@ class ProgramValueAnalysis:
         added=[]
         for branch,predicate in self._branch_conditions.items():
             if branch in self._branch_proofs or predicate not in self._facts:continue
+            if not self._context_closed(branch)or not context_is_closed(predicate.context):continue
             # BRANCH is a NONVALUE point: an incomplete predicate interface
             # cannot be represented by opening its N/A scalar fields.
             if self._point_unknown.get(branch):continue
@@ -1270,6 +1302,7 @@ class ProgramValueAnalysis:
             if (fact.feasible is False or not field.applicable or not field.alternatives or field.unknown_paths
                     or any(a.strength is not Strength.EXACT or type(a.value)is not PythonLiteral
                         or a.value.kind is not LiteralKind.BOOL or type(a.value.payload)is not bool
+                        or not _closed_proof_inputs(a)
                         for a in field.alternatives)):
                 continue
             values={a.value.payload for a in field.alternatives}
@@ -1300,7 +1333,7 @@ class ProgramValueAnalysis:
 
     def _compute(self,point):
         seed=replace(self._seed(point),occurrence=self._compute_occurrence(point))
-        impossible=self._point_refutations.get(point)or self._all_routes_refuted(point)
+        impossible=(self._point_refutations.get(point)or self._all_routes_refuted(point))if context_is_closed(point.context)else None
         if impossible:return replace(seed,fields=_TOKEN,feasible=False,infeasibility=impossible)
         fields=seed.fields;payload=seed.binding_payload;binding_state=seed.binding_state
         if seed.role in('LITERAL','NO_NORMAL_RESULT'):return seed
@@ -1309,7 +1342,7 @@ class ProgramValueAnalysis:
         if operator is not None:
             operands=[Point(point.namespace,u,point.context)for u in operator[1]]
             absent=[p for p in operands if p in self._facts and self._facts[p].feasible is False]
-            if absent:
+            if absent and context_is_closed(point.context):
                 evidence=Evidence('CHECKED_NORMAL_OPERATOR_REQUIRES_ORIGINAL_OPERANDS_V1',
                     (point.namespace.graph,),(point,*absent))
                 return replace(seed,fields=_TOKEN,feasible=False,infeasibility=(evidence,))
@@ -1348,9 +1381,10 @@ class ProgramValueAnalysis:
         value,index=self._value(point)
         feasible=seed.feasible
         if any(e.kind is K.BINDING_READ for e in self._incoming[point]):
-            feasible=(False if not normal_open and self._binding_definite(read_state,BindingState.UNBOUND)
-                else True if not normal_open and self._binding_definite(read_state,BindingState.BOUND)else None)
+            feasible=(False if context_is_closed(point.context)and not normal_open and self._binding_definite(read_state,BindingState.UNBOUND)
+                else True if context_is_closed(point.context)and not normal_open and self._binding_definite(read_state,BindingState.BOUND)else None)
         elif possible:feasible=True if True in possible else None
+        if not context_is_closed(point.context):feasible=None
         infeasibility=()
         if feasible is False:
             infeasibility=(Evidence('ORIGINAL_BINDING_READ_HAS_NO_BOUND_NORMAL_INPUT_V1',
@@ -1449,6 +1483,8 @@ class ProgramValueAnalysis:
                 self._note(point,'VALUE_POINT_BUDGET','Unvisited original dependency point is retained.');self._exhausted=False;continue
             try:
                 self.session.check();self._facts[point]=self._seed(point)
+                if type(point.context)is OpenDependencyContext:
+                    self._context_closed(point);self._exhausted=False
                 if type(point.node)is OperationID:self._branch_predicate(point)
                 neighborhood=self.graph.incoming(point,kinds=(K.CONTROL_CONDITION,)
                     if point in self._branch_conditions else selected)

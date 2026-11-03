@@ -130,7 +130,7 @@ tuple_bool_index = tuple_item((2, 3), True)
         exported = export_value_analysis(report)
         json.dumps(exported, allow_nan=False)
         assert not exported['whole_program_complete'] and not exported['transformation_authorized']
-        assert exported['schema_version']==3
+        assert exported['schema_version']==4
         assert all('immutable_tuple'in f['fields']for f in exported['facts'])
         assert exported['fixed_point_reached'] == report.worklist_stable
         assert exported['query_scope_complete'] == report.exhausted
@@ -163,7 +163,8 @@ def test_original_local_result_coverage_does_not_close_candidate_dispatch(tmp_pa
     from scar.ir.program.codec import SCHEMA_VERSION,dumps
     from scar.ir.program.dependencies import (DependencyCondition,DependencyEdge,DependencyEvidence,
         DependencyFrame,DependencyKind as K,DependencyMeaning as M,DependencyNeighborhood,
-        DependencyPoint as P,DependencyStrength,GraphNamespace)
+        DependencyPoint as P,DependencyStrength,GraphNamespace,OpenDependencyContext,
+        context_frames,context_is_closed,context_push,context_pop)
     from scar.ir.program.ids import (BlockID as B,LocationID as L,OperationID as O,
         RegionID as R,UseID as U,ValueID as V)
     from scar.ir.program.providers import ProviderArtifact
@@ -448,7 +449,7 @@ def test_original_local_result_coverage_does_not_close_candidate_dispatch(tmp_pa
     from scar.analysis.program_dependency_export import export_value_analysis
     exported=export_value_analysis(report);json.dumps(exported,allow_nan=False)
     extended_public=export_value_analysis(extended_report);json.dumps(extended_public,allow_nan=False)
-    assert extended_public['schema_version']==3
+    assert extended_public['schema_version']==4
     opaque=next(c for c in extended_public['conditions']if c['operands'])
     assert len(opaque['operands'])==1 and extended_public['points'][opaque['operands'][0]]['node']==call_x.id.wire
     assert extended_selection!=replace(extended_selection,operands=(extended_source,))
@@ -596,6 +597,64 @@ def test_original_local_result_coverage_does_not_close_candidate_dispatch(tmp_pa
     assert impossible.scalar_constant.precision is FieldPrecision.NOT_APPLICABLE
     assert jump_report.for_point(P(namespace,new_values[6].id)).feasible is not False
     assert any(f.kind=='CONTROL_TERMINATION_OPEN'for f in jump_report.frontiers)
+    # Keep an unknown outer caller while selecting the two real nested call
+    # interfaces. No tuple coercion or unmatched pop may turn it into root.
+    outer=DependencyFrame(namespace,new_calls[3].id,None,None,namespace,entry=wrapper)
+    inner=DependencyFrame(namespace,wrapper_call.id,None,None,namespace,entry=jump_region)
+    open_context=context_push(None,outer,inner)
+    assert type(open_context)is OpenDependencyContext and context_frames(open_context)==(outer,inner)
+    assert not context_is_closed(open_context)and not context_is_closed(None)and context_is_closed(())
+    assert context_frames(None)==()and open_context!=context_push((),outer,inner)
+    popped=context_pop(open_context,(inner,))
+    assert popped.matched and popped.remaining==context_push(None,outer)
+    emptied=context_pop(open_context,(outer,inner))
+    assert emptied.matched and emptied.remaining is None
+    missed=context_pop(None,(inner,))
+    assert not missed.matched and missed.remaining is None and missed!=emptied
+    wrong=context_pop(open_context,(frames[0],))
+    assert not wrong.matched and wrong.remaining==open_context
+    closed_pop=context_pop(context_push((),outer,inner),(outer,inner))
+    assert closed_pop.matched and closed_pop.remaining==()
+    with pytest.raises(ValueError,match='nonempty'):
+        OpenDependencyContext(())
+    with pytest.raises(TypeError):tuple(open_context)
+    with pytest.raises(TypeError):open_context[0]
+    unrelated=replace(namespace,root=R('unrelated-context-target'))
+    with pytest.raises(ValueError,match='call chain'):
+        OpenDependencyContext((outer,replace(inner,caller=unrelated)))
+    with pytest.raises(ValueError,match='context does not end'):
+        P(unrelated,jump_sources[0].id,open_context)
+    original_proof=next(p for p in jump_report.branch_proofs if p.branch.node==jump_branch.id)
+    open_proof_context=context_push(None,*context_frames(original_proof.branch.context))
+    with pytest.raises(TypeError,match='branch proof'):
+        replace(original_proof,branch=replace(original_proof.branch,context=open_proof_context),
+            predicate=replace(original_proof.predicate,context=open_proof_context))
+    route=next(p for p in jump_report.route_refutations if p.route.kind is K.BLOCK_ARGUMENT)
+    with pytest.raises(TypeError,match='route refutation'):
+        replace(route,route=replace(route.route,
+            source=replace(route.route.source,context=context_push(None,*context_frames(route.route.source.context))),
+            target=replace(route.route.target,context=context_push(None,*context_frames(route.route.target.context)))))
+    open_copy=P(namespace,jump_sources[0].id,open_context)
+    open_phi=P(namespace,jump_merged.id,open_context)
+    open_binding=P(namespace,binding.id,context_push(None,frame))
+    open_normal=P(namespace,V('dormant-normal'),context_push(None,frame))
+    open_report=ProgramValueAnalysis(session,ProgramDependencyGraph(lambda _:index)).analyze((
+        open_copy,open_phi,open_binding,open_normal))
+    assert open_report.worklist_stable and not open_report.exhausted
+    assert open_report.for_point(open_copy).scalar_constant.precision is FieldPrecision.EXACT
+    assert {a.value for a in open_report.for_point(open_copy).scalar_constant.alternatives}=={PythonLiteral.from_python(7)}
+    assert {a.value for a in open_report.for_point(open_phi).scalar_constant.alternatives}=={
+        PythonLiteral.from_python(7),PythonLiteral.from_python(99)}
+    assert open_report.for_point(open_binding).binding_states==(BindingState.UNBOUND,)
+    assert open_report.for_point(open_binding).binding_state.precision is FieldPrecision.EXACT
+    assert open_report.for_point(open_normal).feasible is None
+    assert not open_report.branch_proofs and not open_report.binding_proofs and not open_report.route_refutations
+    assert any(f.kind=='OPEN_CONTEXT_PROOF_SCOPE'for f in open_report.frontiers)
+    open_public=export_value_analysis(open_report);json.dumps(open_public,allow_nan=False)
+    assert open_public['schema_version']==4 and any(row['unknown_prefix']for row in open_public['contexts'])
+    assert all(row['unknown_prefix']is False for row in exported['contexts'])
+    assert all(row['frames']for row in open_public['contexts']if row['unknown_prefix'])
+    assert open_public['points'][open_public['roots'][0]]['context']is not None
     # A known argument does not authorize an unverified activation/entry.
     # Its branch value is known, but entry-relative CONTROL cannot prune it.
     external_frame=DependencyFrame(namespace,candidate.id,None,None,namespace,entry=jump_region)

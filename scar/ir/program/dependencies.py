@@ -96,20 +96,91 @@ class DependencyFrame:
             raise ValueError("context frame differs from its selected source definition")
 
 
+def _context_chain(frames):
+    if type(frames) is not tuple or any(type(frame) is not DependencyFrame for frame in frames):
+        raise TypeError("dependency context needs an immutable tuple of original frames")
+    if any(left.target != right.caller for left, right in zip(frames, frames[1:])):
+        raise ValueError("dependency context frames do not form a call chain")
+    return frames
+
+
+@dataclass(frozen=True, slots=True)
+class OpenDependencyContext:
+    """An unknown, possibly empty outer prefix plus a known nonempty suffix.
+
+    This is an abstract family of interface selections, never a runtime stack.
+    It intentionally has no tuple iteration/indexing interface: dropping its
+    prefix marker must be an explicit loss of knowledge, not an implicit slice.
+    """
+    frames: tuple[DependencyFrame, ...]
+
+    def __post_init__(self):
+        if not _context_chain(self.frames):
+            raise ValueError("open dependency context needs a nonempty known suffix")
+
+
+DependencyContext: TypeAlias = tuple[DependencyFrame, ...] | OpenDependencyContext | None
+
+
+def context_frames(context: DependencyContext) -> tuple[DependencyFrame, ...]:
+    """Inspect known frames; an empty result does not prove a closed root."""
+    if context is None:
+        return ()
+    if type(context) is OpenDependencyContext:
+        context.__post_init__()
+        return context.frames
+    return _context_chain(context)
+
+
+def context_is_closed(context: DependencyContext) -> bool:
+    return type(context) is tuple
+
+
+def context_push(context: DependencyContext, *frames: DependencyFrame) -> DependencyContext:
+    known = context_frames(context)
+    appended = _context_chain((*known, *frames))
+    if not frames:
+        return context
+    return appended if context_is_closed(context) else OpenDependencyContext(appended)
+
+
+@dataclass(frozen=True, slots=True)
+class ContextPopResult:
+    matched: bool
+    remaining: DependencyContext
+
+    def __post_init__(self):
+        if type(self.matched) is not bool:
+            raise TypeError("context pop needs an explicit match result")
+        context_frames(self.remaining)
+
+
+def context_pop(context: DependencyContext, expected_frames: tuple[DependencyFrame, ...]) -> ContextPopResult:
+    """Pop an exact known suffix without guessing any unknown outer frame."""
+    known = context_frames(context)
+    expected = _context_chain(expected_frames)
+    if len(expected) > len(known) or expected and known[-len(expected):] != expected:
+        return ContextPopResult(False, context)
+    remaining = known[:-len(expected)] if expected else known
+    if context_is_closed(context):
+        result = remaining
+    else:
+        result = OpenDependencyContext(remaining) if remaining else None
+    return ContextPopResult(True, result)
+
+
 @dataclass(frozen=True, slots=True)
 class DependencyPoint:
     namespace: GraphNamespace
     node: NodeID
-    context: tuple[DependencyFrame, ...] | None = ()
+    context: DependencyContext = ()
 
     def __post_init__(self):
         if type(self.namespace) is not GraphNamespace or type(self.node) not in NODE_TYPES:
             raise TypeError("dependency endpoint needs a qualified original typed ID")
-        if self.context is not None:
-            if type(self.context) is not tuple or any(type(frame) is not DependencyFrame for frame in self.context):
-                raise TypeError("dependency context must be an immutable frame stack or unknown")
-            if any(left.target != right.caller for left, right in zip(self.context, self.context[1:])):
-                raise ValueError("dependency context frames do not form a call chain")
+        known = context_frames(self.context)
+        if known and known[-1].target != self.namespace:
+            raise ValueError("dependency context does not end at the original endpoint namespace")
 
 
 class DependencyKind(str, Enum):

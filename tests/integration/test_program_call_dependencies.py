@@ -7,11 +7,13 @@ import sys
 
 def test_outgoing_routes_all_saved_interfaces_without_replaying_unrelated_graphs(tmp_path):
     import pytest
+    from dataclasses import replace
     from scar.analysis.program_dependencies import ProgramDependencyGraph
     from scar.analysis.program_call_dependencies import StaticCallDependencyProvider
     from scar.analysis.program_dependency_session import ProgramDependencyBudget,ProgramDependencySession
     from scar.analysis.static_program import link_static_program
-    from scar.ir.program.dependencies import DependencyKind as K,DependencyPoint,GraphNamespace
+    from scar.ir.program.dependencies import (DependencyKind as K,DependencyPoint,GraphNamespace,
+        context_frames,context_push,context_is_closed)
 
     source=tmp_path/'source';source.mkdir();path=source/'program.py';model=tmp_path/'model'
     path.write_text('def identity(value):\n    return value\n'
@@ -41,6 +43,15 @@ def test_outgoing_routes_all_saved_interfaces_without_replaying_unrelated_graphs
         assert measurements['routing_shards_read']==len(manifest['static_calls']['shards'])
         # The spare caller was routed by raw receipt, not loaded as a core graph.
         assert measurements['relationship_shards_read']<measurements['routing_shards_read']
+
+        # A known suffix is useful navigation evidence, but it cannot select
+        # a publication's closed caller requirements or become a closed root.
+        open_context=context_push(None,*context_frames(edge.target.context))
+        assert not context_is_closed(open_context) and open_context!=edge.target.context
+        open_formal=replace(edge.target,context=open_context)
+        unknown_prefix=graph.incoming(open_formal,kinds=(K.ARGUMENT,))
+        assert not unknown_prefix.edges and not unknown_prefix.enumerated
+        assert any(f.kind=='STATIC_RELATION_CONTEXT_PREFIX_OPEN'for f in unknown_prefix.frontiers)
 
     # A bounded raw prefix cannot remove the already known local interface,
     # and cannot be advertised as a closed set of potential consumers.

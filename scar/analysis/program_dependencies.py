@@ -10,7 +10,8 @@ from dataclasses import dataclass, replace
 
 from scar.ir.program.dependencies import (DependencyCondition, DependencyEdge,
     DependencyEvidence, DependencyFrame, DependencyFrontier, DependencyKind as K,
-    DependencyMeaning as M, DependencyNeighborhood, DependencyPoint, DependencyStrength, GraphNamespace)
+    DependencyMeaning as M, DependencyNeighborhood, DependencyPoint, DependencyStrength, GraphNamespace,
+    context_frames, context_is_closed, context_push, context_pop)
 from scar.ir.program.ids import (BlockID, ControlPortID, EnvironmentInterfaceID, LocationID, OperationID, RegionID,
     NativeBoundaryID, ProviderID, ResourceDefinitionID, ResourceRequirementID, UseID, ValueID)
 from scar.ir.program.model import (BlockArgument, CompletionResult, OperationResult,
@@ -79,7 +80,8 @@ class ProgramDependencyGraph:
     def neighborhood(self, point, *, direction="incoming", kinds=None):
         if type(point) is not DependencyPoint or direction not in ("incoming", "outgoing"):
             raise ValueError("select a qualified endpoint and incoming/outgoing direction")
-        if point.context and point.context[-1].target != point.namespace:
+        frames=context_frames(point.context)
+        if frames and frames[-1].target != point.namespace:
             raise ValueError("selected context does not end at the original endpoint namespace")
         if kinds is not None:
             kinds = frozenset(kinds)
@@ -253,14 +255,26 @@ class LocalDependencyProvider:
         edges = tuple(replace(edge, source=contextual(edge.source), target=contextual(edge.target),
             evidence=tuple(replace(item, anchors=tuple(contextual(anchor) for anchor in item.anchors))
                 for item in edge.evidence),
-            conditions=tuple(replace(condition, subject=contextual(condition.subject))
-                if condition.subject is not None else condition for condition in edge.conditions)) for edge in templates)
+            conditions=tuple(replace(condition,
+                subject=contextual(condition.subject) if condition.subject is not None else None,
+                operands=tuple(contextual(operand) for operand in condition.operands))
+                for condition in edge.conditions)) for edge in templates)
         notes = tuple(DependencyFrontier(point, kind, detail) for kind, detail in frontiers.get(point.node, ()))
-        if point.context is None:
-            notes += (DependencyFrontier(point, "CALL_CONTEXT_UNKNOWN", "Original local structure is retained; no caller activation is selected."),)
+        index=self.load_index(point.namespace)
+        if not context_is_closed(point.context):
+            value=index.values.get(point.node)
+            entry_argument=(type(value.origin) is BlockArgument and
+                any(region.entry==value.origin.block for region in index.graph.regions)) if value is not None else False
+            interface=(type(point.node) is RegionID or entry_argument
+                or any(point.node==member.reference for environment in index.graph.environments
+                       for member in environment.members))
+            if interface:
+                notes += (DependencyFrontier(point,
+                    "CALL_CONTEXT_UNKNOWN" if point.context is None else "CALL_CONTEXT_PREFIX_OPEN",
+                    "Original interface suffix is retained; its enclosing caller prefix is not selected."),)
         # Direct region-call edges carry a different context transition and
         # are generated on demand rather than flattening shared callees.
-        interfaces = self._region_calls(point, self.load_index(point.namespace), incoming, templates)
+        interfaces = self._region_calls(point, index, incoming, templates)
         return DependencyNeighborhood((*edges, *interfaces.edges), (*notes, *interfaces.frontiers))
 
     def incoming(self, point):
@@ -444,10 +458,12 @@ class LocalDependencyProvider:
     def _region_calls(self, point, index, incoming, templates):
         candidates = []
         # A selected inner frame is the only route back to a local caller.
-        if point.context:
-            frame = point.context[-1]
+        frames=context_frames(point.context)
+        if frames:
+            frame = frames[-1]
             if frame.target == point.namespace and frame.entry is not None:
-                candidates.append((frame, point.context[:-1]))
+                popped=context_pop(point.context,(frame,))
+                if popped.matched:candidates.append((frame,popped.remaining))
         operation_ids = set()
         if type(point.node) is OperationID:operation_ids.add(point.node)
         elif type(point.node) is UseID:operation_ids.add(index.use_site(point.node).operation)
@@ -462,13 +478,13 @@ class LocalDependencyProvider:
             definition = body.definition if body is not None and operation.callee == point.namespace.root else None
             frame = DependencyFrame(point.namespace, operation.id, None, None, point.namespace,
                 definition=definition, entry=operation.callee)
-            if point.context is not None:candidates.append((frame, point.context))
+            candidates.append((frame, point.context))
         rows, notes = {}, []
         for frame, outer in dict.fromkeys(candidates):
             if frame.caller != point.namespace or frame.target != point.namespace:continue
             operation = index.operations.get(frame.operation)
             if operation is None or operation.callee != frame.entry:continue
-            inner = (*outer, frame)
+            inner = context_push(outer,frame)
             evidence = DependencyEvidence("CANONICAL_REGION_INTERFACE_V1", (point.namespace.graph,))
             def emit(source, target, kind, meaning=M.DEPENDENCE):
                 item = DependencyEdge(source, target, kind, meaning, (evidence,))
@@ -510,4 +526,7 @@ class LocalDependencyProvider:
                         emit(endpoint(terminal.use.id, inner), endpoint(result, outer),
                             K.STATE_INTERFACE if is_state else K.COMPLETION,
                             M.STATE_INTERFACE if is_state else M.VALUE)
+        if rows and not context_is_closed(point.context):
+            notes.append(DependencyFrontier(point,"REGION_INTERFACE_CONTEXT_PREFIX_OPEN",
+                "The original Region-call interface is known; its enclosing prefix remains unselected."))
         return DependencyNeighborhood(tuple(rows), tuple(dict.fromkeys(notes)))

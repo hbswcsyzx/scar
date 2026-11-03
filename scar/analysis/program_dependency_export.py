@@ -7,7 +7,8 @@ from enum import Enum
 
 from scar.analysis.program_dependencies import DependencyWalk
 from scar.ir.program.dependencies import (GraphNamespace, DependencyFrame, DependencyPoint,
-    DependencyCondition, DependencyEvidence, DependencyEdge, DependencyFrontier)
+    DependencyCondition, DependencyEvidence, DependencyEdge, DependencyFrontier,
+    OpenDependencyContext, context_frames, context_is_closed)
 from scar.ir.program.source_references import SourceArtifactLocator
 from scar.ir.literals import PythonLiteral
 from scar.ir.record_codec import encode
@@ -52,7 +53,8 @@ class _Tables:
 
     def context(self, value):
         return None if value is None else self.put('contexts', value,
-            lambda: {'frames': [self.frame(item) for item in value]})
+            lambda: {'frames': [self.frame(item) for item in context_frames(value)],
+                'unknown_prefix': not context_is_closed(value)})
 
     def point(self, value):
         return self.put('points', value, lambda: {'namespace': self.namespace(value.namespace),
@@ -82,6 +84,7 @@ class _Tables:
 
     def pack(self, value):
         references = ((GraphNamespace, 'namespace', self.namespace), (DependencyFrame, 'frame', self.frame),
+            (OpenDependencyContext, 'context', self.context),
             (DependencyPoint, 'point', self.point), (DependencyCondition, 'condition', self.condition),
             (DependencyEvidence, 'evidence', self.evidence), (DependencyEdge, 'edge', self.edge),
             (SourceArtifactLocator, 'locator', self.locator))
@@ -121,7 +124,7 @@ def export_dependency_walk(walk):
     for edge in walk.edges:
         table.edge(edge)
     frontiers = [table.frontier(item) for item in walk.frontiers]
-    return {'schema': 'scar.program-dependency-query', 'schema_version': 2,
+    return {'schema': 'scar.program-dependency-query', 'schema_version': 3,
         'direction': walk.direction, 'roots': roots, **table.tables, 'frontiers': frontiers,
         'relation_scope': [kind.value for kind in walk.kinds],
         'summary': {'visited_points': len(walk.points), 'referenced_points': len(table.tables['points']),
@@ -131,7 +134,7 @@ def export_dependency_walk(walk):
         'traversal_exhausted': walk.traversal_exhausted, 'dependence_closed': walk.dependence_closed,
         'whole_program_complete': False, 'transformation_authorized': False,
         'qualification': 'Original typed endpoints and conditional dependencies over shared source fragments. '
-            'Context null is unknown; an empty frame list selects no caller. '
+            'Context null is wholly unknown; unknown_prefix retains only a known suffix, while a closed empty frame list selects no caller. '
             'CFG/sequence/containment are structural, not required ordering or equality. '
             'Query completion is not whole-program closure or transformation permission.'}
 
@@ -162,7 +165,7 @@ def export_value_analysis(result):
     branch_proofs = [table.pack(item) for item in result.branch_proofs]
     binding_proofs = [table.pack(item) for item in result.binding_proofs]
     route_refutations = [table.pack(item) for item in result.route_refutations]
-    return {'schema': 'scar.program-value-analysis', 'schema_version': 3, 'roots': roots,
+    return {'schema': 'scar.program-value-analysis', 'schema_version': 4, 'roots': roots,
         **table.tables, 'facts': facts, 'frontiers': frontiers, 'branch_proofs': branch_proofs,
         'binding_proofs': binding_proofs,
         'route_refutations': route_refutations,
@@ -173,6 +176,7 @@ def export_value_analysis(result):
         'qualification': 'Field-wise definition provenance and supported immutable builtin scalar/tuple content facts. '
             'Binding state knowledge is separate from payload; binding_states is only a convenience projection. '
             'Fixed-point convergence describes represented field constraints, separately from original query scope completeness. '
+            'An open context retains known fields without authorizing closed entry, guard or normal-route proofs. '
             'A source Point is not an ObjectID or content identity; conditions, proofs and unknown paths remain explicit.'}
 
 
@@ -188,7 +192,7 @@ def export_boundary_analysis(result):
     records['reads'] = [number for number, state in enumerate(result.state) if state in reads]
     records['writes'] = [number for number, state in enumerate(result.state) if state in writes]
     records['control_dependencies'] = [table.edge(edge) for edge in result.control_dependencies]
-    return {'schema': 'scar.program-region-boundary', 'schema_version': 2,
+    return {'schema': 'scar.program-region-boundary', 'schema_version': 3,
         **table.tables, 'boundary': records, 'whole_program_complete': False,
         'transformation_authorized': False,
         'qualification': 'A cut of original operations and field-wise interface/effect knowledge. '
