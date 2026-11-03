@@ -26,6 +26,9 @@ partial不覆盖当前模型；归档仅追加owned材料，保所有旧端点�
 
 证据：`artifacts/current/queries/formal-frontend-f0/{run.json,acquisition/result.json,verification/result.json}`。
 纯API与独立材料集成2例通过；集成强制禁止ast.parse/symtable，并核不可逆编码、缺文件、预算和并发新增文件保留。
+补审发现unicode_escape解码warning受外部warnings-as-error影响；已固定忽略codec警告并恢复调用方过滤器，
+并行归档改用spawn隔离。3例通过；866份补充fresh核验4.72秒，材料与manifest未变。
+补验：`artifacts/current/queries/formal-frontend-f0/warning-policy-verification/result.json`。
 
 ## 仍未通过的形式层
 

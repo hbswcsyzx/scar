@@ -70,3 +70,24 @@ def test_source_bytes_lossless_material_and_strict_replay():
         read_source_bytes(changed)
     with pytest.raises(TypeError):
         source_bytes_document(bytearray(b'a'), path='/source/material.py', namespace_root='/source')
+
+
+def test_codec_warning_policy_is_stable_under_ambient_warning_as_error():
+    import warnings
+    from scar.analysis.source_bytes import source_bytes_document, read_source_bytes, decoded_source_bytes
+
+    raw = b'# coding: unicode_escape\ns="\\q"\n'
+    expected = source_bytes_document(raw, path='/source/material.py', namespace_root='/source')
+    assert expected['decoding']['status'] == 'DECODED'
+    with warnings.catch_warnings(record=True) as observed:
+        warnings.simplefilter('error')
+        ambient_filters = warnings.filters
+        original_filters = list(ambient_filters)
+        actual = source_bytes_document(raw, path='/source/material.py', namespace_root='/source')
+        assert actual == expected
+        assert read_source_bytes(json.loads(json.dumps(actual))) == raw
+        assert decoded_source_bytes(actual) == raw.decode('ascii')
+        assert warnings.filters is ambient_filters and warnings.filters == original_filters
+        assert not observed
+        with pytest.raises(DeprecationWarning):
+            warnings.warn('the caller policy remains in force', DeprecationWarning)

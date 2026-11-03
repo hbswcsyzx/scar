@@ -1,11 +1,12 @@
 """F0 source-byte acquisition, independent of parsing and program lowering."""
 from __future__ import annotations
 
-from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import ProcessPoolExecutor
 from hashlib import sha256
 from pathlib import Path
 import argparse
 import json
+import multiprocessing
 import os
 import shutil
 import tempfile
@@ -105,6 +106,15 @@ def _material(unit, read):
     return None, 'RAW_BYTES_UNAVAILABLE', current_issue
 
 
+def _acquire_material(task):
+    # A process owns its warning filters: codec interpretation must not race
+    # with a sibling task's temporary warning policy on GIL builds.
+    from scar.analysis.static_query import _Fragments
+    root, unit = task
+    document, origin, detail = _material(unit, _Fragments(root).read)
+    return unit['key'], document, origin, detail
+
+
 def archive_model_source_bytes(model, out, *, jobs=4, max_bytes=64 * 1024 * 1024):
     """Append F0 materials; preserve all original source and graph endpoints.
 
@@ -150,15 +160,12 @@ def archive_model_source_bytes(model, out, *, jobs=4, max_bytes=64 * 1024 * 1024
         with (out / 'result.json').open('xb') as stream:
             stream.write(_json(report))
         return report
-    def acquire(unit):
-        reader = _Fragments(root)
-        document, origin, detail = _material(unit, reader.read)
-        return unit['key'], document, origin, detail
+    tasks = [(root, unit) for unit in manifest['units']]
     if jobs == 1:
-        materials = list(map(acquire, manifest['units']))
+        materials = list(map(_acquire_material, tasks))
     else:
-        with ThreadPoolExecutor(max_workers=jobs) as pool:
-            materials = list(pool.map(acquire, manifest['units']))
+        with ProcessPoolExecutor(max_workers=jobs, mp_context=multiprocessing.get_context('spawn')) as pool:
+            materials = list(pool.map(_acquire_material, tasks))
     rows = [{'unit': key, 'status': 'PRESERVED' if doc is not None else 'MISSING',
              'origin': origin, 'detail': detail} for key, doc, origin, detail in materials]
     complete = all(doc is not None for _, doc, _, _ in materials)

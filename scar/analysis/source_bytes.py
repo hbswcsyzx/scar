@@ -1,4 +1,9 @@
-"""Pure F0 bytes/encoding API, independent of tokens, parsing and execution."""
+"""Pure F0 bytes/encoding API, independent of tokens, parsing and execution.
+
+F0 V1 ignores codec warnings. Its own warning scopes are serialized; callers
+must not concurrently modify process warning state outside this API when the
+runtime does not provide context-aware warning isolation.
+"""
 from __future__ import annotations
 
 import base64
@@ -7,12 +12,17 @@ from dataclasses import fields
 from hashlib import sha256
 from io import BytesIO
 import sys
+from threading import RLock
 import tokenize
+import warnings
 
 from scar.ir.program.source_bytes import (
     SourceBytesDecoding, SourceBytesError, SourceBytesMaterial, SourceBytesProfile, SourceRawBytes,
 )
 from scar.ir.record_codec import decode, encode
+
+
+_CODEC_WARNINGS_LOCK = RLock()
 
 
 def _profile():
@@ -32,20 +42,24 @@ def _error(stage, error, original):
 
 
 def _interpret(raw):
-    try:
-        encoding, _ = tokenize.detect_encoding(BytesIO(raw).readline)
-    except (SyntaxError, UnicodeError, LookupError) as error:
-        return SourceBytesDecoding('ENCODING_ERROR', None, None, None, _error('ENCODING', error, raw)), None
-    try:
-        text = raw.decode(encoding)
-    except (UnicodeError, LookupError) as error:
-        return SourceBytesDecoding('DECODE_ERROR', encoding, None, None, _error('DECODING', error, raw)), None
-    try:
-        digest = sha256(text.encode('utf-8', errors='strict')).hexdigest()
-    except UnicodeEncodeError as error:
-        return SourceBytesDecoding('DECODED_TEXT_ENCODING_ERROR', encoding, None, len(text),
-            _error('DECODED_TEXT_ENCODING', error, text)), text
-    return SourceBytesDecoding('DECODED', encoding, digest, len(text), None), text
+    # Creation and fresh readers share this exact policy. Codec warnings are
+    # outside V1's result schema and must not become ambient-filter exceptions.
+    with _CODEC_WARNINGS_LOCK, warnings.catch_warnings():
+        warnings.simplefilter('ignore')
+        try:
+            encoding, _ = tokenize.detect_encoding(BytesIO(raw).readline)
+        except (SyntaxError, UnicodeError, LookupError) as error:
+            return SourceBytesDecoding('ENCODING_ERROR', None, None, None, _error('ENCODING', error, raw)), None
+        try:
+            text = raw.decode(encoding)
+        except (UnicodeError, LookupError) as error:
+            return SourceBytesDecoding('DECODE_ERROR', encoding, None, None, _error('DECODING', error, raw)), None
+        try:
+            digest = sha256(text.encode('utf-8', errors='strict')).hexdigest()
+        except UnicodeEncodeError as error:
+            return SourceBytesDecoding('DECODED_TEXT_ENCODING_ERROR', encoding, None, len(text),
+                _error('DECODED_TEXT_ENCODING', error, text)), text
+        return SourceBytesDecoding('DECODED', encoding, digest, len(text), None), text
 
 
 def source_bytes_document(raw: bytes, *, path: str, namespace_root: str) -> dict:
