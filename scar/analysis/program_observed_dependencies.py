@@ -13,9 +13,9 @@ from scar.analysis.observed_call_bindings import derive_observed_interfaces
 from scar.ir.program.call_edges import FrameCompletion
 from scar.ir.program.dependencies import (DependencyCondition, DependencyEdge,
     DependencyEvidence, DependencyKind as K, DependencyMeaning as M,
-    DependencyPoint as P, GraphNamespace)
+    DependencyPoint as P, DependencyStrength, GraphNamespace)
 from scar.ir.program.model import ExitKind, ValueKind
-from scar.ir.program.observed_dependencies import (ObservedCallScope, ObservedDependencyEdge,
+from scar.ir.program.observed_dependencies import (ObservedCallLayout, ObservedCallScope, ObservedDependencyEdge,
     ObservedDependencyFrontier, ObservedDependencyNeighborhood, ObservedPortPhase as Phase,
     ObservedPortPoint)
 
@@ -43,7 +43,9 @@ class ObservedDependencyProvider:
         if directory.resolve() != directory or directory.is_symlink():
             raise ValueError('observed capture directory must be canonical')
         before = _inputs(directory)
-        bindings, interfaces, evidence, issues = derive_observed_interfaces(session, trace)
+        argument_layouts = {}
+        bindings, interfaces, evidence, issues = derive_observed_interfaces(session, trace,
+            argument_layouts=argument_layouts)
         after = _inputs(directory)
         if before != after:
             raise ValueError('observed capture inputs changed during admission')
@@ -55,6 +57,7 @@ class ObservedDependencyProvider:
         self._bindings, self._interfaces = {}, {}
         self._before, self._after = defaultdict(dict), defaultdict(dict)
         self._ports, self._notes = {}, defaultdict(dict)
+        self._layouts = []
         entries = {(e.caller, e.attempt_index): (e, anchor)
                    for e, anchor in zip(evidence.targets.entries, evidence.targets.entry_anchors)}
         frames = {frame.invocation: frame for frame in evidence.trace.entries}
@@ -93,8 +96,9 @@ class ObservedDependencyProvider:
                     or (item.observed_exit is not None and scope.exit_anchor != item.observed_exit.anchor)):
                 raise ValueError('observed interface changed the original direct entry/exit occurrence')
             self._interfaces[scope] = item
-            self._join(scope, item)
+            self._join(scope, item, argument_layouts.get((target.caller, target.attempt_index), ()))
         self.scopes = tuple(self._bindings)
+        self.layouts = tuple(self._layouts)
         self.edges = tuple(dict.fromkeys(edge for rows in self._after.values() for edge in rows))
         self.frontiers = tuple(note for rows in self._notes.values() for note in rows)
         # The same session checks these original inputs again at close. A
@@ -112,7 +116,7 @@ class ObservedDependencyProvider:
     def _note(self, point, kind, detail):
         self._notes[point][ObservedDependencyFrontier(point, kind, detail)] = None
 
-    def _edge(self, source, target, kind, meaning, rule, *, normal=False):
+    def _edge(self, source, target, kind, meaning, rule, *, normal=False, conditions=()):
         originals = source.original, target.original
         sources = tuple(dict.fromkeys(point.namespace.graph for point in originals))
         guards = () if kind is K.OPERAND else (DependencyCondition('SCAR_INTERFACE',
@@ -120,24 +124,61 @@ class ObservedDependencyProvider:
         if normal:
             guards += (DependencyCondition('SCAR_INTERFACE', 'CALLEE_NORMAL_RETURN_SELECTED'),
                 DependencyCondition('SCAR_INTERFACE', 'CALLER_NORMAL_LANDING_DECLARED_NOT_OBSERVED'))
+        guards += conditions
         template = DependencyEdge(*originals, kind, meaning,
-            (DependencyEvidence(rule, sources, originals),), guards)
+            (DependencyEvidence(rule, sources, originals),), guards,
+            DependencyStrength.MAY if conditions else DependencyStrength.EXACT)
         edge = ObservedDependencyEdge(template, source, target)
         self._after[source][edge] = None
         self._before[target][edge] = None
 
-    def _join(self, scope, item):
+    def _join(self, scope, item, layouts):
         binding, interface = item.binding, item.interface
         caller = binding.call.namespace
         callee = GraphNamespace.from_source(interface.body)
         point = lambda ns, node, phase: self._point(scope, P(ns, node, None), phase)
         call = point(caller, binding.call.node, Phase.CALL_SITE)
         entry = point(callee, callee.root, Phase.ENTRY_INTERFACE)
+        body = self.session.load_body(interface.body)
+        for formal in body.interface.parameters:
+            point(callee, formal.value, Phase.ENTRY_INTERFACE)
         self._edge(call, entry, K.CALL_TARGET, M.STRUCTURE, 'OBSERVED_DIRECT_FUNCTION_ENTRY_V1')
         for argument in interface.arguments:
             self._edge(point(GraphNamespace.from_source(argument.actual_body), argument.actual_use, Phase.CALL_SITE),
                 point(GraphNamespace.from_source(argument.formal_body), argument.formal_value, Phase.ENTRY_INTERFACE),
                 K.ARGUMENT, M.REFERENCE, 'OBSERVED_SOURCE_ARGUMENT_INTERFACE_V1')
+        for layout in layouts:
+            condition = (DependencyCondition('SCAR_CALL_ABI', 'IMPLICIT_POSITIONAL_PREFIX',
+                subject=binding.call, index=layout.implicit_prefix) if len(layouts) > 1 else None)
+            guards = () if condition is None else (condition,)
+            defaults = tuple(point(callee, formal.value, Phase.ENTRY_INTERFACE) for formal in layout.missing)
+            implicit = tuple(dict.fromkeys(point(callee, formal.value, Phase.ENTRY_INTERFACE)
+                for formal in (*layout.implicit_formals, *(pack.formal for pack in layout.packs if pack.implicit))))
+            packed = tuple(point(callee, pack.formal.value, Phase.ENTRY_INTERFACE) for pack in layout.packs)
+            self._layouts.append(ObservedCallLayout(scope, layout.implicit_prefix, condition,
+                defaults, implicit, packed))
+            for argument in layout.arguments:
+                if argument not in interface.arguments:
+                    self._edge(point(GraphNamespace.from_source(argument.actual_body), argument.actual_use, Phase.CALL_SITE),
+                        point(GraphNamespace.from_source(argument.formal_body), argument.formal_value, Phase.ENTRY_INTERFACE),
+                        K.ARGUMENT, M.REFERENCE, 'OBSERVED_CONDITIONAL_ARGUMENT_INTERFACE_V1', conditions=guards)
+            for pack in layout.packs:
+                target = point(callee, pack.formal.value, Phase.ENTRY_INTERFACE)
+                for actual in pack.actuals:
+                    if actual.use is None:
+                        self._note(target, 'OBSERVED_PACK_ACTUAL_USE_OPEN',
+                            'An original expanded/ambiguous operand has no unique owned CALL Use; other packing inputs are retained.')
+                        continue
+                    self._edge(point(caller, actual.use, Phase.CALL_SITE), target, K.ARGUMENT, M.DEPENDENCE,
+                        'OBSERVED_ARGUMENT_PACK_DEPENDENCE_NOT_REFERENCE_IDENTITY_V1', conditions=guards)
+                self._note(target, 'OBSERVED_ARGUMENT_PACK_STATE_OPEN',
+                    'Packing dependencies are retained; aggregate identity, allocation and contents are not sampled.')
+            for target in defaults:
+                self._note(target, 'OBSERVED_DEFAULT_STATE_SOURCE_OPEN',
+                    'Current function default state is required under an admitted layout; a declaration default is not its current value.')
+            for target in implicit:
+                self._note(target, 'OBSERVED_IMPLICIT_ARGUMENT_SOURCE_OPEN',
+                    'The implicit prefix uses the original monitored arg0; its source receiver/descriptor provenance remains unresolved.')
         state = interface.state_entry
         if state is not None:
             self._edge(point(caller, state.caller_use, Phase.CALL_SITE),
@@ -247,10 +288,18 @@ def main(argv=None):
     with ProgramDependencySession(args.model, budget=budget) as session:
         provider = session.attach_observations(args.trace)
         document = export_observed_dependencies(provider)
+        layout_counts = Counter(layout.scope for layout in provider.layouts)
         summary = {'schema': 'scar.observed-dependency-summary', 'schema_version': 1,
             'run_scope': provider.run_scope, 'observed_targets': provider.target_count,
             'bound_calls': len(provider.bindings), 'function_interfaces': len(provider.interfaces),
             'scopes': len(provider.scopes), 'edges': dict(Counter(edge.kind.value for edge in provider.edges)),
+            'argument_layouts': len(provider.layouts),
+            'ambiguous_call_layouts': sum(count > 1 for count in layout_counts.values()),
+            'conditional_argument_edges': sum(edge.kind is K.ARGUMENT and any(
+                condition.domain == 'SCAR_CALL_ABI' for condition in edge.template.conditions)
+                for edge in provider.edges),
+            'packing_dependency_edges': sum(edge.kind is K.ARGUMENT and edge.meaning is M.DEPENDENCE
+                for edge in provider.edges),
             'frontiers': dict(Counter(note.kind for note in provider.frontiers)), 'issues': provider.issues,
             'measurements': session.measurements(), 'target_executed': False,
             'whole_program_complete': False, 'normal_landing_observed': False,
@@ -265,5 +314,6 @@ def main(argv=None):
         json.dump(summary, stream, ensure_ascii=False, indent=2)
         stream.write('\n')
     print(json.dumps({key: summary[key] for key in ('bound_calls', 'function_interfaces', 'scopes',
-        'edges', 'gzip_bytes', 'analyzer_seconds', 'target_executed', 'whole_program_complete')}, ensure_ascii=False))
+        'edges', 'argument_layouts', 'ambiguous_call_layouts', 'conditional_argument_edges',
+        'gzip_bytes', 'analyzer_seconds', 'target_executed', 'whole_program_complete')}, ensure_ascii=False))
     return 0

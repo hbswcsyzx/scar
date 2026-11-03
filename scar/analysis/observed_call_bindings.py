@@ -318,7 +318,7 @@ def _locate(owner, captured, selected_site, issues, cache):
     return result
 
 
-def derive_observed_interfaces(session, trace):
+def derive_observed_interfaces(session, trace, *, argument_layouts=None):
     """Replay original evidence using one read-only dependency-session owner.
 
     No existing observed DTO is accepted as evidence. The ordinary readers
@@ -327,6 +327,8 @@ def derive_observed_interfaces(session, trace):
     """
     if not _dependency_session(session):
         raise TypeError('observed replay requires the current ProgramDependencySession')
+    if argument_layouts is not None and (type(argument_layouts) is not dict or argument_layouts):
+        raise ValueError('argument_layouts must be an empty output dictionary')
     session.check()
     raw = _read_trace(trace)
     observed = read_python_call_targets(raw)
@@ -351,7 +353,7 @@ def derive_observed_interfaces(session, trace):
                 break
     from scar.analysis.observed_function_interfaces import derive_observed_function_interfaces
     interfaces, interface_issues = derive_observed_function_interfaces(
-        session, raw, observed, tuple(bindings), cache)
+        session, raw, observed, tuple(bindings), cache, argument_layouts=argument_layouts)
     return tuple(bindings), interfaces, evidence, tuple((*issues, *interface_issues))
 
 

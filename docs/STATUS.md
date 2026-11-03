@@ -42,21 +42,23 @@
 读取复用原输入，保留收据、源码/compiler、namespace和关系核验；预算中断时保留已知边界，覆盖为PARTIAL。
 
 已有真实 CEM probe 使用人工 quadratic cost、2轮×4候选、CUDA输出 `[1,2,2]`，
-不是训练模型或episode。保存81次观测、59条原CALL绑定、2条函数接口/7个参数端口；
+不是训练模型或episode。保存81次观测、59条原CALL绑定；
 原采集286,403 bytes。未重跑LeWM采集、episode或目标性能实验，没有新的加速比结论。
 
-`observed-graph` 重新读取原trace，在同一session接通59个CALL作用域和2个函数接口：
-59条callee Use依赖、2条目标、7条参数、4条world接口、2条选中返回，共74边。
-离线35.56秒、规范化gzip 42,313 bytes；fresh重放相等且74边公共双向查询通过，原图未改。
+`observed-graph` 在同一session接通59个CALL作用域和3个函数接口：59条callee Use依赖、
+3条目标、7条确定参数＋4条条件参数、6条world接口、3条选中返回，共82边。
+离线35.34秒、规范化gzip 52,623 bytes；最终代码fresh重放35.65秒，82边公共双向查询通过，原图未改。
 证据在同目录 `graph/summary.json`、`observations.json.gz`、`validation.json`。
-通用单案例通过（11.14秒）：同caller重复CALL按attempt/callee隔离；静态异常保留；
-typed读回一致；原trace截断后，已有查询、close和新接入均拒绝。未生成caller落点的虚假观测。
+通用单案例通过（13.24秒）：实例隔离、条件布局、kwonly/pack、ABI角色及组内顺序、静态异常、
+typed读回和原trace损坏拒绝均核验；未生成caller落点的虚假观测。
+真实144行CALL保留两种参数布局：无隐式首参时最后形参读当前defaults；有隐式首参时来源待补。
+两个条件都未被选择，不把monitor arg0等同源码receiver，不把声明默认值当当前值；入口/world/返回独立保留。
 
 ## 缺口与接下来的顺序
 
-1. **第4层接口扩展**：仍有22次观测未对应原静态CALL。59条绑定含4次FUNCTION调用，仅2次有接口；
-   另2次分别无同步entry、参数映射不完整。2次normalized receiver、4次TYPE、20次native及29次其它
-   callable调用仍缺相应接口。下一项保留可接的部分参数，定位receiver/native原协议与材料，不按包名补规则。
+1. **第4层接口扩展**：仍有22次观测未对应原静态CALL；4次FUNCTION调用已有3条接口，另1次为延迟体。
+   2次normalized receiver、4次TYPE、20次native及29次其它callable仍缺接口；先定位原生类型/owner/ABI
+   的缺失字段并对照已存PyMethodDef/wrapper材料，不凭源码拼写认定Tensor实现、kernel或copy。
 2. **主体及跨层关系**：补未展开构造/主体、receiver/default/variadic、类产物来源、
    循环实例与携带状态、正常/异常/清理出口；动态未覆盖路径继续保留静态条件。
 3. **第5层联合推理**：接通逐地址状态、别名、效果、逻辑值provenance与Tensor属性反馈，

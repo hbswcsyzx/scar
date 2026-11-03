@@ -6,7 +6,7 @@ DependencyContexts or duplicated program graphs.
 """
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, fields
 import re
 
 from scar.analysis.contextual_call_export import (
@@ -17,7 +17,7 @@ from scar.analysis.observed_function_interfaces import ObservedFunctionInterface
 from scar.analysis.program_dependency_export import _Tables
 from scar.ir.program.call_edges import CallTraceFile
 from scar.ir.program.observed_dependencies import (
-    ObservedCallScope, ObservedDependencyEdge, ObservedDependencyFrontier,
+    ObservedCallLayout, ObservedCallScope, ObservedDependencyEdge, ObservedDependencyFrontier,
     ObservedPortPhase, ObservedPortPoint,
 )
 from scar.ir.record_codec import decode, encode, loads
@@ -38,6 +38,7 @@ class ObservedDependencySnapshot:
     edges: tuple[ObservedDependencyEdge, ...]
     frontiers: tuple[ObservedDependencyFrontier, ...]
     capture_files: tuple[CallTraceFile, ...]
+    layouts: tuple[ObservedCallLayout, ...] | None = None
 
     def __post_init__(self):
         if type(self.run_scope) is not str or re.fullmatch(r'[0-9a-f]{64}', self.run_scope) is None:
@@ -83,6 +84,7 @@ class ObservedDependencySnapshot:
         if any(edge.source.scope not in scope_set for edge in self.edges) or any(
                 frontier.point.scope not in scope_set for frontier in self.frontiers):
             raise ValueError('observed relation references an undeclared CALL scope')
+        _validate_layouts(self.layouts, scope_set, self.bindings, self.edges)
         for item in self.capture_files:
             if (any(type(value) is not str or not value for value in (item.path, item.family))
                     or type(item.raw_sha256) is not str
@@ -91,6 +93,41 @@ class ObservedDependencySnapshot:
                     or any(type(value) is not int or value < 0
                            for value in (item.raw_bytes, item.lines))):
                 raise ValueError('observed capture receipt has invalid typed fields')
+
+
+def _validate_layouts(layouts, scopes, bindings, edges):
+    # None means legacy NOT_RECORDED, never an empty or implicit ABI choice.
+    if layouts is not None and type(layouts) is not tuple:
+        raise TypeError('observed CALL layouts must be an immutable tuple or legacy None')
+    calls = {(binding.target.caller, binding.target.attempt_index): binding.call
+             for binding in bindings}
+    declared = {}
+    for layout in layouts or ():
+        if type(layout) is not ObservedCallLayout:
+            raise TypeError('observed snapshot requires exact ObservedCallLayout')
+        layout.__post_init__()
+        if layout.scope not in scopes:
+            raise ValueError('observed CALL layout references an undeclared scope')
+        alternatives = declared.setdefault(layout.scope, {})
+        if layout.implicit_prefix in alternatives:
+            raise ValueError('duplicate implicit-prefix alternative in observed CALL scope')
+        condition = layout.condition
+        call = calls.get((layout.scope.caller, layout.scope.attempt_index))
+        if call is None or condition is not None and condition.subject != call:
+            raise ValueError('observed CALL layout predicate names another original CALL')
+        alternatives[layout.implicit_prefix] = layout
+    for alternatives in declared.values():
+        if len(alternatives) == 2 and any(layout.condition is None
+                                        for layout in alternatives.values()):
+            raise ValueError('ambiguous observed CALL prefixes need both explicit predicates')
+    for edge in edges:
+        admitted = {layout.condition for layout in declared.get(edge.source.scope, {}).values()
+                    if layout.condition is not None}
+        for condition in edge.template.conditions:
+            if (condition.domain == 'SCAR_CALL_ABI'
+                    and condition.name == 'IMPLICIT_POSITIONAL_PREFIX'
+                    and condition not in admitted):
+                raise ValueError('observed edge uses an undeclared CALL-prefix predicate')
 
 
 class _ObservedTables(_Tables):
@@ -155,10 +192,12 @@ def export_observed_dependencies(provider):
     provider.check()
     snapshot = ObservedDependencySnapshot(provider.run_scope, provider.scopes,
         provider.bindings, provider.interfaces, provider.edges, provider.frontiers,
-        provider.capture_files)
+        provider.capture_files, provider.layouts)
+    if snapshot.layouts is None:
+        raise ValueError('v2 observed dependency export requires explicit CALL layouts')
     table = _ObservedTables()
     packed = table.pack(snapshot)
-    return {'schema': 'scar.observed-dependencies', 'schema_version': 1,
+    return {'schema': 'scar.observed-dependencies', 'schema_version': 2,
         'snapshot': packed, **table.tables, **_FLAGS}
 
 
@@ -172,11 +211,18 @@ def read_observed_dependencies(document):
     _object(document, {'schema', 'schema_version', 'snapshot', *_FLAGS,
         *_TABLES, *_OBSERVED_TABLES}, 'observed dependencies')
     if (document['schema'] != 'scar.observed-dependencies'
-            or type(document['schema_version']) is not int or document['schema_version'] != 1
+            or type(document['schema_version']) is not int or document['schema_version'] not in (1, 2)
             or any(document[name] is not value for name, value in _FLAGS.items())):
         raise ValueError('unsupported observed dependency schema/claims')
+    wire = document['snapshot']
+    if document['schema_version'] == 1:
+        _object(wire, {'record_type', *(field.name for field in fields(ObservedDependencySnapshot)
+                                      if field.name != 'layouts')}, 'legacy observed snapshot')
+        wire = {**wire, 'layouts': None}
     reader = _ObservedReader(document)
-    result = reader.unpack(ObservedDependencySnapshot, document['snapshot'])
+    result = reader.unpack(ObservedDependencySnapshot, wire)
+    if document['schema_version'] == 2 and result.layouts is None:
+        raise ValueError('v2 observed dependency snapshot cannot omit CALL layouts')
     reader.validate_tables()
     return result
 

@@ -12,7 +12,7 @@ from enum import Enum
 import re
 
 from .call_edges import CallRecordAnchor, InvocationKey
-from .dependencies import DependencyEdge, DependencyPoint
+from .dependencies import DependencyCondition, DependencyEdge, DependencyPoint
 from .ids import OperationID, RegionID, UseID, ValueID
 
 
@@ -130,6 +130,45 @@ class ObservedDependencyEdge:
     @property
     def meaning(self):
         return self.template.meaning
+
+
+@dataclass(frozen=True, slots=True)
+class ObservedCallLayout:
+    """One admitted CALL ABI alternative, not an observed branch choice.
+
+    Source parameter ports are unchanged. Missing defaults and implicit or
+    packed inputs remain explicit obligations under this layout's condition.
+    """
+    scope: ObservedCallScope
+    implicit_prefix: int
+    condition: DependencyCondition | None
+    default_formals: tuple[ObservedPortPoint, ...]
+    implicit_formals: tuple[ObservedPortPoint, ...]
+    packed_formals: tuple[ObservedPortPoint, ...]
+
+    def __post_init__(self):
+        if (type(self.scope) is not ObservedCallScope or type(self.implicit_prefix) is not int
+                or self.implicit_prefix not in (0, 1)):
+            raise ValueError('observed CALL layout needs its original scope and finite prefix')
+        self.scope.__post_init__()
+        if self.condition is not None:
+            if type(self.condition) is not DependencyCondition:
+                raise TypeError('CALL layout condition must be a typed original predicate')
+            self.condition.__post_init__()
+            if (self.condition.domain != 'SCAR_CALL_ABI'
+                    or self.condition.name != 'IMPLICIT_POSITIONAL_PREFIX'
+                    or self.condition.index != self.implicit_prefix
+                    or self.condition.subject is None
+                    or type(self.condition.subject.node) is not OperationID):
+                raise ValueError('CALL layout condition changed its original protocol variable')
+        for rows in (self.default_formals, self.implicit_formals, self.packed_formals):
+            if type(rows) is not tuple or len(set(rows)) != len(rows):
+                raise TypeError('CALL layout ports must be immutable and unique')
+            for port in rows:
+                if (type(port) is not ObservedPortPoint or port.scope != self.scope
+                        or port.phase is not ObservedPortPhase.ENTRY_INTERFACE
+                        or type(port.original.node) is not ValueID):
+                    raise ValueError('CALL layout obligation changed its original callee parameter')
 
 
 @dataclass(frozen=True, slots=True)

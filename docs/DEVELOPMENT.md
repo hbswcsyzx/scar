@@ -54,6 +54,7 @@ with ProgramDependencySession('/path/to/model') as session:
 CLI 的 `static-query --program-graph` 使用原 typed ID，不按名称制造依赖。
 动态接口用 `session.attach_observations(trace)` 接入，再由 `session.graph().observed_incoming/outgoing(port)`
 查询；作用域与端口由返回的provider提供。原trace重验后才授边，DTO读回不是证明。
+`graph.observed_layouts(scope)` 返回条件ABI布局；v2显式保存布局，v1读回为NOT_RECORDED而非空布局。
 
 ## 维护
 

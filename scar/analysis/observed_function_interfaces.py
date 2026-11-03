@@ -16,14 +16,38 @@ from scar.analysis.observed_call_bindings import (
 from scar.analysis.program_dependency_export import _Tables
 from scar.ir.program.call_edges import CallRecordAnchor, CapturedSite, FrameCompletion, FrameExit
 from scar.ir.program.contextual_calls import StaticCallInterface
-from scar.ir.program.functions import BindingOrigin, CallBindingStatus, ParameterKind
+from scar.ir.program.functions import (
+    ArgumentKind, BindingOrigin, CallArgument, FormalPort, ParameterBinding, ParameterKind,
+)
 from scar.ir.program.model import StateVersionValue, UseRole
 from scar.ir.program.python_call_targets import PythonEntryBinding, PythonTargetKind
 from scar.ir.program.source_call_bindings import SourceArgumentPort
 from scar.ir.program.source_returns import SourceReturnSite
 from scar.ir.program.static_calls import StaticCallFrontier, StaticStateEntryRoute
 from scar.ir.record_codec import decode
-from scar.trace.code_snapshot import site as code_site
+from scar.trace.code_snapshot import code_parameters, site as code_site
+
+
+_UNKNOWN_DEFAULT = object()
+_IMPLICIT_ARGUMENT = object()
+
+
+@dataclass(frozen=True, slots=True)
+class ObservedArgumentPack:
+    formal: FormalPort
+    origin: BindingOrigin
+    actuals: tuple[CallArgument, ...]
+    implicit: bool
+
+
+@dataclass(frozen=True, slots=True)
+class ObservedArgumentLayout:
+    """Derived ABI alternative, never a serialized target/default verdict."""
+    implicit_prefix: int
+    arguments: tuple[SourceArgumentPort, ...]
+    packs: tuple[ObservedArgumentPack, ...]
+    missing: tuple[FormalPort, ...]
+    implicit_formals: tuple[FormalPort, ...]
 
 
 @dataclass(frozen=True, slots=True)
@@ -105,9 +129,127 @@ def _definition(owner, callee):
     return qualified, signature
 
 
-def _dependency_interface(session, caller, operation, source, semantic_call, actuals,
-                          callee, qualified, signature):
-    """Port assembly over the same original session bodies, without _target.
+def _code_layout(signature, layout, code):
+    if (layout is None or (layout.argcount, layout.posonlyargcount, layout.kwonlyargcount, layout.flags)
+            != (code.co_argcount, code.co_posonlyargcount, code.co_kwonlyargcount, code.co_flags)
+            or layout.parameters != code_parameters(code)):
+        raise LookupError('OBSERVED_CODE_LAYOUT_MISMATCH')
+    kinds = ([ParameterKind.POSITIONAL_ONLY] * layout.posonlyargcount
+        + [ParameterKind.POSITIONAL] * (layout.argcount - layout.posonlyargcount)
+        + [ParameterKind.KEYWORD_ONLY] * layout.kwonlyargcount
+        + ([ParameterKind.VAR_POSITIONAL] if layout.flags & inspect.CO_VARARGS else [])
+        + ([ParameterKind.VAR_KEYWORD] if layout.flags & inspect.CO_VARKEYWORDS else []))
+    # co_varnames orders keyword-only names before variadics; the source
+    # signature orders *args before keyword-only declarations. Compare roles.
+    if (signature is None or len(signature.parameters) != len(kinds)
+            or any(tuple(parameter.name for parameter in signature.parameters if parameter.kind is kind)
+                != tuple(name for role, name in zip(kinds, layout.parameters) if role is kind)
+                for kind in ParameterKind)):
+        raise LookupError('SOURCE_SIGNATURE_CODE_ROLES_OPEN')
+
+
+def _argument_port(caller, operation, actual, callee, formal, name):
+    if actual.use is None:
+        return None
+    use = caller.index.use_site(actual.use)
+    if use.operation != operation.id or actual.use not in operation.invoke_arguments:
+        raise ValueError('observed argument is not an original owned CALL Use')
+    route = ParameterBinding(formal.slot, BindingOrigin.ARGUMENT, (actual.index,))
+    return SourceArgumentPort(actual.index, caller.namespace, operation.id,
+        actual.source, actual.use, use.use.value, callee.namespace,
+        formal.slot, formal.value, name, route)
+
+
+def _argument_layouts(caller, operation, source, actuals, callee, signature, arg0_missing):
+    formals = {formal.slot: formal for formal in callee.interface.parameters}
+    notes = {}
+    def note(kind, detail, reference=source):
+        notes[StaticCallFrontier(kind, detail, reference)] = None
+    def port(parameter, actual):
+        result = _argument_port(caller, operation, actual, callee, formals[parameter.slot], parameter.name)
+        if result is None:
+            note('OBSERVED_ARGUMENT_USE_OPEN', 'A source actual has no recovered owned CALL Use.', actual.source)
+        return result
+    expanded = any(actual.kind in (ArgumentKind.STARRED, ArgumentKind.DOUBLE_STARRED) for actual in actuals)
+    if expanded:
+        # An explicit keyword keeps its name through successful binding, but
+        # unknown expansion gives no complete positional/packing alternative.
+        known = []
+        named = {parameter.name: parameter for parameter in signature.parameters
+            if parameter.kind in (ParameterKind.POSITIONAL, ParameterKind.KEYWORD_ONLY)}
+        for actual in actuals:
+            if actual.kind is ArgumentKind.KEYWORD and actual.keyword in named:
+                candidate = port(named[actual.keyword], actual)
+                if candidate is not None:
+                    known.append(candidate)
+        note('OBSERVED_ARGUMENT_EXPANSION_OPEN',
+            'Only recovered explicit keyword routes are retained; positional/packing and implicit receiver remain open.')
+        return (), tuple(known), tuple(notes)
+    kinds = {ParameterKind.POSITIONAL_ONLY: inspect.Parameter.POSITIONAL_ONLY,
+        ParameterKind.POSITIONAL: inspect.Parameter.POSITIONAL_OR_KEYWORD,
+        ParameterKind.VAR_POSITIONAL: inspect.Parameter.VAR_POSITIONAL,
+        ParameterKind.KEYWORD_ONLY: inspect.Parameter.KEYWORD_ONLY,
+        ParameterKind.VAR_KEYWORD: inspect.Parameter.VAR_KEYWORD}
+    simulated = inspect.Signature(tuple(inspect.Parameter(parameter.name, kinds[parameter.kind],
+        default=inspect.Parameter.empty if parameter.kind in (ParameterKind.VAR_POSITIONAL, ParameterKind.VAR_KEYWORD)
+            else _UNKNOWN_DEFAULT) for parameter in signature.parameters))
+    positional = tuple(actual for actual in actuals if actual.kind is ArgumentKind.POSITIONAL)
+    keywords = {}
+    for actual in actuals:
+        if actual.kind is ArgumentKind.KEYWORD:
+            if actual.keyword in keywords:
+                raise ValueError('duplicate explicit keyword in original source arguments')
+            keywords[actual.keyword] = actual
+    layouts = []
+    for prefix in ((0,) if arg0_missing else (0, 1)):
+        try:
+            bound = simulated.bind(*((_IMPLICIT_ARGUMENT,) if prefix else ()), *positional, **keywords)
+        except TypeError:
+            continue  # Explicit ABI conflict only; missing defaults never refute.
+        arguments, packs, missing, implicit = [], [], [], []
+        for parameter in signature.parameters:
+            formal = formals[parameter.slot]
+            if parameter.kind in (ParameterKind.VAR_POSITIONAL, ParameterKind.VAR_KEYWORD):
+                values = bound.arguments.get(parameter.name, () if parameter.kind is ParameterKind.VAR_POSITIONAL else {})
+                values = tuple(values.values()) if parameter.kind is ParameterKind.VAR_KEYWORD else values
+                packs.append(ObservedArgumentPack(formal,
+                    BindingOrigin.VAR_POSITIONAL_PACK if parameter.kind is ParameterKind.VAR_POSITIONAL else BindingOrigin.VAR_KEYWORD_PACK,
+                    tuple(value for value in values if value is not _IMPLICIT_ARGUMENT),
+                    any(value is _IMPLICIT_ARGUMENT for value in values)))
+            elif parameter.name not in bound.arguments:
+                missing.append(formal)
+            elif bound.arguments[parameter.name] is _IMPLICIT_ARGUMENT:
+                implicit.append(formal)
+            else:
+                candidate = port(parameter, bound.arguments[parameter.name])
+                if candidate is not None:
+                    arguments.append(candidate)
+        layouts.append(ObservedArgumentLayout(prefix, tuple(arguments), tuple(packs), tuple(missing), tuple(implicit)))
+    common = tuple(argument for argument in layouts[0].arguments
+        if all(argument in alternative.arguments for alternative in layouts[1:])) if layouts else ()
+    if len(layouts) != 1 or layouts and layouts[0].implicit_prefix:
+        note('OBSERVED_IMPLICIT_RECEIVER_LAYOUT_OPEN',
+            'FUNCTION/receiver=None does not prove receiver absence; only common argument routes are unconditional.')
+    if not layouts:
+        note('OBSERVED_ARGUMENT_LAYOUT_CONFLICT',
+            'No supported zero/one-prefix ABI matches; observed entry/state/return remain separate facts.')
+    parameters = {parameter.slot: parameter for parameter in signature.parameters}
+    for alternative in layouts:
+        for formal in alternative.missing:
+            note('OBSERVED_CURRENT_DEFAULT_STATE_OPEN',
+                'A viable ABI omits this formal; current defaults are not the source declaration value.', parameters[formal.slot].source)
+        for pack in alternative.packs:
+            note('OBSERVED_PARAMETER_PACK_OPEN',
+                'Variadic tuple/dict packing retains dependencies, never identity with a source element.', parameters[pack.formal.slot].source)
+        for formal in alternative.implicit_formals:
+            note('OBSERVED_IMPLICIT_FORMAL_OPEN',
+                'A viable ABI supplies this formal implicitly; no explicit source Use is invented.', parameters[formal.slot].source)
+    return tuple(layouts), common, tuple(notes)
+
+
+def _observed_interface(owner, caller, operation, source, semantic_call, actuals,
+                        callee, qualified, signature, layouts, arguments, argument_frontiers):
+    """Port assembly over the same original bodies, without _target.
 
     The two reused StaticCallSession routines below are pure algorithms over
     their supplied bodies/AST; they read no owner fields. No StaticCallSession
@@ -115,28 +257,17 @@ def _dependency_interface(session, caller, operation, source, semantic_call, act
     """
     from scar.analysis.static_calls import StaticCallSession
     from scar.analysis.function_binding import bind_call
-    if semantic_call is None:
-        raise LookupError('ORIGINAL_SEMANTIC_CALL_UNAVAILABLE')
-    binding = bind_call(signature, call=semantic_call, target=qualified.definition,
-        source=source, arguments=actuals)
-    if (binding.status is not CallBindingStatus.CONDITIONAL
-            or any(route.origin is not BindingOrigin.ARGUMENT for route in binding.routes)):
-        raise LookupError('FULLY_SUPPLIED_PARAMETER_PLAN_UNAVAILABLE')
-    formals = {formal.slot: formal for formal in callee.interface.parameters}
-    names = {parameter.slot: parameter.name for parameter in signature.parameters}
-    arguments = []
-    for route in binding.routes:
-        if len(route.argument_indices) != 1 or route.slot not in formals:
-            raise LookupError('FORMAL_ARGUMENT_ROUTE_UNAVAILABLE')
-        actual = actuals[route.argument_indices[0]]
-        if actual.use is None:
-            raise LookupError('ACTUAL_ARGUMENT_USE_UNAVAILABLE')
-        formal = formals[route.slot]
-        use = caller.index.use_site(actual.use)
-        arguments.append(SourceArgumentPort(actual.index, caller.namespace, operation.id,
-            actual.source, actual.use, use.use.value, callee.namespace,
-            formal.slot, formal.value, names[formal.slot], route))
-    completions, returns, frontiers = StaticCallSession._completion_routes(session, caller, operation, callee)
+    binding = (bind_call(signature, call=semantic_call, target=qualified.definition,
+        source=source, arguments=actuals) if semantic_call is not None and len(layouts) == 1
+        and layouts[0].implicit_prefix == 0 else None)
+    completions, returns, frontiers = StaticCallSession._completion_routes(owner, caller, operation, callee)
+    frontiers.extend(argument_frontiers)
+    if binding is None:
+        frontiers.append(StaticCallFrontier('OBSERVED_SOURCE_BINDING_PARTIAL',
+            'No unique zero-prefix source plan is asserted; known parameter routes remain independent.', source))
+    else:
+        frontiers.extend(StaticCallFrontier('OBSERVED_SOURCE_PLAN_' + issue.kind.value,
+            issue.detail, source) for issue in binding.issues)
     before, issue = StaticCallSession._caller_world(caller)
     state = None
     if issue is None:
@@ -157,10 +288,10 @@ def _dependency_interface(session, caller, operation, source, semantic_call, act
         StaticCallFrontier('FINE_EFFECTS_OPEN',
             'Parameter/return/state port correspondence does not close mod/ref, alias, escape or readiness.', source)))
     return StaticCallInterface(qualified, callee.namespace, ('OBSERVED_ENTRY_CODE_INTERFACE',),
-        binding, tuple(arguments), returns, completions, state, tuple(frontiers))
+        binding, arguments, returns, completions, state, tuple(frontiers))
 
 
-def derive_observed_function_interfaces(owner, trace, observed, bindings, cache):
+def derive_observed_function_interfaces(owner, trace, observed, bindings, cache, *, argument_layouts=None):
     """Reuse one live static owner and original raw entry evidence, no lowering."""
     entries = {(item.caller.process_id, item.attempt_index): (item, anchor)
                for item, anchor in zip(observed.entries, observed.entry_anchors)}
@@ -170,8 +301,10 @@ def derive_observed_function_interfaces(owner, trace, observed, bindings, cache)
         exits.setdefault(item.invocation, []).append(item)
     captures = {(item.process_id, item.code.key): item.code for item in trace.frame_scan.captures}
     records, issues = [], []
-    unsupported = (inspect.CO_GENERATOR | inspect.CO_COROUTINE | inspect.CO_ASYNC_GENERATOR
-                   | inspect.CO_VARARGS | inspect.CO_VARKEYWORDS)
+    if argument_layouts is not None and (type(argument_layouts) is not dict or argument_layouts):
+        raise ValueError('argument_layouts must be an empty output dictionary')
+    attempts = {(item.process_id, item.index): item for item in trace.attempts}
+    deferred = inspect.CO_GENERATOR | inspect.CO_COROUTINE | inspect.CO_ASYNC_GENERATOR
     for binding in bindings:
         target = binding.target
         key = target.caller.process_id, target.attempt_index
@@ -192,8 +325,12 @@ def derive_observed_function_interfaces(owner, trace, observed, bindings, cache)
             frame = frames[entry.callee]
             if (frame.caller_invocation != target.caller or frame.code != target.code
                     or frame.anchor.index != entry.entry_index or len(frame.path) != 1
-                    or frame.path[0] != binding.captured_site or frame.suspended):
+                    or frame.path[0] != binding.captured_site):
                 raise ValueError('actual entry is not this direct synchronous CALL/code')
+            if frame.suspended or target.layout is not None and target.layout.flags & deferred:
+                issue('OBSERVED_DEFERRED_ENTRY_OPEN',
+                    'Suspended/deferred execution needs its own creation/resumption interface; none is synthesized.')
+                continue
             caller, _ = _locate_body(owner, binding.captured_code, issues, cache)
             captured = captures.get((entry.callee.process_id, entry.code))
             if captured is None:
@@ -201,16 +338,8 @@ def derive_observed_function_interfaces(owner, trace, observed, bindings, cache)
             callee, code = _locate_body(owner, captured, issues, cache)
             if callee.interface is None:
                 raise LookupError('CALLEE_FUNCTION_INTERFACE_UNAVAILABLE')
-            layout = target.layout
-            if (layout is None or layout.flags & unsupported or layout.kwonlyargcount
-                    or tuple(code.co_varnames[:code.co_argcount]) != layout.parameters
-                    or code.co_argcount != layout.argcount):
-                raise LookupError('VARIADIC_KEYWORD_ONLY_OR_SUSPENDED_LAYOUT_OPEN')
             qualified, signature = _definition(owner, callee)
-            if (signature is None or tuple(item.name for item in signature.parameters) != layout.parameters
-                    or any(item.kind not in (ParameterKind.POSITIONAL, ParameterKind.POSITIONAL_ONLY)
-                           for item in signature.parameters)):
-                raise LookupError('SOURCE_SIGNATURE_LAYOUT_OPEN')
+            _code_layout(signature, target.layout, code)
             operation = caller.index.operations[binding.call.node]
             links = [link for link in caller.operation_links if link.operation == operation.id
                      and link.source == binding.source]
@@ -218,29 +347,18 @@ def derive_observed_function_interfaces(owner, trace, observed, bindings, cache)
                 raise LookupError('ORIGINAL_CALL_SOURCE_LINK_NOT_UNIQUE')
             link, = links
             node = caller.context.call_nodes.get(binding.source.atom_id)
-            if (type(node) is not ast.Call or any(type(arg) is ast.Starred for arg in node.args)
-                    or any(keyword.arg is None for keyword in node.keywords)):
-                raise LookupError('EXPANDED_ARGUMENT_LAYOUT_OPEN')
+            if type(node) is not ast.Call:
+                raise LookupError('ORIGINAL_CALL_AST_UNAVAILABLE')
             if _dependency_session(owner):
                 from scar.analysis.static_calls import StaticCallSession
                 actuals, actual_issues = StaticCallSession._actuals(owner, caller, operation, node)
             else:
                 actuals, actual_issues = owner._actuals(caller, operation, node)
-            if actual_issues or len(actuals) != layout.argcount:
-                raise LookupError('FULLY_SUPPLIED_ARGUMENT_PORTS_UNAVAILABLE')
-            if _dependency_session(owner):
-                interface = _dependency_interface(owner, caller, operation, binding.source,
-                    link.semantic_operation, actuals, callee, qualified, signature)
-            else:
-                interface = owner._target(caller, operation, binding.source, link.semantic_operation,
-                    actuals, callee.context.number, qualified.definition,
-                    ('OBSERVED_ENTRY_CODE_INTERFACE',), interface_only=True)
-            plan = interface.binding
-            if (plan is None or plan.status is not CallBindingStatus.CONDITIONAL
-                    or any(route.origin is not BindingOrigin.ARGUMENT for route in plan.routes)
-                    or len(interface.arguments) != layout.argcount
-                    or interface.body != callee.namespace):
-                raise LookupError('FULLY_SUPPLIED_PARAMETER_PLAN_UNAVAILABLE')
+            layouts, arguments, argument_frontiers = _argument_layouts(caller, operation, binding.source,
+                actuals, callee, signature, attempts[key].arg0_missing)
+            interface = _observed_interface(owner, caller, operation, binding.source,
+                link.semantic_operation, actuals, callee, qualified, signature,
+                layouts, arguments, (*actual_issues, *argument_frontiers))
             observed_exits = exits.get(entry.callee, ())
             exit_ = observed_exits[0] if len(observed_exits) == 1 else None
             selected_return = None
@@ -253,6 +371,9 @@ def derive_observed_function_interfaces(owner, trace, observed, bindings, cache)
                 issue('OBSERVED_FUNCTION_EXIT_UNAVAILABLE', 'No unique retained exit for this callee activation.')
             records.append(ObservedFunctionInterface(binding, entry, entry_anchor, frame.anchor,
                 interface, exit_, selected_return))
+            cache['observed-argument-layouts', binding.run_scope, target.caller, target.attempt_index] = layouts
+            if argument_layouts is not None:
+                argument_layouts[target.caller, target.attempt_index] = layouts
         except (LookupError, ValueError, TypeError, OverflowError, TimeoutError) as error:
             issue('OBSERVED_FUNCTION_INTERFACE_UNBOUND', type(error).__name__ + ': ' + str(error))
             if isinstance(error, (OverflowError, TimeoutError)):
@@ -295,5 +416,5 @@ def read_observed_function_interfaces(document):
     return result
 
 
-__all__ = ['ObservedFunctionInterface', 'derive_observed_function_interfaces',
+__all__ = ['ObservedFunctionInterface', 'ObservedArgumentLayout', 'ObservedArgumentPack', 'derive_observed_function_interfaces',
            'export_observed_function_interfaces', 'read_observed_function_interfaces']

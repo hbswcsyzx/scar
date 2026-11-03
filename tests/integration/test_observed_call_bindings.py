@@ -18,7 +18,7 @@ def test_two_actual_classes_bind_one_static_call_without_claiming_class_origin(t
     from scar.analysis.observed_function_interfaces import read_observed_function_interfaces
     from scar.analysis.program_dependency_session import ProgramDependencySession
     from scar.ir.program.call_edges import FrameCompletion
-    from scar.ir.program.dependencies import DependencyKind as K
+    from scar.ir.program.dependencies import DependencyKind as K, DependencyMeaning as M, DependencyStrength as S
     from scar.ir.program.model import ExitKind
     from scar.ir.program.observed_dependencies import ObservedPortPhase as Phase
     from scar.trace.lean_capture import LeanCapturePlan
@@ -56,7 +56,11 @@ def test_two_actual_classes_bind_one_static_call_without_claiming_class_origin(t
         'def identity(value):\n    return value\n\n'
         'def twice(left, right, fn):\n    for value in (left, right):\n'
         '        result = fn(value)\n    return result\n\n'
-        'repeated = twice(11, 29, identity)\n' + assertion + suffix + 'assert mixed == 29\n')
+        'repeated = twice(11, 29, identity)\n\n'
+        'class Holder:\n    def method(receiver, first, last=None):\n        return first\n\n'
+        'holder = Holder()\nambiguous = holder.method(11, 29)\n\n'
+        'def packed(first, *items, flag=None, **extra):\n    return flag\n\n'
+        'packed_value = packed(11, 29, flag=7, spare=9)\n' + assertion + suffix + 'assert mixed == 29\n')
     program.write_text(text)
     original = hashlib.sha256(program.read_bytes()).hexdigest()
     model = tmp_path / 'model'
@@ -194,10 +198,54 @@ def test_two_actual_classes_bind_one_static_call_without_claiming_class_origin(t
         assert {edge.template for edge in occurrences[0]} == {edge.template for edge in occurrences[1]}
         assert not set(occurrences[0]).intersection(occurrences[1])
         assert original_call.completions == declared_completions
+
+        ambiguous_line = text.splitlines().index('ambiguous = holder.method(11, 29)') + 1
+        ambiguous, = (scope for scope in provider.scopes
+            if provider.binding(scope).source.start_line == ambiguous_line)
+        layouts = graph.observed_layouts(ambiguous)
+        assert {layout.implicit_prefix for layout in layouts} == {0, 1}
+        assert all((layout.condition.domain, layout.condition.name, layout.condition.index)
+            == ('SCAR_CALL_ABI', 'IMPLICIT_POSITIONAL_PREFIX', layout.implicit_prefix) for layout in layouts)
+        assert next(layout for layout in layouts if layout.implicit_prefix == 0).default_formals
+        assert next(layout for layout in layouts if layout.implicit_prefix == 1).implicit_formals
+        method_edges = tuple(edge for port in provider.ports(ambiguous)
+            for edge in graph.observed_outgoing(port).edges)
+        assert {K.CALL_TARGET, K.STATE_INTERFACE, K.COMPLETION} <= {edge.kind for edge in method_edges}
+        arguments = [edge for edge in method_edges if edge.kind is K.ARGUMENT]
+        assert arguments and all(edge.meaning is M.REFERENCE and edge.template.strength is S.MAY
+            and any(layout.condition in edge.template.conditions for layout in layouts) for edge in arguments)
+
+        packed_line = text.splitlines().index('packed_value = packed(11, 29, flag=7, spare=9)') + 1
+        packed, = (scope for scope in provider.scopes if provider.binding(scope).source.start_line == packed_line)
+        item, = (item for item in provider.interfaces if item.binding.source.start_line == packed_line)
+        flag, = (port for port in item.interface.arguments if port.formal_name == 'flag')
+        assert flag.index == 2 and flag.parameter.argument_indices == (2,)
+        signature = session.signature_for(item.interface.definition, session.load_body(item.interface.body))
+        assert tuple(parameter.name for parameter in signature.parameters) == ('first', 'items', 'flag', 'extra')
+        assert item.binding.target.layout.parameters == ('first', 'flag', 'items', 'extra')
+        aggregates = {formal for layout in graph.observed_layouts(packed) for formal in layout.packed_formals}
+        packing = tuple(edge for formal in aggregates
+            for edge in graph.observed_incoming(formal, kinds=(K.ARGUMENT,)).edges)
+        assert packing and all(edge.meaning is M.DEPENDENCE for edge in packing)
+
+        # Reordering across ABI groups is allowed; reordering two ordinary
+        # positional parameters would silently change the binding and is not.
+        from dataclasses import replace
+        from scar.analysis.observed_function_interfaces import _code_layout
+        pair, = (candidate for candidate in provider.interfaces
+                 if candidate.binding.source.start_line == keyword_line)
+        pair_signature = session.signature_for(pair.interface.definition, session.load_body(pair.interface.body))
+        pair_code, = (code for code in codes if code.co_qualname == 'select')
+        wrong_order = replace(pair_signature, parameters=tuple(reversed(pair_signature.parameters)))
+        with pytest.raises(LookupError, match='SOURCE_SIGNATURE_CODE_ROLES_OPEN'):
+            _code_layout(wrong_order, pair.binding.target.layout, pair_code)
+
         document = export_observed_dependencies(provider)
+        assert document['schema_version'] == 2
         snapshot = read_observed_dependencies(json.dumps(document))
         assert snapshot.scopes == provider.scopes and snapshot.edges == provider.edges
         assert snapshot.bindings == provider.bindings and snapshot.interfaces == provider.interfaces
+        assert snapshot.layouts == provider.layouts
         with pytest.raises(ValueError):
             read_observed_dependencies(dict(document, transformation_authorized=True))
 

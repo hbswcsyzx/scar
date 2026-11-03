@@ -109,6 +109,11 @@ class ProgramDependencyGraph:
     def observed_ports(self, scope):
         return self._observed_provider(scope).ports(scope)
 
+    def observed_layouts(self, scope):
+        provider = self._observed_provider(scope)
+        provider.binding(scope)
+        return tuple(layout for layout in provider.layouts if layout.scope == scope)
+
     def observed_incoming(self, point, *, kinds=None):
         from scar.ir.program.observed_dependencies import ObservedPortPoint
         if type(point) is not ObservedPortPoint:

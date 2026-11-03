@@ -59,8 +59,9 @@ artifacts/current/queries/ 保存派生查询证据，不是第二份权威程�
 ## 当前接通范围与下一项
 
 已具备源码层、局部规范图、共同依赖查询、部分条件属性推理和循环边界查询。
-真实 CEM 的59个CALL实例及2条函数接口已接入共同图的显式观测端口查询，静态邻接不变。
+真实 CEM 的59个CALL实例及3条函数接口已接入共同图的显式观测端口查询，静态邻接不变。
 实例端口引用原点及run/Invocation/attempt/事件作用域；只有实际选中的return形成返回接口。
+参数未定不丢入口/状态/返回；ABI布局保留条件备选、默认值义务和pack依赖，不猜receiver或容器身份。
 对应 owner 是 [program_observed_dependencies.py](../scar/analysis/program_observed_dependencies.py)。
 选中 CEM 循环的边界查询已在原预算内完成；这不证明状态、效果、资源或整个程序闭合。
 
