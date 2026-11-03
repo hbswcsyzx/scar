@@ -98,7 +98,8 @@ class ControlDependencyProvider:
 
         edges = tuple(replace(edge, source=contextual(edge.source), target=contextual(edge.target),
             evidence=tuple(replace(e, anchors=tuple(contextual(a) for a in e.anchors)) for e in edge.evidence),
-            conditions=tuple(replace(c, subject=contextual(c.subject)) if c.subject is not None else c
+            conditions=tuple(replace(c, subject=contextual(c.subject) if c.subject is not None else None,
+                             operands=tuple(contextual(operand) for operand in c.operands))
                              for c in edge.conditions))
             for edge in (before if incoming else after).get(point.node, ()))
         owner = self._owner(index, point.node)

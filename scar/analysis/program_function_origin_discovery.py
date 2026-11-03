@@ -319,6 +319,10 @@ class AutomaticFactoryEntryOrigins:
                 error.kind + ": " + error.detail + " Missing: " + ", ".join(error.missing_fields))
         except (OverflowError, TimeoutError) as error:
             self._note(point, outgoing, "FACTORY_ORIGIN_DISCOVERY_BUDGET", type(error).__name__ + ": " + str(error))
+            # Loading the original body/ports may stop before the direction is
+            # known.  Let the querying provider retain the yielded prefix and
+            # attach the budget frontier to its actual traversal direction.
+            raise
 
     def validate_origin(self, origin):
         if type(origin) is not StaticFactoryEntryOrigin:

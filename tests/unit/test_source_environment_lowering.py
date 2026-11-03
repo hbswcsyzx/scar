@@ -206,7 +206,7 @@ def test_factory_entry_origins_are_conditional_reference_ports_without_call_or_s
                 derive_factory_entry_origins(creation=class_creation,**{**class_inputs,'creator_document':bad})
 
 
-def test_session_discovers_factory_origins_without_call_targets_and_keeps_open_class_path(tmp_path):
+def test_session_discovers_factory_origins_without_call_targets_and_keeps_open_class_path(tmp_path, monkeypatch):
     import hashlib
     import json
     import subprocess
@@ -264,6 +264,32 @@ def test_session_discovers_factory_origins_without_call_targets_and_keeps_open_c
             assert not neighborhood.enumerated
         assert not (model/'indexes/calls').exists()
         assert session.measurements()['relationship_shards_read']==0
+
+        # A query budget must preserve the already emitted prefix, and a
+        # failure before direction discovery must retain its actual reason.
+        from scar.analysis.program_function_origin_dependencies import FactoryEntryOriginDependencyProvider
+        discovery=session._origin_discovery
+        selected_source=origins[0].source
+        def prefix_then_budget(point):
+            for item in discovery.origins_for(point):
+                yield item
+                raise OverflowError('controlled discovery budget after a known relation')
+        limited=FactoryEntryOriginDependencyProvider(origins_for=prefix_then_budget,load_index=session.index,
+            validate_origin=discovery.validate_origin,interface_scope=discovery.interface_scope,
+            contexts_for=discovery.contexts_for)
+        prefix=limited.outgoing(selected_source)
+        assert prefix.edges and not prefix.enumerated
+        assert any(f.kind=='FACTORY_ORIGIN_QUERY_BUDGET'for f in prefix.frontiers)
+        def unavailable_body(namespace):
+            raise OverflowError('controlled budget before discovery determines direction')
+        early=FactoryEntryOriginDependencyProvider(origins_for=discovery.origins_for,load_index=session.index,
+            validate_origin=discovery.validate_origin,interface_scope=lambda point,outgoing:True,
+            contexts_for=discovery.contexts_for,discovery_frontiers=discovery.frontiers_for)
+        with monkeypatch.context()as patch:
+            patch.setattr(discovery,'_body',unavailable_body)
+            stopped=early.outgoing(selected_source)
+        assert not stopped.edges and not stopped.enumerated
+        assert any(f.kind=='FACTORY_ORIGIN_QUERY_BUDGET'for f in stopped.frontiers)
 
     # Existing class interfaces give the known suffix. Their unknown outer
     # prefix stays unknown all the way back to the original module G port.
