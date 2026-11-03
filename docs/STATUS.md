@@ -54,11 +54,23 @@ F1/F2共11个聚焦检查通过（5.21秒），含四mode、独立wire核对、�
 采集证据：`artifacts/current/queries/formal-frontend-f2/acquisition/result.json`。
 完整核验与汇总：`/var/tmp/scar-f2-recovery-7w7nd_0z/{verification/result.json,run.json}`。
 
-## 下一层F3
+## F3审计与下一步
 
-先完整转录官方symtable的scope/symbol/namespace目录，再对应每个名字来源field的角色、scope与绑定。
-现AST→scope仍有候选；(name,line)不能作为唯一身份，访问数量相等也不证明绑定规则完备。
-须验完整接口目录、名字字段分母及条件，不先扩展F4规范IR、动态接线、化简或backend。
+**Observed**：866份声明源码做1732次官方compiler-only调用，双pass全部一致；
+40,411张public表、208,528个符号，8进程6.244秒，分片压缩1,633,195 bytes。
+旧catalog表数量/child路径没少，15个公开Symbol标志也已全存；真正丢失的是23,010表的原符号序、
+全部表的varnames/nested及全部40,189非空表的raw flags。name+line有349组冲突（直接siblings6组）。
+**Verified**：完整manifest及消费分片保持；所有7种表类型/5种scope码/11独立flags均实际出现。
+这仍只是PUBLIC_COMPILER_VIEW审计，不是F3程序实现、完整lexical scope或AST接通。
+
+**Rejected**：按名字/行号/AST遍历序接线；将LibCST直接当全覆盖authority。
+LibCST1.9.0隔离5例已实测walrus绑定反例，私有名和3.14annotation/typeparams需适配；
+可复用CST与已验证的局部能力。原生编译器直连也受本机local-only符号限制，不读历史指针绕过。
+
+**Proposed**：F3-A官方原材料保全 → F3-B完整字段角色 → F3-C源码scope/phase与存储绑定 → F3-D独立验收。
+源码角色与compiler block/frame分开，允许共享/内联及条件对应；全部通过后才继续F4。
+证据与决策：`/var/tmp/scar-f2-recovery-7w7nd_0z/f3-audit/{real-corpus/result.json,decision.json}`。
+当前/home仍emergency_ro，尚不能在唯一工作区落实下一层源码或发布模型。
 
 ## 当前模型与已有后层证据
 

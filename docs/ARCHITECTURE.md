@@ -36,6 +36,24 @@ F2用官方compile的ONLY_AST|TYPE_COMMENTS，dont_inherit=True、optimize=0及�
 精确literal保IEEE位与代理码点，预算超限不是语法错误；还原使用官方类__new__并逐字段核对。
 语法表不是最终依赖图，也不授予scope合法性；新occurrence身份不冒充旧ast.walk SourceID。
 
+## F3的形式边界
+
+源码名字/求值角色、compiler block与runtime frame分别表示；三者没有固定一一对应。
+公开symtable会移除内联comprehension表、重挂子表、共享annotation表，不能直接作为源码scope树。
+原生id是已释放C AST的历史地址；namespace按名字派生的stdlib视图也不是绑定证明。
+
+严格顺序为：F3-A保全官方原序symbols/整数flags/varnames/children及profile/error/budget；
+F3-B按全部constructor×field×context声明名字角色；F3-C建立源码scope/phase和名字→namespace接口，
+再以显式投影witness对应编译器视图；F3-D全量fresh验收。前步未通过不新增后步实现。
+名字角色按语法类别派发；属性名、keyword标签、import路径、常量文本不能当局部变量读取。
+词法存储绑定与实际值/运行类选择分开；缺静态规则不是动态UNKNOWN，未知值也不抹掉已知端口。
+
+继续复用官方前端；现成scope库仅在已验证能力内复用。LibCST1.9.0的walrus实测反例与
+Ruff对class-cell的显式近似表明不能把工具输出无条件升格为优化事实；不按name/line或ast.walk猜接线。
+依据：[CPython](https://github.com/python/cpython/blob/v3.14.7/Python/symtable.c)、
+[LibCST](https://github.com/Instagram/LibCST/blob/v1.9.0/libcst/metadata/scope_provider.py)、
+[Ruff](https://github.com/astral-sh/ruff/blob/main/crates/ruff_python_semantic/src/scope.rs)。
+
 ## 共享子图与可组合接口
 
 源码 AST/CST 是识别输入；执行依赖由可共享、可成环的规范图表示。
