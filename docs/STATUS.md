@@ -185,9 +185,18 @@ unpack、iterator item→162 items CALL NORMAL0，并能追到原 info_dict form
 iterator/slice 抽象事实转移与真实 caller 输入条件；self/info_dict 的未知来源不能靠
 词法类名或注解补成确定对象。该审计无 resolver/目标/建图/代码改动。
 
-下一项先定义准确 lookup 接口，再改负责 lowerer：保留已知 selector/receiver/world，
-不把属性访问无条件当作直接读取 `__dict__` 或存储字段。descriptor/MRO/native 与未知
-副作用继续分层处理。暂不凭候选数添加规则或优化。
+**Implemented / Verified**：typed lookup 接口已保留原 selector/receiver/world 与正常/异常端口；
+固定解包的逐成员来源、独立 receiver 查询、类语句最终产物来源和条件构造协议已接入共同图。
+本轮进一步接通共享 receiver 路径→原 import→模块 RETURN snapshot 的字段绑定→当前读取，
+相对 FROM 的原 spelling/level/fromlist 不变，绝对模块名只作为有声明证据的 package 候选。
+snapshot 的绑定不是当前值证明；所有关系保留调用上下文、world、已知写入、lookup/hooks 和状态保持条件。
+
+通用静态案例通过（1 case，5.68 秒）；真实 `eval.py:93` 从此前 0 个类来源，得到 **2 条条件路径**，
+都指向 `policy.py:18` 同一类声明的装饰后最终产物，不是两个不同类。对应 2 个条件构造协议、
+40 条接口边，分析与序列化 **119.03 秒**；3 份查询产物合计 gzip **56,738 bytes**，
+规范调用记录强类型读回相等，输入收据稳定。结果在 `queries/contextual-module-type-call/summary.json`。
+目标未执行，主发布及旧全量计数未更新。runtime class/metaclass 选择、构造 slot 的 Python 回调、
+descriptor/隐式 receiver、effects 及其它主体仍未贯通；**第一阶段未完成**。
 
 ### 源码覆盖：编译器已消去的字面 bool If
 
@@ -209,7 +218,7 @@ C++ source 前端复用 Tree-sitter，实际 53,705-byte template 中机械枚�
 
 ## 下一步，按实际依赖缺口推进
 
-1. 默认 factory-origin、入口状态投影和 contextual 调用接口已在选中真实 CALL 接通；下一步按 **原 48 个 CALL 的断边分类**扩展共同求解，补 receiver/descriptor、相对 package/class import、函数字段/defaults、循环与递归摘要，保留条件/未知前缀，不能退回名字提示填目标。origin 和 contextual 关系的全范围发布仍待完成；派生记录需规范化读回，旧发布计数不能冒充最新闭包。
+1. 默认 factory-origin、入口状态投影、contextual 调用接口和模块 receiver 桥接已在选中真实 CALL 接通；下一步沿已识别类产物核对 slot 的 Python 回调、descriptor/隐式 receiver，仍按 **原 48 个 CALL 的第一处断边**归因。相对导入仅补了有声明 package 的模块候选；class FROM 编译适配、函数字段/defaults、循环与递归摘要仍欠账。保留条件/未知前缀，不能退回名字提示填目标。origin 和 contextual 关系的全范围发布仍待完成；旧发布计数不能冒充最新闭包。
    CEM 模块与工具模块均已完整展开；不能误归因为主体后缀。创建 G 的引用不证明入口内容；不制造 CALL，不复用 creation world，不由局部 1 个目标推定全部 48 个已经解决。原分类与收据在 `queries/lewm-call-gaps.json`。
 2. module AnnAssign 首个范围已定点核验；继续 class annotation、deferred child 及实际主体阻断，保留 lazy/future、namespace/world 和异常语义。发布主图时才更新其覆盖分母。
 3. 将原调用、逐地址 reaching writes、alias/effects、binding/容器与 Tensor 属性在共同固定点中反馈；把源码可推而缺规则与真正未绑定字段分开。

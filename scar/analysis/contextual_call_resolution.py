@@ -61,6 +61,9 @@ class ContextualCallResolver:
         self.module_provider = ModuleReferenceDependencyProvider(self.session,self.modules,body_for=self._body)
         graph = self.session.graph()
         graph.register(self.module_provider)
+        from scar.analysis.contextual_module_bindings import ContextualModuleBindingProvider
+        self.contextual_modules = ContextualModuleBindingProvider(self)
+        graph.register(self.contextual_modules)
         graph.register(self)
         from scar.analysis.contextual_type_calls import ContextualTypeCallImplementations
         self.type_calls = ContextualTypeCallImplementations(self)
@@ -325,12 +328,14 @@ class ContextualCallResolver:
         self._last_receiver_evidence = None
         self._last_class_sources = None
         self.type_calls.clear()
+        self.contextual_modules.clear()
         self.modules._facts.clear()
         self.session.close()
 
     def measurements(self):
         return {**self.session.measurements(),**dict(self.counts),
             'type_call_implementations': self.type_calls.measurements(),
+            'contextual_module_bindings': self.contextual_modules.measurements(),
             'module_index_retained_input_bytes':sum(namespace.graph.decoded_bytes for namespace in self.modules._facts),
             'module_index_retention_budget_bytes':self.modules.max_cached_bytes,
             'module_index_shares_original_objects':True,

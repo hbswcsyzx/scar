@@ -126,8 +126,11 @@ world 映射；派生实现显式按收据登记，复用现有 reader/LRU。通
 示例 CLI 自动得到1个类来源、1个构造协议、20条接口边（1.61秒）。CEM/policy原7条构造
 记录通过源码/compiler/端口重验（10.44秒）。真实 eval.py:93 查询仍0个类来源（77.44秒），
 不是这些类记录缺失：receiver已到import，但旧模块模板未消费跨入口状态的receiver路径。
-**下一项先修模块桥接**：共享receiver路径→模块初始化snapshot的当前字段绑定；再补声明
-package上下文下的相对FROM候选。回查同一行后才继续slot的Python回调与隐式receiver绑定。
+**模块桥接与声明 package 下相对 FROM 候选现已实现并核验**：通用静态案例1个通过（5.68秒）；
+真实同一行自动得到2条条件来源路径，均到同一 `policy.py:18` 装饰后最终产物，及2个构造协议、
+40条接口边（119.03秒）。主发布未重建，目标未执行；3份查询产物收据与规范调用强类型读回通过。
+证据在 `queries/contextual-module-type-call`。这不是runtime class/dispatch证明，也不闭合当前模块状态。
+下一项先审计slot的Python回调与descriptor/隐式receiver端口，找到第一处识别/降低/连接缺口后再修改。
 证据在 `queries/type-call-demo`、`queries/class-source-check`、`queries/class-type-call`。
 
 全范围任务已于 2026-11-02 21:42 UTC PUBLISHED，producer 不再受该任务冻结。不要为

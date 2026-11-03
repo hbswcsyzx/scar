@@ -88,17 +88,14 @@ def _stop(resolver, point):
         'The original receiver producer is retained, but no legal reference-source transfer is available at this endpoint.')
 
 
-def collect_receiver_evidence(resolver, lookup, context):
-    """Keep bounded traversal prefixes, including when shared owner budgets end."""
+def walk_reference_sources(resolver, root, initial_frontiers=()):
+    """One reference traversal for lookup operands, retaining bounded prefixes."""
     from scar.analysis.contextual_call_resolution import REFERENCE_KINDS
-
-    if type(lookup) is not StaticAttributeAccess or lookup.result is None:
-        raise TypeError('receiver demand requires an actual original attribute read')
-    namespace = GraphNamespace.from_source(lookup.body)
-    root = Point(namespace, lookup.receiver, context)
-    lookup_result = Point(namespace, lookup.result, context)
+    if type(root) is not Point or type(initial_frontiers) is not tuple or any(
+            type(frontier) is not Frontier for frontier in initial_frontiers):
+        raise TypeError('reference walk needs an original root and typed initial frontiers')
     pending = deque((root,))
-    seen, edges, notes = {}, {}, {}
+    seen, edges, notes = {}, {}, dict.fromkeys(initial_frontiers)
     exhausted = True
     limit = resolver.owner.budget.max_resolution_steps
 
@@ -106,10 +103,6 @@ def collect_receiver_evidence(resolver, lookup, context):
         item = Frontier(point, kind, detail)
         notes[item] = None
 
-    note(lookup_result, 'ATTRIBUTE_DISPATCH_RULE_OPEN',
-        'Receiver evidence is an independent operand query for source spelling ' +
-        repr(lookup.field) + '; it is not a callable-identity edge, actual private lookup name, '
-        'receiver type or descriptor-selection proof.')
     while pending:
         point = pending.popleft()
         if point in seen:
@@ -153,9 +146,22 @@ def collect_receiver_evidence(resolver, lookup, context):
     # Enum order gives stable standard exports while keeping the actual edges
     # and their conditions/evidence/context objects unchanged.
     from scar.ir.program.dependencies import DependencyKind
-    walk = DependencyWalk((root,), tuple(seen), tuple(edges), tuple(notes), 'incoming', exhausted,
+    return DependencyWalk((root,), tuple(seen), tuple(edges), tuple(notes), 'incoming', exhausted,
         tuple(kind for kind in DependencyKind if kind in REFERENCE_KINDS))
+
+
+def collect_receiver_evidence(resolver, lookup, context):
+    """Explain an Attribute receiver without treating it as the lookup value."""
+    if type(lookup) is not StaticAttributeAccess or lookup.result is None:
+        raise TypeError('receiver demand requires an actual original attribute read')
+    namespace = GraphNamespace.from_source(lookup.body)
+    root = Point(namespace, lookup.receiver, context)
+    initial = (Frontier(Point(namespace, lookup.result, context), 'ATTRIBUTE_DISPATCH_RULE_OPEN',
+        'Receiver evidence is an independent operand query for source spelling ' +
+        repr(lookup.field) + '; it is not a callable-identity edge, actual private lookup name, '
+        'receiver type or descriptor-selection proof.'),)
+    walk = walk_reference_sources(resolver, root, initial)
     return ReceiverEvidence(lookup, walk)
 
 
-__all__ = ['ReceiverEvidence', 'attribute_read_at', 'collect_receiver_evidence']
+__all__ = ['ReceiverEvidence', 'attribute_read_at', 'collect_receiver_evidence', 'walk_reference_sources']
