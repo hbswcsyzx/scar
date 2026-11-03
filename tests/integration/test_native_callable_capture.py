@@ -1,4 +1,7 @@
 """One native CALL capture replays into the shared graph and strict export."""
+import hashlib
+import gzip
+import json
 from pathlib import Path
 import subprocess
 import sys
@@ -14,6 +17,8 @@ def test_native_callable_capture_replay_and_shared_graph(tmp_path):
     from scar.analysis.observed_dependency_export import export_observed_dependencies, read_observed_dependencies
     from scar.analysis.program_dependency_session import ProgramDependencySession
     from scar.ir.program.native_callables import NativeCarrier as Carrier, NativeFieldState as State
+    from scar.ir.program.dependencies import DependencyKind as K, DependencyMeaning as M, DependencyStrength as Strength
+    from scar.ir.program.observed_dependencies import ObservedPortPhase as Phase
     from scar.trace.files import resolve as resolve_trace_file
 
     repository = Path(__file__).resolve().parents[2]
@@ -121,6 +126,10 @@ def test_native_callable_capture_replay_and_shared_graph(tmp_path):
         '--phase', 'bodies', '--jobs', '1', '--out', str(model)],
         cwd=repository, capture_output=True, text=True, timeout=40)
     assert built.returncode == 0, built.stdout + built.stderr
+    trace_hashes = {str(path.relative_to(trace)): hashlib.sha256(path.read_bytes()).hexdigest()
+        for path in trace.rglob('*') if path.is_file()}
+    manifest_hash = hashlib.sha256((model / 'manifest.json').read_bytes()).hexdigest()
+    protocol_directory = tmp_path / 'native-protocols'
     with ProgramDependencySession(model) as session:
         graph = session.graph()
         static_providers = tuple(graph.providers)
@@ -143,3 +152,79 @@ def test_native_callable_capture_replay_and_shared_graph(tmp_path):
         assert restored.native_callables == provider.native_callables
         assert restored.native_frontiers == provider.native_frontiers
         assert restored.native_metadata == provider.native_metadata
+        assert restored.native_protocols is restored.native_protocol_manifest is None
+        assert 'native_protocols' not in document['snapshot']
+        assert 'native_protocol_manifest' not in document['snapshot']
+
+        # Protocol expansion declares adapter structure; it never manufactures
+        # an observed C activation or a successful native completion.
+        original_scopes, original_edges = provider.scopes, provider.edges
+        publication = provider.build_native_protocols(protocol_directory)
+        templates = provider.native_protocols
+        assert publication == provider.native_protocol_manifest
+        assert templates and len(set(templates)) == len(templates)
+        declarations = json.loads((protocol_directory / 'manifest.json').read_bytes())
+        assert len(declarations['protocols']) == len(templates)
+        for row, namespace in zip(declarations['protocols'], templates):
+            # Templates share protocol/operand shape, never a method name or
+            # a run-local function address masquerading as reusable identity.
+            assert set(row['shape']) == {'carrier', 'flags', 'arguments'}
+            body = session.load(namespace)
+            boundary, = body.graph.native_boundaries
+            assert boundary.inputs[0].role == 'PYTHON_CALLABLE'
+            assert all(port.role == 'PYTHON_EXPLICIT_ARGUMENT:' + str(number)
+                for number, port in enumerate(boundary.inputs[1:]))
+            wrapper = json.loads(gzip.decompress(Path(namespace.graph.artifact.uri).read_bytes()))
+            contract = wrapper['cabi_contract']
+            assert contract['implementation_entry_observed'] is False
+            assert contract['physical_packing_observed'] is False
+            assert contract['source_call_prefix'] == 'UNRESOLVED_UNLESS_SEPARATELY_ESTABLISHED'
+        assert provider.scopes == original_scopes
+        assert tuple(graph.providers) == static_providers
+        protocol_edges = tuple(edge for edge in provider.edges if edge not in original_edges)
+        assert {K.CALL_TARGET, K.ARGUMENT, K.STATE_INTERFACE, K.COMPLETION} <= {
+            edge.kind for edge in protocol_edges}
+        for edge in protocol_edges:
+            assert edge.source.scope == edge.target.scope
+            assert edge.template.strength is Strength.MAY
+            labels = {(condition.domain, condition.name) for condition in edge.template.conditions}
+            assert ('SCAR_NATIVE_ABI', 'DECLARED_CALL_PROTOCOL') in labels
+            assert edge in graph.observed_outgoing(edge.source, kinds=(edge.kind,)).edges
+            assert edge in graph.observed_incoming(edge.target, kinds=(edge.kind,)).edges
+            for point in (edge.source, edge.target):
+                if point.phase in (Phase.PROTOCOL_INPUT, Phase.DECLARED_NORMAL, Phase.DECLARED_RAISE):
+                    assert point.scope.callee is point.scope.exit_anchor is None
+                    assert point.invocation is None and point.witness == point.scope.attempt_anchor
+            if edge.source.phase in (Phase.DECLARED_NORMAL, Phase.DECLARED_RAISE):
+                phase = edge.source.phase
+                assert phase == edge.target.phase
+                assert phase in (Phase.DECLARED_NORMAL, Phase.DECLARED_RAISE)
+                label = ('DECLARED_NORMAL_COMPLETION_NOT_OBSERVED' if phase is Phase.DECLARED_NORMAL
+                    else 'DECLARED_RAISE_COMPLETION_NOT_OBSERVED')
+                assert ('SCAR_NATIVE_ABI', label) in labels
+        assert any(edge.source.phase is Phase.PROTOCOL_INPUT or edge.target.phase is Phase.PROTOCOL_INPUT
+            for edge in protocol_edges)
+        assert any(edge.source.phase is Phase.DECLARED_NORMAL for edge in protocol_edges)
+        # These are direct Python-side ports. No C packing/receiver slot is
+        # guessed from its source index or exposed as reference identity.
+        assert all(edge.meaning is M.REFERENCE for edge in protocol_edges if edge.kind is K.ARGUMENT)
+        final_edges = provider.edges
+        expanded = export_observed_dependencies(provider)
+        assert expanded['schema_version'] == 4
+        expanded_snapshot = read_observed_dependencies(expanded)
+        assert expanded_snapshot.native_protocols == templates
+        assert expanded_snapshot.native_protocol_manifest == publication
+        assert expanded_snapshot.edges == final_edges
+
+    with ProgramDependencySession(model) as session:
+        graph = session.graph()
+        static_providers = tuple(graph.providers)
+        provider = session.attach_observations(trace)
+        assert provider.native_protocols is provider.native_protocol_manifest is None
+        assert provider.attach_native_protocols(protocol_directory) == publication
+        assert provider.native_protocols == templates and provider.edges == final_edges
+        assert tuple(graph.providers) == static_providers
+        assert read_observed_dependencies(export_observed_dependencies(provider)) == expanded_snapshot
+    assert hashlib.sha256((model / 'manifest.json').read_bytes()).hexdigest() == manifest_hash
+    assert {str(path.relative_to(trace)): hashlib.sha256(path.read_bytes()).hexdigest()
+        for path in trace.rglob('*') if path.is_file()} == trace_hashes

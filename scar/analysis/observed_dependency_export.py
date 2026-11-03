@@ -16,7 +16,9 @@ from scar.analysis.observed_call_bindings import ObservedCallBinding
 from scar.analysis.observed_function_interfaces import ObservedFunctionInterface
 from scar.analysis.program_dependency_export import _Tables
 from scar.ir.program.call_edges import CallTraceFile
-from scar.ir.program.native_callables import NativeCallableMetadata
+from scar.ir.program.native_callables import NativeCallableMetadata, NativeCarrier
+from scar.ir.program.dependencies import GraphNamespace
+from scar.ir.program.source_references import SourceArtifactLocator
 from scar.ir.program.observed_dependencies import (
     ObservedCallLayout, ObservedCallScope, ObservedDependencyEdge, ObservedDependencyFrontier,
     ObservedNativeCallable, ObservedNativeCallableFrontier, ObservedPortPhase, ObservedPortPoint,
@@ -43,6 +45,8 @@ class ObservedDependencySnapshot:
     native_callables: tuple[ObservedNativeCallable, ...] | None = None
     native_frontiers: tuple[ObservedNativeCallableFrontier, ...] | None = None
     native_metadata: tuple[NativeCallableMetadata, ...] | None = None
+    native_protocols: tuple[GraphNamespace, ...] | None = None
+    native_protocol_manifest: SourceArtifactLocator | None = None
 
     def __post_init__(self):
         if type(self.run_scope) is not str or re.fullmatch(r'[0-9a-f]{64}', self.run_scope) is None:
@@ -90,6 +94,7 @@ class ObservedDependencySnapshot:
             raise ValueError('observed relation references an undeclared CALL scope')
         _validate_layouts(self.layouts, scope_set, self.bindings, self.edges)
         _validate_native(self, scopes)
+        _validate_protocols(self)
         for item in self.capture_files:
             if (any(type(value) is not str or not value for value in (item.path, item.family))
                     or type(item.raw_sha256) is not str
@@ -98,6 +103,48 @@ class ObservedDependencySnapshot:
                     or any(type(value) is not int or value < 0
                            for value in (item.raw_bytes, item.lines))):
                 raise ValueError('observed capture receipt has invalid typed fields')
+
+
+_PROTOCOL_PHASES = frozenset((ObservedPortPhase.PROTOCOL_INPUT,
+    ObservedPortPhase.DECLARED_NORMAL, ObservedPortPhase.DECLARED_RAISE))
+
+
+def _validate_protocols(snapshot):
+    protocol_edges = tuple(edge for edge in snapshot.edges
+        if edge.source.phase in _PROTOCOL_PHASES or edge.target.phase in _PROTOCOL_PHASES)
+    namespaces, manifest = snapshot.native_protocols, snapshot.native_protocol_manifest
+    if namespaces is None and manifest is None:
+        if protocol_edges:
+            raise ValueError('declared protocol ports require their original template declarations')
+        return
+    if (type(namespaces) is not tuple or type(manifest) is not SourceArtifactLocator
+            or snapshot.native_metadata is None):
+        raise TypeError('declared protocols need their original namespaces, manifest and callable capture')
+    manifest.__post_init__()
+    known = set()
+    for namespace in namespaces:
+        if type(namespace) is not GraphNamespace or namespace.source_body is not None:
+            raise TypeError('a protocol template is a canonical graph, not a Python source body')
+        namespace.__post_init__()
+        if namespace in known:
+            raise ValueError('duplicate shared protocol template')
+        known.add(namespace)
+    bindings = {(item.target.caller, item.target.attempt_index): item for item in snapshot.bindings}
+    native = {item.scope: item for item in snapshot.native_callables
+              if item.fact.carrier is not NativeCarrier.UNKNOWN}
+    for edge in protocol_edges:
+        binding = bindings[edge.source.scope.caller, edge.source.scope.attempt_index]
+        if edge.source.scope not in native or not any(
+                condition.domain == 'SCAR_NATIVE_ABI' and condition.name == 'DECLARED_CALL_PROTOCOL'
+                and condition.subject == binding.call
+                for condition in edge.template.conditions):
+            raise ValueError('a protocol route needs its supported callable fact and declaration condition')
+        for port in (edge.source, edge.target):
+            if port.phase is ObservedPortPhase.PROTOCOL_INPUT and port.original.namespace not in known:
+                raise ValueError('protocol input belongs to an undeclared shared template')
+            if port.phase in (ObservedPortPhase.DECLARED_NORMAL, ObservedPortPhase.DECLARED_RAISE) \
+                    and port.original.namespace not in known | {binding.call.namespace}:
+                raise ValueError('declared completion changed its original caller/template namespace')
 
 
 def _validate_native(snapshot, scopes):
@@ -250,12 +297,17 @@ def export_observed_dependencies(provider):
     snapshot = ObservedDependencySnapshot(provider.run_scope, provider.scopes,
         provider.bindings, provider.interfaces, provider.edges, provider.frontiers,
         provider.capture_files, provider.layouts, provider.native_callables,
-        provider.native_frontiers, provider.native_metadata)
+        provider.native_frontiers, provider.native_metadata,
+        provider.native_protocols, provider.native_protocol_manifest)
     if snapshot.layouts is None:
         raise ValueError('observed dependency export requires explicit CALL layouts')
     table = _ObservedTables()
     packed = table.pack(snapshot)
-    return {'schema': 'scar.observed-dependencies', 'schema_version': 3,
+    version = 4 if snapshot.native_protocols is not None else 3
+    if version == 3:
+        for name in ('native_protocols', 'native_protocol_manifest'):
+            packed.pop(name)
+    return {'schema': 'scar.observed-dependencies', 'schema_version': version,
         'snapshot': packed, **table.tables, **_FLAGS}
 
 
@@ -269,21 +321,25 @@ def read_observed_dependencies(document):
     _object(document, {'schema', 'schema_version', 'snapshot', *_FLAGS,
         *_TABLES, *_OBSERVED_TABLES}, 'observed dependencies')
     if (document['schema'] != 'scar.observed-dependencies'
-            or type(document['schema_version']) is not int or document['schema_version'] not in (1, 2, 3)
+            or type(document['schema_version']) is not int or document['schema_version'] not in (1, 2, 3, 4)
             or any(document[name] is not value for name, value in _FLAGS.items())):
         raise ValueError('unsupported observed dependency schema/claims')
     wire = document['snapshot']
-    missing = {'native_callables', 'native_frontiers', 'native_metadata'}
+    missing = {'native_protocols', 'native_protocol_manifest'}
+    if document['schema_version'] in (1, 2):
+        missing.update(('native_callables', 'native_frontiers', 'native_metadata'))
     if document['schema_version'] == 1:
         missing.add('layouts')
-    if document['schema_version'] in (1, 2):
+    if document['schema_version'] in (1, 2, 3):
         _object(wire, {'record_type', *(field.name for field in fields(ObservedDependencySnapshot)
                                       if field.name not in missing)}, 'legacy observed snapshot')
         wire = {**wire, **dict.fromkeys(missing)}
     reader = _ObservedReader(document)
     result = reader.unpack(ObservedDependencySnapshot, wire)
-    if document['schema_version'] in (2, 3) and result.layouts is None:
+    if document['schema_version'] in (2, 3, 4) and result.layouts is None:
         raise ValueError('observed dependency snapshot cannot omit recorded CALL layouts')
+    if document['schema_version'] == 4 and result.native_protocols is None:
+        raise ValueError('protocol-capable snapshot must retain its template manifest')
     reader.validate_tables()
     return result
 

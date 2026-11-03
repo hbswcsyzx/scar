@@ -31,49 +31,31 @@
 
 ## 实际核验
 
-选中原 CEM `solve` 的189行循环：492个操作、6,343个成员端点；30个内部回边端口、
-121个异常终止、231条输入、30条消费者边、469条状态记录、123条控制路由均保留。
-原180秒预算内完成，启动准备15.35秒、边界查询113.39秒，总计含导出129.63秒。
-这是一次 SCAR 工具耗时，不是 LeWM benchmark；所有预算前沿为0，但状态/效果/资源等仍未闭合。
-规范化导出281,209 bytes，JSON读回相等；主图和LeWM源码未改。
-证据：`artifacts/current/queries/lewm-observed-calls/loop-boundary-result.json`、
-`loop-boundary.json.gz`；7个循环的成员展开另见同目录 `loop-construct-result.json`。
+外部 CEM probe 使用人工 quadratic cost、2轮×4候选、CUDA输出 `[1,2,2]`；不是训练模型或episode。
+81次CALL均有类型事实，61个METHOD_DEF；原29条OTHER中28条已补实际原生描述符信息，余1条NumPy dispatcher。
+59次对应原静态CALL；另22次未对应：17次缺源码单位，5次原规范CALL不唯一。Python函数接口仍3条。
+已支持有入口证据的BOUND/NORMALIZED receiver；真实两次normalized调用因外部成本函数缺材料尚未接入。
+144行CALL仍保留0/1隐式前缀条件，不把monitor arg0当源码receiver或声明defaults当当前值。
 
-读取复用原输入，保留收据、源码/compiler、namespace和关系核验；预算中断时保留已知边界，覆盖为PARTIAL。
+复用保存trace离线建立48个原生调用协议接口，共享15个模板；模板按ABI/参数形状共享，实际callable作输入。
+新增351条声明边：111参数、48目标、144状态、48正常返回；加原82边共433条，全部通过公共双向查询。
+异常引用包保留适配缺口，48条已知异常world出口独立接通；协议端口不生成native Invocation或完成观测。
+目前图只表达Python侧调用协议与条件C ABI声明，原生实现体、实际C参数和kernel尚未连接。
+离线构建51.07秒、fresh重放45.32秒；v4导出84,161 bytes，协议manifest+分片162,984 bytes。
+静态manifest、LeWM与保存trace未改，未再次执行目标。工具耗时不是workload性能或加速比。
+证据：`artifacts/current/queries/lewm-native-callables/graph-protocols/{summary.json,validation.json}`。
+两个通用聚焦案例通过：receiver接口15.91秒、采集→协议图→v4读回/fresh重放14.01秒；旧v1/v2/v3兼容保留。
 
-已有真实 CEM probe 使用人工 quadratic cost、2轮×4候选、CUDA输出 `[1,2,2]`，
-不是训练模型或episode。保存81次观测、59条原CALL绑定；
-旧采集286,403 bytes；不是完整episode或目标性能实验，没有加速比结论。
-
-`observed-graph` 在同一session接通59个CALL作用域和3个函数接口：59条callee Use依赖、
-3条目标、7条确定参数＋4条条件参数、6条world接口、3条选中返回，共82边。
-离线35.34秒、规范化gzip 52,623 bytes；最终代码fresh重放35.65秒，82边公共双向查询通过，原图未改。
-证据在同目录 `graph/summary.json`、`observations.json.gz`、`validation.json`。
-通用单案例通过（13.24秒）：实例隔离、条件布局、kwonly/pack、ABI角色及组内顺序、静态异常、
-typed读回和原trace损坏拒绝均核验；未生成caller落点的虚假观测。
-真实144行CALL保留两种参数布局：无隐式首参时最后形参读当前defaults；有隐式首参时来源待补。
-两个条件都未被选择，不把monitor arg0等同源码receiver，不把声明默认值当当前值；入口/world/返回独立保留。
-
-新增可选原生载体采集并重跑同一个外部 CEM probe：81次CALL均有事实，61个METHOD_DEF，
-20个未识别C载体；所有实际type均已记录，其中包括10个function、9个type/metaclass及1个NumPy dispatcher。
-UNKNOWN限定C载体字段，不抹掉已有Python目标/类型。记录实际owner/self、方法flags与实现/adapter地址，
-不执行用户getter，不采Tensor数值，不把wrapper flags当METH flags，也不改旧target v2分类。
-通道JSONL 123,895 bytes，probe二进制16,792 bytes；采集含启动/编译/导出51.16秒，不是性能数据。
-离线35.12秒接入原59个CALL作用域，22条无静态绑定事实保留frontier；v3压缩导出63,105 bytes。
-原29条OTHER中28条已明确为METHOD_DEF，余1条NumPy dispatcher；旧target标签不改写。
-fresh重放35.61秒核59条公共事实查询及原82边双向查询，静态manifest/原图未变；
-证据：`artifacts/current/queries/lewm-native-callables/{capture-analysis.json,graph/summary.json,graph/validation.json}`。
-通用端到端案例12.46秒通过；旧调用接口及v2读回兼容案例13.36秒通过。仍只有3条Python函数接口，
-实际native源码体、参数/返回/状态、runtime/kernel连接尚未完成，不能把类型识别当作这些接口已贯通。
+CEM189行循环已有492操作、6,343成员端点、30回边端口及控制/状态边界，查询129.63秒；
+证据在 `artifacts/current/queries/lewm-observed-calls/loop-boundary-result.json`。效果与资源仍未闭合。
 
 ## 缺口与接下来的顺序
 
-1. **第4层接口扩展**：仍有22次观测未对应原静态CALL；4次FUNCTION调用已有3条接口，另1次为延迟体。
-   2次normalized receiver、4次TYPE、20次native及29次其它callable仍缺接口；新事实已补实际类型/owner/ABI，
-   下一步接参数/状态/返回及实现材料。对照PyMethodDef/wrapper只能形成有依据的关联，不能凭名称认定kernel/copy。
-2. **主体及跨层关系**：补未展开构造/主体、receiver/default/variadic、类产物来源、
-   循环实例与携带状态、正常/异常/清理出口；动态未覆盖路径继续保留静态条件。
-3. **第5层联合推理**：接通逐地址状态、别名、效果、逻辑值provenance与Tensor属性反馈，
+1. **先补材料/定位缺口**：自动将可用且能与捕获CodeID核对的外部源码纳入同一模型，补必要主体；
+   再定位5次规范CALL不唯一。不能手工特判probe、函数名或业务变量，不能为找类来源无限推理。
+2. **继续跨层接线**：已知Python receiver与原生协议端口已支持，仍需类调用、延迟体、C参数/实现体、
+   异常包适配及runtime/kernel关系；C ABI条件声明不代表已进入实现或实际copy。
+3. **联合推理**：接通逐地址状态、别名、效果、逻辑值provenance与Tensor属性反馈，
    不把同对象/同Storage或SSA转发当作内容不变证明。
 4. **资源及整图覆盖**：补Python→native/runtime/kernel和CPU/GPU/DRAM/HBM/storage/stream
    的可控制边界，覆盖加载→推理/规划→保存；不展开OS FD表或指令。

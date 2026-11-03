@@ -63,6 +63,9 @@ class ObservedPortPhase(str, Enum):
     ENTRY_INTERFACE = 'ENTRY_INTERFACE'
     RETURN_SITE = 'RETURN_SITE'
     NORMAL_INTERFACE = 'NORMAL_INTERFACE'
+    PROTOCOL_INPUT = 'PROTOCOL_INPUT'
+    DECLARED_NORMAL = 'DECLARED_NORMAL'
+    DECLARED_RAISE = 'DECLARED_RAISE'
 
 
 @dataclass(frozen=True, slots=True)
@@ -84,10 +87,15 @@ class ObservedPortPoint:
             ObservedPortPhase.ENTRY_INTERFACE: (RegionID, ValueID),
             ObservedPortPhase.RETURN_SITE: (UseID,),
             ObservedPortPhase.NORMAL_INTERFACE: (ValueID,),
+            ObservedPortPhase.PROTOCOL_INPUT: (RegionID, ValueID),
+            ObservedPortPhase.DECLARED_NORMAL: (UseID, ValueID),
+            ObservedPortPhase.DECLARED_RAISE: (UseID, ValueID),
         }
         if type(self.original.node) not in types[self.phase]:
             raise ValueError('observed interface phase has an incompatible original endpoint')
-        if self.phase is not ObservedPortPhase.CALL_SITE and self.scope.callee is None:
+        protocol = self.phase in (ObservedPortPhase.PROTOCOL_INPUT,
+            ObservedPortPhase.DECLARED_NORMAL, ObservedPortPhase.DECLARED_RAISE)
+        if not protocol and self.phase is not ObservedPortPhase.CALL_SITE and self.scope.callee is None:
             raise ValueError('no direct callee was captured for this interface')
         if self.phase in (ObservedPortPhase.RETURN_SITE, ObservedPortPhase.NORMAL_INTERFACE) \
                 and self.scope.exit_anchor is None:
@@ -95,12 +103,17 @@ class ObservedPortPoint:
 
     @property
     def invocation(self):
+        if self.phase in (ObservedPortPhase.PROTOCOL_INPUT, ObservedPortPhase.DECLARED_NORMAL,
+                ObservedPortPhase.DECLARED_RAISE):
+            return None  # A declared adapter route is not an observed activation.
         return (self.scope.caller if self.phase in (ObservedPortPhase.CALL_SITE,
             ObservedPortPhase.NORMAL_INTERFACE) else self.scope.callee)
 
     @property
     def witness(self):
-        if self.phase is ObservedPortPhase.CALL_SITE:
+        if self.phase in (ObservedPortPhase.CALL_SITE, ObservedPortPhase.PROTOCOL_INPUT,
+                ObservedPortPhase.DECLARED_NORMAL, ObservedPortPhase.DECLARED_RAISE):
+            # This anchors protocol selection, never entry or completion.
             return self.scope.attempt_anchor
         if self.phase is ObservedPortPhase.ENTRY_INTERFACE:
             return self.scope.frame_entry

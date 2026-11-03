@@ -92,6 +92,8 @@ import 的 module 引用、namespace 和初始化状态分别表示；属性访�
 
 PyTorch/native 边界可以声明参数、结果、状态和可能效果；这不等于已证明 ABI、alias 或 kernel dispatch。
 Python → operator → runtime API → kernel 的每条跨层连接需要对应契约或真实证据，当前尚未完整覆盖。
+CPython调用协议已有共享声明子图：实际callable与原显式实参作输入，输入/正常/异常world分别保留。
+协议输入和声明完成端口不生成Invocation；条件C ABI描述与真实实现进入、C参数、kernel执行分别表示。
 不能将 native 节点无依据展开为物理调用，也不能因缺实现源码就删除已有输入/输出与状态接口。
 见 [native 接口](../scar/ir/program/native.py)；目标止于可指导程序改写的 runtime/kernel 边界，不下钻指令。
 

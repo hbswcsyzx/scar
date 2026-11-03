@@ -84,6 +84,7 @@ class ProgramDependencySession:
             raise TypeError("budget must be ProgramDependencyBudget")
         self.started, self.input_bytes, self.closed = time.monotonic(), 0, False
         self._stamps, self._artifacts, self._logical, self._bases = {}, {}, {}, {}
+        self._evidence_artifacts = {}
         self._descriptor_aliases = {}
         # Explicit, receipt-bound routes only. Large typed graphs/indices live
         # in the existing LRU, never in this namespace routing table.
@@ -319,9 +320,78 @@ class ProgramDependencySession:
         return SourceArtifactLocator(ProviderArtifact(uri, descriptor["sha256"], descriptor["bytes"], schema),
             descriptor["decoded_sha256"], descriptor["decoded_bytes"], "gzip-canonical-json", pointer, declaration)
 
+    def register_evidence_artifact(self, locator, expected_document):
+        """Pin a derived plain-JSON input, without granting semantic authority."""
+        from scar.ir.record_codec import loads as strict_loads
+        self.check()
+        if type(locator) is not SourceArtifactLocator or type(expected_document) is not dict:
+            raise TypeError('evidence registration requires an exact locator and expected JSON object')
+        locator.__post_init__()
+        if locator.representation != 'canonical-json' or locator.pointer != '#':
+            raise ValueError('evidence registration requires the complete plain JSON artifact')
+        path = Path(locator.artifact.uri)
+        if path.is_symlink() or path.resolve() != path or not path.is_file():
+            raise ValueError('evidence artifact must be an original canonical file')
+        previous = self._evidence_artifacts.get(str(path))
+        if previous is not None:
+            if previous != locator or self.read_artifact(locator) != expected_document:
+                raise ValueError('evidence artifact already has a different original declaration')
+            return locator
+        if str(path) == self.manifest_artifact.uri or str(path) in self._logical or path in self._stamps:
+            raise ValueError('derived evidence cannot relabel a previously owned original input')
+        size = locator.artifact.size_bytes
+        if size > self.budget.max_record_bytes or self.input_bytes + 2 * size > self.budget.max_input_bytes:
+            raise OverflowError('evidence artifact exceeds the original record/input byte budget')
+        before = _stamp(path)
+        with path.open('rb') as stream:
+            raw = stream.read(size + 1)
+        if (len(raw) != size or _stamp(path) != before
+                or hashlib.sha256(raw).hexdigest() != locator.artifact.sha256):
+            raise ValueError('evidence artifact differs from its original byte receipt')
+        document = strict_loads(raw)
+        if type(document) is not dict or document != expected_document:
+            raise ValueError('evidence artifact differs from its freshly derived expected document')
+        old = self._stamps.setdefault(path, before)
+        if old != before:
+            raise ValueError('evidence artifact changed in the owning read session')
+        self.input_bytes += 2 * size
+        self._evidence_artifacts[str(path)] = locator
+        self._put(('evidence-artifact', str(path), locator.artifact.sha256), document, size)
+        return locator
+
     def read_artifact(self, locator):
         locator.__post_init__()
         uri = locator.artifact.uri
+        evidence = self._evidence_artifacts.get(uri)
+        if evidence is not None:
+            self.check()
+            original = evidence
+            if (locator.artifact != original.artifact
+                    or locator.decoded_sha256 != original.decoded_sha256
+                    or locator.decoded_bytes != original.decoded_bytes
+                    or locator.representation != original.representation
+                    or locator.declaration != original.declaration):
+                raise ValueError('evidence locator changed its original registered receipt')
+            path = Path(uri)
+            if (path.is_symlink() or path.resolve() != path or not path.is_file()
+                    or _stamp(path) != self._stamps[path]):
+                raise ValueError('registered evidence artifact changed during query')
+            key = 'evidence-artifact', uri, original.artifact.sha256
+            document = self._get(key)
+            if document is None:
+                from scar.ir.record_codec import loads as strict_loads
+                size = original.artifact.size_bytes
+                if self.input_bytes + 2 * size > self.budget.max_input_bytes:
+                    raise OverflowError('registered evidence exceeds the original input byte budget')
+                with path.open('rb') as stream:
+                    raw = stream.read(size + 1)
+                if (len(raw) != size or hashlib.sha256(raw).hexdigest() != original.artifact.sha256
+                        or _stamp(path) != self._stamps[path]):
+                    raise ValueError('registered evidence bytes changed during query')
+                document = strict_loads(raw)
+                self.input_bytes += 2 * size
+                self._put(key, document, size)
+            return document
         if uri == self.manifest_artifact.uri:
             # The pinned plain manifest is already an original input. Source
             # references must not require a synthetic gzip basis or an
@@ -1062,6 +1132,7 @@ class ProgramDependencySession:
             self._cache.clear()
             self._cache_bytes = 0
             self._implementation_graphs.clear()
+            self._evidence_artifacts.clear()
             self._environment_facts.bodies.clear()
             self._environment_facts.bytes = 0
             self._call_routing = None

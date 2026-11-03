@@ -57,8 +57,13 @@ def test_two_actual_classes_bind_one_static_call_without_claiming_class_origin(t
         'def twice(left, right, fn):\n    for value in (left, right):\n'
         '        result = fn(value)\n    return result\n\n'
         'repeated = twice(11, 29, identity)\n\n'
-        'class Holder:\n    def method(receiver, first, last=None):\n        return first\n\n'
+        'class Holder:\n    def method(receiver, first, last=None):\n        return first\n'
+        '    def exact(receiver, value):\n        return value\n'
+        '    def packed(receiver, first, *items, flag=None, **extra):\n        return flag\n\n'
         'holder = Holder()\nambiguous = holder.method(11, 29)\n\n'
+        'bound = holder.method\nbound_value = bound(11, 29)\n'
+        'normalized_value = holder.exact(37)\n'
+        'bound_packed = holder.packed\nmethod_packed = bound_packed(11, 29, flag=7, spare=9)\n\n'
         'def packed(first, *items, flag=None, **extra):\n    return flag\n\n'
         'packed_value = packed(11, 29, flag=7, spare=9)\n' + assertion + suffix + 'assert mixed == 29\n')
     program.write_text(text)
@@ -118,7 +123,8 @@ def test_two_actual_classes_bind_one_static_call_without_claiming_class_origin(t
     interfaces = read_observed_function_interfaces(gzip.decompress(
         (tmp_path / 'bindings' / 'function-interfaces.json.gz').read_bytes()))
     assert report['function_interface_count'] == len(interfaces)
-    assert all(item.binding.target.kind.value == 'FUNCTION' for item in interfaces)
+    assert all(item.binding.target.kind.value in ('FUNCTION', 'BOUND_METHOD',
+        'NORMALIZED_RECEIVER_FUNCTION') for item in interfaces)
     build_lines = {text.splitlines().index(statement) + 1
         for statement in ('first = build(Left)', 'second = build(Right)')}
     builds = [item for item in interfaces if item.binding.source.start_line in build_lines]
@@ -227,6 +233,45 @@ def test_two_actual_classes_bind_one_static_call_without_claiming_class_origin(t
         packing = tuple(edge for formal in aggregates
             for edge in graph.observed_incoming(formal, kinds=(K.ARGUMENT,)).edges)
         assert packing and all(edge.meaning is M.DEPENDENCE for edge in packing)
+
+        # CPython normalizes MethodType before monitoring CALL. Only the
+        # retained finite-ABI receiver witness establishes a known prefix.
+        for statement, kind, expected in (
+                ('bound_value = bound(11, 29)', 'FUNCTION', {}),
+                ('normalized_value = holder.exact(37)', 'NORMALIZED_RECEIVER_FUNCTION', {'value': 0}),
+                ('method_packed = bound_packed(11, 29, flag=7, spare=9)', 'FUNCTION', {'flag': 2})):
+            line = text.splitlines().index(statement) + 1
+            item, = (item for item in provider.interfaces if item.binding.source.start_line == line)
+            target = item.binding.target
+            assert target.kind.value == kind
+            assert item.interface.binding is None
+            assert {port.formal_name: port.index for port in item.interface.arguments} == expected
+            assert all(port.parameter.argument_indices == (port.index,) for port in item.interface.arguments)
+            scope, = (scope for scope in provider.scopes if provider.binding(scope).source.start_line == line)
+            layouts = graph.observed_layouts(scope)
+            layout, = (layout for layout in layouts if layout.implicit_prefix == 1)
+            if kind == 'FUNCTION':
+                assert target.receiver is None and item.entry.receiver_parameter_index is None
+                assert {layout.implicit_prefix for layout in layouts} == {0, 1}
+                assert all(layout.condition is not None for layout in layouts)
+            else:
+                assert target.receiver is not None and item.entry.receiver_parameter_index == 0
+                assert item.entry.receiver_reference == target.receiver.reference
+                assert len(layouts) == 1 and layout.condition is None
+                assert any(frontier.kind == 'OBSERVED_BOUND_RECEIVER_SOURCE_OPEN'
+                    for frontier in item.interface.frontiers)
+            body = session.load_body(item.interface.body)
+            receiver, = layout.implicit_formals
+            assert receiver.original.node == body.interface.parameters[0].value
+            assert item.selected_return in item.interface.normal_returns
+            assert scope.callee == item.entry.callee
+            if statement.startswith('method_packed'):
+                assert len(layout.packed_formals) == 2
+                pack_edges = tuple(edge for formal in layout.packed_formals
+                    for edge in graph.observed_incoming(formal, kinds=(K.ARGUMENT,)).edges)
+                assert pack_edges and all(edge.meaning is M.DEPENDENCE for edge in pack_edges)
+            if kind != 'FUNCTION':
+                assert not graph.observed_incoming(receiver, kinds=(K.ARGUMENT,)).edges
 
         # Reordering across ABI groups is allowed; reordering two ordinary
         # positional parameters would silently change the binding and is not.

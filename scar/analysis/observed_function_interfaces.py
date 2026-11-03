@@ -30,6 +30,24 @@ from scar.trace.code_snapshot import code_parameters, site as code_site
 
 _UNKNOWN_DEFAULT = object()
 _IMPLICIT_ARGUMENT = object()
+_PYTHON_TARGETS = (PythonTargetKind.FUNCTION, PythonTargetKind.BOUND_METHOD,
+    PythonTargetKind.NORMALIZED_RECEIVER_FUNCTION)
+
+
+def _known_receiver(target, entry):
+    """Check the retained receiver ABI without guessing from parameter names."""
+    if target.kind not in _PYTHON_TARGETS:
+        raise ValueError('observed function interface requires a supported Python callable')
+    known = target.kind is not PythonTargetKind.FUNCTION
+    if known:
+        if (target.receiver is None or target.layout.argcount < 1
+                or entry.receiver_parameter_index != 0
+                or entry.receiver_reference != target.receiver.reference):
+            raise ValueError('observed receiver differs from its actual first-formal entry witness')
+    elif (target.receiver is not None or entry.receiver_parameter_index is not None
+            or entry.receiver_reference is not None):
+        raise ValueError('an ordinary function cannot acquire an invented receiver witness')
+    return known
 
 
 @dataclass(frozen=True, slots=True)
@@ -68,8 +86,8 @@ class ObservedFunctionInterface:
                 raise TypeError('observed function interface requires exact ' + kind.__name__)
             value.__post_init__()
         target = self.binding.target
-        if (target.kind is not PythonTargetKind.FUNCTION or target.receiver is not None
-                or self.entry.caller != target.caller or self.entry.attempt_index != target.attempt_index
+        _known_receiver(target, self.entry)
+        if (self.entry.caller != target.caller or self.entry.attempt_index != target.attempt_index
                 or self.entry.code != target.code or self.frame_entry.index != self.entry.entry_index
                 or self.interface.body is None):
             raise ValueError('observed interface changed actual function/entry or lacks an original body')
@@ -160,7 +178,7 @@ def _argument_port(caller, operation, actual, callee, formal, name):
         formal.slot, formal.value, name, route)
 
 
-def _argument_layouts(caller, operation, source, actuals, callee, signature, arg0_missing):
+def _argument_layouts(caller, operation, source, actuals, callee, signature, arg0_missing, *, receiver_known=False):
     formals = {formal.slot: formal for formal in callee.interface.parameters}
     notes = {}
     def note(kind, detail, reference=source):
@@ -201,7 +219,8 @@ def _argument_layouts(caller, operation, source, actuals, callee, signature, arg
                 raise ValueError('duplicate explicit keyword in original source arguments')
             keywords[actual.keyword] = actual
     layouts = []
-    for prefix in ((0,) if arg0_missing else (0, 1)):
+    prefixes = (1,) if receiver_known else (0,) if arg0_missing else (0, 1)
+    for prefix in prefixes:
         try:
             bound = simulated.bind(*((_IMPLICIT_ARGUMENT,) if prefix else ()), *positional, **keywords)
         except TypeError:
@@ -227,9 +246,12 @@ def _argument_layouts(caller, operation, source, actuals, callee, signature, arg
         layouts.append(ObservedArgumentLayout(prefix, tuple(arguments), tuple(packs), tuple(missing), tuple(implicit)))
     common = tuple(argument for argument in layouts[0].arguments
         if all(argument in alternative.arguments for alternative in layouts[1:])) if layouts else ()
-    if len(layouts) != 1 or layouts and layouts[0].implicit_prefix:
+    if not receiver_known and (len(layouts) != 1 or layouts and layouts[0].implicit_prefix):
         note('OBSERVED_IMPLICIT_RECEIVER_LAYOUT_OPEN',
             'FUNCTION/receiver=None does not prove receiver absence; only common argument routes are unconditional.')
+    if receiver_known:
+        note('OBSERVED_BOUND_RECEIVER_SOURCE_OPEN',
+            'The actual receiver/first-formal ABI is retained; its source receiver or descriptor provenance is not an explicit argument Use.')
     if not layouts:
         note('OBSERVED_ARGUMENT_LAYOUT_CONFLICT',
             'No supported zero/one-prefix ABI matches; observed entry/state/return remain separate facts.')
@@ -313,20 +335,27 @@ def derive_observed_function_interfaces(owner, trace, observed, bindings, cache,
             issues.append({'kind': kind, 'process_id': key[0], 'attempt_index': key[1], 'detail': detail})
 
         # A class invocation's nested __init__ is not its direct callee.
-        if target.kind is not PythonTargetKind.FUNCTION or target.receiver is not None:
+        if target.kind not in _PYTHON_TARGETS:
             issue('OBSERVED_FUNCTION_INTERFACE_KIND_OPEN',
-                  'Only exact ordinary Python functions are supported; class/method/native dispatch retains its own boundary.')
+                  'Only observed Python functions and witnessed bound/normalized receivers are supported; class/native dispatch retains its boundary.')
             continue
         try:
             _check_owner(owner)
             if key not in entries:
                 raise LookupError('ACTUAL_PYTHON_ENTRY_UNAVAILABLE')
             entry, entry_anchor = entries[key]
+            receiver_known = _known_receiver(target, entry)
             frame = frames[entry.callee]
             if (frame.caller_invocation != target.caller or frame.code != target.code
                     or frame.anchor.index != entry.entry_index or len(frame.path) != 1
                     or frame.path[0] != binding.captured_site):
                 raise ValueError('actual entry is not this direct synchronous CALL/code')
+            if receiver_known:
+                if not frame.parameters_complete or not frame.parameters:
+                    raise LookupError('OBSERVED_RECEIVER_FIRST_FORMAL_UNAVAILABLE')
+                if (entry.receiver_reference.startswith('weak:')
+                        and frame.parameters[0].ref != entry.receiver_reference):
+                    raise ValueError('observed receiver weak identity differs from the actual first formal')
             if frame.suspended or target.layout is not None and target.layout.flags & deferred:
                 issue('OBSERVED_DEFERRED_ENTRY_OPEN',
                     'Suspended/deferred execution needs its own creation/resumption interface; none is synthesized.')
@@ -355,7 +384,7 @@ def derive_observed_function_interfaces(owner, trace, observed, bindings, cache,
             else:
                 actuals, actual_issues = owner._actuals(caller, operation, node)
             layouts, arguments, argument_frontiers = _argument_layouts(caller, operation, binding.source,
-                actuals, callee, signature, attempts[key].arg0_missing)
+                actuals, callee, signature, attempts[key].arg0_missing, receiver_known=receiver_known)
             interface = _observed_interface(owner, caller, operation, binding.source,
                 link.semantic_operation, actuals, callee, qualified, signature,
                 layouts, arguments, (*actual_issues, *argument_frontiers))
