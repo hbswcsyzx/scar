@@ -1,8 +1,9 @@
 """Admit missing source materials selected by original captured Code records.
 
-A filename locates a candidate only. The retained plan's whole-file snapshot
-and complete compiler descriptors must agree before ordinary source ingestion.
-No import, class-object origin, execution or optimization is inferred here.
+A filename locates material only. A historical snapshot must agree when one
+exists. Otherwise a current static source candidate needs an actual selected
+code and its unique complete compiler correspondence. Neither path establishes
+file execution, import/class identity, runtime globals or optimization legality.
 """
 from __future__ import annotations
 
@@ -67,6 +68,8 @@ def expand_observed_sources(model, trace, out, budget=None, *, max_source_files=
     trace_before = _inputs(trace_path)
     trace = _read_trace(trace)
     observed = read_python_call_targets(trace)
+    actual_codes = {(target.caller.process_id, target.code) for target in observed.targets if target.code is not None}
+    actual_codes.update((entry.callee.process_id, entry.code) for entry in observed.entries)
     present = {unit['path'] for unit in manifest['units']}
     groups = defaultdict(list)
     for capture in trace.frame_scan.captures:
@@ -117,10 +120,11 @@ def expand_observed_sources(model, trace, out, budget=None, *, max_source_files=
             if capture.process_id in metadata
             and metadata[capture.process_id].implementation == sys.implementation.name
             and metadata[capture.process_id].python == sys.version
-            and (capture.process_id, filename) in snapshots]
+            and ((capture.process_id, filename) in snapshots
+                 or (capture.process_id, capture.code.key) in actual_codes)]
         if not candidates:
             issue('CAPTURE_SOURCE_VERSION_UNRECORDED', filename,
-                'No supported original whole-file snapshot and matching compiler profile; current source is not promoted to capture-time material.')
+                'No matching compiler profile with an original snapshot or actual selected code; incidental captures do not demand current source.')
             continue
         try:
             available = (path.is_absolute() and path.resolve() == path
@@ -144,11 +148,16 @@ def expand_observed_sources(model, trace, out, budget=None, *, max_source_files=
         try:
             raw, text, encoding = _read_source(path, required)
             raw_sha, decoded_sha = sha256(raw).hexdigest(), sha256(text.encode()).hexdigest()
-            matched_versions = [capture for capture in candidates
-                if snapshots[capture.process_id, filename].fingerprint == 'sha256:' + decoded_sha]
+            matched_versions = []
+            for capture in candidates:
+                snapshot = snapshots.get((capture.process_id, filename))
+                if snapshot is not None and snapshot.fingerprint != 'sha256:' + decoded_sha:
+                    issue('CAPTURE_SOURCE_VERSION_CHANGED', filename,
+                        'The current file conflicts with this capture scope\'s original whole-file snapshot.',
+                        process_id=capture.process_id, code=capture.code.key)
+                    continue
+                matched_versions.append(capture)
             if not matched_versions:
-                issue('CAPTURE_SOURCE_VERSION_CHANGED', filename,
-                    'Current decoded source differs from every supported original whole-file snapshot.')
                 continue
             compiled = compile(text, filename, 'exec', flags=0, dont_inherit=True, optimize=0)
             pending, codes = [((), compiled)], []
@@ -168,8 +177,13 @@ def expand_observed_sources(model, trace, out, budget=None, *, max_source_files=
                         code=capture.code.key, candidate_count=len(matches))
                     continue
                 compiler_path, _ = matches[0]
-                proofs.append({'capture': encode(capture), 'source_snapshot': encode(snapshots[capture.process_id, filename]),
-                    'plan': encode(plan_receipts[capture.process_id]), 'compiler_path': list(compiler_path),
+                snapshot = snapshots.get((capture.process_id, filename))
+                historical = None if snapshot is None else encode(snapshot)
+                plan = plan_receipts.get(capture.process_id)
+                proofs.append({'capture': encode(capture), 'source_snapshot': historical,
+                    'historical_snapshot': historical,
+                    'source_origin': 'HISTORICAL_SOURCE_SNAPSHOT' if snapshot is not None else 'CURRENT_STATIC_SOURCE_CANDIDATE',
+                    'plan': None if plan is None else encode(plan), 'compiler_path': list(compiler_path),
                     'root_code_layout_key': code_key(compiled), 'implementation': sys.implementation.name,
                     'python': sys.version, 'cache_tag': sys.implementation.cache_tag})
             if not proofs:
@@ -180,7 +194,8 @@ def expand_observed_sources(model, trace, out, budget=None, *, max_source_files=
             retained += len(raw)
             demands.append({'source': source.to_manifest_dict(),
                 'source_bytes': encode(ProviderArtifact(filename, raw_sha, len(raw), 'scar.observed-source-bytes')),
-                'proofs': proofs, 'import_or_class_origin_established': False})
+                'proofs': proofs, 'import_or_class_origin_established': False,
+                'file_execution_established': False, 'runtime_globals_established': False})
         except (OSError, UnicodeError, SyntaxError, ValueError, _ByteBudget, _Changed) as error:
             issue('CAPTURE_SOURCE_MATERIAL_OPEN', filename, type(error).__name__ + ': ' + str(error))
     if _inputs(trace_path) != trace_before:

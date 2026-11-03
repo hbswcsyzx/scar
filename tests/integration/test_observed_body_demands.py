@@ -285,3 +285,83 @@ def test_observed_external_source_appends_without_replacing_prior_graph(tmp_path
     assert program.read_text() == text and external.read_text() == external_text
     assert execution_marker.stat() == execution_stamp
 
+
+@pytest.mark.skipif(sys.implementation.name != 'cpython' or sys.version_info[:3] != (3, 14, 7),
+    reason='observed code correspondence uses the CPython 3.14.7 contract')
+def test_current_library_source_is_only_a_matched_code_scope_candidate(tmp_path):
+    from scar.analysis.observed_body_demands import expand_observed_bodies
+    from scar.analysis.program_dependency_session import ProgramDependencySession
+    from scar.trace.code_snapshot import code_key
+
+    repository = Path(__file__).resolve().parents[2]
+    source = tmp_path / 'source'
+    source.mkdir()
+    external = tmp_path / 'library.py'
+    original_library = ('GLOBAL = 3\n\ndef remote(value):\n    return value\n\n'
+        'def sibling(value):\n    return 11\n')
+    external.write_text(original_library)
+    program = source / 'program.py'
+    program_text = ('namespace = dict()\n'
+        f'exec(compile(open({str(external)!r}).read(), {str(external)!r}, "exec"), namespace)\n'
+        'result = namespace["remote"](2)\n')
+    program.write_text(program_text)
+    model = tmp_path / 'model'
+    built = subprocess.run([sys.executable, '-B', '-m', 'scar.cli', 'static', str(source),
+        '--out', str(model), '--jobs', '1', '--phase', 'bodies'],
+        cwd=repository, capture_output=True, text=True, timeout=40)
+    assert built.returncode == 0, built.stdout + built.stderr
+    trace = tmp_path / 'trace'
+    # snapshot is the transport, not a historical source capture plan.
+    captured = subprocess.run([sys.executable, '-B', '-m', 'scar.cli', 'trace',
+        '--python-call-targets', '--capture-transport', 'snapshot', '--out', str(trace),
+        '--project-root', str(source), '--', sys.executable, '-B', str(program)],
+        cwd=repository, capture_output=True, text=True, timeout=40)
+    assert captured.returncode == 0, captured.stdout + captured.stderr
+    assert not tuple(trace.glob('lean-plan.*.json'))
+
+    # Current file material may differ outside the observed function. Its
+    # initializer would now raise if accidentally executed, and its uncalled
+    # sibling has a different implementation. Neither is capture-time state.
+    current_library = original_library.replace('GLOBAL = 3', 'GLOBAL = 1 / 0').replace('return 11', 'return 29')
+    def function_code(text, name):
+        return next(value for value in compile(text, str(external), 'exec').co_consts
+                    if type(value) is CodeType and value.co_name == name)
+    assert code_key(function_code(original_library, 'remote')) == code_key(function_code(current_library, 'remote'))
+    assert code_key(function_code(original_library, 'sibling')) != code_key(function_code(current_library, 'sibling'))
+    external.write_text(current_library)
+    expansion = tmp_path / 'expansion'
+    report = expand_observed_bodies(model, trace, expansion, max_bodies=8)
+    assert report['target_executed'] is False
+    source_report = report['source_expansion']
+    assert source_report['added_files'] == [str(external)] and source_report['added_source_count'] == 1
+    plan = json.loads(Path(source_report['plan']).read_bytes())
+    demand, = plan['demands']
+    assert demand['import_or_class_origin_established'] is False
+    assert demand['runtime_globals_established'] is demand['file_execution_established'] is False
+    assert demand['source']['module_names'] == [] and demand['source']['module_mappings'] == []
+    assert demand['proofs'] and {proof['capture']['code']['qualname'] for proof in demand['proofs']} == {'remote'}
+    for proof in demand['proofs']:
+        assert proof['source_origin'] == 'CURRENT_STATIC_SOURCE_CANDIDATE'
+        assert proof['historical_snapshot'] is proof['source_snapshot'] is proof['plan'] is None
+    requests = json.loads((expansion / 'plan.json').read_bytes())['requests']
+    selected = [request for request in requests if request['capture']['code']['filename'] == str(external)]
+    assert len(selected) == 1 and selected[0]['capture']['code']['qualname'] == 'remote'
+    authority = selected[0]['source_authority']
+    assert authority['source_origin'] == 'CURRENT_STATIC_SOURCE_CANDIDATE'
+    assert authority['scope'] == 'MATCHED_CODE_SCOPE_ONLY' and authority['historical_snapshot'] is None
+    manifest = json.loads((model / 'manifest.json').read_bytes())
+    unit, = (unit for unit in manifest['units'] if unit['path'] == str(external))
+    sibling, = (row for row in unit['bodies'] if row['name'] == '<module>.sibling')
+    assert 'artifact' not in sibling  # The current static declaration still exists.
+    with ProgramDependencySession(model) as session:
+        provider = session.attach_observations(trace)
+        interfaces = [item for item in provider.interfaces
+            if item.interface.body.source.path == str(external)]
+        remote, = interfaces
+        assert remote.interface.body.entry == 'remote' and len(remote.interface.arguments) == 1
+        assert remote.selected_return in remote.interface.normal_returns
+        assert not remote.interface.environment_routes
+        assert {'OBSERVED_FUNCTION_ENVIRONMENT_OPEN', 'FINE_EFFECTS_OPEN'} <= {
+            frontier.kind for frontier in remote.interface.frontiers}
+    assert external.read_text() == current_library and program.read_text() == program_text
+

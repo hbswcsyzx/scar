@@ -77,7 +77,9 @@ UNKNOWN 应落在确实未知的字段、效果或关系上，不能吞掉已知
 静态前端依据保存源码、语言版本、编译来源和受支持的库契约建立结构、可能路径及条件关系。
 动态层只补必须运行才知道的实际 callable、entry、实例、运行路径或资源事件；两者保留不同依据。
 一次观测可以选择该次调用的目标，不能关闭其它路径、将动态目标集合当全集或授权优化。
-运行 code 与原实现图的连接须核完整 code descriptor、源码和 compiler path，不能靠 qualname/行号猜测。
+静态/动态按事实分工，不按文件边界：已知跨文件边可静态连接，同文件多态也可能需要观测。
+运行 code 与原实现图的连接须核完整 descriptor、compiler path/profile 和已记录的源码版本，不能靠 qualname/行号猜测。
+没有历史全文件指纹时，当前源码仍可建图；匹配函数 Code 只证明该作用域的对应，不证明历史文件、父模块或运行环境。
 缺失 body 可由真实 code 证据驱动按需静态展开；已有规范图、原 ID 和端口继续复用。
 见 [调用观测](../scar/analysis/observed_call_bindings.py)、[函数接口](../scar/analysis/observed_function_interfaces.py)
 与 [按需展开](../scar/analysis/observed_body_demands.py)。这些接口不是静态全程序闭合证明。

@@ -16,6 +16,7 @@ import hashlib
 import json
 from pathlib import Path
 import re
+import sys
 import time
 from types import SimpleNamespace
 
@@ -24,6 +25,7 @@ from scar.analysis.program_dependency_export import _Tables
 from scar.analysis.python_call_targets import read_python_call_targets
 from scar.analysis.static_calls import StaticCallBudget, StaticCallSession
 from scar.analysis.static_function_origins import _replay_compilation
+from scar.analysis.static_compilation import StaticCodeEvidence
 from scar.ir.program.call_edges import CallRecordAnchor, CapturedCode, CapturedSite
 from scar.ir.program.dependencies import DependencyPoint as Point, GraphNamespace
 from scar.ir.program.ids import OperationID, UseID
@@ -32,7 +34,7 @@ from scar.ir.program.python_call_targets import ObservedPythonCallGraph, PythonC
 from scar.ir.record_codec import decode, encode
 from scar.ir.semantics_v2 import Opcode
 from scar.ir.v2.common import SourceReference
-from scar.trace.code_snapshot import describe_code, site as code_site
+from scar.trace.code_snapshot import code_key, describe_code, site as code_site
 
 
 @dataclass(frozen=True, slots=True)
@@ -149,7 +151,24 @@ def _compiler(body):
         context.compiled_module_for_namespace = root
     inputs = SimpleNamespace(document=body.document, metadata=body.metadata,
         sources=body.module if body.module is not None else body.metadata, namespace=body.namespace)
-    return _replay_compilation(inputs, root, context.unit['namespace_root'])[1]
+    path, code = _replay_compilation(inputs, root, context.unit['namespace_root'])
+    subject = (body.module.declaration.compilation.source if body.namespace.source is None
+               else body.namespace.source)
+    body.code_compilation = StaticCodeEvidence(body.metadata.source, context.unit['namespace_root'],
+        body.namespace.definition, subject, path, code, code_key(code), sys.implementation.name,
+        tuple(sys.version_info[:3]), sys.version, sys.implementation.cache_tag,
+        root_code_layout_key=code_key(root)).to_reference()
+    return code
+
+
+def _checked_code(body, capture, cache, code=None):
+    """Authorize this original body only, using this run's source/code facts."""
+    if code is None:
+        code = _compiler(body)
+    correspondence = cache['observed-code-sources'].require(
+        capture, body, code, body.code_compilation)
+    cache['observed-code-correspondence', capture] = correspondence
+    return code
 
 
 def _candidate(entry, captured):
@@ -196,11 +215,12 @@ def _session_body(session, number, position, cache):
         'operation_links': links, 'use_links': uses, 'uses_by_op': by_operation})
 
 
-def _locate_session_body(session, captured, issues, cache):
-    key = 'observed-code-body', captured
+def _locate_session_body(session, capture, issues, cache):
+    captured = capture.code
+    key = 'observed-code-body', capture
     if key in cache:
         body = _session_body(session, *cache[key], cache)
-        return body, _compiler(body)
+        return body, _checked_code(body, capture, cache)
     matches = []
     numbers = [number for number, unit in enumerate(session.units) if unit['path'] == captured.filename]
     if not numbers:
@@ -219,7 +239,9 @@ def _locate_session_body(session, captured, issues, cache):
                 continue
             try:
                 body = _session_body(session, number, pair[0], cache)
-                if describe_code(_compiler(body)) == encode(captured):
+                code = _compiler(body)
+                if describe_code(code) == encode(captured):
+                    _checked_code(body, capture, cache, code)
                     matches.append((number, pair[0]))
             except (ValueError, LookupError, TypeError, SyntaxError) as error:
                 issues.append({'kind': 'CALLER_SOURCE_OR_INTERFACE_OPEN', 'entry': entry['entry_key'],
@@ -228,18 +250,19 @@ def _locate_session_body(session, captured, issues, cache):
         raise LookupError('CAPTURED_CODE_BODY_NOT_UNIQUE: ' + str(len(matches)) + ' complete matches')
     cache[key] = matches[0]
     body = _session_body(session, *matches[0], cache)
-    return body, _compiler(body)
+    return body, _checked_code(body, capture, cache)
 
 
-def _locate_body(owner, captured, issues, cache):
+def _locate_body(owner, capture, issues, cache):
     """Share original body coordinates, never a second graph or code owner."""
     if _dependency_session(owner):
-        return _locate_session_body(owner, captured, issues, cache)
-    key = 'observed-code-body', captured
+        return _locate_session_body(owner, capture, issues, cache)
+    captured = capture.code
+    key = 'observed-code-body', capture
     if key in cache:
         number, position = cache[key]
         body = owner._body(owner._unit(number), position, owner.units[number]['bodies'][position])
-        return body, _compiler(body)
+        return body, _checked_code(body, capture, cache)
     matches = []
     numbers = [i for i, unit in enumerate(owner.units) if unit['path'] == captured.filename]
     if not numbers:
@@ -263,6 +286,7 @@ def _locate_body(owner, captured, issues, cache):
                 code = _compiler(body)
                 if describe_code(code) != encode(captured):
                     continue
+                _checked_code(body, capture, cache, code)
                 matches.append((number, position))
             except (ValueError, LookupError, TypeError, SyntaxError) as error:
                 issues.append({'kind': 'CALLER_SOURCE_OR_INTERFACE_OPEN', 'entry': entry['entry_key'],
@@ -272,7 +296,7 @@ def _locate_body(owner, captured, issues, cache):
     cache[key] = matches[0]
     number, position = matches[0]
     body = owner._body(owner._unit(number), position, owner.units[number]['bodies'][position])
-    return body, _compiler(body)
+    return body, _checked_code(body, capture, cache)
 
 
 def _call_positions(body, link):
@@ -296,11 +320,11 @@ def _call_positions(body, link):
     return _cpython_attribute_positions(node.func, position)
 
 
-def _locate(owner, captured, selected_site, issues, cache):
-    key = captured, selected_site
+def _locate(owner, capture, selected_site, issues, cache):
+    key = capture, selected_site
     if key in cache:
         return cache[key]
-    body, code = _locate_body(owner, captured, issues, cache)
+    body, code = _locate_body(owner, capture, issues, cache)
     if decode(CapturedSite, code_site(code, selected_site.offset)) != selected_site:
         raise LookupError('CAPTURED_CALL_SITE_MISMATCH')
     if selected_site.opname is None or not selected_site.opname.startswith('CALL'):
@@ -354,8 +378,10 @@ def derive_observed_interfaces(session, trace, *, argument_layouts=None):
     observed = read_python_call_targets(raw)
     evidence = ObservedRawEvidence(raw, observed)
     attempts = {(item.process_id, item.index): item for item in raw.attempts}
-    captures = {(item.process_id, item.code.key): item.code for item in raw.frame_scan.captures}
+    captures = {(item.process_id, item.code.key): item for item in raw.frame_scan.captures}
     bindings, issues, cache = [], [], {}
+    from scar.analysis.observed_code_correspondence import ObservedCodeSources
+    cache['observed-code-sources'] = ObservedCodeSources(raw, observed.source_sha256)
     for target, anchor in zip(observed.targets, observed.target_anchors):
         attempt = attempts[target.caller.process_id, target.attempt_index]
         try:
@@ -365,7 +391,7 @@ def derive_observed_interfaces(session, trace, *, argument_layouts=None):
                 raise LookupError('CALLER_CAPTURED_CODE_UNAVAILABLE')
             call, callable_point, source = _locate(session, captured, attempt.site, issues, cache)
             bindings.append(ObservedCallBinding(observed.source_sha256, call, callable_point,
-                source, captured, attempt.site, attempt.anchor, anchor, target))
+                source, captured.code, attempt.site, attempt.anchor, anchor, target))
         except (LookupError, ValueError, TypeError, OverflowError, TimeoutError) as error:
             issues.append({'kind': 'OBSERVED_CALL_UNBOUND', 'process_id': attempt.process_id,
                 'attempt_index': attempt.index, 'detail': type(error).__name__ + ': ' + str(error)})
@@ -394,9 +420,11 @@ def build_observed_call_bindings(model, trace, out, budget=None):
     limits.__post_init__()
     raw = _read_trace(trace)
     observed = read_python_call_targets(raw)
-    captures = {(capture.process_id, capture.code.key): capture.code for capture in raw.frame_scan.captures}
+    captures = {(capture.process_id, capture.code.key): capture for capture in raw.frame_scan.captures}
     attempts = {(attempt.process_id, attempt.index): attempt for attempt in raw.attempts}
     bindings, issues, cache = [], [], {}
+    from scar.analysis.observed_code_correspondence import ObservedCodeSources
+    cache['observed-code-sources'] = ObservedCodeSources(raw, observed.source_sha256)
     function_interfaces, function_issues = (), ()
     owner = StaticCallSession(model, out=out / 'source-basis', budget=limits)
     stable = False
@@ -412,7 +440,7 @@ def build_observed_call_bindings(model, trace, out, budget=None):
                     raise LookupError('CALLER_CAPTURED_CODE_UNAVAILABLE')
                 call, callable_point, source = _locate(owner, captured, attempt.site, issues, cache)
                 bindings.append(ObservedCallBinding(observed.source_sha256, call, callable_point,
-                    source, captured, attempt.site, attempt.anchor, anchor, target))
+                    source, captured.code, attempt.site, attempt.anchor, anchor, target))
             except (LookupError, ValueError, TypeError, OverflowError, TimeoutError) as error:
                 issues.append({'kind': 'OBSERVED_CALL_UNBOUND', 'process_id': attempt.process_id,
                     'attempt_index': attempt.index, 'detail': type(error).__name__ + ': ' + str(error)})

@@ -405,7 +405,7 @@ def derive_observed_function_interfaces(owner, trace, observed, bindings, cache,
     exits = {}
     for item in trace.exits:
         exits.setdefault(item.invocation, []).append(item)
-    captures = {(item.process_id, item.code.key): item.code for item in trace.frame_scan.captures}
+    captures = {(item.process_id, item.code.key): item for item in trace.frame_scan.captures}
     records, issues = [], []
     if argument_layouts is not None and (type(argument_layouts) is not dict or argument_layouts):
         raise ValueError('argument_layouts must be an empty output dictionary')
@@ -444,7 +444,10 @@ def derive_observed_function_interfaces(owner, trace, observed, bindings, cache,
                 issue('OBSERVED_DEFERRED_ENTRY_OPEN',
                     'Suspended/deferred execution needs its own creation/resumption interface; none is synthesized.')
                 continue
-            caller, _ = _locate_body(owner, binding.captured_code, issues, cache)
+            caller_capture = captures.get((target.caller.process_id, binding.captured_code.key))
+            if caller_capture is None:
+                raise LookupError('CALLER_CAPTURED_CODE_UNAVAILABLE')
+            caller, _ = _locate_body(owner, caller_capture, issues, cache)
             captured = captures.get((entry.callee.process_id, entry.code))
             if captured is None:
                 raise LookupError('CALLEE_CAPTURED_CODE_UNAVAILABLE')

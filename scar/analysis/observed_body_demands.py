@@ -16,6 +16,7 @@ import sys
 import time
 
 from scar.analysis.observed_call_bindings import _json, _read_trace
+from scar.analysis.observed_code_correspondence import ObservedCodeSources, SourceScopeAuthority
 from scar.analysis.python_call_targets import read_python_call_targets
 from scar.analysis.static_calls import StaticCallBudget, StaticCallSession
 from scar.analysis.static_compilation import StaticCodeEvidence, _scope_nodes
@@ -39,19 +40,27 @@ class ObservedBodyDemand:
     lexical_entry: SourceArtifactLocator
     source_artifact: SourceArtifactLocator
     compiler: SourceCompilationCodeRef
+    source_authority: SourceScopeAuthority
 
     def __post_init__(self):
         for value, kind in ((self.capture, CodeCapture), (self.lexical_entry, SourceArtifactLocator),
-                (self.source_artifact, SourceArtifactLocator), (self.compiler, SourceCompilationCodeRef)):
+                (self.source_artifact, SourceArtifactLocator), (self.compiler, SourceCompilationCodeRef),
+                (self.source_authority, SourceScopeAuthority)):
             if type(value) is not kind:
                 raise TypeError('observed body demand needs exact ' + kind.__name__)
             post = getattr(value, '__post_init__', None)
             if post is not None:
                 post()
+        compiler_source = (self.compiler.source.snapshot if type(self.compiler.source) is ModuleUnitSource
+                           else self.compiler.source)
         if (type(self.run_scope) is not str or len(self.run_scope) != 64
                 or type(self.unit_number) is not int or self.unit_number < 0
                 or type(self.entry_key) is not str or not self.entry_key.startswith('lexical:')
-                or self.compiler.code_layout_key != self.capture.code.key):
+                or self.compiler.code_layout_key != self.capture.code.key
+                or self.source_authority.run_scope != self.run_scope
+                or self.source_authority.capture != self.capture
+                or self.source_authority.source.path != compiler_source.path
+                or self.source_authority.source.fingerprint != compiler_source.fingerprint):
             raise ValueError('observed body demand changed original captured/compiler identity')
 
 
@@ -122,6 +131,7 @@ def expand_observed_bodies(model, trace, out, budget=None, max_bodies=32, *,
     # capture and the updated canonical source owner for the separate body phase.
     trace = _read_trace(trace)
     observed = read_python_call_targets(trace)
+    code_sources = ObservedCodeSources(trace, observed.source_sha256)
     metadata = {meta.process_id: meta for meta in trace.metadata}
     groups = defaultdict(list)
     issues = []
@@ -177,6 +187,13 @@ def expand_observed_bodies(model, trace, out, budget=None, max_bodies=32, *,
                         for capture in selected:
                             if description != encode(capture.code):
                                 continue
+                            try:
+                                source_authority = code_sources.require_source(capture, snapshot)
+                            except (LookupError, ValueError, TypeError) as error:
+                                issues.append({'kind': 'CAPTURE_CODE_SOURCE_SCOPE_OPEN',
+                                    'code': capture.code.key, 'process_id': capture.process_id,
+                                    'detail': type(error).__name__ + ': ' + str(error)})
+                                continue
                             record_key = capture.process_id, capture.code.key
                             matches.setdefault(record_key, []).append(entry['entry_key'])
                             row = rows.get(entry['entry_key'])
@@ -192,7 +209,8 @@ def expand_observed_bodies(model, trace, out, budget=None, max_bodies=32, *,
                                 owner._locator(unit['artifacts']['lexical'], 'scar.static-lexical-catalog/1',
                                     '#/entries/' + str(ordinal), f'#/units/{number}/artifacts/lexical'),
                                 owner._locator(unit['artifacts']['source'], 'scar.static-source-text/1', '#',
-                                    f'#/units/{number}/artifacts/source'), evidence.to_reference())
+                                    f'#/units/{number}/artifacts/source'), evidence.to_reference(),
+                                source_authority)
                             requests.setdefault(entry['entry_key'], demand)
                     # Distinguish missing scope adapters from actual code
                     # mismatches without guessing from a display name.

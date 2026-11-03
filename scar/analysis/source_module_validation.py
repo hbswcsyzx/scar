@@ -718,9 +718,12 @@ def require_valid_structured_module_program(result,*,source_texts,code_evidence=
         and type(row.source) is SourceReference
         and (atom:=result.semantic.source_atoms.get(row.source.atom_id)) is not None and atom.kind=='Dict'
         and row.source not in annotation_dicts for row in overlay.protocols)
+    module_assertions=any(type(row.source) is SourceReference
+        and (atom:=result.semantic.source_atoms.get(row.source.atom_id)) is not None and atom.kind=='Assert'
+        for row in overlay.expansions)
     prefix,tail=mapping_prefix_selection(context,code_evidence,profile=result.profile,
         literal_bool_elision=literal_bool_elision,module_annotations=module_annotations,
-        dictionary_displays=dictionary_displays)
+        dictionary_displays=dictionary_displays,module_assertions=module_assertions)
     _need(overlay.prefix==(frame_statement_slice(context,unit,F.BODY,prefix) if prefix else None),'SP8 prefix is not the mechanical maximal supported collection')
     _need((overlay.remaining is not None)==bool(tail),'SP8 missing/extra remaining source collection')
     if tail:
@@ -1060,7 +1063,14 @@ def require_valid_structured_module_program(result,*,source_texts,code_evidence=
         return found[0]
     for node in expected_statements:
         source=_module_statement_ref(context,node)
-        if isinstance(node,ast.AnnAssign):
+        if isinstance(node,ast.Assert):
+            from scar.analysis.source_module_assertion_validation import validate_module_assertion
+            validate_module_assertion(node,expansions[source],context=context,code_evidence=code_evidence,
+                profile=result.profile,overlay=overlay,blocks=blocks,operations=operations,values=values,
+                protocols=protocols,invoke=invoke,expression_value=expression_value,
+                source_reference=lambda n:_module_statement_ref(context,n),exception_holds=_mapping_exception_holds,
+                ref_type=ref_type,state_type=state_type)
+        elif isinstance(node,ast.AnnAssign):
             from scar.analysis.source_module_annotation_validation import validate_module_annotation
             validate_module_annotation(node,expansions[source],annotation_plans[source],
                 overlay=overlay,blocks=blocks,operations=operations,values=values,protocols=protocols,
@@ -1228,6 +1238,20 @@ def require_valid_module_propagation(result,*,context,code_evidence):
         if term.kind is TerminatorKind.INVOKE:
             edge=next(edge for edge in term.successors if edge.kind is ExitKind.RAISE)
             pairs.add(tuple(blocks[edge.block].arguments[:2]))
+            marker=protocols.get(op.id)
+            if marker is not None and marker.kind is PythonProtocolKind.FUNCTION_START_PROPAGATION:
+                atom=result.semantic.source_atoms.get(marker.source.atom_id)
+                constructors=[ops[row.operation] for row in overlay.protocols
+                    if row.kind is PythonProtocolKind.MAKE_ASSERTION_ERROR and row.source==marker.source]
+                _need(atom is not None and atom.kind=='Assert' and len(constructors)==1,
+                    'normal propagation pair requires its original assertion constructor')
+                created=next(edge for edge in constructors[0].terminator.successors if edge.kind is ExitKind.NORMAL)
+                _need(op.uses[0].value==blocks[created.block].arguments[0],
+                    'normal propagation pair did not normalize its actual new assertion exception')
+                normal=next(edge for edge in term.successors if edge.kind is ExitKind.NORMAL)
+                _need(len(blocks[normal.block].arguments)==3,
+                    'assert propagation requires separate exception, traceback and world ports')
+                pairs.add(tuple(blocks[normal.block].arguments[:2]))
     changed=True
     while changed:
         changed=False

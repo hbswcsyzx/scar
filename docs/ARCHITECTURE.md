@@ -36,6 +36,9 @@ LeWM 是外部 testcase；通用规则由语言协议、原端口和证据派发
 ## 静态模板与动态实例
 
 静态侧建立子图和可组合端口；动态侧观察实际选择，再对应到原端口。
+两者按事实是否可静态确定分工，不按文件边界分工：跨文件的已知关系直接静态连接，
+同一文件里的不确定分派也保留条件或补充观测。文件负责材料、版本、存储与构建调度；
+函数、类、循环等 Region 才是共享结构和可展开接口的单位。
 运行绑定必须限定 run scope、process/thread、InvocationKey、attempt 及事件锚点。
 静态 context 是接口选择；None、闭合栈和 Open 后缀有不同含义，均不是 Invocation。
 同一调用点的不同 attempt、同一函数的不同激活不能因共用模板而合并。
@@ -44,7 +47,9 @@ LeWM 是外部 testcase；通用规则由语言协议、原端口和证据派发
 [python_call_targets.py](../scar/trace/python_call_targets.py) 记录实际 callable，
 [code_snapshot.py](../scar/trace/code_snapshot.py) 提供完整代码身份及指令位置。
 采集仅保存必要原事实；静态对应、接口建图和推理在离线侧完成。
-代码对应核源码版本、完整 CodeID、编译路径和原位置；名称或行号只用于筛选。
+代码对应核完整 CodeID、编译路径、解释器 profile 和原位置；名称或行号只用于筛选。
+有历史源码指纹时必须核对；没有时可静态建立当前源码子图，但运行对应只授权匹配的 Code 作用域。
+子函数匹配不证明父模块执行、factory 创建来源、globals/defaults/closure 内容或兄弟定义的运行版本。
 实际类对象的调用证据不证明它来自某条类声明；创建来源须另有证据。
 一次观察只限定该运行事实，未覆盖路径与未知状态继续保留。
 
@@ -59,13 +64,13 @@ artifacts/current/queries/ 保存派生查询证据，不是第二份权威程�
 ## 当前接通范围与下一项
 
 已具备源码层、局部规范图、共同依赖查询、部分条件属性推理和循环边界查询。
-真实 CEM 的59个CALL实例及3条函数接口已接入共同图的显式观测端口查询，静态邻接不变。
+真实 CEM 的81个CALL实例及9条函数接口已接入共同图的显式观测端口查询，静态邻接不变。
 实例端口引用原点及run/Invocation/attempt/事件作用域；只有实际选中的return形成返回接口。
 参数未定不丢入口/状态/返回；ABI布局保留条件备选、默认值义务和pack依赖，不猜receiver或容器身份。
 对应 owner 是 [program_observed_dependencies.py](../scar/analysis/program_observed_dependencies.py)。
 选中 CEM 循环的边界查询已在原预算内完成；这不证明状态、效果、资源或整个程序闭合。
 
-下一项按真实缺口补部分参数/receiver/native接口，再补循环迭代/状态与共同推理消费。
+下一项按真实缺口补受保护返回、延迟入口和native接口，再补循环迭代/状态与共同推理消费。
 不得把裸 context=None 的观测边注册为全局事实，也不得丢弃未执行的异常路径。
 Python→native/runtime/kernel、Tensor 属性、alias/effects 与资源连接仍需按实际缺口补齐。
 第一阶段只有在实体、结构、连接、属性和覆盖均经核查后才完成。
