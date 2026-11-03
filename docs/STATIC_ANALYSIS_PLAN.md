@@ -121,6 +121,15 @@ ARGUMENT 追到调用者 import，缺上下文时明确停在原 formal。真实
 后续按类语句结果来源→类对象调用/实例创建→descriptor与隐式receiver绑定→decorator
 返回对象推进；这些是不同层，类suite正常值、类对象、实例和raw function不能混用。
 
+Implemented/Verified：类最终产物来源与条件标准构造协议已接同一图，带原输入/返回/
+world 映射；派生实现显式按收据登记，复用现有 reader/LRU。通用静态用例通过（7.17秒），
+示例 CLI 自动得到1个类来源、1个构造协议、20条接口边（1.61秒）。CEM/policy原7条构造
+记录通过源码/compiler/端口重验（10.44秒）。真实 eval.py:93 查询仍0个类来源（77.44秒），
+不是这些类记录缺失：receiver已到import，但旧模块模板未消费跨入口状态的receiver路径。
+**下一项先修模块桥接**：共享receiver路径→模块初始化snapshot的当前字段绑定；再补声明
+package上下文下的相对FROM候选。回查同一行后才继续slot的Python回调与隐式receiver绑定。
+证据在 `queries/type-call-demo`、`queries/class-source-check`、`queries/class-type-call`。
+
 全范围任务已于 2026-11-02 21:42 UTC PUBLISHED，producer 不再受该任务冻结。不要为
 核验小修复反复启动 107 分钟全范围 linker；先做原主体/接口检查，输入改变后再原子更新
 有关关系，明确索引和主体版本边界。outgoing 原始路由及 typed 重放已分离，预算不足

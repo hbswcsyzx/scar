@@ -7,7 +7,7 @@ on that same graph, including unknown outer prefixes. No target executes.
 from __future__ import annotations
 
 from collections import Counter, deque
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 
 from scar.ir.program.contextual_calls import ContextualCallTarget, ContextualFunctionSource
 from scar.ir.program.dependencies import (
@@ -47,6 +47,10 @@ class ContextualCallResolver:
         self._active = set()
         self._resolve_depth = 0
         self._last_receiver_evidence = None
+        self._last_class_sources = None
+        self._class_implementation_coordinator = None
+        from scar.analysis.contextual_class_sources import ClassStatementSourceExtractor
+        self._class_source_extractor = ClassStatementSourceExtractor(self)
         self.counts = Counter()
         self.modules = ModuleAttributeDependencies(load_body=owner._load_body_namespace,
             source_context=lambda body:(body.context.tree,body.context.semantic,body.context.docs['source']['text']),
@@ -58,6 +62,10 @@ class ContextualCallResolver:
         graph = self.session.graph()
         graph.register(self.module_provider)
         graph.register(self)
+        from scar.analysis.contextual_type_calls import ContextualTypeCallImplementations
+        self.type_calls = ContextualTypeCallImplementations(self)
+        graph.register(self.type_calls)
+        self._class_implementation_coordinator = self.type_calls.observe
 
     def _body(self, namespace):
         # Check every supplied authority first, including a registered foreign
@@ -126,19 +134,34 @@ class ContextualCallResolver:
         saved = self._last_receiver_evidence
         return saved[1] if saved is not None and saved[0] == call else None
 
+    def class_sources(self, call):
+        """Class-statement products from the last completed outer query."""
+        saved = self._last_class_sources
+        return saved[1] if saved is not None and saved[0] == call else None
+
+    def class_invocations(self, call):
+        return self.type_calls.for_call(call)
+
     def resolve(self, call):
         receivers = {}
+        class_sources = {}
         outermost = self._resolve_depth == 0
         self._resolve_depth += 1
         try:
-            result = self._resolve(call, receivers)
+            result = self._resolve(call, receivers, class_sources)
             if outermost:
+                sources = tuple(class_sources)
+                if self._class_implementation_coordinator is not None:
+                    self._class_implementation_coordinator(call, sources)
+                    result = replace(result, frontiers=tuple(dict.fromkeys(
+                        (*result.frontiers, *self.type_calls.frontiers_for(call)))))
                 self._last_receiver_evidence = (call, tuple(receivers.values()))
+                self._last_class_sources = (call, sources)
             return result
         finally:
             self._resolve_depth -= 1
 
-    def _resolve(self, call, receivers):
+    def _resolve(self, call, receivers, class_sources):
         if type(call)is not Point or type(call.node)is not OperationID:
             raise TypeError('contextual resolution needs an original CALL operation point')
         self.owner._check()
@@ -192,6 +215,19 @@ class ContextualCallResolver:
                     if target.frame is not None and len(context_frames(call.context))>=self.owner.budget.max_context_depth:
                         note('CONTEXTUAL_CALL_INTERFACE_DEPTH_BUDGET','The source candidate is retained; entering another CALL would exceed the known-context suffix budget.')
                     continue
+                from scar.analysis.program_lowering import _Unsupported
+                try:
+                    class_source = self._class_source_extractor.source_at(
+                        call, callee, point, tuple(reversed(reverse_path)))
+                except _Unsupported as error:
+                    class_source = None
+                    note('CONTEXTUAL_CLASS_SOURCE_RULE_OPEN',
+                        str(getattr(error.kind, 'value', error.kind)) + ': ' + error.detail)
+                if class_source is not None:
+                    if (class_source not in class_sources and len(class_sources)
+                            >= self.owner.budget.max_candidates_per_call):
+                        raise OverflowError('contextual class-statement source alternative budget exhausted')
+                    class_sources[class_source] = None
                 from scar.analysis.contextual_receiver_sources import (
                     attribute_read_at, collect_receiver_evidence,
                 )
@@ -211,6 +247,7 @@ class ContextualCallResolver:
                         continue
                     pending.append((edge.source,(*reverse_path,edge),ancestors|{edge.source}))
             self.counts['queries']+=1;self.counts['target_alternatives']+=len(targets)
+            self.counts['class_statement_source_alternatives'] += len(class_sources)
         except (OverflowError,TimeoutError)as error:
             note('CONTEXTUAL_CALL_RESOLUTION_BUDGET',type(error).__name__+': '+str(error))
         finally:
@@ -286,11 +323,14 @@ class ContextualCallResolver:
 
     def close(self):
         self._last_receiver_evidence = None
+        self._last_class_sources = None
+        self.type_calls.clear()
         self.modules._facts.clear()
         self.session.close()
 
     def measurements(self):
         return {**self.session.measurements(),**dict(self.counts),
+            'type_call_implementations': self.type_calls.measurements(),
             'module_index_retained_input_bytes':sum(namespace.graph.decoded_bytes for namespace in self.modules._facts),
             'module_index_retention_budget_bytes':self.modules.max_cached_bytes,
             'module_index_shares_original_objects':True,

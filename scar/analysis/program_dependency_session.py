@@ -85,6 +85,9 @@ class ProgramDependencySession:
         self.started, self.input_bytes, self.closed = time.monotonic(), 0, False
         self._stamps, self._artifacts, self._logical, self._bases = {}, {}, {}, {}
         self._descriptor_aliases = {}
+        # Explicit, receipt-bound routes only. Large typed graphs/indices live
+        # in the existing LRU, never in this namespace routing table.
+        self._implementation_graphs = {}
         self._cache, self._cache_bytes = OrderedDict(), 0
         self._seen_graphs, self._seen_shards = set(), set()
         self._call_routing = None
@@ -265,8 +268,28 @@ class ProgramDependencySession:
         if self.input_bytes + cost > self.budget.max_input_bytes:
             raise OverflowError("dependency total input budget exhausted")
         self.input_bytes += cost
-        reader = SimpleNamespace(root=physical.parent, receipts=self.fragments.receipts)
-        document = _Fragments.read(reader, {**descriptor, "path": physical.name})
+        if key in self._implementation_graphs:
+            # Derived graph registration is an explicit input capability. Its
+            # wrapper must retain strict JSON fields before core.loads; the
+            # historical source-fragment reader's policy stays unchanged.
+            import gzip
+            import io
+            from scar.ir.record_codec import loads as strict_loads
+            with physical.open('rb') as stream:
+                stored = stream.read(descriptor['bytes'] + 1)
+            if len(stored) != descriptor['bytes'] or hashlib.sha256(stored).hexdigest() != descriptor['sha256']:
+                raise ValueError('implementation graph stored receipt differs')
+            with gzip.GzipFile(fileobj=io.BytesIO(stored)) as stream:
+                raw = stream.read(descriptor['decoded_bytes'] + 1)
+            if len(raw) != descriptor['decoded_bytes'] or hashlib.sha256(raw).hexdigest() != descriptor['decoded_sha256']:
+                raise ValueError('implementation graph decoded receipt differs')
+            document = strict_loads(raw)
+            if type(document) is not dict:
+                raise ValueError('implementation graph wrapper must be a JSON object')
+            self.fragments.receipts.append(dict(descriptor))
+        else:
+            reader = SimpleNamespace(root=physical.parent, receipts=self.fragments.receipts)
+            document = _Fragments.read(reader, {**descriptor, "path": physical.name})
         if _stamp(physical) != before:
             raise ValueError("dependency artifact changed during read")
         return self._put(cache_key, document, descriptor["decoded_bytes"]) if cache_document else document
@@ -459,6 +482,107 @@ class ProgramDependencySession:
         # each original declaration while sharing the one core/index/document.
         return body if namespace == body.namespace else SimpleNamespace(**{**vars(body), "namespace": namespace})
 
+    def register_implementation_graph(self, locator, representation, graph):
+        """Admit one explicitly supplied existing derived implementation.
+
+        ``#/graph`` is a complete core codec envelope in an existing gzip
+        wrapper. Admission binds its bytes and graph, not its semantic truth,
+        active runtime identity or callback/dispatch applicability.
+        """
+        from scar.ir.program.model import ProgramGraph
+        from scar.ir.program.codec import loads as load_core
+        from scar.ir.program.queries import ProgramIndex
+        self.check()
+        if type(locator) is not SourceArtifactLocator or type(graph) is not ProgramGraph:
+            raise TypeError('implementation registration needs an original locator and exact ProgramGraph')
+        locator.__post_init__()
+        if (locator.pointer != '#/graph' or locator.representation != 'gzip-canonical-json'
+                or type(representation) is not str or not representation):
+            raise ValueError('implementation registration needs its gzip #/graph and explicit representation')
+        uri = locator.artifact.uri
+        physical = Path(uri)
+        if (not physical.is_absolute() or physical.resolve() != physical
+                or physical.is_symlink() or not physical.is_file()):
+            raise ValueError('implementation graph must be an existing canonical physical artifact')
+        if uri in self._body_paths or locator.artifact.schema in ('scar.static-body/1', 'scar.static-class-provider/1'):
+            raise ValueError('implementation registration cannot bypass source-body or class-provider admission')
+        namespace = GraphNamespace(locator, representation, graph.root)
+        previous = self._implementation_graphs.get(uri)
+        if previous is not None and (previous.identity != namespace.identity
+                or previous.graph.artifact != locator.artifact
+                or previous.graph.decoded_bytes != locator.decoded_bytes
+                or previous.graph.representation != locator.representation):
+            raise ValueError('implementation URI already has a different pinned graph/representation')
+        seen = ('implementation-graph', uri, locator.decoded_sha256)
+        if seen not in self._seen_graphs and len(self._seen_graphs) >= self.budget.max_graphs:
+            raise OverflowError('implementation registration exceeds the shared graph-read budget')
+        descriptor = {'path': uri, 'bytes': locator.artifact.size_bytes,
+            'sha256': locator.artifact.sha256, 'decoded_bytes': locator.decoded_bytes,
+            'decoded_sha256': locator.decoded_sha256}
+        key = str(physical)
+        old_artifact, old_logical = self._artifacts.get(key), self._logical.get(uri)
+        # Stage only the route, so the existing reader can enforce budgets,
+        # stamps, receipts and its strict derived-wrapper branch. Failed
+        # admission does not leave a new read capability behind.
+        self._implementation_graphs[uri] = namespace
+        try:
+            self._register(uri, physical, descriptor)
+            if previous is None:
+                # A first derived admission cannot inherit a document decoded
+                # earlier under a different (historical non-strict) policy.
+                self._put(('document', key, descriptor['sha256']), None, 0)
+            document = self.read_artifact(locator)
+            if type(document.get('graph')) is not dict:
+                raise ValueError('implementation wrapper has no original core graph envelope')
+            original = load_core(json.dumps(document['graph'], separators=(',', ':'), allow_nan=False))
+            if original != graph:
+                raise ValueError('registered implementation differs from its strictly decoded stored graph')
+            record = SimpleNamespace(graph=graph, index=ProgramIndex(graph),
+                document=document, namespace=namespace)
+            self._put(('implementation-graph', namespace.identity), record, 3 * locator.decoded_bytes)
+            self._seen_graphs.add(seen)
+            return namespace
+        except BaseException:
+            if previous is None:
+                self._implementation_graphs.pop(uri, None)
+            else:
+                self._implementation_graphs[uri] = previous
+            if old_artifact is None:
+                self._artifacts.pop(key, None)
+            else:
+                self._artifacts[key] = old_artifact
+            if old_logical is None:
+                self._logical.pop(uri, None)
+            else:
+                self._logical[uri] = old_logical
+            raise
+
+    def _implementation_graph(self, namespace):
+        """Load only an explicitly pinned implementation through this LRU."""
+        from scar.ir.program.codec import loads as load_core
+        from scar.ir.program.queries import ProgramIndex
+        registered = self._implementation_graphs[namespace.graph.artifact.uri]
+        if (namespace.source_body is not None or namespace.identity != registered.identity
+                or namespace.graph.artifact != registered.graph.artifact
+                or namespace.graph.decoded_bytes != registered.graph.decoded_bytes
+                or namespace.graph.representation != registered.graph.representation):
+            raise ValueError('implementation namespace changed its registered root/representation/receipt')
+        # Every supplied declaration and current physical stamp is checked,
+        # even when this immutable typed-input record is already resident.
+        document = self.read_artifact(namespace.graph)
+        key = ('implementation-graph', registered.identity)
+        found = self._get(key)
+        if found is None:
+            if type(document.get('graph')) is not dict:
+                raise ValueError('implementation wrapper lost its original core graph envelope')
+            graph = load_core(json.dumps(document['graph'], separators=(',', ':'), allow_nan=False))
+            if graph.root != registered.root:
+                raise ValueError('implementation graph root differs from its registered namespace')
+            found = self._put(key, SimpleNamespace(graph=graph, index=ProgramIndex(graph),
+                document=document, namespace=registered), 3 * registered.graph.decoded_bytes)
+        return found if namespace.graph == found.namespace.graph else SimpleNamespace(
+            graph=found.graph, index=found.index, document=found.document, namespace=namespace)
+
     def load(self, namespace):
         if type(namespace) is SourceBodyNamespace:
             return self.load_body(namespace)
@@ -466,6 +590,8 @@ class ProgramDependencySession:
             raise TypeError("graph lookup needs a qualified original graph namespace")
         if namespace.source_body is not None:
             body = self.load_body(namespace.source_body)
+        elif namespace.graph.artifact.uri in self._implementation_graphs:
+            return self._implementation_graph(namespace)
         elif namespace.graph.pointer == "#/provider/graph":
             original = self._provider_record(replace(namespace.graph, pointer="#/provider"))
             body = SimpleNamespace(**vars(original), namespace=namespace)
@@ -819,7 +945,8 @@ class ProgramDependencySession:
         from scar.ir.program.ids import UseID, ValueID
         from scar.ir.program.model import TerminatorKind
         body = self.load(point.namespace)
-        if not hasattr(body, "document"):
+        if (not hasattr(body, "document")
+                or type(getattr(body, 'namespace', None)) is not SourceBodyNamespace):
             return False
         key = "class-interface-scope", body.unit_number, body.body_position
         scope = self._get(key)
@@ -848,6 +975,7 @@ class ProgramDependencySession:
     def measurements(self):
         routing = self._call_routing
         return {"input_bytes": self.input_bytes, "cache_accounted_bytes": self._cache_bytes + self._environment_facts.bytes,
+                "registered_implementation_graphs": len(self._implementation_graphs),
                 "graphs_read": len(self._seen_graphs), "relationship_shards_read": len(self._seen_shards),
                 "routing_shards_read": routing.shards if routing is not None else 0,
                 "routing_references": routing.references if routing is not None else 0,
@@ -865,11 +993,12 @@ class ProgramDependencySession:
             return
         try:
             for path, stamp in self._stamps.items():
-                if not path.is_file() or path.is_symlink() or _stamp(path) != stamp:
+                if not path.is_file() or path.is_symlink() or path.resolve() != path or _stamp(path) != stamp:
                     raise ValueError("original dependency input changed during query")
         finally:
             self._cache.clear()
             self._cache_bytes = 0
+            self._implementation_graphs.clear()
             self._environment_facts.bodies.clear()
             self._environment_facts.bytes = 0
             self._call_routing = None

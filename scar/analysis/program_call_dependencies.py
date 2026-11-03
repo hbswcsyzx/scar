@@ -250,6 +250,8 @@ class StaticCallDependencyProvider:
         """
         body=self.session.load(point.namespace)
         if not hasattr(body,'document'):return False
+        from scar.ir.program.source_call_bindings import SourceBodyNamespace
+        if type(getattr(body,'namespace',None)) is not SourceBodyNamespace:return False
         roles=set();node=point.node
         interface=getattr(body,'interface',None)
         if type(node)is RegionID and node==body.graph.root and interface is not None:

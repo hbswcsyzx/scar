@@ -107,6 +107,7 @@ class StaticCallDependencyView(ProgramDependencySession):
         self.started, self.closed = owner.started, False
         self._stamps = owner._stamps
         self._artifacts, self._logical, self._descriptor_aliases = {}, {}, {}
+        self._implementation_graphs = {}
         self._uris_by_key = {}
         self._bases = _BasisInputs(self)
         self._body_paths = dict(owner._body_locations)
@@ -216,6 +217,29 @@ class StaticCallDependencyView(ProgramDependencySession):
     def _register(self, uri, physical, descriptor):
         ProgramDependencySession._register(self, uri, physical, descriptor)
         self._uris_by_key.setdefault(str(physical), {})[uri] = None
+
+    def register_implementation_graph(self, locator, representation, graph):
+        """Share explicit derived graph IO with this view's original owner.
+
+        The existing generic registered-read branch already uses owner byte
+        budgets, stamps, strict gzip JSON decoding and its prefixed LRU. No
+        additional reader or large graph store is introduced here.
+        """
+        if type(locator) is not SourceArtifactLocator:
+            raise TypeError('implementation registration needs SourceArtifactLocator')
+        key = locator.artifact.uri
+        previous = self._uris_by_key.get(key)
+        if previous is not None and any(uri in self._body_paths for uri in previous):
+            raise ValueError('implementation registration cannot relabel an original source body')
+        previous = None if previous is None else dict(previous)
+        try:
+            return ProgramDependencySession.register_implementation_graph(self, locator, representation, graph)
+        except BaseException:
+            if previous is None:
+                self._uris_by_key.pop(key, None)
+            else:
+                self._uris_by_key[key] = previous
+            raise
 
     def read(self, descriptor):
         relative = Path(descriptor["path"])
@@ -458,6 +482,7 @@ class StaticCallDependencyView(ProgramDependencySession):
 
     def measurements(self):
         return {"input_bytes": self.owner.input_bytes,
+            "registered_implementation_graphs": len(self._implementation_graphs),
             "cache_accounted_bytes": self.owner._cache_bytes + self._environment_facts.bytes,
             "shared_original_bodies": sum(key[0] == "body" for key in self._seen_graphs),
             "relationship_shards_read": len(self._seen_shards),
@@ -473,6 +498,12 @@ class StaticCallDependencyView(ProgramDependencySession):
     def close(self):
         if self.closed:
             return
+        failure = None
+        try:
+            for namespace in self._implementation_graphs.values():
+                self._pin(Path(namespace.graph.artifact.uri))
+        except BaseException as error:
+            failure = error
         if self._origin_discovery is not None:
             self._origin_discovery.clear()
         if self._entry_namespace_provider is not None:
@@ -487,7 +518,10 @@ class StaticCallDependencyView(ProgramDependencySession):
                 _, size = self.owner._cache.pop(key)
                 self.owner._cache_bytes -= size
         self._bases.clear()
+        self._implementation_graphs.clear()
         self.closed = True
+        if failure is not None:
+            raise failure
 
 
 __all__ = ["StaticCallDependencyView"]

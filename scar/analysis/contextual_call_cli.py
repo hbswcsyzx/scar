@@ -107,6 +107,7 @@ def main(argv=None):
     requested, found_operations = frozenset(args.operation), set()
     calls = targets = output_bytes = selected_calls = 0
     receiver_queries = receiver_edges = 0
+    class_sources_count = class_invocations_count = class_interface_edges = 0
     matched_bodies = eligible_bodies = processed_bodies = 0
     scope_complete, inputs_stable, state = False, False, "FAILED"
     error = None
@@ -162,6 +163,36 @@ def main(argv=None):
         receiver_edges += len(walk.edges)
         return descriptor
 
+    def persist_classes(resolution, caller_number, call_number):
+        nonlocal class_sources_count, class_invocations_count, class_interface_edges
+        from scar.analysis.program_dependency_export import _Tables
+        sources = resolver.class_sources(resolution.call)
+        invocations = resolver.class_invocations(resolution.call)
+        if sources is None or invocations is None:
+            issue('CLASS_INVOCATION_EPHEMERAL_UNAVAILABLE',
+                'The completed call has no matching class-source/implementation scope.')
+            return None
+        if not sources and not invocations:
+            return None
+        table = _Tables()
+        record = {'schema': 'scar.contextual-class-invocations', 'schema_version': 1,
+            'call': table.point(resolution.call), 'sources': [table.pack(source) for source in sources],
+            'invocations': [table.pack(invocation) for invocation in invocations],
+            'frontiers': [table.frontier(frontier) for frontier in resolver.type_calls.frontiers_for(resolution.call)],
+            'target_executed': False, 'runtime_dispatch_verified': False,
+            'physical_abi_mapping_complete': False, 'python_callbacks_connected': False,
+            'whole_program_complete': False, 'transformation_authorized': False}
+        record.update(table.tables)
+        count = sum(len(invocation.edges) for invocation in invocations)
+        descriptor = persist_document(record,
+            f'class-invocations/{caller_number:06d}/{call_number:06d}.json.gz',
+            'scar.contextual-class-invocations/1', class_sources=len(sources),
+            class_invocations=len(invocations), implementation_interface_edges=count)
+        class_sources_count += len(sources)
+        class_invocations_count += len(invocations)
+        class_interface_edges += count
+        return descriptor
+
     try:
         owner = StaticCallSession(model, out=out / "source-basis", budget=budget, activity=task.activity)
         resolver = owner.contextual_resolver()
@@ -202,7 +233,7 @@ def main(argv=None):
             receipts, receiver_receipts = [], []
             caller = {"source": unit["path"], "entry_key": row["entry_key"],
                 "caller_graph": encode(body.namespace.graph), "matched_calls": len(operations),
-                "artifacts": receipts, "receiver_artifacts": receiver_receipts}
+                "artifacts": receipts, "receiver_artifacts": receiver_receipts, 'class_invocation_artifacts': []}
             callers.append(caller)
             for operation in operations:
                 if calls >= args.max_calls:
@@ -219,6 +250,9 @@ def main(argv=None):
                     receipts.append(descriptor["path"])
                     calls += 1
                     targets += len(resolution.targets)
+                    class_descriptor = persist_classes(resolution, caller_number, call_number)
+                    if class_descriptor is not None:
+                        caller['class_invocation_artifacts'].append(class_descriptor['path'])
                     # Read the just-completed scope before any later resolve
                     # can replace its ephemeral receiver evidence. Its graph
                     # is independent evidence, never a callee identity path.
@@ -282,6 +316,8 @@ def main(argv=None):
             "calls_persisted": calls, "selected_call_enumeration_complete": scope_complete},
         "target_alternatives": targets, "interface_edges": dict(interfaces),
         "receiver_queries": receiver_queries, "receiver_edges": receiver_edges,
+        'class_statement_sources': class_sources_count, 'class_invocations': class_invocations_count,
+        'class_implementation_interface_edges': class_interface_edges,
         "argument_edges": interfaces.get("ARGUMENT", 0),
         "normal_return_edges": interfaces.get("COMPLETION", 0),
         "frontier_counts": dict(frontiers), "issues": issues, "error": error,
@@ -300,6 +336,7 @@ def main(argv=None):
         receiver_queries=receiver_queries, receiver_edges=receiver_edges,
         first_stage_complete=False, summary="summary.json")
     print(json.dumps({"state": state, "out": str(out), "calls": calls, "targets": targets,
+        'class_sources': class_sources_count, 'class_invocations': class_invocations_count,
         "interface_edges": dict(interfaces), "analyzer_seconds": summary["analyzer_seconds"],
         "summary": str(out / "summary.json")}, ensure_ascii=False, sort_keys=True))
     return 0 if scope_complete else 130 if state == "INTERRUPTED" else 2

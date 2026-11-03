@@ -65,6 +65,13 @@ source spelling 与实际 lookup name 分开，private-name 改写由词法 Clas
 这条路径解释 lookup 的输入，不是 lookup 结果或 callable 的身份。入口形参未绑定、
 CALL 产物和尚未展开的属性读取分别记录停止位置，不能凭变量名或词法所属类推实例类型。
 
+类语句来源取 `ClassConstruction.result`（最后一层 decorator 返回值），不等于 suite
+的 cell/None，也不保证是 runtime class。标准构造协议另作条件实现图：原 CALL 输入
+→逻辑参数视图→`tp_new`→内部 subtype 分支→实际返回对象类型的 `tp_init`→返回/异常
+清理；`tp_new` 产物不保证新分配或属于请求类。原调用保留，物理 ABI 与 Python callback
+映射仍开放。协议参照 [CPython 3.14.7 typeobject.c](https://github.com/python/cpython/blob/v3.14.7/Objects/typeobject.c)，
+图中操作是协议层静态模型，不是已观测的物理调用或参数 tuple 分配。
+
 `IMPORT_FROM` 也是原 Operation，不转换成虚构的 Attribute AST。`StaticImportFromRequest`
 记录原 name/level/fromlist Use 和 fromlist 的 `CodeConstantSource`；`StaticImportFromRead`
 记录原 receiver/key/world、成员序号及 normal result。两者只是描述原端口的强类型关系，
