@@ -459,6 +459,9 @@ def main(argv=None) -> int:
     if cli_argv and cli_argv[0] == 'source-syntax':
         from scar.analysis.source_parsing import main as source_parsing_main
         return source_parsing_main(cli_argv[1:])
+    if cli_argv and cli_argv[0] == 'source-symbols':
+        from scar.analysis.source_symbol_materials import main as source_symbols_main
+        return source_symbols_main(cli_argv[1:])
     if cli_argv and cli_argv[0] == "static":
         from scar.analysis.static_program import main as static_main
         return static_main(cli_argv[1:])
@@ -482,6 +485,8 @@ def main(argv=None) -> int:
     source_tokens.set_defaults(func=lambda _: 0)
     source_syntax = sub.add_parser('source-syntax', help='F2: retain complete official AST fields without target execution')
     source_syntax.set_defaults(func=lambda _: 0)
+    source_symbols = sub.add_parser('source-symbols', help='F3-A: preserve the official compiler symbol view without AST binding claims')
+    source_symbols.set_defaults(func=lambda _: 0)
     static_cmd = sub.add_parser("static", help="build source-root program graphs without executing the target")
     static_cmd.set_defaults(func=lambda _: 0)
     static_query = sub.add_parser("static-query", help="query stored static definitions and original graph dependencies")

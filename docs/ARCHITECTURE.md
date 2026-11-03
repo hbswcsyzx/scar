@@ -54,6 +54,12 @@ Ruff对class-cell的显式近似表明不能把工具输出无条件升格为优
 [LibCST](https://github.com/Instagram/LibCST/blob/v1.9.0/libcst/metadata/scope_provider.py)、
 [Ruff](https://github.com/astral-sh/ruff/blob/main/crates/ruff_python_semantic/src/scope.rs)。
 
+F3-A已实现类型化编译器视图与独立材料store；显式flags、原序参数/符号/children和别名均可fresh重验。
+编译器补入free symbols的顺序受Python hash上下文影响；profile保有效指纹，worker与parent必须相同。
+完整转录保原序，不能用排序掩盖差异；分析进程固定PYTHONHASHSEED，不能靠启动后改env假装生效。
+原生compiler错误、adapter协议错误、资源与预算分别处理；外部store摘要需由fresh事实重新计算校核。
+collect-only保留原模型，只写新分片并绑定必需四种源码收据；无关manifest元数据变化不使其失效。
+
 ## 共享子图与可组合接口
 
 源码 AST/CST 是识别输入；执行依赖由可共享、可成环的规范图表示。

@@ -25,6 +25,19 @@ F2默认exec，也支持eval/single/func_type；--file先经过F0/F1，--max-nod
 F0/F1/F2声明材料验收已通过，下一阶段是F3作用域与名字绑定，前层未验收不新增后层功能。
 当前profile固定本机CPython及tokenizer源码/静态解释器二进制指纹；内置tokenizer的shared Python暂不接纳。
 
+F3-A：
+
+```bash
+PYTHONHASHSEED=0 python -B -m scar.cli source-symbols --model /path/to/model --out /path/to/materials --collect-only --jobs 8
+PYTHONHASHSEED=0 python -B -m scar.cli source-symbols --model /path/to/model --materials /path/to/materials --out /path/to/check --verify --jobs 8
+```
+
+固定seed只用于分析进程；实际hash上下文写入profile，worker不一致时拒绝。每源scope/symbol上限可配置，
+F1/F2及原材料的replay预算也受本次上限约束。默认capture会向可写模型只追加source_symbols；
+collect-only是独立材料store，fresh核验绑定必需源码收据。PUBLIC_COMPILER_VIEW/UNJOINED不授AST绑定或scope完整性。
+当前/home只读时，命令前缀改为`python -B /var/tmp/scar-f2-recovery-7w7nd_0z/run_overlay.py`；
+它只加载同一main的变更源码缓冲，不创建checkout。恢复写入后按RECOVERY.json同步，普通入口即可使用。
+
 ## 已有建图入口（前端形式验收尚未完成）
 
 ```bash

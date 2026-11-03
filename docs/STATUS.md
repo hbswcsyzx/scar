@@ -54,23 +54,28 @@ F1/F2共11个聚焦检查通过（5.21秒），含四mode、独立wire核对、�
 采集证据：`artifacts/current/queries/formal-frontend-f2/acquisition/result.json`。
 完整核验与汇总：`/var/tmp/scar-f2-recovery-7w7nd_0z/{verification/result.json,run.json}`。
 
-## F3审计与下一步
+## F3-A材料（已验收，尚未接通AST）
 
-**Observed**：866份声明源码做1732次官方compiler-only调用，双pass全部一致；
-40,411张public表、208,528个符号，8进程6.244秒，分片压缩1,633,195 bytes。
-旧catalog表数量/child路径没少，15个公开Symbol标志也已全存；真正丢失的是23,010表的原符号序、
-全部表的varnames/nested及全部40,189非空表的raw flags。name+line有349组冲突（直接siblings6组）。
-**Verified**：完整manifest及消费分片保持；所有7种表类型/5种scope码/11独立flags均实际出现。
-这仍只是PUBLIC_COMPILER_VIEW审计，不是F3程序实现、完整lexical scope或AST接通。
+**Implemented/Verified**：完整类型化public compiler材料、canonical append、collect-only独立store和fresh reader。
+866份源码全部CAPTURED，40,411个scope、208,528个symbol；866分片共2,981,301压缩bytes，解释前沿0。
+8进程采集162.00秒、独立核验162.33秒（均包含完整F0/F1/F2重验；纯native双pass审计为6.24秒）。
+6个聚焦检查通过，含4个F3-A族与2个F1/F2集成；eval.py单文件9scope/89symbol亦独立验证。
 
-**Rejected**：按名字/行号/AST遍历序接线；将LibCST直接当全覆盖authority。
-LibCST1.9.0隔离5例已实测walrus绑定反例，私有名和3.14annotation/typeparams需适配；
-可复用CST与已验证的局部能力。原生编译器直连也受本机local-only符号限制，不读历史指针绕过。
+原序参数/符号、原始integer flags、nested/type及child别名均保存；不持久化历史native地址。
+修复了adapter错误冒充compiler诊断，以及store摘要/预算/权限声明未验证的问题。
+实际跨seed实验确认free-symbol补入顺序不同；profile现在保有效hash上下文，跨worker/replay不匹配则拒。
+PUBLIC_COMPILER_VIEW/UNJOINED始终显式；这不是完整lexical scope、名字绑定或第一阶段完成证明。
 
-**Proposed**：F3-A官方原材料保全 → F3-B完整字段角色 → F3-C源码scope/phase与存储绑定 → F3-D独立验收。
-源码角色与compiler block/frame分开，允许共享/内联及条件对应；全部通过后才继续F4。
-证据与决策：`/var/tmp/scar-f2-recovery-7w7nd_0z/f3-audit/{real-corpus/result.json,decision.json}`。
-当前/home仍emergency_ro，尚不能在唯一工作区落实下一层源码或发布模型。
+本轮材料/汇总在`/var/tmp/scar-f2-recovery-7w7nd_0z/f3a/{materials,verification,run.json}`。
+/home仍emergency_ro；通过同一main的变更源码缓冲运行，原模型manifest和消费分片不变。
+真实模型尚未注册新材料（canonical_model_published=false）；fixture已验证追加端点保持及canonical fresh读回。
+
+## 下一层
+
+F3-B：完整constructor×field×context角色表 → F3-C：源码scope/phase与名字存储绑定 → F3-D：全量独立验收。
+旧15个公开标志已全存，349组name+line冲突及内联/annotation共享证明不能据此直接接AST。
+字段角色和source/compiled/runtime三种scope必须分开，F3通过后才进入F4；不增加优化backend。
+先前审计及LibCST能力反例保存在`f3-audit/`；现成库仅按已验证能力使用。
 
 ## 当前模型与已有后层证据
 
@@ -86,5 +91,5 @@ LibCST1.9.0隔离5例已实测walrus绑定反例，私有名和3.14annotation/ty
 待前层通过后，再继续组合控制、generator创建/恢复、native/runtime/kernel及状态/资源连接；
 不做化简、backend扩展或目标改写，也没有LeWM加速比结论。
 
-当前环境阻塞：/home触发ext4 emergency_ro；本轮用/var/tmp临时Git索引与对象库保全提交。
-本地HEAD/index仍在f4cc1afc，待恢复可写后按保存的原hash核对并同步；不reset或覆盖用户更改。
+当前/home仍只读；同一main通过/var/tmp临时Git索引、对象库和少量变更源码缓冲继续开发。
+本地HEAD/index仍在f4cc1afc；恢复可写后先核原hash，再同步缓冲与文档、注册材料；不覆盖用户更改。
