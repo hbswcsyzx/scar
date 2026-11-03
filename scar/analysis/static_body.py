@@ -285,15 +285,20 @@ def _run_unit(unit, catalog, selected, output, max_operations, producer):
     return unit
 
 
-def expand_static_bodies(directory, *, jobs=4, max_operations=10000, max_bodies=None, files=(), entries=(), progress=None):
+def expand_static_bodies(directory, *, jobs=4, max_operations=10000, max_bodies=None, files=(), entries=(), progress=None,
+                         additive_only=False):
     """Refine only saved source bodies, preserving the complete lexical ledger.
 
     max_bodies/files/entries constrain dispatch, never the published denominator.
     Sources, imports and code are not executed. One process owns each source.
+    additive_only fills missing artifact rows without replacing existing bodies;
+    retained call/class relationships still cover their original basis only.
     """
     from scar.analysis.static_program import read_static_program, _read_fragment, _json, _lowering_route, _discard_static_calls
     if type(jobs) is not int or not 1 <= jobs <= 32:
         raise ValueError("jobs must be in [1,32]")
+    if type(additive_only) is not bool:
+        raise TypeError("additive_only must be a bool")
     if type(max_operations) is not int or max_operations < 1:
         raise ValueError("max_operations must be positive")
     if max_bodies is not None and (type(max_bodies) is not int or max_bodies < 0):
@@ -314,15 +319,25 @@ def expand_static_bodies(directory, *, jobs=4, max_operations=10000, max_bodies=
     original = (output / "manifest.json").read_bytes()
     if json.loads(original) != manifest:
         raise ValueError("model manifest changed during read")
+    original_basis = None
+    if additive_only:
+        from copy import deepcopy
+        from scar.analysis.static_calls import input_basis_unit
+        from scar.analysis.static_basis_compatibility import units_basis_compatible
+        original_basis = deepcopy([input_basis_unit(unit) for unit in manifest['units']])
     started = time.monotonic()
     producer = _producer()
     temporary = Path(tempfile.mkdtemp(prefix=".static-bodies-", dir=output.parent))
     try:
         shutil.copytree(output, temporary, dirs_exist_ok=True, copy_function=os.link)
-        _discard_static_calls(temporary, manifest)
+        if not additive_only:
+            _discard_static_calls(temporary, manifest)
         inputs = {d["path"]: _stamp(temporary/d["path"]) for unit in manifest["units"]
                   for kind, d in unit["artifacts"].items()
                   if kind in ("source", "lexical", "semantic", "semantics", "control")}
+        if additive_only:
+            inputs.update((row['artifact']['path'], _stamp(temporary/row['artifact']['path']))
+                for unit in manifest['units'] for row in unit['bodies'] if 'artifact' in row)
         tasks = []
         allocated = 0
         found_entries = set()
@@ -340,9 +355,13 @@ def expand_static_bodies(directory, *, jobs=4, max_operations=10000, max_bodies=
             if selected_entries and not selected_entries.intersection(entry["entry_key"] for entry in catalog["entries"]):
                 continue
             selected = []
+            rows_by_entry = {row['entry_key']: row for row in unit['bodies']}
             for entry in catalog["entries"]:
                 if selected_entries and entry["entry_key"] not in selected_entries:
                     continue
+                if additive_only and 'artifact' in rows_by_entry[entry['entry_key']]:
+                    raise ValueError('additive expansion cannot replace an existing body artifact: '
+                        + entry['entry_key'])
                 if _lowering_route(entry)["status"] != "READY_TO_ATTEMPT":
                     continue
                 if max_bodies is None or allocated < max_bodies:
@@ -409,6 +428,9 @@ def expand_static_bodies(directory, *, jobs=4, max_operations=10000, max_bodies=
             raise ValueError("shared source fragment changed during body expansion")
         if _producer() != producer:
             raise ValueError("analyzer source changed during body expansion")
+        if additive_only and not units_basis_compatible(original_basis,
+                [input_basis_unit(unit) for unit in manifest['units']]):
+            raise ValueError('body expansion is not an additive extension of the original input basis')
         counts = Counter(row["status"] for unit in manifest["units"] for row in unit["bodies"])
         manifest["summary"]["body_statuses"] = dict(counts)
         manifest["summary"]["canonical_body_operations"] = sum(
@@ -425,6 +447,14 @@ def expand_static_bodies(directory, *, jobs=4, max_operations=10000, max_bodies=
             "reused_bodies": sum(manifest["units"][i].get("body_expansion", {}).get("reused", 0) for i in selected_counts),
             "elapsed_seconds": time.monotonic()-started, "runtime_evidence_required": False,
             "qualification": "Static source construction only; failed/unsupported and undispatched entries remain in the full ledger."}
+        if additive_only:
+            manifest['body_expansion'].update(additive_only=True,
+                relationship_coverage={
+                    'scope': 'PRIOR_BODY_BASIS_ONLY',
+                    'original_manifest_sha256': hashlib.sha256(original).hexdigest(),
+                    'static_calls_preserved': 'static_calls' in manifest,
+                    'static_classes_preserved': 'static_classes' in manifest,
+                    'added_bodies_linked': False})
         manifest["storage"] = {"files": len(list(temporary.rglob("*.gz"))),
             "compressed_bytes": sum(path.stat().st_size for path in temporary.rglob("*.gz"))}
         (temporary/"manifest.json").unlink()

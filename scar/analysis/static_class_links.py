@@ -18,6 +18,7 @@ from time import monotonic
 from scar.analysis.static_class_builder import connect_class_suite, validate_class_builder_expansion
 from scar.ir.program.class_builder import (
     ClassBuilderExpansion, ClassBuilderProvider, StaticClassBuilderBinding,
+    decode_class_builder_provider,
 )
 from scar.ir.program.class_entries import ClassSuiteOverlay, ClassSuiteMethodOverlay, decode_class_entry_overlay
 from scar.ir.program.codec import loads as load_core
@@ -243,6 +244,7 @@ def read_static_class_links(directory, publication, *, index_directory=None, log
     This reader executes no target or saved validation result.
     """
     from scar.analysis.static_calls import input_basis_unit
+    from scar.analysis.static_basis_compatibility import units_basis_compatible
     from scar.analysis.static_program import read_static_program
     root = Path(directory).absolute()
     manifest = read_static_program(root, verify=False)
@@ -264,7 +266,8 @@ def read_static_class_links(directory, publication, *, index_directory=None, log
     basis, _ = _read_json_artifact(index_artifact(basis_artifact), max_bytes=max_bytes)
     if (basis.get("schema") != "scar.static-call-source-basis" or basis.get("schema_version") != 1
             or basis["logical_root"] != str(logical_model)
-            or basis["units"] != [input_basis_unit(u) for u in manifest["units"]]):
+            or not units_basis_compatible(basis["units"],
+                [input_basis_unit(u) for u in manifest["units"]])):
         raise ValueError("class source basis differs from current original inputs")
     cache, providers, catalogs = {}, {}, {}
 
@@ -343,7 +346,7 @@ def read_static_class_links(directory, publication, *, index_directory=None, log
                         or locator.pointer != "#/provider" or provider_document.get("schema") != "scar.static-class-provider"
                         or provider_document.get("schema_version") != 1):
                     raise ValueError("class provider decoded receipt/schema differs")
-                providers[locator] = decode(ClassBuilderProvider, provider_document["provider"])
+                providers[locator] = decode_class_builder_provider(provider_document["provider"])
             parent_graph, _, constructions = original(binding.parent)
             suite_graph, suite_overlay, _ = original(binding.suite)
             if binding.construction not in constructions:

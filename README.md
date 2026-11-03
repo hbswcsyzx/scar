@@ -110,7 +110,7 @@ python -B -m scar.cli trace --calls-only \
   --capture-plan /path/to/plan.json --capture-plan-sha256 PLAN_SHA256 \
   --capture-transport snapshot --out /path/to/fresh-trace -- python /path/to/program.py
 python -B -m scar.cli observed-calls --model /path/to/static-model \
-  --trace /path/to/fresh-trace --out /path/to/fresh-bindings
+  --trace /path/to/fresh-trace --out /path/to/fresh-bindings --expand-missing
 ```
 
 `observed-calls` 只离线连接，不执行目标。输出规范化 `bindings.json.gz`、
@@ -121,6 +121,11 @@ python -B -m scar.cli observed-calls --model /path/to/static-model \
 新计划支持 `CALL_KW` 身份观测；完全提供的位置/普通关键字参数可接原函数接口，
 receiver/default/variadic 及未展开主体仍报告具体缺口。真实 LeWM 求解器（人工 cost、非 episode）
 的参数/返回核验见 `artifacts/current/queries/lewm-observed-calls/result.json`。
+`--expand-missing` 根据完整代码匹配自动请求原静态前端补建无 artifact 的主体；默认最多32个，
+用 `--max-expand-bodies` 限制。展开报告独立保存到 `OUT-expansion`（可用 `--expansion-out`），
+然后重新连接同一 trace。已有源码/主体不变才保留旧 CALL/class 索引，其覆盖仍限原 basis。
+函数内部可经 `session.load(namespace).graph` 查看，循环接口经 `session.loop_views(namespace)`
+查看；循环体共享，初始/回边/world 独立，不把引用转发当内容不变证明。
 
 权威程序图只保留 `artifacts/current/static/`：每份源码共享 source/semantic/semantics/CFG/lexical 分片，常量事实和 import 候选索引连接原 ID。`queries/` 只保存引用这些原分片的派生查询及核验收据。
 `--phase sources` 仅建目录；`--phase graph` 为默认源码图；`--phase bodies` 构造源图后继续规范主体展开。对已有图使用 `--expand`，无需重建源图；`--rules-only` 只发布详细规则/前提，`--max-bodies` 与 `--file` 只限制本次派工，全部入口继续计入分母。

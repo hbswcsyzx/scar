@@ -7,7 +7,7 @@ function-environment references. The shared class body is never cloned.
 """
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, fields
 from enum import Enum
 
 from scar.ir.program.class_construction import ClassConstruction
@@ -111,6 +111,29 @@ class ClassBuilderProvider:
               "provider stages must be typed original ports")
         _need(type(self.cleanup_operations) is tuple
               and all(type(o) is OperationID for o in self.cleanup_operations), "cleanup must name original operations")
+
+
+def decode_class_builder_provider(record):
+    """Strict provider read, admitting only the known pre-lookup graph layout.
+
+    Embedded provider graphs have no core-version envelope. The sole legacy
+    difference admitted here is the absent optional lookup evidence table;
+    None preserves NOT_RECORDED, rather than certifying an empty new table.
+    Original dictionaries and stored provider bytes are never changed.
+    """
+    from scar.ir.record_codec import decode
+    provider_fields = {field.name for field in fields(ClassBuilderProvider)}
+    if type(record) is not dict or set(record) != provider_fields:
+        raise ValueError('class builder provider record fields mismatch')
+    graph = record['graph']
+    graph_fields = {field.name for field in fields(ProgramGraph)}
+    if type(graph) is not dict:
+        raise ValueError('class builder provider graph must be an exact record')
+    if set(graph) == graph_fields - {'attribute_lookups'}:
+        record = {**record, 'graph': {**graph, 'attribute_lookups': None}}
+    elif set(graph) != graph_fields:
+        raise ValueError('class builder provider graph fields mismatch')
+    return decode(ClassBuilderProvider, record)
 
 
 @dataclass(frozen=True, slots=True)

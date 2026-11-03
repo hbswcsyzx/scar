@@ -316,11 +316,37 @@ def main(argv=None):
     parser.add_argument('--trace', required=True)
     parser.add_argument('--out', required=True)
     parser.add_argument('--max-seconds', type=int, default=180)
+    parser.add_argument('--expand-missing', action='store_true',
+                        help='use retained captured code to add missing static bodies before reconnecting')
+    parser.add_argument('--max-expand-bodies', type=int, default=32)
+    parser.add_argument('--expansion-out',
+                        help='fresh expansion report directory (default: OUT-expansion)')
     args = parser.parse_args(argv)
-    report = build_observed_call_bindings(args.model, args.trace, args.out,
-        replace(StaticCallBudget(), max_seconds=args.max_seconds))
+    limits = replace(StaticCallBudget(), max_seconds=args.max_seconds)
+    expansion = None
+    if args.expansion_out and not args.expand_missing:
+        parser.error('--expansion-out requires --expand-missing')
+    if args.expand_missing:
+        normal_out = Path(args.out).absolute()
+        if (normal_out.resolve() != normal_out or normal_out.is_symlink()
+                or normal_out.exists() and (not normal_out.is_dir() or any(normal_out.iterdir()))):
+            raise FileExistsError('observed-call output must be fresh before expanding the model')
+        expansion_out = (Path(args.expansion_out).absolute() if args.expansion_out else
+                         normal_out.with_name(normal_out.name + '-expansion'))
+        if expansion_out.is_relative_to(normal_out) or normal_out.is_relative_to(expansion_out):
+            raise ValueError('binding and expansion reports need separate directories')
+        from scar.analysis.observed_body_demands import expand_observed_bodies
+        expansion = expand_observed_bodies(args.model, args.trace, expansion_out,
+            limits, max_bodies=args.max_expand_bodies)
+    report = build_observed_call_bindings(args.model, args.trace, args.out, limits)
+    if expansion is not None:
+        report['body_expansion'] = {'report': str(expansion_out / 'result.json'),
+            'request_count': expansion['request_count'],
+            'expanded_body_count': expansion['expanded_body_count']}
+        (Path(args.out) / 'summary.json').write_bytes(_json(report))
     print(json.dumps({key: report[key] for key in
-        ('binding_count', 'observed_attempts', 'target_kinds', 'analyzer_seconds', 'issues')},
+        ('binding_count', 'observed_attempts', 'target_kinds', 'analyzer_seconds', 'issues')}
+        | ({'body_expansion': report['body_expansion']} if expansion is not None else {}),
         ensure_ascii=False, sort_keys=True))
     return 0
 

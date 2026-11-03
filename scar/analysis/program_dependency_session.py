@@ -167,6 +167,7 @@ class ProgramDependencySession:
 
     def _register_publication(self, publication, index_directory, family):
         from scar.analysis.static_calls import input_basis_unit
+        from scar.analysis.static_basis_compatibility import units_basis_compatible
         expected = "scar.static-call-publication" if family == "calls" else "scar.static-class-publication"
         if publication.get("schema") != expected:
             raise ValueError("unsupported " + family + " dependency publication")
@@ -191,7 +192,8 @@ class ProgramDependencySession:
             next(d["decoded_bytes"] for d in publication["artifacts"] if d.get("kind") == "BASIS"), "gzip-canonical-json"))
         if (basis.get("schema") != "scar.static-call-source-basis" or basis.get("schema_version") != 1
                 or basis.get("logical_root") != str(self.root)
-                or basis.get("units") != [input_basis_unit(unit) for unit in self.units]):
+                or not units_basis_compatible(basis.get("units"),
+                    [input_basis_unit(unit) for unit in self.units])):
             raise ValueError("relationship source basis differs from original current units")
         self._bases[artifact] = basis
         items = self._call_items if family == "calls" else self._class_items
@@ -645,6 +647,15 @@ class ProgramDependencySession:
     def namespace_for(self, body):
         return body.dependencies
 
+    def loop_views(self, namespace):
+        """Expose shared loop templates and original carried ports, not iterations."""
+        from scar.analysis.program_loop_views import loop_template_views
+        if type(namespace) is GraphNamespace:
+            namespace = namespace.source_body
+        if type(namespace) is not SourceBodyNamespace:
+            raise TypeError('loop views require an original source-body namespace')
+        return loop_template_views(self.load_body(namespace))
+
     def body_locations(self, *, file=None, entry=None, kind=None):
         """Select declaration rows before reading any canonical fragment."""
         from scar.analysis.static_query import _file_matches
@@ -723,7 +734,7 @@ class ProgramDependencySession:
         return self._provider_record(locator).provider
 
     def _provider_record(self, locator):
-        from scar.ir.program.class_builder import ClassBuilderProvider
+        from scar.ir.program.class_builder import decode_class_builder_provider
         from scar.ir.program.queries import ProgramIndex
         if locator.pointer != "#/provider" or locator.artifact.schema != "scar.static-class-provider/1":
             raise ValueError("class provider locator must retain its original #/provider record")
@@ -736,7 +747,7 @@ class ProgramDependencySession:
             if key not in self._seen_graphs and len(self._seen_graphs) >= self.budget.max_graphs:
                 raise OverflowError("dependency graph-read budget exhausted")
             self._seen_graphs.add(key)
-            provider = decode(ClassBuilderProvider, document["provider"])
+            provider = decode_class_builder_provider(document["provider"])
             record = self._put(key, SimpleNamespace(provider=provider, graph=provider.graph,
                 index=ProgramIndex(provider.graph)), 3 * locator.decoded_bytes)
         return record

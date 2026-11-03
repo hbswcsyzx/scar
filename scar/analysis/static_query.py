@@ -306,6 +306,7 @@ def _call_relations(manifest, unit, entries, fragments, limit, *, body_loader=No
     from collections import OrderedDict
     from types import SimpleNamespace
     from scar.analysis.static_calls import input_basis_unit
+    from scar.analysis.static_basis_compatibility import units_basis_compatible
     from scar.analysis.static_function_environment import (
         derive_function_environment_routes, validate_static_body_namespace, _source_reference,
     )
@@ -332,7 +333,8 @@ def _call_relations(manifest, unit, entries, fragments, limit, *, body_loader=No
             or basis_document.get("schema_version") != 1
             or basis_document.get("logical_root") != str(fragments.root)
             or basis_document.get("input_manifest_sha256") != publication.get("input_manifest_sha256")
-            or basis_document.get("units") != [input_basis_unit(row) for row in manifest["units"]]):
+            or not units_basis_compatible(basis_document.get("units"),
+                [input_basis_unit(row) for row in manifest["units"]])):
         raise ValueError("static call input namespace/source/body basis differs from the current model")
     basis_uri = str(fragments.root / basis["path"])
     registry = {}

@@ -13,7 +13,7 @@
 ## 当前唯一已发布图
 
 `artifacts/current/static/manifest.json` SHA-256：
-`18aab515266ee99b9293aa1d7eef72332236c07f97aceefaf79280a6787a97f1`。
+`026a200526cc34964e39c61075a5a8fc73e0e9e491f32c7ad1543cff1d3a8158`。
 
 | 项目 | 当前结果 |
 |---|---:|
@@ -23,19 +23,21 @@
 | 源码操作 / 关系 | 835,725 / 3,738,042 |
 | CFG 节点 / 边 | 478,899 / 569,425 |
 | 有限常量事实 | 124,535 |
-| 有规范图的入口 / 所有主体产物 | 8,089 / 8,819 |
-| 无主体产物声明 | 27,345 |
-| 规范操作 | 1,262,346 |
-| lowerer / shape 不支持 | 326 / 404 |
-| 缺独立适配 / 新单位未派工入口 | 3,731 / 23,614 |
+| 有规范图的入口 / 所有主体产物 | 8,092 / 8,822 |
+| 无主体产物声明 | 27,342 |
+| 规范操作 | 1,262,939 |
+| lowerer / shape 不支持 | 326 / 420 |
+| 缺独立适配 / 尚未派工入口 | 3,925 / 23,401 |
 | 模块 / class suite 未展开后缀 | 107 / 45 |
 | calls 分片 / 已枚举规范调用 | 6,697 / 35,747 |
 | 有条件目标候选的调用 / 无目标候选调用 | 270 / 35,477 |
 | class bindings / parent shards / 共享 provider | 1,065 / 400 / 15 |
-| manifest / 全部压缩分片 | 58,749,856 / 2,438,917,125 bytes |
-| 压缩分片数 | 21,625 |
+| manifest / 全部压缩分片 | 59,008,279 / 2,440,159,572 bytes |
+| 压缩分片数 | 21,631 |
 
-源码/主体覆盖没有因发布 calls 而自动扩大。3,731 个适配项含父图已内联部分，不能全部当作缺独立 frame。当前 source-only Python 单位 264 个，stub 17 个；按需依赖闭包仍未完成。
+本轮仅补缺失主体，source graphs 重建数为 0。旧 CALL/class 索引完整保留，表中其覆盖仍是原 `18aab515...` basis，未包含新主体；不能当作新全范围链接。`body_expansion.relationship_coverage` 显式标注 `PRIOR_BODY_BASIS_ONLY`。
+
+源码/主体覆盖没有因发布 calls 而自动扩大。3,925 个适配项含父图已内联部分，不能全部当作缺独立 frame；另有16个无主体产物的 shape 项，包含在420中。当前 source-only Python 单位 264 个，stub 17 个；按需依赖闭包仍未完成。补建所涉及单位的未派工项已按当前规则重新分类，不能把状态重分类当作主体已生成。
 
 ### 调用发布已经结束，范围内枚举不等于目标解析完成
 
@@ -232,7 +234,13 @@ C++ source 前端复用 Tree-sitter，实际 53,705-byte template 中机械枚�
 
 ## 下一步，按实际依赖缺口推进
 
-下一步按已观测 CodeID/原 catalog entry 触发按需主体展开，并处理隐式 receiver/default 等接口缺口；类最终产物来源单独补证。只补所需字段，不采 Tensor 数值或启用整套 profiler。静态已知连接保留，未执行路径仍按静态条件表示；动态观察不能删除其它合法候选。以下整程序静态覆盖欠账继续有效。
+**Implemented / Verified**：`observed-calls --expand-missing` 已自动将原 trace 的完整代码身份对应到原 lexical occurrence/唯一 compiler path，补建 `json.dumps`、`typing._ProtocolMeta.__instancecheck__`、`torch.is_tensor` 共3个主体。原21,619份 artifact 的 inode/size/mtime 保持；已有主体、CALL/class publication 不变。新增主体可由公共 reader 查询，旧调用参数边和类绑定已各 fresh 读回1项。精确旧 provider 缺 attribute_lookups 时保留 NOT_RECORDED，未更改其文件或宽松化通用 codec。
+
+同一 LeWM trace 离线重连后，函数接口 **1→2**、参数端口 **6→7**、实际正常返回 **1→2**，新接通 `cem.py:164`→`torch.is_tensor`。观测数/原 CALL 绑定仍为81/59，没有重跑采集。自动展开约84.36秒，展开＋重连总计121.71秒；这是工具成本。证据在 `queries/lewm-observed-calls/expand-and-join.json`、`expanded-bindings-expansion/` 与 `incremental-public-readback.json`。
+
+**Implemented / Verified（循环接口）**：真实 `solve` 仍只有1个Region、7个循环模板；`loop_views()` 公开初始与回边映射，每个header为29个绑定槽＋1个world槽，词法嵌套和强类型读回通过。未展开运行迭代，未证明内容不变；当前只是精确接口视图，成员/出口闭包与动态迭代坐标仍待完成，见同一目录 `loop-views.json`。
+
+下一步优先完善函数/循环的可组合展开视图、跨迭代转发及状态依赖，再补 receiver/default 等接口；类最终产物来源单独补证。只补所需字段，不采 Tensor 数值或启用整套 profiler。静态已知连接保留，未执行路径仍按静态条件表示；动态观察不能删除其它合法候选。以下整程序静态覆盖欠账继续有效。
 
 1. 默认 factory-origin、入口状态投影、contextual 调用接口和模块 receiver 桥接已在选中真实 CALL 接通；下一步沿已识别类产物核对 slot 的 Python 回调、descriptor/隐式 receiver，仍按 **原 48 个 CALL 的第一处断边**归因。相对导入仅补了有声明 package 的模块候选；class FROM 编译适配、函数字段/defaults、循环与递归摘要仍欠账。保留条件/未知前缀，不能退回名字提示填目标。origin 和 contextual 关系的全范围发布仍待完成；旧发布计数不能冒充最新闭包。
    CEM 模块与工具模块均已完整展开；不能误归因为主体后缀。创建 G 的引用不证明入口内容；不制造 CALL，不复用 creation world，不由局部 1 个目标推定全部 48 个已经解决。原分类与收据在 `queries/lewm-call-gaps.json`。

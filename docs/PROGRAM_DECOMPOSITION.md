@@ -239,6 +239,7 @@ e-graph 若未来采用，应作为有明确等价与效果前提的搜索层，
 
 展开不是附加一串 children 标签，而是把原边界与内部实现精确对应。
 每个可展开主体保留原 ID、准确源码主体、namespace 和所用语义规则版本。
+函数主体共享一份，调用实例连接其端口；循环共享 body 模板，各迭代是按需实例视图，不能永久复制 N 份内部操作。层次折叠不删除跨层数据/状态边。底层已有明确操作契约的节点可作为叶子，未提供实现则列明展开义务。
 接口至少表达以下适用项目；不要求为不适用的 completion 捏造端口：
 
 1. 有序输入 Use：位置参数、keyword、独立 receiver、环境及状态；求值序不能重排。
@@ -247,6 +248,8 @@ e-graph 若未来采用，应作为有明确等价与效果前提的搜索层，
 4. 各 completion 的后继、状态输出、pending/cleanup/handled-context 映射。
 5. 读写地址、alias/escape、allocation/lifetime、外部与 ordering effects 的摘要及闭合范围。
 6. 外层端口到内部参数/结果/状态的映射，及尚未展开的准确源码 slice 或 callee 边界。
+
+当前 `ProgramDependencySession.loop_views()` 引用原循环 header/body_entry/exit、初始和全部回边槽，含 world，保留词法嵌套。它不新建 CFG 或独立 LoopRegion，尚不声称完整成员/出口闭包。外部输入、循环携带值、SSA 转发和内容不变性需分别推导；只凭端口来自外层或回边换了 ID，不能决定是否可外提。函数可由 `load(namespace).graph` 查看内部子图，缺主体可由观测代码身份触发原静态前端补建。
 
 静态实参 Use → formal port 表示语言绑定和依赖，不是两次动态值观测相等。
 返回摘要必须带适用分支、调用条件和 completion；多个 return 不能任取一个。
