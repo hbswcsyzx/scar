@@ -30,10 +30,11 @@ CEM solve 的 48 个原 CALL 均无目标候选。先按原 callee/receiver/name
 每项都在共同图保留原端点与条件；只补创建关系不能宣布 CEM targets 已解决。module
 注解属于并行主体覆盖工作，不能说完成它就能修复上述 CEM 断点。
 
-首个 factory-origin 组件现已实现，原 CEM 两图的显式 API 双向查询已核验；自动发现、
-默认 Session 接入和全范围发布尚未实现。下一项先将原 factory/body 编译及作用域对应
-机械派工并注册到共同查询，而后消费 entry 状态与 IMPORT_FROM。不能靠调用者手工提供
-origin 列表完成第一阶段验收；只有组件接口通过不代表该项已经自动贯通。
+factory-origin 现已接入默认 Session 自动按需发现；原 CEM 的 G 引用已通过默认查询，
+沿原 class 两帧接口后缀得到 6 条连续引用边到 module G，未知外层始终保留。无 call/class
+publication 的通用程序也能自动找到 module/nested/method 的原 factory。源主体和主图
+分片未重建，仍没有全范围 origin 发布。下一项消费 **entry 状态与 IMPORT_FROM**；引用
+路径已连通不表示当前字典内容、调用目标或 effects 已闭合，也不表示第一阶段完成。
 
 IMPORT_FROM 的最小下一步：保存 IMPORT_NAME 的原 name/level/fromlist 请求及返回模式，
 各成员保存自己的 receiver/key/world/normal result；从所选源码模块 namespace 的实际
@@ -44,7 +45,7 @@ import、fromlist 返回模块、属性读取和注册表 fallback 分开；rela
 
 下一轮分三项并行准备、按依赖顺序验收：
 
-- **接线审计**：保存原调用→callee来源→首次缺边的证据路径，分清缺主体、缺协议、缺状态关系与真正未绑定输入。验收是精确原端点可定位，不能只汇总 frontier。
+- **接线审计**：G 引用已自动追至原 module；接着把原 namespace read 的 key/world、entry state、初始化/后续 reaching writes 接起来，并接真实 IMPORT_FROM 结果。保留覆盖、hook、fallback 和未知写入的条件；不能从 G 引用推其内容。
 - **主体覆盖**：模块字面 bool If 和简单名称 AnnAssign 已实现并独立读回；真实两份模块定点重建的语句残留均为 0，deferred child 仍未展开。继续 class annotation 和后续主体缺口，复用原 compiler prelude/lazy factory/namespace/world。主图尚未替换，不改变其旧覆盖分母。
 - **同图推理**：控制必要条件到值路由已接入同一工作队列；保留原图/条件/反证。进一步将 receiver、字段读取和 reaching writes 回馈调用解析，避免专项 reader 各自得到事实而互不消费。
 

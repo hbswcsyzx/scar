@@ -35,9 +35,9 @@ subject 与有序 operands 都引用原 qualified 端点，ordinal 只表示原�
 不替代谓词参数或参与真值键。只懂一元签名的规则遇额外 operands 必须保持 open。
 
 共同查询导出使用端点引用表保存 operands。当前 dependency walk / value analysis /
-region boundary 的导出版本分别升至 2 / 3 / 2；旧报告没有关系参数，按旧版本解释，
-不能忽略新版字段来消解条件。原 canonical/source/calls 分片版本和当前主图不因查询
-表示升级而改写。
+region boundary 的导出版本分别为 3 / 4 / 3，context 还显式保存 `unknown_prefix`。
+旧报告按原版本解释，不能忽略新版字段来消解条件。原 canonical/source/calls 分片
+版本和当前主图不因查询表示升级而改写。
 
 原 SG 已有精确表达式定义和输入/输出，而旧计算 overlay 缺少记录时，应继续由原 AST、作用域、读写角色和原端口展开 canonical IR。不能伪造旧 overlay record，也不能将已知常量或算术结构整块变成 UNKNOWN。具体算术/比较运算符属于操作契约或 DATA 配置，不应伪装成程序另外创建的 Python 字符串对象；自定义比较的结果仍可能是对象，不能预设为 bool。
 
@@ -54,6 +54,23 @@ import 返回的 module 引用、module namespace 和初始化状态分别建模
 `scar.ir.program.dependencies` 的端点由原 artifact namespace、原 typed ID 和静态接口栈组成。
 跨层只是边跨过 namespace/接口，不是创建一份 callee 或运行实例。关系保留原条件、依据和
 EXACT/MAY；EXACT 表示在所列条件下关系准确，不表示条件已被证明成立。
+
+上下文是静态接口选择，分三种知识状态：
+
+| 表示 | 含义 |
+|---|---|
+| `None` | 没有已选的接口栈；外层未知 |
+| 闭合 tuple，包括 `()` | 已选的完整接口栈；空栈表示未选 caller |
+| `OpenDependencyContext(suffix)` | 任意兼容的未知前缀＋已核的非空接口后缀 |
+
+开放前缀可能为空，但不能被认定为空。Open 与同 frames 的闭合 tuple 不相等；类不提供
+普通迭代/切片，统一通过 context helpers 处理。push 保留开放性；精确 pop 弹尽已知后缀
+得到 `None`，匹配失败另有显式标记，不能从未知前缀猜补帧。Frame 全来自原调用/实现接口，
+不创造 Invocation。一个上下文族也不表示同一个动态对象或数据版本。
+
+Local/Class 可沿已核后缀追踪；旧 call publication 的闭合 state witness 不能因后缀
+相同就适用于 Open。值字段仍保留已知 literal/type/绑定状态，当前证明规则对未闭合入口、
+guard 和完整来源族保持具体前沿，不把整个节点的其它字段抹成 UNKNOWN。
 
 `ProgramDependencyGraph` 提供共同的邻接、遍历和 cut；`ProgramDependencySession` 共享有界
 只读原图与关系缓存。调用、class、环境、状态和局部图由 provider 适配到同一端点类型，
@@ -96,11 +113,13 @@ State SSA 表达静态读写依赖；循环/分支版本是符号版本，不是
 
 这些条件依赖是静态图中可继续分析的关系，不是缓存许可。原端点/来源校验通过、条件由后续推理消解、最终效果闭合，是三件不同的事。
 
-当前发现的接线欠账：上述环境关系主要在 CALL target 已知后建立，但分析函数内部全局
-读取又需要该环境。原源码已有 MAKE_FUNCTION 时，捕获关系应先于调用目标解析成为图中
-可用的条件关系，不能等待某个实例方法的 dispatch 已解决后才表示。
+此前发现的接线欠账是：环境关系主要在 CALL target 已知后建立，但分析函数内部全局
+读取又需要该环境。现已将 module/class/nested 的原创建证明抽成共享 extractor；默认
+Session 按当前 unit 的原词法 owner、DefinitionID、CodeRef 路径及 factory 端口自动配对，
+不再等待实例方法 dispatch。没有调用 publication 时，原 manifest 与源码碎片也足以
+构造/独立核对 SourceDefinitionReference，无需另写 basis。范围和实际核验见 STATUS。
 
-下一项的 factory-entry origin 规则分开处理三件事（实现状态见 STATUS）：
+factory-entry origin 规则分开处理三件事：
 
 | 关系 | 可以表达什么 | 不能据此推出什么 |
 |---|---|---|
@@ -113,6 +132,12 @@ entry callable 选择及字段保持条件必须显式保留。相同 code 可�
 被装到别的函数对象上，不能按 CodeID 合并其环境。saved builtins 还涉及创建时选择，
 不能直接借用 creator/caller 当前 B。第三项继续走实际状态关系；无已知 caller 时的初始
 namespace 替代路径需要单独状态前提，不准把一个捕获引用边升级为内容证明。
+
+class 的创建捕获与 provider 的当前字段读取也分开：原 body-function factory 的 G Use
+通过 `CURRENT_FUNCTION_GLOBALS_EQUALS_FACTORY_CAPTURE` 条件，连接到原
+READ_FUNCTION_FRAME 的正常 G 结果；条件绑定 body function、捕获 Use、读取 world 和
+读取结果。此前的任意准备 callback 不能被跳过。此边是 MAY/REFERENCE，不连接 parent B，
+不传递 namespace 内容，也不新建 world。后续再经原 EVAL_SUITE 输入映射进入 class G。
 
 ## 跨主体值来源与名称绑定
 

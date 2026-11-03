@@ -65,21 +65,27 @@ Root 独立双向读回 29.93 秒，1 条参数边、2 个 namespace，raw 路�
 
 **Implemented / Verified**：从原 Use owner、result producer 或 block argument 追踪原入口 edge-dominance 必要条件，沿最近 controller 递归；与 MAY postdom 控制影响分开。稳定的分支/绑定证明可反证值路由，并从原 seeds 重算，原图与异常/效果边保留。报告新增 occurrence、infeasibility 和 route_refutations，不把结构证据当作值相等。
 
-同一批通用真实源码查询推得唯一不可变 tuple `(7,99,5)`；最新 15-root 机器记录为 128 points、268 edges、1,005 steps、2 branch proofs、5 binding proofs、6 route refutations。未知/custom 区域没有污染独立已知字段。原 core 同步 region 的两层上下文、未知/循环/部分接口与预算边界已核验；**保存的 Python candidate frame 入口范围仍 open**，不能说全部跨函数控制已闭合。验证源码未执行。
+同一批通用真实源码查询推得唯一不可变 tuple `(7,99,5)`；最新 15-root 机器记录为 135 points、281 edges、1,039 steps、2 branch proofs、5 binding proofs、6 route refutations。新增默认 factory 来源的开放前沿单列；未知/custom 区域没有污染独立已知字段。原 core 同步 region 的两层上下文、未知/循环/部分接口与预算边界已核验；**保存的 Python candidate frame 入口范围仍 open**，不能说全部跨函数控制已闭合。验证源码未执行。
 
-当前 `queries/binding-knowledge/` 的源码、小模型与 proofs 收据一致。最新 schema3 仅重查询约 2.31 秒，32 条 condition 显式保留空 operands；原建模 1.96 秒未重测，单列旧测量。源码、模型全部文件和主 current/static 均未改变。此目录只是通用规则核验，不是 LeWM 或另一份权威程序。
+当前 `queries/binding-knowledge/` 的源码、小模型与 proofs 收据一致。最新 schema4 仅重查询约 3.114 秒，context 显式保存 `unknown_prefix`，condition 保留 operands；原建模 1.96 秒未重测，单列旧测量。查询处理 2 graphs / 0 shards，输入计费 1,919,427 bytes；工作队列稳定与查询范围未闭合分别报告。源码、模型全部 14 个文件和主 current/static 均未改变。此目录只是通用规则核验，不是 LeWM 或另一份权威程序。
 
 已有独立 binding state field、normal/raise slot0 隔离和原 TRUTH 合同推理继续保留；worklist 稳定与原查询覆盖完整分别报告。源码常量只来自静态 builtin literal/原编译常量表，不保存 Tensor 内容，不执行用户协议。
 
 ### 函数创建来源与条件身份
 
-**Implemented / Verified（显式 API，自动发现/发布仍未实现）**：新增 `StaticFactoryEntryOrigin`、独立源码/编译重放与共同图 provider。不依赖已识别 caller CALL，就可在明确入口来源条件下表示原 factory 的 FUNCTION_OBJECT/G 捕获到原 body 环境端口。保留创建/入口两侧未知上下文，不造 Frame，不映射 entry world、B、defaults 或 namespace 内容。
+**Implemented / Verified（默认 Session 自动发现，尚未发布独立 origin 索引）**：`StaticFactoryEntryOrigin`、独立源码/编译重放与共同图 provider 现在由默认 Session 按需接入。不依赖已识别 caller CALL，也无需调用者提供 factory、SourceDefinitionReference 或 origin 列表，就可表示原 FUNCTION_OBJECT/G 捕获到原 body 环境端口。不映射 entry world、B、defaults 或 namespace 内容。
 
 源码 hash、原 child slot/path/layout、词法 source 和两个原接口联合核对；捕获 G 还须等于原 module/class/nested ABI 的 G，不只信 role 标签。class 的 operand index1 与 module/nested 的 role index0 分别校验。已确定的编译槽对应进入 evidence，不挂成未知运行条件；入口来源、factory 正常完成和入口当前 code 匹配仍是条件。
 
-审查还修复了条件键碰撞：`DependencyCondition.operands` 保留关系的其它 qualified 端点，entry callable 与不同 factory 不能共享同一个条件键。只懂一元签名的证明规则遇额外参数保持 open；empty origins 不能宣称完整，无关 literal 不产生假 factory 前沿。walk/value/boundary 导出版本为 2/3/2，原主图分片不改版本。相关合并短验 **3 passed / 12.56 秒**。
+审查还修复了条件键碰撞：`DependencyCondition.operands` 保留关系的其它 qualified 端点，entry callable 与不同 factory 不能共享同一个条件键。只懂一元签名的证明规则遇额外参数保持 open；empty origins 不能宣称完整，无关 literal 不产生假 factory 前沿。当前 walk/value/boundary 导出版本为 **3/4/3**，context 显式保存 `unknown_prefix`，原主图分片不改版本。
 
-**Verified（真实 CEM 显式静态读回）**：原 class suite/solve 两图机械导出 2 条 FUNCTION_OBJECT/G 引用 origin，在共享 `ProgramDependencyGraph` 上双向导航通过，12 次 fresh replay。约 48.67 秒，2 graphs、0 typed call shards，原 source/basis 复用，没有复制 basis 或更新主图。证据在 `queries/factory-entry-origins.json`；48 个原 CALL 的目标仍为 0。这证明组件能表达该引用关系，**不代表默认 Session 自动发现、入口状态内容、IMPORT_FROM 或完整 CEM 已接通**。
+原显式 API 的两图核验仍保存在 `queries/factory-entry-origins.json`，仅为该组件较早的输入/读回记录，不能当作默认自动流程。
+
+**Verified（真实 CEM 默认自动流程）**：默认 `session.graph()` 从 `solve` 的原 G formal 自动找到 class factory，并经 class suite→provider 的当前 G 读取→父级捕获 Use，连续 **6 条引用边**到达原 module G。没有手工构造 factory、定义引用、origin 列表或注入 provider。约 **32.76 秒**，9 个访问端点、8 条边、4 个 namespace/graph、4 个关系分片；只索引 **1 个 unit catalog、检查 1 个匹配 factory**，没有全局路由或扫描所有主体。输入计费 153,450,632 bytes；这是分析器成本，不是 LeWM 性能。
+
+代码和机器证据：`queries/factory-entry-origins-automatic.json` 保存默认查询、规范化连续路径、原输入收据与后读校核；旁边 task 终态 COMPLETE/exit0。source/main manifest 前后不变。创建侧保留 `None` fallback 和已核 Open 两帧后缀，沿 provider 退为一帧，再回到 module 的未知外层；没有把未知补成 `()`。新增 class 捕获桥使用 `CURRENT_FUNCTION_GLOBALS_EQUALS_FACTORY_CAPTURE`，绑定原 bodyfn、捕获 G、读取 world 和 G 结果，仍为 MAY/REFERENCE。**48 个原 CALL 的目标仍为 0，入口 namespace 内容、IMPORT_FROM 及完整 CEM 未完成**。
+
+通用静态案例同时覆盖无任何 call/class publication 的 module/nested/class 方法自动来源；增加 class publication 后才使用其原接口后缀追到 module G。原 canonical 分片 hash 不变；额外参数/开放前缀不授闭合证明，坏原定义引用拒绝，预算截断保已知边和具体原因。相关核验按修改范围运行，没有重跑长 fixture 或全范围 linker。
 
 ### 源码覆盖：编译器已消去的字面 bool If
 
@@ -101,7 +107,7 @@ C++ source 前端复用 Tree-sitter，实际 53,705-byte template 中机械枚�
 
 ## 下一步，按实际依赖缺口推进
 
-1. 将已核 factory-origin 组件接入自动发现、共同 Session 与发布，保持原 factory/body/作用域匹配；然后补 entry 时刻 namespace 状态投影与 IMPORT_FROM。不能只增加 API 或以名称猜目标。CEM 48 个调用的分类、三条原端点断边和收据在 `queries/lewm-call-gaps.json`。
+1. 默认 Session 的 factory-origin 自动来源与 class 引用路径已核验；下一步补 **entry 时刻 namespace 状态投影与 IMPORT_FROM**，再供调用解析/共同固定点消费。origin 全范围独立发布、其它未支持作用域仍须补齐。不能以名称猜目标。CEM 48 个调用的分类、三条原端点断边和收据在 `queries/lewm-call-gaps.json`。
    该 CEM 模块和工具模块实际已完整展开，不能把其 G-origin/IMPORT_FROM 问题归因于模块后缀。一般 self/descriptor 来源另行补齐。创建 G 的引用关系不证明调用时内容；不制造 CALL，也不复用创建 world 冒充 entry world。
 2. module AnnAssign 首个范围已定点核验；继续 class annotation、deferred child 及实际主体阻断，保留 lazy/future、namespace/world 和异常语义。发布主图时才更新其覆盖分母。
 3. 将原调用、逐地址 reaching writes、alias/effects、binding/容器与 Tensor 属性在共同固定点中反馈；把源码可推而缺规则与真正未绑定字段分开。

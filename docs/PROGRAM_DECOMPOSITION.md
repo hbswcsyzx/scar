@@ -159,7 +159,8 @@ AST 仅为解析输入和源码对应依据；包含层次只组织定义，不�
 关系由各专项 reader/引用 solver 解释，一般分析没有共同导航接口。本轮已经接入：
 
 - `GraphNamespace + 原 typed ID + 静态 context` 定位端点。context 是选定的调用接口栈，
-  不是 Invocation；未知上下文与空上下文不同。共享主体不复制，不把不同调用的参数并集激活。
+  不是 Invocation；未知、闭合栈和未知前缀＋已核后缀分别表示。Open 后缀精确 push/pop，
+  不用空栈替代未知外层。共享主体不复制，不把不同调用的参数并集激活。
 - `ProgramDependencyGraph` 按需投影原 Value/Use、result、绑定 payload/read、状态接口、
   CFG/控制依赖、资源、实参/形参、completion、环境/G 和 parent/provider/suite 关系。
   依赖、值传递、引用、绑定、状态接口、顺序及结构分别有类型；条件和原证据继续保留。
@@ -198,6 +199,15 @@ current 已发布 35,747 个规范调用的关系枚举，其中仅 270 个有�
 outgoing 检索使用有界 raw namespace→shard 上界路由，原收据先核对，命中分片才独立
 typed 重放。先返回已知本地接口，后续全局预算不抹掉它；路由完整只覆盖已保存关系，
 不是目标集或全程序 consumer/effects 闭合，也不是另一份权威图。
+
+factory-entry 引用来源现已默认按需发现。原 module/class/nested factory extractor 与
+call linker 共用；当前 unit 的词法 owner 只给派工候选，原 DefinitionID、编译 parent/child
+完整路径、code Use/constant、源码 occurrence 与正常端口才建立对应。source span 相同的
+注解 factory 与用户方法不能合并。默认查询不需要手工 origin 列表或一个已解析 CALL。
+
+class creator 的上下文由已有 parent/provider/suite binding 提供原两帧后缀，未知外层继续
+开放。原 factory 捕获 G 到 provider 当前 G 读取还有独立的带 world 条件引用桥，不能经
+普通 OPERAND 边推引用相同。当前仍未把这条引用关系升级为入口字典内容/完整调用目标。
 
 已安装 ATen schema/header 的自动读取及 canonical 接口构造已有真实材料验证，但尚未
 发布进 current 整程序，也未接通 Python callable→native overload。后者必须读取真实

@@ -77,6 +77,14 @@ scalar/type/来源字段；重复 `--boundary-operation program_operation:...` �
 三个入口都不执行目标，导出复用 namespace/上下文/条件/证据。遍历耗尽、字段精度、未闭合项
 和整程序完整性分别报告；UNKNOWN/effects 未闭合不自动变成无副作用。
 
+默认 `ProgramDependencySession.graph()` 已自动发现原 module/class/nested factory 的
+函数对象/G 引用来源，无需调用者提供 origins 或已有 CALL targets。真实 CEM `solve.G`
+到 module G 的 6 条连续条件引用边记录在
+`artifacts/current/queries/factory-entry-origins-automatic.json`，约 32.76 秒；入口字典内容、
+IMPORT_FROM 和调用目标尚未解决。未知前缀＋已核接口后缀使用独立 Open context，不能
+变成闭合空栈。walk/value/boundary 查询格式当前为 3/4/3，保留 `unknown_prefix` 与
+条件的有序 `operands` 引用；不能用旧格式忽略这些字段消解条件。
+
 输出只保留 `artifacts/current/static/`：每份源码共享 source/semantic/semantics/CFG/lexical 分片，常量事实和 import 候选索引连接原 ID。
 `--phase sources` 仅建目录；`--phase graph` 为默认源码图；`--phase bodies` 构造源图后继续规范主体展开。对已有图使用 `--expand`，无需重建源图；`--rules-only` 只发布详细规则/前提，`--max-bodies` 与 `--file` 只限制本次派工，全部入口继续计入分母。
 `--refine` 使用已保留源码细化 scope/import，不重建源码图；`--refine --imports-only` 只更新 import 索引。图结构化展开与跨过程固定点仍未完成，命令成功不代表第一阶段完成。
