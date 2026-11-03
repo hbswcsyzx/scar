@@ -67,7 +67,7 @@ F3-B以113个constructor的196个field和288个attribute建立484条共享规则
 `SyntaxRoleView`一次建立父槽索引，查询任意原槽，包括不落稀疏port的字段；循环查询不重复扫AST。
 schema未覆盖则拒绝；预算停止不发布部分角色表。F3-B通过也不代表scope/名字存储绑定完成。
 
-F3-C按以下形式产物逐层实现和验收；C1已通过，C2/C3尚未实现，不能跳过前层：
+F3-C按以下形式产物逐层实现和验收；C1/C2a已通过，C2全层及C3尚未完成，不能跳过前层：
 
 | 层 | 输入 → 输出 | 通过条件 |
 |---|---|---|
@@ -85,6 +85,12 @@ metadata自身不求值，但继承所属操作上下文；表达式被annotatio
 共享ContextState分别引用求值owner、源码environment、region、private策略和声明路由；原结构owner沿F2父槽查询。
 实例只保存scope/region/private记录及发生变化的SlotRef边界；任意槽或原B端口由共同view查询，不复制AST或逐槽上下文。
 参数/默认值/注解、typeparam name/bound/default可在同一节点内分属不同上下文；选择性mangling保原group/位置，C1不计算名字key。
+
+C2内部先验收C2a名字投影和整scope声明账本，再实现C2b条件查询与捕获传播；C2全层要求两者完成。
+C2a覆盖16个lexical字段/15类及所有原B端口disposition；global/nonlocal先汇总，walrus贡献先归入接收scope。
+有效名按SYMBOL_VISIT_PROJECTION归一并intern，SELECTIVE按原typeparam访问前缀；这不是已验证的codegen地址。
+声明、候选写/删、参数接口、directives及cleanup分开保留，未知运行值不妨碍确定逻辑声明；SUPPRESSED保源码模板而不授实际效果。
+C2b随后将class mapping、local/typeparam slot、closure及class-protocol cell、root locals/globals/builtins分域，并保查找顺序和异常分支。
 
 ## 共享子图与可组合接口
 

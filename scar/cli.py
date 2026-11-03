@@ -468,6 +468,9 @@ def main(argv=None) -> int:
     if cli_argv and cli_argv[0] == 'source-contexts':
         from scar.analysis.source_context_materials import main as source_contexts_main
         return source_contexts_main(cli_argv[1:])
+    if cli_argv and cli_argv[0] == 'source-declarations':
+        from scar.analysis.source_declaration_materials import main as source_declarations_main
+        return source_declarations_main(cli_argv[1:])
     if cli_argv and cli_argv[0] == "static":
         from scar.analysis.static_program import main as static_main
         return static_main(cli_argv[1:])
@@ -497,6 +500,8 @@ def main(argv=None) -> int:
     source_roles.set_defaults(func=lambda _: 0)
     source_contexts = sub.add_parser('source-contexts', help='F3-C1: route original slots to source environments and evaluation regions')
     source_contexts.set_defaults(func=lambda _: 0)
+    source_declarations = sub.add_parser('source-declarations', help='F3-C2a: normalize source names and collect whole-scope declarations')
+    source_declarations.set_defaults(func=lambda _: 0)
     static_cmd = sub.add_parser("static", help="build source-root program graphs without executing the target")
     static_cmd.set_defaults(func=lambda _: 0)
     static_query = sub.add_parser("static-query", help="query stored static definitions and original graph dependencies")
