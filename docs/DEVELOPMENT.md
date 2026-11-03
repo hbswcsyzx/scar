@@ -62,7 +62,7 @@ C1只存scope/region/private策略与稀疏原槽边界，catalog共享一份；
 `SourceContextView(syntax, roles, contexts).resolve(slot)`或`.port_context(port)`复用父槽索引；不复制端口或逐槽context。
 `--max-scopes/--max-regions/--max-boundaries`限制本层，`--max-slots`及其余输入预算同时约束重放。
 
-C2a名字投影和整scope声明（完整C2尚需lookup/capture）：
+C2a名字投影和整scope声明：
 
 ```bash
 python -B -m scar.cli source-declarations --model /path/to/model --roles-materials /path/to/roles --contexts-materials /path/to/contexts --out /path/to/declarations --collect-only --jobs 8
@@ -72,6 +72,17 @@ python -B -m scar.cli source-declarations --model /path/to/model --roles-materia
 外部B/C1输入只读、全收据固定；全部canonical时才允许默认append。每原B port一disposition，名字只intern一次。
 `SourceDeclarationView(...).port/scope/contribution/name`查询原引用账本；`--max-names/--max-contributions/--max-conflicts`约束本层。
 投影阶段固定`SYMBOL_VISIT_PROJECTION`；源码操作意图、visit flags、visibility和C1抑制分别保存，不授运行值或物理地址。
+
+C2b条件化namespace接口与捕获（仍不授C3编译器投影）：
+
+```bash
+python -B -m scar.cli source-bindings --model /path/to/model --roles-materials /path/to/roles --contexts-materials /path/to/contexts --declarations-materials /path/to/declarations --out /path/to/bindings --collect-only --jobs 8
+python -B -m scar.cli source-bindings --model /path/to/model --roles-materials /path/to/roles --contexts-materials /path/to/contexts --declarations-materials /path/to/declarations --materials /path/to/bindings --out /path/to/check --verify --jobs 8
+```
+
+三个上游store固定原收据；全部canonical时才允许默认append。每store一catalog、每源一类型化绑定分片。
+`SourceBindingView(roles, contexts, declarations, material).port/scope/binding/interface/plan/capture/relay`查询原引用，`.verify()`核引用与逆边。
+八项本层预算超限不发布部分表；源码冲突保端口与原因。namespace为源码模板，未观察运行字典、物理cell或地址。
 
 ## 已有建图入口（前端形式验收尚未完成）
 

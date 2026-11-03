@@ -471,6 +471,9 @@ def main(argv=None) -> int:
     if cli_argv and cli_argv[0] == 'source-declarations':
         from scar.analysis.source_declaration_materials import main as source_declarations_main
         return source_declarations_main(cli_argv[1:])
+    if cli_argv and cli_argv[0] == 'source-bindings':
+        from scar.analysis.source_binding_materials import main as source_bindings_main
+        return source_bindings_main(cli_argv[1:])
     if cli_argv and cli_argv[0] == "static":
         from scar.analysis.static_program import main as static_main
         return static_main(cli_argv[1:])
@@ -502,6 +505,8 @@ def main(argv=None) -> int:
     source_contexts.set_defaults(func=lambda _: 0)
     source_declarations = sub.add_parser('source-declarations', help='F3-C2a: normalize source names and collect whole-scope declarations')
     source_declarations.set_defaults(func=lambda _: 0)
+    source_bindings = sub.add_parser('source-bindings', help='F3-C2b: resolve conditional namespace interfaces and logical capture demands')
+    source_bindings.set_defaults(func=lambda _: 0)
     static_cmd = sub.add_parser("static", help="build source-root program graphs without executing the target")
     static_cmd.set_defaults(func=lambda _: 0)
     static_query = sub.add_parser("static-query", help="query stored static definitions and original graph dependencies")

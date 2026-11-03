@@ -67,7 +67,7 @@ F3-B以113个constructor的196个field和288个attribute建立484条共享规则
 `SyntaxRoleView`一次建立父槽索引，查询任意原槽，包括不落稀疏port的字段；循环查询不重复扫AST。
 schema未覆盖则拒绝；预算停止不发布部分角色表。F3-B通过也不代表scope/名字存储绑定完成。
 
-F3-C按以下形式产物逐层实现和验收；C1/C2a已通过，C2全层及C3尚未完成，不能跳过前层：
+F3-C按以下形式产物逐层实现和验收；C1/C2已按声明范围通过，C3尚未完成，不能跳过前层：
 
 | 层 | 输入 → 输出 | 通过条件 |
 |---|---|---|
@@ -90,7 +90,12 @@ C2内部先验收C2a名字投影和整scope声明账本，再实现C2b条件查�
 C2a覆盖16个lexical字段/15类及所有原B端口disposition；global/nonlocal先汇总，walrus贡献先归入接收scope。
 有效名按SYMBOL_VISIT_PROJECTION归一并intern，SELECTIVE按原typeparam访问前缀；这不是已验证的codegen地址。
 声明、候选写/删、参数接口、directives及cleanup分开保留，未知运行值不妨碍确定逻辑声明；SUPPRESSED保源码模板而不授实际效果。
-C2b随后将class mapping、local/typeparam slot、closure及class-protocol cell、root locals/globals/builtins分域，并保查找顺序和异常分支。
+C2b将class mapping、local/typeparam slot、closure及class-protocol cell分域，分别输出读计划、写/删目标和共享capture父链。
+ROOT_GLOBALS只指根环境模板；非根使用各自ENV_GLOBALS/BUILTINS参数，不据源码相同断言运行字典相同。
+class prepared mapping与captured class-dict namespace分开；mapping miss与其他异常分开，非局部写不能写回class mapping。
+内层global、逃到root的walrus和语言隐式协议均保来源；隐式需求逐原region/anchor保存analysis_visibility，不能用共享scope首个region概括。
+SUPPRESSED源码参与、future detached模板及实际执行保持分轴；cell_required仅表示已建跨source-scope捕获义务，不反推合成compiler cell不存在。
+这些是SOURCE_NAMESPACE_TEMPLATES，不授实际cell布局、compiler projection或运行地址。
 
 ## 共享子图与可组合接口
 
