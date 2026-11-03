@@ -50,6 +50,18 @@ python -B -m scar.cli source-roles --model /path/to/model --materials /path/to/r
 默认capture向可写模型只追加source_roles；collect-only不改模型，verify重新计算角色与计数。
 纯API以`read_source_syntax_material`取得验证后的不可变F2材料，用`SyntaxRoleView(material)`复用索引查询。
 
+C1源码上下文（不求词法存储或建立真实frame）：
+
+```bash
+python -B -m scar.cli source-contexts --model /path/to/model --roles-materials /path/to/roles --out /path/to/contexts --collect-only --jobs 8
+python -B -m scar.cli source-contexts --model /path/to/model --roles-materials /path/to/roles --materials /path/to/contexts --out /path/to/check --verify --jobs 8
+```
+
+外部B输入只允许只读采集/核验；B已注册model时可省`--roles-materials`并使用默认增量发布。
+C1只存scope/region/private策略与稀疏原槽边界，catalog共享一份；同源F2/B各只fresh一次。
+`SourceContextView(syntax, roles, contexts).resolve(slot)`或`.port_context(port)`复用父槽索引；不复制端口或逐槽context。
+`--max-scopes/--max-regions/--max-boundaries`限制本层，`--max-slots`及其余输入预算同时约束重放。
+
 ## 已有建图入口（前端形式验收尚未完成）
 
 ```bash

@@ -1,7 +1,7 @@
 # 当前状态
 
 **第一阶段未完成。当前按形式阶段重新验收：F0 → F1 → F2 → F3 → F4 → F5 → F6。**
-阶段定义见 [ARCHITECTURE](ARCHITECTURE.md)。F0/F1/F2和F3-A/F3-B已按声明输入域分别验收；当前进入F3-C设计，组合cleanup开发暂缓。
+阶段定义见 [ARCHITECTURE](ARCHITECTURE.md)。F0/F1/F2、F3-A/F3-B及C1已按声明输入域分别验收；当前下一层为C2，组合cleanup开发暂缓。
 现有后层代码及成果保留，但不能代替前端完整性证明。
 
 ## F0：原始材料
@@ -82,13 +82,26 @@ PUBLIC_COMPILER_VIEW/UNJOINED始终显式；这不是完整lexical scope、名�
 证据：`/var/tmp/scar-f2-recovery-7w7nd_0z/f3b/{materials,verification,run.json}`。
 原模型与全部消费收据不变；因/home只读，实际模型尚未注册F3-B材料，canonical_model_published=false。
 
+## C1源码上下文（已验收，尚不含名字绑定）
+
+50特殊/12描述符/95继承child字段及327metadata槽均显式派发；metadata与祖先求值抑制分轴。
+866/866源码CONTEXTUALIZED：33,752个source scope、65,171个求值region、3,210个private策略、94,813条稀疏边界。
+全部6,483,173槽与563,522个原B端口逐项校验可唯一查询；scope/region引用闭合、无环，抑制不能被子lambda解除。
+867个分片含唯一catalog，共5,792,726压缩bytes；不复制AST、逐slot/port上下文或Tensor值。
+8进程采集262.13秒、独立fresh核验266.26秒（含F0/F1/F2/B重验）；无预算前沿，无symtable/目标执行或真实frame。
+函数/类/lambda/推导式/type alias作用域数还与已验收F2构造器数独立精确对账，非仅核生成器自身摘要。
+3族上下文检查8.32秒、最终C1/B两个集成6.64秒通过；修复Interactive future directive漏识别。
+证据：`/var/tmp/scar-f2-recovery-7w7nd_0z/f3c1/{materials,verification,source-definition-agreement.json,run.json}`。
+原模型及B输入store不变；/home仍只读，canonical_model_published=false，源码缓冲与主工作区待同步。
+
 ## 下一层
 
-F3-C只读审查已收敛为C1属性路由→C2词法存储接口→C3编译器投影对账，逐层验收；尚未新增C实现。
-形式输入、输出和分母见ARCHITECTURE。C1先定全字段传递规则；后续不靠动态观测修补缺静态规则，随后F3-D全量验收。
+下一步C2：原角色port＋C1上下文→整scope声明贡献→name-key与词法环境查询/绑定接口；C3再对编译器投影对账。
+形式输入、输出和分母见ARCHITECTURE。C2/C3尚未实现；后续不靠动态观测修补缺静态规则，随后F3-D全量验收。
 旧15个公开标志已全存，349组name+line冲突及内联/annotation共享证明不能据此直接接AST。
 字段角色和source/compiled/runtime三种scope必须分开，F3通过后才进入F4；不增加优化backend。
 先前审计及LibCST能力反例保存在`f3-audit/`；现成库仅按已验证能力使用。
+
 
 ## 当前模型与已有后层证据
 

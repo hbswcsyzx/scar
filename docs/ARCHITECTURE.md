@@ -67,7 +67,7 @@ F3-B以113个constructor的196个field和288个attribute建立484条共享规则
 `SyntaxRoleView`一次建立父槽索引，查询任意原槽，包括不落稀疏port的字段；循环查询不重复扫AST。
 schema未覆盖则拒绝；预算停止不发布部分角色表。F3-B通过也不代表scope/名字存储绑定完成。
 
-F3-C仍在设计，按以下形式产物逐层实现和验收，不能一次跳到名字接线：
+F3-C按以下形式产物逐层实现和验收；C1已通过，C2/C3尚未实现，不能跳过前层：
 
 | 层 | 输入 → 输出 | 通过条件 |
 |---|---|---|
@@ -79,6 +79,12 @@ C1先做结构owner/env路由，再按归属汇总yield/await，最后派生触�
 source scope、求值region、compiler block、runtime frame分别表示；类可见annotation、future字符串化、选择性mangling需显式规则。
 公开symtable丢失部分源结构，仅作已证明投影后的校核；C2不能直接把其混合flags当每个Name的存储地址。
 依据为上述pinned symtable及同版[codegen](https://github.com/python/cpython/blob/v3.14.7/Python/codegen.c)，不执行目标。
+
+C1字段路由的封闭分区为50特殊selector、12描述符、95继承child字段；其余327槽为payload metadata。
+metadata自身不求值，但继承所属操作上下文；表达式被annotation策略抑制是另一轴，不能遇nested lambda就解除。
+共享ContextState分别引用求值owner、源码environment、region、private策略和声明路由；原结构owner沿F2父槽查询。
+实例只保存scope/region/private记录及发生变化的SlotRef边界；任意槽或原B端口由共同view查询，不复制AST或逐槽上下文。
+参数/默认值/注解、typeparam name/bound/default可在同一节点内分属不同上下文；选择性mangling保原group/位置，C1不计算名字key。
 
 ## 共享子图与可组合接口
 
