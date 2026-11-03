@@ -456,6 +456,9 @@ def main(argv=None) -> int:
     if cli_argv and cli_argv[0] == 'source-tokens':
         from scar.analysis.source_lexing import main as source_lexing_main
         return source_lexing_main(cli_argv[1:])
+    if cli_argv and cli_argv[0] == 'source-syntax':
+        from scar.analysis.source_parsing import main as source_parsing_main
+        return source_parsing_main(cli_argv[1:])
     if cli_argv and cli_argv[0] == "static":
         from scar.analysis.static_program import main as static_main
         return static_main(cli_argv[1:])
@@ -477,6 +480,8 @@ def main(argv=None) -> int:
     source_materials.set_defaults(func=lambda _: 0)
     source_tokens = sub.add_parser('source-tokens', help='F1: lex retained F0 bytes without parsing or execution')
     source_tokens.set_defaults(func=lambda _: 0)
+    source_syntax = sub.add_parser('source-syntax', help='F2: retain complete official AST fields without target execution')
+    source_syntax.set_defaults(func=lambda _: 0)
     static_cmd = sub.add_parser("static", help="build source-root program graphs without executing the target")
     static_cmd.set_defaults(func=lambda _: 0)
     static_query = sub.add_parser("static-query", help="query stored static definitions and original graph dependencies")

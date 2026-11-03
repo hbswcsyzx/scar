@@ -12,13 +12,17 @@ python -B -m scar.cli source-bytes --model /path/to/model --out /path/to/fresh-f
 python -B -m scar.cli source-bytes --model /path/to/model --out /path/to/fresh-check --verify
 python -B -m scar.cli source-tokens --model /path/to/model --out /path/to/fresh-f1 --jobs 4
 python -B -m scar.cli source-tokens --model /path/to/model --out /path/to/fresh-lexical-check --verify --jobs 4
+python -B -m scar.cli source-syntax --model /path/to/model --out /path/to/fresh-f2 --jobs 8
+python -B -m scar.cli source-syntax --model /path/to/model --out /path/to/fresh-syntax-check --verify --jobs 8
 ```
 
 F0只保原始bytes与编码结果。解码失败仍存原bytes；文件不可用/预算停止准确报错，不给后层授权。
 现有模型只追加每源raw/token分片；旧源码和IR保持。F1也可用`--file PATH`独立采集（先执行F0）。
 `--max-tokens`是每源上限；verify按原工件预算重放，原预算超过本次上限则拒绝，不会静默忽略限制。
 F1只转录词法，不证明语法有效；原生错误保prefix，预算停止不发布partial模型。
-F0/F1声明材料验收已通过，下一阶段是F2完整AST字段，前层未验收不新增后层功能。
+F2默认exec，也支持eval/single/func_type；--file先经过F0/F1，--max-nodes是每源AST上限。
+源码始终只解析为AST；语法成功不证明作用域/控制合法。大literal超固定预算准确报frontier，不标UNKNOWN。
+F0/F1/F2声明材料验收已通过，下一阶段是F3作用域与名字绑定，前层未验收不新增后层功能。
 当前profile固定本机CPython及tokenizer源码/静态解释器二进制指纹；内置tokenizer的shared Python暂不接纳。
 
 ## 已有建图入口（前端形式验收尚未完成）

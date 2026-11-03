@@ -7,14 +7,10 @@ from concurrent.futures import ProcessPoolExecutor
 from hashlib import sha256
 import json
 import multiprocessing
-import os
 from pathlib import Path
-import re
-import shutil
-import tempfile
 import time
 
-from scar.analysis.source_materials import _matches, _remove_owned_previous, _source_envelope, _stamps
+from scar.analysis.source_materials import _matches, _source_envelope
 from scar.analysis.source_tokens import read_source_tokens, source_tokens_document
 
 
@@ -63,14 +59,6 @@ def _parallel(tasks, jobs):
         return list(pool.map(_lex_unit, tasks, chunksize=1))
 
 
-def _paths(model, out):
-    root, out = Path(model).absolute(), Path(out).absolute()
-    if (root.resolve() != root or out.resolve() != out or out.is_relative_to(root)
-            or out.exists() and (not out.is_dir() or any(out.iterdir()))):
-        raise ValueError('F1 requires a canonical model and fresh external report directory')
-    return root, out
-
-
 def _report(rows, original, *, verify, seconds, jobs):
     counts, token_types = Counter(row['status'] for row in rows), Counter()
     for row in rows:
@@ -91,103 +79,24 @@ def _report(rows, original, *, verify, seconds, jobs):
 
 
 def model_source_tokens(model, out, *, jobs=4, max_tokens=2_000_000, verify=False):
-    """Append per-unit lexical material, or replay it read-only in fresh workers.
-
-    Every original endpoint and artifact is retained. Native lexical errors
-    are complete diagnostic outputs; budget prefixes are not full coverage
-    and never replace the current model. Invalid inputs abort publication.
-    """
-    from scar.analysis.static_program import _artifacts, _json, read_static_program
+    """Append F1 shards, or freshly replay them without touching old layers."""
+    from scar.analysis.source_stage import SourceStage
     if (type(jobs) is not int or not 1 <= jobs <= 32
             or type(max_tokens) is not int or max_tokens < 0 or type(verify) is not bool):
         raise ValueError('F1 requires bounded jobs and a nonnegative exact token budget')
     started = time.monotonic()
-    root, out = _paths(model, out)
-    manifest = read_static_program(root, verify=False)
-    original = (root / 'manifest.json').read_bytes()
-    if json.loads(original) != manifest:
-        raise ValueError('model changed during F1 initial read')
-    keys = [unit['key'] for unit in manifest['units']]
-    if (any(type(key) is not str or re.fullmatch(r'[A-Za-z0-9_-]{1,128}', key) is None for key in keys)
-            or len(set(keys)) != len(keys)):
-        raise ValueError('F1 requires unique, safe source-unit path components')
-    prior_artifacts = tuple(_artifacts(manifest))
-    owned_paths = {d['path'] for d in prior_artifacts}
-    for unit in manifest['units']:
-        if ('source_tokens' not in unit['artifacts']
-                and ('units/' + unit['key'] + '/source_tokens.json.gz' in owned_paths
-                     or (root / 'units' / unit['key'] / 'source_tokens.json.gz').exists())):
-            raise ValueError('new F1 sidecar collides with an existing artifact')
-    consumed = tuple(descriptor for unit in manifest['units'] for name, descriptor in unit['artifacts'].items()
-        if name in ('source', 'source_bytes', 'source_tokens')) if verify else prior_artifacts
-    stamps = _stamps(root, consumed)
-    temporary = None
-    try:
-        if not verify:
-            temporary = Path(tempfile.mkdtemp(prefix='.source-tokens-', dir=root.parent))
-            shutil.copytree(root, temporary, dirs_exist_ok=True, copy_function=os.link)
-        tasks = [(root, temporary, unit, max_tokens) for unit in manifest['units']]
+    with SourceStage(model, out, artifact='source_tokens', verify=verify,
+            consumes=('source', 'source_bytes', 'source_tokens')) as stage:
+        tasks = [(stage.root, stage.staging, unit, max_tokens) for unit in stage.manifest['units']]
         rows = _parallel(tasks, jobs)
-        report = _report(rows, original, verify=verify, jobs=jobs, seconds=0)
-        if ((root / 'manifest.json').read_bytes() != original or _stamps(root, consumed) != stamps):
-            raise ValueError('F1 input changed during lexical processing')
-        read_static_program(root, verify=False)
+        report = _report(rows, stage.original, verify=verify, jobs=jobs, seconds=0)
         if not verify and report['complete_for_declared_units']:
-            for unit, row in zip(manifest['units'], rows):
-                if unit['key'] != row['unit']:
-                    raise ValueError('F1 unit order changed')
-                # Check the complete old unit with the new receipt removed.
-                before = _json(unit)
-                prior = unit['artifacts'].get('source_tokens')
-                unit['artifacts']['source_tokens'] = row['artifact']
-                restored = {**unit, 'artifacts': {name: item for name, item in unit['artifacts'].items()
-                    if name != 'source_tokens'}}
-                if prior is not None:
-                    restored['artifacts']['source_tokens'] = prior
-                if _json(restored) != before:
-                    raise ValueError('F1 changed an old source-unit field')
-            manifest['source_tokens'] = {'schema': 'scar.source-token-inventory', 'schema_version': 1,
+            stage.publish(rows, {'schema': 'scar.source-token-inventory', 'schema_version': 1,
                 'stage': 'F1', 'scope': 'DECLARED_MODEL_SOURCE_UNITS', 'units': len(rows),
                 'tokens': report['tokens'], 'status_counts': report['status_counts'],
-                'later_stages_verified': False, 'whole_program_complete': False}
-            unique = {d['path']: d for d in _artifacts(manifest)}
-            manifest['storage'] = {'files': len(unique), 'compressed_bytes': sum(d['bytes'] for d in unique.values())}
-            (temporary / 'manifest.json').unlink()
-            (temporary / 'manifest.json').write_bytes(_json(manifest))
-            read_static_program(temporary, verify=False)
-            if _stamps(temporary, prior_artifacts) != stamps:
-                raise ValueError('F1 staging altered an original artifact')
-            # Recheck ownership and all pinned original artifacts immediately
-            # before rename; do not erase concurrently created user files.
-            read_static_program(root, verify=False)
-            if ((root / 'manifest.json').read_bytes() != original or _stamps(root, consumed) != stamps):
-                raise ValueError('F1 original model changed before publication')
-            previous = Path(tempfile.mkdtemp(prefix='.source-tokens-replacing-', dir=root.parent))
-            previous.rmdir()
-            root.rename(previous)
-            try:
-                temporary.rename(root)
-                temporary = None
-            except BaseException:
-                previous.rename(root)
-                raise
-            retained = _remove_owned_previous(previous, prior_artifacts, stamps)
-            if retained is not None:
-                report['retained_previous_directory'] = retained
-        report['published_manifest_sha256'] = sha256((root / 'manifest.json').read_bytes()).hexdigest()
-        report['source_scan_remaining'] = manifest.get('remaining')
-        report['source_scan_issues'] = manifest.get('source_issues')
-        report['manifest_unchanged'] = (root / 'manifest.json').read_bytes() == original
-        report['consumed_artifacts_unchanged'] = _stamps(root, consumed) == stamps
-        report['original_units_and_endpoints_unchanged'] = True
+                'later_stages_verified': False, 'whole_program_complete': False})
         report['seconds'] = time.monotonic() - started
-        out.mkdir(parents=True, exist_ok=True)
-        with (out / 'result.json').open('xb') as stream:
-            stream.write(_json(report))
-        return report
-    finally:
-        if temporary is not None:
-            shutil.rmtree(temporary, ignore_errors=True)
+        return stage.finish(report)
 
 
 def main(argv=None):
