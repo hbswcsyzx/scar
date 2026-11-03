@@ -275,6 +275,27 @@ def _locate_body(owner, captured, issues, cache):
     return body, _compiler(body)
 
 
+def _call_positions(body, link):
+    """Compiler positions selecting one original source CALL, not new atoms.
+
+    CPython 3.14.7 codegen.c:update_start_location_to_match_attr shortens
+    multiline method CALL/CALL_KW locations to the final attribute name.
+    It uses the normalized identifier's Unicode length, not its UTF-8 size.
+    The owning code descriptor and exact bytecode site are checked separately.
+    https://github.com/python/cpython/blob/v3.14.7/Python/codegen.c
+    """
+    source = link.source
+    position = (source.start_line, source.end_line, source.start_column, source.end_column)
+    node = body.context.call_nodes.get(source.atom_id)
+    if (type(node) is not ast.Call or type(node.func) is not ast.Attribute
+            or type(node.func.ctx) is not ast.Load or node.lineno == node.func.end_lineno
+            or any(type(arg) is ast.Starred for arg in node.args)
+            or any(keyword.arg is None for keyword in node.keywords)):
+        return (position,)
+    from scar.analysis.attribute_selector import _cpython_attribute_positions
+    return _cpython_attribute_positions(node.func, position)
+
+
 def _locate(owner, captured, selected_site, issues, cache):
     key = captured, selected_site
     if key in cache:
@@ -286,8 +307,7 @@ def _locate(owner, captured, selected_site, issues, cache):
         raise LookupError('CAPTURED_SITE_IS_NOT_CALL')
     links = [link for link in body.operation_links if link.opcode is Opcode.CALL
         and type(link.source) is SourceReference and
-        (link.source.start_line, link.source.end_line, link.source.start_column,
-         link.source.end_column) == selected_site.position]
+        selected_site.position in _call_positions(body, link)]
     if len(links) != 1:
         raise LookupError('ORIGINAL_CANONICAL_CALL_NOT_UNIQUE')
     link, = links
@@ -467,8 +487,10 @@ def main(argv=None):
     parser.add_argument('--out', required=True)
     parser.add_argument('--max-seconds', type=int, default=180)
     parser.add_argument('--expand-missing', action='store_true',
-                        help='use retained captured code to add missing static bodies before reconnecting')
+                        help='add version-verified missing source units and bodies before reconnecting')
     parser.add_argument('--max-expand-bodies', type=int, default=32)
+    parser.add_argument('--max-source-files', type=int, default=8)
+    parser.add_argument('--max-source-bytes', type=int, default=8 * 1024 * 1024)
     parser.add_argument('--expansion-out',
                         help='fresh expansion report directory (default: OUT-expansion)')
     args = parser.parse_args(argv)
@@ -487,12 +509,14 @@ def main(argv=None):
             raise ValueError('binding and expansion reports need separate directories')
         from scar.analysis.observed_body_demands import expand_observed_bodies
         expansion = expand_observed_bodies(args.model, args.trace, expansion_out,
-            limits, max_bodies=args.max_expand_bodies)
+            limits, max_bodies=args.max_expand_bodies,
+            max_source_files=args.max_source_files, max_source_bytes=args.max_source_bytes)
     report = build_observed_call_bindings(args.model, args.trace, args.out, limits)
     if expansion is not None:
         report['body_expansion'] = {'report': str(expansion_out / 'result.json'),
             'request_count': expansion['request_count'],
-            'expanded_body_count': expansion['expanded_body_count']}
+            'expanded_body_count': expansion['expanded_body_count'],
+            'added_source_count': expansion['source_expansion']['added_source_count']}
         (Path(args.out) / 'summary.json').write_bytes(_json(report))
     print(json.dumps({key: report[key] for key in
         ('binding_count', 'observed_attempts', 'target_kinds', 'analyzer_seconds', 'issues')}

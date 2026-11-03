@@ -11,6 +11,174 @@ import tempfile
 import time
 
 
+def append_static_source_units(directory, sources, *, provenance, jobs=4,
+                               max_bytes=64 * 1024 * 1024, progress=None,
+                               expected_manifest_sha256=None):
+    """Append explicit source interpretations without replacing old inputs.
+
+    Retained relationship/import/material publications describe their original
+    source basis only. No loader, source import or target execution occurs.
+    """
+    from concurrent.futures import ProcessPoolExecutor
+    import json
+    import multiprocessing
+    import re
+    from scar.analysis.static_program import (_artifacts, _json, _lowering_route,
+        _read_fragment, _run_file, _write, read_static_program)
+    from scar.analysis.static_sources import _read_source
+    from scar.analysis.static_body import _stamp
+    from scar.analysis.static_calls import input_basis_unit
+    from scar.analysis.static_basis_compatibility import (_same, _source_expansion_valid,
+        source_units_identity)
+    from scar.ir.program.static_sources import StaticSourceFile
+
+    if type(sources) is not tuple or any(type(source) is not StaticSourceFile for source in sources):
+        raise TypeError('source append requires an immutable tuple of exact StaticSourceFile records')
+    if type(jobs) is not int or not 1 <= jobs <= 32:
+        raise ValueError('source append jobs must be in [1,32]')
+    if type(max_bytes) is not int or max_bytes < 1:
+        raise ValueError('source append byte budget must be positive')
+    if type(provenance) is not dict or not provenance or not _same(provenance, provenance):
+        raise ValueError('source append requires explicit JSON provenance')
+    if expected_manifest_sha256 is not None and (type(expected_manifest_sha256) is not str
+            or re.fullmatch(r'[0-9a-f]{64}', expected_manifest_sha256) is None):
+        raise ValueError('expected manifest receipt must be a lowercase SHA256')
+    if progress is not None and not callable(progress):
+        raise TypeError('source append progress must be callable')
+    output = Path(directory).absolute()
+    manifest = read_static_program(output, verify=False)
+    original = (output / 'manifest.json').read_bytes()
+    if json.loads(original) != manifest or (expected_manifest_sha256 is not None
+            and hashlib.sha256(original).hexdigest() != expected_manifest_sha256):
+        raise ValueError('current static manifest changed before source append')
+    if not sources:
+        return manifest
+    old_basis = [input_basis_unit(unit) for unit in manifest['units']]
+    ledger = manifest.get('source_expansion')
+    if ledger is not None and not _source_expansion_valid(ledger, old_basis):
+        raise ValueError('current source expansion ledger is not an exact append-only chain')
+    old_keys = {unit['key'] for unit in manifest['units']}
+    old_coordinates = {(unit['namespace_root'], unit['path']) for unit in manifest['units']}
+    if len(old_keys) != len(manifest['units']) or len(old_coordinates) != len(manifest['units']):
+        raise ValueError('source append cannot inherit duplicate original unit identities')
+    coordinates = [(source.namespace_root, source.path) for source in sources]
+    if len(set(coordinates)) != len(sources) or any(key in old_coordinates for key in coordinates):
+        raise ValueError('source append cannot replace or duplicate an original source interpretation')
+    if sum(source.size_bytes for source in sources) > max_bytes:
+        raise OverflowError('source append byte budget exhausted')
+    requested_keys = [hashlib.sha256(_json([source.namespace_root, source.path,
+        source.decoded_sha256])).hexdigest()[:24] for source in sources]
+    if len(set(requested_keys)) != len(sources) or any(key in old_keys for key in requested_keys):
+        raise ValueError('source append would overwrite an original canonical unit key')
+
+    def verify_sources():
+        for source in sources:
+            source.__post_init__()
+            if source.module_names or source.module_mappings:
+                raise ValueError('observed source append cannot assert candidate import identities')
+            path = Path(source.path)
+            if path.resolve() != path or path.is_symlink():
+                raise ValueError('source append requires original canonical file paths')
+            raw, text, encoding = _read_source(path, min(max_bytes, source.size_bytes))
+            if (len(raw) != source.size_bytes or hashlib.sha256(raw).hexdigest() != source.raw_sha256
+                    or text != source.text or encoding != source.encoding
+                    or hashlib.sha256(text.encode('utf8')).hexdigest() != source.decoded_sha256):
+                raise ValueError('source append differs from its exact retained bytes/text/encoding')
+
+    verify_sources()
+    temporary = Path(tempfile.mkdtemp(prefix='.static-source-append-', dir=output.parent))
+    try:
+        shutil.copytree(output, temporary, dirs_exist_ok=True, copy_function=os.link)
+        shared = {descriptor['path']: _stamp(temporary / descriptor['path'])
+                  for descriptor in _artifacts(manifest)}
+        if jobs == 1:
+            new_units = []
+            for source in sources:
+                new_units.append(_run_file(source, str(temporary), 'graph', 10000))
+                if progress is not None:
+                    progress(len(new_units), len(sources), new_units[-1])
+        else:
+            with ProcessPoolExecutor(max_workers=jobs,
+                    mp_context=multiprocessing.get_context('spawn')) as pool:
+                # Preserve the requested unit order regardless of worker completion.
+                futures = [pool.submit(_run_file, source, str(temporary), 'graph', 10000)
+                           for source in sources]
+                new_units = []
+                for future in futures:
+                    new_units.append(future.result())
+                    if progress is not None:
+                        progress(len(new_units), len(sources), new_units[-1])
+        if len({unit['key'] for unit in new_units}) != len(new_units) or any(
+                unit['key'] in old_keys for unit in new_units):
+            raise ValueError('source append would overwrite an existing canonical unit key')
+        for unit in new_units:
+            if 'lexical' not in unit['artifacts']:
+                continue
+            catalog = _read_fragment(temporary, unit['artifacts']['lexical'])
+            for entry in catalog['entries']:
+                entry['lowering_route'] = _lowering_route(entry)
+            unit['module_initializer_ids'] = [identity for entry in catalog['entries']
+                if entry['kind'] == 'MODULE' for identity in entry['semantic_definition_ids'] or ()]
+            unit['lexical_completion'] = catalog.get('completion', {})
+            unit['lexical_summary'] = catalog['summary']
+            unit['artifacts']['lexical'] = _write(temporary, unit['artifacts']['lexical']['path'], catalog)
+        step = {'before_count': len(old_basis), 'after_count': len(old_basis) + len(new_units),
+            'prior_manifest_sha256': hashlib.sha256(original).hexdigest(),
+            'before_identity_sha256': source_units_identity(old_basis),
+            'appended_identity_sha256': source_units_identity([input_basis_unit(unit) for unit in new_units]),
+            'unit_keys': [unit['key'] for unit in new_units], 'provenance': json.loads(_json(provenance))}
+        manifest['units'].extend(new_units)
+        manifest['source_expansion'] = {'schema': 'scar.static-source-expansion-ledger',
+            'schema_version': 1, 'coverage': 'PRIOR_SOURCE_BASIS_ONLY',
+            'steps': [*(ledger['steps'] if ledger is not None else ()), step]}
+        manifest['dependency_source_roots'] = list(dict.fromkeys((
+            *manifest.get('dependency_source_roots', ()), *(source.namespace_root for source in sources))))
+        summary = manifest['summary']
+        for unit in new_units:
+            for name, number in unit['counts'].items():
+                summary[name] = summary.get(name, 0) + number
+        summary.update(files=len(manifest['units']), processed_files=len(manifest['units']),
+            source_bytes=sum(unit['source_bytes'] for unit in manifest['units']),
+            physical_source_files=len({(unit['path'], unit['raw_sha256']) for unit in manifest['units']}),
+            statuses=dict(Counter(unit['status'] for unit in manifest['units'])),
+            body_statuses=dict(Counter(body['status'] for unit in manifest['units'] for body in unit['bodies'])),
+            issues_by_stage=dict(Counter(issue['stage'] for unit in manifest['units'] for issue in unit['issues'])))
+        manifest['completion'].update(body_expansion_complete=False, dependency_closure_complete=False,
+            whole_program_model_complete=False, language_ledger_complete=False,
+            static_rule_ledgers_present=all('rules' in unit['artifacts'] for unit in manifest['units']))
+        for name in ('explicit_ast_catalog_complete', 'compiler_symbol_tables_cataloged'):
+            if name in manifest['completion']:
+                manifest['completion'][name] = all(unit.get('lexical_completion', {}).get(name, False)
+                                                   for unit in manifest['units'])
+        manifest['storage'] = {'files': len(list(temporary.rglob('*.gz'))),
+            'compressed_bytes': sum(path.stat().st_size for path in temporary.rglob('*.gz'))}
+        if not _source_expansion_valid(manifest['source_expansion'],
+                [input_basis_unit(unit) for unit in manifest['units']]):
+            raise ValueError('source append failed its strict prefix/ledger identity check')
+        if any(_stamp(temporary / path) != stamp for path, stamp in shared.items()):
+            raise ValueError('an original source/body/publication artifact changed during source append')
+        (temporary / 'manifest.json').unlink()
+        (temporary / 'manifest.json').write_bytes(_json(manifest))
+        read_static_program(temporary, verify=False)
+        verify_sources()
+        read_static_program(output, verify=False)
+        if (output / 'manifest.json').read_bytes() != original:
+            raise ValueError('current model changed before source append publication')
+        previous = Path(tempfile.mkdtemp(prefix='.static-replacing-', dir=output.parent))
+        previous.rmdir()
+        output.rename(previous)
+        try:
+            temporary.rename(output)
+        except BaseException:
+            previous.rename(output)
+            raise
+        shutil.rmtree(previous)
+        return manifest
+    except BaseException:
+        shutil.rmtree(temporary, ignore_errors=True)
+        raise
+
+
 def expand_static_dependency_program(directory, *, material_indices=None, max_files=4096,
                                      max_bytes=64 * 1024 * 1024, jobs=4, progress=None):
     """Analyze available source candidates, retaining their conditional origins.

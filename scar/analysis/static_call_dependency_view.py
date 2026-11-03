@@ -40,12 +40,13 @@ class _BasisInputs(MutableMapping):
 
     def __setitem__(self, artifact, document):
         from scar.analysis.static_calls import input_basis_unit
-        from scar.analysis.static_basis_compatibility import units_basis_compatible
+        from scar.analysis.static_basis_compatibility import published_units_basis_compatible
         if (document.get("schema") != "scar.static-call-source-basis"
                 or document.get("schema_version") != 1
                 or document.get("logical_root") != str(self.view.root)
-                or not units_basis_compatible(document.get("units"),
-                    [input_basis_unit(unit) for unit in self.view.units])):
+                or not published_units_basis_compatible(document.get("units"),
+                    [input_basis_unit(unit) for unit in self.view.units],
+                    source_expansion=self.view.manifest.get('source_expansion'))):
             raise ValueError("dependency-view source basis differs from owner inputs")
         locator = self.view._locator(artifact.uri, artifact.schema)
         if locator.artifact != artifact:

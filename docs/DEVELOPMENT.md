@@ -26,13 +26,15 @@ python -B -m scar.cli trace --calls-only \
   --out /path/to/fresh-trace -- python /path/to/program.py
 python -B -m scar.cli observed-calls --model /path/to/model \
   --trace /path/to/fresh-trace --out /path/to/fresh-bindings --expand-missing
-python -B -m scar.cli observed-graph --model /path/to/model \
+python -B -m scar.cli observed-graph --model /path/to/model --expand-missing \
   --trace /path/to/fresh-trace --out /path/to/fresh-observed-graph
 ```
 
 采集计划由 `scar.trace.lean_capture.LeanCapturePlan` 对原源码/代码身份生成；具体接口以源码为准。
 采集不额外执行用户 repr、descriptor 或 hook 来探测对象，不保存每次 Tensor 的完整数值。
 优先复用已保存 trace；`observed-calls` 只离线连接，缺主体按完整代码身份请求原前端补建。
+`--expand-missing` 先核捕获plan的文件指纹/Code、追加缺失source unit，再补body并fresh接线；
+不执行源码、不猜import名，旧分片保留但覆盖仍限旧basis。文件/字节预算用`--max-source-files/bytes`。
 采集仍含 frame profile hooks，不能宣称零干扰；性能测量与建图采集分开。
 需要实际 callable 类型/owner/ABI 时加 `trace --native-callables`：仅在新 trace 内隔离编译小 C probe，
 不安装环境依赖；当前限 CPython 3.14.7/GIL/Linux x86-64，不执行用户 getter 或读取 Tensor 数值。

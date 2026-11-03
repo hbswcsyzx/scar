@@ -98,7 +98,8 @@ def _entry_code(entry, tree, root, scopes, snapshot):
     return definition, source, path, code
 
 
-def expand_observed_bodies(model, trace, out, budget=None, max_bodies=32):
+def expand_observed_bodies(model, trace, out, budget=None, max_bodies=32, *,
+                           max_source_files=8, max_source_bytes=8 * 1024 * 1024):
     """Plan from original capture, close readers, then add missing static bodies.
 
     ``out`` is a separate expansion report directory. The observed-calls CLI
@@ -114,6 +115,11 @@ def expand_observed_bodies(model, trace, out, budget=None, max_bodies=32):
         raise TypeError('observed body demands need StaticCallBudget')
     if type(max_bodies) is not int or max_bodies < 1 or max_bodies > limits.max_bodies:
         raise ValueError('max_bodies must be positive and within the static body budget')
+    from scar.analysis.observed_source_demands import expand_observed_sources
+    source_expansion = expand_observed_sources(model, trace, out / 'sources', limits,
+        max_source_files=max_source_files, max_source_bytes=max_source_bytes)
+    # Source publication closes its readers before mutation. Reopen original
+    # capture and the updated canonical source owner for the separate body phase.
     trace = _read_trace(trace)
     observed = read_python_call_targets(trace)
     metadata = {meta.process_id: meta for meta in trace.metadata}
@@ -232,6 +238,7 @@ def expand_observed_bodies(model, trace, out, budget=None, max_bodies=32):
             issues.append({'kind': 'OBSERVED_BODY_DEMAND_BUDGET', 'remaining': len(requests) - max_bodies})
         plan = {'schema': 'scar.observed-body-demand-plan', 'schema_version': 1,
             'model': str(model), 'prior_manifest_sha256': prior, 'run_scope': observed.source_sha256,
+            'source_expansion_result': str(out / 'sources' / 'result.json'),
             'requests': encode(tuple(requests[key] for key in selected)), 'requested_entries': selected,
             'already_materialized_entries': list(already), 'issues': issues,
             'target_executed': False, 'runtime_class_identity_proved': False,
@@ -254,6 +261,7 @@ def expand_observed_bodies(model, trace, out, budget=None, max_bodies=32):
     report = {'schema': 'scar.observed-body-expansion', 'schema_version': 1,
         'model': str(model), 'trace': trace.directory, 'plan': str(out / 'plan.json'),
         'prior_manifest_sha256': prior, 'published_manifest_sha256': published,
+        'source_expansion': source_expansion,
         'requested_entries': selected, 'request_count': len(selected),
         'expanded_entries': expanded, 'expanded_body_count': len(expanded),
         'already_materialized_entries': list(already), 'results': results, 'issues': issues,

@@ -37,6 +37,26 @@ def _span(node):
     return values
 
 
+def _cpython_attribute_positions(node, position=None):
+    """Original and CPython3.14.7 shortened attribute/codegen locations.
+
+    codegen.c:update_start_location_to_match_attr uses the normalized AST
+    identifier's Unicode length, even though AST columns are UTF-8 offsets.
+    ``position`` also permits the same rule at an owning CALL location.
+    """
+    position = _span(node) if position is None else position
+    positions = {position}
+    if (sys.implementation.name == 'cpython' and sys.version_info[:3] == (3, 14, 7)
+            and type(node) is ast.Attribute and position[0] != node.end_lineno):
+        column = node.end_col_offset - len(node.attr)
+        if column >= 0:
+            start_line = node.end_lineno
+            end_line = max(start_line, position[1])
+            end_column = max(column, position[3]) if end_line == start_line else position[3]
+            positions.add((start_line, end_line, column, end_column))
+    return tuple(sorted(positions))
+
+
 def _source_span(source):
     if source.end_column is None:
         raise ValueError('attribute selector source lacks its exact end column')
@@ -204,8 +224,12 @@ class AttributeSelectorSource:
         operations = ({'LOAD_ATTR', 'LOAD_METHOD'} if type(node.ctx) is ast.Load
                       else {'STORE_ATTR'} if type(node.ctx) is ast.Store
                       else {'DELETE_ATTR'} if type(node.ctx) is ast.Del else set())
-        return tuple(instruction for path, instruction in self._instruction_positions.get(_span(node), ())
-            if path[:len(prefix)] == prefix and instruction.opname in operations)
+        found = {}
+        for position in _cpython_attribute_positions(node):
+            for path, instruction in self._instruction_positions.get(position, ()):
+                if path[:len(prefix)] == prefix and instruction.opname in operations:
+                    found[path, instruction.offset] = instruction
+        return tuple(found.values())
 
 
 def prepare_attribute_selector_source(source_tree: ast.Module, source_text: str,

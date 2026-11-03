@@ -65,7 +65,9 @@ def test_two_actual_classes_bind_one_static_call_without_claiming_class_origin(t
         'normalized_value = holder.exact(37)\n'
         'bound_packed = holder.packed\nmethod_packed = bound_packed(11, 29, flag=7, spare=9)\n\n'
         'def packed(first, *items, flag=None, **extra):\n    return flag\n\n'
-        'packed_value = packed(11, 29, flag=7, spare=9)\n' + assertion + suffix + 'assert mixed == 29\n')
+        'packed_value = packed(11, 29, flag=7, spare=9)\n'
+        'chain = (" scar ".strip()\n    .ｕｐｐｅｒ()\n    .replace("S", "s"))\n'
+        + assertion + suffix + 'assert mixed == 29\n')
     program.write_text(text)
     original = hashlib.sha256(program.read_bytes()).hexdigest()
     model = tmp_path / 'model'
@@ -116,6 +118,12 @@ def test_two_actual_classes_bind_one_static_call_without_claiming_class_origin(t
     assert len({binding['invocation_id'] for binding in calls}) == 2
     assert all(binding['class_origin_verified'] is False for binding in calls)
     assert sum(binding['kind'] == 'FUNCTION' for binding in report['bindings']) >= 2
+    chain_line = text.splitlines().index('chain = (" scar ".strip()') + 1
+    chained = [binding for binding in report['bindings']
+        if binding['source']['path'] == str(program) and binding['source']['start_line'] == chain_line]
+    assert len(chained) == 3
+    assert len({binding['call_operation'] for binding in chained}) == 3
+    assert len({binding['callee_use'] for binding in chained}) == 3
 
     # The same raw run supplies entry/exit instances. Static interface ports
     # remain shared declarations; an observed normal return does not delete

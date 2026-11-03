@@ -8,6 +8,9 @@ This comparison does not establish relationship coverage of the added bodies.
 from __future__ import annotations
 
 import math
+import hashlib
+import json
+import re
 
 
 def _same(left, right):
@@ -65,4 +68,85 @@ def units_basis_compatible(original_units, current_units):
     return True
 
 
-__all__ = ['units_basis_compatible']
+def source_units_identity(units):
+    """Digest immutable unit/entry coordinates, excluding body-hole contents.
+
+    This is an append ledger coordinate, not a replacement for the full
+    artifact-preserving comparison in ``units_basis_compatible``.
+    """
+    if not units_basis_compatible(units, units):
+        raise ValueError('source expansion identity requires valid projected units')
+    mutable = frozenset(('status', 'cache_key', 'artifact'))
+    stable = [{**{key: value for key, value in unit.items() if key != 'bodies'},
+        'bodies': [{key: value for key, value in row.items() if key not in mutable}
+                   for row in unit['bodies']]} for unit in units]
+    payload = json.dumps(stable, sort_keys=True, ensure_ascii=False,
+                         separators=(',', ':'), allow_nan=False).encode('utf8')
+    return hashlib.sha256(payload).hexdigest()
+
+
+def _source_expansion_valid(ledger, current):
+    if (type(ledger) is not dict or set(ledger) != {'schema', 'schema_version', 'coverage', 'steps'}
+            or ledger['schema'] != 'scar.static-source-expansion-ledger'
+            or type(ledger['schema_version']) is not int or ledger['schema_version'] != 1
+            or ledger['coverage'] != 'PRIOR_SOURCE_BASIS_ONLY'
+            or type(ledger['steps']) is not list or not ledger['steps']):
+        return False
+    if not units_basis_compatible(current, current):
+        return False
+    keys = [unit.get('key') for unit in current]
+    coordinates = [(unit.get('namespace_root'), unit.get('path')) for unit in current]
+    if (any(type(key) is not str or not key for key in keys)
+            or len(set(keys)) != len(keys) or len(set(coordinates)) != len(coordinates)):
+        return False
+    expected_fields = {'before_count', 'after_count', 'prior_manifest_sha256',
+        'before_identity_sha256', 'appended_identity_sha256', 'unit_keys', 'provenance'}
+    previous = None
+    for step in ledger['steps']:
+        if type(step) is not dict or set(step) != expected_fields:
+            return False
+        before, after = step['before_count'], step['after_count']
+        if (type(before) is not int or type(after) is not int
+                or not 0 <= before < after <= len(current)
+                or previous is not None and before != previous
+                or any(type(step[name]) is not str or re.fullmatch(r'[0-9a-f]{64}', step[name]) is None
+                       for name in ('prior_manifest_sha256', 'before_identity_sha256', 'appended_identity_sha256'))
+                or type(step['unit_keys']) is not list
+                or step['unit_keys'] != [unit.get('key') for unit in current[before:after]]
+                or type(step['provenance']) is not dict or not step['provenance']
+                or not _same(step['provenance'], step['provenance'])):
+            return False
+        if any(unit.get('module_names') != [] or unit.get('module_mappings') != []
+               for unit in current[before:after]):
+            return False  # Appended evidence is not an inferred import namespace.
+        if (source_units_identity(current[:before]) != step['before_identity_sha256']
+                or source_units_identity(current[before:after]) != step['appended_identity_sha256']):
+            return False
+        previous = after
+    return previous == len(current)
+
+
+def published_units_basis_compatible(original_units, current_units, *, source_expansion=None):
+    """Retain prior relationship scope across an explicit append-only ledger.
+
+    Every original source/body endpoint is still checked by the strict normal
+    comparison. Additional units are accepted only at recorded append borders;
+    their relationships are not asserted to have been covered by the old basis.
+    """
+    if units_basis_compatible(original_units, current_units):
+        return True
+    if (type(original_units) is not list or type(current_units) is not list
+            or len(original_units) >= len(current_units)
+            or not units_basis_compatible(original_units, current_units[:len(original_units)])):
+        return False
+    try:
+        if not _source_expansion_valid(source_expansion, current_units):
+            return False
+        borders = {count for step in source_expansion['steps']
+                   for count in (step['before_count'], step['after_count'])}
+        return len(original_units) in borders
+    except (TypeError, ValueError, KeyError, OverflowError):
+        return False
+
+
+__all__ = ['units_basis_compatible', 'published_units_basis_compatible', 'source_units_identity']

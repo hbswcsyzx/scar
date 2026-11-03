@@ -244,7 +244,7 @@ def read_static_class_links(directory, publication, *, index_directory=None, log
     This reader executes no target or saved validation result.
     """
     from scar.analysis.static_calls import input_basis_unit
-    from scar.analysis.static_basis_compatibility import units_basis_compatible
+    from scar.analysis.static_basis_compatibility import published_units_basis_compatible
     from scar.analysis.static_program import read_static_program
     root = Path(directory).absolute()
     manifest = read_static_program(root, verify=False)
@@ -266,8 +266,9 @@ def read_static_class_links(directory, publication, *, index_directory=None, log
     basis, _ = _read_json_artifact(index_artifact(basis_artifact), max_bytes=max_bytes)
     if (basis.get("schema") != "scar.static-call-source-basis" or basis.get("schema_version") != 1
             or basis["logical_root"] != str(logical_model)
-            or not units_basis_compatible(basis["units"],
-                [input_basis_unit(u) for u in manifest["units"]])):
+            or not published_units_basis_compatible(basis["units"],
+                [input_basis_unit(u) for u in manifest["units"]],
+                source_expansion=manifest.get('source_expansion'))):
         raise ValueError("class source basis differs from current original inputs")
     cache, providers, catalogs = {}, {}, {}
 

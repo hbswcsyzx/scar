@@ -642,11 +642,27 @@ def main(argv=None):
     parser.add_argument('--native-protocols', help='replay existing ABI declaration shards instead of writing new ones')
     parser.add_argument('--max-seconds', type=int, default=180)
     parser.add_argument('--max-graphs', type=int, default=128)
+    parser.add_argument('--expand-missing', action='store_true',
+                        help='add version-verified missing source units and bodies, then open fresh readers')
+    parser.add_argument('--max-expand-bodies', type=int, default=32)
+    parser.add_argument('--max-source-files', type=int, default=8)
+    parser.add_argument('--max-source-bytes', type=int, default=8 * 1024 * 1024)
     args = parser.parse_args(argv)
     out = Path(args.out).absolute()
     if out.resolve() != out or out.is_symlink() or out.exists() and (not out.is_dir() or any(out.iterdir())):
         raise FileExistsError('observed graph output must be a fresh or empty canonical directory')
+    if args.expand_missing and args.native_protocols is not None:
+        parser.error('--expand-missing rebuilds the source basis; omit --native-protocols to regenerate its declarations')
     started = time.monotonic()
+    expansion = None
+    if args.expand_missing:
+        from dataclasses import replace
+        from scar.analysis.observed_body_demands import expand_observed_bodies
+        from scar.analysis.static_calls import StaticCallBudget
+        expansion = expand_observed_bodies(args.model, args.trace, out / 'expansion',
+            replace(StaticCallBudget(), max_seconds=args.max_seconds),
+            max_bodies=args.max_expand_bodies, max_source_files=args.max_source_files,
+            max_source_bytes=args.max_source_bytes)
     budget = ProgramDependencyBudget(max_seconds=args.max_seconds, max_input_bytes=1024**3,
         max_cached_bytes=256*1024**2, max_graphs=args.max_graphs)
     with ProgramDependencySession(args.model, budget=budget) as session:
@@ -681,6 +697,12 @@ def main(argv=None):
             'measurements': session.measurements(), 'target_executed': False,
             'whole_program_complete': False, 'normal_landing_observed': False,
             'transformation_authorized': False}
+        if expansion is not None:
+            summary['expansion'] = {'report': str(out / 'expansion' / 'result.json'),
+                'added_source_count': expansion['source_expansion']['added_source_count'],
+                'expanded_body_count': expansion['expanded_body_count'],
+                'prior_manifest_sha256': expansion['source_expansion']['prior_manifest_sha256'],
+                'published_manifest_sha256': expansion['published_manifest_sha256']}
     raw = json.dumps(document, separators=(',', ':'), ensure_ascii=False, allow_nan=False).encode()
     stored = gzip.compress(raw, mtime=0)
     out.mkdir(parents=True, exist_ok=True)
