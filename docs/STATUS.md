@@ -38,23 +38,26 @@ source/body expansion分别保留PRIOR_SOURCE/BODY_BASIS_ONLY覆盖，不能用�
 144行CALL仍保留0/1隐式前缀条件，不把monitor arg0当源码receiver或声明defaults当当前值。
 
 复用保存trace离线建立61个原生调用协议接口，共享18个模板；模板按ABI/参数形状共享，实际callable作输入。
-442条协议声明边：137参数、61目标、183状态、61正常返回；全图接口568边，全部通过公共双向查询。
+442条协议声明边：137参数、61目标、183状态、61正常返回；全图接口570边，全部通过公共双向查询。
 异常引用包保留适配缺口，61条已知异常world出口独立接通；协议端口不生成native Invocation或完成观测。
 目前图只表达Python侧调用协议与条件C ABI声明，原生实现体、实际C参数和kernel尚未连接。
-本轮材料追加→body→接线→协议发布92.36秒，fresh重放63.82秒；v4导出119,978 bytes。
+材料追加→body→接线→协议发布92.36秒；最近复用分片离线连接49.45秒、fresh核验53.06秒。
+当前v4导出120,056 bytes，7个Python接口均选中原正常返回，新增隐式None出口且保留此前568边。
 原21,631个分片、原unit行及calls/classes/imports publication保持，LeWM和trace未改、未执行目标。
 旧协议basis已正确失效，新协议重验通过；工具耗时不是workload性能或加速比。
-证据：`artifacts/current/queries/lewm-native-callables/{source-expansion-run.json,graph-source-joined/validation.json}`。
-本轮材料两例19.87秒、多行/Unicode对应例16.53秒通过；旧source/basis/参数接口仍可读。
+证据：`artifacts/current/queries/lewm-native-callables/{source-expansion-run.json,graph-current/validation.json}`。
+模块普通Dict已复用原primitive：分配、key/value顺序、**更新及异常world/临时引用均保留，后续语句继续建图；
+旧有限prefix仍保原未展开后缀。纯静态Dict及跨文件{}回归2例16.38秒，返回路径聚焦例22.72秒通过。
 
 CEM189行循环已有492操作、6,343成员端点、30回边端口及控制/状态边界，查询129.63秒；
 证据在 `artifacts/current/queries/lewm-observed-calls/loop-boundary-result.json`。效果与资源仍未闭合。
 
 ## 缺口与接下来的顺序
 
-1. **材料与局部降低**：当前3个Python接口未闭合（2个库文件材料缺口、1个无直接入口）；还需隐式返回。
+1. **材料与局部降低**：当前3个Python接口未闭合（2个库文件材料缺口、1个无直接入口）。
    无捕获全文件指纹的库文件不能冒充历史版本，可先静态建当前版本子图，再按CodeID限定作用域对应。
-   模块`{}`的admission/validator及模块Assert等局部降低尚有缺口，不能用函数Assert能力替代模块支持。
+   当前库候选需在入口/环境/initializer消费者落实逐run的Code作用域限制；不能只添加来源标签。
+   模块Assert等局部降低仍需补齐；带清理的返回路径证据不足时保留候选，不按None或位置强行选择。
 2. **继续跨层接线**：已知Python receiver与原生协议端口已支持，仍需类调用、延迟体、C参数/实现体、
    异常包适配及runtime/kernel关系；C ABI条件声明不代表已进入实现或实际copy。
 3. **联合推理**：接通逐地址状态、别名、效果、逻辑值provenance与Tensor属性反馈，

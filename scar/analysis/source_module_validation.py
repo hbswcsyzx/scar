@@ -54,7 +54,7 @@ def _mapping_exception_holds(block_id, operations, protocols, blocks, use_links)
         if kind is PythonProtocolKind.FRAME_RELEASE_TEMPORARY and first is not None and first.role in (
                 'function-exception-unwind','mapping-function-exception-unwind','mapping-import-exception-unwind'):
             released.append(op.uses[0].value)
-        if kind is K.FRAME_EXIT_EXCEPTION_PACKET:
+        if kind in (K.FRAME_EXIT_EXCEPTION_PACKET,PythonProtocolKind.FRAME_EXIT):
             held=tuple(use.value for use in op.uses if (row:=use_links.get((op.id,use.id))) is not None and row.role=='held-temporary')
             return held+tuple(reversed(released))
         if kind is PythonProtocolKind.FUNCTION_HANDLED_CONTEXT_ENTER:
@@ -710,8 +710,17 @@ def require_valid_structured_module_program(result,*,source_texts,code_evidence=
     # admission rules rather than being silently enlarged by a new producer.
     literal_bool_elision=any(row.compiler_elision is not None for row in overlay.expansions)
     module_annotations=any(row.compiler_annotation is not None for row in overlay.expansions)
+    annotation_sources={row.source for row in overlay.expansions if row.compiler_annotation is not None}
+    annotation_dicts={_module_statement_ref(context,node.value) for node in ast.walk(context.tree)
+        if isinstance(node,ast.AnnAssign) and isinstance(node.value,ast.Dict)
+        and _module_statement_ref(context,node) in annotation_sources and not node.value.keys}
+    dictionary_displays=any(row.kind in (PythonProtocolKind.BUILD_MAP,PythonProtocolKind.MAP_ADD,PythonProtocolKind.DICT_UPDATE)
+        and type(row.source) is SourceReference
+        and (atom:=result.semantic.source_atoms.get(row.source.atom_id)) is not None and atom.kind=='Dict'
+        and row.source not in annotation_dicts for row in overlay.protocols)
     prefix,tail=mapping_prefix_selection(context,code_evidence,profile=result.profile,
-        literal_bool_elision=literal_bool_elision,module_annotations=module_annotations)
+        literal_bool_elision=literal_bool_elision,module_annotations=module_annotations,
+        dictionary_displays=dictionary_displays)
     _need(overlay.prefix==(frame_statement_slice(context,unit,F.BODY,prefix) if prefix else None),'SP8 prefix is not the mechanical maximal supported collection')
     _need((overlay.remaining is not None)==bool(tail),'SP8 missing/extra remaining source collection')
     if tail:
@@ -993,17 +1002,27 @@ def require_valid_structured_module_program(result,*,source_texts,code_evidence=
     # memory effects. Ordinary tuple expressions use the expression producer.
     index_tuples={id(node.slice) for node in ast.walk(context.tree)
                   if isinstance(node,ast.Subscript) and isinstance(node.slice,ast.Tuple)}
+    dictionary_validator=None
     # Derive expression results only from actual producer ports/literals.
     def expression_value(node):
+        nonlocal dictionary_validator
         source=_module_statement_ref(context,node)
         if isinstance(node,ast.Dict):
             matches=[plan for statement,plan in annotation_plans.items()
                      if nodes[statement].value is node and plan.empty_dict is not None]
-            _need(len(matches)==1,'dictionary expression needs its exact annotation RHS compiler plan')
-            from scar.analysis.source_module_annotation_validation import empty_dict_result
-            return empty_dict_result(node,matches[0],source_reference=lambda n:_module_statement_ref(context,n),
-                overlay=overlay,protocols=protocols,operations=operations,invoke=invoke,
-                ref_type=ref_type,state_type=state_type)
+            if matches:
+                _need(len(matches)==1,'annotation dictionary has conflicting compiler plans')
+                from scar.analysis.source_module_annotation_validation import empty_dict_result
+                return empty_dict_result(node,matches[0],source_reference=lambda n:_module_statement_ref(context,n),
+                    overlay=overlay,protocols=protocols,operations=operations,invoke=invoke,
+                    ref_type=ref_type,state_type=state_type)
+            if dictionary_validator is None:
+                from scar.analysis.source_module_mapping_validation import ModuleDictionaryValidator
+                dictionary_validator=ModuleDictionaryValidator(overlay=overlay,blocks=blocks,
+                    operations=operations,values=values,protocols=protocols,invoke=invoke,
+                    source_reference=lambda n:_module_statement_ref(context,n),
+                    exception_holds=_mapping_exception_holds,ref_type=ref_type,state_type=state_type)
+            return dictionary_validator.result(node,expression_value)
         if isinstance(node,ast.Constant):
             candidates={row.value for row in overlay.value_links if row.source==source
                 and isinstance(values[row.value],ReferenceValue) and type(values[row.value].origin) is LiteralOrigin
@@ -1113,7 +1132,10 @@ def require_valid_structured_module_program(result,*,source_texts,code_evidence=
                 continue  # Definition-specific consumer checks the actual holds/transfer before its STORE_NAME.
             if class_profile and any(record.binding==store.id for record in overlay.class_constructions):
                 continue  # Class-specific consumer checked this exact hold/transfer and both completions.
-            _need([(op.id,use.id) for op in graph.operations for use in op.uses if use.value==consumed]==[(store.id,store.uses[2].id)],
+            prior_uses=(dictionary_validator.transfer_uses.get(consumed,set())
+                if dictionary_validator is not None else set())
+            _need({(op.id,use.id) for op in graph.operations for use in op.uses if use.value==consumed}
+                  ==prior_uses|{(store.id,store.uses[2].id)},
                   'STORE_NAME consumed stack input must not remain pending on either completion')
     # Constant references remain the original typed whole-root code-slot records.
     instructions=_mapping_source_instructions(context,code_evidence,profile=result.profile)

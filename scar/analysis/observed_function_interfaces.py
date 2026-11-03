@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import ast
 from dataclasses import dataclass
+import dis
 import inspect
 
 from scar.analysis.observed_call_bindings import (
@@ -19,13 +20,14 @@ from scar.ir.program.contextual_calls import StaticCallInterface
 from scar.ir.program.functions import (
     ArgumentKind, BindingOrigin, CallArgument, FormalPort, ParameterBinding, ParameterKind,
 )
-from scar.ir.program.model import StateVersionValue, UseRole
+from scar.ir.program.model import LiteralOrigin, OperationResult, ReferenceValue, StateVersionValue, UseRole
 from scar.ir.program.python_call_targets import PythonEntryBinding, PythonTargetKind
 from scar.ir.program.source_call_bindings import SourceArgumentPort
 from scar.ir.program.source_returns import SourceReturnSite
 from scar.ir.program.static_calls import StaticCallFrontier, StaticStateEntryRoute
+from scar.ir.program.structured import PythonProtocolKind, StructuredBodyModel
 from scar.ir.record_codec import decode
-from scar.trace.code_snapshot import code_parameters, site as code_site
+from scar.trace.code_snapshot import code_key, code_parameters, site as code_site
 
 
 _UNKNOWN_DEFAULT = object()
@@ -111,28 +113,110 @@ def _positions(value):
     return value.start_line, value.end_line, value.start_column, value.end_column
 
 
-def _return_site(body, code, exit_, interface):
+def _own_nodes(root):
+    """Only this execution scope, excluding nested callable/class bodies."""
+    yield root
+    for child in ast.iter_child_nodes(root):
+        if isinstance(child, (ast.FunctionDef, ast.AsyncFunctionDef, ast.Lambda, ast.ClassDef)):
+            continue
+        yield from _own_nodes(child)
+
+
+def _cleanup_returns(root, protected=False):
+    """Returns whose lexical exit crosses cleanup, not sibling cleanups."""
+    protected = (protected or isinstance(root, (ast.With, ast.AsyncWith, ast.ExceptHandler))
+        or isinstance(root, (ast.Try, ast.TryStar)) and bool(root.finalbody))
+    if type(root) is ast.Return and protected:
+        yield root
+    for child in ast.iter_child_nodes(root):
+        if isinstance(child, (ast.FunctionDef, ast.AsyncFunctionDef, ast.Lambda, ast.ClassDef)):
+            continue
+        yield from _cleanup_returns(child, protected)
+
+
+def _implicit_terminal(body, terminal, structured):
+    source = body.namespace.source
+    if (not any(link.operation == terminal.operation and link.source == source
+                for link in body.operation_links)
+            or not any(link.operation == terminal.operation and link.use == terminal.use
+                and link.source == source and link.role == 'result' for link in body.use_links)):
+        return False
+    value = body.index.values[terminal.value]
+    if type(value) is not ReferenceValue or type(value.origin) is not LiteralOrigin or value.origin.value is not None:
+        return False
+    block, = (block for region in body.graph.regions for block in region.blocks if block.id == terminal.block)
+    position = block.operations.index(terminal.operation)
+    if position == 0:
+        return False
+    frame = block.operations[position - 1]
+    if not any(protocol.operation == frame and protocol.kind is PythonProtocolKind.FRAME_EXIT
+            and protocol.source == source for protocol in structured.protocols):
+        return False
+    if not any(link.operation == frame and link.source == source and link.role == 'held-payload'
+            and body.index.use_site(link.use).use.value == terminal.value for link in body.use_links):
+        return False
+    operation = body.index.operations[terminal.operation]
+    world = body.index.values[body.index.use_site(operation.terminator.values[1]).use.value]
+    return type(world.origin) is OperationResult and world.origin.operation == frame
+
+
+def _return_site(body, code, exit_, interface, *, issue=None):
+    def opened(kind, detail):
+        if issue is not None:
+            issue(kind, detail)
+        return None
     if (exit_.completion is not FrameCompletion.NORMAL
             or exit_.return_site.opname not in ('RETURN_VALUE', 'RETURN_CONST')):
         return None
-    if decode(CapturedSite, code_site(code, exit_.return_site.offset)) != exit_.return_site:
+    if code_key(code) != exit_.code or decode(CapturedSite, code_site(code, exit_.return_site.offset)) != exit_.return_site:
         raise ValueError('observed return offset/opcode/span differs from original code')
-    nodes = [node for node in ast.walk(body.context.tree) if type(node) is ast.Return
-        and (exit_.return_site.position == _positions(node)
+    roots = [node for node in ast.walk(body.context.tree) if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef))
+        and body.namespace.source is not None and _positions(node) == _positions(body.namespace.source)]
+    if len(roots) != 1:
+        return opened('OBSERVED_RETURN_FUNCTION_SCOPE_OPEN', 'No unique original function scope owns this compiler return.')
+    owned = tuple(_own_nodes(roots[0]))
+    returns = tuple(node for node in owned if type(node) is ast.Return)
+    protected = tuple(_cleanup_returns(roots[0]))
+    nodes = [node for node in returns
+        if (exit_.return_site.position == _positions(node)
              or node.value is not None and exit_.return_site.position == _positions(node.value))]
-    if len(nodes) != 1:
-        return None
-    node, = nodes
-    positions = {_positions(node)}
-    if node.value is not None:
-        positions.add(_positions(node.value))
-    selected = []
-    for terminal in interface.normal_returns:
-        links = [link for link in body.operation_links if link.operation == terminal.operation]
-        uses = [link for link in body.use_links
-                if link.operation == terminal.operation and link.use == terminal.use]
-        if any(_positions(link.source) in positions for link in (*links, *uses)):
-            selected.append(terminal)
+    if nodes:
+        if len(nodes) != 1:
+            return None
+        node, = nodes
+        if node in protected:
+            return opened('OBSERVED_RETURN_CONTROL_PATH_OPEN',
+                'This explicit return crosses cleanup; its compiler/control route remains open.')
+        positions = {_positions(node)}
+        if node.value is not None:
+            positions.add(_positions(node.value))
+        selected = [terminal for terminal in interface.normal_returns
+            if any(_positions(link.source) in positions
+                for link in (*body.operation_links, *body.use_links)
+                if link.operation == terminal.operation)]
+        return selected[0] if len(selected) == 1 else None
+    if protected:
+        return opened('OBSERVED_RETURN_CONTROL_PATH_OPEN',
+            'An unmatched compiler return may belong to a protected explicit return; fallthrough is not selected from None or source position.')
+    instructions = tuple(dis.get_instructions(code))
+    number, = (number for number, instruction in enumerate(instructions)
+               if instruction.offset == exit_.return_site.offset)
+    current = instructions[number]
+    previous = instructions[number - 1] if number else None
+    constant_none = (current.opname == 'RETURN_CONST' and current.argval is None
+        or current.opname == 'RETURN_VALUE' and not current.is_jump_target and previous is not None
+        and previous.opname == 'LOAD_CONST' and previous.argval is None)
+    if not constant_none or body.document.get('structured') is None:
+        return opened('OBSERVED_IMPLICIT_RETURN_COMPILER_OPEN',
+            'No direct compiler None return and recorded structured frame-exit source establish fallthrough.')
+    structured = decode(StructuredBodyModel, body.document['structured'])
+    if (structured.definition != body.namespace.definition or structured.region != body.namespace.region
+            or structured.source != body.namespace.source):
+        raise ValueError('implicit return changed its original structured body identity')
+    selected = [terminal for terminal in interface.normal_returns if _implicit_terminal(body, terminal, structured)]
+    if len(selected) != 1:
+        return opened('OBSERVED_IMPLICIT_RETURN_TERMINAL_OPEN',
+            'The original function-source literal/frame-exit terminal is missing or ambiguous; all normal alternatives remain.')
     return selected[0] if len(selected) == 1 else None
 
 
@@ -392,8 +476,9 @@ def derive_observed_function_interfaces(owner, trace, observed, bindings, cache,
             exit_ = observed_exits[0] if len(observed_exits) == 1 else None
             selected_return = None
             if exit_ is not None:
-                selected_return = _return_site(callee, code, exit_, interface)
-                if exit_.completion is FrameCompletion.NORMAL and selected_return is None:
+                issue_count = len(issues)
+                selected_return = _return_site(callee, code, exit_, interface, issue=issue)
+                if exit_.completion is FrameCompletion.NORMAL and selected_return is None and len(issues) == issue_count:
                     issue('OBSERVED_NORMAL_RETURN_SITE_OPEN',
                           'A normal exit was observed but no unique original return terminal matches its source position.')
             else:

@@ -35,6 +35,7 @@ Action 的 VAL / REP / MEM / XFER / STATE / CTRL / ORDER / IO / OPAQUE 也是可
 条件保留主体、有序操作数和依据；“在条件成立时精确”不等于条件已经获证。
 
 函数体共享一个原始模板，调用点通过实参、形参、环境、状态及返回/异常接口连接。
+字典显示沿分配、顺序求值、更新及异常状态展开；空字典也不能当共享常量。旧有限文件图保持原覆盖。
 展开查询返回原 Operation/Value/Use，而不是为每个调用复制整份源码图。
 循环也可作为整体展开：当前 `LoopTemplateView` / `LoopConstructView` 是原图的投影视图，
 保留成员、嵌套关系、初始输入、header 参数、回边、正常退出、break/continue 及来源缺口；

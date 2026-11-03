@@ -66,6 +66,16 @@ def test_two_actual_classes_bind_one_static_call_without_claiming_class_origin(t
         'bound_packed = holder.packed\nmethod_packed = bound_packed(11, 29, flag=7, spare=9)\n\n'
         'def packed(first, *items, flag=None, **extra):\n    return flag\n\n'
         'packed_value = packed(11, 29, flag=7, spare=9)\n'
+        'def fallthrough(value):\n    kept = value\n\n'
+        'none_result = fallthrough(11)\n'
+        'def branch_none(flag):\n    if flag:\n        return None\n\n'
+        'branch_true = branch_none(True)\nbranch_false = branch_none(False)\n'
+        'def cleaned_none(flag):\n    try:\n        if flag:\n            return None\n'
+        '    finally:\n        flag = False\n\n'
+        'cleaned_true = cleaned_none(True)\ncleaned_false = cleaned_none(False)\n'
+        'def return_before_with(flag, value, manager):\n    if flag:\n        return value\n'
+        '    with manager:\n        value = None\n\n'
+        'before_cleanup = return_before_with(True, 17, None)\n'
         'chain = (" scar ".strip()\n    .ｕｐｐｅｒ()\n    .replace("S", "s"))\n'
         + assertion + suffix + 'assert mixed == 29\n')
     program.write_text(text)
@@ -280,6 +290,37 @@ def test_two_actual_classes_bind_one_static_call_without_claiming_class_origin(t
                 assert pack_edges and all(edge.meaning is M.DEPENDENCE for edge in pack_edges)
             if kind != 'FUNCTION':
                 assert not graph.observed_incoming(receiver, kinds=(K.ARGUMENT,)).edges
+
+        selected_returns = []
+        for statement in ('none_result = fallthrough(11)', 'branch_true = branch_none(True)',
+                'branch_false = branch_none(False)', 'before_cleanup = return_before_with(True, 17, None)'):
+            line = text.splitlines().index(statement) + 1
+            item, = (item for item in provider.interfaces if item.binding.source.start_line == line)
+            assert item.selected_return in item.interface.normal_returns
+            scope, = (scope for scope in provider.scopes if provider.binding(scope) == item.binding)
+            normal_edges = tuple(edge for point in provider.ports(scope)
+                for edge in graph.observed_outgoing(point).edges
+                if edge.source.phase is Phase.RETURN_SITE and edge.target.phase is Phase.NORMAL_INTERFACE)
+            assert len(normal_edges) == 2
+            assert {edge.kind for edge in normal_edges} == {K.COMPLETION, K.STATE_INTERFACE}
+            assert all(edge.source.witness == item.observed_exit.anchor for edge in normal_edges)
+            selected_returns.append(item)
+        explicit, implicit = selected_returns[1:3]
+        assert explicit.interface.body == implicit.interface.body
+        assert explicit.selected_return.operation != implicit.selected_return.operation
+        assert explicit.observed_exit.return_site.offset != implicit.observed_exit.return_site.offset
+
+        protected = []
+        for statement in ('cleaned_true = cleaned_none(True)', 'cleaned_false = cleaned_none(False)'):
+            line = text.splitlines().index(statement) + 1
+            item, = (item for item in provider.interfaces if item.binding.source.start_line == line)
+            assert item.observed_exit.completion is FrameCompletion.NORMAL
+            assert item.selected_return is None and item.interface.normal_returns
+            assert any(issue['kind'] == 'OBSERVED_RETURN_CONTROL_PATH_OPEN'
+                and issue['attempt_index'] == item.binding.target.attempt_index for issue in provider.issues)
+            protected.append(item)
+        assert protected[0].observed_exit.return_site.position == protected[1].observed_exit.return_site.position
+        assert protected[0].observed_exit.return_site.offset != protected[1].observed_exit.return_site.offset
 
         # Reordering across ABI groups is allowed; reordering two ordinary
         # positional parameters would silently change the binding and is not.

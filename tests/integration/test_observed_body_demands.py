@@ -165,13 +165,11 @@ def test_observed_external_source_appends_without_replacing_prior_graph(tmp_path
     external.write_text(external_text)
     program = source / 'program.py'
     execution_marker = tmp_path / 'executed-once'
-    # Known frontend gap: a module-level {} currently leaves its suffix
-    # without canonical CALLs. dict() isolates source-material admission;
-    # this case does not establish complete lowering of arbitrary modules.
+    # A module dictionary display must not hide the later exec/call ports.
     text = (f'open({str(execution_marker)!r}, "x").close()\n'
         'def f(value):\n    return value\n\n'
         'class Anchor:\n    pass\n\nseed = f(1)\n'
-        'namespace = dict()\n'
+        'namespace = {}\n'
         f'exec(compile(open({str(external)!r}).read(), {str(external)!r}, "exec"), namespace)\n'
         'result = namespace["remote"](2)\n')
     program.write_text(text)
