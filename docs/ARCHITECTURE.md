@@ -67,6 +67,19 @@ F3-B以113个constructor的196个field和288个attribute建立484条共享规则
 `SyntaxRoleView`一次建立父槽索引，查询任意原槽，包括不落稀疏port的字段；循环查询不重复扫AST。
 schema未覆盖则拒绝；预算停止不发布部分角色表。F3-B通过也不代表scope/名字存储绑定完成。
 
+F3-C仍在设计，按以下形式产物逐层实现和验收，不能一次跳到名字接线：
+
+| 层 | 输入 → 输出 | 通过条件 |
+|---|---|---|
+| C1 属性路由 | F2/F3-B原槽 → SourceScope、EvaluationRegion、共享SlotContext及private策略 | 157个child字段和全部484槽规则闭合，866源/全部port归属可独立重验 |
+| C2 词法接口 | C1归属及整scope声明 → name-key、local/cell/globals/builtins/class-mapping查询或绑定接口 | 16个lexical字段/15类全覆盖；无名字、wildcard、派生binder分别计数；不冒充实际dict/StorageID |
+| C3 编译器投影 | 原源码接口及F3-A → 直接/内联/共享/省略/合成关系witness | 原引用、参数序、symbol贡献及重挂关系逐项对账，不按name+line或地址猜，不要求scope/table双射 |
+
+C1先做结构owner/env路由，再按归属汇总yield/await，最后派生触发条件；nested def的defaults/decorators仍可能属于外层。
+source scope、求值region、compiler block、runtime frame分别表示；类可见annotation、future字符串化、选择性mangling需显式规则。
+公开symtable丢失部分源结构，仅作已证明投影后的校核；C2不能直接把其混合flags当每个Name的存储地址。
+依据为上述pinned symtable及同版[codegen](https://github.com/python/cpython/blob/v3.14.7/Python/codegen.c)，不执行目标。
+
 ## 共享子图与可组合接口
 
 源码 AST/CST 是识别输入；执行依赖由可共享、可成环的规范图表示。

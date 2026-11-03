@@ -84,7 +84,8 @@ PUBLIC_COMPILER_VIEW/UNJOINED始终显式；这不是完整lexical scope、名�
 
 ## 下一层
 
-F3-C先确定源码scope/phase及名字→存储接口的封闭输入域、规则和独立验收，再实现；随后F3-D全量验收。
+F3-C只读审查已收敛为C1属性路由→C2词法存储接口→C3编译器投影对账，逐层验收；尚未新增C实现。
+形式输入、输出和分母见ARCHITECTURE。C1先定全字段传递规则；后续不靠动态观测修补缺静态规则，随后F3-D全量验收。
 旧15个公开标志已全存，349组name+line冲突及内联/annotation共享证明不能据此直接接AST。
 字段角色和source/compiled/runtime三种scope必须分开，F3通过后才进入F4；不增加优化backend。
 先前审计及LibCST能力反例保存在`f3-audit/`；现成库仅按已验证能力使用。
