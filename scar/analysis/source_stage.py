@@ -21,7 +21,7 @@ class SourceStage:
 
     def __init__(self, model, out, *, artifact, verify, consumes):
         from scar.analysis.static_program import _artifacts, read_static_program
-        if artifact not in ('source_tokens', 'source_syntax', 'source_symbols', 'source_roles', 'source_contexts', 'source_declarations', 'source_bindings') or type(verify) is not bool:
+        if artifact not in ('source_tokens', 'source_syntax', 'source_symbols', 'source_roles', 'source_contexts', 'source_declarations', 'source_bindings', 'compiler_topology') or type(verify) is not bool:
             raise ValueError('unsupported formal source sidecar transaction')
         self.root, self.out = Path(model).absolute(), Path(out).absolute()
         if (self.root.resolve() != self.root or self.out.resolve() != self.out

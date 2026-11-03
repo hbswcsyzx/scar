@@ -59,6 +59,7 @@ def _artifacts(manifest):
     yield from manifest.get("source_contexts", {}).get("artifacts", ())
     yield from manifest.get("source_declarations", {}).get("artifacts", ())
     yield from manifest.get("source_bindings", {}).get("artifacts", ())
+    yield from manifest.get("compiler_topology", {}).get("artifacts", ())
     for unit in manifest["units"]:
         yield from unit["artifacts"].values()
         for body in unit["bodies"]:

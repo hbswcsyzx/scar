@@ -1,7 +1,7 @@
 # 当前状态
 
 **第一阶段未完成。当前按形式阶段重新验收：F0 → F1 → F2 → F3 → F4 → F5 → F6。**
-阶段定义见 [ARCHITECTURE](ARCHITECTURE.md)。F0/F1/F2、F3-A/F3-B、C1及C2已按声明profile与源码范围分别验收；下一层为C3，组合cleanup开发暂缓。
+阶段定义见 [ARCHITECTURE](ARCHITECTURE.md)。F0/F1/F2、F3-A/F3-B、C1及C2已按声明profile与源码范围分别验收；C3-T拓扑已验收，下一层为C3-S符号投影，组合cleanup开发暂缓。
 现有后层代码及成果保留，但不能代替前端完整性证明。
 
 ## F0：原始材料
@@ -94,7 +94,7 @@ PUBLIC_COMPILER_VIEW/UNJOINED始终显式；这不是完整lexical scope、名�
 证据：`/var/tmp/scar-f2-recovery-7w7nd_0z/f3c1/{materials,verification,source-definition-agreement.json,run.json}`。
 原模型及B输入store不变；/home仍只读，canonical_model_published=false，源码缓冲与主工作区待同步。
 
-## C2a名字投影与声明账本（已验收，完整C2尚未完成）
+## C2a名字投影与声明账本（已验收；本层仅含声明）
 
 16个lexical字段/15类规则完整核对；866/866源码DECLARED，563,522原B端口都有明确disposition。
 72,731个共享名字键、392,706条声明贡献、33,752份scope摘要，conflicts=0；source/home、操作意图/visit flags/visibility/C1抑制分轴。
@@ -118,10 +118,22 @@ lookup_resolution=NOT_COMPUTED_IN_C2A；/home只读，canonical_model_published=
 证据：`/var/tmp/scar-f2-recovery-7w7nd_0z/f3c2b/{materials,verification,root-symbol-agreement.json,implementation.json,run.json}`。
 SOURCE_NAMESPACE_TEMPLATES、runtime_binding=NOT_OBSERVED、compiler_projection=NOT_COMPUTED_IN_C2B；原模型及三上游store不变。
 
+## C3-T编译器拓扑（已按声明范围验收）
+
+113 constructor=21特殊handler+92有序访问；484字段=54特殊child+91普通child+12marker+327payload，闭分区逐项核官方规则。
+866/866源码PROJECTED；44,032模板保留原附着边，33,752原source scope全部有投影，全部65,171 region可查询。
+公开行40,411、内联1,279、future脱离2,342、detached后代0，3,621条显式改写；不按name/line或地址接线。
+8进程采集506.00秒、独立重放506.91秒，均含C1及F3-A全量fresh；无前沿/对应矛盾。
+867分片含一份catalog，共1,923,028压缩bytes；独立守恒对账逐项核全部source scope/region、native行/父边/有序子边，0失败。
+额外10,280个无C1 scope的header模板逐原occurrence等于函数体数18,669减原header scope8,389，未按空symbol形状猜。
+最终profile 3族单元11.38秒、唯一存储集成9.34秒通过；普通49构造/91 child字段另逐case核官方visit顺序，0差异。
+证据：`/var/tmp/scar-f2-recovery-7w7nd_0z/f3c3/{materials,verification,topology-agreement.json,transparent-visitor-audit.json,run.json}`。
+原材料及model不变，canonical_model_published=false；symbol_origin_projection/parameter_projection=NOT_COMPUTED_IN_C3T，runtime_execution=NOT_OBSERVED。
+
 ## 下一层
 
-下一层C3：源码接口与官方compiler材料→显式投影witness；不能把source scope和native表直接等同。
-形式输入、输出和分母见ARCHITECTURE。C2已按声明范围验收，C3尚未实现；不靠动态观测修补缺静态规则，随后F3-D全量验收。
+下一层C3-S：名字贡献、合成参数、native符号合并/传播和原整数位、varnames对账。
+形式输入、输出和分母见ARCHITECTURE。C2已按声明范围验收；C3-T已按声明范围验收，C3-S尚未实现；不靠动态观测修补缺静态规则，随后F3-D全量验收。
 旧15个公开标志已全存，349组name+line冲突及内联/annotation共享证明不能据此直接接AST。
 字段角色和source/compiled/runtime三种scope必须分开，F3通过后才进入F4；不增加优化backend。
 先前审计及LibCST能力反例保存在`f3-audit/`；现成库仅按已验证能力使用。

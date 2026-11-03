@@ -474,6 +474,9 @@ def main(argv=None) -> int:
     if cli_argv and cli_argv[0] == 'source-bindings':
         from scar.analysis.source_binding_materials import main as source_bindings_main
         return source_bindings_main(cli_argv[1:])
+    if cli_argv and cli_argv[0] == 'compiler-topology':
+        from scar.analysis.compiler_topology_materials import main as compiler_topology_main
+        return compiler_topology_main(cli_argv[1:])
     if cli_argv and cli_argv[0] == "static":
         from scar.analysis.static_program import main as static_main
         return static_main(cli_argv[1:])
@@ -507,6 +510,8 @@ def main(argv=None) -> int:
     source_declarations.set_defaults(func=lambda _: 0)
     source_bindings = sub.add_parser('source-bindings', help='F3-C2b: resolve conditional namespace interfaces and logical capture demands')
     source_bindings.set_defaults(func=lambda _: 0)
+    compiler_topology = sub.add_parser('compiler-topology', help='F3-C3T: project source compiler templates onto original public scope topology')
+    compiler_topology.set_defaults(func=lambda _: 0)
     static_cmd = sub.add_parser("static", help="build source-root program graphs without executing the target")
     static_cmd.set_defaults(func=lambda _: 0)
     static_query = sub.add_parser("static-query", help="query stored static definitions and original graph dependencies")

@@ -90,6 +90,12 @@ C2内部先验收C2a名字投影和整scope声明账本，再实现C2b条件查�
 C2a覆盖16个lexical字段/15类及所有原B端口disposition；global/nonlocal先汇总，walrus贡献先归入接收scope。
 有效名按SYMBOL_VISIT_PROJECTION归一并intern，SELECTIVE按原typeparam访问前缀；这不是已验证的codegen地址。
 声明、候选写/删、参数接口、directives及cleanup分开保留，未知运行值不妨碍确定逻辑声明；SUPPRESSED保源码模板而不授实际效果。
+C3内部严格分两步：C3-T先完成compiler模板构造/附着、future detach与comp splice，并逐边对应公开图；
+C3-S随后重放名字贡献、合成参数、符号合并与传播，核原整数位与varnames，T未验收不开发S。
+T的身份为原occurrence＋固定语法role；没有source scope的空header annotation仍有原Def.args依据。
+source scope、求值region、compiler template及public row分别引用，只有类型/名称/行号相同不足以接线。
+T只验type/name/lineno/nested/children；symbol_origin_projection与parameter_projection明确NOT_COMPUTED_IN_C3T。
+
 C2b将class mapping、local/typeparam slot、closure及class-protocol cell分域，分别输出读计划、写/删目标和共享capture父链。
 ROOT_GLOBALS只指根环境模板；非根使用各自ENV_GLOBALS/BUILTINS参数，不据源码相同断言运行字典相同。
 class prepared mapping与captured class-dict namespace分开；mapping miss与其他异常分开，非局部写不能写回class mapping。
