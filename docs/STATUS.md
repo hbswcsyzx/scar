@@ -240,7 +240,13 @@ C++ source 前端复用 Tree-sitter，实际 53,705-byte template 中机械枚�
 
 **Implemented / Verified（循环接口）**：真实 `solve` 仍只有1个Region、7个循环模板；`loop_views()` 公开初始与回边映射，每个header为29个绑定槽＋1个world槽，词法嵌套和强类型读回通过。未展开运行迭代，未证明内容不变；当前只是精确接口视图，成员/出口闭包与动态迭代坐标仍待完成，见同一目录 `loop-views.json`。
 
-下一步优先完善函数/循环的可组合展开视图、跨迭代转发及状态依赖，再补 receiver/default 等接口；类最终产物来源单独补证。只补所需字段，不采 Tensor 数值或启用整套 profiler。静态已知连接保留，未执行路径仍按静态条件表示；动态观察不能删除其它合法候选。以下整程序静态覆盖欠账继续有效。
+**Implemented / Verified（源码循环构件展开）**：新增 `loop_constructs()` 和 `LoopConstructView.expand()`，从原 metadata 机械选择同函数中的操作；直接成员排除嵌套循环，内部 phi/world 参数引用原 ID。不复制主体，不永久展开迭代。通用静态案例通过（7.45秒），覆盖混合基本块、嵌套、continue/break、提前 RETURN/RAISE、回边内部端口和原来源保持；没有执行被分析函数。
+
+真实原 CEM 的7个循环分别引用28/208/30/57/492/879/55个操作；其中5个需要在同一基本块内区分循环与外部操作。189行的构件保留121个异常终止，不用 SCC 丢掉不回到 header 的路径。加载、展开、序列化及强类型读回共 **21.87秒**，gzip视图 **176,091 bytes**；仍只有原1个Region/1,282个操作，主manifest不变。证据在 `queries/lewm-observed-calls/loop-construct-result.json` 和 `loop-constructs.json.gz`。这里只验证原记录成员，不证明完整控制/效果范围或内容不变。
+
+**未完成**：真实 CEM `loop_boundary()` 在180秒预算内未完成。单独45秒 cProfile 在会话初始化和首主体解码阶段耗尽，尚未进入 cut，不能据此把逐成员查询认定为实测热点。已定位同一 core 的重复验证、metadata重复解码及两次 publication 的全表 basis 核验；先在同一输入/收据所有者内消重，再测实际切边。诊断在同目录 `loop-boundary-analysis-profile.{json,txt,pstats}`，只分析 SCAR 自身，未重跑目标。通用边界能处理内部 block arguments，不等于真实完整查询已通过。
+
+下一步优先完成公共可组合边界查询，再接通跨迭代状态、效果与出口，补 receiver/default 等接口；类最终产物来源单独补证。只补所需字段，不采 Tensor 数值或启用整套目标 profiler。静态已知连接保留，未执行路径仍按静态条件表示；动态观察不能删除其它合法候选。以下整程序静态覆盖欠账继续有效。
 
 1. 默认 factory-origin、入口状态投影、contextual 调用接口和模块 receiver 桥接已在选中真实 CALL 接通；下一步沿已识别类产物核对 slot 的 Python 回调、descriptor/隐式 receiver，仍按 **原 48 个 CALL 的第一处断边**归因。相对导入仅补了有声明 package 的模块候选；class FROM 编译适配、函数字段/defaults、循环与递归摘要仍欠账。保留条件/未知前缀，不能退回名字提示填目标。origin 和 contextual 关系的全范围发布仍待完成；旧发布计数不能冒充最新闭包。
    CEM 模块与工具模块均已完整展开；不能误归因为主体后缀。创建 G 的引用不证明入口内容；不制造 CALL，不复用 creation world，不由局部 1 个目标推定全部 48 个已经解决。原分类与收据在 `queries/lewm-call-gaps.json`。

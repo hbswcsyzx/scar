@@ -136,7 +136,9 @@ State SSA 表达静态读写依赖；循环/分支版本是符号版本，不是
 
 循环区分外部捕获、跨迭代状态、轮内临时值和出口。递推 `X[t+1] = F(X[t], U[t], State[t])` 中，X 是同一状态角色，X[t] 是不同版本；同名变量、相同对象或相同 Storage 都不代表版本相同。循环外引用相同也不证明被引用内容不变。
 
-**Implemented / Verified**：`session.loop_views(namespace)` 暴露原 LoopInterface、初始/回边所有槽（含 world）、词法父子来源；循环体只指原 body_entry/所属函数 Region。FORWARDED/REDEFINED 仅说明 SSA 端口是否直接转发，换 ID 不证明数值改变；内容不变性单列 UNPROVED。当前不是独立 LoopRegion 或完整成员闭包，未采集迭代坐标，不按重复 CALL 次数猜迭代号。后续先完善成员与跨迭代推理，再讨论受读写、控制、异常和零次迭代约束的外提。
+**Implemented / Verified**：`session.loop_views(namespace)` 暴露原 LoopInterface、初始/回边所有槽（含 world）、词法父子来源。`loop_constructs(namespace)` 进一步给出原操作成员、直接成员和内部 block arguments；`view.expand(session.graph())` 读取原操作，嵌套模板继续引用同一函数图，不复制 CFG 或迭代。成员按原源码映射选择，包含初始化、条件、body、else 和有来源的清理；它是源码构件视图，不等于单轮 body 或完整控制/效果闭包。缺来源或来源混合时明确保留前沿。
+
+`loop_boundary()` 在原切边查询中纳入已完全选中 block 的参数，避免把内部 phi/world 回边误报成外部依赖；保留正常/异常/提前返回和已知边界。通用嵌套案例通过，真实 CEM 完整边界查询在180秒预算内未完成，不能声称整程序可组合边界已验收。FORWARDED/REDEFINED 仅说明 SSA 端口是否直接转发，换 ID 不证明数值改变；内容不变性单列 UNPROVED。未采集迭代坐标，不按重复 CALL 次数猜迭代号；后续先接通状态、效果和出口边界，再讨论外提。
 
 逻辑来源、对象、存储、表示/物化不合并。分配站点加符号调用/迭代上下文表示潜在对象；同一站点的不同实例不自动相同。view 可共享存储而有不同几何范围。
 物理地址不是逻辑值身份。确切地址未知时仍可推导符号基址、偏移、别名和范围。

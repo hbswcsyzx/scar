@@ -656,6 +656,48 @@ class ProgramDependencySession:
             raise TypeError('loop views require an original source-body namespace')
         return loop_template_views(self.load_body(namespace))
 
+    def loop_constructs(self, namespace):
+        """Expand original source loop constructs into shared operation references."""
+        from scar.analysis.program_loop_regions import loop_construct_views
+        if type(namespace) is GraphNamespace:
+            namespace = namespace.source_body
+        if type(namespace) is not SourceBodyNamespace:
+            raise TypeError('loop constructs require an original source-body namespace')
+        return loop_construct_views(self.load_body(namespace))
+
+    def loop_boundary(self, namespace, loop, *, context=None, max_members=16384):
+        """Describe the exact selected source construct, retaining effects/open scope."""
+        from scar.analysis.program_loop_regions import LoopConstructView
+        from dataclasses import replace
+        from scar.analysis.program_regions import (
+            analyze_boundary, BoundaryFieldStatus, BoundaryKnowledge,
+        )
+        from scar.ir.program.dependencies import DependencyPoint
+        from scar.ir.v2.common import SourceReference
+        source = loop.template.loop.source if type(loop) is LoopConstructView else loop
+        if type(source) is not SourceReference:
+            raise TypeError('select a recorded loop construct or its original SourceReference')
+        selected = [item for item in self.loop_constructs(namespace)
+                    if item.template.loop.source == source]
+        if len(selected) != 1 or type(loop) is LoopConstructView and selected[0] != loop:
+            raise ValueError('loop construct differs from its current original source/ports')
+        selected, = selected
+        if not selected.members:
+            from scar.analysis.program_loop_views import LoopViewUnavailable
+            raise LoopViewUnavailable('No operation members are recorded; inspect loop construct frontiers.')
+        graph_namespace = selected.template.namespace
+        operations = tuple(DependencyPoint(graph_namespace, identity, context)
+                           for identity in selected.members)
+        internal = tuple(DependencyPoint(graph_namespace, identity, context)
+                         for identity in selected.internal_block_arguments)
+        boundary = analyze_boundary(self.graph(), operations, internal_values=internal,
+                                    max_members=max_members)
+        return replace(boundary,
+            frontiers=tuple(dict.fromkeys((*boundary.frontiers, *selected.frontiers))),
+            fields=(*boundary.fields, BoundaryFieldStatus('loop_construct_scope',
+                BoundaryKnowledge.PARTIAL, 'SOURCE_LOOP_CONSTRUCT',
+                ('Source grouping and its exact cut do not establish full control, cleanup or effect closure.',))))
+
     def body_locations(self, *, file=None, entry=None, kind=None):
         """Select declaration rows before reading any canonical fragment."""
         from scar.analysis.static_query import _file_matches

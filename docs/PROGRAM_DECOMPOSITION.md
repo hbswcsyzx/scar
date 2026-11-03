@@ -249,7 +249,11 @@ e-graph 若未来采用，应作为有明确等价与效果前提的搜索层，
 5. 读写地址、alias/escape、allocation/lifetime、外部与 ordering effects 的摘要及闭合范围。
 6. 外层端口到内部参数/结果/状态的映射，及尚未展开的准确源码 slice 或 callee 边界。
 
-当前 `ProgramDependencySession.loop_views()` 引用原循环 header/body_entry/exit、初始和全部回边槽，含 world，保留词法嵌套。它不新建 CFG 或独立 LoopRegion，尚不声称完整成员/出口闭包。外部输入、循环携带值、SSA 转发和内容不变性需分别推导；只凭端口来自外层或回边换了 ID，不能决定是否可外提。函数可由 `load(namespace).graph` 查看内部子图，缺主体可由观测代码身份触发原静态前端补建。
+当前函数由 `load(namespace).graph` 查看共享内部子图，CALL 的实参、环境和 completion 通过接口连接；缺主体可由观测代码身份触发原静态前端补建。函数体和调用实例不同，递归继续引用已有主体，不无限内联。原实现未提供或前端尚未支持的主体仍是展开欠账，不能宣称每个函数都已完整展开。
+
+`ProgramDependencySession.loop_views()` 引用原循环 header/body_entry/exit、初始和全部回边槽，含 world，保留词法嵌套。`loop_constructs()` 给出源码构件的原操作 ID、排除直接子构件的 direct_members 和内部 block arguments；`view.expand(session.graph())` 读取原成员，子循环通过 nested_sources 继续查询。它不新建 CFG 或独立 LoopRegion，不按迭代复制。初始化、body、else 等来源相同的操作可属于该构件，不能把整个构件当作每轮执行的 body。提前 RETURN/RAISE 不因不在回边 SCC 中而丢失，跨基本块的源码边界也不强行扩大到整个 block。
+
+`loop_boundary()` 对这些原成员进行切边，只有完整选中 block 的参数才可成为内部端口，保留原初始值与回边。边界仍标记源码范围未证明控制/清理/效果闭合；真实 CEM 的完整查询尚未在180秒内完成。外部输入、循环携带值、SSA 转发和内容不变性需分别推导；只凭端口来自外层或回边换了 ID，不能决定是否可外提。
 
 静态实参 Use → formal port 表示语言绑定和依赖，不是两次动态值观测相等。
 返回摘要必须带适用分支、调用条件和 completion；多个 return 不能任取一个。

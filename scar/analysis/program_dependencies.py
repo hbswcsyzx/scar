@@ -162,20 +162,32 @@ class ProgramDependencyGraph:
         return DependencyWalk(roots, tuple(seen), tuple(edges), tuple(frontiers), direction, exhausted,
                               tuple(kind for kind in K if kind in selected))
 
-    def cut(self, operations, *, max_members=16384):
-        """List original edges crossing an explicitly selected operation set."""
+    def cut(self, operations, *, internal_values=(), max_members=16384):
+        """List original edges crossing an explicitly selected operation set.
+
+        Optional internal_values name original block arguments of fully
+        selected blocks. They change cut membership only, never an edge,
+        binding, reference identity or across-iteration invariance claim.
+        """
         operations = tuple(dict.fromkeys(operations))
         if not operations or any(type(point) is not DependencyPoint or type(point.node) is not OperationID
                                  for point in operations):
             raise TypeError("dependency cut needs qualified original Operation endpoints")
         if type(max_members) is not int or max_members < 1:
             raise ValueError("dependency cut needs a positive membership bound")
+        internal_values = tuple(internal_values)
+        if any(type(point) is not DependencyPoint or type(point.node) is not ValueID
+               for point in internal_values):
+            raise TypeError("dependency cut internal values need qualified original Value endpoints")
+        internal_values = tuple(dict.fromkeys(internal_values))
         if len(operations) > max_members:
             raise OverflowError("dependency cut membership budget exhausted")
         members = dict.fromkeys(operations)
+        operation_groups = defaultdict(set)
         for point in operations:
             index = self.load_index(point.namespace)
             operation = index.operations[point.node]
+            operation_groups[point.namespace, point.context].add(point.node)
             owned = [use.id for use in operation.uses] + list(operation.results)
             if operation.terminator is not None:
                 for successor in operation.terminator.successors:
@@ -185,6 +197,26 @@ class ProgramDependencyGraph:
                 members[DependencyPoint(point.namespace, identity, point.context)] = None
                 if len(members) > max_members:
                     raise OverflowError("dependency cut membership budget exhausted")
+        for point in internal_values:
+            point.__post_init__()
+            selected = operation_groups.get((point.namespace, point.context))
+            if selected is None:
+                raise ValueError("internal block argument has no selected operation namespace/context")
+            index = self.load_index(point.namespace)
+            value = index.values.get(point.node)
+            if value is None or type(value.origin) is not BlockArgument:
+                raise ValueError("internal value must be an original block argument")
+            origin = value.origin
+            block = index._block_records.get(origin.block)
+            if (block is None or index._blocks.get(origin.block) != value.region
+                    or origin.index < 0 or origin.index >= len(block.arguments)
+                    or block.arguments[origin.index] != point.node):
+                raise ValueError("internal block argument changed its original region/block/slot")
+            if not block.operations or any(operation not in selected for operation in block.operations):
+                raise ValueError("internal block argument requires every original block operation selected")
+            members[point] = None
+            if len(members) > max_members:
+                raise OverflowError("dependency cut membership budget exhausted")
         inputs, outputs, interfaces, notes = {}, {}, {}, {}
         interface_kinds = frozenset((K.CALL_TARGET, K.IMPLEMENTATION, K.ARGUMENT,
             K.COMPLETION, K.ENVIRONMENT, K.FIELD_INITIALIZER, K.STATE_INTERFACE))

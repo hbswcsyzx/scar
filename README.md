@@ -125,7 +125,9 @@ receiver/default/variadic 及未展开主体仍报告具体缺口。真实 LeWM 
 用 `--max-expand-bodies` 限制。展开报告独立保存到 `OUT-expansion`（可用 `--expansion-out`），
 然后重新连接同一 trace。已有源码/主体不变才保留旧 CALL/class 索引，其覆盖仍限原 basis。
 函数内部可经 `session.load(namespace).graph` 查看，循环接口经 `session.loop_views(namespace)`
-查看；循环体共享，初始/回边/world 独立，不把引用转发当内容不变证明。
+查看；`session.loop_constructs(namespace)` 返回可用 `view.expand(session.graph())` 展开的原操作引用，
+保留嵌套、初始/回边/world。主体共享，不复制迭代，不把引用转发当内容不变证明。
+`session.loop_boundary(namespace, view)` 保留原切边与未闭合范围；通用案例已核验，真实 CEM 完整查询仍超时。
 
 权威程序图只保留 `artifacts/current/static/`：每份源码共享 source/semantic/semantics/CFG/lexical 分片，常量事实和 import 候选索引连接原 ID。`queries/` 只保存引用这些原分片的派生查询及核验收据。
 `--phase sources` 仅建目录；`--phase graph` 为默认源码图；`--phase bodies` 构造源图后继续规范主体展开。对已有图使用 `--expand`，无需重建源图；`--rules-only` 只发布详细规则/前提，`--max-bodies` 与 `--file` 只限制本次派工，全部入口继续计入分母。

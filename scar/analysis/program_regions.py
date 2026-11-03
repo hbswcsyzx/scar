@@ -186,15 +186,17 @@ class BoundaryAnalysis:
                    for refinement in row.refinements for effect in refinement.effects))
 
 
-def analyze_boundary(view, operations, *, max_members=16384):
+def analyze_boundary(view, operations, *, internal_values=(), max_members=16384):
     """Mechanically describe an operation set in its original graph contexts.
 
     Knowledge scopes distinguish enumeration of the declared graph from
     closure of program behavior. In particular KNOWN declared ports do not
     establish pure effects, observer closure, single-entry structure or legal
-    replacement. Phi/loop state ports retain their original Value identities.
+    replacement. Optional internal_values select original block-argument ports
+    only when their entire original block is selected. Phi/loop state ports
+    retain their original Value identities.
     """
-    cut = view.cut(operations, max_members=max_members)
+    cut = view.cut(operations, internal_values=internal_values, max_members=max_members)
     selected, members = set(cut.operations), set(cut.members)
     indexes = {namespace: view.load_index(namespace) for namespace in dict.fromkeys(p.namespace for p in cut.operations)}
     stored_writes = {}
