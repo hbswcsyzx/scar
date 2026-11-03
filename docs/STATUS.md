@@ -1,6 +1,6 @@
 # 当前状态
 
-当前唯一任务是整程序纯静态建模与建图。**第一阶段未完成**；不执行目标程序、import 初始化或用户回调，不做化简、detector/backend 或性能实验。唯一 checkout 为 `~/AAA/scar`，分支 `main`。LeWM 是外部 testcase，通用规则不按业务名称派发。
+当前任务是程序建模与动静态协同建图。**第一阶段未完成**；静态入口不执行目标，用户现已授权显式动态采集以补充实际实例与连接。不做化简、detector/backend 或性能实验。唯一 checkout 为 `~/AAA/scar`，分支 `main`。LeWM 是外部 testcase，通用规则不按业务名称派发。
 
 ## 核心结构与真正的问题
 
@@ -216,7 +216,17 @@ C++ source 前端复用 Tree-sitter，实际 53,705-byte template 中机械枚�
 
 这些材料和验证在 `queries/native-static-model/`；**尚未发布进 current canonical 整程序，Python callable→参数转换→native overload 与具体 runtime/kernel/resource 连接未完成**。CST 是源码输入层，不冒充 C++ 类型/ABI 证明。
 
+## 动静态协同：共享子图与实际调用绑定
+
+**Implemented / Verified**：复用已有 lean CALL 监控、weak token/生命周期 epoch、DRAM snapshot 缓冲与离线转换，新增实际 `TYPE_OBJECT` 分类和 `observed-calls` 离线连接。分类不读取用户 `__class__` 或调用元类 getter。连接核原 body CodeRef、完整代码描述、offset/opcode/span、原 CALL 与 callee Use，不按类名或行号单独配对；定义子图不复制，run/process/thread/invocation/attempt 单独限定运行观察。
+
+单个通用集成案例通过（7.89 秒）。持久案例 `queries/observed-call-demo/result.json` 中，同一个静态 `cls(3)` CALL/callee Use 对应两个不同实际类对象和调用实例；共 4 条绑定（另含 2 条函数调用），规范化产物强类型读回通过。静态构建 2.58 秒、启动至采集/转换完成 3.54 秒、离线 CLI 连接 1.69 秒；采集目录 60,362 bytes，绑定 gzip 2,693 bytes。这是小案例的工具成本，未测真实应用采集开销或加速比；现有 frame profile hooks 仍在使用，不能称零干扰或只有 CALL 回调。
+
+**边界**：实际类对象身份已知，不等于已证明它来自哪个源码类声明；`class_origin_verified=false`，没有将静态候选改为无条件事实。未据此接通构造回调、完整参数/返回/状态依赖或 GPU/kernel；本轮没有动态运行 LeWM，原 LeWM 静态核验和主发布保持原值。
+
 ## 下一步，按实际依赖缺口推进
+
+先将已观察调用绑定用于原参数/返回接口的实例化查询，再补类最终产物的来源证据与隐式 receiver；只补所需字段，不采 Tensor 数值或启用整套 profiler。静态已知连接保留，未执行路径仍按静态条件表示；动态观察不能删除其它合法候选。以下整程序静态覆盖欠账继续有效。
 
 1. 默认 factory-origin、入口状态投影、contextual 调用接口和模块 receiver 桥接已在选中真实 CALL 接通；下一步沿已识别类产物核对 slot 的 Python 回调、descriptor/隐式 receiver，仍按 **原 48 个 CALL 的第一处断边**归因。相对导入仅补了有声明 package 的模块候选；class FROM 编译适配、函数字段/defaults、循环与递归摘要仍欠账。保留条件/未知前缀，不能退回名字提示填目标。origin 和 contextual 关系的全范围发布仍待完成；旧发布计数不能冒充最新闭包。
    CEM 模块与工具模块均已完整展开；不能误归因为主体后缀。创建 G 的引用不证明入口内容；不制造 CALL，不复用 creation world，不由局部 1 个目标推定全部 48 个已经解决。原分类与收据在 `queries/lewm-call-gaps.json`。

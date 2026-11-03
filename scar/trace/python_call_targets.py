@@ -11,6 +11,21 @@ from scar.ir.record_codec import encode
 from scar.trace.code_snapshot import code_key as captured_code_key,call_instruction,site
 
 
+# Use the builtin descriptor directly: isinstance(value, type) can consult a
+# non-type object's user-defined __class__, and reading metaclass attributes
+# normally can execute custom __getattribute__. No application getter, equality
+# or repr participates in this classification.
+_BUILTIN_TYPE = type
+_ACTUAL_TYPE_MRO = type.__dict__['__mro__'].__get__
+
+
+def _is_type_object(value):
+    for base in _ACTUAL_TYPE_MRO(_BUILTIN_TYPE(value)):
+        if base is _BUILTIN_TYPE:
+            return True
+    return False
+
+
 def _invocation_record(invocation):
     return {'process_id': invocation.process_id, 'thread_id': invocation.thread_id,
             'invocation_id': invocation.invocation_id}
@@ -143,6 +158,7 @@ class PythonTargetObserver:
             if type(candidate) is types.FunctionType:func=candidate;receiver=callable_object.__self__;kind=Kind.BOUND_METHOD
         elif type(callable_object) is types.BuiltinFunctionType:kind=Kind.NATIVE_BUILTIN
         elif type(callable_object) is types.MethodWrapperType:kind=Kind.NATIVE_WRAPPER
+        elif _is_type_object(callable_object):kind=Kind.TYPE_OBJECT
         call_ref=reference(callable_object)
         caller={'process_id':self.recorder.pid,'thread_id':key[0],'invocation_id':owner}
         if func is None:

@@ -2,7 +2,7 @@
 
 State · Control · Action · Resource。
 
-SCAR 面向程序依赖建模与自动化简。当前唯一开发任务是**整程序纯静态分析**：不运行目标，尽可能推导源码、依赖、配置和已提供材料中能够确定的事实，并建立层次化、可组合的程序图。
+SCAR 面向程序依赖建模与自动化简。当前开发任务是**程序建模与动静态协同建图**：静态分析建立可组合子图和端口，动态采集补充实际执行实例及绑定。纯静态入口不运行目标，运行观察有独立范围与证据。
 
 当前建模尚未完成。已有结构化前端和有限推理，不代表已自动完整建模 LeWM；当前没有新的优化或加速比结论。
 
@@ -37,7 +37,7 @@ cd ~/AAA/scar
 
 这还不是完整整程序建模：模块和类的完整主体、部分 Python 协议、跨过程目标与参数绑定、别名/副作用联合推导和 Tensor 属性传播仍需按计划贯通。模块已有 BODY profile，类已有独立入口 ABI；类体的 required expansion 不能算成主体已展开。已有运行见证不能充当纯静态完成依据。
 
-现存 trace、profiler 和 backend 实现当前冻结；这一阶段不调用它们，不新增 detector 或程序变换。
+当前复用已有按需 CALL 采集开发动静态连接；不启用 GPU profiler，不新增 detector 或程序变换。
 已提供纯静态入口，目标源码不会被导入或执行：
 
 ```bash
@@ -101,6 +101,22 @@ v2 复用 namespace/context/point/condition/evidence 引用表，强类型读回
 `read_contextual_call()` 完成。查询不会覆盖旧调用发布。真实 `cem.py:134` 已得到 1 个
 条件目标及 6 条参数/5 条正常返回边，见 `queries/contextual-call/`。其它 CALL 与全范围
 发布仍待完成；入口 snapshot 只是条件来源，不能宣布当前绑定/效果闭合。
+
+动静态连接复用已有 lean capture plan（可由 `LeanCapturePlan.from_source_entry_plan()`
+或对源码编译得到的 codes 自动生成选择表，不执行目标）：
+
+```bash
+python -B -m scar.cli trace --calls-only \
+  --capture-plan /path/to/plan.json --capture-plan-sha256 PLAN_SHA256 \
+  --capture-transport snapshot --out /path/to/fresh-trace -- python /path/to/program.py
+python -B -m scar.cli observed-calls --model /path/to/static-model \
+  --trace /path/to/fresh-trace --out /path/to/fresh-bindings
+```
+
+`observed-calls` 只离线连接，不执行目标。输出规范化 `bindings.json.gz` 与 summary；
+`read_observed_call_bindings()` 提供强类型读回。实际 callable 绑定原 CALL/callee Use，
+运行实例与共享定义分别表示；类对象身份不等于源码类声明来源证明。通用多态案例及成本见
+`artifacts/current/queries/observed-call-demo/result.json`。frame profile hooks 仍存在，未宣称零干扰。
 
 权威程序图只保留 `artifacts/current/static/`：每份源码共享 source/semantic/semantics/CFG/lexical 分片，常量事实和 import 候选索引连接原 ID。`queries/` 只保存引用这些原分片的派生查询及核验收据。
 `--phase sources` 仅建目录；`--phase graph` 为默认源码图；`--phase bodies` 构造源图后继续规范主体展开。对已有图使用 `--expand`，无需重建源图；`--rules-only` 只发布详细规则/前提，`--max-bodies` 与 `--file` 只限制本次派工，全部入口继续计入分母。

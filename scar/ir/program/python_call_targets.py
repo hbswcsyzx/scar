@@ -19,6 +19,9 @@ class PythonTargetKind(str,Enum):
     NORMALIZED_RECEIVER_FUNCTION='NORMALIZED_RECEIVER_FUNCTION'
     NATIVE_BUILTIN='NATIVE_BUILTIN'
     NATIVE_WRAPPER='NATIVE_WRAPPER'
+    # The actual CALL operand is a type object (including custom metaclasses).
+    # This is not a ClassConstruction provenance or standard type_call proof.
+    TYPE_OBJECT='TYPE_OBJECT'
     OTHER_UNCLASSIFIED='OTHER_UNCLASSIFIED'
 
 class PythonCodeScope(str,Enum):
@@ -86,6 +89,9 @@ class PythonCallTarget:
             self.layout.__post_init__()
             _reference(self.function_reference)
             if re.fullmatch(r'pycode-v2:[0-9a-f]{64}',self.code) is None:raise ValueError('original stable code fingerprint required')
+        # A type object has no function __code__ of its own. Its metaclass call,
+        # __new__ and __init__ may still execute Python; this record does not
+        # identify or exclude any of those implementation callbacks.
         elif any(v is not None for v in (self.function_reference,self.code,self.layout,self.receiver)) or self.scope is not PythonCodeScope.NO_PYTHON_CODE:
             raise ValueError('non-Python/unclassified target cannot claim Python fields')
         if (self.kind in (PythonTargetKind.BOUND_METHOD,PythonTargetKind.NORMALIZED_RECEIVER_FUNCTION))!=(type(self.receiver) is BoundReceiver):
