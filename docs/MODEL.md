@@ -47,6 +47,16 @@ import 返回的 module 引用、module namespace 和初始化状态分别建模
 
 属性访问使用原 receiver Use、字段选择器、world、正常结果或赋值 Use 表示；属性名是协议配置，不要求程序另外创建一个字符串对象。原 AST/SG 已能确定字段时，即使旧 core 没有精细地址声明，也可保留这部分已知接口；已有地址声明必须与原接口一致。引用绑定令牌可出现在来源路径中，但不因此成为 Python 对象引用。跨层 module 属性来源由真实 import 结果、所选源模块正常出口的 reaching binding，以及 consumer 的原控制路径组合；属性覆盖同时记录写入端口和 receiver 来源。所有这些关系附带加载、lookup、写入提交、上下文及效果保持条件，不是缓存许可。没有 CALL 的属性读取同样保存关系。
 
+属性降低使用 `ProgramGraph.attribute_lookups`：typed 记录关联原
+operation/source/version、receiver/world Uses、静态 selector 及 NORMAL/RAISE 的原
+有序 payload/world 端口。它描述 lookup **请求**，不声明实际读写 `__dict__` 或某个
+ObjectField；原 opaque world 与未闭合 effects 保留，地址 refinement 可以继续缺失。
+source spelling 与实际 lookup name 分开，private-name 改写由词法 ClassDef/编译来源
+决定，不按 receiver 的名字或推测类型决定。普通 getter 与编译器 LOAD_METHOD 形式
+分开，后者保留 callable/optional-self/has-self 原三槽，不捏成单一 bound-method 结果。
+旧图表为 `None/NOT_RECORDED`，新 core capability 显式存表；读取旧图不自动升级。
+接口表仍引用原 ID，公共图仅增加端口说明/依据，不授 receiver→result 身份。
+
 `IMPORT_FROM` 也是原 Operation，不转换成虚构的 Attribute AST。`StaticImportFromRequest`
 记录原 name/level/fromlist Use 和 fromlist 的 `CodeConstantSource`；`StaticImportFromRead`
 记录原 receiver/key/world、成员序号及 normal result。两者只是描述原端口的强类型关系，

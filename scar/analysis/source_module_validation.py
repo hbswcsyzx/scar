@@ -1174,6 +1174,10 @@ def require_valid_structured_module_program(result,*,source_texts,code_evidence=
           and (not tail or any(frontier.kind=='REQUIRED_EXPANSION' for frontier in overlay.frontiers)),
           'SP8 cannot silently discharge namespace/runtime/residual obligations')
     if paired:require_valid_module_propagation(result,context=context,code_evidence=code_evidence)
+    if graph.attribute_lookups is not None:
+        from scar.analysis.source_attribute_lookup import validate_source_attribute_lookups
+        validate_source_attribute_lookups(graph, result.metadata, source_text=text,
+            semantic=result.semantic, source_metadata=overlay)
 
 
 def require_valid_module_propagation(result,*,context,code_evidence):

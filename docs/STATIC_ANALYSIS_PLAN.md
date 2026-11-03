@@ -95,6 +95,13 @@ Use、已知 selector、world 与各 completion，继续引用原节点。不把
 及 native 副作用仍需要各自的条件展开。先定清接口和现有 state-address 契约的区别，
 再改对应 lowerer/validator/公共图投影；该通用关系通过后才继续 receiver 来源与类型推理。
 
+已实现 typed lookup 表、core32、源码独立重放、ProgramIndex 与共同依赖图依据。
+Verified：一个通用静态用例通过；按原 artifact 的实际 capabilities 定向重建 `solve`，
+74 个 lookup、0 个未解析属性名，去掉新表后原 graph/metadata 完全相等，原四个审计
+点接通。构图 7.47 秒、包含读取校验保存 39.93 秒；目标未执行，主发布未重建。
+结果见 `artifacts/current/queries/attribute-lookups/summary.json`。下一项仍是按下述
+已有端口推进 receiver 来源/类型传递，不扩 detector/backend。
+
 receiver 审计显示 mean/var 的双槽 UNPACK_FIXED→CALL 正常结果、v_batch 的
 slice→unpack→iterator item→items CALL→info_dict formal 均有原端口。它们不需要重造
 绑定/解包节点；在 lookup 降低之后按明确协议补 product/iterator/slice 的抽象传递，

@@ -46,6 +46,7 @@ from scar.ir.program.state_addresses import StateAddressRefinement
 from scar.ir.program.literal_sources import (ExactLiteralOrigin, LiteralDefinition,
     UninterpretedConstant, UnlocatedLiteral, require_definition)
 from scar.ir.program.structured import ControlEdgeReference
+from scar.ir.program.attribute_lookups import AttributeLookupInterface
 from scar.ir.literals import PythonLiteral
 from scar.ir.v2.ids import ValueSlotID
 
@@ -874,10 +875,18 @@ class ProgramGraph:
     stored_value_writes: tuple[StoredValueWrite, ...] = ()
     stored_value_reads: tuple[StoredValueRead, ...] = ()
     frame_roots: tuple[FrameRoot | SourceCompilationFrameRoot, ...] = ()
+    attribute_lookups: tuple[AttributeLookupInterface, ...] | None = None
 
     def __post_init__(self) -> None:
         if not isinstance(self.root, RegionID):
             raise TypeError("ProgramGraph.root must be RegionID")
+        if self.attribute_lookups is not None:
+            rows = _tuple(self.attribute_lookups, "ProgramGraph.attribute_lookups")
+            if any(type(row) is not AttributeLookupInterface for row in rows):
+                raise TypeError("ProgramGraph.attribute_lookups requires exact lookup records or NOT_RECORDED None")
+            for row in rows:
+                row.__post_init__()
+            _unique(tuple(row.operation for row in rows), "ProgramGraph attribute lookup operations")
         roots = _tuple(self.frame_roots, "ProgramGraph.frame_roots")
         root_types = (FrameRoot, SourceCompilationFrameRoot)
         if any(type(row) not in root_types for row in roots):
@@ -1120,7 +1129,7 @@ class ProgramGraph:
 
 
 __all__ = [
-    "StoredValueWrite", "StoredValueRead",
+    "StoredValueWrite", "StoredValueRead", "AttributeLookupInterface",
     "ProtocolScope", "ProtocolOperation", "ProtocolOperationRef",
     "RawOperandSource", "RawRequestTrigger", "InjectedPacketTrigger", "InitialAdvance",
     "ProtocolCallInputCase", "ProtocolCallInputs", "ResumeSourceBinding",

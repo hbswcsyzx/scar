@@ -231,5 +231,9 @@ def require_valid_class_suite(prepared,definition,source,*,code_evidence,result)
         need(operands(operations[overlay.remaining.operation])==expected,
              'remaining continuation lost its exact frame/stack/method-selector inputs')
     need(set(cells)==set(overlay.interface.co_cellvars),'compiler-owned cells not allocated before suite completion')
+    if graph.attribute_lookups is not None:
+        from scar.analysis.source_attribute_lookup import validate_source_attribute_lookups
+        validate_source_attribute_lookups(graph, metadata, source_text=prepared.text,
+            semantic=prepared.semantic, compiler_overlay=overlay, compiler_evidence=evidence)
     return {'valid':True,'source_compilation_replayed':True,'runtime_target_executed':False,
             'suite_complete':overlay.remaining is None,'effects_complete':False}

@@ -44,7 +44,7 @@ from scar.ir.program.resources import ResourceRole
 
 
 SCHEMA = "scar.program-graph"
-SCHEMA_VERSION = 31
+SCHEMA_VERSION = 32
 _GRAPH_FIELDS = frozenset(item.name for item in fields(ProgramGraph))
 _BINDING_FIELDS = frozenset({"binding_definitions", "binding_reads"})
 _RESOURCE_FIELDS = frozenset({"resources", "resource_requirements", "resource_uses",
@@ -73,7 +73,9 @@ _EXCEPTION_MATCH_FIELDS = frozenset({"exception_matches"})
 _CALL_EFFECT_FIELDS = frozenset({"call_effect_expansions"})
 _STORED_VALUE_FIELDS = frozenset({"stored_value_writes", "stored_value_reads"})
 _FRAME_ROOT_FIELDS = frozenset({"frame_roots"})
-_V29_GRAPH_FIELDS = _GRAPH_FIELDS
+_ATTRIBUTE_LOOKUP_FIELDS = frozenset({"attribute_lookups"})
+_V32_GRAPH_FIELDS = _GRAPH_FIELDS
+_V29_GRAPH_FIELDS = _V32_GRAPH_FIELDS - _ATTRIBUTE_LOOKUP_FIELDS
 _V30_GRAPH_FIELDS = _V29_GRAPH_FIELDS
 _V31_GRAPH_FIELDS = _V30_GRAPH_FIELDS
 _V28_GRAPH_FIELDS = _V29_GRAPH_FIELDS - _FRAME_ROOT_FIELDS
@@ -133,6 +135,7 @@ _V28_ENVELOPE_FIELDS = frozenset({"schema", "schema_version"}) | _V28_GRAPH_FIEL
 _V29_ENVELOPE_FIELDS = frozenset({"schema", "schema_version"}) | _V29_GRAPH_FIELDS
 _V30_ENVELOPE_FIELDS = frozenset({"schema", "schema_version"}) | _V30_GRAPH_FIELDS
 _V31_ENVELOPE_FIELDS = frozenset({"schema", "schema_version"}) | _V31_GRAPH_FIELDS
+_V32_ENVELOPE_FIELDS = frozenset({"schema", "schema_version"}) | _V32_GRAPH_FIELDS
 _V19_CONNECTION_RECORD_TAGS = {record: tag for record, tag in PROTOCOL_CONNECTION_RECORD_TAGS.items()
                               if record is not SessionOccupancyCondition}
 _V17_PROTOCOL_RECORD_TAGS = {record: tag for record, tag in PROTOCOL_RECORD_TAGS.items()
@@ -326,6 +329,7 @@ def dumps(graph: ProgramGraph) -> str:
     has_frame_roots = _has_frame_root_capability(graph)
     has_static_frame_roots = _has_static_frame_root_capability(graph)
     has_class_frame = _has_class_frame_capability(graph)
+    has_attribute_lookups = graph.attribute_lookups is not None
     tags = (_V11_RECORD_TAGS if has_driver else
             _V10_RECORD_TAGS if has_resumption else _CLEANUP_RECORD_TAGS)
     if has_addresses or has_protocols or has_exception_matches:
@@ -353,7 +357,10 @@ def dumps(graph: ProgramGraph) -> str:
     if has_class_frame:
         tags = {**tags, **CLASS_FRAME_ABI_RECORD_TAGS}
     encoded = encode(graph, record_tags=tags)
-    if has_class_frame:
+    if has_attribute_lookups:
+        document = {"schema": SCHEMA, "schema_version": 32,
+                    **{name: encoded[name] for name in _V32_GRAPH_FIELDS}}
+    elif has_class_frame:
         document = {"schema": SCHEMA, "schema_version": 31,
                     **{name: encoded[name] for name in _V31_GRAPH_FIELDS}}
     elif has_static_frame_roots:
@@ -487,7 +494,7 @@ def _upgrade_v1_record(record: dict[str, Any]) -> dict[str, Any]:
 
 
 def loads(payload: str) -> ProgramGraph:
-    """Decode exact capability profiles v1–v30 without upgrading old wire."""
+    """Decode exact capability profiles v1–v32 without upgrading old wire."""
     if type(payload) is not str:
         raise TypeError("program graph JSON payload must be str")
     document: Any = _loads(payload)
@@ -498,7 +505,7 @@ def loads(payload: str) -> ProgramGraph:
     if document["schema"] != SCHEMA:
         raise ValueError("unsupported program graph schema")
     version = document["schema_version"]
-    if type(version) is not int or version not in (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31):
+    if type(version) is not int or version not in (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32):
         raise ValueError("unsupported program graph schema version")
     expected_fields = {1: _V1_V2_ENVELOPE_FIELDS, 2: _V1_V2_ENVELOPE_FIELDS,
                        3: _V3_ENVELOPE_FIELDS, 4: _V4_ENVELOPE_FIELDS,
@@ -515,7 +522,7 @@ def loads(payload: str) -> ProgramGraph:
                        25: _V25_ENVELOPE_FIELDS, 26: _V26_ENVELOPE_FIELDS,
                        27: _V27_ENVELOPE_FIELDS, 28: _V28_ENVELOPE_FIELDS,
                        29: _V29_ENVELOPE_FIELDS, 30: _V30_ENVELOPE_FIELDS,
-                       31: _V31_ENVELOPE_FIELDS}[version]
+                       31: _V31_ENVELOPE_FIELDS, 32: _V32_ENVELOPE_FIELDS}[version]
     if set(document) != expected_fields:
         raise ValueError("program graph document has incorrect top-level fields")
     graph_fields = {1: _V1_V2_GRAPH_FIELDS, 2: _V1_V2_GRAPH_FIELDS,
@@ -532,8 +539,14 @@ def loads(payload: str) -> ProgramGraph:
                     25: _V25_GRAPH_FIELDS, 26: _V26_GRAPH_FIELDS,
                     27: _V27_GRAPH_FIELDS, 28: _V28_GRAPH_FIELDS,
                     29: _V29_GRAPH_FIELDS, 30: _V30_GRAPH_FIELDS,
-                    31: _V31_GRAPH_FIELDS}[version]
+                    31: _V31_GRAPH_FIELDS, 32: _V32_GRAPH_FIELDS}[version]
     record = {name: document[name] for name in graph_fields}
+    if version < 32:
+        # NOT_RECORDED is a field-level absence of this capability. Neither a
+        # legacy decoder nor a later reader may infer or backfill lookups here.
+        record["attribute_lookups"] = None
+    elif record["attribute_lookups"] is None:
+        raise ValueError("schema version 32 requires explicitly recorded attribute lookup capability")
     if version < 29:
         record.update({name: [] for name in _FRAME_ROOT_FIELDS})
         # The expanded typed source union and enum must not expand old wire.

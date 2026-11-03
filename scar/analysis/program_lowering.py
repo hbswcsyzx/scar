@@ -295,7 +295,9 @@ class SourceProgram:
                         FrameBodyProfile.STRUCTURED_MAPPING_CLASS_314_V1.value)
                     or language_options is not None or verification != 'STRUCTURE'
                     or version == 8 and module_code_evidence is None or type(document['graph']) is not dict
-                    or document['graph'].get('schema_version') != (30 if version in (9,10,11,12) else 29)):
+                    or (document['graph'].get('schema_version') != (30 if version in (9,10,11,12) else 29)
+                        and not (document['graph'].get('schema_version') == 32
+                            and type(document['graph'].get('attribute_lookups')) is list))):
                 raise ValueError('mapping frame requires its explicit static or captured source/core capability')
             result=cls(load_graph(_canonical(document['graph'])),decode(LoweringMetadata,document['metadata']),
                 semantic_from_dict(document['semantic']),None,SourceControlFlowGraph.from_dict(document['control']),
@@ -321,8 +323,9 @@ class SourceProgram:
             graph_wire = document.get("graph")
             if type(graph_wire) is dict:
                 core_version = graph_wire.get("schema_version")
-                if ("frame_roots" in graph_wire
-                        or type(core_version) is int and core_version >= 29):
+                lookup_profile = core_version == 32 and type(graph_wire.get("attribute_lookups")) is list
+                if ((bool(graph_wire.get("frame_roots")) if lookup_profile else "frame_roots" in graph_wire)
+                        or not lookup_profile and type(core_version) is int and core_version >= 29):
                     raise ValueError("historical source1-7 reader cannot contain frame-root core capability")
                 scopes = graph_wire.get("control_scopes")
                 for scope in scopes if type(scopes) is list else ():
@@ -696,6 +699,7 @@ class _Builder:
         self.values_by_id = {}
         self.value_positions = {}
         self.operation_links, self.value_links, self.use_links = [], [], []
+        self.attribute_lookups = []
         self.value_link_set = set()
         self.targets, self.gaps = [], []
         self.world = LocationID(_key("python-world", str(path), self.snapshot.fingerprint))
@@ -944,6 +948,9 @@ class _Builder:
         self.gap(GapKind.DYNAMIC_DISPATCH, node,
                  "source opcode is known; runtime dispatch, effects and exact exceptional behavior remain unverified")
         cursor, value, operation_id = self.invoke(cursor, node, inputs, old=old)
+        if isinstance(node, ast.Attribute):
+            from scar.analysis.source_attribute_lookup import register_attribute_lookup
+            register_attribute_lookup(self, node, operation_id)
         if isinstance(node, ast.Call):
             callee = inputs[0][0]
             candidate_name = self.reference_candidates.get(callee)
@@ -1219,7 +1226,8 @@ class _Builder:
                                                EvidenceKind.INFERRED, _ASSUMPTIONS,
                                                arguments, results, binding_use))
             graph = ProgramGraph(root_id, tuple(self.regions), tuple(self.operations), tuple(self.values),
-                                 (StateLocation(self.world, "coarse Python/external world", stability=Stability.UNKNOWN),))
+                                 (StateLocation(self.world, "coarse Python/external world", stability=Stability.UNKNOWN),),
+                                 attribute_lookups=tuple(self.attribute_lookups) if self.attribute_lookups else None)
             require_valid(graph)
             if self.frame is not None:
                 from scar.ir.program.frame_validation import require_valid_frame_model
@@ -1238,6 +1246,9 @@ class _Builder:
         metadata = LoweringMetadata(self.entry, self.snapshot, tuple(self.operation_links),
                                    tuple(self.value_links), tuple(self.targets), tuple(self.gaps),
                                    _ASSUMPTIONS, tuple(self.use_links))
+        if graph is not None and graph.attribute_lookups is not None:
+            from scar.analysis.source_attribute_lookup import validate_source_attribute_lookups
+            validate_source_attribute_lookups(graph, metadata, source_text=self.text, semantic=self.semantic)
         return LoweredSourceBody(graph, metadata, self.operations_emitted, self.interface, self.frame)
 
     def candidate_bindings(self, operation, region, function, node):
@@ -1273,11 +1284,13 @@ class _Builder:
 
     def checkpoint(self):
         return tuple(len(items) for items in (self.regions, self.operations, self.values,
-            self.operation_links, self.value_links, self.use_links, self.pending_targets, self.gaps))
+            self.operation_links, self.value_links, self.use_links, self.pending_targets, self.gaps,
+            self.attribute_lookups))
 
     def restore(self, checkpoint):
         for items, length in zip((self.regions, self.operations, self.values,
-                self.operation_links, self.value_links, self.use_links, self.pending_targets, self.gaps), checkpoint):
+                self.operation_links, self.value_links, self.use_links, self.pending_targets, self.gaps,
+                self.attribute_lookups), checkpoint):
             del items[length:]
         self.values_by_id = {value.id: value for value in self.values}
         self.value_positions = {value.id: index for index, value in enumerate(self.values)}
@@ -1523,6 +1536,17 @@ def validate_source_program(result: SourceProgram, *, max_operations: int = 1000
             if {(link.operation, link.use) for link in result.metadata.use_links} != {
                     (op.id, use.id) for op in ops.values() for use in op.uses}:
                 raise ValueError("source use correspondence is incomplete")
+            if result.graph.attribute_lookups is not None:
+                from scar.analysis.source_attribute_lookup import validate_source_attribute_lookups
+                if structural_only:
+                    if source_texts is None or result.metadata.source.path not in source_texts:
+                        raise ValueError("lookup source validation requires exact retained source text")
+                    lookup_text = source_texts[result.metadata.source.path]
+                else:
+                    with tokenize.open(result.metadata.source.path) as stream:
+                        lookup_text = stream.read()
+                validate_source_attribute_lookups(result.graph, result.metadata,
+                    source_text=lookup_text, semantic=result.semantic)
         if not structural_only:
             # A short entry label is not a definition identity. In particular,
             # nested and same-named functions must replay the original source
@@ -1533,6 +1557,10 @@ def validate_source_program(result: SourceProgram, *, max_operations: int = 1000
                 max_operations=max_operations, profile=result.profile, language_options=language_options,
                 project_root=result.language.namespace_root if result.language is not None else None,
                 source=selected_source)
+            if result.graph is not None and result.graph.attribute_lookups is None and rebuilt.graph is not None:
+                # Compare the original recording capability explicitly. The
+                # read graph stays unrecorded; other fresh facts must match.
+                rebuilt = replace(rebuilt, graph=replace(rebuilt.graph, attribute_lookups=None))
             if _canonical(result.to_dict()) != _canonical(rebuilt.to_dict()):
                 raise ValueError("program graph or typed source correspondence differs from source replay")
     except (ValueError, TypeError, KeyError, AttributeError, OSError, SyntaxError, RecursionError) as error:

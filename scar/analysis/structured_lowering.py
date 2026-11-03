@@ -313,6 +313,9 @@ class StructuredBuilder(_Builder):
                  "source operation is connected; runtime dispatch, state accesses and effects remain unproved")
         cursor, value, operation = self.invoke(cursor, node, inputs, old=old)
         self.associate_expression(operation, node, old)
+        if isinstance(node, ast.Attribute):
+            from scar.analysis.source_attribute_lookup import register_attribute_lookup
+            register_attribute_lookup(self, node, operation)
         if isinstance(node, ast.Call):
             callee = inputs[0][0]
             self.pending_targets.append((operation, callee, self.reference_candidates.get(callee), node))
@@ -597,7 +600,8 @@ class StructuredBuilder(_Builder):
         """Assemble canonical core; newer profiles may add existing interfaces."""
         return ProgramGraph(self.function_context, tuple(self.regions), tuple(self.operations), tuple(self.values),
             (StateLocation(self.world, "coarse Python/external world", stability=Stability.UNKNOWN),),
-            binding_definitions=tuple(self.binding_definitions), binding_reads=tuple(self.binding_reads))
+            binding_definitions=tuple(self.binding_definitions), binding_reads=tuple(self.binding_reads),
+            attribute_lookups=tuple(self.attribute_lookups) if self.attribute_lookups else None)
 
     def run(self):
         if self.entry not in self.functions:
@@ -624,6 +628,9 @@ class StructuredBuilder(_Builder):
         metadata = LoweringMetadata(self.entry, self.snapshot, tuple(self.operation_links), tuple(self.value_links),
                                     tuple(self.targets), tuple(self.gaps), self.assumptions(), tuple(self.use_links))
         if graph is not None:
+            if graph.attribute_lookups is not None:
+                from scar.analysis.source_attribute_lookup import validate_source_attribute_lookups
+                validate_source_attribute_lookups(graph, metadata, source_text=self.text, semantic=self.semantic)
             # This complete check also validates the canonical core; callers of
             # PreparedSource.lower receive a fully checked constructed body.
             _require_valid_structured_body(structured, graph, self.interface, metadata,

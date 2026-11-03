@@ -38,6 +38,7 @@ def _producer():
     paths.update(analysis / name for name in (
         "static_body.py", "static_program.py", "static_rules.py", "static_compilation.py",
         "program_lowering.py", "structured_lowering.py", "environment_lowering.py",
+        "source_attribute_lookup.py", "attribute_selector.py",
         "source_language.py", "source_environment_layout.py", "function_interfaces.py",
         "control_flow_v2.py", "source_semantics_v2.py", "constants_v2.py"))
     paths.add(package / "trace" / "code_snapshot.py")

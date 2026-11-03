@@ -65,6 +65,7 @@ class ClassSuiteBuilder:
         self.world=self.fresh(LocationID,'class-world');self.state_type=ValueType(ValueKind.STATE,location=self.world)
         self.ops=[];self.values=[];self.blocks=[];self.block_ops={};self.args={};self.records={}
         self.op_links=[];self.value_links=[];self.use_links=[];self.addresses=[]
+        self.attribute_lookups=[]
         self.protocols=[];self.witnesses=[];self.constants=[];self.factories=[];self.cells=[]
         self.cell_refs={};self.stack=[];self.literal_values={};self.code_refs={};self.tuple_items={};self.function_codes={};self.returned=False;self.remaining=None
         from scar.analysis.static_compilation import compile_source_unit
@@ -299,6 +300,14 @@ class ClassSuiteBuilder:
             else:
                 result,identity=self.invoke('LOAD_ATTRIBUTE',(owner,key),source,i.offset,address=((0,ObjectField(arg),AccessMode.READ),))
                 self.stack.append(result[0])
+            from scar.analysis.source_attribute_lookup import register_attribute_lookup
+            from scar.ir.program.attribute_lookups import AttributeLookupForm
+            nodes=[n for n in self.owner_nodes if isinstance(n,ast.Attribute) and isinstance(n.ctx,(ast.Load,ast.Store))
+                and (n.lineno,n.end_lineno,n.col_offset,n.end_col_offset)==tuple(i.positions)]
+            if len(nodes)!=1:raise ValueError('compiler attribute lookup lacks its exact original source occurrence')
+            register_attribute_lookup(self,nodes[0],identity,source=source,
+                form=AttributeLookupForm.CPYTHON_LOAD_METHOD if i.arg&1 else AttributeLookupForm.CPYTHON_LOAD_ATTR,
+                key_use=next(o for o in self.ops if o.id==identity).uses[1].id)
         elif name in ('CALL','CALL_KW'):
             keyword=self.pop() if name=='CALL_KW' else None
             args=tuple(self.pop()for _ in range(i.arg))[::-1];receiver=self.pop();callee=self.pop()
@@ -394,7 +403,8 @@ class ClassSuiteBuilder:
             tuple(self.ops),tuple(self.values),(StateLocation(self.world,'coarse Python/external world',stability=Stability.UNKNOWN),),
             control_scopes=(ControlScope(self.scope,self.region,None,ControlScopeKind.FRAME,self.source,tuple(self.blocks)),),
             frame_roots=(SourceCompilationFrameRoot(self.scope,FrameKind.CLASS,self.evidence.to_reference(),self.interface),),
-            state_address_refinements=tuple(self.addresses))
+            state_address_refinements=tuple(self.addresses),
+            attribute_lookups=tuple(self.attribute_lookups) if self.attribute_lookups else None)
         frontiers=tuple(f for f in _frontiers(self.source,has_freevars=bool(self.free),has_class_cell='__class__'in self.cell_refs,
             has_decorators=bool(self.node.decorator_list)) if f.kind is not ClassFrontierKind.BODY_REQUIRED_EXPANSION)
         if self.remaining is not None:

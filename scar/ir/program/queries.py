@@ -322,6 +322,8 @@ class ProgramIndex:
         self._session_updates = {row.operation: row for row in graph.session_updates}
         self._terminal_frame_releases = {row.operation: row for row in graph.terminal_frame_releases}
         self._state_addresses = {row.site: row for row in graph.state_address_refinements}
+        self._attribute_lookups = (None if graph.attribute_lookups is None else
+            {row.operation: row for row in graph.attribute_lookups})
         self._state_resource_uses = {(row.operation, row.requirement): row
                                      for row in graph.resource_uses}
         self.graph = graph
@@ -422,6 +424,18 @@ class ProgramIndex:
             "source_runtime_verified": False, "value_identity_verified": False,
             "transformation_authorized": False,
         }
+
+    def attribute_lookup(self, operation: OperationID) -> dict:
+        """Original lookup request ports; storage and dispatch stay separate."""
+        if type(operation) is not OperationID or operation not in self.operations:
+            raise ValueError('attribute lookup requires an original OperationID')
+        interface = None if self._attribute_lookups is None else self._attribute_lookups.get(operation)
+        return {'status': ('NOT_RECORDED' if self._attribute_lookups is None else
+                'NOT_DECLARED' if interface is None else 'RECORDED'),
+            'interface': interface, 'operation': operation,
+            'effects_complete': self.operations[operation].effects_complete,
+            'dispatch_resolved': False, 'direct_storage_access_proved': False,
+            'lookup_set_complete': False, 'transformation_authorized': False}
 
     def state_address(self, site: StateAddressSite) -> dict:
         """Project original state ports and optional address declarations.

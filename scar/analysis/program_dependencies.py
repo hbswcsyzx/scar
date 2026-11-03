@@ -302,6 +302,14 @@ class LocalDependencyProvider:
                 tuple(point(anchor) for anchor in anchors)),)
         def control_condition(operation, number):
             return (DependencyCondition("canonical", "SUCCESSOR_SELECTED", point(operation), number),)
+        lookup_evidence = {}
+        for ordinal, lookup in enumerate(graph.attribute_lookups or ()):
+            anchors = (lookup.operation, lookup.receiver, lookup.world,
+                *lookup.normal.payloads, lookup.normal.world,
+                *lookup.raised.payloads, lookup.raised.world)
+            if lookup.selector.key_use is not None:anchors += (lookup.selector.key_use,)
+            lookup_evidence[lookup.operation] = declaration('CANONICAL_ATTRIBUTE_LOOKUP_INTERFACE_V1',
+                'attribute_lookups/' + str(ordinal), anchors=anchors)
         for region in graph.regions:
             edge(region.id, region.entry, K.CONTROL_FLOW, M.STRUCTURE)
             if region.parent is not None:edge(region.parent, region.id, K.CONTAINS, M.STRUCTURE)
@@ -335,7 +343,8 @@ class LocalDependencyProvider:
                 kind = K.ORDER if use.role is UseRole.STATE_ORDER else K.STATE_INPUT if use.role is UseRole.STATE_CONTENT else K.VALUE_USE
                 meaning = M.ORDER if kind is K.ORDER else M.STATE_INTERFACE if kind is K.STATE_INPUT else M.VALUE
                 edge(use.value, use.id, kind, meaning)
-                edge(use.id, operation.id, K.OPERAND if kind is K.VALUE_USE else kind)
+                edge(use.id, operation.id, K.OPERAND if kind is K.VALUE_USE else kind,
+                    provenance=lookup_evidence.get(operation.id))
                 edge(operation.id, use.id, K.CONTAINS, M.STRUCTURE)
             for access in operation.accesses:
                 edge(access.location, operation.id, K.STATE_LOCATION, M.STRUCTURE)
@@ -360,8 +369,8 @@ class LocalDependencyProvider:
                         # the actual path condition.
                         projection = 'operations/' + str(operation_position) + '/terminator/successors/' + str(number) + '/arguments/' + str(argument_position)
                         edge(operation.id, formal, kind, M.DEPENDENCE, conditions,
-                            provenance=declaration('CANONICAL_COMPLETION_RESULT_PROJECTION_V1', projection,
-                                anchors=(operation.id, formal)))
+                            provenance=(*declaration('CANONICAL_COMPLETION_RESULT_PROJECTION_V1', projection,
+                                anchors=(operation.id, formal)), *lookup_evidence.get(operation.id, ())))
                     else:
                         frontiers[formal].append(("SPECIAL_SUCCESSOR_INPUT_OPEN", "Resumption or driver input retains its original protocol interface; transfer rule is pending."))
         for ordering in graph.ordering:edge(ordering.before, ordering.after, K.ORDER, M.ORDER)

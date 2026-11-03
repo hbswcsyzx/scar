@@ -236,6 +236,9 @@ def expression(builder, node, cursor):
             inputs.append((value,child,role,position,None))
         cursor, value, identity = _invoke(builder,cursor,node,inputs,tuple(held))
         _associate(builder,identity,node,definition,opcode)
+        if opcode is Opcode.ATTRIBUTE:
+            from scar.analysis.source_attribute_lookup import register_attribute_lookup
+            register_attribute_lookup(builder,node,identity)
         if opcode is Opcode.INDEX:
             from scar.ir.program.state_addresses import AddressEffect, Element, ReferenceOwner
             uses=builder.operation_records[identity].uses

@@ -130,6 +130,9 @@ class _ExpressionBody(_Nested):
                 hold_expression(self,cursor,child,value);held.append((child,value));inputs.append((value,child,role,index,None))
             cursor,result,identity=_invoke(self,cursor,node,inputs,tuple(held))
             _associate(self,identity,node,definition,opcode)
+            if opcode is Opcode.ATTRIBUTE:
+                from scar.analysis.source_attribute_lookup import register_attribute_lookup
+                register_attribute_lookup(self,node,identity)
             self.link_value(self.values_by_id[result],node,SourceRole.EXPRESSION)
             if opcode is Opcode.CALL:
                 self.pending_targets.append((identity,inputs[0][0],None,node))

@@ -254,6 +254,9 @@ def expression_for_heap_target(builder, node, cursor, *, parent_definition=None)
             inputs.append((value, child, role, index, None))
         cursor, result, operation_id = builder.invoke(cursor, node, tuple(inputs))
         _associate(builder, operation_id, node, definition, opcode)
+        if opcode is Opcode.ATTRIBUTE:
+            from scar.analysis.source_attribute_lookup import register_attribute_lookup
+            register_attribute_lookup(builder, node, operation_id)
         if opcode is Opcode.INDEX and getattr(builder, "has_language", lambda _: False)("SLICE_KEYS"):
             # This is a source-level, partial receiver/key address. The helper
             # binds the same invoke's existing last coarse-world Use; neither
@@ -404,6 +407,9 @@ def augmented_heap_target(builder, target, cursor):
     cursor, left, identity = builder.invoke(cursor, target, tuple(references))
     _associate(builder, identity, target, definition,
         Opcode.ATTRIBUTE if isinstance(target, ast.Attribute) else Opcode.INDEX)
+    if isinstance(target, ast.Attribute):
+        from scar.analysis.source_attribute_lookup import register_attribute_lookup
+        register_attribute_lookup(builder, target, identity)
     operation = builder.operation_records[identity]
     selector = ObjectField(target.attr) if isinstance(target, ast.Attribute) else Element(operation.uses[1].id)
     builder._addresses(identity, (AddressEffect(ReferenceOwner(operation.uses[0].id),
