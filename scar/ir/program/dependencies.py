@@ -187,6 +187,9 @@ class DependencyKind(str, Enum):
     VALUE_USE = "VALUE_USE"
     OPERAND = "OPERAND"
     RESULT = "RESULT"
+    # Checked component dependence. The kind alone proves neither reference
+    # identity nor non-aliasing between a container and an element.
+    PROJECTION = "PROJECTION"
     BLOCK_ARGUMENT = "BLOCK_ARGUMENT"
     BINDING_PAYLOAD = "BINDING_PAYLOAD"
     BINDING_READ = "BINDING_READ"

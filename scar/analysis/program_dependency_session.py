@@ -90,6 +90,7 @@ class ProgramDependencySession:
         self._call_routing = None
         self._origin_discovery = None
         self._entry_namespace_provider = None
+        self._unpack_projection_provider = None
         from scar.analysis.static_function_environment import _EnvironmentFacts
         self._environment_facts = _EnvironmentFacts(max_bodies=self.budget.max_graphs,
             max_bytes=max(1, min(32 * 1024 * 1024, self.budget.max_cached_bytes // 4)))
@@ -747,6 +748,7 @@ class ProgramDependencySession:
         from scar.analysis.program_function_origin_discovery import AutomaticFactoryEntryOrigins
         from scar.analysis.program_function_origin_dependencies import FactoryEntryOriginDependencyProvider
         from scar.analysis.program_entry_namespace_dependencies import EntryNamespaceDependencyProvider
+        from scar.analysis.program_unpack_dependencies import UnpackProjectionProvider
         graph = getattr(self, "_view", None)
         if graph is None:
             calls = StaticCallDependencyProvider(self)
@@ -763,13 +765,23 @@ class ProgramDependencySession:
                 interface_scope=origins.interface_scope, contexts_for=origins.contexts_for,
                 discovery_frontiers=origins.frontiers_for)
             entries = self._entry_namespace_provider = EntryNamespaceDependencyProvider(self)
-            graph = self._view = ProgramDependencyGraph(self.index, providers=(calls, classes, factories, entries))
+            if self._unpack_projection_provider is None:
+                self._unpack_projection_provider = UnpackProjectionProvider(self)
+            graph = self._view = ProgramDependencyGraph(self.index,
+                providers=(calls, classes, factories, entries, self._unpack_projection_provider))
         return graph
 
     def entry_namespace_projections(self, point):
         """Demand conditional entry-state candidates over the default graph."""
         self.graph()
         return self._entry_namespace_provider.projections_for(point)
+
+    def unpack_projection(self, point):
+        """Return this original normal output's checked fixed-unpack slot."""
+        if self._unpack_projection_provider is None:
+            from scar.analysis.program_unpack_dependencies import UnpackProjectionProvider
+            self._unpack_projection_provider = UnpackProjectionProvider(self)
+        return self._unpack_projection_provider.projection(point)
 
     def _class_relation_coverage(self, point, *, incoming, bindings):
         """Missing published class mappings are not empty dependency proofs.
@@ -844,6 +856,8 @@ class ProgramDependencySession:
                     if self._origin_discovery is not None else None),
                 "entry_namespace_discovery": (self._entry_namespace_provider.measurements()
                     if self._entry_namespace_provider is not None else None),
+                "unpack_projection": (self._unpack_projection_provider.measurements()
+                    if self._unpack_projection_provider is not None else None),
                 "seconds": time.monotonic() - self.started, "target_executed": False}
 
     def close(self):
@@ -865,6 +879,9 @@ class ProgramDependencySession:
             if self._entry_namespace_provider is not None:
                 self._entry_namespace_provider.clear()
                 self._entry_namespace_provider = None
+            if self._unpack_projection_provider is not None:
+                self._unpack_projection_provider.clear()
+                self._unpack_projection_provider = None
             self.closed = True
 
     def __enter__(self):

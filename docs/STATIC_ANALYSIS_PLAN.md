@@ -108,6 +108,12 @@ slice→unpack→iterator item→items CALL→info_dict formal 均有原端口�
 并从实际 caller 的参数边取得输入条件。不能把任意计算的 operand 直接当 result 身份，
 不能从参数命名或注解强行确定 runtime 类型。
 
+Verified：固定解包已按原 slot 接入共同图和同一值推理队列；支持 builtin tuple
+成员内容/构造来源，保留跨调用上下文及非恒定成员。通用用例通过；真实 `solve`
+3 个接口、6 条投影边核对通过（单主体、一次索引、21.14 秒），见
+`queries/unpack-projections/summary.json`。下一断点是上游 receiver→方法目标→返回
+来源；一般 iterator/slice/native 契约及未展开主体仍未完成。
+
 全范围任务已于 2026-11-02 21:42 UTC PUBLISHED，producer 不再受该任务冻结。不要为
 核验小修复反复启动 107 分钟全范围 linker；先做原主体/接口检查，输入改变后再原子更新
 有关关系，明确索引和主体版本边界。outgoing 原始路由及 typed 重放已分离，预算不足

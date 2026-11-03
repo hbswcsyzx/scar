@@ -299,6 +299,7 @@ class ProgramValueAnalysis:
         self._control_inputs={};self._control_unknown=defaultdict(tuple);self._entry_scopes={}
         self._point_refutations={};self._route_refutations={};self._jump_proofs={}
         self._refuted_inputs=defaultdict(list)
+        self._projection_edges={}
 
     def _note(self,point,kind,detail):
         item=Frontier(point,kind,detail);self._frontiers[item]=item
@@ -884,6 +885,101 @@ class ProgramValueAnalysis:
                 value.applicable or edge.strength is Strength.MAY)
         return ValueFields(*(field(getattr(fields,name))for name in _FIELDS))
 
+    def _unpack_route(self,edge):
+        """A checked normal component port, never arbitrary operand identity."""
+        if edge.kind is not K.PROJECTION or edge.meaning is not M.DEPENDENCE:
+            return None
+        lookup=getattr(self.session,'unpack_projection',None)
+        projection=lookup(edge.target)if callable(lookup)else None
+        if projection is None:return None
+        interface=projection.interface
+        target=edge.target
+        operation=Point(target.namespace,interface.operation,target.context)
+        rhs=Point(target.namespace,interface.rhs,target.context)
+        normal=Condition('canonical','SUCCESSOR_SELECTED',operation,interface.normal.successor_index)
+        if (edge.source!=rhs or target.node!=interface.outputs[projection.index]
+                or normal not in edge.conditions or any(_extended_unary(c)for c in edge.conditions)):
+            return None
+        return projection
+
+    def _project_unpack(self,edge,projection):
+        """Project each tuple member independently over the same work queue.
+
+        Tuple content and tuple construction provenance are separate domains.
+        A tuple with one opaque member can still provide another member's
+        facts. Ordinary iterables retain their stateful, exceptional boundary.
+        """
+        target=edge.target;interface=projection.interface;slot=projection.index
+        parent=self._facts[edge.source];fields=parent.fields;result=ValueFields()
+        operation=Point(target.namespace,interface.operation,target.context)
+        contract=Evidence('CHECKED_UNPACK_NORMAL_COMPONENT_V1',
+            tuple(dict.fromkeys(source for item in edge.evidence for source in item.sources)),
+            (edge.source,operation,target))
+        content=fields.immutable_tuple
+        content_complete=bool(content.alternatives)and not content.unknown_paths
+        open_source=bool(content.unknown_paths or fields.reference_sources.unknown_paths)
+        for alternative in content.alternatives:
+            if len(alternative.value.items)!=len(interface.outputs):
+                content_complete=False;open_source=True
+                self._note(target,'UNPACK_TUPLE_ARITY_MISMATCH',
+                    'This builtin tuple alternative has no matching normal unpack; other paths remain open.')
+                continue
+            try:
+                member=self._literal(target,alternative.value.items[slot],contract,reference=True)
+                member=ValueFields(*(replace(getattr(member,name),alternatives=tuple(replace(item,
+                    conditions=alternative.conditions,
+                    evidence=tuple(dict.fromkeys((*alternative.evidence,*item.evidence))),
+                    premises=tuple(dict.fromkeys((*alternative.premises,edge.source))),
+                    strength=alternative.strength)for item in getattr(member,name).alternatives))for name in _FIELDS))
+                result=self._join(target,result,self._transfer(member,edge))
+                if alternative.strength is Strength.MAY:content_complete=False;open_source=True
+            except (_BudgetExceeded,_Unsupported,ValueError,TypeError,OverflowError)as error:
+                content_complete=False;open_source=True
+                result=self._join(target,result,self._unknown(target,'UNPACK_CONTENT_BUDGET',str(error)))
+
+        origins=fields.reference_sources
+        origins_complete=bool(origins.alternatives)and not origins.unknown_paths
+        for alternative in origins.alternatives:
+            source=alternative.value
+            if type(source.node)is not OperationID or source not in self._facts:
+                origins_complete=False;open_source=True;continue
+            constructor=self._operator(source)
+            if constructor is None or constructor[0]!='BUILD_TUPLE' or len(constructor[1])!=len(interface.outputs):
+                origins_complete=False;open_source=True;continue
+            member=Point(source.namespace,constructor[1][slot],source.context)
+            if member not in self._facts:
+                origins_complete=False;open_source=True
+                result=self._join(target,result,self._unknown(target,'UNPACK_MEMBER_UNVISITED',
+                    'The original tuple member lies beyond the discovered dependency scope.'))
+                continue
+            self._dependents[member].add(target)
+            conditions=tuple(dict.fromkeys((*alternative.conditions,*edge.conditions)))
+            if len(conditions)>self.budget.max_conditions:
+                origins_complete=False;open_source=True
+                result=self._join(target,result,self._unknown(target,'VALUE_CONDITION_BUDGET',
+                    'Tuple member routing exceeds the explicit predicate bound.'))
+                continue
+            evidence=Evidence('CHECKED_BUILTIN_TUPLE_MEMBER_ROUTE_V1',
+                tuple(dict.fromkeys((source.namespace.graph,*contract.sources))),
+                (source,member,edge.source,operation,target))
+            route=DependencyEdge(member,target,K.PROJECTION,M.REFERENCE,
+                tuple(dict.fromkeys((*alternative.evidence,*edge.evidence,evidence))),conditions,
+                Strength.MAY if edge.strength is Strength.MAY or alternative.strength is Strength.MAY else Strength.EXACT)
+            if route not in self._projection_edges:
+                if self._usage['edges']+len(self._projection_edges)>=self.budget.max_edges:
+                    origins_complete=False;open_source=True;self._exhausted=False
+                    result=self._join(target,result,self._unknown(target,'VALUE_EDGE_BUDGET',
+                        'Additional tuple member routes remain unprocessed.'))
+                    continue
+                self._projection_edges[route]=route
+            result=self._join(target,result,self._transfer(self._facts[member].fields,route))
+            if alternative.strength is Strength.MAY:origins_complete=False;open_source=True
+        if open_source and not(content_complete or origins_complete):
+            result=self._join(target,result,self._unknown(target,'UNPACK_MEMBER_SOURCE_OPEN',
+                'No complete builtin tuple content/construction route covers this normal component; '
+                'the original iterable may have stateful iteration or other member sources.'))
+        return result
+
     def _operator(self,point):
         if point in self._operators:return self._operators[point]
         body=self.session.load(point.namespace);operation=body.index.operations[point.node]
@@ -1198,7 +1294,8 @@ class ProgramValueAnalysis:
                     'IMMUTABLE_INDEX_KEY_UNSUPPORTED'if opcode=='INDEX'and isinstance(error,_Unsupported)else
                     'BUILTIN_TRUTH_CONTENT_UNSUPPORTED'if opcode=='TRUTH'else'BUILTIN_SCALAR_RULE_OPEN')
                 unknown=(*unknown,self._note(point,kind,type(error).__name__+': '+str(error)))
-        return ValueFields(reference_sources=_NA if opcode=='TRUTH'else ValueField(tuple(references),unknown),
+        return ValueFields(reference_sources=_NA if opcode=='TRUTH'else ValueField(tuple(references),
+                ()if opcode=='BUILD_TUPLE'else unknown),
             scalar_constant=_NA if opcode=='BUILD_TUPLE'or tuples and not alternatives and not unknown else ValueField(tuple(alternatives),unknown),
             builtin_type=ValueField(tuple(types))if opcode in('BUILD_TUPLE','TRUTH')else ValueField(tuple(types),unknown),
             immutable_tuple=_NA if opcode=='TRUTH'or alternatives and not tuples and not unknown else ValueField(tuple(tuples),unknown))
@@ -1338,6 +1435,8 @@ class ProgramValueAnalysis:
         fields=seed.fields;payload=seed.binding_payload;binding_state=seed.binding_state
         if seed.role in('LITERAL','NO_NORMAL_RESULT'):return seed
         possible=[];read_state=_NO_BINDING;normal_open=bool(self._point_unknown.get(point))
+        projections={edge:route for edge in self._incoming[point]if edge.kind is K.PROJECTION
+            and (route:=self._unpack_route(edge))is not None}
         operator=self._operator(point)if type(point.node)is OperationID else None
         if operator is not None:
             operands=[Point(point.namespace,u,point.context)for u in operator[1]]
@@ -1351,7 +1450,14 @@ class ProgramValueAnalysis:
             if not self._edge_selected(edge)or edge in self._route_refutations:continue
             parent=self._facts[edge.source]
             if edge.strength is Strength.MAY:normal_open=True
-            if edge.kind is K.BINDING_PAYLOAD:
+            if edge in projections:
+                fields=self._join(point,fields,self._project_unpack(edge,projections[edge]))
+                possible.append(parent.feasible)
+            elif edge.kind is K.PROJECTION:
+                normal_open=True
+                fields=self._join(point,fields,self._unknown(point,'VALUE_PROJECTION_CONTRACT_OPEN',
+                    'This component relation has no supported original normal-value contract.'))
+            elif edge.kind is K.BINDING_PAYLOAD:
                 payload=self._join(point,payload or ValueFields(),self._transfer(parent.fields,edge),'binding_payload.')
             elif edge.kind is K.BINDING_READ:
                 # The read's own BOUND guard is not an assumption usable to
@@ -1371,6 +1477,10 @@ class ProgramValueAnalysis:
             elif edge.kind is K.RESULT and type(edge.source.node)is OperationID:
                 # Producer selection is not identity. Only a checked opcode's
                 # normal result0 may use the arithmetic field computed above.
+                if any(route.interface.operation==edge.source.node for route in projections.values()):
+                    # Per-component facts came from the checked RHS route;
+                    # the operation summary still denotes only result zero.
+                    continue
                 if self._operator(edge.source)is not None and self._normal_result_zero(point,edge):
                     fields=self._join(point,fields,self._transfer(parent.fields,edge));possible.append(parent.feasible)
                 elif not any(e.kind in(K.BINDING_READ,K.STATE_VALUE)for e in self._incoming[point]):
@@ -1474,7 +1584,7 @@ class ProgramValueAnalysis:
         if not roots or any(type(p)is not Point for p in roots):raise TypeError('value analysis needs qualified DependencyPoint roots')
         if self._facts:raise ValueError('a value-analysis scope is used once')
         selected=frozenset((K.VALUE_USE,K.OPERAND,K.RESULT,K.BLOCK_ARGUMENT,K.ARGUMENT,K.COMPLETION,
-            K.STATE_VALUE,K.ENVIRONMENT,K.BINDING_PAYLOAD,K.BINDING_READ,K.CONTROL_CONDITION))
+            K.STATE_VALUE,K.ENVIRONMENT,K.BINDING_PAYLOAD,K.BINDING_READ,K.CONTROL_CONDITION,K.PROJECTION))
         pending=deque(roots);edges={}
         while pending:
             point=pending.popleft()
@@ -1596,7 +1706,8 @@ class ProgramValueAnalysis:
             pending.extend((dependent,gap)for dependent in self._dependents.get(point,()))
         for point,fact in tuple(self._facts.items()):
             if fact.feasible is False:self._facts[point]=replace(fact,fields=_TOKEN)
-        return ValueAnalysisResult(roots,tuple(self._facts.values()),tuple(edges),tuple(self._frontiers),dict(self._usage),self._exhausted,
+        self._usage['edges']=len(edges)+len(self._projection_edges)
+        return ValueAnalysisResult(roots,tuple(self._facts.values()),tuple(dict.fromkeys((*edges,*self._projection_edges))),tuple(self._frontiers),dict(self._usage),self._exhausted,
             tuple(self._branch_proofs.values()),tuple(self._binding_proofs.values()),self._worklist_stable,
             tuple(self._route_refutations.values()))
 

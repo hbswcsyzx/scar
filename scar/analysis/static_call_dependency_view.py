@@ -115,6 +115,7 @@ class StaticCallDependencyView(ProgramDependencySession):
         self._seen_graphs, self._seen_shards = set(), set()
         self._call_routing, self._origin_discovery = None, None
         self._entry_namespace_provider = None
+        self._unpack_projection_provider = None
         self._environment_facts = owner._environment_facts
         self._cache_prefix = ("static-call-dependency-view", id(self))
         self.fragments = _SharedFragments(self)
@@ -435,6 +436,7 @@ class StaticCallDependencyView(ProgramDependencySession):
         from scar.analysis.program_function_origin_discovery import AutomaticFactoryEntryOrigins
         from scar.analysis.program_function_origin_dependencies import FactoryEntryOriginDependencyProvider
         from scar.analysis.program_entry_namespace_dependencies import EntryNamespaceDependencyProvider
+        from scar.analysis.program_unpack_dependencies import UnpackProjectionProvider
         graph = getattr(self, "_view", None)
         if graph is None:
             classes = (ClassDependencyProvider(self.class_bindings_for, self.index, self.load_provider,
@@ -448,7 +450,10 @@ class StaticCallDependencyView(ProgramDependencySession):
                 interface_scope=origins.interface_scope, contexts_for=origins.contexts_for,
                 discovery_frontiers=origins.frontiers_for)
             entries = self._entry_namespace_provider = EntryNamespaceDependencyProvider(self)
-            graph = self._view = ProgramDependencyGraph(self.index, providers=(classes, factories, entries))
+            if self._unpack_projection_provider is None:
+                self._unpack_projection_provider = UnpackProjectionProvider(self)
+            graph = self._view = ProgramDependencyGraph(self.index,
+                providers=(classes, factories, entries, self._unpack_projection_provider))
         return graph
 
     def measurements(self):
@@ -460,6 +465,8 @@ class StaticCallDependencyView(ProgramDependencySession):
                 if self._origin_discovery is not None else None),
             "entry_namespace_discovery": (self._entry_namespace_provider.measurements()
                 if self._entry_namespace_provider is not None else None),
+            "unpack_projection": (self._unpack_projection_provider.measurements()
+                if self._unpack_projection_provider is not None else None),
             "input_and_cache_owner": "STATIC_CALL_SESSION", "saved_call_publication_loaded": False,
             "seconds": time.monotonic() - self.started, "target_executed": False}
 
@@ -470,6 +477,8 @@ class StaticCallDependencyView(ProgramDependencySession):
             self._origin_discovery.clear()
         if self._entry_namespace_provider is not None:
             self._entry_namespace_provider.clear()
+        if self._unpack_projection_provider is not None:
+            self._unpack_projection_provider.clear()
         graph = getattr(self, "_view", None)
         if graph is not None:
             graph.providers.clear()

@@ -386,7 +386,7 @@ def analyze_boundary(view, operations, *, max_members=16384):
     # identity/content or escapes the program. Implementation transfers stay
     # separate even when their actual is an object reference.
     data_kinds = frozenset((K.VALUE_USE, K.OPERAND, K.RESULT, K.BLOCK_ARGUMENT,
-        K.BINDING_PAYLOAD, K.BINDING_READ, K.STATE_INPUT, K.STATE_OUTPUT, K.STATE_VALUE))
+        K.BINDING_PAYLOAD, K.BINDING_READ, K.STATE_INPUT, K.STATE_OUTPUT, K.STATE_VALUE, K.PROJECTION))
     inputs = tuple(e for e in cut.inputs if e.kind in data_kinds)
     consumers = tuple(e for e in cut.outputs if e.kind in data_kinds)
     aliases = tuple(e for e in (*cut.inputs, *cut.outputs, *cut.interfaces) if e.kind is K.ALIAS)

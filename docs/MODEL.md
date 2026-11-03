@@ -57,6 +57,10 @@ source spelling 与实际 lookup name 分开，private-name 改写由词法 Clas
 旧图表为 `None/NOT_RECORDED`，新 core capability 显式存表；读取旧图不自动升级。
 接口表仍引用原 ID，公共图仅增加端口说明/依据，不授 receiver→result 身份。
 
+固定解包的成员依赖用原 RHS Use→NORMAL 第 i 个输出的 `PROJECTION` 边表示；
+序号来自原 completion/UnpackShape，异常与 world 独立保留。只有已证 builtin tuple
+内容或构造来源才能按 i 传递成员事实，不能直接把容器来源当作元素来源，未知 iterable 保留边界。
+
 `IMPORT_FROM` 也是原 Operation，不转换成虚构的 Attribute AST。`StaticImportFromRequest`
 记录原 name/level/fromlist Use 和 fromlist 的 `CodeConstantSource`；`StaticImportFromRead`
 记录原 receiver/key/world、成员序号及 normal result。两者只是描述原端口的强类型关系，
