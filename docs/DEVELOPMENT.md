@@ -150,6 +150,11 @@ F4-B接口查询：`ProtocolSignatureIndex(graph, structured, interface, metadat
 入口在`scar.ir.program.protocol_signature_context`。规则来自typed protocol，world/ABI等从原接口绑定；缺原参数返回带字段的
 `MISSING_SIGNATURE_CONTEXT`。显式补参仅供诊断，不能覆盖自动绑定或授予源码/变换许可；当前还不是规范图发布入口。
 
+源码产生规则的结构入口在`scar.analysis.source_productions`：`production_type_catalog/read_production_type_catalog`核共享类型目录，
+`validate_production_plan/production_plan_document/read_production_plan`核有界记录、原引用类型、区域归属和有序端口。
+`ProductionSourceIndex(F0, SourceContextView, FrontendBindingView).match(plan)`复用已严格读取的父层；输入SHA只计算一次，不重parse或复制F2。
+源码role port与namespace access分开；属性/keyword标签不能被接成变量读写。输出明确保`source_rules_replayed=False`，当前不能发布canonical新图。
+
 源码身份桥（按unit分片，保持输入模型和旧ID）：
 
 ```bash

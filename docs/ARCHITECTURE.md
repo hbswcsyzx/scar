@@ -65,6 +65,9 @@ B1允许显式类型、拼接、参数引用、重复、有限选择和异质类
 接源码前，先以原F2 fields/list重放旧SourceAtom的BFS身份公式，并核全源ID/kind/完整reference集合；这是身份层，绝不是求值顺序。
 旧SG不存在的source-only输入单独处置，保留其F2/F3，不捏造旧ID域。桥接内核不parse；strict读者仍重验F2上游。
 执行产生规则必须另按语言规则定义；symtable/compiler拓扑的visitor顺序不能当执行边（如decorators/defaults、DictComp key/value）。
+产生规则的输入语法为`SourceProductionPlan`，与canonical执行图分开：12种有限步骤，源码槽、namespace端口、区域参数及结果引用分别有类型。
+区域共享，不按调用/迭代复制；循环显式分不变量前缀与携带值后缀。异常完成通过payload＋captures接入handler参数，不冒用normal结果边。
+当前只核记录、归属、有序值引用及部分接口；cleanup/resume完整控制语义、逐构造求值规则和效果仍须后续重放，不能由shape验收替代。
 Operation.label仍有旧派发消费者、名义类型字符串及分散协议签名，须显式收紧；结构通过不授opcode/效果/变换正确性。
 F4-C最后由已验产生规则生成CFG/SSA及共享区域，并逐项核源码处置、端口、控制/状态和来源；F4通过后才进入F5。
 当前F4-A结构域已验收，F4-B/C尚未完成。`max_visits`只限前置shape遍历；构造器核验复用原验证器，不冒称总步骤预算。

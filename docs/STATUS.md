@@ -92,12 +92,18 @@ call/map/string/assert参数也沿闭合原端口组解析；空组保DECLARED_E
 真实eval/cem原body的4,830条操作来源、65,086条来源引用已接回原F2及已有F3查询；CEM的4个旧OPAQUE可读出Gt/Eq原selector。
 这仍不是执行语义证明。证据：`artifacts/current/queries/source-anchors/{materials,verification}/result.json`及`{eval,cem}-origin-query.json`。
 
+源码产生规则的输入语法已落地：29记录/87字段、4 ID、10枚举/81成员、7 union、12步骤变体；不修改canonical类型根和旧ID。
+检查exact类型、区域归属/值顺序、共享调用、循环不变量/携带接口、异常完成到handler的payload/captures连接及strict codec；不授完整控制/效果语义。
+6项针对性检查通过，连同原签名/类型相关检查共25项通过（5.96秒）。本轮由主代理实现，无新增subagents。
+真实eval/CEM核419/537项原role引用描述符，查询1.03/1.31秒（父层fresh及索引另9.76/12.12秒）；没有生成新执行图或重放逐构造规则。
+记录在`artifacts/current/queries/source-productions/`；旧manifest不变，LeWM未执行或修改。
+
 1. **F4-B后续规则**：接完整操作家族、typed参数来源、状态/access契约和源码产生规则，再接版本化根与强制reader。
    旧core操作语义仍散在32个源码Opcode、88个PythonProtocol及typed侧表；label还承担cleanup/class/native派发。
    旧通用结构校验可容纳ADD的0/1/3输入或缺result，说明缺少统一签名；这不代表可绕过完整source replay。
    三种域不能互代：32 Opcode、88协议和113语法构造器×上下文分别核验；B1不授新图发布或优化。
    下一步将原声明端口接到F2/F3产生规则，并补function/class/comprehension等参数来源；保活完整性另验，不能抄端口来证明。
-   形式顺序：先固定产生规则的输入/输出与有限步骤类型，再逐构造/用途定义字段消耗及控制/数据端口，规则闭合后才生成CFG/SSA。
+   形式顺序：输入/输出与有限步骤结构已固定；下一步逐构造/用途定义字段消耗、控制/数据端口及cleanup/resume语义，规则闭合后才生成CFG/SSA。
    四片其余881操作已分类为控制434、binding246、source invoke201；这是识别结果，不等于其接口/产生规则已通过。
    签名witness仍须进入版本化typed根及强制reader；不能把本层独立查询当作完备。根扩展后重验F4-A目录。
    实读FRAME_BIND为READ_WRITE、UNKNOWN footprint、非full overwrite；不能照旧审计摘要强制WHOLE或升级未知事实。
