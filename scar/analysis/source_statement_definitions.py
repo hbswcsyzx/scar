@@ -72,7 +72,8 @@ def _build_class(b,region,world,parameters):
 
     env,namespace=b.parameter(body,0),b.parameter(body,1)
     active,=b.emit(body,P.EnterClassBody(interface),(env,namespace,b.parameter(body,2)),(b.world,),may_raise=False)
-    active,=b.emit(body,P.InitializeClassNamespace(interface),(env,namespace,active),(b.world,))
+    from scar.analysis.source_class_namespace_rules import initialize,finalize
+    active=initialize(b,body,interface,active,env,namespace)
     protected=b.region(body.source,(b.world,),body)
     b.suite(protected,'body',b.parameter(protected,0),metadata_prefix=int(interface.docstring is not None))
     b.mark('body',P.ProductionDispositionKind.DEFERRED_CHILD)
@@ -82,9 +83,7 @@ def _build_class(b,region,world,parameters):
     for completion in b.completions(protected):
         if completion.kind is C.FALLTHROUGH:
             final=b.region(body.source,(b.world,_REF,_REF),body,P.ProductionRegionKind.HANDLER)
-            returned,state=b.emit(final,P.FinalizeClassNamespace(interface),
-                (b.parameter(final,1),b.parameter(final,2),b.parameter(final,0)),(_REF,b.world))
-            b.transfer(final,C.RETURN,(returned,state),(_REF,b.world))
+            finalize(b,final,interface,b.parameter(final,0),b.parameter(final,1),b.parameter(final,2))
             routes.append(P.CompletionRoute(C.FALLTHROUGH,None,final.id,(env,namespace)))
             outputs.extend(b.completions(final))
         else:

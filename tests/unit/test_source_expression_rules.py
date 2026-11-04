@@ -702,7 +702,7 @@ def test_delegation_keeps_send_and_post_driver_completion_paths_separate(rules, 
             plan = variant.build(occurrence)
             checked = variant.verify(plan)
             assert not checked['native_delegation_expanded'] and not checked['driver_protocol_graph_generated']
-            assert plan.schema_version == 18
+            assert plan.schema_version == 19
             _, root_steps = owned(plan)
             acquire = next(s for s in root_steps if type(s.instruction) is P.ApplyDelegationProtocol)
             assert acquire.instruction.protocol is (P.DelegationProtocolKind.AWAITABLE_ITER if constructor == 'Await'
@@ -1363,10 +1363,10 @@ def test_class_and_alias_definitions_keep_builder_calls_and_lazy_evaluators_sepa
                     assert body.context.environment==interface.scope!=active.context.environment
                     assert body.parameters==(REF,REF,WORLD)
                     assert type(body_steps[0].instruction) is P.EnterClassBody
-                    assert type(body_steps[1].instruction) is P.InitializeClassNamespace
+                    assert type(body_steps[1].instruction) is P.AccessClassName and body_steps[1].instruction.name=='__name__'
                     assert not any(type(s.instruction) is P.ApplyRegion and s.instruction.invocation.region==body.id for s in plan.steps)
                     assert all(c.kind in (C.RETURN,C.RAISE) for c in body.completions)
-                    final=next(s for s in plan.steps if type(s.instruction) is P.FinalizeClassNamespace)
+                    final=next(s for s in plan.steps if type(s.instruction) is P.AccessClassName and s.instruction.name=='__static_attributes__')
                     assert final.region!=body.id  # only normal completion enters finalization
                     assert next(i for i,s in enumerate(execution) if type(s.instruction) is P.ReadBuildClass)<execution.index(declaration)
                     call=next(s for s in execution if type(s.instruction) is P.ApplyLanguageAction and s.instruction.action is P.LanguageActionKind.CALL
@@ -1385,7 +1385,7 @@ def test_class_and_alias_definitions_keep_builder_calls_and_lazy_evaluators_sepa
                 else:
                     alias=next(s.instruction for s in execution if type(s.instruction) is P.BuildTypeAlias)
                     assert alias.expression==rules.source.type_parameters.lazy(alias.expression.source)
-                    assert not any(type(s.instruction) is P.EvaluateChild and s.instruction.field==alias.expression.source for s in plan.steps)
+                    assert not any(type(s.instruction) is P.EvaluateChild and s.instruction.field==alias.expression.source for s in execution)
                     assert any(type(s.instruction) is P.BuildLazyExpression and s.instruction.expression==alias.expression for s in execution)
         for occurrence in occurrences(rules,'keyword'):
             assert rules.descriptor_owner(occurrence) is not None
@@ -1935,3 +1935,84 @@ def test_deferred_evaluation_templates_preserve_format_capture_order_and_stringi
         saw_unpack |= any(s.opname=='UNPACK_SEQUENCE' and s.arg==1 for s in ops)
         saw_guard |= any(s.opname=='LOAD_COMMON_CONSTANT' and 'NotImplementedError' in s.argrepr for s in ops)
     assert saw_default and saw_unpack and saw_guard
+
+
+def test_class_namespace_metadata_cells_and_name_resolution_use_original_scopes(monkeypatch):
+    from scar.analysis.source_statement_rules import SourceStatementRules
+    from scar.ir.program.control import LanguageCompletionKind as C
+    from types import CodeType
+    source='''@decorate()
+class Outer:
+    """   Class documentation.
+        Detail.
+    """
+    field: T
+    self.direct = 1
+    [0 for self.class_comp in items]
+    def method(self):
+        self.z = 1
+        self.__private = 2
+        self.augmented += 1
+        self.declared: T
+        self.initialized: T = 1
+        assert [0 for self.in_assert in items]
+        [0 for self.comp in items]
+        class Inner:
+            self.from_inner_body = 1
+            def nested(self):
+                self.inner = 1
+        return __class__,super()
+def make():
+    global Global
+    __module__ = "captured"
+    class Global:
+        pass
+    class Local[T]:
+        global __name__, __qualname__
+        nonlocal __module__
+        if condition:
+            a: T
+        def method(self, arg: a):
+            return T,__class__
+    return Local
+'''
+    expressions=_rules(_documents(source));facts=expressions.source.class_names
+    for abi in ExceptionABI:
+        rules=SourceStatementRules(expressions.source,world=WORLD,exception_abi=abi)
+        for owner in occurrences(expressions,'ClassDef'):
+            with monkeypatch.context() as no_parse:
+                no_parse.setattr(ast,'parse',lambda *a,**kw:pytest.fail('class namespace reparsed target'))
+                plan=rules.build(owner);assert rules.verify(plan)['local_schedule_verified']
+            declared=next(s for s in plan.steps if type(s.instruction) is P.DeferClassBody)
+            interface=declared.instruction.interface
+            body,steps=owned(plan,declared.instruction.body)
+            assert type(steps[1].instruction) is P.AccessClassName and steps[1].instruction.name=='__name__'
+            stores=[s for s in steps if type(s.instruction) is P.AccessClassName and s.instruction.action is P.BindingActionKind.WRITE]
+            assert [s.instruction.name for s in stores[:3]]==['__module__','__qualname__','__firstlineno__']
+            assert all(s.instruction==facts.access(interface,s.instruction.name,s.instruction.action)
+                for s in plan.steps if type(s.instruction) is P.AccessClassName)
+            assert all(c.kind in (C.RETURN,C.RAISE) for c in body.completions)
+            if facts.qualname(interface.scope)=='make.<locals>.Local':
+                load=steps[1].instruction;write=stores[0].instruction
+                assert expressions.source.frontend.bindings.resolutions[load.resolution].classification=='GLOBAL_EXPLICIT'
+                assert expressions.source.frontend.bindings.resolutions[write.resolution].classification=='FREE'
+                assert any(type(s.instruction) is P.ReadClassTypeParameters for s in steps)
+            for name in ('__class__','__classdict__','__conditional_annotations__'):
+                binding=facts.protocol(interface,name)
+                if binding is not None:
+                    assert any(type(s.instruction) is P.AccessClassProtocol and s.instruction.binding==binding for s in plan.steps)
+    for optimization,enabled in ((0,True),(2,False)):
+        code=compile(source,'<static-class-namespace-oracle>','exec',dont_inherit=True,optimize=optimization)
+        pending=[code];classes={}
+        while pending:
+            current=pending.pop();pending.extend(c for c in current.co_consts if type(c) is CodeType)
+            if current.co_name in ('Outer','Inner','Global','Local'):classes[current.co_qualname]=current
+        for owner in occurrences(expressions,'ClassDef'):
+            scope=expressions.source.definitions.classes[owner];name=facts.qualname(scope)
+            assert name in classes
+            native=classes[name]
+            assert native.co_firstlineno==facts.first_line(scope)
+            tuples=[v for v in native.co_consts if type(v) is tuple and all(type(s) is str for s in v)]
+            assert facts.attributes(scope)[int(enabled)] in tuples
+    assert facts.qualname(expressions.source.definitions.classes[next(o for o in occurrences(expressions,'ClassDef')
+        if expressions.source.roles.field(o,'name').scalar.to_python()=='Global')])=='Global'

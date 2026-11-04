@@ -25,6 +25,7 @@ from scar.analysis.source_definition_interfaces import DefinitionInterfaceIndex
 from scar.analysis.source_pattern_interfaces import PatternInterfaceIndex
 from scar.analysis.source_root_interfaces import RootInterfaceIndex
 from scar.analysis.source_evaluation_interfaces import EvaluationInterfaceIndex
+from scar.analysis.source_class_namespace_interfaces import ClassNamespaceIndex
 
 
 class ProductionError(ValueError):
@@ -63,7 +64,8 @@ def production_type_catalog():
                  'scar.ir.program.delegation_signatures', 'scar.analysis.source_deferred_interfaces',
                  'scar.analysis.source_statement_interfaces', 'scar.analysis.source_type_parameter_interfaces',
                  'scar.analysis.source_definition_interfaces','scar.analysis.source_pattern_interfaces',
-                 'scar.analysis.source_root_interfaces','scar.analysis.source_evaluation_interfaces','scar.analysis.source_syntax'):
+                 'scar.analysis.source_root_interfaces','scar.analysis.source_evaluation_interfaces','scar.analysis.source_syntax',
+                 'scar.analysis.source_class_namespace_interfaces'):
         modules[name] = sha256(Path(sys.modules[name].__file__).read_bytes()).hexdigest()
     payload = dict(schema='scar.source-production-type-catalog', schema_version=1,
         root=root, types=rows, counts=counts, modules=dict(sorted(modules.items())),
@@ -153,7 +155,7 @@ def validate_production_plan(plan, *, max_visits=1_000_000):
     """
     visits = _shape(plan, max_visits)
     _require((plan.schema, plan.schema_version, plan.authority) == (
-        'scar.source-production-plan', 18, 'SOURCE_RECIPE_SHAPE_ONLY'),
+        'scar.source-production-plan', 19, 'SOURCE_RECIPE_SHAPE_ONLY'),
         'SCHEMA', 'plan', 'unsupported recipe schema or authority')
     source = plan.input
     _require(bool(source.path) and bool(source.namespace_root), 'INPUT', 'plan.input', 'source paths must be nonempty')
@@ -597,19 +599,39 @@ def validate_production_plan(plan, *, max_visits=1_000_000):
                     and step.arguments==tuple(P.ProductionParameter(region.id,i) for i in range(len(region.parameters)))
                     and outputs=={(C.FALLTHROUGH,None):(interface.world,)},
                     'CLASS_INTERFACE',str(identity),'class activation must consume the exact environment/namespace/world first')
-            elif type(instruction) in (P.ReadBuildClass,P.BuildClassBody,P.InitializeClassNamespace,
-                    P.FinalizeClassNamespace,P.BuildGenericBase,P.BuildTypeAlias):
+            elif type(instruction) in (P.AccessClassName,P.AccessClassProtocol,P.ReadClassTypeParameters,P.BuildClassAnnotations):
+                interface=instruction.interface;world=interface.world;reference=ValueType(ValueKind.REFERENCE)
+                class_ports(interface);normal=(reference,world);may_raise=True;count=1
+                if type(instruction) is P.AccessClassName:
+                    _require(instruction.action in (P.BindingActionKind.READ,P.BindingActionKind.WRITE)
+                        and (instruction.resolution is None or instruction.resolution>=0),
+                        'CLASS_NAMESPACE_INTERFACE',str(identity),'class name action/resolution differs')
+                    count=2 if instruction.action is P.BindingActionKind.READ else 3
+                    if instruction.action is P.BindingActionKind.WRITE:normal=(world,)
+                elif type(instruction) is P.AccessClassProtocol:
+                    _require(instruction.binding in interface.protocol_bindings,'CLASS_NAMESPACE_INTERFACE',str(identity),'protocol cell must use an original class binding')
+                    count=2 if instruction.action is P.ClassProtocolActionKind.WRITE_VALUE else 1
+                    may_raise=instruction.action is P.ClassProtocolActionKind.WRITE_VALUE
+                    if may_raise:normal=(world,)
+                elif type(instruction) is P.ReadClassTypeParameters:
+                    _require(interface.type_parameters is not None,'CLASS_NAMESPACE_INTERFACE',str(identity),'type tuple read needs a generic class source')
+                    may_raise=False
+                raised=(reference,world) if interface.exception_abi is ExceptionABI.EXCEPTION_WORLD else (reference,reference,world)
+                wanted={(C.FALLTHROUGH,None):normal}
+                if may_raise:wanted[(C.RAISE,None)]=raised
+                _require(args==(*(reference for _ in range(count)),world) and outputs==wanted,
+                    'CLASS_NAMESPACE_INTERFACE',str(identity),'class namespace operation ports differ')
+            elif type(instruction) in (P.ReadBuildClass,P.BuildClassBody,P.BuildGenericBase,P.BuildTypeAlias):
                 _require(bool(args) and type(args[-1]) is ValueType and args[-1].kind is ValueKind.STATE,
                     'DEFINITION_INTERFACE',str(identity),'definition action requires an explicit world')
                 world=args[-1];reference=ValueType(ValueKind.REFERENCE)
                 count=0;normal=(reference,world)
-                if type(instruction) in (P.BuildClassBody,P.InitializeClassNamespace,P.FinalizeClassNamespace):
+                if type(instruction) is P.BuildClassBody:
                     interface=instruction.interface
                     class_ports(interface)
                     _require(world==interface.world,'CLASS_INTERFACE',str(identity),'class action world differs')
                     abi=interface.exception_abi
-                    count=2+len(interface.captures)+int(interface.type_parameters is not None) if type(instruction) is P.BuildClassBody else 2
-                    if type(instruction) is P.InitializeClassNamespace:normal=(world,)
+                    count=2+len(interface.captures)+int(interface.type_parameters is not None)
                 else:
                     abi=instruction.exception_abi
                     if type(instruction) is P.BuildGenericBase:count=1
@@ -967,6 +989,7 @@ class ProductionSourceIndex:
         self._patterns = None
         self._roots = None
         self._evaluations = None
+        self._class_names = None
         self._expressions=frozenset(row.name for row in syntax.profile.ast_schema if 'expr' in row.bases)
         self._role_sites = frozenset(port.site for port in frontend_view.roles.ports)
         self.input = P.ProductionInput(f0['path'], f0['namespace_root'], _digest(encode(syntax)),
@@ -1009,6 +1032,11 @@ class ProductionSourceIndex:
     def evaluations(self):
         if self._evaluations is None:self._evaluations=EvaluationInterfaceIndex(self)
         return self._evaluations
+
+    @property
+    def class_names(self):
+        if self._class_names is None:self._class_names=ClassNamespaceIndex(self)
+        return self._class_names
 
     def match(self, plan, *, max_visits=1_000_000):
         summary = validate_production_plan(plan, max_visits=max_visits)
@@ -1123,7 +1151,8 @@ class ProductionSourceIndex:
                     scope=self.context.material.scopes[environment.scope]
                     _require(environment==self.type_parameters.environment(scope.owner.occurrence,environment.world,environment.exception_abi),
                         'SOURCE_TYPE_PARAMETERS',str(step.id),'factory interface differs from original source scope/parameters/defaults/captures')
-                elif type(instruction) in (P.DeferClassBody,P.EnterClassBody,P.BuildClassBody,P.InitializeClassNamespace,P.FinalizeClassNamespace):
+                elif type(instruction) in (P.DeferClassBody,P.EnterClassBody,P.BuildClassBody,P.AccessClassName,
+                        P.AccessClassProtocol,P.ReadClassTypeParameters,P.BuildClassAnnotations):
                     interface=instruction.interface
                     scope=self.context.material.scopes[interface.scope]
                     owner=scope.owner.occurrence
@@ -1139,6 +1168,18 @@ class ProductionSourceIndex:
                         _require(body.source==P.SlotRef(owner,'FIELD',self.roles.fields['ClassDef']['body'])
                             and body.context.environment==interface.scope,
                             'SOURCE_CLASS',str(step.id),'class callback must retain its original body scope')
+                    if type(instruction) is P.AccessClassName:
+                        _require(instruction==self.class_names.access(interface,instruction.name,instruction.action),
+                            'SOURCE_CLASS',str(step.id),'implicit class name lost original lookup/write resolution')
+                    elif type(instruction) is P.AccessClassProtocol:
+                        binding=self.frontend.bindings.bindings[instruction.binding]
+                        name=self.frontend.namespace.name(binding.name)
+                        _require(binding.owner==interface.scope and binding.domain=='CLASS_PROTOCOL'
+                            and self.class_names.protocol(interface,name)==instruction.binding,
+                            'SOURCE_CLASS',str(step.id),'protocol cell must use an active original class-owned binding')
+                    elif type(instruction) is P.BuildClassAnnotations:
+                        _require(self.class_names.deferred_annotations(interface.scope),'SOURCE_CLASS',str(step.id),
+                            'class has no deferred variable annotation callable')
                 elif type(instruction) in (P.ReadBuildClass,P.BuildGenericBase,P.BuildTypeAlias):
                     _require(type(step.source) is P.ProductionOccurrence,'SOURCE_DEFINITION',str(step.id),'definition action requires its source owner')
                     owner=step.source.occurrence

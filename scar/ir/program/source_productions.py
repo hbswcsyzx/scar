@@ -193,6 +193,11 @@ class CommonConstantKind(str, Enum):
     NOT_IMPLEMENTED_ERROR = 'NOT_IMPLEMENTED_ERROR'
 
 
+class ClassProtocolActionKind(str, Enum):
+    WRITE_VALUE = 'WRITE_VALUE'
+    CELL_REFERENCE = 'CELL_REFERENCE'
+
+
 class AnnotationPublicationKind(str, Enum):
     STRINGIZED = 'STRINGIZED'
     DEFERRED = 'DEFERRED'
@@ -637,18 +642,39 @@ class EnterClassBody:
 
 
 @dataclass(frozen=True, slots=True)
-class InitializeClassNamespace:
-    """Compiler prelude: namespace reads/writes, protocol cells and docstring.
+class AccessClassName:
+    """Implicit compiler name access, distinct from a guessed dict operation.
 
-    Namespace may be a custom mapping. No pure/dict-only effect is asserted.
-    Compiler metadata derives from the original class source and profile.
+    Original F3 resolution selects mapping/global/free-cell behavior. None
+    means the ordinary class-name rule, not an unknown effect or absent read.
+    Hidden capture transport and native lookup expansion remain obligations.
     """
+    interface: ClassBodyInterface
+    name: str
+    action: BindingActionKind
+    resolution: int | None
+
+
+@dataclass(frozen=True, slots=True)
+class AccessClassProtocol:
+    """Original hidden protocol binding, separate from a same-spelled key."""
+    interface: ClassBodyInterface
+    binding: int
+    action: ClassProtocolActionKind
+
+
+@dataclass(frozen=True, slots=True)
+class ReadClassTypeParameters:
+    """Read the type tuple supplied when creating this class callback."""
     interface: ClassBodyInterface
 
 
 @dataclass(frozen=True, slots=True)
-class FinalizeClassNamespace:
-    """Deferred annotations, static attributes and class-cell publication."""
+class BuildClassAnnotations:
+    """Create the later class-variable annotation callable, not its results.
+
+    Scope request body and registration identities remain explicit obligations.
+    """
     interface: ClassBodyInterface
 
 
@@ -934,7 +960,7 @@ ProductionInstruction = (EvaluateChild | ApplyLanguageAction | ReadCompilationOp
     | BuildFunctionAnnotations | BuildFunction | ApplyDecorator | TranslateEscapingException
     | EnterTypeParameters | InvokeTypeParameterFactory | BuildLazyExpression | CreateTypeParameter
     | SetTypeParameterDefault | BindTypeParameter | AttachTypeParameters
-    | DeferClassBody | EnterClassBody | InitializeClassNamespace | FinalizeClassNamespace
+    | DeferClassBody | EnterClassBody | AccessClassName | AccessClassProtocol | ReadClassTypeParameters | BuildClassAnnotations
     | ReadBuildClass | BuildClassBody | BuildGenericBase | BuildTypeAlias
     | ReadContextMethod | InvokeContextMethod | ContextAwaitable | EnterHandledException
     | RestoreHandledException | ContextExceptionArguments | PrepareReraise
@@ -985,7 +1011,7 @@ class SourceProductionPlan:
     steps: tuple[ProductionStep, ...]
     slots: tuple[ProductionSlotDisposition, ...]
     schema: str = 'scar.source-production-plan'
-    schema_version: int = 18
+    schema_version: int = 19
     authority: str = 'SOURCE_RECIPE_SHAPE_ONLY'
 
 

@@ -65,14 +65,14 @@ def test_closed_grammar_exact_records_strict_codec_and_budgets():
     assert summary['control_semantics_checked'] is False
     assert A.read_production_plan(A.production_plan_document(value)) == value
     catalog = A.production_type_catalog()
-    assert catalog['counts'] == dict(records=102, fields=265, identifiers=4, enums=25, enum_members=238, unions=21)
+    assert catalog['counts'] == dict(records=104, fields=272, identifiers=4, enums=26, enum_members=240, unions=21)
     assert set(catalog['instruction_variants']) == {
         'EvaluateChild', 'ApplyLanguageAction', 'ReadCompilationOption', 'ApplyInplaceOperator', 'PublishAnnotation',
         'ImportRequest', 'ImportMember', 'ImportStar',
         'BuildFunctionAnnotations', 'BuildFunction', 'ApplyDecorator', 'TranslateEscapingException',
         'EnterTypeParameters', 'InvokeTypeParameterFactory', 'BuildLazyExpression', 'CreateTypeParameter',
         'SetTypeParameterDefault', 'BindTypeParameter', 'AttachTypeParameters',
-        'DeferClassBody','EnterClassBody','InitializeClassNamespace','FinalizeClassNamespace',
+        'DeferClassBody','EnterClassBody','AccessClassName','AccessClassProtocol','ReadClassTypeParameters','BuildClassAnnotations',
         'ReadBuildClass','BuildClassBody','BuildGenericBase','BuildTypeAlias',
         'ReadContextMethod','InvokeContextMethod','ContextAwaitable','EnterHandledException',
         'RestoreHandledException','ContextExceptionArguments','PrepareReraise',
@@ -255,20 +255,26 @@ def test_class_and_alias_action_ports_preserve_namespace_and_exception_interface
         alias=P.BuildTypeAlias(site,P.LazyExpressionInterface(site,2,(),False),site,abi)
         cases=[(P.ReadBuildClass(abi),(world,),(REF,world)),
             (P.BuildClassBody(interface),(REF,REF,REF,REF,world),(REF,world)),
-            (P.InitializeClassNamespace(interface),(REF,REF,world),(world,)),
-            (P.FinalizeClassNamespace(interface),(REF,REF,world),(REF,world)),
+            (P.AccessClassName(interface,'__name__',P.BindingActionKind.READ,None),(REF,REF,world),(REF,world)),
+            (P.AccessClassName(interface,'__module__',P.BindingActionKind.WRITE,None),(REF,REF,REF,world),(world,)),
+            (P.AccessClassProtocol(interface,3,P.ClassProtocolActionKind.WRITE_VALUE),(REF,REF,world),(world,)),
+            (P.AccessClassProtocol(interface,3,P.ClassProtocolActionKind.CELL_REFERENCE),(REF,world),(REF,world)),
+            (P.ReadClassTypeParameters(interface),(REF,world),(REF,world)),
+            (P.BuildClassAnnotations(interface),(REF,world),(REF,world)),
             (P.BuildGenericBase(abi),(REF,world),(REF,world)),
             (alias,(REF,REF,world),(REF,world)),
             (replace(alias,type_parameters=None),(REF,world),(REF,world))]
         for instruction,arguments,result in cases:
-            outputs=(*normal(*result),P.ProductionCompletion(C.RAISE,raised))
+            may_raise=not (type(instruction) is P.ReadClassTypeParameters or type(instruction) is P.AccessClassProtocol
+                and instruction.action is P.ClassProtocolActionKind.CELL_REFERENCE)
+            outputs=(*normal(*result),*((P.ProductionCompletion(C.RAISE,raised),) if may_raise else ()))
             root=region('definition',parameters=arguments,outputs=outputs,steps=('apply','done'))
             apply=step('apply',root,instruction,tuple(parameter(root,i) for i in range(len(arguments))),outputs)
             done=step('done',root,P.TransferCompletion(C.FALLTHROUGH),
                 tuple(P.ProductionResult(apply.id,i) for i in range(len(result))),normal(*result))
             specimen=plan((root,),(apply,done))
             assert A.read_production_plan(A.production_plan_document(specimen))==specimen
-            with pytest.raises(A.ProductionError,match='DEFINITION_INTERFACE'):
+            with pytest.raises(A.ProductionError,match='DEFINITION_INTERFACE|CLASS_NAMESPACE_INTERFACE'):
                 A.validate_production_plan(replace(specimen,steps=(replace(apply,arguments=()),done)))
 
 

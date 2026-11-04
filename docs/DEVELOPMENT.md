@@ -186,6 +186,7 @@ v15的`source_condition_rules.py`接条件上下文，`SourceExpressionRules.bui
 v16的`source_pattern_interfaces.py`从原F2/F3导出捕获、分支一致性和native操作端口；`source_statement_patterns.py`接Match，八类模式由父语句拥有，不单独当表达式求值。匹配失败不输出假捕获，成功后写入再判断guard；失败/后续case用共享模板。局部规则不授native内部实现、引用清理或全图证明。
 v17的`source_root_interfaces.py`及`source_root_rules.py`接三类执行根：`python -B -m scar.cli source-roots --model /path/to/model --source /original/source.py --out /path/to/materials --jobs 3`。同源选择加`--materials`并换独立输出即可fresh；根、表达式和语句各保独立domain。FunctionType为非执行语法，不编造入口。入口仅在外部namespace准入之后建模，scope注解函数保留待展开请求，不能据此宣布完整依赖图。
 v18的`source_evaluation_interfaces.py`导出原请求环境并做受控编译器字符串化查询，`source_evaluation_rules.py`生成函数注解及类型求值器的共享body；创建操作必须引用真实body ID。材料v4增加`evaluation_request_templates`和`stringized_annotation_values`，原入口/命令不变，须重采集/fresh，旧v3不互认。内核不parse或执行目标；仅字符串化查询恢复原F2子树并静态编译wrapper。模块/类汇总请求仍待展开，全部native/准入证明不由模板存在替代。
+v19的`source_class_namespace_interfaces.py`从原scope/resolution/role推导隐式访问及编译metadata，`source_class_namespace_rules.py`展开有序prelude/finalization。旧InitializeClassNamespace/FinalizeClassNamespace类型已删除；按现有三入口重采/fresh即可，不改旧recipe版本。logical name/cell、未知native捕获传递及class注解汇总仍分别保留，不据普通namespace动作已展开宣称全层完成。
 星号/keyword的失败顺序参考固定版本[CPython codegen](https://github.com/python/cpython/blob/v3.14.7/Python/codegen.c)；本机stack guideline从header读入并固定SHA。
 
 源码身份桥（按unit分片，保持输入模型和旧ID）：
