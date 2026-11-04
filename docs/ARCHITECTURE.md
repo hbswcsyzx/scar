@@ -95,6 +95,9 @@ C3-S随后重放名字贡献、合成参数、符号合并与传播，核原整�
 T的身份为原occurrence＋固定语法role；没有source scope的空header annotation仍有原Def.args依据。
 source scope、求值region、compiler template及public row分别引用，只有类型/名称/行号相同不足以接线。
 T只验type/name/lineno/nested/children；symbol_origin_projection与parameter_projection明确NOT_COMPUTED_IN_C3T。
+S以(原模板,有效NameKey)建立compiler slot，先重放原标量名字贡献与参数，再沿原附着树求解scope、inline合并/删除、cell及free转发。
+raw contribution保源C2a引用或真实原槽；SymbolFact是带低位mask、独立scope code及前置事实引用的版本化DAG，不记录每次set插入。
+PUBLIC符号与参数位置逐原F3-A序号投影，合成/relay无source port仍有固定规则来源；detached/ignored/merged/deleted均有明确处置。
 
 C2b将class mapping、local/typeparam slot、closure及class-protocol cell分域，分别输出读计划、写/删目标和共享capture父链。
 ROOT_GLOBALS只指根环境模板；非根使用各自ENV_GLOBALS/BUILTINS参数，不据源码相同断言运行字典相同。

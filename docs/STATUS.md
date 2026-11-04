@@ -1,7 +1,7 @@
 # 当前状态
 
 **第一阶段未完成。当前按形式阶段重新验收：F0 → F1 → F2 → F3 → F4 → F5 → F6。**
-阶段定义见 [ARCHITECTURE](ARCHITECTURE.md)。F0/F1/F2、F3-A/F3-B、C1及C2已按声明profile与源码范围分别验收；C3-T拓扑已验收，下一层为C3-S符号投影，组合cleanup开发暂缓。
+阶段定义见 [ARCHITECTURE](ARCHITECTURE.md)。F0/F1/F2、F3-A/F3-B、C1及C2已按声明profile与源码范围分别验收；C3-T/S已按声明范围验收，下一层F3-D组合验收，组合cleanup开发暂缓。
 现有后层代码及成果保留，但不能代替前端完整性证明。
 
 ## F0：原始材料
@@ -130,10 +130,22 @@ SOURCE_NAMESPACE_TEMPLATES、runtime_binding=NOT_OBSERVED、compiler_projection=
 证据：`/var/tmp/scar-f2-recovery-7w7nd_0z/f3c3/{materials,verification,topology-agreement.json,transparent-visitor-audit.json,run.json}`。
 原材料及model不变，canonical_model_published=false；symbol_origin_projection/parameter_projection=NOT_COMPUTED_IN_C3T，runtime_execution=NOT_OBSERVED。
 
+## C3-S符号来源与参数（已按声明范围验收）
+
+原标量visitor重放→versioned Fact DAG→沿原T树分析→inline copy/keep/delete、cell/free转发→原A行和参数序投影。
+866/866源码PROJECTED：220,704 compiler slots、447,785 raw贡献、392,706源码贡献处置、433,867事实、4,388变换、2,604协议需求。
+44,032块的208,528原native symbol整字及63,315有序参数位置全部匹配；scope code与低位mask分域，不冒充runtime co_varnames布局。
+16进程采集638.22秒、独立全量fresh643.98秒，严格重验T及D各自输入；0前沿/投影矛盾。
+867分片含单一catalog，共19,950,831压缩bytes；独立对账全部符号/参数/D贡献/B端口/Fact DAG及447,785原F2锚点，0失败。
+76个零低位行全有FREE_RELAY来源；实际slot=208,528 PUBLIC/4,388 INLINED/7,788 DETACHED，DELETED真实0另由micro覆盖，不混为观察值。
+Raw两族3.63秒、solver手写两族0.44秒、存储集成19.08秒、8个关键联例14.97秒通过；collector替换native答案仍得到相同raw输出。
+证据：`/var/tmp/scar-f2-recovery-7w7nd_0z/f3c3s/{materials,verification,symbol-agreement.json,anchor-agreement.json,proof-query-examples.json,run.json}`。
+输入及原model保持，canonical_model_published=false、runtime_binding=NOT_OBSERVED、runtime_local_layout=NOT_CLAIMED。
+
 ## 下一层
 
-下一层C3-S：名字贡献、合成参数、native符号合并/传播和原整数位、varnames对账。
-形式输入、输出和分母见ARCHITECTURE。C2已按声明范围验收；C3-T已按声明范围验收，C3-S尚未实现；不靠动态观测修补缺静态规则，随后F3-D全量验收。
+下一层完成F3-D逐源名字端口/绑定/编译器投影的组合验收，再进入F4规范IR。
+形式输入、输出和分母见ARCHITECTURE。C2已按声明范围验收；C3-T/S已按声明范围验收，F3-D组合验收尚未完成；不靠动态观测修补缺静态规则，随后F3-D全量验收。
 旧15个公开标志已全存，349组name+line冲突及内联/annotation共享证明不能据此直接接AST。
 字段角色和source/compiled/runtime三种scope必须分开，F3通过后才进入F4；不增加优化backend。
 先前审计及LibCST能力反例保存在`f3-audit/`；现成库仅按已验证能力使用。
