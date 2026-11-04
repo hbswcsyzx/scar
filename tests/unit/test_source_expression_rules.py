@@ -18,6 +18,25 @@ WORLD = ValueType(ValueKind.STATE, location=LocationID('test-source-world'))
 REF = ValueType(ValueKind.REFERENCE)
 
 
+def test_explicit_recipe_budget_reaches_all_rule_entrypoints_and_verifier():
+    from scar.analysis.source_statement_rules import SourceStatementRules
+    from scar.analysis.source_root_rules import SourceRootRules
+    from scar.analysis.source_productions import ProductionError, validate_production_plan
+    expressions = _rules(_documents('if value:\n    result = fn(value)\n'))
+    statements = SourceStatementRules(expressions.source, world=WORLD, exception_abi=ExceptionABI.EXCEPTION_WORLD)
+    roots = SourceRootRules(expressions.source, world=WORLD, exception_abi=ExceptionABI.EXCEPTION_WORLD)
+    for rules, occurrence in ((expressions,occurrences(expressions,'Call')[0]),
+            (statements,occurrences(expressions,'If')[0]),(roots,0)):
+        plan = rules.build(occurrence)
+        needed = validate_production_plan(plan)['visits']
+        with pytest.raises(ProductionError,match='BUDGET_FRONTIER'):
+            rules.build(occurrence,max_visits=needed-1)
+        assert rules.build(occurrence,max_visits=needed) == plan
+        assert rules.verify(plan,max_visits=needed)['source_rule_replayed'] is True
+        with pytest.raises(ProductionError,match='QUERY_ARGUMENT'):
+            rules.build(occurrence,max_visits=True)
+
+
 def test_source_template_links_preserve_ports_purposes_and_reject_missing_targets():
     from collections import deque
     from copy import deepcopy

@@ -25,18 +25,18 @@ class SourceRootRules(SourceStatementRules):
 
     def descriptor_owner(self,occurrence):return None
 
-    def build(self,occurrence=None,purpose=P.ProductionPurpose.ROOT,*,max_steps=100_000,max_regions=100_000):
+    def build(self,occurrence=None,purpose=P.ProductionPurpose.ROOT,*,max_steps=100_000,max_regions=100_000,max_visits=1_000_000):
         syntax=self.source.context.syntax
         occurrence=syntax.root if occurrence is None else occurrence
         _require(type(occurrence) is int and occurrence==syntax.root,'SOURCE_REFERENCE',str(occurrence),
             'root rule requires the original F2 entry occurrence')
         _require(purpose is P.ProductionPurpose.ROOT,'PURPOSE_FRONTIER',str(occurrence),'root requires its entry interface')
-        for name,value in (('max_steps',max_steps),('max_regions',max_regions)):
+        for name,value in (('max_steps',max_steps),('max_regions',max_regions),('max_visits',max_visits)):
             _require(type(value) is int and value>=0,'QUERY_ARGUMENT',name,'expected an exact nonnegative integer')
         _require(syntax.nodes[occurrence].constructor in FIELDS,'RULE_FRONTIER',str(occurrence),
             'type grammar has no executable root')
         result=_RootBuilder(self,occurrence,purpose,max_steps,max_regions).build()
-        self.source.match(result)
+        self.source.match(result,max_visits=max_visits)
         return result
 
 

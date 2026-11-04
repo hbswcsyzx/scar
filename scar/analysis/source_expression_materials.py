@@ -17,7 +17,7 @@ from scar.analysis.source_context_view import SourceContextView
 from scar.analysis.source_expression_rules import SourceExpressionRules, SourceRuleError
 from scar.analysis.source_statement_rules import SourceStatementRules
 from scar.analysis.source_root_rules import SourceRootRules
-from scar.analysis.source_productions import ProductionSourceIndex
+from scar.analysis.source_productions import ProductionSourceIndex, ProductionError
 from scar.analysis.source_core_interfaces import CORE_INSTRUCTIONS
 from scar.analysis.source_stage import _durable_bytes, _durable_mkdir, _sync_directory
 from scar.analysis.source_store import read_source_prerequisites
@@ -174,7 +174,7 @@ def _unit(task):
                 suppressed[node.constructor] += 1
             else:
                 try:
-                    plan = rules.build(occurrence, purpose, max_steps=limits['steps'], max_regions=limits['regions'])
+                    plan = rules.build(occurrence, purpose, max_steps=limits['steps'], max_regions=limits['regions'], max_visits=limits['visits'])
                     row.update(status='LOCAL_SOURCE_RULE', plan=encode(plan, record_tags=P.PRODUCTION_RECORD_TAGS))
                     built[node.constructor] += 1
                     account(plan)
@@ -195,7 +195,7 @@ def _unit(task):
         condition_rules=SourceExpressionRules(rules.source,world=_WORLD,exception_abi=ExceptionABI.EXCEPTION_WORLD) if condition_queue else None
         while condition_queue:
             occurrence=condition_queue.popleft()
-            plan=condition_rules.build(occurrence,P.ProductionPurpose.CONDITION,max_steps=limits['steps'],max_regions=limits['regions'])
+            plan=condition_rules.build(occurrence,P.ProductionPurpose.CONDITION,max_steps=limits['steps'],max_regions=limits['regions'],max_visits=limits['visits'])
             condition_built[syntax.nodes[occurrence].constructor]+=1
             account(plan)
             row=dict(occurrence=occurrence,constructor=syntax.nodes[occurrence].constructor,
@@ -234,14 +234,26 @@ def _unit(task):
     return result
 
 
+def _unit_with_context(task):
+    """Preserve typed source errors and make other worker failures transportable."""
+    label = 'SCAR ' + task[-1] + ' source: ' + task[2]['path']
+    try:
+        return _unit(task)
+    except ProductionError as error:
+        error.add_note(label)
+        raise
+    except Exception as error:
+        raise RuntimeError(label + '\n' + type(error).__qualname__ + ': ' + str(error)) from error
+
+
 def collect_source_rules(model, out, *, domain, sources=(), materials=None, jobs=1,
                                max_nodes=1_000_000, max_tokens=2_000_000,
-                               max_steps=100_000, max_regions=100_000):
+                               max_steps=100_000, max_regions=100_000, max_visits=1_000_000):
     if type(domain) is not str or domain not in ('expressions', 'statements','roots'):
         raise ValueError('expected the expression, statement or root source-rule domain')
     singular={'expressions':'expression','statements':'statement','roots':'root'}[domain]
     schema = 'scar.source-' + singular + '-materials'
-    limits = dict(nodes=max_nodes, tokens=max_tokens, steps=max_steps, regions=max_regions)
+    limits = dict(nodes=max_nodes, tokens=max_tokens, steps=max_steps, regions=max_regions, visits=max_visits)
     if type(jobs) is not int or not 1 <= jobs <= 32 or any(type(v) is not int or v < 0 for v in limits.values()):
         raise ValueError('invalid source rule jobs/budgets')
     root, out = Path(model).absolute(), Path(out).absolute()
@@ -274,10 +286,10 @@ def collect_source_rules(model, out, *, domain, sources=(), materials=None, jobs
     tasks = [(str(root), str(out), u, prior.get(u['key']), None if store is None else str(store),
               limits, pins, i == 0, domain) for i, u in enumerate(units)]
     if jobs == 1:
-        rows = [_unit(task) for task in tasks]
+        rows = [_unit_with_context(task) for task in tasks]
     else:
         with ProcessPoolExecutor(max_workers=jobs, mp_context=multiprocessing.get_context('spawn')) as pool:
-            rows = list(pool.map(_unit, tasks))
+            rows = list(pool.map(_unit_with_context, tasks))
     catalog = rows[0].pop('_catalog')
     catalog_bytes = _json(catalog)
     if any(r['catalog_sha256'] != sha256(catalog_bytes).hexdigest() for r in rows):
@@ -344,10 +356,11 @@ def main(argv=None, *, domain='expressions'):
     parser.add_argument('--max-tokens', type=int, default=2_000_000)
     parser.add_argument('--max-steps', type=int, default=100_000)
     parser.add_argument('--max-regions', type=int, default=100_000)
+    parser.add_argument('--max-visits', type=int, default=1_000_000)
     args = parser.parse_args(argv)
     report = collect_source_rules(args.model, args.out, domain=domain, sources=args.source, materials=args.materials,
         jobs=args.jobs, max_nodes=args.max_nodes, max_tokens=args.max_tokens,
-        max_steps=args.max_steps, max_regions=args.max_regions)
+        max_steps=args.max_steps, max_regions=args.max_regions, max_visits=args.max_visits)
     print(json.dumps({key: report[key] for key in ('status', 'mode', 'counts', 'seconds')}, indent=2))
     return 0
 

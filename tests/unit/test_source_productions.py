@@ -19,6 +19,31 @@ CONTEXT = ContextState(OwnerRef(0, 'ROOT'), 0, 0, 0)
 BASIS = P.ProductionInput('/source/test.py', '/source', *('a' * 64 for _ in range(8)))
 
 
+def _raise_source_error(rule):
+    from scar.analysis.source_expression_rules import SourceRuleError
+    cls = SourceRuleError if rule else A.ProductionError
+    error = cls('BUDGET_FRONTIER', 'plan.steps[7]', 'recipe shape traversal limit')
+    error.add_note('SCAR roots source: /source/example.py')
+    raise error
+
+
+def test_source_errors_survive_spawn_workers_without_breaking_pool():
+    from concurrent.futures import ProcessPoolExecutor
+    import multiprocessing
+    import pickle
+    from scar.analysis.source_expression_rules import SourceRuleError
+    with ProcessPoolExecutor(max_workers=1, mp_context=multiprocessing.get_context('spawn')) as pool:
+        for rule, cls in ((False, A.ProductionError), (True, SourceRuleError)):
+            with pytest.raises(cls) as caught:
+                pool.submit(_raise_source_error, rule).result(timeout=30)
+            error = pickle.loads(pickle.dumps(caught.value))
+            assert type(error) is cls
+            assert (error.code, error.path, error.detail) == (
+                'BUDGET_FRONTIER', 'plan.steps[7]', 'recipe shape traversal limit')
+            assert error.__notes__ == ['SCAR roots source: /source/example.py']
+        assert pool.submit(len, (1, 2)).result(timeout=30) == 2
+
+
 def normal(*types):
     return (P.ProductionCompletion(C.FALLTHROUGH, types),)
 

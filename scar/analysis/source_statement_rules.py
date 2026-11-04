@@ -55,13 +55,13 @@ class SourceStatementRules(SourceExpressionRules):
     def descriptor_owner(self, occurrence):
         return self.source.statements.docstring_owner(occurrence) if self.source.context.syntax.nodes[occurrence].constructor == 'Expr' else None
 
-    def build(self, occurrence, purpose=P.ProductionPurpose.STATEMENT, *, max_steps=100_000, max_regions=100_000):
+    def build(self, occurrence, purpose=P.ProductionPurpose.STATEMENT, *, max_steps=100_000, max_regions=100_000, max_visits=1_000_000):
         syntax = self.source.context.syntax
         _require(type(occurrence) is int and 0 <= occurrence < len(syntax.nodes),
             'SOURCE_REFERENCE', 'occurrence', 'expected an original F2 statement occurrence')
         _require(purpose is P.ProductionPurpose.STATEMENT, 'PURPOSE_FRONTIER', str(occurrence),
             'statement rules require the statement interface')
-        for name, count in (('max_steps', max_steps), ('max_regions', max_regions)):
+        for name, count in (('max_steps', max_steps), ('max_regions', max_regions), ('max_visits', max_visits)):
             _require(type(count) is int and count >= 0, 'QUERY_ARGUMENT', name, 'expected an exact nonnegative integer')
         constructor = syntax.nodes[occurrence].constructor
         _require(constructor in _FIELDS, 'RULE_FRONTIER', str(occurrence),
@@ -72,7 +72,7 @@ class SourceStatementRules(SourceExpressionRules):
         _require(self.source.context.material.regions[context.region].eligibility == 'ELIGIBLE',
             'SUPPRESSED_SOURCE', str(occurrence), 'C1 retains this statement without execution')
         result = _StatementBuilder(self, occurrence, purpose, max_steps, max_regions).build()
-        self.source.match(result)
+        self.source.match(result, max_visits=max_visits)
         return result
 
 

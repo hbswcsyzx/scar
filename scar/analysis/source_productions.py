@@ -39,6 +39,9 @@ class ProductionError(ValueError):
         self.code, self.path, self.detail = code, path, detail
         super().__init__(code + ' at ' + path + ': ' + detail)
 
+    def __reduce__(self):
+        return type(self), (self.code, self.path, self.detail), self.__dict__
+
 
 def _require(condition, code, path, detail):
     if not condition:

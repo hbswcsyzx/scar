@@ -29,14 +29,14 @@ def _require(condition, path, detail):
         raise TemplateLinkError(str(path) + ': ' + detail)
 
 
-def build_template_graph(unit, syntax, records):
+def build_template_graph(unit, syntax, records, *, max_visits=1_000_000):
     """Consume (domain, one-based line, plan document), never parse source."""
     nodes = {}; contexts = {}; sites = []; common_input = common_profile = None
     syntax_digest = _digest(syntax)
     for domain, line, document in records:
         _require(type(domain) is T.SourceMaterialDomain and type(line) is int and line > 0,
             unit, 'invalid original material coordinates')
-        plan = read_production_plan(document)
+        plan = read_production_plan(document, max_visits=max_visits)
         _require(type(plan.source) is P.ProductionOccurrence and plan.profile is not None
             and plan.compilation_flow is not None, unit, 'expected a source-bound profiled occurrence template')
         if common_input is None:
@@ -160,7 +160,8 @@ def _stream(path, records):
         decoded_bytes=decoded_bytes, decoded_sha256=digest.hexdigest(), records=count)
 
 
-def link_source_templates(model, out, parents, sources=()):
+def link_source_templates(model, out, parents, sources=(), *, max_visits=1_000_000):
+    _require(type(max_visits) is int and max_visits >= 0, 'max_visits', 'expected a nonnegative integer')
     model = Path(model).absolute(); out = Path(out).absolute()
     _require(model.resolve() == model and out.resolve() == out and not out.exists(), out, 'output must be a fresh canonical path')
     raw = (model / 'manifest.json').read_bytes(); manifest_sha = sha256(raw).hexdigest(); manifest = json.loads(raw)
@@ -178,7 +179,7 @@ def link_source_templates(model, out, parents, sources=()):
     for unit in units:
         syntax = _Fragments(model).read(unit['artifacts']['source_syntax'])
         graph = build_template_graph(unit['key'], syntax,
-            (record for store in stores for record in store.records(unit)))
+            (record for store in stores for record in store.records(unit)), max_visits=max_visits)
         path = out / 'units' / unit['key']; _durable_mkdir(path)
         nodes = _stream(path / 'templates.jsonl.gz', graph.templates)
         links = _stream(path / 'links.jsonl.gz', graph.links)
@@ -196,7 +197,7 @@ def link_source_templates(model, out, parents, sources=()):
     report = dict(schema='scar.source-template-link-store', schema_version=1, status='SOURCE_INTERFACES_LINKED',
         generator_sha256=stores[0].generator_pins, linker_sha256=linker_pin,
         link_types_sha256=types_pin, model_manifest_sha256=manifest_sha,
-        parents=[s.receipt for s in stores], selected_sources=len(rows), units=rows,
+        parents=[s.receipt for s in stores], selected_sources=len(rows), units=rows, max_visits=max_visits,
         templates=sum(r['templates'] for r in rows), links=sum(r['links'] for r in rows),
         compressed_bytes=sum(r['compressed_bytes'] for r in rows),
         canonical_graph_generated=False, child_semantics_proven=False, effects_proven=False,
@@ -205,7 +206,7 @@ def link_source_templates(model, out, parents, sources=()):
     return report
 
 
-def read_template_body(store, unit, key):
+def read_template_body(store, unit, key, *, max_visits=1_000_000):
     """Expand one node to its original typed recipe, checking both receipts."""
     store = Path(store).absolute()
     _require(store.resolve() == store and type(key) is T.SourceTemplateKey, store, 'invalid store or template key')
@@ -244,7 +245,7 @@ def read_template_body(store, unit, key):
     for domain, line, document in material.records(dict(key=unit, **{k:v for k,v in basis.items() if k!='unit'})):
         if line == node.origin.line:
             _require(_digest(document) == node.origin.plan_sha256, key, 'original recipe body differs')
-            selected = read_production_plan(document)
+            selected = read_production_plan(document, max_visits=max_visits)
     _require(selected is not None and selected.source == P.ProductionOccurrence(key.occurrence)
         and selected.purpose is key.purpose and selected.root == node.root
         and encode(selected.input) == header['input'] and encode(selected.profile) == header['profile'],
@@ -257,8 +258,9 @@ def main():
     parser.add_argument('--model', required=True); parser.add_argument('--out', required=True)
     parser.add_argument('--materials', nargs=3, action='append', required=True, metavar=('DOMAIN', 'COLLECTION', 'VERIFICATION'))
     parser.add_argument('--source', action='append', default=[])
+    parser.add_argument('--max-visits', type=int, default=1_000_000)
     args = parser.parse_args()
-    result = link_source_templates(args.model, args.out, args.materials, args.source)
+    result = link_source_templates(args.model, args.out, args.materials, args.source, max_visits=args.max_visits)
     print(json.dumps({k:result[k] for k in ('status','selected_sources','templates','links','compressed_bytes')}, indent=2))
 
 

@@ -260,12 +260,12 @@ class SourceExpressionRules:
         rule, _ = self.source.roles.locate(site)
         return site if site.group == 'FIELD' and rule.name == expected else None
 
-    def build(self, occurrence, purpose=P.ProductionPurpose.VALUE, *, max_steps=100_000, max_regions=100_000):
+    def build(self, occurrence, purpose=P.ProductionPurpose.VALUE, *, max_steps=100_000, max_regions=100_000, max_visits=1_000_000):
         syntax = self.source.context.syntax
         _require(type(occurrence) is int and 0 <= occurrence < len(syntax.nodes), 'SOURCE_REFERENCE',
                  'occurrence', 'expected an original F2 occurrence')
         _require(type(purpose) is P.ProductionPurpose, 'PURPOSE', 'purpose', 'expected an exact source purpose')
-        for name, count in (('max_steps', max_steps), ('max_regions', max_regions)):
+        for name, count in (('max_steps', max_steps), ('max_regions', max_regions), ('max_visits', max_visits)):
             _require(type(count) is int and count >= 0, 'QUERY_ARGUMENT', name, 'expected an exact nonnegative integer')
         constructor = syntax.nodes[occurrence].constructor
         _require(constructor in _FIELDS, 'RULE_FRONTIER', str(occurrence),
@@ -283,11 +283,11 @@ class SourceExpressionRules:
                  'SUPPRESSED_SOURCE', str(occurrence), 'C1 retains this syntax without an executable schedule')
         builder = _Builder(self, occurrence, purpose, max_steps, max_regions)
         result = builder.build()
-        self.source.match(result)
+        self.source.match(result, max_visits=max_visits)
         return result
 
     def verify(self, plan, **budgets):
-        self.source.match(plan)
+        self.source.match(plan, max_visits=budgets.get('max_visits', 1_000_000))
         _require(type(plan.source) is P.ProductionOccurrence, 'SOURCE_REFERENCE', 'plan.source',
                  'expression schedules require an original occurrence')
         expected = self.build(plan.source.occurrence, plan.purpose, **budgets)
