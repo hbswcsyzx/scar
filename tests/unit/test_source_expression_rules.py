@@ -702,7 +702,7 @@ def test_delegation_keeps_send_and_post_driver_completion_paths_separate(rules, 
             plan = variant.build(occurrence)
             checked = variant.verify(plan)
             assert not checked['native_delegation_expanded'] and not checked['driver_protocol_graph_generated']
-            assert plan.schema_version == 21
+            assert plan.schema_version == 22
             _, root_steps = owned(plan)
             acquire = next(s for s in root_steps if type(s.instruction) is P.ApplyDelegationProtocol)
             assert acquire.instruction.protocol is (P.DelegationProtocolKind.AWAITABLE_ITER if constructor == 'Await'
@@ -1176,8 +1176,15 @@ def test_annotation_phases_and_compilation_options_are_static_not_runtime_guesse
         for occurrence in occurrences(selected, 'AnnAssign'):
             plan = statements.build(occurrence)
             statements.verify(plan)
-            published = [s.instruction for s in plan.steps if type(s.instruction) is P.PublishAnnotation]
+            descriptor=selected.source.statements.annotation_publication(occurrence,statements.exception_abi)
+            published=[] if descriptor is None else [descriptor]
             publications.extend(published)
+            assert not any(type(s.instruction) is P.PublishAnnotation for s in plan.steps)
+            if descriptor is not None:
+                runtime=[s.instruction for s in plan.steps if type(s.instruction) in (P.AddAnnotationIndex,P.ReadAnnotationNamespace)]
+                if descriptor.publication is P.AnnotationPublicationKind.DEFERRED and not descriptor.conditional_registration:
+                    assert not runtime
+                else:assert runtime
             assert not any(type(s.instruction) is P.EvaluateChild and field_name(selected,s.instruction.field)=='annotation' for s in plan.steps)
             if selected.source.roles.field(occurrence, 'value').kind != 'NODE':
                 assert not any(type(s.instruction) is P.AccessBinding for s in plan.steps)
@@ -1972,10 +1979,11 @@ def make(seed):
             __private: T
     return Box
 def unreachable():
-    return
+    return (captured := 1)
     class Hidden:
+        nonlocal captured
         if choice:
-            __field: Field
+            __field: captured
 if False:
     class DeadBranch:
         if choice:
@@ -1992,6 +2000,36 @@ if False:
         for abi in ExceptionABI:
             roots=SourceRootRules(source,world=WORLD,exception_abi=abi)
             statements=SourceStatementRules(source,world=WORLD,exception_abi=abi)
+            for occurrence in occurrences(expressions,'AnnAssign'):
+                written=statements.build(occurrence);statements.verify(written)
+                descriptor=source.statements.annotation_publication(occurrence,abi)
+                mutations=[s for s in written.steps if type(s.instruction) is P.AddAnnotationIndex]
+                if descriptor is None or not descriptor.conditional_registration:
+                    assert not mutations
+                    continue
+                assert len(mutations)==1  # one source action, not all alternative emissions
+                lookup=next(s for s in written.steps if type(s.instruction) is P.ReadAnnotationNamespace)
+                access=lookup.instruction.access
+                assert access==source.annotation_states.publication_access(descriptor)
+                assert lookup.arguments==(P.ProductionParameter(written.root,0),)
+                domain=source.annotation_states.parameter(descriptor)
+                indices={r.index for v in domain.variants for r in v.registrations}
+                parameters=[s for s in written.steps if type(s.instruction) is P.ReadCompilationAnnotationIndex]
+                assert bool(parameters)==(len(indices)>1)
+                if parameters:
+                    assert parameters[0].arguments==() and parameters[0].instruction.parameter==domain
+                    assert sorted(indices)==[4,5]
+                if access.lookup is P.AnnotationLookupKind.CLASS_PROTOCOL_CELL:
+                    scope=source.context.context_at_slot(descriptor.annotation).state.environment
+                    assert access==source.annotation_states.request_access(scope)
+                else:
+                    scope=source.context.context_at_slot(descriptor.annotation).state.environment
+                    assert access.lookup is P.AnnotationLookupKind.LOCALS_CHAIN
+                    assert source.annotation_states.request_access(scope).lookup is P.AnnotationLookupKind.GLOBALS_CHAIN
+                    assert access!=source.annotation_states.request_access(scope)
+                bad=replace(lookup,instruction=replace(lookup.instruction,access=replace(access,scope=999)))
+                with pytest.raises(ProductionError,match='SOURCE_ANNOTATION_STATE'):
+                    source.match(replace(written,steps=tuple(bad if s.id==lookup.id else s for s in written.steps)))
             plans=[roots.build(),*(statements.build(o) for o in occurrences(expressions,'ClassDef'))]
             for plan in plans:
                 (roots if plan.purpose is P.ProductionPurpose.ROOT else statements).verify(plan)
@@ -2025,10 +2063,20 @@ if False:
                     annotations=replace(scope_request,variants=(wrong,*scope_request.variants[1:]))))
                 with pytest.raises(ProductionError,match='SOURCE_SCOPE_ANNOTATION'):
                     source.match(replace(plan,steps=tuple(bad if s.id==creation.id else s for s in plan.steps)))
-    future=_rules(_documents('from __future__ import annotations\nx: Missing\nclass C:\n    y: Missing\n'))
+    future=_rules(_documents('from __future__ import annotations\nx: Missing\nclass C:\n    __y: Missing\n'))
     assert future.source.scope_annotations.interface(future.source.roots.scope) is None
     assert all(future.source.scope_annotations.interface(i) is None for i,s in enumerate(
         future.source.context.material.scopes) if s.kind=='CLASS')
+    statements=SourceStatementRules(future.source,world=WORLD,exception_abi=ExceptionABI.EXCEPTION_WORLD)
+    for occurrence in occurrences(future,'AnnAssign'):
+        written=statements.build(occurrence);statements.verify(written)
+        steps=owned(written)[1]
+        assert type(steps[0].instruction) is P.DefineAnnotationString
+        assert type(steps[1].instruction) is P.ReadAnnotationNamespace
+        assert steps[1].instruction.access.name is P.AnnotationStateName.ANNOTATIONS
+        key=future.source.annotation_states.key(future.source.statements.annotation_publication(occurrence,statements.exception_abi))
+        assert key in ('x','_C__y')
+        assert any(type(s.instruction) is P.ApplyPythonProtocol and s.instruction.protocol is K.STORE_SUBSCRIPT for s in steps)
 
 
 def test_deferred_evaluation_templates_preserve_format_capture_order_and_stringization(monkeypatch):

@@ -87,20 +87,26 @@ class ScopeAnnotationIndex:
         names={n.value for n in source.frontend.declarations.names};suffix=0
         while (name:='_scar_static_annotation_condition_'+str(suffix)) in names:suffix+=1
         def unknown(location):return ast.copy_location(ast.Name(id=name,ctx=ast.Load()),location)
+        def condition(value):
+            return ast.copy_location(ast.Compare(left=value,ops=[ast.Is()],comparators=[unknown(value)]),value)
         try_bodies=[]
         for original,node in query.items():
             if original in protected:continue
-            if type(node) in (ast.If,ast.While,ast.Assert):node.test=unknown(node.test)
-            elif type(node) in (ast.For,ast.AsyncFor):node.iter=unknown(node.iter)
+            if type(node) in (ast.If,ast.While,ast.Assert):node.test=condition(node.test)
+            elif type(node) in (ast.For,ast.AsyncFor):
+                node.iter=ast.copy_location(ast.Tuple(elts=[node.iter,unknown(node.iter)],ctx=ast.Load()),node.iter)
             elif type(node) is ast.match_case:
-                if node.guard is not None:node.guard=unknown(node.guard)
-            elif type(node) is ast.Match:node.subject=unknown(node.subject)
+                if node.guard is not None:node.guard=condition(node.guard)
+            elif type(node) is ast.Match:node.subject=condition(node.subject)
             elif type(node) in (ast.Try,ast.TryStar):
                 try_bodies.append(node)
             elif type(node) in (ast.Return,ast.Raise,ast.Break,ast.Continue):
                 edge=roles.parents[original];parent=query[edge.occurrence]
                 field=tuple(roles.fields[syntax.nodes[edge.occurrence].constructor])[edge.ordinal]
-                replacement=ast.copy_location(ast.Pass(),node)
+                values=([node.value] if type(node) is ast.Return and node.value is not None else
+                    [v for v in (node.exc,node.cause) if v is not None] if type(node) is ast.Raise else [])
+                expression=values[0] if len(values)==1 else ast.copy_location(ast.Tuple(elts=values,ctx=ast.Load()),node)
+                replacement=ast.copy_location(ast.Expr(value=expression) if values else ast.Pass(),node)
                 if edge.item_path:
                     container=getattr(parent,field)
                     for i in edge.item_path[:-1]:container=container[i]

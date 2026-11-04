@@ -203,6 +203,17 @@ class AnnotationPublicationKind(str, Enum):
     DEFERRED = 'DEFERRED'
 
 
+class AnnotationLookupKind(str, Enum):
+    LOCALS_CHAIN = 'LOCALS_CHAIN'
+    GLOBALS_CHAIN = 'GLOBALS_CHAIN'
+    CLASS_PROTOCOL_CELL = 'CLASS_PROTOCOL_CELL'
+
+
+class AnnotationStateName(str, Enum):
+    ANNOTATIONS = '__annotations__'
+    CONDITIONAL = '__conditional_annotations__'
+
+
 class DeferredParameterKind(str, Enum):
     POSITIONAL_ONLY = 'POSITIONAL_ONLY'
     POSITIONAL_OR_KEYWORD = 'POSITIONAL_OR_KEYWORD'
@@ -302,19 +313,34 @@ class ApplyInplaceOperator:
 
 @dataclass(frozen=True, slots=True)
 class PublishAnnotation:
-    """Retain a source annotation without eagerly evaluating its expression.
+    """Source descriptor, not an execution instruction.
 
     A deferred entry belongs to the original C1 annotation scope. Registering
     an unconditional class annotation is compile metadata; conditional class
     and all module annotations also record that this declaration was reached.
     Stringized publication instead writes the compiled string immediately.
-    These are logical publication operations, not expanded native helpers.
+    Runtime publication is expanded into namespace reads and mutations.
     """
     annotation: SlotRef
     name: SlotRef
     publication: AnnotationPublicationKind
     conditional_registration: bool
     exception_abi: ExceptionABI
+
+
+@dataclass(frozen=True, slots=True)
+class AnnotationStateAccess:
+    """Namespace/cell lookup in the current activation/world.
+
+    LOCALS_CHAIN and GLOBALS_CHAIN require alias evidence before merging.
+    A class protocol cell uses original C2 binding/implicit/read-plan IDs.
+    """
+    scope: int
+    lookup: AnnotationLookupKind
+    name: AnnotationStateName
+    binding: int | None = None
+    implicit_requirement: int | None = None
+    read_plan: int | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -526,6 +552,25 @@ class ScopeAnnotationInterface:
 
 
 @dataclass(frozen=True, slots=True)
+class AnnotationEmissionVariant:
+    optimization_level: int
+    registrations: tuple[AnnotationRegistration, ...]
+    emitted_in_original_unit: bool
+
+
+@dataclass(frozen=True, slots=True)
+class AnnotationEmissionParameter:
+    """Compiler-context input with a complete finite source-bound domain.
+
+    Alternatives are not simultaneous writes or a runtime random choice.
+    Binding a shared template to its emission context is a later obligation.
+    A singleton numeric domain can be a literal.
+    """
+    publication: PublishAnnotation
+    variants: tuple[AnnotationEmissionVariant, ...]
+
+
+@dataclass(frozen=True, slots=True)
 class BuildFunctionAnnotations:
     """Create the later annotation-request callable, without evaluating values."""
     annotations: FunctionAnnotationInterface
@@ -639,6 +684,29 @@ class ReadAnnotationRegistration:
     """
     registration: AnnotationRegistration
     exception_abi: ExceptionABI
+    access: AnnotationStateAccess
+
+
+@dataclass(frozen=True, slots=True)
+class ReadAnnotationNamespace:
+    access: AnnotationStateAccess
+    exception_abi: ExceptionABI
+
+
+@dataclass(frozen=True, slots=True)
+class ReadCompilationAnnotationIndex:
+    """Symbolic compiler input, not a runtime operation that picks an index."""
+    parameter: AnnotationEmissionParameter
+
+
+@dataclass(frozen=True, slots=True)
+class AddAnnotationIndex:
+    """PySet_Add boundary; preserve type errors and other failure effects.
+
+    This does not dispatch a Python .add method or assume the loaded object
+    still equals the empty set created at initialization.
+    """
+    publication: PublishAnnotation
 
 
 @dataclass(frozen=True, slots=True)
@@ -1023,7 +1091,7 @@ class SuspendExecution:
     delegate: ProductionValue | None = None
 
 
-ProductionInstruction = (EvaluateChild | ApplyLanguageAction | ReadCompilationOption | ApplyInplaceOperator | PublishAnnotation
+ProductionInstruction = (EvaluateChild | ApplyLanguageAction | ReadCompilationOption | ApplyInplaceOperator
     | ImportRequest | ImportMember | ImportStar
     | ApplyPythonProtocol | ApplyDelegationProtocol | AccessBinding | ConstructValue | DefineLiteral
     | BuildFunctionAnnotations | BuildFunction | ApplyDecorator | TranslateEscapingException
@@ -1037,7 +1105,8 @@ ProductionInstruction = (EvaluateChild | ApplyLanguageAction | ReadCompilationOp
     | ReferenceIsNone | InvertCondition | SplitExceptionGroup | MergeExceptionGroup
     | ReferenceIdentical | ApplyPatternAction
     | EnterRootBody | ApplyNamespaceAction | BuildScopeAnnotations | DisplayExpression
-    | EnterEvaluationRequest | ReadAnnotationRegistration | ApplyImplicitComparison | ReadCommonConstant | DefineAnnotationString
+    | EnterEvaluationRequest | ReadAnnotationRegistration | ReadAnnotationNamespace | ReadCompilationAnnotationIndex
+    | AddAnnotationIndex | ApplyImplicitComparison | ReadCommonConstant | DefineAnnotationString
     | ApplyRegion | BranchControl | LoopControl | DeferRegion | ReferenceEnvironment | EnterDeferredBody
     | HandleCompletions | TransferCompletion | SuspendExecution)
 
@@ -1081,7 +1150,7 @@ class SourceProductionPlan:
     slots: tuple[ProductionSlotDisposition, ...]
     capture_transports: tuple[CaptureTransport, ...] = ()
     schema: str = 'scar.source-production-plan'
-    schema_version: int = 21
+    schema_version: int = 22
     authority: str = 'SOURCE_RECIPE_SHAPE_ONLY'
 
 

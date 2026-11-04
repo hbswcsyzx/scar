@@ -33,7 +33,8 @@ def _scope_variant(b,region,variant,environment,mapping,world):
         if entry.registration is None:
             world=_scope_entry(b,region,entry,mapping,world)
             continue
-        registered,world=b.emit(region,P.ReadAnnotationRegistration(entry.registration,b.rules.exception_abi),
+        access=b.rules.source.annotation_states.request_access(entry.registration.scope)
+        registered,world=b.emit(region,P.ReadAnnotationRegistration(entry.registration,b.rules.exception_abi,access),
             (environment,world),(_BOOL,b.world),source=entry.source)
         yes=b.region(entry.source,(_REF,_REF,b.world),region)
         no=b.region(entry.source,(b.world,),region)

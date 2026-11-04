@@ -28,6 +28,7 @@ from scar.analysis.source_evaluation_interfaces import EvaluationInterfaceIndex
 from scar.analysis.source_class_namespace_interfaces import ClassNamespaceIndex
 from scar.analysis.source_capture_interfaces import CaptureInterfaceIndex
 from scar.analysis.source_scope_annotation_interfaces import ScopeAnnotationIndex
+from scar.analysis.source_annotation_state_interfaces import AnnotationStateIndex
 
 
 class ProductionError(ValueError):
@@ -68,7 +69,7 @@ def production_type_catalog():
                  'scar.analysis.source_definition_interfaces','scar.analysis.source_pattern_interfaces',
                  'scar.analysis.source_root_interfaces','scar.analysis.source_evaluation_interfaces','scar.analysis.source_syntax',
                  'scar.analysis.source_class_namespace_interfaces','scar.analysis.source_capture_interfaces',
-                 'scar.analysis.source_scope_annotation_interfaces'):
+                 'scar.analysis.source_scope_annotation_interfaces','scar.analysis.source_annotation_state_interfaces'):
         modules[name] = sha256(Path(sys.modules[name].__file__).read_bytes()).hexdigest()
     payload = dict(schema='scar.source-production-type-catalog', schema_version=1,
         root=root, types=rows, counts=counts, modules=dict(sorted(modules.items())),
@@ -158,7 +159,7 @@ def validate_production_plan(plan, *, max_visits=1_000_000):
     """
     visits = _shape(plan, max_visits)
     _require((plan.schema, plan.schema_version, plan.authority) == (
-        'scar.source-production-plan', 21, 'SOURCE_RECIPE_SHAPE_ONLY'),
+        'scar.source-production-plan', 22, 'SOURCE_RECIPE_SHAPE_ONLY'),
         'SCHEMA', 'plan', 'unsupported recipe schema or authority')
     source = plan.input
     _require(bool(source.path) and bool(source.namespace_root), 'INPUT', 'plan.input', 'source paths must be nonempty')
@@ -278,6 +279,27 @@ def validate_production_plan(plan, *, max_visits=1_000_000):
 
     def cells(environment):
         return all(i>=0 for i in environment.owned_cells) and len(set(environment.owned_cells))==len(environment.owned_cells)
+
+    def annotation_access(access):
+        linked=(access.binding,access.implicit_requirement,access.read_plan)
+        _require(access.scope>=0 and (all(v is not None and v>=0 for v in linked)
+            if access.lookup is P.AnnotationLookupKind.CLASS_PROTOCOL_CELL else all(v is None for v in linked)),
+            'ANNOTATION_STATE_INTERFACE','access','class cells require original links; namespace chains do not use cell IDs')
+        _require(access.lookup is not P.AnnotationLookupKind.CLASS_PROTOCOL_CELL or access.name is P.AnnotationStateName.CONDITIONAL,
+            'ANNOTATION_STATE_INTERFACE','access','only the conditional registry uses a hidden class protocol cell')
+
+    def emission_parameter(parameter):
+        pub=parameter.publication
+        _require(pub.publication is P.AnnotationPublicationKind.DEFERRED and pub.conditional_registration
+            and tuple(v.optimization_level for v in parameter.variants)==(0,1,2),
+            'ANNOTATION_STATE_INTERFACE','parameter','index input requires a conditional declaration and three target policies')
+        scopes=set()
+        for v in parameter.variants:
+            _require(bool(v.registrations) and len(set(v.registrations))==len(v.registrations)
+                and all(r.scope>=0 and r.index>=0 and r.optimization_level==v.optimization_level for r in v.registrations),
+                'ANNOTATION_STATE_INTERFACE','parameter','index alternatives must be distinct scoped compiler registrations')
+            scopes.update(r.scope for r in v.registrations)
+        _require(len(scopes)==1,'ANNOTATION_STATE_INTERFACE','parameter','one source declaration has one original annotation scope')
 
     def deferred_ports(environment):
         _require(type(environment.world) is ValueType and environment.world.kind is ValueKind.STATE,
@@ -485,6 +507,29 @@ def validate_production_plan(plan, *, max_visits=1_000_000):
                 raised=(reference,world) if instruction.exception_abi is ExceptionABI.EXCEPTION_WORLD else (reference,reference,world)
                 _require(outputs=={(C.FALLTHROUGH,None):(ValueType(ValueKind.DATA,'builtins.bool'),world),(C.RAISE,None):raised},
                     'SCOPE_ANNOTATION_INTERFACE',str(identity),'registry lookup/contains must retain errors and current world')
+                annotation_access(instruction.access)
+                _require(instruction.access.name is P.AnnotationStateName.CONDITIONAL
+                    and instruction.access.lookup in (P.AnnotationLookupKind.GLOBALS_CHAIN,P.AnnotationLookupKind.CLASS_PROTOCOL_CELL),
+                    'ANNOTATION_STATE_INTERFACE',str(identity),'request registry lookup must use globals or the captured class cell')
+            elif type(instruction) is P.ReadCompilationAnnotationIndex:
+                emission_parameter(instruction.parameter)
+                _require(not args and outputs=={(C.FALLTHROUGH,None):(ValueType(ValueKind.REFERENCE),)},
+                    'ANNOTATION_STATE_INTERFACE',str(identity),'compiler input is symbolic and must not consume runtime world')
+            elif type(instruction) is P.ReadAnnotationNamespace:
+                annotation_access(instruction.access);reference=ValueType(ValueKind.REFERENCE)
+                _require(len(args)==1 and type(args[0]) is ValueType and args[0].kind is ValueKind.STATE,
+                    'ANNOTATION_STATE_INTERFACE',str(identity),'namespace lookup requires current world')
+                world=args[0];raised=(reference,world) if instruction.exception_abi is ExceptionABI.EXCEPTION_WORLD else (reference,reference,world)
+                _require(outputs=={(C.FALLTHROUGH,None):(reference,world),(C.RAISE,None):raised},
+                    'ANNOTATION_STATE_INTERFACE',str(identity),'namespace lookup must preserve errors and current world')
+            elif type(instruction) is P.AddAnnotationIndex:
+                pub=instruction.publication;reference=ValueType(ValueKind.REFERENCE)
+                _require(pub.publication is P.AnnotationPublicationKind.DEFERRED and pub.conditional_registration
+                    and len(args)==3 and args[:2]==(reference,reference) and type(args[2]) is ValueType and args[2].kind is ValueKind.STATE,
+                    'ANNOTATION_STATE_INTERFACE',str(identity),'set insertion requires registry, one index and current world')
+                world=args[2];raised=(reference,world) if pub.exception_abi is ExceptionABI.EXCEPTION_WORLD else (reference,reference,world)
+                _require(outputs=={(C.FALLTHROUGH,None):(world,),(C.RAISE,None):raised},
+                    'ANNOTATION_STATE_INTERFACE',str(identity),'set insertion keeps type and mutation failures')
             elif type(instruction) is P.EnterEvaluationRequest:
                 ports=evaluation_ports(instruction.environment)
                 _require(region.kind is P.ProductionRegionKind.DEFERRED and ordinal==0
@@ -771,18 +816,14 @@ def validate_production_plan(plan, *, max_visits=1_000_000):
                 expected = {(C.FALLTHROUGH, None): (world,) if type(instruction) is P.ImportStar else (reference, world),
                     (C.RAISE, None): raised}
                 _require(outputs == expected, 'IMPORT_INTERFACE', str(identity), 'import completions differ from its source ABI')
-            elif type(instruction) in (P.ApplyInplaceOperator, P.PublishAnnotation):
+            elif type(instruction) is P.ApplyInplaceOperator:
                 _require(bool(args) and type(args[-1]) is ValueType and args[-1].kind is ValueKind.STATE,
                     'PORT_TYPES', str(identity), 'source protocol requires an explicit world')
                 world, reference = args[-1], ValueType(ValueKind.REFERENCE)
-                inplace = type(instruction) is P.ApplyInplaceOperator
-                _require(args == ((reference, reference, world) if inplace else (world,)),
+                _require(args == (reference, reference, world),
                     'PORT_TYPES', str(identity), 'source protocol argument interface differs')
-                expected = {(C.FALLTHROUGH, None): (reference, world) if inplace else (world,)}
-                may_raise = inplace or instruction.publication is P.AnnotationPublicationKind.STRINGIZED or instruction.conditional_registration
-                if may_raise:
-                    expected[(C.RAISE, None)] = ((reference, world) if instruction.exception_abi is ExceptionABI.EXCEPTION_WORLD
-                        else (reference, reference, world))
+                expected = {(C.FALLTHROUGH, None): (reference, world),
+                    (C.RAISE,None):((reference, world) if instruction.exception_abi is ExceptionABI.EXCEPTION_WORLD else (reference,reference,world))}
                 _require(outputs == expected, 'PORT_TYPES', str(identity), 'source protocol completion interface differs')
             elif type(instruction) is P.AccessBinding:
                 _require(instruction.port >= 0, 'SOURCE_PORT', str(identity), 'source port must be nonnegative')
@@ -1078,6 +1119,7 @@ class ProductionSourceIndex:
         self._class_names = None
         self._capture_paths = None
         self._scope_annotations = None
+        self._annotation_states = None
         self._expressions=frozenset(row.name for row in syntax.profile.ast_schema if 'expr' in row.bases)
         self._role_sites = frozenset(port.site for port in frontend_view.roles.ports)
         self.input = P.ProductionInput(f0['path'], f0['namespace_root'], _digest(encode(syntax)),
@@ -1094,6 +1136,11 @@ class ProductionSourceIndex:
     def scope_annotations(self):
         if self._scope_annotations is None:self._scope_annotations=ScopeAnnotationIndex(self)
         return self._scope_annotations
+
+    @property
+    def annotation_states(self):
+        if self._annotation_states is None:self._annotation_states=AnnotationStateIndex(self)
+        return self._annotation_states
 
     @property
     def deferred(self):
@@ -1203,6 +1250,25 @@ class ProductionSourceIndex:
                         and region_index[step.region].context.environment==instruction.registration.scope,
                         'SOURCE_SCOPE_ANNOTATION',str(step.id),'registration read must stay in its original request scope')
                     self.scope_annotations.registration(instruction.registration,step.source)
+                    _require(instruction.access==self.annotation_states.request_access(instruction.registration.scope),
+                        'SOURCE_ANNOTATION_STATE',str(step.id),'request registry source differs from original scope/implicit binding')
+                elif type(instruction) in (P.ReadAnnotationNamespace,P.ReadCompilationAnnotationIndex,P.AddAnnotationIndex):
+                    _require(type(step.source) is P.SlotRef and step.source.group=='FIELD'
+                        and self.roles.locate(step.source)[0].name=='annotation'
+                        and region_index[step.region].context.environment==self.context.entry_context(step.source.occurrence).environment,
+                        'SOURCE_ANNOTATION_STATE',str(step.id),'publication must stay in its original creator namespace')
+                    abi=(instruction.parameter.publication.exception_abi if type(instruction) is P.ReadCompilationAnnotationIndex
+                        else instruction.publication.exception_abi if type(instruction) is P.AddAnnotationIndex else instruction.exception_abi)
+                    pub=self.statements.annotation_publication(step.source.occurrence,abi)
+                    _require(pub is not None and pub.annotation==step.source,'SOURCE_ANNOTATION_STATE',str(step.id),'source has no published annotation')
+                    if type(instruction) is P.ReadAnnotationNamespace:
+                        _require(instruction.access==self.annotation_states.publication_access(pub),'SOURCE_ANNOTATION_STATE',str(step.id),
+                            'publication namespace/cell source differs from original scope/implicit binding')
+                    elif type(instruction) is P.ReadCompilationAnnotationIndex:
+                        expected=self.annotation_states.parameter(pub)
+                        _require(instruction.parameter==expected and len({r.index for v in expected.variants for r in v.registrations})>1,
+                            'SOURCE_ANNOTATION_STATE',str(step.id),'compiler index domain differs or should have been a singleton literal')
+                    else:_require(instruction.publication==pub,'SOURCE_ANNOTATION_STATE',str(step.id),'set insertion differs from original conditional declaration')
                 elif type(instruction) is P.DefineAnnotationString:
                     _require(step.source==instruction.source and instruction.value==self.evaluations.stringize(instruction.source),
                         'SOURCE_EVALUATION_REQUEST',str(step.id),'stringized annotation differs from original source/compiler result')
@@ -1345,10 +1411,6 @@ class ProductionSourceIndex:
                         and self.context.syntax.nodes[value.reference].constructor in ('Add', 'Sub', 'Mult', 'MatMult',
                             'Div', 'Mod', 'Pow', 'LShift', 'RShift', 'BitOr', 'BitXor', 'BitAnd', 'FloorDiv'),
                         'SOURCE_OPERATOR', str(step.id), 'inplace operator must retain its original AugAssign selector')
-                elif type(instruction) is P.PublishAnnotation:
-                    _require(type(step.source) is P.ProductionOccurrence
-                        and instruction == self.statements.annotation_publication(step.source.occurrence, instruction.exception_abi),
-                        'SOURCE_ANNOTATION', str(step.id), 'annotation publication differs from original scope/phase/name')
                 elif type(instruction) in (P.BuildFunction,P.BuildFunctionAnnotations):
                     _require(type(step.source) is P.ProductionOccurrence, 'SOURCE_FUNCTION', str(step.id), 'function creation requires its original definition')
                     owner = step.source.occurrence

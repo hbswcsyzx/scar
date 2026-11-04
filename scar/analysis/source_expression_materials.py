@@ -62,6 +62,7 @@ def _implementation():
         'analysis/source_class_namespace_interfaces.py', 'analysis/source_class_namespace_rules.py',
         'analysis/source_capture_interfaces.py',
         'analysis/source_scope_annotation_interfaces.py',
+        'analysis/source_annotation_state_interfaces.py','analysis/source_annotation_state_rules.py',
         'analysis/source_syntax.py',
         'analysis/source_type_parameter_interfaces.py', 'analysis/source_type_parameter_rules.py',
         'analysis/source_productions.py', 'analysis/program_types.py',
@@ -112,8 +113,6 @@ def _unit(task):
                 child_obligations[('CONDITION:' if conditioned else '')+syntax.nodes[selected.reference].constructor]+=1
                 if conditioned and selected.reference not in condition_seen:
                     condition_seen.add(selected.reference);condition_queue.append(selected.reference)
-            elif type(instruction) is P.PublishAnnotation and instruction.publication is P.AnnotationPublicationKind.DEFERRED:
-                child_obligations['ANNOTATION_REQUEST']+=1
             elif type(instruction) is P.BuildFunctionAnnotations:
                 request_bodies['FUNCTION_ANNOTATIONS']+=1
             elif type(instruction) is P.BuildLazyExpression:

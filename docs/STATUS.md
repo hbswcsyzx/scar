@@ -94,7 +94,7 @@ call/map/string/assert参数也沿闭合原端口组解析；空组保DECLARED_E
 真实eval/cem原body的4,830条操作来源、65,086条来源引用已接回原F2及已有F3查询；CEM的4个旧OPAQUE可读出Gt/Eq原selector。
 这仍不是执行语义证明。证据：`artifacts/current/queries/source-anchors/{materials,verification}/result.json`及`{eval,cem}-origin-query.json`。
 
-源码产生规则v21：111记录/307字段、4 ID、26枚举/240成员、24 union、67步骤变体；独立于canonical图和旧ID。
+源码产生规则v22：117记录/323字段、4 ID、28枚举/245成员、24 union、69步骤变体；独立于canonical图和旧ID。
 接口检查覆盖区域归属、有序值引用、共享调用、循环不变量/携带端口、异常payload/captures及strict wire；不授完整控制/效果语义。
 函数/生成器分创建和后续激活，保原F3参数与cell转交；暂停显式接新world，不保存旧STATE。调用准入、登记/状态来源、native frame及清理仍待闭合。
 
@@ -107,29 +107,31 @@ sequence区分完整unpack、wildcard-star按需取项及全wildcard省略提取
 真实五源仍为eval/CEM及buffer/world/spaces：5,314表达式=4,875局部recipe+345不单独求值的源码+94父属表达式，另记737父属描述符；998语句=915局部recipe+83父属docstring Expr。两域样本规则前沿均为0。
 条件语法与值语法分开，避免短路结果二次__bool__；材料v4延续按purpose流式补齐199个语句条件模板、29个表达式条件模板，并单列request模板与字符串化计数。模板不是源码occurrence或执行次数；去重范围为每源每材料域。
 语句现有2,461项child接口义务，表达式3,513项。原98项函数注解占位已展开为98个DEFERRED请求模板：共260项注解，122个编译器字符串、138条VALUE求值依赖。占位减少98而具体依赖增加138，不能把计数变化当作最终图完成。
-本轮五源重采集/独立fresh：语句35.51/27.89秒；表达式35.50/34.07秒。这不是LeWM运行时间或全程序建图时间。
-本轮5项定向检查通过（29.96秒）：结构/创建接口、模块根、类metadata与scope请求。覆盖两个异常ABI、原槽引用、try/else/except顺序、finally重复登记、private/generic捕获、隐式registry cell、future/non-simple/local策略、不可达类模板及错误key/index拒绝。未跑全套，compile/dis仅作静态查询/对照，不执行目标；之前捕获父链验收按原范围保留。
+本轮五源重采集/独立fresh：语句28.27/28.08秒；表达式35.31/34.99秒。这不是LeWM运行时间或全程序建图时间。
+本轮4项定向检查通过（65.07秒）：结构/原子接口、注解阶段及scope请求。覆盖两个异常ABI、locals/globals分域、class cell读写同源、future字符串/key/写入顺序、metadata不造执行、重复finally完整编号域/单值折叠、错误来源拒绝。不可达模板另含return walrus绑定与nonlocal，避免投影丢失原声明。未跑全套，compile/dis只作静态查询/对照；之前接口与捕获父链验收按原范围保留。
 五源没有Match，不能把micro证据说成真实LeWM出现了该模式；也没有TryStar、finally、命名handler、AsyncWith、泛型或TypeAlias。
-原十份展示及新增两份policy类recipe均从v21新材料提取，不改旧header冒充迁移。原manifest和六源bytes保持，LeWM未执行或修改。
+展示recipe均从v22新材料提取，不改旧header冒充迁移。原manifest和所选源码bytes保持，LeWM未执行或修改。
 证据集中在`queries/source-{productions,expression-rules,statement-rules,root-rules}/`。本轮由主代理完成，无新增subagents。
 
 三类根入口已接原F2/F3，显式输入globals/locals/world；外部exec/eval/import准入、字典别名和物理frame另验。
 模块的__annotate__在用户语句前创建，条件注解set和future注解setup按原规则安排；docstring受显式目标选项控制，支持原global指令。普通常量语句不制造求值，交互模式显式displayhook边界。
-五源5个根recipe、72项子接口义务，含4处模块docstring归属修正。采集25.21秒/fresh24.17秒；耗时主要包含父层strict重验；每源规则/写入明细保留在收据中。不是建图总耗时。
-五源没有模块级注解函数创建或future注解setup实例，这两项以静态micro为依据，不能外推成真实运行证据。Scope annotation callable请求体与namespace native实现仍待展开。
+五源5个根recipe、72项子接口义务，含4处模块docstring归属修正。采集24.22秒/fresh24.35秒；耗时主要包含父层strict重验；每源规则/写入明细保留在收据中。不是建图总耗时。
+五源没有模块级注解函数创建或future注解setup实例，这两项以静态micro为依据，不能外推成真实运行证据。Scope请求体已有局部模板，namespace完整native实现及准入仍待证明。
 
 函数注解及类型别名/类型参数bound/default的创建动作现在显式引用后续请求体。入口接捕获环境、format及新world，不把旧world保存进closure；normal值与异常出口分开。类型求值器默认format=1，函数注解无默认；format先比较/判断，过大时读固定解释器异常类型后raise。
 函数注解按ordinary→posonly→vararg→kwonly→kwarg→return求值，最后构造dict；星号注解/default只解包一项。future注解从原F2子树交给固定编译器的受控wrapper字符串化，不parse、不执行；临时AST编号不替换原模型ID。引用寿命、native admission及frame布局仍未证明。
 五源真实出现98个函数注解模板；类型参数/别名求值器仍仅有静态micro证据。本轮模块/类变量注解也已有请求模板：format检查、当前登记读取、VALUE依赖及有序dict写入，创建不执行请求。原槽位的重复编译登记各有index；原编译单元丢弃的类保独立源码模板和显式False标记。不能据此宣布登记来源、native调用准入或全部lazy请求闭合。
-新增真实policy.py：226语句=201局部recipe+25父属docstring，规则前沿0；20请求模板中18个函数注解、2个类注解，后者分别连接PlanConfig的5个字段与BasePolicy的2个字段。采集24.42秒/fresh20.61秒，233,697压缩bytes（解压4,405,317）；独立收据在`queries/source-scope-annotations/`。这是额外一源的静态局部证据，不代表866源规则已重放或完整执行图闭合。
+真实policy.py：226语句=201局部recipe+25父属docstring，规则前沿0；20请求模板中18个函数注解、2个类注解，后者连接PlanConfig的5个字段与BasePolicy的2个字段。本轮删除7处虚构的运行登记动作，RHS赋值保留，child义务573→566。采集20.64秒/fresh20.47秒，232,316压缩bytes（解压4,395,839）；收据在`queries/source-scope-annotations/`。这是静态建模修正，不是程序变换或性能收益。
+新增真实data/format.py：52语句=47局部recipe+5父属docstring，规则前沿0；11个函数请求模板，共18个字符串化值，其中2处是模块FORMATS及class name字段的即时注解发布。两处均显式连接当前locals链查找及mapping写入。采集5.56秒/fresh5.23秒，71,843压缩bytes（解压1,160,829）；收据在`queries/source-annotation-state/`，另存两份展示recipe。总计七份真实源码的局部材料，不代表866源规则已重放或完整图闭合。
 
 类namespace的整块Initialize/Finalize已删除，改为隐式name访问、独立protocol cell、泛型tuple传递及有序常量/分支。输入namespace可能是自定义mapping；__class__/__classdict__/conditional cell与同名key不合并，global/nonlocal按原F3 resolution表示。后续native lookup、隐式capture传递及frame布局仍未证明。
 源码规则推导qualname、装饰器首行和CPython static-attribute tuple；该tuple按编译器的self.X Store规则生成，不断言self的实际类型。增强赋值、仅注解目标、inlined/nested scope及assert编译选项分别处理。正常body才进入注解callable创建、static attrs和cell发布；docstring受目标选项控制。
 五源8个真实class recipe含59次隐式name访问、17次protocol访问：6次classdict值写入、11次cell引用，分别发布6个classdictcell及5个classcell。原五源没有class变量注解callable；新增真实policy.py验证见下。真实泛型class transport仍无该批实例。
 v20补无显式读写的FREE转交，本轮进一步接原C2隐式读需求：类条件registry可以有原隐式binding却没有公开FREE slot，不能只依赖symtable。补充父链记录compiler_slots及implicit_requirements两种原证据，原F3材料/ID不变；物理frame布局、native传递与效果仍未证明。
-五源本轮新增捕获父链为0，语句材料记录40个已有owner-cell要求；新增隐式registry父链的直接证据来自静态micro，不是LeWM中的已观测缺陷或性能收益。当前三域压缩材料分别为语句1,016,154、表达式1,599,528、根15,971 bytes；recipe含原C3 pin，仍非最终图。
+五源本轮新增捕获父链为0，语句材料记录40个已有owner-cell要求；新增隐式registry父链的直接证据来自静态micro，不是LeWM中的已观测缺陷或性能收益。当前三域压缩材料分别为语句1,016,192、表达式1,598,000、根15,974 bytes；recipe含原C3 pin，仍非最终图。
 
 **当前真正缺口**：参数/状态来源（含注解登记的producer与native路径选择）、正常与异常引用清理；然后才是F4-C统一共享CFG/SSA，再接跨层/native/resource。捕获边现在可由原C3 FREE或原C2隐式需求支持，不是全部native capture/frame证明。
+本轮写入端已展开为当前namespace/cell查找和集合/mapping写入；请求读取带同域来源。module写入的locals链与请求的globals链不合并，class读写则指向原同一protocol binding。编译编号的完整候选域已保存，单值直接使用常量，多值是未绑定编译输入，不能当成运行选择器、同时写入所有编号或宣称native路径已接通。无条件class的PublishAnnotation执行步骤已删除，源码声明仍在metadata和请求接口中。
 recipe不是canonical图。样本规则缺口为0不能宣布F4-B、完整建图或第一阶段完成，也不授权变换。
 
 1. **F4-B后续规则**：接完整操作家族、typed参数来源、状态/access契约和源码产生规则，再接版本化根与强制reader。

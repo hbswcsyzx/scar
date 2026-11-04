@@ -189,6 +189,7 @@ v18的`source_evaluation_interfaces.py`导出原请求环境并做受控编译�
 v19的`source_class_namespace_interfaces.py`从原scope/resolution/role推导隐式访问及编译metadata，`source_class_namespace_rules.py`展开有序prelude/finalization。旧InitializeClassNamespace/FinalizeClassNamespace类型已删除；按现有三入口重采/fresh即可，不改旧recipe版本。logical name/cell、未知native捕获传递及class注解汇总仍分别保留，不据普通namespace动作已展开宣称全层完成。
 v20的`source_capture_interfaces.py`复用原F3活跃hop，并从原C3 FREE证据补充源解析可定位的共享捕获父链；`CaptureReference`明确区分旧整数ID与新复合键。`owned_cells`只是原binding的逻辑cell要求。三入口和材料外壳仍相同，旧实现pin不能直接fresh；须重生成v20 recipe，不改旧header。模块/类注解汇总体、准入和物理frame仍未闭合。
 v21的`source_scope_annotation_interfaces.py`为模块/类请求导出原scope、共享捕获和三种目标优化策略的登记表；不parse或执行目标。BuildScopeAnnotations/BuildClassAnnotations现在必须带annotations及body ID；ReadAnnotationRegistration保环境/新world和异常出口。材料v4新增两种request计数，不再把它们记作SCOPE_ANNOTATION_REQUEST整块义务。沿原入口重生成即可，原F2/F3材料不变；源码模板与原编译单元是否保留该代码分开记录。
+v22的`source_annotation_state_interfaces.py`导出namespace/cell来源、原投影key和编译参数域；`source_annotation_state_rules.py`展开写入。PublishAnnotation保留为描述符，已退出instruction union；无条件class字段只留metadata。原三入口不变，重生成/fresh读取新recipe；不重签旧版本。绑定编译上下文与完整状态/引用证明仍待完成。
 星号/keyword的失败顺序参考固定版本[CPython codegen](https://github.com/python/cpython/blob/v3.14.7/Python/codegen.c)；本机stack guideline从header读入并固定SHA。
 
 源码身份桥（按unit分片，保持输入模型和旧ID）：
