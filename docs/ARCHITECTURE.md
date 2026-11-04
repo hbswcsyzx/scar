@@ -55,6 +55,15 @@ F2用官方compile的ONLY_AST|TYPE_COMMENTS，dont_inherit=True、optimize=0及�
 精确literal保IEEE位与代理码点，预算超限不是语法错误；还原使用官方类__new__并逐字段核对。
 语法表不是最终依赖图，也不授予scope合法性；新occurrence身份不冒充旧ast.walk SourceID。
 
+## F4的形式顺序
+
+F4-A先闭合输入/输出结构语法：官方13 ASDL域、113构造/484槽引用，以及canonical IR的205记录/733字段、18 ID、60枚举。
+目录按原类型和字段引用共享；exact shape检查拒未登记子类、伪枚举成员、错误ID、循环值和预算前沿，不生成程序图。
+F4-B再定义`构造×原字段×C1上下文 → 操作家族/有序端口/完成与状态签名`，使用F2/F3原引用，不重解析或按name+line接线。
+Operation.label仍有旧派发消费者、名义类型字符串及分散协议签名，须显式收紧；结构通过不授opcode/效果/变换正确性。
+F4-C最后由已验产生规则生成CFG/SSA及共享区域，并逐项核源码处置、端口、控制/状态和来源；F4通过后才进入F5。
+当前F4-A结构域已验收，F4-B/C尚未完成。`max_visits`只限前置shape遍历；构造器核验复用原验证器，不冒称总步骤预算。
+
 ## F3的形式边界
 
 源码名字/求值角色、compiler block与runtime frame分别表示；三者没有固定一一对应。

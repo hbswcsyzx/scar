@@ -1,7 +1,7 @@
 # 当前状态
 
 **第一阶段未完成。当前按形式阶段重新验收：F0 → F1 → F2 → F3 → F4 → F5 → F6。**
-阶段定义见 [ARCHITECTURE](ARCHITECTURE.md)。F0/F1/F2及F3全部子层和组合已按声明profile与866源范围验收；下一层F4先固定规范IR类型与产生规则，尚未开发。
+阶段定义见 [ARCHITECTURE](ARCHITECTURE.md)。F0/F1/F2及F3全部子层和组合已按声明profile与866源范围验收；F4-A结构类型域已验收，当前F4-B操作签名及产生规则尚未完成。
 现有后层代码及成果保留，但不能代替前端完整性证明。
 
 ## F0：原始材料
@@ -154,10 +154,21 @@ Raw两族3.63秒、solver手写两族0.44秒、存储集成19.08秒、8个关键
 证据：`/var/tmp/scar-f2-recovery-7w7nd_0z/f3d/{fresh/result.json,formal-contract.json,unit-check.json,integration-check.json,query-examples.json}`。
 canonical_model_published=false；原目录只读，材料与当前源码缓冲尚未同步到主工作区。
 
-## 下一层：F4规范IR
+## F4-A结构类型域（已验收；F4整体未完成）
 
-先固定实体、操作、端口和区域的封闭类型及合法连接规则，再逐语法构造生成共享图，检查正常/异常完成、控制/状态和引用守恒。
-已有lowerer须按新前端逐项审查后复用，旧图计数不能当新层通过；F4未验收前不新增F5接线、推理或优化后端。
+输入按13官方ASDL域闭合113构造/484槽，保原F3-B规则引用；输出按canonical late-bind闭合205记录/733字段、18 ID、60枚举/313成员、75有序union。
+可达Any/object/未解类型为0；RECORD/ENUM/ID严格登记，伪造枚举成员、ID payload/prefix、未登记子类均拒；类型递归与值循环分开。
+新`program-types`导出两份共享目录共27,315压缩bytes；采集0.089秒、最终fresh读取0.168秒，输入保持，仅写新验收summary。
+输入2例0.66秒、目标两族1.27秒、唯一目录集成2.06秒通过；预算用惰性遍历，不先铺满大tuple。
+证据：`/var/tmp/scar-f2-recovery-7w7nd_0z/f4a/{materials,verification,source-unit-check.json,target-unit-check.json,material-unit-check.json}`。
+仅证明结构域与本层形状/构造规则；未证明opcode/效果、CFG或全部source lowering。没有运行LeWM或改原图。
+
+## 下一层：F4-B产生规则
+
+先统一操作家族、参数化签名和源码原引用：现core只有label/Behavior，操作语义还散在32源码Opcode、88 PythonProtocol及typed侧表。
+已实证旧generic校验能接受ADD的0/1/3输入且无result（不声称可绕过完整source replay）；label还有cleanup/class/native实际派发消费者，须显式分离。
+旧prepare_source会重parse并按name+line合scope，不能作为新F4权威；迁移时必须消费F2/F3原材料与ID。
+先完成这些形式产生规则，再在F4-C生成/逐项验收共享图；不新增detector、backend或程序变换。
 
 ## 当前模型与已有后层证据
 

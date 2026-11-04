@@ -121,6 +121,17 @@ PYTHONHASHSEED=0 python -B -m scar.cli frontend-check --model /path/to/model \
 `.port/.implicit/.endpoints/.parameter/.why`分别查询原引用，不合并源码namespace与compiler分类。
 endpoint中的KEEP路径显式标记association；query预算耗尽返回incomplete与最多一条frontier及remaining，不当成无依赖。
 
+F4-A共享结构目录（不执行目标、不构造程序实例图）：
+
+```bash
+python -B -m scar.cli program-types --out /path/to/type-materials
+python -B -m scar.cli program-types --materials /path/to/type-materials --out /path/to/fresh-type-check
+```
+
+`program_type_catalog/read_program_type_catalog`保原记录类型、字段语法和实现收据；
+`validate_program_shape(graph,max_visits=...)`核exact名义类型与构造约束，返回cross-record/opcode语义未核标记；完整图仍须后层核验。
+类型图递归用REF表示，值对象循环拒绝；原图和输入目录不改，不存每次迭代数值。
+
 ## 已有建图入口（前端形式验收尚未完成）
 
 ```bash
