@@ -18,7 +18,9 @@ _FIELDS = {'Expr': ('value',), 'Pass': (), 'Assign': ('targets', 'value', 'type_
     'Delete': ('targets',), 'Return': ('value',), 'Global': ('names',), 'Nonlocal': ('names',),
     'If': ('test', 'body', 'orelse'), 'While': ('test', 'body', 'orelse'),
     'For': ('target', 'iter', 'body', 'orelse', 'type_comment'),
-    'AsyncFor': ('target', 'iter', 'body', 'orelse', 'type_comment'), 'Break': (), 'Continue': ()}
+    'AsyncFor': ('target', 'iter', 'body', 'orelse', 'type_comment'), 'Break': (), 'Continue': (),
+    'AugAssign': ('target', 'op', 'value'), 'AnnAssign': ('target', 'annotation', 'value', 'simple'),
+    'Assert': ('test', 'msg'), 'Raise': ('exc', 'cause')}
 
 
 class SourceStatementRules(SourceExpressionRules):
@@ -118,6 +120,10 @@ class _StatementBuilder(_Builder):
             return self.plan(root, source)
         elif kind in ('While', 'For', 'AsyncFor'):
             self.loop_statement(root, current)
+            return self.plan(root, source)
+        elif kind in ('AugAssign', 'AnnAssign', 'Assert', 'Raise'):
+            from scar.analysis.source_statement_atoms import emit_atomic_statement
+            emit_atomic_statement(self, root, current)
             return self.plan(root, source)
         self.finish(root, (current,), (self.world,))
         return self.plan(root, source)

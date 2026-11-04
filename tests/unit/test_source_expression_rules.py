@@ -20,16 +20,6 @@ REF = ValueType(ValueKind.REFERENCE)
 
 @pytest.fixture(scope='module')
 def documents():
-    from scar.analysis.source_bytes import source_bytes_document
-    from scar.analysis.source_tokens import source_tokens_document
-    from scar.analysis.source_syntax import source_syntax_document
-    from scar.analysis.source_roles import source_roles_document
-    from scar.analysis.source_contexts import source_contexts_document
-    from scar.analysis.source_declarations import source_declarations_document
-    from scar.analysis.source_bindings import source_bindings_document
-    from scar.analysis.source_symbols import source_symbols_document
-    from scar.analysis.compiler_topology import compiler_topology_document
-    from scar.analysis.compiler_symbols import compiler_symbols_document
     text = '\n'.join((
         'from __future__ import annotations',
         'arithmetic = left() + right()', 'conditional = yes() if condition() else no()',
@@ -97,7 +87,30 @@ def documents():
         'def structured_statements(source, flag):\n    for item in source:\n        if flag:\n            continue\n            unreachable()\n        elif item:\n            break\n    else:\n        exhausted()\n    while flag:\n        for nested in source:\n            pass\n        else:\n            if flag:\n                continue\n            break\n        flag = update(flag)\n    else:\n        return\n    if flag:\n        return result()\n        unreachable()\n    else:\n        raise Error()',
         'async def structured_async(source):\n    async for item in source:\n        if item:\n            continue\n        break\n    else:\n        return\n    return item',
         'def cleanup_transfer(source):\n    for item in source:\n        try:\n            break\n        finally:\n            return item',
+        *('augmented ' + op + '= right()' for op in ('+', '-', '*', '@', '/', '%', '**', '<<', '>>', '|', '^', '&', '//')),
+        'receiver().member += right()', 'receiver()[index()] += right()',
+        'receiver()[start():stop()] += right()', 'receiver()[1:2] += right()',
+        'receiver()[start():stop():stride()] += right()',
+        'module_annotation: Missing', 'annotated_value: Missing = initial()',
+        'receiver().member: Missing', 'receiver()[start():stop(), index()]: Missing',
+        'def local_annotations():\n    local_only: Missing\n    local_value: Missing = initial()\n    receiver().member: Missing\n    receiver()[start():stop():stride()]: Missing',
+        'assert condition()', 'assert condition(), message()',
+        'def raise_forms():\n    if condition():\n        raise\n    if condition():\n        raise error()\n    raise error() from cause()',
     )) + '\n'
+    return _documents(text)
+
+
+def _documents(text):
+    from scar.analysis.source_bytes import source_bytes_document
+    from scar.analysis.source_tokens import source_tokens_document
+    from scar.analysis.source_syntax import source_syntax_document
+    from scar.analysis.source_roles import source_roles_document
+    from scar.analysis.source_contexts import source_contexts_document
+    from scar.analysis.source_declarations import source_declarations_document
+    from scar.analysis.source_bindings import source_bindings_document
+    from scar.analysis.source_symbols import source_symbols_document
+    from scar.analysis.compiler_topology import compiler_topology_document
+    from scar.analysis.compiler_symbols import compiler_symbols_document
     f0 = source_bytes_document(text.encode(), path='/source/schedules.py', namespace_root='/source')
     f1 = source_tokens_document(f0)
     f2 = source_syntax_document(f0, f1)
@@ -113,6 +126,10 @@ def documents():
 
 @pytest.fixture(scope='module')
 def rules(documents):
+    return _rules(documents)
+
+
+def _rules(documents):
     from scar.analysis.frontend_bindings import read_frontend_bindings
     from scar.analysis.source_context_view import SourceContextView
     from scar.ir.program.source_syntax import SourceSyntaxMaterial
@@ -167,6 +184,8 @@ def test_all_local_families_and_selector_domains_without_reparsing(rules, monkey
     selectors, seen = {}, set()
     for occurrence, node in enumerate(rules.source.context.syntax.nodes):
         if node.constructor not in implemented:
+            continue
+        if rules.descriptor_owner(occurrence) is not None:
             continue
         with monkeypatch.context() as local:
             local.setattr(ast, 'parse', lambda *a, **kw: pytest.fail('source rule reparsed the program'))
@@ -258,6 +277,10 @@ def test_comparison_carries_middle_operand_once_and_returns_rich_result(rules):
 def test_targets_slice_holes_frontiers_and_budgets(rules):
     for kind in ('Name', 'Attribute', 'Subscript'):
         for occurrence in occurrences(rules, kind):
+            if rules.descriptor_owner(occurrence) is not None:
+                with pytest.raises(SourceRuleError, match='PARENT_OWNED_SOURCE'):
+                    rules.build(occurrence, purpose(rules, occurrence))
+                continue
             context = rules.source.context.entry_context(occurrence)
             if rules.source.context.material.regions[context.region].eligibility == 'SUPPRESSED':
                 with pytest.raises(SourceRuleError, match='SUPPRESSED_SOURCE'):
@@ -665,7 +688,7 @@ def test_delegation_keeps_send_and_post_driver_completion_paths_separate(rules, 
             plan = variant.build(occurrence)
             checked = variant.verify(plan)
             assert not checked['native_delegation_expanded'] and not checked['driver_protocol_graph_generated']
-            assert plan.schema_version == 6
+            assert plan.schema_version == 7
             _, root_steps = owned(plan)
             acquire = next(s for s in root_steps if type(s.instruction) is P.ApplyDelegationProtocol)
             assert acquire.instruction.protocol is (P.DelegationProtocolKind.AWAITABLE_ITER if constructor == 'Await'
@@ -899,7 +922,7 @@ def test_structured_statement_rules_preserve_source_fields_and_completion_interf
     statements = SourceStatementRules(rules.source, world=WORLD, exception_abi=ExceptionABI.EXCEPTION_WORLD)
     supported = {r['constructor'] for r in statements.catalog()['rules'] if r['status'] == 'LOCAL_STATEMENT_RULE'}
     assert supported == {'Expr','Pass','Assign','Delete','Return','Global','Nonlocal',
-        'If','While','For','AsyncFor','Break','Continue'}
+        'If','While','For','AsyncFor','Break','Continue','AnnAssign','AugAssign','Assert','Raise'}
     seen = set()
     for occurrence, node in enumerate(rules.source.context.syntax.nodes):
         if node.constructor not in supported:continue
@@ -992,3 +1015,100 @@ def test_statement_control_templates_preserve_source_targets_and_completion_boun
     tried = occurrences(rules, 'Try')[0]
     interface = rules.source.statements.completions(tried)
     assert {kind for kind, _ in interface} == {C.RETURN, C.RAISE}
+
+
+def test_atomic_statement_addresses_world_and_terminal_completions(rules):
+    from scar.analysis.source_statement_rules import SourceStatementRules
+    from scar.ir.program.control import LanguageCompletionKind as C
+    from scar.ir.program.structured import PythonProtocolKind as K
+    operators = set()
+    for abi in ExceptionABI:
+        statements = SourceStatementRules(rules.source, world=WORLD, exception_abi=abi)
+        for occurrence in occurrences(rules, 'AugAssign'):
+            plan = statements.build(occurrence)
+            statements.verify(plan)
+            _, steps = owned(plan)
+            inplace = next(s for s in steps if type(s.instruction) is P.ApplyInplaceOperator)
+            selector = rules.source.roles.locate(inplace.instruction.operator)[1].reference
+            operators.add(rules.source.context.syntax.nodes[selector].constructor)
+            target = rules.source.roles.field(occurrence, 'target').reference
+            assert rules.descriptor_owner(target) is not None
+            with pytest.raises(SourceRuleError, match='PARENT_OWNED_SOURCE'):
+                rules.build(target, P.ProductionPurpose.STORE)
+            evaluations = [s for s in steps if type(s.instruction) is P.EvaluateChild]
+            assert sum(s.instruction.field == P.SlotRef(occurrence, 'FIELD', rules.source.roles.fields['AugAssign']['value']) for s in evaluations)==1
+            assert not any(s.instruction.field == P.SlotRef(occurrence, 'FIELD', rules.source.roles.fields['AugAssign']['target']) for s in evaluations)
+            if rules.source.context.syntax.nodes[target].constructor == 'Name':
+                accesses = [s for s in steps if type(s.instruction) is P.AccessBinding]
+                assert [s.instruction.action for s in accesses] == [P.BindingActionKind.READ, P.BindingActionKind.WRITE]
+                assert accesses[0].instruction.port == accesses[1].instruction.port
+            else:
+                receiver = P.SlotRef(target, 'FIELD', rules.source.roles.fields[rules.source.context.syntax.nodes[target].constructor]['value'])
+                assert sum(s.instruction.field == receiver for s in evaluations)==1
+            sliced = [s for s in steps if type(s.instruction) is P.ApplyPythonProtocol and s.instruction.protocol is K.STORE_SLICE]
+            if sliced:
+                assert sliced[0].arguments[0] == P.ProductionResult(inplace.id, 0)
+        for occurrence in occurrences(rules, 'Raise'):
+            plan = statements.build(occurrence)
+            root, steps = owned(plan)
+            assert {c.kind for c in root.completions} == {C.RAISE}
+            evaluations = [s for s in steps if type(s.instruction) is P.EvaluateChild]
+            assert [field_name(rules, s.instruction.field) for s in evaluations] in ([], ['exc'], ['exc','cause'])
+            assert steps[-1].instruction == P.TransferCompletion(C.RAISE)
+            assert steps[-1].completions[0].types == statements.raised
+        for occurrence in occurrences(rules, 'Assert'):
+            plan = statements.build(occurrence)
+            root, steps = owned(plan)
+            assert type(steps[0].instruction) is P.ReadCompilationOption
+            enabled = next(s for s in steps if type(s.instruction) is P.BranchControl).instruction.on_true.region
+            _, enabled_steps = owned(plan, enabled)
+            truth = next(s for s in enabled_steps if type(s.instruction) is P.ApplyLanguageAction and s.instruction.action is P.LanguageActionKind.TRUTH)
+            branch = next(s for s in enabled_steps if type(s.instruction) is P.BranchControl)
+            assert branch.instruction.on_true.arguments == branch.instruction.on_false.arguments == (P.ProductionResult(truth.id, 1),)
+            for step in plan.steps:
+                if type(step.instruction) is P.EvaluateChild and field_name(rules, step.instruction.field)=='msg':
+                    assert step.region == branch.instruction.on_false.region
+    assert len(operators)==13
+
+
+def test_annotation_phases_and_compilation_options_are_static_not_runtime_guesses(rules):
+    import dis
+    from scar.analysis.source_statement_rules import SourceStatementRules
+    from scar.ir.program.structured import PythonProtocolKind as K
+    for selected in (rules, _rules(_documents('module: Missing\nif condition:\n    conditional: Missing\nclass C:\n    plain: Missing\n    if condition:\n        conditional: Missing\n    with_value: Missing = initial()\n    def method(self):\n        local: Missing\n'))):
+        statements = SourceStatementRules(selected.source, world=WORLD, exception_abi=ExceptionABI.EXCEPTION_WORLD)
+        publications = []
+        for occurrence in occurrences(selected, 'AnnAssign'):
+            plan = statements.build(occurrence)
+            statements.verify(plan)
+            published = [s.instruction for s in plan.steps if type(s.instruction) is P.PublishAnnotation]
+            publications.extend(published)
+            assert not any(type(s.instruction) is P.EvaluateChild and field_name(selected,s.instruction.field)=='annotation' for s in plan.steps)
+            if selected.source.roles.field(occurrence, 'value').kind != 'NODE':
+                assert not any(type(s.instruction) is P.AccessBinding for s in plan.steps)
+                assert not any(type(s.instruction) is P.ApplyLanguageAction and s.instruction.action in (
+                    P.LanguageActionKind.ATTRIBUTE_GET,P.LanguageActionKind.ATTRIBUTE_SET,
+                    P.LanguageActionKind.ITEM_GET,P.LanguageActionKind.ITEM_SET) for s in plan.steps)
+                for step in plan.steps:
+                    if type(step.instruction) is P.EvaluateChild:
+                        child = selected.source.roles.locate(step.instruction.field)[1].reference
+                        assert selected.source.context.syntax.nodes[child].constructor not in ('Slice','Tuple')
+        assert publications
+        if selected is rules:
+            assert all(p.publication is P.AnnotationPublicationKind.STRINGIZED for p in publications)
+        else:
+            assert all(p.publication is P.AnnotationPublicationKind.DEFERRED for p in publications)
+            choices = [(selected.source.roles.locate(p.name)[1].scalar.to_python(),p.conditional_registration) for p in publications]
+            assert sorted(choices) == sorted([('module',True),('conditional',True),('plain',False),('conditional',True),('with_value',False)])
+    # Compile-only oracle: optimization selects whether assert work exists;
+    # analyzer flags must not silently decide the target's compilation option.
+    for optimize in (0,1,2):
+        code=compile('assert condition(), message()', '<static-assert-oracle>', 'exec', dont_inherit=True, optimize=optimize)
+        instructions=list(dis.get_instructions(code))
+        assert any(s.opname=='RAISE_VARARGS' for s in instructions) == (optimize==0)
+        assert ('condition' in code.co_names) == (optimize==0)
+    augmented=compile('receiver()[start():stop()] += right()', '<static-augmented-oracle>', 'exec', dont_inherit=True)
+    instructions=list(dis.get_instructions(augmented))
+    assert [s.argval for s in instructions if s.opname=='LOAD_NAME'] == ['receiver','start','stop','right']
+    assert sum(s.opname=='BINARY_SLICE' for s in instructions)==1
+    assert sum(s.opname=='STORE_SLICE' for s in instructions)==1

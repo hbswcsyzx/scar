@@ -146,7 +146,7 @@ def validate_production_plan(plan, *, max_visits=1_000_000):
     """
     visits = _shape(plan, max_visits)
     _require((plan.schema, plan.schema_version, plan.authority) == (
-        'scar.source-production-plan', 6, 'SOURCE_RECIPE_SHAPE_ONLY'),
+        'scar.source-production-plan', 7, 'SOURCE_RECIPE_SHAPE_ONLY'),
         'SCHEMA', 'plan', 'unsupported recipe schema or authority')
     source = plan.input
     _require(bool(source.path) and bool(source.namespace_root), 'INPUT', 'plan.input', 'source paths must be nonempty')
@@ -304,6 +304,22 @@ def validate_production_plan(plan, *, max_visits=1_000_000):
                         ((reference, args[0]),) if kind is C.RETURN else ((args[0],),))
                     _require(types in accepted,
                         'PORT_TYPES', str(identity), 'statement completion payload differs from its world/exception interface')
+            elif type(instruction) is P.ReadCompilationOption:
+                _require(not args and outputs == {(C.FALLTHROUGH, None): (ValueType(ValueKind.DATA, 'builtins.bool'),)},
+                    'COMPILATION_OPTION', str(identity), 'compilation option produces only one symbolic boolean')
+            elif type(instruction) in (P.ApplyInplaceOperator, P.PublishAnnotation):
+                _require(bool(args) and type(args[-1]) is ValueType and args[-1].kind is ValueKind.STATE,
+                    'PORT_TYPES', str(identity), 'source protocol requires an explicit world')
+                world, reference = args[-1], ValueType(ValueKind.REFERENCE)
+                inplace = type(instruction) is P.ApplyInplaceOperator
+                _require(args == ((reference, reference, world) if inplace else (world,)),
+                    'PORT_TYPES', str(identity), 'source protocol argument interface differs')
+                expected = {(C.FALLTHROUGH, None): (reference, world) if inplace else (world,)}
+                may_raise = inplace or instruction.publication is P.AnnotationPublicationKind.STRINGIZED or instruction.conditional_registration
+                if may_raise:
+                    expected[(C.RAISE, None)] = ((reference, world) if instruction.exception_abi is ExceptionABI.EXCEPTION_WORLD
+                        else (reference, reference, world))
+                _require(outputs == expected, 'PORT_TYPES', str(identity), 'source protocol completion interface differs')
             elif type(instruction) is P.AccessBinding:
                 _require(instruction.port >= 0, 'SOURCE_PORT', str(identity), 'source port must be nonnegative')
             elif type(instruction) is P.ApplyPythonProtocol:
@@ -630,6 +646,20 @@ class ProductionSourceIndex:
                             and {(c.kind, c.target) for c in step.completions}
                                 == set(self.statements.completions(value.reference)),
                             'STATEMENT_INTERFACE', str(step.id), 'statement child must retain its source completion obligations')
+                elif type(instruction) is P.ApplyInplaceOperator:
+                    site = instruction.operator
+                    _, value = self.roles.locate(site)
+                    _require(site.group == 'FIELD' and not site.item_path
+                        and step.source == P.ProductionOccurrence(site.occurrence)
+                        and self.context.syntax.nodes[site.occurrence].constructor == 'AugAssign'
+                        and site.ordinal == self.roles.fields['AugAssign']['op'] and value.kind == 'NODE'
+                        and self.context.syntax.nodes[value.reference].constructor in ('Add', 'Sub', 'Mult', 'MatMult',
+                            'Div', 'Mod', 'Pow', 'LShift', 'RShift', 'BitOr', 'BitXor', 'BitAnd', 'FloorDiv'),
+                        'SOURCE_OPERATOR', str(step.id), 'inplace operator must retain its original AugAssign selector')
+                elif type(instruction) is P.PublishAnnotation:
+                    _require(type(step.source) is P.ProductionOccurrence
+                        and instruction == self.statements.annotation_publication(step.source.occurrence, instruction.exception_abi),
+                        'SOURCE_ANNOTATION', str(step.id), 'annotation publication differs from original scope/phase/name')
                 elif type(instruction) is P.LoopControl and instruction.source_loop is not None:
                     target = instruction.source_loop.occurrence
                     _require(0 <= target < len(self.context.syntax.nodes)

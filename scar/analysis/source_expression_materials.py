@@ -48,7 +48,7 @@ def _implementation():
         'analysis/source_delegation_rules.py', 'ir/program/delegation_signatures.py',
         'analysis/source_statement_interfaces.py',
         'analysis/source_callable_rules.py', 'analysis/source_deferred_interfaces.py',
-        'analysis/source_statement_rules.py',
+        'analysis/source_statement_rules.py', 'analysis/source_statement_atoms.py',
         'analysis/source_productions.py', 'analysis/program_types.py',
         'ir/program/source_productions.py', 'ir/record_codec.py')
     return {name: sha256((package / name).read_bytes()).hexdigest() for name in names}
@@ -130,6 +130,8 @@ def _unit(task):
                         if type(step.instruction) is P.EvaluateChild:
                             selected = rules.source.roles.locate(step.instruction.field)[1]
                             child_obligations[syntax.nodes[selected.reference].constructor] += 1
+                        elif type(step.instruction) is P.PublishAnnotation and step.instruction.publication is P.AnnotationPublicationKind.DEFERRED:
+                            child_obligations['ANNOTATION_REQUEST'] += 1
                 except SourceRuleError as error:
                     if error.code not in _FRONTIERS:
                         raise

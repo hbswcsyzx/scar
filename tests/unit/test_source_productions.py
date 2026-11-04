@@ -55,9 +55,10 @@ def test_closed_grammar_exact_records_strict_codec_and_budgets():
     assert summary['control_semantics_checked'] is False
     assert A.read_production_plan(A.production_plan_document(value)) == value
     catalog = A.production_type_catalog()
-    assert catalog['counts'] == dict(records=47, fields=130, identifiers=4, enums=16, enum_members=207, unions=16)
+    assert catalog['counts'] == dict(records=50, fields=138, identifiers=4, enums=18, enum_members=210, unions=16)
     assert set(catalog['instruction_variants']) == {
-        'EvaluateChild', 'ApplyLanguageAction', 'ApplyPythonProtocol', 'ApplyDelegationProtocol', 'AccessBinding', 'ConstructValue', 'DefineLiteral', 'ApplyRegion',
+        'EvaluateChild', 'ApplyLanguageAction', 'ReadCompilationOption', 'ApplyInplaceOperator', 'PublishAnnotation',
+        'ApplyPythonProtocol', 'ApplyDelegationProtocol', 'AccessBinding', 'ConstructValue', 'DefineLiteral', 'ApplyRegion',
         'BranchControl', 'LoopControl', 'DeferRegion', 'ReferenceEnvironment', 'EnterDeferredBody', 'CleanupControl', 'HandleCompletions',
         'TransferCompletion', 'SuspendExecution'}
     assert A.read_production_type_catalog(deepcopy(catalog)) == catalog
@@ -81,6 +82,41 @@ def test_closed_grammar_exact_records_strict_codec_and_budgets():
         A.read_production_plan(cyclic)
     with pytest.raises(A.ProductionError, match='BUDGET_FRONTIER'):
         A.read_production_plan([0] * 10_000, max_visits=4)
+
+
+def test_compilation_inplace_and_annotation_interfaces_are_explicit_and_closed():
+    from scar.ir.program.ids import LocationID
+    from scar.ir.program.protocol_signatures import ExceptionABI
+    world = ValueType(ValueKind.STATE, location=LocationID('atomic-interface-world'))
+    for abi in ExceptionABI:
+        raised = (REF, world) if abi is ExceptionABI.EXCEPTION_WORLD else (REF, REF, world)
+        for instruction in (P.ApplyInplaceOperator(P.SlotRef(0, 'FIELD', 0), abi),
+                P.PublishAnnotation(P.SlotRef(0, 'FIELD', 0), P.SlotRef(1, 'FIELD', 0),
+                    P.AnnotationPublicationKind.DEFERRED, False, abi),
+                P.PublishAnnotation(P.SlotRef(0, 'FIELD', 0), P.SlotRef(1, 'FIELD', 0),
+                    P.AnnotationPublicationKind.DEFERRED, True, abi),
+                P.PublishAnnotation(P.SlotRef(0, 'FIELD', 0), P.SlotRef(1, 'FIELD', 0),
+                    P.AnnotationPublicationKind.STRINGIZED, False, abi)):
+            inplace = type(instruction) is P.ApplyInplaceOperator
+            parameters = (REF, REF, world) if inplace else (world,)
+            result = (REF, world) if inplace else (world,)
+            may_raise = inplace or instruction.publication is P.AnnotationPublicationKind.STRINGIZED or instruction.conditional_registration
+            outputs = (*normal(*result), *((P.ProductionCompletion(C.RAISE, raised),) if may_raise else ()))
+            root = region('root', parameters=parameters, outputs=outputs, steps=('apply', 'done'))
+            apply = step('apply', root, instruction, tuple(parameter(root, i) for i in range(len(parameters))), outputs)
+            done = step('done', root, P.TransferCompletion(C.FALLTHROUGH),
+                tuple(P.ProductionResult(apply.id, i) for i in range(len(result))), normal(*result))
+            specimen = plan((root,), (apply, done))
+            A.validate_production_plan(specimen)
+            assert A.read_production_plan(A.production_plan_document(specimen)) == specimen
+            with pytest.raises(A.ProductionError, match='PORT_TYPES'):
+                A.validate_production_plan(replace(specimen, steps=(replace(apply, arguments=()), done)))
+    root = region('option', parameters=(), outputs=normal(BOOL), steps=('read',))
+    read = step('read', root, P.ReadCompilationOption(P.CompilationOption.ASSERTIONS_ENABLED), (), normal(BOOL))
+    A.validate_production_plan(plan((root,), (read,)))
+    with pytest.raises(A.ProductionError, match='COMPILATION_OPTION'):
+        A.validate_production_plan(plan((replace(root, parameters=(world,)),),
+            (replace(read, arguments=(parameter(root),)),)))
 
 
 def test_ordered_values_shared_subregion_and_invalid_local_edges():

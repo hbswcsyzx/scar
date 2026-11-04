@@ -48,6 +48,7 @@ F2语法输入按F0/F1收据、parser profile和局部occurrence ID定位；字�
 循环外引用可以指向可变对象；引用不变不能证明对象内容跨迭代不变。
 初始化输入、循环携带值、迭代局部值和退出值须沿原端口区分。
 F4-B source recipe另以原F2 `SourceLoopTarget`连接局部子图的break/continue端口；对应共享循环消费自己的跳转，耗尽与break分开连接else/后继。suite只沿正常完成接下一语句。语句may-completion上界、局部产生规则与最终CFG/SSA是三种不同的证明范围；iterator引用不变不授内容不变或引用释放时序证明。
+编译条件与运行状态也分开：`ReadCompilationOption`保目标的符号编译事实，不读取分析进程flags冒充目标事实。注解的声明、字符串化发布与后续请求沿原C1求值阶段连接；deferred来源不等于声明时已求出值。增强赋值的地址/读/运算/写由同一父语句安排，不能当作两次独立地址求值。
 区域 cut 查询列出已有跨边界依赖，不自动证明可外提、复用、删除或整体替换。
 见 [公共依赖查询](../scar/analysis/program_dependencies.py) 与 [边界分析](../scar/analysis/program_regions.py)。
 

@@ -59,7 +59,7 @@ _SELECTORS = {
 _TARGETS = frozenset(('Name', 'Attribute', 'Subscript', 'List', 'Tuple'))
 _RULE_MODULES = ('source_display_rules.py', 'source_string_rules.py', 'source_comprehension_rules.py',
                  'source_suspension_rules.py', 'source_delegation_rules.py', 'source_callable_rules.py',
-                 'source_deferred_interfaces.py')
+                 'source_deferred_interfaces.py', 'source_statement_atoms.py')
 
 
 class SourceRuleError(ProductionError):
@@ -131,6 +131,16 @@ class SourceExpressionRules:
                     [dict(constructor='arguments', field=p, owner='Lambda.args') for p in (
                         'posonlyargs', 'args', 'vararg', 'kwonlyargs', 'kwarg')] if row.name == 'arg' else
                     [dict(constructor='Call', field='keywords')] if row.name == 'keyword' else [])))
+            if row.name in ('Name', 'Attribute', 'Subscript'):
+                rows[-1]['parent_contexts'].extend((
+                    dict(constructor='AugAssign', field='target', condition='READ_MODIFY_WRITE_ADDRESS'),
+                    dict(constructor='AnnAssign', field='target', condition='DECLARATION_WITHOUT_RHS')))
+            elif row.name in ('Slice', 'Tuple'):
+                rows[-1]['parent_contexts'].append(dict(constructor='Subscript', field='slice',
+                    owner='AnnAssign.target', condition='DECLARATION_COMPONENT_CHECKS_WITHOUT_RHS'))
+                if row.name == 'Slice':
+                    rows[-1]['parent_contexts'].append(dict(constructor='Subscript', field='slice',
+                        owner='AugAssign.target', condition='NON_CONSTANT_TWO_PART_SLICE'))
         return dict(schema='scar.source-expression-rule-catalog', schema_version=1,
             source_schema_sha256=self.source.roles.catalog.f2_schema_sha256,
             recipe_type_catalog_sha256=production_type_catalog()['content_sha256'],
@@ -149,12 +159,29 @@ class SourceExpressionRules:
         _require(type(occurrence) is int and 0 <= occurrence < len(syntax.nodes), 'SOURCE_REFERENCE',
                  'occurrence', 'expected an original descriptor occurrence')
         node = syntax.nodes[occurrence]
-        if node.constructor not in _AUX_FIELDS:
-            return None
         site = self.source.roles.parents.get(occurrence)
         if site is None:
             return None
         parent = syntax.nodes[site.occurrence].constructor
+        if node.constructor in ('Name', 'Attribute', 'Subscript'):
+            if parent == 'AugAssign' and site.ordinal == self.source.roles.fields[parent]['target']:
+                return site
+            if parent == 'AnnAssign' and site.ordinal == self.source.roles.fields[parent]['target']:
+                return site if self.source.roles.field(site.occurrence, 'value').kind != 'NODE' else None
+        if node.constructor in ('Slice', 'Tuple'):
+            outer = site
+            while syntax.nodes[outer.occurrence].constructor == 'Tuple' and self.source.roles.locate(outer)[0].name == 'elts':
+                outer = self.source.roles.parents[outer.occurrence]
+            if syntax.nodes[outer.occurrence].constructor == 'Subscript' and self.source.roles.locate(outer)[0].name == 'slice':
+                target = self.source.roles.parents.get(outer.occurrence)
+                if target is not None and self.source.roles.locate(target)[0].name == 'target':
+                    statement = syntax.nodes[target.occurrence].constructor
+                    if statement == 'AnnAssign' and self.source.roles.field(target.occurrence, 'value').kind != 'NODE':
+                        return site
+                    if statement == 'AugAssign' and node.constructor == 'Slice' and outer == site and self.source.statements.two_part_slice(occurrence):
+                        return site
+        if node.constructor not in _AUX_FIELDS:
+            return None
         if node.constructor == 'arguments':
             return site if parent == 'Lambda' and site.ordinal == self.source.roles.fields['Lambda']['args'] else None
         if node.constructor == 'arg':
@@ -181,6 +208,8 @@ class SourceExpressionRules:
         constructor = syntax.nodes[occurrence].constructor
         _require(constructor in _FIELDS, 'RULE_FRONTIER', str(occurrence),
                  'no local expression rule implemented for ' + constructor)
+        _require(self.descriptor_owner(occurrence) is None, 'PARENT_OWNED_SOURCE', str(occurrence),
+            'target address/read/write schedule belongs to its original parent statement')
         _require(purpose is P.ProductionPurpose.VALUE or constructor in _TARGETS and purpose in (
             P.ProductionPurpose.STORE, P.ProductionPurpose.DELETE), 'PURPOSE_FRONTIER', str(occurrence),
             'constructor has no rule for this purpose')
@@ -205,6 +234,7 @@ class SourceExpressionRules:
             driver_admission_proven=False, resume_state_origin_proven=False, frame_context_lifetime_proven=False,
             native_delegation_expanded=False, driver_protocol_graph_generated=False,
             argument_admission_proven=False, closure_layout_proven=False, environment_activation_proven=False,
+            compilation_options_resolved=False, annotation_request_bodies_lowered=False,
             effects_proven=False, canonical_graph_generated=False, transformation_authorized=False)
 
 

@@ -140,6 +140,15 @@ class DeferredBodyKind(str, Enum):
     ASYNC_GENERATOR = 'ASYNC_GENERATOR'
 
 
+class CompilationOption(str, Enum):
+    ASSERTIONS_ENABLED = 'ASSERTIONS_ENABLED'
+
+
+class AnnotationPublicationKind(str, Enum):
+    STRINGIZED = 'STRINGIZED'
+    DEFERRED = 'DEFERRED'
+
+
 class DeferredParameterKind(str, Enum):
     POSITIONAL_ONLY = 'POSITIONAL_ONLY'
     POSITIONAL_OR_KEYWORD = 'POSITIONAL_OR_KEYWORD'
@@ -220,6 +229,35 @@ class EvaluateChild:
 class ApplyLanguageAction:
     action: LanguageActionKind
     selectors: tuple[SlotRef, ...] = ()
+
+
+@dataclass(frozen=True, slots=True)
+class ReadCompilationOption:
+    """A symbolic target compilation fact, not an analyzer/runtime probe."""
+    option: CompilationOption
+
+
+@dataclass(frozen=True, slots=True)
+class ApplyInplaceOperator:
+    operator: SlotRef
+    exception_abi: ExceptionABI
+
+
+@dataclass(frozen=True, slots=True)
+class PublishAnnotation:
+    """Retain a source annotation without eagerly evaluating its expression.
+
+    A deferred entry belongs to the original C1 annotation scope. Registering
+    an unconditional class annotation is compile metadata; conditional class
+    and all module annotations also record that this declaration was reached.
+    Stringized publication instead writes the compiled string immediately.
+    These are logical publication operations, not expanded native helpers.
+    """
+    annotation: SlotRef
+    name: SlotRef
+    publication: AnnotationPublicationKind
+    conditional_registration: bool
+    exception_abi: ExceptionABI
 
 
 @dataclass(frozen=True, slots=True)
@@ -415,7 +453,8 @@ class SuspendExecution:
     delegate: ProductionValue | None = None
 
 
-ProductionInstruction = (EvaluateChild | ApplyLanguageAction | ApplyPythonProtocol | ApplyDelegationProtocol | AccessBinding | ConstructValue | DefineLiteral
+ProductionInstruction = (EvaluateChild | ApplyLanguageAction | ReadCompilationOption | ApplyInplaceOperator | PublishAnnotation
+    | ApplyPythonProtocol | ApplyDelegationProtocol | AccessBinding | ConstructValue | DefineLiteral
     | ApplyRegion | BranchControl | LoopControl | DeferRegion | ReferenceEnvironment | EnterDeferredBody | CleanupControl
     | HandleCompletions | TransferCompletion | SuspendExecution)
 
@@ -458,7 +497,7 @@ class SourceProductionPlan:
     steps: tuple[ProductionStep, ...]
     slots: tuple[ProductionSlotDisposition, ...]
     schema: str = 'scar.source-production-plan'
-    schema_version: int = 6
+    schema_version: int = 7
     authority: str = 'SOURCE_RECIPE_SHAPE_ONLY'
 
 
