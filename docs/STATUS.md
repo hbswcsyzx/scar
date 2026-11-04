@@ -142,15 +142,15 @@ Raw两族3.63秒、solver手写两族0.44秒、存储集成19.08秒、8个关键
 证据：`/var/tmp/scar-f2-recovery-7w7nd_0z/f3c3s/{materials,verification,symbol-agreement.json,anchor-agreement.json,proof-query-examples.json,run.json}`。
 输入及原model保持，canonical_model_published=false、runtime_binding=NOT_OBSERVED、runtime_local_layout=NOT_CLAIMED。
 
-## 下一层
+## 当前层：F3-D组合验收（未通过）
 
-下一层完成F3-D逐源名字端口/绑定/编译器投影的组合验收，再进入F4规范IR。
-形式输入、输出和分母见ARCHITECTURE。C2已按声明范围验收；C3-T/S已按声明范围验收，F3-D组合验收尚未完成；不靠动态观测修补缺静态规则，随后F3-D全量验收。
-旧15个公开标志已全存，349组name+line冲突及内联/annotation共享证明不能据此直接接AST。
-字段角色和source/compiled/runtime三种scope必须分开，F3通过后才进入F4；不增加优化backend。
-先前审计及LibCST能力反例保存在`f3-audit/`；现成库仅按已验证能力使用。
-
-
+本轮仅收紧形式合同并补审原材料，不新增F4或优化功能。
+保存材料的866源审计已逐项核563,522原端口，其中392,706有名字贡献、170,816无贡献；0异常。
+8,375隐式需求按闭规则匹配：855 SUPER、48 conditional、7,472 class annotation；193 future模板明确无raw事件。
+另6,891条class-dict事件来自原synthetic header，不制造源码端口。3,109条COPY/KEEP路由最长2跳；KEEP不授flags因果。
+证据与固定合同在`/var/tmp/scar-f2-recovery-7w7nd_0z/f3d/`，本轮为保存材料交叉审计，不是strict fresh组合通过。
+尚缺：复用原引用的typed组合查询、独立规则分支验收、866源strict fresh组合及输入保持收据。
+三项完成前F4冻结；实现规则缺失不能转成UNKNOWN，真实运行值未知不抹去已知结构。
 
 ## 当前模型与已有后层证据
 
