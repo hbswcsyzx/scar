@@ -246,13 +246,21 @@ class IterationCondition:
 
 
 @dataclass(frozen=True, slots=True)
+class RepeatCondition:
+    """Unconditional backedge until an explicit body completion exits.
+
+    This is control structure, not an invented evaluation of literal True.
+    """
+
+
+@dataclass(frozen=True, slots=True)
 class LoopControl:
     """One loop template, with invariant prefix and carried suffix input ports.
 
     Condition/body receive both groups. Only carried values return along the
     backedge; invariants stay connected to the original loop inputs.
     """
-    condition: ProductionRegionID | IterationCondition
+    condition: ProductionRegionID | IterationCondition | RepeatCondition
     body: ProductionRegionID
     otherwise: ProductionRegionID | None = None
     invariant_count: int = 0
@@ -372,5 +380,5 @@ PRODUCTION_RECORD_TAGS = {cls: ('record_kind', cls.__name__) for cls in (
     ProductionOccurrence, SlotRef, ProductionParameter, ProductionResult,
     EvaluateChild, ApplyLanguageAction, ApplyPythonProtocol, ApplyDelegationProtocol, AccessBinding, ConstructValue, DefineLiteral, ApplyRegion,
     BranchControl, LoopControl, DeferRegion, CleanupControl, HandleCompletions,
-    TransferCompletion, SuspendExecution, ProductionResumeRoute, IterationCondition,
+    TransferCompletion, SuspendExecution, ProductionResumeRoute, IterationCondition, RepeatCondition,
     CountBinding, ChoiceBinding, TypeBinding, TypesBinding)}

@@ -199,7 +199,8 @@ def validate_production_plan(plan, *, max_visits=1_000_000):
 
     def completions(rows, owner, path):
         result = {}
-        _require(bool(rows), 'COMPLETION', path, 'declare at least one completion')
+        # An empty interface declares no eventual completion, e.g. an
+        # unconditional continue loop. It is not a fabricated return edge.
         for row in rows:
             key = row.kind, row.target
             _require(key not in result, 'COMPLETION', path, 'duplicate completion kind/target')
@@ -365,6 +366,15 @@ def validate_production_plan(plan, *, max_visits=1_000_000):
                                      'LOOP_INTERFACE', str(identity), 'break and otherwise result interfaces differ')
                             escaped[(C.FALLTHROUGH, None)] = carried
                     _require(outputs == escaped, 'LOOP_INTERFACE', str(identity), 'iterator loop dropped or invented a completion')
+                elif type(instruction.condition) is P.RepeatCondition:
+                    _require(body.parameters == region.parameters and instruction.otherwise is None,
+                        'LOOP_INTERFACE', str(identity), 'unconditional repetition has no condition/otherwise evaluation')
+                    escaped = {key: types for key, types in region_outputs[body.id].items() if key not in (
+                        (C.FALLTHROUGH, None), (C.BREAK, region.id), (C.CONTINUE, region.id))}
+                    if (C.BREAK, region.id) in region_outputs[body.id]:
+                        escaped[(C.FALLTHROUGH, None)] = carried
+                    _require(outputs == escaped, 'LOOP_INTERFACE', str(identity),
+                        'unconditional loop may complete normally only through its body break')
                 else:
                     condition = child(instruction.condition, P.ProductionRegionKind.LOOP_CONDITION)
                     _require(condition.parameters == body.parameters == region.parameters,

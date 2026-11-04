@@ -55,7 +55,7 @@ def test_closed_grammar_exact_records_strict_codec_and_budgets():
     assert summary['control_semantics_checked'] is False
     assert A.read_production_plan(A.production_plan_document(value)) == value
     catalog = A.production_type_catalog()
-    assert catalog['counts'] == dict(records=39, fields=112, identifiers=4, enums=14, enum_members=193, unions=11)
+    assert catalog['counts'] == dict(records=40, fields=112, identifiers=4, enums=14, enum_members=193, unions=11)
     assert set(catalog['instruction_variants']) == {
         'EvaluateChild', 'ApplyLanguageAction', 'ApplyPythonProtocol', 'ApplyDelegationProtocol', 'AccessBinding', 'ConstructValue', 'DefineLiteral', 'ApplyRegion',
         'BranchControl', 'LoopControl', 'DeferRegion', 'CleanupControl', 'HandleCompletions',
@@ -263,6 +263,21 @@ def test_loop_template_carries_ports_without_iterations_or_cross_region_value_ed
         step('defer', outer, P.DeferRegion(deferred.id), (parameter(outer),), normal(REF)),
         step('later_return', deferred, P.TransferCompletion(C.FALLTHROUGH), (parameter(deferred),))))
     assert A.validate_production_plan(delayed)['regions'] == 2
+
+
+def test_unconditional_loop_has_no_invented_predicate_or_normal_exit():
+    loop = region('loop', kind=P.ProductionRegionKind.LOOP, outputs=(), steps=('drive',))
+    backedge = P.ProductionCompletion(C.CONTINUE, (INT,), loop.id)
+    body = region('body', parent=loop.id, kind=P.ProductionRegionKind.LOOP_BODY,
+        outputs=(backedge,), steps=('continue',))
+    drive = step('drive', loop, P.LoopControl(P.RepeatCondition(), body.id), (parameter(loop),), ())
+    jump = step('continue', body, P.TransferCompletion(C.CONTINUE, loop.id), (parameter(body),), (backedge,))
+    value = plan((loop, body), (drive, jump))
+    assert A.read_production_plan(A.production_plan_document(value)) == value
+    assert A.validate_production_plan(value)['steps'] == 2
+    with pytest.raises(A.ProductionError, match='LOOP_INTERFACE'):
+        A.validate_production_plan(replace(value, regions=(replace(loop, completions=normal(INT)), body),
+            steps=(replace(drive, completions=normal(INT)), jump)))
 
 
 def test_exception_payload_enters_handler_ports_instead_of_normal_value_edges():
