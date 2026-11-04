@@ -403,6 +403,53 @@ class DeferredEnvironment:
 
 
 @dataclass(frozen=True, slots=True)
+class FunctionAnnotationEntry:
+    parameter: SlotRef | None
+    name: str
+    value: SlotRef
+
+
+@dataclass(frozen=True, slots=True)
+class FunctionAnnotationInterface:
+    scope: int
+    captures: tuple[int, ...]
+    entries: tuple[FunctionAnnotationEntry, ...]
+    stringized: bool
+
+
+@dataclass(frozen=True, slots=True)
+class BuildFunctionAnnotations:
+    """Create the later annotation-request callable, without evaluating values."""
+    annotations: FunctionAnnotationInterface
+    exception_abi: ExceptionABI
+
+
+@dataclass(frozen=True, slots=True)
+class BuildFunction:
+    """Code/globals, defaults, source captures, optional annotate callable, world.
+
+    Source-order formal/default metadata is not a physical MAKE_FUNCTION ABI.
+    A docstring source is compile metadata, conditional on target compilation.
+    """
+    environment: DeferredEnvironment
+    annotations: FunctionAnnotationInterface | None
+    docstring: SlotRef | None
+
+
+@dataclass(frozen=True, slots=True)
+class ApplyDecorator:
+    source: SlotRef
+    exception_abi: ExceptionABI
+
+
+@dataclass(frozen=True, slots=True)
+class TranslateEscapingException:
+    """Compiler generator/coroutine wrapper, after user cleanup/handlers."""
+    kind: DeferredBodyKind
+    exception_abi: ExceptionABI
+
+
+@dataclass(frozen=True, slots=True)
 class GlobalsEnvironment:
     scope: int
 
@@ -496,6 +543,7 @@ class SuspendExecution:
 ProductionInstruction = (EvaluateChild | ApplyLanguageAction | ReadCompilationOption | ApplyInplaceOperator | PublishAnnotation
     | ImportRequest | ImportMember | ImportStar
     | ApplyPythonProtocol | ApplyDelegationProtocol | AccessBinding | ConstructValue | DefineLiteral
+    | BuildFunctionAnnotations | BuildFunction | ApplyDecorator | TranslateEscapingException
     | ApplyRegion | BranchControl | LoopControl | DeferRegion | ReferenceEnvironment | EnterDeferredBody | CleanupControl
     | HandleCompletions | TransferCompletion | SuspendExecution)
 
@@ -538,7 +586,7 @@ class SourceProductionPlan:
     steps: tuple[ProductionStep, ...]
     slots: tuple[ProductionSlotDisposition, ...]
     schema: str = 'scar.source-production-plan'
-    schema_version: int = 8
+    schema_version: int = 9
     authority: str = 'SOURCE_RECIPE_SHAPE_ONLY'
 
 

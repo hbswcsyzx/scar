@@ -55,10 +55,11 @@ def test_closed_grammar_exact_records_strict_codec_and_budgets():
     assert summary['control_semantics_checked'] is False
     assert A.read_production_plan(A.production_plan_document(value)) == value
     catalog = A.production_type_catalog()
-    assert catalog['counts'] == dict(records=53, fields=153, identifiers=4, enums=18, enum_members=210, unions=18)
+    assert catalog['counts'] == dict(records=59, fields=169, identifiers=4, enums=18, enum_members=210, unions=19)
     assert set(catalog['instruction_variants']) == {
         'EvaluateChild', 'ApplyLanguageAction', 'ReadCompilationOption', 'ApplyInplaceOperator', 'PublishAnnotation',
         'ImportRequest', 'ImportMember', 'ImportStar',
+        'BuildFunctionAnnotations', 'BuildFunction', 'ApplyDecorator', 'TranslateEscapingException',
         'ApplyPythonProtocol', 'ApplyDelegationProtocol', 'AccessBinding', 'ConstructValue', 'DefineLiteral', 'ApplyRegion',
         'BranchControl', 'LoopControl', 'DeferRegion', 'ReferenceEnvironment', 'EnterDeferredBody', 'CleanupControl', 'HandleCompletions',
         'TransferCompletion', 'SuspendExecution'}
@@ -152,6 +153,39 @@ def test_import_request_member_and_star_have_distinct_typed_interfaces():
                 with pytest.raises(A.ProductionError,match='IMPORT_INTERFACE'):
                     A.validate_production_plan(replace(specimen,steps=(replace(apply,
                         instruction=replace(instruction,component=0)),done)))
+
+
+def test_function_creation_annotations_decorators_and_escape_interfaces():
+    from scar.ir.program.ids import LocationID
+    from scar.ir.program.protocol_signatures import ExceptionABI
+    world=ValueType(ValueKind.STATE,location=LocationID('function-interface-world'))
+    site=P.SlotRef(0,'FIELD',0)
+    annotation=P.FunctionAnnotationInterface(2,(7,), (P.FunctionAnnotationEntry(site,'parameter',site),),False)
+    for abi in ExceptionABI:
+        raised=(REF,world) if abi is ExceptionABI.EXCEPTION_WORLD else (REF,REF,world)
+        env=P.DeferredEnvironment(1,0,(P.DeferredParameter(P.DeferredParameterKind.POSITIONAL_ONLY,site,0,site),),
+            (3,),P.DeferredBodyKind.FUNCTION,world,abi)
+        cases=[(P.BuildFunction(env,None,None),(REF,REF,REF,REF,world),(REF,world)),
+            (P.BuildFunction(env,annotation,site),(REF,REF,REF,REF,REF,world),(REF,world)),
+            (P.BuildFunctionAnnotations(annotation,abi),(REF,REF,world),(REF,world)),
+            (P.ApplyDecorator(site,abi),(REF,REF,world),(REF,world)),
+            *((P.TranslateEscapingException(kind,abi),raised,raised) for kind in (
+                P.DeferredBodyKind.GENERATOR,P.DeferredBodyKind.COROUTINE,P.DeferredBodyKind.ASYNC_GENERATOR))]
+        for instruction,arguments,result in cases:
+            outputs=(*normal(*result),P.ProductionCompletion(C.RAISE,raised))
+            root=region('function',parameters=arguments,outputs=outputs,steps=('apply','done'))
+            apply=step('apply',root,instruction,tuple(parameter(root,i) for i in range(len(arguments))),outputs)
+            done=step('done',root,P.TransferCompletion(C.FALLTHROUGH),
+                tuple(P.ProductionResult(apply.id,i) for i in range(len(result))),normal(*result))
+            specimen=plan((root,),(apply,done))
+            A.validate_production_plan(specimen)
+            assert A.read_production_plan(A.production_plan_document(specimen))==specimen
+            with pytest.raises(A.ProductionError,match='FUNCTION_INTERFACE'):
+                A.validate_production_plan(replace(specimen,steps=(replace(apply,arguments=()),done)))
+            if type(instruction) is P.TranslateEscapingException:
+                with pytest.raises(A.ProductionError,match='FUNCTION_INTERFACE'):
+                    A.validate_production_plan(replace(specimen,steps=(replace(apply,
+                        instruction=replace(instruction,kind=P.DeferredBodyKind.FUNCTION)),done)))
 
 
 def test_ordered_values_shared_subregion_and_invalid_local_edges():

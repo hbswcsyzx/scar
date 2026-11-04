@@ -146,7 +146,7 @@ def validate_production_plan(plan, *, max_visits=1_000_000):
     """
     visits = _shape(plan, max_visits)
     _require((plan.schema, plan.schema_version, plan.authority) == (
-        'scar.source-production-plan', 8, 'SOURCE_RECIPE_SHAPE_ONLY'),
+        'scar.source-production-plan', 9, 'SOURCE_RECIPE_SHAPE_ONLY'),
         'SCHEMA', 'plan', 'unsupported recipe schema or authority')
     source = plan.input
     _require(bool(source.path) and bool(source.namespace_root), 'INPUT', 'plan.input', 'source paths must be nonempty')
@@ -257,6 +257,13 @@ def validate_production_plan(plan, *, max_visits=1_000_000):
                     'DEFERRED_INTERFACE', 'parameters', 'formal requires one distinct original binding port')
                 bindings.add(p.binding_port)
         return (ValueType(ValueKind.REFERENCE), *(ValueType(ValueKind.REFERENCE) for _ in environment.parameters), environment.world)
+
+    def annotation_ports(annotations):
+        _require(annotations.scope >= 0 and bool(annotations.entries)
+            and all(c >= 0 for c in annotations.captures) and len(set(annotations.captures)) == len(annotations.captures),
+            'FUNCTION_INTERFACE', 'annotations', 'annotation scope/entries/capture references must be explicit')
+        _require(all(e.name for e in annotations.entries) and len({e.value for e in annotations.entries}) == len(annotations.entries),
+            'FUNCTION_INTERFACE', 'annotations', 'annotation entries require names and distinct original value sources')
     claimed, referenced_regions = set(), {plan.root}
     for region in plan.regions:
         _require(bool(region.steps), 'REGION_EXIT', str(region.id), 'region needs an explicit result/transfer step')
@@ -307,6 +314,36 @@ def validate_production_plan(plan, *, max_visits=1_000_000):
             elif type(instruction) is P.ReadCompilationOption:
                 _require(not args and outputs == {(C.FALLTHROUGH, None): (ValueType(ValueKind.DATA, 'builtins.bool'),)},
                     'COMPILATION_OPTION', str(identity), 'compilation option produces only one symbolic boolean')
+            elif type(instruction) in (P.BuildFunctionAnnotations,P.BuildFunction,P.ApplyDecorator,P.TranslateEscapingException):
+                _require(bool(args) and type(args[-1]) is ValueType and args[-1].kind is ValueKind.STATE,
+                    'FUNCTION_INTERFACE', str(identity), 'function operation requires an explicit state domain')
+                world, reference = args[-1], ValueType(ValueKind.REFERENCE)
+                if type(instruction) is P.BuildFunction:
+                    env = instruction.environment
+                    deferred_ports(env)
+                    _require(world == env.world, 'FUNCTION_INTERFACE', str(identity), 'function creation world differs from entry contract')
+                    defaults = sum(p.default_source is not None for p in env.parameters)
+                    count = 2 + defaults + len(env.captures) + (instruction.annotations is not None)
+                    if instruction.annotations is not None:
+                        annotation_ports(instruction.annotations)
+                    abi = env.exception_abi
+                    expected_args = (*(reference for _ in range(count)),world)
+                elif type(instruction) is P.BuildFunctionAnnotations:
+                    annotation_ports(instruction.annotations)
+                    abi = instruction.exception_abi
+                    expected_args = (*(reference for _ in range(1+len(instruction.annotations.captures))),world)
+                elif type(instruction) is P.ApplyDecorator:
+                    abi = instruction.exception_abi
+                    expected_args = (reference,reference,world)
+                else:
+                    _require(instruction.kind in (P.DeferredBodyKind.GENERATOR,P.DeferredBodyKind.COROUTINE,P.DeferredBodyKind.ASYNC_GENERATOR),
+                        'FUNCTION_INTERFACE', str(identity), 'ordinary functions do not translate escaping StopIteration')
+                    abi = instruction.exception_abi
+                    expected_args = ((reference,world) if abi is ExceptionABI.EXCEPTION_WORLD else (reference,reference,world))
+                raised = (reference,world) if abi is ExceptionABI.EXCEPTION_WORLD else (reference,reference,world)
+                normal = raised if type(instruction) is P.TranslateEscapingException else (reference,world)
+                _require(args == expected_args and outputs == {(C.FALLTHROUGH,None):normal,(C.RAISE,None):raised},
+                    'FUNCTION_INTERFACE', str(identity), 'function operation input/completion interface differs from source contract')
             elif type(instruction) in (P.ImportRequest, P.ImportMember, P.ImportStar):
                 _require(bool(args) and type(args[-1]) is ValueType and args[-1].kind is ValueKind.STATE,
                     'IMPORT_INTERFACE', str(identity), 'import requires one explicit source world')
@@ -685,6 +722,31 @@ class ProductionSourceIndex:
                     _require(type(step.source) is P.ProductionOccurrence
                         and instruction == self.statements.annotation_publication(step.source.occurrence, instruction.exception_abi),
                         'SOURCE_ANNOTATION', str(step.id), 'annotation publication differs from original scope/phase/name')
+                elif type(instruction) in (P.BuildFunction,P.BuildFunctionAnnotations):
+                    _require(type(step.source) is P.ProductionOccurrence, 'SOURCE_FUNCTION', str(step.id), 'function creation requires its original definition')
+                    owner = step.source.occurrence
+                    annotations = self.deferred.annotations(owner)
+                    _require(instruction.annotations == annotations, 'SOURCE_FUNCTION', str(step.id), 'function annotations differ from original scope/source/captures')
+                    if type(instruction) is P.BuildFunction:
+                        _require(instruction.environment == self.deferred.interface(owner,instruction.environment.world,instruction.environment.exception_abi)
+                            and instruction.docstring == self.statements.function_docstring(owner),
+                            'SOURCE_FUNCTION', str(step.id), 'function creation differs from original entry/docstring metadata')
+                    if annotations is not None:
+                        _require(self.context.material.scopes[annotations.scope].parent == region_index[step.region].context.environment,
+                            'SOURCE_FUNCTION', str(step.id), 'annotation creation crossed its original parent namespace')
+                elif type(instruction) is P.ApplyDecorator:
+                    site = instruction.source
+                    field,value = self.roles.locate(site)
+                    _require(step.source == site and site.group == 'FIELD' and len(site.item_path) == 1
+                        and field.name == 'decorator_list' and value.kind == 'NODE'
+                        and self.context.syntax.nodes[site.occurrence].constructor in ('FunctionDef','AsyncFunctionDef','ClassDef'),
+                        'SOURCE_FUNCTION', str(step.id), 'decorator application requires its original source list item')
+                elif type(instruction) is P.TranslateEscapingException:
+                    _require(type(step.source) is P.SlotRef and step.source.group == 'FIELD'
+                        and self.roles.locate(step.source)[0].name in ('body','elt')
+                        and instruction.kind == self.deferred.kind(step.source.occurrence)
+                        and region_index[step.region].context.environment == self.deferred.scopes[step.source.occurrence],
+                        'SOURCE_FUNCTION', str(step.id), 'exception translation differs from its original deferred body kind')
                 elif type(instruction) in (P.ImportRequest, P.ImportMember, P.ImportStar):
                     _require(type(step.source) is P.ProductionOccurrence, 'SOURCE_IMPORT', str(step.id), 'import needs an original occurrence anchor')
                     occurrence = step.source.occurrence

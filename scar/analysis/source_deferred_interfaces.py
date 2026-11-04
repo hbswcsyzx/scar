@@ -56,6 +56,7 @@ class DeferredInterfaceIndex:
                 if creator in eager:
                     pending.append(creator)
         self._parameters = {}
+        self._annotations = {}
 
     def parameters(self, occurrence):
         if occurrence in self._parameters:
@@ -120,14 +121,57 @@ class DeferredInterfaceIndex:
     def interface(self, occurrence, world, exception_abi):
         if occurrence not in self.scopes:
             raise ValueError('deferred body has no original child scope')
+        scope = self.scopes[occurrence]
+        return P.DeferredEnvironment(scope, self.source.context.material.root_context.environment,
+            self.parameters(occurrence), tuple(self.captures[scope]), self.kind(occurrence), world, exception_abi)
+
+    def kind(self, occurrence):
         syntax, roles = self.source.context.syntax, self.source.roles
         node = syntax.nodes[occurrence]
         asynchronous = node.constructor == 'AsyncFunctionDef'
         generator = node.constructor == 'GeneratorExp' or occurrence in self.yield_owners
         if node.constructor == 'GeneratorExp':
             asynchronous = occurrence in self.async_owners
-        kind = (P.DeferredBodyKind.ASYNC_GENERATOR if generator else P.DeferredBodyKind.COROUTINE) if asynchronous else (
+        return (P.DeferredBodyKind.ASYNC_GENERATOR if generator else P.DeferredBodyKind.COROUTINE) if asynchronous else (
             P.DeferredBodyKind.GENERATOR if generator else P.DeferredBodyKind.FUNCTION)
-        scope = self.scopes[occurrence]
-        return P.DeferredEnvironment(scope, self.source.context.material.root_context.environment,
-            self.parameters(occurrence), tuple(self.captures[scope]), kind, world, exception_abi)
+
+    def annotations(self, occurrence):
+        if occurrence in self._annotations:
+            return self._annotations[occurrence]
+        roles = self.source.roles
+        node = self.source.context.syntax.nodes[occurrence]
+        if node.constructor not in ('FunctionDef','AsyncFunctionDef'):
+            raise ValueError('header annotation interface requires an original function definition')
+        parameters = {p.source.occurrence:p for p in self.parameters(occurrence)}
+        args = roles.field(occurrence, 'args').reference
+        entries = []
+        # CPython annotation evaluation order differs from formal admission:
+        # regular positional args precede positional-only annotations.
+        for name in ('args','posonlyargs','vararg','kwonlyargs','kwarg'):
+            value = roles.field(args,name)
+            members = value.items if value.kind == 'LIST' else (value,) if value.kind == 'NODE' else ()
+            for member in members:
+                annotation = roles.field(member.reference,'annotation')
+                if annotation.kind != 'NODE':
+                    continue
+                parameter = parameters[member.reference]
+                name_index = self.source.frontend.declarations.ports[parameter.binding_port].name
+                key = self.source.frontend.declarations.names[name_index].value
+                entries.append(P.FunctionAnnotationEntry(parameter.source,key,
+                    P.SlotRef(member.reference,'FIELD',roles.fields['arg']['annotation'])))
+        if roles.field(occurrence,'returns').kind == 'NODE':
+            entries.append(P.FunctionAnnotationEntry(None,'return',P.SlotRef(occurrence,'FIELD',roles.fields[node.constructor]['returns'])))
+        if not entries:
+            result = None
+        else:
+            contexts = [self.source.context.context_at_slot(e.value).state for e in entries]
+            scope = contexts[0].environment
+            if any(c.environment != scope for c in contexts):
+                raise ValueError('function header annotations do not share their original C1 scope')
+            regions = [self.source.context.material.regions[c.region] for c in contexts]
+            stringized = regions[0].suppression_reason == 'FUTURE_ANNOTATION_STRINGIZED'
+            if any((r.suppression_reason == 'FUTURE_ANNOTATION_STRINGIZED') != stringized for r in regions):
+                raise ValueError('function header annotation policies differ')
+            result = P.FunctionAnnotationInterface(scope,tuple(self.captures[scope]),tuple(entries),stringized)
+        self._annotations[occurrence] = result
+        return result

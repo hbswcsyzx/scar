@@ -101,6 +101,10 @@ def documents():
         'from package import *',
         'def local_imports():\n    global global_imported\n    import package as global_imported\n    import package.inner as scoped\n    from package import first as local',
         'class ImportNames:\n    import __private as __bound\n    from package import __member\n    import package.__part.deep as __alias',
+        '@first_decorator()\n@second_decorator()\ndef named_forms(a: A,b: B=first(),/,c: C=second(),*rest: R,d: D,e: E=third(),**kw: KW) -> Result:\n    """Function metadata, not a runtime expression."""\n    return a,b,c,rest,d,e,kw',
+        'def named_closure():\n    captured = seed\n    @decorate()\n    def inner(value=default()):\n        """Closure metadata."""\n        return captured,value\n    return inner',
+        'def only_doc():\n    """No user statements execute."""',
+        'class CallableContainer:\n    def method(self,__item: Missing=first(),*,__key: Missing=second()) -> Result:\n        return __item,__key',
     )) + '\n'
     return _documents(text)
 
@@ -693,7 +697,7 @@ def test_delegation_keeps_send_and_post_driver_completion_paths_separate(rules, 
             plan = variant.build(occurrence)
             checked = variant.verify(plan)
             assert not checked['native_delegation_expanded'] and not checked['driver_protocol_graph_generated']
-            assert plan.schema_version == 8
+            assert plan.schema_version == 9
             _, root_steps = owned(plan)
             acquire = next(s for s in root_steps if type(s.instruction) is P.ApplyDelegationProtocol)
             assert acquire.instruction.protocol is (P.DelegationProtocolKind.AWAITABLE_ITER if constructor == 'Await'
@@ -770,7 +774,7 @@ def test_lambda_creation_retains_cells_and_defers_admitted_body_parameters(rules
         assert declaration.arguments == () and body.kind is P.ProductionRegionKind.DEFERRED
         assert body.parameters == (REF, *(REF for _ in env.parameters), WORLD)
         assert execution[0].instruction == P.EnterDeferredBody(env)
-        assert execution[-1].instruction == P.TransferCompletion(C.RETURN)
+        assert all(c.kind in (C.RETURN,C.RAISE) for c in body.completions)
         assert not any(type(s.instruction) is P.ApplyRegion for s in creation)
         assert not any(type(s.instruction) is P.AccessBinding for s in creation)
         cells = [s.instruction.source.relay for s in creation if type(s.instruction) is P.ReferenceEnvironment
@@ -927,10 +931,11 @@ def test_structured_statement_rules_preserve_source_fields_and_completion_interf
     statements = SourceStatementRules(rules.source, world=WORLD, exception_abi=ExceptionABI.EXCEPTION_WORLD)
     supported = {r['constructor'] for r in statements.catalog()['rules'] if r['status'] == 'LOCAL_STATEMENT_RULE'}
     assert supported == {'Expr','Pass','Assign','Delete','Return','Global','Nonlocal',
-        'If','While','For','AsyncFor','Break','Continue','AnnAssign','AugAssign','Assert','Raise','Import','ImportFrom'}
+        'If','While','For','AsyncFor','Break','Continue','AnnAssign','AugAssign','Assert','Raise','Import','ImportFrom','FunctionDef','AsyncFunctionDef'}
     seen = set()
     for occurrence, node in enumerate(rules.source.context.syntax.nodes):
         if node.constructor not in supported:continue
+        if statements.descriptor_owner(occurrence) is not None:continue
         with monkeypatch.context() as current:
             current.setattr(ast,'parse',lambda *a,**kw:pytest.fail('statement rule reparsed target'))
             plan = statements.build(occurrence)
@@ -1202,3 +1207,80 @@ def test_import_source_paths_binding_projections_and_namespace_effects(rules):
     body=next(c for c in code.co_consts if type(c) is CodeType)
     assert [(s.opname,s.argval) for s in dis.get_instructions(body) if s.opname in ('IMPORT_NAME','IMPORT_FROM')]==[
         ('IMPORT_NAME','_C__package'),('IMPORT_NAME','a'),('IMPORT_FROM','_C__member'),('IMPORT_NAME','a.__part'),('IMPORT_FROM','__part')]
+
+
+def test_named_function_creation_and_deferred_body_are_distinct_source_regions(rules):
+    from scar.analysis.source_statement_rules import SourceStatementRules
+    from scar.ir.program.control import LanguageCompletionKind as C
+    observed=set()
+    for abi in ExceptionABI:
+        statements=SourceStatementRules(rules.source,world=WORLD,exception_abi=abi)
+        for occurrence in (*occurrences(rules,'FunctionDef'),*occurrences(rules,'AsyncFunctionDef')):
+            plan=statements.build(occurrence);statements.verify(plan)
+            root,creation=owned(plan)
+            declaration=next(s for s in creation if type(s.instruction) is P.DeferRegion)
+            build=next(s for s in creation if type(s.instruction) is P.BuildFunction)
+            env=declaration.instruction.environment
+            observed.add(env.kind)
+            body,execution=owned(plan,declaration.instruction.body)
+            assert build.instruction.environment==env
+            assert build.arguments[0]==P.ProductionResult(declaration.id,0)
+            assert execution[0].instruction==P.EnterDeferredBody(env)
+            assert all(c.kind in (C.RETURN,C.RAISE) for c in body.completions)
+            assert not any(type(s.instruction) in (P.ApplyRegion,P.HandleCompletions) for s in creation)
+            assert not any(type(s.instruction) is P.EvaluateChild and field_name(rules,s.instruction.field) in ('body','annotation','returns') for s in creation)
+            evaluated=[s.instruction.field for s in creation if type(s.instruction) is P.EvaluateChild]
+            decorators=[P.SlotRef(occurrence,'FIELD',rules.source.roles.fields[rules.source.context.syntax.nodes[occurrence].constructor]['decorator_list'],(i,))
+                for i in range(len(rules.source.roles.field(occurrence,'decorator_list').items))]
+            defaults=[p.default_source for p in env.parameters if p.default_source is not None]
+            assert evaluated==decorators+defaults
+            applied=[s for s in creation if type(s.instruction) is P.ApplyDecorator]
+            assert [s.instruction.source for s in applied]==list(reversed(decorators))
+            value=P.ProductionResult(build.id,0)
+            for step in applied:
+                assert step.arguments[1]==value
+                value=P.ProductionResult(step.id,0)
+            bind=next(s for s in creation if type(s.instruction) is P.AccessBinding)
+            assert bind.arguments[0]==value and bind.instruction.action is P.BindingActionKind.WRITE
+            if build.instruction.docstring is not None:
+                first=rules.source.roles.field(occurrence,'body').items[0].reference
+                assert statements.descriptor_owner(first) is not None
+                assert not any(type(s.instruction) is P.EvaluateChild and rules.source.roles.locate(s.instruction.field)[1].reference==first for s in plan.steps)
+            normalizations=[s for s in plan.steps if type(s.instruction) is P.TranslateEscapingException]
+            assert all(s.instruction.kind==env.kind for s in normalizations)
+            if env.kind is P.DeferredBodyKind.FUNCTION:
+                assert not normalizations
+            else:
+                assert normalizations
+            if rules.source.roles.field(occurrence,'name').scalar.to_python()=='named_forms':
+                interface=build.instruction.annotations
+                assert interface.stringized
+                assert [entry.name for entry in interface.entries]==['c','a','b','rest','d','e','kw','return']
+                assert [p.kind for p in env.parameters][:3]==[P.DeferredParameterKind.POSITIONAL_ONLY]*2+[P.DeferredParameterKind.POSITIONAL_OR_KEYWORD]
+    assert observed==set(P.DeferredBodyKind)
+
+
+def test_annotation_factory_and_generic_frontier_match_static_compiler_contexts():
+    import dis
+    from types import CodeType
+    from scar.analysis.source_statement_rules import SourceStatementRules
+    text='@first()\n@second()\ndef f(a: A,b: B=left(),/,c: C=right(),*,key: K=last()) -> Result:\n    """Documentation."""\n    return a\n'
+    rules=_rules(_documents(text))
+    statements=SourceStatementRules(rules.source,world=WORLD,exception_abi=ExceptionABI.EXCEPTION_WORLD)
+    occurrence=occurrences(rules,'FunctionDef')[0]
+    plan=statements.build(occurrence);statements.verify(plan)
+    factory=next(s.instruction for s in plan.steps if type(s.instruction) is P.BuildFunctionAnnotations)
+    assert not factory.annotations.stringized
+    assert [e.name for e in factory.annotations.entries]==['c','a','b','key','return']
+    code=compile(text,'<static-function-oracle>','exec',dont_inherit=True)
+    instructions=list(dis.get_instructions(code))
+    assert [s.argval for s in instructions if s.opname=='LOAD_NAME']==['first','second','left','right','last']
+    fn=next(c for c in code.co_consts if type(c) is CodeType and c.co_name=='f')
+    assert fn.co_varnames==('a','b','c','key')
+    assert not any(s.opname=='LOAD_CONST' and s.argval=='Documentation.' for s in dis.get_instructions(fn))
+    annotated=next(c for c in code.co_consts if type(c) is CodeType and c.co_name=='__annotate__')
+    assert [s.argval for s in dis.get_instructions(annotated) if s.opname=='LOAD_GLOBAL']==['C','A','B','K','Result']
+    generic=_rules(_documents('def generic[T: Bound=Default](value: T=initial()) -> T:\n    return value\n'))
+    statements=SourceStatementRules(generic.source,world=WORLD,exception_abi=ExceptionABI.EXCEPTION_WORLD)
+    with pytest.raises(SourceRuleError,match='TYPE_PARAMETERS_FRONTIER'):
+        statements.build(occurrences(generic,'FunctionDef')[0])

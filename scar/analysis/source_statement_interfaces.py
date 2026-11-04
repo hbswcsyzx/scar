@@ -66,6 +66,25 @@ class SourceStatementInterfaceIndex:
             occurrence, 'source field must contain original node references')
         return tuple(v.reference for v in value.items)
 
+    def function_docstring(self, occurrence):
+        if self.nodes[occurrence].constructor not in ('FunctionDef','AsyncFunctionDef'):
+            return None
+        body = self.node_items(occurrence,'body')
+        if not body or self.nodes[body[0]].constructor != 'Expr':
+            return None
+        value = self.roles.field(body[0],'value')
+        if value.kind != 'NODE' or self.nodes[value.reference].constructor != 'Constant':
+            return None
+        if type(self.roles.field(value.reference,'value').scalar.to_python()) is not str:
+            return None
+        return P.SlotRef(value.reference,'FIELD',self.roles.fields['Constant']['value'])
+
+    def docstring_owner(self, statement):
+        parent = self.roles.parents.get(statement)
+        if parent is None or self.nodes[parent.occurrence].constructor not in ('FunctionDef','AsyncFunctionDef'):
+            return None
+        return parent if self.roles.locate(parent)[0].name == 'body' and parent.item_path == (0,) and self.function_docstring(parent.occurrence) is not None else None
+
     def two_part_slice(self, occurrence):
         if self.nodes[occurrence].constructor != 'Slice':
             return False

@@ -21,7 +21,9 @@ _FIELDS = {'Expr': ('value',), 'Pass': (), 'Assign': ('targets', 'value', 'type_
     'AsyncFor': ('target', 'iter', 'body', 'orelse', 'type_comment'), 'Break': (), 'Continue': (),
     'AugAssign': ('target', 'op', 'value'), 'AnnAssign': ('target', 'annotation', 'value', 'simple'),
     'Assert': ('test', 'msg'), 'Raise': ('exc', 'cause'),
-    'Import': ('names',), 'ImportFrom': ('module', 'names', 'level')}
+    'Import': ('names',), 'ImportFrom': ('module', 'names', 'level'),
+    'FunctionDef': ('name','args','body','decorator_list','returns','type_comment','type_params'),
+    'AsyncFunctionDef': ('name','args','body','decorator_list','returns','type_comment','type_params')}
 
 
 class SourceStatementRules(SourceExpressionRules):
@@ -38,6 +40,8 @@ class SourceStatementRules(SourceExpressionRules):
             row['status'] = ('LOCAL_STATEMENT_RULE' if row['constructor'] in _FIELDS else
                 'RULE_FRONTIER' if row['constructor'] in statements else 'OUTSIDE_DOMAIN')
             row['purposes'] = [P.ProductionPurpose.STATEMENT.value] if row['constructor'] in _FIELDS else []
+            if row['constructor'] in ('FunctionDef','AsyncFunctionDef'):
+                row['context_frontiers'] = ['TYPE_PARAMETERS_FRONTIER']
         return {**catalog, 'schema': 'scar.source-statement-rule-catalog',
             'statement_implementation_sha256': sha256(Path(__file__).read_bytes()).hexdigest(),
             'scope': 'STRUCTURED_STATEMENT_SOURCE_RECIPES_ONLY',
@@ -46,7 +50,7 @@ class SourceStatementRules(SourceExpressionRules):
             'child_completions': 'CONSERVATIVE_SOURCE_OBLIGATIONS_NOT_CHILD_IMPLEMENTATION_PROOF'}
 
     def descriptor_owner(self, occurrence):
-        return None
+        return self.source.statements.docstring_owner(occurrence) if self.source.context.syntax.nodes[occurrence].constructor == 'Expr' else None
 
     def build(self, occurrence, purpose=P.ProductionPurpose.STATEMENT, *, max_steps=100_000, max_regions=100_000):
         syntax = self.source.context.syntax
@@ -59,6 +63,8 @@ class SourceStatementRules(SourceExpressionRules):
         constructor = syntax.nodes[occurrence].constructor
         _require(constructor in _FIELDS, 'RULE_FRONTIER', str(occurrence),
             'no local statement rule implemented for ' + constructor)
+        _require(self.descriptor_owner(occurrence) is None, 'PARENT_OWNED_SOURCE', str(occurrence),
+            'function docstring belongs to declaration metadata')
         context = self.source.context.entry_context(occurrence)
         _require(self.source.context.material.regions[context.region].eligibility == 'ELIGIBLE',
             'SUPPRESSED_SOURCE', str(occurrence), 'C1 retains this statement without execution')
@@ -130,6 +136,10 @@ class _StatementBuilder(_Builder):
             from scar.analysis.source_statement_imports import emit_import_statement
             emit_import_statement(self, root, current)
             return self.plan(root, source)
+        elif kind in ('FunctionDef','AsyncFunctionDef'):
+            from scar.analysis.source_statement_functions import emit_function_definition
+            emit_function_definition(self, root, current)
+            return self.plan(root, source)
         self.finish(root, (current,), (self.world,))
         return self.plan(root, source)
 
@@ -138,22 +148,16 @@ class _StatementBuilder(_Builder):
             self.raised if kind is C.RAISE else (_REF, self.world) if kind is C.RETURN else (self.world,), target)
             for kind, target in self.rules.source.statements.completions(occurrence))
 
-    def union(self, *groups):
-        merged = {}
-        for group in groups:
-            for completion in group:
-                key = completion.kind, completion.target
-                _require(key not in merged or merged[key] == completion, 'RULE_INTERFACE', str(key), 'completion types differ')
-                merged[key] = completion
-        return tuple(merged.values())
-
-    def suite(self, region, name, current):
+    def suite(self, region, name, current, *, metadata_prefix=0):
         self.mark(name, P.ProductionDispositionKind.EVALUATED_CHILD)
         site = self.site(name)
         values = self.value(site)
         _require(values.kind == 'LIST', 'RULE_SHAPE', str(site), 'suite requires an original list field')
         for ordinal, value in enumerate(values.items):
             child = self.site(name, ordinal)
+            if ordinal < metadata_prefix:
+                self.slots[child] = P.ProductionDispositionKind.METADATA
+                continue
             if current is None:
                 self.slots[child] = P.ProductionDispositionKind.NO_NORMAL_PREDECESSOR
                 continue

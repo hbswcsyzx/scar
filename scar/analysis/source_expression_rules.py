@@ -59,7 +59,8 @@ _SELECTORS = {
 _TARGETS = frozenset(('Name', 'Attribute', 'Subscript', 'List', 'Tuple'))
 _RULE_MODULES = ('source_display_rules.py', 'source_string_rules.py', 'source_comprehension_rules.py',
                  'source_suspension_rules.py', 'source_delegation_rules.py', 'source_callable_rules.py',
-                 'source_deferred_interfaces.py', 'source_statement_atoms.py', 'source_statement_imports.py')
+                 'source_deferred_interfaces.py', 'source_statement_atoms.py', 'source_statement_imports.py',
+                 'source_statement_functions.py')
 
 
 class SourceRuleError(ProductionError):
@@ -127,8 +128,8 @@ class SourceExpressionRules:
                 parent_contexts=([dict(constructor=p, field='args' if p == 'Call' else 'elts')
                     for p in ('Call', 'List', 'Tuple', 'Set')] if row.name == 'Starred' else
                     [dict(constructor=p, field='generators') for p in _COMPREHENSION_PARENTS] if row.name == 'comprehension' else
-                    [dict(constructor='Lambda', field='args')] if row.name == 'arguments' else
-                    [dict(constructor='arguments', field=p, owner='Lambda.args') for p in (
+                    [dict(constructor=p, field='args') for p in ('Lambda','FunctionDef','AsyncFunctionDef')] if row.name == 'arguments' else
+                    [dict(constructor='arguments', field=p, owner=owner+'.args') for owner in ('Lambda','FunctionDef','AsyncFunctionDef') for p in (
                         'posonlyargs', 'args', 'vararg', 'kwonlyargs', 'kwarg')] if row.name == 'arg' else
                     [dict(constructor='Call', field='keywords')] if row.name == 'keyword' else
                     [dict(constructor=p, field='names') for p in ('Import','ImportFrom')] if row.name == 'alias' else [])))
@@ -142,6 +143,9 @@ class SourceExpressionRules:
                 if row.name == 'Slice':
                     rows[-1]['parent_contexts'].append(dict(constructor='Subscript', field='slice',
                         owner='AugAssign.target', condition='NON_CONSTANT_TWO_PART_SLICE'))
+            elif row.name == 'Constant':
+                rows[-1]['parent_contexts'].append(dict(constructor='Expr',field='value',
+                    owners=['FunctionDef.body[0]','AsyncFunctionDef.body[0]'],condition='FUNCTION_DOCSTRING_METADATA'))
         return dict(schema='scar.source-expression-rule-catalog', schema_version=1,
             source_schema_sha256=self.source.roles.catalog.f2_schema_sha256,
             recipe_type_catalog_sha256=production_type_catalog()['content_sha256'],
@@ -164,6 +168,8 @@ class SourceExpressionRules:
         if site is None:
             return None
         parent = syntax.nodes[site.occurrence].constructor
+        if node.constructor == 'Constant' and parent == 'Expr' and self.source.statements.docstring_owner(site.occurrence) is not None:
+            return site
         if node.constructor in ('Name', 'Attribute', 'Subscript'):
             if parent == 'AugAssign' and site.ordinal == self.source.roles.fields[parent]['target']:
                 return site
@@ -186,12 +192,12 @@ class SourceExpressionRules:
         if node.constructor == 'alias':
             return site if parent in ('Import','ImportFrom') and site.ordinal == self.source.roles.fields[parent]['names'] else None
         if node.constructor == 'arguments':
-            return site if parent == 'Lambda' and site.ordinal == self.source.roles.fields['Lambda']['args'] else None
+            return site if parent in ('Lambda','FunctionDef','AsyncFunctionDef') and site.ordinal == self.source.roles.fields[parent]['args'] else None
         if node.constructor == 'arg':
             owner = self.source.roles.parents.get(site.occurrence)
             return site if parent == 'arguments' and owner is not None and (
-                syntax.nodes[owner.occurrence].constructor == 'Lambda'
-                and owner.ordinal == self.source.roles.fields['Lambda']['args']) else None
+                syntax.nodes[owner.occurrence].constructor in ('Lambda','FunctionDef','AsyncFunctionDef')
+                and owner.ordinal == self.source.roles.fields[syntax.nodes[owner.occurrence].constructor]['args']) else None
         allowed = (('Call', 'List', 'Tuple', 'Set') if node.constructor == 'Starred' else
                    _COMPREHENSION_PARENTS if node.constructor == 'comprehension' else ('Call',))
         if parent not in allowed:
@@ -286,6 +292,15 @@ class _Builder:
 
     def normal(self, types):
         return P.ProductionCompletion(C.FALLTHROUGH, types)
+
+    def union(self, *groups):
+        merged = {}
+        for group in groups:
+            for completion in group:
+                key = completion.kind, completion.target
+                _require(key not in merged or merged[key] == completion, 'RULE_INTERFACE', str(key), 'completion types differ')
+                merged[key] = completion
+        return tuple(merged.values())
 
     def literal(self, region, value, state, source=None):
         return self.emit(region, P.DefineLiteral(PythonLiteral.from_python(value, exact=True)),
