@@ -149,7 +149,7 @@ def validate_production_plan(plan, *, max_visits=1_000_000):
     """
     visits = _shape(plan, max_visits)
     _require((plan.schema, plan.schema_version, plan.authority) == (
-        'scar.source-production-plan', 13, 'SOURCE_RECIPE_SHAPE_ONLY'),
+        'scar.source-production-plan', 14, 'SOURCE_RECIPE_SHAPE_ONLY'),
         'SCHEMA', 'plan', 'unsupported recipe schema or authority')
     source = plan.input
     _require(bool(source.path) and bool(source.namespace_root), 'INPUT', 'plan.input', 'source paths must be nonempty')
@@ -370,6 +370,10 @@ def validate_production_plan(plan, *, max_visits=1_000_000):
             elif type(instruction) is P.ReadCompilationOption:
                 _require(not args and outputs == {(C.FALLTHROUGH, None): (ValueType(ValueKind.DATA, 'builtins.bool'),)},
                     'COMPILATION_OPTION', str(identity), 'compilation option produces only one symbolic boolean')
+            elif type(instruction) is P.ReferenceIsNone:
+                _require(args==(ValueType(ValueKind.REFERENCE),)
+                    and outputs=={(C.FALLTHROUGH,None):(ValueType(ValueKind.DATA,'builtins.bool'),)},
+                    'IDENTITY_INTERFACE',str(identity),'None identity predicate consumes one reference, with no state or exception')
             elif type(instruction) is P.EnterTypeParameters:
                 environment=instruction.environment
                 _require(region.kind is P.ProductionRegionKind.TYPE_PARAMETERS and ordinal==0
@@ -497,7 +501,7 @@ def validate_production_plan(plan, *, max_visits=1_000_000):
                     abi=instruction.exception_abi
                     packet=(reference,world) if abi is ExceptionABI.EXCEPTION_WORLD else (reference,reference,world)
                     if type(instruction) in (P.EnterHandledException,P.ContextExceptionArguments,P.PrepareReraise):
-                        expected=packet
+                        expected=(reference,world) if type(instruction) is P.PrepareReraise else packet
                         normal=(reference,world) if type(instruction) is P.EnterHandledException else (
                             (reference,reference,reference,world) if type(instruction) is P.ContextExceptionArguments else packet)
                     else:
@@ -511,15 +515,17 @@ def validate_production_plan(plan, *, max_visits=1_000_000):
                 if raised is not None:wanted[(C.RAISE,None)]=raised
                 _require(args==expected and outputs==wanted,'CONTEXT_INTERFACE',str(identity),
                     'context operation input/completion ports differ from its language contract')
-            elif type(instruction) in (P.MatchExceptionType,P.DeleteExceptionBinding):
+            elif type(instruction) in (P.MatchExceptionType,P.DeleteExceptionBinding,P.SplitExceptionGroup,P.MergeExceptionGroup):
                 _require(bool(args) and type(args[-1]) is ValueType and args[-1].kind is ValueKind.STATE,
                     'EXCEPT_INTERFACE',str(identity),'exception matching/cleanup requires an explicit world')
                 world=args[-1];reference=ValueType(ValueKind.REFERENCE)
                 match=type(instruction) is P.MatchExceptionType
-                if not match:_require(instruction.port>=0,'EXCEPT_INTERFACE',str(identity),'negative source exception binding port')
-                normal=(ValueType(ValueKind.DATA,'builtins.bool'),world) if match else (world,)
+                delete=type(instruction) is P.DeleteExceptionBinding
+                if delete:_require(instruction.port>=0,'EXCEPT_INTERFACE',str(identity),'negative source exception binding port')
+                normal=((ValueType(ValueKind.DATA,'builtins.bool'),world) if match else (world,) if delete else
+                    (reference,reference,world) if type(instruction) is P.SplitExceptionGroup else (reference,world))
                 raised=(reference,world) if instruction.exception_abi is ExceptionABI.EXCEPTION_WORLD else (reference,reference,world)
-                _require(args==((reference,reference,world) if match else (world,))
+                _require(args==((world,) if delete else (reference,reference,world))
                     and outputs=={(C.FALLTHROUGH,None):normal,(C.RAISE,None):raised},
                     'EXCEPT_INTERFACE',str(identity),'exception matching/cleanup ports differ from the language contract')
             elif type(instruction) in (P.ImportRequest, P.ImportMember, P.ImportStar):
@@ -892,14 +898,21 @@ class ProductionSourceIndex:
                         _require(completion.target == self.statements.active_loop(step.source),
                             'SOURCE_LOOP', str(step.id), 'child/transfer completion has a different lexical loop target')
                 instruction = step.instruction
-                if type(instruction) is P.MatchExceptionType:
+                if type(instruction) in (P.MatchExceptionType,P.SplitExceptionGroup):
                     site=instruction.source
                     field,value=self.roles.locate(site)
                     parent=self.roles.parents.get(site.occurrence)
                     _require(step.source==site and site.group=='FIELD' and not site.item_path and field.name=='type'
                         and value.kind=='NODE' and self.context.syntax.nodes[site.occurrence].constructor=='ExceptHandler'
-                        and parent is not None and self.context.syntax.nodes[parent.occurrence].constructor=='Try',
-                        'SOURCE_EXCEPT',str(step.id),'ordinary exception matching requires its original Try handler type')
+                        and parent is not None and self.context.syntax.nodes[parent.occurrence].constructor==(
+                            'TryStar' if type(instruction) is P.SplitExceptionGroup else 'Try'),
+                        'SOURCE_EXCEPT',str(step.id),'exception matching requires its original ordinary/group handler type')
+                elif type(instruction) is P.MergeExceptionGroup:
+                    site=instruction.source
+                    field,value=self.roles.locate(site)
+                    _require(step.source==site and site.group=='FIELD' and not site.item_path and field.name=='handlers'
+                        and value.kind=='LIST' and bool(value.items) and self.context.syntax.nodes[site.occurrence].constructor=='TryStar',
+                        'SOURCE_EXCEPT',str(step.id),'group merge requires its original TryStar handler list')
                 elif type(instruction) is P.DeleteExceptionBinding:
                     _require(type(step.source) is P.SlotRef and self.roles.locate(step.source)[0].name=='name'
                         and instruction.port==self.statements.exception_binding(step.source.occurrence),

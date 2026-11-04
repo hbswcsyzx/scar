@@ -55,7 +55,7 @@ def test_closed_grammar_exact_records_strict_codec_and_budgets():
     assert summary['control_semantics_checked'] is False
     assert A.read_production_plan(A.production_plan_document(value)) == value
     catalog = A.production_type_catalog()
-    assert catalog['counts'] == dict(records=86, fields=233, identifiers=4, enums=20, enum_members=219, unions=20)
+    assert catalog['counts'] == dict(records=89, fields=237, identifiers=4, enums=20, enum_members=219, unions=20)
     assert set(catalog['instruction_variants']) == {
         'EvaluateChild', 'ApplyLanguageAction', 'ReadCompilationOption', 'ApplyInplaceOperator', 'PublishAnnotation',
         'ImportRequest', 'ImportMember', 'ImportStar',
@@ -67,6 +67,7 @@ def test_closed_grammar_exact_records_strict_codec_and_budgets():
         'ReadContextMethod','InvokeContextMethod','ContextAwaitable','EnterHandledException',
         'RestoreHandledException','ContextExceptionArguments','PrepareReraise',
         'MatchExceptionType','DeleteExceptionBinding',
+        'ReferenceIsNone','SplitExceptionGroup','MergeExceptionGroup',
         'ApplyPythonProtocol', 'ApplyDelegationProtocol', 'AccessBinding', 'ConstructValue', 'DefineLiteral', 'ApplyRegion',
         'BranchControl', 'LoopControl', 'DeferRegion', 'ReferenceEnvironment', 'EnterDeferredBody', 'HandleCompletions',
         'TransferCompletion', 'SuspendExecution'}
@@ -263,7 +264,7 @@ def test_context_manager_interfaces_require_method_phase_current_world_and_excep
         cases=[(P.EnterHandledException(abi),packet,(REF,world),False),
             (P.RestoreHandledException(),(REF,world),(world,),False),
             (P.ContextExceptionArguments(abi),packet,(REF,REF,REF,world),False),
-            (P.PrepareReraise(abi),packet,packet,False)]
+            (P.PrepareReraise(abi),(REF,world),packet,False)]
         for method in P.ContextMethodKind:
             cases.append((P.ReadContextMethod(site,method,abi),(REF,world),(REF,world),True))
             exit_method=method in (P.ContextMethodKind.EXIT,P.ContextMethodKind.ASYNC_EXIT)
@@ -301,6 +302,27 @@ def test_exception_match_and_generated_delete_interfaces_require_explicit_source
             specimen=plan((root,),(apply,done))
             assert A.read_production_plan(A.production_plan_document(specimen))==specimen
             with pytest.raises(A.ProductionError,match='EXCEPT_INTERFACE'):
+                A.validate_production_plan(replace(specimen,steps=(replace(apply,arguments=()),done)))
+
+
+def test_exception_group_and_none_identity_interfaces_keep_data_and_state_separate():
+    from scar.ir.program.ids import LocationID
+    from scar.ir.program.protocol_signatures import ExceptionABI
+    world=ValueType(ValueKind.STATE,location=LocationID('group-interface-world'));site=P.SlotRef(0,'FIELD',0)
+    for abi in ExceptionABI:
+        raised=(REF,world) if abi is ExceptionABI.EXCEPTION_WORLD else (REF,REF,world)
+        cases=((P.SplitExceptionGroup(site,abi),(REF,REF,world),(REF,REF,world)),
+            (P.MergeExceptionGroup(site,abi),(REF,REF,world),(REF,world)),
+            (P.ReferenceIsNone(),(REF,),(BOOL,)))
+        for instruction,arguments,result in cases:
+            predicate=type(instruction) is P.ReferenceIsNone
+            outputs=(*normal(*result),*((P.ProductionCompletion(C.RAISE,raised),) if not predicate else ()))
+            root=region('group',parameters=arguments,outputs=outputs,steps=('apply','done'))
+            apply=step('apply',root,instruction,tuple(parameter(root,i) for i in range(len(arguments))),outputs)
+            done=step('done',root,P.TransferCompletion(C.FALLTHROUGH),tuple(P.ProductionResult(apply.id,i) for i in range(len(result))),normal(*result))
+            specimen=plan((root,),(apply,done))
+            assert A.read_production_plan(A.production_plan_document(specimen))==specimen
+            with pytest.raises(A.ProductionError,match='IDENTITY_INTERFACE' if predicate else 'EXCEPT_INTERFACE'):
                 A.validate_production_plan(replace(specimen,steps=(replace(apply,arguments=()),done)))
 
 

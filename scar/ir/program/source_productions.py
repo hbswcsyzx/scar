@@ -649,6 +649,7 @@ class ContextExceptionArguments:
 class PrepareReraise:
     """Propagate a saved exception with current traceback, without a new raise site.
 
+    Inputs are the exception reference and current world, not an old traceback.
     Native frame/lasti mapping is a separate obligation.
     """
     exception_abi: ExceptionABI
@@ -669,6 +670,30 @@ class DeleteExceptionBinding:
     Its preceding None assignment is a separate binding write.
     """
     port: int
+    exception_abi: ExceptionABI
+
+
+@dataclass(frozen=True, slots=True)
+class ReferenceIsNone:
+    """Identity predicate, without truth conversion or a world transition."""
+    pass
+
+
+@dataclass(frozen=True, slots=True)
+class SplitExceptionGroup:
+    """CHECK_EG_MATCH: validate type, split, install non-None matched group.
+
+    None remainder still validates the evaluated type. Group split may invoke
+    user code, wrap a naked exception, allocate or fail.
+    """
+    source: SlotRef
+    exception_abi: ExceptionABI
+
+
+@dataclass(frozen=True, slots=True)
+class MergeExceptionGroup:
+    """Recompose original/reraised/new exceptions using current metadata."""
+    source: SlotRef
     exception_abi: ExceptionABI
 
 
@@ -768,6 +793,7 @@ ProductionInstruction = (EvaluateChild | ApplyLanguageAction | ReadCompilationOp
     | ReadContextMethod | InvokeContextMethod | ContextAwaitable | EnterHandledException
     | RestoreHandledException | ContextExceptionArguments | PrepareReraise
     | MatchExceptionType | DeleteExceptionBinding
+    | ReferenceIsNone | SplitExceptionGroup | MergeExceptionGroup
     | ApplyRegion | BranchControl | LoopControl | DeferRegion | ReferenceEnvironment | EnterDeferredBody
     | HandleCompletions | TransferCompletion | SuspendExecution)
 
@@ -810,7 +836,7 @@ class SourceProductionPlan:
     steps: tuple[ProductionStep, ...]
     slots: tuple[ProductionSlotDisposition, ...]
     schema: str = 'scar.source-production-plan'
-    schema_version: int = 13
+    schema_version: int = 14
     authority: str = 'SOURCE_RECIPE_SHAPE_ONLY'
 
 

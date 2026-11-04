@@ -173,7 +173,7 @@ PYTHONHASHSEED=0 python -B -m scar.cli source-expressions --model /path/to/model
 `source_suspension_rules.py`按原C1执行owner产生Yield规则，区分普通／异步yield和bare None；normal／raise恢复入口显式接收新world，不能保存旧STATE。
 `source_delegation_rules.py`产生Await/YieldFrom共享循环；recipe v3显式保存delegate端口，4种协议强制核签名。采集仍不展开driver/native，准入、close规范化及frame/context保活另验。
 `source_callable_rules.py`产生Lambda及GeneratorExp的创建/延迟body；参数、初始默认值和活跃转交cell沿`source_deferred_interfaces.py`接原F3，不在创建时读取cell内容。v5分别表示异步generator的AWAIT推进及ASYNC_YIELD。
-语句入口：`python -B -m scar.cli source-statements --model /path/to/model --source /original/source.py --out /path/to/materials --jobs 3`；保相同`--source`选择，加`--materials /path/to/materials`并换独立输出即可fresh核验。当前26类：Expr/Pass/Assign/Delete/Return/Global/Nonlocal/If/While/For/AsyncFor/Break/Continue/AugAssign/AnnAssign/Assert/Raise/Import/ImportFrom/FunctionDef/AsyncFunctionDef/ClassDef/TypeAlias/With/AsyncWith/Try；TryStar/Match保frontier。两入口复用collector但保独立domain、catalog和分片，不互认收据。
+语句入口：`python -B -m scar.cli source-statements --model /path/to/model --source /original/source.py --out /path/to/materials --jobs 3`；保相同`--source`选择，加`--materials /path/to/materials`并换独立输出即可fresh核验。当前27类：Expr/Pass/Assign/Delete/Return/Global/Nonlocal/If/While/For/AsyncFor/Break/Continue/AugAssign/AnnAssign/Assert/Raise/Import/ImportFrom/FunctionDef/AsyncFunctionDef/ClassDef/TypeAlias/With/AsyncWith/Try/TryStar；Match保frontier。两入口复用collector但保独立domain、catalog和分片，不互认收据。
 v6语句suite保normal/return/raise/break/continue端口，循环跳转由原F2 occurrence定位并由对应模板消费。`source_statement_interfaces.py`只给保守child接口，不授child实现、路径可行或清理证明；未来组合须检查实际child出口是该接口的子集。升级须重采集并fresh核验，不改旧材料的version冒充迁移。
 v7原子语句在`source_statement_atoms.py`；compile option、inplace operator及annotation publication都有强制接口检查。target和声明地址中的slice/tuple按原父槽分类，避免多生成一次普通写入或容器构造。DEFERRED annotation另计`ANNOTATION_REQUEST` child义务；编译选项未解析和请求body未降低分别保false，不冒称已完成。
 v8导入规则在`source_statement_imports.py`；保原alias/module/level引用和已知名字投影，正常路径按原序请求、取成员、绑定。`alias`作为父属描述符单独记账；不能将from-list、成员查找及绑定名字混为同一字符串，也不以一次静态请求证明module body已执行。
@@ -181,6 +181,7 @@ v9函数创建在`source_statement_functions.py`；defaults与退出路径复用
 v10的`source_type_parameter_interfaces.py`接原F3 scope/声明/resolution/capture，`source_type_parameter_rules.py`生成工厂激活和三类type parameter的顺序动作。lazy evaluator另计bound/default request义务；其body与native factory布局仍未降低。v11的`source_definition_interfaces.py`和`source_statement_definitions.py`接类及类型别名，复用泛型工厂与调用参数组装；class callback保独立namespace入口，类型别名另计`TYPE_ALIAS_VALUE_REQUEST`。class namespace初始化/收尾是待展开的typed边界，不能当作纯操作。
 v12的`source_statement_contexts.py`接同步/异步with，复用完成路由和await推进；`withitem`为父属描述符。`restore_handled_completions`在所有完成上恢复先前异常状态；不能用未绑定的普通attribute lookup代替type-special方法查找，也不将正常exit结果用于抑制return/break/continue。当前只授局部规则与端口一致，native派发、frame/lasti及引用清理仍未证明。
 v13的`source_statement_exceptions.py`接普通try；ExceptHandler为父属描述符，`suite_at`复用原字段列表调度handler body。MatchExceptionType保验证及匹配异常，DeleteExceptionBinding只接受原清理声明；finalbody为一份SHARED模板，通过显式完成路由保留/覆盖pending结果。所有调用须在同一词法activation内，不能借共享访问另一函数的参数或world。
+v14的`source_statement_exception_groups.py`接TryStar，clause在同一dispatcher按序构造，不递归复制后续clause。分开body异常收集与分派失败，复用原异常名清理和共享finally。PrepareReraise输入改为异常引用/world，输出仍依明确异常ABI；旧材料须重新生成并fresh，不直接改version。
 星号/keyword的失败顺序参考固定版本[CPython codegen](https://github.com/python/cpython/blob/v3.14.7/Python/codegen.c)；本机stack guideline从header读入并固定SHA。
 
 源码身份桥（按unit分片，保持输入模型和旧ID）：

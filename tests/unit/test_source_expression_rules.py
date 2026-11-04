@@ -108,6 +108,7 @@ def documents():
         'type ExampleAlias = int',
         'with manager() as target:\n    pass',
         'async def context_fixture():\n    async with manager():\n        pass',
+        'try:\n    work()\nexcept* Failure:\n    pass',
     )) + '\n'
     return _documents(text)
 
@@ -700,7 +701,7 @@ def test_delegation_keeps_send_and_post_driver_completion_paths_separate(rules, 
             plan = variant.build(occurrence)
             checked = variant.verify(plan)
             assert not checked['native_delegation_expanded'] and not checked['driver_protocol_graph_generated']
-            assert plan.schema_version == 13
+            assert plan.schema_version == 14
             _, root_steps = owned(plan)
             acquire = next(s for s in root_steps if type(s.instruction) is P.ApplyDelegationProtocol)
             assert acquire.instruction.protocol is (P.DelegationProtocolKind.AWAITABLE_ITER if constructor == 'Await'
@@ -934,7 +935,7 @@ def test_structured_statement_rules_preserve_source_fields_and_completion_interf
     statements = SourceStatementRules(rules.source, world=WORLD, exception_abi=ExceptionABI.EXCEPTION_WORLD)
     supported = {r['constructor'] for r in statements.catalog()['rules'] if r['status'] == 'LOCAL_STATEMENT_RULE'}
     assert supported == {'Expr','Pass','Assign','Delete','Return','Global','Nonlocal',
-        'If','While','For','AsyncFor','Break','Continue','AnnAssign','AugAssign','Assert','Raise','Import','ImportFrom','FunctionDef','AsyncFunctionDef','ClassDef','TypeAlias','With','AsyncWith','Try'}
+        'If','While','For','AsyncFor','Break','Continue','AnnAssign','AugAssign','Assert','Raise','Import','ImportFrom','FunctionDef','AsyncFunctionDef','ClassDef','TypeAlias','With','AsyncWith','Try','TryStar'}
     seen = set()
     for occurrence, node in enumerate(rules.source.context.syntax.nodes):
         if node.constructor not in supported:continue
@@ -1525,3 +1526,62 @@ def test_try_schedules_share_finally_and_keep_dispatch_cleanup_and_completion_or
     ops=list(dis.get_instructions(choose));names={s.opname for s in ops}
     assert {'CHECK_EXC_MATCH','PUSH_EXC_INFO','POP_EXCEPT'}<=names
     assert any(s.opname.startswith('DELETE_') and s.argval=='err' for s in ops)
+
+
+def test_exception_group_schedules_keep_remainders_accumulation_and_handled_state(monkeypatch):
+    import dis
+    from types import CodeType
+    from scar.analysis.source_statement_rules import SourceStatementRules
+    from scar.analysis.source_productions import read_production_plan,production_plan_document
+    from scar.ir.program.control import LanguageCompletionKind as C
+    from scar.ir.program.structured import PythonProtocolKind as K
+    text='def groups(flag):\n    try:\n        launch()\n    except* SelectType() as error:\n        if flag:\n            raise Replacement()\n        del error\n    except* (Other,Third):\n        consume()\n    except* Last:\n        raise\n    else:\n        success()\n    finally:\n        finish()\nasync def asynchronous():\n    try:\n        await run()\n    except* Failure as error:\n        for item in items:\n            if item:\n                continue\n            break\n        def nested():\n            return\n        await recover(error)\n    except* Other:\n        pass\ndef raises_only():\n    try:\n        work()\n    except* First:\n        raise\n    except* Second:\n        raise\n'
+    rules=_rules(_documents(text))
+    for abi in ExceptionABI:
+        statements=SourceStatementRules(rules.source,world=WORLD,exception_abi=abi)
+        for occurrence in occurrences(rules,'TryStar'):
+            with monkeypatch.context() as guard:
+                guard.setattr(ast,'parse',lambda *a,**kw:pytest.fail('except* schedule reparsed source'))
+                plan=statements.build(occurrence);checked=statements.verify(plan)
+            assert read_production_plan(production_plan_document(plan))==plan
+            assert not checked['exception_group_native_split_merge_proven']
+            handlers=rules.source.statements.node_items(occurrence,'handlers')
+            splits=[s for s in plan.steps if type(s.instruction) is P.SplitExceptionGroup]
+            assert len(splits)==len(handlers) and len({s.region for s in splits})==1
+            dispatcher,steps=owned(plan,splits[0].region)
+            merge=next(s for s in steps if type(s.instruction) is P.MergeExceptionGroup)
+            assert len([s for s in plan.steps if type(s.instruction) is P.MergeExceptionGroup])==1
+            assert all(steps.index(s)<steps.index(merge) for s in splits)
+            accumulator=next(s for s in steps if type(s.instruction) is P.ApplyPythonProtocol and s.instruction.protocol is K.BUILD_DISPLAY_LIST)
+            assert merge.arguments[:2]==(P.ProductionParameter(dispatcher.id,0),P.ProductionResult(accumulator.id,0))
+            assert [s.instruction.source.occurrence for s in splits]==list(handlers)
+            assert not any(type(s.instruction) is P.RestoreHandledException for s in steps)
+            selected=[]
+            for split in splits:
+                assert split.arguments[0]==(P.ProductionParameter(dispatcher.id,0) if split is splits[0] else P.ProductionResult(splits[splits.index(split)-1].id,0))
+                site=split.instruction.source
+                assert sum(type(s.instruction) is P.EvaluateChild and s.instruction.field==site for s in steps)==1
+                position=steps.index(split)
+                branch=next(s for s in steps[position:] if type(s.instruction) is P.BranchControl)
+                assert branch.instruction.on_false.arguments[:2]==(P.ProductionResult(split.id,1),P.ProductionResult(accumulator.id,0))
+                body,body_steps=owned(plan,branch.instruction.on_false.region);selected.append(body.id)
+                body_control=next(s for s in body_steps if type(s.instruction) is P.HandleCompletions)
+                for route in body_control.instruction.routes:
+                    handler,handler_steps=owned(plan,route.handler)
+                    assert {c.kind for c in handler.completions}<={C.FALLTHROUGH,C.RAISE}
+                    assert not any(type(s.instruction) is P.RestoreHandledException for s in handler_steps)
+                    if route.kind is C.RAISE:
+                        assert any(type(s.instruction) is P.ApplyPythonProtocol and s.instruction.protocol is K.APPEND_DISPLAY for s in handler_steps)
+                        assert handler_steps[-1].instruction==P.TransferCompletion(C.FALLTHROUGH)
+            final_append=next(s for s in reversed(steps[:steps.index(merge)]) if type(s.instruction) is P.ApplyPythonProtocol and s.instruction.protocol is K.APPEND_DISPLAY)
+            assert final_append.arguments[1]==P.ProductionResult(splits[-1].id,0)
+            root,_=owned(plan)
+            assert {(c.kind,c.target) for c in root.completions}<=set(rules.source.statements.completions(occurrence))
+            if rules.source.roles.field(occurrence,'finalbody').items:
+                assert len([r for r in plan.regions if r.kind is P.ProductionRegionKind.SHARED])==1
+    code=compile(text,'<static-exception-group-oracle>','exec',dont_inherit=True)
+    functions=[c for c in code.co_consts if type(c) is CodeType]
+    for function in functions:
+        ops=list(dis.get_instructions(function))
+        assert any(s.opname=='CHECK_EG_MATCH' for s in ops)
+        assert any(s.opname=='CALL_INTRINSIC_2' and s.argrepr=='INTRINSIC_PREP_RERAISE_STAR' for s in ops)

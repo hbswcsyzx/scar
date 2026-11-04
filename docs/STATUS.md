@@ -94,7 +94,7 @@ call/map/string/assert参数也沿闭合原端口组解析；空组保DECLARED_E
 真实eval/cem原body的4,830条操作来源、65,086条来源引用已接回原F2及已有F3查询；CEM的4个旧OPAQUE可读出Gt/Eq原selector。
 这仍不是执行语义证明。证据：`artifacts/current/queries/source-anchors/{materials,verification}/result.json`及`{eval,cem}-origin-query.json`。
 
-源码产生规则v13的输入语法已落地：86记录/233字段、4 ID、20枚举/219成员、20 union、50步骤变体；不修改canonical类型根和旧ID。instruction标签由全部variant自动生成，create/set/bind等同字段形状不会在wire中混淆。
+源码产生规则v14的输入语法已落地：89记录/237字段、4 ID、20枚举/219成员、20 union、53步骤变体；不修改canonical类型根和旧ID。instruction标签由全部variant自动生成，create/set/bind等同字段形状不会在wire中混淆。
 检查exact类型、区域归属/值顺序、共享调用、循环不变量/携带接口、异常完成到handler的payload/captures连接及strict codec；不授完整控制/效果语义。
 暂停接口子门已通过：明确handoff、normal/raise两种后续入口、异常ABI及保存引用；禁止保存旧STATE，核恢复完成并集。12项语法/接口检查通过（3.41秒）；driver/frame/context适配尚未证明。
 委托/循环接口子门14项检查通过（3.65秒）：4种运行时协议强制核签名，await/yield-from必须具备delegate，普通yield不得带delegate；循环保持全部escaping completion。RepeatCondition不造求值工作，空完成接口不造返回边。
@@ -109,12 +109,12 @@ F4-B现有28类表达式局部规则，async clause及异步GeneratorExp已接�
 真实eval/CEM及buffer/world/spaces五份源码共5,314个表达式：4,879个局部recipe、345个已知不单独求值的源码、90个父属表达式、表达式规则前沿0，分区精确闭合；另记733个父属描述符，含79个声明docstring Constant、113个arguments、303个arg、4个withitem及4个ExceptHandler等。函数docstring由创建metadata拥有，类docstring由namespace初始化拥有；6个增强赋值target仍由父语句安排读/改/写，没有丢弃源码。
 4处Lambda、3处GeneratorExp及先前6处Yield/2处YieldFrom均有规则。仍有3,483项child接口义务，不能以局部规则代替完整图。Await及异步上下文在静态micro源码中检验；未声称LeWM样本出现了Await。
 345处SUPPRESSED_SOURCE主要来自future注解，材料v2保留原C1原因/槽并单独计数；它们不是缺失规则。该分类由真实样本发现后修正，未丢弃原源码。
-表达式5个流式压缩片共1,472,008 bytes（解压32,888,820）；5进程采集32.62秒、独立fresh32.48秒，见`queries/source-expression-rules/{materials,verification}/result.json`。
-本轮只做3项接口/wire/共享调用检查（0.77秒）与2项try/with专项（13.34秒），含两种异常ABI与静态compile/dis对照；未重跑整套。主要验收仍是原材料生成和独立重放。全部由主代理完成，无新增subagents，未执行目标bytecode。
-`source-statements`现为26类局部规则，新增普通Try。按序匹配并恢复异常状态，else异常绕过同级handler；异常名的None写入/删除沿原声明授权。正常离开handler先恢复再清名，异常离开先清名再恢复。一份SHARED finalbody接受各pending路径，正常保留原完成、异常/return/跳转覆盖它；共享调用必须同activation/namespace并显式传参。编译器提供的字面常量已去除伪异常边，裸return不多出RAISE。class namespace内部操作、native frame/清理及lazy body仍未证明。
+表达式5个流式压缩片共1,470,448 bytes（解压32,888,820）；5进程采集32.38秒、独立fresh32.23秒，见`queries/source-expression-rules/{materials,verification}/result.json`。
+本轮只做3项接口/wire/重抛检查（1.26秒）与3项except*/try/with专项（18.84秒），含两种异常ABI与静态compile/dis对照；未重跑整套。主要验收仍是原材料生成和独立重放。全部由主代理完成，无新增subagents，未执行目标bytecode。
+`source-statements`现为27类局部规则，新增TryStar：分开original/remaining/累计异常list，全部catch type按序求值和split，仅body异常收集后继续，初始绑定/清理/split错误直接导出；每clause保留最近matched handled状态，整个分派结束/失败才恢复旧状态。末尾按原异常和当前元数据merge；沿用共享finally。None身份判定不调用truth；重抛只传异常引用/current world，去掉旧traceback输入。class namespace内部操作、native split/merge/frame/清理及lazy body仍未证明。
 真实五源998个语句分为919个局部recipe、79个父属docstring Expr、0个语句规则frontier，另有2,199项child接口义务。新增4个Try recipe；保3个With、8个ClassDef、109个函数定义及98个annotation factory。Try模板含4次type match、4次异常安装、13次恢复及12次保存异常的重抛准备；这些是静态模板步骤，不是执行次数。
-语句5片共675,625 bytes（解压13,252,480）；5进程采集26.73秒、fresh26.39秒。样本没有finally、命名handler、AsyncWith、泛型或TypeAlias，相应规则由静态micro核验。完整分布见`queries/source-statement-rules/result.json`；CEM的try recipe在`queries/source-productions/cem/try-specimen.json`。98个函数注解请求仍是独立child义务。
-样本规则缺口0不代表全语言或完整图：TryStar/Match、根入口、child/lazy请求body、状态与引用清理、目标编译选项和native/resource仍待闭合。原manifest与五份源码bytes保持，v13材料已重采集/fresh，未改旧header冒充迁移。
+语句5片共676,127 bytes（解压13,252,480）；5进程采集26.47秒、fresh26.56秒。样本没有TryStar、finally、命名handler、AsyncWith、泛型或TypeAlias，相应规则由静态micro核验。完整分布见`queries/source-statement-rules/result.json`；CEM的try recipe在`queries/source-productions/cem/try-specimen.json`。98个函数注解请求仍是独立child义务。
+样本规则缺口0不代表全语言或完整图：Match、根入口、child/lazy请求body、状态与引用清理、目标编译选项和native/resource仍待闭合。原manifest与五份源码bytes保持，v14材料已重采集/fresh，未改旧header冒充迁移。
 Call的140个原规则前沿已消除；单星、多星、kwargs连续组和大组路径均有规则，复用已有协议强制核签名。未把位置漂移的bytecode当作F2节点身份。
 容器更新/分组/哈希时机、解包先于目标写入、f-string转换先于spec、模板捕获不立即转换已有静态对照；implicit literal只描述值，不授对象身份或分配证明。
 推导式每子句一份循环模板，外层先求首个iterator、局部scope内赋目标/过滤/求结果；仅advance的StopIteration转为耗尽，body异常保持传播。引用不变不代表内容不变。
@@ -126,7 +126,7 @@ recipe不是canonical CFG/SSA；state来源、child实现与effects未证，不�
    三种域不能互代：32 Opcode、88协议和113语法构造器×上下文分别核验；B1不授新图发布或优化。
    下一步将原声明端口接到F2/F3产生规则，并补function/class/comprehension等参数来源；保活完整性另验，不能抄端口来证明。
    形式顺序：输入/输出结构已固定；当前持续闭合构造×用途×上下文的字段消耗及完成端口，再重放核验，全部闭合后才生成CFG/SSA。
-   普通Try等26类语句已有局部规则。接下来仍在F4-B：①TryStar异常组拆分/合并及Match模式规则；②根入口、lazy请求和class namespace内部操作；③参数来源和正常/异常引用清理闭合。不能以五源语句frontier0代替全层完备。每批保持“接口→原字段产生规则→独立重放”，全部闭合后才进F4-C；调用准入、闭包/native布局及driver/frame/context合同仍须接通。
+   TryStar等27类语句已有局部规则。接下来仍在F4-B：①Match及其模式规则；②根入口、lazy请求和class namespace内部操作；③参数来源和正常/异常引用清理闭合。不能以五源语句frontier0代替全层完备。每批保持“接口→原字段产生规则→独立重放”，全部闭合后才进F4-C；调用准入、闭包/native布局及driver/frame/context合同仍须接通。
    四片其余881操作已分类为控制434、binding246、source invoke201；这是识别结果，不等于其接口/产生规则已通过。
    签名witness仍须进入版本化typed根及强制reader；不能把本层独立查询当作完备。根扩展后重验F4-A目录。
    实读FRAME_BIND为READ_WRITE、UNKNOWN footprint、非full overwrite；不能照旧审计摘要强制WHOLE或升级未知事实。

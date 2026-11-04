@@ -16,7 +16,7 @@ def _payload(b,region,count):
 
 def _resume(b,region,completion,payload,previous=None):
     if completion.kind is C.RAISE:
-        payload=b.emit(region,P.PrepareReraise(b.rules.exception_abi),payload,b.raised,may_raise=False)
+        payload=b.emit(region,P.PrepareReraise(b.rules.exception_abi),(payload[0],payload[-1]),b.raised,may_raise=False)
     world=payload[-1]
     if previous is not None:
         world,=b.emit(region,P.RestoreHandledException(),(previous,world),(b.world,),may_raise=False)
@@ -144,9 +144,16 @@ def _try_except(b,region,world,handlers):
             handler=b.region(b.site('handlers'),b.raised,region,P.ProductionRegionKind.HANDLER)
             packet=_payload(b,handler,len(b.raised))
             previous,state=b.emit(handler,P.EnterHandledException(b.rules.exception_abi),packet,(_REF,b.world),may_raise=False)
-            dispatch=b.region(handler.source,(*b.raised,_REF),handler)
-            _dispatch(b,dispatch,handlers,0)
-            result=b.control(handler,P.ApplyRegion(P.ProductionRegionCall(dispatch.id,(*packet[:-1],state,previous))),(),b.completions(dispatch))
+            if b.node.constructor=='TryStar':
+                from scar.analysis.source_statement_exception_groups import emit_group_dispatch
+                from scar.analysis.source_statement_contexts import restore_handled_completions
+                dispatch=b.region(handler.source,(_REF,b.world),handler)
+                emit_group_dispatch(b,dispatch,handlers)
+                result=restore_handled_completions(b,handler,dispatch,(packet[0],state),previous)
+            else:
+                dispatch=b.region(handler.source,(*b.raised,_REF),handler)
+                _dispatch(b,dispatch,handlers,0)
+                result=b.control(handler,P.ApplyRegion(P.ProductionRegionCall(dispatch.id,(*packet[:-1],state,previous))),(),b.completions(dispatch))
             if result:b.finish(handler,result,(b.world,))
         else:
             outputs.append(completion)
@@ -168,7 +175,8 @@ def emit_try_statement(b,root,world):
         _require(b.rules.source.context.syntax.nodes[owner].constructor=='ExceptHandler','RULE_SHAPE',str(owner),'try requires original exception-handler descriptors')
         b.slots[b.site('handlers',ordinal)]=P.ProductionDispositionKind.EVALUATED_CHILD
         typed=b.role.field(owner,'type').kind=='NODE'
-        _require(typed or ordinal==len(handlers)-1,'SOURCE_CODEGEN_CONFLICT',str(owner),'bare except must be last')
+        _require(typed or b.node.constructor=='Try' and ordinal==len(handlers)-1,
+            'SOURCE_CODEGEN_CONFLICT',str(owner),'bare except must be last and cannot be except*')
         b.auxiliary(owner,'type',P.ProductionDispositionKind.EVALUATED_CHILD if typed else P.ProductionDispositionKind.METADATA)
         b.auxiliary(owner,'name',P.ProductionDispositionKind.ROLE_PORT if b.rules.source.statements.exception_binding(owner) is not None else P.ProductionDispositionKind.METADATA)
         b.auxiliary(owner,'body',P.ProductionDispositionKind.EVALUATED_CHILD)

@@ -288,6 +288,7 @@ class SourceStatementInterfaceIndex:
                 if _RAISE in body:
                     # Unmatched exceptions and errors in handler admission remain.
                     result |= set().union(*(v for k, v in suites.items() if k.startswith('handler:')))
+                    if kind=='TryStar':result.add(_NORMAL)  # native/user split and recomposition may consume the full group
                 final = suites['finalbody']
                 result = (result if _NORMAL in final else set()) | (final - {_NORMAL})
             elif kind == 'Match':

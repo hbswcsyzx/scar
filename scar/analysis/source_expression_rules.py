@@ -66,7 +66,7 @@ _RULE_MODULES = ('source_display_rules.py', 'source_string_rules.py', 'source_co
                  'source_deferred_interfaces.py', 'source_statement_atoms.py', 'source_statement_imports.py',
                  'source_statement_functions.py', 'source_type_parameter_interfaces.py', 'source_type_parameter_rules.py',
                  'source_definition_interfaces.py', 'source_statement_definitions.py', 'source_statement_contexts.py',
-                 'source_statement_exceptions.py')
+                 'source_statement_exceptions.py', 'source_statement_exception_groups.py')
 
 
 class SourceRuleError(ProductionError):
@@ -269,6 +269,7 @@ class SourceExpressionRules:
             class_namespace_operations_expanded=False, class_builder_admission_proven=False,
             context_method_native_dispatch_proven=False, handled_exception_frame_mapping_proven=False,
             exception_match_native_dispatch_proven=False, exception_binding_native_cleanup_proven=False,
+            exception_group_native_split_merge_proven=False,
             effects_proven=False, canonical_graph_generated=False, transformation_authorized=False)
 
 

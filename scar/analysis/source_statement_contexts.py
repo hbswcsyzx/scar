@@ -56,7 +56,7 @@ def _exceptional_exit(b,handler,site,method):
     b.finish(yes,(b.parameter(yes,0),),(b.world,))
     no=b.region(handler.source,b.raised,protected)
     fresh=b.emit(no,P.PrepareReraise(b.rules.exception_abi),
-        tuple(b.parameter(no,i) for i in range(len(b.raised))),b.raised,may_raise=False)
+        (b.parameter(no,0),b.parameter(no,len(b.raised)-1)),b.raised,may_raise=False)
     b.transfer(no,C.RAISE,fresh,b.raised)
     b.control(protected,P.BranchControl(P.ProductionRegionCall(yes.id,(state,)),
         P.ProductionRegionCall(no.id,(*original,state))),(suppress,),b.union(b.completions(yes),b.completions(no)))
