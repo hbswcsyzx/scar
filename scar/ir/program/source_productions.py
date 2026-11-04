@@ -221,6 +221,9 @@ class ProductionInput:
     contexts_sha256: str
     declarations_sha256: str
     bindings_sha256: str
+    native_symbols_sha256: str
+    compiler_topology_sha256: str
+    compiler_symbols_sha256: str
 
 
 @dataclass(frozen=True, slots=True)
@@ -444,16 +447,34 @@ class DeferredParameter:
 
 
 @dataclass(frozen=True, slots=True)
+class DerivedCaptureRef:
+    """Unit-scoped shared hop key; never an ordinal in the original F3 table."""
+    scope: int
+    binding: int
+
+
+CaptureReference = int | DerivedCaptureRef
+
+
+@dataclass(frozen=True, slots=True)
+class CaptureTransport:
+    reference: DerivedCaptureRef
+    parent: CaptureReference | None
+    compiler_slots: tuple[int, ...]
+
+
+@dataclass(frozen=True, slots=True)
 class DeferredEnvironment:
     scope: int
     globals_scope: int
     parameters: tuple[DeferredParameter, ...]
-    # Original active C2b ForwardHop ordinals, including transitive forwarding.
+    # Original active C2b hops or explicit compiler-witnessed supplement keys.
     # These are cell handles, not values or a native co_freevars ordering.
-    captures: tuple[int, ...]
+    captures: tuple[CaptureReference, ...]
     kind: DeferredBodyKind
     world: GroundType
     exception_abi: ExceptionABI
+    owned_cells: tuple[int, ...] = ()
 
 
 @dataclass(frozen=True, slots=True)
@@ -466,7 +487,7 @@ class FunctionAnnotationEntry:
 @dataclass(frozen=True, slots=True)
 class FunctionAnnotationInterface:
     scope: int
-    captures: tuple[int, ...]
+    captures: tuple[CaptureReference, ...]
     entries: tuple[FunctionAnnotationEntry, ...]
     stringized: bool
 
@@ -508,7 +529,7 @@ class TranslateEscapingException:
 class LazyExpressionInterface:
     source: SlotRef
     scope: int
-    captures: tuple[int, ...]
+    captures: tuple[CaptureReference, ...]
     unpack_starred: bool
     format_default: int = 1
 
@@ -527,11 +548,12 @@ class TypeParameterSpec:
 class TypeParameterEnvironment:
     """Logical source inputs, not synthetic compiler defaults-tuple/dict ABI."""
     scope: int
-    captures: tuple[int, ...]
+    captures: tuple[CaptureReference, ...]
     parameters: tuple[TypeParameterSpec, ...]
     inputs: tuple[SlotRef, ...]
     world: GroundType
     exception_abi: ExceptionABI
+    owned_cells: tuple[int, ...] = ()
 
 
 @dataclass(frozen=True, slots=True)
@@ -562,10 +584,11 @@ class EvaluationRequestEnvironment:
     source: SlotRef
     scope: int
     globals_scope: int
-    captures: tuple[int, ...]
+    captures: tuple[CaptureReference, ...]
     format_default: int | None
     world: GroundType
     exception_abi: ExceptionABI
+    owned_cells: tuple[int, ...] = ()
 
 
 @dataclass(frozen=True, slots=True)
@@ -621,12 +644,13 @@ class AttachTypeParameters:
 class ClassBodyInterface:
     scope: int
     globals_scope: int
-    captures: tuple[int, ...]
+    captures: tuple[CaptureReference, ...]
     protocol_bindings: tuple[int, ...]
     docstring: SlotRef | None
     type_parameters: SlotRef | None
     world: GroundType
     exception_abi: ExceptionABI
+    owned_cells: tuple[int, ...] = ()
 
 
 @dataclass(frozen=True, slots=True)
@@ -876,7 +900,7 @@ class GlobalsEnvironment:
 
 @dataclass(frozen=True, slots=True)
 class ClosureEnvironment:
-    relay: int
+    relay: CaptureReference
 
 
 @dataclass(frozen=True, slots=True)
@@ -1010,14 +1034,15 @@ class SourceProductionPlan:
     regions: tuple[ProductionRegion, ...]
     steps: tuple[ProductionStep, ...]
     slots: tuple[ProductionSlotDisposition, ...]
+    capture_transports: tuple[CaptureTransport, ...] = ()
     schema: str = 'scar.source-production-plan'
-    schema_version: int = 19
+    schema_version: int = 20
     authority: str = 'SOURCE_RECIPE_SHAPE_ONLY'
 
 
 PRODUCTION_RECORD_TAGS = {cls: ('record_kind', cls.__name__) for cls in (
     ProductionOccurrence, SlotRef, ProductionParameter, ProductionResult,
     *ProductionInstruction.__args__,
-    GlobalsEnvironment, ClosureEnvironment,
+    GlobalsEnvironment, ClosureEnvironment, DerivedCaptureRef,
     ProductionResumeRoute, IterationCondition, RepeatCondition,
     CountBinding, ChoiceBinding, TypeBinding, TypesBinding)}

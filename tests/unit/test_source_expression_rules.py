@@ -702,7 +702,7 @@ def test_delegation_keeps_send_and_post_driver_completion_paths_separate(rules, 
             plan = variant.build(occurrence)
             checked = variant.verify(plan)
             assert not checked['native_delegation_expanded'] and not checked['driver_protocol_graph_generated']
-            assert plan.schema_version == 19
+            assert plan.schema_version == 20
             _, root_steps = owned(plan)
             acquire = next(s for s in root_steps if type(s.instruction) is P.ApplyDelegationProtocol)
             assert acquire.instruction.protocol is (P.DelegationProtocolKind.AWAITABLE_ITER if constructor == 'Await'
@@ -813,6 +813,86 @@ def test_lambda_creation_retains_cells_and_defers_admitted_body_parameters(rules
     evaluated = [s.instruction.field for s in creation if type(s.instruction) is P.EvaluateChild]
     assert evaluated == initial_defaults
     assert len([s for s in creation if type(s.instruction) is P.EvaluateChild]) == 3
+
+
+def test_compiler_only_free_requirements_connect_shared_source_capture_paths(monkeypatch):
+    import dis
+    from types import CodeType
+    from scar.analysis.source_statement_rules import SourceStatementRules
+    from scar.analysis.source_productions import ProductionError, validate_production_plan
+    from scar.ir.record_codec import encode, decode
+    text = '''def owner():
+    __module__ = "owner"
+    unused = 1
+    live = seed
+    def carrier():
+        def explicit():
+            return live
+        def inner():
+            nonlocal unused
+            return 0
+        def second():
+            nonlocal unused
+            return 1
+        class Child:
+            nonlocal __module__
+            pass
+        return explicit, inner, second, Child
+    return carrier
+'''
+    documents = _documents(text)
+    rules = _rules(documents)
+    source = rules.source
+    original = encode(source.frontend.bindings)
+    paths = source.capture_paths
+    names = {i: source.frontend.namespace.name(b.name) for i,b in enumerate(paths.data.bindings)}
+    by_name = {name:i for i,name in names.items()}
+    scopes = {source.roles.field(s.owner.occurrence, 'name').scalar.to_python():i
+        for i,s in enumerate(paths.scopes) if s.kind in ('FUNCTION','CLASS')}
+    owner,carrier = scopes['owner'],scopes['carrier']
+    assert len(paths.transports) == 5
+    assert set(paths.owned_cells(owner)) == {by_name[n] for n in ('__module__','unused','live')}
+    assert not paths.data.bindings[by_name['unused']].cell_required
+    assert any(type(r) is int for r in paths.captures[carrier])  # accepted F3 hop retained
+    for name in ('inner','second'):
+        leaf = P.DerivedCaptureRef(scopes[name],by_name['unused'])
+        assert paths.transports[leaf].parent == P.DerivedCaptureRef(carrier,by_name['unused'])
+    shared = paths.transports[P.DerivedCaptureRef(carrier,by_name['unused'])]
+    assert len(shared.compiler_slots) == 2  # distinct source witnesses, one carrier
+    # Compilation/disassembly is a static oracle; none of these functions run.
+    pending = [compile(text,'<static-capture-oracle>','exec')]; code = {}
+    while pending:
+        item = pending.pop(); code[item.co_name] = item
+        pending.extend(c for c in item.co_consts if type(c) is CodeType)
+    assert set(code['owner'].co_cellvars) == {'__module__','unused','live'}
+    assert set(code['carrier'].co_freevars) == {'__module__','unused','live'}
+    assert code['Child'].co_freevars == ('__module__',)
+    assert any(i.opname == 'STORE_DEREF' and i.argval == '__module__' for i in dis.get_instructions(code['Child']))
+    def no_parse(*args,**kwargs):
+        raise AssertionError('accepted F2/F3 must be consumed without reparsing')
+    monkeypatch.setattr(ast,'parse',no_parse)
+    for abi in ExceptionABI:
+        statements = SourceStatementRules(source,world=WORLD,exception_abi=abi)
+        for kind in ('FunctionDef','ClassDef'):
+            for occurrence in occurrences(rules,kind):
+                plan = statements.build(occurrence); statements.verify(plan)
+                assert decode(P.SourceProductionPlan,encode(plan,record_tags=P.PRODUCTION_RECORD_TAGS),
+                    record_tags=P.PRODUCTION_RECORD_TAGS) == plan
+        child = statements.build(paths.scopes[scopes['Child']].owner.occurrence)
+        assert len(child.capture_transports) == 2
+        transport = child.capture_transports[-1]
+        with pytest.raises(ProductionError,match='SOURCE_CAPTURE_TRANSPORT'):
+            source.match(replace(child,capture_transports=(*child.capture_transports[:-1],
+                replace(transport,compiler_slots=(len(source.frontend.symbols.slots),)))))
+        for rows in (
+            (transport,),
+            (*child.capture_transports[:-1],replace(transport,parent=transport.reference)),
+            (*child.capture_transports[:-1],replace(transport,parent=-1)),
+            (*child.capture_transports,P.CaptureTransport(P.DerivedCaptureRef(1000,0),None,(0,))),
+        ):
+            with pytest.raises(ProductionError,match='CAPTURE_TRANSPORT'):
+                validate_production_plan(replace(child,capture_transports=rows))
+    assert encode(source.frontend.bindings) == original
 
 
 def test_generator_creation_keeps_eager_iterator_and_lazy_shared_body_separate(rules):

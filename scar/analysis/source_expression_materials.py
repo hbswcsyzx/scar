@@ -60,6 +60,7 @@ def _implementation():
         'analysis/source_root_interfaces.py', 'analysis/source_root_rules.py',
         'analysis/source_evaluation_interfaces.py', 'analysis/source_evaluation_rules.py',
         'analysis/source_class_namespace_interfaces.py', 'analysis/source_class_namespace_rules.py',
+        'analysis/source_capture_interfaces.py',
         'analysis/source_syntax.py',
         'analysis/source_type_parameter_interfaces.py', 'analysis/source_type_parameter_rules.py',
         'analysis/source_productions.py', 'analysis/program_types.py',

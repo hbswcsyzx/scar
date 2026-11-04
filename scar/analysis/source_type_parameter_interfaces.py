@@ -65,4 +65,5 @@ class TypeParameterInterfaceIndex:
         inputs=(tuple(p.default_source for p in self.source.deferred.parameters(owner) if p.default_source is not None)
             if nodes[owner].constructor in ('FunctionDef','AsyncFunctionDef') else ())
         scope=self.scopes[owner]
-        return P.TypeParameterEnvironment(scope,tuple(self.source.deferred.captures[scope]),parameters,inputs,world,exception_abi)
+        return P.TypeParameterEnvironment(scope,tuple(self.source.deferred.captures[scope]),parameters,inputs,world,exception_abi,
+            self.source.capture_paths.owned_cells(scope))

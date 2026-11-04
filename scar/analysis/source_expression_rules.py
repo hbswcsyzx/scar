@@ -77,7 +77,7 @@ _RULE_MODULES = ('source_display_rules.py', 'source_string_rules.py', 'source_co
                  'source_statement_exceptions.py', 'source_statement_exception_groups.py', 'source_condition_rules.py',
                  'source_pattern_interfaces.py','source_statement_patterns.py','source_root_interfaces.py','source_root_rules.py',
                  'source_evaluation_interfaces.py','source_evaluation_rules.py',
-                 'source_class_namespace_interfaces.py','source_class_namespace_rules.py')
+                 'source_class_namespace_interfaces.py','source_class_namespace_rules.py','source_capture_interfaces.py')
 
 
 class SourceRuleError(ProductionError):
@@ -533,7 +533,7 @@ class _Builder:
                 region.parameters, self.completions(region), tuple(step.id for step in region.steps)))
         return P.SourceProductionPlan(self.rules.source.input, root_source, self.purpose, root.id,
             tuple(records), tuple(self.steps), tuple(P.ProductionSlotDisposition(site, disposition)
-                for site, disposition in self.slots.items()))
+                for site, disposition in self.slots.items()),self.rules.source.capture_paths.export_steps(self.steps))
 
     def target(self, region, state):
         kind = self.node.constructor

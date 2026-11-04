@@ -29,7 +29,7 @@ class EvaluationInterfaceIndex:
             _require(type(request) is P.LazyExpressionInterface,'request','expected an original function annotation or lazy expression interface')
             anchor=request.source;scope=request.scope;captures=request.captures;default=request.format_default
         return P.EvaluationRequestEnvironment(anchor,scope,self.source.context.material.root_context.environment,
-            captures,default,world,abi)
+            captures,default,world,abi,self.source.capture_paths.owned_cells(scope))
 
     def expected(self,environment):
         source=self.source;anchor=environment.source;scope=source.context.material.scopes[environment.scope]

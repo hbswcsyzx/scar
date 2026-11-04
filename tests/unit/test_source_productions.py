@@ -16,7 +16,7 @@ BOOL = ValueType(ValueKind.DATA, 'builtins.bool')
 REF = ValueType(ValueKind.REFERENCE)
 SOURCE = P.ProductionOccurrence(0)
 CONTEXT = ContextState(OwnerRef(0, 'ROOT'), 0, 0, 0)
-BASIS = P.ProductionInput('/source/test.py', '/source', *('a' * 64 for _ in range(5)))
+BASIS = P.ProductionInput('/source/test.py', '/source', *('a' * 64 for _ in range(8)))
 
 
 def normal(*types):
@@ -65,7 +65,7 @@ def test_closed_grammar_exact_records_strict_codec_and_budgets():
     assert summary['control_semantics_checked'] is False
     assert A.read_production_plan(A.production_plan_document(value)) == value
     catalog = A.production_type_catalog()
-    assert catalog['counts'] == dict(records=104, fields=272, identifiers=4, enums=26, enum_members=240, unions=21)
+    assert catalog['counts'] == dict(records=106, fields=285, identifiers=4, enums=26, enum_members=240, unions=23)
     assert set(catalog['instruction_variants']) == {
         'EvaluateChild', 'ApplyLanguageAction', 'ReadCompilationOption', 'ApplyInplaceOperator', 'PublishAnnotation',
         'ImportRequest', 'ImportMember', 'ImportStar',

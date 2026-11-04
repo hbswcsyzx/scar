@@ -19,19 +19,7 @@ class DeferredInterfaceIndex:
         self.ports = defaultdict(list)
         for ordinal, port in enumerate(source.frontend.roles.ports):
             self.ports[port.site].append(ordinal)
-        data = source.frontend.bindings
-        active = set()
-        for demand in data.captures:
-            if demand.activation in ('TEMPLATE_ONLY', 'TYPE_GRAMMAR'):
-                continue
-            hop = demand.hop
-            while hop is not None and hop not in active:
-                active.add(hop)
-                hop = data.relays[hop].parent
-        self.captures = defaultdict(list)
-        for ordinal, hop in enumerate(data.relays):
-            if ordinal in active:
-                self.captures[hop.scope].append(ordinal)
+        self.captures = source.capture_paths.captures
         self.yield_owners, self.await_owners = set(), set()
         eager, direct_async = set(), set()
         for ordinal, node in enumerate(source.context.syntax.nodes):
@@ -123,7 +111,8 @@ class DeferredInterfaceIndex:
             raise ValueError('deferred body has no original child scope')
         scope = self.scopes[occurrence]
         return P.DeferredEnvironment(scope, self.source.context.material.root_context.environment,
-            self.parameters(occurrence), tuple(self.captures[scope]), self.kind(occurrence), world, exception_abi)
+            self.parameters(occurrence), tuple(self.captures[scope]), self.kind(occurrence), world, exception_abi,
+            self.source.capture_paths.owned_cells(scope))
 
     def kind(self, occurrence):
         syntax, roles = self.source.context.syntax, self.source.roles

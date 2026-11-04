@@ -26,6 +26,7 @@ from scar.analysis.source_pattern_interfaces import PatternInterfaceIndex
 from scar.analysis.source_root_interfaces import RootInterfaceIndex
 from scar.analysis.source_evaluation_interfaces import EvaluationInterfaceIndex
 from scar.analysis.source_class_namespace_interfaces import ClassNamespaceIndex
+from scar.analysis.source_capture_interfaces import CaptureInterfaceIndex
 
 
 class ProductionError(ValueError):
@@ -65,7 +66,7 @@ def production_type_catalog():
                  'scar.analysis.source_statement_interfaces', 'scar.analysis.source_type_parameter_interfaces',
                  'scar.analysis.source_definition_interfaces','scar.analysis.source_pattern_interfaces',
                  'scar.analysis.source_root_interfaces','scar.analysis.source_evaluation_interfaces','scar.analysis.source_syntax',
-                 'scar.analysis.source_class_namespace_interfaces'):
+                 'scar.analysis.source_class_namespace_interfaces','scar.analysis.source_capture_interfaces'):
         modules[name] = sha256(Path(sys.modules[name].__file__).read_bytes()).hexdigest()
     payload = dict(schema='scar.source-production-type-catalog', schema_version=1,
         root=root, types=rows, counts=counts, modules=dict(sorted(modules.items())),
@@ -155,7 +156,7 @@ def validate_production_plan(plan, *, max_visits=1_000_000):
     """
     visits = _shape(plan, max_visits)
     _require((plan.schema, plan.schema_version, plan.authority) == (
-        'scar.source-production-plan', 19, 'SOURCE_RECIPE_SHAPE_ONLY'),
+        'scar.source-production-plan', 20, 'SOURCE_RECIPE_SHAPE_ONLY'),
         'SCHEMA', 'plan', 'unsupported recipe schema or authority')
     source = plan.input
     _require(bool(source.path) and bool(source.namespace_root), 'INPUT', 'plan.input', 'source paths must be nonempty')
@@ -259,11 +260,28 @@ def validate_production_plan(plan, *, max_visits=1_000_000):
     protocols = ({r.kind: r for r in protocol_signature_catalog()}
         if any(type(s.instruction) is P.ApplyPythonProtocol for s in plan.steps) else {})
 
+    transports={r.reference:r for r in plan.capture_transports};needed_captures=set()
+    _require(len(transports)==len(plan.capture_transports),'CAPTURE_TRANSPORT','plan.capture_transports','duplicate shared capture key')
+
+    def capture_reference(reference):
+        if type(reference) is int:
+            _require(reference>=0,'CAPTURE_TRANSPORT',str(reference),'original relay reference must be nonnegative')
+            return True
+        valid=reference.scope>=0 and reference.binding>=0 and reference in transports
+        _require(valid,'CAPTURE_TRANSPORT',str(reference),'derived capture needs a declared shared transport')
+        needed_captures.add(reference)
+        return True
+
+    def captures(references):return len(set(references))==len(references) and all(capture_reference(c) for c in references)
+
+    def cells(environment):
+        return all(i>=0 for i in environment.owned_cells) and len(set(environment.owned_cells))==len(environment.owned_cells)
+
     def deferred_ports(environment):
         _require(type(environment.world) is ValueType and environment.world.kind is ValueKind.STATE,
             'DEFERRED_INTERFACE', 'environment.world', 'a deferred activation requires an explicit state domain')
         _require(environment.scope >= 0 and environment.globals_scope >= 0
-            and all(c >= 0 for c in environment.captures) and len(set(environment.captures)) == len(environment.captures),
+            and captures(environment.captures) and cells(environment),
             'DEFERRED_INTERFACE', 'environment', 'original scopes/capture references must be distinct and nonnegative')
         rank, prior, singletons = list(P.DeferredParameterKind), -1, set()
         sources, bindings = set(), set()
@@ -290,7 +308,7 @@ def validate_production_plan(plan, *, max_visits=1_000_000):
 
     def annotation_ports(annotations):
         _require(annotations.scope >= 0 and bool(annotations.entries)
-            and all(c >= 0 for c in annotations.captures) and len(set(annotations.captures)) == len(annotations.captures),
+            and captures(annotations.captures),
             'FUNCTION_INTERFACE', 'annotations', 'annotation scope/entries/capture references must be explicit')
         _require(all(e.name for e in annotations.entries) and len({e.value for e in annotations.entries}) == len(annotations.entries),
             'FUNCTION_INTERFACE', 'annotations', 'annotation entries require names and distinct original value sources')
@@ -298,14 +316,14 @@ def validate_production_plan(plan, *, max_visits=1_000_000):
     def evaluation_ports(environment):
         _require(type(environment.world) is ValueType and environment.world.kind is ValueKind.STATE
             and environment.scope>=0 and environment.globals_scope>=0 and environment.format_default in (None,1)
-            and all(c>=0 for c in environment.captures) and len(set(environment.captures))==len(environment.captures),
+            and captures(environment.captures) and cells(environment),
             'EVALUATION_REQUEST_INTERFACE','environment','request scope/captures/default/world must be explicit')
         reference=ValueType(ValueKind.REFERENCE)
         return (reference,reference,environment.world)
 
     def lazy_interface(expression):
         _require(expression.scope >= 0 and expression.format_default == 1
-            and all(c >= 0 for c in expression.captures) and len(set(expression.captures)) == len(expression.captures),
+            and captures(expression.captures),
             'TYPE_PARAMETER_INTERFACE','lazy','lazy evaluator scope/capture/default-format interface differs')
 
     def type_parameter(parameter):
@@ -323,7 +341,7 @@ def validate_production_plan(plan, *, max_visits=1_000_000):
     def type_parameter_ports(environment):
         _require(type(environment.world) is ValueType and environment.world.kind is ValueKind.STATE
             and environment.scope >= 0 and bool(environment.parameters)
-            and len(set(environment.captures)) == len(environment.captures) and all(c >= 0 for c in environment.captures)
+            and captures(environment.captures) and cells(environment)
             and len(set(environment.inputs)) == len(environment.inputs),
             'TYPE_PARAMETER_INTERFACE','environment','type-parameter scope/input/capture domain differs')
         _require(len({p.name for p in environment.parameters}) == len(environment.parameters)
@@ -339,8 +357,7 @@ def validate_production_plan(plan, *, max_visits=1_000_000):
     def class_ports(interface):
         _require(type(interface.world) is ValueType and interface.world.kind is ValueKind.STATE
             and interface.scope >= 0 and interface.globals_scope >= 0
-            and all(c >= 0 for c in (*interface.captures,*interface.protocol_bindings))
-            and len(set(interface.captures)) == len(interface.captures)
+            and captures(interface.captures) and cells(interface) and all(c>=0 for c in interface.protocol_bindings)
             and len(set(interface.protocol_bindings)) == len(interface.protocol_bindings),
             'CLASS_INTERFACE','interface','class namespace/capture/protocol domain differs')
         reference=ValueType(ValueKind.REFERENCE)
@@ -893,7 +910,7 @@ def validate_production_plan(plan, *, max_visits=1_000_000):
                     'DEFERRED_INTERFACE', str(identity), 'deferred body may return/raise with its declared world, not fall through')
             elif type(instruction) is P.ReferenceEnvironment:
                 reference = instruction.source
-                _require((reference.scope if type(reference) is P.GlobalsEnvironment else reference.relay) >= 0,
+                _require(reference.scope>=0 if type(reference) is P.GlobalsEnvironment else capture_reference(reference.relay),
                     'DEFERRED_INTERFACE', str(identity), 'environment handle reference must be nonnegative')
                 _require(len(args) == 1 and type(args[0]) is ValueType and args[0].kind is ValueKind.STATE
                     and outputs == {(C.FALLTHROUGH, None): (ValueType(ValueKind.REFERENCE), args[0])},
@@ -953,6 +970,26 @@ def validate_production_plan(plan, *, max_visits=1_000_000):
     _require(referenced_regions == set(regions), 'REGION_REFERENCE', 'plan.regions', 'unreferenced region templates remain')
     sites = [item.field for item in plan.slots]
     _require(len(set(sites)) == len(sites), 'SOURCE_SLOT', 'plan.slots', 'each source slot gets one disposition')
+    # Only referenced shared hops and their parents belong to this plan.
+    pending=list(needed_captures);selected=set()
+    while pending:
+        reference=pending.pop()
+        if reference in selected:continue
+        selected.add(reference);row=transports[reference]
+        _require(bool(row.compiler_slots) and all(i>=0 for i in row.compiler_slots)
+            and len(set(row.compiler_slots))==len(row.compiler_slots),'CAPTURE_TRANSPORT',str(reference),
+            'derived hop requires original compiler witnesses')
+        if row.parent is not None:
+            capture_reference(row.parent)
+            if type(row.parent) is P.DerivedCaptureRef:pending.append(row.parent)
+    _require(selected==set(transports),'CAPTURE_TRANSPORT','plan.capture_transports','unreferenced derived transports remain')
+    finished=set()
+    for initial in selected:
+        current=initial;path=set()
+        while type(current) is P.DerivedCaptureRef and current not in finished:
+            _require(current not in path,'CAPTURE_TRANSPORT',str(current),'capture parent cycle')
+            path.add(current);current=transports[current].parent
+        finished.update(path)
     # Every source reference is nonnegative even when original material is not attached.
     for row in (*plan.regions, *plan.steps):
         if type(row.source) is P.ProductionOccurrence:
@@ -990,11 +1027,18 @@ class ProductionSourceIndex:
         self._roots = None
         self._evaluations = None
         self._class_names = None
+        self._capture_paths = None
         self._expressions=frozenset(row.name for row in syntax.profile.ast_schema if 'expr' in row.bases)
         self._role_sites = frozenset(port.site for port in frontend_view.roles.ports)
         self.input = P.ProductionInput(f0['path'], f0['namespace_root'], _digest(encode(syntax)),
             _digest(encode(context_view.roles)), _digest(encode(context_view.material)),
-            _digest(encode(frontend_view.declarations)), _digest(encode(frontend_view.bindings)))
+            _digest(encode(frontend_view.declarations)), _digest(encode(frontend_view.bindings)),
+            _digest(encode(frontend_view.native)),_digest(encode(frontend_view.topology)),_digest(encode(frontend_view.symbols)))
+
+    @property
+    def capture_paths(self):
+        if self._capture_paths is None:self._capture_paths=CaptureInterfaceIndex(self)
+        return self._capture_paths
 
     @property
     def deferred(self):
@@ -1041,6 +1085,8 @@ class ProductionSourceIndex:
     def match(self, plan, *, max_visits=1_000_000):
         summary = validate_production_plan(plan, max_visits=max_visits)
         _require(plan.input == self.input, 'INPUT_LINEAGE', 'plan.input', 'recipe refers to different F2/F3 materials')
+        _require(all(r==self.capture_paths.transports.get(r.reference) for r in plan.capture_transports),
+            'SOURCE_CAPTURE_TRANSPORT','plan.capture_transports','capture path/compiler witnesses differ from original F3 facts')
 
         def source(ref):
             if type(ref) is P.ProductionOccurrence:
@@ -1326,9 +1372,7 @@ class ProductionSourceIndex:
                         _require(handle.scope == self.context.material.root_context.environment,
                             'SOURCE_DEFERRED', str(step.id), 'globals reference must name the original root namespace')
                     else:
-                        _require(0 <= handle.relay < len(self.frontend.bindings.relays),
-                            'SOURCE_DEFERRED', str(step.id), 'cell handle lacks an original forwarding hop')
-                        relay = self.frontend.bindings.relays[handle.relay]
+                        relay = self.capture_paths.relay(handle.relay)
                         scope = self.context.material.scopes[relay.scope]
                         _require(handle.relay in self.deferred.captures[relay.scope]
                             and region_index[step.region].context.environment == scope.parent

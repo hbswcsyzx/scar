@@ -24,7 +24,7 @@ class DefinitionInterfaceIndex:
             if self.source.roles.field(owner,'type_params').items else None)
         return P.ClassBodyInterface(scope,self.source.context.material.root_context.environment,
             tuple(self.source.deferred.captures[scope]),protocols,self.source.statements.declaration_docstring(owner),
-            params,world,exception_abi)
+            params,world,exception_abi,self.source.capture_paths.owned_cells(scope))
 
     def alias(self,owner,exception_abi):
         roles=self.source.roles;nodes=self.source.context.syntax.nodes
