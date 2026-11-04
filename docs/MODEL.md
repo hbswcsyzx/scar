@@ -97,6 +97,7 @@ import 的 module 引用、namespace 和初始化状态分别表示；属性访�
 短路、比较、索引、赋值、调用及解包都可能调用用户代码、产生部分效果或抛错。
 受支持的 try/finally/with 保留 pending completion 和清理顺序；generator/async 创建与恢复分开。
 函数定义的创建、注解请求与调用激活分开，docstring属于编译元数据；decorator可返回任意对象，最终绑定沿实际decorator结果，不保证仍是原函数。初始defaults和cell引用保持来源，不承诺后续内容不变。
+泛型工厂使用原type-parameter子scope；外层已求出的defaults通过显式端口进入。TypeVar等对象、惰性求值器、初始化绑定和参数tuple分别表示；bound/default属于后续请求，不能因其源码出现在声明中就提前求值。
 复杂异常组、模式匹配、动态生成代码及部分异步/委托协议仍可能有明确前沿，不能宣称全语言闭合。
 见 [源码降低](../scar/analysis/program_lowering.py)、[控制结构](../scar/ir/program/structured.py)
 与 [恢复协议](../scar/ir/program/resumption.py)。

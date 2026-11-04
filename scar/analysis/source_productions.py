@@ -20,6 +20,7 @@ from scar.ir.program.delegation_signatures import resolve_delegation_signature
 from scar.ir.record_codec import decode, encode
 from scar.analysis.source_deferred_interfaces import DeferredInterfaceIndex
 from scar.analysis.source_statement_interfaces import SourceStatementInterfaceIndex
+from scar.analysis.source_type_parameter_interfaces import TypeParameterInterfaceIndex
 
 
 class ProductionError(ValueError):
@@ -56,7 +57,7 @@ def production_type_catalog():
     modules[__name__] = sha256(Path(__file__).read_bytes()).hexdigest()
     for name in ('scar.analysis.program_types', 'scar.ir.record_codec', 'scar.ir.program.protocol_signatures',
                  'scar.ir.program.delegation_signatures', 'scar.analysis.source_deferred_interfaces',
-                 'scar.analysis.source_statement_interfaces'):
+                 'scar.analysis.source_statement_interfaces', 'scar.analysis.source_type_parameter_interfaces'):
         modules[name] = sha256(Path(sys.modules[name].__file__).read_bytes()).hexdigest()
     payload = dict(schema='scar.source-production-type-catalog', schema_version=1,
         root=root, types=rows, counts=counts, modules=dict(sorted(modules.items())),
@@ -146,7 +147,7 @@ def validate_production_plan(plan, *, max_visits=1_000_000):
     """
     visits = _shape(plan, max_visits)
     _require((plan.schema, plan.schema_version, plan.authority) == (
-        'scar.source-production-plan', 9, 'SOURCE_RECIPE_SHAPE_ONLY'),
+        'scar.source-production-plan', 10, 'SOURCE_RECIPE_SHAPE_ONLY'),
         'SCHEMA', 'plan', 'unsupported recipe schema or authority')
     source = plan.input
     _require(bool(source.path) and bool(source.namespace_root), 'INPUT', 'plan.input', 'source paths must be nonempty')
@@ -192,7 +193,7 @@ def validate_production_plan(plan, *, max_visits=1_000_000):
         if action == 'LEAVE':
             intervals[identity] = (intervals[identity][0], clock)
             continue
-        if regions[identity].kind is P.ProductionRegionKind.DEFERRED:
+        if regions[identity].kind in (P.ProductionRegionKind.DEFERRED,P.ProductionRegionKind.TYPE_PARAMETERS):
             boundary = identity
         boundaries[identity] = boundary
         intervals[identity] = (clock, None)
@@ -264,6 +265,39 @@ def validate_production_plan(plan, *, max_visits=1_000_000):
             'FUNCTION_INTERFACE', 'annotations', 'annotation scope/entries/capture references must be explicit')
         _require(all(e.name for e in annotations.entries) and len({e.value for e in annotations.entries}) == len(annotations.entries),
             'FUNCTION_INTERFACE', 'annotations', 'annotation entries require names and distinct original value sources')
+
+    def lazy_interface(expression):
+        _require(expression.scope >= 0 and expression.format_default == 1
+            and all(c >= 0 for c in expression.captures) and len(set(expression.captures)) == len(expression.captures),
+            'TYPE_PARAMETER_INTERFACE','lazy','lazy evaluator scope/capture/default-format interface differs')
+
+    def type_parameter(parameter):
+        _require(parameter.binding_port >= 0,'TYPE_PARAMETER_INTERFACE','parameter','negative source interface port')
+        _require(parameter.kind is P.TypeParameterKind.TYPE_VAR or parameter.bound is None,
+            'TYPE_PARAMETER_INTERFACE','parameter','only TypeVar has a bound/constraints evaluator')
+        _require(not parameter.constraints or parameter.bound is not None,'TYPE_PARAMETER_INTERFACE','parameter','constraints require an evaluator')
+        for expression in (parameter.bound,parameter.default):
+            if expression is not None:lazy_interface(expression)
+        _require(parameter.bound is None or not parameter.bound.unpack_starred,
+            'TYPE_PARAMETER_INTERFACE','parameter','bound evaluator does not unpack a starred result')
+        _require(parameter.default is None or not parameter.default.unpack_starred or parameter.kind is P.TypeParameterKind.TYPE_VAR_TUPLE,
+            'TYPE_PARAMETER_INTERFACE','parameter','only TypeVarTuple default may unpack a starred result')
+
+    def type_parameter_ports(environment):
+        _require(type(environment.world) is ValueType and environment.world.kind is ValueKind.STATE
+            and environment.scope >= 0 and bool(environment.parameters)
+            and len(set(environment.captures)) == len(environment.captures) and all(c >= 0 for c in environment.captures)
+            and len(set(environment.inputs)) == len(environment.inputs),
+            'TYPE_PARAMETER_INTERFACE','environment','type-parameter scope/input/capture domain differs')
+        _require(len({p.name for p in environment.parameters}) == len(environment.parameters)
+            and len({p.binding_port for p in environment.parameters}) == len(environment.parameters),
+            'TYPE_PARAMETER_INTERFACE','environment','type parameters require distinct source interfaces')
+        seen=False
+        for p in environment.parameters:
+            type_parameter(p)
+            _require(not seen or p.default is not None,'TYPE_PARAMETER_INTERFACE','environment','non-default parameter follows default')
+            seen|=p.default is not None
+        return (*(ValueType(ValueKind.REFERENCE) for _ in range(len(environment.captures)+len(environment.inputs))),environment.world)
     claimed, referenced_regions = set(), {plan.root}
     for region in plan.regions:
         _require(bool(region.steps), 'REGION_EXIT', str(region.id), 'region needs an explicit result/transfer step')
@@ -314,6 +348,48 @@ def validate_production_plan(plan, *, max_visits=1_000_000):
             elif type(instruction) is P.ReadCompilationOption:
                 _require(not args and outputs == {(C.FALLTHROUGH, None): (ValueType(ValueKind.DATA, 'builtins.bool'),)},
                     'COMPILATION_OPTION', str(identity), 'compilation option produces only one symbolic boolean')
+            elif type(instruction) is P.EnterTypeParameters:
+                environment=instruction.environment
+                _require(region.kind is P.ProductionRegionKind.TYPE_PARAMETERS and ordinal==0
+                    and args==region.parameters==type_parameter_ports(environment)
+                    and step.arguments==tuple(P.ProductionParameter(region.id,i) for i in range(len(region.parameters)))
+                    and outputs=={(C.FALLTHROUGH,None):(environment.world,)},
+                    'TYPE_PARAMETER_INTERFACE',str(identity),'type-parameter activation must admit its exact source inputs first')
+            elif type(instruction) is P.InvokeTypeParameterFactory:
+                environment=instruction.environment
+                target=child(instruction.invocation.region,P.ProductionRegionKind.TYPE_PARAMETERS)
+                _require(not args and target.parameters==type_parameter_ports(environment)
+                    and target.steps and type(steps[target.steps[0]].instruction) is P.EnterTypeParameters
+                    and steps[target.steps[0]].instruction.environment==environment,
+                    'TYPE_PARAMETER_INTERFACE',str(identity),'factory body must activate its original type-parameter interface')
+                body_outputs=invoke(instruction.invocation)
+                reference=ValueType(ValueKind.REFERENCE)
+                raised=(reference,environment.world) if environment.exception_abi is ExceptionABI.EXCEPTION_WORLD else (reference,reference,environment.world)
+                allowed={(C.FALLTHROUGH,None):(reference,environment.world),(C.RAISE,None):raised}
+                _require(all(k in allowed and allowed[k]==v for k,v in body_outputs.items())
+                    and outputs=={**body_outputs,(C.RAISE,None):raised},
+                    'TYPE_PARAMETER_INTERFACE',str(identity),'factory must preserve body results and creation/entry failure')
+            elif type(instruction) in (P.BuildLazyExpression,P.CreateTypeParameter,P.SetTypeParameterDefault,P.BindTypeParameter,P.AttachTypeParameters):
+                _require(bool(args) and type(args[-1]) is ValueType and args[-1].kind is ValueKind.STATE,
+                    'TYPE_PARAMETER_INTERFACE',str(identity),'type-parameter action needs an explicit world')
+                reference=ValueType(ValueKind.REFERENCE);world=args[-1]
+                if type(instruction) is P.BuildLazyExpression:
+                    lazy_interface(instruction.expression)
+                    count=1+len(instruction.expression.captures)
+                elif type(instruction) is P.AttachTypeParameters:
+                    count=2
+                else:
+                    type_parameter(instruction.parameter)
+                    if type(instruction) is P.CreateTypeParameter:count=int(instruction.parameter.bound is not None)
+                    elif type(instruction) is P.SetTypeParameterDefault:
+                        _require(instruction.parameter.default is not None,'TYPE_PARAMETER_INTERFACE',str(identity),'default setter needs an original default evaluator')
+                        count=2
+                    else:count=1
+                normal=(reference,world) if type(instruction) in (P.BuildLazyExpression,P.CreateTypeParameter) else (world,)
+                raised=(reference,world) if instruction.exception_abi is ExceptionABI.EXCEPTION_WORLD else (reference,reference,world)
+                _require(args==(*(reference for _ in range(count)),world)
+                    and outputs=={(C.FALLTHROUGH,None):normal,(C.RAISE,None):raised},
+                    'TYPE_PARAMETER_INTERFACE',str(identity),'type-parameter action ports differ from its source contract')
             elif type(instruction) in (P.BuildFunctionAnnotations,P.BuildFunction,P.ApplyDecorator,P.TranslateEscapingException):
                 _require(bool(args) and type(args[-1]) is ValueType and args[-1].kind is ValueKind.STATE,
                     'FUNCTION_INTERFACE', str(identity), 'function operation requires an explicit state domain')
@@ -649,6 +725,7 @@ class ProductionSourceIndex:
         self.roles = context_view.role_view
         self._deferred = None
         self._statements = None
+        self._type_parameters = None
         self._role_sites = frozenset(port.site for port in frontend_view.roles.ports)
         self.input = P.ProductionInput(f0['path'], f0['namespace_root'], _digest(encode(syntax)),
             _digest(encode(context_view.roles)), _digest(encode(context_view.material)),
@@ -666,6 +743,11 @@ class ProductionSourceIndex:
             self._statements = SourceStatementInterfaceIndex(self)
         return self._statements
 
+    @property
+    def type_parameters(self):
+        if self._type_parameters is None:self._type_parameters=TypeParameterInterfaceIndex(self)
+        return self._type_parameters
+
     def match(self, plan, *, max_visits=1_000_000):
         summary = validate_production_plan(plan, max_visits=max_visits)
         _require(plan.input == self.input, 'INPUT_LINEAGE', 'plan.input', 'recipe refers to different F2/F3 materials')
@@ -682,6 +764,12 @@ class ProductionSourceIndex:
             for region in plan.regions:
                 _require(region.context == source(region.source), 'SOURCE_CONTEXT', str(region.id),
                          'region context differs from its original F2/F3 source reference')
+                if region.kind is P.ProductionRegionKind.TYPE_PARAMETERS:
+                    scope=self.context.material.scopes[region.context.environment]
+                    parent=region_index.get(region.parent)
+                    _require(scope.kind=='TYPE_PARAMETERS' and region.source==scope.anchor
+                        and parent is not None and scope.parent==parent.context.environment,
+                        'SOURCE_TYPE_PARAMETERS',str(region.id),'factory scope must connect its original creator namespace')
                 for completion in region.completions:
                     if type(completion.target) is P.SourceLoopTarget:
                         _require(completion.target == self.statements.active_loop(region.source),
@@ -699,7 +787,31 @@ class ProductionSourceIndex:
                         _require(completion.target == self.statements.active_loop(step.source),
                             'SOURCE_LOOP', str(step.id), 'child/transfer completion has a different lexical loop target')
                 instruction = step.instruction
-                if type(instruction) is P.EvaluateChild:
+                if type(instruction) in (P.EnterTypeParameters,P.InvokeTypeParameterFactory):
+                    environment=instruction.environment
+                    scope=self.context.material.scopes[environment.scope]
+                    _require(environment==self.type_parameters.environment(scope.owner.occurrence,environment.world,environment.exception_abi),
+                        'SOURCE_TYPE_PARAMETERS',str(step.id),'factory interface differs from original source scope/parameters/defaults/captures')
+                elif type(instruction) is P.BuildLazyExpression:
+                    expression=instruction.expression
+                    field,_=self.roles.locate(expression.source)
+                    allow=self.context.syntax.nodes[expression.source.occurrence].constructor=='TypeVarTuple' and field.name=='default_value'
+                    scope=self.context.material.scopes[expression.scope]
+                    _require(expression==self.type_parameters.lazy(expression.source,allow_starred=allow)
+                        and step.source==expression.source and region_index[step.region].context.environment==scope.parent,
+                        'SOURCE_TYPE_PARAMETERS',str(step.id),'lazy evaluator source or creation namespace differs')
+                elif type(instruction) in (P.CreateTypeParameter,P.SetTypeParameterDefault,P.BindTypeParameter):
+                    parameter=instruction.parameter
+                    _require(parameter==self.type_parameters.spec(parameter.name.occurrence)
+                        and step.source==P.ProductionOccurrence(parameter.name.occurrence)
+                        and region_index[step.region].context.environment==self.context.entry_context(parameter.name.occurrence).environment,
+                        'SOURCE_TYPE_PARAMETERS',str(step.id),'type parameter differs from its original source interface/namespace')
+                elif type(instruction) is P.AttachTypeParameters:
+                    scope=self.context.material.scopes[region_index[step.region].context.environment]
+                    _require(step.source==instruction.source and scope.kind=='TYPE_PARAMETERS'
+                        and scope.anchor==instruction.source,
+                        'SOURCE_TYPE_PARAMETERS',str(step.id),'type tuple association requires its original factory scope')
+                elif type(instruction) is P.EvaluateChild:
                     _, value = self.roles.locate(instruction.field)
                     _require(instruction.field.group == 'FIELD' and value.kind in ('NODE', 'LIST'),
                              'SOURCE_REFERENCE', str(step.id), 'evaluated child must be an original child field')

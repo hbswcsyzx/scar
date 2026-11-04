@@ -1,8 +1,7 @@
 """Function creation schedules and separately admitted deferred bodies.
 
-Decorators/defaults run in the original creator; annotation requests and body
-execution retain their distinct C1 scopes. Type-parameter factory creation is
-an explicit remaining source-rule frontier, not a guessed parent namespace.
+Decorators/defaults run in the original creator; generic factory creation,
+annotation requests and body execution retain their distinct C1 scopes.
 """
 from scar.analysis.source_expression_rules import _REF, _require
 from scar.analysis.source_callable_rules import prepare_defaults, complete_deferred_body
@@ -11,8 +10,6 @@ from scar.ir.program.structured import PythonProtocolKind as K
 
 
 def emit_function_definition(b,root,state):
-    _require(not b.value(b.site('type_params')).items, 'TYPE_PARAMETERS_FRONTIER', str(b.occurrence),
-        'generic function definition needs its original type-parameter factory activation rule')
     env=b.rules.source.deferred.interface(b.occurrence,b.world,b.rules.exception_abi)
     annotations=b.rules.source.deferred.annotations(b.occurrence)
     docstring=b.rules.source.statements.function_docstring(b.occurrence)
@@ -25,26 +22,16 @@ def emit_function_definition(b,root,state):
         value,state=b.evaluate(root,site,state)
         decorators.append((site,value))
     defaults,keywords,state=prepare_defaults(b,root,state,env)
-    globals_ref,state=b.environment(root,P.GlobalsEnvironment(env.globals_scope),state)
-    annotate=None
-    if annotations is not None:
-        captures=[]
-        for relay in annotations.captures:
-            capture,state=b.environment(root,P.ClosureEnvironment(relay),state)
-            captures.append(capture)
-        for entry in annotations.entries:
-            b.slots[entry.value]=P.ProductionDispositionKind.DEFERRED_CHILD
-        annotate,state=b.emit(root,P.BuildFunctionAnnotations(annotations,b.rules.exception_abi),
-            (globals_ref,*captures,state),(_REF,b.world))
-    b.mark('body',P.ProductionDispositionKind.DEFERRED_CHILD)
-    body=b.region(b.site('body'),(_REF,*(_REF for _ in env.parameters),b.world),root,P.ProductionRegionKind.DEFERRED)
-    code,=b.emit(root,P.DeferRegion(body.id,env),(),(_REF,),may_raise=False)
-    cells=[]
-    for relay in env.captures:
-        cell,state=b.environment(root,P.ClosureEnvironment(relay),state)
-        cells.append(cell)
-    arguments=(code,globals_ref,*defaults,*keywords,*cells,*(() if annotate is None else (annotate,)),state)
-    function,state=b.emit(root,P.BuildFunction(env,annotations,docstring),arguments,(_REF,b.world))
+    if b.value(b.site('type_params')).items:
+        from scar.analysis.source_type_parameter_rules import enter_factory
+        result,factory,parameters,passed,active=enter_factory(b,root,state,(*defaults,*keywords))
+        function,active=_build_function(b,factory,active,env,annotations,docstring,passed[:len(defaults)],passed[len(defaults):])
+        active,=b.emit(factory,P.AttachTypeParameters(b.site('type_params'),b.rules.exception_abi),
+            (function,parameters,active),(b.world,))
+        b.finish(factory,(function,active),(_REF,b.world))
+        function,state=result
+    else:
+        function,state=_build_function(b,root,state,env,annotations,docstring,defaults,keywords)
     for site,decorator in reversed(decorators):
         function,state=b.emit(root,P.ApplyDecorator(site,b.rules.exception_abi),
             (decorator,function,state),(_REF,b.world),source=site)
@@ -55,6 +42,30 @@ def emit_function_definition(b,root,state):
     state,=b.protocol(root,K.FRAME_RELEASE_TEMPORARY,(function,),state)
     b.finish(root,(state,),(b.world,))
 
+
+def _build_function(b,root,state,env,annotations,docstring,defaults,keywords):
+    source=P.ProductionOccurrence(b.occurrence)
+    globals_ref,state=b.environment(root,P.GlobalsEnvironment(env.globals_scope),state,source=source)
+    annotate=None
+    if annotations is not None:
+        captures=[]
+        for relay in annotations.captures:
+            capture,state=b.environment(root,P.ClosureEnvironment(relay),state,source=source)
+            captures.append(capture)
+        for entry in annotations.entries:
+            b.slots[entry.value]=P.ProductionDispositionKind.DEFERRED_CHILD
+        annotate,state=b.emit(root,P.BuildFunctionAnnotations(annotations,b.rules.exception_abi),
+            (globals_ref,*captures,state),(_REF,b.world),source=source)
+    b.mark('body',P.ProductionDispositionKind.DEFERRED_CHILD)
+    body=b.region(b.site('body'),(_REF,*(_REF for _ in env.parameters),b.world),root,P.ProductionRegionKind.DEFERRED)
+    code,=b.emit(root,P.DeferRegion(body.id,env),(),(_REF,),may_raise=False,source=source)
+    cells=[]
+    for relay in env.captures:
+        cell,state=b.environment(root,P.ClosureEnvironment(relay),state,source=source)
+        cells.append(cell)
+    arguments=(code,globals_ref,*defaults,*keywords,*cells,*(() if annotate is None else (annotate,)),state)
+    function,state=b.emit(root,P.BuildFunction(env,annotations,docstring),arguments,(_REF,b.world),source=source)
+
     current,=b.emit(body,P.EnterDeferredBody(env),tuple(b.parameter(body,i) for i in range(len(body.parameters))),
         (b.world,),may_raise=False)
     protected=b.region(body.source,(b.world,),body)
@@ -63,3 +74,4 @@ def emit_function_definition(b,root,state):
     if docstring is not None:
         b.slots[docstring]=P.ProductionDispositionKind.METADATA
     complete_deferred_body(b,body,protected,(current,),env)
+    return function,state

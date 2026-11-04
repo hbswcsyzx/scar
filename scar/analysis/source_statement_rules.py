@@ -40,8 +40,6 @@ class SourceStatementRules(SourceExpressionRules):
             row['status'] = ('LOCAL_STATEMENT_RULE' if row['constructor'] in _FIELDS else
                 'RULE_FRONTIER' if row['constructor'] in statements else 'OUTSIDE_DOMAIN')
             row['purposes'] = [P.ProductionPurpose.STATEMENT.value] if row['constructor'] in _FIELDS else []
-            if row['constructor'] in ('FunctionDef','AsyncFunctionDef'):
-                row['context_frontiers'] = ['TYPE_PARAMETERS_FRONTIER']
         return {**catalog, 'schema': 'scar.source-statement-rule-catalog',
             'statement_implementation_sha256': sha256(Path(__file__).read_bytes()).hexdigest(),
             'scope': 'STRUCTURED_STATEMENT_SOURCE_RECIPES_ONLY',

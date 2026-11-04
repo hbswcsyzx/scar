@@ -46,7 +46,9 @@ _FIELDS = {
 _AUX_FIELDS = {'keyword': ('arg', 'value'), 'Starred': ('value', 'ctx'),
                'comprehension': ('target', 'iter', 'ifs', 'is_async'),
                'arguments': ('posonlyargs', 'args', 'vararg', 'kwonlyargs', 'kw_defaults', 'kwarg', 'defaults'),
-               'arg': ('arg', 'annotation', 'type_comment'), 'alias': ('name', 'asname')}
+               'arg': ('arg', 'annotation', 'type_comment'), 'alias': ('name', 'asname'),
+               'TypeVar': ('name','bound','default_value'), 'TypeVarTuple': ('name','default_value'),
+               'ParamSpec': ('name','default_value')}
 _COMPREHENSIONS = ('ListComp', 'SetComp', 'DictComp')
 _COMPREHENSION_PARENTS = (*_COMPREHENSIONS, 'GeneratorExp')
 _SELECTORS = {
@@ -60,7 +62,7 @@ _TARGETS = frozenset(('Name', 'Attribute', 'Subscript', 'List', 'Tuple'))
 _RULE_MODULES = ('source_display_rules.py', 'source_string_rules.py', 'source_comprehension_rules.py',
                  'source_suspension_rules.py', 'source_delegation_rules.py', 'source_callable_rules.py',
                  'source_deferred_interfaces.py', 'source_statement_atoms.py', 'source_statement_imports.py',
-                 'source_statement_functions.py')
+                 'source_statement_functions.py', 'source_type_parameter_interfaces.py', 'source_type_parameter_rules.py')
 
 
 class SourceRuleError(ProductionError):
@@ -132,7 +134,11 @@ class SourceExpressionRules:
                     [dict(constructor='arguments', field=p, owner=owner+'.args') for owner in ('Lambda','FunctionDef','AsyncFunctionDef') for p in (
                         'posonlyargs', 'args', 'vararg', 'kwonlyargs', 'kwarg')] if row.name == 'arg' else
                     [dict(constructor='Call', field='keywords')] if row.name == 'keyword' else
-                    [dict(constructor=p, field='names') for p in ('Import','ImportFrom')] if row.name == 'alias' else [])))
+                    [dict(constructor=p, field='names') for p in ('Import','ImportFrom')] if row.name == 'alias' else
+                    [dict(constructor=p,field='type_params') for p in ('FunctionDef','AsyncFunctionDef','ClassDef','TypeAlias')]
+                        if row.name in ('TypeVar','TypeVarTuple','ParamSpec') else [])))
+            if row.name == 'Starred':
+                rows[-1]['parent_contexts'].append(dict(constructor='TypeVarTuple',field='default_value'))
             if row.name in ('Name', 'Attribute', 'Subscript'):
                 rows[-1]['parent_contexts'].extend((
                     dict(constructor='AugAssign', field='target', condition='READ_MODIFY_WRITE_ADDRESS'),
@@ -189,6 +195,10 @@ class SourceExpressionRules:
                         return site
         if node.constructor not in _AUX_FIELDS:
             return None
+        if node.constructor in ('TypeVar','TypeVarTuple','ParamSpec'):
+            return site if parent in ('FunctionDef','AsyncFunctionDef','ClassDef','TypeAlias') and self.source.roles.locate(site)[0].name=='type_params' else None
+        if node.constructor == 'Starred' and parent == 'TypeVarTuple' and self.source.roles.locate(site)[0].name=='default_value':
+            return site
         if node.constructor == 'alias':
             return site if parent in ('Import','ImportFrom') and site.ordinal == self.source.roles.fields[parent]['names'] else None
         if node.constructor == 'arguments':
@@ -245,6 +255,7 @@ class SourceExpressionRules:
             argument_admission_proven=False, closure_layout_proven=False, environment_activation_proven=False,
             compilation_options_resolved=False, annotation_request_bodies_lowered=False,
             importer_dispatch_proven=False, module_initialization_observed=False, import_namespace_layout_proven=False,
+            type_parameter_native_abi_proven=False, lazy_evaluator_bodies_lowered=False,
             effects_proven=False, canonical_graph_generated=False, transformation_authorized=False)
 
 
@@ -348,8 +359,8 @@ class _Builder:
         outputs = next(c.types for c in signature.completions if c.kind is ExitKind.NORMAL) if invoke else signature.results
         return self.emit(region, P.ApplyDelegationProtocol(kind, bindings), (*arguments, state), outputs, may_raise=invoke)
 
-    def environment(self, region, handle, state):
-        return self.emit(region, P.ReferenceEnvironment(handle), (state,), (_REF, self.world), may_raise=False)
+    def environment(self, region, handle, state, *, source=None):
+        return self.emit(region, P.ReferenceEnvironment(handle), (state,), (_REF, self.world), may_raise=False,source=source)
 
     def finish(self, region, values, types):
         self.transfer(region, C.FALLTHROUGH, values, types)

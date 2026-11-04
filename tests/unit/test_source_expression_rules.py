@@ -697,7 +697,7 @@ def test_delegation_keeps_send_and_post_driver_completion_paths_separate(rules, 
             plan = variant.build(occurrence)
             checked = variant.verify(plan)
             assert not checked['native_delegation_expanded'] and not checked['driver_protocol_graph_generated']
-            assert plan.schema_version == 9
+            assert plan.schema_version == 10
             _, root_steps = owned(plan)
             acquire = next(s for s in root_steps if type(s.instruction) is P.ApplyDelegationProtocol)
             assert acquire.instruction.protocol is (P.DelegationProtocolKind.AWAITABLE_ITER if constructor == 'Await'
@@ -1260,7 +1260,7 @@ def test_named_function_creation_and_deferred_body_are_distinct_source_regions(r
     assert observed==set(P.DeferredBodyKind)
 
 
-def test_annotation_factory_and_generic_frontier_match_static_compiler_contexts():
+def test_annotation_factory_matches_static_compiler_contexts():
     import dis
     from types import CodeType
     from scar.analysis.source_statement_rules import SourceStatementRules
@@ -1280,7 +1280,52 @@ def test_annotation_factory_and_generic_frontier_match_static_compiler_contexts(
     assert not any(s.opname=='LOAD_CONST' and s.argval=='Documentation.' for s in dis.get_instructions(fn))
     annotated=next(c for c in code.co_consts if type(c) is CodeType and c.co_name=='__annotate__')
     assert [s.argval for s in dis.get_instructions(annotated) if s.opname=='LOAD_GLOBAL']==['C','A','B','K','Result']
-    generic=_rules(_documents('def generic[T: Bound=Default](value: T=initial()) -> T:\n    return value\n'))
-    statements=SourceStatementRules(generic.source,world=WORLD,exception_abi=ExceptionABI.EXCEPTION_WORLD)
-    with pytest.raises(SourceRuleError,match='TYPE_PARAMETERS_FRONTIER'):
-        statements.build(occurrences(generic,'FunctionDef')[0])
+
+
+def test_generic_function_factory_preserves_creation_scope_lazy_requests_and_default_inputs():
+    import dis
+    from types import CodeType
+    from scar.analysis.source_statement_rules import SourceStatementRules
+    from scar.analysis.source_productions import read_production_plan,production_plan_document
+    text='@decorate()\ndef generic[T: (Left[T],Right)=Default[T],*Ts=*TupleDefault,**P=ParamDefault](value: T=initial(),*,key=keyword()) -> T:\n    return value,T\ndef outer(seed):\n    def nested[T: Bound[seed]=Default[seed]](value: T=seed) -> T:\n        return value,T\n    return nested\n'
+    rules=_rules(_documents(text))
+    for abi in ExceptionABI:
+        statements=SourceStatementRules(rules.source,world=WORLD,exception_abi=abi)
+        for occurrence in occurrences(rules,'FunctionDef'):
+            if not rules.source.roles.field(occurrence,'type_params').items:continue
+            plan=statements.build(occurrence);statements.verify(plan)
+            assert read_production_plan(production_plan_document(plan))==plan
+            root,creation=owned(plan)
+            invoke=next(s for s in creation if type(s.instruction) is P.InvokeTypeParameterFactory)
+            environment=invoke.instruction.environment
+            factory,execution=owned(plan,invoke.instruction.invocation.region)
+            assert factory.kind is P.ProductionRegionKind.TYPE_PARAMETERS
+            assert execution[0].instruction==P.EnterTypeParameters(environment)
+            assert factory.context.environment==environment.scope and environment.scope!=root.context.environment
+            initial=[s for s in creation if type(s.instruction) is P.EvaluateChild]
+            assert [s.instruction.field for s in initial if s.instruction.field in environment.inputs]==list(environment.inputs)
+            assert not any(type(s.instruction) is P.EvaluateChild and s.instruction.field in environment.inputs for s in execution)
+            assert not any(type(s.instruction) is P.EvaluateChild and field_name(rules,s.instruction.field) in ('bound','default_value') for s in plan.steps)
+            assert any(type(s.instruction) is P.AttachTypeParameters for s in execution)
+            assert not any(type(s.instruction) is P.BuildFunction for s in creation)
+            created=[s for s in execution if type(s.instruction) is P.CreateTypeParameter]
+            bound=[s for s in execution if type(s.instruction) is P.BindTypeParameter]
+            assert [s.instruction.parameter for s in created]==list(environment.parameters)==[s.instruction.parameter for s in bound]
+            for parameter in environment.parameters:
+                positions=[i for i,s in enumerate(execution) if type(s.instruction) in (P.CreateTypeParameter,P.SetTypeParameterDefault,P.BindTypeParameter) and s.instruction.parameter==parameter]
+                assert positions==sorted(positions) and [type(execution[i].instruction) for i in positions]==[
+                    P.CreateTypeParameter,*([P.SetTypeParameterDefault] if parameter.default is not None else []),P.BindTypeParameter]
+                port=rules.source.frontend.bindings.ports[parameter.binding_port]
+                assert port.write_target is None  # original type interface, not forged Store
+            if len(environment.parameters)==3:
+                assert [p.kind for p in environment.parameters]==list(P.TypeParameterKind)
+                assert environment.parameters[0].constraints
+                assert environment.parameters[1].default.unpack_starred
+            else:
+                assert environment.captures  # seed is relayed through the factory
+    code=compile(text,'<static-generic-factory-oracle>','exec',dont_inherit=True)
+    instructions=list(dis.get_instructions(code))
+    assert [s.argval for s in instructions if s.opname=='LOAD_NAME']==['decorate','initial','keyword']
+    factory=next(c for c in code.co_consts if type(c) is CodeType and c.co_name=='<generic parameters of generic>')
+    assert not any(s.opname=='LOAD_GLOBAL' and s.argval in ('Left','Right','Default','TupleDefault','ParamDefault') for s in dis.get_instructions(factory))
+    assert any(s.opname=='CALL_INTRINSIC_2' and s.argrepr=='INTRINSIC_SET_FUNCTION_TYPE_PARAMS' for s in dis.get_instructions(factory))

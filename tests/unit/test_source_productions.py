@@ -55,11 +55,13 @@ def test_closed_grammar_exact_records_strict_codec_and_budgets():
     assert summary['control_semantics_checked'] is False
     assert A.read_production_plan(A.production_plan_document(value)) == value
     catalog = A.production_type_catalog()
-    assert catalog['counts'] == dict(records=59, fields=169, identifiers=4, enums=18, enum_members=210, unions=19)
+    assert catalog['counts'] == dict(records=69, fields=199, identifiers=4, enums=19, enum_members=214, unions=20)
     assert set(catalog['instruction_variants']) == {
         'EvaluateChild', 'ApplyLanguageAction', 'ReadCompilationOption', 'ApplyInplaceOperator', 'PublishAnnotation',
         'ImportRequest', 'ImportMember', 'ImportStar',
         'BuildFunctionAnnotations', 'BuildFunction', 'ApplyDecorator', 'TranslateEscapingException',
+        'EnterTypeParameters', 'InvokeTypeParameterFactory', 'BuildLazyExpression', 'CreateTypeParameter',
+        'SetTypeParameterDefault', 'BindTypeParameter', 'AttachTypeParameters',
         'ApplyPythonProtocol', 'ApplyDelegationProtocol', 'AccessBinding', 'ConstructValue', 'DefineLiteral', 'ApplyRegion',
         'BranchControl', 'LoopControl', 'DeferRegion', 'ReferenceEnvironment', 'EnterDeferredBody', 'CleanupControl', 'HandleCompletions',
         'TransferCompletion', 'SuspendExecution'}
@@ -186,6 +188,36 @@ def test_function_creation_annotations_decorators_and_escape_interfaces():
                 with pytest.raises(A.ProductionError,match='FUNCTION_INTERFACE'):
                     A.validate_production_plan(replace(specimen,steps=(replace(apply,
                         instruction=replace(instruction,kind=P.DeferredBodyKind.FUNCTION)),done)))
+
+
+def test_type_parameter_action_interfaces_and_unambiguous_wire_kinds():
+    from scar.ir.program.ids import LocationID
+    from scar.ir.program.protocol_signatures import ExceptionABI
+    world=ValueType(ValueKind.STATE,location=LocationID('type-parameter-interface-world'))
+    site=P.SlotRef(0,'FIELD',0)
+    lazy=P.LazyExpressionInterface(site,2,(4,),False)
+    parameter=P.TypeParameterSpec(site,P.TypeParameterKind.TYPE_VAR,0,lazy,lazy,False)
+    for abi in ExceptionABI:
+        raised=(REF,world) if abi is ExceptionABI.EXCEPTION_WORLD else (REF,REF,world)
+        cases=[(P.BuildLazyExpression(lazy,abi),(REF,REF,world),(REF,world)),
+            (P.CreateTypeParameter(parameter,abi),(REF,world),(REF,world)),
+            (P.SetTypeParameterDefault(parameter,abi),(REF,REF,world),(world,)),
+            (P.BindTypeParameter(parameter,abi),(REF,world),(world,)),
+            (P.AttachTypeParameters(site,abi),(REF,REF,world),(world,))]
+        for instruction,arguments,result in cases:
+            outputs=(*normal(*result),P.ProductionCompletion(C.RAISE,raised))
+            root=region('type-parameter',parameters=arguments,outputs=outputs,steps=('apply','done'))
+            apply=step('apply',root,instruction,tuple(P.ProductionParameter(root.id,i) for i in range(len(arguments))),outputs)
+            done=step('done',root,P.TransferCompletion(C.FALLTHROUGH),
+                tuple(P.ProductionResult(apply.id,i) for i in range(len(result))),normal(*result))
+            specimen=plan((root,),(apply,done))
+            A.validate_production_plan(specimen)
+            wire=A.production_plan_document(specimen)
+            assert wire['steps'][0]['instruction']['record_kind']==type(instruction).__name__
+            assert A.read_production_plan(wire)==specimen
+            with pytest.raises(A.ProductionError,match='TYPE_PARAMETER_INTERFACE'):
+                A.validate_production_plan(replace(specimen,steps=(replace(apply,arguments=()),done)))
+    assert set(P.ProductionInstruction.__args__) <= set(P.PRODUCTION_RECORD_TAGS)
 
 
 def test_ordered_values_shared_subregion_and_invalid_local_edges():

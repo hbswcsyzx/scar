@@ -31,7 +31,7 @@ from scar.ir.record_codec import decode, encode
 _PARENTS = ('source_roles', 'source_contexts', 'source_declarations', 'source_bindings',
             'source_symbols', 'compiler_topology', 'compiler_symbols')
 _FRONTIERS = {'RULE_FRONTIER', 'PURPOSE_FRONTIER', 'BINDING_INTERFACE_FRONTIER', 'SUSPENSION_CONTEXT_FRONTIER',
-              'STATEMENT_CONTEXT_FRONTIER', 'TYPE_PARAMETERS_FRONTIER'}
+              'STATEMENT_CONTEXT_FRONTIER'}
 _WORLD = ValueType(ValueKind.STATE, location=LocationID('source-python-world'))
 
 
@@ -50,6 +50,7 @@ def _implementation():
         'analysis/source_callable_rules.py', 'analysis/source_deferred_interfaces.py',
         'analysis/source_statement_rules.py', 'analysis/source_statement_atoms.py', 'analysis/source_statement_imports.py',
         'analysis/source_statement_functions.py',
+        'analysis/source_type_parameter_interfaces.py', 'analysis/source_type_parameter_rules.py',
         'analysis/source_productions.py', 'analysis/program_types.py',
         'ir/program/source_productions.py', 'ir/record_codec.py')
     return {name: sha256((package / name).read_bytes()).hexdigest() for name in names}
@@ -135,6 +136,9 @@ def _unit(task):
                             child_obligations['ANNOTATION_REQUEST'] += 1
                         elif type(step.instruction) is P.BuildFunctionAnnotations:
                             child_obligations['FUNCTION_ANNOTATION_REQUEST'] += 1
+                        elif type(step.instruction) is P.BuildLazyExpression:
+                            field=rules.source.roles.locate(step.instruction.expression.source)[0].name
+                            child_obligations['TYPE_PARAMETER_'+field.upper()+'_REQUEST'] += 1
                 except SourceRuleError as error:
                     if error.code not in _FRONTIERS:
                         raise

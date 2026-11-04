@@ -177,7 +177,8 @@ PYTHONHASHSEED=0 python -B -m scar.cli source-expressions --model /path/to/model
 v6语句suite保normal/return/raise/break/continue端口，循环跳转由原F2 occurrence定位并由对应模板消费。`source_statement_interfaces.py`只给保守child接口，不授child实现、路径可行或清理证明；未来组合须检查实际child出口是该接口的子集。升级须重采集并fresh核验，不改旧材料的version冒充迁移。
 v7原子语句在`source_statement_atoms.py`；compile option、inplace operator及annotation publication都有强制接口检查。target和声明地址中的slice/tuple按原父槽分类，避免多生成一次普通写入或容器构造。DEFERRED annotation另计`ANNOTATION_REQUEST` child义务；编译选项未解析和请求body未降低分别保false，不冒称已完成。
 v8导入规则在`source_statement_imports.py`；保原alias/module/level引用和已知名字投影，正常路径按原序请求、取成员、绑定。`alias`作为父属描述符单独记账；不能将from-list、成员查找及绑定名字混为同一字符串，也不以一次静态请求证明module body已执行。
-v9函数创建在`source_statement_functions.py`；defaults与退出路径复用`source_callable_rules.py`。docstring为父属metadata；函数注解另计`FUNCTION_ANNOTATION_REQUEST`义务，调用准入、请求body和native frame仍未证明。泛型定义返回`TYPE_PARAMETERS_FRONTIER`，保全部原F2/F3材料；不能以nongeneric样本通过授予全上下文完成。
+v9函数创建在`source_statement_functions.py`；defaults与退出路径复用`source_callable_rules.py`。docstring为父属metadata；函数注解另计`FUNCTION_ANNOTATION_REQUEST`义务，调用准入、请求body和native frame仍未证明。
+v10的`source_type_parameter_interfaces.py`接原F3 scope/声明/resolution/capture，`source_type_parameter_rules.py`生成工厂激活和三类type parameter的顺序动作。lazy evaluator另计bound/default request义务；其body与native factory布局仍未降低。泛型函数已接入，原TYPE_PARAMETERS_FRONTIER已移除；class/type-alias producer仍待实现。
 星号/keyword的失败顺序参考固定版本[CPython codegen](https://github.com/python/cpython/blob/v3.14.7/Python/codegen.c)；本机stack guideline从header读入并固定SHA。
 
 源码身份桥（按unit分片，保持输入模型和旧ID）：

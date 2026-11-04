@@ -50,6 +50,7 @@ class ProductionRegionKind(str, Enum):
     TARGET = 'TARGET'
     PATTERN = 'PATTERN'
     COMPREHENSION = 'COMPREHENSION'
+    TYPE_PARAMETERS = 'TYPE_PARAMETERS'
 
 
 class ProductionDispositionKind(str, Enum):
@@ -138,6 +139,12 @@ class DeferredBodyKind(str, Enum):
     GENERATOR = 'GENERATOR'
     COROUTINE = 'COROUTINE'
     ASYNC_GENERATOR = 'ASYNC_GENERATOR'
+
+
+class TypeParameterKind(str, Enum):
+    TYPE_VAR = 'TYPE_VAR'
+    TYPE_VAR_TUPLE = 'TYPE_VAR_TUPLE'
+    PARAM_SPEC = 'PARAM_SPEC'
 
 
 class CompilationOption(str, Enum):
@@ -450,6 +457,80 @@ class TranslateEscapingException:
 
 
 @dataclass(frozen=True, slots=True)
+class LazyExpressionInterface:
+    source: SlotRef
+    scope: int
+    captures: tuple[int, ...]
+    unpack_starred: bool
+    format_default: int = 1
+
+
+@dataclass(frozen=True, slots=True)
+class TypeParameterSpec:
+    name: SlotRef
+    kind: TypeParameterKind
+    binding_port: int
+    bound: LazyExpressionInterface | None
+    default: LazyExpressionInterface | None
+    constraints: bool
+
+
+@dataclass(frozen=True, slots=True)
+class TypeParameterEnvironment:
+    """Logical source inputs, not synthetic compiler defaults-tuple/dict ABI."""
+    scope: int
+    captures: tuple[int, ...]
+    parameters: tuple[TypeParameterSpec, ...]
+    inputs: tuple[SlotRef, ...]
+    world: GroundType
+    exception_abi: ExceptionABI
+
+
+@dataclass(frozen=True, slots=True)
+class EnterTypeParameters:
+    environment: TypeParameterEnvironment
+
+
+@dataclass(frozen=True, slots=True)
+class InvokeTypeParameterFactory:
+    invocation: ProductionRegionCall
+    environment: TypeParameterEnvironment
+
+
+@dataclass(frozen=True, slots=True)
+class BuildLazyExpression:
+    expression: LazyExpressionInterface
+    exception_abi: ExceptionABI
+
+
+@dataclass(frozen=True, slots=True)
+class CreateTypeParameter:
+    parameter: TypeParameterSpec
+    exception_abi: ExceptionABI
+
+
+@dataclass(frozen=True, slots=True)
+class SetTypeParameterDefault:
+    """Write the default evaluator; retain the original parameter reference."""
+    parameter: TypeParameterSpec
+    exception_abi: ExceptionABI
+
+
+@dataclass(frozen=True, slots=True)
+class BindTypeParameter:
+    """Initialize the original TYPE_PARAMETER_INTERFACE, not a guessed Store."""
+    parameter: TypeParameterSpec
+    exception_abi: ExceptionABI
+
+
+@dataclass(frozen=True, slots=True)
+class AttachTypeParameters:
+    """Associate the tuple with the existing object; no new object identity."""
+    source: SlotRef
+    exception_abi: ExceptionABI
+
+
+@dataclass(frozen=True, slots=True)
 class GlobalsEnvironment:
     scope: int
 
@@ -544,6 +625,8 @@ ProductionInstruction = (EvaluateChild | ApplyLanguageAction | ReadCompilationOp
     | ImportRequest | ImportMember | ImportStar
     | ApplyPythonProtocol | ApplyDelegationProtocol | AccessBinding | ConstructValue | DefineLiteral
     | BuildFunctionAnnotations | BuildFunction | ApplyDecorator | TranslateEscapingException
+    | EnterTypeParameters | InvokeTypeParameterFactory | BuildLazyExpression | CreateTypeParameter
+    | SetTypeParameterDefault | BindTypeParameter | AttachTypeParameters
     | ApplyRegion | BranchControl | LoopControl | DeferRegion | ReferenceEnvironment | EnterDeferredBody | CleanupControl
     | HandleCompletions | TransferCompletion | SuspendExecution)
 
@@ -586,14 +669,13 @@ class SourceProductionPlan:
     steps: tuple[ProductionStep, ...]
     slots: tuple[ProductionSlotDisposition, ...]
     schema: str = 'scar.source-production-plan'
-    schema_version: int = 9
+    schema_version: int = 10
     authority: str = 'SOURCE_RECIPE_SHAPE_ONLY'
 
 
 PRODUCTION_RECORD_TAGS = {cls: ('record_kind', cls.__name__) for cls in (
     ProductionOccurrence, SlotRef, ProductionParameter, ProductionResult,
-    EvaluateChild, ApplyLanguageAction, ApplyPythonProtocol, ApplyDelegationProtocol, AccessBinding, ConstructValue, DefineLiteral, ApplyRegion,
-    BranchControl, LoopControl, DeferRegion, ReferenceEnvironment, EnterDeferredBody, CleanupControl, HandleCompletions,
+    *ProductionInstruction.__args__,
     GlobalsEnvironment, ClosureEnvironment,
-    TransferCompletion, SuspendExecution, ProductionResumeRoute, IterationCondition, RepeatCondition,
+    ProductionResumeRoute, IterationCondition, RepeatCondition,
     CountBinding, ChoiceBinding, TypeBinding, TypesBinding)}
