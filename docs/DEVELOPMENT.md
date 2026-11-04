@@ -146,6 +146,10 @@ python -B -m scar.cli program-types --materials /path/to/type-materials --out /p
 类型图递归用REF表示，值对象循环拒绝；原图和输入目录不改，不存每次迭代数值。
 当前已恢复的共享目录位于`artifacts/current/type-grammars/`；独立fresh记录在`queries/type-grammar-restoration/verification/`。
 
+F4-B接口查询：`ProtocolSignatureIndex(graph, structured, interface, metadata, language=language).match(original_operation_id)`，
+入口在`scar.ir.program.protocol_signature_context`。规则来自typed protocol，world/ABI等从原接口绑定；缺原参数返回带字段的
+`MISSING_SIGNATURE_CONTEXT`。显式补参仅供诊断，不能覆盖自动绑定或授予源码/变换许可；当前还不是规范图发布入口。
+
 ## 已有建图入口（前端形式验收尚未完成）
 
 ```bash

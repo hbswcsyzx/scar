@@ -75,10 +75,22 @@ F4-B1已验收有限端口代数：六种pattern、四种显式参数、五类�
 这是端口形状查询，不是完整家族或源码证明；其状态参数仍为显式原域，未完成参数来源授权。
 证据：`artifacts/current/queries/operation-signatures/{result.json,lewm-port-query.json}`。
 
+F4-B2已接入完整PythonProtocol声明域：67 invoke、19 ordinary、2 opaque明确拒绝；共享压缩目录3,739 bytes。
+新增按原OperationID选择规则的上下文索引，自动绑定入口world、区域异常ABI、unpack/slice与部分frame参数，并核原状态连线。
+保留comprehension两套输入顺序及子lambda/generator的raw ABI；不按实际arity反推参数，不把BOUND_FRAME混入structured协议域。
+17项针对性检查通过（1.85秒）。4个LeWM原函数片（含CEM solve）中728项协议全部自动匹配；未匹配0，无端口冲突。
+frame退出向量从原UseSource组和ValueSource.slot解析，再独立核UseID顺序；CONTROL角色的合流token仍保绑定类型。
+call/map/string/assert参数也沿闭合原端口组解析；空组保DECLARED_EMPTY_GROUP，未伪造源码空参数证明。
+这只证明声明一致，不证明保活集合完整。4片共1,609个操作，本轮只核其中728项协议；读取/旧图验证/查询10.93秒。
+这不是全程序建图或LeWM运行时间。仍需核其余core/control家族，不能用协议覆盖率代替全程序覆盖率。
+该查询不重放源码产生规则、不授权源码/效果/变换；canonical图/manifest保持，第一阶段仍未完成。
+证据：`artifacts/current/queries/protocol-signatures/{result.json,lewm-queries.json,catalog.json.gz}`。
+
 1. **F4-B后续规则**：接完整操作家族、typed参数来源、状态/access契约和源码产生规则，再接版本化根与强制reader。
    旧core操作语义仍散在32个源码Opcode、88个PythonProtocol及typed侧表；label还承担cleanup/class/native派发。
    旧通用结构校验可容纳ADD的0/1/3输入或缺result，说明缺少统一签名；这不代表可绕过完整source replay。
    三种域不能互代：32 Opcode、88协议和113语法构造器×上下文分别核验；B1不授新图发布或优化。
+   下一步将原声明端口接到F2/F3产生规则，并补function/class/comprehension等参数来源；保活完整性另验，不能抄端口来证明。
    签名witness仍须进入版本化typed根及强制reader；不能把本层独立查询当作完备。根扩展后重验F4-A目录。
    实读FRAME_BIND为READ_WRITE、UNKNOWN footprint、非full overwrite；不能照旧审计摘要强制WHOLE或升级未知事实。
 2. **F4-C规范共享图**：消费已验F2/F3原材料与ID，生成并逐项验收控制、状态、效果和完成端口。
