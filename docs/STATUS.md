@@ -39,34 +39,42 @@ F4-A仅验结构类型域：可达Any/object/未解类型为0；没有据此宣�
 ## 恢复、同步与当前存储
 
 `/home`已恢复可写；只读期间的源码缓冲已取回并入当前唯一工作区，合并后的相关回归已通过。
-F3/F4-A真实材料完整保留在R；历史收据均限定当时profile与输入，**尚未canonical注册到当前模型**。
-源码同步不等于材料注册；下一步先核原收据/共享catalog及对应范围，再完成注册，不重做已通过的F3。
+F3七层材料已正式登记到当前模型：6,062个unit片及6个共享catalog，原字节共69,243,786 bytes。
+固定原F3-D验收SHA，核七层报告/DTO/父链与当前profile后复用；没有伪称本轮重新执行全量语义。
+本次登记659.93秒，包含串行typed预检和七次持久发布；8个copy线程不代表预检已并行化。
+去掉新增收据可精确重建原manifest，所有旧字段/ID/片收据不变。正常strict reader保持，原R材料仍作为历史依据保留。
+真实eval.py仅从canonical的10份材料strict查询成功：419ports、89native symbols、0conflicts，8.21秒。
+集成还验证隐藏七个外部store后可独立查询；登记来源`HISTORICAL_FRESH_ACCEPTANCE_REUSE`不扩大证明范围。
+登记/原组合/持久性共8项相关检查通过（15.69秒）；拒绝错pin、输入/profile/catalog漂移、伪预算完成和既有目标冲突。
+证据：`artifacts/current/queries/frontend-registration/{publication/result.json,preservation.json,canonical-query.json}`。
+F4-A共享类型目录已恢复到`artifacts/current/type-grammars/`，重新fresh读回一致（0.184秒）。
 
 最初发现manifest、F2报告及2个F2分片为空；两片已从原F0/F1重建，F2本轮全量fresh重验155.21秒。
 同轮F0/F1/F2及持久性20项检查通过（7.08秒），包含独立字段核对和发布故障注入。
 合并远端后，F3材料/组合与持久性10项集成检查通过（29.08秒）；F2/F3-A reader六项检查另通过。
 随后在`R/syntax-materials.tar.gz`找到完整manifest，已按原SHA精确恢复全部metadata及CALL/class发布范围。
-当前manifest SHA-256：`f1c5834c5e0fc115954f87dc77fa4f0d2be55788e920bcdbbbfa64842bf7bb1e`。
+恢复时manifest SHA-256：`f1c5834c5e0fc115954f87dc77fa4f0d2be55788e920bcdbbbfa64842bf7bb1e`。
 其866份F0/F1/F2收据与本轮fresh输入逐一一致；恢复过程未改原source/body ID或原关系的证据范围。
 
 恢复收据：`artifacts/current/queries/formal-frontend-f2/recovery/exact-restoration.json`。
 中间的投影恢复及query-metadata bridge已由精确恢复取代；不得继续描述为原metadata永久丢失或原CALL/class未恢复。
 F0/F1/F2发布已补文件/目录/manifest fsync、完整报告发布与故障边界检查；两次目录rename之间仍有可恢复窗口。
 
-当前24,264个压缩分片、2,579,129,690 bytes；包括材料、诊断、局部图与关系，不能全算实现图。
+当前manifest SHA-256：`601e929904dc7481693f4a0747b7e01269ecf6d1302ff1efec072627c288aba0`。
+当前30,332个压缩分片、2,648,373,476 bytes；包括材料、诊断、局部图与关系，不能全算实现图。
 核心body：局部图8,098；未尝试23,645；入口适配缺失4,200；不支持326；形状不支持437。
 13,108个原核心分片的长度/SHA一致；36,706个lexical entry与body entry_key逐项一致。
 历史关系仍限定原basis；形式层追加或材料注册不能自动扩大其授权范围。
 
 ## 下一层与整个第一阶段缺口
 
-1. **恢复收尾**：衔接F3材料canonical注册并固定F4-A共享类型目录引用，保原ID和输入限定；不重复开发F3。
-2. **F4-B产生规则**：统一操作家族、参数化签名、结果/效果与源码原引用，再按规则域验收。
+1. **F4-B产生规则**：统一操作家族、参数化签名、结果/效果与源码原引用，再按规则域验收。
    旧core操作语义仍散在32个源码Opcode、88个PythonProtocol及typed侧表；label还承担cleanup/class/native派发。
    旧通用结构校验可容纳ADD的0/1/3输入或缺result，说明缺少统一签名；这不代表可绕过完整source replay。
-3. **F4-C规范共享图**：消费已验F2/F3原材料与ID，生成并逐项验收控制、状态、效果和完成端口。
+   签名witness须进入版本化typed根及强制reader；不能把可被忽略的sidecar当作完备。扩展类型须重验F4-A目录。
+2. **F4-C规范共享图**：消费已验F2/F3原材料与ID，生成并逐项验收控制、状态、效果和完成端口。
    旧prepare_source重parse及按name/line合scope的路径不能作为新F4权威；函数/循环保可展开共享区域，不按迭代unroll。
-4. **F5/F6**：接通跨子图、native/runtime/kernel、资源与数据来源；重新核依赖发现前沿和完整覆盖。
+3. **F5/F6**：接通跨子图、native/runtime/kernel、资源与数据来源；重新核依赖发现前沿和完整覆盖。
 
 LeWM仍是外部testcase。已有CEM probe仅人工quadratic cost、2轮×4候选的局部运行证据；
 当前不做detector/backend扩展或程序变换，没有完整episode优化或LeWM加速比结论。

@@ -36,7 +36,7 @@ PYTHONHASHSEED=0 python -B -m scar.cli source-symbols --model /path/to/model --m
 F1/F2及原材料的replay预算也受本次上限约束。默认capture会向可写模型只追加source_symbols；
 collect-only是独立材料store，fresh核验绑定必需源码收据。PUBLIC_COMPILER_VIEW/UNJOINED不授AST绑定或scope完整性。
 /home已恢复可写，同一main的只读期间提交已合并，普通入口可直接使用。
-已验F3各store仍在`/var/tmp/scar-f2-recovery-7w7nd_0z/`，当前canonical模型尚未注册它们；按原收据衔接，不重做F3规则。
+已验F3七层已按原收据登记到当前模型；`/var/tmp/scar-f2-recovery-7w7nd_0z/`仍保历史材料，canonical查询无需传外部store。
 
 F3-B（只分类字段角色，不执行symtable或目标）：
 
@@ -121,6 +121,19 @@ PYTHONHASHSEED=0 python -B -m scar.cli frontend-check --model /path/to/model \
 `.port/.implicit/.endpoints/.parameter/.why`分别查询原引用，不合并源码namespace与compiler分类。
 endpoint中的KEEP路径显式标记association；query预算耗尽返回incomplete与最多一条frontier及remaining，不当成无依赖。
 
+已接受材料的登记（原字节复制，不重新授予语义结论）：
+
+```bash
+PYTHONHASHSEED=0 python -B -m scar.cli frontend-register --model /path/to/model \
+  --acceptance /path/to/accepted-f3d/result.json --acceptance-sha256 ORIGINAL_ACCEPTED_SHA \
+  --verifications /path/to/seven-verification-reports.json --out /path/to/fresh-registration --jobs 8
+```
+
+verification映射的键是七种artifact名，值为各原fresh报告的绝对路径。SHA须来自先前已接受的F3-D记录；现场重签不是验收。
+登记核source/父层收据、原报告、实际DTO、catalog及当前profile；字节、实现或输入域变化时拒绝。`jobs`控制复制并发。
+保持原ID和证明范围，报告标`HISTORICAL_FRESH_ACCEPTANCE_REUSE`；正常语义reader仍执行原strict检查。
+每层独立持久化；中断可留下已登记前缀，重新使用同一输入和新的输出目录可复用完全相同的已登记层。
+
 F4-A共享结构目录（不执行目标、不构造程序实例图）：
 
 ```bash
@@ -131,6 +144,7 @@ python -B -m scar.cli program-types --materials /path/to/type-materials --out /p
 `program_type_catalog/read_program_type_catalog`保原记录类型、字段语法和实现收据；
 `validate_program_shape(graph,max_visits=...)`核exact名义类型与构造约束，返回cross-record/opcode语义未核标记；完整图仍须后层核验。
 类型图递归用REF表示，值对象循环拒绝；原图和输入目录不改，不存每次迭代数值。
+当前已恢复的共享目录位于`artifacts/current/type-grammars/`；独立fresh记录在`queries/type-grammar-restoration/verification/`。
 
 ## 已有建图入口（前端形式验收尚未完成）
 

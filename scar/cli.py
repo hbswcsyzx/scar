@@ -483,6 +483,9 @@ def main(argv=None) -> int:
     if cli_argv and cli_argv[0] == 'frontend-check':
         from scar.analysis.frontend_check import main as frontend_check_main
         return frontend_check_main(cli_argv[1:])
+    if cli_argv and cli_argv[0] == 'frontend-register':
+        from scar.analysis.frontend_register import main as frontend_register_main
+        return frontend_register_main(cli_argv[1:])
     if cli_argv and cli_argv[0] == 'program-types':
         from scar.analysis.program_type_materials import main as program_types_main
         return program_types_main(cli_argv[1:])
@@ -525,6 +528,8 @@ def main(argv=None) -> int:
     compiler_symbols.set_defaults(func=lambda _: 0)
     frontend_check = sub.add_parser('frontend-check', help='F3-D: verify original source/namespace/compiler graph composition')
     frontend_check.set_defaults(func=lambda _: 0)
+    frontend_register = sub.add_parser('frontend-register', help='register original frontend materials under a pinned historical acceptance receipt')
+    frontend_register.set_defaults(func=lambda _: 0)
     program_types = sub.add_parser('program-types', help='F4-A: export or fresh-check source/target structural type grammars')
     program_types.set_defaults(func=lambda _: 0)
     static_cmd = sub.add_parser("static", help="build source-root program graphs without executing the target")
