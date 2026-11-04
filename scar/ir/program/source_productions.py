@@ -461,6 +461,7 @@ class CaptureTransport:
     reference: DerivedCaptureRef
     parent: CaptureReference | None
     compiler_slots: tuple[int, ...]
+    implicit_requirements: tuple[int, ...] = ()
 
 
 @dataclass(frozen=True, slots=True)
@@ -490,6 +491,38 @@ class FunctionAnnotationInterface:
     captures: tuple[CaptureReference, ...]
     entries: tuple[FunctionAnnotationEntry, ...]
     stringized: bool
+
+
+@dataclass(frozen=True, slots=True)
+class AnnotationRegistration:
+    """Compiler conditional index scoped by original annotation scope/profile."""
+    scope: int
+    optimization_level: int
+    index: int
+
+
+@dataclass(frozen=True, slots=True)
+class ScopeAnnotationEntry:
+    source: SlotRef
+    name: SlotRef
+    key: str
+    registration: AnnotationRegistration | None
+
+
+@dataclass(frozen=True, slots=True)
+class ScopeAnnotationVariant:
+    optimization_level: int
+    entries: tuple[ScopeAnnotationEntry, ...]
+    emitted_in_original_unit: bool = True
+
+
+@dataclass(frozen=True, slots=True)
+class ScopeAnnotationInterface:
+    source: SlotRef
+    scope: int
+    creator_scope: int
+    captures: tuple[CaptureReference, ...]
+    variants: tuple[ScopeAnnotationVariant, ...]
 
 
 @dataclass(frozen=True, slots=True)
@@ -597,6 +630,18 @@ class EnterEvaluationRequest:
 
 
 @dataclass(frozen=True, slots=True)
+class ReadAnnotationRegistration:
+    """Read the current conditional registry; lookup/contains may fail.
+
+    Module lookup uses globals/builtins; class lookup uses the captured
+    protocol cell. It neither reads a frozen set nor proves registration
+    origins or native control-path selection.
+    """
+    registration: AnnotationRegistration
+    exception_abi: ExceptionABI
+
+
+@dataclass(frozen=True, slots=True)
 class ApplyImplicitComparison:
     operator: ImplicitComparisonKind
     exception_abi: ExceptionABI
@@ -695,11 +740,10 @@ class ReadClassTypeParameters:
 
 @dataclass(frozen=True, slots=True)
 class BuildClassAnnotations:
-    """Create the later class-variable annotation callable, not its results.
-
-    Scope request body and registration identities remain explicit obligations.
-    """
+    """Create the later class-variable annotation callable, not its results."""
     interface: ClassBodyInterface
+    annotations: ScopeAnnotationInterface
+    body: ProductionRegionID
 
 
 @dataclass(frozen=True, slots=True)
@@ -849,10 +893,11 @@ class ApplyNamespaceAction:
 class BuildScopeAnnotations:
     """Create the module annotation callable before user statements.
 
-    Its deferred request body is rooted in the original source scope. This is
-    neither execution of annotation expressions nor proof of their ordering.
+    The explicit deferred body is not called by creation.
     """
     interface: RootBodyInterface
+    annotations: ScopeAnnotationInterface
+    body: ProductionRegionID
 
 
 @dataclass(frozen=True, slots=True)
@@ -992,7 +1037,7 @@ ProductionInstruction = (EvaluateChild | ApplyLanguageAction | ReadCompilationOp
     | ReferenceIsNone | InvertCondition | SplitExceptionGroup | MergeExceptionGroup
     | ReferenceIdentical | ApplyPatternAction
     | EnterRootBody | ApplyNamespaceAction | BuildScopeAnnotations | DisplayExpression
-    | EnterEvaluationRequest | ApplyImplicitComparison | ReadCommonConstant | DefineAnnotationString
+    | EnterEvaluationRequest | ReadAnnotationRegistration | ApplyImplicitComparison | ReadCommonConstant | DefineAnnotationString
     | ApplyRegion | BranchControl | LoopControl | DeferRegion | ReferenceEnvironment | EnterDeferredBody
     | HandleCompletions | TransferCompletion | SuspendExecution)
 
@@ -1036,7 +1081,7 @@ class SourceProductionPlan:
     slots: tuple[ProductionSlotDisposition, ...]
     capture_transports: tuple[CaptureTransport, ...] = ()
     schema: str = 'scar.source-production-plan'
-    schema_version: int = 20
+    schema_version: int = 21
     authority: str = 'SOURCE_RECIPE_SHAPE_ONLY'
 
 

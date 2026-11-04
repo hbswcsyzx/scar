@@ -65,7 +65,7 @@ def test_closed_grammar_exact_records_strict_codec_and_budgets():
     assert summary['control_semantics_checked'] is False
     assert A.read_production_plan(A.production_plan_document(value)) == value
     catalog = A.production_type_catalog()
-    assert catalog['counts'] == dict(records=106, fields=285, identifiers=4, enums=26, enum_members=240, unions=23)
+    assert catalog['counts'] == dict(records=111, fields=307, identifiers=4, enums=26, enum_members=240, unions=24)
     assert set(catalog['instruction_variants']) == {
         'EvaluateChild', 'ApplyLanguageAction', 'ReadCompilationOption', 'ApplyInplaceOperator', 'PublishAnnotation',
         'ImportRequest', 'ImportMember', 'ImportStar',
@@ -79,7 +79,7 @@ def test_closed_grammar_exact_records_strict_codec_and_budgets():
         'MatchExceptionType','DeleteExceptionBinding',
         'ReferenceIsNone','ReferenceIdentical','ApplyPatternAction','InvertCondition','SplitExceptionGroup','MergeExceptionGroup',
         'EnterRootBody','ApplyNamespaceAction','BuildScopeAnnotations','DisplayExpression',
-        'EnterEvaluationRequest','ApplyImplicitComparison','ReadCommonConstant','DefineAnnotationString',
+        'EnterEvaluationRequest','ReadAnnotationRegistration','ApplyImplicitComparison','ReadCommonConstant','DefineAnnotationString',
         'ApplyPythonProtocol', 'ApplyDelegationProtocol', 'AccessBinding', 'ConstructValue', 'DefineLiteral', 'ApplyRegion',
         'BranchControl', 'LoopControl', 'DeferRegion', 'ReferenceEnvironment', 'EnterDeferredBody', 'HandleCompletions',
         'TransferCompletion', 'SuspendExecution'}
@@ -252,6 +252,8 @@ def test_class_and_alias_action_ports_preserve_namespace_and_exception_interface
     for abi in ExceptionABI:
         raised=(REF,world) if abi is ExceptionABI.EXCEPTION_WORLD else (REF,REF,world)
         interface=P.ClassBodyInterface(1,0,(2,),(3,),None,site,world,abi)
+        annotations=P.ScopeAnnotationInterface(site,2,1,(2,),tuple(P.ScopeAnnotationVariant(i,(
+            P.ScopeAnnotationEntry(site,site,'item',None),)) for i in (0,1,2)))
         alias=P.BuildTypeAlias(site,P.LazyExpressionInterface(site,2,(),False),site,abi)
         cases=[(P.ReadBuildClass(abi),(world,),(REF,world)),
             (P.BuildClassBody(interface),(REF,REF,REF,REF,world),(REF,world)),
@@ -260,7 +262,7 @@ def test_class_and_alias_action_ports_preserve_namespace_and_exception_interface
             (P.AccessClassProtocol(interface,3,P.ClassProtocolActionKind.WRITE_VALUE),(REF,REF,world),(world,)),
             (P.AccessClassProtocol(interface,3,P.ClassProtocolActionKind.CELL_REFERENCE),(REF,world),(REF,world)),
             (P.ReadClassTypeParameters(interface),(REF,world),(REF,world)),
-            (P.BuildClassAnnotations(interface),(REF,world),(REF,world)),
+            (P.BuildClassAnnotations(interface,annotations,P.ProductionRegionID('request')),(REF,REF,world),(REF,world)),
             (P.BuildGenericBase(abi),(REF,world),(REF,world)),
             (alias,(REF,REF,world),(REF,world)),
             (replace(alias,type_parameters=None),(REF,world),(REF,world))]
@@ -273,9 +275,12 @@ def test_class_and_alias_action_ports_preserve_namespace_and_exception_interface
             done=step('done',root,P.TransferCompletion(C.FALLTHROUGH),
                 tuple(P.ProductionResult(apply.id,i) for i in range(len(result))),normal(*result))
             specimen=plan((root,),(apply,done))
+            if type(instruction) is P.BuildClassAnnotations:
+                body,body_steps=request_specimen(root,site,2,(2,),None,world,abi)
+                specimen=plan((root,body),(apply,done,*body_steps))
             assert A.read_production_plan(A.production_plan_document(specimen))==specimen
             with pytest.raises(A.ProductionError,match='DEFINITION_INTERFACE|CLASS_NAMESPACE_INTERFACE'):
-                A.validate_production_plan(replace(specimen,steps=(replace(apply,arguments=()),done)))
+                A.validate_production_plan(replace(specimen,steps=(replace(apply,arguments=()),*specimen.steps[1:])))
 
 
 def test_context_manager_interfaces_require_method_phase_current_world_and_exception_payload():

@@ -65,7 +65,7 @@ B1允许显式类型、拼接、参数引用、重复、有限选择和异质类
 接源码前，先以原F2 fields/list重放旧SourceAtom的BFS身份公式，并核全源ID/kind/完整reference集合；这是身份层，绝不是求值顺序。
 旧SG不存在的source-only输入单独处置，保留其F2/F3，不捏造旧ID域。桥接内核不parse；strict读者仍重验F2上游。
 执行产生规则必须另按语言规则定义；symtable/compiler拓扑的visitor顺序不能当执行边（如decorators/defaults、DictComp key/value）。
-产生规则的输入语法为`SourceProductionPlan`，与canonical执行图分开：v20含66种有限步骤，源码槽、namespace端口、区域参数及结果引用分别有类型。
+产生规则的输入语法为`SourceProductionPlan`，与canonical执行图分开：v21含67种有限步骤，源码槽、namespace端口、区域参数及结果引用分别有类型。
 隐式字面值复用已有`PythonLiteral`精确编码，不断言相同值具有同一对象身份或发生了分配。
 `ApplyPythonProtocol`复用已有88种协议及签名，参数必须显式绑定，输入/完成端口强制核验；不把协议名当作效果证明。
 区域共享，不按调用/迭代复制；循环显式分不变量前缀与携带值后缀。异常完成通过payload＋captures接入handler参数，不冒用normal结果边。
@@ -111,6 +111,7 @@ v17接Module/Interactive/Expression根，入口显式接已准入globals、local
 v18将BuildFunctionAnnotations/BuildLazyExpression接到DEFERRED请求模板，不以创建边调用body。入口显式接捕获环境、format和新world，保原F3 scope及活跃cell转交；format比较/异常、按序求注解、最后建dict及星号单项unpack各自接线。future字符串从原F2子树经固定编译器的受控wrapper推导，不执行目标，临时query编号不改原ID。材料v4单列request模板/字符串，不再把已展开的函数请求计为整块child占位；scope汇总、准入、native/frame/引用清理仍待完成。
 v19删除整块class namespace init/final边界，按原F3 resolution表示隐式nameop，另以class-owned binding表示protocol cell。qualname、first line、static-attribute tuple及编译选项按源码规则推导；frame/capture物理传递不由logical binding存在替代。泛型tuple来自callback创建，body正常完成才发布static attrs/cell；class注解callable仍为待展开汇总请求。这里的self识别只重放固定CPython metadata规则，不推断对象类型或优化机会。
 v20结合原C2 FREE resolution与C3 compiler FREE事实补齐无显式读写的捕获需求，包括仅转交的中间scope。补充边以源单元内`(scope,binding)`共享键和parent引用存储，保留原F3整数hop；入口另列owned_cells逻辑要求。输入新增原C3材料SHA，不把逻辑cell要求当作物理frame布局、分配或效果证明。
+v21将模块/类变量注解的创建动作接到DEFERRED请求体。静态查询从原F2槽恢复临时AST，以不与原编译常量冲突的标记获取三个优化级别的登记顺序、私有key及conditional index；保留try/else/except的编译顺序和finally重复登记，各表达式仍引用同一原槽。未执行目标。被原编译单元裁掉的类另保源码模板，显式标记emitted_in_original_unit=False；投影只放宽其外层控制，保该类子树，不把投影的frame/capture布局当作证据。隐式capture可引用原C2需求，不强求公开symtable存在FREE项；登记来源/native路径选择、准入及引用清理仍待证明。
 前两步的局部规则已通过：Yield由原C1 owner区分普通／异步形式，bare yield导出None，嵌套定义header仍归外层执行owner。静态compiler只作独立规则对照，不以bytecode位置接源码身份。
 后续语句／定义／cleanup规则闭合后才进入F4-C；每步先验类型/接口，再接源码规则，再在原材料独立重放，不以节点存在或局部计数授予全层完成。
 

@@ -63,7 +63,14 @@ def initialize(b,body,interface,world,environment,namespace):
 def finalize(b,region,interface,world,environment,namespace):
     facts=b.rules.source.class_names
     if facts.deferred_annotations(interface.scope):
-        value,world=b.emit(region,P.BuildClassAnnotations(interface),(environment,world),(_REF,b.world))
+        from scar.analysis.source_evaluation_rules import build_request_body
+        request=b.rules.source.scope_annotations.interface(interface.scope)
+        body=build_request_body(b,region,request);owner=P.ProductionOccurrence(facts.scopes[interface.scope].owner.occurrence)
+        globals_ref,world=b.environment(region,P.GlobalsEnvironment(interface.globals_scope),world,source=owner)
+        cells=[]
+        for relay in request.captures:
+            cell,world=b.environment(region,P.ClosureEnvironment(relay),world,source=owner);cells.append(cell)
+        value,world=b.emit(region,P.BuildClassAnnotations(interface,request,body.id),(globals_ref,*cells,world),(_REF,b.world))
         world,=access(b,region,interface,'__annotate_func__',world,environment,namespace,value)
         world,=b.protocol(region,K.FRAME_RELEASE_TEMPORARY,(value,),world)
     plain,with_asserts=facts.attributes(interface.scope)

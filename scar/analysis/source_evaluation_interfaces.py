@@ -25,6 +25,8 @@ class EvaluationInterfaceIndex:
     def environment(self,request,world,abi):
         if type(request) is P.FunctionAnnotationInterface:
             anchor=request.entries[0].value;scope=request.scope;captures=request.captures;default=None
+        elif type(request) is P.ScopeAnnotationInterface:
+            anchor=request.source;scope=request.scope;captures=request.captures;default=None
         else:
             _require(type(request) is P.LazyExpressionInterface,'request','expected an original function annotation or lazy expression interface')
             anchor=request.source;scope=request.scope;captures=request.captures;default=request.format_default
@@ -33,7 +35,9 @@ class EvaluationInterfaceIndex:
 
     def expected(self,environment):
         source=self.source;anchor=environment.source;scope=source.context.material.scopes[environment.scope]
-        if scope.kind in ('TYPE_PARAMETER_EVALUATOR','TYPE_ALIAS'):
+        if scope.kind=='ANNOTATION' and scope.owner.kind=='VARIABLE_ANNOTATIONS':
+            request=source.scope_annotations.request(environment.scope)
+        elif scope.kind in ('TYPE_PARAMETER_EVALUATOR','TYPE_ALIAS'):
             request=source.type_parameters.lazy(anchor,allow_starred=True)
         else:
             _require(scope.kind=='ANNOTATION' and scope.owner.kind=='HEADER_ANNOTATIONS',anchor,

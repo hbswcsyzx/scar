@@ -27,6 +27,7 @@ from scar.analysis.source_root_interfaces import RootInterfaceIndex
 from scar.analysis.source_evaluation_interfaces import EvaluationInterfaceIndex
 from scar.analysis.source_class_namespace_interfaces import ClassNamespaceIndex
 from scar.analysis.source_capture_interfaces import CaptureInterfaceIndex
+from scar.analysis.source_scope_annotation_interfaces import ScopeAnnotationIndex
 
 
 class ProductionError(ValueError):
@@ -66,7 +67,8 @@ def production_type_catalog():
                  'scar.analysis.source_statement_interfaces', 'scar.analysis.source_type_parameter_interfaces',
                  'scar.analysis.source_definition_interfaces','scar.analysis.source_pattern_interfaces',
                  'scar.analysis.source_root_interfaces','scar.analysis.source_evaluation_interfaces','scar.analysis.source_syntax',
-                 'scar.analysis.source_class_namespace_interfaces','scar.analysis.source_capture_interfaces'):
+                 'scar.analysis.source_class_namespace_interfaces','scar.analysis.source_capture_interfaces',
+                 'scar.analysis.source_scope_annotation_interfaces'):
         modules[name] = sha256(Path(sys.modules[name].__file__).read_bytes()).hexdigest()
     payload = dict(schema='scar.source-production-type-catalog', schema_version=1,
         root=root, types=rows, counts=counts, modules=dict(sorted(modules.items())),
@@ -156,7 +158,7 @@ def validate_production_plan(plan, *, max_visits=1_000_000):
     """
     visits = _shape(plan, max_visits)
     _require((plan.schema, plan.schema_version, plan.authority) == (
-        'scar.source-production-plan', 20, 'SOURCE_RECIPE_SHAPE_ONLY'),
+        'scar.source-production-plan', 21, 'SOURCE_RECIPE_SHAPE_ONLY'),
         'SCHEMA', 'plan', 'unsupported recipe schema or authority')
     source = plan.input
     _require(bool(source.path) and bool(source.namespace_root), 'INPUT', 'plan.input', 'source paths must be nonempty')
@@ -362,6 +364,23 @@ def validate_production_plan(plan, *, max_visits=1_000_000):
             'CLASS_INTERFACE','interface','class namespace/capture/protocol domain differs')
         reference=ValueType(ValueKind.REFERENCE)
         return (reference,reference,interface.world)
+
+    def scope_annotation_ports(request):
+        _require(request.scope>=0 and request.creator_scope>=0 and captures(request.captures)
+            and tuple(v.optimization_level for v in request.variants)==(0,1,2),
+            'SCOPE_ANNOTATION_INTERFACE','request','scope request needs original scope/captures and all target policies')
+        for variant in request.variants:
+            _require(bool(variant.entries),'SCOPE_ANNOTATION_INTERFACE','request','empty variable annotation request')
+            indices=[]
+            for entry in variant.entries:
+                _require(bool(entry.key),'SCOPE_ANNOTATION_INTERFACE','entry','annotation dictionary key must be explicit')
+                if entry.registration is not None:
+                    r=entry.registration
+                    _require(r.scope==request.scope and r.optimization_level==variant.optimization_level and r.index>=0,
+                        'SCOPE_ANNOTATION_INTERFACE','registration','registration belongs to another scope/policy')
+                    indices.append(r.index)
+            _require(indices==list(range(len(indices))),'SCOPE_ANNOTATION_INTERFACE','registration',
+                'conditional indices must preserve the compiler emission sequence')
     claimed, referenced_regions = set(), {plan.root}
     for region in plan.regions:
         _require(bool(region.steps), 'REGION_EXIT', str(region.id), 'region needs an explicit result/transfer step')
@@ -401,6 +420,21 @@ def validate_production_plan(plan, *, max_visits=1_000_000):
             _require(tuple(value_type(v) for v in call.arguments) == target.parameters,
                      'PORT_TYPES', str(call.region), 'region call arguments differ from declared parameters')
             return region_outputs[target.id]
+
+        def scope_request_body(instruction,world,abi):
+            request=instruction.annotations;scope_annotation_ports(request)
+            body=child(instruction.body,P.ProductionRegionKind.DEFERRED)
+            reference=ValueType(ValueKind.REFERENCE)
+            _require(body.steps and type(steps[body.steps[0]].instruction) is P.EnterEvaluationRequest,
+                'SCOPE_ANNOTATION_INTERFACE',str(instruction.body),'scope callable requires an explicit request body')
+            env=steps[body.steps[0]].instruction.environment
+            raised=(reference,world) if abi is ExceptionABI.EXCEPTION_WORLD else (reference,reference,world)
+            allowed={(C.RETURN,None):(reference,world),(C.RAISE,None):raised}
+            _require(request.creator_scope==instruction.interface.scope and env.source==request.source
+                and env.scope==request.scope and env.captures==request.captures and env.format_default is None
+                and env.world==world and env.exception_abi is abi and body.parameters==evaluation_ports(env)
+                and all(k in allowed and allowed[k]==v for k,v in region_outputs[body.id].items()),
+                'SCOPE_ANNOTATION_INTERFACE',str(instruction.body),'scope creation and request interfaces differ')
 
         for ordinal, identity in enumerate(region.steps):
             _require(identity in steps, 'DANGLING_STEP', str(region.id), 'owned step is missing')
@@ -442,6 +476,15 @@ def validate_production_plan(plan, *, max_visits=1_000_000):
                 world=args[2];raised=(reference,world) if instruction.exception_abi is ExceptionABI.EXCEPTION_WORLD else (reference,reference,world)
                 _require(outputs=={(C.FALLTHROUGH,None):(reference,world),(C.RAISE,None):raised},
                     'EVALUATION_REQUEST_INTERFACE',str(identity),'comparison keeps callback and failure effects explicit')
+            elif type(instruction) is P.ReadAnnotationRegistration:
+                reference=ValueType(ValueKind.REFERENCE);r=instruction.registration
+                _require(r.scope>=0 and r.optimization_level in (0,1,2) and r.index>=0
+                    and len(args)==2 and args[0]==reference and type(args[1]) is ValueType and args[1].kind is ValueKind.STATE,
+                    'SCOPE_ANNOTATION_INTERFACE',str(identity),'registry read requires environment, current world and scoped emission index')
+                world=args[1]
+                raised=(reference,world) if instruction.exception_abi is ExceptionABI.EXCEPTION_WORLD else (reference,reference,world)
+                _require(outputs=={(C.FALLTHROUGH,None):(ValueType(ValueKind.DATA,'builtins.bool'),world),(C.RAISE,None):raised},
+                    'SCOPE_ANNOTATION_INTERFACE',str(identity),'registry lookup/contains must retain errors and current world')
             elif type(instruction) is P.EnterEvaluationRequest:
                 ports=evaluation_ports(instruction.environment)
                 _require(region.kind is P.ProductionRegionKind.DEFERRED and ordinal==0
@@ -459,8 +502,9 @@ def validate_production_plan(plan, *, max_visits=1_000_000):
                         and outputs=={(C.FALLTHROUGH,None):(world,)},
                         'ROOT_INTERFACE',str(identity),'admitted root namespaces must be activated first')
                 else:
+                    scope_request_body(instruction,world,interface.exception_abi)
                     raised=(reference,world) if interface.exception_abi is ExceptionABI.EXCEPTION_WORLD else (reference,reference,world)
-                    _require(args==(reference,world) and outputs=={
+                    _require(args==(*(reference for _ in range(1+len(instruction.annotations.captures))),world) and outputs=={
                         (C.FALLTHROUGH,None):(reference,world),(C.RAISE,None):raised},
                         'ROOT_INTERFACE',str(identity),'annotation callable creation needs globals/current world')
             elif type(instruction) in (P.ApplyNamespaceAction,P.DisplayExpression):
@@ -633,6 +677,9 @@ def validate_production_plan(plan, *, max_visits=1_000_000):
                 elif type(instruction) is P.ReadClassTypeParameters:
                     _require(interface.type_parameters is not None,'CLASS_NAMESPACE_INTERFACE',str(identity),'type tuple read needs a generic class source')
                     may_raise=False
+                elif type(instruction) is P.BuildClassAnnotations:
+                    scope_request_body(instruction,world,interface.exception_abi)
+                    count=1+len(instruction.annotations.captures)
                 raised=(reference,world) if interface.exception_abi is ExceptionABI.EXCEPTION_WORLD else (reference,reference,world)
                 wanted={(C.FALLTHROUGH,None):normal}
                 if may_raise:wanted[(C.RAISE,None)]=raised
@@ -976,9 +1023,11 @@ def validate_production_plan(plan, *, max_visits=1_000_000):
         reference=pending.pop()
         if reference in selected:continue
         selected.add(reference);row=transports[reference]
-        _require(bool(row.compiler_slots) and all(i>=0 for i in row.compiler_slots)
-            and len(set(row.compiler_slots))==len(row.compiler_slots),'CAPTURE_TRANSPORT',str(reference),
-            'derived hop requires original compiler witnesses')
+        _require(bool(row.compiler_slots or row.implicit_requirements)
+            and all(i>=0 for i in (*row.compiler_slots,*row.implicit_requirements))
+            and len(set(row.compiler_slots))==len(row.compiler_slots)
+            and len(set(row.implicit_requirements))==len(row.implicit_requirements),'CAPTURE_TRANSPORT',str(reference),
+            'derived hop requires original compiler or implicit dependency witnesses')
         if row.parent is not None:
             capture_reference(row.parent)
             if type(row.parent) is P.DerivedCaptureRef:pending.append(row.parent)
@@ -1028,6 +1077,7 @@ class ProductionSourceIndex:
         self._evaluations = None
         self._class_names = None
         self._capture_paths = None
+        self._scope_annotations = None
         self._expressions=frozenset(row.name for row in syntax.profile.ast_schema if 'expr' in row.bases)
         self._role_sites = frozenset(port.site for port in frontend_view.roles.ports)
         self.input = P.ProductionInput(f0['path'], f0['namespace_root'], _digest(encode(syntax)),
@@ -1039,6 +1089,11 @@ class ProductionSourceIndex:
     def capture_paths(self):
         if self._capture_paths is None:self._capture_paths=CaptureInterfaceIndex(self)
         return self._capture_paths
+
+    @property
+    def scope_annotations(self):
+        if self._scope_annotations is None:self._scope_annotations=ScopeAnnotationIndex(self)
+        return self._scope_annotations
 
     @property
     def deferred(self):
@@ -1143,6 +1198,11 @@ class ProductionSourceIndex:
                     parent=region_index[region_index[step.region].parent]
                     _require(self.context.material.scopes[env.scope].parent==parent.context.environment,
                         'SOURCE_EVALUATION_REQUEST',str(step.id),'request template must connect its original creator namespace')
+                elif type(instruction) is P.ReadAnnotationRegistration:
+                    _require(type(step.source) is P.SlotRef
+                        and region_index[step.region].context.environment==instruction.registration.scope,
+                        'SOURCE_SCOPE_ANNOTATION',str(step.id),'registration read must stay in its original request scope')
+                    self.scope_annotations.registration(instruction.registration,step.source)
                 elif type(instruction) is P.DefineAnnotationString:
                     _require(step.source==instruction.source and instruction.value==self.evaluations.stringize(instruction.source),
                         'SOURCE_EVALUATION_REQUEST',str(step.id),'stringized annotation differs from original source/compiler result')
@@ -1153,6 +1213,8 @@ class ProductionSourceIndex:
                     if type(instruction) is P.BuildScopeAnnotations:
                         _require(self.roots.deferred and not self.roots.future,'SOURCE_ROOT',str(step.id),
                             'source root has no deferred scope annotation callable')
+                        _require(instruction.annotations==self.scope_annotations.interface(interface.scope),
+                            'SOURCE_SCOPE_ANNOTATION',str(step.id),'module annotation request differs from original source/compiler emissions')
                 elif type(instruction) is P.DisplayExpression:
                     _require(self.context.syntax.nodes[step.source.occurrence].constructor=='Expr'
                         and self.roots.interactive_expression(step.source.occurrence),
@@ -1226,6 +1288,8 @@ class ProductionSourceIndex:
                     elif type(instruction) is P.BuildClassAnnotations:
                         _require(self.class_names.deferred_annotations(interface.scope),'SOURCE_CLASS',str(step.id),
                             'class has no deferred variable annotation callable')
+                        _require(instruction.annotations==self.scope_annotations.interface(interface.scope),
+                            'SOURCE_SCOPE_ANNOTATION',str(step.id),'class annotation request differs from original source/compiler emissions')
                 elif type(instruction) in (P.ReadBuildClass,P.BuildGenericBase,P.BuildTypeAlias):
                     _require(type(step.source) is P.ProductionOccurrence,'SOURCE_DEFINITION',str(step.id),'definition action requires its source owner')
                     owner=step.source.occurrence

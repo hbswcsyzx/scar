@@ -18,6 +18,60 @@ def _value(b,region,site,world,*,unpack=False):
     return b.evaluate(region,site,world)
 
 
+def _scope_entry(b,region,entry,mapping,world):
+    value,world=_value(b,region,entry.source,world)
+    key,world=b.literal(region,entry.key,world,source=entry.name)
+    world,=b.protocol(region,K.STORE_SUBSCRIPT,(mapping,key,value),world,selectors=(entry.source,entry.name))
+    for reference in (key,value):
+        world,=b.protocol(region,K.FRAME_RELEASE_TEMPORARY,(reference,),world)
+    b.slots[entry.source]=P.ProductionDispositionKind.DEFERRED_CHILD
+    return world
+
+
+def _scope_variant(b,region,variant,environment,mapping,world):
+    for entry in variant.entries:
+        if entry.registration is None:
+            world=_scope_entry(b,region,entry,mapping,world)
+            continue
+        registered,world=b.emit(region,P.ReadAnnotationRegistration(entry.registration,b.rules.exception_abi),
+            (environment,world),(_BOOL,b.world),source=entry.source)
+        yes=b.region(entry.source,(_REF,_REF,b.world),region)
+        no=b.region(entry.source,(b.world,),region)
+        current=_scope_entry(b,yes,entry,b.parameter(yes,1),b.parameter(yes,2))
+        b.finish(yes,(current,),(b.world,));b.finish(no,(b.parameter(no,0),),(b.world,))
+        world,=b.control(region,P.BranchControl(P.ProductionRegionCall(yes.id,(environment,mapping,world)),
+            P.ProductionRegionCall(no.id,(world,))),(registered,),b.union(b.completions(yes),b.completions(no)))
+    return world
+
+
+def _scope_body(b,body,request,world):
+    mapping,world=b.protocol(body,K.BUILD_MAP,(),world,(CountBinding('pair_count',0),))
+    variants=request.variants
+    if all(v.entries==variants[0].entries for v in variants):
+        world=_scope_variant(b,body,variants[0],b.parameter(body,0),mapping,world)
+        return mapping,world
+    # Target options are symbolic compiler inputs, not the analyzer's flags.
+    enabled,=b.emit(body,P.ReadCompilationOption(P.CompilationOption.ASSERTIONS_ENABLED),(),(_BOOL,),may_raise=False)
+    yes=b.region(request.source,(_REF,_REF,b.world),body)
+    no=b.region(request.source,(_REF,_REF,b.world),body)
+    current=_scope_variant(b,yes,variants[0],b.parameter(yes,0),b.parameter(yes,1),b.parameter(yes,2))
+    b.finish(yes,(current,),(b.world,))
+    docs,=b.emit(no,P.ReadCompilationOption(P.CompilationOption.DOCSTRINGS_ENABLED),(),(_BOOL,),may_raise=False)
+    children=[]
+    for variant in variants[1:]:
+        child=b.region(request.source,(_REF,_REF,b.world),no)
+        current=_scope_variant(b,child,variant,b.parameter(child,0),b.parameter(child,1),b.parameter(child,2))
+        b.finish(child,(current,),(b.world,));children.append(child)
+    args=tuple(b.parameter(no,i) for i in range(3))
+    current,=b.control(no,P.BranchControl(*(P.ProductionRegionCall(child.id,args) for child in children)),
+        (docs,),b.union(*(b.completions(child) for child in children)))
+    b.finish(no,(current,),(b.world,))
+    args=(b.parameter(body,0),mapping,world)
+    world,=b.control(body,P.BranchControl(P.ProductionRegionCall(yes.id,args),P.ProductionRegionCall(no.id,args)),
+        (enabled,),b.union(b.completions(yes),b.completions(no)))
+    return mapping,world
+
+
 def build_request_body(b,parent,request):
     environment=b.rules.source.evaluations.environment(request,b.world,b.rules.exception_abi)
     body=b.region(environment.source,(_REF,_REF,b.world),parent,P.ProductionRegionKind.DEFERRED)
@@ -51,6 +105,8 @@ def build_request_body(b,parent,request):
             pairs.extend((key,value));b.slots[entry.value]=P.ProductionDispositionKind.DEFERRED_CHILD
         value,world=b.protocol(body,K.BUILD_MAP,tuple(pairs),world,
             (CountBinding('pair_count',len(request.entries)),),selectors=tuple(e.value for e in request.entries))
+    elif type(request) is P.ScopeAnnotationInterface:
+        value,world=_scope_body(b,body,request,world)
     else:
         value,world=_value(b,body,request.source,world,unpack=request.unpack_starred)
         b.slots[request.source]=P.ProductionDispositionKind.DEFERRED_CHILD

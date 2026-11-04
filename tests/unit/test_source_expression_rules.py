@@ -702,7 +702,7 @@ def test_delegation_keeps_send_and_post_driver_completion_paths_separate(rules, 
             plan = variant.build(occurrence)
             checked = variant.verify(plan)
             assert not checked['native_delegation_expanded'] and not checked['driver_protocol_graph_generated']
-            assert plan.schema_version == 20
+            assert plan.schema_version == 21
             _, root_steps = owned(plan)
             acquire = next(s for s in root_steps if type(s.instruction) is P.ApplyDelegationProtocol)
             assert acquire.instruction.protocol is (P.DelegationProtocolKind.AWAITABLE_ITER if constructor == 'Await'
@@ -1943,6 +1943,92 @@ last: W
     assert not any(s.opname in ('STORE_NAME','STORE_GLOBAL') and s.argval=='__doc__' for s in dis.get_instructions(optimized))
     repl=compile(cases[3][1],'<static-root-oracle>','single',dont_inherit=True)
     assert sum(s.opname=='CALL_INTRINSIC_1' and 'PRINT' in s.argrepr for s in dis.get_instructions(repl))==2
+
+
+def test_scope_annotation_requests_connect_compiler_emissions_captures_and_conditional_reads(monkeypatch):
+    from scar.analysis.source_root_rules import SourceRootRules
+    from scar.analysis.source_statement_rules import SourceStatementRules
+    from scar.analysis.source_productions import ProductionError,read_production_plan,production_plan_document
+    from scar.ir.program.control import LanguageCompletionKind as C
+    from scar.ir.program.structured import PythonProtocolKind as K
+    text='''first: First
+try:
+    tried: Tried
+except Failure:
+    caught: Caught
+else:
+    otherwise: Otherwise
+finally:
+    final: Final
+class Plain:
+    __private: Private
+    if choice:
+        conditional: Conditional
+def make(seed):
+    class Box[T]:
+        ignored.member: Missing
+        constant: seed
+        if choice:
+            __private: T
+    return Box
+def unreachable():
+    return
+    class Hidden:
+        if choice:
+            __field: Field
+if False:
+    class DeadBranch:
+        if choice:
+            __field: Field
+'''
+    expressions=_rules(_documents(text));source=expressions.source
+    with monkeypatch.context() as no_parse:
+        no_parse.setattr(ast,'parse',lambda *a,**kw:pytest.fail('scope annotation query reparsed target'))
+        request=source.scope_annotations.interface(source.roots.scope)
+        for variant in request.variants:
+            assert [e.key for e in variant.entries]==['first','tried','otherwise','caught','final','final']
+            assert [e.registration.index for e in variant.entries]==list(range(6))
+            assert variant.entries[-1].source==variant.entries[-2].source  # shared expression, two compiler emissions
+        for abi in ExceptionABI:
+            roots=SourceRootRules(source,world=WORLD,exception_abi=abi)
+            statements=SourceStatementRules(source,world=WORLD,exception_abi=abi)
+            plans=[roots.build(),*(statements.build(o) for o in occurrences(expressions,'ClassDef'))]
+            for plan in plans:
+                (roots if plan.purpose is P.ProductionPurpose.ROOT else statements).verify(plan)
+                assert read_production_plan(production_plan_document(plan))==plan
+                creation=next(s for s in plan.steps if type(s.instruction) in (P.BuildScopeAnnotations,P.BuildClassAnnotations))
+                scope_request=creation.instruction.annotations
+                body,steps=owned(plan,creation.instruction.body)
+                assert body.kind is P.ProductionRegionKind.DEFERRED
+                assert steps[0].instruction.environment==source.evaluations.environment(scope_request,WORLD,abi)
+                assert all(c.kind in (C.RETURN,C.RAISE) for c in body.completions)
+                assert not any(type(s.instruction) is P.ApplyRegion and s.instruction.invocation.region==body.id for s in plan.steps)
+                guards=[s for s in plan.steps if type(s.instruction) is P.ReadAnnotationRegistration]
+                assert guards
+                assert all(s.instruction.registration.scope==scope_request.scope for s in guards)
+                assert any(type(s.instruction) is P.ApplyPythonProtocol and s.instruction.protocol is K.STORE_SUBSCRIPT for s in plan.steps)
+                if type(creation.instruction) is P.BuildClassAnnotations:
+                    assert scope_request.captures
+                    transports=[r for r in plan.capture_transports if r.implicit_requirements]
+                    assert transports and all(r.implicit_requirements for r in transports)
+                    assert any(e.key.startswith('_') for e in scope_request.variants[0].entries)
+                    owner=source.context.material.scopes[scope_request.creator_scope].owner.occurrence
+                    pruned=source.roles.field(owner,'name').scalar.to_python() in ('Hidden','DeadBranch')
+                    assert all(v.emitted_in_original_unit is not pruned for v in scope_request.variants)
+                changed=replace(guards[0],instruction=replace(guards[0].instruction,
+                    registration=replace(guards[0].instruction.registration,index=999)))
+                with pytest.raises(ProductionError,match='SCOPE_ANNOTATION_INTERFACE'):
+                    source.match(replace(plan,steps=tuple(changed if s.id==guards[0].id else s for s in plan.steps)))
+                variant=scope_request.variants[0]
+                wrong=replace(variant,entries=(replace(variant.entries[0],key='wrong'),*variant.entries[1:]))
+                bad=replace(creation,instruction=replace(creation.instruction,
+                    annotations=replace(scope_request,variants=(wrong,*scope_request.variants[1:]))))
+                with pytest.raises(ProductionError,match='SOURCE_SCOPE_ANNOTATION'):
+                    source.match(replace(plan,steps=tuple(bad if s.id==creation.id else s for s in plan.steps)))
+    future=_rules(_documents('from __future__ import annotations\nx: Missing\nclass C:\n    y: Missing\n'))
+    assert future.source.scope_annotations.interface(future.source.roots.scope) is None
+    assert all(future.source.scope_annotations.interface(i) is None for i,s in enumerate(
+        future.source.context.material.scopes) if s.kind=='CLASS')
 
 
 def test_deferred_evaluation_templates_preserve_format_capture_order_and_stringization(monkeypatch):

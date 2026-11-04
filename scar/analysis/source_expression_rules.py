@@ -77,7 +77,8 @@ _RULE_MODULES = ('source_display_rules.py', 'source_string_rules.py', 'source_co
                  'source_statement_exceptions.py', 'source_statement_exception_groups.py', 'source_condition_rules.py',
                  'source_pattern_interfaces.py','source_statement_patterns.py','source_root_interfaces.py','source_root_rules.py',
                  'source_evaluation_interfaces.py','source_evaluation_rules.py',
-                 'source_class_namespace_interfaces.py','source_class_namespace_rules.py','source_capture_interfaces.py')
+                 'source_class_namespace_interfaces.py','source_class_namespace_rules.py','source_capture_interfaces.py',
+                 'source_scope_annotation_interfaces.py')
 
 
 class SourceRuleError(ProductionError):

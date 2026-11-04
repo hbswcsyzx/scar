@@ -1,4 +1,4 @@
-"""Supplement source capture paths with accepted compiler FREE requirements.
+"""Supplement source capture paths with accepted FREE and implicit requirements.
 
 Old F3 relay IDs remain unchanged. Missing paths use a separate composite key
 and shared parent edges. Cell ownership is a logical binding requirement,
@@ -52,8 +52,21 @@ class CaptureInterfaceIndex:
             if row.classification=='FREE' and row.binding is not None and witnesses:
                 self.native_requirements.append((resolution,tuple(witnesses)))
                 self._ensure(row.scope,row.binding,tuple(witnesses))
+        # Some implicit reads are recorded at their creator (e.g. conditional
+        # annotation registry), while the actual consumer is the request scope.
+        # Use its original anchor/read target; compiler witnesses supplement
+        # rather than replace the implicit source dependency.
+        for ordinal,row in enumerate(self.data.implicit):
+            if row.binding is None:continue
+            if row.analysis_visibility!='SYMBOL_VISIT' or row.activation in ('TEMPLATE_ONLY','TYPE_GRAMMAR'):continue
+            state=source.context.context_at_slot(row.anchor).state
+            if source.context.material.regions[state.region].eligibility!='ELIGIBLE':continue
+            scope=state.environment
+            witnesses=free.get((scope,source.frontend.namespace.name(row.name)),())
+            if self.data.bindings[row.binding].owner!=scope:
+                self._ensure(scope,row.binding,tuple(witnesses),(ordinal,))
 
-    def _ensure(self,scope,binding,witnesses):
+    def _ensure(self,scope,binding,witnesses,implicit=()):
         owner=self.data.bindings[binding].owner;missing=[];current=scope;seen=set()
         while current!=owner and (current,binding) not in self._by_pair:
             _require(current is not None and current not in seen,scope,'capture must reach its original owner through source scope parents')
@@ -61,14 +74,15 @@ class CaptureInterfaceIndex:
         parent=None if current==owner else self._by_pair[current,binding]
         for current in reversed(missing):
             reference=P.DerivedCaptureRef(current,binding)
-            self.transports[reference]=P.CaptureTransport(reference,parent,witnesses)
+            self.transports[reference]=P.CaptureTransport(reference,parent,witnesses,implicit)
             self._by_pair[current,binding]=reference;self.captures[current].append(reference);parent=reference
         # Multiple consumers may share a carrier; keep the union of original
         # compiler witnesses without cloning the shared path.
         current=self._by_pair.get((scope,binding))
         while type(current) is P.DerivedCaptureRef:
             row=self.transports[current]
-            self.transports[current]=replace(row,compiler_slots=tuple(sorted(set(row.compiler_slots)|set(witnesses))))
+            self.transports[current]=replace(row,compiler_slots=tuple(sorted(set(row.compiler_slots)|set(witnesses))),
+                implicit_requirements=tuple(sorted(set(row.implicit_requirements)|set(implicit))))
             current=row.parent
         self.cells[owner].add(binding)
 

@@ -61,6 +61,7 @@ def _implementation():
         'analysis/source_evaluation_interfaces.py', 'analysis/source_evaluation_rules.py',
         'analysis/source_class_namespace_interfaces.py', 'analysis/source_class_namespace_rules.py',
         'analysis/source_capture_interfaces.py',
+        'analysis/source_scope_annotation_interfaces.py',
         'analysis/source_syntax.py',
         'analysis/source_type_parameter_interfaces.py', 'analysis/source_type_parameter_rules.py',
         'analysis/source_productions.py', 'analysis/program_types.py',
@@ -119,8 +120,10 @@ def _unit(task):
                 request_bodies['LAZY_EXPRESSION']+=1
             elif type(instruction) is P.DefineAnnotationString:
                 stringized_values+=1
-            elif type(instruction) in (P.BuildScopeAnnotations,P.BuildClassAnnotations):
-                child_obligations['SCOPE_ANNOTATION_REQUEST']+=1
+            elif type(instruction) is P.BuildScopeAnnotations:
+                request_bodies['MODULE_VARIABLE_ANNOTATIONS']+=1
+            elif type(instruction) is P.BuildClassAnnotations:
+                request_bodies['CLASS_VARIABLE_ANNOTATIONS']+=1
 
     with ExitStack() as stack:
         if prior is None:

@@ -61,7 +61,14 @@ class _RootBuilder(_StatementBuilder):
         # CPython installs the module annotate callable before user code,
         # including when user statements later raise and leave a partial module.
         if index.deferred and not index.future:
-            value,world=self.emit(root,P.BuildScopeAnnotations(interface),(self.parameter(root,0),world),(_REF,self.world))
+            from scar.analysis.source_evaluation_rules import build_request_body
+            request=self.rules.source.scope_annotations.interface(interface.scope)
+            _require(request is not None,'SOURCE_ANNOTATION',str(source),'deferred root requires its annotation group')
+            body=build_request_body(self,root,request);cells=[]
+            for relay in request.captures:
+                cell,world=self.environment(root,P.ClosureEnvironment(relay),world,source=source);cells.append(cell)
+            value,world=self.emit(root,P.BuildScopeAnnotations(interface,request,body.id),
+                (self.parameter(root,0),*cells,world),(_REF,self.world))
             world=self.store(root,'__annotate__',value,world)
             world,=self.protocol(root,K.FRAME_RELEASE_TEMPORARY,(value,),world)
         if index.annotations:
