@@ -214,6 +214,12 @@ class AnnotationStateName(str, Enum):
     CONDITIONAL = '__conditional_annotations__'
 
 
+class CompilationContextStatus(str, Enum):
+    VERIFIED = 'VERIFIED'
+    NO_RETAINED_OWNER = 'NO_RETAINED_OWNER'
+    OWNER_LAYOUT_UNVERIFIED = 'OWNER_LAYOUT_UNVERIFIED'
+
+
 class DeferredParameterKind(str, Enum):
     POSITIONAL_ONLY = 'POSITIONAL_ONLY'
     POSITIONAL_OR_KEYWORD = 'POSITIONAL_OR_KEYWORD'
@@ -556,6 +562,29 @@ class AnnotationEmissionVariant:
     optimization_level: int
     registrations: tuple[AnnotationRegistration, ...]
     emitted_in_original_unit: bool
+    producer_sites: tuple['AnnotationEmissionSite', ...]
+    context_status: CompilationContextStatus
+    unverified_owner_paths: tuple[tuple[int, ...], ...] = ()
+
+
+@dataclass(frozen=True, slots=True)
+class CompiledCodeReference:
+    """Unit-scoped original code version, never joined by name or line."""
+    optimization_level: int
+    constant_path: tuple[int, ...]
+    code_sha256: str
+    bytecode_size: int
+    digest_kind: str = 'SCAR_COMPILED_CODE_V1'
+
+
+@dataclass(frozen=True, slots=True)
+class AnnotationEmissionSite:
+    registration: AnnotationRegistration
+    code: CompiledCodeReference
+    lookup_offset: int
+    index_offset: int
+    insert_offset: int
+    discard_offset: int
 
 
 @dataclass(frozen=True, slots=True)
@@ -707,6 +736,7 @@ class AddAnnotationIndex:
     still equals the empty set created at initialization.
     """
     publication: PublishAnnotation
+    parameter: AnnotationEmissionParameter
 
 
 @dataclass(frozen=True, slots=True)
@@ -1150,7 +1180,7 @@ class SourceProductionPlan:
     slots: tuple[ProductionSlotDisposition, ...]
     capture_transports: tuple[CaptureTransport, ...] = ()
     schema: str = 'scar.source-production-plan'
-    schema_version: int = 22
+    schema_version: int = 23
     authority: str = 'SOURCE_RECIPE_SHAPE_ONLY'
 
 

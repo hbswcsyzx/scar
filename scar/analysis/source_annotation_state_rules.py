@@ -26,7 +26,7 @@ def publish(b,region,publication,world):
         if len(indices)==1:index,world=b.literal(region,indices.pop(),world,source=source)
         else:
             index,=b.emit(region,P.ReadCompilationAnnotationIndex(parameter),(),(_REF,),may_raise=False,source=source)
-        world,=b.emit(region,P.AddAnnotationIndex(publication),(namespace,index,world),(b.world,),source=source)
+        world,=b.emit(region,P.AddAnnotationIndex(publication,parameter),(namespace,index,world),(b.world,),source=source)
         released=(index,namespace)
     for reference in released:
         world,=b.protocol(region,K.FRAME_RELEASE_TEMPORARY,(reference,),world)

@@ -702,7 +702,7 @@ def test_delegation_keeps_send_and_post_driver_completion_paths_separate(rules, 
             plan = variant.build(occurrence)
             checked = variant.verify(plan)
             assert not checked['native_delegation_expanded'] and not checked['driver_protocol_graph_generated']
-            assert plan.schema_version == 22
+            assert plan.schema_version == 23
             _, root_steps = owned(plan)
             acquire = next(s for s in root_steps if type(s.instruction) is P.ApplyDelegationProtocol)
             assert acquire.instruction.protocol is (P.DelegationProtocolKind.AWAITABLE_ITER if constructor == 'Await'
@@ -1967,6 +1967,11 @@ else:
     otherwise: Otherwise
 finally:
     final: Final
+if False:
+    skipped: Missing
+constant_values = (1e999,-0.0,3+4j)
+membership = item in {"a","b"}
+constant_slice = item[1:3]
 class Plain:
     __private: Private
     if choice:
@@ -1994,9 +1999,9 @@ if False:
         no_parse.setattr(ast,'parse',lambda *a,**kw:pytest.fail('scope annotation query reparsed target'))
         request=source.scope_annotations.interface(source.roots.scope)
         for variant in request.variants:
-            assert [e.key for e in variant.entries]==['first','tried','otherwise','caught','final','final']
-            assert [e.registration.index for e in variant.entries]==list(range(6))
-            assert variant.entries[-1].source==variant.entries[-2].source  # shared expression, two compiler emissions
+            assert [e.key for e in variant.entries]==['first','tried','otherwise','caught','final','final','skipped']
+            assert [e.registration.index for e in variant.entries]==list(range(7))
+            assert variant.entries[-2].source==variant.entries[-3].source  # shared expression, two compiler emissions
         for abi in ExceptionABI:
             roots=SourceRootRules(source,world=WORLD,exception_abi=abi)
             statements=SourceStatementRules(source,world=WORLD,exception_abi=abi)
@@ -2013,6 +2018,31 @@ if False:
                 assert access==source.annotation_states.publication_access(descriptor)
                 assert lookup.arguments==(P.ProductionParameter(written.root,0),)
                 domain=source.annotation_states.parameter(descriptor)
+                assert mutations[0].instruction.parameter==domain
+                if source.annotation_states.key(descriptor)=='skipped':
+                    assert all(v.context_status is P.CompilationContextStatus.VERIFIED and not v.producer_sites
+                        for v in domain.variants)
+                for variant in domain.variants:
+                    if variant.emitted_in_original_unit:
+                        assert variant.context_status is P.CompilationContextStatus.VERIFIED
+                    else:
+                        assert variant.context_status is P.CompilationContextStatus.NO_RETAINED_OWNER
+                        assert not variant.producer_sites
+                    for site in variant.producer_sites:
+                        assert site.registration in variant.registrations
+                        assert source.compilation_contexts.bind(domain,site.code,site.insert_offset)==site.registration
+                        with pytest.raises(ProductionError,match='COMPILATION_CONTEXT'):
+                            source.compilation_contexts.bind(domain,replace(site.code,code_sha256='0'*64),site.insert_offset)
+                        with pytest.raises(ProductionError,match='COMPILATION_CONTEXT'):
+                            source.compilation_contexts.bind(domain,site.code,site.lookup_offset)
+                if domain.variants[0].producer_sites:
+                    first=domain.variants[0]
+                    wrong=replace(first,producer_sites=(replace(first.producer_sites[0],
+                        code=replace(first.producer_sites[0].code,code_sha256='0'*64)),*first.producer_sites[1:]))
+                    tampered=replace(mutations[0],instruction=replace(mutations[0].instruction,
+                        parameter=replace(domain,variants=(wrong,*domain.variants[1:]))))
+                    with pytest.raises(ProductionError,match='SOURCE_ANNOTATION_STATE'):
+                        source.match(replace(written,steps=tuple(tampered if s.id==mutations[0].id else s for s in written.steps)))
                 indices={r.index for v in domain.variants for r in v.registrations}
                 parameters=[s for s in written.steps if type(s.instruction) is P.ReadCompilationAnnotationIndex]
                 assert bool(parameters)==(len(indices)>1)

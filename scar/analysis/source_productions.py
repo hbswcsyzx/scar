@@ -29,6 +29,7 @@ from scar.analysis.source_class_namespace_interfaces import ClassNamespaceIndex
 from scar.analysis.source_capture_interfaces import CaptureInterfaceIndex
 from scar.analysis.source_scope_annotation_interfaces import ScopeAnnotationIndex
 from scar.analysis.source_annotation_state_interfaces import AnnotationStateIndex
+from scar.analysis.source_compilation_contexts import CompilationContextIndex
 
 
 class ProductionError(ValueError):
@@ -69,7 +70,8 @@ def production_type_catalog():
                  'scar.analysis.source_definition_interfaces','scar.analysis.source_pattern_interfaces',
                  'scar.analysis.source_root_interfaces','scar.analysis.source_evaluation_interfaces','scar.analysis.source_syntax',
                  'scar.analysis.source_class_namespace_interfaces','scar.analysis.source_capture_interfaces',
-                 'scar.analysis.source_scope_annotation_interfaces','scar.analysis.source_annotation_state_interfaces'):
+                 'scar.analysis.source_scope_annotation_interfaces','scar.analysis.source_annotation_state_interfaces',
+                 'scar.analysis.source_compilation_contexts'):
         modules[name] = sha256(Path(sys.modules[name].__file__).read_bytes()).hexdigest()
     payload = dict(schema='scar.source-production-type-catalog', schema_version=1,
         root=root, types=rows, counts=counts, modules=dict(sorted(modules.items())),
@@ -159,7 +161,7 @@ def validate_production_plan(plan, *, max_visits=1_000_000):
     """
     visits = _shape(plan, max_visits)
     _require((plan.schema, plan.schema_version, plan.authority) == (
-        'scar.source-production-plan', 22, 'SOURCE_RECIPE_SHAPE_ONLY'),
+        'scar.source-production-plan', 23, 'SOURCE_RECIPE_SHAPE_ONLY'),
         'SCHEMA', 'plan', 'unsupported recipe schema or authority')
     source = plan.input
     _require(bool(source.path) and bool(source.namespace_root), 'INPUT', 'plan.input', 'source paths must be nonempty')
@@ -299,6 +301,27 @@ def validate_production_plan(plan, *, max_visits=1_000_000):
                 and all(r.scope>=0 and r.index>=0 and r.optimization_level==v.optimization_level for r in v.registrations),
                 'ANNOTATION_STATE_INTERFACE','parameter','index alternatives must be distinct scoped compiler registrations')
             scopes.update(r.scope for r in v.registrations)
+            _require(v.context_status is not P.CompilationContextStatus.NO_RETAINED_OWNER or not v.producer_sites,
+                'COMPILATION_CONTEXT','parameter','unemitted owners must not authorize producer sites')
+            _require(not v.unverified_owner_paths or v.context_status is P.CompilationContextStatus.OWNER_LAYOUT_UNVERIFIED,
+                'COMPILATION_CONTEXT','parameter','unverified owner paths require an explicit incomplete context status')
+            _require(len(set(v.unverified_owner_paths))==len(v.unverified_owner_paths)
+                and all(i>=0 for path in v.unverified_owner_paths for i in path),
+                'COMPILATION_CONTEXT','parameter','unverified paths must be distinct nonnegative constant references')
+            _require(v.context_status is not P.CompilationContextStatus.NO_RETAINED_OWNER or not v.emitted_in_original_unit,
+                'COMPILATION_CONTEXT','parameter','retained source variant cannot claim no retained owner')
+            seen=set()
+            for site in v.producer_sites:
+                code=site.code;key=(code,site.insert_offset)
+                _require(site.registration in v.registrations and code.optimization_level==v.optimization_level
+                    and code.digest_kind=='SCAR_COMPILED_CODE_V1' and code.bytecode_size>0
+                    and all(i>=0 for i in code.constant_path) and len(code.code_sha256)==64
+                    and all(c in '0123456789abcdef' for c in code.code_sha256)
+                    and 0<=site.lookup_offset<site.index_offset<site.insert_offset<site.discard_offset<code.bytecode_size
+                    and all(i%2==0 for i in (site.lookup_offset,site.index_offset,site.insert_offset,site.discard_offset))
+                    and key not in seen and code.constant_path not in v.unverified_owner_paths,
+                    'COMPILATION_CONTEXT','site','producer needs one exact code version and ordered instruction offsets')
+                seen.add(key)
         _require(len(scopes)==1,'ANNOTATION_STATE_INTERFACE','parameter','one source declaration has one original annotation scope')
 
     def deferred_ports(environment):
@@ -530,6 +553,8 @@ def validate_production_plan(plan, *, max_visits=1_000_000):
                 world=args[2];raised=(reference,world) if pub.exception_abi is ExceptionABI.EXCEPTION_WORLD else (reference,reference,world)
                 _require(outputs=={(C.FALLTHROUGH,None):(world,),(C.RAISE,None):raised},
                     'ANNOTATION_STATE_INTERFACE',str(identity),'set insertion keeps type and mutation failures')
+                emission_parameter(instruction.parameter)
+                _require(instruction.parameter.publication==pub,'COMPILATION_CONTEXT',str(identity),'write and compiler input must refer to the same declaration')
             elif type(instruction) is P.EnterEvaluationRequest:
                 ports=evaluation_ports(instruction.environment)
                 _require(region.kind is P.ProductionRegionKind.DEFERRED and ordinal==0
@@ -1120,6 +1145,7 @@ class ProductionSourceIndex:
         self._capture_paths = None
         self._scope_annotations = None
         self._annotation_states = None
+        self._compilation_contexts = None
         self._expressions=frozenset(row.name for row in syntax.profile.ast_schema if 'expr' in row.bases)
         self._role_sites = frozenset(port.site for port in frontend_view.roles.ports)
         self.input = P.ProductionInput(f0['path'], f0['namespace_root'], _digest(encode(syntax)),
@@ -1141,6 +1167,11 @@ class ProductionSourceIndex:
     def annotation_states(self):
         if self._annotation_states is None:self._annotation_states=AnnotationStateIndex(self)
         return self._annotation_states
+
+    @property
+    def compilation_contexts(self):
+        if self._compilation_contexts is None:self._compilation_contexts=CompilationContextIndex(self)
+        return self._compilation_contexts
 
     @property
     def deferred(self):
@@ -1268,7 +1299,8 @@ class ProductionSourceIndex:
                         expected=self.annotation_states.parameter(pub)
                         _require(instruction.parameter==expected and len({r.index for v in expected.variants for r in v.registrations})>1,
                             'SOURCE_ANNOTATION_STATE',str(step.id),'compiler index domain differs or should have been a singleton literal')
-                    else:_require(instruction.publication==pub,'SOURCE_ANNOTATION_STATE',str(step.id),'set insertion differs from original conditional declaration')
+                    else:_require(instruction.publication==pub and instruction.parameter==self.annotation_states.parameter(pub),
+                        'SOURCE_ANNOTATION_STATE',str(step.id),'set insertion/compiler contexts differ from original conditional declaration')
                 elif type(instruction) is P.DefineAnnotationString:
                     _require(step.source==instruction.source and instruction.value==self.evaluations.stringize(instruction.source),
                         'SOURCE_EVALUATION_REQUEST',str(step.id),'stringized annotation differs from original source/compiler result')

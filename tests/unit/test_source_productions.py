@@ -65,7 +65,7 @@ def test_closed_grammar_exact_records_strict_codec_and_budgets():
     assert summary['control_semantics_checked'] is False
     assert A.read_production_plan(A.production_plan_document(value)) == value
     catalog = A.production_type_catalog()
-    assert catalog['counts'] == dict(records=117, fields=323, identifiers=4, enums=28, enum_members=245, unions=24)
+    assert catalog['counts'] == dict(records=119, fields=338, identifiers=4, enums=29, enum_members=248, unions=24)
     assert set(catalog['instruction_variants']) == {
         'EvaluateChild', 'ApplyLanguageAction', 'ReadCompilationOption', 'ApplyInplaceOperator',
         'ImportRequest', 'ImportMember', 'ImportStar',
@@ -114,8 +114,10 @@ def test_compilation_inplace_and_annotation_interfaces_are_explicit_and_closed()
     for abi in ExceptionABI:
         raised = (REF, world) if abi is ExceptionABI.EXCEPTION_WORLD else (REF, REF, world)
         pub=P.PublishAnnotation(P.SlotRef(0,'FIELD',0),P.SlotRef(1,'FIELD',0),P.AnnotationPublicationKind.DEFERRED,True,abi)
+        emission=P.AnnotationEmissionParameter(pub,tuple(P.AnnotationEmissionVariant(i,(P.AnnotationRegistration(1,i,0),),
+            True,(),P.CompilationContextStatus.VERIFIED) for i in (0,1,2)))
         cases=((P.ApplyInplaceOperator(P.SlotRef(0,'FIELD',0),abi),(REF,REF,world),(REF,world)),
-            (P.AddAnnotationIndex(pub),(REF,REF,world),(world,)),
+            (P.AddAnnotationIndex(pub,emission),(REF,REF,world),(world,)),
             (P.ReadAnnotationNamespace(P.AnnotationStateAccess(0,P.AnnotationLookupKind.LOCALS_CHAIN,
                 P.AnnotationStateName.CONDITIONAL),abi),(world,),(REF,world)))
         for instruction,parameters,result in cases:

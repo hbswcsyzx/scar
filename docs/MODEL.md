@@ -52,6 +52,7 @@ F2语法输入按F0/F1收据、parser profile和局部occurrence ID定位；字�
 F4-B source recipe另以原F2 `SourceLoopTarget`连接局部子图的break/continue端口；对应共享循环消费自己的跳转，耗尽与break分开连接else/后继。suite只沿正常完成接下一语句。语句may-completion上界、局部产生规则与最终CFG/SSA是三种不同的证明范围；iterator引用不变不授内容不变或引用释放时序证明。
 编译条件与运行状态也分开：`ReadCompilationOption`保目标的符号编译事实，不读取分析进程flags冒充目标事实。注解的声明、字符串化发布与后续请求沿原C1求值阶段连接；deferred来源不等于声明时已求出值。增强赋值的地址/读/运算/写由同一父语句安排，不能当作两次独立地址求值。
 注解状态访问显式区分locals→globals→builtins、globals→builtins及class protocol cell；来源相似不能证明它们引用同一对象。查找消费当前world，不能冻结初始化时的容器。源码编译元数据不计为运行操作；重复编译展开的登记编号是编译上下文参数，不是多次执行或运行时任意选择。有限取值域已知而上下文未绑定时，保留参数及缺失证明；单值可静态折叠。
+编译上下文通过原代码版本、优化策略、常量引用路径和指令偏移标识；不是动态Invocation。代码指纹保指令、参数/捕获布局、异常/位置表及精确常量树，含编译生成的slice/frozenset。源码参数可以拥有多个已证生产位置；可由某一具体位置机械绑定。没有保留的生产位置不证明消费者无用，未证路径也不能抹掉其他已证边。
 区域 cut 查询列出已有跨边界依赖，不自动证明可外提、复用、删除或整体替换。
 见 [公共依赖查询](../scar/analysis/program_dependencies.py) 与 [边界分析](../scar/analysis/program_regions.py)。
 

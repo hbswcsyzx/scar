@@ -51,7 +51,9 @@ class AnnotationStateIndex:
         for variant in request.variants:
             selected=tuple(e.registration for e in variant.entries if e.source==publication.annotation and e.registration is not None)
             _require(bool(selected),publication.annotation,'compiler query omitted a conditional source registration')
-            variants.append(P.AnnotationEmissionVariant(variant.optimization_level,selected,variant.emitted_in_original_unit))
+            status,sites,unverified=self.source.compilation_contexts.sites(scope,variant.optimization_level,emitted=variant.emitted_in_original_unit)
+            variants.append(P.AnnotationEmissionVariant(variant.optimization_level,selected,variant.emitted_in_original_unit,
+                tuple(site for site in sites if site.registration in selected),status,unverified))
         result=P.AnnotationEmissionParameter(publication,tuple(variants));self._parameters[publication]=result
         return result
 

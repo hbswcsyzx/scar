@@ -63,6 +63,7 @@ def _implementation():
         'analysis/source_capture_interfaces.py',
         'analysis/source_scope_annotation_interfaces.py',
         'analysis/source_annotation_state_interfaces.py','analysis/source_annotation_state_rules.py',
+        'analysis/source_compilation_contexts.py',
         'analysis/source_syntax.py',
         'analysis/source_type_parameter_interfaces.py', 'analysis/source_type_parameter_rules.py',
         'analysis/source_productions.py', 'analysis/program_types.py',
