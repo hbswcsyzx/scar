@@ -18,6 +18,7 @@ from scar.ir.program.protocol_signatures import ExceptionABI, protocol_signature
 from scar.ir.program.signature_patterns import SignatureError, SignatureForm
 from scar.ir.program.delegation_signatures import resolve_delegation_signature
 from scar.ir.record_codec import decode, encode
+from scar.analysis.source_deferred_interfaces import DeferredInterfaceIndex
 
 
 class ProductionError(ValueError):
@@ -53,7 +54,7 @@ def production_type_catalog():
         for cls in registry.values()}
     modules[__name__] = sha256(Path(__file__).read_bytes()).hexdigest()
     for name in ('scar.analysis.program_types', 'scar.ir.record_codec', 'scar.ir.program.protocol_signatures',
-                 'scar.ir.program.delegation_signatures'):
+                 'scar.ir.program.delegation_signatures', 'scar.analysis.source_deferred_interfaces'):
         modules[name] = sha256(Path(sys.modules[name].__file__).read_bytes()).hexdigest()
     payload = dict(schema='scar.source-production-type-catalog', schema_version=1,
         root=root, types=rows, counts=counts, modules=dict(sorted(modules.items())),
@@ -143,7 +144,7 @@ def validate_production_plan(plan, *, max_visits=1_000_000):
     """
     visits = _shape(plan, max_visits)
     _require((plan.schema, plan.schema_version, plan.authority) == (
-        'scar.source-production-plan', 3, 'SOURCE_RECIPE_SHAPE_ONLY'),
+        'scar.source-production-plan', 4, 'SOURCE_RECIPE_SHAPE_ONLY'),
         'SCHEMA', 'plan', 'unsupported recipe schema or authority')
     source = plan.input
     _require(bool(source.path) and bool(source.namespace_root), 'INPUT', 'plan.input', 'source paths must be nonempty')
@@ -221,6 +222,32 @@ def validate_production_plan(plan, *, max_visits=1_000_000):
     step_outputs = {s.id: completions(s.completions, s.region, str(s.id)) for s in plan.steps}
     protocols = ({r.kind: r for r in protocol_signature_catalog()}
         if any(type(s.instruction) is P.ApplyPythonProtocol for s in plan.steps) else {})
+
+    def deferred_ports(environment):
+        _require(type(environment.world) is ValueType and environment.world.kind is ValueKind.STATE,
+            'DEFERRED_INTERFACE', 'environment.world', 'a deferred activation requires an explicit state domain')
+        _require(environment.scope >= 0 and environment.globals_scope >= 0
+            and all(c >= 0 for c in environment.captures) and len(set(environment.captures)) == len(environment.captures),
+            'DEFERRED_INTERFACE', 'environment', 'original scopes/capture references must be distinct and nonnegative')
+        rank, prior, singletons = list(P.DeferredParameterKind), -1, set()
+        sources, bindings = set(), set()
+        for p in environment.parameters:
+            current = rank.index(p.kind)
+            _require(current >= prior and p.source not in sources, 'DEFERRED_INTERFACE', 'parameters',
+                'formals must have distinct source binders in declared source-group order')
+            prior = current; sources.add(p.source)
+            if p.kind in (P.DeferredParameterKind.VAR_POSITIONAL, P.DeferredParameterKind.VAR_KEYWORD):
+                _require(p.kind not in singletons, 'DEFERRED_INTERFACE', 'parameters', 'variadic formal may occur only once')
+                singletons.add(p.kind)
+            if p.kind is P.DeferredParameterKind.INITIAL_ITERATOR:
+                _require(len(environment.parameters) == 1 and p.binding_port is None
+                    and environment.kind in (P.DeferredBodyKind.GENERATOR, P.DeferredBodyKind.ASYNC_GENERATOR),
+                    'DEFERRED_INTERFACE', 'parameters', 'initial iterator is a distinct sole generator input')
+            else:
+                _require(p.binding_port is not None and p.binding_port >= 0 and p.binding_port not in bindings,
+                    'DEFERRED_INTERFACE', 'parameters', 'formal requires one distinct original binding port')
+                bindings.add(p.binding_port)
+        return (ValueType(ValueKind.REFERENCE), *(ValueType(ValueKind.REFERENCE) for _ in environment.parameters), environment.world)
     claimed, referenced_regions = set(), {plan.root}
     for region in plan.regions:
         _require(bool(region.steps), 'REGION_EXIT', str(region.id), 'region needs an explicit result/transfer step')
@@ -414,7 +441,32 @@ def validate_production_plan(plan, *, max_visits=1_000_000):
                     _require(otherwise.parameters == region.parameters, 'LOOP_INTERFACE', str(identity),
                              'loop otherwise carry ports differ')
             elif type(instruction) is P.DeferRegion:
-                child(instruction.body, P.ProductionRegionKind.DEFERRED)
+                body = child(instruction.body, P.ProductionRegionKind.DEFERRED)
+                environment = instruction.environment
+                _require(not args and outputs == {(C.FALLTHROUGH, None): (ValueType(ValueKind.REFERENCE),)},
+                    'DEFERRED_INTERFACE', str(identity), 'code declaration has no eager execution/capture arguments')
+                _require(body.parameters == deferred_ports(environment), 'DEFERRED_INTERFACE', str(identity),
+                    'later entry requires environment, source-order admitted values and a fresh world')
+                _require(body.steps and body.steps[0] in steps and type(steps[body.steps[0]].instruction) is P.EnterDeferredBody
+                    and steps[body.steps[0]].instruction.environment == environment,
+                    'DEFERRED_INTERFACE', str(identity), 'body must start with its declared activation')
+                raised = (*((ValueType(ValueKind.REFERENCE),) * (1 if environment.exception_abi is ExceptionABI.EXCEPTION_WORLD else 2)), environment.world)
+                allowed = {(C.RETURN, None): (ValueType(ValueKind.REFERENCE), environment.world), (C.RAISE, None): raised}
+                _require(all(k in allowed and allowed[k] == v for k, v in region_outputs[body.id].items()),
+                    'DEFERRED_INTERFACE', str(identity), 'deferred body may return/raise with its declared world, not fall through')
+            elif type(instruction) is P.ReferenceEnvironment:
+                reference = instruction.source
+                _require((reference.scope if type(reference) is P.GlobalsEnvironment else reference.relay) >= 0,
+                    'DEFERRED_INTERFACE', str(identity), 'environment handle reference must be nonnegative')
+                _require(len(args) == 1 and type(args[0]) is ValueType and args[0].kind is ValueKind.STATE
+                    and outputs == {(C.FALLTHROUGH, None): (ValueType(ValueKind.REFERENCE), args[0])},
+                    'DEFERRED_INTERFACE', str(identity), 'environment reference retains a handle, not cell contents')
+            elif type(instruction) is P.EnterDeferredBody:
+                _require(region.kind is P.ProductionRegionKind.DEFERRED and ordinal == 0
+                    and args == deferred_ports(instruction.environment)
+                    and step.arguments == tuple(P.ProductionParameter(region.id, i) for i in range(len(region.parameters)))
+                    and outputs == {(C.FALLTHROUGH, None): (instruction.environment.world,)},
+                    'DEFERRED_INTERFACE', str(identity), 'activation must consume the exact admitted entry ports first')
             elif type(instruction) is P.CleanupControl:
                 invoke(instruction.protected)
                 child(instruction.cleanup, P.ProductionRegionKind.CLEANUP)
@@ -496,10 +548,17 @@ class ProductionSourceIndex:
             'INPUT_LINEAGE', 'views', 'views do not share the original source/context material')
         self.context, self.frontend = context_view, frontend_view
         self.roles = context_view.role_view
+        self._deferred = None
         self._role_sites = frozenset(port.site for port in frontend_view.roles.ports)
         self.input = P.ProductionInput(f0['path'], f0['namespace_root'], _digest(encode(syntax)),
             _digest(encode(context_view.roles)), _digest(encode(context_view.material)),
             _digest(encode(frontend_view.declarations)), _digest(encode(frontend_view.bindings)))
+
+    @property
+    def deferred(self):
+        if self._deferred is None:
+            self._deferred = DeferredInterfaceIndex(self)
+        return self._deferred
 
     def match(self, plan, *, max_visits=1_000_000):
         summary = validate_production_plan(plan, max_visits=max_visits)
@@ -548,6 +607,38 @@ class ProductionSourceIndex:
                              P.BindingActionKind.DELETE: 'delete_target'}[instruction.action]
                     _require(getattr(binding, field) is not None, 'SOURCE_PORT', str(step.id),
                              'role port has no declared namespace access for this action')
+                elif type(instruction) in (P.DeferRegion, P.EnterDeferredBody):
+                    environment = instruction.environment
+                    scope = self.context.material.scopes[environment.scope]
+                    expected = self.deferred.interface(scope.owner.occurrence, environment.world, environment.exception_abi)
+                    _require(environment == expected, 'SOURCE_DEFERRED', str(step.id),
+                        'parameters/cells/kind differ from the original source binding/forwarding interface')
+                    if type(instruction) is P.DeferRegion:
+                        constructor = self.context.syntax.nodes[scope.owner.occurrence].constructor
+                        anchor = P.SlotRef(scope.owner.occurrence, 'FIELD', self.roles.fields[constructor][
+                            'elt' if constructor == 'GeneratorExp' else 'body'])
+                        _require(region_index[instruction.body].context.environment == environment.scope
+                            and region_index[step.region].context.environment == scope.parent
+                            and step.source == P.ProductionOccurrence(scope.owner.occurrence)
+                            and region_index[instruction.body].source == anchor,
+                            'SOURCE_DEFERRED', str(step.id), 'definition/body must connect original parent/child namespaces')
+                    else:
+                        _require(region_index[step.region].context.environment == environment.scope,
+                            'SOURCE_DEFERRED', str(step.id), 'entry activation moved to another source scope')
+                elif type(instruction) is P.ReferenceEnvironment:
+                    handle = instruction.source
+                    if type(handle) is P.GlobalsEnvironment:
+                        _require(handle.scope == self.context.material.root_context.environment,
+                            'SOURCE_DEFERRED', str(step.id), 'globals reference must name the original root namespace')
+                    else:
+                        _require(0 <= handle.relay < len(self.frontend.bindings.relays),
+                            'SOURCE_DEFERRED', str(step.id), 'cell handle lacks an original forwarding hop')
+                        relay = self.frontend.bindings.relays[handle.relay]
+                        scope = self.context.material.scopes[relay.scope]
+                        _require(handle.relay in self.deferred.captures[relay.scope]
+                            and region_index[step.region].context.environment == scope.parent
+                            and step.source == P.ProductionOccurrence(scope.owner.occurrence),
+                            'SOURCE_DEFERRED', str(step.id), 'cell retention must use an active original child capture path')
             for disposition in plan.slots:
                 self.roles.locate(disposition.field)
                 if disposition.disposition is P.ProductionDispositionKind.ROLE_PORT:

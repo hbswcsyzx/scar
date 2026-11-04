@@ -55,10 +55,10 @@ def test_closed_grammar_exact_records_strict_codec_and_budgets():
     assert summary['control_semantics_checked'] is False
     assert A.read_production_plan(A.production_plan_document(value)) == value
     catalog = A.production_type_catalog()
-    assert catalog['counts'] == dict(records=40, fields=112, identifiers=4, enums=14, enum_members=193, unions=11)
+    assert catalog['counts'] == dict(records=46, fields=127, identifiers=4, enums=16, enum_members=203, unions=13)
     assert set(catalog['instruction_variants']) == {
         'EvaluateChild', 'ApplyLanguageAction', 'ApplyPythonProtocol', 'ApplyDelegationProtocol', 'AccessBinding', 'ConstructValue', 'DefineLiteral', 'ApplyRegion',
-        'BranchControl', 'LoopControl', 'DeferRegion', 'CleanupControl', 'HandleCompletions',
+        'BranchControl', 'LoopControl', 'DeferRegion', 'ReferenceEnvironment', 'EnterDeferredBody', 'CleanupControl', 'HandleCompletions',
         'TransferCompletion', 'SuspendExecution'}
     assert A.read_production_type_catalog(deepcopy(catalog)) == catalog
     # bool must not silently pass as an int, and unregistered subclasses fail.
@@ -256,13 +256,35 @@ def test_loop_template_carries_ports_without_iterations_or_cross_region_value_ed
     with pytest.raises(A.ProductionError, match='LOOP_INTERFACE'):
         A.validate_production_plan(replace(failures, regions=(root, *failures.regions[1:]),
             steps=(value.steps[0], *failures.steps[1:])))
-    # Deferred body parameters belong to its later invocation, not the declaration.
-    outer = region('outer', parameters=(REF,), outputs=normal(REF), steps=('defer',))
-    deferred = region('deferred', parent=outer.id, kind=P.ProductionRegionKind.DEFERRED, steps=('later_return',))
-    delayed = plan((outer, deferred), (
-        step('defer', outer, P.DeferRegion(deferred.id), (parameter(outer),), normal(REF)),
-        step('later_return', deferred, P.TransferCompletion(C.FALLTHROUGH), (parameter(deferred),))))
-    assert A.validate_production_plan(delayed)['regions'] == 2
+
+
+def test_deferred_body_separates_code_creation_and_admitted_entry_state():
+    from scar.ir.program.ids import LocationID
+    from scar.ir.program.protocol_signatures import ExceptionABI
+    world = ValueType(ValueKind.STATE, location=LocationID('world'))
+    env = P.DeferredEnvironment(1, 0, (P.DeferredParameter(P.DeferredParameterKind.POSITIONAL_ONLY,
+        P.SlotRef(2, 'FIELD', 0), 3),), (5,), P.DeferredBodyKind.FUNCTION, world, ExceptionABI.EXCEPTION_WORLD)
+    outer = region('outer', parameters=(), outputs=normal(REF), steps=('defer',))
+    returned = P.ProductionCompletion(C.RETURN, (REF, world))
+    deferred = region('deferred', parent=outer.id, kind=P.ProductionRegionKind.DEFERRED,
+        parameters=(REF, REF, world), outputs=(returned,), steps=('enter', 'later_return'))
+    declaration = step('defer', outer, P.DeferRegion(deferred.id, env), outputs=normal(REF))
+    enter = step('enter', deferred, P.EnterDeferredBody(env),
+        tuple(parameter(deferred, i) for i in range(3)), normal(world))
+    delayed = plan((outer, deferred), (declaration, enter,
+        step('later_return', deferred, P.TransferCompletion(C.RETURN),
+            (parameter(deferred, 1), P.ProductionResult(enter.id, 0)), (returned,))))
+    assert A.read_production_plan(A.production_plan_document(delayed)) == delayed
+    for changed in (
+        replace(delayed, steps=(replace(declaration, arguments=(parameter(outer),)), *delayed.steps[1:])),
+        replace(delayed, steps=(replace(declaration, instruction=replace(declaration.instruction,
+            environment=replace(env, captures=(5, 5)))), *delayed.steps[1:])),
+        replace(delayed, steps=(declaration, replace(enter, arguments=(parameter(deferred, 1),
+            parameter(deferred), parameter(deferred, 2))), delayed.steps[2])),
+        replace(delayed, regions=(outer, replace(deferred, parameters=(REF, world)))),
+    ):
+        with pytest.raises(A.ProductionError):
+            A.validate_production_plan(changed)
 
 
 def test_unconditional_loop_has_no_invented_predicate_or_normal_exit():

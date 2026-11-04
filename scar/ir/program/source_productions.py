@@ -129,6 +129,22 @@ class DelegationProtocolKind(str, Enum):
     STOP_ITERATION_VALUE = 'STOP_ITERATION_VALUE'
 
 
+class DeferredBodyKind(str, Enum):
+    FUNCTION = 'FUNCTION'
+    GENERATOR = 'GENERATOR'
+    COROUTINE = 'COROUTINE'
+    ASYNC_GENERATOR = 'ASYNC_GENERATOR'
+
+
+class DeferredParameterKind(str, Enum):
+    POSITIONAL_ONLY = 'POSITIONAL_ONLY'
+    POSITIONAL_OR_KEYWORD = 'POSITIONAL_OR_KEYWORD'
+    VAR_POSITIONAL = 'VAR_POSITIONAL'
+    KEYWORD_ONLY = 'KEYWORD_ONLY'
+    VAR_KEYWORD = 'VAR_KEYWORD'
+    INITIAL_ITERATOR = 'INITIAL_ITERATOR'
+
+
 @dataclass(frozen=True, slots=True)
 class ProductionInput:
     path: str
@@ -267,9 +283,58 @@ class LoopControl:
 
 
 @dataclass(frozen=True, slots=True)
+class DeferredParameter:
+    """Source-order logical admission port, not a native frame ordinal."""
+    kind: DeferredParameterKind
+    source: SlotRef
+    binding_port: int | None
+
+
+@dataclass(frozen=True, slots=True)
+class DeferredEnvironment:
+    scope: int
+    globals_scope: int
+    parameters: tuple[DeferredParameter, ...]
+    # Original active C2b ForwardHop ordinals, including transitive forwarding.
+    # These are cell handles, not values or a native co_freevars ordering.
+    captures: tuple[int, ...]
+    kind: DeferredBodyKind
+    world: GroundType
+    exception_abi: ExceptionABI
+
+
+@dataclass(frozen=True, slots=True)
+class GlobalsEnvironment:
+    scope: int
+
+
+@dataclass(frozen=True, slots=True)
+class ClosureEnvironment:
+    relay: int
+
+
+@dataclass(frozen=True, slots=True)
+class ReferenceEnvironment:
+    """Retain a namespace/cell handle without reading the cell's contents."""
+    source: GlobalsEnvironment | ClosureEnvironment
+
+
+@dataclass(frozen=True, slots=True)
+class EnterDeferredBody:
+    """Bind an admitted environment and parameter values into a fresh activation.
+
+    Input ports are (function environment reference, source-order parameters,
+    current world). Caller argument admission and actual cell/frame layout
+    are distinct obligations; no old world is captured at definition time.
+    """
+    environment: DeferredEnvironment
+
+
+@dataclass(frozen=True, slots=True)
 class DeferRegion:
-    """Declare code/captures without entering the body's execution path."""
+    """Declare a code reference with a typed later-entry interface, no execution."""
     body: ProductionRegionID
+    environment: DeferredEnvironment
 
 
 @dataclass(frozen=True, slots=True)
@@ -330,7 +395,7 @@ class SuspendExecution:
 
 
 ProductionInstruction = (EvaluateChild | ApplyLanguageAction | ApplyPythonProtocol | ApplyDelegationProtocol | AccessBinding | ConstructValue | DefineLiteral
-    | ApplyRegion | BranchControl | LoopControl | DeferRegion | CleanupControl
+    | ApplyRegion | BranchControl | LoopControl | DeferRegion | ReferenceEnvironment | EnterDeferredBody | CleanupControl
     | HandleCompletions | TransferCompletion | SuspendExecution)
 
 
@@ -372,13 +437,14 @@ class SourceProductionPlan:
     steps: tuple[ProductionStep, ...]
     slots: tuple[ProductionSlotDisposition, ...]
     schema: str = 'scar.source-production-plan'
-    schema_version: int = 3
+    schema_version: int = 4
     authority: str = 'SOURCE_RECIPE_SHAPE_ONLY'
 
 
 PRODUCTION_RECORD_TAGS = {cls: ('record_kind', cls.__name__) for cls in (
     ProductionOccurrence, SlotRef, ProductionParameter, ProductionResult,
     EvaluateChild, ApplyLanguageAction, ApplyPythonProtocol, ApplyDelegationProtocol, AccessBinding, ConstructValue, DefineLiteral, ApplyRegion,
-    BranchControl, LoopControl, DeferRegion, CleanupControl, HandleCompletions,
+    BranchControl, LoopControl, DeferRegion, ReferenceEnvironment, EnterDeferredBody, CleanupControl, HandleCompletions,
+    GlobalsEnvironment, ClosureEnvironment,
     TransferCompletion, SuspendExecution, ProductionResumeRoute, IterationCondition, RepeatCondition,
     CountBinding, ChoiceBinding, TypeBinding, TypesBinding)}

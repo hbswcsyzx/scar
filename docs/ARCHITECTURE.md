@@ -90,6 +90,7 @@ f-string先转换再求格式说明；模板插值只捕获值和转换标记，
 source recipe v2的SuspendExecution显式导出值和world，恢复端口输入新world及保存值；禁止保存旧STATE，所有恢复完成取并集。NEXT/close的driver准入与规范化、frame/exception context保活仍须后续产生规则证明。
 v3为await/yield-from增加显式delegate端口和4种有限运行时协议签名；SEND同时给出完成判别、值及world，异常另走ABI。委托恢复端口接收driver处理后的结果/异常，不等同于原始throw请求；driver内部绑定仍是后层义务。
 Await/YieldFrom的局部规则已接入一份共享SEND循环；普通SEND错误直接传播，只有挂起后的driver完成异常进入CLEANUP_THROW分支。RepeatCondition表示无条件控制边，不造True求值；空完成接口可表达没有正常/异常出口的循环。
+recipe v4把代码声明、环境/cell引用及后续激活分开：DeferRegion不执行body，body入口显式接收环境、原序已准入参数和新world；捕获沿原C2b活跃转交hop，包括仅为内层转交的cell，不提前读值。原序参数/捕获不冒充native布局，调用准入与物理frame/closure映射仍须后验。
 前两步的局部规则已通过：Yield由原C1 owner区分普通／异步形式，bare yield导出None，嵌套定义header仍归外层执行owner。静态compiler只作独立规则对照，不以bytecode位置接源码身份。
 后续语句／定义／cleanup规则闭合后才进入F4-C；每步先验类型/接口，再接源码规则，再在原材料独立重放，不以节点存在或局部计数授予全层完成。
 
