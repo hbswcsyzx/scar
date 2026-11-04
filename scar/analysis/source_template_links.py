@@ -4,11 +4,15 @@ Each source unit is independent. Stored nodes reference the original recipe
 bodies; edges bind actual values to ordered parameters and completion ports.
 """
 import argparse
+from concurrent.futures import ProcessPoolExecutor
+from functools import lru_cache
 import gzip
 from hashlib import sha256
 import json
+import multiprocessing
 import os
 from pathlib import Path
+import time
 
 from scar.analysis.source_expression_materials import _implementation, _basis
 from scar.analysis.source_productions import _digest, read_production_plan
@@ -160,8 +164,46 @@ def _stream(path, records):
         decoded_bytes=decoded_bytes, decoded_sha256=digest.hexdigest(), records=count)
 
 
-def link_source_templates(model, out, parents, sources=(), *, max_visits=1_000_000):
+@lru_cache(maxsize=1)
+def _worker_stores(specifications, manifest_sha):
+    """Process-local immutable parent indexes; no shared graph or descriptor table."""
+    stores = []
+    for domain, material, verification, collected_sha, verified_sha in specifications:
+        store = _Store(domain, material, verification, manifest_sha)
+        _require((store.receipt['collection_sha256'], store.receipt['verification_sha256'])
+            == (collected_sha, verified_sha), domain, 'worker parent proof differs from its submitted snapshot')
+        stores.append(store)
+    return tuple(stores)
+
+
+def _link_unit(task):
+    unit, model, out, specifications, manifest_sha, max_visits, linker_pin, types_pin = task
+    _require(linker_pin == sha256(Path(__file__).read_bytes()).hexdigest()
+        and types_pin == sha256(Path(T.__file__).read_bytes()).hexdigest(), unit['path'], 'worker linker version differs')
+    stores = _worker_stores(specifications, manifest_sha)
+    try:
+        syntax = _Fragments(Path(model)).read(unit['artifacts']['source_syntax'])
+        graph = build_template_graph(unit['key'], syntax,
+            (record for store in stores for record in store.records(unit)), max_visits=max_visits)
+        path = Path(out) / 'units' / unit['key']; _durable_mkdir(path)
+        nodes = _stream(path / 'templates.jsonl.gz', graph.templates)
+        links = _stream(path / 'links.jsonl.gz', graph.links)
+        header = dict(schema=graph.schema, schema_version=graph.schema_version, authority=graph.authority,
+            unit=unit['key'], input=encode(graph.input), profile=encode(graph.profile), templates=nodes, links=links)
+        header_bytes = _json(header)
+        _durable_bytes(path / 'header.json', header_bytes, replace=False); _sync_directory(path)
+        return dict(unit=unit['key'], path=unit['path'], header='units/'+unit['key']+'/header.json',
+            header_bytes=len(header_bytes), header_sha256=sha256(header_bytes).hexdigest(),
+            templates=nodes['records'], links=links['records'], compressed_bytes=nodes['bytes']+links['bytes'])
+    except Exception as error:
+        error.add_note('SCAR template interfaces source: ' + unit['path'])
+        raise
+
+
+def link_source_templates(model, out, parents, sources=(), *, max_visits=1_000_000, jobs=1):
+    started = time.monotonic()
     _require(type(max_visits) is int and max_visits >= 0, 'max_visits', 'expected a nonnegative integer')
+    _require(type(jobs) is int and 1 <= jobs <= 32, 'jobs', 'expected 1 through 32 independent source workers')
     model = Path(model).absolute(); out = Path(out).absolute()
     _require(model.resolve() == model and out.resolve() == out and not out.exists(), out, 'output must be a fresh canonical path')
     raw = (model / 'manifest.json').read_bytes(); manifest_sha = sha256(raw).hexdigest(); manifest = json.loads(raw)
@@ -175,21 +217,15 @@ def link_source_templates(model, out, parents, sources=(), *, max_visits=1_000_0
     _require(bool(units) and (not wanted or wanted == {u['path'] for u in units}), 'sources', 'source selection is not exact')
     _require(len({u['key'] for u in units}) == len(units), 'sources', 'duplicate source unit identity')
     _require(all(u['key'] in s.rows for u in units for s in stores), 'parents', 'selected sources lack a complete material domain')
-    _durable_mkdir(out); rows = []
-    for unit in units:
-        syntax = _Fragments(model).read(unit['artifacts']['source_syntax'])
-        graph = build_template_graph(unit['key'], syntax,
-            (record for store in stores for record in store.records(unit)), max_visits=max_visits)
-        path = out / 'units' / unit['key']; _durable_mkdir(path)
-        nodes = _stream(path / 'templates.jsonl.gz', graph.templates)
-        links = _stream(path / 'links.jsonl.gz', graph.links)
-        header = dict(schema=graph.schema, schema_version=graph.schema_version, authority=graph.authority,
-            unit=unit['key'], input=encode(graph.input), profile=encode(graph.profile), templates=nodes, links=links)
-        header_bytes = _json(header)
-        _durable_bytes(path / 'header.json', header_bytes, replace=False); _sync_directory(path)
-        rows.append(dict(unit=unit['key'], path=unit['path'], header='units/'+unit['key']+'/header.json',
-            header_bytes=len(header_bytes), header_sha256=sha256(header_bytes).hexdigest(),
-            templates=nodes['records'], links=links['records'], compressed_bytes=nodes['bytes']+links['bytes']))
+    specifications = tuple((s.domain.value, str(s.root), str(s.verification), s.receipt['collection_sha256'],
+        s.receipt['verification_sha256']) for s in stores)
+    tasks = [(u, str(model), str(out), specifications, manifest_sha, max_visits, linker_pin, types_pin) for u in units]
+    _durable_mkdir(out)
+    if jobs == 1:
+        rows = [_link_unit(task) for task in tasks]
+    else:
+        with ProcessPoolExecutor(max_workers=jobs, mp_context=multiprocessing.get_context('spawn')) as pool:
+            rows = list(pool.map(_link_unit, tasks))
     _require((model / 'manifest.json').read_bytes() == raw, model, 'model changed during interface linking')
     _require(all(s.unchanged() and s.generator_pins == _implementation() for s in stores)
         and linker_pin == sha256(Path(__file__).read_bytes()).hexdigest()
@@ -197,11 +233,11 @@ def link_source_templates(model, out, parents, sources=(), *, max_visits=1_000_0
     report = dict(schema='scar.source-template-link-store', schema_version=1, status='SOURCE_INTERFACES_LINKED',
         generator_sha256=stores[0].generator_pins, linker_sha256=linker_pin,
         link_types_sha256=types_pin, model_manifest_sha256=manifest_sha,
-        parents=[s.receipt for s in stores], selected_sources=len(rows), units=rows, max_visits=max_visits,
+        parents=[s.receipt for s in stores], selected_sources=len(rows), units=rows, max_visits=max_visits, jobs=jobs,
         templates=sum(r['templates'] for r in rows), links=sum(r['links'] for r in rows),
         compressed_bytes=sum(r['compressed_bytes'] for r in rows),
         canonical_graph_generated=False, child_semantics_proven=False, effects_proven=False,
-        first_stage_complete=False, target_executed=False, transformation_authorized=False)
+        first_stage_complete=False, target_executed=False, transformation_authorized=False, seconds=time.monotonic()-started)
     _durable_bytes(out / 'result.json', _json(report), replace=False)
     return report
 
@@ -259,8 +295,9 @@ def main():
     parser.add_argument('--materials', nargs=3, action='append', required=True, metavar=('DOMAIN', 'COLLECTION', 'VERIFICATION'))
     parser.add_argument('--source', action='append', default=[])
     parser.add_argument('--max-visits', type=int, default=1_000_000)
+    parser.add_argument('--jobs', type=int, default=1)
     args = parser.parse_args()
-    result = link_source_templates(args.model, args.out, args.materials, args.source, max_visits=args.max_visits)
+    result = link_source_templates(args.model, args.out, args.materials, args.source, max_visits=args.max_visits, jobs=args.jobs)
     print(json.dumps({k:result[k] for k in ('status','selected_sources','templates','links','compressed_bytes')}, indent=2))
 
 

@@ -137,6 +137,7 @@ call/map/string/assert参数也沿闭合原端口组解析；空组保DECLARED_E
 全语料扩展：866源语句采集及独立fresh均通过，149,848语句=141,185局部recipe+8,663父属，另28,849条件模板，规则前沿0；906.01/1,330.21秒，170,946,339压缩bytes。证据在`queries/source-statement-full/{materials,verification}/result.json`。语料为849份.py与17份.pyi，不能把类型声明当成已绑定的运行实现。
 866源表达式已采集：741,076表达式=709,740局部+13,668抑制+17,668父属，另1,901条件模板，规则前沿0，1,727.12秒；独立fresh尚未完成。全量根入口未通过：cv2大型根模板超过默认一百万次shape遍历预算，跨进程异常的pickle又遮住了原错误。已用原类型材料作只读诊断取回BUDGET_FRONTIER；该诊断不授新的上游fresh证明，见`queries/source-root-full/serial-diagnostic.json`。
 新增独立的F4-B模板接口层，五份完整三域材料连接6,023个模板、6,046条子接口；实参与形参、完成出口及逻辑编译环境逐项一致。按源文件保存模板表与绑定表，正文由父材料展开。定向检查1项通过（5.16秒），覆盖不同purpose、缺目标拒绝、冲突模板拒绝及strict codec；这不是canonical图或完整子图语义证明。
+接口接线现支持按源spawn并行，worker只有各自的只读父索引和本源输出；五源双进程运行87.95秒，5个header及10个数据分片与串行结果逐字节一致，2次原正文展开通过。证据为`queries/source-template-links/parallel-verification.json`；没有据此报告LeWM加速比，也未改变采集生成器指纹。
 
 **当前真正缺口及顺序**：
 
