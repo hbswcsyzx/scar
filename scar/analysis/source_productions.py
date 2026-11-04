@@ -30,6 +30,7 @@ from scar.analysis.source_capture_interfaces import CaptureInterfaceIndex
 from scar.analysis.source_scope_annotation_interfaces import ScopeAnnotationIndex
 from scar.analysis.source_annotation_state_interfaces import AnnotationStateIndex
 from scar.analysis.source_compilation_contexts import CompilationContextIndex
+from scar.analysis.source_compilation_flow import CompilationFlowIndex, validate_flow
 
 
 class ProductionError(ValueError):
@@ -71,7 +72,7 @@ def production_type_catalog():
                  'scar.analysis.source_root_interfaces','scar.analysis.source_evaluation_interfaces','scar.analysis.source_syntax',
                  'scar.analysis.source_class_namespace_interfaces','scar.analysis.source_capture_interfaces',
                  'scar.analysis.source_scope_annotation_interfaces','scar.analysis.source_annotation_state_interfaces',
-                 'scar.analysis.source_compilation_contexts'):
+                 'scar.analysis.source_compilation_contexts', 'scar.analysis.source_compilation_flow'):
         modules[name] = sha256(Path(sys.modules[name].__file__).read_bytes()).hexdigest()
     payload = dict(schema='scar.source-production-type-catalog', schema_version=1,
         root=root, types=rows, counts=counts, modules=dict(sorted(modules.items())),
@@ -161,7 +162,7 @@ def validate_production_plan(plan, *, max_visits=1_000_000):
     """
     visits = _shape(plan, max_visits)
     _require((plan.schema, plan.schema_version, plan.authority) == (
-        'scar.source-production-plan', 23, 'SOURCE_RECIPE_SHAPE_ONLY'),
+        'scar.source-production-plan', 24, 'SOURCE_RECIPE_SHAPE_ONLY'),
         'SCHEMA', 'plan', 'unsupported recipe schema or authority')
     source = plan.input
     _require(bool(source.path) and bool(source.namespace_root), 'INPUT', 'plan.input', 'source paths must be nonempty')
@@ -1109,8 +1110,11 @@ def validate_production_plan(plan, *, max_visits=1_000_000):
     for row in (*plan.regions, *plan.steps):
         if type(row.source) is P.ProductionOccurrence:
             _require(row.source.occurrence >= 0, 'SOURCE', str(row.id), 'negative source occurrence')
+    validate_flow(plan)
     return dict(complete=True, visits=visits, regions=len(regions), steps=len(steps),
         recipe_shape_checked=True, local_references_checked=True, source_rules_replayed=False,
+        compilation_context_interfaces_checked=plan.compilation_flow is not None,
+        native_context_propagation_proven=False,
         protocol_signature_checks=sum(type(s.instruction) is P.ApplyPythonProtocol for s in plan.steps),
         delegation_signature_checks=sum(type(s.instruction) is P.ApplyDelegationProtocol for s in plan.steps),
         operation_signatures_checked=False, control_semantics_checked=False, rewrite_authorized=False)
@@ -1146,6 +1150,7 @@ class ProductionSourceIndex:
         self._scope_annotations = None
         self._annotation_states = None
         self._compilation_contexts = None
+        self._compilation_flow = None
         self._expressions=frozenset(row.name for row in syntax.profile.ast_schema if 'expr' in row.bases)
         self._role_sites = frozenset(port.site for port in frontend_view.roles.ports)
         self.input = P.ProductionInput(f0['path'], f0['namespace_root'], _digest(encode(syntax)),
@@ -1172,6 +1177,11 @@ class ProductionSourceIndex:
     def compilation_contexts(self):
         if self._compilation_contexts is None:self._compilation_contexts=CompilationContextIndex(self)
         return self._compilation_contexts
+
+    @property
+    def compilation_flow(self):
+        if self._compilation_flow is None:self._compilation_flow=CompilationFlowIndex(self)
+        return self._compilation_flow
 
     @property
     def deferred(self):
@@ -1218,6 +1228,8 @@ class ProductionSourceIndex:
     def match(self, plan, *, max_visits=1_000_000):
         summary = validate_production_plan(plan, max_visits=max_visits)
         _require(plan.input == self.input, 'INPUT_LINEAGE', 'plan.input', 'recipe refers to different F2/F3 materials')
+        _require(plan.compilation_flow is not None and plan.compilation_flow == self.compilation_flow.build(plan),
+            'SOURCE_COMPILATION_FLOW', 'plan.compilation_flow', 'context ports/edges differ from original F2/F3 interfaces')
         _require(all(r==self.capture_paths.transports.get(r.reference) for r in plan.capture_transports),
             'SOURCE_CAPTURE_TRANSPORT','plan.capture_transports','capture path/compiler witnesses differ from original F3 facts')
 

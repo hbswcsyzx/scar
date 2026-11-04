@@ -4,7 +4,7 @@ Child evaluations are typed obligations, not recursively completed lowerings.
 One conservative state domain threads every potentially effectful protocol.
 No effect is certified pure and no physical allocation/transfer is inferred.
 """
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from hashlib import sha256
 from pathlib import Path
 import re
@@ -79,7 +79,7 @@ _RULE_MODULES = ('source_display_rules.py', 'source_string_rules.py', 'source_co
                  'source_evaluation_interfaces.py','source_evaluation_rules.py',
                  'source_class_namespace_interfaces.py','source_class_namespace_rules.py','source_capture_interfaces.py',
                  'source_scope_annotation_interfaces.py','source_annotation_state_interfaces.py','source_annotation_state_rules.py',
-                 'source_compilation_contexts.py')
+                 'source_compilation_contexts.py', 'source_compilation_flow.py')
 
 
 class SourceRuleError(ProductionError):
@@ -533,9 +533,10 @@ class _Builder:
                 if type(source) is P.ProductionOccurrence else self.rules.source.context.context_at_slot(source).state)
             records.append(P.ProductionRegion(region.id, region.parent, region.kind, source, context,
                 region.parameters, self.completions(region), tuple(step.id for step in region.steps)))
-        return P.SourceProductionPlan(self.rules.source.input, root_source, self.purpose, root.id,
+        plan = P.SourceProductionPlan(self.rules.source.input, root_source, self.purpose, root.id,
             tuple(records), tuple(self.steps), tuple(P.ProductionSlotDisposition(site, disposition)
                 for site, disposition in self.slots.items()),self.rules.source.capture_paths.export_steps(self.steps))
+        return replace(plan, compilation_flow=self.rules.source.compilation_flow.build(plan))
 
     def target(self, region, state):
         kind = self.node.constructor

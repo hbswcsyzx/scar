@@ -1169,6 +1169,77 @@ class ProductionSlotDisposition:
     disposition: ProductionDispositionKind
 
 
+class CompilationPathKind(str, Enum):
+    FIELD = 'FIELD'
+    ITEM = 'ITEM'
+
+
+class CompilationEdgeKind(str, Enum):
+    CALL = 'CALL'
+    CHILD = 'CHILD'
+    CODE_DECLARATION = 'CODE_DECLARATION'
+    TYPE_FACTORY = 'TYPE_FACTORY'
+    LOOP_CONDITION = 'LOOP_CONDITION'
+    LOOP_BODY = 'LOOP_BODY'
+    LOOP_EXIT = 'LOOP_EXIT'
+    COMPLETION_HANDLER = 'COMPLETION_HANDLER'
+    RESUME = 'RESUME'
+
+
+class CompilationTransition(str, Enum):
+    QUALIFY_SITE = 'QUALIFY_SITE'
+    ENTER_CODE = 'ENTER_CODE'
+
+
+@dataclass(frozen=True, slots=True)
+class CompilationPathPart:
+    """Field ordinal in the pinned record schema, or tuple item ordinal."""
+    kind: CompilationPathKind
+    ordinal: int
+
+
+@dataclass(frozen=True, slots=True)
+class CompilationContextPort:
+    region: ProductionRegionID
+    source_scope: int
+    code_scope: int
+
+
+@dataclass(frozen=True, slots=True)
+class CompilationChildTarget:
+    field: SlotRef
+    purpose: ProductionPurpose
+    source_scope: int
+    code_scope: int
+
+
+@dataclass(frozen=True, slots=True)
+class CompilationContextEdge:
+    """Qualify the caller's symbolic environment at one static reference site.
+
+    This is not an activation, runtime iteration or concrete bytecode binding.
+    Declaration edges retain an environment for later entry; they do not call.
+    """
+    step: ProductionStepID
+    path: tuple[CompilationPathPart, ...]
+    kind: CompilationEdgeKind
+    target: ProductionRegionID | CompilationChildTarget
+    transition: CompilationTransition
+
+
+@dataclass(frozen=True, slots=True)
+class CompilationFactUse:
+    step: ProductionStepID
+    parameter: CompilationOption | SlotRef
+
+
+@dataclass(frozen=True, slots=True)
+class CompilationContextFlow:
+    ports: tuple[CompilationContextPort, ...]
+    edges: tuple[CompilationContextEdge, ...]
+    uses: tuple[CompilationFactUse, ...]
+
+
 @dataclass(frozen=True, slots=True)
 class SourceProductionPlan:
     input: ProductionInput
@@ -1179,8 +1250,9 @@ class SourceProductionPlan:
     steps: tuple[ProductionStep, ...]
     slots: tuple[ProductionSlotDisposition, ...]
     capture_transports: tuple[CaptureTransport, ...] = ()
+    compilation_flow: CompilationContextFlow | None = None
     schema: str = 'scar.source-production-plan'
-    schema_version: int = 23
+    schema_version: int = 24
     authority: str = 'SOURCE_RECIPE_SHAPE_ONLY'
 
 

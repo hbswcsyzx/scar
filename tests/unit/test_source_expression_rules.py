@@ -18,6 +18,70 @@ WORLD = ValueType(ValueKind.STATE, location=LocationID('test-source-world'))
 REF = ValueType(ValueKind.REFERENCE)
 
 
+def test_compilation_context_flow_preserves_shared_entries_and_code_boundaries():
+    from collections import Counter
+    from scar.analysis.source_statement_rules import SourceStatementRules
+    from scar.analysis.source_root_rules import SourceRootRules
+    from scar.analysis.source_productions import ProductionError, read_production_plan, production_plan_document
+    expressions = _rules(_documents('''
+try:
+    work()
+except Error:
+    recover()
+finally:
+    registered: Missing
+def factory[T](items):
+    for item in items:
+        if item:
+            continue
+    else:
+        finish()
+    return lambda: T
+class C:
+    if flag:
+        field: Missing
+values = [item for item in items]
+async def task(source):
+    return await source
+'''))
+    statements = SourceStatementRules(expressions.source, world=WORLD, exception_abi=ExceptionABI.EXCEPTION_WORLD)
+    plans = [statements.build(o) for kind in ('Try', 'FunctionDef', 'AsyncFunctionDef', 'ClassDef', 'For', 'AnnAssign')
+        for o in occurrences(expressions, kind)]
+    plans += [expressions.build(o) for kind in ('Lambda', 'ListComp', 'Await') for o in occurrences(expressions, kind)]
+    plans += [SourceRootRules(expressions.source, world=WORLD, exception_abi=ExceptionABI.EXCEPTION_WORLD).build(0)]
+    kinds = set()
+    for plan in plans:
+        expressions.source.match(plan)
+        assert read_production_plan(production_plan_document(plan)) == plan
+        flow = plan.compilation_flow
+        assert len(flow.ports) == len(plan.regions)
+        kinds.update(e.kind for e in flow.edges)
+        with pytest.raises(ProductionError, match='SOURCE_COMPILATION_FLOW'):
+            expressions.source.match(replace(plan, compilation_flow=None))
+        if flow.edges:
+            with pytest.raises(ProductionError, match='COMPILATION_FLOW'):
+                expressions.source.match(replace(plan, compilation_flow=replace(flow, edges=flow.edges[:-1])))
+        port = replace(flow.ports[0], source_scope=100_000)
+        with pytest.raises(ProductionError, match='SOURCE_COMPILATION_FLOW'):
+            expressions.source.match(replace(plan, compilation_flow=replace(flow, ports=(port, *flow.ports[1:]))))
+    K = P.CompilationEdgeKind
+    assert {K.CALL, K.CHILD, K.CODE_DECLARATION, K.TYPE_FACTORY, K.LOOP_CONDITION,
+        K.LOOP_BODY, K.LOOP_EXIT, K.COMPLETION_HANDLER, K.RESUME} <= kinds
+    cleanup = plans[0]
+    shared = {r.id for r in cleanup.regions if r.kind is P.ProductionRegionKind.SHARED}
+    incoming = [e for e in cleanup.compilation_flow.edges if e.target in shared]
+    assert incoming and max(Counter(e.target for e in incoming).values()) > 1
+    assert len({(e.step, e.path) for e in incoming}) == len(incoming)
+    assert all(e.transition is P.CompilationTransition.QUALIFY_SITE for e in incoming)
+    assert any(e.kind is K.CODE_DECLARATION and e.transition is P.CompilationTransition.ENTER_CODE
+        for p in plans for e in p.compilation_flow.edges)
+    eager = next(p for p in plans if expressions.source.context.syntax.nodes[p.source.occurrence].constructor == 'ListComp')
+    assert len({p.code_scope for p in eager.compilation_flow.ports}) == 1
+    annotation = next(p for p in plans if any(type(s.instruction) is P.AddAnnotationIndex for s in p.steps))
+    uses = {u.step for u in annotation.compilation_flow.uses}
+    assert all(s.id in uses for s in annotation.steps if type(s.instruction) is P.AddAnnotationIndex)
+
+
 @pytest.fixture(scope='module')
 def documents():
     text = '\n'.join((
@@ -702,7 +766,7 @@ def test_delegation_keeps_send_and_post_driver_completion_paths_separate(rules, 
             plan = variant.build(occurrence)
             checked = variant.verify(plan)
             assert not checked['native_delegation_expanded'] and not checked['driver_protocol_graph_generated']
-            assert plan.schema_version == 23
+            assert plan.schema_version == 24
             _, root_steps = owned(plan)
             acquire = next(s for s in root_steps if type(s.instruction) is P.ApplyDelegationProtocol)
             assert acquire.instruction.protocol is (P.DelegationProtocolKind.AWAITABLE_ITER if constructor == 'Await'

@@ -64,6 +64,7 @@ def _implementation():
         'analysis/source_scope_annotation_interfaces.py',
         'analysis/source_annotation_state_interfaces.py','analysis/source_annotation_state_rules.py',
         'analysis/source_compilation_contexts.py',
+        'analysis/source_compilation_flow.py',
         'analysis/source_syntax.py',
         'analysis/source_type_parameter_interfaces.py', 'analysis/source_type_parameter_rules.py',
         'analysis/source_productions.py', 'analysis/program_types.py',
@@ -101,11 +102,16 @@ def _unit(task):
     digest, decoded_bytes = sha256(), 0
     built, frontier, child_obligations, descriptors, suppressed = (Counter() for _ in range(5))
     condition_queue=deque();condition_seen=set();condition_built=Counter();request_bodies=Counter();stringized_values=0
+    compilation_counts=Counter();compilation_edge_kinds=Counter()
     expressions, parent_expressions = 0, 0
     stream_path = Path(out) / relative
 
     def account(plan):
         nonlocal stringized_values
+        flow=plan.compilation_flow
+        compilation_counts.update(compilation_context_ports=len(flow.ports),
+            compilation_context_edges=len(flow.edges),compilation_fact_uses=len(flow.uses))
+        compilation_edge_kinds.update(edge.kind.value for edge in flow.edges)
         for step in plan.steps:
             instruction=step.instruction
             if type(instruction) is P.EvaluateChild:
@@ -215,6 +221,7 @@ def _unit(task):
         child_interface_obligations=dict(sorted(child_obligations.items())),
         condition_recipes=sum(condition_built.values()),condition_constructors=dict(sorted(condition_built.items())),
         evaluation_request_templates=dict(request_bodies),stringized_annotation_values=stringized_values,
+        compilation_contexts=dict(compilation_counts),compilation_edge_kinds=dict(sorted(compilation_edge_kinds.items())),
         parent_seconds=parent_seconds, seconds=time.monotonic()-started,
         catalog_sha256=sha256(_json(catalog)).hexdigest())
     if keep_catalog:
@@ -273,6 +280,8 @@ def collect_source_rules(model, out, *, domain, sources=(), materials=None, jobs
     if store is not None and (store / 'catalog.json').read_bytes() != catalog_bytes:
         raise ValueError('source rule catalog changed')
     counts = dict(units=len(rows), local_recipes=sum(sum(r['built'].values()) for r in rows),
+        **{name:sum(r['compilation_contexts'].get(name,0) for r in rows) for name in
+            ('compilation_context_ports','compilation_context_edges','compilation_fact_uses')},
         evaluation_request_templates=sum(sum(r['evaluation_request_templates'].values()) for r in rows),
         stringized_annotation_values=sum(r['stringized_annotation_values'] for r in rows),
         condition_recipes=sum(r['condition_recipes'] for r in rows),
@@ -297,6 +306,7 @@ def collect_source_rules(model, out, *, domain, sources=(), materials=None, jobs
         catalog_sha256=sha256(catalog_bytes).hexdigest(), counts=counts, units=rows,
         seconds=time.monotonic()-started, local_source_rules_replayed=True,
         child_interfaces_proven=False, effects_proven=False, state_parameter_origin_proven=False,
+        compilation_context_interfaces_checked=True, native_context_propagation_proven=False,
         canonical_graph_generated=False, whole_program_graph_complete=False,
         target_executed=False, transformation_authorized=False)
     _durable_bytes(out / 'catalog.json', catalog_bytes, replace=False)
