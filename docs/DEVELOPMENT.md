@@ -172,6 +172,7 @@ PYTHONHASHSEED=0 python -B -m scar.cli source-expressions --model /path/to/model
 同步推导式在`source_comprehension_rules.py`；`comprehension`辅助构造保原父generators引用。异步子句返回`ASYNC_COMPREHENSION_FRONTIER`，不生成伪同步循环。
 `source_suspension_rules.py`按原C1执行owner产生Yield规则，区分普通／异步yield和bare None；normal／raise恢复入口显式接收新world，不能保存旧STATE。
 `source_delegation_rules.py`产生Await/YieldFrom共享循环；recipe v3显式保存delegate端口，4种协议强制核签名。采集仍不展开driver/native，准入、close规范化及frame/context保活另验。
+`source_callable_rules.py`产生Lambda及同步GeneratorExp的创建/延迟body；v4参数、初始默认值和活跃转交cell沿`source_deferred_interfaces.py`接原F3，不在创建时读取cell内容。异步生成器表达式返回`ASYNC_GENERATOR_EXPRESSION_FRONTIER`。
 星号/keyword的失败顺序参考固定版本[CPython codegen](https://github.com/python/cpython/blob/v3.14.7/Python/codegen.c)；本机stack guideline从header读入并固定SHA。
 
 源码身份桥（按unit分片，保持输入模型和旧ID）：

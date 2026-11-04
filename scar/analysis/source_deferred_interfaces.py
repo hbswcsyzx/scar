@@ -4,6 +4,7 @@ Capture forwarding is shared per original hop, not reconstructed from names.
 Source-order formals and cell handles are not native frame/freevar layouts.
 """
 from collections import defaultdict
+from dataclasses import replace
 
 from scar.ir.program import source_productions as P
 
@@ -61,10 +62,37 @@ class DeferredInterfaceIndex:
                 members = value.items if value.kind == 'LIST' else (value,) if value.kind == 'NODE' else ()
                 for item in members:
                     site = P.SlotRef(item.reference, 'FIELD', roles.fields['arg']['arg'])
-                    ports = [p for p in self.ports[site] if self.source.frontend.bindings.ports[p].write_target is not None]
+                    ports = []
+                    data = self.source.frontend.bindings
+                    declarations = self.source.frontend.declarations
+                    for p in self.ports[site]:
+                        port = data.ports[p]
+                        if port.declref is None or port.resolution is None:
+                            continue
+                        contribution = declarations.contributions[port.declref]
+                        binding = data.resolutions[port.resolution].binding
+                        if ('PARAMETER_INTERFACE' in contribution.operations and binding is not None
+                                and data.bindings[binding].owner == self.scopes[occurrence]):
+                            ports.append(p)
                     if len(ports) != 1:
                         raise ValueError('formal has no unique original F3 admission/binding port')
                     result.append(P.DeferredParameter(kind, site, ports[0]))
+            positional = [i for i, p in enumerate(result) if p.kind in (
+                P.DeferredParameterKind.POSITIONAL_ONLY, P.DeferredParameterKind.POSITIONAL_OR_KEYWORD)]
+            defaults = roles.field(arguments, 'defaults').items
+            if len(defaults) > len(positional):
+                raise ValueError('positional defaults exceed original positional formals')
+            for ordinal, index in enumerate(positional[len(positional)-len(defaults):]):
+                result[index] = replace(result[index], default_source=P.SlotRef(arguments, 'FIELD',
+                    roles.fields['arguments']['defaults'], (ordinal,)))
+            keywords = [i for i, p in enumerate(result) if p.kind is P.DeferredParameterKind.KEYWORD_ONLY]
+            default_values = roles.field(arguments, 'kw_defaults').items
+            if len(keywords) != len(default_values):
+                raise ValueError('keyword default slots differ from original keyword-only formals')
+            for ordinal, (index, value) in enumerate(zip(keywords, default_values)):
+                if value.kind == 'NODE':
+                    result[index] = replace(result[index], default_source=P.SlotRef(arguments, 'FIELD',
+                        roles.fields['arguments']['kw_defaults'], (ordinal,)))
             result = tuple(result)
         else:
             raise ValueError('source occurrence has no declared deferred interface')

@@ -288,6 +288,9 @@ class DeferredParameter:
     kind: DeferredParameterKind
     source: SlotRef
     binding_port: int | None
+    # Initial default's original creation-time expression; later mutation of
+    # function.__defaults__/__kwdefaults__ is not ruled out by this relation.
+    default_source: SlotRef | None = None
 
 
 @dataclass(frozen=True, slots=True)

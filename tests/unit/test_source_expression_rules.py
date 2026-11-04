@@ -83,6 +83,11 @@ def documents():
         'async def await_nested(source):\n    return await (await source)',
         'async def await_comp(source):\n    return [await produce(item) for item in source]',
         'async_generator_expression = (await produce(item) for item in source)',
+        'lambda_formals = lambda a,b=first(),/,c=second(),*rest,d,e=third(),**kw: (a,b,c,rest,d,e,kw)',
+        'def closure_builder():\n    captured = seed\n    direct = lambda value=default(): (captured,value)\n    forwarded = lambda: (lambda: captured)\n    return direct,forwarded',
+        'def late_cell():\n    callback = lambda: unbound\n    unbound = make()\n    return callback',
+        'generator_clauses = (produce(item,nested) for (item,*rest) in outer() if keep(item) for nested in rest if nested)',
+        'nested_generators = (((row,other) for other in inner(row)) for row in outer())',
     )) + '\n'
     f0 = source_bytes_document(text.encode(), path='/source/schedules.py', namespace_root='/source')
     f1 = source_tokens_document(f0)
@@ -149,7 +154,7 @@ def test_all_local_families_and_selector_domains_without_reparsing(rules, monkey
     assert implemented == {'Constant', 'Name', 'BinOp', 'UnaryOp', 'Attribute', 'Subscript',
                            'Slice', 'NamedExpr', 'IfExp', 'BoolOp', 'Compare', 'Call',
                            'List', 'Tuple', 'Set', 'Dict', 'JoinedStr', 'FormattedValue', 'TemplateStr', 'Interpolation',
-                           'ListComp', 'SetComp', 'DictComp', 'Yield', 'YieldFrom', 'Await'}
+                           'ListComp', 'SetComp', 'DictComp', 'Yield', 'YieldFrom', 'Await', 'Lambda', 'GeneratorExp'}
     selectors, seen = {}, set()
     for occurrence, node in enumerate(rules.source.context.syntax.nodes):
         if node.constructor not in implemented:
@@ -163,6 +168,9 @@ def test_all_local_families_and_selector_domains_without_reparsing(rules, monkey
                 if error.code == 'SUPPRESSED_SOURCE':
                     context = rules.source.context.entry_context(occurrence)
                     assert rules.source.context.material.regions[context.region].eligibility == 'SUPPRESSED'
+                    continue
+                if error.code == 'ASYNC_GENERATOR_EXPRESSION_FRONTIER':
+                    assert node.constructor == 'GeneratorExp'
                     continue
                 assert node.constructor in ('ListComp', 'SetComp', 'DictComp') and error.code == 'ASYNC_COMPREHENSION_FRONTIER'
                 continue
@@ -264,7 +272,7 @@ def test_targets_slice_holes_frontiers_and_budgets(rules):
     assert not any(type(s.instruction) is P.EvaluateChild for s in steps)
     assert len(steps[0].instruction.payload) == 3  # None positions retained, no guessed arity
     with pytest.raises(SourceRuleError, match='RULE_FRONTIER'):
-        rules.build(occurrences(rules, 'GeneratorExp')[0])
+        rules.build(occurrences(rules, 'FunctionDef')[0])
     with pytest.raises(SourceRuleError, match='BUDGET_FRONTIER'):
         rules.build(occurrences(rules, 'BinOp')[0], max_steps=1)
     with pytest.raises(SourceRuleError, match='BUDGET_FRONTIER'):
@@ -616,8 +624,10 @@ def test_yield_boundaries_match_static_compiler_without_executing_code(rules, do
         pending.extend(c for c in code.co_consts if type(c) is CodeType)
         if code.co_name not in ('yield_forms', 'async_yield_forms', 'yield_in_header', '<lambda>'):
             continue
-        selected += 1
         instructions = list(dis.get_instructions(code))
+        if code.co_name == '<lambda>' and not any(i.opname == 'YIELD_VALUE' for i in instructions):
+            continue
+        selected += 1
         for ordinal, op in enumerate(instructions):
             if op.opname == 'YIELD_VALUE':
                 actual += 1
@@ -640,7 +650,7 @@ def test_delegation_keeps_send_and_post_driver_completion_paths_separate(rules, 
             plan = variant.build(occurrence)
             checked = variant.verify(plan)
             assert not checked['native_delegation_expanded'] and not checked['driver_protocol_graph_generated']
-            assert plan.schema_version == 3
+            assert plan.schema_version == 4
             _, root_steps = owned(plan)
             acquire = next(s for s in root_steps if type(s.instruction) is P.ApplyDelegationProtocol)
             assert acquire.instruction.protocol is (P.DelegationProtocolKind.AWAITABLE_ITER if constructor == 'Await'
@@ -697,3 +707,100 @@ def test_delegation_source_rules_match_static_compiler_boundaries(rules, documen
             assert any(i.opname == 'CLEANUP_THROW' for i in instructions[ordinal+2:])
     assert gets['GET_AWAITABLE'] == len(occurrences(rules, 'Await')) == 5
     assert gets['GET_YIELD_FROM_ITER'] == len(occurrences(rules, 'YieldFrom')) == 1
+
+
+@pytest.mark.parametrize('abi', tuple(ExceptionABI))
+def test_lambda_creation_retains_cells_and_defers_admitted_body_parameters(rules, abi):
+    from scar.analysis.source_productions import ProductionError
+    from scar.ir.program.control import LanguageCompletionKind as C
+    from scar.ir.program.structured import PythonProtocolKind as K
+    variant = SourceExpressionRules(rules.source, world=WORLD, exception_abi=abi)
+    forwarded = False
+    for occurrence in occurrences(variant, 'Lambda'):
+        plan = variant.build(occurrence)
+        checked = variant.verify(plan)
+        assert not checked['argument_admission_proven'] and not checked['closure_layout_proven']
+        root, creation = owned(plan)
+        declaration = next(s for s in creation if type(s.instruction) is P.DeferRegion)
+        env = declaration.instruction.environment
+        body, execution = owned(plan, declaration.instruction.body)
+        assert declaration.arguments == () and body.kind is P.ProductionRegionKind.DEFERRED
+        assert body.parameters == (REF, *(REF for _ in env.parameters), WORLD)
+        assert execution[0].instruction == P.EnterDeferredBody(env)
+        assert execution[-1].instruction == P.TransferCompletion(C.RETURN)
+        assert not any(type(s.instruction) is P.ApplyRegion for s in creation)
+        assert not any(type(s.instruction) is P.AccessBinding for s in creation)
+        cells = [s.instruction.source.relay for s in creation if type(s.instruction) is P.ReferenceEnvironment
+            and type(s.instruction.source) is P.ClosureEnvironment]
+        assert tuple(cells) == env.captures
+        source_parameters = variant.source.deferred.parameters(occurrence)
+        assert env.parameters == source_parameters
+        for p in source_parameters:
+            assert variant.source.frontend.roles.ports[p.binding_port].site == p.source
+        make = next(s for s in creation if type(s.instruction) is P.ApplyPythonProtocol
+            and s.instruction.protocol is K.MAKE_LAMBDA_FUNCTION)
+        assert make.arguments[0] == P.ProductionResult(declaration.id, 0)
+        if env.captures:
+            forwarded |= not variant.source.frontend.bindings.scopes[env.scope].captures
+            # Re-signing both declarations cannot hide a deleted capture from
+            # the independent original F3 forwarding/capture inventory.
+            changed_env = replace(env, captures=())
+            changed = replace(plan, steps=tuple(replace(s, instruction=replace(s.instruction, environment=changed_env))
+                if type(s.instruction) in (P.DeferRegion, P.EnterDeferredBody) else s for s in plan.steps))
+            with pytest.raises(ProductionError, match='SOURCE_DEFERRED'):
+                variant.source.match(changed)
+    assert forwarded
+    specific = variant.build(assigned_values(variant)['lambda_formals'])
+    root, creation = owned(specific)
+    env = next(s.instruction.environment for s in creation if type(s.instruction) is P.DeferRegion)
+    assert [p.kind for p in env.parameters] == [P.DeferredParameterKind.POSITIONAL_ONLY]*2 + [
+        P.DeferredParameterKind.POSITIONAL_OR_KEYWORD, P.DeferredParameterKind.VAR_POSITIONAL,
+        P.DeferredParameterKind.KEYWORD_ONLY, P.DeferredParameterKind.KEYWORD_ONLY, P.DeferredParameterKind.VAR_KEYWORD]
+    assert [p.default_source is not None for p in env.parameters] == [False, True, True, False, False, True, False]
+    initial_defaults = [p.default_source for p in env.parameters if p.default_source is not None]
+    evaluated = [s.instruction.field for s in creation if type(s.instruction) is P.EvaluateChild]
+    assert evaluated == initial_defaults
+    assert len([s for s in creation if type(s.instruction) is P.EvaluateChild]) == 3
+
+
+def test_generator_creation_keeps_eager_iterator_and_lazy_shared_body_separate(rules):
+    from scar.ir.program.structured import PythonProtocolKind as K
+    for occurrence in occurrences(rules, 'GeneratorExp'):
+        env = rules.source.deferred.interface(occurrence, WORLD, ExceptionABI.EXCEPTION_WORLD)
+        if env.kind is P.DeferredBodyKind.ASYNC_GENERATOR:
+            with pytest.raises(SourceRuleError, match='ASYNC_GENERATOR_EXPRESSION_FRONTIER'):
+                rules.build(occurrence)
+            continue
+        plan = rules.build(occurrence)
+        rules.verify(plan)
+        root, creation = owned(plan)
+        declaration = next(s for s in creation if type(s.instruction) is P.DeferRegion)
+        body, execution = owned(plan, declaration.instruction.body)
+        assert body.parameters == (REF, REF, WORLD) and len(env.parameters) == 1
+        assert env.parameters[0].kind is P.DeferredParameterKind.INITIAL_ITERATOR
+        assert env.parameters[0].binding_port is None
+        protocols = [s.instruction.protocol for s in creation if type(s.instruction) is P.ApplyPythonProtocol]
+        assert protocols == [K.MAKE_GENEXPR_FUNCTION, K.GET_ITERATOR, K.CREATE_GENEXPR]
+        assert not any(type(s.instruction) is P.SuspendExecution for s in creation)
+        assert type(execution[0].instruction) is P.EnterDeferredBody
+        clauses = rules.source.roles.field(occurrence, 'generators')
+        loops = [s.instruction for s in plan.steps if type(s.instruction) is P.LoopControl]
+        assert len(loops) == len(clauses.items)
+        assert all(loop.invariant_count == 1 and loop.condition.world_parameter == 1 for loop in loops)
+        assert sum(type(s.instruction) is P.SuspendExecution for s in plan.steps) == 1
+        assert not any(type(s.instruction) is P.ApplyPythonProtocol and s.instruction.protocol is K.COMPREHENSION_ADD for s in plan.steps)
+
+
+def test_deferred_source_parameter_order_is_not_native_frame_layout(rules):
+    import dis
+    from types import CodeType
+    source = 'lambda a,b=first(),/,c=second(),*rest,d,e=third(),**kw: (a,b,c,rest,d,e,kw)'
+    code = compile(source, '<static-lambda-oracle>', 'eval')
+    instructions = list(dis.get_instructions(code))
+    make = next(i for i, op in enumerate(instructions) if op.opname == 'MAKE_FUNCTION')
+    assert sum(op.opname == 'CALL' for op in instructions[:make]) == 3
+    native = next(c for c in code.co_consts if type(c) is CodeType)
+    assert native.co_varnames == ('a','b','c','d','e','rest','kw')
+    occurrence = assigned_values(rules)['lambda_formals']
+    names = [rules.source.roles.locate(p.source)[1].scalar.to_python() for p in rules.source.deferred.parameters(occurrence)]
+    assert names == ['a','b','c','rest','d','e','kw']

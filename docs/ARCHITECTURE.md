@@ -76,7 +76,7 @@ Operation.label仍有旧派发消费者、名义类型字符串及分散协议�
 F4-C最后由已验产生规则生成CFG/SSA及共享区域，并逐项核源码处置、端口、控制/状态和来源；F4通过后才进入F5。
 当前F4-A结构域已验收，F4-B/C尚未完成。`max_visits`只限前置shape遍历；构造器核验复用原验证器，不冒称总步骤预算。
 
-F4-B继续按原字段识别、局部产生规则、原材料重放的顺序推进。当前26类表达式规则只生成局部recipe，child仍是带用途/状态接口的原槽义务；
+F4-B继续按原字段识别、局部产生规则、原材料重放的顺序推进。当前28类表达式规则只生成局部recipe，child仍是带用途/状态接口的原槽义务；
 不把未实现的构造变成OPAQUE成功节点。短路/条件/比较保分支区域，异常出口汇总前面所有步骤，不能只抄最后一步。
 状态域/异常ABI由显式profile提供，效果及实际state来源尚未证明。先闭合剩余构造/上下文规则，再进入F4-C；不以局部recipe计数代替规范图覆盖。
 Call区分普通参数与展开参数；唯一位置实参为星号表达式时保留至最终调用，其余星号和keyword连续组按协议顺序处理。
@@ -90,7 +90,8 @@ f-string先转换再求格式说明；模板插值只捕获值和转换标记，
 source recipe v2的SuspendExecution显式导出值和world，恢复端口输入新world及保存值；禁止保存旧STATE，所有恢复完成取并集。NEXT/close的driver准入与规范化、frame/exception context保活仍须后续产生规则证明。
 v3为await/yield-from增加显式delegate端口和4种有限运行时协议签名；SEND同时给出完成判别、值及world，异常另走ABI。委托恢复端口接收driver处理后的结果/异常，不等同于原始throw请求；driver内部绑定仍是后层义务。
 Await/YieldFrom的局部规则已接入一份共享SEND循环；普通SEND错误直接传播，只有挂起后的driver完成异常进入CLEANUP_THROW分支。RepeatCondition表示无条件控制边，不造True求值；空完成接口可表达没有正常/异常出口的循环。
-recipe v4把代码声明、环境/cell引用及后续激活分开：DeferRegion不执行body，body入口显式接收环境、原序已准入参数和新world；捕获沿原C2b活跃转交hop，包括仅为内层转交的cell，不提前读值。原序参数/捕获不冒充native布局，调用准入与物理frame/closure映射仍须后验。
+recipe v4把代码声明、环境/cell引用及后续激活分开：DeferRegion不执行body，body入口显式接收环境、原序已准入参数和新world；捕获沿原C2b活跃转交hop，包括仅为内层转交的cell，不提前读值。参数沿PARAMETER_INTERFACE声明及resolution接原binding，不冒充普通STORE；初始默认值显式指向原创建时表达式。原序参数/捕获不冒充native布局，调用准入与物理frame/closure映射另行证明。
+Lambda和同步GeneratorExp规则已接通原F3接口；生成器仅在创建时求首个iterator，body/过滤/内层循环在DEFERRED区域，共用推导式循环模板且不造容器。异步GeneratorExp/async clause仍有明确规则前沿。
 前两步的局部规则已通过：Yield由原C1 owner区分普通／异步形式，bare yield导出None，嵌套定义header仍归外层执行owner。静态compiler只作独立规则对照，不以bytecode位置接源码身份。
 后续语句／定义／cleanup规则闭合后才进入F4-C；每步先验类型/接口，再接源码规则，再在原材料独立重放，不以节点存在或局部计数授予全层完成。
 

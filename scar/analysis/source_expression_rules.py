@@ -41,10 +41,14 @@ _FIELDS = {
     'ListComp': ('elt', 'generators'), 'SetComp': ('elt', 'generators'),
     'DictComp': ('key', 'value', 'generators'),
     'Yield': ('value',), 'YieldFrom': ('value',), 'Await': ('value',),
+    'Lambda': ('args', 'body'), 'GeneratorExp': ('elt', 'generators'),
 }
 _AUX_FIELDS = {'keyword': ('arg', 'value'), 'Starred': ('value', 'ctx'),
-               'comprehension': ('target', 'iter', 'ifs', 'is_async')}
+               'comprehension': ('target', 'iter', 'ifs', 'is_async'),
+               'arguments': ('posonlyargs', 'args', 'vararg', 'kwonlyargs', 'kw_defaults', 'kwarg', 'defaults'),
+               'arg': ('arg', 'annotation', 'type_comment')}
 _COMPREHENSIONS = ('ListComp', 'SetComp', 'DictComp')
+_COMPREHENSION_PARENTS = (*_COMPREHENSIONS, 'GeneratorExp')
 _SELECTORS = {
     'BinOp': frozenset(('Add', 'Sub', 'Mult', 'MatMult', 'Div', 'Mod', 'Pow', 'LShift',
                        'RShift', 'BitOr', 'BitXor', 'BitAnd', 'FloorDiv')),
@@ -54,7 +58,8 @@ _SELECTORS = {
 }
 _TARGETS = frozenset(('Name', 'Attribute', 'Subscript', 'List', 'Tuple'))
 _RULE_MODULES = ('source_display_rules.py', 'source_string_rules.py', 'source_comprehension_rules.py',
-                 'source_suspension_rules.py', 'source_delegation_rules.py')
+                 'source_suspension_rules.py', 'source_delegation_rules.py', 'source_callable_rules.py',
+                 'source_deferred_interfaces.py')
 
 
 class SourceRuleError(ProductionError):
@@ -119,10 +124,14 @@ class SourceExpressionRules:
             rows.append(dict(constructor=row.name, fields=list(row.fields), status=status,
                 purposes=[p.value for p in purposes], selectors=sorted(_SELECTORS.get(row.name, ())),
                 context_frontiers=([dict(field='generators[].is_async', value=1, code='ASYNC_COMPREHENSION_FRONTIER')]
-                                   if row.name in _COMPREHENSIONS else []),
+                    if row.name in _COMPREHENSIONS else [dict(condition='async clauses or body-owned await',
+                        code='ASYNC_GENERATOR_EXPRESSION_FRONTIER')] if row.name == 'GeneratorExp' else []),
                 parent_contexts=([dict(constructor=p, field='args' if p == 'Call' else 'elts')
                     for p in ('Call', 'List', 'Tuple', 'Set')] if row.name == 'Starred' else
-                    [dict(constructor=p, field='generators') for p in _COMPREHENSIONS] if row.name == 'comprehension' else
+                    [dict(constructor=p, field='generators') for p in _COMPREHENSION_PARENTS] if row.name == 'comprehension' else
+                    [dict(constructor='Lambda', field='args')] if row.name == 'arguments' else
+                    [dict(constructor='arguments', field=p, owner='Lambda.args') for p in (
+                        'posonlyargs', 'args', 'vararg', 'kwonlyargs', 'kwarg')] if row.name == 'arg' else
                     [dict(constructor='Call', field='keywords')] if row.name == 'keyword' else [])))
         return dict(schema='scar.source-expression-rule-catalog', schema_version=1,
             source_schema_sha256=self.source.roles.catalog.f2_schema_sha256,
@@ -148,8 +157,15 @@ class SourceExpressionRules:
         if site is None:
             return None
         parent = syntax.nodes[site.occurrence].constructor
+        if node.constructor == 'arguments':
+            return site if parent == 'Lambda' and site.ordinal == self.source.roles.fields['Lambda']['args'] else None
+        if node.constructor == 'arg':
+            owner = self.source.roles.parents.get(site.occurrence)
+            return site if parent == 'arguments' and owner is not None and (
+                syntax.nodes[owner.occurrence].constructor == 'Lambda'
+                and owner.ordinal == self.source.roles.fields['Lambda']['args']) else None
         allowed = (('Call', 'List', 'Tuple', 'Set') if node.constructor == 'Starred' else
-                   _COMPREHENSIONS if node.constructor == 'comprehension' else ('Call',))
+                   _COMPREHENSION_PARENTS if node.constructor == 'comprehension' else ('Call',))
         if parent not in allowed:
             return None
         expected = (('args' if parent == 'Call' else 'elts') if node.constructor == 'Starred' else
@@ -190,6 +206,7 @@ class SourceExpressionRules:
             scope_activation_proven=False, iterator_cleanup_proven=False,
             driver_admission_proven=False, resume_state_origin_proven=False, frame_context_lifetime_proven=False,
             native_delegation_expanded=False, driver_protocol_graph_generated=False,
+            argument_admission_proven=False, closure_layout_proven=False, environment_activation_proven=False,
             effects_proven=False, canonical_graph_generated=False, transformation_authorized=False)
 
 
@@ -284,6 +301,9 @@ class _Builder:
         outputs = next(c.types for c in signature.completions if c.kind is ExitKind.NORMAL) if invoke else signature.results
         return self.emit(region, P.ApplyDelegationProtocol(kind, bindings), (*arguments, state), outputs, may_raise=invoke)
 
+    def environment(self, region, handle, state):
+        return self.emit(region, P.ReferenceEnvironment(handle), (state,), (_REF, self.world), may_raise=False)
+
     def finish(self, region, values, types):
         self.transfer(region, C.FALLTHROUGH, values, types)
 
@@ -324,6 +344,9 @@ class _Builder:
         elif kind in ('YieldFrom', 'Await'):
             from scar.analysis.source_delegation_rules import emit_delegation
             emit_delegation(self, root, state)
+        elif kind in ('Lambda', 'GeneratorExp'):
+            from scar.analysis.source_callable_rules import emit_callable
+            emit_callable(self, root, state)
         elif kind == 'Constant':
             # A literal source reference does not assert a fresh allocation.
             result = self.emit(root, P.ConstructValue(P.ConstructionKind.LITERAL,

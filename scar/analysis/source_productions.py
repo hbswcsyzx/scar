@@ -236,6 +236,9 @@ def validate_production_plan(plan, *, max_visits=1_000_000):
             _require(current >= prior and p.source not in sources, 'DEFERRED_INTERFACE', 'parameters',
                 'formals must have distinct source binders in declared source-group order')
             prior = current; sources.add(p.source)
+            _require(p.default_source is None or p.kind in (P.DeferredParameterKind.POSITIONAL_ONLY,
+                P.DeferredParameterKind.POSITIONAL_OR_KEYWORD, P.DeferredParameterKind.KEYWORD_ONLY),
+                'DEFERRED_INTERFACE', 'parameters', 'variadic/iterator inputs cannot have source defaults')
             if p.kind in (P.DeferredParameterKind.VAR_POSITIONAL, P.DeferredParameterKind.VAR_KEYWORD):
                 _require(p.kind not in singletons, 'DEFERRED_INTERFACE', 'parameters', 'variadic formal may occur only once')
                 singletons.add(p.kind)

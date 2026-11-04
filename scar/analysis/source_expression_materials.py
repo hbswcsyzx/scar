@@ -30,7 +30,7 @@ from scar.ir.record_codec import decode, encode
 _PARENTS = ('source_roles', 'source_contexts', 'source_declarations', 'source_bindings',
             'source_symbols', 'compiler_topology', 'compiler_symbols')
 _FRONTIERS = {'RULE_FRONTIER', 'PURPOSE_FRONTIER', 'BINDING_INTERFACE_FRONTIER',
-              'ASYNC_COMPREHENSION_FRONTIER', 'SUSPENSION_CONTEXT_FRONTIER'}
+              'ASYNC_COMPREHENSION_FRONTIER', 'SUSPENSION_CONTEXT_FRONTIER', 'ASYNC_GENERATOR_EXPRESSION_FRONTIER'}
 _WORLD = ValueType(ValueKind.STATE, location=LocationID('source-python-world'))
 
 
@@ -45,6 +45,7 @@ def _implementation():
         'analysis/source_comprehension_rules.py',
         'analysis/source_suspension_rules.py',
         'analysis/source_delegation_rules.py', 'ir/program/delegation_signatures.py',
+        'analysis/source_callable_rules.py', 'analysis/source_deferred_interfaces.py',
         'analysis/source_productions.py', 'analysis/program_types.py',
         'ir/program/source_productions.py', 'ir/record_codec.py')
     return {name: sha256((package / name).read_bytes()).hexdigest() for name in names}
