@@ -155,6 +155,17 @@ F4-B接口查询：`ProtocolSignatureIndex(graph, structured, interface, metadat
 `ProductionSourceIndex(F0, SourceContextView, FrontendBindingView).match(plan)`复用已严格读取的父层；输入SHA只计算一次，不重parse或复制F2。
 源码role port与namespace access分开；属性/keyword标签不能被接成变量读写。输出明确保`source_rules_replayed=False`，当前不能发布canonical新图。
 
+局部表达式规则（F4-B，尚未闭合全域）：
+
+```bash
+PYTHONHASHSEED=0 python -B -m scar.cli source-expressions --model /path/to/model --source /original/source.py --out /path/to/materials --jobs 2
+PYTHONHASHSEED=0 python -B -m scar.cli source-expressions --model /path/to/model --source /original/source.py --materials /path/to/materials --out /path/to/fresh-check --jobs 2
+```
+
+`--source`可重复；省略时处理声明源码全集。每源流式写一个`expressions.jsonl.gz`，共享目录只存一份，fresh逐记录重新产生并比较。
+`SourceExpressionRules(ProductionSourceIndex, world=…, exception_abi=…).build/verify`不parse目标；按原字段定义顺序，保持state流与短路对象身份。
+显式rule frontier保原occurrence/构造/用途；child接口、效果和state来源仍是义务。不能用这个入口宣称完整CFG/SSA或执行图已生成。
+
 源码身份桥（按unit分片，保持输入模型和旧ID）：
 
 ```bash

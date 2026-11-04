@@ -217,7 +217,7 @@ def validate_production_plan(plan, *, max_visits=1_000_000):
     claimed, referenced_regions = set(), {plan.root}
     for region in plan.regions:
         _require(bool(region.steps), 'REGION_EXIT', str(region.id), 'region needs an explicit result/transfer step')
-        available = {}
+        available, escaping = {}, {}
 
         def value_type(value):
             if type(value) is P.ProductionParameter:
@@ -325,9 +325,14 @@ def validate_production_plan(plan, *, max_visits=1_000_000):
                 _require(ordinal == len(region.steps) - 1, 'VALUE_ORDER', str(identity), 'transfer must end its region')
             if (C.FALLTHROUGH, None) not in outputs:
                 _require(ordinal == len(region.steps) - 1, 'VALUE_ORDER', str(identity), 'no step may follow terminal control')
+            for key, types in outputs.items():
+                if key != (C.FALLTHROUGH, None) or ordinal == len(region.steps) - 1:
+                    _require(key not in escaping or escaping[key] == types, 'REGION_EXIT', str(region.id),
+                             'escaping completion interfaces disagree')
+                    escaping[key] = types
             available[identity] = outputs
-        _require(available[region.steps[-1]] == region_outputs[region.id], 'REGION_EXIT', str(region.id),
-                 'last step and declared region completion interfaces differ')
+        _require(escaping == region_outputs[region.id], 'REGION_EXIT', str(region.id),
+                 'normal result and all escaping completions must match the region interface')
     _require(claimed == set(steps), 'STEP_OWNER', 'plan.steps', 'unowned steps remain')
     _require(referenced_regions == set(regions), 'REGION_REFERENCE', 'plan.regions', 'unreferenced region templates remain')
     sites = [item.field for item in plan.slots]

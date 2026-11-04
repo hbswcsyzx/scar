@@ -492,6 +492,9 @@ def main(argv=None) -> int:
     if cli_argv and cli_argv[0] == 'source-anchors':
         from scar.analysis.source_anchor_materials import main as source_anchors_main
         return source_anchors_main(cli_argv[1:])
+    if cli_argv and cli_argv[0] == 'source-expressions':
+        from scar.analysis.source_expression_materials import main as source_expressions_main
+        return source_expressions_main(cli_argv[1:])
     if cli_argv and cli_argv[0] == "static":
         from scar.analysis.static_program import main as static_main
         return static_main(cli_argv[1:])
@@ -537,6 +540,8 @@ def main(argv=None) -> int:
     program_types.set_defaults(func=lambda _: 0)
     source_anchors = sub.add_parser('source-anchors', help='link original F2 occurrences to complete legacy SourceAtom identities')
     source_anchors.set_defaults(func=lambda _: 0)
+    source_expressions = sub.add_parser('source-expressions', help='replay local expression rules from original F2/F3; retain explicit rule frontiers')
+    source_expressions.set_defaults(func=lambda _: 0)
     static_cmd = sub.add_parser("static", help="build source-root program graphs without executing the target")
     static_cmd.set_defaults(func=lambda _: 0)
     static_query = sub.add_parser("static-query", help="query stored static definitions and original graph dependencies")

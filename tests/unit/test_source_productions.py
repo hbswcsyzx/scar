@@ -104,6 +104,19 @@ def test_ordered_values_shared_subregion_and_invalid_local_edges():
             A.validate_production_plan(changed)
 
 
+def test_early_exception_is_preserved_when_normal_path_has_a_later_return():
+    exits = (*normal(INT), P.ProductionCompletion(C.RAISE, (REF,)))
+    root = region('root', steps=('invoke', 'finish'), outputs=exits)
+    invoke = step('invoke', root, P.ApplyLanguageAction(P.LanguageActionKind.CALL),
+        (parameter(root),), exits)
+    finish = step('finish', root, P.TransferCompletion(C.FALLTHROUGH),
+        (P.ProductionResult(invoke.id, 0),))
+    value = plan((root,), (invoke, finish))
+    assert A.validate_production_plan(value)['regions'] == 1
+    with pytest.raises(A.ProductionError, match='REGION_EXIT'):
+        A.validate_production_plan(replace(value, regions=(replace(root, completions=normal(INT)),)))
+
+
 def test_branch_has_boolean_decision_explicit_capture_ports_and_completion_union():
     root = region('root', parameters=(BOOL, INT), steps=('branch',))
     yes = region('yes', parent=root.id, kind=P.ProductionRegionKind.ALTERNATIVE, steps=('yes_return',))

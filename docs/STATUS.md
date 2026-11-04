@@ -94,16 +94,24 @@ call/map/string/assert参数也沿闭合原端口组解析；空组保DECLARED_E
 
 源码产生规则的输入语法已落地：29记录/87字段、4 ID、10枚举/81成员、7 union、12步骤变体；不修改canonical类型根和旧ID。
 检查exact类型、区域归属/值顺序、共享调用、循环不变量/携带接口、异常完成到handler的payload/captures连接及strict codec；不授完整控制/效果语义。
-6项针对性检查通过，连同原签名/类型相关检查共25项通过（5.96秒）。本轮由主代理实现，无新增subagents。
+原结构验收25项通过；本轮修正区域出口汇总：前面步骤的异常必须保留，不能只取最后一步的normal结果。
 真实eval/CEM核419/537项原role引用描述符，查询1.03/1.31秒（父层fresh及索引另9.76/12.12秒）；没有生成新执行图或重放逐构造规则。
 记录在`artifacts/current/queries/source-productions/`；旧manifest不变，LeWM未执行或修改。
+
+F4-B现有11类表达式局部规则：名称及属性/索引读写、literal、算术/一元、slice、walrus、条件/短路/比较；直接消费原F2/F3，无目标重parse/执行。
+规则目录对113构造分流：11类局部规则、32类selector metadata、70类规则前沿；这不是全构造/全部上下文已闭合。
+真实eval/CEM两份源码生成999个局部recipe，另191个表达式规则前沿（其中Call 140个），保437项child接口义务。
+两源流式压缩片共271,034 bytes（解压5,940,994）；2进程采集13.04秒、fresh逐记录核验12.79秒，见`queries/source-expression-rules/{materials,verification}/result.json`。
+本轮相关32项检查通过（25.47秒），包含同类型操作数/状态边调换及重签收据后仍拒错误计划；全部由主代理完成，无新增subagents。
+recipe不是canonical CFG/SSA；state来源、child实现与effects未证，不能发布全图或开启变换。
 
 1. **F4-B后续规则**：接完整操作家族、typed参数来源、状态/access契约和源码产生规则，再接版本化根与强制reader。
    旧core操作语义仍散在32个源码Opcode、88个PythonProtocol及typed侧表；label还承担cleanup/class/native派发。
    旧通用结构校验可容纳ADD的0/1/3输入或缺result，说明缺少统一签名；这不代表可绕过完整source replay。
    三种域不能互代：32 Opcode、88协议和113语法构造器×上下文分别核验；B1不授新图发布或优化。
    下一步将原声明端口接到F2/F3产生规则，并补function/class/comprehension等参数来源；保活完整性另验，不能抄端口来证明。
-   形式顺序：输入/输出与有限步骤结构已固定；下一步逐构造/用途定义字段消耗、控制/数据端口及cleanup/resume语义，规则闭合后才生成CFG/SSA。
+   形式顺序：输入/输出结构已固定；当前持续闭合构造×用途×上下文的字段消耗及完成端口，再重放核验，全部闭合后才生成CFG/SSA。
+   下一批规则从Call开始：参数求值、星号解包、keyword分组合并及异常时机；随后补其余表达式、语句/循环、定义/捕获与cleanup/resume。
    四片其余881操作已分类为控制434、binding246、source invoke201；这是识别结果，不等于其接口/产生规则已通过。
    签名witness仍须进入版本化typed根及强制reader；不能把本层独立查询当作完备。根扩展后重验F4-A目录。
    实读FRAME_BIND为READ_WRITE、UNKNOWN footprint、非full overwrite；不能照旧审计摘要强制WHOLE或升级未知事实。
