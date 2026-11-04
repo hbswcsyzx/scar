@@ -47,6 +47,7 @@ F2语法输入按F0/F1收据、parser profile和局部occurrence ID定位；字�
 跨边界接口必须保留正常返回、异常、挂起及适用的状态输入/输出，不只连接返回 Tensor。
 循环外引用可以指向可变对象；引用不变不能证明对象内容跨迭代不变。
 初始化输入、循环携带值、迭代局部值和退出值须沿原端口区分。
+F4-B source recipe另以原F2 `SourceLoopTarget`连接局部子图的break/continue端口；对应共享循环消费自己的跳转，耗尽与break分开连接else/后继。suite只沿正常完成接下一语句。语句may-completion上界、局部产生规则与最终CFG/SSA是三种不同的证明范围；iterator引用不变不授内容不变或引用释放时序证明。
 区域 cut 查询列出已有跨边界依赖，不自动证明可外提、复用、删除或整体替换。
 见 [公共依赖查询](../scar/analysis/program_dependencies.py) 与 [边界分析](../scar/analysis/program_regions.py)。
 

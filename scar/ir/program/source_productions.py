@@ -60,6 +60,7 @@ class ProductionDispositionKind(str, Enum):
     MARKER = 'MARKER'
     METADATA = 'METADATA'
     SUPPRESSED = 'SUPPRESSED'
+    NO_NORMAL_PREDECESSOR = 'NO_NORMAL_PREDECESSOR'
 
 
 class LanguageActionKind(str, Enum):
@@ -168,10 +169,23 @@ ProductionSource = ProductionOccurrence | SlotRef
 
 
 @dataclass(frozen=True, slots=True)
+class SourceLoopTarget:
+    """An original F2 loop, including one outside this local recipe.
+
+    Composition consumes this port at that loop's shared template. It is
+    neither an unresolved name nor a fabricated local ancestor region.
+    """
+    occurrence: int
+
+
+ProductionControlTarget = ProductionRegionID | SourceLoopTarget
+
+
+@dataclass(frozen=True, slots=True)
 class ProductionCompletion:
     kind: LanguageCompletionKind
     types: tuple[GroundType, ...]
-    target: ProductionRegionID | None = None
+    target: ProductionControlTarget | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -283,6 +297,7 @@ class LoopControl:
     body: ProductionRegionID
     otherwise: ProductionRegionID | None = None
     invariant_count: int = 0
+    source_loop: SourceLoopTarget | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -353,7 +368,7 @@ class CleanupControl:
 class CompletionRoute:
     """Completion payload then explicit captures form the handler inputs."""
     kind: LanguageCompletionKind
-    target: ProductionRegionID | None
+    target: ProductionControlTarget | None
     handler: ProductionRegionID
     captures: tuple[ProductionValue, ...] = ()
 
@@ -367,7 +382,7 @@ class HandleCompletions:
 @dataclass(frozen=True, slots=True)
 class TransferCompletion:
     kind: LanguageCompletionKind
-    target: ProductionRegionID | None = None
+    target: ProductionControlTarget | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -443,7 +458,7 @@ class SourceProductionPlan:
     steps: tuple[ProductionStep, ...]
     slots: tuple[ProductionSlotDisposition, ...]
     schema: str = 'scar.source-production-plan'
-    schema_version: int = 5
+    schema_version: int = 6
     authority: str = 'SOURCE_RECIPE_SHAPE_ONLY'
 
 

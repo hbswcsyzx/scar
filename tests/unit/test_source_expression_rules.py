@@ -94,6 +94,9 @@ def documents():
         'sync_lazy_inside = ((x async for x in source) for row in rows)',
         'async def eager_seed_phase():\n    return (x for x in [y async for y in source])',
         'def directive_forms(value):\n    global global_state\n    local = 0\n    def nested():\n        nonlocal local\n        global global_state\n        global_state = local = value\n        del local\n        return\n    return nested',
+        'def structured_statements(source, flag):\n    for item in source:\n        if flag:\n            continue\n            unreachable()\n        elif item:\n            break\n    else:\n        exhausted()\n    while flag:\n        for nested in source:\n            pass\n        else:\n            if flag:\n                continue\n            break\n        flag = update(flag)\n    else:\n        return\n    if flag:\n        return result()\n        unreachable()\n    else:\n        raise Error()',
+        'async def structured_async(source):\n    async for item in source:\n        if item:\n            continue\n        break\n    else:\n        return\n    return item',
+        'def cleanup_transfer(source):\n    for item in source:\n        try:\n            break\n        finally:\n            return item',
     )) + '\n'
     f0 = source_bytes_document(text.encode(), path='/source/schedules.py', namespace_root='/source')
     f1 = source_tokens_document(f0)
@@ -662,7 +665,7 @@ def test_delegation_keeps_send_and_post_driver_completion_paths_separate(rules, 
             plan = variant.build(occurrence)
             checked = variant.verify(plan)
             assert not checked['native_delegation_expanded'] and not checked['driver_protocol_graph_generated']
-            assert plan.schema_version == 5
+            assert plan.schema_version == 6
             _, root_steps = owned(plan)
             acquire = next(s for s in root_steps if type(s.instruction) is P.ApplyDelegationProtocol)
             assert acquire.instruction.protocol is (P.DelegationProtocolKind.AWAITABLE_ITER if constructor == 'Await'
@@ -891,11 +894,12 @@ def test_async_loop_boundaries_match_static_cpython_without_running_target_code(
     assert flags == [True,True,False]
 
 
-def test_linear_statement_rules_preserve_source_fields_and_completion_interfaces(rules, monkeypatch):
+def test_structured_statement_rules_preserve_source_fields_and_completion_interfaces(rules, monkeypatch):
     from scar.analysis.source_statement_rules import SourceStatementRules
     statements = SourceStatementRules(rules.source, world=WORLD, exception_abi=ExceptionABI.EXCEPTION_WORLD)
     supported = {r['constructor'] for r in statements.catalog()['rules'] if r['status'] == 'LOCAL_STATEMENT_RULE'}
-    assert supported == {'Expr','Pass','Assign','Delete','Return','Global','Nonlocal'}
+    assert supported == {'Expr','Pass','Assign','Delete','Return','Global','Nonlocal',
+        'If','While','For','AsyncFor','Break','Continue'}
     seen = set()
     for occurrence, node in enumerate(rules.source.context.syntax.nodes):
         if node.constructor not in supported:continue
@@ -931,3 +935,60 @@ def test_linear_statements_evaluate_rhs_once_order_writes_and_release_only_owned
         root, returned = owned(statements.build(index))
         assert returned[-1].instruction == P.TransferCompletion(C.RETURN)
         assert not any(type(s.instruction) is P.ApplyPythonProtocol and s.instruction.protocol is K.FRAME_RELEASE_TEMPORARY for s in returned)
+
+
+def test_statement_control_templates_preserve_source_targets_and_completion_boundaries(rules):
+    from scar.analysis.source_statement_rules import SourceStatementRules
+    from scar.analysis.source_productions import ProductionError
+    from scar.ir.program.control import LanguageCompletionKind as C
+    from scar.ir.program.structured import PythonProtocolKind as K
+    for abi in ExceptionABI:
+        statements = SourceStatementRules(rules.source, world=WORLD, exception_abi=abi)
+        for kind in ('For', 'While', 'AsyncFor'):
+            for occurrence in occurrences(rules, kind):
+                plan = statements.build(occurrence)
+                statements.verify(plan)
+                loops = [s for s in plan.steps if type(s.instruction) is P.LoopControl and s.instruction.source_loop is not None]
+                assert len(loops) == 1  # one source template, regardless of runtime iteration count
+                control = loops[0].instruction
+                assert control.source_loop == P.SourceLoopTarget(occurrence)
+                region, _ = owned(plan, loops[0].region)
+                body, body_steps = owned(plan, control.body)
+                assert control.invariant_count == (0 if kind == 'While' else 1)
+                assert region.parameters == ((WORLD,) if kind == 'While' else (REF, WORLD))
+                assert body.parameters == (region.parameters if kind == 'While' else (*region.parameters, REF))
+                assert not any(c.target == control.source_loop for c in region.completions)
+                if kind != 'While':
+                    assert type(control.condition) is P.IterationCondition
+                    assert body_steps[0].instruction.purpose is P.ProductionPurpose.STORE
+                    assert body_steps[0].arguments[0] == P.ProductionParameter(body.id, 2)
+                if kind == 'AsyncFor':
+                    assert any(type(s.instruction) is P.ApplyDelegationProtocol
+                        and s.instruction.protocol is P.DelegationProtocolKind.GET_ASYNC_NEXT for s in plan.steps)
+                    assert any(type(s.instruction) is P.SuspendExecution
+                        and s.instruction.suspension is P.SuspensionKind.AWAIT for s in plan.steps)
+                else:
+                    assert sum(type(s.instruction) is P.LoopControl for s in plan.steps) == 1
+        terminal = [statements.build(i) for i in occurrences(rules, 'If')]
+        terminal = [p for p in terminal if not any(c.kind is C.FALLTHROUGH for c in owned(p)[0].completions)]
+        assert terminal and any(s.disposition is P.ProductionDispositionKind.NO_NORMAL_PREDECESSOR
+            for p in terminal for s in p.slots)
+        assert any({c.kind for c in owned(p)[0].completions} == {C.RETURN, C.RAISE} for p in terminal)
+    # The inner for's else has left that loop; its continue belongs to while.
+    statements = SourceStatementRules(rules.source, world=WORLD, exception_abi=ExceptionABI.EXCEPTION_WORLD)
+    continued = [(i, rules.source.statements.active_loop(P.ProductionOccurrence(i))) for i in occurrences(rules, 'Continue')]
+    index, target = next((i, t) for i, t in continued if rules.source.context.syntax.nodes[t.occurrence].constructor == 'While')
+    jump = statements.build(index)
+    assert owned(jump)[1][-1].instruction == P.TransferCompletion(C.CONTINUE, target)
+    different = next(i for i in occurrences(rules, 'For') if i != target.occurrence)
+    step = jump.steps[-1]
+    altered = replace(jump, regions=(replace(jump.regions[0], completions=(replace(step.completions[0], target=P.SourceLoopTarget(different)),)),),
+        steps=(replace(step, instruction=P.TransferCompletion(C.CONTINUE, P.SourceLoopTarget(different)),
+            completions=(replace(step.completions[0], target=P.SourceLoopTarget(different)),)),))
+    with pytest.raises(ProductionError, match='SOURCE_LOOP'):
+        rules.source.match(altered)
+    # Finally-return replaces the protected break in the source interface;
+    # this does not claim that the Try producer or cleanup implementation exists.
+    tried = occurrences(rules, 'Try')[0]
+    interface = rules.source.statements.completions(tried)
+    assert {kind for kind, _ in interface} == {C.RETURN, C.RAISE}

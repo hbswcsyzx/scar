@@ -19,6 +19,7 @@ from scar.ir.program.signature_patterns import SignatureError, SignatureForm
 from scar.ir.program.delegation_signatures import resolve_delegation_signature
 from scar.ir.record_codec import decode, encode
 from scar.analysis.source_deferred_interfaces import DeferredInterfaceIndex
+from scar.analysis.source_statement_interfaces import SourceStatementInterfaceIndex
 
 
 class ProductionError(ValueError):
@@ -54,7 +55,8 @@ def production_type_catalog():
         for cls in registry.values()}
     modules[__name__] = sha256(Path(__file__).read_bytes()).hexdigest()
     for name in ('scar.analysis.program_types', 'scar.ir.record_codec', 'scar.ir.program.protocol_signatures',
-                 'scar.ir.program.delegation_signatures', 'scar.analysis.source_deferred_interfaces'):
+                 'scar.ir.program.delegation_signatures', 'scar.analysis.source_deferred_interfaces',
+                 'scar.analysis.source_statement_interfaces'):
         modules[name] = sha256(Path(sys.modules[name].__file__).read_bytes()).hexdigest()
     payload = dict(schema='scar.source-production-type-catalog', schema_version=1,
         root=root, types=rows, counts=counts, modules=dict(sorted(modules.items())),
@@ -144,7 +146,7 @@ def validate_production_plan(plan, *, max_visits=1_000_000):
     """
     visits = _shape(plan, max_visits)
     _require((plan.schema, plan.schema_version, plan.authority) == (
-        'scar.source-production-plan', 5, 'SOURCE_RECIPE_SHAPE_ONLY'),
+        'scar.source-production-plan', 6, 'SOURCE_RECIPE_SHAPE_ONLY'),
         'SCHEMA', 'plan', 'unsupported recipe schema or authority')
     source = plan.input
     _require(bool(source.path) and bool(source.namespace_root), 'INPUT', 'plan.input', 'source paths must be nonempty')
@@ -206,6 +208,10 @@ def validate_production_plan(plan, *, max_visits=1_000_000):
             key = row.kind, row.target
             _require(key not in result, 'COMPLETION', path, 'duplicate completion kind/target')
             if row.kind in (C.BREAK, C.CONTINUE):
+                if type(row.target) is P.SourceLoopTarget:
+                    _require(row.target.occurrence >= 0, 'COMPLETION', path, 'negative source loop target')
+                    result[key] = row.types
+                    continue  # original lexical target is checked by the source index
                 _require(row.target in regions and regions[row.target].kind is P.ProductionRegionKind.LOOP,
                          'COMPLETION', path, 'break/continue must target a declared loop')
                 start, end = intervals[row.target]
@@ -289,7 +295,16 @@ def validate_production_plan(plan, *, max_visits=1_000_000):
             step, outputs = steps[identity], step_outputs[identity]
             args = tuple(value_type(v) for v in step.arguments)
             instruction = step.instruction
-            if type(instruction) is P.AccessBinding:
+            if type(instruction) is P.EvaluateChild and instruction.purpose is P.ProductionPurpose.STATEMENT:
+                _require(len(args) == 1 and type(args[0]) is ValueType and args[0].kind is ValueKind.STATE,
+                    'PORT_TYPES', str(identity), 'statement child requires one explicit world input')
+                for (kind, _), types in outputs.items():
+                    reference = ValueType(ValueKind.REFERENCE)
+                    accepted = (((reference, args[0]), (reference, reference, args[0])) if kind is C.RAISE else
+                        ((reference, args[0]),) if kind is C.RETURN else ((args[0],),))
+                    _require(types in accepted,
+                        'PORT_TYPES', str(identity), 'statement completion payload differs from its world/exception interface')
+            elif type(instruction) is P.AccessBinding:
                 _require(instruction.port >= 0, 'SOURCE_PORT', str(identity), 'source port must be nonnegative')
             elif type(instruction) is P.ApplyPythonProtocol:
                 try:
@@ -355,6 +370,11 @@ def validate_production_plan(plan, *, max_visits=1_000_000):
                 _require(0 <= instruction.invariant_count <= len(args), 'LOOP_INTERFACE', str(identity),
                          'invariant prefix must fit the explicit input interface')
                 carried = args[instruction.invariant_count:]
+                targets = (region.id,) + (() if instruction.source_loop is None else (instruction.source_loop,))
+                local_jumps = tuple((kind, target) for target in targets for kind in (C.BREAK, C.CONTINUE))
+                consumed = ((C.FALLTHROUGH, None), *local_jumps)
+                def has_break():
+                    return any((C.BREAK, target) in region_outputs[instruction.body] for target in targets)
                 body = child(instruction.body, P.ProductionRegionKind.LOOP_BODY)
                 if type(instruction.condition) is P.IterationCondition:
                     iteration = instruction.condition
@@ -379,7 +399,7 @@ def validate_production_plan(plan, *, max_visits=1_000_000):
                         'LOOP_INTERFACE', str(identity), 'iterator item is a transient body port, not a carried value')
                     escaped = {(C.RAISE, None): raised}
                     for key, types in region_outputs[body.id].items():
-                        if key not in ((C.FALLTHROUGH, None), (C.BREAK, region.id), (C.CONTINUE, region.id)):
+                        if key not in consumed:
                             _require(key not in escaped or escaped[key] == types, 'LOOP_INTERFACE', str(identity),
                                      'iterator/body escaping completion interfaces differ')
                             escaped[key] = types
@@ -391,7 +411,7 @@ def validate_production_plan(plan, *, max_visits=1_000_000):
                             _require(key not in escaped or escaped[key] == types, 'LOOP_INTERFACE', str(identity),
                                      'iterator otherwise completion interfaces differ')
                             escaped[key] = types
-                        if (C.BREAK, region.id) in region_outputs[body.id]:
+                        if has_break():
                             _require((C.FALLTHROUGH, None) not in escaped or escaped[(C.FALLTHROUGH, None)] == carried,
                                      'LOOP_INTERFACE', str(identity), 'break and otherwise result interfaces differ')
                             escaped[(C.FALLTHROUGH, None)] = carried
@@ -399,9 +419,8 @@ def validate_production_plan(plan, *, max_visits=1_000_000):
                 elif type(instruction.condition) is P.RepeatCondition:
                     _require(body.parameters == region.parameters and instruction.otherwise is None,
                         'LOOP_INTERFACE', str(identity), 'unconditional repetition has no condition/otherwise evaluation')
-                    escaped = {key: types for key, types in region_outputs[body.id].items() if key not in (
-                        (C.FALLTHROUGH, None), (C.BREAK, region.id), (C.CONTINUE, region.id))}
-                    if (C.BREAK, region.id) in region_outputs[body.id]:
+                    escaped = {key: types for key, types in region_outputs[body.id].items() if key not in consumed}
+                    if has_break():
                         escaped[(C.FALLTHROUGH, None)] = carried
                     _require(outputs == escaped, 'LOOP_INTERFACE', str(identity),
                         'unconditional loop may complete normally only through its body break')
@@ -412,13 +431,12 @@ def validate_production_plan(plan, *, max_visits=1_000_000):
                     _require(region_outputs[condition.id].get((C.FALLTHROUGH, None)) == (
                         ValueType(ValueKind.DATA, 'builtins.bool'), *carried),
                         'LOOP_INTERFACE', str(identity), 'loop condition returns decision then carried values')
-                    _require(not any(key in region_outputs[condition.id] for key in (
-                        (C.BREAK, region.id), (C.CONTINUE, region.id))),
+                    _require(not any(key in region_outputs[condition.id] for key in local_jumps),
                         'LOOP_INTERFACE', str(identity), 'condition cannot break/continue its own loop')
                     escaped = {}
                     for row in (condition, body):
                         for key, types in region_outputs[row.id].items():
-                            if key not in ((C.FALLTHROUGH, None), (C.BREAK, region.id), (C.CONTINUE, region.id)):
+                            if key not in consumed:
                                 _require(key not in escaped or escaped[key] == types, 'LOOP_INTERFACE', str(identity),
                                     'condition/body escaping completion interfaces differ')
                                 escaped[key] = types
@@ -430,12 +448,12 @@ def validate_production_plan(plan, *, max_visits=1_000_000):
                             _require(key not in escaped or escaped[key] == types, 'LOOP_INTERFACE', str(identity),
                                 'loop otherwise completion interfaces differ')
                             escaped[key] = types
-                        if (C.BREAK, region.id) in region_outputs[body.id]:
+                        if has_break():
                             _require((C.FALLTHROUGH, None) not in escaped or escaped[(C.FALLTHROUGH, None)] == carried,
                                 'LOOP_INTERFACE', str(identity), 'break and otherwise result interfaces differ')
                             escaped[(C.FALLTHROUGH, None)] = carried
                     _require(outputs == escaped, 'LOOP_INTERFACE', str(identity), 'loop dropped or invented a completion')
-                for key in ((C.FALLTHROUGH, None), (C.CONTINUE, region.id), (C.BREAK, region.id)):
+                for key in consumed:
                     if key in region_outputs[body.id]:
                         _require(region_outputs[body.id][key] == carried,
                                  'LOOP_INTERFACE', str(identity), 'loop body backedge/exit carry ports differ')
@@ -552,6 +570,7 @@ class ProductionSourceIndex:
         self.context, self.frontend = context_view, frontend_view
         self.roles = context_view.role_view
         self._deferred = None
+        self._statements = None
         self._role_sites = frozenset(port.site for port in frontend_view.roles.ports)
         self.input = P.ProductionInput(f0['path'], f0['namespace_root'], _digest(encode(syntax)),
             _digest(encode(context_view.roles)), _digest(encode(context_view.material)),
@@ -562,6 +581,12 @@ class ProductionSourceIndex:
         if self._deferred is None:
             self._deferred = DeferredInterfaceIndex(self)
         return self._deferred
+
+    @property
+    def statements(self):
+        if self._statements is None:
+            self._statements = SourceStatementInterfaceIndex(self)
+        return self._statements
 
     def match(self, plan, *, max_visits=1_000_000):
         summary = validate_production_plan(plan, max_visits=max_visits)
@@ -579,6 +604,10 @@ class ProductionSourceIndex:
             for region in plan.regions:
                 _require(region.context == source(region.source), 'SOURCE_CONTEXT', str(region.id),
                          'region context differs from its original F2/F3 source reference')
+                for completion in region.completions:
+                    if type(completion.target) is P.SourceLoopTarget:
+                        _require(completion.target == self.statements.active_loop(region.source),
+                            'SOURCE_LOOP', str(region.id), 'escaping loop completion has a different lexical target')
                 if region.kind is P.ProductionRegionKind.COMPREHENSION:
                     parent = region_index.get(region.parent)
                     scope = self.context.material.scopes[region.context.environment]
@@ -587,11 +616,26 @@ class ProductionSourceIndex:
                         'SOURCE_SCOPE', str(region.id), 'comprehension activation must use its original child namespace')
             for step in plan.steps:
                 source(step.source)
+                for completion in step.completions:
+                    if type(completion.target) is P.SourceLoopTarget:
+                        _require(completion.target == self.statements.active_loop(step.source),
+                            'SOURCE_LOOP', str(step.id), 'child/transfer completion has a different lexical loop target')
                 instruction = step.instruction
                 if type(instruction) is P.EvaluateChild:
                     _, value = self.roles.locate(instruction.field)
                     _require(instruction.field.group == 'FIELD' and value.kind in ('NODE', 'LIST'),
                              'SOURCE_REFERENCE', str(step.id), 'evaluated child must be an original child field')
+                    if instruction.purpose is P.ProductionPurpose.STATEMENT:
+                        _require(value.kind == 'NODE'
+                            and {(c.kind, c.target) for c in step.completions}
+                                == set(self.statements.completions(value.reference)),
+                            'STATEMENT_INTERFACE', str(step.id), 'statement child must retain its source completion obligations')
+                elif type(instruction) is P.LoopControl and instruction.source_loop is not None:
+                    target = instruction.source_loop.occurrence
+                    _require(0 <= target < len(self.context.syntax.nodes)
+                        and self.context.syntax.nodes[target].constructor in ('For', 'While', 'AsyncFor')
+                        and region_index[step.region].source == P.ProductionOccurrence(target),
+                        'SOURCE_LOOP', str(step.id), 'shared loop template must name its original loop occurrence')
                 elif type(instruction) in (P.ApplyLanguageAction, P.ApplyPythonProtocol):
                     for site in instruction.selectors:
                         self.roles.locate(site)

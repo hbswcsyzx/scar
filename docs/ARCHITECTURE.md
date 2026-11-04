@@ -94,7 +94,9 @@ recipe v4把代码声明、环境/cell引用及后续激活分开：DeferRegion�
 Lambda及同步/异步GeneratorExp规则已接通原F3接口；生成器仅在创建时求首个iterator，body/过滤/内层循环在DEFERRED区域，共用推导式循环模板且不造容器。
 recipe v5增加GET_ASYNC_ITERATOR、GET_ASYNC_NEXT及StopAsyncIteration匹配的有限签名；GET_ASYNC_NEXT返回已取得的await迭代器，不再重复acquisition。异步推进在advance区域复用共享SEND循环，只有advance的StopAsyncIteration代表耗尽；target/filter/body的异常继续传播。
 异步属性沿原C1求值owner传播：eager comprehension会使外层求值异步，创建惰性generator不会；首个iter仍按原创建阶段归属。异步generator的元素使用ASYNC_YIELD，与内部AWAIT分开。
-语句规则另按同一typed recipe生成：当前7类linear语句保RHS单次求值、原序写入、正常路径临时引用释放及RETURN出口；global/nonlocal只保编译声明关系。子语句完成接口、分支/循环、定义与异常清理仍待闭合，不能据此发布完整CFG/SSA。
+语句规则另按同一typed recipe生成：7类linear语句保RHS单次求值、原序写入、正常路径临时引用释放及RETURN出口；global/nonlocal只保编译声明关系。
+recipe v6增加原F2 `SourceLoopTarget`，局部子图可以导出外层循环完成端口，不造本地假父节点。suite按原序接STATEMENT child，正常完成才接下一语句；没有正常前驱的尾部仍保原slot disposition。If取分支完成接口并集；For/While/AsyncFor各保一份循环模板，iterator引用是invariant，world由backedge携带，item只进当前body。耗尽才进else，break绕过else；嵌套循环else中的跳转接仍活跃的外层循环。
+`source_statement_interfaces.py`在原F2上机械归约各语句的may-completion上界，定义body不内联；try/finally的完成替换及with的异常抑制影响接口。上界不是可达性证明，也不代表Try/With等child实现已经完成。13类局部语句规则已接接口；定义、import、其余语句和异常/引用清理仍须闭合后才发布CFG/SSA。
 前两步的局部规则已通过：Yield由原C1 owner区分普通／异步形式，bare yield导出None，嵌套定义header仍归外层执行owner。静态compiler只作独立规则对照，不以bytecode位置接源码身份。
 后续语句／定义／cleanup规则闭合后才进入F4-C；每步先验类型/接口，再接源码规则，再在原材料独立重放，不以节点存在或局部计数授予全层完成。
 

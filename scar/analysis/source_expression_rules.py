@@ -395,22 +395,25 @@ class _Builder:
             self.call(root, state)
         return self.plan(root, root_source)
 
+    def completions(self, region):
+        exits = {}
+        for ordinal, step in enumerate(region.steps):
+            for completion in step.completions:
+                if completion.kind is not C.FALLTHROUGH or ordinal == len(region.steps) - 1:
+                    key = completion.kind, completion.target
+                    _require(key not in exits or exits[key].types == completion.types,
+                             'RULE_INTERFACE', str(region.id), 'region completion interfaces disagree')
+                    exits[key] = completion
+        return tuple(exits.values())
+
     def plan(self, root, root_source):
         records = []
         for region in self.regions:
-            exits = {}
-            for ordinal, step in enumerate(region.steps):
-                for completion in step.completions:
-                    if completion.kind is not C.FALLTHROUGH or ordinal == len(region.steps) - 1:
-                        key = completion.kind, completion.target
-                        _require(key not in exits or exits[key].types == completion.types,
-                                 'RULE_INTERFACE', str(region.id), 'region completion interfaces disagree')
-                        exits[key] = completion
             source = region.source
             context = (self.rules.source.context.entry_context(source.occurrence)
                 if type(source) is P.ProductionOccurrence else self.rules.source.context.context_at_slot(source).state)
             records.append(P.ProductionRegion(region.id, region.parent, region.kind, source, context,
-                region.parameters, tuple(exits.values()), tuple(step.id for step in region.steps)))
+                region.parameters, self.completions(region), tuple(step.id for step in region.steps)))
         return P.SourceProductionPlan(self.rules.source.input, root_source, self.purpose, root.id,
             tuple(records), tuple(self.steps), tuple(P.ProductionSlotDisposition(site, disposition)
                 for site, disposition in self.slots.items()))

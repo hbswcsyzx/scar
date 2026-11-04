@@ -46,6 +46,7 @@ def _implementation():
         'analysis/source_comprehension_rules.py',
         'analysis/source_suspension_rules.py',
         'analysis/source_delegation_rules.py', 'ir/program/delegation_signatures.py',
+        'analysis/source_statement_interfaces.py',
         'analysis/source_callable_rules.py', 'analysis/source_deferred_interfaces.py',
         'analysis/source_statement_rules.py',
         'analysis/source_productions.py', 'analysis/program_types.py',
