@@ -55,9 +55,9 @@ def test_closed_grammar_exact_records_strict_codec_and_budgets():
     assert summary['control_semantics_checked'] is False
     assert A.read_production_plan(A.production_plan_document(value)) == value
     catalog = A.production_type_catalog()
-    assert catalog['counts'] == dict(records=29, fields=87, identifiers=4, enums=10, enum_members=81, unions=7)
+    assert catalog['counts'] == dict(records=34, fields=98, identifiers=4, enums=11, enum_members=169, unions=8)
     assert set(catalog['instruction_variants']) == {
-        'EvaluateChild', 'ApplyLanguageAction', 'AccessBinding', 'ConstructValue', 'ApplyRegion',
+        'EvaluateChild', 'ApplyLanguageAction', 'ApplyPythonProtocol', 'AccessBinding', 'ConstructValue', 'ApplyRegion',
         'BranchControl', 'LoopControl', 'DeferRegion', 'CleanupControl', 'HandleCompletions',
         'TransferCompletion', 'SuspendExecution'}
     assert A.read_production_type_catalog(deepcopy(catalog)) == catalog
@@ -115,6 +115,29 @@ def test_early_exception_is_preserved_when_normal_path_has_a_later_return():
     assert A.validate_production_plan(value)['regions'] == 1
     with pytest.raises(A.ProductionError, match='REGION_EXIT'):
         A.validate_production_plan(replace(value, regions=(replace(root, completions=normal(INT)),)))
+
+
+def test_existing_protocol_signatures_are_mandatory_for_recipe_protocol_steps():
+    from scar.ir.program.ids import LocationID
+    from scar.ir.program.signature_patterns import CountBinding, ChoiceBinding, TypeBinding
+    from scar.ir.program.structured import PythonProtocolKind as K
+    world = ValueType(ValueKind.STATE, location=LocationID('world'))
+    exits = (*normal(REF, world), P.ProductionCompletion(C.RAISE, (REF, world)))
+    root = region('root', parameters=(REF, REF, world), outputs=exits, steps=('pack',))
+    bindings = (TypeBinding('world', world), ChoiceBinding('exception_abi', 'EXCEPTION_WORLD'),
+                CountBinding('item_count', 2))
+    pack = step('pack', root, P.ApplyPythonProtocol(K.BUILD_CALL_POSITIONALS, bindings),
+        tuple(parameter(root, i) for i in range(3)), exits)
+    value = plan((root,), (pack,))
+    assert A.validate_production_plan(value)['protocol_signature_checks'] == 1
+    assert A.read_production_plan(A.production_plan_document(value)) == value
+    for instruction in (
+        replace(pack.instruction, bindings=(*bindings[:2], CountBinding('item_count', 1))),
+        replace(pack.instruction, protocol=K.OPAQUE_EXPRESSION),
+        replace(pack.instruction, bindings=(bindings[0], ChoiceBinding('exception_abi', 'EXCEPTION_TRACEBACK_WORLD'), bindings[2])),
+    ):
+        with pytest.raises(A.ProductionError):
+            A.validate_production_plan(replace(value, steps=(replace(pack, instruction=instruction),)))
 
 
 def test_branch_has_boolean_decision_explicit_capture_ports_and_completion_union():

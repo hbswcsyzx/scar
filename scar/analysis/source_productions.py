@@ -13,7 +13,9 @@ import sys
 from scar.analysis.program_types import _build_types
 from scar.ir.program import source_productions as P
 from scar.ir.program.control import LanguageCompletionKind as C
-from scar.ir.program.model import ValueKind, ValueType
+from scar.ir.program.model import ValueKind, ValueType, ExitKind
+from scar.ir.program.protocol_signatures import protocol_signature_catalog, _resolve_protocol_rule
+from scar.ir.program.signature_patterns import SignatureError, SignatureForm
 from scar.ir.record_codec import decode, encode
 
 
@@ -49,7 +51,7 @@ def production_type_catalog():
     modules = {cls.__module__: sha256(Path(sys.modules[cls.__module__].__file__).read_bytes()).hexdigest()
         for cls in registry.values()}
     modules[__name__] = sha256(Path(__file__).read_bytes()).hexdigest()
-    for name in ('scar.analysis.program_types', 'scar.ir.record_codec'):
+    for name in ('scar.analysis.program_types', 'scar.ir.record_codec', 'scar.ir.program.protocol_signatures'):
         modules[name] = sha256(Path(sys.modules[name].__file__).read_bytes()).hexdigest()
     payload = dict(schema='scar.source-production-type-catalog', schema_version=1,
         root=root, types=rows, counts=counts, modules=dict(sorted(modules.items())),
@@ -214,6 +216,8 @@ def validate_production_plan(plan, *, max_visits=1_000_000):
     _require(all(s.region in regions for s in plan.steps), 'STEP_OWNER', 'plan.steps', 'unknown region owner')
     region_outputs = {r.id: completions(r.completions, r.id, str(r.id)) for r in plan.regions}
     step_outputs = {s.id: completions(s.completions, s.region, str(s.id)) for s in plan.steps}
+    protocols = ({r.kind: r for r in protocol_signature_catalog()}
+        if any(type(s.instruction) is P.ApplyPythonProtocol for s in plan.steps) else {})
     claimed, referenced_regions = set(), {plan.root}
     for region in plan.regions:
         _require(bool(region.steps), 'REGION_EXIT', str(region.id), 'region needs an explicit result/transfer step')
@@ -254,6 +258,17 @@ def validate_production_plan(plan, *, max_visits=1_000_000):
             instruction = step.instruction
             if type(instruction) is P.AccessBinding:
                 _require(instruction.port >= 0, 'SOURCE_PORT', str(identity), 'source port must be nonnegative')
+            elif type(instruction) is P.ApplyPythonProtocol:
+                try:
+                    signature = _resolve_protocol_rule(protocols[instruction.protocol], instruction.bindings,
+                        max_nodes=max_visits, max_ports=max_visits)
+                except SignatureError as error:
+                    raise ProductionError('PROTOCOL_SIGNATURE', str(identity), str(error)) from error
+                expected = ({(C.FALLTHROUGH, None): signature.results} if signature.form is SignatureForm.ORDINARY else {
+                    (C.FALLTHROUGH if c.kind is ExitKind.NORMAL else C.RAISE, None): c.types
+                    for c in signature.completions})
+                _require(signature.arguments == args and expected == outputs, 'PORT_TYPES', str(identity),
+                         'protocol ports/completions differ from the declared signature and explicit parameters')
             elif type(instruction) is P.ApplyRegion:
                 _require(not args and invoke(instruction.invocation) == outputs, 'PORT_TYPES', str(identity),
                          'region application completions differ or duplicate explicit call arguments')
@@ -343,6 +358,7 @@ def validate_production_plan(plan, *, max_visits=1_000_000):
             _require(row.source.occurrence >= 0, 'SOURCE', str(row.id), 'negative source occurrence')
     return dict(complete=True, visits=visits, regions=len(regions), steps=len(steps),
         recipe_shape_checked=True, local_references_checked=True, source_rules_replayed=False,
+        protocol_signature_checks=sum(type(s.instruction) is P.ApplyPythonProtocol for s in plan.steps),
         operation_signatures_checked=False, control_semantics_checked=False, rewrite_authorized=False)
 
 
@@ -391,7 +407,7 @@ class ProductionSourceIndex:
                     _, value = self.roles.locate(instruction.field)
                     _require(instruction.field.group == 'FIELD' and value.kind in ('NODE', 'LIST'),
                              'SOURCE_REFERENCE', str(step.id), 'evaluated child must be an original child field')
-                elif type(instruction) is P.ApplyLanguageAction:
+                elif type(instruction) in (P.ApplyLanguageAction, P.ApplyPythonProtocol):
                     for site in instruction.selectors:
                         self.roles.locate(site)
                 elif type(instruction) is P.ConstructValue:

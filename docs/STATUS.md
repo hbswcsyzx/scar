@@ -92,17 +92,18 @@ call/map/string/assert参数也沿闭合原端口组解析；空组保DECLARED_E
 真实eval/cem原body的4,830条操作来源、65,086条来源引用已接回原F2及已有F3查询；CEM的4个旧OPAQUE可读出Gt/Eq原selector。
 这仍不是执行语义证明。证据：`artifacts/current/queries/source-anchors/{materials,verification}/result.json`及`{eval,cem}-origin-query.json`。
 
-源码产生规则的输入语法已落地：29记录/87字段、4 ID、10枚举/81成员、7 union、12步骤变体；不修改canonical类型根和旧ID。
+源码产生规则的输入语法已落地：34记录/98字段、4 ID、11枚举/169成员、8 union、13步骤变体；不修改canonical类型根和旧ID。
 检查exact类型、区域归属/值顺序、共享调用、循环不变量/携带接口、异常完成到handler的payload/captures连接及strict codec；不授完整控制/效果语义。
 原结构验收25项通过；本轮修正区域出口汇总：前面步骤的异常必须保留，不能只取最后一步的normal结果。
 真实eval/CEM核419/537项原role引用描述符，查询1.03/1.31秒（父层fresh及索引另9.76/12.12秒）；没有生成新执行图或重放逐构造规则。
 记录在`artifacts/current/queries/source-productions/`；旧manifest不变，LeWM未执行或修改。
 
-F4-B现有11类表达式局部规则：名称及属性/索引读写、literal、算术/一元、slice、walrus、条件/短路/比较；直接消费原F2/F3，无目标重parse/执行。
-规则目录对113构造分流：11类局部规则、32类selector metadata、70类规则前沿；这不是全构造/全部上下文已闭合。
-真实eval/CEM两份源码生成999个局部recipe，另191个表达式规则前沿（其中Call 140个），保437项child接口义务。
-两源流式压缩片共271,034 bytes（解压5,940,994）；2进程采集13.46秒、fresh逐记录核验13.54秒，见`queries/source-expression-rules/{materials,verification}/result.json`。
-本轮相关32项检查通过（26.16秒），包含同类型操作数/状态边调换及重签收据后仍拒错误计划；全部由主代理完成，无新增subagents。
+F4-B现有12类表达式局部规则：名称及属性/索引读写、literal、算术/一元、slice、walrus、条件/短路/比较与Call；直接消费原F2/F3，无目标重parse/执行。
+规则目录对113构造分流：12类局部规则、2类父上下文描述符、32类selector metadata、67类规则前沿；这不是全构造/全部上下文已闭合。
+真实eval/CEM两份源码的1,190个表达式中，生成1,139个局部recipe；另记65个父属描述符（含63个keyword辅助构造），剩49个规则前沿及757项child接口义务。
+两源流式压缩片共321,669 bytes（解压7,264,582）；2进程采集13.66秒、fresh核验13.72秒，见`queries/source-expression-rules/{materials,verification}/result.json`。
+本轮相关35项检查通过（42.70秒），涵盖source重放、签名/收据反例及静态compiler调用顺序对照；全部由主代理完成，无新增subagents。
+Call的140个原规则前沿已消除；单星、多星、kwargs连续组和大组路径均有规则，复用已有协议强制核签名。未把位置漂移的bytecode当作F2节点身份。
 recipe不是canonical CFG/SSA；state来源、child实现与effects未证，不能发布全图或开启变换。
 
 1. **F4-B后续规则**：接完整操作家族、typed参数来源、状态/access契约和源码产生规则，再接版本化根与强制reader。
@@ -111,7 +112,7 @@ recipe不是canonical CFG/SSA；state来源、child实现与effects未证，不�
    三种域不能互代：32 Opcode、88协议和113语法构造器×上下文分别核验；B1不授新图发布或优化。
    下一步将原声明端口接到F2/F3产生规则，并补function/class/comprehension等参数来源；保活完整性另验，不能抄端口来证明。
    形式顺序：输入/输出结构已固定；当前持续闭合构造×用途×上下文的字段消耗及完成端口，再重放核验，全部闭合后才生成CFG/SSA。
-   下一批规则从Call开始：参数求值、星号解包、keyword分组合并及异常时机；随后补其余表达式、语句/循环、定义/捕获与cleanup/resume。
+   下一批补容器及字符串表达式的字段/展开/失败顺序，随后补推导式、语句/循环、定义/捕获与cleanup/resume；每批均以原材料重放核验。
    四片其余881操作已分类为控制434、binding246、source invoke201；这是识别结果，不等于其接口/产生规则已通过。
    签名witness仍须进入版本化typed根及强制reader；不能把本层独立查询当作完备。根扩展后重验F4-A目录。
    实读FRAME_BIND为READ_WRITE、UNKNOWN footprint、非full overwrite；不能照旧审计摘要强制WHOLE或升级未知事实。

@@ -7,13 +7,18 @@ No effect is certified pure and no physical allocation/transfer is inferred.
 from dataclasses import dataclass, field
 from hashlib import sha256
 from pathlib import Path
+import re
+import sysconfig
 
 from scar.analysis.source_productions import ProductionError, ProductionSourceIndex, _digest, production_type_catalog
 from scar.ir.program import source_productions as P
 from scar.ir.program.control import LanguageCompletionKind as C
 from scar.ir.program.model import ValueKind, ValueType
-from scar.ir.program.protocol_signatures import ExceptionABI
-from scar.ir.program.signature_patterns import ResolvedSignature, SignatureForm, validate_resolved_signature
+from scar.ir.program.protocol_signatures import ExceptionABI, protocol_signature_catalog, _resolve_protocol_rule
+from scar.ir.program.signature_patterns import (ResolvedSignature, SignatureForm, validate_resolved_signature,
+    TypeBinding, ChoiceBinding, CountBinding)
+from scar.ir.program.structured import PythonProtocolKind as K
+from scar.ir.program.model import ExitKind
 from scar.ir.record_codec import encode
 
 
@@ -26,7 +31,9 @@ _FIELDS = {
     'Slice': ('lower', 'upper', 'step'), 'NamedExpr': ('target', 'value'),
     'IfExp': ('test', 'body', 'orelse'), 'BoolOp': ('op', 'values'),
     'Compare': ('left', 'ops', 'comparators'),
+    'Call': ('func', 'args', 'keywords'),
 }
+_AUX_FIELDS = {'keyword': ('arg', 'value'), 'Starred': ('value', 'ctx')}
 _SELECTORS = {
     'BinOp': frozenset(('Add', 'Sub', 'Mult', 'MatMult', 'Div', 'Mod', 'Pow', 'LShift',
                        'RShift', 'BitOr', 'BitXor', 'BitAnd', 'FloorDiv')),
@@ -72,10 +79,16 @@ class SourceExpressionRules:
         self.source, self.world, self.exception_abi = source, world, exception_abi
         self.raised = ((_REF, world) if exception_abi is ExceptionABI.EXCEPTION_WORLD else (_REF, _REF, world))
         self._identity = _digest(encode(source.input))[:24]
+        self.protocols = {r.kind: r for r in protocol_signature_catalog()}
+        header = Path(sysconfig.get_path('include')) / 'internal' / 'pycore_compile.h'
+        raw = header.read_bytes()
+        limits = re.findall(rb'^#define\s+_PY_STACK_USE_GUIDELINE\s+([0-9]+)\s*$', raw, re.MULTILINE)
+        _require(len(limits) == 1 and int(limits[0]) > 0, 'COMPILER_PROFILE', str(header), 'no unique stack guideline')
+        self.call_profile = dict(header=str(header), header_sha256=sha256(raw).hexdigest(), stack_guideline=int(limits[0]))
         self._ports = {}
         for ordinal, port in enumerate(source.frontend.roles.ports):
             self._ports.setdefault(port.site, []).append(ordinal)
-        for constructor, expected in _FIELDS.items():
+        for constructor, expected in {**_FIELDS, **_AUX_FIELDS}.items():
             actual = tuple(source.roles.fields[constructor])
             _require(actual == expected, 'SOURCE_SCHEMA', constructor, 'original field grammar differs from the rule')
 
@@ -86,19 +99,37 @@ class SourceExpressionRules:
             if row.abstract:
                 continue
             supported = row.name in _FIELDS
-            status = ('LOCAL_RULE' if supported else 'SELECTOR_METADATA' if any(
+            status = ('LOCAL_RULE' if supported else 'PARENT_CONTEXT_RULE' if row.name in _AUX_FIELDS else 'SELECTOR_METADATA' if any(
                 base in selectors for base in row.bases) else 'RULE_FRONTIER')
             purposes = ((P.ProductionPurpose.VALUE, P.ProductionPurpose.STORE, P.ProductionPurpose.DELETE)
                         if row.name in _TARGETS else (P.ProductionPurpose.VALUE,)) if supported else ()
             rows.append(dict(constructor=row.name, fields=list(row.fields), status=status,
-                purposes=[p.value for p in purposes], selectors=sorted(_SELECTORS.get(row.name, ()))))
+                purposes=[p.value for p in purposes], selectors=sorted(_SELECTORS.get(row.name, ())),
+                parent_contexts=([dict(constructor='Call', field='args' if row.name == 'Starred' else 'keywords')]
+                                 if row.name in _AUX_FIELDS else [])))
         return dict(schema='scar.source-expression-rule-catalog', schema_version=1,
             source_schema_sha256=self.source.roles.catalog.f2_schema_sha256,
             recipe_type_catalog_sha256=production_type_catalog()['content_sha256'],
             rules=rows, implementation_sha256=sha256(Path(__file__).read_bytes()).hexdigest(),
             state_parameter=encode(self.world), exception_abi=self.exception_abi.value,
+            call_compiler_profile=self.call_profile,
             child_interfaces='VALUE:(WORLD)->(REFERENCE,WORLD);STORE:(REFERENCE,WORLD)->(WORLD);DELETE:(WORLD)->(WORLD)',
             effect_policy='CONSERVATIVE_STATE;NO_PURITY_OR_PHYSICAL_ACTION_PROOF')
+
+    def descriptor_owner(self, occurrence):
+        """An original parent edge, not a standalone executable expression."""
+        syntax = self.source.context.syntax
+        _require(type(occurrence) is int and 0 <= occurrence < len(syntax.nodes), 'SOURCE_REFERENCE',
+                 'occurrence', 'expected an original descriptor occurrence')
+        node = syntax.nodes[occurrence]
+        if node.constructor not in _AUX_FIELDS:
+            return None
+        site = self.source.roles.parents.get(occurrence)
+        if site is None or syntax.nodes[site.occurrence].constructor != 'Call':
+            return None
+        expected = 'args' if node.constructor == 'Starred' else 'keywords'
+        rule, _ = self.source.roles.locate(site)
+        return site if site.group == 'FIELD' and rule.name == expected else None
 
     def build(self, occurrence, purpose=P.ProductionPurpose.VALUE, *, max_steps=100_000, max_regions=100_000):
         syntax = self.source.context.syntax
@@ -153,6 +184,12 @@ class _Builder:
     def mark(self, name, disposition):
         self.slots[self.site(name)] = disposition
 
+    def auxiliary(self, occurrence, name, disposition):
+        kind = self.rules.source.context.syntax.nodes[occurrence].constructor
+        site = P.SlotRef(occurrence, 'FIELD', self.role.fields[kind][name])
+        self.slots[site] = disposition
+        return site
+
     def selector(self, constructor, site):
         value = self.value(site)
         _require(value.kind == 'NODE', 'RULE_SHAPE', str(site), 'selector must be an original marker occurrence')
@@ -193,6 +230,12 @@ class _Builder:
     def action(self, region, kind, selectors, arguments, types=None):
         return self.emit(region, P.ApplyLanguageAction(kind, selectors), arguments,
                          (_REF, self.world) if types is None else types)
+
+    def protocol(self, region, kind, arguments, state, extra=(), selectors=()):
+        bindings = (TypeBinding('world', self.world), ChoiceBinding('exception_abi', self.rules.exception_abi.value), *extra)
+        signature = _resolve_protocol_rule(self.rules.protocols[kind], bindings)
+        outputs = next(c.types for c in signature.completions if c.kind is ExitKind.NORMAL)
+        return self.emit(region, P.ApplyPythonProtocol(kind, bindings, selectors), (*arguments, state), outputs)
 
     def finish(self, region, values, types):
         self.emit(region, P.TransferCompletion(C.FALLTHROUGH), values, types, may_raise=False)
@@ -262,6 +305,8 @@ class _Builder:
             self.boolean(root, state)
         elif kind == 'Compare':
             self.comparison(root, state)
+        elif kind == 'Call':
+            self.call(root, state)
         records = []
         for region in self.regions:
             exits = {}
@@ -379,3 +424,119 @@ class _Builder:
             self.branch(region, condition, continuation, (right, state), done, (result, state))
             region = continuation
             left, state = self.parameter(region, 0), self.parameter(region, 1)
+
+    def call(self, region, state):
+        args, keywords = self.value(self.site('args')), self.value(self.site('keywords'))
+        _require(args.kind == keywords.kind == 'LIST', 'RULE_SHAPE', str(self.occurrence), 'call inputs must be source lists')
+        self.mark('func', P.ProductionDispositionKind.EVALUATED_CHILD)
+        self.mark('args', P.ProductionDispositionKind.EVALUATED_CHILD)
+        self.mark('keywords', P.ProductionDispositionKind.EVALUATED_CHILD)
+        keyword_fields, seen = [], set()
+        for item in keywords.items:
+            _require(item.kind == 'NODE' and self.rules.source.context.syntax.nodes[item.reference].constructor == 'keyword',
+                     'RULE_SHAPE', str(self.occurrence), 'call keyword must retain its original descriptor')
+            occurrence = item.reference
+            arg = P.SlotRef(occurrence, 'FIELD', self.role.fields['keyword']['arg'])
+            raw = self.value(arg)
+            _require(raw.kind == 'SCALAR', 'RULE_SHAPE', str(arg), 'keyword name must be a string or None')
+            name = raw.scalar.to_python()
+            _require(name is None or type(name) is str, 'RULE_SHAPE', str(arg), 'keyword name must be a string or None')
+            if name is not None:
+                _require(name not in seen, 'SOURCE_CODEGEN_CONFLICT', str(arg), 'repeated explicit keyword argument')
+                seen.add(name)
+            self.auxiliary(occurrence, 'arg', P.ProductionDispositionKind.METADATA if name is None else P.ProductionDispositionKind.ROLE_PORT)
+            value = self.auxiliary(occurrence, 'value', P.ProductionDispositionKind.EVALUATED_CHILD)
+            keyword_fields.append((arg, value, name))
+        positionals = []
+        for ordinal, item in enumerate(args.items):
+            _require(item.kind == 'NODE', 'RULE_SHAPE', str(self.occurrence), 'call argument must be a child expression')
+            starred = self.rules.source.context.syntax.nodes[item.reference].constructor == 'Starred'
+            site = self.site('args', ordinal)
+            if starred:
+                context = self.auxiliary(item.reference, 'ctx', P.ProductionDispositionKind.MARKER)
+                marker = self.value(context)
+                _require(marker.kind == 'NODE' and self.rules.source.context.syntax.nodes[marker.reference].constructor == 'Load',
+                         'RULE_SHAPE', str(context), 'starred call argument must be in Load context')
+                site = self.auxiliary(item.reference, 'value', P.ProductionDispositionKind.EVALUATED_CHILD)
+            positionals.append((site, starred))
+        callee, state = self.evaluate(region, self.site('func'), state)
+        expanded = any(star for _, star in positionals) or any(name is None for _, _, name in keyword_fields)
+        if not expanded:
+            values = []
+            for site, _ in positionals:
+                value, state = self.evaluate(region, site, state)
+                values.append(value)
+            for _, site, _ in keyword_fields:
+                value, state = self.evaluate(region, site, state)
+                values.append(value)
+            result = self.action(region, P.LanguageActionKind.CALL, (self.site('args'), self.site('keywords')),
+                                 (callee, *values, state))
+        else:
+            positional, state = self.call_positionals(region, positionals, state)
+            mapping, index = None, 0
+            while index < len(keyword_fields):
+                arg, value, name = keyword_fields[index]
+                if name is None:
+                    if mapping is None:
+                        mapping, state = self.protocol(region, K.BUILD_MAP, (), state,
+                            (CountBinding('pair_count', 0),), (self.site('keywords'),))
+                    update, state = self.evaluate(region, value, state)
+                    state, = self.protocol(region, K.DICT_MERGE, (callee, mapping, update), state, selectors=(arg, value))
+                    index += 1
+                else:
+                    end = index + 1
+                    while end < len(keyword_fields) and keyword_fields[end][2] is not None:
+                        end += 1
+                    update, state = self.call_keyword_run(region, keyword_fields[index:end], state)
+                    if mapping is None:
+                        mapping = update
+                    else:
+                        state, = self.protocol(region, K.DICT_MERGE, (callee, mapping, update), state,
+                            selectors=tuple(arg for arg, _, _ in keyword_fields[index:end]))
+                    index = end
+            result = self.protocol(region, K.CALL_FUNCTION_EX,
+                (callee, positional, *((mapping,) if mapping is not None else ())), state,
+                (ChoiceBinding('keyword_pack', 'PRESENT' if mapping is not None else 'ABSENT'),),
+                (self.site('args'), self.site('keywords')))
+        self.finish(region, result, (_REF, self.world))
+
+    def call_positionals(self, region, items, state):
+        # One *value remains unconverted until CALL_FUNCTION_EX, after kwargs.
+        if len(items) == 1 and items[0][1]:
+            return self.evaluate(region, items[0][0], state)
+        sequence, held = None, []
+        if len(items) > self.rules.call_profile['stack_guideline']:
+            sequence, state = self.protocol(region, K.BUILD_CALL_POSITIONAL_LIST, (), state,
+                (CountBinding('item_count', 0),), (self.site('args'),))
+        for site, starred in items:
+            if starred and sequence is None:
+                sequence, state = self.protocol(region, K.BUILD_CALL_POSITIONAL_LIST, tuple(held), state,
+                    (CountBinding('item_count', len(held)),), (self.site('args'),))
+            value, state = self.evaluate(region, site, state)
+            if sequence is None:
+                held.append(value)
+            else:
+                state, = self.protocol(region, K.EXTEND_CALL_POSITIONALS if starred else K.APPEND_CALL_POSITIONAL,
+                    (sequence, value), state, selectors=(site,))
+        if sequence is None:
+            return self.protocol(region, K.BUILD_CALL_POSITIONALS, tuple(held), state,
+                (CountBinding('item_count', len(held)),), (self.site('args'),))
+        return self.protocol(region, K.CALL_POSITIONALS_TO_TUPLE, (sequence,), state, selectors=(self.site('args'),))
+
+    def call_keyword_run(self, region, items, state):
+        mapping, pairs = None, []
+        if len(items) * 2 > self.rules.call_profile['stack_guideline']:
+            mapping, state = self.protocol(region, K.BUILD_MAP, (), state,
+                (CountBinding('pair_count', 0),), tuple(arg for arg, _, _ in items))
+        for arg, value, _ in items:
+            key, state = self.emit(region, P.ConstructValue(P.ConstructionKind.LITERAL, (arg,)),
+                                   (state,), (_REF, self.world), source=arg)
+            ref, state = self.evaluate(region, value, state)
+            if mapping is None:
+                pairs.extend((key, ref))
+            else:
+                state, = self.protocol(region, K.MAP_ADD, (mapping, key, ref), state, selectors=(arg, value))
+        if mapping is None:
+            return self.protocol(region, K.BUILD_MAP, tuple(pairs), state,
+                (CountBinding('pair_count', len(items)),), tuple(arg for arg, _, _ in items))
+        return mapping, state

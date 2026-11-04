@@ -73,7 +73,8 @@ def _unit(task):
     parent_seconds = time.monotonic() - started
     relative = 'units/' + unit['key'] + '/expressions.jsonl.gz'
     digest, decoded_bytes = sha256(), 0
-    built, frontier, child_obligations = Counter(), Counter(), Counter()
+    built, frontier, child_obligations, descriptors = Counter(), Counter(), Counter(), Counter()
+    expressions = 0
     stream_path = Path(out) / relative
     with ExitStack() as stack:
         if prior is None:
@@ -90,26 +91,34 @@ def _unit(task):
                 raise ValueError('source expression compressed receipt changed')
             stream = stack.enter_context(gzip.GzipFile(fileobj=io.BytesIO(payload), mode='rb'))
         for occurrence, node in enumerate(syntax.nodes):
-            if 'expr' not in categories[node.constructor]:
+            is_expression = 'expr' in categories[node.constructor]
+            owner = rules.descriptor_owner(occurrence)
+            if not is_expression and owner is None:
                 continue
+            expressions += is_expression
             purpose = P.ProductionPurpose.VALUE
             if node.constructor in ('Name', 'Attribute', 'Subscript'):
                 purpose = {'Load': P.ProductionPurpose.VALUE, 'Store': P.ProductionPurpose.STORE,
                            'Del': P.ProductionPurpose.DELETE}[rules.source.roles.context(occurrence)]
             row = dict(occurrence=occurrence, constructor=node.constructor, purpose=purpose.value)
-            try:
-                plan = rules.build(occurrence, purpose, max_steps=limits['steps'], max_regions=limits['regions'])
-                row.update(status='LOCAL_SOURCE_RULE', plan=encode(plan, record_tags=P.PRODUCTION_RECORD_TAGS))
-                built[node.constructor] += 1
-                for step in plan.steps:
-                    if type(step.instruction) is P.EvaluateChild:
-                        selected = rules.source.roles.locate(step.instruction.field)[1]
-                        child_obligations[syntax.nodes[selected.reference].constructor] += 1
-            except SourceRuleError as error:
-                if error.code not in _FRONTIERS:
-                    raise
-                row.update(status='RULE_FRONTIER', error=dict(code=error.code, path=error.path, detail=error.detail))
-                frontier[node.constructor + ':' + error.code] += 1
+            if owner is not None:
+                row.update(status='PARENT_SOURCE_DESCRIPTOR', purpose=P.ProductionPurpose.DESCRIPTOR.value,
+                    owner=encode(owner), fields=[encode(P.SlotRef(occurrence, 'FIELD', i)) for i in range(len(node.fields))])
+                descriptors[node.constructor] += 1
+            else:
+                try:
+                    plan = rules.build(occurrence, purpose, max_steps=limits['steps'], max_regions=limits['regions'])
+                    row.update(status='LOCAL_SOURCE_RULE', plan=encode(plan, record_tags=P.PRODUCTION_RECORD_TAGS))
+                    built[node.constructor] += 1
+                    for step in plan.steps:
+                        if type(step.instruction) is P.EvaluateChild:
+                            selected = rules.source.roles.locate(step.instruction.field)[1]
+                            child_obligations[syntax.nodes[selected.reference].constructor] += 1
+                except SourceRuleError as error:
+                    if error.code not in _FRONTIERS:
+                        raise
+                    row.update(status='RULE_FRONTIER', error=dict(code=error.code, path=error.path, detail=error.detail))
+                    frontier[node.constructor + ':' + error.code] += 1
             raw = _json(row)
             digest.update(raw)
             decoded_bytes += len(raw)
@@ -130,6 +139,7 @@ def _unit(task):
         raise ValueError('decoded source expression receipt changed')
     result = dict(unit=unit['key'], path=unit['path'], input=encode(rules.source.input), artifact=descriptor,
         built=dict(sorted(built.items())), frontiers=dict(sorted(frontier.items())),
+        parent_descriptors=dict(sorted(descriptors.items())), expressions=expressions,
         child_interface_obligations=dict(sorted(child_obligations.items())),
         parent_seconds=parent_seconds, seconds=time.monotonic()-started,
         catalog_sha256=sha256(_json(catalog)).hexdigest())
@@ -186,6 +196,8 @@ def collect_source_expressions(model, out, *, sources=(), materials=None, jobs=1
         raise ValueError('source rule catalog changed')
     counts = dict(units=len(rows), local_recipes=sum(sum(r['built'].values()) for r in rows),
         rule_frontiers=sum(sum(r['frontiers'].values()) for r in rows),
+        expression_occurrences=sum(r['expressions'] for r in rows),
+        parent_descriptors=sum(sum(r['parent_descriptors'].values()) for r in rows),
         child_interface_obligations=sum(sum(r['child_interface_obligations'].values()) for r in rows))
     if store is not None and previous['counts'] != counts:
         raise ValueError('stored source rule summary differs from fresh counters')

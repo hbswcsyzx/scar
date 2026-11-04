@@ -40,6 +40,14 @@ def documents():
         *('unary = ' + op + ' operand' for op in ('~', 'not ', '+', '-')),
         *('compare = left ' + op + ' right' for op in ('==', '!=', '<', '<=', '>', '>=', 'is', 'is not', 'in', 'not in')),
         'literal = 41',
+        'plain_call = function(first(), second(), x=third(), y=fourth())',
+        'single_star = function(*iterable(), x=one(), y=two(), **mapping(), z=three())',
+        'single_star_only = function(*iterable())', 'mapping_only = function(**mapping())',
+        'multi_star = function(prefix(), *left(), middle(), *right(), tail(), **mapping())',
+        'mixed_order = function(x=keyword(), *iterable())',
+        'large_positional = function(' + ','.join('value()' for _ in range(31)) + ', **mapping())',
+        'large_keywords = function(**mapping(), ' + ','.join('key' + str(i) + '=value()' for i in range(16)) + ')',
+        'unsupported = []',
     )) + '\n'
     f0 = source_bytes_document(text.encode(), path='/source/schedules.py', namespace_root='/source')
     f1 = source_tokens_document(f0)
@@ -91,20 +99,21 @@ def purpose(rules, occurrence):
 
 
 def test_all_local_families_and_selector_domains_without_reparsing(rules, monkeypatch):
-    monkeypatch.setattr(ast, 'parse', lambda *a, **kw: pytest.fail('source rule reparsed the program'))
     catalog = rules.catalog()
     implemented = {r['constructor'] for r in catalog['rules'] if r['status'] == 'LOCAL_RULE'}
     assert implemented == {'Constant', 'Name', 'BinOp', 'UnaryOp', 'Attribute', 'Subscript',
-                           'Slice', 'NamedExpr', 'IfExp', 'BoolOp', 'Compare'}
+                           'Slice', 'NamedExpr', 'IfExp', 'BoolOp', 'Compare', 'Call'}
     selectors, seen = {}, set()
     for occurrence, node in enumerate(rules.source.context.syntax.nodes):
         if node.constructor not in implemented:
             continue
-        value = rules.build(occurrence, purpose(rules, occurrence))
-        result = rules.verify(value)
+        with monkeypatch.context() as local:
+            local.setattr(ast, 'parse', lambda *a, **kw: pytest.fail('source rule reparsed the program'))
+            value = rules.build(occurrence, purpose(rules, occurrence))
+            result = rules.verify(value)
         assert result['local_schedule_verified'] and result['child_interfaces_assumed']
         assert not result['effects_proven'] and not result['canonical_graph_generated']
-        assert len(value.slots) == len(node.fields)
+        assert {P.SlotRef(occurrence, 'FIELD', i) for i in range(len(node.fields))} <= {s.field for s in value.slots}
         seen.add(node.constructor)
         for step in value.steps:
             if type(step.instruction) is P.ApplyLanguageAction:
@@ -195,7 +204,7 @@ def test_targets_slice_holes_frontiers_and_budgets(rules):
     assert not any(type(s.instruction) is P.EvaluateChild for s in steps)
     assert len(steps[0].instruction.payload) == 3  # None positions retained, no guessed arity
     with pytest.raises(SourceRuleError, match='RULE_FRONTIER'):
-        rules.build(occurrences(rules, 'Call')[0])
+        rules.build(occurrences(rules, 'List')[0])
     with pytest.raises(SourceRuleError, match='BUDGET_FRONTIER'):
         rules.build(occurrences(rules, 'BinOp')[0], max_steps=1)
     with pytest.raises(SourceRuleError, match='BUDGET_FRONTIER'):
@@ -245,3 +254,85 @@ def test_streamed_store_replays_source_even_if_tampered_receipts_are_resigned(do
     (store / 'result.json').write_text(json.dumps(captured))
     with pytest.raises(ValueError, match='fresh original F2/F3 replay'):
         collect_source_expressions(model, tmp_path / 'reject', materials=store)
+
+
+def test_call_schedules_preserve_argument_failures_and_parent_owned_descriptors(rules, documents):
+    from scar.ir.program.structured import PythonProtocolKind as K
+    syntax = rules.source.context.syntax
+    cases = {}
+    # Original source targets select specimens only; they are not lowering keys.
+    for occurrence in occurrences(rules, 'Assign'):
+        target = rules.source.roles.field(occurrence, 'targets').items[0].reference
+        if syntax.nodes[target].constructor != 'Name':
+            continue
+        name = rules.source.roles.field(target, 'id').scalar.to_python()
+        if name in {'plain_call', 'single_star', 'single_star_only', 'mapping_only', 'multi_star',
+                    'mixed_order', 'large_positional', 'large_keywords'}:
+            value = rules.source.roles.field(occurrence, 'value').reference
+            cases[name] = rules.build(value)
+    def protocols(value):
+        return [s.instruction.protocol for s in owned(value)[1] if type(s.instruction) is P.ApplyPythonProtocol]
+    assert protocols(cases['plain_call']) == []
+    assert protocols(cases['single_star_only']) == [K.CALL_FUNCTION_EX]
+    assert protocols(cases['single_star']) == [K.BUILD_MAP, K.DICT_MERGE, K.BUILD_MAP, K.DICT_MERGE, K.CALL_FUNCTION_EX]
+    assert protocols(cases['mapping_only']) == [K.BUILD_CALL_POSITIONALS, K.BUILD_MAP, K.DICT_MERGE, K.CALL_FUNCTION_EX]
+    assert protocols(cases['multi_star']) == [K.BUILD_CALL_POSITIONAL_LIST, K.EXTEND_CALL_POSITIONALS,
+        K.APPEND_CALL_POSITIONAL, K.EXTEND_CALL_POSITIONALS, K.APPEND_CALL_POSITIONAL,
+        K.CALL_POSITIONALS_TO_TUPLE, K.BUILD_MAP, K.DICT_MERGE, K.CALL_FUNCTION_EX]
+    assert protocols(cases['large_positional']) == [K.BUILD_CALL_POSITIONAL_LIST,
+        *([K.APPEND_CALL_POSITIONAL] * 31), K.CALL_POSITIONALS_TO_TUPLE, K.BUILD_MAP, K.DICT_MERGE, K.CALL_FUNCTION_EX]
+    assert protocols(cases['large_keywords']) == [K.BUILD_CALL_POSITIONALS, K.BUILD_MAP, K.DICT_MERGE,
+        K.BUILD_MAP, *([K.MAP_ADD] * 16), K.DICT_MERGE, K.CALL_FUNCTION_EX]
+    value = cases['mixed_order']
+    _, steps = owned(value)
+    evaluated = [s.instruction.field for s in steps if type(s.instruction) is P.EvaluateChild]
+    assert [field_name(rules, s) for s in evaluated] == ['func', 'value', 'value']
+    # The star written after the keyword is evaluated first, as a positional.
+    assert syntax.nodes[evaluated[1].occurrence].constructor == 'Starred'
+    assert syntax.nodes[evaluated[2].occurrence].constructor == 'keyword'
+    # Failed merges must precede later keyword groups and keep their current world.
+    value = cases['single_star']
+    _, steps = owned(value)
+    merges = [s for s in steps if type(s.instruction) is P.ApplyPythonProtocol and s.instruction.protocol is K.DICT_MERGE]
+    assert len(merges) == 2
+    for first, second in zip(steps, steps[1:]):
+        normal = next(c for c in first.completions if c.kind.value == 'FALLTHROUGH')
+        if second.arguments:  # every boundary consumes the latest state, not a stale input
+            assert second.arguments[-1] == P.ProductionResult(first.id, len(normal.types)-1)
+    for occurrence in (*occurrences(rules, 'Starred'), *occurrences(rules, 'keyword')):
+        owner = rules.descriptor_owner(occurrence)
+        assert owner is not None and syntax.nodes[owner.occurrence].constructor == 'Call'
+
+
+def test_call_packing_protocol_order_matches_static_cpython_compilation(rules, documents):
+    """Independent compiler oracle; no code object is executed."""
+    import dis
+    from scar.analysis.source_bytes import decoded_source_bytes
+    from scar.ir.program.structured import PythonProtocolKind as K
+    code = compile(decoded_source_bytes(documents[0]), '<static-call-oracle>', 'exec')
+    instructions = list(dis.get_instructions(code))
+    opcodes = {K.BUILD_CALL_POSITIONAL_LIST:'BUILD_LIST', K.EXTEND_CALL_POSITIONALS:'LIST_EXTEND',
+        K.APPEND_CALL_POSITIONAL:'LIST_APPEND', K.CALL_POSITIONALS_TO_TUPLE:'CALL_INTRINSIC_1',
+        K.BUILD_MAP:'BUILD_MAP', K.MAP_ADD:'MAP_ADD', K.DICT_MERGE:'DICT_MERGE', K.CALL_FUNCTION_EX:'CALL_FUNCTION_EX'}
+    checked = 0
+    for occurrence in occurrences(rules, 'Call'):
+        value = rules.build(occurrence)
+        expected = [s.instruction.protocol for s in owned(value)[1] if type(s.instruction) is P.ApplyPythonProtocol]
+        if K.CALL_FUNCTION_EX not in expected:
+            continue
+        row = rules.source.context.syntax.nodes[occurrence]
+        schema = next(s for s in rules.source.context.syntax.profile.ast_schema if s.name == 'Call')
+        attrs = dict(zip(schema.attributes, row.attributes))
+        span = tuple(attrs[n].scalar.to_python() for n in ('lineno', 'end_lineno', 'col_offset', 'end_col_offset'))
+        # MAP_ADD's missing location may inherit a child expression's position.
+        # These controlled specimens have one outer packing call per line and
+        # no nested packing calls: use the complete window, not source spans,
+        # as the test oracle. The producer itself never joins by positions.
+        end = next(i for i, op in enumerate(instructions) if op.opname == 'CALL_FUNCTION_EX' and tuple(op.positions) == span)
+        start = next(i for i, op in enumerate(instructions) if op.positions.lineno == span[0])
+        observed = [op.opname for op in instructions[start:end+1] if op.opname in set(opcodes.values())]
+        # BUILD_CALL_POSITIONALS includes the empty-tuple constant pool case,
+        # which is intentionally not a physical-allocation assertion.
+        assert observed == [opcodes[p] for p in expected if p is not K.BUILD_CALL_POSITIONALS]
+        checked += 1
+    assert checked >= 6

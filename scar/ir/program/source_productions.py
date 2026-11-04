@@ -10,7 +10,9 @@ from enum import Enum
 from scar.ir.program.control import LanguageCompletionKind
 from scar.ir.program.source_contexts import ContextState
 from scar.ir.program.source_roles import SlotRef
-from scar.ir.program.signature_patterns import GroundType
+from scar.ir.program.signature_patterns import (GroundType, Bindings, CountBinding,
+    ChoiceBinding, TypeBinding, TypesBinding)
+from scar.ir.program.structured import PythonProtocolKind
 from scar.ir.v2.ids import Identifier
 
 
@@ -171,6 +173,14 @@ class ApplyLanguageAction:
 
 
 @dataclass(frozen=True, slots=True)
+class ApplyPythonProtocol:
+    """Reuse the existing protocol/signature domain with explicit bindings."""
+    protocol: PythonProtocolKind
+    bindings: Bindings
+    selectors: tuple[SlotRef, ...] = ()
+
+
+@dataclass(frozen=True, slots=True)
 class AccessBinding:
     action: BindingActionKind
     port: int
@@ -245,7 +255,7 @@ class SuspendExecution:
     resume: ProductionRegionID
 
 
-ProductionInstruction = (EvaluateChild | ApplyLanguageAction | AccessBinding | ConstructValue
+ProductionInstruction = (EvaluateChild | ApplyLanguageAction | ApplyPythonProtocol | AccessBinding | ConstructValue
     | ApplyRegion | BranchControl | LoopControl | DeferRegion | CleanupControl
     | HandleCompletions | TransferCompletion | SuspendExecution)
 
@@ -294,6 +304,6 @@ class SourceProductionPlan:
 
 PRODUCTION_RECORD_TAGS = {cls: ('record_kind', cls.__name__) for cls in (
     ProductionOccurrence, SlotRef, ProductionParameter, ProductionResult,
-    EvaluateChild, ApplyLanguageAction, AccessBinding, ConstructValue, ApplyRegion,
+    EvaluateChild, ApplyLanguageAction, ApplyPythonProtocol, AccessBinding, ConstructValue, ApplyRegion,
     BranchControl, LoopControl, DeferRegion, CleanupControl, HandleCompletions,
-    TransferCompletion, SuspendExecution)}
+    TransferCompletion, SuspendExecution, CountBinding, ChoiceBinding, TypeBinding, TypesBinding)}
