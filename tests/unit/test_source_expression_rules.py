@@ -18,6 +18,50 @@ WORLD = ValueType(ValueKind.STATE, location=LocationID('test-source-world'))
 REF = ValueType(ValueKind.REFERENCE)
 
 
+def test_source_core_contracts_reject_wrong_operands_profiles_and_source_counts():
+    from scar.analysis.source_productions import ProductionError, validate_production_plan
+    expressions = _rules(_documents('''
+unary = -x
+called = fn(x, y, k=z)
+other = fn(x)
+packed = (x, y)
+unpacked, *rest = items
+template = t"{x}{y}"
+'''))
+    values = assigned_values(expressions)
+    def alter(plan, step, instruction=None, arguments=None):
+        changed = replace(step, instruction=instruction or step.instruction,
+            arguments=step.arguments if arguments is None else arguments)
+        return replace(plan, steps=tuple(changed if s.id == step.id else s for s in plan.steps))
+    unary = expressions.build(values['unary'])
+    operation = next(s for s in unary.steps if type(s.instruction) is P.ApplyLanguageAction)
+    with pytest.raises(ProductionError, match='SOURCE_CORE_INTERFACE'):
+        validate_production_plan(alter(unary, operation, arguments=()))
+    with pytest.raises(ProductionError, match='SOURCE_CORE_INTERFACE'):
+        expressions.source.match(replace(unary, profile=None))
+    with pytest.raises(ProductionError, match='SOURCE_CORE_INTERFACE'):
+        expressions.source.match(replace(unary, profile=replace(unary.profile,
+            exception_abi=ExceptionABI.EXCEPTION_TRACEBACK_WORLD)))
+    called = expressions.build(values['called']); other = expressions.build(values['other'])
+    call = next(s for s in called.steps if type(s.instruction) is P.ApplyLanguageAction)
+    other_call = next(s for s in other.steps if type(s.instruction) is P.ApplyLanguageAction)
+    wrong = alter(called, call, replace(call.instruction, selectors=other_call.instruction.selectors))
+    assert validate_production_plan(wrong)['core_signature_source_counts_checked'] is False
+    with pytest.raises(ProductionError, match='SOURCE_CORE_INTERFACE'):
+        expressions.source.match(wrong)
+    template = expressions.build(values['template'])
+    string_tuple = next(s for s in template.steps if type(s.instruction) is P.ConstructValue
+        and s.instruction.tuple_layout is P.TupleConstructionLayout.TEMPLATE_STRINGS)
+    wrong = alter(template, string_tuple, replace(string_tuple.instruction,
+        tuple_layout=P.TupleConstructionLayout.TEMPLATE_INTERPOLATIONS))
+    with pytest.raises(ProductionError, match='SOURCE_CORE_INTERFACE'):
+        expressions.source.match(wrong)
+    assert expressions.source.match(template)['core_signature_source_counts_checked'] is True
+    expressions.verify(expressions.build(values['packed']))
+    target = next(o for o in occurrences(expressions, 'Tuple') if expressions.source.roles.context(o) == 'Store')
+    expressions.verify(expressions.build(target, P.ProductionPurpose.STORE))
+
+
 def test_compilation_context_flow_preserves_shared_entries_and_code_boundaries():
     from collections import Counter
     from scar.analysis.source_statement_rules import SourceStatementRules
@@ -766,7 +810,7 @@ def test_delegation_keeps_send_and_post_driver_completion_paths_separate(rules, 
             plan = variant.build(occurrence)
             checked = variant.verify(plan)
             assert not checked['native_delegation_expanded'] and not checked['driver_protocol_graph_generated']
-            assert plan.schema_version == 24
+            assert plan.schema_version == 25
             _, root_steps = owned(plan)
             acquire = next(s for s in root_steps if type(s.instruction) is P.ApplyDelegationProtocol)
             assert acquire.instruction.protocol is (P.DelegationProtocolKind.AWAITABLE_ITER if constructor == 'Await'

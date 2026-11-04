@@ -121,6 +121,12 @@ class ConstructionKind(str, Enum):
     INTERPOLATION = 'INTERPOLATION'
 
 
+class TupleConstructionLayout(str, Enum):
+    ITEMS = 'ITEMS'
+    TEMPLATE_STRINGS = 'TEMPLATE_STRINGS'
+    TEMPLATE_INTERPOLATIONS = 'TEMPLATE_INTERPOLATIONS'
+
+
 class SuspensionKind(str, Enum):
     YIELD = 'YIELD'
     ASYNC_YIELD = 'ASYNC_YIELD'
@@ -414,6 +420,7 @@ class AccessBinding:
 class ConstructValue:
     construction: ConstructionKind
     payload: tuple[SlotRef, ...] = ()
+    tuple_layout: TupleConstructionLayout | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -1241,6 +1248,13 @@ class CompilationContextFlow:
 
 
 @dataclass(frozen=True, slots=True)
+class SourceProductionProfile:
+    """Declared abstract state domain and completion ABI, not runtime facts."""
+    world: GroundType
+    exception_abi: ExceptionABI
+
+
+@dataclass(frozen=True, slots=True)
 class SourceProductionPlan:
     input: ProductionInput
     source: ProductionSource
@@ -1251,8 +1265,9 @@ class SourceProductionPlan:
     slots: tuple[ProductionSlotDisposition, ...]
     capture_transports: tuple[CaptureTransport, ...] = ()
     compilation_flow: CompilationContextFlow | None = None
+    profile: SourceProductionProfile | None = None
     schema: str = 'scar.source-production-plan'
-    schema_version: int = 24
+    schema_version: int = 25
     authority: str = 'SOURCE_RECIPE_SHAPE_ONLY'
 
 

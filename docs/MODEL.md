@@ -54,6 +54,7 @@ F4-B source recipe另以原F2 `SourceLoopTarget`连接局部子图的break/conti
 注解状态访问显式区分locals→globals→builtins、globals→builtins及class protocol cell；来源相似不能证明它们引用同一对象。查找消费当前world，不能冻结初始化时的容器。源码编译元数据不计为运行操作；重复编译展开的登记编号是编译上下文参数，不是多次执行或运行时任意选择。有限取值域已知而上下文未绑定时，保留参数及缺失证明；单值可静态折叠。
 编译上下文通过原代码版本、优化策略、常量引用路径和指令偏移标识；不是动态Invocation。代码指纹保指令、参数/捕获布局、异常/位置表及精确常量树，含编译生成的slice/frozenset。源码参数可以拥有多个已证生产位置；可由某一具体位置机械绑定。没有保留的生产位置不证明消费者无用，未证路径也不能抹掉其他已证边。
 共享模板另带`CompilationContextFlow`：每个区域有逻辑编译环境端口，每条入口引用按原步骤ID及类型字段/tuple序号定位。边区分调用、子表达式、代码声明、类型工厂、循环条件/正文/退出、完成处理与恢复；break/continue目标及实参里的区域引用不算入口。代码声明不执行正文。
+源码recipe同时声明抽象world类型及异常ABI。核心操作的参数、正常结果和异常出口必须匹配；Call/ClassDef的显式与隐式参数、扩展解包、slice缺省项及tuple构造数目沿原F2字段推导，不能从待检查的端口数倒推。普通tuple、模板字符串段tuple和插值tuple是三种明确布局。无源码的shape-only样本可省略profile，但源码入口拒绝缺失profile；这些签名不是效果、清理或native准入证明。
 同一模板的不同调用位置通过各自的边限定环境，循环重复使用同一静态边。进入函数、类或延迟求值器时更换代码环境；内联scope保源码身份而共享外层code owner。端口的source_scope表示当前逻辑代码环境，原语法namespace仍保存在region.context中，两者不能互代。编译事实使用者显式引用端口；这些是参数化接口，尚不是caller到原native指令位置的完整实例化证明。
 区域 cut 查询列出已有跨边界依赖，不自动证明可外提、复用、删除或整体替换。
 见 [公共依赖查询](../scar/analysis/program_dependencies.py) 与 [边界分析](../scar/analysis/program_regions.py)。

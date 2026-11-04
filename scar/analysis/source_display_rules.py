@@ -63,7 +63,8 @@ def emit_display(b, region, state):
             if not held:
                 sequence, state = b.literal(region, (), state, source=b.site('elts'))
             else:
-                sequence, state = b.emit(region, P.ConstructValue(P.ConstructionKind.TUPLE, (b.site('elts'), b.site('ctx'))),
+                sequence, state = b.emit(region, P.ConstructValue(P.ConstructionKind.TUPLE, (b.site('elts'), b.site('ctx')),
+                    P.TupleConstructionLayout.ITEMS),
                                          (*held, state), (_REF, b.world))
         else:
             sequence, state = b.protocol(region, build_kind, tuple(held), state,

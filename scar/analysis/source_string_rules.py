@@ -95,14 +95,16 @@ def _template(b, region, state, items):
     if previous:
         empty, state = b.literal(region, '', state, source=b.site('values'))
         strings.append(empty)
-    string_tuple, state = b.emit(region, P.ConstructValue(P.ConstructionKind.TUPLE, (b.site('values'),)),
+    string_tuple, state = b.emit(region, P.ConstructValue(P.ConstructionKind.TUPLE, (b.site('values'),),
+                                 P.TupleConstructionLayout.TEMPLATE_STRINGS),
                                  (*strings, state), (_REF, b.world))
     for ordinal, item in enumerate(items):
         if b.rules.source.context.syntax.nodes[item.reference].constructor == 'Interpolation':
             value, state = b.evaluate(region, b.site('values', ordinal), state)
             interpolations.append(value)
     if interpolations:
-        interpolation_tuple, state = b.emit(region, P.ConstructValue(P.ConstructionKind.TUPLE, (b.site('values'),)),
+        interpolation_tuple, state = b.emit(region, P.ConstructValue(P.ConstructionKind.TUPLE, (b.site('values'),),
+                                            P.TupleConstructionLayout.TEMPLATE_INTERPOLATIONS),
                                             (*interpolations, state), (_REF, b.world))
     else:
         interpolation_tuple, state = b.literal(region, (), state, source=b.site('values'))

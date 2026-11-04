@@ -31,6 +31,7 @@ from scar.analysis.source_scope_annotation_interfaces import ScopeAnnotationInde
 from scar.analysis.source_annotation_state_interfaces import AnnotationStateIndex
 from scar.analysis.source_compilation_contexts import CompilationContextIndex
 from scar.analysis.source_compilation_flow import CompilationFlowIndex, validate_flow
+from scar.analysis.source_core_interfaces import validate_core_interfaces
 
 
 class ProductionError(ValueError):
@@ -72,7 +73,8 @@ def production_type_catalog():
                  'scar.analysis.source_root_interfaces','scar.analysis.source_evaluation_interfaces','scar.analysis.source_syntax',
                  'scar.analysis.source_class_namespace_interfaces','scar.analysis.source_capture_interfaces',
                  'scar.analysis.source_scope_annotation_interfaces','scar.analysis.source_annotation_state_interfaces',
-                 'scar.analysis.source_compilation_contexts', 'scar.analysis.source_compilation_flow'):
+                 'scar.analysis.source_compilation_contexts', 'scar.analysis.source_compilation_flow',
+                 'scar.analysis.source_core_interfaces'):
         modules[name] = sha256(Path(sys.modules[name].__file__).read_bytes()).hexdigest()
     payload = dict(schema='scar.source-production-type-catalog', schema_version=1,
         root=root, types=rows, counts=counts, modules=dict(sorted(modules.items())),
@@ -162,7 +164,7 @@ def validate_production_plan(plan, *, max_visits=1_000_000):
     """
     visits = _shape(plan, max_visits)
     _require((plan.schema, plan.schema_version, plan.authority) == (
-        'scar.source-production-plan', 24, 'SOURCE_RECIPE_SHAPE_ONLY'),
+        'scar.source-production-plan', 25, 'SOURCE_RECIPE_SHAPE_ONLY'),
         'SCHEMA', 'plan', 'unsupported recipe schema or authority')
     source = plan.input
     _require(bool(source.path) and bool(source.namespace_root), 'INPUT', 'plan.input', 'source paths must be nonempty')
@@ -1111,10 +1113,12 @@ def validate_production_plan(plan, *, max_visits=1_000_000):
         if type(row.source) is P.ProductionOccurrence:
             _require(row.source.occurrence >= 0, 'SOURCE', str(row.id), 'negative source occurrence')
     validate_flow(plan)
+    core_checks = validate_core_interfaces(plan)
     return dict(complete=True, visits=visits, regions=len(regions), steps=len(steps),
         recipe_shape_checked=True, local_references_checked=True, source_rules_replayed=False,
         compilation_context_interfaces_checked=plan.compilation_flow is not None,
         native_context_propagation_proven=False,
+        core_signature_shape_checks=core_checks, core_signature_source_counts_checked=False,
         protocol_signature_checks=sum(type(s.instruction) is P.ApplyPythonProtocol for s in plan.steps),
         delegation_signature_checks=sum(type(s.instruction) is P.ApplyDelegationProtocol for s in plan.steps),
         operation_signatures_checked=False, control_semantics_checked=False, rewrite_authorized=False)
@@ -1228,6 +1232,7 @@ class ProductionSourceIndex:
     def match(self, plan, *, max_visits=1_000_000):
         summary = validate_production_plan(plan, max_visits=max_visits)
         _require(plan.input == self.input, 'INPUT_LINEAGE', 'plan.input', 'recipe refers to different F2/F3 materials')
+        core_checks = validate_core_interfaces(plan, self)
         _require(plan.compilation_flow is not None and plan.compilation_flow == self.compilation_flow.build(plan),
             'SOURCE_COMPILATION_FLOW', 'plan.compilation_flow', 'context ports/edges differ from original F2/F3 interfaces')
         _require(all(r==self.capture_paths.transports.get(r.reference) for r in plan.capture_transports),
@@ -1567,6 +1572,7 @@ class ProductionSourceIndex:
         except (ValueError, TypeError, KeyError, IndexError) as error:
             raise ProductionError('SOURCE_REFERENCE', 'plan', str(error)) from error
         return {**summary, 'original_source_references_checked': True,
+                'core_signature_source_checks': core_checks, 'core_signature_source_counts_checked': True,
                 'upstream_fresh_replayed': False}
 
 

@@ -65,7 +65,7 @@ def test_closed_grammar_exact_records_strict_codec_and_budgets():
     assert summary['control_semantics_checked'] is False
     assert A.read_production_plan(A.production_plan_document(value)) == value
     catalog = A.production_type_catalog()
-    assert catalog['counts'] == dict(records=125, fields=358, identifiers=4, enums=32, enum_members=261, unions=27)
+    assert catalog['counts'] == dict(records=126, fields=362, identifiers=4, enums=33, enum_members=264, unions=29)
     assert set(catalog['instruction_variants']) == {
         'EvaluateChild', 'ApplyLanguageAction', 'ReadCompilationOption', 'ApplyInplaceOperator',
         'ImportRequest', 'ImportMember', 'ImportStar',

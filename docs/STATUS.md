@@ -94,40 +94,45 @@ call/map/string/assert参数也沿闭合原端口组解析；空组保DECLARED_E
 真实eval/cem原body的4,830条操作来源、65,086条来源引用已接回原F2及已有F3查询；CEM的4个旧OPAQUE可读出Gt/Eq原selector。
 这仍不是执行语义证明。证据：`artifacts/current/queries/source-anchors/{materials,verification}/result.json`及`{eval,cem}-origin-query.json`。
 
-源码产生规则当前v24：125记录/358字段、4 ID、32枚举/261成员、27 union、69步骤变体；与canonical图分开。
+源码产生规则当前v25：126记录/362字段、4 ID、33枚举/264成员、29 union、69步骤变体；与canonical图分开。
 113个构造器已分派为28表达式、28语句、3执行根、21父属描述符、32 selector及1非执行FunctionType。
 构造分派不等于所有用途、上下文、效果或最终图闭合。现在只从原F2/F3材料生成局部recipe，保持原ID和输入manifest。
 
-本轮补齐参数化编译上下文接口：每个区域有端口，入口边按step ID与类型字段/tuple序号定位；
+共享的参数化编译上下文接口继续保留：每个区域有端口，入口边按step ID与类型字段/tuple序号定位；
 区分调用、子表达式、代码声明、类型工厂、循环条件/正文/退出、完成处理和恢复。
 不同调用位置仍指向同一共享模板；声明不执行正文，循环不按迭代展开。
 源matcher从原F2/F3重建整表，拒绝缺表、漏边、错目标、错代码环境和遗漏fact use。
 内联scope保原源码身份并共享外层code owner，延迟入口另接自己的环境。
 这是F4-B接口接线，不是native调用上下文实例化，也不是canonical CFG/SSA。
 
+本轮补核心签名：源码recipe强制声明抽象world和异常ABI，检查EvaluateChild、语言操作、名字访问、值构造及隐式literal五类步骤。
+调用/类构造参数、解包结果、slice可选项和tuple布局数目从原F2推导，固定端口另作shape检查；不从现有arity倒推参数。
+9份源码共有12,867处core签名检查。无profile样本只授结构证明；源码入口拒绝缺profile、错ABI、缺操作数及错源码数目。
+模板字符串的strings/interpolations tuple现已分开；未有源码产生规则的预留枚举拒绝放行。完整效果、清理和native准入仍未证明。
+
 九份真实源码重生成并独立fresh逐记录一致；五源为eval、cem、buffer、world、spaces，另含policy、format、envs/utils和外部callbacks/registry。
 本轮各域结果如下，秒数包含父层strict重验，不能当作LeWM运行或完整建图耗时：
 
 | 材料域 | 原域及局部recipe | 采集/fresh秒 | 压缩bytes |
 |---|---|---|---|
-| 五源语句 | 998语句，915局部+83父属，199条件模板 | 29.10 / 28.82 | 1,166,798 |
-| 五源表达式 | 5,314表达式，4,875局部+345抑制+94父属，29条件模板 | 36.19 / 36.04 | 1,673,625 |
-| 五源根 | 5根recipe，72项子接口义务 | 24.52 / 24.13 | 17,892 |
-| policy语句 | 226语句，201局部+25父属，53条件模板 | 21.54 / 20.79 | 264,934 |
-| format语句 | 52语句，47局部+5父属，5条件模板 | 5.36 / 5.51 | 79,672 |
-| utils/registry语句 | 193语句，181局部+12父属，16条件模板 | 13.53 / 13.53 | 245,036 |
+| 五源语句 | 998语句，915局部+83父属，199条件模板 | 28.67 / 28.50 | 1,178,543 |
+| 五源表达式 | 5,314表达式，4,875局部+345抑制+94父属，29条件模板 | 36.66 / 36.30 | 1,704,675 |
+| 五源根 | 5根recipe，72项子接口义务 | 24.17 / 24.19 | 18,001 |
+| policy语句 | 226语句，201局部+25父属，53条件模板 | 21.04 / 21.14 | 267,188 |
+| format语句 | 52语句，47局部+5父属，5条件模板 | 5.34 / 5.31 | 80,190 |
+| utils/registry语句 | 193语句，181局部+12父属，16条件模板 | 13.51 / 13.48 | 247,298 |
 
 这六组材料共有8,722个区域上下文端口、9,306条入口边、40项编译事实使用；共享边是静态引用，不是动态调用计数。
 入口边中7,110条仍是外部子模板接口，不表示已经完成全图组合；其余含1,327调用、345代码声明、183完成处理、86循环正文、84循环条件、149循环退出、22恢复边。
 九源未出现类型工厂入口，泛型factory的直接依据来自静态micro；普通finally的多调用共享同样由micro验收，不冒称真实九源出现。
 原代码注解登记仍有15个已证producer上下文，可按代码版本/常量路径/偏移绑定；从caller到具体native路径的传播仍未获证。
-材料gzip流共3,447,957 bytes，解压68,499,483 bytes；不含catalog/收据或原模型，不能当成整个程序图大小。
-19份展示recipe均由v24新材料提取，不改旧header冒充迁移。验收外壳已精简，详细计数直接引用materials/verification结果。
+材料gzip流共3,495,895 bytes，解压69,838,355 bytes；不含catalog/收据或原模型，不能当成整个程序图大小。
+19份展示recipe均由v25新材料提取，不改旧header冒充迁移。验收外壳已精简，详细计数直接引用materials/verification结果。
 证据：`queries/source-{productions,expression-rules,statement-rules,root-rules,scope-annotations,annotation-state,compilation-contexts}/`。
 
-本轮仅3项定向检查，19.18秒：结构/strict wire、共享入口与代码边界、scope注解上下文；未跑整套。
-覆盖九类入口、finally多调用指向同模板、内联code owner、声明/运行分离，及缺表/漏边/错scope拒绝。
-九源材料另经独立fresh验收；源bytes与manifest保持。本轮没有执行或修改LeWM，没有新增subagents。
+本轮4项定向检查，85.14秒：结构/strict wire、core参数反例、全部局部表达式家族、共享入口与代码边界；未跑整套。
+覆盖缺操作数、缺profile、错ABI、错误源码参数计数、错tuple布局拒绝，以及原九类入口规则。
+九源材料另经独立fresh验收；源bytes与manifest保持。866源初次扩展扫描已为已定位的接口缺口主动中止，未验收部分流已删除，诊断留在`queries/source-statement-full/result.json`。本轮没有执行或修改LeWM，没有新增subagents。
 
 **当前真正缺口及顺序**：
 

@@ -65,7 +65,7 @@ B1允许显式类型、拼接、参数引用、重复、有限选择和异质类
 接源码前，先以原F2 fields/list重放旧SourceAtom的BFS身份公式，并核全源ID/kind/完整reference集合；这是身份层，绝不是求值顺序。
 旧SG不存在的source-only输入单独处置，保留其F2/F3，不捏造旧ID域。桥接内核不parse；strict读者仍重验F2上游。
 执行产生规则必须另按语言规则定义；symtable/compiler拓扑的visitor顺序不能当执行边（如decorators/defaults、DictComp key/value）。
-产生规则的输入语法为`SourceProductionPlan`，与canonical执行图分开：v24含69种有限步骤，源码槽、namespace端口、区域参数及结果引用分别有类型。
+产生规则的输入语法为`SourceProductionPlan`，与canonical执行图分开：v25含69种有限步骤，源码槽、namespace端口、区域参数及结果引用分别有类型。
 隐式字面值复用已有`PythonLiteral`精确编码，不断言相同值具有同一对象身份或发生了分配。
 `ApplyPythonProtocol`复用已有88种协议及签名，参数必须显式绑定，输入/完成端口强制核验；不把协议名当作效果证明。
 区域共享，不按调用/迭代复制；循环显式分不变量前缀与携带值后缀。异常完成通过payload＋captures接入handler参数，不冒用normal结果边。
@@ -115,6 +115,7 @@ v21将模块/类变量注解的创建动作接到DEFERRED请求体。静态查�
 v22将PublishAnnotation降为源码描述符，展开条件登记的namespace查找/PySet_Add及future字符串/当前mapping写入；无条件class声明不制造运行步骤。AnnotationStateAccess显式区分写入端LOAD_NAME、请求端LOAD_GLOBAL与原class protocol binding。重复源码的编号保留完整编译参数域，单值折叠；ReadCompilationAnnotationIndex没有runtime world输入，不是实际执行的选择器，native上下文绑定仍未证明。不可达模板投影保留被放宽控制表达式里的原绑定，避免丢失walrus/nonlocal等静态关系。
 v23由source_compilation_contexts静态查询原代码的登记生产位置。临时tuple标记保原表达式/符号影响；常量路径只提出对应，原owner指令、布局、异常/位置表、非code常量和子项元数据逐项一致后才授权。记录原代码指纹及lookup/index/insert/discard偏移，不把查询代码当原代码、不按name/line接线。AddAnnotationIndex携完整参数/位置证据，literal单值也保来源；bind接口可按精确原代码上下文返回唯一登记。未保留owner、已证owner但无该写入、布局未证三者分开；共享region调用端的上下文传播仍是后续义务。
 v24增加参数化上下文接口表。按原F3代码owner生成区域端口，按有限入口引用规则生成带类型的边；调用位置用step ID及字段/tuple序号区分。source matcher强制从原材料重建整表，拒绝漏边、错端口和错上下文；shape reader仍允许无源码的接口样本不带此表。声明与执行、循环模板与迭代、逻辑接口与native实例化分别验收，后者未由本表证明。
+v25为源码recipe增加显式状态/异常profile，补五类core步骤的端口合同。固定签名在shape层检查，变长参数在source层从原字段推导；保留独立的shape检查与source-count检查标记，未证明完整参数来源。tuple布局明确区分三种产生规则；没有源码产生规则的预留枚举不放行。旧无profile接口样本只授结构证明，不能经source matcher进入源码规则材料。
 前两步的局部规则已通过：Yield由原C1 owner区分普通／异步形式，bare yield导出None，嵌套定义header仍归外层执行owner。静态compiler只作独立规则对照，不以bytecode位置接源码身份。
 后续语句／定义／cleanup规则闭合后才进入F4-C；每步先验类型/接口，再接源码规则，再在原材料独立重放，不以节点存在或局部计数授予全层完成。
 
