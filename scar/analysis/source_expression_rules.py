@@ -19,6 +19,8 @@ from scar.ir.program.signature_patterns import (ResolvedSignature, SignatureForm
     TypeBinding, ChoiceBinding, CountBinding)
 from scar.ir.program.structured import PythonProtocolKind as K
 from scar.ir.program.model import ExitKind
+from scar.ir.program.delegation_signatures import delegation_signature_catalog, resolve_delegation_signature
+from scar.ir.program.signature_patterns import SIGNATURE_RECORD_TAGS
 from scar.ir.record_codec import encode
 from scar.ir.literals import PythonLiteral
 
@@ -38,7 +40,7 @@ _FIELDS = {
     'TemplateStr': ('values',), 'Interpolation': ('value', 'str', 'conversion', 'format_spec'),
     'ListComp': ('elt', 'generators'), 'SetComp': ('elt', 'generators'),
     'DictComp': ('key', 'value', 'generators'),
-    'Yield': ('value',),
+    'Yield': ('value',), 'YieldFrom': ('value',), 'Await': ('value',),
 }
 _AUX_FIELDS = {'keyword': ('arg', 'value'), 'Starred': ('value', 'ctx'),
                'comprehension': ('target', 'iter', 'ifs', 'is_async')}
@@ -52,7 +54,7 @@ _SELECTORS = {
 }
 _TARGETS = frozenset(('Name', 'Attribute', 'Subscript', 'List', 'Tuple'))
 _RULE_MODULES = ('source_display_rules.py', 'source_string_rules.py', 'source_comprehension_rules.py',
-                 'source_suspension_rules.py')
+                 'source_suspension_rules.py', 'source_delegation_rules.py')
 
 
 class SourceRuleError(ProductionError):
@@ -127,6 +129,8 @@ class SourceExpressionRules:
             recipe_type_catalog_sha256=production_type_catalog()['content_sha256'],
             rules=rows, implementation_sha256=sha256(Path(__file__).read_bytes()).hexdigest(),
             production_modules={name: sha256(Path(__file__).with_name(name).read_bytes()).hexdigest() for name in _RULE_MODULES},
+            delegation_protocols=[dict(protocol=kind.value, signature=encode(signature, record_tags=SIGNATURE_RECORD_TAGS))
+                for kind, signature in delegation_signature_catalog().items()],
             state_parameter=encode(self.world), exception_abi=self.exception_abi.value,
             call_compiler_profile=self.call_profile,
             child_interfaces='VALUE:(WORLD)->(REFERENCE,WORLD);STORE:(REFERENCE,WORLD)->(WORLD);DELETE:(WORLD)->(WORLD)',
@@ -185,6 +189,7 @@ class SourceExpressionRules:
             child_interfaces_assumed=True, state_parameter_origin_proven=False,
             scope_activation_proven=False, iterator_cleanup_proven=False,
             driver_admission_proven=False, resume_state_origin_proven=False, frame_context_lifetime_proven=False,
+            native_delegation_expanded=False, driver_protocol_graph_generated=False,
             effects_proven=False, canonical_graph_generated=False, transformation_authorized=False)
 
 
@@ -238,13 +243,17 @@ class _Builder:
                          (state,), (_REF, self.world), source=source)
 
     def emit(self, region, instruction, arguments, types, *, may_raise=True, source=None, completion=C.FALLTHROUGH):
-        _require(len(self.steps) < self.max_steps, 'BUDGET_FRONTIER', 'steps', 'source step limit')
         completions = (P.ProductionCompletion(completion, types),) + ((P.ProductionCompletion(C.RAISE, self.raised),) if may_raise else ())
+        return self.control(region, instruction, arguments, completions, source=source)
+
+    def control(self, region, instruction, arguments, completions, *, source=None):
+        _require(len(self.steps) < self.max_steps, 'BUDGET_FRONTIER', 'steps', 'source step limit')
         step = P.ProductionStep(P.ProductionStepID(self.key + ':s' + str(len(self.steps))), region.id,
             region.source if source is None else source, instruction, arguments, completions)
         self.steps.append(step)
         region.steps.append(step)
-        return tuple(P.ProductionResult(step.id, i) for i in range(len(types))) if completion is C.FALLTHROUGH else ()
+        types = next((c.types for c in completions if c.kind is C.FALLTHROUGH), ())
+        return tuple(P.ProductionResult(step.id, i) for i in range(len(types)))
 
     def parameter(self, region, index):
         return P.ProductionParameter(region.id, index)
@@ -267,8 +276,19 @@ class _Builder:
         outputs = next(c.types for c in signature.completions if c.kind is ExitKind.NORMAL) if invoke else signature.results
         return self.emit(region, P.ApplyPythonProtocol(kind, bindings, selectors), (*arguments, state), outputs, may_raise=invoke)
 
+    def delegation(self, region, kind, arguments, state):
+        invoke = kind is not P.DelegationProtocolKind.STOP_ITERATION_VALUE
+        bindings = (TypeBinding('world', self.world), *((ChoiceBinding('exception_abi',
+            self.rules.exception_abi.value),) if invoke else ()))
+        signature = resolve_delegation_signature(kind, bindings)
+        outputs = next(c.types for c in signature.completions if c.kind is ExitKind.NORMAL) if invoke else signature.results
+        return self.emit(region, P.ApplyDelegationProtocol(kind, bindings), (*arguments, state), outputs, may_raise=invoke)
+
     def finish(self, region, values, types):
-        self.emit(region, P.TransferCompletion(C.FALLTHROUGH), values, types, may_raise=False)
+        self.transfer(region, C.FALLTHROUGH, values, types)
+
+    def transfer(self, region, kind, values, types, target=None):
+        self.control(region, P.TransferCompletion(kind, target), values, (P.ProductionCompletion(kind, types, target),))
 
     def short_return(self, parent, source):
         child = self.region(source, (_REF, self.world), parent)
@@ -301,6 +321,9 @@ class _Builder:
         elif kind == 'Yield':
             from scar.analysis.source_suspension_rules import emit_yield
             emit_yield(self, root, state)
+        elif kind in ('YieldFrom', 'Await'):
+            from scar.analysis.source_delegation_rules import emit_delegation
+            emit_delegation(self, root, state)
         elif kind == 'Constant':
             # A literal source reference does not assert a fresh allocation.
             result = self.emit(root, P.ConstructValue(P.ConstructionKind.LITERAL,

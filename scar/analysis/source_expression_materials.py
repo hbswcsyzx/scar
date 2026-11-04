@@ -44,6 +44,7 @@ def _implementation():
         'analysis/source_display_rules.py', 'analysis/source_string_rules.py',
         'analysis/source_comprehension_rules.py',
         'analysis/source_suspension_rules.py',
+        'analysis/source_delegation_rules.py', 'ir/program/delegation_signatures.py',
         'analysis/source_productions.py', 'analysis/program_types.py',
         'ir/program/source_productions.py', 'ir/record_codec.py')
     return {name: sha256((package / name).read_bytes()).hexdigest() for name in names}

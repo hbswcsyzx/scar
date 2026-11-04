@@ -28,13 +28,16 @@ def emit_yield(b, root, state):
         _require(operand.kind == 'SCALAR' and operand.scalar.to_python() is None,
             'RULE_SHAPE', str(site), 'bare yield requires an explicit None field')
         value, state = b.literal(root, None, state, site)
+    result = emit_suspension(b, root, kind, value, state)
+    b.finish(root, result, (_REF, b.world))
+
+
+def emit_suspension(b, root, kind, value, state, *, delegate=None):
+    """A temporal ingress, with driver processing explicit for delegation."""
     sent = b.region(root.source, (_REF, b.world), root, P.ProductionRegionKind.RESUME)
     b.finish(sent, tuple(b.parameter(sent, i) for i in range(2)), (_REF, b.world))
     thrown = b.region(root.source, b.raised, root, P.ProductionRegionKind.RESUME)
-    b.emit(thrown, P.TransferCompletion(C.RAISE),
-        tuple(b.parameter(thrown, i) for i in range(len(b.raised))), b.raised,
-        may_raise=False, completion=C.RAISE)
-    result = b.emit(root, P.SuspendExecution(kind, b.rules.exception_abi, (
+    b.transfer(thrown, C.RAISE, tuple(b.parameter(thrown, i) for i in range(len(b.raised))), b.raised)
+    return b.emit(root, P.SuspendExecution(kind, b.rules.exception_abi, (
         P.ProductionResumeRoute(C.FALLTHROUGH, sent.id),
-        P.ProductionResumeRoute(C.RAISE, thrown.id))), (value, state), (_REF, b.world))
-    b.finish(root, result, (_REF, b.world))
+        P.ProductionResumeRoute(C.RAISE, thrown.id)), delegate=delegate), (value, state), (_REF, b.world))

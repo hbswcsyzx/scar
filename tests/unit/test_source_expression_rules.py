@@ -78,6 +78,11 @@ def documents():
         'lambda_yield = lambda: (yield)',
         'def yield_in_header(source):\n    def nested(default=(yield source)):\n        pass\n    return nested',
         'def suppressed_annotations(source: list[missing_annotation]) -> "Result":\n    return source',
+        'def delegate_forms(source):\n    return (yield from produce(source))',
+        'async def await_forms(source):\n    return await produce(source)',
+        'async def await_nested(source):\n    return await (await source)',
+        'async def await_comp(source):\n    return [await produce(item) for item in source]',
+        'async_generator_expression = (await produce(item) for item in source)',
     )) + '\n'
     f0 = source_bytes_document(text.encode(), path='/source/schedules.py', namespace_root='/source')
     f1 = source_tokens_document(f0)
@@ -144,7 +149,7 @@ def test_all_local_families_and_selector_domains_without_reparsing(rules, monkey
     assert implemented == {'Constant', 'Name', 'BinOp', 'UnaryOp', 'Attribute', 'Subscript',
                            'Slice', 'NamedExpr', 'IfExp', 'BoolOp', 'Compare', 'Call',
                            'List', 'Tuple', 'Set', 'Dict', 'JoinedStr', 'FormattedValue', 'TemplateStr', 'Interpolation',
-                           'ListComp', 'SetComp', 'DictComp', 'Yield'}
+                           'ListComp', 'SetComp', 'DictComp', 'Yield', 'YieldFrom', 'Await'}
     selectors, seen = {}, set()
     for occurrence, node in enumerate(rules.source.context.syntax.nodes):
         if node.constructor not in implemented:
@@ -623,3 +628,72 @@ def test_yield_boundaries_match_static_compiler_without_executing_code(rules, do
                     wrapped += 1
     assert selected == 4 and wrapped == 2
     assert actual == len(occurrences(rules, 'Yield')) == 9
+
+
+@pytest.mark.parametrize('abi', tuple(ExceptionABI))
+def test_delegation_keeps_send_and_post_driver_completion_paths_separate(rules, abi):
+    from scar.analysis.source_productions import ProductionError
+    from scar.ir.program.control import LanguageCompletionKind as C
+    variant = SourceExpressionRules(rules.source, world=WORLD, exception_abi=abi)
+    for constructor in ('Await', 'YieldFrom'):
+        for occurrence in occurrences(variant, constructor):
+            plan = variant.build(occurrence)
+            checked = variant.verify(plan)
+            assert not checked['native_delegation_expanded'] and not checked['driver_protocol_graph_generated']
+            assert plan.schema_version == 3
+            _, root_steps = owned(plan)
+            acquire = next(s for s in root_steps if type(s.instruction) is P.ApplyDelegationProtocol)
+            assert acquire.instruction.protocol is (P.DelegationProtocolKind.AWAITABLE_ITER if constructor == 'Await'
+                else P.DelegationProtocolKind.YIELD_FROM_ITER)
+            loop = next(r for r in plan.regions if r.kind is P.ProductionRegionKind.LOOP)
+            loop_control = owned(plan, loop.id)[1][0].instruction
+            assert type(loop_control.condition) is P.RepeatCondition and loop_control.invariant_count == 1
+            assert not any(r.kind is P.ProductionRegionKind.LOOP_CONDITION for r in plan.regions)
+            send = [s for s in plan.steps if type(s.instruction) is P.ApplyDelegationProtocol
+                and s.instruction.protocol is P.DelegationProtocolKind.SEND]
+            assert len(send) == 1  # one template, no protocol-iteration unroll
+            _, body = owned(plan, send[0].region)
+            branch = body[-1]
+            assert branch.arguments == (P.ProductionResult(send[0].id, 0),)
+            assert branch.instruction.on_true.arguments == tuple(P.ProductionResult(send[0].id, i) for i in (1, 2))
+            suspension = next(s for s in plan.steps if type(s.instruction) is P.SuspendExecution)
+            assert suspension.instruction.delegate == P.ProductionParameter(suspension.region, 0)
+            assert suspension.instruction.suspension is (P.SuspensionKind.AWAIT if constructor == 'Await'
+                else P.SuspensionKind.YIELD_FROM)
+            handlers = [s.instruction for s in plan.steps if type(s.instruction) is P.HandleCompletions]
+            assert len(handlers) == 1
+            protected = owned(plan, handlers[0].protected.region)[1]
+            assert suspension in protected and send[0] not in protected
+            assert handlers[0].routes[0].kind is C.RAISE
+            # Initial send is None; neither fictitious iterator-item state nor
+            # an evaluation of literal True is introduced for loop control.
+            literals = [s.instruction.value.to_python() for s in plan.steps if type(s.instruction) is P.DefineLiteral]
+            assert literals == [None]
+            altered = replace(acquire, instruction=replace(acquire.instruction, protocol=(
+                P.DelegationProtocolKind.YIELD_FROM_ITER if constructor == 'Await' else P.DelegationProtocolKind.AWAITABLE_ITER)))
+            with pytest.raises(SourceRuleError, match='SOURCE_RULE_MISMATCH'):
+                variant.verify(replace(plan, steps=tuple(altered if s.id == acquire.id else s for s in plan.steps)))
+            with pytest.raises(ProductionError, match='SUSPEND_INTERFACE'):
+                variant.verify(replace(plan, steps=tuple(replace(s, instruction=replace(s.instruction, delegate=None))
+                    if s.id == suspension.id else s for s in plan.steps)))
+
+
+def test_delegation_source_rules_match_static_compiler_boundaries(rules, documents):
+    import dis
+    from types import CodeType
+    from scar.analysis.source_bytes import decoded_source_bytes
+    pending = [compile(decoded_source_bytes(documents[0]), '<static-delegation-oracle>', 'exec')]
+    gets = {'GET_AWAITABLE': 0, 'GET_YIELD_FROM_ITER': 0}
+    while pending:
+        code = pending.pop()
+        pending.extend(c for c in code.co_consts if type(c) is CodeType)
+        instructions = list(dis.get_instructions(code))
+        for ordinal, op in enumerate(instructions):
+            if op.opname not in gets:
+                continue
+            gets[op.opname] += 1
+            assert instructions[ordinal+1].opname == 'LOAD_CONST' and instructions[ordinal+1].argval is None
+            assert instructions[ordinal+2].opname == 'SEND'
+            assert any(i.opname == 'CLEANUP_THROW' for i in instructions[ordinal+2:])
+    assert gets['GET_AWAITABLE'] == len(occurrences(rules, 'Await')) == 5
+    assert gets['GET_YIELD_FROM_ITER'] == len(occurrences(rules, 'YieldFrom')) == 1
