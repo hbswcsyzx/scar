@@ -283,17 +283,26 @@ def source_syntax_document(f0_document, f1_document, *, mode='exec', max_nodes=1
     return encode(_produce(f0_document, f1_document, mode, max_nodes))
 
 
-def read_source_syntax(document, f0, f1) -> ast.AST | None:
+def _read_source_syntax(document, f0, f1):
     material = decode(SourceSyntaxMaterial, document)
     fresh = _produce(f0, f1, material.mode, material.max_nodes)
     if material != fresh:
         raise ValueError('F2 document differs from its F0/F1/profile/fresh official parser')
     if material.status != 'PARSED':
-        return None
+        return material, None
     root = _restore_ast(material.root, material.nodes)
     if _flatten_ast(root, max_nodes=material.max_nodes) != (fresh.root, fresh.nodes):
         raise ValueError('restored AST differs in an occurrence/field/presence/exact scalar')
-    return root
+    return material, root
 
 
-__all__ = ['source_syntax_document', 'read_source_syntax']
+def read_source_syntax(document, f0, f1) -> ast.AST | None:
+    return _read_source_syntax(document, f0, f1)[1]
+
+
+def read_source_syntax_material(document, f0, f1) -> SourceSyntaxMaterial:
+    """Return the same verified immutable occurrences used by the AST reader."""
+    return _read_source_syntax(document, f0, f1)[0]
+
+
+__all__ = ['source_syntax_document', 'read_source_syntax', 'read_source_syntax_material']

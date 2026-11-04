@@ -459,6 +459,33 @@ def main(argv=None) -> int:
     if cli_argv and cli_argv[0] == 'source-syntax':
         from scar.analysis.source_parsing import main as source_parsing_main
         return source_parsing_main(cli_argv[1:])
+    if cli_argv and cli_argv[0] == 'source-symbols':
+        from scar.analysis.source_symbol_materials import main as source_symbols_main
+        return source_symbols_main(cli_argv[1:])
+    if cli_argv and cli_argv[0] == 'source-roles':
+        from scar.analysis.source_role_materials import main as source_roles_main
+        return source_roles_main(cli_argv[1:])
+    if cli_argv and cli_argv[0] == 'source-contexts':
+        from scar.analysis.source_context_materials import main as source_contexts_main
+        return source_contexts_main(cli_argv[1:])
+    if cli_argv and cli_argv[0] == 'source-declarations':
+        from scar.analysis.source_declaration_materials import main as source_declarations_main
+        return source_declarations_main(cli_argv[1:])
+    if cli_argv and cli_argv[0] == 'source-bindings':
+        from scar.analysis.source_binding_materials import main as source_bindings_main
+        return source_bindings_main(cli_argv[1:])
+    if cli_argv and cli_argv[0] == 'compiler-topology':
+        from scar.analysis.compiler_topology_materials import main as compiler_topology_main
+        return compiler_topology_main(cli_argv[1:])
+    if cli_argv and cli_argv[0] == 'compiler-symbols':
+        from scar.analysis.compiler_symbol_materials import main as compiler_symbols_main
+        return compiler_symbols_main(cli_argv[1:])
+    if cli_argv and cli_argv[0] == 'frontend-check':
+        from scar.analysis.frontend_check import main as frontend_check_main
+        return frontend_check_main(cli_argv[1:])
+    if cli_argv and cli_argv[0] == 'program-types':
+        from scar.analysis.program_type_materials import main as program_types_main
+        return program_types_main(cli_argv[1:])
     if cli_argv and cli_argv[0] == "static":
         from scar.analysis.static_program import main as static_main
         return static_main(cli_argv[1:])
@@ -482,6 +509,24 @@ def main(argv=None) -> int:
     source_tokens.set_defaults(func=lambda _: 0)
     source_syntax = sub.add_parser('source-syntax', help='F2: retain complete official AST fields without target execution')
     source_syntax.set_defaults(func=lambda _: 0)
+    source_symbols = sub.add_parser('source-symbols', help='F3-A: preserve the official compiler symbol view without AST binding claims')
+    source_symbols.set_defaults(func=lambda _: 0)
+    source_roles = sub.add_parser('source-roles', help='F3-B: classify original AST field slots without scope binding claims')
+    source_roles.set_defaults(func=lambda _: 0)
+    source_contexts = sub.add_parser('source-contexts', help='F3-C1: route original slots to source environments and evaluation regions')
+    source_contexts.set_defaults(func=lambda _: 0)
+    source_declarations = sub.add_parser('source-declarations', help='F3-C2a: normalize source names and collect whole-scope declarations')
+    source_declarations.set_defaults(func=lambda _: 0)
+    source_bindings = sub.add_parser('source-bindings', help='F3-C2b: resolve conditional namespace interfaces and logical capture demands')
+    source_bindings.set_defaults(func=lambda _: 0)
+    compiler_topology = sub.add_parser('compiler-topology', help='F3-C3T: project source compiler templates onto original public scope topology')
+    compiler_topology.set_defaults(func=lambda _: 0)
+    compiler_symbols = sub.add_parser('compiler-symbols', help='F3-C3S: project compiler symbol provenance and exact parameter positions')
+    compiler_symbols.set_defaults(func=lambda _: 0)
+    frontend_check = sub.add_parser('frontend-check', help='F3-D: verify original source/namespace/compiler graph composition')
+    frontend_check.set_defaults(func=lambda _: 0)
+    program_types = sub.add_parser('program-types', help='F4-A: export or fresh-check source/target structural type grammars')
+    program_types.set_defaults(func=lambda _: 0)
     static_cmd = sub.add_parser("static", help="build source-root program graphs without executing the target")
     static_cmd.set_defaults(func=lambda _: 0)
     static_query = sub.add_parser("static-query", help="query stored static definitions and original graph dependencies")

@@ -77,7 +77,7 @@ class SourceStage:
 
     def __init__(self, model, out, *, artifact, verify, consumes):
         from scar.analysis.static_program import _artifacts, read_static_program
-        if artifact not in ('source_tokens', 'source_syntax') or type(verify) is not bool:
+        if artifact not in ('source_tokens', 'source_syntax', 'source_symbols', 'source_roles', 'source_contexts', 'source_declarations', 'source_bindings', 'compiler_topology', 'compiler_symbols') or type(verify) is not bool:
             raise ValueError('unsupported formal source sidecar transaction')
         self.root, self.out = Path(model).absolute(), Path(out).absolute()
         if (self.root.resolve() != self.root or self.out.resolve() != self.out
@@ -164,8 +164,9 @@ class SourceStage:
         read_static_program(self.staging, verify=False)
         if _stamps(self.staging, self.prior) != self.stamps:
             raise ValueError('source staging altered an original artifact')
-        new = {row['artifact']['path']: row['artifact'] for old, row in zip(original['units'], rows)
-            if self.artifact not in old['artifacts']}
+        prior_paths = {descriptor['path'] for descriptor in self.prior}
+        new = {descriptor['path']: descriptor for descriptor in _artifacts(self.manifest)
+            if descriptor['path'] not in prior_paths}
         # All staging directories are new, including those holding old hard
         # links. Sync those entries too, rather than only the sidecar parents.
         directories = [self.staging]

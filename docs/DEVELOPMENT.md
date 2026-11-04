@@ -20,11 +20,117 @@ F0只保原始bytes与编码结果。解码失败仍存原bytes；文件不可�
 现有模型只追加每源raw/token分片；旧源码和IR保持。F1也可用`--file PATH`独立采集（先执行F0）。
 `--max-tokens`是每源上限；verify按原工件预算重放，原预算超过本次上限则拒绝，不会静默忽略限制。
 F1只转录词法，不证明语法有效；原生错误保prefix，预算停止不发布partial模型。
-F2也支持`--file PATH`，先执行F0/F1；默认`--mode exec`，另支持eval/single/func_type。
-`--max-nodes`限制每源AST出现次数；精确literal另有固定预算，越界报frontier，不当成语法错误。
-官方ONLY_AST使用固定type_comments=True、dont_inherit=True、optimize=0及当前feature_version；不生成目标bytecode。
-F0/F1/F2声明材料验收已通过，下一阶段是F3绑定，前层未验收不新增后层功能。
+F2默认exec，也支持eval/single/func_type；--file先经过F0/F1，--max-nodes是每源AST上限。
+源码始终只解析为AST；语法成功不证明作用域/控制合法。大literal超固定预算准确报frontier，不标UNKNOWN。
+F0至F3及F4-A已在声明材料域验收；当前F4-B操作签名和产生规则尚未完成，前层未验收不新增后层功能。
 当前profile固定本机CPython及tokenizer源码/静态解释器二进制指纹；内置tokenizer的shared Python暂不接纳。
+
+F3-A：
+
+```bash
+PYTHONHASHSEED=0 python -B -m scar.cli source-symbols --model /path/to/model --out /path/to/materials --collect-only --jobs 8
+PYTHONHASHSEED=0 python -B -m scar.cli source-symbols --model /path/to/model --materials /path/to/materials --out /path/to/check --verify --jobs 8
+```
+
+固定seed只用于分析进程；实际hash上下文写入profile，worker不一致时拒绝。每源scope/symbol上限可配置，
+F1/F2及原材料的replay预算也受本次上限约束。默认capture会向可写模型只追加source_symbols；
+collect-only是独立材料store，fresh核验绑定必需源码收据。PUBLIC_COMPILER_VIEW/UNJOINED不授AST绑定或scope完整性。
+/home已恢复可写，同一main的只读期间提交已合并，普通入口可直接使用。
+已验F3各store仍在`/var/tmp/scar-f2-recovery-7w7nd_0z/`，当前canonical模型尚未注册它们；按原收据衔接，不重做F3规则。
+
+F3-B（只分类字段角色，不执行symtable或目标）：
+
+```bash
+python -B -m scar.cli source-roles --model /path/to/model --out /path/to/roles --collect-only --jobs 8
+python -B -m scar.cli source-roles --model /path/to/model --materials /path/to/roles --out /path/to/check --verify --jobs 8
+```
+
+每store只保存一份`source_roles/catalog.json.gz`，每源为稀疏原槽ports和484条计数；
+`--max-ports/--max-slots`限制本层，`--max-nodes/--max-tokens`同时约束上游重放。
+默认capture向可写模型只追加source_roles；collect-only不改模型，verify重新计算角色与计数。
+纯API以`read_source_syntax_material`取得验证后的不可变F2材料，用`SyntaxRoleView(material)`复用索引查询。
+
+C1源码上下文（不求词法存储或建立真实frame）：
+
+```bash
+python -B -m scar.cli source-contexts --model /path/to/model --roles-materials /path/to/roles --out /path/to/contexts --collect-only --jobs 8
+python -B -m scar.cli source-contexts --model /path/to/model --roles-materials /path/to/roles --materials /path/to/contexts --out /path/to/check --verify --jobs 8
+```
+
+外部B输入只允许只读采集/核验；B已注册model时可省`--roles-materials`并使用默认增量发布。
+C1只存scope/region/private策略与稀疏原槽边界，catalog共享一份；同源F2/B各只fresh一次。
+`SourceContextView(syntax, roles, contexts).resolve(slot)`或`.port_context(port)`复用父槽索引；不复制端口或逐槽context。
+`--max-scopes/--max-regions/--max-boundaries`限制本层，`--max-slots`及其余输入预算同时约束重放。
+
+C2a名字投影和整scope声明：
+
+```bash
+python -B -m scar.cli source-declarations --model /path/to/model --roles-materials /path/to/roles --contexts-materials /path/to/contexts --out /path/to/declarations --collect-only --jobs 8
+python -B -m scar.cli source-declarations --model /path/to/model --roles-materials /path/to/roles --contexts-materials /path/to/contexts --materials /path/to/declarations --out /path/to/check --verify --jobs 8
+```
+
+外部B/C1输入只读、全收据固定；全部canonical时才允许默认append。每原B port一disposition，名字只intern一次。
+`SourceDeclarationView(...).port/scope/contribution/name`查询原引用账本；`--max-names/--max-contributions/--max-conflicts`约束本层。
+投影阶段固定`SYMBOL_VISIT_PROJECTION`；源码操作意图、visit flags、visibility和C1抑制分别保存，不授运行值或物理地址。
+
+C2b条件化namespace接口与捕获（仍不授C3编译器投影）：
+
+```bash
+python -B -m scar.cli source-bindings --model /path/to/model --roles-materials /path/to/roles --contexts-materials /path/to/contexts --declarations-materials /path/to/declarations --out /path/to/bindings --collect-only --jobs 8
+python -B -m scar.cli source-bindings --model /path/to/model --roles-materials /path/to/roles --contexts-materials /path/to/contexts --declarations-materials /path/to/declarations --materials /path/to/bindings --out /path/to/check --verify --jobs 8
+```
+
+三个上游store固定原收据；全部canonical时才允许默认append。每store一catalog、每源一类型化绑定分片。
+`SourceBindingView(roles, contexts, declarations, material).port/scope/binding/interface/plan/capture/relay`查询原引用，`.verify()`核引用与逆边。
+八项本层预算超限不发布部分表；源码冲突保端口与原因。namespace为源码模板，未观察运行字典、物理cell或地址。
+
+C3-T编译器拓扑（需要固定分析进程hash上下文；不运行目标）：
+
+```bash
+PYTHONHASHSEED=0 python -B -m scar.cli compiler-topology --model /path/to/model --roles-materials /path/to/roles --contexts-materials /path/to/contexts --symbols-materials /path/to/symbols --out /path/to/topology --collect-only --jobs 8
+PYTHONHASHSEED=0 python -B -m scar.cli compiler-topology --model /path/to/model --roles-materials /path/to/roles --contexts-materials /path/to/contexts --symbols-materials /path/to/symbols --materials /path/to/topology --out /path/to/check --verify --jobs 8
+```
+
+`CompilerTopologyView(roles, contexts, native, material)`查询`.scope/.region/.block`，传原SourceContextView后可查询`.port`。
+模板保原construction parent/children；PUBLIC引用原F3-A行，INLINED/FUTURE_DETACHED保模板和规则，不伪造公开行。
+`--max-blocks/--max-rewrites/--max-visit-steps`约束本层；只验拓扑与scope元数据，符号来源/参数仍未投影。
+
+C3-S符号来源与参数投影：
+
+```bash
+PYTHONHASHSEED=0 python -B -m scar.cli compiler-symbols --model /path/to/model --roles-materials /path/to/roles --contexts-materials /path/to/contexts --declarations-materials /path/to/declarations --symbols-materials /path/to/symbols --topology-materials /path/to/topology --out /path/to/compiler-symbols --collect-only --jobs 16
+PYTHONHASHSEED=0 python -B -m scar.cli compiler-symbols --model /path/to/model --roles-materials /path/to/roles --contexts-materials /path/to/contexts --declarations-materials /path/to/declarations --symbols-materials /path/to/symbols --topology-materials /path/to/topology --materials /path/to/compiler-symbols --out /path/to/check --verify --jobs 16
+```
+
+`CompilerSymbolView(declarations, topology, native, material)`查询slot/fact/source/port/symbol/parameter，`.why(scope,ordinal)`返回有界来源引用。
+source slot、compiler slot与native行分域；scope code不是低位flag；varnames只是有序参数，不冒充runtime locals布局。
+五项独立本层预算与原D.max_contributions分开；超限不发布部分来源表，外部五store均固定原收据。
+
+F3-D只读组合验收（不复制程序图，不运行目标）：
+
+```bash
+PYTHONHASHSEED=0 python -B -m scar.cli frontend-check --model /path/to/model \
+  --roles-materials /path/to/roles --contexts-materials /path/to/contexts \
+  --declarations-materials /path/to/declarations --bindings-materials /path/to/bindings \
+  --symbols-materials /path/to/symbols --topology-materials /path/to/topology \
+  --compiler-symbols-materials /path/to/compiler-symbols --out /path/to/fresh-check --jobs 16
+```
+
+全部材料已注册到model时可省略对应sidecar参数。只写验收summary，固定输入/实现收据并重验原Q/S及父层。
+`read_frontend_bindings(F0,F1,F2,B,C1,D,Q,A,T,S)`返回原表组合view；
+`.port/.implicit/.endpoints/.parameter/.why`分别查询原引用，不合并源码namespace与compiler分类。
+endpoint中的KEEP路径显式标记association；query预算耗尽返回incomplete与最多一条frontier及remaining，不当成无依赖。
+
+F4-A共享结构目录（不执行目标、不构造程序实例图）：
+
+```bash
+python -B -m scar.cli program-types --out /path/to/type-materials
+python -B -m scar.cli program-types --materials /path/to/type-materials --out /path/to/fresh-type-check
+```
+
+`program_type_catalog/read_program_type_catalog`保原记录类型、字段语法和实现收据；
+`validate_program_shape(graph,max_visits=...)`核exact名义类型与构造约束，返回cross-record/opcode语义未核标记；完整图仍须后层核验。
+类型图递归用REF表示，值对象循环拒绝；原图和输入目录不改，不存每次迭代数值。
 
 ## 已有建图入口（前端形式验收尚未完成）
 

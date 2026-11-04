@@ -1,51 +1,72 @@
 # 当前状态
 
-**第一阶段未完成。按形式阶段 F0→F1→F2→F3→F4→F5→F6 顺序推进；声明材料的 F0/F1/F2 已验收。**
-下一层只做 F3 作用域与名字绑定。已有后层局部代码保留，验收前不新增 F4 及后层规则。
-阶段契约见 [ARCHITECTURE](ARCHITECTURE.md)，入口见 [DEVELOPMENT](DEVELOPMENT.md)。
+**第一阶段未完成。F0/F1/F2、F3各子层及组合、F4-A已按声明范围验收；当前下一层是F4-B操作签名与产生规则。**
+范围为CPython 3.14.7、866份声明源码及其原收据；编译器材料另固定analysis hash seed=0。
+这不证明依赖发现完整、运行对象绑定已观察或最终执行图已闭合。阶段契约见[ARCHITECTURE](ARCHITECTURE.md)。
 
-## 已验收的形式输入层
+## 实现与历史验收
 
-范围是当前声明的866份源码，不是依赖发现完整性证明。
+下表证据已核实存在。`R`为`/var/tmp/scar-f2-recovery-7w7nd_0z/`；秒数为采集/独立fresh核验。
+F3耗时包含其声明的父层重放，不能相加当作单次建图时间。各层计数保留各自类型与分母。
 
-| 层 | 已核材料 | 结果 |
-|---|---:|---|
-| F0 bytes/编码 | 12,655,117原始bytes | 原文、SHA、编码结果与错误可fresh还原 |
-| F1 token | 1,961,177个 | 全字段/exact_type、换行映射、gap、真实EOF与官方流相等 |
-| F2 AST | 1,511,372个occurrence | 866/866 PARSED，从存表还原并fresh逐字段核验 |
+| 层 | 已验收的机械输出 | 秒数 | 证据（相对R） |
+|---|---|---:|---|
+| F0 材料 | 866份、12,655,117原始bytes；编码/错误与精确还原 | 38.72 / 4.72 | 当前目录`formal-frontend-f0/` |
+| F1 词法 | 1,961,177个token；全字段、exact_type、换行/gap与真实EOF | 44.41 / 109.73 | 当前目录`formal-frontend-f1/` |
+| F2 语法 | 1,511,372个occurrence；2,551,189个field及3,931,984个attribute槽 | 110.91 / 157.32 | `run.json`、`verification/result.json` |
+| F3-A compiler材料 | 40,411个scope、208,528个symbol；原序参数/flags与child引用 | 162.00 / 162.33 | `f3a/{run.json,verification/result.json}` |
+| F3-B 字段角色 | 484条共享规则；6,483,173槽、563,522个稀疏port逐项闭合 | 167.00 / 170.78 | `f3b/{run.json,verification/result.json}` |
+| F3-C1 源码上下文 | 33,752个source scope、65,171个region、94,813条边界 | 262.13 / 266.26 | `f3c1/{run.json,verification/result.json}` |
+| F3-C2a 声明账本 | 72,731个名字键、392,706条贡献；全部原port有disposition | 358.73 / 368.58 | `f3c2a/{run.json,verification/result.json}` |
+| F3-C2b namespace/捕获 | 83,117个binding、112,631个环境接口、10,224项捕获需求 | 473.15 / 479.73 | `f3c2b/{run.json,verification/result.json}` |
+| F3-C3T compiler拓扑 | 44,032个模板与40,411个公开行；原scope/region及父子边对账 | 506.00 / 506.91 | `f3c3/{run.json,verification/result.json}` |
+| F3-C3S 符号来源/参数 | 433,867个fact；208,528个原symbol与63,315个参数位置一致 | 638.22 / 643.98 | `f3c3s/{run.json,verification/result.json}` |
+| F3-D 原引用组合 | 866/866 VERIFIED；全部port、源码贡献、原symbol/参数闭合，冲突0 | — / 977.14 | `f3d/{fresh/result.json,formal-contract.json}` |
+| F4-A 结构类型域 | 205记录/733字段、18 ID、60枚举/313成员、75有序union | 0.089 / 0.168 | `f4a/{materials,verification}/result.json` |
 
-F2全量重验155.21秒，8个spawn进程；866个语法分片共33,269,423压缩bytes。
-官方schema有113个具体constructor、196个字段、288个属性槽；真实源码观察101种constructor。
-339种合成结构形态核codec规则，不冒充parser实际覆盖；独立逐字段检查presence、引用、精确标量及None空洞。
-四种mode及错误/预算出口已验；只执行官方ONLY_AST，没有执行LeWM、symtable或目标bytecode。
-F0/F1/F2与持久性相关的20项检查通过（7.08秒），包括独立DTO/字段核对及发布故障注入。
-F2是语法输入表，尚未授权绑定、效果、计算复用或图化简。旧ast.walk ID保持原样，不混作F2局部ID。
+F0/F1当前目录为`artifacts/current/queries/`下的同名目录。
+F2保缺失/显式None/空列表、列表None空洞及精确IEEE/complex/bytes/代理码点；存表可还原官方AST。
+113个constructor、196个field及288个attribute槽的339种合成形态与实际源码101种constructor分别计数。
+F3各子层的866份材料均有fresh结果；F3-D正式契约已accepted，不能把已实现的绑定工作退回“尚未开发”。
+F3-D的8,375项隐式需求中8,182匹配、193按future规则省略；合成header仍保compiler-only来源。
+F4-A仅验结构类型域：可达Any/object/未解类型为0；没有据此宣布opcode、效果、CFG或全部lowering闭合。
 
-证据：`artifacts/current/queries/formal-frontend-f2/{verification/result.json,recovery/,file/result.json}`。
-F0/F1历史核验在各自`formal-frontend-f0/f1/`；F2此次fresh同时重新核了其全部源输入。
-原F2采集报告在恢复后为空，完整采集耗时已丢失，不能补写；这里报告的是重验耗时。
+实例与规则域分别验收：真实DELETE等零观察项有独立micro正例；单例operator仍按语法occurrence区分。
+只做静态官方ONLY_AST/compiler材料分析，不执行LeWM、目标bytecode或Tensor数值采集。
+语法成功不等于scope合法；F3条件化namespace不是已观测的runtime对象、地址或co_varnames布局。
+旧ast.walk ID与新F2局部ID保持原域，不因parser参数不同而静默重排或按name/line接线。
 
-## 中断恢复与当前存储
+## 恢复、同步与当前存储
 
-恢复后原manifest、F2报告及2个F2分片为空；后两片已从保存的F0/F1重新生成。
-从原866-unit basis恢复核心清单：13,108个核心分片、2,310,613,691压缩bytes的长度/SHA全部匹配。
-36,706个原lexical entry与36,706个body entry_key逐项一致；原端点、字段、顺序和8,829个body artifact引用保留。
-原manifest的附加统计、计划和CALL/class发布元数据未精确恢复；7,117个相关材料保留为owned材料，未冒称原发布范围恢复。
-原source-scan前沿摘要也未恢复，不能把缺失当成remaining为空。恢复摘要使用机械计数，原耗时不猜填。
-F0/F1/F2发布已补文件/目录/manifest fsync、完整报告发布及故障边界检查；两次目录rename仍有可恢复窗口。
+`/home`已恢复可写；只读期间的源码缓冲已取回并入当前唯一工作区，合并后的相关回归已通过。
+F3/F4-A真实材料完整保留在R；历史收据均限定当时profile与输入，**尚未canonical注册到当前模型**。
+源码同步不等于材料注册；下一步先核原收据/共享catalog及对应范围，再完成注册，不重做已通过的F3。
 
-当前24,264个压缩分片、2,579,129,690 bytes，包含材料、诊断、局部图及保留关系，不能全部计为实现图。
-核心body状态：局部图8,098；未尝试23,645；入口适配缺失4,200；不支持326；形状不支持437。
-恢复后`eval.py`词法查询正常；独立还原其1,063个F2 occurrence与官方AST一致。
-当前manifest与fresh核验时manifest的差异只涉及恢复显示元数据，源单位和分片收据完全相同；
-`recovery/query-metadata-bridge.json`逐项限定差异，`run.json`记录当前与核验时的SHA。
+最初发现manifest、F2报告及2个F2分片为空；两片已从原F0/F1重建，F2本轮全量fresh重验155.21秒。
+同轮F0/F1/F2及持久性20项检查通过（7.08秒），包含独立字段核对和发布故障注入。
+合并远端后，F3材料/组合与持久性10项集成检查通过（29.08秒）；F2/F3-A reader六项检查另通过。
+随后在`R/syntax-materials.tar.gz`找到完整manifest，已按原SHA精确恢复全部metadata及CALL/class发布范围。
+当前manifest SHA-256：`f1c5834c5e0fc115954f87dc77fa4f0d2be55788e920bcdbbbfa64842bf7bb1e`。
+其866份F0/F1/F2收据与本轮fresh输入逐一一致；恢复过程未改原source/body ID或原关系的证据范围。
+
+恢复收据：`artifacts/current/queries/formal-frontend-f2/recovery/exact-restoration.json`。
+中间的投影恢复及query-metadata bridge已由精确恢复取代；不得继续描述为原metadata永久丢失或原CALL/class未恢复。
+F0/F1/F2发布已补文件/目录/manifest fsync、完整报告发布与故障边界检查；两次目录rename之间仍有可恢复窗口。
+
+当前24,264个压缩分片、2,579,129,690 bytes；包括材料、诊断、局部图与关系，不能全算实现图。
+核心body：局部图8,098；未尝试23,645；入口适配缺失4,200；不支持326；形状不支持437。
+13,108个原核心分片的长度/SHA一致；36,706个lexical entry与body entry_key逐项一致。
+历史关系仍限定原basis；形式层追加或材料注册不能自动扩大其授权范围。
 
 ## 下一层与整个第一阶段缺口
 
-1. **F3绑定**：固定官方symtable/profile；按constructor×field识别每个名字来源和角色，
-   保存完整scope/symbol/namespace链，再建立AST occurrence到scope的可验证对应；不能用(name,line)猜唯一身份。
-2. **F4规范IR**：逐语法类别/上下文验收控制、状态、效果与完成端口；已有局部图不证明规则闭合。
-3. **F5/F6**：补跨子图、native/runtime/kernel、资源和数据来源连接；恢复保留关系的发布范围，重新核查依赖发现前沿。
+1. **恢复收尾**：衔接F3材料canonical注册并固定F4-A共享类型目录引用，保原ID和输入限定；不重复开发F3。
+2. **F4-B产生规则**：统一操作家族、参数化签名、结果/效果与源码原引用，再按规则域验收。
+   旧core操作语义仍散在32个源码Opcode、88个PythonProtocol及typed侧表；label还承担cleanup/class/native派发。
+   旧通用结构校验可容纳ADD的0/1/3输入或缺result，说明缺少统一签名；这不代表可绕过完整source replay。
+3. **F4-C规范共享图**：消费已验F2/F3原材料与ID，生成并逐项验收控制、状态、效果和完成端口。
+   旧prepare_source重parse及按name/line合scope的路径不能作为新F4权威；函数/循环保可展开共享区域，不按迭代unroll。
+4. **F5/F6**：接通跨子图、native/runtime/kernel、资源与数据来源；重新核依赖发现前沿和完整覆盖。
 
-LeWM仍是外部testcase。先前CEM probe只有人工quadratic cost、2轮×4候选的局部运行证据；
-它不证明完整episode、当前形式前端之后的层已通过，也没有LeWM加速比结论。
+LeWM仍是外部testcase。已有CEM probe仅人工quadratic cost、2轮×4候选的局部运行证据；
+当前不做detector/backend扩展或程序变换，没有完整episode优化或LeWM加速比结论。
