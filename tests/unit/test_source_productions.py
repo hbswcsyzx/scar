@@ -55,7 +55,7 @@ def test_closed_grammar_exact_records_strict_codec_and_budgets():
     assert summary['control_semantics_checked'] is False
     assert A.read_production_plan(A.production_plan_document(value)) == value
     catalog = A.production_type_catalog()
-    assert catalog['counts'] == dict(records=46, fields=128, identifiers=4, enums=16, enum_members=203, unions=14)
+    assert catalog['counts'] == dict(records=46, fields=128, identifiers=4, enums=16, enum_members=206, unions=14)
     assert set(catalog['instruction_variants']) == {
         'EvaluateChild', 'ApplyLanguageAction', 'ApplyPythonProtocol', 'ApplyDelegationProtocol', 'AccessBinding', 'ConstructValue', 'DefineLiteral', 'ApplyRegion',
         'BranchControl', 'LoopControl', 'DeferRegion', 'ReferenceEnvironment', 'EnterDeferredBody', 'CleanupControl', 'HandleCompletions',
@@ -151,9 +151,10 @@ def test_delegation_boundaries_have_closed_signatures_and_distinct_send_outcomes
         raised = P.ProductionCompletion(C.RAISE, (*(REF for _ in range(
             1 if abi is ExceptionABI.EXCEPTION_WORLD else 2)), world))
         for kind in P.DelegationProtocolKind:
-            ordinary = kind is P.DelegationProtocolKind.STOP_ITERATION_VALUE
+            ordinary = kind in (P.DelegationProtocolKind.STOP_ITERATION_VALUE, P.DelegationProtocolKind.MATCH_STOP_ASYNC_ITERATION)
             args = (*(REF for _ in range(2 if kind is P.DelegationProtocolKind.SEND else 1)), world)
-            result = (REF,) if ordinary else (BOOL, REF, world) if kind is P.DelegationProtocolKind.SEND else (REF, world)
+            result = (BOOL if kind is P.DelegationProtocolKind.MATCH_STOP_ASYNC_ITERATION else REF,) if ordinary else (
+                (BOOL, REF, world) if kind is P.DelegationProtocolKind.SEND else (REF, world))
             outputs = (*normal(*result), *((raised,) if not ordinary else ()))
             root = region('root', parameters=args, outputs=outputs, steps=('delegate',))
             instruction = P.ApplyDelegationProtocol(kind, (TypeBinding('world', world),

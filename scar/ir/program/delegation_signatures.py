@@ -25,9 +25,10 @@ def delegation_signature_catalog():
     raised = Choice('exception_abi', tuple(PatternCase(abi.value, Concat((
         Fixed((REF,) * (1 if abi is ExceptionABI.EXCEPTION_WORLD else 2)), WORLD))) for abi in ExceptionABI))
     for kind in K:
-        if kind is K.STOP_ITERATION_VALUE:
+        if kind in (K.STOP_ITERATION_VALUE, K.MATCH_STOP_ASYNC_ITERATION):
             rows[kind] = Signature(SignatureForm.ORDINARY, (_STATE,),
-                Concat((Fixed((REF,)), WORLD)), results=Fixed((REF,)))
+                Concat((Fixed((REF,)), WORLD)), results=Fixed((
+                    BOOL if kind is K.MATCH_STOP_ASYNC_ITERATION else REF,)))
         else:
             send = kind is K.SEND
             rows[kind] = Signature(SignatureForm.INVOKE, (_STATE, _ABI),

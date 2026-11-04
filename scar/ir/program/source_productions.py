@@ -127,6 +127,9 @@ class DelegationProtocolKind(str, Enum):
     AWAITABLE_ITER = 'AWAITABLE_ITER'
     SEND = 'SEND'
     STOP_ITERATION_VALUE = 'STOP_ITERATION_VALUE'
+    GET_ASYNC_ITERATOR = 'GET_ASYNC_ITERATOR'
+    GET_ASYNC_NEXT = 'GET_ASYNC_NEXT'
+    MATCH_STOP_ASYNC_ITERATION = 'MATCH_STOP_ASYNC_ITERATION'
 
 
 class DeferredBodyKind(str, Enum):
@@ -440,7 +443,7 @@ class SourceProductionPlan:
     steps: tuple[ProductionStep, ...]
     slots: tuple[ProductionSlotDisposition, ...]
     schema: str = 'scar.source-production-plan'
-    schema_version: int = 4
+    schema_version: int = 5
     authority: str = 'SOURCE_RECIPE_SHAPE_ONLY'
 
 
