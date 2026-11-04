@@ -101,8 +101,8 @@ call/map/string/assert参数也沿闭合原端口组解析；空组保DECLARED_E
 F4-B现有11类表达式局部规则：名称及属性/索引读写、literal、算术/一元、slice、walrus、条件/短路/比较；直接消费原F2/F3，无目标重parse/执行。
 规则目录对113构造分流：11类局部规则、32类selector metadata、70类规则前沿；这不是全构造/全部上下文已闭合。
 真实eval/CEM两份源码生成999个局部recipe，另191个表达式规则前沿（其中Call 140个），保437项child接口义务。
-两源流式压缩片共271,034 bytes（解压5,940,994）；2进程采集13.04秒、fresh逐记录核验12.79秒，见`queries/source-expression-rules/{materials,verification}/result.json`。
-本轮相关32项检查通过（25.47秒），包含同类型操作数/状态边调换及重签收据后仍拒错误计划；全部由主代理完成，无新增subagents。
+两源流式压缩片共271,034 bytes（解压5,940,994）；2进程采集13.46秒、fresh逐记录核验13.54秒，见`queries/source-expression-rules/{materials,verification}/result.json`。
+本轮相关32项检查通过（26.16秒），包含同类型操作数/状态边调换及重签收据后仍拒错误计划；全部由主代理完成，无新增subagents。
 recipe不是canonical CFG/SSA；state来源、child实现与effects未证，不能发布全图或开启变换。
 
 1. **F4-B后续规则**：接完整操作家族、typed参数来源、状态/access契约和源码产生规则，再接版本化根与强制reader。

@@ -163,6 +163,7 @@ PYTHONHASHSEED=0 python -B -m scar.cli source-expressions --model /path/to/model
 ```
 
 `--source`可重复；省略时处理声明源码全集。每源流式写一个`expressions.jsonl.gz`，共享目录只存一份，fresh逐记录重新产生并比较。
+规则目录绑定recipe类型目录摘要；输入语法或记录构造契约变化时拒绝沿用原材料。
 `SourceExpressionRules(ProductionSourceIndex, world=…, exception_abi=…).build/verify`不parse目标；按原字段定义顺序，保持state流与短路对象身份。
 显式rule frontier保原occurrence/构造/用途；child接口、效果和state来源仍是义务。不能用这个入口宣称完整CFG/SSA或执行图已生成。
 

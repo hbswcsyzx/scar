@@ -8,7 +8,7 @@ from dataclasses import dataclass, field
 from hashlib import sha256
 from pathlib import Path
 
-from scar.analysis.source_productions import ProductionError, ProductionSourceIndex, _digest
+from scar.analysis.source_productions import ProductionError, ProductionSourceIndex, _digest, production_type_catalog
 from scar.ir.program import source_productions as P
 from scar.ir.program.control import LanguageCompletionKind as C
 from scar.ir.program.model import ValueKind, ValueType
@@ -94,6 +94,7 @@ class SourceExpressionRules:
                 purposes=[p.value for p in purposes], selectors=sorted(_SELECTORS.get(row.name, ()))))
         return dict(schema='scar.source-expression-rule-catalog', schema_version=1,
             source_schema_sha256=self.source.roles.catalog.f2_schema_sha256,
+            recipe_type_catalog_sha256=production_type_catalog()['content_sha256'],
             rules=rows, implementation_sha256=sha256(Path(__file__).read_bytes()).hexdigest(),
             state_parameter=encode(self.world), exception_abi=self.exception_abi.value,
             child_interfaces='VALUE:(WORLD)->(REFERENCE,WORLD);STORE:(REFERENCE,WORLD)->(WORLD);DELETE:(WORLD)->(WORLD)',
