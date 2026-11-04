@@ -169,10 +169,11 @@ PYTHONHASHSEED=0 python -B -m scar.cli source-expressions --model /path/to/model
 显式rule frontier保原occurrence/构造/用途；child接口、效果和state来源仍是义务。不能用这个入口宣称完整CFG/SSA或执行图已生成。
 调用/显示使用已有PythonProtocol签名，item/pair数量由原字段分组导出；父属描述符另记`PARENT_SOURCE_DESCRIPTOR`，不计作缺失的独立表达式规则。
 容器、格式化/模板规则分别在`source_display_rules.py`、`source_string_rules.py`；代码SHA和精确字面值输入类型均进入共享规则目录。
-同步推导式在`source_comprehension_rules.py`；`comprehension`辅助构造保原父generators引用。异步子句返回`ASYNC_COMPREHENSION_FRONTIER`，不生成伪同步循环。
+推导式在`source_comprehension_rules.py`；同步/异步子句共用循环模板，异步advance复用已取得的await iterator，按StopAsyncIteration耗尽。原C1求值归属决定eager/惰性异步传播。
 `source_suspension_rules.py`按原C1执行owner产生Yield规则，区分普通／异步yield和bare None；normal／raise恢复入口显式接收新world，不能保存旧STATE。
 `source_delegation_rules.py`产生Await/YieldFrom共享循环；recipe v3显式保存delegate端口，4种协议强制核签名。采集仍不展开driver/native，准入、close规范化及frame/context保活另验。
-`source_callable_rules.py`产生Lambda及同步GeneratorExp的创建/延迟body；v4参数、初始默认值和活跃转交cell沿`source_deferred_interfaces.py`接原F3，不在创建时读取cell内容。异步生成器表达式返回`ASYNC_GENERATOR_EXPRESSION_FRONTIER`。
+`source_callable_rules.py`产生Lambda及GeneratorExp的创建/延迟body；参数、初始默认值和活跃转交cell沿`source_deferred_interfaces.py`接原F3，不在创建时读取cell内容。v5分别表示异步generator的AWAIT推进及ASYNC_YIELD。
+语句入口：`python -B -m scar.cli source-statements --model /path/to/model --source /original/source.py --out /path/to/materials --jobs 3`；加`--materials /path/to/materials`并换独立输出即可fresh核验。当前支持Expr/Pass/Assign/Delete/Return/Global/Nonlocal，其余逐原occurrence保frontier。两入口复用collector但保独立domain、catalog和分片，不互认收据。
 星号/keyword的失败顺序参考固定版本[CPython codegen](https://github.com/python/cpython/blob/v3.14.7/Python/codegen.c)；本机stack guideline从header读入并固定SHA。
 
 源码身份桥（按unit分片，保持输入模型和旧ID）：

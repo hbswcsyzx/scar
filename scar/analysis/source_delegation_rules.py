@@ -27,12 +27,18 @@ def emit_delegation(b, root, state):
     value, state = b.evaluate(root, b.site('value'), state)
     delegate, state = b.delegation(root, P.DelegationProtocolKind.AWAITABLE_ITER if awaiting
         else P.DelegationProtocolKind.YIELD_FROM_ITER, (value,), state)
+    result = emit_delegate_loop(b, root, delegate, state,
+        P.SuspensionKind.AWAIT if awaiting else P.SuspensionKind.YIELD_FROM)
+    b.finish(root, result, (_REF, b.world))
+
+
+def emit_delegate_loop(b, root, delegate, state, kind):
+    """Drive an already-qualified iterator; acquisition must not be repeated."""
     initial, state = b.literal(root, None, state)
     # Only a real pending send value is carried. There is no fake iterator item
     # before the first SEND; its initial request is exactly None.
     loop = b.region(root.source, (_REF, _REF, b.world), root, P.ProductionRegionKind.LOOP)
-    result = b.emit(root, P.ApplyRegion(P.ProductionRegionCall(loop.id, (delegate, initial, state))), (), (_REF, b.world))
-    b.finish(root, result, (_REF, b.world))
+    loop_result = b.emit(root, P.ApplyRegion(P.ProductionRegionCall(loop.id, (delegate, initial, state))), (), (_REF, b.world))
     body = b.region(root.source, loop.parameters, loop, P.ProductionRegionKind.LOOP_BODY)
     b.emit(loop, P.LoopControl(P.RepeatCondition(), body.id, invariant_count=1),
         tuple(b.parameter(loop, i) for i in range(3)), (_REF, b.world))
@@ -50,7 +56,6 @@ def emit_delegation(b, root, state):
         P.ProductionRegionCall(yielded.id, (delegate, value, current))), (done,), outputs)
     protected = b.region(root.source, yielded.parameters, yielded)
     delegate, value, current = (b.parameter(protected, i) for i in range(3))
-    kind = P.SuspensionKind.AWAIT if awaiting else P.SuspensionKind.YIELD_FROM
     resumed = emit_suspension(b, protected, kind, value, current, delegate=delegate)
     b.finish(protected, resumed, (_REF, b.world))
     handler = b.region(root.source, b.raised, yielded, P.ProductionRegionKind.HANDLER)
@@ -69,3 +74,4 @@ def emit_delegation(b, root, state):
         P.ProductionRegionCall(failed.id, values)), (exhausted,), handler_outputs)
     b.control(yielded, P.HandleCompletions(P.ProductionRegionCall(protected.id,
         tuple(b.parameter(yielded, i) for i in range(3))), (P.CompletionRoute(C.RAISE, None, handler.id),)), (), outputs)
+    return loop_result

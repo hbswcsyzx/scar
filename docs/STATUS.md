@@ -104,13 +104,15 @@ call/map/string/assert参数也沿闭合原端口组解析；空组保DECLARED_E
 真实eval/CEM核419/537项原role引用描述符，查询1.03/1.31秒（父层fresh及索引另9.76/12.12秒）；没有生成新执行图或重放逐构造规则。
 记录在`artifacts/current/queries/source-productions/`；旧manifest不变，LeWM未执行或修改。
 
-F4-B现有28类表达式局部规则，新增Lambda及同步GeneratorExp的创建、参数/捕获和延迟body；规则内核直接消费原F2/F3，strict读取重放父层，不执行目标。async clause及异步GeneratorExp仍有明确规则前沿。
+F4-B现有28类表达式局部规则，async clause及异步GeneratorExp已接入共享await推进和正确耗尽/导出路径；规则内核直接消费原F2/F3，strict读取重放父层，不执行目标。
 规则目录对113构造分流：28类局部规则、5类父上下文描述符、32类selector metadata、48类规则前沿；这不是全构造/全部上下文已闭合。
 真实eval/CEM及buffer/world/spaces五份源码共5,314个表达式：4,964个局部recipe、345个已知不单独求值的源码、5个父属表达式、表达式规则前沿0，分区精确闭合；另记175个父属描述符（含前述5个表达式）。
 4处Lambda、3处GeneratorExp及先前6处Yield/2处YieldFrom均有规则。仍有3,488项child接口义务，不能以局部规则代替完整图。Await及异步上下文在静态micro源码中检验；未声称LeWM样本出现了Await。
 345处SUPPRESSED_SOURCE主要来自future注解，材料v2保留原C1原因/槽并单独计数；它们不是缺失规则。该分类由真实样本发现后修正，未丢弃原源码。
-5个流式压缩片共1,466,127 bytes（解压33,111,032）；3进程采集38.31秒、独立fresh37.87秒，见`queries/source-expression-rules/{materials,verification}/result.json`。
-本轮相关57项检查通过：源码/接口38项（98.93秒）和既有签名/类型域19项（2.89秒）。覆盖两种异常ABI、间接捕获、未赋值cell不提前读、默认值空洞及source/native参数顺序区别；全部由主代理完成，无新增subagents。
+表达式5个流式压缩片共1,466,400 bytes（解压33,109,749）；3进程采集38.14秒、独立fresh38.08秒，见`queries/source-expression-rules/{materials,verification}/result.json`。
+本轮相关63项检查通过（144.14秒）：含两种异常ABI、异步嵌套/eager传播与惰性隔离、源/native参数顺序、语句RHS单次求值及domain收据隔离；全部由主代理完成，无新增subagents。
+新增`source-statements`，同一codec/来源/collector支持7类linear语句；真实五源998个语句中生成561个局部recipe，437个构造仍有明确frontier，另有858项child接口义务。正常路径释放临时引用，异常unwind及完整资源生命周期仍待cleanup/driver层证明。
+语句5片共180,138 bytes（解压4,125,261）；3进程采集31.97秒、fresh32.00秒。主要缺口为If×122、FunctionDef×109、For×52、Raise×39、ImportFrom×34及AnnAssign×24；完整分布见`queries/source-statement-rules/result.json`。这仍是局部产生规则，不能把561个recipe称为已接通完整语句图。
 Call的140个原规则前沿已消除；单星、多星、kwargs连续组和大组路径均有规则，复用已有协议强制核签名。未把位置漂移的bytecode当作F2节点身份。
 容器更新/分组/哈希时机、解包先于目标写入、f-string转换先于spec、模板捕获不立即转换已有静态对照；implicit literal只描述值，不授对象身份或分配证明。
 推导式每子句一份循环模板，外层先求首个iterator、局部scope内赋目标/过滤/求结果；仅advance的StopIteration转为耗尽，body异常保持传播。引用不变不代表内容不变。
@@ -122,7 +124,7 @@ recipe不是canonical CFG/SSA；state来源、child实现与effects未证，不�
    三种域不能互代：32 Opcode、88协议和113语法构造器×上下文分别核验；B1不授新图发布或优化。
    下一步将原声明端口接到F2/F3产生规则，并补function/class/comprehension等参数来源；保活完整性另验，不能抄端口来证明。
    形式顺序：输入/输出结构已固定；当前持续闭合构造×用途×上下文的字段消耗及完成端口，再重放核验，全部闭合后才生成CFG/SSA。
-   下一批先补async comprehension/异步GeneratorExp的获取迭代器、await推进及耗尽/终止接口，再补语句/循环、定义及cleanup；这些规则闭合后进入F4-C。原F3参数/捕获桥已接，但实际调用准入、闭包/native布局和driver/frame/context合同仍须接通。
+   异步表达式局部规则已通过，下一批按真实437项语句缺口推进：先规范suite/控制完成端口，再接If/循环及FunctionDef/Import等声明/定义，最后闭合cleanup；全部闭合后进入F4-C。实际调用准入、闭包/native布局和driver/frame/context合同仍须接通。
    四片其余881操作已分类为控制434、binding246、source invoke201；这是识别结果，不等于其接口/产生规则已通过。
    签名witness仍须进入版本化typed根及强制reader；不能把本层独立查询当作完备。根扩展后重验F4-A目录。
    实读FRAME_BIND为READ_WRITE、UNKNOWN footprint、非full overwrite；不能照旧审计摘要强制WHOLE或升级未知事实。

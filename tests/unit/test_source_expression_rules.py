@@ -88,6 +88,12 @@ def documents():
         'def late_cell():\n    callback = lambda: unbound\n    unbound = make()\n    return callback',
         'generator_clauses = (produce(item,nested) for (item,*rest) in outer() if keep(item) for nested in rest if nested)',
         'nested_generators = (((row,other) for other in inner(row)) for row in outer())',
+        'async def async_comps(source):\n    aset = {produce(x) async for x in source if keep(x)}\n    amap = {key(y): value(y) for row in rows async for y in row if await keep(y)}\n    mixed = [y async for row in source for y in row if y]\n    return aset,amap,mixed',
+        'async_seed = (x async for x in source)',
+        'async_eager_inside = ([x async for x in source] for row in rows)',
+        'sync_lazy_inside = ((x async for x in source) for row in rows)',
+        'async def eager_seed_phase():\n    return (x for x in [y async for y in source])',
+        'def directive_forms(value):\n    global global_state\n    local = 0\n    def nested():\n        nonlocal local\n        global global_state\n        global_state = local = value\n        del local\n        return\n    return nested',
     )) + '\n'
     f0 = source_bytes_document(text.encode(), path='/source/schedules.py', namespace_root='/source')
     f1 = source_tokens_document(f0)
@@ -169,11 +175,7 @@ def test_all_local_families_and_selector_domains_without_reparsing(rules, monkey
                     context = rules.source.context.entry_context(occurrence)
                     assert rules.source.context.material.regions[context.region].eligibility == 'SUPPRESSED'
                     continue
-                if error.code == 'ASYNC_GENERATOR_EXPRESSION_FRONTIER':
-                    assert node.constructor == 'GeneratorExp'
-                    continue
-                assert node.constructor in ('ListComp', 'SetComp', 'DictComp') and error.code == 'ASYNC_COMPREHENSION_FRONTIER'
-                continue
+                raise
         assert result['local_schedule_verified'] and result['child_interfaces_assumed']
         assert not result['effects_proven'] and not result['canonical_graph_generated']
         assert {P.SlotRef(occurrence, 'FIELD', i) for i in range(len(node.fields))} <= {s.field for s in value.slots}
@@ -310,9 +312,20 @@ def test_streamed_store_replays_source_even_if_tampered_receipts_are_resigned(do
     assert counts['suppressed_source_occurrences'] > 0
     assert counts['expression_occurrences'] == sum(counts[k] for k in (
         'local_recipes', 'rule_frontiers', 'suppressed_source_occurrences', 'parent_owned_expressions'))
-    assert fresh['counts']['local_recipes'] > 0 and fresh['counts']['rule_frontiers'] > 0
+    assert fresh['counts']['local_recipes'] > 0 and fresh['counts']['rule_frontiers'] == 0
     assert fresh['whole_program_graph_complete'] is fresh['target_executed'] is False
     assert (model / 'manifest.json').read_bytes() == original
+    from scar.analysis.source_expression_materials import collect_source_statements
+    statements = collect_source_statements(model, tmp_path / 'statements')
+    replayed = collect_source_statements(model, tmp_path / 'statement-fresh', materials=tmp_path / 'statements')
+    assert statements['counts'] == replayed['counts']
+    count = statements['counts']
+    assert count['statement_occurrences'] == sum(count[k] for k in (
+        'local_recipes', 'rule_frontiers', 'suppressed_source_occurrences', 'parent_owned_statements'))
+    assert count['local_recipes'] > 0 and count['rule_frontiers'] > 0
+    assert statements['schema'] == 'scar.source-statement-materials' and statements['domain'] == 'statements'
+    with pytest.raises(ValueError, match='previous rule material'):
+        collect_source_statements(model, tmp_path / 'wrong-domain', materials=store)
     descriptor = captured['units'][0]['artifact']
     path = store / descriptor['path']
     rows = [json.loads(line) for line in gzip.decompress(path.read_bytes()).splitlines()]
@@ -552,8 +565,7 @@ def test_comprehensions_use_shared_loops_and_original_scopes(rules):
             assert [field_name(rules, s.instruction.field) for s in before[-2:]] == ['key','value']
     async_comp = next(i for i in occurrences(rules,'ListComp') if any(
         rules.source.roles.field(g.reference,'is_async').scalar.to_python() for g in rules.source.roles.field(i,'generators').items))
-    with pytest.raises(SourceRuleError, match='ASYNC_COMPREHENSION_FRONTIER'):
-        rules.build(async_comp)
+    rules.verify(rules.build(async_comp))
 
 
 def test_comprehension_clause_and_update_counts_match_static_compilation(rules, documents):
@@ -650,7 +662,7 @@ def test_delegation_keeps_send_and_post_driver_completion_paths_separate(rules, 
             plan = variant.build(occurrence)
             checked = variant.verify(plan)
             assert not checked['native_delegation_expanded'] and not checked['driver_protocol_graph_generated']
-            assert plan.schema_version == 4
+            assert plan.schema_version == 5
             _, root_steps = owned(plan)
             acquire = next(s for s in root_steps if type(s.instruction) is P.ApplyDelegationProtocol)
             assert acquire.instruction.protocol is (P.DelegationProtocolKind.AWAITABLE_ITER if constructor == 'Await'
@@ -705,7 +717,7 @@ def test_delegation_source_rules_match_static_compiler_boundaries(rules, documen
             assert instructions[ordinal+1].opname == 'LOAD_CONST' and instructions[ordinal+1].argval is None
             assert instructions[ordinal+2].opname == 'SEND'
             assert any(i.opname == 'CLEANUP_THROW' for i in instructions[ordinal+2:])
-    assert gets['GET_AWAITABLE'] == len(occurrences(rules, 'Await')) == 5
+    assert gets['GET_AWAITABLE'] == len(occurrences(rules, 'Await')) >= 5
     assert gets['GET_YIELD_FROM_ITER'] == len(occurrences(rules, 'YieldFrom')) == 1
 
 
@@ -767,10 +779,6 @@ def test_generator_creation_keeps_eager_iterator_and_lazy_shared_body_separate(r
     from scar.ir.program.structured import PythonProtocolKind as K
     for occurrence in occurrences(rules, 'GeneratorExp'):
         env = rules.source.deferred.interface(occurrence, WORLD, ExceptionABI.EXCEPTION_WORLD)
-        if env.kind is P.DeferredBodyKind.ASYNC_GENERATOR:
-            with pytest.raises(SourceRuleError, match='ASYNC_GENERATOR_EXPRESSION_FRONTIER'):
-                rules.build(occurrence)
-            continue
         plan = rules.build(occurrence)
         rules.verify(plan)
         root, creation = owned(plan)
@@ -780,14 +788,19 @@ def test_generator_creation_keeps_eager_iterator_and_lazy_shared_body_separate(r
         assert env.parameters[0].kind is P.DeferredParameterKind.INITIAL_ITERATOR
         assert env.parameters[0].binding_port is None
         protocols = [s.instruction.protocol for s in creation if type(s.instruction) is P.ApplyPythonProtocol]
-        assert protocols == [K.MAKE_GENEXPR_FUNCTION, K.GET_ITERATOR, K.CREATE_GENEXPR]
+        clauses = rules.source.roles.field(occurrence, 'generators')
+        first_async = rules.source.roles.field(clauses.items[0].reference, 'is_async').scalar.to_python()
+        assert protocols == ([K.MAKE_GENEXPR_FUNCTION, K.CREATE_GENEXPR] if first_async else
+            [K.MAKE_GENEXPR_FUNCTION, K.GET_ITERATOR, K.CREATE_GENEXPR])
         assert not any(type(s.instruction) is P.SuspendExecution for s in creation)
         assert type(execution[0].instruction) is P.EnterDeferredBody
-        clauses = rules.source.roles.field(occurrence, 'generators')
-        loops = [s.instruction for s in plan.steps if type(s.instruction) is P.LoopControl]
+        loops = [s.instruction for s in plan.steps if type(s.instruction) is P.LoopControl
+            and type(s.instruction.condition) is P.IterationCondition]
         assert len(loops) == len(clauses.items)
         assert all(loop.invariant_count == 1 and loop.condition.world_parameter == 1 for loop in loops)
-        assert sum(type(s.instruction) is P.SuspendExecution for s in plan.steps) == 1
+        yields = [s for s in plan.steps if type(s.instruction) is P.SuspendExecution and s.instruction.delegate is None]
+        assert len(yields) == 1 and yields[0].instruction.suspension is (
+            P.SuspensionKind.ASYNC_YIELD if env.kind is P.DeferredBodyKind.ASYNC_GENERATOR else P.SuspensionKind.YIELD)
         assert not any(type(s.instruction) is P.ApplyPythonProtocol and s.instruction.protocol is K.COMPREHENSION_ADD for s in plan.steps)
 
 
@@ -804,3 +817,117 @@ def test_deferred_source_parameter_order_is_not_native_frame_layout(rules):
     occurrence = assigned_values(rules)['lambda_formals']
     names = [rules.source.roles.locate(p.source)[1].scalar.to_python() for p in rules.source.deferred.parameters(occurrence)]
     assert names == ['a','b','c','rest','d','e','kw']
+
+
+@pytest.mark.parametrize('abi', tuple(ExceptionABI))
+def test_async_advancement_awaits_a_qualified_iterator_and_only_catches_its_exhaustion(rules, abi):
+    variant = SourceExpressionRules(rules.source, world=WORLD, exception_abi=abi)
+    checked = 0
+    for kind in ('ListComp','SetComp','DictComp','GeneratorExp'):
+        for occurrence in occurrences(variant, kind):
+            clauses = variant.source.roles.field(occurrence, 'generators').items
+            if not any(variant.source.roles.field(c.reference, 'is_async').scalar.to_python() for c in clauses):
+                continue
+            plan = variant.build(occurrence); variant.verify(plan)
+            regions = {r.id:r for r in plan.regions}
+            for step in plan.steps:
+                if type(step.instruction) is not P.LoopControl or type(step.instruction.condition) is not P.IterationCondition:
+                    continue
+                control = step.instruction
+                _, advancement = owned(plan, control.condition.advance.region)
+                if not any(type(s.instruction) is P.ApplyDelegationProtocol and
+                        s.instruction.protocol is P.DelegationProtocolKind.GET_ASYNC_NEXT for s in advancement):
+                    continue
+                checked += 1
+                assert advancement[0].instruction.protocol is P.DelegationProtocolKind.GET_ASYNC_NEXT
+                assert not any(type(s.instruction) is P.ApplyDelegationProtocol and
+                    s.instruction.protocol is P.DelegationProtocolKind.AWAITABLE_ITER for s in advancement)
+                _, matcher = owned(plan, control.condition.exhausted)
+                assert matcher[0].instruction.protocol is P.DelegationProtocolKind.MATCH_STOP_ASYNC_ITERATION
+                body = regions[control.body]
+                assert body.parent == step.region and body.parameters == (*regions[step.region].parameters, REF)
+                # Advance, including its shared await loop, is the protected
+                # condition. Target/filter/body failures do not use its matcher.
+                assert regions[control.condition.exhausted].parent == step.region
+                assert body.id != control.condition.advance.region
+    assert checked >= 6
+
+
+def test_async_status_follows_eager_evaluation_but_not_lazy_generator_creation(rules):
+    values = assigned_values(rules)
+    def kind(occurrence):
+        return rules.source.deferred.interface(occurrence, WORLD, ExceptionABI.EXCEPTION_WORLD).kind
+    assert kind(values['async_eager_inside']) is P.DeferredBodyKind.ASYNC_GENERATOR
+    assert kind(values['sync_lazy_inside']) is P.DeferredBodyKind.GENERATOR
+    inner = rules.source.roles.field(values['sync_lazy_inside'], 'elt').reference
+    assert kind(inner) is P.DeferredBodyKind.ASYNC_GENERATOR
+    # The eager first iterable is evaluated by the creator, not by the lazy
+    # body, so an async comprehension there does not change that body's kind.
+    candidates = [i for i in occurrences(rules,'GeneratorExp')
+        if rules.source.context.syntax.nodes[rules.source.roles.field(
+            rules.source.roles.field(i,'generators').items[0].reference,'iter').reference].constructor == 'ListComp']
+    assert len(candidates) == 1 and kind(candidates[0]) is P.DeferredBodyKind.GENERATOR
+
+
+def test_async_loop_boundaries_match_static_cpython_without_running_target_code():
+    import dis
+    from types import CodeType
+    samples = ('(x async for x in source)', '([x async for x in source] for y in outer)',
+        '((x async for x in source) for y in outer)')
+    flags = []
+    for source in samples:
+        code = compile(source, '<static-async-protocol-oracle>', 'eval')
+        body = next(c for c in code.co_consts if type(c) is CodeType)
+        flags.append(bool(body.co_flags & 0x200))
+        pending = [body]
+        while pending:
+            current = pending.pop();pending.extend(c for c in current.co_consts if type(c) is CodeType)
+            instructions = list(dis.get_instructions(current))
+            for ordinal, op in enumerate(instructions):
+                if op.opname == 'GET_ANEXT':
+                    assert instructions[ordinal+1].opname == 'LOAD_CONST' and instructions[ordinal+1].argval is None
+                    assert instructions[ordinal+2].opname == 'SEND'
+                    assert any(i.opname == 'END_ASYNC_FOR' for i in instructions[ordinal+2:])
+    assert flags == [True,True,False]
+
+
+def test_linear_statement_rules_preserve_source_fields_and_completion_interfaces(rules, monkeypatch):
+    from scar.analysis.source_statement_rules import SourceStatementRules
+    statements = SourceStatementRules(rules.source, world=WORLD, exception_abi=ExceptionABI.EXCEPTION_WORLD)
+    supported = {r['constructor'] for r in statements.catalog()['rules'] if r['status'] == 'LOCAL_STATEMENT_RULE'}
+    assert supported == {'Expr','Pass','Assign','Delete','Return','Global','Nonlocal'}
+    seen = set()
+    for occurrence, node in enumerate(rules.source.context.syntax.nodes):
+        if node.constructor not in supported:continue
+        with monkeypatch.context() as current:
+            current.setattr(ast,'parse',lambda *a,**kw:pytest.fail('statement rule reparsed target'))
+            plan = statements.build(occurrence)
+            result = statements.verify(plan)
+        assert plan.purpose is P.ProductionPurpose.STATEMENT
+        assert result['local_schedule_verified'] and not result['canonical_graph_generated']
+        assert {P.SlotRef(occurrence,'FIELD',i) for i in range(len(node.fields))} <= {s.field for s in plan.slots}
+        seen.add(node.constructor)
+    assert seen == supported
+
+
+def test_linear_statements_evaluate_rhs_once_order_writes_and_release_only_owned_temporaries(rules):
+    from scar.analysis.source_statement_rules import SourceStatementRules
+    from scar.ir.program.control import LanguageCompletionKind as C
+    from scar.ir.program.structured import PythonProtocolKind as K
+    statements = SourceStatementRules(rules.source, world=WORLD, exception_abi=ExceptionABI.EXCEPTION_WORLD)
+    occurrence = next(i for i in occurrences(rules,'Assign') if len(rules.source.roles.field(i,'targets').items)==2)
+    plan = statements.build(occurrence); root, steps = owned(plan)
+    evaluated = [s for s in steps if type(s.instruction) is P.EvaluateChild]
+    assert len(evaluated)==3 and [s.instruction.purpose for s in evaluated] == [
+        P.ProductionPurpose.VALUE,P.ProductionPurpose.STORE,P.ProductionPurpose.STORE]
+    assert evaluated[1].arguments[0] == evaluated[2].arguments[0] == P.ProductionResult(evaluated[0].id,0)
+    assert evaluated[2].arguments[1] == P.ProductionResult(evaluated[1].id,0)
+    assert steps[-2].instruction.protocol is K.FRAME_RELEASE_TEMPORARY
+    assert steps[-2].arguments == (P.ProductionResult(evaluated[0].id,0),P.ProductionResult(evaluated[2].id,0))
+    for kind in ('Global','Nonlocal'):
+        _, directive = owned(statements.build(occurrences(rules,kind)[0]))
+        assert len(directive)==1 and directive[0].instruction == P.TransferCompletion(C.FALLTHROUGH)
+    for index in occurrences(rules,'Return'):
+        root, returned = owned(statements.build(index))
+        assert returned[-1].instruction == P.TransferCompletion(C.RETURN)
+        assert not any(type(s.instruction) is P.ApplyPythonProtocol and s.instruction.protocol is K.FRAME_RELEASE_TEMPORARY for s in returned)

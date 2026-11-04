@@ -33,10 +33,28 @@ class DeferredInterfaceIndex:
             if ordinal in active:
                 self.captures[hop.scope].append(ordinal)
         self.yield_owners, self.await_owners = set(), set()
+        eager, direct_async = set(), set()
         for ordinal, node in enumerate(source.context.syntax.nodes):
             if node.constructor in ('Yield', 'YieldFrom', 'Await'):
                 target = self.await_owners if node.constructor == 'Await' else self.yield_owners
                 target.add(source.context.entry_context(ordinal).owner.occurrence)
+            if node.constructor in ('ListComp', 'SetComp', 'DictComp', 'GeneratorExp'):
+                if node.constructor != 'GeneratorExp':
+                    eager.add(ordinal)
+                if any(source.roles.field(item.reference, 'is_async').scalar.to_python()
+                        for item in source.roles.field(ordinal, 'generators').items):
+                    direct_async.add(ordinal)
+        # Eager comprehensions implicitly await their body; lazy generator
+        # construction does not. C1 already routes the first iterable/defaults
+        # to their creator, so this worklist respects those phase boundaries.
+        self.async_owners = set(self.await_owners) | direct_async
+        pending = list(self.async_owners & eager)
+        while pending:
+            creator = source.context.entry_context(pending.pop()).owner.occurrence
+            if creator not in self.async_owners:
+                self.async_owners.add(creator)
+                if creator in eager:
+                    pending.append(creator)
         self._parameters = {}
 
     def parameters(self, occurrence):
@@ -107,8 +125,7 @@ class DeferredInterfaceIndex:
         asynchronous = node.constructor == 'AsyncFunctionDef'
         generator = node.constructor == 'GeneratorExp' or occurrence in self.yield_owners
         if node.constructor == 'GeneratorExp':
-            asynchronous = occurrence in self.await_owners or any(roles.field(item.reference, 'is_async').scalar.to_python()
-                for item in roles.field(occurrence, 'generators').items)
+            asynchronous = occurrence in self.async_owners
         kind = (P.DeferredBodyKind.ASYNC_GENERATOR if generator else P.DeferredBodyKind.COROUTINE) if asynchronous else (
             P.DeferredBodyKind.GENERATOR if generator else P.DeferredBodyKind.FUNCTION)
         scope = self.scopes[occurrence]

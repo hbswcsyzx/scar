@@ -492,9 +492,9 @@ def main(argv=None) -> int:
     if cli_argv and cli_argv[0] == 'source-anchors':
         from scar.analysis.source_anchor_materials import main as source_anchors_main
         return source_anchors_main(cli_argv[1:])
-    if cli_argv and cli_argv[0] == 'source-expressions':
+    if cli_argv and cli_argv[0] in ('source-expressions', 'source-statements'):
         from scar.analysis.source_expression_materials import main as source_expressions_main
-        return source_expressions_main(cli_argv[1:])
+        return source_expressions_main(cli_argv[1:], domain='expressions' if cli_argv[0] == 'source-expressions' else 'statements')
     if cli_argv and cli_argv[0] == "static":
         from scar.analysis.static_program import main as static_main
         return static_main(cli_argv[1:])
@@ -542,6 +542,8 @@ def main(argv=None) -> int:
     source_anchors.set_defaults(func=lambda _: 0)
     source_expressions = sub.add_parser('source-expressions', help='replay local expression rules from original F2/F3; retain explicit rule frontiers')
     source_expressions.set_defaults(func=lambda _: 0)
+    source_statements = sub.add_parser('source-statements', help='replay linear statement rules from original F2/F3; retain explicit frontiers')
+    source_statements.set_defaults(func=lambda _: 0)
     static_cmd = sub.add_parser("static", help="build source-root program graphs without executing the target")
     static_cmd.set_defaults(func=lambda _: 0)
     static_query = sub.add_parser("static-query", help="query stored static definitions and original graph dependencies")

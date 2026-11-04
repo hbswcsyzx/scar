@@ -1,4 +1,4 @@
-"""Stream per-source expression recipes and explicit rule frontiers; never run targets."""
+"""Stream per-source rule recipes and explicit frontiers; never run targets."""
 import argparse
 from collections import Counter
 from concurrent.futures import ProcessPoolExecutor
@@ -15,6 +15,7 @@ import time
 from scar.analysis.frontend_bindings import read_frontend_bindings
 from scar.analysis.source_context_view import SourceContextView
 from scar.analysis.source_expression_rules import SourceExpressionRules, SourceRuleError
+from scar.analysis.source_statement_rules import SourceStatementRules
 from scar.analysis.source_productions import ProductionSourceIndex
 from scar.analysis.source_stage import _durable_bytes, _durable_mkdir, _sync_directory
 from scar.analysis.source_store import read_source_prerequisites
@@ -29,8 +30,8 @@ from scar.ir.record_codec import decode, encode
 
 _PARENTS = ('source_roles', 'source_contexts', 'source_declarations', 'source_bindings',
             'source_symbols', 'compiler_topology', 'compiler_symbols')
-_FRONTIERS = {'RULE_FRONTIER', 'PURPOSE_FRONTIER', 'BINDING_INTERFACE_FRONTIER',
-              'ASYNC_COMPREHENSION_FRONTIER', 'SUSPENSION_CONTEXT_FRONTIER', 'ASYNC_GENERATOR_EXPRESSION_FRONTIER'}
+_FRONTIERS = {'RULE_FRONTIER', 'PURPOSE_FRONTIER', 'BINDING_INTERFACE_FRONTIER', 'SUSPENSION_CONTEXT_FRONTIER',
+              'STATEMENT_CONTEXT_FRONTIER'}
 _WORLD = ValueType(ValueKind.STATE, location=LocationID('source-python-world'))
 
 
@@ -46,6 +47,7 @@ def _implementation():
         'analysis/source_suspension_rules.py',
         'analysis/source_delegation_rules.py', 'ir/program/delegation_signatures.py',
         'analysis/source_callable_rules.py', 'analysis/source_deferred_interfaces.py',
+        'analysis/source_statement_rules.py',
         'analysis/source_productions.py', 'analysis/program_types.py',
         'ir/program/source_productions.py', 'ir/record_codec.py')
     return {name: sha256((package / name).read_bytes()).hexdigest() for name in names}
@@ -61,7 +63,7 @@ def _basis(unit):
 
 
 def _unit(task):
-    model, out, unit, prior, materials, limits, pins, keep_catalog = task
+    model, out, unit, prior, materials, limits, pins, keep_catalog, domain = task
     started = time.monotonic()
     if _implementation() != pins:
         raise ValueError('source rule implementation changed between parent and worker')
@@ -72,12 +74,12 @@ def _unit(task):
     frontend = read_frontend_bindings(f0, f1, f2, *(reader.read(unit['artifacts'][name]) for name in _PARENTS))
     syntax = decode(SourceSyntaxMaterial, f2)
     contexts = SourceContextView(syntax, frontend.roles, frontend.contexts)
-    rules = SourceExpressionRules(ProductionSourceIndex(f0, contexts, frontend),
+    rules = (SourceExpressionRules if domain == 'expressions' else SourceStatementRules)(ProductionSourceIndex(f0, contexts, frontend),
         world=_WORLD, exception_abi=ExceptionABI.EXCEPTION_WORLD)
     catalog = rules.catalog()
     categories = {row.name: row.bases for row in syntax.profile.ast_schema if not row.abstract}
     parent_seconds = time.monotonic() - started
-    relative = 'units/' + unit['key'] + '/expressions.jsonl.gz'
+    relative = 'units/' + unit['key'] + '/' + domain + '.jsonl.gz'
     digest, decoded_bytes = sha256(), 0
     built, frontier, child_obligations, descriptors, suppressed = (Counter() for _ in range(5))
     expressions, parent_expressions = 0, 0
@@ -97,12 +99,12 @@ def _unit(task):
                 raise ValueError('source expression compressed receipt changed')
             stream = stack.enter_context(gzip.GzipFile(fileobj=io.BytesIO(payload), mode='rb'))
         for occurrence, node in enumerate(syntax.nodes):
-            is_expression = 'expr' in categories[node.constructor]
+            is_expression = ('expr' if domain == 'expressions' else 'stmt') in categories[node.constructor]
             owner = rules.descriptor_owner(occurrence)
             if not is_expression and owner is None:
                 continue
             expressions += is_expression
-            purpose = P.ProductionPurpose.VALUE
+            purpose = P.ProductionPurpose.VALUE if domain == 'expressions' else P.ProductionPurpose.STATEMENT
             if node.constructor in ('Name', 'Attribute', 'Subscript', 'List', 'Tuple'):
                 purpose = {'Load': P.ProductionPurpose.VALUE, 'Store': P.ProductionPurpose.STORE,
                            'Del': P.ProductionPurpose.DELETE}[rules.source.roles.context(occurrence)]
@@ -154,7 +156,7 @@ def _unit(task):
         raise ValueError('decoded source expression receipt changed')
     result = dict(unit=unit['key'], path=unit['path'], input=encode(rules.source.input), artifact=descriptor,
         built=dict(sorted(built.items())), frontiers=dict(sorted(frontier.items())),
-        parent_descriptors=dict(sorted(descriptors.items())), expressions=expressions,
+        parent_descriptors=dict(sorted(descriptors.items())), **{domain: expressions},
         suppressed_sources=dict(sorted(suppressed.items())), parent_owned_expressions=parent_expressions,
         child_interface_obligations=dict(sorted(child_obligations.items())),
         parent_seconds=parent_seconds, seconds=time.monotonic()-started,
@@ -164,9 +166,12 @@ def _unit(task):
     return result
 
 
-def collect_source_expressions(model, out, *, sources=(), materials=None, jobs=1,
+def collect_source_rules(model, out, *, domain, sources=(), materials=None, jobs=1,
                                max_nodes=1_000_000, max_tokens=2_000_000,
                                max_steps=100_000, max_regions=100_000):
+    if type(domain) is not str or domain not in ('expressions', 'statements'):
+        raise ValueError('expected the expression or statement source-rule domain')
+    schema = 'scar.source-' + ('expression' if domain == 'expressions' else 'statement') + '-materials'
     limits = dict(nodes=max_nodes, tokens=max_tokens, steps=max_steps, regions=max_regions)
     if type(jobs) is not int or not 1 <= jobs <= 32 or any(type(v) is not int or v < 0 for v in limits.values()):
         raise ValueError('invalid source rule jobs/budgets')
@@ -188,7 +193,7 @@ def collect_source_expressions(model, out, *, sources=(), materials=None, jobs=1
             raise ValueError('fresh verification output must be independent of source materials')
         store_bytes = (store / 'result.json').read_bytes()
         previous = json.loads(store_bytes)
-        if (previous.get('schema') != 'scar.source-expression-materials' or previous.get('schema_version') != 2
+        if (previous.get('schema') != schema or previous.get('schema_version') != 2 or previous.get('domain') != domain
             or previous.get('implementation_sha256') != pins or previous.get('input_basis') != basis
             or previous.get('limits') != limits):
             raise ValueError('previous rule material input/implementation/limit domain differs')
@@ -198,7 +203,7 @@ def collect_source_expressions(model, out, *, sources=(), materials=None, jobs=1
     _durable_mkdir(out)
     started = time.monotonic()
     tasks = [(str(root), str(out), u, prior.get(u['key']), None if store is None else str(store),
-              limits, pins, i == 0) for i, u in enumerate(units)]
+              limits, pins, i == 0, domain) for i, u in enumerate(units)]
     if jobs == 1:
         rows = [_unit(task) for task in tasks]
     else:
@@ -212,9 +217,10 @@ def collect_source_expressions(model, out, *, sources=(), materials=None, jobs=1
         raise ValueError('source rule catalog changed')
     counts = dict(units=len(rows), local_recipes=sum(sum(r['built'].values()) for r in rows),
         rule_frontiers=sum(sum(r['frontiers'].values()) for r in rows),
-        expression_occurrences=sum(r['expressions'] for r in rows),
+        **{('expression_occurrences' if domain == 'expressions' else 'statement_occurrences'):sum(r[domain] for r in rows)},
         parent_descriptors=sum(sum(r['parent_descriptors'].values()) for r in rows),
-        parent_owned_expressions=sum(r['parent_owned_expressions'] for r in rows),
+        **{('parent_owned_expressions' if domain == 'expressions' else 'parent_owned_statements'):
+            sum(r['parent_owned_expressions'] for r in rows)},
         suppressed_source_occurrences=sum(sum(r['suppressed_sources'].values()) for r in rows),
         child_interface_obligations=sum(sum(r['child_interface_obligations'].values()) for r in rows))
     if store is not None and previous['counts'] != counts:
@@ -223,7 +229,7 @@ def collect_source_expressions(model, out, *, sources=(), materials=None, jobs=1
         raise ValueError('model or implementation changed while processing source rules')
     if store is not None and (store / 'result.json').read_bytes() != store_bytes:
         raise ValueError('source rule material manifest changed during fresh verification')
-    report = dict(schema='scar.source-expression-materials', schema_version=2,
+    report = dict(schema=schema, schema_version=2, domain=domain,
         status='LOCAL_RULES_WITH_FRONTIERS' if counts['rule_frontiers'] else 'LOCAL_RULES_VERIFIED',
         mode='FRESH_VERIFICATION' if store is not None else 'COLLECTION',
         input_basis=basis, implementation_sha256=pins, model_manifest_sha256=sha256(manifest_bytes).hexdigest(),
@@ -238,7 +244,15 @@ def collect_source_expressions(model, out, *, sources=(), materials=None, jobs=1
     return report
 
 
-def main(argv=None):
+def collect_source_expressions(model, out, **options):
+    return collect_source_rules(model, out, domain='expressions', **options)
+
+
+def collect_source_statements(model, out, **options):
+    return collect_source_rules(model, out, domain='statements', **options)
+
+
+def main(argv=None, *, domain='expressions'):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--model', required=True)
     parser.add_argument('--out', required=True)
@@ -250,7 +264,7 @@ def main(argv=None):
     parser.add_argument('--max-steps', type=int, default=100_000)
     parser.add_argument('--max-regions', type=int, default=100_000)
     args = parser.parse_args(argv)
-    report = collect_source_expressions(args.model, args.out, sources=args.source, materials=args.materials,
+    report = collect_source_rules(args.model, args.out, domain=domain, sources=args.source, materials=args.materials,
         jobs=args.jobs, max_nodes=args.max_nodes, max_tokens=args.max_tokens,
         max_steps=args.max_steps, max_regions=args.max_regions)
     print(json.dumps({key: report[key] for key in ('status', 'mode', 'counts', 'seconds')}, indent=2))

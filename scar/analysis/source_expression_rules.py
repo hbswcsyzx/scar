@@ -123,9 +123,7 @@ class SourceExpressionRules:
                         if row.name in _TARGETS else (P.ProductionPurpose.VALUE,)) if supported else ()
             rows.append(dict(constructor=row.name, fields=list(row.fields), status=status,
                 purposes=[p.value for p in purposes], selectors=sorted(_SELECTORS.get(row.name, ())),
-                context_frontiers=([dict(field='generators[].is_async', value=1, code='ASYNC_COMPREHENSION_FRONTIER')]
-                    if row.name in _COMPREHENSIONS else [dict(condition='async clauses or body-owned await',
-                        code='ASYNC_GENERATOR_EXPRESSION_FRONTIER')] if row.name == 'GeneratorExp' else []),
+                context_frontiers=[],
                 parent_contexts=([dict(constructor=p, field='args' if p == 'Call' else 'elts')
                     for p in ('Call', 'List', 'Tuple', 'Set')] if row.name == 'Starred' else
                     [dict(constructor=p, field='generators') for p in _COMPREHENSION_PARENTS] if row.name == 'comprehension' else
@@ -294,7 +292,7 @@ class _Builder:
         return self.emit(region, P.ApplyPythonProtocol(kind, bindings, selectors), (*arguments, state), outputs, may_raise=invoke)
 
     def delegation(self, region, kind, arguments, state):
-        invoke = kind is not P.DelegationProtocolKind.STOP_ITERATION_VALUE
+        invoke = kind not in (P.DelegationProtocolKind.STOP_ITERATION_VALUE, P.DelegationProtocolKind.MATCH_STOP_ASYNC_ITERATION)
         bindings = (TypeBinding('world', self.world), *((ChoiceBinding('exception_abi',
             self.rules.exception_abi.value),) if invoke else ()))
         signature = resolve_delegation_signature(kind, bindings)
@@ -395,6 +393,9 @@ class _Builder:
             self.comparison(root, state)
         elif kind == 'Call':
             self.call(root, state)
+        return self.plan(root, root_source)
+
+    def plan(self, root, root_source):
         records = []
         for region in self.regions:
             exits = {}

@@ -1,4 +1,4 @@
-"""Scoped synchronous comprehensions using shared iterator-loop templates.
+"""Scoped comprehensions using shared synchronous/asynchronous loop templates.
 
 Reference-valued invariant ports do not certify invariant referent contents.
 The changing namespace/container/iterator state remains in the carried world.
@@ -26,11 +26,15 @@ def comprehension_clauses(b):
         raw = b.value(asynchronous)
         _require(raw.kind == 'SCALAR' and type(raw.scalar.to_python()) is int and raw.scalar.to_python() in (0, 1),
                  'RULE_SHAPE', str(asynchronous), 'async marker must be an explicit compiler flag')
-        _require(raw.scalar.to_python() == 0, 'ASYNC_COMPREHENSION_FRONTIER', str(asynchronous),
-                 'async clauses require suspension/async exhaustion rules')
         _require(b.value(filters).kind == 'LIST', 'RULE_SHAPE', str(filters), 'filters require an original expression list')
-        clauses.append((target, iterable, filters))
+        clauses.append((target, iterable, filters, bool(raw.scalar.to_python())))
     return clauses
+
+
+def get_iterator(b, region, value, world, asynchronous):
+    if asynchronous:
+        return b.delegation(region, P.DelegationProtocolKind.GET_ASYNC_ITERATOR, (value,), world)
+    return b.protocol(region, K.GET_ITERATOR, (value,), world)
 
 
 def emit_comprehension(b, root, state):
@@ -40,7 +44,7 @@ def emit_comprehension(b, root, state):
         b.mark(name, P.ProductionDispositionKind.EVALUATED_CHILD)
     # Only the outermost iterable is evaluated in the enclosing environment.
     iterable, state = b.evaluate(root, clauses[0][1], state)
-    iterator, state = b.protocol(root, K.GET_ITERATOR, (iterable,), state, selectors=(clauses[0][1],))
+    iterator, state = get_iterator(b, root, iterable, state, clauses[0][3])
     scope = b.region(b.site(output_names[0]), (_REF, b.world), root, P.ProductionRegionKind.COMPREHENSION)
     result = b.emit(root, P.ApplyRegion(P.ProductionRegionCall(scope.id, (iterator, state))), (), (_REF, b.world))
     b.finish(root, result, (_REF, b.world))
@@ -54,7 +58,7 @@ def emit_comprehension(b, root, state):
     b.finish(scope, (container, world), (_REF, b.world))
 
 
-def emit_clause_loops(b, scope, clauses, initial, world, container=None):
+def emit_clause_loops(b, scope, clauses, initial, world, container=None, *, suspension=P.SuspensionKind.YIELD):
     """One loop per clause; generator bodies have no synthetic container."""
     pending = []
     invariant_types = (_REF,) if container is None else (_REF, _REF)
@@ -76,14 +80,24 @@ def emit_clause_loops(b, scope, clauses, initial, world, container=None):
     result = launch(scope, 0, initial, container, world)
     while pending:
         loop, index = pending.pop()
-        target, iterable, filters = clauses[index]
+        target, iterable, filters, asynchronous = clauses[index]
         advance = b.region(target, (_REF, b.world), loop, P.ProductionRegionKind.LOOP_CONDITION)
-        next_item = b.protocol(advance, K.COMPREHENSION_NEXT,
-            (b.parameter(advance, 0),), b.parameter(advance, 1), selectors=(iterable,))
+        if asynchronous:
+            from scar.analysis.source_delegation_rules import emit_delegate_loop
+            qualified, current = b.delegation(advance, P.DelegationProtocolKind.GET_ASYNC_NEXT,
+                (b.parameter(advance, 0),), b.parameter(advance, 1))
+            next_item = emit_delegate_loop(b, advance, qualified, current, P.SuspensionKind.AWAIT)
+        else:
+            next_item = b.protocol(advance, K.COMPREHENSION_NEXT,
+                (b.parameter(advance, 0),), b.parameter(advance, 1), selectors=(iterable,))
         b.finish(advance, next_item, (_REF, b.world))
         exhausted = b.region(target, b.raised, loop, P.ProductionRegionKind.HANDLER)
-        stopped, = b.protocol(exhausted, K.MATCH_STOP_ITERATION,
-            (b.parameter(exhausted, 0),), b.parameter(exhausted, len(b.raised)-1), selectors=(iterable,))
+        if asynchronous:
+            stopped, = b.delegation(exhausted, P.DelegationProtocolKind.MATCH_STOP_ASYNC_ITERATION,
+                (b.parameter(exhausted, 0),), b.parameter(exhausted, len(b.raised)-1))
+        else:
+            stopped, = b.protocol(exhausted, K.MATCH_STOP_ITERATION,
+                (b.parameter(exhausted, 0),), b.parameter(exhausted, len(b.raised)-1), selectors=(iterable,))
         b.finish(exhausted, (stopped,), (_BOOL,))
         body = b.region(target, (*loop.parameters, _REF), loop, P.ProductionRegionKind.LOOP_BODY)
         condition = P.IterationCondition(P.ProductionRegionCall(advance.id,
@@ -105,7 +119,7 @@ def emit_clause_loops(b, scope, clauses, initial, world, container=None):
             iterator, current_container, world, item = unpack(body)
         if index+1 < len(clauses):
             value, world = b.evaluate(body, clauses[index+1][1], world)
-            nested, world = b.protocol(body, K.GET_ITERATOR, (value,), world, selectors=(clauses[index+1][1],))
+            nested, world = get_iterator(b, body, value, world, clauses[index+1][3])
             world = launch(body, index+1, nested, current_container, world)
         else:
             values = []
@@ -115,7 +129,7 @@ def emit_clause_loops(b, scope, clauses, initial, world, container=None):
                 values.append(value)
             if current_container is None:
                 from scar.analysis.source_suspension_rules import emit_suspension
-                _, world = emit_suspension(b, body, P.SuspensionKind.YIELD, values[0], world)
+                _, world = emit_suspension(b, body, suspension, values[0], world)
             else:
                 kind = {'ListComp':'LIST', 'SetComp':'SET', 'DictComp':'DICT'}[b.node.constructor]
                 world, = b.protocol(body, K.COMPREHENSION_ADD, (current_container, *values), world,

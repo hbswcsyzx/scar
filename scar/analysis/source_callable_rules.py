@@ -13,9 +13,6 @@ from scar.ir.program.structured import PythonProtocolKind as K
 def emit_callable(b, root, state):
     env = b.rules.source.deferred.interface(b.occurrence, b.world, b.rules.exception_abi)
     generator = b.node.constructor == 'GeneratorExp'
-    _require(not generator or env.kind is P.DeferredBodyKind.GENERATOR,
-        'ASYNC_GENERATOR_EXPRESSION_FRONTIER', str(b.occurrence),
-        'async generator expressions require async iteration/yield/finalization interfaces')
     field = 'elt' if generator else 'body'
     b.mark(field, P.ProductionDispositionKind.DEFERRED_CHILD)
     defaults, keywords = [], []
@@ -54,7 +51,8 @@ def emit_callable(b, root, state):
     if generator:
         *function_env, state = b.protocol(root, K.MAKE_GENEXPR_FUNCTION, (code, globals_ref, *cells), state, (closure,))
         iterable, state = b.evaluate(root, clauses[0][1], state)
-        iterator, state = b.protocol(root, K.GET_ITERATOR, (iterable,), state)
+        from scar.analysis.source_comprehension_rules import get_iterator
+        iterator, state = get_iterator(b, root, iterable, state, clauses[0][3])
         result = b.protocol(root, K.CREATE_GENEXPR, (*function_env, *cells, iterator), state, (closure,))
     else:
         result = b.protocol(root, K.MAKE_LAMBDA_FUNCTION, (code, globals_ref, *defaults, *keywords, *cells), state,
@@ -64,7 +62,8 @@ def emit_callable(b, root, state):
         (b.world,), may_raise=False)
     if generator:
         from scar.analysis.source_comprehension_rules import emit_clause_loops
-        current = emit_clause_loops(b, body, clauses, b.parameter(body, 1), current)
+        current = emit_clause_loops(b, body, clauses, b.parameter(body, 1), current,
+            suspension=P.SuspensionKind.ASYNC_YIELD if env.kind is P.DeferredBodyKind.ASYNC_GENERATOR else P.SuspensionKind.YIELD)
         value, current = b.literal(body, None, current)
     else:
         value, current = b.evaluate(body, b.site('body'), current)
