@@ -37,6 +37,7 @@ F2语法输入按F0/F1收据、parser profile和局部occurrence ID定位；字�
 条件保留主体、有序操作数和依据；“在条件成立时精确”不等于条件已经获证。
 
 函数体共享一个原始模板，调用点通过实参、形参、环境、状态及返回/异常接口连接。
+词法包含关系与调用边分开。F4-B recipe的`SHARED`区域允许同一词法所有者下的多个子区域通过显式端口调用一份模板，但不得跨namespace或延迟执行边界；原区域参数/结果不能变成隐式跨区引用。普通try/finally据此共享一份finalbody，不按pending completion复制源码。这是局部recipe能力，尚未生成canonical共享图。
 字典显示沿分配、顺序求值、更新及异常状态展开；空字典也不能当共享常量。旧有限文件图保持原覆盖。
 展开查询返回原 Operation/Value/Use，而不是为每个调用复制整份源码图。
 循环也可作为整体展开：当前 `LoopTemplateView` / `LoopConstructView` 是原图的投影视图，

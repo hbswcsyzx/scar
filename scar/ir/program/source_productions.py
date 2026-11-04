@@ -51,6 +51,7 @@ class ProductionRegionKind(str, Enum):
     PATTERN = 'PATTERN'
     COMPREHENSION = 'COMPREHENSION'
     TYPE_PARAMETERS = 'TYPE_PARAMETERS'
+    SHARED = 'SHARED'
 
 
 class ProductionDispositionKind(str, Enum):
@@ -654,6 +655,24 @@ class PrepareReraise:
 
 
 @dataclass(frozen=True, slots=True)
+class MatchExceptionType:
+    """CHECK_EXC_MATCH, including validation of the evaluated catch type."""
+    source: SlotRef
+    exception_abi: ExceptionABI
+
+
+@dataclass(frozen=True, slots=True)
+class DeleteExceptionBinding:
+    """Compiler cleanup deletion authorized by CLEAR_ON_HANDLER_EXIT.
+
+    The original name port supplies the target; no source Del port is invented.
+    Its preceding None assignment is a separate binding write.
+    """
+    port: int
+    exception_abi: ExceptionABI
+
+
+@dataclass(frozen=True, slots=True)
 class GlobalsEnvironment:
     scope: int
 
@@ -748,6 +767,7 @@ ProductionInstruction = (EvaluateChild | ApplyLanguageAction | ReadCompilationOp
     | ReadBuildClass | BuildClassBody | BuildGenericBase | BuildTypeAlias
     | ReadContextMethod | InvokeContextMethod | ContextAwaitable | EnterHandledException
     | RestoreHandledException | ContextExceptionArguments | PrepareReraise
+    | MatchExceptionType | DeleteExceptionBinding
     | ApplyRegion | BranchControl | LoopControl | DeferRegion | ReferenceEnvironment | EnterDeferredBody
     | HandleCompletions | TransferCompletion | SuspendExecution)
 
@@ -790,7 +810,7 @@ class SourceProductionPlan:
     steps: tuple[ProductionStep, ...]
     slots: tuple[ProductionSlotDisposition, ...]
     schema: str = 'scar.source-production-plan'
-    schema_version: int = 12
+    schema_version: int = 13
     authority: str = 'SOURCE_RECIPE_SHAPE_ONLY'
 
 

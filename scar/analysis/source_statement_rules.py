@@ -26,7 +26,8 @@ _FIELDS = {'Expr': ('value',), 'Pass': (), 'Assign': ('targets', 'value', 'type_
     'AsyncFunctionDef': ('name','args','body','decorator_list','returns','type_comment','type_params'),
     'ClassDef': ('name','bases','keywords','body','decorator_list','type_params'),
     'TypeAlias': ('name','type_params','value'),
-    'With': ('items','body','type_comment'), 'AsyncWith': ('items','body','type_comment')}
+    'With': ('items','body','type_comment'), 'AsyncWith': ('items','body','type_comment'),
+    'Try': ('body','handlers','orelse','finalbody')}
 
 
 class SourceStatementRules(SourceExpressionRules):
@@ -149,6 +150,10 @@ class _StatementBuilder(_Builder):
             from scar.analysis.source_statement_contexts import emit_context_statement
             emit_context_statement(self,root,current)
             return self.plan(root,source)
+        elif kind=='Try':
+            from scar.analysis.source_statement_exceptions import emit_try_statement
+            emit_try_statement(self,root,current)
+            return self.plan(root,source)
         self.finish(root, (current,), (self.world,))
         return self.plan(root, source)
 
@@ -158,12 +163,14 @@ class _StatementBuilder(_Builder):
             for kind, target in self.rules.source.statements.completions(occurrence))
 
     def suite(self, region, name, current, *, metadata_prefix=0):
-        self.mark(name, P.ProductionDispositionKind.EVALUATED_CHILD)
-        site = self.site(name)
+        self.suite_at(region,self.site(name),current,metadata_prefix=metadata_prefix)
+
+    def suite_at(self,region,site,current,*,metadata_prefix=0):
+        self.slots[site]=P.ProductionDispositionKind.EVALUATED_CHILD
         values = self.value(site)
         _require(values.kind == 'LIST', 'RULE_SHAPE', str(site), 'suite requires an original list field')
         for ordinal, value in enumerate(values.items):
-            child = self.site(name, ordinal)
+            child = P.SlotRef(site.occurrence,site.group,site.ordinal,(*site.item_path,ordinal))
             if ordinal < metadata_prefix:
                 self.slots[child] = P.ProductionDispositionKind.METADATA
                 continue

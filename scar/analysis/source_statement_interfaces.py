@@ -36,6 +36,7 @@ class SourceStatementInterfaceIndex:
         self._import_projections = {port.site: source.frontend.declarations.ports[i].projection
             for i, port in enumerate(source.frontend.roles.ports) if port.role in (
                 'IMPORT_MODULE_SPEC','IMPORT_MEMBER_SPEC','IMPORT_FROM_MODULE_SPEC','RELATIVE_MODULE_MARKER')}
+        self._exception_ports={port.site:i for i,port in enumerate(source.frontend.roles.ports) if port.role=='EXCEPTION_BINDING_SYNTAX'}
         declared = {row.name for row in source.context.syntax.profile.ast_schema if 'stmt' in row.bases}
         _require(declared == _CONSTRUCTORS, 'constructor domain',
             'finite statement completion rules differ from the original grammar')
@@ -70,6 +71,20 @@ class SourceStatementInterfaceIndex:
         if self.nodes[occurrence].constructor not in ('FunctionDef','AsyncFunctionDef'):
             return None
         return self.declaration_docstring(occurrence)
+
+    def exception_binding(self,occurrence):
+        _require(self.nodes[occurrence].constructor=='ExceptHandler',occurrence,'exception binding requires its original handler')
+        site=P.SlotRef(occurrence,'FIELD',self.roles.fields['ExceptHandler']['name'])
+        value=self.roles.locate(site)[1]
+        _require(value.kind=='SCALAR',site,'handler binder requires its original optional name')
+        if value.scalar.to_python() is None:return None
+        port=self._exception_ports.get(site)
+        _require(port is not None,site,'handler name lacks its original role port')
+        binding=self.source.frontend.bindings.ports[port]
+        _require(binding.write_target is not None and binding.declref is not None
+            and self.source.frontend.declarations.contributions[binding.declref].cleanup_policy=='CLEAR_ON_HANDLER_EXIT',
+            site,'handler target requires its original write access and cleanup declaration')
+        return port
 
     def declaration_docstring(self, occurrence):
         if self.nodes[occurrence].constructor not in ('FunctionDef','AsyncFunctionDef','ClassDef'):

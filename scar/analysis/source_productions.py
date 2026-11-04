@@ -149,7 +149,7 @@ def validate_production_plan(plan, *, max_visits=1_000_000):
     """
     visits = _shape(plan, max_visits)
     _require((plan.schema, plan.schema_version, plan.authority) == (
-        'scar.source-production-plan', 12, 'SOURCE_RECIPE_SHAPE_ONLY'),
+        'scar.source-production-plan', 13, 'SOURCE_RECIPE_SHAPE_ONLY'),
         'SCHEMA', 'plan', 'unsupported recipe schema or authority')
     source = plan.input
     _require(bool(source.path) and bool(source.namespace_root), 'INPUT', 'plan.input', 'source paths must be nonempty')
@@ -334,8 +334,18 @@ def validate_production_plan(plan, *, max_visits=1_000_000):
             _require(kind is None or target.kind is kind, 'REGION_KIND', str(identity), 'wrong nested region kind')
             return target
 
-        def invoke(call):
-            target = child(call.region)
+        def invoke(call, *, shared=False):
+            _require(call.region in regions,'DANGLING_REGION',str(call.region),'missing region template')
+            target=regions[call.region]
+            if shared and target.kind is P.ProductionRegionKind.SHARED:
+                owner=region.id
+                while owner is not None and owner!=target.parent:owner=regions[owner].parent
+                _require(owner is not None and boundaries[target.id]==boundaries[region.id]
+                    and target.context.environment==region.context.environment,
+                    'SHARED_REGION',str(call.region),'shared call must stay under its lexical owner in the same activation/namespace')
+                referenced_regions.add(target.id)
+            else:
+                target=child(call.region)
             _require(tuple(value_type(v) for v in call.arguments) == target.parameters,
                      'PORT_TYPES', str(call.region), 'region call arguments differ from declared parameters')
             return region_outputs[target.id]
@@ -501,6 +511,17 @@ def validate_production_plan(plan, *, max_visits=1_000_000):
                 if raised is not None:wanted[(C.RAISE,None)]=raised
                 _require(args==expected and outputs==wanted,'CONTEXT_INTERFACE',str(identity),
                     'context operation input/completion ports differ from its language contract')
+            elif type(instruction) in (P.MatchExceptionType,P.DeleteExceptionBinding):
+                _require(bool(args) and type(args[-1]) is ValueType and args[-1].kind is ValueKind.STATE,
+                    'EXCEPT_INTERFACE',str(identity),'exception matching/cleanup requires an explicit world')
+                world=args[-1];reference=ValueType(ValueKind.REFERENCE)
+                match=type(instruction) is P.MatchExceptionType
+                if not match:_require(instruction.port>=0,'EXCEPT_INTERFACE',str(identity),'negative source exception binding port')
+                normal=(ValueType(ValueKind.DATA,'builtins.bool'),world) if match else (world,)
+                raised=(reference,world) if instruction.exception_abi is ExceptionABI.EXCEPTION_WORLD else (reference,reference,world)
+                _require(args==((reference,reference,world) if match else (world,))
+                    and outputs=={(C.FALLTHROUGH,None):normal,(C.RAISE,None):raised},
+                    'EXCEPT_INTERFACE',str(identity),'exception matching/cleanup ports differ from the language contract')
             elif type(instruction) in (P.ImportRequest, P.ImportMember, P.ImportStar):
                 _require(bool(args) and type(args[-1]) is ValueType and args[-1].kind is ValueKind.STATE,
                     'IMPORT_INTERFACE', str(identity), 'import requires one explicit source world')
@@ -564,12 +585,12 @@ def validate_production_plan(plan, *, max_visits=1_000_000):
                 _require(signature.arguments == args and expected == outputs, 'PORT_TYPES', str(identity),
                          'delegation ports/completions differ from the explicit signature')
             elif type(instruction) is P.ApplyRegion:
-                _require(not args and invoke(instruction.invocation) == outputs, 'PORT_TYPES', str(identity),
+                _require(not args and invoke(instruction.invocation,shared=True) == outputs, 'PORT_TYPES', str(identity),
                          'region application completions differ or duplicate explicit call arguments')
             elif type(instruction) is P.HandleCompletions:
                 _require(not args and bool(instruction.routes), 'COMPLETION_ROUTE', str(identity),
                          'handler control uses explicit call/capture arguments and nonempty routes')
-                protected = invoke(instruction.protected)
+                protected = invoke(instruction.protected,shared=True)
                 merged, routed = {}, set()
                 for route in instruction.routes:
                     key = route.kind, route.target
@@ -871,7 +892,19 @@ class ProductionSourceIndex:
                         _require(completion.target == self.statements.active_loop(step.source),
                             'SOURCE_LOOP', str(step.id), 'child/transfer completion has a different lexical loop target')
                 instruction = step.instruction
-                if type(instruction) in (P.ReadContextMethod,P.InvokeContextMethod,P.ContextAwaitable):
+                if type(instruction) is P.MatchExceptionType:
+                    site=instruction.source
+                    field,value=self.roles.locate(site)
+                    parent=self.roles.parents.get(site.occurrence)
+                    _require(step.source==site and site.group=='FIELD' and not site.item_path and field.name=='type'
+                        and value.kind=='NODE' and self.context.syntax.nodes[site.occurrence].constructor=='ExceptHandler'
+                        and parent is not None and self.context.syntax.nodes[parent.occurrence].constructor=='Try',
+                        'SOURCE_EXCEPT',str(step.id),'ordinary exception matching requires its original Try handler type')
+                elif type(instruction) is P.DeleteExceptionBinding:
+                    _require(type(step.source) is P.SlotRef and self.roles.locate(step.source)[0].name=='name'
+                        and instruction.port==self.statements.exception_binding(step.source.occurrence),
+                        'SOURCE_EXCEPT',str(step.id),'cleanup deletion requires its original exception binding and cleanup policy')
+                elif type(instruction) in (P.ReadContextMethod,P.InvokeContextMethod,P.ContextAwaitable):
                     site=instruction.source
                     field,value=self.roles.locate(site)
                     parent=self.roles.parents.get(site.occurrence)

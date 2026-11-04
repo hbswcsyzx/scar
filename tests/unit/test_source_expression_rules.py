@@ -700,7 +700,7 @@ def test_delegation_keeps_send_and_post_driver_completion_paths_separate(rules, 
             plan = variant.build(occurrence)
             checked = variant.verify(plan)
             assert not checked['native_delegation_expanded'] and not checked['driver_protocol_graph_generated']
-            assert plan.schema_version == 12
+            assert plan.schema_version == 13
             _, root_steps = owned(plan)
             acquire = next(s for s in root_steps if type(s.instruction) is P.ApplyDelegationProtocol)
             assert acquire.instruction.protocol is (P.DelegationProtocolKind.AWAITABLE_ITER if constructor == 'Await'
@@ -934,7 +934,7 @@ def test_structured_statement_rules_preserve_source_fields_and_completion_interf
     statements = SourceStatementRules(rules.source, world=WORLD, exception_abi=ExceptionABI.EXCEPTION_WORLD)
     supported = {r['constructor'] for r in statements.catalog()['rules'] if r['status'] == 'LOCAL_STATEMENT_RULE'}
     assert supported == {'Expr','Pass','Assign','Delete','Return','Global','Nonlocal',
-        'If','While','For','AsyncFor','Break','Continue','AnnAssign','AugAssign','Assert','Raise','Import','ImportFrom','FunctionDef','AsyncFunctionDef','ClassDef','TypeAlias','With','AsyncWith'}
+        'If','While','For','AsyncFor','Break','Continue','AnnAssign','AugAssign','Assert','Raise','Import','ImportFrom','FunctionDef','AsyncFunctionDef','ClassDef','TypeAlias','With','AsyncWith','Try'}
     seen = set()
     for occurrence, node in enumerate(rules.source.context.syntax.nodes):
         if node.constructor not in supported:continue
@@ -1460,3 +1460,68 @@ def test_context_manager_schedules_protect_targets_preserve_exits_and_restore_ex
     assert any(s.opname=='PUSH_EXC_INFO' for s in sync_ops) and any(s.opname=='POP_EXCEPT' for s in sync_ops)
     async_ops=list(dis.get_instructions(functions['async_contexts']))
     assert {s.arg for s in async_ops if s.opname=='GET_AWAITABLE'}=={1,2}
+
+
+def test_try_schedules_share_finally_and_keep_dispatch_cleanup_and_completion_order(monkeypatch):
+    import dis
+    from types import CodeType
+    from scar.analysis.source_statement_rules import SourceStatementRules
+    from scar.analysis.source_productions import read_production_plan,production_plan_document
+    from scar.ir.program.control import LanguageCompletionKind as C
+    text='def choose(flag):\n    for item in items:\n        try:\n            if flag:\n                return result()\n            run()\n        except ErrorFactory() as err:\n            if flag:\n                continue\n            del err\n            handle()\n        except (Left,Right):\n            raise\n        except:\n            break\n        else:\n            on_else()\n        finally:\n            on_finally()\ndef final_override():\n    try:\n        return result()\n    finally:\n        return replacement()\ndef final_preserve():\n    try:\n        return\n    finally:\n        pass\ndef final_raise():\n    try:\n        raise Source()\n    finally:\n        raise Replacement()\nclass Scope:\n    try:\n        run()\n    except Failure as __error:\n        del __error\nasync def asynchronous():\n    try:\n        await initial()\n    except Failure as error:\n        return await recover(error)\n    finally:\n        await finish()\n'
+    rules=_rules(_documents(text));plans={}
+    for abi in ExceptionABI:
+        statements=SourceStatementRules(rules.source,world=WORLD,exception_abi=abi)
+        for occurrence in occurrences(rules,'Try'):
+            with monkeypatch.context() as guard:
+                guard.setattr(ast,'parse',lambda *a,**kw:pytest.fail('try schedule reparsed source'))
+                plan=statements.build(occurrence);checked=statements.verify(plan)
+            assert read_production_plan(production_plan_document(plan))==plan
+            plans[occurrence]=plan
+            assert not checked['exception_binding_native_cleanup_proven'] and not checked['exception_match_native_dispatch_proven']
+            root,_=owned(plan)
+            assert {(c.kind,c.target) for c in root.completions}<=set(rules.source.statements.completions(occurrence))
+            final=rules.source.roles.field(occurrence,'finalbody').items
+            shared=[r for r in plan.regions if r.kind is P.ProductionRegionKind.SHARED]
+            assert len(shared)==int(bool(final))
+            if shared:
+                calls=[s for s in plan.steps if type(s.instruction) is P.HandleCompletions and s.instruction.protected.region==shared[0].id]
+                assert calls
+                for ordinal in range(len(final)):
+                    source=P.SlotRef(occurrence,'FIELD',rules.source.roles.fields['Try']['finalbody'],(ordinal,))
+                    assert sum(type(s.instruction) is P.EvaluateChild and s.instruction.field==source for s in plan.steps)==1
+            for step in plan.steps:
+                if type(step.instruction) is P.DeleteExceptionBinding:
+                    port=rules.source.frontend.bindings.ports[step.instruction.port]
+                    assert port.delete_target is None  # cleanup uses a declaration, not a forged Del port
+                    assert step.instruction.port==rules.source.statements.exception_binding(step.source.occurrence)
+                    region,steps=owned(plan,step.region);position=steps.index(step)
+                    assert type(steps[position-1].instruction) is P.AccessBinding
+                    assert steps[position-1].instruction.action is P.BindingActionKind.WRITE
+                    restores=[i for i,s in enumerate(steps) if type(s.instruction) is P.RestoreHandledException]
+                    if restores:
+                        assert restores[0]<position  # normal/return/loop exit restores before clear
+                    else:
+                        assert region.parent is not None  # exceptional clear is protected until restoration
+            handlers=rules.source.statements.node_items(occurrence,'handlers')
+            assert sum(type(s.instruction) is P.MatchExceptionType for s in plan.steps)<=sum(
+                rules.source.roles.field(h,'type').kind=='NODE' for h in handlers)
+        for occurrence in occurrences(rules,'ExceptHandler'):
+            assert rules.descriptor_owner(occurrence) is not None
+        functions={rules.source.roles.field(o,'name').scalar.to_python():o for o in occurrences(rules,'FunctionDef')}
+        preserve=rules.source.roles.field(functions['final_preserve'],'body').items[0].reference
+        assert {c.kind for c in owned(plans[preserve])[0].completions}=={C.RETURN}
+        bare=rules.source.roles.field(preserve,'body').items[0].reference
+        assert {c.kind for c in owned(statements.build(bare))[0].completions}=={C.RETURN}
+        override=rules.source.roles.field(functions['final_override'],'body').items[0].reference
+        assert {c.kind for c in owned(plans[override])[0].completions}=={C.RETURN,C.RAISE}
+        choose=rules.source.roles.field(functions['choose'],'body').items[0].reference
+        choose_try=rules.source.roles.field(choose,'body').items[0].reference
+        shared=next(r for r in plans[choose_try].regions if r.kind is P.ProductionRegionKind.SHARED)
+        assert sum(type(s.instruction) is P.HandleCompletions and s.instruction.protected.region==shared.id for s in plans[choose_try].steps)>1
+    # Independent static compiler reference, with no target code execution.
+    code=compile(text,'<static-try-oracle>','exec',dont_inherit=True)
+    choose=next(c for c in code.co_consts if type(c) is CodeType and c.co_name=='choose')
+    ops=list(dis.get_instructions(choose));names={s.opname for s in ops}
+    assert {'CHECK_EXC_MATCH','PUSH_EXC_INFO','POP_EXCEPT'}<=names
+    assert any(s.opname.startswith('DELETE_') and s.argval=='err' for s in ops)

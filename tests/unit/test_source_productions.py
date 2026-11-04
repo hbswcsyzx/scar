@@ -55,7 +55,7 @@ def test_closed_grammar_exact_records_strict_codec_and_budgets():
     assert summary['control_semantics_checked'] is False
     assert A.read_production_plan(A.production_plan_document(value)) == value
     catalog = A.production_type_catalog()
-    assert catalog['counts'] == dict(records=84, fields=229, identifiers=4, enums=20, enum_members=218, unions=20)
+    assert catalog['counts'] == dict(records=86, fields=233, identifiers=4, enums=20, enum_members=219, unions=20)
     assert set(catalog['instruction_variants']) == {
         'EvaluateChild', 'ApplyLanguageAction', 'ReadCompilationOption', 'ApplyInplaceOperator', 'PublishAnnotation',
         'ImportRequest', 'ImportMember', 'ImportStar',
@@ -66,6 +66,7 @@ def test_closed_grammar_exact_records_strict_codec_and_budgets():
         'ReadBuildClass','BuildClassBody','BuildGenericBase','BuildTypeAlias',
         'ReadContextMethod','InvokeContextMethod','ContextAwaitable','EnterHandledException',
         'RestoreHandledException','ContextExceptionArguments','PrepareReraise',
+        'MatchExceptionType','DeleteExceptionBinding',
         'ApplyPythonProtocol', 'ApplyDelegationProtocol', 'AccessBinding', 'ConstructValue', 'DefineLiteral', 'ApplyRegion',
         'BranchControl', 'LoopControl', 'DeferRegion', 'ReferenceEnvironment', 'EnterDeferredBody', 'HandleCompletions',
         'TransferCompletion', 'SuspendExecution'}
@@ -282,6 +283,44 @@ def test_context_manager_interfaces_require_method_phase_current_world_and_excep
             if type(instruction) is P.ContextAwaitable:
                 with pytest.raises(A.ProductionError,match='CONTEXT_INTERFACE'):
                     A.validate_production_plan(replace(specimen,steps=(replace(apply,instruction=replace(instruction,method=P.ContextMethodKind.ENTER)),done)))
+
+
+def test_exception_match_and_generated_delete_interfaces_require_explicit_source_and_world():
+    from scar.ir.program.ids import LocationID
+    from scar.ir.program.protocol_signatures import ExceptionABI
+    world=ValueType(ValueKind.STATE,location=LocationID('except-interface-world'))
+    for abi in ExceptionABI:
+        raised=(REF,world) if abi is ExceptionABI.EXCEPTION_WORLD else (REF,REF,world)
+        for instruction,arguments,result in ((P.MatchExceptionType(P.SlotRef(0,'FIELD',0),abi),(REF,REF,world),(BOOL,world)),
+                (P.DeleteExceptionBinding(0,abi),(world,),(world,))):
+            outputs=(*normal(*result),P.ProductionCompletion(C.RAISE,raised))
+            root=region('except',parameters=arguments,outputs=outputs,steps=('apply','done'))
+            apply=step('apply',root,instruction,tuple(parameter(root,i) for i in range(len(arguments))),outputs)
+            done=step('done',root,P.TransferCompletion(C.FALLTHROUGH),
+                tuple(P.ProductionResult(apply.id,i) for i in range(len(result))),normal(*result))
+            specimen=plan((root,),(apply,done))
+            assert A.read_production_plan(A.production_plan_document(specimen))==specimen
+            with pytest.raises(A.ProductionError,match='EXCEPT_INTERFACE'):
+                A.validate_production_plan(replace(specimen,steps=(replace(apply,arguments=()),done)))
+
+
+def test_shared_template_calls_keep_explicit_ports_and_lexical_activation_boundaries():
+    root=region('root',steps=('left','right'))
+    left=region('left',parent=root.id,steps=('invoke-left',))
+    right=region('right',parent=root.id,steps=('invoke-right',))
+    shared=region('shared',parent=root.id,kind=P.ProductionRegionKind.SHARED,steps=('shared-done',))
+    value=plan((root,left,right,shared),(
+        step('left',root,P.ApplyRegion(P.ProductionRegionCall(left.id,(parameter(root),)))),
+        step('right',root,P.ApplyRegion(P.ProductionRegionCall(right.id,(P.ProductionResult(P.ProductionStepID('left'),0),)))),
+        step('invoke-left',left,P.ApplyRegion(P.ProductionRegionCall(shared.id,(parameter(left),)))),
+        step('invoke-right',right,P.ApplyRegion(P.ProductionRegionCall(shared.id,(parameter(right),)))),
+        step('shared-done',shared,P.TransferCompletion(C.FALLTHROUGH),(parameter(shared),))))
+    assert A.read_production_plan(A.production_plan_document(value))==value
+    for regions in ((root,replace(left,kind=P.ProductionRegionKind.DEFERRED),right,shared),
+            (root,left,right,replace(shared,parent=right.id)),
+            (root,left,right,replace(shared,context=replace(CONTEXT,environment=1)))):
+        with pytest.raises(A.ProductionError,match='SHARED_REGION'):
+            A.validate_production_plan(replace(value,regions=regions))
 
 
 def test_ordered_values_shared_subregion_and_invalid_local_edges():

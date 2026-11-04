@@ -45,6 +45,7 @@ _FIELDS = {
 }
 _AUX_FIELDS = {'keyword': ('arg', 'value'), 'Starred': ('value', 'ctx'),
     'withitem': ('context_expr','optional_vars'),
+    'ExceptHandler': ('type','name','body'),
                'comprehension': ('target', 'iter', 'ifs', 'is_async'),
                'arguments': ('posonlyargs', 'args', 'vararg', 'kwonlyargs', 'kw_defaults', 'kwarg', 'defaults'),
                'arg': ('arg', 'annotation', 'type_comment'), 'alias': ('name', 'asname'),
@@ -64,7 +65,8 @@ _RULE_MODULES = ('source_display_rules.py', 'source_string_rules.py', 'source_co
                  'source_suspension_rules.py', 'source_delegation_rules.py', 'source_callable_rules.py',
                  'source_deferred_interfaces.py', 'source_statement_atoms.py', 'source_statement_imports.py',
                  'source_statement_functions.py', 'source_type_parameter_interfaces.py', 'source_type_parameter_rules.py',
-                 'source_definition_interfaces.py', 'source_statement_definitions.py', 'source_statement_contexts.py')
+                 'source_definition_interfaces.py', 'source_statement_definitions.py', 'source_statement_contexts.py',
+                 'source_statement_exceptions.py')
 
 
 class SourceRuleError(ProductionError):
@@ -137,6 +139,7 @@ class SourceExpressionRules:
                         'posonlyargs', 'args', 'vararg', 'kwonlyargs', 'kwarg')] if row.name == 'arg' else
                     [dict(constructor=p, field='keywords') for p in ('Call','ClassDef')] if row.name == 'keyword' else
                     [dict(constructor=p, field='items') for p in ('With','AsyncWith')] if row.name == 'withitem' else
+                    [dict(constructor=p, field='handlers') for p in ('Try','TryStar')] if row.name == 'ExceptHandler' else
                     [dict(constructor=p, field='names') for p in ('Import','ImportFrom')] if row.name == 'alias' else
                     [dict(constructor=p,field='type_params') for p in ('FunctionDef','AsyncFunctionDef','ClassDef','TypeAlias')]
                         if row.name in ('TypeVar','TypeVarTuple','ParamSpec') else [])))
@@ -206,6 +209,8 @@ class SourceExpressionRules:
             return site if parent in ('Import','ImportFrom') and site.ordinal == self.source.roles.fields[parent]['names'] else None
         if node.constructor == 'withitem':
             return site if parent in ('With','AsyncWith') and self.source.roles.locate(site)[0].name=='items' else None
+        if node.constructor == 'ExceptHandler':
+            return site if parent in ('Try','TryStar') and self.source.roles.locate(site)[0].name=='handlers' else None
         if node.constructor == 'arguments':
             return site if parent in ('Lambda','FunctionDef','AsyncFunctionDef') and site.ordinal == self.source.roles.fields[parent]['args'] else None
         if node.constructor == 'arg':
@@ -263,6 +268,7 @@ class SourceExpressionRules:
             type_parameter_native_abi_proven=False, lazy_evaluator_bodies_lowered=False,
             class_namespace_operations_expanded=False, class_builder_admission_proven=False,
             context_method_native_dispatch_proven=False, handled_exception_frame_mapping_proven=False,
+            exception_match_native_dispatch_proven=False, exception_binding_native_cleanup_proven=False,
             effects_proven=False, canonical_graph_generated=False, transformation_authorized=False)
 
 
@@ -321,8 +327,9 @@ class _Builder:
         return tuple(merged.values())
 
     def literal(self, region, value, state, source=None):
+        # Compiler-supplied literal reference, not a runtime allocation/call.
         return self.emit(region, P.DefineLiteral(PythonLiteral.from_python(value, exact=True)),
-                         (state,), (_REF, self.world), source=source)
+                         (state,), (_REF, self.world), source=source, may_raise=False)
 
     def emit(self, region, instruction, arguments, types, *, may_raise=True, source=None, completion=C.FALLTHROUGH):
         completions = (P.ProductionCompletion(completion, types),) + ((P.ProductionCompletion(C.RAISE, self.raised),) if may_raise else ())
