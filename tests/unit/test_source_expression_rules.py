@@ -31,6 +31,7 @@ def documents():
     from scar.analysis.compiler_topology import compiler_topology_document
     from scar.analysis.compiler_symbols import compiler_symbols_document
     text = '\n'.join((
+        'from __future__ import annotations',
         'arithmetic = left() + right()', 'conditional = yes() if condition() else no()',
         'conjunction = first() and second() and third()', 'disjunction = first() or second() or third()',
         'chain = low() < middle() < high()', 'obj.attr = assigned', 'obj[index] = assigned',
@@ -72,6 +73,11 @@ def documents():
         'shadow_comp = [shadow for shadow in shadow]',
         'async def pending_async_comp(source):\n    return [item async for item in source]',
         'pending_generator = (item for item in iterable)',
+        'def yield_forms(source):\n    received = (yield first())\n    yield\n    yield received\n    yield (yield source)',
+        'async def async_yield_forms(source):\n    received = (yield source)\n    yield',
+        'lambda_yield = lambda: (yield)',
+        'def yield_in_header(source):\n    def nested(default=(yield source)):\n        pass\n    return nested',
+        'def suppressed_annotations(source: list[missing_annotation]) -> "Result":\n    return source',
     )) + '\n'
     f0 = source_bytes_document(text.encode(), path='/source/schedules.py', namespace_root='/source')
     f1 = source_tokens_document(f0)
@@ -138,7 +144,7 @@ def test_all_local_families_and_selector_domains_without_reparsing(rules, monkey
     assert implemented == {'Constant', 'Name', 'BinOp', 'UnaryOp', 'Attribute', 'Subscript',
                            'Slice', 'NamedExpr', 'IfExp', 'BoolOp', 'Compare', 'Call',
                            'List', 'Tuple', 'Set', 'Dict', 'JoinedStr', 'FormattedValue', 'TemplateStr', 'Interpolation',
-                           'ListComp', 'SetComp', 'DictComp'}
+                           'ListComp', 'SetComp', 'DictComp', 'Yield'}
     selectors, seen = {}, set()
     for occurrence, node in enumerate(rules.source.context.syntax.nodes):
         if node.constructor not in implemented:
@@ -149,6 +155,10 @@ def test_all_local_families_and_selector_domains_without_reparsing(rules, monkey
                 value = rules.build(occurrence, purpose(rules, occurrence))
                 result = rules.verify(value)
             except SourceRuleError as error:
+                if error.code == 'SUPPRESSED_SOURCE':
+                    context = rules.source.context.entry_context(occurrence)
+                    assert rules.source.context.material.regions[context.region].eligibility == 'SUPPRESSED'
+                    continue
                 assert node.constructor in ('ListComp', 'SetComp', 'DictComp') and error.code == 'ASYNC_COMPREHENSION_FRONTIER'
                 continue
         assert result['local_schedule_verified'] and result['child_interfaces_assumed']
@@ -230,6 +240,11 @@ def test_comparison_carries_middle_operand_once_and_returns_rich_result(rules):
 def test_targets_slice_holes_frontiers_and_budgets(rules):
     for kind in ('Name', 'Attribute', 'Subscript'):
         for occurrence in occurrences(rules, kind):
+            context = rules.source.context.entry_context(occurrence)
+            if rules.source.context.material.regions[context.region].eligibility == 'SUPPRESSED':
+                with pytest.raises(SourceRuleError, match='SUPPRESSED_SOURCE'):
+                    rules.build(occurrence, purpose(rules, occurrence))
+                continue
             selected = purpose(rules, occurrence)
             value = rules.build(occurrence, selected)
             root, steps = owned(value)
@@ -278,12 +293,19 @@ def test_streamed_store_replays_source_even_if_tampered_receipts_are_resigned(do
     captured = collect_source_expressions(model, store)
     fresh = collect_source_expressions(model, tmp_path / 'fresh', materials=store)
     assert captured['counts'] == fresh['counts']
+    counts = captured['counts']
+    assert counts['suppressed_source_occurrences'] > 0
+    assert counts['expression_occurrences'] == sum(counts[k] for k in (
+        'local_recipes', 'rule_frontiers', 'suppressed_source_occurrences', 'parent_owned_expressions'))
     assert fresh['counts']['local_recipes'] > 0 and fresh['counts']['rule_frontiers'] > 0
     assert fresh['whole_program_graph_complete'] is fresh['target_executed'] is False
     assert (model / 'manifest.json').read_bytes() == original
     descriptor = captured['units'][0]['artifact']
     path = store / descriptor['path']
     rows = [json.loads(line) for line in gzip.decompress(path.read_bytes()).splitlines()]
+    not_scheduled = [r for r in rows if r['status'] == 'SOURCE_NOT_SCHEDULED']
+    assert len(not_scheduled) == counts['suppressed_source_occurrences']
+    assert all(r['suppression']['reason'] and 'plan' not in r and 'error' not in r for r in not_scheduled)
     binary = next(r['plan'] for r in rows if r['constructor'] == 'BinOp' and 'plan' in r)
     binary['steps'][0]['instruction']['field'] = binary['steps'][1]['instruction']['field']
     raw = b''.join(json.dumps(r, sort_keys=True, separators=(',', ':')).encode() + b'\n' for r in rows)
@@ -535,3 +557,69 @@ def test_comprehension_clause_and_update_counts_match_static_compilation(rules, 
         count = len(rules.source.roles.field(occurrence,'generators').items)
         assert sum(op.opname=='FOR_ITER' for op in own) == count
         assert sum(op.opname==update for op in own) == 1
+
+
+@pytest.mark.parametrize('abi', tuple(ExceptionABI))
+def test_yield_uses_original_owner_and_later_value_exception_and_world(rules, abi):
+    from scar.ir.program.control import LanguageCompletionKind as C
+    variant = SourceExpressionRules(rules.source, world=WORLD, exception_abi=abi)
+    asynchronous, bare, header = 0, 0, 0
+    for occurrence in occurrences(variant, 'Yield'):
+        plan = variant.build(occurrence)
+        result = variant.verify(plan)
+        assert not result['driver_admission_proven'] and not result['resume_state_origin_proven']
+        root, steps = owned(plan)
+        suspension = next(s for s in steps if type(s.instruction) is P.SuspendExecution)
+        owner = variant.source.context.entry_context(occurrence).owner
+        syntax = variant.source.context.syntax
+        is_async = syntax.nodes[owner.occurrence].constructor == 'AsyncFunctionDef'
+        asynchronous += is_async
+        assert suspension.instruction.suspension is (
+            P.SuspensionKind.ASYNC_YIELD if is_async else P.SuspensionKind.YIELD)
+        assert suspension.instruction.saved == ()
+        for route in suspension.instruction.routes:
+            resumed, body = owned(plan, route.region)
+            expected = (REF, WORLD) if route.kind is C.FALLTHROUGH else variant.raised
+            assert resumed.kind is P.ProductionRegionKind.RESUME and resumed.parameters == expected
+            assert body[-1].instruction == P.TransferCompletion(route.kind)
+            assert body[-1].arguments == tuple(P.ProductionParameter(resumed.id, i) for i in range(len(expected)))
+        assert steps[-1].arguments == tuple(P.ProductionResult(suspension.id, i) for i in range(2))
+        if variant.source.roles.field(occurrence, 'value').kind == 'SCALAR':
+            bare += 1
+            assert type(steps[0].instruction) is P.DefineLiteral and steps[0].instruction.value.to_python() is None
+        else:
+            assert type(steps[0].instruction) is P.EvaluateChild
+        # Header yield belongs to the creator function, not the nested function.
+        if syntax.nodes[owner.occurrence].constructor == 'FunctionDef' and (
+                variant.source.roles.field(owner.occurrence, 'name').scalar.to_python() == 'yield_in_header'):
+            header += 1
+        bad = replace(steps[-1], arguments=(steps[-1].arguments[0], P.ProductionParameter(root.id, 0)))
+        mutated = replace(plan, steps=tuple(bad if s.id == bad.id else s for s in plan.steps))
+        with pytest.raises(SourceRuleError, match='SOURCE_RULE_MISMATCH'):
+            variant.verify(mutated)
+    assert asynchronous == 2 and bare == 3 and header == 1
+
+
+def test_yield_boundaries_match_static_compiler_without_executing_code(rules, documents):
+    import dis
+    from types import CodeType
+    from scar.analysis.source_bytes import decoded_source_bytes
+    pending = [compile(decoded_source_bytes(documents[0]), '<static-yield-oracle>', 'exec')]
+    actual, wrapped, selected = 0, 0, 0
+    while pending:
+        code = pending.pop()
+        pending.extend(c for c in code.co_consts if type(c) is CodeType)
+        if code.co_name not in ('yield_forms', 'async_yield_forms', 'yield_in_header', '<lambda>'):
+            continue
+        selected += 1
+        instructions = list(dis.get_instructions(code))
+        for ordinal, op in enumerate(instructions):
+            if op.opname == 'YIELD_VALUE':
+                actual += 1
+                assert instructions[ordinal+1].opname == 'RESUME'
+                if code.co_name == 'async_yield_forms':
+                    assert instructions[ordinal-1].opname == 'CALL_INTRINSIC_1'
+                    assert 'ASYNC_GEN_WRAP' in instructions[ordinal-1].argrepr
+                    wrapped += 1
+    assert selected == 4 and wrapped == 2
+    assert actual == len(occurrences(rules, 'Yield')) == 9

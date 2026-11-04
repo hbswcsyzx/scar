@@ -29,8 +29,8 @@ from scar.ir.record_codec import decode, encode
 
 _PARENTS = ('source_roles', 'source_contexts', 'source_declarations', 'source_bindings',
             'source_symbols', 'compiler_topology', 'compiler_symbols')
-_FRONTIERS = {'RULE_FRONTIER', 'PURPOSE_FRONTIER', 'SUPPRESSED_SOURCE', 'BINDING_INTERFACE_FRONTIER',
-              'ASYNC_COMPREHENSION_FRONTIER'}
+_FRONTIERS = {'RULE_FRONTIER', 'PURPOSE_FRONTIER', 'BINDING_INTERFACE_FRONTIER',
+              'ASYNC_COMPREHENSION_FRONTIER', 'SUSPENSION_CONTEXT_FRONTIER'}
 _WORLD = ValueType(ValueKind.STATE, location=LocationID('source-python-world'))
 
 
@@ -43,6 +43,7 @@ def _implementation():
     names = ('analysis/source_expression_materials.py', 'analysis/source_expression_rules.py',
         'analysis/source_display_rules.py', 'analysis/source_string_rules.py',
         'analysis/source_comprehension_rules.py',
+        'analysis/source_suspension_rules.py',
         'analysis/source_productions.py', 'analysis/program_types.py',
         'ir/program/source_productions.py', 'ir/record_codec.py')
     return {name: sha256((package / name).read_bytes()).hexdigest() for name in names}
@@ -76,8 +77,8 @@ def _unit(task):
     parent_seconds = time.monotonic() - started
     relative = 'units/' + unit['key'] + '/expressions.jsonl.gz'
     digest, decoded_bytes = sha256(), 0
-    built, frontier, child_obligations, descriptors = Counter(), Counter(), Counter(), Counter()
-    expressions = 0
+    built, frontier, child_obligations, descriptors, suppressed = (Counter() for _ in range(5))
+    expressions, parent_expressions = 0, 0
     stream_path = Path(out) / relative
     with ExitStack() as stack:
         if prior is None:
@@ -108,6 +109,13 @@ def _unit(task):
                 row.update(status='PARENT_SOURCE_DESCRIPTOR', purpose=P.ProductionPurpose.DESCRIPTOR.value,
                     owner=encode(owner), fields=[encode(P.SlotRef(occurrence, 'FIELD', i)) for i in range(len(node.fields))])
                 descriptors[node.constructor] += 1
+                parent_expressions += is_expression
+            elif contexts.material.regions[contexts.entry_context(occurrence).region].eligibility == 'SUPPRESSED':
+                context = contexts.entry_context(occurrence)
+                region = contexts.material.regions[context.region]
+                row.update(status='SOURCE_NOT_SCHEDULED', context=encode(context),
+                    suppression=dict(reason=region.suppression_reason, origin=encode(region.suppression_origin)))
+                suppressed[node.constructor] += 1
             else:
                 try:
                     plan = rules.build(occurrence, purpose, max_steps=limits['steps'], max_regions=limits['regions'])
@@ -131,6 +139,8 @@ def _unit(task):
                 raise ValueError('stored source rule/frontier differs from fresh original F2/F3 replay')
         if prior is not None and stream.read(1):
             raise ValueError('extra source expression records after the original occurrence domain')
+    if expressions != sum(built.values()) + sum(frontier.values()) + sum(suppressed.values()) + parent_expressions:
+        raise ValueError('expression dispositions do not partition the original expression domain')
     if prior is None:
         with stream_path.open('rb') as stream:
             os.fsync(stream.fileno())
@@ -143,6 +153,7 @@ def _unit(task):
     result = dict(unit=unit['key'], path=unit['path'], input=encode(rules.source.input), artifact=descriptor,
         built=dict(sorted(built.items())), frontiers=dict(sorted(frontier.items())),
         parent_descriptors=dict(sorted(descriptors.items())), expressions=expressions,
+        suppressed_sources=dict(sorted(suppressed.items())), parent_owned_expressions=parent_expressions,
         child_interface_obligations=dict(sorted(child_obligations.items())),
         parent_seconds=parent_seconds, seconds=time.monotonic()-started,
         catalog_sha256=sha256(_json(catalog)).hexdigest())
@@ -175,7 +186,7 @@ def collect_source_expressions(model, out, *, sources=(), materials=None, jobs=1
             raise ValueError('fresh verification output must be independent of source materials')
         store_bytes = (store / 'result.json').read_bytes()
         previous = json.loads(store_bytes)
-        if (previous.get('schema') != 'scar.source-expression-materials' or previous.get('schema_version') != 1
+        if (previous.get('schema') != 'scar.source-expression-materials' or previous.get('schema_version') != 2
             or previous.get('implementation_sha256') != pins or previous.get('input_basis') != basis
             or previous.get('limits') != limits):
             raise ValueError('previous rule material input/implementation/limit domain differs')
@@ -201,6 +212,8 @@ def collect_source_expressions(model, out, *, sources=(), materials=None, jobs=1
         rule_frontiers=sum(sum(r['frontiers'].values()) for r in rows),
         expression_occurrences=sum(r['expressions'] for r in rows),
         parent_descriptors=sum(sum(r['parent_descriptors'].values()) for r in rows),
+        parent_owned_expressions=sum(r['parent_owned_expressions'] for r in rows),
+        suppressed_source_occurrences=sum(sum(r['suppressed_sources'].values()) for r in rows),
         child_interface_obligations=sum(sum(r['child_interface_obligations'].values()) for r in rows))
     if store is not None and previous['counts'] != counts:
         raise ValueError('stored source rule summary differs from fresh counters')
@@ -208,7 +221,7 @@ def collect_source_expressions(model, out, *, sources=(), materials=None, jobs=1
         raise ValueError('model or implementation changed while processing source rules')
     if store is not None and (store / 'result.json').read_bytes() != store_bytes:
         raise ValueError('source rule material manifest changed during fresh verification')
-    report = dict(schema='scar.source-expression-materials', schema_version=1,
+    report = dict(schema='scar.source-expression-materials', schema_version=2,
         status='LOCAL_RULES_WITH_FRONTIERS' if counts['rule_frontiers'] else 'LOCAL_RULES_VERIFIED',
         mode='FRESH_VERIFICATION' if store is not None else 'COLLECTION',
         input_basis=basis, implementation_sha256=pins, model_manifest_sha256=sha256(manifest_bytes).hexdigest(),

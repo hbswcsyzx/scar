@@ -76,7 +76,7 @@ Operation.label仍有旧派发消费者、名义类型字符串及分散协议�
 F4-C最后由已验产生规则生成CFG/SSA及共享区域，并逐项核源码处置、端口、控制/状态和来源；F4通过后才进入F5。
 当前F4-A结构域已验收，F4-B/C尚未完成。`max_visits`只限前置shape遍历；构造器核验复用原验证器，不冒称总步骤预算。
 
-F4-B继续按原字段识别、局部产生规则、原材料重放的顺序推进。当前23类表达式规则只生成局部recipe，child仍是带用途/状态接口的原槽义务；
+F4-B继续按原字段识别、局部产生规则、原材料重放的顺序推进。当前24类表达式规则只生成局部recipe，child仍是带用途/状态接口的原槽义务；
 不把未实现的构造变成OPAQUE成功节点。短路/条件/比较保分支区域，异常出口汇总前面所有步骤，不能只抄最后一步。
 状态域/异常ABI由显式profile提供，效果及实际state来源尚未证明。先闭合剩余构造/上下文规则，再进入F4-C；不以局部recipe计数代替规范图覆盖。
 Call区分普通参数与展开参数；唯一位置实参为星号表达式时保留至最终调用，其余星号和keyword连续组按协议顺序处理。
@@ -88,6 +88,7 @@ f-string先转换再求格式说明；模板插值只捕获值和转换标记，
 
 暂停规则按三个小步推进，不跨层：①先验source recipe的handoff／normal与raise恢复端口；②消费原C1 owner产生yield规则并对照静态compiler；③再补委托驱动的await／yield-from及惰性body。
 source recipe v2的SuspendExecution显式导出值和world，恢复端口输入新world及保存值；禁止保存旧STATE，所有恢复完成取并集。NEXT/close的driver准入与规范化、frame/exception context保活仍须后续产生规则证明。
+前两步的局部规则已通过：Yield由原C1 owner区分普通／异步形式，bare yield导出None，嵌套定义header仍归外层执行owner。静态compiler只作独立规则对照，不以bytecode位置接源码身份。
 后续语句／定义／cleanup规则闭合后才进入F4-C；每步先验类型/接口，再接源码规则，再在原材料独立重放，不以节点存在或局部计数授予全层完成。
 
 ## F3的形式边界

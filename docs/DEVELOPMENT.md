@@ -164,11 +164,13 @@ PYTHONHASHSEED=0 python -B -m scar.cli source-expressions --model /path/to/model
 
 `--source`可重复；省略时处理声明源码全集。每源流式写一个`expressions.jsonl.gz`，共享目录只存一份，fresh逐记录重新产生并比较。
 规则目录绑定recipe类型目录摘要；输入语法或记录构造契约变化时拒绝沿用原材料。
+材料v2逐原表达式分区为局部recipe、父属表达式、已知不单独求值的源码、规则前沿，计数必须精确覆盖原分母；SUPPRESSED_SOURCE保C1原因/原槽，不冒称缺失规则或删除源码。
 `SourceExpressionRules(ProductionSourceIndex, world=…, exception_abi=…).build/verify`不parse目标；按原字段定义顺序，保持state流与短路对象身份。
 显式rule frontier保原occurrence/构造/用途；child接口、效果和state来源仍是义务。不能用这个入口宣称完整CFG/SSA或执行图已生成。
 调用/显示使用已有PythonProtocol签名，item/pair数量由原字段分组导出；父属描述符另记`PARENT_SOURCE_DESCRIPTOR`，不计作缺失的独立表达式规则。
 容器、格式化/模板规则分别在`source_display_rules.py`、`source_string_rules.py`；代码SHA和精确字面值输入类型均进入共享规则目录。
 同步推导式在`source_comprehension_rules.py`；`comprehension`辅助构造保原父generators引用。异步子句返回`ASYNC_COMPREHENSION_FRONTIER`，不生成伪同步循环。
+`source_suspension_rules.py`按原C1执行owner产生Yield规则，区分普通／异步yield和bare None；recipe v2的normal／raise恢复入口显式接收新world，不能保存旧STATE。driver准入、close规范化及frame/context保活仍是后续义务。
 星号/keyword的失败顺序参考固定版本[CPython codegen](https://github.com/python/cpython/blob/v3.14.7/Python/codegen.c)；本机stack guideline从header读入并固定SHA。
 
 源码身份桥（按unit分片，保持输入模型和旧ID）：

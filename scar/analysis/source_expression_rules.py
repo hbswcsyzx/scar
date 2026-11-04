@@ -38,6 +38,7 @@ _FIELDS = {
     'TemplateStr': ('values',), 'Interpolation': ('value', 'str', 'conversion', 'format_spec'),
     'ListComp': ('elt', 'generators'), 'SetComp': ('elt', 'generators'),
     'DictComp': ('key', 'value', 'generators'),
+    'Yield': ('value',),
 }
 _AUX_FIELDS = {'keyword': ('arg', 'value'), 'Starred': ('value', 'ctx'),
                'comprehension': ('target', 'iter', 'ifs', 'is_async')}
@@ -50,7 +51,8 @@ _SELECTORS = {
     'Compare': frozenset(('Eq', 'NotEq', 'Lt', 'LtE', 'Gt', 'GtE', 'Is', 'IsNot', 'In', 'NotIn')),
 }
 _TARGETS = frozenset(('Name', 'Attribute', 'Subscript', 'List', 'Tuple'))
-_RULE_MODULES = ('source_display_rules.py', 'source_string_rules.py', 'source_comprehension_rules.py')
+_RULE_MODULES = ('source_display_rules.py', 'source_string_rules.py', 'source_comprehension_rules.py',
+                 'source_suspension_rules.py')
 
 
 class SourceRuleError(ProductionError):
@@ -182,6 +184,7 @@ class SourceExpressionRules:
         return dict(source_rule_replayed=True, local_schedule_verified=True, field_dispositions_verified=True,
             child_interfaces_assumed=True, state_parameter_origin_proven=False,
             scope_activation_proven=False, iterator_cleanup_proven=False,
+            driver_admission_proven=False, resume_state_origin_proven=False, frame_context_lifetime_proven=False,
             effects_proven=False, canonical_graph_generated=False, transformation_authorized=False)
 
 
@@ -234,14 +237,14 @@ class _Builder:
         return self.emit(region, P.DefineLiteral(PythonLiteral.from_python(value, exact=True)),
                          (state,), (_REF, self.world), source=source)
 
-    def emit(self, region, instruction, arguments, types, *, may_raise=True, source=None):
+    def emit(self, region, instruction, arguments, types, *, may_raise=True, source=None, completion=C.FALLTHROUGH):
         _require(len(self.steps) < self.max_steps, 'BUDGET_FRONTIER', 'steps', 'source step limit')
-        completions = (self.normal(types),) + ((P.ProductionCompletion(C.RAISE, self.raised),) if may_raise else ())
+        completions = (P.ProductionCompletion(completion, types),) + ((P.ProductionCompletion(C.RAISE, self.raised),) if may_raise else ())
         step = P.ProductionStep(P.ProductionStepID(self.key + ':s' + str(len(self.steps))), region.id,
             region.source if source is None else source, instruction, arguments, completions)
         self.steps.append(step)
         region.steps.append(step)
-        return tuple(P.ProductionResult(step.id, i) for i in range(len(types)))
+        return tuple(P.ProductionResult(step.id, i) for i in range(len(types))) if completion is C.FALLTHROUGH else ()
 
     def parameter(self, region, index):
         return P.ProductionParameter(region.id, index)
@@ -295,6 +298,9 @@ class _Builder:
         elif kind in _COMPREHENSIONS:
             from scar.analysis.source_comprehension_rules import emit_comprehension
             emit_comprehension(self, root, state)
+        elif kind == 'Yield':
+            from scar.analysis.source_suspension_rules import emit_yield
+            emit_yield(self, root, state)
         elif kind == 'Constant':
             # A literal source reference does not assert a fresh allocation.
             result = self.emit(root, P.ConstructValue(P.ConstructionKind.LITERAL,

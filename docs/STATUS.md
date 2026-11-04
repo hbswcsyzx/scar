@@ -101,11 +101,13 @@ call/map/string/assert参数也沿闭合原端口组解析；空组保DECLARED_E
 真实eval/CEM核419/537项原role引用描述符，查询1.03/1.31秒（父层fresh及索引另9.76/12.12秒）；没有生成新执行图或重放逐构造规则。
 记录在`artifacts/current/queries/source-productions/`；旧manifest不变，LeWM未执行或修改。
 
-F4-B现有23类表达式局部规则，新增同步ListComp/SetComp/DictComp；直接消费原F2/F3，无目标重parse/执行。async子句及GeneratorExp仍有显式规则前沿。
-规则目录对113构造分流：23类局部规则、3类父上下文描述符、32类selector metadata、55类规则前沿；这不是全构造/全部上下文已闭合。
-真实eval/CEM两份源码的1,190个表达式中，生成1,188个局部recipe；另记67个父属描述符（含2个Starred表达式及65个辅助构造），表达式规则前沿为0，仍保850项child接口义务。
-两源流式压缩片共341,822 bytes（解压7,738,270）；2进程采集14.06秒、fresh核验14.09秒，见`queries/source-expression-rules/{materials,verification}/result.json`。
-本轮相关42项检查通过（80.88秒），涵盖source重放、签名/收据反例、循环瞬时端口及静态compiler顺序对照；全部由主代理完成，无新增subagents。
+F4-B现有24类表达式局部规则，新增普通／异步Yield及其恢复接口；规则内核直接消费原F2/F3，strict读取重放父层，不执行目标。async子句、GeneratorExp、Lambda、Await及YieldFrom仍有明确规则前沿。
+规则目录对113构造分流：24类局部规则、3类父上下文描述符、32类selector metadata、54类规则前沿；这不是全构造/全部上下文已闭合。
+真实eval/CEM及buffer/world/spaces五份源码共5,314个表达式：4,955个局部recipe、345个已知不单独求值的源码、5个父属表达式、9个规则前沿，分区精确闭合；另记164个父属描述符（含前述5个表达式）。
+6处真实Yield已产生规则；9个前沿明确为GeneratorExp×3、Lambda×4、YieldFrom×2。仍有3,473项child接口义务，不能以局部规则代替完整图。
+345处SUPPRESSED_SOURCE主要来自future注解，材料v2保留原C1原因/槽并单独计数；它们不是缺失规则。该分类由真实样本发现后修正，未丢弃原源码。
+5个流式压缩片共1,449,464 bytes（解压32,798,165）；3进程采集37.36秒、独立fresh37.31秒，见`queries/source-expression-rules/{materials,verification}/result.json`。
+相关47个检查已覆盖：源规则15项通过后修正1项“注解应求值”的旧测试假设并补验通过，另31项语法/签名检查通过；保留原失败及修正记录，不伪称单次全绿。全部由主代理完成，无新增subagents。
 Call的140个原规则前沿已消除；单星、多星、kwargs连续组和大组路径均有规则，复用已有协议强制核签名。未把位置漂移的bytecode当作F2节点身份。
 容器更新/分组/哈希时机、解包先于目标写入、f-string转换先于spec、模板捕获不立即转换已有静态对照；implicit literal只描述值，不授对象身份或分配证明。
 推导式每子句一份循环模板，外层先求首个iterator、局部scope内赋目标/过滤/求结果；仅advance的StopIteration转为耗尽，body异常保持传播。引用不变不代表内容不变。
@@ -117,7 +119,7 @@ recipe不是canonical CFG/SSA；state来源、child实现与effects未证，不�
    三种域不能互代：32 Opcode、88协议和113语法构造器×上下文分别核验；B1不授新图发布或优化。
    下一步将原声明端口接到F2/F3产生规则，并补function/class/comprehension等参数来源；保活完整性另验，不能抄端口来证明。
    形式顺序：输入/输出结构已固定；当前持续闭合构造×用途×上下文的字段消耗及完成端口，再重放核验，全部闭合后才生成CFG/SSA。
-   下一批继续闭合异步/惰性表达式及其暂停/恢复接口，再补语句/循环、定义/捕获与cleanup；每批均以原材料重放核验，未闭合不进入F4-C。
+   下一批先补委托驱动的Await/YieldFrom、GeneratorExp/Lambda及async comprehension；Yield的局部恢复接口已通过，driver/frame/context合同仍须接通。之后补语句/循环、定义/捕获与cleanup，再进入F4-C。
    四片其余881操作已分类为控制434、binding246、source invoke201；这是识别结果，不等于其接口/产生规则已通过。
    签名witness仍须进入版本化typed根及强制reader；不能把本层独立查询当作完备。根扩展后重验F4-A目录。
    实读FRAME_BIND为READ_WRITE、UNKNOWN footprint、非full overwrite；不能照旧审计摘要强制WHOLE或升级未知事实。
