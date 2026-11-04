@@ -147,6 +147,13 @@ class TypeParameterKind(str, Enum):
     PARAM_SPEC = 'PARAM_SPEC'
 
 
+class ContextMethodKind(str, Enum):
+    ENTER = 'ENTER'
+    EXIT = 'EXIT'
+    ASYNC_ENTER = 'ASYNC_ENTER'
+    ASYNC_EXIT = 'ASYNC_EXIT'
+
+
 class CompilationOption(str, Enum):
     ASSERTIONS_ENABLED = 'ASSERTIONS_ENABLED'
 
@@ -594,6 +601,59 @@ class BuildTypeAlias:
 
 
 @dataclass(frozen=True, slots=True)
+class ReadContextMethod:
+    """Type-special lookup, retaining a logical callable/receiver handle.
+
+    This does not assert allocation of a Python bound-method object.
+    """
+    source: SlotRef
+    method: ContextMethodKind
+    exception_abi: ExceptionABI
+
+
+@dataclass(frozen=True, slots=True)
+class InvokeContextMethod:
+    source: SlotRef
+    method: ContextMethodKind
+    exception_abi: ExceptionABI
+
+
+@dataclass(frozen=True, slots=True)
+class ContextAwaitable:
+    """GET_AWAITABLE qualified for async enter/exit error context."""
+    source: SlotRef
+    method: ContextMethodKind
+    exception_abi: ExceptionABI
+
+
+@dataclass(frozen=True, slots=True)
+class EnterHandledException:
+    """Install the delivered exception; return the previous handled value."""
+    exception_abi: ExceptionABI
+
+
+@dataclass(frozen=True, slots=True)
+class RestoreHandledException:
+    """Restore a retained handled-exception value, threading current world."""
+    pass
+
+
+@dataclass(frozen=True, slots=True)
+class ContextExceptionArguments:
+    """Read type/value/current traceback; ABI sidecar is not an attribute read."""
+    exception_abi: ExceptionABI
+
+
+@dataclass(frozen=True, slots=True)
+class PrepareReraise:
+    """Propagate a saved exception with current traceback, without a new raise site.
+
+    Native frame/lasti mapping is a separate obligation.
+    """
+    exception_abi: ExceptionABI
+
+
+@dataclass(frozen=True, slots=True)
 class GlobalsEnvironment:
     scope: int
 
@@ -625,12 +685,6 @@ class DeferRegion:
     """Declare a code reference with a typed later-entry interface, no execution."""
     body: ProductionRegionID
     environment: DeferredEnvironment
-
-
-@dataclass(frozen=True, slots=True)
-class CleanupControl:
-    protected: ProductionRegionCall
-    cleanup: ProductionRegionID
 
 
 @dataclass(frozen=True, slots=True)
@@ -692,7 +746,9 @@ ProductionInstruction = (EvaluateChild | ApplyLanguageAction | ReadCompilationOp
     | SetTypeParameterDefault | BindTypeParameter | AttachTypeParameters
     | DeferClassBody | EnterClassBody | InitializeClassNamespace | FinalizeClassNamespace
     | ReadBuildClass | BuildClassBody | BuildGenericBase | BuildTypeAlias
-    | ApplyRegion | BranchControl | LoopControl | DeferRegion | ReferenceEnvironment | EnterDeferredBody | CleanupControl
+    | ReadContextMethod | InvokeContextMethod | ContextAwaitable | EnterHandledException
+    | RestoreHandledException | ContextExceptionArguments | PrepareReraise
+    | ApplyRegion | BranchControl | LoopControl | DeferRegion | ReferenceEnvironment | EnterDeferredBody
     | HandleCompletions | TransferCompletion | SuspendExecution)
 
 
@@ -734,7 +790,7 @@ class SourceProductionPlan:
     steps: tuple[ProductionStep, ...]
     slots: tuple[ProductionSlotDisposition, ...]
     schema: str = 'scar.source-production-plan'
-    schema_version: int = 11
+    schema_version: int = 12
     authority: str = 'SOURCE_RECIPE_SHAPE_ONLY'
 
 

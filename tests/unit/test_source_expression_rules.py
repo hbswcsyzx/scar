@@ -106,6 +106,8 @@ def documents():
         'def only_doc():\n    """No user statements execute."""',
         'class CallableContainer:\n    def method(self,__item: Missing=first(),*,__key: Missing=second()) -> Result:\n        return __item,__key',
         'type ExampleAlias = int',
+        'with manager() as target:\n    pass',
+        'async def context_fixture():\n    async with manager():\n        pass',
     )) + '\n'
     return _documents(text)
 
@@ -698,7 +700,7 @@ def test_delegation_keeps_send_and_post_driver_completion_paths_separate(rules, 
             plan = variant.build(occurrence)
             checked = variant.verify(plan)
             assert not checked['native_delegation_expanded'] and not checked['driver_protocol_graph_generated']
-            assert plan.schema_version == 11
+            assert plan.schema_version == 12
             _, root_steps = owned(plan)
             acquire = next(s for s in root_steps if type(s.instruction) is P.ApplyDelegationProtocol)
             assert acquire.instruction.protocol is (P.DelegationProtocolKind.AWAITABLE_ITER if constructor == 'Await'
@@ -932,7 +934,7 @@ def test_structured_statement_rules_preserve_source_fields_and_completion_interf
     statements = SourceStatementRules(rules.source, world=WORLD, exception_abi=ExceptionABI.EXCEPTION_WORLD)
     supported = {r['constructor'] for r in statements.catalog()['rules'] if r['status'] == 'LOCAL_STATEMENT_RULE'}
     assert supported == {'Expr','Pass','Assign','Delete','Return','Global','Nonlocal',
-        'If','While','For','AsyncFor','Break','Continue','AnnAssign','AugAssign','Assert','Raise','Import','ImportFrom','FunctionDef','AsyncFunctionDef','ClassDef','TypeAlias'}
+        'If','While','For','AsyncFor','Break','Continue','AnnAssign','AugAssign','Assert','Raise','Import','ImportFrom','FunctionDef','AsyncFunctionDef','ClassDef','TypeAlias','With','AsyncWith'}
     seen = set()
     for occurrence, node in enumerate(rules.source.context.syntax.nodes):
         if node.constructor not in supported:continue
@@ -1394,3 +1396,67 @@ def test_class_and_alias_definitions_keep_builder_calls_and_lazy_evaluators_sepa
     factory=next(c for c in outer.co_consts if type(c) is CodeType and c.co_name=='<generic parameters of Generic>')
     ops=list(dis.get_instructions(factory))
     assert next(i for i,s in enumerate(ops) if s.opname=='CALL_INTRINSIC_1' and s.argrepr=='INTRINSIC_SUBSCRIPT_GENERIC')<next(i for i,s in enumerate(ops) if s.opname=='LOAD_GLOBAL' and s.argval=='Base')
+
+
+def test_context_manager_schedules_protect_targets_preserve_exits_and_restore_exception_state(monkeypatch):
+    import dis
+    from types import CodeType
+    from scar.analysis.source_statement_rules import SourceStatementRules
+    from scar.analysis.source_productions import read_production_plan,production_plan_document
+    from scar.ir.program.control import LanguageCompletionKind as C
+    from scar.ir.program.structured import PythonProtocolKind as K
+    text='def contexts(flag):\n    with first():\n        pass\n    for item in items:\n        with first() as obj.value,second() as (head,*tail):\n            if flag:\n                continue\n            break\n    with first():\n        raise Failure\ndef target_return():\n    with first() as target:\n        return\ndef nested_return():\n    with first(),second():\n        return\ndef plain_return():\n    with first():\n        return\nasync def async_contexts():\n    async with first() as target,second():\n        return target\n'
+    rules=_rules(_documents(text))
+    for abi in ExceptionABI:
+        statements=SourceStatementRules(rules.source,world=WORLD,exception_abi=abi)
+        for constructor in ('With','AsyncWith'):
+            for occurrence in occurrences(rules,constructor):
+                with monkeypatch.context() as guard:
+                    guard.setattr(ast,'parse',lambda *a,**kw:pytest.fail('context schedule reparsed source'))
+                    plan=statements.build(occurrence);checked=statements.verify(plan)
+                assert read_production_plan(production_plan_document(plan))==plan
+                assert not checked['handled_exception_frame_mapping_proven'] and not checked['context_method_native_dispatch_proven']
+                root,creation=owned(plan)
+                source_interface=set(rules.source.statements.completions(occurrence))
+                assert {(c.kind,c.target) for c in root.completions}<=source_interface
+                methods=[s.instruction.method for s in creation if type(s.instruction) is P.ReadContextMethod]
+                assert methods==([P.ContextMethodKind.ASYNC_EXIT,P.ContextMethodKind.ASYNC_ENTER] if constructor=='AsyncWith' else [P.ContextMethodKind.EXIT,P.ContextMethodKind.ENTER])
+                invoke=next(s for s in creation if type(s.instruction) is P.HandleCompletions)
+                protected,body=owned(plan,invoke.instruction.protected.region)
+                targets=[s for s in body if type(s.instruction) is P.EvaluateChild and s.instruction.purpose is P.ProductionPurpose.STORE]
+                has_target=rules.source.roles.field(rules.source.roles.field(occurrence,'items').items[0].reference,'optional_vars').kind=='NODE'
+                assert bool(targets)==has_target
+                for route in invoke.instruction.routes:
+                    handler,steps=owned(plan,route.handler)
+                    if route.kind is C.RAISE:
+                        assert type(steps[0].instruction) is P.EnterHandledException
+                        restored=next(s for s in steps if type(s.instruction) is P.HandleCompletions)
+                        assert {r.kind for r in restored.instruction.routes}=={C.FALLTHROUGH,C.RAISE}
+                        for restoration in restored.instruction.routes:
+                            assert restoration.captures==(P.ProductionResult(steps[0].id,0),)
+                            _,restore_steps=owned(plan,restoration.handler)
+                            assert type(restore_steps[0].instruction) is P.RestoreHandledException
+                            assert restore_steps[-1].instruction==P.TransferCompletion(restoration.kind,restoration.target)
+                    else:
+                        assert not any(type(s.instruction) is P.ApplyPythonProtocol and s.instruction.protocol is K.TRUTH for s in steps)
+                        assert steps[-1].instruction==P.TransferCompletion(route.kind,route.target)
+                if constructor=='AsyncWith':
+                    assert {s.instruction.method for s in plan.steps if type(s.instruction) is P.ContextAwaitable}=={P.ContextMethodKind.ASYNC_ENTER,P.ContextMethodKind.ASYNC_EXIT}
+                    assert any(type(s.instruction) is P.SuspendExecution for s in plan.steps)
+                assert any(type(s.instruction) is P.PrepareReraise for s in plan.steps)==any(
+                    r.kind is C.RAISE for r in invoke.instruction.routes)
+        for occurrence in occurrences(rules,'withitem'):
+            assert rules.descriptor_owner(occurrence) is not None
+    # An as-store or later enter may fail and be suppressed even with bare return.
+    functions={rules.source.roles.field(o,'name').scalar.to_python():o for o in occurrences(rules,'FunctionDef')}
+    for name,may_fall in (('target_return',True),('nested_return',True),('plain_return',False)):
+        occurrence=rules.source.roles.field(functions[name],'body').items[0].reference
+        assert ((C.FALLTHROUGH,None) in rules.source.statements.completions(occurrence))==may_fall
+    code=compile(text,'<static-context-oracle>','exec',dont_inherit=True)
+    functions={c.co_name:c for c in code.co_consts if type(c) is CodeType}
+    sync_ops=list(dis.get_instructions(functions['contexts']))
+    methods=[s.argrepr for s in sync_ops if s.opname=='LOAD_SPECIAL']
+    assert '__exit__' in methods[0] and '__enter__' in methods[1]
+    assert any(s.opname=='PUSH_EXC_INFO' for s in sync_ops) and any(s.opname=='POP_EXCEPT' for s in sync_ops)
+    async_ops=list(dis.get_instructions(functions['async_contexts']))
+    assert {s.arg for s in async_ops if s.opname=='GET_AWAITABLE'}=={1,2}

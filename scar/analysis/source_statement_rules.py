@@ -25,7 +25,8 @@ _FIELDS = {'Expr': ('value',), 'Pass': (), 'Assign': ('targets', 'value', 'type_
     'FunctionDef': ('name','args','body','decorator_list','returns','type_comment','type_params'),
     'AsyncFunctionDef': ('name','args','body','decorator_list','returns','type_comment','type_params'),
     'ClassDef': ('name','bases','keywords','body','decorator_list','type_params'),
-    'TypeAlias': ('name','type_params','value')}
+    'TypeAlias': ('name','type_params','value'),
+    'With': ('items','body','type_comment'), 'AsyncWith': ('items','body','type_comment')}
 
 
 class SourceStatementRules(SourceExpressionRules):
@@ -143,6 +144,10 @@ class _StatementBuilder(_Builder):
         elif kind in ('ClassDef','TypeAlias'):
             from scar.analysis.source_statement_definitions import emit_definition
             emit_definition(self,root,current)
+            return self.plan(root,source)
+        elif kind in ('With','AsyncWith'):
+            from scar.analysis.source_statement_contexts import emit_context_statement
+            emit_context_statement(self,root,current)
             return self.plan(root,source)
         self.finish(root, (current,), (self.world,))
         return self.plan(root, source)

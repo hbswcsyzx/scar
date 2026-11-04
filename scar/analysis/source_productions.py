@@ -149,7 +149,7 @@ def validate_production_plan(plan, *, max_visits=1_000_000):
     """
     visits = _shape(plan, max_visits)
     _require((plan.schema, plan.schema_version, plan.authority) == (
-        'scar.source-production-plan', 11, 'SOURCE_RECIPE_SHAPE_ONLY'),
+        'scar.source-production-plan', 12, 'SOURCE_RECIPE_SHAPE_ONLY'),
         'SCHEMA', 'plan', 'unsupported recipe schema or authority')
     source = plan.input
     _require(bool(source.path) and bool(source.namespace_root), 'INPUT', 'plan.input', 'source paths must be nonempty')
@@ -475,6 +475,32 @@ def validate_production_plan(plan, *, max_visits=1_000_000):
                 _require(args==(*(reference for _ in range(count)),world)
                     and outputs=={(C.FALLTHROUGH,None):normal,(C.RAISE,None):raised},
                     'DEFINITION_INTERFACE',str(identity),'definition action ports differ from the declared source contract')
+            elif type(instruction) in (P.ReadContextMethod,P.InvokeContextMethod,P.ContextAwaitable,
+                    P.EnterHandledException,P.RestoreHandledException,P.ContextExceptionArguments,P.PrepareReraise):
+                _require(bool(args) and type(args[-1]) is ValueType and args[-1].kind is ValueKind.STATE,
+                    'CONTEXT_INTERFACE',str(identity),'context operation requires an explicit world')
+                world=args[-1];reference=ValueType(ValueKind.REFERENCE)
+                raised=None
+                if type(instruction) is P.RestoreHandledException:
+                    expected=(reference,world);normal=(world,)
+                else:
+                    abi=instruction.exception_abi
+                    packet=(reference,world) if abi is ExceptionABI.EXCEPTION_WORLD else (reference,reference,world)
+                    if type(instruction) in (P.EnterHandledException,P.ContextExceptionArguments,P.PrepareReraise):
+                        expected=packet
+                        normal=(reference,world) if type(instruction) is P.EnterHandledException else (
+                            (reference,reference,reference,world) if type(instruction) is P.ContextExceptionArguments else packet)
+                    else:
+                        exit_method=instruction.method in (P.ContextMethodKind.EXIT,P.ContextMethodKind.ASYNC_EXIT)
+                        _require(type(instruction) is not P.ContextAwaitable or instruction.method in (
+                            P.ContextMethodKind.ASYNC_ENTER,P.ContextMethodKind.ASYNC_EXIT),
+                            'CONTEXT_INTERFACE',str(identity),'only an async context method acquires an await iterator')
+                        expected=(*(reference for _ in range(4 if type(instruction) is P.InvokeContextMethod and exit_method else 1)),world)
+                        normal=(reference,world);raised=packet
+                wanted={(C.FALLTHROUGH,None):normal}
+                if raised is not None:wanted[(C.RAISE,None)]=raised
+                _require(args==expected and outputs==wanted,'CONTEXT_INTERFACE',str(identity),
+                    'context operation input/completion ports differ from its language contract')
             elif type(instruction) in (P.ImportRequest, P.ImportMember, P.ImportStar):
                 _require(bool(args) and type(args[-1]) is ValueType and args[-1].kind is ValueKind.STATE,
                     'IMPORT_INTERFACE', str(identity), 'import requires one explicit source world')
@@ -697,9 +723,6 @@ def validate_production_plan(plan, *, max_visits=1_000_000):
                     and step.arguments == tuple(P.ProductionParameter(region.id, i) for i in range(len(region.parameters)))
                     and outputs == {(C.FALLTHROUGH, None): (instruction.environment.world,)},
                     'DEFERRED_INTERFACE', str(identity), 'activation must consume the exact admitted entry ports first')
-            elif type(instruction) is P.CleanupControl:
-                invoke(instruction.protected)
-                child(instruction.cleanup, P.ProductionRegionKind.CLEANUP)
             elif type(instruction) is P.SuspendExecution:
                 _require(len(args) == 2 and args[0] == ValueType(ValueKind.REFERENCE)
                     and type(args[1]) is ValueType and args[1].kind is ValueKind.STATE,
@@ -848,7 +871,20 @@ class ProductionSourceIndex:
                         _require(completion.target == self.statements.active_loop(step.source),
                             'SOURCE_LOOP', str(step.id), 'child/transfer completion has a different lexical loop target')
                 instruction = step.instruction
-                if type(instruction) in (P.EnterTypeParameters,P.InvokeTypeParameterFactory):
+                if type(instruction) in (P.ReadContextMethod,P.InvokeContextMethod,P.ContextAwaitable):
+                    site=instruction.source
+                    field,value=self.roles.locate(site)
+                    parent=self.roles.parents.get(site.occurrence)
+                    _require(site.group=='FIELD' and not site.item_path and field.name=='context_expr'
+                        and value.kind=='NODE' and self.context.syntax.nodes[site.occurrence].constructor=='withitem'
+                        and parent is not None and self.roles.locate(parent)[0].name=='items'
+                        and self.context.syntax.nodes[parent.occurrence].constructor in ('With','AsyncWith')
+                        and step.source==site,
+                        'SOURCE_CONTEXT_MANAGER',str(step.id),'context method requires its original withitem expression')
+                    asynchronous=self.context.syntax.nodes[parent.occurrence].constructor=='AsyncWith'
+                    _require(asynchronous==(instruction.method in (P.ContextMethodKind.ASYNC_ENTER,P.ContextMethodKind.ASYNC_EXIT)),
+                        'SOURCE_CONTEXT_MANAGER',str(step.id),'context method phase differs from its original sync/async declaration')
+                elif type(instruction) in (P.EnterTypeParameters,P.InvokeTypeParameterFactory):
                     environment=instruction.environment
                     scope=self.context.material.scopes[environment.scope]
                     _require(environment==self.type_parameters.environment(scope.owner.occurrence,environment.world,environment.exception_abi),

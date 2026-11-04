@@ -44,6 +44,7 @@ _FIELDS = {
     'Lambda': ('args', 'body'), 'GeneratorExp': ('elt', 'generators'),
 }
 _AUX_FIELDS = {'keyword': ('arg', 'value'), 'Starred': ('value', 'ctx'),
+    'withitem': ('context_expr','optional_vars'),
                'comprehension': ('target', 'iter', 'ifs', 'is_async'),
                'arguments': ('posonlyargs', 'args', 'vararg', 'kwonlyargs', 'kw_defaults', 'kwarg', 'defaults'),
                'arg': ('arg', 'annotation', 'type_comment'), 'alias': ('name', 'asname'),
@@ -63,7 +64,7 @@ _RULE_MODULES = ('source_display_rules.py', 'source_string_rules.py', 'source_co
                  'source_suspension_rules.py', 'source_delegation_rules.py', 'source_callable_rules.py',
                  'source_deferred_interfaces.py', 'source_statement_atoms.py', 'source_statement_imports.py',
                  'source_statement_functions.py', 'source_type_parameter_interfaces.py', 'source_type_parameter_rules.py',
-                 'source_definition_interfaces.py', 'source_statement_definitions.py')
+                 'source_definition_interfaces.py', 'source_statement_definitions.py', 'source_statement_contexts.py')
 
 
 class SourceRuleError(ProductionError):
@@ -135,6 +136,7 @@ class SourceExpressionRules:
                     [dict(constructor='arguments', field=p, owner=owner+'.args') for owner in ('Lambda','FunctionDef','AsyncFunctionDef') for p in (
                         'posonlyargs', 'args', 'vararg', 'kwonlyargs', 'kwarg')] if row.name == 'arg' else
                     [dict(constructor=p, field='keywords') for p in ('Call','ClassDef')] if row.name == 'keyword' else
+                    [dict(constructor=p, field='items') for p in ('With','AsyncWith')] if row.name == 'withitem' else
                     [dict(constructor=p, field='names') for p in ('Import','ImportFrom')] if row.name == 'alias' else
                     [dict(constructor=p,field='type_params') for p in ('FunctionDef','AsyncFunctionDef','ClassDef','TypeAlias')]
                         if row.name in ('TypeVar','TypeVarTuple','ParamSpec') else [])))
@@ -202,6 +204,8 @@ class SourceExpressionRules:
             return site
         if node.constructor == 'alias':
             return site if parent in ('Import','ImportFrom') and site.ordinal == self.source.roles.fields[parent]['names'] else None
+        if node.constructor == 'withitem':
+            return site if parent in ('With','AsyncWith') and self.source.roles.locate(site)[0].name=='items' else None
         if node.constructor == 'arguments':
             return site if parent in ('Lambda','FunctionDef','AsyncFunctionDef') and site.ordinal == self.source.roles.fields[parent]['args'] else None
         if node.constructor == 'arg':
@@ -258,6 +262,7 @@ class SourceExpressionRules:
             importer_dispatch_proven=False, module_initialization_observed=False, import_namespace_layout_proven=False,
             type_parameter_native_abi_proven=False, lazy_evaluator_bodies_lowered=False,
             class_namespace_operations_expanded=False, class_builder_admission_proven=False,
+            context_method_native_dispatch_proven=False, handled_exception_frame_mapping_proven=False,
             effects_proven=False, canonical_graph_generated=False, transformation_authorized=False)
 
 

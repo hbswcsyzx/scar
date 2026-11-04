@@ -51,6 +51,7 @@ def _implementation():
         'analysis/source_statement_rules.py', 'analysis/source_statement_atoms.py', 'analysis/source_statement_imports.py',
         'analysis/source_statement_functions.py',
         'analysis/source_definition_interfaces.py', 'analysis/source_statement_definitions.py',
+        'analysis/source_statement_contexts.py',
         'analysis/source_type_parameter_interfaces.py', 'analysis/source_type_parameter_rules.py',
         'analysis/source_productions.py', 'analysis/program_types.py',
         'ir/program/source_productions.py', 'ir/record_codec.py')

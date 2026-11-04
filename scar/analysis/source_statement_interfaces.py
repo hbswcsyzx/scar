@@ -261,8 +261,10 @@ class SourceStatementInterfaceIndex:
                     result.add(_NORMAL)
             elif kind in ('With', 'AsyncWith'):
                 result = suites['body'] | {_RAISE}
-                if _RAISE in suites['body']:
-                    result.add(_NORMAL)  # __exit__ may suppress a body exception
+                items=self.node_items(current,'items')
+                if (_RAISE in suites['body'] or len(items)>1
+                        or any(self.roles.field(item,'optional_vars').kind=='NODE' for item in items)):
+                    result.add(_NORMAL)  # also suppress target-store or later-enter failures
             elif kind in ('Try', 'TryStar'):
                 body = suites['body']
                 result = body - {_NORMAL}
