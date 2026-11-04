@@ -55,9 +55,9 @@ def test_closed_grammar_exact_records_strict_codec_and_budgets():
     assert summary['control_semantics_checked'] is False
     assert A.read_production_plan(A.production_plan_document(value)) == value
     catalog = A.production_type_catalog()
-    assert catalog['counts'] == dict(records=38, fields=109, identifiers=4, enums=13, enum_members=189, unions=10)
+    assert catalog['counts'] == dict(records=39, fields=112, identifiers=4, enums=14, enum_members=193, unions=11)
     assert set(catalog['instruction_variants']) == {
-        'EvaluateChild', 'ApplyLanguageAction', 'ApplyPythonProtocol', 'AccessBinding', 'ConstructValue', 'DefineLiteral', 'ApplyRegion',
+        'EvaluateChild', 'ApplyLanguageAction', 'ApplyPythonProtocol', 'ApplyDelegationProtocol', 'AccessBinding', 'ConstructValue', 'DefineLiteral', 'ApplyRegion',
         'BranchControl', 'LoopControl', 'DeferRegion', 'CleanupControl', 'HandleCompletions',
         'TransferCompletion', 'SuspendExecution'}
     assert A.read_production_type_catalog(deepcopy(catalog)) == catalog
@@ -140,6 +140,33 @@ def test_existing_protocol_signatures_are_mandatory_for_recipe_protocol_steps():
             A.validate_production_plan(replace(value, steps=(replace(pack, instruction=instruction),)))
 
 
+def test_delegation_boundaries_have_closed_signatures_and_distinct_send_outcomes():
+    from scar.ir.program.ids import LocationID
+    from scar.ir.program.protocol_signatures import ExceptionABI
+    from scar.ir.program.signature_patterns import ChoiceBinding, TypeBinding
+    from scar.ir.program.delegation_signatures import delegation_signature_catalog
+    world = ValueType(ValueKind.STATE, location=LocationID('world'))
+    assert set(delegation_signature_catalog()) == set(P.DelegationProtocolKind)
+    for abi in ExceptionABI:
+        raised = P.ProductionCompletion(C.RAISE, (*(REF for _ in range(
+            1 if abi is ExceptionABI.EXCEPTION_WORLD else 2)), world))
+        for kind in P.DelegationProtocolKind:
+            ordinary = kind is P.DelegationProtocolKind.STOP_ITERATION_VALUE
+            args = (*(REF for _ in range(2 if kind is P.DelegationProtocolKind.SEND else 1)), world)
+            result = (REF,) if ordinary else (BOOL, REF, world) if kind is P.DelegationProtocolKind.SEND else (REF, world)
+            outputs = (*normal(*result), *((raised,) if not ordinary else ()))
+            root = region('root', parameters=args, outputs=outputs, steps=('delegate',))
+            instruction = P.ApplyDelegationProtocol(kind, (TypeBinding('world', world),
+                *((ChoiceBinding('exception_abi', abi.value),) if not ordinary else ())))
+            value = plan((root,), (step('delegate', root, instruction,
+                tuple(parameter(root, i) for i in range(len(args))), outputs),))
+            assert A.validate_production_plan(value)['delegation_signature_checks'] == 1
+            assert A.read_production_plan(A.production_plan_document(value)) == value
+            with pytest.raises(A.ProductionError, match='PORT_TYPES'):
+                A.validate_production_plan(replace(value, steps=(replace(value.steps[0],
+                    arguments=value.steps[0].arguments[:-1]),)))
+
+
 def test_implicit_literals_keep_exact_values_without_asserting_identity_or_allocation():
     from scar.ir.literals import PythonLiteral
     for literal in (None, '', (), ('nested', 7)):
@@ -218,6 +245,17 @@ def test_loop_template_carries_ports_without_iterations_or_cross_region_value_ed
     assert 'iteration' not in str(A.production_plan_document(value)).lower()
     with pytest.raises(A.ProductionError, match='LOOP_INTERFACE'):
         A.validate_production_plan(replace(value, regions=(root, condition, replace(body, parameters=(BOOL,)))))
+    raised = P.ProductionCompletion(C.RAISE, (REF,))
+    failing = step('may_raise', body, P.ApplyLanguageAction(P.LanguageActionKind.CALL),
+        (parameter(body, 1),), (*normal(INT), raised))
+    failures = replace(value, regions=(replace(root, completions=(*root.completions, raised)), condition,
+        replace(body, steps=(failing.id, *body.steps), completions=(*body.completions, raised))),
+        steps=(replace(value.steps[0], completions=(*value.steps[0].completions, raised)),
+            *value.steps[1:], failing))
+    assert A.validate_production_plan(failures)['regions'] == 3
+    with pytest.raises(A.ProductionError, match='LOOP_INTERFACE'):
+        A.validate_production_plan(replace(failures, regions=(root, *failures.regions[1:]),
+            steps=(value.steps[0], *failures.steps[1:])))
     # Deferred body parameters belong to its later invocation, not the declaration.
     outer = region('outer', parameters=(REF,), outputs=normal(REF), steps=('defer',))
     deferred = region('deferred', parent=outer.id, kind=P.ProductionRegionKind.DEFERRED, steps=('later_return',))
@@ -270,7 +308,13 @@ def test_suspension_exports_state_and_receives_distinct_later_delivery_ports(tra
         step('throw', thrown, P.TransferCompletion(C.RAISE),
             tuple(parameter(thrown, i) for i in range(len(raised))), (outputs[1],))))
     assert A.read_production_plan(A.production_plan_document(value)) == value
+    for kind in (P.SuspensionKind.AWAIT, P.SuspensionKind.YIELD_FROM):
+        delegated = replace(value, steps=(replace(value.steps[0], instruction=replace(suspension,
+            suspension=kind, delegate=parameter(root))), *value.steps[1:]))
+        assert A.read_production_plan(A.production_plan_document(delegated)) == delegated
     for instruction in (
+        replace(suspension, suspension=P.SuspensionKind.YIELD_FROM),
+        replace(suspension, delegate=parameter(root)),
         replace(suspension, saved=(parameter(root, 1),)),  # stale world is never a saved capture
         replace(suspension, routes=suspension.routes[:1]),
         replace(suspension, routes=(suspension.routes[0], suspension.routes[0])),

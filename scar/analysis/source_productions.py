@@ -16,6 +16,7 @@ from scar.ir.program.control import LanguageCompletionKind as C
 from scar.ir.program.model import ValueKind, ValueType, ExitKind
 from scar.ir.program.protocol_signatures import ExceptionABI, protocol_signature_catalog, _resolve_protocol_rule
 from scar.ir.program.signature_patterns import SignatureError, SignatureForm
+from scar.ir.program.delegation_signatures import resolve_delegation_signature
 from scar.ir.record_codec import decode, encode
 
 
@@ -51,7 +52,8 @@ def production_type_catalog():
     modules = {cls.__module__: sha256(Path(sys.modules[cls.__module__].__file__).read_bytes()).hexdigest()
         for cls in registry.values()}
     modules[__name__] = sha256(Path(__file__).read_bytes()).hexdigest()
-    for name in ('scar.analysis.program_types', 'scar.ir.record_codec', 'scar.ir.program.protocol_signatures'):
+    for name in ('scar.analysis.program_types', 'scar.ir.record_codec', 'scar.ir.program.protocol_signatures',
+                 'scar.ir.program.delegation_signatures'):
         modules[name] = sha256(Path(sys.modules[name].__file__).read_bytes()).hexdigest()
     payload = dict(schema='scar.source-production-type-catalog', schema_version=1,
         root=root, types=rows, counts=counts, modules=dict(sorted(modules.items())),
@@ -141,7 +143,7 @@ def validate_production_plan(plan, *, max_visits=1_000_000):
     """
     visits = _shape(plan, max_visits)
     _require((plan.schema, plan.schema_version, plan.authority) == (
-        'scar.source-production-plan', 2, 'SOURCE_RECIPE_SHAPE_ONLY'),
+        'scar.source-production-plan', 3, 'SOURCE_RECIPE_SHAPE_ONLY'),
         'SCHEMA', 'plan', 'unsupported recipe schema or authority')
     source = plan.input
     _require(bool(source.path) and bool(source.namespace_root), 'INPUT', 'plan.input', 'source paths must be nonempty')
@@ -269,6 +271,17 @@ def validate_production_plan(plan, *, max_visits=1_000_000):
                     for c in signature.completions})
                 _require(signature.arguments == args and expected == outputs, 'PORT_TYPES', str(identity),
                          'protocol ports/completions differ from the declared signature and explicit parameters')
+            elif type(instruction) is P.ApplyDelegationProtocol:
+                try:
+                    signature = resolve_delegation_signature(instruction.protocol, instruction.bindings,
+                        max_nodes=max_visits, max_ports=max_visits)
+                except (SignatureError, ValueError) as error:
+                    raise ProductionError('DELEGATION_SIGNATURE', str(identity), str(error)) from error
+                expected = ({(C.FALLTHROUGH, None): signature.results} if signature.form is SignatureForm.ORDINARY else {
+                    (C.FALLTHROUGH if c.kind is ExitKind.NORMAL else C.RAISE, None): c.types
+                    for c in signature.completions})
+                _require(signature.arguments == args and expected == outputs, 'PORT_TYPES', str(identity),
+                         'delegation ports/completions differ from the explicit signature')
             elif type(instruction) is P.ApplyRegion:
                 _require(not args and invoke(instruction.invocation) == outputs, 'PORT_TYPES', str(identity),
                          'region application completions differ or duplicate explicit call arguments')
@@ -359,6 +372,29 @@ def validate_production_plan(plan, *, max_visits=1_000_000):
                     _require(region_outputs[condition.id].get((C.FALLTHROUGH, None)) == (
                         ValueType(ValueKind.DATA, 'builtins.bool'), *carried),
                         'LOOP_INTERFACE', str(identity), 'loop condition returns decision then carried values')
+                    _require(not any(key in region_outputs[condition.id] for key in (
+                        (C.BREAK, region.id), (C.CONTINUE, region.id))),
+                        'LOOP_INTERFACE', str(identity), 'condition cannot break/continue its own loop')
+                    escaped = {}
+                    for row in (condition, body):
+                        for key, types in region_outputs[row.id].items():
+                            if key not in ((C.FALLTHROUGH, None), (C.BREAK, region.id), (C.CONTINUE, region.id)):
+                                _require(key not in escaped or escaped[key] == types, 'LOOP_INTERFACE', str(identity),
+                                    'condition/body escaping completion interfaces differ')
+                                escaped[key] = types
+                    if instruction.otherwise is None:
+                        escaped[(C.FALLTHROUGH, None)] = carried
+                    else:
+                        otherwise = child(instruction.otherwise, P.ProductionRegionKind.ALTERNATIVE)
+                        for key, types in region_outputs[otherwise.id].items():
+                            _require(key not in escaped or escaped[key] == types, 'LOOP_INTERFACE', str(identity),
+                                'loop otherwise completion interfaces differ')
+                            escaped[key] = types
+                        if (C.BREAK, region.id) in region_outputs[body.id]:
+                            _require((C.FALLTHROUGH, None) not in escaped or escaped[(C.FALLTHROUGH, None)] == carried,
+                                'LOOP_INTERFACE', str(identity), 'break and otherwise result interfaces differ')
+                            escaped[(C.FALLTHROUGH, None)] = carried
+                    _require(outputs == escaped, 'LOOP_INTERFACE', str(identity), 'loop dropped or invented a completion')
                 for key in ((C.FALLTHROUGH, None), (C.CONTINUE, region.id), (C.BREAK, region.id)):
                     if key in region_outputs[body.id]:
                         _require(region_outputs[body.id][key] == carried,
@@ -376,6 +412,12 @@ def validate_production_plan(plan, *, max_visits=1_000_000):
                 _require(len(args) == 2 and args[0] == ValueType(ValueKind.REFERENCE)
                     and type(args[1]) is ValueType and args[1].kind is ValueKind.STATE,
                     'SUSPEND_INTERFACE', str(identity), 'handoff must export a reference and its current world')
+                delegated = instruction.suspension in (P.SuspensionKind.AWAIT, P.SuspensionKind.YIELD_FROM)
+                _require((instruction.delegate is not None) == delegated, 'SUSPEND_INTERFACE', str(identity),
+                    'await/yield-from require an explicit delegate; ordinary yield must not have one')
+                if delegated:
+                    _require(value_type(instruction.delegate) == ValueType(ValueKind.REFERENCE),
+                        'SUSPEND_INTERFACE', str(identity), 'delegate must be a visible reference operand')
                 saved = tuple(value_type(v) for v in instruction.saved)
                 _require(not any(type(t) is ValueType and t.kind is ValueKind.STATE for t in saved),
                     'SUSPEND_INTERFACE', str(identity), 'state must enter afresh, never through a saved value')
@@ -422,6 +464,7 @@ def validate_production_plan(plan, *, max_visits=1_000_000):
     return dict(complete=True, visits=visits, regions=len(regions), steps=len(steps),
         recipe_shape_checked=True, local_references_checked=True, source_rules_replayed=False,
         protocol_signature_checks=sum(type(s.instruction) is P.ApplyPythonProtocol for s in plan.steps),
+        delegation_signature_checks=sum(type(s.instruction) is P.ApplyDelegationProtocol for s in plan.steps),
         operation_signatures_checked=False, control_semantics_checked=False, rewrite_authorized=False)
 
 

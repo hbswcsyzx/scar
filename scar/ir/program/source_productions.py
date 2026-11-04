@@ -122,6 +122,13 @@ class SuspensionKind(str, Enum):
     AWAIT = 'AWAIT'
 
 
+class DelegationProtocolKind(str, Enum):
+    YIELD_FROM_ITER = 'YIELD_FROM_ITER'
+    AWAITABLE_ITER = 'AWAITABLE_ITER'
+    SEND = 'SEND'
+    STOP_ITERATION_VALUE = 'STOP_ITERATION_VALUE'
+
+
 @dataclass(frozen=True, slots=True)
 class ProductionInput:
     path: str
@@ -188,6 +195,13 @@ class ApplyPythonProtocol:
     protocol: PythonProtocolKind
     bindings: Bindings
     selectors: tuple[SlotRef, ...] = ()
+
+
+@dataclass(frozen=True, slots=True)
+class ApplyDelegationProtocol:
+    """A declared compiler/runtime boundary; not an expanded native call graph."""
+    protocol: DelegationProtocolKind
+    bindings: Bindings
 
 
 @dataclass(frozen=True, slots=True)
@@ -302,9 +316,12 @@ class SuspendExecution:
     exception_abi: ExceptionABI
     routes: tuple[ProductionResumeRoute, ...]
     saved: tuple[ProductionValue, ...] = ()
+    # A delegated suspension is processed by its driver before a normalized
+    # result/error is delivered to these routes. It is not an ordinary yield.
+    delegate: ProductionValue | None = None
 
 
-ProductionInstruction = (EvaluateChild | ApplyLanguageAction | ApplyPythonProtocol | AccessBinding | ConstructValue | DefineLiteral
+ProductionInstruction = (EvaluateChild | ApplyLanguageAction | ApplyPythonProtocol | ApplyDelegationProtocol | AccessBinding | ConstructValue | DefineLiteral
     | ApplyRegion | BranchControl | LoopControl | DeferRegion | CleanupControl
     | HandleCompletions | TransferCompletion | SuspendExecution)
 
@@ -347,13 +364,13 @@ class SourceProductionPlan:
     steps: tuple[ProductionStep, ...]
     slots: tuple[ProductionSlotDisposition, ...]
     schema: str = 'scar.source-production-plan'
-    schema_version: int = 2
+    schema_version: int = 3
     authority: str = 'SOURCE_RECIPE_SHAPE_ONLY'
 
 
 PRODUCTION_RECORD_TAGS = {cls: ('record_kind', cls.__name__) for cls in (
     ProductionOccurrence, SlotRef, ProductionParameter, ProductionResult,
-    EvaluateChild, ApplyLanguageAction, ApplyPythonProtocol, AccessBinding, ConstructValue, DefineLiteral, ApplyRegion,
+    EvaluateChild, ApplyLanguageAction, ApplyPythonProtocol, ApplyDelegationProtocol, AccessBinding, ConstructValue, DefineLiteral, ApplyRegion,
     BranchControl, LoopControl, DeferRegion, CleanupControl, HandleCompletions,
     TransferCompletion, SuspendExecution, ProductionResumeRoute, IterationCondition,
     CountBinding, ChoiceBinding, TypeBinding, TypesBinding)}
