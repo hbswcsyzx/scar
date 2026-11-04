@@ -93,6 +93,7 @@ UNKNOWN 应落在确实未知的字段、效果或关系上，不能吞掉已知
 Python 建模遵守求值顺序，区分定义阶段与调用阶段、绑定与对象内容、全局/闭包/类命名空间。
 import 的 module 引用、namespace 和初始化状态分别表示；属性访问描述 lookup 请求，
 不能直接当作 `__dict__` 读取或推断其结果身份。类定义最终产物取 decorator 链返回值，不保证是类。
+导入的请求参数和名字投影可静态保存为已知字段；实际importer/module实例、registry命中及初始化另属状态/证据。IMPORT_FROM保导入回退语义；star import保动态namespace写范围，不能当作已知静态binder列表。
 短路、比较、索引、赋值、调用及解包都可能调用用户代码、产生部分效果或抛错。
 受支持的 try/finally/with 保留 pending completion 和清理顺序；generator/async 创建与恢复分开。
 复杂异常组、模式匹配、动态生成代码及部分异步/委托协议仍可能有明确前沿，不能宣称全语言闭合。

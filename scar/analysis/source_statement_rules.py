@@ -20,7 +20,8 @@ _FIELDS = {'Expr': ('value',), 'Pass': (), 'Assign': ('targets', 'value', 'type_
     'For': ('target', 'iter', 'body', 'orelse', 'type_comment'),
     'AsyncFor': ('target', 'iter', 'body', 'orelse', 'type_comment'), 'Break': (), 'Continue': (),
     'AugAssign': ('target', 'op', 'value'), 'AnnAssign': ('target', 'annotation', 'value', 'simple'),
-    'Assert': ('test', 'msg'), 'Raise': ('exc', 'cause')}
+    'Assert': ('test', 'msg'), 'Raise': ('exc', 'cause'),
+    'Import': ('names',), 'ImportFrom': ('module', 'names', 'level')}
 
 
 class SourceStatementRules(SourceExpressionRules):
@@ -124,6 +125,10 @@ class _StatementBuilder(_Builder):
         elif kind in ('AugAssign', 'AnnAssign', 'Assert', 'Raise'):
             from scar.analysis.source_statement_atoms import emit_atomic_statement
             emit_atomic_statement(self, root, current)
+            return self.plan(root, source)
+        elif kind in ('Import', 'ImportFrom'):
+            from scar.analysis.source_statement_imports import emit_import_statement
+            emit_import_statement(self, root, current)
             return self.plan(root, source)
         self.finish(root, (current,), (self.world,))
         return self.plan(root, source)

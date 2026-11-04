@@ -55,9 +55,10 @@ def test_closed_grammar_exact_records_strict_codec_and_budgets():
     assert summary['control_semantics_checked'] is False
     assert A.read_production_plan(A.production_plan_document(value)) == value
     catalog = A.production_type_catalog()
-    assert catalog['counts'] == dict(records=50, fields=138, identifiers=4, enums=18, enum_members=210, unions=16)
+    assert catalog['counts'] == dict(records=53, fields=153, identifiers=4, enums=18, enum_members=210, unions=18)
     assert set(catalog['instruction_variants']) == {
         'EvaluateChild', 'ApplyLanguageAction', 'ReadCompilationOption', 'ApplyInplaceOperator', 'PublishAnnotation',
+        'ImportRequest', 'ImportMember', 'ImportStar',
         'ApplyPythonProtocol', 'ApplyDelegationProtocol', 'AccessBinding', 'ConstructValue', 'DefineLiteral', 'ApplyRegion',
         'BranchControl', 'LoopControl', 'DeferRegion', 'ReferenceEnvironment', 'EnterDeferredBody', 'CleanupControl', 'HandleCompletions',
         'TransferCompletion', 'SuspendExecution'}
@@ -117,6 +118,40 @@ def test_compilation_inplace_and_annotation_interfaces_are_explicit_and_closed()
     with pytest.raises(A.ProductionError, match='COMPILATION_OPTION'):
         A.validate_production_plan(plan((replace(root, parameters=(world,)),),
             (replace(read, arguments=(parameter(root),)),)))
+
+
+def test_import_request_member_and_star_have_distinct_typed_interfaces():
+    from scar.ir.program.ids import LocationID
+    from scar.ir.program.protocol_signatures import ExceptionABI
+    world=ValueType(ValueKind.STATE,location=LocationID('import-interface-world'))
+    site=P.SlotRef(0,'FIELD',0)
+    for abi in ExceptionABI:
+        raised=(REF,world) if abi is ExceptionABI.EXCEPTION_WORLD else (REF,REF,world)
+        for instruction in (P.ImportRequest(site,None,None,0,abi,'module',None,0),
+                P.ImportRequest(site,(site,),site,0,abi,'module',('member',),1),
+                P.ImportMember(site,None,abi,'member'),P.ImportMember(site,1,abi,'part'),P.ImportStar(site,0,abi)):
+            request=type(instruction) is P.ImportRequest
+            star=type(instruction) is P.ImportStar
+            arguments=(world,) if request else (REF,world)
+            result=(world,) if star else (REF,world)
+            outputs=(*normal(*result),P.ProductionCompletion(C.RAISE,raised))
+            root=region('import',parameters=arguments,outputs=outputs,steps=('apply','done'))
+            apply=step('apply',root,instruction,tuple(parameter(root,i) for i in range(len(arguments))),outputs)
+            done=step('done',root,P.TransferCompletion(C.FALLTHROUGH),
+                tuple(P.ProductionResult(apply.id,i) for i in range(len(result))),normal(*result))
+            specimen=plan((root,),(apply,done))
+            A.validate_production_plan(specimen)
+            assert A.read_production_plan(A.production_plan_document(specimen))==specimen
+            with pytest.raises(A.ProductionError,match='IMPORT_INTERFACE'):
+                A.validate_production_plan(replace(specimen,steps=(replace(apply,arguments=()),done)))
+            if request:
+                with pytest.raises(A.ProductionError,match='IMPORT_INTERFACE'):
+                    A.validate_production_plan(replace(specimen,steps=(replace(apply,
+                        instruction=replace(instruction,fromlist=(),level=site)),done)))
+            elif not star:
+                with pytest.raises(A.ProductionError,match='IMPORT_INTERFACE'):
+                    A.validate_production_plan(replace(specimen,steps=(replace(apply,
+                        instruction=replace(instruction,component=0)),done)))
 
 
 def test_ordered_values_shared_subregion_and_invalid_local_edges():

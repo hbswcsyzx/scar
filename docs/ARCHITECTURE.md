@@ -96,8 +96,9 @@ recipe v5增加GET_ASYNC_ITERATOR、GET_ASYNC_NEXT及StopAsyncIteration匹配的
 异步属性沿原C1求值owner传播：eager comprehension会使外层求值异步，创建惰性generator不会；首个iter仍按原创建阶段归属。异步generator的元素使用ASYNC_YIELD，与内部AWAIT分开。
 语句规则另按同一typed recipe生成：7类linear语句保RHS单次求值、原序写入、正常路径临时引用释放及RETURN出口；global/nonlocal只保编译声明关系。
 recipe v6增加原F2 `SourceLoopTarget`，局部子图可以导出外层循环完成端口，不造本地假父节点。suite按原序接STATEMENT child，正常完成才接下一语句；没有正常前驱的尾部仍保原slot disposition。If取分支完成接口并集；For/While/AsyncFor各保一份循环模板，iterator引用是invariant，world由backedge携带，item只进当前body。耗尽才进else，break绕过else；嵌套循环else中的跳转接仍活跃的外层循环。
-`source_statement_interfaces.py`在原F2上机械归约各语句的may-completion上界，定义body不内联；try/finally的完成替换及with的异常抑制影响接口。上界不是可达性证明，也不代表Try/With等child实现已经完成。17类局部语句规则已接接口；定义、import和异常/引用清理仍须闭合后才发布CFG/SSA。
+`source_statement_interfaces.py`在原F2上机械归约各语句的may-completion上界，定义body不内联；try/finally的完成替换及with的异常抑制影响接口。上界不是可达性证明，也不代表Try/With等child实现已经完成。19类局部语句规则已接接口；定义、其余复合控制和异常/引用清理仍须闭合后才发布CFG/SSA。
 recipe v7先固定三类接口，再接AugAssign/AnnAssign/Assert/Raise。增强赋值保存一次地址、读旧值、求RHS、原地运算后写回；其target由父语句处理。没有RHS的注解只检查必要地址分量，不造get/set或多余slice/tuple；原C1决定局部抑制、字符串化发布或延迟登记。延迟annotation请求body仍是独立child义务。assert保目标编译选项的符号输入，不能照分析进程的优化flags删除检查；失败分支才求message。raise按exc/cause顺序求值，再规范化并导出异常ABI。
+v8区分ImportRequest/ImportMember/ImportStar，三种接口先验再接产生规则。原F3投影依据导出已知请求名、成员名、from-list和相对层级；bind继续引用原namespace write port。普通点路径绑定head，dotted-as沿IMPORT_FROM路径逐层取成员；普通from-member保私有名改写，点路径分量不改写。star保动态namespace写效果，不捏造静态名字集合。请求不等于实际初始化或I/O；importer/frame/registry实现和清理仍未证明，不能据此删除import。
 前两步的局部规则已通过：Yield由原C1 owner区分普通／异步形式，bare yield导出None，嵌套定义header仍归外层执行owner。静态compiler只作独立规则对照，不以bytecode位置接源码身份。
 后续语句／定义／cleanup规则闭合后才进入F4-C；每步先验类型/接口，再接源码规则，再在原材料独立重放，不以节点存在或局部计数授予全层完成。
 

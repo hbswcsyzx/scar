@@ -46,7 +46,7 @@ _FIELDS = {
 _AUX_FIELDS = {'keyword': ('arg', 'value'), 'Starred': ('value', 'ctx'),
                'comprehension': ('target', 'iter', 'ifs', 'is_async'),
                'arguments': ('posonlyargs', 'args', 'vararg', 'kwonlyargs', 'kw_defaults', 'kwarg', 'defaults'),
-               'arg': ('arg', 'annotation', 'type_comment')}
+               'arg': ('arg', 'annotation', 'type_comment'), 'alias': ('name', 'asname')}
 _COMPREHENSIONS = ('ListComp', 'SetComp', 'DictComp')
 _COMPREHENSION_PARENTS = (*_COMPREHENSIONS, 'GeneratorExp')
 _SELECTORS = {
@@ -59,7 +59,7 @@ _SELECTORS = {
 _TARGETS = frozenset(('Name', 'Attribute', 'Subscript', 'List', 'Tuple'))
 _RULE_MODULES = ('source_display_rules.py', 'source_string_rules.py', 'source_comprehension_rules.py',
                  'source_suspension_rules.py', 'source_delegation_rules.py', 'source_callable_rules.py',
-                 'source_deferred_interfaces.py', 'source_statement_atoms.py')
+                 'source_deferred_interfaces.py', 'source_statement_atoms.py', 'source_statement_imports.py')
 
 
 class SourceRuleError(ProductionError):
@@ -130,7 +130,8 @@ class SourceExpressionRules:
                     [dict(constructor='Lambda', field='args')] if row.name == 'arguments' else
                     [dict(constructor='arguments', field=p, owner='Lambda.args') for p in (
                         'posonlyargs', 'args', 'vararg', 'kwonlyargs', 'kwarg')] if row.name == 'arg' else
-                    [dict(constructor='Call', field='keywords')] if row.name == 'keyword' else [])))
+                    [dict(constructor='Call', field='keywords')] if row.name == 'keyword' else
+                    [dict(constructor=p, field='names') for p in ('Import','ImportFrom')] if row.name == 'alias' else [])))
             if row.name in ('Name', 'Attribute', 'Subscript'):
                 rows[-1]['parent_contexts'].extend((
                     dict(constructor='AugAssign', field='target', condition='READ_MODIFY_WRITE_ADDRESS'),
@@ -182,6 +183,8 @@ class SourceExpressionRules:
                         return site
         if node.constructor not in _AUX_FIELDS:
             return None
+        if node.constructor == 'alias':
+            return site if parent in ('Import','ImportFrom') and site.ordinal == self.source.roles.fields[parent]['names'] else None
         if node.constructor == 'arguments':
             return site if parent == 'Lambda' and site.ordinal == self.source.roles.fields['Lambda']['args'] else None
         if node.constructor == 'arg':
@@ -235,6 +238,7 @@ class SourceExpressionRules:
             native_delegation_expanded=False, driver_protocol_graph_generated=False,
             argument_admission_proven=False, closure_layout_proven=False, environment_activation_proven=False,
             compilation_options_resolved=False, annotation_request_bodies_lowered=False,
+            importer_dispatch_proven=False, module_initialization_observed=False, import_namespace_layout_proven=False,
             effects_proven=False, canonical_graph_generated=False, transformation_authorized=False)
 
 

@@ -96,6 +96,11 @@ def documents():
         'def local_annotations():\n    local_only: Missing\n    local_value: Missing = initial()\n    receiver().member: Missing\n    receiver()[start():stop():stride()]: Missing',
         'assert condition()', 'assert condition(), message()',
         'def raise_forms():\n    if condition():\n        raise\n    if condition():\n        raise error()\n    raise error() from cause()',
+        'import package', 'import package.child', 'import package.child.deep as alias, other as renamed',
+        'from package import first, second as two', 'from . import relative', 'from ...package import private as _alias',
+        'from package import *',
+        'def local_imports():\n    global global_imported\n    import package as global_imported\n    import package.inner as scoped\n    from package import first as local',
+        'class ImportNames:\n    import __private as __bound\n    from package import __member\n    import package.__part.deep as __alias',
     )) + '\n'
     return _documents(text)
 
@@ -688,7 +693,7 @@ def test_delegation_keeps_send_and_post_driver_completion_paths_separate(rules, 
             plan = variant.build(occurrence)
             checked = variant.verify(plan)
             assert not checked['native_delegation_expanded'] and not checked['driver_protocol_graph_generated']
-            assert plan.schema_version == 7
+            assert plan.schema_version == 8
             _, root_steps = owned(plan)
             acquire = next(s for s in root_steps if type(s.instruction) is P.ApplyDelegationProtocol)
             assert acquire.instruction.protocol is (P.DelegationProtocolKind.AWAITABLE_ITER if constructor == 'Await'
@@ -922,7 +927,7 @@ def test_structured_statement_rules_preserve_source_fields_and_completion_interf
     statements = SourceStatementRules(rules.source, world=WORLD, exception_abi=ExceptionABI.EXCEPTION_WORLD)
     supported = {r['constructor'] for r in statements.catalog()['rules'] if r['status'] == 'LOCAL_STATEMENT_RULE'}
     assert supported == {'Expr','Pass','Assign','Delete','Return','Global','Nonlocal',
-        'If','While','For','AsyncFor','Break','Continue','AnnAssign','AugAssign','Assert','Raise'}
+        'If','While','For','AsyncFor','Break','Continue','AnnAssign','AugAssign','Assert','Raise','Import','ImportFrom'}
     seen = set()
     for occurrence, node in enumerate(rules.source.context.syntax.nodes):
         if node.constructor not in supported:continue
@@ -1112,3 +1117,88 @@ def test_annotation_phases_and_compilation_options_are_static_not_runtime_guesse
     assert [s.argval for s in instructions if s.opname=='LOAD_NAME'] == ['receiver','start','stop','right']
     assert sum(s.opname=='BINARY_SLICE' for s in instructions)==1
     assert sum(s.opname=='STORE_SLICE' for s in instructions)==1
+
+
+def test_import_source_paths_binding_projections_and_namespace_effects(rules):
+    import dis
+    from types import CodeType
+    from scar.analysis.source_statement_rules import SourceStatementRules
+    from scar.analysis.source_productions import ProductionError
+    from scar.ir.program.control import LanguageCompletionKind as C
+    observed=set()
+    for abi in ExceptionABI:
+        statements=SourceStatementRules(rules.source,world=WORLD,exception_abi=abi)
+        for occurrence in (*occurrences(rules,'Import'),*occurrences(rules,'ImportFrom')):
+            plan=statements.build(occurrence)
+            checked=statements.verify(plan)
+            assert not checked['importer_dispatch_proven'] and not checked['module_initialization_observed']
+            root,steps=owned(plan)
+            assert {c.kind for c in root.completions}=={C.FALLTHROUGH,C.RAISE}
+            aliases=rules.source.statements.node_items(occurrence,'names')
+            requests=[s for s in steps if type(s.instruction) is P.ImportRequest]
+            bindings=[s for s in steps if type(s.instruction) is P.AccessBinding]
+            kind=rules.source.context.syntax.nodes[occurrence].constructor
+            assert len(requests)==(len(aliases) if kind=='Import' else 1)
+            for alias in aliases:
+                assert rules.descriptor_owner(alias)==rules.source.roles.parents[alias]
+            if kind=='Import':
+                assert all(s.instruction.from_names is None and s.instruction.fromlist is None
+                    and s.instruction.relative_level==0 for s in requests)
+                assert len(bindings)==len(aliases)
+                for alias,request,binding in zip(aliases,requests,bindings):
+                    raw=rules.source.roles.field(alias,'name').scalar.to_python()
+                    renamed=rules.source.roles.field(alias,'asname').scalar.to_python() is not None
+                    members=[s for s in steps if type(s.instruction) is P.ImportMember and s.source==P.ProductionOccurrence(alias)]
+                    assert [s.instruction.component for s in members]==(list(range(1,len(raw.split('.')))) if renamed else [])
+                    owner=P.ProductionResult(request.id,0)
+                    for member in members:
+                        assert member.arguments[0]==owner
+                        assert member.instruction.member_name==raw.split('.')[member.instruction.component]
+                        owner=P.ProductionResult(member.id,0)
+                    assert binding.arguments[0]==owner
+                    observed.add('dotted-as' if members else 'head')
+                    if raw=='__private':
+                        assert request.instruction.requested_name=='_ImportNames__private'
+                        observed.add('private-request')
+            else:
+                request=requests[0]
+                names=tuple(rules.source.roles.field(alias,'name').scalar.to_python() for alias in aliases)
+                assert request.instruction.from_names==names
+                assert request.instruction.relative_level==rules.source.roles.field(occurrence,'level').scalar.to_python()
+                if request.instruction.relative_level:
+                    observed.add('relative')
+                stars=[s for s in steps if type(s.instruction) is P.ImportStar]
+                members=[s for s in steps if type(s.instruction) is P.ImportMember]
+                assert all(s.arguments[0]==P.ProductionResult(request.id,0) for s in (*members,*stars))
+                if names==('*',):
+                    assert len(stars)==1 and not bindings and not members
+                    assert stars[0].instruction.environment==root.context.environment
+                    observed.add('star')
+                else:
+                    assert len(members)==len(bindings)==len(aliases) and not stars
+                    assert all(s.instruction.component is None for s in members)
+                    for member,binding in zip(members,bindings):
+                        assert binding.arguments[0]==P.ProductionResult(member.id,0)
+                        if member.instruction.member_name=='_ImportNames__member':
+                            name=rules.source.frontend.declarations.ports[binding.instruction.port].name
+                            assert rules.source.frontend.declarations.names[name].value=='_ImportNames__member'
+                            assert names==('__member',)  # from-list remains unmangled
+                            observed.add('private-member')
+            altered=replace(plan,steps=tuple(replace(s,instruction=replace(s.instruction,
+                requested_name='wrong-source-name')) if s.id==requests[0].id else s for s in plan.steps))
+            with pytest.raises(ProductionError,match='SOURCE_IMPORT'):
+                rules.source.match(altered)
+    assert observed=={'head','dotted-as','private-request','relative','star','private-member'}
+    # Independent CPython compiler oracle; imported programs do not exist and
+    # none of these code objects is executed.
+    samples={'import a.b as c':[('IMPORT_NAME','a.b'),('IMPORT_FROM','b'),('STORE_NAME','c')],
+        'import a.b':[('IMPORT_NAME','a.b'),('STORE_NAME','a')],
+        'from ..a import x,y as z':[('IMPORT_NAME','a'),('IMPORT_FROM','x'),('STORE_NAME','x'),('IMPORT_FROM','y'),('STORE_NAME','z')]}
+    for text,expected in samples.items():
+        code=compile(text,'<static-import-oracle>','exec',dont_inherit=True)
+        assert [(s.opname,s.argval) for s in dis.get_instructions(code) if s.opname in ('IMPORT_NAME','IMPORT_FROM','STORE_NAME')]==expected
+    code=compile('class C:\n import __package as __name\n from a import __member\n import a.__part as __alias',
+        '<static-import-private-oracle>','exec',dont_inherit=True)
+    body=next(c for c in code.co_consts if type(c) is CodeType)
+    assert [(s.opname,s.argval) for s in dis.get_instructions(body) if s.opname in ('IMPORT_NAME','IMPORT_FROM')]==[
+        ('IMPORT_NAME','_C__package'),('IMPORT_NAME','a'),('IMPORT_FROM','_C__member'),('IMPORT_NAME','a.__part'),('IMPORT_FROM','__part')]

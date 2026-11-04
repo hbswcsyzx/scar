@@ -146,7 +146,7 @@ def validate_production_plan(plan, *, max_visits=1_000_000):
     """
     visits = _shape(plan, max_visits)
     _require((plan.schema, plan.schema_version, plan.authority) == (
-        'scar.source-production-plan', 7, 'SOURCE_RECIPE_SHAPE_ONLY'),
+        'scar.source-production-plan', 8, 'SOURCE_RECIPE_SHAPE_ONLY'),
         'SCHEMA', 'plan', 'unsupported recipe schema or authority')
     source = plan.input
     _require(bool(source.path) and bool(source.namespace_root), 'INPUT', 'plan.input', 'source paths must be nonempty')
@@ -307,6 +307,31 @@ def validate_production_plan(plan, *, max_visits=1_000_000):
             elif type(instruction) is P.ReadCompilationOption:
                 _require(not args and outputs == {(C.FALLTHROUGH, None): (ValueType(ValueKind.DATA, 'builtins.bool'),)},
                     'COMPILATION_OPTION', str(identity), 'compilation option produces only one symbolic boolean')
+            elif type(instruction) in (P.ImportRequest, P.ImportMember, P.ImportStar):
+                _require(bool(args) and type(args[-1]) is ValueType and args[-1].kind is ValueKind.STATE,
+                    'IMPORT_INTERFACE', str(identity), 'import requires one explicit source world')
+                world, reference = args[-1], ValueType(ValueKind.REFERENCE)
+                member = type(instruction) is P.ImportMember
+                _require(args == ((reference, world) if member or type(instruction) is P.ImportStar else (world,)),
+                    'IMPORT_INTERFACE', str(identity), 'import request/member/star arguments differ')
+                if not member:
+                    _require(instruction.environment >= 0, 'IMPORT_INTERFACE', str(identity), 'negative source namespace')
+                    if type(instruction) is P.ImportRequest:
+                        _require((instruction.fromlist is None) == (instruction.level is None)
+                            and (instruction.fromlist is None or bool(instruction.fromlist)),
+                            'IMPORT_INTERFACE', str(identity), 'source from-import requires nonempty names and an explicit level')
+                        _require((instruction.fromlist is None) == (instruction.from_names is None)
+                            and instruction.relative_level >= 0
+                            and (instruction.fromlist is not None and len(instruction.from_names) == len(instruction.fromlist)
+                                or instruction.fromlist is None and instruction.relative_level == 0),
+                            'IMPORT_INTERFACE', str(identity), 'resolved source import fields disagree with selector shape')
+                else:
+                    _require(instruction.component is None or instruction.component >= 1,
+                        'IMPORT_INTERFACE', str(identity), 'dotted import component must exclude the head')
+                raised = (reference, world) if instruction.exception_abi is ExceptionABI.EXCEPTION_WORLD else (reference, reference, world)
+                expected = {(C.FALLTHROUGH, None): (world,) if type(instruction) is P.ImportStar else (reference, world),
+                    (C.RAISE, None): raised}
+                _require(outputs == expected, 'IMPORT_INTERFACE', str(identity), 'import completions differ from its source ABI')
             elif type(instruction) in (P.ApplyInplaceOperator, P.PublishAnnotation):
                 _require(bool(args) and type(args[-1]) is ValueType and args[-1].kind is ValueKind.STATE,
                     'PORT_TYPES', str(identity), 'source protocol requires an explicit world')
@@ -660,6 +685,20 @@ class ProductionSourceIndex:
                     _require(type(step.source) is P.ProductionOccurrence
                         and instruction == self.statements.annotation_publication(step.source.occurrence, instruction.exception_abi),
                         'SOURCE_ANNOTATION', str(step.id), 'annotation publication differs from original scope/phase/name')
+                elif type(instruction) in (P.ImportRequest, P.ImportMember, P.ImportStar):
+                    _require(type(step.source) is P.ProductionOccurrence, 'SOURCE_IMPORT', str(step.id), 'import needs an original occurrence anchor')
+                    occurrence = step.source.occurrence
+                    if type(instruction) is P.ImportRequest:
+                        if self.context.syntax.nodes[occurrence].constructor == 'alias':
+                            parent = self.roles.parents[occurrence]
+                            expected = self.statements.import_request(parent.occurrence, instruction.exception_abi, occurrence)
+                        else:
+                            expected = self.statements.import_request(occurrence, instruction.exception_abi)
+                    elif type(instruction) is P.ImportMember:
+                        expected = self.statements.import_member(occurrence, instruction.component, instruction.exception_abi)
+                    else:
+                        expected = self.statements.import_star(occurrence, instruction.exception_abi)
+                    _require(instruction == expected, 'SOURCE_IMPORT', str(step.id), 'import source selectors/namespace differ from original references')
                 elif type(instruction) is P.LoopControl and instruction.source_loop is not None:
                     target = instruction.source_loop.occurrence
                     _require(0 <= target < len(self.context.syntax.nodes)

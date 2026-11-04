@@ -261,6 +261,46 @@ class PublishAnnotation:
 
 
 @dataclass(frozen=True, slots=True)
+class ImportRequest:
+    """Logical IMPORT_NAME request in an original source namespace.
+
+    Source selectors retain the compiler/private-name context. No fromlist
+    means ordinary import, distinct from a tuple of imported member names.
+    Namespace capabilities, importer dispatch, registry tests and module
+    initialization are not falsely replaced by a pure constant lookup.
+    """
+    module: SlotRef
+    fromlist: tuple[SlotRef, ...] | None
+    level: SlotRef | None
+    environment: int
+    exception_abi: ExceptionABI
+    requested_name: str
+    from_names: tuple[str, ...] | None
+    relative_level: int
+
+
+@dataclass(frozen=True, slots=True)
+class ImportMember:
+    """IMPORT_FROM, including its import-registry fallback, not plain getattr.
+
+    None selects a from-import member under its compiler name projection.
+    A positive component selects an unmangled dotted-asname path segment.
+    """
+    name: SlotRef
+    component: int | None
+    exception_abi: ExceptionABI
+    member_name: str
+
+
+@dataclass(frozen=True, slots=True)
+class ImportStar:
+    """Dynamic namespace mutation; never invent static binders for its names."""
+    specifier: SlotRef
+    environment: int
+    exception_abi: ExceptionABI
+
+
+@dataclass(frozen=True, slots=True)
 class ApplyPythonProtocol:
     """Reuse the existing protocol/signature domain with explicit bindings."""
     protocol: PythonProtocolKind
@@ -454,6 +494,7 @@ class SuspendExecution:
 
 
 ProductionInstruction = (EvaluateChild | ApplyLanguageAction | ReadCompilationOption | ApplyInplaceOperator | PublishAnnotation
+    | ImportRequest | ImportMember | ImportStar
     | ApplyPythonProtocol | ApplyDelegationProtocol | AccessBinding | ConstructValue | DefineLiteral
     | ApplyRegion | BranchControl | LoopControl | DeferRegion | ReferenceEnvironment | EnterDeferredBody | CleanupControl
     | HandleCompletions | TransferCompletion | SuspendExecution)
@@ -497,7 +538,7 @@ class SourceProductionPlan:
     steps: tuple[ProductionStep, ...]
     slots: tuple[ProductionSlotDisposition, ...]
     schema: str = 'scar.source-production-plan'
-    schema_version: int = 7
+    schema_version: int = 8
     authority: str = 'SOURCE_RECIPE_SHAPE_ONLY'
 
 

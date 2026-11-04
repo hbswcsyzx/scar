@@ -33,6 +33,9 @@ class SourceStatementInterfaceIndex:
         self.nodes = source.context.syntax.nodes
         self.roles = source.roles
         self._summaries = {}
+        self._import_projections = {port.site: source.frontend.declarations.ports[i].projection
+            for i, port in enumerate(source.frontend.roles.ports) if port.role in (
+                'IMPORT_MODULE_SPEC','IMPORT_MEMBER_SPEC','IMPORT_FROM_MODULE_SPEC','RELATIVE_MODULE_MARKER')}
         declared = {row.name for row in source.context.syntax.profile.ast_schema if 'stmt' in row.bases}
         _require(declared == _CONSTRUCTORS, 'constructor domain',
             'finite statement completion rules differ from the original grammar')
@@ -57,10 +60,10 @@ class SourceStatementInterfaceIndex:
             current = edge.occurrence
         return None
 
-    def suite_items(self, occurrence, name):
+    def node_items(self, occurrence, name):
         value = self.roles.field(occurrence, name)
         _require(value.kind == 'LIST' and all(v.kind == 'NODE' for v in value.items),
-            occurrence, 'statement suite must contain original node references')
+            occurrence, 'source field must contain original node references')
         return tuple(v.reference for v in value.items)
 
     def two_part_slice(self, occurrence):
@@ -102,16 +105,88 @@ class SourceStatementInterfaceIndex:
             current = edge.occurrence
         return P.PublishAnnotation(annotation, name, P.AnnotationPublicationKind.DEFERRED, conditional, exception_abi)
 
+    def import_request(self, occurrence, exception_abi, alias=None):
+        kind = self.nodes[occurrence].constructor
+        _require(kind in ('Import', 'ImportFrom'), occurrence, 'expected original import statement')
+        members = self.node_items(occurrence, 'names')
+        _require(bool(members), occurrence, 'import requires original aliases')
+        if kind == 'Import':
+            _require(alias in members, occurrence, 'ordinary import requires one of its original aliases')
+            module = P.SlotRef(alias, 'FIELD', self.roles.fields['alias']['name'])
+            names, level = None, None
+            text = self.roles.field(alias, 'name').scalar.to_python()
+            from_names, relative = None, 0
+            anchor = alias
+        else:
+            _require(alias is None, occurrence, 'from-import has one shared request')
+            module = P.SlotRef(occurrence, 'FIELD', self.roles.fields[kind]['module'])
+            level = P.SlotRef(occurrence, 'FIELD', self.roles.fields[kind]['level'])
+            names = tuple(P.SlotRef(a, 'FIELD', self.roles.fields['alias']['name']) for a in members)
+            text = self.roles.field(occurrence, 'module').scalar.to_python() or ''
+            from_names = tuple(self.roles.field(a, 'name').scalar.to_python() for a in members)
+            relative = self.roles.field(occurrence, 'level').scalar.to_python()
+            anchor = occurrence
+        return P.ImportRequest(module, names, level, self.source.context.entry_context(anchor).environment, exception_abi,
+            self.import_compiler_name(module, text), from_names, relative)
+
+    def import_compiler_name(self, site, text):
+        """Apply compiler name projection using the accepted original F3 basis.
+
+        This uses the private policy/prefix, not IMPORT_HEAD binder projection:
+        a full module request and its binding head are distinct names.
+        """
+        basis = self._import_projections.get(site)
+        _require(basis is not None, site, 'import name has no original F3 projection basis')
+        if basis.private_mode == 'NONE':
+            return text
+        if basis.private_mode == 'SELECTIVE':
+            scope = self.source.context.material.scopes[basis.parameter_group]
+            _, value = self.roles.locate(scope.anchor)
+            allowed = {self.roles.field(v.reference, 'name').scalar.to_python()
+                for v in value.items[:basis.prefix_count]}
+            if text not in allowed:
+                return text
+        owner = basis.class_owner.occurrence
+        class_name = self.roles.field(owner, 'name').scalar.to_python().lstrip('_')
+        return ('_' + class_name + text if class_name and text.startswith('__')
+            and not text.endswith('__') and '.' not in text else text)
+
+    def import_member(self, alias, component, exception_abi):
+        _require(self.nodes[alias].constructor == 'alias', alias, 'import member requires an original alias')
+        parent = self.roles.parents[alias]
+        owner = self.nodes[parent.occurrence].constructor
+        name = self.roles.field(alias, 'name').scalar.to_python()
+        if owner == 'ImportFrom':
+            _require(component is None and name != '*', alias, 'from-import requires one named member')
+            text = self.import_compiler_name(P.SlotRef(alias, 'FIELD', self.roles.fields['alias']['name']), name)
+        else:
+            _require(owner == 'Import' and self.roles.field(alias, 'asname').scalar.to_python() is not None
+                and type(component) is int and 1 <= component < len(name.split('.')),
+                alias, 'dotted as-import requires an original non-head path component')
+            text = name.split('.')[component]
+        return P.ImportMember(P.SlotRef(alias, 'FIELD', self.roles.fields['alias']['name']), component, exception_abi, text)
+
+    def import_star(self, alias, exception_abi):
+        _require(self.nodes[alias].constructor == 'alias'
+            and self.roles.field(alias, 'name').scalar.to_python() == '*', alias, 'expected original star alias')
+        parent = self.roles.parents[alias]
+        _require(self.nodes[parent.occurrence].constructor == 'ImportFrom'
+            and self.node_items(parent.occurrence, 'names') == (alias,), alias, 'star import requires one from-import alias')
+        context = self.source.context.entry_context(alias)
+        _require(self.source.context.material.scopes[context.environment].kind in ('ROOT_EXEC','ROOT_INTERACTIVE'),
+            alias, 'star import requires an original module namespace')
+        return P.ImportStar(P.SlotRef(alias, 'FIELD', self.roles.fields['alias']['name']), context.environment, exception_abi)
+
     def groups(self, occurrence):
         kind = self.nodes[occurrence].constructor
-        groups = {name: self.suite_items(occurrence, name) for name in _SUITES.get(kind, ())}
+        groups = {name: self.node_items(occurrence, name) for name in _SUITES.get(kind, ())}
         if kind in ('Try', 'TryStar'):
             handlers = self.roles.field(occurrence, 'handlers')
-            groups.update(('handler:' + str(i), self.suite_items(v.reference, 'body'))
+            groups.update(('handler:' + str(i), self.node_items(v.reference, 'body'))
                 for i, v in enumerate(handlers.items))
         elif kind == 'Match':
             cases = self.roles.field(occurrence, 'cases')
-            groups.update(('case:' + str(i), self.suite_items(v.reference, 'body'))
+            groups.update(('case:' + str(i), self.node_items(v.reference, 'body'))
                 for i, v in enumerate(cases.items))
         return groups
 
