@@ -17,7 +17,9 @@ def lazy_factory(b,region,expression,world):
         capture,world=b.environment(region,P.ClosureEnvironment(relay),world,source=owner)
         captures.append(capture)
     b.slots[expression.source]=P.ProductionDispositionKind.DEFERRED_CHILD
-    return b.emit(region,P.BuildLazyExpression(expression,b.rules.exception_abi),
+    from scar.analysis.source_evaluation_rules import build_request_body
+    request=build_request_body(b,region,expression)
+    return b.emit(region,P.BuildLazyExpression(expression,b.rules.exception_abi,request.id),
         (globals_ref,*captures,world),(_REF,b.world),source=expression.source)
 
 

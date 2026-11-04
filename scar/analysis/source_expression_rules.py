@@ -75,7 +75,8 @@ _RULE_MODULES = ('source_display_rules.py', 'source_string_rules.py', 'source_co
                  'source_statement_functions.py', 'source_type_parameter_interfaces.py', 'source_type_parameter_rules.py',
                  'source_definition_interfaces.py', 'source_statement_definitions.py', 'source_statement_contexts.py',
                  'source_statement_exceptions.py', 'source_statement_exception_groups.py', 'source_condition_rules.py',
-                 'source_pattern_interfaces.py','source_statement_patterns.py','source_root_interfaces.py','source_root_rules.py')
+                 'source_pattern_interfaces.py','source_statement_patterns.py','source_root_interfaces.py','source_root_rules.py',
+                 'source_evaluation_interfaces.py','source_evaluation_rules.py')
 
 
 class SourceRuleError(ProductionError):
@@ -154,6 +155,7 @@ class SourceExpressionRules:
                         if row.name in ('TypeVar','TypeVarTuple','ParamSpec') else [])))
             if row.name == 'Starred':
                 rows[-1]['parent_contexts'].append(dict(constructor='TypeVarTuple',field='default_value'))
+                rows[-1]['parent_contexts'].append(dict(constructor='arg',field='annotation',condition='VAR_POSITIONAL_HEADER'))
             if row.name == 'match_case':
                 rows[-1]['parent_contexts'] = [dict(constructor='Match',field='cases')]
             elif row.name == 'TypeIgnore':
@@ -230,6 +232,9 @@ class SourceExpressionRules:
             return site if parent in ('FunctionDef','AsyncFunctionDef','ClassDef','TypeAlias') and self.source.roles.locate(site)[0].name=='type_params' else None
         if node.constructor == 'Starred' and parent == 'TypeVarTuple' and self.source.roles.locate(site)[0].name=='default_value':
             return site
+        if node.constructor == 'Starred' and parent == 'arg' and self.source.roles.locate(site)[0].name=='annotation':
+            parameter=self.source.roles.parents.get(site.occurrence)
+            if parameter is not None and syntax.nodes[parameter.occurrence].constructor=='arguments' and self.source.roles.locate(parameter)[0].name=='vararg':return site
         if node.constructor == 'alias':
             return site if parent in ('Import','ImportFrom') and site.ordinal == self.source.roles.fields[parent]['names'] else None
         if node.constructor == 'withitem':

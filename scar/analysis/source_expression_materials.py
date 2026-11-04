@@ -58,6 +58,8 @@ def _implementation():
         'analysis/source_condition_rules.py',
         'analysis/source_pattern_interfaces.py', 'analysis/source_statement_patterns.py',
         'analysis/source_root_interfaces.py', 'analysis/source_root_rules.py',
+        'analysis/source_evaluation_interfaces.py', 'analysis/source_evaluation_rules.py',
+        'analysis/source_syntax.py',
         'analysis/source_type_parameter_interfaces.py', 'analysis/source_type_parameter_rules.py',
         'analysis/source_productions.py', 'analysis/program_types.py',
         'ir/program/source_productions.py', 'ir/record_codec.py')
@@ -93,11 +95,12 @@ def _unit(task):
     relative = 'units/' + unit['key'] + '/' + domain + '.jsonl.gz'
     digest, decoded_bytes = sha256(), 0
     built, frontier, child_obligations, descriptors, suppressed = (Counter() for _ in range(5))
-    condition_queue=deque();condition_seen=set();condition_built=Counter()
+    condition_queue=deque();condition_seen=set();condition_built=Counter();request_bodies=Counter();stringized_values=0
     expressions, parent_expressions = 0, 0
     stream_path = Path(out) / relative
 
     def account(plan):
+        nonlocal stringized_values
         for step in plan.steps:
             instruction=step.instruction
             if type(instruction) is P.EvaluateChild:
@@ -109,11 +112,11 @@ def _unit(task):
             elif type(instruction) is P.PublishAnnotation and instruction.publication is P.AnnotationPublicationKind.DEFERRED:
                 child_obligations['ANNOTATION_REQUEST']+=1
             elif type(instruction) is P.BuildFunctionAnnotations:
-                child_obligations['FUNCTION_ANNOTATION_REQUEST']+=1
+                request_bodies['FUNCTION_ANNOTATIONS']+=1
             elif type(instruction) is P.BuildLazyExpression:
-                field=rules.source.roles.locate(instruction.expression.source)[0].name
-                owner=syntax.nodes[instruction.expression.source.occurrence].constructor
-                child_obligations['TYPE_ALIAS_VALUE_REQUEST' if owner=='TypeAlias' else 'TYPE_PARAMETER_'+field.upper()+'_REQUEST']+=1
+                request_bodies['LAZY_EXPRESSION']+=1
+            elif type(instruction) is P.DefineAnnotationString:
+                stringized_values+=1
             elif type(instruction) is P.BuildScopeAnnotations:
                 child_obligations['SCOPE_ANNOTATION_REQUEST']+=1
 
@@ -206,6 +209,7 @@ def _unit(task):
         suppressed_sources=dict(sorted(suppressed.items())), parent_owned_expressions=parent_expressions,
         child_interface_obligations=dict(sorted(child_obligations.items())),
         condition_recipes=sum(condition_built.values()),condition_constructors=dict(sorted(condition_built.items())),
+        evaluation_request_templates=dict(request_bodies),stringized_annotation_values=stringized_values,
         parent_seconds=parent_seconds, seconds=time.monotonic()-started,
         catalog_sha256=sha256(_json(catalog)).hexdigest())
     if keep_catalog:
@@ -241,7 +245,7 @@ def collect_source_rules(model, out, *, domain, sources=(), materials=None, jobs
             raise ValueError('fresh verification output must be independent of source materials')
         store_bytes = (store / 'result.json').read_bytes()
         previous = json.loads(store_bytes)
-        if (previous.get('schema') != schema or previous.get('schema_version') != 3 or previous.get('domain') != domain
+        if (previous.get('schema') != schema or previous.get('schema_version') != 4 or previous.get('domain') != domain
             or previous.get('implementation_sha256') != pins or previous.get('input_basis') != basis
             or previous.get('limits') != limits):
             raise ValueError('previous rule material input/implementation/limit domain differs')
@@ -264,6 +268,8 @@ def collect_source_rules(model, out, *, domain, sources=(), materials=None, jobs
     if store is not None and (store / 'catalog.json').read_bytes() != catalog_bytes:
         raise ValueError('source rule catalog changed')
     counts = dict(units=len(rows), local_recipes=sum(sum(r['built'].values()) for r in rows),
+        evaluation_request_templates=sum(sum(r['evaluation_request_templates'].values()) for r in rows),
+        stringized_annotation_values=sum(r['stringized_annotation_values'] for r in rows),
         condition_recipes=sum(r['condition_recipes'] for r in rows),
         rule_frontiers=sum(sum(r['frontiers'].values()) for r in rows),
         **{singular+'_occurrences':sum(r[domain] for r in rows)},
@@ -278,7 +284,7 @@ def collect_source_rules(model, out, *, domain, sources=(), materials=None, jobs
         raise ValueError('model or implementation changed while processing source rules')
     if store is not None and (store / 'result.json').read_bytes() != store_bytes:
         raise ValueError('source rule material manifest changed during fresh verification')
-    report = dict(schema=schema, schema_version=3, domain=domain,
+    report = dict(schema=schema, schema_version=4, domain=domain,
         status='LOCAL_RULES_WITH_FRONTIERS' if counts['rule_frontiers'] else 'LOCAL_RULES_VERIFIED',
         mode='FRESH_VERIFICATION' if store is not None else 'COLLECTION',
         input_basis=basis, implementation_sha256=pins, model_manifest_sha256=sha256(manifest_bytes).hexdigest(),

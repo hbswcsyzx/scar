@@ -185,6 +185,14 @@ class NamespaceActionKind(str, Enum):
     ENSURE_ANNOTATIONS = 'ENSURE_ANNOTATIONS'
 
 
+class ImplicitComparisonKind(str, Enum):
+    GREATER = 'GREATER'
+
+
+class CommonConstantKind(str, Enum):
+    NOT_IMPLEMENTED_ERROR = 'NOT_IMPLEMENTED_ERROR'
+
+
 class AnnotationPublicationKind(str, Enum):
     STRINGIZED = 'STRINGIZED'
     DEFERRED = 'DEFERRED'
@@ -463,6 +471,7 @@ class BuildFunctionAnnotations:
     """Create the later annotation-request callable, without evaluating values."""
     annotations: FunctionAnnotationInterface
     exception_abi: ExceptionABI
+    body: ProductionRegionID
 
 
 @dataclass(frozen=True, slots=True)
@@ -535,6 +544,45 @@ class InvokeTypeParameterFactory:
 class BuildLazyExpression:
     expression: LazyExpressionInterface
     exception_abi: ExceptionABI
+    body: ProductionRegionID
+
+
+@dataclass(frozen=True, slots=True)
+class EvaluationRequestEnvironment:
+    """Admitted captured environment, format argument and fresh world.
+
+    The synthetic format parameter is a logical request port, not an invented
+    source Name or a claimed native frame slot. None means no initial default.
+    """
+    source: SlotRef
+    scope: int
+    globals_scope: int
+    captures: tuple[int, ...]
+    format_default: int | None
+    world: GroundType
+    exception_abi: ExceptionABI
+
+
+@dataclass(frozen=True, slots=True)
+class EnterEvaluationRequest:
+    environment: EvaluationRequestEnvironment
+
+
+@dataclass(frozen=True, slots=True)
+class ApplyImplicitComparison:
+    operator: ImplicitComparisonKind
+    exception_abi: ExceptionABI
+
+
+@dataclass(frozen=True, slots=True)
+class ReadCommonConstant:
+    constant: CommonConstantKind
+
+
+@dataclass(frozen=True, slots=True)
+class DefineAnnotationString:
+    source: SlotRef
+    value: str
 
 
 @dataclass(frozen=True, slots=True)
@@ -894,6 +942,7 @@ ProductionInstruction = (EvaluateChild | ApplyLanguageAction | ReadCompilationOp
     | ReferenceIsNone | InvertCondition | SplitExceptionGroup | MergeExceptionGroup
     | ReferenceIdentical | ApplyPatternAction
     | EnterRootBody | ApplyNamespaceAction | BuildScopeAnnotations | DisplayExpression
+    | EnterEvaluationRequest | ApplyImplicitComparison | ReadCommonConstant | DefineAnnotationString
     | ApplyRegion | BranchControl | LoopControl | DeferRegion | ReferenceEnvironment | EnterDeferredBody
     | HandleCompletions | TransferCompletion | SuspendExecution)
 
@@ -936,7 +985,7 @@ class SourceProductionPlan:
     steps: tuple[ProductionStep, ...]
     slots: tuple[ProductionSlotDisposition, ...]
     schema: str = 'scar.source-production-plan'
-    schema_version: int = 17
+    schema_version: int = 18
     authority: str = 'SOURCE_RECIPE_SHAPE_ONLY'
 
 

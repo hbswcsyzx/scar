@@ -47,6 +47,16 @@ def identity():
     return plan((root,), (step('return', root, P.TransferCompletion(C.FALLTHROUGH), (parameter(root),)),))
 
 
+def request_specimen(root,source,scope,captures,default,world,abi):
+    environment=P.EvaluationRequestEnvironment(source,scope,0,captures,default,world,abi)
+    body=region('request',parent=root.id,kind=P.ProductionRegionKind.DEFERRED,
+        parameters=(REF,REF,world),outputs=(P.ProductionCompletion(C.RETURN,(REF,world)),),steps=('admit','return-request'))
+    admit=step('admit',body,P.EnterEvaluationRequest(environment),tuple(parameter(body,i) for i in range(3)),normal(world))
+    returned=step('return-request',body,P.TransferCompletion(C.RETURN),
+        (parameter(body,1),P.ProductionResult(admit.id,0)),(P.ProductionCompletion(C.RETURN,(REF,world)),))
+    return body,(admit,returned)
+
+
 def test_closed_grammar_exact_records_strict_codec_and_budgets():
     value = identity()
     summary = A.validate_production_plan(value)
@@ -55,7 +65,7 @@ def test_closed_grammar_exact_records_strict_codec_and_budgets():
     assert summary['control_semantics_checked'] is False
     assert A.read_production_plan(A.production_plan_document(value)) == value
     catalog = A.production_type_catalog()
-    assert catalog['counts'] == dict(records=97, fields=250, identifiers=4, enums=23, enum_members=236, unions=21)
+    assert catalog['counts'] == dict(records=102, fields=265, identifiers=4, enums=25, enum_members=238, unions=21)
     assert set(catalog['instruction_variants']) == {
         'EvaluateChild', 'ApplyLanguageAction', 'ReadCompilationOption', 'ApplyInplaceOperator', 'PublishAnnotation',
         'ImportRequest', 'ImportMember', 'ImportStar',
@@ -69,6 +79,7 @@ def test_closed_grammar_exact_records_strict_codec_and_budgets():
         'MatchExceptionType','DeleteExceptionBinding',
         'ReferenceIsNone','ReferenceIdentical','ApplyPatternAction','InvertCondition','SplitExceptionGroup','MergeExceptionGroup',
         'EnterRootBody','ApplyNamespaceAction','BuildScopeAnnotations','DisplayExpression',
+        'EnterEvaluationRequest','ApplyImplicitComparison','ReadCommonConstant','DefineAnnotationString',
         'ApplyPythonProtocol', 'ApplyDelegationProtocol', 'AccessBinding', 'ConstructValue', 'DefineLiteral', 'ApplyRegion',
         'BranchControl', 'LoopControl', 'DeferRegion', 'ReferenceEnvironment', 'EnterDeferredBody', 'HandleCompletions',
         'TransferCompletion', 'SuspendExecution'}
@@ -176,7 +187,7 @@ def test_function_creation_annotations_decorators_and_escape_interfaces():
             (3,),P.DeferredBodyKind.FUNCTION,world,abi)
         cases=[(P.BuildFunction(env,None,None),(REF,REF,REF,REF,world),(REF,world)),
             (P.BuildFunction(env,annotation,site),(REF,REF,REF,REF,REF,world),(REF,world)),
-            (P.BuildFunctionAnnotations(annotation,abi),(REF,REF,world),(REF,world)),
+            (P.BuildFunctionAnnotations(annotation,abi,P.ProductionRegionID('request')),(REF,REF,world),(REF,world)),
             (P.ApplyDecorator(site,abi),(REF,REF,world),(REF,world)),
             *((P.TranslateEscapingException(kind,abi),raised,raised) for kind in (
                 P.DeferredBodyKind.GENERATOR,P.DeferredBodyKind.COROUTINE,P.DeferredBodyKind.ASYNC_GENERATOR))]
@@ -187,10 +198,13 @@ def test_function_creation_annotations_decorators_and_escape_interfaces():
             done=step('done',root,P.TransferCompletion(C.FALLTHROUGH),
                 tuple(P.ProductionResult(apply.id,i) for i in range(len(result))),normal(*result))
             specimen=plan((root,),(apply,done))
+            if type(instruction) is P.BuildFunctionAnnotations:
+                body,body_steps=request_specimen(root,site,annotation.scope,annotation.captures,None,world,abi)
+                specimen=plan((root,body),(apply,done,*body_steps))
             A.validate_production_plan(specimen)
             assert A.read_production_plan(A.production_plan_document(specimen))==specimen
             with pytest.raises(A.ProductionError,match='FUNCTION_INTERFACE'):
-                A.validate_production_plan(replace(specimen,steps=(replace(apply,arguments=()),done)))
+                A.validate_production_plan(replace(specimen,steps=(replace(apply,arguments=()),*specimen.steps[1:])))
             if type(instruction) is P.TranslateEscapingException:
                 with pytest.raises(A.ProductionError,match='FUNCTION_INTERFACE'):
                     A.validate_production_plan(replace(specimen,steps=(replace(apply,
@@ -206,7 +220,7 @@ def test_type_parameter_action_interfaces_and_unambiguous_wire_kinds():
     parameter=P.TypeParameterSpec(site,P.TypeParameterKind.TYPE_VAR,0,lazy,lazy,False)
     for abi in ExceptionABI:
         raised=(REF,world) if abi is ExceptionABI.EXCEPTION_WORLD else (REF,REF,world)
-        cases=[(P.BuildLazyExpression(lazy,abi),(REF,REF,world),(REF,world)),
+        cases=[(P.BuildLazyExpression(lazy,abi,P.ProductionRegionID('request')),(REF,REF,world),(REF,world)),
             (P.CreateTypeParameter(parameter,abi),(REF,world),(REF,world)),
             (P.SetTypeParameterDefault(parameter,abi),(REF,REF,world),(world,)),
             (P.BindTypeParameter(parameter,abi),(REF,world),(world,)),
@@ -218,12 +232,15 @@ def test_type_parameter_action_interfaces_and_unambiguous_wire_kinds():
             done=step('done',root,P.TransferCompletion(C.FALLTHROUGH),
                 tuple(P.ProductionResult(apply.id,i) for i in range(len(result))),normal(*result))
             specimen=plan((root,),(apply,done))
+            if type(instruction) is P.BuildLazyExpression:
+                body,body_steps=request_specimen(root,site,lazy.scope,lazy.captures,1,world,abi)
+                specimen=plan((root,body),(apply,done,*body_steps))
             A.validate_production_plan(specimen)
             wire=A.production_plan_document(specimen)
             assert wire['steps'][0]['instruction']['record_kind']==type(instruction).__name__
             assert A.read_production_plan(wire)==specimen
             with pytest.raises(A.ProductionError,match='TYPE_PARAMETER_INTERFACE'):
-                A.validate_production_plan(replace(specimen,steps=(replace(apply,arguments=()),done)))
+                A.validate_production_plan(replace(specimen,steps=(replace(apply,arguments=()),*specimen.steps[1:])))
     assert set(P.ProductionInstruction.__args__) <= set(P.PRODUCTION_RECORD_TAGS)
 
 

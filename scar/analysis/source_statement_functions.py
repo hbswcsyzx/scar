@@ -54,7 +54,9 @@ def _build_function(b,root,state,env,annotations,docstring,defaults,keywords):
             captures.append(capture)
         for entry in annotations.entries:
             b.slots[entry.value]=P.ProductionDispositionKind.DEFERRED_CHILD
-        annotate,state=b.emit(root,P.BuildFunctionAnnotations(annotations,b.rules.exception_abi),
+        from scar.analysis.source_evaluation_rules import build_request_body
+        request=build_request_body(b,root,annotations)
+        annotate,state=b.emit(root,P.BuildFunctionAnnotations(annotations,b.rules.exception_abi,request.id),
             (globals_ref,*captures,state),(_REF,b.world),source=source)
     b.mark('body',P.ProductionDispositionKind.DEFERRED_CHILD)
     body=b.region(b.site('body'),(_REF,*(_REF for _ in env.parameters),b.world),root,P.ProductionRegionKind.DEFERRED)

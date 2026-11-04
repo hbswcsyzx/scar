@@ -702,7 +702,7 @@ def test_delegation_keeps_send_and_post_driver_completion_paths_separate(rules, 
             plan = variant.build(occurrence)
             checked = variant.verify(plan)
             assert not checked['native_delegation_expanded'] and not checked['driver_protocol_graph_generated']
-            assert plan.schema_version == 17
+            assert plan.schema_version == 18
             _, root_steps = owned(plan)
             acquire = next(s for s in root_steps if type(s.instruction) is P.ApplyDelegationProtocol)
             assert acquire.instruction.protocol is (P.DelegationProtocolKind.AWAITABLE_ITER if constructor == 'Await'
@@ -1661,7 +1661,7 @@ def test_demanded_conditions_are_streamed_once_and_tampered_context_is_rejected(
     (model/'manifest.json').write_text(json.dumps(dict(schema='scar.static-program',schema_version=1,units=[unit])))
     for name,collect,expected in (('expressions',collect_source_expressions,3),('statements',collect_source_statements,5)):
         store=tmp_path/name;report=collect(model,store);fresh=collect(model,tmp_path/(name+'-fresh'),materials=store)
-        assert report['schema_version']==3 and report['counts']==fresh['counts']
+        assert report['schema_version']==4 and report['counts']==fresh['counts']
         assert report['counts']['condition_recipes']==expected
         descriptor=report['units'][0]['artifact'];path=store/descriptor['path']
         rows=[json.loads(line) for line in gzip.decompress(path.read_bytes()).splitlines()]
@@ -1863,3 +1863,75 @@ last: W
     assert not any(s.opname in ('STORE_NAME','STORE_GLOBAL') and s.argval=='__doc__' for s in dis.get_instructions(optimized))
     repl=compile(cases[3][1],'<static-root-oracle>','single',dont_inherit=True)
     assert sum(s.opname=='CALL_INTRINSIC_1' and 'PRINT' in s.argrepr for s in dis.get_instructions(repl))==2
+
+
+def test_deferred_evaluation_templates_preserve_format_capture_order_and_stringization(monkeypatch):
+    from scar.analysis.source_statement_rules import SourceStatementRules
+    from scar.analysis.source_productions import ProductionError,read_production_plan,production_plan_document
+    from scar.ir.program.control import LanguageCompletionKind as C
+    from scar.ir.program.structured import PythonProtocolKind as K
+    import dis
+    from types import CodeType
+    source='''def outer(seed):
+    def callback(a: First(seed), /, b: Second(seed), *items: *Values, c: Third(seed), **kw: Keywords) -> Result(seed):
+        return a
+    class Holder:
+        saved = seed
+        def method(self, value: saved) -> __private:
+            return value
+    type Local[T: Bound[seed]=Default[seed], *Ts=*tuple[int, ...], **P=[int]] = tuple[T,*Ts]
+    return callback,Holder,Local
+'''
+    inputs=[_rules(_documents(prefix+source)) for prefix in ('','from __future__ import annotations\n')]
+    for expressions in inputs:
+        for abi in ExceptionABI:
+            rules=SourceStatementRules(expressions.source,world=WORLD,exception_abi=abi)
+            templates=[];strings=[]
+            with monkeypatch.context() as no_parse:
+                no_parse.setattr(ast,'parse',lambda *a,**kw:pytest.fail('evaluation request reparsed target'))
+                for kind in ('FunctionDef','TypeAlias'):
+                    for occurrence in occurrences(expressions,kind):
+                        plan=rules.build(occurrence);assert rules.verify(plan)['local_schedule_verified']
+                        assert read_production_plan(production_plan_document(plan))==plan
+                        by_id={r.id:r for r in plan.regions};by_step={s.id:s for s in plan.steps}
+                        for step in plan.steps:
+                            if type(step.instruction) in (P.BuildFunctionAnnotations,P.BuildLazyExpression):
+                                body=by_id[step.instruction.body];entry=by_step[body.steps[0]]
+                                assert body.kind is P.ProductionRegionKind.DEFERRED and type(entry.instruction) is P.EnterEvaluationRequest
+                                assert body.parameters==(REF,REF,WORLD) and body.parent==step.region
+                                env=entry.instruction.environment
+                                assert env==expressions.source.evaluations.expected(env)
+                                assert all(c.kind in (C.RETURN,C.RAISE) for c in body.completions)
+                                templates.append((plan,body,step))
+                            elif type(step.instruction) is P.DefineAnnotationString:
+                                assert step.instruction.value==expressions.source.evaluations.stringize(step.instruction.source)
+                                strings.append(step.instruction.value)
+                        # Definitions have no eager call edge into request bodies.
+                        request_ids={s.instruction.body for s in plan.steps if type(s.instruction) in (P.BuildFunctionAnnotations,P.BuildLazyExpression)}
+                        assert not any(type(s.instruction) is P.ApplyRegion and s.instruction.invocation.region in request_ids for s in plan.steps)
+            assert len(templates)==7
+            if expressions.source.roots.future:
+                assert len(strings)==8 and '*Values' in strings
+            else:assert not strings
+            for plan,body,creation in templates:
+                steps=owned(plan,body.id)[1]
+                assert type(steps[1].instruction) is P.DefineLiteral and steps[1].instruction.value.to_python()==2
+                assert any(type(s.instruction) is P.ApplyImplicitComparison for s in steps)
+                assert any(type(s.instruction) is P.ReadCommonConstant for s in plan.steps)
+                changed=replace(creation,instruction=replace(creation.instruction,body=plan.root))
+                with pytest.raises(ProductionError,match='REGION_REFERENCE|REGION_OWNER|REGION_KIND|EVALUATION_REQUEST_INTERFACE'):
+                    expressions.source.match(replace(plan,steps=tuple(changed if s.id==creation.id else s for s in plan.steps)))
+            # The callback map follows compiler order: ordinary before posonly.
+            callback=next(s.instruction.annotations for p,b,s in templates if type(s.instruction) is P.BuildFunctionAnnotations
+                and len(s.instruction.annotations.entries)==6)
+            assert [e.name for e in callback.entries]==['b','a','items','c','kw','return']
+    # Static compiler-only oracle for guard/default/unpack paths; never execute.
+    pending=[compile(source,'<static-request-oracle>','exec',dont_inherit=True)]
+    saw_default=False;saw_unpack=False;saw_guard=False
+    while pending:
+        code=pending.pop();pending.extend(v for v in code.co_consts if type(v) is CodeType)
+        ops=list(dis.get_instructions(code))
+        saw_default |= any(s.opname=='SET_FUNCTION_ATTRIBUTE' and 'defaults' in s.argrepr.lower() for s in ops)
+        saw_unpack |= any(s.opname=='UNPACK_SEQUENCE' and s.arg==1 for s in ops)
+        saw_guard |= any(s.opname=='LOAD_COMMON_CONSTANT' and 'NotImplementedError' in s.argrepr for s in ops)
+    assert saw_default and saw_unpack and saw_guard

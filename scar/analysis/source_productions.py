@@ -24,6 +24,7 @@ from scar.analysis.source_type_parameter_interfaces import TypeParameterInterfac
 from scar.analysis.source_definition_interfaces import DefinitionInterfaceIndex
 from scar.analysis.source_pattern_interfaces import PatternInterfaceIndex
 from scar.analysis.source_root_interfaces import RootInterfaceIndex
+from scar.analysis.source_evaluation_interfaces import EvaluationInterfaceIndex
 
 
 class ProductionError(ValueError):
@@ -62,7 +63,7 @@ def production_type_catalog():
                  'scar.ir.program.delegation_signatures', 'scar.analysis.source_deferred_interfaces',
                  'scar.analysis.source_statement_interfaces', 'scar.analysis.source_type_parameter_interfaces',
                  'scar.analysis.source_definition_interfaces','scar.analysis.source_pattern_interfaces',
-                 'scar.analysis.source_root_interfaces'):
+                 'scar.analysis.source_root_interfaces','scar.analysis.source_evaluation_interfaces','scar.analysis.source_syntax'):
         modules[name] = sha256(Path(sys.modules[name].__file__).read_bytes()).hexdigest()
     payload = dict(schema='scar.source-production-type-catalog', schema_version=1,
         root=root, types=rows, counts=counts, modules=dict(sorted(modules.items())),
@@ -152,7 +153,7 @@ def validate_production_plan(plan, *, max_visits=1_000_000):
     """
     visits = _shape(plan, max_visits)
     _require((plan.schema, plan.schema_version, plan.authority) == (
-        'scar.source-production-plan', 17, 'SOURCE_RECIPE_SHAPE_ONLY'),
+        'scar.source-production-plan', 18, 'SOURCE_RECIPE_SHAPE_ONLY'),
         'SCHEMA', 'plan', 'unsupported recipe schema or authority')
     source = plan.input
     _require(bool(source.path) and bool(source.namespace_root), 'INPUT', 'plan.input', 'source paths must be nonempty')
@@ -292,6 +293,14 @@ def validate_production_plan(plan, *, max_visits=1_000_000):
         _require(all(e.name for e in annotations.entries) and len({e.value for e in annotations.entries}) == len(annotations.entries),
             'FUNCTION_INTERFACE', 'annotations', 'annotation entries require names and distinct original value sources')
 
+    def evaluation_ports(environment):
+        _require(type(environment.world) is ValueType and environment.world.kind is ValueKind.STATE
+            and environment.scope>=0 and environment.globals_scope>=0 and environment.format_default in (None,1)
+            and all(c>=0 for c in environment.captures) and len(set(environment.captures))==len(environment.captures),
+            'EVALUATION_REQUEST_INTERFACE','environment','request scope/captures/default/world must be explicit')
+        reference=ValueType(ValueKind.REFERENCE)
+        return (reference,reference,environment.world)
+
     def lazy_interface(expression):
         _require(expression.scope >= 0 and expression.format_default == 1
             and all(c >= 0 for c in expression.captures) and len(set(expression.captures)) == len(expression.captures),
@@ -402,6 +411,24 @@ def validate_production_plan(plan, *, max_visits=1_000_000):
             elif type(instruction) is P.ReadCompilationOption:
                 _require(not args and outputs == {(C.FALLTHROUGH, None): (ValueType(ValueKind.DATA, 'builtins.bool'),)},
                     'COMPILATION_OPTION', str(identity), 'compilation option produces only one symbolic boolean')
+            elif type(instruction) in (P.ReadCommonConstant,P.DefineAnnotationString):
+                reference=ValueType(ValueKind.REFERENCE)
+                _require(len(args)==1 and type(args[0]) is ValueType and args[0].kind is ValueKind.STATE
+                    and outputs=={(C.FALLTHROUGH,None):(reference,args[0])},
+                    'EVALUATION_REQUEST_INTERFACE',str(identity),'compiler literal/common constant has no allocation or exception claim')
+            elif type(instruction) is P.ApplyImplicitComparison:
+                reference=ValueType(ValueKind.REFERENCE)
+                _require(len(args)==3 and args[:2]==(reference,reference) and type(args[2]) is ValueType and args[2].kind is ValueKind.STATE,
+                    'EVALUATION_REQUEST_INTERFACE',str(identity),'implicit comparison needs two references/current world')
+                world=args[2];raised=(reference,world) if instruction.exception_abi is ExceptionABI.EXCEPTION_WORLD else (reference,reference,world)
+                _require(outputs=={(C.FALLTHROUGH,None):(reference,world),(C.RAISE,None):raised},
+                    'EVALUATION_REQUEST_INTERFACE',str(identity),'comparison keeps callback and failure effects explicit')
+            elif type(instruction) is P.EnterEvaluationRequest:
+                ports=evaluation_ports(instruction.environment)
+                _require(region.kind is P.ProductionRegionKind.DEFERRED and ordinal==0
+                    and args==region.parameters==ports and step.arguments==tuple(P.ProductionParameter(region.id,i) for i in range(3))
+                    and outputs=={(C.FALLTHROUGH,None):(instruction.environment.world,)},
+                    'EVALUATION_REQUEST_INTERFACE',str(identity),'request starts by admitting environment, format and fresh world')
             elif type(instruction) in (P.EnterRootBody,P.BuildScopeAnnotations):
                 interface=instruction.interface;world=interface.world;reference=ValueType(ValueKind.REFERENCE)
                 _require(type(world) is ValueType and world.kind is ValueKind.STATE and interface.scope>=0,
@@ -485,6 +512,7 @@ def validate_production_plan(plan, *, max_visits=1_000_000):
                 if type(instruction) is P.BuildLazyExpression:
                     lazy_interface(instruction.expression)
                     count=1+len(instruction.expression.captures)
+                    request=instruction.expression
                 elif type(instruction) is P.AttachTypeParameters:
                     count=2
                 else:
@@ -499,6 +527,17 @@ def validate_production_plan(plan, *, max_visits=1_000_000):
                 _require(args==(*(reference for _ in range(count)),world)
                     and outputs=={(C.FALLTHROUGH,None):normal,(C.RAISE,None):raised},
                     'TYPE_PARAMETER_INTERFACE',str(identity),'type-parameter action ports differ from its source contract')
+                if type(instruction) is P.BuildLazyExpression:
+                    body=child(instruction.body,P.ProductionRegionKind.DEFERRED)
+                    _require(body.steps and type(steps[body.steps[0]].instruction) is P.EnterEvaluationRequest,
+                        'EVALUATION_REQUEST_INTERFACE',str(identity),'lazy callable needs an explicit request template')
+                    env=steps[body.steps[0]].instruction.environment
+                    _require(env.source==request.source and env.scope==request.scope and env.captures==request.captures
+                        and env.format_default==request.format_default and env.world==world and env.exception_abi is instruction.exception_abi
+                        and body.parameters==evaluation_ports(env)
+                        and all(k in ((C.RETURN,None),(C.RAISE,None)) and v==((reference,world) if k[0] is C.RETURN else raised)
+                            for k,v in region_outputs[body.id].items()),
+                        'EVALUATION_REQUEST_INTERFACE',str(identity),'lazy declaration/request source or completion interface differs')
             elif type(instruction) in (P.BuildFunctionAnnotations,P.BuildFunction,P.ApplyDecorator,P.TranslateEscapingException):
                 _require(bool(args) and type(args[-1]) is ValueType and args[-1].kind is ValueKind.STATE,
                     'FUNCTION_INTERFACE', str(identity), 'function operation requires an explicit state domain')
@@ -529,6 +568,16 @@ def validate_production_plan(plan, *, max_visits=1_000_000):
                 normal = raised if type(instruction) is P.TranslateEscapingException else (reference,world)
                 _require(args == expected_args and outputs == {(C.FALLTHROUGH,None):normal,(C.RAISE,None):raised},
                     'FUNCTION_INTERFACE', str(identity), 'function operation input/completion interface differs from source contract')
+                if type(instruction) is P.BuildFunctionAnnotations:
+                    body=child(instruction.body,P.ProductionRegionKind.DEFERRED)
+                    _require(body.steps and type(steps[body.steps[0]].instruction) is P.EnterEvaluationRequest,
+                        'EVALUATION_REQUEST_INTERFACE',str(identity),'annotation callable needs an explicit request template')
+                    env=steps[body.steps[0]].instruction.environment;request=instruction.annotations
+                    _require(env.source==request.entries[0].value and env.scope==request.scope and env.captures==request.captures
+                        and env.format_default is None and env.world==world and env.exception_abi is abi and body.parameters==evaluation_ports(env)
+                        and all(k in ((C.RETURN,None),(C.RAISE,None)) and v==((reference,world) if k[0] is C.RETURN else raised)
+                            for k,v in region_outputs[body.id].items()),
+                        'EVALUATION_REQUEST_INTERFACE',str(identity),'annotation declaration/request source or completion interface differs')
             elif type(instruction) is P.DeferClassBody:
                 interface=instruction.interface
                 body=child(instruction.body,P.ProductionRegionKind.DEFERRED)
@@ -917,6 +966,7 @@ class ProductionSourceIndex:
         self._definitions = None
         self._patterns = None
         self._roots = None
+        self._evaluations = None
         self._expressions=frozenset(row.name for row in syntax.profile.ast_schema if 'expr' in row.bases)
         self._role_sites = frozenset(port.site for port in frontend_view.roles.ports)
         self.input = P.ProductionInput(f0['path'], f0['namespace_root'], _digest(encode(syntax)),
@@ -954,6 +1004,11 @@ class ProductionSourceIndex:
     def roots(self):
         if self._roots is None:self._roots=RootInterfaceIndex(self)
         return self._roots
+
+    @property
+    def evaluations(self):
+        if self._evaluations is None:self._evaluations=EvaluationInterfaceIndex(self)
+        return self._evaluations
 
     def match(self, plan, *, max_visits=1_000_000):
         summary = validate_production_plan(plan, max_visits=max_visits)
@@ -1006,7 +1061,18 @@ class ProductionSourceIndex:
                         _require(completion.target == self.statements.active_loop(step.source),
                             'SOURCE_LOOP', str(step.id), 'child/transfer completion has a different lexical loop target')
                 instruction = step.instruction
-                if type(instruction) in (P.EnterRootBody,P.BuildScopeAnnotations):
+                if type(instruction) is P.EnterEvaluationRequest:
+                    env=instruction.environment
+                    _require(env==self.evaluations.expected(env) and step.source==env.source
+                        and region_index[step.region].context.environment==env.scope,
+                        'SOURCE_EVALUATION_REQUEST',str(step.id),'request activation must use its original evaluator scope/captures/source')
+                    parent=region_index[region_index[step.region].parent]
+                    _require(self.context.material.scopes[env.scope].parent==parent.context.environment,
+                        'SOURCE_EVALUATION_REQUEST',str(step.id),'request template must connect its original creator namespace')
+                elif type(instruction) is P.DefineAnnotationString:
+                    _require(step.source==instruction.source and instruction.value==self.evaluations.stringize(instruction.source),
+                        'SOURCE_EVALUATION_REQUEST',str(step.id),'stringized annotation differs from original source/compiler result')
+                elif type(instruction) in (P.EnterRootBody,P.BuildScopeAnnotations):
                     interface=instruction.interface
                     _require(interface==self.roots.interface(interface.world,interface.exception_abi),
                         'SOURCE_ROOT',str(step.id),'root activation/callable must use its original input scope')
