@@ -38,6 +38,8 @@ F4-A仅验结构类型域：可达Any/object/未解类型为0；没有据此宣�
 
 ## 恢复、同步与当前存储
 
+当前新增本地提交尚未推送：SSH公钥认证失败，GitHub连接器create-tree写入也返回403；不能把可读仓库元数据当作写入权限。
+
 `/home`已恢复可写；只读期间的源码缓冲已取回并入当前唯一工作区，合并后的相关回归已通过。
 F3七层材料已正式登记到当前模型：6,062个unit片及6个共享catalog，原字节共69,243,786 bytes。
 固定原F3-D验收SHA，核七层报告/DTO/父链与当前profile后复用；没有伪称本轮重新执行全量语义。
@@ -92,8 +94,9 @@ call/map/string/assert参数也沿闭合原端口组解析；空组保DECLARED_E
 真实eval/cem原body的4,830条操作来源、65,086条来源引用已接回原F2及已有F3查询；CEM的4个旧OPAQUE可读出Gt/Eq原selector。
 这仍不是执行语义证明。证据：`artifacts/current/queries/source-anchors/{materials,verification}/result.json`及`{eval,cem}-origin-query.json`。
 
-源码产生规则的输入语法已落地：37记录/105字段、4 ID、12枚举/186成员、10 union、14步骤变体；不修改canonical类型根和旧ID。
+源码产生规则v2的输入语法已落地：38记录/109字段、4 ID、13枚举/189成员、10 union、14步骤变体；不修改canonical类型根和旧ID。
 检查exact类型、区域归属/值顺序、共享调用、循环不变量/携带接口、异常完成到handler的payload/captures连接及strict codec；不授完整控制/效果语义。
+暂停接口子门已通过：明确handoff、normal/raise两种后续入口、异常ABI及保存引用；禁止保存旧STATE，核恢复完成并集。12项语法/接口检查通过（3.41秒）；driver/frame/context适配尚未证明。
 原结构验收25项通过；本轮修正区域出口汇总：前面步骤的异常必须保留，不能只取最后一步的normal结果。
 真实eval/CEM核419/537项原role引用描述符，查询1.03/1.31秒（父层fresh及索引另9.76/12.12秒）；没有生成新执行图或重放逐构造规则。
 记录在`artifacts/current/queries/source-productions/`；旧manifest不变，LeWM未执行或修改。

@@ -14,7 +14,7 @@ from scar.analysis.program_types import _build_types
 from scar.ir.program import source_productions as P
 from scar.ir.program.control import LanguageCompletionKind as C
 from scar.ir.program.model import ValueKind, ValueType, ExitKind
-from scar.ir.program.protocol_signatures import protocol_signature_catalog, _resolve_protocol_rule
+from scar.ir.program.protocol_signatures import ExceptionABI, protocol_signature_catalog, _resolve_protocol_rule
 from scar.ir.program.signature_patterns import SignatureError, SignatureForm
 from scar.ir.record_codec import decode, encode
 
@@ -141,7 +141,7 @@ def validate_production_plan(plan, *, max_visits=1_000_000):
     """
     visits = _shape(plan, max_visits)
     _require((plan.schema, plan.schema_version, plan.authority) == (
-        'scar.source-production-plan', 1, 'SOURCE_RECIPE_SHAPE_ONLY'),
+        'scar.source-production-plan', 2, 'SOURCE_RECIPE_SHAPE_ONLY'),
         'SCHEMA', 'plan', 'unsupported recipe schema or authority')
     source = plan.input
     _require(bool(source.path) and bool(source.namespace_root), 'INPUT', 'plan.input', 'source paths must be nonempty')
@@ -373,7 +373,29 @@ def validate_production_plan(plan, *, max_visits=1_000_000):
                 invoke(instruction.protected)
                 child(instruction.cleanup, P.ProductionRegionKind.CLEANUP)
             elif type(instruction) is P.SuspendExecution:
-                child(instruction.resume, P.ProductionRegionKind.RESUME)
+                _require(len(args) == 2 and args[0] == ValueType(ValueKind.REFERENCE)
+                    and type(args[1]) is ValueType and args[1].kind is ValueKind.STATE,
+                    'SUSPEND_INTERFACE', str(identity), 'handoff must export a reference and its current world')
+                saved = tuple(value_type(v) for v in instruction.saved)
+                _require(not any(type(t) is ValueType and t.kind is ValueKind.STATE for t in saved),
+                    'SUSPEND_INTERFACE', str(identity), 'state must enter afresh, never through a saved value')
+                _require(len(instruction.routes) == 2 and {r.kind for r in instruction.routes} == {C.FALLTHROUGH, C.RAISE}
+                    and len({r.region for r in instruction.routes}) == 2,
+                    'SUSPEND_INTERFACE', str(identity), 'one distinct normal and exceptional temporal ingress is required')
+                merged = {}
+                for route in instruction.routes:
+                    target = child(route.region, P.ProductionRegionKind.RESUME)
+                    count = (1 if route.kind is C.FALLTHROUGH
+                        or instruction.exception_abi is ExceptionABI.EXCEPTION_WORLD else 2)
+                    payload = (*(ValueType(ValueKind.REFERENCE) for _ in range(count)), args[1])
+                    _require(target.parameters == (*payload, *saved), 'SUSPEND_INTERFACE', str(identity),
+                        'resumption requires normalized delivery/current world followed by saved values')
+                    for key, types in region_outputs[target.id].items():
+                        _require(key not in merged or merged[key] == types, 'SUSPEND_INTERFACE', str(identity),
+                            'temporal route completion interfaces disagree')
+                        merged[key] = types
+                _require(merged == outputs, 'SUSPEND_INTERFACE', str(identity),
+                    'suspension must preserve all eventual route completions')
             elif type(instruction) is P.TransferCompletion:
                 _require(outputs == {(instruction.kind, instruction.target): args}
                     and region_outputs[region.id].get((instruction.kind, instruction.target)) == args,

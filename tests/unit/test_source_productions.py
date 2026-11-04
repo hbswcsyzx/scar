@@ -55,7 +55,7 @@ def test_closed_grammar_exact_records_strict_codec_and_budgets():
     assert summary['control_semantics_checked'] is False
     assert A.read_production_plan(A.production_plan_document(value)) == value
     catalog = A.production_type_catalog()
-    assert catalog['counts'] == dict(records=37, fields=105, identifiers=4, enums=12, enum_members=186, unions=10)
+    assert catalog['counts'] == dict(records=38, fields=109, identifiers=4, enums=13, enum_members=189, unions=10)
     assert set(catalog['instruction_variants']) == {
         'EvaluateChild', 'ApplyLanguageAction', 'ApplyPythonProtocol', 'AccessBinding', 'ConstructValue', 'DefineLiteral', 'ApplyRegion',
         'BranchControl', 'LoopControl', 'DeferRegion', 'CleanupControl', 'HandleCompletions',
@@ -245,6 +245,52 @@ def test_exception_payload_enters_handler_ports_instead_of_normal_value_edges():
     with pytest.raises(A.ProductionError, match='VALUE_ORDER'):
         A.validate_production_plan(replace(value, steps=(*value.steps[:2], replace(value.steps[2],
             arguments=(P.ProductionResult(value.steps[1].id, 0),)))))
+
+
+@pytest.mark.parametrize('traceback', (False, True))
+def test_suspension_exports_state_and_receives_distinct_later_delivery_ports(traceback):
+    from scar.ir.program.ids import LocationID
+    from scar.ir.program.protocol_signatures import ExceptionABI
+    world = ValueType(ValueKind.STATE, location=LocationID('world'))
+    abi = ExceptionABI.EXCEPTION_TRACEBACK_WORLD if traceback else ExceptionABI.EXCEPTION_WORLD
+    raised = (*(REF for _ in range(2 if traceback else 1)), world)
+    outputs = (*normal(REF, world), P.ProductionCompletion(C.RAISE, raised))
+    root = region('root', parameters=(REF, world, INT), outputs=outputs, steps=('suspend',))
+    sent = region('sent', parent=root.id, kind=P.ProductionRegionKind.RESUME,
+        parameters=(REF, world, INT), outputs=normal(REF, world), steps=('sent_return',))
+    thrown = region('thrown', parent=root.id, kind=P.ProductionRegionKind.RESUME,
+        parameters=(*raised, INT), outputs=(outputs[1],), steps=('throw',))
+    suspension = P.SuspendExecution(P.SuspensionKind.YIELD, abi, (
+        P.ProductionResumeRoute(C.FALLTHROUGH, sent.id), P.ProductionResumeRoute(C.RAISE, thrown.id)),
+        (parameter(root, 2),))
+    value = plan((root, sent, thrown), (
+        step('suspend', root, suspension, (parameter(root), parameter(root, 1)), outputs),
+        step('sent_return', sent, P.TransferCompletion(C.FALLTHROUGH),
+            (parameter(sent), parameter(sent, 1)), normal(REF, world)),
+        step('throw', thrown, P.TransferCompletion(C.RAISE),
+            tuple(parameter(thrown, i) for i in range(len(raised))), (outputs[1],))))
+    assert A.read_production_plan(A.production_plan_document(value)) == value
+    for instruction in (
+        replace(suspension, saved=(parameter(root, 1),)),  # stale world is never a saved capture
+        replace(suspension, routes=suspension.routes[:1]),
+        replace(suspension, routes=(suspension.routes[0], suspension.routes[0])),
+        replace(suspension, routes=(replace(suspension.routes[0], kind=C.RETURN), suspension.routes[1])),
+    ):
+        with pytest.raises(A.ProductionError, match='SUSPEND_INTERFACE'):
+            A.validate_production_plan(replace(value, steps=(replace(value.steps[0], instruction=instruction), *value.steps[1:])))
+    for changed in (
+        replace(value, regions=(root, replace(sent, parameters=(REF, INT, world)), thrown)),
+        replace(value, steps=(replace(value.steps[0], completions=normal(REF, world)), *value.steps[1:])),
+        replace(value, steps=(replace(value.steps[0], arguments=(parameter(root, 1), parameter(root))), *value.steps[1:])),
+    ):
+        with pytest.raises(A.ProductionError, match='SUSPEND_INTERFACE'):
+            A.validate_production_plan(changed)
+    # The earlier handoff world cannot be captured by a later region's result.
+    with pytest.raises(A.ProductionError, match='VALUE_SCOPE'):
+        A.validate_production_plan(replace(value, steps=(value.steps[0], replace(value.steps[1],
+            arguments=(parameter(sent), parameter(root, 1))), value.steps[2])))
+    with pytest.raises(A.ProductionError, match='SCHEMA'):
+        A.validate_production_plan(replace(value, schema_version=1))
 
 
 def test_original_source_inputs_fields_contexts_and_binding_ports():

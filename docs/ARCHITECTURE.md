@@ -86,6 +86,10 @@ f-string先转换再求格式说明；模板插值只捕获值和转换标记，
 同步推导式的首个iter在外层求值/取iterator，然后进入原C1局部namespace；每个for子句一份共享循环模板，过滤短路，DictComp先key后value。
 局部scope激活、逃逸cell保活及物理inlining/清理仍是合同义务；不回滚walrus等外层写入。async clauses及惰性GeneratorExp仍有显式规则前沿。
 
+暂停规则按三个小步推进，不跨层：①先验source recipe的handoff／normal与raise恢复端口；②消费原C1 owner产生yield规则并对照静态compiler；③再补委托驱动的await／yield-from及惰性body。
+source recipe v2的SuspendExecution显式导出值和world，恢复端口输入新world及保存值；禁止保存旧STATE，所有恢复完成取并集。NEXT/close的driver准入与规范化、frame/exception context保活仍须后续产生规则证明。
+后续语句／定义／cleanup规则闭合后才进入F4-C；每步先验类型/接口，再接源码规则，再在原材料独立重放，不以节点存在或局部计数授予全层完成。
+
 ## F3的形式边界
 
 源码名字/求值角色、compiler block与runtime frame分别表示；三者没有固定一一对应。

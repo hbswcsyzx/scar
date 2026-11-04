@@ -13,6 +13,7 @@ from scar.ir.program.source_roles import SlotRef
 from scar.ir.program.signature_patterns import (GroundType, Bindings, CountBinding,
     ChoiceBinding, TypeBinding, TypesBinding)
 from scar.ir.program.structured import PythonProtocolKind
+from scar.ir.program.protocol_signatures import ExceptionABI
 from scar.ir.literals import PythonLiteral
 from scar.ir.v2.ids import Identifier
 
@@ -116,6 +117,7 @@ class ConstructionKind(str, Enum):
 
 class SuspensionKind(str, Enum):
     YIELD = 'YIELD'
+    ASYNC_YIELD = 'ASYNC_YIELD'
     YIELD_FROM = 'YIELD_FROM'
     AWAIT = 'AWAIT'
 
@@ -276,9 +278,30 @@ class TransferCompletion:
 
 
 @dataclass(frozen=True, slots=True)
+class ProductionResumeRoute:
+    """Normalized delivery, followed by the suspension's explicit saved values.
+
+    FALLTHROUGH delivers (sent reference, current world); RAISE delivers the
+    chosen exception ABI. NEXT is SEND(None); admitted close/cancellation
+    delivers an exception. Driver admission/normalization is not proved here.
+    """
+    kind: LanguageCompletionKind
+    region: ProductionRegionID
+
+
+@dataclass(frozen=True, slots=True)
 class SuspendExecution:
+    """Export (reference, world), then eventually complete through a route.
+
+    Current-world inputs arrive afresh at a later temporal ingress; they must
+    never be saved across the handoff. Saved references preserve identities,
+    not snapshots of mutable referents. Steps after this control execute only
+    if a later normal resumption completes. No eventual resumption is assumed.
+    """
     suspension: SuspensionKind
-    resume: ProductionRegionID
+    exception_abi: ExceptionABI
+    routes: tuple[ProductionResumeRoute, ...]
+    saved: tuple[ProductionValue, ...] = ()
 
 
 ProductionInstruction = (EvaluateChild | ApplyLanguageAction | ApplyPythonProtocol | AccessBinding | ConstructValue | DefineLiteral
@@ -324,7 +347,7 @@ class SourceProductionPlan:
     steps: tuple[ProductionStep, ...]
     slots: tuple[ProductionSlotDisposition, ...]
     schema: str = 'scar.source-production-plan'
-    schema_version: int = 1
+    schema_version: int = 2
     authority: str = 'SOURCE_RECIPE_SHAPE_ONLY'
 
 
@@ -332,4 +355,5 @@ PRODUCTION_RECORD_TAGS = {cls: ('record_kind', cls.__name__) for cls in (
     ProductionOccurrence, SlotRef, ProductionParameter, ProductionResult,
     EvaluateChild, ApplyLanguageAction, ApplyPythonProtocol, AccessBinding, ConstructValue, DefineLiteral, ApplyRegion,
     BranchControl, LoopControl, DeferRegion, CleanupControl, HandleCompletions,
-    TransferCompletion, SuspendExecution, IterationCondition, CountBinding, ChoiceBinding, TypeBinding, TypesBinding)}
+    TransferCompletion, SuspendExecution, ProductionResumeRoute, IterationCondition,
+    CountBinding, ChoiceBinding, TypeBinding, TypesBinding)}
