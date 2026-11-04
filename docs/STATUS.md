@@ -68,10 +68,19 @@ F0/F1/F2发布已补文件/目录/manifest fsync、完整报告发布与故障�
 
 ## 下一层与整个第一阶段缺口
 
-1. **F4-B产生规则**：统一操作家族、参数化签名、结果/效果与源码原引用，再按规则域验收。
+F4-B1已验收有限端口代数：六种pattern、四种显式参数、五类原ground type及ordinary/invoke两种形式。
+所有选择分支先静态核验；空重复不展开、非空重复先核大小；接口匹配沿原Use和完成边，不依赖label。
+8项针对性检查通过（0.51秒），原canonical类型目录2项通过（1.31秒）；未改原类型根或graph wire。
+真实LeWM `get_dataset`的66操作原片已读回，核其中1个typed TRUTH接口，错误normal结果类型准确拒绝。
+这是端口形状查询，不是完整家族或源码证明；其状态参数仍为显式原域，未完成参数来源授权。
+证据：`artifacts/current/queries/operation-signatures/{result.json,lewm-port-query.json}`。
+
+1. **F4-B后续规则**：接完整操作家族、typed参数来源、状态/access契约和源码产生规则，再接版本化根与强制reader。
    旧core操作语义仍散在32个源码Opcode、88个PythonProtocol及typed侧表；label还承担cleanup/class/native派发。
    旧通用结构校验可容纳ADD的0/1/3输入或缺result，说明缺少统一签名；这不代表可绕过完整source replay。
-   签名witness须进入版本化typed根及强制reader；不能把可被忽略的sidecar当作完备。扩展类型须重验F4-A目录。
+   三种域不能互代：32 Opcode、88协议和113语法构造器×上下文分别核验；B1不授新图发布或优化。
+   签名witness仍须进入版本化typed根及强制reader；不能把本层独立查询当作完备。根扩展后重验F4-A目录。
+   实读FRAME_BIND为READ_WRITE、UNKNOWN footprint、非full overwrite；不能照旧审计摘要强制WHOLE或升级未知事实。
 2. **F4-C规范共享图**：消费已验F2/F3原材料与ID，生成并逐项验收控制、状态、效果和完成端口。
    旧prepare_source重parse及按name/line合scope的路径不能作为新F4权威；函数/循环保可展开共享区域，不按迭代unroll。
 3. **F5/F6**：接通跨子图、native/runtime/kernel、资源与数据来源；重新核依赖发现前沿和完整覆盖。
