@@ -18,6 +18,35 @@ WORLD = ValueType(ValueKind.STATE, location=LocationID('test-source-world'))
 REF = ValueType(ValueKind.REFERENCE)
 
 
+def test_template_state_sequence_rejects_stale_worlds_in_steps_and_nested_calls():
+    from scar.analysis.source_productions import validate_production_plan
+    from scar.analysis.source_template_links import validate_state_sequence, TemplateLinkError
+
+    rules = _rules(_documents('left(x) + right(y)\nleft if predicate() else right\n'))
+    for constructor in ('BinOp', 'IfExp'):
+        plan = rules.build(occurrences(rules, constructor)[0])
+        assert validate_state_sequence(plan)['state_uses'] > 0
+        root = next(r for r in plan.regions if r.id == plan.root)
+        original_world = P.ProductionParameter(root.id, root.parameters.index(WORLD))
+        if constructor == 'BinOp':
+            children = [s for s in plan.steps if s.region == root.id and type(s.instruction) is P.EvaluateChild]
+            selected = children[1]
+            assert selected.arguments[-1] != original_world
+            changed = replace(selected, arguments=(*selected.arguments[:-1], original_world))
+        else:
+            selected = next(s for s in plan.steps if type(s.instruction) is P.BranchControl)
+            call = selected.instruction.on_false
+            assert call.arguments[-1] != original_world
+            changed = replace(selected, instruction=replace(selected.instruction,
+                on_false=replace(call, arguments=(*call.arguments[:-1], original_world))))
+        broken = replace(plan, steps=tuple(changed if s.id == selected.id else s for s in plan.steps))
+        # Every type, ordinal and local definition is still valid. The fault
+        # is the dependency on an earlier state, rather than its shape.
+        assert validate_production_plan(broken)['local_references_checked'] is True
+        with pytest.raises(TemplateLinkError, match='stale or foreign world'):
+            validate_state_sequence(broken)
+
+
 def test_explicit_recipe_budget_reaches_all_rule_entrypoints_and_verifier():
     from scar.analysis.source_statement_rules import SourceStatementRules
     from scar.analysis.source_root_rules import SourceRootRules

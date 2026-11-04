@@ -197,6 +197,7 @@ v23的`source_compilation_contexts.py`生成原代码引用和登记生产位置
 
 只读模板接线入口为`python -B -m scar.analysis.source_template_links --model MODEL --out FRESH_OUT --materials expressions EXPR_COLLECTION EXPR_VERIFICATION --materials statements STMT_COLLECTION STMT_VERIFICATION --materials roots ROOT_COLLECTION ROOT_VERIFICATION`；可加`--source PATH`精确选择输入，未选时要求全模型三域材料齐全。仅接受已独立fresh的相同生成器/输入版本。每源分别存templates/links两张gzip JSONL表及小header，正文保留在父材料；`read_template_body(store, unit, SourceTemplateKey(occurrence, purpose))`核收据后展开。该入口不修改采集生成器或canonical图。
 接线可用`--jobs N`（1至32个spawn进程）按源文件并行；每个worker缓存自己的只读父索引，独立写本源分片，不共享可变图或FD表。主进程只核父收据/版本并汇总单位收据，输出的记录顺序及分片字节不随worker完成顺序变化。
+接线时另核局部world的来源顺序：步骤及内嵌调用只读当前world，正常state结果替换后续world；只读协议无需制造新state，循环world必须走携带端口。`local_state_sequence_checked`只表示这项依赖约束，不替代native效果或引用清理证明；采集生成器和recipe版本不变。
 星号/keyword的失败顺序参考固定版本[CPython codegen](https://github.com/python/cpython/blob/v3.14.7/Python/codegen.c)；本机stack guideline从header读入并固定SHA。
 
 源码身份桥（按unit分片，保持输入模型和旧ID）：

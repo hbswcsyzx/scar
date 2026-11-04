@@ -5,6 +5,7 @@ bodies; edges bind actual values to ordered parameters and completion ports.
 """
 import argparse
 from concurrent.futures import ProcessPoolExecutor
+from dataclasses import fields, is_dataclass
 from functools import lru_cache
 import gzip
 from hashlib import sha256
@@ -21,6 +22,7 @@ from scar.analysis.static_query import _Fragments
 from scar.ir.program import source_productions as P
 from scar.ir.program import source_template_links as T
 from scar.ir.program.control import LanguageCompletionKind as C
+from scar.ir.program.model import ValueKind, ValueType
 from scar.ir.record_codec import encode, decode
 
 
@@ -33,6 +35,66 @@ def _require(condition, path, detail):
         raise TemplateLinkError(str(path) + ': ' + detail)
 
 
+def validate_state_sequence(plan):
+    """Check current-world origins in an already shape-checked local recipe.
+
+    Types alone permit using a previous world after an effect. Read-only
+    operations may inspect the current world without replacing it; a normal
+    state result becomes the following steps' current world. Nested call
+    operands are included, without entering their shared/deferred bodies.
+
+    This proves local sequencing, not the physical effects of native calls,
+    the value of a mutable referent, or Python reference cleanup semantics.
+    """
+    regions = {r.id: r for r in plan.regions}
+    normal = {s.id: next((c.types for c in s.completions if c.kind is C.FALLTHROUGH), ())
+        for s in plan.steps}
+    steps = {s.id: s for s in plan.steps}
+
+    def state(kind):
+        return type(kind) is ValueType and kind.kind is ValueKind.STATE
+
+    def value_type(value):
+        if type(value) is P.ProductionParameter:
+            return regions[value.region].parameters[value.index]
+        return normal[value.step][value.index]
+
+    def operands(step):
+        # The finite instruction schema also contains nested call arguments,
+        # captures and saved operands. Do not infer them from display labels.
+        pending = [step.instruction, step.arguments]
+        while pending:
+            item = pending.pop()
+            if type(item) in (P.ProductionParameter, P.ProductionResult):
+                yield item
+            elif type(item) is tuple:
+                pending.extend(reversed(item))
+            elif is_dataclass(item):
+                pending.extend(getattr(item, field.name) for field in reversed(fields(item)))
+
+    uses = results = loops = 0
+    for region in plan.regions:
+        incoming = [P.ProductionParameter(region.id, i) for i, kind in enumerate(region.parameters) if state(kind)]
+        _require(len(incoming) <= 1, region.id, 'one current-world input is permitted per local region')
+        current = incoming[0] if incoming else None
+        for identity in region.steps:
+            step = steps[identity]
+            used = [v for v in operands(step) if state(value_type(v))]
+            _require(all(v == current for v in used), identity, 'operand uses a stale or foreign world instead of the current world')
+            uses += len(used)
+            if type(step.instruction) is P.LoopControl:
+                loops += 1
+                _require(not any(state(value_type(v)) for v in step.arguments[:step.instruction.invariant_count]),
+                    identity, 'current world must be loop-carried, never a loop invariant')
+            produced = [i for i, kind in enumerate(normal[identity]) if state(kind)]
+            _require(len(produced) <= 1, identity, 'one normal current-world result is permitted per step')
+            if produced:
+                _require(bool(used), identity, 'a normal world result requires a current-world operand')
+                current = P.ProductionResult(identity, produced[0])
+                results += 1
+    return dict(regions=len(regions), steps=len(steps), state_uses=uses, state_results=results, loop_templates=loops)
+
+
 def build_template_graph(unit, syntax, records, *, max_visits=1_000_000):
     """Consume (domain, one-based line, plan document), never parse source."""
     nodes = {}; contexts = {}; sites = []; common_input = common_profile = None
@@ -41,6 +103,7 @@ def build_template_graph(unit, syntax, records, *, max_visits=1_000_000):
         _require(type(domain) is T.SourceMaterialDomain and type(line) is int and line > 0,
             unit, 'invalid original material coordinates')
         plan = read_production_plan(document, max_visits=max_visits)
+        validate_state_sequence(plan)
         _require(type(plan.source) is P.ProductionOccurrence and plan.profile is not None
             and plan.compilation_flow is not None, unit, 'expected a source-bound profiled occurrence template')
         if common_input is None:
@@ -236,6 +299,7 @@ def link_source_templates(model, out, parents, sources=(), *, max_visits=1_000_0
         parents=[s.receipt for s in stores], selected_sources=len(rows), units=rows, max_visits=max_visits, jobs=jobs,
         templates=sum(r['templates'] for r in rows), links=sum(r['links'] for r in rows),
         compressed_bytes=sum(r['compressed_bytes'] for r in rows),
+        local_state_sequence_checked=True,
         canonical_graph_generated=False, child_semantics_proven=False, effects_proven=False,
         first_stage_complete=False, target_executed=False, transformation_authorized=False, seconds=time.monotonic()-started)
     _durable_bytes(out / 'result.json', _json(report), replace=False)
