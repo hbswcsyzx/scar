@@ -18,6 +18,48 @@ WORLD = ValueType(ValueKind.STATE, location=LocationID('test-source-world'))
 REF = ValueType(ValueKind.REFERENCE)
 
 
+def test_source_template_links_preserve_ports_purposes_and_reject_missing_targets():
+    from collections import deque
+    from copy import deepcopy
+    from scar.analysis.source_template_links import build_template_graph, TemplateLinkError
+    from scar.analysis.source_statement_rules import SourceStatementRules
+    from scar.analysis.source_root_rules import SourceRootRules
+    from scar.analysis.source_productions import production_plan_document
+    from scar.ir.program.source_template_links import SourceMaterialDomain as D, SourceTemplateGraph
+    from scar.ir.record_codec import encode, decode
+    documents = _documents('value = fn(x)\nif x and y:\n    value = x\nfor item in items:\n    value = item\n')
+    expressions = _rules(documents); source = expressions.source
+    statements = SourceStatementRules(source, world=WORLD, exception_abi=ExceptionABI.EXCEPTION_WORLD)
+    roots = SourceRootRules(source, world=WORLD, exception_abi=ExceptionABI.EXCEPTION_WORLD)
+    records=[]; pending=deque(); seen=set(); line=0
+    def add(domain, plan):
+        nonlocal line
+        line+=1;records.append((domain,line,production_plan_document(plan)))
+        for s in plan.steps:
+            if type(s.instruction) is P.EvaluateChild and s.instruction.purpose is P.ProductionPurpose.CONDITION:
+                o=source.roles.locate(s.instruction.field)[1].reference
+                if o not in seen:seen.add(o);pending.append(o)
+    schema={r.name:r.bases for r in source.context.syntax.profile.ast_schema}
+    for o,node in enumerate(source.context.syntax.nodes):
+        if 'stmt' in schema[node.constructor] and statements.descriptor_owner(o) is None:
+            add(D.STATEMENTS,statements.build(o))
+        elif 'expr' in schema[node.constructor] and expressions.descriptor_owner(o) is None:
+            add(D.EXPRESSIONS,expressions.build(o,purpose(expressions,o)))
+    add(D.ROOTS,roots.build(0))
+    while pending:add(D.EXPRESSIONS,expressions.build(pending.popleft(),P.ProductionPurpose.CONDITION))
+    graph=build_template_graph('test-source',documents[2],iter(records))
+    assert graph.links and len({(e.caller,e.step) for e in graph.links})==len(graph.links)
+    assert any(a.key.occurrence==b.key.occurrence and a.key.purpose is not b.key.purpose
+        for a in graph.templates for b in graph.templates)
+    assert decode(SourceTemplateGraph,encode(graph,record_tags=P.PRODUCTION_RECORD_TAGS),
+        record_tags=P.PRODUCTION_RECORD_TAGS)==graph
+    with pytest.raises(TemplateLinkError,match='missing target template'):
+        build_template_graph('test-source',documents[2],(r for r in records if r[0] is not D.EXPRESSIONS))
+    duplicate=deepcopy(records[0][2]);duplicate['slots'][0]['disposition']='SUPPRESSED'
+    with pytest.raises(TemplateLinkError,match='conflicting templates'):
+        build_template_graph('test-source',documents[2],(*records,(D.STATEMENTS,1000,duplicate)))
+
+
 def test_source_core_contracts_reject_wrong_operands_profiles_and_source_counts():
     from scar.analysis.source_productions import ProductionError, validate_production_plan
     expressions = _rules(_documents('''

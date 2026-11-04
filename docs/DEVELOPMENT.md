@@ -193,6 +193,8 @@ v22的`source_annotation_state_interfaces.py`导出namespace/cell来源、原投
 v23的`source_compilation_contexts.py`生成原代码引用和登记生产位置；`source.compilation_contexts.bind(parameter, code_reference, insert_offset)`核原参数及代码版本后返回AnnotationRegistration，不执行或改写目标。常量编码区分tuple/frozenset/slice并保IEEE bits；SourceInput继续授权原F2/F3，Native位置只授本查询范围，不授全CFG/SSA。原材料入口重生成即可。
 当前recipe v24还包含`compilation_flow`端口/入口边/编译事实使用表，由`source_compilation_flow.py`机械生成并在source matcher重验。源码recipe必须有表；无源码的shape-only样本可省略。材料外壳仍为v4，旧实现pin不互认，按原三入口重采集/fresh；报告单列端口、边及fact-use数量，native上下文传播证明仍为False。
 当前recipe v25另由`source_core_interfaces.py`检查核心签名：profile声明抽象world/异常ABI，变长端口沿原Call/ClassDef、解包、Slice及tuple字段确定。报告单列core签名数量；原三入口和v4材料外壳不变，重采集/fresh后使用新pin。省略profile只适用于无源码的结构样本。
+
+只读模板接线入口为`python -B -m scar.analysis.source_template_links --model MODEL --out FRESH_OUT --materials expressions EXPR_COLLECTION EXPR_VERIFICATION --materials statements STMT_COLLECTION STMT_VERIFICATION --materials roots ROOT_COLLECTION ROOT_VERIFICATION`；可加`--source PATH`精确选择输入，未选时要求全模型三域材料齐全。仅接受已独立fresh的相同生成器/输入版本。每源分别存templates/links两张gzip JSONL表及小header，正文保留在父材料；`read_template_body(store, unit, SourceTemplateKey(occurrence, purpose))`核收据后展开。该入口不修改采集生成器或canonical图。
 星号/keyword的失败顺序参考固定版本[CPython codegen](https://github.com/python/cpython/blob/v3.14.7/Python/codegen.c)；本机stack guideline从header读入并固定SHA。
 
 源码身份桥（按unit分片，保持输入模型和旧ID）：
