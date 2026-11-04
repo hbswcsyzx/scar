@@ -531,6 +531,69 @@ class AttachTypeParameters:
 
 
 @dataclass(frozen=True, slots=True)
+class ClassBodyInterface:
+    scope: int
+    globals_scope: int
+    captures: tuple[int, ...]
+    protocol_bindings: tuple[int, ...]
+    docstring: SlotRef | None
+    type_parameters: SlotRef | None
+    world: GroundType
+    exception_abi: ExceptionABI
+
+
+@dataclass(frozen=True, slots=True)
+class DeferClassBody:
+    body: ProductionRegionID
+    interface: ClassBodyInterface
+
+
+@dataclass(frozen=True, slots=True)
+class EnterClassBody:
+    """Admit closure environment and the namespace supplied by the builder."""
+    interface: ClassBodyInterface
+
+
+@dataclass(frozen=True, slots=True)
+class InitializeClassNamespace:
+    """Compiler prelude: namespace reads/writes, protocol cells and docstring.
+
+    Namespace may be a custom mapping. No pure/dict-only effect is asserted.
+    Compiler metadata derives from the original class source and profile.
+    """
+    interface: ClassBodyInterface
+
+
+@dataclass(frozen=True, slots=True)
+class FinalizeClassNamespace:
+    """Deferred annotations, static attributes and class-cell publication."""
+    interface: ClassBodyInterface
+
+
+@dataclass(frozen=True, slots=True)
+class ReadBuildClass:
+    exception_abi: ExceptionABI
+
+
+@dataclass(frozen=True, slots=True)
+class BuildClassBody:
+    interface: ClassBodyInterface
+
+
+@dataclass(frozen=True, slots=True)
+class BuildGenericBase:
+    exception_abi: ExceptionABI
+
+
+@dataclass(frozen=True, slots=True)
+class BuildTypeAlias:
+    name: SlotRef
+    expression: LazyExpressionInterface
+    type_parameters: SlotRef | None
+    exception_abi: ExceptionABI
+
+
+@dataclass(frozen=True, slots=True)
 class GlobalsEnvironment:
     scope: int
 
@@ -627,6 +690,8 @@ ProductionInstruction = (EvaluateChild | ApplyLanguageAction | ReadCompilationOp
     | BuildFunctionAnnotations | BuildFunction | ApplyDecorator | TranslateEscapingException
     | EnterTypeParameters | InvokeTypeParameterFactory | BuildLazyExpression | CreateTypeParameter
     | SetTypeParameterDefault | BindTypeParameter | AttachTypeParameters
+    | DeferClassBody | EnterClassBody | InitializeClassNamespace | FinalizeClassNamespace
+    | ReadBuildClass | BuildClassBody | BuildGenericBase | BuildTypeAlias
     | ApplyRegion | BranchControl | LoopControl | DeferRegion | ReferenceEnvironment | EnterDeferredBody | CleanupControl
     | HandleCompletions | TransferCompletion | SuspendExecution)
 
@@ -669,7 +734,7 @@ class SourceProductionPlan:
     steps: tuple[ProductionStep, ...]
     slots: tuple[ProductionSlotDisposition, ...]
     schema: str = 'scar.source-production-plan'
-    schema_version: int = 10
+    schema_version: int = 11
     authority: str = 'SOURCE_RECIPE_SHAPE_ONLY'
 
 

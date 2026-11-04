@@ -62,7 +62,8 @@ _TARGETS = frozenset(('Name', 'Attribute', 'Subscript', 'List', 'Tuple'))
 _RULE_MODULES = ('source_display_rules.py', 'source_string_rules.py', 'source_comprehension_rules.py',
                  'source_suspension_rules.py', 'source_delegation_rules.py', 'source_callable_rules.py',
                  'source_deferred_interfaces.py', 'source_statement_atoms.py', 'source_statement_imports.py',
-                 'source_statement_functions.py', 'source_type_parameter_interfaces.py', 'source_type_parameter_rules.py')
+                 'source_statement_functions.py', 'source_type_parameter_interfaces.py', 'source_type_parameter_rules.py',
+                 'source_definition_interfaces.py', 'source_statement_definitions.py')
 
 
 class SourceRuleError(ProductionError):
@@ -127,13 +128,13 @@ class SourceExpressionRules:
             rows.append(dict(constructor=row.name, fields=list(row.fields), status=status,
                 purposes=[p.value for p in purposes], selectors=sorted(_SELECTORS.get(row.name, ())),
                 context_frontiers=[],
-                parent_contexts=([dict(constructor=p, field='args' if p == 'Call' else 'elts')
-                    for p in ('Call', 'List', 'Tuple', 'Set')] if row.name == 'Starred' else
+                parent_contexts=([dict(constructor=p, field='args' if p == 'Call' else 'bases' if p == 'ClassDef' else 'elts')
+                    for p in ('Call', 'ClassDef', 'List', 'Tuple', 'Set')] if row.name == 'Starred' else
                     [dict(constructor=p, field='generators') for p in _COMPREHENSION_PARENTS] if row.name == 'comprehension' else
                     [dict(constructor=p, field='args') for p in ('Lambda','FunctionDef','AsyncFunctionDef')] if row.name == 'arguments' else
                     [dict(constructor='arguments', field=p, owner=owner+'.args') for owner in ('Lambda','FunctionDef','AsyncFunctionDef') for p in (
                         'posonlyargs', 'args', 'vararg', 'kwonlyargs', 'kwarg')] if row.name == 'arg' else
-                    [dict(constructor='Call', field='keywords')] if row.name == 'keyword' else
+                    [dict(constructor=p, field='keywords') for p in ('Call','ClassDef')] if row.name == 'keyword' else
                     [dict(constructor=p, field='names') for p in ('Import','ImportFrom')] if row.name == 'alias' else
                     [dict(constructor=p,field='type_params') for p in ('FunctionDef','AsyncFunctionDef','ClassDef','TypeAlias')]
                         if row.name in ('TypeVar','TypeVarTuple','ParamSpec') else [])))
@@ -151,7 +152,7 @@ class SourceExpressionRules:
                         owner='AugAssign.target', condition='NON_CONSTANT_TWO_PART_SLICE'))
             elif row.name == 'Constant':
                 rows[-1]['parent_contexts'].append(dict(constructor='Expr',field='value',
-                    owners=['FunctionDef.body[0]','AsyncFunctionDef.body[0]'],condition='FUNCTION_DOCSTRING_METADATA'))
+                    owners=['FunctionDef.body[0]','AsyncFunctionDef.body[0]','ClassDef.body[0]'],condition='DECLARATION_DOCSTRING'))
         return dict(schema='scar.source-expression-rule-catalog', schema_version=1,
             source_schema_sha256=self.source.roles.catalog.f2_schema_sha256,
             recipe_type_catalog_sha256=production_type_catalog()['content_sha256'],
@@ -208,11 +209,11 @@ class SourceExpressionRules:
             return site if parent == 'arguments' and owner is not None and (
                 syntax.nodes[owner.occurrence].constructor in ('Lambda','FunctionDef','AsyncFunctionDef')
                 and owner.ordinal == self.source.roles.fields[syntax.nodes[owner.occurrence].constructor]['args']) else None
-        allowed = (('Call', 'List', 'Tuple', 'Set') if node.constructor == 'Starred' else
-                   _COMPREHENSION_PARENTS if node.constructor == 'comprehension' else ('Call',))
+        allowed = (('Call', 'ClassDef', 'List', 'Tuple', 'Set') if node.constructor == 'Starred' else
+                   _COMPREHENSION_PARENTS if node.constructor == 'comprehension' else ('Call','ClassDef'))
         if parent not in allowed:
             return None
-        expected = (('args' if parent == 'Call' else 'elts') if node.constructor == 'Starred' else
+        expected = (('args' if parent == 'Call' else 'bases' if parent == 'ClassDef' else 'elts') if node.constructor == 'Starred' else
                     'generators' if node.constructor == 'comprehension' else 'keywords')
         rule, _ = self.source.roles.locate(site)
         return site if site.group == 'FIELD' and rule.name == expected else None
@@ -256,6 +257,7 @@ class SourceExpressionRules:
             compilation_options_resolved=False, annotation_request_bodies_lowered=False,
             importer_dispatch_proven=False, module_initialization_observed=False, import_namespace_layout_proven=False,
             type_parameter_native_abi_proven=False, lazy_evaluator_bodies_lowered=False,
+            class_namespace_operations_expanded=False, class_builder_admission_proven=False,
             effects_proven=False, canonical_graph_generated=False, transformation_authorized=False)
 
 
@@ -578,10 +580,16 @@ class _Builder:
             left, state = self.parameter(region, 0), self.parameter(region, 1)
 
     def call(self, region, state):
-        args, keywords = self.value(self.site('args')), self.value(self.site('keywords'))
-        _require(args.kind == keywords.kind == 'LIST', 'RULE_SHAPE', str(self.occurrence), 'call inputs must be source lists')
         self.mark('func', P.ProductionDispositionKind.EVALUATED_CHILD)
-        self.mark('args', P.ProductionDispositionKind.EVALUATED_CHILD)
+        callee, state = self.evaluate(region, self.site('func'), state)
+        result = self.invoke_source_call(region, callee, state)
+        self.finish(region, result, (_REF, self.world))
+
+    def invoke_source_call(self, region, callee, state, *, argument_field='args', prefix=(), suffix=()):
+        """Shared source call packing; already-created hidden operands stay explicit."""
+        args, keywords = self.value(self.site(argument_field)), self.value(self.site('keywords'))
+        _require(args.kind == keywords.kind == 'LIST', 'RULE_SHAPE', str(self.occurrence), 'call inputs must be source lists')
+        self.mark(argument_field, P.ProductionDispositionKind.EVALUATED_CHILD)
         self.mark('keywords', P.ProductionDispositionKind.EVALUATED_CHILD)
         keyword_fields, seen = [], set()
         for item in keywords.items:
@@ -603,7 +611,7 @@ class _Builder:
         for ordinal, item in enumerate(args.items):
             _require(item.kind == 'NODE', 'RULE_SHAPE', str(self.occurrence), 'call argument must be a child expression')
             starred = self.rules.source.context.syntax.nodes[item.reference].constructor == 'Starred'
-            site = self.site('args', ordinal)
+            site = self.site(argument_field, ordinal)
             if starred:
                 context = self.auxiliary(item.reference, 'ctx', P.ProductionDispositionKind.MARKER)
                 marker = self.value(context)
@@ -611,20 +619,20 @@ class _Builder:
                          'RULE_SHAPE', str(context), 'starred call argument must be in Load context')
                 site = self.auxiliary(item.reference, 'value', P.ProductionDispositionKind.EVALUATED_CHILD)
             positionals.append((site, starred))
-        callee, state = self.evaluate(region, self.site('func'), state)
         expanded = any(star for _, star in positionals) or any(name is None for _, _, name in keyword_fields)
         if not expanded:
-            values = []
+            values = list(prefix)
             for site, _ in positionals:
                 value, state = self.evaluate(region, site, state)
                 values.append(value)
+            values.extend(suffix)
             for _, site, _ in keyword_fields:
                 value, state = self.evaluate(region, site, state)
                 values.append(value)
-            result = self.action(region, P.LanguageActionKind.CALL, (self.site('args'), self.site('keywords')),
+            result = self.action(region, P.LanguageActionKind.CALL, (self.site(argument_field), self.site('keywords')),
                                  (callee, *values, state))
         else:
-            positional, state = self.call_positionals(region, positionals, state)
+            positional, state = self.call_positionals(region, positionals, state, field=argument_field, prefix=prefix, suffix=suffix)
             mapping, index = None, 0
             while index < len(keyword_fields):
                 arg, value, name = keyword_fields[index]
@@ -649,31 +657,35 @@ class _Builder:
             result = self.protocol(region, K.CALL_FUNCTION_EX,
                 (callee, positional, *((mapping,) if mapping is not None else ())), state,
                 (ChoiceBinding('keyword_pack', 'PRESENT' if mapping is not None else 'ABSENT'),),
-                (self.site('args'), self.site('keywords')))
-        self.finish(region, result, (_REF, self.world))
+                (self.site(argument_field), self.site('keywords')))
+        return result
 
-    def call_positionals(self, region, items, state):
+    def call_positionals(self, region, items, state, *, field='args', prefix=(), suffix=()):
         # One *value remains unconverted until CALL_FUNCTION_EX, after kwargs.
-        if len(items) == 1 and items[0][1]:
+        if len(items) == 1 and items[0][1] and not prefix and not suffix:
             return self.evaluate(region, items[0][0], state)
-        sequence, held = None, []
-        if len(items) > self.rules.call_profile['stack_guideline']:
-            sequence, state = self.protocol(region, K.BUILD_CALL_POSITIONAL_LIST, (), state,
-                (CountBinding('item_count', 0),), (self.site('args'),))
+        sequence, held = None, list(prefix)
+        if len(items)+len(prefix)+len(suffix) > self.rules.call_profile['stack_guideline']:
+            sequence, state = self.protocol(region, K.BUILD_CALL_POSITIONAL_LIST, tuple(held), state,
+                (CountBinding('item_count', len(held)),), (self.site(field),))
         for site, starred in items:
             if starred and sequence is None:
                 sequence, state = self.protocol(region, K.BUILD_CALL_POSITIONAL_LIST, tuple(held), state,
-                    (CountBinding('item_count', len(held)),), (self.site('args'),))
+                    (CountBinding('item_count', len(held)),), (self.site(field),))
             value, state = self.evaluate(region, site, state)
             if sequence is None:
                 held.append(value)
             else:
                 state, = self.protocol(region, K.EXTEND_CALL_POSITIONALS if starred else K.APPEND_CALL_POSITIONAL,
                     (sequence, value), state, selectors=(site,))
+        for value in suffix:
+            if sequence is None:held.append(value)
+            else:
+                state,=self.protocol(region,K.APPEND_CALL_POSITIONAL,(sequence,value),state,selectors=(self.site(field),))
         if sequence is None:
             return self.protocol(region, K.BUILD_CALL_POSITIONALS, tuple(held), state,
-                (CountBinding('item_count', len(held)),), (self.site('args'),))
-        return self.protocol(region, K.CALL_POSITIONALS_TO_TUPLE, (sequence,), state, selectors=(self.site('args'),))
+                (CountBinding('item_count', len(held)),), (self.site(field),))
+        return self.protocol(region, K.CALL_POSITIONALS_TO_TUPLE, (sequence,), state, selectors=(self.site(field),))
 
     def call_keyword_run(self, region, items, state):
         mapping, pairs = None, []

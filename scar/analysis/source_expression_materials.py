@@ -50,6 +50,7 @@ def _implementation():
         'analysis/source_callable_rules.py', 'analysis/source_deferred_interfaces.py',
         'analysis/source_statement_rules.py', 'analysis/source_statement_atoms.py', 'analysis/source_statement_imports.py',
         'analysis/source_statement_functions.py',
+        'analysis/source_definition_interfaces.py', 'analysis/source_statement_definitions.py',
         'analysis/source_type_parameter_interfaces.py', 'analysis/source_type_parameter_rules.py',
         'analysis/source_productions.py', 'analysis/program_types.py',
         'ir/program/source_productions.py', 'ir/record_codec.py')
@@ -138,7 +139,8 @@ def _unit(task):
                             child_obligations['FUNCTION_ANNOTATION_REQUEST'] += 1
                         elif type(step.instruction) is P.BuildLazyExpression:
                             field=rules.source.roles.locate(step.instruction.expression.source)[0].name
-                            child_obligations['TYPE_PARAMETER_'+field.upper()+'_REQUEST'] += 1
+                            owner=syntax.nodes[step.instruction.expression.source.occurrence].constructor
+                            child_obligations['TYPE_ALIAS_VALUE_REQUEST' if owner=='TypeAlias' else 'TYPE_PARAMETER_'+field.upper()+'_REQUEST'] += 1
                 except SourceRuleError as error:
                     if error.code not in _FRONTIERS:
                         raise

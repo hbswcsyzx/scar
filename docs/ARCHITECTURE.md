@@ -65,7 +65,7 @@ B1允许显式类型、拼接、参数引用、重复、有限选择和异质类
 接源码前，先以原F2 fields/list重放旧SourceAtom的BFS身份公式，并核全源ID/kind/完整reference集合；这是身份层，绝不是求值顺序。
 旧SG不存在的source-only输入单独处置，保留其F2/F3，不捏造旧ID域。桥接内核不parse；strict读者仍重验F2上游。
 执行产生规则必须另按语言规则定义；symtable/compiler拓扑的visitor顺序不能当执行边（如decorators/defaults、DictComp key/value）。
-产生规则的输入语法为`SourceProductionPlan`，与canonical执行图分开：15种有限步骤，源码槽、namespace端口、区域参数及结果引用分别有类型。
+产生规则的输入语法为`SourceProductionPlan`，与canonical执行图分开：v11含42种有限步骤，源码槽、namespace端口、区域参数及结果引用分别有类型。
 隐式字面值复用已有`PythonLiteral`精确编码，不断言相同值具有同一对象身份或发生了分配。
 `ApplyPythonProtocol`复用已有88种协议及签名，参数必须显式绑定，输入/完成端口强制核验；不把协议名当作效果证明。
 区域共享，不按调用/迭代复制；循环显式分不变量前缀与携带值后缀。异常完成通过payload＋captures接入handler参数，不冒用normal结果边。
@@ -96,11 +96,12 @@ recipe v5增加GET_ASYNC_ITERATOR、GET_ASYNC_NEXT及StopAsyncIteration匹配的
 异步属性沿原C1求值owner传播：eager comprehension会使外层求值异步，创建惰性generator不会；首个iter仍按原创建阶段归属。异步generator的元素使用ASYNC_YIELD，与内部AWAIT分开。
 语句规则另按同一typed recipe生成：7类linear语句保RHS单次求值、原序写入、正常路径临时引用释放及RETURN出口；global/nonlocal只保编译声明关系。
 recipe v6增加原F2 `SourceLoopTarget`，局部子图可以导出外层循环完成端口，不造本地假父节点。suite按原序接STATEMENT child，正常完成才接下一语句；没有正常前驱的尾部仍保原slot disposition。If取分支完成接口并集；For/While/AsyncFor各保一份循环模板，iterator引用是invariant，world由backedge携带，item只进当前body。耗尽才进else，break绕过else；嵌套循环else中的跳转接仍活跃的外层循环。
-`source_statement_interfaces.py`在原F2上机械归约各语句的may-completion上界，定义body不内联；try/finally的完成替换及with的异常抑制影响接口。上界不是可达性证明，也不代表Try/With等child实现已经完成。21类局部语句规则已接接口，含generic函数创建；其余定义/复合控制和清理仍须闭合后才发布CFG/SSA。
+`source_statement_interfaces.py`在原F2上机械归约各语句的may-completion上界，定义body不内联；try/finally的完成替换及with的异常抑制影响接口。上界不是可达性证明，也不代表Try/With等child实现已经完成。23类局部语句规则已接接口，含函数、类、类型别名；其余复合控制和清理仍须闭合后才发布CFG/SSA。
 recipe v7先固定三类接口，再接AugAssign/AnnAssign/Assert/Raise。增强赋值保存一次地址、读旧值、求RHS、原地运算后写回；其target由父语句处理。没有RHS的注解只检查必要地址分量，不造get/set或多余slice/tuple；原C1决定局部抑制、字符串化发布或延迟登记。延迟annotation请求body仍是独立child义务。assert保目标编译选项的符号输入，不能照分析进程的优化flags删除检查；失败分支才求message。raise按exc/cause顺序求值，再规范化并导出异常ABI。
 v8区分ImportRequest/ImportMember/ImportStar，三种接口先验再接产生规则。原F3投影依据导出已知请求名、成员名、from-list和相对层级；bind继续引用原namespace write port。普通点路径绑定head，dotted-as沿IMPORT_FROM路径逐层取成员；普通from-member保私有名改写，点路径分量不改写。star保动态namespace写效果，不捏造静态名字集合。请求不等于实际初始化或I/O；importer/frame/registry实现和清理仍未证明，不能据此删除import。
 v9区分函数创建、annotation factory、decorator调用和generator/coroutine异常翻译。创建按decorator表达式→defaults→annotation factory/函数对象→逆序decorator→原name write port；body单独激活，正常fallthrough转RETURN None，escaping StopIteration在用户handler之后翻译。Lambda/GeneratorExp共用此退出路径。docstring保编译元数据；注解按CPython的args→posonlyargs等原顺序形成延迟请求接口，不提前求值。
 v10显式激活原TYPE_PARAMETERS scope：外层defaults只求一次并传入工厂；bound/default捕获原lazy evaluator，不提前运行；逐项create→set default→bind，最后构造参数tuple并关联原function引用。绑定使用原TYPE_PARAMETER_INTERFACE而非伪造Store。工厂传递的是逻辑source输入，非隐藏tuple/dict的native ABI。所有instruction统一带类型标签，避免同字段形状的create/set/bind在存储中混淆。
+v11的类定义把callback模板交给实际选择的builder，不直接调用类体；入口显式接环境、builder提供的namespace和新world。初始化拥有docstring等namespace动作，只有body正常完成才进入收尾，返回class cell或None而非类对象。类与普通调用共用base/star/keyword组装规则；泛型base先创建、后接到用户bases末端。类型别名保存原TYPE_ALIAS evaluator和名字来源，声明不求值；泛型定义复用原type-parameter工厂。namespace内部操作、builder准入及lazy请求body仍待展开，不能据此授予完整效果或native证明。
 前两步的局部规则已通过：Yield由原C1 owner区分普通／异步形式，bare yield导出None，嵌套定义header仍归外层执行owner。静态compiler只作独立规则对照，不以bytecode位置接源码身份。
 后续语句／定义／cleanup规则闭合后才进入F4-C；每步先验类型/接口，再接源码规则，再在原材料独立重放，不以节点存在或局部计数授予全层完成。
 

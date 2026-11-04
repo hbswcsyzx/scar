@@ -22,8 +22,8 @@ class TypeParameterInterfaceIndex:
         if value.kind!='NODE':return None
         context=self.source.context.context_at_slot(site).state
         scope=self.source.context.material.scopes[context.environment]
-        _require(scope.kind=='TYPE_PARAMETER_EVALUATOR' and scope.anchor==site,site,
-            'lazy type-parameter expression requires its original evaluator scope')
+        _require(scope.kind in ('TYPE_PARAMETER_EVALUATOR','TYPE_ALIAS') and scope.anchor==site,site,
+            'lazy expression requires its original type-parameter/alias evaluator scope')
         starred=self.source.context.syntax.nodes[value.reference].constructor=='Starred'
         _require(not starred or allow_starred,site,'starred evaluator is permitted only for TypeVarTuple defaults')
         return P.LazyExpressionInterface(site,context.environment,

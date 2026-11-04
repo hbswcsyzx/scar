@@ -23,7 +23,9 @@ _FIELDS = {'Expr': ('value',), 'Pass': (), 'Assign': ('targets', 'value', 'type_
     'Assert': ('test', 'msg'), 'Raise': ('exc', 'cause'),
     'Import': ('names',), 'ImportFrom': ('module', 'names', 'level'),
     'FunctionDef': ('name','args','body','decorator_list','returns','type_comment','type_params'),
-    'AsyncFunctionDef': ('name','args','body','decorator_list','returns','type_comment','type_params')}
+    'AsyncFunctionDef': ('name','args','body','decorator_list','returns','type_comment','type_params'),
+    'ClassDef': ('name','bases','keywords','body','decorator_list','type_params'),
+    'TypeAlias': ('name','type_params','value')}
 
 
 class SourceStatementRules(SourceExpressionRules):
@@ -62,7 +64,7 @@ class SourceStatementRules(SourceExpressionRules):
         _require(constructor in _FIELDS, 'RULE_FRONTIER', str(occurrence),
             'no local statement rule implemented for ' + constructor)
         _require(self.descriptor_owner(occurrence) is None, 'PARENT_OWNED_SOURCE', str(occurrence),
-            'function docstring belongs to declaration metadata')
+            'docstring belongs to its parent declaration schedule')
         context = self.source.context.entry_context(occurrence)
         _require(self.source.context.material.regions[context.region].eligibility == 'ELIGIBLE',
             'SUPPRESSED_SOURCE', str(occurrence), 'C1 retains this statement without execution')
@@ -138,6 +140,10 @@ class _StatementBuilder(_Builder):
             from scar.analysis.source_statement_functions import emit_function_definition
             emit_function_definition(self, root, current)
             return self.plan(root, source)
+        elif kind in ('ClassDef','TypeAlias'):
+            from scar.analysis.source_statement_definitions import emit_definition
+            emit_definition(self,root,current)
+            return self.plan(root,source)
         self.finish(root, (current,), (self.world,))
         return self.plan(root, source)
 

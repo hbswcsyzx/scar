@@ -55,13 +55,15 @@ def test_closed_grammar_exact_records_strict_codec_and_budgets():
     assert summary['control_semantics_checked'] is False
     assert A.read_production_plan(A.production_plan_document(value)) == value
     catalog = A.production_type_catalog()
-    assert catalog['counts'] == dict(records=69, fields=199, identifiers=4, enums=19, enum_members=214, unions=20)
+    assert catalog['counts'] == dict(records=78, fields=219, identifiers=4, enums=19, enum_members=214, unions=20)
     assert set(catalog['instruction_variants']) == {
         'EvaluateChild', 'ApplyLanguageAction', 'ReadCompilationOption', 'ApplyInplaceOperator', 'PublishAnnotation',
         'ImportRequest', 'ImportMember', 'ImportStar',
         'BuildFunctionAnnotations', 'BuildFunction', 'ApplyDecorator', 'TranslateEscapingException',
         'EnterTypeParameters', 'InvokeTypeParameterFactory', 'BuildLazyExpression', 'CreateTypeParameter',
         'SetTypeParameterDefault', 'BindTypeParameter', 'AttachTypeParameters',
+        'DeferClassBody','EnterClassBody','InitializeClassNamespace','FinalizeClassNamespace',
+        'ReadBuildClass','BuildClassBody','BuildGenericBase','BuildTypeAlias',
         'ApplyPythonProtocol', 'ApplyDelegationProtocol', 'AccessBinding', 'ConstructValue', 'DefineLiteral', 'ApplyRegion',
         'BranchControl', 'LoopControl', 'DeferRegion', 'ReferenceEnvironment', 'EnterDeferredBody', 'CleanupControl', 'HandleCompletions',
         'TransferCompletion', 'SuspendExecution'}
@@ -218,6 +220,34 @@ def test_type_parameter_action_interfaces_and_unambiguous_wire_kinds():
             with pytest.raises(A.ProductionError,match='TYPE_PARAMETER_INTERFACE'):
                 A.validate_production_plan(replace(specimen,steps=(replace(apply,arguments=()),done)))
     assert set(P.ProductionInstruction.__args__) <= set(P.PRODUCTION_RECORD_TAGS)
+
+
+def test_class_and_alias_action_ports_preserve_namespace_and_exception_interfaces():
+    from scar.ir.program.ids import LocationID
+    from scar.ir.program.protocol_signatures import ExceptionABI
+    world=ValueType(ValueKind.STATE,location=LocationID('definition-interface-world'))
+    site=P.SlotRef(0,'FIELD',0)
+    for abi in ExceptionABI:
+        raised=(REF,world) if abi is ExceptionABI.EXCEPTION_WORLD else (REF,REF,world)
+        interface=P.ClassBodyInterface(1,0,(2,),(3,),None,site,world,abi)
+        alias=P.BuildTypeAlias(site,P.LazyExpressionInterface(site,2,(),False),site,abi)
+        cases=[(P.ReadBuildClass(abi),(world,),(REF,world)),
+            (P.BuildClassBody(interface),(REF,REF,REF,REF,world),(REF,world)),
+            (P.InitializeClassNamespace(interface),(REF,REF,world),(world,)),
+            (P.FinalizeClassNamespace(interface),(REF,REF,world),(REF,world)),
+            (P.BuildGenericBase(abi),(REF,world),(REF,world)),
+            (alias,(REF,REF,world),(REF,world)),
+            (replace(alias,type_parameters=None),(REF,world),(REF,world))]
+        for instruction,arguments,result in cases:
+            outputs=(*normal(*result),P.ProductionCompletion(C.RAISE,raised))
+            root=region('definition',parameters=arguments,outputs=outputs,steps=('apply','done'))
+            apply=step('apply',root,instruction,tuple(parameter(root,i) for i in range(len(arguments))),outputs)
+            done=step('done',root,P.TransferCompletion(C.FALLTHROUGH),
+                tuple(P.ProductionResult(apply.id,i) for i in range(len(result))),normal(*result))
+            specimen=plan((root,),(apply,done))
+            assert A.read_production_plan(A.production_plan_document(specimen))==specimen
+            with pytest.raises(A.ProductionError,match='DEFINITION_INTERFACE'):
+                A.validate_production_plan(replace(specimen,steps=(replace(apply,arguments=()),done)))
 
 
 def test_ordered_values_shared_subregion_and_invalid_local_edges():

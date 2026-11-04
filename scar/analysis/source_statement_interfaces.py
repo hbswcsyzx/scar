@@ -69,6 +69,11 @@ class SourceStatementInterfaceIndex:
     def function_docstring(self, occurrence):
         if self.nodes[occurrence].constructor not in ('FunctionDef','AsyncFunctionDef'):
             return None
+        return self.declaration_docstring(occurrence)
+
+    def declaration_docstring(self, occurrence):
+        if self.nodes[occurrence].constructor not in ('FunctionDef','AsyncFunctionDef','ClassDef'):
+            return None
         body = self.node_items(occurrence,'body')
         if not body or self.nodes[body[0]].constructor != 'Expr':
             return None
@@ -81,9 +86,9 @@ class SourceStatementInterfaceIndex:
 
     def docstring_owner(self, statement):
         parent = self.roles.parents.get(statement)
-        if parent is None or self.nodes[parent.occurrence].constructor not in ('FunctionDef','AsyncFunctionDef'):
+        if parent is None or self.nodes[parent.occurrence].constructor not in ('FunctionDef','AsyncFunctionDef','ClassDef'):
             return None
-        return parent if self.roles.locate(parent)[0].name == 'body' and parent.item_path == (0,) and self.function_docstring(parent.occurrence) is not None else None
+        return parent if self.roles.locate(parent)[0].name == 'body' and parent.item_path == (0,) and self.declaration_docstring(parent.occurrence) is not None else None
 
     def two_part_slice(self, occurrence):
         if self.nodes[occurrence].constructor != 'Slice':

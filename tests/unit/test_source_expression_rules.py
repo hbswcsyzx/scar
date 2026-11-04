@@ -105,6 +105,7 @@ def documents():
         'def named_closure():\n    captured = seed\n    @decorate()\n    def inner(value=default()):\n        """Closure metadata."""\n        return captured,value\n    return inner',
         'def only_doc():\n    """No user statements execute."""',
         'class CallableContainer:\n    def method(self,__item: Missing=first(),*,__key: Missing=second()) -> Result:\n        return __item,__key',
+        'type ExampleAlias = int',
     )) + '\n'
     return _documents(text)
 
@@ -697,7 +698,7 @@ def test_delegation_keeps_send_and_post_driver_completion_paths_separate(rules, 
             plan = variant.build(occurrence)
             checked = variant.verify(plan)
             assert not checked['native_delegation_expanded'] and not checked['driver_protocol_graph_generated']
-            assert plan.schema_version == 10
+            assert plan.schema_version == 11
             _, root_steps = owned(plan)
             acquire = next(s for s in root_steps if type(s.instruction) is P.ApplyDelegationProtocol)
             assert acquire.instruction.protocol is (P.DelegationProtocolKind.AWAITABLE_ITER if constructor == 'Await'
@@ -931,7 +932,7 @@ def test_structured_statement_rules_preserve_source_fields_and_completion_interf
     statements = SourceStatementRules(rules.source, world=WORLD, exception_abi=ExceptionABI.EXCEPTION_WORLD)
     supported = {r['constructor'] for r in statements.catalog()['rules'] if r['status'] == 'LOCAL_STATEMENT_RULE'}
     assert supported == {'Expr','Pass','Assign','Delete','Return','Global','Nonlocal',
-        'If','While','For','AsyncFor','Break','Continue','AnnAssign','AugAssign','Assert','Raise','Import','ImportFrom','FunctionDef','AsyncFunctionDef'}
+        'If','While','For','AsyncFor','Break','Continue','AnnAssign','AugAssign','Assert','Raise','Import','ImportFrom','FunctionDef','AsyncFunctionDef','ClassDef','TypeAlias'}
     seen = set()
     for occurrence, node in enumerate(rules.source.context.syntax.nodes):
         if node.constructor not in supported:continue
@@ -1329,3 +1330,67 @@ def test_generic_function_factory_preserves_creation_scope_lazy_requests_and_def
     factory=next(c for c in code.co_consts if type(c) is CodeType and c.co_name=='<generic parameters of generic>')
     assert not any(s.opname=='LOAD_GLOBAL' and s.argval in ('Left','Right','Default','TupleDefault','ParamDefault') for s in dis.get_instructions(factory))
     assert any(s.opname=='CALL_INTRINSIC_2' and s.argrepr=='INTRINSIC_SET_FUNCTION_TYPE_PARAMS' for s in dis.get_instructions(factory))
+
+
+def test_class_and_alias_definitions_keep_builder_calls_and_lazy_evaluators_separate():
+    import dis
+    from types import CodeType
+    from scar.analysis.source_statement_rules import SourceStatementRules
+    from scar.analysis.source_productions import read_production_plan,production_plan_document
+    from scar.ir.program.control import LanguageCompletionKind as C
+    text='@first()\n@second()\nclass Plain(Base(),*more(),metaclass=meta(),**options()):\n    """Published through the class namespace."""\n    value: Annotation\n    def method(self):\n        return __class__,super()\ndef outer(seed):\n    class Generic[T: Bound[seed]=Default[seed]](Base[T],*more(),metaclass=meta()):\n        """Generic namespace."""\n        saved=T\n        def method(self):\n            return seed,__class__\n    type Alias[U=seed] = tuple[seed,U]\n    type Local = tuple[seed]\n    return Generic,Alias,Local\ntype Global = int | str\nclass Empty:\n    pass\n'
+    text+='class Direct(Base(),metaclass=meta()):\n    """Only a namespace docstring."""\nclass AliasContainer:\n    type __Private = tuple[__Private]\n'
+    rules=_rules(_documents(text))
+    for abi in ExceptionABI:
+        statements=SourceStatementRules(rules.source,world=WORLD,exception_abi=abi)
+        for constructor in ('ClassDef','TypeAlias'):
+            for occurrence in occurrences(rules,constructor):
+                plan=statements.build(occurrence);statements.verify(plan)
+                assert read_production_plan(production_plan_document(plan))==plan
+                root,creation=owned(plan)
+                generic=bool(rules.source.roles.field(occurrence,'type_params').items)
+                factory=next((s for s in creation if type(s.instruction) is P.InvokeTypeParameterFactory),None)
+                assert (factory is not None)==generic
+                active,execution=owned(plan,factory.instruction.invocation.region) if generic else (root,creation)
+                if constructor=='ClassDef':
+                    declaration=next(s for s in execution if type(s.instruction) is P.DeferClassBody)
+                    interface=declaration.instruction.interface
+                    body,body_steps=owned(plan,declaration.instruction.body)
+                    assert body.context.environment==interface.scope!=active.context.environment
+                    assert body.parameters==(REF,REF,WORLD)
+                    assert type(body_steps[0].instruction) is P.EnterClassBody
+                    assert type(body_steps[1].instruction) is P.InitializeClassNamespace
+                    assert not any(type(s.instruction) is P.ApplyRegion and s.instruction.invocation.region==body.id for s in plan.steps)
+                    assert all(c.kind in (C.RETURN,C.RAISE) for c in body.completions)
+                    final=next(s for s in plan.steps if type(s.instruction) is P.FinalizeClassNamespace)
+                    assert final.region!=body.id  # only normal completion enters finalization
+                    assert next(i for i,s in enumerate(execution) if type(s.instruction) is P.ReadBuildClass)<execution.index(declaration)
+                    call=next(s for s in execution if type(s.instruction) is P.ApplyLanguageAction and s.instruction.action is P.LanguageActionKind.CALL
+                        or type(s.instruction) is P.ApplyPythonProtocol and s.instruction.protocol.value=='CALL_FUNCTION_EX')
+                    if generic:
+                        base=next(s for s in execution if type(s.instruction) is P.BuildGenericBase)
+                        evaluated=next(s for s in execution if type(s.instruction) is P.EvaluateChild)
+                        assert execution.index(base)<execution.index(evaluated)<execution.index(call)
+                        assert interface.captures
+                    if interface.docstring is not None:
+                        assert any(s.field==interface.docstring and s.disposition is P.ProductionDispositionKind.METADATA for s in plan.slots)
+                    if rules.source.roles.field(occurrence,'name').scalar.to_python()=='Plain':
+                        assert interface.protocol_bindings
+                        assert [s.instruction.source for s in creation if type(s.instruction) is P.ApplyDecorator]==[
+                            P.SlotRef(occurrence,'FIELD',rules.source.roles.fields['ClassDef']['decorator_list'],(i,)) for i in (1,0)]
+                else:
+                    alias=next(s.instruction for s in execution if type(s.instruction) is P.BuildTypeAlias)
+                    assert alias.expression==rules.source.type_parameters.lazy(alias.expression.source)
+                    assert not any(type(s.instruction) is P.EvaluateChild and s.instruction.field==alias.expression.source for s in plan.steps)
+                    assert any(type(s.instruction) is P.BuildLazyExpression and s.instruction.expression==alias.expression for s in execution)
+        for occurrence in occurrences(rules,'keyword'):
+            assert rules.descriptor_owner(occurrence) is not None
+        for occurrence in occurrences(rules,'Starred'):
+            assert rules.descriptor_owner(occurrence) is not None
+    # Compilation/disassembly only: no decorators, class bodies or aliases run.
+    code=compile(text,'<static-class-alias-oracle>','exec',dont_inherit=True)
+    assert [s.argval for s in dis.get_instructions(code) if s.opname=='LOAD_NAME']==['first','second','Base','more','meta','options','Base','meta']
+    outer=next(c for c in code.co_consts if type(c) is CodeType and c.co_name=='outer')
+    factory=next(c for c in outer.co_consts if type(c) is CodeType and c.co_name=='<generic parameters of Generic>')
+    ops=list(dis.get_instructions(factory))
+    assert next(i for i,s in enumerate(ops) if s.opname=='CALL_INTRINSIC_1' and s.argrepr=='INTRINSIC_SUBSCRIPT_GENERIC')<next(i for i,s in enumerate(ops) if s.opname=='LOAD_GLOBAL' and s.argval=='Base')
