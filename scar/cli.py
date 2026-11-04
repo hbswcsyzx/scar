@@ -480,6 +480,9 @@ def main(argv=None) -> int:
     if cli_argv and cli_argv[0] == 'compiler-symbols':
         from scar.analysis.compiler_symbol_materials import main as compiler_symbols_main
         return compiler_symbols_main(cli_argv[1:])
+    if cli_argv and cli_argv[0] == 'frontend-check':
+        from scar.analysis.frontend_check import main as frontend_check_main
+        return frontend_check_main(cli_argv[1:])
     if cli_argv and cli_argv[0] == "static":
         from scar.analysis.static_program import main as static_main
         return static_main(cli_argv[1:])
@@ -517,6 +520,8 @@ def main(argv=None) -> int:
     compiler_topology.set_defaults(func=lambda _: 0)
     compiler_symbols = sub.add_parser('compiler-symbols', help='F3-C3S: project compiler symbol provenance and exact parameter positions')
     compiler_symbols.set_defaults(func=lambda _: 0)
+    frontend_check = sub.add_parser('frontend-check', help='F3-D: verify original source/namespace/compiler graph composition')
+    frontend_check.set_defaults(func=lambda _: 0)
     static_cmd = sub.add_parser("static", help="build source-root program graphs without executing the target")
     static_cmd.set_defaults(func=lambda _: 0)
     static_query = sub.add_parser("static-query", help="query stored static definitions and original graph dependencies")

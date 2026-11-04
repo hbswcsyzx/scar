@@ -1,7 +1,7 @@
 # 当前状态
 
 **第一阶段未完成。当前按形式阶段重新验收：F0 → F1 → F2 → F3 → F4 → F5 → F6。**
-阶段定义见 [ARCHITECTURE](ARCHITECTURE.md)。F0/F1/F2、F3-A/F3-B、C1及C2已按声明profile与源码范围分别验收；C3-T/S已按声明范围验收，下一层F3-D组合验收，组合cleanup开发暂缓。
+阶段定义见 [ARCHITECTURE](ARCHITECTURE.md)。F0/F1/F2及F3全部子层和组合已按声明profile与866源范围验收；下一层F4先固定规范IR类型与产生规则，尚未开发。
 现有后层代码及成果保留，但不能代替前端完整性证明。
 
 ## F0：原始材料
@@ -54,7 +54,7 @@ F1/F2共11个聚焦检查通过（5.21秒），含四mode、独立wire核对、�
 采集证据：`artifacts/current/queries/formal-frontend-f2/acquisition/result.json`。
 完整核验与汇总：`/var/tmp/scar-f2-recovery-7w7nd_0z/{verification/result.json,run.json}`。
 
-## F3-A材料（已验收，尚未接通AST）
+## F3-A材料（已验收，单独不授AST连接）
 
 **Implemented/Verified**：完整类型化public compiler材料、canonical append、collect-only独立store和fresh reader。
 866份源码全部CAPTURED，40,411个scope、208,528个symbol；866分片共2,981,301压缩bytes，解释前沿0。
@@ -142,15 +142,22 @@ Raw两族3.63秒、solver手写两族0.44秒、存储集成19.08秒、8个关键
 证据：`/var/tmp/scar-f2-recovery-7w7nd_0z/f3c3s/{materials,verification,symbol-agreement.json,anchor-agreement.json,proof-query-examples.json,run.json}`。
 输入及原model保持，canonical_model_published=false、runtime_binding=NOT_OBSERVED、runtime_local_layout=NOT_CLAIMED。
 
-## 当前层：F3-D组合验收（未通过）
+## F3-D原引用组合（已按声明范围验收）
 
-本轮仅收紧形式合同并补审原材料，不新增F4或优化功能。
-保存材料的866源审计已逐项核563,522原端口，其中392,706有名字贡献、170,816无贡献；0异常。
-8,375隐式需求按闭规则匹配：855 SUPER、48 conditional、7,472 class annotation；193 future模板明确无raw事件。
-另6,891条class-dict事件来自原synthetic header，不制造源码端口。3,109条COPY/KEEP路由最长2跳；KEEP不授flags因果。
-证据与固定合同在`/var/tmp/scar-f2-recovery-7w7nd_0z/f3d/`，本轮为保存材料交叉审计，不是strict fresh组合通过。
-尚缺：复用原引用的typed组合查询、独立规则分支验收、866源strict fresh组合及输入保持收据。
-三项完成前F4冻结；实现规则缺失不能转成UNKNOWN，真实运行值未知不抹去已知结构。
+类型化组合view复用原B/C1/D/Q/A/T/S，不复制AST、函数体或逐端口闭包。
+866/866源码strict fresh通过；563,522端口、392,706源码贡献、208,528原符号及63,315有序参数位置全部闭合，0冲突。
+8,375隐式需求中8,182匹配、193按future规则明确省略；6,891个原synthetic header保compiler-only来源。
+16进程977.14秒，含Q/S及全部父层重放；七store/原模型不变，仅输出773,329 bytes验收summary。
+两族查询9.56秒、唯一存储集成6.92秒通过；真实材料查询2.99秒验证DIRECT/COPY/KEEP、参数及原Fact DAG。
+预算前沿最多一条且带remaining；KEEP不授flags因果，DELETE仍可沿先前投影到原符号。
+规则域与实例域分别验收：真实DELETE/grammar/detached-super为0，正例来自micro；synthetic .0没有原B端口，SKIP边仍保原编译表，不补造源码入口。
+证据：`/var/tmp/scar-f2-recovery-7w7nd_0z/f3d/{fresh/result.json,formal-contract.json,unit-check.json,integration-check.json,query-examples.json}`。
+canonical_model_published=false；原目录只读，材料与当前源码缓冲尚未同步到主工作区。
+
+## 下一层：F4规范IR
+
+先固定实体、操作、端口和区域的封闭类型及合法连接规则，再逐语法构造生成共享图，检查正常/异常完成、控制/状态和引用守恒。
+已有lowerer须按新前端逐项审查后复用，旧图计数不能当新层通过；F4未验收前不新增F5接线、推理或优化后端。
 
 ## 当前模型与已有后层证据
 

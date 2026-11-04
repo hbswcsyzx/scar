@@ -106,6 +106,21 @@ PYTHONHASHSEED=0 python -B -m scar.cli compiler-symbols --model /path/to/model -
 source slot、compiler slot与native行分域；scope code不是低位flag；varnames只是有序参数，不冒充runtime locals布局。
 五项独立本层预算与原D.max_contributions分开；超限不发布部分来源表，外部五store均固定原收据。
 
+F3-D只读组合验收（不复制程序图，不运行目标）：
+
+```bash
+PYTHONHASHSEED=0 python -B -m scar.cli frontend-check --model /path/to/model \
+  --roles-materials /path/to/roles --contexts-materials /path/to/contexts \
+  --declarations-materials /path/to/declarations --bindings-materials /path/to/bindings \
+  --symbols-materials /path/to/symbols --topology-materials /path/to/topology \
+  --compiler-symbols-materials /path/to/compiler-symbols --out /path/to/fresh-check --jobs 16
+```
+
+全部材料已注册到model时可省略对应sidecar参数。只写验收summary，固定输入/实现收据并重验原Q/S及父层。
+`read_frontend_bindings(F0,F1,F2,B,C1,D,Q,A,T,S)`返回原表组合view；
+`.port/.implicit/.endpoints/.parameter/.why`分别查询原引用，不合并源码namespace与compiler分类。
+endpoint中的KEEP路径显式标记association；query预算耗尽返回incomplete与最多一条frontier及remaining，不当成无依赖。
+
 ## 已有建图入口（前端形式验收尚未完成）
 
 ```bash
