@@ -114,7 +114,7 @@ def documents():
     return _documents(text)
 
 
-def _documents(text):
+def _documents(text,mode='exec'):
     from scar.analysis.source_bytes import source_bytes_document
     from scar.analysis.source_tokens import source_tokens_document
     from scar.analysis.source_syntax import source_syntax_document
@@ -127,7 +127,7 @@ def _documents(text):
     from scar.analysis.compiler_symbols import compiler_symbols_document
     f0 = source_bytes_document(text.encode(), path='/source/schedules.py', namespace_root='/source')
     f1 = source_tokens_document(f0)
-    f2 = source_syntax_document(f0, f1)
+    f2 = source_syntax_document(f0, f1,mode=mode)
     b = source_roles_document(f0, f1, f2)
     c = source_contexts_document(f0, f1, f2, b)
     d = source_declarations_document(f0, f1, f2, b, c)
@@ -702,7 +702,7 @@ def test_delegation_keeps_send_and_post_driver_completion_paths_separate(rules, 
             plan = variant.build(occurrence)
             checked = variant.verify(plan)
             assert not checked['native_delegation_expanded'] and not checked['driver_protocol_graph_generated']
-            assert plan.schema_version == 16
+            assert plan.schema_version == 17
             _, root_steps = owned(plan)
             acquire = next(s for s in root_steps if type(s.instruction) is P.ApplyDelegationProtocol)
             assert acquire.instruction.protocol is (P.DelegationProtocolKind.AWAITABLE_ITER if constructor == 'Await'
@@ -1773,3 +1773,93 @@ def test_match_recipes_connect_patterns_captures_guards_and_shared_case_fallback
     function=next(c for c in code.co_consts if type(c) is CodeType)
     opnames={i.opname for i in dis.get_instructions(function)}
     assert {'MATCH_MAPPING','MATCH_SEQUENCE','MATCH_CLASS','MATCH_KEYS','UNPACK_EX','UNPACK_SEQUENCE'}<=opnames
+
+
+def test_admitted_roots_preserve_namespace_preludes_docstrings_and_interactive_display(monkeypatch):
+    import dis
+    from types import CodeType
+    from scar.analysis.source_root_rules import SourceRootRules
+    from scar.analysis.source_root_interfaces import clean_docstring
+    from scar.analysis.source_statement_rules import SourceStatementRules
+    from scar.analysis.source_productions import ProductionError,read_production_plan,production_plan_document
+    from scar.ir.program.control import LanguageCompletionKind as C
+    text='''"""   Title
+\t  Detail
+
+"""
+global __doc__, __annotate__
+x: T = produce()
+if check:
+    y: U
+else:
+    z: V
+class Nested:
+    other: R
+def nested():
+    local: F
+"ignored constant"
+raise Error
+last: W
+'''
+    cases=[('exec',text),('exec','from __future__ import annotations\nobj.attr: Missing\n'),
+        ('eval','produce(value)'),('single','if check:\n    "show literal"\n    produce()\n'),('exec','')]
+    inputs=[_rules(_documents(source,mode)) for mode,source in cases]
+    for abi in ExceptionABI:
+        for (mode,source),expressions in zip(cases,inputs):
+            rules=SourceRootRules(expressions.source,world=WORLD,exception_abi=abi)
+            with monkeypatch.context() as no_parse:
+                no_parse.setattr(ast,'parse',lambda *a,**kw:pytest.fail('root rule reparsed target'))
+                plan=rules.build();assert rules.verify(plan)['local_schedule_verified']
+                assert read_production_plan(production_plan_document(plan))==plan
+            root,steps=owned(plan)
+            assert root.parameters==(REF,REF,WORLD) and type(steps[0].instruction) is P.EnterRootBody
+            assert all(c.kind in (C.RETURN,C.RAISE) for c in root.completions)
+            assert plan.source==P.ProductionOccurrence(expressions.source.context.syntax.root)
+            if source==text:
+                assert len(expressions.source.roots.annotations)==4
+                assert type(steps[1].instruction) is P.BuildScopeAnnotations
+                assert steps[1].arguments[0]==P.ProductionParameter(root.id,0)
+                assert any(type(s.instruction) is P.ApplyNamespaceAction and s.instruction.kind is P.NamespaceActionKind.STORE_GLOBAL for s in steps)
+                assert not any(type(s.instruction) is P.ApplyNamespaceAction and s.instruction.kind is P.NamespaceActionKind.ENSURE_ANNOTATIONS for s in steps)
+                descriptor=expressions.source.statements.declaration_docstring(expressions.source.context.syntax.root)
+                literal=clean_docstring(expressions.source.roles.locate(descriptor)[1].scalar.to_python())
+                assert any(type(s.instruction) is P.DefineLiteral and s.instruction.value.to_python()==literal for s in plan.steps)
+                assert any(type(s.instruction) is P.ReadCompilationOption and s.instruction.option is P.CompilationOption.DOCSTRINGS_ENABLED for s in steps)
+                # Annotation creation precedes user body, even if body later raises.
+                assert next(i for i,s in enumerate(steps) if type(s.instruction) is P.BuildScopeAnnotations)<next(
+                    i for i,s in enumerate(steps) if type(s.instruction) is P.ApplyRegion)
+            elif mode=='exec' and source:
+                assert expressions.source.roots.future and len(expressions.source.roots.annotations)==1
+                assert not any(type(s.instruction) is P.BuildScopeAnnotations for s in plan.steps)
+                assert any(type(s.instruction) is P.ApplyNamespaceAction and s.instruction.kind is P.NamespaceActionKind.ENSURE_ANNOTATIONS for s in steps)
+            elif mode=='eval':
+                assert len([s for s in steps if type(s.instruction) is P.EvaluateChild])==1
+                assert steps[-1].instruction.kind is C.RETURN
+            if mode=='single':
+                statements=SourceStatementRules(expressions.source,world=WORLD,exception_abi=abi)
+                for occurrence in occurrences(expressions,'Expr'):
+                    statement=statements.build(occurrence)
+                    assert statements.verify(statement)['local_schedule_verified']
+                    assert len([s for s in statement.steps if type(s.instruction) is P.DisplayExpression])==1
+            elif mode=='exec':
+                statements=SourceStatementRules(expressions.source,world=WORLD,exception_abi=abi)
+                for occurrence in occurrences(expressions,'Expr'):
+                    if statements.descriptor_owner(occurrence) is not None:continue
+                    if expressions.source.statements.ignored_constant_expression(occurrence):
+                        assert not any(type(s.instruction) is P.EvaluateChild for s in statements.build(occurrence).steps)
+            bad=replace(steps[0],instruction=P.EnterRootBody(replace(steps[0].instruction.interface,scope=999)))
+            with pytest.raises(ProductionError,match='SOURCE_ROOT'):
+                expressions.source.match(replace(plan,steps=(bad,*plan.steps[1:])))
+            with pytest.raises(ProductionError,match='ROOT_INTERFACE'):
+                expressions.source.match(replace(plan,regions=(replace(root,parameters=(REF,WORLD)),*plan.regions[1:])))
+    # Read the independent compiler result without executing target bytecode.
+    code=compile(text,'<static-root-oracle>','exec',dont_inherit=True,optimize=0)
+    ops=list(dis.get_instructions(code))
+    assert next(i for i,s in enumerate(ops) if s.opname=='STORE_GLOBAL' and s.argval=='__annotate__')<next(
+        i for i,s in enumerate(ops) if s.opname=='STORE_NAME' and s.argval=='__conditional_annotations__')
+    assert clean_docstring('   Title\n\t  Detail\n\n') in code.co_consts
+    assert not any(s.opname=='LOAD_CONST' and s.argval=='ignored constant' for s in ops)
+    optimized=compile(text,'<static-root-oracle>','exec',dont_inherit=True,optimize=2)
+    assert not any(s.opname in ('STORE_NAME','STORE_GLOBAL') and s.argval=='__doc__' for s in dis.get_instructions(optimized))
+    repl=compile(cases[3][1],'<static-root-oracle>','single',dont_inherit=True)
+    assert sum(s.opname=='CALL_INTRINSIC_1' and 'PRINT' in s.argrepr for s in dis.get_instructions(repl))==2

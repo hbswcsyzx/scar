@@ -36,6 +36,7 @@ class ProductionPurpose(str, Enum):
     PATTERN = 'PATTERN'
     DESCRIPTOR = 'DESCRIPTOR'
     GRAMMAR = 'GRAMMAR'
+    ROOT = 'ROOT'
 
 
 class ProductionRegionKind(str, Enum):
@@ -175,6 +176,13 @@ class PatternActionKind(str, Enum):
 
 class CompilationOption(str, Enum):
     ASSERTIONS_ENABLED = 'ASSERTIONS_ENABLED'
+    DOCSTRINGS_ENABLED = 'DOCSTRINGS_ENABLED'
+
+
+class NamespaceActionKind(str, Enum):
+    STORE_NAME = 'STORE_NAME'
+    STORE_GLOBAL = 'STORE_GLOBAL'
+    ENSURE_ANNOTATIONS = 'ENSURE_ANNOTATIONS'
 
 
 class AnnotationPublicationKind(str, Enum):
@@ -710,6 +718,52 @@ class ReferenceIdentical:
 
 
 @dataclass(frozen=True, slots=True)
+class RootBodyInterface:
+    """An external admitted globals/locals pair, not necessarily one mapping.
+
+    Admission by exec/eval/import machinery precedes this interface. No
+    dictionary allocation, __builtins__ injection or physical frame is implied.
+    """
+    source: ProductionOccurrence
+    scope: int
+    world: GroundType
+    exception_abi: ExceptionABI
+
+
+@dataclass(frozen=True, slots=True)
+class EnterRootBody:
+    interface: RootBodyInterface
+
+
+@dataclass(frozen=True, slots=True)
+class ApplyNamespaceAction:
+    """STORE_NAME uses mapping assignment; STORE_GLOBAL uses dictionary API.
+
+    ENSURE_ANNOTATIONS implements the SETUP_ANNOTATIONS presence check on
+    locals. Existing values are retained; missing-key and other errors differ.
+    None of these boundaries is certified effect-free.
+    """
+    kind: NamespaceActionKind
+    exception_abi: ExceptionABI
+
+
+@dataclass(frozen=True, slots=True)
+class BuildScopeAnnotations:
+    """Create the module annotation callable before user statements.
+
+    Its deferred request body is rooted in the original source scope. This is
+    neither execution of annotation expressions nor proof of their ordering.
+    """
+    interface: RootBodyInterface
+
+
+@dataclass(frozen=True, slots=True)
+class DisplayExpression:
+    """Interactive intrinsic print, including displayhook effects/failures."""
+    exception_abi: ExceptionABI
+
+
+@dataclass(frozen=True, slots=True)
 class ApplyPatternAction:
     """Finite native boundary with result arity rederived from original source.
 
@@ -839,6 +893,7 @@ ProductionInstruction = (EvaluateChild | ApplyLanguageAction | ReadCompilationOp
     | MatchExceptionType | DeleteExceptionBinding
     | ReferenceIsNone | InvertCondition | SplitExceptionGroup | MergeExceptionGroup
     | ReferenceIdentical | ApplyPatternAction
+    | EnterRootBody | ApplyNamespaceAction | BuildScopeAnnotations | DisplayExpression
     | ApplyRegion | BranchControl | LoopControl | DeferRegion | ReferenceEnvironment | EnterDeferredBody
     | HandleCompletions | TransferCompletion | SuspendExecution)
 
@@ -881,7 +936,7 @@ class SourceProductionPlan:
     steps: tuple[ProductionStep, ...]
     slots: tuple[ProductionSlotDisposition, ...]
     schema: str = 'scar.source-production-plan'
-    schema_version: int = 16
+    schema_version: int = 17
     authority: str = 'SOURCE_RECIPE_SHAPE_ONLY'
 
 

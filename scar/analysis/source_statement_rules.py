@@ -85,9 +85,12 @@ class _StatementBuilder(_Builder):
         for name in _FIELDS[kind]:
             self.mark(name, P.ProductionDispositionKind.METADATA)
         if kind == 'Expr':
-            self.mark('value', P.ProductionDispositionKind.EVALUATED_CHILD)
-            value, current = self.evaluate(root, self.site('value'), current)
-            current, = self.protocol(root, K.FRAME_RELEASE_TEMPORARY, (value,), current)
+            if not self.rules.source.statements.ignored_constant_expression(self.occurrence):
+                self.mark('value', P.ProductionDispositionKind.EVALUATED_CHILD)
+                value, current = self.evaluate(root, self.site('value'), current)
+                if self.rules.source.roots.interactive_expression(self.occurrence):
+                    current,=self.emit(root,P.DisplayExpression(self.rules.exception_abi),(value,current),(self.world,))
+                current, = self.protocol(root, K.FRAME_RELEASE_TEMPORARY, (value,), current)
         elif kind in ('Assign', 'Delete'):
             self.mark('targets', P.ProductionDispositionKind.TARGET_ADDRESS)
             targets = self.value(self.site('targets'))

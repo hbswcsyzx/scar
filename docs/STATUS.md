@@ -94,7 +94,7 @@ call/map/string/assert参数也沿闭合原端口组解析；空组保DECLARED_E
 真实eval/cem原body的4,830条操作来源、65,086条来源引用已接回原F2及已有F3查询；CEM的4个旧OPAQUE可读出Gt/Eq原selector。
 这仍不是执行语义证明。证据：`artifacts/current/queries/source-anchors/{materials,verification}/result.json`及`{eval,cem}-origin-query.json`。
 
-源码产生规则v16：92记录/241字段、4 ID、22枚举/231成员、21 union、56步骤变体；独立于canonical图和旧ID。
+源码产生规则v17：97记录/250字段、4 ID、23枚举/236成员、21 union、60步骤变体；独立于canonical图和旧ID。
 接口检查覆盖区域归属、有序值引用、共享调用、循环不变量/携带端口、异常payload/captures及strict wire；不授完整控制/效果语义。
 函数/生成器分创建和后续激活，保原F3参数与cell转交；暂停显式接新world，不保存旧STATE。调用准入、lazy body、native frame及清理仍待闭合。
 
@@ -102,18 +102,23 @@ F4-B现有28类表达式、28类语句局部规则。Match已接八类模式：s
 整个模式成功后沿原F3端口写入捕获，再判断CONDITION guard；guard为假保留写入并进入下一case。OR各分支按首项顺序归一捕获，后续case用SHARED模板，避免递归复制。
 sequence区分完整unpack、wildcard-star按需取项及全wildcard省略提取；mapping保keys/subpattern/rest顺序，class保原始keyword标签。
 九种有限native边界的端口由原源码字段重推，不从实际arity反推；native内部实现、物理引用寿命及完整effects未获证。
-表达式目录对113构造分流：28局部、20父属描述符、32 selector、33全局规则前沿；语句目录28局部、85域外。域外/父属不当成缺失的独立表达式规则。
+三个目录合并后，113种官方语法构造恰好分为28表达式、28语句、3可执行根、21父属描述符、32 selector及1非执行类型语法。没有遗漏或双重归属；这只是构造分流闭合，不证明所有用途/上下文及执行语义闭合。
 
-真实五源仍为eval/CEM及buffer/world/spaces：5,314表达式=4,879局部recipe+345不单独求值的源码+90父属表达式，另记733父属描述符；998语句=919局部recipe+79父属docstring Expr。两域样本规则前沿均为0。
+真实五源仍为eval/CEM及buffer/world/spaces：5,314表达式=4,875局部recipe+345不单独求值的源码+94父属表达式，另记737父属描述符；998语句=915局部recipe+83父属docstring Expr。两域样本规则前沿均为0。
 条件语法与值语法分开，避免短路结果二次__bool__；材料v3按purpose流式补齐199个语句条件模板、29个表达式条件模板。模板不是源码occurrence或执行次数；去重范围为每源每材料域。
-语句仍有2,425项child接口义务，表达式3,513项；其中98项函数注解请求尚未展开。局部规则存在不证明这些依赖已经连接。
-本轮五源重采集/独立fresh：语句27.75/28.58秒、740,538压缩bytes（解压14,905,660）；表达式32.99/34.09秒、1,480,924压缩bytes（解压33,109,921）。这不是LeWM运行时间或全程序建图时间。
-本轮仅3项定向检查：接口/wire两项1.02秒，Match静态规则一项8.64秒；两种异常ABI、八类模式、捕获与fallback路径、静态compile/dis对照均包含，未重跑全套。
+语句仍有2,421项child接口义务，表达式3,513项；其中98项函数注解请求尚未展开。局部规则存在不证明这些依赖已经连接。
+本轮五源重采集/独立fresh：语句27.47/27.22秒、741,702压缩bytes（解压14,881,578）；表达式32.91/32.40秒、1,480,021压缩bytes（解压33,090,195）。这不是LeWM运行时间或全程序建图时间。
+本轮仅3项定向检查：结构/wire一项0.71秒，根入口及条件材料回归两项21.09秒。含exec/eval/single、两个异常ABI、空入口、global指令、注解前置、docstring选项与空白、REPL显示及错误端口拒绝；仅静态compile/dis，不执行目标。
 五源没有Match，不能把micro证据说成真实LeWM出现了该模式；也没有TryStar、finally、命名handler、AsyncWith、泛型或TypeAlias。
-旧九份展示recipe均从v16新材料提取，不改旧header冒充迁移。原manifest和五源bytes保持，LeWM未执行或修改。
-证据集中在`queries/source-{productions,expression-rules,statement-rules}/`。本轮由主代理完成，无新增subagents。
+旧九份展示recipe均从v17新材料提取，另加CEM根入口展示，不改旧header冒充迁移。原manifest和五源bytes保持，LeWM未执行或修改。
+证据集中在`queries/source-{productions,expression-rules,statement-rules,root-rules}/`。本轮由主代理完成，无新增subagents。
 
-**当前真正缺口**：根入口、lazy请求body、class namespace内部规则、参数/状态来源、正常与异常引用清理；然后才是F4-C统一共享CFG/SSA，再接跨层/native/resource。
+三类根入口已接原F2/F3，显式输入globals/locals/world；外部exec/eval/import准入、字典别名和物理frame另验。
+模块的__annotate__在用户语句前创建，条件注解set和future注解setup按原规则安排；docstring受显式目标选项控制，支持原global指令。普通常量语句不制造求值，交互模式显式displayhook边界。
+五源5个根recipe、72项子接口义务，含4处模块docstring归属修正。采集24.21秒/fresh24.29秒，5片15,039压缩bytes（解压215,891）；每源规则与流式写入0.026–0.040秒，其余主要为父层strict重验。不是建图总耗时。
+五源没有模块级注解函数创建或future注解setup实例，这两项以静态micro为依据，不能外推成真实运行证据。Scope annotation callable请求体与namespace native实现仍待展开。
+
+**当前真正缺口**：lazy请求body、class namespace内部规则、参数/状态来源、正常与异常引用清理；然后才是F4-C统一共享CFG/SSA，再接跨层/native/resource。
 recipe不是canonical图。样本规则缺口为0不能宣布F4-B、完整建图或第一阶段完成，也不授权变换。
 
 1. **F4-B后续规则**：接完整操作家族、typed参数来源、状态/access契约和源码产生规则，再接版本化根与强制reader。
@@ -122,7 +127,7 @@ recipe不是canonical图。样本规则缺口为0不能宣布F4-B、完整建图
    三种域不能互代：32 Opcode、88协议和113语法构造器×上下文分别核验；B1不授新图发布或优化。
    下一步将原声明端口接到F2/F3产生规则，并补function/class/comprehension等参数来源；保活完整性另验，不能抄端口来证明。
    形式顺序：输入/输出结构已固定；当前持续闭合构造×用途×上下文的字段消耗及完成端口，再重放核验，全部闭合后才生成CFG/SSA。
-   含Match的28类语句已有局部规则。接下来仍在F4-B：①根入口；②lazy请求和class namespace内部操作；③参数来源和正常/异常引用清理闭合。不能以五源语句frontier0代替全层完备。每批保持“接口→原字段产生规则→独立重放”，全部闭合后才进F4-C；调用准入、闭包/native布局及driver/frame/context合同仍须接通。
+   含Match的28类语句已有局部规则。根入口局部规则也已接入。接下来仍在F4-B：①lazy请求body；②class namespace内部操作；③参数来源和正常/异常引用清理闭合。不能以五源语句frontier0代替全层完备。每批保持“接口→原字段产生规则→独立重放”，全部闭合后才进F4-C；调用准入、闭包/native布局及driver/frame/context合同仍须接通。
    四片其余881操作已分类为控制434、binding246、source invoke201；这是识别结果，不等于其接口/产生规则已通过。
    签名witness仍须进入版本化typed根及强制reader；不能把本层独立查询当作完备。根扩展后重验F4-A目录。
    实读FRAME_BIND为READ_WRITE、UNKNOWN footprint、非full overwrite；不能照旧审计摘要强制WHOLE或升级未知事实。

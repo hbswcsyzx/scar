@@ -50,6 +50,7 @@ _FIELDS = {
     'Lambda': ('args', 'body'), 'GeneratorExp': ('elt', 'generators'),
 }
 _AUX_FIELDS = {**_PATTERN_FIELDS, 'match_case': ('pattern','guard','body'),
+    'TypeIgnore': ('lineno','tag'),
     'keyword': ('arg', 'value'), 'Starred': ('value', 'ctx'),
     'withitem': ('context_expr','optional_vars'),
     'ExceptHandler': ('type','name','body'),
@@ -74,7 +75,7 @@ _RULE_MODULES = ('source_display_rules.py', 'source_string_rules.py', 'source_co
                  'source_statement_functions.py', 'source_type_parameter_interfaces.py', 'source_type_parameter_rules.py',
                  'source_definition_interfaces.py', 'source_statement_definitions.py', 'source_statement_contexts.py',
                  'source_statement_exceptions.py', 'source_statement_exception_groups.py', 'source_condition_rules.py',
-                 'source_pattern_interfaces.py','source_statement_patterns.py')
+                 'source_pattern_interfaces.py','source_statement_patterns.py','source_root_interfaces.py','source_root_rules.py')
 
 
 class SourceRuleError(ProductionError):
@@ -155,6 +156,8 @@ class SourceExpressionRules:
                 rows[-1]['parent_contexts'].append(dict(constructor='TypeVarTuple',field='default_value'))
             if row.name == 'match_case':
                 rows[-1]['parent_contexts'] = [dict(constructor='Match',field='cases')]
+            elif row.name == 'TypeIgnore':
+                rows[-1]['parent_contexts'] = [dict(constructor='Module',field='type_ignores')]
             elif row.name in _PATTERN_FIELDS:
                 rows[-1]['parent_contexts'] = [dict(constructor=parent,field=field) for parent,field in (
                     (('MatchSequence','patterns'),) if row.name == 'MatchStar' else _PATTERN_PARENTS)]
@@ -170,7 +173,8 @@ class SourceExpressionRules:
                         owner='AugAssign.target', condition='NON_CONSTANT_TWO_PART_SLICE'))
             elif row.name == 'Constant':
                 rows[-1]['parent_contexts'].append(dict(constructor='Expr',field='value',
-                    owners=['FunctionDef.body[0]','AsyncFunctionDef.body[0]','ClassDef.body[0]'],condition='DECLARATION_DOCSTRING'))
+                    owners=['Module.body[0]','FunctionDef.body[0]','AsyncFunctionDef.body[0]','ClassDef.body[0]'],condition='DECLARATION_DOCSTRING'))
+                rows[-1]['parent_contexts'].append(dict(constructor='Expr',field='value',condition='NON_INTERACTIVE_CONSTANT_STATEMENT'))
         return dict(schema='scar.source-expression-rule-catalog', schema_version=1,
             source_schema_sha256=self.source.roles.catalog.f2_schema_sha256,
             recipe_type_catalog_sha256=production_type_catalog()['content_sha256'],
@@ -193,7 +197,8 @@ class SourceExpressionRules:
         if site is None:
             return None
         parent = syntax.nodes[site.occurrence].constructor
-        if node.constructor == 'Constant' and parent == 'Expr' and self.source.statements.docstring_owner(site.occurrence) is not None:
+        if node.constructor == 'Constant' and parent == 'Expr' and (
+            self.source.statements.docstring_owner(site.occurrence) is not None or self.source.statements.ignored_constant_expression(site.occurrence)):
             return site
         if node.constructor in ('Name', 'Attribute', 'Subscript'):
             if parent == 'AugAssign' and site.ordinal == self.source.roles.fields[parent]['target']:
@@ -216,6 +221,8 @@ class SourceExpressionRules:
             return None
         if node.constructor == 'match_case':
             return site if parent == 'Match' and self.source.roles.locate(site)[0].name == 'cases' else None
+        if node.constructor == 'TypeIgnore':
+            return site if parent == 'Module' and self.source.roles.locate(site)[0].name == 'type_ignores' else None
         if node.constructor in _PATTERN_FIELDS:
             allowed = (('MatchSequence','patterns'),) if node.constructor == 'MatchStar' else _PATTERN_PARENTS
             return site if (parent,self.source.roles.locate(site)[0].name) in allowed else None

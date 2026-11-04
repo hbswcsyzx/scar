@@ -55,7 +55,7 @@ def test_closed_grammar_exact_records_strict_codec_and_budgets():
     assert summary['control_semantics_checked'] is False
     assert A.read_production_plan(A.production_plan_document(value)) == value
     catalog = A.production_type_catalog()
-    assert catalog['counts'] == dict(records=92, fields=241, identifiers=4, enums=22, enum_members=231, unions=21)
+    assert catalog['counts'] == dict(records=97, fields=250, identifiers=4, enums=23, enum_members=236, unions=21)
     assert set(catalog['instruction_variants']) == {
         'EvaluateChild', 'ApplyLanguageAction', 'ReadCompilationOption', 'ApplyInplaceOperator', 'PublishAnnotation',
         'ImportRequest', 'ImportMember', 'ImportStar',
@@ -68,6 +68,7 @@ def test_closed_grammar_exact_records_strict_codec_and_budgets():
         'RestoreHandledException','ContextExceptionArguments','PrepareReraise',
         'MatchExceptionType','DeleteExceptionBinding',
         'ReferenceIsNone','ReferenceIdentical','ApplyPatternAction','InvertCondition','SplitExceptionGroup','MergeExceptionGroup',
+        'EnterRootBody','ApplyNamespaceAction','BuildScopeAnnotations','DisplayExpression',
         'ApplyPythonProtocol', 'ApplyDelegationProtocol', 'AccessBinding', 'ConstructValue', 'DefineLiteral', 'ApplyRegion',
         'BranchControl', 'LoopControl', 'DeferRegion', 'ReferenceEnvironment', 'EnterDeferredBody', 'HandleCompletions',
         'TransferCompletion', 'SuspendExecution'}

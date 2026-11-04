@@ -16,6 +16,7 @@ from scar.analysis.frontend_bindings import read_frontend_bindings
 from scar.analysis.source_context_view import SourceContextView
 from scar.analysis.source_expression_rules import SourceExpressionRules, SourceRuleError
 from scar.analysis.source_statement_rules import SourceStatementRules
+from scar.analysis.source_root_rules import SourceRootRules
 from scar.analysis.source_productions import ProductionSourceIndex
 from scar.analysis.source_stage import _durable_bytes, _durable_mkdir, _sync_directory
 from scar.analysis.source_store import read_source_prerequisites
@@ -56,6 +57,7 @@ def _implementation():
         'analysis/source_statement_exception_groups.py',
         'analysis/source_condition_rules.py',
         'analysis/source_pattern_interfaces.py', 'analysis/source_statement_patterns.py',
+        'analysis/source_root_interfaces.py', 'analysis/source_root_rules.py',
         'analysis/source_type_parameter_interfaces.py', 'analysis/source_type_parameter_rules.py',
         'analysis/source_productions.py', 'analysis/program_types.py',
         'ir/program/source_productions.py', 'ir/record_codec.py')
@@ -83,7 +85,7 @@ def _unit(task):
     frontend = read_frontend_bindings(f0, f1, f2, *(reader.read(unit['artifacts'][name]) for name in _PARENTS))
     syntax = decode(SourceSyntaxMaterial, f2)
     contexts = SourceContextView(syntax, frontend.roles, frontend.contexts)
-    rules = (SourceExpressionRules if domain == 'expressions' else SourceStatementRules)(ProductionSourceIndex(f0, contexts, frontend),
+    rules = {'expressions':SourceExpressionRules,'statements':SourceStatementRules,'roots':SourceRootRules}[domain](ProductionSourceIndex(f0, contexts, frontend),
         world=_WORLD, exception_abi=ExceptionABI.EXCEPTION_WORLD)
     catalog = rules.catalog()
     categories = {row.name: row.bases for row in syntax.profile.ast_schema if not row.abstract}
@@ -112,6 +114,8 @@ def _unit(task):
                 field=rules.source.roles.locate(instruction.expression.source)[0].name
                 owner=syntax.nodes[instruction.expression.source.occurrence].constructor
                 child_obligations['TYPE_ALIAS_VALUE_REQUEST' if owner=='TypeAlias' else 'TYPE_PARAMETER_'+field.upper()+'_REQUEST']+=1
+            elif type(instruction) is P.BuildScopeAnnotations:
+                child_obligations['SCOPE_ANNOTATION_REQUEST']+=1
 
     with ExitStack() as stack:
         if prior is None:
@@ -128,12 +132,13 @@ def _unit(task):
                 raise ValueError('source expression compressed receipt changed')
             stream = stack.enter_context(gzip.GzipFile(fileobj=io.BytesIO(payload), mode='rb'))
         for occurrence, node in enumerate(syntax.nodes):
-            is_expression = ('expr' if domain == 'expressions' else 'stmt') in categories[node.constructor]
+            is_expression = {'expressions':'expr','statements':'stmt','roots':'mod'}[domain] in categories[node.constructor]
             owner = rules.descriptor_owner(occurrence)
             if not is_expression and owner is None:
                 continue
             expressions += is_expression
-            purpose = P.ProductionPurpose.VALUE if domain == 'expressions' else P.ProductionPurpose.STATEMENT
+            purpose = {'expressions':P.ProductionPurpose.VALUE,'statements':P.ProductionPurpose.STATEMENT,
+                'roots':P.ProductionPurpose.ROOT}[domain]
             if node.constructor in ('Name', 'Attribute', 'Subscript', 'List', 'Tuple'):
                 purpose = {'Load': P.ProductionPurpose.VALUE, 'Store': P.ProductionPurpose.STORE,
                            'Del': P.ProductionPurpose.DELETE}[rules.source.roles.context(occurrence)]
@@ -211,9 +216,10 @@ def _unit(task):
 def collect_source_rules(model, out, *, domain, sources=(), materials=None, jobs=1,
                                max_nodes=1_000_000, max_tokens=2_000_000,
                                max_steps=100_000, max_regions=100_000):
-    if type(domain) is not str or domain not in ('expressions', 'statements'):
-        raise ValueError('expected the expression or statement source-rule domain')
-    schema = 'scar.source-' + ('expression' if domain == 'expressions' else 'statement') + '-materials'
+    if type(domain) is not str or domain not in ('expressions', 'statements','roots'):
+        raise ValueError('expected the expression, statement or root source-rule domain')
+    singular={'expressions':'expression','statements':'statement','roots':'root'}[domain]
+    schema = 'scar.source-' + singular + '-materials'
     limits = dict(nodes=max_nodes, tokens=max_tokens, steps=max_steps, regions=max_regions)
     if type(jobs) is not int or not 1 <= jobs <= 32 or any(type(v) is not int or v < 0 for v in limits.values()):
         raise ValueError('invalid source rule jobs/budgets')
@@ -260,9 +266,9 @@ def collect_source_rules(model, out, *, domain, sources=(), materials=None, jobs
     counts = dict(units=len(rows), local_recipes=sum(sum(r['built'].values()) for r in rows),
         condition_recipes=sum(r['condition_recipes'] for r in rows),
         rule_frontiers=sum(sum(r['frontiers'].values()) for r in rows),
-        **{('expression_occurrences' if domain == 'expressions' else 'statement_occurrences'):sum(r[domain] for r in rows)},
+        **{singular+'_occurrences':sum(r[domain] for r in rows)},
         parent_descriptors=sum(sum(r['parent_descriptors'].values()) for r in rows),
-        **{('parent_owned_expressions' if domain == 'expressions' else 'parent_owned_statements'):
+        **{'parent_owned_'+domain:
             sum(r['parent_owned_expressions'] for r in rows)},
         suppressed_source_occurrences=sum(sum(r['suppressed_sources'].values()) for r in rows),
         child_interface_obligations=sum(sum(r['child_interface_obligations'].values()) for r in rows))
@@ -293,6 +299,10 @@ def collect_source_expressions(model, out, **options):
 
 def collect_source_statements(model, out, **options):
     return collect_source_rules(model, out, domain='statements', **options)
+
+
+def collect_source_roots(model,out,**options):
+    return collect_source_rules(model,out,domain='roots',**options)
 
 
 def main(argv=None, *, domain='expressions'):

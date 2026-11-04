@@ -23,6 +23,7 @@ from scar.analysis.source_statement_interfaces import SourceStatementInterfaceIn
 from scar.analysis.source_type_parameter_interfaces import TypeParameterInterfaceIndex
 from scar.analysis.source_definition_interfaces import DefinitionInterfaceIndex
 from scar.analysis.source_pattern_interfaces import PatternInterfaceIndex
+from scar.analysis.source_root_interfaces import RootInterfaceIndex
 
 
 class ProductionError(ValueError):
@@ -60,7 +61,8 @@ def production_type_catalog():
     for name in ('scar.analysis.program_types', 'scar.ir.record_codec', 'scar.ir.program.protocol_signatures',
                  'scar.ir.program.delegation_signatures', 'scar.analysis.source_deferred_interfaces',
                  'scar.analysis.source_statement_interfaces', 'scar.analysis.source_type_parameter_interfaces',
-                 'scar.analysis.source_definition_interfaces','scar.analysis.source_pattern_interfaces'):
+                 'scar.analysis.source_definition_interfaces','scar.analysis.source_pattern_interfaces',
+                 'scar.analysis.source_root_interfaces'):
         modules[name] = sha256(Path(sys.modules[name].__file__).read_bytes()).hexdigest()
     payload = dict(schema='scar.source-production-type-catalog', schema_version=1,
         root=root, types=rows, counts=counts, modules=dict(sorted(modules.items())),
@@ -150,7 +152,7 @@ def validate_production_plan(plan, *, max_visits=1_000_000):
     """
     visits = _shape(plan, max_visits)
     _require((plan.schema, plan.schema_version, plan.authority) == (
-        'scar.source-production-plan', 16, 'SOURCE_RECIPE_SHAPE_ONLY'),
+        'scar.source-production-plan', 17, 'SOURCE_RECIPE_SHAPE_ONLY'),
         'SCHEMA', 'plan', 'unsupported recipe schema or authority')
     source = plan.input
     _require(bool(source.path) and bool(source.namespace_root), 'INPUT', 'plan.input', 'source paths must be nonempty')
@@ -233,6 +235,15 @@ def validate_production_plan(plan, *, max_visits=1_000_000):
     _require(all(s.region in regions for s in plan.steps), 'STEP_OWNER', 'plan.steps', 'unknown region owner')
     region_outputs = {r.id: completions(r.completions, r.id, str(r.id)) for r in plan.regions}
     step_outputs = {s.id: completions(s.completions, s.region, str(s.id)) for s in plan.steps}
+    if plan.purpose is P.ProductionPurpose.ROOT:
+        root=regions[plan.root];reference=ValueType(ValueKind.REFERENCE)
+        _require(len(root.parameters)==3 and root.parameters[:2]==(reference,reference)
+            and type(root.parameters[2]) is ValueType and root.parameters[2].kind is ValueKind.STATE,
+            'ROOT_INTERFACE','plan.root','root requires admitted globals, locals and current world')
+        world=root.parameters[2]
+        _require(all((kind is C.RETURN and types==(reference,world)) or (kind is C.RAISE and types in (
+            (reference,world),(reference,reference,world))) for (kind,_),types in region_outputs[root.id].items()),
+            'ROOT_INTERFACE','plan.root','root completes with a Python result or its exception payload')
     if plan.purpose is P.ProductionPurpose.CONDITION:
         root=regions[plan.root];reference=ValueType(ValueKind.REFERENCE)
         _require(len(root.parameters)==1 and type(root.parameters[0]) is ValueType and root.parameters[0].kind is ValueKind.STATE,
@@ -391,6 +402,31 @@ def validate_production_plan(plan, *, max_visits=1_000_000):
             elif type(instruction) is P.ReadCompilationOption:
                 _require(not args and outputs == {(C.FALLTHROUGH, None): (ValueType(ValueKind.DATA, 'builtins.bool'),)},
                     'COMPILATION_OPTION', str(identity), 'compilation option produces only one symbolic boolean')
+            elif type(instruction) in (P.EnterRootBody,P.BuildScopeAnnotations):
+                interface=instruction.interface;world=interface.world;reference=ValueType(ValueKind.REFERENCE)
+                _require(type(world) is ValueType and world.kind is ValueKind.STATE and interface.scope>=0,
+                    'ROOT_INTERFACE',str(identity),'root interface requires original scope and explicit world')
+                if type(instruction) is P.EnterRootBody:
+                    _require(plan.purpose is P.ProductionPurpose.ROOT and region.id==plan.root and ordinal==0
+                        and args==region.parameters==(reference,reference,world)
+                        and step.arguments==tuple(P.ProductionParameter(region.id,i) for i in range(3))
+                        and outputs=={(C.FALLTHROUGH,None):(world,)},
+                        'ROOT_INTERFACE',str(identity),'admitted root namespaces must be activated first')
+                else:
+                    raised=(reference,world) if interface.exception_abi is ExceptionABI.EXCEPTION_WORLD else (reference,reference,world)
+                    _require(args==(reference,world) and outputs=={
+                        (C.FALLTHROUGH,None):(reference,world),(C.RAISE,None):raised},
+                        'ROOT_INTERFACE',str(identity),'annotation callable creation needs globals/current world')
+            elif type(instruction) in (P.ApplyNamespaceAction,P.DisplayExpression):
+                reference=ValueType(ValueKind.REFERENCE)
+                _require(bool(args) and type(args[-1]) is ValueType and args[-1].kind is ValueKind.STATE,
+                    'NAMESPACE_INTERFACE',str(identity),'namespace/display action requires explicit world')
+                world=args[-1]
+                count=1 if type(instruction) is P.DisplayExpression or instruction.kind is P.NamespaceActionKind.ENSURE_ANNOTATIONS else 3
+                raised=(reference,world) if instruction.exception_abi is ExceptionABI.EXCEPTION_WORLD else (reference,reference,world)
+                _require(args==(*(reference for _ in range(count)),world) and outputs=={
+                    (C.FALLTHROUGH,None):(world,),(C.RAISE,None):raised},
+                    'NAMESPACE_INTERFACE',str(identity),'namespace/display action ports differ from declared contract')
             elif type(instruction) is P.ReferenceIsNone:
                 _require(args==(ValueType(ValueKind.REFERENCE),)
                     and outputs=={(C.FALLTHROUGH,None):(ValueType(ValueKind.DATA,'builtins.bool'),)},
@@ -880,6 +916,7 @@ class ProductionSourceIndex:
         self._type_parameters = None
         self._definitions = None
         self._patterns = None
+        self._roots = None
         self._expressions=frozenset(row.name for row in syntax.profile.ast_schema if 'expr' in row.bases)
         self._role_sites = frozenset(port.site for port in frontend_view.roles.ports)
         self.input = P.ProductionInput(f0['path'], f0['namespace_root'], _digest(encode(syntax)),
@@ -912,6 +949,11 @@ class ProductionSourceIndex:
     def patterns(self):
         if self._patterns is None:self._patterns=PatternInterfaceIndex(self)
         return self._patterns
+
+    @property
+    def roots(self):
+        if self._roots is None:self._roots=RootInterfaceIndex(self)
+        return self._roots
 
     def match(self, plan, *, max_visits=1_000_000):
         summary = validate_production_plan(plan, max_visits=max_visits)
@@ -964,7 +1006,18 @@ class ProductionSourceIndex:
                         _require(completion.target == self.statements.active_loop(step.source),
                             'SOURCE_LOOP', str(step.id), 'child/transfer completion has a different lexical loop target')
                 instruction = step.instruction
-                if type(instruction) is P.ApplyPatternAction:
+                if type(instruction) in (P.EnterRootBody,P.BuildScopeAnnotations):
+                    interface=instruction.interface
+                    _require(interface==self.roots.interface(interface.world,interface.exception_abi),
+                        'SOURCE_ROOT',str(step.id),'root activation/callable must use its original input scope')
+                    if type(instruction) is P.BuildScopeAnnotations:
+                        _require(self.roots.deferred and not self.roots.future,'SOURCE_ROOT',str(step.id),
+                            'source root has no deferred scope annotation callable')
+                elif type(instruction) is P.DisplayExpression:
+                    _require(self.context.syntax.nodes[step.source.occurrence].constructor=='Expr'
+                        and self.roots.interactive_expression(step.source.occurrence),
+                        'SOURCE_ROOT',str(step.id),'display requires an original interactive top-level expression')
+                elif type(instruction) is P.ApplyPatternAction:
                     _require(instruction==self.patterns.action(instruction.kind,instruction.source,instruction.exception_abi)
                         and step.source==instruction.source,'SOURCE_PATTERN',str(step.id),'pattern operation differs from original source path/counts')
                 elif type(instruction) in (P.MatchExceptionType,P.SplitExceptionGroup):
@@ -1183,6 +1236,11 @@ class ProductionSourceIndex:
                 _require(type(plan.source) is P.ProductionOccurrence and
                     {(c.kind,c.target) for c in region_index[plan.root].completions}<=set(self.statements.completions(plan.source.occurrence)),
                     'STATEMENT_INTERFACE','plan.root','statement recipe escapes its source completion interface')
+            elif plan.purpose is P.ProductionPurpose.ROOT:
+                first=next((step for step in plan.steps if region_index[plan.root].steps and step.id==region_index[plan.root].steps[0]),None)
+                _require(plan.source==P.ProductionOccurrence(self.context.syntax.root)
+                    and first is not None and type(first.instruction) is P.EnterRootBody,
+                    'SOURCE_ROOT','plan.root','root recipe must begin at its original source entry')
         except ProductionError:
             raise
         except (ValueError, TypeError, KeyError, IndexError) as error:

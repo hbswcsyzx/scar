@@ -87,7 +87,7 @@ class SourceStatementInterfaceIndex:
         return port
 
     def declaration_docstring(self, occurrence):
-        if self.nodes[occurrence].constructor not in ('FunctionDef','AsyncFunctionDef','ClassDef'):
+        if self.nodes[occurrence].constructor not in ('Module','FunctionDef','AsyncFunctionDef','ClassDef'):
             return None
         body = self.node_items(occurrence,'body')
         if not body or self.nodes[body[0]].constructor != 'Expr':
@@ -101,9 +101,13 @@ class SourceStatementInterfaceIndex:
 
     def docstring_owner(self, statement):
         parent = self.roles.parents.get(statement)
-        if parent is None or self.nodes[parent.occurrence].constructor not in ('FunctionDef','AsyncFunctionDef','ClassDef'):
+        if parent is None or self.nodes[parent.occurrence].constructor not in ('Module','FunctionDef','AsyncFunctionDef','ClassDef'):
             return None
         return parent if self.roles.locate(parent)[0].name == 'body' and parent.item_path == (0,) and self.declaration_docstring(parent.occurrence) is not None else None
+
+    def ignored_constant_expression(self,occurrence):
+        if self.nodes[occurrence].constructor!='Expr' or self.source.roots.interactive_expression(occurrence):return False
+        return self.nodes[self.roles.field(occurrence,'value').reference].constructor=='Constant'
 
     def two_part_slice(self, occurrence):
         if self.nodes[occurrence].constructor != 'Slice':
