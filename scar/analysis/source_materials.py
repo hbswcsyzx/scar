@@ -115,15 +115,24 @@ def _acquire_material(task):
     return unit['key'], document, origin, detail
 
 
+def _write_material_report(out, report):
+    from scar.analysis.source_stage import _durable_bytes, _durable_mkdir
+    from scar.analysis.static_program import _json
+    _durable_mkdir(out)
+    _durable_bytes(out / 'result.json', _json(report), replace=False)
+
+
 def archive_model_source_bytes(model, out, *, jobs=4, max_bytes=64 * 1024 * 1024):
     """Append F0 materials; preserve all original source and graph endpoints.
 
     The denominator is the manifest's declared source units, not undiscovered
     dependencies. Existing scan frontiers stay explicit. Readers close before
-    atomic publication; no AST, symbol-table, compile, or target call is made.
+    durable publication; no AST, symbol-table, compile, or target call is made.
+    The two renames retain the same recoverable gap as SourceStage.
     """
     from scar.analysis.static_program import _artifacts, _json, _write, read_static_program
     from scar.analysis.static_query import _Fragments
+    from scar.analysis.source_stage import _durable_bytes, _sync_directory, _sync_file
     if type(jobs) is not int or not 1 <= jobs <= 32 or type(max_bytes) is not int or max_bytes < 1:
         raise ValueError('F0 requires bounded positive jobs and byte budgets')
     started = time.monotonic()
@@ -156,9 +165,7 @@ def archive_model_source_bytes(model, out, *, jobs=4, max_bytes=64 * 1024 * 1024
             'whole_program_complete': False, 'seconds': time.monotonic() - started}
         if (root / 'manifest.json').read_bytes() != original:
             raise ValueError('F0 model changed during budget admission')
-        out.mkdir(parents=True, exist_ok=True)
-        with (out / 'result.json').open('xb') as stream:
-            stream.write(_json(report))
+        _write_material_report(out, report)
         return report
     tasks = [(root, unit) for unit in manifest['units']]
     if jobs == 1:
@@ -186,12 +193,15 @@ def archive_model_source_bytes(model, out, *, jobs=4, max_bytes=64 * 1024 * 1024
         if complete:
             temporary = Path(tempfile.mkdtemp(prefix='.source-bytes-', dir=root.parent))
             shutil.copytree(root, temporary, dirs_exist_ok=True, copy_function=os.link)
+            new = {}
             for unit, (key, document, _, _) in zip(manifest['units'], materials):
                 if key != unit['key']:
                     raise ValueError('F0 material order changed')
                 if 'source_bytes' not in unit['artifacts']:
                     unit['artifacts']['source_bytes'] = _write(temporary,
                         'units/' + key + '/source_bytes.json.gz', document)
+                    descriptor = unit['artifacts']['source_bytes']
+                    new[descriptor['path']] = descriptor
                     original_unit = {**unit, 'artifacts': {name: item for name, item in unit['artifacts'].items()
                                                           if name != 'source_bytes'}}
                 else:
@@ -204,31 +214,48 @@ def archive_model_source_bytes(model, out, *, jobs=4, max_bytes=64 * 1024 * 1024
             artifacts = tuple(_artifacts(manifest))
             manifest['storage'] = {'files': len({d['path'] for d in artifacts}),
                 'compressed_bytes': sum(d['bytes'] for d in {d['path']: d for d in artifacts}.values())}
-            (temporary / 'manifest.json').unlink()
-            (temporary / 'manifest.json').write_bytes(_json(manifest))
+            _durable_bytes(temporary / 'manifest.json', _json(manifest), replace=True)
             read_static_program(temporary, verify=False)
+            directories = [temporary]
+            for path in temporary.rglob('*'):
+                if path.is_dir():
+                    directories.append(path)
+                elif path.is_file():
+                    _sync_file(path, new.get(path.relative_to(temporary).as_posix()))
+            for directory in sorted(directories, key=lambda path: len(path.parts), reverse=True):
+                _sync_directory(directory)
+            if _stamps(temporary, prior_artifacts) != prior_stamps:
+                raise ValueError('F0 staging altered an original artifact')
             read_static_program(root, verify=False)
             if ((root / 'manifest.json').read_bytes() != original
                     or _stamps(root, prior_artifacts) != prior_stamps):
                 raise ValueError('F0 original model changed before publication')
+            _sync_file(root / 'manifest.json')
+            _sync_directory(root)
+            _sync_directory(root.parent)
             previous = Path(tempfile.mkdtemp(prefix='.source-bytes-replacing-', dir=root.parent))
             previous.rmdir()
             root.rename(previous)
             try:
+                _sync_directory(root.parent)
                 temporary.rename(root)
                 temporary = None
+                _sync_directory(root.parent)
             except BaseException:
-                previous.rename(root)
+                if temporary is not None:
+                    previous.rename(root)
+                    _sync_directory(root.parent)
+                # After the second rename, failed fsync leaves previous intact.
+                # It must not be deleted until new-root durability is known.
                 raise
             retained = _remove_owned_previous(previous, prior_artifacts, prior_stamps)
             if retained is not None:
                 report['retained_previous_directory'] = retained
+            _sync_directory(root.parent)
         report['published_manifest_sha256'] = sha256((root / 'manifest.json').read_bytes()).hexdigest()
         report['program_input_basis_unchanged'] = True
         report['seconds'] = time.monotonic() - started
-        out.mkdir(parents=True, exist_ok=True)
-        with (out / 'result.json').open('xb') as stream:
-            stream.write(_json(report))
+        _write_material_report(out, report)
         return report
     finally:
         if temporary is not None:
@@ -278,14 +305,13 @@ def verify_model_source_bytes(model, out):
         'parser_executed': False, 'lexer_executed': False, 'target_executed': False,
         'later_stages_verified': False, 'whole_program_complete': False,
         'seconds': time.monotonic() - started}
-    out.mkdir(parents=True, exist_ok=True)
-    with (out / 'result.json').open('xb') as stream:
-        stream.write(_json(report))
+    _write_material_report(out, report)
     return report
 
 
 def main(argv=None):
     from scar.analysis.static_program import _json, _write
+    from scar.analysis.source_stage import _durable_mkdir, _sync_directory, _sync_file
     parser = argparse.ArgumentParser(prog='scar source-bytes')
     group = parser.add_mutually_exclusive_group(required=True)
     group.add_argument('--model')
@@ -315,26 +341,25 @@ def main(argv=None):
     try:
         raw = _read_raw_source(path, args.max_bytes)
     except (OSError, _ByteBudget, _Changed) as error:
-        out.mkdir(parents=True, exist_ok=True)
         report = {'schema': 'scar.source-material-file', 'schema_version': 1, 'stage': 'F0',
             'path': str(path), 'artifact': None, 'material_complete': False,
             'error': {'stage': 'READ', 'type': type(error).__name__, 'detail': str(error)},
             'parser_executed': False, 'lexer_executed': False, 'target_executed': False,
             'later_stages_verified': False}
-        with (out / 'result.json').open('xb') as stream:
-            stream.write(_json(report))
+        _write_material_report(out, report)
         print(_json(report).decode().strip())
         return 1
     document = source_bytes_document(raw, path=str(path), namespace_root=namespace)
-    out.mkdir(parents=True, exist_ok=True)
+    _durable_mkdir(out)
     descriptor = _write(out, 'source_bytes.json.gz', document)
+    _sync_file(out / descriptor['path'], descriptor)
+    _sync_directory(out)
     report = {'schema': 'scar.source-material-file', 'schema_version': 1, 'stage': 'F0',
         'artifact': descriptor, 'material_complete': True,
         'decoding_status': document['decoding']['status'],
         'parser_executed': False, 'lexer_executed': False, 'target_executed': False,
         'later_stages_verified': False}
-    with (out / 'result.json').open('xb') as stream:
-        stream.write(_json(report))
+    _write_material_report(out, report)
     print(_json(report).decode().strip())
     return 0
 

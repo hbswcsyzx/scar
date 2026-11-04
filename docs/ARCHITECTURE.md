@@ -30,6 +30,11 @@ F1固定官方token表和实现指纹，通过显式CRLF/CR→LF视图调用gene
 string/line以共享精确文本引用存储；相同文本引用不代表同一源位置，原token extent另存。
 TOKENIZED、TOKENIZER_ERROR、BUDGET_STOPPED、UPSTREAM_DECODING_ERROR分开；真ENDMARKER并确认耗尽才算EOF。
 词法warnings单独记录；spawn进程隔离过滤器。budget前缀不覆盖当前模型，fresh读取逐字段重放。
+F2先fresh核F0/F1；官方ONLY_AST重新读取同一换行视图，不宣称公开parser可直接接收TokenInfo。
+profile固定flags、dont_inherit、optimize、feature_version、整数/递归限制和实际parser实现；默认exec，另有3种显式mode。
+语法表以局部整数引用记录每个occurrence，字段/属性数组对齐官方schema，ABSENT/None/空列表各自保留。
+精确literal保IEEE位、bytes和surrogate；预算不足保frontier。还原不走构造默认值，fresh逐字段核验。
+F2位置列是UTF-8字节，diagnostic原坐标单列；语法成功不证明scope或effects合法，不映射旧ast.walk ID。
 
 ## 共享子图与可组合接口
 
@@ -74,6 +79,8 @@ artifacts/current/static/ 是唯一当前程序模型；源码/主体/关系按�
 无图诊断不是已完成主体；仅fresh读取确认原收据内无图/端口、源身份不变，才允许补建并保留诊断输入。
 既有规范/partial图不走此替换口；实际支持尚缺时报告static rule，不消耗无效的补建请求。
 artifacts/current/queries/ 保存派生查询证据，不是第二份权威程序。
+更新模型先同步文件、目录与manifest，再切换目录并持久化父目录，最后清理旧owned片；报告完整落盘后发布。
+两次目录rename之间仍有可恢复窗口，不能称为单次原子交换。恢复丢失的manifest统计与发布范围必须显式记录，不能猜填。
 
 ## 已有后层能力与当前开发边界
 
@@ -85,7 +92,7 @@ artifacts/current/queries/ 保存派生查询证据，不是第二份权威程�
 选中 CEM 循环的边界查询已在原预算内完成；这不证明状态、效果、资源或整个程序闭合。
 
 可证明的线性编译栈来源已接原cleanup返回；跨跳转合流继续保留候选，不按None猜来源。
-这些是已有局部结果，不证明形式前端完备。F0/F1已对声明材料验收；下一层只做F2无损语法，验收前不新增F3及后层实现。
+这些是已有局部结果，不证明形式前端完备。F0/F1/F2已对声明材料验收；下一层只做F3绑定，验收前不新增F4及后层实现。
 不得把裸 context=None 的观测边注册为全局事实，也不得丢弃未执行的异常路径。
 Python→native/runtime/kernel、Tensor 属性、alias/effects 与资源连接仍需按实际缺口补齐。
 第一阶段只有在实体、结构、连接、属性和覆盖均经核查后才完成。
