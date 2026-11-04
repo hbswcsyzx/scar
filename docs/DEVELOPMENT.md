@@ -168,6 +168,7 @@ PYTHONHASHSEED=0 python -B -m scar.cli source-expressions --model /path/to/model
 显式rule frontier保原occurrence/构造/用途；child接口、效果和state来源仍是义务。不能用这个入口宣称完整CFG/SSA或执行图已生成。
 调用/显示使用已有PythonProtocol签名，item/pair数量由原字段分组导出；父属描述符另记`PARENT_SOURCE_DESCRIPTOR`，不计作缺失的独立表达式规则。
 容器、格式化/模板规则分别在`source_display_rules.py`、`source_string_rules.py`；代码SHA和精确字面值输入类型均进入共享规则目录。
+同步推导式在`source_comprehension_rules.py`；`comprehension`辅助构造保原父generators引用。异步子句返回`ASYNC_COMPREHENSION_FRONTIER`，不生成伪同步循环。
 星号/keyword的失败顺序参考固定版本[CPython codegen](https://github.com/python/cpython/blob/v3.14.7/Python/codegen.c)；本机stack guideline从header读入并固定SHA。
 
 源码身份桥（按unit分片，保持输入模型和旧ID）：

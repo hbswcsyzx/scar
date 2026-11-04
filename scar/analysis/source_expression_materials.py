@@ -29,7 +29,8 @@ from scar.ir.record_codec import decode, encode
 
 _PARENTS = ('source_roles', 'source_contexts', 'source_declarations', 'source_bindings',
             'source_symbols', 'compiler_topology', 'compiler_symbols')
-_FRONTIERS = {'RULE_FRONTIER', 'PURPOSE_FRONTIER', 'SUPPRESSED_SOURCE', 'BINDING_INTERFACE_FRONTIER'}
+_FRONTIERS = {'RULE_FRONTIER', 'PURPOSE_FRONTIER', 'SUPPRESSED_SOURCE', 'BINDING_INTERFACE_FRONTIER',
+              'ASYNC_COMPREHENSION_FRONTIER'}
 _WORLD = ValueType(ValueKind.STATE, location=LocationID('source-python-world'))
 
 
@@ -41,6 +42,7 @@ def _implementation():
     package = Path(__file__).resolve().parents[1]
     names = ('analysis/source_expression_materials.py', 'analysis/source_expression_rules.py',
         'analysis/source_display_rules.py', 'analysis/source_string_rules.py',
+        'analysis/source_comprehension_rules.py',
         'analysis/source_productions.py', 'analysis/program_types.py',
         'ir/program/source_productions.py', 'ir/record_codec.py')
     return {name: sha256((package / name).read_bytes()).hexdigest() for name in names}

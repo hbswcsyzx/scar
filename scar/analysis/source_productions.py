@@ -311,13 +311,54 @@ def validate_production_plan(plan, *, max_visits=1_000_000):
                 _require(0 <= instruction.invariant_count <= len(args), 'LOOP_INTERFACE', str(identity),
                          'invariant prefix must fit the explicit input interface')
                 carried = args[instruction.invariant_count:]
-                condition = child(instruction.condition, P.ProductionRegionKind.LOOP_CONDITION)
                 body = child(instruction.body, P.ProductionRegionKind.LOOP_BODY)
-                _require(condition.parameters == body.parameters == region.parameters,
-                         'LOOP_INTERFACE', str(identity), 'loop condition/body carry ports differ')
-                _require(region_outputs[condition.id].get((C.FALLTHROUGH, None)) == (
-                    ValueType(ValueKind.DATA, 'builtins.bool'), *carried),
-                    'LOOP_INTERFACE', str(identity), 'loop condition returns decision then carried values')
+                if type(instruction.condition) is P.IterationCondition:
+                    iteration = instruction.condition
+                    _require(instruction.invariant_count <= iteration.world_parameter < len(args)
+                        and type(args[iteration.world_parameter]) is ValueType
+                        and args[iteration.world_parameter].kind is ValueKind.STATE,
+                        'LOOP_INTERFACE', str(identity), 'iterator advancement must replace an explicit carried state port')
+                    child(iteration.advance.region, P.ProductionRegionKind.LOOP_CONDITION)
+                    advance_outputs = invoke(iteration.advance)
+                    _require(advance_outputs.get((C.FALLTHROUGH, None)) == (
+                        ValueType(ValueKind.REFERENCE), args[iteration.world_parameter])
+                        and set(advance_outputs) == {(C.FALLTHROUGH, None), (C.RAISE, None)},
+                        'LOOP_INTERFACE', str(identity), 'advance returns one transient item/current world or raises')
+                    raised = advance_outputs[(C.RAISE, None)]
+                    _require(raised and raised[-1] == args[iteration.world_parameter],
+                        'LOOP_INTERFACE', str(identity), 'advance exception must carry its current world')
+                    matcher = child(iteration.exhausted, P.ProductionRegionKind.HANDLER)
+                    _require(matcher.parameters == raised and region_outputs[matcher.id] == {
+                        (C.FALLTHROUGH, None): (ValueType(ValueKind.DATA, 'builtins.bool'),)},
+                        'LOOP_INTERFACE', str(identity), 'exhaustion predicate consumes the original exception payload')
+                    _require(body.parameters == (*region.parameters, ValueType(ValueKind.REFERENCE)),
+                        'LOOP_INTERFACE', str(identity), 'iterator item is a transient body port, not a carried value')
+                    escaped = {(C.RAISE, None): raised}
+                    for key, types in region_outputs[body.id].items():
+                        if key not in ((C.FALLTHROUGH, None), (C.BREAK, region.id), (C.CONTINUE, region.id)):
+                            _require(key not in escaped or escaped[key] == types, 'LOOP_INTERFACE', str(identity),
+                                     'iterator/body escaping completion interfaces differ')
+                            escaped[key] = types
+                    if instruction.otherwise is None:
+                        escaped[(C.FALLTHROUGH, None)] = carried
+                    else:
+                        otherwise = child(instruction.otherwise, P.ProductionRegionKind.ALTERNATIVE)
+                        for key, types in region_outputs[otherwise.id].items():
+                            _require(key not in escaped or escaped[key] == types, 'LOOP_INTERFACE', str(identity),
+                                     'iterator otherwise completion interfaces differ')
+                            escaped[key] = types
+                        if (C.BREAK, region.id) in region_outputs[body.id]:
+                            _require((C.FALLTHROUGH, None) not in escaped or escaped[(C.FALLTHROUGH, None)] == carried,
+                                     'LOOP_INTERFACE', str(identity), 'break and otherwise result interfaces differ')
+                            escaped[(C.FALLTHROUGH, None)] = carried
+                    _require(outputs == escaped, 'LOOP_INTERFACE', str(identity), 'iterator loop dropped or invented a completion')
+                else:
+                    condition = child(instruction.condition, P.ProductionRegionKind.LOOP_CONDITION)
+                    _require(condition.parameters == body.parameters == region.parameters,
+                             'LOOP_INTERFACE', str(identity), 'loop condition/body carry ports differ')
+                    _require(region_outputs[condition.id].get((C.FALLTHROUGH, None)) == (
+                        ValueType(ValueKind.DATA, 'builtins.bool'), *carried),
+                        'LOOP_INTERFACE', str(identity), 'loop condition returns decision then carried values')
                 for key in ((C.FALLTHROUGH, None), (C.CONTINUE, region.id), (C.BREAK, region.id)):
                     if key in region_outputs[body.id]:
                         _require(region_outputs[body.id][key] == carried,
@@ -397,9 +438,16 @@ class ProductionSourceIndex:
             return self.context.context_at_slot(ref).state
 
         try:
+            region_index = {r.id: r for r in plan.regions}
             for region in plan.regions:
                 _require(region.context == source(region.source), 'SOURCE_CONTEXT', str(region.id),
                          'region context differs from its original F2/F3 source reference')
+                if region.kind is P.ProductionRegionKind.COMPREHENSION:
+                    parent = region_index.get(region.parent)
+                    scope = self.context.material.scopes[region.context.environment]
+                    _require(parent is not None and scope.kind == 'COMPREHENSION'
+                        and scope.parent == parent.context.environment,
+                        'SOURCE_SCOPE', str(region.id), 'comprehension activation must use its original child namespace')
             for step in plan.steps:
                 source(step.source)
                 instruction = step.instruction

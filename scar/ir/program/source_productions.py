@@ -48,6 +48,7 @@ class ProductionRegionKind(str, Enum):
     RESUME = 'RESUME'
     TARGET = 'TARGET'
     PATTERN = 'PATTERN'
+    COMPREHENSION = 'COMPREHENSION'
 
 
 class ProductionDispositionKind(str, Enum):
@@ -217,13 +218,25 @@ class BranchControl:
 
 
 @dataclass(frozen=True, slots=True)
+class IterationCondition:
+    """Advance, classify exhaustion, then deliver the item only to the body.
+
+    world_parameter is a carried loop port replaced by the advance's current
+    world on both success and exhaustion. Other exceptions propagate unchanged.
+    """
+    advance: ProductionRegionCall
+    exhausted: ProductionRegionID
+    world_parameter: int
+
+
+@dataclass(frozen=True, slots=True)
 class LoopControl:
     """One loop template, with invariant prefix and carried suffix input ports.
 
     Condition/body receive both groups. Only carried values return along the
     backedge; invariants stay connected to the original loop inputs.
     """
-    condition: ProductionRegionID
+    condition: ProductionRegionID | IterationCondition
     body: ProductionRegionID
     otherwise: ProductionRegionID | None = None
     invariant_count: int = 0
@@ -319,4 +332,4 @@ PRODUCTION_RECORD_TAGS = {cls: ('record_kind', cls.__name__) for cls in (
     ProductionOccurrence, SlotRef, ProductionParameter, ProductionResult,
     EvaluateChild, ApplyLanguageAction, ApplyPythonProtocol, AccessBinding, ConstructValue, DefineLiteral, ApplyRegion,
     BranchControl, LoopControl, DeferRegion, CleanupControl, HandleCompletions,
-    TransferCompletion, SuspendExecution, CountBinding, ChoiceBinding, TypeBinding, TypesBinding)}
+    TransferCompletion, SuspendExecution, IterationCondition, CountBinding, ChoiceBinding, TypeBinding, TypesBinding)}

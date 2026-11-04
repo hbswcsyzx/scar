@@ -36,8 +36,12 @@ _FIELDS = {
     'List': ('elts', 'ctx'), 'Tuple': ('elts', 'ctx'), 'Set': ('elts',), 'Dict': ('keys', 'values'),
     'JoinedStr': ('values',), 'FormattedValue': ('value', 'conversion', 'format_spec'),
     'TemplateStr': ('values',), 'Interpolation': ('value', 'str', 'conversion', 'format_spec'),
+    'ListComp': ('elt', 'generators'), 'SetComp': ('elt', 'generators'),
+    'DictComp': ('key', 'value', 'generators'),
 }
-_AUX_FIELDS = {'keyword': ('arg', 'value'), 'Starred': ('value', 'ctx')}
+_AUX_FIELDS = {'keyword': ('arg', 'value'), 'Starred': ('value', 'ctx'),
+               'comprehension': ('target', 'iter', 'ifs', 'is_async')}
+_COMPREHENSIONS = ('ListComp', 'SetComp', 'DictComp')
 _SELECTORS = {
     'BinOp': frozenset(('Add', 'Sub', 'Mult', 'MatMult', 'Div', 'Mod', 'Pow', 'LShift',
                        'RShift', 'BitOr', 'BitXor', 'BitAnd', 'FloorDiv')),
@@ -46,7 +50,7 @@ _SELECTORS = {
     'Compare': frozenset(('Eq', 'NotEq', 'Lt', 'LtE', 'Gt', 'GtE', 'Is', 'IsNot', 'In', 'NotIn')),
 }
 _TARGETS = frozenset(('Name', 'Attribute', 'Subscript', 'List', 'Tuple'))
-_RULE_MODULES = ('source_display_rules.py', 'source_string_rules.py')
+_RULE_MODULES = ('source_display_rules.py', 'source_string_rules.py', 'source_comprehension_rules.py')
 
 
 class SourceRuleError(ProductionError):
@@ -110,8 +114,11 @@ class SourceExpressionRules:
                         if row.name in _TARGETS else (P.ProductionPurpose.VALUE,)) if supported else ()
             rows.append(dict(constructor=row.name, fields=list(row.fields), status=status,
                 purposes=[p.value for p in purposes], selectors=sorted(_SELECTORS.get(row.name, ())),
+                context_frontiers=([dict(field='generators[].is_async', value=1, code='ASYNC_COMPREHENSION_FRONTIER')]
+                                   if row.name in _COMPREHENSIONS else []),
                 parent_contexts=([dict(constructor=p, field='args' if p == 'Call' else 'elts')
                     for p in ('Call', 'List', 'Tuple', 'Set')] if row.name == 'Starred' else
+                    [dict(constructor=p, field='generators') for p in _COMPREHENSIONS] if row.name == 'comprehension' else
                     [dict(constructor='Call', field='keywords')] if row.name == 'keyword' else [])))
         return dict(schema='scar.source-expression-rule-catalog', schema_version=1,
             source_schema_sha256=self.source.roles.catalog.f2_schema_sha256,
@@ -135,10 +142,12 @@ class SourceExpressionRules:
         if site is None:
             return None
         parent = syntax.nodes[site.occurrence].constructor
-        allowed = ('Call', 'List', 'Tuple', 'Set') if node.constructor == 'Starred' else ('Call',)
+        allowed = (('Call', 'List', 'Tuple', 'Set') if node.constructor == 'Starred' else
+                   _COMPREHENSIONS if node.constructor == 'comprehension' else ('Call',))
         if parent not in allowed:
             return None
-        expected = ('args' if parent == 'Call' else 'elts') if node.constructor == 'Starred' else 'keywords'
+        expected = (('args' if parent == 'Call' else 'elts') if node.constructor == 'Starred' else
+                    'generators' if node.constructor == 'comprehension' else 'keywords')
         rule, _ = self.source.roles.locate(site)
         return site if site.group == 'FIELD' and rule.name == expected else None
 
@@ -172,6 +181,7 @@ class SourceExpressionRules:
                  'source fields, schedule, state threading or completion references differ')
         return dict(source_rule_replayed=True, local_schedule_verified=True, field_dispositions_verified=True,
             child_interfaces_assumed=True, state_parameter_origin_proven=False,
+            scope_activation_proven=False, iterator_cleanup_proven=False,
             effects_proven=False, canonical_graph_generated=False, transformation_authorized=False)
 
 
@@ -208,11 +218,11 @@ class _Builder:
         _require(name in _SELECTORS[constructor], 'RULE_SELECTOR', str(site), 'selector is outside its finite source domain')
         return name
 
-    def region(self, source, parameters, parent=None):
+    def region(self, source, parameters, parent=None, kind=None):
         _require(len(self.regions) < self.max_regions, 'BUDGET_FRONTIER', 'regions', 'source region limit')
         region = _Draft(P.ProductionRegionID(self.key + ':r' + str(len(self.regions))),
             None if parent is None else parent.id,
-            P.ProductionRegionKind.EXECUTION if parent is None else P.ProductionRegionKind.ALTERNATIVE,
+            kind if kind is not None else P.ProductionRegionKind.EXECUTION if parent is None else P.ProductionRegionKind.ALTERNATIVE,
             source, parameters)
         self.regions.append(region)
         return region
@@ -247,10 +257,12 @@ class _Builder:
                          (_REF, self.world) if types is None else types)
 
     def protocol(self, region, kind, arguments, state, extra=(), selectors=()):
-        bindings = (TypeBinding('world', self.world), ChoiceBinding('exception_abi', self.rules.exception_abi.value), *extra)
-        signature = _resolve_protocol_rule(self.rules.protocols[kind], bindings)
-        outputs = next(c.types for c in signature.completions if c.kind is ExitKind.NORMAL)
-        return self.emit(region, P.ApplyPythonProtocol(kind, bindings, selectors), (*arguments, state), outputs)
+        rule = self.rules.protocols[kind]
+        invoke = rule.signature.form is SignatureForm.INVOKE
+        bindings = (TypeBinding('world', self.world), *((ChoiceBinding('exception_abi', self.rules.exception_abi.value),) if invoke else ()), *extra)
+        signature = _resolve_protocol_rule(rule, bindings)
+        outputs = next(c.types for c in signature.completions if c.kind is ExitKind.NORMAL) if invoke else signature.results
+        return self.emit(region, P.ApplyPythonProtocol(kind, bindings, selectors), (*arguments, state), outputs, may_raise=invoke)
 
     def finish(self, region, values, types):
         self.emit(region, P.TransferCompletion(C.FALLTHROUGH), values, types, may_raise=False)
@@ -280,6 +292,9 @@ class _Builder:
         elif kind in ('JoinedStr', 'FormattedValue', 'TemplateStr', 'Interpolation'):
             from scar.analysis.source_string_rules import emit_string
             emit_string(self, root, state)
+        elif kind in _COMPREHENSIONS:
+            from scar.analysis.source_comprehension_rules import emit_comprehension
+            emit_comprehension(self, root, state)
         elif kind == 'Constant':
             # A literal source reference does not assert a fresh allocation.
             result = self.emit(root, P.ConstructValue(P.ConstructionKind.LITERAL,

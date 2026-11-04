@@ -55,7 +55,7 @@ def test_closed_grammar_exact_records_strict_codec_and_budgets():
     assert summary['control_semantics_checked'] is False
     assert A.read_production_plan(A.production_plan_document(value)) == value
     catalog = A.production_type_catalog()
-    assert catalog['counts'] == dict(records=36, fields=102, identifiers=4, enums=12, enum_members=185, unions=9)
+    assert catalog['counts'] == dict(records=37, fields=105, identifiers=4, enums=12, enum_members=186, unions=10)
     assert set(catalog['instruction_variants']) == {
         'EvaluateChild', 'ApplyLanguageAction', 'ApplyPythonProtocol', 'AccessBinding', 'ConstructValue', 'DefineLiteral', 'ApplyRegion',
         'BranchControl', 'LoopControl', 'DeferRegion', 'CleanupControl', 'HandleCompletions',
@@ -148,6 +148,42 @@ def test_implicit_literals_keep_exact_values_without_asserting_identity_or_alloc
         value = plan((root,), (step('literal', root, instruction, outputs=normal(REF)),))
         result = A.read_production_plan(A.production_plan_document(value))
         assert result.steps[0].instruction.value.to_python() == literal
+
+
+def test_iterator_loop_passes_items_to_body_without_artificial_carried_values():
+    from scar.ir.program.ids import LocationID
+    from scar.ir.program.signature_patterns import ChoiceBinding, TypeBinding
+    from scar.ir.program.structured import PythonProtocolKind as K
+    world = ValueType(ValueKind.STATE, location=LocationID('world'))
+    raised = P.ProductionCompletion(C.RAISE, (REF, world))
+    loop = region('loop', kind=P.ProductionRegionKind.LOOP, parameters=(REF, REF, world),
+        outputs=(*normal(world), raised), steps=('drive',))
+    advance = region('advance', parent=loop.id, kind=P.ProductionRegionKind.LOOP_CONDITION,
+        parameters=(REF, world), outputs=(*normal(REF, world), raised), steps=('next',))
+    matcher = region('matcher', parent=loop.id, kind=P.ProductionRegionKind.HANDLER,
+        parameters=(REF, world), outputs=normal(BOOL), steps=('match',))
+    body = region('body', parent=loop.id, kind=P.ProductionRegionKind.LOOP_BODY,
+        parameters=(REF, REF, world, REF), outputs=normal(world), steps=('done',))
+    condition = P.IterationCondition(P.ProductionRegionCall(advance.id,
+        (parameter(loop), parameter(loop, 2))), matcher.id, 2)
+    value = plan((loop, advance, matcher, body), (
+        step('drive', loop, P.LoopControl(condition, body.id, invariant_count=2),
+            tuple(parameter(loop, i) for i in range(3)), loop.completions),
+        step('next', advance, P.ApplyPythonProtocol(K.COMPREHENSION_NEXT,
+            (TypeBinding('world', world), ChoiceBinding('exception_abi', 'EXCEPTION_WORLD'))),
+            (parameter(advance), parameter(advance, 1)), advance.completions),
+        step('match', matcher, P.ApplyPythonProtocol(K.MATCH_STOP_ITERATION, (TypeBinding('world', world),)),
+            (parameter(matcher), parameter(matcher, 1)), normal(BOOL)),
+        step('done', body, P.TransferCompletion(C.FALLTHROUGH), (parameter(body, 2),), normal(world))))
+    assert A.read_production_plan(A.production_plan_document(value)) == value
+    for changed in (
+        replace(value, regions=(*value.regions[:3], replace(body, parameters=(REF, REF, world)))),
+        replace(value, steps=(replace(value.steps[0], instruction=P.LoopControl(replace(condition, world_parameter=0), body.id,
+            invariant_count=2)), *value.steps[1:])),
+        replace(value, steps=(replace(value.steps[0], completions=normal(world)), *value.steps[1:])),
+    ):
+        with pytest.raises(A.ProductionError):
+            A.validate_production_plan(changed)
 
 
 def test_branch_has_boolean_decision_explicit_capture_ports_and_completion_union():

@@ -65,6 +65,13 @@ def documents():
         'adjacent_template = t"{left}{right}"', 'empty_template = t""',
         'large_formatted = f"' + ''.join('{part'+str(i)+'}' for i in range(31)) + '"',
         'pending_comp = [item for item in iterable]',
+        'set_comp = {produce(item) for item in outer() if keep(item) if other(item)}',
+        'dict_comp = {key(item): value(item) for item in outer() for nested in inner(item) if check(nested)}',
+        'target_comp = [nested for (item, *rest) in outer() if allow(item) for nested in rest if nested]',
+        'nested_comp = [[nested for nested in inner(item)] for item in outer()]',
+        'shadow_comp = [shadow for shadow in shadow]',
+        'async def pending_async_comp(source):\n    return [item async for item in source]',
+        'pending_generator = (item for item in iterable)',
     )) + '\n'
     f0 = source_bytes_document(text.encode(), path='/source/schedules.py', namespace_root='/source')
     f1 = source_tokens_document(f0)
@@ -130,15 +137,20 @@ def test_all_local_families_and_selector_domains_without_reparsing(rules, monkey
     implemented = {r['constructor'] for r in catalog['rules'] if r['status'] == 'LOCAL_RULE'}
     assert implemented == {'Constant', 'Name', 'BinOp', 'UnaryOp', 'Attribute', 'Subscript',
                            'Slice', 'NamedExpr', 'IfExp', 'BoolOp', 'Compare', 'Call',
-                           'List', 'Tuple', 'Set', 'Dict', 'JoinedStr', 'FormattedValue', 'TemplateStr', 'Interpolation'}
+                           'List', 'Tuple', 'Set', 'Dict', 'JoinedStr', 'FormattedValue', 'TemplateStr', 'Interpolation',
+                           'ListComp', 'SetComp', 'DictComp'}
     selectors, seen = {}, set()
     for occurrence, node in enumerate(rules.source.context.syntax.nodes):
         if node.constructor not in implemented:
             continue
         with monkeypatch.context() as local:
             local.setattr(ast, 'parse', lambda *a, **kw: pytest.fail('source rule reparsed the program'))
-            value = rules.build(occurrence, purpose(rules, occurrence))
-            result = rules.verify(value)
+            try:
+                value = rules.build(occurrence, purpose(rules, occurrence))
+                result = rules.verify(value)
+            except SourceRuleError as error:
+                assert node.constructor in ('ListComp', 'SetComp', 'DictComp') and error.code == 'ASYNC_COMPREHENSION_FRONTIER'
+                continue
         assert result['local_schedule_verified'] and result['child_interfaces_assumed']
         assert not result['effects_proven'] and not result['canonical_graph_generated']
         assert {P.SlotRef(occurrence, 'FIELD', i) for i in range(len(node.fields))} <= {s.field for s in value.slots}
@@ -232,7 +244,7 @@ def test_targets_slice_holes_frontiers_and_budgets(rules):
     assert not any(type(s.instruction) is P.EvaluateChild for s in steps)
     assert len(steps[0].instruction.payload) == 3  # None positions retained, no guessed arity
     with pytest.raises(SourceRuleError, match='RULE_FRONTIER'):
-        rules.build(occurrences(rules, 'ListComp')[0])
+        rules.build(occurrences(rules, 'GeneratorExp')[0])
     with pytest.raises(SourceRuleError, match='BUDGET_FRONTIER'):
         rules.build(occurrences(rules, 'BinOp')[0], max_steps=1)
     with pytest.raises(SourceRuleError, match='BUDGET_FRONTIER'):
@@ -465,3 +477,61 @@ def test_container_and_formatting_schedules_match_static_compiler_output(rules, 
     assert line_ops('template', {'CONVERT_VALUE','FORMAT_SIMPLE','FORMAT_WITH_SPEC','BUILD_INTERPOLATION','BUILD_TEMPLATE'}) == [
         'FORMAT_SIMPLE','BUILD_INTERPOLATION','BUILD_TEMPLATE']
     assert line_ops('large_formatted', {'BUILD_LIST','LIST_APPEND'}) == ['BUILD_LIST', *(['LIST_APPEND']*31)]
+
+
+def test_comprehensions_use_shared_loops_and_original_scopes(rules):
+    from scar.ir.program.structured import PythonProtocolKind as K
+    values = assigned_values(rules)
+    for name in ('pending_comp','set_comp','dict_comp','target_comp','nested_comp','shadow_comp'):
+        occurrence = values[name]
+        plan = rules.build(occurrence)
+        root, root_steps = owned(plan)
+        scope = next(r for r in plan.regions if r.kind is P.ProductionRegionKind.COMPREHENSION)
+        assert scope.context.environment != root.context.environment
+        assert rules.source.context.material.scopes[scope.context.environment].parent == root.context.environment
+        assert type(root_steps[0].instruction) is P.EvaluateChild
+        assert field_name(rules, root_steps[0].instruction.field) == 'iter'
+        assert rules.source.context.context_at_slot(root_steps[0].instruction.field).state.environment == root.context.environment
+        clauses = rules.source.roles.field(occurrence, 'generators').items
+        loops = [r for r in plan.regions if r.kind is P.ProductionRegionKind.LOOP]
+        assert len(loops) == len(clauses)  # templates count syntax clauses, not runtime iterations
+        for loop in loops:
+            _, steps = owned(plan, loop.id)
+            assert len(steps) == 1 and type(steps[0].instruction) is P.LoopControl
+            control = steps[0].instruction
+            assert type(control.condition) is P.IterationCondition and control.invariant_count == 2
+            body, body_steps = owned(plan, control.body)
+            assert body.parameters == (*loop.parameters, REF)  # transient item has no backedge
+            assert len(loop.parameters) == 3 and loop.parameters[-1] == WORLD
+            assert type(body_steps[0].instruction) is P.EvaluateChild and body_steps[0].instruction.purpose is P.ProductionPurpose.STORE
+            assert body_steps[0].arguments[0] == P.ProductionParameter(body.id, 3)
+            advance, adv_steps = owned(plan, control.condition.advance.region)
+            assert adv_steps[0].instruction.protocol is K.COMPREHENSION_NEXT
+            matcher, match_steps = owned(plan, control.condition.exhausted)
+            assert match_steps[0].instruction.protocol is K.MATCH_STOP_ITERATION
+            assert len(matcher.completions) == 1  # only advancement exhaustion is matched, not body errors
+        produced = [s for s in plan.steps if type(s.instruction) is P.ApplyPythonProtocol and s.instruction.protocol is K.COMPREHENSION_ADD]
+        assert len(produced) == 1
+        if name == 'dict_comp':
+            before = [s for s in plan.steps if s.region == produced[0].region and type(s.instruction) is P.EvaluateChild]
+            assert [field_name(rules, s.instruction.field) for s in before[-2:]] == ['key','value']
+    async_comp = next(i for i in occurrences(rules,'ListComp') if any(
+        rules.source.roles.field(g.reference,'is_async').scalar.to_python() for g in rules.source.roles.field(i,'generators').items))
+    with pytest.raises(SourceRuleError, match='ASYNC_COMPREHENSION_FRONTIER'):
+        rules.build(async_comp)
+
+
+def test_comprehension_clause_and_update_counts_match_static_compilation(rules, documents):
+    import dis
+    from scar.analysis.source_bytes import decoded_source_bytes
+    instructions = list(dis.get_instructions(compile(decoded_source_bytes(documents[0]), '<static-comp-oracle>', 'exec')))
+    values = assigned_values(rules)
+    for name, update in (('pending_comp','LIST_APPEND'),('set_comp','SET_ADD'),('dict_comp','MAP_ADD'),('target_comp','LIST_APPEND')):
+        occurrence = values[name]
+        node = rules.source.context.syntax.nodes[occurrence]
+        schema = next(c for c in rules.source.context.syntax.profile.ast_schema if c.name == node.constructor)
+        line = node.attributes[schema.attributes.index('lineno')].scalar.to_python()
+        own = [op for op in instructions if op.positions.lineno == line]
+        count = len(rules.source.roles.field(occurrence,'generators').items)
+        assert sum(op.opname=='FOR_ITER' for op in own) == count
+        assert sum(op.opname==update for op in own) == 1

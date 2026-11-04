@@ -69,18 +69,22 @@ B1允许显式类型、拼接、参数引用、重复、有限选择和异质类
 隐式字面值复用已有`PythonLiteral`精确编码，不断言相同值具有同一对象身份或发生了分配。
 `ApplyPythonProtocol`复用已有88种协议及签名，参数必须显式绑定，输入/完成端口强制核验；不把协议名当作效果证明。
 区域共享，不按调用/迭代复制；循环显式分不变量前缀与携带值后缀。异常完成通过payload＋captures接入handler参数，不冒用normal结果边。
+迭代循环的`IterationCondition`连接advance和exhaustion predicate；元素只进入body临时端口，当前world替换携带端口，不增添伪造的item回边。
+引用端口不变不表示对象内容不变；iterator/container的内容版本仍由state边表达，不能直接据此reuse。
 当前只核记录、归属、有序值引用及部分接口；cleanup/resume完整控制语义、逐构造求值规则和效果仍须后续重放，不能由shape验收替代。
 Operation.label仍有旧派发消费者、名义类型字符串及分散协议签名，须显式收紧；结构通过不授opcode/效果/变换正确性。
 F4-C最后由已验产生规则生成CFG/SSA及共享区域，并逐项核源码处置、端口、控制/状态和来源；F4通过后才进入F5。
 当前F4-A结构域已验收，F4-B/C尚未完成。`max_visits`只限前置shape遍历；构造器核验复用原验证器，不冒称总步骤预算。
 
-F4-B继续按原字段识别、局部产生规则、原材料重放的顺序推进。当前20类表达式规则只生成局部recipe，child仍是带用途/状态接口的原槽义务；
+F4-B继续按原字段识别、局部产生规则、原材料重放的顺序推进。当前23类表达式规则只生成局部recipe，child仍是带用途/状态接口的原槽义务；
 不把未实现的构造变成OPAQUE成功节点。短路/条件/比较保分支区域，异常出口汇总前面所有步骤，不能只抄最后一步。
 状态域/异常ABI由显式profile提供，效果及实际state来源尚未证明。先闭合剩余构造/上下文规则，再进入F4-C；不以局部recipe计数代替规范图覆盖。
 Call区分普通参数与展开参数；唯一位置实参为星号表达式时保留至最终调用，其余星号和keyword连续组按协议顺序处理。
 keyword/Starred是受父Call字段约束的描述符，不是独立求值节点；规则不重放method/super/builtin编译优化，也不据此断言物理分配次数。
 Starred也可归属显示/赋值目标；解包在写目标前完成，Dict的覆盖更新与Call的重复键拒绝分开。容器与字符串规则分文件维护，仍共用同一输入语法。
 f-string先转换再求格式说明；模板插值只捕获值和转换标记，使用独立构造，不复用立即格式化操作。
+同步推导式的首个iter在外层求值/取iterator，然后进入原C1局部namespace；每个for子句一份共享循环模板，过滤短路，DictComp先key后value。
+局部scope激活、逃逸cell保活及物理inlining/清理仍是合同义务；不回滚walrus等外层写入。async clauses及惰性GeneratorExp仍有显式规则前沿。
 
 ## F3的形式边界
 
