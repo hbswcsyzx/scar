@@ -22,6 +22,7 @@ from scar.analysis.source_deferred_interfaces import DeferredInterfaceIndex
 from scar.analysis.source_statement_interfaces import SourceStatementInterfaceIndex
 from scar.analysis.source_type_parameter_interfaces import TypeParameterInterfaceIndex
 from scar.analysis.source_definition_interfaces import DefinitionInterfaceIndex
+from scar.analysis.source_pattern_interfaces import PatternInterfaceIndex
 
 
 class ProductionError(ValueError):
@@ -59,7 +60,7 @@ def production_type_catalog():
     for name in ('scar.analysis.program_types', 'scar.ir.record_codec', 'scar.ir.program.protocol_signatures',
                  'scar.ir.program.delegation_signatures', 'scar.analysis.source_deferred_interfaces',
                  'scar.analysis.source_statement_interfaces', 'scar.analysis.source_type_parameter_interfaces',
-                 'scar.analysis.source_definition_interfaces'):
+                 'scar.analysis.source_definition_interfaces','scar.analysis.source_pattern_interfaces'):
         modules[name] = sha256(Path(sys.modules[name].__file__).read_bytes()).hexdigest()
     payload = dict(schema='scar.source-production-type-catalog', schema_version=1,
         root=root, types=rows, counts=counts, modules=dict(sorted(modules.items())),
@@ -149,7 +150,7 @@ def validate_production_plan(plan, *, max_visits=1_000_000):
     """
     visits = _shape(plan, max_visits)
     _require((plan.schema, plan.schema_version, plan.authority) == (
-        'scar.source-production-plan', 15, 'SOURCE_RECIPE_SHAPE_ONLY'),
+        'scar.source-production-plan', 16, 'SOURCE_RECIPE_SHAPE_ONLY'),
         'SCHEMA', 'plan', 'unsupported recipe schema or authority')
     source = plan.input
     _require(bool(source.path) and bool(source.namespace_root), 'INPUT', 'plan.input', 'source paths must be nonempty')
@@ -223,6 +224,9 @@ def validate_production_plan(plan, *, max_visits=1_000_000):
                     'COMPLETION', path, 'loop target must enclose the region without crossing deferred code')
             else:
                 _require(row.target is None, 'COMPLETION', path, 'only break/continue carry a loop target')
+                if row.kind is P.PatternCompletionKind.FAIL:
+                    _require(len(row.types)==1 and type(row.types[0]) is ValueType and row.types[0].kind is ValueKind.STATE,
+                        'PATTERN_INTERFACE',path,'pattern failure delivers current world without fabricated capture values')
             result[key] = row.types
         return result
 
@@ -391,6 +395,28 @@ def validate_production_plan(plan, *, max_visits=1_000_000):
                 _require(args==(ValueType(ValueKind.REFERENCE),)
                     and outputs=={(C.FALLTHROUGH,None):(ValueType(ValueKind.DATA,'builtins.bool'),)},
                     'IDENTITY_INTERFACE',str(identity),'None identity predicate consumes one reference, with no state or exception')
+            elif type(instruction) is P.ReferenceIdentical:
+                _require(args==(ValueType(ValueKind.REFERENCE),ValueType(ValueKind.REFERENCE))
+                    and outputs=={(C.FALLTHROUGH,None):(ValueType(ValueKind.DATA,'builtins.bool'),)},
+                    'IDENTITY_INTERFACE',str(identity),'identity consumes two references without state or callbacks')
+            elif type(instruction) is P.ApplyPatternAction:
+                K=P.PatternActionKind
+                _require(bool(args) and type(args[-1]) is ValueType and args[-1].kind is ValueKind.STATE
+                    and 0<=instruction.reference_results<=max_visits,
+                    'PATTERN_INTERFACE',str(identity),'pattern boundary needs explicit world and bounded result count')
+                world=args[-1];reference=ValueType(ValueKind.REFERENCE)
+                predicate=instruction.kind in (K.SEQUENCE_TEST,K.MAPPING_TEST,K.LENGTH_TEST)
+                count=2 if instruction.kind in (K.EQUAL,K.CLASS_EXTRACT,K.KEYS_EXTRACT) else 1
+                _require(instruction.reference_results==(0 if predicate else 1) or instruction.kind in (
+                    K.SEQUENCE_UNPACK,K.TUPLE_UNPACK),'PATTERN_INTERFACE',str(identity),'fixed pattern result count differs')
+                normal=((ValueType(ValueKind.DATA,'builtins.bool'),world) if predicate else
+                    (*(reference for _ in range(instruction.reference_results)),world))
+                may_raise=instruction.kind not in (K.SEQUENCE_TEST,K.MAPPING_TEST,K.TUPLE_UNPACK)
+                raised=(reference,world) if instruction.exception_abi is ExceptionABI.EXCEPTION_WORLD else (reference,reference,world)
+                wanted={(C.FALLTHROUGH,None):normal}
+                if may_raise:wanted[(C.RAISE,None)]=raised
+                _require(args==(*(reference for _ in range(count)),world) and outputs==wanted,
+                    'PATTERN_INTERFACE',str(identity),'pattern native boundary ports differ from its declared signature')
             elif type(instruction) is P.InvertCondition:
                 boolean=ValueType(ValueKind.DATA,'builtins.bool')
                 _require(args==(boolean,) and outputs=={(C.FALLTHROUGH,None):(boolean,)},
@@ -853,6 +879,7 @@ class ProductionSourceIndex:
         self._statements = None
         self._type_parameters = None
         self._definitions = None
+        self._patterns = None
         self._expressions=frozenset(row.name for row in syntax.profile.ast_schema if 'expr' in row.bases)
         self._role_sites = frozenset(port.site for port in frontend_view.roles.ports)
         self.input = P.ProductionInput(f0['path'], f0['namespace_root'], _digest(encode(syntax)),
@@ -881,6 +908,11 @@ class ProductionSourceIndex:
         if self._definitions is None:self._definitions=DefinitionInterfaceIndex(self)
         return self._definitions
 
+    @property
+    def patterns(self):
+        if self._patterns is None:self._patterns=PatternInterfaceIndex(self)
+        return self._patterns
+
     def match(self, plan, *, max_visits=1_000_000):
         summary = validate_production_plan(plan, max_visits=max_visits)
         _require(plan.input == self.input, 'INPUT_LINEAGE', 'plan.input', 'recipe refers to different F2/F3 materials')
@@ -897,6 +929,18 @@ class ProductionSourceIndex:
             for region in plan.regions:
                 _require(region.context == source(region.source), 'SOURCE_CONTEXT', str(region.id),
                          'region context differs from its original F2/F3 source reference')
+                if region.kind is P.ProductionRegionKind.PATTERN:
+                    _require(type(region.source) is P.ProductionOccurrence,'SOURCE_PATTERN',str(region.id),'pattern region requires its original occurrence')
+                    captures=self.patterns.captures(region.source.occurrence)
+                    _require(len(region.parameters)==2 and region.parameters[0]==ValueType(ValueKind.REFERENCE)
+                        and type(region.parameters[1]) is ValueType and region.parameters[1].kind is ValueKind.STATE,
+                        'SOURCE_PATTERN',str(region.id),'pattern entry requires subject and current world')
+                    reference=ValueType(ValueKind.REFERENCE);world=region.parameters[1]
+                    allowed={(C.FALLTHROUGH,None):(*(reference for _ in captures),world),
+                        (P.PatternCompletionKind.FAIL,None):(world,)}
+                    _require(all((c.kind,c.target) in allowed and allowed[(c.kind,c.target)]==c.types
+                        or c.kind is C.RAISE and c.types in ((reference,world),(reference,reference,world)) for c in region.completions),
+                        'SOURCE_PATTERN',str(region.id),'pattern completion differs from original capture interface')
                 if region.kind is P.ProductionRegionKind.TYPE_PARAMETERS:
                     scope=self.context.material.scopes[region.context.environment]
                     parent=region_index.get(region.parent)
@@ -920,7 +964,10 @@ class ProductionSourceIndex:
                         _require(completion.target == self.statements.active_loop(step.source),
                             'SOURCE_LOOP', str(step.id), 'child/transfer completion has a different lexical loop target')
                 instruction = step.instruction
-                if type(instruction) in (P.MatchExceptionType,P.SplitExceptionGroup):
+                if type(instruction) is P.ApplyPatternAction:
+                    _require(instruction==self.patterns.action(instruction.kind,instruction.source,instruction.exception_abi)
+                        and step.source==instruction.source,'SOURCE_PATTERN',str(step.id),'pattern operation differs from original source path/counts')
+                elif type(instruction) in (P.MatchExceptionType,P.SplitExceptionGroup):
                     site=instruction.source
                     field,value=self.roles.locate(site)
                     parent=self.roles.parents.get(site.occurrence)
@@ -1132,6 +1179,10 @@ class ProductionSourceIndex:
                 if disposition.disposition is P.ProductionDispositionKind.ROLE_PORT:
                     _require(disposition.field in self._role_sites, 'SOURCE_PORT', 'plan.slots',
                              'role disposition must refer to an original F3 role port')
+            if plan.purpose is P.ProductionPurpose.STATEMENT:
+                _require(type(plan.source) is P.ProductionOccurrence and
+                    {(c.kind,c.target) for c in region_index[plan.root].completions}<=set(self.statements.completions(plan.source.occurrence)),
+                    'STATEMENT_INTERFACE','plan.root','statement recipe escapes its source completion interface')
         except ProductionError:
             raise
         except (ValueError, TypeError, KeyError, IndexError) as error:

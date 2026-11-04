@@ -55,7 +55,7 @@ def test_closed_grammar_exact_records_strict_codec_and_budgets():
     assert summary['control_semantics_checked'] is False
     assert A.read_production_plan(A.production_plan_document(value)) == value
     catalog = A.production_type_catalog()
-    assert catalog['counts'] == dict(records=90, fields=237, identifiers=4, enums=20, enum_members=221, unions=20)
+    assert catalog['counts'] == dict(records=92, fields=241, identifiers=4, enums=22, enum_members=231, unions=21)
     assert set(catalog['instruction_variants']) == {
         'EvaluateChild', 'ApplyLanguageAction', 'ReadCompilationOption', 'ApplyInplaceOperator', 'PublishAnnotation',
         'ImportRequest', 'ImportMember', 'ImportStar',
@@ -67,7 +67,7 @@ def test_closed_grammar_exact_records_strict_codec_and_budgets():
         'ReadContextMethod','InvokeContextMethod','ContextAwaitable','EnterHandledException',
         'RestoreHandledException','ContextExceptionArguments','PrepareReraise',
         'MatchExceptionType','DeleteExceptionBinding',
-        'ReferenceIsNone','InvertCondition','SplitExceptionGroup','MergeExceptionGroup',
+        'ReferenceIsNone','ReferenceIdentical','ApplyPatternAction','InvertCondition','SplitExceptionGroup','MergeExceptionGroup',
         'ApplyPythonProtocol', 'ApplyDelegationProtocol', 'AccessBinding', 'ConstructValue', 'DefineLiteral', 'ApplyRegion',
         'BranchControl', 'LoopControl', 'DeferRegion', 'ReferenceEnvironment', 'EnterDeferredBody', 'HandleCompletions',
         'TransferCompletion', 'SuspendExecution'}
@@ -343,6 +343,38 @@ def test_condition_interfaces_distinguish_control_booleans_from_object_reference
     assert A.read_production_plan(A.production_plan_document(specimen))==specimen
     with pytest.raises(A.ProductionError,match='CONDITION_INTERFACE'):
         A.validate_production_plan(replace(specimen,steps=(replace(action,arguments=()),)))
+
+
+def test_pattern_native_ports_and_failure_do_not_fabricate_capture_references():
+    from scar.ir.program.ids import LocationID
+    from scar.ir.program.protocol_signatures import ExceptionABI
+    world=ValueType(ValueKind.STATE,location=LocationID('pattern-interface-world'))
+    for abi in ExceptionABI:
+        raised=(REF,world) if abi is ExceptionABI.EXCEPTION_WORLD else (REF,REF,world)
+        for kind in P.PatternActionKind:
+            predicate=kind in (P.PatternActionKind.SEQUENCE_TEST,P.PatternActionKind.MAPPING_TEST,P.PatternActionKind.LENGTH_TEST)
+            arity=2 if kind in (P.PatternActionKind.EQUAL,P.PatternActionKind.CLASS_EXTRACT,P.PatternActionKind.KEYS_EXTRACT) else 1
+            count=0 if predicate else 3 if kind in (P.PatternActionKind.SEQUENCE_UNPACK,P.PatternActionKind.TUPLE_UNPACK) else 1
+            args=(*(REF for _ in range(arity)),world)
+            result=(BOOL,world) if predicate else (*(REF for _ in range(count)),world)
+            may_raise=kind not in (P.PatternActionKind.SEQUENCE_TEST,P.PatternActionKind.MAPPING_TEST,P.PatternActionKind.TUPLE_UNPACK)
+            outputs=(*normal(*result),*((P.ProductionCompletion(C.RAISE,raised),) if may_raise else ()))
+            root=region('pattern-action',parameters=args,outputs=outputs,steps=('apply',))
+            apply=step('apply',root,P.ApplyPatternAction(kind,SOURCE,count,abi),tuple(parameter(root,i) for i in range(len(args))),outputs)
+            specimen=plan((root,),(apply,))
+            assert A.read_production_plan(A.production_plan_document(specimen))==specimen
+            with pytest.raises(A.ProductionError,match='PATTERN_INTERFACE'):
+                A.validate_production_plan(replace(specimen,steps=(replace(apply,arguments=apply.arguments[:-1]),)))
+    failed=(P.ProductionCompletion(P.PatternCompletionKind.FAIL,(world,)),)
+    root=region('failure',parameters=(world,),outputs=failed,steps=('fail',))
+    specimen=plan((root,),(step('fail',root,P.TransferCompletion(P.PatternCompletionKind.FAIL),(parameter(root),),failed),))
+    assert A.read_production_plan(A.production_plan_document(specimen))==specimen
+    with pytest.raises(A.ProductionError,match='PATTERN_INTERFACE'):
+        A.validate_production_plan(replace(specimen,regions=(replace(root,completions=(
+            P.ProductionCompletion(P.PatternCompletionKind.FAIL,(REF,world)),)),)))
+    root=region('identity',parameters=(REF,REF),outputs=normal(BOOL),steps=('is',))
+    specimen=plan((root,),(step('is',root,P.ReferenceIdentical(),(parameter(root),parameter(root,1)),normal(BOOL)),))
+    assert A.read_production_plan(A.production_plan_document(specimen))==specimen
 
 
 def test_shared_template_calls_keep_explicit_ports_and_lexical_activation_boundaries():

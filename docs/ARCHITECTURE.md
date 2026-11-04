@@ -65,7 +65,7 @@ B1允许显式类型、拼接、参数引用、重复、有限选择和异质类
 接源码前，先以原F2 fields/list重放旧SourceAtom的BFS身份公式，并核全源ID/kind/完整reference集合；这是身份层，绝不是求值顺序。
 旧SG不存在的source-only输入单独处置，保留其F2/F3，不捏造旧ID域。桥接内核不parse；strict读者仍重验F2上游。
 执行产生规则必须另按语言规则定义；symtable/compiler拓扑的visitor顺序不能当执行边（如decorators/defaults、DictComp key/value）。
-产生规则的输入语法为`SourceProductionPlan`，与canonical执行图分开：v15含54种有限步骤，源码槽、namespace端口、区域参数及结果引用分别有类型。
+产生规则的输入语法为`SourceProductionPlan`，与canonical执行图分开：v16含56种有限步骤，源码槽、namespace端口、区域参数及结果引用分别有类型。
 隐式字面值复用已有`PythonLiteral`精确编码，不断言相同值具有同一对象身份或发生了分配。
 `ApplyPythonProtocol`复用已有88种协议及签名，参数必须显式绑定，输入/完成端口强制核验；不把协议名当作效果证明。
 区域共享，不按调用/迭代复制；循环显式分不变量前缀与携带值后缀。异常完成通过payload＋captures接入handler参数，不冒用normal结果边。
@@ -106,6 +106,7 @@ v12将with清理表示为完成路由，移除未使用且未闭合的CleanupCon
 v13将try body、按序catch type测试、handler、else与共享finalbody分别接线。else只接body正常出口，其异常不进同级handler；匹配/初始绑定失败恢复旧异常。异常名字沿原write port绑定，人工None写入后由原CLEAR_ON_HANDLER_EXIT贡献授权删除，不伪造Del port。正常handler出口先恢复再清名，异常出口先清名再恢复。`SHARED`调用可从词法子区域复用祖先所拥有的模板，强制同activation/namespace及显式端口；finally正常完成保留pending值并替换world，非正常完成覆盖pending结果。编译器提供的DefineLiteral不制造分配或异常边。上述仍不证明native frame、引用寿命或完整效果。
 v14将except*的原异常、remaining和accumulated list分开：每个catch type都顺序求值/校验，SplitExceptionGroup条件更新handled状态；不能因remaining为None跳过后续type。仅body异常收集后继续，初始绑定/清名/split错误直接离开分派；每个clause不恢复旧handled值。最后将remaining（可为None）加入list，再按原异常及当前元数据MergeExceptionGroup；整个分派的正常/异常出口统一恢复旧状态。ReferenceIsNone是无world的身份判定；PrepareReraise只消费异常引用和当前world，旧traceback不再作为输入。流程依据固定[bytecodes](https://github.com/python/cpython/blob/v3.14.7/Python/bytecodes.c)、[ceval](https://github.com/python/cpython/blob/v3.14.7/Python/ceval.c)及[exceptions](https://github.com/python/cpython/blob/v3.14.7/Objects/exceptions.c)，native实现/效果仍未获证。
 v15区分VALUE与CONDITION，修正先求短路对象再truth导致的重复__bool__。条件BoolOp/Not/IfExp/比较链沿原字段传递控制决策；其余表达式委托同occurrence的VALUE模板后truth一次，NamedExpr不能改为给目标绑定布尔量。if/while/assert、IfExp.test及推导式filter接CONDITION；InvertCondition只翻转已准入的布尔决策。材料v3在原分区后流式保存按请求生成的上下文变体，依occurrence/purpose做有限工作队列；每源每材料域只生成一次，跨域canonical合并仍待F4-C。依据固定CPython codegen_jump_if，未授frame/效果证明。
+v16接Match及八类pattern。PATTERN区域的成功端口按原捕获顺序返回引用，失败端口仅返回world；整个模式成功后再写namespace，guard为假不撤销写入。OR和case后续路径共享模板，guard复用CONDITION；九类native边界按原字段重新推导端口，native实现及引用寿命仍待证明。
 前两步的局部规则已通过：Yield由原C1 owner区分普通／异步形式，bare yield导出None，嵌套定义header仍归外层执行owner。静态compiler只作独立规则对照，不以bytecode位置接源码身份。
 后续语句／定义／cleanup规则闭合后才进入F4-C；每步先验类型/接口，再接源码规则，再在原材料独立重放，不以节点存在或局部计数授予全层完成。
 

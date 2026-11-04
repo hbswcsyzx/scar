@@ -55,6 +55,7 @@ def _implementation():
         'analysis/source_statement_exceptions.py',
         'analysis/source_statement_exception_groups.py',
         'analysis/source_condition_rules.py',
+        'analysis/source_pattern_interfaces.py', 'analysis/source_statement_patterns.py',
         'analysis/source_type_parameter_interfaces.py', 'analysis/source_type_parameter_rules.py',
         'analysis/source_productions.py', 'analysis/program_types.py',
         'ir/program/source_productions.py', 'ir/record_codec.py')

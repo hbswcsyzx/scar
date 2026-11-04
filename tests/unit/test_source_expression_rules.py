@@ -109,6 +109,7 @@ def documents():
         'with manager() as target:\n    pass',
         'async def context_fixture():\n    async with manager():\n        pass',
         'try:\n    work()\nexcept* Failure:\n    pass',
+        'match source:\n    case _:\n        pass',
     )) + '\n'
     return _documents(text)
 
@@ -701,7 +702,7 @@ def test_delegation_keeps_send_and_post_driver_completion_paths_separate(rules, 
             plan = variant.build(occurrence)
             checked = variant.verify(plan)
             assert not checked['native_delegation_expanded'] and not checked['driver_protocol_graph_generated']
-            assert plan.schema_version == 15
+            assert plan.schema_version == 16
             _, root_steps = owned(plan)
             acquire = next(s for s in root_steps if type(s.instruction) is P.ApplyDelegationProtocol)
             assert acquire.instruction.protocol is (P.DelegationProtocolKind.AWAITABLE_ITER if constructor == 'Await'
@@ -935,7 +936,7 @@ def test_structured_statement_rules_preserve_source_fields_and_completion_interf
     statements = SourceStatementRules(rules.source, world=WORLD, exception_abi=ExceptionABI.EXCEPTION_WORLD)
     supported = {r['constructor'] for r in statements.catalog()['rules'] if r['status'] == 'LOCAL_STATEMENT_RULE'}
     assert supported == {'Expr','Pass','Assign','Delete','Return','Global','Nonlocal',
-        'If','While','For','AsyncFor','Break','Continue','AnnAssign','AugAssign','Assert','Raise','Import','ImportFrom','FunctionDef','AsyncFunctionDef','ClassDef','TypeAlias','With','AsyncWith','Try','TryStar'}
+        'If','While','For','AsyncFor','Break','Continue','AnnAssign','AugAssign','Assert','Raise','Import','ImportFrom','FunctionDef','AsyncFunctionDef','ClassDef','TypeAlias','With','AsyncWith','Try','TryStar','Match'}
     seen = set()
     for occurrence, node in enumerate(rules.source.context.syntax.nodes):
         if node.constructor not in supported:continue
@@ -1674,3 +1675,101 @@ def test_demanded_conditions_are_streamed_once_and_tampered_context_is_rejected(
         (store/'result.json').write_text(json.dumps(report))
         with pytest.raises(ValueError,match='condition variant'):
             collect(model,tmp_path/(name+'-tampered'),materials=store)
+
+
+def test_match_recipes_connect_patterns_captures_guards_and_shared_case_fallback(monkeypatch):
+    from scar.analysis.source_statement_rules import SourceStatementRules
+    from scar.analysis.source_productions import read_production_plan,production_plan_document,ProductionError
+    from scar.analysis.source_pattern_interfaces import FIELDS
+    from scar.ir.program.control import LanguageCompletionKind as C
+    text='''def patterns(subject):
+    match subject:
+        case None | True | False:
+            return 1
+        case -1 | 1+2j | -2-3j | Constants.VALUE:
+            return 2
+        case [left, right] | [right, left, *_] if left and right:
+            return left
+        case [_, *tail]:
+            return tail
+        case [_, *_]:
+            pass
+        case []:
+            pass
+        case {}:
+            pass
+        case {**rest}:
+            return rest
+        case {-1: x, 1+2j: y, Constants.KEY: z, **rest}:
+            return x,y,z,rest
+        case Pair(x, __field=y) as whole:
+            return whole
+        case captured if not captured:
+            return captured
+        case _:
+            return None
+    match subject:
+        case [x, *_, y, _]:
+            pass
+    match subject:
+        case [*_]:
+            pass
+    for item in subject:
+        match item:
+            case [x]:
+                break
+            case _:
+                continue
+'''
+    rules=_rules(_documents(text));index=rules.source.patterns
+    assert {kind for kind in FIELDS if occurrences(rules,kind)}==set(FIELDS)
+    for kind in ('match_case','MatchValue','MatchSingleton','MatchSequence','MatchMapping','MatchClass','MatchStar','MatchAs','MatchOr'):
+        assert all(rules.descriptor_owner(o)==rules.source.roles.parents[o] for o in occurrences(rules,kind))
+    for abi in ExceptionABI:
+        statements=SourceStatementRules(rules.source,world=WORLD,exception_abi=abi)
+        plans=[]
+        with monkeypatch.context() as no_parse:
+            no_parse.setattr(ast,'parse',lambda *a,**kw:pytest.fail('pattern rule reparsed target'))
+            for occurrence in occurrences(rules,'Match'):
+                plan=statements.build(occurrence)
+                assert statements.verify(plan)['local_schedule_verified']
+                assert read_production_plan(production_plan_document(plan))==plan
+                assert all(c.kind is not P.PatternCompletionKind.FAIL for c in owned(plan)[0].completions)
+                plans.append(plan)
+        plan=plans[0];regions={r.id:r for r in plan.regions};steps={s.id:s for s in plan.steps}
+        assert {s.instruction.kind for p in plans for s in p.steps if type(s.instruction) is P.ApplyPatternAction}==set(P.PatternActionKind)
+        # All stores use source binding ports after success; failure carries no captures.
+        captures=[s for s in plan.steps if type(s.instruction) is P.AccessBinding]
+        assert captures and all(s.instruction.action is P.BindingActionKind.WRITE and
+            regions[s.region].kind is P.ProductionRegionKind.HANDLER for s in captures)
+        assert all(c.types==(WORLD,) for r in plan.regions for c in r.completions if c.kind is P.PatternCompletionKind.FAIL)
+        guards=[s for s in plan.steps if type(s.instruction) is P.EvaluateChild and s.instruction.purpose is P.ProductionPurpose.CONDITION]
+        assert len(guards)==2
+        assert all(any(type(steps[before].instruction) is P.AccessBinding for before in
+            regions[s.region].steps[:regions[s.region].steps.index(s.id)]) for s in guards)
+        assert not any(type(s.instruction) is P.AccessBinding and s.instruction.action is P.BindingActionKind.DELETE for s in plan.steps)
+        # OR alternatives produce one canonical capture order despite reordered syntax.
+        alternative=next(o for o in occurrences(rules,'MatchOr') if len(index.captures(o))==2)
+        assert [c.name for c in index.captures(alternative)]==['left','right']
+        shared=next(r for r in plan.regions if r.source==index.site(alternative,'patterns',1) and r.kind is P.ProductionRegionKind.SHARED)
+        route=next(s for s in owned(plan,shared.id)[1] if type(s.instruction) is P.HandleCompletions)
+        success=next(r for r in route.instruction.routes if r.kind is C.FALLTHROUGH)
+        terminal=owned(plan,success.handler)[1][-1]
+        assert [v.index for v in terminal.arguments[:-1]]==[1,0]
+        # No unpack/allocation for wildcard-only sequences; star wildcard uses item access.
+        for seq in occurrences(rules,'MatchSequence'):
+            children,star,wild,only=index.sequence(seq)
+            actions=[s.instruction.kind for s in plan.steps if type(s.instruction) is P.ApplyPatternAction
+                and s.instruction.source.occurrence==seq]
+            if only:assert P.PatternActionKind.SEQUENCE_UNPACK not in actions
+        original=next(s for s in plan.steps if type(s.instruction) is P.ApplyPatternAction)
+        malformed=replace(original.instruction,reference_results=100)
+        with pytest.raises(ProductionError,match='PATTERN_INTERFACE|SOURCE_PATTERN'):
+            rules.source.match(replace(plan,steps=tuple(replace(s,instruction=malformed) if s.id==original.id else s for s in plan.steps)))
+    # The independent compiler oracle is inspected only, never executed.
+    import dis
+    from types import CodeType
+    code=compile(text,'<static-pattern-oracle>','exec',dont_inherit=True,optimize=0)
+    function=next(c for c in code.co_consts if type(c) is CodeType)
+    opnames={i.opname for i in dis.get_instructions(function)}
+    assert {'MATCH_MAPPING','MATCH_SEQUENCE','MATCH_CLASS','MATCH_KEYS','UNPACK_EX','UNPACK_SEQUENCE'}<=opnames

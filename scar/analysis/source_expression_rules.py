@@ -23,6 +23,12 @@ from scar.ir.program.delegation_signatures import delegation_signature_catalog, 
 from scar.ir.program.signature_patterns import SIGNATURE_RECORD_TAGS
 from scar.ir.record_codec import encode
 from scar.ir.literals import PythonLiteral
+from scar.analysis.source_pattern_interfaces import FIELDS as _PATTERN_FIELDS
+
+
+_PATTERN_PARENTS = (('match_case','pattern'),('MatchSequence','patterns'),
+    ('MatchMapping','patterns'),('MatchClass','patterns'),('MatchClass','kwd_patterns'),
+    ('MatchAs','pattern'),('MatchOr','patterns'))
 
 
 _REF = ValueType(ValueKind.REFERENCE)
@@ -43,7 +49,8 @@ _FIELDS = {
     'Yield': ('value',), 'YieldFrom': ('value',), 'Await': ('value',),
     'Lambda': ('args', 'body'), 'GeneratorExp': ('elt', 'generators'),
 }
-_AUX_FIELDS = {'keyword': ('arg', 'value'), 'Starred': ('value', 'ctx'),
+_AUX_FIELDS = {**_PATTERN_FIELDS, 'match_case': ('pattern','guard','body'),
+    'keyword': ('arg', 'value'), 'Starred': ('value', 'ctx'),
     'withitem': ('context_expr','optional_vars'),
     'ExceptHandler': ('type','name','body'),
                'comprehension': ('target', 'iter', 'ifs', 'is_async'),
@@ -66,7 +73,8 @@ _RULE_MODULES = ('source_display_rules.py', 'source_string_rules.py', 'source_co
                  'source_deferred_interfaces.py', 'source_statement_atoms.py', 'source_statement_imports.py',
                  'source_statement_functions.py', 'source_type_parameter_interfaces.py', 'source_type_parameter_rules.py',
                  'source_definition_interfaces.py', 'source_statement_definitions.py', 'source_statement_contexts.py',
-                 'source_statement_exceptions.py', 'source_statement_exception_groups.py', 'source_condition_rules.py')
+                 'source_statement_exceptions.py', 'source_statement_exception_groups.py', 'source_condition_rules.py',
+                 'source_pattern_interfaces.py','source_statement_patterns.py')
 
 
 class SourceRuleError(ProductionError):
@@ -145,6 +153,11 @@ class SourceExpressionRules:
                         if row.name in ('TypeVar','TypeVarTuple','ParamSpec') else [])))
             if row.name == 'Starred':
                 rows[-1]['parent_contexts'].append(dict(constructor='TypeVarTuple',field='default_value'))
+            if row.name == 'match_case':
+                rows[-1]['parent_contexts'] = [dict(constructor='Match',field='cases')]
+            elif row.name in _PATTERN_FIELDS:
+                rows[-1]['parent_contexts'] = [dict(constructor=parent,field=field) for parent,field in (
+                    (('MatchSequence','patterns'),) if row.name == 'MatchStar' else _PATTERN_PARENTS)]
             if row.name in ('Name', 'Attribute', 'Subscript'):
                 rows[-1]['parent_contexts'].extend((
                     dict(constructor='AugAssign', field='target', condition='READ_MODIFY_WRITE_ADDRESS'),
@@ -201,6 +214,11 @@ class SourceExpressionRules:
                         return site
         if node.constructor not in _AUX_FIELDS:
             return None
+        if node.constructor == 'match_case':
+            return site if parent == 'Match' and self.source.roles.locate(site)[0].name == 'cases' else None
+        if node.constructor in _PATTERN_FIELDS:
+            allowed = (('MatchSequence','patterns'),) if node.constructor == 'MatchStar' else _PATTERN_PARENTS
+            return site if (parent,self.source.roles.locate(site)[0].name) in allowed else None
         if node.constructor in ('TypeVar','TypeVarTuple','ParamSpec'):
             return site if parent in ('FunctionDef','AsyncFunctionDef','ClassDef','TypeAlias') and self.source.roles.locate(site)[0].name=='type_params' else None
         if node.constructor == 'Starred' and parent == 'TypeVarTuple' and self.source.roles.locate(site)[0].name=='default_value':

@@ -157,6 +157,22 @@ class ContextMethodKind(str, Enum):
     ASYNC_EXIT = 'ASYNC_EXIT'
 
 
+class PatternCompletionKind(str, Enum):
+    FAIL = 'PATTERN_FAIL'
+
+
+class PatternActionKind(str, Enum):
+    SEQUENCE_TEST = 'SEQUENCE_TEST'
+    MAPPING_TEST = 'MAPPING_TEST'
+    LENGTH_TEST = 'LENGTH_TEST'
+    EQUAL = 'EQUAL'
+    SEQUENCE_UNPACK = 'SEQUENCE_UNPACK'
+    SEQUENCE_ITEM = 'SEQUENCE_ITEM'
+    CLASS_EXTRACT = 'CLASS_EXTRACT'
+    KEYS_EXTRACT = 'KEYS_EXTRACT'
+    TUPLE_UNPACK = 'TUPLE_UNPACK'
+
+
 class CompilationOption(str, Enum):
     ASSERTIONS_ENABLED = 'ASSERTIONS_ENABLED'
 
@@ -209,7 +225,7 @@ ProductionControlTarget = ProductionRegionID | SourceLoopTarget
 
 @dataclass(frozen=True, slots=True)
 class ProductionCompletion:
-    kind: LanguageCompletionKind
+    kind: LanguageCompletionKind | PatternCompletionKind
     types: tuple[GroundType, ...]
     target: ProductionControlTarget | None = None
 
@@ -688,6 +704,26 @@ class InvertCondition:
 
 
 @dataclass(frozen=True, slots=True)
+class ReferenceIdentical:
+    """Object identity, without equality/truth callbacks or state transition."""
+    pass
+
+
+@dataclass(frozen=True, slots=True)
+class ApplyPatternAction:
+    """Finite native boundary with result arity rederived from original source.
+
+    Type tests read flags; length/item/split/compare may call user code.
+    CLASS_EXTRACT and KEYS_EXTRACT return an exact tuple or None. Suffix
+    SEQUENCE_ITEM reads current length, not a saved earlier length.
+    """
+    kind: PatternActionKind
+    source: ProductionSource
+    reference_results: int
+    exception_abi: ExceptionABI
+
+
+@dataclass(frozen=True, slots=True)
 class SplitExceptionGroup:
     """CHECK_EG_MATCH: validate type, split, install non-None matched group.
 
@@ -742,7 +778,7 @@ class DeferRegion:
 @dataclass(frozen=True, slots=True)
 class CompletionRoute:
     """Completion payload then explicit captures form the handler inputs."""
-    kind: LanguageCompletionKind
+    kind: LanguageCompletionKind | PatternCompletionKind
     target: ProductionControlTarget | None
     handler: ProductionRegionID
     captures: tuple[ProductionValue, ...] = ()
@@ -756,7 +792,7 @@ class HandleCompletions:
 
 @dataclass(frozen=True, slots=True)
 class TransferCompletion:
-    kind: LanguageCompletionKind
+    kind: LanguageCompletionKind | PatternCompletionKind
     target: ProductionControlTarget | None = None
 
 
@@ -802,6 +838,7 @@ ProductionInstruction = (EvaluateChild | ApplyLanguageAction | ReadCompilationOp
     | RestoreHandledException | ContextExceptionArguments | PrepareReraise
     | MatchExceptionType | DeleteExceptionBinding
     | ReferenceIsNone | InvertCondition | SplitExceptionGroup | MergeExceptionGroup
+    | ReferenceIdentical | ApplyPatternAction
     | ApplyRegion | BranchControl | LoopControl | DeferRegion | ReferenceEnvironment | EnterDeferredBody
     | HandleCompletions | TransferCompletion | SuspendExecution)
 
@@ -844,7 +881,7 @@ class SourceProductionPlan:
     steps: tuple[ProductionStep, ...]
     slots: tuple[ProductionSlotDisposition, ...]
     schema: str = 'scar.source-production-plan'
-    schema_version: int = 15
+    schema_version: int = 16
     authority: str = 'SOURCE_RECIPE_SHAPE_ONLY'
 
 

@@ -94,31 +94,27 @@ call/map/string/assert参数也沿闭合原端口组解析；空组保DECLARED_E
 真实eval/cem原body的4,830条操作来源、65,086条来源引用已接回原F2及已有F3查询；CEM的4个旧OPAQUE可读出Gt/Eq原selector。
 这仍不是执行语义证明。证据：`artifacts/current/queries/source-anchors/{materials,verification}/result.json`及`{eval,cem}-origin-query.json`。
 
-源码产生规则v15的输入语法已落地：90记录/237字段、4 ID、20枚举/221成员、20 union、54步骤变体；不修改canonical类型根和旧ID。instruction标签由全部variant自动生成，create/set/bind等同字段形状不会在wire中混淆。
-检查exact类型、区域归属/值顺序、共享调用、循环不变量/携带接口、异常完成到handler的payload/captures连接及strict codec；不授完整控制/效果语义。
-暂停接口子门已通过：明确handoff、normal/raise两种后续入口、异常ABI及保存引用；禁止保存旧STATE，核恢复完成并集。12项语法/接口检查通过（3.41秒）；driver/frame/context适配尚未证明。
-委托/循环接口子门14项检查通过（3.65秒）：4种运行时协议强制核签名，await/yield-from必须具备delegate，普通yield不得带delegate；循环保持全部escaping completion。RepeatCondition不造求值工作，空完成接口不造返回边。
-惰性入口的类型/局部接口及原F3桥已核验：代码声明不执行body或保存旧world，后续入口必须先激活环境并按原序接收已准入参数。参数使用声明/resolution而非write_target；活跃转交路径包含仅为内层转交的cell，初始默认值显式接原表达式。v3材料已以v4重采集和fresh核验，不是自动升级。
-异步接口子门15项检查通过（3.74秒）：共7种有限协议及两种异常ABI；新增异步iterator获取、已取得的await iterator推进及StopAsyncIteration匹配，尚不授driver/native展开证明。
-原结构验收25项通过；本轮修正区域出口汇总：前面步骤的异常必须保留，不能只取最后一步的normal结果。
-真实eval/CEM核419/537项原role引用描述符，查询1.03/1.31秒（父层fresh及索引另9.76/12.12秒）；没有生成新执行图或重放逐构造规则。
-记录在`artifacts/current/queries/source-productions/`；旧manifest不变，LeWM未执行或修改。
+源码产生规则v16：92记录/241字段、4 ID、22枚举/231成员、21 union、56步骤变体；独立于canonical图和旧ID。
+接口检查覆盖区域归属、有序值引用、共享调用、循环不变量/携带端口、异常payload/captures及strict wire；不授完整控制/效果语义。
+函数/生成器分创建和后续激活，保原F3参数与cell转交；暂停显式接新world，不保存旧STATE。调用准入、lazy body、native frame及清理仍待闭合。
 
-F4-B现有28类表达式局部规则，async clause及异步GeneratorExp已接入共享await推进和正确耗尽/导出路径；规则内核直接消费原F2/F3，strict读取重放父层，不执行目标。
-规则目录对113构造分流：28类局部规则、11类父上下文描述符、32类selector metadata、42类规则前沿；新增ExceptHandler父属描述，不授全构造/全部上下文闭合。
-真实eval/CEM及buffer/world/spaces五份源码共5,314个表达式：4,879个局部recipe、345个已知不单独求值的源码、90个父属表达式、表达式规则前沿0，分区精确闭合；另记733个父属描述符，含79个声明docstring Constant、113个arguments、303个arg、4个withitem及4个ExceptHandler等。函数docstring由创建metadata拥有，类docstring由namespace初始化拥有；6个增强赋值target仍由父语句安排读/改/写，没有丢弃源码。
-4处Lambda、3处GeneratorExp及先前6处Yield/2处YieldFrom均有规则。仍有3,483项child接口义务，不能以局部规则代替完整图。Await及异步上下文在静态micro源码中检验；未声称LeWM样本出现了Await。
-345处SUPPRESSED_SOURCE主要来自future注解，材料v2保留原C1原因/槽并单独计数；它们不是缺失规则。该分类由真实样本发现后修正，未丢弃原源码。
-表达式5个流式压缩片共1,480,303 bytes（解压33,109,921），含29个按需条件模板；5进程采集32.48秒、独立fresh32.38秒，见`queries/source-expression-rules/{materials,verification}/result.json`。模板不另算源码occurrence，child接口义务现为3,513项。
-本轮只做2项接口/wire检查（0.72秒）与2项条件/材料专项（13.79秒），含两种异常ABI、静态compile/dis及重签收据后篡改条件记录的拒绝检查；未重跑整套。主要验收仍是原材料生成和独立重放。全部由主代理完成，无新增subagents，未执行目标bytecode。
-`source-statements`仍为27类，Match尚待实现。本轮审查其guard时发现SCAR模型缺陷：VALUE短路结果再truth可重复__bool__。先补CONDITION接口/规则并改if/while/assert、IfExp.test及filter，BoolOp/Not/条件表达式/比较链递归传条件上下文；NamedExpr等保VALUE求值后判断。材料v3按需求补齐条件变体，每源/材料域内按purpose去重，root只接受BOOL/world。class namespace内部操作、native/frame/清理及lazy body仍未证明。
-真实五源998个语句仍分为919个局部recipe、79个父属docstring Expr、0个语句规则frontier；另外保存199个条件模板，总child接口义务2,425项。条件模板含19个BoolOp、49个Call、83个Compare、16个Name、28个UnaryOp及4个Attribute。这些是静态模板，不是执行次数。
-语句5片共741,869 bytes（解压14,905,660）；5进程采集27.57秒、fresh27.08秒。样本没有TryStar、finally、命名handler、AsyncWith、泛型或TypeAlias，相应规则仍以静态micro为依据。完整分布见`queries/source-statement-rules/result.json`；CEM条件模板在`queries/source-productions/cem/condition-specimen.json`。98个函数注解请求仍是独立child义务。
-样本规则缺口0不代表全语言或完整图：Match、根入口、其余child/lazy请求body、状态与引用清理、目标编译选项和native/resource仍待闭合。原manifest与五份源码bytes保持，v15规则/v3材料已重采集/fresh，未改旧header冒充迁移。
-Call的140个原规则前沿已消除；单星、多星、kwargs连续组和大组路径均有规则，复用已有协议强制核签名。未把位置漂移的bytecode当作F2节点身份。
-容器更新/分组/哈希时机、解包先于目标写入、f-string转换先于spec、模板捕获不立即转换已有静态对照；implicit literal只描述值，不授对象身份或分配证明。
-推导式每子句一份循环模板，外层先求首个iterator、局部scope内赋目标/过滤/求结果；仅advance的StopIteration转为耗尽，body异常保持传播。引用不变不代表内容不变。
-recipe不是canonical CFG/SSA；state来源、child实现与effects未证，不能发布全图或开启变换。
+F4-B现有28类表达式、28类语句局部规则。Match已接八类模式：success输出捕获引用，PATTERN_FAIL只带当前world，不能伪造捕获值。
+整个模式成功后沿原F3端口写入捕获，再判断CONDITION guard；guard为假保留写入并进入下一case。OR各分支按首项顺序归一捕获，后续case用SHARED模板，避免递归复制。
+sequence区分完整unpack、wildcard-star按需取项及全wildcard省略提取；mapping保keys/subpattern/rest顺序，class保原始keyword标签。
+九种有限native边界的端口由原源码字段重推，不从实际arity反推；native内部实现、物理引用寿命及完整effects未获证。
+表达式目录对113构造分流：28局部、20父属描述符、32 selector、33全局规则前沿；语句目录28局部、85域外。域外/父属不当成缺失的独立表达式规则。
+
+真实五源仍为eval/CEM及buffer/world/spaces：5,314表达式=4,879局部recipe+345不单独求值的源码+90父属表达式，另记733父属描述符；998语句=919局部recipe+79父属docstring Expr。两域样本规则前沿均为0。
+条件语法与值语法分开，避免短路结果二次__bool__；材料v3按purpose流式补齐199个语句条件模板、29个表达式条件模板。模板不是源码occurrence或执行次数；去重范围为每源每材料域。
+语句仍有2,425项child接口义务，表达式3,513项；其中98项函数注解请求尚未展开。局部规则存在不证明这些依赖已经连接。
+本轮五源重采集/独立fresh：语句27.75/28.58秒、740,538压缩bytes（解压14,905,660）；表达式32.99/34.09秒、1,480,924压缩bytes（解压33,109,921）。这不是LeWM运行时间或全程序建图时间。
+本轮仅3项定向检查：接口/wire两项1.02秒，Match静态规则一项8.64秒；两种异常ABI、八类模式、捕获与fallback路径、静态compile/dis对照均包含，未重跑全套。
+五源没有Match，不能把micro证据说成真实LeWM出现了该模式；也没有TryStar、finally、命名handler、AsyncWith、泛型或TypeAlias。
+旧九份展示recipe均从v16新材料提取，不改旧header冒充迁移。原manifest和五源bytes保持，LeWM未执行或修改。
+证据集中在`queries/source-{productions,expression-rules,statement-rules}/`。本轮由主代理完成，无新增subagents。
+
+**当前真正缺口**：根入口、lazy请求body、class namespace内部规则、参数/状态来源、正常与异常引用清理；然后才是F4-C统一共享CFG/SSA，再接跨层/native/resource。
+recipe不是canonical图。样本规则缺口为0不能宣布F4-B、完整建图或第一阶段完成，也不授权变换。
 
 1. **F4-B后续规则**：接完整操作家族、typed参数来源、状态/access契约和源码产生规则，再接版本化根与强制reader。
    旧core操作语义仍散在32个源码Opcode、88个PythonProtocol及typed侧表；label还承担cleanup/class/native派发。
@@ -126,7 +122,7 @@ recipe不是canonical CFG/SSA；state来源、child实现与effects未证，不�
    三种域不能互代：32 Opcode、88协议和113语法构造器×上下文分别核验；B1不授新图发布或优化。
    下一步将原声明端口接到F2/F3产生规则，并补function/class/comprehension等参数来源；保活完整性另验，不能抄端口来证明。
    形式顺序：输入/输出结构已固定；当前持续闭合构造×用途×上下文的字段消耗及完成端口，再重放核验，全部闭合后才生成CFG/SSA。
-   TryStar等27类语句已有局部规则。接下来仍在F4-B：①Match及其模式规则；②根入口、lazy请求和class namespace内部操作；③参数来源和正常/异常引用清理闭合。不能以五源语句frontier0代替全层完备。每批保持“接口→原字段产生规则→独立重放”，全部闭合后才进F4-C；调用准入、闭包/native布局及driver/frame/context合同仍须接通。
+   含Match的28类语句已有局部规则。接下来仍在F4-B：①根入口；②lazy请求和class namespace内部操作；③参数来源和正常/异常引用清理闭合。不能以五源语句frontier0代替全层完备。每批保持“接口→原字段产生规则→独立重放”，全部闭合后才进F4-C；调用准入、闭包/native布局及driver/frame/context合同仍须接通。
    四片其余881操作已分类为控制434、binding246、source invoke201；这是识别结果，不等于其接口/产生规则已通过。
    签名witness仍须进入版本化typed根及强制reader；不能把本层独立查询当作完备。根扩展后重验F4-A目录。
    实读FRAME_BIND为READ_WRITE、UNKNOWN footprint、非full overwrite；不能照旧审计摘要强制WHOLE或升级未知事实。

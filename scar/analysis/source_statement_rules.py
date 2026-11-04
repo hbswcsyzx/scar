@@ -27,7 +27,8 @@ _FIELDS = {'Expr': ('value',), 'Pass': (), 'Assign': ('targets', 'value', 'type_
     'ClassDef': ('name','bases','keywords','body','decorator_list','type_params'),
     'TypeAlias': ('name','type_params','value'),
     'With': ('items','body','type_comment'), 'AsyncWith': ('items','body','type_comment'),
-    'Try': ('body','handlers','orelse','finalbody'), 'TryStar': ('body','handlers','orelse','finalbody')}
+    'Try': ('body','handlers','orelse','finalbody'), 'TryStar': ('body','handlers','orelse','finalbody'),
+    'Match': ('subject','cases')}
 
 
 class SourceStatementRules(SourceExpressionRules):
@@ -153,6 +154,10 @@ class _StatementBuilder(_Builder):
         elif kind in ('Try','TryStar'):
             from scar.analysis.source_statement_exceptions import emit_try_statement
             emit_try_statement(self,root,current)
+            return self.plan(root,source)
+        elif kind == 'Match':
+            from scar.analysis.source_statement_patterns import emit_match_statement
+            emit_match_statement(self,root,current)
             return self.plan(root,source)
         self.finish(root, (current,), (self.world,))
         return self.plan(root, source)
