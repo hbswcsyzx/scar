@@ -108,8 +108,7 @@ def emit_clause_loops(b, scope, clauses, initial, world, container=None, *, susp
         world, = b.evaluate(body, target, world, P.ProductionPurpose.STORE, item)
         for ordinal in range(len(b.value(filters).items)):
             site = P.SlotRef(filters.occurrence, filters.group, filters.ordinal, (ordinal,))
-            value, world = b.evaluate(body, site, world)
-            test, world = b.action(body, P.LanguageActionKind.TRUTH, (), (value, world), (_BOOL, b.world))
+            test, world = b.condition(body,site,world)
             skip = b.region(site, (b.world,), body)
             b.finish(skip, (b.parameter(skip, 0),), (b.world,))
             follow = b.region(site, body.parameters, body)

@@ -66,7 +66,7 @@ _RULE_MODULES = ('source_display_rules.py', 'source_string_rules.py', 'source_co
                  'source_deferred_interfaces.py', 'source_statement_atoms.py', 'source_statement_imports.py',
                  'source_statement_functions.py', 'source_type_parameter_interfaces.py', 'source_type_parameter_rules.py',
                  'source_definition_interfaces.py', 'source_statement_definitions.py', 'source_statement_contexts.py',
-                 'source_statement_exceptions.py', 'source_statement_exception_groups.py')
+                 'source_statement_exceptions.py', 'source_statement_exception_groups.py', 'source_condition_rules.py')
 
 
 class SourceRuleError(ProductionError):
@@ -126,8 +126,8 @@ class SourceExpressionRules:
             supported = row.name in _FIELDS
             status = ('LOCAL_RULE' if supported else 'PARENT_CONTEXT_RULE' if row.name in _AUX_FIELDS else 'SELECTOR_METADATA' if any(
                 base in selectors for base in row.bases) else 'RULE_FRONTIER')
-            purposes = ((P.ProductionPurpose.VALUE, P.ProductionPurpose.STORE, P.ProductionPurpose.DELETE)
-                        if row.name in _TARGETS else (P.ProductionPurpose.VALUE,)) if supported else ()
+            purposes = ((P.ProductionPurpose.VALUE, P.ProductionPurpose.CONDITION, P.ProductionPurpose.STORE, P.ProductionPurpose.DELETE)
+                        if row.name in _TARGETS else (P.ProductionPurpose.VALUE,P.ProductionPurpose.CONDITION)) if supported else ()
             rows.append(dict(constructor=row.name, fields=list(row.fields), status=status,
                 purposes=[p.value for p in purposes], selectors=sorted(_SELECTORS.get(row.name, ())),
                 context_frontiers=[],
@@ -167,7 +167,7 @@ class SourceExpressionRules:
                 for kind, signature in delegation_signature_catalog().items()],
             state_parameter=encode(self.world), exception_abi=self.exception_abi.value,
             call_compiler_profile=self.call_profile,
-            child_interfaces='VALUE:(WORLD)->(REFERENCE,WORLD);STORE:(REFERENCE,WORLD)->(WORLD);DELETE:(WORLD)->(WORLD)',
+            child_interfaces='VALUE:(WORLD)->(REFERENCE,WORLD);CONDITION:(WORLD)->(BOOL,WORLD);STORE:(REFERENCE,WORLD)->(WORLD);DELETE:(WORLD)->(WORLD)',
             effect_policy='CONSERVATIVE_STATE;NO_PURITY_OR_PHYSICAL_ACTION_PROOF')
 
     def descriptor_owner(self, occurrence):
@@ -239,9 +239,12 @@ class SourceExpressionRules:
                  'no local expression rule implemented for ' + constructor)
         _require(self.descriptor_owner(occurrence) is None, 'PARENT_OWNED_SOURCE', str(occurrence),
             'target address/read/write schedule belongs to its original parent statement')
-        _require(purpose is P.ProductionPurpose.VALUE or constructor in _TARGETS and purpose in (
+        _require(purpose in (P.ProductionPurpose.VALUE,P.ProductionPurpose.CONDITION) or constructor in _TARGETS and purpose in (
             P.ProductionPurpose.STORE, P.ProductionPurpose.DELETE), 'PURPOSE_FRONTIER', str(occurrence),
             'constructor has no rule for this purpose')
+        if purpose is P.ProductionPurpose.CONDITION and constructor in _TARGETS:
+            _require(self.source.roles.context(occurrence)=='Load','PURPOSE_SOURCE_MISMATCH',str(occurrence),
+                'condition cannot evaluate a Store/Del target')
         context = self.source.context.entry_context(occurrence)
         _require(self.source.context.material.regions[context.region].eligibility == 'ELIGIBLE',
                  'SUPPRESSED_SOURCE', str(occurrence), 'C1 retains this syntax without an executable schedule')
@@ -351,8 +354,12 @@ class _Builder:
     def evaluate(self, region, site, state, purpose=P.ProductionPurpose.VALUE, value=None):
         _require(self.value(site).kind == 'NODE', 'RULE_SHAPE', str(site), 'evaluated child must be an expression occurrence')
         arguments = (state,) if value is None else (value, state)
-        outputs = (_REF, self.world) if purpose is P.ProductionPurpose.VALUE else (self.world,)
+        outputs = ((_BOOL,self.world) if purpose is P.ProductionPurpose.CONDITION else
+            (_REF,self.world) if purpose is P.ProductionPurpose.VALUE else (self.world,))
         return self.emit(region, P.EvaluateChild(site, purpose), arguments, outputs, source=site)
+
+    def condition(self,region,site,state):
+        return self.evaluate(region,site,state,P.ProductionPurpose.CONDITION)
 
     def action(self, region, kind, selectors, arguments, types=None):
         return self.emit(region, P.ApplyLanguageAction(kind, selectors), arguments,
@@ -400,6 +407,10 @@ class _Builder:
         kind = self.node.constructor
         for name in _FIELDS[kind]:
             self.mark(name, P.ProductionDispositionKind.METADATA)
+        if self.purpose is P.ProductionPurpose.CONDITION:
+            from scar.analysis.source_condition_rules import emit_condition
+            emit_condition(self,root,state)
+            return self.plan(root,root_source)
         if kind in ('Name', 'Attribute', 'Subscript'):
             self.target(root, state)
         elif kind in ('List', 'Tuple', 'Set', 'Dict'):
@@ -537,8 +548,7 @@ class _Builder:
     def conditional(self, region, state):
         for name in ('test', 'body', 'orelse'):
             self.mark(name, P.ProductionDispositionKind.EVALUATED_CHILD)
-        value, state = self.evaluate(region, self.site('test'), state)
-        condition, state = self.action(region, P.LanguageActionKind.TRUTH, (), (value, state), (_BOOL, self.world))
+        condition, state = self.condition(region, self.site('test'), state)
         alternatives = []
         for name in ('body', 'orelse'):
             child = self.region(self.site(name), (self.world,), region)

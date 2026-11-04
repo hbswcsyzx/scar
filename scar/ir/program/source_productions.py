@@ -28,6 +28,7 @@ class ProductionStepID(Identifier):
 
 class ProductionPurpose(str, Enum):
     VALUE = 'VALUE'
+    CONDITION = 'CONDITION'
     STATEMENT = 'STATEMENT'
     STORE = 'STORE'
     DELETE = 'DELETE'
@@ -63,6 +64,7 @@ class ProductionDispositionKind(str, Enum):
     METADATA = 'METADATA'
     SUPPRESSED = 'SUPPRESSED'
     NO_NORMAL_PREDECESSOR = 'NO_NORMAL_PREDECESSOR'
+    DELEGATED_VALUE_RULE = 'DELEGATED_VALUE_RULE'
 
 
 class LanguageActionKind(str, Enum):
@@ -680,6 +682,12 @@ class ReferenceIsNone:
 
 
 @dataclass(frozen=True, slots=True)
+class InvertCondition:
+    """Invert an admitted control boolean without truth-testing an object."""
+    pass
+
+
+@dataclass(frozen=True, slots=True)
 class SplitExceptionGroup:
     """CHECK_EG_MATCH: validate type, split, install non-None matched group.
 
@@ -793,7 +801,7 @@ ProductionInstruction = (EvaluateChild | ApplyLanguageAction | ReadCompilationOp
     | ReadContextMethod | InvokeContextMethod | ContextAwaitable | EnterHandledException
     | RestoreHandledException | ContextExceptionArguments | PrepareReraise
     | MatchExceptionType | DeleteExceptionBinding
-    | ReferenceIsNone | SplitExceptionGroup | MergeExceptionGroup
+    | ReferenceIsNone | InvertCondition | SplitExceptionGroup | MergeExceptionGroup
     | ApplyRegion | BranchControl | LoopControl | DeferRegion | ReferenceEnvironment | EnterDeferredBody
     | HandleCompletions | TransferCompletion | SuspendExecution)
 
@@ -836,7 +844,7 @@ class SourceProductionPlan:
     steps: tuple[ProductionStep, ...]
     slots: tuple[ProductionSlotDisposition, ...]
     schema: str = 'scar.source-production-plan'
-    schema_version: int = 14
+    schema_version: int = 15
     authority: str = 'SOURCE_RECIPE_SHAPE_ONLY'
 
 

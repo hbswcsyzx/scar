@@ -701,7 +701,7 @@ def test_delegation_keeps_send_and_post_driver_completion_paths_separate(rules, 
             plan = variant.build(occurrence)
             checked = variant.verify(plan)
             assert not checked['native_delegation_expanded'] and not checked['driver_protocol_graph_generated']
-            assert plan.schema_version == 14
+            assert plan.schema_version == 15
             _, root_steps = owned(plan)
             acquire = next(s for s in root_steps if type(s.instruction) is P.ApplyDelegationProtocol)
             assert acquire.instruction.protocol is (P.DelegationProtocolKind.AWAITABLE_ITER if constructor == 'Await'
@@ -1076,7 +1076,7 @@ def test_atomic_statement_addresses_world_and_terminal_completions(rules):
             assert type(steps[0].instruction) is P.ReadCompilationOption
             enabled = next(s for s in steps if type(s.instruction) is P.BranchControl).instruction.on_true.region
             _, enabled_steps = owned(plan, enabled)
-            truth = next(s for s in enabled_steps if type(s.instruction) is P.ApplyLanguageAction and s.instruction.action is P.LanguageActionKind.TRUTH)
+            truth = next(s for s in enabled_steps if type(s.instruction) is P.EvaluateChild and s.instruction.purpose is P.ProductionPurpose.CONDITION)
             branch = next(s for s in enabled_steps if type(s.instruction) is P.BranchControl)
             assert branch.instruction.on_true.arguments == branch.instruction.on_false.arguments == (P.ProductionResult(truth.id, 1),)
             for step in plan.steps:
@@ -1585,3 +1585,92 @@ def test_exception_group_schedules_keep_remainders_accumulation_and_handled_stat
         ops=list(dis.get_instructions(function))
         assert any(s.opname=='CHECK_EG_MATCH' for s in ops)
         assert any(s.opname=='CALL_INTRINSIC_2' and s.argrepr=='INTRINSIC_PREP_RERAISE_STAR' for s in ops)
+
+
+def test_condition_context_does_not_truth_test_a_short_circuit_result_twice(monkeypatch):
+    import dis
+    from types import CodeType
+    from scar.analysis.source_statement_rules import SourceStatementRules
+    from scar.ir.program.structured import PythonProtocolKind as K
+    from scar.ir.program.control import LanguageCompletionKind as C
+    text='assigned = source\ndef control(a,b,c):\n    if a and b or c:\n        pass\n    while not (a or b):\n        break\n    assert a < b < c\n    return a if b and c else c\nvalues = [item for item in items if flag and other]\ndef guard(subject):\n    match subject:\n        case captured if flag and other:\n            pass\ndef named(a,b):\n    if (saved := a and b):\n        pass\ndef conditional(a,b,c):\n    if a if b else c:\n        pass\n'
+    rules=_rules(_documents(text));boolean=ValueType(ValueKind.DATA,'builtins.bool')
+    for abi in ExceptionABI:
+        expression=SourceExpressionRules(rules.source,world=WORLD,exception_abi=abi)
+        statements=SourceStatementRules(rules.source,world=WORLD,exception_abi=abi)
+        for constructor in ('BoolOp','IfExp','Compare','UnaryOp','NamedExpr'):
+            for occurrence in occurrences(rules,constructor):
+                with monkeypatch.context() as guard:
+                    guard.setattr(ast,'parse',lambda *a,**kw:pytest.fail('condition rule reparsed source'))
+                    conditioned=expression.build(occurrence,P.ProductionPurpose.CONDITION);expression.verify(conditioned)
+                valued=expression.build(occurrence)
+                root,steps=owned(conditioned)
+                assert root.id!=owned(valued)[0].id
+                assert next(c.types for c in root.completions if c.kind is C.FALLTHROUGH)==(boolean,WORLD)
+                assert next(c.types for c in owned(valued)[0].completions if c.kind is C.FALLTHROUGH)==(REF,WORLD)
+                if constructor=='BoolOp':
+                    assert not any(type(s.instruction) is P.ApplyPythonProtocol and s.instruction.protocol is K.TRUTH for s in conditioned.steps)
+                    assert all(s.instruction.purpose is P.ProductionPurpose.CONDITION for s in conditioned.steps if type(s.instruction) is P.EvaluateChild)
+                    branch=next(s.instruction for s in steps if type(s.instruction) is P.BranchControl)
+                    op=rules.source.context.syntax.nodes[rules.source.roles.field(occurrence,'op').reference].constructor
+                    done=branch.on_false if op=='And' else branch.on_true
+                    short,_=owned(conditioned,done.region)
+                    assert short.parameters==(boolean,WORLD)  # already decided, no object truth call on this edge
+                elif constructor=='Compare':
+                    assert sum(type(s.instruction) is P.ApplyPythonProtocol and s.instruction.protocol is K.TRUTH for s in conditioned.steps)==len(rules.source.roles.field(occurrence,'ops').items)
+                elif constructor=='UnaryOp':
+                    assert any(type(s.instruction) is P.InvertCondition for s in conditioned.steps)
+                elif constructor=='NamedExpr':
+                    child=next(s.instruction for s in steps if type(s.instruction) is P.EvaluateChild)
+                    assert child.purpose is P.ProductionPurpose.VALUE
+                    assert rules.source.roles.locate(child.field)[1].reference==occurrence  # assignment must precede final truth test
+        for constructor in ('If','While','Assert'):
+            for occurrence in occurrences(rules,constructor):
+                plan=statements.build(occurrence)
+                tests=[s for s in plan.steps if type(s.instruction) is P.EvaluateChild and field_name(rules,s.instruction.field)=='test']
+                assert tests and all(s.instruction.purpose is P.ProductionPurpose.CONDITION for s in tests)
+        target=next(o for o in occurrences(rules,'Name') if rules.source.roles.context(o)=='Store')
+        with pytest.raises(SourceRuleError,match='PURPOSE_SOURCE_MISMATCH'):
+            expression.build(target,P.ProductionPurpose.CONDITION)
+    # Static compiler control paths do not return an operand for a second test.
+    code=compile('def condition(a,b):\n    if a and b:\n        return 1\n    return 0\n','<static-condition-oracle>','exec',dont_inherit=True)
+    function=next(c for c in code.co_consts if type(c) is CodeType)
+    ops=list(dis.get_instructions(function));tests=[s for s in ops if s.opname=='TO_BOOL']
+    assert len(tests)==2
+    jump=next(s for s in ops if s.opname=='POP_JUMP_IF_FALSE')
+    tail=[s for s in ops if s.offset>=jump.argval]
+    assert not any(s.opname=='TO_BOOL' for s in tail)
+
+
+def test_demanded_conditions_are_streamed_once_and_tampered_context_is_rejected(tmp_path):
+    import json,gzip
+    from hashlib import sha256
+    from scar.analysis.source_anchor_materials import _write
+    from scar.analysis.source_bytes import decoded_source_bytes
+    from scar.analysis.source_expression_materials import collect_source_expressions,collect_source_statements
+    documents=_documents('if a and b:\n    pass\nassert not c\nvalue = left if flag or other else right\n')
+    model=tmp_path/'model';model.mkdir();f0=documents[0];text=decoded_source_bytes(f0)
+    source=dict(schema='scar.static-source-text',schema_version=1,path=f0['path'],namespace_root=f0['namespace_root'],
+        raw_sha256=f0['raw']['sha256'],decoded_sha256=sha256(text.encode()).hexdigest(),encoding='utf-8',text=text)
+    names=('source_bytes','source_tokens','source_syntax','source_roles','source_contexts',
+        'source_declarations','source_bindings','source_symbols','compiler_topology','compiler_symbols')
+    artifacts={name:_write(model,name+'.json.gz',doc) for name,doc in dict(source=source,**dict(zip(names,documents))).items()}
+    unit=dict(key='fixture',path=f0['path'],namespace_root=f0['namespace_root'],raw_sha256=source['raw_sha256'],
+        decoded_sha256=source['decoded_sha256'],encoding='utf-8',source_bytes=len(text.encode()),artifacts=artifacts)
+    (model/'manifest.json').write_text(json.dumps(dict(schema='scar.static-program',schema_version=1,units=[unit])))
+    for name,collect,expected in (('expressions',collect_source_expressions,3),('statements',collect_source_statements,5)):
+        store=tmp_path/name;report=collect(model,store);fresh=collect(model,tmp_path/(name+'-fresh'),materials=store)
+        assert report['schema_version']==3 and report['counts']==fresh['counts']
+        assert report['counts']['condition_recipes']==expected
+        descriptor=report['units'][0]['artifact'];path=store/descriptor['path']
+        rows=[json.loads(line) for line in gzip.decompress(path.read_bytes()).splitlines()]
+        contexts=[r for r in rows if r['status']=='LOCAL_CONTEXT_SOURCE_RULE']
+        assert len(contexts)==expected and len({(r['occurrence'],r['purpose']) for r in contexts})==expected
+        assert all(r['purpose']=='CONDITION' and r['plan']['purpose']=='CONDITION' for r in contexts)
+        contexts[0]['plan']['purpose']='VALUE'
+        raw=b''.join((json.dumps(row,sort_keys=True,separators=(',',':'))+'\n').encode() for row in rows)
+        payload=gzip.compress(raw,compresslevel=3,mtime=0);path.write_bytes(payload)
+        descriptor.update(bytes=len(payload),sha256=sha256(payload).hexdigest(),decoded_bytes=len(raw),decoded_sha256=sha256(raw).hexdigest())
+        (store/'result.json').write_text(json.dumps(report))
+        with pytest.raises(ValueError,match='condition variant'):
+            collect(model,tmp_path/(name+'-tampered'),materials=store)

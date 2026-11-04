@@ -1,6 +1,6 @@
 """Stream per-source rule recipes and explicit frontiers; never run targets."""
 import argparse
-from collections import Counter
+from collections import Counter, deque
 from concurrent.futures import ProcessPoolExecutor
 from contextlib import ExitStack
 import gzip
@@ -54,6 +54,7 @@ def _implementation():
         'analysis/source_statement_contexts.py',
         'analysis/source_statement_exceptions.py',
         'analysis/source_statement_exception_groups.py',
+        'analysis/source_condition_rules.py',
         'analysis/source_type_parameter_interfaces.py', 'analysis/source_type_parameter_rules.py',
         'analysis/source_productions.py', 'analysis/program_types.py',
         'ir/program/source_productions.py', 'ir/record_codec.py')
@@ -89,8 +90,28 @@ def _unit(task):
     relative = 'units/' + unit['key'] + '/' + domain + '.jsonl.gz'
     digest, decoded_bytes = sha256(), 0
     built, frontier, child_obligations, descriptors, suppressed = (Counter() for _ in range(5))
+    condition_queue=deque();condition_seen=set();condition_built=Counter()
     expressions, parent_expressions = 0, 0
     stream_path = Path(out) / relative
+
+    def account(plan):
+        for step in plan.steps:
+            instruction=step.instruction
+            if type(instruction) is P.EvaluateChild:
+                selected=rules.source.roles.locate(instruction.field)[1]
+                conditioned=instruction.purpose is P.ProductionPurpose.CONDITION
+                child_obligations[('CONDITION:' if conditioned else '')+syntax.nodes[selected.reference].constructor]+=1
+                if conditioned and selected.reference not in condition_seen:
+                    condition_seen.add(selected.reference);condition_queue.append(selected.reference)
+            elif type(instruction) is P.PublishAnnotation and instruction.publication is P.AnnotationPublicationKind.DEFERRED:
+                child_obligations['ANNOTATION_REQUEST']+=1
+            elif type(instruction) is P.BuildFunctionAnnotations:
+                child_obligations['FUNCTION_ANNOTATION_REQUEST']+=1
+            elif type(instruction) is P.BuildLazyExpression:
+                field=rules.source.roles.locate(instruction.expression.source)[0].name
+                owner=syntax.nodes[instruction.expression.source.occurrence].constructor
+                child_obligations['TYPE_ALIAS_VALUE_REQUEST' if owner=='TypeAlias' else 'TYPE_PARAMETER_'+field.upper()+'_REQUEST']+=1
+
     with ExitStack() as stack:
         if prior is None:
             _durable_mkdir(stream_path.parent)
@@ -132,18 +153,7 @@ def _unit(task):
                     plan = rules.build(occurrence, purpose, max_steps=limits['steps'], max_regions=limits['regions'])
                     row.update(status='LOCAL_SOURCE_RULE', plan=encode(plan, record_tags=P.PRODUCTION_RECORD_TAGS))
                     built[node.constructor] += 1
-                    for step in plan.steps:
-                        if type(step.instruction) is P.EvaluateChild:
-                            selected = rules.source.roles.locate(step.instruction.field)[1]
-                            child_obligations[syntax.nodes[selected.reference].constructor] += 1
-                        elif type(step.instruction) is P.PublishAnnotation and step.instruction.publication is P.AnnotationPublicationKind.DEFERRED:
-                            child_obligations['ANNOTATION_REQUEST'] += 1
-                        elif type(step.instruction) is P.BuildFunctionAnnotations:
-                            child_obligations['FUNCTION_ANNOTATION_REQUEST'] += 1
-                        elif type(step.instruction) is P.BuildLazyExpression:
-                            field=rules.source.roles.locate(step.instruction.expression.source)[0].name
-                            owner=syntax.nodes[step.instruction.expression.source.occurrence].constructor
-                            child_obligations['TYPE_ALIAS_VALUE_REQUEST' if owner=='TypeAlias' else 'TYPE_PARAMETER_'+field.upper()+'_REQUEST'] += 1
+                    account(plan)
                 except SourceRuleError as error:
                     if error.code not in _FRONTIERS:
                         raise
@@ -156,6 +166,21 @@ def _unit(task):
                 stream.write(raw)
             elif stream.readline(len(raw) + 1) != raw:
                 raise ValueError('stored source rule/frontier differs from fresh original F2/F3 replay')
+        # Context variants form a separate keyed domain after the original
+        # occurrence partition. Expand only demanded conditions, once per key.
+        condition_rules=SourceExpressionRules(rules.source,world=_WORLD,exception_abi=ExceptionABI.EXCEPTION_WORLD) if condition_queue else None
+        while condition_queue:
+            occurrence=condition_queue.popleft()
+            plan=condition_rules.build(occurrence,P.ProductionPurpose.CONDITION,max_steps=limits['steps'],max_regions=limits['regions'])
+            condition_built[syntax.nodes[occurrence].constructor]+=1
+            account(plan)
+            row=dict(occurrence=occurrence,constructor=syntax.nodes[occurrence].constructor,
+                purpose=P.ProductionPurpose.CONDITION.value,status='LOCAL_CONTEXT_SOURCE_RULE',
+                plan=encode(plan,record_tags=P.PRODUCTION_RECORD_TAGS))
+            raw=_json(row);digest.update(raw);decoded_bytes+=len(raw)
+            if prior is None:stream.write(raw)
+            elif stream.readline(len(raw)+1)!=raw:
+                raise ValueError('stored condition variant differs from fresh original F2/F3 replay')
         if prior is not None and stream.read(1):
             raise ValueError('extra source expression records after the original occurrence domain')
     if expressions != sum(built.values()) + sum(frontier.values()) + sum(suppressed.values()) + parent_expressions:
@@ -174,6 +199,7 @@ def _unit(task):
         parent_descriptors=dict(sorted(descriptors.items())), **{domain: expressions},
         suppressed_sources=dict(sorted(suppressed.items())), parent_owned_expressions=parent_expressions,
         child_interface_obligations=dict(sorted(child_obligations.items())),
+        condition_recipes=sum(condition_built.values()),condition_constructors=dict(sorted(condition_built.items())),
         parent_seconds=parent_seconds, seconds=time.monotonic()-started,
         catalog_sha256=sha256(_json(catalog)).hexdigest())
     if keep_catalog:
@@ -208,7 +234,7 @@ def collect_source_rules(model, out, *, domain, sources=(), materials=None, jobs
             raise ValueError('fresh verification output must be independent of source materials')
         store_bytes = (store / 'result.json').read_bytes()
         previous = json.loads(store_bytes)
-        if (previous.get('schema') != schema or previous.get('schema_version') != 2 or previous.get('domain') != domain
+        if (previous.get('schema') != schema or previous.get('schema_version') != 3 or previous.get('domain') != domain
             or previous.get('implementation_sha256') != pins or previous.get('input_basis') != basis
             or previous.get('limits') != limits):
             raise ValueError('previous rule material input/implementation/limit domain differs')
@@ -231,6 +257,7 @@ def collect_source_rules(model, out, *, domain, sources=(), materials=None, jobs
     if store is not None and (store / 'catalog.json').read_bytes() != catalog_bytes:
         raise ValueError('source rule catalog changed')
     counts = dict(units=len(rows), local_recipes=sum(sum(r['built'].values()) for r in rows),
+        condition_recipes=sum(r['condition_recipes'] for r in rows),
         rule_frontiers=sum(sum(r['frontiers'].values()) for r in rows),
         **{('expression_occurrences' if domain == 'expressions' else 'statement_occurrences'):sum(r[domain] for r in rows)},
         parent_descriptors=sum(sum(r['parent_descriptors'].values()) for r in rows),
@@ -244,7 +271,7 @@ def collect_source_rules(model, out, *, domain, sources=(), materials=None, jobs
         raise ValueError('model or implementation changed while processing source rules')
     if store is not None and (store / 'result.json').read_bytes() != store_bytes:
         raise ValueError('source rule material manifest changed during fresh verification')
-    report = dict(schema=schema, schema_version=2, domain=domain,
+    report = dict(schema=schema, schema_version=3, domain=domain,
         status='LOCAL_RULES_WITH_FRONTIERS' if counts['rule_frontiers'] else 'LOCAL_RULES_VERIFIED',
         mode='FRESH_VERIFICATION' if store is not None else 'COLLECTION',
         input_basis=basis, implementation_sha256=pins, model_manifest_sha256=sha256(manifest_bytes).hexdigest(),

@@ -187,8 +187,7 @@ class _StatementBuilder(_Builder):
 
     def conditional_statement(self, root, current):
         self.mark('test', P.ProductionDispositionKind.EVALUATED_CHILD)
-        value, current = self.evaluate(root, self.site('test'), current)
-        decision, current = self.action(root, P.LanguageActionKind.TRUTH, (), (value, current), (_BOOL, self.world))
+        decision, current = self.condition(root,self.site('test'),current)
         alternatives = []
         for name in ('body', 'orelse'):
             child = self.region(self.site(name), (self.world,), root)
@@ -216,8 +215,7 @@ class _StatementBuilder(_Builder):
         state = self.parameter(condition, invariant)
         if iterator is None:
             self.mark('test', P.ProductionDispositionKind.EVALUATED_CHILD)
-            value, state = self.evaluate(condition, self.site('test'), state)
-            decision, state = self.action(condition, P.LanguageActionKind.TRUTH, (), (value, state), (_BOOL, self.world))
+            decision, state = self.condition(condition,self.site('test'),state)
             self.finish(condition, (decision, state), (_BOOL, self.world))
             control = condition.id
         else:

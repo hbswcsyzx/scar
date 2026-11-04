@@ -55,7 +55,7 @@ def test_closed_grammar_exact_records_strict_codec_and_budgets():
     assert summary['control_semantics_checked'] is False
     assert A.read_production_plan(A.production_plan_document(value)) == value
     catalog = A.production_type_catalog()
-    assert catalog['counts'] == dict(records=89, fields=237, identifiers=4, enums=20, enum_members=219, unions=20)
+    assert catalog['counts'] == dict(records=90, fields=237, identifiers=4, enums=20, enum_members=221, unions=20)
     assert set(catalog['instruction_variants']) == {
         'EvaluateChild', 'ApplyLanguageAction', 'ReadCompilationOption', 'ApplyInplaceOperator', 'PublishAnnotation',
         'ImportRequest', 'ImportMember', 'ImportStar',
@@ -67,7 +67,7 @@ def test_closed_grammar_exact_records_strict_codec_and_budgets():
         'ReadContextMethod','InvokeContextMethod','ContextAwaitable','EnterHandledException',
         'RestoreHandledException','ContextExceptionArguments','PrepareReraise',
         'MatchExceptionType','DeleteExceptionBinding',
-        'ReferenceIsNone','SplitExceptionGroup','MergeExceptionGroup',
+        'ReferenceIsNone','InvertCondition','SplitExceptionGroup','MergeExceptionGroup',
         'ApplyPythonProtocol', 'ApplyDelegationProtocol', 'AccessBinding', 'ConstructValue', 'DefineLiteral', 'ApplyRegion',
         'BranchControl', 'LoopControl', 'DeferRegion', 'ReferenceEnvironment', 'EnterDeferredBody', 'HandleCompletions',
         'TransferCompletion', 'SuspendExecution'}
@@ -324,6 +324,25 @@ def test_exception_group_and_none_identity_interfaces_keep_data_and_state_separa
             assert A.read_production_plan(A.production_plan_document(specimen))==specimen
             with pytest.raises(A.ProductionError,match='IDENTITY_INTERFACE' if predicate else 'EXCEPT_INTERFACE'):
                 A.validate_production_plan(replace(specimen,steps=(replace(apply,arguments=()),done)))
+
+
+def test_condition_interfaces_distinguish_control_booleans_from_object_references():
+    from scar.ir.program.ids import LocationID
+    world=ValueType(ValueKind.STATE,location=LocationID('condition-interface-world'))
+    outputs=(*normal(BOOL,world),P.ProductionCompletion(C.RAISE,(REF,world)))
+    root=region('condition',parameters=(world,),outputs=outputs,steps=('condition','done'))
+    apply=step('condition',root,P.EvaluateChild(P.SlotRef(0,'FIELD',0),P.ProductionPurpose.CONDITION),(parameter(root),),outputs)
+    done=step('done',root,P.TransferCompletion(C.FALLTHROUGH),(P.ProductionResult(apply.id,0),P.ProductionResult(apply.id,1)),normal(BOOL,world))
+    specimen=replace(plan((root,),(apply,done)),purpose=P.ProductionPurpose.CONDITION)
+    assert A.read_production_plan(A.production_plan_document(specimen))==specimen
+    with pytest.raises(A.ProductionError,match='CONDITION_INTERFACE'):
+        A.validate_production_plan(replace(specimen,regions=(replace(root,completions=normal(REF,world)),)))
+    root=region('invert',parameters=(BOOL,),outputs=normal(BOOL),steps=('invert',))
+    action=step('invert',root,P.InvertCondition(),(parameter(root),),normal(BOOL))
+    specimen=plan((root,),(action,))
+    assert A.read_production_plan(A.production_plan_document(specimen))==specimen
+    with pytest.raises(A.ProductionError,match='CONDITION_INTERFACE'):
+        A.validate_production_plan(replace(specimen,steps=(replace(action,arguments=()),)))
 
 
 def test_shared_template_calls_keep_explicit_ports_and_lexical_activation_boundaries():

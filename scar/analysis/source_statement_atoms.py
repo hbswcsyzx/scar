@@ -165,8 +165,7 @@ def _assert(b, root, state):
     omitted = b.region(root.source, (b.world,), root)
     b.finish(omitted, (b.parameter(omitted, 0),), (b.world,))
     b.mark('test', P.ProductionDispositionKind.EVALUATED_CHILD)
-    test, current = b.evaluate(checked, b.site('test'), b.parameter(checked, 0))
-    condition, current = b.action(checked, P.LanguageActionKind.TRUTH, (), (test, current), (_BOOL, b.world))
+    condition, current = b.condition(checked,b.site('test'),b.parameter(checked,0))
     decision_state = current
     passed = b.region(root.source, (b.world,), checked)
     b.finish(passed, (b.parameter(passed, 0),), (b.world,))

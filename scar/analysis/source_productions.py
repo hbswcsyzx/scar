@@ -149,7 +149,7 @@ def validate_production_plan(plan, *, max_visits=1_000_000):
     """
     visits = _shape(plan, max_visits)
     _require((plan.schema, plan.schema_version, plan.authority) == (
-        'scar.source-production-plan', 14, 'SOURCE_RECIPE_SHAPE_ONLY'),
+        'scar.source-production-plan', 15, 'SOURCE_RECIPE_SHAPE_ONLY'),
         'SCHEMA', 'plan', 'unsupported recipe schema or authority')
     source = plan.input
     _require(bool(source.path) and bool(source.namespace_root), 'INPUT', 'plan.input', 'source paths must be nonempty')
@@ -229,6 +229,15 @@ def validate_production_plan(plan, *, max_visits=1_000_000):
     _require(all(s.region in regions for s in plan.steps), 'STEP_OWNER', 'plan.steps', 'unknown region owner')
     region_outputs = {r.id: completions(r.completions, r.id, str(r.id)) for r in plan.regions}
     step_outputs = {s.id: completions(s.completions, s.region, str(s.id)) for s in plan.steps}
+    if plan.purpose is P.ProductionPurpose.CONDITION:
+        root=regions[plan.root];reference=ValueType(ValueKind.REFERENCE)
+        _require(len(root.parameters)==1 and type(root.parameters[0]) is ValueType and root.parameters[0].kind is ValueKind.STATE,
+            'CONDITION_INTERFACE','plan.root','condition root requires one explicit world input')
+        world=root.parameters[0];outputs=region_outputs[root.id]
+        _require(outputs.get((C.FALLTHROUGH,None))==(ValueType(ValueKind.DATA,'builtins.bool'),world)
+            and all(kind in (C.FALLTHROUGH,C.RAISE) and (kind is not C.RAISE or types in (
+                (reference,world),(reference,reference,world))) for (kind,_),types in outputs.items()),
+            'CONDITION_INTERFACE','plan.root','condition root must export a control boolean, not a value reference')
     protocols = ({r.kind: r for r in protocol_signature_catalog()}
         if any(type(s.instruction) is P.ApplyPythonProtocol for s in plan.steps) else {})
 
@@ -367,6 +376,14 @@ def validate_production_plan(plan, *, max_visits=1_000_000):
                         ((reference, args[0]),) if kind is C.RETURN else ((args[0],),))
                     _require(types in accepted,
                         'PORT_TYPES', str(identity), 'statement completion payload differs from its world/exception interface')
+            elif type(instruction) is P.EvaluateChild and instruction.purpose is P.ProductionPurpose.CONDITION:
+                reference=ValueType(ValueKind.REFERENCE)
+                _require(len(args)==1 and type(args[0]) is ValueType and args[0].kind is ValueKind.STATE,
+                    'CONDITION_INTERFACE',str(identity),'condition child requires its current world')
+                _require(outputs.get((C.FALLTHROUGH,None))==(ValueType(ValueKind.DATA,'builtins.bool'),args[0])
+                    and all(kind in (C.FALLTHROUGH,C.RAISE) and (kind is not C.RAISE or types in (
+                        (reference,args[0]),(reference,reference,args[0]))) for (kind,_),types in outputs.items()),
+                    'CONDITION_INTERFACE',str(identity),'condition child returns a control boolean/current world or its exception ABI')
             elif type(instruction) is P.ReadCompilationOption:
                 _require(not args and outputs == {(C.FALLTHROUGH, None): (ValueType(ValueKind.DATA, 'builtins.bool'),)},
                     'COMPILATION_OPTION', str(identity), 'compilation option produces only one symbolic boolean')
@@ -374,6 +391,10 @@ def validate_production_plan(plan, *, max_visits=1_000_000):
                 _require(args==(ValueType(ValueKind.REFERENCE),)
                     and outputs=={(C.FALLTHROUGH,None):(ValueType(ValueKind.DATA,'builtins.bool'),)},
                     'IDENTITY_INTERFACE',str(identity),'None identity predicate consumes one reference, with no state or exception')
+            elif type(instruction) is P.InvertCondition:
+                boolean=ValueType(ValueKind.DATA,'builtins.bool')
+                _require(args==(boolean,) and outputs=={(C.FALLTHROUGH,None):(boolean,)},
+                    'CONDITION_INTERFACE',str(identity),'condition inversion consumes/returns one control boolean, without state or exceptions')
             elif type(instruction) is P.EnterTypeParameters:
                 environment=instruction.environment
                 _require(region.kind is P.ProductionRegionKind.TYPE_PARAMETERS and ordinal==0
@@ -832,6 +853,7 @@ class ProductionSourceIndex:
         self._statements = None
         self._type_parameters = None
         self._definitions = None
+        self._expressions=frozenset(row.name for row in syntax.profile.ast_schema if 'expr' in row.bases)
         self._role_sites = frozenset(port.site for port in frontend_view.roles.ports)
         self.input = P.ProductionInput(f0['path'], f0['namespace_root'], _digest(encode(syntax)),
             _digest(encode(context_view.roles)), _digest(encode(context_view.material)),
@@ -988,6 +1010,9 @@ class ProductionSourceIndex:
                     _, value = self.roles.locate(instruction.field)
                     _require(instruction.field.group == 'FIELD' and value.kind in ('NODE', 'LIST'),
                              'SOURCE_REFERENCE', str(step.id), 'evaluated child must be an original child field')
+                    if instruction.purpose is P.ProductionPurpose.CONDITION:
+                        _require(value.kind=='NODE' and self.context.syntax.nodes[value.reference].constructor in self._expressions,
+                            'SOURCE_CONDITION',str(step.id),'condition child must identify its original expression occurrence')
                     if instruction.purpose is P.ProductionPurpose.STATEMENT:
                         _require(value.kind == 'NODE'
                             and {(c.kind, c.target) for c in step.completions}
