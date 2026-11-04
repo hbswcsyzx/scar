@@ -48,6 +48,23 @@ def documents():
         'large_positional = function(' + ','.join('value()' for _ in range(31)) + ', **mapping())',
         'large_keywords = function(**mapping(), ' + ','.join('key' + str(i) + '=value()' for i in range(16)) + ')',
         'unsupported = []',
+        'list_display = [first(), *iterable(), last()]',
+        'tuple_display = (first(), *iterable(), last())',
+        'set_display = {first(), *iterable(), last()}',
+        'dict_display = {key0(): value0(), **mapping(), key1(): value1()}',
+        'none_key = {None: value0(), **mapping()}',
+        '[target, *rest, obj.attr] = assigned',
+        'target, (nested, *tail), obj[index] = assigned',
+        'del [target, obj.attr, obj[index]]',
+        'large_list = [' + ','.join('part'+str(i) for i in range(31)) + ']',
+        'large_set = {' + ','.join('part'+str(i) for i in range(31)) + '}',
+        'large_dict = {' + ','.join('key'+str(i)+':part'+str(i) for i in range(34)) + '}',
+        'formatted = f"prefix {value()!r:{spec()}} suffix"',
+        'single_formatted = f"{value()}"', 'empty_formatted = f""',
+        'template = t"prefix {value()!r:{spec()}} suffix"',
+        'adjacent_template = t"{left}{right}"', 'empty_template = t""',
+        'large_formatted = f"' + ''.join('{part'+str(i)+'}' for i in range(31)) + '"',
+        'pending_comp = [item for item in iterable]',
     )) + '\n'
     f0 = source_bytes_document(text.encode(), path='/source/schedules.py', namespace_root='/source')
     f1 = source_tokens_document(f0)
@@ -89,9 +106,19 @@ def field_name(rules, site):
     return rules.source.roles.locate(site)[0].name
 
 
+def assigned_values(rules):
+    values = {}
+    for occurrence in occurrences(rules, 'Assign'):
+        target = rules.source.roles.field(occurrence, 'targets').items[0].reference
+        if rules.source.context.syntax.nodes[target].constructor == 'Name':
+            name = rules.source.roles.field(target, 'id').scalar.to_python()
+            values[name] = rules.source.roles.field(occurrence, 'value').reference
+    return values
+
+
 def purpose(rules, occurrence):
     kind = rules.source.context.syntax.nodes[occurrence].constructor
-    if kind not in ('Name', 'Attribute', 'Subscript'):
+    if kind not in ('Name', 'Attribute', 'Subscript', 'List', 'Tuple'):
         return P.ProductionPurpose.VALUE
     context = rules.source.roles.context(occurrence)
     return {'Load': P.ProductionPurpose.VALUE, 'Store': P.ProductionPurpose.STORE,
@@ -102,7 +129,8 @@ def test_all_local_families_and_selector_domains_without_reparsing(rules, monkey
     catalog = rules.catalog()
     implemented = {r['constructor'] for r in catalog['rules'] if r['status'] == 'LOCAL_RULE'}
     assert implemented == {'Constant', 'Name', 'BinOp', 'UnaryOp', 'Attribute', 'Subscript',
-                           'Slice', 'NamedExpr', 'IfExp', 'BoolOp', 'Compare', 'Call'}
+                           'Slice', 'NamedExpr', 'IfExp', 'BoolOp', 'Compare', 'Call',
+                           'List', 'Tuple', 'Set', 'Dict', 'JoinedStr', 'FormattedValue', 'TemplateStr', 'Interpolation'}
     selectors, seen = {}, set()
     for occurrence, node in enumerate(rules.source.context.syntax.nodes):
         if node.constructor not in implemented:
@@ -204,7 +232,7 @@ def test_targets_slice_holes_frontiers_and_budgets(rules):
     assert not any(type(s.instruction) is P.EvaluateChild for s in steps)
     assert len(steps[0].instruction.payload) == 3  # None positions retained, no guessed arity
     with pytest.raises(SourceRuleError, match='RULE_FRONTIER'):
-        rules.build(occurrences(rules, 'List')[0])
+        rules.build(occurrences(rules, 'ListComp')[0])
     with pytest.raises(SourceRuleError, match='BUDGET_FRONTIER'):
         rules.build(occurrences(rules, 'BinOp')[0], max_steps=1)
     with pytest.raises(SourceRuleError, match='BUDGET_FRONTIER'):
@@ -301,7 +329,7 @@ def test_call_schedules_preserve_argument_failures_and_parent_owned_descriptors(
             assert second.arguments[-1] == P.ProductionResult(first.id, len(normal.types)-1)
     for occurrence in (*occurrences(rules, 'Starred'), *occurrences(rules, 'keyword')):
         owner = rules.descriptor_owner(occurrence)
-        assert owner is not None and syntax.nodes[owner.occurrence].constructor == 'Call'
+        assert owner is not None and syntax.nodes[owner.occurrence].constructor in ('Call', 'List', 'Tuple', 'Set')
 
 
 def test_call_packing_protocol_order_matches_static_cpython_compilation(rules, documents):
@@ -336,3 +364,104 @@ def test_call_packing_protocol_order_matches_static_cpython_compilation(rules, d
         assert observed == [opcodes[p] for p in expected if p is not K.BUILD_CALL_POSITIONALS]
         checked += 1
     assert checked >= 6
+
+
+def test_container_protocols_preserve_hash_update_and_target_order(rules):
+    from scar.ir.program.structured import PythonProtocolKind as K
+    values = assigned_values(rules)
+    plans = {name:rules.build(values[name]) for name in ('dict_display', 'large_dict', 'list_display', 'tuple_display', 'set_display')}
+    def protocols(plan):
+        return [s.instruction.protocol for s in owned(plan)[1] if type(s.instruction) is P.ApplyPythonProtocol]
+    assert protocols(plans['dict_display']) == [K.BUILD_MAP, K.DICT_UPDATE, K.BUILD_MAP, K.DICT_UPDATE]
+    assert K.DICT_MERGE not in protocols(plans['dict_display'])
+    assert protocols(plans['large_dict']) == [K.BUILD_MAP, *([K.MAP_ADD]*17), K.BUILD_MAP, *([K.MAP_ADD]*17), K.DICT_UPDATE]
+    assert protocols(plans['list_display']) == [K.BUILD_DISPLAY_LIST, K.EXTEND_DISPLAY, K.APPEND_DISPLAY]
+    assert protocols(plans['tuple_display']) == [K.BUILD_DISPLAY_LIST, K.EXTEND_DISPLAY, K.APPEND_DISPLAY, K.DISPLAY_LIST_TO_TUPLE]
+    actions = [s.instruction.action for s in plans['set_display'].steps if type(s.instruction) is P.ApplyLanguageAction]
+    assert actions == [P.LanguageActionKind.SET_UPDATE, P.LanguageActionKind.SET_INSERT]
+    none_key = rules.build(values['none_key'])
+    _, steps = owned(none_key)
+    # Literal None is a real expression; an unpack hole is metadata, not an evaluated key.
+    evaluated_keys = [s.instruction.field.item_path for s in steps if type(s.instruction) is P.EvaluateChild
+                      and field_name(rules, s.instruction.field) == 'keys']
+    assert evaluated_keys == [(0,)]
+    for kind in ('List', 'Tuple'):
+        for occurrence in occurrences(rules, kind):
+            if purpose(rules, occurrence) is not P.ProductionPurpose.STORE:
+                continue
+            root, steps = owned(rules.build(occurrence, P.ProductionPurpose.STORE))
+            assert type(steps[0].instruction) is P.ApplyPythonProtocol or steps[0].instruction.action is P.LanguageActionKind.UNPACK_EXTENDED
+            stores = [s for s in steps if type(s.instruction) is P.EvaluateChild]
+            assert all(s.instruction.purpose is P.ProductionPurpose.STORE for s in stores)
+            assert all(s.arguments[0].step == steps[0].id for s in stores)
+
+
+def test_formatted_strings_convert_before_spec_and_templates_capture_without_conversion(rules):
+    from scar.ir.program.structured import PythonProtocolKind as K
+    values = assigned_values(rules)
+    template = rules.build(values['template'])
+    _, template_steps = owned(template)
+    evaluated = [s for s in template_steps if type(s.instruction) is P.EvaluateChild]
+    assert [rules.source.context.syntax.nodes[rules.source.roles.locate(s.instruction.field)[1].reference].constructor
+            for s in evaluated] == ['Constant', 'Constant', 'Interpolation']
+    assert sum(s.instruction.value.to_python() == '' for s in rules.build(values['adjacent_template']).steps
+               if type(s.instruction) is P.DefineLiteral) == 3
+    for occurrence in (*occurrences(rules, 'FormattedValue'), *occurrences(rules, 'Interpolation')):
+        plan = rules.build(occurrence)
+        _, steps = owned(plan)
+        converting = [i for i,s in enumerate(steps) if type(s.instruction) is P.ApplyPythonProtocol
+                      and s.instruction.protocol is K.FSTRING_CONVERT]
+        formatting = [s for s in steps if type(s.instruction) is P.ApplyPythonProtocol and s.instruction.protocol is K.FSTRING_FORMAT]
+        is_template = rules.source.context.syntax.nodes[occurrence].constructor == 'Interpolation'
+        if is_template:
+            assert not converting and not formatting
+            assert any(type(s.instruction) is P.ConstructValue and s.instruction.construction is P.ConstructionKind.INTERPOLATION for s in steps)
+        else:
+            assert len(formatting) == 1
+            spec = [i for i,s in enumerate(steps) if type(s.instruction) is P.EvaluateChild and field_name(rules,s.instruction.field)=='format_spec']
+            if converting and spec:
+                assert converting[0] < spec[0]
+    singleton = rules.build(values['single_formatted'])
+    root, steps = owned(singleton)
+    assert len(steps) == 2 and steps[-1].arguments[0] == P.ProductionResult(steps[0].id, 0)
+    empty = rules.build(values['empty_template'])
+    assert {s.instruction.value.to_python() for s in empty.steps if type(s.instruction) is P.DefineLiteral} == {'', ()}
+
+
+def test_container_and_formatting_schedules_match_static_compiler_output(rules, documents):
+    import dis
+    from scar.analysis.source_bytes import decoded_source_bytes
+    from scar.ir.program.structured import PythonProtocolKind as K
+    code = compile(decoded_source_bytes(documents[0]), '<static-display-oracle>', 'exec')
+    instructions = list(dis.get_instructions(code))
+    values = assigned_values(rules)
+    aliases = {K.BUILD_MAP:'BUILD_MAP', K.MAP_ADD:'MAP_ADD', K.DICT_UPDATE:'DICT_UPDATE',
+        K.BUILD_DISPLAY_LIST:'BUILD_LIST', K.EXTEND_DISPLAY:'LIST_EXTEND', K.APPEND_DISPLAY:'LIST_APPEND',
+        K.BUILD_SET_DISPLAY:'BUILD_SET', K.DISPLAY_LIST_TO_TUPLE:'CALL_INTRINSIC_1'}
+    actions = {P.LanguageActionKind.SET_INSERT:'SET_ADD', P.LanguageActionKind.SET_UPDATE:'SET_UPDATE'}
+    wanted = set(aliases.values()) | set(actions.values())
+    for name in ('dict_display','large_dict','list_display','tuple_display','set_display','large_set','large_list'):
+        occurrence = values[name]
+        node = rules.source.context.syntax.nodes[occurrence]
+        schema = next(c for c in rules.source.context.syntax.profile.ast_schema if c.name == node.constructor)
+        line = node.attributes[schema.attributes.index('lineno')].scalar.to_python()
+        observed = [op.opname for op in instructions if op.positions.lineno==line and op.opname in wanted]
+        expected = []
+        for step in owned(rules.build(occurrence))[1]:
+            op = step.instruction
+            if type(op) is P.ApplyPythonProtocol and op.protocol in aliases:
+                expected.append(aliases[op.protocol])
+            elif type(op) is P.ApplyLanguageAction and op.action in actions:
+                expected.append(actions[op.action])
+        assert observed == expected
+    def line_ops(name, wanted):
+        occurrence = values[name]
+        node = rules.source.context.syntax.nodes[occurrence]
+        schema = next(c for c in rules.source.context.syntax.profile.ast_schema if c.name == node.constructor)
+        line = node.attributes[schema.attributes.index('lineno')].scalar.to_python()
+        return [op.opname for op in instructions if op.positions.lineno == line and op.opname in wanted]
+    assert line_ops('formatted', {'CONVERT_VALUE','FORMAT_SIMPLE','FORMAT_WITH_SPEC','BUILD_STRING'}) == [
+        'CONVERT_VALUE','FORMAT_SIMPLE','FORMAT_WITH_SPEC','BUILD_STRING']
+    assert line_ops('template', {'CONVERT_VALUE','FORMAT_SIMPLE','FORMAT_WITH_SPEC','BUILD_INTERPOLATION','BUILD_TEMPLATE'}) == [
+        'FORMAT_SIMPLE','BUILD_INTERPOLATION','BUILD_TEMPLATE']
+    assert line_ops('large_formatted', {'BUILD_LIST','LIST_APPEND'}) == ['BUILD_LIST', *(['LIST_APPEND']*31)]

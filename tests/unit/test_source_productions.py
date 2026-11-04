@@ -55,9 +55,9 @@ def test_closed_grammar_exact_records_strict_codec_and_budgets():
     assert summary['control_semantics_checked'] is False
     assert A.read_production_plan(A.production_plan_document(value)) == value
     catalog = A.production_type_catalog()
-    assert catalog['counts'] == dict(records=34, fields=98, identifiers=4, enums=11, enum_members=169, unions=8)
+    assert catalog['counts'] == dict(records=36, fields=102, identifiers=4, enums=12, enum_members=185, unions=9)
     assert set(catalog['instruction_variants']) == {
-        'EvaluateChild', 'ApplyLanguageAction', 'ApplyPythonProtocol', 'AccessBinding', 'ConstructValue', 'ApplyRegion',
+        'EvaluateChild', 'ApplyLanguageAction', 'ApplyPythonProtocol', 'AccessBinding', 'ConstructValue', 'DefineLiteral', 'ApplyRegion',
         'BranchControl', 'LoopControl', 'DeferRegion', 'CleanupControl', 'HandleCompletions',
         'TransferCompletion', 'SuspendExecution'}
     assert A.read_production_type_catalog(deepcopy(catalog)) == catalog
@@ -138,6 +138,16 @@ def test_existing_protocol_signatures_are_mandatory_for_recipe_protocol_steps():
     ):
         with pytest.raises(A.ProductionError):
             A.validate_production_plan(replace(value, steps=(replace(pack, instruction=instruction),)))
+
+
+def test_implicit_literals_keep_exact_values_without_asserting_identity_or_allocation():
+    from scar.ir.literals import PythonLiteral
+    for literal in (None, '', (), ('nested', 7)):
+        root = region('root', parameters=(), outputs=normal(REF), steps=('literal',))
+        instruction = P.DefineLiteral(PythonLiteral.from_python(literal))
+        value = plan((root,), (step('literal', root, instruction, outputs=normal(REF)),))
+        result = A.read_production_plan(A.production_plan_document(value))
+        assert result.steps[0].instruction.value.to_python() == literal
 
 
 def test_branch_has_boolean_decision_explicit_capture_ports_and_completion_union():

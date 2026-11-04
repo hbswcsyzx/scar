@@ -20,6 +20,7 @@ from scar.ir.program.signature_patterns import (ResolvedSignature, SignatureForm
 from scar.ir.program.structured import PythonProtocolKind as K
 from scar.ir.program.model import ExitKind
 from scar.ir.record_codec import encode
+from scar.ir.literals import PythonLiteral
 
 
 _REF = ValueType(ValueKind.REFERENCE)
@@ -32,6 +33,9 @@ _FIELDS = {
     'IfExp': ('test', 'body', 'orelse'), 'BoolOp': ('op', 'values'),
     'Compare': ('left', 'ops', 'comparators'),
     'Call': ('func', 'args', 'keywords'),
+    'List': ('elts', 'ctx'), 'Tuple': ('elts', 'ctx'), 'Set': ('elts',), 'Dict': ('keys', 'values'),
+    'JoinedStr': ('values',), 'FormattedValue': ('value', 'conversion', 'format_spec'),
+    'TemplateStr': ('values',), 'Interpolation': ('value', 'str', 'conversion', 'format_spec'),
 }
 _AUX_FIELDS = {'keyword': ('arg', 'value'), 'Starred': ('value', 'ctx')}
 _SELECTORS = {
@@ -41,7 +45,8 @@ _SELECTORS = {
     'BoolOp': frozenset(('And', 'Or')),
     'Compare': frozenset(('Eq', 'NotEq', 'Lt', 'LtE', 'Gt', 'GtE', 'Is', 'IsNot', 'In', 'NotIn')),
 }
-_TARGETS = frozenset(('Name', 'Attribute', 'Subscript'))
+_TARGETS = frozenset(('Name', 'Attribute', 'Subscript', 'List', 'Tuple'))
+_RULE_MODULES = ('source_display_rules.py', 'source_string_rules.py')
 
 
 class SourceRuleError(ProductionError):
@@ -105,12 +110,14 @@ class SourceExpressionRules:
                         if row.name in _TARGETS else (P.ProductionPurpose.VALUE,)) if supported else ()
             rows.append(dict(constructor=row.name, fields=list(row.fields), status=status,
                 purposes=[p.value for p in purposes], selectors=sorted(_SELECTORS.get(row.name, ())),
-                parent_contexts=([dict(constructor='Call', field='args' if row.name == 'Starred' else 'keywords')]
-                                 if row.name in _AUX_FIELDS else [])))
+                parent_contexts=([dict(constructor=p, field='args' if p == 'Call' else 'elts')
+                    for p in ('Call', 'List', 'Tuple', 'Set')] if row.name == 'Starred' else
+                    [dict(constructor='Call', field='keywords')] if row.name == 'keyword' else [])))
         return dict(schema='scar.source-expression-rule-catalog', schema_version=1,
             source_schema_sha256=self.source.roles.catalog.f2_schema_sha256,
             recipe_type_catalog_sha256=production_type_catalog()['content_sha256'],
             rules=rows, implementation_sha256=sha256(Path(__file__).read_bytes()).hexdigest(),
+            production_modules={name: sha256(Path(__file__).with_name(name).read_bytes()).hexdigest() for name in _RULE_MODULES},
             state_parameter=encode(self.world), exception_abi=self.exception_abi.value,
             call_compiler_profile=self.call_profile,
             child_interfaces='VALUE:(WORLD)->(REFERENCE,WORLD);STORE:(REFERENCE,WORLD)->(WORLD);DELETE:(WORLD)->(WORLD)',
@@ -125,9 +132,13 @@ class SourceExpressionRules:
         if node.constructor not in _AUX_FIELDS:
             return None
         site = self.source.roles.parents.get(occurrence)
-        if site is None or syntax.nodes[site.occurrence].constructor != 'Call':
+        if site is None:
             return None
-        expected = 'args' if node.constructor == 'Starred' else 'keywords'
+        parent = syntax.nodes[site.occurrence].constructor
+        allowed = ('Call', 'List', 'Tuple', 'Set') if node.constructor == 'Starred' else ('Call',)
+        if parent not in allowed:
+            return None
+        expected = ('args' if parent == 'Call' else 'elts') if node.constructor == 'Starred' else 'keywords'
         rule, _ = self.source.roles.locate(site)
         return site if site.group == 'FIELD' and rule.name == expected else None
 
@@ -209,6 +220,10 @@ class _Builder:
     def normal(self, types):
         return P.ProductionCompletion(C.FALLTHROUGH, types)
 
+    def literal(self, region, value, state, source=None):
+        return self.emit(region, P.DefineLiteral(PythonLiteral.from_python(value, exact=True)),
+                         (state,), (_REF, self.world), source=source)
+
     def emit(self, region, instruction, arguments, types, *, may_raise=True, source=None):
         _require(len(self.steps) < self.max_steps, 'BUDGET_FRONTIER', 'steps', 'source step limit')
         completions = (self.normal(types),) + ((P.ProductionCompletion(C.RAISE, self.raised),) if may_raise else ())
@@ -257,8 +272,14 @@ class _Builder:
         kind = self.node.constructor
         for name in _FIELDS[kind]:
             self.mark(name, P.ProductionDispositionKind.METADATA)
-        if kind in _TARGETS:
+        if kind in ('Name', 'Attribute', 'Subscript'):
             self.target(root, state)
+        elif kind in ('List', 'Tuple', 'Set', 'Dict'):
+            from scar.analysis.source_display_rules import emit_display
+            emit_display(self, root, state)
+        elif kind in ('JoinedStr', 'FormattedValue', 'TemplateStr', 'Interpolation'):
+            from scar.analysis.source_string_rules import emit_string
+            emit_string(self, root, state)
         elif kind == 'Constant':
             # A literal source reference does not assert a fresh allocation.
             result = self.emit(root, P.ConstructValue(P.ConstructionKind.LITERAL,

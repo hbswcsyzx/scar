@@ -40,6 +40,7 @@ def _json(value):
 def _implementation():
     package = Path(__file__).resolve().parents[1]
     names = ('analysis/source_expression_materials.py', 'analysis/source_expression_rules.py',
+        'analysis/source_display_rules.py', 'analysis/source_string_rules.py',
         'analysis/source_productions.py', 'analysis/program_types.py',
         'ir/program/source_productions.py', 'ir/record_codec.py')
     return {name: sha256((package / name).read_bytes()).hexdigest() for name in names}
@@ -97,7 +98,7 @@ def _unit(task):
                 continue
             expressions += is_expression
             purpose = P.ProductionPurpose.VALUE
-            if node.constructor in ('Name', 'Attribute', 'Subscript'):
+            if node.constructor in ('Name', 'Attribute', 'Subscript', 'List', 'Tuple'):
                 purpose = {'Load': P.ProductionPurpose.VALUE, 'Store': P.ProductionPurpose.STORE,
                            'Del': P.ProductionPurpose.DELETE}[rules.source.roles.context(occurrence)]
             row = dict(occurrence=occurrence, constructor=node.constructor, purpose=purpose.value)

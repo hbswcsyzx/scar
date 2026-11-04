@@ -65,7 +65,8 @@ B1允许显式类型、拼接、参数引用、重复、有限选择和异质类
 接源码前，先以原F2 fields/list重放旧SourceAtom的BFS身份公式，并核全源ID/kind/完整reference集合；这是身份层，绝不是求值顺序。
 旧SG不存在的source-only输入单独处置，保留其F2/F3，不捏造旧ID域。桥接内核不parse；strict读者仍重验F2上游。
 执行产生规则必须另按语言规则定义；symtable/compiler拓扑的visitor顺序不能当执行边（如decorators/defaults、DictComp key/value）。
-产生规则的输入语法为`SourceProductionPlan`，与canonical执行图分开：13种有限步骤，源码槽、namespace端口、区域参数及结果引用分别有类型。
+产生规则的输入语法为`SourceProductionPlan`，与canonical执行图分开：14种有限步骤，源码槽、namespace端口、区域参数及结果引用分别有类型。
+隐式字面值复用已有`PythonLiteral`精确编码，不断言相同值具有同一对象身份或发生了分配。
 `ApplyPythonProtocol`复用已有88种协议及签名，参数必须显式绑定，输入/完成端口强制核验；不把协议名当作效果证明。
 区域共享，不按调用/迭代复制；循环显式分不变量前缀与携带值后缀。异常完成通过payload＋captures接入handler参数，不冒用normal结果边。
 当前只核记录、归属、有序值引用及部分接口；cleanup/resume完整控制语义、逐构造求值规则和效果仍须后续重放，不能由shape验收替代。
@@ -73,11 +74,13 @@ Operation.label仍有旧派发消费者、名义类型字符串及分散协议�
 F4-C最后由已验产生规则生成CFG/SSA及共享区域，并逐项核源码处置、端口、控制/状态和来源；F4通过后才进入F5。
 当前F4-A结构域已验收，F4-B/C尚未完成。`max_visits`只限前置shape遍历；构造器核验复用原验证器，不冒称总步骤预算。
 
-F4-B继续按原字段识别、局部产生规则、原材料重放的顺序推进。当前12类表达式规则只生成局部recipe，child仍是带用途/状态接口的原槽义务；
+F4-B继续按原字段识别、局部产生规则、原材料重放的顺序推进。当前20类表达式规则只生成局部recipe，child仍是带用途/状态接口的原槽义务；
 不把未实现的构造变成OPAQUE成功节点。短路/条件/比较保分支区域，异常出口汇总前面所有步骤，不能只抄最后一步。
 状态域/异常ABI由显式profile提供，效果及实际state来源尚未证明。先闭合剩余构造/上下文规则，再进入F4-C；不以局部recipe计数代替规范图覆盖。
 Call区分普通参数与展开参数；唯一位置实参为星号表达式时保留至最终调用，其余星号和keyword连续组按协议顺序处理。
 keyword/Starred是受父Call字段约束的描述符，不是独立求值节点；规则不重放method/super/builtin编译优化，也不据此断言物理分配次数。
+Starred也可归属显示/赋值目标；解包在写目标前完成，Dict的覆盖更新与Call的重复键拒绝分开。容器与字符串规则分文件维护，仍共用同一输入语法。
+f-string先转换再求格式说明；模板插值只捕获值和转换标记，使用独立构造，不复用立即格式化操作。
 
 ## F3的形式边界
 

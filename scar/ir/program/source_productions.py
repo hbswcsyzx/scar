@@ -13,6 +13,7 @@ from scar.ir.program.source_roles import SlotRef
 from scar.ir.program.signature_patterns import (GroundType, Bindings, CountBinding,
     ChoiceBinding, TypeBinding, TypesBinding)
 from scar.ir.program.structured import PythonProtocolKind
+from scar.ir.literals import PythonLiteral
 from scar.ir.v2.ids import Identifier
 
 
@@ -85,6 +86,10 @@ class LanguageActionKind(str, Enum):
     TARGET_READ = 'TARGET_READ'
     TARGET_WRITE = 'TARGET_WRITE'
     TARGET_DELETE = 'TARGET_DELETE'
+    SET_INSERT = 'SET_INSERT'
+    SET_UPDATE = 'SET_UPDATE'
+    UNPACK_EXTENDED = 'UNPACK_EXTENDED'
+    STRING_JOIN = 'STRING_JOIN'
 
 
 class BindingActionKind(str, Enum):
@@ -104,6 +109,8 @@ class ConstructionKind(str, Enum):
     TEMPLATE_STRING = 'TEMPLATE_STRING'
     EXCEPTION = 'EXCEPTION'
     CONTROL_PACKET = 'CONTROL_PACKET'
+    TUPLE = 'TUPLE'
+    INTERPOLATION = 'INTERPOLATION'
 
 
 class SuspensionKind(str, Enum):
@@ -193,6 +200,12 @@ class ConstructValue:
 
 
 @dataclass(frozen=True, slots=True)
+class DefineLiteral:
+    """An exact implicit value; no object identity or allocation assertion."""
+    value: PythonLiteral
+
+
+@dataclass(frozen=True, slots=True)
 class ApplyRegion:
     invocation: ProductionRegionCall
 
@@ -255,7 +268,7 @@ class SuspendExecution:
     resume: ProductionRegionID
 
 
-ProductionInstruction = (EvaluateChild | ApplyLanguageAction | ApplyPythonProtocol | AccessBinding | ConstructValue
+ProductionInstruction = (EvaluateChild | ApplyLanguageAction | ApplyPythonProtocol | AccessBinding | ConstructValue | DefineLiteral
     | ApplyRegion | BranchControl | LoopControl | DeferRegion | CleanupControl
     | HandleCompletions | TransferCompletion | SuspendExecution)
 
@@ -304,6 +317,6 @@ class SourceProductionPlan:
 
 PRODUCTION_RECORD_TAGS = {cls: ('record_kind', cls.__name__) for cls in (
     ProductionOccurrence, SlotRef, ProductionParameter, ProductionResult,
-    EvaluateChild, ApplyLanguageAction, ApplyPythonProtocol, AccessBinding, ConstructValue, ApplyRegion,
+    EvaluateChild, ApplyLanguageAction, ApplyPythonProtocol, AccessBinding, ConstructValue, DefineLiteral, ApplyRegion,
     BranchControl, LoopControl, DeferRegion, CleanupControl, HandleCompletions,
     TransferCompletion, SuspendExecution, CountBinding, ChoiceBinding, TypeBinding, TypesBinding)}
