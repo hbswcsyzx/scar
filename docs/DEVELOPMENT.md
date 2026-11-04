@@ -150,6 +150,16 @@ F4-B接口查询：`ProtocolSignatureIndex(graph, structured, interface, metadat
 入口在`scar.ir.program.protocol_signature_context`。规则来自typed protocol，world/ABI等从原接口绑定；缺原参数返回带字段的
 `MISSING_SIGNATURE_CONTEXT`。显式补参仅供诊断，不能覆盖自动绑定或授予源码/变换许可；当前还不是规范图发布入口。
 
+源码身份桥（按unit分片，保持输入模型和旧ID）：
+
+```bash
+python -B -m scar.cli source-anchors --model /path/to/model --out /path/to/materials --jobs 8
+python -B -m scar.cli source-anchors --model /path/to/model --materials /path/to/materials --out /path/to/fresh-check --jobs 8
+```
+
+两入口均重验F2上游；身份生成本身只读原occurrence字段，不再解析或恢复AST。无旧SG的unit明确保留source-only处置。
+`SourceAtomAnchorView.atom/occurrence/field`按原ID/字段查询；None只表示非旧Atom域构造，低层view不自授fresh源码证明。
+
 ## 已有建图入口（前端形式验收尚未完成）
 
 ```bash

@@ -489,6 +489,9 @@ def main(argv=None) -> int:
     if cli_argv and cli_argv[0] == 'program-types':
         from scar.analysis.program_type_materials import main as program_types_main
         return program_types_main(cli_argv[1:])
+    if cli_argv and cli_argv[0] == 'source-anchors':
+        from scar.analysis.source_anchor_materials import main as source_anchors_main
+        return source_anchors_main(cli_argv[1:])
     if cli_argv and cli_argv[0] == "static":
         from scar.analysis.static_program import main as static_main
         return static_main(cli_argv[1:])
@@ -532,6 +535,8 @@ def main(argv=None) -> int:
     frontend_register.set_defaults(func=lambda _: 0)
     program_types = sub.add_parser('program-types', help='F4-A: export or fresh-check source/target structural type grammars')
     program_types.set_defaults(func=lambda _: 0)
+    source_anchors = sub.add_parser('source-anchors', help='link original F2 occurrences to complete legacy SourceAtom identities')
+    source_anchors.set_defaults(func=lambda _: 0)
     static_cmd = sub.add_parser("static", help="build source-root program graphs without executing the target")
     static_cmd.set_defaults(func=lambda _: 0)
     static_query = sub.add_parser("static-query", help="query stored static definitions and original graph dependencies")
