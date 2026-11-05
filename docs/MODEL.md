@@ -82,6 +82,11 @@ UNKNOWN 应落在确实未知的字段、效果或关系上，不能吞掉已知
 求解达到不动点只表示当前规则不再产生事实，不证明整个程序已覆盖或所有目标已解析。
 未见消费者不证明无用；未见异常不证明不会抛错；没有记录写入不等于 NONE。
 
+脚本入口契约引用原源码版本、root及namespace读取端口，并声明argv、cwd、环境和初始globals。
+argv/environment记录可变位置的初始内容，不作为不可变tuple/dict常量。初值字段推导受整个入口契约约束。
+编译上下文保filename/mode、请求flags、继承策略、source有效future位和优化级别；未知继承不是0。
+同路径/同bytes不保证同一编译上下文，compile也不等于执行；parser-only flags与运行代码flags分开。
+
 算子结果的声明类型由`ValueShape`及`ReturnTypeEvidence`连接原结果端口，元组字段和序列元素有显式投影。
 这些记录是Value的条件属性，不能代替ObjectID、StorageID或LogicalVersion。序列转成list/tuple只传播元素类型摘要。
 绑定/未绑定方法的receiver独立保存，原调用的实参、参数包和输入/输出world保持原样；手写接口没有生成映射时不虚构ATen selector。
