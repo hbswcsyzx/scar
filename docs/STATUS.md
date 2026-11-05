@@ -31,7 +31,7 @@ factory依赖可由原inventory独立走前端，再以不可变引用加入852�
 
 - **Verified：** source-interfaces-full/完整覆盖852单元目录；48个真实worker完成局部接口投影，68.80秒，累计worker CPU 2,431.63秒，摘要正文2,680,976 bytes。每源独立写出；复用原F4收据，没有重跑F1–F4或改变基础facts6。
 - **Verified：** source-interfaces-world/verification.json独立核全部48迭代、2body、29mapping/3merge的原F4端口、world、owner及挂起筛选；与旧产物已有的4迭代/1body子集逐项相等。4项针对性源码检查27.88秒通过。
-- **Verified：** entry-local-interfaces/为最新完整发布的诊断前缀：274按需加载、2,001活跃scope、9,801调用候选、10,059字段内容边；4M事件后frontier168,070，仍非固定点。interface-equivalence.json核全部17张关系表，与entry-batched-read-write的记录数、压缩及解码SHA完全相等。
+- **Verified：** 旧schema10的entry-local-interfaces/诊断前缀：274按需加载、2,001活跃scope、9,801调用候选、10,059字段内容边；4M事件后frontier168,070，非固定点。interface-equivalence.json核当时17张关系表与entry-batched-read-write的记录数、压缩及解码SHA完全相等。
 - **Observed：** 接线137.67秒，含本次全部局部接口预处理共206.46秒，旧同输入/同4M预算为428.86秒；单次总耗时少约51.9%。并非隔离重复benchmark或LeWM加速比。
 - **Verified：** F5接线完整计划解码/恢复、suspension材料发现及模板池均为0；从摘要读取22单元的35迭代、20body、28mapping接口。输入压缩片仍核字节收据。接线约20.98秒入口准备、89.23秒传播、23.55秒主发布；逐表耗时可查result。
 - **Verified：** content-factors-real/verification.json：旧57,048条关系→1,814连接因子，展开集合/计数及查询过滤完全相等；compressed1,986,616→357,762 bytes。只改变存储表示，不改原程序。
@@ -40,7 +40,7 @@ factory依赖可由原inventory独立走前端，再以不可变引用加入852�
 - **Implemented / Verified：** 独立DeltaContainerFlow将每次write引起的iterator/copy全历史重扫改为增量通知，首次订阅仍完整回放。container-delta-entry-prefix/verification.json按原2M分段准入，在4M事件核17张关系表的记录多重集，全部新增0/遗漏0；仍是诊断前缀，不证明全图收敛。传播82.30秒，旧同前缀89.23秒，未做隔离重复整体benchmark。
 - **Implemented / Verified：** 增量实现现已接主路径，动态key只处理本次新候选，read订阅去重；内容key采用READ_SELECTOR_V1，消除旧标签对通知顺序的依赖。entry-delta-selector-4m/verification.json：16张非content表完全相等，51,570条唯一(source,target,container)依赖完全相等；带key记录57,048→52,369，明确不声称旧标签相等。schema12严格读回及World原25条字段边通过，总128.85秒，仍非固定点。
 - **Verified：** dynamic-key-delta/verification.json用原item ABI、合成500个key和8个receiver：访问1,002,000→4,000；3次中位数2.063→0.060秒，值、邻接及本场景带标签关系相等。34.21倍仅为此协议微基准，不是整个分析器或LeWM加速。
-- **Verified：** container-delta-evaluation/verification.json：使用World原端口的合成1000次mapping写入，3次中位数0.72615→0.09674秒（7.51倍），2,226带标签关系、值及邻接完全相等。这只是协议微基准，不是整体建图或LeWM加速。增量实现尚未替换后台旧进程。
+- **Verified：** 旧增量原型container-delta-evaluation/verification.json：World原端口的合成1000次mapping写入，3次中位数0.72615→0.09674秒（7.51倍），2,226带标签关系、值及邻接完全相等；仅为当时协议微基准。当前版本的key语义及新测量以entry-delta-selector-4m与dynamic-key-delta为准。
 - **Implemented / Verified：** source_scalar_values.collect_unit在原常量、alias、namespace读写和LanguageOperation上建字段依赖；IR不依赖analysis模块。scalar-values-world/verification.json保World全部66个原operation，得到8条条件推导，单源字段固定点约2秒；4个端口触发有限域宽化。保原operand/result/world，既不激活body，也不宣称must常量、身份等价或变换合法。
 - **Implemented / Verified：** source_launch CLI登记实际launcher的原F0/F2版本、root、argv/env及初始globals；script-launch-current/verification.json核原2个namespace读取端口、本地条件字段和codec往返。未提供的环境项保持未知，argv/environment保持可变。入口登记尚未激活launcher或接入完整求解。
 - **Verified：** launcher-compilation-context/verification.json：仅编译F0捕获bytes、不exec/import目标，在optimize0/1/2均发现launcher继承的annotations位16777216改变eval常量区及code_digest；因此不能按path/bytes硬接旧eval子图。有效future位从隔离编译结果提取，不能直接OR已强制生效的历史feature目录位。
@@ -49,7 +49,7 @@ factory依赖可由原inventory独立走前端，再以不可变引用加入852�
 ## 剩余瓶颈与后续顺序
 
 1. **局部接口层已验收。** 原scope/fact/port分母完整，按单元并行产出；跨单元接线不再恢复F4正文。后续新增依赖可独立补同类分片，不重建既有图。
-2. **当前层：完成共享状态传播验收。** 增量主路径、selector语义及生产者/读取者pins已接通；将以同输入继续完整求解，附每30秒分析器栈采样（日志中的Timeout只是采样触发，不是程序终止）。仍有必要的写×读展开，不能声称完整通道传播、并行全局求解或第一阶段已完成。native绑定表schema5同步约束传播pins，尚未重跑全量native路径。
+2. **当前层：完成共享状态传播验收。** 增量主路径、selector语义及生产者/读取者pins已接通；entry-incremental-fixed正在以同输入、100M上限求解，附每30秒分析器栈采样（日志中的Timeout只是采样触发，不是程序终止）。仍有必要的写×读展开，不能声称完整通道传播、并行全局求解或第一阶段已完成。native绑定表schema5同步约束传播pins，尚未重跑全量native路径。
 3. **随后接静态值字段。** 既有builtin evaluator、有限高度域和单源原端口投影已实现；2+3、字符串拼接及反馈循环fixture通过。下一步将它接入已准入scope的原跨调用/内容依赖，区分条件may字段与唯一值证明；当前独立字段层没有接通调用、import或资源关系。
 4. **入口与编译上下文覆盖。** 成功命令入口是run_inference.py，当前完整求解仍为eval.py入口。带收据入口契约已实现；下一步接原read_text→compile→exec端口、匹配或生成编译上下文variant，再接YAML/CLI配置来源。当前eval F4不能冒充继承annotations的编译版本；缺variant是缺实现，不能写成运行字段UNKNOWN。共享formal/heap、逻辑版本/shape/资源、YIELD_FROM/AWAIT等仍未全贯通。
 
