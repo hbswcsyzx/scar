@@ -57,19 +57,19 @@ def _check_root(root, expected):
         raise ValueError('sealed template root differs from the expected receipt')
 
 
-def _read_one(root, unit_id, key, expected_root_sha256):
+def _read_batch(root, unit_id, keys, expected_root_sha256):
     """Spawn-safe task over trusted tool code and original source coordinates."""
     started, cpu = time.monotonic(), time.process_time()
     with _torch_guard():
         _check_root(root, expected_root_sha256)
-        from scar.analysis.source_template_links import read_template_body
-        plan = read_template_body(root, unit_id, key)
+        from scar.analysis.source_template_batch import read_template_bodies
+        plans = read_template_bodies(root, unit_id, keys)
         _check_root(root, expected_root_sha256)
-        if (type(plan) is not P.SourceProductionPlan
+        if set(plans) != set(keys) or any(type(plan) is not P.SourceProductionPlan
                 or plan.source != P.ProductionOccurrence(key.occurrence)
-                or plan.purpose is not key.purpose):
+                or plan.purpose is not key.purpose for key,plan in plans.items()):
             raise ValueError('strict template reader returned another source plan')
-    return plan, os.getpid(), time.monotonic() - started, time.process_time() - cpu
+    return plans, os.getpid(), time.monotonic() - started, time.process_time() - cpu
 
 
 def _default_jobs():
@@ -77,7 +77,7 @@ def _default_jobs():
         count = len(os.sched_getaffinity(0))
     except (AttributeError, OSError):
         count = getattr(os, 'process_cpu_count', os.cpu_count)() or 1
-    return min(32, max(1, count))
+    return min(48, max(1, count))
 
 
 class TemplatePlanPool:
@@ -99,30 +99,31 @@ class TemplatePlanPool:
         self._worker_pids = set()
         self._counts = dict(read_many_calls=0, tasks=0, completed_tasks=0, failed_tasks=0,
                             cancelled_tasks=0, serial_tasks=0, parallel_tasks=0,
-                            failed_batches=0, peak_inflight=0)
+                            failed_batches=0, peak_inflight=0,worker_batches=0,completed_worker_batches=0)
         self._wall_seconds = self._worker_seconds = self._worker_cpu_seconds = self._close_seconds = 0.0
 
     @property
     def stats(self):
         with self._lock:
-            return dict(self._counts, jobs=self.jobs, parent_pid=os.getpid(),
+            return dict(self._counts, jobs=self.jobs, plans_per_batch=8,parent_pid=os.getpid(),
                         worker_pids=sorted(self._worker_pids), start_method='spawn',
                         wall_seconds=self._wall_seconds, worker_seconds=self._worker_seconds,
                         worker_cpu_seconds=self._worker_cpu_seconds, close_seconds=self._close_seconds,
                         pool_created=self._executor is not None, closed=self._closed)
 
     def _accept(self, result, *, parallel):
-        plan, pid, seconds, cpu_seconds = result
-        if type(plan) is not P.SourceProductionPlan:
+        plans, pid, seconds, cpu_seconds = result
+        if type(plans) is not dict or any(type(plan) is not P.SourceProductionPlan for plan in plans.values()):
             raise ValueError('template worker did not return a typed source plan')
-        self._counts['completed_tasks'] += 1
+        self._counts['completed_tasks'] += len(plans)
+        self._counts['completed_worker_batches'] += 1
         self._worker_seconds += seconds
         self._worker_cpu_seconds += cpu_seconds
         if parallel:
             if pid == os.getpid():
                 raise RuntimeError('parallel template task ran in the caller process')
             self._worker_pids.add(pid)
-        return plan
+        return plans
 
     def read_many(self, root, unit_id, keys, expected_root_sha256):
         with self._lock:
@@ -147,14 +148,14 @@ class TemplatePlanPool:
                     result = {}
                 elif len(keys) == 1 or self.jobs == 1:
                     result = {}
-                    for key in keys:
-                        self._counts['tasks'] += 1
-                        self._counts['serial_tasks'] += 1
-                        try:
-                            result[key] = self._accept(_read_one(root, unit_id, key, expected_root_sha256), parallel=False)
-                        except BaseException:
-                            self._counts['failed_tasks'] += 1
-                            raise
+                    self._counts['tasks'] += len(keys)
+                    self._counts['serial_tasks'] += len(keys)
+                    self._counts['worker_batches'] += 1
+                    try:
+                        result = self._accept(_read_batch(root, unit_id, keys, expected_root_sha256), parallel=False)
+                    except BaseException:
+                        self._counts['failed_tasks'] += len(keys)
+                        raise
                 else:
                     result = self._read_parallel(root, unit_id, keys, expected_root_sha256)
                 _check_root(root, expected_root_sha256)
@@ -170,18 +171,19 @@ class TemplatePlanPool:
         if self._executor is None:
             self._executor = ProcessPoolExecutor(max_workers=self.jobs,
                 mp_context=multiprocessing.get_context('spawn'), initializer=_initialize_worker)
-        remaining = iter(keys)
+        remaining = iter(tuple(keys[i:i+8]) for i in range(0,len(keys),8))
         pending, results = {}, {}
-        window = min(self.jobs, len(keys))
+        window = min(self.jobs, (len(keys)+7)//8)
 
         def submit():
-            key = next(remaining, None)
-            if key is None:
+            batch = next(remaining, None)
+            if batch is None:
                 return
-            future = self._executor.submit(_read_one, root, unit_id, key, expected)
-            pending[future] = key
-            self._counts['tasks'] += 1
-            self._counts['parallel_tasks'] += 1
+            future = self._executor.submit(_read_batch, root, unit_id, batch, expected)
+            pending[future] = batch
+            self._counts['tasks'] += len(batch)
+            self._counts['parallel_tasks'] += len(batch)
+            self._counts['worker_batches'] += 1
             self._counts['peak_inflight'] = max(self._counts['peak_inflight'], len(pending))
 
         try:
@@ -190,11 +192,13 @@ class TemplatePlanPool:
             while pending:
                 done, _ = wait(pending, return_when=FIRST_COMPLETED)
                 for future in done:
-                    key = pending.pop(future)
+                    batch = pending.pop(future)
                     try:
-                        results[key] = self._accept(future.result(), parallel=True)
+                        received = self._accept(future.result(), parallel=True)
+                        if set(received)!=set(batch):raise ValueError('template batch selection differs')
+                        results.update(received)
                     except BaseException:
-                        self._counts['failed_tasks'] += 1
+                        self._counts['failed_tasks'] += len(batch)
                         raise
                     submit()
         except BaseException:
@@ -204,12 +208,12 @@ class TemplatePlanPool:
                 future.cancel()
             for future in pending:
                 if future.cancelled():
-                    self._counts['cancelled_tasks'] += 1
+                    self._counts['cancelled_tasks'] += len(pending[future])
                     continue
                 try:
                     self._accept(future.result(), parallel=True)
                 except BaseException:
-                    self._counts['failed_tasks'] += 1
+                    self._counts['failed_tasks'] += len(pending[future])
             raise
         return results
 

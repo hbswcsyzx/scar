@@ -168,14 +168,15 @@ class ContainerFlow:
         from scar.ir.program.structured import PythonProtocolKind as K
         from scar.ir.record_codec import decode
         from scar.analysis.normal_graph import _Emitter
-        from scar.analysis.source_template_links import read_template_body
         o=self.s.offsets[unit.unit];wire=unit.ports[point-o]
         port=decode(G.Port,wire,record_tags=P.PRODUCTION_RECORD_TAGS) if type(wire) is dict else wire
         cache=unit.unit,port.template
         if cache not in self.pack_merge_proofs:
             proof=set();store=getattr(self.s,'store',None)
             if store is not None:
-                plan=read_template_body(store.templates_for(unit.unit),unit.unit,port.template)
+                # Share the sealed plan cache with generator/iteration
+                # interfaces rather than decoding the same unit independently.
+                plan=self.s.generators.index()._plan(unit,port.template)[0]
                 if all(step.region==plan.root for step in plan.steps):
                     emitter=_Emitter(plan,port.template,{})
                     points={}

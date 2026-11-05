@@ -18,6 +18,7 @@ from scar.analysis import normal_targets
 from scar.analysis import normal_containers
 from scar.analysis import normal_namespaces
 from scar.analysis import source_descriptors,source_function_connections,source_construction,source_generators,source_suspension_interfaces
+from scar.analysis import source_template_batch,source_template_workers,normal_output
 from scar.ir.program import source_generators as D,suspension_interfaces as S
 from scar.analysis.source_template_links import read_template_body
 from scar.ir.program import normal_targets as T
@@ -35,10 +36,13 @@ class NormalCallGraph:
     def __init__(self, targets):
         self.path = Path(targets).absolute()
         self.report = json.loads((self.path / 'result.json').read_bytes())
-        if self.report['schema'] != 'scar.normal-source-targets' or self.report['schema_version'] != 9:
+        if self.report['schema'] != 'scar.normal-source-targets' or self.report['schema_version'] != 10:
             raise ValueError('expected current source target graph')
         if self.report['types_sha256'] != sha256(Path(T.__file__).read_bytes()).hexdigest():
             raise ValueError('call edge declarations differ')
+        if self.report['source_reader_pins']!={name:sha256(Path(module.__file__).read_bytes()).hexdigest() for name,module in
+                (('batch',source_template_batch),('workers',source_template_workers),('output',normal_output))}:
+            raise ValueError('source reader/writer implementation differs')
         if self.report['implementation_sha256'] != sha256(Path(normal_targets.__file__).read_bytes()).hexdigest():
             raise ValueError('call target producer differs')
         if self.report['container_implementation_sha256'] != sha256(Path(normal_containers.__file__).read_bytes()).hexdigest():
@@ -171,6 +175,35 @@ class NormalCallGraph:
         for row in self._documents('attribute_storage',None,None,'site'):
             if unit is None or row['site']['world']['unit'] in unit:
                 yield decode(T.AttributeStorageAccess,row,record_tags=P.PRODUCTION_RECORD_TAGS)
+
+    def attribute_contents(self,source=None):
+        """Possible stores supplying reads, selected by the consuming source."""
+        for row in self._documents('attribute_content',source,None,'target'):
+            link=decode(T.AttributeContentLink,row,record_tags=P.PRODUCTION_RECORD_TAGS)
+            if any(p.unit not in self.units for p in (link.source,link.target,link.owner)):
+                raise ValueError('attribute content endpoint is outside the source catalog')
+            if link.read.member!=link.write.member:
+                raise ValueError('attribute content selects different member names')
+            yield link
+
+    def attribute_reference(self,ref):
+        """Resolve a content-edge access to its exact original source ABI."""
+        unit=self.fact_store.load(ref.unit)
+        if ref.origin is T.AttributeOrigin.BUILTIN_GETATTR:
+            call=unit.calls[ref.ordinal]
+            if len(call.positional) not in (2,3):raise ValueError('getattr reference has another call ABI')
+            gp=lambda p:T.GlobalPort(unit.unit,decode(G.Port,unit.ports[p],record_tags=P.PRODUCTION_RECORD_TAGS)
+                if type(unit.ports[p]) is dict else unit.ports[p])
+            return T.AttributeSite(ref.origin,F.AttributeAction.GET,gp(call.positional[0]),ref.member,
+                gp(call.result),None,gp(call.world),gp(call.result_world),gp(call.positional[1]))
+        a=unit.attributes[ref.ordinal]
+        if a.name!=ref.member:raise ValueError('attribute reference selects another original member')
+        gp=lambda p:T.GlobalPort(unit.unit,decode(G.Port,unit.ports[p],record_tags=P.PRODUCTION_RECORD_TAGS)
+            if type(unit.ports[p]) is dict else unit.ports[p])
+        read=a.action in (F.AttributeAction.GET,F.AttributeAction.IMPORT_MEMBER)
+        return T.AttributeSite(ref.origin,a.action,gp(a.receiver),a.name,
+            gp(a.value) if read else None,gp(a.value) if a.action is F.AttributeAction.SET else None,
+            gp(a.world),gp(a.result_world))
 
     def entry_activations(self,source=None):
         """Scopes admitted by entry analysis; never runtime invocation records."""

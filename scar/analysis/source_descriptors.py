@@ -48,6 +48,7 @@ class DescriptorFlow:
         self.s=solver;self.accesses=defaultdict(list);self.reads=defaultdict(list)
         self.lookups={};self.sinks={};self.targets=defaultdict(set)
         self.property_accesses={};self.property_templates={};self.storage_accesses={};self.connected=set()
+        self.content_links={};self.field_writes=defaultdict(dict);self.field_reads=defaultdict(dict);self.call_ordinals={}
         for unit in units:
             for i in range(len(unit.attributes)):self.admit(unit,i)
 
@@ -111,10 +112,40 @@ class DescriptorFlow:
         # event. Replay the source receiver instead of depending on event order.
         for value in tuple(self.s.values[access.receiver]):self.consume(access.receiver,value)
 
-    def storage(self,a,kind,owner,namespace_unit,conditions):
-        key=(a.key,kind,owner,namespace_unit)
+    def storage(self,a,kind,owner,namespace_unit,conditions,receiver_class=None):
+        key=(a.key,kind,owner,namespace_unit,receiver_class)
         if key not in self.storage_accesses:
-            self.storage_accesses[key]=T.AttributeStorageAccess(self.site(a),kind,self.s.gp(owner),namespace_unit,conditions)
+            self.storage_accesses[key]=T.AttributeStorageAccess(self.site(a),kind,self.s.gp(owner),namespace_unit,conditions,
+                None if receiver_class is None else self.s.gp(receiver_class))
+
+    def reference(self,a):
+        if a.origin is T.AttributeOrigin.BUILTIN_GETATTR:
+            index=a.key[1]
+            if index not in self.call_ordinals:
+                unit,call=self.s.call_rows[index]
+                self.call_ordinals[index]=(unit.unit,unit.calls.index(call))
+            unit,ordinal=self.call_ordinals[index]
+        else:unit,ordinal=a.key
+        return T.AttributeFactReference(unit,ordinal,a.origin,a.member)
+
+    def contents(self,key,a,kind,owner,receiver_class=None,namespace_unit=None,conditions=()):
+        """Publish content dependencies; existing namespace transfer stays intact."""
+        if a.action is F.AttributeAction.SET:
+            if a.key in self.field_writes[key]:return
+            self.field_writes[key][a.key]=a
+            pairs=((a,read) for read in tuple(self.field_reads[key].values()))
+        elif a.action is F.AttributeAction.GET:
+            if a.key in self.field_reads[key]:return
+            self.field_reads[key][a.key]=a
+            pairs=((write,a) for write in tuple(self.field_writes[key].values()))
+        else:return
+        for write,read in pairs:
+            identity=key,write.key,read.key
+            if identity not in self.content_links:
+                self.content_links[identity]=T.AttributeContentLink(self.reference(write),self.reference(read),
+                    self.s.gp(write.assigned),self.s.gp(read.result),kind,self.s.gp(owner),
+                    None if receiver_class is None else self.s.gp(receiver_class),namespace_unit,
+                    (*conditions,'MAY_REACHING_STORE_NOT_SELECTED_STATE_VERSION','NO_SOURCE_ORDER_OR_RUNTIME_IDENTITY_PROOF'))
 
     def write_namespace(self,key,source):
         if source is None:return
@@ -123,7 +154,8 @@ class DescriptorFlow:
 
     def instance_storage(self,a,value):
         key=('field',value,a.member)
-        self.storage(a,T.AttributeStorageKind.INSTANCE_FIELDS,value[2],None,_FIELD_CONDITIONS)
+        self.storage(a,T.AttributeStorageKind.INSTANCE_FIELDS,value[2],None,_FIELD_CONDITIONS,value[1])
+        self.contents(key,a,T.AttributeStorageKind.INSTANCE_FIELDS,value[2],value[1],conditions=_FIELD_CONDITIONS)
         if a.action is F.AttributeAction.SET:self.write_namespace(key,a.assigned)
         elif a.action is F.AttributeAction.GET:
             self.s.reads[key].add(a.result)

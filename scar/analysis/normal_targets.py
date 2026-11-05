@@ -24,6 +24,7 @@ from scar.ir.program import source_productions as P
 from scar.ir.program import normal_graph as G
 from scar.ir.record_codec import decode,encode
 from scar.analysis.source_template_links import _json
+from scar.analysis import source_template_batch,source_template_workers,normal_output
 from scar.analysis.source_stage import _durable_bytes,_durable_mkdir
 from scar.analysis.static_query import _Fragments
 from scar.analysis.normal_containers import ContainerFlow
@@ -404,20 +405,23 @@ def solve_targets(facts,out,*,max_events=20_000_000,entries=(),jobs=None):
 
 
 def _publish(solver,facts,root,report,out,started,max_events,fixed,stars,extra=None):
+    publish_started=time.monotonic();table_write_seconds={}
     solver.generators.validate_parents()
     solver.generators.close()
     units=solver.units;_durable_mkdir(out)
-    from scar.analysis.source_template_links import _stream
+    from scar.analysis.normal_output import write_table
+    def _stream(path,records):return write_table(path,records,timings=table_write_seconds)
     fragment=_stream(out/'calls.jsonl.gz',solver.links.values())
     content=_stream(out/'content.jsonl.gz',solver.containers.links.values())
     namespaces=_stream(out/'namespaces.jsonl.gz',normal_namespaces.namespace_lookups(solver))
     properties=_stream(out/'properties.jsonl.gz',solver.descriptors.property_accesses.values())
     attribute_storage=_stream(out/'attribute-storage.jsonl.gz',solver.descriptors.storage_accesses.values())
+    attribute_content=_stream(out/'attribute-content.jsonl.gz',solver.descriptors.content_links.values())
     constructions=_stream(out/'constructions.jsonl.gz',solver.constructions.links.values())
     modes=Counter(link.mode for link in solver.links.values());known_calls={link.result for link in solver.links.values()}
     source_calls={link.result for link in solver.links.values() if link.source_callable is not None}
     original_calls=sum(len(u.calls) for u in units)
-    result=dict(schema='scar.normal-source-targets',schema_version=9,status='SOURCE_TARGET_FIXED_POINT' if fixed else 'SOURCE_TARGET_BUDGET_FRONTIER',
+    result=dict(schema='scar.normal-source-targets',schema_version=10,status='SOURCE_TARGET_FIXED_POINT' if fixed else 'SOURCE_TARGET_BUDGET_FRONTIER',
         analysis_mode='LIBRARY_MAY_ANALYSIS',
         source_facts=str(facts),source_facts_sha256=sha256(root).hexdigest(),profile='NORMAL_SUCCESS',
         selected_sources=len(units),source_calls=original_calls,source_functions=len(solver.functions),source_classes=len(solver.classes),
@@ -434,6 +438,7 @@ def _publish(solver,facts,root,report,out,started,max_events,fixed,stars,extra=N
         declared_import_modules=len(solver.imported_modules),namespace_lookups=namespaces['records'],namespaces=namespaces,
         properties=properties,property_states=dict(Counter(p.state.value for p in solver.descriptors.property_accesses.values())),
         attribute_storage=attribute_storage,attribute_storage_kinds=dict(Counter(p.kind.value for p in solver.descriptors.storage_accesses.values())),
+        attribute_content=attribute_content,attribute_content_links=len(solver.descriptors.content_links),
         descriptor_implementation_sha256=sha256(Path(source_descriptors.__file__).read_bytes()).hexdigest(),
         invocation_implementation_sha256=sha256(Path(source_function_connections.__file__).read_bytes()).hexdigest(),
         constructions=constructions,construction_stages=dict(Counter(p.stage.value for p in solver.constructions.links.values())),
@@ -443,6 +448,8 @@ def _publish(solver,facts,root,report,out,started,max_events,fixed,stars,extra=N
         generator_types_sha256=sha256(Path(D.__file__).read_bytes()).hexdigest(),
         suspension_interface_implementation_sha256=sha256(Path(source_suspension_interfaces.__file__).read_bytes()).hexdigest(),
         suspension_interface_types_sha256=sha256(Path(S.__file__).read_bytes()).hexdigest(),
+        source_reader_pins={name:sha256(Path(module.__file__).read_bytes()).hexdigest() for name,module in
+            (('batch',source_template_batch),('workers',source_template_workers),('output',normal_output))},
         namespace_implementation_sha256=sha256(Path(normal_namespaces.__file__).read_bytes()).hexdigest(),
         namespace_types_sha256=sha256(Path(N.__file__).read_bytes()).hexdigest(),
         unresolved_calls=original_calls-len(known_calls),value_events=solver.events,frontier=len(solver.queue),event_budget=max_events,
@@ -455,23 +462,29 @@ def _publish(solver,facts,root,report,out,started,max_events,fixed,stars,extra=N
     solver.generators.validate_parents()
     result['generator_analysis']=solver.generators.stats
     if extra:result.update(extra)
+    result['publication_seconds']=time.monotonic()-publish_started
+    result['table_write_seconds']=table_write_seconds
+    result['seconds']=time.monotonic()-started
     _durable_bytes(out/'result.json',_json(result),replace=False);return result
 
 
 def solve_entry_targets(facts,out,entries,*,max_events=20_000_000,jobs=None):
     from scar.analysis import normal_entry,normal_facts
     from scar.ir.program import normal_entry as E
-    from scar.analysis.source_template_links import _stream
+    from scar.analysis.normal_output import write_table as _stream
     from heapq import nlargest
     started=time.monotonic();store=normal_facts.SourceFactStore(facts);out=Path(out).absolute()
+    catalog_seconds=time.monotonic()-started
     if out.exists():raise ValueError('fresh entry target output required')
     entries=tuple(str(Path(p).absolute()) for p in entries)
     solver=normal_entry.EntrySolver(store,entries,jobs=jobs);solver.prepare()
+    prepared=time.monotonic()
     while (solver.queue or solver.pending) and solver.events<max_events:
         solver.solve(min(max_events,solver.events+2_000_000))
         print(json.dumps(dict(phase='ENTRY_SCOPE_PROPAGATION',events=solver.events,frontier=len(solver.queue),
             pending_scopes=len(solver.pending),active_scopes=len(solver.active_scopes),loaded_units=len(store.loaded),
             seconds=time.monotonic()-started)),file=sys.stderr,flush=True)
+    propagated=time.monotonic()
     fixed=not solver.queue and not solver.pending;solver.complete_call_demands();_durable_mkdir(out)
     kinds=Counter(value[0] for values in solver.values.values() for value in values)
     hot=[]
@@ -482,6 +495,8 @@ def solve_entry_targets(facts,out,entries,*,max_events=20_000_000,jobs=None):
                 source=store.rows[identity]['path'],facts=len(values),kinds=dict(Counter(v[0] for v in values))))
     known_calls={link.result for link in solver.links.values()}
     extra=dict(analysis_mode='ENTRY_SCOPED_MAY_ANALYSIS',entry_sources=entries,
+        analysis_phase_seconds=dict(fact_catalog=catalog_seconds,entry_preparation=prepared-started-catalog_seconds,
+            propagation=propagated-prepared),
         selected_sources=store.report['selected_sources'],loaded_sources=len(store.loaded),
         active_code_scopes=len(solver.active_scopes),pending_code_scopes=len(solver.pending),
         active_source_calls=len(solver.active_call_indices),
@@ -504,7 +519,7 @@ def main():
     p=argparse.ArgumentParser(description=__doc__);p.add_argument('--facts',required=True);p.add_argument('--out',required=True)
     p.add_argument('--entry',action='append',required=True,help='source entry module; declarations alone do not choose execution roots')
     p.add_argument('--max-events',type=int,default=20_000_000)
-    p.add_argument('--jobs',type=int,default=None,help='template reader processes; default min(32, CPU affinity)')
+    p.add_argument('--jobs',type=int,default=None,help='template reader processes; default min(48, CPU affinity)')
     a=p.parse_args();r=solve_targets(a.facts,a.out,max_events=a.max_events,entries=a.entry,jobs=a.jobs)
     print(json.dumps({k:r[k] for k in ('status','source_calls','calls_with_candidates','candidate_links','modes','value_events','seconds')},indent=2))
 

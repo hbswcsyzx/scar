@@ -17,7 +17,7 @@ from scar.analysis.source_suspension_interfaces import SuspensionInterfaceIndex
 
 def tables(flow,out,*,prefix=''):
     """Separate interface records from driver edges; reference original bodies."""
-    from scar.analysis.source_template_links import _stream
+    from scar.analysis.normal_output import write_table as _stream
     rows=(('deferred_creations',flow.creations),('iteration_interfaces',flow.iterations),
           ('deferred_bodies',flow.bodies),('generator_iterators',flow.getters),
           ('generator_advances',flow.advances),('deferred_driver_obligations',flow.obligations))

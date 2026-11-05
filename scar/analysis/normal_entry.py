@@ -156,7 +156,11 @@ class EntrySolver(_Solver):
             owner=self.pending.popleft()
             if owner in self.active_scopes:continue
             unit=self.load_unit(owner.unit);self.active_scopes.add(owner)
-            for group in self.groups.get(owner,()):
+            groups=self.groups.get(owner,())
+            iterations=tuple(unit.iterations[i] for group in groups for span in group.tables
+                if span.table is F.FactTable.ITERATIONS for i in range(span.start,span.stop))
+            if iterations:self.generators.index().register_iterations(unit,iterations)
+            for group in groups:
                 for span in group.tables:
                     for i in range(span.start,span.stop):self.admit(unit,span.table.value,i)
 

@@ -222,3 +222,44 @@ g = stream(leaf)
         for yielded in driven.yielded:
             assert yielded.exported!=yielded.sent and yielded.sent_literal.to_python() is None
             assert ('constant','NoneType',None) in solver.values[solver.original_point(yielded.sent)]
+
+
+def test_field_content_keeps_original_stores_reads_and_receiver_classes():
+    unit=source_facts('''
+def allocate(cls):
+    return object.__new__(cls)
+def left():
+    return 1
+def right():
+    return 2
+class A:
+    __new__ = allocate
+class B:
+    __new__ = allocate
+a = A()
+b = B()
+a.value = left
+a.value = left
+b.value = right
+x = a.value
+y = getattr(b, 'value')
+''')
+    solver=_Solver([unit]);assert solver.solve(100_000)
+    links=list(solver.descriptors.content_links.values());assert links
+    for link in links:
+        assert link.receiver_class is not None and link.read.member==link.write.member=='value'
+        assert decode(T.AttributeContentLink,encode(link,record_tags=P.PRODUCTION_RECORD_TAGS),
+                      record_tags=P.PRODUCTION_RECORD_TAGS)==link
+        write=unit.attributes[link.write.ordinal]
+        assert write.action is F.AttributeAction.SET and unit.ports[write.value]==link.source.port
+        if link.read.origin is T.AttributeOrigin.BUILTIN_GETATTR:
+            assert unit.ports[unit.calls[link.read.ordinal].result]==link.target.port
+        else:assert unit.ports[unit.attributes[link.read.ordinal].value]==link.target.port
+    by_owner={}
+    for access in solver.descriptors.storage_accesses.values():
+        if access.site.member=='value':by_owner.setdefault(access.owner,set()).add(access.receiver_class)
+    assert any(len(classes)>1 for classes in by_owner.values())
+    # Equal abstract contents must not erase a distinct source write site.
+    pairs={}
+    for link in links:pairs.setdefault((link.owner,link.receiver_class,link.read),set()).add(link.write)
+    assert any(len(writes)==3 for writes in pairs.values())

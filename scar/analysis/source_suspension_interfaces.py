@@ -13,7 +13,7 @@ from time import perf_counter
 
 from scar.analysis.normal_graph import _Emitter
 from scar.analysis.source_productions import _digest, production_plan_document
-from scar.analysis.source_template_links import read_template_body, read_template_graph, _worker_stores
+from scar.analysis.source_template_links import read_template_graph, _worker_stores
 from scar.ir.program import normal_graph as G, normal_links as F, source_productions as P
 from scar.ir.program import suspension_interfaces as I
 from scar.ir.program.control import LanguageCompletionKind as C
@@ -46,6 +46,7 @@ class SuspensionInterfaceIndex:
         self.store, self.plan_reader = fact_store, plan_reader
         self._plans, self._ports, self._headers, self._graphs = {}, {}, {}, {}
         self._suspending, self._bodies, self._iterations = {}, {}, {}
+        self._iteration_candidates = {}
         self._pins = {}
         self._materials_pinned = set()
         self._material_reports, self._body_functions = {}, {}
@@ -156,11 +157,9 @@ class SuspensionInterfaceIndex:
                 source = I.WitnessSource.CONTROLLED_PLAN_PROVIDER
                 receipt = model = None
             else:
-                root, report, receipt = self._header(unit)
-                plan = read_template_body(root, unit.unit, key)
-                digest = self._graphs[unit.unit][key].origin.plan_sha256
-                model, source = report['model_manifest_sha256'], I.WitnessSource.SEALED_TEMPLATE_STORE
-                self._pin_materials(unit)
+                self._prefetch(unit,(key,))
+                self._stats['plan_read_seconds'] += perf_counter() - started
+                return self._plans[cache]
             self._accept_plan(unit,key,plan,digest,source,receipt,model)
             self._stats['plan_read_seconds'] += perf_counter() - started
         return self._plans[cache]
@@ -256,6 +255,11 @@ class SuspensionInterfaceIndex:
             if item not in unit.iterations:raise ValueError('iteration must come from the original unit facts')
             self._stats['iteration_reads'] += 1
             value = self._port(unit, item.value)
+            if self.plan_reader is None and (unit.unit,value.port.template) not in self._plans:
+                pending = sorted((key for key in self._iteration_candidates.get(unit.unit,())
+                    if key!=value.port.template and (unit.unit,key) not in self._plans),
+                    key=lambda key:(key.occurrence,key.purpose.value))
+                self._prefetch(unit,(value.port.template,*pending[:63]))
             plan = self._plan(unit, value.port.template)[0]
             emitter = _Emitter(plan, value.port.template, {})
             step = emitter.steps.get(value.port.owner)
@@ -277,6 +281,14 @@ class SuspensionInterfaceIndex:
             self._iterations[cache] = I.IterationSite(self._witness(unit, value.port.template, step),
                 protocol, source, value, states[0], normal.world, completions)
         return self._iterations[cache]
+
+    def register_iterations(self, unit, items):
+        """Register admitted scope coordinates without reading or activating plans."""
+        unit = self._unit(unit)
+        keys = self._iteration_candidates.setdefault(unit.unit,set())
+        for item in items:
+            if type(item) is not F.Iteration:raise ValueError('expected original iteration facts')
+            keys.add(self._port(unit,item.value).port.template)
 
     def _candidate_templates(self, unit, owner):
         indices = set()

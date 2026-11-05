@@ -1,51 +1,47 @@
 # 当前状态
 
-**第一阶段尚未完成。范围仍是建模、建图与查询，没有进入程序化简或代码生成。**
-NORMAL_SUCCESS / CPython 3.14.7；边界到算子/外部动作接口。后端设计为 C++20、算子 ABI v1、计划 schema v1。
-本轮未运行 LeWM；下面的秒数是 SCAR 静态工具耗时，不是 LeWM 运行时间或加速比。
+**第一阶段尚未完成：当前只做程序建模、建图与查询。**
+NORMAL_SUCCESS / CPython 3.14.7；软件边界到算子/外部动作接口。后端设计为 C++20、算子 ABI v1、计划 schema v1。
+本轮仅执行 SCAR 静态分析器，没有运行 LeWM、导入 torch 或实施程序变换。下面的加速只涉及分析器。
 
-## 已完成并验证
+## 已落实
 
 | 层 | 当前范围 |
 |---|---|
-| F0–F3 | 866 份源码材料、词法/语法、作用域及 binding；849 .py 与17 .pyi 分开 |
-| F4 | 882,537 共享模板、3,385,528 操作、4,645 循环、24,159,357 边；函数/循环不按调用/迭代 unroll |
-| F5 作用域事实 | schema6，22,171 代码作用域组；全部849源强类型读回、事实范围覆盖、15,179函数及2,052类的 body_scope 原ID核对通过 |
-| F5 入口求解 | 按需加载；已知普通函数可在签名接受条件下激活；DIRECT/CLOSED_PACK/SYMBOLIC_PACK分开，生成器创建与恢复分开 |
-| 命名空间规则 | 模块或接口声明支持其为namespace才继续限定名；普通对象属性保留原操作和端口，不凭字符串拼出 namespace |
+| F0–F3 | 866份材料，849 .py与17 .pyi分开；原字节、词法/语法、作用域及binding |
+| F4 | 按源码单元存储882,537共享模板、3,385,528操作、4,645循环、24,159,357边；函数/循环不按调用或迭代unroll |
+| F5 事实 | schema6，22,171代码作用域组；849源的强类型、事实范围及body_scope原ID核对通过 |
+| F5 接线 | 入口按需激活；参数/捕获环境/world/返回；DIRECT/CLOSED_PACK/SYMBOLIC_PACK；构造协议、属性及同步generator驱动 |
+| F5 发布 | source-target schema10；实例字段显式SET RHS→GET result，保原站点、owner、receiver class及may条件 |
 
-原端口、别名及已有事实保持；私有名/参数名沿原 F3 投影。参数 admission 修复新增31,270条连接。
-同一alias允许多个code_scope按OR准入；原C1 environment与code_scope不混用，inline comprehension复用外层code_scope。
-静态接线使用 `source_function_connections.py`，旧动态适配器 `source_invocations.py` 未改。
+原端口及共享body保留；函数引用不是内容版本，may候选不证明运行路径、对象/数据身份或变换合法。
+同一源码分配点可返回多类，字段按allocation来源、receiver class和member区分。YIELD_FROM/AWAIT等未完成驱动仍保obligation。
+factory依赖可由原inventory独立走前端，再以不可变引用加入852单元facts集合；没有复制已有事实正文或修改基础模型。
+已有原生声明/资源旁表保留算子条件候选、CPU/NUMA DRAM/GPU及设备内存/SATA/NVMe关系，不声称实际placement/copy/kernel已发生。
 
-当前模型仍为 `artifacts/current/static/`，manifest SHA：
-`601e929904dc7481693f4a0747b7e01269ecf6d1302ff1efec072627c288aba0`。
-压缩边表575,718,843 bytes；小索引231,760 bytes引用原store，不复制正文。
+基础模型为 artifacts/current/static/，manifest SHA：
+601e929904dc7481693f4a0747b7e01269ecf6d1302ff1efec072627c288aba0。
+原压缩边表575,718,843 bytes，小引用索引231,760 bytes；本轮均未重建。
 
-## 最新真实结果
+## 最新实测与证据
 
-路径相对 `artifacts/current/queries/`；当前source-target schema9。旧收据仅授其原版本/范围的证据。
+以下路径相对 artifacts/current/queries/。
 
-- **Implemented / Verified：** 未知参数包不再阻断已知普通函数体。`ArgumentProjection`记录元素/余项与原包关系；条件默认值、签名接受条件及OPEN demand保留，不用包对象冒充元素。两个通用源码测试15.78秒通过，包含生成器不提前执行与必定不成立签名拒绝；目标源码未运行。
-- **Verified：** `entry-symbolic-packs-fixed/verification.json`强类型读回10表，核对489个symbolic连接/1,638条投影。`update_wrapper`接通，eval scope0–4均条件激活。该850单元输入的4M事件前缀仍有208,137队列项，非固定点。
-- **Verified：** 由原inventory的material946/947机械准入`_instantiate2.py`和`_internal/utils.py`；`source-dependency-frontend-instantiate/`完整31阶段569.23秒。`facts-entry-factory/`引用852单元，复制事实正文0 bytes，原manifest SHA未变。
-- **Observed / Verified：** 最新`entry-factory-symbolic/`求解259.38秒，4M事件、frontier134,410；1,981活跃scope、274按需加载单元、9,846调用候选，其中426个SYMBOLIC_PACK。`verification.json`核对入口eval:94与模型loader的实例化调用均连接新源码原body并可展开。仍非固定点，不能称完整建图。
-- **Inferred / Verified：** `python-bindings-symbolic-packs/verification.json`核对54份原生声明接口、2个调用位置/4个empty、zeros条件候选。输入为上面的850单元前缀；传播同样在4M预算停止。它们不是实际执行、分配或GPU kernel观测。
-- **Verified：** `software-resources-symbolic-packs/verification.json`核对294条条件资源候选、4条operand来源及既有12节点/12关系的CPU、NUMA DRAM、GPU/设备内存、SATA/NVMe与存储端点；源目录范围850，物理placement/copy未获证。
-- **Implemented / Verified：** 同步GENERATOR+YIELD已接创建→iterator→advance。真实图的World._run_iter/body scope24已由advance接通；yield、sent和return/exhaustion分别保原端口，当前world不从creation保存。三项源码核查22.75秒通过。YIELD_FROM/AWAIT/ASYNC_YIELD及显式驱动方法仍保obligation。
-- **Verified：** `entry-generator-parallel/`的852单元/4M事件运行：32个真实spawn worker、125个并行计划任务；总耗时555.74秒，前版721.36秒，单次配对约1.30倍，仅SCAR分析器。12张既有表解压摘要逐项相同；frontier168,070、2,001活跃scope、274加载单元，仍未收敛。模板池已关闭，首次读取与发布前后父材料核对保留。
+- **Verified：** entry-batched-read-write/为最新完整发布的诊断前缀：852单元目录、274按需加载、2,001活跃scope、9,801调用候选；4M事件后frontier168,070，仍非固定点，不能称完整建图。
+- **Verified：** 与旧同输入/同4M预算的555.74秒相比，本次428.86秒，单次对照约1.30倍。parallel-equivalence.json核对15张共同表实际stored/decoded收据，记录数及decoded SHA全部相等。并非隔离重复benchmark或LeWM加速比。
+- **Verified：** 新增10,059条字段内容边；verification.json核25条World源码读取依赖的原读写事实/owner/class，含10个policy写读候选对及跨源码写入。它们不选择状态版本。4项针对性源码检查28.02秒通过。
+- **Observed：** F5模板池配置48，实际6个worker、峰值6批并行，298个计划分79批；任务均关闭。全程约20.32秒入口准备、380.43秒传播、24.21秒主发布；逐表耗时已进入result。池wall包含单键调用者任务，不能直接与旧版仅并行池wall比较。
+- **Verified：** 当前批量读取真实源码6模板：10.76→1.98秒且typed plans相同；4,000条真实ContentLink写出0.92→0.29秒且压缩字节完全相同。这两项是局部单次测量。每进程仅缓存2份已验单元图；命中仍核原字节/声明/父证明，选中plan及EOF校验保留。
+- **Observed：** entry-field-content-fixed/diagnostic.json记录一次20M事件试跑：传播1060.66秒、frontier1,113,127；已接通World._get_actions原body26，policy调用仍未接通。因旧逐条发布器在内容表输出超过100MB且未结束，主动中止自己的导出；该目录没有完整result，不能作为完整图收据。
+- **Observed：** source-unit-load-profile.txt仅剖析SCAR读一份真实29MB事实单元：约2.74秒，其中typed decode约2.04秒；不是目标程序profile，也不代表全程占比。
 
-所有求解都保留目录、未决需求和预算前沿。共享formal/heap的may-union可能混合不同调用；绑定条件不证明路径可满足或内容身份。晚到的封闭形状若反驳旧symbolic条件，当前仍保条件式记录，尚无路径反驳传播。
+## 剩余瓶颈与后续顺序
 
-## 下一步顺序
+1. **先补F4→F5紧凑接口摘要。** F1–F4已有分片和并行入口；F5仍为iteration的world/completion、suspension及DICT_MERGE判据回读完整材料。应在局部事实生成时机械产出原端口摘要，避免求解中恢复整单元；不重新执行目标源码。
+2. **再把独立摘要任务跨单元调度。** 现批量读取减少重复，但仍按当前unit同步等待；仅调高jobs无法形成足够任务。以文件/函数生成独立约束，按稳定ID汇合；不能复制整个solver当作并行接线。
+3. **收紧共享传播与存图。** 当前formal/heap是较粗may-union，容器内容采用写×读成对边，20M时显著膨胀。下一步设计共享内容接口及增量订阅，避免重复组合，再按依赖分量推进固定点；这仍属建图。
+4. **完成真实入口覆盖。** 配置/YAML/_target_来源、策略/solver、数据与权重到输出及资源关系尚未全部贯通；字段/逻辑内容版本、shape/bytes等也未全面落图。达到当前规则固定点不等于第一阶段完成。
 
-1. **继续接通策略调用与其数据来源。** World._run_iter已恢复；WorldModelPolicy.get_action及solver仍未完整贯通。沿实际receiver/字段/调用原端口定位，保留未完成的delegation/await驱动接口，不因看到generator就激活全部body。
-2. **配置/反射目标与依赖补图。** factory源码已接通，但配置_target_及YAML组合仍未投影到cfg；不能凭CEM名称猜实例。继续消费真实模块需求，保未知目标和条件。
-3. **求解前沿与数据/状态精度。** 当前预算未收敛；调用上下文、namespace版本、逻辑来源、内容版本、shape/bytes、alias和寿命仍需贯通，不能只增加预算或拿计数充当完成。
-4. **统一入口与完整覆盖核查。** 数据/权重加载→规划/模型→环境/保存输出及资源关系全部贯通后，才验收第一阶段。
-
-并发入口：`python -m scar.analysis.normal_targets --facts <facts> --entry <entry.py> --out <fresh-out> --jobs 32`。
-默认上限min(32, CPU affinity)，可用56核；独立模板由多进程解析，工作数按任务懒启动，事实合并仍由协调进程处理。
-
-动态采集采用静态模板加有限补证，按未决接口设置时间/次数/新事实预算，不保存每轮Tensor内容；自动停止策略尚未实现。
-第一阶段完成前不新增优化backend、不变换LeWM，也不报告尚未测得的LeWM加速比。
+入口：python -m scar.analysis.normal_targets --facts <facts> --entry <entry.py> --out <fresh-out> --jobs 48。
+F5模板池默认min(48, CPU affinity)，本机可用56核；worker只读不可变材料，所有准入/状态合并仍由协调进程更新。
+第一阶段完成前不新增优化backend、不变换LeWM、不报告未经测量的LeWM加速。

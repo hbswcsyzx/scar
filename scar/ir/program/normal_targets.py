@@ -201,6 +201,45 @@ class AttributeStorageAccess:
     owner: Endpoint
     namespace_unit: str | None
     conditions: tuple[str,...]
+    receiver_class: GlobalPort | None = None
+
+
+@dataclass(frozen=True, slots=True)
+class AttributeFactReference:
+    """A location in an immutable input table, not a new operation identity.
+
+    ATTRIBUTE/IMPORT_MEMBER select UnitFacts.attributes; BUILTIN_GETATTR
+    selects UnitFacts.calls and retains the statically selected member name.
+    """
+    unit: str
+    ordinal: int
+    origin: AttributeOrigin
+    member: str
+
+    def __post_init__(self):
+        if type(self.unit) is not str or not self.unit or type(self.ordinal) is not int or self.ordinal < 0:
+            raise ValueError('attribute reference requires an original unit and table ordinal')
+        if type(self.origin) is not AttributeOrigin or type(self.member) is not str or not self.member:
+            raise ValueError('attribute reference requires its origin and selected member')
+
+
+@dataclass(frozen=True, slots=True)
+class AttributeContentLink:
+    """Possible reaching store between original access sites.
+
+    This is neither a strong update nor a content/version/object equality
+    proof. The original read/write worlds remain on the referenced sites.
+    """
+    write: AttributeFactReference
+    read: AttributeFactReference
+    source: GlobalPort
+    target: GlobalPort
+    kind: AttributeStorageKind
+    owner: Endpoint
+    receiver_class: GlobalPort | None
+    namespace_unit: str | None
+    conditions: tuple[str, ...]
+    semantics: str = 'FLOW_INSENSITIVE_MAY_REACHING_ATTRIBUTE_STORE'
 
 
 @dataclass(frozen=True, slots=True)

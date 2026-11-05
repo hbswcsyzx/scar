@@ -92,6 +92,9 @@ stub契约与注册实现是不同依据，不表示发生两次计算；C++注�
 属性接口单独保存GET/SET/DELETE/IMPORT_MEMBER、receiver、输入/输出world及读取结果或赋值RHS；不伪装成源码CALL。
 property accessor复用`FunctionConnection`的参数/环境/状态接线。getter返回连接原属性结果，setter/deleter丢弃Python返回值。
 字段、类namespace及模块namespace路由分别标型；字段fallback的descriptor/MRO条件未获证时仍是may关系，不授对象身份或版本等价。
+实例字段以`allocation来源＋receiver class＋member`分区；同一源码分配点可能返回多类，不能只保分配端口。
+`AttributeContentLink`显式保存SET RHS→GET result及原读写表坐标，原world仍从站点查询；相同抽象内容的不同写入也保留。
+它是可能供给关系，不选择读取版本，不证明先后顺序，也不因DELETE或未见写入而清除其他路径的内容。
 类调用分为`__new__ → 返回类型判定 → 条件__init__ → 返回`。`ConstructionPort`以原调用结果和原class端口为锚点，
 区分分配结果与分配后world；它是派生协议接口，不伪造源码`G.Port`。初始化消费分配后world，丢弃init的数据返回。
 已声明自定义new时不预先生成默认实例；默认object分配要求源码继承链及namespace条件。MRO/metaclass仍是条件，不当成已观测目标。

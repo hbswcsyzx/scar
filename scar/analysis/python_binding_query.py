@@ -117,6 +117,9 @@ class PythonBindingGraph:
     def source_attribute_storage(self,source=None):
         yield from self._source_table('source_attribute_storage',T.AttributeStorageAccess,source,'site.world')
 
+    def source_attribute_contents(self,source=None):
+        yield from self._source_table('source_attribute_content',T.AttributeContentLink,source,'target')
+
     def source_constructions(self,source=None):
         yield from self._source_table('source_constructions',T.ConstructionLink,source,'result')
 
