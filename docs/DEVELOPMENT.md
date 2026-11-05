@@ -313,3 +313,17 @@ python -B -m scar.analysis.normal_query --targets TARGET_STORE --source /path/to
 `NormalCallGraph.namespace_lookups(source)`读取名字空间查找及开放绑定；CLI加`--namespaces`查看。
 记录保留原接收者/结果端口和源码模块；导入路径只是标准导入条件下的候选，不能当已加载对象。
 原生接口提供方可沿这些端口继续接线，源码候选数0不表示该成员不存在。
+
+生成算子接口与原始调用接线（静态工具进程，不执行目标）：
+
+```bash
+python -B -m scar.analysis.python_bindings --targets TARGET_STORE --out FRESH_BINDINGS --jobs 4
+python -B -m scar.analysis.python_binding_query --graph FRESH_BINDINGS --symbol torch.randn --source /path/to/program.py
+python -B -m scar.analysis.native_resource_declarations --bindings FRESH_BINDINGS --out FRESH_RESOURCE_DECLARATIONS
+```
+
+`PythonBindingGraph.definitions/native_calls/normalization/expand_native/wrapper`沿共享定义查询；
+`NormalCallGraph.call_sites`独立于目标推导，保留完整原调用ABI。转换依赖不是值别名。
+生成目录按export及源unit分片；算子接口与软件图共享原端口，不复制函数/循环正文。
+当前后端目标固定于`pyproject.toml [tool.scar.codegen]`：C++20、operator ABI v1、plan schema v1。
+第一阶段内只固定接口/编译基线，不实现优化或调度runtime。

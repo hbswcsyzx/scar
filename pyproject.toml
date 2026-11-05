@@ -23,3 +23,13 @@ py-modules = ["sitecustomize"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+
+# Macro-compiler target baseline; runtime/code generation remains a later stage.
+[tool.scar.codegen]
+host_backend = "cpp"
+cxx_standard = 20
+operator_abi_version = 1
+execution_plan_schema_version = 1
+operator_calling_convention = "c_function_table"
+torch_abi = "inherit_imported_torch_target"
+python_boundary = "entry_and_explicit_compatibility_calls"

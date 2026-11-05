@@ -9,6 +9,9 @@ import gzip
 from hashlib import sha256
 import json
 from pathlib import Path
+from dataclasses import fields
+from typing import get_type_hints
+from types import SimpleNamespace
 
 from scar.analysis.normal_links import _pins
 from scar.analysis import normal_targets
@@ -18,6 +21,9 @@ from scar.analysis.source_template_links import read_template_body
 from scar.ir.program import normal_targets as T
 from scar.ir.program import source_productions as P
 from scar.ir.program import normal_namespaces as N
+from scar.ir.program import normal_graph as G
+from scar.ir.program import normal_links as F
+from scar.ir.program.python_bindings import SourceCallSite
 from scar.ir.record_codec import decode
 
 
@@ -101,6 +107,52 @@ class NormalCallGraph:
             if any(unit not in self.units for unit in link.source_units):
                 raise ValueError('namespace source is outside the input domain')
             yield link
+
+    def call_sites(self, source=None):
+        """Read original calls even when target propagation found no callee.
+
+        Decode only referenced ports, not millions of unused unit ports.
+        This exposes the actual source ABI; parser/native ABI is separate.
+        """
+        rows=self.units.values() if source is None else (self.units[self.sources[str(Path(source).absolute())]],)
+        for row in rows:
+            payload=(self.facts/row['facts']).read_bytes()
+            if len(payload)!=row['bytes'] or sha256(payload).hexdigest()!=row['sha256']:
+                raise ValueError('call-site facts compressed receipt differs')
+            raw=gzip.decompress(payload)
+            if len(raw)!=row['decoded_bytes'] or sha256(raw).hexdigest()!=row['decoded_sha256']:
+                raise ValueError('call-site facts decoded receipt differs')
+            document=json.loads(raw);ports=document['ports'];cache={}
+            def port(index):
+                if type(index) is not int or not 0<=index<len(ports):raise ValueError('call-site port ordinal differs')
+                if index not in cache:cache[index]=T.GlobalPort(row['unit'],decode(G.Port,ports[index],record_tags=P.PRODUCTION_RECORD_TAGS))
+                return cache[index]
+            for wire in document['calls']:
+                call=decode(F.Call,wire)
+                yield SourceCallSite(port(call.callee),tuple(port(p) for p in call.positional),
+                    tuple((name,port(p)) for name,p in call.keywords),port(call.result),port(call.world),port(call.result_world),
+                    None if call.positional_pack is None else port(call.positional_pack),
+                    None if call.keyword_pack is None else port(call.keyword_pack))
+
+    def unit_facts(self):
+        """Yield receipt-bound unit facts with lazy port decoding for solvers."""
+        hints=get_type_hints(F.UnitFacts);expected={f.name for f in fields(F.UnitFacts)}
+        for row in self.units.values():
+            payload=(self.facts/row['facts']).read_bytes()
+            if len(payload)!=row['bytes'] or sha256(payload).hexdigest()!=row['sha256']:
+                raise ValueError('source unit compressed receipt differs')
+            raw=gzip.decompress(payload)
+            if len(raw)!=row['decoded_bytes'] or sha256(raw).hexdigest()!=row['decoded_sha256']:
+                raise ValueError('source unit decoded receipt differs')
+            document=json.loads(raw)
+            if set(document)!=expected or document['unit']!=row['unit']:
+                raise ValueError('source unit declarations differ')
+            size=len(document['ports'])
+            if any(type(i) is not int or not 0<=i<size for pair in document['aliases'] for i in pair):
+                raise ValueError('source unit alias ordinal differs')
+            typed={name:decode(hints[name],value,record_tags=P.PRODUCTION_RECORD_TAGS)
+                for name,value in document.items() if name not in ('ports','aliases')}
+            yield SimpleNamespace(**typed,ports=document['ports'],aliases=document['aliases'])
 
     def expand(self, link):
         """Return the sealed original plan containing this candidate body.

@@ -1,6 +1,6 @@
 # 当前状态
 
-**第一阶段未完成。F0/F1/F2、F3各子层及组合、F4-A及全域模板接口已按声明范围验收；F4-C正常路径图、F5跨函数/展开参数/容器及名字空间关系已生成并核查；下一项为原生接口提供方与资源接线。**
+**第一阶段未完成。F0/F1/F2、F3各子层及组合、F4-A及全域模板接口已按声明范围验收；F4-C正常路径图、F5跨函数/展开参数/容器及名字空间关系已生成并核查；原生生成接口已接通到算子声明；继续补硬件资源图及未覆盖的外部接口。**
 按用户最新要求，本轮优先LeWM正常成功运行；应用报错、异常展开及引用清理细节暂不作为推进门槛。
 范围为CPython 3.14.7、866份声明源码及其原收据；编译器材料另固定analysis hash seed=0。
 这不证明依赖发现完整、运行对象绑定已观察或最终执行图已闭合。阶段契约见[ARCHITECTURE](ARCHITECTURE.md)。
@@ -163,5 +163,11 @@ call/map/string/assert参数也沿闭合原端口组解析；空组保DECLARED_E
    名字空间关系连接原接收者/结果端口、名字、原模块及开放绑定；2,031项导入模块候选来自原F2，标准导入条件下可接编译子模块边界，不以是否有.py主体决定该节点是否存在。空的源码值集表示绑定仍待接口提供方，不表示成员不存在；binding_proven保持False。实现为`normal_namespaces`，没有LeWM特例。
    LeWM四源267条调用连接、22条内容边及169条名字空间关系经类型读回和分片收据核验，15.79秒；CEM的torch.randn/ones/cat/topk已连到原torch名字空间/源码端口，源码绑定值仍为0。证据为同目录`verification.json`；这些仍是静态可能关系，不是实际kernel、transfer、alias或效果证明。
    `NormalCallGraph.calls/contents/namespace_lookups/expand`只读原图及共享body。下一项：复用安装版native声明和Python绑定生成规则，接通原生导出、参数规范化、schema/dispatch及资源要求；不靠同名硬接ATen，不把dispatch候选或.to()当已发生的kernel/拷贝。应用异常和引用清理暂不阻塞本轮。
+
+4. **生成式算子接口已接入原图**：隔离torchgen工具恢复2,839绑定、1,703完整导出族/wrapper（含62个deprecated绑定），不import torch或执行LeWM。不是按函数同名推断；Python parser、C++转换、ATen schema保持不同端口和分支。全域生成7,912条名字空间接口关系；源引用经过原alias/name/参数/返回/容器传播，2,732个源调用点产生8,667条有条件的原生接口候选，422份canonical NativeBoundary、5,328条声明转换依赖，250.89秒。证据在`queries/python-bindings-full/{result,verification}.json`。
+   原调用ABI（包括无已知目标的调用）可经`NormalCallGraph.call_sites`读取；实际候选保留positional/keywords/包/result及输入/输出world。全2,839定义类型读回，LeWM四源逐项核原调用ABI，通用赋值别名传播、factory/options/out/多返回接口及按binding过滤查询已核，6.97秒。CEM的7个调用点已有19个生成接口候选；未证明namespace当前绑定、实际重载、override是否分流、alias或完整效果，不作执行次数/加速比结论。
+   资源层新增763个资源/状态相关schema输入和575个dispatch声明，按422个NativeBoundary机械投影，7.87秒。Optional/List只保类型路径，不展开为资源实例；Device/Tensor/Generator类型不证明实际消费，CUDA key不证明GPU执行或copy。证据为`queries/native-resource-declarations/result.json`。没有创建无条件ResourceUse或物理资源实例。
+   按用户最新边界，软件展开至算子/外部动作接口；保留调用转换/状态契约，不再继续拆CPython解释器及kernel内部。下一项集中在目标硬件图、资源容量/连接约束、状态/数据生命周期与软件区域的完整关联，以及生成器之外的Python/NumPy/文件/环境接口。第一阶段完成前不实现图化简或codegen runtime。
+   后端设计已固定为C++20，算子ABI v1、执行计划schema v1；本机GCC 13.3.0，安装Torch CMake target声明CXX_STANDARD 20，ATen/torch/library头文件编译期语法核验通过。仅编译，不链接/运行目标；证据为`queries/cpp-target/result.json`。
 
 第一阶段仍未完成；当前不扩detector/backend、不变换程序，没有完整LeWM episode优化或加速比结论。
