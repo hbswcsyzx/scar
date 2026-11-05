@@ -1,62 +1,46 @@
 # 当前状态
 
-**第一阶段尚未完成。当前只做静态建模、建图与查询，不进行程序变换。**
-NORMAL_SUCCESS / CPython 3.14.7；软件边界到算子/运行时API。后端设计 C++20、算子ABI v1、计划schema v1。
-本阶段未运行 LeWM、导入 torch 或采集目标运行数据。以下耗时均属于分析器。
+**第一阶段尚未完成。当前只做静态建模、建图与查询。**
+NORMAL_SUCCESS / CPython 3.14.7；后端约定C++20、算子ABI v1、计划schema v1。
+没有运行LeWM或导入torch；以下时间都是分析器耗时，不是程序加速比。
 
 ## 已落实
 
-| 层 | 当前范围 |
+| 层 | 已实现的图与接口 |
 |---|---|
-| F0–F3 | 866材料：849 Python源与17 stub；原bytes、全部词法/语法、scope及binding |
-| F4 | 882,537共享模板、3,385,528操作、4,645循环、24,159,357边；函数/循环不按调用或迭代unroll |
-| F5 输入 | schema6，22,171代码scope组；独立factory依赖加入后852单元，不复制原facts正文 |
-| F5 局部接口 | 852分片；8,750 iteration、709 deferred body、9,361 mapping模板、1,362 merge协议；48 worker实测68.80秒 |
-| F5 接线 | 入口按需激活；参数/捕获环境/world/返回、构造/属性及同步generator；DIRECT/CLOSED_PACK/SYMBOLIC_PACK |
-| F5 发布 | source-target schema12，READ_SELECTOR_V1；字段按allocation来源/class/member区分；content按相同目标邻域分解 |
-| 静态字段 | 原端口literal/type/open有限域，每端口最多4个literal；已接参数/默认值/数据返回、模块成员、属性及容器内容关系，保原表行与条件 |
-| 入口及builtin | 脚本输入契约；按namespace/reference解析compile/exec接口、默认参数、caller context和条件code值流 |
+| F0–F3 | 866材料：849 Python源与17 stub；原bytes、词法/语法、scope、binding及compiler视图 |
+| F4 | 882,537共享模板、3,385,528操作、4,645循环、24,159,357边；函数/循环不按调用或迭代复制 |
+| F5局部接口 | 852 source单元，8,750 iteration、709 deferred body、9,361 mapping模板；48 worker构建68.80秒 |
+| F5求解 | 参数/默认值/捕获环境/world/返回、构造/属性、容器增量和同步generator；参数包缓存及共享content因子 |
+| 静态字段 | 每端口最多4个literal候选及type/open信息；参数、返回、模块成员、属性、容器关系保原端口与条件 |
+| 实际入口 | 自动连接path/read_text/compile/exec；有效future flags独立建C1/C2、官方C3-T/S及632模板共享F4变体 |
+| 命名空间 | 有序C2 lookup、READ/WRITE/DELETE及原world；函数实际globals捕获；exec字典与module身份分开 |
+| 新入口求解 | 编译变体仅经exec激活；追加4,360端口，原5,978,863端口编号不变；自定义builtins内容订阅与标准fallback条件分别记录 |
 
-基础模型 artifacts/current/static/ 的manifest SHA：
-601e929904dc7481693f4a0747b7e01269ecf6d1302ff1efec072627c288aba0。
-压缩边表575,718,843 bytes；小引用索引231,760 bytes。本轮没有重建F0–F4。
-原生声明/资源旁表已有CPU/NUMA DRAM/GPU/设备内存/SATA/NVMe候选关系，尚未做当前版本全链路重验。
-引用、对象、storage、逻辑内容版本互不等价。所有may关系均不是唯一值、实际执行、纯度或变换合法性证明。
+原基础manifest SHA：601e929904dc7481693f4a0747b7e01269ecf6d1302ff1efec072627c288aba0。
+编译上下文变体不覆盖原F0–F4。源码、对象、storage、逻辑内容版本和物理副本互不等价。
+原生声明及CPU/DRAM/GPU/设备内存/SATA/NVMe资源旁表已有，尚未与新入口完成全链路重验。
 
-## 当前证据
+## 当前实际验收
 
-以下路径相对 artifacts/current/queries/；旧结果保留其原commit及收据范围，不冒充当前读取器结果。
+路径相对artifacts/current/queries/，全部是静态结果。
 
-- **Observed / Verified：** entry-incremental-fixed/ 完整写出一次100M预算结果，严格读回通过：274加载单元、2,388活跃scope、155,674调用候选，frontier仍6,327,332。2,503.55万content关系存为11,370因子，整个结果约154MiB；总3746.02秒，发布293.75秒。它是预算前沿，不是固定点。inspection.json记录当前scope与候选概况；高密度热点包含matplotlib，粗粒度may合并仍需审查。
-- **Verified：** entry-delta-selector-4m/保16张非content表及51,570条唯一(source,target,container)依赖与旧前缀相等；旧key标签依赖通知先后，已统一为read selector，不声称旧带key集合相等。默认值直连不广播为容器内容。
-- **Implemented / Verified：** StaticPackShapes已接主路径：不可变escape/write/update/merge证明只计算一次，每次仍检查全部子包open及顶层values。pack-shapes-world/核全部51查询/顺序相等；单fixture核空包、escape、子包opening及后续污染。重复查询微基准约63倍，仅此协议。
-- **Verified：** entry-pack-shapes-4m/verification.json核接入缓存后的18张发布表记录数与decoded SHA全部相等，并通过当前严格读取器；总126.76秒。primitive/循环/source接口的针对性检查通过，不据此宣布整图收敛。
-- **Implemented / Verified：** 原生绑定重算现复用852接口摘要。binding-interface-wiring/核真实World的48 iteration及2 body，封死F4恢复入口仍通过，plan_reads=0；reader接受精确receipt并拒绝错误receipt。仅构造/读取检查，非全量native图验收。
-- **Implemented / Verified：** scalar-values-world/保66个原operation、8条条件推导，单源字段固定点约2秒；4个端口发生有限域宽化。没有把singleton may集当must常量。
-- **Implemented / Verified：** script-launch-current/保实际启动命令输入、原F0/F2/root及2个初始namespace读取端口。argv/environment是可变位置的初值，未列出的环境仍未知。
-- **Implemented / Verified：** launcher-source-execution-current/verification.json核compile/exec两边界、一个编译上下文及一个code-use；原owner、actuals、worlds保留。mode来自原F2 literal，flags0/dont_inheritFalse/optimize-1及声明process0/inherit16777216分别记录。局部alias与shadow源码检查通过；尚未解析payload或激活exec body。
-- **Implemented / Verified：** scalar-graph-world-policy/verification.json核真实World/Policy字段层：52操作、964关系组、9,455原端口字段、6条条件推导，53.07秒；压缩/解码收据及父表行、参数/返回和外层条件逐项核对通过。字段队列清空不等于4M父图固定点；未声称must常量。共享namespace/content使用线性分组；world/state、参数包及deferred creation不冒充标量引用。
-- **Implemented / Verified：** scalar-graph-entry/verification.json核当前4M父图全部已准入的274单元：2,824操作、31,857关系组、646,856字段、696条件推导；构建192.64秒，完整typed流式读回148.11秒，压缩结果约16MiB。父图仍是前沿，不宣称整程序收敛。
-- **Implemented / Verified：** launcher-source-text-current/保13路径表达式、5路径候选及原read_text调用；自动连到eval.py的原F0文本候选。默认UTF8、无symlink重定向、版本保持均保条件，编码/newline解释独立于PEP263；尚未绑定compile变体/body。
-- **Implemented / Verified：** launcher-compiled-values-current/verification.json自动接文本→compile及path→标准str→filename，继承flags=16777216、optimize=0。候选code_digest与独立source-only控制不同，保F3/F4_VARIANT_NOT_BUILT，不激活旧body；F0完整locator/manifest与编码条件均保留。通用fixture覆盖dont_inherit及局部str shadow。
-- **Implemented / Verified：** launcher-context-variants-current/verification.json按有效flags生成独立C1命名空间，复用原F0/F1/F2/roles：8 scopes、13 regions、4,377 slots、19 boundaries；1个注解区域正确stringize。AST含位置逐项相等、全部槽位重放通过，旧C1 reader拒收新profile，原manifest未改；不授F4 body。
-- **Implemented / Verified：** launcher-binding-variants-current/verification.json以同一有效context重建C2a/C2b：419 ports、8 scopes、47 bindings、52 plans、2 captures/relays，0冲突，1个注解端口正确DETACHED；父SHA及规则重放通过。C1入口同时核requested/inherited/input/code/future flags一致性，拒收矛盾字段。
-- **Implemented / Verified：** native/symtable-context-3.14.7/verification.json：独立官方3.14.7工具worker＋C++20 flags入口；核心源码及原环境不改。零flags的fixture/eval raw view与本机相等，annotations使scope分别3→2、9→5；显式继承与直接flags相等。该证据是静态编译器视图，尚不授AST对应或F4 body。
-- **Implemented / Verified：** launcher-symbol-variants-current/verification.json以当前C1及全部F0/F1/F2/roles locator、文本解释和真实worker profile保存5 raw scopes/84 symbols；fresh重捕获相等，原生视图自身仍UNJOINED。
-- **Implemented / Verified：** launcher-topology-variants-current/verification.json完成C3-T：8源码scope映射11 compiler blocks，5 PUBLIC与5原生行双射、2 INLINED、4 FUTURE_DETACHED；全部源码scope覆盖，结构规则及原生重捕获通过。C3-S与F4见后续独立验收。
-- **Implemented / Verified：** launcher-compiler-symbol-variants-current/result.json完成C3-S：84符号、6参数投影，96slots/251 contributions/241source dispositions/185facts/7transforms，fresh reader通过，17.90秒。CELL/FREE/GLOBAL及posonly/kwonly针对性fixture通过，旧source-only readers不授变体权限。
-- **Implemented / Verified：** launcher-f4-variants-current/verification.json复用现有规则，按实际context生成局部共享图：1,063语法occurrence全部归类、632模板/631子链接、2,079操作、15,162控制/状态/数据/声明边，4,360 primitive ports/76calls/4functions/2loops。构建32.35秒、读回与闭合核验20.51秒；全部facts有scope归属、世界状态序列及child接口闭合通过。原材料不改、未执行body；exec连接见下项。
-- **Implemented / Verified：** launcher-exec-roots-current/verification.json：原exec调用连接到同一共享F4根；2个条件namespace分支，每支6个协议阶段，保namespace选择、条件builtins插入、closure检查、audit、body及discard/release的world顺序。正常结果None不等于body返回值；默认优化frame locals为快照。仅正常成功路径。
-- **Implemented / Verified：** launcher-namespace-graph-current/verification.json：234个原名字操作（169 READ/65 WRITE）、4组实际globals引用/函数捕获、120个分支接口绑定、8条globals引用绑定、3条带条件内容连接。恢复原C2有序lookup和原F4 world，ENV_GLOBALS经实际创建参数，不登记为module；原fact行/容器成员/key/alias路径逐项核对。构建5.44秒、读回核验1.56秒、压缩表35,034 bytes。单个静态fixture另核DELETE及globals捕获。此局部图尚未接全局solver，不声明must常量。
-- **Observed：** 4b5ac5b9版本的连续接线求解已启动，launch为entry-pack-fixed.launch.json；使用--until-fixed-point，不因固定事件上限从头重算。结果以同名log/result为准，尚不能据启动记录宣布收敛。
-- **Verified：** launcher-compilation-context/仅编译捕获bytes，optimize0/1/2均确认继承annotations会改变eval常量区/code_digest。相同path/bytes不足以硬接旧F4 root。有效future位不能直接OR历史feature目录位。
+- `launcher-f4-variants-current/verification.json`：实际compile context的1,063语法occurrence全部归类；632模板、2,079操作、15,162边，包含原world序列和2个循环。
+- `launcher-exec-roots-current/verification.json`：2个条件分支；namespace选择、builtins插入、closure检查、audit、body、discard/release共6阶段；正常结果None，根返回值不冒充exec值。
+- `launcher-namespace-graph-current/verification.json`：234个名字操作、4组globals捕获、3条带版本/lookup条件的内容连接；构建5.44秒，压缩表35,034 bytes。这些may边不是常量或可变换证明。
+- **新入口已接入全局求解：** `launcher-context-targets-current/verification.json`完整typed读回20类已发布关系表，并展开实际context函数体。1M事件前缀构建98.62秒、核验50.50秒，产物约4.8MB；275加载单元、2,007 scope、7,942调用连接，其中166条caller属于编译上下文；2个exec分支、96条有guard的builtin候选。
+- **未收敛：** 上述前缀普通frontier为28,851，namespace frontier为0；状态明确为CONTEXT_TARGET_BUDGET_FRONTIER。未知caller frame globals保FrameProtocol/open，不等同于源码module。标准builtin候选保选择条件，自定义map已订阅；当前真实globals无显式自定义builtins内容，不能据此宣称这一字段已唯一解析。
+- 通用单fixture核晚到自定义builtins能接入source callable；`relation-replay-verification.json/.py`可复现新旧类/容器flow的832事件与9类关系完全相等，耗时9.50秒（含fixture构建），不作为主图加速数据。
+- 旧独立eval.py长任务已由实际launcher/context求解替代并终止，未发布固定点；收据为`entry-pack-fixed.superseded.json`。首个1M原型的两项namespace问题记在`launcher-context-targets-1m-reviewed/review.json`，当前产物已修正并重验。
 
 ## 后续顺序
 
-1. 当前连续主求解仍未收敛，不重跑既有前缀、不改其已载入producer。最新观察约242M事件、frontier7.92M、274单元/2,438 scope；主worklist为单线程，48进程只负责局部材料。已定位继承subtype路径重枚举/base更新重扫历史结果，以及容器重复订阅。下一次改动先处理这些重复，再接新的namespace接口；不以堆进程代替依赖设计。
-2. 有限字段与原跨调用/内容关系已接通，继续补pack投影、捕获环境字段及generator值规则；审查跨调用合并产生的过宽候选。字段层与父图分别验收，不把slice当完整程序。
-3. launcher的文本→compile输入、C1/C2、严格F3-A、C3-T/S及局部F4变体已验收；exec namespace/world/root与实际globals内容的局部连接已验收，下一步接全局求解和YAML/CLI。原_symtable三参视图不当作带flags证据。当前全局主求解入口仍为eval.py，新的局部图不冒充已激活入口。
-4. 贯通并验收当前native算子/资源/逻辑值及版本关系；YIELD_FROM/AWAIT等driver仍有明确obligation。最后按源码、边界和资源分母审计第一阶段；不凭计数或固定点宣告完成。
+1. 沿原函数创建/capture/调用接口接通caller frame globals与builtins来源；不把源码unit当作运行时namespace。保lookup顺序、创建world与数据版本。
+2. 完成声明启动输入到配置/YAML/CLI的数据关系；把module需求机械分为源码、namespace、原生边界和真正缺少的输入，不把全部demand当缺文件。
+3. 将新的context图接到既有Python/native绑定、算子及资源要求图；保alias、逻辑来源、位置、状态和效果，运行时未知字段仍未知。
+4. 在上述入口与接口稳定后持续求解，审计源码、跨层边界、循环和资源的覆盖分母。队列清空不等于整个程序覆盖完成；第一阶段通过后才进入化简。
 
-入口：python -m scar.analysis.source_interface_build --facts <facts> --out <interfaces> --jobs 48；
-python -m scar.analysis.normal_targets --facts <facts> --interfaces <interfaces> --entry <entry.py> --out <fresh-out> --until-fixed-point。
+当前入口：
+`python -m scar.analysis.source_context_build --facts <source-facts> --namespaces <namespace-graph> --entry <script-entry> --interfaces <local-interfaces> --out <fresh-output> --until-fixed-point --jobs 48`
+
+各材料由对应静态阶段机械生成；CLI参数是材料路径，不是手写业务连线。小引用索引与分片正文分别保存，读取时按需展开共享子图。

@@ -189,3 +189,8 @@ exec的连接区域保留命名空间选择、条件builtins插入、closure检�
 不把exec字典登记成module。名字访问保原C2有序lookup、WRITE/DELETE目标及F4 world；
 函数globals保实际创建参数与ReferenceEnvironment来源，builtins按frame入口/函数创建时选择。
 内容边保原容器成员、key、赋值端口、引用路径及读写world；有条件的may-reaching边不是常量证明。
+
+实际入口的编译context与source-only输入分别持有共享图。exec字典不进入import registry；
+caller frame globals须由原frame/capture关系绑定，不能以源码module名代替其身份。
+builtins在根frame入口或函数创建world选择；选中的map内容保普通读依赖，标准fallback单独保guard。
+类关系查询只在单次查询中共享DAG子问题，依赖变化后重查；不缓存过期的False/UNKNOWN结论。
