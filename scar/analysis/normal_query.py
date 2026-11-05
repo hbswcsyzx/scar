@@ -13,9 +13,11 @@ from pathlib import Path
 from scar.analysis.normal_links import _pins
 from scar.analysis import normal_targets
 from scar.analysis import normal_containers
+from scar.analysis import normal_namespaces
 from scar.analysis.source_template_links import read_template_body
 from scar.ir.program import normal_targets as T
 from scar.ir.program import source_productions as P
+from scar.ir.program import normal_namespaces as N
 from scar.ir.record_codec import decode
 
 
@@ -25,7 +27,7 @@ class NormalCallGraph:
     def __init__(self, targets):
         self.path = Path(targets).absolute()
         self.report = json.loads((self.path / 'result.json').read_bytes())
-        if self.report['schema'] != 'scar.normal-source-targets' or self.report['schema_version'] != 3:
+        if self.report['schema'] != 'scar.normal-source-targets' or self.report['schema_version'] != 4:
             raise ValueError('expected current source target graph')
         if self.report['types_sha256'] != sha256(Path(T.__file__).read_bytes()).hexdigest():
             raise ValueError('call edge declarations differ')
@@ -33,6 +35,10 @@ class NormalCallGraph:
             raise ValueError('call target producer differs')
         if self.report['container_implementation_sha256'] != sha256(Path(normal_containers.__file__).read_bytes()).hexdigest():
             raise ValueError('container flow producer differs')
+        if self.report['namespace_implementation_sha256'] != sha256(Path(normal_namespaces.__file__).read_bytes()).hexdigest():
+            raise ValueError('namespace relationship producer differs')
+        if self.report['namespace_types_sha256'] != sha256(Path(N.__file__).read_bytes()).hexdigest():
+            raise ValueError('namespace declarations differ')
         self.facts = Path(self.report['source_facts'])
         raw = (self.facts / 'result.json').read_bytes()
         if sha256(raw).hexdigest() != self.report['source_facts_sha256']:
@@ -86,6 +92,16 @@ class NormalCallGraph:
                 raise ValueError('content endpoint is outside the input domain')
             yield link
 
+    def namespace_lookups(self, source=None, *, occurrence=None):
+        """Known receiver/member origins, including still-open native bindings."""
+        for document in self._documents('namespaces',source,occurrence,'result'):
+            link=decode(N.NamespaceLookup,document,record_tags=P.PRODUCTION_RECORD_TAGS)
+            if any(port.unit not in self.units for port in (link.receiver,link.result)):
+                raise ValueError('namespace endpoint is outside the input domain')
+            if any(unit not in self.units for unit in link.source_units):
+                raise ValueError('namespace source is outside the input domain')
+            yield link
+
     def expand(self, link):
         """Return the sealed original plan containing this candidate body.
 
@@ -106,6 +122,7 @@ def main():
     parser.add_argument('--source', required=True)
     parser.add_argument('--occurrence', type=int)
     parser.add_argument('--content', action='store_true', help='also count possible container-content edges')
+    parser.add_argument('--namespaces',action='store_true',help='also show inferred namespace/member relationships')
     args = parser.parse_args()
     view = NormalCallGraph(args.targets)
     links = tuple(view.calls(args.source, occurrence=args.occurrence))
@@ -114,6 +131,9 @@ def main():
         source_targets=sorted({view.units[link.body.unit]['path'] for link in links if link.body is not None}),
         packed_links=sum(link.argument_packs is not None for link in links),
         content_links=sum(1 for _ in view.contents(args.source,occurrence=args.occurrence)) if args.content else None,
+        namespace_lookups=[dict(namespace=l.namespace,member=l.member,kind=l.kind.value,
+            inferred_source_values=l.inferred_source_values,binding_proven=l.binding_proven)
+            for l in view.namespace_lookups(args.source,occurrence=args.occurrence)] if args.namespaces else None,
         runtime_dispatch_verified=False, first_stage_complete=False), indent=2))
 
 

@@ -26,6 +26,8 @@ from scar.analysis.source_template_links import _json
 from scar.analysis.source_stage import _durable_bytes,_durable_mkdir
 from scar.analysis.static_query import _Fragments
 from scar.analysis.normal_containers import ContainerFlow
+from scar.analysis import normal_namespaces
+from scar.ir.program import normal_namespaces as N
 
 
 def _star_imports(model,unit,module):
@@ -33,18 +35,22 @@ def _star_imports(model,unit,module):
     fields={r['name']:{n:i for i,n in enumerate(r['fields'])} for r in syntax['profile']['ast_schema']}
     from scar.ir.literals import PythonLiteral
     def scalar(node,name):return decode(PythonLiteral,node['fields'][fields[node['constructor']][name]]['scalar']).to_python()
-    found=[]
+    found=[];requested=set()
     for node in syntax['nodes']:
+        if node['constructor']=='Import':
+            for value in node['fields'][fields['Import']['names']]['items']:
+                requested.add(scalar(syntax['nodes'][value['reference']],'name'))
+            continue
         if node['constructor']!='ImportFrom':continue
         aliases=node['fields'][fields['ImportFrom']['names']]['items']
-        if not any(scalar(syntax['nodes'][v['reference']],'name')=='*' for v in aliases):continue
         name=scalar(node,'module') or '';level=scalar(node,'level')
         if level:
             package=module if Path(unit['path']).name=='__init__.py' else module.rpartition('.')[0]
             prefix=package.split('.')[:len(package.split('.'))-level+1]
             name='.'.join((*prefix,*(() if not name else name.split('.'))))
-        found.append(name)
-    return unit['key'],found
+        if name:requested.add(name)
+        if any(scalar(syntax['nodes'][v['reference']],'name')=='*' for v in aliases):found.append(name)
+    return unit['key'],found,tuple(sorted(requested))
 
 
 class _Solver:
@@ -57,15 +63,19 @@ class _Solver:
         self.dynamic_gets=defaultdict(set);self.symbol_calls=set();self.links={};self.call_rows=[]
         self.base_watch=defaultdict(set);self.ctor_base_watch=defaultdict(set)
         self.star_forward=defaultdict(set)
+        self.imported_modules=set()
         self.builtin_names=set(dir(builtins));self.events=0
         for unit in units:
             offset=len(self.port);self.offsets[unit.unit]=offset
             self.owner.extend([unit.unit]*len(unit.ports));self.port.extend(unit.ports);self.module_units[unit.module].append(unit.unit)
             self.functions.update((offset+f.value,(unit,f)) for f in unit.functions)
             self.classes.update((offset+c.value,(unit,c)) for c in unit.classes)
-        for target,modules in stars:
+        for target,modules,*inventory in stars:
             for module in modules:
                 for source in self.module_units.get(module,()):self.star_forward[source].add(target)
+            for module in (() if not inventory else inventory[0]):
+                parts=module.split('.')
+                self.imported_modules.update('.'.join(parts[:i]) for i in range(1,len(parts)+1))
         for unit in units:
             offset=self.offsets[unit.unit]
             for a,b in unit.aliases:self.edge(offset+a,offset+b)
@@ -160,7 +170,7 @@ class _Solver:
                 self.reads[key].add(target)
                 for item in tuple(self.ns_values[key]):self.add(target,item)
             child=module+'.'+name
-            if child in self.module_units:self.add(target,('module',child))
+            if child in self.module_units or child in self.imported_modules:self.add(target,('module',child))
             if not units:self.add(target,('external',child,(target,)))
         elif value[0]=='external':
             # Retain rooted external namespace provenance until a source
@@ -346,10 +356,11 @@ def solve_targets(facts,out,*,max_events=20_000_000):
     from scar.analysis.source_template_links import _stream
     fragment=_stream(out/'calls.jsonl.gz',solver.links.values())
     content=_stream(out/'content.jsonl.gz',solver.containers.links.values())
+    namespaces=_stream(out/'namespaces.jsonl.gz',normal_namespaces.namespace_lookups(solver))
     modes=Counter(link.mode for link in solver.links.values());known_calls={link.result for link in solver.links.values()}
     source_calls={link.result for link in solver.links.values() if link.source_callable is not None}
     original_calls=sum(len(u.calls) for u in units)
-    result=dict(schema='scar.normal-source-targets',schema_version=3,status='SOURCE_TARGET_FIXED_POINT' if fixed else 'SOURCE_TARGET_BUDGET_FRONTIER',
+    result=dict(schema='scar.normal-source-targets',schema_version=4,status='SOURCE_TARGET_FIXED_POINT' if fixed else 'SOURCE_TARGET_BUDGET_FRONTIER',
         source_facts=str(facts),source_facts_sha256=sha256(root).hexdigest(),profile='NORMAL_SUCCESS',
         selected_sources=len(units),source_calls=original_calls,source_functions=len(solver.functions),source_classes=len(solver.classes),
         calls_with_candidates=len(known_calls),candidate_links=len(solver.links),modes=dict(modes),
@@ -359,7 +370,10 @@ def solve_targets(facts,out,*,max_events=20_000_000):
         classes_with_packed_bases=sum(c.bases_pack is not None for u in units for c in u.classes),
         content=content,content_links=len(solver.containers.links),unknown_namespace_keys=len(solver.containers.unknown_keys),
         container_implementation_sha256=sha256(Path(ContainerFlow.consume.__code__.co_filename).read_bytes()).hexdigest(),
-        star_import_module_candidates=sum(len(names) for _,names in stars),
+        star_import_module_candidates=sum(len(names) for _,names,*_ in stars),
+        declared_import_modules=len(solver.imported_modules),namespace_lookups=namespaces['records'],namespaces=namespaces,
+        namespace_implementation_sha256=sha256(Path(normal_namespaces.__file__).read_bytes()).hexdigest(),
+        namespace_types_sha256=sha256(Path(N.__file__).read_bytes()).hexdigest(),
         unresolved_calls=original_calls-len(known_calls),value_events=solver.events,frontier=len(solver.queue),
         calls=fragment,seconds=time.monotonic()-started,conditions='source target alternatives; descriptor/module/attribute admissions remain conditional',
         runtime_dispatch_verified=False,effects_proven=False,first_stage_complete=False,target_executed=False,transformation_authorized=False,

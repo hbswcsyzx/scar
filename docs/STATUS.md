@@ -1,6 +1,6 @@
 # 当前状态
 
-**第一阶段未完成。F0/F1/F2、F3各子层及组合、F4-A及全域模板接口已按声明范围验收；F4-C正常路径图、F5跨函数/展开参数及容器引用传播已生成并核查；继续接外部名字空间/native与资源。**
+**第一阶段未完成。F0/F1/F2、F3各子层及组合、F4-A及全域模板接口已按声明范围验收；F4-C正常路径图、F5跨函数/展开参数/容器及名字空间关系已生成并核查；下一项为原生接口提供方与资源接线。**
 按用户最新要求，本轮优先LeWM正常成功运行；应用报错、异常展开及引用清理细节暂不作为推进门槛。
 范围为CPython 3.14.7、866份声明源码及其原收据；编译器材料另固定analysis hash seed=0。
 这不证明依赖发现完整、运行对象绑定已观察或最终执行图已闭合。阶段契约见[ARCHITECTURE](ARCHITECTURE.md)。
@@ -157,13 +157,11 @@ call/map/string/assert参数也沿闭合原端口组解析；空组保DECLARED_E
    `python -B -m scar.analysis.normal_graph --templates SOURCE_TEMPLATE_STORE --out FRESH_OUT --jobs 16`生成；`read_normal_edges(store, unit)`读回。默认全域，可用`--source PATH`选择输入；核心无LeWM名称规则。已有N1扁平IR适配不作为这份层次图的前置条件。
    正常路径边语法为9记录/28字段、4 ID、9枚举/43成员、9 union。五源已生成并读回：22,724操作、73循环；7,340个调用/恢复入口及19,834条返回关系配对通过，79条state回边及782条分支守卫已核。证据在`queries/normal-graph-five/`。
    LeWM目录内全部582份声明源码已生成正常路径图：457,866模板、553,118区域、1,661,663操作、2,308循环，16进程596.62秒。边表为4,946,837控制、2,666,942数据、4,331,137状态、10,763声明，压缩285,025,448 bytes；全部分片header/压缩哈希及汇总计数已核，见`queries/normal-graph-project/{result,publication}.json`。这些是静态操作而非动态执行次数；原操作正文仍共享在父材料中，不含原模型/父材料空间，也不是LeWM运行时间。
-3. **F5跨函数调用已完成当前实现的全量传播**：849份运行.py使用原有操作/区域/端口，17份.pyi不冒充运行实现。新版包含5,623,201端口、4,556,255引用传递、399,294名字访问、15,179函数、2,052类、8,414导入及80,761调用点。24进程提取191.49秒；事实压缩93,729,331 bytes，见`queries/normal-link-facts-packs/result.json`。
-   全域传播203.50秒、2,614,054项值事件、工作队列前沿0；49,201个调用有候选，18,535个有源码目标，共58,403条连接。31,560个调用仍没有目标；固定点不是完整分派覆盖。1,567个展开参数调用现已纳入分母，1,330条候选连接保留实际参数包端口，不虚构包内容或包到形参的别名。外部成员保留可推导的来源路径，循环引用在重复源位置退为成员未知，不无限增长名字。
-   `NormalCallGraph.calls/expand`核原收据读取连接并展开共享body，不新建另一套节点。LeWM的eval、policy、CEM、world四源249条候选连接已强类型读回，含82条源码连接和14条包依赖；另展开一份原跨文件body，15.46秒。见`queries/normal-targets-packs/{result,verification}.json`。仅作包依赖、类型往返及外部名字循环的定向检查；未跑整套测试或目标程序。
-   STATE连接是跨调用/创建/恢复的因果依赖，不表示复用旧world；函数环境是投影，不是与函数对象相等。源码目标仍是may关系，依赖当前descriptor及标准名字空间等条件，不能当成实际分派或优化许可。
-   本轮补通用容器/映射/迭代约束，事实schema v3：28,134容器、26,165下标访问、6,346更新及8,712迭代接口；849源重建191.35秒。传播244.98秒，50,612个调用有候选、18,611个有源码目标、60,319条调用连接，另9,504条可能内容边（379,559压缩bytes）；队列前沿0。当前材料在`queries/normal-link-facts-containers/`及`normal-targets-containers/`。
-   新关系沿原端口传引用，保留下标操作的输入/输出world；内容边明确为FLOW_INSENSITIVE_MAY_CONTENT，跨版本合并不能证明不变性。支持原构造的dict/list/tuple/set、已知键、复制/追加、迭代、固定解包及globals映射；不据此假设自定义getitem协议。LeWM四源262条调用连接和22条内容边已严格读回，12.67秒，见后者`verification.json`。
-   下一项的具体缺口已定位：CEM的`torch.randn/ones/cat/topk`尚未形成目标连接。已读安装版torch入口，函数通过`dir/getattr/globals`循环注册；通用globals读写已接入，原生对象的成员目录及声明准入仍缺证据。先显式连出名字空间查找及边界接口，再接native参数、状态与资源；不能靠同名硬接ATen。
-   下一项只做外部库/native接口与资源依赖接线：复用现有native声明解析器，先定位原调用到原接口的绑定缺口，再接参数、返回、状态与资源要求。不能用算子同名证明Python绑定、把dispatch候选当实际kernel，或把`.to()`当已发生拷贝。应用异常和引用清理不阻塞本轮。
+3. **F5当前接线实现已全量传播并可查询**：849份运行.py，17份.pyi不冒充运行实现。当前事实schema v3，包含80,761调用点、28,134容器、26,165下标访问、6,346更新及8,712迭代接口；24进程重建191.35秒，见`queries/normal-link-facts-containers/result.json`。原SourceProductionPlan及ID不变。
+   当前结果schema v4：52,382个调用有可能目标、18,611个有源码目标、63,501条调用连接、9,504条可能内容边及43,415条名字空间查找关系；传播276.54秒、队列前沿0。28,379个调用仍无目标，不能将固定点当完整分派覆盖。证据为`queries/normal-targets-namespaces/result.json`。
+   内容边只传可能的引用，保留下标访问的输入/输出world，明确FLOW_INSENSITIVE_MAY_CONTENT，不证明数据不变或缓存合法。函数环境是投影，STATE是因果依赖。支持原构造容器、已知键、复制/追加、迭代、固定解包及globals映射；自定义getitem不冒充内建容器语义。展开参数仍保留实际包端口，不捏造包内容或包到形参的别名。
+   名字空间关系连接原接收者/结果端口、名字、原模块及开放绑定；2,031项导入模块候选来自原F2，标准导入条件下可接编译子模块边界，不以是否有.py主体决定该节点是否存在。空的源码值集表示绑定仍待接口提供方，不表示成员不存在；binding_proven保持False。实现为`normal_namespaces`，没有LeWM特例。
+   LeWM四源267条调用连接、22条内容边及169条名字空间关系经类型读回和分片收据核验，15.79秒；CEM的torch.randn/ones/cat/topk已连到原torch名字空间/源码端口，源码绑定值仍为0。证据为同目录`verification.json`；这些仍是静态可能关系，不是实际kernel、transfer、alias或效果证明。
+   `NormalCallGraph.calls/contents/namespace_lookups/expand`只读原图及共享body。下一项：复用安装版native声明和Python绑定生成规则，接通原生导出、参数规范化、schema/dispatch及资源要求；不靠同名硬接ATen，不把dispatch候选或.to()当已发生的kernel/拷贝。应用异常和引用清理暂不阻塞本轮。
 
 第一阶段仍未完成；当前不扩detector/backend、不变换程序，没有完整LeWM episode优化或加速比结论。
