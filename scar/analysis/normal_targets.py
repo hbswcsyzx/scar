@@ -25,6 +25,7 @@ from scar.ir.record_codec import decode,encode
 from scar.analysis.source_template_links import _json
 from scar.analysis.source_stage import _durable_bytes,_durable_mkdir
 from scar.analysis.static_query import _Fragments
+from scar.analysis.normal_containers import ContainerFlow
 
 
 def _star_imports(model,unit,module):
@@ -89,6 +90,7 @@ class _Solver:
             offset=self.offsets[unit.unit]
             for function in unit.functions:
                 for formal in function.formals[1:-1]:self.add(offset+formal,('external_value',offset+formal))
+        self.containers=ContainerFlow(self,units)
 
     def ns(self,unit,namespace):
         owner='' if namespace.kind is F.NamespaceKind.BUILTINS else unit
@@ -176,6 +178,7 @@ class _Solver:
             self.reads[key].add(target)
             for item in tuple(self.ns_values[key]):self.add(target,item)
             self.class_lookup(value[1],name,target,point)
+        elif value[0]=='container':self.containers.attribute(value,name,target)
 
     @lru_cache(maxsize=None)
     def gp(self,point):
@@ -252,7 +255,13 @@ class _Solver:
 
     def call(self,index,value):
         caller,call=self.call_rows[index];offset=self.offsets[caller.unit]
-        if value[0]=='function':self.bind(index,value[1])
+        if value[0]=='container_method':
+            name='builtins.'+('dict' if value[1][2]=='MAPPING' else 'set' if value[1][2]=='SET' else 'list')+'.'+value[2]
+            self.links[(index,'container',value[1],value[2])]=T.CallLink(self.gp(offset+call.result),self.gp(offset+call.callee),
+                None,None,'BUILTIN_CONTAINER_METHOD',name,conditions=('SOURCE_BUILTIN_CONTAINER','FLOW_INSENSITIVE_MAY_CONTENT'),
+                argument_packs=self.packs(caller,call))
+            self.containers.call(caller,call,value)
+        elif value[0]=='function':self.bind(index,value[1])
         elif value[0]=='bound':self.bind(index,value[1],value[2],mode='SOURCE_BOUND_METHOD')
         elif value[0]=='classbound':self.bind(index,value[1],value[3],mode='SOURCE_CLASS_METHOD',class_receiver=value[2])
         elif value[0]=='class':
@@ -268,6 +277,7 @@ class _Solver:
             self.links[(index,mode,name)]=T.CallLink(self.gp(offset+call.result),self.gp(offset+call.callee),None,None,mode,name,
                 conditions=conditions,argument_packs=self.packs(caller,call))
             self.add(offset+call.result,('external_value',offset+call.result))
+            self.containers.external(caller,call,name)
             if name in ('builtins.staticmethod','builtins.classmethod') and call.positional:
                 self.add(offset+call.result,('staticmethod' if name.endswith('staticmethod') else 'classmethod',offset+call.positional[0]))
             elif name=='builtins.getattr' and len(call.positional)>=2:
@@ -301,6 +311,7 @@ class _Solver:
                 for receiver,out in tuple(self.dynamic_gets[point]):
                     self.gets[receiver].add((value[2],out))
                     for base in tuple(self.values[receiver]):self.attribute(receiver,base,value[2],out)
+            self.containers.consume(point,value)
         return not self.queue
 
 
@@ -334,10 +345,11 @@ def solve_targets(facts,out,*,max_events=20_000_000):
     solver=_Solver(units,stars);fixed=solver.solve(max_events);_durable_mkdir(out)
     from scar.analysis.source_template_links import _stream
     fragment=_stream(out/'calls.jsonl.gz',solver.links.values())
+    content=_stream(out/'content.jsonl.gz',solver.containers.links.values())
     modes=Counter(link.mode for link in solver.links.values());known_calls={link.result for link in solver.links.values()}
     source_calls={link.result for link in solver.links.values() if link.source_callable is not None}
     original_calls=sum(len(u.calls) for u in units)
-    result=dict(schema='scar.normal-source-targets',schema_version=2,status='SOURCE_TARGET_FIXED_POINT' if fixed else 'SOURCE_TARGET_BUDGET_FRONTIER',
+    result=dict(schema='scar.normal-source-targets',schema_version=3,status='SOURCE_TARGET_FIXED_POINT' if fixed else 'SOURCE_TARGET_BUDGET_FRONTIER',
         source_facts=str(facts),source_facts_sha256=sha256(root).hexdigest(),profile='NORMAL_SUCCESS',
         selected_sources=len(units),source_calls=original_calls,source_functions=len(solver.functions),source_classes=len(solver.classes),
         calls_with_candidates=len(known_calls),candidate_links=len(solver.links),modes=dict(modes),
@@ -345,6 +357,8 @@ def solve_targets(facts,out,*,max_events=20_000_000):
         packed_source_calls=sum(c.positional_pack is not None for u in units for c in u.calls),
         packed_candidate_links=sum(link.argument_packs is not None for link in solver.links.values()),
         classes_with_packed_bases=sum(c.bases_pack is not None for u in units for c in u.classes),
+        content=content,content_links=len(solver.containers.links),unknown_namespace_keys=len(solver.containers.unknown_keys),
+        container_implementation_sha256=sha256(Path(ContainerFlow.consume.__code__.co_filename).read_bytes()).hexdigest(),
         star_import_module_candidates=sum(len(names) for _,names in stars),
         unresolved_calls=original_calls-len(known_calls),value_events=solver.events,frontier=len(solver.queue),
         calls=fragment,seconds=time.monotonic()-started,conditions='source target alternatives; descriptor/module/attribute admissions remain conditional',

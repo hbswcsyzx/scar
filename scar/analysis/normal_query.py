@@ -12,6 +12,7 @@ from pathlib import Path
 
 from scar.analysis.normal_links import _pins
 from scar.analysis import normal_targets
+from scar.analysis import normal_containers
 from scar.analysis.source_template_links import read_template_body
 from scar.ir.program import normal_targets as T
 from scar.ir.program import source_productions as P
@@ -24,12 +25,14 @@ class NormalCallGraph:
     def __init__(self, targets):
         self.path = Path(targets).absolute()
         self.report = json.loads((self.path / 'result.json').read_bytes())
-        if self.report['schema'] != 'scar.normal-source-targets' or self.report['schema_version'] != 2:
+        if self.report['schema'] != 'scar.normal-source-targets' or self.report['schema_version'] != 3:
             raise ValueError('expected current source target graph')
         if self.report['types_sha256'] != sha256(Path(T.__file__).read_bytes()).hexdigest():
             raise ValueError('call edge declarations differ')
         if self.report['implementation_sha256'] != sha256(Path(normal_targets.__file__).read_bytes()).hexdigest():
             raise ValueError('call target producer differs')
+        if self.report['container_implementation_sha256'] != sha256(Path(normal_containers.__file__).read_bytes()).hexdigest():
+            raise ValueError('container flow producer differs')
         self.facts = Path(self.report['source_facts'])
         raw = (self.facts / 'result.json').read_bytes()
         if sha256(raw).hexdigest() != self.report['source_facts_sha256']:
@@ -43,10 +46,9 @@ class NormalCallGraph:
         if sha256((self.templates / 'result.json').read_bytes()).hexdigest() != self.inputs['source_result_sha256']:
             raise ValueError('source template version differs')
 
-    def calls(self, source=None, *, occurrence=None):
-        """Validate the whole fragment receipt; decode selected unit edges only."""
+    def _documents(self, table, source, occurrence, anchor):
         unit = None if source is None else self.sources[str(Path(source).absolute())]
-        receipt = self.report['calls']
+        receipt = self.report[table]
         payload = (self.path / receipt['path']).read_bytes()
         if len(payload) != receipt['bytes'] or sha256(payload).hexdigest() != receipt['sha256']:
             raise ValueError('call fragment differs')
@@ -57,10 +59,15 @@ class NormalCallGraph:
             raise ValueError('call record count differs')
         for line in raw.splitlines():
             document = json.loads(line)
-            if unit is not None and document['result']['unit'] != unit:
+            if unit is not None and document[anchor]['unit'] != unit:
                 continue
-            if occurrence is not None and document['result']['port']['template']['occurrence'] != occurrence:
+            if occurrence is not None and document[anchor]['port']['template']['occurrence'] != occurrence:
                 continue
+            yield document
+
+    def calls(self, source=None, *, occurrence=None):
+        """Validate the whole fragment receipt; decode selected unit edges only."""
+        for document in self._documents('calls', source, occurrence, 'result'):
             link = decode(T.CallLink, document, record_tags=P.PRODUCTION_RECORD_TAGS)
             if link.result.unit not in self.units or link.callee.unit != link.result.unit:
                 raise ValueError('call source is not in its input domain')
@@ -69,6 +76,14 @@ class NormalCallGraph:
                     raise ValueError('call body has no qualified source')
                 if any(route.formal.unit != link.body.unit for route in link.parameters):
                     raise ValueError('formal parameters belong to another body source')
+            yield link
+
+    def contents(self, source=None, *, occurrence=None):
+        """Possible content edges selected by the consuming source unit."""
+        for document in self._documents('content', source, occurrence, 'target'):
+            link = decode(T.ContentLink, document, record_tags=P.PRODUCTION_RECORD_TAGS)
+            if any(port.unit not in self.units for port in (link.source,link.target,link.container)):
+                raise ValueError('content endpoint is outside the input domain')
             yield link
 
     def expand(self, link):
@@ -90,6 +105,7 @@ def main():
     parser.add_argument('--targets', required=True)
     parser.add_argument('--source', required=True)
     parser.add_argument('--occurrence', type=int)
+    parser.add_argument('--content', action='store_true', help='also count possible container-content edges')
     args = parser.parse_args()
     view = NormalCallGraph(args.targets)
     links = tuple(view.calls(args.source, occurrence=args.occurrence))
@@ -97,6 +113,7 @@ def main():
         modes=dict(Counter(link.mode for link in links)),
         source_targets=sorted({view.units[link.body.unit]['path'] for link in links if link.body is not None}),
         packed_links=sum(link.argument_packs is not None for link in links),
+        content_links=sum(1 for _ in view.contents(args.source,occurrence=args.occurrence)) if args.content else None,
         runtime_dispatch_verified=False, first_stage_complete=False), indent=2))
 
 

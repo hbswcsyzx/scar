@@ -72,6 +72,44 @@ class Constant:
     literal: PythonLiteral
 
 
+class ContainerKind(str, Enum):
+    MAPPING = 'MAPPING'
+    SEQUENCE = 'SEQUENCE'
+    SET = 'SET'
+
+
+@dataclass(frozen=True, slots=True)
+class Container:
+    value: int
+    kind: ContainerKind
+    elements: tuple[int, ...] = ()
+    pairs: tuple[tuple[int, int], ...] = ()
+
+
+@dataclass(frozen=True, slots=True)
+class ItemAccess:
+    receiver: int
+    key: int | PythonLiteral
+    value: int
+    write: bool
+    world: int
+    result_world: int
+
+
+@dataclass(frozen=True, slots=True)
+class ContainerUpdate:
+    target: int
+    source: int
+    append: bool
+
+
+@dataclass(frozen=True, slots=True)
+class Iteration:
+    source: int
+    value: int
+    advance: bool
+
+
 @dataclass(frozen=True, slots=True)
 class Call:
     callee: int
@@ -97,3 +135,7 @@ class UnitFacts:
     imports: tuple[Import, ...]
     constants: tuple[Constant, ...]
     calls: tuple[Call, ...]
+    containers: tuple[Container, ...] = ()
+    items: tuple[ItemAccess, ...] = ()
+    updates: tuple[ContainerUpdate, ...] = ()
+    iterations: tuple[Iteration, ...] = ()

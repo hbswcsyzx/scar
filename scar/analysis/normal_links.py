@@ -46,6 +46,7 @@ class _Facts:
         self.fields={r['name']:{name:i for i,name in enumerate(r['fields'])} for r in syntax['profile']['ast_schema']}
         self.ports=[];self.ids={};self.aliases=set();self.names=[];self.functions=[];self.classes=[]
         self.attributes=[];self.imports=[];self.constants=[];self.calls=[]
+        self.containers=[];self.items=[];self.updates=[];self.iterations=[]
 
     def point(self,port):
         if port not in self.ids:self.ids[port]=len(self.ports);self.ports.append(port)
@@ -97,6 +98,41 @@ class _Aliases(_Emitter):
         completion=next(c for c in step.completions if c.kind is C.FALLTHROUGH)
         return self.facts.point(self.port(step.id,G.PortKind.RESULT,index,completion))
 
+    def item_access(self,step,write):
+        self.facts.items.append(F.ItemAccess(self.value_id(step.arguments[0]),self.value_id(step.arguments[1]),
+            self.value_id(step.arguments[2]) if write else self.result_id(step),write,
+            self.value_id(step.arguments[-1]),self.result_id(step,0 if write else 1)))
+
+    def container_protocol(self,step,ins):
+        """Interpret existing language ABI, without evaluating target objects."""
+        k=ins.protocol;f=self.facts
+        sequences=(K.BUILD_DISPLAY_LIST,K.BUILD_CALL_POSITIONALS,K.BUILD_CALL_POSITIONAL_LIST,K.BUILD_SET_DISPLAY)
+        if k in sequences:
+            kind=F.ContainerKind.SET if k is K.BUILD_SET_DISPLAY else F.ContainerKind.SEQUENCE
+            f.containers.append(F.Container(self.result_id(step),kind,tuple(self.value_id(v) for v in step.arguments[:-1])))
+        elif k is K.BUILD_MAP:
+            values=tuple(self.value_id(v) for v in step.arguments[:-1])
+            f.containers.append(F.Container(self.result_id(step),F.ContainerKind.MAPPING,pairs=tuple(zip(values[::2],values[1::2]))))
+        elif k in (K.MAP_ADD,K.STORE_SUBSCRIPT):self.item_access(step,True)
+        elif k is K.COMPREHENSION_ADD:
+            if len(step.arguments)==4:self.item_access(step,True)
+            else:f.updates.append(F.ContainerUpdate(self.value_id(step.arguments[0]),self.value_id(step.arguments[1]),True))
+        elif k in (K.DICT_UPDATE,K.DICT_MERGE,K.EXTEND_DISPLAY,K.EXTEND_CALL_POSITIONALS):
+            offset=1 if k is K.DICT_MERGE else 0
+            f.updates.append(F.ContainerUpdate(self.value_id(step.arguments[offset]),self.value_id(step.arguments[offset+1]),False))
+        elif k in (K.APPEND_DISPLAY,K.APPEND_CALL_POSITIONAL):
+            f.updates.append(F.ContainerUpdate(self.value_id(step.arguments[0]),self.value_id(step.arguments[1]),True))
+        elif k in (K.DISPLAY_LIST_TO_TUPLE,K.CALL_POSITIONALS_TO_TUPLE):
+            result=self.result_id(step);f.containers.append(F.Container(result,F.ContainerKind.SEQUENCE))
+            f.updates.append(F.ContainerUpdate(result,self.value_id(step.arguments[0]),False))
+        elif k in (K.GET_ITERATOR,K.ADVANCE_ITERATOR,K.COMPREHENSION_NEXT):
+            f.iterations.append(F.Iteration(self.value_id(step.arguments[0]),self.result_id(step),k is not K.GET_ITERATOR))
+        elif k is K.UNPACK_FIXED:
+            for index in range(len(next(c for c in step.completions if c.kind is C.FALLTHROUGH).types)-1):
+                f.items.append(F.ItemAccess(self.value_id(step.arguments[0]),PythonLiteral.from_python(index,exact=True),
+                    self.result_id(step,index),False,self.value_id(step.arguments[-1]),
+                    self.result_id(step,len(next(c for c in step.completions if c.kind is C.FALLTHROUGH).types)-1)))
+
     def describe(self):
         facts=self.facts;module=facts.module
         for step in self.plan.steps:
@@ -116,7 +152,12 @@ class _Aliases(_Emitter):
             elif type(ins) is P.ImportMember:
                 facts.attributes.append(F.Attribute(self.value_id(step.arguments[0]),ins.member_name,self.result_id(step),False))
             elif type(ins) is P.ApplyLanguageAction:
-                if ins.action in (P.LanguageActionKind.ATTRIBUTE_GET,P.LanguageActionKind.ATTRIBUTE_SET):
+                if ins.action in (P.LanguageActionKind.ITEM_GET,P.LanguageActionKind.ITEM_SET):
+                    self.item_access(step,ins.action is P.LanguageActionKind.ITEM_SET)
+                elif ins.action in (P.LanguageActionKind.SET_INSERT,P.LanguageActionKind.SET_UPDATE):
+                    facts.updates.append(F.ContainerUpdate(self.value_id(step.arguments[0]),self.value_id(step.arguments[1]),
+                        ins.action is P.LanguageActionKind.SET_INSERT))
+                elif ins.action in (P.LanguageActionKind.ATTRIBUTE_GET,P.LanguageActionKind.ATTRIBUTE_SET):
                     name=facts.scalar(ins.selectors[0]);write=ins.action is P.LanguageActionKind.ATTRIBUTE_SET
                     facts.attributes.append(F.Attribute(self.value_id(step.arguments[0]),name,
                         self.value_id(step.arguments[1]) if write else self.result_id(step),write))
@@ -189,9 +230,16 @@ class _Aliases(_Emitter):
                 literal=facts.scalar(ins.payload[0])
                 if type(literal) in (str,int,bool) or literal is None:
                     facts.constants.append(F.Constant(self.result_id(step),PythonLiteral.from_python(literal,exact=True)))
+                elif literal==():facts.containers.append(F.Container(self.result_id(step),F.ContainerKind.SEQUENCE))
+            elif type(ins) is P.ConstructValue and ins.construction is P.ConstructionKind.TUPLE:
+                if ins.tuple_layout is P.TupleConstructionLayout.ITEMS:
+                    facts.containers.append(F.Container(self.result_id(step),F.ContainerKind.SEQUENCE,
+                        tuple(self.value_id(v) for v in step.arguments[:-1])))
             elif type(ins) is P.DefineLiteral:
                 value=ins.value.to_python()
                 if type(value) in (str,int,bool) or value is None:facts.constants.append(F.Constant(self.result_id(step),ins.value))
+                elif value==():facts.containers.append(F.Container(self.result_id(step),F.ContainerKind.SEQUENCE))
+            elif type(ins) is P.ApplyPythonProtocol:self.container_protocol(step,ins)
 
 
 def _pins():
@@ -221,12 +269,14 @@ def _extract(task):
             plan=decode(P.SourceProductionPlan,document,record_tags=P.PRODUCTION_RECORD_TAGS)
             emitter=_Aliases(plan,node.key,interfaces,facts);emitter.run();emitter.describe()
     value=F.UnitFacts(unit['key'],_module(unit['path']),tuple(facts.ports),tuple(sorted(facts.aliases)),tuple(facts.names),
-        tuple(facts.functions),tuple(facts.classes),tuple(facts.attributes),tuple(facts.imports),tuple(facts.constants),tuple(facts.calls))
+        tuple(facts.functions),tuple(facts.classes),tuple(facts.attributes),tuple(facts.imports),tuple(facts.constants),tuple(facts.calls),
+        tuple(facts.containers),tuple(facts.items),tuple(facts.updates),tuple(facts.iterations))
     payload=_json(encode(value,record_tags=P.PRODUCTION_RECORD_TAGS));compressed=gzip.compress(payload,compresslevel=3,mtime=0)
     path=Path(out)/'units'/unit['key'];_durable_mkdir(path);_durable_bytes(path/'facts.json.gz',compressed,replace=False)
     return dict(unit=unit['key'],path=unit['path'],module=value.module,facts='units/'+unit['key']+'/facts.json.gz',
         bytes=len(compressed),sha256=sha256(compressed).hexdigest(),decoded_bytes=len(payload),decoded_sha256=sha256(payload).hexdigest(),
-        counts={name:len(getattr(value,name)) for name in ('ports','aliases','names','functions','classes','attributes','imports','constants','calls')})
+        counts={name:len(getattr(value,name)) for name in ('ports','aliases','names','functions','classes','attributes','imports','constants','calls',
+            'containers','items','updates','iterations')})
 
 
 def extract_facts(model,templates,out,sources=(),*,jobs=1):
@@ -245,7 +295,7 @@ def extract_facts(model,templates,out,sources=(),*,jobs=1):
     if _pins()!=pins or (model/'manifest.json').read_bytes()!=model_raw or (templates/'result.json').read_bytes()!=source_raw:raise ValueError('facts inputs changed')
     counts=Counter()
     for row in rows:counts.update(row['counts'])
-    result=dict(schema='scar.normal-source-link-facts',schema_version=2,status='SOURCE_LINK_FACTS_EXTRACTED',model=str(model),templates=str(templates),
+    result=dict(schema='scar.normal-source-link-facts',schema_version=3,status='SOURCE_LINK_FACTS_EXTRACTED',model=str(model),templates=str(templates),
         model_manifest_sha256=sha256(model_raw).hexdigest(),source_result_sha256=sha256(source_raw).hexdigest(),implementation_sha256=pins,
         selected_sources=len(rows),units=rows,counts=dict(counts),seconds=time.monotonic()-started,
         profile='NORMAL_SUCCESS',runtime_dispatch_verified=False,first_stage_complete=False,target_executed=False)

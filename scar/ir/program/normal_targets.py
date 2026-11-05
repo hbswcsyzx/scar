@@ -5,6 +5,7 @@ from enum import Enum
 from .normal_graph import Port
 from .source_template_links import SourceTemplateKey
 from .source_productions import ProductionRegionID
+from scar.ir.literals import PythonLiteral
 
 
 @dataclass(frozen=True, slots=True)
@@ -64,3 +65,13 @@ class CallLink:
     conditions: tuple[str, ...] = ('SOURCE_STATIC_CANDIDATE', 'CURRENT_CALLABLE_DESCRIPTOR')
     runtime_dispatch_verified: bool = False
     argument_packs: ArgumentPacks | None = None
+
+
+@dataclass(frozen=True, slots=True)
+class ContentLink:
+    """Possible reference content, never a concrete content version proof."""
+    source: GlobalPort
+    target: GlobalPort
+    container: GlobalPort
+    key: PythonLiteral | None = None
+    semantics: str = 'FLOW_INSENSITIVE_MAY_CONTENT'

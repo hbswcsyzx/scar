@@ -305,3 +305,7 @@ python -B -m scar.analysis.normal_query --targets TARGET_STORE --source /path/to
 `NormalCallGraph.calls(source, occurrence=...)`返回原有类型的可能调用连接；
 `expand(link)`沿收据展开原共享body，使用`link.body.region`定位区域。
 展开不代表执行、目标唯一或具备优化许可。展开参数保留实际包端口，未确定内容时不捏造形参别名。
+
+容器内容约束使用同一提取/求解入口，当前事实与结果schema均为v3；旧收据不改签。
+`NormalCallGraph.contents(source)`读取以该源为消费者的可能内容边；CLI加`--content`汇总。
+边只描述引用可能来自哪个内容位置，不证明某次调用的内容版本、无副作用或复用合法性。
