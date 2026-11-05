@@ -22,7 +22,7 @@ F0只保原始bytes与编码结果。解码失败仍存原bytes；文件不可�
 F1只转录词法，不证明语法有效；原生错误保prefix，预算停止不发布partial模型。
 F2默认exec，也支持eval/single/func_type；--file先经过F0/F1，--max-nodes是每源AST上限。
 源码始终只解析为AST；语法成功不证明作用域/控制合法。大literal超固定预算准确报frontier，不标UNKNOWN。
-F0至F3及F4-A已在声明材料域验收；当前F4-B操作签名和产生规则尚未完成，前层未验收不新增后层功能。
+F0至F3及F4-A、全域模板接口已在声明材料域验收；F4-C正常路径边表与F5可能调用接线继续复用原ID。
 当前profile固定本机CPython及tokenizer源码/静态解释器二进制指纹；内置tokenizer的shared Python暂不接纳。
 
 F3-A：
@@ -283,3 +283,15 @@ API以 `provider.build_native_protocols(fresh_dir)` 生成、`attach_native_prot
 [ARCHITECTURE](ARCHITECTURE.md)；不新增专题、版本或 gate 文档。
 先定位缺失的识别事实、端口、连接或推理规则，再修改负责层；只运行相关检查。
 生成图仅发布到 `artifacts/current/static/`，查询只引用原 ID/收据，不另建权威程序。
+
+正常路径图与跨文件可能调用（静态，不执行目标）：
+
+```bash
+python -B -m scar.analysis.normal_graph --templates TEMPLATE_STORE --out FRESH_GRAPH --jobs 16
+python -B -m scar.analysis.normal_links --model MODEL --templates TEMPLATE_STORE --out FRESH_FACTS --jobs 24
+python -B -m scar.analysis.normal_targets --facts FRESH_FACTS --out FRESH_TARGETS
+```
+
+原操作/区域正文共享，边表与连接事实按unit分片；可能调用另存稀疏表。
+`CallLink`保留实参、形参、默认值、环境及状态依赖，源码目标仍带准入条件。
+当前固定参数调用传播不覆盖全部动态分派，不能由工作队列为空宣布全程序建图完成。
