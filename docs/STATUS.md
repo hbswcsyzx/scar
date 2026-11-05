@@ -36,6 +36,8 @@ NORMAL_SUCCESS / CPython 3.14.7；软件边界到算子/运行时API。后端设
 - **Implemented / Verified：** script-launch-current/保实际启动命令输入、原F0/F2/root及2个初始namespace读取端口。argv/environment是可变位置的初值，未列出的环境仍未知。
 - **Implemented / Verified：** launcher-source-execution-current/verification.json核compile/exec两边界、一个编译上下文及一个code-use；原owner、actuals、worlds保留。mode来自原F2 literal，flags0/dont_inheritFalse/optimize-1及声明process0/inherit16777216分别记录。局部alias与shadow源码检查通过；尚未解析payload或激活exec body。
 - **Implemented / Verified：** scalar-graph-world-policy/verification.json核真实World/Policy字段层：52操作、964关系组、9,455原端口字段、6条条件推导，53.07秒；压缩/解码收据及父表行、参数/返回和外层条件逐项核对通过。字段队列清空不等于4M父图固定点；未声称must常量。共享namespace/content使用线性分组；world/state、参数包及deferred creation不冒充标量引用。
+- **Implemented / Verified：** scalar-graph-entry/verification.json核当前4M父图全部已准入的274单元：2,824操作、31,857关系组、646,856字段、696条件推导；构建192.64秒，完整typed流式读回148.11秒，压缩结果约16MiB。父图仍是前沿，不宣称整程序收敛。
+- **Implemented / Verified：** launcher-source-text-current/保13路径表达式、5路径候选及原read_text调用；自动连到eval.py的原F0文本候选。默认UTF8、无symlink重定向、版本保持均保条件，编码/newline解释独立于PEP263；尚未绑定compile变体/body。
 - **Observed：** 4b5ac5b9版本的连续接线求解已启动，launch为entry-pack-fixed.launch.json；使用--until-fixed-point，不因固定事件上限从头重算。结果以同名log/result为准，尚不能据启动记录宣布收敛。
 - **Verified：** launcher-compilation-context/仅编译捕获bytes，optimize0/1/2均确认继承annotations会改变eval常量区/code_digest。相同path/bytes不足以硬接旧F4 root。有效future位不能直接OR历史feature目录位。
 
@@ -43,7 +45,7 @@ NORMAL_SUCCESS / CPython 3.14.7；软件边界到算子/运行时API。后端设
 
 1. 参数包缓存已接入，继续求解至已准入工作队列清空；支持 --until-fixed-point，避免在固定事件上限退出后重算前缀。固定点与整程序覆盖分开验收，不新增优化backend。
 2. 有限字段与原跨调用/内容关系已接通，继续补pack投影、捕获环境字段及generator值规则；审查跨调用合并产生的过宽候选。字段层与父图分别验收，不把slice当完整程序。
-3. 补实际launcher的payload解释、编译context variant和exec root绑定，再接YAML/CLI配置。当前求解入口仍为eval.py；payload/variant是缺实现，不能谎报为内在runtime UNKNOWN。
+3. launcher的F0文本条件候选已建立；继续补compile payload、编译context variant和exec root绑定，再接YAML/CLI配置。当前求解入口仍为eval.py；variant缺实现，不能谎报为内在runtime UNKNOWN。
 4. 贯通并验收当前native算子/资源/逻辑值及版本关系；YIELD_FROM/AWAIT等driver仍有明确obligation。最后按源码、边界和资源分母审计第一阶段；不凭计数或固定点宣告完成。
 
 入口：python -m scar.analysis.source_interface_build --facts <facts> --out <interfaces> --jobs 48；
