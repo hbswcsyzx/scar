@@ -46,7 +46,7 @@ class _Facts:
         self.fields={r['name']:{name:i for i,name in enumerate(r['fields'])} for r in syntax['profile']['ast_schema']}
         self.ports=[];self.ids={};self.aliases=set();self.names=[];self.functions=[];self.classes=[]
         self.attributes=[];self.imports=[];self.constants=[];self.calls=[]
-        self.containers=[];self.items=[];self.updates=[];self.iterations=[]
+        self.containers=[];self.items=[];self.updates=[];self.iterations=[];self.operations=[]
 
     def point(self,port):
         if port not in self.ids:self.ids[port]=len(self.ports);self.ports.append(port)
@@ -56,6 +56,11 @@ class _Facts:
         value=self.syntax['nodes'][site.occurrence]['fields'][site.ordinal]
         for index in site.item_path:value=value['items'][index]
         return decode(PythonLiteral,value['scalar']).to_python()
+
+    def operator(self,site):
+        value=self.syntax['nodes'][site.occurrence]['fields'][site.ordinal]
+        for index in site.item_path:value=value['items'][index]
+        return F.OperatorSelector(self.syntax['nodes'][value['reference']]['constructor'])
 
     def field(self,occurrence,name):
         node=self.syntax['nodes'][occurrence]
@@ -102,6 +107,12 @@ class _Aliases(_Emitter):
         self.facts.items.append(F.ItemAccess(self.value_id(step.arguments[0]),self.value_id(step.arguments[1]),
             self.value_id(step.arguments[2]) if write else self.result_id(step),write,
             self.value_id(step.arguments[-1]),self.result_id(step,0 if write else 1)))
+
+    def language_operation(self,step,kind,selector):
+        normal=next(c for c in step.completions if c.kind is C.FALLTHROUGH)
+        self.facts.operations.append(F.LanguageOperation(kind,self.facts.operator(selector),
+            tuple(self.value_id(v) for v in step.arguments[:-1]),self.result_id(step),
+            self.value_id(step.arguments[-1]),self.result_id(step,len(normal.types)-1)))
 
     def container_protocol(self,step,ins):
         """Interpret existing language ABI, without evaluating target objects."""
@@ -152,7 +163,9 @@ class _Aliases(_Emitter):
             elif type(ins) is P.ImportMember:
                 facts.attributes.append(F.Attribute(self.value_id(step.arguments[0]),ins.member_name,self.result_id(step),False))
             elif type(ins) is P.ApplyLanguageAction:
-                if ins.action in (P.LanguageActionKind.ITEM_GET,P.LanguageActionKind.ITEM_SET):
+                if ins.action in (P.LanguageActionKind.UNARY,P.LanguageActionKind.BINARY,P.LanguageActionKind.COMPARE):
+                    self.language_operation(step,F.LanguageOperationKind(ins.action.value),ins.selectors[0])
+                elif ins.action in (P.LanguageActionKind.ITEM_GET,P.LanguageActionKind.ITEM_SET):
                     self.item_access(step,ins.action is P.LanguageActionKind.ITEM_SET)
                 elif ins.action in (P.LanguageActionKind.SET_INSERT,P.LanguageActionKind.SET_UPDATE):
                     facts.updates.append(F.ContainerUpdate(self.value_id(step.arguments[0]),self.value_id(step.arguments[1]),
@@ -178,6 +191,8 @@ class _Aliases(_Emitter):
                     facts.calls.append(F.Call(self.value_id(step.arguments[0]),tuple(self.value_id(v) for v in actual[:n]),
                         tuple((name,self.value_id(v)) for name,v in zip(names,actual[n:])),self.result_id(step),
                         self.value_id(step.arguments[-1]),self.result_id(step,len(normal.types)-1)))
+            elif type(ins) is P.ApplyInplaceOperator:
+                self.language_operation(step,F.LanguageOperationKind.INPLACE_BINARY,ins.operator)
             elif type(ins) is P.ApplyDecorator:
                 facts.calls.append(F.Call(self.value_id(step.arguments[0]),(self.value_id(step.arguments[1]),),(),
                     self.result_id(step),self.value_id(step.arguments[-1]),self.result_id(step,1)))
@@ -270,13 +285,15 @@ def _extract(task):
             emitter=_Aliases(plan,node.key,interfaces,facts);emitter.run();emitter.describe()
     value=F.UnitFacts(unit['key'],_module(unit['path']),tuple(facts.ports),tuple(sorted(facts.aliases)),tuple(facts.names),
         tuple(facts.functions),tuple(facts.classes),tuple(facts.attributes),tuple(facts.imports),tuple(facts.constants),tuple(facts.calls),
-        tuple(facts.containers),tuple(facts.items),tuple(facts.updates),tuple(facts.iterations))
+        tuple(facts.containers),tuple(facts.items),tuple(facts.updates),tuple(facts.iterations),tuple(facts.operations))
     payload=_json(encode(value,record_tags=P.PRODUCTION_RECORD_TAGS));compressed=gzip.compress(payload,compresslevel=3,mtime=0)
     path=Path(out)/'units'/unit['key'];_durable_mkdir(path);_durable_bytes(path/'facts.json.gz',compressed,replace=False)
     return dict(unit=unit['key'],path=unit['path'],module=value.module,facts='units/'+unit['key']+'/facts.json.gz',
         bytes=len(compressed),sha256=sha256(compressed).hexdigest(),decoded_bytes=len(payload),decoded_sha256=sha256(payload).hexdigest(),
         counts={name:len(getattr(value,name)) for name in ('ports','aliases','names','functions','classes','attributes','imports','constants','calls',
-            'containers','items','updates','iterations')})
+            'containers','items','updates','iterations','operations')},
+        operation_kinds=dict(Counter(op.action.value for op in value.operations)),
+        operator_selectors=dict(Counter(op.selector.value for op in value.operations)))
 
 
 def extract_facts(model,templates,out,sources=(),*,jobs=1):
@@ -293,11 +310,12 @@ def extract_facts(model,templates,out,sources=(),*,jobs=1):
     else:
         with ProcessPoolExecutor(max_workers=jobs,mp_context=multiprocessing.get_context('spawn')) as pool:rows=list(pool.map(_extract,tasks))
     if _pins()!=pins or (model/'manifest.json').read_bytes()!=model_raw or (templates/'result.json').read_bytes()!=source_raw:raise ValueError('facts inputs changed')
-    counts=Counter()
-    for row in rows:counts.update(row['counts'])
-    result=dict(schema='scar.normal-source-link-facts',schema_version=3,status='SOURCE_LINK_FACTS_EXTRACTED',model=str(model),templates=str(templates),
+    counts=Counter();operation_kinds=Counter();operator_selectors=Counter()
+    for row in rows:
+        counts.update(row['counts']);operation_kinds.update(row['operation_kinds']);operator_selectors.update(row['operator_selectors'])
+    result=dict(schema='scar.normal-source-link-facts',schema_version=4,status='SOURCE_LINK_FACTS_EXTRACTED',model=str(model),templates=str(templates),
         model_manifest_sha256=sha256(model_raw).hexdigest(),source_result_sha256=sha256(source_raw).hexdigest(),implementation_sha256=pins,
-        selected_sources=len(rows),units=rows,counts=dict(counts),seconds=time.monotonic()-started,
+        selected_sources=len(rows),units=rows,counts=dict(counts),operation_kinds=dict(operation_kinds),operator_selectors=dict(operator_selectors),seconds=time.monotonic()-started,
         profile='NORMAL_SUCCESS',runtime_dispatch_verified=False,first_stage_complete=False,target_executed=False)
     _durable_bytes(out/'result.json',_json(result),replace=False);return result
 

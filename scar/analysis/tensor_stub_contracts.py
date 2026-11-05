@@ -254,13 +254,15 @@ def collect_tensor_contracts(site: Path) -> dict:
         candidates = [(s, i, n) for s, i, n in candidates if (s.index, i) not in identities]
     if not selected:
         raise ValueError('installed stub has no Tensor class declaration')
-    classes, methods, attributes = [], [], []
+    classes, methods, attributes, aliases = [], [], [], []
     for source, index, node in selected:
         owner = source.module + '.' + node.name
         occurrence = '/body/' + str(index)
         row = dict(id=source.identity(occurrence), name=node.name, qualified_name=owner,
                    source=source.index, occurrence=occurrence, span=source.span(node),
-                   bases=[source.syntax(base) for base in node.bases], methods=[], attributes=[])
+                   bases=[source.syntax(base) for base in node.bases], methods=[], attributes=[], aliases=[])
+        local_members={n.name for n in node.body if isinstance(n,(ast.FunctionDef,ast.AsyncFunctionDef))}
+        local_members.update(t.id for n in node.body if isinstance(n,ast.Assign) for t in n.targets if isinstance(t,ast.Name))
         ordinals = Counter()
         for member_index, member in enumerate(node.body):
             pointer = occurrence + '/body/' + str(member_index)
@@ -282,6 +284,18 @@ def collect_tensor_contracts(site: Path) -> dict:
                     runtime_binding_verified=False)
                 attributes.append(item)
                 row['attributes'].append(item['id'])
+            if isinstance(member,ast.Assign) or isinstance(member,ast.AnnAssign) and member.value is not None:
+                targets=member.targets if isinstance(member,ast.Assign) else (member.target,)
+                for target_index,target in enumerate(targets):
+                    if not isinstance(target,ast.Name):continue
+                    reference=source.resolve(member.value)
+                    if isinstance(member.value,ast.Name) and member.value.id in local_members:
+                        reference=owner+'.'+member.value.id
+                    item=dict(id=source.identity(pointer+'/target/'+str(target_index)),owner=owner,name=target.id,
+                        source=source.index,occurrence=pointer,span=source.span(member),reference=reference,
+                        expression=source.syntax(member.value),expression_ast=ast.dump(member.value,include_attributes=False),
+                        conditions=(*_CONDITIONS,'CLASS_ASSIGNMENT_VALUE_AND_NAMESPACE_LOOKUP_MATCH'))
+                    aliases.append(item);row['aliases'].append(item['id'])
         classes.append(row)
     receipts = [source.receipt for source in sources]
     registrations = []
@@ -299,15 +313,26 @@ def collect_tensor_contracts(site: Path) -> dict:
             elif active:
                 match = re.match(r'\s*\{\s*"([A-Za-z_][A-Za-z_0-9]*)"', line)
                 if match:
+                    entry=re.fullmatch(r'\s*\{\s*"\w+"\s*,\s*(.+)\s*,\s*(METH_\w+(?:\s*\|\s*METH_\w+)*)\s*,\s*(?:nullptr|NULL)\s*\},?\s*',line)
+                    symbol=None;adapter='UNRESOLVED';flags=None
+                    if entry:
+                        expression,flags=entry.groups();expression=expression.strip()
+                        wrapped=re.fullmatch(r'castPyCFunctionWithKeywords\(TypeError_to_NotImplemented_<(\w+)>\)',expression)
+                        direct=re.fullmatch(r'castPyCFunctionWithKeywords\((\w+)\)|(\w+)',expression)
+                        if wrapped:symbol=wrapped.group(1);adapter='TYPE_ERROR_TO_NOT_IMPLEMENTED'
+                        elif direct:symbol=direct.group(1) or direct.group(2);adapter='DIRECT'
                     registrations.append(dict(name=match.group(1), source=len(receipts) - 1,
-                        lineno=line_number, text=line, status='REGISTRATION_SOURCE_DECLARATION'))
+                        lineno=line_number, text=line, status='REGISTRATION_SOURCE_DECLARATION',
+                        cpp_symbol=symbol,adapter=adapter,flags=flags,
+                        conditions=(*_CONDITIONS,'REGISTRATION_TABLE_IN_CURRENT_TENSOR_TYPE_MRO',
+                            'CPP_REGISTRATION_TARGET_EXPRESSION_MATCHES_DECLARATION')))
     counts = Counter(item['returns']['kind'] for item in methods)
-    return dict(schema='scar.tensor-stub-contracts', schema_version=1,
+    return dict(schema='scar.tensor-stub-contracts', schema_version=2,
                 status='DECLARED_INTERFACES', sources=receipts, classes=classes,
-                methods=methods, attributes=attributes, registrations=registrations,
+                methods=methods, attributes=attributes, aliases=aliases, registrations=registrations,
                 conditions=_CONDITIONS, summary=dict(classes=len(classes), methods=len(methods),
                     method_names=len({r['name'] for r in methods}), attributes=len(attributes),
-                    overloads=sum(r['overload'] for r in methods), return_kinds=dict(counts),
+                    aliases=len(aliases),overloads=sum(r['overload'] for r in methods), return_kinds=dict(counts),
                     registration_names=len({r['name'] for r in registrations})),
                 target_executed=False, torch_imported=False, runtime_binding_verified=False,
                 native_selectors_inferred=False, same_reference_proven=False,

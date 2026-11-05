@@ -122,6 +122,53 @@ class Call:
     keyword_pack: int | None = None
 
 
+class LanguageOperationKind(str, Enum):
+    UNARY = 'UNARY'
+    BINARY = 'BINARY'
+    INPLACE_BINARY = 'INPLACE_BINARY'
+    COMPARE = 'COMPARE'
+
+
+class OperatorSelector(str, Enum):
+    ADD = 'Add'
+    SUB = 'Sub'
+    MULT = 'Mult'
+    MAT_MULT = 'MatMult'
+    DIV = 'Div'
+    FLOOR_DIV = 'FloorDiv'
+    MOD = 'Mod'
+    POW = 'Pow'
+    L_SHIFT = 'LShift'
+    R_SHIFT = 'RShift'
+    BIT_OR = 'BitOr'
+    BIT_XOR = 'BitXor'
+    BIT_AND = 'BitAnd'
+    U_ADD = 'UAdd'
+    U_SUB = 'USub'
+    INVERT = 'Invert'
+    NOT = 'Not'
+    EQ = 'Eq'
+    NOT_EQ = 'NotEq'
+    LT = 'Lt'
+    LT_E = 'LtE'
+    GT = 'Gt'
+    GT_E = 'GtE'
+    IS = 'Is'
+    IS_NOT = 'IsNot'
+    IN = 'In'
+    NOT_IN = 'NotIn'
+
+
+@dataclass(frozen=True, slots=True)
+class LanguageOperation:
+    action: LanguageOperationKind
+    selector: OperatorSelector
+    operands: tuple[int, ...]
+    result: int
+    world: int
+    result_world: int
+
+
 @dataclass(frozen=True, slots=True)
 class UnitFacts:
     unit: str
@@ -139,3 +186,4 @@ class UnitFacts:
     items: tuple[ItemAccess, ...] = ()
     updates: tuple[ContainerUpdate, ...] = ()
     iterations: tuple[Iteration, ...] = ()
+    operations: tuple[LanguageOperation, ...] = ()

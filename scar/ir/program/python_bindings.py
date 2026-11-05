@@ -91,6 +91,7 @@ class PythonBinding:
     deprecated: bool = False
     native_returns: tuple[NativeReturnSlot,...] = ()
     python_return: ValueShape | None = None
+    cpp_symbol: str | None = None
 
 
 @dataclass(frozen=True, slots=True)

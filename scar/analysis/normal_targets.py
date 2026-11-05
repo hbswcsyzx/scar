@@ -60,6 +60,7 @@ class _Solver:
         self.writes=defaultdict(set);self.reads=defaultdict(set);self.ns_values=defaultdict(set)
         self.gets=defaultdict(set);self.sets=defaultdict(set);self.call_watch=defaultdict(list)
         self.member_watch=defaultdict(set);self.ctor_watch=defaultdict(set);self.classmethod_watch=defaultdict(set)
+        self.instance_call_sinks={};self.instance_call_watch={}
         self.dynamic_gets=defaultdict(set);self.symbol_calls=set();self.links={};self.call_rows=[]
         self.base_watch=defaultdict(set);self.ctor_base_watch=defaultdict(set)
         self.star_forward=defaultdict(set)
@@ -162,6 +163,34 @@ class _Solver:
             for item in tuple(self.values[point]):
                 if item[0]=='class':self.constructor(item[1],index,receiver,seen)
 
+    def instance_call(self,index,cls,receiver):
+        identity=(index,cls,receiver)
+        if identity in self.instance_call_sinks:return
+        # This lookup target is internal: it is never an original graph port
+        # or an alias of the object being called. Reusing class lookup keeps
+        # late namespace, base and descriptor values in the same fixed point.
+        sink=('instance_call_lookup',*identity)
+        self.instance_call_sinks[identity]=sink
+        self.instance_call_watch[sink]=(index,receiver)
+        self.class_lookup(cls,'__call__',sink,receiver)
+
+    def instance_call_target(self,index,receiver,value):
+        conditions=('SPECIAL_METHOD_LOOKUP_ON_CLASS','INSTANCE_DICTIONARY_BYPASSED',
+            'STANDARD_INSTANCE_CALL_SLOT_DISPATCH','CURRENT_CLASS_MRO_SELECTS_DECLARATION')
+        if value[0]=='bound':
+            fid=value[1];mode='SOURCE_INSTANCE_CALL'
+            descriptor='STANDARD_FUNCTION_DESCRIPTOR_BINDING';class_receiver=None;receiver=value[2]
+        elif value[0]=='function':
+            fid=value[1];mode='SOURCE_INSTANCE_STATIC_CALL'
+            descriptor='STANDARD_STATICMETHOD_DESCRIPTOR_BINDING';class_receiver=None;receiver=None
+        elif value[0]=='classbound':
+            fid=value[1];mode='SOURCE_INSTANCE_CLASS_CALL'
+            descriptor='STANDARD_CLASSMETHOD_DESCRIPTOR_BINDING';class_receiver=value[2];receiver=value[3]
+        else:return
+        self.bind(index,fid,receiver,mode=mode,class_receiver=class_receiver,
+            conditions=(*conditions,descriptor),environment_source=fid,
+            deferred_mode=mode+'_CREATE_DEFERRED_BODY')
+
     def attribute(self,point,value,name,target):
         if value[0]=='module':
             module=value[1];units=self.module_units.get(module,())
@@ -196,22 +225,25 @@ class _Solver:
         if type(port) is dict:port=decode(G.Port,port,record_tags=P.PRODUCTION_RECORD_TAGS)
         return T.GlobalPort(self.owner[point],port)
 
-    def bind(self,call_index,fid,receiver=None,*,mode='SOURCE_FUNCTION',return_value=True,class_receiver=None):
+    def bind(self,call_index,fid,receiver=None,*,mode='SOURCE_FUNCTION',return_value=True,class_receiver=None,
+             conditions=(),environment_source=None,deferred_mode='CREATE_DEFERRED_BODY'):
         identity=(call_index,fid,receiver,mode,class_receiver)
         if identity in self.symbol_calls:return
         self.symbol_calls.add(identity)
         caller,call=self.call_rows[call_index];unit,function=self.functions[fid]
         offset=self.offsets[caller.unit];target_offset=self.offsets[unit.unit]
+        environment_source=offset+call.callee if environment_source is None else environment_source
+        call_conditions=('SOURCE_STATIC_CANDIDATE','CURRENT_CALLABLE_DESCRIPTOR','STANDARD_MODULE_NAMESPACES',*conditions)
         if call.positional_pack is not None:
             # Target provenance is useful even with unknown argument packing.
             # No pack->formal alias, invented arity, or body execution is granted.
-            routes=(T.Route(self.gp(target_offset+function.formals[0]),T.RouteKind.FUNCTION_ENVIRONMENT,(self.gp(offset+call.callee),)),
+            routes=(T.Route(self.gp(target_offset+function.formals[0]),T.RouteKind.FUNCTION_ENVIRONMENT,(self.gp(environment_source),)),
                 T.Route(self.gp(target_offset+function.formals[-1]),T.RouteKind.STATE,(self.gp(offset+call.world),)))
             synchronous=function.environment.kind is P.DeferredBodyKind.FUNCTION
             self.links[identity]=T.CallLink(self.gp(offset+call.result),self.gp(offset+call.callee),self.gp(fid),
-                T.Body(unit.unit,function.template,function.body),mode if synchronous else 'CREATE_DEFERRED_BODY',None,
-                routes,(),('SOURCE_STATIC_CANDIDATE','CURRENT_CALLABLE_DESCRIPTOR','STANDARD_MODULE_NAMESPACES',
-                    'ARGUMENT_PACK_BINDING_PENDING'),argument_packs=self.packs(caller,call,receiver,class_receiver))
+                T.Body(unit.unit,function.template,function.body),mode if synchronous else deferred_mode,None,
+                routes,(),(*call_conditions,'ARGUMENT_PACK_BINDING_PENDING'),
+                argument_packs=self.packs(caller,call,receiver,class_receiver))
             return
         positional=[offset+p for p in call.positional]
         if receiver is not None:positional.insert(0,receiver)
@@ -243,7 +275,7 @@ class _Solver:
         if synchronous:
             for source,formal in bindings:self.edge(source,formal)
             for formal,value in class_bindings:self.add(formal,value)
-        routes.insert(0,T.Route(self.gp(target_offset+function.formals[0]),T.RouteKind.FUNCTION_ENVIRONMENT,(self.gp(offset+call.callee),)))
+        routes.insert(0,T.Route(self.gp(target_offset+function.formals[0]),T.RouteKind.FUNCTION_ENVIRONMENT,(self.gp(environment_source),)))
         routes.append(T.Route(self.gp(target_offset+function.formals[-1]),T.RouteKind.STATE,(self.gp(offset+call.world),)))
         returned=[]
         if synchronous and return_value and function.returns is not None:
@@ -252,8 +284,8 @@ class _Solver:
         if synchronous and function.return_world is not None:
             returned.append((self.gp(target_offset+function.return_world),self.gp(offset+call.result_world)))
         self.links[identity]=T.CallLink(self.gp(offset+call.result),self.gp(offset+call.callee),self.gp(fid),
-            T.Body(unit.unit,function.template,function.body),mode if synchronous else 'CREATE_DEFERRED_BODY',None,
-            tuple(routes),tuple(returned),('SOURCE_STATIC_CANDIDATE','CURRENT_CALLABLE_DESCRIPTOR','STANDARD_MODULE_NAMESPACES'))
+            T.Body(unit.unit,function.template,function.body),mode if synchronous else deferred_mode,None,
+            tuple(routes),tuple(returned),call_conditions)
 
     def packs(self,unit,call,receiver=None,class_receiver=None):
         if call.positional_pack is None:return None
@@ -274,6 +306,7 @@ class _Solver:
         elif value[0]=='function':self.bind(index,value[1])
         elif value[0]=='bound':self.bind(index,value[1],value[2],mode='SOURCE_BOUND_METHOD')
         elif value[0]=='classbound':self.bind(index,value[1],value[3],mode='SOURCE_CLASS_METHOD',class_receiver=value[2])
+        elif value[0]=='instance':self.instance_call(index,value[1],offset+call.callee)
         elif value[0]=='class':
             cls=value[1];result=offset+call.result;self.add(result,('instance',cls,result))
             self.links[(index,'class',cls)]=T.CallLink(self.gp(result),self.gp(offset+call.callee),self.gp(cls),None,'SOURCE_CONSTRUCTION',None,
@@ -312,6 +345,9 @@ class _Solver:
                     key=('field',value,name);self.writes[source].add(key)
                     for item in tuple(self.values[source]):self.namespace_value(key,item)
             for index in self.call_watch[point]:self.call(index,value)
+            if point in self.instance_call_watch:
+                index,receiver=self.instance_call_watch[point]
+                self.instance_call_target(index,receiver,value)
             if value[0]=='class':
                 for name,target,receiver,root in tuple(self.base_watch[point]):self.class_lookup(value[1],name,target,receiver,root=root)
                 for index,receiver in tuple(self.ctor_base_watch[point]):self.constructor(value[1],index,receiver)

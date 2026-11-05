@@ -26,10 +26,11 @@ def value_shape(row):
 
 
 class _ContainerAdapter:
-    def __init__(self,base,flow):self.base=base;self.flow=flow
+    def __init__(self,base,flow):self.base=base;self.flow=flow;self.observers=()
     def __getattr__(self,name):return getattr(self.base,name)
     def consume(self,point,value):
         self.base.consume(point,value);self.flow.consume(point,value)
+        for observer in self.observers:observer(point,value)
     def external(self,unit,call,name):
         self.base.external(unit,call,name);self.flow.replay_call_update(unit,call)
     def call(self,unit,call,value):

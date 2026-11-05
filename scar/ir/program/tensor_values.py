@@ -3,9 +3,10 @@ from dataclasses import dataclass
 from enum import Enum
 
 from scar.ir.literals import PythonLiteral
-from .normal_targets import GlobalPort
+from .normal_targets import GlobalPort,LanguageOperationSite
 from .providers import ProviderFactReference
 from .python_bindings import PythonBindingID,SourceCallSite
+from .normal_links import LanguageOperationKind,OperatorSelector
 
 
 from .binding_returns import ValueShapeKind,ValueShape,SchemaType,NativeReturnSlot,ReceiverMode
@@ -57,3 +58,53 @@ class DeclaredProtocolCall:
     declaration: ProviderFactReference
     conditions: tuple[str,...]
     assigned: GlobalPort | None=None
+
+
+class OperatorBranch(str,Enum):
+    FORWARD='FORWARD'
+    REFLECTED_SUBTYPE_PRIORITY='REFLECTED_SUBTYPE_PRIORITY'
+    REFLECTED_FALLBACK='REFLECTED_FALLBACK'
+    INPLACE='INPLACE'
+    UNARY='UNARY'
+    CONTAINS='CONTAINS'
+    TRUTH_BOOL='TRUTH_BOOL'
+    TRUTH_LENGTH='TRUTH_LENGTH'
+
+
+class OperatorResultConversion(str,Enum):
+    DIRECT='DIRECT'
+    TRUTH_VALUE='TRUTH_VALUE'
+    NEGATED_TRUTH_VALUE='NEGATED_TRUTH_VALUE'
+
+
+@dataclass(frozen=True,slots=True)
+class DeclaredOperatorCall:
+    action: LanguageOperationKind
+    selector: OperatorSelector
+    operands: tuple[GlobalPort,...]
+    receiver: GlobalPort
+    arguments: tuple[GlobalPort,...]
+    result: GlobalPort
+    world: GlobalPort
+    result_world: GlobalPort
+    member: str
+    branch: OperatorBranch
+    declaration: ProviderFactReference
+    conditions: tuple[str,...]
+    result_conversion: OperatorResultConversion=OperatorResultConversion.DIRECT
+    native_selector: str | None=None
+    binding: PythonBindingID | None=None
+
+
+class LanguageFrontierReason(str,Enum):
+    TENSOR_METHOD_DECLARATION_UNAVAILABLE='TENSOR_METHOD_DECLARATION_UNAVAILABLE'
+    TENSOR_ALIAS_TARGET_UNRESOLVED='TENSOR_ALIAS_TARGET_UNRESOLVED'
+    LANGUAGE_OPERATION_ARITY_DIFFERS='LANGUAGE_OPERATION_ARITY_DIFFERS'
+
+
+@dataclass(frozen=True,slots=True)
+class LanguageProtocolFrontier:
+    site: LanguageOperationSite
+    member: str | None
+    branch: OperatorBranch | None
+    reason: LanguageFrontierReason

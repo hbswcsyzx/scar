@@ -24,8 +24,8 @@ from scar.analysis.source_stage import _durable_bytes,_durable_mkdir
 from scar.analysis.source_template_links import _json,_stream
 from scar.analysis.static_native_materials import read_static_native_materials,NativeMaterialBudget
 from scar.analysis.static_native_interfaces import native_material_document,lower_static_native_materials
-from scar.analysis import tensor_stub_contracts,tensor_return_flow
-from scar.ir.program import python_bindings as B,normal_namespaces as N,source_productions as P
+from scar.analysis import tensor_stub_contracts,tensor_return_flow,tensor_language_flow
+from scar.ir.program import python_bindings as B,normal_namespaces as N,source_productions as P,normal_targets as T
 from scar.ir.program.binding_returns import ReceiverMode,NativeReturnSlot
 from scar.ir.program import binding_returns,tensor_values
 from scar.ir.program.providers import ProviderArtifact,ProviderFactReference
@@ -59,7 +59,7 @@ def _catalog(site,catalog=None):
     return result
 
 
-def _definition(row,index,artifact,revision,conditions,wrapper_sha256):
+def _definition(row,index,artifact,revision,conditions,wrapper_sha256,cpp_symbol=None):
     # Code identity includes source revision, signature branch and exact
     # generated transformations. Different source query scopes share IDs.
     identity=dict(revision=revision,symbol=row['export_namespace']+'.'+row['export_name'],
@@ -67,7 +67,7 @@ def _definition(row,index,artifact,revision,conditions,wrapper_sha256):
         conversions=row['conversions'],cpp=row['cpp_argument_bindings'],deprecated=row['deprecated'],
         dispatch=row['dispatch_expression'],wrapper_sha256=wrapper_sha256,
         registration_container=row['registration_container'],parser_index=row['parser_index'],kind=row['kind'],
-        native_returns=row['native_returns'],python_return=row['python_return'])
+        native_returns=row['native_returns'],python_return=row['python_return'],cpp_symbol=cpp_symbol)
     identity=B.PythonBindingID(sha256(_json(identity)).hexdigest())
     arguments=tuple(B.ParserArgument(a['name'],a['schema_name'],a['type'],a['position'],a['parser_index'],
         a['keyword_only'],a['default'],a.get('default_init'),a['parser_type'],a['parser_formal'],a['kind'],
@@ -83,7 +83,13 @@ def _definition(row,index,artifact,revision,conditions,wrapper_sha256):
         ProviderFactReference(artifact,'#/wrappers/'+pointer),row['family_complete'],None,'DECLARATION_ONLY',conditions,
         row['parser_index'],row['group_id'],row['branch_condition'],row['implicit_receiver'],row['deprecated'],
         tuple(NativeReturnSlot(r['ordinal'],r['name'],tensor_return_flow.schema_type(r['type']),r['annotation']) for r in row['native_returns']),
-        tensor_return_flow.value_shape(row['python_return']))
+        tensor_return_flow.value_shape(row['python_return']),cpp_symbol)
+
+
+def _wrapper_symbol(text):
+    matches=re.findall(r'^static\s+PyObject\s*\*\s*(\w+)\s*\(',text,re.M)
+    if len(matches)!=1:raise ValueError('generated wrapper needs one declared C++ function symbol')
+    return matches[0]
 
 
 def _symbols(definitions):
@@ -101,6 +107,8 @@ class _BindingSolver(_Solver):
         self.native_calls={}
         super().__init__(units,stars)
         self.return_flow=tensor_return_flow.TensorReturnFlow(self,units,stub or dict(methods=[],attributes=[]),stub_artifact)
+        self.language_flow=tensor_language_flow.TensorLanguageFlow(self,units,self.return_flow)
+        self.containers.observers=(self.language_flow.consume,)
 
     def attribute(self,point,value,name,target):
         super().attribute(point,value,name,target)
@@ -158,7 +166,8 @@ def build_binding_graph(targets,out,site,*,catalog=None,jobs=4,propagate=True):
     stub=tensor_stub_contracts.collect_tensor_contracts(site);stub_path=out/'tensor-stubs.json'
     _durable_bytes(stub_path,_json(stub),replace=False);stub_artifact=_artifact(stub_path,'scar.tensor-stub-contracts')
     conditions=tuple(document['open_conditions'])+('CURRENT_NAMESPACE_EXPORT_ADMISSION','NATIVE_OVERRIDE_PATH_NOT_SELECTED')
-    definitions=[_definition(row,i,artifact,document['source_revision'],conditions,document['wrappers'][row['wrapper_id']]['sha256'])
+    wrapper_symbols={key:_wrapper_symbol(row['text']) for key,row in document['wrappers'].items()}
+    definitions=[_definition(row,i,artifact,document['source_revision'],conditions,document['wrappers'][row['wrapper_id']]['sha256'],wrapper_symbols[row['wrapper_id']])
         for i,row in enumerate(document['bindings'])]
     symbols=_symbols(definitions);definition_by_id={d.id:d for d in definitions};links=defaultdict(list)
     namespace_path=view.path/view.report['namespaces']['path']
@@ -172,7 +181,7 @@ def build_binding_graph(targets,out,site,*,catalog=None,jobs=4,propagate=True):
             selected.add(definition.selector)
             links[lookup.result.unit].append(B.NamespaceBindingLink(
                 ProviderFactReference(namespace_artifact,'jsonl:'+str(index)),lookup.receiver,lookup.result,definition.id,conditions))
-    propagation=None;native_calls=();return_facts=();member_calls=();protocol_calls=()
+    propagation=None;native_calls=();return_facts=();member_calls=();protocol_calls=();operator_calls=();operator_frontiers=();language_propagation=None
     if propagate:
         units=list(view.unit_facts());model_units=json.loads((Path(view.inputs['model'])/'manifest.json').read_bytes())['units']
         model_units={u['key']:u for u in model_units}
@@ -182,7 +191,19 @@ def build_binding_graph(targets,out,site,*,catalog=None,jobs=4,propagate=True):
         native_calls=tuple(solver.native_calls.values())
         return_facts=tuple(solver.return_flow.facts.values());member_calls=tuple(solver.return_flow.member_calls.values())
         protocol_calls=tuple(solver.return_flow.protocol_calls.values())
+        operator_calls=tuple(solver.language_flow.calls.values());frontiers=[]
+        for key,reason in solver.language_flow.frontiers.items():
+            offset,operation=solver.language_flow.operations[key[0]];gp=lambda p:solver.gp(offset+p)
+            source=T.LanguageOperationSite(operation.action,operation.selector,tuple(map(gp,operation.operands)),
+                gp(operation.result),gp(operation.world),gp(operation.result_world))
+            frontiers.append(tensor_values.LanguageProtocolFrontier(source,key[2] if len(key)>2 else None,
+                key[1] if len(key)>2 else None,tensor_values.LanguageFrontierReason(reason)))
+        operator_frontiers=tuple(frontiers)
+        language_propagation=dict(source_operations=len(solver.language_flow.operations),
+            operations_with_interfaces=len({c.result for c in operator_calls}),interface_candidates=len(operator_calls),
+            declaration_frontiers=len(operator_frontiers),work_events=solver.language_flow.events)
         selected.update(definition_by_id[c.binding].selector for c in native_calls)
+        selected.update(c.native_selector for c in operator_calls if c.native_selector is not None)
         propagation=dict(status='FIXED_POINT' if fixed else 'BUDGET_FRONTIER',events=solver.events,frontier=len(solver.queue),
             source_calls=len(solver.call_rows),native_call_sites=len({c.site.result for c in native_calls}),native_call_candidates=len(native_calls))
         # Preserve only typed output records; the source graph is still shared.
@@ -219,13 +240,16 @@ def build_binding_graph(targets,out,site,*,catalog=None,jobs=4,propagate=True):
     norm=_stream(out/'normalization.jsonl.gz',normalization);calls=_stream(out/'native-calls.jsonl.gz',native_calls)
     returns=_stream(out/'return-types.jsonl.gz',return_facts);members=_stream(out/'declared-members.jsonl.gz',member_calls)
     protocols=_stream(out/'declared-protocols.jsonl.gz',protocol_calls)
-    result=dict(schema='scar.generated-python-binding-graph',schema_version=2,status='DECLARATIONS_CONNECTED',
+    operators=_stream(out/'declared-operators.jsonl.gz',operator_calls)
+    operator_gaps=_stream(out/'operator-frontiers.jsonl.gz',operator_frontiers)
+    result=dict(schema='scar.generated-python-binding-graph',schema_version=3,status='DECLARATIONS_CONNECTED',
         source_targets=str(view.path),source_result_sha256=sha256((view.path/'result.json').read_bytes()).hexdigest(),
         package_version=document['package_version'],source_revision=document['source_revision'],materials=dict(uri=artifact.uri,sha256=artifact.sha256,size_bytes=artifact.size_bytes),
         definitions=len(definitions),wrappers=len(document['wrappers']),export_families=len(families),exports=exports,units=units,
         namespace_links=sum(len(rows) for rows in links.values()),selected_native_selectors=len(selected),native_interfaces=len(natives),
         native_interface_frontier=sorted(selected-set(natives)),normalization=norm,native_calls=calls,propagation=propagation,
         return_types=returns,declared_members=members,declared_protocols=protocols,
+        declared_operators=operators,operator_frontiers=operator_gaps,language_propagation=language_propagation,
         return_type_kinds=dict(Counter(row.shape.value for row in return_facts)),
         tensor_stubs=dict(uri=stub_artifact.uri,sha256=stub_artifact.sha256,size_bytes=stub_artifact.size_bytes),
         conditions=conditions,manual_bindings_included=False,python_reexports_resolved=False,runtime_binding_verified=False,
@@ -235,6 +259,7 @@ def build_binding_graph(targets,out,site,*,catalog=None,jobs=4,propagate=True):
         stub_collector_sha256=sha256(Path(tensor_stub_contracts.__file__).read_bytes()).hexdigest(),
         return_types_sha256=sha256(Path(binding_returns.__file__).read_bytes()).hexdigest(),
         value_types_sha256=sha256(Path(tensor_values.__file__).read_bytes()).hexdigest())
+    result['language_flow_sha256']=sha256(Path(tensor_language_flow.__file__).read_bytes()).hexdigest()
     _durable_bytes(out/'result.json',_json(result),replace=False);return result
 
 

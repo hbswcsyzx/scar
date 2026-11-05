@@ -306,7 +306,7 @@ python -B -m scar.analysis.normal_query --targets TARGET_STORE --source /path/to
 `expand(link)`沿收据展开原共享body，使用`link.body.region`定位区域。
 展开不代表执行、目标唯一或具备优化许可。展开参数保留实际包端口，未确定内容时不捏造形参别名。
 
-容器内容约束使用同一提取/求解入口，当前事实schema为v3、接线结果为v4；旧收据不改签。
+容器/运算内容约束使用同一提取/求解入口，当前事实schema为v4、接线结果为v4；旧收据不改签。
 `NormalCallGraph.contents(source)`读取以该源为消费者的可能内容边；CLI加`--content`汇总。
 边只描述引用可能来自哪个内容位置，不证明某次调用的内容版本、无副作用或复用合法性。
 
@@ -324,7 +324,9 @@ python -B -m scar.analysis.native_resource_declarations --bindings FRESH_BINDING
 
 `PythonBindingGraph.definitions/native_calls/normalization/expand_native/wrapper`沿共享定义查询；
 `NormalCallGraph.call_sites`独立于目标推导，保留完整原调用ABI。转换依赖不是值别名。
-绑定图schema v2另提供`return_types/declared_members/declared_protocols(source)`，CLI按源汇总返回类型与手写方法。
+绑定图schema v3另提供`return_types/declared_members/declared_protocols/declared_operators/operator_frontiers(source)`，CLI按源汇总。
+`NormalCallGraph.language_operations(source)`独立读取全部原运算接口，包括尚无协议目标的操作；循环不unroll。
+运算协议从AST selector识别正向、反向、原地与比较分支；类型、NotImplemented与优先级保条件，不用输入到结果的alias边代替运算。
 返回契约来自隔离torchgen及安装版wrap规则；Tensor接口从固定源码/pyi抽取，不import torch。
 Tensor方法、元组投影和复制后内容只作条件类型传播；原调用ABI/world不变，未知索引保留整数协议准入条件。
 生成目录按export及源unit分片；算子接口与软件图共享原端口，不复制函数/循环正文。
@@ -341,3 +343,4 @@ python -B -m scar.analysis.software_resources --bindings BINDINGS --declarations
 `TargetHardwareGraph.resources/connections/paths`读取目标描述；`SoftwareResourceGraph.sources/candidates/artifact_locations`
 读取原软件关系。目标ID由snapshot限定，inventory编号不直接当框架device ordinal；位置/设备候选需满足各自条件。
 容量是平台报告的total，预算和实际使用独立；PCIe max不是实测带宽，Optional/List类型路径不展开为实际资源实例。
+软件资源关系schema v2将显式调用和语言协议的规范化依赖分开标记；原运算端口不伪装成SourceCallSite。

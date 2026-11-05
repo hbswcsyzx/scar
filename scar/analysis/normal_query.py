@@ -50,6 +50,8 @@ class NormalCallGraph:
         if sha256(raw).hexdigest() != self.report['source_facts_sha256']:
             raise ValueError('source fact result differs')
         self.inputs = json.loads(raw)
+        if self.inputs['schema']!='scar.normal-source-link-facts' or self.inputs['schema_version']!=4:
+            raise ValueError('expected current language/source facts')
         if self.inputs['implementation_sha256'] != _pins():
             raise ValueError('source fact implementation differs')
         self.units = {row['unit']: row for row in self.inputs['units']}
@@ -108,12 +110,7 @@ class NormalCallGraph:
                 raise ValueError('namespace source is outside the input domain')
             yield link
 
-    def call_sites(self, source=None):
-        """Read original calls even when target propagation found no callee.
-
-        Decode only referenced ports, not millions of unused unit ports.
-        This exposes the actual source ABI; parser/native ABI is separate.
-        """
+    def _fact_documents(self,source=None):
         rows=self.units.values() if source is None else (self.units[self.sources[str(Path(source).absolute())]],)
         for row in rows:
             payload=(self.facts/row['facts']).read_bytes()
@@ -122,7 +119,14 @@ class NormalCallGraph:
             raw=gzip.decompress(payload)
             if len(raw)!=row['decoded_bytes'] or sha256(raw).hexdigest()!=row['decoded_sha256']:
                 raise ValueError('call-site facts decoded receipt differs')
-            document=json.loads(raw);ports=document['ports'];cache={}
+            document=json.loads(raw)
+            if document['unit']!=row['unit']:raise ValueError('source fact unit differs')
+            yield row,document
+
+    def call_sites(self, source=None):
+        """Read all original calls; decode only their referenced source ports."""
+        for row,document in self._fact_documents(source):
+            ports=document['ports'];cache={}
             def port(index):
                 if type(index) is not int or not 0<=index<len(ports):raise ValueError('call-site port ordinal differs')
                 if index not in cache:cache[index]=T.GlobalPort(row['unit'],decode(G.Port,ports[index],record_tags=P.PRODUCTION_RECORD_TAGS))
@@ -133,6 +137,19 @@ class NormalCallGraph:
                     tuple((name,port(p)) for name,p in call.keywords),port(call.result),port(call.world),port(call.result_world),
                     None if call.positional_pack is None else port(call.positional_pack),
                     None if call.keyword_pack is None else port(call.keyword_pack))
+
+    def language_operations(self,source=None):
+        """Original operator/world ABI, including unresolved protocol targets."""
+        for row,document in self._fact_documents(source):
+            ports=document['ports'];cache={}
+            def port(index):
+                if type(index) is not int or not 0<=index<len(ports):raise ValueError('operator port ordinal differs')
+                if index not in cache:cache[index]=T.GlobalPort(row['unit'],decode(G.Port,ports[index],record_tags=P.PRODUCTION_RECORD_TAGS))
+                return cache[index]
+            for wire in document['operations']:
+                operation=decode(F.LanguageOperation,wire)
+                yield T.LanguageOperationSite(operation.action,operation.selector,tuple(map(port,operation.operands)),
+                    port(operation.result),port(operation.world),port(operation.result_world))
 
     def unit_facts(self):
         """Yield receipt-bound unit facts with lazy port decoding for solvers."""

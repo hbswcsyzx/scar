@@ -31,6 +31,11 @@ class OperandSourceKind(str,Enum):
     CONVERSION_OPEN='CONVERSION_OPEN'
 
 
+class NormalizationDependencyKind(str,Enum):
+    CALL='DECLARED_NORMALIZATION_DEPENDENCY'
+    LANGUAGE_PROTOCOL='DECLARED_OPERATOR_NORMALIZATION_DEPENDENCY'
+
+
 @dataclass(frozen=True,slots=True)
 class OperandSource:
     call: GlobalPort
@@ -42,7 +47,7 @@ class OperandSource:
     kind: OperandSourceKind
     default_expression: str | None
     conditions: tuple[str,...]
-    semantics: str='DECLARED_NORMALIZATION_DEPENDENCY'
+    semantics: NormalizationDependencyKind=NormalizationDependencyKind.CALL
 
 
 @dataclass(frozen=True,slots=True)

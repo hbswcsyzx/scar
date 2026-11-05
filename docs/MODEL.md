@@ -83,6 +83,10 @@ UNKNOWN 应落在确实未知的字段、效果或关系上，不能吞掉已知
 算子结果的声明类型由`ValueShape`及`ReturnTypeEvidence`连接原结果端口，元组字段和序列元素有显式投影。
 这些记录是Value的条件属性，不能代替ObjectID、StorageID或LogicalVersion。序列转成list/tuple只传播元素类型摘要。
 绑定/未绑定方法的receiver独立保存，原调用的实参、参数包和输入/输出world保持原样；手写接口没有生成映射时不虚构ATen selector。
+语言运算保留原Operation及有序operand/world端口；`DeclaredOperatorCall`连接协议分支、声明及有条件的wrapper实现。
+stub契约与注册实现是不同依据，不表示发生两次计算；C++注册目标与生成wrapper的实际符号对应，不能按Python名字猜算子。
+隐式实例调用通过类上的`__call__`接线，查找中间结果不写回原对象端口；反射优先级、NotImplemented与原地fallback保留条件。
+协议依据为固定[Python 3.14.7数据模型](https://github.com/python/cpython/blob/v3.14.7/Doc/reference/datamodel.rst)，不是运行观测。
 
 效果至少区分 reads、writes、allocates、frees、aliases、escapes、RNG、异常、外部及顺序影响。
 未知效果保持开放；异常前已经发生的写入、IO 和清理不可回滚成“无效果”。

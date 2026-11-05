@@ -6,12 +6,23 @@ from .normal_graph import Port
 from .source_template_links import SourceTemplateKey
 from .source_productions import ProductionRegionID
 from scar.ir.literals import PythonLiteral
+from .normal_links import LanguageOperationKind,OperatorSelector
 
 
 @dataclass(frozen=True, slots=True)
 class GlobalPort:
     unit: str
     port: Port
+
+
+@dataclass(frozen=True, slots=True)
+class LanguageOperationSite:
+    action: LanguageOperationKind
+    selector: OperatorSelector
+    operands: tuple[GlobalPort,...]
+    result: GlobalPort
+    world: GlobalPort
+    result_world: GlobalPort
 
 
 @dataclass(frozen=True, slots=True)
