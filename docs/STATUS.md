@@ -39,6 +39,7 @@ NORMAL_SUCCESS / CPython 3.14.7；软件边界到算子/运行时API。后端设
 - **Implemented / Verified：** scalar-graph-entry/verification.json核当前4M父图全部已准入的274单元：2,824操作、31,857关系组、646,856字段、696条件推导；构建192.64秒，完整typed流式读回148.11秒，压缩结果约16MiB。父图仍是前沿，不宣称整程序收敛。
 - **Implemented / Verified：** launcher-source-text-current/保13路径表达式、5路径候选及原read_text调用；自动连到eval.py的原F0文本候选。默认UTF8、无symlink重定向、版本保持均保条件，编码/newline解释独立于PEP263；尚未绑定compile变体/body。
 - **Implemented / Verified：** launcher-compiled-values-current/verification.json自动接文本→compile及path→标准str→filename，继承flags=16777216、optimize=0。候选code_digest与独立source-only控制不同，保F3/F4_VARIANT_NOT_BUILT，不激活旧body；F0完整locator/manifest与编码条件均保留。通用fixture覆盖dont_inherit及局部str shadow。
+- **Implemented / Verified：** launcher-context-variants-current/verification.json按有效flags生成独立C1命名空间，复用原F0/F1/F2/roles：8 scopes、13 regions、4,377 slots、19 boundaries；1个注解区域正确stringize。AST含位置逐项相等、全部槽位重放通过，旧C1 reader拒收新profile，原manifest未改。C2/native/F4仍待接入。
 - **Observed：** 4b5ac5b9版本的连续接线求解已启动，launch为entry-pack-fixed.launch.json；使用--until-fixed-point，不因固定事件上限从头重算。结果以同名log/result为准，尚不能据启动记录宣布收敛。
 - **Verified：** launcher-compilation-context/仅编译捕获bytes，optimize0/1/2均确认继承annotations会改变eval常量区/code_digest。相同path/bytes不足以硬接旧F4 root。有效future位不能直接OR历史feature目录位。
 
@@ -46,7 +47,7 @@ NORMAL_SUCCESS / CPython 3.14.7；软件边界到算子/运行时API。后端设
 
 1. 参数包缓存已接入，继续求解至已准入工作队列清空；支持 --until-fixed-point，避免在固定事件上限退出后重算前缀。固定点与整程序覆盖分开验收，不新增优化backend。
 2. 有限字段与原跨调用/内容关系已接通，继续补pack投影、捕获环境字段及generator值规则；审查跨调用合并产生的过宽候选。字段层与父图分别验收，不把slice当完整程序。
-3. launcher的文本→compile输入/代码值已接通；下一门由显式effective context生成C1变体，复用原F0/F1/F2，再顺序迁移C2、严格F3-A及F4，最后接exec namespace/root与YAML/CLI。原_symtable接口不接flags，不能借旧native视图作变体证据。当前主求解入口仍为eval.py。
+3. launcher的文本→compile输入及C1变体已验收；接下来迁移C2、严格F3-A及F4，再接exec namespace/root与YAML/CLI。原_symtable接口不接flags，不能借旧native视图作变体证据；独立官方工具worker在构建中。当前主求解入口仍为eval.py。
 4. 贯通并验收当前native算子/资源/逻辑值及版本关系；YIELD_FROM/AWAIT等driver仍有明确obligation。最后按源码、边界和资源分母审计第一阶段；不凭计数或固定点宣告完成。
 
 入口：python -m scar.analysis.source_interface_build --facts <facts> --out <interfaces> --jobs 48；
