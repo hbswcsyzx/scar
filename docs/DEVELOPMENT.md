@@ -360,3 +360,7 @@ binding图schema v4继承入口范围，按scope增量订阅native协议，并�
 有限值字段：`python -B -m scar.analysis.source_scalar_graph --targets TARGET_STORE --out FRESH_FIELDS`；
 可重复传`--source PATH`只采该源码slice，仍保父图跨层来源。`ScalarGraphFields(path).rows(table)`按类型读取
 fields/groups/operations/derivations；先核收据，逐行解码，不展开content因子。固定点只针对有限字段域，不是must常量证明。
+
+源码文本候选：`python -B -m scar.analysis.source_text_values --facts FACTS --entry-contract ENTRY --out FRESH_TEXT`。
+编译输入/代码值：`python -B -m scar.analysis.source_compiled_values --facts FACTS --executions BUILTIN_OVERLAY --texts TEXT_OVERLAY --out FRESH_CODE`。
+这两层不运行目标；保默认编码及路径版本条件，不把code digest或source-only控制版本当F4 body许可。
