@@ -40,3 +40,9 @@ def test_effective_future_context_controls_regions_and_template_identity():
         read_source_contexts(future['material'],f0,f1,f2,b)
     with pytest.raises(ValueError,match='new F2'):
         context_variant_document('controlled-source',f0,f1,f2,b,inherited,text+'another = 3\n')
+    with pytest.raises(ValueError,match='future flags are inconsistent'):
+        context_variant_document('controlled-source',f0,f1,f2,b,
+            replace(base,compiled_future_flags=annotation),text)
+    with pytest.raises(ValueError,match='requested and inherited'):
+        context_variant_document('controlled-source',f0,f1,f2,b,
+            replace(inherited,compiler_input_flags=0),text)

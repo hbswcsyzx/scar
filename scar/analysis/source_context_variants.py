@@ -19,6 +19,7 @@ from scar.analysis import source_compiled_values as compiled, source_text_values
 from scar.analysis.normal_facts import SourceFactStore
 from scar.analysis.normal_output import write_table
 from scar.analysis.source_bytes import read_source_bytes
+from scar.analysis.call_compilation import supported_future_flag_mask
 from scar.analysis.source_stage import _durable_bytes, _durable_mkdir
 from scar.analysis.source_template_links import _json
 from scar.analysis.static_query import _Fragments
@@ -58,6 +59,12 @@ def context_variant_document(source_unit, f0, f1, f2, f3b, context, payload, *,
     if (context.runtime.implementation!=sys.implementation.name
             or context.runtime.version!=tuple(sys.version_info)):
         raise ValueError('context variant compiler runtime differs')
+    inherited = 0 if context.caller_dont_inherit else context.inherited_future_flags
+    if ((context.caller_dont_inherit and context.inherited_future_flags!=0)
+            or context.compiler_input_flags != context.requested_flags | inherited):
+        raise ValueError('compiler requested and inherited flags are inconsistent')
+    if context.compiled_future_flags != context.compiled_code_flags & supported_future_flag_mask():
+        raise ValueError('compiled future flags are inconsistent with code flags')
     if context.compiled_code_flags & ~context.compiled_future_flags:
         raise ValueError('C1 root activation for non-module code flags is not implemented')
     limits = max_scopes,max_regions,max_boundaries,max_slots
@@ -78,7 +85,8 @@ def context_variant_document(source_unit, f0, f1, f2, f3b, context, payload, *,
         raise ValueError('compiler text/context needs a new F2 occurrence variant')
     code = compile(payload,context.filename,context.mode,flags=context.compiler_input_flags,
                    dont_inherit=True,optimize=context.optimize)
-    if code.co_flags!=context.compiled_code_flags:
+    if (code.co_flags!=context.compiled_code_flags
+            or code.co_flags & supported_future_flag_mask()!=context.compiled_future_flags):
         raise ValueError('compiled code flags differ from their retained context')
     digest = source_compilation_contexts.code_digest(code)
     text_sha = sha256(payload.encode('utf-8')).hexdigest()
