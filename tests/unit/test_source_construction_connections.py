@@ -132,3 +132,43 @@ o = Open()
                 and any(r.kind is T.RouteKind.PACK_POSITIONALS for r in link.connection.parameters)]
     assert {len(r.actuals) for link in variants for r in link.connection.parameters
             if r.kind is T.RouteKind.PACK_POSITIONALS} == {1, 2}
+
+
+def test_unknown_pack_keeps_known_body_and_symbolic_content_projections():
+    unit = source_facts('''
+def leaf():
+    return 7
+def select(value, *, key):
+    return value
+def forward(*args, **kwargs):
+    return select(*args, **kwargs)
+def independent(required):
+    return leaf
+def keyword_required(*, missing):
+    return leaf
+def deferred(value):
+    yield value
+result = forward(leaf, key=leaf)
+known_return = independent(*unknown)
+bad = keyword_required(*unknown)
+g = deferred(*unknown)
+''')
+    solver = _Solver([unit])
+    assert solver.solve(100_000)
+    symbolic = [c for c in solver.links.values() if c.binding is T.ArgumentBinding.SYMBOLIC_PACK]
+    assert symbolic and any(c.projections for c in symbolic)
+    module = lambda name: solver.ns_values[unit.unit, F.NamespaceKind.MODULE.value, 0, name]
+    leaf = next(value for value in module('leaf') if value[0] == 'function')
+    assert leaf in module('known_return')
+    assert leaf in module('result')
+    assert not module('bad')
+    assert any(c.mode == 'CREATE_DEFERRED_BODY' for c in symbolic)
+    for call in symbolic:
+        assert 'CALL_SIGNATURE_ACCEPTANCE' in call.conditions
+        assert call.argument_packs is not None
+        assert decode(T.CallLink, encode(call, record_tags=P.PRODUCTION_RECORD_TAGS),
+                      record_tags=P.PRODUCTION_RECORD_TAGS) == call
+        for projection in call.projections:
+            pack = unit.ports.index(projection.pack.port)
+            formal = unit.ports.index(projection.formal.port)
+            assert formal not in solver.adj.get(pack, ())

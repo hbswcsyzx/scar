@@ -59,6 +59,7 @@ class Body:
 class RouteKind(str, Enum):
     ARGUMENT = 'ARGUMENT'
     INITIAL_DEFAULT = 'INITIAL_DEFAULT'
+    CONDITIONAL_DEFAULT = 'CONDITIONAL_DEFAULT'
     PACK_POSITIONALS = 'PACK_POSITIONALS'
     PACK_KEYWORDS = 'PACK_KEYWORDS'
     FUNCTION_ENVIRONMENT = 'FUNCTION_ENVIRONMENT'
@@ -76,7 +77,7 @@ class Route:
 
 @dataclass(frozen=True, slots=True)
 class ArgumentPacks:
-    """Source pack objects; their contents/arity have not been established.
+    """Original pack objects; inference status is recorded on the connection.
 
     A receiver is prepended by method binding, never included in the pack.
     These are dependencies, not aliases between a pack and each parameter.
@@ -92,6 +93,47 @@ class FunctionActivation(str,Enum):
     CREATE_DEFERRED_BODY='CREATE_DEFERRED_BODY'
 
 
+class ArgumentBinding(str, Enum):
+    NOT_MODELED = 'NOT_MODELED'
+    DIRECT = 'DIRECT'
+    CLOSED_PACK = 'CLOSED_PACK'
+    SYMBOLIC_PACK = 'SYMBOLIC_PACK'
+
+
+class ProjectionKind(str, Enum):
+    POSITIONAL_ITEM = 'POSITIONAL_ITEM'
+    KEYWORD_ITEM = 'KEYWORD_ITEM'
+    POSITIONAL_TAIL = 'POSITIONAL_TAIL'
+    KEYWORD_REMAINDER = 'KEYWORD_REMAINDER'
+
+
+@dataclass(frozen=True, slots=True)
+class ArgumentProjection:
+    """Conditional content selection; the pack object is not the parameter.
+
+    Shape/arity/key presence may remain unknown. Edges apply only where the
+    original call's signature accepts its arguments and this source is selected.
+    """
+    formal: GlobalPort
+    pack: GlobalPort
+    kind: ProjectionKind
+    index: int | None = None
+    name: str | None = None
+    excluded_names: tuple[str, ...] = ()
+    conditions: tuple[str, ...] = ()
+
+    def __post_init__(self):
+        positional = self.kind in (ProjectionKind.POSITIONAL_ITEM, ProjectionKind.POSITIONAL_TAIL)
+        if positional != (self.index is not None):
+            raise ValueError('positional projection needs its original pack index')
+        if self.index is not None and (type(self.index) is not int or self.index < 0):
+            raise ValueError('projection index must be nonnegative')
+        if (self.kind is ProjectionKind.KEYWORD_ITEM) != (self.name is not None):
+            raise ValueError('keyword projection needs its parameter name')
+        if self.excluded_names and self.kind is not ProjectionKind.KEYWORD_REMAINDER:
+            raise ValueError('only keyword remainder excludes consumed names')
+
+
 @dataclass(frozen=True,slots=True)
 class FunctionConnection:
     """Conditional entry/exit wiring independent of the source operation kind."""
@@ -102,6 +144,8 @@ class FunctionConnection:
     returns: tuple[tuple[Endpoint,Endpoint],...]
     conditions: tuple[str,...]
     argument_packs: ArgumentPacks | None=None
+    projections: tuple[ArgumentProjection, ...] = ()
+    binding: ArgumentBinding = ArgumentBinding.DIRECT
 
 
 class AttributeOrigin(str,Enum):
@@ -171,6 +215,8 @@ class CallLink:
     conditions: tuple[str, ...] = ('SOURCE_STATIC_CANDIDATE', 'CURRENT_CALLABLE_DESCRIPTOR')
     runtime_dispatch_verified: bool = False
     argument_packs: ArgumentPacks | None = None
+    projections: tuple[ArgumentProjection, ...] = ()
+    binding: ArgumentBinding = ArgumentBinding.NOT_MODELED
 
 
 @dataclass(frozen=True, slots=True)

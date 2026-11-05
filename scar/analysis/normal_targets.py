@@ -238,7 +238,7 @@ class _Solver:
                 connection.source_callable,connection.body,
                 mode if connection.activation is T.FunctionActivation.NORMAL else deferred_mode,None,
                 connection.parameters,connection.returns,connection.conditions,
-                argument_packs=connection.argument_packs)
+                argument_packs=connection.argument_packs,projections=connection.projections,binding=connection.binding)
         connection=connect(self,fid,invocation,receiver,class_receiver=class_receiver,
             environment_source=environment_source,return_value=return_value,conditions=conditions,on_ready=publish)
         if connection is not None:publish(connection)
@@ -369,12 +369,14 @@ def _publish(solver,facts,root,report,out,started,max_events,fixed,stars,extra=N
     modes=Counter(link.mode for link in solver.links.values());known_calls={link.result for link in solver.links.values()}
     source_calls={link.result for link in solver.links.values() if link.source_callable is not None}
     original_calls=sum(len(u.calls) for u in units)
-    result=dict(schema='scar.normal-source-targets',schema_version=7,status='SOURCE_TARGET_FIXED_POINT' if fixed else 'SOURCE_TARGET_BUDGET_FRONTIER',
+    result=dict(schema='scar.normal-source-targets',schema_version=8,status='SOURCE_TARGET_FIXED_POINT' if fixed else 'SOURCE_TARGET_BUDGET_FRONTIER',
         analysis_mode='LIBRARY_MAY_ANALYSIS',
         source_facts=str(facts),source_facts_sha256=sha256(root).hexdigest(),profile='NORMAL_SUCCESS',
         selected_sources=len(units),source_calls=original_calls,source_functions=len(solver.functions),source_classes=len(solver.classes),
         calls_with_candidates=len(known_calls),candidate_links=len(solver.links),modes=dict(modes),
         calls_with_source_targets=len(source_calls),
+        argument_bindings=dict(Counter(link.binding.value for link in solver.links.values())),
+        argument_projections=sum(len(link.projections) for link in solver.links.values()),
         packed_source_calls=sum(c.positional_pack is not None for u in units for c in u.calls),
         packed_candidate_links=sum(link.argument_packs is not None for link in solver.links.values()),
         classes_with_packed_bases=sum(c.bases_pack is not None for u in units for c in u.classes),

@@ -30,7 +30,8 @@ class ContainerFlow:
         self.pack_constants={};self.pack_blocked=set();self.pack_updates={};self.pack_writes={}
         self.pack_escapes={};self.pack_merge_proofs={};self.pack_origins={}
         self.pack_watch=defaultdict(set);self.pending_invocations={}
-        self.variadic_origins=defaultdict(dict);self.open_containers=set()
+        self.variadic_origins=defaultdict(dict);self.variadic_prefixes=defaultdict(dict);self.open_containers=set()
+        self.argument_projections=defaultdict(set);self.remainder_projections=defaultdict(set)
         for source,namespaces in solver.writes.items():
             for namespace in namespaces:self.namespace_sources[namespace].add(source)
         for unit in units:
@@ -70,10 +71,56 @@ class ContainerFlow:
         mapping=route is T.RouteKind.PACK_KEYWORDS
         container=('container',formal,'MAPPING' if mapping else 'SEQUENCE')
         witness=(container[2],tuple(actuals),tuple(names))
-        self.variadic_origins[formal][origin]=witness
+        if type(origin) is tuple and origin and origin[0]=='SYMBOLIC_PACK_PREFIX':
+            self.variadic_prefixes[formal][origin]=witness;self.open_containers.add(container)
+        else:self.variadic_origins[formal][origin]=witness
         self.s.add(formal,container)
         for index,point in enumerate(actuals):
             self.write(container,('str',names[index]) if mapping else ('int',index),point)
+
+    def project_argument(self,formal,pack,kind,index=None,name=None,excluded_names=()):
+        """Subscribe to possible elements, never alias the pack to its formal.
+
+        Closed shape admission is separate. These constraints describe the
+        original call only under signature acceptance and source-selection
+        conditions published by FunctionConnection.ArgumentProjection.
+        """
+        spec=(formal,kind,index,name,tuple(excluded_names))
+        if spec in self.argument_projections[pack]:return
+        self.argument_projections[pack].add(spec)
+        if kind in (T.ProjectionKind.POSITIONAL_TAIL,T.ProjectionKind.KEYWORD_REMAINDER):
+            container=('container',formal,'SEQUENCE' if kind is T.ProjectionKind.POSITIONAL_TAIL else 'MAPPING')
+            self.open_containers.add(container);self.s.add(formal,container)
+        for value in tuple(self.s.values.get(pack,())):self.project_value(value,spec)
+
+    def project_value(self,value,spec):
+        formal,kind,index,name,excluded=spec
+        scalar=kind in (T.ProjectionKind.POSITIONAL_ITEM,T.ProjectionKind.KEYWORD_ITEM)
+        if value[0]!='container':
+            if scalar and value[0] in ('external_value','external_member'):
+                self.s.add(formal,('external_value',None))
+            return
+        sequence=kind in (T.ProjectionKind.POSITIONAL_ITEM,T.ProjectionKind.POSITIONAL_TAIL)
+        if value[2]!=('SEQUENCE' if sequence else 'MAPPING'):return
+        if scalar:
+            self.read(value,('int',index) if sequence else ('str',name),formal)
+            if value in self.open_containers:self.s.add(formal,('external_value',None))
+        else:
+            self.remainder_projections[value].add(spec)
+            for key,sources in tuple(self.entries[value].items()):
+                for source in tuple(sources):self.project_remainder(value,key,source,spec)
+
+    def project_remainder(self,container,key,source,spec):
+        formal,kind,index,name,excluded=spec
+        sequence=kind is T.ProjectionKind.POSITIONAL_TAIL
+        if sequence:
+            if key is not None and (key[0]!='int' or key[1]<index):return
+            selected=None if key is None else ('int',key[1]-index)
+        else:
+            if key is not None and (key[0]!='str' or key[1] in excluded):return
+            selected=key
+        target=('container',formal,'SEQUENCE' if sequence else 'MAPPING')
+        self.write(target,selected,source)
 
     def _index_pack_unit(self,unit):
         if unit.unit in self.pack_units:return
@@ -219,6 +266,8 @@ class ContainerFlow:
         for target in tuple(self.iter_sources[container]):self.iterate(container,target)
         for mode,target in tuple(self.content_readers[container]):self.iterate_mode(container,target,mode)
         for target in tuple(self.copies[container]):self.copy(container,target)
+        for spec in tuple(self.remainder_projections.get(container,())):
+            self.project_remainder(container,key,source,spec)
 
     def read(self,container,key,target):
         if container[2]=='SEQUENCE' and key is not None and key[0]=='int' and key[1]<0:key=None
@@ -285,6 +334,7 @@ class ContainerFlow:
                 elif source[2]!=F.ContainerKind.MAPPING.value:self.write(target,None,point)
 
     def consume(self,point,value):
+        for spec in tuple(self.argument_projections.get(point,())):self.project_value(value,spec)
         for key,target,write in tuple(self.items.get(point,())):self.apply_item(value,key,target,write)
         for receiver,target,write in tuple(self.keys.get(point,())):
             for container in tuple(self.s.values[receiver]):self.apply_item(container,point,target,write)

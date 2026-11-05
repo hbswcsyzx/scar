@@ -154,7 +154,7 @@ class ConstructionFlow:
             self.s.links[('construction', *key)] = T.CallLink(self.s.gp(c.result), self.s.gp(c.callee),
                 connection.source_callable, connection.body, mode, None,
                 connection.parameters, connection.returns, connection.conditions,
-                argument_packs=connection.argument_packs)
+                argument_packs=connection.argument_packs,projections=connection.projections,binding=connection.binding)
             self.record(c, stage, (c.cls, c.world) if kind == 'new' else (c.new_result, c.new_world),
                 (c.new_result, c.new_world) if kind == 'new' else (c.result, c.result_world),
                 connection, detail=(returned_cls, fid, value), conditions=conditions)

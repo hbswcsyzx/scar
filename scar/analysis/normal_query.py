@@ -34,7 +34,7 @@ class NormalCallGraph:
     def __init__(self, targets):
         self.path = Path(targets).absolute()
         self.report = json.loads((self.path / 'result.json').read_bytes())
-        if self.report['schema'] != 'scar.normal-source-targets' or self.report['schema_version'] != 7:
+        if self.report['schema'] != 'scar.normal-source-targets' or self.report['schema_version'] != 8:
             raise ValueError('expected current source target graph')
         if self.report['types_sha256'] != sha256(Path(T.__file__).read_bytes()).hexdigest():
             raise ValueError('call edge declarations differ')
@@ -96,6 +96,10 @@ class NormalCallGraph:
                     raise ValueError('call body has no qualified source')
                 if any(route.formal.unit != link.body.unit for route in link.parameters):
                     raise ValueError('formal parameters belong to another body source')
+                if any(p.formal.unit != link.body.unit or p.pack.unit != link.result.unit for p in link.projections):
+                    raise ValueError('argument projection is not owned by its original call/body')
+            if link.binding is T.ArgumentBinding.SYMBOLIC_PACK and link.argument_packs is None:
+                raise ValueError('symbolic binding needs its original parameter packs')
             yield link
 
     def contents(self, source=None, *, occurrence=None):

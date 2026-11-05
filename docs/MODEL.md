@@ -96,6 +96,9 @@ property accessor复用`FunctionConnection`的参数/环境/状态接线。gette
 区分分配结果与分配后world；它是派生协议接口，不伪造源码`G.Port`。初始化消费分配后world，丢弃init的数据返回。
 已声明自定义new时不预先生成默认实例；默认object分配要求源码继承链及namespace条件。MRO/metaclass仍是条件，不当成已观测目标。
 变参formal的tuple/dict内容与每次绑定的有序实参分开；只有原构造/协议证明形状封闭，才展开调用参数包，不从may内容数量推断长度。
+参数包不封闭时，已知函数体仍可在`CALL_SIGNATURE_ACCEPTANCE`条件下接入；`ArgumentProjection`分别表示位置元素、命名元素及剩余参数。
+`SYMBOLIC_PACK`与`CLOSED_PACK`分开，默认值缺席条件、原包和未决需求保留；投影传播may内容，不建立包对象到参数的alias。
+这只补充条件静态图，不证明调用实际发生、绑定完整、路径可满足或变换合法；生成器/异步创建仍不激活body。
 
 效果至少区分 reads、writes、allocates、frees、aliases、escapes、RNG、异常、外部及顺序影响。
 未知效果保持开放；异常前已经发生的写入、IO 和清理不可回滚成“无效果”。
