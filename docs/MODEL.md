@@ -86,6 +86,9 @@ UNKNOWN 应落在确实未知的字段、效果或关系上，不能吞掉已知
 argv/environment记录可变位置的初始内容，不作为不可变tuple/dict常量。初值字段推导受整个入口契约约束。
 编译上下文保filename/mode、请求flags、继承策略、source有效future位和优化级别；未知继承不是0。
 同路径/同bytes不保证同一编译上下文，compile也不等于执行；parser-only flags与运行代码flags分开。
+compile/exec边界按原namespace/reference来源识别，保留全部actual、world和caller scope；同名局部变量不因此成为builtin。
+语言默认值、原F2直接literal和一般source value分别记录，不把单个may候选升级为唯一值。
+compile结果到exec输入只增加条件引用关系；payload解释、有效编译版本和body绑定需要分别完成，不伪造root展开。
 
 content的READ_SELECTOR_V1标签表示读取选择条件；未知位置的写入连接全部已订阅selector。
 None用于整体/未知选择或未指定selector的直接依赖，literal None键仍有独立PythonLiteral。

@@ -40,6 +40,10 @@ class PythonBindingGraph:
         self.source=NormalCallGraph(self.report['source_targets'])
         if sha256((self.source.path/'result.json').read_bytes()).hexdigest()!=self.report['source_result_sha256']:
             raise ValueError('source target graph differs')
+        if self.report['propagation'] is not None:
+            summary=None if self.source.interface_store is None else self.source.interface_store.receipt
+            if self.report['source_interface_summary']!=summary:
+                raise ValueError('binding source interface parent differs from the source query')
         if self.report.get('analysis_mode')=='ENTRY_SCOPED_MAY_ANALYSIS':
             if tuple(self.report['entry_sources'])!=tuple(self.source.report['entry_sources']):
                 raise ValueError('binding entry sources differ from the source query')

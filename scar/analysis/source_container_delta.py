@@ -8,16 +8,28 @@ Source ports, key presence, defaults and position constraints are retained.
 """
 from collections import defaultdict
 from scar.analysis.normal_containers import ContainerFlow, _key
+from scar.analysis.source_pack_shapes import StaticPackShapes
 
 
 class DeltaContainerFlow(ContainerFlow):
     def __init__(self, solver, units):
+        self.pack_shapes = StaticPackShapes(self)
         self.content_key_semantics = 'READ_SELECTOR_V1'
         self.selected_readers = defaultdict(lambda: defaultdict(set))
         self.delta_stats = dict(copy_replays=0, copy_reuses=0,
             copy_deltas=0, iterator_deltas=0, read_replays=0, read_reuses=0,
             dynamic_key_events=0, dynamic_key_accesses=0)
         super().__init__(solver, units)
+
+    @property
+    def analysis_stats(self):
+        return dict(self.delta_stats, pack_shapes=self.pack_shapes.stats)
+
+    def _closed_pack(self, point, kind, seen=frozenset()):
+        return self.pack_shapes.closed(point, kind, seen)
+
+    def invocation_arguments(self, invocation):
+        return self.pack_shapes.arguments(invocation)
 
     def _iterator_delta(self, container, key, source, target):
         if container[2] == 'MAPPING':

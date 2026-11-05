@@ -160,17 +160,17 @@ class _BindingCallbacks:
 
 
 class _BindingSolver(_BindingCallbacks,_Solver):
-    def __init__(self,units,stars,definitions,stub=None,stub_artifact=None,*,jobs=None):
+    def __init__(self,units,stars,definitions,stub=None,stub_artifact=None,*,jobs=None,interface_store=None):
         self._binding_maps(definitions)
-        super().__init__(units,stars,jobs=jobs)
+        super().__init__(units,stars,jobs=jobs,interface_store=interface_store)
         self._binding_flows(stub,stub_artifact,eager=True)
 
 
 class EntryBindingSolver(_BindingCallbacks,EntrySolver):
     """Load native constraints only when their original code scope is admitted."""
-    def __init__(self,store,entries,definitions,stub=None,stub_artifact=None,*,jobs=None):
+    def __init__(self,store,entries,definitions,stub=None,stub_artifact=None,*,jobs=None,interface_store=None):
         self._binding_maps(definitions)
-        super().__init__(store,entries,jobs=jobs)
+        super().__init__(store,entries,jobs=jobs,interface_store=interface_store)
         self._binding_flows(stub,stub_artifact,eager=False)
 
     def load_unit(self,identity):
@@ -222,7 +222,8 @@ def _source_tables(solver,out,*,entry):
     solver.generators.validate_parents()
     tables['generator_analysis']=solver.generators.stats
     tables['source_propagation_pins']=propagation_pins()
-    tables['source_container_analysis']=dict(solver.containers.delta_stats)
+    tables['source_interface_summary']=None if solver.interface_store is None else solver.interface_store.receipt
+    tables['source_container_analysis']=solver.containers.analysis_stats
     return tables
 
 
@@ -266,7 +267,8 @@ def build_binding_graph(targets,out,site,*,catalog=None,jobs=4,propagate=True,ma
     if propagate:
         if entry:
             store=normal_facts.SourceFactStore(view.facts)
-            solver=EntryBindingSolver(store,entry_sources,definitions,stub,stub_artifact,jobs=jobs)
+            solver=EntryBindingSolver(store,entry_sources,definitions,stub,stub_artifact,jobs=jobs,
+                interface_store=view.interface_store)
         else:
             units=list(view.unit_facts());model_units=json.loads((Path(view.inputs['model'])/'manifest.json').read_bytes())['units']
             model_units={u['key']:u for u in model_units}

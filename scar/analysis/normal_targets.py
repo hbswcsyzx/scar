@@ -26,7 +26,7 @@ from scar.ir.program import source_productions as P
 from scar.ir.program import normal_graph as G
 from scar.ir.record_codec import decode,encode
 from scar.analysis.source_template_links import _json
-from scar.analysis import source_template_batch,source_template_workers,normal_output,source_interface_store,source_content_factors,normal_containers,source_container_delta
+from scar.analysis import source_template_batch,source_template_workers,normal_output,source_interface_store,source_content_factors,normal_containers,source_container_delta,source_pack_shapes
 from scar.ir.program import source_interfaces as L,content_factors as C
 from scar.analysis.source_stage import _durable_bytes,_durable_mkdir
 from scar.analysis.static_query import _Fragments
@@ -42,7 +42,7 @@ def propagation_pins():
     """Bind the complete source-content implementation, including overrides."""
     return {name:sha256(Path(path).read_bytes()).hexdigest() for name,path in (
         ('solver',__file__),('containers',normal_containers.__file__),
-        ('container_delta',source_container_delta.__file__))}
+        ('container_delta',source_container_delta.__file__),('pack_shapes',source_pack_shapes.__file__))}
 
 
 def _star_imports(model,unit,module):
@@ -406,8 +406,8 @@ def solve_targets(facts,out,*,max_events=20_000_000,entries=(),jobs=None,interfa
     with ThreadPoolExecutor(max_workers=8) as pool:
         stars=list(pool.map(lambda u:_star_imports(str(model),model_units[u.unit],u.module),units))
     solver=_Solver(units,stars,jobs=jobs)
-    while solver.queue and solver.events<max_events:
-        solver.solve(min(max_events,solver.events+2_000_000))
+    while solver.queue and (max_events is None or solver.events<max_events):
+        solver.solve(solver.events+2_000_000 if max_events is None else min(max_events,solver.events+2_000_000))
         print(json.dumps(dict(phase='SOURCE_TARGET_PROPAGATION',events=solver.events,
             frontier=len(solver.queue),value_facts=solver.events+len(solver.queue),
             value_ports=len(solver.values),seconds=time.monotonic()-started)),file=sys.stderr,flush=True)
@@ -446,7 +446,7 @@ def _publish(solver,facts,root,report,out,started,max_events,fixed,stars,extra=N
         classes_with_packed_bases=sum(c.bases_pack is not None for u in units for c in u.classes),
         unknown_namespace_keys=len(solver.containers.unknown_keys),
         container_implementation_sha256=sha256(Path(normal_containers.__file__).read_bytes()).hexdigest(),
-        propagation_pins=propagation_pins(),container_analysis=dict(solver.containers.delta_stats),
+        propagation_pins=propagation_pins(),container_analysis=solver.containers.analysis_stats,
         star_import_module_candidates=sum(len(names) for _,names,*_ in stars),
         declared_import_modules=len(solver.imported_modules),namespace_lookups=namespaces['records'],namespaces=namespaces,
         properties=properties,property_states=dict(Counter(p.state.value for p in solver.descriptors.property_accesses.values())),
@@ -497,8 +497,8 @@ def solve_entry_targets(facts,out,entries,*,max_events=20_000_000,jobs=None,inte
     summaries=None if interfaces is None else source_interface_store.SourceInterfaceStore(interfaces,store)
     solver=normal_entry.EntrySolver(store,entries,jobs=jobs,interface_store=summaries);solver.prepare()
     prepared=time.monotonic()
-    while (solver.queue or solver.pending) and solver.events<max_events:
-        solver.solve(min(max_events,solver.events+2_000_000))
+    while (solver.queue or solver.pending) and (max_events is None or solver.events<max_events):
+        solver.solve(solver.events+2_000_000 if max_events is None else min(max_events,solver.events+2_000_000))
         print(json.dumps(dict(phase='ENTRY_SCOPE_PROPAGATION',events=solver.events,frontier=len(solver.queue),
             pending_scopes=len(solver.pending),active_scopes=len(solver.active_scopes),loaded_units=len(store.loaded),
             seconds=time.monotonic()-started)),file=sys.stderr,flush=True)
@@ -537,6 +537,7 @@ def main():
     p=argparse.ArgumentParser(description=__doc__);p.add_argument('--facts',required=True);p.add_argument('--out',required=True)
     p.add_argument('--entry',action='append',required=True,help='source entry module; declarations alone do not choose execution roots')
     p.add_argument('--max-events',type=int,default=20_000_000)
+    p.add_argument('--until-fixed-point',action='store_true',help='propagate until the admitted constraint worklists are empty')
     p.add_argument('--jobs',type=int,default=None,help='template reader processes; default min(48, CPU affinity)')
     p.add_argument('--interfaces',help='precomputed per-unit source interface store')
     p.add_argument('--stack-log',help='sample the analyzer stack every 30 seconds; no target instrumentation')
@@ -546,7 +547,7 @@ def main():
             stream=diagnostics.enter_context(Path(a.stack_log).open('x'))
             faulthandler.dump_traceback_later(30,repeat=True,file=stream)
             diagnostics.callback(faulthandler.cancel_dump_traceback_later)
-        r=solve_targets(a.facts,a.out,max_events=a.max_events,entries=a.entry,jobs=a.jobs,interfaces=a.interfaces)
+        r=solve_targets(a.facts,a.out,max_events=None if a.until_fixed_point else a.max_events,entries=a.entry,jobs=a.jobs,interfaces=a.interfaces)
     print(json.dumps({k:r[k] for k in ('status','source_calls','calls_with_candidates','candidate_links','modes','value_events','seconds')},indent=2))
 
 
