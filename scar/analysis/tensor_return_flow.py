@@ -47,18 +47,36 @@ class TensorReturnFlow:
             for name in (row['qualified_name'],row['qualified_name'].split('.')[0]+'.'+row['name'])}
         self.shapes={};self.origins={};self.facts={};self.member_calls={};self.protocol_calls={}
         self.item_watch=defaultdict(list);self.key_watch=defaultdict(list);self.iterators=defaultdict(set);self.iter_reads=defaultdict(set)
+        self.registered_units=set();self.admitted=set()
         for i,row in enumerate(stub['methods']):self.methods[row['name']].append((i,row))
         for i,row in enumerate(stub['attributes']):self.attributes[row['name']].append((i,row))
-        for unit in units:
-            offset=solver.offsets[unit.unit]
-            for access in unit.items:
-                key=offset+access.key if type(access.key) is int else access.key
-                value=(offset+access.receiver,key,offset+access.value,access.write,offset+access.world,offset+access.result_world)
-                self.item_watch[value[0]].append(value)
-                if type(key) is int:self.key_watch[key].append(value)
-            for iteration in unit.iterations:
-                if iteration.advance:self.iterators[offset+iteration.source].add(offset+iteration.value)
         solver.containers=_ContainerAdapter(solver.containers,self)
+        for unit in units:self.register_unit(unit)
+
+    def register_unit(self,unit,*,eager=True):
+        if unit.unit in self.registered_units:return
+        self.registered_units.add(unit.unit)
+        if eager:
+            for table in ('items','iterations','updates'):
+                for index in range(len(getattr(unit,table))):self.admit(unit,table,index)
+
+    def admit(self,unit,table,index):
+        identity=unit.unit,table,index
+        if identity in self.admitted:return
+        self.admitted.add(identity);offset=self.s.offsets[unit.unit];item=getattr(unit,table)[index]
+        if table=='items':
+            key=offset+item.key if type(item.key) is int else item.key
+            row=(offset+item.receiver,key,offset+item.value,item.write,offset+item.world,offset+item.result_world)
+            self.item_watch[row[0]].append(row)
+            if type(key) is int:self.key_watch[key].append(row)
+            for value in tuple(self.s.values.get(row[0],())):self._item(value,row)
+        elif table=='iterations':
+            if item.advance:
+                point=offset+item.source;self.iterators[point].add(offset+item.value)
+                for value in tuple(self.s.values.get(point,())):self.consume(point,value)
+        elif table=='updates':
+            if not item.append:self.copy_content(offset+item.source,offset+item.target)
+        else:raise ValueError('unknown Tensor return constraint table')
 
     def emit(self,key,origin,target,shape,source,conditions,path=()):
         self.origins.setdefault(key,(origin,source,conditions));self.shapes[key,path]=shape

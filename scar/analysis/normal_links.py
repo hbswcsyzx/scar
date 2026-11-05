@@ -39,6 +39,18 @@ def _module(path):
     return '.'.join(parts)
 
 
+class _OwnedFacts(list):
+    def __init__(self,facts,table):
+        super().__init__();self.facts=facts;self.table=table
+
+    def append(self,value):self.append_owned(value,self.facts.owner)
+
+    def append_owned(self,value,owner):
+        if owner is None:raise ValueError('source fact has no original code scope')
+        self.facts.scope_members[owner][self.table].add(len(self))
+        super().append(value)
+
+
 class _Facts:
     def __init__(self,unit,syntax,bindings,declarations,roles,contexts):
         self.unit=unit;self.syntax=syntax;self.bindings=bindings;self.declarations=declarations
@@ -51,9 +63,35 @@ class _Facts:
                 self.attribute_projections[site]=declaration['projection']
         self.module=_module(unit['path'])
         self.fields={r['name']:{name:i for i,name in enumerate(r['fields'])} for r in syntax['profile']['ast_schema']}
-        self.ports=[];self.ids={};self.aliases=set();self.names=[];self.functions=[];self.classes=[]
-        self.attributes=[];self.imports=[];self.constants=[];self.calls=[]
-        self.containers=[];self.items=[];self.updates=[];self.iterations=[];self.operations=[]
+        self.ports=[];self.ids={};self.aliases=set();self.alias_owners=defaultdict(set)
+        self.owner=None;self.root_scope=None;self.scope_refs={}
+        self.scope_members=defaultdict(lambda:defaultdict(set))
+        for table in F.FactTable:
+            if table is not F.FactTable.ALIASES:setattr(self,table.value,_OwnedFacts(self,table))
+
+    def scope_ref(self,ordinal):
+        if ordinal not in self.scope_refs:
+            self.scope_refs[ordinal]=F.CodeScopeRef(self.unit['key'],ordinal)
+            self.scope_members[self.scope_refs[ordinal]]
+        return self.scope_refs[ordinal]
+
+    def groups(self,aliases):
+        for index,pair in enumerate(aliases):
+            if not self.alias_owners[pair]:raise ValueError('reference alias has no source code scope')
+            for owner in self.alias_owners[pair]:self.scope_members[owner][F.FactTable.ALIASES].add(index)
+        groups=[]
+        for owner,tables in sorted(self.scope_members.items(),key=lambda item:item[0].ordinal):
+            ranges=[]
+            for table in F.FactTable:
+                indices=sorted(tables.get(table,()))
+                if not indices:continue
+                start=previous=indices[0]
+                for index in indices[1:]:
+                    if index!=previous+1:ranges.append(F.FactRange(table,start,previous+1));start=index
+                    previous=index
+                ranges.append(F.FactRange(table,start,previous+1))
+            groups.append(F.FactScopeGroup(owner,tuple(ranges)))
+        return tuple(groups)
 
     def point(self,port):
         if port not in self.ids:self.ids[port]=len(self.ports);self.ports.append(port)
@@ -141,20 +179,43 @@ class _Facts:
         name=self.declarations['names'][ref['index']]['value']
         return F.Namespace(F.NamespaceKind.LEXICAL,binding_index,name)
 
-    def parameter_admission(self,parameter,formal,scope):
+    def parameter_admission(self,parameter,formal,scope,body_scope):
         namespace=self.parameter_namespace(parameter,scope)
-        if namespace is not None:self.names.append(F.NameAccess(namespace,formal,True))
+        if namespace is not None:self.names.append_owned(F.NameAccess(namespace,formal,True),body_scope.owner)
 
 
 class _Aliases(_Emitter):
     def __init__(self,plan,key,interfaces,facts):
         super().__init__(plan,key,interfaces);self.facts=facts
+        self.contexts={port.region:port for port in plan.compilation_flow.ports}
+        for port in self.contexts.values():facts.scope_ref(port.code_scope)
+        if plan.purpose is P.ProductionPurpose.ROOT:
+            witness=self.witness(plan.root)
+            if facts.root_scope is not None and facts.root_scope!=witness:raise ValueError('source has conflicting root code scopes')
+            facts.root_scope=witness
+
+    def witness(self,region):
+        port=self.contexts[region]
+        return F.CodeScopeWitness(self.facts.scope_ref(port.code_scope),self.key,region,port.source_scope)
+
+    def record_activations(self):
+        for edge in self.plan.compilation_flow.edges:
+            if edge.kind is P.CompilationEdgeKind.CODE_DECLARATION:continue
+            source=self.witness(self.steps[edge.step].region).owner
+            if type(edge.target) is P.CompilationChildTarget:
+                link=self.interfaces['links'][self.key,edge.step];entry=self.interfaces['nodes'][link.callee]
+                target=F.CodeScopeWitness(self.facts.scope_ref(edge.target.code_scope),link.callee,entry.root,edge.target.source_scope)
+            else:target=self.witness(edge.target)
+            if source!=target.owner:
+                self.facts.activations.append_owned(F.ScopeActivation(source,target,edge.kind,edge.step,edge.path),source)
 
     def control(self,*args,**kwargs):pass
 
     def data(self,source,target,kind,**kwargs):
         if type(kind) is ValueType and kind.kind is ValueKind.REFERENCE and source!=target:
-            self.facts.aliases.add((self.facts.point(source),self.facts.point(target)))
+            pair=self.facts.point(source),self.facts.point(target)
+            self.facts.aliases.add(pair)
+            self.facts.alias_owners[pair].add(self.witness(self.step.region).owner)
 
     def value_id(self,value):return self.facts.point(self.value(value)[0])
 
@@ -207,6 +268,7 @@ class _Aliases(_Emitter):
         facts=self.facts;module=facts.module
         for step in self.plan.steps:
             self.step=step;ins=step.instruction
+            facts.owner=self.witness(step.region).owner
             normal=next((c for c in step.completions if c.kind is C.FALLTHROUGH),None)
             if type(ins) is P.AccessBinding:
                 if ins.action is P.BindingActionKind.WRITE:facts.name_access(ins,self.value_id(step.arguments[0]))
@@ -217,8 +279,9 @@ class _Aliases(_Emitter):
                     package=module if Path(facts.unit['path']).name=='__init__.py' else module.rpartition('.')[0]
                     prefix=package.split('.')[:len(package.split('.'))-ins.relative_level+1]
                     name='.'.join((*prefix,*(() if not name else name.split('.'))))
+                requested_module=name
                 if ins.from_names is None:name=name.split('.')[0]
-                facts.imports.append(F.Import(self.result_id(step),name))
+                facts.imports.append(F.Import(self.result_id(step),name,requested_module))
             elif type(ins) is P.ImportMember:
                 facts.attributes.append(F.Attribute(self.value_id(step.arguments[0]),ins.member_name,self.result_id(step),
                     F.AttributeAction.IMPORT_MEMBER,self.value_id(step.arguments[-1]),self.result_id(step,len(normal.types)-1)))
@@ -245,7 +308,8 @@ class _Aliases(_Emitter):
                         if declared is not None:
                             hidden=3+int(bool(facts.syntax['nodes'][owner]['fields'][facts.field(owner,'type_params').ordinal]['items']))
                             bases=tuple(self.value_id(v) for v in step.arguments[hidden:hidden+len(arg_values)])
-                            facts.classes.append(F.Class(self.result_id(step),self.key,declared.interface.scope,declared.body,bases))
+                            facts.classes.append(F.Class(self.result_id(step),self.key,declared.interface.scope,declared.body,bases,
+                                body_scope=self.witness(declared.body)))
                         continue
                     names=[facts.scalar(facts.field(v['reference'],'arg')) for v in kw_values]
                     actual=step.arguments[1:-1];n=len(arg_values)
@@ -265,7 +329,7 @@ class _Aliases(_Emitter):
                         # The packed native class-build ABI includes hidden
                         # body/name operands. Keep it whole, not as base classes.
                         facts.classes.append(F.Class(self.result_id(step),self.key,declared.interface.scope,
-                            declared.body,(),self.value_id(step.arguments[1])))
+                            declared.body,(),self.value_id(step.arguments[1]),self.witness(declared.body)))
                     continue
                 # Protocol ABI: callee, positional pack, [keyword pack], world.
                 # Preserve the actual evaluated packs, including aliases and
@@ -297,10 +361,11 @@ class _Aliases(_Emitter):
                 function=F.Function(self.result_id(step),self.key,body.id,env,tuple(names),
                     tuple(facts.point(self.port(body.id,G.PortKind.PARAMETER,i)) for i in range(len(body.parameters))),tuple(defaults),
                     None if returned is None else facts.point(self.port(body.id,G.PortKind.RESULT,0,returned)),
-                    None if returned is None else facts.point(self.port(body.id,G.PortKind.RESULT,len(returned.types)-1,returned)))
+                    None if returned is None else facts.point(self.port(body.id,G.PortKind.RESULT,len(returned.types)-1,returned)),
+                    self.witness(body.id))
                 facts.functions.append(function)
                 for parameter,formal in zip(env.parameters,function.formals[1:-1]):
-                    facts.parameter_admission(parameter,formal,env.scope)
+                    facts.parameter_admission(parameter,formal,env.scope,function.body_scope)
             elif type(ins) is P.ConstructValue and ins.construction is P.ConstructionKind.LITERAL:
                 literal=facts.scalar(ins.payload[0])
                 if type(literal) in (str,int,bool) or literal is None:
@@ -315,6 +380,7 @@ class _Aliases(_Emitter):
                 if type(value) in (str,int,bool) or value is None:facts.constants.append(F.Constant(self.result_id(step),ins.value))
                 elif value==():facts.containers.append(F.Container(self.result_id(step),F.ContainerKind.SEQUENCE))
             elif type(ins) is P.ApplyPythonProtocol:self.container_protocol(step,ins)
+        self.record_activations()
 
 
 def _pins():
@@ -344,15 +410,18 @@ def _extract(task):
             # same fixed type catalog once for every source expression.
             plan=decode(P.SourceProductionPlan,document,record_tags=P.PRODUCTION_RECORD_TAGS)
             emitter=_Aliases(plan,node.key,interfaces,facts);emitter.run();emitter.describe()
-    value=F.UnitFacts(unit['key'],_module(unit['path']),tuple(facts.ports),tuple(sorted(facts.aliases)),tuple(facts.names),
+    if facts.root_scope is None:raise ValueError('source has no original root code scope')
+    aliases=tuple(sorted(facts.aliases));groups=facts.groups(aliases)
+    value=F.UnitFacts(unit['key'],_module(unit['path']),tuple(facts.ports),aliases,tuple(facts.names),
         tuple(facts.functions),tuple(facts.classes),tuple(facts.attributes),tuple(facts.imports),tuple(facts.constants),tuple(facts.calls),
-        tuple(facts.containers),tuple(facts.items),tuple(facts.updates),tuple(facts.iterations),tuple(facts.operations))
+        tuple(facts.containers),tuple(facts.items),tuple(facts.updates),tuple(facts.iterations),tuple(facts.operations),
+        facts.root_scope,groups,tuple(facts.activations))
     payload=_json(encode(value,record_tags=P.PRODUCTION_RECORD_TAGS));compressed=gzip.compress(payload,compresslevel=3,mtime=0)
     path=Path(out)/'units'/unit['key'];_durable_mkdir(path);_durable_bytes(path/'facts.json.gz',compressed,replace=False)
     return dict(unit=unit['key'],path=unit['path'],module=value.module,facts='units/'+unit['key']+'/facts.json.gz',
         bytes=len(compressed),sha256=sha256(compressed).hexdigest(),decoded_bytes=len(payload),decoded_sha256=sha256(payload).hexdigest(),
         counts={name:len(getattr(value,name)) for name in ('ports','aliases','names','functions','classes','attributes','imports','constants','calls',
-            'containers','items','updates','iterations','operations')},
+            'containers','items','updates','iterations','operations','scope_groups','activations')},
         operation_kinds=dict(Counter(op.action.value for op in value.operations)),
         operator_selectors=dict(Counter(op.selector.value for op in value.operations)))
 
@@ -374,7 +443,7 @@ def extract_facts(model,templates,out,sources=(),*,jobs=1):
     counts=Counter();operation_kinds=Counter();operator_selectors=Counter()
     for row in rows:
         counts.update(row['counts']);operation_kinds.update(row['operation_kinds']);operator_selectors.update(row['operator_selectors'])
-    result=dict(schema='scar.normal-source-link-facts',schema_version=5,status='SOURCE_LINK_FACTS_EXTRACTED',model=str(model),templates=str(templates),
+    result=dict(schema='scar.normal-source-link-facts',schema_version=6,status='SOURCE_LINK_FACTS_EXTRACTED',model=str(model),templates=str(templates),
         model_manifest_sha256=sha256(model_raw).hexdigest(),source_result_sha256=sha256(source_raw).hexdigest(),implementation_sha256=pins,
         selected_sources=len(rows),units=rows,counts=dict(counts),operation_kinds=dict(operation_kinds),operator_selectors=dict(operator_selectors),seconds=time.monotonic()-started,
         profile='NORMAL_SUCCESS',runtime_dispatch_verified=False,first_stage_complete=False,target_executed=False)

@@ -54,6 +54,7 @@ def connect(solver, fid: int, invocation: Invocation, receiver: int | None = Non
     if len(keywords) != len(invocation.keywords):
         return None
     if invocation.positional_pack is not None or invocation.keyword_pack is not None:
+        if hasattr(solver,'body_demand'):solver.body_demand(fid,invocation.callee,'ARGUMENT_PACK_BINDING_OPEN')
         packs = T.ArgumentPacks(
             None if invocation.positional_pack is None else gp(invocation.positional_pack),
             None if invocation.keyword_pack is None else gp(invocation.keyword_pack),
@@ -121,6 +122,7 @@ def connect(solver, fid: int, invocation: Invocation, receiver: int | None = Non
 
     returned = []
     if activation is T.FunctionActivation.NORMAL:
+        if hasattr(solver,'activate_function'):solver.activate_function(fid,invocation.callee)
         for actual, formal in bindings:
             solver.edge(actual, formal)
         for formal, value in class_bindings:
@@ -131,5 +133,7 @@ def connect(solver, fid: int, invocation: Invocation, receiver: int | None = Non
             returned.append((gp(source), gp(invocation.result)))
         if function.return_world is not None:
             returned.append((gp(offset + function.return_world), gp(invocation.result_world)))
+    elif hasattr(solver,'body_demand'):
+        solver.body_demand(fid,invocation.callee,'DEFERRED_BODY_RESUME_OPEN')
     return T.FunctionConnection(gp(fid), body, activation, (environment, *routes, state),
                                 tuple(returned), conditions)

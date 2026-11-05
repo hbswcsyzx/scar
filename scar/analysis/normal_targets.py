@@ -68,7 +68,7 @@ class _Solver:
         self.dynamic_gets=defaultdict(set);self.symbol_calls=set();self.links={};self.call_rows=[]
         self.base_watch=defaultdict(set);self.ctor_base_watch=defaultdict(set)
         self.star_forward=defaultdict(set)
-        self.imported_modules=set()
+        self.imported_modules=set();self.external_namespaces=set()
         self.builtin_names=set(dir(builtins));self.events=0
         for unit in units:
             offset=len(self.port);self.offsets[unit.unit]=offset
@@ -117,9 +117,7 @@ class _Solver:
         # consumers of an open value use only its tag; provenance stays on
         # the original ports and routes rather than multiplying this token.
         if value[0]=='external_value':value=('external_value',None)
-        elif value[0]=='external' and len(value)>2:
-            # Lookup history is queried by membership only, never by order.
-            value=('external',value[1],tuple(sorted(set(value[2]))))
+        elif value[0]=='external':value=('external',value[1])
         if value not in self.values[point]:self.values[point].add(value);self.queue.append((point,value))
 
     def edge(self,source,target):
@@ -215,12 +213,12 @@ class _Solver:
             if child in self.module_units or child in self.imported_modules:self.add(target,('module',child))
             if not units:self.add(target,('external',child,(target,)))
         elif value[0]=='external':
-            # Retain rooted external namespace provenance until a source
-            # member site repeats. Cyclic aliases then widen to an unqualified
-            # member rather than growing names indefinitely. Attribute lookup
-            # remains a conditional alternative, never an observed binding.
-            visited=value[2] if len(value)>2 else ()
-            if target not in visited:self.add(target,('external',value[1]+'.'+name,(*visited,target)))
+            # A qualified symbol is not automatically another namespace.
+            # Extend only admitted modules or provider-declared containers.
+            # Other projections keep their original receiver/result graph
+            # ports without inventing recursively concatenated symbol names.
+            if value[1] in self.module_units or value[1] in self.imported_modules or value[1] in self.external_namespaces:
+                self.add(target,('external',value[1]+'.'+name))
             else:self.add(target,('external_member',target,name))
         elif value[0] in ('external_value','external_member'):
             self.add(target,('external_member',target,name))
@@ -330,7 +328,8 @@ class _Solver:
         return not self.queue
 
 
-def solve_targets(facts,out,*,max_events=20_000_000):
+def solve_targets(facts,out,*,max_events=20_000_000,entries=()):
+    if entries:return solve_entry_targets(facts,out,entries,max_events=max_events)
     started=time.monotonic();facts=Path(facts).absolute();out=Path(out).absolute()
     if out.exists():raise ValueError('fresh target output required')
     root=(facts/'result.json').read_bytes();report=json.loads(root);units=[]
@@ -363,7 +362,12 @@ def solve_targets(facts,out,*,max_events=20_000_000):
         print(json.dumps(dict(phase='SOURCE_TARGET_PROPAGATION',events=solver.events,
             frontier=len(solver.queue),value_facts=solver.events+len(solver.queue),
             value_ports=len(solver.values),seconds=time.monotonic()-started)),file=sys.stderr,flush=True)
-    fixed=not solver.queue;_durable_mkdir(out)
+    fixed=not solver.queue
+    return _publish(solver,facts,root,report,out,started,max_events,fixed,stars)
+
+
+def _publish(solver,facts,root,report,out,started,max_events,fixed,stars,extra=None):
+    units=solver.units;_durable_mkdir(out)
     from scar.analysis.source_template_links import _stream
     fragment=_stream(out/'calls.jsonl.gz',solver.links.values())
     content=_stream(out/'content.jsonl.gz',solver.containers.links.values())
@@ -373,7 +377,8 @@ def solve_targets(facts,out,*,max_events=20_000_000):
     modes=Counter(link.mode for link in solver.links.values());known_calls={link.result for link in solver.links.values()}
     source_calls={link.result for link in solver.links.values() if link.source_callable is not None}
     original_calls=sum(len(u.calls) for u in units)
-    result=dict(schema='scar.normal-source-targets',schema_version=5,status='SOURCE_TARGET_FIXED_POINT' if fixed else 'SOURCE_TARGET_BUDGET_FRONTIER',
+    result=dict(schema='scar.normal-source-targets',schema_version=6,status='SOURCE_TARGET_FIXED_POINT' if fixed else 'SOURCE_TARGET_BUDGET_FRONTIER',
+        analysis_mode='LIBRARY_MAY_ANALYSIS',
         source_facts=str(facts),source_facts_sha256=sha256(root).hexdigest(),profile='NORMAL_SUCCESS',
         selected_sources=len(units),source_calls=original_calls,source_functions=len(solver.functions),source_classes=len(solver.classes),
         calls_with_candidates=len(known_calls),candidate_links=len(solver.links),modes=dict(modes),
@@ -397,12 +402,56 @@ def solve_targets(facts,out,*,max_events=20_000_000):
         calls=fragment,seconds=time.monotonic()-started,conditions='source target alternatives; descriptor/module/attribute admissions remain conditional',
         runtime_dispatch_verified=False,effects_proven=False,first_stage_complete=False,target_executed=False,transformation_authorized=False,
         implementation_sha256=sha256(Path(__file__).read_bytes()).hexdigest(),types_sha256=sha256(Path(T.__file__).read_bytes()).hexdigest())
+    if extra:result.update(extra)
     _durable_bytes(out/'result.json',_json(result),replace=False);return result
+
+
+def solve_entry_targets(facts,out,entries,*,max_events=20_000_000):
+    from scar.analysis import normal_entry,normal_facts
+    from scar.ir.program import normal_entry as E
+    from scar.analysis.source_template_links import _stream
+    from heapq import nlargest
+    started=time.monotonic();store=normal_facts.SourceFactStore(facts);out=Path(out).absolute()
+    if out.exists():raise ValueError('fresh entry target output required')
+    entries=tuple(str(Path(p).absolute()) for p in entries)
+    solver=normal_entry.EntrySolver(store,entries);solver.prepare()
+    while (solver.queue or solver.pending) and solver.events<max_events:
+        solver.solve(min(max_events,solver.events+2_000_000))
+        print(json.dumps(dict(phase='ENTRY_SCOPE_PROPAGATION',events=solver.events,frontier=len(solver.queue),
+            pending_scopes=len(solver.pending),active_scopes=len(solver.active_scopes),loaded_units=len(store.loaded),
+            seconds=time.monotonic()-started)),file=sys.stderr,flush=True)
+    fixed=not solver.queue and not solver.pending;solver.complete_call_demands();_durable_mkdir(out)
+    kinds=Counter(value[0] for values in solver.values.values() for value in values)
+    hot=[]
+    for point,values in nlargest(8,solver.values.items(),key=lambda item:len(item[1])):
+        if type(point) is int:
+            identity,_=store.locate(point)
+            hot.append(dict(port=encode(solver.gp(point),record_tags=P.PRODUCTION_RECORD_TAGS),
+                source=store.rows[identity]['path'],facts=len(values),kinds=dict(Counter(v[0] for v in values))))
+    known_calls={link.result for link in solver.links.values()}
+    extra=dict(analysis_mode='ENTRY_SCOPED_MAY_ANALYSIS',entry_sources=entries,
+        selected_sources=store.report['selected_sources'],loaded_sources=len(store.loaded),
+        active_code_scopes=len(solver.active_scopes),pending_code_scopes=len(solver.pending),
+        active_source_calls=len(solver.active_call_indices),
+        source_calls=store.report['counts']['calls'],unresolved_calls=len(solver.active_call_indices)-len(known_calls),
+        fixed_point_scope='ADMITTED_ENTRY_CONSTRAINTS',abstract_fact_kinds=dict(kinds),abstract_fact_hotspots=hot,
+        source_catalog_retained=True,declared_source_calls=store.report['counts']['calls'],
+        declared_source_functions=store.report['counts']['functions'],
+        entry_activations=_stream(out/'entry-activations.jsonl.gz',solver.activations.values()),
+        entry_module_demands=_stream(out/'entry-module-demands.jsonl.gz',solver.module_demands.values()),
+        entry_body_demands=_stream(out/'entry-body-demands.jsonl.gz',solver.body_demands.values()),
+        entry_call_demands=_stream(out/'entry-call-demands.jsonl.gz',solver.call_demands.values()),
+        entry_implementation_sha256=sha256(Path(normal_entry.__file__).read_bytes()).hexdigest(),
+        fact_reader_sha256=sha256(Path(normal_facts.__file__).read_bytes()).hexdigest(),
+        entry_types_sha256=sha256(Path(E.__file__).read_bytes()).hexdigest())
+    result=_publish(solver,store.path,store.raw,store.report,out,started,max_events,fixed,solver.stars,extra)
+    return result
 
 
 def main():
     p=argparse.ArgumentParser(description=__doc__);p.add_argument('--facts',required=True);p.add_argument('--out',required=True)
-    p.add_argument('--max-events',type=int,default=20_000_000);a=p.parse_args();r=solve_targets(a.facts,a.out,max_events=a.max_events)
+    p.add_argument('--entry',action='append',required=True,help='source entry module; declarations alone do not choose execution roots')
+    p.add_argument('--max-events',type=int,default=20_000_000);a=p.parse_args();r=solve_targets(a.facts,a.out,max_events=a.max_events,entries=a.entry)
     print(json.dumps({k:r[k] for k in ('status','source_calls','calls_with_candidates','candidate_links','modes','value_events','seconds')},indent=2))
 
 

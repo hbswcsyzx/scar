@@ -27,20 +27,30 @@ class ContainerFlow:
         for source,namespaces in solver.writes.items():
             for namespace in namespaces:self.namespace_sources[namespace].add(source)
         for unit in units:
-            o=solver.offsets[unit.unit]
-            for c in unit.containers:
-                value=('container',o+c.value,c.kind.value);solver.add(o+c.value,value)
-                for index,element in enumerate(c.elements):self.write(value,('int',index),o+element)
-                for key,element in c.pairs:self.register(o+c.value,o+key,o+element,True)
-            for item in unit.items:
-                self.register(o+item.receiver,o+item.key if type(item.key) is int else item.key,o+item.value,item.write)
-            for update in unit.updates:
-                if update.append:
-                    self.items[o+update.target].add((None,o+update.source,True))
-                else:self.update(o+update.source,o+update.target)
-            for iteration in unit.iterations:
-                if iteration.advance:self.iterators[o+iteration.source].add(o+iteration.value)
-                else:solver.add(o+iteration.value,('iterator',o+iteration.source))
+            for table in ('containers','items','updates','iterations'):
+                for i in range(len(getattr(unit,table))):self.admit(unit,table,i)
+
+    def admit(self,unit,table,index):
+        o=self.s.offsets[unit.unit];item=getattr(unit,table)[index]
+        if table=='containers':
+            value=('container',o+item.value,item.kind.value);self.s.add(o+item.value,value)
+            for i,element in enumerate(item.elements):self.write(value,('int',i),o+element)
+            for key,element in item.pairs:self.register(o+item.value,o+key,o+element,True)
+        elif table=='items':
+            self.register(o+item.receiver,o+item.key if type(item.key) is int else item.key,o+item.value,item.write)
+            for value in tuple(self.s.values.get(o+item.receiver,())):
+                self.apply_item(value,o+item.key if type(item.key) is int else item.key,o+item.value,item.write)
+        elif table=='updates':
+            if item.append:self.items[o+item.target].add((None,o+item.source,True))
+            else:self.update(o+item.source,o+item.target)
+            for value in tuple(self.s.values.get(o+item.target if item.append else o+item.source,())):
+                self.consume(o+item.target if item.append else o+item.source,value)
+        elif table=='iterations':
+            if item.advance:
+                self.iterators[o+item.source].add(o+item.value)
+                for value in tuple(self.s.values.get(o+item.source,())):self.consume(o+item.source,value)
+            else:self.s.add(o+item.value,('iterator',o+item.source))
+        else:raise ValueError('unknown container fact table')
 
     def register(self,receiver,key,value,write):
         self.items[receiver].add((key,value,write))

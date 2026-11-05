@@ -20,6 +20,9 @@ import time
 
 from scar.analysis.normal_query import NormalCallGraph
 from scar.analysis.normal_targets import _Solver,_star_imports
+from scar.analysis.normal_entry import EntrySolver
+from scar.analysis import normal_entry,normal_facts,normal_namespaces
+from scar.ir.program import normal_entry as E
 from scar.analysis.source_stage import _durable_bytes,_durable_mkdir
 from scar.analysis.source_template_links import _json,_stream
 from scar.analysis.static_native_materials import read_static_native_materials,NativeMaterialBudget
@@ -100,25 +103,36 @@ def _symbols(definitions):
     return result
 
 
-class _BindingSolver(_Solver):
-    """Extend existing reference flow with declaration origins, not new rules per workload."""
-    def __init__(self,units,stars,definitions,stub=None,stub_artifact=None):
+class _BindingCallbacks:
+    """Native declarations over either library or entry-admitted source flow."""
+    def _binding_maps(self,definitions):
         self.binding_symbols=_symbols(definitions);self.bindings={d.id.value:d for d in definitions}
-        self.native_calls={}
-        super().__init__(units,stars)
-        self.return_flow=tensor_return_flow.TensorReturnFlow(self,units,stub or dict(methods=[],attributes=[]),stub_artifact)
-        self.language_flow=tensor_language_flow.TensorLanguageFlow(self,units,self.return_flow)
+        self.native_calls={};self.return_flow=None;self.language_flow=None
+
+    def _binding_flows(self,stub,artifact,*,eager):
+        self.external_namespaces.update('.'.join(symbol.split('.')[:i])
+            for symbol in self.binding_symbols for i in range(1,len(symbol.split('.'))))
+        self.return_flow=tensor_return_flow.TensorReturnFlow(self,(),stub or dict(methods=[],attributes=[]),artifact)
+        self.external_namespaces.update('.'.join(symbol.split('.')[:i])
+            for symbol in self.return_flow.descriptors for i in range(1,len(symbol.split('.'))+1))
+        self.language_flow=tensor_language_flow.TensorLanguageFlow(self,(),self.return_flow)
         self.containers.observers=(self.language_flow.consume,)
+        for unit in tuple(self.units):
+            self.return_flow.register_unit(unit,eager=eager)
+            self.language_flow.register_unit(unit,eager=eager)
 
     def attribute(self,point,value,name,target):
         super().attribute(point,value,name,target)
-        if value[0] in ('module','external'):
+        if value[0]=='module' or value[0]=='external' and (
+                value[1] in self.module_units or value[1] in self.imported_modules or value[1] in self.external_namespaces):
             for definition in self.binding_symbols.get(value[1]+'.'+name,()):
                 self.add(target,('generated_binding',definition.id.value))
-        self.return_flow.attribute(point,value,name,target)
+        if self.return_flow is not None:self.return_flow.attribute(point,value,name,target)
 
     def call(self,index,value):
-        if value[0]=='declared_member':return self.return_flow.call_member(index,value)
+        if value[0]=='declared_member':
+            if hasattr(self,'resolved_interface_calls'):self.resolved_interface_calls.add(index)
+            return self.return_flow.call_member(index,value)
         if value[0] not in ('generated_binding','generated_bound'):return super().call(index,value)
         unit,call=self.call_rows[index];offset=self.offsets[unit.unit];gp=lambda p:self.gp(offset+p)
         definition=self.bindings[value[1]];receiver=None;mode=ReceiverMode.FUNCTION
@@ -136,10 +150,38 @@ class _BindingSolver(_Solver):
             'PARSER_VARIANT:'+str(definition.parser_index),'BINDING_BRANCH:'+str(definition.branch_condition))
         candidate=B.NativeCallCandidate(site,definition.id,conditions,False,None if receiver is None else self.gp(receiver),mode)
         self.native_calls[identity]=candidate
+        if hasattr(self,'resolved_interface_calls'):self.resolved_interface_calls.add(index)
         # Keep an open namespace/override alternative alongside conditional
         # native return declarations; neither branch proves a storage alias.
         self.add(offset+call.result,('external_value',offset+call.result))
         self.return_flow.native_return(index,definition,candidate,offset+call.result)
+
+
+class _BindingSolver(_BindingCallbacks,_Solver):
+    def __init__(self,units,stars,definitions,stub=None,stub_artifact=None):
+        self._binding_maps(definitions)
+        super().__init__(units,stars)
+        self._binding_flows(stub,stub_artifact,eager=True)
+
+
+class EntryBindingSolver(_BindingCallbacks,EntrySolver):
+    """Load native constraints only when their original code scope is admitted."""
+    def __init__(self,store,entries,definitions,stub=None,stub_artifact=None):
+        self._binding_maps(definitions)
+        super().__init__(store,entries)
+        self._binding_flows(stub,stub_artifact,eager=False)
+
+    def load_unit(self,identity):
+        unit=super().load_unit(identity)
+        if self.return_flow is not None:
+            self.return_flow.register_unit(unit,eager=False)
+            self.language_flow.register_unit(unit,eager=False)
+        return unit
+
+    def admit(self,unit,table,index):
+        super().admit(unit,table,index)
+        if table in ('items','iterations','updates'):self.return_flow.admit(unit,table,index)
+        elif table=='operations':self.language_flow.admit(unit,index)
 
 
 def _native_batch(task):
@@ -158,7 +200,23 @@ def _native_batch(task):
     return result
 
 
-def build_binding_graph(targets,out,site,*,catalog=None,jobs=4,propagate=True):
+def _source_tables(solver,out,*,entry):
+    tables=dict(source_links=_stream(out/'source-calls.jsonl.gz',solver.links.values()),
+        source_content=_stream(out/'source-content.jsonl.gz',solver.containers.links.values()),
+        source_namespaces=_stream(out/'source-namespaces.jsonl.gz',normal_namespaces.namespace_lookups(solver)),
+        source_properties=_stream(out/'source-properties.jsonl.gz',solver.descriptors.property_accesses.values()),
+        source_attribute_storage=_stream(out/'source-attribute-storage.jsonl.gz',solver.descriptors.storage_accesses.values()))
+    if entry:
+        solver.complete_call_demands()
+        tables.update(entry_activations=_stream(out/'entry-activations.jsonl.gz',solver.activations.values()),
+            entry_module_demands=_stream(out/'entry-module-demands.jsonl.gz',solver.module_demands.values()),
+            entry_body_demands=_stream(out/'entry-body-demands.jsonl.gz',solver.body_demands.values()),
+            entry_call_demands=_stream(out/'entry-call-demands.jsonl.gz',solver.call_demands.values()))
+    return tables
+
+
+def build_binding_graph(targets,out,site,*,catalog=None,jobs=4,propagate=True,max_events=20_000_000):
+    if type(max_events) is not int or max_events<1:raise ValueError('positive binding event budget required')
     started=time.monotonic();out=Path(out).absolute();site=Path(site).absolute();view=NormalCallGraph(targets)
     if out.exists():raise ValueError('fresh binding output required')
     document=_catalog(site,catalog);_durable_mkdir(out);path=out/'materials.json'
@@ -172,22 +230,40 @@ def build_binding_graph(targets,out,site,*,catalog=None,jobs=4,propagate=True):
     symbols=_symbols(definitions);definition_by_id={d.id:d for d in definitions};links=defaultdict(list)
     namespace_path=view.path/view.report['namespaces']['path']
     namespace_artifact=_artifact(namespace_path,'scar.normal-namespace-lookups+gzip-jsonl')
-    selected=set()
+    selected=set();linked=set()
+    def connect_lookup(index,lookup,evidence):
+        for definition in symbols.get(lookup.namespace+'.'+lookup.member,()):
+            selected.add(definition.selector)
+            identity=lookup.receiver,lookup.result,definition.id
+            if identity not in linked:
+                linked.add(identity)
+                links[lookup.result.unit].append(B.NamespaceBindingLink(
+                    ProviderFactReference(evidence,'jsonl:'+str(index)),lookup.receiver,lookup.result,definition.id,conditions))
     for index,wire in enumerate(view._documents('namespaces',None,None,'result'),1):
         candidates=symbols.get(wire['namespace']+'.'+wire['member'],())
         if not candidates:continue
         lookup=decode(N.NamespaceLookup,wire,record_tags=P.PRODUCTION_RECORD_TAGS)
-        for definition in candidates:
-            selected.add(definition.selector)
-            links[lookup.result.unit].append(B.NamespaceBindingLink(
-                ProviderFactReference(namespace_artifact,'jsonl:'+str(index)),lookup.receiver,lookup.result,definition.id,conditions))
+        connect_lookup(index,lookup,namespace_artifact)
+    analysis_mode=view.report.get('analysis_mode','LIBRARY_MAY_ANALYSIS')
+    if analysis_mode not in ('LIBRARY_MAY_ANALYSIS','ENTRY_SCOPED_MAY_ANALYSIS'):
+        raise ValueError('unsupported binding source analysis mode')
+    entry=analysis_mode=='ENTRY_SCOPED_MAY_ANALYSIS'
+    entry_sources=tuple(view.report.get('entry_sources',()))
+    if entry and not entry_sources:raise ValueError('entry binding graph requires the original entry sources')
+    source_tables={};scope_summary={}
     propagation=None;native_calls=();return_facts=();member_calls=();protocol_calls=();operator_calls=();operator_frontiers=();language_propagation=None
     if propagate:
-        units=list(view.unit_facts());model_units=json.loads((Path(view.inputs['model'])/'manifest.json').read_bytes())['units']
-        model_units={u['key']:u for u in model_units}
-        with ThreadPoolExecutor(max_workers=8) as pool:
-            stars=list(pool.map(lambda u:_star_imports(view.inputs['model'],model_units[u.unit],u.module),units))
-        solver=_BindingSolver(units,stars,definitions,stub,stub_artifact);fixed=solver.solve()
+        if entry:
+            store=normal_facts.SourceFactStore(view.facts)
+            solver=EntryBindingSolver(store,entry_sources,definitions,stub,stub_artifact)
+        else:
+            units=list(view.unit_facts());model_units=json.loads((Path(view.inputs['model'])/'manifest.json').read_bytes())['units']
+            model_units={u['key']:u for u in model_units}
+            with ThreadPoolExecutor(max_workers=8) as pool:
+                stars=list(pool.map(lambda u:_star_imports(view.inputs['model'],model_units[u.unit],u.module),units))
+            solver=_BindingSolver(units,stars,definitions,stub,stub_artifact)
+            del units
+        fixed=solver.solve(max_events)
         native_calls=tuple(solver.native_calls.values())
         return_facts=tuple(solver.return_flow.facts.values());member_calls=tuple(solver.return_flow.member_calls.values())
         protocol_calls=tuple(solver.return_flow.protocol_calls.values())
@@ -204,10 +280,29 @@ def build_binding_graph(targets,out,site,*,catalog=None,jobs=4,propagate=True):
             declaration_frontiers=len(operator_frontiers),work_events=solver.language_flow.events)
         selected.update(definition_by_id[c.binding].selector for c in native_calls)
         selected.update(c.native_selector for c in operator_calls if c.native_selector is not None)
+        source_tables=_source_tables(solver,out,entry=entry)
+        lookup_artifact=_artifact(out/source_tables['source_namespaces']['path'],'scar.normal-namespace-lookups+gzip-jsonl')
+        with gzip.open(Path(lookup_artifact.uri),'rt') as stream:
+            for index,line in enumerate(stream,1):
+                connect_lookup(index,decode(N.NamespaceLookup,json.loads(line),record_tags=P.PRODUCTION_RECORD_TAGS),lookup_artifact)
+        pending=len(solver.pending) if entry else 0
         propagation=dict(status='FIXED_POINT' if fixed else 'BUDGET_FRONTIER',events=solver.events,frontier=len(solver.queue),
-            source_calls=len(solver.call_rows),native_call_sites=len({c.site.result for c in native_calls}),native_call_candidates=len(native_calls))
+            pending_code_scopes=pending,event_budget=max_events,
+            source_calls=len(solver.active_call_indices) if entry else len(solver.call_rows),
+            native_call_sites=len({c.site.result for c in native_calls}),native_call_candidates=len(native_calls),
+            loaded_sources=len(solver.units),language_work_frontier=len(solver.language_flow.queue),
+            fixed_point_scope='ADMITTED_ENTRY_CONSTRAINTS' if entry else 'LIBRARY_CONSTRAINTS')
+        if entry:
+            scope_summary=dict(loaded_sources=len(store.loaded),active_code_scopes=len(solver.active_scopes),
+                pending_code_scopes=pending,active_source_calls=len(solver.active_call_indices),
+                source_catalog_retained=True,declared_source_calls=store.report['counts']['calls'],
+                declared_source_functions=store.report['counts']['functions'],
+                entry_implementation_sha256=sha256(Path(normal_entry.__file__).read_bytes()).hexdigest(),
+                fact_reader_sha256=sha256(Path(normal_facts.__file__).read_bytes()).hexdigest(),
+                entry_types_sha256=sha256(Path(E.__file__).read_bytes()).hexdigest())
         # Preserve only typed output records; the source graph is still shared.
-        del solver,units
+        del solver
+        if entry:del store
     yaml_path=site/'torchgen/packaged/ATen/native/native_functions.yaml'
     raw_names=set(re.findall(r'^- func: ([^\s(]+)\(',yaml_path.read_text(),re.M))
     raw_selectors={name if '::' in name else 'aten::'+name for name in raw_names}
@@ -242,7 +337,8 @@ def build_binding_graph(targets,out,site,*,catalog=None,jobs=4,propagate=True):
     protocols=_stream(out/'declared-protocols.jsonl.gz',protocol_calls)
     operators=_stream(out/'declared-operators.jsonl.gz',operator_calls)
     operator_gaps=_stream(out/'operator-frontiers.jsonl.gz',operator_frontiers)
-    result=dict(schema='scar.generated-python-binding-graph',schema_version=3,status='DECLARATIONS_CONNECTED',
+    result=dict(schema='scar.generated-python-binding-graph',schema_version=4,status='DECLARATIONS_CONNECTED',
+        analysis_mode=analysis_mode,entry_sources=entry_sources,event_budget=max_events,
         source_targets=str(view.path),source_result_sha256=sha256((view.path/'result.json').read_bytes()).hexdigest(),
         package_version=document['package_version'],source_revision=document['source_revision'],materials=dict(uri=artifact.uri,sha256=artifact.sha256,size_bytes=artifact.size_bytes),
         definitions=len(definitions),wrappers=len(document['wrappers']),export_families=len(families),exports=exports,units=units,
@@ -260,14 +356,19 @@ def build_binding_graph(targets,out,site,*,catalog=None,jobs=4,propagate=True):
         return_types_sha256=sha256(Path(binding_returns.__file__).read_bytes()).hexdigest(),
         value_types_sha256=sha256(Path(tensor_values.__file__).read_bytes()).hexdigest())
     result['language_flow_sha256']=sha256(Path(tensor_language_flow.__file__).read_bytes()).hexdigest()
+    result.update(source_tables);result.update(scope_summary)
+    if entry:
+        result.update(entry_implementation_sha256=sha256(Path(normal_entry.__file__).read_bytes()).hexdigest(),
+            fact_reader_sha256=sha256(Path(normal_facts.__file__).read_bytes()).hexdigest(),
+            entry_types_sha256=sha256(Path(E.__file__).read_bytes()).hexdigest())
     _durable_bytes(out/'result.json',_json(result),replace=False);return result
 
 
 def main():
     parser=argparse.ArgumentParser(description=__doc__);parser.add_argument('--targets',required=True);parser.add_argument('--out',required=True)
     parser.add_argument('--site-packages',default=sysconfig.get_paths()['purelib']);parser.add_argument('--catalog');parser.add_argument('--jobs',type=int,default=4)
-    parser.add_argument('--no-propagate',action='store_true');args=parser.parse_args()
-    result=build_binding_graph(args.targets,args.out,args.site_packages,catalog=args.catalog,jobs=args.jobs,propagate=not args.no_propagate)
+    parser.add_argument('--no-propagate',action='store_true');parser.add_argument('--max-events',type=int,default=20_000_000);args=parser.parse_args()
+    result=build_binding_graph(args.targets,args.out,args.site_packages,catalog=args.catalog,jobs=args.jobs,propagate=not args.no_propagate,max_events=args.max_events)
     print(json.dumps({k:result[k] for k in ('status','definitions','export_families','namespace_links','native_interfaces','native_interface_frontier','propagation','return_type_kinds','seconds')},indent=2))
 
 

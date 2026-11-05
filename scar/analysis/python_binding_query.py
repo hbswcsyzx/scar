@@ -11,6 +11,9 @@ from scar.analysis import python_bindings
 from scar.analysis import tensor_return_flow,tensor_stub_contracts,tensor_language_flow
 from scar.ir.program import python_bindings as B,normal_namespaces as N,source_productions as P
 from scar.ir.program import tensor_values as V,binding_returns as R
+from scar.ir.program import normal_targets as T
+from scar.ir.program import normal_entry as E
+from scar.analysis import normal_entry,normal_facts
 from scar.ir.program.codec import loads as graph_loads
 from scar.ir.record_codec import decode
 
@@ -18,7 +21,7 @@ from scar.ir.record_codec import decode
 class PythonBindingGraph:
     def __init__(self,path):
         self.path=Path(path).absolute();self.report=json.loads((self.path/'result.json').read_bytes())
-        if self.report['schema']!='scar.generated-python-binding-graph' or self.report['schema_version']!=3:
+        if self.report['schema']!='scar.generated-python-binding-graph' or self.report['schema_version']!=4:
             raise ValueError('unsupported generated binding graph')
         if self.report['implementation_sha256']!=sha256(Path(python_bindings.__file__).read_bytes()).hexdigest():
             raise ValueError('binding graph producer differs')
@@ -30,6 +33,11 @@ class PythonBindingGraph:
         self.source=NormalCallGraph(self.report['source_targets'])
         if sha256((self.source.path/'result.json').read_bytes()).hexdigest()!=self.report['source_result_sha256']:
             raise ValueError('source target graph differs')
+        if self.report.get('analysis_mode')=='ENTRY_SCOPED_MAY_ANALYSIS':
+            if tuple(self.report['entry_sources'])!=tuple(self.source.report['entry_sources']):
+                raise ValueError('binding entry sources differ from the source query')
+            for field,module in (('entry_implementation_sha256',normal_entry),('fact_reader_sha256',normal_facts),('entry_types_sha256',E)):
+                if self.report[field]!=sha256(Path(module.__file__).read_bytes()).hexdigest():raise ValueError('entry binding implementation differs')
         self.exports={row['symbol']:row for row in self.report['exports']}
         self._definitions={};self._catalog=None;self._native={};self._lookup_streams={}
 
@@ -82,6 +90,42 @@ class PythonBindingGraph:
     def normalization(self,identity=None):
         select=None if identity is None else lambda row:decode(B.PythonBindingID,row['binding'])==identity
         yield from self._table(self.report['normalization'],B.NormalizationLink,select=select)
+
+    def _source_table(self,name,cls,source,anchor):
+        """Enhanced source facts from this run, independently of its parent."""
+        if name not in self.report:return
+        unit=None if source is None else self.source.sources[str(Path(source).absolute())]
+        def selected(row):
+            for field in anchor.split('.'):row=row[field]
+            return row is not None and row['unit']==unit
+        yield from self._table(self.report[name],cls,select=None if unit is None else selected)
+
+    def source_calls(self,source=None):
+        yield from self._source_table('source_links',T.CallLink,source,'result')
+
+    def source_contents(self,source=None):
+        yield from self._source_table('source_content',T.ContentLink,source,'target')
+
+    def source_namespace_lookups(self,source=None):
+        yield from self._source_table('source_namespaces',N.NamespaceLookup,source,'result')
+
+    def source_properties(self,source=None):
+        yield from self._source_table('source_properties',T.PropertyAccess,source,'site.world')
+
+    def source_attribute_storage(self,source=None):
+        yield from self._source_table('source_attribute_storage',T.AttributeStorageAccess,source,'site.world')
+
+    def entry_activations(self,source=None):
+        yield from self._source_table('entry_activations',E.ScopeActivationEvidence,source,'target')
+
+    def module_demands(self,source=None):
+        yield from self._source_table('entry_module_demands',E.ModuleEntryDemand,source,'producer')
+
+    def body_demands(self,source=None):
+        yield from self._source_table('entry_body_demands',E.BodyEntryDemand,source,'producer')
+
+    def call_demands(self,source=None):
+        yield from self._source_table('entry_call_demands',E.CallEntryDemand,source,'result')
 
     def return_types(self,source=None):
         unit=None if source is None else self.source.sources[str(Path(source).absolute())]

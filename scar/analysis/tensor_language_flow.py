@@ -63,6 +63,8 @@ class TensorLanguageFlow:
     def __init__(self, solver, units, return_flow):
         self.s, self.returns = solver, return_flow
         self.operations = []
+        self.registered_units = set()
+        self.admitted = set()
         self.watch = defaultdict(set)
         self.tensor_points = set()
         self.queue, self.pending = deque(), set()
@@ -82,19 +84,32 @@ class TensorLanguageFlow:
             if definition.kind is B.BindingKind.METHOD and symbol:
                 self.method_wrappers[symbol].append(definition)
         for unit in units:
-            offset = solver.offsets[unit.unit]
-            for operation in getattr(unit, 'operations', ()):
-                index = len(self.operations)
-                self.operations.append((offset, operation))
-                for operand in operation.operands:
-                    self.watch[offset + operand].add(index)
-        # Subscribe and replay; construction does not depend on whether an
-        # existing operand tag has already passed through the solver queue.
-        for point in self.watch:
-            if any(self.is_tensor(value) for value in tuple(solver.values[point])):
+            self.register_unit(unit)
+        self.drain()
+
+    def register_unit(self, unit, *, eager=True):
+        if unit.unit in self.registered_units:
+            return
+        self.registered_units.add(unit.unit)
+        if eager:
+            for index in range(len(getattr(unit, 'operations', ()))):
+                self.admit(unit, index)
+
+    def admit(self, unit, local_index):
+        identity = unit.unit, local_index
+        if identity in self.admitted:
+            return
+        self.admitted.add(identity)
+        offset = self.s.offsets[unit.unit]
+        operation = unit.operations[local_index]
+        index = len(self.operations)
+        self.operations.append((offset, operation))
+        for operand in operation.operands:
+            point = offset + operand
+            self.watch[point].add(index)
+            if point in self.tensor_points or any(self.is_tensor(value) for value in tuple(self.s.values.get(point, ()))):
                 self.tensor_points.add(point)
-                for index in self.watch[point]:
-                    self.schedule(index)
+                self.schedule(index)
         self.drain()
 
     def is_tensor(self, value):

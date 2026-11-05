@@ -34,7 +34,7 @@ class NormalCallGraph:
     def __init__(self, targets):
         self.path = Path(targets).absolute()
         self.report = json.loads((self.path / 'result.json').read_bytes())
-        if self.report['schema'] != 'scar.normal-source-targets' or self.report['schema_version'] != 5:
+        if self.report['schema'] != 'scar.normal-source-targets' or self.report['schema_version'] != 6:
             raise ValueError('expected current source target graph')
         if self.report['types_sha256'] != sha256(Path(T.__file__).read_bytes()).hexdigest():
             raise ValueError('call edge declarations differ')
@@ -53,7 +53,7 @@ class NormalCallGraph:
         if sha256(raw).hexdigest() != self.report['source_facts_sha256']:
             raise ValueError('source fact result differs')
         self.inputs = json.loads(raw)
-        if self.inputs['schema']!='scar.normal-source-link-facts' or self.inputs['schema_version']!=5:
+        if self.inputs['schema']!='scar.normal-source-link-facts' or self.inputs['schema_version']!=6:
             raise ValueError('expected current language/source facts')
         if self.inputs['implementation_sha256'] != _pins():
             raise ValueError('source fact implementation differs')
@@ -62,6 +62,11 @@ class NormalCallGraph:
         self.templates = Path(self.inputs['templates'])
         if sha256((self.templates / 'result.json').read_bytes()).hexdigest() != self.inputs['source_result_sha256']:
             raise ValueError('source template version differs')
+        if self.report.get('analysis_mode')=='ENTRY_SCOPED_MAY_ANALYSIS':
+            from scar.analysis import normal_entry,normal_facts
+            from scar.ir.program import normal_entry as E
+            for field,module in (('entry_implementation_sha256',normal_entry),('fact_reader_sha256',normal_facts),('entry_types_sha256',E)):
+                if self.report[field]!=sha256(Path(module.__file__).read_bytes()).hexdigest():raise ValueError('entry scope implementation differs')
 
     def _documents(self, table, source, occurrence, anchor):
         unit = None if source is None else self.sources[str(Path(source).absolute())]
@@ -124,6 +129,33 @@ class NormalCallGraph:
         for row in self._documents('attribute_storage',None,None,'site'):
             if unit is None or row['site']['world']['unit']==unit:
                 yield decode(T.AttributeStorageAccess,row,record_tags=P.PRODUCTION_RECORD_TAGS)
+
+    def entry_activations(self,source=None):
+        """Scopes admitted by entry analysis; never runtime invocation records."""
+        from scar.ir.program.normal_entry import ScopeActivationEvidence
+        if 'entry_activations' not in self.report:return
+        for row in self._documents('entry_activations',source,None,'target'):
+            yield decode(ScopeActivationEvidence,row,record_tags=P.PRODUCTION_RECORD_TAGS)
+
+    def module_demands(self,source=None):
+        from scar.ir.program.normal_entry import ModuleEntryDemand
+        if 'entry_module_demands' not in self.report:return
+        unit=None if source is None else self.sources[str(Path(source).absolute())]
+        for row in self._documents('entry_module_demands',None,None,'producer'):
+            if unit is None or row['producer'] is not None and row['producer']['unit']==unit:
+                yield decode(ModuleEntryDemand,row,record_tags=P.PRODUCTION_RECORD_TAGS)
+
+    def body_demands(self,source=None):
+        from scar.ir.program.normal_entry import BodyEntryDemand
+        if 'entry_body_demands' not in self.report:return
+        for row in self._documents('entry_body_demands',source,None,'producer'):
+            yield decode(BodyEntryDemand,row,record_tags=P.PRODUCTION_RECORD_TAGS)
+
+    def call_demands(self,source=None):
+        from scar.ir.program.normal_entry import CallEntryDemand
+        if 'entry_call_demands' not in self.report:return
+        for row in self._documents('entry_call_demands',source,None,'result'):
+            yield decode(CallEntryDemand,row,record_tags=P.PRODUCTION_RECORD_TAGS)
 
     def _fact_documents(self,source=None):
         rows=self.units.values() if source is None else (self.units[self.sources[str(Path(source).absolute())]],)

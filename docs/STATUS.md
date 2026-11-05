@@ -1,57 +1,51 @@
 # 当前状态
 
-**第一阶段未完成；只开发建模、建图和查询，不进入化简或代码生成。**
-当前为 NORMAL_SUCCESS、CPython 3.14.7；软件边界到算子/外部动作接口，应用异常/引用清理暂缓。
-后端设计固定为 C++20、算子 ABI v1、执行计划 schema v1，尚未交付代码生成器。
-本轮未运行 LeWM、未 import torch、未采集 Tensor 数值，原仓库未改；下述时间都是 SCAR 自身耗时。
+**第一阶段尚未完成。范围仍是建模、建图与查询，没有进入程序化简或代码生成。**
+NORMAL_SUCCESS / CPython 3.14.7；边界到算子/外部动作接口。后端设计为 C++20、算子 ABI v1、计划 schema v1。
+本轮未运行 LeWM；下面的秒数是 SCAR 静态工具耗时，不是 LeWM 运行时间或加速比。
 
-## 已建立的结构
+## 已完成并验证
 
-| 层 | 已验证范围 | 尚未代表什么 |
-|---|---|---|
-| F0–F3 材料/词法/语法/绑定 | 866 源，原字节、官方前端字段、作用域与 binding 可追溯 | 不证明依赖全集或运行分派 |
-| F4 共享子图 | 882,537 模板、889,242 子接口；3,385,528 操作、4,645 循环、24,159,357 边 | 函数和循环不按执行次数 unroll |
-| F5 跨层接线 | 调用、参数、namespace、属性、容器、语言协议和原生接口已实现条件接线 | 全域来源传播尚未收敛，不能宣称完整 |
-| F6 值/状态/资源推理 | 已有类型及分片/查询接口 | 逻辑来源、内容版本、shape/bytes 和寿命尚未全面贯通 |
+| 层 | 当前范围 |
+|---|---|
+| F0–F3 | 866 份源码材料、词法/语法、作用域及 binding；849 .py 与17 .pyi 分开 |
+| F4 | 882,537 共享模板、3,385,528 操作、4,645 循环、24,159,357 边；函数/循环不按调用/迭代 unroll |
+| F5 作用域事实 | schema6，22,171 代码作用域组；全部849源强类型读回、事实范围覆盖、15,179函数及2,052类的 body_scope 原ID核对通过 |
+| F5 入口求解 | 入口/导入/源码调用/类创建驱动激活，按需加载；模板声明不激活函数体；参数包与延迟恢复留下明确需求 |
+| 命名空间规则 | 模块或接口声明支持其为namespace才继续限定名；普通对象属性保留原操作和端口，不凭字符串拼出 namespace |
 
-模型仍为 `artifacts/current/static/`，manifest SHA：
+原端口、别名及已有事实保持；私有名/参数名沿原 F3 投影。参数 admission 修复新增31,270条连接。
+同一alias允许多个code_scope按OR准入；原C1 environment与code_scope不混用，inline comprehension复用外层code_scope。
+静态接线使用 `source_function_connections.py`，旧动态适配器 `source_invocations.py` 未改。
+
+当前模型仍为 `artifacts/current/static/`，manifest SHA：
 `601e929904dc7481693f4a0747b7e01269ecf6d1302ff1efec072627c288aba0`。
-849 份 .py 与 17 份 .pyi 分开；声明不当作运行实现。
-`queries/normal-graph-complete/`引用两个 store，压缩边表共 575,718,843 bytes，小索引 231,760 bytes；不复制正文。
-全分片收据/父引用已核，CEM 与 torch.nn.functional 的强类型查询已过；不是全 2,416 万边独立重放。
+压缩边表575,718,843 bytes；小索引231,760 bytes引用原store，不复制正文。
 
-## 本轮修复与未通过项
+## 最新真实结果
 
-以下路径相对 `artifacts/current/queries/`；原收据不改写，实现版本保存在 Git。
+路径相对 `artifacts/current/queries/`；实现/父材料SHA及范围保存在收据中。
 
-- **Implemented / Verified：属性接口。** GET/SET/DELETE/IMPORT_MEMBER 保留原 receiver、数据及 world 端口；property accessor 复用函数接线，setter/deleter 无数据返回边。私有名沿原 F3 投影。字段、类及模块 namespace 分型并保留 descriptor/MRO 条件。已在 `739cfb3b` 提交。
-- **Implemented / Verified：参数 admission。** 原实现把 PARAMETER_INTERFACE 误作普通 STORE，漏掉 formal→lexical binding。现沿原 C2b resolution 接线并同步 private 签名；不按 self 名称猜类型。849 源新增 31,270 条绑定，其他记录计数保持，生成 192.42 秒：`normal-link-facts-parameters/{result,verification}.json`。
-- **Verified：LeWM 局部路径。** CEM 新增 27 条参数绑定；原先为 0 的 property 访问现有 8 条连接，涉及 horizon/action_dim/dtype，原属性 ABI 核查通过。证据在 `normal-targets-parameters/verification.json`。它不代表整个 solve 已接通。
-- **Rejected：全域固定点验收。** 参数接通后，传播达到 20,000,000 事件仍余 479,425；没有启动后续绑定/资源重建，也没有授权变换。该轮 500.55 秒：`normal-targets-parameters/result.json`。
-- **Implemented：内部事实压缩。** 合并消费者不区分的 external_value 来源标签及无序 lookup history；来源边、原端口和限定符号保留，不授对象/内容等价。小依赖环核查 2,176→128 事件，投影事实与原结果相同：`parameter-transfer-quotient.json`。全域仍触及预算、余 610,387，522.32 秒；**未解决全域规模瓶颈**：`normal-targets-parameters-compact/result.json`。
+- **Verified：** `normal-link-facts-scopes/` 生成201.95秒；`fact-scope-verification/result.json` 汇总4个独立分片读回，覆盖全部849源与22,171组。
+- **Verified：** `normal-targets-entry-namespaces/` 对真实 `eval.py` 入口求解53.13秒，409,439事件、队列0；按需加载162单元、激活1,215作用域，保留完整849源目录。仅当前已准入约束收敛，不证明全部路径或依赖闭合。
+- **Observed：** eval目前只激活scope0，业务函数体仍停在Hydra装饰器返回链；有109个body需求（102参数包、7延迟恢复），以及未决模块/调用。没有把空callee或未解析 `__call__` 静默当成不可达。
+- **Verified：** `namespace-transfer-rule.json` 的属性循环收敛，原字段关系与声明过的provider成员保留，不授对象/内容等价。
+- **Observed：** `source-admission-entry/` 将9639条模块需求归并为501个模块：177个source已有材料但未准入、262个查询尚未执行、20个native候选、35个记录根下未找到、7个未进入旧import索引。该工具只关联原需求与原材料，不据文件存在选择实际import目标。
 
-**Observed：有界诊断与稀疏索引。** 5M 事件时有 5,054,983 条事实、3,751,331 个非空端口；external history 最长仅4，尚不支持其组合爆炸的推断。
-最大合流来自 unittest.mock 的 self：431 个 instance 加一个 unknown。证据在 `parameter-propagation-diagnostic/result.json`。
-只读 defaultdict 访问改为 get，避免数百万空集合；新跑在 2M/20M 的事实及队列计数与旧结果相同。
-新跑显式限定 50M，传播443.84秒、含写出650.03秒，仍余2,961,039：`normal-targets-parameters-sparse/result.json`。
-本次固定点验收仍 **Rejected**；不再提高该轮预算，不启动后续绑定/资源重建。
-旧动态适配器 `source_invocations.py` 保持原样；静态接线使用 `source_function_connections.py`。
+曾经全库无差别传播触及50M预算；入口约束接通后又发现 `inspect` 中外部符号名错误扩展，20M时约20.5M事实为external。
+修正的是namespace类型依据，不是靠删除源码或抬高预算掩盖问题。历史失败收据保留，不充当当前验收。
 
-## 已定位的下一条缺口
+原生分析已按scope增量接入，schema4的增强source连接/激活/未决需求已强类型读回：`python-bindings-entry/verification.json`。
+该轮91.88秒、411,389事件且队列0，46份算子声明接口；活跃native调用0，不能据此宣称业务推理已接通。
+`software-target-resources-entry/verification.json`核对264条条件资源关系、849个源文件位置与12个硬件节点；实际operand来源0，未建立physical placement/copy。
+硬件目录已有NUMA CPU/DRAM、GPU/设备内存、SATA/NVMe和存储端点共12节点/12关系；它们不是实际allocation、placement或copy观测。
 
-**Observed：依赖准入预算截断。** 当前 import 图已保存装饰器的导入请求，但依赖库存按名称排序、查询 4,096 个模块后停止；
-9,843 个请求中包括 torch.autograd 的后续请求未查询，相关源码未纳入，所以 factory→decorator→solve 来源链未闭合。
-这是缺材料，不是装饰器等于原函数。真实端口、import ordinal、预算与 SHA 在 `dependency-admission-audit.json`。
+## 第一阶段还差什么
 
-后续按顺序：
+1. **补入软件依赖并接通入口。** 先消费真实需求到材料的关联，补图后继续Hydra→业务函数→policy/planner/model；同样机制处理其它程序，不写业务专用规则。
+2. **接通未决调用/恢复协议。** 参数包、生成器/await、外部可调用对象和动态分派等，保原端口与必要条件；动静态补证不能把未观测当成不存在。
+3. **贯通数据、状态与资源推理。** 逻辑来源、内容版本、shape/bytes、alias及寿命还没有全面接通。这是未完成功能，不是只差测试。
+4. **统一自动入口和全图验收。** 检查从数据/权重加载，经模型与规划，到环境/保存输出及相关资源的跨层关系；明确未解析字段、未准入材料和缺规则。
 
-1. 将声明图与入口驱动的激活/来源求解分开：保留全部函数/循环模板，沿原控制/调用接口提出传播需求。当前 solver 对全部模板登记调用、种入未知形参，缺少入口激活约束；不能把所有库/测试函数当执行根。先明确形式接口再实现，不按库名裁剪。
-2. 将上述需求接到通用依赖续查，在新派生范围准入缺失源码，复用原 ID/分片；不覆盖冻结模型、不写业务专用装饰器规则。
-3. 重新接通原生接口与资源关系，再推进 F6 和统一入口/全图验收。
-
-最后通过的原生/资源基线在 `739cfb3b` 与 `*-attributes/` 收据：2,839 绑定定义、498 算子接口、14,691 返回类型关系；
-17,630 资源来源依赖、2,637 条条件目标关系。硬件图包含 NUMA CPU/DRAM、GPU/设备内存、SATA/NVMe/存储端点共 12 节点/12 关系。
-这些不是实际 allocation、placement、copy 或 kernel 观测，不能作 LeWM 加速比。
-
-动态层后续按未决接口限量补证据，设置时间/次数/新事实预算，复用循环与函数模板；不保存每轮 Tensor 内容。
-达到采集目标不等于证明全部路径；该自动采集/停止策略目前是设计约束，尚未实现。
+动态采集采用静态模板加有限补证，按未决接口设置时间/次数/新事实预算，不保存每轮Tensor内容；自动停止策略尚未实现。
+第一阶段完成前不新增优化backend、不变换LeWM，也不报告尚未测得的LeWM加速比。

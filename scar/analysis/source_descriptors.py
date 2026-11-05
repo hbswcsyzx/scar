@@ -49,14 +49,16 @@ class DescriptorFlow:
         self.lookups={};self.sinks={};self.targets=defaultdict(set)
         self.property_accesses={};self.property_templates={};self.storage_accesses={};self.connected=set()
         for unit in units:
-            o=solver.offsets[unit.unit]
-            for i,a in enumerate(unit.attributes):
-                read=a.action in (F.AttributeAction.GET,F.AttributeAction.IMPORT_MEMBER)
-                access=_Access((unit.unit,i),T.AttributeOrigin.IMPORT_MEMBER if a.action is F.AttributeAction.IMPORT_MEMBER
-                    else T.AttributeOrigin.ATTRIBUTE,a.action,o+a.receiver,a.name,
-                    o+a.value if read else None,o+a.value if a.action is F.AttributeAction.SET else None,
-                    o+a.world,o+a.result_world)
-                self.register(access)
+            for i in range(len(unit.attributes)):self.admit(unit,i)
+
+    def admit(self,unit,index):
+        o=self.s.offsets[unit.unit];a=unit.attributes[index]
+        read=a.action in (F.AttributeAction.GET,F.AttributeAction.IMPORT_MEMBER)
+        access=_Access((unit.unit,index),T.AttributeOrigin.IMPORT_MEMBER if a.action is F.AttributeAction.IMPORT_MEMBER
+            else T.AttributeOrigin.ATTRIBUTE,a.action,o+a.receiver,a.name,
+            o+a.value if read else None,o+a.value if a.action is F.AttributeAction.SET else None,
+            o+a.world,o+a.result_world)
+        self.register(access);return access
 
     def register(self,access):
         if access in self.accesses[access.receiver]:return

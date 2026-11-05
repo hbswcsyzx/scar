@@ -7,7 +7,8 @@ def namespace_lookups(solver):
     emitted=set()
     for unit in solver.units:
         offset=solver.offsets[unit.unit]
-        for access in unit.attributes:
+        for index,access in enumerate(unit.attributes):
+            if hasattr(solver,'admitted') and (unit.unit,'attributes',index) not in solver.admitted:continue
             if access.action not in (F.AttributeAction.GET,F.AttributeAction.IMPORT_MEMBER):continue
             receiver=offset+access.receiver;result=offset+access.value
             for value in sorted(solver.values[receiver],key=repr):
