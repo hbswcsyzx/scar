@@ -43,17 +43,19 @@ NORMAL_SUCCESS / CPython 3.14.7；软件边界到算子/运行时API。后端设
 - **Implemented / Verified：** launcher-binding-variants-current/verification.json以同一有效context重建C2a/C2b：419 ports、8 scopes、47 bindings、52 plans、2 captures/relays，0冲突，1个注解端口正确DETACHED；父SHA及规则重放通过。C1入口同时核requested/inherited/input/code/future flags一致性，拒收矛盾字段。
 - **Implemented / Verified：** native/symtable-context-3.14.7/verification.json：独立官方3.14.7工具worker＋C++20 flags入口；核心源码及原环境不改。零flags的fixture/eval raw view与本机相等，annotations使scope分别3→2、9→5；显式继承与直接flags相等。该证据是静态编译器视图，尚不授AST对应或F4 body。
 - **Implemented / Verified：** launcher-symbol-variants-current/verification.json以当前C1及全部F0/F1/F2/roles locator、文本解释和真实worker profile保存5 raw scopes/84 symbols；fresh重捕获相等，原生视图自身仍UNJOINED。
-- **Implemented / Verified：** launcher-topology-variants-current/verification.json完成C3-T：8源码scope映射11 compiler blocks，5 PUBLIC与5原生行双射、2 INLINED、4 FUTURE_DETACHED；全部源码scope覆盖，结构规则及原生重捕获通过。C3-S符号来源/参数及F4仍未完成。
+- **Implemented / Verified：** launcher-topology-variants-current/verification.json完成C3-T：8源码scope映射11 compiler blocks，5 PUBLIC与5原生行双射、2 INLINED、4 FUTURE_DETACHED；全部源码scope覆盖，结构规则及原生重捕获通过。C3-S与F4见后续独立验收。
 - **Implemented / Verified：** launcher-compiler-symbol-variants-current/result.json完成C3-S：84符号、6参数投影，96slots/251 contributions/241source dispositions/185facts/7transforms，fresh reader通过，17.90秒。CELL/FREE/GLOBAL及posonly/kwonly针对性fixture通过，旧source-only readers不授变体权限。
-- **Implemented / Verified：** launcher-f4-variants-current/verification.json复用现有规则，按实际context生成局部共享图：1,063语法occurrence全部归类、632模板/631子链接、2,079操作、15,162控制/状态/数据/声明边，4,360 primitive ports/76calls/4functions/2loops。构建32.35秒、读回与闭合核验20.51秒；全部facts有scope归属、世界状态序列及child接口闭合通过。原材料不改、未执行body；exec入口尚未绑定。
+- **Implemented / Verified：** launcher-f4-variants-current/verification.json复用现有规则，按实际context生成局部共享图：1,063语法occurrence全部归类、632模板/631子链接、2,079操作、15,162控制/状态/数据/声明边，4,360 primitive ports/76calls/4functions/2loops。构建32.35秒、读回与闭合核验20.51秒；全部facts有scope归属、世界状态序列及child接口闭合通过。原材料不改、未执行body；exec连接见下项。
+- **Implemented / Verified：** launcher-exec-roots-current/verification.json：原exec调用连接到同一共享F4根；2个条件namespace分支，每支6个协议阶段，保namespace选择、条件builtins插入、closure检查、audit、body及discard/release的world顺序。正常结果None不等于body返回值；默认优化frame locals为快照。仅正常成功路径。
+- **Implemented / Verified：** launcher-namespace-graph-current/verification.json：234个原名字操作（169 READ/65 WRITE）、4组实际globals引用/函数捕获、120个分支接口绑定、8条globals引用绑定、3条带条件内容连接。恢复原C2有序lookup和原F4 world，ENV_GLOBALS经实际创建参数，不登记为module；原fact行/容器成员/key/alias路径逐项核对。构建5.44秒、读回核验1.56秒、压缩表35,034 bytes。单个静态fixture另核DELETE及globals捕获。此局部图尚未接全局solver，不声明must常量。
 - **Observed：** 4b5ac5b9版本的连续接线求解已启动，launch为entry-pack-fixed.launch.json；使用--until-fixed-point，不因固定事件上限从头重算。结果以同名log/result为准，尚不能据启动记录宣布收敛。
 - **Verified：** launcher-compilation-context/仅编译捕获bytes，optimize0/1/2均确认继承annotations会改变eval常量区/code_digest。相同path/bytes不足以硬接旧F4 root。有效future位不能直接OR历史feature目录位。
 
 ## 后续顺序
 
-1. 参数包缓存已接入，继续求解至已准入工作队列清空；支持 --until-fixed-point，避免在固定事件上限退出后重算前缀。固定点与整程序覆盖分开验收，不新增优化backend。
+1. 当前连续主求解仍未收敛，不重跑既有前缀、不改其已载入producer。最新观察约242M事件、frontier7.92M、274单元/2,438 scope；主worklist为单线程，48进程只负责局部材料。已定位继承subtype路径重枚举/base更新重扫历史结果，以及容器重复订阅。下一次改动先处理这些重复，再接新的namespace接口；不以堆进程代替依赖设计。
 2. 有限字段与原跨调用/内容关系已接通，继续补pack投影、捕获环境字段及generator值规则；审查跨调用合并产生的过宽候选。字段层与父图分别验收，不把slice当完整程序。
-3. launcher的文本→compile输入、C1/C2、严格F3-A、C3-T/S及局部F4变体已验收；接exec namespace/world/root与YAML/CLI。原_symtable三参视图不当作带flags证据。当前全局主求解入口仍为eval.py，新的局部图不冒充已激活入口。
+3. launcher的文本→compile输入、C1/C2、严格F3-A、C3-T/S及局部F4变体已验收；exec namespace/world/root与实际globals内容的局部连接已验收，下一步接全局求解和YAML/CLI。原_symtable三参视图不当作带flags证据。当前全局主求解入口仍为eval.py，新的局部图不冒充已激活入口。
 4. 贯通并验收当前native算子/资源/逻辑值及版本关系；YIELD_FROM/AWAIT等driver仍有明确obligation。最后按源码、边界和资源分母审计第一阶段；不凭计数或固定点宣告完成。
 
 入口：python -m scar.analysis.source_interface_build --facts <facts> --out <interfaces> --jobs 48；

@@ -181,3 +181,11 @@ OS FD/OFD 表、驱动内部结构和硬件指令不是当前要求重建的实�
 已实现的是上述强类型基础、受支持源码降低、共享层次查询及部分静动连接；尚未完成的是
 全 Python/native 协议覆盖、统一逻辑溯源和所有跨层依赖的自动闭合。实际验收范围见 [STATUS](STATUS.md)。
 架构组织见 [ARCHITECTURE](ARCHITECTURE.md)，后续只能在这些边界内扩展，不把设计目标当成现有能力。
+
+exec的连接区域保留命名空间选择、条件builtins插入、closure检查、audit、共享根调用及释放阶段；
+正常结果是None，根body返回值只进入discard。显式globals且locals缺省时二者共用原引用；
+默认优化frame locals是新字典快照。此协议连接只覆盖正常成功路径。
+命名空间接口分别保留ROOT_LOCALS、ROOT_GLOBALS、ENV_GLOBALS、BUILTINS、词法绑定及类映射，
+不把exec字典登记成module。名字访问保原C2有序lookup、WRITE/DELETE目标及F4 world；
+函数globals保实际创建参数与ReferenceEnvironment来源，builtins按frame入口/函数创建时选择。
+内容边保原容器成员、key、赋值端口、引用路径及读写world；有条件的may-reaching边不是常量证明。
