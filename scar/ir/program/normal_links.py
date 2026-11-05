@@ -49,6 +49,7 @@ class Class:
     scope: int
     body: P.ProductionRegionID
     bases: tuple[int, ...]
+    bases_pack: int | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -79,6 +80,8 @@ class Call:
     result: int
     world: int
     result_world: int
+    positional_pack: int | None = None
+    keyword_pack: int | None = None
 
 
 @dataclass(frozen=True, slots=True)

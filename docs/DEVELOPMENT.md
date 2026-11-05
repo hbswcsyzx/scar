@@ -295,3 +295,13 @@ python -B -m scar.analysis.normal_targets --facts FRESH_FACTS --out FRESH_TARGET
 原操作/区域正文共享，边表与连接事实按unit分片；可能调用另存稀疏表。
 `CallLink`保留实参、形参、默认值、环境及状态依赖，源码目标仍带准入条件。
 当前固定参数调用传播不覆盖全部动态分派，不能由工作队列为空宣布全程序建图完成。
+
+跨文件图查询（只读，不重新建图）：
+
+```bash
+python -B -m scar.analysis.normal_query --targets TARGET_STORE --source /path/to/program.py
+```
+
+`NormalCallGraph.calls(source, occurrence=...)`返回原有类型的可能调用连接；
+`expand(link)`沿收据展开原共享body，使用`link.body.region`定位区域。
+展开不代表执行、目标唯一或具备优化许可。展开参数保留实际包端口，未确定内容时不捏造形参别名。

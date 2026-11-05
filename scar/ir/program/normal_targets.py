@@ -39,6 +39,19 @@ class Route:
 
 
 @dataclass(frozen=True, slots=True)
+class ArgumentPacks:
+    """Source pack objects; their contents/arity have not been established.
+
+    A receiver is prepended by method binding, never included in the pack.
+    These are dependencies, not aliases between a pack and each parameter.
+    """
+    positional: GlobalPort
+    keywords: GlobalPort | None = None
+    receiver: GlobalPort | None = None
+    class_receiver: GlobalPort | None = None
+
+
+@dataclass(frozen=True, slots=True)
 class CallLink:
     result: GlobalPort
     callee: GlobalPort
@@ -50,3 +63,4 @@ class CallLink:
     returns: tuple[tuple[GlobalPort, GlobalPort], ...] = ()
     conditions: tuple[str, ...] = ('SOURCE_STATIC_CANDIDATE', 'CURRENT_CALLABLE_DESCRIPTOR')
     runtime_dispatch_verified: bool = False
+    argument_packs: ArgumentPacks | None = None

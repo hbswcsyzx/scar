@@ -159,10 +159,16 @@ class _Solver:
                 for item in tuple(self.ns_values[key]):self.add(target,item)
             child=module+'.'+name
             if child in self.module_units:self.add(target,('module',child))
-            if not units:self.add(target,('external',child))
-        elif value[0] in ('external','external_value','external_member'):
-            # An unknown receiver's repeated .member access is a finite
-            # source-site fact, not an endlessly growing qualified name.
+            if not units:self.add(target,('external',child,(target,)))
+        elif value[0]=='external':
+            # Retain rooted external namespace provenance until a source
+            # member site repeats. Cyclic aliases then widen to an unqualified
+            # member rather than growing names indefinitely. Attribute lookup
+            # remains a conditional alternative, never an observed binding.
+            visited=value[2] if len(value)>2 else ()
+            if target not in visited:self.add(target,('external',value[1]+'.'+name,(*visited,target)))
+            else:self.add(target,('external_member',target,name))
+        elif value[0] in ('external_value','external_member'):
             self.add(target,('external_member',target,name))
         elif value[0]=='class':self.class_lookup(value[1],name,target)
         elif value[0]=='instance':
@@ -183,6 +189,17 @@ class _Solver:
         self.symbol_calls.add(identity)
         caller,call=self.call_rows[call_index];unit,function=self.functions[fid]
         offset=self.offsets[caller.unit];target_offset=self.offsets[unit.unit]
+        if call.positional_pack is not None:
+            # Target provenance is useful even with unknown argument packing.
+            # No pack->formal alias, invented arity, or body execution is granted.
+            routes=(T.Route(self.gp(target_offset+function.formals[0]),T.RouteKind.FUNCTION_ENVIRONMENT,(self.gp(offset+call.callee),)),
+                T.Route(self.gp(target_offset+function.formals[-1]),T.RouteKind.STATE,(self.gp(offset+call.world),)))
+            synchronous=function.environment.kind is P.DeferredBodyKind.FUNCTION
+            self.links[identity]=T.CallLink(self.gp(offset+call.result),self.gp(offset+call.callee),self.gp(fid),
+                T.Body(unit.unit,function.template,function.body),mode if synchronous else 'CREATE_DEFERRED_BODY',None,
+                routes,(),('SOURCE_STATIC_CANDIDATE','CURRENT_CALLABLE_DESCRIPTOR','STANDARD_MODULE_NAMESPACES',
+                    'ARGUMENT_PACK_BINDING_PENDING'),argument_packs=self.packs(caller,call,receiver,class_receiver))
+            return
         positional=[offset+p for p in call.positional]
         if receiver is not None:positional.insert(0,receiver)
         keyword=dict((name,offset+p) for name,p in call.keywords)
@@ -225,6 +242,14 @@ class _Solver:
             T.Body(unit.unit,function.template,function.body),mode if synchronous else 'CREATE_DEFERRED_BODY',None,
             tuple(routes),tuple(returned),('SOURCE_STATIC_CANDIDATE','CURRENT_CALLABLE_DESCRIPTOR','STANDARD_MODULE_NAMESPACES'))
 
+    def packs(self,unit,call,receiver=None,class_receiver=None):
+        if call.positional_pack is None:return None
+        offset=self.offsets[unit.unit]
+        return T.ArgumentPacks(self.gp(offset+call.positional_pack),
+            None if call.keyword_pack is None else self.gp(offset+call.keyword_pack),
+            None if receiver is None else self.gp(receiver),
+            None if class_receiver is None else self.gp(class_receiver))
+
     def call(self,index,value):
         caller,call=self.call_rows[index];offset=self.offsets[caller.unit]
         if value[0]=='function':self.bind(index,value[1])
@@ -233,13 +258,15 @@ class _Solver:
         elif value[0]=='class':
             cls=value[1];result=offset+call.result;self.add(result,('instance',cls,result))
             self.links[(index,'class',cls)]=T.CallLink(self.gp(result),self.gp(offset+call.callee),self.gp(cls),None,'SOURCE_CONSTRUCTION',None,
-                conditions=('SOURCE_STATIC_CANDIDATE','DEFAULT_TYPE_CONSTRUCTION'))
+                conditions=('SOURCE_STATIC_CANDIDATE','DEFAULT_TYPE_CONSTRUCTION'),argument_packs=self.packs(caller,call))
             self.constructor(cls,index,result)
         elif value[0] in ('external','external_member'):
             name=value[1] if value[0]=='external' else 'member:'+value[2]
             mode='EXTERNAL_SYMBOL' if value[0]=='external' else 'DYNAMIC_MEMBER'
-            conditions=('SOURCE_RECEIVER_MEMBER','RUNTIME_MEMBER_TARGET_UNKNOWN') if mode=='DYNAMIC_MEMBER' else ('SOURCE_STATIC_CANDIDATE','STANDARD_IMPORT_AND_BUILTIN_NAMESPACES')
-            self.links[(index,mode,name)]=T.CallLink(self.gp(offset+call.result),self.gp(offset+call.callee),None,None,mode,name,conditions=conditions)
+            conditions=('SOURCE_RECEIVER_MEMBER','RUNTIME_MEMBER_TARGET_UNKNOWN') if mode=='DYNAMIC_MEMBER' else (
+                'SOURCE_STATIC_CANDIDATE','STANDARD_IMPORT_AND_BUILTIN_NAMESPACES','STANDARD_ATTRIBUTE_LOOKUP')
+            self.links[(index,mode,name)]=T.CallLink(self.gp(offset+call.result),self.gp(offset+call.callee),None,None,mode,name,
+                conditions=conditions,argument_packs=self.packs(caller,call))
             self.add(offset+call.result,('external_value',offset+call.result))
             if name in ('builtins.staticmethod','builtins.classmethod') and call.positional:
                 self.add(offset+call.result,('staticmethod' if name.endswith('staticmethod') else 'classmethod',offset+call.positional[0]))
@@ -310,11 +337,14 @@ def solve_targets(facts,out,*,max_events=20_000_000):
     modes=Counter(link.mode for link in solver.links.values());known_calls={link.result for link in solver.links.values()}
     source_calls={link.result for link in solver.links.values() if link.source_callable is not None}
     original_calls=sum(len(u.calls) for u in units)
-    result=dict(schema='scar.normal-source-targets',schema_version=1,status='SOURCE_TARGET_FIXED_POINT' if fixed else 'SOURCE_TARGET_BUDGET_FRONTIER',
+    result=dict(schema='scar.normal-source-targets',schema_version=2,status='SOURCE_TARGET_FIXED_POINT' if fixed else 'SOURCE_TARGET_BUDGET_FRONTIER',
         source_facts=str(facts),source_facts_sha256=sha256(root).hexdigest(),profile='NORMAL_SUCCESS',
         selected_sources=len(units),source_calls=original_calls,source_functions=len(solver.functions),source_classes=len(solver.classes),
         calls_with_candidates=len(known_calls),candidate_links=len(solver.links),modes=dict(modes),
         calls_with_source_targets=len(source_calls),
+        packed_source_calls=sum(c.positional_pack is not None for u in units for c in u.calls),
+        packed_candidate_links=sum(link.argument_packs is not None for link in solver.links.values()),
+        classes_with_packed_bases=sum(c.bases_pack is not None for u in units for c in u.classes),
         star_import_module_candidates=sum(len(names) for _,names in stars),
         unresolved_calls=original_calls-len(known_calls),value_events=solver.events,frontier=len(solver.queue),
         calls=fragment,seconds=time.monotonic()-started,conditions='source target alternatives; descriptor/module/attribute admissions remain conditional',

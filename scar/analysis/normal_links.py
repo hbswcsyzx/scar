@@ -140,6 +140,23 @@ class _Aliases(_Emitter):
             elif type(ins) is P.ApplyDecorator:
                 facts.calls.append(F.Call(self.value_id(step.arguments[0]),(self.value_id(step.arguments[1]),),(),
                     self.result_id(step),self.value_id(step.arguments[-1]),self.result_id(step,1)))
+            elif type(ins) is P.ApplyPythonProtocol and ins.protocol is K.CALL_FUNCTION_EX:
+                owner=ins.selectors[0].occurrence
+                if facts.syntax['nodes'][owner]['constructor']=='ClassDef':
+                    declared=next((s.instruction for s in self.plan.steps if type(s.instruction) is P.DeferClassBody),None)
+                    if declared is not None:
+                        # The packed native class-build ABI includes hidden
+                        # body/name operands. Keep it whole, not as base classes.
+                        facts.classes.append(F.Class(self.result_id(step),self.key,declared.interface.scope,
+                            declared.body,(),self.value_id(step.arguments[1])))
+                    continue
+                # Protocol ABI: callee, positional pack, [keyword pack], world.
+                # Preserve the actual evaluated packs, including aliases and
+                # mutations, rather than re-evaluating source argument syntax.
+                facts.calls.append(F.Call(self.value_id(step.arguments[0]),(),(),self.result_id(step),
+                    self.value_id(step.arguments[-1]),self.result_id(step,len(normal.types)-1),
+                    self.value_id(step.arguments[1]),
+                    self.value_id(step.arguments[2]) if len(step.arguments)==4 else None))
             elif type(ins) is P.BuildFunction or type(ins) is P.ApplyPythonProtocol and ins.protocol in (K.MAKE_LAMBDA_FUNCTION,K.MAKE_GENEXPR_FUNCTION,K.MAKE_NESTED_FUNCTION):
                 code=step.arguments[0]
                 if type(code) is not P.ProductionResult:continue
@@ -228,7 +245,7 @@ def extract_facts(model,templates,out,sources=(),*,jobs=1):
     if _pins()!=pins or (model/'manifest.json').read_bytes()!=model_raw or (templates/'result.json').read_bytes()!=source_raw:raise ValueError('facts inputs changed')
     counts=Counter()
     for row in rows:counts.update(row['counts'])
-    result=dict(schema='scar.normal-source-link-facts',schema_version=1,status='SOURCE_LINK_FACTS_EXTRACTED',model=str(model),templates=str(templates),
+    result=dict(schema='scar.normal-source-link-facts',schema_version=2,status='SOURCE_LINK_FACTS_EXTRACTED',model=str(model),templates=str(templates),
         model_manifest_sha256=sha256(model_raw).hexdigest(),source_result_sha256=sha256(source_raw).hexdigest(),implementation_sha256=pins,
         selected_sources=len(rows),units=rows,counts=dict(counts),seconds=time.monotonic()-started,
         profile='NORMAL_SUCCESS',runtime_dispatch_verified=False,first_stage_complete=False,target_executed=False)
