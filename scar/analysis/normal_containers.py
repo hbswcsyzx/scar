@@ -173,6 +173,14 @@ class ContainerFlow:
         cache=unit.unit,port.template
         if cache not in self.pack_merge_proofs:
             proof=set();store=getattr(self.s,'store',None)
+            summaries=self.s.interface_store
+            if summaries is not None and summaries.covers(unit):
+                summary=summaries.mapping(unit,port.template)
+                if summary.straight_line:
+                    proof={(o+item.target_index,o+item.source_index) for item in summary.merges
+                           if item.target_index is not None and item.source_index is not None}
+                self.pack_merge_proofs[cache]=proof
+                return proof
             if store is not None:
                 # Share the sealed plan cache with generator/iteration
                 # interfaces rather than decoding the same unit independently.

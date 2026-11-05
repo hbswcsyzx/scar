@@ -36,11 +36,13 @@ class SourceGeneratorFlow:
     def index(self):
         if self.interfaces is None:
             if not hasattr(self.s,'store'):return None
-            self.interfaces=SuspensionInterfaceIndex(self.s.store,jobs=self.s.analysis_jobs)
+            self.interfaces=SuspensionInterfaceIndex(self.s.store,jobs=self.s.analysis_jobs,
+                summaries=self.s.interface_store)
         return self.interfaces
 
     def validate_parents(self):
         if self.interfaces is not None:self.interfaces.validate_parents()
+        elif self.s.interface_store is not None:self.s.interface_store.validate_parents()
 
     def close(self):
         if self.interfaces is not None:self.interfaces.close()

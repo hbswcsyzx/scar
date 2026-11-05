@@ -38,12 +38,13 @@ class SuspensionInterfaceIndex:
     plans. Its witnesses say CONTROLLED_PLAN_PROVIDER and carry no fabricated
     store receipt. With no provider, a receipt-bound SourceFactStore is required.
     """
-    def __init__(self, fact_store=None, *, plan_reader=None, jobs=None):
+    def __init__(self, fact_store=None, *, plan_reader=None, jobs=None, summaries=None):
         if fact_store is None and plan_reader is None:
             raise ValueError('suspension interfaces require a fact store or controlled plan provider')
         if jobs is not None and (type(jobs) is not int or jobs < 1):
             raise ValueError('plan reader jobs must be a positive exact integer')
         self.store, self.plan_reader = fact_store, plan_reader
+        self.summaries = summaries
         self._plans, self._ports, self._headers, self._graphs = {}, {}, {}, {}
         self._suspending, self._bodies, self._iterations = {}, {}, {}
         self._iteration_candidates = {}
@@ -61,6 +62,7 @@ class SuspensionInterfaceIndex:
     def stats(self):
         return dict(self._stats, cached_plans=len(self._plans),cached_bodies=len(self._bodies),
             cached_iterations=len(self._iterations),pinned_paths=len(self._pins),
+            local_summaries=None if self.summaries is None else dict(self.summaries.stats),
             plan_pool={} if self._pool is None else dict(self._pool.stats))
 
     def close(self):
@@ -90,6 +92,7 @@ class SuspensionInterfaceIndex:
         publication so a changed parent cannot be reported as accepted.
         """
         started = perf_counter();checked = 0
+        if self.summaries is not None:self.summaries.validate_parents()
         self._stats['parent_checks'] += 1
         try:
             for path, stamp in self._pins.items():
@@ -254,6 +257,9 @@ class SuspensionInterfaceIndex:
         else:
             if item not in unit.iterations:raise ValueError('iteration must come from the original unit facts')
             self._stats['iteration_reads'] += 1
+            if self.summaries is not None and self.summaries.covers(unit):
+                self._iterations[cache] = self.summaries.iteration(unit,item)
+                return self._iterations[cache]
             value = self._port(unit, item.value)
             if self.plan_reader is None and (unit.unit,value.port.template) not in self._plans:
                 pending = sorted((key for key in self._iteration_candidates.get(unit.unit,())
@@ -365,6 +371,10 @@ class SuspensionInterfaceIndex:
         else:
             if function not in unit.functions:raise ValueError('function is not in its original unit facts')
             self._stats['body_reads'] += 1
+            if self.summaries is not None and self.summaries.covers(unit):
+                self._bodies[cache] = self.summaries.body(unit,function)
+                self._body_functions[cache] = function
+                return self._bodies[cache]
             key = function.template
             owner = function.body_scope.owner
             candidates = self._candidate_templates(unit,owner)

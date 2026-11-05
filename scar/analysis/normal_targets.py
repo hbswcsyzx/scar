@@ -24,7 +24,8 @@ from scar.ir.program import source_productions as P
 from scar.ir.program import normal_graph as G
 from scar.ir.record_codec import decode,encode
 from scar.analysis.source_template_links import _json
-from scar.analysis import source_template_batch,source_template_workers,normal_output
+from scar.analysis import source_template_batch,source_template_workers,normal_output,source_interface_store
+from scar.ir.program import source_interfaces as L
 from scar.analysis.source_stage import _durable_bytes,_durable_mkdir
 from scar.analysis.static_query import _Fragments
 from scar.analysis.normal_containers import ContainerFlow
@@ -60,9 +61,10 @@ def _star_imports(model,unit,module):
 
 
 class _Solver:
-    def __init__(self,units,stars=(),*,jobs=None):
+    def __init__(self,units,stars=(),*,jobs=None,interface_store=None):
         if jobs is not None and (type(jobs) is not int or jobs<1):raise ValueError('positive analysis worker count required')
         self.analysis_jobs=jobs
+        self.interface_store=interface_store
         self.units=units;self.offsets={};self.owner=[];self.port=[];self.functions={};self.classes={}
         self.interface_ports={};self.interface_points={};self.interface_reverse={};self.original_templates={};self.original_indices={}
         self.module_units=defaultdict(list);self.adj=defaultdict(set);self.values=defaultdict(set);self.queue=deque()
@@ -366,8 +368,9 @@ class _Solver:
         return not self.queue
 
 
-def solve_targets(facts,out,*,max_events=20_000_000,entries=(),jobs=None):
-    if entries:return solve_entry_targets(facts,out,entries,max_events=max_events,jobs=jobs)
+def solve_targets(facts,out,*,max_events=20_000_000,entries=(),jobs=None,interfaces=None):
+    if entries:return solve_entry_targets(facts,out,entries,max_events=max_events,jobs=jobs,interfaces=interfaces)
+    if interfaces is not None:raise ValueError('local interfaces require an entry-scoped source catalog')
     started=time.monotonic();facts=Path(facts).absolute();out=Path(out).absolute()
     if out.exists():raise ValueError('fresh target output required')
     root=(facts/'result.json').read_bytes();report=json.loads(root);units=[]
@@ -449,7 +452,9 @@ def _publish(solver,facts,root,report,out,started,max_events,fixed,stars,extra=N
         suspension_interface_implementation_sha256=sha256(Path(source_suspension_interfaces.__file__).read_bytes()).hexdigest(),
         suspension_interface_types_sha256=sha256(Path(S.__file__).read_bytes()).hexdigest(),
         source_reader_pins={name:sha256(Path(module.__file__).read_bytes()).hexdigest() for name,module in
-            (('batch',source_template_batch),('workers',source_template_workers),('output',normal_output))},
+            (('batch',source_template_batch),('workers',source_template_workers),('output',normal_output),
+             ('interfaces',source_interface_store),('interface_types',L))},
+        interface_summary=None if solver.interface_store is None else solver.interface_store.receipt,
         namespace_implementation_sha256=sha256(Path(normal_namespaces.__file__).read_bytes()).hexdigest(),
         namespace_types_sha256=sha256(Path(N.__file__).read_bytes()).hexdigest(),
         unresolved_calls=original_calls-len(known_calls),value_events=solver.events,frontier=len(solver.queue),event_budget=max_events,
@@ -468,7 +473,7 @@ def _publish(solver,facts,root,report,out,started,max_events,fixed,stars,extra=N
     _durable_bytes(out/'result.json',_json(result),replace=False);return result
 
 
-def solve_entry_targets(facts,out,entries,*,max_events=20_000_000,jobs=None):
+def solve_entry_targets(facts,out,entries,*,max_events=20_000_000,jobs=None,interfaces=None):
     from scar.analysis import normal_entry,normal_facts
     from scar.ir.program import normal_entry as E
     from scar.analysis.normal_output import write_table as _stream
@@ -477,7 +482,8 @@ def solve_entry_targets(facts,out,entries,*,max_events=20_000_000,jobs=None):
     catalog_seconds=time.monotonic()-started
     if out.exists():raise ValueError('fresh entry target output required')
     entries=tuple(str(Path(p).absolute()) for p in entries)
-    solver=normal_entry.EntrySolver(store,entries,jobs=jobs);solver.prepare()
+    summaries=None if interfaces is None else source_interface_store.SourceInterfaceStore(interfaces,store)
+    solver=normal_entry.EntrySolver(store,entries,jobs=jobs,interface_store=summaries);solver.prepare()
     prepared=time.monotonic()
     while (solver.queue or solver.pending) and solver.events<max_events:
         solver.solve(min(max_events,solver.events+2_000_000))
@@ -520,7 +526,8 @@ def main():
     p.add_argument('--entry',action='append',required=True,help='source entry module; declarations alone do not choose execution roots')
     p.add_argument('--max-events',type=int,default=20_000_000)
     p.add_argument('--jobs',type=int,default=None,help='template reader processes; default min(48, CPU affinity)')
-    a=p.parse_args();r=solve_targets(a.facts,a.out,max_events=a.max_events,entries=a.entry,jobs=a.jobs)
+    p.add_argument('--interfaces',help='precomputed per-unit source interface store')
+    a=p.parse_args();r=solve_targets(a.facts,a.out,max_events=a.max_events,entries=a.entry,jobs=a.jobs,interfaces=a.interfaces)
     print(json.dumps({k:r[k] for k in ('status','source_calls','calls_with_candidates','candidate_links','modes','value_events','seconds')},indent=2))
 
 

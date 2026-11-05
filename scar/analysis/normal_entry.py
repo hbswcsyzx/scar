@@ -11,8 +11,8 @@ from scar.ir.program import normal_links as F,normal_entry as E
 
 
 class EntrySolver(_Solver):
-    def __init__(self,store,entries,*,jobs=None):
-        super().__init__([],(),jobs=jobs)
+    def __init__(self,store,entries,*,jobs=None,interface_store=None):
+        super().__init__([],(),jobs=jobs,interface_store=interface_store)
         self.store=store;self.offsets=store.offsets
         self.owner=SourcePointSpace(store,owners=True);self.port=SourcePointSpace(store)
         for row in store.rows.values():self.module_units[row['module']].append(row['unit'])

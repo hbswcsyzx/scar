@@ -18,7 +18,8 @@ from scar.analysis import normal_targets
 from scar.analysis import normal_containers
 from scar.analysis import normal_namespaces
 from scar.analysis import source_descriptors,source_function_connections,source_construction,source_generators,source_suspension_interfaces
-from scar.analysis import source_template_batch,source_template_workers,normal_output
+from scar.analysis import source_template_batch,source_template_workers,normal_output,source_interface_store
+from scar.ir.program import source_interfaces as L
 from scar.ir.program import source_generators as D,suspension_interfaces as S
 from scar.analysis.source_template_links import read_template_body
 from scar.ir.program import normal_targets as T
@@ -41,7 +42,8 @@ class NormalCallGraph:
         if self.report['types_sha256'] != sha256(Path(T.__file__).read_bytes()).hexdigest():
             raise ValueError('call edge declarations differ')
         if self.report['source_reader_pins']!={name:sha256(Path(module.__file__).read_bytes()).hexdigest() for name,module in
-                (('batch',source_template_batch),('workers',source_template_workers),('output',normal_output))}:
+                (('batch',source_template_batch),('workers',source_template_workers),('output',normal_output),
+                 ('interfaces',source_interface_store),('interface_types',L))}:
             raise ValueError('source reader/writer implementation differs')
         if self.report['implementation_sha256'] != sha256(Path(normal_targets.__file__).read_bytes()).hexdigest():
             raise ValueError('call target producer differs')
@@ -63,6 +65,10 @@ class NormalCallGraph:
             raise ValueError('source fact result differs')
         from scar.analysis.normal_facts import SourceFactStore
         self.fact_store=SourceFactStore(self.facts);self.inputs=self.fact_store.report
+        summary=self.report['interface_summary']
+        self.interface_store=None if summary is None else source_interface_store.SourceInterfaceStore(summary['path'],self.fact_store)
+        if self.interface_store is not None and self.interface_store.receipt!=summary:
+            raise ValueError('local interface parent differs from source target result')
         self.units=self.fact_store.rows;self.sources=self.fact_store.sources
         self.templates=self.fact_store.templates
         if self.report.get('analysis_mode')=='ENTRY_SCOPED_MAY_ANALYSIS':

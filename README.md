@@ -22,6 +22,15 @@ python -B -m scar.cli static /path/to/program --out /path/to/model --phase bodie
 静态入口不导入或运行目标。按需 CALL 采集和离线连接用法见开发说明。
 已有函数/循环展开、跨分片依赖查询、有限属性推理；存在节点不代表依赖或效果已闭合。
 
+已有 F4 图与 facts6 后，先按单元并行投影接口，再跨单元接线：
+
+```bash
+python -B -m scar.analysis.source_interface_build --facts /path/to/facts --out /path/to/interfaces --jobs 48
+python -B -m scar.analysis.normal_targets --facts /path/to/facts --interfaces /path/to/interfaces --entry /path/to/entry.py --out /path/to/targets
+```
+
+摘要沿用原函数/循环/状态端口；不导入目标，也不按调用或迭代展开正文。
+
 ## 文档
 
 - [模型](docs/MODEL.md)：实体、身份、边、可展开结构与正确性约束。

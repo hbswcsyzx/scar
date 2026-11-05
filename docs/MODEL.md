@@ -105,6 +105,9 @@ property accessor复用`FunctionConnection`的参数/环境/状态接线。gette
 同步生成器分离创建、取iterator与advance：创建保存引用路由，advance才接body，并使用当前推进的world。
 yield导出接循环元素；sent输入与terminal return分开，正常return经StopIteration接口表示耗尽，不当作元素。
 挂起/恢复旁表引用sealed F4原端口及摘要；稀疏F5没有的world端口仍用其原G.Port，不伪造源码身份。
+F4局部图先按源码单元投影为`UnitSourceInterfaces`，再由F5连接；摘要是原图接口表，不另建一套程序节点。
+迭代保全部完成端口，惰性body按原code owner选择挂起；映射保确切协议、world及端点映射资格。
+非直线模板、无匹配协议、未映射端点与缺摘要分开；这些状态均不授无副作用、参数包闭合或值等价证明。
 
 效果至少区分 reads、writes、allocates、frees、aliases、escapes、RNG、异常、外部及顺序影响。
 未知效果保持开放；异常前已经发生的写入、IO 和清理不可回滚成“无效果”。
