@@ -344,3 +344,6 @@ python -B -m scar.analysis.software_resources --bindings BINDINGS --declarations
 读取原软件关系。目标ID由snapshot限定，inventory编号不直接当框架device ordinal；位置/设备候选需满足各自条件。
 容量是平台报告的total，预算和实际使用独立；PCIe max不是实测带宽，Optional/List类型路径不展开为实际资源实例。
 软件资源关系schema v2将显式调用和语言协议的规范化依赖分开标记；原运算端口不伪装成SourceCallSite。
+
+全域正常路径图可用`python -B -m scar.analysis.normal_graph_collection --templates TEMPLATES --graph STORE_A --graph STORE_B --out FRESH_DIRECTORY`建立小索引。
+`NormalGraphCollection.role/source_edges`按原unit查询；大边表保留在原store，类型声明有独立role，不进入runtime候选。
