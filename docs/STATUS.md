@@ -44,6 +44,8 @@ NORMAL_SUCCESS / CPython 3.14.7；软件边界到算子/运行时API。后端设
 - **Implemented / Verified：** native/symtable-context-3.14.7/verification.json：独立官方3.14.7工具worker＋C++20 flags入口；核心源码及原环境不改。零flags的fixture/eval raw view与本机相等，annotations使scope分别3→2、9→5；显式继承与直接flags相等。该证据是静态编译器视图，尚不授AST对应或F4 body。
 - **Implemented / Verified：** launcher-symbol-variants-current/verification.json以当前C1及全部F0/F1/F2/roles locator、文本解释和真实worker profile保存5 raw scopes/84 symbols；fresh重捕获相等，原生视图自身仍UNJOINED。
 - **Implemented / Verified：** launcher-topology-variants-current/verification.json完成C3-T：8源码scope映射11 compiler blocks，5 PUBLIC与5原生行双射、2 INLINED、4 FUTURE_DETACHED；全部源码scope覆盖，结构规则及原生重捕获通过。C3-S符号来源/参数及F4仍未完成。
+- **Implemented / Verified：** launcher-compiler-symbol-variants-current/result.json完成C3-S：84符号、6参数投影，96slots/251 contributions/241source dispositions/185facts/7transforms，fresh reader通过，17.90秒。CELL/FREE/GLOBAL及posonly/kwonly针对性fixture通过，旧source-only readers不授变体权限。
+- **Implemented / Verified：** launcher-f4-variants-current/verification.json复用现有规则，按实际context生成局部共享图：1,063语法occurrence全部归类、632模板/631子链接、2,079操作、15,162控制/状态/数据/声明边，4,360 primitive ports/76calls/4functions/2loops。构建32.35秒、读回与闭合核验20.51秒；全部facts有scope归属、世界状态序列及child接口闭合通过。原材料不改、未执行body；exec入口尚未绑定。
 - **Observed：** 4b5ac5b9版本的连续接线求解已启动，launch为entry-pack-fixed.launch.json；使用--until-fixed-point，不因固定事件上限从头重算。结果以同名log/result为准，尚不能据启动记录宣布收敛。
 - **Verified：** launcher-compilation-context/仅编译捕获bytes，optimize0/1/2均确认继承annotations会改变eval常量区/code_digest。相同path/bytes不足以硬接旧F4 root。有效future位不能直接OR历史feature目录位。
 
@@ -51,7 +53,7 @@ NORMAL_SUCCESS / CPython 3.14.7；软件边界到算子/运行时API。后端设
 
 1. 参数包缓存已接入，继续求解至已准入工作队列清空；支持 --until-fixed-point，避免在固定事件上限退出后重算前缀。固定点与整程序覆盖分开验收，不新增优化backend。
 2. 有限字段与原跨调用/内容关系已接通，继续补pack投影、捕获环境字段及generator值规则；审查跨调用合并产生的过宽候选。字段层与父图分别验收，不把slice当完整程序。
-3. launcher的文本→compile输入、C1/C2、严格F3-A与C3-T变体已验收；接C3-S符号来源/参数和F4，再接exec namespace/root与YAML/CLI。原_symtable三参视图不当作带flags证据。当前主求解入口仍为eval.py。
+3. launcher的文本→compile输入、C1/C2、严格F3-A、C3-T/S及局部F4变体已验收；接exec namespace/world/root与YAML/CLI。原_symtable三参视图不当作带flags证据。当前全局主求解入口仍为eval.py，新的局部图不冒充已激活入口。
 4. 贯通并验收当前native算子/资源/逻辑值及版本关系；YIELD_FROM/AWAIT等driver仍有明确obligation。最后按源码、边界和资源分母审计第一阶段；不凭计数或固定点宣告完成。
 
 入口：python -m scar.analysis.source_interface_build --facts <facts> --out <interfaces> --jobs 48；

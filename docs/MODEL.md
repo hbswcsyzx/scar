@@ -91,6 +91,8 @@ compile/exec边界按原namespace/reference来源识别，保留全部actual、w
 compile结果到exec输入只增加条件引用关系；payload解释、有效编译版本和body绑定需要分别完成，不伪造root展开。
 文本候选与标准str(path)可供给filename；编译使用显式继承flags及dont_inherit=True隔离分析器上下文。
 CompiledSourceCandidate保存代码值digest与独立source-only控制版本；相等也不自动证明F4对应，不同则不能沿用旧body。
+编译变体沿C1→声明/绑定→带flags原生符号→C3对应→F4生成，命名空间由源码和编译输入限定，调用见证另存，不按调用复制body。
+F4复用原规则，只为其编译查询绑定局部服务；根future策略与有效flags一致。新图和原source-only图可共存，exec的namespace/world路由另行接线。
 
 有限标量字段沿原scope、参数/默认值、数据返回、模块/属性及content关系传播；world、环境及参数包不作标量alias。
 `ScalarTransferGroup`保父表行、原端口及条件，以线性大小私有join传递；join不是程序节点。字段上限4，宽化保open，不从singleton may集证明常量。
