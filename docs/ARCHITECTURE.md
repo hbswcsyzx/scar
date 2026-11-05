@@ -70,6 +70,7 @@ B1允许显式类型、拼接、参数引用、重复、有限选择和异质类
 `ApplyPythonProtocol`复用已有88种协议及签名，参数必须显式绑定，输入/完成端口强制核验；不把协议名当作效果证明。
 区域共享，不按调用/迭代复制；循环显式分不变量前缀与携带值后缀。异常完成通过payload＋captures接入handler参数，不冒用normal结果边。
 模板接线还核局部world顺序：包括内嵌调用操作数，已由正常结果更新的world不得退回旧输入；只读操作保留当前world，循环state不能放入不变量前缀。这项依赖约束不声称已理解所有native效果或引用清理。
+引用值端口仍需声明借用、持有、转交及消费责任，并接正常/异常清理；值可用或端口类型一致不证明寿命正确。清理关系沿原REF及完成边，复用现有FRAME协议，native效果未知则保持开放。
 迭代循环的`IterationCondition`连接advance和exhaustion predicate；元素只进入body临时端口，当前world替换携带端口，不增添伪造的item回边。
 引用端口不变不表示对象内容不变；iterator/container的内容版本仍由state边表达，不能直接据此reuse。
 当前只核记录、归属、有序值引用及部分接口；cleanup/resume完整控制语义、逐构造求值规则和效果仍须后续重放，不能由shape验收替代。

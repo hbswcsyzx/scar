@@ -18,6 +18,42 @@ WORLD = ValueType(ValueKind.STATE, location=LocationID('test-source-world'))
 REF = ValueType(ValueKind.REFERENCE)
 
 
+def test_template_store_rejects_current_catalog_and_compiler_profile_drift(tmp_path):
+    from copy import deepcopy
+    from hashlib import sha256
+    import json
+    from scar.analysis.source_expression_materials import _implementation
+    from scar.analysis.source_template_links import _Store, TemplateLinkError
+
+    catalog = _rules(_documents('pass\n')).catalog()
+    material, verification = tmp_path/'materials', tmp_path/'verification'
+    material.mkdir(); verification.mkdir()
+    manifest = '0'*64
+
+    def parents(document):
+        # Empty unit indexes isolate this metadata boundary; the public
+        # linker separately requires an exact nonempty source selection.
+        payload = json.dumps(document, sort_keys=True).encode()
+        report = dict(schema='scar.source-expression-rule-materials', schema_version=4,
+            domain='expressions', status='LOCAL_RULES_VERIFIED', input_basis=[], counts={}, limits={},
+            units=[], implementation_sha256=_implementation(), model_manifest_sha256=manifest,
+            catalog_sha256=sha256(payload).hexdigest())
+        for path, mode in ((material, 'COLLECTION'), (verification, 'FRESH_VERIFICATION')):
+            (path/'catalog.json').write_bytes(payload)
+            (path/'result.json').write_text(json.dumps(dict(report, mode=mode)))
+        return _Store('expressions', material, verification, manifest)
+
+    assert parents(catalog).rows == {}
+    bad_type = deepcopy(catalog); bad_type['recipe_type_catalog_sha256'] = 'f'*64
+    bad_header = deepcopy(catalog); bad_header['call_compiler_profile']['header_sha256'] = 'f'*64
+    bad_guideline = deepcopy(catalog); bad_guideline['call_compiler_profile']['stack_guideline'] += 1
+    for changed in (bad_type, bad_header, bad_guideline):
+        # Both parent reports and both catalogs agree, and generator pins
+        # still match. The dependency differs from the running reader.
+        with pytest.raises(TemplateLinkError, match='current type/support catalog|current compiler profile'):
+            parents(changed)
+
+
 def test_template_state_sequence_rejects_stale_worlds_in_steps_and_nested_calls():
     from scar.analysis.source_productions import validate_production_plan
     from scar.analysis.source_template_links import validate_state_sequence, TemplateLinkError

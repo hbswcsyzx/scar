@@ -9,14 +9,17 @@ from dataclasses import fields, is_dataclass
 from functools import lru_cache
 import gzip
 from hashlib import sha256
+import io
 import json
 import multiprocessing
 import os
 from pathlib import Path
+import re
+import sysconfig
 import time
 
 from scar.analysis.source_expression_materials import _implementation, _basis
-from scar.analysis.source_productions import _digest, read_production_plan
+from scar.analysis.source_productions import _digest, production_type_catalog, read_production_plan
 from scar.analysis.source_stage import _durable_bytes, _durable_mkdir, _sync_directory
 from scar.analysis.static_query import _Fragments
 from scar.ir.program import source_productions as P
@@ -164,6 +167,14 @@ def _json(value):
     return (json.dumps(value, sort_keys=True, separators=(',', ':'), ensure_ascii=True, allow_nan=False) + '\n').encode('ascii')
 
 
+def _compiler_profile():
+    header = Path(sysconfig.get_path('include')) / 'internal' / 'pycore_compile.h'
+    raw = header.read_bytes()
+    limits = re.findall(rb'^#define\s+_PY_STACK_USE_GUIDELINE\s+([0-9]+)\s*$', raw, re.MULTILINE)
+    _require(len(limits) == 1 and int(limits[0]) > 0, header, 'current compiler profile lacks a unique positive stack guideline')
+    return dict(header=str(header), header_sha256=sha256(raw).hexdigest(), stack_guideline=int(limits[0]))
+
+
 class _Store:
     def __init__(self, domain, material, verification, manifest_sha256):
         self.domain = T.SourceMaterialDomain(domain)
@@ -182,6 +193,16 @@ class _Store:
         catalog = (self.root / 'catalog.json').read_bytes()
         _require(sha256(catalog).hexdigest() == a['catalog_sha256']
             and (self.verification / 'catalog.json').read_bytes() == catalog, domain, 'parent catalog differs')
+        declaration = json.loads(catalog)
+        _require(type(declaration) is dict, domain, 'parent catalog must be a record')
+        self.catalog_type_sha256 = declaration.get('recipe_type_catalog_sha256')
+        self.compiler_profile = declaration.get('call_compiler_profile')
+        _require(self.catalog_type_sha256 == production_type_catalog()['content_sha256'],
+            domain, 'parent recipe differs from the current type/support catalog')
+        _require(self.compiler_profile == _compiler_profile(),
+            domain, 'parent recipe differs from the current compiler profile')
+        self.profile = decode(P.SourceProductionProfile,
+            dict(world=declaration['state_parameter'], exception_abi=declaration['exception_abi']))
         self.rows = {u['unit']: u for u in a['units']}; self.basis = {u['unit']: u for u in a['input_basis']}
         fresh_rows = {u['unit']: u for u in b['units']}
         _require(len(self.rows) == len(a['units']) and len(self.basis) == len(a['input_basis'])
@@ -195,7 +216,9 @@ class _Store:
 
     def unchanged(self):
         return (sha256((self.root / 'result.json').read_bytes()).hexdigest() == self.receipt['collection_sha256']
-            and sha256((self.verification / 'result.json').read_bytes()).hexdigest() == self.receipt['verification_sha256'])
+            and sha256((self.verification / 'result.json').read_bytes()).hexdigest() == self.receipt['verification_sha256']
+            and self.catalog_type_sha256 == production_type_catalog()['content_sha256']
+            and self.compiler_profile == _compiler_profile())
 
     def records(self, unit):
         _require(unit['key'] in self.rows and self.basis[unit['key']] == _basis(unit), unit['path'], 'parent material/input is unavailable or differs')
@@ -300,40 +323,127 @@ def link_source_templates(model, out, parents, sources=(), *, max_visits=1_000_0
         templates=sum(r['templates'] for r in rows), links=sum(r['links'] for r in rows),
         compressed_bytes=sum(r['compressed_bytes'] for r in rows),
         local_state_sequence_checked=True,
+        parent_catalogs_current=True,
         canonical_graph_generated=False, child_semantics_proven=False, effects_proven=False,
         first_stage_complete=False, target_executed=False, transformation_authorized=False, seconds=time.monotonic()-started)
     _durable_bytes(out / 'result.json', _json(report), replace=False)
     return report
 
 
-def read_template_body(store, unit, key, *, max_visits=1_000_000):
-    """Expand one node to its original typed recipe, checking both receipts."""
+def _read_graph_table(path, descriptor, expected):
+    fragment = path.parent / descriptor['path']
+    _require(fragment.resolve() == fragment and fragment.parent == path.parent, path, 'unsafe graph table')
+    payload = fragment.read_bytes()
+    _require(len(payload) == descriptor['bytes'] and sha256(payload).hexdigest() == descriptor['sha256'], path, 'graph table compressed receipt differs')
+    digest = sha256(); size = 0; rows = []
+    with gzip.GzipFile(fileobj=io.BytesIO(payload), mode='rb') as stream:
+        for raw in stream:
+            digest.update(raw); size += len(raw)
+            _require(size <= descriptor['decoded_bytes'], path, 'graph table decoded budget exceeded')
+            rows.append(decode(expected, json.loads(raw), record_tags=P.PRODUCTION_RECORD_TAGS))
+    _require(size == descriptor['decoded_bytes'] and digest.hexdigest() == descriptor['decoded_sha256']
+        and len(rows) == descriptor['records'], path, 'graph table decoded receipt or record count differs')
+    return tuple(rows)
+
+
+def read_template_graph(store, unit):
+    """Read one typed interface graph and verify its sealed parent snapshot.
+
+    Checks stored tables, identities, interface-reference closure and current
+    declarations. Source-rule semantics were checked by the producer; original
+    bodies are read on expansion. No native-effect or canonical-IR proof is
+    granted here. Parent indexes are process-local immutable cache entries.
+    """
     store = Path(store).absolute()
-    _require(store.resolve() == store and type(key) is T.SourceTemplateKey, store, 'invalid store or template key')
-    report = json.loads((store / 'result.json').read_bytes())
+    _require(store.resolve() == store and type(unit) is str and Path(unit).name == unit and unit not in ('', '.', '..'), store, 'invalid store or source unit')
+    report_bytes = (store / 'result.json').read_bytes(); report = json.loads(report_bytes)
     _require(report['schema'] == 'scar.source-template-link-store' and report['schema_version'] == 1
         and report['status'] == 'SOURCE_INTERFACES_LINKED', store, 'no completed interface link publication')
+    _require(report['link_types_sha256'] == sha256(Path(T.__file__).read_bytes()).hexdigest()
+        and report['generator_sha256'] == _implementation(), store, 'stored interface or generator declarations differ')
+    _require(len(report['units']) == report['selected_sources']
+        and len({r['unit'] for r in report['units']}) == len(report['units']), store, 'source index count or identities differ')
+    specifications = tuple((p['domain'], p['materials'], p['verification'], p['collection_sha256'], p['verification_sha256']) for p in report['parents'])
+    _require(len(specifications) == 3 and {p[0] for p in specifications} == {d.value for d in T.SourceMaterialDomain}, store, 'one parent snapshot per domain is required')
+    parents = _worker_stores(specifications, report['model_manifest_sha256'])
     entries = [r for r in report['units'] if r['unit'] == unit]
     _require(len(entries) == 1, unit, 'unit is absent or ambiguous')
+    _require(entries[0]['header'] == 'units/' + unit + '/header.json', unit, 'source header identity differs')
     path = store / entries[0]['header']
     _require(path.resolve() == path and path.is_relative_to(store), unit, 'unsafe unit header')
     raw_header = path.read_bytes()
     _require(len(raw_header) == entries[0]['header_bytes'] and sha256(raw_header).hexdigest() == entries[0]['header_sha256'], unit, 'unit header receipt differs')
-    header = json.loads(raw_header); descriptor = header['templates']; fragment = path.parent / descriptor['path']
-    _require(fragment.resolve() == fragment and fragment.parent == path.parent, unit, 'unsafe template table')
-    payload = fragment.read_bytes()
-    _require(len(payload) == descriptor['bytes'] and sha256(payload).hexdigest() == descriptor['sha256'], unit, 'template table receipt differs')
-    digest = sha256(); size = 0; found = []
-    with gzip.open(fragment, 'rb') as stream:
-        for raw in stream:
-            digest.update(raw); size += len(raw)
-            _require(size <= descriptor['decoded_bytes'], unit, 'template table decoded budget exceeded')
-            node = decode(T.SourceTemplateNode, json.loads(raw), record_tags=P.PRODUCTION_RECORD_TAGS)
-            if node.key == key:
-                found.append(node)
-    _require(size == descriptor['decoded_bytes'] and digest.hexdigest() == descriptor['decoded_sha256']
-        and len(found) == 1, key, 'template is absent/ambiguous or its table differs')
+    header = json.loads(raw_header)
+    _require((header['schema'], header['schema_version'], header['authority'], header['unit']) ==
+        ('scar.source-template-links', 1, 'SOURCE_TEMPLATE_INTERFACES_ONLY', unit), unit, 'unsupported source graph header')
+    _require(all(unit in p.rows and header['input'] == p.rows[unit]['input'] for p in parents), unit, 'graph input differs from its source material')
+    profile = decode(P.SourceProductionProfile, header['profile'])
+    _require(all(profile == p.profile for p in parents), unit, 'graph state/exception profile differs from its source material')
+    templates = _read_graph_table(path, header['templates'], T.SourceTemplateNode)
+    links = _read_graph_table(path, header['links'], T.SourceTemplateLink)
+    _require(len(templates) == entries[0]['templates'] and len(links) == entries[0]['links']
+        and entries[0]['compressed_bytes'] == header['templates']['bytes'] + header['links']['bytes'], unit, 'unit index counts differ from tables')
+    keys = {n.key for n in templates}; sites = {(e.caller, e.step) for e in links}
+    _require(len(keys) == len(templates) and len(sites) == len(links), unit, 'duplicate template or child-entry site')
+    _require(all(e.caller in keys and e.callee in keys and all(v.index >= 0 for v in e.arguments) for e in links), unit, 'dangling template edge or negative argument ordinal')
+    _require(all(n.origin.line > 0 and len(n.origin.plan_sha256) == 64
+        and all(c in '0123456789abcdef' for c in n.origin.plan_sha256) for n in templates), unit, 'invalid original body coordinates')
+    _require((store / 'result.json').read_bytes() == report_bytes
+        and all(p.unchanged() and p.generator_pins == _implementation() for p in parents), store, 'graph or parent snapshots changed during reading')
+    return T.SourceTemplateGraph(unit, decode(P.ProductionInput, header['input']),
+        profile, templates, links)
+
+
+def _verify_template_unit(task):
+    store, unit, reader_pin = task
+    _require(sha256(Path(__file__).read_bytes()).hexdigest() == reader_pin, unit, 'worker reader version differs')
+    graph = read_template_graph(store, unit)
+    return dict(unit=unit, templates=len(graph.templates), links=len(graph.links))
+
+
+def verify_template_store(store, *, jobs=1):
+    """Read every stored graph; return compact receipts, never centralized graphs.
+
+    This checks wire storage and template-reference closure. It does not
+    regenerate source rules or prove native effects or cleanup semantics.
+    """
+    started = time.monotonic(); store = Path(store).absolute()
+    _require(type(jobs) is int and 1 <= jobs <= 32, 'jobs', 'expected 1 through 32 source workers')
+    _require(store.resolve() == store, store, 'store path must be canonical')
+    raw = (store / 'result.json').read_bytes(); report = json.loads(raw)
+    reader_pin = sha256(Path(__file__).read_bytes()).hexdigest()
+    tasks = [(str(store), row['unit'], reader_pin) for row in report['units']]
+    _require(bool(tasks), store, 'no stored source graphs')
+    if jobs == 1:
+        rows = [_verify_template_unit(task) for task in tasks]
+    else:
+        with ProcessPoolExecutor(max_workers=jobs, mp_context=multiprocessing.get_context('spawn')) as pool:
+            rows = list(pool.map(_verify_template_unit, tasks))
+    templates = sum(r['templates'] for r in rows); links = sum(r['links'] for r in rows)
+    _require(len(rows) == report['selected_sources'] and templates == report['templates']
+        and links == report['links'] and sum(r['compressed_bytes'] for r in report['units']) == report['compressed_bytes'],
+        store, 'global graph counts differ from stored source units')
+    _require((store / 'result.json').read_bytes() == raw
+        and sha256(Path(__file__).read_bytes()).hexdigest() == reader_pin, store, 'store or reader changed during verification')
+    return dict(schema='scar.source-template-store-verification', schema_version=1, status='STORED_INTERFACES_VERIFIED',
+        graph_result_sha256=sha256(raw).hexdigest(), reader_sha256=reader_pin,
+        link_types_sha256=report['link_types_sha256'], model_manifest_sha256=report['model_manifest_sha256'],
+        selected_sources=len(rows), templates=templates, links=links, compressed_bytes=report['compressed_bytes'],
+        units=rows, jobs=jobs, seconds=time.monotonic()-started, parent_catalogs_current=True,
+        table_receipts_checked=True, stored_template_references_closed=True,
+        source_rules_replayed=False, canonical_graph_generated=False, effects_proven=False,
+        first_stage_complete=False, target_executed=False, transformation_authorized=False)
+
+
+def read_template_body(store, unit, key, *, max_visits=1_000_000):
+    """Expand one graph node to its original typed source recipe."""
+    _require(type(key) is T.SourceTemplateKey, unit, 'invalid template key')
+    store = Path(store).absolute()
+    graph = read_template_graph(store, unit)
+    found = [n for n in graph.templates if n.key == key]
+    _require(len(found) == 1, key, 'template is absent or ambiguous')
     node = found[0]
+    report = json.loads((store / 'result.json').read_bytes())
     parents = [p for p in report['parents'] if p['domain'] == node.origin.domain.value]
     _require(len(parents) == 1, unit, 'missing original material domain')
     parent = parents[0]; material = _Store(parent['domain'], parent['materials'], parent['verification'], report['model_manifest_sha256'])
@@ -348,7 +458,7 @@ def read_template_body(store, unit, key, *, max_visits=1_000_000):
             selected = read_production_plan(document, max_visits=max_visits)
     _require(selected is not None and selected.source == P.ProductionOccurrence(key.occurrence)
         and selected.purpose is key.purpose and selected.root == node.root
-        and encode(selected.input) == header['input'] and encode(selected.profile) == header['profile'],
+        and selected.input == graph.input and selected.profile == graph.profile,
         key, 'original recipe identity/input/profile differs')
     return selected
 
