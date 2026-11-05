@@ -174,9 +174,9 @@ class SoftwareResourceGraph:
         return tuple(row for row in rows if boundary is None or row.boundary==boundary)
 
     def sources(self,source=None):
-        unit=None if source is None else self.bindings.source.sources[str(Path(source).absolute())]
+        unit=self.bindings.source.units_for_source(source)
         rows=_records(self.path,self.report['operand_sources'],S.OperandSource)
-        return tuple(row for row in rows if unit is None or row.call.unit==unit)
+        return tuple(row for row in rows if unit is None or row.call.unit in unit)
 
     def artifact_locations(self):
         return _records(self.path,self.report['artifact_locations'],S.SoftwareArtifactLocation)

@@ -66,9 +66,9 @@ class PythonBindingGraph:
         return self._definitions[identity]
 
     def lookup_links(self,source=None):
-        unit=None if source is None else self.source.sources[str(Path(source).absolute())]
+        unit=self.source.units_for_source(source)
         for row in self.report['units']:
-            if unit is None or row['unit']==unit:
+            if unit is None or row['unit'] in unit:
                 yield from self._table(row,B.NamespaceBindingLink)
 
     def original_lookup(self,link):
@@ -83,9 +83,9 @@ class PythonBindingGraph:
         return lookup
 
     def native_calls(self,source=None):
-        unit=None if source is None else self.source.sources[str(Path(source).absolute())]
+        unit=self.source.units_for_source(source)
         yield from self._table(self.report['native_calls'],B.NativeCallCandidate,
-            select=None if unit is None else lambda row:row['site']['result']['unit']==unit)
+            select=None if unit is None else lambda row:row['site']['result']['unit'] in unit)
 
     def normalization(self,identity=None):
         select=None if identity is None else lambda row:decode(B.PythonBindingID,row['binding'])==identity
@@ -94,10 +94,10 @@ class PythonBindingGraph:
     def _source_table(self,name,cls,source,anchor):
         """Enhanced source facts from this run, independently of its parent."""
         if name not in self.report:return
-        unit=None if source is None else self.source.sources[str(Path(source).absolute())]
+        unit=self.source.units_for_source(source)
         def selected(row):
             for field in anchor.split('.'):row=row[field]
-            return row is not None and row['unit']==unit
+            return row is not None and row['unit'] in unit
         yield from self._table(self.report[name],cls,select=None if unit is None else selected)
 
     def source_calls(self,source=None):
@@ -128,29 +128,29 @@ class PythonBindingGraph:
         yield from self._source_table('entry_call_demands',E.CallEntryDemand,source,'result')
 
     def return_types(self,source=None):
-        unit=None if source is None else self.source.sources[str(Path(source).absolute())]
+        unit=self.source.units_for_source(source)
         yield from self._table(self.report['return_types'],V.ReturnTypeEvidence,
-            select=None if unit is None else lambda row:row['target']['unit']==unit)
+            select=None if unit is None else lambda row:row['target']['unit'] in unit)
 
     def declared_members(self,source=None):
-        unit=None if source is None else self.source.sources[str(Path(source).absolute())]
+        unit=self.source.units_for_source(source)
         yield from self._table(self.report['declared_members'],V.DeclaredMemberCall,
-            select=None if unit is None else lambda row:row['site']['result']['unit']==unit)
+            select=None if unit is None else lambda row:row['site']['result']['unit'] in unit)
 
     def declared_protocols(self,source=None):
-        unit=None if source is None else self.source.sources[str(Path(source).absolute())]
+        unit=self.source.units_for_source(source)
         yield from self._table(self.report['declared_protocols'],V.DeclaredProtocolCall,
-            select=None if unit is None else lambda row:row['receiver']['unit']==unit)
+            select=None if unit is None else lambda row:row['receiver']['unit'] in unit)
 
     def declared_operators(self,source=None):
-        unit=None if source is None else self.source.sources[str(Path(source).absolute())]
+        unit=self.source.units_for_source(source)
         yield from self._table(self.report['declared_operators'],V.DeclaredOperatorCall,
-            select=None if unit is None else lambda row:row['result']['unit']==unit)
+            select=None if unit is None else lambda row:row['result']['unit'] in unit)
 
     def operator_frontiers(self,source=None):
-        unit=None if source is None else self.source.sources[str(Path(source).absolute())]
+        unit=self.source.units_for_source(source)
         yield from self._table(self.report['operator_frontiers'],V.LanguageProtocolFrontier,
-            select=None if unit is None else lambda row:row['site']['result']['unit']==unit)
+            select=None if unit is None else lambda row:row['site']['result']['unit'] in unit)
 
     def expand_native(self,definition):
         if definition.native is None:raise ValueError('this binding has no admitted native schema graph')

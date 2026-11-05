@@ -21,8 +21,10 @@ class EntrySolver(_Solver):
         self.admitted=set();self.active_call_indices=set();self.resolved_interface_calls=set()
         self.local_calls={};self.stars=[];self._metadata_loaded=set()
         for entry in entries:
-            identity=store.sources[str(entry)];unit=self.load_unit(identity)
-            self.activate(unit.root_scope.owner,None,E.EntryReason.PROGRAM_ENTRY)
+            identities=store.units_for_source(entry)
+            if not identities:raise ValueError('entry source is not in the declared catalog')
+            for identity in identities:
+                unit=self.load_unit(identity);self.activate(unit.root_scope.owner,None,E.EntryReason.PROGRAM_ENTRY)
 
     def load_unit(self,identity):
         unit=self.store.load(identity)
@@ -33,7 +35,7 @@ class EntrySolver(_Solver):
         for group in unit.scope_groups:self.groups[group.owner].append(group)
         for i,call in enumerate(unit.calls):
             self.local_calls[identity,i]=len(self.call_rows);self.call_rows.append((unit,call))
-        row=_star_imports(str(self.store.model),self.store.model_units[identity],unit.module);self.stars.append(row)
+        row=_star_imports(str(self.store.model_for(identity)),self.store.model_units[identity],unit.module);self.stars.append(row)
         for module in row[1]:
             for source in self.module_units.get(module,()):
                 self.star_forward[source].add(identity)

@@ -52,16 +52,10 @@ class NormalCallGraph:
         raw = (self.facts / 'result.json').read_bytes()
         if sha256(raw).hexdigest() != self.report['source_facts_sha256']:
             raise ValueError('source fact result differs')
-        self.inputs = json.loads(raw)
-        if self.inputs['schema']!='scar.normal-source-link-facts' or self.inputs['schema_version']!=6:
-            raise ValueError('expected current language/source facts')
-        if self.inputs['implementation_sha256'] != _pins():
-            raise ValueError('source fact implementation differs')
-        self.units = {row['unit']: row for row in self.inputs['units']}
-        self.sources = {row['path']: row['unit'] for row in self.inputs['units']}
-        self.templates = Path(self.inputs['templates'])
-        if sha256((self.templates / 'result.json').read_bytes()).hexdigest() != self.inputs['source_result_sha256']:
-            raise ValueError('source template version differs')
+        from scar.analysis.normal_facts import SourceFactStore
+        self.fact_store=SourceFactStore(self.facts);self.inputs=self.fact_store.report
+        self.units=self.fact_store.rows;self.sources=self.fact_store.sources
+        self.templates=self.fact_store.templates
         if self.report.get('analysis_mode')=='ENTRY_SCOPED_MAY_ANALYSIS':
             from scar.analysis import normal_entry,normal_facts
             from scar.ir.program import normal_entry as E
@@ -69,7 +63,7 @@ class NormalCallGraph:
                 if self.report[field]!=sha256(Path(module.__file__).read_bytes()).hexdigest():raise ValueError('entry scope implementation differs')
 
     def _documents(self, table, source, occurrence, anchor):
-        unit = None if source is None else self.sources[str(Path(source).absolute())]
+        unit = self.units_for_source(source)
         receipt = self.report[table]
         payload = (self.path / receipt['path']).read_bytes()
         if len(payload) != receipt['bytes'] or sha256(payload).hexdigest() != receipt['sha256']:
@@ -81,7 +75,7 @@ class NormalCallGraph:
             raise ValueError('call record count differs')
         for line in raw.splitlines():
             document = json.loads(line)
-            if unit is not None and document[anchor]['unit'] != unit:
+            if unit is not None and document[anchor]['unit'] not in unit:
                 continue
             if occurrence is not None and document[anchor]['port']['template']['occurrence'] != occurrence:
                 continue
@@ -119,15 +113,15 @@ class NormalCallGraph:
             yield link
 
     def properties(self,source=None):
-        unit=None if source is None else self.sources[str(Path(source).absolute())]
+        unit=self.units_for_source(source)
         for row in self._documents('properties',None,None,'site'):
-            if unit is None or row['site']['world']['unit']==unit:
+            if unit is None or row['site']['world']['unit'] in unit:
                 yield decode(T.PropertyAccess,row,record_tags=P.PRODUCTION_RECORD_TAGS)
 
     def attribute_storage(self,source=None):
-        unit=None if source is None else self.sources[str(Path(source).absolute())]
+        unit=self.units_for_source(source)
         for row in self._documents('attribute_storage',None,None,'site'):
-            if unit is None or row['site']['world']['unit']==unit:
+            if unit is None or row['site']['world']['unit'] in unit:
                 yield decode(T.AttributeStorageAccess,row,record_tags=P.PRODUCTION_RECORD_TAGS)
 
     def entry_activations(self,source=None):
@@ -140,9 +134,9 @@ class NormalCallGraph:
     def module_demands(self,source=None):
         from scar.ir.program.normal_entry import ModuleEntryDemand
         if 'entry_module_demands' not in self.report:return
-        unit=None if source is None else self.sources[str(Path(source).absolute())]
+        unit=self.units_for_source(source)
         for row in self._documents('entry_module_demands',None,None,'producer'):
-            if unit is None or row['producer'] is not None and row['producer']['unit']==unit:
+            if unit is None or row['producer'] is not None and row['producer']['unit'] in unit:
                 yield decode(ModuleEntryDemand,row,record_tags=P.PRODUCTION_RECORD_TAGS)
 
     def body_demands(self,source=None):
@@ -157,18 +151,14 @@ class NormalCallGraph:
         for row in self._documents('entry_call_demands',source,None,'result'):
             yield decode(CallEntryDemand,row,record_tags=P.PRODUCTION_RECORD_TAGS)
 
+    def units_for_source(self,source=None):
+        return None if source is None else frozenset(self.fact_store.units_for_source(source))
+
     def _fact_documents(self,source=None):
-        rows=self.units.values() if source is None else (self.units[self.sources[str(Path(source).absolute())]],)
-        for row in rows:
-            payload=(self.facts/row['facts']).read_bytes()
-            if len(payload)!=row['bytes'] or sha256(payload).hexdigest()!=row['sha256']:
-                raise ValueError('call-site facts compressed receipt differs')
-            raw=gzip.decompress(payload)
-            if len(raw)!=row['decoded_bytes'] or sha256(raw).hexdigest()!=row['decoded_sha256']:
-                raise ValueError('call-site facts decoded receipt differs')
-            document=json.loads(raw)
-            if document['unit']!=row['unit']:raise ValueError('source fact unit differs')
-            yield row,document
+        selected=self.units_for_source(source)
+        for identity,row in self.units.items():
+            if selected is None or identity in selected:
+                yield row,self.fact_store.document(identity)
 
     def call_sites(self, source=None):
         """Read all original calls; decode only their referenced source ports."""
@@ -212,24 +202,8 @@ class NormalCallGraph:
                     port(a.value) if a.action is F.AttributeAction.SET else None,port(a.world),port(a.result_world))
 
     def unit_facts(self):
-        """Yield receipt-bound unit facts with lazy port decoding for solvers."""
-        hints=get_type_hints(F.UnitFacts);expected={f.name for f in fields(F.UnitFacts)}
-        for row in self.units.values():
-            payload=(self.facts/row['facts']).read_bytes()
-            if len(payload)!=row['bytes'] or sha256(payload).hexdigest()!=row['sha256']:
-                raise ValueError('source unit compressed receipt differs')
-            raw=gzip.decompress(payload)
-            if len(raw)!=row['decoded_bytes'] or sha256(raw).hexdigest()!=row['decoded_sha256']:
-                raise ValueError('source unit decoded receipt differs')
-            document=json.loads(raw)
-            if set(document)!=expected or document['unit']!=row['unit']:
-                raise ValueError('source unit declarations differ')
-            size=len(document['ports'])
-            if any(type(i) is not int or not 0<=i<size for pair in document['aliases'] for i in pair):
-                raise ValueError('source unit alias ordinal differs')
-            typed={name:decode(hints[name],value,record_tags=P.PRODUCTION_RECORD_TAGS)
-                for name,value in document.items() if name not in ('ports','aliases')}
-            yield SimpleNamespace(**typed,ports=document['ports'],aliases=document['aliases'])
+        """Read each unit against its own immutable parent receipt."""
+        for identity in self.units:yield self.fact_store.load(identity)
 
     def expand(self, link):
         """Return the sealed original plan containing this candidate body.
@@ -239,7 +213,7 @@ class NormalCallGraph:
         """
         if link.body is None:
             raise ValueError('this edge has no source body')
-        plan = read_template_body(self.templates, link.body.unit, link.body.template)
+        plan = read_template_body(self.fact_store.templates_for(link.body.unit), link.body.unit, link.body.template)
         if link.body.region not in {region.id for region in plan.regions}:
             raise ValueError('candidate region absent from original plan')
         return plan
