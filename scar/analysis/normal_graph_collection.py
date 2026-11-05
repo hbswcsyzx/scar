@@ -5,16 +5,20 @@ runtime dispatch, effects, logical versions, or completion of the first stage.
 """
 import argparse
 from collections import Counter
+import gzip
 from hashlib import sha256
+import io
 import json
 from pathlib import Path
 import time
+from types import MappingProxyType
 
 from scar.analysis import normal_graph
 from scar.analysis.source_stage import _durable_bytes,_durable_mkdir
 from scar.analysis.source_template_links import _json
-from scar.ir.program import graph_collection as C
+from scar.ir.program import graph_collection as C,normal_graph as G,source_productions as P
 from scar.ir.program.providers import ProviderArtifact
+from scar.ir import record_codec
 from scar.ir.record_codec import encode,decode
 
 
@@ -45,6 +49,35 @@ def _header(root,row):
     header=json.loads(raw)
     if header['unit']!=row['unit']:raise ValueError('source graph header selects another unit')
     return header
+
+
+def _context_pins():
+    return {name:sha256(Path(module.__file__).read_bytes()).hexdigest()
+        for name,module in (('record_codec',record_codec),('record_tags',P),('normal_graph',G))}
+
+
+def _edges(root,row,tags):
+    """The ordinary exact decoder with one validated, immutable tag snapshot.
+
+    Only tag-catalog preparation moves out of the per-edge loop. Field,
+    discriminator, ID, constructor and record_errors checks still run in the
+    same _decode implementation for every record.
+    """
+    header_path=_member(root,row['header']);header=_header(root,row);receipt=header['edges']
+    fragment=_member(header_path.parent,receipt['path'])
+    if fragment.parent!=header_path.parent:raise ValueError('unsafe graph edge table')
+    payload=fragment.read_bytes()
+    if len(payload)!=receipt['bytes'] or sha256(payload).hexdigest()!=receipt['sha256']:
+        raise ValueError('graph edge compressed receipt differs')
+    digest=sha256();size=0;rows=[]
+    with gzip.GzipFile(fileobj=io.BytesIO(payload),mode='rb') as stream:
+        for raw in stream:
+            digest.update(raw);size+=len(raw)
+            if size>receipt['decoded_bytes']:raise ValueError('graph edge decoded budget exceeded')
+            rows.append(record_codec._decode(G.Edge,json.loads(raw),tags))
+    if size!=receipt['decoded_bytes'] or digest.hexdigest()!=receipt['decoded_sha256'] or len(rows)!=receipt['records']:
+        raise ValueError('graph edge decoded receipt/count differs')
+    return tuple(rows)
 
 
 def _projection(directory,*,check_shards):
@@ -125,6 +158,7 @@ def build_collection(templates,graphs,out):
         declared_unit_coverage_complete=True,edge_types_replayed=False,profile='NORMAL_SUCCESS',
         runtime_dispatch_verified=False,target_executed=False,first_stage_complete=False,
         implementation_sha256=sha256(Path(__file__).read_bytes()).hexdigest(),types_sha256=sha256(Path(C.__file__).read_bytes()).hexdigest(),
+        context_sha256=_context_pins(),
         seconds=time.monotonic()-started)
     _durable_bytes(out/'result.json',_json(report),replace=False);return report
 
@@ -136,6 +170,7 @@ class NormalGraphCollection:
             raise ValueError('normal graph directory version differs')
         if self.report['implementation_sha256']!=sha256(Path(__file__).read_bytes()).hexdigest() or self.report['types_sha256']!=sha256(Path(C.__file__).read_bytes()).hexdigest():
             raise ValueError('normal graph directory implementation/types differ')
+        if self.report['context_sha256']!=_context_pins():raise ValueError('graph record context differs')
         self.directory=decode(C.NormalGraphDirectory,self.report['directory'])
         parent,self.stores,self.units,counts,compressed=_projection(self.directory,check_shards=False)
         roles=dict(Counter(u.role.value for u in self.units.values()))
@@ -144,13 +179,20 @@ class NormalGraphCollection:
         if len(self.units)!=self.report['source_units'] or len(self.stores)!=self.report['graph_stores']:
             raise ValueError('normal graph directory domain count differs')
         self.sources={str(Path(u['path']).absolute()):u['unit'] for u in parent['units']}
+        self._tags=MappingProxyType(record_codec._record_tags(P.PRODUCTION_RECORD_TAGS))
+        self._rows={row['unit']:row for _,report in self.stores.values() for row in report['units']}
+        self._artifacts={store.id:store.result for store in self.directory.stores}
 
     def role(self,unit):return self.units[unit].role
 
     def edges(self,unit):
         """Typed lazy read of one original shard, including declaration graphs."""
         reference=self.units[unit];root,_=self.stores[reference.store]
-        return normal_graph.read_normal_edges(root,unit)
+        _read(self.directory.source_interfaces);_read(self._artifacts[reference.store])
+        if self.report['context_sha256']!=_context_pins():raise ValueError('graph record context changed while querying')
+        result=_edges(root,self._rows[unit],self._tags)
+        _read(self._artifacts[reference.store]);_read(self.directory.source_interfaces)
+        return result
 
     def source_edges(self,source):return self.edges(self.sources[str(Path(source).absolute())])
 
