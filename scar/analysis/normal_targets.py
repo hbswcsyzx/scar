@@ -9,6 +9,7 @@ from collections import defaultdict,deque,Counter
 import gzip
 from hashlib import sha256
 import json
+import sys
 from pathlib import Path
 import time
 from concurrent.futures import ThreadPoolExecutor
@@ -124,16 +125,16 @@ class _Solver:
     def edge(self,source,target):
         if source==target or target in self.adj[source]:return
         self.adj[source].add(target)
-        for value in tuple(self.values[source]):self.add(target,value)
+        for value in tuple(self.values.get(source,())):self.add(target,value)
 
     def namespace_value(self,key,value):
         if value in self.ns_values[key]:return
         self.ns_values[key].add(value)
         if len(key)==4 and key[1]==F.NamespaceKind.MODULE.value:
-            for target in self.star_forward[key[0]]:self.namespace_value((target,key[1],0,key[3]),value)
-        for target in self.reads[key]:self.add(target,value)
-        for target,receiver,cls in self.member_watch[key]:self.member(target,receiver,cls,value)
-        for call_index,receiver in self.ctor_watch[key]:
+            for target in self.star_forward.get(key[0],()):self.namespace_value((target,key[1],0,key[3]),value)
+        for target in self.reads.get(key,()):self.add(target,value)
+        for target,receiver,cls in self.member_watch.get(key,()):self.member(target,receiver,cls,value)
+        for call_index,receiver in self.ctor_watch.get(key,()):
             if value[0]=='function':self.bind(call_index,value[1],receiver,mode='SOURCE_INIT',return_value=False)
 
     def member(self,target,receiver,cls,value):
@@ -307,20 +308,20 @@ class _Solver:
     def solve(self,max_events=20_000_000):
         while self.queue and self.events<max_events:
             point,value=self.queue.popleft();self.events+=1
-            for target in tuple(self.adj[point]):self.add(target,value)
-            for namespace in tuple(self.writes[point]):self.namespace_value(namespace,value)
-            for name,target in tuple(self.gets[point]):self.attribute(point,value,name,target)
-            for index in self.call_watch[point]:self.call(index,value)
+            for target in tuple(self.adj.get(point,())):self.add(target,value)
+            for namespace in tuple(self.writes.get(point,())):self.namespace_value(namespace,value)
+            for name,target in tuple(self.gets.get(point,())):self.attribute(point,value,name,target)
+            for index in self.call_watch.get(point,()):self.call(index,value)
             if point in self.instance_call_watch:
                 index,receiver=self.instance_call_watch[point]
                 self.instance_call_target(index,receiver,value)
             if value[0]=='class':
-                for name,target,receiver,root in tuple(self.base_watch[point]):self.class_lookup(value[1],name,target,receiver,root=root)
-                for index,receiver in tuple(self.ctor_base_watch[point]):self.constructor(value[1],index,receiver)
-            for target,cls,receiver in tuple(self.classmethod_watch[point]):
+                for name,target,receiver,root in tuple(self.base_watch.get(point,())):self.class_lookup(value[1],name,target,receiver,root=root)
+                for index,receiver in tuple(self.ctor_base_watch.get(point,())):self.constructor(value[1],index,receiver)
+            for target,cls,receiver in tuple(self.classmethod_watch.get(point,())):
                 if value[0]=='function':self.add(target,('classbound',value[1],cls,receiver))
             if value[0]=='constant' and value[1]=='str':
-                for receiver,out,index in tuple(self.dynamic_gets[point]):
+                for receiver,out,index in tuple(self.dynamic_gets.get(point,())):
                     self.descriptors.builtin_getattr(index,value[2])
                     self.gets[receiver].add((value[2],out))
                     for base in tuple(self.values[receiver]):self.attribute(receiver,base,value[2],out)
@@ -356,7 +357,13 @@ def solve_targets(facts,out,*,max_events=20_000_000):
     model_units={u['key']:u for u in json.loads(model_raw)['units']}
     with ThreadPoolExecutor(max_workers=8) as pool:
         stars=list(pool.map(lambda u:_star_imports(str(model),model_units[u.unit],u.module),units))
-    solver=_Solver(units,stars);fixed=solver.solve(max_events);_durable_mkdir(out)
+    solver=_Solver(units,stars)
+    while solver.queue and solver.events<max_events:
+        solver.solve(min(max_events,solver.events+2_000_000))
+        print(json.dumps(dict(phase='SOURCE_TARGET_PROPAGATION',events=solver.events,
+            frontier=len(solver.queue),value_facts=solver.events+len(solver.queue),
+            value_ports=len(solver.values),seconds=time.monotonic()-started)),file=sys.stderr,flush=True)
+    fixed=not solver.queue;_durable_mkdir(out)
     from scar.analysis.source_template_links import _stream
     fragment=_stream(out/'calls.jsonl.gz',solver.links.values())
     content=_stream(out/'content.jsonl.gz',solver.containers.links.values())
@@ -384,7 +391,9 @@ def solve_targets(facts,out,*,max_events=20_000_000):
         invocation_implementation_sha256=sha256(Path(source_function_connections.__file__).read_bytes()).hexdigest(),
         namespace_implementation_sha256=sha256(Path(normal_namespaces.__file__).read_bytes()).hexdigest(),
         namespace_types_sha256=sha256(Path(N.__file__).read_bytes()).hexdigest(),
-        unresolved_calls=original_calls-len(known_calls),value_events=solver.events,frontier=len(solver.queue),
+        unresolved_calls=original_calls-len(known_calls),value_events=solver.events,frontier=len(solver.queue),event_budget=max_events,
+        source_fact_ports=len(solver.port),index_entries={name:len(getattr(solver,name)) for name in
+            ('adj','values','writes','reads','gets','call_watch','base_watch','ctor_base_watch','classmethod_watch','dynamic_gets')},
         calls=fragment,seconds=time.monotonic()-started,conditions='source target alternatives; descriptor/module/attribute admissions remain conditional',
         runtime_dispatch_verified=False,effects_proven=False,first_stage_complete=False,target_executed=False,transformation_authorized=False,
         implementation_sha256=sha256(Path(__file__).read_bytes()).hexdigest(),types_sha256=sha256(Path(T.__file__).read_bytes()).hexdigest())

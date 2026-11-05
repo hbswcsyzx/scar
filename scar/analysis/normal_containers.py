@@ -133,21 +133,21 @@ class ContainerFlow:
                 elif source[2]!=F.ContainerKind.MAPPING.value:self.write(target,None,point)
 
     def consume(self,point,value):
-        for key,target,write in tuple(self.items[point]):self.apply_item(value,key,target,write)
-        for receiver,target,write in tuple(self.keys[point]):
+        for key,target,write in tuple(self.items.get(point,())):self.apply_item(value,key,target,write)
+        for receiver,target,write in tuple(self.keys.get(point,())):
             for container in tuple(self.s.values[receiver]):self.apply_item(container,point,target,write)
-        for target in tuple(self.updates[point]):
+        for target in tuple(self.updates.get(point,())):
             for container in tuple(self.s.values[target]):self.copy(value,container)
         # A target can become known after its copy source.
         if value[0]=='container':
-            for source in tuple(self.update_targets[point]):
+            for source in tuple(self.update_targets.get(point,())):
                 for container in tuple(self.s.values[source]):self.copy(container,value)
-        for target in tuple(self.iterators[point]):
+        for target in tuple(self.iterators.get(point,())):
             if value[0]=='iterator':
                 self.iter_sources[value[1]].add(target)
                 for container in tuple(self.s.values[value[1]]):self.iterate(container,target)
-        for target in tuple(self.iter_sources[point]):self.iterate(value,target)
-        for container,target in tuple(self.method_keys[point]):self.apply_item(container,point,target,False)
+        for target in tuple(self.iter_sources.get(point,())):self.iterate(value,target)
+        for container,target in tuple(self.method_keys.get(point,())):self.apply_item(container,point,target,False)
 
     def attribute(self,value,name,target):
         if value[0]=='container' and name in ('get','update','append','extend','keys','values','items'):
