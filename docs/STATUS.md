@@ -25,11 +25,12 @@
 
 | 输出 | 真实结果 | 生成秒数 | 证据 |
 |---|---|---:|---|
-| 语言/引用事实 v4 | 80,761调用点；34,569运算＝11,902二元＋16,541比较＋5,425一元＋701原地运算 | 194.11 | `normal-link-facts-language/result.json` |
-| 源码目标 v4 | 52,769调用点有候选、18,997有源码目标；63,894连接，含391条实例调用，前沿0 | 289.79 | `normal-targets-language/{result,verification}.json` |
-| 绑定/协议图 v3 | 2,839定义；3,575调用点/10,108生成接口候选；498份算子接口；14,691条返回类型关系 | 297.87 | `python-bindings-language/{result,verification}.json` |
+| 属性/引用事实 v5 | 80,761调用点；34,569运算；109,574属性接口，含28个DELETE | 194.36 | `normal-link-facts-attributes/result.json` |
+| 源码目标 v5 | 52,773调用点有候选、19,002有源码目标；63,919调用连接，含391条实例调用，前沿0 | 323.54 | `normal-targets-attributes/{result,verification}.json` |
+| 属性协议 | 747条property连接、41条无accessor、6条目标未决；36,762条条件存储路由 | 包含上项 | 同上，`properties/attribute_storage` |
+| 绑定/协议图 v3 | 2,839定义；3,575调用点/10,108生成接口候选；498份算子接口；14,691条返回类型关系 | 336.35 | `python-bindings-attributes/{result,verification}.json` |
 | 运算协议 | 794个可推断Tensor操作上3,442条协议证据，含1,650条真实wrapper关系 | 包含上项 | 同上，`language_propagation` |
-| 资源来源图 v2 | 17,630依赖＝14,532显式调用＋3,098语言协议；2,637有条件目标关系 | 28.95 | `software-target-resources-language/{result,verification}.json` |
+| 资源来源图 v2 | 17,630依赖＝14,532显式调用＋3,098语言协议；2,637有条件目标关系 | 28.45 | `software-target-resources-attributes/{result,verification}.json` |
 | 全域边表索引 | 复用582源，新增284源；引用两个store，复制边0 bytes | 902.13新增生成 / 2.10索引 | `normal-graph-{remainder,complete}/` |
 
 全866源的压缩边表575,718,843 bytes；当前小索引231,760 bytes，函数/循环正文继续引用原模板。
@@ -39,9 +40,8 @@
 CEM的19,793条边旧新读回逐项相同；一次局部读取对照为8.89秒→5.33秒，非正式性能benchmark，也不是LeWM加速比。
 错误字段和G类型上下文漂移均拒绝。证据为`normal-graph-complete/verification.json`；原读取基线在`normal-graph-all/`。
 
-全63,894调用连接及34,569运算接口经过类型读回，实例调用环境/self/world关系核查通过，146.82秒。
-绑定及LeWM三源已连接调用/运算的原ABI核查通过，27.54秒；资源表及原实参/receiver/operand/包端口核查通过，24.76秒。
-这些是各自声明范围的验收，不是全程序正确性或优化许可。
+本轮全部property连接、字段/namespace关系及LeWM三源的原属性ABI已读回；绑定、声明算子及原调用ABI核查通过，19.96秒。
+资源表及原实参/receiver/operand/包端口核查通过，28.80秒。以上均是声明范围的验收，不是全程序正确性或优化许可。
 
 实现要点：
 
@@ -51,11 +51,19 @@ CEM的19,793条边旧新读回逐项相同；一次局部读取对照为8.89秒�
 - 19项CEM源运算中，3个乘加操作已产生19条协议证据、11条wrapper关系，自动接到`aten::add.Tensor`/`aten::mul.Tensor`。CEM仍有14个显式调用点的生成接口候选，另有`.to/.cpu/.tolist`声明。
 - 同一端口首次取得Tensor类型才触发协议重访，保留各来源记录；没有新增类型到对象/storage身份的证明。
 - 原生材料读取按URI/SHA/大小校验并缓存。显式调用和语言协议的资源来源有独立枚举，不伪造SourceCallSite。
+- 属性保留GET/SET/DELETE/IMPORT_MEMBER及原数据/world端口；私有名来自原F3投影，不按所在类猜测。
+- 普通调用和property复用同一参数/环境/状态接线。setter/deleter没有数据返回边；字段、类和模块namespace分别标型，descriptor/MRO等条件继续保留。
+- 静态接线独立为`source_function_connections.py`；原动态适配器`source_invocations.py`保持原样。
 
 本轮还通过了小型通用内存solver核查：实例调用/继承/descriptor、callee不污染、运算反射/原地分支、别名/注册精确匹配、world不进入数据值以及参数包偏移。没有跑冗长测试套件。
 
 “协议声明前沿0”只针对当前794个可推断Tensor操作，**不能外推到全部34,569运算或整个程序**。
-其余标量、自定义对象、属性/descriptor及外部函数仍须继续解析。求解达到固定点也不证明这些规则已完备。
+其余标量、自定义协议及外部函数仍须继续解析。求解达到固定点也不证明这些规则已完备。
+
+**当前明确断点：形参端口→函数体局部binding。** CEM已有真实源码构造/方法调用接线，但参数端口属于PARAMETER_INTERFACE，
+现有提取误用只接STORE_CANDIDATE的写入规则，导致包括self在内的参数未进入函数体lexical读取。
+因此本轮CEM仍为0条property连接；不能用全域747条掩盖该缺口，也不能直接归因Hydra。
+下一步从原C2b resolution接通全部参数形式；装饰器返回值与配置构造是后续独立检查点，不凭self名称补类型。
 
 ## 目标资源与交付边界
 
@@ -66,7 +74,7 @@ CEM的19,793条边旧新读回逐项相同；一次局部读取对照为8.89秒�
 
 ## 接下来按顺序完成
 
-1. **补F5尚缺协议**：普通对象的属性/descriptor与自定义协议，手写全局函数、NumPy、模型加载、文件/环境接口。先补原操作ABI，再接定义与效果来源。
+1. **贯通F5参数与可调用来源**：先修formal→lexical binding，再复查类成员/property及装饰器路径。随后处理其余自定义协议、NumPy、模型加载与外部动作接口。
 2. **接F6值/状态/资源**：常量与符号属性、逻辑来源、状态版本、shape/bytes和寿命；字段未决与规则缺失分别记录。
 3. **统一自动入口与全图验收**：从入口到外部动作汇总实际覆盖范围和全部跨层引用，不以已收录源码全集替代依赖发现或动态分派完整性。
 

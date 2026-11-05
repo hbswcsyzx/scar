@@ -6,7 +6,7 @@ from .normal_graph import Port
 from .source_template_links import SourceTemplateKey
 from .source_productions import ProductionRegionID
 from scar.ir.literals import PythonLiteral
-from .normal_links import LanguageOperationKind,OperatorSelector
+from .normal_links import LanguageOperationKind,OperatorSelector,AttributeAction
 
 
 @dataclass(frozen=True, slots=True)
@@ -57,10 +57,81 @@ class ArgumentPacks:
     A receiver is prepended by method binding, never included in the pack.
     These are dependencies, not aliases between a pack and each parameter.
     """
-    positional: GlobalPort
+    positional: GlobalPort | None
     keywords: GlobalPort | None = None
     receiver: GlobalPort | None = None
     class_receiver: GlobalPort | None = None
+
+
+class FunctionActivation(str,Enum):
+    NORMAL='NORMAL'
+    CREATE_DEFERRED_BODY='CREATE_DEFERRED_BODY'
+
+
+@dataclass(frozen=True,slots=True)
+class FunctionConnection:
+    """Conditional entry/exit wiring independent of the source operation kind."""
+    source_callable: GlobalPort
+    body: Body
+    activation: FunctionActivation
+    parameters: tuple[Route,...]
+    returns: tuple[tuple[GlobalPort,GlobalPort],...]
+    conditions: tuple[str,...]
+    argument_packs: ArgumentPacks | None=None
+
+
+class AttributeOrigin(str,Enum):
+    ATTRIBUTE='ATTRIBUTE'
+    IMPORT_MEMBER='IMPORT_MEMBER'
+    BUILTIN_GETATTR='BUILTIN_GETATTR'
+
+
+@dataclass(frozen=True,slots=True)
+class AttributeSite:
+    origin: AttributeOrigin
+    action: AttributeAction
+    receiver: GlobalPort
+    member: str
+    result: GlobalPort | None
+    assigned: GlobalPort | None
+    world: GlobalPort
+    result_world: GlobalPort
+    dynamic_member: GlobalPort | None=None
+
+
+@dataclass(frozen=True,slots=True)
+class PropertyAccess:
+    site: AttributeSite
+    descriptor: GlobalPort
+    receiver_class: GlobalPort
+    accessor: GlobalPort | None
+    connection: FunctionConnection | None
+    conditions: tuple[str,...]
+    state: 'PropertyAccessState'
+
+
+class PropertyAccessState(str,Enum):
+    CONNECTED='CONNECTED'
+    ACCESSOR_ABSENT='ACCESSOR_ABSENT'
+    ACCESSOR_NOT_CALLABLE='ACCESSOR_NOT_CALLABLE'
+    ACCESSOR_TARGET_OPEN='ACCESSOR_TARGET_OPEN'
+    ACCESSOR_ARGUMENT_PACK_OPEN='ACCESSOR_ARGUMENT_PACK_OPEN'
+    SIGNATURE_INAPPLICABLE='SIGNATURE_INAPPLICABLE'
+
+
+class AttributeStorageKind(str,Enum):
+    INSTANCE_FIELDS='INSTANCE_FIELDS'
+    CLASS_NAMESPACE='CLASS_NAMESPACE'
+    MODULE_NAMESPACE='MODULE_NAMESPACE'
+
+
+@dataclass(frozen=True,slots=True)
+class AttributeStorageAccess:
+    site: AttributeSite
+    kind: AttributeStorageKind
+    owner: GlobalPort
+    namespace_unit: str | None
+    conditions: tuple[str,...]
 
 
 @dataclass(frozen=True, slots=True)

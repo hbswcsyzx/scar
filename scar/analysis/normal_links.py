@@ -40,8 +40,15 @@ def _module(path):
 
 
 class _Facts:
-    def __init__(self,unit,syntax,bindings,declarations):
+    def __init__(self,unit,syntax,bindings,declarations,roles,contexts):
         self.unit=unit;self.syntax=syntax;self.bindings=bindings;self.declarations=declarations
+        self.contexts=contexts;self.attribute_projections={};self.attribute_names={};self.private_prefixes={}
+        for index,(port,declaration) in enumerate(zip(roles['ports'],declarations['ports'],strict=True)):
+            if declaration['port']!=index:raise ValueError('source role/declaration port order differs')
+            if port['role']=='ATTRIBUTE_LABEL':
+                site=decode(P.SlotRef,port['site'])
+                if site in self.attribute_projections:raise ValueError('duplicate source attribute projection')
+                self.attribute_projections[site]=declaration['projection']
         self.module=_module(unit['path'])
         self.fields={r['name']:{name:i for i,name in enumerate(r['fields'])} for r in syntax['profile']['ast_schema']}
         self.ports=[];self.ids={};self.aliases=set();self.names=[];self.functions=[];self.classes=[]
@@ -56,6 +63,31 @@ class _Facts:
         value=self.syntax['nodes'][site.occurrence]['fields'][site.ordinal]
         for index in site.item_path:value=value['items'][index]
         return decode(PythonLiteral,value['scalar']).to_python()
+
+    def attribute_name(self,site):
+        if site in self.attribute_names:return self.attribute_names[site]
+        text=self.scalar(site);basis=self.attribute_projections[site];mode=basis['private_mode']
+        if mode not in ('NONE','ALL','SELECTIVE'):raise ValueError('unsupported attribute private-name policy')
+        if mode!='NONE' and text.startswith('__') and not text.endswith('__') and '.' not in text:
+            selected=True
+            if mode=='SELECTIVE':
+                key=basis['parameter_group'],basis['prefix_count']
+                if key not in self.private_prefixes:
+                    scope=self.contexts['scopes'][key[0]];anchor=decode(P.SlotRef,scope['anchor'])
+                    parameters=self.syntax['nodes'][anchor.occurrence]['fields'][anchor.ordinal]
+                    for index in anchor.item_path:parameters=parameters['items'][index]
+                    if scope['kind']!='TYPE_PARAMETERS' or type(key[1]) is not int or not 0<=key[1]<=len(parameters['items']):
+                        raise ValueError('attribute selective prefix differs from its original parameter group')
+                    self.private_prefixes[key]=frozenset(
+                        self.scalar(self.field(item['reference'],'name')) for item in parameters['items'][:key[1]])
+                selected=text in self.private_prefixes[key]
+            if selected:
+                owner=basis['class_owner']['occurrence']
+                if self.syntax['nodes'][owner]['constructor']!='ClassDef':raise ValueError('attribute private owner is not its original class')
+                class_name=self.scalar(self.field(owner,'name')).lstrip('_')
+                if class_name:text='_'+class_name+text
+        self.attribute_names[site]=text
+        return text
 
     def operator(self,site):
         value=self.syntax['nodes'][site.occurrence]['fields'][site.ordinal]
@@ -161,7 +193,8 @@ class _Aliases(_Emitter):
                 if ins.from_names is None:name=name.split('.')[0]
                 facts.imports.append(F.Import(self.result_id(step),name))
             elif type(ins) is P.ImportMember:
-                facts.attributes.append(F.Attribute(self.value_id(step.arguments[0]),ins.member_name,self.result_id(step),False))
+                facts.attributes.append(F.Attribute(self.value_id(step.arguments[0]),ins.member_name,self.result_id(step),
+                    F.AttributeAction.IMPORT_MEMBER,self.value_id(step.arguments[-1]),self.result_id(step,len(normal.types)-1)))
             elif type(ins) is P.ApplyLanguageAction:
                 if ins.action in (P.LanguageActionKind.UNARY,P.LanguageActionKind.BINARY,P.LanguageActionKind.COMPARE):
                     self.language_operation(step,F.LanguageOperationKind(ins.action.value),ins.selectors[0])
@@ -170,10 +203,11 @@ class _Aliases(_Emitter):
                 elif ins.action in (P.LanguageActionKind.SET_INSERT,P.LanguageActionKind.SET_UPDATE):
                     facts.updates.append(F.ContainerUpdate(self.value_id(step.arguments[0]),self.value_id(step.arguments[1]),
                         ins.action is P.LanguageActionKind.SET_INSERT))
-                elif ins.action in (P.LanguageActionKind.ATTRIBUTE_GET,P.LanguageActionKind.ATTRIBUTE_SET):
-                    name=facts.scalar(ins.selectors[0]);write=ins.action is P.LanguageActionKind.ATTRIBUTE_SET
+                elif ins.action in (P.LanguageActionKind.ATTRIBUTE_GET,P.LanguageActionKind.ATTRIBUTE_SET,P.LanguageActionKind.ATTRIBUTE_DELETE):
+                    name=facts.attribute_name(ins.selectors[0]);action=F.AttributeAction(ins.action.value.removeprefix('ATTRIBUTE_'))
                     facts.attributes.append(F.Attribute(self.value_id(step.arguments[0]),name,
-                        self.value_id(step.arguments[1]) if write else self.result_id(step),write))
+                        None if action is F.AttributeAction.DELETE else self.value_id(step.arguments[1]) if action is F.AttributeAction.SET else self.result_id(step),
+                        action,self.value_id(step.arguments[-1]),self.result_id(step,len(normal.types)-1)))
                 elif ins.action is P.LanguageActionKind.CALL:
                     owner=ins.selectors[0].occurrence;constructor=facts.syntax['nodes'][owner]['constructor']
                     args_slot,kw_slot=ins.selectors
@@ -266,7 +300,8 @@ def _extract(task):
     model,templates,out,unit,pins=task
     if _pins()!=pins:raise ValueError('link facts builder changed')
     reader=_Fragments(Path(model));syntax=reader.read(unit['artifacts']['source_syntax'])
-    facts=_Facts(unit,syntax,reader.read(unit['artifacts']['source_bindings']),reader.read(unit['artifacts']['source_declarations']))
+    facts=_Facts(unit,syntax,reader.read(unit['artifacts']['source_bindings']),reader.read(unit['artifacts']['source_declarations']),
+        reader.read(unit['artifacts']['source_roles']),reader.read(unit['artifacts']['source_contexts']))
     graph=read_template_graph(templates,unit['key']);root=json.loads((Path(templates)/'result.json').read_bytes())
     specifications=tuple((p['domain'],p['materials'],p['verification'],p['collection_sha256'],p['verification_sha256']) for p in root['parents'])
     stores=_worker_stores(specifications,root['model_manifest_sha256'])
@@ -313,7 +348,7 @@ def extract_facts(model,templates,out,sources=(),*,jobs=1):
     counts=Counter();operation_kinds=Counter();operator_selectors=Counter()
     for row in rows:
         counts.update(row['counts']);operation_kinds.update(row['operation_kinds']);operator_selectors.update(row['operator_selectors'])
-    result=dict(schema='scar.normal-source-link-facts',schema_version=4,status='SOURCE_LINK_FACTS_EXTRACTED',model=str(model),templates=str(templates),
+    result=dict(schema='scar.normal-source-link-facts',schema_version=5,status='SOURCE_LINK_FACTS_EXTRACTED',model=str(model),templates=str(templates),
         model_manifest_sha256=sha256(model_raw).hexdigest(),source_result_sha256=sha256(source_raw).hexdigest(),implementation_sha256=pins,
         selected_sources=len(rows),units=rows,counts=dict(counts),operation_kinds=dict(operation_kinds),operator_selectors=dict(operator_selectors),seconds=time.monotonic()-started,
         profile='NORMAL_SUCCESS',runtime_dispatch_verified=False,first_stage_complete=False,target_executed=False)

@@ -17,6 +17,7 @@ from scar.analysis.normal_links import _pins
 from scar.analysis import normal_targets
 from scar.analysis import normal_containers
 from scar.analysis import normal_namespaces
+from scar.analysis import source_descriptors,source_function_connections
 from scar.analysis.source_template_links import read_template_body
 from scar.ir.program import normal_targets as T
 from scar.ir.program import source_productions as P
@@ -33,7 +34,7 @@ class NormalCallGraph:
     def __init__(self, targets):
         self.path = Path(targets).absolute()
         self.report = json.loads((self.path / 'result.json').read_bytes())
-        if self.report['schema'] != 'scar.normal-source-targets' or self.report['schema_version'] != 4:
+        if self.report['schema'] != 'scar.normal-source-targets' or self.report['schema_version'] != 5:
             raise ValueError('expected current source target graph')
         if self.report['types_sha256'] != sha256(Path(T.__file__).read_bytes()).hexdigest():
             raise ValueError('call edge declarations differ')
@@ -45,12 +46,14 @@ class NormalCallGraph:
             raise ValueError('namespace relationship producer differs')
         if self.report['namespace_types_sha256'] != sha256(Path(N.__file__).read_bytes()).hexdigest():
             raise ValueError('namespace declarations differ')
+        for field,module in (('descriptor_implementation_sha256',source_descriptors),('invocation_implementation_sha256',source_function_connections)):
+            if self.report[field]!=sha256(Path(module.__file__).read_bytes()).hexdigest():raise ValueError('source invocation/descriptor implementation differs')
         self.facts = Path(self.report['source_facts'])
         raw = (self.facts / 'result.json').read_bytes()
         if sha256(raw).hexdigest() != self.report['source_facts_sha256']:
             raise ValueError('source fact result differs')
         self.inputs = json.loads(raw)
-        if self.inputs['schema']!='scar.normal-source-link-facts' or self.inputs['schema_version']!=4:
+        if self.inputs['schema']!='scar.normal-source-link-facts' or self.inputs['schema_version']!=5:
             raise ValueError('expected current language/source facts')
         if self.inputs['implementation_sha256'] != _pins():
             raise ValueError('source fact implementation differs')
@@ -110,6 +113,18 @@ class NormalCallGraph:
                 raise ValueError('namespace source is outside the input domain')
             yield link
 
+    def properties(self,source=None):
+        unit=None if source is None else self.sources[str(Path(source).absolute())]
+        for row in self._documents('properties',None,None,'site'):
+            if unit is None or row['site']['world']['unit']==unit:
+                yield decode(T.PropertyAccess,row,record_tags=P.PRODUCTION_RECORD_TAGS)
+
+    def attribute_storage(self,source=None):
+        unit=None if source is None else self.sources[str(Path(source).absolute())]
+        for row in self._documents('attribute_storage',None,None,'site'):
+            if unit is None or row['site']['world']['unit']==unit:
+                yield decode(T.AttributeStorageAccess,row,record_tags=P.PRODUCTION_RECORD_TAGS)
+
     def _fact_documents(self,source=None):
         rows=self.units.values() if source is None else (self.units[self.sources[str(Path(source).absolute())]],)
         for row in rows:
@@ -150,6 +165,18 @@ class NormalCallGraph:
                 operation=decode(F.LanguageOperation,wire)
                 yield T.LanguageOperationSite(operation.action,operation.selector,tuple(map(port,operation.operands)),
                     port(operation.result),port(operation.world),port(operation.result_world))
+
+    def attribute_sites(self,source=None):
+        for row,document in self._fact_documents(source):
+            ports=document['ports'];cache={}
+            def port(index):
+                if index not in cache:cache[index]=T.GlobalPort(row['unit'],decode(G.Port,ports[index],record_tags=P.PRODUCTION_RECORD_TAGS))
+                return cache[index]
+            for wire in document['attributes']:
+                a=decode(F.Attribute,wire);read=a.action in (F.AttributeAction.GET,F.AttributeAction.IMPORT_MEMBER)
+                yield T.AttributeSite(T.AttributeOrigin.IMPORT_MEMBER if a.action is F.AttributeAction.IMPORT_MEMBER else T.AttributeOrigin.ATTRIBUTE,
+                    a.action,port(a.receiver),a.name,port(a.value) if read else None,
+                    port(a.value) if a.action is F.AttributeAction.SET else None,port(a.world),port(a.result_world))
 
     def unit_facts(self):
         """Yield receipt-bound unit facts with lazy port decoding for solvers."""

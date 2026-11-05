@@ -52,12 +52,25 @@ class Class:
     bases_pack: int | None = None
 
 
+class AttributeAction(str,Enum):
+    GET='GET'
+    SET='SET'
+    DELETE='DELETE'
+    IMPORT_MEMBER='IMPORT_MEMBER'
+
+
 @dataclass(frozen=True, slots=True)
 class Attribute:
     receiver: int
     name: str
-    value: int
-    write: bool
+    value: int | None
+    action: AttributeAction
+    world: int
+    result_world: int
+
+    def __post_init__(self):
+        if type(self.action) is not AttributeAction:raise ValueError('attribute action needs an exact kind')
+        if (self.value is None)!=(self.action is AttributeAction.DELETE):raise ValueError('only attribute DELETE has no value port')
 
 
 @dataclass(frozen=True, slots=True)

@@ -27,6 +27,9 @@ from scar.analysis.source_stage import _durable_bytes,_durable_mkdir
 from scar.analysis.static_query import _Fragments
 from scar.analysis.normal_containers import ContainerFlow
 from scar.analysis import normal_namespaces
+from scar.analysis import source_descriptors,source_function_connections
+from scar.analysis.source_function_connections import Invocation,connect
+from scar.analysis.source_descriptors import DescriptorFlow
 from scar.ir.program import normal_namespaces as N
 
 
@@ -58,7 +61,7 @@ class _Solver:
         self.units=units;self.offsets={};self.owner=[];self.port=[];self.functions={};self.classes={}
         self.module_units=defaultdict(list);self.adj=defaultdict(set);self.values=defaultdict(set);self.queue=deque()
         self.writes=defaultdict(set);self.reads=defaultdict(set);self.ns_values=defaultdict(set)
-        self.gets=defaultdict(set);self.sets=defaultdict(set);self.call_watch=defaultdict(list)
+        self.gets=defaultdict(set);self.call_watch=defaultdict(list)
         self.member_watch=defaultdict(set);self.ctor_watch=defaultdict(set);self.classmethod_watch=defaultdict(set)
         self.instance_call_sinks={};self.instance_call_watch={}
         self.dynamic_gets=defaultdict(set);self.symbol_calls=set();self.links={};self.call_rows=[]
@@ -88,13 +91,14 @@ class _Solver:
                     if item.namespace.kind is F.NamespaceKind.BUILTINS and item.namespace.name in self.builtin_names:
                         self.add(offset+item.value,('external','builtins.'+item.namespace.name))
             for item in unit.attributes:
-                if item.write:self.sets[offset+item.receiver].add((item.name,offset+item.value))
-                else:self.gets[offset+item.receiver].add((item.name,offset+item.value))
+                if item.action in (F.AttributeAction.GET,F.AttributeAction.IMPORT_MEMBER):
+                    self.gets[offset+item.receiver].add((item.name,offset+item.value))
             for item in unit.imports:self.add(offset+item.value,('module',item.module))
             for item in unit.constants:
                 value=item.literal.to_python();self.add(offset+item.value,('constant',type(value).__name__,value))
             for call in unit.calls:
                 index=len(self.call_rows);self.call_rows.append((unit,call));self.call_watch[offset+call.callee].append(index)
+        self.descriptors=DescriptorFlow(self,units)
         for fid in self.functions:self.add(fid,('function',fid))
         for cid in self.classes:self.add(cid,('class',cid))
         for unit in units:
@@ -192,6 +196,7 @@ class _Solver:
             deferred_mode=mode+'_CREATE_DEFERRED_BODY')
 
     def attribute(self,point,value,name,target):
+        if self.descriptors.attribute(point,value,name,target):return
         if value[0]=='module':
             module=value[1];units=self.module_units.get(module,())
             for unit in units:
@@ -213,10 +218,7 @@ class _Solver:
             self.add(target,('external_member',target,name))
         elif value[0]=='class':self.class_lookup(value[1],name,target)
         elif value[0]=='instance':
-            key=('field',value,name)
-            self.reads[key].add(target)
-            for item in tuple(self.ns_values[key]):self.add(target,item)
-            self.class_lookup(value[1],name,target,point)
+            self.descriptors.read(point,value,name,target)
         elif value[0]=='container':self.containers.attribute(value,name,target)
 
     @lru_cache(maxsize=None)
@@ -230,62 +232,20 @@ class _Solver:
         identity=(call_index,fid,receiver,mode,class_receiver)
         if identity in self.symbol_calls:return
         self.symbol_calls.add(identity)
-        caller,call=self.call_rows[call_index];unit,function=self.functions[fid]
-        offset=self.offsets[caller.unit];target_offset=self.offsets[unit.unit]
-        environment_source=offset+call.callee if environment_source is None else environment_source
-        call_conditions=('SOURCE_STATIC_CANDIDATE','CURRENT_CALLABLE_DESCRIPTOR','STANDARD_MODULE_NAMESPACES',*conditions)
-        if call.positional_pack is not None:
-            # Target provenance is useful even with unknown argument packing.
-            # No pack->formal alias, invented arity, or body execution is granted.
-            routes=(T.Route(self.gp(target_offset+function.formals[0]),T.RouteKind.FUNCTION_ENVIRONMENT,(self.gp(environment_source),)),
-                T.Route(self.gp(target_offset+function.formals[-1]),T.RouteKind.STATE,(self.gp(offset+call.world),)))
-            synchronous=function.environment.kind is P.DeferredBodyKind.FUNCTION
-            self.links[identity]=T.CallLink(self.gp(offset+call.result),self.gp(offset+call.callee),self.gp(fid),
-                T.Body(unit.unit,function.template,function.body),mode if synchronous else deferred_mode,None,
-                routes,(),(*call_conditions,'ARGUMENT_PACK_BINDING_PENDING'),
-                argument_packs=self.packs(caller,call,receiver,class_receiver))
-            return
-        positional=[offset+p for p in call.positional]
-        if receiver is not None:positional.insert(0,receiver)
-        keyword=dict((name,offset+p) for name,p in call.keywords)
-        params=function.environment.parameters;routes=[];position=0;bindings=[];class_bindings=[]
-        for i,(param,name) in enumerate(zip(params,function.parameter_names)):
-            formal=target_offset+function.formals[i+1]
-            kind=param.kind;actuals=();route=T.RouteKind.ARGUMENT;keys=()
-            if class_receiver is not None and i==0:
-                class_bindings.append((formal,('class',class_receiver)));route=T.RouteKind.CLASS_RECEIVER
-                actuals=() if receiver is None else (receiver,)
-                if receiver is not None:position=1
-            elif kind in (P.DeferredParameterKind.POSITIONAL_ONLY,P.DeferredParameterKind.POSITIONAL_OR_KEYWORD) and position<len(positional):
-                actuals=(positional[position],);position+=1
-            elif kind in (P.DeferredParameterKind.POSITIONAL_OR_KEYWORD,P.DeferredParameterKind.KEYWORD_ONLY) and name in keyword:
-                actuals=(keyword.pop(name),)
-            elif kind is P.DeferredParameterKind.VAR_POSITIONAL:
-                actuals=tuple(positional[position:]);position=len(positional);route=T.RouteKind.PACK_POSITIONALS
-            elif kind is P.DeferredParameterKind.VAR_KEYWORD:
-                keys=tuple(keyword);actuals=tuple(keyword.values());keyword.clear();route=T.RouteKind.PACK_KEYWORDS
-            elif function.defaults[i] is not None:
-                actuals=(target_offset+function.defaults[i],);route=T.RouteKind.INITIAL_DEFAULT
-            else:return  # no successful binding under this source signature
-            routes.append(T.Route(self.gp(formal),route,tuple(self.gp(p) for p in actuals),keys))
-            if route in (T.RouteKind.ARGUMENT,T.RouteKind.INITIAL_DEFAULT):
-                for source in actuals:bindings.append((source,formal))
-        if position<len(positional) or keyword:return
-        synchronous=function.environment.kind is P.DeferredBodyKind.FUNCTION
-        if synchronous:
-            for source,formal in bindings:self.edge(source,formal)
-            for formal,value in class_bindings:self.add(formal,value)
-        routes.insert(0,T.Route(self.gp(target_offset+function.formals[0]),T.RouteKind.FUNCTION_ENVIRONMENT,(self.gp(environment_source),)))
-        routes.append(T.Route(self.gp(target_offset+function.formals[-1]),T.RouteKind.STATE,(self.gp(offset+call.world),)))
-        returned=[]
-        if synchronous and return_value and function.returns is not None:
-            self.edge(target_offset+function.returns,offset+call.result)
-            returned.append((self.gp(target_offset+function.returns),self.gp(offset+call.result)))
-        if synchronous and function.return_world is not None:
-            returned.append((self.gp(target_offset+function.return_world),self.gp(offset+call.result_world)))
-        self.links[identity]=T.CallLink(self.gp(offset+call.result),self.gp(offset+call.callee),self.gp(fid),
-            T.Body(unit.unit,function.template,function.body),mode if synchronous else deferred_mode,None,
-            tuple(routes),tuple(returned),call_conditions)
+        caller,call=self.call_rows[call_index];offset=self.offsets[caller.unit]
+        invocation=Invocation(offset+call.callee,tuple(offset+p for p in call.positional),
+            tuple((name,offset+p) for name,p in call.keywords),offset+call.result,
+            offset+call.world,offset+call.result_world,
+            None if call.positional_pack is None else offset+call.positional_pack,
+            None if call.keyword_pack is None else offset+call.keyword_pack)
+        connection=connect(self,fid,invocation,receiver,class_receiver=class_receiver,
+            environment_source=environment_source,return_value=return_value,conditions=conditions)
+        if connection is None:return
+        self.links[identity]=T.CallLink(self.gp(offset+call.result),self.gp(offset+call.callee),
+            connection.source_callable,connection.body,
+            mode if connection.activation is T.FunctionActivation.NORMAL else deferred_mode,None,
+            connection.parameters,connection.returns,connection.conditions,
+            argument_packs=connection.argument_packs)
 
     def packs(self,unit,call,receiver=None,class_receiver=None):
         if call.positional_pack is None:return None
@@ -297,7 +257,8 @@ class _Solver:
 
     def call(self,index,value):
         caller,call=self.call_rows[index];offset=self.offsets[caller.unit]
-        if value[0]=='container_method':
+        if value[0]=='property_method':self.descriptors.call(index,value)
+        elif value[0]=='container_method':
             name='builtins.'+('dict' if value[1][2]=='MAPPING' else 'set' if value[1][2]=='SET' else 'list')+'.'+value[2]
             self.links[(index,'container',value[1],value[2])]=T.CallLink(self.gp(offset+call.result),self.gp(offset+call.callee),
                 None,None,'BUILTIN_CONTAINER_METHOD',name,conditions=('SOURCE_BUILTIN_CONTAINER','FLOW_INSENSITIVE_MAY_CONTENT'),
@@ -321,13 +282,15 @@ class _Solver:
                 conditions=conditions,argument_packs=self.packs(caller,call))
             self.add(offset+call.result,('external_value',offset+call.result))
             self.containers.external(caller,call,name)
-            if name in ('builtins.staticmethod','builtins.classmethod') and call.positional:
+            if name=='builtins.property':self.descriptors.construct(index)
+            elif name in ('builtins.staticmethod','builtins.classmethod') and call.positional:
                 self.add(offset+call.result,('staticmethod' if name.endswith('staticmethod') else 'classmethod',offset+call.positional[0]))
             elif name=='builtins.getattr' and len(call.positional)>=2:
                 receiver=offset+call.positional[0];name_point=offset+call.positional[1];out=offset+call.result
-                self.dynamic_gets[name_point].add((receiver,out))
+                self.dynamic_gets[name_point].add((receiver,out,index))
                 for item in tuple(self.values[name_point]):
                     if item[0]=='constant' and item[1]=='str':
+                        self.descriptors.builtin_getattr(index,item[2])
                         self.gets[receiver].add((item[2],out))
                         for base in tuple(self.values[receiver]):self.attribute(receiver,base,item[2],out)
             elif name in ('builtins.__import__','importlib.import_module') and call.positional:
@@ -340,10 +303,6 @@ class _Solver:
             for target in tuple(self.adj[point]):self.add(target,value)
             for namespace in tuple(self.writes[point]):self.namespace_value(namespace,value)
             for name,target in tuple(self.gets[point]):self.attribute(point,value,name,target)
-            for name,source in tuple(self.sets[point]):
-                if value[0]=='instance':
-                    key=('field',value,name);self.writes[source].add(key)
-                    for item in tuple(self.values[source]):self.namespace_value(key,item)
             for index in self.call_watch[point]:self.call(index,value)
             if point in self.instance_call_watch:
                 index,receiver=self.instance_call_watch[point]
@@ -354,10 +313,12 @@ class _Solver:
             for target,cls,receiver in tuple(self.classmethod_watch[point]):
                 if value[0]=='function':self.add(target,('classbound',value[1],cls,receiver))
             if value[0]=='constant' and value[1]=='str':
-                for receiver,out in tuple(self.dynamic_gets[point]):
+                for receiver,out,index in tuple(self.dynamic_gets[point]):
+                    self.descriptors.builtin_getattr(index,value[2])
                     self.gets[receiver].add((value[2],out))
                     for base in tuple(self.values[receiver]):self.attribute(receiver,base,value[2],out)
             self.containers.consume(point,value)
+            self.descriptors.consume(point,value)
         return not self.queue
 
 
@@ -393,10 +354,12 @@ def solve_targets(facts,out,*,max_events=20_000_000):
     fragment=_stream(out/'calls.jsonl.gz',solver.links.values())
     content=_stream(out/'content.jsonl.gz',solver.containers.links.values())
     namespaces=_stream(out/'namespaces.jsonl.gz',normal_namespaces.namespace_lookups(solver))
+    properties=_stream(out/'properties.jsonl.gz',solver.descriptors.property_accesses.values())
+    attribute_storage=_stream(out/'attribute-storage.jsonl.gz',solver.descriptors.storage_accesses.values())
     modes=Counter(link.mode for link in solver.links.values());known_calls={link.result for link in solver.links.values()}
     source_calls={link.result for link in solver.links.values() if link.source_callable is not None}
     original_calls=sum(len(u.calls) for u in units)
-    result=dict(schema='scar.normal-source-targets',schema_version=4,status='SOURCE_TARGET_FIXED_POINT' if fixed else 'SOURCE_TARGET_BUDGET_FRONTIER',
+    result=dict(schema='scar.normal-source-targets',schema_version=5,status='SOURCE_TARGET_FIXED_POINT' if fixed else 'SOURCE_TARGET_BUDGET_FRONTIER',
         source_facts=str(facts),source_facts_sha256=sha256(root).hexdigest(),profile='NORMAL_SUCCESS',
         selected_sources=len(units),source_calls=original_calls,source_functions=len(solver.functions),source_classes=len(solver.classes),
         calls_with_candidates=len(known_calls),candidate_links=len(solver.links),modes=dict(modes),
@@ -408,6 +371,10 @@ def solve_targets(facts,out,*,max_events=20_000_000):
         container_implementation_sha256=sha256(Path(ContainerFlow.consume.__code__.co_filename).read_bytes()).hexdigest(),
         star_import_module_candidates=sum(len(names) for _,names,*_ in stars),
         declared_import_modules=len(solver.imported_modules),namespace_lookups=namespaces['records'],namespaces=namespaces,
+        properties=properties,property_states=dict(Counter(p.state.value for p in solver.descriptors.property_accesses.values())),
+        attribute_storage=attribute_storage,attribute_storage_kinds=dict(Counter(p.kind.value for p in solver.descriptors.storage_accesses.values())),
+        descriptor_implementation_sha256=sha256(Path(source_descriptors.__file__).read_bytes()).hexdigest(),
+        invocation_implementation_sha256=sha256(Path(source_function_connections.__file__).read_bytes()).hexdigest(),
         namespace_implementation_sha256=sha256(Path(normal_namespaces.__file__).read_bytes()).hexdigest(),
         namespace_types_sha256=sha256(Path(N.__file__).read_bytes()).hexdigest(),
         unresolved_calls=original_calls-len(known_calls),value_events=solver.events,frontier=len(solver.queue),

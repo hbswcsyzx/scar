@@ -87,6 +87,9 @@ UNKNOWN 应落在确实未知的字段、效果或关系上，不能吞掉已知
 stub契约与注册实现是不同依据，不表示发生两次计算；C++注册目标与生成wrapper的实际符号对应，不能按Python名字猜算子。
 隐式实例调用通过类上的`__call__`接线，查找中间结果不写回原对象端口；反射优先级、NotImplemented与原地fallback保留条件。
 协议依据为固定[Python 3.14.7数据模型](https://github.com/python/cpython/blob/v3.14.7/Doc/reference/datamodel.rst)，不是运行观测。
+属性接口单独保存GET/SET/DELETE/IMPORT_MEMBER、receiver、输入/输出world及读取结果或赋值RHS；不伪装成源码CALL。
+property accessor复用`FunctionConnection`的参数/环境/状态接线。getter返回连接原属性结果，setter/deleter丢弃Python返回值。
+字段、类namespace及模块namespace路由分别标型；字段fallback的descriptor/MRO条件未获证时仍是may关系，不授对象身份或版本等价。
 
 效果至少区分 reads、writes、allocates、frees、aliases、escapes、RNG、异常、外部及顺序影响。
 未知效果保持开放；异常前已经发生的写入、IO 和清理不可回滚成“无效果”。

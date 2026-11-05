@@ -348,3 +348,6 @@ python -B -m scar.analysis.software_resources --bindings BINDINGS --declarations
 全域正常路径图可用`python -B -m scar.analysis.normal_graph_collection --templates TEMPLATES --graph STORE_A --graph STORE_B --out FRESH_DIRECTORY`建立小索引。
 `NormalGraphCollection.role/source_edges`按原unit查询；大边表保留在原store，类型声明有独立role，不进入runtime候选。
 读取会话固定codec/P/G版本并预编译不可变标签上下文；逐边解码及压缩/解压SHA、大小、计数、父引用校验保留。
+
+属性事实schema v5记录完整原ABI；`NormalCallGraph.attribute_sites/properties/attribute_storage`分别查询原操作与条件接线。
+静态函数接线在`source_function_connections.py`；原`source_invocations.py`继续用于动态适配，两个入口相互独立。
