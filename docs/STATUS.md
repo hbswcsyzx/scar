@@ -1,6 +1,6 @@
 # 当前状态
 
-**第一阶段未完成。F0/F1/F2、F3各子层及组合、F4-A及全域模板接口已按声明范围验收；F4-C正常路径图、F5跨函数/展开参数/容器及名字空间关系已生成并核查；原生生成接口已接通到算子声明；继续补硬件资源图及未覆盖的外部接口。**
+**第一阶段未完成。F0/F1/F2、F3各子层及组合、F4-A及全域模板接口已按声明范围验收；F4-C正常路径图、F5跨函数/展开参数/容器及名字空间关系已生成并核查；原生生成接口已接通到算子声明；目标硬件图及软件资源关系已接入，继续补返回类型/方法/外部接口与数据状态。**
 按用户最新要求，本轮优先LeWM正常成功运行；应用报错、异常展开及引用清理细节暂不作为推进门槛。
 范围为CPython 3.14.7、866份声明源码及其原收据；编译器材料另固定analysis hash seed=0。
 这不证明依赖发现完整、运行对象绑定已观察或最终执行图已闭合。阶段契约见[ARCHITECTURE](ARCHITECTURE.md)。
@@ -169,5 +169,10 @@ call/map/string/assert参数也沿闭合原端口组解析；空组保DECLARED_E
    资源层新增763个资源/状态相关schema输入和575个dispatch声明，按422个NativeBoundary机械投影，7.87秒。Optional/List只保类型路径，不展开为资源实例；Device/Tensor/Generator类型不证明实际消费，CUDA key不证明GPU执行或copy。证据为`queries/native-resource-declarations/result.json`。没有创建无条件ResourceUse或物理资源实例。
    按用户最新边界，软件展开至算子/外部动作接口；保留调用转换/状态契约，不再继续拆CPython解释器及kernel内部。下一项集中在目标硬件图、资源容量/连接约束、状态/数据生命周期与软件区域的完整关联，以及生成器之外的Python/NumPy/文件/环境接口。第一阶段完成前不实现图化简或codegen runtime。
    后端设计已固定为C++20，算子ABI v1、执行计划schema v1；本机GCC 13.3.0，安装Torch CMake target声明CXX_STANDARD 20，ATen/torch/library头文件编译期语法核验通过。仅编译，不链接/运行目标；证据为`queries/cpp-target/result.json`。
+
+5. **目标硬件图和软件关系已生成**：只读19份平台来源，12个目标节点/12条关系，NUMA CPU/DRAM、GPU/设备内存、SATA/NVMe及请求路径的存储端点分别有类型；GPU内存不假称HBM，PCIe max只作标称能力，带宽/延迟与可分配预算保持未知。图生成0.158秒，见`queries/target-hardware/result.json`。没有建FD/缓存行/指令节点。
+   763个资源相关native输入与目标图形成2,289条有条件的位置/设备候选；12,824条规范化来源依赖连回原调用，849份源码文件连接到存储端点；21.40秒，见`queries/software-target-resources/result.json`。Default只保原表达式，Pack只保包依赖，不假定其值/资源；候选均未选择，也不是ResourceUse、分配或copy事件。
+   全表类型读回、目标引用闭合及保留inventory重放通过；所有actuals逐项核对原调用端口。CEM有24条资源来源依赖，device/generator已能沿源码→参数转换→native端口→带条件目标候选查询。25.28秒，证据为同目录`verification.json`；工作区实际卷落到sda，数据路径卷落到nvme1n1，LVM中间层只用于推导backing，不进入图节点。
+   当前仍缺：native返回类型与Tensor方法/descriptor/实例调用的更完整传播，手写Python/NumPy/文件/环境接口，数据/状态版本与资源寿命/符号shape、byte数的完整关联。接下来先沿这些实际缺口补软件与数据图；不进入化简/codegen runtime。
 
 第一阶段仍未完成；当前不扩detector/backend、不变换程序，没有完整LeWM episode优化或加速比结论。

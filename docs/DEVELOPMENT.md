@@ -327,3 +327,14 @@ python -B -m scar.analysis.native_resource_declarations --bindings FRESH_BINDING
 生成目录按export及源unit分片；算子接口与软件图共享原端口，不复制函数/循环正文。
 当前后端目标固定于`pyproject.toml [tool.scar.codegen]`：C++20、operator ABI v1、plan schema v1。
 第一阶段内只固定接口/编译基线，不实现优化或调度runtime。
+
+目标硬件图及软件资源关系（不运行目标）：
+
+```bash
+python -B -m scar.analysis.target_graph --out FRESH_TARGET --path /path/to/program --path /path/to/data
+python -B -m scar.analysis.software_resources --bindings BINDINGS --declarations RESOURCE_DECLARATIONS --target FRESH_TARGET --out FRESH_RELATIONS
+```
+
+`TargetHardwareGraph.resources/connections/paths`读取目标描述；`SoftwareResourceGraph.sources/candidates/artifact_locations`
+读取原软件关系。目标ID由snapshot限定，inventory编号不直接当框架device ordinal；位置/设备候选需满足各自条件。
+容量是平台报告的total，预算和实际使用独立；PCIe max不是实测带宽，Optional/List类型路径不展开为实际资源实例。
