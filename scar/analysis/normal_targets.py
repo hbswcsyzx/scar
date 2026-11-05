@@ -24,8 +24,8 @@ from scar.ir.program import source_productions as P
 from scar.ir.program import normal_graph as G
 from scar.ir.record_codec import decode,encode
 from scar.analysis.source_template_links import _json
-from scar.analysis import source_template_batch,source_template_workers,normal_output,source_interface_store
-from scar.ir.program import source_interfaces as L
+from scar.analysis import source_template_batch,source_template_workers,normal_output,source_interface_store,source_content_factors
+from scar.ir.program import source_interfaces as L,content_factors as C
 from scar.analysis.source_stage import _durable_bytes,_durable_mkdir
 from scar.analysis.static_query import _Fragments
 from scar.analysis.normal_containers import ContainerFlow
@@ -415,7 +415,8 @@ def _publish(solver,facts,root,report,out,started,max_events,fixed,stars,extra=N
     from scar.analysis.normal_output import write_table
     def _stream(path,records):return write_table(path,records,timings=table_write_seconds)
     fragment=_stream(out/'calls.jsonl.gz',solver.links.values())
-    content=_stream(out/'content.jsonl.gz',solver.containers.links.values())
+    content=source_content_factors.write_factors(solver.containers,out)
+    table_write_seconds['content-factors.jsonl.gz']=content['content_factor_stats']['seconds']
     namespaces=_stream(out/'namespaces.jsonl.gz',normal_namespaces.namespace_lookups(solver))
     properties=_stream(out/'properties.jsonl.gz',solver.descriptors.property_accesses.values())
     attribute_storage=_stream(out/'attribute-storage.jsonl.gz',solver.descriptors.storage_accesses.values())
@@ -424,7 +425,7 @@ def _publish(solver,facts,root,report,out,started,max_events,fixed,stars,extra=N
     modes=Counter(link.mode for link in solver.links.values());known_calls={link.result for link in solver.links.values()}
     source_calls={link.result for link in solver.links.values() if link.source_callable is not None}
     original_calls=sum(len(u.calls) for u in units)
-    result=dict(schema='scar.normal-source-targets',schema_version=10,status='SOURCE_TARGET_FIXED_POINT' if fixed else 'SOURCE_TARGET_BUDGET_FRONTIER',
+    result=dict(schema='scar.normal-source-targets',schema_version=11,status='SOURCE_TARGET_FIXED_POINT' if fixed else 'SOURCE_TARGET_BUDGET_FRONTIER',
         analysis_mode='LIBRARY_MAY_ANALYSIS',
         source_facts=str(facts),source_facts_sha256=sha256(root).hexdigest(),profile='NORMAL_SUCCESS',
         selected_sources=len(units),source_calls=original_calls,source_functions=len(solver.functions),source_classes=len(solver.classes),
@@ -435,7 +436,7 @@ def _publish(solver,facts,root,report,out,started,max_events,fixed,stars,extra=N
         packed_source_calls=sum(c.positional_pack is not None for u in units for c in u.calls),
         packed_candidate_links=sum(link.argument_packs is not None for link in solver.links.values()),
         classes_with_packed_bases=sum(c.bases_pack is not None for u in units for c in u.classes),
-        content=content,content_links=len(solver.containers.links),unknown_namespace_keys=len(solver.containers.unknown_keys),
+        unknown_namespace_keys=len(solver.containers.unknown_keys),
         container_implementation_sha256=sha256(Path(ContainerFlow.consume.__code__.co_filename).read_bytes()).hexdigest(),
         star_import_module_candidates=sum(len(names) for _,names,*_ in stars),
         declared_import_modules=len(solver.imported_modules),namespace_lookups=namespaces['records'],namespaces=namespaces,
@@ -453,7 +454,8 @@ def _publish(solver,facts,root,report,out,started,max_events,fixed,stars,extra=N
         suspension_interface_types_sha256=sha256(Path(S.__file__).read_bytes()).hexdigest(),
         source_reader_pins={name:sha256(Path(module.__file__).read_bytes()).hexdigest() for name,module in
             (('batch',source_template_batch),('workers',source_template_workers),('output',normal_output),
-             ('interfaces',source_interface_store),('interface_types',L))},
+             ('interfaces',source_interface_store),('interface_types',L),
+             ('content_factors',source_content_factors),('content_factor_types',C))},
         interface_summary=None if solver.interface_store is None else solver.interface_store.receipt,
         namespace_implementation_sha256=sha256(Path(normal_namespaces.__file__).read_bytes()).hexdigest(),
         namespace_types_sha256=sha256(Path(N.__file__).read_bytes()).hexdigest(),
@@ -463,6 +465,7 @@ def _publish(solver,facts,root,report,out,started,max_events,fixed,stars,extra=N
         calls=fragment,seconds=time.monotonic()-started,conditions='source target alternatives; descriptor/module/attribute admissions remain conditional',
         runtime_dispatch_verified=False,effects_proven=False,first_stage_complete=False,target_executed=False,transformation_authorized=False,
         implementation_sha256=sha256(Path(__file__).read_bytes()).hexdigest(),types_sha256=sha256(Path(T.__file__).read_bytes()).hexdigest())
+    result.update(content)
     result.update(source_generators.tables(solver.generators,out))
     solver.generators.validate_parents()
     result['generator_analysis']=solver.generators.stats

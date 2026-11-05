@@ -95,6 +95,8 @@ property accessor复用`FunctionConnection`的参数/环境/状态接线。gette
 实例字段以`allocation来源＋receiver class＋member`分区；同一源码分配点可能返回多类，不能只保分配端口。
 `AttributeContentLink`显式保存SET RHS→GET result及原读写表坐标，原world仍从站点查询；相同抽象内容的不同写入也保留。
 它是可能供给关系，不选择读取版本，不证明先后顺序，也不因DELETE或未见写入而清除其他路径的内容。
+密集content边可按完全相同的目标邻域存为`ContentFactor`；因子是连接关系的存储表示，不是新的源码动作或数据等价证明。
+源索引投影环不能逐位置展开：增量队列处理内容变化，下降闭环保留start/stride/path；UNKNOWN_POSITION是保守位置宽化，原投影边仍在。
 类调用分为`__new__ → 返回类型判定 → 条件__init__ → 返回`。`ConstructionPort`以原调用结果和原class端口为锚点，
 区分分配结果与分配后world；它是派生协议接口，不伪造源码`G.Port`。初始化消费分配后world，丢弃init的数据返回。
 已声明自定义new时不预先生成默认实例；默认object分配要求源码继承链及namespace条件。MRO/metaclass仍是条件，不当成已观测目标。

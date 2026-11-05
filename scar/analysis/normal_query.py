@@ -18,8 +18,8 @@ from scar.analysis import normal_targets
 from scar.analysis import normal_containers
 from scar.analysis import normal_namespaces
 from scar.analysis import source_descriptors,source_function_connections,source_construction,source_generators,source_suspension_interfaces
-from scar.analysis import source_template_batch,source_template_workers,normal_output,source_interface_store
-from scar.ir.program import source_interfaces as L
+from scar.analysis import source_template_batch,source_template_workers,normal_output,source_interface_store,source_content_factors
+from scar.ir.program import source_interfaces as L,content_factors as C
 from scar.ir.program import source_generators as D,suspension_interfaces as S
 from scar.analysis.source_template_links import read_template_body
 from scar.ir.program import normal_targets as T
@@ -37,13 +37,14 @@ class NormalCallGraph:
     def __init__(self, targets):
         self.path = Path(targets).absolute()
         self.report = json.loads((self.path / 'result.json').read_bytes())
-        if self.report['schema'] != 'scar.normal-source-targets' or self.report['schema_version'] != 10:
+        if self.report['schema'] != 'scar.normal-source-targets' or self.report['schema_version'] != 11:
             raise ValueError('expected current source target graph')
         if self.report['types_sha256'] != sha256(Path(T.__file__).read_bytes()).hexdigest():
             raise ValueError('call edge declarations differ')
         if self.report['source_reader_pins']!={name:sha256(Path(module.__file__).read_bytes()).hexdigest() for name,module in
                 (('batch',source_template_batch),('workers',source_template_workers),('output',normal_output),
-                 ('interfaces',source_interface_store),('interface_types',L))}:
+                 ('interfaces',source_interface_store),('interface_types',L),
+                 ('content_factors',source_content_factors),('content_factor_types',C))}:
             raise ValueError('source reader/writer implementation differs')
         if self.report['implementation_sha256'] != sha256(Path(normal_targets.__file__).read_bytes()).hexdigest():
             raise ValueError('call target producer differs')
@@ -118,11 +119,38 @@ class NormalCallGraph:
 
     def contents(self, source=None, *, occurrence=None):
         """Possible content edges selected by the consuming source unit."""
+        if self.report.get('content_encoding')=='EQUAL_NEIGHBORHOODS_V1':
+            units=self.units_for_source(source)
+            for factor in self.content_factors(source):
+                for target in factor.targets:
+                    anchor=target.call if type(target) is T.ConstructionPort else target
+                    if units is not None and target.unit not in units:continue
+                    if occurrence is not None and anchor.port.template.occurrence!=occurrence:continue
+                    for origin in factor.sources:
+                        yield T.ContentLink(origin,target,factor.container,factor.key,factor.semantics)
+            return
         for document in self._documents('content', source, occurrence, 'target'):
             link = decode(T.ContentLink, document, record_tags=P.PRODUCTION_RECORD_TAGS)
             if any(port.unit not in self.units for port in (link.source,link.target,link.container)):
                 raise ValueError('content endpoint is outside the input domain')
             yield link
+
+    def content_factors(self,source=None):
+        """Read compact connectivity factors, without enumerating their products."""
+        units=self.units_for_source(source)
+        for row in self._documents('content_factors',None,None,'container'):
+            if units is not None and not any(target['unit'] in units if 'unit' in target else target['call']['unit'] in units
+                                             for target in row['targets']):continue
+            factor=decode(C.ContentFactor,row,record_tags=P.PRODUCTION_RECORD_TAGS)
+            if not factor.sources or not factor.targets or any(endpoint.unit not in self.units
+                    for endpoint in (factor.container,*factor.sources,*factor.targets)):
+                raise ValueError('content factor has empty or foreign endpoints')
+            yield factor
+
+    def content_index_cycles(self,source=None):
+        """Retained cycle constraints for conservatively widened positions."""
+        for row in self._documents('content_index_cycles',source,None,'container'):
+            yield decode(C.ContentIndexCycle,row,record_tags=P.PRODUCTION_RECORD_TAGS)
 
     def constructions(self, source=None, *, occurrence=None):
         """Allocation, compatible-instance test and init interfaces per class call."""

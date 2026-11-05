@@ -4,10 +4,11 @@ This is a flow-insensitive may-analysis. It does not establish content versions,
 constant tensor values, standard custom __getitem__, or optimization legality.
 Unknown receivers remain requirements in the original item-access facts.
 """
-from collections import defaultdict
+from collections import defaultdict,deque
 
 from scar.ir.literals import PythonLiteral
 from scar.ir.program import normal_links as F, normal_targets as T
+from scar.ir.program.content_factors import ContentIndexCycle
 
 
 def _key(value):
@@ -26,6 +27,8 @@ class ContainerFlow:
         self.iteration_sites=defaultdict(list);self.iteration_site_keys=set();self.iterator_getters=defaultdict(set)
         self.followed_iterators=set()
         self.links={};self.namespace_sources=defaultdict(set);self.unknown_keys=set()
+        self.content_pending=deque();self.content_current=None;self.content_draining=False
+        self.index_cycles={};self.content_events=0
         # Shape witnesses use original construction facts, never the size or
         # contents of the flow-insensitive entries map.
         self.pack_units={};self.pack_reverse=defaultdict(set);self.pack_constructors={}
@@ -275,8 +278,40 @@ class ContainerFlow:
             self.links[identity]=T.ContentLink(self.s.gp(source),self.s.gp(target),self.s.gp(container),literal)
 
     def write(self,container,key,source):
+        # Paths refer to a single original source reference. A positive tail
+        # shift around a shared formal/container cycle otherwise enumerates
+        # arbitrarily many integer positions and consumes Python stack depth.
+        path=()
+        if self.content_current is not None and self.content_current[2]==source:
+            current,current_key,_,trail=self.content_current
+            path=(*trail,(current,current_key))
+        if container[2]=='SEQUENCE' and key is not None and key[0]=='int' and key[1]>=0:
+            for i,(prior,prior_key) in enumerate(path):
+                if (prior==container and prior_key is not None and prior_key[0]=='int'
+                        and prior_key[1]>key[1]):
+                    cycle=tuple(c for c,_ in path[i:])+(container,)
+                    identity=container,source,prior_key[1],prior_key[1]-key[1],cycle
+                    if identity not in self.index_cycles:
+                        self.index_cycles[identity]=ContentIndexCycle(self.s.gp(container[1]),self.s.gp(source),
+                            prior_key[1],prior_key[1]-key[1],tuple(self.s.gp(c[1]) for c in cycle))
+                    self.open_containers.add(container)
+                    key=None
+                    break
         if source in self.entries[container][key]:return
         self.entries[container][key].add(source)
+        self.content_pending.append((container,key,source,path))
+        if self.content_draining:return
+        self.content_draining=True
+        try:
+            while self.content_pending:
+                self.content_current=self.content_pending.popleft()
+                current,current_key,current_source,_=self.content_current
+                self.content_events+=1
+                self._notify_write(current,current_key,current_source)
+        finally:
+            self.content_current=None;self.content_draining=False
+
+    def _notify_write(self,container,key,source):
         for wanted in (key,None):
             for target in tuple(self.readers[container,wanted]):self.link(source,target,container[1],key)
         if key is None:

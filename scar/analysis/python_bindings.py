@@ -22,7 +22,7 @@ from scar.analysis.normal_query import NormalCallGraph
 from scar.analysis.normal_targets import _Solver,_star_imports
 from scar.analysis.normal_entry import EntrySolver
 from scar.analysis import normal_entry,normal_facts,normal_namespaces
-from scar.analysis import source_generators
+from scar.analysis import source_generators,source_content_factors
 from scar.ir.program import normal_entry as E
 from scar.analysis.source_stage import _durable_bytes,_durable_mkdir
 from scar.analysis.source_template_links import _json
@@ -206,12 +206,12 @@ def _source_tables(solver,out,*,entry):
     solver.generators.validate_parents()
     solver.generators.close()
     tables=dict(source_links=_stream(out/'source-calls.jsonl.gz',solver.links.values()),
-        source_content=_stream(out/'source-content.jsonl.gz',solver.containers.links.values()),
         source_namespaces=_stream(out/'source-namespaces.jsonl.gz',normal_namespaces.namespace_lookups(solver)),
         source_properties=_stream(out/'source-properties.jsonl.gz',solver.descriptors.property_accesses.values()),
         source_attribute_storage=_stream(out/'source-attribute-storage.jsonl.gz',solver.descriptors.storage_accesses.values()),
         source_attribute_content=_stream(out/'source-attribute-content.jsonl.gz',solver.descriptors.content_links.values()),
         source_constructions=_stream(out/'source-constructions.jsonl.gz',solver.constructions.links.values()))
+    tables.update(source_content_factors.write_factors(solver.containers,out,prefix='source_'))
     tables.update(source_generators.tables(solver.generators,out,prefix='source_'))
     if entry:
         solver.complete_call_demands()

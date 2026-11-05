@@ -12,6 +12,7 @@ from scar.analysis import tensor_return_flow,tensor_stub_contracts,tensor_langua
 from scar.ir.program import python_bindings as B,normal_namespaces as N,source_productions as P
 from scar.ir.program import tensor_values as V,binding_returns as R
 from scar.ir.program import normal_targets as T
+from scar.ir.program import content_factors as C
 from scar.ir.program import source_generators as D,suspension_interfaces as S
 from scar.ir.program import normal_entry as E
 from scar.analysis import normal_entry,normal_facts
@@ -106,7 +107,23 @@ class PythonBindingGraph:
         yield from self._source_table('source_links',T.CallLink,source,'result')
 
     def source_contents(self,source=None):
+        if self.report.get('source_content_encoding')=='EQUAL_NEIGHBORHOODS_V1':
+            units=self.source.units_for_source(source)
+            for factor in self.source_content_factors(source):
+                for target in factor.targets:
+                    if units is not None and target.unit not in units:continue
+                    for origin in factor.sources:
+                        yield T.ContentLink(origin,target,factor.container,factor.key,factor.semantics)
+            return
         yield from self._source_table('source_content',T.ContentLink,source,'target')
+
+    def source_content_factors(self,source=None):
+        units=self.source.units_for_source(source)
+        for factor in self._table(self.report['source_content_factors'],C.ContentFactor):
+            if units is None or any(target.unit in units for target in factor.targets):yield factor
+
+    def source_content_index_cycles(self,source=None):
+        yield from self._source_table('source_content_index_cycles',C.ContentIndexCycle,source,'container')
 
     def source_namespace_lookups(self,source=None):
         yield from self._source_table('source_namespaces',N.NamespaceLookup,source,'result')
