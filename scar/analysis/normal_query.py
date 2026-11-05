@@ -170,6 +170,7 @@ class NormalCallGraph:
         for row,document in self._fact_documents(source):
             ports=document['ports'];cache={}
             def port(index):
+                if type(index) is not int or not 0<=index<len(ports):raise ValueError('attribute port ordinal differs')
                 if index not in cache:cache[index]=T.GlobalPort(row['unit'],decode(G.Port,ports[index],record_tags=P.PRODUCTION_RECORD_TAGS))
                 return cache[index]
             for wire in document['attributes']:

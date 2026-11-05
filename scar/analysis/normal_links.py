@@ -118,6 +118,33 @@ class _Facts:
             for step in self.bindings['plans'][port['read_plan']]['steps']:
                 self.names.append(F.NameAccess(self.namespace(step['interface'],name),value,False))
 
+    def parameter_namespace(self,parameter,scope):
+        # A formal is admitted to its declared logical binding. C2b does not
+        # give PARAMETER_INTERFACE a STORE_CANDIDATE write_target.
+        if parameter.binding_port is None:
+            if parameter.kind is P.DeferredParameterKind.INITIAL_ITERATOR:return
+            raise ValueError('named formal has no original parameter binding port')
+        port=self.bindings['ports'][parameter.binding_port]
+        if port['declref'] is None or port['resolution'] is None:
+            raise ValueError('formal has no original parameter contribution/resolution')
+        contribution=self.declarations['contributions'][port['declref']]
+        resolution=self.bindings['resolutions'][port['resolution']]
+        binding_index=resolution['binding'];ref=port['name']
+        if ('PARAMETER_INTERFACE' not in contribution['operations']
+                or contribution['port']!=parameter.binding_port or binding_index is None):
+            raise ValueError('formal does not select an original parameter admission')
+        binding=self.bindings['bindings'][binding_index]
+        if (binding['domain']!='LOCAL_BINDING' or binding['owner']!=scope
+                or ref is None or ref['kind']!='SOURCE'
+                or binding['name']!=ref or resolution['name']!=ref):
+            raise ValueError('formal logical binding owner/name differs')
+        name=self.declarations['names'][ref['index']]['value']
+        return F.Namespace(F.NamespaceKind.LEXICAL,binding_index,name)
+
+    def parameter_admission(self,parameter,formal,scope):
+        namespace=self.parameter_namespace(parameter,scope)
+        if namespace is not None:self.names.append(F.NameAccess(namespace,formal,True))
+
 
 class _Aliases(_Emitter):
     def __init__(self,plan,key,interfaces,facts):
@@ -256,7 +283,7 @@ class _Aliases(_Emitter):
                 names=[];defaults=[]
                 for parameter in env.parameters:
                     if parameter.kind is P.DeferredParameterKind.INITIAL_ITERATOR:names.append('.0')
-                    else:names.append(facts.scalar(parameter.source))
+                    else:names.append(facts.parameter_namespace(parameter,env.scope).name)
                     site=parameter.default_source
                     if site is None:defaults.append(None);continue
                     selected=facts.syntax['nodes'][site.occurrence]['fields'][site.ordinal]
@@ -273,8 +300,7 @@ class _Aliases(_Emitter):
                     None if returned is None else facts.point(self.port(body.id,G.PortKind.RESULT,len(returned.types)-1,returned)))
                 facts.functions.append(function)
                 for parameter,formal in zip(env.parameters,function.formals[1:-1]):
-                    if parameter.binding_port is not None:
-                        facts.name_access(P.AccessBinding(P.BindingActionKind.WRITE,parameter.binding_port),formal)
+                    facts.parameter_admission(parameter,formal,env.scope)
             elif type(ins) is P.ConstructValue and ins.construction is P.ConstructionKind.LITERAL:
                 literal=facts.scalar(ins.payload[0])
                 if type(literal) in (str,int,bool) or literal is None:

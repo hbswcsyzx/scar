@@ -112,6 +112,13 @@ class _Solver:
         return owner,namespace.kind.value,namespace.owner,namespace.name
 
     def add(self,point,value):
+        # These are transfer-domain facts, not object/value identities. All
+        # consumers of an open value use only its tag; provenance stays on
+        # the original ports and routes rather than multiplying this token.
+        if value[0]=='external_value':value=('external_value',None)
+        elif value[0]=='external' and len(value)>2:
+            # Lookup history is queried by membership only, never by order.
+            value=('external',value[1],tuple(sorted(set(value[2]))))
         if value not in self.values[point]:self.values[point].add(value);self.queue.append((point,value))
 
     def edge(self,source,target):
