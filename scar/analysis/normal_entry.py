@@ -11,8 +11,8 @@ from scar.ir.program import normal_links as F,normal_entry as E
 
 
 class EntrySolver(_Solver):
-    def __init__(self,store,entries):
-        super().__init__([],())
+    def __init__(self,store,entries,*,jobs=None):
+        super().__init__([],(),jobs=jobs)
         self.store=store;self.offsets=store.offsets
         self.owner=SourcePointSpace(store,owners=True);self.port=SourcePointSpace(store)
         for row in store.rows.values():self.module_units[row['module']].append(row['unit'])
@@ -70,6 +70,13 @@ class EntrySolver(_Solver):
         unit,function=self.functions[fid]
         if function.body_scope is None:raise ValueError('source function has no original body scope')
         self.activate(function.body_scope.owner,self.gp(callee),E.EntryReason.SOURCE_FUNCTION_CALL)
+
+    def activate_generator(self,fid,driver,callee):
+        unit,function=self.functions[fid]
+        if function.body_scope is None:raise ValueError('generator has no original body scope')
+        self.activate(function.body_scope.owner,self.gp(driver),E.EntryReason.GENERATOR_ADVANCE)
+        demand=E.BodyEntryDemand(function.body_scope,self.gp(callee),E.BodyDemandKind.DEFERRED_BODY_RESUME_OPEN)
+        self.body_demands.pop(demand,None)
 
     def body_demand(self,fid,callee,kind):
         unit,function=self.functions[fid]

@@ -17,7 +17,8 @@ from scar.analysis.normal_links import _pins
 from scar.analysis import normal_targets
 from scar.analysis import normal_containers
 from scar.analysis import normal_namespaces
-from scar.analysis import source_descriptors,source_function_connections,source_construction
+from scar.analysis import source_descriptors,source_function_connections,source_construction,source_generators,source_suspension_interfaces
+from scar.ir.program import source_generators as D,suspension_interfaces as S
 from scar.analysis.source_template_links import read_template_body
 from scar.ir.program import normal_targets as T
 from scar.ir.program import source_productions as P
@@ -34,7 +35,7 @@ class NormalCallGraph:
     def __init__(self, targets):
         self.path = Path(targets).absolute()
         self.report = json.loads((self.path / 'result.json').read_bytes())
-        if self.report['schema'] != 'scar.normal-source-targets' or self.report['schema_version'] != 8:
+        if self.report['schema'] != 'scar.normal-source-targets' or self.report['schema_version'] != 9:
             raise ValueError('expected current source target graph')
         if self.report['types_sha256'] != sha256(Path(T.__file__).read_bytes()).hexdigest():
             raise ValueError('call edge declarations differ')
@@ -48,7 +49,9 @@ class NormalCallGraph:
             raise ValueError('namespace declarations differ')
         for field,module in (('descriptor_implementation_sha256',source_descriptors),
                 ('invocation_implementation_sha256',source_function_connections),
-                ('construction_implementation_sha256',source_construction)):
+                ('construction_implementation_sha256',source_construction),
+                ('generator_implementation_sha256',source_generators),('generator_types_sha256',D),
+                ('suspension_interface_implementation_sha256',source_suspension_interfaces),('suspension_interface_types_sha256',S)):
             if self.report[field]!=sha256(Path(module.__file__).read_bytes()).hexdigest():raise ValueError('source invocation/descriptor implementation differs')
         self.facts = Path(self.report['source_facts'])
         raw = (self.facts / 'result.json').read_bytes()
@@ -77,7 +80,8 @@ class NormalCallGraph:
             raise ValueError('call record count differs')
         for line in raw.splitlines():
             document = json.loads(line)
-            endpoint=document[anchor]
+            endpoint=document
+            for field in anchor.split('.'):endpoint=endpoint[field]
             if endpoint is not None and 'call' in endpoint:endpoint=endpoint['call']
             if unit is not None and (endpoint is None or endpoint['unit'] not in unit):
                 continue
@@ -121,6 +125,30 @@ class NormalCallGraph:
                 if type(endpoint) is T.ConstructionPort and (endpoint.call!=link.result or endpoint.source_class!=link.source_class):
                     raise ValueError('construction interface has another call/class anchor')
             yield link
+
+    def deferred_creations(self,source=None):
+        for row in self._documents('deferred_creations',source,None,'origin.world'):
+            yield decode(D.DeferredCreation,row,record_tags=P.PRODUCTION_RECORD_TAGS)
+
+    def iteration_interfaces(self,source=None):
+        for row in self._documents('iteration_interfaces',source,None,'value'):
+            yield decode(S.IterationSite,row,record_tags=P.PRODUCTION_RECORD_TAGS)
+
+    def deferred_bodies(self,source=None):
+        for row in self._documents('deferred_bodies',source,None,'source_callable'):
+            yield decode(S.DeferredBodySite,row,record_tags=P.PRODUCTION_RECORD_TAGS)
+
+    def generator_iterators(self,source=None):
+        for row in self._documents('generator_iterators',source,None,'result'):
+            yield decode(D.GeneratorIterator,row,record_tags=P.PRODUCTION_RECORD_TAGS)
+
+    def generator_advances(self,source=None):
+        for row in self._documents('generator_advances',source,None,'iteration'):
+            yield decode(D.GeneratorAdvance,row,record_tags=P.PRODUCTION_RECORD_TAGS)
+
+    def deferred_driver_obligations(self,source=None):
+        for row in self._documents('deferred_driver_obligations',source,None,'origin.world'):
+            yield decode(D.DeferredDriverObligation,row,record_tags=P.PRODUCTION_RECORD_TAGS)
 
     def namespace_lookups(self, source=None, *, occurrence=None):
         """Known receiver/member origins, including still-open native bindings."""

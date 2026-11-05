@@ -28,10 +28,11 @@ from scar.analysis.source_stage import _durable_bytes,_durable_mkdir
 from scar.analysis.static_query import _Fragments
 from scar.analysis.normal_containers import ContainerFlow
 from scar.analysis import normal_namespaces
-from scar.analysis import source_descriptors,source_function_connections,source_construction
+from scar.analysis import source_descriptors,source_function_connections,source_construction,source_generators,source_suspension_interfaces
 from scar.analysis.source_function_connections import Invocation,connect
 from scar.analysis.source_descriptors import DescriptorFlow
 from scar.ir.program import normal_namespaces as N
+from scar.ir.program import source_generators as D,suspension_interfaces as S
 
 
 def _star_imports(model,unit,module):
@@ -58,8 +59,11 @@ def _star_imports(model,unit,module):
 
 
 class _Solver:
-    def __init__(self,units,stars=()):
+    def __init__(self,units,stars=(),*,jobs=None):
+        if jobs is not None and (type(jobs) is not int or jobs<1):raise ValueError('positive analysis worker count required')
+        self.analysis_jobs=jobs
         self.units=units;self.offsets={};self.owner=[];self.port=[];self.functions={};self.classes={}
+        self.interface_ports={};self.interface_points={};self.interface_reverse={};self.original_templates={};self.original_indices={}
         self.module_units=defaultdict(list);self.adj=defaultdict(set);self.values=defaultdict(set);self.queue=deque()
         self.writes=defaultdict(set);self.reads=defaultdict(set);self.ns_values=defaultdict(set)
         self.gets=defaultdict(set);self.call_watch=defaultdict(list)
@@ -108,6 +112,7 @@ class _Solver:
                 for formal in function.formals[1:-1]:self.add(offset+formal,('external_value',offset+formal))
         self.containers=ContainerFlow(self,units)
         self.constructions=source_construction.ConstructionFlow(self)
+        self.generators=source_generators.SourceGeneratorFlow(self)
 
     def ns(self,unit,namespace):
         owner='' if namespace.kind is F.NamespaceKind.BUILTINS else unit
@@ -188,6 +193,7 @@ class _Solver:
             deferred_mode=mode+'_CREATE_DEFERRED_BODY')
 
     def attribute(self,point,value,name,target):
+        if self.generators.attribute(value,name,target):return
         if self.descriptors.attribute(point,value,name,target):return
         if value[0]=='module':
             module=value[1];units=self.module_units.get(module,())
@@ -217,10 +223,50 @@ class _Solver:
 
     @lru_cache(maxsize=None)
     def gp(self,point):
-        if type(point) is int and point<0:return self.constructions.ports[point]
+        if type(point) is int and point<0:return self.interface_ports[point]
         port=self.port[point]
         if type(port) is dict:port=decode(G.Port,port,record_tags=P.PRODUCTION_RECORD_TAGS)
         return T.GlobalPort(self.owner[point],port)
+
+    def interface_point(self,key,endpoint):
+        """Internal transfer index for a typed interface, not a source ID."""
+        if key not in self.interface_points:
+            point=self.interface_reverse.get(endpoint)
+            if point is None:
+                point=-len(self.interface_ports)-1
+                self.interface_ports[point]=endpoint;self.interface_reverse[endpoint]=point
+            self.interface_points[key]=point
+        point=self.interface_points[key]
+        if self.interface_ports[point]!=endpoint:raise ValueError('interface key selects another endpoint')
+        return point
+
+    def endpoint_point(self,endpoint):
+        if type(endpoint) is T.GlobalPort:return self.original_point(endpoint)
+        if endpoint not in self.interface_reverse:raise ValueError('protocol endpoint was not declared')
+        return self.interface_reverse[endpoint]
+
+    def original_point(self,endpoint):
+        """Reuse F5 ports or register a witnessed original F4 port lazily.
+
+        The caller supplies provenance from the sealed interface index. New
+        transfer ordinals never masquerade as positions in the F5 port table.
+        """
+        if type(endpoint) is not T.GlobalPort:raise ValueError('original source endpoint required')
+        identity=endpoint.unit
+        if identity not in self.original_templates:
+            unit=self.store.load(identity) if hasattr(self,'store') else next(u for u in self.units if u.unit==identity)
+            groups=defaultdict(list)
+            for i,port in enumerate(unit.ports):
+                key=(port['template']['occurrence'],port['template']['purpose']) if type(port) is dict else (port.template.occurrence,port.template.purpose.value)
+                groups[key].append((i,port))
+            self.original_templates[identity]=groups
+        template=endpoint.port.template;key=identity,template
+        if key not in self.original_indices:
+            self.original_indices[key]={
+                decode(G.Port,wire,record_tags=P.PRODUCTION_RECORD_TAGS) if type(wire) is dict else wire:self.offsets[identity]+i
+                for i,wire in self.original_templates[identity].get((template.occurrence,template.purpose.value),())}
+        point=self.original_indices[key].get(endpoint.port)
+        return point if point is not None else self.interface_point(('original',endpoint),endpoint)
 
     def bind(self,call_index,fid,receiver=None,*,mode='SOURCE_FUNCTION',return_value=True,class_receiver=None,
              conditions=(),environment_source=None,deferred_mode='CREATE_DEFERRED_BODY'):
@@ -319,8 +365,8 @@ class _Solver:
         return not self.queue
 
 
-def solve_targets(facts,out,*,max_events=20_000_000,entries=()):
-    if entries:return solve_entry_targets(facts,out,entries,max_events=max_events)
+def solve_targets(facts,out,*,max_events=20_000_000,entries=(),jobs=None):
+    if entries:return solve_entry_targets(facts,out,entries,max_events=max_events,jobs=jobs)
     started=time.monotonic();facts=Path(facts).absolute();out=Path(out).absolute()
     if out.exists():raise ValueError('fresh target output required')
     root=(facts/'result.json').read_bytes();report=json.loads(root);units=[]
@@ -347,7 +393,7 @@ def solve_targets(facts,out,*,max_events=20_000_000,entries=()):
     model_units={u['key']:u for u in json.loads(model_raw)['units']}
     with ThreadPoolExecutor(max_workers=8) as pool:
         stars=list(pool.map(lambda u:_star_imports(str(model),model_units[u.unit],u.module),units))
-    solver=_Solver(units,stars)
+    solver=_Solver(units,stars,jobs=jobs)
     while solver.queue and solver.events<max_events:
         solver.solve(min(max_events,solver.events+2_000_000))
         print(json.dumps(dict(phase='SOURCE_TARGET_PROPAGATION',events=solver.events,
@@ -358,6 +404,8 @@ def solve_targets(facts,out,*,max_events=20_000_000,entries=()):
 
 
 def _publish(solver,facts,root,report,out,started,max_events,fixed,stars,extra=None):
+    solver.generators.validate_parents()
+    solver.generators.close()
     units=solver.units;_durable_mkdir(out)
     from scar.analysis.source_template_links import _stream
     fragment=_stream(out/'calls.jsonl.gz',solver.links.values())
@@ -369,7 +417,7 @@ def _publish(solver,facts,root,report,out,started,max_events,fixed,stars,extra=N
     modes=Counter(link.mode for link in solver.links.values());known_calls={link.result for link in solver.links.values()}
     source_calls={link.result for link in solver.links.values() if link.source_callable is not None}
     original_calls=sum(len(u.calls) for u in units)
-    result=dict(schema='scar.normal-source-targets',schema_version=8,status='SOURCE_TARGET_FIXED_POINT' if fixed else 'SOURCE_TARGET_BUDGET_FRONTIER',
+    result=dict(schema='scar.normal-source-targets',schema_version=9,status='SOURCE_TARGET_FIXED_POINT' if fixed else 'SOURCE_TARGET_BUDGET_FRONTIER',
         analysis_mode='LIBRARY_MAY_ANALYSIS',
         source_facts=str(facts),source_facts_sha256=sha256(root).hexdigest(),profile='NORMAL_SUCCESS',
         selected_sources=len(units),source_calls=original_calls,source_functions=len(solver.functions),source_classes=len(solver.classes),
@@ -391,6 +439,10 @@ def _publish(solver,facts,root,report,out,started,max_events,fixed,stars,extra=N
         constructions=constructions,construction_stages=dict(Counter(p.stage.value for p in solver.constructions.links.values())),
         construction_interface_ports=len(solver.constructions.ports),
         construction_implementation_sha256=sha256(Path(source_construction.__file__).read_bytes()).hexdigest(),
+        generator_implementation_sha256=sha256(Path(source_generators.__file__).read_bytes()).hexdigest(),
+        generator_types_sha256=sha256(Path(D.__file__).read_bytes()).hexdigest(),
+        suspension_interface_implementation_sha256=sha256(Path(source_suspension_interfaces.__file__).read_bytes()).hexdigest(),
+        suspension_interface_types_sha256=sha256(Path(S.__file__).read_bytes()).hexdigest(),
         namespace_implementation_sha256=sha256(Path(normal_namespaces.__file__).read_bytes()).hexdigest(),
         namespace_types_sha256=sha256(Path(N.__file__).read_bytes()).hexdigest(),
         unresolved_calls=original_calls-len(known_calls),value_events=solver.events,frontier=len(solver.queue),event_budget=max_events,
@@ -399,11 +451,14 @@ def _publish(solver,facts,root,report,out,started,max_events,fixed,stars,extra=N
         calls=fragment,seconds=time.monotonic()-started,conditions='source target alternatives; descriptor/module/attribute admissions remain conditional',
         runtime_dispatch_verified=False,effects_proven=False,first_stage_complete=False,target_executed=False,transformation_authorized=False,
         implementation_sha256=sha256(Path(__file__).read_bytes()).hexdigest(),types_sha256=sha256(Path(T.__file__).read_bytes()).hexdigest())
+    result.update(source_generators.tables(solver.generators,out))
+    solver.generators.validate_parents()
+    result['generator_analysis']=solver.generators.stats
     if extra:result.update(extra)
     _durable_bytes(out/'result.json',_json(result),replace=False);return result
 
 
-def solve_entry_targets(facts,out,entries,*,max_events=20_000_000):
+def solve_entry_targets(facts,out,entries,*,max_events=20_000_000,jobs=None):
     from scar.analysis import normal_entry,normal_facts
     from scar.ir.program import normal_entry as E
     from scar.analysis.source_template_links import _stream
@@ -411,7 +466,7 @@ def solve_entry_targets(facts,out,entries,*,max_events=20_000_000):
     started=time.monotonic();store=normal_facts.SourceFactStore(facts);out=Path(out).absolute()
     if out.exists():raise ValueError('fresh entry target output required')
     entries=tuple(str(Path(p).absolute()) for p in entries)
-    solver=normal_entry.EntrySolver(store,entries);solver.prepare()
+    solver=normal_entry.EntrySolver(store,entries,jobs=jobs);solver.prepare()
     while (solver.queue or solver.pending) and solver.events<max_events:
         solver.solve(min(max_events,solver.events+2_000_000))
         print(json.dumps(dict(phase='ENTRY_SCOPE_PROPAGATION',events=solver.events,frontier=len(solver.queue),
@@ -448,7 +503,9 @@ def solve_entry_targets(facts,out,entries,*,max_events=20_000_000):
 def main():
     p=argparse.ArgumentParser(description=__doc__);p.add_argument('--facts',required=True);p.add_argument('--out',required=True)
     p.add_argument('--entry',action='append',required=True,help='source entry module; declarations alone do not choose execution roots')
-    p.add_argument('--max-events',type=int,default=20_000_000);a=p.parse_args();r=solve_targets(a.facts,a.out,max_events=a.max_events,entries=a.entry)
+    p.add_argument('--max-events',type=int,default=20_000_000)
+    p.add_argument('--jobs',type=int,default=None,help='template reader processes; default min(32, CPU affinity)')
+    a=p.parse_args();r=solve_targets(a.facts,a.out,max_events=a.max_events,entries=a.entry,jobs=a.jobs)
     print(json.dumps({k:r[k] for k in ('status','source_calls','calls_with_candidates','candidate_links','modes','value_events','seconds')},indent=2))
 
 

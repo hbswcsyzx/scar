@@ -49,9 +49,10 @@ class ConstructionFlow:
         if key not in self.point_keys:
             unit, call = self.s.call_rows[index]
             origin = self.s.offsets[unit.unit] + call.result
-            point = -len(self.ports) - 1
+            endpoint = T.ConstructionPort(self.s.gp(origin), self.s.gp(cls), role)
+            point = self.s.interface_point(('construction', *key), endpoint)
             self.point_keys[key] = point
-            self.ports[point] = T.ConstructionPort(self.s.gp(origin), self.s.gp(cls), role)
+            self.ports[point] = endpoint
         return self.point_keys[key]
 
     def record(self, c, stage, inputs=(), outputs=(), connection=None, *, detail=(), conditions=()):

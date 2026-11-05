@@ -14,7 +14,7 @@ from scar.ir.record_codec import decode, encode
 from tests.unit.test_source_expression_rules import _documents, _rules, purpose, WORLD
 
 
-def source_facts(text):
+def source_facts(text, *, protocols=False):
     documents = _documents(text)
     expressions = _rules(documents)
     source = expressions.source
@@ -55,8 +55,15 @@ def source_facts(text):
     names = ('ports', 'names', 'functions', 'classes', 'attributes', 'imports', 'constants', 'calls',
              'containers', 'items', 'updates', 'iterations', 'operations', 'activations')
     tables = {name: tuple(getattr(facts, name)) for name in names}
-    return F.UnitFacts(unit=unit['key'], module='construction_check', aliases=aliases,
+    result=F.UnitFacts(unit=unit['key'], module='construction_check', aliases=aliases,
         root_scope=facts.root_scope, scope_groups=facts.groups(aliases), **tables)
+    if not protocols:return result
+    from scar.analysis.source_suspension_interfaces import SuspensionInterfaceIndex
+    original={node.key:plans[node.origin.domain,node.origin.line] for node in graph.templates}
+    def reader(identity,key):
+        assert identity==result.unit
+        return original[key]
+    return result,SuspensionInterfaceIndex(plan_reader=reader)
 
 
 def test_source_new_init_and_foreign_result_preserve_protocol_interfaces():
@@ -172,3 +179,46 @@ g = deferred(*unknown)
             pack = unit.ports.index(projection.pack.port)
             formal = unit.ports.index(projection.formal.port)
             assert formal not in solver.adj.get(pack, ())
+
+
+def test_generator_creation_and_advance_keep_yield_sent_and_return_separate():
+    source='''
+def leaf():
+    return 1
+def terminal():
+    return 2
+def stream(value):
+    sent = yield value
+    return terminal
+g = stream(leaf)
+'''
+    unit,index=source_facts(source,protocols=True)
+    solver=_Solver([unit]);solver.generators.interfaces=index
+    assert solver.solve(100_000)
+    assert len(solver.generators.creations)==1 and not solver.generators.advances
+    frame=next(iter(solver.generators.states.values()))
+    fid=frame[0];function=solver.functions[fid][1]
+    leaf=next(v for v in solver.ns_values[unit.unit,F.NamespaceKind.MODULE.value,0,'leaf'] if v[0]=='function')
+    assert leaf not in solver.values[function.formals[1]]
+
+    unit,index=source_facts(source+'for item in g:\n    result = item\n',protocols=True)
+    solver=_Solver([unit]);solver.generators.interfaces=index
+    assert solver.solve(100_000)
+    module=lambda name:solver.ns_values[unit.unit,F.NamespaceKind.MODULE.value,0,name]
+    leaf=next(v for v in module('leaf') if v[0]=='function')
+    terminal=next(v for v in module('terminal') if v[0]=='function')
+    assert leaf in module('result') and terminal not in module('result')
+    assert solver.generators.getters and solver.generators.advances
+    from scar.ir.program import source_generators as D
+    for driven in solver.generators.advances.values():
+        assert driven.connection.activation is T.FunctionActivation.RESUME_BODY
+        assert not driven.connection.returns
+        assert decode(D.GeneratorAdvance,encode(driven,record_tags=P.PRODUCTION_RECORD_TAGS),
+                      record_tags=P.PRODUCTION_RECORD_TAGS)==driven
+        site=solver.generators.iterations[driven.iteration]
+        state=next(r for r in driven.connection.parameters if r.kind is T.RouteKind.STATE)
+        assert state.actuals==(site.world,)
+        assert driven.exhaustion is not None and driven.exhaustion.value!=site.value
+        for yielded in driven.yielded:
+            assert yielded.exported!=yielded.sent and yielded.sent_literal.to_python() is None
+            assert ('constant','NoneType',None) in solver.values[solver.original_point(yielded.sent)]

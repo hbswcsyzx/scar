@@ -99,6 +99,9 @@ property accessor复用`FunctionConnection`的参数/环境/状态接线。gette
 参数包不封闭时，已知函数体仍可在`CALL_SIGNATURE_ACCEPTANCE`条件下接入；`ArgumentProjection`分别表示位置元素、命名元素及剩余参数。
 `SYMBOLIC_PACK`与`CLOSED_PACK`分开，默认值缺席条件、原包和未决需求保留；投影传播may内容，不建立包对象到参数的alias。
 这只补充条件静态图，不证明调用实际发生、绑定完整、路径可满足或变换合法；生成器/异步创建仍不激活body。
+同步生成器分离创建、取iterator与advance：创建保存引用路由，advance才接body，并使用当前推进的world。
+yield导出接循环元素；sent输入与terminal return分开，正常return经StopIteration接口表示耗尽，不当作元素。
+挂起/恢复旁表引用sealed F4原端口及摘要；稀疏F5没有的world端口仍用其原G.Port，不伪造源码身份。
 
 效果至少区分 reads、writes、allocates、frees、aliases、escapes、RNG、异常、外部及顺序影响。
 未知效果保持开放；异常前已经发生的写入、IO 和清理不可回滚成“无效果”。

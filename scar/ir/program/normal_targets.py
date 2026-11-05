@@ -91,6 +91,7 @@ class ArgumentPacks:
 class FunctionActivation(str,Enum):
     NORMAL='NORMAL'
     CREATE_DEFERRED_BODY='CREATE_DEFERRED_BODY'
+    RESUME_BODY='RESUME_BODY'
 
 
 class ArgumentBinding(str, Enum):

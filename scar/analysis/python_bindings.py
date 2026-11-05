@@ -22,6 +22,7 @@ from scar.analysis.normal_query import NormalCallGraph
 from scar.analysis.normal_targets import _Solver,_star_imports
 from scar.analysis.normal_entry import EntrySolver
 from scar.analysis import normal_entry,normal_facts,normal_namespaces
+from scar.analysis import source_generators
 from scar.ir.program import normal_entry as E
 from scar.analysis.source_stage import _durable_bytes,_durable_mkdir
 from scar.analysis.source_template_links import _json,_stream
@@ -158,17 +159,17 @@ class _BindingCallbacks:
 
 
 class _BindingSolver(_BindingCallbacks,_Solver):
-    def __init__(self,units,stars,definitions,stub=None,stub_artifact=None):
+    def __init__(self,units,stars,definitions,stub=None,stub_artifact=None,*,jobs=None):
         self._binding_maps(definitions)
-        super().__init__(units,stars)
+        super().__init__(units,stars,jobs=jobs)
         self._binding_flows(stub,stub_artifact,eager=True)
 
 
 class EntryBindingSolver(_BindingCallbacks,EntrySolver):
     """Load native constraints only when their original code scope is admitted."""
-    def __init__(self,store,entries,definitions,stub=None,stub_artifact=None):
+    def __init__(self,store,entries,definitions,stub=None,stub_artifact=None,*,jobs=None):
         self._binding_maps(definitions)
-        super().__init__(store,entries)
+        super().__init__(store,entries,jobs=jobs)
         self._binding_flows(stub,stub_artifact,eager=False)
 
     def load_unit(self,identity):
@@ -201,18 +202,23 @@ def _native_batch(task):
 
 
 def _source_tables(solver,out,*,entry):
+    solver.generators.validate_parents()
+    solver.generators.close()
     tables=dict(source_links=_stream(out/'source-calls.jsonl.gz',solver.links.values()),
         source_content=_stream(out/'source-content.jsonl.gz',solver.containers.links.values()),
         source_namespaces=_stream(out/'source-namespaces.jsonl.gz',normal_namespaces.namespace_lookups(solver)),
         source_properties=_stream(out/'source-properties.jsonl.gz',solver.descriptors.property_accesses.values()),
         source_attribute_storage=_stream(out/'source-attribute-storage.jsonl.gz',solver.descriptors.storage_accesses.values()),
         source_constructions=_stream(out/'source-constructions.jsonl.gz',solver.constructions.links.values()))
+    tables.update(source_generators.tables(solver.generators,out,prefix='source_'))
     if entry:
         solver.complete_call_demands()
         tables.update(entry_activations=_stream(out/'entry-activations.jsonl.gz',solver.activations.values()),
             entry_module_demands=_stream(out/'entry-module-demands.jsonl.gz',solver.module_demands.values()),
             entry_body_demands=_stream(out/'entry-body-demands.jsonl.gz',solver.body_demands.values()),
             entry_call_demands=_stream(out/'entry-call-demands.jsonl.gz',solver.call_demands.values()))
+    solver.generators.validate_parents()
+    tables['generator_analysis']=solver.generators.stats
     return tables
 
 
@@ -256,13 +262,13 @@ def build_binding_graph(targets,out,site,*,catalog=None,jobs=4,propagate=True,ma
     if propagate:
         if entry:
             store=normal_facts.SourceFactStore(view.facts)
-            solver=EntryBindingSolver(store,entry_sources,definitions,stub,stub_artifact)
+            solver=EntryBindingSolver(store,entry_sources,definitions,stub,stub_artifact,jobs=jobs)
         else:
             units=list(view.unit_facts());model_units=json.loads((Path(view.inputs['model'])/'manifest.json').read_bytes())['units']
             model_units={u['key']:u for u in model_units}
             with ThreadPoolExecutor(max_workers=8) as pool:
                 stars=list(pool.map(lambda u:_star_imports(view.inputs['model'],model_units[u.unit],u.module),units))
-            solver=_BindingSolver(units,stars,definitions,stub,stub_artifact)
+            solver=_BindingSolver(units,stars,definitions,stub,stub_artifact,jobs=jobs)
             del units
         fixed=solver.solve(max_events)
         native_calls=tuple(solver.native_calls.values())

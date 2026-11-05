@@ -23,6 +23,8 @@ class ContainerFlow:
         self.update_targets=defaultdict(set);self.all_readers=defaultdict(set);self.method_keys=defaultdict(set)
         self.copies=defaultdict(set);self.iterators=defaultdict(set);self.iter_sources=defaultdict(set)
         self.content_readers=defaultdict(set)
+        self.iteration_sites=defaultdict(list);self.iteration_site_keys=set();self.iterator_getters=defaultdict(set)
+        self.followed_iterators=set()
         self.links={};self.namespace_sources=defaultdict(set);self.unknown_keys=set()
         # Shape witnesses use original construction facts, never the size or
         # contents of the flow-insensitive entries map.
@@ -55,10 +57,17 @@ class ContainerFlow:
             for value in tuple(self.s.values.get(o+item.target if item.append else o+item.source,())):
                 self.consume(o+item.target if item.append else o+item.source,value)
         elif table=='iterations':
+            identity=unit.unit,item
+            if identity not in self.iteration_site_keys:
+                self.iteration_site_keys.add(identity);self.iteration_sites[o+item.value].append((unit,item))
             if item.advance:
                 self.iterators[o+item.source].add(o+item.value)
                 for value in tuple(self.s.values.get(o+item.source,())):self.consume(o+item.source,value)
-            else:self.s.add(o+item.value,('iterator',o+item.source))
+            else:
+                self.iterator_getters[o+item.source].add(o+item.value)
+                self.s.add(o+item.value,('iterator',o+item.source))
+                if hasattr(self.s,'generators'):
+                    for value in tuple(self.s.values.get(o+item.source,())):self.s.generators.get_iterator(value,o+item.value)
         else:raise ValueError('unknown container fact table')
 
     def bind_variadic(self,formal,route,actuals,names,origin=None):
@@ -308,6 +317,14 @@ class ContainerFlow:
                 elif literal[0] in ('external_value','external_member'):self.access(receiver,None,target,write)
 
     def iterate(self,container,target):
+        if container[0]=='source_deferred':
+            self.s.generators.advance(container,target);return
+        if container[0]=='iterator':
+            key=container,target
+            if key in self.followed_iterators:return
+            self.followed_iterators.add(key);self.iter_sources[container[1]].add(target)
+            for value in tuple(self.s.values.get(container[1],())):self.iterate(value,target)
+            return
         if container[0]=='content_iterator':
             self.iterate_mode(container[1],target,container[2]);return
         if container[0]!='container':return
@@ -326,6 +343,10 @@ class ContainerFlow:
                 if key is not None:self.s.add(target,('pair',container,key))
 
     def copy(self,source,target):
+        if target[0]!='container':return
+        if source[0]=='source_deferred' and hasattr(self.s,'generators'):
+            self.s.generators.obligation(self.s.generators.creations[source[1]].origin,
+                'CONTAINER_CONSUMER_ITERATOR_DRIVER_REQUIRED',self.s.gp(target[1]));return
         if source[0]!='container' or target[0]!='container':return
         self.copies[source].add(target)
         for key,sources in tuple(self.entries[source].items()):
@@ -334,6 +355,8 @@ class ContainerFlow:
                 elif source[2]!=F.ContainerKind.MAPPING.value:self.write(target,None,point)
 
     def consume(self,point,value):
+        if hasattr(self.s,'generators'):
+            for target in tuple(self.iterator_getters.get(point,())):self.s.generators.get_iterator(value,target)
         for spec in tuple(self.argument_projections.get(point,())):self.project_value(value,spec)
         for key,target,write in tuple(self.items.get(point,())):self.apply_item(value,key,target,write)
         for receiver,target,write in tuple(self.keys.get(point,())):
@@ -348,6 +371,7 @@ class ContainerFlow:
             if value[0]=='iterator':
                 self.iter_sources[value[1]].add(target)
                 for container in tuple(self.s.values[value[1]]):self.iterate(container,target)
+            elif value[0]=='source_deferred':self.s.generators.advance(value,target)
         for target in tuple(self.iter_sources.get(point,())):self.iterate(value,target)
         for container,target in tuple(self.method_keys.get(point,())):self.apply_item(container,point,target,False)
         for key in tuple(self.pack_watch.get(point,())):

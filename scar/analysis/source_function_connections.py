@@ -241,6 +241,9 @@ def connect(solver, fid: int, invocation: Invocation, receiver: int | None = Non
             returned.append((gp(offset + function.return_world), gp(invocation.result_world)))
     elif hasattr(solver,'body_demand'):
         solver.body_demand(fid,invocation.callee,'DEFERRED_BODY_RESUME_OPEN')
-    return T.FunctionConnection(gp(fid), body, activation, (environment, *routes, state),
-                                tuple(returned), conditions, packs,
-                                projections=tuple(projections), binding=binding)
+    connection=T.FunctionConnection(gp(fid), body, activation, (environment, *routes, state),
+                                    tuple(returned), conditions, packs,
+                                    projections=tuple(projections), binding=binding)
+    if activation is T.FunctionActivation.CREATE_DEFERRED_BODY and hasattr(solver,'generators'):
+        solver.generators.create(fid,invocation,receiver,class_receiver,connection)
+    return connection

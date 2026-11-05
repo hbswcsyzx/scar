@@ -12,6 +12,7 @@ from scar.analysis import tensor_return_flow,tensor_stub_contracts,tensor_langua
 from scar.ir.program import python_bindings as B,normal_namespaces as N,source_productions as P
 from scar.ir.program import tensor_values as V,binding_returns as R
 from scar.ir.program import normal_targets as T
+from scar.ir.program import source_generators as D,suspension_interfaces as S
 from scar.ir.program import normal_entry as E
 from scar.analysis import normal_entry,normal_facts
 from scar.ir.program.codec import loads as graph_loads
@@ -118,6 +119,24 @@ class PythonBindingGraph:
 
     def source_constructions(self,source=None):
         yield from self._source_table('source_constructions',T.ConstructionLink,source,'result')
+
+    def deferred_creations(self,source=None):
+        yield from self._source_table('source_deferred_creations',D.DeferredCreation,source,'origin.world')
+
+    def iteration_interfaces(self,source=None):
+        yield from self._source_table('source_iteration_interfaces',S.IterationSite,source,'value')
+
+    def deferred_bodies(self,source=None):
+        yield from self._source_table('source_deferred_bodies',S.DeferredBodySite,source,'source_callable')
+
+    def generator_iterators(self,source=None):
+        yield from self._source_table('source_generator_iterators',D.GeneratorIterator,source,'result')
+
+    def generator_advances(self,source=None):
+        yield from self._source_table('source_generator_advances',D.GeneratorAdvance,source,'iteration')
+
+    def deferred_driver_obligations(self,source=None):
+        yield from self._source_table('source_deferred_driver_obligations',D.DeferredDriverObligation,source,'origin.world')
 
     def entry_activations(self,source=None):
         yield from self._source_table('entry_activations',E.ScopeActivationEvidence,source,'target')

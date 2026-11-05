@@ -13,6 +13,7 @@ class EntryReason(str,Enum):
     SOURCE_FUNCTION_CALL='SOURCE_FUNCTION_CALL'
     CLASS_BUILD='CLASS_BUILD'
     EAGER_REGION='EAGER_REGION'
+    GENERATOR_ADVANCE='GENERATOR_ADVANCE'
 
 
 @dataclass(frozen=True,slots=True)
