@@ -14,7 +14,7 @@ NORMAL_SUCCESS / CPython 3.14.7；软件边界到算子/运行时API。后端设
 | F5 局部接口 | 852分片；8,750 iteration、709 deferred body、9,361 mapping模板、1,362 merge协议；48 worker实测68.80秒 |
 | F5 接线 | 入口按需激活；参数/捕获环境/world/返回、构造/属性及同步generator；DIRECT/CLOSED_PACK/SYMBOLIC_PACK |
 | F5 发布 | source-target schema12，READ_SELECTOR_V1；字段按allocation来源/class/member区分；content按相同目标邻域分解 |
-| 静态字段 | 原端口literal/type/open有限域，每端口最多4个literal；尚未接入全部跨调用依赖 |
+| 静态字段 | 原端口literal/type/open有限域，每端口最多4个literal；已接参数/默认值/数据返回、模块成员、属性及容器内容关系，保原表行与条件 |
 | 入口及builtin | 脚本输入契约；按namespace/reference解析compile/exec接口、默认参数、caller context和条件code值流 |
 
 基础模型 artifacts/current/static/ 的manifest SHA：
@@ -34,13 +34,15 @@ NORMAL_SUCCESS / CPython 3.14.7；软件边界到算子/运行时API。后端设
 - **Implemented / Verified：** 原生绑定重算现复用852接口摘要。binding-interface-wiring/核真实World的48 iteration及2 body，封死F4恢复入口仍通过，plan_reads=0；reader接受精确receipt并拒绝错误receipt。仅构造/读取检查，非全量native图验收。
 - **Implemented / Verified：** scalar-values-world/保66个原operation、8条条件推导，单源字段固定点约2秒；4个端口发生有限域宽化。没有把singleton may集当must常量。
 - **Implemented / Verified：** script-launch-current/保实际启动命令输入、原F0/F2/root及2个初始namespace读取端口。argv/environment是可变位置的初值，未列出的环境仍未知。
-- **Implemented：** launcher-source-execution-current/自动生成compile/exec两边界、一个编译上下文及一个code-use；原owner、actuals、worlds保留。mode来自原F2 literal，flags0/dont_inheritFalse/optimize-1及声明process0/inherit16777216分别记录。局部alias与shadow源码检查通过；尚未解析payload或激活exec body。
+- **Implemented / Verified：** launcher-source-execution-current/verification.json核compile/exec两边界、一个编译上下文及一个code-use；原owner、actuals、worlds保留。mode来自原F2 literal，flags0/dont_inheritFalse/optimize-1及声明process0/inherit16777216分别记录。局部alias与shadow源码检查通过；尚未解析payload或激活exec body。
+- **Implemented / Verified：** scalar-graph-world-policy/verification.json核真实World/Policy字段层：52操作、964关系组、9,455原端口字段、6条条件推导，53.07秒；压缩/解码收据及父表行、参数/返回和外层条件逐项核对通过。字段队列清空不等于4M父图固定点；未声称must常量。共享namespace/content使用线性分组；world/state、参数包及deferred creation不冒充标量引用。
+- **Observed：** 4b5ac5b9版本的连续接线求解已启动，launch为entry-pack-fixed.launch.json；使用--until-fixed-point，不因固定事件上限从头重算。结果以同名log/result为准，尚不能据启动记录宣布收敛。
 - **Verified：** launcher-compilation-context/仅编译捕获bytes，optimize0/1/2均确认继承annotations会改变eval常量区/code_digest。相同path/bytes不足以硬接旧F4 root。有效future位不能直接OR历史feature目录位。
 
 ## 后续顺序
 
 1. 参数包缓存已接入，继续求解至已准入工作队列清空；支持 --until-fixed-point，避免在固定事件上限退出后重算前缀。固定点与整程序覆盖分开验收，不新增优化backend。
-2. 将有限静态值字段接到原参数、返回、namespace及内容关系；保状态/版本及条件，审查跨调用合并产生的过宽候选。
+2. 有限字段与原跨调用/内容关系已接通，继续补pack投影、捕获环境字段及generator值规则；审查跨调用合并产生的过宽候选。字段层与父图分别验收，不把slice当完整程序。
 3. 补实际launcher的payload解释、编译context variant和exec root绑定，再接YAML/CLI配置。当前求解入口仍为eval.py；payload/variant是缺实现，不能谎报为内在runtime UNKNOWN。
 4. 贯通并验收当前native算子/资源/逻辑值及版本关系；YIELD_FROM/AWAIT等driver仍有明确obligation。最后按源码、边界和资源分母审计第一阶段；不凭计数或固定点宣告完成。
 

@@ -90,6 +90,9 @@ compile/exec边界按原namespace/reference来源识别，保留全部actual、w
 语言默认值、原F2直接literal和一般source value分别记录，不把单个may候选升级为唯一值。
 compile结果到exec输入只增加条件引用关系；payload解释、有效编译版本和body绑定需要分别完成，不伪造root展开。
 
+有限标量字段沿原scope、参数/默认值、数据返回、模块/属性及content关系传播；world、环境及参数包不作标量alias。
+`ScalarTransferGroup`保父表行、原端口及条件，以线性大小私有join传递；join不是程序节点。字段上限4，宽化保open，不从singleton may集证明常量。
+
 content的READ_SELECTOR_V1标签表示读取选择条件；未知位置的写入连接全部已订阅selector。
 None用于整体/未知选择或未指定selector的直接依赖，literal None键仍有独立PythonLiteral。
 dict.get默认值保直接来源边，不广播为容器内容；编码因子只分解已有关系，不据标签证明版本或身份。

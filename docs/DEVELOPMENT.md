@@ -356,3 +356,7 @@ python -B -m scar.analysis.software_resources --bindings BINDINGS --declarations
 `python -B -m scar.analysis.normal_facts --parent BASE_FACTS --parent EXTRA_FACTS --out FRESH_CATALOG`引用原分片组成多父目录，正文复制0 bytes；按源展开使用所属父模型和模板，旧收据不重签。
 binding图schema v4继承入口范围，按scope增量订阅native协议，并发布本轮增强的source关系；不得退回全unit eager分析后宣称入口闭合。
 静态函数接线在`source_function_connections.py`；原`source_invocations.py`继续用于动态适配，两个入口相互独立。
+
+有限值字段：`python -B -m scar.analysis.source_scalar_graph --targets TARGET_STORE --out FRESH_FIELDS`；
+可重复传`--source PATH`只采该源码slice，仍保父图跨层来源。`ScalarGraphFields(path).rows(table)`按类型读取
+fields/groups/operations/derivations；先核收据，逐行解码，不展开content因子。固定点只针对有限字段域，不是must常量证明。

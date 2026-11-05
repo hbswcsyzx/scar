@@ -42,6 +42,22 @@ class ScalarReferenceFlow:
 
 
 @dataclass(frozen=True, slots=True)
+class ScalarTransferGroup:
+    """A relation factored through an existing source-query table row.
+
+    The group is an analysis relation, not a new program operation or value.
+    Original table/row/role retain its applicability and provenance.
+    """
+    source_table: str
+    source_ordinal: int
+    role: str
+    sources: tuple[T.GlobalPort, ...]
+    targets: tuple[T.GlobalPort, ...]
+    conditions: tuple[str, ...] = ()
+    semantics: str = 'CONDITIONAL_MAY_SCALAR_CONTENT_NOT_VALUE_IDENTITY'
+
+
+@dataclass(frozen=True, slots=True)
 class ScalarDerivation:
     site: T.LanguageOperationSite
     premises: tuple[ScalarPremise, ...]
