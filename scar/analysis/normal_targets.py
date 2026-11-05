@@ -12,6 +12,8 @@ import json
 import sys
 from pathlib import Path
 import time
+from contextlib import ExitStack
+import faulthandler
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import fields
 from functools import lru_cache
@@ -24,17 +26,23 @@ from scar.ir.program import source_productions as P
 from scar.ir.program import normal_graph as G
 from scar.ir.record_codec import decode,encode
 from scar.analysis.source_template_links import _json
-from scar.analysis import source_template_batch,source_template_workers,normal_output,source_interface_store,source_content_factors
+from scar.analysis import source_template_batch,source_template_workers,normal_output,source_interface_store,source_content_factors,normal_containers,source_container_delta
 from scar.ir.program import source_interfaces as L,content_factors as C
 from scar.analysis.source_stage import _durable_bytes,_durable_mkdir
 from scar.analysis.static_query import _Fragments
-from scar.analysis.normal_containers import ContainerFlow
 from scar.analysis import normal_namespaces
 from scar.analysis import source_descriptors,source_function_connections,source_construction,source_generators,source_suspension_interfaces
 from scar.analysis.source_function_connections import Invocation,connect
 from scar.analysis.source_descriptors import DescriptorFlow
 from scar.ir.program import normal_namespaces as N
 from scar.ir.program import source_generators as D,suspension_interfaces as S
+
+
+def propagation_pins():
+    """Bind the complete source-content implementation, including overrides."""
+    return {name:sha256(Path(path).read_bytes()).hexdigest() for name,path in (
+        ('solver',__file__),('containers',normal_containers.__file__),
+        ('container_delta',source_container_delta.__file__))}
 
 
 def _star_imports(model,unit,module):
@@ -113,7 +121,7 @@ class _Solver:
             offset=self.offsets[unit.unit]
             for function in unit.functions:
                 for formal in function.formals[1:-1]:self.add(offset+formal,('external_value',offset+formal))
-        self.containers=ContainerFlow(self,units)
+        self.containers=source_container_delta.DeltaContainerFlow(self,units)
         self.constructions=source_construction.ConstructionFlow(self)
         self.generators=source_generators.SourceGeneratorFlow(self)
 
@@ -425,7 +433,7 @@ def _publish(solver,facts,root,report,out,started,max_events,fixed,stars,extra=N
     modes=Counter(link.mode for link in solver.links.values());known_calls={link.result for link in solver.links.values()}
     source_calls={link.result for link in solver.links.values() if link.source_callable is not None}
     original_calls=sum(len(u.calls) for u in units)
-    result=dict(schema='scar.normal-source-targets',schema_version=11,status='SOURCE_TARGET_FIXED_POINT' if fixed else 'SOURCE_TARGET_BUDGET_FRONTIER',
+    result=dict(schema='scar.normal-source-targets',schema_version=12,status='SOURCE_TARGET_FIXED_POINT' if fixed else 'SOURCE_TARGET_BUDGET_FRONTIER',
         analysis_mode='LIBRARY_MAY_ANALYSIS',
         source_facts=str(facts),source_facts_sha256=sha256(root).hexdigest(),profile='NORMAL_SUCCESS',
         selected_sources=len(units),source_calls=original_calls,source_functions=len(solver.functions),source_classes=len(solver.classes),
@@ -437,7 +445,8 @@ def _publish(solver,facts,root,report,out,started,max_events,fixed,stars,extra=N
         packed_candidate_links=sum(link.argument_packs is not None for link in solver.links.values()),
         classes_with_packed_bases=sum(c.bases_pack is not None for u in units for c in u.classes),
         unknown_namespace_keys=len(solver.containers.unknown_keys),
-        container_implementation_sha256=sha256(Path(ContainerFlow.consume.__code__.co_filename).read_bytes()).hexdigest(),
+        container_implementation_sha256=sha256(Path(normal_containers.__file__).read_bytes()).hexdigest(),
+        propagation_pins=propagation_pins(),container_analysis=dict(solver.containers.delta_stats),
         star_import_module_candidates=sum(len(names) for _,names,*_ in stars),
         declared_import_modules=len(solver.imported_modules),namespace_lookups=namespaces['records'],namespaces=namespaces,
         properties=properties,property_states=dict(Counter(p.state.value for p in solver.descriptors.property_accesses.values())),
@@ -530,7 +539,14 @@ def main():
     p.add_argument('--max-events',type=int,default=20_000_000)
     p.add_argument('--jobs',type=int,default=None,help='template reader processes; default min(48, CPU affinity)')
     p.add_argument('--interfaces',help='precomputed per-unit source interface store')
-    a=p.parse_args();r=solve_targets(a.facts,a.out,max_events=a.max_events,entries=a.entry,jobs=a.jobs,interfaces=a.interfaces)
+    p.add_argument('--stack-log',help='sample the analyzer stack every 30 seconds; no target instrumentation')
+    a=p.parse_args()
+    with ExitStack() as diagnostics:
+        if a.stack_log:
+            stream=diagnostics.enter_context(Path(a.stack_log).open('x'))
+            faulthandler.dump_traceback_later(30,repeat=True,file=stream)
+            diagnostics.callback(faulthandler.cancel_dump_traceback_later)
+        r=solve_targets(a.facts,a.out,max_events=a.max_events,entries=a.entry,jobs=a.jobs,interfaces=a.interfaces)
     print(json.dumps({k:r[k] for k in ('status','source_calls','calls_with_candidates','candidate_links','modes','value_events','seconds')},indent=2))
 
 

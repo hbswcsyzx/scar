@@ -94,6 +94,7 @@ def write_factors(flow, out, prefix=''):
     stats['seconds'] = monotonic() - started
     return {prefix + 'content_factors': descriptor,
             prefix + 'content_encoding': 'EQUAL_NEIGHBORHOODS_V1',
+            prefix + 'content_key_semantics': getattr(flow,'content_key_semantics','LEGACY_ARRIVAL_LABELS'),
             prefix + 'content_links': len(flow.links),
             prefix + 'content_index_cycles': cycles,
             prefix + 'content_events': getattr(flow,'content_events',0),

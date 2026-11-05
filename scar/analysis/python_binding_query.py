@@ -7,6 +7,7 @@ import json
 from pathlib import Path
 
 from scar.analysis.normal_query import NormalCallGraph
+from scar.analysis.normal_targets import propagation_pins
 from scar.analysis import python_bindings
 from scar.analysis import tensor_return_flow,tensor_stub_contracts,tensor_language_flow
 from scar.ir.program import python_bindings as B,normal_namespaces as N,source_productions as P
@@ -23,8 +24,12 @@ from scar.ir.record_codec import decode
 class PythonBindingGraph:
     def __init__(self,path):
         self.path=Path(path).absolute();self.report=json.loads((self.path/'result.json').read_bytes())
-        if self.report['schema']!='scar.generated-python-binding-graph' or self.report['schema_version']!=4:
+        if self.report['schema']!='scar.generated-python-binding-graph' or self.report['schema_version']!=5:
             raise ValueError('unsupported generated binding graph')
+        if self.report['propagation'] is not None and (
+                self.report['source_propagation_pins'] != propagation_pins()
+                or self.report['source_content_key_semantics'] != 'READ_SELECTOR_V1'):
+            raise ValueError('binding source propagation or key semantics differ')
         if self.report['implementation_sha256']!=sha256(Path(python_bindings.__file__).read_bytes()).hexdigest():
             raise ValueError('binding graph producer differs')
         if self.report['types_sha256']!=sha256(Path(B.__file__).read_bytes()).hexdigest():

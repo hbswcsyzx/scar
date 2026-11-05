@@ -37,8 +37,11 @@ class NormalCallGraph:
     def __init__(self, targets):
         self.path = Path(targets).absolute()
         self.report = json.loads((self.path / 'result.json').read_bytes())
-        if self.report['schema'] != 'scar.normal-source-targets' or self.report['schema_version'] != 11:
+        if self.report['schema'] != 'scar.normal-source-targets' or self.report['schema_version'] != 12:
             raise ValueError('expected current source target graph')
+        if (self.report['propagation_pins'] != normal_targets.propagation_pins()
+                or self.report['content_key_semantics'] != 'READ_SELECTOR_V1'):
+            raise ValueError('source-content producer or selector semantics differ')
         if self.report['types_sha256'] != sha256(Path(T.__file__).read_bytes()).hexdigest():
             raise ValueError('call edge declarations differ')
         if self.report['source_reader_pins']!={name:sha256(Path(module.__file__).read_bytes()).hexdigest() for name,module in

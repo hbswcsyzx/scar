@@ -19,7 +19,7 @@ import sysconfig
 import time
 
 from scar.analysis.normal_query import NormalCallGraph
-from scar.analysis.normal_targets import _Solver,_star_imports
+from scar.analysis.normal_targets import _Solver,_star_imports,propagation_pins
 from scar.analysis.normal_entry import EntrySolver
 from scar.analysis import normal_entry,normal_facts,normal_namespaces
 from scar.analysis import source_generators,source_content_factors
@@ -221,6 +221,8 @@ def _source_tables(solver,out,*,entry):
             entry_call_demands=_stream(out/'entry-call-demands.jsonl.gz',solver.call_demands.values()))
     solver.generators.validate_parents()
     tables['generator_analysis']=solver.generators.stats
+    tables['source_propagation_pins']=propagation_pins()
+    tables['source_container_analysis']=dict(solver.containers.delta_stats)
     return tables
 
 
@@ -346,7 +348,7 @@ def build_binding_graph(targets,out,site,*,catalog=None,jobs=4,propagate=True,ma
     protocols=_stream(out/'declared-protocols.jsonl.gz',protocol_calls)
     operators=_stream(out/'declared-operators.jsonl.gz',operator_calls)
     operator_gaps=_stream(out/'operator-frontiers.jsonl.gz',operator_frontiers)
-    result=dict(schema='scar.generated-python-binding-graph',schema_version=4,status='DECLARATIONS_CONNECTED',
+    result=dict(schema='scar.generated-python-binding-graph',schema_version=5,status='DECLARATIONS_CONNECTED',
         analysis_mode=analysis_mode,entry_sources=entry_sources,event_budget=max_events,
         source_targets=str(view.path),source_result_sha256=sha256((view.path/'result.json').read_bytes()).hexdigest(),
         package_version=document['package_version'],source_revision=document['source_revision'],materials=dict(uri=artifact.uri,sha256=artifact.sha256,size_bytes=artifact.size_bytes),

@@ -87,6 +87,10 @@ argv/environment记录可变位置的初始内容，不作为不可变tuple/dict
 编译上下文保filename/mode、请求flags、继承策略、source有效future位和优化级别；未知继承不是0。
 同路径/同bytes不保证同一编译上下文，compile也不等于执行；parser-only flags与运行代码flags分开。
 
+content的READ_SELECTOR_V1标签表示读取选择条件；未知位置的写入连接全部已订阅selector。
+None用于整体/未知选择或未指定selector的直接依赖，literal None键仍有独立PythonLiteral。
+dict.get默认值保直接来源边，不广播为容器内容；编码因子只分解已有关系，不据标签证明版本或身份。
+
 算子结果的声明类型由`ValueShape`及`ReturnTypeEvidence`连接原结果端口，元组字段和序列元素有显式投影。
 这些记录是Value的条件属性，不能代替ObjectID、StorageID或LogicalVersion。序列转成list/tuple只传播元素类型摘要。
 绑定/未绑定方法的receiver独立保存，原调用的实参、参数包和输入/输出world保持原样；手写接口没有生成映射时不虚构ATen selector。
