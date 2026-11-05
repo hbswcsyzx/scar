@@ -40,6 +40,7 @@ factory依赖可由原inventory独立走前端，再以不可变引用加入852�
 - **Implemented / Verified：** 独立DeltaContainerFlow将每次write引起的iterator/copy全历史重扫改为增量通知，首次订阅仍完整回放。container-delta-entry-prefix/verification.json按原2M分段准入，在4M事件核17张关系表的记录多重集，全部新增0/遗漏0；仍是诊断前缀，不证明全图收敛。传播82.30秒，旧同前缀89.23秒，未做隔离重复整体benchmark。
 - **Implemented / Verified：** 增量实现现已接主路径，动态key只处理本次新候选，read订阅去重；内容key采用READ_SELECTOR_V1，消除旧标签对通知顺序的依赖。entry-delta-selector-4m/verification.json：16张非content表完全相等，51,570条唯一(source,target,container)依赖完全相等；带key记录57,048→52,369，明确不声称旧标签相等。schema12严格读回及World原25条字段边通过，总128.85秒，仍非固定点。
 - **Verified：** dynamic-key-delta/verification.json用原item ABI、合成500个key和8个receiver：访问1,002,000→4,000；3次中位数2.063→0.060秒，值、邻接及本场景带标签关系相等。34.21倍仅为此协议微基准，不是整个分析器或LeWM加速。
+- **Implemented / Verified：** 独立StaticPackShapes把不可变escape/write/update及merge证明与动态open/readiness分开。pack-shapes-world/verification.json核World全部51个pack查询与旧结果/顺序相等；一个源码fixture核子依赖opening、空包、escape与后续污染。5,100次重复查询的3次中位数0.517→0.00822秒；仅静态查询微基准。尚未接入正在运行的producer，不改其代码或重建852接口。
 - **Verified：** 旧增量原型container-delta-evaluation/verification.json：World原端口的合成1000次mapping写入，3次中位数0.72615→0.09674秒（7.51倍），2,226带标签关系、值及邻接完全相等；仅为当时协议微基准。当前版本的key语义及新测量以entry-delta-selector-4m与dynamic-key-delta为准。
 - **Implemented / Verified：** source_scalar_values.collect_unit在原常量、alias、namespace读写和LanguageOperation上建字段依赖；IR不依赖analysis模块。scalar-values-world/verification.json保World全部66个原operation，得到8条条件推导，单源字段固定点约2秒；4个端口触发有限域宽化。保原operand/result/world，既不激活body，也不宣称must常量、身份等价或变换合法。
 - **Implemented / Verified：** source_launch CLI登记实际launcher的原F0/F2版本、root、argv/env及初始globals；script-launch-current/verification.json核原2个namespace读取端口、本地条件字段和codec往返。未提供的环境项保持未知，argv/environment保持可变。入口登记尚未激活launcher或接入完整求解。
@@ -49,7 +50,7 @@ factory依赖可由原inventory独立走前端，再以不可变引用加入852�
 ## 剩余瓶颈与后续顺序
 
 1. **局部接口层已验收。** 原scope/fact/port分母完整，按单元并行产出；跨单元接线不再恢复F4正文。后续新增依赖可独立补同类分片，不重建既有图。
-2. **当前层：完成共享状态传播验收。** 增量主路径、selector语义及生产者/读取者pins已接通；entry-incremental-fixed正在以同输入、100M上限求解，附每30秒分析器栈采样（日志中的Timeout只是采样触发，不是程序终止）。仍有必要的写×读展开，不能声称完整通道传播、并行全局求解或第一阶段已完成。native绑定表schema5同步约束传播pins，尚未重跑全量native路径。
+2. **当前层：完成共享状态传播验收。** entry-incremental-fixed同一100M上限求解继续，已过50M；栈采样定位参数包整单元重扫，静态shape缓存已独立实现并核对，待本次producer终止后接入中央pins和主路径。每30秒栈日志中的Timeout是采样触发，不是程序终止。仍有必要的写×读展开，不能声称并行全局求解或第一阶段已完成。native绑定表schema5尚未重跑全量路径。
 3. **随后接静态值字段。** 既有builtin evaluator、有限高度域和单源原端口投影已实现；2+3、字符串拼接及反馈循环fixture通过。下一步将它接入已准入scope的原跨调用/内容依赖，区分条件may字段与唯一值证明；当前独立字段层没有接通调用、import或资源关系。
 4. **入口与编译上下文覆盖。** 成功命令入口是run_inference.py，当前完整求解仍为eval.py入口。带收据入口契约已实现；下一步接原read_text→compile→exec端口、匹配或生成编译上下文variant，再接YAML/CLI配置来源。当前eval F4不能冒充继承annotations的编译版本；缺variant是缺实现，不能写成运行字段UNKNOWN。共享formal/heap、逻辑版本/shape/资源、YIELD_FROM/AWAIT等仍未全贯通。
 
