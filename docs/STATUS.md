@@ -14,6 +14,7 @@ NORMAL_SUCCESS / CPython 3.14.7；软件边界到算子/外部动作接口。后
 | F5 局部接口 | schema1，852单元分片；8,750 iteration、709 deferred body、9,361 mapping模板/1,362 merge协议；沿用原端口和owner |
 | F5 接线 | 入口按需激活；参数/捕获环境/world/返回；DIRECT/CLOSED_PACK/SYMBOLIC_PACK；构造协议、属性及同步generator驱动 |
 | F5 发布 | 开发版source-target schema11；实例字段保原站点/owner/class；密集content关系按相同目标邻域分解存储 |
+| 独立字段层 | 复用既有builtin求值器，原端口挂条件literal/type/open字段；每端口最多4个literal，反馈循环宽化；尚未接入跨调用求解 |
 
 原端口及共享body保留；函数引用不是内容版本，may候选不证明运行路径、对象/数据身份或变换合法。
 同一源码分配点可返回多类，字段按allocation来源、receiver class和member区分。YIELD_FROM/AWAIT等未完成驱动仍保obligation。
@@ -35,14 +36,17 @@ factory依赖可由原inventory独立走前端，再以不可变引用加入852�
 - **Verified：** F5接线完整计划解码/恢复、suspension材料发现及模板池均为0；从摘要读取22单元的35迭代、20body、28mapping接口。输入压缩片仍核字节收据。接线约20.98秒入口准备、89.23秒传播、23.55秒主发布；逐表耗时可查result。
 - **Verified：** content-factors-real/verification.json：旧57,048条关系→1,814连接因子，展开集合/计数及查询过滤完全相等；compressed1,986,616→357,762 bytes。只改变存储表示，不改原程序。
 - **Implemented / Verified：** 更完整求解曾在20M后因下降索引投影环递归失败，诊断留entry-content-factors-fixed.failure.json；现用内容增量队列和保约束的位置宽化处理。百万索引自环/双环单fixture5.61秒通过，另5项相关检查31.75秒通过。因子对当前关系无损，宽化本身是may过近似，不能称与旧精确位置完全相等。
-- **Observed：** entry-content-cycle-fixed.log中的同一100M上限进程已越过28M事件，尚未发布result；不因进度输出或预算上限宣称固定点。旧schema10结果是其原commit的已封存证据，当前读取/发布使用schema11。
+- **Observed：** entry-content-cycle-fixed.log中的同一100M上限进程已越过58M事件，2,362活跃scope、274加载单元、frontier3,074,031，尚未发布result；不因进度或预算上限宣称固定点。旧schema10结果是其原commit的已封存证据，当前读取/发布使用schema11。
+- **Implemented / Verified：** 独立DeltaContainerFlow将每次write引起的iterator/copy全历史重扫改为增量通知，首次订阅仍完整回放。container-delta-entry-prefix/verification.json按原2M分段准入，在4M事件核17张关系表的记录多重集，全部新增0/遗漏0；仍是诊断前缀，不证明全图收敛。传播82.30秒，旧同前缀89.23秒，未做隔离重复整体benchmark。
+- **Verified：** container-delta-evaluation/verification.json：使用World原端口的合成1000次mapping写入，3次中位数0.72615→0.09674秒（7.51倍），2,226带标签关系、值及邻接完全相等。这只是协议微基准，不是整体建图或LeWM加速。增量实现尚未替换后台旧进程。
+- **Implemented / Verified：** source_scalar_values.collect_unit在原常量、alias、namespace读写和LanguageOperation上建字段依赖；IR不依赖analysis模块。scalar-values-world/verification.json保World全部66个原operation，得到8条条件推导，单源字段固定点约2秒；4个端口触发有限域宽化。保原operand/result/world，既不激活body，也不宣称must常量、身份等价或变换合法。
 - **Observed：** entry-field-content-fixed/diagnostic.json记录一次20M事件试跑：传播1060.66秒、frontier1,113,127；已接通World._get_actions原body26，policy调用仍未接通。因旧逐条发布器在内容表输出超过100MB且未结束，主动中止自己的导出；该目录没有完整result，不能作为完整图收据。
 
 ## 剩余瓶颈与后续顺序
 
 1. **局部接口层已验收。** 原scope/fact/port分母完整，按单元并行产出；跨单元接线不再恢复F4正文。后续新增依赖可独立补同类分片，不重建既有图。
-2. **当前层：完成共享状态传播验收。** 存图分解已验；位置环修复后继续同入口固定点求解。下一步才替换传播中的写×读展开：exact/unknown-write/all-values分开，键存在性与dict.get默认值来源保持独立。
-3. **下一层：静态值字段。** scalar-inference-audit/result.json确认当前F5已有2+3及字符串拼接节点、常量operand，却未产出常量结果。应接入已有bounded builtin evaluator并用有限高度域防循环无限生值；不重造解释器、不以内容相等推对象身份。
+2. **当前层：完成共享状态传播验收。** 存图分解、位置环、增量通知的局部及真实前缀关系均已验；同一完整求解继续运行。其终止后先保存收据并查清未决端口，再将已验增量实现接入主路径，同时pin生产者/读取者。仍存在必要的写×读展开，不能声称通道传播或并行全局求解已经完成。
+3. **随后接静态值字段。** 既有builtin evaluator、有限高度域和单源原端口投影已实现；2+3、字符串拼接及反馈循环fixture通过。下一步将它接入已准入scope的原跨调用/内容依赖，区分条件may字段与唯一值证明；当前独立字段层没有接通调用、import或资源关系。
 4. **入口与编译上下文覆盖。** 成功命令入口是run_inference.py，当前求解仍为eval.py入口。launcher的read_text→compile→exec、argv/env及YAML还未接通；compile默认继承future annotations，不能仅凭相同文件bytes硬接旧F4根。需带收据入口契约、有效编译上下文及配置来源。共享formal/heap、逻辑版本/shape/资源、YIELD_FROM/AWAIT等仍未全贯通。
 
 入口：先 python -m scar.analysis.source_interface_build --facts <facts> --out <interfaces> --jobs 48，
