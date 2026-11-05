@@ -97,6 +97,7 @@ class PythonBindingGraph:
         unit=self.source.units_for_source(source)
         def selected(row):
             for field in anchor.split('.'):row=row[field]
+            if row is not None and 'call' in row:row=row['call']
             return row is not None and row['unit'] in unit
         yield from self._table(self.report[name],cls,select=None if unit is None else selected)
 
@@ -114,6 +115,9 @@ class PythonBindingGraph:
 
     def source_attribute_storage(self,source=None):
         yield from self._source_table('source_attribute_storage',T.AttributeStorageAccess,source,'site.world')
+
+    def source_constructions(self,source=None):
+        yield from self._source_table('source_constructions',T.ConstructionLink,source,'result')
 
     def entry_activations(self,source=None):
         yield from self._source_table('entry_activations',E.ScopeActivationEvidence,source,'target')

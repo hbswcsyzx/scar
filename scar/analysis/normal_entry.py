@@ -77,6 +77,11 @@ class EntrySolver(_Solver):
         demand=E.BodyEntryDemand(function.body_scope,self.gp(callee),E.BodyDemandKind(kind))
         self.body_demands[demand]=demand
 
+    def body_binding_resolved(self,fid,callee):
+        unit,function=self.functions[fid]
+        demand=E.BodyEntryDemand(function.body_scope,self.gp(callee),E.BodyDemandKind.ARGUMENT_PACK_BINDING_OPEN)
+        self.body_demands.pop(demand,None)
+
     def call(self,index,value):
         super().call(index,value)
         if value[0]=='property_method':

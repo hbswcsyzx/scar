@@ -3,7 +3,7 @@ from dataclasses import dataclass
 from enum import Enum
 
 from .normal_links import CodeScopeRef,CodeScopeWitness
-from .normal_targets import GlobalPort
+from .normal_targets import GlobalPort, Endpoint
 
 
 class EntryReason(str,Enum):
@@ -18,7 +18,7 @@ class EntryReason(str,Enum):
 @dataclass(frozen=True,slots=True)
 class ScopeActivationEvidence:
     target: CodeScopeRef
-    cause: GlobalPort | CodeScopeRef | None
+    cause: Endpoint | CodeScopeRef | None
     reason: EntryReason
     conditions: tuple[str,...]=('STATIC_MAY_ACTIVATION','CODE_SCOPE_ACTIVE_NOT_PATH_SELECTED')
 
@@ -26,7 +26,7 @@ class ScopeActivationEvidence:
 @dataclass(frozen=True,slots=True)
 class ModuleEntryDemand:
     module: str
-    producer: GlobalPort | None
+    producer: Endpoint | None
     conditions: tuple[str,...]=('NO_DECLARED_PYTHON_UNIT','SOURCE_OR_NATIVE_PROVIDER_CLASSIFICATION_PENDING')
 
 

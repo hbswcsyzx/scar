@@ -205,7 +205,8 @@ def _source_tables(solver,out,*,entry):
         source_content=_stream(out/'source-content.jsonl.gz',solver.containers.links.values()),
         source_namespaces=_stream(out/'source-namespaces.jsonl.gz',normal_namespaces.namespace_lookups(solver)),
         source_properties=_stream(out/'source-properties.jsonl.gz',solver.descriptors.property_accesses.values()),
-        source_attribute_storage=_stream(out/'source-attribute-storage.jsonl.gz',solver.descriptors.storage_accesses.values()))
+        source_attribute_storage=_stream(out/'source-attribute-storage.jsonl.gz',solver.descriptors.storage_accesses.values()),
+        source_constructions=_stream(out/'source-constructions.jsonl.gz',solver.constructions.links.values()))
     if entry:
         solver.complete_call_demands()
         tables.update(entry_activations=_stream(out/'entry-activations.jsonl.gz',solver.activations.values()),

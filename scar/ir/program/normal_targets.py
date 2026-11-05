@@ -15,6 +15,30 @@ class GlobalPort:
     port: Port
 
 
+class ConstructionPortKind(str, Enum):
+    NEW_RESULT = 'NEW_RESULT'
+    NEW_WORLD = 'NEW_WORLD'
+
+
+@dataclass(frozen=True, slots=True)
+class ConstructionPort:
+    """A language-protocol interface, never an invented source-production port.
+
+    Both anchors reference original source ports. The role separates the
+    result of allocation from the state after allocation and before init.
+    """
+    call: GlobalPort
+    source_class: GlobalPort
+    role: ConstructionPortKind
+
+    @property
+    def unit(self):
+        return self.call.unit
+
+
+Endpoint = GlobalPort | ConstructionPort
+
+
 @dataclass(frozen=True, slots=True)
 class LanguageOperationSite:
     action: LanguageOperationKind
@@ -46,7 +70,7 @@ class RouteKind(str, Enum):
 class Route:
     formal: GlobalPort
     kind: RouteKind
-    actuals: tuple[GlobalPort, ...]
+    actuals: tuple[Endpoint, ...]
     keyword_names: tuple[str, ...] = ()
 
 
@@ -59,7 +83,7 @@ class ArgumentPacks:
     """
     positional: GlobalPort | None
     keywords: GlobalPort | None = None
-    receiver: GlobalPort | None = None
+    receiver: Endpoint | None = None
     class_receiver: GlobalPort | None = None
 
 
@@ -75,7 +99,7 @@ class FunctionConnection:
     body: Body
     activation: FunctionActivation
     parameters: tuple[Route,...]
-    returns: tuple[tuple[GlobalPort,GlobalPort],...]
+    returns: tuple[tuple[Endpoint,Endpoint],...]
     conditions: tuple[str,...]
     argument_packs: ArgumentPacks | None=None
 
@@ -129,7 +153,7 @@ class AttributeStorageKind(str,Enum):
 class AttributeStorageAccess:
     site: AttributeSite
     kind: AttributeStorageKind
-    owner: GlobalPort
+    owner: Endpoint
     namespace_unit: str | None
     conditions: tuple[str,...]
 
@@ -143,7 +167,7 @@ class CallLink:
     mode: str
     external_symbol: str | None
     parameters: tuple[Route, ...] = ()
-    returns: tuple[tuple[GlobalPort, GlobalPort], ...] = ()
+    returns: tuple[tuple[Endpoint, Endpoint], ...] = ()
     conditions: tuple[str, ...] = ('SOURCE_STATIC_CANDIDATE', 'CURRENT_CALLABLE_DESCRIPTOR')
     runtime_dispatch_verified: bool = False
     argument_packs: ArgumentPacks | None = None
@@ -152,8 +176,37 @@ class CallLink:
 @dataclass(frozen=True, slots=True)
 class ContentLink:
     """Possible reference content, never a concrete content version proof."""
-    source: GlobalPort
-    target: GlobalPort
-    container: GlobalPort
+    source: Endpoint
+    target: Endpoint
+    container: Endpoint
     key: PythonLiteral | None = None
     semantics: str = 'FLOW_INSENSITIVE_MAY_CONTENT'
+
+
+class ConstructionStage(str, Enum):
+    NEW_LOOKUP_PENDING = 'NEW_LOOKUP_PENDING'
+    SOURCE_NEW = 'SOURCE_NEW'
+    OBJECT_NEW = 'OBJECT_NEW'
+    EXPLICIT_OBJECT_NEW = 'EXPLICIT_OBJECT_NEW'
+    INIT_LOOKUP_PENDING = 'INIT_LOOKUP_PENDING'
+    SOURCE_INIT = 'SOURCE_INIT'
+    OBJECT_INIT = 'OBJECT_INIT'
+    RETURN_FOREIGN = 'RETURN_FOREIGN'
+    RESULT_TYPE_OPEN = 'RESULT_TYPE_OPEN'
+
+
+@dataclass(frozen=True, slots=True)
+class ConstructionLink:
+    """One conditional step of a class call or explicit object allocation.
+
+    Outputs declare interfaces even when the target is still pending; they
+    do not prove that an allocation/initialization occurred or produced data.
+    """
+    result: GlobalPort
+    callee: GlobalPort
+    source_class: GlobalPort
+    stage: ConstructionStage
+    inputs: tuple[Endpoint, ...]
+    outputs: tuple[Endpoint, ...]
+    connection: FunctionConnection | None
+    conditions: tuple[str, ...]

@@ -17,7 +17,7 @@ from scar.analysis.normal_links import _pins
 from scar.analysis import normal_targets
 from scar.analysis import normal_containers
 from scar.analysis import normal_namespaces
-from scar.analysis import source_descriptors,source_function_connections
+from scar.analysis import source_descriptors,source_function_connections,source_construction
 from scar.analysis.source_template_links import read_template_body
 from scar.ir.program import normal_targets as T
 from scar.ir.program import source_productions as P
@@ -34,7 +34,7 @@ class NormalCallGraph:
     def __init__(self, targets):
         self.path = Path(targets).absolute()
         self.report = json.loads((self.path / 'result.json').read_bytes())
-        if self.report['schema'] != 'scar.normal-source-targets' or self.report['schema_version'] != 6:
+        if self.report['schema'] != 'scar.normal-source-targets' or self.report['schema_version'] != 7:
             raise ValueError('expected current source target graph')
         if self.report['types_sha256'] != sha256(Path(T.__file__).read_bytes()).hexdigest():
             raise ValueError('call edge declarations differ')
@@ -46,7 +46,9 @@ class NormalCallGraph:
             raise ValueError('namespace relationship producer differs')
         if self.report['namespace_types_sha256'] != sha256(Path(N.__file__).read_bytes()).hexdigest():
             raise ValueError('namespace declarations differ')
-        for field,module in (('descriptor_implementation_sha256',source_descriptors),('invocation_implementation_sha256',source_function_connections)):
+        for field,module in (('descriptor_implementation_sha256',source_descriptors),
+                ('invocation_implementation_sha256',source_function_connections),
+                ('construction_implementation_sha256',source_construction)):
             if self.report[field]!=sha256(Path(module.__file__).read_bytes()).hexdigest():raise ValueError('source invocation/descriptor implementation differs')
         self.facts = Path(self.report['source_facts'])
         raw = (self.facts / 'result.json').read_bytes()
@@ -75,9 +77,11 @@ class NormalCallGraph:
             raise ValueError('call record count differs')
         for line in raw.splitlines():
             document = json.loads(line)
-            if unit is not None and document[anchor]['unit'] not in unit:
+            endpoint=document[anchor]
+            if endpoint is not None and 'call' in endpoint:endpoint=endpoint['call']
+            if unit is not None and (endpoint is None or endpoint['unit'] not in unit):
                 continue
-            if occurrence is not None and document[anchor]['port']['template']['occurrence'] != occurrence:
+            if occurrence is not None and (endpoint is None or endpoint['port']['template']['occurrence'] != occurrence):
                 continue
             yield document
 
@@ -100,6 +104,18 @@ class NormalCallGraph:
             link = decode(T.ContentLink, document, record_tags=P.PRODUCTION_RECORD_TAGS)
             if any(port.unit not in self.units for port in (link.source,link.target,link.container)):
                 raise ValueError('content endpoint is outside the input domain')
+            yield link
+
+    def constructions(self, source=None, *, occurrence=None):
+        """Allocation, compatible-instance test and init interfaces per class call."""
+        for row in self._documents('constructions', source, occurrence, 'result'):
+            link=decode(T.ConstructionLink,row,record_tags=P.PRODUCTION_RECORD_TAGS)
+            if any(p.unit not in self.units for p in (link.result,link.callee,link.source_class)):
+                raise ValueError('construction anchors outside source catalog')
+            for endpoint in (*link.inputs,*link.outputs):
+                if endpoint.unit not in self.units:raise ValueError('construction endpoint outside source catalog')
+                if type(endpoint) is T.ConstructionPort and (endpoint.call!=link.result or endpoint.source_class!=link.source_class):
+                    raise ValueError('construction interface has another call/class anchor')
             yield link
 
     def namespace_lookups(self, source=None, *, occurrence=None):
@@ -136,7 +152,9 @@ class NormalCallGraph:
         if 'entry_module_demands' not in self.report:return
         unit=self.units_for_source(source)
         for row in self._documents('entry_module_demands',None,None,'producer'):
-            if unit is None or row['producer'] is not None and row['producer']['unit'] in unit:
+            producer=row['producer']
+            if producer is not None and 'call' in producer:producer=producer['call']
+            if unit is None or producer is not None and producer['unit'] in unit:
                 yield decode(ModuleEntryDemand,row,record_tags=P.PRODUCTION_RECORD_TAGS)
 
     def body_demands(self,source=None):

@@ -24,7 +24,8 @@ class Invocation:
 
 def connect(solver, fid: int, invocation: Invocation, receiver: int | None = None, *,
             class_receiver: int | None = None, environment_source: int | None = None,
-            return_value: bool = True, conditions: tuple[str, ...] = ()) -> T.FunctionConnection | None:
+            return_value: bool = True, conditions: tuple[str, ...] = (),
+            on_ready=None) -> T.FunctionConnection | None:
     """Return a shared-body connection after admitting the complete signature.
 
     NORMAL activations propagate ordinary/default reference arguments and the
@@ -32,6 +33,7 @@ def connect(solver, fid: int, invocation: Invocation, receiver: int | None = Non
     packs retain ordered dependencies, never a pack-to-formal reference edge.
     State input/output uses Route/returns, matching the original call binder.
     """
+    requested_conditions = conditions
     unit, function = solver.functions[fid]
     offset = solver.offsets[unit.unit]
     params = function.environment.parameters
@@ -50,20 +52,43 @@ def connect(solver, fid: int, invocation: Invocation, receiver: int | None = Non
                           (gp(environment_source),))
     state = T.Route(gp(offset + function.formals[-1]), T.RouteKind.STATE, (gp(invocation.world),))
     body = T.Body(unit.unit, function.template, function.body)
-    keywords = dict(invocation.keywords)
-    if len(keywords) != len(invocation.keywords):
-        return None
+    positional = list(invocation.positional)
+    keyword_items = invocation.keywords
+    packs = None
     if invocation.positional_pack is not None or invocation.keyword_pack is not None:
-        if hasattr(solver,'body_demand'):solver.body_demand(fid,invocation.callee,'ARGUMENT_PACK_BINDING_OPEN')
         packs = T.ArgumentPacks(
             None if invocation.positional_pack is None else gp(invocation.positional_pack),
             None if invocation.keyword_pack is None else gp(invocation.keyword_pack),
             None if receiver is None else gp(receiver),
             None if class_receiver is None else gp(class_receiver))
-        return T.FunctionConnection(gp(fid), body, activation, (environment, state), (),
-            (*conditions, 'ARGUMENT_PACK_BINDING_PENDING'), packs)
+        expanded = solver.containers.invocation_arguments(invocation)
+        if expanded is None:
+            if hasattr(solver,'body_demand'):solver.body_demand(fid,invocation.callee,'ARGUMENT_PACK_BINDING_OPEN')
+            key = (fid, invocation, receiver, class_receiver, environment_source,
+                   return_value, requested_conditions)
 
-    positional = list(invocation.positional)
+            def retry():
+                # The caller owns publication of its original call/descriptor
+                # interface. Retrying connect bypasses call-target deduplication.
+                connection = connect(solver, fid, invocation, receiver,
+                    class_receiver=class_receiver, environment_source=environment_source,
+                    return_value=return_value, conditions=requested_conditions, on_ready=on_ready)
+                if connection is None or 'ARGUMENT_PACK_BINDING_PENDING' in connection.conditions:
+                    return False
+                if on_ready is not None:on_ready(connection)
+                return True
+
+            solver.containers.watch_invocation(key, invocation, retry)
+            return T.FunctionConnection(gp(fid), body, activation, (environment, state), (),
+                (*conditions, 'ARGUMENT_PACK_BINDING_PENDING'), packs)
+        positional, keyword_items = expanded
+        positional = list(positional)
+        conditions = (*conditions, 'ARGUMENT_PACK_SHAPE_FROM_CLOSED_SOURCE_CONSTRUCTION')
+
+    keywords = dict(keyword_items)
+    if len(keywords) != len(keyword_items):
+        return None
+
     positional_kinds = (P.DeferredParameterKind.POSITIONAL_ONLY,
                         P.DeferredParameterKind.POSITIONAL_OR_KEYWORD,
                         P.DeferredParameterKind.INITIAL_ITERATOR)
@@ -81,7 +106,7 @@ def connect(solver, fid: int, invocation: Invocation, receiver: int | None = Non
     elif receiver is not None:
         positional.insert(0, receiver)
 
-    routes, bindings, class_bindings = [], [], []
+    routes, bindings, class_bindings, variadics = [], [], [], []
     position = 0
     for index, (parameter, name) in enumerate(zip(params, function.parameter_names)):
         formal = offset + function.formals[index + 1]
@@ -117,8 +142,12 @@ def connect(solver, fid: int, invocation: Invocation, receiver: int | None = Non
         routes.append(T.Route(gp(formal), route, tuple(gp(p) for p in actuals), names))
         if route in (T.RouteKind.ARGUMENT, T.RouteKind.INITIAL_DEFAULT):
             bindings.extend((actual, formal) for actual in actuals)
+        elif route in (T.RouteKind.PACK_POSITIONALS, T.RouteKind.PACK_KEYWORDS):
+            variadics.append((formal, route, actuals, names))
     if position < len(positional) or keywords:
         return None
+    if hasattr(solver,'body_binding_resolved'):
+        solver.body_binding_resolved(fid,invocation.callee)
 
     returned = []
     if activation is T.FunctionActivation.NORMAL:
@@ -127,6 +156,9 @@ def connect(solver, fid: int, invocation: Invocation, receiver: int | None = Non
             solver.edge(actual, formal)
         for formal, value in class_bindings:
             solver.add(formal, value)
+        for formal, route, actuals, names in variadics:
+            solver.containers.bind_variadic(formal, route, actuals, names,
+                origin=(fid,invocation,receiver,class_receiver))
         if return_value and invocation.result is not None and function.returns is not None:
             source = offset + function.returns
             solver.edge(source, invocation.result)
@@ -136,4 +168,4 @@ def connect(solver, fid: int, invocation: Invocation, receiver: int | None = Non
     elif hasattr(solver,'body_demand'):
         solver.body_demand(fid,invocation.callee,'DEFERRED_BODY_RESUME_OPEN')
     return T.FunctionConnection(gp(fid), body, activation, (environment, *routes, state),
-                                tuple(returned), conditions)
+                                tuple(returned), conditions, packs)

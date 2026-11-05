@@ -24,6 +24,13 @@ class ContainerFlow:
         self.copies=defaultdict(set);self.iterators=defaultdict(set);self.iter_sources=defaultdict(set)
         self.content_readers=defaultdict(set)
         self.links={};self.namespace_sources=defaultdict(set);self.unknown_keys=set()
+        # Shape witnesses use original construction facts, never the size or
+        # contents of the flow-insensitive entries map.
+        self.pack_units={};self.pack_reverse=defaultdict(set);self.pack_constructors={}
+        self.pack_constants={};self.pack_blocked=set();self.pack_updates={};self.pack_writes={}
+        self.pack_escapes={};self.pack_merge_proofs={};self.pack_origins={}
+        self.pack_watch=defaultdict(set);self.pending_invocations={}
+        self.variadic_origins=defaultdict(dict);self.open_containers=set()
         for source,namespaces in solver.writes.items():
             for namespace in namespaces:self.namespace_sources[namespace].add(source)
         for unit in units:
@@ -31,6 +38,7 @@ class ContainerFlow:
                 for i in range(len(getattr(unit,table))):self.admit(unit,table,i)
 
     def admit(self,unit,table,index):
+        self._index_pack_unit(unit)
         o=self.s.offsets[unit.unit];item=getattr(unit,table)[index]
         if table=='containers':
             value=('container',o+item.value,item.kind.value);self.s.add(o+item.value,value)
@@ -51,6 +59,140 @@ class ContainerFlow:
                 for value in tuple(self.s.values.get(o+item.source,())):self.consume(o+item.source,value)
             else:self.s.add(o+item.value,('iterator',o+item.source))
         else:raise ValueError('unknown container fact table')
+
+    def bind_variadic(self,formal,route,actuals,names,origin=None):
+        """Create the formal tuple/dict abstraction, including empty packs.
+
+        A formal can receive many invocations. Entries are a may-union; each
+        binding's separate ordered witness is retained for later refinements.
+        No element is an alias of the tuple/dict object itself.
+        """
+        mapping=route is T.RouteKind.PACK_KEYWORDS
+        container=('container',formal,'MAPPING' if mapping else 'SEQUENCE')
+        witness=(container[2],tuple(actuals),tuple(names))
+        self.variadic_origins[formal][origin]=witness
+        self.s.add(formal,container)
+        for index,point in enumerate(actuals):
+            self.write(container,('str',names[index]) if mapping else ('int',index),point)
+
+    def _index_pack_unit(self,unit):
+        if unit.unit in self.pack_units:return
+        self.pack_units[unit.unit]=unit;o=self.s.offsets[unit.unit]
+        for source,target in unit.aliases:self.pack_reverse[o+target].add(o+source)
+        for item in unit.containers:self.pack_constructors[o+item.value]=(unit,item)
+        for item in unit.constants:self.pack_constants[o+item.value]=item.literal
+        self.pack_blocked.update(o+item.value for item in unit.names if not item.write)
+        self.pack_blocked.update(o+item.value for item in unit.attributes
+            if item.action in (F.AttributeAction.GET,F.AttributeAction.IMPORT_MEMBER))
+        self.pack_blocked.update(o+item.value for item in unit.items if not item.write)
+        self.pack_blocked.update(o+item.result for item in unit.calls)
+        self.pack_blocked.update(o+formal for f in unit.functions for formal in f.formals)
+        self.pack_updates[unit.unit]=tuple((o+x.target,o+x.source,x.append) for x in unit.updates)
+        self.pack_writes[unit.unit]=tuple(o+x.receiver for x in unit.items if x.write)
+        self.pack_escapes[unit.unit]=tuple(o+x.value for x in unit.names if x.write)
+
+    def _pack_origin(self,point,seen=frozenset()):
+        if point in self.pack_constructors or point in self.pack_constants:return point
+        if point in self.pack_origins:return self.pack_origins[point]
+        if point in seen or point in self.pack_blocked:return None
+        sources=self.pack_reverse.get(point,())
+        origins={self._pack_origin(p,seen|{point}) for p in sources}
+        origin=next(iter(origins)) if len(origins)==1 and None not in origins else None
+        self.pack_origins[point]=origin
+        return origin
+
+    def _merge_proof(self,unit,point):
+        """Admit only original straight-line DICT_MERGE construction steps.
+
+        F5 intentionally omits the mutation opcode. Recover that discriminator
+        from its sealed F4 parent rather than interpreting a generic update as
+        a complete dictionary or deriving key closure from observed contents.
+        """
+        from scar.ir.program import normal_graph as G,source_productions as P
+        from scar.ir.program.structured import PythonProtocolKind as K
+        from scar.ir.record_codec import decode
+        from scar.analysis.normal_graph import _Emitter
+        from scar.analysis.source_template_links import read_template_body
+        o=self.s.offsets[unit.unit];wire=unit.ports[point-o]
+        port=decode(G.Port,wire,record_tags=P.PRODUCTION_RECORD_TAGS) if type(wire) is dict else wire
+        cache=unit.unit,port.template
+        if cache not in self.pack_merge_proofs:
+            proof=set();store=getattr(self.s,'store',None)
+            if store is not None:
+                plan=read_template_body(store.templates_for(unit.unit),unit.unit,port.template)
+                if all(step.region==plan.root for step in plan.steps):
+                    emitter=_Emitter(plan,port.template,{})
+                    points={}
+                    for index,raw in enumerate(unit.ports):
+                        if type(raw) is dict:
+                            key=raw['template']
+                            if (key['occurrence'],key['purpose'])!=(port.template.occurrence,port.template.purpose.value):continue
+                            raw=decode(G.Port,raw,record_tags=P.PRODUCTION_RECORD_TAGS)
+                        if raw.template==port.template:points[raw]=o+index
+                    for step in plan.steps:
+                        ins=step.instruction
+                        if type(ins) is P.ApplyPythonProtocol and ins.protocol is K.DICT_MERGE:
+                            target=points.get(emitter.value(step.arguments[1])[0])
+                            source=points.get(emitter.value(step.arguments[2])[0])
+                            if target is not None and source is not None:proof.add((target,source))
+            self.pack_merge_proofs[cache]=proof
+        return self.pack_merge_proofs[cache]
+
+    def _closed_pack(self,point,kind,seen=frozenset()):
+        origin=self._pack_origin(point)
+        if origin is None or origin in seen or origin not in self.pack_constructors:return None
+        unit,item=self.pack_constructors[origin];o=self.s.offsets[unit.unit]
+        container=('container',origin,kind)
+        if item.kind.value!=kind or container in self.open_containers:return None
+        # A saved/merged namespace reference or a write prevents this fresh
+        # expression from being used as an immutable construction witness.
+        if any(self._pack_origin(p)==origin for p in (*self.pack_escapes[unit.unit],*self.pack_writes[unit.unit])):return None
+        updates=[(target,source,append) for target,source,append in self.pack_updates[unit.unit]
+                 if self._pack_origin(target)==origin]
+        if kind=='SEQUENCE':
+            if updates:return None
+            return tuple(o+p for p in item.elements),origin
+        pairs={}
+        for key,value in item.pairs:
+            literal=self.pack_constants.get(self._pack_origin(o+key))
+            if literal is None:return None
+            name=literal.to_python()
+            if type(name) is not str:return None
+            pairs[name]=o+value
+        if updates:
+            proof=self._merge_proof(unit,origin)
+            for target,source,append in updates:
+                if append or (target,source) not in proof:return None
+                merged=self._closed_pack(source,'MAPPING',seen|{origin})
+                if merged is None:return None
+                for name,value in merged[0]:
+                    if name in pairs:return None
+                    pairs[name]=value
+        return tuple(pairs.items()),origin
+
+    def invocation_arguments(self,invocation):
+        """Return arguments only with a closed original-construction witness.
+
+        Value arrival is a readiness/pollution check. It never supplies arity,
+        key completeness, equality or a last-write interpretation.
+        """
+        for unit in self.s.units:self._index_pack_unit(unit)
+        positional=list(invocation.positional);keywords=list(invocation.keywords)
+        for point,kind in ((invocation.positional_pack,'SEQUENCE'),(invocation.keyword_pack,'MAPPING')):
+            if point is None:continue
+            closed=self._closed_pack(point,kind)
+            if closed is None:return None
+            contents,origin=closed;expected=('container',origin,kind)
+            values=self.s.values.get(point,())
+            if expected not in values or any(value!=expected for value in values):return None
+            if kind=='SEQUENCE':positional.extend(contents)
+            else:keywords.extend(contents)
+        return tuple(positional),tuple(keywords)
+
+    def watch_invocation(self,key,invocation,retry):
+        self.pending_invocations.setdefault(key,retry)
+        for point in (invocation.positional_pack,invocation.keyword_pack):
+            if point is not None:self.pack_watch[point].add(key)
 
     def register(self,receiver,key,value,write):
         self.items[receiver].add((key,value,write))
@@ -158,6 +300,12 @@ class ContainerFlow:
                 for container in tuple(self.s.values[value[1]]):self.iterate(container,target)
         for target in tuple(self.iter_sources.get(point,())):self.iterate(value,target)
         for container,target in tuple(self.method_keys.get(point,())):self.apply_item(container,point,target,False)
+        for key in tuple(self.pack_watch.get(point,())):
+            retry=self.pending_invocations.get(key)
+            if retry is not None and retry():
+                self.pending_invocations.pop(key,None)
+                for watched in (key[1].positional_pack,key[1].keyword_pack):
+                    if watched is not None:self.pack_watch[watched].discard(key)
 
     def attribute(self,value,name,target):
         if value[0]=='container' and name in ('get','update','append','extend','keys','values','items'):
@@ -173,11 +321,14 @@ class ContainerFlow:
             if len(call.positional)>1:self.link(o+call.positional[1],result,container[1])
             else:self.s.add(result,('constant','NoneType',None))
         elif name=='append' and container[2]=='SEQUENCE' and call.positional:
+            self.open_containers.add(container)
             self.write(container,None,o+call.positional[0])
         elif name in ('extend','update') and call.positional:
+            self.open_containers.add(container)
             source=o+call.positional[0];self.update(source,container[1])
             for value in tuple(self.s.values[source]):self.copy(value,container)
         if name=='update' and container[2]=='MAPPING':
+            self.open_containers.add(container)
             for key,point in call.keywords:self.write(container,('str',key),o+point)
 
     def external(self,unit,call,name):

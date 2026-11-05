@@ -28,7 +28,7 @@ from scar.analysis.source_stage import _durable_bytes,_durable_mkdir
 from scar.analysis.static_query import _Fragments
 from scar.analysis.normal_containers import ContainerFlow
 from scar.analysis import normal_namespaces
-from scar.analysis import source_descriptors,source_function_connections
+from scar.analysis import source_descriptors,source_function_connections,source_construction
 from scar.analysis.source_function_connections import Invocation,connect
 from scar.analysis.source_descriptors import DescriptorFlow
 from scar.ir.program import normal_namespaces as N
@@ -63,10 +63,10 @@ class _Solver:
         self.module_units=defaultdict(list);self.adj=defaultdict(set);self.values=defaultdict(set);self.queue=deque()
         self.writes=defaultdict(set);self.reads=defaultdict(set);self.ns_values=defaultdict(set)
         self.gets=defaultdict(set);self.call_watch=defaultdict(list)
-        self.member_watch=defaultdict(set);self.ctor_watch=defaultdict(set);self.classmethod_watch=defaultdict(set)
+        self.member_watch=defaultdict(set);self.classmethod_watch=defaultdict(set)
         self.instance_call_sinks={};self.instance_call_watch={}
         self.dynamic_gets=defaultdict(set);self.symbol_calls=set();self.links={};self.call_rows=[]
-        self.base_watch=defaultdict(set);self.ctor_base_watch=defaultdict(set)
+        self.base_watch=defaultdict(set)
         self.star_forward=defaultdict(set)
         self.imported_modules=set();self.external_namespaces=set()
         self.builtin_names=set(dir(builtins));self.events=0
@@ -107,6 +107,7 @@ class _Solver:
             for function in unit.functions:
                 for formal in function.formals[1:-1]:self.add(offset+formal,('external_value',offset+formal))
         self.containers=ContainerFlow(self,units)
+        self.constructions=source_construction.ConstructionFlow(self)
 
     def ns(self,unit,namespace):
         owner='' if namespace.kind is F.NamespaceKind.BUILTINS else unit
@@ -132,8 +133,6 @@ class _Solver:
             for target in self.star_forward.get(key[0],()):self.namespace_value((target,key[1],0,key[3]),value)
         for target in self.reads.get(key,()):self.add(target,value)
         for target,receiver,cls in self.member_watch.get(key,()):self.member(target,receiver,cls,value)
-        for call_index,receiver in self.ctor_watch.get(key,()):
-            if value[0]=='function':self.bind(call_index,value[1],receiver,mode='SOURCE_INIT',return_value=False)
 
     def member(self,target,receiver,cls,value):
         if receiver is not None and value[0]=='function':self.add(target,('bound',value[1],receiver))
@@ -159,19 +158,6 @@ class _Solver:
             self.base_watch[offset+base].add((name,target,receiver,root))
             for value in tuple(self.values[offset+base]):
                 if value[0]=='class':self.class_lookup(value[1],name,target,receiver,seen,root)
-
-    def constructor(self,cls,index,receiver,seen=None):
-        seen=set() if seen is None else seen
-        if cls in seen:return
-        seen.add(cls);unit,descriptor=self.classes[cls]
-        key=(unit.unit,F.NamespaceKind.CLASS.value,descriptor.scope,'__init__')
-        self.ctor_watch[key].add((index,receiver))
-        for item in tuple(self.ns_values[key]):
-            if item[0]=='function':self.bind(index,item[1],receiver,mode='SOURCE_INIT',return_value=False)
-        for base in descriptor.bases:
-            point=self.offsets[unit.unit]+base;self.ctor_base_watch[point].add((index,receiver))
-            for item in tuple(self.values[point]):
-                if item[0]=='class':self.constructor(item[1],index,receiver,seen)
 
     def instance_call(self,index,cls,receiver):
         identity=(index,cls,receiver)
@@ -217,7 +203,9 @@ class _Solver:
             # Extend only admitted modules or provider-declared containers.
             # Other projections keep their original receiver/result graph
             # ports without inventing recursively concatenated symbol names.
-            if value[1] in self.module_units or value[1] in self.imported_modules or value[1] in self.external_namespaces:
+            if value[1]=='builtins.object' and name=='__new__':
+                self.add(target,('external','builtins.object.__new__'))
+            elif value[1] in self.module_units or value[1] in self.imported_modules or value[1] in self.external_namespaces:
                 self.add(target,('external',value[1]+'.'+name))
             else:self.add(target,('external_member',target,name))
         elif value[0] in ('external_value','external_member'):
@@ -229,6 +217,7 @@ class _Solver:
 
     @lru_cache(maxsize=None)
     def gp(self,point):
+        if type(point) is int and point<0:return self.constructions.ports[point]
         port=self.port[point]
         if type(port) is dict:port=decode(G.Port,port,record_tags=P.PRODUCTION_RECORD_TAGS)
         return T.GlobalPort(self.owner[point],port)
@@ -244,19 +233,20 @@ class _Solver:
             offset+call.world,offset+call.result_world,
             None if call.positional_pack is None else offset+call.positional_pack,
             None if call.keyword_pack is None else offset+call.keyword_pack)
+        def publish(connection):
+            self.links[identity]=T.CallLink(self.gp(offset+call.result),self.gp(offset+call.callee),
+                connection.source_callable,connection.body,
+                mode if connection.activation is T.FunctionActivation.NORMAL else deferred_mode,None,
+                connection.parameters,connection.returns,connection.conditions,
+                argument_packs=connection.argument_packs)
         connection=connect(self,fid,invocation,receiver,class_receiver=class_receiver,
-            environment_source=environment_source,return_value=return_value,conditions=conditions)
-        if connection is None:return
-        self.links[identity]=T.CallLink(self.gp(offset+call.result),self.gp(offset+call.callee),
-            connection.source_callable,connection.body,
-            mode if connection.activation is T.FunctionActivation.NORMAL else deferred_mode,None,
-            connection.parameters,connection.returns,connection.conditions,
-            argument_packs=connection.argument_packs)
+            environment_source=environment_source,return_value=return_value,conditions=conditions,on_ready=publish)
+        if connection is not None:publish(connection)
 
     def packs(self,unit,call,receiver=None,class_receiver=None):
-        if call.positional_pack is None:return None
+        if call.positional_pack is None and call.keyword_pack is None:return None
         offset=self.offsets[unit.unit]
-        return T.ArgumentPacks(self.gp(offset+call.positional_pack),
+        return T.ArgumentPacks(None if call.positional_pack is None else self.gp(offset+call.positional_pack),
             None if call.keyword_pack is None else self.gp(offset+call.keyword_pack),
             None if receiver is None else self.gp(receiver),
             None if class_receiver is None else self.gp(class_receiver))
@@ -275,10 +265,10 @@ class _Solver:
         elif value[0]=='classbound':self.bind(index,value[1],value[3],mode='SOURCE_CLASS_METHOD',class_receiver=value[2])
         elif value[0]=='instance':self.instance_call(index,value[1],offset+call.callee)
         elif value[0]=='class':
-            cls=value[1];result=offset+call.result;self.add(result,('instance',cls,result))
+            cls=value[1];result=offset+call.result
             self.links[(index,'class',cls)]=T.CallLink(self.gp(result),self.gp(offset+call.callee),self.gp(cls),None,'SOURCE_CONSTRUCTION',None,
-                conditions=('SOURCE_STATIC_CANDIDATE','DEFAULT_TYPE_CONSTRUCTION'),argument_packs=self.packs(caller,call))
-            self.constructor(cls,index,result)
+                conditions=('SOURCE_STATIC_CANDIDATE','STANDARD_TYPE_CALL_SLOT_ADMISSION','NEW_THEN_CONDITIONAL_INIT'),argument_packs=self.packs(caller,call))
+            self.constructions.construct(index,cls)
         elif value[0] in ('external','external_member'):
             name=value[1] if value[0]=='external' else 'member:'+value[2]
             mode='EXTERNAL_SYMBOL' if value[0]=='external' else 'DYNAMIC_MEMBER'
@@ -288,7 +278,8 @@ class _Solver:
                 conditions=conditions,argument_packs=self.packs(caller,call))
             self.add(offset+call.result,('external_value',offset+call.result))
             self.containers.external(caller,call,name)
-            if name=='builtins.property':self.descriptors.construct(index)
+            if name=='builtins.object.__new__':self.constructions.object_new(index)
+            elif name=='builtins.property':self.descriptors.construct(index)
             elif name in ('builtins.staticmethod','builtins.classmethod') and call.positional:
                 self.add(offset+call.result,('staticmethod' if name.endswith('staticmethod') else 'classmethod',offset+call.positional[0]))
             elif name=='builtins.getattr' and len(call.positional)>=2:
@@ -315,7 +306,6 @@ class _Solver:
                 self.instance_call_target(index,receiver,value)
             if value[0]=='class':
                 for name,target,receiver,root in tuple(self.base_watch.get(point,())):self.class_lookup(value[1],name,target,receiver,root=root)
-                for index,receiver in tuple(self.ctor_base_watch.get(point,())):self.constructor(value[1],index,receiver)
             for target,cls,receiver in tuple(self.classmethod_watch.get(point,())):
                 if value[0]=='function':self.add(target,('classbound',value[1],cls,receiver))
             if value[0]=='constant' and value[1]=='str':
@@ -325,6 +315,7 @@ class _Solver:
                     for base in tuple(self.values[receiver]):self.attribute(receiver,base,value[2],out)
             self.containers.consume(point,value)
             self.descriptors.consume(point,value)
+            self.constructions.consume(point,value)
         return not self.queue
 
 
@@ -374,10 +365,11 @@ def _publish(solver,facts,root,report,out,started,max_events,fixed,stars,extra=N
     namespaces=_stream(out/'namespaces.jsonl.gz',normal_namespaces.namespace_lookups(solver))
     properties=_stream(out/'properties.jsonl.gz',solver.descriptors.property_accesses.values())
     attribute_storage=_stream(out/'attribute-storage.jsonl.gz',solver.descriptors.storage_accesses.values())
+    constructions=_stream(out/'constructions.jsonl.gz',solver.constructions.links.values())
     modes=Counter(link.mode for link in solver.links.values());known_calls={link.result for link in solver.links.values()}
     source_calls={link.result for link in solver.links.values() if link.source_callable is not None}
     original_calls=sum(len(u.calls) for u in units)
-    result=dict(schema='scar.normal-source-targets',schema_version=6,status='SOURCE_TARGET_FIXED_POINT' if fixed else 'SOURCE_TARGET_BUDGET_FRONTIER',
+    result=dict(schema='scar.normal-source-targets',schema_version=7,status='SOURCE_TARGET_FIXED_POINT' if fixed else 'SOURCE_TARGET_BUDGET_FRONTIER',
         analysis_mode='LIBRARY_MAY_ANALYSIS',
         source_facts=str(facts),source_facts_sha256=sha256(root).hexdigest(),profile='NORMAL_SUCCESS',
         selected_sources=len(units),source_calls=original_calls,source_functions=len(solver.functions),source_classes=len(solver.classes),
@@ -394,11 +386,14 @@ def _publish(solver,facts,root,report,out,started,max_events,fixed,stars,extra=N
         attribute_storage=attribute_storage,attribute_storage_kinds=dict(Counter(p.kind.value for p in solver.descriptors.storage_accesses.values())),
         descriptor_implementation_sha256=sha256(Path(source_descriptors.__file__).read_bytes()).hexdigest(),
         invocation_implementation_sha256=sha256(Path(source_function_connections.__file__).read_bytes()).hexdigest(),
+        constructions=constructions,construction_stages=dict(Counter(p.stage.value for p in solver.constructions.links.values())),
+        construction_interface_ports=len(solver.constructions.ports),
+        construction_implementation_sha256=sha256(Path(source_construction.__file__).read_bytes()).hexdigest(),
         namespace_implementation_sha256=sha256(Path(normal_namespaces.__file__).read_bytes()).hexdigest(),
         namespace_types_sha256=sha256(Path(N.__file__).read_bytes()).hexdigest(),
         unresolved_calls=original_calls-len(known_calls),value_events=solver.events,frontier=len(solver.queue),event_budget=max_events,
         source_fact_ports=len(solver.port),index_entries={name:len(getattr(solver,name)) for name in
-            ('adj','values','writes','reads','gets','call_watch','base_watch','ctor_base_watch','classmethod_watch','dynamic_gets')},
+            ('adj','values','writes','reads','gets','call_watch','base_watch','classmethod_watch','dynamic_gets')},
         calls=fragment,seconds=time.monotonic()-started,conditions='source target alternatives; descriptor/module/attribute admissions remain conditional',
         runtime_dispatch_verified=False,effects_proven=False,first_stage_complete=False,target_executed=False,transformation_authorized=False,
         implementation_sha256=sha256(Path(__file__).read_bytes()).hexdigest(),types_sha256=sha256(Path(T.__file__).read_bytes()).hexdigest())
@@ -424,7 +419,7 @@ def solve_entry_targets(facts,out,entries,*,max_events=20_000_000):
     kinds=Counter(value[0] for values in solver.values.values() for value in values)
     hot=[]
     for point,values in nlargest(8,solver.values.items(),key=lambda item:len(item[1])):
-        if type(point) is int:
+        if type(point) is int and point>=0:
             identity,_=store.locate(point)
             hot.append(dict(port=encode(solver.gp(point),record_tags=P.PRODUCTION_RECORD_TAGS),
                 source=store.rows[identity]['path'],facts=len(values),kinds=dict(Counter(v[0] for v in values))))
