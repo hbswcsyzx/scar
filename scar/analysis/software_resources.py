@@ -32,6 +32,14 @@ def _records(directory,receipt,cls):
 
 
 def _operand_sources(definition,call,operand,native_name):
+    if definition.implicit_receiver and native_name==definition.implicit_receiver:
+        kind=S.OperandSourceKind.RECEIVER if call.receiver is not None else S.OperandSourceKind.RECEIVER_OPEN
+        actuals=() if call.receiver is None else (call.receiver,)
+        if call.receiver is None and call.receiver_mode=='UNBOUND' and call.site.positional_pack is not None:
+            kind=S.OperandSourceKind.PACK_DEPENDENCY;actuals=(call.site.positional_pack,)
+        yield S.OperandSource(call.site.result,definition.id,operand.boundary,operand.port,definition.implicit_receiver,
+            actuals,kind,None,(*call.conditions,'METHOD_RECEIVER_DEPENDENCY_NOT_STORAGE_ALIAS'))
+        return
     params={a.parser_index:a for a in definition.arguments};found=False
     for conversion in definition.conversions:
         if conversion.stage is not B.ConversionStage.PYTHON_PARSE or native_name not in conversion.schema_arguments:continue
@@ -40,14 +48,15 @@ def _operand_sources(definition,call,operand,native_name):
         actuals=();kind=S.OperandSourceKind.CONVERSION_OPEN;expression=None
         if argument.name in keywords:
             kind=S.OperandSourceKind.KEYWORD;actuals=(keywords[argument.name],)
-        elif site.keyword_pack is not None:
-            kind=S.OperandSourceKind.PACK_DEPENDENCY;actuals=(site.keyword_pack,)
-        elif not argument.keyword_only and site.positional_pack is not None:
-            kind=S.OperandSourceKind.PACK_DEPENDENCY;actuals=(site.positional_pack,)
-        elif definition.kind is B.BindingKind.METHOD:
-            kind=S.OperandSourceKind.RECEIVER_OPEN
-        elif argument.position is not None and argument.position<len(site.positional):
-            kind=S.OperandSourceKind.POSITIONAL;actuals=(site.positional[argument.position],)
+        elif site.keyword_pack is not None or (not argument.keyword_only and site.positional_pack is not None):
+            # CALL_FUNCTION_EX retains whole evaluated packs. Either pack can
+            # supply a positional-or-keyword parameter; **kwargs does not
+            # erase the *args dependency. This is not a binding/alias proof.
+            kind=S.OperandSourceKind.PACK_DEPENDENCY
+            actuals=tuple(p for p in (None if argument.keyword_only else site.positional_pack,site.keyword_pack) if p is not None)
+        elif argument.position is not None and argument.position+(1 if call.receiver_mode=='UNBOUND' else 0)<len(site.positional):
+            shift=1 if call.receiver_mode=='UNBOUND' else 0
+            kind=S.OperandSourceKind.POSITIONAL;actuals=(site.positional[argument.position+shift],)
         elif argument.default is not None or argument.default_init is not None:
             kind=S.OperandSourceKind.DEFAULT_EXPRESSION;expression=argument.default_init or argument.default
         yield S.OperandSource(site.result,definition.id,operand.boundary,operand.port,argument.name,actuals,kind,expression,

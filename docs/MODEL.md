@@ -80,6 +80,10 @@ UNKNOWN 应落在确实未知的字段、效果或关系上，不能吞掉已知
 求解达到不动点只表示当前规则不再产生事实，不证明整个程序已覆盖或所有目标已解析。
 未见消费者不证明无用；未见异常不证明不会抛错；没有记录写入不等于 NONE。
 
+算子结果的声明类型由`ValueShape`及`ReturnTypeEvidence`连接原结果端口，元组字段和序列元素有显式投影。
+这些记录是Value的条件属性，不能代替ObjectID、StorageID或LogicalVersion。序列转成list/tuple只传播元素类型摘要。
+绑定/未绑定方法的receiver独立保存，原调用的实参、参数包和输入/输出world保持原样；手写接口没有生成映射时不虚构ATen selector。
+
 效果至少区分 reads、writes、allocates、frees、aliases、escapes、RNG、异常、外部及顺序影响。
 未知效果保持开放；异常前已经发生的写入、IO 和清理不可回滚成“无效果”。
 `.eval()` 不证明纯函数，推理也不默认无 autograd；模式、hooks、buffers 和可变参数属于相关状态。

@@ -324,6 +324,9 @@ python -B -m scar.analysis.native_resource_declarations --bindings FRESH_BINDING
 
 `PythonBindingGraph.definitions/native_calls/normalization/expand_native/wrapper`沿共享定义查询；
 `NormalCallGraph.call_sites`独立于目标推导，保留完整原调用ABI。转换依赖不是值别名。
+绑定图schema v2另提供`return_types/declared_members/declared_protocols(source)`，CLI按源汇总返回类型与手写方法。
+返回契约来自隔离torchgen及安装版wrap规则；Tensor接口从固定源码/pyi抽取，不import torch。
+Tensor方法、元组投影和复制后内容只作条件类型传播；原调用ABI/world不变，未知索引保留整数协议准入条件。
 生成目录按export及源unit分片；算子接口与软件图共享原端口，不复制函数/循环正文。
 当前后端目标固定于`pyproject.toml [tool.scar.codegen]`：C++20、operator ABI v1、plan schema v1。
 第一阶段内只固定接口/编译基线，不实现优化或调度runtime。

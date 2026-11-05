@@ -161,7 +161,10 @@ def main():
     from torchgen.gen import parse_native_yaml
     from torchgen.context import native_function_manager
     from torchgen.api import python as python_api
-    from torchgen.model import Argument, SelfArgument, TensorOptionsArguments, Variant
+    from torchgen.model import (
+        Argument, BaseTy, BaseType, CustomClassType, FunctionSchema, ListType,
+        OptionalType, Return, SelfArgument, TensorOptionsArguments, Variant,
+    )
     from torchgen.packaged.autograd import gen_python_functions as generator
 
     def material(relative):
@@ -232,6 +235,20 @@ def main():
         'signature_from_schema': python_api.signature_from_schema,
         'cpp_signature': python_api.CppSignatureGroup.from_native_function,
         'cpp_arguments': python_api.cpp.arguments,
+        'return_schema': Return,
+        'function_schema': FunctionSchema,
+        'return_base_type': BaseType,
+        'return_optional_type': OptionalType,
+        'return_list_type': ListType,
+        'return_custom_class_type': CustomClassType,
+        'cpp_returntype_type': python_api.cpp.returntype_type,
+        'cpp_returns_type': python_api.cpp.returns_type,
+        'cpp_valuetype_type': python_api.cpp.valuetype_type,
+        'structseq_fieldnames': python_api.structseq_fieldnames,
+        'emit_structseq_call': generator.emit_structseq_call,
+        'gen_structseq_typename_key': generator.gen_structseq_typename_key,
+        'generate_return_type_definition_and_registrations':
+            generator.generate_return_type_definition_and_registrations,
         **{name: getattr(python_api, name) for name in (
             'arg_parser_output_exprs', 'dispatch_lambda_args', 'dispatch_lambda_exprs',
             'dispatch_lambda_return_str', 'cpp_dispatch_target', 'cpp_dispatch_exprs')},
@@ -242,6 +259,165 @@ def main():
         obj = inspect.unwrap(obj)
         lines, first = inspect.getsourcelines(obj)
         api_sources[name] = source(inspect.getsourcefile(obj), first, first + len(lines) - 1)
+    cpp_types_path, _ = material('torchgen/api/types/types.py')
+    api_sources['cpp_base_type_mapping'] = source(cpp_types_path)
+
+    # The generated declaration's native list type does not specify its Python
+    # container. Audit the installed C++ wrap overloads as build materials too.
+    wrap_path, wrap_raw = material('torch/include/torch/csrc/autograd/utils/wrap_outputs.h')
+    wrap_lines = wrap_raw.decode('utf-8').splitlines()
+
+    def wrap_source(key, signature):
+        matches = [index for index, line in enumerate(wrap_lines) if line == signature]
+        need(len(matches) == 1, 'one installed wrap rule required: ' + key)
+        first = matches[0]
+        depth = 0
+        for index in range(first, len(wrap_lines)):
+            depth += wrap_lines[index].count('{') - wrap_lines[index].count('}')
+            if depth == 0:
+                api_sources[key] = source(wrap_path, first + 1, index + 1)
+                return
+        raise ValueError('unterminated installed wrap rule: ' + key)
+
+    for key, signature in {
+        'wrap_tensor': 'inline PyObject* wrap(const at::Tensor& tensor) {',
+        'wrap_scalar_tensor': 'inline PyObject* wrap(const at::Scalar& scalar) {',
+        'wrap_tensor_list': 'inline PyObject* wrap(at::TensorList tl) {',
+        'wrap_int_list': 'inline PyObject* wrap(at::IntArrayRef list) {',
+        'wrap_bool': 'inline PyObject* wrap(bool value) {',
+        'wrap_int': 'inline PyObject* wrap(int64_t value) {',
+        'wrap_float': 'inline PyObject* wrap(double value) {',
+        'wrap_pointer': 'inline PyObject* wrap(void* value) {',
+        'wrap_dtype': 'inline PyObject* wrap(at::ScalarType scalarType) {',
+        'wrap_qscheme': 'inline PyObject* wrap(at::QScheme qscheme) {',
+        'wrap_stream': 'inline PyObject* wrap(at::Stream stream) {',
+        'wrap_tuple': 'PyObject* wrap(std::tuple<Ts...> values) {',
+        'wrap_named_tuple': 'PyObject* wrap(PyTypeObject* type, std::tuple<Ts...> values) {',
+    }.items():
+        wrap_source(key, signature)
+
+    def native_type(type_):
+        # Read the official algebraic type objects, never reverse-engineer a
+        # type from schema text or an operator's name.
+        result = {'text': str(type_)}
+        if isinstance(type_, BaseType):
+            return {**result, 'kind': 'BASE', 'name': type_.name.name}
+        if isinstance(type_, OptionalType):
+            return {**result, 'kind': 'OPTIONAL', 'element': native_type(type_.elem)}
+        if isinstance(type_, ListType):
+            return {**result, 'kind': 'LIST', 'element': native_type(type_.elem),
+                    'size': type_.size}
+        if isinstance(type_, CustomClassType):
+            return {**result, 'kind': 'CUSTOM_CLASS', 'name': type_.class_name}
+        return {**result, 'kind': 'UNKNOWN', 'model_class': type(type_).__name__}
+
+    def python_shape(type_, rules):
+        if isinstance(type_, BaseType):
+            rules.add('return_base_type')
+            if type_.name == BaseTy.Tensor:
+                rules.add('wrap_tensor')
+                return {'kind': 'TENSOR'}
+            if type_.name == BaseTy.Scalar:
+                rules.update(('wrap_scalar_tensor', 'wrap_tensor'))
+                return {'kind': 'TENSOR', 'conversion': 'SCALAR_TO_TENSOR'}
+            scalar_rules = {
+                BaseTy.bool: ('bool', 'wrap_bool'),
+                BaseTy.int: ('int', 'wrap_int'),
+                BaseTy.float: ('float', 'wrap_float'),
+            }
+            if type_.name in scalar_rules:
+                scalar_type, rule = scalar_rules[type_.name]
+                rules.add(rule)
+                return {'kind': 'SCALAR', 'scalar_type': scalar_type}
+            object_rules = {
+                BaseTy.ScalarType: ('torch.dtype', 'wrap_dtype'),
+                BaseTy.QScheme: ('torch.qscheme', 'wrap_qscheme'),
+                BaseTy.Stream: ('torch.Stream', 'wrap_stream'),
+            }
+            if type_.name in object_rules:
+                python_type, rule = object_rules[type_.name]
+                rules.add(rule)
+                return {'kind': 'OBJECT', 'python_type': python_type}
+        elif isinstance(type_, OptionalType):
+            rules.add('return_optional_type')
+            # This installed generator does not support an optional Tensor
+            # lambda return / wrap overload. Keep the declared distinction,
+            # without claiming an unobserved Python conversion.
+            return {'kind': 'OPEN', 'declared_kind': 'OPTIONAL',
+                    'element': python_shape(type_.elem, rules),
+                    'reason': 'NO_AUDITED_OPTIONAL_WRAP_OVERLOAD'}
+        elif isinstance(type_, ListType):
+            rules.add('return_list_type')
+            if isinstance(type_.elem, BaseType) and type_.elem.name == BaseTy.Tensor:
+                rules.update(('wrap_tensor_list', 'wrap_tensor'))
+                return {'kind': 'TENSOR_LIST', 'container': 'tuple',
+                        'element': {'kind': 'TENSOR'}, 'size': type_.size}
+        return {'kind': 'OPEN', 'reason': 'NO_AUDITED_PYTHON_WRAP_RULE',
+                'native_type': native_type(type_)}
+
+    def return_contract(function, ps, generated_dispatch, lambda_return, structseq_typenames):
+        returns = [
+            {'ordinal': ordinal, 'name': item.name, 'type': native_type(item.type),
+             'annotation': None if item.annotation is None else str(item.annotation)}
+            for ordinal, item in enumerate(function.func.returns)
+        ]
+        rules = {'return_schema', 'cpp_returntype_type', 'cpp_returns_type',
+                 'cpp_valuetype_type', 'cpp_base_type_mapping',
+                 'dispatch_lambda_return_str', 'emit_single_dispatch'}
+        if not returns:
+            # Read the official generated terminal statement. In particular,
+            # inplace foreach returns the original Python input, although its
+            # ATen schema returns void. No operator-name list is duplicated.
+            terminal = generated_dispatch.rstrip()
+            input_return = re.search(
+                r'PyObject\* (\w+) = _r\.args\[(\d+)\];\s*'
+                r'Py_INCREF\(\1\);\s*return \1;$', terminal)
+            if lambda_return == 'void' and input_return:
+                parser_index = int(input_return.group(2))
+                parser_arguments = list(ps.arguments())
+                if parser_index < len(parser_arguments):
+                    argument = parser_arguments[parser_index]
+                    result = {'kind': 'ARGUMENT', 'parser_index': parser_index,
+                              'argument': argument.name, 'schema_argument': argument.name,
+                              'argument_type': native_type(argument.type),
+                              'container': 'preserve_input',
+                              'returns_input_object': True,
+                              'expression': '_r.args[' + str(parser_index) + ']'}
+                else:
+                    result = {'kind': 'OPEN', 'reason': 'RETURNED_PARSER_ARGUMENT_UNRESOLVED'}
+            elif lambda_return == 'void' and terminal.endswith('Py_RETURN_NONE;'):
+                result = {'kind': 'NONE'}
+            else:
+                result = {'kind': 'OPEN', 'reason': 'UNRECOGNIZED_VOID_WRAPPER_RETURN'}
+        else:
+            items = []
+            for native, item in zip(returns, function.func.returns):
+                items.append({**python_shape(item.type, rules),
+                              'native_ordinal': native['ordinal'],
+                              'native_name': native['name'], 'native_type': native['type']})
+            if len(items) == 1:
+                result = items[0]
+            else:
+                fields = python_api.structseq_fieldnames(function.func.returns)
+                typename = structseq_typenames.get(generator.gen_structseq_typename_key(function))
+                rules.update(('structseq_fieldnames', 'emit_structseq_call',
+                              'gen_structseq_typename_key'))
+                if typename is not None and fields:
+                    rules.update(('wrap_named_tuple',
+                                  'generate_return_type_definition_and_registrations'))
+                    result = {'kind': 'NAMED_TUPLE', 'container': 'tuple', 'items': items,
+                              'fields': fields, 'structseq_typename': typename,
+                              'python_type': 'torch.return_types.' + python_api.cpp.name(function.func)}
+                elif typename is None and not fields:
+                    rules.add('wrap_tuple')
+                    result = {'kind': 'TUPLE', 'container': 'tuple', 'items': items}
+                else:
+                    result = {'kind': 'OPEN', 'reason': 'STRUCTSEQ_RULE_DISAGREEMENT',
+                              'items': items, 'fields': fields}
+        result['native_ordinals'] = [item['ordinal'] for item in returns]
+        result['sources'] = [api_sources[key] for key in sorted(rules)]
+        result['rule_ids'] = sorted(rules)
+        return returns, result
 
     def schema_arguments(argument):
         if isinstance(argument, Argument):
@@ -316,6 +492,8 @@ def main():
                         cpp_args = python_api.cpp_dispatch_exprs(function, python_signature=ps)
                         generated_dispatch = generator.emit_single_dispatch(ps, function, structseq_typenames, symint=True)
                         lambda_return = python_api.dispatch_lambda_return_str(function)
+                        native_returns, python_return = return_contract(
+                            function, ps, generated_dispatch, lambda_return, structseq_typenames)
                         # Binding.argument links a C++ formal explicitly to one
                         # or several schema arguments; Python/native port order
                         # is never used as a schema correspondence heuristic.
@@ -368,6 +546,7 @@ def main():
                         'kind': 'method' if method else 'function',
                         'native_selector': function.namespace + '::' + str(function.func.name),
                         'native_schema': str(function.func),
+                        'native_returns': native_returns, 'python_return': python_return,
                         'parser_signature': ps.signature_str(symint=True),
                         'parser_index': parser_index, 'group_id': qualified + '#' + str(parser_index),
                         'arguments': arguments, 'conversions': conversions,
@@ -406,7 +585,7 @@ def main():
     torch_imported = any(name.partition('.')[0] == 'torch' for name in sys.modules)
     need(not torch_imported, 'torch import is forbidden')
     report = {
-        'protocol_version': 1, 'package_version': package_version,
+        'protocol_version': 2, 'package_version': package_version,
         'catalog_scope': 'TORCHGEN_GENERATED_NATIVE_PYTHON_BINDINGS',
         'manual_bindings_included': False, 'python_reexports_resolved': False,
         'source_revision': constants['git_version'], 'cuda_build': constants.get('cuda'),

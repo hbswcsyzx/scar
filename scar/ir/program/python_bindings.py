@@ -12,6 +12,7 @@ from .native import EntryPortRef
 from .normal_targets import GlobalPort
 from .providers import ProviderFactReference
 from .source_references import SourceArtifactLocator
+from .binding_returns import ValueShape,NativeReturnSlot,ReceiverMode
 
 
 class PythonBindingID(Identifier):
@@ -88,6 +89,8 @@ class PythonBinding:
     branch_condition: str | None = None
     implicit_receiver: str | None = None
     deprecated: bool = False
+    native_returns: tuple[NativeReturnSlot,...] = ()
+    python_return: ValueShape | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -129,3 +132,5 @@ class NativeCallCandidate:
     binding: PythonBindingID
     conditions: tuple[str, ...]
     runtime_binding_verified: bool = False
+    receiver: GlobalPort | None = None
+    receiver_mode: ReceiverMode = ReceiverMode.FUNCTION
