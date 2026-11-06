@@ -37,11 +37,12 @@ class FrameGlobalsFlow:
         self.entry_contracts[contract.source.unit]=contract
         self._material(contract.source.unit)
 
-    def _material(self, unit):
-        if unit in self.materials:return self.materials[unit]
-        material=self.index.load(unit); self.materials[unit]=material
+    def _material(self, unit, templates=()):
+        material=self.index.load_selected(unit,templates)
+        if self.materials.get(unit) is material:return material
+        fresh=unit not in self.materials;self.materials[unit]=material
         root=material.root; globals=self._formal(root,0); locals=self._formal(root,1)
-        if unit not in self.s.store.original_source_units:
+        if fresh and unit not in self.s.store.original_source_units:
             contract=self.entry_contracts.get(unit)
             conditions=(contract.conditions if contract is not None else
                 ('STANDARD_SOURCE_MODULE_INITIALIZATION','SOURCE_ROOT_GLOBALS_AND_LOCALS_USE_THE_SELECTED_NAMESPACE'))
@@ -67,7 +68,7 @@ class FrameGlobalsFlow:
 
     def _source(self, owner, fid, callee):
         unit,function=self.s.functions[fid]
-        material=self._material(unit.unit); callable=self.s.gp(fid)
+        material=self._material(unit.unit,(function.template,)); callable=self.s.gp(fid)
         for capture in material.captures:
             if capture.function!=callable or capture.body.owner!=owner:continue
             witness=next(w for w in material.witnesses if w.template==capture.site.port.template

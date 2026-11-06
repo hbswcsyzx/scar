@@ -14,6 +14,7 @@ from scar.analysis.source_namespace_interfaces import NamespacePlanView
 from scar.analysis.source_suspension_interfaces import SuspensionInterfaceIndex
 from scar.analysis.source_productions import _digest
 from scar.ir.program import source_productions as P, suspension_interfaces as I
+from scar.ir.program.model import ValueType,ValueKind
 from scar.ir.record_codec import decode
 
 
@@ -29,12 +30,13 @@ class FrameCaptureIndex:
         self.store,self.exec_graph = context_store,exec_graph
         self.base_index = SuspensionInterfaceIndex(context_store.base,jobs=jobs)
         self._units,self._pins = {},{}
+        self._selected={};self._records={};self._headers={}
         self._connections = {}
         for connection in exec_graph.connections():
             self._connections.setdefault(connection.root.owner.unit,connection)
         self._stats = dict(base_units=0,compiled_units=0,base_templates=0,compiled_templates=0,
             cache_hits=0,references=0,captures=0,witnesses=0,obligations=0,
-            parent_checks=0,load_seconds=0.0)
+            parent_checks=0,load_seconds=0.0,root_interfaces=0)
         self._closed = False
 
     @property
@@ -109,43 +111,76 @@ class FrameCaptureIndex:
         self._stats['compiled_templates'] += len(result)
         return result
 
+    def _root_header(self, unit):
+        if unit.unit in self._headers:return self._headers[unit.unit]
+        if unit.unit in self.store.original_source_units:
+            connection=self._connections[unit.unit]
+            root,report=self.exec_graph.parents['f4_graphs'];descriptor=report['variants'][unit.unit]
+            self._pin(root/'result.json')
+            self._pin(root/descriptor['path']/descriptor['tables']['templates']['path'])
+            graph=self.exec_graph.expand_root(connection)
+            node=next(n for n in graph.templates if n.key==unit.root_scope.template)
+            kind='COMPILE_CONTEXT_F4_VARIANT';self._stats['compiled_units']+=1
+        else:
+            self.base_index._header(unit)
+            node=self.base_index._graphs[unit.unit][unit.root_scope.template]
+            kind='SEALED_SOURCE_TEMPLATE_STORE';self._stats['base_units']+=1
+        if (node.key.purpose is not P.ProductionPurpose.ROOT or node.root!=unit.root_scope.region
+                or len(node.parameters)!=3 or any(type(t) is not ValueType or t.kind is not k
+                    for t,k in zip(node.parameters,(ValueKind.REFERENCE,ValueKind.REFERENCE,ValueKind.STATE)))):
+            raise ValueError('frame root header globals/locals/world ABI differs')
+        self._headers[unit.unit]=kind;self._stats['root_interfaces']+=1
+        return kind
+
     def load(self, unit_id):
+        """Explicit full-unit view; incremental users select only needed plans."""
+        unit=self.store.load(unit_id)
+        return self.load_selected(unit_id,{unit.root_scope.template,*(f.template for f in unit.functions)})
+
+    def load_selected(self, unit_id, templates=()):
         if self._closed:
             raise ValueError('frame capture index is closed')
-        if unit_id in self._units:
-            self._stats['cache_hits'] += 1
-            return self._units[unit_id]
         started = perf_counter();self.validate_parents()
         unit = self.store.load(unit_id)
         if unit.root_scope is None or unit.root_scope.owner.unit != unit_id:
             raise ValueError('frame capture unit lacks an original root witness')
-        keys = {function.template for function in unit.functions}
-        keys.add(unit.root_scope.template)
+        keys=set(templates)
+        if not keys<={unit.root_scope.template,*(f.template for f in unit.functions)}:
+            raise ValueError('selected frame plan is not an original root or function template')
+        selected=self._selected.setdefault(unit_id,set())
+        if unit_id in self._units and keys<=selected:
+            self._stats['cache_hits']+=1
+            return self._units[unit_id]
+        kind=self._root_header(unit)
+        missing=keys-selected
         if unit_id in self.store.original_source_units:
-            plans = self._compiled_plans(unit,keys)
-            kind = 'COMPILE_CONTEXT_F4_VARIANT';self._stats['compiled_units'] += 1
+            plans = self._compiled_plans(unit,missing) if missing else {}
         else:
-            self.base_index._prefetch(unit,keys)
-            plans = {key:self.base_index._plan(unit,key) for key in keys}
-            kind = 'SEALED_SOURCE_TEMPLATE_STORE';self._stats['base_units'] += 1
+            self.base_index._prefetch(unit,missing)
+            plans = {key:self.base_index._plan(unit,key) for key in missing}
             self._stats['base_templates'] += len(plans)
-        references,captures,witnesses,obligations = [],[],[],[]
+        records=self._records.setdefault(unit_id,{})
         for key,(plan,digest,source,receipt,model) in sorted(plans.items(),
                 key=lambda item:(item[0].occurrence,item[0].purpose.value)):
             view = NamespacePlanView(unit_id,plan)
             refs,created,pending = extract_captures(view)
-            references.extend(refs);captures.extend(created);obligations.extend(pending)
+            witnesses=[]
             for record in (*refs,*created):
                 step = view.steps[record.site.port.owner]
                 if record.owner != view.owner(step.region):
                     raise ValueError('frame capture owner differs from its original step')
                 witnesses.append(I.StepWitness(unit_id,key,digest,step.id,step.region,record.owner.owner,
                     source,receipt,model))
+            records[key]=(refs,created,tuple(witnesses),pending)
+            for name,rows in zip(('references','captures','witnesses','obligations'),records[key]):
+                self._stats[name]+=len(rows)
+        selected.update(missing)
+        references,captures,witnesses,obligations=(tuple(row for key in sorted(records,
+            key=lambda k:(k.occurrence,k.purpose.value)) for row in records[key][i]) for i in range(4))
         self.validate_parents()
         value = SimpleNamespace(root=unit.root_scope,references=tuple(references),captures=tuple(captures),
-            witnesses=tuple(witnesses),obligations=tuple(obligations),template_store_kind=kind)
+            witnesses=tuple(witnesses),obligations=tuple(obligations),template_store_kind=kind,
+            selected_templates=frozenset(selected))
         self._units[unit_id] = value
-        for name,rows in (('references',references),('captures',captures),('witnesses',witnesses),('obligations',obligations)):
-            self._stats[name] += len(rows)
         self._stats['load_seconds'] += perf_counter()-started
         return value

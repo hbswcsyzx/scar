@@ -38,6 +38,8 @@ two = second()
         def load(self,identity):
             assert identity==unit.unit
             return material
+        def load_selected(self,identity,templates=()):
+            return self.load(identity)
         def close(self):pass
         def validate_parents(self):return 0
     monkeypatch.setattr('scar.analysis.source_frame_globals.FrameCaptureIndex',ControlledIndex)

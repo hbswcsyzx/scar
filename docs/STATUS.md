@@ -30,16 +30,17 @@ NORMAL_SUCCESS / CPython 3.14.7；后端约定C++20、算子ABI v1、计划schem
 - `launcher-exec-roots-current/verification.json`：2个条件分支；namespace选择、builtins插入、closure检查、audit、body、discard/release共6阶段；正常结果None，根返回值不冒充exec值。
 - `launcher-namespace-graph-current/verification.json`：234个名字操作、4组globals捕获、3条带版本/lookup条件的内容连接；构建5.44秒，压缩表35,034 bytes。这些may边不是常量或可变换证明。
 - **历史接口前缀（8986b4ad）：** `launcher-context-targets-current/verification.json`完整typed读回20类已发布关系表，并展开实际context函数体。1M事件前缀构建98.62秒、核验50.50秒，产物约4.8MB；275加载单元、2,007 scope、7,942调用连接，其中166条caller属于编译上下文；2个exec分支、96条有guard的builtin候选。
-- **当前frame门验收：** `launcher-frame-targets-current/verification.json`完整typed读回26类关系表，核selected factory/callee/capture/world与既有calllink吻合、4个输入字段与原entry.json逐字匹配且已接content因子。11个root接口、1个默认exec frame绑定、25个globals()读，当前前缀的frame/capture obligation均0；7,898条调用连接，其中166条caller属于编译上下文。1M事件构建172.85秒、核验58.47秒，产物约4.8MB。
-- **未收敛：** 当前普通frontier为28,766，namespace frontier为0；状态仍为CONTEXT_TARGET_BUDGET_FRONTIER。frame绑定是带原版本/选择条件的引用关系，未宣称runtime对象身份；locals快照及不确定字段继续保留协议/前沿。
-- **已定位采集成本：** 新frame索引为11单元读578个计划，耗时73.89秒；实际frame关系只用3个函数模板，11个root接口均有用途。下一步按需增量读3个函数计划＋11个root header/ABI，保原收据与完整源码目录；不重建F0–F4，不削去依赖。
+- **完整读取frame对照（d4372014）：** `launcher-frame-targets-current/verification.json`完整typed读回26类关系表，核selected factory/callee/capture/world与既有calllink吻合、4个输入字段与原entry.json逐字匹配且已接content因子。11个root接口、1个默认exec frame绑定、25个globals()读，当前前缀的frame/capture obligation均0；7,898条调用连接，其中166条caller属于编译上下文。1M事件构建172.85秒、核验58.47秒，产物约4.8MB。
+- **当前按需frame门验收：** `frame-capture-selection/verification.json`逐项核原14条factory/callee证据对应的3个函数模板，并核第二模板增选保留已有refs/witnesses。`launcher-selected-frame-targets-current/verification.json`完整typed读回26类关系；实际读取仅3计划＋11 root接口。1M事件构建129.08秒、核验59.20秒；8,096条调用连接、166条context caller、frame默认绑定1/globals读25/声明输入4/相关obligation0。
+- **未收敛：** 当前普通frontier为17,857，namespace frontier为0；状态仍为CONTEXT_TARGET_BUDGET_FRONTIER。frame绑定是带原版本/选择条件的引用关系，未宣称runtime对象身份；locals快照及不确定字段继续保留协议/前沿。
+- **读取成本已减少：** 旧索引578计划/73.89秒，当前3计划/29.05秒；11 root接口全部保留。两次1M不是固定点，队列顺序和候选计数可不同；不据此宣称完整关系相等或LeWM加速。后续仍可减少header的重复校验。
 - 通用单fixture核晚到自定义builtins能接入source callable；`relation-replay-verification.json/.py`可复现新旧类/容器flow的832事件与9类关系完全相等，耗时9.50秒（含fixture构建），不作为主图加速数据。
 - 旧独立eval.py长任务已由实际launcher/context求解替代并终止，未发布固定点；收据为`entry-pack-fixed.superseded.json`。首个1M原型的两项namespace问题记在`launcher-context-targets-1m-reviewed/review.json`，当前产物已修正并重验。
 
 ## 后续顺序
 
-1. caller frame→globals捕获→exec/globals()当前门已通过。先把frame读取改为root ABI＋选中函数的增量接口，避免578计划的多余重读；保创建world、多个callee证据和原版本。补齐仍可静态推导的locals快照/隐式状态关系。
-2. 完成声明启动输入到配置/YAML/CLI的数据关系；把module需求机械分为源码、namespace、原生边界和真正缺少的输入，不把全部demand当缺文件。
+1. caller frame及按需读取门已通过。下一步先准入Hydra正常RUN调用源（安装版hydra/core/utils.py当前未在facts中），获得task_function(task_cfg)的原始端口；不得借用已有passthrough/rerun分支冒充。locals快照/隐式状态仍有待静态细化的字段。
+2. 补配置输入与字段来源：实际argv有launcher追加项；YAML保defaults顺序、package、覆盖及插值；环境/搜索插件未定处保条件。然后接正常task cfg形参及原GET/SET端口。把module需求机械分为源码、namespace、原生边界和真正缺少的输入，不把全部demand当缺文件。
 3. 将新的context图接到既有Python/native绑定、算子及资源要求图；保alias、逻辑来源、位置、状态和效果，运行时未知字段仍未知。
 4. 在上述入口与接口稳定后持续求解，审计源码、跨层边界、循环和资源的覆盖分母。队列清空不等于整个程序覆盖完成；第一阶段通过后才进入化简。
 
