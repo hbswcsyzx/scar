@@ -41,6 +41,7 @@ NORMAL_SUCCESS / CPython 3.14.7；交付后端约定 C++20、算子 ABI v1、计
 - **`config-state-boundary-current/verification.json`：声明状态边界门通过。** 输入根21→原cfg实参5943的调用后world5952；调用94/attribute171、5条callee alias与6条None-return alias均核scope/原端口。data result5947与定义返回10190、None来源10191分别保留。构建1.87秒、验收4.71秒；扩展目录仅作拼接核验，884单元/6,166,764端口，全部旧offset不变。未重跑全域solver，未证明该scope激活或输入版本匹配，更未证明当前task字段。
 - `config-state-context-current`：加入15源后的原FIFO求解，4M事件、273.24秒；307源、2,459作用域，frontier2,599,288。新接口查询保原call/argument/data-return/world及alias行号；此预算前缀的目标状态连接为0，不能把声明当作入口准入。
 - `config-state-admission/lexical-experiment-verification.json`：实验性词法copy闭包核验18,864条原names、108源及scope归属。相同4M事件256.62秒，run接口推进但状态API仍未接通，frontier增至10,093,417；**不选为默认**。这不是LeWM运行或加速数据；继续定位原namespace/descriptor/callee队列的传播前沿。
+- `config-state-admission/worklist-verification.json`：8:1公平队列原输入、旧offset、事件守恒及状态接口已独立核验。4M事件805.63秒，2,627作用域、160,211条件CallLinks，frontier28,830,867；目标状态接点仍0，**不采用为默认**。CLASS compose_config已有function，attribute与callee已有bound token；callee有订阅且无pending，不能再简单归因于这段词法/CLASS写传播。CLI完成打印参数错误导致退出1，已落盘图仍通过独立核验；此实验不是完成门。
 
 组合门6项 obligation保留隐式库根、3个同名 schema查询、组选择与CLI/lazy层；
 覆盖门保当前argv/追加项、组及字段更新条件、lazy与任务绑定。OPEN_PROVIDER不产生虚构数据；未求出最终 cfg。

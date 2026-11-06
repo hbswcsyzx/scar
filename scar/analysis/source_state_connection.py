@@ -42,9 +42,9 @@ def _pins():
 def _derive(boundaries,targets):
     boundary_report,bindings=read_configuration_state_bindings(boundaries)
     target_report=json.loads((Path(targets)/'result.json').read_bytes())
-    if target_report.get('analysis_transport_profile')=='ADMITTED_LEXICAL_REFERENCE_COPY_CLOSURE':
-        from scar.analysis.source_lexical_context import LexicalContextGraph
-        graph=LexicalContextGraph(targets)
+    if target_report.get('analysis_worklist_profile')=='FAIR_INSTALLED_CONSUMER_WORKLIST_8_TO_1':
+        from scar.analysis.source_worklist_context import WorklistContextGraph
+        graph=WorklistContextGraph(targets)
     else:
         graph=ContextTargetGraph(targets)
     store=graph.fact_store

@@ -393,6 +393,12 @@ python -B -m scar.analysis.software_resources --bindings BINDINGS --declarations
 
 事实schema v6保留完整原ABI，并用原code_scope分组；`NormalCallGraph.attribute_sites/properties/attribute_storage`分别查询原操作与条件接线。
 `entry_activations/module_demands/body_demands/call_demands`查询激活与未决接口；队列收敛不代表这些需求已解决。
+可选 `python -B -m scar.analysis.source_worklist_context` 接受与 `source_context_build` 相同的输入参数，
+仅用已安装消费者调度8:1公平工作队列；普通transfer与copy规则不变。`WorklistContextGraph`核producer及事件守恒，
+相同事件预算不保证相同前缀，当前不宣称顺序敏感transfer等价。
+`python -B -m scar.analysis.source_state_connection --boundaries BOUNDARIES --targets TARGETS --out FRESH_JOIN`
+把声明状态边界接到原CallLink的实参/形参、数据返回和world；结果保原表行号与scope/alias依据。
+`read_source_state_connections`重新推导接点；0连接是未决前沿，不把候选内容当作当前任务状态。
 `python -B -m scar.analysis.source_admission --targets TARGET_STORE --out FRESH_PLAN`支持普通及context图，按真实source provider关联需求与原依赖材料，不修改模型。
 对旧inventory未索引的实际module需求，用原候选roots定点查找；可重复`--search-root`指定候选root。
 新搜索表与原inventory的索引域分开，未固定内容版本不列ready；搜索根及文件存在均不证明运行时import选择。
