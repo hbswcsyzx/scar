@@ -37,6 +37,11 @@ factory参数、decorator/task关联、初始argv与文件候选分别记录；�
 `read_configuration_overrides(path)`严格读回；库初始化、visitor、自定义函数均不执行，组选择和当前argv仍需条件。
 此静态输入工具的可选依赖为`configuration-source`；现有lewm环境已具备，未重新安装。
 
+`python -B -m scar.analysis.source_configuration_values --overrides OVERRIDES --out FRESH_VALUES --omegaconf-source /path/to/site-packages/omegaconf`
+生成有序状态表达式和已知路径的字段/引用图；可重复加`--path-json '["world","num_envs"]'`限定查询。
+`read_configuration_values(path)`返回(report, typed graph)，root ID均指本图expression ordinal；原版本另见roots表。
+字段结果始终保父条件；OPEN、missing、absent、null、循环及成员封闭性分别读取，不将其直接注入当前任务形参。
+
 ## 当前形式前端入口
 
 ```bash

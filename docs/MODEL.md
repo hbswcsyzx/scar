@@ -235,3 +235,10 @@ CLI值由声明输入端口及明确的option projection推导，初始argv不�
 复用固定版本的ANTLR生成语法工具，不初始化Hydra、不调用visitor或用户函数；CALL/SWEEP保结构和未求值义务。
 覆盖图的版本0显式引用组合图的选中根版本，后续写入各有input/output版本；这些ID只在对应工件内定位。
 普通字段候选与组选择保不同条件，missing/插值在此层仍非已解析值；不把初始argv投影冒充当前argv或当前cfg。
+
+输入值层把上述步骤编译为共享代数DAG：EMPTY/INPUT/OPEN_PROVIDER/EMBED/MERGE/ASSIGN/UPDATE/DELETE。
+每个根版本只引用已有表达式；字段投影以(root expression, selector path)定位，保原材料/argv来源、依赖及条件。
+映射/序列另有members_complete，不因存在几个已知字段便认定整个容器封闭。merge missing保旧值与scalar assign设missing分开。
+插值复用固定生成语法；惰性引用使用该查询选中的根和安装后的父路径。动态key先重建路径再拆分，循环保依赖环。
+中途地址读取有独立read demand：update可指旧snapshot；merge内部尚未降低的状态点保None，不冒充最终root。
+未知provider、schema、当前argv与未支持的别名效果继续阻止无条件结论；本层是输入来源图，尚非任务当前cfg或物理对象身份。
