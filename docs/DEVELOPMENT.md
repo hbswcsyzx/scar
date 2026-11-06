@@ -11,6 +11,12 @@ F5可增量接入经过完整前端的新源码，不重建旧图：先用
 `source_context_build`新增`--supplement <frontend/facts> <fresh-interfaces>`（可重复），原base和exec父收据不变；
 目录追加所有新端口，读回器重建同序目录并严格核对。module参数只是搜索候选，不是实际import选择。
 
+新定位的缺失源码可自动成批进入前端：
+`python -B -m scar.analysis.source_file_seed --admission <plan> --out <fresh-seed> --max-files 16`。
+当前只接计划中实际ready且完整hash的新search候选；旧inventory候选与预算前沿仍保留原引用。
+批量seed仍未授F0–F4；接上述`source_dependency_frontend --explicit-seed --jobs 16`才按原顺序处理，
+超过4源采用调用者给定进程数，不会因material-index为空错误退回单进程。
+
 ## 当前形式前端入口
 
 ```bash

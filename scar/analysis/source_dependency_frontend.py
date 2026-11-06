@@ -96,9 +96,10 @@ def build_dependency_frontend(model, material_indices, out, *, jobs=1, explicit_
     if json.loads(original) != parent:
         raise ValueError('original model changed before dependency admission')
     inventory = None if explicit_seed else read_static_dependencies(model)
-    if explicit_seed and (parent.get('source_input_scope')!='EXPLICIT_SINGLE_SOURCE_FILE'
-            or parent.get('phase')!='sources' or len(parent['units'])!=1):
-        raise ValueError('explicit frontend input must be a single source-only seed')
+    if explicit_seed and (parent.get('source_input_scope') not in
+            ('EXPLICIT_SINGLE_SOURCE_FILE','EXPLICIT_SOURCE_FILES')
+            or parent.get('phase')!='sources' or not parent['units']):
+        raise ValueError('explicit frontend input must be a source-only seed')
     if inventory is not None and any(index >= len(inventory.materials) for index in indices):
         raise ValueError('material index lies outside the original dependency inventory')
     for index in indices:
@@ -108,7 +109,8 @@ def build_dependency_frontend(model, material_indices, out, *, jobs=1, explicit_
             raise ValueError('material ' + str(index) + ' is not an external fingerprinted runtime source candidate')
 
     implementation = sha256(Path(__file__).read_bytes()).hexdigest()
-    effective_jobs = 1 if len(indices) <= 4 else jobs
+    source_count = len(parent['units']) if explicit_seed else len(indices)
+    effective_jobs = 1 if source_count <= 4 else jobs
     own_model = out / 'model'
     stages = []
     current = 'dependency-expansion'
@@ -141,7 +143,7 @@ def build_dependency_frontend(model, material_indices, out, *, jobs=1, explicit_
     _durable_mkdir(out)
     basis = dict(model=str(model), model_manifest_sha256=sha256(original).hexdigest(),
         dependency_inventory=None if explicit_seed else parent['artifacts']['dependencies'],
-        source_input_scope='EXPLICIT_SINGLE_SOURCE_FILE' if explicit_seed else 'EXPLICIT_DEPENDENCY_MATERIALS',
+        source_input_scope=parent['source_input_scope'] if explicit_seed else 'EXPLICIT_DEPENDENCY_MATERIALS',
         material_indices=indices, jobs=jobs, effective_jobs=effective_jobs,
         max_source_bytes=_MAX_SOURCE_BYTES, implementation_sha256=implementation)
     _durable_bytes(out / 'inputs.json', _json(basis), replace=False)
