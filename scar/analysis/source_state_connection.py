@@ -41,13 +41,7 @@ def _pins():
 
 def _derive(boundaries,targets):
     boundary_report,bindings=read_configuration_state_bindings(boundaries)
-    target_report=json.loads((Path(targets)/'result.json').read_bytes())
-    if target_report.get('analysis_worklist_profile')=='FAIR_INSTALLED_CONSUMER_WORKLIST_8_TO_1':
-        from scar.analysis.source_worklist_context import WorklistContextGraph
-        graph=WorklistContextGraph(targets)
-    else:
-        graph=ContextTargetGraph(targets)
-    store=graph.fact_store
+    graph=ContextTargetGraph(targets);store=graph.fact_store
     boundary_artifact=_artifact(Path(boundaries)/boundary_report['bindings']['path'],'scar.source-state-projections')
     wanted={_json(encode(b.data_result)) for b in bindings}
     sites=select_relation_rows(graph.path,graph.report['calls'],lambda w:_json(w['result']) in wanted)

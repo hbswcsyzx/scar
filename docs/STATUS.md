@@ -39,9 +39,10 @@ NORMAL_SUCCESS / CPython 3.14.7；交付后端约定 C++20、算子 ABI v1、计
 - **`config-values-current/verification.json`：输入字段子门通过。** 共享操作DAG保原数据/argv来源；3条引用在所列条件下得到world.num_envs=1、dataset.stats=pusht_expert_train、solver.seed=42。两处missing合并未知prefix仍OPEN；容器成员是否完整显式记录。3个merge内部状态点保未知，2个地址读取指向旧根19，均不伪装成最终根21。16个源码函数固定AST，语法工具不初始化库。构建2.96秒、严格验收2.72秒；本子图压缩表5,651 bytes，工件30,356 bytes。两个通用用例2.32秒，涵盖覆盖后引用、missing/absent/null、序列替换、动态路径、引用环及未知别名效果。
 - **`config-state-admission/sources-verification.json`：新15源ready门通过。** 基于原需求计划，逐path核与旧catalog无交集；16-worker完整前端520.77秒，15-worker局部摘要6.57秒。严格读回77,174端口、880调用、459作用域，旧catalog SHA未变；包含缺失配置加载器与callback源码，未运行目标。
 - **`config-state-boundary-current/verification.json`：声明状态边界门通过。** 输入根21→原cfg实参5943的调用后world5952；调用94/attribute171、5条callee alias与6条None-return alias均核scope/原端口。data result5947与定义返回10190、None来源10191分别保留。构建1.87秒、验收4.71秒；扩展目录仅作拼接核验，884单元/6,166,764端口，全部旧offset不变。未重跑全域solver，未证明该scope激活或输入版本匹配，更未证明当前task字段。
-- `config-state-context-current`：加入15源后的原FIFO求解，4M事件、273.24秒；307源、2,459作用域，frontier2,599,288。新接口查询保原call/argument/data-return/world及alias行号；此预算前缀的目标状态连接为0，不能把声明当作入口准入。
+- `config-state-context-current`：加入15源后的原FIFO求解，4M事件、273.24秒；307源、2,459作用域，frontier2,599,288。当前工作版本`config-state-connection-active/verification.json`严格读回22.20秒；接口查询保原call/argument/data-return/world及alias行号。此预算前缀的目标状态连接为0，不能把声明当作入口准入。
 - `config-state-admission/lexical-experiment-verification.json`：实验性词法copy闭包核验18,864条原names、108源及scope归属。相同4M事件256.62秒，run接口推进但状态API仍未接通，frontier增至10,093,417；**不选为默认**。这不是LeWM运行或加速数据；继续定位原namespace/descriptor/callee队列的传播前沿。
 - `config-state-admission/worklist-verification.json`：8:1公平队列原输入、旧offset、事件守恒及状态接口已独立核验。4M事件805.63秒，2,627作用域、160,211条件CallLinks，frontier28,830,867；目标状态接点仍0，**不采用为默认**。CLASS compose_config已有function，attribute与callee已有bound token；callee有订阅且无pending，不能再简单归因于这段词法/CLASS写传播。CLI完成打印参数错误导致退出1，已落盘图仍通过独立核验；此实验不是完成门。
+- `config-state-admission/next-call-audit.json`：定点查询确认下一站Hydra调用34（callee1859/result1881）`config_loader.load_configuration`无CallLink，receiver1889也无已发布storage接线。`Hydra.run→compose_config`另已核calls#122784为DIRECT，self、4显式参数、2默认、data/world返回都接通，签名没有拒绝。词法与公平队列实验代码分别存档于`fd943439`/`06a34fdf`，已从工作版本删除；历史结果不当作当前固定点。
 
 组合门6项 obligation保留隐式库根、3个同名 schema查询、组选择与CLI/lazy层；
 覆盖门保当前argv/追加项、组及字段更新条件、lazy与任务绑定。OPEN_PROVIDER不产生虚构数据；未求出最终 cfg。
@@ -49,7 +50,7 @@ NORMAL_SUCCESS / CPython 3.14.7；交付后端约定 C++20、算子 ABI v1、计
 ## 后续顺序与验收
 
 1. **输入字段层：** plain/untyped条件性字段应用与lazy引用子门已过；不代表完整cfg。未知prefix与中途地址/合并状态按表保留，不从条件候选证明当前内容。
-2. **配置接口层：** 新源已挂入context传播；当前先定位并解决接口事件积压，原词法实验不作默认。验收API实参/数据返回/world及scope后，再沿后续hydra写入、callback、deepcopy、删除与task actual/formal/world推进。修改后cfg内容不能用None返回值或初始字段代替；不盲增全局预算。
+2. **配置接口层：** 当前缺口已定位到`compose_config`中配置加载器receiver及字段来源。先复用已存调用/构造/字段关系，定点连接已知调用的局部摘要，区分引用通路与内容版本；不再用全局重排/增预算代替定位。验收API实参/数据返回/world及scope后，再沿后续hydra写入、callback、deepcopy、删除与task actual/formal/world推进。修改后cfg内容不能用None返回值或初始字段代替。
 3. **算子与资源层：** 新 context图连接现有 Python/native声明、算子及资源图；已知属性静态保留，运行地址等未知字段不伪造。
 4. **全图验收：** 源码闭包、顺序敏感传播、循环和跨层接口的覆盖分母/缺口审计。队列清空本身不证明全覆盖；第一阶段通过后才进入化简。
 
