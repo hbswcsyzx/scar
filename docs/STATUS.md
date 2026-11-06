@@ -43,13 +43,14 @@ NORMAL_SUCCESS / CPython 3.14.7；后端约定C++20、算子ABI v1、计划schem
 - **当前断点已缩小：** `receiver-targets/solver-observations.json`是分析器抽象token的只读快照，不是目标运行trace。2M构建140.56秒；`observer-verification.json`核27个关系分片与已验前缀逐字节一致，复用先前26类typed读回并额外严格读index-cycle表。classmethod/OBJECT_NEW/SOURCE_INIT及返回路径均已有边；工厂结果4976有instance，而下游形参10897/接收者3446只有None，属性订阅存在。实例在中间返回链上的传播尚未完成或未定位，不能归因为descriptor缺陷。下一门先检查该链的实际事件传播，避免盲补源码或只增全局预算。
 - **引用transport闭包门：** 原FIFO分段4M确认`func()`→函数RETURN出口有20条active REFERENCE线，链首2M已到instance、4M链尾仍无。`reference-targets`只对已admit alias进行迭代闭包，原边/端口保留；2M普通事件加2,203,635次alias传递，耗时153.79秒（闭包9.40秒），严格读回72.75秒。RETURN出口和后续实参已有instance；形参处尚无，实参事件明确pending1。此为分析器进展，不是目标加速；普通frontier591,760，第一阶段未完成。一个0.12秒micro验收覆盖20链、cycle、晚边、未激活边与共享owner。
 - **正常任务链子gate已通过：** `normal-task-chain-verification.json`严格核6个选中CallLink、实参/形参/返回/world以及唯一compiled rawrun模板。`copy-transfer-targets`将原已安装的参数/数据返回copy一并闭包，classmethod→构造/init→Hydra.run→run_job→compiled rawrun均已接通，cfg formal为3972；不借passthrough/rerun，不冒充实际dispatch。4M普通事件加12,258,044次copy传递，239.47秒，其中闭包22.23秒；普通frontier2,784,656，非固定点。原数据边和world记录未替换；配置内容、callback效果、全域覆盖仍未通过。
-- **数据材料子gate已通过：** `config-input-materials/verification.json`严格读回真实三个YAML的102个node/102个reference及原bytes；三材料独立分片，不合成巨型JSON。OmegaConf resolver匹配完整函数AST，科学计数float/日期字符串差异已核，自定义Path构造不执行；两处missing标记、三处插值仍为representation string，package header原bytes保留。一个1.78秒通用用例核UTF8/CRLF、alias共享/循环与typed读回。材料来源当前是声明文件输入，尚未自动从程序推导请求，未组合配置或绑定cfg字段。
+- **数据材料子gate已通过：** `config-input-materials/verification.json`严格读回真实三个YAML的102个node/102个reference及原bytes；三材料独立分片，不合成巨型JSON。OmegaConf resolver匹配完整函数AST，科学计数float/日期字符串差异已核，自定义Path构造不执行；两处missing标记、三处插值仍为representation string，package header原bytes保留。一个1.78秒通用用例核UTF8/CRLF、alias共享/循环与typed读回。该材料采集步骤以声明文件为输入；下一项已核主文件的自动请求来源。未组合配置或绑定cfg字段。
+- **自动请求识别子gate：** `config-request-current/verification.json`从原调用图识别1条版本化Hydra API请求，参数三条literal/alias路径、factory→decorator→实际task创建路径及原argv选项来源均已核；由实际compile filename恢复的主YAML候选与材料URI一致。初始argv仍非当前argv，环境/搜索插件条件未消除；不手写最终cfg，当前仅请求候选。下一步是有序defaults/package组合。
 - 旧独立eval.py长任务已由实际launcher/context求解替代并终止，未发布固定点；收据为`entry-pack-fixed.superseded.json`。首个1M原型的两项namespace问题记在`launcher-context-targets-1m-reviewed/review.json`，当前产物已修正并重验。
 
 ## 后续顺序
 
 1. caller frame、按需读取、源码批量准入和正常任务链子gate已通过。下一门先建输入材料与组合图，再沿已验actual/formal/world绑定字段；不手写最终cfg，也不混入物理对象身份。
-2. 配置材料层已通过。接下来机械识别库API请求及原入口argv候选，再做defaults/package/_self_→CLI覆盖→lazy节点引用→带条件cfg投影；不把材料Parser结果当最终cfg。先用两个通用YAML验覆盖后引用、missing和序列，再接真实3文件/原argv。launcher追加项、环境/search插件、callback变更保独立条件。源码闭包与locals/隐式状态仍需继续补齐。
+2. 配置材料与请求识别已通过。接下来做defaults/package/_self_→CLI覆盖→lazy节点引用→带条件cfg投影；不把材料Parser结果当最终cfg。先用两个通用YAML验覆盖后引用、missing和序列，再接真实3文件/原argv。launcher追加项、环境/search插件、callback变更保独立条件。源码闭包与locals/隐式状态仍需继续补齐。
 3. 将新的context图接到既有Python/native绑定、算子及资源要求图；保alias、逻辑来源、位置、状态和效果，运行时未知字段仍未知。
 4. 在上述入口与接口稳定后持续求解，审计源码、跨层边界、循环和资源的覆盖分母。队列清空不等于整个程序覆盖完成；第一阶段通过后才进入化简。
 

@@ -24,6 +24,10 @@ F5可增量接入经过完整前端的新源码，不重建旧图：先用
 可加`--loader-source /path/to/omegaconf/_utils.py`，只识别已固定AST版本的resolver规则，不导入OmegaConf。
 `DataMaterialStore(path).read()/raw()`返回typed图/原bytes。材料不是已组合cfg，未知tag保对应字段的obligation。
 
+`python -B -m scar.analysis.source_configuration_requests --targets CONTEXT_GRAPH --out FRESH_REQUESTS`
+从已准入版本化库调用及入口输入生成条件请求，`read_configuration_requests(path)`核父收据并typed读回。
+factory参数、decorator/task关联、初始argv与文件候选分别记录；不直接给cfg注入常量。
+
 ## 当前形式前端入口
 
 ```bash

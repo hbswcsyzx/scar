@@ -218,3 +218,8 @@ children/root引用reference ordinal，reference.target引用node ordinal，因�
 材料层的representation_literal只解释YAML表示；`???`和`${path}`此时仍是字符串。
 已安装OmegaConf loader的完整函数AST与工具bytes固定到profile，仅复现resolver和内建scalar解释，不调用自定义构造器。
 每材料独立保存source.bin、node/ref/obligation三表和小header；普通读回核全部收据及图不变量。
+
+配置请求由版本化库API的SourceCallLink识别，不按workload名称或参数变量名选择。
+参数候选保原formal/actual、literal来源及有向alias路径；factory到decorator及task创建也保独立路径。
+CLI值由声明输入端口及明确的option projection推导，初始argv不冒充当前argv。
+文件候选优先用实际compile context filename；环境覆盖、搜索插件及输入变更未闭合时继续带条件。
