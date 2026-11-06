@@ -32,6 +32,11 @@ factory参数、decorator/task关联、初始argv与文件候选分别记录；�
 沿条件文件请求自动发现defaults依赖，保存共享材料、有序版本及provider/选择缺口。
 `read_configuration_composition(path)`核父收据并返回(report, typed graph)；本层不输出最终cfg。
 
+`python -B -m scar.analysis.source_configuration_overrides --composition GRAPH --out FRESH_OVERRIDES --hydra-source /path/to/site-packages/hydra`
+复用固定ANTLR语法，按已固定库源码中的argparse声明筛选初始argv，生成带原输入端口的表达式和有序写入图。
+`read_configuration_overrides(path)`严格读回；库初始化、visitor、自定义函数均不执行，组选择和当前argv仍需条件。
+此静态输入工具的可选依赖为`configuration-source`；现有lewm环境已具备，未重新安装。
+
 ## 当前形式前端入口
 
 ```bash

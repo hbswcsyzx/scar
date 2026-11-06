@@ -14,6 +14,7 @@ NORMAL_SUCCESS / CPython 3.14.7；交付后端约定 C++20、算子 ABI v1、计
 | F5 跨层接线 | 参数、捕获、返回、world、构造/属性/容器；实际 launcher→compile/exec→Hydra→任务正常链 | 尚未固定点；may 调用不是实际 dispatch |
 | 配置请求 | 原调用/alias/decorator、入口 argv、实际 compile filename→文件候选 | 初始 argv、搜索路径、环境选择仍带条件 |
 | 配置组合 | 自动发现3文件/102数据节点；defaults、package、共享材料和有序根版本 | CLI/lazy、ConfigStore/schema、任务 cfg 字段未闭合 |
+| 覆盖输入 | 初始 argv→已知option/positional→6表达式/6有序写入，保来源及类型 | 仅初始版本；组选择、字段应用与lazy引用待接 |
 | native/资源 | 既有声明、CPU/DRAM/GPU/设备内存/SATA/NVMe 旁图 | 尚未与新入口完成全链路重验 |
 
 五类实体为 Operation / Value / StateLocation / Region / Resource；输入输出是端口角色。
@@ -32,13 +33,14 @@ NORMAL_SUCCESS / CPython 3.14.7；交付后端约定 C++20、算子 ABI v1、计
 - `config-input-materials/verification.json`：真实三 YAML 的102 node/102 reference与 bytes；OmegaConf scalar resolver固定版本，自定义构造不执行；missing/插值仅保表示。
 - `config-request-current/verification.json`：自动推导1条 API请求、3条参数 literal/alias路径及唯一 task/decorator关联；主文件候选与材料一致。仍是条件请求。
 - **`config-composition-current/verification.json`：新门通过。** 自动发现 launcher/local、solver/cem、主文件，6依赖、5根版本；正确保 `_self_` 和 package 顺序。构建2.06秒、严格读回1.52秒；图压缩表3,234 bytes，含材料与收据共41,881 bytes。通用单用例核嵌套 group、header/显式 package优先级与材料共享。15个库函数固定源码/AST，未执行目标。
+- **`config-overrides-current/verification.json`：新门通过。** 按源码声明复用stdlib argparse与ANTLR语法工具，6原argv端口→6表达式→6条件写入；基版本明确引用组合根4。构建0.81秒、严格读回1.20秒；图压缩表1,796 bytes。通用单用例核CLI/YAML类型差异、转义、empty/null/missing、容器、函数和sweep不求值。未初始化Hydra或运行目标；CLI已知option不当作覆盖。
 
-最后一门仅通过局部有序组合：6项 obligation明确保留隐式库根、3个同名 schema查询、
-组 override的已有目标选择、CLI/lazy层。OPEN_PROVIDER不产生虚构数据；未求出最终 cfg。
+组合门6项 obligation保留隐式库根、3个同名 schema查询、组选择与CLI/lazy层；
+覆盖门保当前argv/追加项、组及字段更新条件、lazy与任务绑定。OPEN_PROVIDER不产生虚构数据；未求出最终 cfg。
 
 ## 后续顺序与验收
 
-1. **覆盖与引用层：** 原 argv→override语法/类型→有序字段版本→lazy引用；核覆盖后引用、missing与null/缺键分离，不把 YAML resolver当 CLI语法。
+1. **覆盖与引用层：** 初始argv语法/类型/有序写图已过；下一门做字段应用→lazy引用，核覆盖后引用及missing/null/缺键分离。未求值函数/组选择不能当普通字段常量。
 2. **配置接口层：** 补 ConfigStore/provider与输入变更条件，沿已验 actual/formal/world接到任务字段；保 deepcopy、删除与callback效果，不把初值冒充当前值。
 3. **算子与资源层：** 新 context图连接现有 Python/native声明、算子及资源图；已知属性静态保留，运行地址等未知字段不伪造。
 4. **全图验收：** 源码闭包、顺序敏感传播、循环和跨层接口的覆盖分母/缺口审计。队列清空本身不证明全覆盖；第一阶段通过后才进入化简。

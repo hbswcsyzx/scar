@@ -230,3 +230,8 @@ CLI值由声明输入端口及明确的option projection推导，初始argv不�
 组override是选择约束，不是在声明位置进行merge；缺失provider以OPEN_PROVIDER及obligation保留。
 库隐式根、每文件同名schema、CLI和lazy引用尚未闭合时，局部payload顺序只在列出的条件下成立，
 不得把组合版本、已解析cfg或运行时对象身份等同。
+
+初始argv覆盖以独立表达式图及有序写入保存，原输入端口、完整token、字符区间、quote和类型均保留。
+复用固定版本的ANTLR生成语法工具，不初始化Hydra、不调用visitor或用户函数；CALL/SWEEP保结构和未求值义务。
+覆盖图的版本0显式引用组合图的选中根版本，后续写入各有input/output版本；这些ID只在对应工件内定位。
+普通字段候选与组选择保不同条件，missing/插值在此层仍非已解析值；不把初始argv投影冒充当前argv或当前cfg。
