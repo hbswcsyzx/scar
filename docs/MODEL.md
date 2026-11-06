@@ -194,3 +194,8 @@ exec的连接区域保留命名空间选择、条件builtins插入、closure检�
 caller frame globals须由原frame/capture关系绑定，不能以源码module名代替其身份。
 builtins在根frame入口或函数创建world选择；选中的map内容保普通读依赖，标准fallback单独保guard。
 类关系查询只在单次查询中共享DAG子问题，依赖变化后重查；不缓存过期的False/UNKNOWN结论。
+
+FrameGlobalsBinding连接原函数factory、选中callee、创建world与frame globals引用；根namespace
+由原globals/locals formal输入描述，字典view不是新的allocation，也不是module对象身份。
+StaticInputPort以输入contract版本和字段路径标识声明初值，独立于原源码端口；content因子可引用该
+外部输入端口。初始字段版本不等于当前内容不变；普通名字访问和字典读写、浅拷贝保持同一内容依赖。

@@ -4,6 +4,7 @@ from dataclasses import dataclass
 from .normal_targets import GlobalPort
 from .source_exec_roots import ExecEndpoint
 from .source_namespaces import NamespaceInterfaceRef
+from .source_frame_bindings import ContextEndpoint
 
 
 @dataclass(frozen=True, slots=True)
@@ -26,6 +27,6 @@ class BuiltinNamespaceSelection:
     capturing_function: GlobalPort | None
     globals_reference: GlobalPort
     globals_container: GlobalPort
-    source: GlobalPort
+    source: ContextEndpoint
     read_world: GlobalPort
     conditions: tuple[str, ...]

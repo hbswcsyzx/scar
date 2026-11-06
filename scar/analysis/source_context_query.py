@@ -12,6 +12,7 @@ from scar.analysis.source_symbol_variants import _table
 from scar.analysis.source_productions import _digest
 from scar.ir.program import source_exec_roots as X
 from scar.ir.program import source_builtin_namespaces as B
+from scar.ir.program import source_frame_bindings as F,source_namespaces as N
 from scar.ir.record_codec import decode,encode
 
 
@@ -89,6 +90,45 @@ class ContextTargetGraph(Q.NormalCallGraph):
     def builtin_selections(self, source=None):
         for document in self._documents('builtin_selections',source,None,'access'):
             yield decode(B.BuiltinNamespaceSelection,document,record_tags=Q.P.PRODUCTION_RECORD_TAGS)
+
+    def root_namespace_bindings(self, source=None):
+        for document in self._documents('root_namespace_bindings',source,None,'globals'):
+            yield decode(F.RootNamespaceBinding,document,record_tags=Q.P.PRODUCTION_RECORD_TAGS)
+
+    def frame_globals_bindings(self, source=None):
+        for document in self._documents('frame_globals_bindings',source,None,'source'):
+            yield decode(F.FrameGlobalsBinding,document,record_tags=Q.P.PRODUCTION_RECORD_TAGS)
+
+    def frame_globals_reads(self, source=None):
+        for document in self._documents('frame_globals_reads',source,None,'result'):
+            yield decode(F.FrameGlobalsRead,document,record_tags=Q.P.PRODUCTION_RECORD_TAGS)
+
+    def frame_globals_obligations(self, source=None):
+        for document in self._documents('frame_globals_obligations',source,None,'result'):
+            yield decode(F.FrameGlobalsObligation,document,record_tags=Q.P.PRODUCTION_RECORD_TAGS)
+
+    def frame_capture_obligations(self, source=None):
+        for document in self._documents('frame_capture_obligations',source,None,'site'):
+            yield decode(N.NamespaceGraphObligation,document,record_tags=Q.P.PRODUCTION_RECORD_TAGS)
+
+    def static_input_bindings(self, source=None):
+        units=self.units_for_source(source)
+        for document in self._documents('static_input_bindings',None,None,'port.root.owner'):
+            value=decode(F.StaticInputBinding,document,record_tags=Q.P.PRODUCTION_RECORD_TAGS)
+            if units is None or value.port.unit in units:yield value
+
+    def content_factors(self, source=None):
+        units=self.units_for_source(source)
+        for wire in self._documents('content_factors',None,None,'container'):
+            factor=decode(F.ContextContentFactor,wire,record_tags=Q.P.PRODUCTION_RECORD_TAGS)
+            if not factor.sources or not factor.targets or any(e.unit not in self.units
+                    for e in (factor.container,*factor.sources,*factor.targets)):
+                raise ValueError('context content factor has empty or foreign endpoints')
+            if units is None or any(e.unit in units for e in factor.targets):yield factor
+
+    def content_index_cycles(self, source=None):
+        for wire in self._documents('content_index_cycles',source,None,'container'):
+            yield decode(F.ContextContentIndexCycle,wire,record_tags=Q.P.PRODUCTION_RECORD_TAGS)
 
     def expand(self, link):
         if link.body is None:raise ValueError('this edge has no source body')

@@ -106,7 +106,8 @@ class BuiltinNamespaceFlow:
             *(('UNKNOWN_SOURCE_KEY_SELECTS_BUILTINS_STRING',) if unknown_key else ()))
         row = BuiltinNamespaceSelection(request.connection,request.access,request.interface,
             request.selected_at,request.capturing_function,request.globals_reference,
-            self._gp(container[1]),self._gp(source),request.read_world,tuple(dict.fromkeys(conditions)))
+            self._gp(container[2] if container[0]=='source_root_namespace' else container[1]),
+            self.s.gp(source),request.read_world,tuple(dict.fromkeys(conditions)))
         if row not in self._selections:
             self._selections.add(row);self.selections.append(row)
         self._watch(source,'BUILTINS_VALUE',request,container,unknown_key)
@@ -143,6 +144,9 @@ class BuiltinNamespaceFlow:
                     for key in (('str','__builtins__'),None):
                         for source in tuple(self.s.containers.entries[token].get(key,())):
                             self._source(token,source,request,key is None)
+                elif token[0]=='source_root_namespace':
+                    self.globals_readers[token].add(request)
+                    self.s.frames.watch_root_content(token,'__builtins__',self.content_write)
                 else:
                     self.s.add(request.target,('external_value',None))
             elif token[0] == 'container':

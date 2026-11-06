@@ -10,6 +10,7 @@ from scar.analysis.normal_entry import EntrySolver
 from scar.analysis.source_context_fact_store import ContextFactStore
 from scar.analysis.source_context_interfaces import ContextInterfaceStore
 from scar.analysis.source_namespace_flow import NamespaceFlow
+from scar.analysis.source_frame_globals import FrameGlobalsFlow
 from scar.analysis.source_relation_replay import SharedConstructionFlow, SharedContainerFlow
 from scar.ir.program import normal_links as F, normal_entry as E
 
@@ -17,6 +18,7 @@ from scar.ir.program import normal_links as F, normal_entry as E
 class ContextEntrySolver(EntrySolver):
     def __init__(self, base, namespace_graph, entries, *, interfaces, jobs=None):
         self.namespace_graph = namespace_graph
+        self.frames = None
         self.namespace_flow = None; self.namespace_pending = deque(); self.namespace_scopes = set()
         self.exec_by_result = defaultdict(list); self.call_owners = {}
         for connection in namespace_graph.exec_graph.connections():
@@ -32,6 +34,17 @@ class ContextEntrySolver(EntrySolver):
         self.containers = SharedContainerFlow(self,[])
         self.constructions = SharedConstructionFlow(self)
         self.namespace_flow = NamespaceFlow(self,namespace_graph)
+        self.frames = FrameGlobalsFlow(self)
+
+    def activate_function(self, fid, callee):
+        super().activate_function(fid,callee)
+        if self.frames is not None:
+            self.frames.activate_function(fid,callee)
+
+    def activate_generator(self, fid, driver, callee):
+        super().activate_generator(fid,driver,callee)
+        if self.frames is not None:
+            self.frames.activate_function(fid,callee)
 
     def load_unit(self, identity):
         fresh = identity not in self._metadata_loaded
@@ -60,7 +73,20 @@ class ContextEntrySolver(EntrySolver):
             # These lossy MODULE rows are replaced by ordered C2 interfaces.
             self.admitted.add((unit.unit,table,index))
             return
-        return super().admit(unit,table,index)
+        result=super().admit(unit,table,index)
+        if table=='names' and self.frames is not None:
+            access=unit.names[index]
+            if access.write and access.namespace.kind is F.NamespaceKind.MODULE:
+                self.frames.name_write(unit.unit,access.namespace.name,self.offsets[unit.unit]+access.value)
+            elif not access.write and access.namespace.kind is F.NamespaceKind.MODULE:
+                self.frames.name_read(unit.unit,access.namespace.name,self.offsets[unit.unit]+access.value)
+        return result
+
+    def attribute(self, point, value, name, target):
+        if value[0]=='source_root_namespace':
+            self.frames.views.attribute(value,name,target)
+            return
+        return super().attribute(point,value,name,target)
 
     def prepare(self):
         super().prepare()
@@ -81,13 +107,11 @@ class ContextEntrySolver(EntrySolver):
                 self.add(offset+call.result,('constant','NoneType',None))
                 self.resolved_interface_calls.add(index)
                 return
-        if (unit.unit in self.store.original_source_units and value[:2]==('external','builtins.globals')
+        if (value[:2]==('external','builtins.globals')
                 and not call.positional and not call.keywords
                 and call.positional_pack is None and call.keyword_pack is None):
             owner = self.call_owners[index]
-            for source in self.namespace_flow.globals_by_owner.get(owner,()):
-                self.edge(source,offset+call.result)
-            if not self.namespace_flow.globals_by_owner.get(owner):
+            if not self.frames.read_globals(owner,self.gp(offset+call.result),self.gp(offset+call.world)):
                 self.add(offset+call.result,('external_value',None))
             self.resolved_interface_calls.add(index)
             return

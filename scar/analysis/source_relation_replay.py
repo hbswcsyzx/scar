@@ -64,6 +64,9 @@ class SharedContainerFlow(DeltaContainerFlow):
         return dict(super().analysis_stats,subscriptions=dict(self.subscription_stats))
 
     def iterate(self, container, target):
+        frames=getattr(self.s,'frames',None)
+        if frames is not None and container[0]=='source_root_namespace':
+            container=frames.views.proxy(container)
         if container[0]=='container':
             if target in self.iter_sources[container]:
                 self.subscription_stats['iteration_reuses']+=1
@@ -83,3 +86,37 @@ class SharedContainerFlow(DeltaContainerFlow):
         namespace = getattr(self.s,'namespace_flow',None)
         if namespace is not None:
             namespace.builtins.content_write(container,key,source)
+        frames=getattr(self.s,'frames',None)
+        if frames is not None:
+            frames.views.content_write(container,key,source)
+
+    def access(self, receiver, key, target, write):
+        frames=getattr(self.s,'frames',None)
+        if receiver[0]=='source_root_namespace' and frames is not None:
+            frames.access_root(receiver,key,target,write)
+            return
+        super().access(receiver,key,target,write)
+
+    def copy(self, source, target):
+        frames=getattr(self.s,'frames',None)
+        if frames is not None:
+            if source[0]=='source_root_namespace':source=frames.views.proxy(source)
+            if target[0]=='source_root_namespace':target=frames.views.proxy(target)
+        super().copy(source,target)
+
+    def attribute(self, value, name, target):
+        if value[0]=='container' and value[2]=='MAPPING' and name=='copy':
+            self.s.add(target,('container_method',value,name))
+            return
+        super().attribute(value,name,target)
+
+    def call(self, unit, call, value):
+        if value[0]=='container_method' and value[1][2]=='MAPPING' and value[2]=='copy':
+            # Open packs may be empty; preserve their accepting normal branch.
+            if not call.positional and not call.keywords:
+                result=self.s.offsets[unit.unit]+call.result
+                target=('container',result,'MAPPING')
+                self.s.add(result,target)
+                self.copy(value[1],target)
+            return
+        super().call(unit,call,value)

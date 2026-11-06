@@ -44,9 +44,8 @@ class NamespaceFlow:
         if type(connection.globals.value) is GlobalPort:
             self.s.edge(self.point(connection.globals.value),globals_point)
         else:
-            # Preserve the unresolved frame handle. A source module is not
-            # evidence of the caller's actual globals dictionary identity.
-            self.s.add(globals_point,('external_value',None))
+            if not self.s.frames.connect_exec(connection,globals_point):
+                self.s.add(globals_point,('external_value',None))
         if type(connection.locals.value) is GlobalPort:
             self.s.edge(self.point(connection.locals.value),locals_point)
         else:
@@ -127,7 +126,9 @@ class NamespaceFlow:
         if request in self.mapping_requests:
             return
         self.mapping_requests.add(request)
-        if token[0] in ('container','namespace_mapping'):
+        if token[0]=='source_root_namespace':
+            self.s.frames.access_root(token,('str',key),target,write)
+        elif token[0] in ('container','namespace_mapping'):
             self.s.containers.access(token,('str',key),target,write)
         elif not write:
             self.s.add(target,('external_value',None))

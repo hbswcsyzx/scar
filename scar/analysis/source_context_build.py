@@ -14,7 +14,10 @@ from scar.analysis import source_context_solver,source_context_fact_store,source
 from scar.analysis import source_namespace_flow,source_relation_replay,source_class_queries
 from scar.analysis import normal_targets,source_launch,source_namespace_graph
 from scar.analysis import normal_entry,normal_facts,source_namespace_builtins
+from scar.analysis import source_frame_captures,source_frame_globals
+from scar.analysis import source_root_namespace_views
 from scar.ir.program import source_builtin_namespaces
+from scar.ir.program import source_frame_bindings
 from scar.analysis.normal_facts import SourceFactStore
 from scar.analysis.normal_output import write_table
 from scar.analysis.source_stage import _durable_bytes,_durable_mkdir
@@ -29,17 +32,27 @@ def pins():
         ('original_publisher',normal_targets),('entry_contract',source_launch),
         ('namespace_graph',source_namespace_graph),('entry_solver',normal_entry),
         ('fact_reader',normal_facts),('builtin_flow',source_namespace_builtins),
-        ('builtin_types',source_builtin_namespaces))}
+        ('builtin_types',source_builtin_namespaces),('frame_index',source_frame_captures),
+        ('frame_flow',source_frame_globals),('frame_types',source_frame_bindings),
+        ('root_views',source_root_namespace_views))}
 
 
 def build_context_targets(facts,namespaces,entry,interfaces,out,*,max_events=2_000_000,jobs=4):
+    with ExitStack() as resources:
+        return _build_context_targets(facts,namespaces,entry,interfaces,out,max_events=max_events,jobs=jobs,resources=resources)
+
+
+def _build_context_targets(facts,namespaces,entry,interfaces,out,*,max_events,jobs,resources):
     started=time.monotonic(); out=Path(out).absolute()
     if out.exists():raise ValueError('fresh context target output required')
     base=SourceFactStore(facts); graph=source_namespace_graph.NamespaceGraph(namespaces)
     contract=source_launch.read_script_entry(entry,base)
     initial=pins(); producer=sha256(Path(__file__).read_bytes()).hexdigest()
     solver=source_context_solver.ContextEntrySolver(base,graph,(contract.source.path,),interfaces=interfaces,jobs=jobs)
+    resources.callback(solver.frames.close)
+    resources.callback(solver.generators.close)
     prepared=time.monotonic()
+    solver.frames.configure_entry(contract)
     for binding in contract.globals:
         value=binding.literal.to_python()
         solver.namespace_value(solver.ns(contract.source.unit,binding.namespace),('constant',type(value).__name__,value))
@@ -50,6 +63,7 @@ def build_context_targets(facts,namespaces,entry,interfaces,out,*,max_events=2_0
             exec_connections=len(solver.namespace_flow.connections),loaded_units=len(solver.store.loaded),
             seconds=time.monotonic()-started)),file=sys.stderr,flush=True)
     fixed=not solver.queue and not solver.pending and not solver.namespace_pending
+    solver.frames.validate_parents()
     solver.complete_call_demands(); _durable_mkdir(out)
     _durable_bytes(out/'context-facts.json',solver.store.raw,replace=False)
     extra=dict(analysis_mode='ENTRY_COMPILED_CONTEXT_MAY_ANALYSIS',entry_sources=[contract.source.path],
@@ -65,6 +79,14 @@ def build_context_targets(facts,namespaces,entry,interfaces,out,*,max_events=2_0
         exec_connections=write_table(out/'exec-connections.jsonl.gz',solver.namespace_flow.connections.values()),
         builtin_candidates=write_table(out/'builtin-candidates.jsonl.gz',solver.namespace_flow.builtins.fallbacks),
         builtin_selections=write_table(out/'builtin-selections.jsonl.gz',solver.namespace_flow.builtins.selections),
+        root_namespace_bindings=write_table(out/'root-namespace-bindings.jsonl.gz',solver.frames.roots.values()),
+        frame_globals_bindings=write_table(out/'frame-globals-bindings.jsonl.gz',solver.frames.bindings.values()),
+        frame_globals_reads=write_table(out/'frame-globals-reads.jsonl.gz',solver.frames.reads.values()),
+        frame_globals_obligations=write_table(out/'frame-globals-obligations.jsonl.gz',solver.frames.obligations.values()),
+        frame_capture_obligations=write_table(out/'frame-capture-obligations.jsonl.gz',
+            (o for material in solver.frames.materials.values() for o in material.obligations)),
+        static_input_bindings=write_table(out/'static-input-bindings.jsonl.gz',solver.frames.views.input_bindings.values()),
+        frame_source_stats=solver.frames.index.stats,
         construction_queries=dict(solver.constructions.query_stats),
         namespace_requests=len(solver.namespace_flow.mapping_requests),
         analysis_phase_seconds=dict(preparation=prepared-started,propagation=time.monotonic()-prepared))
@@ -77,6 +99,7 @@ def build_context_targets(facts,namespaces,entry,interfaces,out,*,max_events=2_0
     publish=FunctionType(original.__code__,dict(original.__globals__,_durable_bytes=tables_only),
         original.__name__,original.__defaults__,original.__closure__)
     report=publish(solver,base.path,base.raw,solver.store.report,out,started,max_events,fixed,solver.stars,extra)
+    solver.frames.validate_parents(); solver.frames.close()
     if (pins()!=initial or sha256(Path(__file__).read_bytes()).hexdigest()!=producer
             or (base.path/'result.json').read_bytes()!=base.raw):
         raise ValueError('context source rules changed during propagation')
