@@ -42,6 +42,10 @@ factory参数、decorator/task关联、初始argv与文件候选分别记录；�
 `read_configuration_values(path)`返回(report, typed graph)，root ID均指本图expression ordinal；原版本另见roots表。
 字段结果始终保父条件；OPEN、missing、absent、null、循环及成员封闭性分别读取，不将其直接注入当前任务形参。
 
+`python -B -m scar.analysis.source_configuration_state_binding --values VALUES --facts SOURCE_FACTS --out FRESH_BINDINGS`
+定位已建图库API的原cfg实参及调用前后world，保存声明状态接点；Python返回值不承载该内容版本。
+`read_configuration_state_bindings(path)`严格核源码版本、scope内alias及原端口；仍需证明输入与调用状态对应。
+
 ## 当前形式前端入口
 
 ```bash

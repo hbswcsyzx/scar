@@ -242,3 +242,8 @@ CLI值由声明输入端口及明确的option projection推导，初始argv不�
 插值复用固定生成语法；惰性引用使用该查询选中的根和安装后的父路径。动态key先重建路径再拆分，循环保依赖环。
 中途地址读取有独立read demand：update可指旧snapshot；merge内部尚未降低的状态点保None，不冒充最终root。
 未知provider、schema、当前argv与未支持的别名效果继续阻止无条件结论；本层是输入来源图，尚非任务当前cfg或物理对象身份。
+
+SourceStateProjection把输入内容候选连接到原调用的(receiver reference, result_world)，
+同时保存world_before与独立data_result；返回None的修改操作也能产生新内容版本。
+接点保原call/attribute坐标及所属scope的alias证据。声明接点不证明调用激活、输入版本匹配或后续任务内容，
+不得越过callback、deepcopy、删除及环境效果直接向形参注入字段。
