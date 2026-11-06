@@ -17,6 +17,9 @@ F5可增量接入经过完整前端的新源码，不重建旧图：先用
 批量seed仍未授F0–F4；接上述`source_dependency_frontend --explicit-seed --jobs 16`才按原顺序处理，
 超过4源采用调用者给定进程数，不会因material-index为空错误退回单进程。
 
+`source_context_build --observe-port UNIT LOCAL`可重复指定少量原端口，发布独立`solver-observations.json`。
+只读当前分析器token、pending和已有订阅，每类最多4样本；它不执行目标，也不把pending为0当全图收敛。
+
 ## 当前形式前端入口
 
 ```bash

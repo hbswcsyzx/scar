@@ -25,6 +25,7 @@ from scar.analysis.source_template_links import _json
 
 
 def pins():
+    from scar.analysis import source_solver_observations
     return {name:sha256(Path(module.__file__).read_bytes()).hexdigest() for name,module in (
         ('solver',source_context_solver),('facts',source_context_fact_store),
         ('interfaces',source_context_interfaces),('namespaces',source_namespace_flow),
@@ -34,16 +35,16 @@ def pins():
         ('fact_reader',normal_facts),('builtin_flow',source_namespace_builtins),
         ('builtin_types',source_builtin_namespaces),('frame_index',source_frame_captures),
         ('frame_flow',source_frame_globals),('frame_types',source_frame_bindings),
-        ('root_views',source_root_namespace_views))}
+        ('root_views',source_root_namespace_views),('observations',source_solver_observations))}
 
 
-def build_context_targets(facts,namespaces,entry,interfaces,out,*,max_events=2_000_000,jobs=4,supplements=()):
+def build_context_targets(facts,namespaces,entry,interfaces,out,*,max_events=2_000_000,jobs=4,supplements=(),observe_ports=()):
     with ExitStack() as resources:
         return _build_context_targets(facts,namespaces,entry,interfaces,out,max_events=max_events,jobs=jobs,
-            resources=resources,supplements=tuple(supplements))
+            resources=resources,supplements=tuple(supplements),observe_ports=tuple(observe_ports))
 
 
-def _build_context_targets(facts,namespaces,entry,interfaces,out,*,max_events,jobs,resources,supplements):
+def _build_context_targets(facts,namespaces,entry,interfaces,out,*,max_events,jobs,resources,supplements,observe_ports):
     started=time.monotonic(); out=Path(out).absolute()
     if out.exists():raise ValueError('fresh context target output required')
     base=SourceFactStore(facts); graph=source_namespace_graph.NamespaceGraph(namespaces)
@@ -70,6 +71,12 @@ def _build_context_targets(facts,namespaces,entry,interfaces,out,*,max_events,jo
     solver.frames.validate_parents()
     solver.complete_call_demands(); _durable_mkdir(out)
     _durable_bytes(out/'context-facts.json',solver.store.raw,replace=False)
+    observations=None
+    if observe_ports:
+        from scar.analysis.source_solver_observations import snapshot_ports
+        raw=_json(snapshot_ports(solver,observe_ports))
+        _durable_bytes(out/'solver-observations.json',raw,replace=False)
+        observations=dict(path='solver-observations.json',bytes=len(raw),sha256=sha256(raw).hexdigest())
     extra=dict(analysis_mode='ENTRY_COMPILED_CONTEXT_MAY_ANALYSIS',entry_sources=[contract.source.path],
         active_code_scopes=len(solver.active_scopes),loaded_sources=len(solver.units),
         active_source_calls=len(solver.active_call_indices),pending_code_scopes=len(solver.pending),
@@ -121,6 +128,7 @@ def _build_context_targets(facts,namespaces,entry,interfaces,out,*,max_events,jo
             for source,pair in zip(supplemental_sources,supplements)],
         entry_unit=contract.source.unit,importable_compiled_namespaces=False,
         namespace_lookup_semantics='ORDERED_SOURCE_GRAPH_CONDITIONAL_MAY_TRANSFER',
+        solver_observations=observations,
         fixed_point_scope='ADMITTED_SOURCE_AND_EXEC_CONTEXT_CONSTRAINTS',
         target_executed=False,first_stage_complete=False,seconds=time.monotonic()-started)
     _durable_bytes(out/'result.json',_json(report),replace=False)
@@ -135,6 +143,8 @@ def main():
     parser.add_argument('--jobs',type=int,default=4)
     parser.add_argument('--supplement',nargs=2,action='append',default=[],metavar=('FACTS','INTERFACES'),
         help='append a pinned source catalog and its local interfaces without changing existing ports')
+    parser.add_argument('--observe-port',nargs=2,action='append',default=[],metavar=('UNIT','LOCAL'),
+        help='snapshot selected analyzer port values and subscriptions at this event frontier')
     parser.add_argument('--stack-log')
     args=parser.parse_args()
     with ExitStack() as diagnostics:
@@ -143,7 +153,8 @@ def main():
             faulthandler.dump_traceback_later(30,repeat=True,file=stream)
             diagnostics.callback(faulthandler.cancel_dump_traceback_later)
         report=build_context_targets(args.facts,args.namespaces,args.entry,args.interfaces,args.out,
-            max_events=None if args.until_fixed_point else args.max_events,jobs=args.jobs,supplements=args.supplement)
+            max_events=None if args.until_fixed_point else args.max_events,jobs=args.jobs,supplements=args.supplement,
+            observe_ports=tuple((unit,int(local)) for unit,local in args.observe_port))
     print(json.dumps({name:report[name] for name in ('status','value_events','frontier','admitted_exec_connections',
         'active_compiled_namespaces','seconds')}),flush=True)
 
