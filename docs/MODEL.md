@@ -212,3 +212,9 @@ F5的纯引用transport可在已安装的有向copy约束中迭代闭包，包�
 版本化组合操作（defaults/package/override及lazy引用）、与原call actual/formal/world绑定的输入候选。
 map/seq不是PythonLiteral；mandatory-missing、null、缺键和未知字段不混用。解析材料不冒充程序执行事件，
 组合结果也不能越过deepcopy、删除和callback效果直接冒充当前cfg。文件内容版本、逻辑组合版本与物理对象身份分开。
+
+数据材料的DataNode表示scalar/map/seq定义，DataReference表示一次源码出现并携带独立span；
+children/root引用reference ordinal，reference.target引用node ordinal，因此alias共享/循环不展开。
+材料层的representation_literal只解释YAML表示；`???`和`${path}`此时仍是字符串。
+已安装OmegaConf loader的完整函数AST与工具bytes固定到profile，仅复现resolver和内建scalar解释，不调用自定义构造器。
+每材料独立保存source.bin、node/ref/obligation三表和小header；普通读回核全部收据及图不变量。

@@ -20,6 +20,10 @@ F5可增量接入经过完整前端的新源码，不重建旧图：先用
 `source_context_build --observe-port UNIT LOCAL`可重复指定少量原端口，发布独立`solver-observations.json`。
 只读当前分析器token、pending和已有订阅，每类最多4样本；它不执行目标，也不把pending为0当全图收敛。
 
+数据材料入口：`python -B -m scar.analysis.source_data_materials --file INPUT.yaml --out FRESH_STORE`。
+可加`--loader-source /path/to/omegaconf/_utils.py`，只识别已固定AST版本的resolver规则，不导入OmegaConf。
+`DataMaterialStore(path).read()/raw()`返回typed图/原bytes。材料不是已组合cfg，未知tag保对应字段的obligation。
+
 ## 当前形式前端入口
 
 ```bash
