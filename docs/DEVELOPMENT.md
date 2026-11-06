@@ -358,7 +358,9 @@ python -B -m scar.analysis.software_resources --bindings BINDINGS --declarations
 
 事实schema v6保留完整原ABI，并用原code_scope分组；`NormalCallGraph.attribute_sites/properties/attribute_storage`分别查询原操作与条件接线。
 `entry_activations/module_demands/body_demands/call_demands`查询激活与未决接口；队列收敛不代表这些需求已解决。
-`python -B -m scar.analysis.source_admission --targets TARGET_STORE --out FRESH_PLAN`机械关联需求与原依赖材料，不修改模型。
+`python -B -m scar.analysis.source_admission --targets TARGET_STORE --out FRESH_PLAN`支持普通及context图，按真实source provider关联需求与原依赖材料，不修改模型。
+对旧inventory未索引的实际module需求，用原候选roots定点查找；可重复`--search-root`指定候选root。
+新搜索表与原inventory的索引域分开，未固定内容版本不列ready；搜索根及文件存在均不证明运行时import选择。
 `python -B -m scar.analysis.source_dependency_frontend --model ORIGINAL_MODEL --material-index INDEX --out FRESH_ROOT --jobs 4`将选中的原指纹源码经过既有F0--F5，写独立model、验收与facts；不扫目录、不改原模型、不运行目标。
 `python -B -m scar.analysis.normal_facts --parent BASE_FACTS --parent EXTRA_FACTS --out FRESH_CATALOG`引用原分片组成多父目录，正文复制0 bytes；按源展开使用所属父模型和模板，旧收据不重签。
 binding图schema v4继承入口范围，按scope增量订阅native协议，并发布本轮增强的source关系；不得退回全unit eager分析后宣称入口闭合。
