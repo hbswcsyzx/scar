@@ -17,7 +17,7 @@ from scar.ir.program import normal_links as F, normal_entry as E
 
 class ContextEntrySolver(EntrySolver):
     def __init__(self, base, namespace_graph, entries, *, interfaces, jobs=None,
-                 supplemental_sources=(), supplemental_interfaces=()):
+                 supplemental_sources=(), supplemental_interfaces=(), entry_units=None):
         self.namespace_graph = namespace_graph
         self.frames = None
         self.namespace_flow = None; self.namespace_pending = deque(); self.namespace_scopes = set()
@@ -27,6 +27,11 @@ class ContextEntrySolver(EntrySolver):
         store = ContextFactStore(base,namespace_graph.exec_graph,supplemental_sources=supplemental_sources)
         summaries = ContextInterfaceStore(interfaces,store,namespace_graph.exec_graph,
             supplemental_interfaces=supplemental_interfaces)
+        if entry_units is not None:
+            if entries:raise ValueError('select script entries by paths or qualified units, not both')
+            entry_units=tuple(entry_units)
+            if not entry_units or not set(entry_units)<=store.importable_units:
+                raise ValueError('declared entry units must belong to the source catalog')
         super().__init__(store,entries,jobs=jobs,interface_store=summaries)
         # A compile-context body is not an importable module instance.
         for module in tuple(self.module_units):
@@ -37,6 +42,10 @@ class ContextEntrySolver(EntrySolver):
         self.constructions = SharedConstructionFlow(self)
         self.namespace_flow = NamespaceFlow(self,namespace_graph)
         self.frames = FrameGlobalsFlow(self)
+        if entry_units is not None:
+            for identity in entry_units:
+                unit=self.load_unit(identity)
+                self.activate(unit.root_scope.owner,None,E.EntryReason.PROGRAM_ENTRY)
 
     def activate_function(self, fid, callee):
         super().activate_function(fid,callee)

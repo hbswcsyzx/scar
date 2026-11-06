@@ -50,8 +50,9 @@ def _build_context_targets(facts,namespaces,entry,interfaces,out,*,max_events,jo
     contract=source_launch.read_script_entry(entry,base)
     initial=pins(); producer=sha256(Path(__file__).read_bytes()).hexdigest()
     supplemental_sources=tuple(SourceFactStore(pair[0]) for pair in supplements)
-    solver=source_context_solver.ContextEntrySolver(base,graph,(contract.source.path,),interfaces=interfaces,jobs=jobs,
-        supplemental_sources=supplemental_sources,supplemental_interfaces=tuple(pair[1] for pair in supplements))
+    solver=source_context_solver.ContextEntrySolver(base,graph,(),interfaces=interfaces,jobs=jobs,
+        supplemental_sources=supplemental_sources,supplemental_interfaces=tuple(pair[1] for pair in supplements),
+        entry_units=(contract.source.unit,))
     resources.callback(solver.frames.close)
     resources.callback(solver.generators.close)
     prepared=time.monotonic()
