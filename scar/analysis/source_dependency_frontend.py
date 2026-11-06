@@ -12,6 +12,7 @@ import gzip
 from hashlib import sha256
 import json
 import os
+import shutil
 from pathlib import Path
 import time
 
@@ -53,7 +54,7 @@ def _manifest(units):
     return value
 
 
-def build_dependency_frontend(model, material_indices, out, *, jobs=1):
+def build_dependency_frontend(model, material_indices, out, *, jobs=1, explicit_seed=False):
     """Compile selected physical source files through the existing F0--F5 APIs.
 
     Four or fewer selected files run in this process. Larger batches retain
@@ -82,7 +83,8 @@ def build_dependency_frontend(model, material_indices, out, *, jobs=1):
     started = time.monotonic()
     model, out = Path(model).absolute(), Path(out).absolute()
     indices = tuple(material_indices)
-    if (type(jobs) is not int or not 1 <= jobs <= 32 or not indices
+    if (type(jobs) is not int or not 1 <= jobs <= 32 or type(explicit_seed) is not bool
+            or (not indices and not explicit_seed) or (indices and explicit_seed)
             or any(type(index) is not int or index < 0 for index in indices)
             or len(set(indices)) != len(indices)):
         raise ValueError('dependency frontend needs unique material indices and jobs in [1,32]')
@@ -93,8 +95,11 @@ def build_dependency_frontend(model, material_indices, out, *, jobs=1):
     parent = read_static_program(model, verify=False)
     if json.loads(original) != parent:
         raise ValueError('original model changed before dependency admission')
-    inventory = read_static_dependencies(model)
-    if any(index >= len(inventory.materials) for index in indices):
+    inventory = None if explicit_seed else read_static_dependencies(model)
+    if explicit_seed and (parent.get('source_input_scope')!='EXPLICIT_SINGLE_SOURCE_FILE'
+            or parent.get('phase')!='sources' or len(parent['units'])!=1):
+        raise ValueError('explicit frontend input must be a single source-only seed')
+    if inventory is not None and any(index >= len(inventory.materials) for index in indices):
         raise ValueError('material index lies outside the original dependency inventory')
     for index in indices:
         material = inventory.materials[index]
@@ -135,22 +140,30 @@ def build_dependency_frontend(model, material_indices, out, *, jobs=1):
     unchanged()
     _durable_mkdir(out)
     basis = dict(model=str(model), model_manifest_sha256=sha256(original).hexdigest(),
-        dependency_inventory=parent['artifacts']['dependencies'],
+        dependency_inventory=None if explicit_seed else parent['artifacts']['dependencies'],
+        source_input_scope='EXPLICIT_SINGLE_SOURCE_FILE' if explicit_seed else 'EXPLICIT_DEPENDENCY_MATERIALS',
         material_indices=indices, jobs=jobs, effective_jobs=effective_jobs,
         max_source_bytes=_MAX_SOURCE_BYTES, implementation_sha256=implementation)
     _durable_bytes(out / 'inputs.json', _json(basis), replace=False)
     try:
-        expansion = expand_static_dependency_materials(inventory, out=own_model,
-            material_indices=indices, max_files=len(indices), max_bytes=_MAX_SOURCE_BYTES,
-            jobs=effective_jobs, existing_units=())
-        expansion_out = out / 'expansion'
-        _durable_mkdir(expansion_out)
-        _durable_bytes(expansion_out / 'result.json', _json(expansion.to_dict()), replace=False)
-        seal(current, expansion_out, expansion.to_dict())
-        if expansion.frontiers or not expansion.units:
-            raise ValueError('dependency-expansion did not accept the selected materials: ' +
-                ', '.join(sorted({frontier.kind for frontier in expansion.frontiers})))
-        _durable_bytes(own_model / 'manifest.json', _json(_manifest(expansion.units)), replace=False)
+        if explicit_seed:
+            current='explicit-source-seed'
+            # The small, owned source-only seed is the new frontend input.
+            # The original source path and version stay in its unit records.
+            read_static_program(model)
+            shutil.copytree(model,own_model)
+        else:
+            expansion = expand_static_dependency_materials(inventory, out=own_model,
+                material_indices=indices, max_files=len(indices), max_bytes=_MAX_SOURCE_BYTES,
+                jobs=effective_jobs, existing_units=())
+            expansion_out = out / 'expansion'
+            _durable_mkdir(expansion_out)
+            _durable_bytes(expansion_out / 'result.json', _json(expansion.to_dict()), replace=False)
+            seal(current, expansion_out, expansion.to_dict())
+            if expansion.frontiers or not expansion.units:
+                raise ValueError('dependency-expansion did not accept the selected materials: ' +
+                    ', '.join(sorted({frontier.kind for frontier in expansion.frontiers})))
+            _durable_bytes(own_model / 'manifest.json', _json(_manifest(expansion.units)), replace=False)
         read_static_program(own_model)
 
         current = 'f0-capture'
@@ -229,11 +242,12 @@ def build_dependency_frontend(model, material_indices, out, *, jobs=1):
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--model', required=True)
-    parser.add_argument('--material-index', action='append', type=int, required=True)
+    parser.add_argument('--material-index', action='append', type=int, default=[])
+    parser.add_argument('--explicit-seed',action='store_true',help='compile a fresh single-file source-only seed')
     parser.add_argument('--out', required=True)
     parser.add_argument('--jobs', type=int, default=1)
     args = parser.parse_args(argv)
-    report = build_dependency_frontend(args.model, args.material_index, args.out, jobs=args.jobs)
+    report = build_dependency_frontend(args.model, args.material_index, args.out, jobs=args.jobs,explicit_seed=args.explicit_seed)
     print(_json({key: report[key] for key in
         ('status', 'facts', 'source_units', 'original_model_unchanged', 'seconds')}).decode().strip())
     return 0

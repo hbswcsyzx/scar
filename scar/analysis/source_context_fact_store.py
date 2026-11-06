@@ -5,7 +5,7 @@ are F4 compilation stores, not the original sealed source-template format;
 their interface reader must be selected explicitly by the consumer.
 """
 from bisect import bisect_right
-from collections import Counter
+from collections import Counter, defaultdict
 from hashlib import sha256
 import json
 from pathlib import Path
@@ -22,10 +22,13 @@ def _stamp(path):
 
 
 class ContextFactStore:
-    def __init__(self, base: SourceFactStore, exec_graph: ExecRootGraph):
+    def __init__(self, base: SourceFactStore, exec_graph: ExecRootGraph, *, supplemental_sources=()):
         if not isinstance(base,SourceFactStore) or not isinstance(exec_graph,ExecRootGraph):
             raise TypeError('original source facts and a verified exec root graph required')
         self.base,self.exec_graph = base,exec_graph
+        self.supplemental_sources = tuple(supplemental_sources)
+        if any(not isinstance(parent,SourceFactStore) for parent in self.supplemental_sources):
+            raise TypeError('supplemental sources must be receipt-bound source fact stores')
         exec_raw = (exec_graph.path/'result.json').read_bytes()
         if (json.loads(exec_raw) != exec_graph.report
                 or exec_graph.report['source_facts_sha256'] != sha256(base.raw).hexdigest()
@@ -49,7 +52,8 @@ class ContextFactStore:
         self.loaded = dict(base.loaded)
         # Paths remain the source-only admission index. Compiled variants are
         # selected by exec edges, never by a filename/module import lookup.
-        self.source_units,self.sources = base.source_units,base.sources
+        self.source_units = defaultdict(list,{path:list(units) for path,units in base.source_units.items()})
+        self.sources = dict(base.sources)
         self.importable_units = frozenset(base.rows)
         self.original_source_units = {}
         self.variant_template_stores = {}
@@ -106,6 +110,28 @@ class ContextFactStore:
                 schema=f4_report['schema'],schema_version=f4_report['schema_version'],
                 sha256=sha256(f4_raw).hexdigest(),sealed_source_template_store=False)
 
+        # New source stores follow all original source and compiled points.
+        # Catalog position is not a semantic identity; original qualified
+        # ports and every pre-existing numeric offset remain unchanged.
+        self._source_parents = {identity:base for identity in base.rows}
+        supplemental_receipts = []
+        for parent in self.supplemental_sources:
+            if (parent.path/'result.json').read_bytes() != parent.raw:
+                raise ValueError('supplemental source snapshot changed')
+            self._parent_snapshots += ((parent.path/'result.json',parent.raw),)
+            supplemental_receipts.append(dict(path=str(parent.path),sha256=sha256(parent.raw).hexdigest()))
+            for identity,row in parent.rows.items():
+                if identity in self.rows:
+                    raise ValueError('supplemental source unit already belongs to the context catalog')
+                self.rows[identity] = row
+                self.model_units[identity] = parent.model_units[identity]
+                self.starts.append(self.size);self.identities.append(identity)
+                self.offsets[identity] = self.size;self.size += row['counts']['ports']
+                self._source_parents[identity] = parent
+                self.source_units[row['path']].append(identity)
+        self.importable_units = frozenset(self._source_parents)
+        self.sources = {path:units[0] for path,units in self.source_units.items() if len(units)==1}
+
         counts = Counter()
         for row in self.rows.values():
             counts.update(row['counts'])
@@ -113,11 +139,13 @@ class ContextFactStore:
             status='SOURCE_AND_COMPILED_CONTEXT_FACT_CATALOG',
             base_source_facts=dict(path=str(base.path),sha256=sha256(base.raw).hexdigest(),
                 schema=base.report['schema'],schema_version=base.report['schema_version']),
+            supplemental_source_facts=supplemental_receipts,
             exec_roots=dict(path=str(exec_graph.path),sha256=sha256(exec_raw).hexdigest()),
             f4_graphs=dict(exec_graph.report['f4_graphs']),variant_facts=self.variant_fact_receipts,
             original_source_units=self.original_source_units,template_stores=self.variant_template_stores,
             importable_units=sorted(self.importable_units),units=list(self.rows.values()),counts=dict(counts),
             selected_sources=len(self.rows),base_sources=len(base.rows),compiled_namespaces=len(connections),
+            supplemental_sources=sum(len(parent.rows) for parent in self.supplemental_sources),
             base_point_count=base.size,point_count=self.size,copied_fact_bytes=0,
             source_body_activated=False,target_executed=False,first_stage_complete=False,
             implementation_sha256=sha256(Path(__file__).read_bytes()).hexdigest())
@@ -161,7 +189,7 @@ class ContextFactStore:
         if identity not in self.rows:
             raise KeyError(identity)
         if identity not in self.loaded:
-            self.loaded[identity] = self.base.load(identity)
+            self.loaded[identity] = self.source_parent_for(identity).load(identity)
         return self.loaded[identity]
 
     def locate(self,point):
@@ -173,12 +201,22 @@ class ContextFactStore:
         return self.identities[index],point-self.starts[index]
 
     def model_for(self,identity):
-        return self.base.model_for(self.original_source_units.get(identity,identity))
+        source = self.original_source_units.get(identity,identity)
+        return self.source_parent_for(source).model_for(source)
 
     def templates_for(self,identity):
         if identity in self.original_source_units:
             return Path(self.variant_template_stores[identity]['path'])
-        return self.base.templates_for(identity)
+        return self.source_parent_for(identity).templates_for(identity)
+
+    def source_parent_for(self,identity):
+        """Return the real source catalog, never a compiled-context facade."""
+        return self._source_parents[self.original_source_units.get(identity,identity)]
+
+    def document(self,identity):
+        if identity in self.original_source_units:
+            raise ValueError('compiled-context documents require the compiled fact reader')
+        return self.source_parent_for(identity).document(identity)
 
     def units_for_source(self,source):
         return tuple(self.source_units.get(str(Path(source).absolute()),()))

@@ -4,6 +4,13 @@
 不创建 worktree、日期版源码或历史实验副本；正常提交 Git，不 reset。
 不修改外部 LeWM、数据/权重、CUDA/driver 或整套环境。删除实现前先查引用。
 
+F5可增量接入经过完整前端的新源码，不重建旧图：先用
+`scar.analysis.source_file_seed.seed_source_file(path, namespace_root, out, module=None)`建原路径单源seed，
+再运行`python -B -m scar.analysis.source_dependency_frontend --model <seed> --explicit-seed --out <fresh-frontend>`，
+用`source_interface_build --facts <frontend/facts> --out <fresh-interfaces> --jobs 1`投影摘要。
+`source_context_build`新增`--supplement <frontend/facts> <fresh-interfaces>`（可重复），原base和exec父收据不变；
+目录追加所有新端口，读回器重建同序目录并严格核对。module参数只是搜索候选，不是实际import选择。
+
 ## 当前形式前端入口
 
 ```bash

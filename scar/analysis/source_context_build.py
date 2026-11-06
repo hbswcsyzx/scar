@@ -37,18 +37,21 @@ def pins():
         ('root_views',source_root_namespace_views))}
 
 
-def build_context_targets(facts,namespaces,entry,interfaces,out,*,max_events=2_000_000,jobs=4):
+def build_context_targets(facts,namespaces,entry,interfaces,out,*,max_events=2_000_000,jobs=4,supplements=()):
     with ExitStack() as resources:
-        return _build_context_targets(facts,namespaces,entry,interfaces,out,max_events=max_events,jobs=jobs,resources=resources)
+        return _build_context_targets(facts,namespaces,entry,interfaces,out,max_events=max_events,jobs=jobs,
+            resources=resources,supplements=tuple(supplements))
 
 
-def _build_context_targets(facts,namespaces,entry,interfaces,out,*,max_events,jobs,resources):
+def _build_context_targets(facts,namespaces,entry,interfaces,out,*,max_events,jobs,resources,supplements):
     started=time.monotonic(); out=Path(out).absolute()
     if out.exists():raise ValueError('fresh context target output required')
     base=SourceFactStore(facts); graph=source_namespace_graph.NamespaceGraph(namespaces)
     contract=source_launch.read_script_entry(entry,base)
     initial=pins(); producer=sha256(Path(__file__).read_bytes()).hexdigest()
-    solver=source_context_solver.ContextEntrySolver(base,graph,(contract.source.path,),interfaces=interfaces,jobs=jobs)
+    supplemental_sources=tuple(SourceFactStore(pair[0]) for pair in supplements)
+    solver=source_context_solver.ContextEntrySolver(base,graph,(contract.source.path,),interfaces=interfaces,jobs=jobs,
+        supplemental_sources=supplemental_sources,supplemental_interfaces=tuple(pair[1] for pair in supplements))
     resources.callback(solver.frames.close)
     resources.callback(solver.generators.close)
     prepared=time.monotonic()
@@ -113,6 +116,8 @@ def _build_context_targets(facts,namespaces,entry,interfaces,out,*,max_events,jo
         implementation_sha256=producer,extension_pins=initial,
         context_facts=dict(path='context-facts.json',bytes=len(solver.store.raw),sha256=sha256(solver.store.raw).hexdigest()),
         namespace_graph=reference(namespaces),script_entry=reference(entry),
+        supplemental_sources=[dict(facts=reference(source.path),interfaces=reference(pair[1]))
+            for source,pair in zip(supplemental_sources,supplements)],
         entry_unit=contract.source.unit,importable_compiled_namespaces=False,
         namespace_lookup_semantics='ORDERED_SOURCE_GRAPH_CONDITIONAL_MAY_TRANSFER',
         fixed_point_scope='ADMITTED_SOURCE_AND_EXEC_CONTEXT_CONSTRAINTS',
@@ -127,6 +132,8 @@ def main():
     parser.add_argument('--max-events',type=int,default=2_000_000)
     parser.add_argument('--until-fixed-point',action='store_true')
     parser.add_argument('--jobs',type=int,default=4)
+    parser.add_argument('--supplement',nargs=2,action='append',default=[],metavar=('FACTS','INTERFACES'),
+        help='append a pinned source catalog and its local interfaces without changing existing ports')
     parser.add_argument('--stack-log')
     args=parser.parse_args()
     with ExitStack() as diagnostics:
@@ -135,7 +142,7 @@ def main():
             faulthandler.dump_traceback_later(30,repeat=True,file=stream)
             diagnostics.callback(faulthandler.cancel_dump_traceback_later)
         report=build_context_targets(args.facts,args.namespaces,args.entry,args.interfaces,args.out,
-            max_events=None if args.until_fixed_point else args.max_events,jobs=args.jobs)
+            max_events=None if args.until_fixed_point else args.max_events,jobs=args.jobs,supplements=args.supplement)
     print(json.dumps({name:report[name] for name in ('status','value_events','frontier','admitted_exec_connections',
         'active_compiled_namespaces','seconds')}),flush=True)
 

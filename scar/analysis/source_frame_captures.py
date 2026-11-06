@@ -29,6 +29,9 @@ class FrameCaptureIndex:
             raise ValueError('frame capture exec parent differs from context facts')
         self.store,self.exec_graph = context_store,exec_graph
         self.base_index = SuspensionInterfaceIndex(context_store.base,jobs=jobs)
+        self._source_indices = {id(context_store.base):self.base_index}
+        for parent in context_store.supplemental_sources:
+            self._source_indices[id(parent)] = SuspensionInterfaceIndex(parent,jobs=jobs)
         self._units,self._pins = {},{}
         self._selected={};self._records={};self._headers={}
         self._connections = {}
@@ -42,7 +45,12 @@ class FrameCaptureIndex:
     @property
     def stats(self):
         return dict(self._stats,cached_units=len(self._units),pinned_variant_paths=len(self._pins),
-            source_reader=dict(self.base_index.stats))
+            source_reader=dict(self.base_index.stats),
+            supplemental_readers=[dict(index.stats) for index in self._source_indices.values()
+                if index is not self.base_index])
+
+    def _source_index(self, unit):
+        return self._source_indices[id(self.store.source_parent_for(unit.unit))]
 
     def _pin(self, path):
         path = Path(path);stamp = _stamp(path)
@@ -52,7 +60,8 @@ class FrameCaptureIndex:
 
     def validate_parents(self):
         self._stats['parent_checks'] += 1
-        count = self.store.validate_parents()+self.base_index.validate_parents()
+        count = self.store.validate_parents()+sum(index.validate_parents()
+            for index in self._source_indices.values())
         for path,stamp in self._pins.items():
             if _stamp(path) != stamp:
                 raise ValueError('frame capture original parent changed: '+str(path))
@@ -60,7 +69,8 @@ class FrameCaptureIndex:
 
     def close(self):
         if not self._closed:
-            self.base_index.close();self._closed = True
+            for index in self._source_indices.values():index.close()
+            self._closed = True
 
     def _compiled_plans(self, unit, keys):
         connection = self._connections[unit.unit]
@@ -122,8 +132,9 @@ class FrameCaptureIndex:
             node=next(n for n in graph.templates if n.key==unit.root_scope.template)
             kind='COMPILE_CONTEXT_F4_VARIANT';self._stats['compiled_units']+=1
         else:
-            self.base_index._header(unit)
-            node=self.base_index._graphs[unit.unit][unit.root_scope.template]
+            index=self._source_index(unit)
+            index._header(unit)
+            node=index._graphs[unit.unit][unit.root_scope.template]
             kind='SEALED_SOURCE_TEMPLATE_STORE';self._stats['base_units']+=1
         if (node.key.purpose is not P.ProductionPurpose.ROOT or node.root!=unit.root_scope.region
                 or len(node.parameters)!=3 or any(type(t) is not ValueType or t.kind is not k
@@ -156,8 +167,9 @@ class FrameCaptureIndex:
         if unit_id in self.store.original_source_units:
             plans = self._compiled_plans(unit,missing) if missing else {}
         else:
-            self.base_index._prefetch(unit,missing)
-            plans = {key:self.base_index._plan(unit,key) for key in missing}
+            index=self._source_index(unit)
+            index._prefetch(unit,missing)
+            plans = {key:index._plan(unit,key) for key in missing}
             self._stats['base_templates'] += len(plans)
         records=self._records.setdefault(unit_id,{})
         for key,(plan,digest,source,receipt,model) in sorted(plans.items(),

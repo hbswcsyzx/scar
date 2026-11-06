@@ -17,6 +17,7 @@ NORMAL_SUCCESS / CPython 3.14.7；后端约定C++20、算子ABI v1、计划schem
 | 命名空间 | 有序C2 lookup、READ/WRITE/DELETE及原world；函数实际globals捕获；exec字典与module身份分开 |
 | 新入口求解 | 编译变体仅经exec激活；追加4,360端口，原5,978,863端口编号不变；自定义builtins内容订阅与标准fallback条件分别记录 |
 | Frame与输入 | 已选callable→原factory globals捕获→caller frame→exec/globals()；root dict view和独立声明输入端口，保创建world与callee |
+| 增量源码准入 | 单源seed复用完整F0→F4；独立facts与局部摘要追加到既有source+compiled catalog之后，各provider分别验收，不改旧端口或重建旧摘要 |
 
 原基础manifest SHA：601e929904dc7481693f4a0747b7e01269ecf6d1302ff1efec072627c288aba0。
 编译上下文变体不覆盖原F0–F4。源码、对象、storage、逻辑内容版本和物理副本互不等价。
@@ -35,11 +36,13 @@ NORMAL_SUCCESS / CPython 3.14.7；后端约定C++20、算子ABI v1、计划schem
 - **未收敛：** 当前普通frontier为17,857，namespace frontier为0；状态仍为CONTEXT_TARGET_BUDGET_FRONTIER。frame绑定是带原版本/选择条件的引用关系，未宣称runtime对象身份；locals快照及不确定字段继续保留协议/前沿。
 - **读取成本已减少：** 旧索引578计划/73.89秒，当前3计划/29.05秒；11 root接口全部保留。两次1M不是固定点，队列顺序和候选计数可不同；不据此宣称完整关系相等或LeWM加速。后续仍可减少header的重复校验。
 - 通用单fixture核晚到自定义builtins能接入source callable；`relation-replay-verification.json/.py`可复现新旧类/容器flow的832事件与9类关系完全相等，耗时9.50秒（含fixture构建），不作为主图加速数据。
+- **新增源码接入门：** `hydra-run-admission/frontend/result.json`将安装版`hydra/core/utils.py`经过原F0→F4流水线，178.65秒，1源/7,815端口/113调用；独立局部摘要2.31秒。`graph-verification.json`完整读回26类关系，核原853单元/5,983,223端口编号不变，追加后854单元/5,991,038端口，原852源摘要复用。真实入口1M传播130.44秒，读回50.09秒；7,961调用连接中33条caller属于新增源码，frontier 28,648，未固定点。
+- **接入不等于接通任务：** `task-call-verification.json`定位原186行`task_function(task_cfg)`及deepcopy、lexical传递、前序删除；不是passthrough/rerun。当前前缀尚未激活`run_job`，该调用的求解连接为0；上游`hydra._internal.hydra`仍未准入。需要自动模块需求定位与源码闭包，不能直接向任务形参注入猜测的配置。
 - 旧独立eval.py长任务已由实际launcher/context求解替代并终止，未发布固定点；收据为`entry-pack-fixed.superseded.json`。首个1M原型的两项namespace问题记在`launcher-context-targets-1m-reviewed/review.json`，当前产物已修正并重验。
 
 ## 后续顺序
 
-1. caller frame及按需读取门已通过。下一步先准入Hydra正常RUN调用源（安装版hydra/core/utils.py当前未在facts中），获得task_function(task_cfg)的原始端口；不得借用已有passthrough/rerun分支冒充。locals快照/隐式状态仍有待静态细化的字段。
+1. caller frame、按需读取、补充source catalog门已通过。当前补自动需求定位与上游源码闭包，连接正常任务调用；不得借用已有passthrough/rerun分支冒充。locals快照/隐式状态仍有待静态细化的字段。
 2. 补配置输入与字段来源：实际argv有launcher追加项；YAML保defaults顺序、package、覆盖及插值；环境/搜索插件未定处保条件。然后接正常task cfg形参及原GET/SET端口。把module需求机械分为源码、namespace、原生边界和真正缺少的输入，不把全部demand当缺文件。
 3. 将新的context图接到既有Python/native绑定、算子及资源要求图；保alias、逻辑来源、位置、状态和效果，运行时未知字段仍未知。
 4. 在上述入口与接口稳定后持续求解，审计源码、跨层边界、循环和资源的覆盖分母。队列清空不等于整个程序覆盖完成；第一阶段通过后才进入化简。

@@ -50,13 +50,20 @@ class ContextTargetGraph(Q.NormalCallGraph):
             if sha256((Path(ref['path'])/'result.json').read_bytes()).hexdigest()!=ref['sha256']:
                 raise ValueError('context graph parent differs: '+name)
         self.namespace_graph=NamespaceGraph(r['namespace_graph']['path'])
-        self.fact_store=ContextFactStore(base,self.namespace_graph.exec_graph)
+        supplements=r.get('supplemental_sources',[])
+        for pair in supplements:
+            for ref in pair.values():
+                if sha256((Path(ref['path'])/'result.json').read_bytes()).hexdigest()!=ref['sha256']:
+                    raise ValueError('supplemental graph parent differs')
+        self.fact_store=ContextFactStore(base,self.namespace_graph.exec_graph,
+            supplemental_sources=tuple(SourceFactStore(pair['facts']['path']) for pair in supplements))
         receipt=r['context_facts']; raw=(self.path/receipt['path']).read_bytes()
         if (len(raw)!=receipt['bytes'] or sha256(raw).hexdigest()!=receipt['sha256'] or raw!=self.fact_store.raw):
             raise ValueError('context source catalog receipt differs')
         self.inputs=self.fact_store.report; self.units=self.fact_store.rows; self.sources=self.fact_store.sources
         self.templates=base.templates
-        self.interface_store=ContextInterfaceStore(r['interface_summary']['base']['path'],self.fact_store,self.namespace_graph.exec_graph)
+        self.interface_store=ContextInterfaceStore(r['interface_summary']['base']['path'],self.fact_store,self.namespace_graph.exec_graph,
+            supplemental_interfaces=tuple(pair['interfaces']['path'] for pair in supplements))
         if self.interface_store.receipt!=r['interface_summary']:
             raise ValueError('context local interfaces differ')
 
@@ -73,7 +80,7 @@ class ContextTargetGraph(Q.NormalCallGraph):
             if unit in self.fact_store.original_source_units:
                 document=encode(self.fact_store.load(unit),record_tags=Q.P.PRODUCTION_RECORD_TAGS)
             else:
-                document=self.fact_store.base.document(unit)
+                document=self.fact_store.document(unit)
             yield row,document
 
     def exec_connections(self, source=None):

@@ -16,15 +16,17 @@ from scar.ir.program import normal_links as F, normal_entry as E
 
 
 class ContextEntrySolver(EntrySolver):
-    def __init__(self, base, namespace_graph, entries, *, interfaces, jobs=None):
+    def __init__(self, base, namespace_graph, entries, *, interfaces, jobs=None,
+                 supplemental_sources=(), supplemental_interfaces=()):
         self.namespace_graph = namespace_graph
         self.frames = None
         self.namespace_flow = None; self.namespace_pending = deque(); self.namespace_scopes = set()
         self.exec_by_result = defaultdict(list); self.call_owners = {}
         for connection in namespace_graph.exec_graph.connections():
             self.exec_by_result[connection.site.result].append(connection)
-        store = ContextFactStore(base,namespace_graph.exec_graph)
-        summaries = ContextInterfaceStore(interfaces,store,namespace_graph.exec_graph)
+        store = ContextFactStore(base,namespace_graph.exec_graph,supplemental_sources=supplemental_sources)
+        summaries = ContextInterfaceStore(interfaces,store,namespace_graph.exec_graph,
+            supplemental_interfaces=supplemental_interfaces)
         super().__init__(store,entries,jobs=jobs,interface_store=summaries)
         # A compile-context body is not an importable module instance.
         for module in tuple(self.module_units):

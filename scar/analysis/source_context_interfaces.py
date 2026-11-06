@@ -12,9 +12,18 @@ from scar.ir.record_codec import decode
 
 
 class ContextInterfaceStore:
-    def __init__(self, base_path, context_store, exec_graph):
+    def __init__(self, base_path, context_store, exec_graph, *, supplemental_interfaces=()):
         self.base = SourceInterfaceStore(base_path,context_store.base)
         self.facts,self.exec_graph = context_store,exec_graph
+        paths = tuple(supplemental_interfaces)
+        if len(paths) != len(context_store.supplemental_sources):
+            raise ValueError('each supplemental source catalog needs its own local interfaces')
+        self.supplements = tuple(SourceInterfaceStore(path,parent) for path,parent in
+            zip(paths,context_store.supplemental_sources))
+        self._providers = {unit:store for store in self.supplements for unit in store.rows}
+        if any(not parent.rows.keys() <= store.rows.keys() for parent,store in
+                zip(context_store.supplemental_sources,self.supplements)):
+            raise ValueError('supplemental local interface coverage differs')
         self.projected = {}; self.iterations = {}; self.bodies = {}; self.mappings = {}
         self.stats = dict(context_units=0,context_templates=0,iteration_reads=0,body_reads=0,mapping_reads=0)
         # Bind the trusted, unchanged projector to this composite fact space.
@@ -24,15 +33,17 @@ class ContextInterfaceStore:
             original.__name__,original.__defaults__,original.__closure__)
 
     def covers(self, unit):
-        return unit.unit in self.facts.original_source_units or self.base.covers(unit)
+        return unit.unit in self.facts.original_source_units or unit.unit in self._providers or self.base.covers(unit)
 
     def validate_parents(self):
         self.base.validate_parents(); self.facts.validate_parents()
+        for store in self.supplements:store.validate_parents()
 
     @property
     def receipt(self):
         return dict(schema='scar.context-source-interface-adapter',schema_version=1,
-            base=self.base.receipt,context_facts_sha256=sha256(self.facts.raw).hexdigest(),
+            base=self.base.receipt,supplements=[store.receipt for store in self.supplements],
+            context_facts_sha256=sha256(self.facts.raw).hexdigest(),
             exec_roots_sha256=self.facts.exec_sha256,
             implementation_sha256=sha256(Path(__file__).read_bytes()).hexdigest(),
             projector_sha256=sha256(Path(source_interface_build.__file__).read_bytes()).hexdigest())
@@ -70,18 +81,18 @@ class ContextInterfaceStore:
 
     def iteration(self, unit, item):
         if unit.unit not in self.facts.original_source_units:
-            return self.base.iteration(unit,item)
+            return self._providers.get(unit.unit,self.base).iteration(unit,item)
         self._load(unit); self.stats['iteration_reads']+=1
         return self.iterations[unit.unit,item]
 
     def body(self, unit, function):
         if unit.unit not in self.facts.original_source_units:
-            return self.base.body(unit,function)
+            return self._providers.get(unit.unit,self.base).body(unit,function)
         self._load(unit); self.stats['body_reads']+=1
         return self.bodies[unit.unit,function.value]
 
     def mapping(self, unit, template):
         if unit.unit not in self.facts.original_source_units:
-            return self.base.mapping(unit,template)
+            return self._providers.get(unit.unit,self.base).mapping(unit,template)
         self._load(unit); self.stats['mapping_reads']+=1
         return self.mappings[unit.unit,template]

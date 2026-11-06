@@ -199,3 +199,7 @@ FrameGlobalsBinding连接原函数factory、选中callee、创建world与frame g
 由原globals/locals formal输入描述，字典view不是新的allocation，也不是module对象身份。
 StaticInputPort以输入contract版本和字段路径标识声明初值，独立于原源码端口；content因子可引用该
 外部输入端口。初始字段版本不等于当前内容不变；普通名字访问和字典读写、浅拷贝保持同一内容依赖。
+
+新增依赖源码从F0→F4进入独立provider；F5目录按原source、compiled context、新source的顺序追加。
+已有qualified端口和数值offset不变，源码正文及局部接口仍向各自父收据读取。compiled context只由exec边激活，
+不成为import候选；同module的不同源码保may候选，不以路径或名字合并身份。源码准入、body激活、实际调用选择和字段值求解是不同事实。
