@@ -16,7 +16,7 @@ NORMAL_SUCCESS / CPython 3.14.7；交付后端约定 C++20、算子 ABI v1、计
 | 配置组合 | 自动发现3文件/102数据节点；defaults、package、共享材料和有序根版本 | CLI/lazy、ConfigStore/schema、任务 cfg 字段未闭合 |
 | 覆盖输入 | 初始 argv→已知option/positional→6表达式/6有序写入，保来源及类型 | 仅初始版本；组选择、字段应用与lazy引用待接 |
 | 输入字段图 | 22状态表达式、12根版本、52字段投影；3条lazy引用，5处可能的中途读取需求 | 条件性输入候选；未绑定任务当前cfg，部分中途状态仍未降低 |
-| 声明状态接点 | 自动定位原cfg实参和post-call world，独立保None数据返回；新15源及摘要ready | 884单元目录拼接已核，尚未重跑全域求解/证明调用输入与任务内容 |
+| 声明状态接点 | 自动定位原cfg实参和post-call world，独立保None数据返回；884单元context已求解4M事件 | 原FIFO预算前缀尚未连接API；输入版本及任务内容仍未证明 |
 | native/资源 | 既有声明、CPU/DRAM/GPU/设备内存/SATA/NVMe 旁图 | 尚未与新入口完成全链路重验 |
 
 五类实体为 Operation / Value / StateLocation / Region / Resource；输入输出是端口角色。
@@ -39,6 +39,8 @@ NORMAL_SUCCESS / CPython 3.14.7；交付后端约定 C++20、算子 ABI v1、计
 - **`config-values-current/verification.json`：输入字段子门通过。** 共享操作DAG保原数据/argv来源；3条引用在所列条件下得到world.num_envs=1、dataset.stats=pusht_expert_train、solver.seed=42。两处missing合并未知prefix仍OPEN；容器成员是否完整显式记录。3个merge内部状态点保未知，2个地址读取指向旧根19，均不伪装成最终根21。16个源码函数固定AST，语法工具不初始化库。构建2.96秒、严格验收2.72秒；本子图压缩表5,651 bytes，工件30,356 bytes。两个通用用例2.32秒，涵盖覆盖后引用、missing/absent/null、序列替换、动态路径、引用环及未知别名效果。
 - **`config-state-admission/sources-verification.json`：新15源ready门通过。** 基于原需求计划，逐path核与旧catalog无交集；16-worker完整前端520.77秒，15-worker局部摘要6.57秒。严格读回77,174端口、880调用、459作用域，旧catalog SHA未变；包含缺失配置加载器与callback源码，未运行目标。
 - **`config-state-boundary-current/verification.json`：声明状态边界门通过。** 输入根21→原cfg实参5943的调用后world5952；调用94/attribute171、5条callee alias与6条None-return alias均核scope/原端口。data result5947与定义返回10190、None来源10191分别保留。构建1.87秒、验收4.71秒；扩展目录仅作拼接核验，884单元/6,166,764端口，全部旧offset不变。未重跑全域solver，未证明该scope激活或输入版本匹配，更未证明当前task字段。
+- `config-state-context-current`：加入15源后的原FIFO求解，4M事件、273.24秒；307源、2,459作用域，frontier2,599,288。新接口查询保原call/argument/data-return/world及alias行号；此预算前缀的目标状态连接为0，不能把声明当作入口准入。
+- `config-state-admission/lexical-experiment-verification.json`：实验性词法copy闭包核验18,864条原names、108源及scope归属。相同4M事件256.62秒，run接口推进但状态API仍未接通，frontier增至10,093,417；**不选为默认**。这不是LeWM运行或加速数据；继续定位原namespace/descriptor/callee队列的传播前沿。
 
 组合门6项 obligation保留隐式库根、3个同名 schema查询、组选择与CLI/lazy层；
 覆盖门保当前argv/追加项、组及字段更新条件、lazy与任务绑定。OPEN_PROVIDER不产生虚构数据；未求出最终 cfg。
@@ -46,7 +48,7 @@ NORMAL_SUCCESS / CPython 3.14.7；交付后端约定 C++20、算子 ABI v1、计
 ## 后续顺序与验收
 
 1. **输入字段层：** plain/untyped条件性字段应用与lazy引用子门已过；不代表完整cfg。未知prefix与中途地址/合并状态按表保留，不从条件候选证明当前内容。
-2. **配置接口层：** 新源与声明post-call状态接点已就绪。下一门把这批源挂入context传播，定点核API调用目标及输入版本；再沿后续hydra写入、callback、deepcopy、删除与task actual/formal/world推进。边界是修改后的cfg内容，不能用API的None返回值或初始字段代替；不盲增全局事件预算。
+2. **配置接口层：** 新源已挂入context传播；当前先定位并解决接口事件积压，原词法实验不作默认。验收API实参/数据返回/world及scope后，再沿后续hydra写入、callback、deepcopy、删除与task actual/formal/world推进。修改后cfg内容不能用None返回值或初始字段代替；不盲增全局预算。
 3. **算子与资源层：** 新 context图连接现有 Python/native声明、算子及资源图；已知属性静态保留，运行地址等未知字段不伪造。
 4. **全图验收：** 源码闭包、顺序敏感传播、循环和跨层接口的覆盖分母/缺口审计。队列清空本身不证明全覆盖；第一阶段通过后才进入化简。
 
