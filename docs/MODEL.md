@@ -223,3 +223,10 @@ children/root引用reference ordinal，reference.target引用node ordinal，因�
 参数候选保原formal/actual、literal来源及有向alias路径；factory到decorator及task创建也保独立路径。
 CLI值由声明输入端口及明确的option projection推导，初始argv不冒充当前argv。
 文件候选优先用实际compile context filename；环境覆盖、搜索插件及输入变更未闭合时继续带条件。
+
+配置组合以有序ConfigurationStep保存根版本链，MERGE_MATERIAL引用共享材料及package，
+只排除该文件根defaults；不展开所有字段成巨型字典。ConfigurationDependency保原reference与子实例，
+显式package_override和已解析package分开；同文件不同package共享材料，不共享实例。
+组override是选择约束，不是在声明位置进行merge；缺失provider以OPEN_PROVIDER及obligation保留。
+库隐式根、每文件同名schema、CLI和lazy引用尚未闭合时，局部payload顺序只在列出的条件下成立，
+不得把组合版本、已解析cfg或运行时对象身份等同。

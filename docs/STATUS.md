@@ -1,60 +1,47 @@
 # 当前状态
 
-**第一阶段尚未完成。当前只做静态建模、建图与查询。**
-NORMAL_SUCCESS / CPython 3.14.7；后端约定C++20、算子ABI v1、计划schema v1。
-没有运行LeWM或导入torch；以下时间都是分析器耗时，不是程序加速比。
+**第一阶段尚未完成；当前只做静态建模、建图与查询。**
+NORMAL_SUCCESS / CPython 3.14.7；交付后端约定 C++20、算子 ABI v1、计划 schema v1。
+本阶段未运行 LeWM 或导入 torch/Hydra/OmegaConf。以下秒数均为分析器耗时，不是 LeWM 加速比。
 
-## 已落实
+## 分层进度
 
-| 层 | 已实现的图与接口 |
-|---|---|
-| F0–F3 | 866材料：849 Python源与17 stub；原bytes、词法/语法、scope、binding及compiler视图 |
-| F4 | 882,537共享模板、3,385,528操作、4,645循环、24,159,357边；函数/循环不按调用或迭代复制 |
-| F5局部接口 | 852 source单元，8,750 iteration、709 deferred body、9,361 mapping模板；48 worker构建68.80秒 |
-| F5求解 | 参数/默认值/捕获环境/world/返回、构造/属性、容器增量和同步generator；参数包缓存及共享content因子 |
-| 静态字段 | 每端口最多4个literal候选及type/open信息；参数、返回、模块成员、属性、容器关系保原端口与条件 |
-| 实际入口 | 自动连接path/read_text/compile/exec；有效future flags独立建C1/C2、官方C3-T/S及632模板共享F4变体 |
-| 命名空间 | 有序C2 lookup、READ/WRITE/DELETE及原world；函数实际globals捕获；exec字典与module身份分开 |
-| 新入口求解 | 编译变体仅经exec激活；追加4,360端口，原5,978,863端口编号不变；自定义builtins内容订阅与标准fallback条件分别记录 |
-| Frame与输入 | 已选callable→原factory globals捕获→caller frame→exec/globals()；root dict view和独立声明输入端口，保创建world与callee |
-| 增量源码准入 | 单源seed复用完整F0→F4；独立facts与局部摘要追加到既有source+compiled catalog之后，各provider分别验收，不改旧端口或重建旧摘要 |
+| 层 | 当前结果 | 剩余边界 |
+|---|---|---|
+| F0–F3 识别 | 866 材料：849 Python 源、17 stub；bytes、词法/语法、scope、binding、编译视图 | 新依赖按需经同一前端准入 |
+| F4 局部图 | 882,537 共享模板、3,385,528 操作、4,645 循环、24,159,357 边 | 共享展开不等于全域 canonical 图已闭合 |
+| F5 局部接口 | 原 852 源摘要；48 workers 构建68.80秒；新增依赖独立追加 | 不重建旧图或改变旧端口编号 |
+| F5 跨层接线 | 参数、捕获、返回、world、构造/属性/容器；实际 launcher→compile/exec→Hydra→任务正常链 | 尚未固定点；may 调用不是实际 dispatch |
+| 配置请求 | 原调用/alias/decorator、入口 argv、实际 compile filename→文件候选 | 初始 argv、搜索路径、环境选择仍带条件 |
+| 配置组合 | 自动发现3文件/102数据节点；defaults、package、共享材料和有序根版本 | CLI/lazy、ConfigStore/schema、任务 cfg 字段未闭合 |
+| native/资源 | 既有声明、CPU/DRAM/GPU/设备内存/SATA/NVMe 旁图 | 尚未与新入口完成全链路重验 |
 
-原基础manifest SHA：601e929904dc7481693f4a0747b7e01269ecf6d1302ff1efec072627c288aba0。
-编译上下文变体不覆盖原F0–F4。源码、对象、storage、逻辑内容版本和物理副本互不等价。
-原生声明及CPU/DRAM/GPU/设备内存/SATA/NVMe资源旁表已有，尚未与新入口完成全链路重验。
+五类实体为 Operation / Value / StateLocation / Region / Resource；输入输出是端口角色。
+对象、storage、逻辑内容版本和物理副本互不等价；循环不按迭代复制。
 
-## 当前实际验收
+## 当前验收证据
 
-路径相对artifacts/current/queries/，全部是静态结果。
+以下路径相对 artifacts/current/queries/；完整历史留在 Git，当前页只列有效门。
 
-- `launcher-f4-variants-current/verification.json`：实际compile context的1,063语法occurrence全部归类；632模板、2,079操作、15,162边，包含原world序列和2个循环。
-- `launcher-exec-roots-current/verification.json`：2个条件分支；namespace选择、builtins插入、closure检查、audit、body、discard/release共6阶段；正常结果None，根返回值不冒充exec值。
-- `launcher-namespace-graph-current/verification.json`：234个名字操作、4组globals捕获、3条带版本/lookup条件的内容连接；构建5.44秒，压缩表35,034 bytes。这些may边不是常量或可变换证明。
-- **历史接口前缀（8986b4ad）：** `launcher-context-targets-current/verification.json`完整typed读回20类已发布关系表，并展开实际context函数体。1M事件前缀构建98.62秒、核验50.50秒，产物约4.8MB；275加载单元、2,007 scope、7,942调用连接，其中166条caller属于编译上下文；2个exec分支、96条有guard的builtin候选。
-- **完整读取frame对照（d4372014）：** `launcher-frame-targets-current/verification.json`完整typed读回26类关系表，核selected factory/callee/capture/world与既有calllink吻合、4个输入字段与原entry.json逐字匹配且已接content因子。11个root接口、1个默认exec frame绑定、25个globals()读，当前前缀的frame/capture obligation均0；7,898条调用连接，其中166条caller属于编译上下文。1M事件构建172.85秒、核验58.47秒，产物约4.8MB。
-- **当前按需frame门验收：** `frame-capture-selection/verification.json`逐项核原14条factory/callee证据对应的3个函数模板，并核第二模板增选保留已有refs/witnesses。`launcher-selected-frame-targets-current/verification.json`完整typed读回26类关系；实际读取仅3计划＋11 root接口。1M事件构建129.08秒、核验59.20秒；8,096条调用连接、166条context caller、frame默认绑定1/globals读25/声明输入4/相关obligation0。
-- **未收敛：** 当前普通frontier为17,857，namespace frontier为0；状态仍为CONTEXT_TARGET_BUDGET_FRONTIER。frame绑定是带原版本/选择条件的引用关系，未宣称runtime对象身份；locals快照及不确定字段继续保留协议/前沿。
-- **读取成本已减少：** 旧索引578计划/73.89秒，当前3计划/29.05秒；11 root接口全部保留。两次1M不是固定点，队列顺序和候选计数可不同；不据此宣称完整关系相等或LeWM加速。后续仍可减少header的重复校验。
-- 通用单fixture核晚到自定义builtins能接入source callable；`relation-replay-verification.json/.py`可复现新旧类/容器flow的832事件与9类关系完全相等，耗时9.50秒（含fixture构建），不作为主图加速数据。
-- **新增源码接入门：** `hydra-run-admission/frontend/result.json`将安装版`hydra/core/utils.py`经过原F0→F4流水线，178.65秒，1源/7,815端口/113调用；独立局部摘要2.31秒。`graph-verification.json`完整读回26类关系，核原853单元/5,983,223端口编号不变，追加后854单元/5,991,038端口，原852源摘要复用。真实入口1M传播130.44秒，读回50.09秒；7,961调用连接中33条caller属于新增源码，frontier 28,648，未固定点。
-- **接入不等于接通任务：** `task-call-verification.json`定位原186行`task_function(task_cfg)`及deepcopy、lexical传递、前序删除；不是passthrough/rerun。该早期前缀尚未激活`run_job`；当时缺失的上游`hydra._internal.hydra`已由下面的批量准入补入。不能直接向任务形参注入猜测的配置。
-- **自动需求定位门：** `hydra-run-admission/admission/verification.json`核原17,593条demand及ordinal不变；1,053个module中，仅对16个旧inventory未索引需求沿原6个候选root定点搜索。17.31秒找到15个完整hash源码/212,369 bytes，其中自动找到缺失上游。原inventory索引与新search索引分开，不改原模型、不声称实际import选择；486源码候选可准入、495旧预算查询待搜索、25原生候选，其余保明确分类。
-- **批量准入与新当前图：** `closure-sources-verification.json`严格读回15新源及局部摘要，F0→F4耗时550.69秒，15个摘要worker耗时7.24秒；新增98,552端口/1,337调用。`closure-graph-verification.json`核26类关系与精确声明入口unit；累计869单元/6,089,590端口，全部旧offset不变。2M传播141.15秒、读回68.35秒，10,262调用连接中160条caller来自补充源码；frontier 93,252，正常任务call links仍0。不是固定点或第一阶段通过；正在沿原接口核对上游选中/绑定及新缺失需求。
-- **当前断点已缩小：** `receiver-targets/solver-observations.json`是分析器抽象token的只读快照，不是目标运行trace。2M构建140.56秒；`observer-verification.json`核27个关系分片与已验前缀逐字节一致，复用先前26类typed读回并额外严格读index-cycle表。classmethod/OBJECT_NEW/SOURCE_INIT及返回路径均已有边；工厂结果4976有instance，而下游形参10897/接收者3446只有None，属性订阅存在。实例在中间返回链上的传播尚未完成或未定位，不能归因为descriptor缺陷。下一门先检查该链的实际事件传播，避免盲补源码或只增全局预算。
-- **引用transport闭包门：** 原FIFO分段4M确认`func()`→函数RETURN出口有20条active REFERENCE线，链首2M已到instance、4M链尾仍无。`reference-targets`只对已admit alias进行迭代闭包，原边/端口保留；2M普通事件加2,203,635次alias传递，耗时153.79秒（闭包9.40秒），严格读回72.75秒。RETURN出口和后续实参已有instance；形参处尚无，实参事件明确pending1。此为分析器进展，不是目标加速；普通frontier591,760，第一阶段未完成。一个0.12秒micro验收覆盖20链、cycle、晚边、未激活边与共享owner。
-- **正常任务链子gate已通过：** `normal-task-chain-verification.json`严格核6个选中CallLink、实参/形参/返回/world以及唯一compiled rawrun模板。`copy-transfer-targets`将原已安装的参数/数据返回copy一并闭包，classmethod→构造/init→Hydra.run→run_job→compiled rawrun均已接通，cfg formal为3972；不借passthrough/rerun，不冒充实际dispatch。4M普通事件加12,258,044次copy传递，239.47秒，其中闭包22.23秒；普通frontier2,784,656，非固定点。原数据边和world记录未替换；配置内容、callback效果、全域覆盖仍未通过。
-- **数据材料子gate已通过：** `config-input-materials/verification.json`严格读回真实三个YAML的102个node/102个reference及原bytes；三材料独立分片，不合成巨型JSON。OmegaConf resolver匹配完整函数AST，科学计数float/日期字符串差异已核，自定义Path构造不执行；两处missing标记、三处插值仍为representation string，package header原bytes保留。一个1.78秒通用用例核UTF8/CRLF、alias共享/循环与typed读回。该材料采集步骤以声明文件为输入；下一项已核主文件的自动请求来源。未组合配置或绑定cfg字段。
-- **自动请求识别子gate：** `config-request-current/verification.json`从原调用图识别1条版本化Hydra API请求，参数三条literal/alias路径、factory→decorator→实际task创建路径及原argv选项来源均已核；由实际compile filename恢复的主YAML候选与材料URI一致。初始argv仍非当前argv，环境/搜索插件条件未消除；不手写最终cfg，当前仅请求候选。下一步是有序defaults/package组合。
-- 旧独立eval.py长任务已由实际launcher/context求解替代并终止，未发布固定点；收据为`entry-pack-fixed.superseded.json`。首个1M原型的两项namespace问题记在`launcher-context-targets-1m-reviewed/review.json`，当前产物已修正并重验。
+- `launcher-f4-variants-current/verification.json`：实际 compile context 的1,063语法 occurrence 全归类；632模板、2,079操作、15,162边，保原 world 与2个循环。
+- `launcher-exec-roots-current/verification.json`、`launcher-namespace-graph-current/verification.json`：exec 分阶段、None/discard、globals/builtins/capture、234名字操作和条件内容连接；exec 字典不是 module。
+- `frame-capture-selection/verification.json`：按选中 callable 只读3函数计划＋11 root 接口，保原 factory/callee/world。读取29.05秒，旧全量读取73.89秒；这是材料读取时间对照。
+- `hydra-run-admission/closure-sources-verification.json`：15新源完整前端550.69秒，15摘要 workers7.24秒；新图累计869单元/6,089,590端口，旧 offset 不变。
+- `hydra-run-admission/reference-proof.json`、`normal-task-chain-verification.json`：已安装有向 copy 闭包保原边；classmethod→构造/init→Hydra.run→run_job→compiled rawrun 接通，cfg formal3972。不是 passthrough/rerun，也不注入猜测 cfg。
+- 当前 `hydra-run-admission/copy-transfer-targets`：63,327 CallLinks；4M普通事件＋12,258,044 copy传递，239.47秒（闭包22.23秒）；普通 frontier2,784,656，namespace frontier0，**不是固定点或全覆盖**。顺序敏感 transfer 尚需审计。
+- `config-input-materials/verification.json`：真实三 YAML 的102 node/102 reference与 bytes；OmegaConf scalar resolver固定版本，自定义构造不执行；missing/插值仅保表示。
+- `config-request-current/verification.json`：自动推导1条 API请求、3条参数 literal/alias路径及唯一 task/decorator关联；主文件候选与材料一致。仍是条件请求。
+- **`config-composition-current/verification.json`：新门通过。** 自动发现 launcher/local、solver/cem、主文件，6依赖、5根版本；正确保 `_self_` 和 package 顺序。构建2.06秒、严格读回1.52秒；图压缩表3,234 bytes，含材料与收据共41,881 bytes。通用单用例核嵌套 group、header/显式 package优先级与材料共享。15个库函数固定源码/AST，未执行目标。
 
-## 后续顺序
+最后一门仅通过局部有序组合：6项 obligation明确保留隐式库根、3个同名 schema查询、
+组 override的已有目标选择、CLI/lazy层。OPEN_PROVIDER不产生虚构数据；未求出最终 cfg。
 
-1. caller frame、按需读取、源码批量准入和正常任务链子gate已通过。下一门先建输入材料与组合图，再沿已验actual/formal/world绑定字段；不手写最终cfg，也不混入物理对象身份。
-2. 配置材料与请求识别已通过。接下来做defaults/package/_self_→CLI覆盖→lazy节点引用→带条件cfg投影；不把材料Parser结果当最终cfg。先用两个通用YAML验覆盖后引用、missing和序列，再接真实3文件/原argv。launcher追加项、环境/search插件、callback变更保独立条件。源码闭包与locals/隐式状态仍需继续补齐。
-3. 将新的context图接到既有Python/native绑定、算子及资源要求图；保alias、逻辑来源、位置、状态和效果，运行时未知字段仍未知。
-4. 在上述入口与接口稳定后持续求解，审计源码、跨层边界、循环和资源的覆盖分母。队列清空不等于整个程序覆盖完成；第一阶段通过后才进入化简。
+## 后续顺序与验收
 
-当前入口：
-`python -m scar.analysis.source_context_build --facts <source-facts> --namespaces <namespace-graph> --entry <script-entry> --interfaces <local-interfaces> --out <fresh-output> --until-fixed-point --jobs 48`
+1. **覆盖与引用层：** 原 argv→override语法/类型→有序字段版本→lazy引用；核覆盖后引用、missing与null/缺键分离，不把 YAML resolver当 CLI语法。
+2. **配置接口层：** 补 ConfigStore/provider与输入变更条件，沿已验 actual/formal/world接到任务字段；保 deepcopy、删除与callback效果，不把初值冒充当前值。
+3. **算子与资源层：** 新 context图连接现有 Python/native声明、算子及资源图；已知属性静态保留，运行地址等未知字段不伪造。
+4. **全图验收：** 源码闭包、顺序敏感传播、循环和跨层接口的覆盖分母/缺口审计。队列清空本身不证明全覆盖；第一阶段通过后才进入化简。
 
-各材料由对应静态阶段机械生成；CLI参数是材料路径，不是手写业务连线。小引用索引与分片正文分别保存，读取时按需展开共享子图。
+CLI与查询见 [DEVELOPMENT](DEVELOPMENT.md)，实体与连接约束见 [MODEL](MODEL.md)。
+各层以小索引＋分片正文按需读取；现有入口前缀不为每一子门重新全量构建。

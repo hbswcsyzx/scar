@@ -28,6 +28,10 @@ F5可增量接入经过完整前端的新源码，不重建旧图：先用
 从已准入版本化库调用及入口输入生成条件请求，`read_configuration_requests(path)`核父收据并typed读回。
 factory参数、decorator/task关联、初始argv与文件候选分别记录；不直接给cfg注入常量。
 
+`python -B -m scar.analysis.source_configuration_composition --requests REQUESTS --out FRESH_GRAPH --hydra-source /path/to/site-packages/hydra --loader-source /path/to/omegaconf/_utils.py`
+沿条件文件请求自动发现defaults依赖，保存共享材料、有序版本及provider/选择缺口。
+`read_configuration_composition(path)`核父收据并返回(report, typed graph)；本层不输出最终cfg。
+
 ## 当前形式前端入口
 
 ```bash
