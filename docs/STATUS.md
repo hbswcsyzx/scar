@@ -42,12 +42,13 @@ NORMAL_SUCCESS / CPython 3.14.7；后端约定C++20、算子ABI v1、计划schem
 - **批量准入与新当前图：** `closure-sources-verification.json`严格读回15新源及局部摘要，F0→F4耗时550.69秒，15个摘要worker耗时7.24秒；新增98,552端口/1,337调用。`closure-graph-verification.json`核26类关系与精确声明入口unit；累计869单元/6,089,590端口，全部旧offset不变。2M传播141.15秒、读回68.35秒，10,262调用连接中160条caller来自补充源码；frontier 93,252，正常任务call links仍0。不是固定点或第一阶段通过；正在沿原接口核对上游选中/绑定及新缺失需求。
 - **当前断点已缩小：** `receiver-targets/solver-observations.json`是分析器抽象token的只读快照，不是目标运行trace。2M构建140.56秒；`observer-verification.json`核27个关系分片与已验前缀逐字节一致，复用先前26类typed读回并额外严格读index-cycle表。classmethod/OBJECT_NEW/SOURCE_INIT及返回路径均已有边；工厂结果4976有instance，而下游形参10897/接收者3446只有None，属性订阅存在。实例在中间返回链上的传播尚未完成或未定位，不能归因为descriptor缺陷。下一门先检查该链的实际事件传播，避免盲补源码或只增全局预算。
 - **引用transport闭包门：** 原FIFO分段4M确认`func()`→函数RETURN出口有20条active REFERENCE线，链首2M已到instance、4M链尾仍无。`reference-targets`只对已admit alias进行迭代闭包，原边/端口保留；2M普通事件加2,203,635次alias传递，耗时153.79秒（闭包9.40秒），严格读回72.75秒。RETURN出口和后续实参已有instance；形参处尚无，实参事件明确pending1。此为分析器进展，不是目标加速；普通frontier591,760，第一阶段未完成。一个0.12秒micro验收覆盖20链、cycle、晚边、未激活边与共享owner。
+- **正常任务链子gate已通过：** `normal-task-chain-verification.json`严格核6个选中CallLink、实参/形参/返回/world以及唯一compiled rawrun模板。`copy-transfer-targets`将原已安装的参数/数据返回copy一并闭包，classmethod→构造/init→Hydra.run→run_job→compiled rawrun均已接通，cfg formal为3972；不借passthrough/rerun，不冒充实际dispatch。4M普通事件加12,258,044次copy传递，239.47秒，其中闭包22.23秒；普通frontier2,784,656，非固定点。原数据边和world记录未替换；配置内容、callback效果、全域覆盖仍未通过。
 - 旧独立eval.py长任务已由实际launcher/context求解替代并终止，未发布固定点；收据为`entry-pack-fixed.superseded.json`。首个1M原型的两项namespace问题记在`launcher-context-targets-1m-reviewed/review.json`，当前产物已修正并重验。
 
 ## 后续顺序
 
-1. caller frame、按需读取、补充source catalog和自动需求定位/批量准入门已通过。当前沿新当前图补源码闭包与正常任务调用；不得借用已有passthrough/rerun分支冒充。入口按声明source.unit选择，不让同path的新候选变成额外PROGRAM_ENTRY。locals快照/隐式状态仍有待静态细化的字段。
-2. 补配置输入与字段来源：实际argv有launcher追加项；YAML保defaults顺序、package、覆盖及插值；环境/搜索插件未定处保条件。然后接正常task cfg形参及原GET/SET端口。把module需求机械分为源码、namespace、原生边界和真正缺少的输入，不把全部demand当缺文件。
+1. caller frame、按需读取、源码批量准入和正常任务链子gate已通过。下一门先建输入材料与组合图，再沿已验actual/formal/world绑定字段；不手写最终cfg，也不混入物理对象身份。
+2. 配置输入依次做：原bytes/有版本parser→scalar/map/seq材料→defaults/package/_self_→CLI覆盖→lazy节点引用→带条件cfg投影。SafeLoader不等于OmegaConf loader；先用两个通用YAML验覆盖后引用、missing和序列，再用真实3文件/原argv。launcher追加项、环境/search插件、callback变更保独立条件。源码闭包与locals/隐式状态仍需继续补齐。
 3. 将新的context图接到既有Python/native绑定、算子及资源要求图；保alias、逻辑来源、位置、状态和效果，运行时未知字段仍未知。
 4. 在上述入口与接口稳定后持续求解，审计源码、跨层边界、循环和资源的覆盖分母。队列清空不等于整个程序覆盖完成；第一阶段通过后才进入化简。
 

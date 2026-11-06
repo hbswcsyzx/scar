@@ -81,6 +81,10 @@ class ContextEntrySolver(EntrySolver):
         if fresh and flow is not None and (point in flow.watchers or point in flow.builtins.watchers):
             self.namespace_pending.append((point,normalized))
 
+    def edge(self,source,target):
+        super().edge(source,target)
+        self.reference_transport.install(source,target)
+
     def admit(self, unit, table, index):
         if (table=='names' and unit.unit in self.store.original_source_units
                 and unit.names[index].namespace.kind in (F.NamespaceKind.MODULE,F.NamespaceKind.BUILTINS)):

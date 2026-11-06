@@ -9,13 +9,18 @@ def test_directed_cycle_late_edge_and_activation_boundary():
     class Solver:
         def __init__(self):
             self.offsets={'unit':100};self.admitted=set()
-            self.values=defaultdict(set);self.queue=deque();self.events=7
+            self.values=defaultdict(set);self.adj=defaultdict(set);self.queue=deque();self.events=7
             self.transport=ActiveReferenceTransport(self)
 
         def add(self,point,value):
             if value not in self.values.get(point,()):
                 self.values[point].add(value);self.queue.append((point,value))
                 self.transport.enqueue(point,value)
+
+        def edge(self,source,target):
+            self.adj[source].add(target)
+            for value in tuple(self.values.get(source,())):self.add(target,value)
+            self.transport.install(source,target)
 
     solver=Solver();transport=solver.transport
     unit=SimpleNamespace(unit='unit',aliases=tuple((i,i+1) for i in range(20))+((20,5),(20,21)))
@@ -24,7 +29,9 @@ def test_directed_cycle_late_edge_and_activation_boundary():
     old_queue=tuple(solver.queue)
 
     def admit(index):
-        solver.admitted.add(('unit','aliases',index));transport.admit(unit,index)
+        solver.admitted.add(('unit','aliases',index))
+        source,target=unit.aliases[index]
+        solver.edge(source+100,target+100);transport.admit(unit,index)
 
     # A loaded unit does not authorize its unadmitted final edge.
     for index in range(19):admit(index)
@@ -48,3 +55,9 @@ def test_directed_cycle_late_edge_and_activation_boundary():
     assert not solver.values.get(99) and not solver.values.get(122)
     assert unit.aliases is original_aliases and solver.offsets=={'unit':100}
     assert solver.events==7 and transport.stats['normal_events_include_alias_closure'] is False
+    # Installed argument/return copies and virtual interface points use the
+    # same directional rule; ordinary namespace/operation callbacks stay queued.
+    solver.edge(121,-3);solver.edge(-3,-4);solver.edge(-4,123)
+    transport.drain()
+    assert solver.values[123]=={token,second} and solver.events==7
+    assert solver.adj[121]=={-3} and transport.facts=={('unit',i) for i in range(22)}

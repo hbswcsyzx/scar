@@ -204,6 +204,11 @@ StaticInputPort以输入contract版本和字段路径标识声明初值，独立
 已有qualified端口和数值offset不变，源码正文及局部接口仍向各自父收据读取。compiled context只由exec边激活，
 不成为import候选；同module的不同源码保may候选，不以路径或名字合并身份。源码准入、body激活、实际调用选择和字段值求解是不同事实。
 
-F5的纯引用transport可在已准入alias子图中迭代闭包，不必逐条线等待普通事件队列。
+F5的纯引用transport可在已安装的有向copy约束中迭代闭包，包括已准入alias、参数及数据返回，不必逐条线等待普通事件队列。
 它只传播已有抽象token，不计算目标操作或合并物理storage；原端口、边和普通事件保留。
 闭包经正常add可提前触发原有module激活，工作量另计；当前不宣称全部顺序敏感transfer的固定点等价。
+
+下一输入层分开记录三件事：数据材料节点（scalar/map/seq、原bytes/tag/span和子引用）、
+版本化组合操作（defaults/package/override及lazy引用）、与原call actual/formal/world绑定的输入候选。
+map/seq不是PythonLiteral；mandatory-missing、null、缺键和未知字段不混用。解析材料不冒充程序执行事件，
+组合结果也不能越过deepcopy、删除和callback效果直接冒充当前cfg。文件内容版本、逻辑组合版本与物理对象身份分开。
