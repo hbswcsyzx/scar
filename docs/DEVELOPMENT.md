@@ -396,6 +396,9 @@ python -B -m scar.analysis.software_resources --bindings BINDINGS --declarations
 `python -B -m scar.analysis.source_state_connection --boundaries BOUNDARIES --targets TARGETS --out FRESH_JOIN`
 把声明状态边界接到原CallLink的实参/形参、数据返回和world；结果保原表行号与scope/alias依据。
 `read_source_state_connections`重新推导接点；0连接是未决前沿，不把候选内容当作当前任务状态。
+按需字段/方法图：`python -B -m scar.analysis.source_field_graph --relations RELATIONS --catalog CURRENT_CONTEXT --unit UNIT --call CALL_ORDINAL --out FRESH_GRAPH`。
+不传`--call`时自动识别该unit中field GET→method GET→call的结构。按unit/call分片，引用原source/call表，不运行目标或全域求解。
+`python -B -m scar.analysis.source_field_graph --read GRAPH`检查原证据、调用栈与方法ABI；字段writer域、当前版本及dispatch仍保条件。
 `python -B -m scar.analysis.source_admission --targets TARGET_STORE --out FRESH_PLAN`支持普通及context图，按真实source provider关联需求与原依赖材料，不修改模型。
 对旧inventory未索引的实际module需求，用原候选roots定点查找；可重复`--search-root`指定候选root。
 新搜索表与原inventory的索引域分开，未固定内容版本不列ready；搜索根及文件存在均不证明运行时import选择。

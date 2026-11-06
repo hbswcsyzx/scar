@@ -71,6 +71,13 @@ CodeID 指向代码版本与位置；InvocationID 指向一次真实调用，两
 地址复用需要 allocation/epoch 约束，view 需要 offset/shape/strides；地址相等不证明同一分配。
 引用来源路径解释“引用如何传入”，不自动证明读取结果、实际 callable 或数据内容相同。
 
+F5按需引用视图用`(原Endpoint, 配对调用栈)`作为查询状态，不复制程序Operation；
+alias、完整LEXICAL binding、实参、初始default、data return及构造结果使用不同边类型。
+反向跨返回口进入调用时压栈，形参只匹配该调用再出栈；捕获环境及递归截断保留未决项。
+`NEW_RESULT`是构造协议结果，`__new__`可返回旧对象；只有原OBJECT_NEW/EXPLICIT_OBJECT_NEW提供分配位置候选。
+同一候选位置的字段SET→GET只产生带scope、实例、descriptor及版本条件的may-content边，保原world；
+它不变成alias，也不证明当前内容。由此推导的方法接口独立于入口准入及runtime dispatch。
+
 [逻辑值 IR](../scar/ir/v2/values.py) 已定义 LogicalValue、ValueVersion、ProvenanceRecord、
 Materialization 和等价声明，用于分开逻辑来源、推导关系、版本及物理表示。
 这些类型的存在不代表任意 deepcopy、transform、CPU/GPU materialization 已自动统一溯源；

@@ -17,6 +17,7 @@ NORMAL_SUCCESS / CPython 3.14.7；交付后端约定 C++20、算子 ABI v1、计
 | 覆盖输入 | 初始 argv→已知option/positional→6表达式/6有序写入，保来源及类型 | 仅初始版本；组选择、字段应用与lazy引用待接 |
 | 输入字段图 | 22状态表达式、12根版本、52字段投影；3条lazy引用，5处可能的中途读取需求 | 条件性输入候选；未绑定任务当前cfg，部分中途状态仍未降低 |
 | 声明状态接点 | 自动定位原cfg实参和post-call world，独立保None数据返回；884单元context已求解4M事件 | 原FIFO预算前缀尚未连接API；输入版本及任务内容仍未证明 |
+| 按需字段/方法 | 独立于全局FIFO，原引用与匹配call/return连接字段赋值→读取→声明方法接口 | 条件关系不授入口准入、当前字段版本或dispatch；外部writer仍开放 |
 | native/资源 | 既有声明、CPU/DRAM/GPU/设备内存/SATA/NVMe 旁图 | 尚未与新入口完成全链路重验 |
 
 五类实体为 Operation / Value / StateLocation / Region / Resource；输入输出是端口角色。
@@ -43,6 +44,7 @@ NORMAL_SUCCESS / CPython 3.14.7；交付后端约定 C++20、算子 ABI v1、计
 - `config-state-admission/lexical-experiment-verification.json`：实验性词法copy闭包核验18,864条原names、108源及scope归属。相同4M事件256.62秒，run接口推进但状态API仍未接通，frontier增至10,093,417；**不选为默认**。这不是LeWM运行或加速数据；继续定位原namespace/descriptor/callee队列的传播前沿。
 - `config-state-admission/worklist-verification.json`：8:1公平队列原输入、旧offset、事件守恒及状态接口已独立核验。4M事件805.63秒，2,627作用域、160,211条件CallLinks，frontier28,830,867；目标状态接点仍0，**不采用为默认**。CLASS compose_config已有function，attribute与callee已有bound token；callee有订阅且无pending，不能再简单归因于这段词法/CLASS写传播。CLI完成打印参数错误导致退出1，已落盘图仍通过独立核验；此实验不是完成门。
 - `config-state-admission/next-call-audit.json`：定点查询确认下一站Hydra调用34（callee1859/result1881）`config_loader.load_configuration`无CallLink，receiver1889也无已发布storage接线。`Hydra.run→compose_config`另已核calls#122784为DIRECT，self、4显式参数、2默认、data/world返回都接通，签名没有拒绝。词法与公平队列实验代码分别存档于`fd943439`/`06a34fdf`，已从工作版本删除；历史结果不当作当前固定点。
+- **`config-field-interface-current/verification.json`：按需条件字段/方法门通过。** 自动识别原调用34→method GET44→field GET45；原SET269→GET45形成1条may-content边，再由赋值来源及CLASS binding推导1个DIRECT声明方法接口。4引用slice、356查询状态、357边、29来源候选；独立核407原证据、24调用行、46构造行及35父guard。构建71.46秒、核验22.91秒，峰值RSS约0.76 GiB；单query压缩分片19,498 bytes，原图不复制。通用小用例核调用配对、custom-new返回旧对象和不同对象字段不串线。尚有1引用前沿，外部writer域、当前版本及dispatch仍开放；此门不授入口准入或第一阶段完成。
 
 组合门6项 obligation保留隐式库根、3个同名 schema查询、组选择与CLI/lazy层；
 覆盖门保当前argv/追加项、组及字段更新条件、lazy与任务绑定。OPEN_PROVIDER不产生虚构数据；未求出最终 cfg。
@@ -50,7 +52,7 @@ NORMAL_SUCCESS / CPython 3.14.7；交付后端约定 C++20、算子 ABI v1、计
 ## 后续顺序与验收
 
 1. **输入字段层：** plain/untyped条件性字段应用与lazy引用子门已过；不代表完整cfg。未知prefix与中途地址/合并状态按表保留，不从条件候选证明当前内容。
-2. **配置接口层：** 当前缺口已定位到`compose_config`中配置加载器receiver及字段来源。先复用已存调用/构造/字段关系，定点连接已知调用的局部摘要，区分引用通路与内容版本；不再用全局重排/增预算代替定位。验收API实参/数据返回/world及scope后，再沿后续hydra写入、callback、deepcopy、删除与task actual/formal/world推进。修改后cfg内容不能用None返回值或初始字段代替。
+2. **配置接口层：** 配置加载器字段来源及声明方法接口的条件连接已通过。下一门以显式声明上下文连接该方法体中的receiver参数、self调用及staticmethod descriptor，避免将新接口伪装成历史CallLink或实际准入；继续向配置修改API推进。然后沿后续hydra写入、callback、deepcopy、删除与task actual/formal/world连接版本。修改后cfg内容不能用None返回值或初始字段代替；不重跑全域传播替代局部接线。
 3. **算子与资源层：** 新 context图连接现有 Python/native声明、算子及资源图；已知属性静态保留，运行地址等未知字段不伪造。
 4. **全图验收：** 源码闭包、顺序敏感传播、循环和跨层接口的覆盖分母/缺口审计。队列清空本身不证明全覆盖；第一阶段通过后才进入化简。
 
