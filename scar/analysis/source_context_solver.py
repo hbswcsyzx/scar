@@ -12,6 +12,7 @@ from scar.analysis.source_context_interfaces import ContextInterfaceStore
 from scar.analysis.source_namespace_flow import NamespaceFlow
 from scar.analysis.source_frame_globals import FrameGlobalsFlow
 from scar.analysis.source_relation_replay import SharedConstructionFlow, SharedContainerFlow
+from scar.analysis.source_reference_transport import ActiveReferenceTransport
 from scar.ir.program import normal_links as F, normal_entry as E
 
 
@@ -19,6 +20,7 @@ class ContextEntrySolver(EntrySolver):
     def __init__(self, base, namespace_graph, entries, *, interfaces, jobs=None,
                  supplemental_sources=(), supplemental_interfaces=(), entry_units=None):
         self.namespace_graph = namespace_graph
+        self.reference_transport=ActiveReferenceTransport(self)
         self.frames = None
         self.namespace_flow = None; self.namespace_pending = deque(); self.namespace_scopes = set()
         self.exec_by_result = defaultdict(list); self.call_owners = {}
@@ -74,6 +76,7 @@ class ContextEntrySolver(EntrySolver):
             ('external',value[1]) if value[0]=='external' else value)
         fresh = normalized not in self.values.get(point,())
         super().add(point,value)
+        if fresh:self.reference_transport.enqueue(point,normalized)
         flow = self.namespace_flow
         if fresh and flow is not None and (point in flow.watchers or point in flow.builtins.watchers):
             self.namespace_pending.append((point,normalized))
@@ -85,6 +88,7 @@ class ContextEntrySolver(EntrySolver):
             self.admitted.add((unit.unit,table,index))
             return
         result=super().admit(unit,table,index)
+        if table=='aliases':self.reference_transport.admit(unit,index)
         if table=='names' and self.frames is not None:
             access=unit.names[index]
             if access.write and access.namespace.kind is F.NamespaceKind.MODULE:
@@ -105,6 +109,7 @@ class ContextEntrySolver(EntrySolver):
             for owner in self.active_scopes-self.namespace_scopes:
                 self.namespace_scopes.add(owner)
                 self.namespace_flow.admit_scope(owner)
+        self.reference_transport.drain()
 
     def call(self, index, value):
         unit,call = self.call_rows[index]; offset = self.offsets[unit.unit]
@@ -130,11 +135,11 @@ class ContextEntrySolver(EntrySolver):
 
     def solve(self, max_events=20_000_000):
         self.prepare()
-        while (self.queue or self.pending or self.namespace_pending) and self.events<max_events:
+        while (self.queue or self.pending or self.namespace_pending or self.reference_transport.queue) and self.events<max_events:
             while self.namespace_pending:
                 point,value = self.namespace_pending.popleft()
                 self.namespace_flow.consume(point,value)
             self.prepare()
             if self.queue:
                 super().solve(min(max_events,self.events+65_536))
-        return not self.queue and not self.pending and not self.namespace_pending
+        return not self.queue and not self.pending and not self.namespace_pending and not self.reference_transport.queue

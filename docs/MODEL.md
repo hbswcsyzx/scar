@@ -203,3 +203,7 @@ StaticInputPort以输入contract版本和字段路径标识声明初值，独立
 新增依赖源码从F0→F4进入独立provider；F5目录按原source、compiled context、新source的顺序追加。
 已有qualified端口和数值offset不变，源码正文及局部接口仍向各自父收据读取。compiled context只由exec边激活，
 不成为import候选；同module的不同源码保may候选，不以路径或名字合并身份。源码准入、body激活、实际调用选择和字段值求解是不同事实。
+
+F5的纯引用transport可在已准入alias子图中迭代闭包，不必逐条线等待普通事件队列。
+它只传播已有抽象token，不计算目标操作或合并物理storage；原端口、边和普通事件保留。
+闭包经正常add可提前触发原有module激活，工作量另计；当前不宣称全部顺序敏感transfer的固定点等价。

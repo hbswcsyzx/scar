@@ -1,6 +1,6 @@
 """Solve actual script entries through compiled contexts, with typed receipts."""
 import argparse
-from collections import Counter
+from collections import Counter,deque
 from contextlib import ExitStack
 import faulthandler
 from hashlib import sha256
@@ -26,6 +26,7 @@ from scar.analysis.source_template_links import _json
 
 def pins():
     from scar.analysis import source_solver_observations
+    from scar.analysis import source_reference_transport
     return {name:sha256(Path(module.__file__).read_bytes()).hexdigest() for name,module in (
         ('solver',source_context_solver),('facts',source_context_fact_store),
         ('interfaces',source_context_interfaces),('namespaces',source_namespace_flow),
@@ -35,7 +36,8 @@ def pins():
         ('fact_reader',normal_facts),('builtin_flow',source_namespace_builtins),
         ('builtin_types',source_builtin_namespaces),('frame_index',source_frame_captures),
         ('frame_flow',source_frame_globals),('frame_types',source_frame_bindings),
-        ('root_views',source_root_namespace_views),('observations',source_solver_observations))}
+        ('root_views',source_root_namespace_views),('observations',source_solver_observations),
+        ('reference_transport',source_reference_transport))}
 
 
 def build_context_targets(facts,namespaces,entry,interfaces,out,*,max_events=2_000_000,jobs=4,supplements=(),observe_ports=()):
@@ -61,22 +63,28 @@ def _build_context_targets(facts,namespaces,entry,interfaces,out,*,max_events,jo
     for binding in contract.globals:
         value=binding.literal.to_python()
         solver.namespace_value(solver.ns(contract.source.unit,binding.namespace),('constant',type(value).__name__,value))
-    while (solver.queue or solver.pending or solver.namespace_pending) and (max_events is None or solver.events<max_events):
+    history=deque(maxlen=32);observation_count=0
+    if observe_ports:
+        from scar.analysis.source_solver_observations import snapshot_ports
+    while (solver.queue or solver.pending or solver.namespace_pending or solver.reference_transport.queue) and (max_events is None or solver.events<max_events):
         solver.solve(solver.events+200_000 if max_events is None else min(max_events,solver.events+200_000))
+        if observe_ports:
+            history.append(snapshot_ports(solver,observe_ports));observation_count+=1
         print(json.dumps(dict(phase='CONTEXT_ENTRY_PROPAGATION',events=solver.events,frontier=len(solver.queue),
             namespace_frontier=len(solver.namespace_pending),active_scopes=len(solver.active_scopes),
             exec_connections=len(solver.namespace_flow.connections),loaded_units=len(solver.store.loaded),
             seconds=time.monotonic()-started)),file=sys.stderr,flush=True)
-    fixed=not solver.queue and not solver.pending and not solver.namespace_pending
+    fixed=not solver.queue and not solver.pending and not solver.namespace_pending and not solver.reference_transport.queue
     solver.frames.validate_parents()
     solver.complete_call_demands(); _durable_mkdir(out)
     _durable_bytes(out/'context-facts.json',solver.store.raw,replace=False)
-    observations=None
+    observations=None;observation_history=None
     if observe_ports:
         from scar.analysis.source_solver_observations import snapshot_ports
         raw=_json(snapshot_ports(solver,observe_ports))
         _durable_bytes(out/'solver-observations.json',raw,replace=False)
         observations=dict(path='solver-observations.json',bytes=len(raw),sha256=sha256(raw).hexdigest())
+        observation_history=write_table(out/'solver-observation-history.jsonl.gz',history)
     extra=dict(analysis_mode='ENTRY_COMPILED_CONTEXT_MAY_ANALYSIS',entry_sources=[contract.source.path],
         active_code_scopes=len(solver.active_scopes),loaded_sources=len(solver.units),
         active_source_calls=len(solver.active_call_indices),pending_code_scopes=len(solver.pending),
@@ -98,6 +106,9 @@ def _build_context_targets(facts,namespaces,entry,interfaces,out,*,max_events,jo
             (o for material in solver.frames.materials.values() for o in material.obligations)),
         static_input_bindings=write_table(out/'static-input-bindings.jsonl.gz',solver.frames.views.input_bindings.values()),
         frame_source_stats=solver.frames.index.stats,
+        reference_transport=solver.reference_transport.stats,
+        reference_alias_facts=write_table(out/'reference-alias-facts.jsonl.gz',
+            (dict(unit=unit,alias=index) for unit,index in sorted(solver.reference_transport.facts))),
         construction_queries=dict(solver.constructions.query_stats),
         namespace_requests=len(solver.namespace_flow.mapping_requests),
         analysis_phase_seconds=dict(preparation=prepared-started,propagation=time.monotonic()-prepared))
@@ -129,6 +140,8 @@ def _build_context_targets(facts,namespaces,entry,interfaces,out,*,max_events,jo
         entry_unit=contract.source.unit,importable_compiled_namespaces=False,
         namespace_lookup_semantics='ORDERED_SOURCE_GRAPH_CONDITIONAL_MAY_TRANSFER',
         solver_observations=observations,
+        solver_observation_history=observation_history,observation_snapshots_seen=observation_count,
+        observation_snapshots_dropped=max(0,observation_count-len(history)),
         fixed_point_scope='ADMITTED_SOURCE_AND_EXEC_CONTEXT_CONSTRAINTS',
         target_executed=False,first_stage_complete=False,seconds=time.monotonic()-started)
     _durable_bytes(out/'result.json',_json(report),replace=False)

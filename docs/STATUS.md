@@ -41,6 +41,7 @@ NORMAL_SUCCESS / CPython 3.14.7；后端约定C++20、算子ABI v1、计划schem
 - **自动需求定位门：** `hydra-run-admission/admission/verification.json`核原17,593条demand及ordinal不变；1,053个module中，仅对16个旧inventory未索引需求沿原6个候选root定点搜索。17.31秒找到15个完整hash源码/212,369 bytes，其中自动找到缺失上游。原inventory索引与新search索引分开，不改原模型、不声称实际import选择；486源码候选可准入、495旧预算查询待搜索、25原生候选，其余保明确分类。
 - **批量准入与新当前图：** `closure-sources-verification.json`严格读回15新源及局部摘要，F0→F4耗时550.69秒，15个摘要worker耗时7.24秒；新增98,552端口/1,337调用。`closure-graph-verification.json`核26类关系与精确声明入口unit；累计869单元/6,089,590端口，全部旧offset不变。2M传播141.15秒、读回68.35秒，10,262调用连接中160条caller来自补充源码；frontier 93,252，正常任务call links仍0。不是固定点或第一阶段通过；正在沿原接口核对上游选中/绑定及新缺失需求。
 - **当前断点已缩小：** `receiver-targets/solver-observations.json`是分析器抽象token的只读快照，不是目标运行trace。2M构建140.56秒；`observer-verification.json`核27个关系分片与已验前缀逐字节一致，复用先前26类typed读回并额外严格读index-cycle表。classmethod/OBJECT_NEW/SOURCE_INIT及返回路径均已有边；工厂结果4976有instance，而下游形参10897/接收者3446只有None，属性订阅存在。实例在中间返回链上的传播尚未完成或未定位，不能归因为descriptor缺陷。下一门先检查该链的实际事件传播，避免盲补源码或只增全局预算。
+- **引用transport闭包门：** 原FIFO分段4M确认`func()`→函数RETURN出口有20条active REFERENCE线，链首2M已到instance、4M链尾仍无。`reference-targets`只对已admit alias进行迭代闭包，原边/端口保留；2M普通事件加2,203,635次alias传递，耗时153.79秒（闭包9.40秒），严格读回72.75秒。RETURN出口和后续实参已有instance；形参处尚无，实参事件明确pending1。此为分析器进展，不是目标加速；普通frontier591,760，第一阶段未完成。一个0.12秒micro验收覆盖20链、cycle、晚边、未激活边与共享owner。
 - 旧独立eval.py长任务已由实际launcher/context求解替代并终止，未发布固定点；收据为`entry-pack-fixed.superseded.json`。首个1M原型的两项namespace问题记在`launcher-context-targets-1m-reviewed/review.json`，当前产物已修正并重验。
 
 ## 后续顺序
