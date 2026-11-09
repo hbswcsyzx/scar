@@ -414,6 +414,8 @@ python -B -m scar.analysis.software_resources --bindings BINDINGS --declarations
 body与entry分表共享，不按调用或循环复制。输入来源查询是may-dependency，不授alias/内容等价；报告分开父链认证、正文投影和查询耗时。
 `python -B -m scar.analysis.source_value_interface_graph --values VALUES --out FRESH_INTERFACES`连接派生调用输入的原source接口；`--read INTERFACES`重核。
 同一进程可共享`ValueInterfaceParents`给build/read，父图完整认证一次，再以原report/表收据保有效性；不改变目标选择或内容证明强度。
+`python -B -m scar.analysis.source_body_expansion --interfaces INTERFACES --out FRESH_BODIES`展开原source/compiled函数正文；`--read BODIES`重核。
+`source_graph_material(catalog, unit)`统一普通/compiled材料读取。正文references表引用原父表或新增body表，entry/reach的body序号指references表；不复制旧正文。
 `python -B -m scar.analysis.source_admission --targets TARGET_STORE --out FRESH_PLAN`支持普通及context图，按真实source provider关联需求与原依赖材料，不修改模型。
 对旧inventory未索引的实际module需求，用原候选roots定点查找；可重复`--search-root`指定候选root。
 新搜索表与原inventory的索引域分开，未固定内容版本不列ready；搜索根及文件存在均不证明运行时import选择。

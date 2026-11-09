@@ -99,6 +99,9 @@ DATA包含bool、协议值等，不只对象引用。轻量查询只传播DATA�
 原world、调用配对标签、分支及循环回边仍在图中。该flow-insensitive may查询不证明平衡执行路径、当前状态版本或实际影响。
 派生调用输入可另接原CallLink的actual→formal、world与返回接口；根形参→派生actual的may依赖仍在父值流图，不能拼成根形参alias。
 历史may-target与当前caller上下文匹配分开；接到compiled函数的声明接口也不等于已展开或运行该正文。
+普通源码与compile-context使用同一材料接口，按原catalog格式选择reader；compiled计划仍引用其原domain、行号、digest及编译profile。
+正文展开用原函数端口去重，已有正文只存跨工件引用，新增正文才写本地表；入口分别保原binding/形参/world条件。
+展开静态函数正文不选择动态activation；后续来源查询仍保may-dependency限制，循环仍用原回边。
 
 [逻辑值 IR](../scar/ir/v2/values.py) 已定义 LogicalValue、ValueVersion、ProvenanceRecord、
 Materialization 和等价声明，用于分开逻辑来源、推导关系、版本及物理表示。
