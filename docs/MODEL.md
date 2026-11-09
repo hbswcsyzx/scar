@@ -102,6 +102,17 @@ DATA包含bool、协议值等，不只对象引用。轻量查询只传播DATA�
 普通源码与compile-context使用同一材料接口，按原catalog格式选择reader；compiled计划仍引用其原domain、行号、digest及编译profile。
 正文展开用原函数端口去重，已有正文只存跨工件引用，新增正文才写本地表；入口分别保原binding/形参/world条件。
 展开静态函数正文不选择动态activation；后续来源查询仍保may-dependency限制，循环仍用原回边。
+调用上下文引用查询另以原incoming CallLink为条件：形参只沿当前栈顶接口回到它的实参，data return先压入该接口再由其形参配对弹出。
+外层caller未选定时保边界，不合并其他caller；非词法namespace、捕获、deferred及构造结果各保原协议边界。
+同一正文共享多个incoming接口；查询栈是静态路径证据，不是Invocation或循环展开。来源匹配与开放上下文分开记录，原may候选不被删除。
+若引用路径得到原函数定义，可用原signature binder生成带路径条件的函数接口；函数环境仍来自原callee，不以CodeID替代函数对象状态。
+
+构造是独立协议区域。SOURCE_NEW保cls/原参数/world，数据返回NEW_RESULT、状态返回NEW_WORLD；其结果可能是已有或foreign对象。
+SOURCE_INIT从NEW_RESULT/NEW_WORLD入正文，只把world返回原调用；完整构造的数据仍来自new结果，init数据被丢弃。
+OBJECT_NEW/OBJECT_INIT、foreign返回、new/type-test/init未决都保原stage/class及证据，不把pending无输出阶段补成完成路径或分配证明。
+构造class输入只从单一ARGUMENT引用投影：init的NEW_RESULT给请求类的兼容INSTANCE，new的原class参数给CLASS_OBJECT。
+兼容INSTANCE可能是子类；精确类型、MRO与override仍未证明。pack本身不当作单一class引用，无关参数包仍留在原接口而不增加类型缺口。
+多个原构造entry可共享同一声明正文/类型上下文，其实际对象、world与entry条件继续由原connection分别保存。
 
 [逻辑值 IR](../scar/ir/v2/values.py) 已定义 LogicalValue、ValueVersion、ProvenanceRecord、
 Materialization 和等价声明，用于分开逻辑来源、推导关系、版本及物理表示。
