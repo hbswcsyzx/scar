@@ -128,6 +128,9 @@ namespace来源子图按原端口共享，使用点以原callee查询/state锚�
 源码声明图按原callsite及CodeScope覆盖完整选定源树，namespace路径可在没有选中incoming的情况下单独分析；它不伪造Invocation或scope激活。
 同一原callsite的caller查询另保调用栈，两种视图不能相互冒充。生成绑定按完整路径连接，保所有overload和原source ABI；转换依赖不当作alias。
 分析状态（尚未选定、尚未证明）保在请求证据及状态字段，不能当作运行时guard与“选择该binding”合取。
+生成绑定可独立链接到精确版本的canonical ATen接口。实参→parser转换→native端口是推导依赖；wrapper返回形状与native返回slots分别保留。
+source world→native world、native normal world→source result_world也是依赖；wrapper前后effects开放，不能折叠为同一StateVersion。异常边界留在canonical接口。
+一个native整数数组参数可依赖多个显式位置实参，聚合单独标记，不可只取第一个实参；fixed/optional列表的广播或vararg选择未证时保转换OPEN。
 类基项保原求值端口、顺序和CLASSES fact所属创建scope；packed ABI仍含body/name，不能直接当base列表。
 namespace图的class-definition来源是附条件的源码声明产物，不是运行时class或MRO证明；当前版本、builtin及动态属性缺口仍逐字段保留。
 继承成员记录原有序base槽及完整来源路径；每条descriptor选择可追至记录，不选择第一条基类或写入作为实际MRO/当前成员。
