@@ -16,6 +16,8 @@ SCAR 是宏观编译器：用有类型、可展开的图统一表示程序及硬
 
 局部状态通过`ProgramView.state(unit)`接入同一查询。`BindingLocationTemplate`由源版本、原C2接口/绑定槽和key限定；实际frame、mapping或cell仍为实例参数。同一源槽不同激活不因此成为同一个物理位置；C2 binding索引也不是CodeScope ordinal。`BindingVersionTemplate`另保原函数、定义类型/站点及执行occurrence参数；绑定到同一引用不能证明对象或Tensor内容未变。读取保匹配recipe栈的全部may定义，`BINDING_READ`带条件和MAY精度；`STATE_LOCATION`统一为位置→版本。写入/删除、形参入场和开放来源分别表示；None payload不是Python None。
 
+隐式类名字沿原C2分类或ordinary规则投影：prepared mapping、frame globals、frame builtins和捕获cell分开，有序lookup不是所有位置都已读取。显式环境/mapping参数通过条件ENVIRONMENT边绑定地址owner；没有原C2接口索引时保None，不借用另一scope的索引。`ReadBuildClass`是当前frame builtins中的语言查找，不等于导入builtins模块或已选择默认builder。escaped-root等原路由优先复用，无法确定不能自行改成源码globals_scope。
+
 `SourceEffectRequest`保原操作和69种指令的闭合分类，动作标签可重叠，只表示待解释能力；不授pure、真实搬运、分配或RNG结论。已知绑定接口与尚缺的地址规则分开，`missing_rules`不伪装为运行时UNKNOWN。CLI为`python -B -m scar.cli program-state-view --catalog CONTEXT_CATALOG --unit UNIT --out FRESH_VIEW`，默认根据READ、原C2槽域/owner和原函数body作用域选择所有可跟踪局部槽；捕获不冒充当前帧的局部槽。`--slot C2_LOCAL_SLOT`可缩小查询，`--interfaces-only`仅发布接口。`--read VIEW`独立重推全部已存记录及覆盖数，拒绝虚假的完成/内容证明标志；state/type/solver合同精确核版本，facade producer SHA保来源，其变化仍须逐表当前重推。位置、访问、版本、选择、跟踪与边分表存储；单元头共享namespace/材料，跟踪的操作/控制边索引引用原正文投影，不复制指令。
 
 | 实体 | 含义 | 对应程序部分 |

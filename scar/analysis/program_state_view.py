@@ -22,11 +22,13 @@ from scar.ir.record_codec import encode, decode
 def _pins():
     from scar.analysis import source_state, source_effects, source_name_definitions
     from scar.analysis import source_name_access_anchors, source_value_flow, program_view
+    from scar.analysis import source_implicit_namespaces
     from scar.ir.program import source_effects as effects_types
     return {name:sha256(Path(module.__file__).read_bytes()).hexdigest() for name,module in (
         ('producer', __import__(__name__, fromlist=['__file__'])), ('state', source_state),
         ('state_types', S), ('effect_catalog', source_effects), ('effect_types', effects_types),
         ('definitions', source_name_definitions), ('anchors', source_name_access_anchors),
+        ('implicit_addresses', source_implicit_namespaces),
         ('body_projection', source_value_flow), ('unified_adapter', program_view))}
 
 

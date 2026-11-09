@@ -32,6 +32,7 @@ class SourceStateProvider:
         self.view = view; self.source = view.project_unit(unit)
         self.material = self.source.material; self.namespace = self.source.namespace
         self.bindings, self.declarations, self.materials = _bindings(self.material, {})
+        self.interface_ids = {descriptor:index for index,descriptor in enumerate(self.bindings.interfaces)}
         self._guard = {Path(m.uri):_stamp(Path(m.uri)) for m in self.materials}
         self.locations = {}; self.versions = {}; self.accesses = []; self.requests = {}
         self.in_edges = defaultdict(list); self.out_edges = defaultdict(list)
@@ -74,7 +75,7 @@ class SourceStateProvider:
 
     def _identify(self, context, step, operation):
         ins = step.instruction; kind = None; index = None; alternatives = (); missing = None
-        payload = None
+        payload = None; owner_handles = ()
         if type(ins) in (P.AccessBinding, P.DeleteExceptionBinding, P.BindTypeParameter):
             index = ins.parameter.binding_port if type(ins) is P.BindTypeParameter else ins.port
             port = self.bindings.ports[index]
@@ -102,7 +103,7 @@ class SourceStateProvider:
                         raise ValueError('type parameter is not an original binding admission')
                     slot = self.bindings.bindings[binding]
                     descriptor = EnvironmentInterface('LEXICAL_BINDING', slot.owner, binding)
-                    alternatives = (S.BindingAccessAlternative(self._location(descriptor, key), None, None),)
+                    alternatives = (S.BindingAccessAlternative(self._location(descriptor, key), self.interface_ids.get(descriptor), None),)
                 else:
                     target = port.write_target if kind is S.BindingAccessKind.WRITE or type(ins) is P.DeleteExceptionBinding else port.delete_target
                     if target is None: raise ValueError('binding update lacks original target')
@@ -113,9 +114,22 @@ class SourceStateProvider:
             if ins.binding not in ins.interface.protocol_bindings:
                 raise ValueError('class protocol access is outside its declared interface')
             descriptor = EnvironmentInterface('CLASS_PROTOCOL_CELL', slot.owner, ins.binding)
-            alternatives = (S.BindingAccessAlternative(self._location(descriptor, self._name(slot.name)), None, None),)
+            alternatives = (S.BindingAccessAlternative(self._location(descriptor, self._name(slot.name)), self.interface_ids.get(descriptor), None),)
             kind = S.BindingAccessKind.HANDLE if ins.action is P.ClassProtocolActionKind.CELL_REFERENCE else S.BindingAccessKind.WRITE
             payload = context.result(step) if kind is S.BindingAccessKind.HANDLE else context.value(step.arguments[1])
+        else:
+            from scar.analysis.source_implicit_namespaces import identify_implicit_namespace
+            implicit = identify_implicit_namespace(self.bindings, self.declarations, context, step)
+            if implicit is not None:
+                kind = implicit.kind; payload = implicit.payload; missing = implicit.missing_outcome
+                owner_handles = implicit.owner_handles
+                read = kind is S.BindingAccessKind.READ
+                alternatives = tuple(S.BindingAccessAlternative(self._location(descriptor, implicit.key),
+                    self.interface_ids.get(descriptor), ordinal if read else None,
+                    'RETURN_VALUE' if read else None,
+                    ('NEXT' if ordinal+1<len(implicit.descriptors) else missing) if read else None,
+                    'PROPAGATE' if read else None)
+                    for ordinal,descriptor in enumerate(implicit.descriptors))
         if kind is None: return ()
         before, after = context.worlds(step)
         record = S.BindingAccessTemplate(operation, context.site(step), context.owner(step.region).owner,
@@ -130,6 +144,12 @@ class SourceStateProvider:
             self._edge(location if read else op, op if read else location,
                 K.ENVIRONMENT if kind is S.BindingAccessKind.HANDLE else K.STATE_INPUT if read else K.STATE_OUTPUT,
                 Meaning.STATE_INTERFACE, (condition,), 'scar.source-state.binding-interface.v1')
+            if owner_handles and owner_handles[branch] is not None:
+                handle = self.view.source_port(owner_handles[branch])
+                selected = DependencyCondition('scar.source-state.address-owner',
+                    self.locations[alternative.location].interface.kind, op, branch, (handle, location))
+                self._edge(handle, location, K.ENVIRONMENT, Meaning.STATE_INTERFACE, (selected,),
+                    'scar.source-state.explicit-namespace-owner.v1')
         return (ordinal,)
 
     def _edge(self, source, target, kind, meaning, conditions=(), rule='scar.source-state.binding-version.v1', strength=Strength.EXACT):
