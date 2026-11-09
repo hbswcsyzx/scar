@@ -9,7 +9,7 @@
 |---|---|---|
 | ①统一IR/查询 | source与native共用ProgramView；原ID、可展开区域、循环和来源均保留 | 完整程序覆盖由后续层验收 |
 | ②局部结构与状态 | 884单元接口盘点完成，正常环境投影缺口已补；保绑定、内容和native状态 | 异常状态暂缓，效果及实例选择不冒充已证明 |
-| ③跨层连接 | 已有参数/返回/捕获/成员/native材料，尚未统一贯通 | 实作保caller配对的关系provider |
+| ③跨层连接 | 普通源函数参数/env/world/返回已接统一懒查询，已发布581单元条件接口 | 默认值创建、捕获、绑定方法/构造及native转换待贯通 |
 | ④资源与运行证据 | 已有硬件快照、类型及候选资源路由 | 接运行I/O及必要的实际选择 |
 | ⑤完整推理链验收 | 未通过 | 入口→配置→加载→planner/模型→输出的跨层覆盖 |
 
@@ -26,6 +26,8 @@
 
 覆盖分片合3,911,326 bytes，另有260,144 bytes收据索引；这是新增盘点数据大小，不是原图总大小。原F4正文及已有图继续共享，规范视图按需生成，不再保存一份全目录巨大图。修正只重建受影响单元并核旧图，未重新跑884单元。
 
+**③新增已验：** 全父声明域581单元/48,290调用在88.95秒内产生4,643条件函数接口，表合4,408,486 bytes；4,626普通＋17 deferred，25,110参数路由、152 pack投影及各4,626 data/world返回。4,638调用接到函数候选，其余43,652调用、166,839原namespace前沿及2个签名不适配候选保留。没有重证全部父namespace或实际dispatch。打开全域索引物化0单元，查询自动接入所需单元；一个真实单元的两个callsite共享body、参数/返回配对、跨unit、错误frame拒绝和None/open前缀验收共15.49秒、峰值约350 MiB。它证明基础桥，不代表③全部通过。
+
 ## 当前可用材料
 
 均在 `artifacts/current/queries/`，本地生成材料不推送Git。
@@ -41,10 +43,12 @@
 | program-native-state-current | 196个native单元、507地址、1,099状态投影、90 scoped alias声明 |
 | program-declared-calls-current / program-binding-native-current | 源调用声明及196个native ABI，尚未证明实际dispatch |
 | program-source-resources-current | 539类型投影与已有12硬件节点的候选路由；不等于实际搬运/分配 |
+| program-function-interfaces-all-current | 581单元条件接口、全callsite/原前沿索引；共享正文不复制 |
+| program-source-call-view-current/verification.json | 全域索引的自动懒接入与caller匹配查询验收 |
 
 ## 接下来按顺序推进
 
-1. **③调用连接：** 复用既有binder，将实参/形参、环境、world和返回接入同一ProgramView；调用frame保原call operation、callee Use/value和目标body Region。进入push、返回只准匹配pop；默认值保创建上下文，deferred creation不冒充执行正文。先用已有小型真实单元验收，再扩大到已有调用材料，不重跑全局FIFO前缀。
+1. **③调用连接：** 基础关系provider已实现caller push/匹配pop，默认值创建和deferred/resume仍留明确边界。下一步接创建上下文/捕获、绑定方法与构造协议、native转换，并补compiled入口、配置/导入及依赖闭包；581父声明域不是884目录或完整推理链。复用原binder和材料，不重跑全局FIFO前缀。
 2. **④资源连接：** 在已接软件依赖上补I/O及必要运行选择。类型候选、源码文件位置、实际资源使用分别保存；不采集Tensor数值，不展开OS内部。
 3. **⑤整体验收：** 按run_inference.py与保留配置核对跨层边、共享循环、外部边界及明确缺项。通过后才进入化简及代码生成。
 

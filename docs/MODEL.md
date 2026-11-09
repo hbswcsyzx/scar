@@ -26,6 +26,8 @@ SCAR 是宏观编译器：用有类型、可展开的图统一表示程序及硬
 
 保留的环境值与可变namespace地址分开：`ClassTypeParameterProjection`保原`ReadClassTypeParameters`、完整ClassBodyInterface/类型参数SlotRef、environment及其owned Use、结果和world对。它是当前callback环境→tuple结果的带activation条件依赖；不是环境与tuple的alias，也不是后续`__type_params__`字段读取，不造LocationID。`state.environment_values`提供类型化查询记录；持久化依赖边引用已共享的原操作/端口，完整interface不再复制到通用状态表，reader机械重建。实际创建上下文及版本尚待③选择。
 
+源码函数接口保原callee来源、signature绑定、参数/env/world、pack/default及data/world返回，并索引所有未接调用和父前沿。`scar function-interfaces --calls DECLARED_CALLS --out FRESH --jobs N [--unit UNIT]`发布条件接口；`scar function-call-view --interfaces INTERFACES [--unit UNIT]`打开其统一视图。`SourceFunctionCallProvider(view,store)`默认不物化任何单元，查询按需求接入；原source bodies继续共享。进入使用包含目标body Region的完整Frame，返回须匹配pop；未知外层保持None/open suffix并显式报前沿，不能并入所有caller。FUNCTION_ENVIRONMENT和pack只是依赖，默认值创建上下文未选时留前沿，deferred creation没有普通正文/返回边。静态候选不授dispatch或内容版本证明。
+
 Native单元沿原codec namespace、entry/exit Value/Use和world投影。Tensor与Generator状态地址是`boundary slot＋Optional/List类型路径＋选中值实例`，不是已观察元素、StorageID或内容版本；列表不展开，Optional保存在条件。输入保原before/normal/raised world，返回仅在normal存在。原alias before/显式after字段保留，其阶段是annotation字段而非程序执行时间；标签按原declaration与boundary限定。分组是声明关系记录，查询时才产生条件MAY/PROJECTION边，禁止传递合并成对象或storage身份；wildcard、空after、无annotation与False may_write都不授无副作用/RNG或no-alias结论。
 
 入口：`python -B -m scar.cli native-state-view --source BINDING_NATIVE_MATERIALS --out FRESH_VIEW`，`--read VIEW`独立重推所有native分片。`NativeStateSession(materials, view=existing_view)`复用同一查询和原core loader；基础core记录优先于扩展metadata，扩展状态不伪造canonical正文。新状态指向原图与声明，不复制原native图，也不声称已选择Python/native调用或dispatch。
