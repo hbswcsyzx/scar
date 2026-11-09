@@ -17,6 +17,7 @@ from scar.ir.program import source_address_paths as A, source_content as O
 from scar.ir.program import source_productions as P
 from scar.ir.program.control import LanguageCompletionKind as C
 from scar.ir.program.model import ValueKind, ValueType
+from scar.ir.program.signature_patterns import ChoiceBinding
 from scar.ir.program.structured import PythonProtocolKind as K
 
 if TYPE_CHECKING:
@@ -44,8 +45,12 @@ _ITEMS = {
     P.LanguageActionKind.ITEM_SET: 'SET',
     P.LanguageActionKind.ITEM_DELETE: 'DELETE',
 }
+_UPDATES = frozenset((P.LanguageActionKind.SET_INSERT, P.LanguageActionKind.SET_UPDATE))
+_UPDATE_PROTOCOLS = frozenset((K.DICT_UPDATE, K.EXTEND_DISPLAY, K.APPEND_DISPLAY,
+    K.EXTEND_CALL_POSITIONALS, K.APPEND_CALL_POSITIONAL, K.DICT_MERGE))
 _PROTOCOLS = frozenset((K.SOURCE_INDEX, K.STORE_SUBSCRIPT, K.MAP_ADD,
-    K.BINARY_SLICE, K.STORE_SLICE, K.STORE_SLICE_SUBSCRIPT))
+    K.BINARY_SLICE, K.STORE_SLICE, K.STORE_SLICE_SUBSCRIPT,
+    K.COMPREHENSION_ADD)) | _UPDATE_PROTOCOLS
 
 
 def _shape(context, step, references, outputs):
@@ -80,12 +85,32 @@ class ContentInterfaceIndex:
         ins = step.instruction
         language = type(ins) is P.ApplyLanguageAction
         protocol = type(ins) is P.ApplyPythonProtocol
-        if not (language and (ins.action in _ATTRIBUTES or ins.action in _ITEMS)
+        if not (language and (ins.action in _ATTRIBUTES or ins.action in _ITEMS or ins.action in _UPDATES)
                 or protocol and ins.protocol in _PROTOCOLS):
             return None
         if (context.unit != self.source.unit or context.steps.get(step.id) != step
                 or self.source.plans.get(context.key) != context.plan):
             raise ValueError('content request context is outside its original source unit/plan')
+
+        if language and ins.action in _UPDATES or protocol and ins.protocol in _UPDATE_PROTOCOLS:
+            # DICT_MERGE keeps its leading callee as a separate original operand.
+            merge = protocol and ins.protocol is K.DICT_MERGE
+            receiver_argument = 1 if merge else 0
+            _shape(context, step, 3 if merge else 2, 0)
+            return IdentifiedContent('UPDATE', context.value(step.arguments[receiver_argument]),
+                receiver_argument, O.WholeOwner(),
+                context.value(step.arguments[receiver_argument + 1]), None, None)
+
+        if protocol and ins.protocol is K.COMPREHENSION_ADD:
+            choices = [binding.choice for binding in ins.bindings
+                if type(binding) is ChoiceBinding and binding.name == 'comprehension_kind']
+            if len(choices) != 1 or choices[0] not in ('LIST', 'SET', 'DICT'):
+                raise ValueError('comprehension content request lacks its original unique kind binding')
+            mapping = choices[0] == 'DICT'
+            _shape(context, step, 3 if mapping else 2, 0)
+            selector = A.ItemSelector(context.value(step.arguments[1])) if mapping else O.WholeOwner()
+            return IdentifiedContent('SET' if mapping else 'UPDATE', context.value(step.arguments[0]),
+                0, selector, context.value(step.arguments[2 if mapping else 1]), None, None)
 
         if language:
             attribute = ins.action in _ATTRIBUTES

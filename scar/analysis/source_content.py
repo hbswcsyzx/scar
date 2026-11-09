@@ -41,7 +41,7 @@ class SourceContentProvider:
                 self.address_accesses[address.id].append(ordinal)
                 location=Point(self.namespace,address.id)
                 selected=DependencyCondition('scar.source-content.request','SELECTED_PROTOCOL_ADDRESS_INSTANCE',
-                    operation,ordinal,(use,location))
+                    operation,None,(use,location))
                 self._edge(use,location,K.ENVIRONMENT,Meaning.STATE_INTERFACE,(selected,))
                 if type(address.selector) is C.ItemSelector:
                     keys=(address.selector.key,)
@@ -53,7 +53,7 @@ class SourceContentProvider:
                         self._edge(self.view.source_port(key_port),location,K.PROJECTION,Meaning.DEPENDENCE,(selected,))
                 self._edge(Point(self.namespace,previous.id),operation,K.STATE_INPUT,Meaning.STATE_INTERFACE,(selected,))
                 completed=DependencyCondition('scar.source-content.request','ORIGINAL_NORMAL_COMPLETION_SELECTED',
-                    self.view.source_port(after),ordinal,(operation,Point(self.namespace,following.id)))
+                    self.view.source_port(after),after.port.ordinal,(operation,Point(self.namespace,following.id)))
                 self._edge(operation,Point(self.namespace,following.id),K.STATE_OUTPUT,Meaning.STATE_INTERFACE,(selected,completed))
         if register:self.view.register(self)
 
@@ -61,7 +61,7 @@ class SourceContentProvider:
         identity=LocationID(_digest(('scar.source-content-address.v1',self.source.basis,receiver,selector)))
         if identity not in self.addresses:
             parameters=(C.ContentInstanceParameter.ACTIVATION,C.ContentInstanceParameter.OWNER_REFERENCE_OCCURRENCE)
-            if type(selector) is not C.FieldSelector:
+            if type(selector) in (C.ItemSelector,C.SliceBoundsSelector):
                 parameters+= (C.ContentInstanceParameter.SELECTOR_REFERENCE_OCCURRENCES,)
             self.addresses[identity]=C.ContentAddressTemplate(identity,receiver,selector,parameters)
         return self.addresses[identity]

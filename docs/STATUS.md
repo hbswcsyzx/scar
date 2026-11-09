@@ -9,7 +9,7 @@ NORMAL_SUCCESS / CPython 3.14.7；交付后端约定 C++20、算子 ABI v1、计
 | 层 | 状态 |
 |---|---|
 | ①统一IR接口 | 接口合同与3个普通/compiled完整单元验收通过；复用core引擎，70,373端点/75,037关系以单元头＋类型ID存储；完整推理链覆盖仍在后续层 |
-| ②局部结构与状态 | 绑定与属性/索引请求、前后符号状态已共图；3单元内容接口已验，gcrl63条自动局部链保持；聚合更新/native效果仍待补 |
+| ②局部结构与状态 | 绑定、属性/索引和聚合容器请求及前后符号状态已共图；3单元接口已验，gcrl63条自动局部链保持；native/其余隐式状态仍待补 |
 | ③跨层依赖 | 既有参数/返回/成员/算子部分关系待统一接入；暂停前函数接口批次未发布，不计完成 |
 | ④资源与执行证据 | 已有硬件及类型投影；运行I/O和动态记录向统一图接线待完成 |
 | ⑤完整推理链验收 | 尚未通过；文件数、节点数和单个源码单元通过均不替代此项 |
@@ -20,9 +20,9 @@ NORMAL_SUCCESS / CPython 3.14.7；交付后端约定 C++20、算子 ABI v1、计
 
 **最新增量已验：** 同一current材料又补齐7处类隐式名字/frame builtins地址，现为222访问、122地址模板、14,661条关系，该单元已识别的地址规则缺口由7降为0；不代表效果已闭合。新增lookup保hit/miss顺序，prepared mapping与frame环境的原实参以条件边接到地址。构建与针对性检查30.04秒；tracks/versions/selections三表与上次已完整重推结果逐字节一致，沿用其证明，未重复93秒全解码。当前表4,419,322压缩bytes；旧表已由当前发布替换，证明链保在verification中。
 
-**对象内容接口已验：** `program-content-state-current/verification.json`覆盖普通与compiled共3单元：337个属性/索引协议请求、674个前后world状态投影、2,398条内容关系，全部接原操作、receiver Use与key/bounds端口；同一`ProgramView`可跨绑定与内容查询。新增四表共397,982压缩bytes；3 workers合34.50秒，新增表分别0.53–1.02秒重推，原8张绑定表逐字节不变并继承已验结果，未重做全量解码。gcrl当前发布仍在`program-local-state-current`。统一状态schema现为`scar.source-state-view/1`，同一命令包含绑定与内容分表。实测实例为GET/SET；DELETE及六种相关原生Python协议有明确ABI规则，但本批未宣称覆盖其所有实例。投影是`project(world,address)`符号值，不是Tensor快照或已知LogicalVersion；GET也保后态，不假定getter纯。
+**对象内容接口已验：** `program-content-state-current/verification.json`覆盖普通与compiled共3单元：351个属性/索引/聚合协议请求、702个前后world状态投影、2,498条内容关系，全部接原操作、receiver Use与key/bounds端口；同一`ProgramView`可跨绑定与内容查询。新增四表共415,833压缩bytes；3 workers合34.30秒，新增表分别0.55–1.33秒重推，原8张绑定表逐字节不变并继承已验结果，未重做全量解码。gcrl当前发布仍在`program-local-state-current`。统一状态schema为`scar.source-state-view/1`。实测实例为GET/SET/UPDATE；DELETE和slice等原ABI有规则，未宣称本批实例覆盖。append/extend/dict merge/comprehension保原协议，DICT_MERGE的callee不是owner，comprehension按原ChoiceBinding分派。投影是`project(world,address)`符号值，不是Tensor快照或已知LogicalVersion；GET也保后态，不假定getter纯。
 
-**②的剩余工作：** 自动局部选择、隐式类地址与属性/索引请求已接通当前单元；其余隐式namespace、容器聚合更新、Tensor/native读写alias以及descriptor/内容效果契约仍需补，尚未覆盖入口相关全部单元。缺投影规则用`missing_rules`列出，与待选帧、回调/协议及内容状态分开；绑定未变及不同投影ID均不能证明内容相同或已改变。先补这些状态接口，再推进③跨层参数/返回/捕获、④资源/运行事实，最后⑤整条推理链验收。全图与第一阶段均未完成。
+**②的剩余工作：** 其余隐式namespace、Tensor/native状态与alias声明、完整descriptor/内容效果接口及入口相关单元覆盖。下一项复用已有196个canonical ATen单元：以原NativeType及schema/边界限定的alias声明建立局部状态关系；`may_write`不是已发生写入，空after和无alias都不是纯性证明，不跨schema合并标签。之后再推进③跨层参数/返回/捕获、④资源/运行事实，最后⑤整条推理链验收。缺规则与待选实例分开；绑定未变及不同投影ID不证明内容同异。全图与第一阶段均未完成。
 
 ## 分层进度
 

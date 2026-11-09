@@ -11,6 +11,7 @@ from .ids import LocationID, OperationID, UseID, ValueID
 from .normal_targets import GlobalPort
 from .normal_links import CodeScopeRef
 from .source_address_paths import FieldSelector, ItemSelector
+from .state_addresses import WholeOwner
 
 
 @dataclass(frozen=True, slots=True)
@@ -20,13 +21,14 @@ class SliceBoundsSelector:
     upper: GlobalPort
 
 
-ContentSelector = FieldSelector | ItemSelector | SliceBoundsSelector
+ContentSelector = FieldSelector | ItemSelector | SliceBoundsSelector | WholeOwner
 
 
 class ContentRequestKind(str, Enum):
     GET = 'GET'
     SET = 'SET'
     DELETE = 'DELETE'
+    UPDATE = 'UPDATE'
 
 
 class ContentInstanceParameter(str, Enum):
@@ -59,6 +61,11 @@ class ContentStateProjection:
 
 @dataclass(frozen=True, slots=True)
 class ContentAccessTemplate:
+    """SET payload is the assigned reference; UPDATE payload is an input.
+
+    An UPDATE input is never asserted equal to the resulting whole contents.
+    Original instructions retain the append/extend/merge protocol distinction.
+    """
     operation: OperationID
     site: GlobalPort
     scope: CodeScopeRef
