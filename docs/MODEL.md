@@ -97,6 +97,8 @@ call-result是独立不透明根，不因参数来源相似就把返回对象或
 局部读写以完整(CodeScopeRef, LEXICAL Namespace)位置节点连接，避免writer×reader展开；跨作用域捕获和非词法内容另保边界。
 DATA包含bool、协议值等，不只对象引用。轻量查询只传播DATA与操作的数据输入/输出，不以world序列污染全部后继值；
 原world、调用配对标签、分支及循环回边仍在图中。该flow-insensitive may查询不证明平衡执行路径、当前状态版本或实际影响。
+派生调用输入可另接原CallLink的actual→formal、world与返回接口；根形参→派生actual的may依赖仍在父值流图，不能拼成根形参alias。
+历史may-target与当前caller上下文匹配分开；接到compiled函数的声明接口也不等于已展开或运行该正文。
 
 [逻辑值 IR](../scar/ir/v2/values.py) 已定义 LogicalValue、ValueVersion、ProvenanceRecord、
 Materialization 和等价声明，用于分开逻辑来源、推导关系、版本及物理表示。
