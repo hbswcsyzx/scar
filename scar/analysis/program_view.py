@@ -568,9 +568,17 @@ def read_program_view(path, *, unit):
     from scar.analysis.source_value_flow import _artifact
     path=Path(path).absolute();raw=(path/'result.json').read_bytes();report=json.loads(raw)
     current_pins=_pins()
+    # Schema 2's compact storage forbids contexts (program_view_storage._local).
+    # The known previous dependency declaration predates Frame.selection only;
+    # no Frame is present in these tables. Admit that exact producer receipt,
+    # then still rederive every node/edge with current rules below. Contextual
+    # query records have no such migration and retain exact wire validation.
+    frameless_v2_dependency_pin='fec8584d711dbecd8ecb6bc9dd80eb85d7a1f16f03d6c5959f4d7581e3dd73e6'
     if ((report['schema'],report['schema_version'])!=('scar.unified-program-view',2)
             or set(report['pins'])!=set(current_pins)
-            or any(report['pins'][k]!=current_pins[k] for k in current_pins if k!='producer')
+            or any(report['pins'][k]!=current_pins[k] and not
+                (k=='core_types' and report['pins'][k]==frameless_v2_dependency_pin)
+                for k in current_pins if k!='producer')
             or len(report['pins']['producer'])!=64 or any(c not in '0123456789abcdef' for c in report['pins']['producer'])
             or report['contract']!=mapping_contract()
             or report['acceptance']!='PINNED_DATA_CONTRACT_AND_CURRENT_SOURCE_REDERIVATION'):

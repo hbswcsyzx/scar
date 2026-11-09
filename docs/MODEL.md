@@ -36,6 +36,8 @@ Native单元沿原codec namespace、entry/exit Value/Use和world投影。Tensor�
 
 入口：`python -B -m scar.cli native-state-view --source BINDING_NATIVE_MATERIALS --out FRESH_VIEW`，`--read VIEW`独立重推所有native分片。`NativeStateSession(materials, view=existing_view)`复用同一查询和原core loader；基础core记录优先于扩展metadata，扩展状态不伪造canonical正文。新状态指向原图与声明，不复制原native图，也不声称已选择Python/native调用或dispatch。
 
+`SourceNativeCallProvider`把原Python actual/pack/default接口接到同一native entry，将各normal output的原Use接回Python包装结果；world前后仅为状态依赖，不是版本相等。无actual的默认表达式仍保原声明，不造常量或引用alias。`CALL_TARGET`使用共享native Region；Frame的`selection`保原NamedBindingMatch FactRef，防止同call、同算子的不同来源路径混接，返回必须准确pop。所有转换/包装边均为MAY，parser、override、dispatch及未解receiver/conversion显式保留前沿。`scar native-call-view --source BINDING_NATIVE_MATERIALS [--unit UNIT]`打开视图，源码分片按需加载；`interface(unit,ordinal)`返回原输入、包装声明及frame，不复制native正文。旧schema2局部存储禁止context，故只对已知旧dependency版本允许逐行重推读回；含Frame的旧query wire不隐式兼容。
+
 `SourceEffectRequest`保原操作和69种指令的闭合分类，动作标签可重叠，只表示待解释能力；不授pure、真实搬运、分配或RNG结论。已知绑定接口与尚缺的地址规则分开，`missing_rules`不伪装为运行时UNKNOWN。CLI为`python -B -m scar.cli program-state-view --catalog CONTEXT_CATALOG --unit UNIT --out FRESH_VIEW`，默认根据READ、原C2槽域/owner和原函数body作用域选择所有可跟踪局部槽，随后发布内容接口；捕获不冒充当前帧的局部槽。`--slot C2_LOCAL_SLOT`可缩小查询，`--interfaces-only`不求绑定固定点。schema `scar.source-state-view/1`中绑定与内容分表，均引用同一单元namespace与既有ID。`--read VIEW`独立重推全部已存记录及覆盖数，拒绝虚假的完成/内容证明标志；类型/求解器合同精确核版本，投影适配器SHA保来源，其变化必须通过全部表和计数的当前规则重推。缺少新环境合同的旧单元还须确认没有该投影；有则重新发布。跟踪的操作/控制边索引引用原正文投影，不复制指令。
 
 | 实体 | 含义 | 对应程序部分 |

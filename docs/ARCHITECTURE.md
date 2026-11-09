@@ -21,6 +21,7 @@ LeWM 是外部 testcase；通用规则由语言协议、原端口和证据派发
 ②已完成884单元完整接口盘点并补齐正常路径的2处callback环境tuple投影；C2绑定、内容、namespace/注解及196个native单元共用查询，gcrl63条局部链保持。四类异常状态缺项按既定范围暂缓，效果/实例选择仍开放；正常接口门通过不代表全图通过。目录盘点只存小报告、缺规则与收据，原正文共享，修正按指令类型选择受影响单元，不重复全域工作。
 ③的基础源函数桥已实现：581单元条件接口由SourceFunctionCallProvider接到统一懒查询，按需求单元加载，实际执行caller frame的push/匹配pop；frame包含原call、callee Use/value和目标body Region。默认值创建及deferred/resume、捕获/构造/native转换仍有边界。条件字符串本身不执行上下文匹配；原callee/descriptor/namespace未决字段继续保留，不授实际dispatch。内容投影及native声明不授物理槽、LogicalVersion或效果闭合。
 创建接口再由884单元原F.Function与F4 factory提取，保实际creator scope、初始operand和表达式源的区别。当前default通过callable＋pre-call world选择逻辑slot，不把初始表达式搬到caller；捕获env通过原relay选择已有canonical binding地址，不读cell内容。CALL_TARGET是带frame的BODY入口；统一expand不再同时暴露core的裸callee。同unit调用还核caller code_scope，创建/实例/内容的未决不能合并。
+native桥复用已有参数转换、返回包装及196个canonical接口。源函数/native调用共用原callsite与caller scope解析；Frame另保原NamedMatch选择，进入与返回双向匹配。转换、pack聚合、默认表达式、包装和world依赖不授对象/storage身份；接口存在不授parser接受、override或runtime dispatch。源码转换分片懒加载，不再复制一份native图。
 CFG边是CONTROL_FLOW，区别于控制依赖CONTROL；完整CallSite/path及completion保原映射。普通walk不证明调用/返回已匹配或节点实际执行。
 每层通过后提交一次；只维护本架构、MODEL与STATUS，不新增逐门文档。后续形式细节是已有材料协议，本轮入口以此表为准。
 

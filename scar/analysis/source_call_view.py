@@ -28,6 +28,38 @@ from scar.ir.program.ids import OperationID,ValueID,UseID,ControlPortID
 from scar.ir.program.source_references import SourceArtifactLocator
 
 
+def source_call_site(view,link):
+    """Resolve the original F4 call operation and its callee Use/value.
+
+    Only link.result and link.callee are required, so source-function and
+    generated-native interfaces share the same exact original ABI check.
+    """
+    caller=view.unit(link.result.unit)
+    caller._expand((link.result.port.template,))
+    operation=caller._node(link.result.port.template,link.result.port.owner)
+    step=view.original(operation);context=NamespacePlanView(caller.unit,caller.plans[link.result.port.template])
+    if (context.result(step)!=link.result or not step.arguments
+            or context.value(step.arguments[0])!=link.callee):
+        raise ValueError('source call frame differs from original callee/result ABI')
+    use=caller.port(context.emitter.port(step.id,G.PortKind.ARGUMENT,0))
+    value=view.source_port(link.callee)
+    return operation,use,value
+
+
+def source_caller_scope(view,frame,context):
+    """Resolve the caller source scope without unioning same-unit functions."""
+    frames=context_frames(context);source=view.namespaces[frame.caller]
+    if not frames:
+        return source.facts.root_scope.owner if context_is_closed(context) else None
+    entry=frames[-1].entry or frames[-1].target.root
+    node=source.nodes.get(entry)
+    if node is None:raise ValueError('caller context entry is not attached to its original source unit')
+    plan=source.plans[node.anchor.template]
+    ports=[p for p in plan.compilation_flow.ports if p.region==node.anchor.original]
+    if len(ports)!=1:raise ValueError('caller context entry lacks its original code-scope port')
+    return F.CodeScopeRef(source.unit,ports[0].code_scope)
+
+
 class Flow(str,Enum):
     ENTER='ENTER'
     RETURN='RETURN'
@@ -98,29 +130,11 @@ class SourceFunctionCallProvider:
         return original in self.boundary_ports[point.namespace]
 
     def _call(self,link):
-        caller=self.view.unit(link.result.unit)
-        caller._expand((link.result.port.template,))
-        operation=caller._node(link.result.port.template,link.result.port.owner)
-        step=self.view.original(operation);context=NamespacePlanView(caller.unit,caller.plans[link.result.port.template])
-        if (context.result(step)!=link.result or not step.arguments
-                or context.value(step.arguments[0])!=link.callee):
-            raise ValueError('source call frame differs from original callee/result ABI')
-        use=caller.port(context.emitter.port(step.id,G.PortKind.ARGUMENT,0))
-        value=self.view.source_port(link.callee)
-        return operation,use,value
+        return source_call_site(self.view,link)
 
     def _caller_scope(self,frame,context):
         """Namespace equality alone cannot select a function within one unit."""
-        frames=context_frames(context);source=self.view.namespaces[frame.caller]
-        if not frames:
-            return source.facts.root_scope.owner if context_is_closed(context) else None
-        entry=frames[-1].entry or frames[-1].target.root
-        node=source.nodes.get(entry)
-        if node is None:raise ValueError('caller context entry is not attached to its original source unit')
-        plan=source.plans[node.anchor.template]
-        ports=[p for p in plan.compilation_flow.ports if p.region==node.anchor.original]
-        if len(ports)!=1:raise ValueError('caller context entry lacks its original code-scope port')
-        return F.CodeScopeRef(source.unit,ports[0].code_scope)
+        return source_caller_scope(self.view,frame,context)
 
     def _relation(self,source,target,frame,flow,kind,meaning,key,route,guards):
         relation=CallRelation(source,target,frame,flow,kind,meaning,key,route,guards)

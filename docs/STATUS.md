@@ -9,7 +9,7 @@
 |---|---|---|
 | ①统一IR/查询 | source与native共用ProgramView；原ID、可展开区域、循环和来源均保留 | 完整程序覆盖由后续层验收 |
 | ②局部结构与状态 | 884单元接口盘点完成，正常环境投影缺口已补；保绑定、内容和native状态 | 异常状态暂缓，效果及实例选择不冒充已证明 |
-| ③跨层连接 | 函数创建/初始操作数、当前default槽与捕获cell已接统一查询；CALL_TARGET支持带frame展开 | creator实例/内容版本、绑定方法/构造及native转换仍待接 |
+| ③跨层连接 | 函数创建/default/cell和Python→native转换已接统一查询；CALL_TARGET带frame展开 | creator实例/内容版本、绑定方法/构造、实际选择及依赖闭包仍待接 |
 | ④资源与运行证据 | 已有硬件快照、类型及候选资源路由 | 接运行I/O及必要的实际选择 |
 | ⑤完整推理链验收 | 未通过 | 入口→配置→加载→planner/模型→输出的跨层覆盖 |
 
@@ -32,6 +32,8 @@
 
 **统一接线已验：** 当前default为逻辑slot在原pre-call world上的状态投影，不能直连初始表达式充当当前值；INITIAL_DEFAULT/CONDITIONAL_DEFAULT与函数体展开、caller code_scope拒绝三项验收共35.74秒。创建角色边只接原owned Use→factory操作，7创建/2default/2cell两单元验收6.50秒；不激活正文。闭包env→2个canonical cell地址→3条原cell读边验收10.16秒；地址精确复用第二层，不新增另一套cell身份。creator/outer-cell实例、mutation history及内容版本仍为明确未决字段。所有耗时均为分析器，不是LeWM加速比。
 
+**③native桥新增已验：** 真实CEM与一个pack来源单元的21个条件接口、183条关系，225次查询双向接通；同一视图另有8个源函数接口。包含19 positional、20 keyword、41 default表达式、2 pack及3 open转换请求，保intlist聚合。原NamedMatch限定frame，错误match/无frame不混接；所有转换/包装均MAY依赖，无对象/storage alias或真实搬运断言。验收92.96秒、峰值约514 MiB；183条证据边压缩375,907 bytes，仅为本次选定关系。旧gcrl的20,222节点/21,511边按窄版本兼容完整重推通过，27.26秒、约377 MiB；原材料和通用codec未改。未运行目标，不代表③或完整推理链通过。
+
 ## 当前可用材料
 
 均在 `artifacts/current/queries/`，本地生成材料不推送Git。
@@ -53,10 +55,11 @@
 | program-call-defaults-current/verification.json | framed BODY展开、caller code_scope及当前default状态验收 |
 | program-creation-role-view-current/verification.json | 初始factory输入角色接原Use/操作，含closure handle |
 | program-captured-cell-view-current/verification.json | 当前callee环境→原canonical cell地址→已有READ接通 |
+| program-source-native-view-current | CEM/pack转换、world及包装的双向查询；frameless_read为旧图完整重推 |
 
 ## 接下来按顺序推进
 
-1. **③调用连接：** 当前创建/默认槽/捕获接口已通；下一步选择creator/global/builtins实例及相应版本，接绑定方法/构造协议、native转换、deferred/resume，并补compiled入口、配置/导入及依赖闭包。581父声明域不是884目录或完整推理链，不重跑全局FIFO前缀。
+1. **③调用连接：** 当前创建/default/cell与条件native转换已通；下一步接绑定方法/构造协议，选择creator/global/builtins实例及相应版本、deferred/resume，并补compiled入口、配置/导入及依赖闭包。581父声明域不是884目录或完整推理链，不重跑全局FIFO前缀。未选择的native parser/override/dispatch继续显式开放。
 2. **④资源连接：** 在已接软件依赖上补I/O及必要运行选择。类型候选、源码文件位置、实际资源使用分别保存；不采集Tensor数值，不展开OS内部。
 3. **⑤整体验收：** 按run_inference.py与保留配置核对跨层边、共享循环、外部边界及明确缺项。通过后才进入化简及代码生成。
 

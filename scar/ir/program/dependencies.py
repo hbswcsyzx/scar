@@ -14,6 +14,7 @@ from scar.ir.program.ids import (BlockID, ControlPortID, EnvironmentInterfaceID,
     ResourceDefinitionID, ResourceRequirementID, UseID, ValueID)
 from scar.ir.program.source_call_bindings import SourceBodyNamespace
 from scar.ir.program.source_references import SourceArtifactLocator
+from scar.ir.program.providers import ProviderFactReference
 from scar.ir.v2.ids import OperationDefinitionID
 
 
@@ -76,6 +77,9 @@ class DependencyFrame:
     target: GraphNamespace
     definition: OperationDefinitionID | None = None
     entry: RegionID | None = None
+    # Original alternative evidence, such as a NamedBindingMatch. None leaves
+    # this path selection unspecified; it never stands for a runtime call ID.
+    selection: ProviderFactReference | None = None
 
     def __post_init__(self):
         if (type(self.caller) is not GraphNamespace or type(self.target) is not GraphNamespace
@@ -91,6 +95,10 @@ class DependencyFrame:
             raise ValueError("direct region calls need their original target entry")
         if self.definition is not None and type(self.definition) is not OperationDefinitionID:
             raise TypeError("selected source definition must be OperationDefinitionID")
+        if self.selection is not None:
+            if type(self.selection) is not ProviderFactReference:
+                raise TypeError("context frame selection must be ProviderFactReference")
+            self.selection.__post_init__()
         if (self.entry in (None, self.target.root) and self.target.source_body is not None
                 and self.definition != self.target.source_body.definition):
             raise ValueError("context frame differs from its selected source definition")
