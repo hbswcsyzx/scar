@@ -89,6 +89,8 @@ alias、完整LEXICAL binding、实参、初始default、data return及构造结
 call-result是独立不透明根，不因参数来源相似就把返回对象或deepcopy输出当成原输入。
 跨函数返回图分别保存world return、data return及引用路径依据。先沿已选择的声明上下文连接，再保留历史may-call的独立调用点；
 引用路径未接通时只停止该引用的传递，world仍可返回。world返回不证明内容保留。图节点共享原body，不为循环迭代复制。
+调用消费者另记原callee/位置/关键字/参数包端口、来源路径和形参route。字段投影是对根对象的数据依赖，不能变成根对象alias。
+形参接线保原world输入/输出与函数创建种类；生成器创建不进入正文，未解析target、pack或构造协议不等于没有消费者。
 
 [逻辑值 IR](../scar/ir/v2/values.py) 已定义 LogicalValue、ValueVersion、ProvenanceRecord、
 Materialization 和等价声明，用于分开逻辑来源、推导关系、版本及物理表示。
