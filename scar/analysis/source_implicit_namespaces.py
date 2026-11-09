@@ -17,7 +17,7 @@ class ImplicitNamespaceAccess:
     key: str
     descriptors: tuple[B.EnvironmentInterface, ...]
     owner_handles: tuple[T.GlobalPort | None, ...]
-    payload: T.GlobalPort
+    payload: T.GlobalPort | None
     missing_outcome: str | None
 
 

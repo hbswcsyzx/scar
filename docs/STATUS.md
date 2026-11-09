@@ -9,7 +9,7 @@ NORMAL_SUCCESS / CPython 3.14.7；交付后端约定 C++20、算子 ABI v1、计
 | 层 | 状态 |
 |---|---|
 | ①统一IR接口 | 接口合同与3个普通/compiled完整单元验收通过；复用core引擎，70,373端点/75,037关系以单元头＋类型ID存储；完整推理链覆盖仍在后续层 |
-| ②局部结构与状态 | 绑定、内容与196个native局部状态单元已接统一查询；gcrl63条自动局部链保持；其余隐式状态与全域覆盖仍待补 |
+| ②局部结构与状态 | 绑定、内容、namespace/注解与196个native单元已接统一查询；gcrl63条自动局部链保持；其余状态与入口相关单元覆盖仍待补 |
 | ③跨层依赖 | 既有参数/返回/成员/算子部分关系待统一接入；暂停前函数接口批次未发布，不计完成 |
 | ④资源与执行证据 | 已有硬件及类型投影；运行I/O和动态记录向统一图接线待完成 |
 | ⑤完整推理链验收 | 尚未通过；文件数、节点数和单个源码单元通过均不替代此项 |
@@ -24,7 +24,9 @@ NORMAL_SUCCESS / CPython 3.14.7；交付后端约定 C++20、算子 ABI v1、计
 
 **Native局部状态已验：** `program-native-state-current/verification.json`覆盖全部196个已存canonical接口：507地址（496 Tensor＋11 Generator）、1,099 world投影、90组scoped alias声明和3,804条关系；170个声明可能写、12个列表叶族均不等于运行事实。原图复制0 bytes，新增表747,278压缩bytes；构建6.53秒、严格读回5.64秒，验证进程峰值约467 MiB。独立认证原native batches与源码收据，不重跑parser或源caller链。输入保before/normal/raised world，输出仅保原normal结果；alias按declaration/boundary/原annotation字段限定并按需展开MAY关系，不存dense pairs，不把空after或无annotation当纯性。一个`ProgramView`已同时查询源状态与native状态，原core记录优先保留；source调用绑定尚未证明。
 
-**②的剩余工作：** 其余隐式namespace/关联状态、完整descriptor/内容效果接口及入口相关单元覆盖。native材料现在具备本地模型，③才能据原参数/返回接口接source与native；当前没有提前宣称该接线完成。之后为④资源/运行事实和⑤整条推理链验收。缺规则与待选实例分开；绑定未变及不同投影ID不证明内容同异。全图与第一阶段均未完成。
+**Namespace/注解接口已验：** `program-namespace-state-current/verification.json`对SPT和rich两个真实依赖单元（3,844操作）发布并完整重推；覆盖ReadAnnotationNamespace 3、ReadAnnotationRegistration 3、ApplyNamespaceAction 6、AddAnnotationIndex 1。2 workers合47.64秒；单元构建9.23/22.24秒、读回8.78/22.26秒，表合562,647压缩bytes。LOCALS_CHAIN、GLOBALS_CHAIN和class-cell规则保持不同；registration bool不当registry引用，不造中间GP。STORE_NAME/GLOBAL、条件ensure和registry更新均连原内容world；缺地址标记仅在接口实际建立后清除，效果仍不闭合。类型参数关联有原ABI规则，本批没有宣称其实例覆盖。
+
+**②的剩余工作：** 其它隐式状态、完整descriptor/内容效果接口及入口相关单元覆盖。当前两新单元剩余缺地址标记仅为异常状态操作，不能据此宣称其它单元或全程序已无缺口。下一步机械盘点相关单元的类型/接口覆盖，补正常profile中的缺规则，再据原参数/返回接口进入③；之后为④资源/运行事实和⑤推理链验收。缺规则与待选实例分开；绑定未变及不同投影ID不证明内容同异。全图与第一阶段均未完成。
 
 ## 分层进度
 

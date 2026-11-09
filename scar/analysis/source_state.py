@@ -40,6 +40,10 @@ class SourceStateProvider:
         self.flows = {}; self.anchors = None
         self.read_frontiers = defaultdict(list)
         self.content_provider = None
+        self.root_scopes = {step.instruction.interface.scope for plan in self.source.plans.values()
+            for step in plan.steps if type(step.instruction) is P.EnterRootBody}
+        self.class_scopes = {step.instruction.interface.scope for plan in self.source.plans.values()
+            for step in plan.steps if type(step.instruction) is P.EnterClassBody}
         for key, plan in self.source.plans.items():
             context = NamespacePlanView(unit, plan)
             for step in plan.steps:
@@ -56,6 +60,10 @@ class SourceStateProvider:
         if self.content_provider is None:
             from scar.analysis.source_content import SourceContentProvider
             self.content_provider = SourceContentProvider(self)
+            for operation in self.content_provider.operation_accesses:
+                request=self.requests[operation]
+                self.requests[operation]=replace(request,missing_rules=tuple(rule for rule in request.missing_rules
+                    if rule!='STATE_ADDRESS_PROJECTION_NOT_IMPLEMENTED'))
         return self.content_provider
 
     def _name(self, name):
@@ -127,7 +135,11 @@ class SourceStateProvider:
             payload = context.result(step) if kind is S.BindingAccessKind.HANDLE else context.value(step.arguments[1])
         else:
             from scar.analysis.source_implicit_namespaces import identify_implicit_namespace
-            implicit = identify_implicit_namespace(self.bindings, self.declarations, context, step)
+            from scar.analysis.source_annotation_namespaces import identify_annotation_namespace
+            implicit = identify_annotation_namespace(self.bindings,self.declarations,
+                self.root_scopes,self.class_scopes,context,step)
+            if implicit is None:
+                implicit = identify_implicit_namespace(self.bindings, self.declarations, context, step)
             if implicit is not None:
                 kind = implicit.kind; payload = implicit.payload; missing = implicit.missing_outcome
                 owner_handles = implicit.owner_handles

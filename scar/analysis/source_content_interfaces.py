@@ -19,6 +19,7 @@ from scar.ir.program.control import LanguageCompletionKind as C
 from scar.ir.program.model import ValueKind, ValueType
 from scar.ir.program.signature_patterns import ChoiceBinding
 from scar.ir.program.structured import PythonProtocolKind as K
+from scar.ir.literals import PythonLiteral
 
 if TYPE_CHECKING:
     from scar.analysis.program_view import SourceUnitProvider
@@ -51,6 +52,7 @@ _UPDATE_PROTOCOLS = frozenset((K.DICT_UPDATE, K.EXTEND_DISPLAY, K.APPEND_DISPLAY
 _PROTOCOLS = frozenset((K.SOURCE_INDEX, K.STORE_SUBSCRIPT, K.MAP_ADD,
     K.BINARY_SLICE, K.STORE_SLICE, K.STORE_SLICE_SUBSCRIPT,
     K.COMPREHENSION_ADD)) | _UPDATE_PROTOCOLS
+_ASSOCIATIONS = (P.SetTypeParameterDefault,P.AttachTypeParameters,P.AddAnnotationIndex)
 
 
 def _shape(context, step, references, outputs):
@@ -86,11 +88,28 @@ class ContentInterfaceIndex:
         language = type(ins) is P.ApplyLanguageAction
         protocol = type(ins) is P.ApplyPythonProtocol
         if not (language and (ins.action in _ATTRIBUTES or ins.action in _ITEMS or ins.action in _UPDATES)
-                or protocol and ins.protocol in _PROTOCOLS):
+                or protocol and ins.protocol in _PROTOCOLS or type(ins) is P.ApplyNamespaceAction
+                or type(ins) in _ASSOCIATIONS):
             return None
         if (context.unit != self.source.unit or context.steps.get(step.id) != step
                 or self.source.plans.get(context.key) != context.plan):
             raise ValueError('content request context is outside its original source unit/plan')
+
+        if type(ins) is P.ApplyNamespaceAction:
+            ensure=ins.kind is P.NamespaceActionKind.ENSURE_ANNOTATIONS
+            if not ensure and ins.kind not in (P.NamespaceActionKind.STORE_NAME,P.NamespaceActionKind.STORE_GLOBAL):
+                raise ValueError('namespace request has no original action rule')
+            _shape(context,step,1 if ensure else 3,0)
+            key=(PythonLiteral.from_python('__annotations__',exact=True) if ensure else context.value(step.arguments[1]))
+            return IdentifiedContent('UPDATE' if ensure else 'SET',context.value(step.arguments[0]),0,
+                A.ItemSelector(key),None if ensure else context.value(step.arguments[2]),None,None)
+
+        if type(ins) in _ASSOCIATIONS:
+            # The default evaluator is retained, not executed. Association and
+            # registry inputs are not asserted equal to whole post-contents.
+            _shape(context,step,2,0)
+            return IdentifiedContent('UPDATE',context.value(step.arguments[0]),0,O.WholeOwner(),
+                context.value(step.arguments[1]),None,None)
 
         if language and ins.action in _UPDATES or protocol and ins.protocol in _UPDATE_PROTOCOLS:
             # DICT_MERGE keeps its leading callee as a separate original operand.

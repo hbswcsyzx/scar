@@ -18,6 +18,8 @@ SCAR 是宏观编译器：用有类型、可展开的图统一表示程序及硬
 
 隐式类名字沿原C2分类或ordinary规则投影：prepared mapping、frame globals、frame builtins和捕获cell分开，有序lookup不是所有位置都已读取。显式环境/mapping参数通过条件ENVIRONMENT边绑定地址owner；没有原C2接口索引时保None，不借用另一scope的索引。`ReadBuildClass`是当前frame builtins中的语言查找，不等于导入builtins模块或已选择默认builder。escaped-root等原路由优先复用，无法确定不能自行改成源码globals_scope。
 
+注解lookup按原`AnnotationStateAccess`分派，creator与deferred request scope分开：LOCALS_CHAIN不能借同名GLOBAL计划，class-cell保原implicit/binding/read_plan。`ReadAnnotationNamespace`可产生registry引用；`ReadAnnotationRegistration`产生bool，namespace read的payload为None，contains/index仍保原组合指令，不虚构registry GP。无显式owner时保实例参数，不拿world冒充dict/cell。namespace store使用原key/value端口；ensure只作条件UPDATE。默认求值器及type-parameter tuple关联也只是UPDATE输入，不执行其延迟正文。
+
 `state.content()`将属性/索引协议接入同一namespace：地址是`(receiver引用发生实例, Field/Item/SliceBounds)`表达式，不是已选物理槽。属性lookup名复用已封存private-name投影，并以完整world对/receiver/action/payload定位原fact；索引DELETE直接来自原操作，不能依赖缺少DELETE的旧items表。原owned receiver Use、动态key及bounds均连到地址，不重造slice对象。`ContentStateProjection=project(world,address)`是原world上的符号状态变量，前后ID不同不证明写入或LogicalVersion不同；GET可能调用有副作用的descriptor，仍保前/后态。payload与GET结果保原端口，不建立结果等于slot内容的alias。实例、协议与实际内容版本保持明确开放前沿。
 
 聚合更新用`WholeOwner`选择整个目标内容，不人为分配未知element key；UPDATE的payload是元素或源容器输入，不表示整个新内容等于它。DICT_MERGE保callee/目标/源三个原端口，comprehension用原ChoiceBinding区分LIST/SET/DICT。条件由原操作、owned Use、地址和真实completion端口限定，不用全局收集序号决定身份，便于独立并行构建。
