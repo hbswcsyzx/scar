@@ -18,6 +18,7 @@ LeWM 是外部 testcase；通用规则由语言协议、原端口和证据派发
 
 统一接口复用`ProgramDependencyGraph`：F4适配投影到既有类型ID，保原Step/Region/Port和完整G.Edge；旧N1图按原representation路由。`get/expand/producers/consumers/explain`使用同一接口，不伪造canonical正文。
 五类实体之外，Use和控制端口是辅助角色：`kind=None`表示“非独立实体”，不是未知节点。操作原始类型仍来自封存的F4 instruction，不能按label猜效果。
+②现已把C2绑定地址、真实读写站点和原控制固定点版本接入统一接口，69种指令的效果请求分类闭合；验收范围仍是3单元接口与2条局部状态链。下一步先自动选择全部可跟踪局部槽，补隐式地址和对象/容器/内容效果；③的旧函数接口草稿不能绕过②冒充全图接通。
 CFG边是CONTROL_FLOW，区别于控制依赖CONTROL；完整CallSite/path及completion保原映射。普通walk不证明调用/返回已匹配或节点实际执行。
 每层通过后提交一次；只维护本架构、MODEL与STATUS，不新增逐门文档。后续形式细节是已有材料协议，本轮入口以此表为准。
 

@@ -67,6 +67,7 @@ class SourceUnitProvider:
         self.graph = material.graph; self.facts = material.fact_store.load(self.unit)
         self.nodes = {}; self.anchors = {}; self.records = {}; self.incoming_edges = defaultdict(list)
         self.outgoing_edges = defaultdict(list); self.edge_sources = defaultdict(list); self.expanded = set()
+        self.metadata_providers = ()
         self.plans = {}; self.callers = defaultdict(set)
         self.basis = _digest((self.unit, self.graph.input, self.graph.profile))
         root = self.facts.root_scope
@@ -261,7 +262,13 @@ class SourceUnitProvider:
     def _neighbors(self, point, incoming):
         if point.namespace != self.namespace: return DependencyNeighborhood()
         self.check(point)
-        if point.node not in self.nodes: raise ValueError('source endpoint has no admitted identity projection')
+        if point.node not in self.nodes:
+            # Extension records use this same source namespace. Their owning
+            # metadata adapter, rather than a fabricated source port, admits
+            # them; unknown endpoints still fail.
+            if any(provider.describe(point) is not None for provider in self.metadata_providers):
+                return DependencyNeighborhood()
+            raise ValueError('source endpoint has no admitted identity projection')
         node = self.nodes[point.node]; key = node.anchor.template
         if key is not None: self._expand((key, *sorted(self.callers[key], key=lambda k: (k.occurrence,k.purpose.value))))
         edges = self.incoming_edges[point.node] if incoming else self.outgoing_edges[point.node]
@@ -295,6 +302,7 @@ class ProgramView:
     def __init__(self, catalog, *, core_loader=None):
         self.catalog = (catalog if catalog is None or isinstance(catalog, ContextTargetGraph) else ContextTargetGraph(catalog))
         self.core_loader = core_loader; self.units = {}; self.namespaces = {}; self.metadata_providers = []
+        self.state_providers = {}
         self.dependencies = ProgramDependencyGraph(self._core_index)
         self.dependencies.providers[:] = [_RepresentationProvider(p) for p in self.dependencies.providers]
 
@@ -308,9 +316,17 @@ class ProgramView:
         if self.catalog is None: raise ValueError('no source catalog is attached')
         if identity not in self.units:
             provider = SourceUnitProvider(source_graph_material(self.catalog, identity))
+            provider.metadata_providers = self.metadata_providers
             self.units[identity] = provider; self.namespaces[provider.namespace] = provider
             self.dependencies.register(provider)
         return self.units[identity]
+
+    def state(self, identity):
+        """Attach source effect requests and binding versions on demand."""
+        if identity not in self.state_providers:
+            from scar.analysis.source_state import SourceStateProvider
+            self.state_providers[identity] = SourceStateProvider(self, identity)
+        return self.state_providers[identity]
 
     def register(self, provider):
         """Attach another typed relation/record adapter to this same view."""
