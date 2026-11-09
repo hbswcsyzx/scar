@@ -18,7 +18,9 @@ SCAR 是宏观编译器：用有类型、可展开的图统一表示程序及硬
 
 隐式类名字沿原C2分类或ordinary规则投影：prepared mapping、frame globals、frame builtins和捕获cell分开，有序lookup不是所有位置都已读取。显式环境/mapping参数通过条件ENVIRONMENT边绑定地址owner；没有原C2接口索引时保None，不借用另一scope的索引。`ReadBuildClass`是当前frame builtins中的语言查找，不等于导入builtins模块或已选择默认builder。escaped-root等原路由优先复用，无法确定不能自行改成源码globals_scope。
 
-`SourceEffectRequest`保原操作和69种指令的闭合分类，动作标签可重叠，只表示待解释能力；不授pure、真实搬运、分配或RNG结论。已知绑定接口与尚缺的地址规则分开，`missing_rules`不伪装为运行时UNKNOWN。CLI为`python -B -m scar.cli program-state-view --catalog CONTEXT_CATALOG --unit UNIT --out FRESH_VIEW`，默认根据READ、原C2槽域/owner和原函数body作用域选择所有可跟踪局部槽；捕获不冒充当前帧的局部槽。`--slot C2_LOCAL_SLOT`可缩小查询，`--interfaces-only`仅发布接口。`--read VIEW`独立重推全部已存记录及覆盖数，拒绝虚假的完成/内容证明标志；state/type/solver合同精确核版本，facade producer SHA保来源，其变化仍须逐表当前重推。位置、访问、版本、选择、跟踪与边分表存储；单元头共享namespace/材料，跟踪的操作/控制边索引引用原正文投影，不复制指令。
+`state.content()`将属性/索引协议接入同一namespace：地址是`(receiver引用发生实例, Field/Item/SliceBounds)`表达式，不是已选物理槽。属性lookup名复用已封存private-name投影，并以完整world对/receiver/action/payload定位原fact；索引DELETE直接来自原操作，不能依赖缺少DELETE的旧items表。原owned receiver Use、动态key及bounds均连到地址，不重造slice对象。`ContentStateProjection=project(world,address)`是原world上的符号状态变量，前后ID不同不证明写入或LogicalVersion不同；GET可能调用有副作用的descriptor，仍保前/后态。payload与GET结果保原端口，不建立结果等于slot内容的alias。实例、协议与实际内容版本保持明确开放前沿。
+
+`SourceEffectRequest`保原操作和69种指令的闭合分类，动作标签可重叠，只表示待解释能力；不授pure、真实搬运、分配或RNG结论。已知绑定接口与尚缺的地址规则分开，`missing_rules`不伪装为运行时UNKNOWN。CLI为`python -B -m scar.cli program-state-view --catalog CONTEXT_CATALOG --unit UNIT --out FRESH_VIEW`，默认根据READ、原C2槽域/owner和原函数body作用域选择所有可跟踪局部槽，随后发布内容接口；捕获不冒充当前帧的局部槽。`--slot C2_LOCAL_SLOT`可缩小查询，`--interfaces-only`不求绑定固定点。schema `scar.source-state-view/1`中绑定与内容分表，均引用同一单元namespace与既有ID。`--read VIEW`独立重推全部已存记录及覆盖数，拒绝虚假的完成/内容证明标志；state/type/solver合同精确核版本，facade producer SHA保来源，其变化仍须逐表当前重推。跟踪的操作/控制边索引引用原正文投影，不复制指令。
 
 | 实体 | 含义 | 对应程序部分 |
 |---|---|---|

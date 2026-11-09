@@ -39,6 +39,7 @@ class SourceStateProvider:
         self.tracks = []; self.track_ids = {}; self.selections = []; self.track_limits = []
         self.flows = {}; self.anchors = None
         self.read_frontiers = defaultdict(list)
+        self.content_provider = None
         for key, plan in self.source.plans.items():
             context = NamespacePlanView(unit, plan)
             for step in plan.steps:
@@ -49,6 +50,13 @@ class SourceStateProvider:
                 self.requests[operation] = S.SourceEffectRequest(operation, rule, accesses, missing,
                     ('CALLBACK_OBJECT_CONTENT_ALIAS_RNG_EXTERNAL_AND_ORDERING_EFFECTS_NOT_CLOSED',))
         view.register(self)
+
+    def content(self):
+        """Attach object/index requests to the same source namespace."""
+        if self.content_provider is None:
+            from scar.analysis.source_content import SourceContentProvider
+            self.content_provider = SourceContentProvider(self)
+        return self.content_provider
 
     def _name(self, name):
         return self.declarations.names[name.index].value if name.kind == 'SOURCE' else name.symbol

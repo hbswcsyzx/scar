@@ -14,7 +14,7 @@ from scar.analysis.source_stage import _durable_bytes, _durable_mkdir
 from scar.analysis.source_symbol_variants import _table
 from scar.analysis.source_template_links import _json
 from scar.analysis.source_value_flow import _artifact
-from scar.ir.program import source_state as S, source_productions as P
+from scar.ir.program import source_state as S, source_productions as P, source_content as C
 from scar.ir.program import view as V
 from scar.ir.record_codec import encode, decode
 
@@ -23,12 +23,14 @@ def _pins():
     from scar.analysis import source_state, source_effects, source_name_definitions
     from scar.analysis import source_name_access_anchors, source_value_flow, program_view
     from scar.analysis import source_implicit_namespaces
+    from scar.analysis import source_content, source_content_interfaces
     from scar.ir.program import source_effects as effects_types
     return {name:sha256(Path(module.__file__).read_bytes()).hexdigest() for name,module in (
         ('producer', __import__(__name__, fromlist=['__file__'])), ('state', source_state),
         ('state_types', S), ('effect_catalog', source_effects), ('effect_types', effects_types),
         ('definitions', source_name_definitions), ('anchors', source_name_access_anchors),
         ('implicit_addresses', source_implicit_namespaces),
+        ('content', source_content), ('content_types', C), ('content_interfaces', source_content_interfaces),
         ('body_projection', source_value_flow), ('unified_adapter', program_view))}
 
 
@@ -52,19 +54,27 @@ def _tracks(state):
 
 
 def _rows(state):
+    content=state.content()
     return dict(rules=(type(catalog()[0]),catalog()),
         requests=(S.SourceEffectRequest,state.requests.values()),
         locations=(S.BindingLocationTemplate,state.locations.values()),
         accesses=(S.BindingAccessTemplate,state.accesses),
         versions=(S.BindingVersionTemplate,state.versions.values()),
         selections=(S.BindingReadSelection,state.selections),
-        tracks=(S.StoredBindingTrack,_tracks(state)),edges=(S.StoredBindingEdge,_edges(state)))
+        tracks=(S.StoredBindingTrack,_tracks(state)),edges=(S.StoredBindingEdge,_edges(state)),
+        content_addresses=(C.ContentAddressTemplate,content.addresses.values()),
+        content_states=(C.ContentStateProjection,content.projections.values()),
+        content_accesses=(C.ContentAccessTemplate,content.accesses),
+        content_edges=(S.StoredBindingEdge,_edges(content)))
 
 
 def _counts(state):
+    content=state.content()
     return dict(operations=len(state.requests),binding_accesses=len(state.accesses),locations=len(state.locations),
         versions=len(state.versions),read_selections=len(state.selections),tracks=len(state.tracks),
         relations=sum(len(rows) for rows in state.out_edges.values()),
+        content_accesses=len(content.accesses),content_addresses=len(content.addresses),
+        content_states=len(content.projections),content_relations=sum(len(rows) for rows in content.out_edges.values()),
         missing_address_rules=dict(Counter(r.rule.instruction for r in state.requests.values() if r.missing_rules)))
 
 
@@ -73,7 +83,7 @@ def publish_state_view(state, out):
     if out.exists():raise ValueError('fresh state-view output required')
     state.check();_durable_mkdir(out)
     tables={name:write_table(out/(name+'.jsonl.gz'),rows) for name,(_,rows) in _rows(state).items()}
-    report=dict(schema='scar.source-binding-state-view',schema_version=1,
+    report=dict(schema='scar.source-state-view',schema_version=1,
         catalog=str(state.view.catalog.path),parent=encode(_artifact(state.view.catalog.path/'result.json',state.view.catalog.report['schema'])),
         unit=state.material.unit,namespace=encode(state.namespace),source_material=encode(state.material.result_artifact),
         binding_materials=encode(state.materials),pins=pins,tables=tables,
@@ -95,7 +105,7 @@ def read_state_view(path):
     # data. All state/type/solver contracts stay exact and every row is still
     # independently rederived below. Keep the producer SHA as provenance.
     admitted=report['pins']
-    if (report['schema'],report['schema_version'])!=('scar.source-binding-state-view',1) or (
+    if (report['schema'],report['schema_version'])!=('scar.source-state-view',1) or (
             {k:v for k,v in admitted.items() if k!='producer'}!={k:v for k,v in pins.items() if k!='producer'}):
         raise ValueError('state view schema or producer contract differs')
     if (type(admitted.get('producer')) is not str or len(admitted['producer'])!=64
