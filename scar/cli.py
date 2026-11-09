@@ -505,6 +505,7 @@ def main(argv=None) -> int:
         from scar.analysis.contextual_call_cli import main as contextual_calls_main
         return contextual_calls_main(cli_argv[1:])
     source_graph_commands = {
+        'program-view': 'scar.analysis.program_view',
         'call-declarations': 'scar.analysis.source_declared_calls',
         'native-bindings': 'scar.analysis.source_named_bindings',
         'native-interfaces': 'scar.analysis.source_binding_native_graph',
@@ -573,6 +574,7 @@ def main(argv=None) -> int:
     contextual_calls = sub.add_parser("static-calls", help="resolve guarded source-call interfaces over the shared static graph")
     contextual_calls.set_defaults(func=lambda _: 0)
     for name, help_ in (
+            ('program-view', 'normalize sealed source graphs into the shared typed dependency interface'),
             ('call-declarations', 'project all selected source callsite namespace declarations by unit'),
             ('native-bindings', 'join full namespace requests to conditional generated bindings'),
             ('native-interfaces', 'connect original source operands and state to canonical native interfaces'),

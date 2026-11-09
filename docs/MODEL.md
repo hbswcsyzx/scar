@@ -7,6 +7,13 @@ SCAR 是宏观编译器：用有类型、可展开的图统一表示程序及硬
 
 ## 五类核心实体
 
+统一查询使用`ProgramView`与既有`ProgramDependencyGraph`。源码ID由原unit、编译/绑定profile、template和原Step/Region/完整Port限定，不随查询函数或展开顺序改变；节点投影保双向来源，不重新生成操作语义。
+`get`返回公共节点元数据，`original`保原强类型记录，`expand`展开共享区域，`producers/consumers`查询依赖，`explain/explain_edge`保来源及原调用路径。Use、control等辅助端点有独立role，`kind=None`不是UNKNOWN，也不作为新计算值。
+统一视图按单元发布：namespace/material各存一次，节点与边使用既有类型ID引用，原G.Edge以封存F4 template＋ordinal定位，不重复保存完整端点/来源对象。原指令正文不复制。
+数据生成器、wire类型和材料协议精确核版本；facade producer SHA保来源，选中单元总由当前同版本映射规则重推验收。增加查询方法不要求重建未变的前端材料；改变映射/数据合同必须重新验收。
+
+入口：`python -B -m scar.cli program-view --catalog CONTEXT_CATALOG --unit UNIT --out FRESH_VIEW`；可重复`--unit`。`--read VIEW --unit UNIT`对该完整单元按当前合同重推，而不是只检查文件哈希。
+
 | 实体 | 含义 | 对应程序部分 |
 |---|---|---|
 | Operation | 消费端口、产生结果并具有效果的操作 | 调用、计算、绑定、读写、分配、搬运、IO、等待 |
