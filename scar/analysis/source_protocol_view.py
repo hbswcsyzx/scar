@@ -17,6 +17,7 @@ from scar.analysis.source_call_view import Flow, source_call_site, source_caller
 from scar.analysis.source_call_captures import FunctionCaptureStateProvider
 from scar.analysis.source_declared_calls import _owners
 from scar.analysis.source_protocol_materials import SourceProtocolMaterials
+from scar.analysis.source_protocol_frontiers import SourceProtocolFrontierProvider
 from scar.analysis.source_reference_slice import ReferenceSlicer, source_port
 from scar.analysis.source_value_flow import _artifact
 from scar.ir.program import normal_targets as T, model as M, view as V, source_protocol_view as R
@@ -57,6 +58,7 @@ class SourceProtocolCallProvider:
         self.frames = {}; self.interfaces = {}; self.owners = {}; self.functions = {}; self.attached = set()
         self.slicer = ReferenceSlicer(SimpleNamespace(fact_store=view.catalog.fact_store))
         self.captures = FunctionCaptureStateProvider(view)
+        self.frontiers = SourceProtocolFrontierProvider(view, materials)
         self.available_units = frozenset(materials.graph.sites[s.site].unit for s in materials.graph.steps) | frozenset(
             materials.members.contexts[e.caller].body.unit for e in (() if materials.members is None else materials.members.edges))
         self.manifests = {}
@@ -330,6 +332,7 @@ class SourceProtocolCallProvider:
             ownership_relations=len(self.records),
             records=dict(Counter(type(r).__name__ for r in self.records.values())),
             pending_endpoint_reasons=sum(map(len, self.pending.values())),
+            original_member_frontiers=self.frontiers.summary(),
             source_bodies_copied=False, loops_unrolled=False, allocation_proven=False,
             runtime_dispatch_proven=False, namespace_semantics_rederived=False, first_stage_complete=False)
 
@@ -356,9 +359,11 @@ def publish_protocol_view(provider, out):
     parents = dict(constructors=encode(_artifact(provider.materials.path/'result.json', provider.materials.report['schema'])))
     if provider.materials.member_path is not None:
         parents['members'] = encode(_artifact(provider.materials.member_path/'result.json', provider.materials.member_report['schema']))
-    report = dict(schema='scar.source-protocol-view', schema_version=1, catalog=str(provider.view.catalog.path),
+    frontiers = provider.frontiers.publish(out/'frontiers')
+    report = dict(schema='scar.source-protocol-view', schema_version=2, catalog=str(provider.view.catalog.path),
         constructors=str(provider.materials.path), members=None if provider.materials.member_path is None else str(provider.materials.member_path),
         parents=parents, shards=shards, summary=provider.summary(),
+        frontiers=encode(_artifact(out/'frontiers'/'result.json',frontiers['schema'])),
         producer_sha256=sha256(Path(__file__).read_bytes()).hexdigest(),
         types_sha256=sha256(Path(R.__file__).read_bytes()).hexdigest(),
         original_interfaces_rechecked=True, namespace_semantics_rederived=False, runtime_dispatch_proven=False,
@@ -373,8 +378,14 @@ def main():
     parser.add_argument('--source', required=True); parser.add_argument('--catalog', required=True)
     parser.add_argument('--members'); parser.add_argument('--unit', action='append', default=[])
     parser.add_argument('--out', help='optional fresh directory for compact unit shards')
+    parser.add_argument('--frontiers-only', action='store_true', help='attach original unresolved member fields without constructing known bodies')
     args = parser.parse_args(); view = ProgramView(args.catalog)
     materials = SourceProtocolMaterials(args.source, view.catalog, members=args.members)
+    if args.frontiers_only:
+        frontiers=SourceProtocolFrontierProvider(view,materials)
+        for unit in args.unit or sorted(frontiers.available_units): frontiers.attach(unit)
+        report=frontiers.publish(args.out) if args.out else frontiers.summary()
+        print(json.dumps(report),flush=True); return
     provider = SourceProtocolCallProvider(view, materials, units=args.unit)
     if args.out and not args.unit:
         for unit in sorted(provider.available_units): provider.attach(unit)

@@ -63,7 +63,8 @@ class SourceProtocolMaterials:
         if (tuple(entries)!=self.graph.entries or tuple(frontiers)!=self.graph.frontiers
                 or any(len(rows[n])!=self.report['counts']['constructor_'+n] for n in rows)):
             raise ValueError('constructor source entries/frontiers or original material counts differ')
-        self.members=None;self.member_root=self.member_path=None;self.member_report=None;self._member_calls=[]
+        self.members=None;self.member_root=self.member_path=None;self.member_report=None
+        self._member_calls=[];self._member_frontiers=[]
         if members is not None:self._members(members,slicer)
         self.original_materials_checked=True;self.source_interfaces_rederived=True
         self.namespace_semantics_rederived=False;self.runtime_dispatch=False
@@ -126,12 +127,9 @@ class SourceProtocolMaterials:
         for edge in graph.edges:
             self._index(edge.caller,len(graph.contexts),'member caller');self._index(edge.target,len(graph.contexts),'member target')
             caller=graph.contexts[edge.caller];target=graph.contexts[edge.target];connection=edge.connection
-            unit=slicer.unit(caller.body.unit)[0];prefix=slicer.fact(unit,'calls',0).locator.rsplit('/',1)[0]+'/'
-            tail=edge.call.locator.removeprefix(prefix)
-            if not edge.call.locator.startswith(prefix) or not tail.isdecimal() or str(int(tail))!=tail:raise ValueError('member original call ordinal differs')
-            i=int(tail);self._index(i,len(unit.calls),'member source call');call=unit.calls[i]
-            if edge.call!=slicer.fact(unit,'calls',i) or (target.source_callable,target.body)!=(connection.source_callable,connection.body):raise ValueError('member original call/target differs')
-            self._member_calls.append((unit.unit,SourceBodyCall(edge.call,call)))
+            unit,record=self._member_source_call(slicer,caller,edge.call);call=record.call
+            if (target.source_callable,target.body)!=(connection.source_callable,connection.body):raise ValueError('member original call/target differs')
+            self._member_calls.append((unit.unit,record))
             provider,fn=self._function(slicer,connection.source_callable,connection.body)
             formals=tuple(source_port(provider,p) for p in fn.formals)
             activation=T.FunctionActivation.NORMAL if fn.environment.kind is P.DeferredBodyKind.FUNCTION else T.FunctionActivation.CREATE_DEFERRED_BODY
@@ -151,9 +149,26 @@ class SourceProtocolMaterials:
                 if fn.returns is not None:returns=((source_port(provider,fn.returns),source_port(unit,call.result)),)
                 if fn.return_world is not None:returns+=((source_port(provider,fn.return_world),source_port(unit,call.result_world)),)
             if connection.returns!=returns:raise ValueError('member normal return ABI differs')
-        for frontier in graph.frontiers:self._index(frontier.context,len(graph.contexts),'member frontier')
+        for i,frontier in enumerate(graph.frontiers):
+            self._index(frontier.context,len(graph.contexts),'member frontier')
+            context=graph.contexts[frontier.context];record=None
+            if frontier.call is not None:
+                _,record=self._member_source_call(slicer,context,frontier.call)
+            evidence=_table_ref(self.member_root,report['tables']['frontiers'],'scar.constructor-member-frontiers',i)
+            self._member_frontiers.append((context,record,evidence,frontier.reason))
         if any(len(rows[n])!=report['counts'][n] for n in rows):raise ValueError('member material counts differ')
         self.members=graph
+
+    @classmethod
+    def _member_source_call(cls,slicer,context,reference):
+        unit=slicer.unit(context.body.unit)[0]
+        prefix=slicer.fact(unit,'calls',0).locator.rsplit('/',1)[0]+'/'
+        tail=reference.locator.removeprefix(prefix)
+        if not reference.locator.startswith(prefix) or not tail.isdecimal() or str(int(tail))!=tail:
+            raise ValueError('member original call ordinal differs')
+        i=int(tail);cls._index(i,len(unit.calls),'member source call')
+        if reference!=slicer.fact(unit,'calls',i):raise ValueError('member original call fact differs')
+        return unit,SourceBodyCall(reference,unit.calls[i])
 
     @staticmethod
     def _function(slicer,point,body):
@@ -174,6 +189,11 @@ class SourceProtocolMaterials:
     def member_call(self,i):
         self.check();self._index(i,len(self._member_calls),'member edge')
         return self._member_calls[i]
+
+    def member_frontier(self,i):
+        """Return original context, optional checked call, row evidence and reason."""
+        self.check();self._index(i,len(self._member_frontiers),'member frontier')
+        return self._member_frontiers[i]
 
     def check(self):
         if any(path.read_bytes()!=raw or json.loads(raw)!=report for path,(raw,report) in self._reports.items()):raise ValueError('protocol ancestor report changed')

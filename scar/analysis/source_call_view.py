@@ -9,6 +9,8 @@ from collections import Counter,defaultdict
 from dataclasses import dataclass,replace
 from enum import Enum
 import json
+from pathlib import Path
+from typing import Protocol,runtime_checkable
 
 from scar.analysis.program_view import ProgramView
 from scar.analysis.source_function_interfaces import SourceFunctionInterfaceStore
@@ -26,6 +28,27 @@ from scar.ir.program.dependencies import (
     context_push,context_pop,context_is_closed,context_frames)
 from scar.ir.program.ids import OperationID,ValueID,UseID,ControlPortID
 from scar.ir.program.source_references import SourceArtifactLocator
+
+
+@runtime_checkable
+class FunctionInterfaceReader(Protocol):
+    path: Path
+    report: dict
+    catalog: object
+
+    def read_unit(self,unit): ...
+    def validate(self): ...
+
+
+def open_function_interfaces(value):
+    """Select a declared material representation, never a workload name."""
+    if isinstance(value,FunctionInterfaceReader): return value
+    path=Path(value).absolute();schema=json.loads((path/'result.json').read_bytes())['schema']
+    from scar.analysis.source_function_interfaces import SCHEMA as ordinary_schema
+    if schema==ordinary_schema: return SourceFunctionInterfaceStore(path)
+    from scar.analysis.source_compiled_interfaces import SCHEMA as compiled_schema,CompiledFunctionInterfaceStore
+    if schema==compiled_schema: return CompiledFunctionInterfaceStore(path)
+    raise ValueError('unsupported function-interface material representation: '+str(schema))
 
 
 def prepare_source_ports(view,ports,*,bodies=()):
@@ -117,7 +140,7 @@ class SourceFunctionCallProvider:
 
     def __init__(self,view,interfaces,*,units=None):
         self.view=view
-        self.store=interfaces if isinstance(interfaces,SourceFunctionInterfaceStore) else SourceFunctionInterfaceStore(interfaces)
+        self.store=open_function_interfaces(interfaces)
         if view.catalog is None or (view.catalog.path,view.catalog.report)!=(self.store.catalog.path,self.store.catalog.report):
             raise ValueError('source call view and interfaces need the same original catalog')
         self.graphs={};self.frames={};self.links={};self.relations=[]
@@ -326,7 +349,7 @@ def main():
     parser=argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--interfaces',required=True);parser.add_argument('--unit',action='append')
     parser.add_argument('--creations',help='optional original factory-role graph, loaded on demand')
-    args=parser.parse_args();store=SourceFunctionInterfaceStore(args.interfaces)
+    args=parser.parse_args();store=open_function_interfaces(args.interfaces)
     view=ProgramView(store.catalog)
     provider=SourceFunctionCallProvider(view,store,units=args.unit)
     report=provider.summary()
