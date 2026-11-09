@@ -406,6 +406,8 @@ python -B -m scar.analysis.software_resources --bindings BINDINGS --declarations
 循环保回边，protocol world变化单独表示。当前材料适配只覆盖普通源码单元，compiled变体显式留边界；不运行目标或全局solver。
 `python -B -m scar.analysis.source_addressed_world --world WORLD_GRAPH --catalog CURRENT_CONTEXT --out FRESH_ADDRESSES`关联地址路径与world；`--read ADDRESSES`重核。
 字段/index访问保根与selectors，call保输入来源及开放效果；不以符号路径相等证明动态对象或内容版本相等。
+`python -B -m scar.analysis.source_world_returns --world WORLD_GRAPH --out FRESH_RETURNS --max-nodes 10 --max-edges 12`连接跨函数返回；`--read RETURNS`核验。
+完整认证world父链一次后按原report SHA及表收据复用祖先；同源码单元的历史调用者一次扫描，预算前沿显式保留。
 `python -B -m scar.analysis.source_admission --targets TARGET_STORE --out FRESH_PLAN`支持普通及context图，按真实source provider关联需求与原依赖材料，不修改模型。
 对旧inventory未索引的实际module需求，用原候选roots定点查找；可重复`--search-root`指定候选root。
 新搜索表与原inventory的索引域分开，未固定内容版本不列ready；搜索根及文件存在均不证明运行时import选择。
