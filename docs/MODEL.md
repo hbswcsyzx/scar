@@ -92,6 +92,12 @@ call-result是独立不透明根，不因参数来源相似就把返回对象或
 调用消费者另记原callee/位置/关键字/参数包端口、来源路径和形参route。字段投影是对根对象的数据依赖，不能变成根对象alias。
 形参接线保原world输入/输出与函数创建种类；生成器创建不进入正文，未解析target、pack或构造协议不等于没有消费者。
 
+正文值流保原DATA/STATE/CONTROL/DECLARE边，并为每个非结构操作保存原instruction及类型化输入/输出接口。
+输入→操作→输出表示可能的数据推导，不是alias或LogicalVersion等价；零输入操作同样保留。
+局部读写以完整(CodeScopeRef, LEXICAL Namespace)位置节点连接，避免writer×reader展开；跨作用域捕获和非词法内容另保边界。
+DATA包含bool、协议值等，不只对象引用。轻量查询只传播DATA与操作的数据输入/输出，不以world序列污染全部后继值；
+原world、调用配对标签、分支及循环回边仍在图中。该flow-insensitive may查询不证明平衡执行路径、当前状态版本或实际影响。
+
 [逻辑值 IR](../scar/ir/v2/values.py) 已定义 LogicalValue、ValueVersion、ProvenanceRecord、
 Materialization 和等价声明，用于分开逻辑来源、推导关系、版本及物理表示。
 这些类型的存在不代表任意 deepcopy、transform、CPU/GPU materialization 已自动统一溯源；
