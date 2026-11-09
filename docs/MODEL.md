@@ -113,6 +113,15 @@ OBJECT_NEW/OBJECT_INIT、foreign返回、new/type-test/init未决都保原stage/
 构造class输入只从单一ARGUMENT引用投影：init的NEW_RESULT给请求类的兼容INSTANCE，new的原class参数给CLASS_OBJECT。
 兼容INSTANCE可能是子类；精确类型、MRO与override仍未证明。pack本身不当作单一class引用，无关参数包仍留在原接口而不增加类型缺口。
 多个原构造entry可共享同一声明正文/类型上下文，其实际对象、world与entry条件继续由原connection分别保存。
+构造兼容输入可作为声明成员展开的根；旧正文引用共享，新正文按source callable去重并按源码单元批量读取模板。
+instance上的classmethod只有在绑定class等于记录source class的附加条件下采用该class参数；未确定子类分支另保前沿。
+
+namespace来源图以原GlobalPort及待选择的属性序列为查询状态。源码slot写入只产生带namespace/版本/作用域条件的引用来源，
+不宣称当前slot、对象或内容相同。编译exec的globals字典与普通source module分别保身份条件；compiled单元不进模块导入候选索引。
+导入按原Import.module解释返回模块候选，requested_module保完整请求；所有路径/名称映射候选均保留。
+GET属性选择与IMPORT_FROM的registry fallback分别记录，属性receiver与结果不成为alias。
+类基项保原求值端口、顺序和CLASSES fact所属创建scope；packed ABI仍含body/name，不能直接当base列表。
+namespace图的class-definition来源是附条件的源码声明产物，不是运行时class或MRO证明；当前版本、builtin及动态属性缺口仍逐字段保留。
 
 [逻辑值 IR](../scar/ir/v2/values.py) 已定义 LogicalValue、ValueVersion、ProvenanceRecord、
 Materialization 和等价声明，用于分开逻辑来源、推导关系、版本及物理表示。

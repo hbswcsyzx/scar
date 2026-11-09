@@ -421,6 +421,9 @@ body与entry分表共享，不按调用或循环复制。输入来源查询是ma
 `python -B -m scar.analysis.source_call_context_graph --bodies BODY_EXPANSION --out FRESH_CONTEXTS`保存选中incoming接口的callee引用查询及独立构造阶段；`--read CONTEXTS`重核。
 查询栈索引interfaces表，roots引用原body entry；外层caller未选定即保边界。构造sites/steps/entries分表，保原Endpoint与connection，不把init数据接到构造结果。
 `source_constructor_contexts.constructor_context_inputs(ConstructorInterfaceGraph)`从原单参数route投影兼容class输入，供后续声明方法展开；不选择MRO或运行时精确class。
+`python -B -m scar.analysis.source_constructor_members --calls CALL_CONTEXT_GRAPH --out FRESH_MEMBERS`连接构造class输入、声明成员接口及共享正文；`--read MEMBERS`重核。
+`python -B -m scar.analysis.source_class_base_graph --catalog CONTEXT_CATALOG --inputs MEMBERS_OR_CLASS_INPUTS --out FRESH_BASES`建立有序base与namespace来源图；`--read BASES`重核。
+也可重复`--class-value UNIT LOCAL_PORT`选择任意已保留类定义。根是静态查询选择，不授程序入口、当前类型或继承关系证明；本层不扫描历史calls/constructions表。
 `python -B -m scar.analysis.source_admission --targets TARGET_STORE --out FRESH_PLAN`支持普通及context图，按真实source provider关联需求与原依赖材料，不修改模型。
 对旧inventory未索引的实际module需求，用原候选roots定点查找；可重复`--search-root`指定候选root。
 新搜索表与原inventory的索引域分开，未固定内容版本不列ready；搜索根及文件存在均不证明运行时import选择。

@@ -27,7 +27,9 @@ NORMAL_SUCCESS / CPython 3.14.7；交付后端约定 C++20、算子 ABI v1、计
 | 派生实参接口 | 75输入→14原形参绑定/8源函数；含task actual2369→compiled formal3972 | 84目标/协议前沿；未授caller匹配或dispatch |
 | 正文展开 | 11共享正文（复用6、新增5），12参数入口；compiled任务正文526操作/60调用 | 2非数据参数路由保接口边界；下游native/源调用仍需接线 |
 | 调用上下文/构造 | 16入边上下文、220callee查询；318构造阶段/64源正文接口；声明与历史证据分别保留 | 当前0闭合函数来源，868历史候选关系仍OPEN；namespace/成员/外层frame待接 |
-| 构造class输入 | 64兼容类型输入→50共享声明上下文/34函数，保原entry与world | 纯投影已核；尚未进入方法展开调度，不授精确类型或MRO |
+| 构造class输入 | 64兼容类型输入→50共享声明上下文/34函数，保原entry与world | 已纳入下列成员展开；不授精确类型或MRO |
+| 构造成员/正文 | 51声明上下文、2直接成员边；新增35正文/870操作/60调用 | 120调用前沿；继承及namespace/field来源仍需接，不授精确runtime class |
+| base/namespace来源 | 39类/30有序base槽；29槽有条件源码class候选，原端口/来源保留 | 当前globals/class namespace/builtin/slot版本仍OPEN；尚未计算或证明MRO |
 | native声明/资源 | 独立2839条生成声明、1703导出；有效硬件旁图12节点/12边 | 旧source binding工件过期；当前声明未接源/原生端口，原资源候选operand_sources=0 |
 
 五类实体为 Operation / Value / StateLocation / Region / Resource；输入输出是端口角色。
@@ -70,7 +72,9 @@ NORMAL_SUCCESS / CPython 3.14.7；交付后端约定 C++20、算子 ABI v1、计
 - **`config-body-expansion-current/verification.json`：普通/compiled正文展开门通过。** 11共享正文中6个只引用父表、新增5个，12参数入口；新增605操作/13,442边/72调用。compiled rawrun形参3972已进入原编译正文（526操作、11,554边、60调用、8回边），得到67个may依赖调用输入；不运行compile/exec或目标。2个环境等非数据参数路由保独立边界。完整父认证188.00秒、正文构建23.27秒、同进程重验26.40秒，峰值RSS约0.80 GiB、压缩387,227 bytes；compiled材料另独立核原domain/ordinal/digest/profile。原port ID不变，旧body payload复制0，循环保共享回边。仍未证明当前内容、activation或全覆盖。
 - **`source-native-binding-materials-current/verification.json`：独立生成声明目录门通过。** 2839定义、1703导出/1703 wrapper、2220 group，复用仍有效原始材料并核当前工具/源码版本；未复用失效旧source绑定图，也未运行torchgen worker或源solver。构建2.38秒、strict读回4.68秒、峰值RSS约0.28 GiB；定义表压缩840,714 bytes，原始材料约37.1 MB。所有native引用仍None/DECLARATION_ONLY，源/原生/资源连接均False；manual绑定和Python reexport未纳入，不将声明目录当作链路已贯通。新模块用`source_native_binding_materials.py`，原C2b collector逐字保留。
 - **`config-call-context-current/verification.json`：选中入边与构造协议门通过。** 1,569原接口记录、16共享入边上下文、220callee查询（1,536引用状态/1,316边）。形参只沿栈顶原接口弹出；未选outer caller不合并，声明edges证据单独适配，不伪装历史calls。通用两caller回调用例0.91秒，真实声明证据也核过。原168调用点投影318构造阶段、64 source new/init接口；new结果与world保持ConstructionPort，init数据丢弃，foreign/pending不补完成。当前函数origin=0、868历史候选关系全部OPEN、236来源边界（75 namespace、133 producer/成员、27 call/protocol、1 outer）；这不是优化被拒或新调用目标已确定。完整父认证215.11秒，构建33.28秒、重验27.31秒；压缩397,823 bytes、峰值RSS约1.66 GiB，无target import/执行。补声明schema支持前后当前图各表字节一致；第一阶段仍未完成。
-- **`config-constructor-class-inputs-current/verification.json`：构造兼容类型投影已核。** 原64 source entry给64单参数class输入（10 class object、54兼容instance），可共享为50声明上下文/34源函数；原entry、source_class、Fn connection及所有条件仍保留，额外类型投影缺口0。1.04秒完成原route逐项校验与typed表读回；不把无关pack算成新的class缺口，也不声称精确运行类型、MRO、分配或方法调度。当前为纯API与机器可读投影，尚未自动扩展这些构造正文的成员调用。
+- **`config-constructor-class-inputs-current/verification.json`：构造兼容类型投影已核。** 原64 source entry给64单参数class输入（10 class object、54兼容instance），可共享为50声明上下文/34源函数；原entry、source_class、Fn connection及所有条件仍保留，额外类型投影缺口0。1.04秒完成原route逐项校验与typed表读回；不把无关pack算成新的class缺口，也不声称精确运行类型、MRO或分配。后续成员展开见下项。
+- **`config-constructor-members-current/verification.json`：构造输入→成员/正文门通过。** 64原构造entry进入51共享声明上下文，2条普通成员接口；51正文上下文映射46共享body（原11只引用、新增35），新增870操作/60调用/19,227边。120未解调用仍保原代码位置；classmethod兼容实例分支另需bound class等值条件和open-subclass前沿，不能默认cls是requested class。源码单元先批量读模板，再投影正文。完整父认证250.09秒、构建92.04秒、原规则重验101.32秒；压缩633,726 bytes。没有证明实际activation、MRO或完整调用图。
+- **`config-class-bases-current/verification.json`：有序基类与namespace来源门通过。** 39类保30个base槽/9无显式base，创建scope取原CLASSES fact owner。新增namespace声明来源后29槽得到29个条件class-definition候选（此前小投影为0）；209来源状态/187边，原AddressPaths仍保留。113关系/版本前沿不等同113未建模节点或优化拒绝。未把base pack隐藏body/name拆成bases，也不以同名类猜导入：索引仅importable单元，保所有路径/名称映射及其选择条件；GET和IMPORT_FROM fallback分开。通用用例0.91秒涵盖重名provider、compiled排除与返回模块语义。构建12.32秒、重验12.93秒、压缩21,969 bytes；当前namespace版本、实际bases和MRO均未证明。
 
 native/资源审计：11个旧`python-bindings-*`图为schema1–4且producer过期，不能接当前schema5 reader/ContextTargetGraph；
 原始`materials.json`仍通过当前隔离工具与材料版本核验，可独立重建声明。现有资源图的264 placement candidates对应operand_sources=0；
@@ -82,7 +86,7 @@ native/资源审计：11个旧`python-bindings-*`图为schema1–4且producer过
 ## 后续顺序与验收
 
 1. **输入字段层：** plain/untyped条件性字段应用与lazy引用子门已过；不代表完整cfg。未知prefix与中途地址/合并状态按表保留，不从条件候选证明当前内容。
-2. **跨层源调用/状态层：** 选中incoming的formal/return配对及独立new/init协议已过门。下一步用64构造class输入作为声明上下文根，复用原材料展开对应正文并接self/cls成员；同步连接namespace/捕获/outer caller，保当前类型兼容、MRO与world条件。当前220callee查询没有闭合函数origin，需解决这些具体接口，不能把868条OPEN关系说成已确定目标。保全部原may候选和未知字段，不以增加FIFO预算替代接线，不复制循环或授入口/当前内容证明。
+2. **跨层源调用/状态层：** 构造class根→直接成员→共享正文已接；有序base/namespace声明来源已核。下一步将这些有证据的base候选接入继承成员选择，明确早前类/实例槽遮蔽及MRO条件；并让callee查询复用namespace来源，连接frame/slot版本、捕获与outer caller。当前220旧callee查询仍没有闭合函数origin，不能把868条OPEN关系或29个base候选冒充确定dispatch。继续保原may候选及未知字段，不以增加FIFO预算替代接线，不复制循环或授入口/当前内容证明。
 3. **算子与资源层：** 原始生成绑定声明已从旧source solver解耦；待上述源连接提供NamespaceLookup/类型来源，再接Python→native归一化依赖和资源类型候选。重接原实参，不能继续使用operand_sources=0的旁图声称全链路完成；Tensor类型、设备候选与实际分配/传输分开。源运行I/O与源码文件位置分开建模；运行地址等未知字段不伪造。
 4. **全图验收：** 源码闭包、顺序敏感传播、循环和跨层接口的覆盖分母/缺口审计。队列清空本身不证明全覆盖；第一阶段通过后才进入化简。
 
