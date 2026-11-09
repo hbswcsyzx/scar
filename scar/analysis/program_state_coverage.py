@@ -141,15 +141,75 @@ def inventory(catalog,out,*,units=(),jobs=16,memory_mib=8192):
         local_model_closed=False,call_reachability_proven=False,binding_fixed_points_complete=False,
         target_executed=False,first_stage_complete=False,seconds=time.monotonic()-started)
     _durable_bytes(out/'result.json',_json(report),replace=False)
+    index_inventory(out)
     return report
+
+
+def index_inventory(path):
+    """Authenticate completed shards without rebuilding any original graph.
+
+    This also seals inventories made before the shard index was introduced.
+    Their original plan, producer pins and result bytes remain untouched.
+    """
+    path=Path(path).absolute();raw=(path/'result.json').read_bytes();report=json.loads(raw)
+    if (report['schema'],report['schema_version'])!=('scar.source-state-coverage',1):
+        raise ValueError('unsupported coverage inventory')
+    plan=json.loads((path/'plan.json').read_bytes())
+    if plan!=report['plan'] or len(set(plan['selected_units']))!=len(plan['selected_units']):
+        raise ValueError('inventory plan or original unit domain differs')
+    actual={};counts=Counter();gaps=Counter();instructions=Counter();families=Counter()
+    failures=[];peaks={};stored=0
+    for unit in plan['selected_units']:
+        folder=path/'units'/unit;data=(folder/'result.json').read_bytes();row=json.loads(data)
+        if (row['unit']!=unit or row['schema']!='scar.source-state-unit-coverage'
+                or row['schema_version']!=1 or row['target_executed'] is not False
+                or row['first_stage_complete'] is not False):
+            raise ValueError('inventory shard identity or scope differs')
+        actual[unit]=encode(_artifact(folder/'result.json',row['schema']));stored+=len(data)
+        pid=str(row['worker_pid']);peaks[pid]=max(peaks.get(pid,0),row['worker_peak_rss_kib'])
+        if row['status']=='FAILED':
+            failures.append(dict(unit=unit,error_type=row['error_type'],error=row['error']));continue
+        if row['status']!='INVENTORIED' or row['binding_fixed_points_complete'] is not False:
+            raise ValueError('inventory shard claims an unperformed analysis')
+        table=row['gaps']
+        if table['path']!='gaps.jsonl.gz':raise ValueError('inventory gap table path differs')
+        payload=(folder/table['path']).read_bytes();stored+=len(payload)
+        if (len(payload)!=table['bytes'] or sha256(payload).hexdigest()!=table['sha256']
+                or table['records']!=row['gap_operations']
+                or table['records']!=sum(row['counts']['missing_address_rules'].values())):
+            raise ValueError('inventory gap receipt/count differs')
+        counts.update({k:v for k,v in row['counts'].items() if type(v)is int})
+        gaps.update(row['counts']['missing_address_rules']);instructions.update(row['instructions']);families.update(row['families'])
+    if (report['completed_units']!=len(actual) or report['inventoried_units']!=len(actual)-len(failures)
+            or report['counts']!=dict(counts) or report['missing_address_rules']!=dict(gaps)
+            or report['instructions']!=dict(instructions) or report['families']!=dict(families)
+            or sorted(report['failures'],key=lambda r:r['unit'])!=sorted(failures,key=lambda r:r['unit'])
+            or report['status']!=('INCOMPLETE_INVENTORY' if failures else 'COMPLETE_INVENTORY')):
+        raise ValueError('inventory aggregate differs from its unit shards')
+    if raw!=(path/'result.json').read_bytes():raise ValueError('inventory changed while indexing')
+    result=dict(schema='scar.source-state-coverage-index',schema_version=1,
+        inventory=encode(_artifact(path/'result.json',report['schema'])),
+        plan=encode(_artifact(path/'plan.json',plan['schema'])),units=actual,
+        stored_shard_bytes=stored,worker_peak_rss_kib=peaks,
+        producer_sha256=sha256(Path(__file__).read_bytes()).hexdigest(),
+        semantic_rederivation=False,target_executed=False,first_stage_complete=False)
+    _durable_bytes(path/'index.json',_json(result),replace=False)
+    return result
 
 
 def main():
     parser=argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--catalog',required=True);parser.add_argument('--out',required=True)
+    parser.add_argument('--catalog');parser.add_argument('--out');parser.add_argument('--index')
     parser.add_argument('--unit',action='append',default=[]);parser.add_argument('--jobs',type=int,default=16)
     parser.add_argument('--memory-mib',type=int,default=8192)
-    args=parser.parse_args();report=inventory(args.catalog,args.out,units=args.unit,jobs=args.jobs,memory_mib=args.memory_mib)
+    args=parser.parse_args()
+    if args.index:
+        if args.catalog or args.out or args.unit:parser.error('--index stands alone')
+        report=index_inventory(args.index)
+        print(json.dumps(dict(status='INVENTORY_SHARDS_INDEXED',units=len(report['units']),stored_shard_bytes=report['stored_shard_bytes'])))
+        return
+    if not args.catalog or not args.out:parser.error('--catalog and --out are required')
+    report=inventory(args.catalog,args.out,units=args.unit,jobs=args.jobs,memory_mib=args.memory_mib)
     print(json.dumps({key:report[key] for key in ('status','completed_units','inventoried_units','missing_address_rules','seconds')}))
 
 

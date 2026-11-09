@@ -134,8 +134,23 @@ class SourceUnitProvider:
             cls = ControlPortID if original.kind in _CONTROL else UseID if original.kind is G.PortKind.ARGUMENT else ValueID
             kind = V.ProgramEntityKind.VALUE if cls is ValueID else None
             role = V.ProgramNodeRole(original.kind.value)
-            owner = self._node(template, original.owner)
+            owner = None
         else: raise TypeError('source projection requires an original region, step or port')
+        # Full original anchors already index admitted nodes. Reusing them
+        # avoids rehashing the material/port and recursing through an owner on
+        # every edge. Preserve later full-record and owner assignments.
+        identity = self.anchors.get(anchor)
+        if identity is not None:
+            current = self.nodes[identity]
+            if type(identity) is not cls or current.anchor != anchor:
+                raise ValueError('source-to-core cached identity projection differs')
+            if value_type is not None:
+                if current.value_type not in (None, value_type): raise ValueError('source port has incompatible declared types')
+                if current.value_type is None:
+                    self.nodes[identity] = replace(current, value_type=value_type)
+            return current.point
+        if type(original) is G.Port:
+            owner = self._node(template, original.owner)
         identity = self._identity(cls, template, original)
         point = Point(self.namespace, identity, None)
         if identity in self.nodes:
@@ -460,7 +475,7 @@ class ProgramView:
         unscoped = replace(edge, source=replace(edge.source, context=None), target=replace(edge.target, context=None),
             conditions=tuple(replace(c, subject=None if c.subject is None else replace(c.subject, context=None),
                 operands=tuple(replace(p, context=None) for p in c.operands)) for c in edge.conditions))
-        return tuple(provider.edge_sources.get(unscoped, ()))
+        return tuple(provider.edge_sources.get(unscoped, ())) or edge.evidence
 
     def project_unit(self, unit, *, templates=None):
         """Normalize one selected finite material domain, without body copies."""

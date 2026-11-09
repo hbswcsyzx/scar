@@ -18,7 +18,8 @@ LeWM 是外部 testcase；通用规则由语言协议、原端口和证据派发
 
 统一接口复用`ProgramDependencyGraph`：F4适配投影到既有类型ID，保原Step/Region/Port和完整G.Edge；旧N1图按原representation路由。`get/expand/producers/consumers/explain`使用同一接口，不伪造canonical正文。
 五类实体之外，Use和控制端口是辅助角色：`kind=None`表示“非独立实体”，不是未知节点。操作原始类型仍来自封存的F4 instruction，不能按label猜效果。
-②已接C2绑定、类名字、属性/索引/聚合、namespace/注解接口及196个native单元的类型/world/scoped alias声明；gcrl63条自动局部链保持。源与native可共用同一视图，尚无source→native调用选择证明。下一步先机械汇总入口相关单元的操作类型、已有接口和缺规则，补正常profile中的本地缺口后进入③；不能将单元样例通过当全域覆盖。内容投影和声明不授实际物理槽、LogicalVersion或效果闭合；native不重跑parser/源caller链，不变数据继承精确指纹。
+②已完成884单元完整接口盘点并补齐正常路径的2处callback环境tuple投影；C2绑定、内容、namespace/注解及196个native单元共用查询，gcrl63条局部链保持。四类异常状态缺项按既定范围暂缓，效果/实例选择仍开放；正常接口门通过不代表全图通过。目录盘点只存小报告、缺规则与收据，原正文共享，修正按指令类型选择受影响单元，不重复全域工作。
+下一步进入③：复用既有binder产生条件接口，由关系provider实际执行caller frame的push/匹配pop；frame包含原call、callee Use/value和目标body Region，默认值保创建上下文，deferred creation不进入普通正文。条件字符串本身不执行上下文匹配；原callee/descriptor/namespace未决字段继续保留，不授实际dispatch。内容投影及native声明不授物理槽、LogicalVersion或效果闭合。
 CFG边是CONTROL_FLOW，区别于控制依赖CONTROL；完整CallSite/path及completion保原映射。普通walk不证明调用/返回已匹配或节点实际执行。
 每层通过后提交一次；只维护本架构、MODEL与STATUS，不新增逐门文档。后续形式细节是已有材料协议，本轮入口以此表为准。
 

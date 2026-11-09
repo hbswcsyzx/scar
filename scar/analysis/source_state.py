@@ -35,6 +35,7 @@ class SourceStateProvider:
         self.interface_ids = {descriptor:index for index,descriptor in enumerate(self.bindings.interfaces)}
         self._guard = {Path(m.uri):_stamp(Path(m.uri)) for m in self.materials}
         self.locations = {}; self.versions = {}; self.accesses = []; self.requests = {}
+        self.environment_values = {}
         self.in_edges = defaultdict(list); self.out_edges = defaultdict(list)
         self.tracks = []; self.track_ids = {}; self.selections = []; self.track_limits = []
         self.flows = {}; self.anchors = None
@@ -50,7 +51,13 @@ class SourceStateProvider:
                 operation = self.source._identity(OperationID, key, step.id)
                 rule = classify_instruction(step.instruction)
                 accesses = self._identify(context, step, operation)
-                missing = (() if accesses else ('STATE_ADDRESS_PROJECTION_NOT_IMPLEMENTED',)) if rule.resolution.value == 'ADDRESS_RULE' else ()
+                projection = None
+                if type(step.instruction) is P.ReadClassTypeParameters:
+                    from scar.analysis.source_environment_values import identify_class_type_parameters, attach_class_type_parameters
+                    projection = identify_class_type_parameters(self.source, context, step, operation)
+                    self.environment_values[operation] = projection
+                    attach_class_type_parameters(self, projection)
+                missing = (() if accesses or projection is not None else ('STATE_ADDRESS_PROJECTION_NOT_IMPLEMENTED',)) if rule.resolution.value == 'ADDRESS_RULE' else ()
                 self.requests[operation] = S.SourceEffectRequest(operation, rule, accesses, missing,
                     ('CALLBACK_OBJECT_CONTENT_ALIAS_RNG_EXTERNAL_AND_ORDERING_EFFECTS_NOT_CLOSED',))
         view.register(self)

@@ -25,6 +25,8 @@ def _pins():
     from scar.analysis import source_implicit_namespaces
     from scar.analysis import source_annotation_namespaces
     from scar.analysis import source_content, source_content_interfaces
+    from scar.analysis import source_environment_values
+    from scar.ir.program import source_environment_values as environment_types
     from scar.ir.program import source_effects as effects_types
     return {name:sha256(Path(module.__file__).read_bytes()).hexdigest() for name,module in (
         ('producer', __import__(__name__, fromlist=['__file__'])), ('state', source_state),
@@ -33,6 +35,7 @@ def _pins():
         ('implicit_addresses', source_implicit_namespaces),
         ('annotation_addresses', source_annotation_namespaces),
         ('content', source_content), ('content_types', C), ('content_interfaces', source_content_interfaces),
+        ('environment_values', source_environment_values), ('environment_value_types', environment_types),
         ('body_projection', source_value_flow), ('unified_adapter', program_view))}
 
 
@@ -104,14 +107,23 @@ def read_state_view(path):
     path=Path(path).absolute();raw=(path/'result.json').read_bytes();report=json.loads(raw)
     pins=_pins()
     # As with ProgramView, facade/CLI evolution need not invalidate unchanged
-    # data. All state/type/solver contracts stay exact and every row is still
-    # independently rederived below. Keep the producer SHA as provenance.
+    # data. Types/solvers stay exact and every row is independently rederived.
+    # Projection adapters are provenance, never a successful-validation cache.
+    # Their evolution is accepted only after all current rows match below.
+    # Type/solver pins remain exact; missing retained-environment contracts
+    # additionally require that the legacy unit has no such operations.
     admitted=report['pins']
-    facades={'producer','unified_adapter'}
+    facades={'producer','unified_adapter','state','implicit_addresses',
+        'annotation_addresses','content_interfaces'}
+    introduced={'environment_values','environment_value_types'}
+    legacy_environment=introduced.isdisjoint(admitted)
+    omitted=introduced if legacy_environment else set()
     if (report['schema'],report['schema_version'])!=('scar.source-state-view',1) or (
-            {k:v for k,v in admitted.items() if k not in facades}!={k:v for k,v in pins.items() if k not in facades}):
+            {k:v for k,v in admitted.items() if k not in facades}!={k:v for k,v in pins.items() if k not in facades|omitted}):
         raise ValueError('state view schema or producer contract differs')
     for name in facades:
+        if name not in admitted and name not in {'producer','unified_adapter','state'}:
+            continue
         if (type(admitted.get(name)) is not str or len(admitted[name])!=64
                 or any(c not in '0123456789abcdef' for c in admitted[name])):
             raise ValueError('state view facade provenance is not a SHA256')
@@ -121,6 +133,8 @@ def read_state_view(path):
     parent=_artifact(Path(report['catalog'])/'result.json',report['parent']['schema'])
     if encode(parent)!=report['parent']:raise ValueError('state view catalog receipt differs')
     view=ProgramView(report['catalog']);state=view.state(report['unit'])
+    if legacy_environment and state.environment_values:
+        raise ValueError('legacy state view needs republication with retained environment projections')
     if (encode(state.namespace)!=report['namespace'] or encode(state.material.result_artifact)!=report['source_material']
             or encode(state.materials)!=report['binding_materials']):
         raise ValueError('state view source address material differs')
