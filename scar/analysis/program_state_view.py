@@ -105,12 +105,14 @@ def read_state_view(path):
     # data. All state/type/solver contracts stay exact and every row is still
     # independently rederived below. Keep the producer SHA as provenance.
     admitted=report['pins']
+    facades={'producer','unified_adapter'}
     if (report['schema'],report['schema_version'])!=('scar.source-state-view',1) or (
-            {k:v for k,v in admitted.items() if k!='producer'}!={k:v for k,v in pins.items() if k!='producer'}):
+            {k:v for k,v in admitted.items() if k not in facades}!={k:v for k,v in pins.items() if k not in facades}):
         raise ValueError('state view schema or producer contract differs')
-    if (type(admitted.get('producer')) is not str or len(admitted['producer'])!=64
-            or any(c not in '0123456789abcdef' for c in admitted['producer'])):
-        raise ValueError('state view producer provenance is not a SHA256')
+    for name in facades:
+        if (type(admitted.get(name)) is not str or len(admitted[name])!=64
+                or any(c not in '0123456789abcdef' for c in admitted[name])):
+            raise ValueError('state view facade provenance is not a SHA256')
     if (report['original_body_bytes_copied']!=0 or any(report[name] is not False for name in
             ('loops_unrolled','target_executed','tensor_content_versions_proven','effect_membership_closed','first_stage_complete'))):
         raise ValueError('state view claims results outside its static binding scope')

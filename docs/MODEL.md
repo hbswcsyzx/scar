@@ -22,6 +22,10 @@ SCAR 是宏观编译器：用有类型、可展开的图统一表示程序及硬
 
 聚合更新用`WholeOwner`选择整个目标内容，不人为分配未知element key；UPDATE的payload是元素或源容器输入，不表示整个新内容等于它。DICT_MERGE保callee/目标/源三个原端口，comprehension用原ChoiceBinding区分LIST/SET/DICT。条件由原操作、owned Use、地址和真实completion端口限定，不用全局收集序号决定身份，便于独立并行构建。
 
+Native单元沿原codec namespace、entry/exit Value/Use和world投影。Tensor与Generator状态地址是`boundary slot＋Optional/List类型路径＋选中值实例`，不是已观察元素、StorageID或内容版本；列表不展开，Optional保存在条件。输入保原before/normal/raised world，返回仅在normal存在。原alias before/显式after字段保留，其阶段是annotation字段而非程序执行时间；标签按原declaration与boundary限定。分组是声明关系记录，查询时才产生条件MAY/PROJECTION边，禁止传递合并成对象或storage身份；wildcard、空after、无annotation与False may_write都不授无副作用/RNG或no-alias结论。
+
+入口：`python -B -m scar.cli native-state-view --source BINDING_NATIVE_MATERIALS --out FRESH_VIEW`，`--read VIEW`独立重推所有native分片。`NativeStateSession(materials, view=existing_view)`复用同一查询和原core loader；基础core记录优先于扩展metadata，扩展状态不伪造canonical正文。新状态指向原图与声明，不复制原native图，也不声称已选择Python/native调用或dispatch。
+
 `SourceEffectRequest`保原操作和69种指令的闭合分类，动作标签可重叠，只表示待解释能力；不授pure、真实搬运、分配或RNG结论。已知绑定接口与尚缺的地址规则分开，`missing_rules`不伪装为运行时UNKNOWN。CLI为`python -B -m scar.cli program-state-view --catalog CONTEXT_CATALOG --unit UNIT --out FRESH_VIEW`，默认根据READ、原C2槽域/owner和原函数body作用域选择所有可跟踪局部槽，随后发布内容接口；捕获不冒充当前帧的局部槽。`--slot C2_LOCAL_SLOT`可缩小查询，`--interfaces-only`不求绑定固定点。schema `scar.source-state-view/1`中绑定与内容分表，均引用同一单元namespace与既有ID。`--read VIEW`独立重推全部已存记录及覆盖数，拒绝虚假的完成/内容证明标志；state/type/solver合同精确核版本，facade producer SHA保来源，其变化仍须逐表当前重推。跟踪的操作/控制边索引引用原正文投影，不复制指令。
 
 | 实体 | 含义 | 对应程序部分 |

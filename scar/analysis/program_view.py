@@ -44,8 +44,9 @@ def _digest(value):
 
 class _RepresentationProvider:
     """Route existing core providers without fabricating an N1 ProgramGraph."""
-    def __init__(self, provider):
+    def __init__(self, provider, extension=None):
         self.provider = provider
+        self.extension = extension
         self.relation_kinds = getattr(provider, 'relation_kinds', None)
 
     def incoming(self, point):
@@ -56,6 +57,8 @@ class _RepresentationProvider:
 
     def _query(self, point, incoming):
         if point.namespace.representation == SOURCE_REPRESENTATION:
+            return DependencyNeighborhood()
+        if self.extension is not None and self.extension(point):
             return DependencyNeighborhood()
         return (self.provider.incoming if incoming else self.provider.outgoing)(point)
 
@@ -304,13 +307,27 @@ class ProgramView:
         self.core_loader = core_loader; self.units = {}; self.namespaces = {}; self.metadata_providers = []
         self.state_providers = {}
         self.dependencies = ProgramDependencyGraph(self._core_index)
-        self.dependencies.providers[:] = [_RepresentationProvider(p) for p in self.dependencies.providers]
+        self.dependencies.providers[:] = [_RepresentationProvider(p,self._core_extension) for p in self.dependencies.providers]
 
     def _core_index(self, namespace):
         if namespace.representation == SOURCE_REPRESENTATION:
             raise TypeError('source recipes are not fabricated canonical ProgramGraphs')
         if self.core_loader is None: raise ValueError('this original core graph has not been attached')
         return self.core_loader(namespace)
+
+    def _core_record(self, point):
+        index=self._core_index(point.namespace)
+        for name in ('operations','values','regions','locations','resources','_uses','_block_records'):
+            rows=getattr(index,name,{})
+            if point.node in rows:return rows[point.node]
+        for name in ('resources','resource_requirements','environments','control_ports','provider_envelopes','native_boundaries'):
+            for record in getattr(index.graph,name,()):
+                if getattr(record,'id',None)==point.node:return record
+        return None
+
+    def _core_extension(self, point):
+        if not self.metadata_providers or self._core_record(point) is not None:return False
+        return self._metadata(point)[0] is not None
 
     def unit(self, identity):
         if self.catalog is None: raise ValueError('no source catalog is attached')
@@ -364,17 +381,13 @@ class ProgramView:
 
     def original(self, point):
         provider = self.namespaces.get(point.namespace)
+        if provider is None:
+            original=self._core_record(point)
+            if original is not None:return original
         if provider is None or point.node not in provider.nodes:
             adapter,_=self._metadata(point)
             if adapter is not None:return adapter.original(point)
             if provider is not None:raise ValueError('source endpoint has no admitted record adapter')
-            index = self._core_index(point.namespace)
-            for name in ('operations','values','regions','locations','resources','_uses','_block_records'):
-                rows = getattr(index, name, {})
-                if point.node in rows: return rows[point.node]
-            for name in ('resources','resource_requirements','environments','control_ports','provider_envelopes','native_boundaries'):
-                for record in getattr(index.graph, name, ()):
-                    if getattr(record, 'id', None) == point.node: return record
             raise ValueError('core endpoint is not in an attached entity table')
         provider.ensure(point)
         return provider.records[point.node]
@@ -385,8 +398,9 @@ class ProgramView:
             provider.ensure(point); node = provider.nodes[point.node]
             owner = None if node.owner is None else replace(node.owner, context=point.context)
             return V.ProgramNode(point, node.kind, node.role, owner, node.value_type)
-        _,node=self._metadata(point)
-        if node is not None:return node
+        if provider is not None or self._core_record(point) is None:
+            _,node=self._metadata(point)
+            if node is not None:return node
         original = self.original(point)
         kinds = {OperationID:V.ProgramEntityKind.OPERATION, ValueID:V.ProgramEntityKind.VALUE,
             RegionID:V.ProgramEntityKind.REGION, LocationID:V.ProgramEntityKind.STATE_LOCATION,

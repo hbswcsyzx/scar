@@ -507,6 +507,7 @@ def main(argv=None) -> int:
     source_graph_commands = {
         'program-view': 'scar.analysis.program_view',
         'program-state-view': 'scar.analysis.program_state_view',
+        'native-state-view': 'scar.analysis.native_state_view',
         'call-declarations': 'scar.analysis.source_declared_calls',
         'native-bindings': 'scar.analysis.source_named_bindings',
         'native-interfaces': 'scar.analysis.source_binding_native_graph',
@@ -577,6 +578,7 @@ def main(argv=None) -> int:
     for name, help_ in (
             ('program-view', 'normalize sealed source graphs into the shared typed dependency interface'),
             ('program-state-view', 'attach symbolic binding addresses and may versions to the shared graph'),
+            ('native-state-view', 'attach native type paths and scoped alias declarations to the shared graph'),
             ('call-declarations', 'project all selected source callsite namespace declarations by unit'),
             ('native-bindings', 'join full namespace requests to conditional generated bindings'),
             ('native-interfaces', 'connect original source operands and state to canonical native interfaces'),

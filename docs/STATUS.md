@@ -9,7 +9,7 @@ NORMAL_SUCCESS / CPython 3.14.7；交付后端约定 C++20、算子 ABI v1、计
 | 层 | 状态 |
 |---|---|
 | ①统一IR接口 | 接口合同与3个普通/compiled完整单元验收通过；复用core引擎，70,373端点/75,037关系以单元头＋类型ID存储；完整推理链覆盖仍在后续层 |
-| ②局部结构与状态 | 绑定、属性/索引和聚合容器请求及前后符号状态已共图；3单元接口已验，gcrl63条自动局部链保持；native/其余隐式状态仍待补 |
+| ②局部结构与状态 | 绑定、内容与196个native局部状态单元已接统一查询；gcrl63条自动局部链保持；其余隐式状态与全域覆盖仍待补 |
 | ③跨层依赖 | 既有参数/返回/成员/算子部分关系待统一接入；暂停前函数接口批次未发布，不计完成 |
 | ④资源与执行证据 | 已有硬件及类型投影；运行I/O和动态记录向统一图接线待完成 |
 | ⑤完整推理链验收 | 尚未通过；文件数、节点数和单个源码单元通过均不替代此项 |
@@ -22,7 +22,9 @@ NORMAL_SUCCESS / CPython 3.14.7；交付后端约定 C++20、算子 ABI v1、计
 
 **对象内容接口已验：** `program-content-state-current/verification.json`覆盖普通与compiled共3单元：351个属性/索引/聚合协议请求、702个前后world状态投影、2,498条内容关系，全部接原操作、receiver Use与key/bounds端口；同一`ProgramView`可跨绑定与内容查询。新增四表共415,833压缩bytes；3 workers合34.30秒，新增表分别0.55–1.33秒重推，原8张绑定表逐字节不变并继承已验结果，未重做全量解码。gcrl当前发布仍在`program-local-state-current`。统一状态schema为`scar.source-state-view/1`。实测实例为GET/SET/UPDATE；DELETE和slice等原ABI有规则，未宣称本批实例覆盖。append/extend/dict merge/comprehension保原协议，DICT_MERGE的callee不是owner，comprehension按原ChoiceBinding分派。投影是`project(world,address)`符号值，不是Tensor快照或已知LogicalVersion；GET也保后态，不假定getter纯。
 
-**②的剩余工作：** 其余隐式namespace、Tensor/native状态与alias声明、完整descriptor/内容效果接口及入口相关单元覆盖。下一项复用已有196个canonical ATen单元：以原NativeType及schema/边界限定的alias声明建立局部状态关系；`may_write`不是已发生写入，空after和无alias都不是纯性证明，不跨schema合并标签。之后再推进③跨层参数/返回/捕获、④资源/运行事实，最后⑤整条推理链验收。缺规则与待选实例分开；绑定未变及不同投影ID不证明内容同异。全图与第一阶段均未完成。
+**Native局部状态已验：** `program-native-state-current/verification.json`覆盖全部196个已存canonical接口：507地址（496 Tensor＋11 Generator）、1,099 world投影、90组scoped alias声明和3,804条关系；170个声明可能写、12个列表叶族均不等于运行事实。原图复制0 bytes，新增表747,278压缩bytes；构建6.53秒、严格读回5.64秒，验证进程峰值约467 MiB。独立认证原native batches与源码收据，不重跑parser或源caller链。输入保before/normal/raised world，输出仅保原normal结果；alias按declaration/boundary/原annotation字段限定并按需展开MAY关系，不存dense pairs，不把空after或无annotation当纯性。一个`ProgramView`已同时查询源状态与native状态，原core记录优先保留；source调用绑定尚未证明。
+
+**②的剩余工作：** 其余隐式namespace/关联状态、完整descriptor/内容效果接口及入口相关单元覆盖。native材料现在具备本地模型，③才能据原参数/返回接口接source与native；当前没有提前宣称该接线完成。之后为④资源/运行事实和⑤整条推理链验收。缺规则与待选实例分开；绑定未变及不同投影ID不证明内容同异。全图与第一阶段均未完成。
 
 ## 分层进度
 

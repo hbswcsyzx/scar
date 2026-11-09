@@ -18,7 +18,7 @@ LeWM 是外部 testcase；通用规则由语言协议、原端口和证据派发
 
 统一接口复用`ProgramDependencyGraph`：F4适配投影到既有类型ID，保原Step/Region/Port和完整G.Edge；旧N1图按原representation路由。`get/expand/producers/consumers/explain`使用同一接口，不伪造canonical正文。
 五类实体之外，Use和控制端口是辅助角色：`kind=None`表示“非独立实体”，不是未知节点。操作原始类型仍来自封存的F4 instruction，不能按label猜效果。
-②现已把C2绑定、隐式类名字与属性/索引/聚合请求接入统一接口，69种指令的效果请求分类闭合；3单元内容接口与gcrl完整单元的63条自动局部状态链已验。内容状态沿原world投影，尚不授物理槽/逻辑版本或效果闭合。下一步先将已有canonical native单元的类型、world与scoped may-alias声明接入同一局部接口，再补其余namespace并扩入口相关单元；原生声明不是实际写入，跨源调用仍属③。增量不改已验数据时继承精确指纹证明，只核新增关系。
+②已接C2绑定、类名字、属性/索引/聚合请求及196个native单元的类型/world/scoped alias声明；3个源码单元内容接口与gcrl63条自动局部链已验。源与native可共用同一视图，尚无source→native调用选择证明。下一步补其余隐式namespace/关联状态并扩入口相关单元，再进入③；内容投影和声明都不授实际物理槽、LogicalVersion或效果闭合。native读取独立认证原batches，不重跑parser/源caller链；增量不改已验数据时继承精确指纹，只核新增关系。
 CFG边是CONTROL_FLOW，区别于控制依赖CONTROL；完整CallSite/path及completion保原映射。普通walk不证明调用/返回已匹配或节点实际执行。
 每层通过后提交一次；只维护本架构、MODEL与STATUS，不新增逐门文档。后续形式细节是已有材料协议，本轮入口以此表为准。
 
