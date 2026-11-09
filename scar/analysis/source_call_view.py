@@ -28,6 +28,33 @@ from scar.ir.program.ids import OperationID,ValueID,UseID,ControlPortID
 from scar.ir.program.source_references import SourceArtifactLocator
 
 
+def prepare_source_ports(view,ports,*,bodies=()):
+    """Batch only referenced original templates before individual port queries.
+
+    Construction interfaces contribute their original call/class anchors;
+    they are not source ports. Each unit receives one deduplicated _expand,
+    without admitting callers, copying bodies or changing context selections.
+    """
+    keys=defaultdict(set)
+    def add(point):
+        if type(point) is T.GlobalPort:
+            if type(point.port) is not G.Port:raise TypeError('source preparation needs an original graph port')
+            keys[point.unit].add(point.port.template)
+        elif type(point) is T.ConstructionPort:
+            if type(point.call) is not T.GlobalPort or type(point.source_class) is not T.GlobalPort:
+                raise TypeError('construction preparation needs its original call/class ports')
+            add(point.call);add(point.source_class)
+        else:raise TypeError('source preparation needs exact GlobalPort or ConstructionPort endpoints')
+    if type(ports) in (T.GlobalPort,T.ConstructionPort):ports=(ports,)
+    for point in ports:add(point)
+    if type(bodies) is T.Body:bodies=(bodies,)
+    for body in bodies:
+        if type(body) is not T.Body:raise TypeError('source preparation needs exact original Body records')
+        keys[body.unit].add(body.template)
+    for unit in sorted(keys):
+        view.unit(unit)._expand(tuple(sorted(keys[unit],key=lambda key:(key.occurrence,key.purpose.value))))
+
+
 def source_call_site(view,link):
     """Resolve the original F4 call operation and its callee Use/value.
 
@@ -48,7 +75,12 @@ def source_call_site(view,link):
 
 def source_caller_scope(view,frame,context):
     """Resolve the caller source scope without unioning same-unit functions."""
-    frames=context_frames(context);source=view.namespaces[frame.caller]
+    return source_active_scope(view,frame.caller,context)
+
+
+def source_active_scope(view,namespace,context):
+    """Resolve one source activation scope, including a protocol's caller."""
+    frames=context_frames(context);source=view.namespaces[namespace]
     if not frames:
         return source.facts.root_scope.owner if context_is_closed(context) else None
     entry=frames[-1].entry or frames[-1].target.root
@@ -146,6 +178,21 @@ class SourceFunctionCallProvider:
         if unit in self.graphs:return self.graphs[unit]
         graph=self.store.read_unit(unit);self.graphs[unit]=graph
         caller=self.view.unit(unit);facts=caller.facts
+        ports=[];bodies=[]
+        for query in graph.queries:
+            call=facts.calls[query.query]
+            ports.extend((source_port(facts,call.result),source_port(facts,call.callee)))
+        for interface in graph.interfaces:
+            link=interface.link
+            ports.extend(p for p in (link.callee,link.result,link.source_callable) if p is not None)
+            if link.body is not None:bodies.append(link.body)
+            for route in link.parameters:ports.extend((route.formal,*route.actuals))
+            for source,target in link.returns:ports.extend((source,target))
+            for projection in link.projections:ports.extend((projection.formal,projection.pack))
+            if link.argument_packs is not None:
+                pack=link.argument_packs
+                ports.extend(p for p in (pack.positional,pack.keywords,pack.receiver,pack.class_receiver) if p is not None)
+        prepare_source_ports(self.view,ports,bodies=bodies)
         call_points={}
         for query in graph.queries:
             fact=facts.calls[query.query]

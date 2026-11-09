@@ -17,6 +17,8 @@ from scar.ir.program import source_call_captures as C, source_state as S
 from scar.ir.program import source_productions as P, source_bindings as B
 from scar.ir.program import normal_targets as T, view as V
 from scar.ir.program.source_function_interfaces import SourceFunctionInterface
+from scar.ir.program.providers import ProviderFactReference
+from scar.ir.v2._validation import record_errors
 from scar.ir.program.ids import LocationID, RegionID
 from scar.ir.program.dependencies import (
     DependencyPoint as Point, DependencyFrame as Frame, DependencyEdge as Edge,
@@ -122,18 +124,38 @@ class FunctionCaptureStateProvider:
         """
         if type(interface) is not SourceFunctionInterface or type(env_route) is not T.Route or type(frame) is not Frame:
             raise TypeError('capture binding needs original typed source interface, route and frame')
-        if interface.activation is not T.FunctionActivation.NORMAL: return ()
         link=interface.link
-        _require(env_route in link.parameters and env_route.kind is T.RouteKind.FUNCTION_ENVIRONMENT
+        return self._bind(link.source_callable,link.body,link.parameters,link.conditions,interface.activation,
+            env_route,frame,definition=interface.definition,call=interface.call,reference=interface.reference)
+
+    def bind_connection(self, connection:T.FunctionConnection, env_route:T.Route, frame, *,
+            definition:ProviderFactReference, call:ProviderFactReference, reference:ProviderFactReference):
+        """Bind an original protocol/member connection without forging a query."""
+        if type(connection) is not T.FunctionConnection or type(env_route) is not T.Route or type(frame) is not Frame:
+            raise TypeError('capture binding needs original typed function connection, route and frame')
+        errors=record_errors(connection,T.FunctionConnection,'connection')
+        if errors:raise ValueError('; '.join(errors))
+        frame.__post_init__()
+        for evidence in (definition,call,reference):
+            if type(evidence) is not ProviderFactReference:
+                raise TypeError('capture connection provenance must be original ProviderFactReference records')
+            evidence.__post_init__()
+        return self._bind(connection.source_callable,connection.body,connection.parameters,connection.conditions,
+            connection.activation,env_route,frame,definition=definition,call=call,reference=reference)
+
+    def _bind(self, source_callable, body, parameters, conditions, activation, env_route, frame, *,
+            definition, call, reference):
+        if activation is not T.FunctionActivation.NORMAL:return ()
+        _require(env_route in parameters and env_route.kind is T.RouteKind.FUNCTION_ENVIRONMENT
             and len(env_route.actuals)==1 and type(env_route.actuals[0]) is T.GlobalPort,
             'callee environment route differs from its original interface')
-        source=self.view.unit(link.source_callable.unit)
+        source=self.view.unit(source_callable.unit)
         functions=[(i,f) for i,f in enumerate(source.facts.functions)
-            if source_port(source.facts,f.value)==link.source_callable]
+            if source_port(source.facts,f.value)==source_callable]
         _require(len(functions)==1,'target is not one original source function')
         ordinal,function=functions[0]
         _require(function.environment.kind is P.DeferredBodyKind.FUNCTION
-            and link.body==T.Body(source.unit,function.template,function.body)
+            and body==T.Body(source.unit,function.template,function.body)
             and function.formals and env_route.formal==source_port(source.facts,function.formals[0])
             and frame.target==source.namespace and frame.entry==source._identity(RegionID,function.template,function.body),
             'NORMAL environment/formal/body/frame differs from original function')
@@ -142,7 +164,7 @@ class FunctionCaptureStateProvider:
         plan=source.plans[function.template]
         bindings,declarations,materials=self._unit(source)
         slicer=ReferenceSlicer(SimpleNamespace(fact_store=source.material.fact_store))
-        _require(interface.definition==slicer.fact(source.facts,'functions',ordinal),
+        _require(definition==slicer.fact(source.facts,'functions',ordinal),
             'source function fact evidence differs')
         environment=self.view.source_port(env_route.formal); records=[]
         for capture,relay in enumerate(function.environment.captures):
@@ -156,11 +178,11 @@ class FunctionCaptureStateProvider:
             state=self.view.state_providers.get(source.unit)
             if state is not None and identity in state.locations:
                 _require(state.locations[identity]==location,'existing SourceState binding address differs')
-            conditions=(*link.conditions,'CALLEE_ENVIRONMENT_SELECTS_RECORDED_RELAY_CELL_HANDLE',
+            guards=(*conditions,'CALLEE_ENVIRONMENT_SELECTS_RECORDED_RELAY_CELL_HANDLE',
                 'CAPTURE_LAYOUT_AND_SOURCE_BINDING_OWNER_MATCH_SELECTED_FUNCTION')
-            record=C.FunctionCaptureBinding(interface.definition,interface.call,interface.reference,link.source_callable,
-                link.body,frame,env_route.formal,env_route.actuals[0],capture,relay,path,binding,slot.owner,key,
-                location,materials,conditions)
+            record=C.FunctionCaptureBinding(definition,call,reference,source_callable,
+                body,frame,env_route.formal,env_route.actuals[0],capture,relay,path,binding,slot.owner,key,
+                location,materials,guards)
             if record not in self._ids:
                 index=len(self.bindings);self._ids[record]=index;self.bindings.append(record)
                 self.outgoing_index[self._key(environment)].append(index)

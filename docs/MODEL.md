@@ -30,6 +30,10 @@ SCAR 是宏观编译器：用有类型、可展开的图统一表示程序及硬
 
 函数对象的创建与使用分开：`SourceFunctionCreation`保原factory、creator/body scope、code/globals、default operand/原expression、cell handles、annotation和前后world；factory的多ref结果按原ABI保留。`scar function-creations --catalog CATALOG --out FRESH --jobs N`发布分片；`SourceFunctionCreationProvider`把初始输入角色接原owned Use/操作，`function-call-view --creations STORE`可合入视图。创建不执行body，输入字段也不是当前对象内容的alias。
 
+构造/descriptor使用同一source端口与frame协议：`ConstructionInterfaceValue`表示原`NEW_RESULT/NEW_WORLD`，不等于fresh对象、storage或已知状态版本。`ProtocolCallableSelection`由原callee、阶段world和目标定义证据投影当前函数；`ProtocolDefaultSlot/State`保当前默认槽及读取，初始表达式仅为来源。`SourceProtocolCallProvider`把原SOURCE_NEW/SOURCE_INIT和method连接接到共享body；Frame.selection保原stage/edge事实，返回精确pop。INIT的数据返回丢弃，构造结果来自NEW_RESULT；OBJECT_INIT/RETURN_FOREIGN保NEW_WORLD→最终world的MAY依赖，不宣称版本相等。class receiver是type投影，pack仅是依赖；所有原连接guards保留。接口值的owner及CONTAINS让原call可展开到这些值。`bind_connection`复用capture校验，不伪造普通函数query/origin。
+
+入口为`scar protocol-call-view --source CALL_CONTEXTS --catalog CATALOG [--members MEMBERS] [--unit UNIT] [--out FRESH]`；无unit且指定out时发布原接口域全部单元。输出按unit分construction values、callables、default slots/states、relations，引用原正文；未解namespace/MRO/实例、方法前沿与实际dispatch仍以原材料及条件保留。三个调用适配器先通过`prepare_source_ports`按unit/template收集去重，批量准备后才逐端口接线，避免交错读取反复解码整张模板表；准备不代表执行或准入。
+
 `FunctionDefaultSlot`是源函数参数的逻辑默认槽；`FunctionDefaultState=project(pre_call_world,slot)`保当前绑定状态，不是tensor内容或LogicalVersion。它依赖当前callable和world，再以条件projection进入formal；初始GP仅是需creator/无mutation证明的provenance。`FunctionCaptureBinding`沿原C2 relay/derived transport把当前callee env连到原`BindingLocationTemplate`，位置ID公式与第二层相同；handle选择不读内容、不宣称外层frame同一cell。相关metadata保MAY、frame和未决实例前沿。
 
 Native单元沿原codec namespace、entry/exit Value/Use和world投影。Tensor与Generator状态地址是`boundary slot＋Optional/List类型路径＋选中值实例`，不是已观察元素、StorageID或内容版本；列表不展开，Optional保存在条件。输入保原before/normal/raised world，返回仅在normal存在。原alias before/显式after字段保留，其阶段是annotation字段而非程序执行时间；标签按原declaration与boundary限定。分组是声明关系记录，查询时才产生条件MAY/PROJECTION边，禁止传递合并成对象或storage身份；wildcard、空after、无annotation与False may_write都不授无副作用/RNG或no-alias结论。

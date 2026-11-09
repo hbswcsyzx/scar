@@ -450,9 +450,9 @@ class ProgramView:
         """
         children=self._expand_original(point)
         if type(point.node) is OperationID:
-            targets=self.dependencies.outgoing(point,kinds=(K.CALL_TARGET,))
+            targets=self.dependencies.outgoing(point,kinds=(K.CALL_TARGET,K.CONTAINS))
             children=(*children,*(edge.target for edge in targets.edges
-                if self.get(edge.target).kind is V.ProgramEntityKind.REGION))
+                if edge.kind is K.CONTAINS or self.get(edge.target).kind is V.ProgramEntityKind.REGION))
         return tuple(dict.fromkeys(children))
 
     def _expand_original(self, point):

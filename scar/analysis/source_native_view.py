@@ -13,7 +13,7 @@ from scar.analysis.program_view import ProgramView
 from scar.analysis.source_binding_native_graph import BindingNativeStore
 from scar.analysis.native_state import NativeStateSession
 from scar.analysis.native_state_materials import NativeStateMaterials
-from scar.analysis.source_call_view import Flow, source_call_site, source_caller_scope
+from scar.analysis.source_call_view import Flow, source_call_site, source_caller_scope, prepare_source_ports
 from scar.analysis.source_declared_calls import DeclaredCallStore, _owners
 from scar.analysis.source_reference_slice import source_port
 from scar.analysis.source_value_flow import _artifact
@@ -84,6 +84,11 @@ class SourceNativeCallProvider:
         call_owners = {source_port(facts, call.result): owners[i] for i, call in enumerate(facts.calls)}
         matches = {self.store.parents.match_reference(unit, i): row.candidate
             for i, row in enumerate(self.store.parents.matches(unit))}
+        ports=[]
+        for output in graph.outputs:
+            ports.extend((output.result,output.world,output.result_world,matches[output.match].site.callee))
+        for row in graph.inputs:ports.extend((row.dependency.call,*row.dependency.actuals))
+        prepare_source_ports(self.view,ports)
         grouped = defaultdict(list)
         for i, row in enumerate(graph.inputs): grouped[row.match].append((i, row))
         for ordinal, output in enumerate(graph.outputs):
