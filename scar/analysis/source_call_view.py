@@ -15,7 +15,9 @@ from scar.analysis.source_function_interfaces import SourceFunctionInterfaceStor
 from scar.analysis.source_namespace_interfaces import NamespacePlanView
 from scar.analysis.source_reference_slice import source_port
 from scar.analysis.source_value_flow import _artifact
-from scar.ir.program import normal_graph as G,normal_targets as T
+from scar.analysis.source_call_defaults import FunctionDefaultStateProvider
+from scar.analysis.source_call_captures import FunctionCaptureStateProvider
+from scar.ir.program import normal_graph as G,normal_targets as T,normal_links as F
 from scar.ir.program.dependencies import (
     DependencyPoint as Point,DependencyFrame as Frame,DependencyEdge as Edge,
     DependencyCondition as Condition,DependencyEvidence as Evidence,
@@ -58,6 +60,8 @@ class SourceFunctionCallProvider:
         self.available_units=frozenset(self.store.report['shards']);self.boundary_ports={}
         self.incoming_index=defaultdict(list);self.outgoing_index=defaultdict(list)
         self.pending=defaultdict(set)
+        self.defaults=FunctionDefaultStateProvider(view)
+        self.captures=FunctionCaptureStateProvider(view)
         artifact=_artifact(self.store.path/'result.json',self.store.report['schema'])
         self.manifest=SourceArtifactLocator(artifact,artifact.sha256,artifact.size_bytes,'canonical-json')
         # Stored interface shards already are the complete conditional graph.
@@ -105,6 +109,19 @@ class SourceFunctionCallProvider:
         value=self.view.source_port(link.callee)
         return operation,use,value
 
+    def _caller_scope(self,frame,context):
+        """Namespace equality alone cannot select a function within one unit."""
+        frames=context_frames(context);source=self.view.namespaces[frame.caller]
+        if not frames:
+            return source.facts.root_scope.owner if context_is_closed(context) else None
+        entry=frames[-1].entry or frames[-1].target.root
+        node=source.nodes.get(entry)
+        if node is None:raise ValueError('caller context entry is not attached to its original source unit')
+        plan=source.plans[node.anchor.template]
+        ports=[p for p in plan.compilation_flow.ports if p.region==node.anchor.original]
+        if len(ports)!=1:raise ValueError('caller context entry lacks its original code-scope port')
+        return F.CodeScopeRef(source.unit,ports[0].code_scope)
+
     def _relation(self,source,target,frame,flow,kind,meaning,key,route,guards):
         relation=CallRelation(source,target,frame,flow,kind,meaning,key,route,guards)
         self.relations.append(relation)
@@ -139,10 +156,18 @@ class SourceFunctionCallProvider:
             body=self.view.source_region(link.body.unit,link.body.template,link.body.region)
             frame=Frame(operation.namespace,operation.node,use.node,value.node,body.namespace,entry=body.node)
             self.frames[key]=frame
+            self._relation(operation,body,frame,Flow.ENTER,Kind.CALL_TARGET,Meaning.DEPENDENCE,
+                key,0,link.conditions)
             for ri,route in enumerate(link.parameters):
                 formal=self.view.source_port(route.formal)
+                if route.kind is T.RouteKind.FUNCTION_ENVIRONMENT:
+                    self.captures.bind(interface,route,frame)
                 if route.kind in (T.RouteKind.INITIAL_DEFAULT,T.RouteKind.CONDITIONAL_DEFAULT):
-                    self._note(formal,'FUNCTION_DEFAULT_CREATION_CONTEXT_AND_VERSION_NOT_SELECTED');continue
+                    world=source_port(facts,facts.calls[interface.query].world)
+                    current=self.defaults.read(interface,route,frame,world)
+                    self._relation(current,formal,frame,Flow.ENTER,Kind.PROJECTION,Meaning.DEPENDENCE,
+                        key,ri,(*link.conditions,'PARAMETER_ROUTE_'+route.kind.value))
+                    continue
                 if not route.actuals:
                     self._note(formal,'SOURCE_CALL_ROUTE_HAS_NO_DIRECT_REFERENCE_OPERAND');continue
                 for actual in route.actuals:
@@ -185,7 +210,7 @@ class SourceFunctionCallProvider:
                     'A declared function boundary has no selected attached caller/resume interface.'),))
             return Neighborhood()
         self.store.validate();self.view.get(point)
-        edges=[];needs_frame=False;matched=False
+        edges=[];needs_frame=False;matched=False;wrong_caller_scope=False
         for relation in rows:
             pop=(incoming and relation.flow is Flow.ENTER) or (not incoming and relation.flow is Flow.RETURN)
             if pop:
@@ -194,11 +219,15 @@ class SourceFunctionCallProvider:
                 matched=True;caller_context=popped.remaining;callee_context=point.context
             else:
                 caller_context=point.context;callee_context=context_push(caller_context,relation.frame)
+            unit,ordinal=relation.interface
+            query=self.graphs[unit].queries[self.links[relation.interface].query]
+            active=self._caller_scope(relation.frame,caller_context)
+            if active is not None and active not in query.owners:
+                wrong_caller_scope=True;continue
             source_context=caller_context if relation.flow is Flow.ENTER else callee_context
             target_context=callee_context if relation.flow is Flow.ENTER else caller_context
             source=replace(relation.source,context=source_context);target=replace(relation.target,context=target_context)
             call=Point(relation.frame.caller,relation.frame.operation,caller_context)
-            unit,ordinal=relation.interface
             manifest=replace(self.manifest,pointer='#/shards/'+unit+'/tables/interfaces')
             sources=(self.view.namespaces[relation.frame.caller].locator,
                 self.view.namespaces[relation.frame.target].locator,manifest)
@@ -210,6 +239,7 @@ class SourceFunctionCallProvider:
                 conditions,Strength.MAY))
         reasons=set(self.pending.get(key,()))
         if needs_frame and not matched:reasons.add('SOURCE_CALL_CONTEXT_FRAME_NOT_SELECTED')
+        if wrong_caller_scope:reasons.add('SOURCE_CALLER_CODE_SCOPE_DOES_NOT_OWN_CALLSITE')
         if edges and not context_is_closed(point.context):reasons.add('SOURCE_CALL_CONTEXT_PREFIX_OPEN')
         frontiers=tuple(Frontier(point,r,'Retained source interfaces require the recorded target, versions and matching caller frame.')
             for r in sorted(reasons))
@@ -224,6 +254,8 @@ class SourceFunctionCallProvider:
             interfaces=len(self.links),normal_frames=len(self.frames),relations=len(self.relations),
             flows=dict(Counter(r.flow.value for r in self.relations)),
             kinds=dict(Counter(r.kind.value for r in self.relations)),
+            default_reads=len(self.defaults.reads),default_slots=len(self.defaults.addresses),
+            captured_cell_bindings=len(self.captures.bindings),captured_locations=len(self.captures.locations),
             pending_endpoint_reasons=sum(len(r) for r in self.pending.values()),
             namespace_semantics_rederived=False,runtime_dispatch_proven=False,
             source_bodies_copied=False,loops_unrolled=False,first_stage_complete=False)
@@ -232,9 +264,16 @@ class SourceFunctionCallProvider:
 def main():
     parser=argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--interfaces',required=True);parser.add_argument('--unit',action='append')
+    parser.add_argument('--creations',help='optional original factory-role graph, loaded on demand')
     args=parser.parse_args();store=SourceFunctionInterfaceStore(args.interfaces)
-    provider=SourceFunctionCallProvider(ProgramView(store.catalog),store,units=args.unit)
-    print(json.dumps(provider.summary()),flush=True)
+    view=ProgramView(store.catalog)
+    provider=SourceFunctionCallProvider(view,store,units=args.unit)
+    report=provider.summary()
+    if args.creations:
+        from scar.analysis.source_creation_view import SourceFunctionCreationProvider
+        creations=SourceFunctionCreationProvider(view,args.creations,units=tuple(args.unit or ()))
+        report['creation_roles']=creations.summary()
+    print(json.dumps(report),flush=True)
 
 
 if __name__=='__main__':main()

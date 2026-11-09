@@ -443,6 +443,19 @@ class ProgramView:
         return V.ProgramNode(point, kinds.get(type(point.node)), roles[type(point.node)], owner, value_type)
 
     def expand(self, point):
+        """Expand original structure and guarded callable body interfaces.
+
+        Call targets retain their selected frame and original edge evidence;
+        listing a body does not assert its activation or discharge its guards.
+        """
+        children=self._expand_original(point)
+        if type(point.node) is OperationID:
+            targets=self.dependencies.outgoing(point,kinds=(K.CALL_TARGET,))
+            children=(*children,*(edge.target for edge in targets.edges
+                if self.get(edge.target).kind is V.ProgramEntityKind.REGION))
+        return tuple(dict.fromkeys(children))
+
+    def _expand_original(self, point):
         provider = self.namespaces.get(point.namespace)
         if provider is not None and point.node in provider.nodes:return provider.expand(point)
         adapter,_=self._metadata(point)
@@ -452,7 +465,10 @@ class ProgramView:
             children=tuple(o for block in original.blocks for o in block.operations)
         elif type(original) is M.Block:children=original.operations
         elif type(original) is M.Operation:
-            children=(*(u.id for u in original.uses),*original.results,*(() if original.callee is None else (original.callee,)))
+            # A callable body belongs to its selected interface frame. The
+            # CALL_TARGET query in expand supplies it; do not also expose an
+            # unframed body through this structural port expansion.
+            children=(*(u.id for u in original.uses),*original.results)
         return tuple(Point(point.namespace,node,point.context) for node in children)
 
     def producers(self, point): return self.dependencies.incoming(point)
