@@ -26,7 +26,7 @@ NORMAL_SUCCESS / CPython 3.14.7；交付后端约定 C++20、算子 ABI v1、计
 | 正文操作/值流 | 6共享正文的833操作、18,444边、50局部位置；9入口→75依赖调用输入 | 可能依赖已达任务调用实参；内容/状态版本仍未证明 |
 | 派生实参接口 | 75输入→14原形参绑定/8源函数；含task actual2369→compiled formal3972 | 84目标/协议前沿；未授caller匹配或dispatch |
 | 正文展开 | 11共享正文（复用6、新增5），12参数入口；compiled任务正文526操作/60调用 | 2非数据参数路由保接口边界；下游native/源调用仍需接线 |
-| native/资源 | 有效硬件旁图12节点/12边；原始2839条生成绑定材料可重用 | 旧source binding工件过期；原资源候选operand_sources=0，运行I/O尚未连接 |
+| native声明/资源 | 独立2839条生成声明、1703导出；有效硬件旁图12节点/12边 | 旧source binding工件过期；当前声明未接源/原生端口，原资源候选operand_sources=0 |
 
 五类实体为 Operation / Value / StateLocation / Region / Resource；输入输出是端口角色。
 对象、storage、逻辑内容版本和物理副本互不等价；循环不按迭代复制。
@@ -66,16 +66,20 @@ NORMAL_SUCCESS / CPython 3.14.7；交付后端约定 C++20、算子 ABI v1、计
 - **`config-value-flow-current/verification.json`：正文操作和值依赖门通过。** 保原833个操作及typed输入/输出、18,444边（含4回边）、50局部位置/227访问；不生成输入输出或writer/reader的笛卡尔积。9形参入口得到75处may依赖调用输入，正常run_job配置形参已追至task调用35实参0；复制输出不冒充原对象，172名称内容/捕获边界显式保留。构建165.12秒（父认证142.80、正文19.49、查询0.036）、严格核验172.68秒，峰值RSS约0.78 GiB、压缩535,261 bytes。通用小用例1.45秒；真实核验阻断目标import。不是已证明的内容来源统一、执行路径或第一阶段完成。
 - **`config-value-interfaces-current/verification.json`：派生实参接口门通过。** 75输入保父may-dependency，单扫历史calls接14条原实参/形参绑定、8源函数；task调用35 actual2369→compiled rawrun formal3972已接原world/data返回。根config与派生actual不因此成为alias。84条前沿含同一输入的多target边界，不是84个被拒优化；主要为native/目标契约、构造及pack。完整父认证173.82秒仅一次，接口构建13.53秒、同进程原规则重验13.13秒；峰值RSS约0.80 GiB、压缩12,818 bytes，阻断目标import。compiled正文未在本视图展开，当前caller上下文、运行dispatch、内容版本及全图完成仍未证明。
 - **`config-body-expansion-current/verification.json`：普通/compiled正文展开门通过。** 11共享正文中6个只引用父表、新增5个，12参数入口；新增605操作/13,442边/72调用。compiled rawrun形参3972已进入原编译正文（526操作、11,554边、60调用、8回边），得到67个may依赖调用输入；不运行compile/exec或目标。2个环境等非数据参数路由保独立边界。完整父认证188.00秒、正文构建23.27秒、同进程重验26.40秒，峰值RSS约0.80 GiB、压缩387,227 bytes；compiled材料另独立核原domain/ordinal/digest/profile。原port ID不变，旧body payload复制0，循环保共享回边。仍未证明当前内容、activation或全覆盖。
+- **`source-native-binding-materials-current/verification.json`：独立生成声明目录门通过。** 2839定义、1703导出/1703 wrapper、2220 group，复用仍有效原始材料并核当前工具/源码版本；未复用失效旧source绑定图，也未运行torchgen worker或源solver。构建2.38秒、strict读回4.68秒、峰值RSS约0.28 GiB；定义表压缩840,714 bytes，原始材料约37.1 MB。所有native引用仍None/DECLARATION_ONLY，源/原生/资源连接均False；manual绑定和Python reexport未纳入，不将声明目录当作链路已贯通。新模块用`source_native_binding_materials.py`，原C2b collector逐字保留。
 
 native/资源审计：11个旧`python-bindings-*`图为schema1–4且producer过期，不能接当前schema5 reader/ContextTargetGraph；
 原始`materials.json`仍通过当前隔离工具与材料版本核验，可独立重建声明。现有资源图的264 placement candidates对应operand_sources=0；
 源码path→mount/disk只表示文件所在位置，不证明程序open/read/write。硬件inventory有效不等于源程序已接资源或实际产生ResourceUse。
+`config-body-expansion-current/downstream-audit.json`按11正文全部调用查原关系：168调用点中134有814条历史may边，涉及346个源函数（339尚未展开）；
+含construction/new/init、deferred及未匹配caller上下文的callback候选，不能据此宣布346个真实调用。当前compiled单元的torch namespace仅有dtype `float32`读取，
+生成声明目录尚无由此得到的算子调用依据；下一门须先区分源调用上下文及构造协议，而非把声明目录直接当作native链路。
 
 ## 后续顺序与验收
 
 1. **输入字段层：** plain/untyped条件性字段应用与lazy引用子门已过；不代表完整cfg。未知prefix与中途地址/合并状态按表保留，不从条件候选证明当前内容。
-2. **配置状态层：** 原config→core.run_job→派生task实参→compiled rawrun形参及正文已保条件接通，普通/compiled材料适配门已过。继续接下游源调用与输入/后续状态版本；构造/pack/native按各自协议，may可达不冒充确定顺序、当前内容或入口准入。不重新编译目标或复制循环，不盲增预算。
-3. **算子与资源层：** 先将原始生成绑定声明从旧source solver解耦，再以当前NamespaceLookup/GlobalPort连接Python→native归一化依赖和资源类型候选。重接原实参，不能继续使用operand_sources=0的旁图声称全链路完成；Tensor类型、设备候选与实际分配/传输分开。源运行I/O与源码文件位置分开建模；运行地址等未知字段不伪造。
+2. **跨层源调用/状态层：** 原config→core.run_job→派生task实参→compiled rawrun形参及正文已保条件接通，普通/compiled材料适配门已过。下游按callsite/caller上下文分开普通调用、construction/new/init、instance-call与deferred协议，先接原body接口及状态，再推进已确认声明正文。保全部may候选及未解条件，339个未展开函数不冒充已激活正文。输入和后续版本仍待证明，不重新编译目标、复制循环或盲增预算。
+3. **算子与资源层：** 原始生成绑定声明已从旧source solver解耦；待上述源连接提供NamespaceLookup/类型来源，再接Python→native归一化依赖和资源类型候选。重接原实参，不能继续使用operand_sources=0的旁图声称全链路完成；Tensor类型、设备候选与实际分配/传输分开。源运行I/O与源码文件位置分开建模；运行地址等未知字段不伪造。
 4. **全图验收：** 源码闭包、顺序敏感传播、循环和跨层接口的覆盖分母/缺口审计。队列清空本身不证明全覆盖；第一阶段通过后才进入化简。
 
 CLI与查询见 [DEVELOPMENT](DEVELOPMENT.md)，实体与连接约束见 [MODEL](MODEL.md)。

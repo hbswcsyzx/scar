@@ -416,6 +416,8 @@ body与entry分表共享，不按调用或循环复制。输入来源查询是ma
 同一进程可共享`ValueInterfaceParents`给build/read，父图完整认证一次，再以原report/表收据保有效性；不改变目标选择或内容证明强度。
 `python -B -m scar.analysis.source_body_expansion --interfaces INTERFACES --out FRESH_BODIES`展开原source/compiled函数正文；`--read BODIES`重核。
 `source_graph_material(catalog, unit)`统一普通/compiled材料读取。正文references表引用原父表或新增body表，entry/reach的body序号指references表；不复制旧正文。
+`python -B -m scar.analysis.source_native_binding_materials --site SITE_PACKAGES --out FRESH_DECLARATIONS [--catalog RAW_MATERIALS]`独立收集生成绑定声明；`--read DECLARATIONS`重核工具、源码和原定义。
+本目录不依赖旧source solver，不选择导出/overload，不连接native或资源；接口继续使用既有PythonBinding类型。原`source_binding_materials.py`仍属于C2b前端。
 `python -B -m scar.analysis.source_admission --targets TARGET_STORE --out FRESH_PLAN`支持普通及context图，按真实source provider关联需求与原依赖材料，不修改模型。
 对旧inventory未索引的实际module需求，用原候选roots定点查找；可重复`--search-root`指定候选root。
 新搜索表与原inventory的索引域分开，未固定内容版本不列ready；搜索根及文件存在均不证明运行时import选择。
