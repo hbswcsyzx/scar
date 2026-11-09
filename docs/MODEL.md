@@ -77,6 +77,9 @@ alias、完整LEXICAL binding、实参、初始default、data return及构造结
 `NEW_RESULT`是构造协议结果，`__new__`可返回旧对象；只有原OBJECT_NEW/EXPLICIT_OBJECT_NEW提供分配位置候选。
 同一候选位置的字段SET→GET只产生带scope、实例、descriptor及版本条件的may-content边，保原world；
 它不变成alias，也不证明当前内容。由此推导的方法接口独立于入口准入及runtime dispatch。
+声明正文上下文以原函数body和类型化class-input为键，调用边显式连接原实参/形参、数据返回和world。
+同键共享正文，递归保回边；它不是Invocation。descriptor包装的原调用、builtin查找和前序miss条件均保留。
+非NORMAL连接仅声明创建边，不因创建generator/coroutine就进入正文。声明状态接点另表引用这些边，不改历史CallLink。
 
 [逻辑值 IR](../scar/ir/v2/values.py) 已定义 LogicalValue、ValueVersion、ProvenanceRecord、
 Materialization 和等价声明，用于分开逻辑来源、推导关系、版本及物理表示。
