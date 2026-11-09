@@ -427,6 +427,11 @@ body与entry分表共享，不按调用或循环复制。输入来源查询是ma
 `python -B -m scar.analysis.source_namespace_callees --calls CALL_CONTEXT_GRAPH --out FRESH_NAMESPACES`将namespace来源接到原callee查询/state；`--read GRAPH`重推核验。
 `python -B -m scar.analysis.source_inherited_member_graph --calls CALL_CONTEXT_GRAPH --out FRESH_INHERITED`接继承成员、原ABI与共享正文；`--read GRAPH`重核路径及正文。
 两者build/read可复用同一个`ConstructorMemberParents`，完整父链只认证一次；不合并caller，不证明实际MRO/dispatch。
+`python -B -m scar.analysis.source_connected_bodies --namespaces NAMESPACE_GRAPH --members INHERITED_GRAPH --out FRESH_BODIES`连接两类接口、共享正文及下游callee查询；`--read GRAPH`重推。
+`ConnectedBodyParents(..., common=certified_constructor_parents)`复用原父链；`interface_scopes`记录派生返回的完整caller许可域。读取时不能把所有接口都经普通`admit`授予通用域。
+`python -B -m scar.analysis.source_declared_calls --catalog CONTEXT_CATALOG --source-root SOURCE_TREE --out FRESH_CALLS --jobs 4`按unit并行生成全部原callsite的namespace子图；可重复`--source-root`。
+`DeclaredCallStore.load_unit(unit)`核收据/ABI/owners/请求；`read_unit(unit)`再重推该unit。源码声明不授scope激活或caller选择，compiled变体保在既有正文入口。
+`python -B -m scar.analysis.source_named_bindings --calls FRESH_CALLS --bindings GENERATED_DECLARATIONS --out FRESH_BINDINGS --jobs 4`按完整符号保所有overload及原ABI；`--read GRAPH --unit UNIT`单unit重推匹配。未匹配不能解释为没有native实现。
 `python -B -m scar.analysis.source_fact_materials --catalog CONTEXT_CATALOG --graph GRAPH_A --graph GRAPH_B --out FRESH_MATERIALS`核所列图的全部源事实引用；`--read INDEX`重核。
 `read_fact_materials(INDEX)`返回report/resolver；`resolver.resolve(reference)`核目录路由、分片bytes/decoded收据和locator，返回原locator与实际物化artifact。
 旧collection相对URI不能直接当文件路径；compiled的records/0按原JSONL记录解释。共享父body所在图须显式列入`--graph`，索引不暗示未列祖先已验证。

@@ -122,6 +122,12 @@ namespace来源图以原GlobalPort及待选择的属性序列为查询状态。�
 GET属性选择与IMPORT_FROM的registry fallback分别记录，属性receiver与结果不成为alias。
 标准`import a.b.c`返回`a`时，父包上安装子模块的每个已匹配属性前缀另保来源边；仍需当前slot及标准导入条件。
 namespace来源子图按原端口共享，使用点以原callee查询/state锚定，因此各caller栈不合并。函数接口保原调用ABI与环境版本条件。
+进入被解析函数正文时，outer stack取原调用者查询的根；factory内部的来源stack仍是来源证据，不能代替调用者的实参frame。
+派生接口的data return另有完整caller-stack许可域；读取同一静态result端口必须匹配该域，不能把某个caller得到的目标推广到其他caller。
+历史may接口保原开放条件。所有正文共享，成员递归路径保边界/原回边，不通过迭代复制正文。
+源码声明图按原callsite及CodeScope覆盖完整选定源树，namespace路径可在没有选中incoming的情况下单独分析；它不伪造Invocation或scope激活。
+同一原callsite的caller查询另保调用栈，两种视图不能相互冒充。生成绑定按完整路径连接，保所有overload和原source ABI；转换依赖不当作alias。
+分析状态（尚未选定、尚未证明）保在请求证据及状态字段，不能当作运行时guard与“选择该binding”合取。
 类基项保原求值端口、顺序和CLASSES fact所属创建scope；packed ABI仍含body/name，不能直接当base列表。
 namespace图的class-definition来源是附条件的源码声明产物，不是运行时class或MRO证明；当前版本、builtin及动态属性缺口仍逐字段保留。
 继承成员记录原有序base槽及完整来源路径；每条descriptor选择可追至记录，不选择第一条基类或写入作为实际MRO/当前成员。

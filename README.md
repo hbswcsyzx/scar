@@ -31,6 +31,16 @@ python -B -m scar.analysis.normal_targets --facts /path/to/facts --interfaces /p
 
 摘要沿用原函数/循环/状态端口；不导入目标，也不按调用或迭代展开正文。
 
+已有 context catalog 后，可独立分析整个源树的调用声明，无需等待入口求解队列收敛：
+
+```bash
+python -B -m scar.analysis.source_declared_calls --catalog CONTEXT_CATALOG --source-root /path/to/program --out FRESH_CALLS --jobs 4
+python -B -m scar.analysis.source_named_bindings --calls FRESH_CALLS --bindings GENERATED_BINDING_DECLARATIONS --out FRESH_BINDINGS --jobs 4
+```
+
+每个源码单元独立存储。原调用、scope、参数和循环不复制；完整符号匹配保留所有候选overload。
+声明图不代表scope已执行；参数类型、当前namespace、parser接受及实际dispatch仍需各自依据。
+
 ## 文档
 
 - [模型](docs/MODEL.md)：实体、身份、边、可展开结构与正确性约束。

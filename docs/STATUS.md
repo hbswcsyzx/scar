@@ -32,7 +32,10 @@ NORMAL_SUCCESS / CPython 3.14.7；交付后端约定 C++20、算子 ABI v1、计
 | base/namespace来源 | 39类/30有序base槽；29槽有条件源码class候选，原端口/来源保留 | 当前globals/class namespace/builtin/slot版本仍OPEN；尚未计算或证明MRO |
 | namespace调用接口 | 236原查询锚点共享168来源子图，26条件函数接口/13源函数，102具名请求 | 父调用栈保留；当前namespace/函数环境版本与实际dispatch仍OPEN |
 | 继承成员/正文 | 原64构造入口→52共享上下文；2直接＋4继承接口，47共享正文 | 121正文调用前沿；基类路径不代替当前MRO、遮蔽或精确类型证明 |
-| 源证据物化 | 6图/3,699引用→22原分片，18项集合路径显式重定位；stored/decoded/locator均核验 | 仅覆盖列出图的表与报告，不等于全部祖先或全程序语义验收 |
+| 共享正文/下游调用 | 55正文、111保outer caller的入口→421查询；72条件namespace函数接口 | 当前非词法/producer等453关系前沿；尚未到全域固定点 |
+| 全源码调用声明 | 581源单元/48,290原callsite全部纳入；33,558具名请求，按unit独立分片 | 不授scope激活或caller选择；7个selector深度前沿、参数/返回来源等待上下文 |
+| 具名原生绑定 | 2,559 callsite→7,543条件绑定接口，保196声明/196 ATen selectors | parser、native schema、实际dispatch未证明；非生成绑定仍保显式缺口 |
+| 源证据物化 | 9图/657,136引用→771原分片，765项集合路径显式重定位；stored/decoded/locator均核验 | 仅覆盖列出图的表与报告，不等于全部祖先或全程序语义验收 |
 | native声明/资源 | 独立2839条生成声明、1703导出；有效硬件旁图12节点/12边 | 旧source binding工件过期；当前声明未接源/原生端口，原资源候选operand_sources=0 |
 
 五类实体为 Operation / Value / StateLocation / Region / Resource；输入输出是端口角色。
@@ -80,7 +83,10 @@ NORMAL_SUCCESS / CPython 3.14.7；交付后端约定 C++20、算子 ABI v1、计
 - **`config-class-bases-current/verification.json`：有序基类与namespace来源门通过。** 39类/30基类槽，其中29槽保源码类候选；209来源状态/187边。补标准`import a.b`父包属性来源后，原三表字节未变；构建12.47秒、重验13.04秒、压缩21,969 bytes。113前沿保当前namespace/builtin等字段缺口，不授实际bases/MRO；通用用例0.93秒。
 - **`config-namespace-callees-current/verification.json`：namespace→callee门通过。** 原236查询锚点共享168来源图；26条件接口涉及13源函数，102具名请求不当作native目标。原caller栈、实参、data/world及路径条件保留。父链认证250.94秒一次；本图构建11.44秒、重验12.43秒，压缩133,875 bytes。
 - **`config-inherited-members-current/verification.json`：继承路径→成员/正文门通过。** 同一认证父对象复用，无二次父认证；64原入口→52上下文，2直接＋4继承接口；47共享正文中11引用父表、新增36（882操作/62调用/19,483边）。原base槽、namespace路径及descriptor条件随边保留，不按第一基类或同名类选实际MRO。构建97.05秒、重验102.22秒，压缩653,963 bytes；121正文调用前沿仍开放。本轮两图全程478.72秒、峰值RSS约1.79 GiB。
-- **`config-source-fact-materials-current/verification.json`：源证据物化门通过。** 审计发现旧`ReferenceSlicer.fact`把collection当primitive目录，且旧核验重复同一拼接，未实际解引用。新增固定目录路由与`FactMaterialResolver.resolve`，原证据键、GP、locator均不改，不造文件或软链。6张列出图的3,699引用→22原分片（18重定位），逐核目录链、stored/decoded收据、unit及locator；compiled保绝对variant与records/0，不回退原源码。构建9.33秒、重验9.30秒；索引2,900 bytes、原分片合6,416,848 bytes。旧逻辑URI须经此目录解析，不能直接`Path(uri)`；此门不重新授予图语义或完整祖先覆盖。
+- **`config-source-fact-materials-current/verification.json`：源证据物化门通过。** 旧`ReferenceSlicer.fact`把collection当primitive目录的问题由显式目录路由解决，原证据键、GP、locator不改，不造文件或软链。现扩至所列9图的657,136引用→771原分片（765重定位），逐核目录链、stored/decoded收据、unit及locator；compiled保绝对variant与records/0，不回退原源码。构建131.85秒、重验136.74秒；索引71,088 bytes、原分片合99,713,538 bytes，峰值RSS约1.01 GiB。旧逻辑URI须经material resolver解析，不能直接`Path(uri)`；此门不重新授予图语义或完整祖先覆盖。
+- **`config-connected-bodies-current/verification.json`：共享正文→下游查询门通过。** 复用47正文、新增8正文/610操作/70调用，合55正文；26 namespace入口＋67构造入口＋18成员入口共111，全部保选中outer caller，最大stack4、入口预算截断0。421查询保2,993状态/2,572边，补72条namespace接口（14源函数）、70具名请求及74构造接口，均为条件关系。新增派生返回须匹配完整caller stack，111条`interface_scopes`存许可域，防同一结果端口串到另一caller；原历史may关系不伪装成匹配证明。3个小用例1.51秒核caller分离、双层转发和派生返回许可。父认证250.91＋114.05秒仅一次，构建109.09、重验166.70秒；压缩4,728,937 bytes、峰值约2.50 GiB。这些是分析器耗时，不是LeWM性能。
+- **`program-declared-calls-current/verification.json`：全源树调用声明图已构建。** 按通用source-root选择581原单元，48,290 callsite与原owners/callee全部保留；675,747 namespace状态、639,845来源边、33,558具名请求。4个spawn worker按unit独立写入，catalog各初始化一次、每unit清普通facts/端口缓存；构建383.97秒、压缩42,785,099 bytes，最大子进程RSS约1.04 GiB。入口源码unit完整重推4.29秒；没有声称581单元都再次语义重推。无全域FIFO截断；7个selector深度边界分布于3源码单元，其他未决为版本/参数/call-result等字段或关系，不是缺失callsite。scope声明不等于已执行。
+- **`program-named-bindings-current/verification.json`：完整符号→生成绑定声明门通过。** 581单元按完整返回模块＋selector路径查既有2839声明，2,559 callsite得到7,543候选，保196 binding/196 ATen selector及全部overload；30,996请求没有对应生成声明，不能按末段同名补匹配。原callee/参数/packs/receiver/result/world都保留。4-worker构建239.08秒；修正guard与分析未选状态混用时，仅迁移7543条条件注解3.39秒，原ABI及匹配集合未改，新规则选中unit读回8.48秒；压缩2,003,330 bytes。原生schema、parser接受、实际dispatch和scope激活仍未证明，不是可变换机会或实测调用次数。
 
 native/资源审计：11个旧`python-bindings-*`图为schema1–4且producer过期，不能接当前schema5 reader/ContextTargetGraph；
 原始`materials.json`仍通过当前隔离工具与材料版本核验，可独立重建声明。现有资源图的264 placement candidates对应operand_sources=0；
@@ -92,8 +98,8 @@ native/资源审计：11个旧`python-bindings-*`图为schema1–4且producer过
 ## 后续顺序与验收
 
 1. **输入字段层：** plain/untyped条件性字段应用与lazy引用子门已过；不代表完整cfg。未知prefix与中途地址/合并状态按表保留，不从条件候选证明当前内容。
-2. **跨层源调用/状态层：** namespace→callee及有证据基类路径→继承成员/共享正文已接；旧caller查询不改写，新增26函数接口仍带路径/版本条件。继续连接字段/返回生产者、捕获与outer caller，把新增接口纳入后续共享正文查询；处理遮蔽、当前namespace/state版本及入口选择，不能把候选变成确定dispatch。源事实证据统一经material resolver物化；旧直接URI生成点后续迁移，冻结祖先不重签。
-3. **算子与资源层：** 原始生成绑定声明已从旧source solver解耦；待上述源连接提供NamespaceLookup/类型来源，再接Python→native归一化依赖和资源类型候选。重接原实参，不能继续使用operand_sources=0的旁图声称全链路完成；Tensor类型、设备候选与实际分配/传输分开。源运行I/O与源码文件位置分开建模；运行地址等未知字段不伪造。
+2. **跨层源调用/状态层：** 全源树调用声明与入口上下文查询分开建立，避免所有覆盖等待Hydra入口前缀；二者以原call/CodeScope/端口连接。已有55共享正文与caller许可域；继续接字段/返回生产者、捕获和参数类型，处理7个selector深度边界及遮蔽/版本/入口条件。源事实引用经material resolver物化，冻结祖先不重签。
+3. **算子与资源层：** 已有2559源码callsite的生成绑定候选；下一步将196个精确ATen selector降低为canonical接口，再按原parser转换声明连接实参→native端口与资源类型候选。不能继续使用operand_sources=0的旁图声称全链路完成；Tensor类型、设备候选与实际分配/传输分开。源运行I/O与源码文件位置分开建模；运行地址等未知字段不伪造。
 4. **全图验收：** 源码闭包、顺序敏感传播、循环和跨层接口的覆盖分母/缺口审计。队列清空本身不证明全覆盖；第一阶段通过后才进入化简。
 
 CLI与查询见 [DEVELOPMENT](DEVELOPMENT.md)，实体与连接约束见 [MODEL](MODEL.md)。
