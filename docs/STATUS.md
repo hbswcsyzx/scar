@@ -36,8 +36,9 @@ NORMAL_SUCCESS / CPython 3.14.7；交付后端约定 C++20、算子 ABI v1、计
 | 全源码调用声明 | 581源单元/48,290原callsite全部纳入；33,558具名请求，按unit独立分片 | 不授scope激活或caller选择；7个selector深度前沿、参数/返回来源等待上下文 |
 | 具名原生绑定 | 2,559 callsite→7,543条件绑定接口，保196声明/196 ATen selectors | 当前namespace、parser、实际dispatch未证明；非生成绑定仍保显式缺口 |
 | 原生端口归一化 | 196 canonical ATen接口；29,964输入依赖、7,543返回包装依赖，显式world接线 | 2,553输入转换/receiver仍OPEN；不是值alias或parser/dispatch证明 |
+| 词法读写顺序 | 原C2/F4读写锚点→匹配控制栈/GEN-KILL；3单元7查询排除23条不可达写边，原7处selector截断归零 | 当前仅选中查询的正常路径视图；捕获/未知效果和异常/resume分支保OPEN，不证明Tensor内容版本 |
 | 源证据物化 | 9图/657,136引用→771原分片，765项集合路径显式重定位；stored/decoded/locator均核验 | 仅覆盖列出图的表与报告，不等于全部祖先或全程序语义验收 |
-| native声明/资源 | 原目录2839声明、1703导出；另有196 source binding→canonical native链接；硬件旁图12节点/12边 | 原生数据/状态端口已接；资源候选仍须接新实参依赖，旧旁图operand_sources=0 |
+| native声明/资源 | 539个原生资源类型投影→18,283源码路由；1,617内存池/设备候选，复用12硬件节点 | 类型/来源与实际placement分开；运行I/O及非生成接口仍需补，不使用旧operand_sources=0旁图宣称接通 |
 
 五类实体为 Operation / Value / StateLocation / Region / Resource；输入输出是端口角色。
 对象、storage、逻辑内容版本和物理副本互不等价；循环不按迭代复制。
@@ -90,8 +91,14 @@ NORMAL_SUCCESS / CPython 3.14.7；交付后端约定 C++20、算子 ABI v1、计
 - **`program-named-bindings-current/verification.json`：完整符号→生成绑定声明门通过。** 581单元按完整返回模块＋selector路径查既有2839声明，2,559 callsite得到7,543候选，保196 binding/196 ATen selector及全部overload；30,996请求没有对应生成声明，不能按末段同名补匹配。原callee/参数/packs/receiver/result/world都保留。4-worker构建239.08秒；修正guard与分析未选状态混用时，仅迁移7543条条件注解3.39秒，原ABI及匹配集合未改，新规则选中unit读回8.48秒；压缩2,003,330 bytes。原生schema、parser接受、实际dispatch和scope激活仍未证明，不是可变换机会或实测调用次数。
 - **`program-binding-native-current/verification.json`：源码→canonical原生端口门通过。** 从上述匹配机械选出196精确selector，复用isolated parser/lowerer按64分4批；原声明目录不改，以独立links表连接。581分片保29,964输入依赖、7,543返回包装依赖及7,543组显式source world→native world / native normal world→source result_world；这些是条件依赖，不是值/状态版本相等，wrapper前后effects仍OPEN。2,553输入转换/receiver未解，22参数包依赖不伪装成单参数。初构建39.45秒；审计发现整数列表varargs遗漏后续维度，已按通用声明规则重建3,920条聚合依赖，实际四维base overload逐GP验证；fixed/optional列表保歧义OPEN。归一化刷新26.51秒、没有重跑原生parser或源树；全部196 canonical图核验＋选中unit新规则重推1.68秒。表压缩5,841,417 bytes，native材料与图1,417,715 bytes；未声称581单元都再次重推。未导入/执行目标或选择实际dispatch，也未接硬件placement。
 
+- **`program-control-names-current/verification.json`：顺序敏感名字接线已验证。** 机械选出所有原selector截断查询（3单元/7查询），8个read过滤共排除23条正常路径不可达写边，7处截断归零；保3,995控制状态/4,012转移/437定义。C2 slot.owner核对函数环境；原writer FactRef、所有READ recipe上下文和未知效果分别保留。缺任何同槽写/参数锚点时禁用排除。3-worker初构建76.40秒；共享格式迁移后与下列完整单元共4任务并行重推76.96秒，原查询/定义语义指纹均未改变。当前表压缩818,158 bytes，最大读回子进程RSS约712 MiB。不是581单元全域顺序分析，也不证明实际dispatch或Tensor内容版本。
+- **`program-control-unit-current/verification.json`：完整单元顺序建图已验证。** 37/37原调用，11组到达定义共享6份函数正文（425操作/3,893原控制边）；15个read过滤保9,000上下文状态及真实回边。无profiling构建19.10秒；选中单元完整重推23.64秒。共享后表893,122→726,417 bytes，所有原定义/查询语义指纹一致；旧63.53秒构建有cProfile插桩，不能与本次clean时间计算加速比。只覆盖所选单元，剩余imports/参数/字段来源明确保前沿。
+- **`program-control-names-loop.json`：真实循环传播通过。** 原BACKEDGE与匹配recipe栈保留，1,172状态/1,176转移；前驱写跨回边到读取的路径未被误删，循环不变量绑定在固定点保留，未展开迭代。14.34秒并通过typed codec/import guard；复用同材料模拟缺失写锚点，新过滤器明确拒绝排除。这里证明绑定定义传播，不证明所引用对象内容不变。
+- **`program-source-resources-current/verification.json`：原生端口→资源类型桥已验证。** 581单元保18,283条源码归一化路由，539个共享类型投影（496 Tensor、32 Device、11 Generator），接1,617目标池/设备候选；另保1,162源单元host候选、283 dispatch声明及588 native executor候选。复用12硬件节点及原拓扑，不重新探测设备，不制造实际分配或传输。构建37.15秒，全局类型/硬件与选中unit路由重推7.60秒，表压缩415,607 bytes、峰值RSS约319 MiB；未声称581路由分片都再次语义重推。
+
 native/资源审计：11个旧`python-bindings-*`图为schema1–4且producer过期，不能接当前schema5 reader/ContextTargetGraph；
 原始`materials.json`仍通过当前隔离工具与材料版本核验，可独立重建声明。现有资源图的264 placement candidates对应operand_sources=0；
+它们已由`program-source-resources-current`的原归一化端口路由替代用于当前资源接线。
 源码path→mount/disk只表示文件所在位置，不证明程序open/read/write。硬件inventory有效不等于源程序已接资源或实际产生ResourceUse。
 `config-body-expansion-current/downstream-audit.json`按11正文全部调用查原关系：168调用点中134有814条历史may边，涉及346个源函数（339尚未展开）；
 含construction/new/init、deferred及未匹配caller上下文的callback候选，不能据此宣布346个真实调用。当前compiled单元的torch namespace仅有dtype `float32`读取，
@@ -100,8 +107,8 @@ native/资源审计：11个旧`python-bindings-*`图为schema1–4且producer过
 ## 后续顺序与验收
 
 1. **输入字段层：** plain/untyped条件性字段应用与lazy引用子门已过；不代表完整cfg。未知prefix与中途地址/合并状态按表保留，不从条件候选证明当前内容。
-2. **跨层源调用/状态层：** 全源树调用声明与入口上下文查询分开建立，避免所有覆盖等待Hydra入口前缀；二者以原call/CodeScope/端口连接。已有55共享正文与caller许可域。7个selector深度边界已定位：`v = v.attr`的读被flow-insensitive关系接回该次写，生成重复attr链；它们不是源程序32层属性访问。下一步按原CFG/world建立读写到达定义，外部未知writer保OPEN，不调大预算或写变量名特例；再接字段/返回生产者、捕获和参数类型。源事实引用经material resolver物化，冻结祖先不重签。
-3. **算子与资源层：** 196个ATen接口与源码实参→native端口已接。下一步以这些真实端口/转换依赖接Tensor、Device、Generator资源类型候选及既有硬件图；不再使用operand_sources=0的旧旁图宣称完成。Tensor类型、设备候选与实际分配/传输分开；再补非生成接口与源运行I/O，源码文件所在位置不等于运行I/O。运行地址等未知字段不伪造。
+2. **跨层源调用/状态层：** 全源树声明与入口上下文分开，通过原call/CodeScope/端口连接。正常控制流的到达定义已接入查询，原7个selector截断归零；保C2 slot所有者、原writer事实、所有recipe上下文并集，锚点/预算缺口禁用排除，外部未知来源仍OPEN。下一步把顺序敏感来源用于更广的源调用，并接字段/返回生产者、捕获和参数类型；不调预算或写变量名特例。原声明与异常/resume分支不被覆盖。
+3. **算子与资源层：** 196个ATen接口、源码端口与资源类型/目标池候选已接，539投影共享而不是按调用复制。下一步补非生成接口和源运行I/O；源码文件所在位置不等于运行I/O，类型候选不证明物理使用或placement。运行地址等未知字段不伪造。
 4. **全图验收：** 源码闭包、顺序敏感传播、循环和跨层接口的覆盖分母/缺口审计。队列清空本身不证明全覆盖；第一阶段通过后才进入化简。
 
 CLI与查询见 [DEVELOPMENT](DEVELOPMENT.md)，实体与连接约束见 [MODEL](MODEL.md)。

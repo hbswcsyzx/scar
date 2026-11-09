@@ -34,12 +34,17 @@ python -B -m scar.analysis.normal_targets --facts /path/to/facts --interfaces /p
 已有 context catalog 后，可独立分析整个源树的调用声明，无需等待入口求解队列收敛：
 
 ```bash
-python -B -m scar.analysis.source_declared_calls --catalog CONTEXT_CATALOG --source-root /path/to/program --out FRESH_CALLS --jobs 4
-python -B -m scar.analysis.source_named_bindings --calls FRESH_CALLS --bindings GENERATED_BINDING_DECLARATIONS --out FRESH_BINDINGS --jobs 4
+python -B -m scar.cli call-declarations --catalog CONTEXT_CATALOG --source-root /path/to/program --out FRESH_CALLS --jobs 4
+python -B -m scar.cli native-bindings --calls FRESH_CALLS --bindings GENERATED_BINDING_DECLARATIONS --out FRESH_BINDINGS --jobs 4
+python -B -m scar.cli native-interfaces --named FRESH_BINDINGS --out FRESH_NATIVE --jobs 4
+python -B -m scar.cli resource-graph --native FRESH_NATIVE --target TARGET_HARDWARE --out FRESH_RESOURCES
+python -B -m scar.cli name-flow --declared FRESH_CALLS --unit SOURCE_UNIT --out FRESH_NAME_FLOW --jobs 4
 ```
 
 每个源码单元独立存储。原调用、scope、参数和循环不复制；完整符号匹配保留所有候选overload。
 声明图不代表scope已执行；参数类型、当前namespace、parser接受及实际dispatch仍需各自依据。
+`name-flow`在共享控制流上计算词法槽位的may到达定义；新正常路径视图与原声明分开，未知效果保留。
+资源图共享已有硬件库存，连接原生值的类型与源码依赖，不把设备候选当成实际placement。
 
 ## 文档
 

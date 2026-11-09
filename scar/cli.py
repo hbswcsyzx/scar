@@ -504,6 +504,24 @@ def main(argv=None) -> int:
     if cli_argv and cli_argv[0] == "static-calls":
         from scar.analysis.contextual_call_cli import main as contextual_calls_main
         return contextual_calls_main(cli_argv[1:])
+    source_graph_commands = {
+        'call-declarations': 'scar.analysis.source_declared_calls',
+        'native-bindings': 'scar.analysis.source_named_bindings',
+        'native-interfaces': 'scar.analysis.source_binding_native_graph',
+        'resource-graph': 'scar.analysis.source_resource_graph',
+        'name-flow': 'scar.analysis.source_control_namespaces',
+    }
+    if cli_argv and cli_argv[0] in source_graph_commands:
+        import importlib
+        # Keep the leaf producers' stable CLI and implementation receipts.
+        # Only their own argparse entry sees these forwarded arguments.
+        original_argv = sys.argv
+        try:
+            sys.argv = ['scar '+cli_argv[0], *cli_argv[1:]]
+            importlib.import_module(source_graph_commands[cli_argv[0]]).main()
+        finally:
+            sys.argv = original_argv
+        return 0
     if cli_argv and cli_argv[0] == "observed-calls":
         from scar.analysis.observed_call_bindings import main as observed_calls_main
         return observed_calls_main(cli_argv[1:])
@@ -554,6 +572,13 @@ def main(argv=None) -> int:
     observed_graph.set_defaults(func=lambda _: 0)
     contextual_calls = sub.add_parser("static-calls", help="resolve guarded source-call interfaces over the shared static graph")
     contextual_calls.set_defaults(func=lambda _: 0)
+    for name, help_ in (
+            ('call-declarations', 'project all selected source callsite namespace declarations by unit'),
+            ('native-bindings', 'join full namespace requests to conditional generated bindings'),
+            ('native-interfaces', 'connect original source operands and state to canonical native interfaces'),
+            ('resource-graph', 'connect native value constraints to a retained target resource graph'),
+            ('name-flow', 'qualify lexical name sources using matched shared control flow')):
+        sub.add_parser(name, help=help_).set_defaults(func=lambda _: 0)
     observed_calls = sub.add_parser("observed-calls", help="bind captured actual callees to original static CALL ports")
     observed_calls.set_defaults(func=lambda _: 0)
     program_query = sub.add_parser("query-program", help="traverse qualified work, native, invocation and static source references")

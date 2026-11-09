@@ -434,6 +434,11 @@ body与entry分表共享，不按调用或循环复制。输入来源查询是ma
 `python -B -m scar.analysis.source_named_bindings --calls FRESH_CALLS --bindings GENERATED_DECLARATIONS --out FRESH_BINDINGS --jobs 4`按完整符号保所有overload及原ABI；`--read GRAPH --unit UNIT`单unit重推匹配。未匹配不能解释为没有native实现。
 `python -B -m scar.analysis.source_binding_native_graph --named FRESH_BINDINGS --out FRESH_NATIVE --jobs 4`复用隔离parser和canonical lowerer，将精确selector、原实参及wrapper声明接至native端口；`--read GRAPH --unit UNIT`核全部native材料/图及该unit归一化。
 输入/返回包装、world依赖独立保留；不假设Python返回与native slots一一对应，也不声明wrapper前后state版本相等。
+上述三个模块也可通过`scar.cli call-declarations / native-bindings / native-interfaces`使用。
+`python -B -m scar.cli resource-graph --native FRESH_NATIVE --target TARGET_HARDWARE --out FRESH_RESOURCES`复用库存接资源类型与源码依赖；`--read GRAPH --unit UNIT`重推全局类型/目标及选中unit路由，不重新探测硬件。
+`python -B -m scar.cli name-flow --declared FRESH_CALLS --unit UNIT --out FRESH_NAMES --jobs 4`按单元计算正常控制路径的词法读写来源；省略`--unit`选择全部声明单元，可用`--frontier REASON`机械选择原查询前沿。
+`--read FRESH_NAMES --unit UNIT`重推该unit的全部选中查询/到达定义。schema v2中anchors、函数bodies各存一份，tracks按ID引用；同函数的值流投影也只计算一次。原声明与异常/resume分支不被正常路径过滤覆盖。
+词法槽版本不等于Tensor内容版本；未知回调/捕获来源保前沿，不能将过滤结果作为cache或删除操作的许可。
 `python -B -m scar.analysis.source_fact_materials --catalog CONTEXT_CATALOG --graph GRAPH_A --graph GRAPH_B --out FRESH_MATERIALS`核所列图的全部源事实引用；`--read INDEX`重核。
 `read_fact_materials(INDEX)`返回report/resolver；`resolver.resolve(reference)`核目录路由、分片bytes/decoded收据和locator，返回原locator与实际物化artifact。
 旧collection相对URI不能直接当文件路径；compiled的records/0按原JSONL记录解释。共享父body所在图须显式列入`--graph`，索引不暗示未列祖先已验证。

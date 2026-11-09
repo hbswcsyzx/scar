@@ -131,6 +131,13 @@ namespace来源子图按原端口共享，使用点以原callee查询/state锚�
 生成绑定可独立链接到精确版本的canonical ATen接口。实参→parser转换→native端口是推导依赖；wrapper返回形状与native返回slots分别保留。
 source world→native world、native normal world→source result_world也是依赖；wrapper前后effects开放，不能折叠为同一StateVersion。异常边界留在canonical接口。
 一个native整数数组参数可依赖多个显式位置实参，聚合单独标记，不可只取第一个实参；fixed/optional列表的广播或vararg选择未证时保转换OPEN。
+词法名字的事实不是执行次序：WRITE记录的value是RHS，真实写站点须锚定原AccessBinding及world；参数是函数入口的独立定义。
+到达定义以原控制端口＋匹配recipe调用栈为状态，成功WRITE/DELETE做GEN/KILL，未知world效果弱加入开放来源；循环通过回边固定点求解，不展开迭代。
+不同词法槽的传播结果引用共享函数控制边/操作和共享名字锚点；这些原图记录不按分析的名字数复制，分析器也复用原函数值流投影。
+读取在READ入口观察，合并所有保留上下文的may定义。只有原C2本地slot所属环境匹配、锚点及控制求解覆盖足够时，正常路径查询才排除不可达的显式写；捕获和未知入口保开放。
+原声明图不覆盖或删除。NORMAL_SUCCESS过滤另带路径条件，不能从该投影排除应用异常/resume路径或证明当前内容、纯性、dead work及优化合法性。
+原生Tensor/Device/Generator类型投影通过原归一化依赖接入硬件图；Optional/List投影不是实际元素、分配或副本。native输出到Python包装结果也只是依赖，不把整个Python容器置于GPU。
+host执行、native executor与目标内存池分别保候选；保留CPU/GPU/内存/存储拓扑不等于证明程序使用这些资源。source文件所在磁盘也不是运行I/O。
 类基项保原求值端口、顺序和CLASSES fact所属创建scope；packed ABI仍含body/name，不能直接当base列表。
 namespace图的class-definition来源是附条件的源码声明产物，不是运行时class或MRO证明；当前版本、builtin及动态属性缺口仍逐字段保留。
 继承成员记录原有序base槽及完整来源路径；每条descriptor选择可追至记录，不选择第一条基类或写入作为实际MRO/当前成员。
