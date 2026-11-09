@@ -16,6 +16,8 @@ NORMAL_SUCCESS / CPython 3.14.7；交付后端约定 C++20、算子 ABI v1、计
 
 ①的当前接口门已过，正在推进②；不启用化简或代码生成。入口相关代码与候选关系全面考虑，孤立文件不强求，也不按一次未观察到执行删图。
 
+**全目录盘点已完成：** `program-state-coverage-current/result.json`对catalog全部884单元（883 ordinary＋1 compiled）实际构建局部接口，884成功、0失败；3,090,222原操作逐一取得效果请求，36,855,719规范端点、39,427,810关系。16 workers耗时1,374.04秒，每worker虚拟地址上限8 GiB；只写覆盖记录与缺规则，不复制原图，不运行目标或求61,734条可用局部绑定链。目录范围不等于入口可达范围。缺投影仅为ReadClassTypeParameters 2，以及EnterHandledException 2,892、ContextExceptionArguments 1,420、PrepareReraise 6,223、RestoreHandledException 8,570；后四类保持暂缓，不能称它们不存在于正常清理图。泛型环境投影的接入验收正在进行；此盘点不代表第二层或第一阶段已全部完成。
+
 **Observed / Verified：** `program-binding-state-current/verification.json`通过3个普通/compiled单元的接口发布与逐记录重推：5,846个操作获得效果请求，684个绑定访问、343个地址模板。69种原始指令按20类闭合识别，分类不等于效果已证明。随后`program-local-state-current/verification.json`通过默认CLI的自动局部选择：gcrl完整单元中63条可分析状态链、126个读取选择、7个共享函数体、14,644条关系；不按业务名选槽、不复制函数体/循环迭代。5,499个版本模板中5,387个是开放效果来源，不是已知Tensor新值。完整构建/写盘32.45秒、峰值RSS约358 MiB；独立逐表解码和重推93.84秒，验证进程峰值约914 MiB。当前表4,416,018压缩bytes、112,184,328解码bytes；重复状态坐标/版本集合及严格解码是已显露的存储/读回开销，尚未完成归因。未采集Tensor数值，未运行目标。已存两槽查询也按当前facade重推通过；CLI扩展不要求废弃不变的数据合同。
 
 **最新增量已验：** 同一current材料又补齐7处类隐式名字/frame builtins地址，现为222访问、122地址模板、14,661条关系，该单元已识别的地址规则缺口由7降为0；不代表效果已闭合。新增lookup保hit/miss顺序，prepared mapping与frame环境的原实参以条件边接到地址。构建与针对性检查30.04秒；tracks/versions/selections三表与上次已完整重推结果逐字节一致，沿用其证明，未重复93秒全解码。当前表4,419,322压缩bytes；旧表已由当前发布替换，证明链保在verification中。
