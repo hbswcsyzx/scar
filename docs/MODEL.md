@@ -36,6 +36,10 @@ SCAR 是宏观编译器：用有类型、可展开的图统一表示程序及硬
 
 普通模块和显式compiled exec上下文共享`FunctionInterfaceReader`及同一接线器，材料schema和来源分开。`scar compiled-function-interfaces --catalog CATALOG --unit COMPILED_UNIT --out FRESH`只对保留的compiled上下文使用既有namespace/binder规则，保完整候选/前沿；不把exec globals当可导入模块，也不加入import provider索引。`function-call-view --interfaces STORE`按schema打开两类材料；两个call可共享同一body而拥有不同frame。当前exec globals、捕获、默认值及namespace版本条件仍不因此证明。
 
+`SourceExecProvider`保原exec actions/edges、namespace选择及匹配body frame；ExecProtocolValue是辅助协议端点，不能伪装成源码GP。两分支有独立selection，body data进入discard，exec的None来自正常返回契约；审计、builtins初始化和释放保各自world/control边，BODY输出只由原正文返回供应。声明script入口不授运行激活。入口为`scar exec-view --catalog CATALOG [--out FRESH]`，`--read VIEW`严格重推全部typed表。
+
+`SourceConfigurationProvider`把已版本化的输入表达式、字段投影、插值、读请求和声明root版本接入独立标记的`DECLARED_INPUT_ALGEBRA`子区，不能将这些操作计作运行事件。它复用canonical WholeOwner地址及post-call content-state公式，只以MAY条件把声明值接到receiver内容候选；Python返回值、整个world及未来task cfg均不相等。`scar configuration-view --catalog CATALOG --boundaries BOUNDARIES [--out FRESH]`发布小表，`--read VIEW`重推所有记录/边。原输入版本、源码API版本、实际receiver及后续mutation仍是独立条件；所有obligations保持可查询。
+
 入口为`scar protocol-call-view --source CALL_CONTEXTS --catalog CATALOG [--members MEMBERS] [--unit UNIT] [--out FRESH]`；无unit且指定out时发布原接口域全部单元。输出按unit分construction values、callables、default slots/states、relations，引用原正文；未解namespace/MRO/实例、方法前沿与实际dispatch仍以原材料及条件保留。三个调用适配器先通过`prepare_source_ports`按unit/template收集去重，批量准备后才逐端口接线，避免交错读取反复解码整张模板表；准备不代表执行或准入。
 
 `FunctionDefaultSlot`是源函数参数的逻辑默认槽；`FunctionDefaultState=project(pre_call_world,slot)`保当前绑定状态，不是tensor内容或LogicalVersion。它依赖当前callable和world，再以条件projection进入formal；初始GP仅是需creator/无mutation证明的provenance。`FunctionCaptureBinding`沿原C2 relay/derived transport把当前callee env连到原`BindingLocationTemplate`，位置ID公式与第二层相同；handle选择不读内容、不宣称外层frame同一cell。相关metadata保MAY、frame和未决实例前沿。
