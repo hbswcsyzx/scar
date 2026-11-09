@@ -80,6 +80,10 @@ alias、完整LEXICAL binding、实参、初始default、data return及构造结
 声明正文上下文以原函数body和类型化class-input为键，调用边显式连接原实参/形参、数据返回和world。
 同键共享正文，递归保回边；它不是Invocation。descriptor包装的原调用、builtin查找和前序miss条件均保留。
 非NORMAL连接仅声明创建边，不因创建generator/coroutine就进入正文。声明状态接点另表引用这些边，不改历史CallLink。
+调用后状态视图复用原F4 STATE/CONTROL端口、guard及CallSite，不以事实表行号推断执行顺序。
+原子操作的world输入→输出另记OperationStateTransition，表示状态变化，绝不是数据copy或内容不变。
+迭代器耗尽沿原advance的RAISE world及匹配StopIteration控制退出；普通应用异常不因此扩大。
+后继状态cut是保调用标记/分支条件的may路径；可达不证明must执行、当前版本、匹配上下文或效果已消除。
 
 [逻辑值 IR](../scar/ir/v2/values.py) 已定义 LogicalValue、ValueVersion、ProvenanceRecord、
 Materialization 和等价声明，用于分开逻辑来源、推导关系、版本及物理表示。

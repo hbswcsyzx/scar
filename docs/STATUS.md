@@ -19,6 +19,7 @@ NORMAL_SUCCESS / CPython 3.14.7；交付后端约定 C++20、算子 ABI v1、计
 | 声明状态接点 | 自动定位原cfg实参和post-call world，独立保None数据返回；884单元context已求解4M事件 | 原FIFO预算前缀尚未连接API；输入版本及任务内容仍未证明 |
 | 按需字段/方法 | 独立于全局FIFO，原引用与匹配call/return连接字段赋值→读取→声明方法接口 | 条件关系不授入口准入、当前字段版本或dispatch；外部writer仍开放 |
 | 声明正文/状态 | 共享12个函数上下文、11条方法边；配置修改API接成1条条件状态接口 | 111个正文调用前沿；输入及后续版本、入口准入未证 |
+| 调用后状态路径 | 原F4中API后world→调用者正常return的may路径已接通，含分支及共享循环 | 尚未匹配所有调用/分支选择；字段地址、内容版本与opaque effects未闭合 |
 | native/资源 | 既有声明、CPU/DRAM/GPU/设备内存/SATA/NVMe 旁图 | 尚未与新入口完成全链路重验 |
 
 五类实体为 Operation / Value / StateLocation / Region / Resource；输入输出是端口角色。
@@ -52,11 +53,12 @@ NORMAL_SUCCESS / CPython 3.14.7；交付后端约定 C++20、算子 ABI v1、计
 
 - `config-declared-context-current/verification.json`：12个共享声明上下文、11边（8普通方法、3静态方法），111调用前沿；构建26.31秒、核验26.43秒，峰值RSS约0.73 GiB。原LEXICAL/MODULE/CLASS/builtin选择与包装调用保条件，不按成员名猜目标；staticmethod不加self，classmethod绑定类，延迟body创建不进入正文。通用小用例保递归回边、遮蔽条件和三种descriptor。
 - `config-declared-state-current/verification.json`：原状态projection与声明edge1匹配，1边界→1连接；内容实参、None数据返回、world输入与返回分别核验。构建约29秒、核验28.33秒；保留输入版本、后续状态版本、声明非入口准入3项义务。历史FIFO中的0连接仍是原前沿；新声明边不冒充历史CallLink或运行Invocation。
+- **`config-post-call-world-current/verification.json`：共享调用后状态路径门通过。** 从原238个模板批量读取并投影，API后world可达caller正常return；保2219 CONTROL、1412 STATE边、172操作状态变化、6回边。原scope后续87访问：7属性SET、64属性GET、14调用、1item SET/1GET；这是may依赖，不是总序。构建约39秒、严格核验40.20秒，峰值RSS约0.74 GiB，压缩96,951 bytes。通用用例核迭代耗尽world与回边；首轮遗漏的exhaustion状态桥已按原F4修正。未证明当前内容、effects或第一阶段完成。
 
 ## 后续顺序与验收
 
 1. **输入字段层：** plain/untyped条件性字段应用与lazy引用子门已过；不代表完整cfg。未知prefix与中途地址/合并状态按表保留，不从条件候选证明当前内容。
-2. **配置状态层：** 声明正文已连到配置修改API。下一门沿原F4 STATE/CONTROL关系建立调用后world→后续读写→返回的共享状态图，保分支、循环回边及未知效果；再跨调用返回、callback、deepcopy、删除接任务输入。属性表行号不当作执行顺序，引用不变不代表内容版本不变。保留3项未证义务，不重跑全域传播替代局部接线。
+2. **配置状态层：** API后world已沿原F4连接至caller返回。下一门给这87访问接通原receiver与字段/index地址，区分精确路径、动态key、未知效果；再跨调用返回、callback、deepcopy、删除接任务输入。CONTROL/STATE可达仍是may关系，不能当作确定顺序或内容保留。输入和后续版本、入口准入3项义务继续保留；不重跑全域传播替代局部接线。
 3. **算子与资源层：** 新 context图连接现有 Python/native声明、算子及资源图；已知属性静态保留，运行地址等未知字段不伪造。
 4. **全图验收：** 源码闭包、顺序敏感传播、循环和跨层接口的覆盖分母/缺口审计。队列清空本身不证明全覆盖；第一阶段通过后才进入化简。
 
