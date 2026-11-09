@@ -84,6 +84,9 @@ alias、完整LEXICAL binding、实参、初始default、data return及构造结
 原子操作的world输入→输出另记OperationStateTransition，表示状态变化，绝不是数据copy或内容不变。
 迭代器耗尽沿原advance的RAISE world及匹配StopIteration控制退出；普通应用异常不因此扩大。
 后继状态cut是保调用标记/分支条件的may路径；可达不证明must执行、当前版本、匹配上下文或效果已消除。
+状态访问的地址另记原根端口＋有类型字段/索引selector，并保访问前后world。动态key引用原值端口，不按repr猜值。
+仅同CodeScope的完整LEXICAL binding可用于局部路径推导；捕获、模块查找、循环及预算截断显式保前沿。
+call-result是独立不透明根，不因参数来源相似就把返回对象或deepcopy输出当成原输入。
 
 [逻辑值 IR](../scar/ir/v2/values.py) 已定义 LogicalValue、ValueVersion、ProvenanceRecord、
 Materialization 和等价声明，用于分开逻辑来源、推导关系、版本及物理表示。
