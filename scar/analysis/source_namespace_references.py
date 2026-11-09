@@ -152,6 +152,21 @@ class _Query:
             for ordinal, imported in imports.get(local, ()):
                 ref = r.slicer.fact(unit, 'imports', ordinal)
                 self.module(index, imported.module, state.selectors, (ref,), _IMPORT_GUARDS)
+                requested = imported.requested_module
+                if (imported.module and requested is not None
+                        and requested.startswith(imported.module+'.')):
+                    # import a.b.c returns a, but the standard loader also
+                    # installs b on a and c on a.b. Retain every witnessed
+                    # prefix: later slot mutation can affect any selection.
+                    suffix = requested[len(imported.module)+1:].split('.')
+                    prefix = []; selected = []
+                    for component, selector in zip(suffix, state.selectors):
+                        if selector.member != component: break
+                        prefix.append(component); selected.append(selector.access)
+                        self.module(index, imported.module+'.'+'.'.join(prefix),
+                            state.selectors[len(prefix):], (ref, *selected), (*_IMPORT_GUARDS,
+                                'REQUESTED_CHILD_IMPORT_COMPLETES_AND_INSTALLS_STANDARD_PARENT_ATTRIBUTE',
+                                'CURRENT_PARENT_ATTRIBUTE_SELECTS_RECORDED_IMPORTED_CHILD_MODULE'))
             if local in terminals:
                 kind, table, ordinal = terminals[local]; ref = r.slicer.fact(unit, table, ordinal)
                 if state.selectors:

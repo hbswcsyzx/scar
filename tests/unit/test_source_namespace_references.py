@@ -22,16 +22,20 @@ def test_returned_module_exports_and_import_from_fallback_are_not_aliases():
         'sub':unit('sub','lib.sub',7),'compiled':unit('compiled','lib',8)}
     caller=units['caller'];caller.imports=(F.Import(0,'lib','lib.sub'),F.Import(2,'lib','lib'))
     caller.attributes=(F.Attribute(0,'C',1,F.AttributeAction.GET,9,10),
-        F.Attribute(2,'C',3,F.AttributeAction.IMPORT_MEMBER,9,10))
+        F.Attribute(2,'C',3,F.AttributeAction.IMPORT_MEMBER,9,10),
+        F.Attribute(0,'sub',4,F.AttributeAction.GET,9,10),
+        F.Attribute(4,'C',5,F.AttributeAction.GET,9,10))
     rows={name:dict(module=value.module,facts='/source/'+name+'.json',sha256='0'*64,bytes=0) for name,value in units.items()}
     store=NS(load=lambda name:units[name],rows=rows,model_units={name:{} for name in units},
         importable_units=frozenset(units)-{'compiled'},original_source_units={'compiled':'caller'})
     snapshot=NS(fact_store=store,validate_parents=lambda:None)
     resolver=NamespaceReferenceResolver(snapshot)
     normal=resolver.resolve(gp('caller',1)); imported=resolver.resolve(gp('caller',3))
+    child=resolver.resolve(gp('caller',5))
     def classes(graph):
         return {graph.states[o.state].port for o in graph.origins if o.kind is N.NamespaceOriginKind.CLASS_DEFINITION}
     assert classes(normal)==classes(imported)=={gp('a',5),gp('b',6)}
+    assert classes(child)=={gp('sub',7)}
     assert not any(o.kind is N.NamespaceOriginKind.MODULE_CANDIDATE for o in normal.origins)
     assert any(o.symbol=='lib.C' for o in imported.origins if o.kind is N.NamespaceOriginKind.MODULE_CANDIDATE)
     assert all(o.symbol!='lib.sub.C' for o in imported.origins)

@@ -424,6 +424,12 @@ body与entry分表共享，不按调用或循环复制。输入来源查询是ma
 `python -B -m scar.analysis.source_constructor_members --calls CALL_CONTEXT_GRAPH --out FRESH_MEMBERS`连接构造class输入、声明成员接口及共享正文；`--read MEMBERS`重核。
 `python -B -m scar.analysis.source_class_base_graph --catalog CONTEXT_CATALOG --inputs MEMBERS_OR_CLASS_INPUTS --out FRESH_BASES`建立有序base与namespace来源图；`--read BASES`重核。
 也可重复`--class-value UNIT LOCAL_PORT`选择任意已保留类定义。根是静态查询选择，不授程序入口、当前类型或继承关系证明；本层不扫描历史calls/constructions表。
+`python -B -m scar.analysis.source_namespace_callees --calls CALL_CONTEXT_GRAPH --out FRESH_NAMESPACES`将namespace来源接到原callee查询/state；`--read GRAPH`重推核验。
+`python -B -m scar.analysis.source_inherited_member_graph --calls CALL_CONTEXT_GRAPH --out FRESH_INHERITED`接继承成员、原ABI与共享正文；`--read GRAPH`重核路径及正文。
+两者build/read可复用同一个`ConstructorMemberParents`，完整父链只认证一次；不合并caller，不证明实际MRO/dispatch。
+`python -B -m scar.analysis.source_fact_materials --catalog CONTEXT_CATALOG --graph GRAPH_A --graph GRAPH_B --out FRESH_MATERIALS`核所列图的全部源事实引用；`--read INDEX`重核。
+`read_fact_materials(INDEX)`返回report/resolver；`resolver.resolve(reference)`核目录路由、分片bytes/decoded收据和locator，返回原locator与实际物化artifact。
+旧collection相对URI不能直接当文件路径；compiled的records/0按原JSONL记录解释。共享父body所在图须显式列入`--graph`，索引不暗示未列祖先已验证。
 `python -B -m scar.analysis.source_admission --targets TARGET_STORE --out FRESH_PLAN`支持普通及context图，按真实source provider关联需求与原依赖材料，不修改模型。
 对旧inventory未索引的实际module需求，用原候选roots定点查找；可重复`--search-root`指定候选root。
 新搜索表与原inventory的索引域分开，未固定内容版本不列ready；搜索根及文件存在均不证明运行时import选择。

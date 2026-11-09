@@ -120,8 +120,15 @@ namespace来源图以原GlobalPort及待选择的属性序列为查询状态。�
 不宣称当前slot、对象或内容相同。编译exec的globals字典与普通source module分别保身份条件；compiled单元不进模块导入候选索引。
 导入按原Import.module解释返回模块候选，requested_module保完整请求；所有路径/名称映射候选均保留。
 GET属性选择与IMPORT_FROM的registry fallback分别记录，属性receiver与结果不成为alias。
+标准`import a.b.c`返回`a`时，父包上安装子模块的每个已匹配属性前缀另保来源边；仍需当前slot及标准导入条件。
+namespace来源子图按原端口共享，使用点以原callee查询/state锚定，因此各caller栈不合并。函数接口保原调用ABI与环境版本条件。
 类基项保原求值端口、顺序和CLASSES fact所属创建scope；packed ABI仍含body/name，不能直接当base列表。
 namespace图的class-definition来源是附条件的源码声明产物，不是运行时class或MRO证明；当前版本、builtin及动态属性缺口仍逐字段保留。
+继承成员记录原有序base槽及完整来源路径；每条descriptor选择可追至记录，不选择第一条基类或写入作为实际MRO/当前成员。
+
+源事实材料与程序的数据Materialization分开。旧集合相对证据URI通过`FactMaterialRoute`沿原`unit_parent`目录选择定位到primitive分片，
+核每级目录和叶stored/decoded收据、unit及原locator；不按同哈希任找文件。compiled事实保原variant unit与JSONL records/0。
+图保原证据键，`FactMaterialResolver.resolve`提供可实际读取的物化引用；源材料路由不声明对象alias、内容等价或运行I/O。
 
 [逻辑值 IR](../scar/ir/v2/values.py) 已定义 LogicalValue、ValueVersion、ProvenanceRecord、
 Materialization 和等价声明，用于分开逻辑来源、推导关系、版本及物理表示。
