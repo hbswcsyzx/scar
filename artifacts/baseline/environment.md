@@ -92,3 +92,13 @@ opportunities and selected zero transformations. This is `Observed` trace
 evidence, not a clean optimized A/B result. Raw events are in
 `../traces/lewm_resource_sampled_c_call_20260917/`, with the analysis summary
 at `../reports/lewm_resource_sampled_c_call_20260917.summary.json`.
+
+## Input availability recheck — 2026-11-10
+
+The `/gpu4-share/{data,nfs,source}` volumes are mounted again. The unchanged
+command above succeeds with both checkpoint and `cache_dir` rooted at
+`/gpu4-share/data/byx/lewm_data`. One episode returned `success_rate=100.0`;
+clean process wall time was 51.82 s and logged CEM solve time was 1.5835 s.
+This is an input-restoration check, not a repeated optimization benchmark.
+Current receipts, logs and the subsequent lean trace are in
+`../current/experiments/lewm-input-recovered-current/inputs.json`.

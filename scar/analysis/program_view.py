@@ -276,6 +276,8 @@ class SourceUnitProvider:
         if point.node not in self.nodes:raise ValueError('source endpoint has no admitted identity projection')
         key=self.nodes[point.node].anchor.template
         if key is not None:self._expand((key,))
+        if type(point.node) is RegionID and type(self.records[point.node]) is not P.ProductionRegion:
+            raise ValueError('declared source region is absent from its original recipe')
 
     def _neighbors(self, point, incoming):
         if point.namespace != self.namespace: return DependencyNeighborhood()
@@ -389,6 +391,22 @@ class ProgramView:
         if identity not in provider.nodes or type(provider.records[identity]) is not P.ProductionRegion:
             raise ValueError('source region is outside its original recipe')
         return replace(provider.nodes[identity].point, context=context)
+
+    def source_region_ref(self, unit, template, region, *, context=None):
+        """Reference a sealed root or declared function body without expansion.
+
+        The header or exact original function fact supplies this identity.
+        get/original/expand still admit the full recipe when its fields or
+        dependencies are queried; no arbitrary nested region is introduced.
+        """
+        provider=self.unit(unit)
+        declared=provider.material.interfaces['nodes'].get(template)
+        body=any(f.template==template and f.body==region for f in provider.facts.functions)
+        if declared is None or declared.root!=region and not body:
+            raise ValueError('source region reference is not an original declared root or function body')
+        point=provider._node(template,region)
+        provider.check(point)
+        return replace(point,context=context)
 
     def entry(self, unit, *, context=None):
         root = self.unit(unit).facts.root_scope

@@ -48,22 +48,38 @@ def _span(syntax,occurrence):
 class ObservedSourceCallsiteIndex:
     def __init__(self,codes,*,compiled=()):
         self.codes=codes;self.view=codes.view;self.bindings=[];self.frontiers=[]
-        self.compiled=tuple(compiled)
-        self._callers={};self._syntax={};self._static={}
+        self.compiled=tuple(compiled) or tuple(getattr(codes,'compiled',()))
+        profiles={p.unit:p for p in self.compiled}
+        self._callers={};self._syntax={};self._static={};self._owners={}
+        self._calls={};self._plans={};self._contexts={}
         self.slicer=ReferenceSlicer(SimpleNamespace(fact_store=self.view.catalog.fact_store))
         roots={}
+        for unit,capture,scope,code in getattr(codes,'root_callers',()):
+            self._admit(_Caller(unit,capture,scope,code,None))
         for row in codes.records.values():
-            key=row.source,row.compile_flags
+            profile=profiles.get(row.body.unit)
+            if row.body.unit in self.view.catalog.fact_store.original_source_units and profile is None:
+                raise ValueError('compiled child caller requires its original compiler profile')
+            key=row.source,row.compile_flags,row.body.unit
             if key not in roots:
-                root=compile(Path(row.source.uri).read_bytes(),row.compiled_root.filename,'exec',
-                    flags=row.compile_flags,dont_inherit=True,optimize=0)
-                if describe_code(root)!=encode(row.compiled_root):raise ValueError('ordinary root replay differs from code correspondence')
+                if profile is None:
+                    root=compile(Path(row.source.uri).read_bytes(),row.compiled_root.filename,'exec',
+                        flags=row.compile_flags,dont_inherit=True,optimize=0)
+                else:
+                    if (profile.catalog.path,profile.catalog.report)!=(self.view.catalog.path,self.view.catalog.report):
+                        raise ValueError('compiled child caller uses a different original catalog')
+                    profile.check()
+                    if row.compile_flags!=profile.context.compiler_input_flags:
+                        raise ValueError('compiled child caller lost its original compiler inputs')
+                    root=profile.code
+                if describe_code(root)!=encode(row.compiled_root):raise ValueError('original root replay differs from code correspondence')
                 roots[key]=root
             code=roots[key]
             for offset in row.constant_path:
                 code=code.co_consts[offset]
                 if type(code) is not CodeType:raise ValueError('observed source code path is not a compiler child')
-            for capture in row.captures:self._admit(_Caller(row.body.unit,capture,row.scope,code,row.id))
+            branches=() if profile is None else tuple(b.evidence for p in profile.profiles for b in p.branches)
+            for capture in row.captures:self._admit(_Caller(row.body.unit,capture,row.scope,code,row.id,branches))
         for profile in self.compiled:
             if (profile.catalog.path,profile.catalog.report)!=(self.view.catalog.path,self.view.catalog.report):
                 raise ValueError('compiled caller profile uses a different original catalog')
@@ -73,6 +89,23 @@ class ObservedSourceCallsiteIndex:
                     if profile.root_scope!=facts.root_scope:raise ValueError('compiled caller root scope differs')
                     self._admit(_Caller(profile.unit,capture,facts.root_scope,profile.code,None,
                         tuple(b.evidence for p in profile.profiles for b in p.branches)))
+        # Raw CALL evidence first selects real caller scopes. Fetch each unit's
+        # relevant original recipes in one batch; do not normalize CommonCore
+        # nodes/edges merely to match an instruction to its sealed source ABI.
+        scopes=defaultdict(set)
+        for attempt in codes.trace.attempts:
+            caller=self._callers.get((attempt.process_id,attempt.site.code))
+            if caller is not None:scopes[caller.unit].add(caller.scope.owner)
+        from scar.analysis.source_declared_calls import _owners
+        for unit,wanted in scopes.items():
+            source=self.view.unit(unit);facts=source.facts
+            owners=_owners(facts);self._owners[unit]=owners
+            calls=tuple((i,call,source_port(facts,call.result)) for i,call in enumerate(facts.calls)
+                if wanted.intersection(owners[i]))
+            self._calls[unit]=calls
+            keys=tuple(dict.fromkeys(gp.port.template for _,_,gp in calls))
+            plans=source.material.plans(keys);self._plans[unit]=plans
+            self._contexts[unit]={key:NamespacePlanView(unit,plan) for key,plan in plans.items()}
         targets={(t.caller.process_id,t.attempt_index):(a,t) for a,t in zip(codes.targets.target_anchors,codes.targets.targets)}
         for attempt in codes.trace.attempts:
             key=attempt.process_id,attempt.site.code
@@ -112,17 +145,21 @@ class ObservedSourceCallsiteIndex:
         if cache_key in self._static:return self._static[cache_key]
         syntax=self._source_syntax(caller.unit);roles=SyntaxRoleView(syntax)
         source=self.view.unit(caller.unit);facts=source.facts
-        calls=tuple((i,call,source_port(facts,call.result)) for i,call in enumerate(facts.calls))
-        source._expand(tuple(dict.fromkeys(gp.port.template for _,_,gp in calls)))
+        owners=self._owners[caller.unit]
+        # Scope-group ranges are an index. The selected bare F4 recipe still
+        # independently checks exact owner and callee/result/world interfaces.
+        calls=tuple(row for row in self._calls[caller.unit] if caller.scope.owner in owners[row[0]])
         instructions=tuple(dis.get_instructions(caller.code,adaptive=False,show_caches=False))
         call_instructions=tuple(i for i in instructions if i.opname in ('CALL','CALL_KW','CALL_FUNCTION_EX'))
         rows=[];decorator_offsets=set()
         for i,call,gp in calls:
-            plan=source.plans[gp.port.template];context=NamespacePlanView(caller.unit,plan);step=context.steps[gp.port.owner]
+            context=self._contexts[caller.unit][gp.port.template];step=context.steps[gp.port.owner]
             owner=context.owner(step.region)
             if owner.owner!=caller.scope.owner:continue
-            if context.result(step)!=gp or context.value(step.arguments[0])!=source_port(facts,call.callee):
-                raise ValueError('observed source callsite differs from original callee/result ABI')
+            if (context.result(step)!=gp or not step.arguments
+                    or context.value(step.arguments[0])!=source_port(facts,call.callee)
+                    or context.worlds(step)!=(source_port(facts,call.world),source_port(facts,call.result_world))):
+                raise ValueError('observed source callsite differs from original callee/result/world ABI')
             ins=step.instruction;fact=self.slicer.fact(facts,'calls',i)
             if type(ins) is P.ApplyDecorator:
                 _,value=roles.locate(ins.source)

@@ -33,6 +33,7 @@ scar build-query /path/to/fresh-build --action dependencies --file model.py --en
 
 Python 中用 `BuildSession(build_path)` 共享一次查询会话的 catalog/代码/关系缓存。
 `session.view` 提供原 `get/expand/producers/consumers/explain`。
+`source_region_ref` 可先连接原声明的函数正文；`get/expand` 再读取和核验正文，循环与函数仍共享原 ID。
 F4 构建的观察选择保留原 trace 与调用接口的 run scope，`attach_trace()` 返回已接入材料摘要；
 静态调用 frame 不是动态 invocation。旧 model 构建继续通过 `observed_scopes/observed_ports` 查询独立观察调用域。
 

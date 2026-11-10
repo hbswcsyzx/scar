@@ -2,7 +2,7 @@
 
 **第一阶段未完成；已转为五层主链优先，统一构建/存储/读回流程已实现；没有进入化简。**
 范围：Python/PyTorch、NORMAL_SUCCESS、CPython 3.14.7。后端基线C++20、算子ABI v1、计划schema v1。
-真实配置启动已运行；本轮复用其证据，未重跑目标、推理episode或报告加速比。LeWM原仓库保持干净。
+真实配置启动及恢复输入后的1个PushT episode均已成功运行；正常推理trace现已采集，完整接图尚未验收。没有加速比结论，LeWM原仓库保持干净。
 
 | 层 | 当前证据 | 仍缺 |
 |---|---|---|
@@ -60,6 +60,16 @@
 
 **环境复核（2026-11-10重启后）：** Conda `lewm`、Python 3.14.7、Torch 2.13.0+cu132/CUDA 13.2、RTX4090可用，实际CUDA计算及回传通过；SCAR和stable_worldmodel可导入。LeWM原仓库仍干净，源码、静态分片及配置启动trace保留。服务器13:33重启后原构建进程不存在，已用原材料重新完成上述构建。
 
-**推理输入未恢复：** `/gpu1-share/data`不存在，历史`/gpu4-share/.../lewm_data`路径不存在，当前无NFS挂载；两个本地LeWM HF缓存只有refs，没有权重。可见未挂载的`data2-vg/lv-data`、`lv-nfs`、`lv-source`（850/850/200 GiB），尚未核实卷内内容，不能断言数据已删除或仍在其中。只读检查因`sudo`需要密码而未执行；需有权限者核查/恢复挂载或提供替代输入。未格式化、修复或挂载卷，未改变系统配置。当前继续离线建图，真实episode仍须输入。
+**输入已恢复（2026-11-10）：** 用户指向`/gpu4-share`后重新检查，source/data/nfs三个逻辑卷已挂载；实际输入根`/gpu4-share/data/byx/lewm_data`可读。权重为`checkpoints/pusht/weights.pt`（72,290,721 B，SHA256 `48938400ae3464c9680731287f583a9cb516f55a8ec64ea13a91be47fb15b607`），数据`datasets/pusht_expert_train.h5`（46,300,921,856 B）。只读HDF5元数据核验通过，未复制或完整hash数据。
+
+**Observed：** 原命令在恢复路径完成1 episode，`success_rate=100%`，CEM solve日志1.5835秒、整进程51.82秒、峰值RSS 2,167,944 KiB；这是单次未插桩输入验证，不是重复性能基准。随后相同输入的lean/snapshot采集成功，trace子命令193.60秒、CEM日志13.6746秒，170,310事件/85,155调用、699代码、99,230 CALL，0预算丢弃，仍有5,661 operand协议gap、5,536 target gap及2 unknown exit，不能声称全程序已闭合。已确认记录实际eval.run、policy、CEM、LeWM encode/rollout/get_cost代码。Tensor内容未采集；循环正文仍由静态共享子图表达。
+
+新材料位于`artifacts/current/experiments/lewm-input-recovered-current/`：`inputs.json`、`run.log`、`trace/`、`capture-plan.json`及单独timing。
+
+**Implemented / Verified（范围受限）：** compiled exec的子函数现在使用原profile匹配；绑定/normalized receiver只在V2握手下确认ABI，原attribute-base内容身份仍有MAY条件。普通FUNCTION保0/1歧义。参数绑定未决时保留已知正文、环境/world及返回接口，参数边留空且标NOT_MODELED。公共`source_region_ref`先引用原声明body，真正get/expand时再核完整recipe；小检查验证相同ID、惰性展开及错误模板拒绝。小trace接线46项、4前沿、11单元零CommonCore预展开；实际大trace发布如下，尚未完成严格读回/路径查询。
+
+**Observed：** `program-normal-observed-functions-current/` 在8 GiB地址空间上限内发布成功：470.08秒，峰值RSS 3,673,260 KiB；24个实际caller单元、2,163声明调用、176观察组，保留200父接口，新增135个接口，其中62组是正文已知/参数未决。代码匹配材料涉及61单元。三个观察caller尚无父接口，91,765条观察前沿包含大量需要native/其他协议处理的逐事件边界，不能视作91,765个独立建图缺陷。报告仍`first_stage_complete=false`；前述600秒预算失败及重复扫描诊断已记到inputs.json，未将失败产物作为通过。
+
+接下来：严格读回新观察叶；为报告中的三个caller补已有声明/函数接口材料；再通过统一入口查询实际推理的跨层连接与资源边界。物理分配/搬运、逻辑内容版本与未观察分支仍须各自证据，尚未进入优化。
 
 实体和边见[MODEL](MODEL.md)，分层合同见[ARCHITECTURE](ARCHITECTURE.md)。
