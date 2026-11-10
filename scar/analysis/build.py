@@ -132,7 +132,7 @@ class BuildSession:
     """One catalog/code/call cache for any number of queries in a session."""
     def __init__(self, path, *, seconds=3600, input_bytes=16 * 1024**3, _publishing=False):
         from scar.analysis.program_dependency_session import ProgramDependencySession
-        from scar.analysis.program_view import ProgramView
+        from scar.analysis.program_view import ProgramView, _RepresentationProvider
         self.path = Path(path).resolve()
         self.report = json.loads((self.path / 'manifest.json').read_bytes())
         if (self.report.get('schema'), self.report.get('schema_version')) != (SCHEMA, 1):
@@ -148,6 +148,11 @@ class BuildSession:
             budget=_budget(seconds, input_bytes))
         self.view = ProgramView(None, core_loader=self.session.index)
         self.view.dependencies = self.session.graph()
+        # Core adapters validate against their own original entity tables.
+        # Route extension-owned resource nodes to the metadata adapter, as the
+        # ordinary ProgramView does, while keeping this same observed session.
+        self.view.dependencies.providers[:] = [_RepresentationProvider(provider,
+            self.view._core_extension) for provider in self.view.dependencies.providers]
         self.resources = _LazyResources(self.view, self.session)
         self.view.register(self.resources)
         self.observed = None

@@ -52,6 +52,12 @@ def test_build_readback_queries_original_calls_loops_and_resources(built):
         resource = next(e.source for e in resource_edges if hasattr(session.view.original(e.source), 'owner'))
         assert session.view.original(resource).owner == operation.node
         assert session.view.get(resource).point == resource
+        candidates = session.view.producers(resource).edges
+        assert candidates and all(e.kind is K.RESOURCE for e in candidates)
+        for edge in candidates:
+            session.view.producers(edge.source)
+        walk = session.view.dependencies.walk((operation,), kinds=(K.RESOURCE,), max_points=20)
+        assert walk.edges
     gaps = json.loads((out / 'gaps.json').read_text())['gaps']
     assert any(g['kind'] == 'TRACE_NOT_SUPPLIED' for g in gaps)
     assert any(g['kind'] == 'INFERENCE_PATH_NOT_CERTIFIED' for g in gaps)

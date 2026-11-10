@@ -20,7 +20,7 @@
 - `ProgramView` 复用单个 `ProgramDependencySession` 的 catalog、原图、代码与关系缓存；函数/循环正文不复制，调用上下文独立存储。CPU/DRAM需求与 GPU、设备内存、文件、SSD/NVMe 条件候选接原操作/数据端口。Behavior 分类只授 MAY 候选，不授设备实际存在、文件身份、dispatch 或物理复制。
 - **流程验收：通过。** `program-build-mainchain-current/` 已构建并读回，引用原 866 单元及 87 份配置材料；既有真实配置启动 trace 准入，21 个观察调用域、21 条观察关系独立保存。没有运行 LeWM 或重跑旧求解队列。`workflow_complete=true`，`first_stage_complete=false`。
 - **缺口公开：** `gaps.json` 共 51,298 项，包含原局部 body 详细缺口、跨层前沿、配置组合、缺少真实运行资源、未认证推理覆盖和有界探查前沿。该数包含整个索引材料域，不能视作主链可达缺口数量；入口探查边界明确记录在 manifest 和查询结果中，不代表无预算截断的全链验收。
-- **验证：** 新增统一构建、原跨调用参数/上下文、共享循环、资源端点、配置材料、篡改拒绝和真实小程序 CALL 接入测试；资源测试覆盖候选与需求分离、序列化读回及幂等。相关回归 21 项通过；配置准入最终变更后 19 项定向测试通过。LeWM 原仓库无改动。
+- **验证：** 新增统一构建、原跨调用参数/上下文、共享循环、资源端点、配置材料、篡改拒绝和真实小程序 CALL 接入测试；资源测试覆盖候选与需求分离、序列化读回及幂等。另修复扩展资源节点回到原 core reader 的路由，反向遍历需求→候选资源已覆盖。相关回归 21 项通过；最终变更后 19 项定向测试通过。LeWM 原仓库无改动。
 
 产物：`manifest.json` 为小引用清单；`relationships.json` 引原跨层分片；`observed.json` 独立保调用域；`resources.json.gz` 保入口符号资源；其余 body 资源按需生成；`configuration.json` 引配置表示图。`entry-query.json` 保存有界探查，完整未决清单见 `gaps.json`。
 
