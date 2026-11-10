@@ -1,7 +1,7 @@
 # 当前状态
 
 **第一阶段未完成，当前推进③跨层连接；尚未进入化简。**
-范围：Python/PyTorch、NORMAL_SUCCESS、CPython 3.14.7；后续宿主后端C++20、算子ABI v1、计划schema v1。本轮未执行LeWM或导入torch/Hydra，无程序加速比。
+范围：Python/PyTorch、NORMAL_SUCCESS、CPython 3.14.7；后续宿主后端C++20、算子ABI v1、计划schema v1。本轮执行了真实LeWM配置启动，未执行推理episode，无程序加速比。
 
 | 层 | 已实现与证据范围 | 仍缺 |
 |---|---|---|
@@ -29,6 +29,8 @@
 - **本轮新增 Verified：** 配对返回自动推得call75的创建来源，6→7接口；最新构建/读回18.84秒。另复用分析器补2个库文件/283调用的32接口，36.65秒。集合只保收据与unit路由，不复制行；第二轮来源组合去除完全相同的推导，39→43接口，保所有不同creator/路径/条件。
 - **统一图 Verified：** 3单元、359声明调用、43 frames、305关系、5组返回函数来源及33 capture绑定；两exec分支均接到返回decorator及wrapper工厂，19项定向查询通过。完整构建/读回/组合查询163.74秒、峰值约1.47 GiB；新增表148,686 bytes，不是整图大小。原接口Fact保留、creator不混当前caller、cell内容/实际dispatch仍未证。
 - **下一断点已定位：** call75正文返回停在ApplyDecorator call29，callee来自wraps工厂返回；普通wraps入口已接，内部partial构造call242仍有源码class与native两个候选。不能把包装当恒等函数、不能沿`__wrapped__`冒认目标。下一步用轻量动态选择补实际callable/closure，再接原静态端口；整个入口链仍未通。
+- **新增 Observed / Verified：** 真实`run_inference.py --config-name=pusht --cfg job hydra.job.chdir=False`启动成功，第三次采集41.23秒、约918 MiB，50 CALL/35 entry、无预算截断。前两次配置执行也成功，但导入期全局复用的两个库函数BODY耗尽采集预算；移除这两个动态BODY后，保调用方callee证据及原静态子图，不再增加预算。已捕获三个Hydra实际code、closure HANDLE及包装返回→下一调用的同一weak引用；HANDLE不等于cell内容。
+- **新增 Implemented / Verified：** `observed-source-codes`复用父LOAD_CONST/完整AST span/常量路径规则及完整code指纹，将真实记录接到原共享body；5条code对应、4项target/entry绑定，新增表5,862 bytes。为IMPLEMENTATION/MAY证据，不伪装CALL_TARGET或Invocation；源码、syntax、frame/operand及target/meta收据均受守护。compiled exec仍缺原profile对应，实际CALL offset→F4端口及捕获内容版本尚未闭合。
 
 ## 已有材料与验收
 
@@ -53,11 +55,12 @@
 | program-returned-functions-current / program-function-leaves-current | 首轮返回接口与不复制行的3单元集合 |
 | program-wrapper-declared-calls-current / program-wrapper-function-interfaces-current | 精确补2个库文件的声明与32个普通函数接口，未重建581域 |
 | program-returned-composition-current / program-returned-unified-current / program-entry-exec-current | 去重后的返回来源组合、统一查询及当前exec分支材料；包装/callback链未闭合 |
+| program-entry-observed-prefix-current/attempt3 / program-observed-source-codes-current | 真实配置启动的CALL/closure证据、严格读回及5条actual code→原body对应；不是episode |
 | program-source-resources-current | 539类型投影与已有硬件的候选路由；不是实际分配或传输 |
 
 ## 接下来顺序
 
-1. **③下一项：** 动静结合接包装callable/capture：静态保留共享body和协议候选；短动态运行只补实际调用选择、code对应与closure handle。先验真实启动前缀，再打通ROOT→decorator→captured callback→run；无观测路径不删、一次选择不外推未来。之后接配置/导入的当前状态及相关deferred/resume；不重跑全局FIFO前缀。
+1. **③下一项：** 使用已采到的actual code/CALL offset/weak引用及closure HANDLE，先核compiled exec原profile，再把实际调用选择接到F4原端口及捕获接口；不重复启动采集。静态子图保控制/循环及协议候选，无观测路径不删、一次选择不外推未来。随后打通callback→run，接配置/导入当前状态及相关deferred/resume；不重跑全局FIFO前缀。
 2. **④：** 在已接软件关系上接相关I/O、设备与存储；候选和Observed分开，不采集Tensor数值，不展开OS内部。
 3. **⑤：** 验收整个正常推理链的依赖、循环、外部边界、明确未决字段及无预算截断。通过后才进入化简和代码生成。
 

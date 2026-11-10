@@ -38,6 +38,8 @@ SCAR 是宏观编译器：用有类型、可展开的图统一表示程序及硬
 
 返回函数增加`ReturnedCallableProvenance`：原函数创建、返回引用切片、完整creator接口序列和当前consumer各自保留。creator描述过去的引用来源，不能压到当前调用栈上；当前body仅压入当前call frame。`ReturnedCallableProvider`把选定创建点接到当前callee，保MAY及原前提，不读cell内容。所有source Frame.selection保原接口Fact；叠加叶中继承的接口仍引用父Fact。`function-interface-collection`只存不重叠叶的收据与unit路由，接口行和正文仍留在原分片。
 
+`ObservedSourceCodeLink`保存实际CodeCapture/target/entry原锚点，经既有编译器的父LOAD_CONST、完整源码span及常量路径匹配原Function/Body，并核完整code指纹。统一图以辅助Provider记录及IMPLEMENTATION/MAY连接表示这种代码模板对应；不授函数创建实例、globals/cell相同或某静态调用已激活。普通源码只重放既有`flags=0,dont_inherit=True,optimize=0`合同；compiled exec需自己的原profile，不能由运行code的CO_NESTED等flags猜编译输入。
+
 `SourceExecProvider`保原exec actions/edges、namespace选择及匹配body frame；ExecProtocolValue是辅助协议端点，不能伪装成源码GP。两分支有独立selection，body data进入discard，exec的None来自正常返回契约；审计、builtins初始化和释放保各自world/control边，BODY输出只由原正文返回供应。声明script入口不授运行激活。入口为`scar exec-view --catalog CATALOG [--out FRESH]`，`--read VIEW`严格重推全部typed表。
 
 `SourceConfigurationProvider`把已版本化的输入表达式、字段投影、插值、读请求和声明root版本接入独立标记的`DECLARED_INPUT_ALGEBRA`子区，不能将这些操作计作运行事件。它复用canonical WholeOwner地址及post-call content-state公式，只以MAY条件把声明值接到receiver内容候选；Python返回值、整个world及未来task cfg均不相等。`scar configuration-view --catalog CATALOG --boundaries BOUNDARIES [--out FRESH]`发布小表，`--read VIEW`重推所有记录/边。原输入版本、源码API版本、实际receiver及后续mutation仍是独立条件；所有obligations保持可查询。
