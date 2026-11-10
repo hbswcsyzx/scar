@@ -7,7 +7,7 @@
 |---|---|---|
 | ①统一接口 | source/native共用ProgramView，原ID、端口、区域、循环、来源和辅助接口值均可查询/展开 | 整个推理链覆盖由⑤验收 |
 | ②局部结构/状态 | 884单元完整盘点，69类指令效果请求；正常环境接口缺口已补，绑定/内容/native状态分开 | 应用异常细节按既定范围暂缓；效果和实例版本未闭合 |
-| ③跨层连接 | 普通/compiled函数、factory/default/cell、native、构造、exec分支、声明配置值与原未决字段已接统一查询 | 首先补returned-callable及捕获callback链，再补当前状态、导入闭包、相关deferred/resume及运行选择 |
+| ③跨层连接 | 普通/compiled及返回函数、factory/default/cell、native、构造、exec分支、声明配置值与原未决字段已接统一查询 | 返回包装调用及捕获callback链仍缺；之后补当前状态、导入闭包、相关deferred/resume及运行选择 |
 | ④资源/运行事实 | 已有12硬件节点、类型及候选资源路由 | 相关运行I/O、物理放置/搬运/同步的实际证据与软件端口连接 |
 | ⑤完整推理链 | 未通过 | run_inference.py→配置/加载→planner/模型→输出的完整跨层查询与覆盖 |
 
@@ -26,6 +26,9 @@
 - **新增 Verified：** exec两分支保12协议actions、30条原边和全部guard；58辅助记录/103关系共享1个compiled root。参数与data/world返回分支配对、discard、None及全部7表严格重推通过，8.07秒/约520 MiB/31,072表bytes；不授namespace版本、激活或效果闭合。
 - **新增 Verified：** 声明配置代数22表达式、52投影、3插值、5读请求及12 root版本形成119记录/244关系；canonical whole-content地址复用、None返回不混cfg、wrong scope拒绝均通过。完整10表落盘重推15.92秒/约502 MiB/54,346 bytes；不是实际运行cfg快照或计算次数。
 - **实际组合缺口已验：** exec ROOT→decorator工厂可接，不能直接进入`run(cfg)`；compiled calls75/0停在返回函数及捕获callback前沿，calls59/60所属run正文也不能借ROOT前缀进入。函数声明边仅IMPLEMENTATION，不授activation。组合检查15.11秒通过的是这项不完整性结论，第一阶段仍未完成。
+- **本轮新增 Verified：** 配对返回自动推得call75的创建来源，6→7接口；最新构建/读回18.84秒。另复用分析器补2个库文件/283调用的32接口，36.65秒。集合只保收据与unit路由，不复制行；第二轮来源组合去除完全相同的推导，39→43接口，保所有不同creator/路径/条件。
+- **统一图 Verified：** 3单元、359声明调用、43 frames、305关系、5组返回函数来源及33 capture绑定；两exec分支均接到返回decorator及wrapper工厂，19项定向查询通过。完整构建/读回/组合查询163.74秒、峰值约1.47 GiB；新增表148,686 bytes，不是整图大小。原接口Fact保留、creator不混当前caller、cell内容/实际dispatch仍未证。
+- **下一断点已定位：** call75正文返回停在ApplyDecorator call29，callee来自wraps工厂返回；普通wraps入口已接，内部partial构造call242仍有源码class与native两个候选。不能把包装当恒等函数、不能沿`__wrapped__`冒认目标。下一步用轻量动态选择补实际callable/closure，再接原静态端口；整个入口链仍未通。
 
 ## 已有材料与验收
 
@@ -47,11 +50,14 @@
 | program-source-exec-view-current | exec原分支、actions及共享正文的匹配查询与7表重推 |
 | program-configuration-view-current / program-configuration-unified-current | 声明配置→canonical receiver内容候选，全部typed记录/关系重推 |
 | program-entry-composition-current | exec/compiled视图真实组合；验证Root到工厂已通、callback到run仍缺接口 |
+| program-returned-functions-current / program-function-leaves-current | 首轮返回接口与不复制行的3单元集合 |
+| program-wrapper-declared-calls-current / program-wrapper-function-interfaces-current | 精确补2个库文件的声明与32个普通函数接口，未重建581域 |
+| program-returned-composition-current / program-returned-unified-current / program-entry-exec-current | 去重后的返回来源组合、统一查询及当前exec分支材料；包装/callback链未闭合 |
 | program-source-resources-current | 539类型投影与已有硬件的候选路由；不是实际分配或传输 |
 
 ## 接下来顺序
 
-1. **③下一项：** 复用匹配调用/返回的有界引用引擎，给returned function保目标定义和creator上下文，再接其参数与capture；先打通ROOT→decorator→captured callback→run的实际源接口链。禁止拿CODE_DECLARATION补裸调用边。之后再接配置/导入的当前状态及相关deferred/resume；不重跑全局FIFO前缀。
+1. **③下一项：** 动静结合接包装callable/capture：静态保留共享body和协议候选；短动态运行只补实际调用选择、code对应与closure handle。先验真实启动前缀，再打通ROOT→decorator→captured callback→run；无观测路径不删、一次选择不外推未来。之后接配置/导入的当前状态及相关deferred/resume；不重跑全局FIFO前缀。
 2. **④：** 在已接软件关系上接相关I/O、设备与存储；候选和Observed分开，不采集Tensor数值，不展开OS内部。
 3. **⑤：** 验收整个正常推理链的依赖、循环、外部边界、明确未决字段及无预算截断。通过后才进入化简和代码生成。
 

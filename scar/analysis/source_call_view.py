@@ -17,6 +17,7 @@ from scar.analysis.source_function_interfaces import SourceFunctionInterfaceStor
 from scar.analysis.source_namespace_interfaces import NamespacePlanView
 from scar.analysis.source_reference_slice import source_port
 from scar.analysis.source_value_flow import _artifact
+from scar.analysis.source_world_returns import _table_ref
 from scar.analysis.source_call_defaults import FunctionDefaultStateProvider
 from scar.analysis.source_call_captures import FunctionCaptureStateProvider
 from scar.ir.program import normal_graph as G,normal_targets as T,normal_links as F
@@ -48,7 +49,20 @@ def open_function_interfaces(value):
     if schema==ordinary_schema: return SourceFunctionInterfaceStore(path)
     from scar.analysis.source_compiled_interfaces import SCHEMA as compiled_schema,CompiledFunctionInterfaceStore
     if schema==compiled_schema: return CompiledFunctionInterfaceStore(path)
+    from scar.analysis.source_returned_functions import SCHEMA as returned_schema,ReturnedFunctionInterfaceStore
+    if schema==returned_schema:return ReturnedFunctionInterfaceStore(path)
+    from scar.analysis.source_function_collection import SCHEMA as collection_schema,FunctionInterfaceCollection
+    if schema==collection_schema:return FunctionInterfaceCollection(path)
     raise ValueError('unsupported function-interface material representation: '+str(schema))
+
+
+def function_interface_fact(store,unit,ordinal):
+    """Stable interface alternative, including inherited rows of an overlay."""
+    getter=getattr(store,'interface_fact',None)
+    if callable(getter):return getter(unit,ordinal)
+    shard=store.report['shards'][unit]
+    return _table_ref(store.path/shard['path'],shard['tables']['interfaces'],
+        'scar.source-function-interface-record',ordinal)
 
 
 def prepare_source_ports(view,ports,*,bodies=()):
@@ -149,6 +163,10 @@ class SourceFunctionCallProvider:
         self.pending=defaultdict(set)
         self.defaults=FunctionDefaultStateProvider(view)
         self.captures=FunctionCaptureStateProvider(view)
+        self.returned=None
+        if callable(getattr(self.store,'callable_provenance',None)):
+            from scar.analysis.source_callable_provenance_view import ReturnedCallableProvider
+            self.returned=ReturnedCallableProvider(self)
         artifact=_artifact(self.store.path/'result.json',self.store.report['schema'])
         self.manifest=SourceArtifactLocator(artifact,artifact.sha256,artifact.size_bytes,'canonical-json')
         # Stored interface shards already are the complete conditional graph.
@@ -238,8 +256,10 @@ class SourceFunctionCallProvider:
             if interface.activation is not T.FunctionActivation.NORMAL:
                 self._note(operation,'DEFERRED_CREATION_IS_NOT_ORDINARY_BODY_EXECUTION');continue
             body=self.view.source_region(link.body.unit,link.body.template,link.body.region)
-            frame=Frame(operation.namespace,operation.node,use.node,value.node,body.namespace,entry=body.node)
+            frame=Frame(operation.namespace,operation.node,use.node,value.node,body.namespace,entry=body.node,
+                selection=function_interface_fact(self.store,unit,ordinal))
             self.frames[key]=frame
+            if self.returned is not None:self.returned.bind(key,interface,frame)
             self._relation(operation,body,frame,Flow.ENTER,Kind.CALL_TARGET,Meaning.DEPENDENCE,
                 key,0,link.conditions)
             for ri,route in enumerate(link.parameters):
@@ -340,6 +360,7 @@ class SourceFunctionCallProvider:
             kinds=dict(Counter(r.kind.value for r in self.relations)),
             default_reads=len(self.defaults.reads),default_slots=len(self.defaults.addresses),
             captured_cell_bindings=len(self.captures.bindings),captured_locations=len(self.captures.locations),
+            returned_callable_bindings=0 if self.returned is None else len(self.returned.bindings),
             pending_endpoint_reasons=sum(len(r) for r in self.pending.values()),
             namespace_semantics_rederived=False,runtime_dispatch_proven=False,
             source_bodies_copied=False,loops_unrolled=False,first_stage_complete=False)
