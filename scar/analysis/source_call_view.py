@@ -53,6 +53,8 @@ def open_function_interfaces(value):
     if schema==returned_schema:return ReturnedFunctionInterfaceStore(path)
     from scar.analysis.source_function_collection import SCHEMA as collection_schema,FunctionInterfaceCollection
     if schema==collection_schema:return FunctionInterfaceCollection(path)
+    from scar.analysis.source_observed_interfaces import SCHEMA as observed_schema,ObservedFunctionInterfaceStore
+    if schema==observed_schema:return ObservedFunctionInterfaceStore(path)
     raise ValueError('unsupported function-interface material representation: '+str(schema))
 
 

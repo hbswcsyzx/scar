@@ -19,6 +19,7 @@ from scar.analysis.static_query import _Fragments
 from scar.analysis.source_reference_slice import ReferenceSlicer, source_port
 from scar.analysis.source_value_flow import _artifact
 from scar.analysis.program_view import ProgramView, _digest
+from scar.analysis.source_observed_materials import ObservedFactMaterials
 from scar.analysis.normal_output import write_table
 from scar.analysis.source_stage import _durable_mkdir, _durable_bytes
 from scar.analysis.source_template_links import _json
@@ -51,6 +52,7 @@ class ObservedSourceCodeProvider:
         if any(m['python'] != sys.version for m in self.trace.frame_scan.metadata):
             raise ValueError('code correspondence needs the recorded compiler runtime')
         self.records = {}; self.points = {}; self.bodies = {}; self.issues = []
+        self.fact_materials=ObservedFactMaterials(view.catalog)
         self._sources = {}; self._guard = {}
         self._target_metas = tuple(sorted(Path(self.trace.directory).glob('python-call-target-meta.*.json')))
         digests=[]
@@ -120,6 +122,7 @@ class ObservedSourceCodeProvider:
                             raise ValueError('observed code mapping has conflicting compiler paths')
                         self.records[key] = row; self.points[key] = point; self.bodies[key] = body
                         self._sources[unit] = view.unit(unit)
+        self.fact_materials.admit(tuple(r.function_fact for r in self.records.values()))
         self.check(); view.register(self)
 
     @staticmethod
@@ -127,6 +130,7 @@ class ObservedSourceCodeProvider:
 
     def check(self):
         self.view.catalog.fact_store.validate_parents()
+        self.fact_materials.check()
         if tuple(sorted(Path(self.trace.directory).glob('python-call-target-meta.*.json'))) != self._target_metas:
             raise ValueError('observed target process inventory changed')
         for source in self._sources.values():source.check()
