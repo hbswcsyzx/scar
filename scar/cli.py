@@ -450,6 +450,9 @@ def _query_body_execution(args) -> int:
 
 def main(argv=None) -> int:
     cli_argv = sys.argv[1:] if argv is None else list(argv)
+    if cli_argv and cli_argv[0] in ('build', 'build-query'):
+        from scar.analysis.build import main as build_main, query_main
+        return (build_main if cli_argv[0] == 'build' else query_main)(cli_argv[1:])
     if cli_argv and cli_argv[0] == 'source-bytes':
         from scar.analysis.source_materials import main as source_materials_main
         return source_materials_main(cli_argv[1:])
@@ -580,6 +583,8 @@ def main(argv=None) -> int:
     source_statements.set_defaults(func=lambda _: 0)
     source_roots = sub.add_parser('source-roots', help='replay admitted source-root rules with explicit globals/locals interfaces')
     source_roots.set_defaults(func=lambda _: 0)
+    sub.add_parser('build', help='build, join and publish one entry with optional trace evidence (scar build --help)')
+    sub.add_parser('build-query', help='query a unified build and expand original shared bodies (scar build-query --help)')
     static_cmd = sub.add_parser("static", help="build source-root program graphs without executing the target")
     static_cmd.set_defaults(func=lambda _: 0)
     static_query = sub.add_parser("static-query", help="query stored static definitions and original graph dependencies")

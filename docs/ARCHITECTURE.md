@@ -6,6 +6,18 @@ LeWM 是外部 testcase；通用规则由语言协议、原端口和证据派发
 
 ## 当前实施顺序
 
+当前按主链优先推进：先贯通统一入口、局部图、跨层连接、资源接口和存储查询，再依据全链缺口集中补齐。
+`scar build --entry ENTRY --trace TRACE_DIR --out OUT` 调度现有分析器，使用同一 `ProgramView` / `ProgramDependencySession`；
+缺 catalog 时复用 worker 池建立源码与共享 body，再发布跨函数关系。有 catalog 时保留原材料，只读复用；
+必要的增量建图在新输出中进行。查询会话共享原图/代码/关系缓存，预算耗尽作为前沿，不变成空依赖。
+manifest 引用原分片，`relationships.json` 索引跨层分片，`observed.json` 单独保存调用域，
+`resources.json.gz` 保存入口的类型化符号资源投影，其余 body 按需派生；没有复制原正文或展开迭代。
+`configuration.json` 引用自动发现并经现有 YAML parser 准入的配置表示图；未知 tag、插值、组合及运行端口绑定继续留前沿。
+资源需求与候选分开：CPU/host representation 需求不代表 tensor backing；GPU/设备内存及文件/SSD/NVMe
+只依据原 Behavior 分类产生带接口解析条件的 MAY 候选。实际事件仍需原采集证据，`.to()` 不授物理复制。
+两个验收节点分别是流程可建/存/读/查并列出前沿，以及正常推理关键依赖/资源边界闭合。
+前者由 `workflow_complete` 表示，后者保留 `first_stage_complete=false`；当前没有真实推理覆盖完成结论。
+
 第一阶段按以下五层推进；既有局部原型不代表整层通过。以`run_inference.py`及已存推理配置验收相关依赖；不强求排除孤立文件，也不把一次未执行作为删图依据。
 
 | 层 | 输入→输出 | 验收 |
@@ -25,7 +37,7 @@ LeWM 是外部 testcase；通用规则由语言协议、原端口和证据派发
 native桥复用已有参数转换、返回包装及196个canonical接口。源函数/native调用共用原callsite与caller scope解析；Frame另保原NamedMatch选择，进入与返回双向匹配。转换、pack聚合、默认表达式、包装和world依赖不授对象/storage身份；接口存在不授parser接受、override或runtime dispatch。源码转换分片懒加载，不再复制一份native图。
 构造/descriptor桥再把原协议端口、当前callable/default槽及source连接接入；材料reader只重验原site/stage/Fn ABI，不深层重跑旧namespace solver。SOURCE_INIT不转发data返回，OBJECT_INIT/RETURN_FOREIGN显式接续world。CONTAINS补原call的接口值展开，未解原前沿不因此成为已选目标。所有调用适配器先按unit批量准备所需原模板，再接局部端口；实例/frame与body继续共享。
 CFG边是CONTROL_FLOW，区别于控制依赖CONTROL；完整CallSite/path及completion保原映射。普通walk不证明调用/返回已匹配或节点实际执行。
-每层通过后提交一次；只维护本架构、MODEL与STATUS，不新增逐门文档。后续形式细节是已有材料协议，本轮入口以此表为准。
+每批变更做必要检查和一次主链验收后提交；维护现有文档，不新增逐门文档。后续形式细节是已有材料协议，本轮入口以此表为准。
 
 ## 三个主阶段与后端决定
 
@@ -56,7 +68,7 @@ C++宿主通过版本化C函数表接入插件（仍是C++后端），传递描�
 
 ## 形式阶段与顺序
 
-先验收前层的输入域、全部类型/字段及转换不变量，再开发后层。已有后层原型保留，当前只推进第一阶段；
+材料准入保持前层类型/身份与转换不变量，工程实施先贯通五层再补齐断点。已有后层原型保留，当前只推进第一阶段；
 功能样例通过不能证明前层完备。当前 Python 前端按本机 CPython 3.14.7 的版本化接口核对。
 
 这里的“层”是形式转换，不是功能分组。每层固定为

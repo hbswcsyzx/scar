@@ -12,6 +12,28 @@ LeWM 是外部 testcase；通用规则不按业务名称选择处理方式。
 
 ## 使用
 
+统一入口会复用包含当前入口的已有静态 catalog；没有材料时自动建立源码、函数/循环子图和跨函数连接：
+
+```bash
+scar build --entry /path/to/entry.py --trace /path/to/trace --out /path/to/fresh-build --jobs 4
+scar build-query /path/to/fresh-build --action expand
+scar build-query /path/to/fresh-build --action select --file model.py
+scar build-query /path/to/fresh-build --action inputs
+scar build-query /path/to/fresh-build --action dependencies --file model.py --entry forward --node program_value:ORIGINAL_ID
+```
+
+无 trace 时可省略 `--trace`。`--model` 可显式选择已有 catalog，`--source-root` 可增加依赖源码根。
+`manifest.json` 引用原正文和关系分片；资源按 body 延迟接线，观察调用域独立保存。
+入口源码树及显式依赖根的 YAML 自动进入现有配置材料解析器；不执行 tag、插值或 Hydra 组合。
+`gaps.json` 保留局部缺口、跨层前沿、未接运行资源及查询截断。
+`workflow_complete` 只表示构建/存储/读回流程通过，`first_stage_complete` 当前始终为 false。
+候选 GPU、文件和 SSD/NVMe 关系带条件；它们不是实际 dispatch、存储身份或物理复制证据。
+
+Python 中用 `BuildSession(build_path)` 共享一次查询会话的 catalog/代码/关系缓存。
+`session.view` 提供原 `get/expand/producers/consumers/explain`；
+`session.attach_trace()` 准入观察后，通过 `view.dependencies.observed_scopes()`、
+`observed_ports(scope)` 和 `observed_incoming/outgoing(port)` 查询指定真实调用域，保留观察与静态候选的区别。
+
 ```bash
 source ~/miniconda3/etc/profile.d/conda.sh
 conda activate lewm
