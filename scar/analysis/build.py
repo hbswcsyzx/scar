@@ -23,7 +23,8 @@ SCHEMA = 'scar.program-build'
 
 def _rules():
     return {name: sha256((Path(__file__).parent / name).read_bytes()).hexdigest()
-        for name in ('build.py', 'build_resources.py')}
+        for name in ('build.py', 'build_resources.py','build_f4.py','build_f4_resources.py',
+            '../ir/program/build_f4_resources.py')}
 
 
 def _write(path, value):
@@ -135,6 +136,12 @@ class BuildSession:
         from scar.analysis.program_view import ProgramView, _RepresentationProvider
         self.path = Path(path).resolve()
         self.report = json.loads((self.path / 'manifest.json').read_bytes())
+        self._f4=None
+        if self.report.get('backend')=='F4':
+            from scar.analysis.build_f4 import F4BuildSession
+            self._f4=F4BuildSession(path,seconds=seconds,input_bytes=input_bytes,_publishing=_publishing)
+            self.session=self._f4;self.view=self._f4.view;self.resources=self._f4.resources
+            self.entry=self._f4.entry;self.entries=self._f4.entries;return
         if (self.report.get('schema'), self.report.get('schema_version')) != (SCHEMA, 1):
             raise ValueError('unsupported build manifest')
         if self.report['rules'] != _rules():
@@ -163,6 +170,7 @@ class BuildSession:
         self.entry = Point(GraphNamespace.from_source(self.entries[0]), self.entries[0].region, ())
 
     def attach_trace(self):
+        if self._f4 is not None:return self._f4.attach_trace()
         if self.observed is None and self.report['trace'] is not None:
             for receipt in self.report['trace']['inputs']:
                 _check(receipt)
@@ -170,9 +178,11 @@ class BuildSession:
         return self.observed
 
     def select(self, *, file=None, entry=None, kind=None):
+        if self._f4 is not None:return self._f4.select(file=file,entry=entry,kind=kind)
         return tuple(self.session.select_bodies(file=file, entry=entry, kind=kind))
 
     def close(self):
+        if self._f4 is not None:return self._f4.close()
         self.session.close()
 
     def __enter__(self):
@@ -196,7 +206,7 @@ def _model_for(entry, explicit):
 
 
 def build(entry, trace, out, *, model=None, jobs=4, source_roots=(),
-          max_seconds=3600, max_input_bytes=16 * 1024**3):
+          max_seconds=3600, max_input_bytes=16 * 1024**3,catalog=None,cache_roots=()):
     from scar.analysis.static_program import build_static_program, link_static_program, read_static_program
     from scar.analysis.static_calls import StaticCallBudget
     from scar.analysis.program_dependency_export import export_dependency_walk
@@ -212,6 +222,11 @@ def build(entry, trace, out, *, model=None, jobs=4, source_roots=(),
     trace_path = None if trace is None else Path(trace).resolve()
     if trace_path is not None and not trace_path.is_dir():
         raise ValueError('trace must be an existing directory; omit it for static-only build')
+    from scar.analysis.build_f4 import discover,build_f4
+    f4=discover(entry,trace_path,catalog=catalog,cache_roots=cache_roots) if catalog or model is None else None
+    if f4 is not None:
+        return build_f4(entry,trace_path,out,f4,source_roots=source_roots,
+            max_seconds=max_seconds,max_input_bytes=max_input_bytes)
     selected = _model_for(entry, model) if model or not source_roots else None
     out.mkdir(parents=True)
     if selected is None:
@@ -332,12 +347,15 @@ def main(argv=None):
     parser.add_argument('--out', required=True)
     parser.add_argument('--model', help='reuse an existing admitted source model')
     parser.add_argument('--source-root', action='append', default=[])
+    parser.add_argument('--catalog',help='explicit F4 context catalog; otherwise discover a compatible retained catalog')
+    parser.add_argument('--cache-root',action='append',default=[],help='search this directory for retained relationship publications')
     parser.add_argument('--jobs', type=int, default=4)
     parser.add_argument('--max-seconds', type=int, default=3600)
     parser.add_argument('--max-input-bytes', type=int, default=16 * 1024**3)
     args = parser.parse_args(argv)
     result = build(args.entry, args.trace, args.out, model=args.model, jobs=args.jobs,
-        source_roots=args.source_root, max_seconds=args.max_seconds, max_input_bytes=args.max_input_bytes)
+        source_roots=args.source_root, max_seconds=args.max_seconds, max_input_bytes=args.max_input_bytes,
+        catalog=args.catalog,cache_roots=args.cache_root)
     print(json.dumps(dict(workflow_complete=result['workflow_complete'],
         first_stage_complete=result['first_stage_complete'], **result['summary'])))
     return 0
@@ -351,13 +369,19 @@ def query_main(argv=None):
     parser.add_argument('--entry')
     parser.add_argument('--kind')
     parser.add_argument('--node', help='original typed wire ID from an expansion')
-    parser.add_argument('--action', choices=('summary', 'select', 'expand', 'dependencies', 'observed', 'inputs'), default='summary')
+    parser.add_argument('--action', choices=('summary', 'select', 'expand', 'dependencies', 'observed', 'inputs', 'resources'), default='summary')
     parser.add_argument('--direction', choices=('incoming', 'outgoing'), default='incoming')
     parser.add_argument('--max-points', type=int, default=256)
     args = parser.parse_args(argv)
     with BuildSession(args.build) as session:
+        if session._f4 is not None:
+            result=_query_f4(session._f4,args)
+            print(json.dumps(result,ensure_ascii=False));return 0
         if args.action == 'summary':
             result = session.report
+        elif args.action == 'resources':
+            session.resources.demand(session.entry)
+            result = session.resources.provider.payload()
         elif args.action == 'inputs':
             result = json.loads((session.path / 'configuration.json').read_bytes())
             for material in result['materials']:
@@ -383,3 +407,22 @@ def query_main(argv=None):
                     direction=args.direction, max_points=args.max_points))
         print(json.dumps(result, ensure_ascii=False))
     return 0
+
+
+def _query_f4(session,args):
+    from scar.analysis.program_dependency_export import export_dependency_walk
+    if args.action=='summary':return session.report
+    if args.action=='observed':return session.attach_trace()
+    if args.action=='inputs':
+        result=json.loads((session.path/'configuration.json').read_bytes())
+        for material in result['materials']:
+            _check(material['source']);_check(material['material'])
+        return result
+    if args.action=='resources':
+        session.resources.demand(session.entry)
+        return session.resources.payload()
+    points=session.select(file=args.file,entry=args.entry,kind=args.kind)
+    if args.node:points=(session.point(file=args.file,entry=args.entry,kind=args.kind,node=args.node),)
+    if args.action=='select':return dict(points=[encode(p) for p in points])
+    if args.action=='expand':return dict(children=[encode(p) for point in points for p in session.view.expand(point)])
+    return export_dependency_walk(session.view.dependencies.walk(points,direction=args.direction,max_points=args.max_points))

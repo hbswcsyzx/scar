@@ -7,14 +7,17 @@ LeWM 是外部 testcase；通用规则由语言协议、原端口和证据派发
 ## 当前实施顺序
 
 当前按主链优先推进：先贯通统一入口、局部图、跨层连接、资源接口和存储查询，再依据全链缺口集中补齐。
-`scar build --entry ENTRY --trace TRACE_DIR --out OUT` 调度现有分析器，使用同一 `ProgramView` / `ProgramDependencySession`；
-缺 catalog 时复用 worker 池建立源码与共享 body，再发布跨函数关系。有 catalog 时保留原材料，只读复用；
+`scar build --entry ENTRY --trace TRACE_DIR --out OUT` 调度现有分析器。匹配 F4 catalog 时，在同一 `ProgramView` 接入
+普通/compiled/返回函数、观察选择、exec、函数创建、native、构造协议、配置、局部状态和资源适配器；
+各适配器保原端口与条件，按需加载。`BuildSession` 统一选择、展开、依赖、资源和读回查询。
+缺 F4 材料时使用原 `ProgramDependencySession` 路线，复用 worker 池建立源码与共享 body，再发布跨函数关系。有 catalog 时保留原材料，只读复用；
 必要的增量建图在新输出中进行。查询会话共享原图/代码/关系缓存，预算耗尽作为前沿，不变成空依赖。
 manifest 引用原分片，`relationships.json` 索引跨层分片，`observed.json` 单独保存调用域，
 `resources.json.gz` 保存入口的类型化符号资源投影，其余 body 按需派生；没有复制原正文或展开迭代。
 `configuration.json` 引用自动发现并经现有 YAML parser 准入的配置表示图；未知 tag、插值、组合及运行端口绑定继续留前沿。
-资源需求与候选分开：CPU/host representation 需求不代表 tensor backing；GPU/设备内存及文件/SSD/NVMe
-只依据原 Behavior 分类产生带接口解析条件的 MAY 候选。实际事件仍需原采集证据，`.to()` 不授物理复制。
+资源需求与候选分开：F4 的 CPU/host representation 需求带执行条件，不代表 tensor backing；GPU/设备内存及存储候选
+复用原 native 转换/类型接口和硬件快照。结构、声明及编译请求不制造独立运行需求。旧路线保留 Behavior 的条件候选。
+实际事件仍需原采集证据，`.to()` 不授物理复制。
 两个验收节点分别是流程可建/存/读/查并列出前沿，以及正常推理关键依赖/资源边界闭合。
 前者由 `workflow_complete` 表示，后者保留 `first_stage_complete=false`；当前没有真实推理覆盖完成结论。
 
