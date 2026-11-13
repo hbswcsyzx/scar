@@ -181,11 +181,17 @@ def build_frontend(paths, out, *, sources=(), jobs=4, trace=None, project_root=N
         if trace is not None:
             run.stage('observed-function-interfaces','scar.analysis.source_observed_interfaces',
                 ['--parent',out/'function-interfaces','--trace',trace,'--project-root',project_root,
-                    '--out',out/'observed-function-interfaces'],
+                    '--out',out/'observed-function-interfaces','--boundaries-out',out/'observed-boundaries'],
                 out/'observed-function-interfaces/result.json','scar.source-observed-function-interfaces',
                 first_stage_complete=False,source_bodies_copied=False,loops_unrolled=False,
                 future_dispatch_proven=False,creator_instances_proven=False,cell_contents_proven=False)
             report['observed_function_interfaces'] = _receipt(out/'observed-function-interfaces/result.json')
+            boundary=json.loads((out/'observed-boundaries/result.json').read_bytes())
+            if (boundary['schema']!='scar.source-observed-boundaries'
+                    or boundary['first_stage_complete'] is not False
+                    or boundary['target_executed'] is not False):
+                raise ValueError('observed boundary publication contract differs')
+            report['observed_boundaries'] = _receipt(out/'observed-boundaries/result.json')
         report.update(workflow_complete=True, local_declarations_complete=True,
             model=_receipt(model/'manifest.json'), catalog=_receipt(out/'catalog/result.json'),
             calls=_receipt(out/'calls/result.json'),

@@ -22,6 +22,7 @@ scar build --entry /path/to/entry.py --catalog /path/to/frontend/catalog --cache
 `frontend` 顺序执行源码→词法→AST→作用域/绑定→共享区域模板→局部接口→调用参数/返回接口；三类独立模板可并行。
 每层检查原报告再推进，失败保留具体阶段。`local_declarations_complete` 只表示所选源码的局部声明图完成。
 已有采集可追加 `--trace TRACE --project-root ORIGINAL_ROOT` 离线接线；随后 `build` 使用同一目录的观察接口。
+同一分析索引同时发布共享的类型/原生调用边界和独立观察表；有native companion时保原ABI字段，无companion时明确未记录。
 
 统一入口优先组合与入口源码匹配的 F4 catalog、调用/状态接口和资源材料；没有材料时建立源码、函数/循环子图和跨函数连接：
 
@@ -93,8 +94,9 @@ python -B -m scar.cli name-flow --declared FRESH_CALLS --unit SOURCE_UNIT --out 
 - [开发用法](docs/DEVELOPMENT.md)：命令、查询接口和工作区约定。
 - [当前状态](docs/STATUS.md)：真实结果、缺口与下一步。
 
-当前权威图在 `artifacts/current/static/`；原 trace 与派生查询证据在
-`artifacts/current/queries/`。大产物不提交 Git，只保留一份正在开发的源码。
+当前CPU形式前端及建图证据在 `artifacts/current/experiments/cpu-*-current/formal/`，
+精简验收摘要见 `artifacts/baseline/formal-frontend-results.json`；已有源码/查询材料仍共享原分片。
+大产物不提交 Git，只保留一份正在开发的源码。
 
 当前 CPU 主测试程序位于项目外、与 `le-wm` 同级：`sunfish`（一般程序）、`gray-scott`（PDE）、`cirq`（量子电路模拟）。
 外部入口及命令、10 秒至 10 分钟的实测负载见 `artifacts/baseline/cpu-workloads.json`；测试程序的运行成功与完整建图验收分别报告。

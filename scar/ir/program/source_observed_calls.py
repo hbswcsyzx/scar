@@ -49,6 +49,9 @@ class ObservedSourceFunctionGroup:
     # observed values. Creation-time defaults never refute a layout.
     argument_prefixes: tuple[int, ...]
     argument_layout_proven: bool
+    # Actual frame records prove body entry independently of the receiver's
+    # weak identity or its explicit/implicit argument layout.
+    body_entries: tuple[CallRecordAnchor, ...] = ()
 
 
 @dataclass(frozen=True, slots=True)

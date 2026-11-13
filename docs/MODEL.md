@@ -39,8 +39,12 @@ SCAR 是宏观编译器：用有类型、可展开的图统一表示程序及硬
 返回函数增加`ReturnedCallableProvenance`：原函数创建、返回引用切片、完整creator接口序列和当前consumer各自保留。creator描述过去的引用来源，不能压到当前调用栈上；当前body仅压入当前call frame。`ReturnedCallableProvider`把选定创建点接到当前callee，保MAY及原前提，不读cell内容。所有source Frame.selection保原接口Fact；叠加叶中继承的接口仍引用父Fact。`function-interface-collection`只存不重叠叶的收据与unit路由，接口行和正文仍留在原分片。
 
 `ObservedSourceCodeLink`保存实际CodeCapture/target/entry原锚点，经既有编译器的父LOAD_CONST、完整源码span及常量路径匹配原Function/Body，并核完整code指纹。统一图以辅助Provider记录及IMPLEMENTATION/MAY连接表示这种代码模板对应；不授函数创建实例、globals/cell相同或某静态调用已激活。普通源码只重放既有`flags=0,dont_inherit=True,optimize=0`合同；compiled exec需自己的原profile，不能由运行code的CO_NESTED等flags猜编译输入。
+Lambda 还核原F3 `LAMBDA_BODY` 投影；同一行的多个表达式按完整跨度和真实常量槽分别对应。
 
 `CompiledCodeProfiles`沿原compile请求、文本与C1/F4收据恢复有效输入；相同root code只证明模板对应，不选择exec namespace分支。`ObservedSourceCallsite`再以完整caller code、scope、操作ABI及源码槽连接真实offset与原Call Fact；ApplyDecorator与工厂可有相同span，须用原定义的code常量位置区分。`ObservedSourceFunctionGroup`按原call/definition归组；已有等价接口保原Fact/frame，只有缺失目标增加条件接口。未知receiver以可能的0/1额外prefix记录，不用创建期default排除；未证布局只注释code证据，不新增错误参数路由。动态Invocation仍在原观察记录里，不能冒充静态Frame，循环body继续共享。
+正文entry与receiver身份分别判断：原caller的相邻CALL区间内，完整code、直接caller及site唯一匹配的非挂起帧可供应环境/world/返回接口。receiver不能weakref时不保留用户对象，也不猜地址身份；参数布局未证则保`NOT_MODELED`及原帧锚点。
+
+`SourceObservedBoundary`是原CALL拥有的辅助接口，不是新Operation或假callee body。按原call fact和target kind共享；callee、参数/packs、前后world及result引用原F4端口，观察事件另表保存。`TYPE_OBJECT`不等于标准构造阶段，未分类调用不重标native。可选native companion按同次caller/attempt/callable连接原carrier/ABI字段；无采集为`NOT_RECORDED`，不同于已采字段`UNKNOWN`。输入/状态/可能正常输出边保MAY条件，effects继续为UNKNOWN，不授native entry或正常完成证明。
 
 `SourceExecProvider`保原exec actions/edges、namespace选择及匹配body frame；ExecProtocolValue是辅助协议端点，不能伪装成源码GP。两分支有独立selection，body data进入discard，exec的None来自正常返回契约；审计、builtins初始化和释放保各自world/control边，BODY输出只由原正文返回供应。声明script入口不授运行激活。入口为`scar exec-view --catalog CATALOG [--out FRESH]`，`--read VIEW`严格重推全部typed表。
 

@@ -11,6 +11,7 @@ from dataclasses import replace
 from hashlib import sha256
 import json
 import inspect
+from bisect import bisect_right
 from pathlib import Path
 
 from scar.analysis.source_call_view import open_function_interfaces,function_interface_fact
@@ -140,6 +141,40 @@ def _body_connection(mini,unit,function,invocation):
         binding=T.ArgumentBinding.NOT_MODELED)
 
 
+def _body_entry_windows(index):
+    """Index original direct frames inside each caller's actual CALL interval.
+
+    This does not recover a receiver token. Different iterations of the same
+    callsite cannot borrow each other's entries; callbacks without the exact
+    captured target code and one-step caller path cannot satisfy the query.
+    """
+    prior=getattr(index,'_body_entry_windows',None)
+    if prior is not None:return prior
+    frames=defaultdict(list);limits={};last={}
+    for attempt in index.codes.trace.attempts:
+        previous=last.get(attempt.invocation)
+        if previous is not None:limits[previous]=attempt.frame_index
+        last[attempt.invocation]=(attempt.process_id,attempt.index)
+    for frame in index.codes.trace.entries:
+        if (frame.suspended or not frame.path_complete or len(frame.path)!=1
+                or frame.caller_invocation is None or frame.caller!=frame.path[0]):continue
+        frames[frame.caller_invocation,frame.code,frame.caller].append(frame)
+    rows={key:(tuple(f.anchor.index for f in sorted(values,key=lambda f:f.anchor.index)),
+               tuple(sorted(values,key=lambda f:f.anchor.index))) for key,values in frames.items()}
+    index._body_entry_windows=rows,limits
+    return rows,limits
+
+
+def _body_entry(index,observation):
+    rows,limits=_body_entry_windows(index)
+    positions,frames=rows.get((observation.target.caller,observation.target.code,
+        observation.attempt.site),((),()))
+    start=bisect_right(positions,observation.attempt.frame_index)
+    end=limits.get((observation.attempt.process_id,observation.attempt.index))
+    stop=len(positions) if end is None else bisect_right(positions,end)
+    return frames[start] if stop-start==1 else None
+
+
 def _groups(parent,index,unit):
     original=parent.load_unit(unit);facts=parent.catalog.fact_store.load(unit)
     by_code=defaultdict(list)
@@ -149,7 +184,7 @@ def _groups(parent,index,unit):
         for rows in by_code.values() for code in rows}
     frames={frame.invocation:frame for frame in index.codes.trace.entries}
     from scar.analysis.observed_function_interfaces import _known_receiver
-    grouped=defaultdict(list);frontiers=[];selected={}
+    grouped=defaultdict(list);frontiers=[];selected={};body_entries={}
     for observation in index.bindings:
         if observation.unit!=unit:continue
         target=observation.target
@@ -161,8 +196,18 @@ def _groups(parent,index,unit):
         for code in candidates:
             entry=entries_by_code[code.id].get((target.caller,target.attempt_index))
             if entry is None:
-                frontiers.append(R.ObservedSourceFunctionFrontier(observation,'OBSERVED_CALL_HAS_NO_MATCHED_IMMEDIATE_PYTHON_ENTRY'));continue
-            known=_known_receiver(target,entry)
+                frame=_body_entry(index,observation)
+                if frame is None:
+                    frontiers.append(R.ObservedSourceFunctionFrontier(observation,'OBSERVED_CALL_HAS_NO_MATCHED_IMMEDIATE_PYTHON_ENTRY'));continue
+                # A missing weak receiver witness must not erase a witnessed
+                # body. Only the world/environment/return interfaces are safe
+                # until argument layout is independently established below.
+                known=False
+                frontiers.append(R.ObservedSourceFunctionFrontier(observation,
+                    'OBSERVED_BODY_ENTRY_RETAINED_RECEIVER_IDENTITY_OPEN'))
+            else:
+                frame=frames[entry.callee]
+                known=_known_receiver(target,entry)
             if known:
                 frame=frames[entry.callee]
                 if (not frame.parameters_complete or not frame.parameters or entry.receiver_reference.startswith('weak:')
@@ -170,6 +215,7 @@ def _groups(parent,index,unit):
                     frontiers.append(R.ObservedSourceFunctionFrontier(observation,'OBSERVED_RECEIVER_FIRST_FORMAL_IDENTITY_NOT_RETAINED'));continue
             key=observation.query,code.function_fact,known
             grouped[key].append(observation);selected[key]=code
+            body_entries[observation.id,code.id]=frame.anchor
     groups=[]
     for key,observations in grouped.items():
         query,_,receiver_known=key;code=selected[key];call=facts.calls[query];offset=parent.catalog.fact_store.offsets[unit]
@@ -208,7 +254,8 @@ def _groups(parent,index,unit):
         if not proven:connection=_body_connection(mini,fn_unit,function,invocation)
         matches=tuple(i for i,f in enumerate(original.interfaces) if f.query==query and _same_connection(f,connection))
         groups.append(R.ObservedSourceFunctionGroup(query,code,tuple(observations),connection,matches,
-            tuple(sorted({p for choices in alternatives for p in choices})),proven))
+            tuple(sorted({p for choices in alternatives for p in choices})),proven,
+            tuple(body_entries[o.id,code.id] for o in observations)))
     return tuple(groups),tuple(frontiers)
 
 
@@ -366,11 +413,14 @@ def main():
     parser.add_argument('--target-max-bytes',type=int,default=32_000_000)
     parser.add_argument('--target-max-rows',type=int,default=100_000)
     parser.add_argument('--frame-max-events',type=int,default=100_000)
-    parser.add_argument('--out');parser.add_argument('--read');args=parser.parse_args()
+    parser.add_argument('--out');parser.add_argument('--read')
+    parser.add_argument('--boundaries-out',help='also connect non-Python CALL interfaces using this same checked trace index')
+    args=parser.parse_args()
     if args.read:
         store=ObservedFunctionInterfaceStore(args.read)
         for unit in store.report['shards']:store.read_unit(unit)
         report=store.report
+        index=store.index
     else:
         if not all((args.parent,args.trace,args.project_root,args.out)):parser.error('--parent --trace --project-root --out required')
         parent=open_function_interfaces(args.parent)
@@ -384,6 +434,9 @@ def main():
             frame_budget=replace(CallEdgeBudget(),max_events=args.frame_max_events))
         index=ObservedSourceCallsiteIndex(codes,compiled=profiles)
         report=build_observed_interfaces(parent,index,args.out)
+    if args.boundaries_out:
+        from scar.analysis.source_observed_boundaries import build_boundaries
+        build_boundaries(index,args.boundaries_out)
     _check_targets();print(json.dumps(report['counts']),flush=True)
 
 

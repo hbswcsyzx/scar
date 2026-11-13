@@ -62,7 +62,12 @@ def discover(entry,trace,*,catalog=None,cache_roots=()):
             functions.append(_receipt(path/'result.json'))
         key={'scar.source-function-creations':'creations','scar.source-call-context-graph':'protocol',
             'scar.constructor-member-contexts':'members','scar.source-binding-native-graph':'native',
-            'scar.source-resource-graph':'resources','scar.configuration-state-bindings':'configuration'}.get(schema)
+            'scar.source-resource-graph':'resources','scar.configuration-state-bindings':'configuration',
+            'scar.source-observed-boundaries':'observed_boundaries'}.get(schema)
+        if key=='observed_boundaries':
+            basis=r['basis']
+            if (trace is None or basis['trace']!=str(trace)
+                    or Path(basis['catalog']['uri']).parent.resolve()!=c.path.resolve()):continue
         if key and key not in components:
             components[key]=_receipt(path/'result.json')
     return dict(catalog=_receipt(c.path/'result.json'),entry_unit=unit,functions=functions,
@@ -157,7 +162,7 @@ class F4BuildSession:
         else:
             from scar.analysis.source_exec_view import SourceExecProvider
             self.providers['exec']=SourceExecProvider(self.view,self.catalog)
-        for name in ('creations','native','protocol','configuration'):
+        for name in ('creations','native','protocol','configuration','observed_boundaries'):
             try:
                 path=self._component_path(name)
                 if path is None:
@@ -173,6 +178,11 @@ class F4BuildSession:
                     from scar.analysis.source_protocol_view import SourceProtocolCallProvider
                     materials=SourceProtocolMaterials(path,self.catalog,members=self._component_path('members'))
                     provider=SourceProtocolCallProvider(self.view,materials)
+                elif name=='observed_boundaries':
+                    from scar.analysis.source_observed_boundaries import BoundaryStore,SourceObservedBoundaryProvider
+                    indices=[p.store.index for p in self.providers.values()
+                        if getattr(getattr(p,'store',None),'report',{}).get('schema')=='scar.source-observed-function-interfaces']
+                    provider=SourceObservedBoundaryProvider(self.view,BoundaryStore(path,index=indices[0] if indices else None))
                 else:
                     from scar.analysis.source_configuration_view import SourceConfigurationProvider
                     provider=SourceConfigurationProvider(self.view,path)
@@ -185,13 +195,16 @@ class F4BuildSession:
         if self.report['trace']:
             from scar.analysis.build import _check
             for receipt in self.report['trace']['inputs']:_check(receipt)
-        observations=[]
+        observations=[];boundaries=[]
         for p in self.providers.values():
             store=getattr(p,'store',None)
             if store is not None and store.report['schema']=='scar.source-observed-function-interfaces':
                 observations.append(dict(path=str(store.path),counts=store.report['counts'],run_scope=store.report['run_scope']))
+            if store is not None and store.report['schema']=='scar.source-observed-boundaries':
+                store.validate()
+                boundaries.append(dict(path=str(store.path),counts=store.report['counts'],run_scope=store.report['basis']['run_scope']))
         self.observed=dict(schema='scar.build-f4-observed-selections',publications=observations,
-            runtime_events_replaced_by_static_frames=False)
+            boundaries=boundaries,runtime_events_replaced_by_static_frames=False)
         return self.observed
 
     def select(self,*,file=None,entry=None,kind=None):
@@ -232,7 +245,7 @@ class F4BuildSession:
     def layer_summary(self):
         return dict(unified=True,local_state=dict(bindings=True,content=True),
             cross_layer=dict(functions=any(k.startswith('functions:') for k in self.providers),
-                **{k:k in self.providers for k in ('exec','creations','native','protocol','configuration')}),resources=True,
+                **{k:k in self.providers for k in ('exec','creations','native','protocol','configuration','observed_boundaries')}),resources=True,
             storage=True,readback=True,providers=sorted(self.providers),
             loaded_units=len(self.view.units),catalog_units=len(self.catalog.fact_store.rows),
             body_copies=0,loops_unrolled=False)
@@ -278,9 +291,10 @@ def build_f4(entry,trace,out,spec,*,source_roots=(),max_points=128,max_seconds=3
         (out/'resources.json.gz').write_bytes(gzip.compress(json.dumps(payload,separators=(',',':')).encode(),mtime=0))
         report['layers']=session.layer_summary()
         report['assembly_elapsed_by_layer']=session.timings
-        report['observed_admission']='ADMITTED' if observed['publications'] else 'NOT_JOINED'
+        report['observed_admission']='ADMITTED' if observed['publications'] or observed['boundaries'] else 'NOT_JOINED'
         report['summary']=dict(source_units=len(session.catalog.fact_store.rows),loaded_units=len(session.view.units),
             configuration_inputs=len(configuration),observed_publications=len(observed['publications']),
+            observed_boundary_publications=len(observed['boundaries']),
             resource_records=len(session.resources.provider.records))
     finally:session.close()
     gaps.append(dict(layer='coverage',kind='FULL_INFERENCE_COVERAGE_UNPROVEN',

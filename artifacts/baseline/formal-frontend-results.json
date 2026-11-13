@@ -184,5 +184,150 @@
       "parent_interfaces": 1
     },
     "runtime_inputs": "separate short trace of original two functions; frontend only reads retained trace"
+  },
+  "sunfish_connected": {
+    "status": "VERIFIED_SHARED_BOUNDARIES_AND_PARTIAL_PYTHON_BODY_CONNECTIONS",
+    "source_units": 2,
+    "build_seconds": 170.46112911399905,
+    "build_summary": {
+      "configuration_inputs": 0,
+      "gaps": 106,
+      "loaded_units": 2,
+      "observed_boundary_publications": 1,
+      "observed_publications": 1,
+      "resource_records": 28,
+      "source_units": 2
+    },
+    "build_layers": {
+      "body_copies": 0,
+      "catalog_units": 2,
+      "cross_layer": {
+        "configuration": false,
+        "creations": false,
+        "exec": false,
+        "functions": true,
+        "native": false,
+        "observed_boundaries": true,
+        "protocol": false
+      },
+      "loaded_units": 2,
+      "local_state": {
+        "bindings": true,
+        "content": true
+      },
+      "loops_unrolled": false,
+      "providers": [
+        "functions:/home/zyf/AAA/scar/artifacts/current/experiments/cpu-sunfish-current/formal/call-connected",
+        "observed_boundaries"
+      ],
+      "readback": true,
+      "resources": true,
+      "storage": true,
+      "unified": true
+    },
+    "shared_boundaries": {
+      "boundaries": 110,
+      "kinds": {
+        "NATIVE_BUILTIN": 45,
+        "OTHER_UNCLASSIFIED": 29,
+        "TYPE_OBJECT": 36
+      },
+      "observations": 1354,
+      "units": 2
+    },
+    "native_status": "RECORDED",
+    "native_capture_seconds": 5.41534940800193,
+    "native_capture_bestmove": "bestmove h1g1 ponder f3e3",
+    "boundary_readback": {
+      "schema": "scar.native-boundary-readback-check",
+      "shared": {
+        "boundaries": 110,
+        "kinds": {
+          "NATIVE_BUILTIN": 45,
+          "OTHER_UNCLASSIFIED": 29,
+          "TYPE_OBJECT": 36
+        },
+        "observations": 1354,
+        "units": 2,
+        "attached_units": 2,
+        "shared_interfaces": 110,
+        "target_kind_observations_connected": true,
+        "source_bodies_copied": false,
+        "loops_unrolled": false,
+        "implementation_entry_proven": false,
+        "normal_completion_proven": false,
+        "effects_proven": false,
+        "target_executed": false,
+        "first_stage_complete": false
+      },
+      "examples": [
+        {
+          "kind": "NATIVE_BUILTIN",
+          "aux_role": "NATIVE_BOUNDARY",
+          "ports": 6,
+          "input_edges": 5,
+          "output_edges": 2,
+          "observations": 9
+        },
+        {
+          "kind": "TYPE_OBJECT",
+          "aux_role": "PROVIDER",
+          "ports": 6,
+          "input_edges": 5,
+          "output_edges": 2,
+          "observations": 1
+        },
+        {
+          "kind": "OTHER_UNCLASSIFIED",
+          "aux_role": "PROVIDER",
+          "ports": 4,
+          "input_edges": 3,
+          "output_edges": 2,
+          "observations": 5
+        }
+      ],
+      "native_status": "RECORDED",
+      "three_target_kinds_verified": true,
+      "bodies_copied": false,
+      "loops_unrolled": false,
+      "effects_unknown_preserved": true,
+      "implementation_entry_proven": false,
+      "first_stage_complete": false,
+      "seconds": 31.97801562300083
+    },
+    "source_body_gap_before": 107,
+    "source_body_gap_after": 23,
+    "immediate_body_entry_gap_before": 111,
+    "immediate_body_entry_gap_after": 51,
+    "receiver_identity_open_with_body_entry": 60,
+    "observed_interface_counts": {
+      "annotated_parent_groups": 15,
+      "body_only_groups": 8,
+      "calls": 385,
+      "derived_interfaces": 11,
+      "interfaces": 52,
+      "observation_frontiers": 1714,
+      "observed_groups": 26,
+      "parent_interfaces": 41
+    },
+    "first_stage_complete": false,
+    "report": "artifacts/current/experiments/cpu-sunfish-current/formal/build-connected/manifest.json"
+  },
+  "tiny_connected_frontend": {
+    "workflow_complete": true,
+    "stages": 24,
+    "admitted_stages": 24,
+    "seconds": 34.670916813000076,
+    "target_executed": false,
+    "first_stage_complete": false,
+    "boundaries": {
+      "boundaries": 1,
+      "kinds": {
+        "TYPE_OBJECT": 1
+      },
+      "observations": 1,
+      "units": 1
+    },
+    "native_status": "NOT_RECORDED"
   }
 }

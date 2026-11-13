@@ -26,6 +26,7 @@ def _rules():
         for name in ('build.py', 'observed_body_scope.py', 'observed_call_bindings.py',
             'observed_function_interfaces.py', 'build_resources.py','build_target_resources.py','build_f4.py','build_f4_resources.py',
             'source_declared_catalog.py','source_fact_materials.py',
+            'source_observed_boundaries.py','../ir/program/source_observed_boundaries.py',
             '../ir/program/build_f4_resources.py')}
 
 
