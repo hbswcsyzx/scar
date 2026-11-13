@@ -226,7 +226,7 @@ CompiledSourceCandidate保存代码值digest与独立source-only控制版本；�
 编译变体沿C1→声明/绑定→带flags原生符号→C3对应→F4生成，命名空间由源码和编译输入限定，调用见证另存，不按调用复制body。
 F4复用原规则，只为其编译查询绑定局部服务；根future策略与有效flags一致。新图和原source-only图可共存，exec的namespace/world路由另行接线。
 可选audit只观察编译文本与执行代码指纹，不提供完整编译请求。离线枚举兼容配方并按完整CodeID核对，局部F0–F4图可作为代码等价表示；多解保留，原请求与创建环境未决。
-这些材料按实际捕获的根/嵌套CodeID接入共享目录，不进入模块导入候选。读回同时守住原audit、匹配报告与局部材料；函数正文对应不等于当前参数、namespace或effects相同。
+这些材料按实际捕获的根/嵌套CodeID接入共享目录，不进入模块导入候选。读回同时守住原audit、匹配报告与局部材料；函数正文对应不等于当前参数、namespace或effects相同。 局部CALL声明域与import候选域分开；生成代码的迭代/可挂起/mapping摘要引用真实局部材料收据，不能伪造模块manifest或恢复实例。
 
 有限标量字段沿原scope、参数/默认值、数据返回、模块/属性及content关系传播；world、环境及参数包不作标量alias。
 `ScalarTransferGroup`保父表行、原端口及条件，以线性大小私有join传递；join不是程序节点。字段上限4，宽化保open，不从singleton may集证明常量。

@@ -17,8 +17,6 @@ from scar.analysis.source_declared_catalog import DeclaredSourceCatalog, _receip
 from scar.analysis.source_stage import _durable_bytes, _durable_mkdir
 from scar.analysis.source_template_links import _json
 from scar.analysis.observed_compiled_material import ObservedCompiledLocalMaterial, build_local_material
-from scar.ir.program.source_interfaces import UnitSourceInterfaces
-from scar.ir.record_codec import decode
 
 
 SCHEMA = 'scar.observed-source-catalog'
@@ -49,6 +47,7 @@ class _Facts:
         if self.report['units'] != self.rows:
             raise ValueError('composite fact directory differs from its primitive leaves')
         self._ordered = tuple(sorted(self.offsets, key=self.offsets.get))
+        self.declaration_units = frozenset(self.rows)
         self._starts = tuple(self.offsets[u] for u in self._ordered)
         for name in ('rows', 'model_units', 'offsets', 'sources', 'source_units', '_source_parents'):
             setattr(self, name, MappingProxyType(getattr(self, name)))
@@ -73,38 +72,33 @@ class _Facts:
 
 
 class _Interfaces:
-    """Delegate actual summaries; an absent projection is never an empty one."""
+    """Route the same three interface families to their actual local shards."""
     def __init__(self, catalog):
+        from scar.analysis.compiled_local_interfaces import CompiledLocalInterfaces
         self.catalog = catalog; self.base = catalog.base.interface_store
-        self.stats = self.base.stats; self.loaded = {}
+        self.compiled = {entry['unit']:CompiledLocalInterfaces(Path(entry['interfaces']['path']).parent,
+            catalog.materials[entry['unit']]) for entry in catalog.report['compiled']}
+    @property
+    def stats(self):
+        stores = (self.base, *self.compiled.values())
+        return {name:sum(store.stats.get(name, 0) for store in stores)
+            for name in {k for store in stores for k in store.stats}}
+    def _provider(self, unit): return self.compiled.get(unit.unit, self.base)
+    def validate_summaries(self):
+        for provider in self.compiled.values(): provider.validate_parents()
     def validate_parents(self): return self.catalog.validate_materials()
-    def covers(self, unit):
-        if unit.unit not in self.catalog.materials: return self.base.covers(unit)
-        return 'interfaces' in self.catalog.materials[unit.unit].report['tables']
-    def load(self, unit):
-        if unit.unit not in self.catalog.materials: return self.base.load(unit)
-        material = self.catalog.materials[unit.unit]
-        if not self.covers(unit): raise ValueError('retained compiled auxiliary interfaces not yet projected')
-        if unit.unit not in self.loaded:
-            self.loaded[unit.unit] = decode(UnitSourceInterfaces,
-                material._document(material.report['tables']['interfaces']))
-        return self.loaded[unit.unit]
-    def iteration(self, unit, item):
-        if unit.unit in self.catalog.materials: raise ValueError('compiled iteration summary not projected')
-        return self.base.iteration(unit, item)
-    def body(self, unit, item):
-        if unit.unit in self.catalog.materials: raise ValueError('compiled suspension summary not projected')
-        return self.base.body(unit, item)
-    def mapping(self, unit, template):
-        if unit.unit in self.catalog.materials: raise ValueError('compiled mapping summary not projected')
-        return self.base.mapping(unit, template)
+    def covers(self, unit): return self._provider(unit).covers(unit)
+    def load(self, unit): return self._provider(unit).load(unit)
+    def iteration(self, unit, item): return self._provider(unit).iteration(unit, item)
+    def body(self, unit, item): return self._provider(unit).body(unit, item)
+    def mapping(self, unit, template): return self._provider(unit).mapping(unit, template)
 
 
 class ObservedSourceCatalog(DeclaredSourceCatalog):
     def __init__(self, path):
         self.path = Path(path).absolute(); self._root_receipt = _receipt(self.path/'result.json')
         self.report = r = json.loads((self.path/'result.json').read_bytes())
-        if ((r['schema'], r['schema_version']) != (SCHEMA, 1)
+        if ((r['schema'], r['schema_version']) != (SCHEMA, 2)
                 or r['implementation_sha256'] != sha256(Path(__file__).read_bytes()).hexdigest()
                 or any(r[name] is not False for name in _FALSE)):
             raise ValueError('observed source catalog contract or producer differs')
@@ -118,6 +112,7 @@ class ObservedSourceCatalog(DeclaredSourceCatalog):
         self.materials = {}; self.replay_profiles = {}; self._receipts = [r['matches'], r['facts']]
         for entry in r['compiled']:
             _check(entry['material']); self._receipts.append(entry['material'])
+            _check(entry['interfaces']); self._receipts.append(entry['interfaces'])
             material = ObservedCompiledLocalMaterial(Path(entry['material']['path']).parent)
             unit = material.unit
             if unit in self.materials or unit != entry['unit'] or material.report['recipe'] != entry['recipe']:
@@ -131,6 +126,8 @@ class ObservedSourceCatalog(DeclaredSourceCatalog):
             self.replay_profiles[unit] = dict(recipe=entry['recipe'], root_code=entry['root_code'])
         self.fact_store = _Facts(self, Path(r['facts']['path']).read_bytes())
         self.interface_store = _Interfaces(self)
+        if r['auxiliary_interfaces'] != 'ALL_COMPILED_LOCAL_FAMILIES_PROJECTED':
+            raise ValueError('observed catalog lacks its compiled local interface coverage')
         self.units, self.sources = self.fact_store.rows, self.fact_store.sources
         self.inputs, self.templates = self.base.inputs, self.base.templates
         self.validate_parents()
@@ -138,6 +135,7 @@ class ObservedSourceCatalog(DeclaredSourceCatalog):
     def validate_materials(self):
         self.base.validate_parents()
         for material in self.materials.values(): material.validate_parents()
+        if hasattr(self, 'interface_store'): self.interface_store.validate_summaries()
         self.audit.check()
         return len(self.materials)
 
@@ -170,6 +168,7 @@ def build_observed_catalog(base, trace, matches, out, *, project_root, material_
     from scar.analysis.compilation_audit import CompilationAuditInputs, SCHEMA as MATCH_SCHEMA
     from scar.analysis.call_operand_reader import read_call_operands
     from scar.analysis.source_symbol_variants import SymbolVariantWorker
+    from scar.analysis.compiled_local_interfaces import build_material_interfaces
     from scar.trace.code_snapshot import describe_code
     started = time.monotonic(); base = DeclaredSourceCatalog(base)
     trace = Path(trace).absolute(); matches = Path(matches).absolute(); out = Path(out).absolute()
@@ -183,7 +182,7 @@ def build_observed_catalog(base, trace, matches, out, *, project_root, material_
         raise ValueError('compilation matches differ from the actual audit material')
     frames = read_call_operands(trace, project_root)
     captured = {(c.process_id, c.code.key) for c in frames.frame_scan.captures}
-    _durable_mkdir(out); _durable_mkdir(out/'compiled')
+    _durable_mkdir(out); _durable_mkdir(out/'compiled'); _durable_mkdir(out/'interfaces')
     entries = []; unselected = []; seen = set(); cache_hits = 0
     material_roots = tuple(Path(p).resolve() for p in material_roots)
     def child_keys(code):
@@ -225,7 +224,9 @@ def build_observed_catalog(base, trace, matches, out, *, project_root, material_
                         raise ValueError('cached local material has another retained payload or replay')
                     cache_hits += 1
                 if local['replayed_root_code'] != matched['code']: raise ValueError('local F4 replay root differs')
+                build_material_interfaces(folder, out/'interfaces'/key)
                 entries.append(dict(unit=local['unit'], material=_receipt(folder/'result.json'),
+                    interfaces=_receipt(out/'interfaces'/key/'result.json'),
                     recipe=recipe, root_code=matched['code'], compatible_recipes=alternatives,
                     observed_child_codes=actual, process_id=matched['process_id']))
     rows = dict(base.fact_store.rows)
@@ -237,12 +238,12 @@ def build_observed_catalog(base, trace, matches, out, *, project_root, material_
     facts = dict(schema='scar.observed-source-facts', schema_version=1, units=rows)
     _durable_bytes(out/'facts.json', _json(facts), replace=False)
     audit.check(); base.validate_parents(); _check(match_receipt)
-    result = dict(schema=SCHEMA, schema_version=1, base=_receipt(base.path/'result.json'),
+    result = dict(schema=SCHEMA, schema_version=2, base=_receipt(base.path/'result.json'),
         facts=_receipt(out/'facts.json'), matches=match_receipt, compiled=entries,
         unselected_roots=unselected, selection='ROOT_OR_NESTED_FULL_CODE_ID_IN_FRAME_CAPTURE',
         imports='ORIGINAL_FILE_UNITS_ONLY', source_units=list(rows),
         material_cache_hits=cache_hits,
-        auxiliary_interfaces='ORIGINAL_SUMMARIES_OR_ACTUAL_EMPTY_COMPILED_LEAVES_ONLY',
+        auxiliary_interfaces='ALL_COMPILED_LOCAL_FAMILIES_PROJECTED',
         implementation_sha256=sha256(Path(__file__).read_bytes()).hexdigest(),
         **{name:False for name in _FALSE}, seconds=time.monotonic()-started)
     _durable_bytes(out/'result.json', _json(result), replace=False)

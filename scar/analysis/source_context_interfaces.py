@@ -1,7 +1,7 @@
 """Reuse local F5 interface projection for compiled-context graph fragments."""
 from hashlib import sha256
 from pathlib import Path
-from types import FunctionType
+from functools import partial
 
 from scar.analysis import source_interface_build
 from scar.analysis.source_interface_store import SourceInterfaceStore
@@ -26,11 +26,7 @@ class ContextInterfaceStore:
             raise ValueError('supplemental local interface coverage differs')
         self.projected = {}; self.iterations = {}; self.bodies = {}; self.mappings = {}
         self.stats = dict(context_units=0,context_templates=0,iteration_reads=0,body_reads=0,mapping_reads=0)
-        # Bind the trusted, unchanged projector to this composite fact space.
-        # No module globals, source AST or target function are modified.
-        original = source_interface_build._project
-        self.project = FunctionType(original.__code__,dict(original.__globals__,_FACTS=context_store),
-            original.__name__,original.__defaults__,original.__closure__)
+        self.project = partial(source_interface_build._project, fact_store=context_store)
 
     def covers(self, unit):
         return unit.unit in self.facts.original_source_units or unit.unit in self._providers or self.base.covers(unit)

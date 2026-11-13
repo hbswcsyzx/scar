@@ -529,5 +529,93 @@
       "first_stage_complete": false,
       "report": "artifacts/current/experiments/cpu-sunfish-current/formal/compiled-readback-check.json"
     }
+  },
+  "connected_local_interfaces": {
+    "status": "VERIFIED_ALL_SELECTED_DECLARED_CALLS_AND_COMPILED_LOCAL_FAMILIES",
+    "calls_schema_version": 2,
+    "declared_units": 7,
+    "calls": 647,
+    "compiled_families": {
+      "bodies": 7,
+      "iterations": 32,
+      "mappings": 7,
+      "merges": 2,
+      "suspensions": 7
+    },
+    "callers_without_parent": [],
+    "observed": {
+      "annotated_parent_groups": 26,
+      "body_only_groups": 13,
+      "calls": 644,
+      "derived_interfaces": 39,
+      "interfaces": 106,
+      "observation_frontiers": 3125,
+      "observed_groups": 65,
+      "parent_interfaces": 67
+    },
+    "boundaries": {
+      "boundaries": 191,
+      "callback_observations": 455,
+      "callbacks": 21,
+      "kinds": {
+        "NATIVE_BUILTIN": 78,
+        "OTHER_UNCLASSIFIED": 58,
+        "TYPE_OBJECT": 55
+      },
+      "observations": 2326,
+      "source_callback_interfaces": 18,
+      "source_callback_observations": 451,
+      "units": 3
+    },
+    "readback_seconds": 74.64604656899974,
+    "build": {
+      "seconds": 228.65353469699767,
+      "workflow_complete": true,
+      "summary": {
+        "configuration_inputs": 0,
+        "gaps": 105,
+        "loaded_units": 6,
+        "observed_boundary_publications": 1,
+        "observed_publications": 1,
+        "resource_records": 28,
+        "source_units": 7
+      },
+      "first_stage_complete": false
+    },
+    "frontend": {
+      "stages": 26,
+      "admitted_stages": 26,
+      "seconds": 56.00161113200011,
+      "workflow_complete": true,
+      "first_stage_complete": false
+    },
+    "code_coverage": {
+      "capture_code_templates": 77,
+      "matched_capture_code_templates": 44,
+      "unmatched_code_templates": 33,
+      "missing_by_file": {
+        "<frozen importlib._bootstrap>": 5,
+        "/home/zyf/miniconda3/envs/lewm/lib/python3.14/collections/__init__.py": 1,
+        "/home/zyf/AAA/sunfish/sunfish.py": 3,
+        "<frozen importlib._bootstrap_external>": 1,
+        "<frozen _collections_abc>": 1,
+        "/home/zyf/miniconda3/envs/lewm/lib/python3.14/concurrent/futures/thread.py": 5,
+        "/home/zyf/miniconda3/envs/lewm/lib/python3.14/concurrent/futures/_base.py": 7,
+        "/home/zyf/miniconda3/envs/lewm/lib/python3.14/threading.py": 6,
+        "<frozen codecs>": 1,
+        "/home/zyf/miniconda3/envs/lewm/lib/python3.14/re/__init__.py": 1,
+        "/home/zyf/miniconda3/envs/lewm/lib/python3.14/weakref.py": 1,
+        "/home/zyf/miniconda3/envs/lewm/lib/python3.14/_weakrefset.py": 1
+      }
+    },
+    "external_source_correspondence": {
+      "matched_templates": 3,
+      "matched_callback_observations": 4,
+      "seconds": 0.09272507800051244,
+      "graph_constructed": false
+    },
+    "report": "artifacts/current/experiments/cpu-sunfish-current/formal/connected-interfaces/readback-check.json",
+    "first_stage_complete": false,
+    "transformation_applied": false
   }
 }

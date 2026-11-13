@@ -60,7 +60,7 @@ class BindingNativeParents:
         self.binding_report, self.definitions = read_binding_materials(self.binding_root)
         self.source_root = Path(r['calls']).absolute()
         self.source_raw = (self.source_root/'result.json').read_bytes(); source = json.loads(self.source_raw)
-        if ((source['schema'], source['schema_version']) != (source_declared_calls.SCHEMA, 1)
+        if ((source['schema'], source['schema_version']) != (source_declared_calls.SCHEMA, source_declared_calls.SCHEMA_VERSION)
                 or source['pins'] != source_declared_calls._pins()
                 or set(source['shards']) != set(r['shards'])):
             raise ValueError('named bindings changed their declared source unit coverage')

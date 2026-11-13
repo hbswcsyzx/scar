@@ -30,8 +30,9 @@ from scar.ir.record_codec import decode, encode
 
 SCHEMA = 'scar.source-declared-calls'
 UNIT_SCHEMA = 'scar.source-declared-call-unit'
+SCHEMA_VERSION = 2
 NO_PROOF = ('source_scopes_activated', 'caller_contexts_selected', 'runtime_dispatch_proven',
-    'current_namespace_versions_proven', 'compiled_units_included', 'source_bodies_copied',
+    'current_namespace_versions_proven', 'source_bodies_copied',
     'loops_unrolled', 'target_executed', 'first_stage_complete')
 _WORKER = None
 
@@ -74,10 +75,18 @@ def _roots(values):
 
 def _selection(store, roots):
     paths = tuple(Path(root) for root in roots)
-    return tuple(sorted(identity for identity in store.importable_units
+    compiled = frozenset(getattr(store, 'observed_compiled_units', ()))
+    # A source declaration does not need a module-import grant. Generated
+    # units have no original file under roots; their bounded catalog scope
+    # was selected by captured root/nested CodeID, independently of imports.
+    return tuple(sorted(identity for identity in getattr(store, 'declaration_units', store.importable_units)
         if identity not in store.original_source_units
         and store.rows[identity].get('facts_format') != 'COMPILE_CONTEXT_F4_JSONL'
-        and any(Path(store.rows[identity]['path']).is_relative_to(root) for root in paths)))
+        and (identity in compiled or any(Path(store.rows[identity]['path']).is_relative_to(root) for root in paths))))
+
+
+def _has_compiled(store, units):
+    return bool(set(units).intersection(getattr(store, 'observed_compiled_units', ())))
 
 
 def _owners(unit):
@@ -121,8 +130,8 @@ def _symbols(resolver, queries):
 
 def project_declared_calls(snapshot, identity, *, resolver=None, max_states=4000, max_selectors=32):
     limits = _limits(max_states, max_selectors); store = snapshot.fact_store
-    if identity not in store.importable_units or identity in store.original_source_units:
-        raise ValueError('declared call projection requires an original importable source unit')
+    if identity not in getattr(store, 'declaration_units', store.importable_units) or identity in store.original_source_units:
+        raise ValueError('declared call projection requires an admitted local source declaration unit')
     resolver = resolver if resolver is not None else NamespaceReferenceResolver(snapshot)
     unit = store.load(identity); owners = _owners(unit); queries = []
     for ordinal, call in enumerate(unit.calls):
@@ -206,9 +215,11 @@ def _write_unit(runtime, unit, out, limits, pins):
     folder = Path(out)/_folder(unit); _durable_mkdir(folder)
     tables = {name: write_table(folder/(name+'.jsonl.gz'), getattr(graph, name)) for name in ('queries', 'symbols')}
     descriptor = dict(path=_folder(unit), source=row['path'], module=row['module'], tables=tables, counts=_counts(graph))
-    report = dict(schema=UNIT_SCHEMA, schema_version=1, unit=unit, parent=encode(runtime.parent),
+    report = dict(schema=UNIT_SCHEMA, schema_version=SCHEMA_VERSION, unit=unit, parent=encode(runtime.parent),
         source=descriptor['source'], module=descriptor['module'], limits=limits, pins=pins,
-        tables=tables, counts=descriptor['counts'], **{name: False for name in NO_PROOF})
+        tables=tables, counts=descriptor['counts'],
+        compiled_units_included=_has_compiled(runtime.catalog.fact_store, (unit,)),
+        **{name: False for name in NO_PROOF})
     if _pins() != pins: raise ValueError('declared call projection rules changed')
     _durable_bytes(folder/'result.json', _json(report), replace=False)
     descriptor['result'] = encode(_artifact(folder/'result.json', UNIT_SCHEMA))
@@ -242,7 +253,7 @@ def build_declared_calls(catalog, out, *, source_roots, jobs=4, max_states=4000,
     if type(jobs) is not int or jobs < 1: raise ValueError('declared call jobs must be positive')
     limits = _limits(max_states, max_selectors); roots = _roots(source_roots); runtime = _Runtime(catalog)
     units = _selection(runtime.catalog.fact_store, roots)
-    if not units: raise ValueError('source roots select no retained importable source units')
+    if not units: raise ValueError('source selection contains no retained local declaration units')
     _durable_mkdir(out); shards = {}
     if jobs == 1:
         for unit in units: shards[unit] = _write_unit(runtime, unit, out, limits, pins)
@@ -253,11 +264,12 @@ def build_declared_calls(catalog, out, *, source_roots, jobs=4, max_states=4000,
             for unit, shard in pool.map(_worker, units, chunksize=1): shards[unit] = shard
     runtime.snapshot.validate_parents()
     if pins != _pins(): raise ValueError('declared call producer changed')
-    report = dict(schema=SCHEMA, schema_version=1, status='ALL_SELECTED_SOURCE_CALL_DECLARATIONS_PROJECTED',
+    report = dict(schema=SCHEMA, schema_version=SCHEMA_VERSION, status='ALL_SELECTED_SOURCE_CALL_DECLARATIONS_PROJECTED',
         catalog=str(runtime.catalog.path), parent=encode(runtime.parent), source_roots=list(roots),
         limits=limits, jobs=jobs, start_method='spawn' if jobs > 1 else 'serial', pins=pins,
         shards=shards, tables=_flat_tables(shards), counts=_totals(shards),
         source_selection_is_not_entry_admission=True, source_calls_are_declarations=True,
+        compiled_units_included=_has_compiled(runtime.catalog.fact_store, units),
         **{name: False for name in NO_PROOF}, seconds=time.monotonic()-started)
     _durable_bytes(out/'result.json', _json(report), replace=False)
     return report
@@ -268,7 +280,7 @@ class DeclaredCallStore:
     def __init__(self, path, catalog=None):
         self.path = Path(path).absolute(); self.raw = (self.path/'result.json').read_bytes()
         self.report = r = json.loads(self.raw)
-        if (r['schema'], r['schema_version']) != (SCHEMA, 1) or r['pins'] != _pins():
+        if (r['schema'], r['schema_version']) != (SCHEMA, SCHEMA_VERSION) or r['pins'] != _pins():
             raise ValueError('declared call producer differs')
         self.runtime = _Runtime(r['catalog'] if catalog is None else catalog)
         self.catalog, self.snapshot = self.runtime.catalog, self.runtime.snapshot
@@ -286,6 +298,9 @@ class DeclaredCallStore:
                 raise ValueError('declared call shard metadata differs from its original source unit')
         if r['tables'] != _flat_tables(r['shards']) or r['counts'] != _totals(r['shards']):
             raise ValueError('declared call global receipt index or counts differ')
+        if (type(r['compiled_units_included']) is not bool
+                or r['compiled_units_included'] != _has_compiled(self.catalog.fact_store, r['shards'])):
+            raise ValueError('declared call compiled-unit selection differs from its actual catalog')
         if (any(r[name] is not False for name in NO_PROOF)
                 or r['source_selection_is_not_entry_admission'] is not True or r['source_calls_are_declarations'] is not True):
             raise ValueError('source call declarations cannot grant entry or runtime authority')
@@ -307,9 +322,11 @@ class DeclaredCallStore:
         if encode(_artifact(folder/'result.json', UNIT_SCHEMA)) != shard['result']:
             raise ValueError('declared call original unit report receipt differs')
         raw = (folder/'result.json').read_bytes(); report = json.loads(raw)
-        expected = dict(schema=UNIT_SCHEMA, schema_version=1, unit=unit, parent=self.report['parent'],
+        expected = dict(schema=UNIT_SCHEMA, schema_version=SCHEMA_VERSION, unit=unit, parent=self.report['parent'],
             source=shard['source'], module=shard['module'], limits=self.report['limits'], pins=self.report['pins'],
-            tables=shard['tables'], counts=shard['counts'], **{name: False for name in NO_PROOF})
+            tables=shard['tables'], counts=shard['counts'],
+            compiled_units_included=_has_compiled(self.catalog.fact_store, (unit,)),
+            **{name: False for name in NO_PROOF})
         if report != expected: raise ValueError('declared call unit provenance or projection metadata differs')
         queries = tuple(decode(D.DeclaredCallQuery, wire, record_tags=P.PRODUCTION_RECORD_TAGS)
             for wire in _table(folder, shard['tables']['queries']))

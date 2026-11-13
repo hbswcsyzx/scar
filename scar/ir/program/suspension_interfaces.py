@@ -14,6 +14,7 @@ from .structured import PythonProtocolKind
 
 class WitnessSource(str, Enum):
     SEALED_TEMPLATE_STORE = 'SEALED_TEMPLATE_STORE'
+    SEALED_COMPILED_LOCAL_MATERIAL = 'SEALED_COMPILED_LOCAL_MATERIAL'
     CONTROLLED_PLAN_PROVIDER = 'CONTROLLED_PLAN_PROVIDER'
 
 
@@ -44,10 +45,14 @@ class StepWitness:
                 raise ValueError('interface witness requires an exact SHA256')
         if type(self.source) is not WitnessSource:
             raise TypeError('interface witness source must be explicit')
-        sealed = self.source is WitnessSource.SEALED_TEMPLATE_STORE
-        if ((sealed and (self.template_result_sha256 is None or self.model_manifest_sha256 is None))
-                or (not sealed and (self.template_result_sha256 is not None or self.model_manifest_sha256 is not None))):
-            raise ValueError('only a sealed witness carries its model/template receipts')
+        if self.source is WitnessSource.SEALED_TEMPLATE_STORE:
+            valid = self.template_result_sha256 is not None and self.model_manifest_sha256 is not None
+        elif self.source is WitnessSource.SEALED_COMPILED_LOCAL_MATERIAL:
+            valid = self.template_result_sha256 is not None and self.model_manifest_sha256 is None
+        else:
+            valid = self.template_result_sha256 is None and self.model_manifest_sha256 is None
+        if not valid:
+            raise ValueError('interface witness receipts differ from their material kind')
 
 
 @dataclass(frozen=True, slots=True)

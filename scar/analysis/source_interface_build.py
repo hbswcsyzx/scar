@@ -66,13 +66,14 @@ def _context(parent):
     return _CONTEXTS[key]
 
 
-def _project(unit, graph, plans, root_sha, model_sha):
+def _project(unit, graph, plans, root_sha, model_sha, *, fact_store=None,
+             witness_source=I.WitnessSource.SEALED_TEMPLATE_STORE):
     """Reuse the original port projector, seeded only with admitted sealed plans."""
-    index = SuspensionInterfaceIndex(_FACTS)
+    index = SuspensionInterfaceIndex(_FACTS if fact_store is None else fact_store)
     nodes = {node.key:node for node in graph.templates}
     for key,plan in plans.items():
         index._accept_plan(unit,key,plan,nodes[key].origin.plan_sha256,
-                           I.WitnessSource.SEALED_TEMPLATE_STORE,root_sha,model_sha)
+                           witness_source,root_sha,model_sha)
     index._suspending[unit.unit] = {key for key,plan in plans.items()
         if any(type(step.instruction) is P.SuspendExecution for step in plan.steps)}
     iterations = tuple(L.IterationInterface(i,index.iteration(unit,item)) for i,item in enumerate(unit.iterations))
