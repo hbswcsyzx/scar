@@ -21,7 +21,8 @@ from scar.analysis.observed_compiled_material import ObservedCompiledLocalMateri
 
 SCHEMA = 'scar.observed-source-catalog'
 _FALSE = ('original_compile_options_proven', 'execution_namespace_proven',
-    'source_code_temporal_pairing_proven', 'target_executed', 'first_stage_complete')
+    'source_code_temporal_pairing_proven', 'historical_source_version_proven',
+    'target_executed', 'first_stage_complete')
 
 
 class _Facts:
@@ -98,18 +99,25 @@ class ObservedSourceCatalog(DeclaredSourceCatalog):
     def __init__(self, path):
         self.path = Path(path).absolute(); self._root_receipt = _receipt(self.path/'result.json')
         self.report = r = json.loads((self.path/'result.json').read_bytes())
-        if ((r['schema'], r['schema_version']) != (SCHEMA, 2)
+        if ((r['schema'], r['schema_version']) != (SCHEMA, 3)
                 or r['implementation_sha256'] != sha256(Path(__file__).read_bytes()).hexdigest()
                 or any(r[name] is not False for name in _FALSE)):
             raise ValueError('observed source catalog contract or producer differs')
-        for receipt in (r['base'], r['matches'], r['facts']): _check(receipt)
-        from scar.analysis.compilation_audit import CompilationAuditInputs
-        matched = json.loads(Path(r['matches']['path']).read_bytes())
-        self.audit = CompilationAuditInputs(matched['trace'])
-        if self.audit.receipts != matched['capture_inputs']:
-            raise ValueError('observed source catalog audit parents differ from compilation matches')
+        receipts = [r[name] for name in ('base','matches','external_matches','external_materials','input_catalog','facts') if r[name] is not None]
+        for receipt in receipts: _check(receipt)
+        self.audit = None; self.external = None; self.external_readers = {}
+        if r['matches'] is not None:
+            from scar.analysis.compilation_audit import CompilationAuditInputs
+            matched = json.loads(Path(r['matches']['path']).read_bytes())
+            self.audit = CompilationAuditInputs(matched['trace'])
+            if self.audit.receipts != matched['capture_inputs']:
+                raise ValueError('observed source catalog audit parents differ from compilation matches')
+        if r['external_matches'] is not None:
+            from scar.analysis.observed_external_sources import ExternalSourceMatches
+            self.external = ExternalSourceMatches(Path(r['external_matches']['path']).parent)
+            self.external_readers[r['external_matches']['path']] = self.external
         self.base = DeclaredSourceCatalog(Path(r['base']['path']).parent)
-        self.materials = {}; self.replay_profiles = {}; self._receipts = [r['matches'], r['facts']]
+        self.materials = {}; self.replay_profiles = {}; self._receipts = receipts
         for entry in r['compiled']:
             _check(entry['material']); self._receipts.append(entry['material'])
             _check(entry['interfaces']); self._receipts.append(entry['interfaces'])
@@ -118,7 +126,22 @@ class ObservedSourceCatalog(DeclaredSourceCatalog):
             if unit in self.materials or unit != entry['unit'] or material.report['recipe'] != entry['recipe']:
                 raise ValueError('observed compiled material identity or replay differs')
             if material.report['replayed_root_code'] != entry['root_code']:
-                raise ValueError('observed compiled root differs from the matched execution code')
+                raise ValueError('local compiler root differs from its compatible source representation')
+            if entry['origin'] == 'AUDIT_CODE_ROOT_MATCH':
+                if self.audit is None: raise ValueError('audited source material has no audit input')
+            elif entry['origin'] == 'CURRENT_SOURCE_CODE_MATCH':
+                from scar.analysis.observed_external_sources import ExternalSourceMatches
+                source_reader=entry['source_reader'];_check(source_reader);self._receipts.append(source_reader)
+                if source_reader['path'] not in self.external_readers:
+                    self.external_readers[source_reader['path']]=ExternalSourceMatches(Path(source_reader['path']).parent)
+                external=self.external_readers[source_reader['path']]
+                match = next((m for m in external.matches if m['group'] == entry['external_group']),None)
+                if (match is None or (match['source'],match['root_code'],match['matched_captures'])
+                        != (entry['source_id'],entry['root_code'],entry['matched_captures'])
+                        or entry['recipe'] not in external.groups[entry['external_group']]['compatible_recipes']
+                        or material.report['snapshot']['sha256'] != external.sources[entry['source_id']]['snapshot']['sha256']):
+                    raise ValueError('current source material changed its matched source/code representation')
+            else: raise ValueError('source material needs its explicit evidence origin')
             if not any(all(recipe[k] == entry['recipe'][k] for k in entry['recipe'])
                     for recipe in entry['compatible_recipes']):
                 raise ValueError('analysis replay is not one of the retained compatible alternatives')
@@ -136,12 +159,15 @@ class ObservedSourceCatalog(DeclaredSourceCatalog):
         self.base.validate_parents()
         for material in self.materials.values(): material.validate_parents()
         if hasattr(self, 'interface_store'): self.interface_store.validate_summaries()
-        self.audit.check()
+        if self.audit is not None:self.audit.check()
+        for reader in self.external_readers.values():reader.check()
         return len(self.materials)
 
     def evidence_stamps(self):
         self.validate_parents()
-        return {**self.audit.guard_stamps(), **{Path(r['path']):_stamp(Path(r['path']))
+        return {**({} if self.audit is None else self.audit.guard_stamps()),
+            **{p:s for reader in self.external_readers.values() for p,s in reader.guard_stamps().items()},
+            **{Path(r['path']):_stamp(Path(r['path']))
             for r in (*self._receipts, self._root_receipt)}}
 
     def validate_parents(self):
@@ -178,7 +204,7 @@ def build_observed_catalog(base, trace, matches, out, *, project_root, material_
     audit = CompilationAuditInputs(trace)
     if ((report['schema'], report['schema_version']) != (MATCH_SCHEMA, 1)
             or report['trace'] != str(trace) or report['capture_inputs'] != audit.receipts
-            or any(report[k] is not False for k in _FALSE)):
+            or any(report[k] is not False for k in _FALSE if k != 'historical_source_version_proven')):
         raise ValueError('compilation matches differ from the actual audit material')
     frames = read_call_operands(trace, project_root)
     captured = {(c.process_id, c.code.key) for c in frames.frame_scan.captures}
@@ -227,6 +253,7 @@ def build_observed_catalog(base, trace, matches, out, *, project_root, material_
                 build_material_interfaces(folder, out/'interfaces'/key)
                 entries.append(dict(unit=local['unit'], material=_receipt(folder/'result.json'),
                     interfaces=_receipt(out/'interfaces'/key/'result.json'),
+                    origin='AUDIT_CODE_ROOT_MATCH',
                     recipe=recipe, root_code=matched['code'], compatible_recipes=alternatives,
                     observed_child_codes=actual, process_id=matched['process_id']))
     rows = dict(base.fact_store.rows)
@@ -238,8 +265,9 @@ def build_observed_catalog(base, trace, matches, out, *, project_root, material_
     facts = dict(schema='scar.observed-source-facts', schema_version=1, units=rows)
     _durable_bytes(out/'facts.json', _json(facts), replace=False)
     audit.check(); base.validate_parents(); _check(match_receipt)
-    result = dict(schema=SCHEMA, schema_version=2, base=_receipt(base.path/'result.json'),
-        facts=_receipt(out/'facts.json'), matches=match_receipt, compiled=entries,
+    result = dict(schema=SCHEMA, schema_version=3, base=_receipt(base.path/'result.json'),
+        facts=_receipt(out/'facts.json'), matches=match_receipt, external_matches=None,external_materials=None,
+        input_catalog=None,compiled=entries,
         unselected_roots=unselected, selection='ROOT_OR_NESTED_FULL_CODE_ID_IN_FRAME_CAPTURE',
         imports='ORIGINAL_FILE_UNITS_ONLY', source_units=list(rows),
         material_cache_hits=cache_hits,

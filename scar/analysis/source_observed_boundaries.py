@@ -51,10 +51,12 @@ def _pins():
     from scar.analysis import source_observed_codes, source_observed_calls, source_call_view
     from scar.analysis import native_callables
     from scar.ir.program import native_callables as native_types
+    from scar.ir.program import source_observed_codes as code_types
     return {name: sha256(Path(module.__file__).read_bytes()).hexdigest() for name, module in (
         ('producer', __import__(__name__, fromlist=['__file__'])), ('types', R),
         ('code_reader', source_observed_codes), ('callsite_reader', source_observed_calls),
-        ('call_ports', source_call_view), ('native_reader', native_callables), ('native_types', native_types))}
+        ('call_ports', source_call_view), ('native_reader', native_callables), ('native_types', native_types),
+        ('code_types', code_types))}
 
 
 class _NativeInputs:

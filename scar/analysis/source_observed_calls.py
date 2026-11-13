@@ -57,9 +57,10 @@ class ObservedSourceCallsiteIndex:
         self._calls={};self._plans={};self._contexts={}
         self.slicer=ReferenceSlicer(SimpleNamespace(fact_store=self.view.catalog.fact_store))
         roots={}
-        for unit,capture,scope,code in getattr(codes,'root_callers',()):
-            self._admit(_Caller(unit,capture,scope,code,None))
-        for row in codes.records.values():
+        if not hasattr(codes,'scope_records'):
+            for unit,capture,scope,code in getattr(codes,'root_callers',()):
+                self._admit(_Caller(unit,capture,scope,code,None))
+        for row in (*codes.records.values(),*getattr(codes,'scope_records',{}).values()):
             profile=profiles.get(row.body.unit)
             compatible=replay_profiles.get(row.body.unit)
             if row.body.unit in observed_compiled_units and compatible is None:
@@ -93,6 +94,7 @@ class ObservedSourceCallsiteIndex:
         for profile in self.compiled:
             if (profile.catalog.path,profile.catalog.report)!=(self.view.catalog.path,self.view.catalog.report):
                 raise ValueError('compiled caller profile uses a different original catalog')
+            if hasattr(codes,'scope_records'):continue
             for capture in codes.trace.frame_scan.captures:
                 if describe_code(profile.code)==encode(capture.code):
                     facts=self.view.catalog.fact_store.load(profile.unit)

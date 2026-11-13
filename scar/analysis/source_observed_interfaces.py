@@ -47,11 +47,12 @@ GUARDS=('OBSERVED_CODE_AND_IMMEDIATE_ENTRY_BELONG_TO_RECORDED_RUN_AND_ATTEMPTS',
 def _pins():
     from scar.analysis import source_observed_calls,source_observed_codes,source_compiled_code_profiles
     from scar.analysis import source_function_connections,static_compilation,source_observed_materials,source_fact_materials
+    from scar.ir.program import source_observed_codes as code_types
     return {name:sha256(Path(module.__file__).read_bytes()).hexdigest() for name,module in (
         ('producer',__import__(__name__,fromlist=['__file__'])),('types',R),('interfaces',I),
         ('callsite',source_observed_calls),('code',source_observed_codes),('compiler',source_compiled_code_profiles),
         ('binder',source_function_connections),('code_mapping',static_compilation),
-        ('fact_guard',source_observed_materials),('fact_routes',source_fact_materials))}
+        ('fact_guard',source_observed_materials),('fact_routes',source_fact_materials),('code_types',code_types))}
 
 
 def _same_connection(interface,connection):

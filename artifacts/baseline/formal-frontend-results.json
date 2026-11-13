@@ -617,5 +617,128 @@
     "report": "artifacts/current/experiments/cpu-sunfish-current/formal/connected-interfaces/readback-check.json",
     "first_stage_complete": false,
     "transformation_applied": false
+  },
+  "source_scope_admission": {
+    "status": "VERIFIED_COMPLETE_CAPTURED_CODE_SCOPE_SOURCE_CORRESPONDENCE",
+    "source_units": 18,
+    "declared_calls": 2936,
+    "code": {
+      "code_links": 88,
+      "scope_links": 7,
+      "scope_kinds": {
+        "CODE_ROOT": 4,
+        "CLASS_BODY": 3
+      },
+      "captured_code_templates": 77,
+      "matched_code_templates": 77,
+      "unmatched_code_templates": 0,
+      "issues": []
+    },
+    "external_discovery": {
+      "captures": 77,
+      "compatible_recipes": 29,
+      "failed_compiles": {},
+      "groups": 22,
+      "known": 47,
+      "matched_captures": 30,
+      "replay_attempts": 33,
+      "requested": 30,
+      "source_bytes": 368193,
+      "source_files": 11,
+      "source_representations": 11,
+      "unmatched_captures": 0
+    },
+    "external_lowering": {
+      "seconds": 287.79089076700257,
+      "units": 11,
+      "jobs": 8,
+      "worker_pids": [
+        69177,
+        69180,
+        69181,
+        69182,
+        69183,
+        69184,
+        69185,
+        69186
+      ],
+      "source_bytes": 368193
+    },
+    "observed": {
+      "annotated_parent_groups": 26,
+      "body_only_groups": 35,
+      "calls": 644,
+      "derived_interfaces": 74,
+      "interfaces": 141,
+      "observation_frontiers": 3144,
+      "observed_groups": 100,
+      "parent_interfaces": 67
+    },
+    "boundaries": {
+      "boundaries": 191,
+      "callback_observations": 455,
+      "callbacks": 21,
+      "kinds": {
+        "NATIVE_BUILTIN": 78,
+        "OTHER_UNCLASSIFIED": 58,
+        "TYPE_OBJECT": 55
+      },
+      "observations": 2326,
+      "source_callback_interfaces": 21,
+      "source_callback_observations": 455,
+      "units": 3
+    },
+    "callsite": {
+      "bindings": 2886,
+      "frontiers": 123,
+      "caller_codes": 77,
+      "caller_alternatives": 95,
+      "units": 3,
+      "source_bodies_copied": false,
+      "target_interfaces_connected": false,
+      "creator_instances_proven": false,
+      "first_stage_complete": false
+    },
+    "readback_seconds": 144.63820928600035,
+    "class_examples": [
+      {
+        "unit": "90f8b1eb2b1a5308cb8dc07c",
+        "code": "pycode-v2:d28579461aac805c948e4047f329e68a8b6f3391665b061f8f74b0d7719d8f6f",
+        "frame_entries": 1,
+        "body_children": 13
+      },
+      {
+        "unit": "90f8b1eb2b1a5308cb8dc07c",
+        "code": "pycode-v2:9878242e1e2f18405cfd6ed488a85215b82e938387a8da8fb0b843ce4ded94d8",
+        "frame_entries": 1,
+        "body_children": 11
+      },
+      {
+        "unit": "90f8b1eb2b1a5308cb8dc07c",
+        "code": "pycode-v2:d6efc34dc09df5e819feb48c3aafac67a674741c3bec6fa769e5b93b3919154c",
+        "frame_entries": 1,
+        "body_children": 11
+      }
+    ],
+    "incremental_readback": {
+      "schema": "scar.incremental-source-readback-check",
+      "source_units": 18,
+      "external_reader_footprints": 2,
+      "source_records_preserved": true,
+      "target_executed": false,
+      "first_stage_complete": false,
+      "seconds": 140.98058185099944
+    },
+    "automatic_frontend": {
+      "stages": 29,
+      "admitted_stages": 29,
+      "seconds": 231.65747533499962,
+      "workflow_complete": true,
+      "current_receipt_tail_verified": true,
+      "primitive_graphs_reused": true
+    },
+    "report": "artifacts/current/experiments/cpu-sunfish-current/formal/scope-admission/readback-check.json",
+    "first_stage_complete": false,
+    "transformation_applied": false
   }
 }

@@ -269,6 +269,8 @@ F4局部图先按源码单元投影为`UnitSourceInterfaces`，再由F5连接；
 `.eval()` 不证明纯函数，推理也不默认无 autograd；模式、hooks、buffers 和可变参数属于相关状态。
 见 [效果模型](../scar/ir/effects.py) 与 [状态地址](../scar/ir/program/state_addresses.py)。
 
+代码作用域不等于Python可调用对象：模块/exec/eval根、class body与函数正文分别记录。实际CodeID可对应共享Region和独立Frame锚点；class body不进入函数参数binder，当前namespace与创建对象身份仍需单独依据。
+
 ## 静态结构与动态证据
 
 静态前端依据保存源码、语言版本、编译来源和受支持的库契约建立结构、可能路径及条件关系。

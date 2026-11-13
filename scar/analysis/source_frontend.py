@@ -180,6 +180,24 @@ def build_frontend(paths, out, *, sources=(), jobs=4, trace=None, project_root=N
                 target_executed=False, original_compile_options_proven=False,
                 execution_namespace_proven=False, first_stage_complete=False)
             active_catalog = out/'observed-source-catalog'
+        if trace is not None:
+            run.stage('external-source-matches', 'scar.analysis.observed_source_admission',
+                ['discover','--catalog',active_catalog,'--trace',trace,'--project-root',project_root,
+                    '--out',out/'external-source-matches'],
+                out/'external-source-matches/result.json','scar.observed-external-source-matches',
+                target_executed=False, original_compile_options_proven=False,
+                historical_source_version_proven=False, first_stage_complete=False)
+            run.stage('external-source-materials', 'scar.analysis.external_source_materials',
+                ['--matches',out/'external-source-matches','--out',out/'external-source-materials',
+                    '--jobs',min(jobs,8)],
+                out/'external-source-materials/result.json','scar.external-source-materials',
+                status='EXTERNAL_SOURCE_MATERIALS_BUILT',target_executed=False,first_stage_complete=False)
+            run.stage('complete-source-catalog','scar.analysis.observed_source_admission',
+                ['extend','--catalog',active_catalog,'--materials',out/'external-source-materials',
+                    '--out',out/'complete-source-catalog'],
+                out/'complete-source-catalog/result.json','scar.observed-source-catalog',
+                target_executed=False,first_stage_complete=False)
+            active_catalog = out/'complete-source-catalog'
         call_roots = [part for p in paths for part in ('--source-root',p)]
         run.stage('calls','scar.analysis.source_declared_calls',
             ['--catalog',active_catalog,*call_roots,'--out',out/'calls','--jobs',jobs],

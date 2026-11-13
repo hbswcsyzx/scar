@@ -73,14 +73,14 @@ class ReferenceSlicer:
         except KeyError:
             raise ValueError('reference endpoint is outside its original source port table') from None
 
-    def fact(self, unit, table, ordinal):
+    def fact(self, unit, table, ordinal=None):
         row = self.store.rows[unit.unit]
         path = Path(row['facts'])
         if not path.is_absolute():
             path = self.store._source_parents[unit.unit].path/path
         artifact = ProviderArtifact(str(path), row['sha256'], row['bytes'], 'scar.source-facts-unit')
         prefix = '#/records/0/' if row.get('facts_format') == 'COMPILE_CONTEXT_F4_JSONL' else '#/'
-        return ProviderFactReference(artifact, prefix+table+'/'+str(ordinal))
+        return ProviderFactReference(artifact, prefix+table+('' if ordinal is None else '/'+str(ordinal)))
 
     def interfaces(self, identity):
         if identity in self.indexed:

@@ -396,17 +396,18 @@ class ProgramView:
         return replace(provider.nodes[identity].point, context=context)
 
     def source_region_ref(self, unit, template, region, *, context=None):
-        """Reference a sealed root or declared function body without expansion.
+        """Reference a sealed root or declared code body without expansion.
 
-        The header or exact original function fact supplies this identity.
+        The header or exact original function/class fact supplies the identity.
         get/original/expand still admit the full recipe when its fields or
         dependencies are queried; no arbitrary nested region is introduced.
         """
         provider=self.unit(unit)
         declared=provider.material.interfaces['nodes'].get(template)
-        body=any(f.template==template and f.body==region for f in provider.facts.functions)
+        body=any(f.template==template and f.body==region
+            for f in (*provider.facts.functions,*provider.facts.classes))
         if declared is None or declared.root!=region and not body:
-            raise ValueError('source region reference is not an original declared root or function body')
+            raise ValueError('source region reference is not an original declared root or code body')
         point=provider._node(template,region)
         provider.check(point)
         return replace(point,context=context)

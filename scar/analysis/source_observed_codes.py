@@ -29,7 +29,8 @@ from scar.analysis.source_stage import _durable_mkdir, _durable_bytes
 from scar.analysis.source_template_links import _json
 from scar.ir.program.source_syntax import SourceSyntaxMaterial
 from scar.ir.program.compiler_topology import CompilerTopologyMaterial
-from scar.ir.program.source_observed_codes import ObservedSourceCodeLink
+from scar.ir.program.source_observed_codes import (ObservedSourceCodeLink,
+    ObservedSourceScopeKind as ScopeKind, ObservedSourceScopeLink)
 from scar.ir.program import normal_targets as T, view as V
 from scar.ir.program.call_edges import CapturedCode,CallEdgeBudget
 from scar.ir.program.providers import ProviderArtifact, ProviderFactReference
@@ -126,7 +127,7 @@ class ObservedSourceCodeProvider:
         self.targets = read_python_call_targets(self.trace,max_bytes=target_max_bytes,max_rows=target_max_rows)
         if any(m['python'] != sys.version for m in self.trace.frame_scan.metadata):
             raise ValueError('code correspondence needs the recorded compiler runtime')
-        self.records = {}; self.points = {}; self.bodies = {}; self.issues = [];self.root_callers=[]
+        self.records = {}; self.scope_records = {}; self.points = {}; self.bodies = {}; self.issues = [];self.root_callers=[]
         self.fact_materials=ObservedFactMaterials(view.catalog)
         self._sources = {}; self._guard = {}; self._trace_guard = {}
         self._target_metas = tuple(sorted(Path(self.trace.directory).glob('python-call-target-meta.*.json')))
@@ -144,6 +145,9 @@ class ObservedSourceCodeProvider:
         for capture in self.trace.frame_scan.captures:
             captures[capture.code.filename].append(capture)
         targets_by_code=defaultdict(list);entries_by_code=defaultdict(list)
+        frame_entries=defaultdict(list)
+        for entry in self.trace.entries:
+            frame_entries[entry.invocation.process_id,entry.code].append(entry.anchor)
         for anchor,target in zip(self.targets.target_anchors,self.targets.targets):targets_by_code[target.code].append((anchor,target))
         for anchor,entry in zip(self.targets.entry_anchors,self.targets.entries):entries_by_code[entry.code].append((anchor,entry))
         selected = tuple(units or (u for u,r in view.catalog.fact_store.rows.items()
@@ -204,9 +208,38 @@ class ObservedSourceCodeProvider:
                     if block.origin.role in ('LAMBDA_BODY', 'GENERATOR_EXPRESSION') and block.projection == 'PUBLIC'}
                 expression_paths = _expression_code_paths(code)
             root_descriptor=decode(CapturedCode,describe_code(code))
+            source_artifact=ProviderArtifact(str(path),sha256(raw).hexdigest(),len(raw),'python-source')
+            scoped=[]
+            matched_roots=tuple(capture for capture in observed if capture.code==root_descriptor)
             if profile is None:
                 self.root_callers.extend((unit,capture,facts.root_scope,code) for capture in observed
                     if capture.code==root_descriptor)
+            if matched_roots:
+                root_fact=slicer.fact(facts,'root_scope')
+                identity=ProviderID(_digest((SCHEMA+'.scope',self.targets.source_sha256,root_fact,root_descriptor)))
+                scoped.append(ObservedSourceScopeLink(identity,ScopeKind.CODE_ROOT,root_fact,
+                    T.Body(unit,facts.root_scope.template,facts.root_scope.region),facts.root_scope,matched_roots,
+                    source_artifact,ProviderFactReference(syntax_artifact,'#/nodes/0'),root_descriptor,(),flags,
+                    tuple(a for c in matched_roots for a in frame_entries[c.process_id,c.code.key])))
+            for ordinal,declared in enumerate(facts.classes):
+                node=syntax.nodes[declared.template.occurrence]
+                if node.constructor!='ClassDef' or declared.body_scope is None:continue
+                attributes=dict(zip(schemas[node.constructor].attributes,
+                    (v.scalar.to_python() if v.kind=='SCALAR' else None for v in node.attributes)))
+                span=tuple(attributes[k] for k in ('lineno','end_lineno','col_offset','end_col_offset'))
+                for constant_path,child,_ in mappings.get(span,()):
+                    expected=decode(CapturedCode,describe_code(child))
+                    matched=tuple(c for c in observed if c.code==expected)
+                    if not matched:continue
+                    if declared.body_scope.source_scope!=declared.scope:
+                        raise ValueError('class source/code-scope correspondence differs from its original fact')
+                    definition=slicer.fact(facts,'classes',ordinal)
+                    identity=ProviderID(_digest((SCHEMA+'.scope',self.targets.source_sha256,definition,expected)))
+                    scoped.append(ObservedSourceScopeLink(identity,ScopeKind.CLASS_BODY,definition,
+                        T.Body(unit,declared.template,declared.body),declared.body_scope,matched,source_artifact,
+                        ProviderFactReference(syntax_artifact,'#/nodes/'+str(declared.template.occurrence)),
+                        root_descriptor,constant_path,flags,
+                        tuple(a for c in matched for a in frame_entries[c.process_id,c.code.key])))
             pending=[]
             for ordinal, function in enumerate(facts.functions):
                 node = syntax.nodes[function.template.occurrence]
@@ -237,20 +270,19 @@ class ObservedSourceCodeProvider:
                             ProviderFactReference(syntax_artifact,'#/nodes/'+str(function.template.occurrence)),
                             root_descriptor,constant_path,flags)
                         pending.append(row)
-            if not pending:
-                if profile is None and any(c.code == root_descriptor for c in observed):
-                    self._sources[unit] = view.unit(unit)
-                continue
+            if not pending and not scoped:continue
             source=view.unit(unit)
-            for row in pending:
+            for row in (*pending,*scoped):
                 body = view.source_region_ref(unit,row.body.template,row.body.region)
                 point = Point(body.namespace,row.id,None)
                 key = self._key(point)
-                if key in self.records and self.records[key] != row:
+                records=self.records if type(row) is ObservedSourceCodeLink else self.scope_records
+                if key in records and records[key] != row:
                     raise ValueError('observed code mapping has conflicting compiler paths')
-                self.records[key] = row; self.points[key] = point; self.bodies[key] = body
+                records[key] = row; self.points[key] = point; self.bodies[key] = body
                 self._sources[unit] = source
-        self.fact_materials.admit(tuple(r.function_fact for r in self.records.values()))
+        self.fact_materials.admit((*tuple(r.function_fact for r in self.records.values()),
+            *tuple(r.source_fact for r in self.scope_records.values())))
         self.check(); view.register(self)
 
     @staticmethod
@@ -302,16 +334,19 @@ class ObservedSourceCodeProvider:
         self._check_trace()
 
     def describe(self, point):
-        if self._key(point) not in self.records:return None
+        if self._key(point) not in self.records and self._key(point) not in self.scope_records:return None
         if point.context is not None:raise ValueError('observed code evidence has no static invocation context')
         self.check()
         return V.ProgramNode(point,None,V.ProgramNodeRole.PROVIDER,self.bodies[self._key(point)],None)
 
-    def original(self, point):return self.records[self._key(point)]
+    def original(self, point):
+        key=self._key(point)
+        return self.records[key] if key in self.records else self.scope_records[key]
     def expand(self, point):return ()
     def explain(self, point):
         row = self.original(point)
         return dict(original=row,code_template_matched=True,
+            scope_kind=row.kind.value if type(row) is ObservedSourceScopeLink else 'FUNCTION_BODY',
             compatible_replay_used=row.body.unit in self.replay_profiles,
             original_compilation_request_proven=False,
             source_function_creation_proven=False,caller_site_selected=False,
@@ -320,13 +355,13 @@ class ObservedSourceCodeProvider:
     def _neighbors(self, point, incoming):
         if point.context is not None:return Neighborhood()
         keys = tuple(k for k,b in self.bodies.items() if b == point) if incoming else (self._key(point),)
-        keys = tuple(k for k in keys if k in self.records)
+        keys = tuple(k for k in keys if k in self.records or k in self.scope_records)
         if not keys:return Neighborhood()
         self.check(); edges=[]
         for key in keys:
-            source,target=self.points[key],self.bodies[key];row=self.records[key]
+            source,target=self.points[key],self.bodies[key];row=self.original(source)
             conditions = (
-                'CODE_TEMPLATE_CORRESPONDENCE_NOT_SOURCE_FUNCTION_CREATION_IDENTITY',
+                'CODE_TEMPLATE_CORRESPONDENCE_NOT_SCOPE_EXECUTION_OR_CREATOR_IDENTITY',
                 'F4_EXECUTION_PROFILE_AND_CALLER_INTERFACE_STILL_REQUIRED')
             if row.body.unit in self.replay_profiles:
                 conditions += ('CODE_EQUIVALENT_REPLAY_NOT_ORIGINAL_COMPILATION_REQUEST',)
@@ -340,7 +375,13 @@ class ObservedSourceCodeProvider:
     def outgoing(self, point):return self._neighbors(point,False)
 
     def summary(self):
+        matched={(c.process_id,c.code.key) for r in (*self.records.values(),*self.scope_records.values()) for c in r.captures}
+        kinds=defaultdict(int)
+        for row in self.scope_records.values():kinds[row.kind.value]+=1
         return dict(code_links=len(self.records),units=len(self._sources),
+            scope_links=len(self.scope_records),scope_kinds=dict(kinds),
+            captured_code_templates=len(self.trace.frame_scan.captures),matched_code_templates=len(matched),
+            unmatched_code_templates=len(self.trace.frame_scan.captures)-len(matched),
             compiled_units=sorted(self._compiled),
             compatible_replay_units=sorted(self.replay_profiles),
             target_observations=sum(len(r.targets) for r in self.records.values()),
@@ -366,11 +407,12 @@ def main():
         frame_budget=replace(CallEdgeBudget(),max_events=args.frame_max_events))
     out=Path(args.out).absolute()
     if out.exists():raise ValueError('fresh observed source-code view output required')
-    _durable_mkdir(out);table=write_table(out/'links.jsonl.gz',provider.records.values());provider.check()
-    report=dict(schema=SCHEMA,schema_version=1,catalog=str(view.catalog.path),trace=provider.trace.directory,
+    _durable_mkdir(out);table=write_table(out/'links.jsonl.gz',provider.records.values())
+    scopes=write_table(out/'scope-links.jsonl.gz',provider.scope_records.values());provider.check()
+    report=dict(schema=SCHEMA,schema_version=2,catalog=str(view.catalog.path),trace=provider.trace.directory,
         run_scope=provider.targets.source_sha256,compiled_units=[p.unit for p in profiles],
         target_reader_budget=provider.target_reader_budget,frame_reader_budget=encode(provider.trace.frame_budget),
-        table=table,summary=provider.summary())
+        table=table,scope_table=scopes,summary=provider.summary())
     _durable_bytes(out/'result.json',_json(report),replace=False);print(json.dumps(report['summary']),flush=True)
 
 
