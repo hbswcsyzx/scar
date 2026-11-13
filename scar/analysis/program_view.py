@@ -71,6 +71,8 @@ class SourceUnitProvider:
         self.nodes = {}; self.anchors = {}; self.records = {}; self.incoming_edges = defaultdict(list)
         self.outgoing_edges = defaultdict(list); self.edge_sources = defaultdict(list); self.expanded = set()
         self.metadata_providers = ()
+        self.effect_provider = None
+        self.effect_contexts = {}
         self.plans = {}; self.callers = defaultdict(set)
         self.basis = _digest((self.unit, self.graph.input, self.graph.profile))
         root = self.facts.root_scope
@@ -111,6 +113,10 @@ class SourceUnitProvider:
                 path=parent.root/parent.rows[self.unit]['artifact']['path']
                 self._guard[path]=_stamp(path)
         self.check()
+
+    def effects(self, point):
+        from scar.analysis.source_effect_projection import project_effects
+        return project_effects(self, point)
 
     def check(self, point=None):
         if point is not None and (point.namespace != self.namespace or point.namespace.graph != self.namespace.graph
@@ -301,8 +307,11 @@ class SourceUnitProvider:
                 operands=tuple(replace(p, context=point.context) for p in c.operands)) for c in e.conditions)) for e in edges)
         frontiers = []
         if node.kind is V.ProgramEntityKind.OPERATION:
-            frontiers.append(DependencyFrontier(point, 'SOURCE_EFFECT_FIELDS_NOT_ATTACHED',
-                'Original instruction is retained; effect, alias and resource summaries are separate analyses.'))
+            effects = self.effects(point)
+            if effects.unresolved_fields or effects.missing_rules:
+                frontiers.append(DependencyFrontier(point, 'SOURCE_EFFECT_FIELDS_PARTIALLY_RESOLVED',
+                    'Known source accesses are attached; unresolved fields: '+', '.join(effects.unresolved_fields)
+                    +('; missing rules: '+', '.join(effects.missing_rules) if effects.missing_rules else '')))
         if type(node.anchor.original) is G.Port:
             port=node.anchor.original
             if port in self.formals:
@@ -496,6 +505,12 @@ class ProgramView:
     def producers(self, point): return self.dependencies.incoming(point)
     def consumers(self, point): return self.dependencies.outgoing(point)
 
+    def effects(self, point):
+        """Query field-level source effects, without admitting other bodies."""
+        provider = self.namespaces.get(point.namespace)
+        if provider is None: raise ValueError('source effects need an admitted source namespace')
+        return provider.effects(point)
+
     def explain(self, point):
         provider = self.namespaces.get(point.namespace)
         if provider is None or point.node not in provider.nodes:
@@ -505,6 +520,9 @@ class ProgramView:
         provider.ensure(point)
         return dict(node=self.get(point), projection=provider.nodes[point.node], original=provider.records[point.node],
             input=provider.graph.input, profile=provider.graph.profile,
+            effects=self.effects(point) if type(provider.records[point.node]) is P.ProductionStep else None,
+            effect_members=(provider.effect_provider.effect_members(point)
+                if provider.effect_provider is not None and type(provider.records[point.node]) is P.ProductionStep else None),
             normal_success_view_only=True, execution_or_effect_proof=False)
 
     def explain_edge(self, edge):

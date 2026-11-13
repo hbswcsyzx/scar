@@ -384,3 +384,7 @@ SourceStateProjection把输入内容候选连接到原调用的(receiver referen
 同时保存world_before与独立data_result；返回None的修改操作也能产生新内容版本。
 接点保原call/attribute坐标及所属scope的alias证据。声明接点不证明调用激活、输入版本匹配或后续任务内容，
 不得越过callback、deepcopy、删除及环境效果直接向形参注入字段。
+
+统一source查询的 `effects(point)` / `explain(point)` 返回强类型SourceEffectSummary：原world输入/输出、六个集合字段及RNG/异常/外部/排序字段分别保Knowledge。集合成员引用同一unit的绑定/content访问表；已知成员与集合完整性分开。直接词法读取可明确槽读取及不写槽，不能推出对象/Tensor内容或物理storage不变。未附加状态地址时保具体missing rule；不为查询其他操作而展开无关正文。
+
+F4ResourceApplicability区分NOT_APPLICABLE、COMPOSITE、DECLARATION_ONLY、HOST、HOST_INTERFACE_OPEN、EXTERNAL_INTERFACE_OPEN。组合节点的需求由进入的子区域组成，不声称子区域无资源。原生executor路由保原CALL、named match、normalization、官方schema和dispatch声明；CPU/GPU/内存/SSD/NVMe兼容边始终是未选候选，独立于实际dispatch、allocation、placement或transfer证据。

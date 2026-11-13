@@ -999,5 +999,217 @@
       "RUNTIME_STATE_AND_RESOURCE_EVIDENCE",
       "UNIFIED_CPU_CASE_ACCEPTANCE"
     ]
+  },
+  "state_resource_join": {
+    "status": "VERIFIED_SOURCE_EFFECT_FIELDS_RESOURCE_APPLICABILITY_AND_NATIVE_EXECUTOR_ROUTES",
+    "source": {
+      "unit": "90f8b1eb2b1a5308cb8dc07c",
+      "operation_requests": 9623,
+      "binding_accesses": 847,
+      "content_accesses": 577,
+      "seconds": 92.23195876200043,
+      "cases": {
+        "OPEN_PROTOCOL": {
+          "instruction": "ApplyPythonProtocol",
+          "reads": "UNKNOWN",
+          "writes": "UNKNOWN",
+          "binding_read_members": 0,
+          "binding_write_members": 0,
+          "content_read_members": 0,
+          "content_write_members": 0,
+          "unresolved_fields": [
+            "reads",
+            "writes",
+            "allocates",
+            "frees",
+            "aliases",
+            "escapes",
+            "rng_effect",
+            "may_raise",
+            "external_effect",
+            "ordering_effect"
+          ]
+        },
+        "LEXICAL_READ": {
+          "instruction": "AccessBinding",
+          "reads": "KNOWN",
+          "writes": "NONE",
+          "binding_read_members": 1,
+          "binding_write_members": 0,
+          "content_read_members": 0,
+          "content_write_members": 0,
+          "unresolved_fields": [
+            "allocates",
+            "frees",
+            "aliases",
+            "escapes"
+          ]
+        },
+        "BINDING_WRITE": {
+          "instruction": "AccessBinding",
+          "reads": "UNKNOWN",
+          "writes": "UNKNOWN",
+          "binding_read_members": 0,
+          "binding_write_members": 1,
+          "content_read_members": 0,
+          "content_write_members": 0,
+          "unresolved_fields": [
+            "reads",
+            "writes",
+            "allocates",
+            "frees",
+            "aliases",
+            "escapes",
+            "rng_effect",
+            "external_effect",
+            "ordering_effect"
+          ]
+        },
+        "CONTENT_READ": {
+          "instruction": "ApplyLanguageAction",
+          "reads": "UNKNOWN",
+          "writes": "UNKNOWN",
+          "binding_read_members": 0,
+          "binding_write_members": 0,
+          "content_read_members": 1,
+          "content_write_members": 0,
+          "unresolved_fields": [
+            "reads",
+            "writes",
+            "allocates",
+            "frees",
+            "aliases",
+            "escapes",
+            "rng_effect",
+            "external_effect",
+            "ordering_effect"
+          ]
+        },
+        "CONTENT_WRITE": {
+          "instruction": "ApplyLanguageAction",
+          "reads": "UNKNOWN",
+          "writes": "UNKNOWN",
+          "binding_read_members": 0,
+          "binding_write_members": 0,
+          "content_read_members": 0,
+          "content_write_members": 1,
+          "unresolved_fields": [
+            "reads",
+            "writes",
+            "allocates",
+            "frees",
+            "aliases",
+            "escapes",
+            "rng_effect",
+            "external_effect",
+            "ordering_effect"
+          ]
+        },
+        "IDENTITY_INTRINSIC": {
+          "instruction": "InvertCondition",
+          "reads": "NONE",
+          "writes": "NONE",
+          "binding_read_members": 0,
+          "binding_write_members": 0,
+          "content_read_members": 0,
+          "content_write_members": 0,
+          "unresolved_fields": [
+            "allocates",
+            "frees",
+            "aliases",
+            "escapes"
+          ]
+        }
+      },
+      "report": "artifacts/current/experiments/cpu-sunfish-current/formal/scope-admission/state-resource-join/result.json"
+    },
+    "native_executor": {
+      "primary_readback": {
+        "schema": "scar.native-executor-primary-readback-check",
+        "unit": "55106d6cde8999b0503921d5",
+        "schemas": [
+          "aten::sin",
+          "aten::sin.out"
+        ],
+        "executor_routes": 4,
+        "value_routes": 10,
+        "resource_records": 44,
+        "runtime_placement_proven": false,
+        "target_executed": false,
+        "first_stage_complete": false,
+        "seconds": 5.952340556999843
+      },
+      "vertical_graph": {
+        "schema": "scar.native-vertical-graph-check",
+        "unit": "55106d6cde8999b0503921d5",
+        "examples": [
+          {
+            "source_operation": "program_operation:71aa9f03d576d7532d2369cce9e6e9351d18e00ac94776519ebb777916eaf4aa",
+            "native_targets": [
+              "program_region:static-native:d5612e99e65ced4bfbd420ae6264cd94",
+              "program_region:static-native:e7d861def139202d3e702fb91ccc8ec9"
+            ],
+            "native_body_operations": [
+              3,
+              3
+            ],
+            "native_executor_routes": 4
+          }
+        ],
+        "source_bodies_copied": false,
+        "loops_unrolled": false,
+        "actual_native_dispatch_proven": false,
+        "actual_resource_use_proven": false,
+        "target_executed": false,
+        "first_stage_complete": false,
+        "seconds": 5.768009457999142
+      },
+      "report": "artifacts/current/experiments/native-executor-current/readback-check.json"
+    },
+    "build": {
+      "workflow_complete": true,
+      "first_stage_complete": false,
+      "seconds": 412.0615498999978,
+      "time_scope": "BUILD_F4_ASSEMBLY_PUBLICATION_AND_INDEPENDENT_READBACK_EXCLUDING_CLI_DISCOVERY",
+      "summary": {
+        "configuration_inputs": 0,
+        "gaps": 63,
+        "loaded_units": 10,
+        "observed_boundary_publications": 1,
+        "observed_publications": 1,
+        "resource_records": 28,
+        "source_units": 18
+      },
+      "assembly_elapsed_by_layer": {
+        "catalog": 31.809622926994052,
+        "cross_layer_interfaces": 140.5732319719973,
+        "function_interfaces": 122.63150720299745,
+        "local_state_and_content": 190.20481574499718,
+        "resources": 190.5595930540003
+      },
+      "gap_kinds": {
+        "COMPILED_EXEC_SELECTION_NOT_PROVIDED": 1,
+        "MATERIAL_NOT_AVAILABLE": 4,
+        "SOURCE_EFFECT_FIELDS_PARTIALLY_RESOLVED": 45,
+        "UNRESOLVED_EXTERNAL_RESOURCE_INTERFACE": 3,
+        "RESOURCE_RUNTIME_EVIDENCE_MISSING": 6,
+        "CONTENT_PROTOCOL_AND_INSTANCE_OPEN": 2,
+        "DEPENDENCY_POINT_BUDGET": 1,
+        "FULL_INFERENCE_COVERAGE_UNPROVEN": 1
+      },
+      "report": "artifacts/current/experiments/cpu-sunfish-current/formal/scope-admission/state-resource-join/build/manifest.json"
+    },
+    "regressions": {
+      "resource_checks_passed": 31
+    },
+    "first_stage_complete": false,
+    "target_executed": false,
+    "transformation_applied": false,
+    "remaining": [
+      "RUNTIME_STATE_INSTANCE_AND_CONTENT_VERSIONS",
+      "SOURCE_NATIVE_RUNTIME_SELECTION_AND_ACTUAL_RESOURCE_USE",
+      "THREAD_PROCESS_RELATIONSHIPS",
+      "THREE_CPU_CASES_ON_CURRENT_FORMAL_PIPELINE"
+    ]
   }
 }

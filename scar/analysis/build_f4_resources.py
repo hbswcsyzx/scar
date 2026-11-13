@@ -12,6 +12,9 @@ import json
 from pathlib import Path
 
 from scar.analysis.build_resources import BuildResourceProvider, _key
+from scar.analysis.build_target_resources import RetainedBuildTarget
+from scar.analysis.source_call_view import source_call_site
+from scar.analysis.source_namespace_interfaces import NamespacePlanView
 from scar.analysis.program_view import SOURCE_REPRESENTATION, _digest
 from scar.analysis.source_effects import classify_instruction
 from scar.analysis.source_resource_graph import SourceResourceGraph, _target, _pins as resource_pins
@@ -32,7 +35,7 @@ from scar.ir.program.providers import ProviderArtifact
 from scar.ir.record_codec import encode
 
 
-SCHEMA = 'scar.build-f4-resource-interfaces.v1'
+SCHEMA = 'scar.build-f4-resource-interfaces.v2'
 _HOST_GUARDS = ('SOURCE_SCOPE_AND_OPERATION_OCCURRENCE_ENTERED',
     'PYTHON_HOST_INTERPRETER_AND_REFERENCE_REPRESENTATION_INTERFACE',
     'NO_TENSOR_STORAGE_ALLOCATION_PLACEMENT_OR_TRANSFER_PROOF')
@@ -62,8 +65,9 @@ class LazyF4Resources:
 
     def __init__(self, view, source_resources=None, *, target=None):
         self.view = view; self.provider = _Requirements(view)
-        self.interfaces = {}; self.hardware = {}; self.routes = []
+        self.interfaces = {}; self.hardware = {}; self.routes = []; self.executor_routes = []
         self._sources = {}; self._guard = {}; self._seen = set(); self._unit_routes = {}
+        self._unit_executors = {}; self._host_edges = set()
         self.gaps = []; self._resource_error = None
         self.resource_store = source_resources if isinstance(source_resources, SourceResourceGraph) else None
         self.resource_path = (self.resource_store.path if self.resource_store is not None
@@ -103,8 +107,11 @@ class LazyF4Resources:
     @staticmethod
     def _pins():
         from scar.analysis import build_resources, source_effects, source_resource_graph, target_graph
-        return tuple((module.__file__, sha256(Path(module.__file__).read_bytes()).hexdigest())
-            for module in (build_resources, source_effects, source_resource_graph, target_graph, R))
+        from scar.analysis import build_target_resources, source_call_view, source_namespace_interfaces
+        paths = {__file__, *(module.__file__ for module in (build_resources, source_effects,
+            source_resource_graph, target_graph, build_target_resources, source_call_view,
+            source_namespace_interfaces, R))}
+        return tuple((path,sha256(Path(path).read_bytes()).hexdigest()) for path in sorted(paths))
 
     def _remember(self, path):
         path = Path(path).absolute(); raw = path.read_bytes()
@@ -149,19 +156,19 @@ class LazyF4Resources:
         return matches[0]
 
     def _host_targets(self, source, operation):
+        """Bind existing symbolic pools by retained hardware type compatibility."""
         if self.target is None: return
         for record in self.target_resources:
-            name = 'cpu' if type(record) is H.CpuExecutor else (
-                'dram' if type(record) is H.MemoryDomain and record.kind is H.MemoryKind.HOST else None)
-            if name is None: continue
-            pool = self.provider.pools.get((source.namespace, name))
-            if pool is not None:
+            for name in RetainedBuildTarget._pool_names(record):
+                pool = self.provider.pools.get((source.namespace, name))
+                if pool is None: continue
                 target = self._target_point(source,H.TargetResourceRef(self.target_ref,record.id))
                 edge_key = target,pool
                 if edge_key in self._host_edges: continue
                 self._host_edges.add(edge_key)
-                self.provider._edge(target,pool,'scar.build.f4.host-pool-target-candidate.v1',
-                    guards=('HOST_AFFINITY_NUMA_AND_MEMORY_ACCESS_POLICY_SELECT_RECORDED_TARGET',
+                self.provider._edge(target,pool,'scar.build.f4.target-pool-type-candidate.v2',
+                    guards=('SCOPE_EXECUTION_AND_RESOURCE_POLICY_SELECT_RECORDED_TARGET',
+                        'RESOURCE_TYPE_COMPATIBILITY_NOT_PLACEMENT_OR_TRANSFER_PROOF',
                         'INVENTORY_CAPACITY_NOT_AVAILABLE_ALLOCATION_BUDGET'), evidence=(self.target_locator,))
 
     def _resource_unit(self, source):
@@ -169,7 +176,7 @@ class LazyF4Resources:
         if self._resource_error is not None: return ()
         if unit in self._unit_routes: return self._unit_routes[unit]
         if self.resource_report is None or unit not in self.resource_report['shards']:
-            self._unit_routes[unit] = (); return ()
+            self._unit_routes[unit] = (); self._unit_executors[unit] = (); return ()
         if self.resource_store is None: self.resource_store = SourceResourceGraph(self.resource_path)
         store = self.resource_store
         declared = json.loads(store.native.parents.source_raw)
@@ -188,6 +195,37 @@ class LazyF4Resources:
             for i,r in enumerate(normalized.inputs)}
         outputs = {_table_ref(folder,shard['tables']['outputs'],'scar.source-native-output-normalization',i):r
             for i,r in enumerate(normalized.outputs)}
+        named = {store.native.parents.match_reference(unit,i):row.candidate
+            for i,row in enumerate(store.native.parents.matches(unit))}
+        executors = []
+        for normalization, output in outputs.items():
+            candidate = named[output.match]; link = store.native.by_id[output.binding]
+            schema,_,boundary = store.native.natives[link.native.selector]
+            if (candidate.binding != output.binding or link.native != schema or boundary.id != output.boundary
+                    or (candidate.site.result,candidate.site.world,candidate.site.result_world)
+                        != (output.result,output.world,output.result_world)
+                    or link.declaration != output.declaration):
+                raise ValueError('native executor source match/schema/output normalization differs')
+            for i,option in enumerate(store.rows['executors']):
+                if option.boundary != output.boundary: continue
+                dispatch = []; dispatch_evidence = []
+                for ordinal in option.declared_dispatch:
+                    if type(ordinal) is not int or not 0 <= ordinal < len(store.rows['dispatch']):
+                        raise ValueError('native executor dispatch index is outside its declaration table')
+                    row = store.rows['dispatch'][ordinal]
+                    if row.boundary != output.boundary:
+                        raise ValueError('native executor selected another boundary dispatch declaration')
+                    dispatch.append(row)
+                    dispatch_evidence.append(_table_ref(store.path,store.report['tables']['dispatch'],
+                        'scar.native-dispatch-declaration',ordinal))
+                    self._remember(Path(row.evidence.artifact.uri))
+                executor_evidence = _table_ref(store.path,store.report['tables']['executors'],
+                    'scar.native-executor-option',i)
+                executors.append((output,candidate.site,link,normalization,option,executor_evidence,
+                    tuple(dispatch),tuple(dispatch_evidence)))
+            for reference in (output.match,output.declaration):
+                self._remember(Path(reference.artifact.uri))
+            self._remember(Path(schema.graph.artifact.uri))
         resources = []
         for i, route in enumerate(routes):
             value = store.rows['values'][route.value]
@@ -208,7 +246,23 @@ class LazyF4Resources:
             if receipt['path'].startswith('units/') and not receipt['path'].startswith('units/'+unit+'/'): continue
             self._remember(store.path/receipt['path'])
         for receipt in shard['tables'].values(): self._remember(folder/receipt['path'])
-        self._unit_routes[unit] = tuple(resources); return self._unit_routes[unit]
+        self._unit_routes[unit] = tuple(resources); self._unit_executors[unit] = tuple(executors)
+        return self._unit_routes[unit]
+
+    @staticmethod
+    def _applicability(rule):
+        resolution = rule.resolution; A = R.F4ResourceApplicability
+        if resolution is F.EffectResolution.COMPILE_INPUT:
+            return A.NOT_APPLICABLE, 'Retained compiler input has no separate runtime resource demand.'
+        if resolution is F.EffectResolution.REGION_COMPOSITION:
+            return A.COMPOSITE, 'Resource demands compose from entered primitive child regions; children are not resource-free.'
+        if resolution is F.EffectResolution.DEFERRED_DECLARATION:
+            return A.DECLARATION_ONLY, 'Shared deferred code is a declaration; its callable construction and entered body have separate demands.'
+        if resolution is F.EffectResolution.LOCAL_INTRINSIC:
+            return A.HOST, 'Known local interpreter intrinsic uses host execution/reference representation; physical placement is unobserved.'
+        if resolution is F.EffectResolution.DYNAMIC_TARGET_OR_PROTOCOL:
+            return A.EXTERNAL_INTERFACE_OPEN, 'Host dispatch is required; external executor/storage/effect interfaces remain unresolved.'
+        return A.HOST_INTERFACE_OPEN, 'Host namespace/environment interface is retained; instance-specific resource effects remain unresolved.'
 
     def _add(self, source, point):
         point = _key(point)
@@ -222,15 +276,15 @@ class LazyF4Resources:
             if node.role not in (V.ProgramNodeRole.ARGUMENT,V.ProgramNodeRole.RESULT): continue
             if type(node.value_type) is M.ValueType and node.value_type.kind is M.ValueKind.REFERENCE: refs.append(node.point)
             elif type(node.value_type) is M.ValueType and node.value_type.kind is M.ValueKind.STATE: worlds.append(node.point)
-        structural = rule.resolution in (F.EffectResolution.REGION_COMPOSITION,
-            F.EffectResolution.COMPILE_INPUT,F.EffectResolution.DEFERRED_DECLARATION)
-        self.interfaces[point] = R.F4ResourceInterface(point,rule,tuple(refs),tuple(worlds),structural)
+        applicability,reason = self._applicability(rule)
+        structural = applicability in (R.F4ResourceApplicability.NOT_APPLICABLE,
+            R.F4ResourceApplicability.COMPOSITE,R.F4ResourceApplicability.DECLARATION_ONLY)
+        self.interfaces[point] = R.F4ResourceInterface(point,rule,tuple(refs),tuple(worlds),structural,applicability,reason)
         self._seen.add(point)
         if structural:
-            self.provider._frontier(point,'F4_STRUCTURAL_OR_COMPILER_INTERFACE_HAS_NO_SEPARATE_RUNTIME_RESOURCE_DEMAND',
-                'Original control/declaration interfaces remain shared; resolve their entered primitive bodies separately.')
             return
-        self.provider.add_operation(point,tuple(refs),original)
+        self.provider.add_operation(point,tuple(refs),original,
+            hints=('cpu',) if applicability is R.F4ResourceApplicability.HOST else ())
         self._host_targets(source,point)
         try:
             resource_rows = self._resource_unit(source)
@@ -239,9 +293,30 @@ class LazyF4Resources:
             # remain usable while the precise admission failure stays visible.
             self._resource_error = type(error).__name__+': '+str(error)
             self.gaps.append(dict(layer='source_resources',kind=type(error).__name__,detail=str(error)))
-            self.resource_store = None; self._unit_routes.clear(); resource_rows = ()
+            self.resource_store = None; self._unit_routes.clear(); self._unit_executors.clear(); resource_rows = ()
         if self._resource_error is not None:
             self.provider._frontier(point,'OPTIONAL_SOURCE_RESOURCE_MATERIAL_UNAVAILABLE',self._resource_error)
+        for output,site,link,normalization,option,evidence,dispatch,dispatch_evidence in self._unit_executors.get(source.unit,()):
+            if output.result.port.template != source.nodes[point.node].anchor.template or output.result.port.owner != original.id:
+                continue
+            operation,_,_ = source_call_site(self.view,site)
+            context = NamespacePlanView(source.unit,source.plans[site.result.port.template])
+            if operation != point or context.worlds(original) != (output.world,output.result_world):
+                raise ValueError('native executor route changed its original F4 CALL/world ports')
+            target = self._target_point(source,option.target)
+            hardware = next(record for record in self.target_resources if record.id == option.target.resource)
+            if type(hardware) not in (H.CpuExecutor,H.Accelerator) or option.selected:
+                raise ValueError('native executor option is not an unselected inventory executor')
+            conditions = tuple(dict.fromkeys((*output.conditions,*option.conditions,
+                *(condition for row in dispatch for condition in row.conditions),
+                'ORIGINAL_NAMED_MATCH_SCHEMA_AND_NORMALIZATION_ALTERNATIVE_SELECTED',
+                'DISPATCH_DECLARATIONS_NOT_CURRENT_KERNEL_SELECTION_OR_NATIVE_ENTRY',
+                'NO_PHYSICAL_EXECUTION_PLACEMENT_ALLOCATION_OR_TRANSFER_PROOF')))
+            record = R.F4NativeExecutorRoute(point,output.result,output.match,output.declaration,
+                normalization,link.native,evidence,dispatch,dispatch_evidence,option.target,conditions)
+            self.executor_routes.append(record)
+            self.provider._edge(target,point,'scar.build.f4.original-native-executor-option.v2',
+                guards=conditions,evidence=(self.target_locator,link.native.graph))
         for call,endpoints,route,value,options,guards,evidence in resource_rows:
             if call.port.template != source.nodes[point.node].anchor.template or call.port.owner != original.id: continue
             actuals=tuple(self.view.source_port(p) for p in endpoints) or (point,)
@@ -290,6 +365,7 @@ class LazyF4Resources:
         self.check(); base=_key(point)
         return dict(original=self.original(point),interface=self.interfaces.get(base),
             routes=tuple(r for r in self.routes if r.operation==base or base in r.endpoints),
+            executor_routes=tuple(r for r in self.executor_routes if r.operation==base),
             target_snapshot=None if self.target is None else self.target_ref,
             runtime_placement_proven=False,transfers_observed=False,effects_closed=False,
             tensor_storage_identity_proven=False)
@@ -298,5 +374,6 @@ class LazyF4Resources:
         self.check()
         return dict(schema=SCHEMA,resources=self.provider.payload(),
             interfaces=encode(tuple(self.interfaces.values())),hardware=encode(tuple(self.hardware.items())),
-            routes=encode(tuple(self.routes)),gaps=self.gaps,source_bodies_copied=False,loops_unrolled=False,
+            routes=encode(tuple(self.routes)),executor_routes=encode(tuple(self.executor_routes)),
+            gaps=self.gaps,source_bodies_copied=False,loops_unrolled=False,
             actual_placement_established=False,transfers_observed=False,first_stage_complete=False)

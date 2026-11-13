@@ -7,6 +7,8 @@ one write site in a loop does not denote a single immutable runtime value.
 from dataclasses import dataclass
 from enum import Enum
 
+from scar.ir.effects import Knowledge
+
 from .ids import LocationID, OperationID, ValueID
 from .normal_targets import GlobalPort
 from .normal_links import CodeScopeRef, Namespace
@@ -84,6 +86,45 @@ class SourceEffectRequest:
     accesses: tuple[int, ...]
     missing_rules: tuple[str, ...]
     pending: tuple[str, ...]
+
+
+@dataclass(frozen=True, slots=True)
+class SourceEffectSet:
+    """Known source access members and independent completeness knowledge.
+
+    Ordinals refer to the owning unit's binding/content access tables. A
+    protocol request is not an observed physical read or write. An empty
+    UNKNOWN set never means that no effect exists.
+    """
+    knowledge: Knowledge = Knowledge.UNKNOWN
+    binding_accesses: tuple[int, ...] = ()
+    content_accesses: tuple[int, ...] = ()
+
+    def __post_init__(self):
+        if (type(self.knowledge) is not Knowledge
+                or any(type(n) is not int or n < 0 for n in (*self.binding_accesses, *self.content_accesses))
+                or self.knowledge is Knowledge.NONE and (self.binding_accesses or self.content_accesses)):
+            raise ValueError('effect members require original nonnegative access ordinals and consistent knowledge')
+
+
+@dataclass(frozen=True, slots=True)
+class SourceEffectSummary:
+    operation: OperationID
+    rule: FamilyRule
+    world_inputs: tuple[GlobalPort, ...]
+    world_outputs: tuple[GlobalPort, ...]
+    reads: SourceEffectSet
+    writes: SourceEffectSet
+    allocates: SourceEffectSet
+    frees: SourceEffectSet
+    aliases: SourceEffectSet
+    escapes: SourceEffectSet
+    rng_effect: Knowledge
+    may_raise: Knowledge
+    external_effect: Knowledge
+    ordering_effect: Knowledge
+    unresolved_fields: tuple[str, ...]
+    missing_rules: tuple[str, ...]
 
 
 @dataclass(frozen=True, slots=True)

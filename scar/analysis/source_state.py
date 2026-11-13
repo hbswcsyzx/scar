@@ -60,6 +60,7 @@ class SourceStateProvider:
                 missing = (() if accesses or projection is not None else ('STATE_ADDRESS_PROJECTION_NOT_IMPLEMENTED',)) if rule.resolution.value == 'ADDRESS_RULE' else ()
                 self.requests[operation] = S.SourceEffectRequest(operation, rule, accesses, missing,
                     ('CALLBACK_OBJECT_CONTENT_ALIAS_RNG_EXTERNAL_AND_ORDERING_EFFECTS_NOT_CLOSED',))
+        self.source.effect_provider = self
         view.register(self)
 
     def content(self):
@@ -257,6 +258,15 @@ class SourceStateProvider:
         if type(operation) is Point:
             self.source.check(operation); operation = operation.node
         return self.requests[operation]
+
+    def effect_members(self, operation):
+        """Expose the exact access rows referenced by a field-level summary."""
+        request = self.effects(operation)
+        identity = request.operation
+        content = self.content_provider
+        return dict(bindings=tuple((n, self.accesses[n]) for n in request.accesses),
+            contents=() if content is None else tuple((n, content.accesses[n])
+                for n in content.operation_accesses.get(identity, ())))
 
     def check(self, point=None):
         self.source.check(point)

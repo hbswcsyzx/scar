@@ -27,6 +27,8 @@ def _rules():
             'observed_function_interfaces.py', 'build_resources.py','build_target_resources.py','build_f4.py','build_f4_resources.py',
             'source_declared_catalog.py','source_fact_materials.py',
             'source_observed_boundaries.py','../ir/program/source_observed_boundaries.py',
+            'program_view.py','source_effect_projection.py','source_effects.py','source_state.py',
+            '../ir/program/source_state.py',
             '../ir/program/build_f4_resources.py')}
 
 
