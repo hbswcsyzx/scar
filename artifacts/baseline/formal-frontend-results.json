@@ -329,5 +329,102 @@
       "units": 1
     },
     "native_status": "NOT_RECORDED"
+  },
+  "sunfish_callbacks": {
+    "status": "VERIFIED_CALLBACK_CODE_AND_SHARED_BODY_LINKS",
+    "schema_version": 2,
+    "build_seconds": 177.41457507400264,
+    "workflow_complete": true,
+    "first_stage_complete": false,
+    "summary": {
+      "configuration_inputs": 0,
+      "gaps": 107,
+      "loaded_units": 2,
+      "observed_boundary_publications": 1,
+      "observed_publications": 1,
+      "resource_records": 28,
+      "source_units": 2
+    },
+    "counts": {
+      "boundaries": 117,
+      "callback_observations": 425,
+      "callbacks": 18,
+      "kinds": {
+        "NATIVE_BUILTIN": 49,
+        "OTHER_UNCLASSIFIED": 32,
+        "TYPE_OBJECT": 36
+      },
+      "observations": 1880,
+      "source_callback_interfaces": 7,
+      "source_callback_observations": 154,
+      "units": 2
+    },
+    "readback": {
+      "schema": "scar.callback-readback-check",
+      "summary": {
+        "boundaries": 117,
+        "callback_observations": 425,
+        "callbacks": 18,
+        "kinds": {
+          "NATIVE_BUILTIN": 49,
+          "OTHER_UNCLASSIFIED": 32,
+          "TYPE_OBJECT": 36
+        },
+        "observations": 1880,
+        "source_callback_interfaces": 7,
+        "source_callback_observations": 154,
+        "units": 2,
+        "attached_units": 2,
+        "shared_interfaces": 117,
+        "shared_callback_interfaces": 18,
+        "target_kind_observations_connected": true,
+        "source_bodies_copied": false,
+        "loops_unrolled": false,
+        "implementation_entry_proven": false,
+        "normal_completion_proven": false,
+        "effects_proven": false,
+        "target_executed": false,
+        "first_stage_complete": false
+      },
+      "examples": [
+        {
+          "kind": "ordinary",
+          "observations": 1,
+          "body_children": 1,
+          "edge_kinds": [
+            "CALL_TARGET",
+            "ENVIRONMENT",
+            "PROJECTION",
+            "STATE_INTERFACE"
+          ]
+        },
+        {
+          "kind": "suspendable",
+          "observations": 2,
+          "body_children": 1,
+          "edge_kinds": [
+            "IMPLEMENTATION"
+          ]
+        },
+        {
+          "kind": "source_unavailable",
+          "observations": 1,
+          "body_children": 0,
+          "edge_kinds": []
+        }
+      ],
+      "balanced_ordinary_callback_frames": true,
+      "callback_return_not_outer_result_alias": true,
+      "suspendable_body_not_resume_proof": true,
+      "missing_source_preserves_known_code": true,
+      "repeated_expand_preserves_shared_ids": true,
+      "first_stage_complete": false,
+      "seconds": 33.19204859100137
+    },
+    "code_links": 38,
+    "source_generator_expression_templates": 11,
+    "callback_body_missing_observations": 271,
+    "missing_dynamic_source_observations": 267,
+    "report": "artifacts/current/experiments/cpu-sunfish-current/formal/build-callbacks/manifest.json"
   }
 }

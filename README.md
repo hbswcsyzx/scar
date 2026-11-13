@@ -23,6 +23,7 @@ scar build --entry /path/to/entry.py --catalog /path/to/frontend/catalog --cache
 每层检查原报告再推进，失败保留具体阶段。`local_declarations_complete` 只表示所选源码的局部声明图完成。
 已有采集可追加 `--trace TRACE --project-root ORIGINAL_ROOT` 离线接线；随后 `build` 使用同一目录的观察接口。
 同一分析索引同时发布共享的类型/原生调用边界和独立观察表；有native companion时保原ABI字段，无companion时明确未记录。
+边界可展开到实际Python回调的共享代码/body；普通入口与可挂起body分开，恢复位置和参数来源没有证据时保留未决字段。
 
 统一入口优先组合与入口源码匹配的 F4 catalog、调用/状态接口和资源材料；没有材料时建立源码、函数/循环子图和跨函数连接：
 

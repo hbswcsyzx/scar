@@ -45,14 +45,17 @@ from scar.trace.files import open_binary, resolve as resolve_trace_file
 
 
 SCHEMA = 'scar.source-observed-code-view'
+_EXPRESSION_BODIES = {'Lambda': ('LAMBDA_BODY', '<lambda>'),
+    'GeneratorExp': ('GENERATOR_EXPRESSION', '<genexpr>')}
 
 
-def _lambda_code_paths(root):
+def _expression_code_paths(root):
     """Index exact compiler child slots/positions, not names or first lines.
 
-    F3's LAMBDA_BODY projection admits a source occurrence separately. Here
-    LOAD_CONST supplies its code path; the full captured descriptor is still
-    checked by the ordinary source-code correspondence below.
+    F3's public expression-body projection admits a source occurrence
+    separately. LOAD_CONST supplies its exact code path; the full captured
+    descriptor is still checked by source-code correspondence below. A
+    generator expression body is not a creation or resume-instance witness.
     """
     found = defaultdict(list); pending = [((), root)]; visited = set()
     while pending:
@@ -63,13 +66,14 @@ def _lambda_code_paths(root):
             child = instruction.argval
             if instruction.opname != 'LOAD_CONST' or type(child) is not CodeType: continue
             if type(instruction.arg) is not int or code.co_consts[instruction.arg] is not child:
-                raise ValueError('source lambda compiler child lost its exact constant slot')
+                raise ValueError('source expression compiler child lost its exact constant slot')
             child_path = (*path, instruction.arg)
             pending.append((child_path, child))
             span = tuple(instruction.positions)
-            if child.co_name == '<lambda>' and all(type(value) is int for value in span):
+            if child.co_name in ('<lambda>', '<genexpr>') and all(type(value) is int for value in span):
                 item = child_path, child, None
-                if item not in found[span]: found[span].append(item)
+                key = child.co_name, span
+                if item not in found[key]: found[key].append(item)
     return found
 
 
@@ -150,17 +154,17 @@ class ObservedSourceCodeProvider:
             mappings = {}; issues = []
             _scope_nodes(tree, code, (), ast.Module, mappings, issues)
             replay = {flags:(code,mappings)}
-            lambda_blocks = {}; lambda_paths = {}
-            if profile is None and any(syntax.nodes[f.template.occurrence].constructor == 'Lambda'
+            expression_blocks = {}; expression_paths = {}
+            if profile is None and any(syntax.nodes[f.template.occurrence].constructor in _EXPRESSION_BODIES
                     for f in facts.functions):
                 descriptor = model['artifacts']['compiler_topology']
                 topology = decode(CompilerTopologyMaterial, _Fragments(root).read(descriptor))
                 if topology.status != 'PROJECTED':
-                    raise ValueError('source lambda correspondence needs its original compiler topology')
+                    raise ValueError('source expression correspondence needs its original compiler topology')
                 topology_path = root/descriptor['path']; self._guard[topology_path] = topology_path.read_bytes()
-                lambda_blocks = {block.origin.occurrence: block for block in topology.blocks
-                    if block.origin.role == 'LAMBDA_BODY' and block.projection == 'PUBLIC'}
-                lambda_paths = _lambda_code_paths(code)
+                expression_blocks = {(block.origin.occurrence, block.origin.role): block for block in topology.blocks
+                    if block.origin.role in ('LAMBDA_BODY', 'GENERATOR_EXPRESSION') and block.projection == 'PUBLIC'}
+                expression_paths = _expression_code_paths(code)
             root_descriptor=decode(CapturedCode,describe_code(code))
             if profile is None:
                 self.root_callers.extend((unit,capture,facts.root_scope,code) for capture in observed
@@ -168,15 +172,18 @@ class ObservedSourceCodeProvider:
             pending=[]
             for ordinal, function in enumerate(facts.functions):
                 node = syntax.nodes[function.template.occurrence]
-                if node.constructor not in ('FunctionDef', 'AsyncFunctionDef', 'Lambda'):continue
+                if node.constructor not in ('FunctionDef', 'AsyncFunctionDef', *_EXPRESSION_BODIES):continue
                 attributes = dict(zip(schemas[node.constructor].attributes,
                     (v.scalar.to_python() if v.kind == 'SCALAR' else None for v in node.attributes)))
                 span = tuple(attributes[k] for k in ('lineno','end_lineno','col_offset','end_col_offset'))
                 for flags,(root_code,mappings) in replay.items():
-                    if node.constructor == 'Lambda':
-                        block = lambda_blocks.get(function.template.occurrence)
-                        if block is None or block.source_scope != function.environment.scope: continue
-                        candidates = lambda_paths.get(span, ())
+                    if node.constructor in _EXPRESSION_BODIES:
+                        role, name = _EXPRESSION_BODIES[node.constructor]
+                        block = expression_blocks.get((function.template.occurrence, role))
+                        if (block is None or block.source_scope != function.environment.scope
+                                or function.body_scope is None
+                                or function.body_scope.source_scope != block.source_scope): continue
+                        candidates = expression_paths.get((name, span), ())
                     else:
                         candidates = mappings.get(span, ())
                     for constant_path, child, _ in candidates:
