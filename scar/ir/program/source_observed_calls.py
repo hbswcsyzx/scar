@@ -3,7 +3,7 @@ from dataclasses import dataclass
 from .ids import ProviderID
 from .providers import ProviderFactReference
 from .normal_links import CodeScopeWitness
-from .normal_targets import GlobalPort
+from .normal_targets import GlobalPort, Body
 from .call_edges import CodeCapture, CallRecordAnchor
 from .call_operands import OperandCallAttempt
 from .python_call_targets import PythonCallTarget
@@ -36,6 +36,33 @@ class ObservedSourceCallsiteFrontier:
     attempt: OperandCallAttempt
     reason: str
     candidates: tuple[ProviderFactReference, ...] = ()
+
+
+@dataclass(frozen=True, slots=True)
+class ObservedSourceProtocolCallsite:
+    """A compiler-inserted CALL attached to its actual language operation.
+
+    Arguments retain the protocol ABI, which need not be callee-first.
+    The body is a shared definition, not a proven activation or instance.
+    """
+    id: ProviderID
+    unit: str
+    kind: str
+    definition: ProviderFactReference
+    operation: GlobalPort
+    arguments: tuple[GlobalPort, ...]
+    result: GlobalPort
+    world: GlobalPort
+    result_world: GlobalPort
+    body: Body
+    owner: CodeScopeWitness
+    caller: CodeCapture
+    attempt: OperandCallAttempt
+    target: PythonCallTarget
+    target_anchor: CallRecordAnchor
+    rule: str
+    code_link: ProviderID | None
+    profile_alternatives: tuple[ProviderFactReference, ...] = ()
 
 
 @dataclass(frozen=True, slots=True)

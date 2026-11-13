@@ -35,6 +35,30 @@ class SourceObservedBoundary:
 
 
 @dataclass(frozen=True, slots=True)
+class SourceObservedProtocolBoundary:
+    """Original protocol ports and shared body; never a Python-formal ABI."""
+    id: ProviderID
+    unit: str
+    kind: str
+    definition: ProviderFactReference
+    operation: GlobalPort
+    arguments: tuple[GlobalPort, ...]
+    result: GlobalPort
+    world: GlobalPort
+    result_world: GlobalPort
+    body: Body
+    owner: CodeScopeWitness
+    effects: Knowledge = Knowledge.UNKNOWN
+
+    def __post_init__(self):
+        if (self.kind not in ('CREATE_GENEXPR', 'BUILD_CLASS')
+                or self.owner.owner.unit != self.unit or self.body.unit != self.unit
+                or any(port.unit != self.unit for port in
+                    (self.operation, *self.arguments, self.result, self.world, self.result_world))):
+            raise ValueError('protocol boundary needs its original unit, operation and body')
+
+
+@dataclass(frozen=True, slots=True)
 class SourceBoundaryObservation:
     boundary: ProviderID
     source_observation: ProviderID

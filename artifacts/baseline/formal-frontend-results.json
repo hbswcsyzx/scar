@@ -762,5 +762,171 @@
       },
       "report": "artifacts/current/experiments/cpu-sunfish-current/formal/scope-admission/build/manifest.json"
     }
+  },
+  "protocol_call_join": {
+    "status": "VERIFIED_PUBLICATION_AND_INDEPENDENT_GRAPH_READBACK",
+    "coverage": {
+      "recorded_attempts": 2481,
+      "mapped_attempts": 2481,
+      "ordinary_correspondence_alternatives": 2886,
+      "protocol_correspondence_alternatives": 123
+    },
+    "calls": {
+      "bindings": 2886,
+      "frontiers": 0,
+      "caller_codes": 77,
+      "protocol_bindings": 123,
+      "caller_alternatives": 95,
+      "units": 3,
+      "source_bodies_copied": false,
+      "target_interfaces_connected": false,
+      "creator_instances_proven": false,
+      "first_stage_complete": false
+    },
+    "boundaries": {
+      "boundaries": 191,
+      "callback_observations": 455,
+      "callbacks": 21,
+      "kinds": {
+        "NATIVE_BUILTIN": 78,
+        "OTHER_UNCLASSIFIED": 58,
+        "TYPE_OBJECT": 55
+      },
+      "observations": 2326,
+      "protocol_kinds": {
+        "BUILD_CLASS": 3,
+        "CREATE_GENEXPR": 15
+      },
+      "protocol_observations": 123,
+      "protocols": 18,
+      "source_callback_interfaces": 21,
+      "source_callback_observations": 455,
+      "units": 3
+    },
+    "publication_seconds": 107.40530430599756,
+    "independent_readback_seconds": 117.50137844999699,
+    "protocol_examples": [
+      {
+        "kind": "CREATE_GENEXPR",
+        "arguments": 6,
+        "incoming_edges": 8,
+        "outgoing_edges": 3
+      },
+      {
+        "kind": "CREATE_GENEXPR",
+        "arguments": 6,
+        "incoming_edges": 8,
+        "outgoing_edges": 3
+      },
+      {
+        "kind": "CREATE_GENEXPR",
+        "arguments": 7,
+        "incoming_edges": 9,
+        "outgoing_edges": 3
+      },
+      {
+        "kind": "CREATE_GENEXPR",
+        "arguments": 6,
+        "incoming_edges": 8,
+        "outgoing_edges": 3
+      },
+      {
+        "kind": "CREATE_GENEXPR",
+        "arguments": 6,
+        "incoming_edges": 8,
+        "outgoing_edges": 3
+      },
+      {
+        "kind": "CREATE_GENEXPR",
+        "arguments": 6,
+        "incoming_edges": 8,
+        "outgoing_edges": 3
+      },
+      {
+        "kind": "CREATE_GENEXPR",
+        "arguments": 6,
+        "incoming_edges": 8,
+        "outgoing_edges": 3
+      },
+      {
+        "kind": "BUILD_CLASS",
+        "arguments": 4,
+        "incoming_edges": 6,
+        "outgoing_edges": 3
+      },
+      {
+        "kind": "BUILD_CLASS",
+        "arguments": 4,
+        "incoming_edges": 6,
+        "outgoing_edges": 3
+      },
+      {
+        "kind": "BUILD_CLASS",
+        "arguments": 3,
+        "incoming_edges": 5,
+        "outgoing_edges": 3
+      },
+      {
+        "kind": "CREATE_GENEXPR",
+        "arguments": 7,
+        "incoming_edges": 9,
+        "outgoing_edges": 3
+      },
+      {
+        "kind": "CREATE_GENEXPR",
+        "arguments": 9,
+        "incoming_edges": 11,
+        "outgoing_edges": 3
+      },
+      {
+        "kind": "CREATE_GENEXPR",
+        "arguments": 7,
+        "incoming_edges": 9,
+        "outgoing_edges": 3
+      },
+      {
+        "kind": "CREATE_GENEXPR",
+        "arguments": 7,
+        "incoming_edges": 9,
+        "outgoing_edges": 3
+      },
+      {
+        "kind": "CREATE_GENEXPR",
+        "arguments": 6,
+        "incoming_edges": 8,
+        "outgoing_edges": 3
+      },
+      {
+        "kind": "CREATE_GENEXPR",
+        "arguments": 6,
+        "incoming_edges": 8,
+        "outgoing_edges": 3
+      },
+      {
+        "kind": "CREATE_GENEXPR",
+        "arguments": 7,
+        "incoming_edges": 9,
+        "outgoing_edges": 3
+      },
+      {
+        "kind": "CREATE_GENEXPR",
+        "arguments": 6,
+        "incoming_edges": 8,
+        "outgoing_edges": 3
+      }
+    ],
+    "source_bodies_copied": false,
+    "loops_unrolled": false,
+    "target_executed": false,
+    "first_stage_complete": false,
+    "transformation_applied": false,
+    "report": "artifacts/current/experiments/cpu-sunfish-current/formal/scope-admission/protocol-call-check/readback-check.json",
+    "remaining": [
+      "GENERATOR_INSTANCE_AND_RESUME_POSITION",
+      "CLASS_NAMESPACE_AND_INTERNAL_CONSTRUCTION_STATE",
+      "SOURCE_ARGUMENT_RECEIVER_LAYOUT",
+      "NATIVE_INTERNAL_EFFECTS_AND_RESOURCE_USE",
+      "CPU_CASES_ON_SAME_FORMAL_PIPELINE"
+    ]
   }
 }

@@ -29,6 +29,7 @@ from scar.ir.program.call_edges import CallEdgeBudget
 from scar.ir.program.ids import ProviderID
 from scar.ir.program.python_call_targets import PythonTargetKind as Target
 from scar.ir.program.structured import PythonProtocolKind
+from scar.ir.program.model import ValueType, ValueKind
 from scar.ir.program.dependencies import (
     DependencyPoint as Point, DependencyFrame as Frame, DependencyKind as K, DependencyMeaning as Meaning,
     DependencyStrength as Strength, DependencyCondition as Condition,
@@ -48,15 +49,16 @@ _FALSE = ('source_bodies_copied', 'loops_unrolled', 'implementation_entry_proven
 
 
 def _pins():
-    from scar.analysis import source_observed_codes, source_observed_calls, source_call_view
+    from scar.analysis import source_observed_codes, source_observed_calls, source_call_view, source_observed_protocols
     from scar.analysis import native_callables
     from scar.ir.program import native_callables as native_types
     from scar.ir.program import source_observed_codes as code_types
+    from scar.ir.program import source_observed_calls as call_types
     return {name: sha256(Path(module.__file__).read_bytes()).hexdigest() for name, module in (
         ('producer', __import__(__name__, fromlist=['__file__'])), ('types', R),
         ('code_reader', source_observed_codes), ('callsite_reader', source_observed_calls),
         ('call_ports', source_call_view), ('native_reader', native_callables), ('native_types', native_types),
-        ('code_types', code_types))}
+        ('code_types', code_types), ('call_types', call_types), ('protocol_reader', source_observed_protocols))}
 
 
 class _NativeInputs:
@@ -184,6 +186,61 @@ def _derive(index):
     return {unit: (tuple(records[unit]), tuple(observations[unit])) for unit in sorted(records)}
 
 
+def _derive_protocols(index):
+    """Project independent protocol observations from actual sealed F4 ports."""
+    index.check(); groups = {}; observations = defaultdict(list); contexts = {}; declarations = {}
+    for observation in getattr(index, 'protocol_bindings', ()):
+        unit = observation.unit; source = index.view.unit(unit); facts = source.facts
+        template = observation.operation.port.template; key = unit, template
+        if key not in contexts:
+            contexts[key] = NamespacePlanView(unit, source.material.plans((template,))[template])
+        context = contexts[key]; step = context.steps[observation.operation.port.owner]
+        if (context.site(step) != observation.operation or context.owner(step.region) != observation.owner
+                or context.result(step) != observation.result
+                or context.worlds(step) != (observation.world, observation.result_world)):
+            raise ValueError('protocol observation changed its original operation/scope/world ABI')
+        arguments = tuple(context.value(value) for value in step.arguments
+            if not (type(context.emitter.value(value)[1]) is ValueType
+                and context.emitter.value(value)[1].kind is ValueKind.STATE))
+        if arguments != observation.arguments:
+            raise ValueError('protocol observation changed its original non-world arguments')
+        ins = step.instruction
+        if observation.kind == 'CREATE_GENEXPR':
+            valid = type(ins) is P.ApplyPythonProtocol and ins.protocol is PythonProtocolKind.CREATE_GENEXPR
+            definitions = facts.functions; table = 'functions'
+        elif observation.kind == 'BUILD_CLASS':
+            valid = (type(ins) is P.ApplyLanguageAction and ins.action is P.LanguageActionKind.CALL
+                or type(ins) is P.ApplyPythonProtocol and ins.protocol is PythonProtocolKind.CALL_FUNCTION_EX)
+            definitions = facts.classes; table = 'classes'
+        else: raise ValueError('unsupported original protocol boundary kind')
+        if (unit,table) not in declarations:
+            declarations[unit,table] = {index.slicer.fact(facts,table,ordinal):definition
+                for ordinal,definition in enumerate(definitions)}
+        selected = declarations[unit,table].get(observation.definition)
+        if (not valid or selected is None or observation.body.unit != unit
+                or selected.template != observation.body.template
+                or selected.body != observation.body.region or selected.template != template):
+            raise ValueError('protocol boundary changed its original definition/shared body')
+        if observation.kind == 'BUILD_CLASS' and source_port(facts, selected.value) != observation.result:
+            raise ValueError('class protocol result differs from its original class fact')
+        if observation.kind == 'CREATE_GENEXPR' and source_port(facts, selected.value) not in arguments:
+            raise ValueError('generator creation lost its original function environment output')
+        identity = ProviderID(_digest((SCHEMA+'.protocol', source.basis, observation.operation,
+            observation.kind, observation.definition, observation.body)))
+        record = R.SourceObservedProtocolBoundary(identity, unit, observation.kind, observation.definition,
+            observation.operation, arguments, observation.result, observation.world,
+            observation.result_world, observation.body, observation.owner)
+        if groups.setdefault(identity, record) != record:
+            raise ValueError('shared protocol boundary identity has conflicting original interfaces')
+        observations[unit].append(R.SourceBoundaryObservation(identity, observation.id,
+            observation.attempt.anchor, observation.target, observation.target_anchor,
+            observation.profile_alternatives))
+    records = defaultdict(list)
+    for record in groups.values(): records[record.unit].append(record)
+    index.check()
+    return {unit:(tuple(records[unit]),tuple(observations[unit])) for unit in sorted(records)}
+
+
 def _callbacks(index, units):
     """Associate same-thread direct frames with their actual enclosing CALL.
 
@@ -248,33 +305,44 @@ def _callbacks(index, units):
     return {unit:(tuple(records[unit].values()),tuple(observed[unit])) for unit in units}
 
 
-def _counts(units,callbacks):
-    return dict(units=len(units),boundaries=sum(len(b) for b,_ in units.values()),
+def _counts(units,callbacks,protocols=None):
+    protocols = {} if protocols is None else protocols
+    return dict(units=len(set(units)|set(protocols)),boundaries=sum(len(b) for b,_ in units.values()),
         observations=sum(len(o) for _,o in units.values()),
         kinds=dict(Counter(b.target_kind.value for rows,_ in units.values() for b in rows)),
         callbacks=sum(len(c) for c,_ in callbacks.values()),
         callback_observations=sum(len(o) for _,o in callbacks.values()),
         source_callback_interfaces=sum(c.body is not None for rows,_ in callbacks.values() for c in rows),
         source_callback_observations=sum(sum(o.callback in {c.id for c in rows if c.body is not None}
-            for o in observations) for rows,observations in callbacks.values()))
+            for o in observations) for rows,observations in callbacks.values()),
+        protocols=sum(len(rows) for rows,_ in protocols.values()),
+        protocol_observations=sum(len(rows) for _,rows in protocols.values()),
+        protocol_kinds=dict(Counter(record.kind for rows,_ in protocols.values() for record in rows)))
 
 
 def build_boundaries(index, out):
     """Publish per-unit shared signatures and separate original observations."""
     out = Path(out).absolute()
     if out.resolve() != out or out.exists(): raise ValueError('fresh canonical boundary output required')
-    basis, pins = _basis(index), _pins(); units = _derive(index); callbacks=_callbacks(index,units); shards = {}
+    basis, pins = _basis(index), _pins(); units = _derive(index); callbacks=_callbacks(index,units)
+    protocols = _derive_protocols(index); shards = {}
     _durable_mkdir(out)
-    for unit, (boundaries, observations) in units.items():
+    for unit in sorted(set(units)|set(protocols)):
+        boundaries, observations = units.get(unit,((),()))
+        callback_rows, callback_observations = callbacks.get(unit,((),()))
+        protocol_rows, protocol_observations = protocols.get(unit,((),()))
         folder = out/'units'/unit; _durable_mkdir(folder)
         tables = dict(boundaries=write_table(folder/'boundaries.jsonl.gz', boundaries),
             observations=write_table(folder/'observations.jsonl.gz', observations),
-            callbacks=write_table(folder/'callbacks.jsonl.gz',callbacks[unit][0]),
-            callback_observations=write_table(folder/'callback_observations.jsonl.gz',callbacks[unit][1]))
+            callbacks=write_table(folder/'callbacks.jsonl.gz',callback_rows),
+            callback_observations=write_table(folder/'callback_observations.jsonl.gz',callback_observations),
+            protocols=write_table(folder/'protocols.jsonl.gz',protocol_rows),
+            protocol_observations=write_table(folder/'protocol_observations.jsonl.gz',protocol_observations))
         shards[unit] = dict(path='units/'+unit, tables=tables,
-            boundaries=len(boundaries), observations=len(observations))
-    report = dict(schema=SCHEMA, schema_version=2, basis=basis, pins=pins, shards=shards,
-        counts=_counts(units,callbacks),
+            boundaries=len(boundaries), observations=len(observations),
+            protocols=len(protocol_rows), protocol_observations=len(protocol_observations))
+    report = dict(schema=SCHEMA, schema_version=3, basis=basis, pins=pins, shards=shards,
+        counts=_counts(units,callbacks,protocols),
         **{name:False for name in _FALSE})
     if _basis(index) != basis or _pins() != pins: raise ValueError('boundary producer or original inputs changed')
     _durable_bytes(out/'result.json', _json(report), replace=False)
@@ -285,7 +353,7 @@ class BoundaryStore:
     def __init__(self, path, index=None):
         self.path = Path(path).absolute(); self.raw = (self.path/'result.json').read_bytes()
         self.report = r = json.loads(self.raw)
-        if (r['schema'], r['schema_version'], r['pins']) != (SCHEMA, 2, _pins()) or any(r[n] is not False for n in _FALSE):
+        if (r['schema'], r['schema_version'], r['pins']) != (SCHEMA, 3, _pins()) or any(r[n] is not False for n in _FALSE):
             raise ValueError('boundary schema, producer or proof contract differs')
         basis = r['basis']
         if index is None:
@@ -299,25 +367,30 @@ class BoundaryStore:
             index = ObservedSourceCallsiteIndex(codes, compiled=profiles)
         if _basis(index) != basis: raise ValueError('boundary index does not match the original catalog/trace/run/budgets')
         self.index = index; self.catalog = index.view.catalog
-        expected = _derive(index); callbacks=_callbacks(index,expected); self.units = {}; self._tables = {}
-        if set(expected) != set(r['shards']): raise ValueError('boundary unit selection differs from the original call index')
-        for unit, records in expected.items():
+        expected = _derive(index); callbacks=_callbacks(index,expected); protocols=_derive_protocols(index)
+        self.units = {}; self._tables = {}
+        if set(expected)|set(protocols) != set(r['shards']): raise ValueError('boundary unit selection differs from the original call index')
+        for unit in sorted(r['shards']):
+            records=expected.get(unit,((),())); protocol_rows=protocols.get(unit,((),()))
             s = r['shards'][unit]; folder = self.path/s['path']
-            names=('boundaries','observations','callbacks','callback_observations')
+            names=('boundaries','observations','callbacks','callback_observations','protocols','protocol_observations')
             if s['path'] != 'units/'+unit or set(s['tables']) != set(names):
                 raise ValueError('boundary original shard layout differs')
             loaded = []
             for name, kind in zip(names,(R.SourceObservedBoundary,R.SourceBoundaryObservation,
-                    R.SourceBoundaryCallback,R.SourceCallbackObservation)):
+                    R.SourceBoundaryCallback,R.SourceCallbackObservation,
+                    R.SourceObservedProtocolBoundary,R.SourceBoundaryObservation)):
                 receipt = s['tables'][name]; table = folder/receipt['path']; before = _stamp(table)
                 if receipt['path'] != name+'.jsonl.gz': raise ValueError('boundary table left its original shard')
                 loaded.append(tuple(decode(kind, row, record_tags=P.PRODUCTION_RECORD_TAGS) for row in _table(folder, receipt)))
                 if _stamp(table) != before: raise ValueError('boundary table changed during reading')
                 self._tables[table] = before
-            if tuple(loaded) != (*records,*callbacks[unit]) or (s['boundaries'], s['observations']) != tuple(map(len, records)):
+            if (tuple(loaded) != (*records,*callbacks.get(unit,((),())),*protocol_rows)
+                    or (s['boundaries'], s['observations']) != tuple(map(len, records))
+                    or (s['protocols'],s['protocol_observations']) != tuple(map(len,protocol_rows))):
                 raise ValueError('stored boundary signature/observations differ from original CALL evidence')
             self.units[unit] = SimpleNamespace(**dict(zip(names,loaded)))
-        counts = _counts(expected,callbacks)
+        counts = _counts(expected,callbacks,protocols)
         if counts != r['counts']: raise ValueError('boundary shared/observed counts differ')
         self.validate()
 
@@ -343,6 +416,8 @@ class SourceObservedBoundaryProvider:
         self.available_units = frozenset(self.store.units); self.attached = set()
         self.records = {}; self.owners = {}; self.observations = defaultdict(list)
         self.in_edges = defaultdict(list); self.out_edges = defaultdict(list)
+        self.protocols={};self.protocol_owners={};self.protocol_observations=defaultdict(list)
+        self.protocol_in=defaultdict(list);self.protocol_out=defaultdict(list)
         self.callbacks={};self.callback_owners={};self.callback_frames={}
         self.callback_observations=defaultdict(list);self.callback_targets=defaultdict(set)
         self.callback_in=defaultdict(list);self.callback_out=defaultdict(list)
@@ -361,7 +436,8 @@ class SourceObservedBoundaryProvider:
         if unit in self.attached: return
         rows = self.store.read_unit(unit); ports = []
         for b in rows.boundaries: ports.extend(self._ports(b))
-        prepare_source_ports(self.view, ports)
+        for b in rows.protocols: ports.extend(self._protocol_ports(b))
+        prepare_source_ports(self.view, ports, bodies=tuple(b.body for b in rows.protocols))
         for i, b in enumerate(rows.boundaries):
             operation, _, _ = source_call_site(self.view, b)
             point = Point(operation.namespace, b.id, None); key = self._key(point)
@@ -380,9 +456,38 @@ class SourceObservedBoundaryProvider:
                 row = b, evidence, edge
                 self.out_edges[self._key(edge[0])].append(row); self.in_edges[self._key(edge[1])].append(row)
         for observation in rows.observations: self.observations[observation.boundary].append(observation)
+        for i,boundary in enumerate(rows.protocols):self._attach_protocol(unit,i,boundary)
+        for observation in rows.protocol_observations:self.protocol_observations[observation.boundary].append(observation)
         self.attached.add(unit)
         for i,callback in enumerate(rows.callbacks):self._attach_callback(unit,i,callback)
         for observation in rows.callback_observations:self.callback_observations[observation.callback].append(observation)
+
+    def _attach_protocol(self,unit,ordinal,boundary):
+        source=self.view.unit(unit)
+        # source_port verifies the actual ENTER port. The owning original
+        # step supplies the OperationID, as in the ordinary source_call_site.
+        self.view.source_port(boundary.operation)
+        operation=source._node(boundary.operation.port.template,boundary.operation.port.owner)
+        point=Point(operation.namespace,boundary.id,None);key=self._key(point)
+        self.protocols[key]=boundary;self.protocol_owners[key]=operation
+        shard=self.store.report['shards'][unit]
+        evidence=_table_ref(self.store.path/shard['path'],shard['tables']['protocols'],
+            SCHEMA+'.protocol-interface',ordinal)
+        edges=[(operation,point,K.CONTAINS,Meaning.STRUCTURE,'DECLARED_PROTOCOL_INTERFACE',0)]
+        edges.extend((self.view.source_port(port),point,K.ARGUMENT,Meaning.DEPENDENCE,
+            'ORIGINAL_PROTOCOL_ARGUMENT_NOT_PYTHON_FORMAL',n) for n,port in enumerate(boundary.arguments))
+        edges.extend(((self.view.source_port(boundary.world),point,K.STATE_INTERFACE,Meaning.STATE_INTERFACE,
+                'PRE_PROTOCOL_WORLD',0),
+            (point,self.view.source_port(boundary.result),K.COMPLETION,Meaning.DEPENDENCE,
+                'NORMAL_COMPLETION_NOT_OBSERVED',0),
+            (point,self.view.source_port(boundary.result_world),K.STATE_INTERFACE,Meaning.STATE_INTERFACE,
+                'NORMAL_COMPLETION_NOT_OBSERVED',1),
+            (point,self.view.source_region_ref(boundary.body.unit,boundary.body.template,boundary.body.region),
+                K.IMPLEMENTATION,Meaning.STRUCTURE,'SHARED_PROTOCOL_BODY_NOT_ACTIVATION',0)))
+        for edge in edges:
+            row=boundary,evidence,edge
+            self.protocol_out[self._key(edge[0])].append(row)
+            self.protocol_in[self._key(edge[1])].append(row)
 
     def _attach_callback(self,unit,ordinal,callback):
         source=self.view.unit(unit);key=source.namespace,callback.boundary
@@ -428,6 +533,10 @@ class SourceObservedBoundaryProvider:
             *((b.positional_pack,) if b.positional_pack else ()), *((b.keyword_pack,) if b.keyword_pack else ()),
             b.world, b.result, b.result_world)
 
+    @staticmethod
+    def _protocol_ports(b):
+        return (b.operation,*b.arguments,b.world,b.result,b.result_world)
+
     def _demand(self, point):
         source = self.view.namespaces.get(point.namespace)
         if source is not None:
@@ -436,6 +545,10 @@ class SourceObservedBoundaryProvider:
 
     def describe(self, point):
         self._demand(point); key = self._key(point)
+        if key in self.protocols:
+            self.store.validate()
+            return V.ProgramNode(point,None,V.ProgramNodeRole.PROVIDER,
+                replace(self.protocol_owners[key],context=point.context),None)
         if key in self.callbacks:
             self.store.validate()
             return V.ProgramNode(point,None,V.ProgramNodeRole.PROVIDER,
@@ -448,10 +561,15 @@ class SourceObservedBoundaryProvider:
     def original(self, point):
         if self.describe(point) is None: raise ValueError('boundary is outside the original source interface publication')
         key=self._key(point)
+        if key in self.protocols:return self.protocols[key]
         return self.callbacks[key] if key in self.callbacks else self.records[key]
 
     def expand(self, point):
         b = self.original(point)
+        if type(b) is R.SourceObservedProtocolBoundary:
+            body=self.view.source_region_ref(b.body.unit,b.body.template,b.body.region)
+            ports=tuple(self.view.source_port(port,context=point.context) for port in self._protocol_ports(b))
+            return tuple(dict.fromkeys((*ports,replace(body,context=None))))
         if type(b) is R.SourceBoundaryCallback:
             if b.body is None:return ()
             target=self.view.source_region_ref(b.body.unit,b.body.template,b.body.region)
@@ -462,6 +580,12 @@ class SourceObservedBoundaryProvider:
 
     def explain(self, point):
         b = self.original(point)
+        if type(b) is R.SourceObservedProtocolBoundary:
+            return dict(node=self.describe(point),original=b,observations=tuple(self.protocol_observations[b.id]),
+                protocol_kind=b.kind,argument_formals_proven=False,normal_completion_proven=False,
+                body_activation_proven=False,class_namespace_proven=False,
+                generator_instance_proven=False,resume_position_proven=False,
+                effects=b.effects.value,source_bodies_copied=False,first_stage_complete=False)
         if type(b) is R.SourceBoundaryCallback:
             return dict(node=self.describe(point),original=b,observations=tuple(self.callback_observations[b.id]),
                 entry_kind='SUSPENDABLE_BODY_ENTRY' if b.suspending else 'ORDINARY_FRAME_ENTRY',
@@ -476,7 +600,8 @@ class SourceObservedBoundaryProvider:
         self._demand(point); self.store.validate()
         rows = (self.in_edges if incoming else self.out_edges).get(self._key(point), ())
         callback_rows=(self.callback_in if incoming else self.callback_out).get(self._key(point),())
-        if not rows and not callback_rows:return Neighborhood()
+        protocol_rows=(self.protocol_in if incoming else self.protocol_out).get(self._key(point),())
+        if not rows and not callback_rows and not protocol_rows:return Neighborhood()
         active = source_active_scope(self.view, point.namespace, point.context); edges = []
         for b, evidence, (source, target, kind, meaning, route, ordinal) in rows:
             if active is not None and active != b.owner.owner: continue
@@ -495,7 +620,38 @@ class SourceObservedBoundaryProvider:
         edges.extend(callback.edges)
         frontiers = () if not edges else (Frontier(point, 'OBSERVED_CALL_IMPLEMENTATION_AND_EFFECTS_OPEN',
             'Python-side CALL ports and recorded target categories are connected; no native body, type-call stage or completion is proven.'),)
-        return Neighborhood(tuple(dict.fromkeys(edges)),(*frontiers,*callback.frontiers))
+        protocols=self._protocol_neighbors(point,incoming)
+        return Neighborhood(tuple(dict.fromkeys((*edges,*protocols.edges))),(*frontiers,*callback.frontiers,*protocols.frontiers))
+
+    def _protocol_neighbors(self,point,incoming):
+        rows=(self.protocol_in if incoming else self.protocol_out).get(self._key(point),())
+        edges=[];frontiers=[]
+        for boundary,fact,(left,right,kind,meaning,route,ordinal) in rows:
+            namespace=self.view.unit(boundary.unit).namespace
+            if route=='SHARED_PROTOCOL_BODY_NOT_ACTIVATION':
+                if incoming and point.context is not None:continue
+                caller_context=None if incoming else point.context
+                left=replace(left,context=caller_context);right=replace(right,context=None)
+            else:
+                caller_context=point.context
+                left,right=replace(left,context=caller_context),replace(right,context=caller_context)
+            active=source_active_scope(self.view,namespace,caller_context)
+            if active is not None and active!=boundary.owner.owner:continue
+            owner=replace(self.protocol_owners[namespace,boundary.id],context=caller_context)
+            guards=('RECORDED_PROTOCOL_OPERATION_NOT_NATIVE_FORMAL_ABI',
+                'PROTOCOL_ARGUMENTS_RETAIN_ORIGINAL_F4_POSITIONS',
+                'SHARED_BODY_NOT_SCOPE_ENTRY_OR_CALLABLE_ENVIRONMENT_IDENTITY',
+                'NORMAL_COMPLETION_AND_EFFECTS_NOT_PROVEN',route)
+            guards+=(('GENERATOR_INSTANCE_AND_RESUME_POSITION_NOT_PROVEN',) if boundary.kind=='CREATE_GENEXPR'
+                else ('CLASS_BODY_NAMESPACE_AND_CONSTRUCTION_STAGES_NOT_PROVEN',))
+            conditions=tuple(Condition(SCHEMA,guard,owner,ordinal,(left,right)) for guard in guards)
+            edges.append(Edge(left,right,kind,meaning,
+                (Evidence(SCHEMA+'.original-protocol-interface.v1',
+                    (self.locator,namespace.graph,right.namespace.graph),(owner,left,right)),),conditions,Strength.MAY))
+        if edges:
+            frontiers.append(Frontier(point,'OBSERVED_PROTOCOL_BODY_ENTRY_AND_COMPLETION_OPEN',
+                'Original protocol ports and a shared body are linked; callable environment, body activation, normal completion and resume instance remain open.'))
+        return Neighborhood(tuple(dict.fromkeys(edges)),tuple(frontiers))
 
     def _callback_neighbors(self,point,incoming):
         rows=(self.callback_in if incoming else self.callback_out).get(self._key(point),())
@@ -537,4 +693,5 @@ class SourceObservedBoundaryProvider:
     def summary(self):
         return dict(**self.store.report['counts'], attached_units=len(self.attached), shared_interfaces=len(self.records),
             shared_callback_interfaces=len(self.callbacks),
+            shared_protocol_interfaces=len(self.protocols),
             target_kind_observations_connected=True, **{name:False for name in _FALSE})

@@ -7,7 +7,7 @@ from scar.analysis.source_fact_materials import FactMaterialResolver
 
 class ObservedFactMaterials:
     def __init__(self,catalog):
-        self.resolver=FactMaterialResolver(catalog.path)
+        self.resolver=FactMaterialResolver(catalog)
         if (self.resolver.catalog.path,self.resolver.catalog.report)!=(catalog.path,catalog.report):
             raise ValueError('observed primitive facts use a different source catalog')
         self.routes={};self._guard={};self._references=set()

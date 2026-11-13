@@ -24,6 +24,7 @@ scar build --entry /path/to/entry.py --catalog /path/to/frontend/catalog --cache
 已有采集可追加 `--trace TRACE --project-root ORIGINAL_ROOT` 离线接线；随后 `build` 使用同一目录的观察接口。
 同一分析索引同时发布共享的类型/原生调用边界和独立观察表；有native companion时保原ABI字段，无companion时明确未记录。
 边界可展开到实际Python回调的共享代码/body；普通入口与可挂起body分开，恢复位置和参数来源没有证据时保留未决字段。
+编译器插入的生成器创建、类构造CALL单独接回原协议操作及其参数/状态/结果，不套普通函数ABI；共享正文不代表已证明实际激活或generator恢复实例。
 动态生成的代码可用 `scar trace --compile-events --project-root ROOT --out TRACE -- python app.py` 保留限额内编译文本与执行代码指纹。
 带此采集的 `frontend --trace TRACE --project-root ROOT` 会自动匹配兼容编译配方、生成局部F0–F4图并接回调用；只编译，不执行保存的文本。
 同文件名的不同代码用完整CodeID区分，编译选项多解保留；原始编译请求、创建环境与参数值不由代码相等推出。

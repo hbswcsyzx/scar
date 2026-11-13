@@ -19,7 +19,8 @@ from scar.analysis.static_query import _Fragments
 from scar.analysis.source_observed_codes import replay_catalog_code
 from scar.ir.program import source_productions as P, normal_targets as T
 from scar.ir.program.source_syntax import SourceSyntaxMaterial
-from scar.ir.program.source_observed_calls import ObservedSourceCallsite,ObservedSourceCallsiteFrontier
+from scar.ir.program.source_observed_calls import (ObservedSourceCallsite,ObservedSourceCallsiteFrontier,
+    ObservedSourceProtocolCallsite)
 from scar.ir.program.ids import ProviderID
 from scar.ir.program.call_edges import CodeCapture
 from scar.ir.program.normal_links import CodeScopeWitness
@@ -49,6 +50,7 @@ def _span(syntax,occurrence):
 class ObservedSourceCallsiteIndex:
     def __init__(self,codes,*,compiled=()):
         self.codes=codes;self.view=codes.view;self.bindings=[];self.frontiers=[]
+        self.protocol_bindings=[];self._protocol_static={}
         self.compiled=tuple(compiled) or tuple(getattr(codes,'compiled',()))
         profiles={p.unit:p for p in self.compiled}
         replay_profiles=getattr(self.view.catalog,'replay_profiles',{})
@@ -124,6 +126,22 @@ class ObservedSourceCallsiteIndex:
             for caller in self._callers.get(key,()):
                 if encode(attempt.site)!=site(caller.code,attempt.site.offset):raise ValueError('real CALL differs from original compiler instruction')
                 matches=self._index(caller).get(attempt.site.offset,())
+                if not matches:
+                    from scar.analysis.source_observed_protocols import protocol_index
+                    protocols=protocol_index(self,caller).get(attempt.site.offset,())
+                    if len(protocols)==1:
+                        p=protocols[0];anchor,target=targets[attempt.process_id,attempt.index]
+                        identity=ProviderID(_digest(('scar.observed-source-protocol-callsite.v1',
+                            codes.targets.source_sha256,p,attempt.process_id,attempt.index,caller.capture,
+                            caller.link,caller.profiles)))
+                        self.protocol_bindings.append(ObservedSourceProtocolCallsite(identity,caller.unit,p.kind,
+                            p.definition,p.operation,p.arguments,p.result,p.world,p.result_world,p.body,p.owner,
+                            caller.capture,attempt,target,anchor,p.rule,caller.link,caller.profiles))
+                        continue
+                    if protocols:
+                        self.frontiers.append(ObservedSourceCallsiteFrontier(caller.unit,attempt,
+                            'PROTOCOL_CALLSITE_SOURCE_MAPPING_AMBIGUOUS',tuple(p.definition for p in protocols)))
+                        continue
                 if len(matches)!=1:
                     self.frontiers.append(ObservedSourceCallsiteFrontier(caller.unit,attempt,
                         'CALLSITE_SOURCE_MAPPING_MISSING' if not matches else 'CALLSITE_SOURCE_MAPPING_AMBIGUOUS',
@@ -135,7 +153,8 @@ class ObservedSourceCallsiteIndex:
                 self.bindings.append(ObservedSourceCallsite(identity,caller.unit,query,evidence,
                     source_port(facts,call.callee),source_port(facts,call.result),owner,caller.capture,
                     attempt,target,anchor,rule,caller.link,caller.profiles))
-        codes.fact_materials.admit(tuple(b.call for b in self.bindings))
+        codes.fact_materials.admit((*tuple(b.call for b in self.bindings),
+            *tuple(b.definition for b in self.protocol_bindings)))
         self.check()
 
     def _admit(self,caller):
@@ -219,6 +238,7 @@ class ObservedSourceCallsiteIndex:
 
     def summary(self):
         return dict(bindings=len(self.bindings),frontiers=len(self.frontiers),caller_codes=len(self._callers),
+            protocol_bindings=len(self.protocol_bindings),
             caller_alternatives=sum(len(rows) for rows in self._callers.values()),
             units=len({r.unit for r in self.bindings}),source_bodies_copied=False,
             target_interfaces_connected=False,creator_instances_proven=False,first_stage_complete=False)
