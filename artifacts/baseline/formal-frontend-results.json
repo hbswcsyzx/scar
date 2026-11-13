@@ -927,6 +927,77 @@
       "SOURCE_ARGUMENT_RECEIVER_LAYOUT",
       "NATIVE_INTERNAL_EFFECTS_AND_RESOURCE_USE",
       "CPU_CASES_ON_SAME_FORMAL_PIPELINE"
+    ],
+    "build": {
+      "workflow_complete": true,
+      "first_stage_complete": false,
+      "seconds": 412.72806351400504,
+      "summary": {
+        "configuration_inputs": 0,
+        "gaps": 105,
+        "loaded_units": 10,
+        "observed_boundary_publications": 1,
+        "observed_publications": 1,
+        "resource_records": 28,
+        "source_units": 18
+      },
+      "layers": {
+        "body_copies": 0,
+        "catalog_units": 18,
+        "cross_layer": {
+          "configuration": false,
+          "creations": false,
+          "exec": false,
+          "functions": true,
+          "native": false,
+          "observed_boundaries": true,
+          "protocol": false
+        },
+        "loaded_units": 10,
+        "local_state": {
+          "bindings": true,
+          "content": true
+        },
+        "loops_unrolled": false,
+        "providers": [
+          "functions:/home/zyf/AAA/scar/artifacts/current/experiments/cpu-sunfish-current/formal/scope-admission/protocol-call-check/observed-function-interfaces",
+          "observed_boundaries"
+        ],
+        "readback": true,
+        "resources": true,
+        "storage": true,
+        "unified": true
+      },
+      "assembly_elapsed_by_layer": {
+        "catalog": 31.604141976997198,
+        "cross_layer_interfaces": 141.06947712499823,
+        "function_interfaces": 122.9948741909975,
+        "local_state_and_content": 190.97853343099996,
+        "resources": 191.3281025489996
+      },
+      "report": "artifacts/current/experiments/cpu-sunfish-current/formal/scope-admission/protocol-call-check/build/manifest.json",
+      "time_scope": "BUILD_F4_ASSEMBLY_PUBLICATION_AND_INDEPENDENT_READBACK_EXCLUDING_CLI_DISCOVERY"
+    },
+    "physical_protocol_attempts": {
+      "CREATE_GENEXPR": 110,
+      "BUILD_CLASS": 3
+    },
+    "build_gap_kinds": {
+      "COMPILED_EXEC_SELECTION_NOT_PROVIDED": 1,
+      "MATERIAL_NOT_AVAILABLE": 4,
+      "SOURCE_EFFECT_FIELDS_NOT_ATTACHED": 45,
+      "UNRESOLVED_EXTERNAL_RESOURCE_INTERFACE": 6,
+      "RESOURCE_RUNTIME_EVIDENCE_MISSING": 6,
+      "F4_STRUCTURAL_OR_COMPILER_INTERFACE_HAS_NO_SEPARATE_RUNTIME_RESOURCE_DEMAND": 39,
+      "CONTENT_PROTOCOL_AND_INSTANCE_OPEN": 2,
+      "DEPENDENCY_POINT_BUDGET": 1,
+      "FULL_INFERENCE_COVERAGE_UNPROVEN": 1
+    },
+    "next_layer_order": [
+      "RESOURCE_APPLICABILITY_AND_EFFECT_ATTACHMENT",
+      "NATIVE_EXECUTOR_AND_STORAGE_ROUTES_USING_EXISTING_INTERFACES",
+      "RUNTIME_STATE_AND_RESOURCE_EVIDENCE",
+      "UNIFIED_CPU_CASE_ACCEPTANCE"
     ]
   }
 }
