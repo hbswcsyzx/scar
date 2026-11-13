@@ -35,7 +35,7 @@ Cirq 长档为 22 qubits、depth20、12 轮、8 个独立电路：平均 7.74 �
 - **Implemented / Verified：** 普通body-only调用增加原输入到未解析形参的保守依赖；真实微型前端及独立读回验证2条匹配frame的MAY边、原输入边、返回和codec。保持`NOT_MODELED`，不冒充参数/别名证明。
 - **Observed：** Cirq新短窗口记录4342 CALL、681 CodeID，快照全部完整关闭、零丢弃；99个未知退出均为未计划typing分支抛错，107个生成器entry缺口在两种记录中重合。97次回调未命中静态offset计划，尚须定位；不能将传输完整称为程序依赖完整。
 - **Implemented / Verified：** 编译对应层保留全域source/mode/flags/opt，先以采集到的字节码摘要拒绝不相容项，再完整CodeID比较并用原filename真实compile确认；预筛不授权匹配。Cirq2162执行模板、364源码以7488次compile在6.018s完成，未提高原20000次/120s预算；旧记录保全域回退。模板warnings不影响预筛，实际确认仍遵守当前诊断策略。
-- **当前主链：** Cirq前21个源码/局部图步骤已通过，续跑复用这些材料，编译对应及外部源码发现已通过，8进程正在降低64个外部文件。新采集已定位97次缺口全为`LOAD_SUPER_ATTR`；须将融合的super协议接回原源码操作。外部正文、调用、状态/资源和统一读回未验收，不从头重建或扩大优化范围。
+- **当前主链：** Cirq前21个源码/局部图步骤已通过。外部准入按64文件的原预算分批完成，681/681捕获CodeID已有源码对应；最终173单元/172份primitive材料经发布过程的新reader校验，14份重复快照未再入图。源码对应不代表正文已接通：35个已表示code是尚未绑定的annotation请求，应接既有deferred region；97次`LOAD_SUPER_ATTR`须接回原super调用。当前正在投影调用接口，状态/资源及独立统一读回未完成。
 
 - **Verified：** 统一effect字段已接入原绑定/content访问表：Sunfish 9623操作请求、847绑定访问、577内容访问；六类实际操作的字段/原成员引用、codec和重复查询92.232s通过。局部读取的明确字段与对象内容/分配/别名UNKNOWN分开，不以空集合冒充无副作用。
 - **Verified：** 资源适用性分为编译信息、子图组合、声明、host和开放外部接口，原结构说明不再冒充缺运行采集。新单文件官方算子材料沿正式前端→named/native→resource构造；原CALL可展开至aten::sin及sin.out两个共享正文，4条CPU executor候选、10条值资源路由经主进程独立读回通过（5.952s），纵向图查询5.768s。未执行该fixture或证明实际dispatch。

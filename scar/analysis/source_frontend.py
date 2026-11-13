@@ -84,6 +84,54 @@ class _Run:
         return value
 
 
+def admit_external_sources(run, catalog, trace, project_root, jobs):
+    """Finish bounded admission batches before projecting global call links.
+
+    Each extension keeps the original leaves. A later batch discovers only
+    codes not represented by that catalog; it neither reruns the target nor
+    raises the per-batch source/compile/byte budgets. Progress must strictly
+    reduce unresolved captured codes, bounding the number of batches.
+    """
+    catalog=Path(catalog);batches=[];previous=None;limit=None
+    while True:
+        suffix='' if not batches else '-'+str(len(batches)+1)
+        find='external-source-matches'+suffix
+        material='external-source-materials'+suffix
+        publish='complete-source-catalog'+suffix
+        found=run.stage(find,'scar.analysis.observed_source_admission',
+            ['discover','--catalog',catalog,'--trace',trace,'--project-root',project_root,
+                '--out',run.out/find],run.out/find/'result.json',
+            'scar.observed-external-source-matches',target_executed=False,
+            original_compile_options_proven=False,historical_source_version_proven=False,
+            first_stage_complete=False)
+        requested=found['counts']['requested']
+        if limit is None:limit=found['counts']['captures']+1
+        if (previous is not None and requested>=previous) or len(batches)>=limit:
+            raise RuntimeError('external source admission made no progress; unresolved reasons remain in '+find)
+        row=dict(discovery=_receipt(run.out/find/'result.json'),
+            requested=requested,matched=found['counts']['matched_captures'],
+            search_complete=found['search_complete'])
+        if not found['matches']:
+            batches.append(row)
+            if not found['search_complete']:
+                raise RuntimeError('external source admission exhausted its budget without new material; see '+find)
+            return catalog,batches
+        run.stage(material,'scar.analysis.external_source_materials',
+            ['--matches',run.out/find,'--out',run.out/material,'--jobs',min(jobs,8)],
+            run.out/material/'result.json','scar.external-source-materials',
+            status='EXTERNAL_SOURCE_MATERIALS_BUILT',target_executed=False,first_stage_complete=False)
+        run.stage(publish,'scar.analysis.observed_source_admission',
+            ['extend','--catalog',catalog,'--materials',run.out/material,'--out',run.out/publish],
+            run.out/publish/'result.json','scar.observed-source-catalog',
+            target_executed=False,first_stage_complete=False)
+        catalog=run.out/publish
+        row.update(materials=_receipt(run.out/material/'result.json'),
+            catalog=_receipt(catalog/'result.json'))
+        batches.append(row)
+        if found['search_complete']:return catalog,batches
+        previous=requested
+
+
 def build_frontend(paths, out, *, sources=(), jobs=4, trace=None, project_root=None):
     """Build complete local declarations for the selected source corpus."""
     paths = tuple(dict.fromkeys(Path(p).resolve() for p in paths))
@@ -181,23 +229,8 @@ def build_frontend(paths, out, *, sources=(), jobs=4, trace=None, project_root=N
                 execution_namespace_proven=False, first_stage_complete=False)
             active_catalog = out/'observed-source-catalog'
         if trace is not None:
-            run.stage('external-source-matches', 'scar.analysis.observed_source_admission',
-                ['discover','--catalog',active_catalog,'--trace',trace,'--project-root',project_root,
-                    '--out',out/'external-source-matches'],
-                out/'external-source-matches/result.json','scar.observed-external-source-matches',
-                target_executed=False, original_compile_options_proven=False,
-                historical_source_version_proven=False, first_stage_complete=False)
-            run.stage('external-source-materials', 'scar.analysis.external_source_materials',
-                ['--matches',out/'external-source-matches','--out',out/'external-source-materials',
-                    '--jobs',min(jobs,8)],
-                out/'external-source-materials/result.json','scar.external-source-materials',
-                status='EXTERNAL_SOURCE_MATERIALS_BUILT',target_executed=False,first_stage_complete=False)
-            run.stage('complete-source-catalog','scar.analysis.observed_source_admission',
-                ['extend','--catalog',active_catalog,'--materials',out/'external-source-materials',
-                    '--out',out/'complete-source-catalog'],
-                out/'complete-source-catalog/result.json','scar.observed-source-catalog',
-                target_executed=False,first_stage_complete=False)
-            active_catalog = out/'complete-source-catalog'
+            active_catalog,report['external_admission_batches']=admit_external_sources(
+                run,active_catalog,trace,project_root,jobs)
         call_roots = [part for p in paths for part in ('--source-root',p)]
         run.stage('calls','scar.analysis.source_declared_calls',
             ['--catalog',active_catalog,*call_roots,'--out',out/'calls','--jobs',jobs],

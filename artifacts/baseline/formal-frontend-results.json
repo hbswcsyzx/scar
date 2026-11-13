@@ -1457,7 +1457,7 @@
     "note": "Earlier formal-graph results are historical verification. Changed producer pins require fresh F4 and dependent catalogs; current readers must reject stale materials."
   },
   "cirq_current_compilation_join": {
-    "status": "REPLAY_AND_FIRST_EXTERNAL_BATCH_VERIFIED_ADMISSION_CONTINUING",
+    "status": "LOCAL_SOURCE_ADMISSION_VERIFIED_CALL_INTERFACE_PROJECTION_RUNNING",
     "capture_check": {
       "schema": "scar.cirq-current-capture-check",
       "status": "TRANSPORT_AND_READERS_VERIFIED_WITH_EXPLICIT_SEMANTIC_FRONTIERS",
@@ -1566,14 +1566,140 @@
         "bytes": 367536
       }
     },
-    "source_admission_pending": {
-      "reason": "SOURCE_COUNT_BUDGET_EXHAUSTED",
-      "capture_count": 356,
-      "unmatched_filename_count": 108,
-      "per_batch_source_files": 64,
-      "automatic_batching_implemented": true,
-      "current_actual_batch_validation_complete": false,
-      "source_graphs_rebuilt": false
+    "bounded_source_admission": {
+      "status": "IMPLEMENTED_AND_ACTUAL_BATCHED_PUBLICATION_VERIFIED",
+      "captures": 681,
+      "base_known": 9,
+      "new_source_correspondence_keys": 672,
+      "represented_captured_code_keys": 681,
+      "unmatched_captured_keys": 0,
+      "per_batch_limits_raised": false,
+      "matching_batches": [
+        {
+          "counts": {
+            "captures": 681,
+            "compatible_recipes": 292,
+            "failed_compiles": {},
+            "groups": 104,
+            "known": 9,
+            "matched_captures": 316,
+            "replay_attempts": 372,
+            "requested": 672,
+            "source_bytes": 1027331,
+            "source_files": 64,
+            "source_representations": 64,
+            "unmatched_captures": 356
+          },
+          "search_complete": false,
+          "receipt": {
+            "path": "artifacts/current/experiments/cpu-quantum-current/continued-current/external-source-matches/result.json",
+            "sha256": "5ee1993123f44064299e864e070a59de339d6474ac0817728265c69f283c346e",
+            "bytes": 670127
+          }
+        },
+        {
+          "counts": {
+            "captures": 681,
+            "compatible_recipes": 293,
+            "failed_compiles": {},
+            "groups": 94,
+            "known": 294,
+            "matched_captures": 201,
+            "replay_attempts": 375,
+            "requested": 387,
+            "source_bytes": 716347,
+            "source_files": 64,
+            "source_representations": 64,
+            "unmatched_captures": 186
+          },
+          "search_complete": false,
+          "receipt": {
+            "path": "artifacts/current/experiments/cpu-quantum-current/admission-complete-current/external-source-matches/result.json",
+            "sha256": "39761717536e17fc2814da8ff5c0bb49ce673dc6919217bf86922c8784f2df68",
+            "bytes": 412133
+          }
+        },
+        {
+          "counts": {
+            "captures": 681,
+            "compatible_recipes": 217,
+            "failed_compiles": {},
+            "groups": 105,
+            "known": 495,
+            "matched_captures": 186,
+            "replay_attempts": 261,
+            "requested": 186,
+            "source_bytes": 1681123,
+            "source_files": 58,
+            "source_representations": 58,
+            "unmatched_captures": 0
+          },
+          "search_complete": true,
+          "receipt": {
+            "path": "artifacts/current/experiments/cpu-quantum-current/admission-complete-current/external-source-matches-2/result.json",
+            "sha256": "53a0265c39b7ef099c19100bf24506f9f9dd3c2415ce7a6b390c8571ac6301b0",
+            "bytes": 321445
+          }
+        }
+      ],
+      "representation_is_not_body_interface_proof": true,
+      "supplier_receipt": {
+        "path": "artifacts/current/experiments/cpu-quantum-current/admission-complete-current/external-source-matches-2/supplying-code-view.json",
+        "sha256": "ddad55435fbf53a4cee557b0831f817ed77020a07e6449c5b3484d99a562a7e4",
+        "bytes": 14046
+      },
+      "represented_without_projected_body_keys": 35,
+      "body_frontier_kind": "COMPILER_GENERATED_ANNOTATION_REQUEST",
+      "duplicate_admission_check": {
+        "path": "artifacts/current/experiments/call-input-envelope-current/source-admission-repeat-check.json",
+        "sha256": "eee5ec3b98b0cca497c21abefd568d7b3095d5637ade523e62b81823942a72ea",
+        "bytes": 504
+      },
+      "first_stage_complete": false,
+      "final_catalog_fresh_reader_verified": true,
+      "separate_process_unified_readback_verified": false,
+      "publication": {
+        "schema": "scar.cirq-bounded-admission-gate",
+        "status": "SOURCE_MATCHING_AND_CATALOG_FRESH_READER_PASSED",
+        "source_units": 173,
+        "retained_primitive_materials": 172,
+        "repeated_snapshot_materials_omitted": 14,
+        "new_source_correspondence_keys": 672,
+        "base_captured_code_keys": 9,
+        "total_captured_code_keys": 681,
+        "counts": {
+          "ports": 1333923,
+          "calls": 16982,
+          "functions": 5109,
+          "classes": 479,
+          "iterations": 3068
+        },
+        "retained_primitive_files": 4486,
+        "retained_primitive_bytes": 304620727,
+        "original_f0_to_f4_rebuilt": false,
+        "target_executed": false,
+        "scope": "SOURCE_REPRESENTATION_AND_LOCAL_GRAPH_NOT_COMPLETE_PROGRAM_DEPENDENCY_CLOSURE",
+        "first_stage_complete": false,
+        "supplementary_admission_seconds": 1827.5330344699978,
+        "receipts": {
+          "continuation": {
+            "path": "artifacts/current/experiments/cpu-quantum-current/admission-complete-current/result.json",
+            "bytes": 2920,
+            "sha256": "1df96720f8573a40f73b8bcf373d8deae0d30f6a49f48b991489f323bc09fc63"
+          },
+          "catalog": {
+            "path": "artifacts/current/experiments/cpu-quantum-current/admission-complete-current/complete-source-catalog-2/result.json",
+            "bytes": 812536,
+            "sha256": "2c0d51cbf1093a2e18a17a1e6e9b94862a6ab7bada7a589ed482adc191e351b8"
+          }
+        },
+        "next_layers": [
+          "COMPILER_GENERATED_REQUEST_CODE_TO_BODY",
+          "FUSED_CALL_OPCODE_TO_SOURCE",
+          "CALL_DATA_STATE_AND_RESOURCE_JOIN",
+          "INDEPENDENT_UNIFIED_GRAPH_READBACK"
+        ]
+      }
     }
   }
 }

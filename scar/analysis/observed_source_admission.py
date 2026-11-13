@@ -27,7 +27,24 @@ def discover(catalog, trace, project_root, out, *, frame_max_events=100_000):
     codes=ObservedSourceCodeProvider(view, trace, project_root,
         frame_budget=replace(CallEdgeBudget(),max_events=frame_max_events))
     records=(*codes.records.values(),*codes.scope_records.values())
-    known={(c.process_id,c.code.key) for row in records for c in row.captures}
+    body_known={(c.process_id,c.code.key) for row in records for c in row.captures}
+    # A full source/code representation can already be retained even when a
+    # particular language body interface is not projected. Do not lower that
+    # source again to repair a different layer's frontier. The admitted
+    # catalog binds these original captures to checked source/root recipes.
+    represented_codes={item['capture']['code']['key']
+        for entry in view.catalog.report.get('compiled',())
+        for item in entry.get('matched_captures',())}
+    represented_codes.update(key
+        for entry in view.catalog.report.get('compiled',())
+        if entry.get('origin')=='AUDIT_CODE_ROOT_MATCH'
+        for key in entry['observed_child_codes'])
+    # CodeID is a complete structural code identity, independent of PID.
+    # Reusing its source representation is not reusing an old invocation,
+    # function object, namespace or argument binding from that process.
+    represented={(c.process_id,c.code.key) for c in codes.trace.frame_scan.captures
+        if c.code.key in represented_codes}
+    known=body_known|represented
     report=match_external_sources(codes.trace.frame_scan.captures,known,out)
     codes.check()
     # Keep the supplying trace/catalog footprint beside the matcher, whose
@@ -38,7 +55,10 @@ def discover(catalog, trace, project_root, out, *, frame_max_events=100_000):
         schema='scar.external-source-capture-supplier',schema_version=1,
         catalog=_receipt(view.catalog.path/'result.json'),trace=codes.trace.directory,
         project_root=codes.trace.project_root,capture_inputs=receipts,
-        code_summary=codes.summary(),target_executed=False)),replace=False)
+        code_summary=codes.summary(),source_body_interface_keys=len(body_known),
+        retained_source_representation_keys=len(represented),
+        represented_without_projected_body_keys=[list(k) for k in sorted(represented-body_known)],
+        source_representation_is_not_body_interface_proof=True,target_executed=False)),replace=False)
     return report
 
 
@@ -68,7 +88,30 @@ def extend(catalog, materials, out):
     observed=isinstance(catalog,ObservedSourceCatalog)
     base=catalog.base if observed else catalog
     added=[dict(entry,source_reader=batch['source_reader']) for entry in batch['entries']]
-    entries=[*catalog.report['compiled'],*added] if observed else added
+    supplied=[*catalog.report['compiled'],*added] if observed else added
+    entries=[];retained={};representations={};deduplicated=[]
+    fields=('origin','recipe','root_code','source_id','external_group')
+    for entry in supplied:
+        # Evidence locators can give independent snapshots different unit
+        # IDs. The complete retained source/root/recipe identifies whether
+        # they actually supply the same static representation.
+        representation=(_json([entry.get(k) for k in fields])
+            if entry['origin']=='CURRENT_SOURCE_CODE_MATCH' else None)
+        prior=retained.get(entry['unit']) or representations.get(representation)
+        if prior is not None:
+            # Resuming an older bounded discovery can supply an already
+            # retained primitive again. Reuse only the same source/recipe and
+            # a subset of the exact original capture/constant-path evidence.
+            if (entry['origin']!='CURRENT_SOURCE_CODE_MATCH'
+                    or any(prior.get(k)!=entry.get(k) for k in fields)
+                    or not {_json(item) for item in entry['matched_captures']}
+                        <= {_json(item) for item in prior['matched_captures']}):
+                raise ValueError('extended source namespace collides with different material evidence')
+            _check(entry['material']);_check(entry['interfaces'])
+            deduplicated.append(dict(supplied=entry['unit'],retained=prior['unit']))
+            continue
+        entries.append(entry);retained[entry['unit']]=entry
+        if representation is not None:representations[representation]=entry
     rows=dict(base.fact_store.rows)
     for entry in entries:
         _check(entry['material']);_check(entry['interfaces'])
@@ -85,6 +128,7 @@ def extend(catalog, materials, out):
         facts=_receipt(out/'facts.json'),compiled=entries,
         unselected_roots=catalog.report['unselected_roots'] if observed else [],
         selection='RETAINED_LOCAL_DECLARATIONS_PLUS_EXACT_CAPTURED_CODE_SOURCE_REPRESENTATIONS',
+        retained_primitive_duplicates=deduplicated,
         imports='ORIGINAL_FILE_UNITS_ONLY',source_units=list(rows),
         auxiliary_interfaces='ALL_COMPILED_LOCAL_FAMILIES_PROJECTED',
         implementation_sha256=sha256(Path(producer.__file__).read_bytes()).hexdigest(),
