@@ -30,7 +30,7 @@ Cirq 长档为 22 qubits、depth20、12 轮、8 个独立电路：平均 7.74 �
 ## 本轮建图证据
 
 - **Verified：** 通用 `scar frontend` 按F0→F1→F2→F3→F4→调用接口推进：纯静态23步、已有trace24步；有编译audit时自动补匹配与生成代码局部图，共26步。当前小样本26/26通过，52.219s；同filename不同代码、延后执行旧code与失败compile分别保存。离线阶段不运行目标。Gray–Scott全部2个Python文件的前21步114.024s，1315模板/1313连接。
-- **Verified：** CodeScope连接已区分CODE_ROOT/CLASS_BODY与函数binder。当前Sunfish采集77/77代码模板有源码对应、455/455回调有正文，3个类体的事件/展开检查通过；18单元共2936个局部CALL声明，观察函数接口141个。外部11文件368,193B由8个实际进程降低，287.791s，未执行目标源码；定向读回144.638s。自动前端29/29步通过，后续目录收据变更以复用材料的当前尾链验证。仍有123个CALL位置前沿，first_stage_complete=false。
+- **Verified：** CodeScope连接已区分CODE_ROOT/CLASS_BODY与函数binder。当前Sunfish采集77/77代码模板有源码对应、455/455回调有正文，3个类体的事件/展开检查通过；18单元共2936个局部CALL声明，观察函数接口141个。外部11文件368,193B由8个实际进程降低，287.791s，未执行目标源码；定向读回144.638s；整体build/保存/独立重开读回529.458s通过，仍105条缺口。自动前端29/29步通过，后续目录收据变更以复用材料的当前尾链验证。仍有123个CALL位置前沿，first_stage_complete=false。
 - **Verified：** 接口层已区分declaration_units与importable_units（CALL声明schema v2）。7单元全部647个局部CALL有原分片，callers_without_parent归零；生成代码32迭代/7可挂起正文/7mapping、2merge/7suspension全部读回。仅解码25/2978份计划，未重建F4。定向验收74.646s，整体build/保存/入口读回228.654s；自动前端26/26步通过，56.002s。
 - **Verified：** Sunfish新采集5.858s，保存12份编译文本共68,545B；完整CodeID匹配保48个兼容配方，不推断原编译选项或namespace。实际frame对应5个生成代码局部图，186.443s、文件合计4.62MB；与2个原文件图合并为7单元。5份材料复用后仅重建目录6.970s，读回也守原audit证据。 当前整体build/保存/入口读回216.255s通过；455个回调帧中451个有源码body，新增3个lambda正文通过8个共享回调接口接回267帧，无正文复制。定向读回112.042s通过，58个代码连接，重复展开及调用上下文正反检查通过。此轮当时尚缺4个外部源码回调和1个动态caller接口；后者现已解决，first_stage_complete仍为false。
 - **Verified：** Sunfish两个核心文件的正式F4目录可直接读回，无全局namespace solver。生成器、链式比较、循环均可展开；重复展开保持同一ID与节点/边数，循环不unroll。三项查询12.884s。

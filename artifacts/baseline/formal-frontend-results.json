@@ -739,6 +739,28 @@
     },
     "report": "artifacts/current/experiments/cpu-sunfish-current/formal/scope-admission/readback-check.json",
     "first_stage_complete": false,
-    "transformation_applied": false
+    "transformation_applied": false,
+    "build": {
+      "seconds": 529.4578732259979,
+      "workflow_complete": true,
+      "first_stage_complete": false,
+      "summary": {
+        "configuration_inputs": 0,
+        "gaps": 105,
+        "loaded_units": 10,
+        "observed_boundary_publications": 1,
+        "observed_publications": 1,
+        "resource_records": 28,
+        "source_units": 18
+      },
+      "assembly_elapsed_by_layer": {
+        "catalog": 32.174307175999274,
+        "cross_layer_interfaces": 200.20028994199674,
+        "function_interfaces": 184.18237126599706,
+        "local_state_and_content": 249.01107808099914,
+        "resources": 249.35597404500004
+      },
+      "report": "artifacts/current/experiments/cpu-sunfish-current/formal/scope-admission/build/manifest.json"
+    }
   }
 }
