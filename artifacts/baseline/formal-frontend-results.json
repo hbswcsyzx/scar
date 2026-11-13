@@ -1455,5 +1455,125 @@
     "old_runtime_evidence_preserved": true,
     "old_receipts_rewritten": false,
     "note": "Earlier formal-graph results are historical verification. Changed producer pins require fresh F4 and dependent catalogs; current readers must reject stale materials."
+  },
+  "cirq_current_compilation_join": {
+    "status": "REPLAY_AND_FIRST_EXTERNAL_BATCH_VERIFIED_ADMISSION_CONTINUING",
+    "capture_check": {
+      "schema": "scar.cirq-current-capture-check",
+      "status": "TRANSPORT_AND_READERS_VERIFIED_WITH_EXPLICIT_SEMANTIC_FRONTIERS",
+      "trace": "/home/zyf/AAA/scar/artifacts/current/experiments/cpu-quantum-current/trace-compiled-prefilter-current",
+      "call_attempts": 4342,
+      "snapshot_streams": 8,
+      "transport_drops": 0,
+      "reader_issues": 0,
+      "compile_sources": 364,
+      "code_execution_events": 2380,
+      "execution_bytecode_prefilters": 2380,
+      "unplanned_monitoring_sites": 97,
+      "unplanned_opcodes": {
+        "LOAD_SUPER_ATTR": 97
+      },
+      "workload_norm_error": 0.0,
+      "capture_wall_seconds": 37.44280704799894,
+      "first_stage_complete": false
+    },
+    "compilation_replay": {
+      "counts": {
+        "actual_filename_confirmations": 936,
+        "bytecode_prefilter_comparisons": 6006036,
+        "bytecode_prefilter_rejections": 5937339,
+        "compatible_recipes": 936,
+        "compile_attempts": 7488,
+        "descriptor_comparisons": 68697,
+        "execution_code_templates": 2162,
+        "execution_code_templates_with_bytecode_prefilter": 2162,
+        "failed_candidate_compiles": {
+          "IndentationError": 12,
+          "SyntaxError": 984
+        },
+        "matched": 214,
+        "shared_prefilter_compiles": 6552,
+        "sources": 364
+      },
+      "seconds": 6.017626602995733,
+      "search_domain": {
+        "dont_inherit": true,
+        "flags": "OBSERVED_ROOT_FUTURE_FLAGS_ONLY",
+        "modes": [
+          "exec",
+          "eval",
+          "single"
+        ],
+        "optimize": [
+          0,
+          1,
+          2
+        ]
+      },
+      "original_compile_options_proven": false,
+      "source_code_temporal_pairing_proven": false,
+      "execution_namespace_proven": false,
+      "receipt": {
+        "path": "artifacts/current/experiments/cpu-quantum-current/continued-current/compilation-matches/result.json",
+        "sha256": "0d16539c345bd9c3ab9c78a2e4065839b10a36f22d5290da43f72efda14e91db",
+        "bytes": 1083821
+      }
+    },
+    "prefilter_semantics": "REJECTION_ONLY_THEN_FULL_CODEID_AND_REAL_FILENAME_COMPILE",
+    "template_warning_policy": "IGNORED_ONLY_FOR_PREFILTER_REAL_CONFIRMATION_USES_CURRENT_POLICY",
+    "root_search_domain_narrowed": false,
+    "budget_increased": false,
+    "source_layers_rebuilt": false,
+    "new_snapshot_streams_verified": 8,
+    "new_raw_trace_rewritten": false,
+    "readback_checks": {
+      "optional_gap_site": {
+        "path": "artifacts/current/experiments/cpu-quantum-current/gap-site-check.json",
+        "sha256": "3b4ad404d03a9d05594d2822b6d955197152d2861bacb31303c7de6fd17e6221",
+        "bytes": 288
+      },
+      "prefilter_micro": {
+        "path": "artifacts/current/experiments/call-input-envelope-current/audit-prefilter/check.json",
+        "sha256": "25edb83809a3674d7165598dba9875efb32eadee5339f3cbf3f260835848c7d7",
+        "bytes": 1449
+      }
+    },
+    "unresolved_monitoring_protocol": {
+      "count": 97,
+      "opcode": "LOAD_SUPER_ATTR",
+      "source_call_connection_proven": false
+    },
+    "first_stage_complete": false,
+    "first_external_batch": {
+      "material_units": 64,
+      "covered_code_templates": 316,
+      "seconds": 352.434061056003,
+      "jobs": 8,
+      "worker_pids": [
+        99351,
+        99354,
+        99355,
+        99356,
+        99357,
+        99358,
+        99359,
+        99360
+      ],
+      "worker_cpu_seconds": 1901.232438425,
+      "receipt": {
+        "path": "artifacts/current/experiments/cpu-quantum-current/continued-current/external-source-materials/result.json",
+        "sha256": "bc67405891cc83e1b6824e9985be32b9ec3d7bfedc663c85075b0615de0ac9db",
+        "bytes": 367536
+      }
+    },
+    "source_admission_pending": {
+      "reason": "SOURCE_COUNT_BUDGET_EXHAUSTED",
+      "capture_count": 356,
+      "unmatched_filename_count": 108,
+      "per_batch_source_files": 64,
+      "automatic_batching_implemented": true,
+      "current_actual_batch_validation_complete": false,
+      "source_graphs_rebuilt": false
+    }
   }
 }

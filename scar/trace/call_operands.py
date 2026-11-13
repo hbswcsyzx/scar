@@ -366,11 +366,13 @@ class CallOperandObserver:
             self._hook_epoch += 1
         return result
 
-    def _scoped_gap(self, reason, code, owner=None):
+    def _scoped_gap(self, reason, code, owner=None, *, offset=None):
         # Actual code is retained even when no invocation was successfully
         # issued. This is not a fabricated activation or a global epoch gap.
         key = code_key(code)
-        return self._emit("SCOPED_GAP", owner, self.recorder.index, {"reason":reason,"code":key})
+        payload={"reason":reason,"code":key}
+        if offset is not None:payload['site']=_raw_site(code,offset)
+        return self._emit("SCOPED_GAP", owner, self.recorder.index, payload)
 
     def _base_state(self, frame):
         thread_id = threading.get_ident()
@@ -948,10 +950,10 @@ class CallOperandObserver:
                     if self.lean_plan is not None:
                         body = self.lean_plan.match(code)
                         if body is None or offset not in body.call_offsets:
-                            self._scoped_gap("LEAN_CALL_NOT_IN_STATIC_PLAN", code, owner)
+                            self._scoped_gap("LEAN_CALL_NOT_IN_STATIC_PLAN", code, owner, offset=offset)
                             return None
                         if offset in body.unsupported_offsets:
-                            self._scoped_gap("LEAN_UNSUPPORTED_CALL_SITE", code, owner)
+                            self._scoped_gap("LEAN_UNSUPPORTED_CALL_SITE", code, owner, offset=offset)
                             return None
                     if not self._monitor_is_intact(code):
                         self._mark_interference(frame, "MONITORING_MASK_OR_TOOL_CHANGED", monitoring=True)

@@ -234,7 +234,11 @@ def read_call_operands(trace, root, *, budget=CallOperandBudget(), frame_budget=
             _require("anchor" not in row, "raw operand events cannot supply their own anchors")
             _require(kind != 'SCOPED_GAP' or meta.rule in (LEAN_PORTS_RULE, PROGRAM_PORTS_RULE, PROCESS_PORTS_RULE),
                      'scoped gaps require the explicit lean profile')
-            event = decode(_TYPES[kind], {**row, "anchor": {
+            # Earlier scoped records retained the code but no precise site.
+            # Absence remains unknown; no offset is inferred from neighbors.
+            payload = {**row}
+            if kind == 'SCOPED_GAP' and 'site' not in payload:payload['site'] = None
+            event = decode(_TYPES[kind], {**payload, "anchor": {
                 "path": anchor.path, "line_number": anchor.line_number,
                 "line_sha256": anchor.line_sha256, "index": anchor.index,
             }})

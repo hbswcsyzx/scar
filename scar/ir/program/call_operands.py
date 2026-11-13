@@ -288,11 +288,15 @@ class OperandScopedGap(_OperandEvent):
     hook_epoch: int
     reason: str
     code: str
+    site: CapturedSite | None = None
 
     def __post_init__(self):
         self._common(OperandEventKind.SCOPED_GAP)
         _text(self.reason, "scoped operand gap reason")
         _code(self.code)
+        if self.site is not None:
+            _site(self.site)
+            _require(self.site.code == self.code, "scoped gap site belongs to another code")
 
 
 OperandEvent = OperandInstruction | OperandCallAttempt | OperandEntryHandshake | OperandGap | OperandScopedGap

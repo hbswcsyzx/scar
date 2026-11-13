@@ -146,7 +146,11 @@ class CompilationAudit:
                     try:description=describe_code(value)
                     except (TypeError,ValueError,RecursionError) as error:
                         self._gap('CODE_DESCRIPTION_'+type(error).__name__,filename,position,tid);return
-                    self._event('CODE_EXECUTION',dict(code=description),position,tid)
+                    # Optional rejection-only metadata. The structural CodeID
+                    # still includes the complete code/constant tree; this
+                    # digest neither identifies source nor admits a match.
+                    self._event('CODE_EXECUTION',dict(code=description,
+                        code_bytecode_sha256=hashlib.sha256(value.co_code).hexdigest()),position,tid)
                     return
                 if type(value) not in (str,bytes):
                     self._gap('UNSUPPORTED_COMPILE_SOURCE_TYPE',filename,position,tid);return
