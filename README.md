@@ -12,6 +12,17 @@ LeWM 是外部 testcase；通用规则不按业务名称选择处理方式。
 
 ## 使用
 
+正式前端按层构建局部图，不运行目标程序：
+
+```bash
+scar frontend /path/to/source-root --out /path/to/frontend --jobs 8
+scar build --entry /path/to/entry.py --catalog /path/to/frontend/catalog --cache-root /path/to/frontend --out /path/to/build
+```
+
+`frontend` 顺序执行源码→词法→AST→作用域/绑定→共享区域模板→局部接口→调用参数/返回接口；三类独立模板可并行。
+每层检查原报告再推进，失败保留具体阶段。`local_declarations_complete` 只表示所选源码的局部声明图完成。
+已有采集可追加 `--trace TRACE --project-root ORIGINAL_ROOT` 离线接线；随后 `build` 使用同一目录的观察接口。
+
 统一入口优先组合与入口源码匹配的 F4 catalog、调用/状态接口和资源材料；没有材料时建立源码、函数/循环子图和跨函数连接：
 
 ```bash
@@ -24,7 +35,7 @@ scar build-query /path/to/fresh-build --action resources
 scar build-query /path/to/fresh-build --action dependencies --file model.py --entry forward --node program_value:ORIGINAL_ID
 ```
 
-无 trace 时可省略 `--trace`。`--catalog` 选择 F4 context catalog，`--cache-root` 指定接口材料目录；
+无 trace 时可省略 `--trace`。`--catalog` 选择 F4 局部声明或 context catalog，`--cache-root` 指定接口材料目录；
 `--model` 显式选择旧 source model，`--source-root` 增加依赖源码根。
 新源码构建的 `--body-scope observed` 根据完整运行 CodeID 选择正文，并自动准入 trace 涉及的外部源码文件；保留其余源码声明，不扫描整个依赖安装目录、不证明未观察路径为死代码。
 该模式默认直接连接运行中的实际调用，跳过全局静态目标求解；`--call-binding static` 可显式恢复静态求解。
@@ -60,7 +71,7 @@ python -B -m scar.analysis.normal_targets --facts /path/to/facts --interfaces /p
 
 摘要沿用原函数/循环/状态端口；不导入目标，也不按调用或迭代展开正文。
 
-已有 context catalog 后，可独立分析整个源树的调用声明，无需等待入口求解队列收敛：
+已有局部声明或 context catalog 后，可独立分析整个源树的调用声明，无需等待入口求解队列收敛：
 
 ```bash
 python -B -m scar.cli call-declarations --catalog CONTEXT_CATALOG --source-root /path/to/program --out FRESH_CALLS --jobs 4

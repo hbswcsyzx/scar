@@ -1,0 +1,188 @@
+{
+  "schema": "scar.formal-frontend-evidence",
+  "schema_version": 1,
+  "first_stage_complete": false,
+  "target_executed_by_offline_build": false,
+  "stages": [
+    "F0_SOURCE_BYTES",
+    "F1_TOKENS",
+    "F2_SYNTAX",
+    "F3_SCOPES_BINDINGS_COMPILER",
+    "F4_SHARED_LOCAL_GRAPH",
+    "SOURCE_CALL_INTERFACES",
+    "OBSERVED_CALL_SELECTIONS",
+    "RESOURCE_INTERFACES",
+    "SHARDED_READBACK"
+  ],
+  "tiny_frontend": {
+    "stages": 23,
+    "admitted_stages": 23,
+    "seconds": 32.299749098001485,
+    "source_units": 1,
+    "functions": 2,
+    "iteration_interfaces": 2,
+    "stored_bytes": 646029,
+    "workflow_complete": true,
+    "local_declarations_complete": true,
+    "target_executed": false,
+    "function_interfaces": {
+      "activation_kinds": {
+        "NORMAL": 1
+      },
+      "binding_kinds": {
+        "DIRECT": 1
+      },
+      "calls": 2,
+      "connected_calls": 1,
+      "controlled_queries": 0,
+      "data_returns": 1,
+      "declared_namespace_frontiers": 5,
+      "frontier_reasons": {
+        "NO_RECORDED_SOURCE_FUNCTION_ORIGIN_OTHER_CALLEE_ALTERNATIVES_REMAIN_OPEN": 1,
+        "PARENT_CALLEE_REFERENCE_FRONTIERS_REMAIN_OPEN": 2
+      },
+      "frontiers": 3,
+      "function_origins": 1,
+      "interfaces": 1,
+      "parameter_routes": 4,
+      "projection_routes": 0,
+      "query_indexes": 2,
+      "retained_namespace_frontiers": 5,
+      "source_function_unit_pairs": 1,
+      "state_returns": 1,
+      "unconnected_calls": 1,
+      "units": 1
+    }
+  },
+  "gray_scott": {
+    "status": "VERIFIED_LOCAL_DECLARATIONS",
+    "source_units": 2,
+    "stages": 21,
+    "admitted_stages": 21,
+    "seconds": 114.0235217399968,
+    "templates": 1315,
+    "links": 1313,
+    "iterations": 2,
+    "stored_bytes": 1731918,
+    "report": "artifacts/current/experiments/cpu-gray-scott-current/formal/result.json"
+  },
+  "sunfish": {
+    "status": "VERIFIED_LOCAL_GRAPH_AND_PARTIAL_OBSERVED_JOIN",
+    "source_corpus_units": 5,
+    "f4_units": 2,
+    "templates": 5738,
+    "links": 5797,
+    "code_correspondence": {
+      "callsite_interfaces_connected": false,
+      "code_links": 22,
+      "compiled_units": [],
+      "creator_instances_proven": false,
+      "entry_bindings": 93,
+      "first_stage_complete": false,
+      "issues": [],
+      "source_bodies_copied": false,
+      "target_observations": 333,
+      "units": 2
+    },
+    "interfaces": {
+      "annotated_parent_groups": 12,
+      "body_only_groups": 3,
+      "calls": 385,
+      "derived_interfaces": 5,
+      "interfaces": 46,
+      "observation_frontiers": 1634,
+      "observed_groups": 17,
+      "parent_interfaces": 41
+    },
+    "build_seconds": 156.69088184900102,
+    "workflow_complete": true,
+    "build_summary": {
+      "configuration_inputs": 0,
+      "gaps": 105,
+      "loaded_units": 2,
+      "observed_publications": 1,
+      "resource_records": 28,
+      "source_units": 2
+    },
+    "first_stage_complete": false,
+    "report": "artifacts/current/experiments/cpu-sunfish-current/formal/build/manifest.json",
+    "region_query_report": "artifacts/current/experiments/cpu-sunfish-current/formal/catalog-check.json",
+    "observation_frontiers_by_reason": {
+      "OBSERVED_CALLABLE_REQUIRES_OTHER_CALL_PROTOCOL": 1310,
+      "OBSERVED_TARGET_CODE_HAS_NO_RETAINED_SOURCE_BODY_CORRESPONDENCE": 107,
+      "OBSERVED_CALL_HAS_NO_MATCHED_IMMEDIATE_PYTHON_ENTRY": 111,
+      "OBSERVED_CODE_REQUIRES_DIFFERENT_SOURCE_ARGUMENT_OR_DESCRIPTOR_BINDING": 53,
+      "OBSERVED_SOURCE_ARGUMENT_OR_IMPLICIT_RECEIVER_LAYOUT_OPEN": 53
+    },
+    "readback": {
+      "parameter_edge_found": true,
+      "parameter_edge_conditional": true,
+      "call_interfaces": {
+        "units": 2,
+        "available_units": 2,
+        "available_calls": 385,
+        "calls": 385,
+        "interfaces": 46,
+        "normal_frames": 44,
+        "relations": 313,
+        "flows": {
+          "ENTER": 225,
+          "RETURN": 88
+        },
+        "kinds": {
+          "CALL_TARGET": 44,
+          "ENVIRONMENT": 44,
+          "ARGUMENT": 82,
+          "STATE_INTERFACE": 88,
+          "COMPLETION": 44,
+          "PROJECTION": 11
+        },
+        "default_reads": 5,
+        "default_slots": 5,
+        "captured_cell_bindings": 3,
+        "captured_locations": 3,
+        "returned_callable_bindings": 0,
+        "pending_endpoint_reasons": 4754,
+        "namespace_semantics_rederived": false,
+        "runtime_dispatch_proven": false,
+        "source_bodies_copied": false,
+        "loops_unrolled": false,
+        "first_stage_complete": false
+      },
+      "hardware": {
+        "CpuExecutor": 2,
+        "MemoryDomain": 2,
+        "StorageDevice": 4,
+        "StorageEndpoint": 1
+      },
+      "hardware_connections": 8,
+      "seconds": 91.5879474359972
+    }
+  },
+  "checks": {
+    "structured_local_checks": 3,
+    "existing_resource_build_checks": 8,
+    "lewm_worktree_clean": true,
+    "no_optimization_enabled": true
+  },
+  "tiny_observed_frontend": {
+    "workflow_complete": true,
+    "local_declarations_complete": true,
+    "stages": 24,
+    "admitted_stages": 24,
+    "seconds": 34.495452178998676,
+    "target_executed": false,
+    "first_stage_complete": false,
+    "counts": {
+      "annotated_parent_groups": 0,
+      "body_only_groups": 1,
+      "calls": 2,
+      "derived_interfaces": 1,
+      "interfaces": 2,
+      "observation_frontiers": 4,
+      "observed_groups": 1,
+      "parent_interfaces": 1
+    },
+    "runtime_inputs": "separate short trace of original two functions; frontend only reads retained trace"
+  }
+}

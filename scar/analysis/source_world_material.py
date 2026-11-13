@@ -9,7 +9,7 @@ from hashlib import sha256
 import json
 from pathlib import Path
 
-from scar.analysis.source_context_query import ContextTargetGraph
+from scar.analysis.source_declared_catalog import read_source_catalog
 from scar.analysis.source_template_batch import read_template_bodies
 from scar.analysis.source_template_links import read_template_graph
 from scar.ir.program.providers import ProviderArtifact
@@ -20,7 +20,7 @@ class WorldMaterial:
     """Read a source unit's sealed F4 plans without constructing a solver."""
 
     def __init__(self, catalog, unit):
-        self.catalog = catalog if isinstance(catalog, ContextTargetGraph) else ContextTargetGraph(catalog)
+        self.catalog = read_source_catalog(catalog)
         self.fact_store = self.catalog.fact_store
         if type(unit) is not str or unit not in self.fact_store.rows:
             raise ValueError('world material needs an original catalog source unit')

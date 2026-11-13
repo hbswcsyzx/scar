@@ -15,7 +15,7 @@ import time
 
 from scar.analysis.program_dependencies import ProgramDependencyGraph
 from scar.analysis.source_graph_material import source_graph_material
-from scar.analysis.source_context_query import ContextTargetGraph
+from scar.analysis.source_declared_catalog import read_source_catalog
 from scar.analysis.normal_graph import normal_edges, _Emitter
 from scar.analysis.source_template_links import _json, _worker_stores
 from scar.analysis.source_consumer_parents import _stamp
@@ -320,7 +320,7 @@ class SourceUnitProvider:
 class ProgramView:
     """Shared source/core query interface with explicit original record access."""
     def __init__(self, catalog, *, core_loader=None):
-        self.catalog = (catalog if catalog is None or isinstance(catalog, ContextTargetGraph) else ContextTargetGraph(catalog))
+        self.catalog = None if catalog is None else read_source_catalog(catalog)
         self.core_loader = core_loader; self.units = {}; self.namespaces = {}; self.metadata_providers = []
         self.state_providers = {}
         self.dependencies = ProgramDependencyGraph(self._core_index)
@@ -551,7 +551,7 @@ def publish_program_view(catalog, units, out):
     from scar.analysis.program_view_storage import pack_nodes,pack_edges
     started = time.monotonic(); pins = _pins(); out = Path(out).absolute()
     if out.exists(): raise ValueError('fresh unified program view output required')
-    catalog = catalog if isinstance(catalog, ContextTargetGraph) else ContextTargetGraph(catalog)
+    catalog = read_source_catalog(catalog)
     _durable_mkdir(out); shards = {}
     for unit in tuple(dict.fromkeys(units)):
         view=ProgramView(catalog)

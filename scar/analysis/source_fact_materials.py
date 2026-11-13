@@ -13,7 +13,7 @@ import json
 from pathlib import Path
 import time
 
-from scar.analysis.source_context_query import ContextTargetGraph
+from scar.analysis.source_declared_catalog import DeclaredSourceCatalog, read_source_catalog
 from scar.analysis.source_symbol_variants import _table
 from scar.analysis.normal_output import write_table
 from scar.analysis.source_stage import _durable_bytes, _durable_mkdir
@@ -33,18 +33,20 @@ def _artifact(path, raw, schema):
 
 class FactMaterialResolver:
     def __init__(self, catalog):
-        self.catalog = ContextTargetGraph(catalog)
+        self.catalog = read_source_catalog(catalog)
         self.store = self.catalog.fact_store
         self.catalog_raw = (self.catalog.path/'result.json').read_bytes()
         context = _artifact(self.catalog.path/'result.json', self.catalog_raw, self.catalog.report['schema'])
-        receipt = self.catalog.report['context_facts']
-        directory = ProviderArtifact(str(self.catalog.path/receipt['path']), receipt['sha256'],
+        declared = isinstance(self.catalog, DeclaredSourceCatalog)
+        receipt = self.catalog.report['facts' if declared else 'context_facts']
+        directory_path = Path(receipt['path']) if declared else self.catalog.path/receipt['path']
+        directory = ProviderArtifact(str(directory_path), receipt['sha256'],
             receipt['bytes'], self.store.report['schema'])
         self._routes = {}; self._rows = {}
         for unit, row in self.store.rows.items():
             logical = Path(row['facts']); physical = logical; catalogs = [context, directory]
             if not logical.is_absolute():
-                parent = self.store._source_parents[unit]
+                parent = self.store.source_parent_for(unit)
                 logical = parent.path/logical
                 while True:
                     catalogs.append(_artifact(parent.path/'result.json', parent.raw, parent.report['schema']))

@@ -8,7 +8,7 @@ from collections import defaultdict
 from hashlib import sha256
 import json
 
-from scar.analysis.source_context_query import ContextTargetGraph
+from scar.analysis.source_declared_catalog import read_source_catalog
 from scar.analysis.source_world_material import WorldMaterial
 from scar.analysis.source_relation_selection import select_relation_rows
 from scar.analysis.source_consumer_parents import _stamp
@@ -21,7 +21,7 @@ class CompiledGraphMaterial(WorldMaterial):
     """Expose existing compile-context recipes through the source reader API."""
 
     def __init__(self, catalog, unit):
-        self.catalog = catalog if isinstance(catalog, ContextTargetGraph) else ContextTargetGraph(catalog)
+        self.catalog = read_source_catalog(catalog)
         self.fact_store = self.catalog.fact_store
         if unit not in self.fact_store.original_source_units:
             raise ValueError('compiled material requires an original compile-context source identity')
@@ -92,7 +92,7 @@ class CompiledGraphMaterial(WorldMaterial):
 
 def source_graph_material(catalog, unit):
     """Select by the source catalog's format; keep its original identities."""
-    catalog = catalog if isinstance(catalog, ContextTargetGraph) else ContextTargetGraph(catalog)
+    catalog = read_source_catalog(catalog)
     if unit in catalog.fact_store.original_source_units:
         return CompiledGraphMaterial(catalog, unit)
     return WorldMaterial(catalog, unit)

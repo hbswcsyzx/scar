@@ -16,8 +16,7 @@ import sys
 import time
 from types import SimpleNamespace
 
-from scar.analysis.source_class_base_graph import _catalog
-from scar.analysis.source_context_query import ContextTargetGraph
+from scar.analysis.source_declared_catalog import read_source_catalog
 from scar.analysis.source_namespace_references import NamespaceReferenceResolver
 from scar.analysis.source_reference_slice import source_port
 from scar.analysis.source_symbol_variants import _table
@@ -49,8 +48,7 @@ def _check_targets():
 
 
 def _open_catalog(catalog):
-    if not isinstance(catalog, ContextTargetGraph):
-        return _catalog(catalog)
+    catalog = read_source_catalog(catalog)
     raw = (catalog.path/'result.json').read_bytes()
     if json.loads(raw) != catalog.report: raise ValueError('declared call catalog changed')
     artifact = _artifact(catalog.path/'result.json', catalog.report['schema'])

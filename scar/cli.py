@@ -451,6 +451,9 @@ def _query_body_execution(args) -> int:
 
 def main(argv=None) -> int:
     cli_argv = sys.argv[1:] if argv is None else list(argv)
+    if cli_argv and cli_argv[0] == 'frontend':
+        from scar.analysis.source_frontend import main as frontend_main
+        return frontend_main(cli_argv[1:])
     if cli_argv and cli_argv[0] in ('build', 'build-query'):
         from scar.analysis.build import main as build_main, query_main
         return (build_main if cli_argv[0] == 'build' else query_main)(cli_argv[1:])
@@ -550,6 +553,7 @@ def main(argv=None) -> int:
         return observed_graph_main(cli_argv[1:])
     parser = argparse.ArgumentParser(prog="scar")
     sub = parser.add_subparsers(dest="subcommand", required=True)
+    sub.add_parser('frontend', help='run formal source layers through local graph declarations (scar frontend --help)')
     source_materials = sub.add_parser('source-bytes', help='F0: preserve source bytes without lexing, parsing or execution')
     source_materials.set_defaults(func=lambda _: 0)
     source_tokens = sub.add_parser('source-tokens', help='F1: lex retained F0 bytes without parsing or execution')

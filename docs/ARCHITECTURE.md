@@ -6,6 +6,13 @@ LeWM 是外部 testcase；通用规则由语言协议、原端口和证据派发
 
 ## 当前实施顺序
 
+正式源码前端现由 `scar frontend` 按原材料依赖调度：F0源码/字节 → F1词法 → F2 AST →
+F3符号、字段角色、上下文、声明、绑定及编译器对应 → F4表达式/语句/根模板 → 模板连接、facts、局部接口。
+F0–F3依次推进；F4独立域共享总worker预算，完成必要的原规则重放后才接线。
+新局部声明目录直接引用这些分片，无需先运行全局namespace solver；前端继续派生调用声明和参数/返回接口，
+可选读取已有trace补实际code选择。`ProgramView`、调用声明、
+动态code对应和统一build共用此目录。它不提供实际dispatch、动态exec选择或效果证明。
+
 当前按主链优先推进：先贯通统一入口、局部图、跨层连接、资源接口和存储查询，再依据全链缺口集中补齐。
 `scar build --entry ENTRY --trace TRACE_DIR --out OUT` 调度现有分析器。匹配 F4 catalog 时，在同一 `ProgramView` 接入
 普通/compiled/返回函数、观察选择、exec、函数创建、native、构造协议、配置、局部状态和资源适配器；

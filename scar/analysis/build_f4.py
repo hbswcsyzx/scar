@@ -27,14 +27,15 @@ def _reports(roots):
 
 def discover(entry,trace,*,catalog=None,cache_roots=()):
     """Choose compatible cached materials by schema and exact catalog, not names."""
-    from scar.analysis.source_context_query import ContextTargetGraph
+    from scar.analysis.source_declared_catalog import read_source_catalog
     from scar.analysis.build import _receipt
     roots=tuple(cache_roots) or (Path(__file__).resolve().parents[2]/'artifacts/current/queries',)
     rows=_reports(roots);gaps=[];selected=None
-    candidates=[Path(catalog)] if catalog else [p for p,r in rows if r.get('schema')=='scar.context-source-targets']
+    schemas=('scar.context-source-targets','scar.declared-source-catalog')
+    candidates=[Path(catalog)] if catalog else [p for p,r in rows if r.get('schema') in schemas]
     for path in candidates:
         try:
-            c=ContextTargetGraph(path)
+            c=read_source_catalog(path)
             units=[u for u,r in c.fact_store.rows.items() if r['path']==str(entry)
                 and u not in c.fact_store.original_source_units]
             if len(units)!=1:continue
@@ -83,7 +84,7 @@ class _LazyState:
 class F4BuildSession:
     def __init__(self,path,*,_publishing=False,seconds=3600,input_bytes=16*1024**3):
         from scar.analysis.build import _check,_rules
-        from scar.analysis.source_context_query import ContextTargetGraph
+        from scar.analysis.source_declared_catalog import read_source_catalog
         from scar.analysis.program_view import ProgramView
         self._started=time.monotonic();self._seconds=seconds;self._input_bytes=input_bytes
         self.timings={};self._admitted={}
@@ -92,7 +93,7 @@ class F4BuildSession:
         if not _publishing and not self.report['workflow_complete']:raise ValueError('F4 build not published')
         for receipt in self.report['tables'].values():self._admit(receipt)
         spec=self.report['f4'];self._admit(spec['catalog'])
-        self.catalog=ContextTargetGraph(Path(spec['catalog']['path']).parent)
+        self.catalog=read_source_catalog(Path(spec['catalog']['path']).parent)
         self._checkpoint('catalog')
         self.view=ProgramView(self.catalog);self.providers={};self.gaps=list(spec['selection_gaps'])
         self._claimed=set();self.closed=False;self.observed=None
@@ -149,8 +150,13 @@ class F4BuildSession:
                 self.gaps.append(dict(layer='calls',kind='INTERFACE_MATERIAL_REJECTED',path=receipt['path'],detail=str(error)))
 
     def _components(self,components):
-        from scar.analysis.source_exec_view import SourceExecProvider
-        self.providers['exec']=SourceExecProvider(self.view,self.catalog)
+        from scar.analysis.source_declared_catalog import DeclaredSourceCatalog
+        if isinstance(self.catalog,DeclaredSourceCatalog):
+            self.gaps.append(dict(layer='exec',kind='COMPILED_EXEC_SELECTION_NOT_PROVIDED',
+                detail='Local source declarations do not select dynamically compiled exec roots.'))
+        else:
+            from scar.analysis.source_exec_view import SourceExecProvider
+            self.providers['exec']=SourceExecProvider(self.view,self.catalog)
         for name in ('creations','native','protocol','configuration'):
             try:
                 path=self._component_path(name)
