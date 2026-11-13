@@ -106,11 +106,14 @@ class F4BuildSession:
         self.view.state(spec['entry_unit']).content()
         self._checkpoint('local_state_and_content')
         from scar.analysis.build_f4_resources import LazyF4Resources
+        target=self.report.get('target')
+        if target is not None:self._admit(target)
+        target_path=None if target is None else Path(target['path']).parent
         try:
-            self.resources=LazyF4Resources(self.view,self._component_path('resources'))
+            self.resources=LazyF4Resources(self.view,self._component_path('resources'),target=target_path)
         except (OSError,ValueError) as error:
             self.gaps.append(dict(layer='resources',kind='RESOURCE_MATERIAL_NOT_JOINED',detail=str(error)))
-            self.resources=LazyF4Resources(self.view)
+            self.resources=LazyF4Resources(self.view,target=target_path)
         self.resources.demand(self.entry)
         self._checkpoint('resources')
 
@@ -234,7 +237,7 @@ class F4BuildSession:
         self.view.dependencies.providers.clear();self.view.units.clear();self.view.namespaces.clear()
 
 
-def build_f4(entry,trace,out,spec,*,source_roots=(),max_points=128,max_seconds=3600,max_input_bytes=16*1024**3):
+def build_f4(entry,trace,out,spec,*,source_roots=(),max_points=128,max_seconds=3600,max_input_bytes=16*1024**3,target=None):
     from scar.analysis.build import _rules,_receipt,_write,_configuration_inputs
     from scar.analysis.program_dependency_export import export_dependency_walk
     started=time.monotonic();out.mkdir(parents=True)
@@ -243,7 +246,9 @@ def build_f4(entry,trace,out,spec,*,source_roots=(),max_points=128,max_seconds=3
         from scar.analysis.program_observed_dependencies import _inputs
         trace_ref=dict(path=str(trace),inputs=[_receipt(p) for p in sorted(_inputs(trace))])
     report=dict(schema='scar.program-build',schema_version=1,backend='F4',entry=str(entry),rules=_rules(),
-        f4=spec,model=None,trace=trace_ref,tables={},workflow_complete=False,first_stage_complete=False,
+        f4=spec,model=None,trace=trace_ref,
+        target=None if target is None else _receipt(Path(target)/'result.json'),
+        tables={},workflow_complete=False,first_stage_complete=False,
         target_executed=False,original_body_bytes_copied=0,loops_unrolled=False,
         limits=dict(max_seconds=max_seconds,max_input_bytes=max_input_bytes,
             byte_scope='DIRECT_PUBLICATION_RECEIPTS',time_enforcement='COOPERATIVE_STAGE_BOUNDARIES'),

@@ -63,7 +63,8 @@ def _trace(args) -> int:
     if capture_plan_path is not None:
         from scar.trace.lean_capture import read_plan
         capture_plan_path = Path(capture_plan_path).resolve()
-        lean_plan = read_plan(capture_plan_path, expected_sha256=capture_plan_sha256)
+        lean_plan = read_plan(capture_plan_path, expected_sha256=capture_plan_sha256,
+            max_codes=args.max_call_codes)
         if args.project_root is not None and str(Path(args.project_root).resolve()) != lean_plan.namespace_root:
             raise SystemExit('--project-root differs from the capture plan namespace')
     stream_interfaces = getattr(args, 'stream_interfaces', False) or program_ports

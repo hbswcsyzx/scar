@@ -184,6 +184,10 @@ def _session_body(session, number, position, cache):
     session.check()
     original = session._base_body(number, position)
     original = session.load_body(original.namespace)  # Recheck supplied authority/namespace.
+    adapter_key = 'observed-session-body-adapter', number, position, original.namespace
+    cached = session._get(adapter_key)
+    if cached is not None and cached[0] is original:
+        return cached[1]
     key = 'observed-session-source-context', number
     context = cache.get(key)
     if context is None:
@@ -211,8 +215,13 @@ def _session_body(session, number, position, cache):
     # This existing routine reads only the supplied source atoms/records; no
     # StaticCallSession fields, constructor, body cache or basis are borrowed.
     StaticCallSession._check_source_references(session, context, (original.metadata, links, uses))
-    return SimpleNamespace(**{**vars(original), 'context': context,
+    adapted = SimpleNamespace(**{**vars(original), 'context': context,
         'operation_links': links, 'use_links': uses, 'uses_by_op': by_operation})
+    # Reuse only the same admitted private body, after load_body has rechecked
+    # its original artifact/namespace. Charge retained body/index references to
+    # the owner's existing byte-bounded LRU; never retain a second graph cache.
+    session._put(adapter_key, (original, adapted), 2 * original.row['artifact']['decoded_bytes'])
+    return adapted
 
 
 def _locate_session_body(session, capture, issues, cache):
@@ -382,6 +391,21 @@ def derive_observed_interfaces(session, trace, *, argument_layouts=None):
     bindings, issues, cache = [], [], {}
     from scar.analysis.observed_code_correspondence import ObservedCodeSources
     cache['observed-code-sources'] = ObservedCodeSources(raw, observed.source_sha256)
+    from scar.analysis.observed_function_interfaces import derive_observed_function_interfaces
+    interfaces, interface_issues, pending = [], [], []
+
+    def connect_pending():
+        if not pending:
+            return
+        layouts = {} if argument_layouts is not None else None
+        records, notes = derive_observed_function_interfaces(
+            session, raw, observed, tuple(pending), cache, argument_layouts=layouts)
+        interfaces.extend(records)
+        interface_issues.extend(notes)
+        if layouts is not None:
+            argument_layouts.update(layouts)
+        pending.clear()
+
     for target, anchor in zip(observed.targets, observed.target_anchors):
         attempt = attempts[target.caller.process_id, target.attempt_index]
         try:
@@ -390,17 +414,22 @@ def derive_observed_interfaces(session, trace, *, argument_layouts=None):
             if captured is None:
                 raise LookupError('CALLER_CAPTURED_CODE_UNAVAILABLE')
             call, callable_point, source = _locate(session, captured, attempt.site, issues, cache)
-            bindings.append(ObservedCallBinding(observed.source_sha256, call, callable_point,
-                source, captured.code, attempt.site, attempt.anchor, anchor, target))
+            binding = ObservedCallBinding(observed.source_sha256, call, callable_point,
+                source, captured.code, attempt.site, attempt.anchor, anchor, target)
+            bindings.append(binding)
+            pending.append(binding)
         except (LookupError, ValueError, TypeError, OverflowError, TimeoutError) as error:
             issues.append({'kind': 'OBSERVED_CALL_UNBOUND', 'process_id': attempt.process_id,
                 'attempt_index': attempt.index, 'detail': type(error).__name__ + ': ' + str(error)})
             if isinstance(error, (OverflowError, TimeoutError)):
                 break
-    from scar.analysis.observed_function_interfaces import derive_observed_function_interfaces
-    interfaces, interface_issues = derive_observed_function_interfaces(
-        session, raw, observed, tuple(bindings), cache, argument_layouts=argument_layouts)
-    return tuple(bindings), interfaces, evidence, tuple((*issues, *interface_issues))
+        # Resolve the callee while this batch's original caller/source material
+        # is still hot. Bodies stay shared and the final observation order is
+        # unchanged; interface diagnostics remain a separate ordered segment.
+        if len(pending) >= 64:
+            connect_pending()
+    connect_pending()
+    return tuple(bindings), tuple(interfaces), evidence, tuple((*issues, *interface_issues))
 
 
 def build_observed_call_bindings(model, trace, out, budget=None):

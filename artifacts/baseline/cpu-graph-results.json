@@ -1,0 +1,148 @@
+{
+  "schema": "scar.cpu-graph-results",
+  "first_stage_complete": false,
+  "builds": [
+    {
+      "case": "cpu-gray-scott-current",
+      "build": "/home/zyf/AAA/scar/artifacts/current/experiments/cpu-gray-scott-current/automatic",
+      "workflow_complete": true,
+      "first_stage_complete": false,
+      "observed_admission": "ADMITTED",
+      "observed": {
+        "edges": 428,
+        "scopes": 85
+      },
+      "source_units": 10,
+      "wall_seconds": 337.37,
+      "max_rss_kib": 2250824,
+      "observation_issue_counts": {
+        "COMPLETION_PAYLOAD_ADAPTER_REQUIRED": 29,
+        "OBSERVED_FUNCTION_ENVIRONMENT_OPEN": 54,
+        "FINE_EFFECTS_OPEN": 54,
+        "CALLABLE_CARRIER_DETAILS_OPEN": 77,
+        "CALLER_LANDING_NOT_INDEPENDENTLY_OBSERVED": 108,
+        "OBSERVED_FUNCTION_INTERFACE_OPEN": 31,
+        "OBSERVED_ARGUMENT_PACK_STATE_OPEN": 22,
+        "OBSERVED_IMPLICIT_ARGUMENT_SOURCE_OPEN": 30,
+        "COMPLETION_TYPE_ADAPTER_REQUIRED": 12,
+        "OBSERVED_IMPLICIT_RECEIVER_LAYOUT_OPEN": 25,
+        "OBSERVED_PARAMETER_PACK_OPEN": 15,
+        "OBSERVED_IMPLICIT_FORMAL_OPEN": 30,
+        "OBSERVED_SOURCE_BINDING_PARTIAL": 30,
+        "OBSERVED_DEFAULT_STATE_SOURCE_OPEN": 67,
+        "OBSERVED_CURRENT_DEFAULT_STATE_OPEN": 20,
+        "OBSERVED_NATIVE_IMPLEMENTATION_OPEN": 8,
+        "OBSERVED_BOUND_RECEIVER_SOURCE_OPEN": 5,
+        "OBSERVED_SOURCE_PLAN_DECORATED_TARGET": 18,
+        "OBSERVED_CALL_UNBOUND": 3,
+        "OBSERVED_FUNCTION_INTERFACE_KIND_OPEN": 19,
+        "OBSERVED_FUNCTION_INTERFACE_UNBOUND": 12,
+        "CALLER_CANONICAL_BODY_UNAVAILABLE": 3,
+        "CALLER_SOURCE_OR_INTERFACE_OPEN": 8
+      },
+      "budget_errors": []
+    },
+    {
+      "case": "cpu-sunfish-current",
+      "build": "/home/zyf/AAA/scar/artifacts/current/experiments/cpu-sunfish-current/graph",
+      "workflow_complete": true,
+      "first_stage_complete": false,
+      "observed_admission": "ADMITTED",
+      "observed": {
+        "edges": 330,
+        "scopes": 187
+      },
+      "source_units": 13,
+      "wall_seconds": 79.78,
+      "max_rss_kib": 438044,
+      "observation_issue_counts": {
+        "OBSERVED_FUNCTION_INTERFACE_OPEN": 160,
+        "OBSERVED_FUNCTION_ENVIRONMENT_OPEN": 27,
+        "FINE_EFFECTS_OPEN": 27,
+        "CALLER_LANDING_NOT_INDEPENDENTLY_OBSERVED": 54,
+        "OBSERVED_CALL_UNBOUND": 2294,
+        "CALLER_CANONICAL_BODY_UNAVAILABLE": 583,
+        "CALLER_SOURCE_OR_INTERFACE_OPEN": 976,
+        "OBSERVED_FUNCTION_INTERFACE_KIND_OPEN": 146,
+        "OBSERVED_FUNCTION_INTERFACE_UNBOUND": 14
+      },
+      "budget_errors": []
+    },
+    {
+      "case": "cpu-quantum-current",
+      "build": "/home/zyf/AAA/scar/artifacts/current/experiments/cpu-quantum-current/graph",
+      "workflow_complete": true,
+      "first_stage_complete": false,
+      "observed_admission": "ADMITTED",
+      "observed": {
+        "edges": 6730,
+        "scopes": 2524
+      },
+      "source_units": 169,
+      "wall_seconds": 792.02,
+      "max_rss_kib": 2346628,
+      "observation_issue_counts": {
+        "OBSERVED_FUNCTION_INTERFACE_OPEN": 1676,
+        "COMPLETION_PAYLOAD_ADAPTER_REQUIRED": 118,
+        "OBSERVED_FUNCTION_ENVIRONMENT_OPEN": 848,
+        "FINE_EFFECTS_OPEN": 848,
+        "CALLER_LANDING_NOT_INDEPENDENTLY_OBSERVED": 1696,
+        "OBSERVED_BOUND_RECEIVER_SOURCE_OPEN": 389,
+        "OBSERVED_ARGUMENT_LAYOUT_CONFLICT": 11,
+        "OBSERVED_SOURCE_BINDING_PARTIAL": 604,
+        "OBSERVED_DEFAULT_STATE_SOURCE_OPEN": 374,
+        "OBSERVED_IMPLICIT_ARGUMENT_SOURCE_OPEN": 593,
+        "OBSERVED_IMPLICIT_RECEIVER_LAYOUT_OPEN": 215,
+        "OBSERVED_CURRENT_DEFAULT_STATE_OPEN": 231,
+        "OBSERVED_IMPLICIT_FORMAL_OPEN": 592,
+        "COMPLETION_INTERFACE_OPEN": 7,
+        "COMPLETION_TYPE_ADAPTER_REQUIRED": 44,
+        "OBSERVED_ARGUMENT_PACK_STATE_OPEN": 12,
+        "OBSERVED_PARAMETER_PACK_OPEN": 6,
+        "OBSERVED_SOURCE_PLAN_DECORATED_TARGET": 1,
+        "CALLER_SOURCE_OR_INTERFACE_OPEN": 661,
+        "OBSERVED_CALL_UNBOUND": 1818,
+        "CALLER_CANONICAL_BODY_UNAVAILABLE": 876,
+        "OBSERVED_FUNCTION_INTERFACE_UNBOUND": 150,
+        "OBSERVED_FUNCTION_INTERFACE_KIND_OPEN": 1526
+      },
+      "budget_errors": []
+    },
+    {
+      "case": "cpu-fem-current",
+      "build": "/home/zyf/AAA/scar/artifacts/current/experiments/cpu-fem-current/verified",
+      "workflow_complete": true,
+      "first_stage_complete": false,
+      "observed_admission": "ADMITTED",
+      "observed": {
+        "edges": 1261,
+        "scopes": 665
+      },
+      "source_units": 149,
+      "wall_seconds": 279.01,
+      "max_rss_kib": 1768012,
+      "observation_issue_counts": {
+        "OBSERVED_FUNCTION_INTERFACE_OPEN": 566,
+        "OBSERVED_IMPLICIT_ARGUMENT_SOURCE_OPEN": 61,
+        "OBSERVED_BOUND_RECEIVER_SOURCE_OPEN": 31,
+        "OBSERVED_IMPLICIT_FORMAL_OPEN": 61,
+        "OBSERVED_SOURCE_BINDING_PARTIAL": 61,
+        "OBSERVED_FUNCTION_ENVIRONMENT_OPEN": 99,
+        "FINE_EFFECTS_OPEN": 99,
+        "CALLER_LANDING_NOT_INDEPENDENTLY_OBSERVED": 198,
+        "OBSERVED_DEFAULT_STATE_SOURCE_OPEN": 31,
+        "OBSERVED_IMPLICIT_RECEIVER_LAYOUT_OPEN": 30,
+        "OBSERVED_CURRENT_DEFAULT_STATE_OPEN": 30,
+        "COMPLETION_TYPE_ADAPTER_REQUIRED": 5,
+        "COMPLETION_PAYLOAD_ADAPTER_REQUIRED": 6,
+        "OBSERVED_SOURCE_PLAN_DECORATED_TARGET": 2,
+        "OBSERVED_CALL_UNBOUND": 426,
+        "CALLER_CANONICAL_BODY_UNAVAILABLE": 5,
+        "CALLER_SOURCE_OR_INTERFACE_OPEN": 112,
+        "OBSERVED_FUNCTION_INTERFACE_KIND_OPEN": 433,
+        "OBSERVED_FUNCTION_INTERFACE_UNBOUND": 133
+      },
+      "budget_errors": []
+    }
+  ]
+}

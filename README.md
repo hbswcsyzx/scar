@@ -16,6 +16,7 @@ LeWM 是外部 testcase；通用规则不按业务名称选择处理方式。
 
 ```bash
 scar build --entry /path/to/entry.py --trace /path/to/trace --out /path/to/fresh-build --jobs 4
+scar build --entry /path/to/entry.py --trace /path/to/trace --body-scope observed --target /path/to/target --out /path/to/fresh-build --jobs 8
 scar build-query /path/to/fresh-build --action expand
 scar build-query /path/to/fresh-build --action select --file model.py
 scar build-query /path/to/fresh-build --action inputs
@@ -25,6 +26,9 @@ scar build-query /path/to/fresh-build --action dependencies --file model.py --en
 
 无 trace 时可省略 `--trace`。`--catalog` 选择 F4 context catalog，`--cache-root` 指定接口材料目录；
 `--model` 显式选择旧 source model，`--source-root` 增加依赖源码根。
+新源码构建的 `--body-scope observed` 根据完整运行 CodeID 选择正文，并自动准入 trace 涉及的外部源码文件；保留其余源码声明，不扫描整个依赖安装目录、不证明未观察路径为死代码。
+该模式默认直接连接运行中的实际调用，跳过全局静态目标求解；`--call-binding static` 可显式恢复静态求解。
+已有 source model 可用 `--model MODEL --call-binding observed` 接新 trace。`--target` 引用独立的硬件库存；库存、条件候选和实际资源使用分别保存。
 `manifest.json` 引用原正文和关系分片；资源按原操作/区域延迟接线，观察依据独立保存。
 入口源码树及显式依赖根的 YAML 自动进入现有配置材料解析器；不执行 tag、插值或 Hydra 组合。
 `gaps.json` 保留局部缺口、跨层前沿、未接运行资源及查询截断。
@@ -80,3 +84,6 @@ python -B -m scar.cli name-flow --declared FRESH_CALLS --unit SOURCE_UNIT --out 
 
 当前权威图在 `artifacts/current/static/`；原 trace 与派生查询证据在
 `artifacts/current/queries/`。大产物不提交 Git，只保留一份正在开发的源码。
+
+当前 CPU 主测试程序位于项目外、与 `le-wm` 同级：`sunfish`（一般程序）、`gray-scott`（PDE）、`cirq`（量子电路模拟）。
+外部入口及命令、10 秒至 10 分钟的实测负载见 `artifacts/baseline/cpu-workloads.json`；测试程序的运行成功与完整建图验收分别报告。

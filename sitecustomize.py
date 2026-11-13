@@ -9,7 +9,8 @@ if os.environ.get("SCAR_TRACE_DIR"):
             if os.environ.get('SCAR_CAPTURE_PLAN') is not None:
                 from scar.trace.lean_capture import read_plan as _scar_read_plan
                 _scar_lean_plan = _scar_read_plan(os.environ['SCAR_CAPTURE_PLAN'],
-                    expected_sha256=os.environ['SCAR_CAPTURE_PLAN_SHA256'])
+                    expected_sha256=os.environ['SCAR_CAPTURE_PLAN_SHA256'],
+                    max_codes=int(os.environ.get('SCAR_CALL_MAX_CODES','4096')))
             _scar_recorder = install(os.environ['SCAR_TRACE_DIR'],os.environ['SCAR_CALL_PROJECT_ROOT'],
                                      lean_plan=_scar_lean_plan)
             if _scar_recorder is not None and getattr(_scar_recorder, 'collector_witness', None) is not None:

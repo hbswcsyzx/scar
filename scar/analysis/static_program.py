@@ -564,9 +564,13 @@ def _run_file(source, output, phase, max_body_operations):
 
 def build_static_program(project_root, *, source_roots=(), out="artifacts/current/static",
                          jobs=4, phase="graph", max_files=4096, max_bytes=64_000_000,
-                         max_directories=16384, max_body_operations=10000, progress=None):
+                         max_directories=16384, max_body_operations=10000, progress=None,
+                         source_files=()):
     """Publish the current source model; replace only an owned prior output."""
     from scar.analysis.static_sources import collect_sources
+    if isinstance(source_files, (str, bytes, Path)):
+        raise TypeError('source_files must be a sequence of exact source files')
+    source_files = tuple(source_files)
     if type(jobs) is not int or not 1 <= jobs <= 32:
         raise ValueError("jobs must be in [1, 32]")
     if phase not in ("sources", "graph", "bodies"):
@@ -574,7 +578,7 @@ def build_static_program(project_root, *, source_roots=(), out="artifacts/curren
     output = Path(out).absolute()
     if output.is_symlink() or output.resolve() != output:
         raise ValueError("output cannot traverse a symlink")
-    for source_root in (project_root, *source_roots):
+    for source_root in (project_root, *source_roots, *source_files):
         if Path(source_root).resolve().is_relative_to(output):
             raise ValueError("output cannot contain or equal a source root")
     prior = None
@@ -582,7 +586,7 @@ def build_static_program(project_root, *, source_roots=(), out="artifacts/curren
         read_static_program(output)
         prior = hashlib.sha256((output / "manifest.json").read_bytes()).hexdigest()
     started = time.monotonic()
-    sources = collect_sources(project_root, source_roots=tuple(source_roots), max_files=max_files,
+    sources = collect_sources(project_root, source_roots=tuple(source_roots), source_files=source_files, max_files=max_files,
                               max_bytes=max_bytes, max_directories=max_directories)
     output.parent.mkdir(parents=True, exist_ok=True)
     temporary = Path(tempfile.mkdtemp(prefix=".static-building-", dir=output.parent))
@@ -622,6 +626,9 @@ def build_static_program(project_root, *, source_roots=(), out="artifacts/curren
             counts.update(unit["counts"])
         result = {"schema": SCHEMA, "schema_version": VERSION, "phase": phase,
                   "project_root": sources.project_root, "source_roots": list(sources.source_roots),
+                  "source_selection": {"directory_roots": [str(Path(p).resolve()) for p in (project_root, *source_roots)],
+                      "explicit_files": [str(Path(p).resolve()) for p in source_files],
+                      "namespace_roots_are_not_scan_coverage": True},
                   "target_executed": False, "runtime_evidence_required": False,
                   "source_catalog_status": sources.status.value,
                   "source_issues": [asdict(x) for x in sources.issues],

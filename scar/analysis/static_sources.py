@@ -142,7 +142,7 @@ def _positive_limit(value, name):
         raise ValueError(f"{name} must be a positive integer")
 
 
-def collect_sources(project_root, *, source_roots=(), max_files=4096,
+def collect_sources(project_root, *, source_roots=(), source_files=(), max_files=4096,
                     max_bytes=64_000_000, max_directories=16_384):
     """Collect all bounded ``.py``/``.pyi`` source candidates under source roots.
 
@@ -150,6 +150,8 @@ def collect_sources(project_root, *, source_roots=(), max_files=4096,
     relative roots are interpreted from ``project_root``. The returned roots
     retain their actual absolute paths. Namespace mappings are candidates only
     and never assert Python import search order or runtime reachability.
+    ``source_files`` admits exact dependency files without scanning their
+    package directories; inferred package roots are naming candidates only.
 
     ``max_files`` limits successfully retained files and ``max_bytes`` limits
     their cumulative raw bytes. Directory-budget frontiers remain exact paths;
@@ -161,6 +163,8 @@ def collect_sources(project_root, *, source_roots=(), max_files=4096,
     _positive_limit(max_directories, "max_directories")
     if isinstance(source_roots, (str, bytes, Path)):
         raise TypeError("source_roots must be an iterable of roots, not one path")
+    if isinstance(source_files, (str, bytes, Path)):
+        raise TypeError("source_files must be an iterable of exact files")
 
     root = _absolute(project_root)
     issues, remaining = [], []
@@ -190,9 +194,27 @@ def collect_sources(project_root, *, source_roots=(), max_files=4096,
         else:
             issues.append(_issue(IssueKind.SOURCE_ROOT_INVALID, candidate, detail))
 
+    # Exact dependency files do not imply scanning their whole installation.
+    # Package boundaries supply candidate module names, never import authority.
+    source_paths = set()
+    for supplied in source_files:
+        candidate = _absolute(supplied, root)
+        symlink = _has_symlink_component(candidate)
+        if symlink is not None:
+            issues.append(_issue(IssueKind.SYMLINK_SKIPPED, candidate,
+                                 f"explicit source traverses symbolic link {symlink}"))
+            continue
+        if candidate.suffix not in _SOURCE_SUFFIXES or not candidate.is_file():
+            issues.append(_issue(IssueKind.FILE_UNAVAILABLE, candidate,
+                                 "explicit dependency is not a Python source file"))
+            continue
+        namespace = candidate.parent
+        while (namespace / '__init__.py').is_file() and namespace != namespace.parent:
+            namespace = namespace.parent
+        namespace_roots.add(namespace)
+        source_paths.add(candidate)
     directories = deque(sorted(scan_roots, key=str))
     visited = set()
-    source_paths = set()
     while directories:
         directory = directories.popleft()
         if directory in visited:

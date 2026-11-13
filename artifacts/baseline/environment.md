@@ -102,3 +102,7 @@ clean process wall time was 51.82 s and logged CEM solve time was 1.5835 s.
 This is an input-restoration check, not a repeated optimization benchmark.
 Current receipts, logs and the subsequent lean trace are in
 `../current/experiments/lewm-input-recovered-current/inputs.json`.
+
+## 2026-11-13 CPU testcase 切换
+
+Conda lewm/Python3.14.7/Torch2.13.0+cu132仍可导入；torch.cuda.is_available()为False，56逻辑CPU。当前主测试组Sunfish、Gray–Scott及Cirq，命令与实际结果见cpu-workloads.json。Cirq依赖安装隔离于~/AAA/cirq/.scar-runtime，未更改Torch/CUDA；LeWM原仓库干净。

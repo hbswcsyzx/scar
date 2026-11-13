@@ -425,17 +425,26 @@ def _observed_interface(owner, caller, operation, source, semantic_call, actuals
 
 def derive_observed_function_interfaces(owner, trace, observed, bindings, cache, *, argument_layouts=None):
     """Reuse one live static owner and original raw entry evidence, no lowering."""
-    entries = {(item.caller.process_id, item.attempt_index): (item, anchor)
-               for item, anchor in zip(observed.entries, observed.entry_anchors)}
-    frames = {item.invocation: item for item in trace.entries}
-    exits = {}
-    for item in trace.exits:
-        exits.setdefault(item.invocation, []).append(item)
-    captures = {(item.process_id, item.code.key): item for item in trace.frame_scan.captures}
+    # A batch shares these original rows; rebuilding them would rescan the
+    # complete trace once per batch. Strong owners prevent identity reuse.
+    index = cache.get('observed-function-frame-index')
+    if index is None:
+        entries = {(item.caller.process_id, item.attempt_index): (item, anchor)
+                   for item, anchor in zip(observed.entries, observed.entry_anchors)}
+        frames = {item.invocation: item for item in trace.entries}
+        exits = {}
+        for item in trace.exits:
+            exits.setdefault(item.invocation, []).append(item)
+        captures = {(item.process_id, item.code.key): item for item in trace.frame_scan.captures}
+        attempts = {(item.process_id, item.index): item for item in trace.attempts}
+        index = trace, observed, entries, frames, exits, captures, attempts
+        cache['observed-function-frame-index'] = index
+    if index[0] is not trace or index[1] is not observed:
+        raise ValueError('observed interface frame index belongs to another original trace')
+    entries, frames, exits, captures, attempts = index[2:]
     records, issues = [], []
     if argument_layouts is not None and (type(argument_layouts) is not dict or argument_layouts):
         raise ValueError('argument_layouts must be an empty output dictionary')
-    attempts = {(item.process_id, item.index): item for item in trace.attempts}
     deferred = inspect.CO_GENERATOR | inspect.CO_COROUTINE | inspect.CO_ASYNC_GENERATOR
     for binding in bindings:
         target = binding.target

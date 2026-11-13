@@ -1,0 +1,312 @@
+{
+  "schema": "scar.cpu-workload-suite",
+  "schema_version": 1,
+  "scope": "external testcases; measured workload runs are independent from graph-capture windows",
+  "environment": {
+    "conda": "lewm",
+    "python": "3.14.7",
+    "torch": "2.13.0+cu132",
+    "cuda_available": false
+  },
+  "first_stage_complete": false,
+  "transformation_applied": false,
+  "cases": [
+    {
+      "name": "Sunfish",
+      "kind": "general program / chess search",
+      "source": "https://github.com/thomasahle/sunfish",
+      "path": "/home/zyf/AAA/sunfish",
+      "command": [
+        "/home/zyf/miniconda3/envs/lewm/bin/python",
+        "-B",
+        "-u",
+        "/home/zyf/AAA/sunfish/sunfish.py"
+      ],
+      "protocol": [
+        "uci",
+        "isready",
+        "position startpos",
+        "go movetime 10000",
+        "quit after bestmove"
+      ],
+      "wall_seconds": 7.142953359000785,
+      "average_cores": 0.9955054502826439,
+      "max_rss_kib": 69048,
+      "result": "bestmove d2d4 ponder d7d5",
+      "capture": "cpu-sunfish-current/trace-endgame",
+      "capture_scope": "different small endgame position, depth 1; not full starting-position search"
+    },
+    {
+      "name": "Gray-Scott",
+      "kind": "CPU scientific computing / reaction-diffusion PDE",
+      "source": "https://github.com/cselab/gray-scott",
+      "path": "/home/zyf/AAA/gray-scott",
+      "entry": "/home/zyf/AAA/scar-testcases/cpu_science/gray_scott_case.py",
+      "parameters": {
+        "grid": 512,
+        "steps": 5000,
+        "native_threads": 1
+      },
+      "wall_seconds": 68.72,
+      "max_rss_kib": 123776,
+      "user_seconds": 47.43,
+      "system_seconds": 21.07,
+      "result": {
+        "finite": true,
+        "u_sum": 253931.44468403255,
+        "v_sum": 4601.382254067897,
+        "u_range": [
+          0.2729258283862289,
+          1.0
+        ],
+        "v_range": [
+          8.800095891203267e-53,
+          0.3957793580692359
+        ]
+      },
+      "capture": "cpu-gray-scott-current/trace",
+      "capture_scope": "original upstream driver, end_time 2; not full 5000-step run"
+    },
+    {
+      "name": "Cirq",
+      "kind": "CPU quantum computing / entangling state-vector simulation",
+      "source": "https://quantumai.google/cirq/simulate/simulation",
+      "path": "/home/zyf/AAA/cirq",
+      "entry": "/home/zyf/AAA/scar-testcases/cpu_quantum/run.py",
+      "baseline": {
+        "schema": "scar.cpu-quantum-baseline",
+        "command": [
+          "/home/zyf/miniconda3/envs/lewm/bin/python",
+          "-B",
+          "/home/zyf/AAA/scar-testcases/cpu_quantum/run.py",
+          "--qubits",
+          "22",
+          "--depth",
+          "20",
+          "--rounds",
+          "12",
+          "--circuits",
+          "8",
+          "--workers",
+          "8",
+          "--dtype",
+          "complex128",
+          "--out",
+          "/home/zyf/AAA/scar/artifacts/current/experiments/cpu-quantum-current/baseline.workload.json"
+        ],
+        "environment": {
+          "PYTHONPATH": "/home/zyf/AAA/cirq/.scar-runtime",
+          "PYTHONDONTWRITEBYTECODE": "1",
+          "OMP_NUM_THREADS": "1",
+          "OPENBLAS_NUM_THREADS": "1",
+          "MKL_NUM_THREADS": "1"
+        },
+        "cwd": "/home/zyf/AAA/scar-testcases/cpu_quantum",
+        "source_sha256": "89c98a323ea07cdf5dddd492a8c8e7d4726a0d97c42a92304de11488d6ea4801",
+        "source_unchanged": true,
+        "runtime": "/home/zyf/AAA/cirq/.scar-runtime",
+        "isolated_distributions": {
+          "cirq-core": "1.7.0",
+          "duet": "0.2.9",
+          "sortedcontainers": "2.4.0"
+        },
+        "python": "3.14.7 | packaged by conda-forge | (main, Sep  2 2026, 21:08:32) [GCC 15.3.0]",
+        "started_unix": 1794568109.0548115,
+        "supervisor_wall_seconds": 636.443423056,
+        "returncode": 0,
+        "timed_out": false,
+        "timeout_seconds": 900,
+        "peak_sampled_cpu_percent": 807.4134221207712,
+        "peak_sampled_sum_process_rss_bytes": 5185810432,
+        "rss_scope": "sum of process RSS, including potentially shared pages; sampled every two seconds",
+        "workload": {
+          "schema": "scar.cpu-quantum-workload",
+          "backend": "cirq.Simulator / NumPy CPU",
+          "parameters": {
+            "qubits": 22,
+            "depth": 20,
+            "rounds": 12,
+            "circuits": 8,
+            "workers": 8,
+            "seed": 1729,
+            "dtype": "complex128",
+            "norm_tolerance": null
+          },
+          "python": "3.14.7 | packaged by conda-forge | (main, Sep  2 2026, 21:08:32) [GCC 15.3.0]",
+          "wall_seconds": 636.0853689830001,
+          "worker_cpu_seconds": 4921.291197445,
+          "norm_tolerance": 1e-09,
+          "max_norm_error": 1.2212453270876722e-14,
+          "active_worker_pids": [
+            22115,
+            22118,
+            22119,
+            22120,
+            22121,
+            22122,
+            22123,
+            22124
+          ],
+          "results": [
+            {
+              "experiment": 0,
+              "pid": 22115,
+              "seed": 1729,
+              "gates_per_round": 1100,
+              "rounds": 12,
+              "norm": 0.9999999999999999,
+              "norm_error": 1.1102230246251565e-16,
+              "norm_tolerance": 1e-09,
+              "z0": 0.000347292179744052,
+              "cpu_seconds": 624.0919145209999,
+              "wall_seconds": 631.6981716220007,
+              "max_rss_kib": 661892
+            },
+            {
+              "experiment": 1,
+              "pid": 22118,
+              "seed": 1730,
+              "gates_per_round": 1100,
+              "rounds": 12,
+              "norm": 1.000000000000001,
+              "norm_error": 1.1102230246251565e-15,
+              "norm_tolerance": 1e-09,
+              "z0": -0.0003662154783697913,
+              "cpu_seconds": 597.6891182490001,
+              "wall_seconds": 604.9958505129998,
+              "max_rss_kib": 663112
+            },
+            {
+              "experiment": 2,
+              "pid": 22122,
+              "seed": 1731,
+              "gates_per_round": 1100,
+              "rounds": 12,
+              "norm": 1.0000000000000093,
+              "norm_error": 9.325873406851315e-15,
+              "norm_tolerance": 1e-09,
+              "z0": 0.0002242237142149328,
+              "cpu_seconds": 626.0586665879999,
+              "wall_seconds": 633.4992405909998,
+              "max_rss_kib": 662116
+            },
+            {
+              "experiment": 3,
+              "pid": 22123,
+              "seed": 1732,
+              "gates_per_round": 1100,
+              "rounds": 12,
+              "norm": 0.9999999999999961,
+              "norm_error": 3.885780586188048e-15,
+              "norm_tolerance": 1e-09,
+              "z0": 0.000644997240757117,
+              "cpu_seconds": 624.1629171909999,
+              "wall_seconds": 631.5545401170002,
+              "max_rss_kib": 599456
+            },
+            {
+              "experiment": 4,
+              "pid": 22120,
+              "seed": 1733,
+              "gates_per_round": 1100,
+              "rounds": 12,
+              "norm": 1.0000000000000042,
+              "norm_error": 4.218847493575595e-15,
+              "norm_tolerance": 1e-09,
+              "z0": -0.00031990564610551164,
+              "cpu_seconds": 625.2594604970001,
+              "wall_seconds": 632.6583235179996,
+              "max_rss_kib": 665344
+            },
+            {
+              "experiment": 5,
+              "pid": 22121,
+              "seed": 1734,
+              "gates_per_round": 1100,
+              "rounds": 12,
+              "norm": 1.0000000000000078,
+              "norm_error": 7.771561172376096e-15,
+              "norm_tolerance": 1e-09,
+              "z0": 0.000306020944384533,
+              "cpu_seconds": 600.277143817,
+              "wall_seconds": 607.6309536449999,
+              "max_rss_kib": 659512
+            },
+            {
+              "experiment": 6,
+              "pid": 22119,
+              "seed": 1735,
+              "gates_per_round": 1100,
+              "rounds": 12,
+              "norm": 0.9999999999999887,
+              "norm_error": 1.1324274851176597e-14,
+              "norm_tolerance": 1e-09,
+              "z0": -0.0004959145510106122,
+              "cpu_seconds": 625.17144305,
+              "wall_seconds": 632.7155422309997,
+              "max_rss_kib": 663000
+            },
+            {
+              "experiment": 7,
+              "pid": 22124,
+              "seed": 1736,
+              "gates_per_round": 1100,
+              "rounds": 12,
+              "norm": 1.0000000000000122,
+              "norm_error": 1.2212453270876722e-14,
+              "norm_tolerance": 1e-09,
+              "z0": -0.00022721090996696836,
+              "cpu_seconds": 598.580533532,
+              "wall_seconds": 605.9000957480002,
+              "max_rss_kib": 664380
+            }
+          ],
+          "state_vectors_saved": false,
+          "accelerator_used": false
+        },
+        "instrumented": false,
+        "acceleration_claimed": false,
+        "precision": "complex128",
+        "norm_tolerance": 1e-09,
+        "calibration_reference": "/home/zyf/AAA/scar/artifacts/current/experiments/cpu-quantum-current/calibration-fp64-8.json",
+        "intended_duration_seconds": 600,
+        "state_vectors_saved": false,
+        "accelerator_used": false,
+        "warmup_runs": 0,
+        "benchmark_repetitions": 1,
+        "statistical_speedup_established": false,
+        "mean_compute_cores": 7.736840740910872,
+        "total_simulated_gates": 105600,
+        "environment_receipt": {
+          "path": "/home/zyf/AAA/scar/artifacts/current/experiments/cpu-quantum-current/environment.json",
+          "sha256": "f3e806b9ff5e4dee095ec5a6e850c3c811c591bc22b47bdde0c5296214c374c4"
+        }
+      },
+      "capture": "cpu-quantum-current/trace",
+      "capture_scope": "3 qubits, depth 1, one worker; parallel process handoff is not certified"
+    }
+  ],
+  "measurement_contract": {
+    "repetitions": 1,
+    "warmup": 0,
+    "speedup_claimed": false,
+    "program_output_arrays_saved_by_collector": false
+  },
+  "known_limits": [
+    "source graph exists does not prove dependency/effect closure",
+    "full benchmark and bounded capture use distinct parameters",
+    "multiprocess benchmark does not establish cross-process graph edges"
+  ],
+  "runner_sources": [
+    {
+      "path": "/home/zyf/AAA/scar-testcases/cpu_science/gray_scott_case.py",
+      "sha256": "b5bf31fd8271df619310ae2be3fa53bed8f092740ae8b126fa796f17c743e170",
+      "text": "\"\"\"External CPU PDE testcase using unchanged cselab/gray-scott code.\"\"\"\nimport argparse\nimport json\nfrom pathlib import Path\nimport sys\nimport time\n\n\ndef main():\n    parser = argparse.ArgumentParser()\n    parser.add_argument(\"--source\", default=str(Path(__file__).resolve().parents[2] / \"gray-scott/python\"))\n    parser.add_argument(\"--grid\", type=int, default=512)\n    parser.add_argument(\"--steps\", type=int, default=1000)\n    parser.add_argument(\"--out\", type=Path, required=True)\n    args = parser.parse_args()\n    sys.path.insert(0, args.source)\n    from gray_scott import GrayScott\n    import numpy as np\n    args.out.mkdir(parents=True, exist_ok=True)\n    started = time.perf_counter()\n    simulation = GrayScott(N=args.grid, second_order=False, movie=False, outdir=str(args.out))\n    simulation.integrate(0, args.steps * simulation.dt, dump_freq=args.steps + 1)\n    result = dict(grid=args.grid, requested_steps=args.steps, dt=simulation.dt,\n        wall_seconds=time.perf_counter() - started, finite=bool(np.isfinite(simulation.u).all() and np.isfinite(simulation.v).all()),\n        u_sum=float(simulation.u.sum()), v_sum=float(simulation.v.sum()),\n        u_range=[float(simulation.u.min()), float(simulation.u.max())],\n        v_range=[float(simulation.v.min()), float(simulation.v.max())])\n    (args.out / \"result.json\").write_text(json.dumps(result, indent=2) + \"\\n\")\n    print(json.dumps(result))\n    assert result[\"finite\"]\n\n\nif __name__ == \"__main__\":\n    main()\n"
+    },
+    {
+      "path": "/home/zyf/AAA/scar-testcases/cpu_quantum/run.py",
+      "sha256": "89c98a323ea07cdf5dddd492a8c8e7d4726a0d97c42a92304de11488d6ea4801",
+      "text": "\"\"\"CPU state-vector simulation of parameterized, entangling quantum circuits.\n\nEach task represents an independent circuit experiment. Repeated rounds evolve\nthe previous quantum state; no state vector is serialized or written to disk.\nThe parent reports norm and Z expectation scalars and real worker CPU time.\n\"\"\"\nimport argparse\nfrom concurrent.futures import ProcessPoolExecutor\nimport json\nimport multiprocessing\nimport os\nfrom pathlib import Path\nimport resource\nimport sys\nimport time\n\n\ndef simulate_experiment(spec):\n    import cirq\n    import numpy as np\n\n    qubits, depth, rounds, seed, ordinal, dtype, tolerance = spec\n    started = time.perf_counter()\n    cpu_started = time.process_time()\n    rng = np.random.default_rng(seed + ordinal)\n    wires = cirq.LineQubit.range(qubits)\n    circuit = cirq.Circuit()\n    for layer in range(depth):\n        circuit.append(cirq.rx(float(rng.uniform(-np.pi, np.pi)))(q) for q in wires)\n        circuit.append(cirq.rz(float(rng.uniform(-np.pi, np.pi)))(q) for q in wires)\n        circuit.append(cirq.CZ(wires[q], wires[q + 1]) for q in range(layer % 2, qubits - 1, 2))\n        if layer % 2:\n            circuit.append(cirq.CZ(wires[-1], wires[0]))\n    simulator = cirq.Simulator(dtype=getattr(np, dtype), seed=seed + ordinal)\n    state = 0\n    for _ in range(rounds):\n        result = simulator.simulate(circuit, initial_state=state, qubit_order=wires)\n        state = result.final_state_vector\n    norm = float(np.vdot(state, state).real)\n    half = state.size // 2\n    z0 = float(np.vdot(state[:half], state[:half]).real - np.vdot(state[half:], state[half:]).real)\n    if not np.isfinite(norm) or abs(norm - 1.0) > tolerance:\n        raise ValueError('state norm failed: ' + str(norm))\n    return dict(experiment=ordinal, pid=os.getpid(), seed=seed + ordinal,\n        gates_per_round=sum(1 for _ in circuit.all_operations()), rounds=rounds,\n        norm=norm, norm_error=abs(norm - 1.0), norm_tolerance=tolerance,\n        z0=z0, cpu_seconds=time.process_time() - cpu_started,\n        wall_seconds=time.perf_counter() - started,\n        max_rss_kib=resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)\n\n\ndef main():\n    parser = argparse.ArgumentParser(description=__doc__)\n    parser.add_argument('--qubits', type=int, default=20)\n    parser.add_argument('--depth', type=int, default=20)\n    parser.add_argument('--rounds', type=int, default=1)\n    parser.add_argument('--circuits', type=int, default=1)\n    parser.add_argument('--workers', type=int, choices=(1, 2, 4, 8), default=1)\n    parser.add_argument('--seed', type=int, default=1729)\n    parser.add_argument('--dtype', choices=('complex64', 'complex128'), default='complex128')\n    parser.add_argument('--norm-tolerance', type=float)\n    parser.add_argument('--out', type=Path)\n    args = parser.parse_args()\n    if not 2 <= args.qubits <= 25 or min(args.depth, args.rounds, args.circuits) < 1:\n        parser.error('qubits must be 2..25; depth, rounds and circuits must be positive')\n    tolerance = args.norm_tolerance\n    if tolerance is None:\n        tolerance = 1e-9 if args.dtype == 'complex128' else 5e-3\n    if not 0 < tolerance < 1:\n        parser.error('norm tolerance must be strictly between 0 and 1')\n    # Configure native CPU libraries before their first import in each process.\n    for key in ('OMP_NUM_THREADS', 'OPENBLAS_NUM_THREADS', 'MKL_NUM_THREADS'):\n        os.environ[key] = '1'\n    specs = [(args.qubits, args.depth, args.rounds, args.seed, i, args.dtype, tolerance) for i in range(args.circuits)]\n    started = time.perf_counter()\n    if args.workers == 1:\n        results = [simulate_experiment(spec) for spec in specs]\n    else:\n        with ProcessPoolExecutor(max_workers=args.workers,\n                mp_context=multiprocessing.get_context('spawn')) as pool:\n            results = list(pool.map(simulate_experiment, specs, chunksize=1))\n    elapsed = time.perf_counter() - started\n    report = dict(schema='scar.cpu-quantum-workload', backend='cirq.Simulator / NumPy CPU',\n        parameters={k: v for k, v in vars(args).items() if k != 'out'},\n        python=sys.version, wall_seconds=elapsed,\n        worker_cpu_seconds=sum(r['cpu_seconds'] for r in results),\n        norm_tolerance=tolerance,\n        max_norm_error=max(r['norm_error'] for r in results),\n        active_worker_pids=sorted({r['pid'] for r in results}), results=results,\n        state_vectors_saved=False, accelerator_used=False)\n    if args.out:\n        args.out.write_text(json.dumps(report, indent=2) + '\\n')\n    print(json.dumps(report))\n\n\nif __name__ == '__main__':\n    main()\n"
+    }
+  ]
+}

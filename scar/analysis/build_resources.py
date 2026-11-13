@@ -1,7 +1,7 @@
 """Symbolic resource interfaces for the unified build.
 
-These are requirements and guarded candidates, never a hardware inventory or
-observations of execution. A Python value's host representation is distinct
+These are requirements and guarded candidates, with optional references to a
+retained hardware inventory, never observations of execution. A Python value's host representation is distinct
 from any tensor storage it may reference. In particular a device request does
 not certify a physical copy, allocation, kernel launch or file access.
 """
@@ -45,7 +45,7 @@ class BuildResourceProvider:
     """Typed dependency adapter; no target code or live probes are executed."""
     relation_kinds = frozenset((K.RESOURCE,))
 
-    def __init__(self, view):
+    def __init__(self, view, *, target=None):
         self.view = view
         self.records = {}
         self.owners = {}
@@ -57,16 +57,21 @@ class BuildResourceProvider:
         self.pools = {}
         self._operations = set()
         self._candidate_operations = set()
+        self.target = None
+        if target is not None:
+            from scar.analysis.build_target_resources import RetainedBuildTarget
+            self.target = RetainedBuildTarget(self, target)
 
     def _record(self, point, record, owner):
         self.records[point] = record
         self.owners[point] = owner
         return point
 
-    def _edge(self, source, target, rule, *, condition=None, may=False):
+    def _edge(self, source, target, rule, *, condition=None, may=False, guards=(), evidence=()):
         edge = Edge(source, target, K.RESOURCE, Meaning.DEPENDENCE,
-            (Evidence(rule, (source.namespace.graph,), (source, target)),),
-            () if condition is None else (Condition(_SCHEMA, condition, target),),
+            (Evidence(rule, (source.namespace.graph, *evidence), (source, target)),),
+            tuple(Condition(_SCHEMA, name, target) for name in dict.fromkeys(
+                (*guards, *((condition,) if condition is not None else ())))),
             Strength.MAY if may else Strength.EXACT)
         self.edges.append(edge)
         self._incoming[target].append(edge)
@@ -87,6 +92,8 @@ class BuildResourceProvider:
             self._record(point, ResourceDefinition(point.node, kind, role,
                 ExternalResource(root, 'symbolic:' + name)), Point(operation.namespace, root, None))
             self.pools[key] = point
+            if self.target is not None:
+                self.target.bind_pool(point, name)
         return self.pools[key]
 
     def _require(self, operation, name, *, ports=(), conditional=False):
@@ -197,6 +204,8 @@ class BuildResourceProvider:
         return self
 
     def _neighbors(self, point, incoming):
+        if self.target is not None:
+            self.target.check()
         base = _key(point)
         edges = (self._incoming if incoming else self._outgoing).get(base, ())
         # Resource interfaces share their owning operation's call context.
@@ -231,10 +240,11 @@ class BuildResourceProvider:
 
     def explain(self, point):
         return dict(node=self.describe(point), original=self.original(point),
-            symbolic_interface=True, runtime_placement_proven=False, transfers_observed=False)
+            symbolic_interface=True, runtime_placement_proven=False, transfers_observed=False,
+            target_snapshot=None if self.target is None else self.target.snapshot)
 
     def payload(self):
-        return dict(schema=_SCHEMA,
+        result = dict(schema=_SCHEMA,
             records=[dict(point=encode(p), record=encode(record), owner=encode(self.owners[p]),
                 type=type(record).__name__) for p, record in self.records.items()],
             edges=[encode(edge) for edge in self.edges],
@@ -242,6 +252,9 @@ class BuildResourceProvider:
             candidate_operations=[encode(point) for point in sorted(self._candidate_operations,
                 key=lambda p: (str(p.namespace.root), str(p.node)))],
             actual_events=[], actual_placement_established=False, transfers_observed=False)
+        if self.target is not None:
+            result['target'] = self.target.payload()
+        return result
 
     @classmethod
     def from_payload(cls, view, payload):
@@ -260,6 +273,10 @@ class BuildResourceProvider:
             provider._record(point, record, owner)
             if type(record) is ResourceRequirement:
                 provider._operations.add(owner)
+            elif type(record.origin) is ExternalResource and record.origin.port.startswith('symbolic:'):
+                name = record.origin.port.removeprefix('symbolic:')
+                if name in _POOLS:
+                    provider.pools[point.namespace, name] = point
         provider._candidate_operations = {decode(Point, row) for row in payload.get('candidate_operations', ())}
         for row in payload['edges']:
             edge = decode(Edge, row)
@@ -272,6 +289,14 @@ class BuildResourceProvider:
             frontier = decode(Frontier, row)
             provider.frontiers.append(frontier)
             provider._frontiers[frontier.point].append(frontier)
+        if 'target' in payload:
+            from scar.analysis.build_target_resources import RetainedBuildTarget
+            from pathlib import Path
+            path = Path(payload['target']['snapshot']['uri']).parent
+            provider.target = RetainedBuildTarget(provider, path)
+            if provider.target.payload() != payload['target']:
+                raise ValueError('resource target payload differs from retained hardware')
+            provider.target.restore()
         view.register(provider)
         return provider
 

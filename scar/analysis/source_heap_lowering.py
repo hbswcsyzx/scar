@@ -225,7 +225,13 @@ def expression_for_heap_target(builder, node, cursor, *, parent_definition=None)
                 'membership retains ordered operands, contains/iteration fallback, truth, world and failures; runtime dispatch/identity/content remain unproved')
             return cursor,result
         finally:del builder.active_temporaries[baseline:]
-    if isinstance(node, ast.Attribute):
+    if isinstance(node, ast.UnaryOp) and type(node.op) in (ast.UAdd, ast.USub, ast.Invert):
+        # Assignment-target subtrees are absent from the old overlay too.
+        # Keep the original unary selector and ordered operand/world invoke;
+        # an unknown operand can dispatch to user code, so do not fold it.
+        children = ((node.operand, "operand", 0),)
+        opcode = {ast.UAdd: Opcode.POS, ast.USub: Opcode.NEG, ast.Invert: Opcode.INVERT}[type(node.op)]
+    elif isinstance(node, ast.Attribute):
         if node.attr.startswith("__") and not node.attr.endswith("__"):
             _unsupported(node, "private attribute lookup requires exact compiler-class name mangling")
         children = ((node.value, "receiver", 0),)

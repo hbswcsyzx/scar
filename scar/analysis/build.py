@@ -23,7 +23,8 @@ SCHEMA = 'scar.program-build'
 
 def _rules():
     return {name: sha256((Path(__file__).parent / name).read_bytes()).hexdigest()
-        for name in ('build.py', 'build_resources.py','build_f4.py','build_f4_resources.py',
+        for name in ('build.py', 'observed_body_scope.py', 'observed_call_bindings.py',
+            'observed_function_interfaces.py', 'build_resources.py','build_target_resources.py','build_f4.py','build_f4_resources.py',
             '../ir/program/build_f4_resources.py')}
 
 
@@ -89,10 +90,10 @@ def _budget(seconds=3600, input_bytes=16 * 1024**3):
 
 class _LazyResources:
     """Materialize resource interfaces once for each demanded original body."""
-    def __init__(self, view, session):
+    def __init__(self, view, session, *, target=None):
         from scar.analysis.build_resources import BuildResourceProvider
         self.view, self.session = view, session
-        self.provider = BuildResourceProvider(view)
+        self.provider = BuildResourceProvider(view, target=target)
         self.seen = set()
         self.relation_kinds = self.provider.relation_kinds
 
@@ -160,7 +161,11 @@ class BuildSession:
         # ordinary ProgramView does, while keeping this same observed session.
         self.view.dependencies.providers[:] = [_RepresentationProvider(provider,
             self.view._core_extension) for provider in self.view.dependencies.providers]
-        self.resources = _LazyResources(self.view, self.session)
+        target = self.report.get('target')
+        if target is not None:
+            _check(target)
+        self.resources = _LazyResources(self.view, self.session,
+            target=None if target is None else Path(target['path']).parent)
         self.view.register(self.resources)
         self.observed = None
         self.entries = tuple(self.session.select_bodies(file=self.report['entry'], kind='MODULE'))
@@ -206,7 +211,8 @@ def _model_for(entry, explicit):
 
 
 def build(entry, trace, out, *, model=None, jobs=4, source_roots=(),
-          max_seconds=3600, max_input_bytes=16 * 1024**3,catalog=None,cache_roots=()):
+          max_seconds=3600, max_input_bytes=16 * 1024**3,catalog=None,cache_roots=(),target=None,
+          body_scope='all', call_binding=None):
     from scar.analysis.static_program import build_static_program, link_static_program, read_static_program
     from scar.analysis.static_calls import StaticCallBudget
     from scar.analysis.program_dependency_export import export_dependency_walk
@@ -222,25 +228,51 @@ def build(entry, trace, out, *, model=None, jobs=4, source_roots=(),
     trace_path = None if trace is None else Path(trace).resolve()
     if trace_path is not None and not trace_path.is_dir():
         raise ValueError('trace must be an existing directory; omit it for static-only build')
+    if body_scope not in ('all', 'observed') or body_scope == 'observed' and (trace_path is None or model is not None):
+        raise ValueError('observed body scope requires a trace and a fresh source build')
+    call_binding = call_binding or ('observed' if body_scope == 'observed' else 'static')
+    if call_binding not in ('static', 'observed') or call_binding == 'observed' and trace_path is None:
+        raise ValueError('observed call binding requires a trace')
+    target_path = None if target is None else Path(target).resolve()
+    target_ref = None
+    if target_path is not None:
+        from scar.analysis.target_graph import TargetHardwareGraph
+        hardware = TargetHardwareGraph(target_path)
+        hardware.resources(); hardware.connections(); hardware.paths()
+        target_ref = _receipt(target_path / 'result.json')
     from scar.analysis.build_f4 import discover,build_f4
     f4=discover(entry,trace_path,catalog=catalog,cache_roots=cache_roots) if catalog or model is None else None
     if f4 is not None:
         return build_f4(entry,trace_path,out,f4,source_roots=source_roots,
-            max_seconds=max_seconds,max_input_bytes=max_input_bytes)
+            max_seconds=max_seconds,max_input_bytes=max_input_bytes,target=target_path)
     selected = _model_for(entry, model) if model or not source_roots else None
     out.mkdir(parents=True)
     if selected is None:
         selected = out / 'source'
+        observed_scope = None
+        source_files = ()
+        if body_scope == 'observed':
+            from scar.analysis.observed_body_scope import read_observed_scope
+            observed_scope = read_observed_scope(trace_path)
+            source_files = tuple(sorted({c.code.filename for c in observed_scope.captures
+                if Path(c.code.filename).suffix == '.py' and Path(c.code.filename).is_file()}))
         source = build_static_program(entry.parent, source_roots=source_roots,
-            out=selected, jobs=jobs, phase='bodies')
+            out=selected, jobs=jobs, phase='bodies', source_files=source_files)
         from scar.analysis.static_body import expand_static_bodies
-        expand_static_bodies(selected, jobs=jobs)
-        source = link_static_program(selected, budget=replace(StaticCallBudget(),
+        entries=()
+        if body_scope == 'observed':
+            from scar.analysis.observed_body_scope import select_observed_bodies
+            entries, selection=select_observed_bodies(selected, trace_path, entry,scope=observed_scope)
+            selection['observed_source_files'] = list(source_files)
+            _write(out/'body-selection.json',selection)
+        expand_static_bodies(selected, jobs=jobs, entries=entries)
+        source = (link_static_program(selected, budget=replace(StaticCallBudget(),
             max_seconds=max_seconds, max_input_bytes=max_input_bytes))
+            if call_binding == 'static' else read_static_program(selected, verify=False))
     else:
         source = read_static_program(selected, verify=False)
         # Refinement owns a private copy; never modify a supplied catalog.
-        if 'static_calls' not in source:
+        if 'static_calls' not in source and call_binding == 'static':
             import shutil
             original_model = selected
             selected = out / 'source'
@@ -272,7 +304,10 @@ def build(entry, trace, out, *, model=None, jobs=4, source_roots=(),
                         'module_frontiers', 'class_frontiers', 'diagnostics', 'last_attempt_issue') if name in body}))
     calls = source.get('static_calls')
     if calls is None:
-        gaps.append(dict(layer='calls', kind='CALL_RELATIONS_NOT_PUBLISHED'))
+        gaps.append(dict(layer='calls', kind='STATIC_CALL_INFERENCE_NOT_REQUESTED'
+            if call_binding == 'observed' else 'CALL_RELATIONS_NOT_PUBLISHED',
+            detail='Static local data/control/state subgraphs remain indexed. '
+                'Observed interfaces apply only to their recorded run; unobserved dispatch remains open.'))
     else:
         gaps.extend(dict(layer='calls', kind='PUBLICATION_FRONTIER', detail=f) for f in calls['frontiers'])
         gaps.append(dict(layer='calls', kind='CONDITIONAL_RELATIONS_REMAIN',
@@ -292,12 +327,14 @@ def build(entry, trace, out, *, model=None, jobs=4, source_roots=(),
         observed='observed.json' if trace_path is not None else None,
         function_bodies_copied=0, loop_iterations_expanded=0))
     report = dict(schema=SCHEMA, schema_version=1, rules=_rules(), entry=str(entry), model=_receipt(selected/'manifest.json'),
-        trace=trace_ref, tables={}, body_storage='ORIGINAL_REFERENCED_SHARDS',
+        trace=trace_ref, target=target_ref, tables={}, body_storage='ORIGINAL_REFERENCED_SHARDS',
         cross_layer_storage='ORIGINAL_CALL_SHARDS_AND_SCOPED_OBSERVATIONS',
         resource_storage='LAZY_TYPED_SYMBOLIC_INTERFACES', original_body_bytes_copied=0,
         loops_unrolled=False, target_executed=False, first_stage_complete=False,
         entry_probe_limits=dict(max_points=128, max_edges=512, max_depth=8),
         observed_admission='ABSENT' if trace_path is None else 'PENDING',
+        body_scope=body_scope,
+        call_binding=call_binding,
         workflow_complete=False, selection_scope='INDEXED_CORPUS_NOT_PROVEN_RUNTIME_REACHABILITY',
         summary=dict(source_units=len(source['units']),
             configuration_inputs=len(configuration),
@@ -344,6 +381,11 @@ def main(argv=None):
     parser = argparse.ArgumentParser(prog='scar build')
     parser.add_argument('--entry', required=True)
     parser.add_argument('--trace')
+    parser.add_argument('--target', help='retained target hardware graph; inventory is not placement evidence')
+    parser.add_argument('--body-scope', choices=('all','observed'), default='all',
+        help='lower all declared bodies or exact observed code bodies; all source templates remain indexed')
+    parser.add_argument('--call-binding', choices=('static','observed'),
+        help='infer static call targets or join actual trace selections; observed body scope defaults to observed binding')
     parser.add_argument('--out', required=True)
     parser.add_argument('--model', help='reuse an existing admitted source model')
     parser.add_argument('--source-root', action='append', default=[])
@@ -355,7 +397,8 @@ def main(argv=None):
     args = parser.parse_args(argv)
     result = build(args.entry, args.trace, args.out, model=args.model, jobs=args.jobs,
         source_roots=args.source_root, max_seconds=args.max_seconds, max_input_bytes=args.max_input_bytes,
-        catalog=args.catalog,cache_roots=args.cache_root)
+        catalog=args.catalog,cache_roots=args.cache_root,target=args.target,body_scope=args.body_scope,
+        call_binding=args.call_binding)
     print(json.dumps(dict(workflow_complete=result['workflow_complete'],
         first_stage_complete=result['first_stage_complete'], **result['summary'])))
     return 0
