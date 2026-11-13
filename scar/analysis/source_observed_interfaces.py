@@ -49,7 +49,7 @@ def _pins():
     from scar.analysis import source_function_connections,static_compilation,source_observed_materials,source_fact_materials
     from scar.ir.program import source_observed_codes as code_types
     return {name:sha256(Path(module.__file__).read_bytes()).hexdigest() for name,module in (
-        ('producer',__import__(__name__,fromlist=['__file__'])),('types',R),('interfaces',I),
+        ('producer',__import__(__name__,fromlist=['__file__'])),('types',R),('interfaces',I),('connections',T),
         ('callsite',source_observed_calls),('protocol_calls',source_observed_protocols),
         ('code',source_observed_codes),('compiler',source_compiled_code_profiles),
         ('binder',source_function_connections),('code_mapping',static_compilation),
@@ -61,7 +61,7 @@ def _same_connection(interface,connection):
     return (interface.activation==connection.activation and link.source_callable==connection.source_callable
         and link.body==connection.body and link.parameters==connection.parameters and link.returns==connection.returns
         and link.argument_packs==connection.argument_packs and link.projections==connection.projections
-        and link.binding==connection.binding)
+        and link.binding==connection.binding and link.input_envelope==connection.input_envelope)
 
 
 def _argument_prefixes(index,observation,call,function,*,receiver_known=False):
@@ -122,7 +122,8 @@ def _body_connection(mini,unit,function,invocation):
     """Retain a witnessed body when explicit argument routing is unresolved.
 
     Code/entry correspondence is independent of self/default/pack contents.
-    Only the original environment, world and return interfaces are attached.
+    Original data formals retain a conservative pre-call input envelope;
+    their exact argument/receiver/default binding remains unmodeled.
     """
     offset=mini.offsets[unit.unit];gp=mini.gp
     if len(function.formals)!=len(function.environment.parameters)+2:
@@ -132,7 +133,13 @@ def _body_connection(mini,unit,function,invocation):
     routes=(T.Route(gp(offset+function.formals[0]),T.RouteKind.FUNCTION_ENVIRONMENT,(gp(invocation.callee),)),
         T.Route(gp(offset+function.formals[-1]),T.RouteKind.STATE,(gp(invocation.world),)))
     returned=[]
+    envelope=None
     if activation is T.FunctionActivation.NORMAL:
+        envelope=T.CallInputEnvelope(gp(invocation.callee),tuple(gp(p) for p in invocation.positional),
+            tuple((name,gp(p)) for name,p in invocation.keywords),
+            None if invocation.positional_pack is None else gp(invocation.positional_pack),
+            None if invocation.keyword_pack is None else gp(invocation.keyword_pack),gp(invocation.world),
+            tuple(gp(offset+p) for p in function.formals[1:-1]))
         if invocation.result is not None and function.returns is not None:
             returned.append((gp(offset+function.returns),gp(invocation.result)))
         if function.return_world is not None:returned.append((gp(offset+function.return_world),gp(invocation.result_world)))
@@ -140,7 +147,7 @@ def _body_connection(mini,unit,function,invocation):
         activation,routes,tuple(returned),(*tuple(c for c in GUARDS
             if c!='SOURCE_ARGUMENT_ABI_HAS_NO_ADDITIONAL_UNMODELED_RECEIVER'),
             'EXPLICIT_ARGUMENT_RECEIVER_AND_DEFAULT_BINDING_NOT_MODELED'),
-        binding=T.ArgumentBinding.NOT_MODELED)
+        binding=T.ArgumentBinding.NOT_MODELED,input_envelope=envelope)
 
 
 def _body_entry_windows(index):
@@ -270,9 +277,8 @@ def _overlay(parent,unit,groups,frontiers,folder,receipt):
         original=parent.catalog.fact_store.load(unit).calls[query]
         from scar.analysis.source_reference_slice import source_port
         facts=parent.catalog.fact_store.load(unit)
-        link=T.CallLink(source_port(facts,original.result),source_port(facts,original.callee),c.source_callable,c.body,
-            'SOURCE_FUNCTION' if c.activation is T.FunctionActivation.NORMAL else 'CREATE_DEFERRED_BODY',None,
-            c.parameters,c.returns,c.conditions,argument_packs=c.argument_packs,projections=c.projections,binding=c.binding)
+        link=c.to_link(source_port(facts,original.result),source_port(facts,original.callee),
+            'SOURCE_FUNCTION' if c.activation is T.FunctionActivation.NORMAL else 'CREATE_DEFERRED_BODY')
         queries[query]=replace(queries[query],interfaces=(*queries[query].interfaces,len(interfaces)))
         interfaces.append(I.SourceFunctionInterface(query,i,call,group.code.function_fact,reference,c.activation,link))
     for frontier in frontiers:
@@ -305,7 +311,7 @@ def build_observed_interfaces(parent,index,out):
         shards[unit]=dict(path=_folder(unit),tables=tables,counts=_counts(graph,parent.load_unit(unit),groups,frontiers))
     parent.validate();index.check()
     if pins!=_pins():raise ValueError('observed interface rules changed')
-    report=dict(schema=SCHEMA,schema_version=1,parent_path=str(parent.path),
+    report=dict(schema=SCHEMA,schema_version=2,parent_path=str(parent.path),
         parent=encode(_artifact(parent.path/'result.json',parent.report['schema'])),catalog=str(parent.catalog.path),
         trace=index.codes.trace.directory,project_root=index.codes.trace.project_root,run_scope=index.codes.targets.source_sha256,
         code_units=sorted(index.codes._sources),compiled_units=[p.unit for p in index.compiled],
@@ -324,7 +330,7 @@ def build_observed_interfaces(parent,index,out):
 class ObservedFunctionInterfaceStore:
     def __init__(self,path):
         self.path=Path(path).absolute();self.raw=(self.path/'result.json').read_bytes();self.report=r=json.loads(self.raw)
-        if (r['schema'],r['schema_version'],r['pins'])!=(SCHEMA,1,_pins()):raise ValueError('observed interface schema or rules differ')
+        if (r['schema'],r['schema_version'],r['pins'])!=(SCHEMA,2,_pins()):raise ValueError('observed interface schema or rules differ')
         self.parent=open_function_interfaces(r['parent_path']);self.catalog=self.parent.catalog
         from scar.analysis.program_view import ProgramView
         from scar.analysis.source_observed_codes import ObservedSourceCodeProvider

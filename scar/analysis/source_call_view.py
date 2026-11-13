@@ -160,6 +160,7 @@ class SourceFunctionCallProvider:
         if view.catalog is None or (view.catalog.path,view.catalog.report)!=(self.store.catalog.path,self.store.catalog.report):
             raise ValueError('source call view and interfaces need the same original catalog')
         self.graphs={};self.frames={};self.links={};self.relations=[]
+        self.body_formals={}
         self.available_units=frozenset(self.store.report['shards']);self.boundary_ports={}
         self.incoming_index=defaultdict(list);self.outgoing_index=defaultdict(list)
         self.pending=defaultdict(set)
@@ -217,6 +218,41 @@ class SourceFunctionCallProvider:
         self.outgoing_index[self._key(source)].append(relation)
         self.incoming_index[self._key(target)].append(relation)
 
+    def _input_envelope(self,interface,facts):
+        """Validate a dependency envelope against the original CALL and body.
+
+        This has no solver/reference propagation and creates no pack value.
+        The CALL operation is the existing junction for its pre-call inputs.
+        """
+        link=interface.link;envelope=link.input_envelope
+        if envelope is None:return ()
+        if (interface.activation is not T.FunctionActivation.NORMAL
+                or link.binding is not T.ArgumentBinding.NOT_MODELED):
+            raise ValueError('call input envelope cannot establish argument binding or deferred execution')
+        unit=link.body.unit
+        if unit not in self.body_formals:
+            target=self.view.unit(unit).facts
+            self.body_formals[unit]={
+                (function.template,function.body,source_port(target,function.value)):
+                    tuple(source_port(target,p) for p in function.formals[1:-1])
+                for function in target.functions}
+        formals=self.body_formals[unit].get((link.body.template,link.body.region,link.source_callable))
+        if formals is None:raise ValueError('input envelope has no original source function body')
+        call=facts.calls[interface.query]
+        expected=T.CallInputEnvelope(source_port(facts,call.callee),
+            tuple(source_port(facts,p) for p in call.positional),
+            tuple((name,source_port(facts,p)) for name,p in call.keywords),
+            None if call.positional_pack is None else source_port(facts,call.positional_pack),
+            None if call.keyword_pack is None else source_port(facts,call.keyword_pack),
+            source_port(facts,call.world),formals)
+        if envelope!=expected:raise ValueError('input envelope differs from original pre-call inputs/data formals')
+        # Existing argument-source interfaces take precedence. The current
+        # body-only emitter has none, but an envelope never duplicates them.
+        covered={route.formal for route in link.parameters
+            if route.kind not in (T.RouteKind.FUNCTION_ENVIRONMENT,T.RouteKind.STATE)}
+        covered.update(projection.formal for projection in link.projections)
+        return tuple(formal for formal in formals if formal not in covered)
+
     def attach(self,unit):
         if unit in self.graphs:return self.graphs[unit]
         graph=self.store.read_unit(unit);self.graphs[unit]=graph
@@ -232,6 +268,11 @@ class SourceFunctionCallProvider:
             for route in link.parameters:ports.extend((route.formal,*route.actuals))
             for source,target in link.returns:ports.extend((source,target))
             for projection in link.projections:ports.extend((projection.formal,projection.pack))
+            if link.input_envelope is not None:
+                envelope=link.input_envelope
+                ports.extend((envelope.callee,*envelope.positional,
+                    *(point for _,point in envelope.keywords),envelope.world,*envelope.formals))
+                ports.extend(point for point in (envelope.positional_pack,envelope.keyword_pack) if point is not None)
             if link.argument_packs is not None:
                 pack=link.argument_packs
                 ports.extend(p for p in (pack.positional,pack.keywords,pack.receiver,pack.class_receiver) if p is not None)
@@ -294,6 +335,14 @@ class SourceFunctionCallProvider:
                     self._note(target,'SOURCE_CALL_PACK_CREATION_CONTEXT_NOT_SELECTED');continue
                 self._relation(source,target,frame,Flow.ENTER,Kind.PROJECTION,Meaning.DEPENDENCE,key,pi,
                     (*link.conditions,*projection.conditions,'ARGUMENT_PROJECTION_'+projection.kind.value))
+            for ei,formal_port in enumerate(self._input_envelope(interface,facts)):
+                formal=self.view.source_port(formal_port)
+                if formal.namespace!=frame.target:
+                    raise ValueError('input envelope formal does not belong to selected source body')
+                self._note(formal,'SOURCE_ARGUMENT_BINDING_NOT_MODELED_INPUT_PROVENANCE_ENVELOPE_ONLY')
+                self._relation(operation,formal,frame,Flow.ENTER,Kind.PROJECTION,Meaning.DEPENDENCE,key,ei,
+                    (*link.conditions,'PRECALL_INPUT_PROVENANCE_ENVELOPE_NOT_ARGUMENT_BINDING',
+                        'NO_SELECTED_ARGUMENT_REFERENCE_ALIAS_OR_PACK_ALLOCATION_PROOF'))
             for ri,(source,target) in enumerate(link.returns):
                 if type(source) is not T.GlobalPort or type(target) is not T.GlobalPort:
                     self._note(operation,'SOURCE_CALL_RETURN_ENDPOINT_NEEDS_PROTOCOL_INTERFACE');continue

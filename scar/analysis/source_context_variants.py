@@ -15,6 +15,7 @@ from pathlib import Path
 import sys
 
 from scar.analysis import source_contexts as C, source_context_view, source_roles, source_syntax
+from scar.analysis import compiler_stage_cache
 from scar.analysis import source_compiled_values as compiled, source_text_values, source_compilation_contexts
 from scar.analysis.normal_facts import SourceFactStore
 from scar.analysis.normal_output import write_table
@@ -33,7 +34,8 @@ def pins():
     return {name:sha256(Path(module.__file__).read_bytes()).hexdigest() for name,module in (
         ('contexts',C),('view',source_context_view),('roles',source_roles),
         ('syntax',source_syntax),('compiler_values',compiled),
-        ('compiler_digest',source_compilation_contexts),('types',V),('context_types',X))}
+        ('compiler_digest',source_compilation_contexts),('types',V),('context_types',X),
+        ('compiler_stage_cache',compiler_stage_cache))}
 
 
 class _ContextRouter(C._Router):
@@ -53,7 +55,20 @@ def context_variant_document(source_unit, f0, f1, f2, f3b, context, payload, *,
     Text-open and source-file decoding can differ. Reusing their AST is
     conditional on equal constructor, field, literal and position trees, not
     on equal path, raw bytes or a superficial module-code comparison.
+
+    Only an explicitly owned compiler-stage session reuses successful pure
+    documents. Each returned mutable document stays independent; standalone
+    calls and independent readers still replay the source/context rules.
     """
+    return compiler_stage_cache.reuse_document('context_variant_document', _context_variant_document,
+        source_unit, f0, f1, f2, f3b, context, payload,
+        max_scopes=max_scopes, max_regions=max_regions,
+        max_boundaries=max_boundaries, max_slots=max_slots)
+
+
+def _context_variant_document(source_unit, f0, f1, f2, f3b, context, payload, *,
+                              max_scopes=100000, max_regions=200000,
+                              max_boundaries=1000000, max_slots=10000000):
     if type(context) is not X.EffectiveCompileContext or type(payload) is not str:
         raise TypeError('explicit compiler context and interpreted source text required')
     if (context.runtime.implementation!=sys.implementation.name

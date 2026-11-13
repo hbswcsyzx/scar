@@ -72,6 +72,42 @@ def identity():
     return plan((root,), (step('return', root, P.TransferCompletion(C.FALLTHROUGH), (parameter(root),)),))
 
 
+def test_private_grammar_reuse_does_not_share_public_catalog_mutations(monkeypatch):
+    original=A._build_types; builds=[]
+    def counted(*args, **kwargs):
+        builds.append(args[0])
+        return original(*args, **kwargs)
+    A.clear_production_type_cache()
+    monkeypatch.setattr(A,'_build_types',counted)
+    try:
+        value=identity()
+        first=A.validate_production_plan(value)
+        assert A.read_production_plan(A.production_plan_document(value))==value
+        assert builds==[P.SourceProductionPlan]
+        catalog=A.production_type_catalog()
+        catalog['types'].clear();catalog['root'].clear()
+        assert A.validate_production_plan(value)==first
+        assert A.production_type_catalog()['types']
+        grammar,rows,_=A._shape_grammar(P.SourceProductionPlan)
+        with pytest.raises(TypeError): grammar['kind']='ATOM'
+        with pytest.raises(TypeError): rows[next(iter(rows))]['kind']='ATOM'
+    finally:
+        A.clear_production_type_cache()
+
+
+def test_cached_grammar_still_checks_current_constructor_and_bad_values(monkeypatch):
+    A.clear_production_type_cache()
+    value=identity();A.validate_production_plan(value)
+    invalid=replace(value,source=P.ProductionOccurrence(True))
+    with pytest.raises(A.ProductionError,match='TYPE_MISMATCH'):
+        A.validate_production_plan(invalid)
+    def replacement(self): raise ValueError('live constructor invariant')
+    monkeypatch.setattr(P.SourceProductionPlan,'__post_init__',replacement,raising=False)
+    with pytest.raises(A.ProductionError,match='live constructor invariant'):
+        A.validate_production_plan(value)
+    A.clear_production_type_cache()
+
+
 def request_specimen(root,source,scope,captures,default,world,abi):
     environment=P.EvaluationRequestEnvironment(source,scope,0,captures,default,world,abi)
     body=region('request',parent=root.id,kind=P.ProductionRegionKind.DEFERRED,

@@ -135,6 +135,39 @@ class ArgumentProjection:
             raise ValueError('only keyword remainder excludes consumed names')
 
 
+@dataclass(frozen=True, slots=True)
+class CallInputEnvelope:
+    """Pre-call provenance dependencies when data argument binding is open.
+
+    These are original source ports, not an allocated argument tuple or pack.
+    A formal may depend on any input, callable environment/default state or
+    pre-call world; this records no reference identity or selected argument.
+    """
+    callee: GlobalPort
+    positional: tuple[GlobalPort, ...]
+    keywords: tuple[tuple[str, GlobalPort], ...]
+    positional_pack: GlobalPort | None
+    keyword_pack: GlobalPort | None
+    world: GlobalPort
+    formals: tuple[GlobalPort, ...]
+    semantics: str = 'PRECALL_INPUT_PROVENANCE_ENVELOPE_NOT_ARGUMENT_BINDING'
+
+    def __post_init__(self):
+        if (type(self.positional) is not tuple or type(self.keywords) is not tuple
+                or type(self.formals) is not tuple
+                or any(type(item) is not tuple or len(item) != 2
+                    or type(item[0]) is not str or not item[0] for item in self.keywords)):
+            raise TypeError('call input envelope requires typed original argument collections')
+        inputs = (self.callee, *self.positional, *(point for _, point in self.keywords),
+            self.world, *(point for point in (self.positional_pack, self.keyword_pack) if point is not None))
+        if (any(type(point) is not GlobalPort for point in (*inputs, *self.formals))
+                or any(point.unit != self.callee.unit for point in inputs)
+                or len(set(self.formals)) != len(self.formals)
+                or len({point.unit for point in self.formals}) > 1
+                or self.semantics != 'PRECALL_INPUT_PROVENANCE_ENVELOPE_NOT_ARGUMENT_BINDING'):
+            raise ValueError('call input envelope must retain one original caller and data-formal boundary')
+
+
 @dataclass(frozen=True,slots=True)
 class FunctionConnection:
     """Conditional entry/exit wiring independent of the source operation kind."""
@@ -147,6 +180,18 @@ class FunctionConnection:
     argument_packs: ArgumentPacks | None=None
     projections: tuple[ArgumentProjection, ...] = ()
     binding: ArgumentBinding = ArgumentBinding.DIRECT
+    input_envelope: CallInputEnvelope | None = None
+
+    def __post_init__(self):
+        if self.input_envelope is not None and (type(self.input_envelope) is not CallInputEnvelope
+                or self.activation is not FunctionActivation.NORMAL
+                or self.binding is not ArgumentBinding.NOT_MODELED):
+            raise ValueError('input provenance envelope requires an ordinary body with open argument binding')
+
+    def to_link(self, result, callee, mode, external_symbol=None):
+        return CallLink(result, callee, self.source_callable, self.body, mode, external_symbol,
+            self.parameters, self.returns, self.conditions, argument_packs=self.argument_packs,
+            projections=self.projections, binding=self.binding, input_envelope=self.input_envelope)
 
 
 class AttributeOrigin(str,Enum):
@@ -257,6 +302,13 @@ class CallLink:
     argument_packs: ArgumentPacks | None = None
     projections: tuple[ArgumentProjection, ...] = ()
     binding: ArgumentBinding = ArgumentBinding.NOT_MODELED
+    input_envelope: CallInputEnvelope | None = None
+
+    def __post_init__(self):
+        if self.input_envelope is not None and (type(self.input_envelope) is not CallInputEnvelope
+                or self.binding is not ArgumentBinding.NOT_MODELED or self.body is None
+                or self.input_envelope.callee != self.callee):
+            raise ValueError('call input provenance envelope differs from its original open-binding call')
 
 
 @dataclass(frozen=True, slots=True)

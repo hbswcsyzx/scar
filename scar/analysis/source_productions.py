@@ -5,10 +5,12 @@ that a recipe implements its Python constructor, effects or cleanup semantics.
 The canonical program graph remains the later lowering target.
 """
 from dataclasses import fields
+from functools import lru_cache
 from hashlib import sha256
 import json
 from pathlib import Path, PurePosixPath
 import sys
+from types import MappingProxyType
 
 from scar.analysis.program_types import _build_types
 from scar.ir.program import source_productions as P
@@ -93,12 +95,39 @@ def read_production_type_catalog(document):
     return expected
 
 
+def _freeze_grammar(value):
+    if type(value) is dict:
+        return MappingProxyType({key:_freeze_grammar(member) for key,member in value.items()})
+    if type(value) is list:
+        return tuple(_freeze_grammar(member) for member in value)
+    return value
+
+
+@lru_cache(maxsize=4)
+def _shape_grammar(root_type):
+    """Private immutable declarations for a fixed compiler type schema.
+
+    Public catalogs remain independent mutable documents. Only declarations
+    are cached: every value, budget, cycle and live constructor is checked on
+    each walk. Schema hot reloads must clear this cache or start a new process,
+    as for the record codec's type-schema cache.
+    """
+    root, declarations, registry, _ = _build_types(root_type)
+    return (_freeze_grammar(root),
+        MappingProxyType({row['key']:_freeze_grammar(row) for row in declarations}),
+        MappingProxyType(registry))
+
+
+def clear_production_type_cache():
+    """Invalidate private type declarations after an explicit schema reload."""
+    _shape_grammar.cache_clear()
+
+
 def _shape(plan, max_visits):
     """Exact nominal walk over the generated finite grammar, never recursion."""
     _require(type(max_visits) is int and max_visits >= 0, 'QUERY_ARGUMENT', 'max_visits',
              'expected an exact nonnegative integer')
-    root, declarations, registry, _ = _build_types(P.SourceProductionPlan)
-    rows = {row['key']: row for row in declarations}
+    root, rows, registry = _shape_grammar(P.SourceProductionPlan)
     atoms = {'NoneType': type(None), 'bool': bool, 'int': int, 'float': float, 'str': str, 'bytes': bytes}
 
     def accepts(expr, value):

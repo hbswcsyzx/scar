@@ -44,6 +44,7 @@ GeneratorExp同样核原`GENERATOR_EXPRESSION`编译器投影；代码对应不�
 
 `CompiledCodeProfiles`沿原compile请求、文本与C1/F4收据恢复有效输入；相同root code只证明模板对应，不选择exec namespace分支。`ObservedSourceCallsite`再以完整caller code、scope、操作ABI及源码槽连接真实offset与原Call Fact；ApplyDecorator与工厂可有相同span，须用原定义的code常量位置区分。`ObservedSourceFunctionGroup`按原call/definition归组；已有等价接口保原Fact/frame，只有缺失目标增加条件接口。未知receiver以可能的0/1额外prefix记录，不用创建期default排除；未证布局只注释code证据，不新增错误参数路由。动态Invocation仍在原观察记录里，不能冒充静态Frame，循环body继续共享。
 正文entry与receiver身份分别判断：原caller的相邻CALL区间内，完整code、直接caller及site唯一匹配的非挂起帧可供应环境/world/返回接口。receiver不能weakref时不保留用户对象，也不猜地址身份；参数布局未证则保`NOT_MODELED`及原帧锚点。
+这种普通正文的形参另保`CallInputEnvelope`：原callee、显式参数、packs及调用前world通过原CALL操作接到尚未精确路由的data formal。边是匹配frame下的MAY依赖，不是REFERENCE/alias或参数绑定证明；不造参数包、不引入调用结果作为输入。已有精确route优先，可挂起正文的创建不借此进入正文。
 
 `SourceObservedBoundary`是原CALL拥有的辅助接口，不是新Operation或假callee body。按原call fact和target kind共享；callee、参数/packs、前后world及result引用原F4端口，观察事件另表保存。`TYPE_OBJECT`不等于标准构造阶段，未分类调用不重标native。可选native companion按同次caller/attempt/callable连接原carrier/ABI字段；无采集为`NOT_RECORDED`，不同于已采字段`UNKNOWN`。输入/状态/可能正常输出边保MAY条件，effects继续为UNKNOWN，不授native entry或正常完成证明。
 边界内回调按原caller、CALL位置及相邻CALL/caller退出区间接线，按边界＋完整CodeID共享，帧观察另表。普通回调使用独立的匹配frame，参数来源保持条件投影，返回到dispatcher不等于外层CALL结果。可挂起代码只接共享body的IMPLEMENTATION关系，不重绑初始参数，也不把co_flags当作恢复位置或实例证据。缺源码仍保已知CodeID与入口锚点，body字段未决，不删除回调。

@@ -1353,6 +1353,107 @@
     },
     "scope_materialization_status": "PROPOSED_NOT_IMPLEMENTED",
     "audit": "artifacts/current/experiments/frontend-cost-current/design-audit.json",
-    "first_stage_complete": false
+    "first_stage_complete": false,
+    "implemented_redundant_work_reduction": {
+      "status": "IMPLEMENTED_AND_VERIFIED",
+      "scope": "SCAR_OFFLINE_BUILDER_ONLY_NOT_WORKLOAD_SPEEDUP",
+      "source_sha256": "cdac5a68dd738051e0d66fc81d5947d6a1776248fc6fe862253477608d870ec4",
+      "source_bytes": 6247,
+      "recipe": {
+        "dont_inherit": true,
+        "filename": "<frozen genericpath>",
+        "flags": 0,
+        "mode": "exec",
+        "optimize": 0
+      },
+      "warmup": 1,
+      "repetitions": 3,
+      "baseline": {
+        "samples": [
+          27.351539312003297,
+          27.361935494001955,
+          27.87728617399989
+        ],
+        "median": 27.361935494001955,
+        "min": 27.351539312003297,
+        "max": 27.87728617399989,
+        "variance": 0.060233796319305734
+      },
+      "optimized": {
+        "samples": [
+          13.721234044001903,
+          13.860887251998065,
+          13.656559199996991
+        ],
+        "median": 13.721234044001903,
+        "min": 13.656559199996991,
+        "max": 13.860887251998065,
+        "variance": 0.007270645198359168
+      },
+      "median_ratio": 1.9941308053092313,
+      "python": "3.14.7 | packaged by conda-forge | (main, Sep  2 2026, 21:08:32) [GCC 15.3.0]",
+      "platform": "Linux-6.17.0-29-generic-x86_64-with-glibc2.39",
+      "cpu_count": 56,
+      "entire_output_equivalent": true,
+      "equivalence_sha256": "25b5da882b51d346222e9248f6a33bc018871e4597d6787812e7caac27f2a560",
+      "retained_private_grammar": true,
+      "explicit_bounded_stage_session": true,
+      "standalone_reader_replays": true,
+      "proofs_cached": false,
+      "target_executed": false,
+      "first_stage_complete": false,
+      "receipts": {
+        "baseline": {
+          "path": "artifacts/current/experiments/compiler-cache-ab-current/before.json",
+          "sha256": "73919b432bbff869fe03079e37c1b5e888797f01a137c9bda89f04b0af83d7e5",
+          "bytes": 1003
+        },
+        "optimized": {
+          "path": "artifacts/current/experiments/compiler-cache-ab-current/afterx.json",
+          "sha256": "78fae97423563773652a33a38fdb28428507b0943ca3774496a5b58ece6dc693",
+          "bytes": 1005
+        },
+        "equivalence": {
+          "path": "artifacts/current/experiments/compiler-cache-ab-current/equivalence-check.json",
+          "sha256": "b41f5357c94419d287b69dd8a41f7257e68ae8b2d4ca33e4e46387dde6896506",
+          "bytes": 680
+        }
+      },
+      "verification": {
+        "targeted_pytest_passed": 81,
+        "known_baseline_fixture_deselected": 1,
+        "baseline_fixture": "test_original_source_inputs_fields_contexts_and_binding_ports",
+        "baseline_defect": "Manual fixture omits mandatory source profile/world/completion ABI; same failure reproduced with the original uncached checker",
+        "log": {
+          "path": "artifacts/current/experiments/compiler-cache-ab-current/targeted-pytest.log",
+          "sha256": "bcb2bd791048f5b0a9ff3b4575fafc1664aca87e6f7c84984e9ba64bcba22381",
+          "bytes": 193
+        }
+      },
+      "baseline_commit": "fd56efd6"
+    }
+  },
+  "call_input_envelope": {
+    "status": "IMPLEMENTED_AND_INDEPENDENTLY_READ_BACK",
+    "interfaces": 1,
+    "formal_edges": 2,
+    "exact_argument_binding_proven": false,
+    "reference_identity_proven": false,
+    "pre_call_inputs_preserved": true,
+    "matched_returns": true,
+    "wire_roundtrip": true,
+    "primitive_f4_pins_unchanged": true,
+    "first_stage_complete": false,
+    "receipt": {
+      "path": "artifacts/current/experiments/call-input-envelope-current/check.json",
+      "sha256": "2a85cd2c4b05662a4633cfc5b9b84778a0e291a726891ef3d8a9e1dbbec32308",
+      "bytes": 90507
+    }
+  },
+  "artifact_compatibility": {
+    "current_producer_revision_changed": true,
+    "old_runtime_evidence_preserved": true,
+    "old_receipts_rewritten": false,
+    "note": "Earlier formal-graph results are historical verification. Changed producer pins require fresh F4 and dependent catalogs; current readers must reject stale materials."
   }
 }
