@@ -200,6 +200,9 @@ def read_source_catalog(value):
         report = json.loads((path/'result.json').read_bytes())
         if report.get('schema') == SCHEMA:
             return DeclaredSourceCatalog(path)
+        if report.get('schema') == 'scar.observed-source-catalog':
+            from scar.analysis.observed_source_catalog import ObservedSourceCatalog
+            return ObservedSourceCatalog(path)
     from scar.analysis.source_context_query import ContextTargetGraph
     return value if isinstance(value, ContextTargetGraph) else ContextTargetGraph(value)
 

@@ -31,7 +31,7 @@ def discover(entry,trace,*,catalog=None,cache_roots=()):
     from scar.analysis.build import _receipt
     roots=tuple(cache_roots) or (Path(__file__).resolve().parents[2]/'artifacts/current/queries',)
     rows=_reports(roots);gaps=[];selected=None
-    schemas=('scar.context-source-targets','scar.declared-source-catalog')
+    schemas=('scar.context-source-targets','scar.declared-source-catalog','scar.observed-source-catalog')
     candidates=[Path(catalog)] if catalog else [p for p,r in rows if r.get('schema') in schemas]
     for path in candidates:
         try:

@@ -91,7 +91,10 @@ class SourceUnitProvider:
                 V.ProgramNodeRole.ABSTRACT_STATE_DOMAIN, None, world, material.result_artifact)
             self.anchors[anchor] = world.location; self.records[world.location] = world
         self._guard = {path:_stamp(path) for path in material._parents}
-        if self.unit in material.fact_store.original_source_units:
+        if self.unit in getattr(material.fact_store, 'observed_compiled_units', ()):
+            self._guard.update(material.guard_stamps())
+            self._guard.update(material.catalog.evidence_stamps())
+        elif self.unit in material.fact_store.original_source_units:
             for receipt in material.descriptor['tables'].values():
                 path=material.root/material.descriptor['path']/receipt['path']
                 self._guard[path]=_stamp(path)

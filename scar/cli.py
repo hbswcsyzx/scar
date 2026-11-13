@@ -69,7 +69,8 @@ def _trace(args) -> int:
             raise SystemExit('--project-root differs from the capture plan namespace')
     stream_interfaces = getattr(args, 'stream_interfaces', False) or program_ports
     native_callables = getattr(args, 'native_callables', False)
-    python_targets = getattr(args, 'python_call_targets', False) or lean_plan is not None or stream_interfaces or program_ports or native_callables
+    compile_events = getattr(args, 'compile_events', False)
+    python_targets = getattr(args, 'python_call_targets', False) or lean_plan is not None or stream_interfaces or program_ports or native_callables or compile_events
     operands = getattr(args, 'call_operands', False) or python_targets
     os_capture_root = getattr(args, 'os_capture_root', None)
     if os_capture_root is not None:
@@ -90,6 +91,8 @@ def _trace(args) -> int:
     env.pop('SCAR_CALL_OPERANDS',None)
     env.pop('SCAR_PYTHON_CALL_TARGETS',None)
     env.pop('SCAR_NATIVE_CALLABLE_PROBE',None)
+    for key in tuple(env):
+        if key.startswith('SCAR_COMPILE_'):env.pop(key,None)
     env.pop('SCAR_STREAM_INTERFACES',None)
     env.pop('SCAR_STREAM_BACKING_OBSERVATIONS',None)
     env.pop('SCAR_OPERAND_CAPTURE',None)
@@ -128,6 +131,10 @@ def _trace(args) -> int:
                 or any(out.glob('python-call-target-meta.*.json*'))
                 or any(out.glob('native-callables.*.jsonl*'))
                 or any(out.glob('native-callable-meta.*.json*'))
+                or any(out.glob('compilation-meta.*.json'))
+                or any(out.glob('compilation-disabled.*.json'))
+                or any(out.glob('compilation-events.*.jsonl*'))
+                or any(out.glob('compilation-sources.*.jsonl*'))
                 or any(out.glob('lean-plan.*.json'))
                 or any(out.glob('stream-interfaces.*.jsonl*'))
                 or any(out.glob('stream-interface-meta.*.json*'))
@@ -136,6 +143,16 @@ def _trace(args) -> int:
         env['SCAR_TRACE_CALL_EDGES'] = '1'
         env['SCAR_CALL_PROJECT_ROOT'] = str(Path(args.project_root or (
             lean_plan.namespace_root if lean_plan is not None else Path.cwd())).resolve())
+        if compile_events:
+            env['SCAR_COMPILE_EVENTS']='1'
+            for name,suffix in (('max_compile_events','MAX_EVENTS'),('max_compile_sources','MAX_SOURCES'),
+                    ('max_compile_source_bytes','MAX_SOURCE_BYTES'),('max_compile_total_source_bytes','MAX_TOTAL_SOURCE_BYTES'),
+                    ('max_compile_stream_bytes','MAX_STREAM_BYTES')):
+                value=getattr(args,name)
+                if type(value) is not int or value<1:raise SystemExit('compile audit limits must be positive')
+                env['SCAR_COMPILE_'+suffix]=str(value)
+            if args.max_compile_source_bytes>1_000_000:
+                raise SystemExit('--max-compile-source-bytes cannot exceed 1000000')
         env['SCAR_CALL_MAX_EVENTS'] = str(args.max_call_events)
         env['SCAR_CALL_MAX_BYTES'] = str(args.max_call_bytes)
         if args.max_call_references < 1:
@@ -864,6 +881,13 @@ def main(argv=None) -> int:
                        help='record explicit v2 Python callee and receiver roles; implies call-operands (CPython 3.14.7)')
     trace.add_argument('--native-callables', action='store_true',
                        help='capture actual native callable type/owner/ABI with an isolated optional C probe; implies Python call targets (CPython 3.14.7)')
+    trace.add_argument('--compile-events',action='store_true',
+                       help='passively retain bounded compilation text and executed CodeID observations; implies Python call targets')
+    trace.add_argument('--max-compile-events',type=int,default=4096)
+    trace.add_argument('--max-compile-sources',type=int,default=1024)
+    trace.add_argument('--max-compile-source-bytes',type=int,default=512000)
+    trace.add_argument('--max-compile-total-source-bytes',type=int,default=8000000)
+    trace.add_argument('--max-compile-stream-bytes',type=int,default=16000000)
     trace.add_argument('--capture-plan', help='use a source-derived lean interface capture plan; implies Python call targets')
     trace.add_argument('--capture-plan-sha256', help='expected capture plan SHA256')
     trace.add_argument('--capture-profile', choices=('program-ports','process-ports'),

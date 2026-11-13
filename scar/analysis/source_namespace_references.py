@@ -127,7 +127,8 @@ class _Query:
                     guards = (*_NAMESPACE_GUARDS, 'SAME_LEXICAL_FRAME_AND_WRITE_VERSION_SELECTED')
                 elif namespace.kind is F.NamespaceKind.MODULE:
                     kind = N.NamespaceEdgeKind.GLOBAL_WRITE
-                    compiled = unit.unit in r.snapshot.fact_store.original_source_units
+                    compiled = (unit.unit in r.snapshot.fact_store.original_source_units
+                        or unit.unit in getattr(r.snapshot.fact_store, 'observed_compiled_units', ()))
                     guards = (*_NAMESPACE_GUARDS, 'CURRENT_FRAME_GLOBALS_SELECT_RECORDED_COMPILE_CONTEXT_DICT' if compiled
                         else 'CURRENT_FRAME_GLOBALS_SELECT_RECORDED_SOURCE_MODULE_NAMESPACE')
                     self.frontier(index, 'CURRENT_GLOBAL_NAMESPACE_IDENTITY_AND_CONTENTS_OPEN', (read,))

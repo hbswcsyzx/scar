@@ -165,9 +165,24 @@ def build_frontend(paths, out, *, sources=(), jobs=4, trace=None, project_root=N
             ['--facts',out/'facts','--interfaces',out/'interfaces','--out',out/'catalog'],
             out/'catalog/result.json','scar.declared-source-catalog', first_stage_complete=False,
             target_executed=False, global_namespace_resolved=False, runtime_dispatch_proven=False)
+        active_catalog = out/'catalog'
+        if trace is not None and (any(trace.glob('compilation-meta.*.json'))
+                or any(trace.glob('compilation-disabled.*.json'))):
+            run.stage('compilation-matches', 'scar.analysis.compilation_audit',
+                ['--trace',trace,'--out',out/'compilation-matches'],
+                out/'compilation-matches/result.json','scar.observed-compilation-matches',
+                target_executed=False, original_compile_options_proven=False,
+                execution_namespace_proven=False, first_stage_complete=False)
+            run.stage('observed-source-catalog', 'scar.analysis.observed_source_catalog',
+                ['--base',active_catalog,'--trace',trace,'--matches',out/'compilation-matches',
+                    '--project-root',project_root,'--out',out/'observed-source-catalog'],
+                out/'observed-source-catalog/result.json','scar.observed-source-catalog',
+                target_executed=False, original_compile_options_proven=False,
+                execution_namespace_proven=False, first_stage_complete=False)
+            active_catalog = out/'observed-source-catalog'
         call_roots = [part for p in paths for part in ('--source-root',p)]
         run.stage('calls','scar.analysis.source_declared_calls',
-            ['--catalog',out/'catalog',*call_roots,'--out',out/'calls','--jobs',jobs],
+            ['--catalog',active_catalog,*call_roots,'--out',out/'calls','--jobs',jobs],
             out/'calls/result.json','scar.source-declared-calls',
             status='ALL_SELECTED_SOURCE_CALL_DECLARATIONS_PROJECTED',
             first_stage_complete=False,target_executed=False,runtime_dispatch_proven=False)
@@ -193,7 +208,7 @@ def build_frontend(paths, out, *, sources=(), jobs=4, trace=None, project_root=N
                 raise ValueError('observed boundary publication contract differs')
             report['observed_boundaries'] = _receipt(out/'observed-boundaries/result.json')
         report.update(workflow_complete=True, local_declarations_complete=True,
-            model=_receipt(model/'manifest.json'), catalog=_receipt(out/'catalog/result.json'),
+            model=_receipt(model/'manifest.json'), catalog=_receipt(active_catalog/'result.json'),
             calls=_receipt(out/'calls/result.json'),
             function_interfaces=_receipt(out/'function-interfaces/result.json'))
     except Exception as error:

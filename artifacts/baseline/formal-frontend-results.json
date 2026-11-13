@@ -426,5 +426,108 @@
     "callback_body_missing_observations": 271,
     "missing_dynamic_source_observations": 267,
     "report": "artifacts/current/experiments/cpu-sunfish-current/formal/build-callbacks/manifest.json"
+  },
+  "observed_compilation": {
+    "status": "VERIFIED_COMPILE_TEXT_TO_SHARED_LOCAL_GRAPH_AND_OBSERVED_CALLBACK_BODY",
+    "frontend": {
+      "workflow_complete": true,
+      "local_declarations_complete": true,
+      "stages": 26,
+      "admitted_stages": 26,
+      "seconds": 52.21949100599886,
+      "target_executed": false,
+      "first_stage_complete": false
+    },
+    "capture": {
+      "seconds": 5.858277161998558,
+      "bestmove": "bestmove h1g1 ponder f3e3",
+      "returncode": 0,
+      "scope": "small-position path capture; not the full starting-position benchmark"
+    },
+    "matches": {
+      "counts": {
+        "compatible_recipes": 48,
+        "compile_attempts": 1836,
+        "execution_code_templates": 26,
+        "failed_candidate_compiles": {
+          "SyntaxError": 357
+        },
+        "matched": 12,
+        "sources": 12
+      },
+      "seconds": 1.3059892290002608,
+      "original_compile_options_proven": false,
+      "execution_namespace_proven": false
+    },
+    "local_material": {
+      "compiled_units": 5,
+      "source_units": 7,
+      "cold_seconds": 186.4426543269983,
+      "reused_directory_seconds": 6.970455727001536,
+      "cache_hits": 5,
+      "storage_bytes": 4620489,
+      "ports": 19654,
+      "calls": 262,
+      "source_bodies_copied": false,
+      "loops_unrolled": false
+    },
+    "boundary_counts": {
+      "boundaries": 191,
+      "callback_observations": 455,
+      "callbacks": 21,
+      "kinds": {
+        "NATIVE_BUILTIN": 78,
+        "OTHER_UNCLASSIFIED": 58,
+        "TYPE_OBJECT": 55
+      },
+      "observations": 2326,
+      "source_callback_interfaces": 18,
+      "source_callback_observations": 451,
+      "units": 3
+    },
+    "build": {
+      "seconds": 216.25523666899971,
+      "workflow_complete": true,
+      "first_stage_complete": false,
+      "summary": {
+        "configuration_inputs": 0,
+        "gaps": 107,
+        "loaded_units": 6,
+        "observed_boundary_publications": 1,
+        "observed_publications": 1,
+        "resource_records": 28,
+        "source_units": 7
+      },
+      "report": "artifacts/current/experiments/cpu-sunfish-current/formal/build-observed-compilation/manifest.json"
+    },
+    "remaining": {
+      "callback_body_missing_observations": 4,
+      "callers_without_parent": [
+        "eff15773fe997b5328eeae30788296e0be70721c17bafc7e573237377f2fa666"
+      ],
+      "auxiliary_interfaces_not_projected": [
+        "eff15773fe997b5328eeae30788296e0be70721c17bafc7e573237377f2fa666"
+      ]
+    },
+    "transformation_applied": false,
+    "first_stage_complete": false,
+    "readback": {
+      "seconds": 112.04244590899907,
+      "code_links": 58,
+      "caller_codes": 44,
+      "caller_alternatives": 62,
+      "callsite_bindings": 2886,
+      "callsite_frontiers": 123,
+      "shared_lambda_bodies": 3,
+      "lambda_callback_interfaces": 8,
+      "lambda_callback_observations": 267,
+      "missing_observations": 4,
+      "repeated_expand_preserves_shared_ids": true,
+      "open_prefix_frames_balanced_and_closed_root_rejected": true,
+      "callback_return_not_outer_result_alias": true,
+      "importable_file_units_only": true,
+      "first_stage_complete": false,
+      "report": "artifacts/current/experiments/cpu-sunfish-current/formal/compiled-readback-check.json"
+    }
   }
 }

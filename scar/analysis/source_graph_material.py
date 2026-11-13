@@ -93,6 +93,8 @@ class CompiledGraphMaterial(WorldMaterial):
 def source_graph_material(catalog, unit):
     """Select by the source catalog's format; keep its original identities."""
     catalog = read_source_catalog(catalog)
+    if unit in getattr(catalog.fact_store, 'observed_compiled_units', ()):
+        return catalog.local_material(unit)
     if unit in catalog.fact_store.original_source_units:
         return CompiledGraphMaterial(catalog, unit)
     return WorldMaterial(catalog, unit)

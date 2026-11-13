@@ -49,6 +49,31 @@ _EXPRESSION_BODIES = {'Lambda': ('LAMBDA_BODY', '<lambda>'),
     'GeneratorExp': ('GENERATOR_EXPRESSION', '<genexpr>')}
 
 
+def replay_catalog_code(raw, profile):
+    """Compile retained bytes under a compatible recipe; never execute them.
+
+    The full root descriptor authenticates this representation. It does not
+    establish the original compile request or the resulting callable's world.
+    """
+    if type(profile) is not dict or set(profile) != {'recipe', 'root_code'}:
+        raise ValueError('compatible replay needs its explicit recipe and root code descriptor')
+    recipe = profile['recipe']
+    if (type(recipe) is not dict
+            or set(recipe) != {'filename', 'mode', 'flags', 'dont_inherit', 'optimize'}
+            or type(recipe['filename']) is not str or recipe['mode'] not in ('exec', 'eval', 'single')
+            or type(recipe['flags']) is not int or recipe['flags'] < 0
+            or recipe['dont_inherit'] is not True or type(recipe['optimize']) is not int
+            or recipe['optimize'] not in (0, 1, 2)):
+        raise ValueError('explicit compatible replay recipe required')
+    code = compile(raw, recipe['filename'], recipe['mode'], flags=recipe['flags'],
+        dont_inherit=True, optimize=recipe['optimize'])
+    if describe_code(code) != profile['root_code']:
+        raise ValueError('compatible replay root differs from the retained full code descriptor')
+    tree = compile(raw, recipe['filename'], recipe['mode'], flags=recipe['flags'] | ast.PyCF_ONLY_AST,
+        dont_inherit=True, optimize=0)
+    return code, tree, recipe['flags']
+
+
 def _expression_code_paths(root):
     """Index exact compiler child slots/positions, not names or first lines.
 
@@ -83,6 +108,11 @@ class ObservedSourceCodeProvider:
     def __init__(self, view, trace, project_root, *, units=(), compiled=(),
                  target_max_bytes=32_000_000, target_max_rows=100_000,frame_budget=CallEdgeBudget()):
         self.view = view
+        self.replay_profiles = dict(getattr(view.catalog, 'replay_profiles', {}))
+        self._replay_profile_bytes = _json(self.replay_profiles)
+        self.observed_compiled_units = frozenset(getattr(view.catalog.fact_store, 'observed_compiled_units', ()))
+        if not self.replay_profiles.keys() <= self.observed_compiled_units:
+            raise ValueError('compatible replay profiles must name observed compiled units')
         self.compiled = tuple(compiled)
         self._compiled = {}
         for profile in self.compiled:
@@ -117,16 +147,22 @@ class ObservedSourceCodeProvider:
         for anchor,target in zip(self.targets.target_anchors,self.targets.targets):targets_by_code[target.code].append((anchor,target))
         for anchor,entry in zip(self.targets.entry_anchors,self.targets.entries):entries_by_code[entry.code].append((anchor,entry))
         selected = tuple(units or (u for u,r in view.catalog.fact_store.rows.items()
-            if r['path'] in captures or u in self._compiled and self._compiled[u].compiled_root.filename in captures))
+            if r['path'] in captures or u in self._compiled and self._compiled[u].compiled_root.filename in captures
+            or u in self.replay_profiles and self.replay_profiles[u]['recipe']['filename'] in captures))
         slicer = ReferenceSlicer(type('SourceFacts', (), {'fact_store': view.catalog.fact_store})())
         for unit in selected:
             profile = self._compiled.get(unit)
-            if unit in view.catalog.fact_store.original_source_units and profile is None:
+            compatible = self.replay_profiles.get(unit)
+            if unit in self.observed_compiled_units and compatible is None:
+                self.issues.append(dict(unit=unit,reason='OBSERVED_COMPILED_SOURCE_REQUIRES_COMPATIBLE_REPLAY'));continue
+            if unit in view.catalog.fact_store.original_source_units and profile is None and compatible is None:
                 self.issues.append(dict(unit=unit,reason='COMPILED_CONTEXT_CODE_CORRESPONDENCE_REQUIRES_ORIGINAL_PROFILE'));continue
-            original = view.catalog.fact_store.original_source_units.get(unit, unit)
+            original = unit if compatible is not None else view.catalog.fact_store.original_source_units.get(unit, unit)
             model = view.catalog.fact_store.model_units[original]
             path = Path(model['path'])
-            observed = captures.get(str(path) if profile is None else profile.compiled_root.filename, ())
+            filename = (profile.compiled_root.filename if profile is not None else
+                compatible['recipe']['filename'] if compatible is not None else str(path))
+            observed = captures.get(filename, ())
             if not observed:continue
             raw = path.read_bytes()
             if len(raw) > 1_000_000 or sha256(raw).hexdigest() != model['raw_sha256']:
@@ -143,7 +179,9 @@ class ObservedSourceCodeProvider:
             # not to a fresh flags=0 import of the same source filename. The
             # authenticated profile replays its original payload, mode, flags,
             # dont_inherit=True and optimize; all exec branches stay separate.
-            if profile is None:
+            if profile is None and compatible is not None:
+                code, tree, flags = replay_catalog_code(raw, compatible)
+            elif profile is None:
                 flags = 0
                 code = compile(raw, str(path), 'exec', flags=flags, dont_inherit=True, optimize=0)
                 tree = ast.parse(raw, filename=str(path))
@@ -199,7 +237,10 @@ class ObservedSourceCodeProvider:
                             ProviderFactReference(syntax_artifact,'#/nodes/'+str(function.template.occurrence)),
                             root_descriptor,constant_path,flags)
                         pending.append(row)
-            if not pending:continue
+            if not pending:
+                if profile is None and any(c.code == root_descriptor for c in observed):
+                    self._sources[unit] = view.unit(unit)
+                continue
             source=view.unit(unit)
             for row in pending:
                 body = view.source_region_ref(unit,row.body.template,row.body.region)
@@ -249,6 +290,8 @@ class ObservedSourceCodeProvider:
 
     def check(self):
         self.view.catalog.fact_store.validate_parents()
+        if _json(getattr(self.view.catalog, 'replay_profiles', {})) != self._replay_profile_bytes:
+            raise ValueError('compatible replay profile declaration changed')
         for profile in self.compiled:profile.check()
         self.fact_materials.check()
         if tuple(sorted(Path(self.trace.directory).glob('python-call-target-meta.*.json'))) != self._target_metas:
@@ -267,7 +310,10 @@ class ObservedSourceCodeProvider:
     def original(self, point):return self.records[self._key(point)]
     def expand(self, point):return ()
     def explain(self, point):
-        return dict(original=self.original(point),code_template_matched=True,
+        row = self.original(point)
+        return dict(original=row,code_template_matched=True,
+            compatible_replay_used=row.body.unit in self.replay_profiles,
+            original_compilation_request_proven=False,
             source_function_creation_proven=False,caller_site_selected=False,
             globals_or_cell_contents_proven=False)
 
@@ -279,9 +325,12 @@ class ObservedSourceCodeProvider:
         self.check(); edges=[]
         for key in keys:
             source,target=self.points[key],self.bodies[key];row=self.records[key]
-            guards=tuple(Condition(SCHEMA,c,source,None,(source,target)) for c in (
+            conditions = (
                 'CODE_TEMPLATE_CORRESPONDENCE_NOT_SOURCE_FUNCTION_CREATION_IDENTITY',
-                'F4_EXECUTION_PROFILE_AND_CALLER_INTERFACE_STILL_REQUIRED'))
+                'F4_EXECUTION_PROFILE_AND_CALLER_INTERFACE_STILL_REQUIRED')
+            if row.body.unit in self.replay_profiles:
+                conditions += ('CODE_EQUIVALENT_REPLAY_NOT_ORIGINAL_COMPILATION_REQUEST',)
+            guards=tuple(Condition(SCHEMA,c,source,None,(source,target)) for c in conditions)
             locators=(source.namespace.graph,)
             edges.append(Edge(source,target,K.IMPLEMENTATION,Meaning.STRUCTURE,
                 (Evidence('scar.observed-code.original-source-body.v1',locators,(source,target)),),guards,Strength.MAY))
@@ -293,6 +342,7 @@ class ObservedSourceCodeProvider:
     def summary(self):
         return dict(code_links=len(self.records),units=len(self._sources),
             compiled_units=sorted(self._compiled),
+            compatible_replay_units=sorted(self.replay_profiles),
             target_observations=sum(len(r.targets) for r in self.records.values()),
             entry_bindings=sum(len(r.entries) for r in self.records.values()),issues=self.issues,
             source_bodies_copied=False,creator_instances_proven=False,callsite_interfaces_connected=False,

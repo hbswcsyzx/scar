@@ -71,7 +71,7 @@ def _argument_prefixes(index,observation,call,function,*,receiver_known=False):
     https://docs.python.org/3.14/library/dis.html#opcode-CALL
     """
     if call.positional_pack is not None or call.keyword_pack is not None:return ()
-    caller=index._callers[observation.attempt.process_id,observation.attempt.site.code]
+    caller=index.caller_for(observation)
     instruction=call_instruction(caller.code,observation.attempt.site.offset)
     if instruction is None:return ()
     opcode,count=instruction

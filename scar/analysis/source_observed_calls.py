@@ -16,6 +16,7 @@ from scar.analysis.source_roles import SyntaxRoleView
 from scar.analysis.source_reference_slice import ReferenceSlicer,source_port
 from scar.analysis.source_namespace_interfaces import NamespacePlanView
 from scar.analysis.static_query import _Fragments
+from scar.analysis.source_observed_codes import replay_catalog_code
 from scar.ir.program import source_productions as P, normal_targets as T
 from scar.ir.program.source_syntax import SourceSyntaxMaterial
 from scar.ir.program.source_observed_calls import ObservedSourceCallsite,ObservedSourceCallsiteFrontier
@@ -50,6 +51,8 @@ class ObservedSourceCallsiteIndex:
         self.codes=codes;self.view=codes.view;self.bindings=[];self.frontiers=[]
         self.compiled=tuple(compiled) or tuple(getattr(codes,'compiled',()))
         profiles={p.unit:p for p in self.compiled}
+        replay_profiles=getattr(self.view.catalog,'replay_profiles',{})
+        observed_compiled_units=frozenset(getattr(self.view.catalog.fact_store,'observed_compiled_units',()))
         self._callers={};self._syntax={};self._static={};self._owners={}
         self._calls={};self._plans={};self._contexts={}
         self.slicer=ReferenceSlicer(SimpleNamespace(fact_store=self.view.catalog.fact_store))
@@ -58,11 +61,18 @@ class ObservedSourceCallsiteIndex:
             self._admit(_Caller(unit,capture,scope,code,None))
         for row in codes.records.values():
             profile=profiles.get(row.body.unit)
-            if row.body.unit in self.view.catalog.fact_store.original_source_units and profile is None:
+            compatible=replay_profiles.get(row.body.unit)
+            if row.body.unit in observed_compiled_units and compatible is None:
+                raise ValueError('observed compiled child caller requires a compatible replay profile')
+            if row.body.unit in self.view.catalog.fact_store.original_source_units and profile is None and compatible is None:
                 raise ValueError('compiled child caller requires its original compiler profile')
             key=row.source,row.compile_flags,row.body.unit
             if key not in roots:
-                if profile is None:
+                if profile is None and compatible is not None:
+                    root,_,flags=replay_catalog_code(Path(row.source.uri).read_bytes(),compatible)
+                    if row.compile_flags!=flags:
+                        raise ValueError('observed compiled caller lost its compatible replay flags')
+                elif profile is None:
                     root=compile(Path(row.source.uri).read_bytes(),row.compiled_root.filename,'exec',
                         flags=row.compile_flags,dont_inherit=True,optimize=0)
                 else:
@@ -94,8 +104,8 @@ class ObservedSourceCallsiteIndex:
         # nodes/edges merely to match an instruction to its sealed source ABI.
         scopes=defaultdict(set)
         for attempt in codes.trace.attempts:
-            caller=self._callers.get((attempt.process_id,attempt.site.code))
-            if caller is not None:scopes[caller.unit].add(caller.scope.owner)
+            for caller in self._callers.get((attempt.process_id,attempt.site.code),()):
+                scopes[caller.unit].add(caller.scope.owner)
         from scar.analysis.source_declared_calls import _owners
         for unit,wanted in scopes.items():
             source=self.view.unit(unit);facts=source.facts
@@ -109,32 +119,45 @@ class ObservedSourceCallsiteIndex:
         targets={(t.caller.process_id,t.attempt_index):(a,t) for a,t in zip(codes.targets.target_anchors,codes.targets.targets)}
         for attempt in codes.trace.attempts:
             key=attempt.process_id,attempt.site.code
-            caller=self._callers.get(key)
-            if caller is None:continue
-            if encode(attempt.site)!=site(caller.code,attempt.site.offset):raise ValueError('real CALL differs from original compiler instruction')
-            matches=self._index(caller).get(attempt.site.offset,())
-            if len(matches)!=1:
-                self.frontiers.append(ObservedSourceCallsiteFrontier(caller.unit,attempt,
-                    'CALLSITE_SOURCE_MAPPING_MISSING' if not matches else 'CALLSITE_SOURCE_MAPPING_AMBIGUOUS',
-                    tuple(row[1] for row in matches)));continue
-            query,evidence,owner,rule=matches[0];facts=self.view.catalog.fact_store.load(caller.unit);call=facts.calls[query]
-            anchor,target=targets[attempt.process_id,attempt.index]
-            identity=ProviderID(_digest(('scar.observed-source-callsite.v1',codes.targets.source_sha256,evidence,attempt.process_id,attempt.index)))
-            self.bindings.append(ObservedSourceCallsite(identity,caller.unit,query,evidence,
-                source_port(facts,call.callee),source_port(facts,call.result),owner,caller.capture,
-                attempt,target,anchor,rule,caller.link,caller.profiles))
+            for caller in self._callers.get(key,()):
+                if encode(attempt.site)!=site(caller.code,attempt.site.offset):raise ValueError('real CALL differs from original compiler instruction')
+                matches=self._index(caller).get(attempt.site.offset,())
+                if len(matches)!=1:
+                    self.frontiers.append(ObservedSourceCallsiteFrontier(caller.unit,attempt,
+                        'CALLSITE_SOURCE_MAPPING_MISSING' if not matches else 'CALLSITE_SOURCE_MAPPING_AMBIGUOUS',
+                        tuple(row[1] for row in matches)));continue
+                query,evidence,owner,rule=matches[0];facts=self.view.catalog.fact_store.load(caller.unit);call=facts.calls[query]
+                anchor,target=targets[attempt.process_id,attempt.index]
+                identity=ProviderID(_digest(('scar.observed-source-callsite.v1',codes.targets.source_sha256,
+                    evidence,attempt.process_id,attempt.index,caller.unit,caller.scope,caller.link,caller.profiles)))
+                self.bindings.append(ObservedSourceCallsite(identity,caller.unit,query,evidence,
+                    source_port(facts,call.callee),source_port(facts,call.result),owner,caller.capture,
+                    attempt,target,anchor,rule,caller.link,caller.profiles))
         codes.fact_materials.admit(tuple(b.call for b in self.bindings))
         self.check()
 
     def _admit(self,caller):
         if describe_code(caller.code)!=encode(caller.capture.code):raise ValueError('caller code descriptor differs')
         key=caller.capture.process_id,caller.capture.code.key
-        old=self._callers.setdefault(key,caller)
-        if old!=caller:raise ValueError('caller code has different static scope/profile alternatives')
+        alternatives=self._callers.setdefault(key,[])
+        if caller not in alternatives:alternatives.append(caller)
+
+    def caller_for(self,observation):
+        """Recover one relation's declared caller without choosing its world.
+
+        Different source units/scopes may share a code descriptor. Each remains
+        a separate correspondence alternative, including at downstream joins.
+        """
+        candidates=tuple(c for c in self._callers.get((observation.attempt.process_id,observation.attempt.site.code),())
+            if c.unit==observation.unit and c.scope.owner==observation.owner.owner and c.link==observation.code_link
+            and c.capture==observation.caller and c.profiles==observation.profile_alternatives)
+        if len(candidates)!=1:raise ValueError('callsite relation has no unique declared caller alternative')
+        return candidates[0]
 
     def _source_syntax(self,unit):
         if unit not in self._syntax:
-            original=self.view.catalog.fact_store.original_source_units.get(unit,unit)
+            original=(unit if unit in getattr(self.view.catalog.fact_store,'observed_compiled_units',())
+                else self.view.catalog.fact_store.original_source_units.get(unit,unit))
             model=self.view.catalog.fact_store.model_units[original]
             root=self.view.catalog.fact_store.model_for(original)
             self._syntax[unit]=decode(SourceSyntaxMaterial,_Fragments(root).read(model['artifacts']['source_syntax']))
@@ -194,5 +217,6 @@ class ObservedSourceCallsiteIndex:
 
     def summary(self):
         return dict(bindings=len(self.bindings),frontiers=len(self.frontiers),caller_codes=len(self._callers),
+            caller_alternatives=sum(len(rows) for rows in self._callers.values()),
             units=len({r.unit for r in self.bindings}),source_bodies_copied=False,
             target_interfaces_connected=False,creator_instances_proven=False,first_stage_complete=False)
