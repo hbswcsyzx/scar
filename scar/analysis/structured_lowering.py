@@ -466,16 +466,48 @@ class StructuredBuilder(_Builder):
         self.record_loop(loop)
         return loop.after
 
+    def assignment(self, node, cursor):
+        """Evaluate one RHS, then consume its reference in target order.
+
+        Earlier stores consume reference copies while the original remains on
+        the enclosing frame's pending stack. The final store consumes that pending
+        reference. A failing target keeps the earlier writes and the existing
+        target/unpack protocol's exceptional world; later targets are not run.
+        """
+        if not node.targets:
+            raise _Unsupported(GapKind.SOURCE_MAPPING, node, "assignment has no original target")
+        cursor, value = self.expr(node.value, cursor)
+        if cursor is None:
+            return None
+        if len(node.targets) == 1:
+            return self.store(node.targets[0], value, cursor)
+        from scar.analysis.source_heap_lowering import _hold
+        from scar.analysis.source_mapping_lowering import _transfer
+        baseline = len(self.active_temporaries)
+        _hold(self, cursor, node.value, value)
+        try:
+            for index, target in enumerate(node.targets):
+                if index == len(node.targets) - 1:
+                    # The last STORE owns the original stack reference; no
+                    # additional decref/release may follow its consumption.
+                    _transfer(self, ((node.value, value),), node)
+                cursor = self.store(target, value, cursor)
+                if cursor is None:
+                    return None
+            return cursor
+        finally:
+            # Exceptional paths have already transferred their own pending
+            # references to frame exit; they must not leak into sibling CFGs.
+            del self.active_temporaries[baseline:]
+
     def statements(self, statements, cursor):
         for node in statements:
             if cursor is None:
                 self.gap(GapKind.SOURCE_COVERAGE, node,
                          "closed completion path: source remains indexed, no executable core operation emitted")
                 continue
-            if isinstance(node, ast.Assign) and len(node.targets) == 1:
-                cursor, value = self.expr(node.value, cursor)
-                if cursor is not None:
-                    cursor = self.store(node.targets[0], value, cursor)
+            if isinstance(node, ast.Assign):
+                cursor = self.assignment(node, cursor)
             elif isinstance(node, ast.Expr):
                 cursor, value = self.expr(node.value, cursor)
                 if cursor is not None:

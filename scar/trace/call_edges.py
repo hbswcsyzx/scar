@@ -393,6 +393,10 @@ class CallEdgeRecorder:
     def profile(self, frame, event, arg):
         if self.closed or self.io_failed or event not in ('call','return'):
             return
+        observer = self.operand_observer
+        environments = None if observer is None else getattr(observer, 'environment_observer', None)
+        if environments is not None and environments.owns_callback_frame(frame):
+            return
         if event == 'call' and self._entry_stop_reason is not None:
             if os.getpid() == self.pid:
                 with self.lock:

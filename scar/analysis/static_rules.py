@@ -291,10 +291,12 @@ def _rule(node):
             needs.append(_needs("COMPILER_OPTIMIZE_ZERO", "Assertion lowering is conditional on compile optimize=0."))
         if isinstance(node, ast.AnnAssign):
             needs.append(_needs("ANNOTATION_SCOPE_POLICY", "Local annotation declaration and target side effects are separate from version-dependent thunk execution."))
-    elif isinstance(node, (ast.If, ast.While, ast.For, ast.Assign, ast.Expr, ast.Return, ast.Pass, ast.Break, ast.Continue)):
+    elif isinstance(node, ast.Assign):
+        function = "StructuredBuilder.assignment"
+        if not node.targets:
+            unsupported = "Assignment requires its original ordered target list."
+    elif isinstance(node, (ast.If, ast.While, ast.For, ast.Expr, ast.Return, ast.Pass, ast.Break, ast.Continue)):
         function = "StructuredBuilder.statements"
-        if isinstance(node, ast.Assign) and len(node.targets) != 1:
-            unsupported = "Current structured assignment accepts a single target."
     elif isinstance(node, (ast.Global, ast.Nonlocal)):
         module, function = "environment_lowering", "StructuredEnvironmentBuilder.statements"
     elif isinstance(node, _METADATA):

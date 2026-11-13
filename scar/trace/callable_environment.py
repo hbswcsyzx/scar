@@ -86,6 +86,7 @@ class CallableEnvironmentObserver:
         self._buffer_limit = 65536
         self._lock = threading.RLock()
         self._observer_ref = weakref.ref(self)
+        self._anchor_callback_code = None
         self._index = self._attempts = self._events = self._bytes = self._references = 0
         self._dispatch_count = self._entry_count = self._gap_count = self._dropped = 0
         self._discarded = 0
@@ -242,6 +243,16 @@ class CallableEnvironmentObserver:
             if not remaining:
                 self._records.pop(address, None)
 
+    def owns_callback_frame(self, frame):
+        """Recognize this observer's cleanup, including entry before line 1.
+
+        Code identity alone would also hide another observer used as workload
+        code. The callback's default weak owner reference identifies our own
+        instrumentation activation without a module/path blacklist.
+        """
+        return (frame.f_code is self._anchor_callback_code
+            and frame.f_locals.get('observer_ref') is self._observer_ref)
+
     def _anchored_reference(self, value, function, field, position=None):
         address = id(value)
         record = self._records.get(address)
@@ -285,6 +296,7 @@ class CallableEnvironmentObserver:
                     except BaseException:
                         pass
             try:
+                self._anchor_callback_code = forgotten.__code__
                 reference = weakref.ref(function, forgotten)
             except BaseException:
                 if not record.anchors:
