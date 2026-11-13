@@ -1211,5 +1211,148 @@
       "THREAD_PROCESS_RELATIONSHIPS",
       "THREE_CPU_CASES_ON_CURRENT_FORMAL_PIPELINE"
     ]
+  },
+  "gray_scott_current_join": {
+    "schema": "scar.gray-scott-current-join-stage-report",
+    "status": "FORMAL_JOIN_AND_INDEPENDENT_READBACK_PASSED",
+    "artifacts": {
+      "admission": {
+        "path": "/home/zyf/AAA/scar/artifacts/current/experiments/cpu-gray-scott-current/formal/current-join/initial-admission.json",
+        "sha256": "5251195bc67a3dff3b39da0adc73dbb84a21c313cee49f5ec6b7109f6c1a3436",
+        "bytes": 792
+      },
+      "readback": {
+        "path": "/home/zyf/AAA/scar/artifacts/current/experiments/cpu-gray-scott-current/formal/current-join/readback-check.json",
+        "sha256": "01a85911a5fd5db93d9e2bc7f18050e827d714143e52a936a06513850f9f60ea",
+        "bytes": 4012
+      },
+      "external_materials": {
+        "path": "/home/zyf/AAA/scar/artifacts/current/experiments/cpu-gray-scott-current/formal/current-join/external-materials/result.json",
+        "sha256": "c8c5551a814c99a8eb80968c28725cff2da5e8b65497336f2c5d37624f637bcb",
+        "bytes": 53534
+      },
+      "observation_frontiers": {
+        "path": "/home/zyf/AAA/scar/artifacts/current/experiments/cpu-gray-scott-current/formal/current-join/observation-frontier-summary.json",
+        "sha256": "59eb687508f33cf8d922540cf94729c84195378be27bc913ebbbb5a62e9e385b",
+        "bytes": 5577
+      }
+    },
+    "catalog": "/home/zyf/AAA/scar/artifacts/current/experiments/cpu-gray-scott-current/formal/current-join/external-catalog",
+    "primitive_f4_reused": true,
+    "base_units": 2,
+    "base_ports": 9075,
+    "base_templates": 1315,
+    "base_static_calls": 92,
+    "external_source_lowering_entered": true,
+    "external_materials": 12,
+    "external_ports": 486516,
+    "external_static_calls": 6897,
+    "external_code_coverage_complete": true,
+    "captured_codes": 38,
+    "matched_codes": 38,
+    "actual_call_denominator": 88,
+    "matched_actual_calls": 88,
+    "unresolved_actual_calls": 0,
+    "observed_function_counts": {
+      "annotated_parent_groups": 2,
+      "body_only_groups": 21,
+      "calls": 92,
+      "derived_interfaces": 32,
+      "interfaces": 35,
+      "observation_frontiers": 81,
+      "observed_groups": 34,
+      "parent_interfaces": 3
+    },
+    "boundary_counts": {
+      "boundaries": 18,
+      "callback_observations": 8,
+      "callbacks": 8,
+      "kinds": {
+        "NATIVE_BUILTIN": 8,
+        "OTHER_UNCLASSIFIED": 6,
+        "TYPE_OBJECT": 4
+      },
+      "observations": 21,
+      "protocol_kinds": {
+        "BUILD_CLASS": 1
+      },
+      "protocol_observations": 1,
+      "protocols": 1,
+      "source_callback_interfaces": 8,
+      "source_callback_observations": 8,
+      "units": 2
+    },
+    "stages": [
+      {
+        "seconds": 3.1593912999960594,
+        "stage": "interfaces",
+        "status": "PASSED"
+      },
+      {
+        "seconds": 0.8160192740033381,
+        "stage": "catalog",
+        "status": "PASSED"
+      },
+      {
+        "seconds": 4.914008355000988,
+        "stage": "external-discovery",
+        "status": "PASSED"
+      },
+      {
+        "seconds": 1413.7114260359958,
+        "stage": "external-materials",
+        "status": "PASSED"
+      },
+      {
+        "seconds": 117.84599987600086,
+        "stage": "external-catalog",
+        "status": "PASSED"
+      },
+      {
+        "seconds": 249.68472802399629,
+        "stage": "calls",
+        "status": "PASSED"
+      },
+      {
+        "seconds": 212.94127943000058,
+        "stage": "function-interfaces",
+        "status": "PASSED"
+      },
+      {
+        "seconds": 153.25747481500002,
+        "stage": "independent-observed-readback",
+        "status": "PASSED"
+      }
+    ],
+    "observed_join_seconds": 234.73225335900497,
+    "production_files_edited": false,
+    "target_executed": false,
+    "benchmark_repeated": false,
+    "first_stage_complete": false,
+    "code_and_call_mapping_is_not_argument_namespace_or_runtime_placement_proof": true
+  },
+  "frontend_build_cost": {
+    "profile": {
+      "schema": "scar.frontend-instrumented-cost-profile",
+      "source": "<frozen genericpath>",
+      "source_bytes": 6247,
+      "seconds": 82.42303338400234,
+      "target_executed": false,
+      "scope": "SCAR_OFFLINE_BUILDER_NOT_TARGET_BENCHMARK"
+    },
+    "hotspots": {
+      "instrumented": true,
+      "target_benchmark": false,
+      "function_calls": 120854977,
+      "decode_calls": 632,
+      "context_variant_document_calls": 8,
+      "production_plan_validation_calls": 1185,
+      "type_universe_build_calls": 1185,
+      "type_universe_cumulative_seconds": 18.097,
+      "profile": "artifacts/current/experiments/frontend-cost-current/profile.txt"
+    },
+    "scope_materialization_status": "PROPOSED_NOT_IMPLEMENTED",
+    "audit": "artifacts/current/experiments/frontend-cost-current/design-audit.json",
+    "first_stage_complete": false
   }
 }
