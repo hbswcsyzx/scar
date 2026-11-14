@@ -549,6 +549,7 @@ def main(argv=None) -> int:
     source_graph_commands = {
         'program-view': 'scar.analysis.program_view',
         'program-state-view': 'scar.analysis.program_state_view',
+        'state-view': 'scar.analysis.program_state_view',
         'native-state-view': 'scar.analysis.native_state_view',
         'native-call-view': 'scar.analysis.source_native_view',
         'protocol-call-view': 'scar.analysis.source_protocol_view',
@@ -642,6 +643,7 @@ def main(argv=None) -> int:
     for name, help_ in (
             ('program-view', 'normalize sealed source graphs into the shared typed dependency interface'),
             ('program-state-view', 'attach symbolic binding addresses and may versions to the shared graph'),
+            ('state-view', 'read or publish a symbolic binding state view'),
             ('native-state-view', 'attach native type paths and scoped alias declarations to the shared graph'),
             ('native-call-view', 'join Python normalization and native boundaries with matched caller frames'),
             ('protocol-call-view', 'join constructor and descriptor interfaces to shared source bodies'),
