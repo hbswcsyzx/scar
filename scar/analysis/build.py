@@ -28,6 +28,7 @@ def _rules():
             'source_declared_catalog.py','source_fact_materials.py',
             'source_observed_boundaries.py','../ir/program/source_observed_boundaries.py',
             'source_body_interfaces.py','source_body_activations.py','source_body_activation_view.py',
+            'source_observed_resumptions.py','source_resumption_view.py','../trace/resumptions.py',
             'compiler_code_paths.py','source_observed_codes.py','source_observed_calls.py',
             '../ir/program/compiler_code_paths.py','../ir/program/source_observed_codes.py',
             'source_resource_scopes.py','source_resource_scope_view.py','../ir/program/resource_scopes.py',

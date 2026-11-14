@@ -355,9 +355,13 @@ def build_frontend(paths, out, *, sources=(), jobs=4, trace=None, project_root=N
                 'loops_unrolled','target_executed','first_stage_complete')})
         if trace is not None:
             resource_arguments=[]
+            runtime_module='scar.analysis.source_observed_interfaces'
+            if any(Path(trace).glob('resumption-meta.*.json')):
+                runtime_module='scar.analysis.source_runtime_interfaces'
+                resource_arguments+=['--resumptions-out',out/'resumptions']
             if any(Path(trace).glob('resource-scope-meta.*.json')):
-                resource_arguments=['--resource-scopes-out',out/'resource-scopes']
-            run.stage('observed-function-interfaces','scar.analysis.source_observed_interfaces',
+                resource_arguments+=['--resource-scopes-out',out/'resource-scopes']
+            run.stage('observed-function-interfaces',runtime_module,
                 ['--parent',out/'function-interfaces','--trace',trace,'--project-root',project_root,
                     '--out',out/'observed-function-interfaces','--boundaries-out',out/'observed-boundaries',
                     '--activations-out',out/'body-activations',
@@ -373,9 +377,12 @@ def build_frontend(paths, out, *, sources=(), jobs=4, trace=None, project_root=N
                     or graph_check['first_stage_complete'] is not False):
                 raise ValueError('body graph readback is incomplete')
             report['body_activations_verified'] = _receipt(out/'body-activations-verified.json')
-            if resource_arguments:
+            if '--resource-scopes-out' in resource_arguments:
                 report['resource_scopes']=_receipt(out/'resource-scopes/result.json')
                 report['resource_scopes_verified']=_receipt(out/'resource-scopes/graph-check.json')
+            if runtime_module=='scar.analysis.source_runtime_interfaces':
+                channels=json.loads((out/'observed-function-interfaces/runtime-channels.json').read_bytes())
+                report['resumptions']=channels['resumptions']
             boundary=json.loads((out/'observed-boundaries/result.json').read_bytes())
             if (boundary['schema']!='scar.source-observed-boundaries'
                     or boundary['first_stage_complete'] is not False

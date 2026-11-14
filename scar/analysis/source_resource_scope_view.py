@@ -30,6 +30,7 @@ class SourceResourceScopeProvider:
         self.locator=SourceArtifactLocator(artifact,artifact.sha256,artifact.size_bytes,'canonical-json')
         root=RegionID(_digest((SCHEMA+'.evidence-root',self.store.coordinates.run.id)))
         self.namespace=GraphNamespace(self.locator,SCHEMA+'.observations.v1',root)
+        self.owned_namespaces=(self.namespace,)
         self.root=Point(self.namespace,root,None)
         self.nodes[root]=(self.store.report,self.root,V.ProgramEntityKind.REGION,V.ProgramNodeRole.PROVIDER)
         scopes={row.id:row for row in self.store.rows['scopes']};work=defaultdict(list)

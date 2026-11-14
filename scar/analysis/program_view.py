@@ -334,6 +334,7 @@ class ProgramView:
     def __init__(self, catalog, *, core_loader=None):
         self.catalog = None if catalog is None else read_source_catalog(catalog)
         self.core_loader = core_loader; self.units = {}; self.namespaces = {}; self.metadata_providers = []
+        self.adapter_namespaces = {}; self.core_namespaces = set()
         self.state_providers = {}
         self.dependencies = ProgramDependencyGraph(self._core_index)
         self.dependencies.providers[:] = [_RepresentationProvider(p,self._core_extension) for p in self.dependencies.providers]
@@ -342,9 +343,12 @@ class ProgramView:
         if namespace.representation == SOURCE_REPRESENTATION:
             raise TypeError('source recipes are not fabricated canonical ProgramGraphs')
         if self.core_loader is None: raise ValueError('this original core graph has not been attached')
-        return self.core_loader(namespace)
+        if namespace in self.adapter_namespaces:raise ValueError('adapter namespace is not a canonical core graph')
+        index=self.core_loader(namespace);self.core_namespaces.add(namespace)
+        return index
 
     def _core_record(self, point):
+        if self.core_loader is None or point.namespace in self.adapter_namespaces:return None
         index=self._core_index(point.namespace)
         for name in ('operations','values','regions','locations','resources','_uses','_block_records'):
             rows=getattr(index,name,{})
@@ -379,6 +383,11 @@ class ProgramView:
         methods=('describe','original','expand','explain')
         available=tuple(callable(getattr(provider,name,None)) for name in methods)
         if any(available) and not all(available):raise TypeError('metadata adapters need describe/original/expand/explain')
+        for namespace in getattr(provider,'owned_namespaces',()):
+            if (type(namespace)is not GraphNamespace or namespace in self.namespaces or namespace in self.core_namespaces
+                    or namespace in self.adapter_namespaces and self.adapter_namespaces[namespace] is not provider):
+                raise ValueError('adapter namespace is invalid or already belongs to another graph')
+            self.adapter_namespaces[namespace]=provider
         self.dependencies.register(provider)
         if all(available):self.metadata_providers.append(provider)
         return provider
