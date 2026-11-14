@@ -62,7 +62,8 @@ class ObservedSourceCallsiteIndex:
         if not hasattr(codes,'scope_records'):
             for unit,capture,scope,code in getattr(codes,'root_callers',()):
                 self._admit(_Caller(unit,capture,scope,code,None))
-        for row in (*codes.records.values(),*getattr(codes,'scope_records',{}).values()):
+        for row in (*codes.records.values(),*getattr(codes,'scope_records',{}).values(),
+                *getattr(codes,'request_records',{}).values()):
             profile=profiles.get(row.body.unit)
             compatible=replay_profiles.get(row.body.unit)
             if row.body.unit in observed_compiled_units and compatible is None:
@@ -195,6 +196,10 @@ class ObservedSourceCallsiteIndex:
         calls=tuple(row for row in self._calls[caller.unit] if caller.scope.owner in owners[row[0]])
         instructions=tuple(dis.get_instructions(caller.code,adaptive=False,show_caches=False))
         call_instructions=tuple(i for i in instructions if i.opname in ('CALL','CALL_KW','CALL_FUNCTION_EX'))
+        fused=defaultdict(list)
+        for instruction in instructions:
+            if instruction.opname=='LOAD_SUPER_ATTR' and type(instruction.arg) is int:
+                fused[tuple(instruction.positions),2 if instruction.arg&2 else 0].append(instruction.offset)
         rows=[];decorator_offsets=set()
         for i,call,gp in calls:
             context=self._contexts[caller.unit][gp.port.template];step=context.steps[gp.port.owner]
@@ -224,6 +229,20 @@ class ObservedSourceCallsiteIndex:
             span=_span(syntax,occurrence)
             rows.append((i,fact,owner,'EXPLICIT_SOURCE_CALL',
                 [x.offset for x in call_instructions if tuple(x.positions)==span]))
+            # LOAD_SUPER_ATTR reports the inner constructor call, whose
+            # source span is shorter than the fused Attribute span. Follow
+            # the original F2 value edge; never infer a builtin by its name or
+            # bind this event to the following method invocation. Both
+            # attribute/method stack layouts use the same explicit-args bit.
+            parent,constructor,field=roles.parent(occurrence)
+            if (constructor=='Attribute' and field=='value' and not call.keywords
+                    and call.positional_pack is None and call.keyword_pack is None
+                    and len(call.positional) in (0,2)):
+                args=roles.field(occurrence,'args');keywords=roles.field(occurrence,'keywords')
+                if (args.kind=='LIST' and len(args.items)==len(call.positional)
+                        and keywords.kind=='LIST' and not keywords.items):
+                    offsets=fused.get((_span(syntax,parent),len(call.positional)),())
+                    if offsets:rows.append((i,fact,owner,'FUSED_SUPER_ATTRIBUTE_SOURCE_CALL',offsets))
         index=defaultdict(list)
         for i,fact,owner,rule,offsets in rows:
             for offset in offsets:

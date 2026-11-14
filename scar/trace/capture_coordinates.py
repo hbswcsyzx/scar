@@ -340,7 +340,8 @@ def _lean_plan_member(files, trace_root, pid, members, calls, operands):
           "lean capture must preserve its explicit thin-boundary scope and namespace")
     declaration = decode(ProviderArtifact, calls.get("capture_plan"))
     expected = trace_root / f"lean-plan.{pid}.json"
-    _need(declaration.uri == str(expected) and declaration.schema == "scar.lean-capture-plan/1"
+    _need(declaration.uri == str(expected) and declaration.schema in
+              ("scar.lean-capture-plan/1", "scar.lean-capture-plan/2")
           and 0 < declaration.size_bytes <= 16_000_000, "lean plan receipt path/schema/size differs")
     local, entry = files.local(expected)
     _need((entry["raw_bytes"] if entry is not None else local.stat().st_size) == declaration.size_bytes,
@@ -350,12 +351,18 @@ def _lean_plan_member(files, trace_root, pid, members, calls, operands):
     maximum = calls.get("limits", {}).get("max_codes")
     _need(_integer(maximum, 1), "lean frame code budget is not declared")
     plan = LeanCapturePlan.from_dict(document, max_codes=maximum)
+    _need(declaration.schema=='scar.lean-capture-plan/'+str(document['schema_version']),
+          'lean plan receipt schema differs from its original document')
     _need(plan.namespace_root == calls["project_root"], "lean plan namespace differs from its issuer")
     members[str(expected)] = artifact
-    return {"capability": "SCAR_LEAN_CAPTURE_PLAN_MEMBERSHIP_V1", "profile": PROFILE,
+    membership={"capability": "SCAR_LEAN_CAPTURE_PLAN_MEMBERSHIP_V1", "profile": PROFILE,
             "plan": encode(artifact), "planned_codes": len(plan.bodies), "scope": scope,
             "unplanned_bodies_expanded": False,
-            "source_compiler_runtime_contents_proved": False}, [str(expected)]
+            "source_compiler_runtime_contents_proved": False}
+    if plan.activation_paths:
+        membership.update(capability='SCAR_LEAN_CAPTURE_PLAN_MEMBERSHIP_V2',
+            context_restricted_codes=len(plan.activation_paths))
+    return membership, [str(expected)]
 
 
 def _program_source_members(files, trace_root, pid, members, calls, operands):

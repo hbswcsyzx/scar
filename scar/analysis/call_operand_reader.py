@@ -202,13 +202,17 @@ def read_call_operands(trace, root, *, budget=CallOperandBudget(), frame_budget=
             plan_path = Path(artifact.uri)
             _require(plan_path == trace_path / f'lean-plan.{process}.json' and not plan_path.is_symlink()
                      and plan_path.is_file() and plan_path.stat().st_size == artifact.size_bytes
-                     and artifact.size_bytes <= 16_000_000 and artifact.schema == 'scar.lean-capture-plan/1',
+                     and artifact.size_bytes <= 16_000_000 and artifact.schema in
+                         ('scar.lean-capture-plan/1','scar.lean-capture-plan/2'),
                      'lean plan artifact/policy scope differs')
             with plan_path.open('rb') as stream:
                 raw_plan = stream.read(16_000_001)
             _require(len(raw_plan) == artifact.size_bytes and
                      hashlib.sha256(raw_plan).hexdigest() == artifact.sha256, 'lean plan SHA/size differs')
-            plan = LeanCapturePlan.from_dict(_json_object(raw_plan, path=str(plan_path), line_number=1),
+            plan_document = _json_object(raw_plan, path=str(plan_path), line_number=1)
+            _require(artifact.schema=='scar.lean-capture-plan/'+str(plan_document.get('schema_version')),
+                     'lean plan receipt schema differs from its original document')
+            plan = LeanCapturePlan.from_dict(plan_document,
                 max_codes=min(frame_budget.max_codes,base_meta[process]['limits']['max_codes']))
             _require(plan.namespace_root == str(root_path), 'lean plan namespace differs')
         metadata.append(meta)

@@ -26,7 +26,8 @@ def discover(catalog, trace, project_root, out, *, frame_max_events=100_000):
     view=ProgramView(catalog)
     codes=ObservedSourceCodeProvider(view, trace, project_root,
         frame_budget=replace(CallEdgeBudget(),max_events=frame_max_events))
-    records=(*codes.records.values(),*codes.scope_records.values())
+    records=(*codes.records.values(),*codes.scope_records.values(),
+        *getattr(codes,'request_records',{}).values())
     body_known={(c.process_id,c.code.key) for row in records for c in row.captures}
     # A full source/code representation can already be retained even when a
     # particular language body interface is not projected. Do not lower that

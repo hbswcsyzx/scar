@@ -549,6 +549,7 @@ class CallOperandObserver:
                 if self.lean_plan.candidate(code) is not None:
                     self._scoped_gap("LEAN_PLANNED_CODE_VERSION_MISMATCH", code, invocation)
                 return  # An interface observation never opts in the callee body.
+            if self.lean_plan.match_frame(frame) is None:return
             if body.unsupported_offsets:
                 self._scoped_gap("LEAN_UNEXPANDED_STATIC_CALL_SITES:" + ','.join(map(str,body.unsupported_offsets)), code, invocation)
         if self.capture == _CAPTURE_WINDOWS:
@@ -783,6 +784,8 @@ class CallOperandObserver:
     def _on_instruction(self, code, offset):
         if self.recorder._closing:
             return
+        if threading.get_ident() in self.recorder._instrumentation_barriers:
+            return  # A shared CodeType mask does not make collector work target work.
         writer = self.recorder._is_capture_writer
         if writer is not None and writer():
             return
@@ -916,6 +919,8 @@ class CallOperandObserver:
     def _on_call(self, code, offset, callable_object, arg0):
         if self.recorder._closing or self.recorder._entry_stop_reason is not None:
             return
+        if threading.get_ident() in self.recorder._instrumentation_barriers:
+            return  # Keep the mask for later real application invocations.
         writer = self.recorder._is_capture_writer
         if writer is not None and writer():
             return
@@ -940,6 +945,8 @@ class CallOperandObserver:
                         return self._disabled_callback_result(code)
                     owner_info = self._event_owner(frame, code)
                     if owner_info is None:
+                        if self.lean_plan is not None and self.lean_plan.match_frame(frame) is None:
+                            return None  # Shared CodeType mask, unselected activation.
                         if self.lean_plan is not None or self.program_ports:
                             self._scoped_gap("CALL_FRAME_UNAVAILABLE", code)
                             return None

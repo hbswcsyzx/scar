@@ -10,6 +10,7 @@ import dis
 from dataclasses import replace
 from collections import defaultdict
 from hashlib import sha256
+import gzip
 import json
 from pathlib import Path
 import sys
@@ -30,8 +31,8 @@ from scar.analysis.source_template_links import _json
 from scar.ir.program.source_syntax import SourceSyntaxMaterial
 from scar.ir.program.compiler_topology import CompilerTopologyMaterial
 from scar.ir.program.source_observed_codes import (ObservedSourceCodeLink,
-    ObservedSourceScopeKind as ScopeKind, ObservedSourceScopeLink)
-from scar.ir.program import normal_targets as T, view as V
+    ObservedSourceScopeKind as ScopeKind, ObservedSourceScopeLink, ObservedSourceRequestCodeLink)
+from scar.ir.program import normal_targets as T, view as V, source_productions as P
 from scar.ir.program.call_edges import CapturedCode,CallEdgeBudget
 from scar.ir.program.providers import ProviderArtifact, ProviderFactReference
 from scar.ir.program.ids import ProviderID
@@ -109,6 +110,7 @@ class ObservedSourceCodeProvider:
     def __init__(self, view, trace, project_root, *, units=(), compiled=(),
                  target_max_bytes=32_000_000, target_max_rows=100_000,frame_budget=CallEdgeBudget()):
         self.view = view
+        self.project_root = str(Path(project_root).absolute())
         self.replay_profiles = dict(getattr(view.catalog, 'replay_profiles', {}))
         self._replay_profile_bytes = _json(self.replay_profiles)
         self.observed_compiled_units = frozenset(getattr(view.catalog.fact_store, 'observed_compiled_units', ()))
@@ -127,7 +129,8 @@ class ObservedSourceCodeProvider:
         self.targets = read_python_call_targets(self.trace,max_bytes=target_max_bytes,max_rows=target_max_rows)
         if any(m['python'] != sys.version for m in self.trace.frame_scan.metadata):
             raise ValueError('code correspondence needs the recorded compiler runtime')
-        self.records = {}; self.scope_records = {}; self.points = {}; self.bodies = {}; self.issues = [];self.root_callers=[]
+        self.records = {}; self.scope_records = {}; self.request_records = {}
+        self.points = {}; self.bodies = {}; self.issues = [];self.root_callers=[]
         self.fact_materials=ObservedFactMaterials(view.catalog)
         self._sources = {}; self._guard = {}; self._trace_guard = {}
         self._target_metas = tuple(sorted(Path(self.trace.directory).glob('python-call-target-meta.*.json')))
@@ -153,6 +156,7 @@ class ObservedSourceCodeProvider:
         selected = tuple(units or (u for u,r in view.catalog.fact_store.rows.items()
             if r['path'] in captures or u in self._compiled and self._compiled[u].compiled_root.filename in captures
             or u in self.replay_profiles and self.replay_profiles[u]['recipe']['filename'] in captures))
+        self.selected_units = selected
         slicer = ReferenceSlicer(type('SourceFacts', (), {'fact_store': view.catalog.fact_store})())
         for unit in selected:
             profile = self._compiled.get(unit)
@@ -270,13 +274,36 @@ class ObservedSourceCodeProvider:
                             ProviderFactReference(syntax_artifact,'#/nodes/'+str(function.template.occurrence)),
                             root_descriptor,constant_path,flags)
                         pending.append(row)
-            if not pending and not scoped:continue
+            from scar.analysis.source_annotation_code_bridge import request_candidates
+            descriptor = model['artifacts']['compiler_topology']
+            topology = decode(CompilerTopologyMaterial, _Fragments(root).read(descriptor))
+            topology_path = root/descriptor['path']; self._guard[topology_path] = topology_path.read_bytes()
+            material = view.unit(unit).material
+            requests = []
+            for values in request_candidates(material, syntax, topology, code, observed):
+                definition = values['declaration']
+                identity = ProviderID(_digest((SCHEMA+'.request',self.targets.source_sha256,
+                    values,root_descriptor,flags)))
+                requests.append(ObservedSourceRequestCodeLink(identity, **values,
+                    source=source_artifact, syntax=ProviderFactReference(syntax_artifact,
+                        '#/nodes/'+str(values['body'].template.occurrence)),
+                    compiled_root=root_descriptor, compile_flags=flags,
+                    frame_entries=tuple(a for c in values['captures']
+                        for a in frame_entries[c.process_id,c.code.key])))
+                artifact = definition.artifact; path = Path(artifact.uri); raw = path.read_bytes()
+                if (len(raw),sha256(raw).hexdigest()) != (artifact.size_bytes,artifact.sha256):
+                    raise ValueError('annotation request sealed recipe evidence changed')
+                self._guard[path] = raw
+            if not pending and not scoped and not requests:continue
             source=view.unit(unit)
-            for row in (*pending,*scoped):
-                body = view.source_region_ref(unit,row.body.template,row.body.region)
+            for row in (*pending,*scoped,*requests):
+                body = (view.source_region(unit,row.body.template,row.body.region)
+                    if type(row) is ObservedSourceRequestCodeLink else
+                    view.source_region_ref(unit,row.body.template,row.body.region))
                 point = Point(body.namespace,row.id,None)
                 key = self._key(point)
-                records=self.records if type(row) is ObservedSourceCodeLink else self.scope_records
+                records=(self.records if type(row) is ObservedSourceCodeLink else self.request_records
+                    if type(row) is ObservedSourceRequestCodeLink else self.scope_records)
                 if key in records and records[key] != row:
                     raise ValueError('observed code mapping has conflicting compiler paths')
                 records[key] = row; self.points[key] = point; self.bodies[key] = body
@@ -334,28 +361,32 @@ class ObservedSourceCodeProvider:
         self._check_trace()
 
     def describe(self, point):
-        if self._key(point) not in self.records and self._key(point) not in self.scope_records:return None
+        if not any(self._key(point) in rows for rows in (self.records,self.scope_records,self.request_records)):return None
         if point.context is not None:raise ValueError('observed code evidence has no static invocation context')
         self.check()
         return V.ProgramNode(point,None,V.ProgramNodeRole.PROVIDER,self.bodies[self._key(point)],None)
 
     def original(self, point):
         key=self._key(point)
-        return self.records[key] if key in self.records else self.scope_records[key]
+        for rows in (self.records,self.scope_records,self.request_records):
+            if key in rows:return rows[key]
+        raise KeyError(key)
     def expand(self, point):return ()
     def explain(self, point):
         row = self.original(point)
         return dict(original=row,code_template_matched=True,
-            scope_kind=row.kind.value if type(row) is ObservedSourceScopeLink else 'FUNCTION_BODY',
+            scope_kind=row.kind.value if type(row) in (ObservedSourceScopeLink,ObservedSourceRequestCodeLink) else 'FUNCTION_BODY',
             compatible_replay_used=row.body.unit in self.replay_profiles,
             original_compilation_request_proven=False,
             source_function_creation_proven=False,caller_site_selected=False,
-            globals_or_cell_contents_proven=False)
+            globals_or_cell_contents_proven=False,request_format_bound=False,
+            ordinary_function_argument_binder_created=False)
 
     def _neighbors(self, point, incoming):
         if point.context is not None:return Neighborhood()
         keys = tuple(k for k,b in self.bodies.items() if b == point) if incoming else (self._key(point),)
-        keys = tuple(k for k in keys if k in self.records or k in self.scope_records)
+        keys = tuple(k for k in keys if any(k in rows for rows in
+            (self.records,self.scope_records,self.request_records)))
         if not keys:return Neighborhood()
         self.check(); edges=[]
         for key in keys:
@@ -365,6 +396,8 @@ class ObservedSourceCodeProvider:
                 'F4_EXECUTION_PROFILE_AND_CALLER_INTERFACE_STILL_REQUIRED')
             if row.body.unit in self.replay_profiles:
                 conditions += ('CODE_EQUIVALENT_REPLAY_NOT_ORIGINAL_COMPILATION_REQUEST',)
+            if type(row) is ObservedSourceRequestCodeLink:
+                conditions += ('ANNOTATION_REQUEST_FORMAT_CREATOR_GLOBALS_AND_CELLS_UNBOUND',)
             guards=tuple(Condition(SCHEMA,c,source,None,(source,target)) for c in conditions)
             locators=(source.namespace.graph,)
             edges.append(Edge(source,target,K.IMPLEMENTATION,Meaning.STRUCTURE,
@@ -375,11 +408,14 @@ class ObservedSourceCodeProvider:
     def outgoing(self, point):return self._neighbors(point,False)
 
     def summary(self):
-        matched={(c.process_id,c.code.key) for r in (*self.records.values(),*self.scope_records.values()) for c in r.captures}
+        matched={(c.process_id,c.code.key) for r in (*self.records.values(),*self.scope_records.values(),
+            *self.request_records.values()) for c in r.captures}
         kinds=defaultdict(int)
         for row in self.scope_records.values():kinds[row.kind.value]+=1
         return dict(code_links=len(self.records),units=len(self._sources),
             scope_links=len(self.scope_records),scope_kinds=dict(kinds),
+            request_links=len(self.request_records),
+            request_frame_observations=sum(len(r.frame_entries) for r in self.request_records.values()),
             captured_code_templates=len(self.trace.frame_scan.captures),matched_code_templates=len(matched),
             unmatched_code_templates=len(self.trace.frame_scan.captures)-len(matched),
             compiled_units=sorted(self._compiled),
@@ -388,6 +424,83 @@ class ObservedSourceCodeProvider:
             entry_bindings=sum(len(r.entries) for r in self.records.values()),issues=self.issues,
             source_bodies_copied=False,creator_instances_proven=False,callsite_interfaces_connected=False,
             first_stage_complete=False)
+
+
+def request_code_pins():
+    from scar.analysis import source_annotation_code_bridge
+    from scar.ir.program import source_observed_codes as request_ir
+    return {name:sha256(Path(path).read_bytes()).hexdigest() for name,path in
+        (('provider',__file__),('requests',request_ir.__file__),('bridge',source_annotation_code_bridge.__file__))}
+
+
+def publish_observed_codes(provider, out):
+    """Seal code, scope and separate request links without copying F4 bodies."""
+    out=Path(out).absolute()
+    if out.resolve()!=out or out.exists():raise ValueError('fresh canonical observed source-code view output required')
+    _durable_mkdir(out);table=write_table(out/'links.jsonl.gz',provider.records.values())
+    scopes=write_table(out/'scope-links.jsonl.gz',provider.scope_records.values())
+    requests=write_table(out/'request-links.jsonl.gz',provider.request_records.values());provider.check()
+    report=dict(schema=SCHEMA,schema_version=3,catalog=str(provider.view.catalog.path),
+        trace=provider.trace.directory,project_root=provider.project_root,selected_units=list(provider.selected_units),
+        run_scope=provider.targets.source_sha256,compiled_units=[p.unit for p in provider.compiled],
+        target_reader_budget=provider.target_reader_budget,frame_reader_budget=encode(provider.trace.frame_budget),
+        table=table,scope_table=scopes,request_table=requests,request_pins=request_code_pins(),
+        summary=provider.summary())
+    _durable_bytes(out/'result.json',_json(report),replace=False)
+    return report
+
+
+def read_observed_request_codes(path, *, max_stored_bytes=32_000_000,
+                                max_decoded_bytes=128_000_000, max_records=100_000):
+    """Independently replay code/request correspondence against original leaves.
+
+    Reader decoding, frame anchors, source/compiler paths and sealed recipe
+    admission all run again. No Fact-table resolver is given recipe evidence.
+    """
+    for value in (max_stored_bytes,max_decoded_bytes,max_records):
+        if type(value) is not int or value<1:raise ValueError('positive exact request reader budgets required')
+    path=Path(path).absolute()
+    if path.resolve()!=path:raise ValueError('canonical observed request store required')
+    raw=(path/'result.json').read_bytes();report=json.loads(raw)
+    if ((report.get('schema'),report.get('schema_version'))!=(SCHEMA,3)
+            or report.get('request_pins')!=request_code_pins()
+            or report['summary']['first_stage_complete'] is not False):
+        raise ValueError('observed request code producer or authority differs')
+    descriptor=report['request_table']
+    if (descriptor['path']!='request-links.jsonl.gz'
+            or any(type(descriptor[name]) is not int or not 0<=descriptor[name]<=limit
+                for name,limit in (('bytes',max_stored_bytes),('decoded_bytes',max_decoded_bytes),('records',max_records)))):
+        raise ValueError('observed request table path or budget differs')
+    table=path/descriptor['path']
+    if table.is_symlink() or table.stat().st_size!=descriptor['bytes']:
+        raise ValueError('observed request table size/path differs')
+    payload=table.read_bytes()
+    if sha256(payload).hexdigest()!=descriptor['sha256']:raise ValueError('observed request stored receipt differs')
+    with gzip.open(table,'rb') as stream:decoded=stream.read(max_decoded_bytes+1)
+    if (len(decoded)!=descriptor['decoded_bytes'] or len(decoded)>max_decoded_bytes
+            or sha256(decoded).hexdigest()!=descriptor['decoded_sha256']
+            or decoded.count(b'\n')!=descriptor['records']):
+        raise ValueError('observed request decoded receipt differs')
+    stored=tuple(decode(ObservedSourceRequestCodeLink,json.loads(line),record_tags=P.PRODUCTION_RECORD_TAGS)
+        for line in decoded.splitlines())
+    from scar.analysis.source_compiled_code_profiles import CompiledCodeProfiles
+    view=ProgramView(report['catalog'])
+    profiles=tuple(CompiledCodeProfiles(view.catalog,u) for u in report['compiled_units'])
+    provider=ObservedSourceCodeProvider(view,report['trace'],report['project_root'],
+        units=report['selected_units'],compiled=profiles,**report['target_reader_budget'],
+        frame_budget=decode(CallEdgeBudget,report['frame_reader_budget']))
+    fresh=tuple(provider.request_records.values())
+    order=lambda row:row.id.value
+    if (report['run_scope']!=provider.targets.source_sha256
+            or len({row.id for row in stored})!=len(stored)
+            or tuple(sorted(stored,key=order))!=tuple(sorted(fresh,key=order))
+            or report['summary']['request_links']!=len(fresh)):
+        raise ValueError('observed request code links differ from fresh source/compiler/frame correspondence')
+    provider.check()
+    if ((path/'result.json').read_bytes()!=raw or table.read_bytes()!=payload
+            or report['request_pins']!=request_code_pins()):
+        raise ValueError('observed request store changed during read')
+    return provider
 
 
 def main():
@@ -405,15 +518,8 @@ def main():
     provider=ObservedSourceCodeProvider(view,args.trace,args.project_root,units=args.unit,compiled=profiles,
         target_max_bytes=args.target_max_bytes,target_max_rows=args.target_max_rows,
         frame_budget=replace(CallEdgeBudget(),max_events=args.frame_max_events))
-    out=Path(args.out).absolute()
-    if out.exists():raise ValueError('fresh observed source-code view output required')
-    _durable_mkdir(out);table=write_table(out/'links.jsonl.gz',provider.records.values())
-    scopes=write_table(out/'scope-links.jsonl.gz',provider.scope_records.values());provider.check()
-    report=dict(schema=SCHEMA,schema_version=2,catalog=str(view.catalog.path),trace=provider.trace.directory,
-        run_scope=provider.targets.source_sha256,compiled_units=[p.unit for p in profiles],
-        target_reader_budget=provider.target_reader_budget,frame_reader_budget=encode(provider.trace.frame_budget),
-        table=table,scope_table=scopes,summary=provider.summary())
-    _durable_bytes(out/'result.json',_json(report),replace=False);print(json.dumps(report['summary']),flush=True)
+    report=publish_observed_codes(provider,args.out)
+    print(json.dumps(report['summary']),flush=True)
 
 
 if __name__=='__main__':main()

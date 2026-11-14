@@ -131,9 +131,11 @@ class CallEdgeRecorder:
             # Rooted planned activations keep thin real ancestry. Seen target
             # code alone never expands its implementation or monitoring mask.
             parent = frame.f_back
-            return (self.lean_plan.candidate(frame.f_code) is not None or
+            return (self.lean_plan.candidate(frame.f_code) is not None
+                    and (self.lean_plan.match(frame.f_code) is None
+                         or self.lean_plan.match_frame(frame) is not None) or
                     parent is not None and (threading.get_ident(), id(parent)) in self.active
-                    and self.lean_plan.match(parent.f_code) is not None)
+                    and self.lean_plan.match_frame(parent) is not None)
         if self._inside(frame) or self._inside(frame.f_back):
             return True
         observer = self.operand_observer
@@ -163,13 +165,13 @@ class CallEdgeRecorder:
                                or filename == self._instrumentation_loader):
             self._instrumentation_barriers[thread] = id(frame)
             return True
-        if self.process_ports and event == 'call':
+        if (self.process_ports or self.lean_plan is not None) and event == 'call':
             parent = frame.f_back
             if parent is None or (thread,id(parent)) not in self.active:
-                # Attaching to existing threads can first see a call below an
-                # already-active collector/bootstrap frame. No entry event for
-                # that ancestor was delivered. Seed the barrier at its real
-                # outermost frame, without inventing a target invocation.
+                # Installation (including lean capture) can first see a call
+                # below an already-active collector/bootstrap frame. No entry
+                # event for that ancestor was delivered. Seed the barrier at
+                # its real outermost frame, without a target invocation.
                 ancestor, root = parent, None
                 stack = self._target_forward_stacks.get(thread, ())
                 floor = stack[-1]['floor'] if stack else None
@@ -403,7 +405,7 @@ class CallEdgeRecorder:
                     self._skipped_entries += 1
                     self.dropped += 1
             return  # No entry can be published; do not walk an unretained stack.
-        if self.program_ports and self._instrumentation_barrier(frame, event):
+        if (self.program_ports or self.lean_plan is not None) and self._instrumentation_barrier(frame, event):
             return
         if frame.f_code.co_filename in self.observer_files:
             return
@@ -452,7 +454,7 @@ class CallEdgeRecorder:
                     code = self._code(frame.f_code)
                     seen = {}
                     targets = getattr(self.operand_observer, 'python_targets', None)
-                    detailed = (self.lean_plan is None or self.lean_plan.match(frame.f_code) is not None
+                    detailed = (self.lean_plan is None or self.lean_plan.match_frame(frame) is not None
                                 or targets is not None and targets.accepts_frame(frame))
                     names = code_parameters(frame.f_code) if detailed else ()
                     parameters, complete = (self._bindings(frame.f_locals,seen,names)

@@ -1,85 +1,51 @@
 # 当前状态
 
-**第一阶段未完成。当前仅做自动建模、建图和读回，没有进入程序化简或代码生成。**
-LeWM 原仓库保持干净；当前无可用 GPU，主 testcase 已切换为外部 CPU 程序。
-后端规划仍为 C++20、算子 ABI v1、计划 schema v1。
+**第一阶段未完成；当前只做自动建模、建图和读回。未进入化简或代码生成。**
+LeWM 原仓库未修改；无可用 GPU，当前使用外部 CPU testcase：Sunfish、Gray–Scott、Cirq。
+未来后端约定仍为 C++20 / 算子 ABI v1 / 计划 schema v1。
 
-## 模型与流程
+## 按层执行与验收
 
-实体仍为 Operation / Value / StateLocation / Region / Resource；控制端口、Use、观察和契约为强类型辅助记录。
-函数/循环正文共享，调用与迭代不复制正文；源码、局部依赖、跨层接口、运行证据与硬件库存分别存储并通过原 ID 连接。
-
-已实现的统一入口：源码识别 → 静态子图 → 运行代码选择/跨层连接 → 资源接口 → 分片存储/读回。
-`scar build --body-scope observed` 自动准入实际 CodeID 涉及的外部源码文件，保留未选正文的源码声明；不扫描整个 site-packages。
-该模式默认跳过全局静态目标固定点，直接连接原 trace 的实际调用；未观察路径保持条件，未证明为死代码。
-`--target` 接入独立的 CPU/DRAM/存储库存和拓扑；候选资源不冒充实际 placement、分配或搬运。
-
-## CPU 主测试组：真实运行
-
-| 外部程序 | 内容 | 实测负载 |
+| 层 | 内容 | 当前结果与下一验收点 |
 |---|---|---|
-| Sunfish | 一般程序：国际象棋搜索 | 7.143s，平均 0.996 核 |
-| Gray–Scott | 科学计算：512 网格、5000 步反应扩散 | 68.72s，单核配置，最终数组有限 |
-| Cirq 1.7.0 | 科学计算：FP64 量子电路模拟 | 单核 13.475s；8 进程 50.946s；长档 636.085s |
+| 1 | F0 源字节 → F1 token → F2 语法 → F3 作用域/编译对应 | 已实现并实测；原源码和完整编译上下文限定身份 |
+| 2 | F4 共享局部图：表达式、控制、函数、类、循环 | Cirq 173 单元已生成；正文共享，不按调用/迭代复制 |
+| 3 | 实际 CodeID/CALL/回调 → 原源码端口与跨层接口 | 当前主攻；通用小图及注解请求已验，Cirq 全目录观察叠加正在离线构建 |
+| 4 | 状态与资源接线 | 已有局部 binding/content/effect、native 候选和硬件库存；实际状态/资源关系仍须核对 |
+| 5 | 原分片组装、独立读回、入口到输出查询 | 流程已实现；三个 CPU case 尚未全部在当前合同下验收 |
 
-Cirq 长档为 22 qubits、depth20、12 轮、8 个独立电路：平均 7.74 核，峰值采样 CPU807.4%，进程 RSS 和峰值约4.83 GiB（共享页可能重复）。
-最大 norm 误差1.221e-14，容差1e-9；不保存完整 statevector，不使用 GPU，不以 sleep 凑时。
-以上均为单次基准、warmup0，没有加速比结论。完整命令和配置见 `artifacts/baseline/cpu-workloads.json`。
-依赖隔离于 `~/AAA/cirq/.scar-runtime`；未升级 LeWM 的 Torch/CUDA。Qulacs 缺匹配 wheel/Boost，保留干净源码及失败收据。
+实体为 Operation / Value / StateLocation / Region / Resource；Use、控制端口、观察与契约是强类型辅助记录。
+函数与循环可递归展开，调用 Frame 与真实 Invocation 分开。未知字段保条件，不删除已知节点；MAY 依赖不冒充精确参数、别名、版本或纯度证明。
+后续严格依次完成：第3层实际调用映射与接口读回 → 第4层状态/资源 → 第5层统一验收。不加 detector、backend 或代码生成。
 
-## 当前建图证据
+## 本轮真实进展
 
-本轮修改了前端producer：下列早期CPU材料保留为历史验收，旧收据不改写；当前reader拒绝版本不符的F4，须重新生成依赖材料。
+- **Verified：** Cirq 按原64文件预算分批准入，形成173单元、172份primitive材料；14份重复快照未重复入图。原681/681捕获CodeID有源码表示；这不等于正文/依赖已接通。
+- **Verified：** 该目录的静态调用声明及函数接口已完成，1948.105s、8进程：16,982个静态调用声明，1,281个条件接口、1,266个已接静态调用、5,103条参数路由。未接声明不能直接视为实际运行缺口。
+- **Implemented / Verified：** 编译器注解callback用独立记录连到原deferred region，不伪造普通FunctionFact。Cirq一源码单元的14个真实请求已独立读回；原recipe、代码常量路径与源码scope一致。format/创建实例/globals/cells未绑定。
+- **Implemented / Verified：** 原生dispatcher可接普通函数、注解请求及可挂起callback的共享正文；请求保原3输入、2返回端口。通用micro的schema4边界独立读回通过；返回连dispatcher，未当成外层结果alias。
+- **Implemented / Verified：** 采集支持LOAD_SUPER_ATTR及CALL_FUNCTION_EX。通用micro 21/21实际调用接回原源码，5个融合调用不按函数名选目标；当前schema4接口及16条双向边经独立读回。参数包/代理分配/native入口仍分别保条件。
+- **Rejected：** 将9个中间CodeID全局加入计划使Cirq导入期CALL扩大到62,142，native流触及原64MiB预算。该失败流原样保留，不升预算、不补造完整收据。
+- **Implemented / Verified：** `scar refine-capture`从原frame/path及完整源码重放生成按父CodeID＋调用offset限定的补采计划。原4,622 selector保留，新增9个只在所需上下文展开；schema1仍可读，schema2保存路径范围。串行和并发共享CodeType小程序已验证，未选调用保接口，不冒充未执行。
+- **Verified：** Cirq路径限定补采100.327s：689代码模板、4,900实际CALL及4,900 native事实，8/8流完整、零丢弃、严格reader零问题；14目标请求全部有直接调用者，数值观察与前次一致。整图对应仍待当前离线接线验收。
+- **Verified：** lean采集复用collector同步子树屏障。通用micro的SCAR安装子树entry 3295→0，应用对同一inspect函数的两次调用保留，6/6流完整；这是功能证据，非性能基准。
+- **Observed：** 当前主耗时仍是整文件F4及目录的冷解码。新增观察连接复用静态材料，没有重建F0–F4。先完成本层接线，之后再落实按CodeScope物化；不以伪header绕过原材料校验。
 
-- **Implemented / Verified：** 私有不可变类型目录与一次编译内的有界纯文档复用，消除重复规则构造；同6247B源码、warmup1/重复3次，离线局部建图中位数27.362s→13.721s（1.994倍）。完整图/记录/事实相等，独立reader仍重放。仅SCAR建图速度，不是workload加速；81项针对性检查通过，另1项缺少现行profile/world ABI的既有fixture已单独复现并记录。
-- **Implemented / Verified：** 普通body-only调用增加原输入到未解析形参的保守依赖；真实微型前端及独立读回验证2条匹配frame的MAY边、原输入边、返回和codec。保持`NOT_MODELED`，不冒充参数/别名证明。
-- **Observed：** Cirq新短窗口记录4342 CALL、681 CodeID，快照全部完整关闭、零丢弃；99个未知退出均为未计划typing分支抛错，107个生成器entry缺口在两种记录中重合。97次回调未命中静态offset计划，尚须定位；不能将传输完整称为程序依赖完整。
-- **Implemented / Verified：** 编译对应层保留全域source/mode/flags/opt，先以采集到的字节码摘要拒绝不相容项，再完整CodeID比较并用原filename真实compile确认；预筛不授权匹配。Cirq2162执行模板、364源码以7488次compile在6.018s完成，未提高原20000次/120s预算；旧记录保全域回退。模板warnings不影响预筛，实际确认仍遵守当前诊断策略。
-- **当前主链：** Cirq前21个源码/局部图步骤已通过。外部准入按64文件的原预算分批完成，681/681捕获CodeID已有源码对应；最终173单元/172份primitive材料经发布过程的新reader校验，14份重复快照未再入图。源码对应不代表正文已接通：35个已表示code是尚未绑定的annotation请求，应接既有deferred region；97次`LOAD_SUPER_ATTR`须接回原super调用。当前正在投影调用接口，状态/资源及独立统一读回未完成。
+上述原材料位于 `artifacts/current/experiments/cpu-quantum-current/` 及同级 micro 目录；精简可复核收据汇总在 `artifacts/baseline/formal-frontend-results.json`。
 
-- **Verified：** 统一effect字段已接入原绑定/content访问表：Sunfish 9623操作请求、847绑定访问、577内容访问；六类实际操作的字段/原成员引用、codec和重复查询92.232s通过。局部读取的明确字段与对象内容/分配/别名UNKNOWN分开，不以空集合冒充无副作用。
-- **Verified：** 资源适用性分为编译信息、子图组合、声明、host和开放外部接口，原结构说明不再冒充缺运行采集。新单文件官方算子材料沿正式前端→named/native→resource构造；原CALL可展开至aten::sin及sin.out两个共享正文，4条CPU executor候选、10条值资源路由经主进程独立读回通过（5.952s），纵向图查询5.768s。未执行该fixture或证明实际dispatch。
-- **Verified：** 当前build_f4组装/保存/独立重开412.062s通过（不含CLI选材），18单元、28资源记录、63条提示；先前39条结构说明现为typed适用性，3条明确host intrinsic不再要求未知外部资源，不能把提示数下降当作新增运行覆盖。31项既有资源检查通过。
-- **Verified：** Gray–Scott正式接口链已完成并独立读回：原2unit/1315模板F4全部复用，12外部文件自动准入；38/38捕获CodeID、88/88实际CALL有对应（87普通、1类构造），0 CALL映射缺口。仍有81条ABI/receiver条件、涉及61次调用；这些不是丢失CALL。外部F4降低1413.711s为主耗时，未重跑benchmark。
+## 已有基线与范围
 
-- **Verified：** 正式前端按F0字节→F1词法→F2语法→F3作用域/编译对应→F4共享局部图推进。有trace时继续生成调用接口、匹配生成代码和外部源码、接观察边。自动前端29/29步已有实测通过；目录收据更新后用原材料验证尾链，不重建不变的F4。
-- **Verified：** Sunfish当前18个源码单元，77/77捕获代码模板有源码对应，455/455回调有共享正文；3个类体独立于普通函数binder。外部11文件368,193B由8个实际进程建局部图，287.791s，离线不执行目标。
-- **Verified：** 对原真实trace的123条CALL位置缺口逐组核对opcode、源码位置和原F4操作：120条生成器创建、3条类构造，接回18个共享操作。普通调用对应仍2886条，位置映射前沿123→0，单次索引验收86.142s。这里123条是兼容源码对应关系，实际协议调用为110次生成器创建、3次类构造；不能混用两种计数。
-- **Verified：** 协议调用独立于普通函数ABI，保原参数、world、结果和共享正文；边界分片schema3保存共享接口与独立观察。真实记录2481/2481次CALL全部有源码对应；发布107.405s，独立重导读回及18项实际图查询117.501s通过。未证明generator实例/恢复位置或类构造内部状态。
-- **Verified：** 前一轮协议接线的build_f4组装/保存/独立重开读回412.728s通过（不含CLI选材时间），18源码单元、28资源记录，仍105条提示。入口查询有点数/深度预算；流程成功、源码对应或CALL位置归零都不代表完整程序依赖闭合。
-- **Verified：** 生成代码的32迭代、7可挂起正文、7mapping、2merge和7suspension接口已有原分片读回；仅读取所需25/2978份计划。函数/循环重复展开保持原ID，不复制正文或unroll。
-- **Verified：** Gray–Scott两个Python文件完成正式局部前端：114.024s、1315模板/1313连接。旧版三个CPU case的自动组装见下表，尚未全部迁入当前正式链。
-
-正常负载与建图采集使用不同规模：Sunfish采小残局，Gray采短时间段，Cirq采3 qubits/1 worker。短窗口不能证明长基准全部分支或进程关系。
-统一构图/存储/读回现均已完成；全部 observed_admission=ADMITTED，但 first_stage_complete=false：
-
-| 图 | 源码单元 | 观察调用域/边 | 总构建秒数 |
-|---|---:|---:|---:|
-| Sunfish graph | 13 | 187/330 | 79.78 |
-| Gray–Scott automatic | 10 | 85/428 | 337.37 |
-| Cirq graph | 169 | 2524/6730 | 792.02 |
-| FEM verified（辅助回归） | 149 | 665/1261 | 279.01 |
-
-这里ADMITTED只表示原采集通过准入并接入了部分接口，不表示所有CALL都已绑定。Sunfish仍有2294条、Cirq仍有1818条OBSERVED_CALL_UNBOUND（逐事件记录，尚须按原代码/位置归并）。
-Gray旧的2文件小图与新的10文件自动依赖图范围不同，不能把17.4s/337.37s直接算作性能退化倍率。
-原材料在 `artifacts/current/experiments/cpu-*-current/`；精简可复核结果见 `artifacts/baseline/cpu-graph-results.json`。
-旧LeWM完整trace和F4材料保留，历史细节由Git记录。
-
-## 按层推进第一阶段
-
-| 层 | 当前状态 | 本层验收产物 |
+| 外部程序 | 已测负载 | 建图历史证据 |
 |---|---|---|
-| 1. 源码识别：字节、token、语法、作用域 | 已实现，已有正式实测 | 原版本/编译上下文、精确源码端口 |
-| 2. 局部图：表达式、控制、函数/类/循环正文 | 已实现，当前Sunfish18单元 | 共享操作、值/状态端口、可递归展开正文 |
-| 3. 动静连接：真实CodeID、CALL、回调、语言协议 | 当前主攻；位置映射及分片存读已验，仍有状态/参数前沿 | 每个捕获CALL有来源，接口/观察分离，读回不改原ID |
-| 4. 跨层状态与资源 | effect字段与静态原生资源已接；实际状态/资源未闭合 | namespace、实例/恢复、存储来源、线程/进程与实际资源关系 |
-| 5. 统一组装与复核 | 流程已通，覆盖未完成 | 三个CPU case同一路线的入口→输出、资源及分片读回报告 |
+| Sunfish | 一般程序，7.143s，平均0.996核 | 原77/77代码、2481/2481实际CALL有源码对应 |
+| Gray–Scott | 科学计算，512网格/5000步，68.72s单核 | 原38/38代码、88/88实际CALL有对应 |
+| Cirq | FP64量子模拟，单核13.475s；8进程50.946s；长档636.085s | 当前主链见上文 |
 
-当前第3层的CALL位置映射、协议分片和整体组装已验；其余参数/实例前沿保持原条件。当前已接effect摘要、资源适用性及native→executor候选；下一步补实际状态/资源证据与跨进程关系，巩固Gray–Scott统一组装，并将Cirq迁入当前正式链，最后做第5层统一验收。不增加detector、backend或代码生成。
-资源提示已区分不适用、静态需求与实际使用；45个入口查询操作现有字段级摘要，未决字段仍逐项保留。原生声明与资源候选不替代运行证据。
-原生ABI、generator恢复实例、类namespace未知时保字段/接口条件，不把已知操作整块写成UNKNOWN，也不靠删除前沿宣布通过。
-目标是接清所需程序依赖；不扩展到OS内部FD表或机器指令。
-首要性能瓶颈仍是canonical正文/图的冷解码；按原文件/模板分片并行建局部图，复用已核验目录和材料，避免重复解码。
-只有入口到输出及跨层/资源依赖验收通过，才将 first_stage_complete 设为true。
+长档Cirq为22qubits/depth20/12轮/8电路，平均7.74核，最大norm误差1.221e-14。
+负载均为单次基准、warmup0，没有workload加速比结论。短采集不能证明长负载全部分支或进程关系。
+早期材料保原收据；producer/schema改变后不手工重签，必须按当前合同重验。旧Sunfish/Gray结果不代表本轮整图验收通过。
+SCAR自身局部建图缓存改进的中位数27.362s→13.721s（warmup1、3次）仅是建图速度，不能当作应用加速。
 
-剩余效率缺口：Gray新增外部源码使25个CodeID对应486,516个整文件端口；只加worker不能解决这个膨胀。重复类型目录和context重放已减少，按CodeScope降低仍仅完成设计审计，不能以伪root或假header绕过完整性要求。先接通当前层，再落实“完整声明/显式物化覆盖”。
+`scar build`按原ID组合源码、接口和硬件分片，`BuildSession`复用会话读缓存；硬件库存/资源候选不等于实际placement、分配或复制。
+当前硬件库存可表示CPU、DRAM与存储拓扑；本轮9资源/8连接已采集，GPU接口不可用如实保状态，不扩展OS内部FD表或机器指令。
+只有当前范围内的入口到输出、跨层依赖及资源分片均经独立读回验收，才将 `first_stage_complete` 设为true。

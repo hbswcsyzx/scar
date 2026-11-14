@@ -1701,5 +1701,76 @@
         ]
       }
     }
+  },
+  "cross_layer_current": {
+    "status": "MICRO_VERIFIED_FULL_CIRQ_JOIN_RUNNING",
+    "entities": [
+      "Operation",
+      "Value",
+      "StateLocation",
+      "Region",
+      "Resource"
+    ],
+    "request_body_model": "SEPARATE_DEFERRED_REGION_NOT_FUNCTION_FACT",
+    "request_links_independently_verified": 14,
+    "fused_actual_calls_mapped": 21,
+    "context_selector_schema": 2,
+    "contexts_are_capture_policy_not_dispatch_proof": true,
+    "cirq_static_units": 173,
+    "cirq_captured_codes": 689,
+    "cirq_actual_calls": 4900,
+    "cirq_native_facts": 4900,
+    "cirq_seed_requests_with_direct_callers": 14,
+    "cirq_snapshot_streams_verified": 8,
+    "cirq_drops": 0,
+    "cirq_full_graph_verified": false,
+    "first_stage_complete": false,
+    "receipts": {
+      "annotation_code": {
+        "path": "artifacts/current/experiments/annotation-code-bridge-current/result.json",
+        "bytes": 5847,
+        "sha256": "5002dc871945d0702349ee03c0efb43ab2bc6119a6e9e02bbaf1be30bd2686ee"
+      },
+      "annotation_boundary": {
+        "path": "artifacts/current/experiments/annotation-request-boundary-current/result.json",
+        "bytes": 3273,
+        "sha256": "d7692a51f838d9315b008b78efb7deed7956fda427a990ac8e44dad936c469eb"
+      },
+      "fused_call_current": {
+        "path": "artifacts/current/experiments/fused-call-current/current-check.json",
+        "bytes": 1984,
+        "sha256": "50b9d4da7c300b5b750f8e39d251615168c600545cc2c31625f18ea5af32fc23"
+      },
+      "collector_scope": {
+        "path": "artifacts/current/experiments/snapshot-scope-current/result.json",
+        "bytes": 1919,
+        "sha256": "52e5678c0669a91264bbe485433b674da95ddc0d1cfd206ad27b3e7f0820b1ea"
+      },
+      "context_selection": {
+        "path": "artifacts/current/experiments/context-selection-current/result.json",
+        "bytes": 499,
+        "sha256": "f519455299628f83a8e65df4df490d1089abf4219aa05174ecc0d82fba8e4210"
+      },
+      "context_concurrency": {
+        "path": "artifacts/current/experiments/context-threads-current/result.json",
+        "bytes": 408,
+        "sha256": "f8622c1771ad48b07296a4d7917fbbec730452cd6d2aaf0d571aae036d95833a"
+      },
+      "cirq_capture": {
+        "path": "artifacts/current/experiments/cpu-quantum-current/capture-request-context-check.json",
+        "bytes": 1019,
+        "sha256": "dc3299b313f14671050d5b1dcbe3b240eedada4cb83c5eb12336508210c96ee0"
+      },
+      "cirq_static_interfaces": {
+        "path": "artifacts/current/experiments/cpu-quantum-current/formal-interfaces-current/result.json",
+        "bytes": 705,
+        "sha256": "60804e7c7406c5e1ce66f2d2de1ff41be5574e8146e71557d2f6ab3e09d5c18e"
+      },
+      "cirq_target": {
+        "path": "artifacts/current/experiments/cpu-quantum-current/target-current/result.json",
+        "bytes": 2517,
+        "sha256": "17415d545b6b9f5bf6ae318d7bbd089c44ed4a13e3e565b3b012245d0af260f6"
+      }
+    }
   }
 }

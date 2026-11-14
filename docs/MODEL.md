@@ -42,7 +42,12 @@ SCAR 是宏观编译器：用有类型、可展开的图统一表示程序及硬
 Lambda 还核原F3 `LAMBDA_BODY` 投影；同一行的多个表达式按完整跨度和真实常量槽分别对应。
 GeneratorExp同样核原`GENERATOR_EXPRESSION`编译器投影；代码对应不代表创建已进入正文，也不建立生成器实例身份。
 
+编译器生成的注解callback用独立`ObservedSourceRequestCodeLink`对应原deferred Region，而非伪造FunctionFact。完整code、父常量路径、MAKE_FUNCTION/安装协议、F2声明及C3请求scope共同定位原封存recipe；请求输入仍是environment/format/world，返回value/world。`SourceBoundaryCallback.body_kind`区分普通函数、求值请求及无源码接口；经native dispatcher的callback返回该dispatcher，不等于外层CALL结果。format、创建实例及globals/cells内容仍各自待绑定。
+
 `CompiledCodeProfiles`沿原compile请求、文本与C1/F4收据恢复有效输入；相同root code只证明模板对应，不选择exec namespace分支。`ObservedSourceCallsite`再以完整caller code、scope、操作ABI及源码槽连接真实offset与原Call Fact；ApplyDecorator与工厂可有相同span，须用原定义的code常量位置区分。`ObservedSourceFunctionGroup`按原call/definition归组；已有等价接口保原Fact/frame，只有缺失目标增加条件接口。未知receiver以可能的0/1额外prefix记录，不用创建期default排除；未证布局只注释code证据，不新增错误参数路由。动态Invocation仍在原观察记录里，不能冒充静态Frame，循环body继续共享。
+`LOAD_SUPER_ATTR`按原Attribute.value边对应内层源Call，后续方法CALL另算；以参数位区分0/2显式参数，不按`super`名称推断真实目标。`CALL_FUNCTION_EX`保留参数包协议；看见CALL仍不证明native入口、分配或普通形参绑定。
+
+采集计划是范围策略，不是程序事实。`scar refine-capture`只从已核源码的CodeID及原frame/path关系导出补采selector；新增正文可限定在完整父CodeID＋调用offset路径下，避免把共享库函数的所有调用全局展开。原selector和原图ID保持；同一CodeType的monitoring mask不能授予所有激活展开权。plan schema2持久化路径限制，schema1原计划仍可读取；未选择上下文保持开放，不能宣称未执行或无效果。collector同步子树与应用执行分开，即使它们调用同一stdlib代码。
 正文entry与receiver身份分别判断：原caller的相邻CALL区间内，完整code、直接caller及site唯一匹配的非挂起帧可供应环境/world/返回接口。receiver不能weakref时不保留用户对象，也不猜地址身份；参数布局未证则保`NOT_MODELED`及原帧锚点。
 这种普通正文的形参另保`CallInputEnvelope`：原callee、显式参数、packs及调用前world通过原CALL操作接到尚未精确路由的data formal。边是匹配frame下的MAY依赖，不是REFERENCE/alias或参数绑定证明；不造参数包、不引入调用结果作为输入。已有精确route优先，可挂起正文的创建不借此进入正文。
 

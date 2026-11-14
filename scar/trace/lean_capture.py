@@ -4,17 +4,21 @@ from dataclasses import dataclass,field
 import dis,hashlib,json,os,sys,weakref
 from pathlib import Path
 from types import CodeType
-from scar.ir.program.call_edges import CapturedCode
+from scar.ir.program.call_edges import CapturedCode,CapturedSite
 from scar.ir.program.providers import ProviderArtifact
 from scar.ir.record_codec import decode,encode
 from scar.ir.semantics_v2 import SourceSnapshot
 from scar.trace.code_snapshot import describe_code
 
 PROFILE='SCAR_LEAN_PORTS_V1'
-# Both opcodes expose their actual callable through sys.monitoring.CALL.
-# This permits target/entry observation, not keyword argument-role inference.
-# CALL_FUNCTION_EX and intrinsic families retain their unsupported locations.
-_OBSERVABLE_CALLS=('CALL','CALL_KW')
+# These pinned CPython opcodes expose the callable through monitoring.CALL.
+# EX retains only its observed first tuple argument; fused super lookup does
+# not prove that a super proxy was allocated or a native tp_call executed.
+# Argument binding remains separate from selecting the actual code target.
+_OBSERVABLE_CALLS=('CALL','CALL_KW','CALL_FUNCTION_EX','LOAD_SUPER_ATTR')
+
+def _is_call_site(opname):
+    return opname.startswith('CALL') or opname=='LOAD_SUPER_ATTR'
 
 def _need(value,message):
     if not value:raise ValueError(message)
@@ -42,8 +46,10 @@ class LeanCapturePlan:
     namespace_root:str
     bodies:tuple[LeanBodyPlan,...]
     max_codes:int=4096
+    activation_paths:tuple[tuple[str,tuple[tuple[CapturedSite,...],...]],...]=()
     _by_source:dict=field(default_factory=dict,init=False,repr=False,compare=False)
     _memo:dict=field(default_factory=dict,init=False,repr=False,compare=False)
+    _contexts:dict=field(default_factory=dict,init=False,repr=False,compare=False)
     def __post_init__(self):
         _need(type(self.namespace_root) is str and Path(self.namespace_root).is_absolute()
               and os.path.normpath(self.namespace_root)==self.namespace_root,'lean namespace root must be exact')
@@ -51,6 +57,21 @@ class LeanCapturePlan:
         _need(type(self.bodies) is tuple and 0<len(self.bodies)<=self.max_codes,'lean plan code budget exceeded')
         _need(all(type(b) is LeanBodyPlan for b in self.bodies),'lean bodies must be typed')
         _need(len({b.code.key for b in self.bodies})==len(self.bodies),'lean plan repeats a code identity')
+        keys={b.code.key for b in self.bodies}
+        _need(type(self.activation_paths) is tuple and len(self.activation_paths)<=len(keys),
+              'activation contexts require a bounded tuple')
+        for key,paths in self.activation_paths:
+            _need(key in keys and key not in self._contexts and type(paths) is tuple and 0<len(paths)<=128,
+                  'activation context must select one planned code with bounded alternatives')
+            _need(len(set(paths))==len(paths),'activation paths must be unique')
+            for path in paths:
+                _need(type(path) is tuple and 0<len(path)<=128,
+                      'activation path must contain bounded actual caller sites')
+                for caller in path:
+                    _need(type(caller) is CapturedSite and caller.code in keys and caller.offset>=0,
+                          'activation caller must have its own full code selector')
+                    caller.__post_init__()
+            self._contexts[key]=paths
         for b in self.bodies:
             b.__post_init__()
             key=(b.code.filename,b.code.qualname,b.code.first_line)
@@ -72,8 +93,8 @@ class LeanCapturePlan:
                 text=path.read_text(encoding='utf-8')
                 sources[str(path)]=SourceSnapshot(str(path),'sha256:'+hashlib.sha256(text.encode()).hexdigest(),'utf-8',f'{sys.version_info.major}.{sys.version_info.minor}')
             instructions=tuple(dis.get_instructions(code))
-            calls=tuple(i.offset for i in instructions if i.opname.startswith('CALL'))
-            unsupported=tuple(i.offset for i in instructions if i.opname.startswith('CALL') and i.opname not in _OBSERVABLE_CALLS)
+            calls=tuple(i.offset for i in instructions if _is_call_site(i.opname))
+            unsupported=tuple(i.offset for i in instructions if _is_call_site(i.opname) and i.opname not in _OBSERVABLE_CALLS)
             bodies.append(LeanBodyPlan(sources[str(path)],decode(CapturedCode,describe_code(code)),calls,unsupported))
         return cls(str(Path(namespace_root).resolve()),tuple(bodies),max_codes)
     @classmethod
@@ -98,8 +119,8 @@ class LeanCapturePlan:
             _need(describe_code(code)==encode(entry.captured),'readonly entry code descriptor changed')
             instructions=tuple(dis.get_instructions(code))
             body=LeanBodyPlan(entry.reference.snapshot,entry.captured,
-                tuple(i.offset for i in instructions if i.opname.startswith('CALL')),
-                tuple(i.offset for i in instructions if i.opname.startswith('CALL') and i.opname not in _OBSERVABLE_CALLS))
+                tuple(i.offset for i in instructions if _is_call_site(i.opname)),
+                tuple(i.offset for i in instructions if _is_call_site(i.opname) and i.opname not in _OBSERVABLE_CALLS))
             previous=bodies.setdefault(body.code.key,body)
             _need(previous==body,'one selector key has conflicting source/code variants')
             _need(len(bodies)<=max_codes,'lean plan code budget exceeded')
@@ -124,25 +145,52 @@ class LeanCapturePlan:
         return body
     def clear_runtime_cache(self):
         self._memo.clear()
+    def match_frame(self,frame):
+        """A code mask is shared; its actual invocation need not be selected.
+
+        Paths are bounded capture policy, not a claim about future dispatch.
+        Original selectors have no context restriction. Added selectors match
+        full code identities and real caller instruction offsets, never names.
+        """
+        body=self.match(frame.f_code)
+        if body is None:return None
+        paths=self._contexts.get(body.code.key)
+        if paths is None:return body
+        for path in paths:
+            caller=frame.f_back
+            for expected in path:
+                if caller is None or caller.f_lasti!=expected.offset:break
+                selected=self.match(caller.f_code)
+                if selected is None or selected.code.key!=expected.code:break
+                caller=caller.f_back
+            else:return body
+        return None
     def verify_sources(self):
         for source in {b.source.path:b.source for b in self.bodies}.values():
             p=Path(source.path)
             _need(p.is_file() and not p.is_symlink() and p.stat().st_size<=1_000_000,'lean source changed or unavailable')
             _need('sha256:'+hashlib.sha256(p.read_text(encoding='utf-8').encode()).hexdigest()==source.fingerprint,'lean source version changed')
     def to_dict(self):
-        return {'schema':'scar.lean-capture-plan','schema_version':1,'profile':PROFILE,
+        document={'schema':'scar.lean-capture-plan','schema_version':2 if self.activation_paths else 1,'profile':PROFILE,
                 'namespace_root':self.namespace_root,'bodies':encode(self.bodies),
                 'source_compiler_runtime_contents_proved':False}
+        if self.activation_paths:document['activation_paths']=encode(self.activation_paths)
+        return document
     @classmethod
     def from_dict(cls,doc,*,max_codes=4096):
-        _need(type(doc) is dict and set(doc)=={'schema','schema_version','profile','namespace_root','bodies','source_compiler_runtime_contents_proved'}
-              and doc['schema']=='scar.lean-capture-plan' and type(doc['schema_version']) is int and doc['schema_version']==1
+        base={'schema','schema_version','profile','namespace_root','bodies','source_compiler_runtime_contents_proved'}
+        _need(type(doc) is dict and type(doc.get('schema_version')) is int and doc['schema_version'] in (1,2)
+              and set(doc)==base|({'activation_paths'} if doc['schema_version']==2 else set())
+              and doc['schema']=='scar.lean-capture-plan'
               and doc['profile']==PROFILE and doc['source_compiler_runtime_contents_proved'] is False,'unsupported lean plan schema')
-        return cls(doc['namespace_root'],decode(tuple[LeanBodyPlan,...],doc['bodies']),max_codes)
+        paths=decode(tuple[tuple[str,tuple[tuple[CapturedSite,...],...]],...],doc['activation_paths']) if doc['schema_version']==2 else ()
+        _need(doc['schema_version']==1 or bool(paths),'context plan needs actual activation paths')
+        return cls(doc['namespace_root'],decode(tuple[LeanBodyPlan,...],doc['bodies']),max_codes,paths)
     def publish(self,directory,pid):
-        self.verify_sources();raw=_raw(self.to_dict());path=Path(directory)/f'lean-plan.{pid}.json'
+        self.verify_sources();document=self.to_dict();raw=_raw(document);path=Path(directory)/f'lean-plan.{pid}.json'
         with path.open('xb') as stream:stream.write(raw)
-        return ProviderArtifact(str(path),hashlib.sha256(raw).hexdigest(),len(raw),'scar.lean-capture-plan/1')
+        return ProviderArtifact(str(path),hashlib.sha256(raw).hexdigest(),len(raw),
+            'scar.lean-capture-plan/'+str(document['schema_version']))
 
 
 def read_plan(path,*,expected_sha256,max_bytes=16_000_000,max_codes=4096):

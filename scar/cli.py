@@ -542,6 +542,7 @@ def main(argv=None) -> int:
         'returned-function-interfaces': 'scar.analysis.source_returned_functions',
         'function-interface-collection': 'scar.analysis.source_function_collection',
         'observed-source-codes': 'scar.analysis.source_observed_codes',
+        'refine-capture': 'scar.trace.plan_refine',
         'observed-function-interfaces': 'scar.analysis.source_observed_interfaces',
         'function-call-view': 'scar.analysis.source_call_view',
         'function-creations': 'scar.analysis.source_function_creations',

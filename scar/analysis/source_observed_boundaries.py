@@ -17,6 +17,7 @@ from scar.analysis.source_namespace_interfaces import NamespacePlanView
 from scar.analysis.source_roles import SyntaxRoleView
 from scar.analysis.source_reference_slice import source_port
 from scar.analysis.source_observed_calls import ObservedSourceCallsiteIndex
+from scar.analysis.source_request_callback_abi import request_callback_abi
 from scar.analysis.source_symbol_variants import _table
 from scar.analysis.source_world_returns import _table_ref
 from scar.analysis.source_value_flow import _artifact
@@ -26,6 +27,7 @@ from scar.analysis.source_stage import _durable_bytes, _durable_mkdir
 from scar.analysis.source_template_links import _json
 from scar.ir.program import source_observed_boundaries as R, source_productions as P, view as V
 from scar.ir.program.call_edges import CallEdgeBudget
+from scar.ir.program.source_observed_codes import ObservedSourceRequestCodeLink
 from scar.ir.program.ids import ProviderID
 from scar.ir.program.python_call_targets import PythonTargetKind as Target
 from scar.ir.program.structured import PythonProtocolKind
@@ -54,11 +56,15 @@ def _pins():
     from scar.ir.program import native_callables as native_types
     from scar.ir.program import source_observed_codes as code_types
     from scar.ir.program import source_observed_calls as call_types
-    return {name: sha256(Path(module.__file__).read_bytes()).hexdigest() for name, module in (
+    from scar.analysis import source_request_callback_abi
+    result = {name: sha256(Path(module.__file__).read_bytes()).hexdigest() for name, module in (
         ('producer', __import__(__name__, fromlist=['__file__'])), ('types', R),
         ('code_reader', source_observed_codes), ('callsite_reader', source_observed_calls),
         ('call_ports', source_call_view), ('native_reader', native_callables), ('native_types', native_types),
-        ('code_types', code_types), ('call_types', call_types), ('protocol_reader', source_observed_protocols))}
+        ('code_types', code_types), ('call_types', call_types), ('protocol_reader', source_observed_protocols),
+        ('request_abi', source_request_callback_abi))}
+    result.update(('request_code_'+name, digest) for name, digest in source_observed_codes.request_code_pins().items())
+    return result
 
 
 class _NativeInputs:
@@ -253,10 +259,10 @@ def _callbacks(index, units):
     intervals={key:(tuple(a.frame_index for a in rows),tuple(rows)) for key,rows in calls.items()}
     for exit_ in index.codes.trace.exits:exits[exit_.invocation].append(exit_)
     captures={(c.process_id,c.code.key):c for c in index.codes.trace.frame_scan.captures}
-    for code in index.codes.records.values():
+    for code in (*index.codes.records.values(), *index.codes.request_records.values()):
         for capture in code.captures:by_code[capture.process_id,capture.code.key].append(code)
     selected={(o.target.caller,o.target.attempt_index):(unit,o) for unit,(_,rows) in units.items() for o in rows}
-    records=defaultdict(dict); observed=defaultdict(list)
+    records=defaultdict(dict); observed=defaultdict(list); request_abis={}
     for frame in index.codes.trace.entries:
         caller=frame.caller_invocation
         if (caller is None or not frame.path_complete or len(frame.path)!=1
@@ -286,18 +292,27 @@ def _callbacks(index, units):
         candidates=by_code.get((frame.invocation.process_id,frame.code),()) or (None,)
         for code in candidates:
             body=None if code is None else code.body
-            identity=ProviderID(_digest((SCHEMA+'.callback',source.boundary,capture.code.key,body)))
-            function=None
-            if code is not None:
+            body_kind=R.SourceCallbackBodyKind.NO_SOURCE
+            definition=scope=result=result_world=None; formals=()
+            if type(code) is ObservedSourceRequestCodeLink:
+                if frame.suspended:raise ValueError('evaluation-request callback cannot use a suspendable entry')
+                body_kind=R.SourceCallbackBodyKind.EVALUATION_REQUEST
+                definition,scope=code.declaration,code.scope
+                if code.id not in request_abis:request_abis[code.id]=request_callback_abi(index.view,code)
+                formals,result,result_world=request_abis[code.id]
+            elif code is not None:
+                body_kind=R.SourceCallbackBodyKind.FUNCTION
                 facts,local=index.slicer.local(code.function)
                 function=next(f for f in facts.functions if f.value==local)
                 if function.body_scope!=code.scope:raise ValueError('callback source body scope differs')
-            gp=lambda p: source_port(facts,p)
-            record=R.SourceBoundaryCallback(identity,source.boundary,capture.code,frame.suspended,body,
-                None if code is None else code.function_fact,None if code is None else code.scope,
-                () if function is None else tuple(gp(p) for p in function.formals),
-                None if function is None or function.returns is None else gp(function.returns),
-                None if function is None or function.return_world is None else gp(function.return_world))
+                gp=lambda p: source_port(facts,p)
+                definition,scope=code.function_fact,code.scope
+                formals=tuple(gp(p) for p in function.formals)
+                result=None if function.returns is None else gp(function.returns)
+                result_world=None if function.return_world is None else gp(function.return_world)
+            identity=ProviderID(_digest((SCHEMA+'.callback',source.boundary,capture.code.key,body_kind,body)))
+            record=R.SourceBoundaryCallback(identity,source.boundary,capture.code,frame.suspended,body_kind,
+                body,definition,scope,formals,result,result_world)
             if records[unit].setdefault(identity,record)!=record:raise ValueError('shared callback identity conflict')
             observed[unit].append(R.SourceCallbackObservation(identity,source.source_observation,
                 frame.invocation,frame.anchor,exit_anchor,capture.anchor))
@@ -313,6 +328,7 @@ def _counts(units,callbacks,protocols=None):
         callbacks=sum(len(c) for c,_ in callbacks.values()),
         callback_observations=sum(len(o) for _,o in callbacks.values()),
         source_callback_interfaces=sum(c.body is not None for rows,_ in callbacks.values() for c in rows),
+        callback_body_kinds=dict(Counter(c.body_kind.value for rows,_ in callbacks.values() for c in rows)),
         source_callback_observations=sum(sum(o.callback in {c.id for c in rows if c.body is not None}
             for o in observations) for rows,observations in callbacks.values()),
         protocols=sum(len(rows) for rows,_ in protocols.values()),
@@ -341,7 +357,7 @@ def build_boundaries(index, out):
         shards[unit] = dict(path='units/'+unit, tables=tables,
             boundaries=len(boundaries), observations=len(observations),
             protocols=len(protocol_rows), protocol_observations=len(protocol_observations))
-    report = dict(schema=SCHEMA, schema_version=3, basis=basis, pins=pins, shards=shards,
+    report = dict(schema=SCHEMA, schema_version=4, basis=basis, pins=pins, shards=shards,
         counts=_counts(units,callbacks,protocols),
         **{name:False for name in _FALSE})
     if _basis(index) != basis or _pins() != pins: raise ValueError('boundary producer or original inputs changed')
@@ -353,7 +369,7 @@ class BoundaryStore:
     def __init__(self, path, index=None):
         self.path = Path(path).absolute(); self.raw = (self.path/'result.json').read_bytes()
         self.report = r = json.loads(self.raw)
-        if (r['schema'], r['schema_version'], r['pins']) != (SCHEMA, 3, _pins()) or any(r[n] is not False for n in _FALSE):
+        if (r['schema'], r['schema_version'], r['pins']) != (SCHEMA, 4, _pins()) or any(r[n] is not False for n in _FALSE):
             raise ValueError('boundary schema, producer or proof contract differs')
         basis = r['basis']
         if index is None:
@@ -501,7 +517,7 @@ class SourceObservedBoundaryProvider:
         self.out_edges[self._key(parent)].append(row);self.in_edges[self._key(point)].append(row)
         if callback.body is None:return
         body=callback.body
-        target=self.view.source_region_ref(body.unit,body.template,body.region)
+        target=self._callback_body(callback)
         frame=None if callback.suspending else Frame(source.namespace,self.owners[key].node,None,None,
             target.namespace,entry=target.node,selection=fact)
         if frame is not None:self.callback_frames[self._key(point)]=frame
@@ -513,19 +529,29 @@ class SourceObservedBoundaryProvider:
             # start/resume PC or a fresh binding of its saved arguments.
             relation(point,target,K.IMPLEMENTATION,Meaning.STRUCTURE,None,'SUSPENDABLE_BODY_TEMPLATE_NOT_RESUME_POSITION')
             return
-        relation(point,target,K.CALL_TARGET,Meaning.DEPENDENCE,'ENTER','RECORDED_ORDINARY_CALLBACK_BODY')
+        request=callback.body_kind is R.SourceCallbackBodyKind.EVALUATION_REQUEST
+        relation(point,target,K.CALL_TARGET,Meaning.DEPENDENCE,'ENTER',
+            'RECORDED_EVALUATION_REQUEST_CALLBACK_BODY' if request else 'RECORDED_ORDINARY_CALLBACK_BODY')
         prepare_source_ports(self.view,callback.formals,
             bodies=(callback.body,))
         for i,formal in enumerate(callback.formals):
             target=self.view.source_port(formal)
             kind=K.ENVIRONMENT if i==0 else K.STATE_INTERFACE if i==len(callback.formals)-1 else K.PROJECTION
             meaning=Meaning.STATE_INTERFACE if kind is K.STATE_INTERFACE else Meaning.DEPENDENCE
-            relation(point,target,kind,meaning,'ENTER','CALLBACK_INPUT_PROJECTION_ORIGIN_NOT_SELECTED')
+            rule=('REQUEST_ENVIRONMENT_FORMAT_AND_WORLD_ORIGINS_UNBOUND' if request
+                else 'CALLBACK_INPUT_PROJECTION_ORIGIN_NOT_SELECTED')
+            relation(point,target,kind,meaning,'ENTER',rule)
         for port,kind in ((callback.result,K.PROJECTION),(callback.result_world,K.STATE_INTERFACE)):
             if port is not None:
                 relation(self.view.source_port(port),parent,kind,
                     Meaning.STATE_INTERFACE if kind is K.STATE_INTERFACE else Meaning.DEPENDENCE,
                     'RETURN','CALLBACK_RETURN_TO_DISPATCHER_NOT_OUTER_RESULT_ALIAS')
+
+    def _callback_body(self,callback):
+        body=callback.body
+        if callback.body_kind is R.SourceCallbackBodyKind.EVALUATION_REQUEST:
+            return self.view.source_region(body.unit,body.template,body.region)
+        return self.view.source_region_ref(body.unit,body.template,body.region)
 
     @staticmethod
     def _ports(b):
@@ -572,7 +598,7 @@ class SourceObservedBoundaryProvider:
             return tuple(dict.fromkeys((*ports,replace(body,context=None))))
         if type(b) is R.SourceBoundaryCallback:
             if b.body is None:return ()
-            target=self.view.source_region_ref(b.body.unit,b.body.template,b.body.region)
+            target=self._callback_body(b)
             frame=self.callback_frames.get(self._key(point))
             return (replace(target,context=None if frame is None else context_push(point.context,frame)),)
         children=(Point(point.namespace,c.id,point.context) for c in self.callbacks.values() if c.boundary==b.id)
@@ -588,8 +614,11 @@ class SourceObservedBoundaryProvider:
                 effects=b.effects.value,source_bodies_copied=False,first_stage_complete=False)
         if type(b) is R.SourceBoundaryCallback:
             return dict(node=self.describe(point),original=b,observations=tuple(self.callback_observations[b.id]),
-                entry_kind='SUSPENDABLE_BODY_ENTRY' if b.suspending else 'ORDINARY_FRAME_ENTRY',
+                entry_kind=('SUSPENDABLE_BODY_ENTRY' if b.suspending else
+                    'EVALUATION_REQUEST_FRAME_ENTRY' if b.body_kind is R.SourceCallbackBodyKind.EVALUATION_REQUEST
+                    else 'ORDINARY_FRAME_ENTRY'), body_kind=b.body_kind.value,
                 source_body_available=b.body is not None,argument_origins_proven=False,
+                request_format_value_proven=False,creator_globals_and_cells_bound=False,
                 resume_position_proven=False,generator_instance_proven=False,
                 callback_result_is_outer_call_result=False,first_stage_complete=False)
         return dict(node=self.describe(point), original=b, observations=tuple(self.observations[b.id]),
