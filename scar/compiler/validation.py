@@ -2,7 +2,7 @@
 import math
 import os
 from pathlib import Path
-from .model import ExecutionPlan,ArrayRegion,PROFILE,OPS
+from .model import ExecutionPlan,ArrayRegion,CpuPlacement,PROFILE,OPS
 
 class InvalidPlan(ValueError):pass
 
@@ -57,9 +57,37 @@ def validate_region(region):
         raise InvalidPlan('dead arithmetic may carry NumPy warning/exception effects')
     return dict(nodes=len(by_id),live_nodes=len(live),array_inputs=len(parameters),source_identity=source.sha256)
 
+def validate_resource_binding(binding):
+    if type(binding)is not CpuPlacement:raise InvalidPlan('typed CPU placement required')
+    if (not Path(binding.target_path).is_absolute() or len(binding.target_sha256)!=64
+            or any(c not in '0123456789abcdef' for c in binding.target_sha256)):
+        raise InvalidPlan('versioned target snapshot required')
+    if (not binding.executor_id or type(binding.cpu_ids)is not tuple or not binding.cpu_ids
+            or any(type(c)is not int or c<0 for c in binding.cpu_ids)
+            or len(set(binding.cpu_ids))!=len(binding.cpu_ids)):
+        raise InvalidPlan('unique CPU allocation and executor identity required')
+    if binding.memory_domain_id is not None and (type(binding.memory_domain_id)is not str or not binding.memory_domain_id):
+        raise InvalidPlan('invalid memory domain reference')
+    if binding.memory_policy!='UNBOUND':raise InvalidPlan('NUMA memory placement is not implemented')
+    if binding.memory_budget_bytes is not None and (type(binding.memory_budget_bytes)is not int or binding.memory_budget_bytes<8):
+        raise InvalidPlan('invalid placement memory budget')
+    if binding.numa_node is not None and (type(binding.numa_node)is not int or binding.numa_node<0):
+        raise InvalidPlan('invalid NUMA node')
+    if type(binding.evidence)is not tuple or any(type(e)is not dict for e in binding.evidence):
+        raise InvalidPlan('placement evidence must reference original records')
+    return binding
+
 def validate_plan(plan):
-    if not isinstance(plan,ExecutionPlan) or (plan.schema_version,plan.profile,plan.operator_abi_version)!=(1,PROFILE,1):
+    if (not isinstance(plan,ExecutionPlan) or plan.schema_version not in (1,2)
+            or (plan.profile,plan.operator_abi_version)!=(PROFILE,1)):
         raise InvalidPlan('unsupported execution plan schema/profile/ABI')
+    if (plan.schema_version==2)!=(plan.resource_binding is not None):
+        raise InvalidPlan('resource-bound plans require schema 2; legacy plans require schema 1')
+    if plan.resource_binding is not None:
+        binding=validate_resource_binding(plan.resource_binding)
+        if len(binding.cpu_ids)!=plan.cpu_threads:raise InvalidPlan('CPU allocation and worker count differ')
+        if binding.memory_budget_bytes!=plan.cost.get('memory_budget_bytes'):
+            raise InvalidPlan('placement and output memory budgets differ')
     if plan.device!='cpu' or plan.buffer_policy!='fresh_output':raise InvalidPlan('unsupported resource placement or ownership')
     capacity=len(os.sched_getaffinity(0)) if hasattr(os,'sched_getaffinity') else (os.cpu_count() or 1)
     if type(plan.cpu_threads)is not int or not 1<=plan.cpu_threads<=capacity:raise InvalidPlan('CPU thread allocation exceeds available affinity')

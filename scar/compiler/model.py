@@ -1,4 +1,4 @@
-"""Version 1 CPU array-region profile of the macro execution-plan contract.
+"""CPU array-region profile and versioned macro execution-plan contracts.
 
 This bounded profile is a derived optimization IR, not a replacement for the
 whole-program graph. Source IDs survive lowering; runtime type/layout guards
@@ -45,6 +45,23 @@ class LoopAxis:
     extent: str
 
 @dataclass(frozen=True)
+class CpuPlacement:
+    """A CPU execution allocation tied to an original hardware snapshot.
+
+    The memory domain names a planning candidate. UNBOUND explicitly does
+    not promise NUMA page placement, residency, or an available byte budget.
+    """
+    target_path: str
+    target_sha256: str
+    executor_id: str
+    cpu_ids: tuple[int,...]
+    memory_domain_id: str|None=None
+    memory_budget_bytes: int|None=None
+    numa_node: int|None=None
+    memory_policy: str='UNBOUND'
+    evidence: tuple[dict,...]=()
+
+@dataclass(frozen=True)
 class ExecutionPlan:
     region: ArrayRegion
     schema_version: int=1
@@ -57,6 +74,7 @@ class ExecutionPlan:
     proof: dict=field(default_factory=dict)
     cost: dict=field(default_factory=dict)
     cpu_threads: int=1
+    resource_binding: CpuPlacement|None=None
 
 def region_from_dict(r):
     src=dict(r['source']);src['origins']=tuple(src.get('origins',()))
@@ -69,8 +87,17 @@ def plan_from_dict(r):
     if r.pop('schema',None)!=SCHEMA:raise ValueError('unsupported execution plan schema')
     r['region']=region_from_dict(r['region'])
     r['schedule']=tuple(LoopAxis(**a) for a in r['schedule']);r['passes']=tuple(r.get('passes',()))
+    if r.get('resource_binding') is not None:
+        binding=dict(r['resource_binding'])
+        binding['cpu_ids']=tuple(binding['cpu_ids']);binding['evidence']=tuple(binding.get('evidence',()))
+        r['resource_binding']=CpuPlacement(**binding)
     return ExecutionPlan(**r)
 
-def document(plan):return dict(schema=SCHEMA,**asdict(plan))
+def document(plan):
+    result=dict(schema=SCHEMA,**asdict(plan))
+    # Preserve the exact canonical document/digest of previously shipped v1
+    # plans. Resource-bound plans explicitly opt into schema v2.
+    if plan.resource_binding is None:result.pop('resource_binding')
+    return result
 def write_plan(plan,path):Path(path).write_text(json.dumps(document(plan),indent=2,allow_nan=False)+'\n')
 def read_plan(path):return plan_from_dict(json.loads(Path(path).read_text()))
