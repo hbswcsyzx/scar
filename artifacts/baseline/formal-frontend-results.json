@@ -3572,5 +3572,259 @@
       "LOGICAL_CONTENT_AND_PHYSICAL_RESOURCE_IDENTITIES",
       "CIRQ_FRONTEND_FINALIZATION"
     ]
+  },
+  "conditional_normal_resume_bindings": {
+    "status": "VERIFIED_CONDITIONAL_STATIC_BINDING_GRAPH_NOT_RUNTIME_RESUME_PROOF",
+    "producer": "scar/analysis/source_name_definitions.py",
+    "run": "artifacts/current/experiments/cpu-sunfish-current/observed-binding-states-resume-connected/result.json",
+    "selected_local_read_slots": 168,
+    "completed_fixed_points": 168,
+    "budget_or_control_incomplete": 0,
+    "counts": {
+      "binding_accesses": 8453,
+      "content_accesses": 3045,
+      "content_addresses": 2603,
+      "content_relations": 21658,
+      "content_states": 6090,
+      "locations": 5533,
+      "operations": 78420,
+      "read_selections": 527,
+      "relations": 291685,
+      "tracks": 168,
+      "versions": 87475
+    },
+    "frontier_counts": {
+      "ACCESS_OUTSIDE_RETAINED_NORMAL_BODY_CONTROL": 105,
+      "APPLICATION_EXCEPTION_PATHS_OUTSIDE_NORMAL_SUCCESS_VIEW": 168,
+      "NORMAL_RESUME_REQUIRES_SAME_ACTIVATION_AND_NORMALIZED_DELIVERY": 3,
+      "OPAQUE_CALLBACK_AND_CAPTURE_SLOT_IDENTITY_REMAIN_OPEN": 168
+    },
+    "seconds": 255.52203658600047,
+    "verification": "artifacts/current/experiments/cpu-sunfish-current/resume-binding-check.json",
+    "changed_tracks": [
+      {
+        "function": {
+          "unit": "90f8b1eb2b1a5308cb8dc07c",
+          "port": {
+            "template": {
+              "occurrence": 3334,
+              "purpose": "VALUE"
+            },
+            "owner": {
+              "kind": "source_production_step",
+              "value": "ddd31fc94f711121bfe2d2aa:3334:VALUE:s2",
+              "wire": "source_production_step:ddd31fc94f711121bfe2d2aa:3334:VALUE:s2"
+            },
+            "kind": "RESULT",
+            "ordinal": 0,
+            "completion": "FALLTHROUGH",
+            "target": null,
+            "path": []
+          }
+        },
+        "namespace": {
+          "kind": "LEXICAL",
+          "owner": 3,
+          "name": "i"
+        },
+        "suspension": {
+          "template": {
+            "occurrence": 3334,
+            "purpose": "VALUE"
+          },
+          "owner": {
+            "kind": "source_production_step",
+            "value": "ddd31fc94f711121bfe2d2aa:3334:VALUE:s18",
+            "wire": "source_production_step:ddd31fc94f711121bfe2d2aa:3334:VALUE:s18"
+          },
+          "kind": "ENTER",
+          "ordinal": 0,
+          "completion": null,
+          "target": null,
+          "path": []
+        },
+        "route": {
+          "template": {
+            "occurrence": 3334,
+            "purpose": "VALUE"
+          },
+          "owner": {
+            "kind": "source_production_region",
+            "value": "ddd31fc94f711121bfe2d2aa:3334:VALUE:r7",
+            "wire": "source_production_region:ddd31fc94f711121bfe2d2aa:3334:VALUE:r7"
+          },
+          "kind": "ENTER",
+          "ordinal": 0,
+          "completion": null,
+          "target": null,
+          "path": []
+        },
+        "matched_returns": 1,
+        "definitions_before": 34,
+        "definitions_after": 35,
+        "old_definitions_preserved": true,
+        "fresh_world_unknown_writer_preserved": true,
+        "incorrect_route_and_scope_rejected": true,
+        "reads_with_resume_writer": 0,
+        "states_before": 291,
+        "states_after": 301
+      },
+      {
+        "function": {
+          "unit": "90f8b1eb2b1a5308cb8dc07c",
+          "port": {
+            "template": {
+              "occurrence": 3431,
+              "purpose": "VALUE"
+            },
+            "owner": {
+              "kind": "source_production_step",
+              "value": "ddd31fc94f711121bfe2d2aa:3431:VALUE:s2",
+              "wire": "source_production_step:ddd31fc94f711121bfe2d2aa:3431:VALUE:s2"
+            },
+            "kind": "RESULT",
+            "ordinal": 0,
+            "completion": "FALLTHROUGH",
+            "target": null,
+            "path": []
+          }
+        },
+        "namespace": {
+          "kind": "LEXICAL",
+          "owner": 2,
+          "name": "i"
+        },
+        "suspension": {
+          "template": {
+            "occurrence": 3431,
+            "purpose": "VALUE"
+          },
+          "owner": {
+            "kind": "source_production_step",
+            "value": "ddd31fc94f711121bfe2d2aa:3431:VALUE:s18",
+            "wire": "source_production_step:ddd31fc94f711121bfe2d2aa:3431:VALUE:s18"
+          },
+          "kind": "ENTER",
+          "ordinal": 0,
+          "completion": null,
+          "target": null,
+          "path": []
+        },
+        "route": {
+          "template": {
+            "occurrence": 3431,
+            "purpose": "VALUE"
+          },
+          "owner": {
+            "kind": "source_production_region",
+            "value": "ddd31fc94f711121bfe2d2aa:3431:VALUE:r7",
+            "wire": "source_production_region:ddd31fc94f711121bfe2d2aa:3431:VALUE:r7"
+          },
+          "kind": "ENTER",
+          "ordinal": 0,
+          "completion": null,
+          "target": null,
+          "path": []
+        },
+        "matched_returns": 1,
+        "definitions_before": 20,
+        "definitions_after": 21,
+        "old_definitions_preserved": true,
+        "fresh_world_unknown_writer_preserved": true,
+        "incorrect_route_and_scope_rejected": true,
+        "reads_with_resume_writer": 0,
+        "states_before": 165,
+        "states_after": 175
+      },
+      {
+        "function": {
+          "unit": "90f8b1eb2b1a5308cb8dc07c",
+          "port": {
+            "template": {
+              "occurrence": 3481,
+              "purpose": "VALUE"
+            },
+            "owner": {
+              "kind": "source_production_step",
+              "value": "ddd31fc94f711121bfe2d2aa:3481:VALUE:s2",
+              "wire": "source_production_step:ddd31fc94f711121bfe2d2aa:3481:VALUE:s2"
+            },
+            "kind": "RESULT",
+            "ordinal": 0,
+            "completion": "FALLTHROUGH",
+            "target": null,
+            "path": []
+          }
+        },
+        "namespace": {
+          "kind": "LEXICAL",
+          "owner": 1,
+          "name": "x"
+        },
+        "suspension": {
+          "template": {
+            "occurrence": 3481,
+            "purpose": "VALUE"
+          },
+          "owner": {
+            "kind": "source_production_step",
+            "value": "ddd31fc94f711121bfe2d2aa:3481:VALUE:s18",
+            "wire": "source_production_step:ddd31fc94f711121bfe2d2aa:3481:VALUE:s18"
+          },
+          "kind": "ENTER",
+          "ordinal": 0,
+          "completion": null,
+          "target": null,
+          "path": []
+        },
+        "route": {
+          "template": {
+            "occurrence": 3481,
+            "purpose": "VALUE"
+          },
+          "owner": {
+            "kind": "source_production_region",
+            "value": "ddd31fc94f711121bfe2d2aa:3481:VALUE:r7",
+            "wire": "source_production_region:ddd31fc94f711121bfe2d2aa:3481:VALUE:r7"
+          },
+          "kind": "ENTER",
+          "ordinal": 0,
+          "completion": null,
+          "target": null,
+          "path": []
+        },
+        "matched_returns": 1,
+        "definitions_before": 12,
+        "definitions_after": 13,
+        "old_definitions_preserved": true,
+        "fresh_world_unknown_writer_preserved": true,
+        "incorrect_route_and_scope_rejected": true,
+        "reads_with_resume_writer": 0,
+        "states_before": 93,
+        "states_after": 103
+      }
+    ],
+    "unchanged_entry_tracks": 25,
+    "other_units_byte_identical": 10,
+    "unified_build": "artifacts/current/experiments/cpu-sunfish-current/resume-connected-build/manifest.json",
+    "unified_build_seconds": 235.618137774989,
+    "publication_readback": {
+      "admitted_publications": 8,
+      "entry_expanded": true,
+      "independent_full_analysis_repeated": false,
+      "indices_reconstructed": 0,
+      "mode": "STORED_TABLES_WITH_ADMITTED_INDEX",
+      "output_tables": 7,
+      "seconds": 0.9929813479975564
+    },
+    "selected_binding_states": {
+      "bytes": 53143,
+      "path": "artifacts/current/experiments/cpu-sunfish-current/observed-binding-states-resume-connected/result.json",
+      "sha256": "060b8d66056a03b5fc036a49280ad438575aed615f166dbf198532454f4b418d"
+    },
+    "loops_unrolled": false,
+    "runtime_resumption_or_tensor_contents_proven": false,
+    "target_executed": false,
+    "first_stage_complete": false
   }
 }

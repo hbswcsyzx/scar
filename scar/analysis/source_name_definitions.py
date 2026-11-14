@@ -8,6 +8,7 @@ from collections import defaultdict, deque
 from functools import cache
 
 from scar.analysis.source_graph_material import source_graph_material
+from scar.analysis.source_compilation_flow import _at, _item
 from scar.analysis.source_name_access_anchors import anchor_name_accesses
 from scar.analysis.source_reference_slice import ReferenceSlicer, source_port
 from scar.analysis.source_value_flow import project_value_flow
@@ -27,6 +28,44 @@ def _ids(bits):
 
 def _exit(entry, completion=C.FALLTHROUGH, target=None):
     return G.Port(entry.template, entry.owner, G.PortKind.EXIT, completion=completion, target=target)
+
+
+def _normal_resumptions(material, edges, scope):
+    """Admit declared same-body routes, never infer a runtime resumption.
+
+    SuspendExecution is structural and intentionally absent from primitive
+    operations. Recover its exact sealed recipe rather than interpreting a
+    missing operation as an unknown instruction or matching source names.
+    """
+    requested = {e.source.template for e in edges if e.transition is G.Transition.RESUME}
+    plans = material.plans(requested) if requested else {}
+    indexes = {key: ({s.id: s for s in plan.steps}, {r.id: r for r in plan.regions},
+        {p.region: p.code_scope for p in plan.compilation_flow.ports}) for key, plan in plans.items()}
+    admitted = {}
+    for ordinal, edge in enumerate(edges):
+        if edge.transition is not G.Transition.RESUME: continue
+        site = edge.site
+        if (site is None or site.template != edge.source.template
+                or edge.target.template != site.template
+                or edge.source != G.Port(site.template, site.step, G.PortKind.ENTER)):
+            continue
+        steps, regions, owners = indexes[site.template]
+        step = steps.get(site.step)
+        if step is None or type(step.instruction) is not P.SuspendExecution: continue
+        instruction = step.instruction
+        if owners[step.region] != scope.ordinal: continue
+        for index, route in enumerate(instruction.routes):
+            path = _at(instruction, 'routes') + (_item(index),) + _at(route, 'region')
+            if (route.kind is not C.FALLTHROUGH or site.path != path
+                    or edge.target != G.Port(site.template, route.region, G.PortKind.ENTER)
+                    or owners[route.region] != scope.ordinal):
+                continue
+            # Normal delivery is (sent reference, fresh world, saved refs).
+            # A saved reference is not a snapshot of the referenced contents.
+            parameters = regions[route.region].parameters
+            if len(parameters) == len(instruction.saved) + 2 and _state(parameters[1]):
+                admitted[ordinal] = instruction
+    return admitted
 
 
 def reaching_name_definitions(snapshot, source_function, namespace, *, anchor_graph=None,
@@ -146,6 +185,14 @@ def reaching_name_definitions(snapshot, source_function, namespace, *, anchor_gr
                 'OPAQUE_EFFECT_IS_UNKNOWN_NOT_NONE_AND_NOT_REFERENCE_ALIAS',))
     frontier(None, None, None, 'APPLICATION_EXCEPTION_PATHS_OUTSIDE_NORMAL_SUCCESS_VIEW')
     frontier(None, None, None, 'OPAQUE_CALLBACK_AND_CAPTURE_SLOT_IDENTITY_REMAIN_OPEN')
+    resumptions = _normal_resumptions(material, edges, scope)
+    for edge_ordinal in resumptions:
+        site = edges[edge_ordinal].target
+        weak[site] |= definition(D.NameDefinitionKind.OPAQUE_EFFECT, site, conditions=(
+            'DECLARED_NORMAL_RESUME_OF_SAME_ACTIVATION_REQUIRES_NORMALIZED_DELIVERY',
+            'FRESH_WORLD_MAY_CONTAIN_EXTERNAL_WRITES_DURING_SUSPENSION',
+            'SAVED_REFERENCES_DO_NOT_PRESERVE_REFERENT_CONTENTS',
+            'OPAQUE_EFFECT_IS_UNKNOWN_NOT_NONE_AND_NOT_REFERENCE_ALIAS',))
 
     coordinates = [(root, ())]; index = {(root, ()): 0}; queue = deque((0,)); transitions = []
     successors = defaultdict(list); traversal_complete = True
@@ -153,7 +200,14 @@ def reaching_name_definitions(snapshot, source_function, namespace, *, anchor_gr
         source = queue.popleft(); port, stack = coordinates[source]
         for edge_ordinal in adjacency.get(port, ()):
             edge = edges[edge_ordinal]; following = stack
-            if edge.transition is G.Transition.CALL:
+            if edge.transition in (G.Transition.CALL, G.Transition.RESUME):
+                if edge.transition is G.Transition.RESUME:
+                    if edge_ordinal not in resumptions:
+                        traversal_complete = False; frontier(source, edge_ordinal, None, 'RESUME_ACTIVATION_CONTEXT_UNRESOLVED'); continue
+                    frontier(source, edge_ordinal, None,
+                        'NORMAL_RESUME_REQUIRES_SAME_ACTIVATION_AND_NORMALIZED_DELIVERY')
+                    if resumptions[edge_ordinal].delegate is not None:
+                        frontier(source, edge_ordinal, None, 'DELEGATED_RESUME_DRIVER_REMAINS_UNBOUND')
                 if edge.site is None:
                     traversal_complete = False; frontier(source, edge_ordinal, None, 'STRUCTURAL_CALLSITE_UNRESOLVED'); continue
                 if len(stack) >= max_stack:
@@ -162,8 +216,6 @@ def reaching_name_definitions(snapshot, source_function, namespace, *, anchor_gr
             elif edge.transition is G.Transition.RETURN:
                 if not stack or stack[-1] != edge.site: continue
                 following = stack[:-1]
-            elif edge.transition is G.Transition.RESUME:
-                traversal_complete = False; frontier(source, edge_ordinal, None, 'RESUME_ACTIVATION_CONTEXT_UNRESOLVED'); continue
             coordinate = edge.target, following
             if coordinate not in index:
                 if len(coordinates) >= max_states:
