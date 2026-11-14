@@ -1,0 +1,104 @@
+#include "scar_abi_v1.h"
+#include <bit>
+#include <cfenv>
+#include <cstddef>
+#include <cstdint>
+#include <cstring>
+#include <limits>
+@OPENMP_INCLUDE@
+
+#pragma STDC FENV_ACCESS ON
+
+namespace {
+static_assert(sizeof(double) == 8 && std::numeric_limits<double>::is_iec559);
+
+struct Shape {
+    bool scalar;
+    int64_t rows;
+    int64_t cols;
+};
+
+bool valid_array(const scar_array_v1 &a) {
+    if (a.rank != 2 || a.shape[0] < 0 || a.shape[1] < 0 ||
+        a.lower_bound > a.upper_bound) return false;
+    if (reinterpret_cast<uintptr_t>(a.data) % alignof(double) != 0 ||
+        a.strides[0] % int64_t(sizeof(double)) != 0 ||
+        a.strides[1] % int64_t(sizeof(double)) != 0) return false;
+    if (a.shape[0] == 0 || a.shape[1] == 0) return true;
+    if (a.data == nullptr) return false;
+    __int128 low = 0, high = 0;
+    for (int axis = 0; axis != 2; ++axis) {
+        const __int128 offset = __int128(a.shape[axis] - 1) * a.strides[axis];
+        if (offset < 0) low += offset;
+        else high += offset;
+    }
+    if (low < std::numeric_limits<ptrdiff_t>::min() ||
+        high > std::numeric_limits<ptrdiff_t>::max()) return false;
+    const __int128 pointer = reinterpret_cast<uintptr_t>(a.data);
+    return pointer + low >= a.lower_bound &&
+           pointer + high + sizeof(double) <= a.upper_bound;
+}
+
+int64_t slice_bound(int64_t bound, int64_t extent) {
+    __int128 normalized = bound;
+    if (normalized < 0) normalized += extent;
+    if (normalized < 0) return 0;
+    if (normalized > extent) return extent;
+    return static_cast<int64_t>(normalized);
+}
+
+bool same_shape(Shape a, Shape b) {
+    return a.rows == b.rows && a.cols == b.cols;
+}
+
+double read_value(const unsigned char *address, uint32_t &nonfinite_input) {
+    double value;
+    std::memcpy(&value, address, sizeof(value));
+    // Inspect the exponent bits without performing FP classification on a
+    // signaling NaN. Reject quiet NaNs and infinities even if no fenv flag is
+    // raised: NumPy owns their payload/sign propagation on the fallback path.
+    nonfinite_input |= static_cast<uint32_t>(
+        (std::bit_cast<uint64_t>(value) & UINT64_C(0x7ff0000000000000)) ==
+        UINT64_C(0x7ff0000000000000));
+    return value;
+}
+
+int32_t run(const scar_array_v1 *inputs, uint64_t count, scar_array_v1 *output) {
+    if (count != @INPUT_COUNT@ || output == nullptr ||
+        (count && inputs == nullptr)) return SCAR_ARGUMENT_GUARD_V1;
+    for (uint64_t i = 0; i < count; ++i) {
+        if (!valid_array(inputs[i])) return SCAR_ARGUMENT_GUARD_V1;
+    }
+    if (!valid_array(*output)) return SCAR_ARGUMENT_GUARD_V1;
+    if (__int128(output->shape[1]) * sizeof(double) >
+        std::numeric_limits<int64_t>::max()) return SCAR_ARGUMENT_GUARD_V1;
+    if (output->shape[0] && output->shape[1] &&
+        (output->strides[1] != sizeof(double) ||
+         output->strides[0] != output->shape[1] * int64_t(sizeof(double))))
+        return SCAR_ARGUMENT_GUARD_V1;
+    for (uint64_t i = 0; i < count; ++i) {
+        if (output->lower_bound < inputs[i].upper_bound &&
+            inputs[i].lower_bound < output->upper_bound)
+            return SCAR_ARGUMENT_GUARD_V1;
+    }
+@SHAPES@
+    if (output->shape[0] != @OUTPUT_SHAPE@.rows ||
+        output->shape[1] != @OUTPUT_SHAPE@.cols) return SCAR_SHAPE_GUARD_V1;
+    fenv_t saved;
+    if (std::feholdexcept(&saved) != 0) return SCAR_FLOATING_GUARD_V1;
+    uint32_t nonfinite_input = 0;
+    uint32_t worker_guard = 0;
+@LOOPS@
+    const int raised = std::fetestexcept(FE_DIVBYZERO | FE_INVALID | FE_OVERFLOW | FE_UNDERFLOW);
+    const int restored = std::fesetenv(&saved);
+    return raised || restored || nonfinite_input || worker_guard ? SCAR_FLOATING_GUARD_V1 : SCAR_OK_V1;
+}
+
+const scar_operator_table_v1 table = {
+    1, sizeof(scar_operator_table_v1), @INPUT_COUNT@, &run, "@PLAN_SHA256@"
+};
+}  // namespace
+
+extern "C" SCAR_EXPORT_V1 const scar_operator_table_v1 *scar_get_operator_table_v1() {
+    return &table;
+}

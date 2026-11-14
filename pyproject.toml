@@ -22,10 +22,13 @@ include = ["scar*"]
 [tool.setuptools]
 py-modules = ["sitecustomize"]
 
+[tool.setuptools.package-data]
+"scar.codegen" = ["*.h", "*.in"]
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 
-# Macro-compiler target baseline; runtime/code generation remains a later stage.
+# Macro-compiler target baseline; bounded region compilation is implemented.
 [tool.scar.codegen]
 host_backend = "cpp"
 cxx_standard = 20
