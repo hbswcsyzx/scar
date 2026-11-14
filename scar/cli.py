@@ -69,6 +69,7 @@ def _trace(args) -> int:
             raise SystemExit('--project-root differs from the capture plan namespace')
     stream_interfaces = getattr(args, 'stream_interfaces', False) or program_ports
     resource_scopes=getattr(args,'resource_scopes',False)
+    resumptions=getattr(args,'resumptions',False)
     if getattr(args,'stream_backing',False) and not stream_interfaces:
         raise SystemExit('--stream-backing requires --stream-interfaces')
     native_callables = getattr(args, 'native_callables', False)
@@ -100,6 +101,7 @@ def _trace(args) -> int:
         if key.startswith('SCAR_COMPILE_'):env.pop(key,None)
     env.pop('SCAR_STREAM_INTERFACES',None)
     env.pop('SCAR_RESOURCE_SCOPES',None)
+    env.pop('SCAR_RESUMPTIONS',None)
     env.pop('SCAR_STREAM_BACKING_OBSERVATIONS',None)
     env.pop('SCAR_OPERAND_CAPTURE',None)
     env.pop('SCAR_CAPTURE_PLAN',None)
@@ -120,9 +122,9 @@ def _trace(args) -> int:
     physical = getattr(args, "tensor_physical", False)
     if physical and not execution_evidence:
         raise SystemExit("--tensor-physical requires --execution-evidence")
-    if execution_evidence and not (getattr(args, "calls_only", False) or operands):
+    if execution_evidence and not (getattr(args, "calls_only", False) or operands or resumptions):
         raise SystemExit("--execution-evidence requires --calls-only or --call-operands")
-    if getattr(args,"calls_only",False) or operands:
+    if getattr(args,"calls_only",False) or operands or resumptions:
         if args.snapshot_buffer_bytes < 1:
             raise SystemExit('--snapshot-buffer-bytes must be positive')
         env['SCAR_CAPTURE_TRANSPORT'] = args.capture_transport
@@ -147,6 +149,7 @@ def _trace(args) -> int:
                 or (execution_evidence and any(out.glob('execution-evidence.*.json')))):
             raise SystemExit("calls-only requires a fresh output directory")
         env['SCAR_TRACE_CALL_EDGES'] = '1'
+        if resumptions:env['SCAR_RESUMPTIONS']='1'
         env['SCAR_CALL_PROJECT_ROOT'] = str(Path(args.project_root or (
             lean_plan.namespace_root if lean_plan is not None else Path.cwd())).resolve())
         if compile_events:
@@ -557,6 +560,7 @@ def main(argv=None) -> int:
         'exec-view': 'scar.analysis.source_exec_view',
         'state-coverage': 'scar.analysis.program_state_coverage',
         'observed-states': 'scar.analysis.source_observed_state',
+        'source-resumptions': 'scar.analysis.source_observed_resumptions',
         'function-interfaces': 'scar.analysis.source_function_interfaces',
         'compiled-function-interfaces': 'scar.analysis.source_compiled_interfaces',
         'returned-function-interfaces': 'scar.analysis.source_returned_functions',
@@ -654,6 +658,7 @@ def main(argv=None) -> int:
             ('exec-view', 'connect declared script and shared exec roots with matched namespace branches'),
             ('state-coverage', 'persist complete shared local graph/state shards and coverage in parallel'),
             ('observed-states', 'connect local binding versions in actually entered source function bodies'),
+            ('source-resumptions', 'join actual resumable activation boundaries to original shared source ports'),
             ('function-interfaces', 'derive conditional source-call parameter and return interfaces'),
             ('compiled-function-interfaces', 'derive call interfaces for an explicitly retained compiled execution context'),
             ('returned-function-interfaces', 'derive conditional returned-callable interfaces with separate creator provenance'),
@@ -952,6 +957,7 @@ def main(argv=None) -> int:
     trace.add_argument('--strace-executable',default='strace',help='strace executable for the owned opt-in OS capture')
     trace.add_argument('--max-os-bytes',type=int,default=128000000)
     trace.add_argument('--stream-interfaces', action='store_true', help='observe builtin stream calls and C completion without reading contents or wrapping objects')
+    trace.add_argument('--resumptions',action='store_true',help='observe actual resumable activation boundaries without retaining frames or yielded values')
     trace.add_argument('--stream-backing',action='store_true',
         help='also observe exact builtin stream backing handles; requires --stream-interfaces')
     trace.add_argument('--resource-scopes',action='store_true',

@@ -79,6 +79,7 @@ class CallEdgeRecorder:
         self._entry_stop_reason = None
         self._skipped_entries = 0
         self.phase_events = None
+        self.resumptions = None
         self.io_failed = False
         self.started = time.perf_counter_ns()
         self.event_path = self.out/f"call-events.{self.pid}.jsonl"
@@ -494,6 +495,8 @@ class CallEdgeRecorder:
                         self.entered += 1
                         self.unclosed_written += 1
                         self.active[thread,id(frame)] = invocation,code,suspended
+                        if self.resumptions is not None:
+                            self.resumptions.profile_event(frame, 'call', invocation, code, self.index)
                         if forward_root is not None:
                             forward_root['seen'] = True
                             forward_root['root_invocation'] = invocation
@@ -531,6 +534,8 @@ class CallEdgeRecorder:
                         self.unclosed_written -= 1
                         self.unknown_exits += completion == 'UNKNOWN'
                         self.suspended_exits += completion == 'SUSPENDED'
+                        if self.resumptions is not None:
+                            self.resumptions.profile_event(frame, 'return', invocation, code, self.index)
                     else:
                         self.dropped += 1
             except Exception as error:
@@ -613,6 +618,8 @@ class CallEdgeRecorder:
             encoded = (json.dumps(metadata,separators=(',',':')) if self.process_ports
                        else json.dumps(metadata,indent=2))
             (self.out/f"call-meta.{self.pid}.json").write_text(encoded+'\n')
+            if self.resumptions is not None:
+                self.resumptions.close()
             if self.lean_plan is not None:
                 self.lean_plan.clear_runtime_cache()
 
@@ -640,6 +647,9 @@ def install(out, project_root, *, lean_plan=None):
         from scar.trace.capture_phases import CapturePhases
         recorder.phase_events = CapturePhases.from_environment(recorder)
     recorder.collector_witness = None
+    if os.environ.get('SCAR_RESUMPTIONS') == '1':
+        from scar.trace.resumptions import ResumptionObserver
+        recorder.resumptions = ResumptionObserver(recorder)
     if os.environ.get('SCAR_COLLECTOR_EXECUTION_WITNESS') == '1':
         from scar.trace.collector_execution_witness import CollectorExecutionWitness
         recorder.collector_witness = CollectorExecutionWitness(recorder)

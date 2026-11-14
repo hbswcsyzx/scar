@@ -3826,5 +3826,129 @@
     "runtime_resumption_or_tensor_contents_proven": false,
     "target_executed": false,
     "first_stage_complete": false
+  },
+  "actual_resumable_boundary_progress": {
+    "status": "VERIFIED_CAPTURE_AND_PARTIAL_SOURCE_PORT_JOIN",
+    "generic_case": {
+      "records": 418,
+      "activations": 104,
+      "counts": {
+        "PY_RESUME": 4,
+        "PY_RETURN": 3,
+        "PY_START": 104,
+        "PY_THROW": 101,
+        "PY_UNWIND": 101,
+        "PY_YIELD": 105
+      },
+      "frontiers": {},
+      "cross_thread_activation_verified": true,
+      "distinct_repeated_creations_verified": 101,
+      "throw_unwind_verified": true,
+      "coroutine_return_verified": true,
+      "source_case": "artifacts/current/experiments/resumption-boundaries-case.py",
+      "metadata": "artifacts/current/experiments/resumption-boundaries-case-trace/resumption-meta.194588.json",
+      "first_stage_complete": false
+    },
+    "sunfish_metadata": "artifacts/current/experiments/cpu-sunfish-current/resumption-capture/resumption-meta.194803.json",
+    "sunfish": {
+      "records": 1896,
+      "activations": 135,
+      "counts": {
+        "PY_RESUME": 813,
+        "PY_RETURN": 135,
+        "PY_START": 135,
+        "PY_THROW": 0,
+        "PY_UNWIND": 0,
+        "PY_YIELD": 813
+      },
+      "bytes": 674609,
+      "frontiers": {},
+      "open_activations": 0,
+      "search_executed": false
+    },
+    "source_join": {
+      "activations": 135,
+      "catalog": "/home/zyf/AAA/scar/artifacts/current/experiments/cpu-sunfish-current/body-protocol-frontend/complete-source-catalog",
+      "contents_or_driver_normalization_proven": false,
+      "first_stage_complete": false,
+      "frontier_count": 450,
+      "loops_unrolled": false,
+      "metadata": {
+        "bytes": 1686,
+        "path": "/home/zyf/AAA/scar/artifacts/current/experiments/cpu-sunfish-current/resumption-capture/resumption-meta.194803.json",
+        "sha256": "1a82ee48b3ef290dfd1e7fe4fb09b438a9847873864950965a7656d070129463"
+      },
+      "original_body_bytes_copied": 0,
+      "parent": {
+        "bytes": 29198,
+        "path": "/home/zyf/AAA/scar/artifacts/current/experiments/cpu-sunfish-current/resumption-selected-functions/result.json",
+        "sha256": "6e2ba68820b4bc2e91a968136bfb211ea0424ab7db752ccfae4c6cbf469cf4c2"
+      },
+      "pins": {
+        "bodies": "1140798063c444c1a40e181ad493e039a8409f93381e44947a731b0589940c80",
+        "boundaries": "eb438a91046b496ec00062334f51914f520da251512273eca01fe0d9f9b14d67",
+        "producer": "c5921a9daad40d44cf4671d2d5d4d492f45c80637fd326bd7bb4685070dbc1c5"
+      },
+      "process_id": 194803,
+      "records": 1896,
+      "schema": "scar.source-observed-resumptions",
+      "schema_version": 1,
+      "seconds": 112.91999631399813,
+      "source_body_interfaces": 6,
+      "source_port_counts": {
+        "PY_RESUME": 621,
+        "PY_RETURN": 102,
+        "PY_START": 102,
+        "PY_YIELD": 621
+      },
+      "source_port_events": 1446,
+      "tables": {
+        "bindings": {
+          "bytes": 82861,
+          "decoded_bytes": 2961048,
+          "decoded_sha256": "9555f008c8609da22acf2ebead125dbf4ed3dd5d252685d8eb0e1dcf9cb99cb2",
+          "path": "bindings.jsonl.gz",
+          "records": 1446,
+          "sha256": "7a00a0acbe50e2f4809b71e2da690d568e354859ec26d12bfe7e855cb6ffd53c"
+        },
+        "events": {
+          "bytes": 36124,
+          "decoded_bytes": 674609,
+          "decoded_sha256": "281b6df38e1983d33e2c460741d58b35736824acdcdc8e25fb27bf4b7b119da8",
+          "path": "events.jsonl.gz",
+          "records": 1896,
+          "sha256": "11508f1057cf9c2ebd10a86b9391ca6099b445472bcb3deb48a2b143e4d169b6"
+        },
+        "frontiers": {
+          "bytes": 1303,
+          "decoded_bytes": 35100,
+          "decoded_sha256": "991d23c708c43cfc96551a2fb830d02ac8dd34f260bd34edf3ddcc6b6dd14519",
+          "path": "frontiers.jsonl.gz",
+          "records": 450,
+          "sha256": "124c0993541a58d88fa6a90cb40c54c36f45bc3e320e5cee3de56b1fb07f469a"
+        },
+        "interfaces": {
+          "bytes": 3628,
+          "decoded_bytes": 62684,
+          "decoded_sha256": "d46bdd115e36b849f914565f8939ab697a53ac83827058e26cdb67f7217667a8",
+          "path": "interfaces.jsonl.gz",
+          "records": 6,
+          "sha256": "c487020e502998b03d053aa8776c0d51915b6c19f0d3601b30c817570842517c"
+        }
+      },
+      "target_executed": false,
+      "trace": "/home/zyf/AAA/scar/artifacts/current/experiments/cpu-sunfish-current/resumption-capture"
+    },
+    "source_gap": "450 events from seven standard-library code identities absent from the retained catalog",
+    "unified_build_provider_implemented": false,
+    "frames_or_payloads_retained": false,
+    "driver_normalization_or_contents_proven": false,
+    "first_stage_complete": false,
+    "api_reference": "https://docs.python.org/3.14/library/sys.monitoring.html",
+    "existing_recorder_regression": {
+      "command": "python -B -m pytest -q tests/unit/test_call_edge_recorder.py",
+      "passed": 16,
+      "seconds": 1.79
+    }
   }
 }
