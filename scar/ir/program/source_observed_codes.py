@@ -8,6 +8,7 @@ from .normal_links import CodeScopeWitness
 from .call_edges import CodeCapture, CapturedCode, CallRecordAnchor
 from .python_call_targets import PythonCallTarget, PythonEntryBinding
 from .source_productions import EvaluationRequestEnvironment, ProductionStepID
+from .compiler_code_paths import CompilerCodePath
 
 
 @dataclass(frozen=True, slots=True)
@@ -114,4 +115,41 @@ class ObservedSourceRequestCodeLink:
             raise ValueError('request correspondence needs its sealed declaration/body and exact compiler creation')
 
 
-ObservedSourceBodyLink = (ObservedSourceCodeLink | ObservedSourceScopeLink | ObservedSourceRequestCodeLink)
+@dataclass(frozen=True, slots=True)
+class ObservedSourceCompilerCodeLink:
+    """A compiler-generated body's original recipe, without a function fact.
+
+    Generic factories, lazy value evaluators and other C3 bodies use their
+    actual entry protocol. This does not fabricate Python argument binding.
+    """
+    id: ProviderID
+    origin: CompilerCodePath
+    entry_recipe: ProviderFactReference
+    entry_step: ProductionStepID
+    plan_sha256: str
+    body: Body
+    scope: CodeScopeWitness
+    captures: tuple[CodeCapture, ...]
+    source: ProviderArtifact
+    syntax: ProviderFactReference
+    compiled_root: CapturedCode
+    compile_flags: int
+    frame_entries: tuple[CallRecordAnchor, ...]
+    semantics: str = 'OBSERVED_COMPILER_BODY_NOT_CALLABLE_INSTANCE_OR_ENVIRONMENT_BINDING'
+
+    @property
+    def constant_path(self):
+        return self.origin.constant_path
+
+    def __post_init__(self):
+        if (not self.captures or self.scope.source_scope != self.origin.source_scope
+                or self.scope.owner.unit != self.body.unit
+                or (self.scope.template,self.scope.region) != (self.body.template,self.body.region)
+                or len(self.plan_sha256) != 64
+                or any(c not in '0123456789abcdef' for c in self.plan_sha256)
+                or type(self.compile_flags) is not int or self.compile_flags < 0):
+            raise ValueError('compiler body requires an original recipe, scope and complete captures')
+
+
+ObservedSourceBodyLink = (ObservedSourceCodeLink | ObservedSourceScopeLink
+    | ObservedSourceRequestCodeLink | ObservedSourceCompilerCodeLink)

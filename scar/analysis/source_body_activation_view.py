@@ -85,7 +85,7 @@ class SourceBodyActivationProvider:
         self.interfaces={}; self.activations={}; self.observations=defaultdict(list); self.points={}
         self.frames={}; self.frame_keys={}; self.origins={}; self.code_points={}; self.covered=set()
         self.frame_rows=defaultdict(list)
-        for table in (self.store.index.codes.records,self.store.index.codes.scope_records,self.store.index.codes.request_records):
+        for table in self.store.index.codes.body_link_tables():
             for key,row in table.items():self.code_points[row.id]=self.store.index.codes.points[key]
         artifact=_artifact(self.store.path/'result.json',SCHEMA)
         self.locator=SourceArtifactLocator(artifact,artifact.sha256,artifact.size_bytes,'canonical-json')
@@ -269,11 +269,11 @@ class SourceBodyActivationProvider:
     def incoming(self,point):return self._neighbors(point,True)
 
 
-def verify_body_activations(path,out):
-    """Fresh readback plus every balanced relation, without target execution."""
+def verify_body_activations(path,out,*,index=None):
+    """Read stored tables and every balanced relation; reuse an admitted index."""
     from scar.analysis.source_stage import _durable_bytes
     from scar.analysis.source_template_links import _json
-    started=time.monotonic(); store=SourceBodyActivationStore(path)
+    started=time.monotonic(); store=SourceBodyActivationStore(path,index=index)
     provider=SourceBodyActivationProvider(store.view,store)
     checked=0
     for rows in provider.out_edges.values():

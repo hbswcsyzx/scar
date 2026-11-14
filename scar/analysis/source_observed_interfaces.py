@@ -458,6 +458,7 @@ def main():
     parser.add_argument('--out');parser.add_argument('--read')
     parser.add_argument('--boundaries-out',help='also connect non-Python CALL interfaces using this same checked trace index')
     parser.add_argument('--activations-out',help='join every recorded body entry, including root/class/resume protocols')
+    parser.add_argument('--graph-check-out',help='verify saved body graph with this same admitted index')
     args=parser.parse_args()
     if args.read:
         store=ObservedFunctionInterfaceStore(args.read)
@@ -483,6 +484,9 @@ def main():
     if args.activations_out:
         from scar.analysis.source_body_activations import build_body_activations
         build_body_activations(index,args.activations_out)
+        if args.graph_check_out:
+            from scar.analysis.source_body_activation_view import verify_body_activations
+            verify_body_activations(args.activations_out,args.graph_check_out,index=index)
     _check_targets();print(json.dumps(report['counts']),flush=True)
 
 

@@ -2125,5 +2125,124 @@
     "implementation_only_model_interfaces": true,
     "target_workload_speedup_claimed": false,
     "first_stage_complete": false
+  },
+  "compiler_construction_connection_layer": {
+    "status": "SUNFISH_BODY_AND_SOURCE_ANCHOR_CONNECTIONS_VERIFIED_UNIFIED_ASSEMBLY_RUNNING",
+    "recorded_at": "2026-11-14T06:11:17.523561+00:00",
+    "compiler_roles": 12,
+    "compiler_projections": 4,
+    "representation": "C3_CONSTRUCTION_PARENT_AND_SOURCE_POSITION_TO_ORIGINAL_CODE_CONSTANT_PATH",
+    "captured_code_authentication": "FULL_CAPTURED_CODE_DESCRIPTOR",
+    "generic_bodies": "ORIGINAL_ENTRY_RECIPE_NOT_FABRICATED_FUNCTION_FACT",
+    "ambiguous_paths": "EXPLICIT_FRONTIER",
+    "source_selection_order": "CODE_SCOPE_THEN_INNERMOST_OPERATION_LOCATION",
+    "body_loading": "BATCHED_FINITE_SHARED_TEMPLATE_CLOSURE",
+    "graph_readback": "STORED_TABLE_REPLAY_AND_BIDIRECTIONAL_QUERY_USING_ADMITTED_INDEX",
+    "sunfish": {
+      "coverage": {
+        "body_protocols": {
+          "EnterClassBody": 3,
+          "EnterDeferredBody": 76,
+          "EnterRootBody": 4
+        },
+        "covered_entries": 1856,
+        "entry_coverage_complete": true,
+        "missing_entries": 0,
+        "occurrences": 1966,
+        "recorded_entries": 1856,
+        "shared_activations": 127,
+        "shared_interfaces": 83,
+        "source_anchor_frontiers": 0,
+        "unmatched_entries": 0
+      },
+      "body_join_seconds": 82.20637729601003,
+      "graph_check": {
+        "bidirectional_edges_checked": 23485,
+        "coverage": {
+          "body_protocols": {
+            "EnterClassBody": 3,
+            "EnterDeferredBody": 76,
+            "EnterRootBody": 4
+          },
+          "covered_entries": 1856,
+          "entry_coverage_complete": true,
+          "missing_entries": 0,
+          "occurrences": 1966,
+          "recorded_entries": 1856,
+          "shared_activations": 127,
+          "shared_interfaces": 83,
+          "source_anchor_frontiers": 0,
+          "unmatched_entries": 0
+        },
+        "first_stage_complete": false,
+        "ingress_frames": 337,
+        "required_ports_checked": 4434,
+        "schema": "scar.source-body-activations.graph-check",
+        "schema_version": 1,
+        "seconds": 88.8220957670128,
+        "shared_activations": 127,
+        "source_bodies_copied": false,
+        "status": "STRUCTURE_VERIFIED",
+        "target_executed": false,
+        "unrelated_return_frames_rejected": 337
+      }
+    },
+    "language_sample_historical": {
+      "matched_code_objects": 15,
+      "project_entry_gaps_before": 7,
+      "project_entry_gaps_after": 0,
+      "recorded_entries": 30,
+      "covered_entries": 23,
+      "external_source_entries_not_admitted": 7,
+      "receipt": {
+        "path": "/home/zyf/AAA/scar/artifacts/current/experiments/body-protocols-current/graph-check-c3-batched.json",
+        "bytes": 710,
+        "sha256": "963689c1338834a35b75bcc085d381ce49c09d46ff3bde9678e25a76a7b75e7b"
+      }
+    },
+    "interrupted_prior_sunfish": {
+      "reason": "AGENT_INTERRUPTED_OBSOLETE_PER_TEMPLATE_READ_PROJECTION",
+      "status": "NOT_ACCEPTED",
+      "stage_seconds": 1180.7117833939992,
+      "receipt": {
+        "path": "/home/zyf/AAA/scar/artifacts/current/experiments/cpu-sunfish-current/body-protocol-frontend/result.json",
+        "bytes": 2935,
+        "sha256": "44e4205fb9c4c94ce261d7e14fbe3c14164f7379cf4fc4c15785bba3d0e7995f"
+      }
+    },
+    "unified_assembly": {
+      "status": "RUNNING",
+      "out": "/home/zyf/AAA/scar/artifacts/current/experiments/cpu-sunfish-current/c3-connected-build"
+    },
+    "receipts": {
+      "activations": {
+        "path": "/home/zyf/AAA/scar/artifacts/current/experiments/cpu-sunfish-current/body-activations-c3-connected/result.json",
+        "bytes": 29652,
+        "sha256": "df3fd19e2fa0e9fbce69f2597c204d45f1e1f628e6450feb4268cd7207339431"
+      },
+      "graph_check": {
+        "path": "/home/zyf/AAA/scar/artifacts/current/experiments/cpu-sunfish-current/graph-check-c3-connected.json",
+        "bytes": 670,
+        "sha256": "399e5ff89c51af455876438d3b557cb12bb758367d1e119ca9258122b554ca44"
+      }
+    },
+    "source_sha256": {
+      "compiler_code_paths.py": "3b58a08d5c23166345db812c3d5af24f78a489048ef011dfda47cac15b7d4140",
+      "source_observed_codes.py": "b879a83e31ba681002187d3e2972a3383c7cb0a2a7b7baa0bd31f476e3538423",
+      "source_observed_calls.py": "47a95f09ec2da22bcc89907ad231199511b99998884213fefbd879167da66769",
+      "source_body_interfaces.py": "1140798063c444c1a40e181ad493e039a8409f93381e44947a731b0589940c80",
+      "source_body_activations.py": "0846aed9a3439a35cdb2bb5467ee3b12f39b197319c549942fbda9f14e953acc",
+      "source_body_activation_view.py": "bbb2d932154d6781d1feca1f6131096fe54f92d3c5ab002f0880b2a9227a8051",
+      "source_observed_interfaces.py": "d04b1393c0bd01756a26d5effb3889a51a965eb0f843a8be742829142c224db4",
+      "source_frontend.py": "438a8f4ee90644e390fa71a9d5ee8a973c16fe9b0dd4e14f0ba89ec147952454",
+      "observed_source_admission.py": "9cf568add0745b2163782b05cc1332886918ca47d495019a7d7da1ab12bbd8d6",
+      "build_f4.py": "d6d75f9ff1b5079efcee494a66c369df2bbe28375686844899aa29733729905c",
+      "build.py": "f3a3f7c134b1a30d17d44df6677a9573e22bde7fd135304433168499e9e6e759",
+      "../ir/program/compiler_code_paths.py": "ad2430e72be64716a33c044691a03f49c68fdba607446e59bd36b9159b305346",
+      "../ir/program/source_observed_codes.py": "edac377630de717f7669a7bb2a417234c469dac7324be0dfb2c254e554d734da"
+    },
+    "target_workload_executed": false,
+    "target_workload_speedup_claimed": false,
+    "first_stage_complete": false
   }
 }

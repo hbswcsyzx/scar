@@ -1,42 +1,37 @@
 # 当前状态
 
-**第一阶段未完成；当前只做建模、建图和读回。没有应用加速比结论。**
-LeWM未修改；本机无可用GPU，外部CPU testcase为Sunfish、Gray–Scott、Cirq。后端约定仍为C++20 / 算子ABI v1。
+第一阶段未完成；当前只做自动建模、建图和读回，未进入化简或代码生成。
+LeWM 未修改；本机无可用 GPU。外部 CPU testcase 为 Sunfish、Gray–Scott、Cirq。
 
-## 当前按层推进
-
-| 层 | 已实现 | 尚未通过的部分 |
+| 层 | 已实现 | 当前剩余 |
 |---|---|---|
-| 输入识别 | F0字节、F1 token、F2语法、F3作用域/编译对应 | 版本化材料须按当前producer验证，旧收据不重签 |
-| 共享局部图 | 表达式、函数、类、分支、循环、deferred正文；原端口和world | 局部图不等于真实跨层连接完整 |
-| 跨层连接 | 静态接口及实际CodeID/CALL、native/callback对应 | 已实现通用root/import路径、共享正文和条件恢复接口；广域实测、具体恢复实例仍待验收 |
-| 状态/资源 | binding/content/effect接口及CPU、DRAM、存储、GPU接口 | 库存不等于实际placement、allocation或transfer证明 |
-| 组合/存储 | 原ID分片组合、按需展开、入口查询和独立读回 | 整图验收仍受上述缺口阻挡 |
+| F0–F3 识别 | 字节、token、语法、字段角色、作用域与编译器构造图 | 新依赖仍须走相同前端 |
+| F4 局部图 | 表达式、语句、函数、类、循环、deferred 正文和状态端口 | 共享正文，不按迭代复制 |
+| F5 接线 | 实际 CodeID/调用、五类正文入口、完成与条件恢复接口 | 外部源码准入、恢复实例/位置、完整实例覆盖 |
+| 状态/资源 | 绑定/内容版本及 CPU、内存、存储、设备的条件接口 | 实际 placement/transfer 不能由库存或源码调用推定 |
+| 发布/读回 | 原 ID 分片、按需展开、双向查询 | 入口到输出及状态/资源整体闭合尚未验收 |
 
-实体为Operation / Value / StateLocation / Region / Resource；函数和循环共享正文，不按迭代unroll。
-未知字段、条件关系、缺失规则、缺边和查询预算停止分别记录，不互相替代。
+实体为 Operation / Value / StateLocation / Region / Resource。
 
-## 本轮：统一正文与跨层连接
+## 本轮进展
 
-- **Implemented：** 五类正文入口统一读取原scope、参数、world和全部完成端口；沿原模板连接遍历同code-scope的子图，不按调用或循环迭代复制。region/step引用带完整unit、template限定。
-- **Verified：** 一次通用语言样例涵盖五类入口：15个共享接口、4个跨模板suspension、8个恢复入口。初版只扫描单模板漏掉suspension，已修正为共享图遍历，并加针对性回归检查。
-- **Implemented：** 新连接器枚举全部已记录frame进入；优先复用原CALL映射，其他opcode以原CodeID、PEP657位置和作用域得到条件source-operation候选，不按应用名称派发。前后dispatcher保留未知副作用；内层返回不当成外层结果alias。
-- **Verified：** 自动准入依赖后，真实trace的14/14次进入全部对应正文，13个共享activation、11个共享接口；126个必需端口、555条双向关系及13个无关返回Frame拒绝通过。初次读回因context_pop调用错误失败，已修正；原失败报告保留，未改成通过。
-- **Implemented：** 端口规则分母来自IR的全部GlobalPort字段；输入、saved引用、完成、handoff均逐项核对。未知字段与缺边分别记录。新接口分片接入frontend及统一build。
-- **Verified / Open：** 真实生成器trace的17个入口/恢复Frame、212个端口、2117条双向边通过；16/30次进入有源码对应，另7次项目内generic factory/嵌套正文、7次外部源码进入仍待对应，未宣称完整覆盖。
-- **Running：** Sunfish正在按当前协议重新执行完整前端、自动依赖准入及动态接线，不重跑原应用。
+- **Implemented：** 代码对应改为沿 C3 编译器构造图匹配；统一处理 12 类来源及 4 类投影。泛型工厂、内部函数/类、lazy evaluator 均保留原作用域、常量路径和入口协议，不伪造普通函数事实。
+- **Verified：** 现有语言样例的 15 个编译代码对象全部对应。真实记录的正文进入从 16/30 提高到 23/30：项目内 7 处缺口已消除，剩余 7 次属于未纳入该目录的外部源码。
+- **Verified：** 保存后读回 24 个入口/恢复 frame、270 个必需端口及 2362 条双向关系；读回用时 3.98 秒。仍保留上述覆盖缺口，不宣称整图完成。
+- **Implemented：** 共享子图由逐节点读取改为依赖闭包批量读取；图读回复用已准入索引，避免重建一遍源码/运行索引。原材料校验和逐端口连接核对保留。
+- **Observed：** Sunfish 旧版作业在正文连接阶段被主动中止（该步骤运行 1180.71 秒）；原失败收据和已产出的接口均保留，不改写为通过。
+- **Verified：** Sunfish 当前记录的 1856/1856 次进入均有正文对应，未对应进入和来源操作缺口均为 0；127 个共享 activation、83 个正文接口。正文连接 82.21 秒；保存后读回 337 个入口/恢复 frame、4434 个端口、23485 条双向关系，用时 88.82 秒。只覆盖该份采集记录，不代表整个程序所有路径。
+- **Implemented / Verified：** 来源选择改为先确认代码作用域再选择最内层操作，消除生成器迭代的 198 处错层定位；不按应用或 opcode 特例派发。
+- **Running：** 当前结果接入统一 build，继续核对已有状态、资源及分片发布接口。
 
-入口命令：`scar body-interfaces --catalog DIR --out DIR`；`scar body-activations --catalog DIR --trace TRACE --project-root ROOT --out DIR`。
-复核：`scar body-activations --read DIR --graph-check --out REPORT.json`。
+命令：`scar body-activations --catalog DIR --trace TRACE --project-root ROOT --out DIR --graph-check-out REPORT.json`。
+单独读回：`scar body-activations --read DIR --graph-check --out REPORT.json`。
 
-此前Cirq173静态单元、689 CodeID/5719 CALL及Sunfish/Gray结果保留原收据，不冒充本轮协议下的完整验收。
-本轮接口/观察表位于artifacts/current/experiments/body-interface-current/及body-protocols-current/。
-无优化backend新增，无LeWM修改，无应用加速比结论。
+## 后续顺序
 
-## 下一步
+1. 完成 Sunfish 统一 build，报告状态/资源仍未接通的实际缺口。
+2. 在同一图接入已有状态/资源接口，核对入口到输出关系。
+3. 完成分片发布、读回与覆盖报告后再判定第一阶段完成。
 
-先完成当前协议在真实CPU案例中的独立验收，再核对状态/资源及入口到输出的整图读回。
-通用代码对应仍需审计generic compiler wrapper及lazy evaluator等C3角色；具体generator/coroutine实例与resume PC保持显式未决，不能冒充已实测绑定。
-随后核对状态/资源接口与入口到输出的读回。上述各层通过后才报告第一阶段完成；不新增detector或optimization backend。
-
-可复核实测收据集中在artifacts/baseline/formal-frontend-results.json；建模方法见[ARCHITECTURE](ARCHITECTURE.md)，实体关系见[MODEL](MODEL.md)。
+实测收据集中在 artifacts/baseline/formal-frontend-results.json。
+此前结果按原 producer 版本保留，不能替代当前版本验收。无新增 detector/backend，无应用加速比结论。

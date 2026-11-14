@@ -125,6 +125,30 @@ class BodyInterfaceResolver:
     """Share one original plan decode across all requested bodies in it."""
     def __init__(self, view):
         self.view = view; self.plans = {}; self.heads = {}; self.interfaces = {}
+        self.prepared = set(); self.children = {}
+
+    def prepare(self, body):
+        """Admit a shared template closure in one fragment pass, not per node.
+
+        This is the finite static reference closure, not dynamic unrolling.
+        Existing readers still authenticate every selected original recipe.
+        """
+        start = body.unit,body.template
+        if start in self.prepared: return
+        material = self.view.unit(body.unit).material
+        if body.unit not in self.children:
+            children = defaultdict(list)
+            for (caller,_),link in material.interfaces['links'].items():
+                children[caller].append(link.callee)
+            self.children[body.unit] = children
+        pending = [body.template]; selected = set()
+        while pending:
+            key = pending.pop()
+            if key in selected or (body.unit,key) in self.prepared: continue
+            selected.add(key); pending.extend(self.children[body.unit].get(key,()))
+        keys = tuple(key for key in material.interfaces['nodes'] if key in selected)
+        self.seed(body.unit,material.plans(keys))
+        self.prepared.update((body.unit,key) for key in keys)
 
     def seed(self,unit,plans):
         material=self.view.unit(unit).material
@@ -146,6 +170,7 @@ class BodyInterfaceResolver:
         return self.plans[identity]
 
     def resolve(self, body):
+        self.prepare(body)
         self.plan(body.unit,body.template)
         if body in self.interfaces:return self.interfaces[body]
         if body not in self.heads:

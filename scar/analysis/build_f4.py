@@ -48,7 +48,7 @@ def discover(entry,trace,*,catalog=None,cache_roots=()):
         if catalog:raise ValueError('explicit F4 catalog does not contain the current entry')
         return None
     c,unit=selected
-    components={};functions=[]
+    components={};functions=[];component_pins={}
     priority={'scar.source-observed-function-interfaces':0,'scar.source-returned-function-interfaces':1,
         'scar.source-function-interface-collection':2,'scar.source-function-interfaces':3,
         'scar.source-compiled-function-interfaces':4}
@@ -69,6 +69,15 @@ def discover(entry,trace,*,catalog=None,cache_roots=()):
             basis=r['basis']
             if (trace is None or basis['trace']!=str(trace)
                     or Path(basis['catalog']['uri']).parent.resolve()!=c.path.resolve()):continue
+            if key not in component_pins:
+                if key=='body_activations':
+                    from scar.analysis.source_body_activations import _pins
+                else:
+                    from scar.analysis.source_observed_boundaries import _pins
+                component_pins[key]=_pins()
+            if r.get('pins')!=component_pins[key]:
+                gaps.append(dict(layer=key,kind='CACHED_COMPONENT_RULES_CHANGED',path=str(path)))
+                continue
         if key and key not in components:
             components[key]=_receipt(path/'result.json')
     return dict(catalog=_receipt(c.path/'result.json'),entry_unit=unit,functions=functions,

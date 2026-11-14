@@ -63,7 +63,7 @@ class ObservedSourceCallsiteIndex:
             for unit,capture,scope,code in getattr(codes,'root_callers',()):
                 self._admit(_Caller(unit,capture,scope,code,None))
         for row in (*codes.records.values(),*getattr(codes,'scope_records',{}).values(),
-                *getattr(codes,'request_records',{}).values()):
+                *getattr(codes,'request_records',{}).values(),*getattr(codes,'compiler_records',{}).values()):
             profile=profiles.get(row.body.unit)
             compatible=replay_profiles.get(row.body.unit)
             if row.body.unit in observed_compiled_units and compatible is None:

@@ -1,12 +1,11 @@
 """Match real code observations to shared F4 definitions using compiler paths.
 
-Reuse the established parent LOAD_CONST/span mapper and full code fingerprint.
+Use C3 compiler construction paths and full code fingerprints.
 This is a code-template correspondence, not a guessed function-name binding,
 callsite selection, creator-instance identity or a static invocation frame.
 """
 import argparse
 import ast
-import dis
 from dataclasses import replace
 from collections import defaultdict
 from hashlib import sha256
@@ -14,11 +13,10 @@ import gzip
 import json
 from pathlib import Path
 import sys
-from types import CodeType
 
 from scar.analysis.call_operand_reader import read_call_operands
 from scar.analysis.python_call_targets import read_python_call_targets
-from scar.analysis.static_compilation import _scope_nodes
+from scar.analysis.compiler_code_paths import CompilerCodeIndex
 from scar.analysis.static_query import _Fragments
 from scar.analysis.source_reference_slice import ReferenceSlicer, source_port
 from scar.analysis.source_value_flow import _artifact
@@ -31,7 +29,8 @@ from scar.analysis.source_template_links import _json
 from scar.ir.program.source_syntax import SourceSyntaxMaterial
 from scar.ir.program.compiler_topology import CompilerTopologyMaterial
 from scar.ir.program.source_observed_codes import (ObservedSourceCodeLink,
-    ObservedSourceScopeKind as ScopeKind, ObservedSourceScopeLink, ObservedSourceRequestCodeLink)
+    ObservedSourceScopeKind as ScopeKind, ObservedSourceScopeLink, ObservedSourceRequestCodeLink,
+    ObservedSourceCompilerCodeLink)
 from scar.ir.program import normal_targets as T, view as V, source_productions as P
 from scar.ir.program.call_edges import CapturedCode,CallEdgeBudget
 from scar.ir.program.providers import ProviderArtifact, ProviderFactReference
@@ -47,8 +46,8 @@ from scar.trace.files import open_binary, resolve as resolve_trace_file
 
 
 SCHEMA = 'scar.source-observed-code-view'
-_EXPRESSION_BODIES = {'Lambda': ('LAMBDA_BODY', '<lambda>'),
-    'GeneratorExp': ('GENERATOR_EXPRESSION', '<genexpr>')}
+_FUNCTION_ROLES = {'FunctionDef':'FUNCTION_BODY', 'AsyncFunctionDef':'FUNCTION_BODY',
+    'Lambda':'LAMBDA_BODY', 'GeneratorExp':'GENERATOR_EXPRESSION'}
 
 
 def replay_catalog_code(raw, profile):
@@ -76,32 +75,34 @@ def replay_catalog_code(raw, profile):
     return code, tree, recipe['flags']
 
 
-def _expression_code_paths(root):
-    """Index exact compiler child slots/positions, not names or first lines.
-
-    F3's public expression-body projection admits a source occurrence
-    separately. LOAD_CONST supplies its exact code path; the full captured
-    descriptor is still checked by source-code correspondence below. A
-    generator expression body is not a creation or resume-instance witness.
-    """
-    found = defaultdict(list); pending = [((), root)]; visited = set()
-    while pending:
-        path, code = pending.pop()
-        if path in visited: continue
-        visited.add(path)
-        for instruction in dis.get_instructions(code, adaptive=False, show_caches=False):
-            child = instruction.argval
-            if instruction.opname != 'LOAD_CONST' or type(child) is not CodeType: continue
-            if type(instruction.arg) is not int or code.co_consts[instruction.arg] is not child:
-                raise ValueError('source expression compiler child lost its exact constant slot')
-            child_path = (*path, instruction.arg)
-            pending.append((child_path, child))
-            span = tuple(instruction.positions)
-            if child.co_name in ('<lambda>', '<genexpr>') and all(type(value) is int for value in span):
-                item = child_path, child, None
-                key = child.co_name, span
-                if item not in found[key]: found[key].append(item)
-    return found
+def _compiler_bodies(material, topology, selected):
+    """Resolve only requested C3 scopes to original five-kind body entries."""
+    from scar.analysis.source_annotation_code_bridge import _recipe_reference
+    from scar.analysis.source_connection_contracts import body_entry_rules
+    from scar.analysis.source_namespace_interfaces import NamespacePlanView
+    rules = dict(body_entry_rules()); keys = defaultdict(list)
+    for key in material.interfaces['nodes']: keys[key.occurrence].append(key)
+    plans = {}; seen = set()
+    for origin, captures in selected:
+        block = origin.block; candidates = []
+        # Bounds/defaults can be recipes within an enclosing declaration.
+        while block is not None and not candidates:
+            candidates = keys[topology.blocks[block].origin.occurrence]
+            block = topology.blocks[block].parent
+        for key in candidates:
+            if key not in plans:
+                plans[key] = NamespacePlanView(material.unit,material.plans((key,))[key])
+            context = plans[key]
+            for index, step in enumerate(context.plan.steps):
+                if type(step.instruction) not in rules: continue
+                owner = context.owner(step.region)
+                if owner.source_scope != origin.source_scope: continue
+                body = T.Body(material.unit,key,step.region)
+                if (origin,body) in seen: continue
+                seen.add((origin,body))
+                yield dict(origin=origin,entry_recipe=_recipe_reference(material,key,index),
+                    entry_step=step.id,plan_sha256=material.interfaces['nodes'][key].origin.plan_sha256,
+                    body=body,scope=owner,captures=captures)
 
 
 class ObservedSourceCodeProvider:
@@ -129,7 +130,8 @@ class ObservedSourceCodeProvider:
         self.targets = read_python_call_targets(self.trace,max_bytes=target_max_bytes,max_rows=target_max_rows)
         if any(m['python'] != sys.version for m in self.trace.frame_scan.metadata):
             raise ValueError('code correspondence needs the recorded compiler runtime')
-        self.records = {}; self.scope_records = {}; self.request_records = {}
+        self.records = {}; self.scope_records = {}; self.request_records = {}; self.compiler_records = {}
+        self.compiler_correspondence = {}
         self.points = {}; self.bodies = {}; self.issues = [];self.root_callers=[]
         self.fact_materials=ObservedFactMaterials(view.catalog)
         self._sources = {}; self._guard = {}; self._trace_guard = {}
@@ -181,7 +183,6 @@ class ObservedSourceCodeProvider:
             syntax = decode(SourceSyntaxMaterial, _Fragments(root).read(descriptor))
             syntax_path = root/descriptor['path']; self._guard[syntax_path] = syntax_path.read_bytes()
             syntax_artifact = _artifact(syntax_path, 'scar.source-syntax')
-            schemas = {s.name:s for s in syntax.profile.ast_schema}
             facts = view.catalog.fact_store.load(unit)
             # An exec child belongs to its retained effective compiler profile,
             # not to a fresh flags=0 import of the same source filename. The
@@ -197,20 +198,11 @@ class ObservedSourceCodeProvider:
                 flags = profile.context.compiler_input_flags
                 code = profile.code
                 tree = ast.parse(profile.payload, filename=profile.context.filename, mode=profile.context.mode)
-            mappings = {}; issues = []
-            _scope_nodes(tree, code, (), ast.Module, mappings, issues)
-            replay = {flags:(code,mappings)}
-            expression_blocks = {}; expression_paths = {}
-            if profile is None and any(syntax.nodes[f.template.occurrence].constructor in _EXPRESSION_BODIES
-                    for f in facts.functions):
-                descriptor = model['artifacts']['compiler_topology']
-                topology = decode(CompilerTopologyMaterial, _Fragments(root).read(descriptor))
-                if topology.status != 'PROJECTED':
-                    raise ValueError('source expression correspondence needs its original compiler topology')
-                topology_path = root/descriptor['path']; self._guard[topology_path] = topology_path.read_bytes()
-                expression_blocks = {(block.origin.occurrence, block.origin.role): block for block in topology.blocks
-                    if block.origin.role in ('LAMBDA_BODY', 'GENERATOR_EXPRESSION') and block.projection == 'PUBLIC'}
-                expression_paths = _expression_code_paths(code)
+            descriptor = model['artifacts']['compiler_topology']
+            topology = decode(CompilerTopologyMaterial, _Fragments(root).read(descriptor))
+            topology_path = root/descriptor['path']; self._guard[topology_path] = topology_path.read_bytes()
+            paths = CompilerCodeIndex(syntax,topology,code)
+            self.compiler_correspondence[unit] = paths.summary()
             root_descriptor=decode(CapturedCode,describe_code(code))
             source_artifact=ProviderArtifact(str(path),sha256(raw).hexdigest(),len(raw),'python-source')
             scoped=[]
@@ -228,10 +220,9 @@ class ObservedSourceCodeProvider:
             for ordinal,declared in enumerate(facts.classes):
                 node=syntax.nodes[declared.template.occurrence]
                 if node.constructor!='ClassDef' or declared.body_scope is None:continue
-                attributes=dict(zip(schemas[node.constructor].attributes,
-                    (v.scalar.to_python() if v.kind=='SCALAR' else None for v in node.attributes)))
-                span=tuple(attributes[k] for k in ('lineno','end_lineno','col_offset','end_col_offset'))
-                for constant_path,child,_ in mappings.get(span,()):
+                for origin in paths.by_scope[declared.body_scope.source_scope]:
+                    if origin.role != 'CLASS_BODY':continue
+                    constant_path = origin.constant_path; child = paths.codes[constant_path]
                     expected=decode(CapturedCode,describe_code(child))
                     matched=tuple(c for c in observed if c.code==expected)
                     if not matched:continue
@@ -247,37 +238,23 @@ class ObservedSourceCodeProvider:
             pending=[]
             for ordinal, function in enumerate(facts.functions):
                 node = syntax.nodes[function.template.occurrence]
-                if node.constructor not in ('FunctionDef', 'AsyncFunctionDef', *_EXPRESSION_BODIES):continue
-                attributes = dict(zip(schemas[node.constructor].attributes,
-                    (v.scalar.to_python() if v.kind == 'SCALAR' else None for v in node.attributes)))
-                span = tuple(attributes[k] for k in ('lineno','end_lineno','col_offset','end_col_offset'))
-                for flags,(root_code,mappings) in replay.items():
-                    if node.constructor in _EXPRESSION_BODIES:
-                        role, name = _EXPRESSION_BODIES[node.constructor]
-                        block = expression_blocks.get((function.template.occurrence, role))
-                        if (block is None or block.source_scope != function.environment.scope
-                                or function.body_scope is None
-                                or function.body_scope.source_scope != block.source_scope): continue
-                        candidates = expression_paths.get((name, span), ())
-                    else:
-                        candidates = mappings.get(span, ())
-                    for constant_path, child, _ in candidates:
-                        expected = decode(CapturedCode, describe_code(child))
-                        matched = tuple(c for c in observed if c.code == expected)
-                        if not matched:continue
-                        definition = slicer.fact(facts, 'functions', ordinal)
-                        identity = ProviderID(_digest((SCHEMA,self.targets.source_sha256,definition,expected)))
-                        row = ObservedSourceCodeLink(identity,definition,source_port(facts,function.value),
-                            T.Body(unit,function.template,function.body),function.body_scope,matched,
-                            tuple(targets_by_code[expected.key]),tuple(entries_by_code[expected.key]),
-                            ProviderArtifact(str(path),sha256(raw).hexdigest(),len(raw),'python-source'),
-                            ProviderFactReference(syntax_artifact,'#/nodes/'+str(function.template.occurrence)),
-                            root_descriptor,constant_path,flags)
-                        pending.append(row)
+                if node.constructor not in _FUNCTION_ROLES or function.body_scope is None:continue
+                for origin in paths.by_scope[function.body_scope.source_scope]:
+                    if origin.role != _FUNCTION_ROLES[node.constructor]:continue
+                    constant_path = origin.constant_path; child = paths.codes[constant_path]
+                    expected = decode(CapturedCode, describe_code(child))
+                    matched = tuple(c for c in observed if c.code == expected)
+                    if not matched:continue
+                    definition = slicer.fact(facts, 'functions', ordinal)
+                    identity = ProviderID(_digest((SCHEMA,self.targets.source_sha256,definition,expected)))
+                    row = ObservedSourceCodeLink(identity,definition,source_port(facts,function.value),
+                        T.Body(unit,function.template,function.body),function.body_scope,matched,
+                        tuple(targets_by_code[expected.key]),tuple(entries_by_code[expected.key]),
+                        source_artifact,
+                        ProviderFactReference(syntax_artifact,'#/nodes/'+str(function.template.occurrence)),
+                        root_descriptor,constant_path,flags)
+                    pending.append(row)
             from scar.analysis.source_annotation_code_bridge import request_candidates
-            descriptor = model['artifacts']['compiler_topology']
-            topology = decode(CompilerTopologyMaterial, _Fragments(root).read(descriptor))
-            topology_path = root/descriptor['path']; self._guard[topology_path] = topology_path.read_bytes()
             material = view.unit(unit).material
             requests = []
             for values in request_candidates(material, syntax, topology, code, observed):
@@ -294,16 +271,39 @@ class ObservedSourceCodeProvider:
                 if (len(raw),sha256(raw).hexdigest()) != (artifact.size_bytes,artifact.sha256):
                     raise ValueError('annotation request sealed recipe evidence changed')
                 self._guard[path] = raw
-            if not pending and not scoped and not requests:continue
+            represented = {(row.scope.source_scope,row.constant_path) for row in (*pending,*scoped,*requests)}
+            selected_compiler = []
+            for origin in paths.matches.values():
+                if (origin.source_scope,origin.constant_path) in represented:continue
+                expected = decode(CapturedCode,describe_code(paths.codes[origin.constant_path]))
+                matched = tuple(c for c in observed if c.code == expected)
+                if matched:selected_compiler.append((origin,matched))
+            compiler = []
+            for values in _compiler_bodies(material,topology,selected_compiler):
+                identity = ProviderID(_digest((SCHEMA+'.compiler',self.targets.source_sha256,
+                    values,root_descriptor,flags)))
+                compiler.append(ObservedSourceCompilerCodeLink(identity,**values,source=source_artifact,
+                    syntax=ProviderFactReference(syntax_artifact,'#/nodes/'+str(
+                        topology.blocks[values['origin'].block].origin.occurrence)),
+                    compiled_root=root_descriptor,compile_flags=flags,
+                    frame_entries=tuple(a for c in values['captures']
+                        for a in frame_entries[c.process_id,c.code.key])))
+                artifact=values['entry_recipe'].artifact; recipe_path=Path(artifact.uri)
+                recipe_raw=recipe_path.read_bytes()
+                if (len(recipe_raw),sha256(recipe_raw).hexdigest()) != (artifact.size_bytes,artifact.sha256):
+                    raise ValueError('compiler body recipe evidence changed')
+                self._guard[recipe_path]=recipe_raw
+            if not pending and not scoped and not requests and not compiler:continue
             source=view.unit(unit)
-            for row in (*pending,*scoped,*requests):
+            for row in (*pending,*scoped,*requests,*compiler):
                 body = (view.source_region(unit,row.body.template,row.body.region)
-                    if type(row) is ObservedSourceRequestCodeLink else
+                    if type(row) in (ObservedSourceRequestCodeLink,ObservedSourceCompilerCodeLink) else
                     view.source_region_ref(unit,row.body.template,row.body.region))
                 point = Point(body.namespace,row.id,None)
                 key = self._key(point)
                 records=(self.records if type(row) is ObservedSourceCodeLink else self.request_records
-                    if type(row) is ObservedSourceRequestCodeLink else self.scope_records)
+                    if type(row) is ObservedSourceRequestCodeLink else self.compiler_records
+                    if type(row) is ObservedSourceCompilerCodeLink else self.scope_records)
                 if key in records and records[key] != row:
                     raise ValueError('observed code mapping has conflicting compiler paths')
                 records[key] = row; self.points[key] = point; self.bodies[key] = body
@@ -314,6 +314,12 @@ class ObservedSourceCodeProvider:
 
     @staticmethod
     def _key(point):return point.namespace,point.node
+
+    def body_link_tables(self):
+        return self.records,self.scope_records,self.request_records,self.compiler_records
+
+    def body_links(self):
+        return tuple(row for table in self.body_link_tables() for row in table.values())
 
     def _admit_trace(self,logical,size,digest):
         """Hash every original stream once, then guard its immutable identity.
@@ -361,21 +367,22 @@ class ObservedSourceCodeProvider:
         self._check_trace()
 
     def describe(self, point):
-        if not any(self._key(point) in rows for rows in (self.records,self.scope_records,self.request_records)):return None
+        if not any(self._key(point) in rows for rows in self.body_link_tables()):return None
         if point.context is not None:raise ValueError('observed code evidence has no static invocation context')
         self.check()
         return V.ProgramNode(point,None,V.ProgramNodeRole.PROVIDER,self.bodies[self._key(point)],None)
 
     def original(self, point):
         key=self._key(point)
-        for rows in (self.records,self.scope_records,self.request_records):
+        for rows in self.body_link_tables():
             if key in rows:return rows[key]
         raise KeyError(key)
     def expand(self, point):return ()
     def explain(self, point):
         row = self.original(point)
         return dict(original=row,code_template_matched=True,
-            scope_kind=row.kind.value if type(row) in (ObservedSourceScopeLink,ObservedSourceRequestCodeLink) else 'FUNCTION_BODY',
+            scope_kind=(row.origin.role.value if type(row) is ObservedSourceCompilerCodeLink else
+                row.kind.value if type(row) in (ObservedSourceScopeLink,ObservedSourceRequestCodeLink) else 'FUNCTION_BODY'),
             compatible_replay_used=row.body.unit in self.replay_profiles,
             original_compilation_request_proven=False,
             source_function_creation_proven=False,caller_site_selected=False,
@@ -386,7 +393,7 @@ class ObservedSourceCodeProvider:
         if point.context is not None:return Neighborhood()
         keys = tuple(k for k,b in self.bodies.items() if b == point) if incoming else (self._key(point),)
         keys = tuple(k for k in keys if any(k in rows for rows in
-            (self.records,self.scope_records,self.request_records)))
+            self.body_link_tables()))
         if not keys:return Neighborhood()
         self.check(); edges=[]
         for key in keys:
@@ -408,13 +415,13 @@ class ObservedSourceCodeProvider:
     def outgoing(self, point):return self._neighbors(point,False)
 
     def summary(self):
-        matched={(c.process_id,c.code.key) for r in (*self.records.values(),*self.scope_records.values(),
-            *self.request_records.values()) for c in r.captures}
+        matched={(c.process_id,c.code.key) for r in self.body_links() for c in r.captures}
         kinds=defaultdict(int)
         for row in self.scope_records.values():kinds[row.kind.value]+=1
         return dict(code_links=len(self.records),units=len(self._sources),
             scope_links=len(self.scope_records),scope_kinds=dict(kinds),
             request_links=len(self.request_records),
+            compiler_links=len(self.compiler_records),compiler_correspondence=self.compiler_correspondence,
             request_frame_observations=sum(len(r.frame_entries) for r in self.request_records.values()),
             captured_code_templates=len(self.trace.frame_scan.captures),matched_code_templates=len(matched),
             unmatched_code_templates=len(self.trace.frame_scan.captures)-len(matched),
@@ -427,10 +434,12 @@ class ObservedSourceCodeProvider:
 
 
 def request_code_pins():
-    from scar.analysis import source_annotation_code_bridge
+    from scar.analysis import source_annotation_code_bridge,compiler_code_paths
+    from scar.ir.program import compiler_code_paths as compiler_path_ir
     from scar.ir.program import source_observed_codes as request_ir
     return {name:sha256(Path(path).read_bytes()).hexdigest() for name,path in
-        (('provider',__file__),('requests',request_ir.__file__),('bridge',source_annotation_code_bridge.__file__))}
+        (('provider',__file__),('requests',request_ir.__file__),('bridge',source_annotation_code_bridge.__file__),
+         ('compiler_paths',compiler_code_paths.__file__),('compiler_path_ir',compiler_path_ir.__file__))}
 
 
 def publish_observed_codes(provider, out):
@@ -440,11 +449,12 @@ def publish_observed_codes(provider, out):
     _durable_mkdir(out);table=write_table(out/'links.jsonl.gz',provider.records.values())
     scopes=write_table(out/'scope-links.jsonl.gz',provider.scope_records.values())
     requests=write_table(out/'request-links.jsonl.gz',provider.request_records.values());provider.check()
-    report=dict(schema=SCHEMA,schema_version=3,catalog=str(provider.view.catalog.path),
+    compiler=write_table(out/'compiler-links.jsonl.gz',provider.compiler_records.values())
+    report=dict(schema=SCHEMA,schema_version=4,catalog=str(provider.view.catalog.path),
         trace=provider.trace.directory,project_root=provider.project_root,selected_units=list(provider.selected_units),
         run_scope=provider.targets.source_sha256,compiled_units=[p.unit for p in provider.compiled],
         target_reader_budget=provider.target_reader_budget,frame_reader_budget=encode(provider.trace.frame_budget),
-        table=table,scope_table=scopes,request_table=requests,request_pins=request_code_pins(),
+        table=table,scope_table=scopes,request_table=requests,compiler_table=compiler,request_pins=request_code_pins(),
         summary=provider.summary())
     _durable_bytes(out/'result.json',_json(report),replace=False)
     return report
@@ -462,7 +472,7 @@ def read_observed_request_codes(path, *, max_stored_bytes=32_000_000,
     path=Path(path).absolute()
     if path.resolve()!=path:raise ValueError('canonical observed request store required')
     raw=(path/'result.json').read_bytes();report=json.loads(raw)
-    if ((report.get('schema'),report.get('schema_version'))!=(SCHEMA,3)
+    if ((report.get('schema'),report.get('schema_version'))!=(SCHEMA,4)
             or report.get('request_pins')!=request_code_pins()
             or report['summary']['first_stage_complete'] is not False):
         raise ValueError('observed request code producer or authority differs')

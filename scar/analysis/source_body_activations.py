@@ -37,7 +37,7 @@ TABLES = dict(interfaces=B.SourceBodyInterface, activations=R.SourceBodyActivati
     observations=R.SourceBodyActivationObservation, parents=R.SourceBodyActivationParent,
     frontiers=R.SourceBodyActivationFrontier)
 _LINK_TABLES = {C.ObservedSourceCodeLink:'records', C.ObservedSourceScopeLink:'scope_records',
-    C.ObservedSourceRequestCodeLink:'request_records'}
+    C.ObservedSourceRequestCodeLink:'request_records', C.ObservedSourceCompilerCodeLink:'compiler_records'}
 
 
 def _links(codes):
@@ -110,11 +110,12 @@ class _SourceAnchors:
                 candidates=[(span,template) for span,template in self.locations[unit]
                     if self._contains(span,site.position)]
                 if not candidates:continue
-                # Remove strictly enclosing locations, retaining equal-span
-                # templates and all operation alternatives at that location.
-                minimal=[(span,template) for span,template in candidates if not any(
-                    other!=span and self._contains(span,other) for other,_ in candidates)]
-                for _,template in minimal:
+                # Select code ownership before taking the innermost source
+                # location. A compiler instruction may carry the location of
+                # syntax evaluated in another scope (e.g. a generator's first
+                # iterable); pruning by syntax alone hides its body protocol.
+                located=[]
+                for _,template in candidates:
                     context=self.resolver.plan(unit,template)
                     for step in context.plan.steps:
                         if context.owner(step.region).owner != caller.scope.owner:continue
@@ -124,7 +125,9 @@ class _SourceAnchors:
                                 or not self._contains(span,site.position)):continue
                         types=tuple(context.emitter.value(value)[1] for value in step.arguments)
                         if any(type(t) is ValueType and t.kind is ValueKind.STATE for t in types):
-                            result.append(self._anchor(site,unit,context,step))
+                            located.append((span,self._anchor(site,unit,context,step)))
+                result.extend(anchor for span,anchor in located if not any(
+                    other!=span and self._contains(span,other) for other,_ in located))
         answer=tuple(dict.fromkeys(result)); self.cache[key]=answer
         return answer
 
@@ -199,7 +202,9 @@ def derive_body_activations(index):
 def _pins():
     from scar.ir.program import source_observed_codes
     from scar.analysis import source_observed_codes as code_reader,source_observed_calls as call_reader
-    return {**body_pins(), 'activation_producer':sha256(Path(__file__).read_bytes()).hexdigest(),
+    return {**body_pins(), **{'correspondence_'+name:digest
+        for name,digest in code_reader.request_code_pins().items()},
+        'activation_producer':sha256(Path(__file__).read_bytes()).hexdigest(),
         'activation_types':sha256(Path(R.__file__).read_bytes()).hexdigest(),
         'correspondence_types':sha256(Path(source_observed_codes.__file__).read_bytes()).hexdigest(),
         'correspondence_reader':sha256(Path(code_reader.__file__).read_bytes()).hexdigest(),
@@ -290,6 +295,7 @@ def main(argv=None):
     parser=argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--catalog'); parser.add_argument('--trace'); parser.add_argument('--project-root')
     parser.add_argument('--out'); parser.add_argument('--read'); parser.add_argument('--graph-check',action='store_true')
+    parser.add_argument('--graph-check-out',help='read back graph using the same admitted source/trace index')
     args=parser.parse_args(argv)
     if args.graph_check:
         if not args.read or not args.out:parser.error('--graph-check requires --read and --out')
@@ -301,7 +307,11 @@ def main(argv=None):
     else:
         if not all((args.catalog,args.trace,args.project_root,args.out)):parser.error('--catalog --trace --project-root --out required')
         view=ProgramView(args.catalog); codes=ObservedSourceCodeProvider(view,args.trace,args.project_root)
-        report=build_body_activations(ObservedSourceCallsiteIndex(codes),args.out)
+        index=ObservedSourceCallsiteIndex(codes)
+        report=build_body_activations(index,args.out)
+        if args.graph_check_out:
+            from scar.analysis.source_body_activation_view import verify_body_activations
+            verify_body_activations(args.out,args.graph_check_out,index=index)
     print(json.dumps(report['coverage'],indent=2))
     return 0
 
