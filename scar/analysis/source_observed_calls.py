@@ -55,7 +55,7 @@ class ObservedSourceCallsiteIndex:
         profiles={p.unit:p for p in self.compiled}
         replay_profiles=getattr(self.view.catalog,'replay_profiles',{})
         observed_compiled_units=frozenset(getattr(self.view.catalog.fact_store,'observed_compiled_units',()))
-        self._callers={};self._syntax={};self._static={};self._owners={}
+        self._callers={};self._syntax={};self._roles={};self._static={};self._owners={}
         self._calls={};self._plans={};self._contexts={}
         self.slicer=ReferenceSlicer(SimpleNamespace(fact_store=self.view.catalog.fact_store))
         roots={}
@@ -188,7 +188,9 @@ class ObservedSourceCallsiteIndex:
     def _index(self,caller):
         cache_key=caller.unit,caller.scope.owner,caller.capture.code.key
         if cache_key in self._static:return self._static[cache_key]
-        syntax=self._source_syntax(caller.unit);roles=SyntaxRoleView(syntax)
+        syntax=self._source_syntax(caller.unit)
+        if caller.unit not in self._roles:self._roles[caller.unit]=SyntaxRoleView(syntax)
+        roles=self._roles[caller.unit]
         source=self.view.unit(caller.unit);facts=source.facts
         owners=self._owners[caller.unit]
         # Scope-group ranges are an index. The selected bare F4 recipe still
@@ -229,6 +231,22 @@ class ObservedSourceCallsiteIndex:
             span=_span(syntax,occurrence)
             rows.append((i,fact,owner,'EXPLICIT_SOURCE_CALL',
                 [x.offset for x in call_instructions if tuple(x.positions)==span]))
+            # CPython can locate a chained method CALL at the final
+            # attribute label rather than the receiver's whole expression.
+            # Derive that suffix from the original F2 callee and its end;
+            # no runtime target or particular attribute name selects a call.
+            function=roles.field(occurrence,'func')
+            if function.kind=='NODE' and syntax.nodes[function.reference].constructor=='Attribute':
+                attribute=roles.field(function.reference,'attr')
+                label=attribute.scalar.to_python() if attribute.kind=='SCALAR' else None
+                _,last,_,end=_span(syntax,function.reference)
+                if type(label) is str and label:
+                    start=end-len(label.encode('utf-8'))
+                    suffix=(last,span[1],start,span[3])
+                    if ((span[0],span[2])<=(last,start)<(last,end)<=(span[1],span[3])
+                            and suffix!=span):
+                        offsets=[x.offset for x in call_instructions if tuple(x.positions)==suffix]
+                        if offsets:rows.append((i,fact,owner,'TERMINAL_ATTRIBUTE_SOURCE_CALL',offsets))
             # LOAD_SUPER_ATTR reports the inner constructor call, whose
             # source span is shorter than the fused Attribute span. Follow
             # the original F2 value edge; never infer a builtin by its name or
@@ -246,7 +264,7 @@ class ObservedSourceCallsiteIndex:
         index=defaultdict(list)
         for i,fact,owner,rule,offsets in rows:
             for offset in offsets:
-                if rule=='EXPLICIT_SOURCE_CALL' and offset in decorator_offsets:continue
+                if rule in ('EXPLICIT_SOURCE_CALL','TERMINAL_ATTRIBUTE_SOURCE_CALL') and offset in decorator_offsets:continue
                 index[offset].append((i,fact,owner,rule))
         self._static[cache_key]=dict(index);return self._static[cache_key]
 

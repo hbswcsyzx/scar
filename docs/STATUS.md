@@ -10,7 +10,7 @@ LeWM 原仓库未修改；无可用 GPU，当前使用外部 CPU testcase：Sunf
 |---|---|---|
 | 1 | F0 源字节 → F1 token → F2 语法 → F3 作用域/编译对应 | 已实现并实测；原源码和完整编译上下文限定身份 |
 | 2 | F4 共享局部图：表达式、控制、函数、类、循环 | Cirq 173 单元已生成；正文共享，不按调用/迭代复制 |
-| 3 | 实际 CodeID/CALL/回调 → 原源码端口与跨层接口 | 当前主攻；通用小图及注解请求已验，Cirq 全目录观察叠加正在离线构建 |
+| 3 | 实际 CodeID/CALL/回调 → 原源码端口与跨层接口 | 当前主攻；通用小图及注解请求已验，689代码/35请求已有独立对应；4个CALL缺口已在受影响单元修复，正更新全目录接口 |
 | 4 | 状态与资源接线 | 已有局部 binding/content/effect、native 候选和硬件库存；实际状态/资源关系仍须核对 |
 | 5 | 原分片组装、独立读回、入口到输出查询 | 流程已实现；三个 CPU case 尚未全部在当前合同下验收 |
 
@@ -20,16 +20,18 @@ LeWM 原仓库未修改；无可用 GPU，当前使用外部 CPU testcase：Sunf
 
 ## 本轮真实进展
 
-- **Verified：** Cirq 按原64文件预算分批准入，形成173单元、172份primitive材料；14份重复快照未重复入图。原681/681捕获CodeID有源码表示；这不等于正文/依赖已接通。
+- **Verified：** Cirq 按原64文件预算分批准入，形成173单元、172份primitive材料；14份重复快照未重复入图。原681/681捕获CodeID有源码表示；后续独立读回确认689/689代码及35/35请求有正文对应。这不等于依赖已全部接通。
 - **Verified：** 该目录的静态调用声明及函数接口已完成，1948.105s、8进程：16,982个静态调用声明，1,281个条件接口、1,266个已接静态调用、5,103条参数路由。未接声明不能直接视为实际运行缺口。
 - **Implemented / Verified：** 编译器注解callback用独立记录连到原deferred region，不伪造普通FunctionFact。Cirq一源码单元的14个真实请求已独立读回；原recipe、代码常量路径与源码scope一致。format/创建实例/globals/cells未绑定。
 - **Implemented / Verified：** 原生dispatcher可接普通函数、注解请求及可挂起callback的共享正文；请求保原3输入、2返回端口。通用micro的schema4边界独立读回通过；返回连dispatcher，未当成外层结果alias。
-- **Implemented / Verified：** 采集支持LOAD_SUPER_ATTR及CALL_FUNCTION_EX。通用micro 21/21实际调用接回原源码，5个融合调用不按函数名选目标；当前schema4接口及16条双向边经独立读回。参数包/代理分配/native入口仍分别保条件。
+- **Implemented / Verified：** 采集支持LOAD_SUPER_ATTR及CALL_FUNCTION_EX。通用micro 21/21实际调用接回原源码，5个融合调用不按函数名选目标；606e62b2合同下的schema4接口及16条双向边经独立读回。参数包/代理分配/native入口仍分别保条件。
 - **Rejected：** 将9个中间CodeID全局加入计划使Cirq导入期CALL扩大到62,142，native流触及原64MiB预算。该失败流原样保留，不升预算、不补造完整收据。
 - **Implemented / Verified：** `scar refine-capture`从原frame/path及完整源码重放生成按父CodeID＋调用offset限定的补采计划。原4,622 selector保留，新增9个只在所需上下文展开；schema1仍可读，schema2保存路径范围。串行和并发共享CodeType小程序已验证，未选调用保接口，不冒充未执行。
-- **Verified：** Cirq路径限定补采100.327s：689代码模板、4,900实际CALL及4,900 native事实，8/8流完整、零丢弃、严格reader零问题；14目标请求全部有直接调用者，数值观察与前次一致。整图对应仍待当前离线接线验收。
+- **Verified：** Cirq路径限定补采100.327s：689代码模板、4,900实际CALL及4,900 native事实，8/8流完整、零丢弃、严格reader零问题；14目标请求全部有直接调用者，数值观察与前次一致。旧规则发布1,010函数接口、695共享边界、203回调（含14请求）；独立检查发现4次多行方法CALL映射缺口，归为一个位置规则，停止剩余已知无法通过的验证。
 - **Verified：** lean采集复用collector同步子树屏障。通用micro的SCAR安装子树entry 3295→0，应用对同一inspect函数的两次调用保留，6/6流完整；这是功能证据，非性能基准。
-- **Observed：** 当前主耗时仍是整文件F4及目录的冷解码。新增观察连接复用静态材料，没有重建F0–F4。先完成本层接线，之后再落实按CodeScope物化；不以伪header绕过原材料校验。
+- **Implemented / Verified：** 新规则从原F2属性/调用终点推导末尾片段，通用micro 6/6 CALL通过。真实Cirq受影响单元独立读回113/113 CALL，原缺4次接同一共享原Call及边界，双向查询通过；未重跑应用或重建F4。新全目录叠加正在生成，旧观察报告保持原producer收据，不重签。
+- **待完成：** 全35请求中，当前仅14有已接的直接native callback接口；其余21须按真实路径补上下文。新全目录构建会同时保存完整代码视图、生成全请求补采计划；不全局展开共享库函数。
+- **Observed：** 当前主耗时仍是整文件F4及目录的冷解码。新增观察连接复用静态材料，没有重建F0–F4。已定位每unit至少3次无缓存父接口读取及目录预读；先完成本层验收，再消除重复和落实按CodeScope物化；不以伪header绕过原材料校验。
 
 上述原材料位于 `artifacts/current/experiments/cpu-quantum-current/` 及同级 micro 目录；精简可复核收据汇总在 `artifacts/baseline/formal-frontend-results.json`。
 

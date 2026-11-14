@@ -1703,7 +1703,7 @@
     }
   },
   "cross_layer_current": {
-    "status": "MICRO_VERIFIED_FULL_CIRQ_JOIN_RUNNING",
+    "status": "SOURCE_IDENTITY_AND_TERMINAL_FIX_VERIFIED_GLOBAL_JOIN_REFRESH_RUNNING",
     "entities": [
       "Operation",
       "Value",
@@ -1770,7 +1770,85 @@
         "path": "artifacts/current/experiments/cpu-quantum-current/target-current/result.json",
         "bytes": 2517,
         "sha256": "17415d545b6b9f5bf6ae318d7bbd089c44ed4a13e3e565b3b012245d0af260f6"
+      },
+      "cirq_observed_interfaces": {
+        "path": "artifacts/current/experiments/cpu-quantum-current/observed-context-current/result.json",
+        "bytes": 181693,
+        "sha256": "88d51a5ce07d2a63c45cf22a68af67db68e107762b6b8c4d67e53dddc3b38a47"
+      },
+      "cirq_observed_boundaries": {
+        "path": "artifacts/current/experiments/cpu-quantum-current/boundaries-context-current/result.json",
+        "bytes": 201074,
+        "sha256": "19c63abaaef2fa627bab6321c87b76d5a618550ecc77c1ecf8dc0c537dfe2741"
+      },
+      "cirq_resource_inputs": {
+        "path": "artifacts/current/experiments/cpu-quantum-current/resource-input-check.json",
+        "bytes": 445,
+        "sha256": "5e9344cff9cb192dcb12340adf7307f5a1602174c1def75ed24b339462fa61ae"
+      },
+      "cirq_partial_readback": {
+        "path": "artifacts/current/experiments/cpu-quantum-current/observed-context-readback-partial.json",
+        "bytes": 14119,
+        "sha256": "6ee0b7fc3980a6a7b018b404dd718459561b9c365823270b7e35e4f7dcbeb933"
+      },
+      "terminal_micro": {
+        "path": "artifacts/current/experiments/terminal-call-current/result.json",
+        "bytes": 397,
+        "sha256": "41e4771b9559fd95e39dba097c108d77c376cf5fa8ee4e2880156bb3d5b5c18b"
+      },
+      "cirq_terminal_source": {
+        "path": "artifacts/current/experiments/cpu-quantum-current/terminal-unit-check.json",
+        "bytes": 14667,
+        "sha256": "05602536ddab8325cedab0d465457230f905b168641f9f464078474ddaaa6263"
       }
-    }
+    },
+    "published_function_interfaces": {
+      "annotated_parent_groups": 46,
+      "body_only_groups": 300,
+      "calls": 8251,
+      "derived_interfaces": 512,
+      "interfaces": 1010,
+      "observation_frontiers": 4889,
+      "observed_groups": 558,
+      "parent_interfaces": 498
+    },
+    "published_boundary_interfaces": {
+      "boundaries": 695,
+      "callback_body_kinds": {
+        "EVALUATION_REQUEST": 14,
+        "FUNCTION": 189
+      },
+      "callback_observations": 929,
+      "callbacks": 203,
+      "kinds": {
+        "NATIVE_BUILTIN": 174,
+        "NATIVE_WRAPPER": 1,
+        "OTHER_UNCLASSIFIED": 55,
+        "TYPE_OBJECT": 465
+      },
+      "observations": 2845,
+      "protocol_kinds": {
+        "BUILD_CLASS": 191,
+        "CREATE_GENEXPR": 15
+      },
+      "protocol_observations": 263,
+      "protocols": 206,
+      "source_callback_interfaces": 203,
+      "source_callback_observations": 929,
+      "units": 102
+    },
+    "cirq_source_codes_independently_matched": 689,
+    "cirq_request_codes_independently_matched": 35,
+    "prior_global_calls_mapped": 4896,
+    "prior_global_mapping_gaps": 4,
+    "affected_source_calls_verified": 113,
+    "affected_source_mapping_gaps": 0,
+    "whole_cirq_interfaces_revalidated_after_fix": false,
+    "next_steps": [
+      "REFRESH_GLOBAL_OBSERVED_INTERFACES_WITH_CURRENT_CALL_POSITION_RULES",
+      "DERIVE_CAPTURE_CONTEXTS_FOR_ALL_35_REQUESTS_AND_JOIN_REMAINING_CALLBACKS",
+      "VERIFY_STATE_AND_RESOURCE_RELATIONS",
+      "UNIFIED_CURRENT_SCHEMA_READBACK_FOR_THREE_CPU_CASES"
+    ]
   }
 }
