@@ -21,6 +21,9 @@ F0–F3依次推进；F4独立域共享总worker预算，完成必要的原规�
 必要的增量建图在新输出中进行。查询会话共享原图/代码/关系缓存，预算耗尽作为前沿，不变成空依赖。
 manifest 引用原分片，`relationships.json` 索引跨层分片，`observed.json` 单独保存调用域，
 `resources.json.gz` 保存入口的类型化符号资源投影，其余 body 按需派生；没有复制原正文或展开迭代。
+`catalog-graph-state` 复用单元并行盘点，在每个 unit 分片内保存完整节点/边及状态表，
+不重跑 F0–F4。统一 build 的 `coverage.json` 分别引用目录图覆盖、实际正文进入和资源观察；
+`entry-query.json` 保留为有界导航示例，不再充当图覆盖分母。
 `configuration.json` 引用自动发现并经现有 YAML parser 准入的配置表示图；未知 tag、插值、组合及运行端口绑定继续留前沿。
 资源需求与候选分开：F4 的 CPU/host representation 需求带执行条件，不代表 tensor backing；GPU/设备内存及存储候选
 复用原 native 转换/类型接口和硬件快照。结构、声明及编译请求不制造独立运行需求。旧路线保留 Behavior 的条件候选。

@@ -32,7 +32,7 @@ def _rules():
             '../ir/program/compiler_code_paths.py','../ir/program/source_observed_codes.py',
             'source_resource_scopes.py','source_resource_scope_view.py','../ir/program/resource_scopes.py',
             '../ir/program/source_body_interfaces.py','../ir/program/source_body_activations.py',
-            'program_view.py','source_effect_projection.py','source_effects.py','source_state.py',
+            'program_view.py','program_state_coverage.py','source_effect_projection.py','source_effects.py','source_state.py',
             '../ir/program/source_state.py',
             '../ir/program/build_f4_resources.py')}
 

@@ -64,8 +64,15 @@ def discover(entry,trace,*,catalog=None,cache_roots=()):
             'scar.constructor-member-contexts':'members','scar.source-binding-native-graph':'native',
             'scar.source-resource-graph':'resources','scar.configuration-state-bindings':'configuration',
             'scar.source-observed-boundaries':'observed_boundaries',
+            'scar.source-state-coverage':'source_coverage',
             'scar.source-resource-scopes':'resource_scopes',
             'scar.source-body-activations':'body_activations'}.get(schema)
+        if key=='source_coverage':
+            from scar.analysis.program_state_coverage import _pins as coverage_pins
+            plan=r['plan']
+            if Path(plan['catalog']).resolve()!=c.path.resolve() or not plan.get('local_graph_shards'):continue
+            if plan['pins']!=coverage_pins():
+                gaps.append(dict(layer=key,kind='CACHED_COMPONENT_RULES_CHANGED',path=str(path)));continue
         if key=='resource_scopes':
             if (trace is None or Path(r['capture'])/'trace'!=trace or r['catalog']!=str(c.path)):continue
             from scar.analysis.source_resource_scopes import _pins as resource_scope_pins
@@ -117,7 +124,7 @@ class F4BuildSession:
         self.catalog=read_source_catalog(Path(spec['catalog']['path']).parent)
         self._checkpoint('catalog')
         self.view=ProgramView(self.catalog);self.providers={};self.gaps=list(spec['selection_gaps'])
-        self._claimed=set();self.closed=False;self.observed=None
+        self._claimed=set();self.closed=False;self.observed=None;self.source_coverage=None;self.coverage_path=None
         self.entry=self.view.entry(spec['entry_unit'],context=())
         self.entries=(self.entry,);self.session=self
         self._functions(spec['functions'])
@@ -178,7 +185,7 @@ class F4BuildSession:
         else:
             from scar.analysis.source_exec_view import SourceExecProvider
             self.providers['exec']=SourceExecProvider(self.view,self.catalog)
-        for name in ('creations','native','protocol','configuration','observed_boundaries','body_activations','resource_scopes'):
+        for name in ('creations','native','protocol','configuration','observed_boundaries','body_activations','resource_scopes','source_coverage'):
             try:
                 path=self._component_path(name)
                 if path is None:
@@ -217,6 +224,12 @@ class F4BuildSession:
                         if getattr(getattr(p,'store',None),'index',None) is not None]
                     store=ResourceScopeStore(path,index=indices[0] if indices else None)
                     provider=SourceResourceScopeProvider(self.view,store)
+                elif name=='source_coverage':
+                    from scar.analysis.program_state_coverage import read_inventory
+                    self.source_coverage=read_inventory(path,catalog=self.catalog);self.coverage_path=path
+                    if not self.source_coverage['catalog_local_graph_materialized']:
+                        self.gaps.append(dict(layer=name,kind='CATALOG_LOCAL_GRAPH_INCOMPLETE'))
+                    continue
                 else:
                     from scar.analysis.source_configuration_view import SourceConfigurationProvider
                     provider=SourceConfigurationProvider(self.view,path)
@@ -290,7 +303,25 @@ class F4BuildSession:
                 **{k:k in self.providers for k in ('exec','creations','native','protocol','configuration','observed_boundaries','body_activations','resource_scopes')}),resources=True,
             storage=True,readback=True,providers=sorted(self.providers),
             loaded_units=len(self.view.units),catalog_units=len(self.catalog.fact_store.rows),
+            catalog_local_graph_materialized=bool(self.source_coverage and self.source_coverage['catalog_local_graph_materialized']),
             body_copies=0,loops_unrolled=False)
+
+    def coverage_summary(self):
+        """Count complete shared unit domains separately from observed execution."""
+        local=None
+        if self.source_coverage is not None:
+            report=json.loads((self.coverage_path/'result.json').read_bytes())
+            local=dict(inventory=self.source_coverage['inventory'],index=str(self.coverage_path/'index.json'),
+                catalog_unit_domain_complete=self.source_coverage['catalog_local_graph_materialized'],
+                catalog_units=report['plan']['catalog_units'],materialized_units=report['inventoried_units'],
+                counts=report['counts'],failed_units=report['failures'],
+                stored_shard_bytes=self.source_coverage['stored_shard_bytes'])
+        observed=self.observed or self.attach_trace()
+        return dict(schema='scar.program-build-coverage',schema_version=1,
+            local_graph=local,observed_body_entries=[r['coverage'] for r in observed['body_activations']],
+            observed_resource_scopes=[r['summary'] for r in observed['resource_scopes']],
+            entry_query_purpose='BOUNDED_NAVIGATION_EXAMPLE_NOT_COVERAGE_DENOMINATOR',
+            runtime_path_complete=False,effects_closed=False,first_stage_complete=False)
 
     def readback_publication(self,report):
         """Read serialized outputs against the same admitted immutable inputs.
@@ -314,6 +345,13 @@ class F4BuildSession:
         canonical=lambda value:json.loads(json.dumps(value))
         if json.loads((self.path/'observed.json').read_bytes())!=canonical(self.attach_trace()):
             raise ValueError('stored execution evidence differs from admitted observations')
+        if (self.path/'coverage.json').exists():
+            if self.source_coverage is not None:
+                from scar.analysis.program_state_coverage import read_inventory
+                if read_inventory(self.coverage_path,catalog=self.catalog)!=self.source_coverage:
+                    raise ValueError('admitted graph coverage changed during publication')
+            if json.loads((self.path/'coverage.json').read_bytes())!=canonical(self.coverage_summary()):
+                raise ValueError('stored coverage differs from original unit and execution domains')
         with gzip.open(self.path/'resources.json.gz','rt') as stream:resources=json.load(stream)
         if resources!=canonical(self.resources.payload()):
             raise ValueError('stored resource interfaces differ from admitted resource ports')
@@ -358,6 +396,7 @@ def build_f4(entry,trace,out,spec,*,source_roots=(),max_points=128,max_seconds=3
     session=F4BuildSession(out,_publishing=True,seconds=max_seconds,input_bytes=max_input_bytes)
     try:
         observed=session.attach_trace();_write(out/'observed.json',observed)
+        _write(out/'coverage.json',session.coverage_summary())
         walk=session.view.dependencies.walk((session.entry,),direction='outgoing',include_structure=True,
             max_points=max_points,max_edges=512,max_depth=8)
         _write(out/'entry-query.json',export_dependency_walk(walk))
@@ -378,6 +417,7 @@ def build_f4(entry,trace,out,spec,*,source_roots=(),max_points=128,max_seconds=3
             observed_boundary_publications=len(observed['boundaries']),
             observed_body_activation_publications=len(observed['body_activations']),
             observed_resource_scope_publications=len(observed['resource_scopes']),
+            catalog_local_graph_materialized=bool(session.source_coverage and session.source_coverage['catalog_local_graph_materialized']),
             resource_records=len(session.resources.provider.records))
         return _finish_publication(session,report,gaps,started)
     finally:session.close()
@@ -387,7 +427,7 @@ def _finish_publication(session,report,gaps,started):
     from scar.analysis.build import _receipt,_write
     out=session.path
     gaps.append(dict(layer='coverage',kind='FULL_INFERENCE_COVERAGE_UNPROVEN',
-        detail='All layers are composed; this bounded entry probe and configuration trace are not a full inference execution.'))
+        detail='Shared catalog graph coverage and observed entries are recorded separately in coverage.json; runtime path, content and effect closure remain unproved.'))
     _write(out/'gaps.json',dict(schema='scar.build-gaps',gaps=gaps,counts=dict(Counter(g['layer'] for g in gaps))))
     report['tables']={p.name:_receipt(p) for p in out.iterdir() if p.is_file() and p.name!='manifest.json'}
     report['summary']['gaps']=len(gaps)

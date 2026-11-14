@@ -646,7 +646,7 @@ def main(argv=None) -> int:
             ('protocol-call-view', 'join constructor and descriptor interfaces to shared source bodies'),
             ('configuration-view', 'attach declared input algebra to guarded source content boundaries'),
             ('exec-view', 'connect declared script and shared exec roots with matched namespace branches'),
-            ('state-coverage', 'inventory local state interfaces and rule gaps in parallel'),
+            ('state-coverage', 'persist complete shared local graph/state shards and coverage in parallel'),
             ('function-interfaces', 'derive conditional source-call parameter and return interfaces'),
             ('compiled-function-interfaces', 'derive call interfaces for an explicitly retained compiled execution context'),
             ('returned-function-interfaces', 'derive conditional returned-callable interfaces with separate creator provenance'),

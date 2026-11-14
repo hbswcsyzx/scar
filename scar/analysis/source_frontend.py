@@ -329,6 +329,11 @@ def build_frontend(paths, out, *, sources=(), jobs=4, trace=None, project_root=N
             out/'body-interfaces-verified.json','scar.source-body-interfaces.readback',status='VERIFIED')
         report['body_interfaces'] = _receipt(out/'body-interfaces/result.json')
         report['body_interfaces_verified'] = _receipt(out/'body-interfaces-verified.json')
+        run.stage('catalog-graph-state','scar.analysis.program_state_coverage',
+            ['--catalog',active_catalog,'--out',out/'catalog-graph-state','--jobs',min(jobs,8)],
+            out/'catalog-graph-state/result.json','scar.source-state-coverage',status='COMPLETE_INVENTORY',
+            target_executed=False,first_stage_complete=False)
+        report['catalog_graph_state']=_receipt(out/'catalog-graph-state/index.json')
         call_roots = [part for p in paths for part in ('--source-root',p)]
         run.stage('calls','scar.analysis.source_declared_calls',
             ['--catalog',active_catalog,*call_roots,'--out',out/'calls','--jobs',jobs],

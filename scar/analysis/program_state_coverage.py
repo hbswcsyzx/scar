@@ -18,13 +18,14 @@ import resource
 import time
 
 from scar.analysis.program_view import ProgramView
-from scar.analysis.source_context_query import ContextTargetGraph
+from scar.analysis.source_declared_catalog import read_source_catalog
 from scar.analysis.source_declared_calls import _NoTargets,_check_targets
 from scar.analysis.source_local_state import local_read_tracks
 from scar.analysis.source_stage import _durable_bytes,_durable_mkdir
 from scar.analysis.source_template_links import _json
 from scar.analysis.normal_output import write_table
-from scar.analysis.program_state_view import _pins as state_pins,_counts
+from scar.analysis.program_state_view import _pins as state_pins,_counts,_rows
+from scar.analysis.program_view_storage import pack_nodes,pack_edges
 from scar.analysis.source_value_flow import _artifact
 from scar.ir.record_codec import encode
 
@@ -33,8 +34,9 @@ _WORKER=None
 
 
 def _pins():
-    from scar.analysis import source_local_state
+    from scar.analysis import source_local_state,program_view_storage
     return dict(inventory=sha256(Path(__file__).read_bytes()).hexdigest(),state=state_pins(),
+        graph_storage=sha256(Path(program_view_storage.__file__).read_bytes()).hexdigest(),
         track_selection=sha256(Path(source_local_state.__file__).read_bytes()).hexdigest())
 
 
@@ -60,7 +62,7 @@ def _initialize(path,out,pins,memory_mib):
     soft,hard=resource.getrlimit(resource.RLIMIT_AS);limit=memory_mib*1024*1024
     if hard!=resource.RLIM_INFINITY:limit=min(limit,hard)
     resource.setrlimit(resource.RLIMIT_AS,(limit,hard))
-    _WORKER=ContextTargetGraph(path),Path(out),pins
+    _WORKER=read_source_catalog(path),Path(out),pins
 
 
 def _unit(unit):
@@ -80,10 +82,24 @@ def _unit(unit):
         pending=Counter(reason for request in state.requests.values() for reason in request.pending)
         gaps=tuple(request for request in state.requests.values() if request.missing_rules)
         table=write_table(folder/'gaps.jsonl.gz',gaps)
+        if set(source.expanded)!=set(source.material.interfaces['nodes']):
+            raise ValueError('local graph did not cover every declared shared template')
+        graph_folder=folder/'graph';_durable_mkdir(graph_folder)
+        graph_tables=dict(nodes=write_table(graph_folder/'nodes.jsonl.gz',pack_nodes(source)),
+            edges=write_table(graph_folder/'edges.jsonl.gz',pack_edges(source)))
+        projections=sum(len(rows) for rows in source.edge_sources.values())
+        if (graph_tables['nodes']['records'],graph_tables['edges']['records'])!=(len(source.nodes),projections):
+            raise ValueError('stored graph node or edge projection denominator differs')
+        state_folder=folder/'state';_durable_mkdir(state_folder)
+        state_tables={name:write_table(state_folder/(name+'.jsonl.gz'),rows)
+            for name,(_,rows) in _rows(state).items()}
         result=dict(schema='scar.source-state-unit-coverage',schema_version=1,status='INVENTORIED',
             unit=unit,path=row['path'],namespace=encode(state.namespace),source_material=encode(state.material.result_artifact),
             counts=counts,instructions=dict(instructions),families=dict(families),open_effect_fields=dict(pending),
             gaps=table,gap_operations=len(gaps),binding_fixed_points_complete=False,
+            graph=dict(tables=graph_tables,templates=len(source.expanded),nodes=len(source.nodes),
+                relations=len(source.edge_sources),edge_projections=projections),state_tables=state_tables,
+            original_body_bytes_copied=0,loops_unrolled=False,
             target_executed=False,first_stage_complete=False)
         state.check();_check_targets()
     except Exception as error:
@@ -108,14 +124,15 @@ def inventory(catalog,out,*,units=(),jobs=16,memory_mib=8192):
     if out.exists():raise ValueError('fresh state-coverage output required')
     if type(jobs) is not int or jobs<1 or type(memory_mib) is not int or memory_mib<256:
         raise ValueError('positive worker count and at least 256 MiB per worker required')
-    source=ContextTargetGraph(catalog);all_units=set(source.fact_store.rows)
+    source=read_source_catalog(catalog);all_units=set(source.fact_store.rows)
     selected=all_units if not units else set(units)
     if not selected<=all_units:raise ValueError('coverage unit is outside the original catalog')
     ordered=sorted(selected,key=lambda u:(-source.fact_store.rows[u]['counts']['ports'],u))
     _durable_mkdir(out);parent=_artifact(source.path/'result.json',source.report['schema'])
     plan=dict(schema='scar.source-state-coverage-plan',schema_version=1,catalog=str(source.path),parent=encode(parent),
         scope='CATALOG' if not units else 'EXPLICIT_ORIGINAL_UNITS',catalog_units=len(all_units),
-        selected_units=ordered,entry_sources=source.report['entry_sources'],pins=pins,
+        selected_units=ordered,entry_sources=source.report.get('entry_sources'),pins=pins,
+        catalog_schema=source.report['schema'],local_graph_shards=True,
         jobs=min(jobs,len(ordered) or 1),worker_memory_mib=memory_mib,
         binding_fixed_points_run=False,target_executed=False,first_stage_complete=False)
     _durable_bytes(out/'plan.json',_json(plan),replace=False);results={}
@@ -145,7 +162,7 @@ def inventory(catalog,out,*,units=(),jobs=16,memory_mib=8192):
     return report
 
 
-def index_inventory(path):
+def _inventory_index(path):
     """Authenticate completed shards without rebuilding any original graph.
 
     This also seals inventories made before the shard index was introduced.
@@ -178,6 +195,20 @@ def index_inventory(path):
                 or table['records']!=row['gap_operations']
                 or table['records']!=sum(row['counts']['missing_address_rules'].values())):
             raise ValueError('inventory gap receipt/count differs')
+        if plan.get('local_graph_shards'):
+            graph=row['graph']
+            if (set(graph['tables'])!={'nodes','edges'} or row['loops_unrolled']is not False
+                    or row['original_body_bytes_copied']!=0
+                    or graph['templates']!=row['counts']['templates']
+                    or graph['nodes']!=graph['tables']['nodes']['records']
+                    or graph['edge_projections']!=graph['tables']['edges']['records']):
+                raise ValueError('inventory local graph coverage or storage domain differs')
+            for subfolder,tables in (('graph',graph['tables']),('state',row['state_tables'])):
+                for name,receipt in tables.items():
+                    if receipt['path']!=name+'.jsonl.gz':raise ValueError('inventory table path differs')
+                    payload=(folder/subfolder/receipt['path']).read_bytes();stored+=len(payload)
+                    if len(payload)!=receipt['bytes'] or sha256(payload).hexdigest()!=receipt['sha256']:
+                        raise ValueError('inventory local graph/state table receipt differs')
         counts.update({k:v for k,v in row['counts'].items() if type(v)is int})
         gaps.update(row['counts']['missing_address_rules']);instructions.update(row['instructions']);families.update(row['families'])
     if (report['completed_units']!=len(actual) or report['inventoried_units']!=len(actual)-len(failures)
@@ -191,10 +222,34 @@ def index_inventory(path):
         inventory=encode(_artifact(path/'result.json',report['schema'])),
         plan=encode(_artifact(path/'plan.json',plan['schema'])),units=actual,
         stored_shard_bytes=stored,worker_peak_rss_kib=peaks,
+        catalog_local_graph_materialized=bool(plan.get('local_graph_shards') and not failures
+            and plan['scope']=='CATALOG' and len(actual)==plan['catalog_units']),
         producer_sha256=sha256(Path(__file__).read_bytes()).hexdigest(),
         semantic_rederivation=False,target_executed=False,first_stage_complete=False)
-    _durable_bytes(path/'index.json',_json(result),replace=False)
     return result
+
+
+def index_inventory(path):
+    """Seal all finished graph/state shards without repeating their analysis."""
+    result=_inventory_index(path)
+    _durable_bytes(Path(path)/'index.json',_json(result),replace=False)
+    return result
+
+
+def read_inventory(path,*,catalog=None):
+    """Admit the complete stored unit domain and receipts, not a graph walk."""
+    path=Path(path).resolve();raw=(path/'index.json').read_bytes();actual=json.loads(raw)
+    expected=_inventory_index(path)
+    if actual!=expected:raise ValueError('stored inventory index differs from its original shards')
+    plan=json.loads((path/'plan.json').read_bytes())
+    if plan['pins']!=_pins():raise ValueError('inventory implementation changed')
+    source=read_source_catalog(catalog if catalog is not None else plan['catalog'])
+    if (str(source.path)!=plan['catalog']
+            or encode(_artifact(source.path/'result.json',source.report['schema']))!=plan['parent']
+            or plan['scope']=='CATALOG' and set(plan['selected_units'])!=set(source.fact_store.rows)):
+        raise ValueError('inventory original catalog unit denominator differs')
+    if raw!=(path/'index.json').read_bytes():raise ValueError('inventory index changed during read')
+    return actual
 
 
 def main():
