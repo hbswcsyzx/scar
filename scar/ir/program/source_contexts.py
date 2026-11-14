@@ -1,16 +1,83 @@
 """C1 static owners, source environments and evaluation eligibility templates."""
 from dataclasses import dataclass
+from enum import Enum
 
 from .source_roles import SlotRef
+
+
+class SourceOwnerKind(str, Enum):
+    # _Router root/private/prepare/annotation/transfer paths and C3 owner roles.
+    ROOT = 'ROOT'
+    CLASS_DECLARATION = 'CLASS_DECLARATION'
+    FUNCTION_BODY = 'FUNCTION_BODY'
+    LAMBDA_BODY = 'LAMBDA_BODY'
+    CLASS_BODY = 'CLASS_BODY'
+    FORMAL_INTERFACE = 'FORMAL_INTERFACE'
+    TYPE_PARAMETERS = 'TYPE_PARAMETERS'
+    HEADER_ANNOTATIONS = 'HEADER_ANNOTATIONS'
+    VARIABLE_ANNOTATIONS = 'VARIABLE_ANNOTATIONS'
+    TYPE_ALIAS_VALUE = 'TYPE_ALIAS_VALUE'
+    TYPE_PARAMETER_BOUND = 'TYPE_PARAMETER_BOUND'
+    TYPE_PARAMETER_DEFAULT = 'TYPE_PARAMETER_DEFAULT'
+    COMPREHENSION = 'COMPREHENSION'
+    GENERATOR_EXPRESSION = 'GENERATOR_EXPRESSION'
+
+
+class SourceScopeKind(str, Enum):
+    # Every kind passed to _Router.scope, including all root parser modes.
+    ROOT_EXEC = 'ROOT_EXEC'
+    ROOT_EVAL = 'ROOT_EVAL'
+    ROOT_INTERACTIVE = 'ROOT_INTERACTIVE'
+    TYPE_GRAMMAR = 'TYPE_GRAMMAR'
+    FUNCTION = 'FUNCTION'
+    LAMBDA = 'LAMBDA'
+    CLASS = 'CLASS'
+    TYPE_PARAMETERS = 'TYPE_PARAMETERS'
+    ANNOTATION = 'ANNOTATION'
+    TYPE_ALIAS = 'TYPE_ALIAS'
+    TYPE_PARAMETER_EVALUATOR = 'TYPE_PARAMETER_EVALUATOR'
+    COMPREHENSION = 'COMPREHENSION'
+    GENERATOR_EXPRESSION = 'GENERATOR_EXPRESSION'
+
+
+class EvaluationRegionKind(str, Enum):
+    # Every _Router.region path; later yield processing changes trigger only.
+    ROOT = 'ROOT'
+    TYPE_GRAMMAR = 'TYPE_GRAMMAR'
+    FUNCTION_BODY = 'FUNCTION_BODY'
+    LAMBDA_BODY = 'LAMBDA_BODY'
+    CLASS_BODY = 'CLASS_BODY'
+    FORMAL_INTERFACE = 'FORMAL_INTERFACE'
+    DECLARATION_TIME = 'DECLARATION_TIME'
+    TYPE_PARAMETERS = 'TYPE_PARAMETERS'
+    FUNCTION_ANNOTATION = 'FUNCTION_ANNOTATION'
+    VARIABLE_ANNOTATION = 'VARIABLE_ANNOTATION'
+    TYPE_ALIAS_VALUE = 'TYPE_ALIAS_VALUE'
+    TYPE_PARAMETER_BOUND = 'TYPE_PARAMETER_BOUND'
+    TYPE_PARAMETER_DEFAULT = 'TYPE_PARAMETER_DEFAULT'
+    COMPREHENSION = 'COMPREHENSION'
+    GENERATOR_EXPRESSION = 'GENERATOR_EXPRESSION'
+
+
+def _normalize_kind(record, kind_type):
+    value = record.kind
+    if type(value) is kind_type:
+        return
+    if type(value) is not str:
+        raise ValueError('classification requires its exact Enum or a declared string value')
+    # Exact strings preserve source-router compatibility; other Enums and
+    # string subclasses cannot cross classification domains implicitly.
+    object.__setattr__(record, 'kind', kind_type(value))
 
 
 @dataclass(frozen=True, slots=True)
 class OwnerRef:
     occurrence: int
-    kind: str
+    kind: SourceOwnerKind
 
     def __post_init__(self):
-        if type(self.occurrence) is not int or self.occurrence < 0 or type(self.kind) is not str:
+        _normalize_kind(self, SourceOwnerKind)
+        if type(self.occurrence) is not int or self.occurrence < 0:
             raise ValueError('invalid static evaluation owner')
 
 
@@ -33,17 +100,20 @@ class ContextState:
 
 @dataclass(frozen=True, slots=True)
 class SourceScope:
-    kind: str
+    kind: SourceScopeKind
     owner: OwnerRef
     anchor: SlotRef | None
     parent: int | None
     lookup_policy: str
 
+    def __post_init__(self):
+        _normalize_kind(self, SourceScopeKind)
+
 
 @dataclass(frozen=True, slots=True)
 class EvaluationRegion:
     """ELIGIBLE means no C1 suppression; legality/reachability are not proven."""
-    kind: str
+    kind: EvaluationRegionKind
     owner: OwnerRef
     anchor: SlotRef | None
     parent: int | None
@@ -53,6 +123,7 @@ class EvaluationRegion:
     suppression_reason: str | None
 
     def __post_init__(self):
+        _normalize_kind(self, EvaluationRegionKind)
         if (self.eligibility not in ('ELIGIBLE', 'SUPPRESSED')
                 or (self.suppression_reason is None) != (self.eligibility == 'ELIGIBLE')):
             raise ValueError('invalid evaluation eligibility template')

@@ -227,6 +227,11 @@ def build_frontend(paths, out, *, sources=(), jobs=4, trace=None, project_root=N
         workflow_complete=False, local_declarations_complete=False, first_stage_complete=False,
         target_executed=False, global_namespace_resolved=False, runtime_dispatch_proven=False)
     try:
+        from scar.analysis.source_connection_domains import connection_domains
+        from scar.analysis.source_connection_contracts import connection_reference_catalog
+        if not connection_domains()['type_domains_closed']:
+            raise ValueError('connection input classification domains are not closed')
+        connection_reference_catalog()
         if source_model is None:
             extra_roots = [part for p in paths[1:] for part in ('--source-root',p)]
             run.stage('source', 'scar.cli', ['static',paths[0],*extra_roots,'--out',model,
@@ -270,6 +275,16 @@ def build_frontend(paths, out, *, sources=(), jobs=4, trace=None, project_root=N
                     try: future.result()
                     except Exception as error: errors.append(error)
                 if errors: raise errors[0]
+
+        # Independent typed-reference rules supply the denominator. In
+        # particular this does not ask the edge producer what it emitted.
+        run.stage('connection-contract', 'scar.analysis.source_connection_contracts',
+            [*[part for domain in _DOMAINS for part in ('--materials',out/domain)],
+                '--out',out/'connection-contract.json'],
+            out/'connection-contract.json','scar.source-connection-gate',
+            local_connection_schema_complete=True,local_entry_relations_complete=True,
+            input_type_domains_closed=True,runtime_connections_checked=False,first_stage_complete=False)
+        report['connection_contract'] = _receipt(out/'connection-contract.json')
 
         parents = [part for domain in _DOMAINS for part in
             ('--materials',domain,out/domain,out/(domain+'-verified'))]

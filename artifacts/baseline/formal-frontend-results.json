@@ -1703,7 +1703,7 @@
     }
   },
   "cross_layer_current": {
-    "status": "ALL_35_REQUEST_CALLBACKS_PUBLISHED_INDEPENDENT_REPLAY_RUNNING",
+    "status": "PARTIAL_ACCEPTANCE_SUPERSEDED_BY_CLOSED_DOMAIN_CONTRACT",
     "entities": [
       "Operation",
       "Value",
@@ -1876,7 +1876,14 @@
     ],
     "cirq_mapping_frontiers": 0,
     "cirq_shared_request_callbacks_published": 35,
-    "parent_unit_reloads_per_projection": 1
+    "parent_unit_reloads_per_projection": 1,
+    "independent_reader_status": "INTERRUPTED_NOT_ACCEPTED",
+    "verified_interface_shards": 100,
+    "partial_acceptance_receipt": {
+      "path": "artifacts/current/experiments/cpu-quantum-current/all-requests-graph-interrupted.json",
+      "bytes": 553,
+      "sha256": "c7f33060f11a42c8d92ca7cf5ac033033a0f6ae2340142f6a9c5b90741358489"
+    }
   },
   "current_cpu_rejoins": {
     "cpu-sunfish-current": {
@@ -1891,7 +1898,15 @@
         "bytes": 3706,
         "sha256": "3ce7f0c73f67d7eac452701ff595537aeb68f5f8b8191848a6b13d737e2bc41d"
       },
-      "unified_build_status": "RUNNING"
+      "unified_build_status": "WORKFLOW_COMPLETE",
+      "unified_seconds": 433.2257910479966,
+      "unified_receipt": {
+        "path": "artifacts/current/experiments/cpu-sunfish-current/unified-current/manifest.json",
+        "bytes": 7953,
+        "sha256": "99a6158d3a65e65418cda1087b486ebea94d35d10d55d783e60867d1b07b911d"
+      },
+      "implementation_revision": "1ef4e6da",
+      "current_declaration_materials_readmitted": false
     },
     "cpu-gray-scott-current": {
       "workflow_complete": true,
@@ -1905,7 +1920,87 @@
         "bytes": 3763,
         "sha256": "24f2d755e32967add01f7f76908596dd50b6ea3e5dc940fa1b62dcd74fa8e4b4"
       },
-      "unified_build_status": "RUNNING"
+      "unified_build_status": "WORKFLOW_COMPLETE",
+      "unified_seconds": 647.5880739169952,
+      "unified_receipt": {
+        "path": "artifacts/current/experiments/cpu-gray-scott-current/unified-current/manifest.json",
+        "bytes": 7926,
+        "sha256": "2c1ffd256fa94755f786e20ebde0fa29dc2cb4ffc570f1d8eb85e664d4eac690"
+      },
+      "implementation_revision": "1ef4e6da",
+      "current_declaration_materials_readmitted": false
     }
+  },
+  "mechanical_connection_layer": {
+    "status": "LOCAL_GATE_VERIFIED_CROSS_LAYER_OPEN",
+    "methodology": "CLOSED_INPUT_DOMAINS_THEN_RULES_THEN_REQUIRED_RELATIONS_THEN_INDEPENDENT_GATE",
+    "instruction_variants": 69,
+    "enum_domains": 41,
+    "enum_values": 316,
+    "reference_fields": 20,
+    "environment_protocol_cases": 6,
+    "field_classifications": [
+      {
+        "type": "scar.ir.program.source_contexts.OwnerRef",
+        "field": "kind",
+        "annotation": "scar.ir.program.source_contexts.SourceOwnerKind",
+        "status": "CLOSED_ENUM_DOMAIN",
+        "type_layer_gap": false
+      },
+      {
+        "type": "scar.ir.program.source_contexts.SourceScope",
+        "field": "kind",
+        "annotation": "scar.ir.program.source_contexts.SourceScopeKind",
+        "status": "CLOSED_ENUM_DOMAIN",
+        "type_layer_gap": false
+      },
+      {
+        "type": "scar.ir.program.source_contexts.EvaluationRegion",
+        "field": "kind",
+        "annotation": "scar.ir.program.source_contexts.EvaluationRegionKind",
+        "status": "CLOSED_ENUM_DOMAIN",
+        "type_layer_gap": false
+      }
+    ],
+    "domains_sha256": "ba2c4d448f6b3c6a05db3809de39a13efce323c6137020f2c40d8659359aa85c",
+    "counts": {
+      "instructions": 24286,
+      "regions": 8429,
+      "required_entry_relations": 8488,
+      "checked_entry_relations": 8488,
+      "body_entry_interfaces": 78,
+      "plans": 7193,
+      "parent_descriptors": 365
+    },
+    "gate_seconds": 22.57566226599738,
+    "input_material_admission_checked": false,
+    "runtime_connections_checked": false,
+    "first_stage_complete": false,
+    "frontend_stages": 24,
+    "frontend_admitted_stages": 24,
+    "frontend_seconds": 41.97154796900577,
+    "targeted_checks": {
+      "passed": 6,
+      "seconds": 8.48,
+      "files": [
+        "tests/unit/test_source_connection_contracts.py",
+        "tests/unit/test_source_contexts.py"
+      ],
+      "producer_validator_joint_omission_rejected": true
+    },
+    "receipts": {
+      "frontend": {
+        "path": "artifacts/current/experiments/connection-layer-current/frontend/result.json",
+        "bytes": 1980,
+        "sha256": "454eab5e2b5156d4a09872bdc49b59189758517e1804471a3408cf913079b421"
+      },
+      "independent_local_gate": {
+        "path": "artifacts/current/experiments/connection-layer-current/replay.json",
+        "bytes": 49290,
+        "sha256": "8898eb392cd8039ffa6bdf85d2419e8d77e938387b4609a329b2a331472606ae"
+      }
+    },
+    "compatibility": "C1 classification enums preserve JSON string wire; implementation/type catalog pins changed. Prior materials retain original receipts, not current producer admission.",
+    "next_layer": "UNIFIED_CROSS_LAYER_ENTRY_COMPLETION_CONTRACTS_BEFORE_PROVIDER_CONNECTION_CHANGES"
   }
 }
