@@ -3950,5 +3950,158 @@
       "passed": 16,
       "seconds": 1.79
     }
+  },
+  "parallel_three_stage_compiler_progress": {
+    "status": "VERIFIED_BOUNDED_THREE_STAGE_VERTICAL_SLICE",
+    "gates": {
+      "A": "Versioned source-region and independently validated execution-plan contracts",
+      "B": "Generic source discovery, graph passes and native C++20 lowering run independently",
+      "C": "Actual scientific region compiled from retained original F2 references",
+      "D": "Region and scientific-program correctness plus clean paired measurements"
+    },
+    "source_compilation": "artifacts/current/experiments/compiler-gray-scott-release/result.json",
+    "region_benchmark": "artifacts/current/experiments/compiler-gray-scott-release/benchmark.json",
+    "program_validation": "artifacts/current/experiments/compiler-gray-scott-parallel-v1/program-validation/result.json",
+    "source_regions": [
+      {
+        "qualname": "GrayScott.laplacian",
+        "region": "array-region:116e6ad3b7c4592b6907075a",
+        "status": "COMPILED_UNMEASURED"
+      }
+    ],
+    "original_f2_references": 48,
+    "baseline_region_median": 0.00744807,
+    "native_region_median": 0.002321177,
+    "region_speedup": 3.20874711407187,
+    "region_decision": "TRANSFORM_UNDER_CONTRACT",
+    "region_warmup": 3,
+    "region_repetitions": 9,
+    "planned_cpu_threads": 4,
+    "region_stats": {
+      "native_calls": 15,
+      "fallback_calls": 2,
+      "reasons": {
+        "GuardFailure:C++ input requires native float64 rank-two arrays": 1,
+        "GuardFailure:native floating-point error or non-finite input; run original NumPy operation": 1
+      }
+    },
+    "program_speedup": 1.049878468433217,
+    "program_decision": "NO_OP",
+    "program_baseline": {
+      "median": 0.5453849990008166,
+      "min": 0.5427438429906033,
+      "max": 0.6202238569967449,
+      "stdev": 0.04399049696922601,
+      "samples": [
+        0.6202238569967449,
+        0.5453849990008166,
+        0.5427438429906033
+      ]
+    },
+    "program_native": {
+      "median": 0.5194744109903695,
+      "min": 0.5182325269997818,
+      "max": 0.5378964319970692,
+      "stdev": 0.011011980548170422,
+      "samples": [
+        0.5194744109903695,
+        0.5378964319970692,
+        0.5182325269997818
+      ]
+    },
+    "program_correctness": {
+      "region": true,
+      "single_step": true,
+      "trajectory_20_steps": true,
+      "full_integrate": true,
+      "required_state": true,
+      "stdout": true,
+      "files": true
+    },
+    "prior_rejected_implementations": [
+      {
+        "implementation": "serial reference",
+        "speedup": 0.5468301098952099,
+        "decision": "NO_OP"
+      },
+      {
+        "implementation": "serial pointer hoist",
+        "speedup": 0.918845,
+        "decision": "NO_OP"
+      }
+    ],
+    "public_api": {
+      "compile": "scar compile-region",
+      "measure": "scar benchmark-region",
+      "deployment": "install_regions(...,selection=report,exclusive_inputs=True)"
+    },
+    "deployment_checks": "artifacts/current/experiments/compiler-gray-scott-parallel-v1/deployment-check.json",
+    "test_summary": "57 focused tests passed in 2.97s; wheel includes ABI header and source template",
+    "backend": {
+      "language": "C++20",
+      "abi_version": 1,
+      "execution_plan_schema": 1,
+      "profile": "cpu-array-region-v1"
+    },
+    "phase1_body_batch": {
+      "before_seconds": 655.7994903780054,
+      "after_seconds": 421.85958488300093,
+      "observation": "One run each, not an application speedup; resumption tables byte identical",
+      "report": "artifacts/current/experiments/cpu-sunfish-current/batched-runtime/observed-function-interfaces/runtime-channels.json"
+    },
+    "assumptions": [
+      "SYNCHRONOUS_CPU_EXECUTION",
+      "NO_FOREIGN_CONCURRENT_INPUT_WRITERS"
+    ],
+    "whole_program_compiled": false,
+    "first_stage_complete": false,
+    "original_workload_source_modified": false,
+    "lewm_modified": false,
+    "verification_remeasurement": {
+      "report": "artifacts/current/experiments/compiler-gray-scott-release/region-benchmark-final.json",
+      "decision": "TRANSFORM_UNDER_CONTRACT",
+      "speedup": 4.388426807163752,
+      "baseline_seconds": {
+        "median": 0.007241523,
+        "min": 0.007005815,
+        "max": 0.007924125,
+        "stdev": 0.0004288492638083923,
+        "samples": [
+          0.007145253,
+          0.007241523,
+          0.00790688,
+          0.007015268,
+          0.007924125,
+          0.007082079,
+          0.00786039,
+          0.007005815,
+          0.007909932
+        ]
+      },
+      "native_seconds": {
+        "median": 0.001650141,
+        "min": 0.000829746,
+        "max": 0.001754219,
+        "stdev": 0.00045811410331700596,
+        "samples": [
+          0.001650141,
+          0.000838452,
+          0.001664049,
+          0.000853642,
+          0.00175046,
+          0.000857741,
+          0.001737955,
+          0.000829746,
+          0.001754219
+        ]
+      },
+      "warmup": 3,
+      "repetitions": 9,
+      "note": "Separate run; retain earlier 3.209x primary result rather than substitute the fastest run. Native timings show material variation."
+    },
+    "external_program_validator": {
+      "path": "/home/zyf/AAA/scar-testcases/cpu_science/compiler_validate.py",
+      "sha256": "9dcf6d1e63727b24025ec1bfb98794c8b870aefa56be58262f6b9de7d67a210c"
+    }
   }
 }

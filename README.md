@@ -4,13 +4,26 @@ State · Control · Action · Resource：面向Python程序的宏观编译器。
 
 目标流程：**统一程序/资源图 → 结构与硬件感知化简 → C++20宿主执行代码**。
 算子实现通过版本化接口接入官方高性能库或外部算子生成agent，支持单算子、通信及融合区域。
-当前只开发第一阶段，静态优先；软件边界到算子接口，不展开kernel内部。
+当前并行开发建图、图化简与规划、C++20代码交付；静态优先，软件边界到算子接口。
 已具备共享控制/数据/状态图、跨函数与容器传播及生成式算子接口接线；仍需补完整资源映射和外部接口。
-第一阶段尚未完成，不启用目标程序变换，也没有LeWM加速比结论。
+完整程序建模尚未完成；已贯通受约束的 CPU 数组区域编译，没有LeWM加速比结论。
 LeWM 是外部 testcase；通用规则不按业务名称选择处理方式。
 后端基线为C++20、算子ABI v1、执行计划schema v1，配置见`pyproject.toml`。
 
 ## 使用
+
+三阶段区域闭环（CPU、精确 float64 二维 ndarray；其他输入回到原执行）：
+
+```bash
+scar compile-region /path/to/program.py --catalog /path/to/catalog --cpu-threads 4 --out /path/to/compiled
+scar benchmark-region /path/to/compiled/region-0/native --out /path/to/compiled/benchmark.json
+```
+
+未测量的编译产物默认不选用。Python API `install_regions(module, artifacts, exclusive_inputs=True, selection=report)`
+仅在已测计划及输入 shape/layout 范围内使用原生代码；`trial=True` 只用于受控 A/B。
+契约要求同步 CPU 执行及无外部并发写入；这些不是由 ndarray 类型推断的全局事实。
+前端自动扫描函数，不按业务名称选区域；图保留源码版本、CodeID 与原 F2 occurrence 引用。
+当前支持切片、常量和基础算术，拒绝未知状态/调用；C++20 拥有区域循环，Python保留其他程序行为。
 
 正式前端按层构建局部图，不运行目标程序：
 
