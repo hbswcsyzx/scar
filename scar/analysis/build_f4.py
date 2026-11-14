@@ -69,11 +69,11 @@ def discover(entry,trace,*,catalog=None,cache_roots=()):
             'scar.source-resource-scopes':'resource_scopes',
             'scar.source-body-activations':'body_activations'}.get(schema)
         if key=='binding_states':
-            from scar.analysis.source_observed_state import _pins as binding_pins
+            from scar.analysis.source_observed_state import compatible_pins as binding_pins_match
             plan=r['plan'];parent=json.loads(Path(plan['parent']['path']).read_bytes())
             if (trace is None or parent['trace']!=str(trace)
                     or Path(plan['catalog']['uri']).parent.resolve()!=c.path.resolve()):continue
-            if plan['pins']!=binding_pins():
+            if not binding_pins_match(plan['pins']):
                 gaps.append(dict(layer=key,kind='CACHED_COMPONENT_RULES_CHANGED',path=str(path)));continue
         if key=='source_coverage':
             from scar.analysis.program_inventory_admission import compatible_static_pins

@@ -8,7 +8,7 @@ from collections import Counter
 import json
 from pathlib import Path
 
-from scar.analysis.source_observed_state import SCHEMA,_pins
+from scar.analysis.source_observed_state import SCHEMA,compatible_pins
 from scar.analysis.program_state_view import _pins as state_pins
 from scar.analysis.source_consumer_parents import _stamp
 from scar.analysis.source_declared_catalog import _check
@@ -22,7 +22,7 @@ class SourceObservedStateProvider:
     def __init__(self,view,path,*,index=None):
         self.view=view;self.path=Path(path).resolve();self.loaded={};self.headers={};self.guards={}
         self.report=r=json.loads((self.path/'result.json').read_bytes());plan=r['plan']
-        if ((r['schema'],r['schema_version'],plan['pins'])!=(SCHEMA,1,_pins())
+        if ((r['schema'],r['schema_version'])!=(SCHEMA,1) or not compatible_pins(plan['pins'])
                 or any(r[k]is not False for k in ('source_bodies_copied','loops_unrolled',
                     'actual_frame_or_tensor_contents_proven','opaque_writers_excluded','target_executed','first_stage_complete'))):
             raise ValueError('observed state schema, implementation or authority differs')
@@ -54,10 +54,14 @@ class SourceObservedStateProvider:
             unit=row['unit'];path=self.path/'units'/unit/'result.json'
             if row['state']['path']!=str(path):raise ValueError('observed state shard path differs')
             _check(row['state']);header=json.loads(path.read_bytes())
-            if ((header['schema'],header['schema_version'],header['unit'],header['pins'])!=
-                    ('scar.source-state-view',1,unit,state_pins())
+            if ((header['schema'],header['unit'],header['pins'])!=
+                    ('scar.source-state-view',unit,state_pins()) or header['schema_version'] not in (1,2)
                     or header['parent']!=plan['catalog'] or header['counts']!=row['counts']):
                 raise ValueError('observed state shard domain or implementation differs')
+            if header['schema_version']==2:
+                from scar.analysis.binding_track_storage import ENCODING,pins
+                if (header.get('track_encoding'),header.get('storage_pins'))!=(ENCODING,pins()):
+                    raise ValueError('observed state storage contract differs')
             self.headers[unit]=header;self.guards[path]=_stamp(path)
             totals.update({k:v for k,v in row['counts'].items() if type(v)is int})
         if dict(totals)!=r['counts']:raise ValueError('observed state aggregate differs from unit records')

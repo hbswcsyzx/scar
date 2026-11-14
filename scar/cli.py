@@ -573,6 +573,9 @@ def main(argv=None) -> int:
         'resource-scopes': 'scar.analysis.source_resource_scopes',
         'name-flow': 'scar.analysis.source_control_namespaces',
     }
+    if cli_argv and cli_argv[0] in ('state-view','program-state-view'):
+        from scar.analysis.binding_track_storage import state_view_main
+        return state_view_main(cli_argv[1:]) or 0
     if cli_argv and cli_argv[0] in source_graph_commands:
         import importlib
         # Keep the leaf producers' stable CLI and implementation receipts.

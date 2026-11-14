@@ -3364,5 +3364,213 @@
       "next_change": "PROPOSED_SHARED_CONTROL_AND_READ_DEFINITION_STORAGE_NO_SOLVER_SEMANTICS_CHANGE",
       "implemented": false
     }
+  },
+  "binding_state_storage_v2": {
+    "recorded_at": "2026-11-14T11:36:07.799947+00:00",
+    "status": "LOSSLESS_STORAGE_AND_UNIFIED_ADMISSION_VERIFIED",
+    "first_stage_complete": false,
+    "contract": "SHARED_CONTROL_DEFINITION_SETS_V1",
+    "analysis_rule_pins_separate_from_storage_pins": true,
+    "producer_hash_is_provenance_actual_selection_independently_checked": true,
+    "comparison": {
+      "controls": 22,
+      "counts": {
+        "binding_accesses": 8453,
+        "content_accesses": 3045,
+        "content_addresses": 2603,
+        "content_relations": 21658,
+        "content_states": 6090,
+        "locations": 5533,
+        "operations": 78420,
+        "read_selections": 527,
+        "relations": 291679,
+        "tracks": 168,
+        "versions": 87472
+      },
+      "first_stage_complete": false,
+      "frontier_counts": {
+        "ACCESS_OUTSIDE_RETAINED_NORMAL_BODY_CONTROL": 105,
+        "APPLICATION_EXCEPTION_PATHS_OUTSIDE_NORMAL_SUCCESS_VIEW": 168,
+        "OPAQUE_CALLBACK_AND_CAPTURE_SLOT_IDENTITY_REMAIN_OPEN": 168,
+        "RESUME_ACTIVATION_CONTEXT_UNRESOLVED": 3
+      },
+      "new_seconds": 262.98764316500456,
+      "new_table_bytes": 45089751,
+      "old_seconds": 830.0463087169919,
+      "old_table_bytes": 419251355,
+      "repetitions": 1,
+      "schema": "scar.binding-storage-comparison",
+      "scope": "SCAR_BINDING_ANALYSIS_AND_STORAGE_NOT_APPLICATION_SPEEDUP",
+      "status": "ALL_RECORD_FIELDS_ROUNDTRIPPED_AND_FRESH_TABLES_MATCH",
+      "timings": [
+        {
+          "new_publication_seconds": 2.1300693359953584,
+          "new_total_seconds": 21.91107426500821,
+          "old_publication_seconds": 2.1229582530068,
+          "old_total_seconds": 21.456615754010272,
+          "unit": "1a32db04b29f52385322f23c182b6724dbfd05fcb4b25600d46c578de00e8c28"
+        },
+        {
+          "new_publication_seconds": 8.93961967600626,
+          "new_total_seconds": 78.58299800199165,
+          "old_publication_seconds": 45.67092712900194,
+          "old_total_seconds": 113.90086655699997,
+          "unit": "25ce45eb14194f64894b6885431f7db3c790612b156001ac8f4b5705b8efe42a"
+        },
+        {
+          "new_publication_seconds": 2.099533894986962,
+          "new_total_seconds": 20.98818398200092,
+          "old_publication_seconds": 2.211963118999847,
+          "old_total_seconds": 21.25907532099518,
+          "unit": "503e140a51cc17973e2b4edc956d8aed722667a7d281126ef370470fac1673db"
+        },
+        {
+          "new_publication_seconds": 2.7186888290016213,
+          "new_total_seconds": 23.35451091499999,
+          "old_publication_seconds": 2.8071504489926156,
+          "old_total_seconds": 23.549391959008062,
+          "unit": "59e1f7f343d3990027e86eb6a4f5d11bc14f4ed120a112f1ee330b46dadaef0e"
+        },
+        {
+          "new_publication_seconds": 16.008701087994268,
+          "new_total_seconds": 148.5154055479943,
+          "old_publication_seconds": 586.1319089110038,
+          "old_total_seconds": 720.4665179299918,
+          "unit": "5a4dd918d047caa00a2081f0"
+        },
+        {
+          "new_publication_seconds": 0.5702364410099108,
+          "new_total_seconds": 6.313341557004605,
+          "old_publication_seconds": 0.5959135539887939,
+          "old_total_seconds": 6.3787495699943975,
+          "unit": "70c1ca7470a5fe48ab1d5a34040e239dd75e807c8ff4f2ce62275062967507d8"
+        },
+        {
+          "new_publication_seconds": 18.263962103999802,
+          "new_total_seconds": 156.25830399199913,
+          "old_publication_seconds": 587.8633920610009,
+          "old_total_seconds": 724.7201518610091,
+          "unit": "7806b05859ff33917cb32a8a458695052a99e7a3bf0b9859c50e4c2149e2f9f0"
+        },
+        {
+          "new_publication_seconds": 3.7786886609974317,
+          "new_total_seconds": 40.805862948996946,
+          "old_publication_seconds": 4.063822819996858,
+          "old_total_seconds": 41.968219433998456,
+          "unit": "90f8b1eb2b1a5308cb8dc07c"
+        },
+        {
+          "new_publication_seconds": 1.464583182008937,
+          "new_total_seconds": 12.004825512005482,
+          "old_publication_seconds": 2.5889592919993447,
+          "old_total_seconds": 13.20309636699676,
+          "unit": "a965cc28daa38fcb7adcc03ed4e81a18e8e618291b1c5dbce9e21717cbe3c662"
+        },
+        {
+          "new_publication_seconds": 4.014497598996968,
+          "new_total_seconds": 41.60777557200345,
+          "old_publication_seconds": 4.0195521249988815,
+          "old_total_seconds": 42.419296309992205,
+          "unit": "f65874e8d2a64aa271dd59e31d9d8fa715afd344859cc2cebaf7183024727a92"
+        },
+        {
+          "new_publication_seconds": 0.057122348007396795,
+          "new_total_seconds": 0.3702107890130719,
+          "old_publication_seconds": 0.08314246300142258,
+          "old_total_seconds": 0.3807154270034516,
+          "unit": "f693c6b37495dafecc9bc6413222752fa5f3e391875890ddfd901074793bdbf3"
+        }
+      ],
+      "tracks": 168,
+      "units": 11
+    },
+    "comparison_receipt": {
+      "path": "/home/zyf/AAA/scar/artifacts/current/experiments/cpu-sunfish-current/binding-storage-comparison.json",
+      "bytes": 3448,
+      "sha256": "cc241295b75fb37bbe6cb039c73728165e7e97d87038c515f47f89fb38c2bd54"
+    },
+    "independent_entry_replay": {
+      "status": "STATE_VIEW_REDERIVED",
+      "schema_version": 2,
+      "counts": {
+        "binding_accesses": 847,
+        "content_accesses": 577,
+        "content_addresses": 198,
+        "content_relations": 4113,
+        "content_states": 1154,
+        "locations": 412,
+        "missing_address_rules": {
+          "EnterHandledException": 1,
+          "PrepareReraise": 3,
+          "RestoreHandledException": 4
+        },
+        "operations": 9623,
+        "read_selections": 14,
+        "relations": 2556,
+        "tracks": 28,
+        "versions": 575
+      },
+      "seconds": 77.29006652899261
+    },
+    "independent_replay_log": {
+      "path": "/home/zyf/AAA/scar/artifacts/current/experiments/cpu-sunfish-current/binding-codec-entry-replay.log",
+      "bytes": 442,
+      "sha256": "05e3c15ea0549fdcb31e0860d6d09b2e752e80ed75b649276fac3872f1dee0e7"
+    },
+    "packed_fresh": {
+      "path": "/home/zyf/AAA/scar/artifacts/current/experiments/cpu-sunfish-current/observed-binding-states-packed-fresh/result.json",
+      "bytes": 53046,
+      "sha256": "25cef6e49847d69c86d7bc6dc9d16445d01a67960b09b73f5bdb9ea2ee32d07d"
+    },
+    "legacy_stream_roundtrip": {
+      "path": "/home/zyf/AAA/scar/artifacts/current/experiments/cpu-sunfish-current/observed-binding-states-stream-packed/result.json",
+      "bytes": 54481,
+      "sha256": "f1a7c8c625f4a90ca4ffa5334faf9b2edd6aff322c81cbdd9275f92cd9761e74"
+    },
+    "unified_build": {
+      "receipt": {
+        "path": "/home/zyf/AAA/scar/artifacts/current/experiments/cpu-sunfish-current/packed-binding-connected-build/manifest.json",
+        "bytes": 11883,
+        "sha256": "66f8f07dd9d66a2d10d6d551cf9ed40fd03f55fe16d84e8d61251dcd5d61c5bd"
+      },
+      "seconds": 273.45045643899357,
+      "summary": {
+        "catalog_local_graph_materialized": true,
+        "configuration_inputs": 0,
+        "gaps": 67,
+        "loaded_units": 11,
+        "observed_binding_state_publications": 1,
+        "observed_body_activation_publications": 1,
+        "observed_boundary_publications": 1,
+        "observed_publications": 1,
+        "observed_resource_scope_publications": 1,
+        "resource_records": 31,
+        "source_units": 18
+      },
+      "readback": {
+        "admitted_publications": 9,
+        "entry_expanded": true,
+        "independent_full_analysis_repeated": false,
+        "indices_reconstructed": 0,
+        "mode": "STORED_TABLES_WITH_ADMITTED_INDEX",
+        "output_tables": 7,
+        "seconds": 1.0433201170089887
+      }
+    },
+    "failed_buffered_migration": {
+      "log": {
+        "path": "/home/zyf/AAA/scar/artifacts/current/experiments/cpu-sunfish-current/observed-binding-states-packed.log",
+        "bytes": 3420,
+        "sha256": "f3dd664e530a10fca9e668096aa4a15be92fd96dd1e0e94c9833fe81f40c85c4"
+      },
+      "reason": "LEGACY_TABLE_READER_DECOMPRESSED_ENTIRE_4_3_GB_TABLE",
+      "fixed": "STREAMED_RECEIPT_CHECKED_JSONL_UNDER_UNCHANGED_8_GIB_WORKER_LIMIT"
+    },
+    "remaining": [
+      "THREE_CONDITIONAL_RESUMPTION_CONTEXTS",
+      "ACCESS_ANCHORS_OUTSIDE_NORMAL_CONTROL_VIEW",
+      "LOGICAL_CONTENT_AND_PHYSICAL_RESOURCE_IDENTITIES",
+      "CIRQ_FRONTEND_FINALIZATION"
+    ]
   }
 }

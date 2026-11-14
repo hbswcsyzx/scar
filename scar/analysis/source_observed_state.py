@@ -18,7 +18,8 @@ import resource
 import time
 
 from scar.analysis.program_view import ProgramView,_digest
-from scar.analysis.program_state_view import publish_state_view,_pins as state_pins
+from scar.analysis.program_state_view import _pins as state_pins
+from scar.analysis.binding_track_storage import publish_state_view,pins as storage_pins
 from scar.analysis.program_state_coverage import _release
 from scar.analysis.source_declared_catalog import read_source_catalog,_receipt,_check
 from scar.analysis.source_local_state import local_read_tracks
@@ -38,7 +39,19 @@ def _pins():
     return dict(producer=sha256(Path(__file__).read_bytes()).hexdigest(),state=state_pins(),
         selection=sha256(Path(source_observed_interfaces.__file__).read_bytes()).hexdigest(),
         materials=sha256(Path(source_graph_material.__file__).read_bytes()).hexdigest(),
-        local_slots=sha256(Path(source_local_state.__file__).read_bytes()).hexdigest())
+        local_slots=sha256(Path(source_local_state.__file__).read_bytes()).hexdigest(),storage=storage_pins())
+
+
+def compatible_pins(actual):
+    """Producer provenance may evolve; used analysis contracts stay exact.
+
+    The reader independently checks actual code selection. Schema-1 units
+    predate the storage pin; their format and analysis pins are checked too.
+    """
+    expected=_pins();provenance=actual.get('producer')
+    if type(provenance)is not str or len(provenance)!=64 or any(c not in '0123456789abcdef' for c in provenance):return False
+    if {k:v for k,v in actual.items() if k not in ('producer','storage')}!={k:v for k,v in expected.items() if k not in ('producer','storage')}:return False
+    return 'storage' not in actual or actual['storage']==expected['storage']
 
 
 def _initialize(catalog,out,pins,limits,memory_mib):

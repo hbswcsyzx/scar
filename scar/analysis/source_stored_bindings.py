@@ -30,9 +30,16 @@ class StoredBindingVersions:
     def __init__(self,view,folder,header,summary):
         self.folder=Path(folder);self.header=header;self.summary=summary
         self.source=view.project_unit(header['unit']);self.namespace=self.source.namespace
+        expected_tables=TABLES
+        if header['schema_version']==2:
+            from scar.analysis.binding_track_storage import ENCODING,pins
+            if (header.get('track_encoding'),header.get('storage_pins'))!=(ENCODING,pins()):
+                raise ValueError('stored binding track encoding differs')
+            expected_tables=TABLES|{'controls'}
+        elif header['schema_version']!=1:raise ValueError('unsupported stored binding schema')
         if (encode(self.namespace)!=header['namespace']
                 or encode(self.source.material.result_artifact)!=header['source_material']
-                or set(header['tables'])!=TABLES or header['original_body_bytes_copied']!=0
+                or set(header['tables'])!=expected_tables or header['original_body_bytes_copied']!=0
                 or any(header[k]is not False for k in ('loops_unrolled','target_executed',
                     'tensor_content_versions_proven','effect_membership_closed','first_stage_complete'))):
             raise ValueError('stored binding source domain, table grammar or authority differs')

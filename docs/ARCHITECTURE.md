@@ -28,6 +28,8 @@ manifest 引用原分片，`relationships.json` 索引跨层分片，`observed.j
 其版本仍带激活与执行发生参数，不是 Tensor 内容身份。查询载入保存的版本关系，检查类型、收据
 和原节点引用，不重复固定点；`scar state-view --read` 保留独立源重放。全目录辅助正文接口及其重推
 由 `frontend --verify-body-interfaces` 显式请求；规范 F4 与观测正文接口仍照常建立。
+状态表 schema 2 将同函数的控制拓扑写入 `controls`，轨迹引用本地定义位集池；
+分析规则收据与存储编码收据分开。schema 1 继续可读，`state-view --read` 按格式选择独立重推器。
 `configuration.json` 引用自动发现并经现有 YAML parser 准入的配置表示图；未知 tag、插值、组合及运行端口绑定继续留前沿。
 资源需求与候选分开：F4 的 CPU/host representation 需求带执行条件，不代表 tensor backing；GPU/设备内存及存储候选
 复用原 native 转换/类型接口和硬件快照。结构、声明及编译请求不制造独立运行需求。旧路线保留 Behavior 的条件候选。
