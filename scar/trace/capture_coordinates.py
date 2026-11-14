@@ -1,6 +1,6 @@
 """Bind retained collector artifacts to shared execution coordinates.
 
-This bounded profile checks an existing calls/operands + ETO/Kineto + strace
+This bounded profile checks calls/operands + strace, with optional ETO/Kineto
 capture, including optional function-environment sidecars. Artifact bytes,
 exact OS file-creation/exec receipts and collector
 manifests establish membership under explicit capture contracts.  Neither PID
@@ -73,6 +73,27 @@ def _quoted(value):
     except (ValueError, UnicodeError):
         return None
     return result if type(result) is str else None
+
+
+def collector_namespace(native):
+    """Validate planned artifact names separately from collected artifacts.
+
+    A closed process may have no Torch observation. Its explicit absent-file
+    declarations still identify the collector nonce, never native work.
+    """
+    pid=native.get('pid');status=native.get('status');artifacts=native.get('artifacts',{})
+    _need(_integer(pid,1) and status in ('CLOSED','NOT_COLLECTED')
+          and native.get('failures')==[] and set(artifacts)=={'execution_trace','kineto'},
+          'collector namespace requires its process, status and two artifact declarations')
+    eto=PurePosixPath(artifacts['execution_trace']['path']);kineto=PurePosixPath(artifacts['kineto']['path'])
+    match=re.fullmatch(r'execution-trace\.'+str(pid)+r'\.([0-9a-f]{32})\.json',eto.name)
+    _need(eto.is_absolute() and eto.parent==kineto.parent and eto.parent.name=='trace'
+          and match is not None and kineto.name=='kineto.'+str(pid)+'.'+match[1]+'.json',
+          'collector artifact declarations do not share the original trace namespace and nonce')
+    if status=='NOT_COLLECTED':
+        _need(all(row.get('exists') is False and row.get('size_bytes') is None for row in artifacts.values()),
+              'uncollected native provider must declare both planned artifacts absent')
+    return eto.parent.parent,match[1],status=='CLOSED'
 
 
 @dataclass(slots=True)
@@ -438,19 +459,16 @@ def bind_capture_coordinates(capture_dir, *, max_bytes=1_000_000_000, max_lines=
     native_payload = manifest_path.read_bytes()
     native = _json(native_payload)
     _need(type(native) is dict and native.get("schema") == "scar.execution-evidence-collection"
-          and native.get("schema_version") == 1 and native.get("status") == "CLOSED"
+          and native.get("schema_version") == 1 and native.get("status") in ("CLOSED", "NOT_COLLECTED")
           and native.get("failures") == [] and _integer(native.get("pid"), 1),
           "native collector did not close this supported process capture successfully")
     pid = native["pid"]
     _need(int(_MANIFEST_NAME.fullmatch(manifest_path.name)[1]) == pid, "native manifest filename/process mismatch")
-    eto_name = PurePosixPath(native["artifacts"]["execution_trace"]["path"])
-    kineto_name = PurePosixPath(native["artifacts"]["kineto"]["path"])
-    _need(eto_name.is_absolute() and eto_name.parent == kineto_name.parent
-          and eto_name.parent.name == "trace", "native artifact declarations have no common trace namespace")
-    match = re.fullmatch(r"execution-trace\." + str(pid) + r"\.([0-9a-f]{32})\.json", eto_name.name)
-    _need(match is not None and kineto_name.name == "kineto." + str(pid) + "." + match[1] + ".json",
-          "native artifact declarations do not share the collector nonce")
-    original_root, nonce = eto_name.parent.parent, match[1]
+    original_root, nonce, torch_collected = collector_namespace(native)
+    eto_name = kineto_name = None
+    if torch_collected:
+        eto_name = PurePosixPath(native["artifacts"]["execution_trace"]["path"])
+        kineto_name = PurePosixPath(native["artifacts"]["kineto"]["path"])
     archive_path = root / "archive-index.json"
     archive_payload, archive = None, None
     if archive_path.exists() or archive_path.is_symlink():
@@ -463,6 +481,9 @@ def bind_capture_coordinates(capture_dir, *, max_bytes=1_000_000_000, max_lines=
               and archive.get("schema_version") == 1 and archive.get("verified_roundtrip") is True
               and type(archive.get("files")) is list, "unsupported lossless archive manifest")
     files = _Files(root, original_root, archive, max_bytes)
+    if not torch_collected:
+        _need(all(not files.contains(row['path']) for row in native['artifacts'].values()),
+              'uncollected native artifact unexpectedly exists in retained capture')
     trace_root = original_root / "trace"
     native_name = trace_root / manifest_path.name
     native_artifact = files.verify(native_name, "scar.execution-evidence-collection")
@@ -646,7 +667,7 @@ def bind_capture_coordinates(capture_dir, *, max_bytes=1_000_000_000, max_lines=
             'scope':'closed retained artifacts with exact target creation/publication; birth join requires witness binder',
             'source_build_established':False,'executed_binary_pages_established':False}
     for name, schema, field in ((eto_name, "pytorch.execution-trace.v1", "execution_trace"),
-                                (kineto_name, "pytorch.kineto.chrome-trace.v1", "kineto")):
+                                (kineto_name, "pytorch.kineto.chrome-trace.v1", "kineto")) if torch_collected else ():
         artifact = files.verify(name, schema)
         _need(artifact.size_bytes == native["artifacts"][field]["size_bytes"], "native collector raw byte count differs")
         members[str(name)] = artifact
@@ -760,7 +781,8 @@ def bind_capture_coordinates(capture_dir, *, max_bytes=1_000_000_000, max_lines=
         proofs.append({'kind':'COLLECTOR_CODE_WITNESS_FINAL_PUBLICATION','logical_path':name,
             'source':encode(last['source']),'exclusive_temporary_creation':encode(opened[0]['source']),
             'basis':'last successful same-thread exact temp-to-manifest rename; original immutable final SHA checked'})
-    _need(creations.get(str(eto_name)), "declared nonce ETO has no target-process open receipt")
+    if torch_collected:
+        _need(creations.get(str(eto_name)), "declared nonce ETO has no target-process open receipt")
     renamed = []
     for fact in target_facts:
         if fact["name"] != "rename" or fact["result"] != 0 or len(fact["args"]) != 2:
@@ -770,9 +792,11 @@ def bind_capture_coordinates(capture_dir, *, max_bytes=1_000_000_000, max_lines=
             renamed.append(fact)
         if new == str(native_name) and old == str(trace_root / (".execution-evidence." + str(pid) + "." + nonce + ".tmp")):
             proofs.append({"kind": "COLLECTOR_MANIFEST_PUBLICATION", "logical_path": new, "source": encode(fact["source"])})
-    _need(len(renamed) == 1 and any(proof["kind"] == "COLLECTOR_MANIFEST_PUBLICATION" for proof in proofs),
+    _need((not torch_collected or len(renamed) == 1)
+          and any(proof["kind"] == "COLLECTOR_MANIFEST_PUBLICATION" for proof in proofs),
           "collector nonce artifacts lack exact successful publication receipts")
-    proofs.append({"kind": "KINETO_PUBLICATION", "logical_path": str(kineto_name), "source": encode(renamed[0]["source"])})
+    if torch_collected:
+        proofs.append({"kind": "KINETO_PUBLICATION", "logical_path": str(kineto_name), "source": encode(renamed[0]["source"])})
     seed = {"profile": _PROFILE, "archive_sha256": sha256(archive_payload).hexdigest() if archive_payload is not None else None,
             "native_manifest_sha256": native_artifact.sha256, "command_sha256": run_artifact.sha256,
             "target_exec": encode(target_exec["source"]), "target_birth": encode(target_birth["source"])}
@@ -815,10 +839,11 @@ def bind_capture_coordinates(capture_dir, *, max_bytes=1_000_000_000, max_lines=
     native_keys = frozenset(_key(artifact) for artifact in members.values())
     # Linux native TID lookup is explicit.  It never applies to Python ident,
     # ETO collector tokens, GPU lanes, or unrelated artifacts.
-    kineto_artifact = members[str(kineto_name)]
-    for tid, thread in thread_rows.items():
-        if pid_for_tid[tid] == pid:
-            os_threads[_key(kineto_artifact), tid] = thread
+    if torch_collected:
+        kineto_artifact = members[str(kineto_name)]
+        for tid, thread in thread_rows.items():
+            if pid_for_tid[tid] == pid:
+                os_threads[_key(kineto_artifact), tid] = thread
     gaps = parse_gaps + [{"code": "os_actor_not_connected_to_target_ancestry", "tid": tid}
                          for _, tid, _ in os_files if tid not in pid_for_tid]
     gaps += [{"code": "python_ident_to_native_tid_unverified"}, {"code": "python_operation_to_torch_rf_unverified"},
@@ -844,6 +869,7 @@ def bind_capture_coordinates(capture_dir, *, max_bytes=1_000_000_000, max_lines=
                 or declaration.get("unknown_exits", 0) or declaration.get("gaps", 0)):
             gaps.append({"code": "collector_declared_incomplete_observations", "collector": family})
     report = {"schema": "scar.capture-coordinates", "schema_version": 1, "profile": _PROFILE,
+        "native_execution_evidence": "COLLECTED" if torch_collected else "NOT_COLLECTED",
         "run": encode(run), "processes": encode(tuple(process_rows.values())), "threads": encode(tuple(thread_rows.values())),
         "target_process": encode(target.id), "membership": membership, "evidence": proofs,
         "original_root": str(original_root), "local_root": str(root), "seed": seed, "open": gaps,

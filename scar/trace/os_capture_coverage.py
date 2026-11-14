@@ -106,10 +106,14 @@ def _owned_v2(profile,launch,coords):
     _need(local.parent==root/'trace' and not local.is_symlink(),'native manifest escapes exact local namespace')
     native,receipt=_document(local)
     _need(receipt==expected and local.name==f"execution-evidence.{native.get('pid')}.json"
-          and native.get('status')=='CLOSED' and native.get('failures')==[],
+          and native.get('status') in ('CLOSED','NOT_COLLECTED') and native.get('failures')==[],
           'owned native manifest exact bytes/close differ')
     declaration=native.get('configuration',{}).get('os_capture_intent',{})
-    native_nonce=Path(native['artifacts']['kineto']['path']).name.split('.')[2]
+    from scar.trace.capture_coordinates import collector_namespace
+    _,native_nonce,collected=collector_namespace(native)
+    if not collected:
+        _need(coords.get('native_execution_evidence')=='NOT_COLLECTED',
+              'process-only membership cannot assert native provider artifacts')
     _need(declaration.get('intent')==intent_receipt and declaration.get('capture_nonce')==nonce
           and declaration.get('native_nonce')==native_nonce,
           'owned native intent/capture/native nonce association differs')

@@ -388,7 +388,8 @@ def bind_os_capture_provider(root,*,run,native,native_artifact,command,archive,p
           and launch['target_argv_index']==intent['target_argv_index']
           and launch['actual_exec_argv'][launch['target_argv_index']:]==command,
           'actual launch namespace/target boundary differs')
-    native_nonce=Path(native['artifacts']['kineto']['path']).name.split('.')[2]
+    from scar.trace.capture_coordinates import collector_namespace
+    _,native_nonce,_=collector_namespace(native)
     _need(declaration.get('native_nonce')==native_nonce,'native/provider nonce association differs')
     _need(launch['status']=='CLOSED' and launch['returncode']==0 and launch['failure'] is None
           and launch['budget_stop'] is None,'closed successful capture required')

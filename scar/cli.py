@@ -68,6 +68,8 @@ def _trace(args) -> int:
         if args.project_root is not None and str(Path(args.project_root).resolve()) != lean_plan.namespace_root:
             raise SystemExit('--project-root differs from the capture plan namespace')
     stream_interfaces = getattr(args, 'stream_interfaces', False) or program_ports
+    if getattr(args,'stream_backing',False) and not stream_interfaces:
+        raise SystemExit('--stream-backing requires --stream-interfaces')
     native_callables = getattr(args, 'native_callables', False)
     compile_events = getattr(args, 'compile_events', False)
     python_targets = getattr(args, 'python_call_targets', False) or lean_plan is not None or stream_interfaces or program_ports or native_callables or compile_events
@@ -178,6 +180,8 @@ def _trace(args) -> int:
                 env['SCAR_NATIVE_CALLABLE_PROBE'] = str(build_probe(out / 'native-probe'))
             if stream_interfaces:
                 env['SCAR_STREAM_INTERFACES'] = '1'
+                if getattr(args,'stream_backing',False):
+                    env['SCAR_STREAM_BACKING_OBSERVATIONS'] = '1'
             env['SCAR_OPERAND_CAPTURE'] = capture
             env['SCAR_OPERAND_MAX_EVENTS'] = str(args.max_operand_events)
             env['SCAR_OPERAND_MAX_BYTES'] = str(args.max_operand_bytes)
@@ -934,6 +938,8 @@ def main(argv=None) -> int:
     trace.add_argument('--strace-executable',default='strace',help='strace executable for the owned opt-in OS capture')
     trace.add_argument('--max-os-bytes',type=int,default=128000000)
     trace.add_argument('--stream-interfaces', action='store_true', help='observe builtin stream calls and C completion without reading contents or wrapping objects')
+    trace.add_argument('--stream-backing',action='store_true',
+        help='also observe exact builtin stream backing handles; requires --stream-interfaces')
     trace.add_argument('--max-os-lines',type=int,default=2000000)
     trace.add_argument('--max-capture-bytes',type=int,default=256000000)
     trace.add_argument('--max-archive-bytes',type=int,default=128000000)

@@ -275,6 +275,45 @@ class F4BuildSession:
             loaded_units=len(self.view.units),catalog_units=len(self.catalog.fact_store.rows),
             body_copies=0,loops_unrolled=False)
 
+    def readback_publication(self,report):
+        """Read serialized outputs against the same admitted immutable inputs.
+
+        Reopening a BuildSession remains the independent replay API. Publishing
+        must not repeat that entire analysis: the stores already authenticated
+        their source/trace relations, and retain guards for subsequent queries.
+        """
+        from scar.analysis.build import _check,_rules
+        import gzip
+        started=time.monotonic()
+        if (json.loads((self.path/'manifest.json').read_bytes())!=report
+                or report['rules']!=_rules()):
+            raise ValueError('publication manifest or implementation changed')
+        for receipt in (*self._admitted.values(),*report['tables'].values()):_check(receipt)
+        spec=report['f4']
+        relationships=dict(schema='scar.build-f4-relationships',catalog=spec['catalog'],
+            function_leaves=spec['functions'],components=spec['components'],copied_bodies=0)
+        if json.loads((self.path/'relationships.json').read_bytes())!=relationships:
+            raise ValueError('stored relationship references differ from admitted components')
+        canonical=lambda value:json.loads(json.dumps(value))
+        if json.loads((self.path/'observed.json').read_bytes())!=canonical(self.attach_trace()):
+            raise ValueError('stored execution evidence differs from admitted observations')
+        with gzip.open(self.path/'resources.json.gz','rt') as stream:resources=json.load(stream)
+        if resources!=canonical(self.resources.payload()):
+            raise ValueError('stored resource interfaces differ from admitted resource ports')
+        stores={id(p.store):p.store for p in self.providers.values() if hasattr(p,'store')}
+        for store in stores.values():
+            guard=getattr(store,'validate',None) or getattr(store,'check',None)
+            if guard is not None:guard()
+        self.view.expand(self.entry)
+        for source in self.view.units.values():source.check()
+        for receipt in (*self._admitted.values(),*report['tables'].values()):_check(receipt)
+        if report['rules']!=_rules():raise ValueError('publication implementation changed during readback')
+        self._checkpoint()
+        return dict(mode='STORED_TABLES_WITH_ADMITTED_INDEX',
+            output_tables=len(report['tables']),admitted_publications=len(self._admitted),
+            entry_expanded=True,indices_reconstructed=0,independent_full_analysis_repeated=False,
+            seconds=time.monotonic()-started)
+
     def close(self):
         if self.closed:return
         self.closed=True
@@ -322,17 +361,20 @@ def build_f4(entry,trace,out,spec,*,source_roots=(),max_points=128,max_seconds=3
             observed_boundary_publications=len(observed['boundaries']),
             observed_body_activation_publications=len(observed['body_activations']),
             resource_records=len(session.resources.provider.records))
+        return _finish_publication(session,report,gaps,started)
     finally:session.close()
+
+
+def _finish_publication(session,report,gaps,started):
+    from scar.analysis.build import _receipt,_write
+    out=session.path
     gaps.append(dict(layer='coverage',kind='FULL_INFERENCE_COVERAGE_UNPROVEN',
         detail='All layers are composed; this bounded entry probe and configuration trace are not a full inference execution.'))
     _write(out/'gaps.json',dict(schema='scar.build-gaps',gaps=gaps,counts=dict(Counter(g['layer'] for g in gaps))))
     report['tables']={p.name:_receipt(p) for p in out.iterdir() if p.is_file() and p.name!='manifest.json'}
     report['summary']['gaps']=len(gaps)
     _write(out/'manifest.json',report)
-    remaining=max_seconds-(time.monotonic()-started)
-    if remaining<=0:raise TimeoutError('F4 build exceeded its cooperative time budget')
-    recovered=F4BuildSession(out,_publishing=True,seconds=remaining,input_bytes=max_input_bytes)
-    try:recovered.view.expand(recovered.entry)
-    finally:recovered.close()
+    session._checkpoint()
+    report['publication_readback']=session.readback_publication(report)
     report['seconds']=time.monotonic()-started
     report['workflow_complete']=True;_write(out/'manifest.json',report);return report

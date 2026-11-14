@@ -2427,5 +2427,283 @@
       "CONNECT_RESOURCE_AND_STATE_PORTS_WITH_EXPLICIT_REMAINING_FIELDS",
       "REPLACE_BOUNDED_ENTRY_PROBE_WITH_COMPLETE_ACCEPTANCE_TRAVERSAL"
     ]
+  },
+  "shared_index_publication_and_cpu_resources": {
+    "recorded_at": "2026-11-14T07:10:30.557319+00:00",
+    "status": "BODY_FUNCTION_BOUNDARY_COMPOSITION_AND_PYTHON_OS_CAPTURE_VERIFIED",
+    "prior_turn": "PROGRESS",
+    "first_stage_complete": false,
+    "modeling_changes": {
+      "unordered_code_units_and_correspondence_alternatives": "CANONICAL_ID_ORDER",
+      "trace_events_and_operand_ports": "ORIGINAL_ORDER_RETAINED",
+      "publication_readback": "REREAD_OUTPUTS_RECHECK_INPUT_GUARDS_REUSE_ADMITTED_INDEX",
+      "native_provider_absence": "EXPLICIT_NOT_COLLECTED_WITH_PLANNED_ARTIFACTS_ABSENT"
+    },
+    "unified_build": {
+      "seconds": 421.58040925799287,
+      "summary": {
+        "configuration_inputs": 0,
+        "gaps": 67,
+        "loaded_units": 17,
+        "observed_body_activation_publications": 1,
+        "observed_boundary_publications": 1,
+        "observed_publications": 1,
+        "resource_records": 31,
+        "source_units": 18
+      },
+      "layers": {
+        "body_copies": 0,
+        "catalog_units": 18,
+        "cross_layer": {
+          "body_activations": true,
+          "configuration": false,
+          "creations": false,
+          "exec": false,
+          "functions": true,
+          "native": false,
+          "observed_boundaries": true,
+          "protocol": false
+        },
+        "loaded_units": 17,
+        "local_state": {
+          "bindings": true,
+          "content": true
+        },
+        "loops_unrolled": false,
+        "providers": [
+          "body_activations",
+          "functions:/home/zyf/AAA/scar/artifacts/current/experiments/cpu-sunfish-current/body-protocol-frontend/function-interfaces",
+          "functions:/home/zyf/AAA/scar/artifacts/current/experiments/cpu-sunfish-current/c3-observed-functions",
+          "observed_boundaries"
+        ],
+        "readback": true,
+        "resources": true,
+        "storage": true,
+        "unified": true
+      },
+      "publication_readback": {
+        "admitted_publications": 6,
+        "entry_expanded": true,
+        "independent_full_analysis_repeated": false,
+        "indices_reconstructed": 0,
+        "mode": "STORED_TABLES_WITH_ADMITTED_INDEX",
+        "output_tables": 6,
+        "seconds": 0.32519394300470594
+      },
+      "receipt": {
+        "path": "/home/zyf/AAA/scar/artifacts/current/experiments/cpu-sunfish-current/connected-build-canonical/manifest.json",
+        "bytes": 10024,
+        "sha256": "1e48e915d8af4740a175aa4107752d6188628e3d9ab5f755c8c4b64b9d9a2cbb"
+      },
+      "body_coverage": {
+        "body_protocols": {
+          "EnterClassBody": 3,
+          "EnterDeferredBody": 76,
+          "EnterRootBody": 4
+        },
+        "covered_entries": 1856,
+        "entry_coverage_complete": true,
+        "missing_entries": 0,
+        "occurrences": 1966,
+        "recorded_entries": 1856,
+        "shared_activations": 127,
+        "shared_interfaces": 83,
+        "source_anchor_frontiers": 0,
+        "unmatched_entries": 0
+      }
+    },
+    "cpu_capture": {
+      "command_receipt": {
+        "path": "/home/zyf/AAA/scar/artifacts/current/experiments/cpu-sunfish-current/resource-capture-nodes-run.json",
+        "bytes": 1532,
+        "sha256": "6731c7c28a94d85f333d3e80c776e565212cebb7b4d531dc14b62c85d2e3b607"
+      },
+      "seconds": 66.97652726300294,
+      "bestmove_observed": true,
+      "returncode": 0,
+      "native_execution_evidence": "NOT_COLLECTED",
+      "coordinate_counts": {
+        "artifact_members": 37,
+        "os_artifacts": 24,
+        "os_lines": 45577,
+        "processes": 13,
+        "threads": 24,
+        "verified_raw_bytes": 145475118
+      },
+      "receipt": {
+        "path": "/home/zyf/AAA/scar/artifacts/current/experiments/cpu-sunfish-current/resource-capture-nodes/capture-coordinates.json",
+        "bytes": 103195,
+        "sha256": "842438fd6ea9971061fe3b70d5e9ef9c7a175a0ebadc8a04fb16eb1896fe9046"
+      },
+      "software_capture_status": "PARTIAL_DROPPED_EVENTS_EXPLICIT_NOT_FULL_PROGRAM_COVERAGE",
+      "call_dropped_events": 177581,
+      "operand_dropped_events": 1,
+      "stream_interface_begin_records": 0
+    },
+    "resources": {
+      "summary": {
+        "actual_fd_producer_ports": 43,
+        "argument_frontiers": 7830,
+        "canonical_dependencies_established": false,
+        "classification_counts": {
+          "COMPLETED": 45541,
+          "PROCESS_EXIT": 24,
+          "SIGNAL": 12
+        },
+        "complete_resource_model": false,
+        "complete_work_effects_established": false,
+        "connected_io": 81,
+        "gap_groups": 105,
+        "gap_occurrences": 29387,
+        "handle_generations": 2687,
+        "interface_counts": {
+          "brk": 515,
+          "clone3": 14,
+          "close": 2808,
+          "dup2": 27,
+          "epoll_create1": 1,
+          "eventfd2": 2,
+          "execve": 43,
+          "exit": 10,
+          "exit_group": 13,
+          "fcntl": 37,
+          "fstat": 2179,
+          "fsync": 2,
+          "getcwd": 17,
+          "getdents64": 372,
+          "getrandom": 25,
+          "ioctl": 59,
+          "linkat": 10,
+          "lseek": 1780,
+          "lstat": 432,
+          "madvise": 10,
+          "mkdir": 4,
+          "mmap": 1191,
+          "mprotect": 390,
+          "mremap": 2,
+          "munmap": 174,
+          "newfstatat": 47,
+          "open": 9,
+          "openat": 2815,
+          "pipe2": 20,
+          "poll": 2,
+          "pread64": 26,
+          "read": 6338,
+          "readlink": 25,
+          "readlinkat": 9,
+          "rename": 1,
+          "stat": 5853,
+          "unlink": 18,
+          "vfork": 9,
+          "wait4": 12,
+          "write": 20240
+        },
+        "interface_families": {
+          "BYTE_IO": 26604,
+          "DESCRIPTOR_OR_DEVICE_INTERFACE": 4711,
+          "DESCRIPTOR_PRODUCER": 2847,
+          "EXECUTION_CONTEXT_INTERFACE": 89,
+          "FILESYSTEM_NAMESPACE_INTERFACE": 33,
+          "METADATA_QUERY": 8934,
+          "UNMODELED_KERNEL_INTERFACE": 27,
+          "VIRTUAL_MEMORY_INTERFACE": 2282,
+          "WAIT_OR_LOCK_INTERFACE": 14
+        },
+        "interface_mode": "OBSERVED_KERNEL_INTERFACES_R1",
+        "interface_records": 45541,
+        "legacy_outside_fd_profile_by_syscall": {
+          "brk": 515,
+          "epoll_create1": 1,
+          "eventfd2": 2,
+          "exit": 10,
+          "exit_group": 13,
+          "fstat": 2179,
+          "fsync": 2,
+          "getcwd": 17,
+          "getdents64": 372,
+          "getrandom": 25,
+          "ioctl": 59,
+          "linkat": 10,
+          "lseek": 1780,
+          "lstat": 432,
+          "madvise": 10,
+          "mkdir": 4,
+          "mmap": 1191,
+          "mprotect": 390,
+          "mremap": 2,
+          "munmap": 174,
+          "newfstatat": 47,
+          "pipe2": 20,
+          "poll": 2,
+          "readlink": 25,
+          "readlinkat": 9,
+          "rename": 1,
+          "stat": 5853,
+          "unlink": 18,
+          "wait4": 12
+        },
+        "legacy_outside_fd_profile_count": 13175,
+        "legacy_process_coordinate_open": 0,
+        "legacy_syscall_observations": 32366,
+        "missing_duration": 24,
+        "nonreturn_protocol_counts": {
+          "EXEC_IMAGE_REPLACED": 13,
+          "EXIT_REQUEST": 23,
+          "RETURN_RENDERING_UNRECOVERED": 1
+        },
+        "observed_handle_ends": 77,
+        "open_file_descriptions": 2687,
+        "ordinary_return_outcomes": 45504,
+        "physical_lines": 45577,
+        "process_coordinate_open": 0,
+        "quiescence_records": 0,
+        "source_runtime_verified": false,
+        "syscall_observations": 45541,
+        "syscall_work_dependencies_coverage": "UNKNOWN",
+        "tid_artifacts": 24,
+        "transformation_authorized": false,
+        "unconnected_line_reasons": {
+          "OFD_release_not_established": 24,
+          "outside_fd_profile": 13175
+        }
+      },
+      "seconds": 57.370737742996425,
+      "receipt": {
+        "path": "/home/zyf/AAA/scar/artifacts/current/experiments/cpu-sunfish-current/resource-capture-nodes/resource-model.json",
+        "bytes": 48736,
+        "sha256": "6fed2931fbdb515c9e349ff95ba31ca89f3b8720a7f5bc9417d297405697795a"
+      },
+      "source_operation_correspondence_established": false,
+      "folded_into_optimization_graph": false
+    },
+    "rejected_attempts": [
+      {
+        "receipt": {
+          "path": "/home/zyf/AAA/scar/artifacts/current/experiments/cpu-sunfish-current/resource-capture-run.json",
+          "bytes": 1367,
+          "sha256": "9c43f981a4a28aacf95a72c7ffeedf68f2e5a4f99d7f24cad6b59a7e67fd8141"
+        },
+        "reasons": [
+          "NATIVE_ONLY_COORDINATE_RESTRICTION",
+          "OPERAND_CONVERSION_IO_FAILURE_WITH_EMPTY_JSONL"
+        ]
+      },
+      {
+        "receipt": {
+          "path": "/home/zyf/AAA/scar/artifacts/current/experiments/cpu-sunfish-current/resource-capture-small-run.json",
+          "bytes": 1466,
+          "sha256": "a68ba7ed5989653bf00c2d3616fbd6cf6017ae21dd708171cd37d6999d91e851"
+        },
+        "reasons": [
+          "CAPTURE_BYTES_BUDGET_DURING_CONVERSION"
+        ]
+      }
+    ],
+    "application_speedup_claimed": false,
+    "next_tasks": [
+      "CONNECT_SOURCE_STATE_AND_RESOURCE_PORTS_WITH_CAPTURE_SCOPE_PROOF",
+      "FILTER_COLLECTOR_WORK_BEFORE_PROJECTING_RESOURCE_EVIDENCE",
+      "BUILD_COMPLETE_SHARED_GRAPH_COVERAGE_WITHOUT_ITERATION_UNROLL_OR_BOUNDED_ENTRY_PROBE"
+    ]
   }
 }

@@ -48,7 +48,9 @@ def _links(codes):
     if (len(result) != sum(len(getattr(codes,name)) for name in _LINK_TABLES.values())
             or len({row.id for row in result}) != len(result)):
         raise ValueError('source-body correspondence domain contains unclassified or duplicate rows')
-    return result
+    # Correspondence alternatives are a set. Their source catalog enumeration
+    # must not change activation identity when another admitted index is reused.
+    return tuple(sorted(result,key=lambda row:row.id.value))
 
 
 def _completions(context, step):
@@ -128,7 +130,7 @@ class _SourceAnchors:
                             located.append((span,self._anchor(site,unit,context,step)))
                 result.extend(anchor for span,anchor in located if not any(
                     other!=span and self._contains(span,other) for other,_ in located))
-        answer=tuple(dict.fromkeys(result)); self.cache[key]=answer
+        answer=tuple(sorted(dict.fromkeys(result),key=_digest)); self.cache[key]=answer
         return answer
 
 
@@ -213,7 +215,7 @@ def _pins():
 
 def _basis(index):
     return dict(catalog=encode(_artifact(index.view.catalog.path/'result.json',index.view.catalog.report['schema'])),
-        trace=index.codes.trace.directory,project_root=index.codes.project_root,code_units=list(index.codes.selected_units),
+        trace=index.codes.trace.directory,project_root=index.codes.project_root,code_units=sorted(index.codes.selected_units),
         run_scope=index.codes.targets.source_sha256,target_reader_budget=index.codes.target_reader_budget,
         frame_budget=encode(index.codes.trace.frame_budget))
 
