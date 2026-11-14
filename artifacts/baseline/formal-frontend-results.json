@@ -3104,5 +3104,233 @@
       "interface_only_refresh": "FAILED_CLOSED_NOT_COMMITTED_AS_A_TOOL",
       "old_receipts_rewritten": false
     }
+  },
+  "observed_local_binding_state_progress": {
+    "recorded_at": "2026-11-14T10:46:22.753818+00:00",
+    "status": "SAVED_BINDING_STATE_UNIFIED_ADMISSION_AND_SOURCE_QUERIES_VERIFIED",
+    "first_stage_complete": false,
+    "producer": {
+      "receipt": {
+        "path": "/home/zyf/AAA/scar/artifacts/current/experiments/cpu-sunfish-current/observed-binding-states-interned/result.json",
+        "bytes": 52842,
+        "sha256": "f77f2b93ee114a76d03fe171df0286e825cf3380a50893e3dfad6c62feb92c1a"
+      },
+      "selected_local_read_slots": 168,
+      "completed_fixed_points": 165,
+      "budget_or_control_incomplete": 3,
+      "counts": {
+        "binding_accesses": 8453,
+        "content_accesses": 3045,
+        "content_addresses": 2603,
+        "content_relations": 21658,
+        "content_states": 6090,
+        "locations": 5533,
+        "operations": 78420,
+        "read_selections": 527,
+        "relations": 291679,
+        "tracks": 168,
+        "versions": 87472
+      },
+      "frontier_counts": {
+        "ACCESS_OUTSIDE_RETAINED_NORMAL_BODY_CONTROL": 105,
+        "APPLICATION_EXCEPTION_PATHS_OUTSIDE_NORMAL_SUCCESS_VIEW": 168,
+        "OPAQUE_CALLBACK_AND_CAPTURE_SLOT_IDENTITY_REMAIN_OPEN": 168,
+        "RESUME_ACTIVATION_CONTEXT_UNRESOLVED": 3
+      },
+      "seconds": 830.0463087169919,
+      "worker_peak_rss_kib": 1547400,
+      "shared_function_value_flows": 22
+    },
+    "limitations": [
+      "BINDING_VERSION_TEMPLATES_NOT_ACTUAL_TENSOR_CONTENT_VERSIONS",
+      "RESUME_ACTIVATION_CONTEXT_UNRESOLVED_FOR_THREE_TRACKS",
+      "105_ACCESS_ANCHORS_OUTSIDE_RETAINED_NORMAL_CONTROL_NOT_PROVED_DEAD",
+      "OPAQUE_CALLBACK_WRITERS_AND_APPLICATION_EXCEPTION_PATHS_REMAIN_OPEN",
+      "DEFAULT_FRONTEND_OPTIONAL_WHOLE_CATALOG_AUDIT_POLICY_ONLY_CLI_PARSED_NOT_NEW_END_TO_END_BENCHMARKED"
+    ],
+    "failed_attempts": [
+      {
+        "path": "artifacts/current/experiments/cpu-sunfish-current/observed-binding-states.log",
+        "reason": "OBSERVED_COMPILED_MATERIAL_MISSING_SHARED_TEMPLATE_CLOSURE_ADAPTER"
+      },
+      {
+        "path": "artifacts/current/experiments/cpu-sunfish-current/observed-binding-states-closed.log",
+        "reason": "MEMORYERROR_WHILE_EXPANDING_REPEATED_IMMUTABLE_DEFINITION_SETS"
+      }
+    ],
+    "gray_scott": {
+      "frontend": {
+        "path": "/home/zyf/AAA/scar/artifacts/current/experiments/cpu-gray-scott-current/graph-frontend-current/result.json",
+        "bytes": 5195,
+        "sha256": "3cbf1b3a444a31c191794139232e0ddc996a7e6d520ca9e91e49b6278382b9f8"
+      },
+      "workflow_complete": true,
+      "first_stage_complete": false,
+      "whole_frontend_seconds": 2737.204602842001,
+      "stages": 31,
+      "admitted_stages": 31,
+      "catalog_units": 14,
+      "counts": {
+        "binding_accesses": 27803,
+        "content_accesses": 9470,
+        "content_addresses": 9290,
+        "content_relations": 67577,
+        "content_states": 18940,
+        "local_read_tracks_available": 5898,
+        "local_read_tracks_solved": 0,
+        "locations": 14813,
+        "normalized_endpoints": 3001871,
+        "normalized_relations": 3205873,
+        "operations": 248292,
+        "original_steps": 248292,
+        "read_selections": 0,
+        "regions": 85635,
+        "relations": 34635,
+        "templates": 70817,
+        "tracks": 0,
+        "versions": 0
+      },
+      "materialization_seconds": 442.11497881899413,
+      "stored_shard_bytes": 518677778,
+      "observed_body_coverage": {
+        "body_protocols": {
+          "EnterClassBody": 1,
+          "EnterDeferredBody": 31,
+          "EnterRootBody": 2
+        },
+        "covered_entries": 81,
+        "entry_coverage_complete": true,
+        "missing_entries": 0,
+        "occurrences": 81,
+        "recorded_entries": 81,
+        "shared_activations": 49,
+        "shared_interfaces": 34,
+        "source_anchor_frontiers": 0,
+        "unmatched_entries": 0
+      },
+      "new_binding_state_stage_in_this_already_running_frontend": false
+    },
+    "cirq": {
+      "status": "RUNNING_ORIGINAL_FRONTEND_PROCESS",
+      "log": "artifacts/current/experiments/cpu-quantum-current/graph-frontend-current.log",
+      "last_completed_stage": "body-interfaces",
+      "independent_body_interface_rederivation": "RUNNING_UNDER_EARLIER_DEFAULT_POLICY"
+    },
+    "unified_build": {
+      "receipt": {
+        "path": "/home/zyf/AAA/scar/artifacts/current/experiments/cpu-sunfish-current/binding-connected-build/manifest.json",
+        "bytes": 11627,
+        "sha256": "c92d7829c2d427015d06b50cb87b20e72e5b68929f8fff4c6831db983e4fc803"
+      },
+      "seconds": 268.3674305179884,
+      "summary": {
+        "catalog_local_graph_materialized": true,
+        "configuration_inputs": 0,
+        "gaps": 67,
+        "loaded_units": 11,
+        "observed_binding_state_publications": 1,
+        "observed_body_activation_publications": 1,
+        "observed_boundary_publications": 1,
+        "observed_publications": 1,
+        "observed_resource_scope_publications": 1,
+        "resource_records": 31,
+        "source_units": 18
+      },
+      "layers": {
+        "body_copies": 0,
+        "catalog_local_graph_materialized": true,
+        "catalog_units": 18,
+        "cross_layer": {
+          "binding_states": true,
+          "body_activations": true,
+          "configuration": false,
+          "creations": false,
+          "exec": false,
+          "functions": true,
+          "native": false,
+          "observed_boundaries": true,
+          "protocol": false,
+          "resource_scopes": true
+        },
+        "loaded_units": 11,
+        "local_state": {
+          "bindings": true,
+          "content": true
+        },
+        "loops_unrolled": false,
+        "providers": [
+          "binding_states",
+          "body_activations",
+          "functions:/home/zyf/AAA/scar/artifacts/current/experiments/cpu-sunfish-current/body-protocol-frontend/function-interfaces",
+          "functions:/home/zyf/AAA/scar/artifacts/current/experiments/cpu-sunfish-current/scoped-selected-functions",
+          "observed_boundaries",
+          "resource_scopes"
+        ],
+        "readback": true,
+        "resources": true,
+        "storage": true,
+        "unified": true
+      },
+      "readback": {
+        "admitted_publications": 9,
+        "entry_expanded": true,
+        "independent_full_analysis_repeated": false,
+        "indices_reconstructed": 0,
+        "mode": "STORED_TABLES_WITH_ADMITTED_INDEX",
+        "output_tables": 7,
+        "seconds": 1.0223234570003115
+      }
+    },
+    "source_query": {
+      "receipt": {
+        "path": "/home/zyf/AAA/scar/artifacts/current/experiments/cpu-sunfish-current/binding-state-source-query.json",
+        "bytes": 499,
+        "sha256": "aa42840fdfbcc241f9283fc8a1d630753b8278c145c9e2eb7f28f157c67cc6b4"
+      },
+      "result": {
+        "first_stage_complete": false,
+        "location_expands_to_version": true,
+        "projected_relations": 1326,
+        "read_target_is_original_binding_read": true,
+        "relations_checked_by_kind": [
+          "BINDING_PAYLOAD",
+          "BINDING_READ",
+          "STATE_LOCATION",
+          "STATE_OUTPUT"
+        ],
+        "same_original_source_namespace": true,
+        "schema": "scar.observed-binding-source-query",
+        "seconds": 65.62919190600223,
+        "source_fixed_points_repeated": false,
+        "status": "STRUCTURE_VERIFIED",
+        "tensor_content_identity_proven": false,
+        "unit": "90f8b1eb2b1a5308cb8dc07c",
+        "versions": 575
+      }
+    },
+    "stored_state_admission": {
+      "mode": "PINNED_TYPED_STORED_STATE_WITH_ENDPOINT_CLOSURE",
+      "fixed_points_repeated": false,
+      "source_normalization_reused": true,
+      "independent_source_replay_available": true
+    },
+    "resume_frontier_diagnosis": {
+      "status": "OBSERVED_AND_SOURCE_RULE_CONFIRMED_NOT_YET_REPAIRED",
+      "count": 3,
+      "unit": "90f8b1eb2b1a5308cb8dc07c",
+      "source_template_occurrences": [
+        3334,
+        3431,
+        3481
+      ],
+      "transition": "RESUME",
+      "source_rule": "normal_graph._Emitter.run/SuspendExecution.routes",
+      "meaning": "CONDITIONAL_NORMAL_RESUMPTION_WITH_FRESH_WORLD_AND_SAVED_REFERENCES_NOT_SAVED_CONTENTS",
+      "next_obligations": [
+        "SAME_ACTIVATION_ROUTE_SELECTION",
+        "MATCHED_RESUME_RETURN_STACK",
+        "FRESH_WORLD_AND_POTENTIAL_EXTERNAL_SLOT_WRITERS"
+      ]
+    }
   }
 }

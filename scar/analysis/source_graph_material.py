@@ -17,6 +17,21 @@ from scar.ir.program.providers import ProviderArtifact
 from scar.ir.program.source_template_links import SourceTemplateKey
 
 
+class ObservedGraphMaterial:
+    """Complete the same lazy template interface over an observed leaf.
+
+    The original leaf still owns plans, receipts and guards. Only the shared
+    template adjacency is added; no stored artifact or source ID is changed.
+    """
+    def __init__(self,material):
+        self._material=material;self._children=defaultdict(list)
+        for link in material.graph.links:self._children[link.caller].append(link.callee)
+
+    def __getattr__(self,name):return getattr(self._material,name)
+
+    closure=WorldMaterial.closure
+
+
 class CompiledGraphMaterial(WorldMaterial):
     """Expose existing compile-context recipes through the source reader API."""
 
@@ -94,7 +109,7 @@ def source_graph_material(catalog, unit):
     """Select by the source catalog's format; keep its original identities."""
     catalog = read_source_catalog(catalog)
     if unit in getattr(catalog.fact_store, 'observed_compiled_units', ()):
-        return catalog.local_material(unit)
+        return ObservedGraphMaterial(catalog.local_material(unit))
     if unit in catalog.fact_store.original_source_units:
         return CompiledGraphMaterial(catalog, unit)
     return WorldMaterial(catalog, unit)

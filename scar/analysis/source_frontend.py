@@ -202,7 +202,8 @@ def admit_external_sources(run, catalog, trace, project_root, jobs):
         previous=requested
 
 
-def build_frontend(paths, out, *, sources=(), jobs=4, trace=None, project_root=None, source_model=None):
+def build_frontend(paths, out, *, sources=(), jobs=4, trace=None, project_root=None, source_model=None,
+        verify_body_interfaces=False):
     """Build complete local declarations for the selected source corpus."""
     paths = tuple(dict.fromkeys(Path(p).resolve() for p in paths))
     sources = tuple(dict.fromkeys(Path(p).resolve() for p in sources))
@@ -320,15 +321,20 @@ def build_frontend(paths, out, *, sources=(), jobs=4, trace=None, project_root=N
         if trace is not None:
             active_catalog,report['external_admission_batches']=admit_external_sources(
                 run,active_catalog,trace,project_root,jobs)
-        run.stage('body-interfaces','scar.analysis.source_body_interfaces',
-            ['--catalog',active_catalog,'--out',out/'body-interfaces','--jobs',jobs],
-            out/'body-interfaces/result.json','scar.source-body-interfaces',
-            source_bodies_copied=False,runtime_bindings_proven=False,first_stage_complete=False)
-        run.stage('body-interfaces-verified','scar.analysis.source_body_interfaces',
-            ['--read',out/'body-interfaces','--out',out/'body-interfaces-verified.json'],
-            out/'body-interfaces-verified.json','scar.source-body-interfaces.readback',status='VERIFIED')
-        report['body_interfaces'] = _receipt(out/'body-interfaces/result.json')
-        report['body_interfaces_verified'] = _receipt(out/'body-interfaces-verified.json')
+        # Canonical F4 already contains every declared body and its ports.
+        # Runtime body interfaces below are derived with the admitted index.
+        # A second full-catalog interface view is an optional independent audit.
+        report['whole_catalog_body_rederivation']=bool(verify_body_interfaces)
+        if verify_body_interfaces:
+            run.stage('body-interfaces','scar.analysis.source_body_interfaces',
+                ['--catalog',active_catalog,'--out',out/'body-interfaces','--jobs',jobs],
+                out/'body-interfaces/result.json','scar.source-body-interfaces',
+                source_bodies_copied=False,runtime_bindings_proven=False,first_stage_complete=False)
+            report['body_interfaces'] = _receipt(out/'body-interfaces/result.json')
+            run.stage('body-interfaces-verified','scar.analysis.source_body_interfaces',
+                ['--read',out/'body-interfaces','--out',out/'body-interfaces-verified.json'],
+                out/'body-interfaces-verified.json','scar.source-body-interfaces.readback',status='VERIFIED')
+            report['body_interfaces_verified'] = _receipt(out/'body-interfaces-verified.json')
         run.stage('catalog-graph-state','scar.analysis.program_state_coverage',
             ['--catalog',active_catalog,'--out',out/'catalog-graph-state','--jobs',min(jobs,8)],
             out/'catalog-graph-state/result.json','scar.source-state-coverage',status='COMPLETE_INVENTORY',
@@ -376,6 +382,12 @@ def build_frontend(paths, out, *, sources=(), jobs=4, trace=None, project_root=N
                     or boundary['target_executed'] is not False):
                 raise ValueError('observed boundary publication contract differs')
             report['observed_boundaries'] = _receipt(out/'observed-boundaries/result.json')
+            run.stage('observed-binding-states','scar.analysis.source_observed_state',
+                ['--interfaces',out/'observed-function-interfaces','--out',out/'observed-binding-states',
+                    '--jobs',min(jobs,8)],out/'observed-binding-states/result.json',
+                'scar.observed-source-binding-states',target_executed=False,first_stage_complete=False,
+                actual_frame_or_tensor_contents_proven=False,loops_unrolled=False)
+            report['observed_binding_states']=_receipt(out/'observed-binding-states/result.json')
         report.update(workflow_complete=True, local_declarations_complete=True,
             model=_receipt(model/'manifest.json'), catalog=_receipt(active_catalog/'result.json'),
             calls=_receipt(out/'calls/result.json'),
@@ -401,13 +413,16 @@ def main(argv=None):
     parser.add_argument('--jobs', type=int, default=4, help='total lowering worker budget, 1..32')
     parser.add_argument('--source', action='append', default=[], help='exact file selected for F4; earlier source layers retain the corpus')
     parser.add_argument('--source-model', help='reuse an existing F0--F3 source model; current F4 collection and fresh verification still run')
+    parser.add_argument('--verify-body-interfaces',action='store_true',
+        help='also materialize and independently rederive all declared body interfaces')
     parser.add_argument('--trace', help='existing trace to join after local call interfaces; no target execution')
     parser.add_argument('--project-root', help='original trace namespace root; required with --trace')
     args = parser.parse_args(argv)
     if (args.trace is None) != (args.project_root is None):
         parser.error('--trace and --project-root must be supplied together')
     report = build_frontend(args.paths,args.out,sources=args.source,jobs=args.jobs,
-        trace=args.trace,project_root=args.project_root,source_model=args.source_model)
+        trace=args.trace,project_root=args.project_root,source_model=args.source_model,
+        verify_body_interfaces=args.verify_body_interfaces)
     print(json.dumps(report,indent=2),flush=True)
     return 0 if report['workflow_complete'] else 1
 

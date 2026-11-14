@@ -64,14 +64,22 @@ def discover(entry,trace,*,catalog=None,cache_roots=()):
             'scar.constructor-member-contexts':'members','scar.source-binding-native-graph':'native',
             'scar.source-resource-graph':'resources','scar.configuration-state-bindings':'configuration',
             'scar.source-observed-boundaries':'observed_boundaries',
+            'scar.observed-source-binding-states':'binding_states',
             'scar.source-state-coverage':'source_coverage',
             'scar.source-resource-scopes':'resource_scopes',
             'scar.source-body-activations':'body_activations'}.get(schema)
+        if key=='binding_states':
+            from scar.analysis.source_observed_state import _pins as binding_pins
+            plan=r['plan'];parent=json.loads(Path(plan['parent']['path']).read_bytes())
+            if (trace is None or parent['trace']!=str(trace)
+                    or Path(plan['catalog']['uri']).parent.resolve()!=c.path.resolve()):continue
+            if plan['pins']!=binding_pins():
+                gaps.append(dict(layer=key,kind='CACHED_COMPONENT_RULES_CHANGED',path=str(path)));continue
         if key=='source_coverage':
-            from scar.analysis.program_state_coverage import _pins as coverage_pins
+            from scar.analysis.program_inventory_admission import compatible_static_pins
             plan=r['plan']
             if Path(plan['catalog']).resolve()!=c.path.resolve() or not plan.get('local_graph_shards'):continue
-            if plan['pins']!=coverage_pins():
+            if not compatible_static_pins(plan):
                 gaps.append(dict(layer=key,kind='CACHED_COMPONENT_RULES_CHANGED',path=str(path)));continue
         if key=='resource_scopes':
             if (trace is None or Path(r['capture'])/'trace'!=trace or r['catalog']!=str(c.path)):continue
@@ -132,6 +140,9 @@ class F4BuildSession:
         self._components(spec['components'])
         self._checkpoint('cross_layer_interfaces')
         self.view.register(_LazyState(self.view))
+        binding_states=self.providers.get('binding_states')
+        if binding_states is not None and spec['entry_unit'] in binding_states.headers:
+            binding_states.ensure(spec['entry_unit'])
         self.view.state(spec['entry_unit']).content()
         self._checkpoint('local_state_and_content')
         from scar.analysis.build_f4_resources import LazyF4Resources
@@ -185,7 +196,7 @@ class F4BuildSession:
         else:
             from scar.analysis.source_exec_view import SourceExecProvider
             self.providers['exec']=SourceExecProvider(self.view,self.catalog)
-        for name in ('creations','native','protocol','configuration','observed_boundaries','body_activations','resource_scopes','source_coverage'):
+        for name in ('creations','native','protocol','configuration','observed_boundaries','body_activations','resource_scopes','binding_states','source_coverage'):
             try:
                 path=self._component_path(name)
                 if path is None:
@@ -225,11 +236,16 @@ class F4BuildSession:
                     store=ResourceScopeStore(path,index=indices[0] if indices else None)
                     provider=SourceResourceScopeProvider(self.view,store)
                 elif name=='source_coverage':
-                    from scar.analysis.program_state_coverage import read_inventory
-                    self.source_coverage=read_inventory(path,catalog=self.catalog);self.coverage_path=path
+                    from scar.analysis.program_inventory_admission import admit_static_inventory
+                    self.source_coverage=admit_static_inventory(path,catalog=self.catalog);self.coverage_path=path
                     if not self.source_coverage['catalog_local_graph_materialized']:
                         self.gaps.append(dict(layer=name,kind='CATALOG_LOCAL_GRAPH_INCOMPLETE'))
                     continue
+                elif name=='binding_states':
+                    from scar.analysis.source_observed_state_view import SourceObservedStateProvider
+                    indices=[p.store.index for p in self.providers.values()
+                        if getattr(getattr(p,'store',None),'index',None) is not None]
+                    provider=SourceObservedStateProvider(self.view,path,index=indices[0] if indices else None)
                 else:
                     from scar.analysis.source_configuration_view import SourceConfigurationProvider
                     provider=SourceConfigurationProvider(self.view,path)
@@ -242,8 +258,13 @@ class F4BuildSession:
         if self.report['trace']:
             from scar.analysis.build import _check
             for receipt in self.report['trace']['inputs']:_check(receipt)
-        observations=[];boundaries=[];activations=[];resource_scopes=[]
+        observations=[];boundaries=[];activations=[];resource_scopes=[];binding_states=[]
         for p in self.providers.values():
+            if getattr(p,'report',{}).get('schema')=='scar.observed-source-binding-states':
+                p.check();binding_states.append(dict(path=str(p.path),counts=p.report['counts'],
+                    selected_local_read_slots=p.report['selected_local_read_slots'],
+                    completed_fixed_points=p.report['completed_fixed_points'],
+                    budget_or_control_incomplete=p.report['budget_or_control_incomplete']))
             store=getattr(p,'store',None)
             if store is not None and store.report['schema']=='scar.source-observed-function-interfaces':
                 observations.append(dict(path=str(store.path),counts=store.report['counts'],run_scope=store.report['run_scope']))
@@ -258,7 +279,7 @@ class F4BuildSession:
                 store.check()
                 resource_scopes.append(dict(path=str(store.path),summary=store.report['summary']))
         self.observed=dict(schema='scar.build-f4-observed-selections',publications=observations,
-            boundaries=boundaries,body_activations=activations,resource_scopes=resource_scopes,
+            boundaries=boundaries,body_activations=activations,resource_scopes=resource_scopes,binding_states=binding_states,
             runtime_events_replaced_by_static_frames=False)
         return self.observed
 
@@ -300,7 +321,7 @@ class F4BuildSession:
     def layer_summary(self):
         return dict(unified=True,local_state=dict(bindings=True,content=True),
             cross_layer=dict(functions=any(k.startswith('functions:') for k in self.providers),
-                **{k:k in self.providers for k in ('exec','creations','native','protocol','configuration','observed_boundaries','body_activations','resource_scopes')}),resources=True,
+                **{k:k in self.providers for k in ('exec','creations','native','protocol','configuration','observed_boundaries','body_activations','resource_scopes','binding_states')}),resources=True,
             storage=True,readback=True,providers=sorted(self.providers),
             loaded_units=len(self.view.units),catalog_units=len(self.catalog.fact_store.rows),
             catalog_local_graph_materialized=bool(self.source_coverage and self.source_coverage['catalog_local_graph_materialized']),
@@ -316,10 +337,12 @@ class F4BuildSession:
                 catalog_units=report['plan']['catalog_units'],materialized_units=report['inventoried_units'],
                 counts=report['counts'],failed_units=report['failures'],
                 stored_shard_bytes=self.source_coverage['stored_shard_bytes'])
+            local['admission']=self.source_coverage['admission']
         observed=self.observed or self.attach_trace()
         return dict(schema='scar.program-build-coverage',schema_version=1,
             local_graph=local,observed_body_entries=[r['coverage'] for r in observed['body_activations']],
             observed_resource_scopes=[r['summary'] for r in observed['resource_scopes']],
+            observed_binding_states=observed['binding_states'],
             entry_query_purpose='BOUNDED_NAVIGATION_EXAMPLE_NOT_COVERAGE_DENOMINATOR',
             runtime_path_complete=False,effects_closed=False,first_stage_complete=False)
 
@@ -347,8 +370,8 @@ class F4BuildSession:
             raise ValueError('stored execution evidence differs from admitted observations')
         if (self.path/'coverage.json').exists():
             if self.source_coverage is not None:
-                from scar.analysis.program_state_coverage import read_inventory
-                if read_inventory(self.coverage_path,catalog=self.catalog)!=self.source_coverage:
+                from scar.analysis.program_inventory_admission import admit_static_inventory
+                if admit_static_inventory(self.coverage_path,catalog=self.catalog)!=self.source_coverage:
                     raise ValueError('admitted graph coverage changed during publication')
             if json.loads((self.path/'coverage.json').read_bytes())!=canonical(self.coverage_summary()):
                 raise ValueError('stored coverage differs from original unit and execution domains')
@@ -411,12 +434,13 @@ def build_f4(entry,trace,out,spec,*,source_roots=(),max_points=128,max_seconds=3
         (out/'resources.json.gz').write_bytes(gzip.compress(json.dumps(payload,separators=(',',':')).encode(),mtime=0))
         report['layers']=session.layer_summary()
         report['assembly_elapsed_by_layer']=session.timings
-        report['observed_admission']='ADMITTED' if any(observed[k] for k in ('publications','boundaries','body_activations','resource_scopes')) else 'NOT_JOINED'
+        report['observed_admission']='ADMITTED' if any(observed[k] for k in ('publications','boundaries','body_activations','resource_scopes','binding_states')) else 'NOT_JOINED'
         report['summary']=dict(source_units=len(session.catalog.fact_store.rows),loaded_units=len(session.view.units),
             configuration_inputs=len(configuration),observed_publications=len(observed['publications']),
             observed_boundary_publications=len(observed['boundaries']),
             observed_body_activation_publications=len(observed['body_activations']),
             observed_resource_scope_publications=len(observed['resource_scopes']),
+            observed_binding_state_publications=len(observed['binding_states']),
             catalog_local_graph_materialized=bool(session.source_coverage and session.source_coverage['catalog_local_graph_materialized']),
             resource_records=len(session.resources.provider.records))
         return _finish_publication(session,report,gaps,started)

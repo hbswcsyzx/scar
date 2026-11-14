@@ -5,6 +5,7 @@ primitive operations can weakly introduce opaque effects. Neither missing
 paths in this NORMAL_SUCCESS view nor exhausted budgets prove impossibility.
 """
 from collections import defaultdict, deque
+from functools import cache
 
 from scar.analysis.source_graph_material import source_graph_material
 from scar.analysis.source_name_access_anchors import anchor_name_accesses
@@ -188,15 +189,19 @@ def reaching_name_definitions(snapshot, source_function, namespace, *, anchor_gr
             if combined != incoming[target]:
                 incoming[target] = combined
                 if target not in queued: queued.add(target); queue.append(target)
+    # Many recipe ports carry the same definition set. Materialize that
+    # immutable ordinal tuple once per distinct bitset, rather than once for
+    # every incoming/outgoing control coordinate. Wire values stay identical.
+    identifiers = cache(_ids)
     reads = []; seen_reads = set()
     for state, (port, _) in enumerate(coordinates):
         for access, anchors in reads_by_site.get(port, {}).items():
-            reads.append(D.NameDefinitionRead(state, access, tuple(anchors), _ids(incoming[state]))); seen_reads.add(access)
+            reads.append(D.NameDefinitionRead(state, access, tuple(anchors), identifiers(incoming[state]))); seen_reads.add(access)
     for accesses in reads_by_site.values():
         for access in accesses:
             if access not in seen_reads:
                 frontier(None, None, access, 'READ_NOT_REACHED_IN_RETAINED_NORMAL_CONTROL_VIEW')
-    states = tuple(D.NameDefinitionState(port, stack, _ids(incoming[i]), _ids(outgoing[i]))
+    states = tuple(D.NameDefinitionState(port, stack, identifiers(incoming[i]), identifiers(outgoing[i]))
         for i, (port, stack) in enumerate(coordinates))
     material.validate_parents()
     return D.NameDefinitionGraph(source_function, function_fact, body, scope, namespace, anchor_graph,
