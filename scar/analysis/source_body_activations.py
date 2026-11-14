@@ -149,7 +149,10 @@ def derive_body_activations(index):
             by_site[capture.process_id,capture.code.key].append(link)
     endings=defaultdict(list)
     for exit_ in index.codes.trace.exits:endings[exit_.invocation].append(exit_)
-    resolver=BodyInterfaceResolver(index.view); anchors=_SourceAnchors(index,resolver)
+    resolver=BodyInterfaceResolver(index.view)
+    resolver.prepare_many(link.body for entry in index.codes.trace.entries
+        for link,_ in by_code.get((entry.invocation.process_id,entry.code),()))
+    anchors=_SourceAnchors(index,resolver)
     interfaces={}; activations={}; observations=[]; frontiers=[]; by_invocation=defaultdict(list)
     for entry in index.codes.trace.entries:
         matches=by_code.get((entry.invocation.process_id,entry.code),())

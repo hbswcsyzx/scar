@@ -3,6 +3,7 @@ from types import SimpleNamespace as NS
 import pytest
 
 from scar.analysis.source_body_interfaces import BodyInterfaceResolver
+from scar.analysis import source_body_interfaces as body_reader
 from scar.analysis import source_body_activation_view as port_view
 from scar.ir.program import source_body_interfaces as B, source_productions as P, normal_graph as G
 from scar.ir.program.normal_targets import Body, GlobalPort
@@ -66,3 +67,29 @@ def test_added_resume_reference_cannot_disappear_from_the_graph_contract(monkeyp
     monkeypatch.delitem(port_view._PORT_RULES,('ingresses','*','suspension'))
     with pytest.raises(ValueError,match='complete declared schema'):
         port_view.body_port_contract()
+
+
+def test_prepare_many_reads_two_body_closures_in_one_original_plan_batch(monkeypatch):
+    first, second, shared, unrelated = (G.SourceTemplateKey(i,P.ProductionPurpose.STATEMENT)
+        for i in range(1,5))
+    region=P.ProductionRegionID('r0')
+    bodies=(Body('unit',first,region),Body('unit',second,region))
+    # The stored node order differs from request order. The shared child also
+    # cycles to a root; neither duplication nor cycles should add a read pass.
+    original={key:NS(origin=NS(plan_sha256=str(key.occurrence)))
+        for key in (second,shared,first,unrelated)}
+    plans={key:object() for key in original}; reads=[]
+    def read(keys):
+        reads.append(keys)
+        return {key:plans[key] for key in keys}
+    material=NS(interfaces=dict(nodes=original,links={
+        (first,'a'):NS(callee=shared),(second,'b'):NS(callee=shared),(shared,'c'):NS(callee=first)}),plans=read)
+    resolver=BodyInterfaceResolver(NS(unit=lambda unit:NS(material=material,check=lambda:None)))
+    monkeypatch.setattr(body_reader,'extract_body_interfaces',lambda *args,**kwargs:())
+    monkeypatch.setattr(body_reader,'NamespacePlanView',lambda unit,plan:plan)
+    resolver.prepare_many(iter(bodies))
+    assert reads==[(second,shared,first)]
+    assert set(resolver.plans)=={('unit',key) for key in (first,second,shared)}
+    assert all(resolver.plan('unit',key) is plans[key] for key in (first,second,shared))
+    for body in bodies:resolver.prepare(body)
+    assert reads==[(second,shared,first)]
