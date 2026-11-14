@@ -29,7 +29,9 @@ def test_reference_return_is_separate_from_state_return(monkeypatch):
             (T.Route(gp(source, 3), T.RouteKind.STATE, (gp(target, 12),)),),
             ((gp(source, 4), gp(target, 11)), (gp(source, 5), gp(target, 13))), ())
     class Interfaces:
-        slicer = NS(store=NS(original_source_units={}))
+        # b is an already admitted compiled-context caller. Its original
+        # world-argument/return routes remain usable through the common F4 API.
+        slicer = NS(store=NS(original_source_units={'b':'original-b'}))
         snapshot = NS(catalog=None, validate_parents=lambda: None)
         def function(self, point): return units[point.unit], functions[point.unit]
         def caller(self, unit, index): return functions[unit.unit]
@@ -43,11 +45,17 @@ def test_reference_return_is_separate_from_state_return(monkeypatch):
             # a returns its tracked object; b returns an unrelated call result.
             root = gp('a', 0) if self.unit.unit == 'a' else gp('b', 30)
             return (A.AddressPath(root, A.AddressRootKind.CALL_RESULT, (), (), ('SELECTED_SOURCE_PATH',)),)
-    monkeypatch.setattr(M, 'WorldMaterial', lambda *args: None)
+    material_units=[]
+    def material(catalog,unit):
+        material_units.append(unit)
+        return None
+    monkeypatch.setattr(M, '_caller_material', material)
     monkeypatch.setattr(M, 'project_world_flow', lambda material, body, witness, anchor, end, **kw: flow(body.unit, anchor))
     monkeypatch.setattr(M, 'AddressResolver', Addresses)
     graph = M.compose_returns(Interfaces(), ((gp('a', 7), None, gp('a', 0), flow('a', gp('a', 8))),))
     assert len(graph.nodes) == 3 and len(graph.edges) == 2
+    assert material_units == ['b','c']
+    assert not any(f.reason == 'COMPILED_CALLER_WORLD_MATERIAL_ADAPTER_PENDING' for f in graph.frontiers)
     first, second = graph.edges
     assert first.reference_forwarded and not second.reference_forwarded
     assert graph.nodes[first.caller].tracked_reference == gp('b', 11)

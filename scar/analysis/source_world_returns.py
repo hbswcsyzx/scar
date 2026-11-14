@@ -14,7 +14,6 @@ import time
 import sys
 
 from scar.analysis.source_world_flow import project_world_flow
-from scar.analysis.source_world_material import WorldMaterial
 from scar.analysis.source_relation_snapshot import RelationSnapshot
 from scar.analysis.source_reference_slice import ReferenceSlicer, source_port
 from scar.analysis.source_address_paths import AddressResolver
@@ -36,6 +35,13 @@ def _artifact(path, schema):
 def _table_ref(root, receipt, schema, ordinal):
     return ProviderFactReference(ProviderArtifact(str(Path(root)/receipt['path']), receipt['sha256'],
         receipt['bytes'], schema), '#/records/'+str(ordinal))
+
+
+def _caller_material(catalog, unit):
+    # The common reader's receipt guards import this module, so defer loading
+    # the adapter until the original world-return declarations are available.
+    from scar.analysis.source_graph_material import source_graph_material
+    return source_graph_material(catalog, unit)
 
 
 class ReturnInterfaces:
@@ -158,10 +164,8 @@ def compose_returns(interfaces, initial, *, max_nodes=32, max_edges=128, max_tem
                 frontiers.append(R.WorldReturnFrontier(index, 'RETURN_NODE_BUDGET_FRONTIER')); continue
             else:
                 target = None
-            if key in interfaces.slicer.store.original_source_units:
-                frontiers.append(R.WorldReturnFrontier(index, 'COMPILED_CALLER_WORLD_MATERIAL_ADAPTER_PENDING')); continue
             if target is None:
-                if key not in materials: materials[key] = WorldMaterial(interfaces.snapshot.catalog, key)
+                if key not in materials: materials[key] = _caller_material(interfaces.snapshot.catalog, key)
                 body = T.Body(key, caller_fn.template, caller_fn.body)
                 caller_flow = project_world_flow(materials[key], body, witness, after,
                     source_port(caller_unit, caller_fn.return_world), max_templates=max_templates)
@@ -185,10 +189,11 @@ def _artifact(path, schema):
 
 
 def _pins():
-    from scar.analysis import source_world_flow, source_address_paths, source_world_material, source_world_return_parents
+    from scar.analysis import source_world_flow, source_address_paths, source_world_material, source_graph_material, source_world_return_parents
     return {name: sha256(Path(path).read_bytes()).hexdigest() for name, path in (
         ('producer', __file__), ('types', R.__file__), ('world_flow', source_world_flow.__file__),
         ('addresses', source_address_paths.__file__), ('material', source_world_material.__file__),
+        ('material_adapter', source_graph_material.__file__),
         ('parent_reader', source_world_return_parents.__file__))}
 
 
