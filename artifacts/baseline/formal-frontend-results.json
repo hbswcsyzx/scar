@@ -3331,6 +3331,38 @@
         "MATCHED_RESUME_RETURN_STACK",
         "FRESH_WORLD_AND_POTENTIAL_EXTERNAL_SLOT_WRITERS"
       ]
+    },
+    "publication_profile": {
+      "recorded_at": "2026-11-14T10:55:37.865286+00:00",
+      "classification": "OBSERVED",
+      "units": [
+        {
+          "unit": "7806b05859ff33917cb32a8a458695052a99e7a3bf0b9859c50e4c2149e2f9f0",
+          "total_seconds": 724.7201518610091,
+          "publication_seconds": 587.8633920610009,
+          "track_count": 39,
+          "track_compressed_bytes": 184315512,
+          "track_decoded_bytes": 4295953471
+        },
+        {
+          "unit": "5a4dd918d047caa00a2081f0",
+          "total_seconds": 720.4665179299918,
+          "publication_seconds": 586.1319089110038,
+          "track_count": 39,
+          "track_compressed_bytes": 184446159,
+          "track_decoded_bytes": 4295944332
+        },
+        {
+          "unit": "25ce45eb14194f64894b6885431f7db3c790612b156001ac8f4b5705b8efe42a",
+          "total_seconds": 113.90086655699997,
+          "publication_seconds": 45.67092712900194,
+          "track_count": 24,
+          "track_compressed_bytes": 10890783,
+          "track_decoded_bytes": 316035860
+        }
+      ],
+      "next_change": "PROPOSED_SHARED_CONTROL_AND_READ_DEFINITION_STORAGE_NO_SOLVER_SEMANTICS_CHANGE",
+      "implemented": false
     }
   }
 }
