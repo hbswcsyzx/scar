@@ -71,10 +71,15 @@ def _supported(plan: ExecutionPlan) -> dict[str, bool]:
     # of shared structural policy, including when backends load separately.
     from scar.compiler.validation import validate_plan
     validate_plan(plan)
-    if (plan.schema_version != 1 or plan.operator_abi_version != ABI_VERSION or
+    if (plan.schema_version not in (1, 2) or plan.operator_abi_version != ABI_VERSION or
             plan.profile != PROFILE or plan.device != "cpu" or
             plan.buffer_policy != "fresh_output"):
-        raise ValueError("C++ backend requires CPU execution-plan/ABI version 1 and fresh output")
+        raise ValueError("C++ backend requires CPU execution-plan version 1/2, ABI 1 and fresh output")
+    if plan.resource_binding is not None:
+        if sys.platform != "linux":
+            raise ValueError("C++ CPU affinity binding requires Linux")
+        if any(cpu >= 2**20 for cpu in plan.resource_binding.cpu_ids):
+            raise ValueError("C++ CPU affinity binding supports Linux CPU IDs below 2**20")
     if plan.region.frontiers:
         raise ValueError("C++ backend cannot cross unresolved execution frontiers")
     extents = [axis.extent for axis in plan.schedule]
@@ -149,6 +154,7 @@ def _bound(value, extent: str, *, stop: bool = False) -> str:
 
 
 def _source(plan: ExecutionPlan, scalar: dict[str, bool]) -> str:
+    binding = plan.resource_binding
     names = {node.id: f"s{i}" for i, node in enumerate(plan.region.nodes)}
     shape_lines = []
     views = {}
@@ -243,13 +249,20 @@ def _source(plan: ExecutionPlan, scalar: dict[str, bool]) -> str:
         # worker whose environment could not be prepared safely.
         worker_start = [
             "        const int caller_rounding = std::fegetround();",
-            f"        #pragma omp parallel num_threads({plan.cpu_threads}) reduction(|:worker_guard)",
+            f"        #pragma omp parallel num_threads({plan.cpu_threads}) reduction(|:worker_guard{', placement_guard' if binding is not None else ''})",
             "        {",
+            *([
+                "            ThreadAffinity worker_affinity;",
+                f"            const bool worker_team_ready = omp_get_num_threads() == {plan.cpu_threads};",
+                "            const bool worker_affinity_ready = worker_team_ready &&",
+                "                worker_affinity.bind(planned_cpu_ids[omp_get_thread_num()]);",
+            ] if binding is not None else []),
             "            fenv_t worker_saved, worker_held;",
             "            const bool worker_saved_ok = std::fegetenv(&worker_saved) == 0;",
             "            const bool worker_held_ok = worker_saved_ok && std::feholdexcept(&worker_held) == 0;",
-            "            const bool worker_ready = worker_held_ok && caller_rounding >= 0 &&",
+            "            const bool worker_fenv_ready = worker_held_ok && caller_rounding >= 0 &&",
             "                                      std::fesetround(caller_rounding) == 0;",
+            "            const bool worker_ready = worker_fenv_ready" + (" && worker_affinity_ready;" if binding is not None else ";"),
             "            uint32_t nonfinite_input = 0;",
             "            #pragma omp for schedule(static)",
         ]
@@ -260,17 +273,50 @@ def _source(plan: ExecutionPlan, scalar: dict[str, bool]) -> str:
             "                std::fetestexcept(FE_DIVBYZERO | FE_INVALID | FE_OVERFLOW | FE_UNDERFLOW) : 0;",
             "            const int worker_restored = worker_saved_ok ? std::fesetenv(&worker_saved) : -1;",
             "            worker_guard |= static_cast<uint32_t>(",
-            "                !worker_ready || worker_raised || worker_restored || nonfinite_input);",
+            "                !worker_fenv_ready || worker_raised || worker_restored || nonfinite_input);",
+            *([
+                "            const bool worker_affinity_kept = worker_affinity.bound();",
+                "            const bool worker_affinity_restored = worker_affinity.restore();",
+                "            placement_guard |= static_cast<uint32_t>(",
+                "                !worker_affinity_ready || !worker_affinity_kept || !worker_affinity_restored);",
+            ] if binding is not None else []),
             "        }",
         ]
         loops = [*prelude, *worker_start, *parallel_rows, *worker_end, "    }"]
     template = (_DIRECTORY / "kernel_v1.cpp.in").read_text()
+    affinity_start = []
+    affinity_finish = []
+    if binding is not None:
+        affinity_start = [
+            "    ThreadAffinity caller_affinity;",
+            "    for (int cpu : planned_cpu_ids) {",
+            "        if (!caller_affinity.contains(cpu)) return affinity_guard_status;",
+            "    }",
+        ]
+        if plan.cpu_threads == 1:
+            affinity_start.append("    if (!caller_affinity.bind(planned_cpu_ids[0])) return affinity_guard_status;")
+            affinity_finish.extend((
+                "    const bool caller_affinity_kept = caller_affinity.bound();",
+                "    const bool caller_affinity_restored = caller_affinity.restore();",
+                "    placement_guard |= static_cast<uint32_t>(!caller_affinity_kept || !caller_affinity_restored);",
+            ))
+        else:
+            affinity_finish.extend((
+                "    const bool caller_affinity_restored = caller_affinity.restore_original();",
+                "    placement_guard |= static_cast<uint32_t>(!caller_affinity_restored);",
+            ))
+        affinity_finish.append("    if (placement_guard) return affinity_guard_status;")
     for key, value in {
         "INPUT_COUNT": str(len(plan.region.parameters)),
         "SHAPES": "\n".join(shape_lines),
         "OUTPUT_SHAPE": names[plan.region.output],
         "LOOPS": "\n".join(loops), "PLAN_SHA256": _plan_digest(plan),
         "OPENMP_INCLUDE": "#include <omp.h>" if plan.cpu_threads > 1 else "",
+        "CPU_BINDING_ENABLED": "1" if binding is not None else "0",
+        "CPU_IDS": ", ".join(str(cpu) for cpu in binding.cpu_ids) if binding is not None else "0",
+        "CPU_SLOTS": str(max(binding.cpu_ids) + 1) if binding is not None else "1",
+        "AFFINITY_START": "\n".join(affinity_start),
+        "AFFINITY_FINISH": "\n".join(affinity_finish),
     }.items():
         template = template.replace(f"@{key}@", value)
     return template
@@ -333,6 +379,7 @@ class CppArtifact:
     _metadata: dict
     _library: object
     _run: object
+    _resource_schedule: dict | None = None
 
     @property
     def source_path(self) -> Path:
@@ -355,6 +402,15 @@ class CppArtifact:
         return self.directory / "artifact.json"
 
     @property
+    def resource_schedule_path(self) -> Path | None:
+        filename = self._metadata["files"].get("resource_schedule")
+        return self.directory / filename if filename is not None else None
+
+    @property
+    def resource_schedule(self) -> dict | None:
+        return json.loads(json.dumps(self._resource_schedule))
+
+    @property
     def compiler_options(self) -> tuple[str, ...]:
         return tuple(self._metadata["compiler_options"])
 
@@ -363,6 +419,7 @@ class CppArtifact:
         return {**json.loads(json.dumps(self._metadata)), "artifact_directory": str(self.directory),
                 "source_path": str(self.source_path), "library_path": str(self.library_path),
                 "plan_path": str(self.plan_path), "metadata_path": str(self.metadata_path),
+                "resource_schedule_path": str(self.resource_schedule_path) if self.resource_schedule_path is not None else None,
                 "abi_header_path": str(self.abi_header_path)}
 
     def run(self, *arrays):
@@ -384,16 +441,26 @@ class CppArtifact:
         status = self._run(inputs, len(descriptors), ctypes.byref(output_descriptor))
         if status:
             reasons = {1: "native pointer/rank/bounds guard", 2: "native shape guard",
-                       3: "native floating-point error or non-finite input; run original NumPy operation"}
+                       3: "native floating-point error or non-finite input; run original NumPy operation",
+                       4: "native CPU affinity availability, binding, or restoration guard"}
             raise GuardFailure(reasons.get(status, f"unknown native guard status {status}"))
         return output
 
 
-def build(plan: ExecutionPlan, out: Path) -> CppArtifact:
+def build(plan: ExecutionPlan, out: Path, *, resource_schedule=None) -> CppArtifact:
     """Validate, emit and compile a persistent host shared-library artifact."""
     # Freeze the caller's mutable nested attrs/proof dictionaries via its wire format.
     plan = plan_from_dict(document(plan))
     scalar = _supported(plan)
+    admitted_schedule = None
+    schedule_bytes = b""
+    if resource_schedule is not None:
+        from .schedule import admit_schedule
+        admitted_schedule = admit_schedule(plan, resource_schedule)
+        if type(admitted_schedule) is not dict:
+            raise ValueError("resource schedule admission must return a JSON document")
+        schedule_bytes = (json.dumps(admitted_schedule, sort_keys=True, indent=2,
+                                     allow_nan=False) + "\n").encode()
     source = _source(plan, scalar)
     compiler_options = (*COMPILER_OPTIONS, *(("-fopenmp",) if plan.cpu_threads > 1 else ()))
     compiler = shlex.split(os.environ.get("CXX", "g++"))
@@ -408,7 +475,7 @@ def build(plan: ExecutionPlan, out: Path) -> CppArtifact:
     source_path.write_text(source)
     header_path.write_bytes(header)
     write_plan(plan, plan_path)
-    build_id = _digest(source.encode() + header + repr(compiler_options).encode())
+    build_id = _digest(source.encode() + header + repr(compiler_options).encode() + schedule_bytes)
     library_path = directory / f"kernel_{build_id[:20]}.so"
     fd, temporary = tempfile.mkstemp(prefix=".kernel-", suffix=".so", dir=directory)
     os.close(fd)
@@ -425,7 +492,7 @@ def build(plan: ExecutionPlan, out: Path) -> CppArtifact:
                              check=False).stdout.splitlines()
     metadata = {
         "schema": "scar.native-artifact", "schema_version": 1, "backend": "cpp",
-        "operator_abi_version": ABI_VERSION, "execution_plan_schema_version": 1,
+        "operator_abi_version": ABI_VERSION, "execution_plan_schema_version": plan.schema_version,
         "cxx_standard": 20, "python_boundary": "ctypes", "build_id": build_id,
         "host_loop_lowering": "guarded_view_and_row_pointer_hoisting",
         "cpu_threads": plan.cpu_threads,
@@ -448,6 +515,35 @@ def build(plan: ExecutionPlan, out: Path) -> CppArtifact:
                         "non-finite loaded inputs require original-function fallback",
                         "floating-point exceptions require original-function fallback"],
     }
+    binding = plan.resource_binding
+    metadata["resource_placement"] = {
+        "cpu_affinity": "NATIVE_ENFORCED_PER_CALL" if binding is not None else "UNBOUND",
+        "cpu_ids": list(binding.cpu_ids) if binding is not None else [],
+        "worker_assignment": "worker_i_to_cpu_ids_i" if binding is not None else None,
+        "affinity_lifetime": "save_bind_verify_execute_verify_restore_verify" if binding is not None else None,
+        "affinity_failure": "GuardFailure" if binding is not None else None,
+        "placement_optimality": "not established",
+        "memory_policy": "UNBOUND",
+        "memory_domain_id": binding.memory_domain_id if binding is not None else None,
+        "memory_domain_role": "candidate_reference_only" if binding is not None else None,
+        "numa_page_binding": False,
+    }
+    if admitted_schedule is not None:
+        (directory / "resource-plan.json").write_bytes(schedule_bytes)
+        metadata["files"]["resource_schedule"] = "resource-plan.json"
+        metadata["sha256"]["resource_schedule"] = _digest(schedule_bytes)
+        metadata["resource_schedule_sha256"] = _digest(schedule_bytes)
+        metadata["resource_schedule_execution"] = {
+            "profile": "synchronous_cpu_allocation_compute_export",
+            "admission": "validated_at_build_and_load",
+            "allocation": "Python boundary: guarded fresh numpy.empty",
+            "compute": "C++ ABI call: synchronous row loops and worker join",
+            "export": "Python boundary: return fresh ndarray only after native success",
+            "failure": "withhold output and raise GuardFailure for original-function fallback",
+            "cpp_general_scheduler": False,
+            "asynchronous_transfers": False,
+            "numa_page_binding": False,
+        }
     (directory / "artifact.json").write_text(json.dumps(metadata, indent=2, allow_nan=False) + "\n")
     return load(directory)
 
@@ -470,6 +566,20 @@ def load(out: Path) -> CppArtifact:
     for kind, expected in metadata["sha256"].items():
         if _digest((directory / metadata["files"][kind]).read_bytes()) != expected:
             raise ValueError(f"artifact {kind} digest mismatch")
+    has_schedule = "resource_schedule" in metadata["files"]
+    if has_schedule != ("resource_schedule_sha256" in metadata):
+        raise ValueError("artifact resource schedule metadata is inconsistent")
+    admitted_schedule = None
+    if has_schedule:
+        from .schedule import admit_schedule
+        schedule_bytes = (directory / metadata["files"]["resource_schedule"]).read_bytes()
+        if (_digest(schedule_bytes) != metadata["resource_schedule_sha256"] or
+                metadata["sha256"].get("resource_schedule") != metadata["resource_schedule_sha256"]):
+            raise ValueError("artifact resource schedule digest mismatch")
+        schedule = json.loads(schedule_bytes)
+        admitted_schedule = admit_schedule(plan, schedule)
+        if admitted_schedule != schedule:
+            raise ValueError("artifact resource schedule differs from admitted execution profile")
     library = ctypes.CDLL(str(directory / metadata["files"]["library"]))
     getter = library.scar_get_operator_table_v1
     getter.argtypes = []
@@ -482,4 +592,4 @@ def load(out: Path) -> CppArtifact:
             table.input_count != len(plan.region.parameters) or not table.run or
             table.plan_sha256 != metadata["plan_sha256"].encode()):
         raise ValueError("native operator table does not match artifact plan/ABI")
-    return CppArtifact(plan, directory, metadata, library, table.run)
+    return CppArtifact(plan, directory, metadata, library, table.run, admitted_schedule)

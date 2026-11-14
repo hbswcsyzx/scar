@@ -24,7 +24,8 @@ enum scar_status_v1 {
     SCAR_OK_V1 = 0,
     SCAR_ARGUMENT_GUARD_V1 = 1,
     SCAR_SHAPE_GUARD_V1 = 2,
-    SCAR_FLOATING_GUARD_V1 = 3
+    SCAR_FLOATING_GUARD_V1 = 3,
+    SCAR_CPU_AFFINITY_GUARD_V1 = 4
 };
 
 typedef int32_t (*scar_run_fn_v1)(const scar_array_v1 *inputs,

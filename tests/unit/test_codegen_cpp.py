@@ -3,6 +3,7 @@ from dataclasses import replace
 import ctypes
 import os
 import platform
+from pathlib import Path
 import shutil
 
 import numpy as np
@@ -10,7 +11,7 @@ import pytest
 
 from scar.codegen import GuardFailure, build, load
 from scar.codegen.cpp import _Array
-from scar.compiler.model import ArrayRegion, ExecutionPlan, Expr, SourceRef
+from scar.compiler.model import ArrayRegion, CpuPlacement, ExecutionPlan, Expr, SourceRef
 
 
 @pytest.mark.parametrize("cpu_threads", [1, 2])
@@ -133,3 +134,50 @@ def test_cpp_strided_expression_and_guards(tmp_path, cpu_threads):
     limited = build(replace(plan, cost={"memory_budget_bytes": 8}), tmp_path / "limited")
     with pytest.raises(GuardFailure, match="memory_budget"):
         limited.run(a, b)
+
+    if platform.system() == "Linux":
+        # These backend checks use a typed placement; target-graph provenance
+        # is checked separately by the compiler's hardware admission boundary.
+        original_affinity = os.sched_getaffinity(0)
+        cpu_ids = tuple(sorted(original_affinity)[:cpu_threads])
+        placement = CpuPlacement(str(tmp_path / "target.json"), "0" * 64,
+                                 "test-cpu-executor", cpu_ids)
+        bound = build(replace(plan, schema_version=2, resource_binding=placement), tmp_path / "bound")
+
+        def thread_affinities():
+            masks = {}
+            for task in Path("/proc/self/task").iterdir():
+                try:
+                    masks[int(task.name)] = os.sched_getaffinity(int(task.name))
+                except ProcessLookupError:
+                    pass
+            return masks
+
+        def assert_affinities_restored(before):
+            after = thread_affinities()
+            assert all(after[tid] == mask for tid, mask in before.items() if tid in after)
+            assert os.sched_getaffinity(0) == original_affinity
+
+        masks = thread_affinities()
+        np.testing.assert_array_equal(bound.run(a, b).view(np.uint64), expected.view(np.uint64))
+        assert_affinities_restored(masks)
+        with pytest.raises(GuardFailure, match="floating-point"):
+            bound.run(np.zeros((5, 6)), np.ones((5, 6)))
+        assert_affinities_restored(masks)
+        assert bound.run(a[:0], b[:0]).shape == (0, 5)
+        assert_affinities_restored(masks)
+        policy = bound.report["resource_placement"]
+        assert policy["cpu_affinity"] == "NATIVE_ENFORCED_PER_CALL"
+        assert policy["cpu_ids"] == list(cpu_ids)
+        assert policy["memory_policy"] == "UNBOUND" and not policy["numa_page_binding"]
+        if len(original_affinity) > 1:
+            narrowed = {next(cpu for cpu in original_affinity if cpu != cpu_ids[-1])}
+            try:
+                os.sched_setaffinity(0, narrowed)
+                with pytest.raises(GuardFailure, match="CPU affinity"):
+                    bound.run(a, b)
+                assert os.sched_getaffinity(0) == narrowed
+            finally:
+                os.sched_setaffinity(0, original_affinity)
+        with pytest.raises(ValueError, match="schema"):
+            build(replace(plan, resource_binding=placement), tmp_path / "invalid-binding")

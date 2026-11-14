@@ -1,3 +1,6 @@
+#if @CPU_BINDING_ENABLED@ && !defined(_GNU_SOURCE)
+#define _GNU_SOURCE
+#endif
 #include "scar_abi_v1.h"
 #include <bit>
 #include <cfenv>
@@ -6,11 +9,114 @@
 #include <cstring>
 #include <limits>
 @OPENMP_INCLUDE@
+#if @CPU_BINDING_ENABLED@
+#ifndef __linux__
+#error "CPU affinity binding requires Linux"
+#endif
+#include <cerrno>
+#include <sched.h>
+#include <unistd.h>
+#endif
 
 #pragma STDC FENV_ACCESS ON
 
 namespace {
 static_assert(sizeof(double) == 8 && std::numeric_limits<double>::is_iec559);
+
+#if @CPU_BINDING_ENABLED@
+constexpr int32_t affinity_guard_status = SCAR_CPU_AFFINITY_GUARD_V1;
+constexpr int planned_cpu_ids[] = {@CPU_IDS@};
+constexpr size_t minimum_cpu_slots = @CPU_SLOTS@;
+
+// sched_*affinity with pid zero acts on the calling Linux thread. Keep its
+// complete original mask, including CPUs outside this plan, and restore it on
+// every exit. Dynamic CPU masks avoid the fixed CPU_SETSIZE limit.
+class ThreadAffinity {
+    cpu_set_t *saved_ = nullptr;
+    cpu_set_t *target_ = nullptr;
+    cpu_set_t *observed_ = nullptr;
+    size_t slots_ = 0;
+    size_t bytes_ = 0;
+    int cpu_ = -1;
+    bool changed_ = false;
+
+    bool matches(const cpu_set_t *expected) noexcept {
+        if (observed_ == nullptr) return false;
+        CPU_ZERO_S(bytes_, observed_);
+        return sched_getaffinity(0, bytes_, observed_) == 0 &&
+               CPU_EQUAL_S(bytes_, expected, observed_);
+    }
+
+public:
+    ThreadAffinity() noexcept {
+        const long configured = sysconf(_SC_NPROCESSORS_CONF);
+        slots_ = configured > 0 ? static_cast<size_t>(configured) : 128;
+        if (slots_ < minimum_cpu_slots) slots_ = minimum_cpu_slots;
+        for (; slots_ <= (size_t(1) << 20); slots_ *= 2) {
+            saved_ = CPU_ALLOC(slots_);
+            if (saved_ == nullptr) return;
+            bytes_ = CPU_ALLOC_SIZE(slots_);
+            CPU_ZERO_S(bytes_, saved_);
+            if (sched_getaffinity(0, bytes_, saved_) == 0) {
+                target_ = CPU_ALLOC(slots_);
+                observed_ = CPU_ALLOC(slots_);
+                return;
+            }
+            const int error = errno;
+            CPU_FREE(saved_);
+            saved_ = nullptr;
+            if (error != EINVAL) return;
+        }
+    }
+
+    ThreadAffinity(const ThreadAffinity &) = delete;
+    ThreadAffinity &operator=(const ThreadAffinity &) = delete;
+
+    bool contains(int cpu) const noexcept {
+        return saved_ != nullptr && target_ != nullptr && observed_ != nullptr &&
+               cpu >= 0 && static_cast<size_t>(cpu) < slots_ &&
+               CPU_ISSET_S(cpu, bytes_, saved_);
+    }
+
+    bool bind(int cpu) noexcept {
+        if (!contains(cpu)) return false;
+        CPU_ZERO_S(bytes_, target_);
+        CPU_SET_S(cpu, bytes_, target_);
+        cpu_ = cpu;
+        changed_ = true;
+        return sched_setaffinity(0, bytes_, target_) == 0 && bound();
+    }
+
+    bool bound() noexcept {
+        return changed_ && matches(target_) && sched_getcpu() == cpu_;
+    }
+
+    bool restore() noexcept {
+        if (!changed_) return true;
+        if (sched_setaffinity(0, bytes_, saved_) != 0 || !matches(saved_)) return false;
+        changed_ = false;
+        return true;
+    }
+
+    bool restore_original() noexcept {
+        if (saved_ == nullptr || observed_ == nullptr) return false;
+        if (!changed_ && matches(saved_)) return true;
+        // Also cover a runtime that changed the OpenMP master thread's mask
+        // before our worker scope began. Restore the caller entry snapshot.
+        changed_ = true;
+        return restore();
+    }
+
+    ~ThreadAffinity() {
+        // Retry if an explicit restore failed; the caller still receives a
+        // guard failure. An external cpuset change may prevent exact restore.
+        restore();
+        if (saved_ != nullptr) CPU_FREE(saved_);
+        if (target_ != nullptr) CPU_FREE(target_);
+        if (observed_ != nullptr) CPU_FREE(observed_);
+    }
+};
+#endif
 
 struct Shape {
     bool scalar;
@@ -84,13 +190,16 @@ int32_t run(const scar_array_v1 *inputs, uint64_t count, scar_array_v1 *output) 
 @SHAPES@
     if (output->shape[0] != @OUTPUT_SHAPE@.rows ||
         output->shape[1] != @OUTPUT_SHAPE@.cols) return SCAR_SHAPE_GUARD_V1;
+@AFFINITY_START@
     fenv_t saved;
     if (std::feholdexcept(&saved) != 0) return SCAR_FLOATING_GUARD_V1;
     uint32_t nonfinite_input = 0;
     uint32_t worker_guard = 0;
+    uint32_t placement_guard = 0;
 @LOOPS@
     const int raised = std::fetestexcept(FE_DIVBYZERO | FE_INVALID | FE_OVERFLOW | FE_UNDERFLOW);
     const int restored = std::fesetenv(&saved);
+@AFFINITY_FINISH@
     return raised || restored || nonfinite_input || worker_guard ? SCAR_FLOATING_GUARD_V1 : SCAR_OK_V1;
 }
 
