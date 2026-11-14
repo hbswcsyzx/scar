@@ -2127,7 +2127,7 @@
     "first_stage_complete": false
   },
   "compiler_construction_connection_layer": {
-    "status": "SUNFISH_BODY_AND_SOURCE_ANCHOR_CONNECTIONS_VERIFIED_UNIFIED_ASSEMBLY_RUNNING",
+    "status": "SUNFISH_BODY_CONNECTIONS_AND_UNIFIED_BUILD_VERIFIED_CURRENT_BOUNDARIES_PUBLISHED",
     "recorded_at": "2026-11-14T06:11:17.523561+00:00",
     "compiler_roles": 12,
     "compiler_projections": 4,
@@ -2211,8 +2211,137 @@
       }
     },
     "unified_assembly": {
-      "status": "RUNNING",
-      "out": "/home/zyf/AAA/scar/artifacts/current/experiments/cpu-sunfish-current/c3-connected-build"
+      "status": "WORKFLOW_VERIFIED_NOT_FULL_COVERAGE",
+      "workflow_complete": true,
+      "seconds": 765.4597205979953,
+      "summary": {
+        "configuration_inputs": 0,
+        "gaps": 67,
+        "loaded_units": 17,
+        "observed_body_activation_publications": 1,
+        "observed_boundary_publications": 0,
+        "observed_publications": 0,
+        "resource_records": 31,
+        "source_units": 18
+      },
+      "layers": {
+        "body_copies": 0,
+        "catalog_units": 18,
+        "cross_layer": {
+          "body_activations": true,
+          "configuration": false,
+          "creations": false,
+          "exec": false,
+          "functions": true,
+          "native": false,
+          "observed_boundaries": false,
+          "protocol": false
+        },
+        "loaded_units": 17,
+        "local_state": {
+          "bindings": true,
+          "content": true
+        },
+        "loops_unrolled": false,
+        "providers": [
+          "body_activations",
+          "functions:/home/zyf/AAA/scar/artifacts/current/experiments/cpu-sunfish-current/body-protocol-frontend/function-interfaces"
+        ],
+        "readback": true,
+        "resources": true,
+        "storage": true,
+        "unified": true
+      },
+      "timings": {
+        "catalog": 31.344580764998682,
+        "cross_layer_interfaces": 345.096324387996,
+        "function_interfaces": 68.96028392700828,
+        "local_state_and_content": 375.1197957580007,
+        "resources": 375.5045692700078
+      },
+      "gaps_by_kind": [
+        {
+          "layer": "body_activations",
+          "kind": "CACHED_COMPONENT_RULES_CHANGED",
+          "count": 1
+        },
+        {
+          "layer": "observed_boundaries",
+          "kind": "CACHED_COMPONENT_RULES_CHANGED",
+          "count": 1
+        },
+        {
+          "layer": "calls",
+          "kind": "INTERFACE_MATERIAL_REJECTED",
+          "count": 1
+        },
+        {
+          "layer": "exec",
+          "kind": "COMPILED_EXEC_SELECTION_NOT_PROVIDED",
+          "count": 1
+        },
+        {
+          "layer": "creations",
+          "kind": "MATERIAL_NOT_AVAILABLE",
+          "count": 1
+        },
+        {
+          "layer": "native",
+          "kind": "MATERIAL_NOT_AVAILABLE",
+          "count": 1
+        },
+        {
+          "layer": "protocol",
+          "kind": "MATERIAL_NOT_AVAILABLE",
+          "count": 1
+        },
+        {
+          "layer": "configuration",
+          "kind": "MATERIAL_NOT_AVAILABLE",
+          "count": 1
+        },
+        {
+          "layer": "observed_boundaries",
+          "kind": "MATERIAL_NOT_AVAILABLE",
+          "count": 1
+        },
+        {
+          "layer": "query",
+          "kind": "SOURCE_EFFECT_FIELDS_PARTIALLY_RESOLVED",
+          "count": 45
+        },
+        {
+          "layer": "query",
+          "kind": "UNRESOLVED_EXTERNAL_RESOURCE_INTERFACE",
+          "count": 3
+        },
+        {
+          "layer": "query",
+          "kind": "RESOURCE_RUNTIME_EVIDENCE_MISSING",
+          "count": 6
+        },
+        {
+          "layer": "query",
+          "kind": "CONTENT_PROTOCOL_AND_INSTANCE_OPEN",
+          "count": 2
+        },
+        {
+          "layer": "query",
+          "kind": "DEPENDENCY_POINT_BUDGET",
+          "count": 1
+        },
+        {
+          "layer": "coverage",
+          "kind": "FULL_INFERENCE_COVERAGE_UNPROVEN",
+          "count": 1
+        }
+      ],
+      "receipt": {
+        "path": "/home/zyf/AAA/scar/artifacts/current/experiments/cpu-sunfish-current/c3-connected-build/manifest.json",
+        "bytes": 9073,
+        "sha256": "2c741196a5db4c50a8a05994aed09ce4ee691d635c6743c8c8bac33ab56605fd"
+      },
+      "first_stage_complete": false
     },
     "receipts": {
       "activations": {
@@ -2243,6 +2372,60 @@
     },
     "target_workload_executed": false,
     "target_workload_speedup_claimed": false,
-    "first_stage_complete": false
+    "first_stage_complete": false,
+    "current_observed_functions": {
+      "counts": {
+        "annotated_parent_groups": 26,
+        "body_only_groups": 35,
+        "calls": 644,
+        "derived_interfaces": 74,
+        "interfaces": 141,
+        "observation_frontiers": 3144,
+        "observed_groups": 100,
+        "parent_interfaces": 67
+      },
+      "receipt": {
+        "path": "/home/zyf/AAA/scar/artifacts/current/experiments/cpu-sunfish-current/c3-observed-functions/result.json",
+        "bytes": 9133,
+        "sha256": "891bdd6c2a9c8ce99e4ab8667987ded9523839761dc1705cc98d8275f1d38bdc"
+      }
+    },
+    "current_observed_boundaries": {
+      "counts": {
+        "boundaries": 191,
+        "callback_body_kinds": {
+          "FUNCTION": 21
+        },
+        "callback_observations": 455,
+        "callbacks": 21,
+        "kinds": {
+          "NATIVE_BUILTIN": 78,
+          "OTHER_UNCLASSIFIED": 58,
+          "TYPE_OBJECT": 55
+        },
+        "observations": 2326,
+        "protocol_kinds": {
+          "BUILD_CLASS": 3,
+          "CREATE_GENEXPR": 15
+        },
+        "protocol_observations": 123,
+        "protocols": 18,
+        "source_callback_interfaces": 21,
+        "source_callback_observations": 455,
+        "units": 3
+      },
+      "receipt": {
+        "path": "/home/zyf/AAA/scar/artifacts/current/experiments/cpu-sunfish-current/c3-observed-boundaries/result.json",
+        "bytes": 15184,
+        "sha256": "552f6e1a05f9be1c0510b7060e7db460d5c9633a4220a8f55d7144518fadee8f"
+      },
+      "attached_to_prior_unified_build": false
+    },
+    "remaining_tasks": [
+      "AVOID_DUPLICATE_FULL_INDEX_RECONSTRUCTION_DURING_BUILD_READBACK",
+      "JOIN_CURRENT_NATIVE_AND_CALLBACK_BOUNDARY_PUBLICATIONS",
+      "CONNECT_RESOURCE_AND_STATE_PORTS_WITH_EXPLICIT_REMAINING_FIELDS",
+      "REPLACE_BOUNDED_ENTRY_PROBE_WITH_COMPLETE_ACCEPTANCE_TRAVERSAL"
+    ]
   }
 }

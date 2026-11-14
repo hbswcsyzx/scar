@@ -22,16 +22,17 @@ LeWM 未修改；本机无可用 GPU。外部 CPU testcase 为 Sunfish、Gray–
 - **Observed：** Sunfish 旧版作业在正文连接阶段被主动中止（该步骤运行 1180.71 秒）；原失败收据和已产出的接口均保留，不改写为通过。
 - **Verified：** Sunfish 当前记录的 1856/1856 次进入均有正文对应，未对应进入和来源操作缺口均为 0；127 个共享 activation、83 个正文接口。正文连接 82.21 秒；保存后读回 337 个入口/恢复 frame、4434 个端口、23485 条双向关系，用时 88.82 秒。只覆盖该份采集记录，不代表整个程序所有路径。
 - **Implemented / Verified：** 来源选择改为先确认代码作用域再选择最内层操作，消除生成器迭代的 198 处错层定位；不按应用或 opcode 特例派发。
-- **Running：** 当前结果接入统一 build，继续核对已有状态、资源及分片发布接口。
+- **Verified：** 统一 build 的构建与存储读回完成，18 个源码单元目录、17 个实际载入单元、31 个资源记录；未复制正文或展开循环。耗时 765.46 秒，其中自动读回重复初始化整套索引是下一步要去掉的额外工作。
+- **Implemented：** 当前版本调用接口和 native/回调边界材料已产出：100 个函数观察组、191 个边界、2326 次边界观察、21 个源码回调接口。它们在上述 build 完成后发布，尚未合入该次 build。
 
 命令：`scar body-activations --catalog DIR --trace TRACE --project-root ROOT --out DIR --graph-check-out REPORT.json`。
 单独读回：`scar body-activations --read DIR --graph-check --out REPORT.json`。
 
 ## 后续顺序
 
-1. 完成 Sunfish 统一 build，报告状态/资源仍未接通的实际缺口。
-2. 在同一图接入已有状态/资源接口，核对入口到输出关系。
-3. 完成分片发布、读回与覆盖报告后再判定第一阶段完成。
+1. 去掉 build 读回重复重建全部索引；保留材料校验及必要查询，不再重复全量工作。
+2. 接入已发布的 native/回调材料，补状态与实际资源端口；上次 build 有 67 项报告，其中包括旧材料拒绝、材料缺失、未知字段和查询预算，不能合称缺边。
+3. 用完整覆盖遍历替换当前有界入口探针，再判定第一阶段完成。
 
 实测收据集中在 artifacts/baseline/formal-frontend-results.json。
 此前结果按原 producer 版本保留，不能替代当前版本验收。无新增 detector/backend，无应用加速比结论。
