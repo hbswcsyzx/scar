@@ -11,6 +11,7 @@ from dataclasses import replace
 from hashlib import sha256
 import json
 import inspect
+from contextlib import contextmanager
 from bisect import bisect_right
 from pathlib import Path
 
@@ -185,8 +186,34 @@ def _body_entry(index,observation):
     return frames[start] if stop-start==1 else None
 
 
-def _groups(parent,index,unit):
-    original=parent.load_unit(unit);facts=parent.catalog.fact_store.load(unit)
+@contextmanager
+def _parent_unit(parent,unit):
+    """One checked immutable parent graph per projection, with file guards.
+
+    Collection readers without a direct shard keep their ordinary load path.
+    Nothing is cached across units or independent verification sessions.
+    """
+    shard=parent.report.get('shards',{}).get(unit)
+    if not isinstance(shard,dict) or not {'path','tables'}<=shard.keys():
+        yield None
+        return
+    paths=tuple(parent.path/shard['path']/table['path'] for table in shard['tables'].values())
+    before={path:_stamp(path) for path in paths}
+    graph=parent.load_unit(unit)
+    def check():
+        parent.validate()
+        if any(_stamp(path)!=stamp for path,stamp in before.items()):
+            raise ValueError('parent interface shard changed during observed projection')
+    check()
+    try:
+        yield graph
+    finally:
+        check()
+
+
+def _groups(parent,index,unit,*,original=None):
+    if original is None:original=parent.load_unit(unit)
+    facts=parent.catalog.fact_store.load(unit)
     by_code=defaultdict(list)
     for code in index.codes.records.values():
         by_code[code.captures[0].code.key].append(code)
@@ -269,8 +296,9 @@ def _groups(parent,index,unit):
     return tuple(groups),tuple(frontiers)
 
 
-def _overlay(parent,unit,groups,frontiers,folder,receipt):
-    graph=parent.load_unit(unit);interfaces=list(graph.interfaces);queries=list(graph.queries);fs=list(graph.frontiers)
+def _overlay(parent,unit,groups,frontiers,folder,receipt,*,base=None):
+    graph=parent.load_unit(unit) if base is None else base
+    interfaces=list(graph.interfaces);queries=list(graph.queries);fs=list(graph.frontiers)
     for i,group in enumerate(groups):
         if group.parent_interfaces:continue
         c=group.connection;query=group.query;call=group.observations[0].call
@@ -304,12 +332,15 @@ def build_observed_interfaces(parent,index,out):
     observed_units={o.unit for o in index.bindings}
     selected=tuple(sorted(observed_units & parent.report['shards'].keys()))
     for unit in selected:
-        groups,frontiers=_groups(parent,index,unit);folder=out/_folder(unit);_durable_mkdir(folder)
-        tables={'groups':write_table(folder/'groups.jsonl.gz',groups),
-            'observation_frontiers':write_table(folder/'observation_frontiers.jsonl.gz',frontiers)}
-        graph=_overlay(parent,unit,groups,frontiers,folder,tables['groups'])
-        tables.update({n:write_table(folder/(n+'.jsonl.gz'),getattr(graph,n)) for n in ('interfaces','queries','frontiers')})
-        shards[unit]=dict(path=_folder(unit),tables=tables,counts=_counts(graph,parent.load_unit(unit),groups,frontiers))
+        with _parent_unit(parent,unit) as base:
+            groups,frontiers=_groups(parent,index,unit,original=base)
+            folder=out/_folder(unit);_durable_mkdir(folder)
+            tables={'groups':write_table(folder/'groups.jsonl.gz',groups),
+                'observation_frontiers':write_table(folder/'observation_frontiers.jsonl.gz',frontiers)}
+            graph=_overlay(parent,unit,groups,frontiers,folder,tables['groups'],base=base)
+            tables.update({n:write_table(folder/(n+'.jsonl.gz'),getattr(graph,n)) for n in ('interfaces','queries','frontiers')})
+            original=parent.load_unit(unit) if base is None else base
+            shards[unit]=dict(path=_folder(unit),tables=tables,counts=_counts(graph,original,groups,frontiers))
     parent.validate();index.check()
     if pins!=_pins():raise ValueError('observed interface rules changed')
     report=dict(schema=SCHEMA,schema_version=2,parent_path=str(parent.path),
@@ -375,14 +406,16 @@ class ObservedFunctionInterfaceStore:
                 result=tuple(decode(kind,w,record_tags=P.PRODUCTION_RECORD_TAGS) for w in _table(folder,s['tables'][n]))
                 if _stamp(path)!=stamp:raise ValueError('observed table changed while reading')
                 self._loaded[path]=stamp;return result
-            groups=rows('groups',R.ObservedSourceFunctionGroup);frontiers=rows('observation_frontiers',R.ObservedSourceFunctionFrontier)
-            expected=_groups(self.parent,self.index,unit)
-            if (groups,frontiers)!=expected:raise ValueError('observed groups differ from original trace and call binder')
-            graph=_overlay(self.parent,unit,groups,frontiers,folder,s['tables']['groups'])
-            if (graph.interfaces!=rows('interfaces',I.SourceFunctionInterface) or graph.queries!=rows('queries',I.SourceFunctionInterfaceQuery)
-                    or graph.frontiers!=rows('frontiers',I.SourceFunctionInterfaceFrontier)
-                    or s['counts']!=_counts(graph,self.parent.load_unit(unit),groups,frontiers)):
-                raise ValueError('observed interfaces differ from original records')
+            with _parent_unit(self.parent,unit) as base:
+                groups=rows('groups',R.ObservedSourceFunctionGroup);frontiers=rows('observation_frontiers',R.ObservedSourceFunctionFrontier)
+                expected=_groups(self.parent,self.index,unit,original=base)
+                if (groups,frontiers)!=expected:raise ValueError('observed groups differ from original trace and call binder')
+                graph=_overlay(self.parent,unit,groups,frontiers,folder,s['tables']['groups'],base=base)
+                original=self.parent.load_unit(unit) if base is None else base
+                if (graph.interfaces!=rows('interfaces',I.SourceFunctionInterface) or graph.queries!=rows('queries',I.SourceFunctionInterfaceQuery)
+                        or graph.frontiers!=rows('frontiers',I.SourceFunctionInterfaceFrontier)
+                        or s['counts']!=_counts(graph,original,groups,frontiers)):
+                    raise ValueError('observed interfaces differ from original records')
             self._cache[unit]=graph
         self.validate();return self._cache[unit]
 

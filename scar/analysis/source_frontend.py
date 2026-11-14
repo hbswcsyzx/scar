@@ -84,6 +84,76 @@ class _Run:
         return value
 
 
+def _reuse_source_model(run, model, roots, sources):
+    """Admit existing F0--F3 inputs, leaving prerequisite replay to F4.
+
+    The receipt covers the original manifest and selected current source
+    bytes. It does not recertify the earlier stages for the entire corpus.
+    No source artifact, identity or parent receipt is copied or rewritten.
+    """
+    model = Path(model).absolute()
+    row = dict(stage='source-model', status='RUNNING', model=str(model))
+    started = time.monotonic()
+    with run.lock:
+        run.rows.append(row); run._progress()
+    try:
+        if (model.resolve() != model or not model.is_dir() or model.is_symlink()
+                or model.is_relative_to(run.out) or run.out.is_relative_to(model)):
+            raise ValueError('source-model requires an existing canonical directory independent of output')
+        manifest = model/'manifest.json'
+        if manifest.is_symlink() or not manifest.is_file():
+            raise ValueError('source-model manifest must be an original regular file')
+        original = manifest.read_bytes(); document = json.loads(original)
+        if (document.get('schema') != 'scar.static-program'
+                or type(document.get('schema_version')) is not int or document['schema_version'] != 1
+                or document.get('phase') != 'sources' or document.get('source_catalog_status') != 'COMPLETE'
+                or document.get('worker_errors') != [] or document.get('source_changed') != []):
+            raise ValueError('source-model requires a completed source manifest without worker errors or changed sources')
+        units = document.get('units')
+        if type(units) is not list or not units:
+            raise ValueError('source-model requires its original nonempty source unit directory')
+        by_path = {}
+        for unit in units:
+            if type(unit) is not dict or type(unit.get('path')) is not str or not Path(unit['path']).is_absolute():
+                raise ValueError('source-model unit lacks its original absolute source path')
+            by_path.setdefault(unit['path'], []).append(unit)
+        selected = tuple(sources) or tuple(Path(path) for path in by_path)
+        receipts = []
+        for source in selected:
+            candidates = by_path.get(str(source))
+            if not candidates or not any(source.is_relative_to(root) for root in roots):
+                raise ValueError('selected source is outside the source-model units or supplied roots: '+str(source))
+            if source.resolve() != source or source.is_symlink() or not source.is_file():
+                raise ValueError('selected source must retain its original canonical regular file: '+str(source))
+            before = source.stat(); raw = source.read_bytes(); after = source.stat()
+            stamp = lambda value:(value.st_dev,value.st_ino,value.st_size,value.st_mtime_ns,value.st_ctime_ns)
+            digest = sha256(raw).hexdigest()
+            if (stamp(before) != stamp(after) or len(raw) != before.st_size
+                    or any(unit.get('raw_sha256') != digest or unit.get('source_bytes') != len(raw)
+                        for unit in candidates)):
+                raise ValueError('selected current source bytes differ from the source-model manifest: '+str(source))
+            receipts.append(dict(path=str(source),bytes=len(raw),sha256=digest,
+                units=[unit['key'] for unit in candidates]))
+        if manifest.read_bytes() != original:
+            raise ValueError('source-model manifest changed during input admission')
+        receipt = dict(schema='scar.source-frontend-input',schema_version=1,
+            model=str(model),manifest=dict(path=str(manifest),bytes=len(original),sha256=sha256(original).hexdigest()),
+            selected_sources=receipts,reused_layers=['source',*(name for name,_ in _LAYERS)],
+            scope='ORIGINAL_F0_F3_INPUTS_WITH_SELECTED_SOURCE_IDENTITY_AND_CURRENT_BYTES_CHECKED',
+            whole_f0_f3_corpus_revalidated=False,f4_prerequisite_replay_required=True,
+            source_ids_rewritten=False,target_executed=False)
+        _durable_bytes(run.out/'source-input.json',json.dumps(receipt,indent=2).encode()+b'\n',replace=False)
+        row.update(status='REUSED_INPUT',report=_receipt(run.out/'source-input.json'))
+    except Exception as error:
+        row.update(status='FAILED',error_type=type(error).__name__,error=str(error))
+        raise
+    finally:
+        with run.lock:
+            row['seconds'] = time.monotonic()-started; run._progress()
+            print(json.dumps({key:row[key] for key in ('stage','status','seconds')}),flush=True)
+    return model, original
+
+
 def admit_external_sources(run, catalog, trace, project_root, jobs):
     """Finish bounded admission batches before projecting global call links.
 
@@ -132,7 +202,7 @@ def admit_external_sources(run, catalog, trace, project_root, jobs):
         previous=requested
 
 
-def build_frontend(paths, out, *, sources=(), jobs=4, trace=None, project_root=None):
+def build_frontend(paths, out, *, sources=(), jobs=4, trace=None, project_root=None, source_model=None):
     """Build complete local declarations for the selected source corpus."""
     paths = tuple(dict.fromkeys(Path(p).resolve() for p in paths))
     sources = tuple(dict.fromkeys(Path(p).resolve() for p in sources))
@@ -157,13 +227,17 @@ def build_frontend(paths, out, *, sources=(), jobs=4, trace=None, project_root=N
         workflow_complete=False, local_declarations_complete=False, first_stage_complete=False,
         target_executed=False, global_namespace_resolved=False, runtime_dispatch_proven=False)
     try:
-        extra_roots = [part for p in paths[1:] for part in ('--source-root',p)]
-        run.stage('source', 'scar.cli', ['static',paths[0],*extra_roots,'--out',model,
-            '--phase','sources','--jobs',jobs], model/'manifest.json', 'scar.static-program',
-            phase='sources', source_catalog_status='COMPLETE', worker_errors=[], source_changed=[])
-        for command, schema in _LAYERS:
-            run.stage(command, 'scar.cli', [command,'--model',model,'--out',out/command,
-                '--jobs',jobs], out/command/'result.json', schema, complete_for_declared_units=True)
+        if source_model is None:
+            extra_roots = [part for p in paths[1:] for part in ('--source-root',p)]
+            run.stage('source', 'scar.cli', ['static',paths[0],*extra_roots,'--out',model,
+                '--phase','sources','--jobs',jobs], model/'manifest.json', 'scar.static-program',
+                phase='sources', source_catalog_status='COMPLETE', worker_errors=[], source_changed=[])
+            for command, schema in _LAYERS:
+                run.stage(command, 'scar.cli', [command,'--model',model,'--out',out/command,
+                    '--jobs',jobs], out/command/'result.json', schema, complete_for_declared_units=True)
+        else:
+            model, source_manifest = _reuse_source_model(run,source_model,paths,sources)
+            report['source_input'] = _receipt(out/'source-input.json')
 
         selection = [part for p in sources for part in ('--source',p)]
         active = min(jobs, len(_DOMAINS))
@@ -262,11 +336,16 @@ def build_frontend(paths, out, *, sources=(), jobs=4, trace=None, project_root=N
             model=_receipt(model/'manifest.json'), catalog=_receipt(active_catalog/'result.json'),
             calls=_receipt(out/'calls/result.json'),
             function_interfaces=_receipt(out/'function-interfaces/result.json'))
+        if source_model is not None and (model/'manifest.json').read_bytes() != source_manifest:
+            report.update(workflow_complete=False,local_declarations_complete=False)
+            raise ValueError('reused source-model manifest changed during frontend execution')
     except Exception as error:
         report.update(error_type=type(error).__name__, error=str(error))
     report.update(seconds=time.monotonic()-started, stages=len(run.rows),
         admitted_stages=sum(row['status']=='ADMITTED' for row in run.rows),
         progress=_receipt(out/'progress.json'))
+    if source_model is not None:
+        report['reused_input_stages'] = sum(row['status']=='REUSED_INPUT' for row in run.rows)
     _durable_bytes(out/'result.json', json.dumps(report,indent=2).encode()+b'\n', replace=False)
     return report
 
@@ -277,13 +356,14 @@ def main(argv=None):
     parser.add_argument('--out', required=True, help='fresh output directory')
     parser.add_argument('--jobs', type=int, default=4, help='total lowering worker budget, 1..32')
     parser.add_argument('--source', action='append', default=[], help='exact file selected for F4; earlier source layers retain the corpus')
+    parser.add_argument('--source-model', help='reuse an existing F0--F3 source model; current F4 collection and fresh verification still run')
     parser.add_argument('--trace', help='existing trace to join after local call interfaces; no target execution')
     parser.add_argument('--project-root', help='original trace namespace root; required with --trace')
     args = parser.parse_args(argv)
     if (args.trace is None) != (args.project_root is None):
         parser.error('--trace and --project-root must be supplied together')
     report = build_frontend(args.paths,args.out,sources=args.source,jobs=args.jobs,
-        trace=args.trace,project_root=args.project_root)
+        trace=args.trace,project_root=args.project_root,source_model=args.source_model)
     print(json.dumps(report,indent=2),flush=True)
     return 0 if report['workflow_complete'] else 1
 

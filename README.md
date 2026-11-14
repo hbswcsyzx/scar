@@ -22,6 +22,7 @@ scar build --entry /path/to/entry.py --catalog /path/to/frontend/catalog --cache
 `frontend` 顺序执行源码→词法→AST→作用域/绑定→共享区域模板→局部接口→调用参数/返回接口；三类独立模板可并行。
 每层检查原报告再推进，失败保留具体阶段。`local_declarations_complete` 只表示所选源码的局部声明图完成。
 已有采集可追加 `--trace TRACE --project-root ORIGINAL_ROOT` 离线接线；随后 `build` 使用同一目录的观察接口。
+已有F0–F3模型可用 `frontend ROOT --source-model MODEL --source FILE --out FRESH` 从F4继续；原source ID和分片保持，当前源字节先核对，F4仍执行收集与独立验证。
 同一分析索引同时发布共享的类型/原生调用边界和独立观察表；有native companion时保原ABI字段，无companion时明确未记录。
 边界可展开到实际Python回调的共享代码/body；普通入口与可挂起body分开，恢复位置和参数来源没有证据时保留未决字段。
 编译器插入的生成器创建、类构造CALL单独接回原协议操作及其参数/状态/结果，不套普通函数ABI；共享正文不代表已证明实际激活或generator恢复实例。

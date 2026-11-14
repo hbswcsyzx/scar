@@ -1703,7 +1703,7 @@
     }
   },
   "cross_layer_current": {
-    "status": "SOURCE_IDENTITY_AND_TERMINAL_FIX_VERIFIED_GLOBAL_JOIN_REFRESH_RUNNING",
+    "status": "ALL_35_REQUEST_CALLBACKS_PUBLISHED_INDEPENDENT_REPLAY_RUNNING",
     "entities": [
       "Operation",
       "Value",
@@ -1718,9 +1718,9 @@
     "contexts_are_capture_policy_not_dispatch_proof": true,
     "cirq_static_units": 173,
     "cirq_captured_codes": 689,
-    "cirq_actual_calls": 4900,
-    "cirq_native_facts": 4900,
-    "cirq_seed_requests_with_direct_callers": 14,
+    "cirq_actual_calls": 5719,
+    "cirq_native_facts": 5719,
+    "cirq_seed_requests_with_direct_callers": 35,
     "cirq_snapshot_streams_verified": 8,
     "cirq_drops": 0,
     "cirq_full_graph_verified": false,
@@ -1800,6 +1800,31 @@
         "path": "artifacts/current/experiments/cpu-quantum-current/terminal-unit-check.json",
         "bytes": 14667,
         "sha256": "05602536ddab8325cedab0d465457230f905b168641f9f464078474ddaaa6263"
+      },
+      "all_request_capture": {
+        "path": "artifacts/current/experiments/cpu-quantum-current/capture-all-requests-check.json",
+        "bytes": 1031,
+        "sha256": "dddd13bfd6d00b859c8f05aa141326a377ea4a522bedf9ac3cbca10e9c0e1f19"
+      },
+      "all_request_interfaces": {
+        "path": "artifacts/current/experiments/cpu-quantum-current/observed-all-requests-current/result.json",
+        "bytes": 181710,
+        "sha256": "aea4e157d43945c369019236b3656e276b128b0558ee6baf5e98cdedc061d0bd"
+      },
+      "all_request_boundaries": {
+        "path": "artifacts/current/experiments/cpu-quantum-current/boundaries-all-requests-current/result.json",
+        "bytes": 201012,
+        "sha256": "3dc80d0d68a38c1c8bb7fea508c9d7b9afe1b70eed8e4452e3af93cdd6c85e3a"
+      },
+      "parent_window": {
+        "path": "artifacts/current/experiments/terminal-call-current/parent-window-check.json",
+        "bytes": 405,
+        "sha256": "85ac7730096416d78a826128084450da60024eeed4a8655347634e071d56b8c7"
+      },
+      "frontend_reuse": {
+        "path": "artifacts/current/experiments/frontend-resume-current/check.json",
+        "bytes": 853,
+        "sha256": "7ae26d296fe46d4e9224f9725c0b58cbbb3dd5c3b0b5964b8da7600d61b9a740"
       }
     },
     "published_function_interfaces": {
@@ -1845,10 +1870,42 @@
     "affected_source_mapping_gaps": 0,
     "whole_cirq_interfaces_revalidated_after_fix": false,
     "next_steps": [
-      "REFRESH_GLOBAL_OBSERVED_INTERFACES_WITH_CURRENT_CALL_POSITION_RULES",
-      "DERIVE_CAPTURE_CONTEXTS_FOR_ALL_35_REQUESTS_AND_JOIN_REMAINING_CALLBACKS",
-      "VERIFY_STATE_AND_RESOURCE_RELATIONS",
-      "UNIFIED_CURRENT_SCHEMA_READBACK_FOR_THREE_CPU_CASES"
-    ]
+      "INDEPENDENT_ALL_REQUEST_GRAPH_READBACK",
+      "VERIFY_CURRENT_CPU_UNIFIED_STATE_AND_RESOURCE_RELATIONS",
+      "AUDIT_REMAINING_GRAPH_COVERAGE_FIELDS"
+    ],
+    "cirq_mapping_frontiers": 0,
+    "cirq_shared_request_callbacks_published": 35,
+    "parent_unit_reloads_per_projection": 1
+  },
+  "current_cpu_rejoins": {
+    "cpu-sunfish-current": {
+      "workflow_complete": true,
+      "local_declarations_complete": true,
+      "reused_input_stages": 1,
+      "fresh_stages": 18,
+      "seconds": 845.9571002070006,
+      "first_stage_complete": false,
+      "receipt": {
+        "path": "artifacts/current/experiments/cpu-sunfish-current/rejoined-current/result.json",
+        "bytes": 3706,
+        "sha256": "3ce7f0c73f67d7eac452701ff595537aeb68f5f8b8191848a6b13d737e2bc41d"
+      },
+      "unified_build_status": "RUNNING"
+    },
+    "cpu-gray-scott-current": {
+      "workflow_complete": true,
+      "local_declarations_complete": true,
+      "reused_input_stages": 1,
+      "fresh_stages": 16,
+      "seconds": 1466.7560642000026,
+      "first_stage_complete": false,
+      "receipt": {
+        "path": "artifacts/current/experiments/cpu-gray-scott-current/rejoined-current/result.json",
+        "bytes": 3763,
+        "sha256": "24f2d755e32967add01f7f76908596dd50b6ea3e5dc940fa1b62dcd74fa8e4b4"
+      },
+      "unified_build_status": "RUNNING"
+    }
   }
 }
