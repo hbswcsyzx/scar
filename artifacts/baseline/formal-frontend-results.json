@@ -2705,5 +2705,223 @@
       "FILTER_COLLECTOR_WORK_BEFORE_PROJECTING_RESOURCE_EVIDENCE",
       "BUILD_COMPLETE_SHARED_GRAPH_COVERAGE_WITHOUT_ITERATION_UNROLL_OR_BOUNDED_ENTRY_PROBE"
     ]
+  },
+  "native_resource_scope_connection_layer": {
+    "recorded_at": "2026-11-14T08:43:26.740776+00:00",
+    "status": "FUNCTION_BODY_BOUNDARY_STATE_RESOURCE_COMPOSITION_AND_READBACK_VERIFIED",
+    "first_stage_complete": false,
+    "model": {
+      "input_events": [
+        "BEGIN",
+        "C_RETURN",
+        "C_RAISE"
+      ],
+      "record_bytes": 72,
+      "source_binding": "ORIGINAL_CALL_AND_SOURCE_ARGUMENT_WORLD_COMPLETION_PORTS",
+      "work_relation": "BALANCED_NATIVE_CALL_ENCLOSURE_NOT_EXCLUSIVE_CAUSATION",
+      "graph_storage": "SHARED_SOURCE_INTERFACES_WITH_SEPARATE_OCCURRENCE_TABLES_AND_UNIT_BINDING_SHARDS",
+      "clock_matching_used": false,
+      "global_fd_table_reconstructed": false
+    },
+    "capture": {
+      "seconds": 5.172445677002543,
+      "returncode": 0,
+      "scope": "NORMAL_PROGRAM_STARTUP_AND_PROTOCOL_IO_NOT_SEARCH",
+      "command_receipt": {
+        "path": "/home/zyf/AAA/scar/artifacts/current/experiments/cpu-sunfish-current/resource-scope-capture-run.json",
+        "bytes": 1348,
+        "sha256": "cdf23fba83e5d47bad299fb8119052fc018393ae36dd0144733c402a8fe2f3e0"
+      },
+      "coordinates": {
+        "path": "/home/zyf/AAA/scar/artifacts/current/experiments/cpu-sunfish-current/resource-scope-capture/capture-coordinates.json",
+        "bytes": 78405,
+        "sha256": "32d91324e8d75b2161165f3800d55622236f415f9cfc89910f768664ed044842"
+      },
+      "marker_records": 600,
+      "marker_bytes": 43200
+    },
+    "resources": {
+      "summary": {
+        "enclosed_work": 26,
+        "excluded_marker_writes": 600,
+        "scopes": 300,
+        "source_bindings": 340,
+        "source_bound_scopes": 300,
+        "source_frontiers": 0,
+        "syscalls": {
+          "ioctl": 3,
+          "read": 1,
+          "write": 22
+        },
+        "unassigned_work": 17137,
+        "unclosed_scopes": 0
+      },
+      "seconds": 1.6428394679969642,
+      "receipt": {
+        "path": "/home/zyf/AAA/scar/artifacts/current/experiments/cpu-sunfish-current/scoped-selected-resources/result.json",
+        "bytes": 4466,
+        "sha256": "3fb13b030fa1eee234b911e2bc4ea413580e9ca90cdb97e95323cd13f3714efb"
+      },
+      "graph_check": {
+        "actual_thread_resources": 1,
+        "bidirectional_relations": 288,
+        "clock_matching_used": false,
+        "exclusive_program_work_or_resource_content_proven": false,
+        "first_stage_complete": false,
+        "schema": "scar.source-resource-scopes.graph-check",
+        "seconds": 7.364929668998229,
+        "shared_interfaces": 48,
+        "source_bodies_copied": false,
+        "status": "STRUCTURE_VERIFIED",
+        "summary": {
+          "enclosed_work": 26,
+          "excluded_marker_writes": 600,
+          "scopes": 300,
+          "source_bindings": 340,
+          "source_bound_scopes": 300,
+          "source_frontiers": 0,
+          "syscalls": {
+            "ioctl": 3,
+            "read": 1,
+            "write": 22
+          },
+          "unassigned_work": 17137,
+          "unclosed_scopes": 0
+        }
+      },
+      "graph_check_receipt": {
+        "path": "/home/zyf/AAA/scar/artifacts/current/experiments/cpu-sunfish-current/scoped-selected-resources/graph-check.json",
+        "bytes": 565,
+        "sha256": "c0c86760f92d5b32c3cad1040327868b03b97b60692c717b7178e3352f51bfa5"
+      }
+    },
+    "body_coverage": {
+      "body_protocols": {
+        "EnterClassBody": 3,
+        "EnterDeferredBody": 24,
+        "EnterRootBody": 1
+      },
+      "covered_entries": 679,
+      "entry_coverage_complete": true,
+      "missing_entries": 0,
+      "occurrences": 682,
+      "recorded_entries": 679,
+      "shared_activations": 31,
+      "shared_interfaces": 28,
+      "source_anchor_frontiers": 0,
+      "unmatched_entries": 0
+    },
+    "body_receipt": {
+      "path": "/home/zyf/AAA/scar/artifacts/current/experiments/cpu-sunfish-current/scoped-selected-bodies/result.json",
+      "bytes": 20304,
+      "sha256": "1acf83f629b4fe6396fcb65afac5c41bd382e925dbc44dfe4a5f68b3628665a2"
+    },
+    "fixed_composition_defect": {
+      "observed_error": "activation source or trace identity differs",
+      "cause": "FUNCTION_PUBLICATION_SAVED_SUCCESSFUL_MAPPINGS_NOT_FULL_INPUT_UNIT_SELECTION",
+      "input_units": 13,
+      "reconstructed_units_before_fix": 11,
+      "transformation": "PRESERVE_SORTED_CODES_SELECTED_UNITS",
+      "failed_layer": "body_activations",
+      "partial_build_receipt": {
+        "path": "/home/zyf/AAA/scar/artifacts/current/experiments/cpu-sunfish-current/scoped-all-layer-build/manifest.json",
+        "bytes": 10023,
+        "sha256": "e464e48a79871238661142534005599b07dff312eabb493bb6acd9feb313a10b"
+      },
+      "full_selection_readback_verified": true,
+      "publication_receipt": {
+        "path": "/home/zyf/AAA/scar/artifacts/current/experiments/cpu-sunfish-current/scoped-selected-functions/result.json",
+        "bytes": 8771,
+        "sha256": "5faabc5cf8ffb63302c9be28e37d603f940875a2a27ddf6a951ac291b6268254"
+      }
+    },
+    "limitations": [
+      "STARTUP_AND_PROTOCOL_IO_CAPTURE_NOT_SEARCH_OR_SCIENCE_WORKLOAD",
+      "SCOPE_ENCLOSURE_MAY_INCLUDE_CALLBACKS_AND_COLLECTOR_OVERHEAD",
+      "MARKER_DESCRIPTOR_AND_FILE_MUST_NOT_BE_MODIFIED_BY_APPLICATION",
+      "17137_OS_WORK_RECORDS_REMAIN_UNASSIGNED",
+      "STATIC_CALL_CONTEXT_HAS_NOT_SELECTED_ACTUAL_INVOCATION",
+      "NO_CONTENT_ALIAS_DEVICE_READINESS_OR_COMPLETE_EFFECT_AUTHORITY",
+      "FULL_SHARED_GRAPH_COVERAGE_NOT_PROVED"
+    ],
+    "prior_failed_artifacts": [
+      {
+        "path": "artifacts/current/experiments/cpu-sunfish-current/source-resource-graph",
+        "reason": "INTENUM_NOT_SUPPORTED_BY_TYPED_RECORD_DECODER_FIXED_WITH_STRING_ENUM_AND_UNCHANGED_BINARY_WIRE_MAPPING"
+      }
+    ],
+    "unified_build": {
+      "receipt": {
+        "path": "/home/zyf/AAA/scar/artifacts/current/experiments/cpu-sunfish-current/scoped-connected-build/manifest.json",
+        "bytes": 10248,
+        "sha256": "c590b9f7fe45d378f503cc30a49600322c8da8d3be80ee6cda73814d81d4b034"
+      },
+      "seconds": 266.78123761298775,
+      "summary": {
+        "configuration_inputs": 0,
+        "gaps": 67,
+        "loaded_units": 11,
+        "observed_body_activation_publications": 1,
+        "observed_boundary_publications": 1,
+        "observed_publications": 1,
+        "observed_resource_scope_publications": 1,
+        "resource_records": 31,
+        "source_units": 18
+      },
+      "layers": {
+        "body_copies": 0,
+        "catalog_units": 18,
+        "cross_layer": {
+          "body_activations": true,
+          "configuration": false,
+          "creations": false,
+          "exec": false,
+          "functions": true,
+          "native": false,
+          "observed_boundaries": true,
+          "protocol": false,
+          "resource_scopes": true
+        },
+        "loaded_units": 11,
+        "local_state": {
+          "bindings": true,
+          "content": true
+        },
+        "loops_unrolled": false,
+        "providers": [
+          "body_activations",
+          "functions:/home/zyf/AAA/scar/artifacts/current/experiments/cpu-sunfish-current/body-protocol-frontend/function-interfaces",
+          "functions:/home/zyf/AAA/scar/artifacts/current/experiments/cpu-sunfish-current/scoped-selected-functions",
+          "observed_boundaries",
+          "resource_scopes"
+        ],
+        "readback": true,
+        "resources": true,
+        "storage": true,
+        "unified": true
+      },
+      "publication_readback": {
+        "admitted_publications": 7,
+        "entry_expanded": true,
+        "independent_full_analysis_repeated": false,
+        "indices_reconstructed": 0,
+        "mode": "STORED_TABLES_WITH_ADMITTED_INDEX",
+        "output_tables": 6,
+        "seconds": 0.26842207700246945
+      },
+      "remaining_gap_kinds": {
+        "CACHED_COMPONENT_RULES_CHANGED": 3,
+        "INTERFACE_MATERIAL_REJECTED": 1,
+        "COMPILED_EXEC_SELECTION_NOT_PROVIDED": 1,
+        "MATERIAL_NOT_AVAILABLE": 4,
+        "SOURCE_EFFECT_FIELDS_PARTIALLY_RESOLVED": 45,
+        "UNRESOLVED_EXTERNAL_RESOURCE_INTERFACE": 3,
+        "RESOURCE_RUNTIME_EVIDENCE_MISSING": 6,
+        "CONTENT_PROTOCOL_AND_INSTANCE_OPEN": 2,
+        "DEPENDENCY_POINT_BUDGET": 1,
+        "FULL_INFERENCE_COVERAGE_UNPROVEN": 1
+      }
+    },
+    "validation_scope": "ONE_REAL_CAPTURE_STORED_GRAPH_RELATION_READBACK_AND_ONE_CORRECTED_UNIFIED_BUILD_NO_BROAD_TEST_SUITE"
   }
 }

@@ -30,6 +30,7 @@ def _rules():
             'source_body_interfaces.py','source_body_activations.py','source_body_activation_view.py',
             'compiler_code_paths.py','source_observed_codes.py','source_observed_calls.py',
             '../ir/program/compiler_code_paths.py','../ir/program/source_observed_codes.py',
+            'source_resource_scopes.py','source_resource_scope_view.py','../ir/program/resource_scopes.py',
             '../ir/program/source_body_interfaces.py','../ir/program/source_body_activations.py',
             'program_view.py','source_effect_projection.py','source_effects.py','source_state.py',
             '../ir/program/source_state.py',

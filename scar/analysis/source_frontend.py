@@ -343,11 +343,14 @@ def build_frontend(paths, out, *, sources=(), jobs=4, trace=None, project_root=N
                 'effects_proven','source_relations_rederived','namespace_semantics_rederived',
                 'loops_unrolled','target_executed','first_stage_complete')})
         if trace is not None:
+            resource_arguments=[]
+            if any(Path(trace).glob('resource-scope-meta.*.json')):
+                resource_arguments=['--resource-scopes-out',out/'resource-scopes']
             run.stage('observed-function-interfaces','scar.analysis.source_observed_interfaces',
                 ['--parent',out/'function-interfaces','--trace',trace,'--project-root',project_root,
                     '--out',out/'observed-function-interfaces','--boundaries-out',out/'observed-boundaries',
                     '--activations-out',out/'body-activations',
-                    '--graph-check-out',out/'body-activations-verified.json'],
+                    '--graph-check-out',out/'body-activations-verified.json',*resource_arguments],
                 out/'observed-function-interfaces/result.json','scar.source-observed-function-interfaces',
                 first_stage_complete=False,source_bodies_copied=False,loops_unrolled=False,
                 future_dispatch_proven=False,creator_instances_proven=False,cell_contents_proven=False)
@@ -359,6 +362,9 @@ def build_frontend(paths, out, *, sources=(), jobs=4, trace=None, project_root=N
                     or graph_check['first_stage_complete'] is not False):
                 raise ValueError('body graph readback is incomplete')
             report['body_activations_verified'] = _receipt(out/'body-activations-verified.json')
+            if resource_arguments:
+                report['resource_scopes']=_receipt(out/'resource-scopes/result.json')
+                report['resource_scopes_verified']=_receipt(out/'resource-scopes/graph-check.json')
             boundary=json.loads((out/'observed-boundaries/result.json').read_bytes())
             if (boundary['schema']!='scar.source-observed-boundaries'
                     or boundary['first_stage_complete'] is not False

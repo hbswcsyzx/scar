@@ -68,13 +68,16 @@ def _trace(args) -> int:
         if args.project_root is not None and str(Path(args.project_root).resolve()) != lean_plan.namespace_root:
             raise SystemExit('--project-root differs from the capture plan namespace')
     stream_interfaces = getattr(args, 'stream_interfaces', False) or program_ports
+    resource_scopes=getattr(args,'resource_scopes',False)
     if getattr(args,'stream_backing',False) and not stream_interfaces:
         raise SystemExit('--stream-backing requires --stream-interfaces')
     native_callables = getattr(args, 'native_callables', False)
     compile_events = getattr(args, 'compile_events', False)
-    python_targets = getattr(args, 'python_call_targets', False) or lean_plan is not None or stream_interfaces or program_ports or native_callables or compile_events
+    python_targets = getattr(args, 'python_call_targets', False) or lean_plan is not None or stream_interfaces or program_ports or native_callables or compile_events or resource_scopes
     operands = getattr(args, 'call_operands', False) or python_targets
     os_capture_root = getattr(args, 'os_capture_root', None)
+    if resource_scopes and os_capture_root is None:
+        raise SystemExit('--resource-scopes requires --os-capture-root')
     if os_capture_root is not None:
         if not 1 <= args.archive_workers <= 32:
             raise SystemExit('--archive-workers must be between 1 and 32')
@@ -96,6 +99,7 @@ def _trace(args) -> int:
     for key in tuple(env):
         if key.startswith('SCAR_COMPILE_'):env.pop(key,None)
     env.pop('SCAR_STREAM_INTERFACES',None)
+    env.pop('SCAR_RESOURCE_SCOPES',None)
     env.pop('SCAR_STREAM_BACKING_OBSERVATIONS',None)
     env.pop('SCAR_OPERAND_CAPTURE',None)
     env.pop('SCAR_CAPTURE_PLAN',None)
@@ -182,6 +186,7 @@ def _trace(args) -> int:
                 env['SCAR_STREAM_INTERFACES'] = '1'
                 if getattr(args,'stream_backing',False):
                     env['SCAR_STREAM_BACKING_OBSERVATIONS'] = '1'
+            if resource_scopes:env['SCAR_RESOURCE_SCOPES']='1'
             env['SCAR_OPERAND_CAPTURE'] = capture
             env['SCAR_OPERAND_MAX_EVENTS'] = str(args.max_operand_events)
             env['SCAR_OPERAND_MAX_BYTES'] = str(args.max_operand_bytes)
@@ -563,6 +568,7 @@ def main(argv=None) -> int:
         'native-bindings': 'scar.analysis.source_named_bindings',
         'native-interfaces': 'scar.analysis.source_binding_native_graph',
         'resource-graph': 'scar.analysis.source_resource_graph',
+        'resource-scopes': 'scar.analysis.source_resource_scopes',
         'name-flow': 'scar.analysis.source_control_namespaces',
     }
     if cli_argv and cli_argv[0] in source_graph_commands:
@@ -653,6 +659,7 @@ def main(argv=None) -> int:
             ('native-bindings', 'join full namespace requests to conditional generated bindings'),
             ('native-interfaces', 'connect original source operands and state to canonical native interfaces'),
             ('resource-graph', 'connect native value constraints to a retained target resource graph'),
+            ('resource-scopes', 'connect owned CALL markers to actual OS work and source/state interfaces'),
             ('name-flow', 'qualify lexical name sources using matched shared control flow')):
         sub.add_parser(name, help=help_).set_defaults(func=lambda _: 0)
     observed_calls = sub.add_parser("observed-calls", help="bind captured actual callees to original static CALL ports")
@@ -940,6 +947,8 @@ def main(argv=None) -> int:
     trace.add_argument('--stream-interfaces', action='store_true', help='observe builtin stream calls and C completion without reading contents or wrapping objects')
     trace.add_argument('--stream-backing',action='store_true',
         help='also observe exact builtin stream backing handles; requires --stream-interfaces')
+    trace.add_argument('--resource-scopes',action='store_true',
+        help='opt in to owned native CALL markers for OS/source joins; requires --os-capture-root')
     trace.add_argument('--max-os-lines',type=int,default=2000000)
     trace.add_argument('--max-capture-bytes',type=int,default=256000000)
     trace.add_argument('--max-archive-bytes',type=int,default=128000000)

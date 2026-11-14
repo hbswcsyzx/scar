@@ -25,6 +25,11 @@ manifest 引用原分片，`relationships.json` 索引跨层分片，`observed.j
 资源需求与候选分开：F4 的 CPU/host representation 需求带执行条件，不代表 tensor backing；GPU/设备内存及存储候选
 复用原 native 转换/类型接口和硬件快照。结构、声明及编译请求不制造独立运行需求。旧路线保留 Behavior 的条件候选。
 实际事件仍需原采集证据，`.to()` 不授物理复制。
+`--resource-scopes` 为可选的实际 CALL 边界通道：72 字节 BEGIN/完成记录先采集，
+后端按原 CALL、线程和 syscall 顺序连接。`scar frontend --trace …` 自动发现该通道，
+在同一索引生成调用、正文和资源材料；`scar build` 按 schema 与原输入收据接入。
+动态范围与 OS 工作保存在证据表，源码绑定按 unit 分片；图中只放共享接口及原状态/资源引用。
+这不是全局 FD 表或时间配对，也不把范围包围关系升级为内容、就绪或独占因果证明。
 两个验收节点分别是流程可建/存/读/查并列出前沿，以及正常推理关键依赖/资源边界闭合。
 前者由 `workflow_complete` 表示，后者保留 `first_stage_complete=false`；当前没有真实推理覆盖完成结论。
 

@@ -119,10 +119,11 @@ class CallOperandObserver:
 
     def __init__(self, recorder, *, capture="instructions", max_events=100_000,
                  max_bytes=32_000_000, max_loads=64, max_namespace_items=4096,
-                 max_references=None, python_targets=False, stream_interfaces=False):
+                 max_references=None, python_targets=False, stream_interfaces=False, resource_scopes=False):
         if type(stream_interfaces) is not bool:
             raise TypeError('stream_interfaces must be an explicit bool')
-        python_targets = python_targets or stream_interfaces
+        if type(resource_scopes)is not bool:raise TypeError('resource_scopes must be an explicit bool')
+        python_targets = python_targets or stream_interfaces or resource_scopes
         if type(capture) is not str or capture not in _CAPTURE_RULES:
             raise ValueError("operand capture must be 'instructions' or 'windows'")
         for name, value in (("max_events", max_events), ("max_bytes", max_bytes),
@@ -157,7 +158,7 @@ class CallOperandObserver:
         if capture in (_CAPTURE_LEAN, _CAPTURE_PROGRAM, _CAPTURE_PROCESS) and python_targets is not True:
             raise ValueError('lean capture requires explicit Python target interfaces')
         self._local_mask = sys.monitoring.events.CALL if capture in (_CAPTURE_LEAN, _CAPTURE_PROGRAM, _CAPTURE_PROCESS) else _LOCAL_MASK
-        self._stream_enabled = stream_interfaces
+        self._stream_enabled = stream_interfaces or resource_scopes
         # CPython derives C_RETURN/C_RAISE from CALL. get_local_events returns
         # the normalized CALL mask even when the dependent bits were supplied.
         self.rule = _CAPTURE_RULES[capture]
@@ -192,6 +193,7 @@ class CallOperandObserver:
         self.environment_observer = None
         self.python_targets = None
         self.stream_interfaces = None
+        self.resource_scopes = None
         if type(python_targets) is not bool:
             raise TypeError("python_targets must be an explicit bool")
         self._target_event_digest = hashlib.sha256() if python_targets else None
@@ -216,6 +218,9 @@ class CallOperandObserver:
             if stream_interfaces:
                 from scar.trace.stream_interfaces import StreamInterfaceObserver
                 self.stream_interfaces = StreamInterfaceObserver(self)
+            if resource_scopes:
+                from scar.trace.resource_scopes import ResourceScopeObserver
+                self.resource_scopes = ResourceScopeObserver(self)
         except BaseException:
             if self._fd is not None:
                 os.close(self._fd)
@@ -226,7 +231,7 @@ class CallOperandObserver:
         witness = getattr(recorder, 'collector_witness', None)
         if witness is not None:
             callbacks = ('_on_instruction','_on_call','_reference')
-            if stream_interfaces:
+            if self._stream_enabled:
                 callbacks += ('_on_stream_return', '_on_stream_raise')
             witness.register('operands', self, callbacks)
             witness.register('environments', self.environment_observer, ('dispatch','entry'))
@@ -1016,6 +1021,10 @@ class CallOperandObserver:
                                 self.environment_observer.discard(attempt_index)
                         else:
                             self.environment_observer.discard(attempt_index)
+                    # The boundary marker is last: observer preprocessing must
+                    # not be attributed to the target native CALL.
+                    if self.resource_scopes is not None:
+                        self.resource_scopes.begin(callable_object,code,offset,owner,attempt_index)
                 except Exception as error:
                     if self.lean_plan is not None or self.program_ports:
                         state = self._base_state(frame)
@@ -1032,6 +1041,9 @@ class CallOperandObserver:
         writer = self.recorder._is_capture_writer
         if self.recorder._closing or writer is not None and writer():
             return
+        if self.resource_scopes is not None:
+            with self.recorder.lock,self._lock:
+                self.resource_scopes.complete(code,offset,target,self.resource_scopes.C_RETURN)
         if self.stream_interfaces is not None and not self._stopped:
             with self.recorder.lock, self._lock:
                 self.stream_interfaces.complete(code, offset, target, sys._getframe(1), 'C_RETURN')
@@ -1040,6 +1052,9 @@ class CallOperandObserver:
         writer = self.recorder._is_capture_writer
         if self.recorder._closing or writer is not None and writer():
             return
+        if self.resource_scopes is not None:
+            with self.recorder.lock,self._lock:
+                self.resource_scopes.complete(code,offset,target,self.resource_scopes.C_RAISE)
         if self.stream_interfaces is not None and not self._stopped:
             with self.recorder.lock, self._lock:
                 self.stream_interfaces.complete(code, offset, target, sys._getframe(1), 'C_RAISE')
@@ -1118,6 +1133,7 @@ class CallOperandObserver:
         if os.getpid() == self.pid:
             return
         self._stopped = self._closed = True
+        if self.resource_scopes is not None:self.resource_scopes.after_fork()
         if self.stream_interfaces is not None:
             self.stream_interfaces.closed = self.stream_interfaces.stopped = True
             self.stream_interfaces.buffer.clear()
@@ -1240,6 +1256,8 @@ class CallOperandObserver:
                         self.stream_interfaces.errors.append('OPERAND_INPUT_HANDOFF_UNAVAILABLE')
                         self.stream_interfaces.stopped = True
                     self.stream_interfaces.close(legacy_inputs)
+                if self.resource_scopes is not None:
+                    self.resource_scopes.close(legacy_inputs)
             finally:
                 try:
                     if self.environment_observer is not None:
@@ -1269,10 +1287,14 @@ def _environment_limit(name, default):
 
 def install(recorder, *, capture=None, max_events=None, max_bytes=None,
             max_loads=None, max_namespace_items=None, max_references=None, python_targets=None,
-            stream_interfaces=None):
+            stream_interfaces=None,resource_scopes=None):
     """Attach the sidecar without replacing the existing sys.setprofile hook."""
     if capture is None:
         capture = os.environ.get("SCAR_OPERAND_CAPTURE", _CAPTURE_INSTRUCTIONS)
+    if resource_scopes is None:
+        selection=os.environ.get('SCAR_RESOURCE_SCOPES','0')
+        if selection not in ('0','1'):raise ValueError('SCAR_RESOURCE_SCOPES must be 0 or 1')
+        resource_scopes=selection=='1'
     if stream_interfaces is None:
         selection = os.environ.get('SCAR_STREAM_INTERFACES', '0')
         if selection not in ('0', '1'):
@@ -1293,7 +1315,7 @@ def install(recorder, *, capture=None, max_events=None, max_bytes=None,
     return CallOperandObserver(recorder, capture=capture, max_events=max_events, max_bytes=max_bytes,
                                max_loads=max_loads, max_namespace_items=max_namespace_items,
                                max_references=max_references, python_targets=python_targets,
-                               stream_interfaces=stream_interfaces)
+                               stream_interfaces=stream_interfaces,resource_scopes=resource_scopes)
 
 
 __all__ = ["CallOperandObserver", "install"]

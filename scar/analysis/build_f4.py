@@ -64,7 +64,13 @@ def discover(entry,trace,*,catalog=None,cache_roots=()):
             'scar.constructor-member-contexts':'members','scar.source-binding-native-graph':'native',
             'scar.source-resource-graph':'resources','scar.configuration-state-bindings':'configuration',
             'scar.source-observed-boundaries':'observed_boundaries',
+            'scar.source-resource-scopes':'resource_scopes',
             'scar.source-body-activations':'body_activations'}.get(schema)
+        if key=='resource_scopes':
+            if (trace is None or Path(r['capture'])/'trace'!=trace or r['catalog']!=str(c.path)):continue
+            from scar.analysis.source_resource_scopes import _pins as resource_scope_pins
+            if r['pins']!=resource_scope_pins():
+                gaps.append(dict(layer=key,kind='CACHED_COMPONENT_RULES_CHANGED',path=str(path)));continue
         if key in ('observed_boundaries','body_activations'):
             basis=r['basis']
             if (trace is None or basis['trace']!=str(trace)
@@ -172,7 +178,7 @@ class F4BuildSession:
         else:
             from scar.analysis.source_exec_view import SourceExecProvider
             self.providers['exec']=SourceExecProvider(self.view,self.catalog)
-        for name in ('creations','native','protocol','configuration','observed_boundaries','body_activations'):
+        for name in ('creations','native','protocol','configuration','observed_boundaries','body_activations','resource_scopes'):
             try:
                 path=self._component_path(name)
                 if path is None:
@@ -204,6 +210,13 @@ class F4BuildSession:
                     if not store.report['coverage']['entry_coverage_complete']:
                         self.gaps.append(dict(layer=name,kind='EXECUTED_ENTRIES_WITHOUT_SOURCE_BODY',
                             missing=store.report['coverage']['missing_entries']))
+                elif name=='resource_scopes':
+                    from scar.analysis.source_resource_scopes import ResourceScopeStore
+                    from scar.analysis.source_resource_scope_view import SourceResourceScopeProvider
+                    indices=[p.store.index for p in self.providers.values()
+                        if getattr(getattr(p,'store',None),'index',None) is not None]
+                    store=ResourceScopeStore(path,index=indices[0] if indices else None)
+                    provider=SourceResourceScopeProvider(self.view,store)
                 else:
                     from scar.analysis.source_configuration_view import SourceConfigurationProvider
                     provider=SourceConfigurationProvider(self.view,path)
@@ -216,7 +229,7 @@ class F4BuildSession:
         if self.report['trace']:
             from scar.analysis.build import _check
             for receipt in self.report['trace']['inputs']:_check(receipt)
-        observations=[];boundaries=[];activations=[]
+        observations=[];boundaries=[];activations=[];resource_scopes=[]
         for p in self.providers.values():
             store=getattr(p,'store',None)
             if store is not None and store.report['schema']=='scar.source-observed-function-interfaces':
@@ -228,8 +241,12 @@ class F4BuildSession:
                 store.check()
                 activations.append(dict(path=str(store.path),coverage=store.report['coverage'],
                     run_scope=store.report['basis']['run_scope']))
+            if store is not None and store.report['schema']=='scar.source-resource-scopes':
+                store.check()
+                resource_scopes.append(dict(path=str(store.path),summary=store.report['summary']))
         self.observed=dict(schema='scar.build-f4-observed-selections',publications=observations,
-            boundaries=boundaries,body_activations=activations,runtime_events_replaced_by_static_frames=False)
+            boundaries=boundaries,body_activations=activations,resource_scopes=resource_scopes,
+            runtime_events_replaced_by_static_frames=False)
         return self.observed
 
     def select(self,*,file=None,entry=None,kind=None):
@@ -270,7 +287,7 @@ class F4BuildSession:
     def layer_summary(self):
         return dict(unified=True,local_state=dict(bindings=True,content=True),
             cross_layer=dict(functions=any(k.startswith('functions:') for k in self.providers),
-                **{k:k in self.providers for k in ('exec','creations','native','protocol','configuration','observed_boundaries','body_activations')}),resources=True,
+                **{k:k in self.providers for k in ('exec','creations','native','protocol','configuration','observed_boundaries','body_activations','resource_scopes')}),resources=True,
             storage=True,readback=True,providers=sorted(self.providers),
             loaded_units=len(self.view.units),catalog_units=len(self.catalog.fact_store.rows),
             body_copies=0,loops_unrolled=False)
@@ -355,11 +372,12 @@ def build_f4(entry,trace,out,spec,*,source_roots=(),max_points=128,max_seconds=3
         (out/'resources.json.gz').write_bytes(gzip.compress(json.dumps(payload,separators=(',',':')).encode(),mtime=0))
         report['layers']=session.layer_summary()
         report['assembly_elapsed_by_layer']=session.timings
-        report['observed_admission']='ADMITTED' if observed['publications'] or observed['boundaries'] or observed['body_activations'] else 'NOT_JOINED'
+        report['observed_admission']='ADMITTED' if any(observed[k] for k in ('publications','boundaries','body_activations','resource_scopes')) else 'NOT_JOINED'
         report['summary']=dict(source_units=len(session.catalog.fact_store.rows),loaded_units=len(session.view.units),
             configuration_inputs=len(configuration),observed_publications=len(observed['publications']),
             observed_boundary_publications=len(observed['boundaries']),
             observed_body_activation_publications=len(observed['body_activations']),
+            observed_resource_scope_publications=len(observed['resource_scopes']),
             resource_records=len(session.resources.provider.records))
         return _finish_publication(session,report,gaps,started)
     finally:session.close()

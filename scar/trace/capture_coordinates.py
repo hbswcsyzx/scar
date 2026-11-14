@@ -294,6 +294,33 @@ def _python_target_members(files, trace_root, pid, members, project_root):
             "collector_stopped": document["stopped"], "call_ports_established": False}, [str(events), str(metadata)]
 
 
+def _resource_scope_members(files,trace_root,pid,members):
+    """Admit marker bytes and their exact original CALL input receipts."""
+    from scar.trace.resource_scopes import SCHEMA,RECORD
+    metadata=trace_root/f'resource-scope-meta.{pid}.json'
+    if not files.contains(metadata):return None,[]
+    doc,declaration=files.document(metadata,SCHEMA)
+    row=doc.get('file',{});events=PurePosixPath(row.get('uri',''))
+    _need(doc.get('schema')==SCHEMA and doc.get('schema_version')==1 and doc.get('process_id')==pid
+          and events==trace_root/f'resource-scopes.{pid}.{doc.get("nonce")}.bin'
+          and doc.get('record_format')=='<8s8Q' and doc.get('record_bytes')==RECORD.size
+          and _integer(doc.get('records')) and doc.get('errors')==[]
+          and doc.get('clock_matching_used') is False,'resource scope marker profile differs')
+    artifact=files.verify(events,SCHEMA+'.binary.v1')
+    _need((artifact.sha256,artifact.size_bytes)==(row.get('sha256'),row.get('size_bytes'))
+          and artifact.size_bytes==doc['records']*RECORD.size,'resource marker bytes differ')
+    inputs=doc.get('legacy_inputs')
+    _need(type(inputs)is list and len(inputs)==5,'resource markers need their original CALL input handoff')
+    for item in inputs:
+        name=item['path'];original=members.get(name)
+        _need(original is not None and item['process_id']==pid
+              and (item['raw_sha256'],item['raw_bytes'])==(original.sha256,original.size_bytes),
+              'resource scope markers refer to another original CALL stream')
+    members[str(events)]=artifact;members[str(metadata)]=declaration
+    return dict(capability='SCAR_NATIVE_RESOURCE_SCOPES_V1',manifest=encode(declaration),
+        events=encode(artifact),records=doc['records'],scope_completion_proven=False),[str(events),str(metadata)]
+
+
 def _stream_interface_members(files, trace_root, pid, members, project_root):
     """Retained resource-interface bytes, not content or canonical-call proof."""
     events = trace_root / f'stream-interfaces.{pid}.jsonl'
@@ -511,6 +538,7 @@ def bind_capture_coordinates(capture_dir, *, max_bytes=1_000_000_000, max_lines=
     operand_name = trace_root / ("call-operands." + str(pid) + ".jsonl")
     members[str(operand_name)] = files.verify(operand_name, "scar.call-operands.events.v1")
     _need(members[str(operand_name)].size_bytes == operands["bytes"], "operand event byte count differs")
+    resource_scope_membership,resource_scope_names=_resource_scope_members(files,trace_root,pid,members)
     python_target_membership, python_target_names = _python_target_members(
         files, trace_root, pid, members, operands["project_root"])
     stream_membership, stream_names = _stream_interface_members(
@@ -758,6 +786,7 @@ def bind_capture_coordinates(capture_dir, *, max_bytes=1_000_000_000, max_lines=
     exclusive_names += lean_plan_names
     exclusive_names += program_source_names
     exclusive_names += stream_names
+    exclusive_names += resource_scope_names
     if environment_present:
         exclusive_names += [str(environment_name), str(environment_meta_name)]
     exclusive_names += dispatch_names
@@ -918,6 +947,8 @@ def bind_capture_coordinates(capture_dir, *, max_bytes=1_000_000_000, max_lines=
         report['captured_python_source_membership'] = program_source_membership
         report['open'].append({'code':'captured_source_bytes_not_loader_or_compiler_match',
                                'source':program_source_membership['manifest']})
+    if resource_scope_membership is not None:
+        report['resource_scope_membership']=resource_scope_membership
     if stream_membership is not None:
         report['stream_interface_membership'] = stream_membership
         report['open'].append({'code': 'stream_interface_source_contents_and_backing_resources_unverified',

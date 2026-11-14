@@ -346,7 +346,10 @@ def build_observed_interfaces(parent,index,out):
     report=dict(schema=SCHEMA,schema_version=2,parent_path=str(parent.path),
         parent=encode(_artifact(parent.path/'result.json',parent.report['schema'])),catalog=str(parent.catalog.path),
         trace=index.codes.trace.directory,project_root=index.codes.trace.project_root,run_scope=index.codes.targets.source_sha256,
-        code_units=sorted(index.codes._sources),compiled_units=[p.unit for p in index.compiled],
+        # Preserve the input selection, including units with no code match.
+        # Keeping only successful mappings narrows the replay index and makes
+        # a separately stored body activation basis incompatible with it.
+        code_units=sorted(index.codes.selected_units),compiled_units=[p.unit for p in index.compiled],
         target_reader_budget=index.codes.target_reader_budget,
         frame_reader_budget=encode(index.codes.trace.frame_budget),
         selection=dict(mode='OBSERVED_CALLER_UNITS',units=list(selected),
@@ -459,6 +462,7 @@ def main():
     parser.add_argument('--boundaries-out',help='also connect non-Python CALL interfaces using this same checked trace index')
     parser.add_argument('--activations-out',help='join every recorded body entry, including root/class/resume protocols')
     parser.add_argument('--graph-check-out',help='verify saved body graph with this same admitted index')
+    parser.add_argument('--resource-scopes-out',help='join owned OS boundary markers with this same source/trace index')
     args=parser.parse_args()
     if args.read:
         store=ObservedFunctionInterfaceStore(args.read)
@@ -487,6 +491,11 @@ def main():
         if args.graph_check_out:
             from scar.analysis.source_body_activation_view import verify_body_activations
             verify_body_activations(args.activations_out,args.graph_check_out,index=index)
+    if args.resource_scopes_out:
+        from scar.analysis.source_resource_scopes import build_resource_scopes
+        build_resource_scopes(Path(index.codes.trace.directory).parent,args.resource_scopes_out,
+            catalog=index.view.catalog.path,project_root=index.codes.project_root,index=index,
+            graph_check_out=Path(args.resource_scopes_out)/'graph-check.json')
     _check_targets();print(json.dumps(report['counts']),flush=True)
 
 

@@ -310,6 +310,7 @@ def archive_owned_capture(capture_root,*,budgets=None,workers=4):
     # Temporary snapshot bytes are evidence too, including a stopped prefix.
     # Archival preserves bytes; it does not grant journal/graph completeness.
     paths+=sorted((root/'trace').glob('*.jsonl.snapshot'))
+    paths+=sorted((root/'trace').glob('resource-scopes.*.bin'))
     paths+=sorted((root/'trace').glob('execution-trace.*.json'))
     paths+=sorted((root/'trace').glob('kineto.*.json'))
     paths+=_native_input_archive_paths(root,budget)
