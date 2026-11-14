@@ -112,3 +112,6 @@ class ObservedSourceRequestCodeLink:
                     (self.load_offset, self.make_offset, self.installation_offset, self.compile_flags))
                 or not self.load_offset < self.make_offset < self.installation_offset):
             raise ValueError('request correspondence needs its sealed declaration/body and exact compiler creation')
+
+
+ObservedSourceBodyLink = (ObservedSourceCodeLink | ObservedSourceScopeLink | ObservedSourceRequestCodeLink)

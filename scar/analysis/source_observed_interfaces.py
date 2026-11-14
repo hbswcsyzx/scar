@@ -457,6 +457,7 @@ def main():
     parser.add_argument('--frame-max-events',type=int,default=100_000)
     parser.add_argument('--out');parser.add_argument('--read')
     parser.add_argument('--boundaries-out',help='also connect non-Python CALL interfaces using this same checked trace index')
+    parser.add_argument('--activations-out',help='join every recorded body entry, including root/class/resume protocols')
     args=parser.parse_args()
     if args.read:
         store=ObservedFunctionInterfaceStore(args.read)
@@ -479,6 +480,9 @@ def main():
     if args.boundaries_out:
         from scar.analysis.source_observed_boundaries import build_boundaries
         build_boundaries(index,args.boundaries_out)
+    if args.activations_out:
+        from scar.analysis.source_body_activations import build_body_activations
+        build_body_activations(index,args.activations_out)
     _check_targets();print(json.dumps(report['counts']),flush=True)
 
 

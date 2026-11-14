@@ -320,6 +320,15 @@ def build_frontend(paths, out, *, sources=(), jobs=4, trace=None, project_root=N
         if trace is not None:
             active_catalog,report['external_admission_batches']=admit_external_sources(
                 run,active_catalog,trace,project_root,jobs)
+        run.stage('body-interfaces','scar.analysis.source_body_interfaces',
+            ['--catalog',active_catalog,'--out',out/'body-interfaces','--jobs',jobs],
+            out/'body-interfaces/result.json','scar.source-body-interfaces',
+            source_bodies_copied=False,runtime_bindings_proven=False,first_stage_complete=False)
+        run.stage('body-interfaces-verified','scar.analysis.source_body_interfaces',
+            ['--read',out/'body-interfaces','--out',out/'body-interfaces-verified.json'],
+            out/'body-interfaces-verified.json','scar.source-body-interfaces.readback',status='VERIFIED')
+        report['body_interfaces'] = _receipt(out/'body-interfaces/result.json')
+        report['body_interfaces_verified'] = _receipt(out/'body-interfaces-verified.json')
         call_roots = [part for p in paths for part in ('--source-root',p)]
         run.stage('calls','scar.analysis.source_declared_calls',
             ['--catalog',active_catalog,*call_roots,'--out',out/'calls','--jobs',jobs],
@@ -336,11 +345,19 @@ def build_frontend(paths, out, *, sources=(), jobs=4, trace=None, project_root=N
         if trace is not None:
             run.stage('observed-function-interfaces','scar.analysis.source_observed_interfaces',
                 ['--parent',out/'function-interfaces','--trace',trace,'--project-root',project_root,
-                    '--out',out/'observed-function-interfaces','--boundaries-out',out/'observed-boundaries'],
+                    '--out',out/'observed-function-interfaces','--boundaries-out',out/'observed-boundaries',
+                    '--activations-out',out/'body-activations'],
                 out/'observed-function-interfaces/result.json','scar.source-observed-function-interfaces',
                 first_stage_complete=False,source_bodies_copied=False,loops_unrolled=False,
                 future_dispatch_proven=False,creator_instances_proven=False,cell_contents_proven=False)
             report['observed_function_interfaces'] = _receipt(out/'observed-function-interfaces/result.json')
+            report['body_activations'] = _receipt(out/'body-activations/result.json')
+            run.stage('body-activations-verified','scar.cli',
+                ['body-activations','--read',out/'body-activations','--graph-check',
+                    '--out',out/'body-activations-verified.json'],
+                out/'body-activations-verified.json','scar.source-body-activations.graph-check',
+                status='STRUCTURE_VERIFIED',first_stage_complete=False)
+            report['body_activations_verified'] = _receipt(out/'body-activations-verified.json')
             boundary=json.loads((out/'observed-boundaries/result.json').read_bytes())
             if (boundary['schema']!='scar.source-observed-boundaries'
                     or boundary['first_stage_complete'] is not False

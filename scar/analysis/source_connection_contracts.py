@@ -69,6 +69,12 @@ _ENVIRONMENT_RULES = {
 }
 
 
+def body_entry_rules():
+    """The complete body-entry family, excluding environment handle reads."""
+    connection_reference_catalog()
+    return tuple((kind, field) for kind, (field, is_entry) in _ENVIRONMENT_RULES.items() if is_entry)
+
+
 @lru_cache(None)
 def _region_fields(kind, path=(), active=()):
     """Find all region-address fields independently of producer branches.

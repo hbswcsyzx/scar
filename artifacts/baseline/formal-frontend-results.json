@@ -2002,5 +2002,128 @@
     },
     "compatibility": "C1 classification enums preserve JSON string wire; implementation/type catalog pins changed. Prior materials retain original receipts, not current producer admission.",
     "next_layer": "UNIFIED_CROSS_LAYER_ENTRY_COMPLETION_CONTRACTS_BEFORE_PROVIDER_CONNECTION_CHANGES"
+  },
+  "shared_body_protocol_layer": {
+    "status": "ROOT_GRAPH_VERIFIED_GENERIC_CORRESPONDENCE_OPEN_SUNFISH_RUNNING",
+    "body_entry_variants": 5,
+    "qualified_regions_and_steps": true,
+    "template_graph_traversal": "SAME_CODE_SCOPE_SHARED_CHILDREN_NO_ITERATION_UNROLL",
+    "static_protocol_counts": {
+      "completion_ports": 60,
+      "entries": 15,
+      "interfaces": 15,
+      "parameters": 55,
+      "resume_ingresses": 8,
+      "suspensions": 4
+    },
+    "root_graph_check": {
+      "bidirectional_edges_checked": 555,
+      "coverage": {
+        "body_protocols": {
+          "EnterDeferredBody": 9,
+          "EnterRootBody": 2
+        },
+        "covered_entries": 14,
+        "entry_coverage_complete": true,
+        "missing_entries": 0,
+        "occurrences": 14,
+        "recorded_entries": 14,
+        "shared_activations": 13,
+        "shared_interfaces": 11,
+        "source_anchor_frontiers": 0,
+        "unmatched_entries": 0
+      },
+      "first_stage_complete": false,
+      "ingress_frames": 13,
+      "required_ports_checked": 126,
+      "schema": "scar.source-body-activations.graph-check",
+      "schema_version": 1,
+      "seconds": 200.35394708099193,
+      "shared_activations": 13,
+      "source_bodies_copied": false,
+      "status": "STRUCTURE_VERIFIED",
+      "target_executed": false,
+      "unrelated_return_frames_rejected": 13
+    },
+    "generator_graph_check": {
+      "bidirectional_edges_checked": 2117,
+      "coverage": {
+        "body_protocols": {
+          "EnterDeferredBody": 2,
+          "EnterEvaluationRequest": 1,
+          "EnterRootBody": 1
+        },
+        "covered_entries": 16,
+        "entry_coverage_complete": false,
+        "missing_entries": 14,
+        "occurrences": 16,
+        "recorded_entries": 30,
+        "shared_activations": 7,
+        "shared_interfaces": 4,
+        "source_anchor_frontiers": 0,
+        "unmatched_entries": 14
+      },
+      "first_stage_complete": false,
+      "ingress_frames": 17,
+      "required_ports_checked": 212,
+      "schema": "scar.source-body-activations.graph-check",
+      "schema_version": 1,
+      "seconds": 15.953816164997988,
+      "shared_activations": 7,
+      "source_bodies_copied": false,
+      "status": "STRUCTURE_VERIFIED",
+      "target_executed": false,
+      "unrelated_return_frames_rejected": 17
+    },
+    "generator_unmatched": {
+      "project_source": 7,
+      "external_source": 7
+    },
+    "known_unimplemented_correspondence": "GENERIC_TYPE_PARAMETER_FACTORY_AND_NESTED_CLASS_FUNCTION_TYPE_ALIAS_CODE_PATHS",
+    "targeted_checks": {
+      "passed": 6,
+      "seconds": 1.24
+    },
+    "sunfish": {
+      "status": "RUNNING",
+      "progress": {
+        "path": "artifacts/current/experiments/cpu-sunfish-current/body-protocol-frontend/progress.json",
+        "bytes": 35227,
+        "sha256": "e2388430ebc1ff31f92fc1be3872fd060f657f02a7f8064fcb57c3957c8f6866"
+      },
+      "latest_stage": "observed-function-interfaces"
+    },
+    "receipts": {
+      "root_graph": {
+        "path": "artifacts/current/experiments/body-interface-current/graph-check.json",
+        "bytes": 639,
+        "sha256": "b262d314aea4c993d4fbc5ced3b51fcee584b0ec18b77726081574add8b42493"
+      },
+      "generator_graph": {
+        "path": "artifacts/current/experiments/body-protocols-current/graph-check.json",
+        "bytes": 667,
+        "sha256": "56bc4ec3d6e11439af2fa370c9624b7dadb154fc50599d0ed57383ac18352bcc"
+      },
+      "shared_static_interfaces": {
+        "path": "artifacts/current/experiments/body-protocols-current/interfaces-shared/result.json",
+        "bytes": 1963,
+        "sha256": "3cc613a35c22a7f9e3ba4ef7ca6bb6faf13f91dce62a7387aae5e18d28ac5cbf"
+      },
+      "original_root_driver_failure": {
+        "path": "artifacts/current/experiments/body-interface-current/frontend-connected/result.json",
+        "bytes": 3684,
+        "sha256": "47d586426b7e1e11971070674f5fccc1e7e309bd6dfd4fb0e2adacf931e27fdd"
+      }
+    },
+    "source_sha256": {
+      "scar/analysis/source_body_interfaces.py": "856f447ad7a5f3a8e98b41bdce766ca977fc8c2721155b644719105364adf369",
+      "scar/analysis/source_body_activations.py": "8e0f3e0b6c8e19357bb0be3d37041f63a615655f9d0151e0bc7aacbe603c3443",
+      "scar/analysis/source_body_activation_view.py": "ec4f2d20627360921a42eca03a341b9363ae90a18e20d522bfd40b73079936d3",
+      "scar/ir/program/source_body_interfaces.py": "10670956894b1f69ebaef613e36c3f31d6fd2a96f6ced90b39fe832be2b6e0e8",
+      "scar/ir/program/source_body_activations.py": "0a01f2d2c0e21e5419b36685617be6af1faadb80b523d64b3da66a4d0cb33276"
+    },
+    "implementation_only_model_interfaces": true,
+    "target_workload_speedup_claimed": false,
+    "first_stage_complete": false
   }
 }
