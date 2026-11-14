@@ -1,6 +1,7 @@
 """Clean, paired region validation and measured no-op/native selection."""
 import argparse
 from dataclasses import asdict
+from hashlib import sha256
 import importlib.util
 import inspect
 import json
@@ -12,7 +13,7 @@ import sys
 import time
 import warnings
 import numpy as np
-from scar.codegen import load
+from scar.codegen import CppArtifact,load
 from .runtime import guarded_function
 from scar.optimization import select_measured
 
@@ -37,7 +38,10 @@ def bitwise_equal(left,right):
 def benchmark(artifact_path,out,*,shape=(1026,1026),warmup=3,repetitions=9):
     if warmup<0 or repetitions<3 or len(shape)!=2 or min(shape)<3:raise ValueError('valid 2D shape and >=3 repetitions required')
     if sys.getprofile() is not None or sys.gettrace() is not None:raise ValueError('clean benchmark cannot have Python trace/profile hooks')
-    artifact=load(artifact_path);module=load_source(artifact.plan.region.source.path)
+    artifact=artifact_path if isinstance(artifact_path,CppArtifact) else load(artifact_path)
+    if sha256(Path(artifact.plan.region.source.path).read_bytes()).hexdigest()!=artifact.plan.region.source.sha256:
+        raise ValueError('benchmark source version differs from compiled graph')
+    module=load_source(artifact.plan.region.source.path)
     original=resolve(module,artifact.plan.region.source.qualname)
     wrapped=guarded_function(original,artifact,exclusive_inputs=True,trial=True)
     signature=inspect.signature(original)
@@ -75,10 +79,12 @@ def benchmark(artifact_path,out,*,shape=(1026,1026),warmup=3,repetitions=9):
     decision=select_measured(artifact.plan,timings[0],timings[1],validated=True,
         native_fallbacks=wrapped.scar_stats['fallback_calls']-fallback_before_timing)
     selected=decision['selected']
-    report=dict(schema='scar.region-benchmark',schema_version=1,scope='controlled_serial_region',
+    report=dict(schema='scar.region-benchmark',schema_version=1,scope='controlled_synchronous_cpu_region',
         validation=dict(bitwise_output=True,input_unchanged=True,fresh_output=True,mutable_input_invalidation=True,
             caller_output_mutation_safe=True,dtype_fallback_once=True,nonfinite_fallback=True),
         source=asdict(artifact.plan.region.source),artifact=artifact.report,shape=list(shape),
+        region_id=artifact.plan.region.id,
+        resource_binding=None if artifact.plan.resource_binding is None else asdict(artifact.plan.resource_binding),
         warmup=warmup,repetitions=repetitions,paired_order='AB_BA_ALTERNATING',instrumented=False,
         baseline_seconds=a,optimized_seconds=b,speedup=speedup,native_without_fallback=no_fallback,
         stats=wrapped.scar_stats,decision=decision['decision'],selection=decision,

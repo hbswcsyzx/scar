@@ -88,6 +88,17 @@ K / Σ / A / R / Q / M 分别观察控制、状态、动作、资源、契约和
 Action 的 VAL / REP / MEM / XFER / STATE / CTRL / ORDER / IO / OPAQUE 也是可重叠标签，
 并非五类实体或底层 `Behavior` 枚举的替代品。Q 保留假设；M 区分静态依据与运行证据。
 
+## 硬件化简契约
+
+输入是保留数据、控制、状态、效果及逃逸依赖的程序图、硬件拓扑/容量/代价模型与契约 Q；未知字段和未决条件继续显式保留。
+Operation、Value、StateLocation、Region、Resource 及其原 ID 保持；任务图是引用原语义与来源的派生 IR，不替换原程序图。
+决策覆盖 Q 允许的结构等价变换、物理副本及存储位置、搬运与计算先后、buffer 分配/释放生命期、设备选择及并行度。
+目标是在峰值 memory、容量/可用预算、transfer 与同步约束下最小化 makespan；allocation 不等于 ready，逃逸输出不能提前释放。
+算术次数和逻辑 bytes 是静态需求，不直接等于 duration、实际 DRAM 流量、cache miss 或有效带宽；缺少的成本逐字段保留 UNKNOWN。
+当前固定 placement solver 只在给定整数 duration、资源需求与预算的离散模型内求解；尚未完成 joint placement，也不证明物理全局最优。
+当前可执行后端仍只准入有运行时 guard 的纯 CPU 数组区域；任务图不自动关闭开放效果、控制或跨调用内容版本条件。
+实测用于成本校准及正确性/性能验收；优化主链由程序图、硬件模型与 Q 驱动，不以黑盒编译版本排名替代。
+
 ## 图、端口与层次
 
 图用规范化记录和 ID 引用保存；源码对应、包含、数据、引用、状态、控制及资源关系分别表示。

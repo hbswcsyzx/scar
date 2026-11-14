@@ -8,7 +8,7 @@ State · Control · Action · Resource：面向Python程序的宏观编译器。
 已具备共享控制/数据/状态图、跨函数与容器传播及生成式算子接口接线；仍需补完整资源映射和外部接口。
 完整程序建模尚未完成；已贯通受约束的 CPU 数组区域编译，没有LeWM加速比结论。
 LeWM 是外部 testcase；通用规则不按业务名称选择处理方式。
-后端基线为C++20、算子ABI v1、执行计划schema v1，配置见`pyproject.toml`。
+后端基线为C++20、算子ABI v1、执行计划schema v1（资源绑定用v2），配置见`pyproject.toml`。
 
 ## 使用
 
@@ -18,6 +18,19 @@ LeWM 是外部 testcase；通用规则不按业务名称选择处理方式。
 scar compile-region /path/to/program.py --catalog /path/to/catalog --cpu-threads 4 --out /path/to/compiled
 scar benchmark-region /path/to/compiled/region-0/native --out /path/to/compiled/benchmark.json
 ```
+
+有catalog时直接降低原F4操作和端口；F0编译仅恢复CodeID，不重新用AST选择表达式语义。
+硬件规划按模型推导，实测用于成本校准及验收，不以黑盒程序版本排名为主链：
+
+```bash
+scar compile-region /path/to/program.py --catalog /path/to/catalog --target /path/to/hardware --cpu-threads 4 --out /path/to/preview
+scar plan-resources /path/to/preview/region-0/resource-plan.json --plan /path/to/preview/region-0/plan.json --shape 258 258 --out /path/to/planning.json
+```
+
+固定线程参数当前只生成未排名的可行分配预览；未指定时，硬件分配缺代价模型则报告`PLANNING_REQUIRED`，不编译多版本比时。
+`plan-resources --model COSTS.json`接显式任务成本；资源容量、CPU需求和切片输出大小从原计划推导，未知成本或预算不补零。
+求解器当前只覆盖固定放置、非抢占任务和增量内存预算；模型最优不等于物理最优，联合放置/搬运/融合仍未完成。
+资源任务图区分分配、值就绪和导出；C++当前仅消费同步CPU三任务形态，拒绝未实现的copy/wait或NUMA放置。
 
 未测量的编译产物默认不选用。Python API `install_regions(module, artifacts, exclusive_inputs=True, selection=report)`
 仅在已测计划及输入 shape/layout 范围内使用原生代码；`trial=True` 只用于受控 A/B。

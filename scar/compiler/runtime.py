@@ -8,6 +8,7 @@ from contextlib import contextmanager
 from functools import wraps
 from hashlib import sha256
 import inspect
+import os
 from pathlib import Path
 import threading
 import types
@@ -20,6 +21,10 @@ def guarded_function(original,artifact,*,exclusive_inputs=False,selection=None,t
     source=artifact.plan.region.source
     if sha256(Path(source.path).read_bytes()).hexdigest()!=source.sha256 or code_key(original.__code__)!=source.code_key:
         raise SourceMismatch('source/code version differs from compiled region')
+    binding=artifact.plan.resource_binding
+    if binding is not None:
+        from scar.optimization.hardware import validate_cpu_placement
+        validate_cpu_placement(binding)
     code=original.__code__;defaults=original.__defaults__
     kwdefaults={k:id(v) for k,v in (original.__kwdefaults__ or {}).items()}
     signature=inspect.signature(original);stats=dict(native_calls=0,fallback_calls=0,reasons={})
@@ -31,6 +36,9 @@ def guarded_function(original,artifact,*,exclusive_inputs=False,selection=None,t
     def call(*args,**kwargs):
         if not exclusive_inputs or threading.active_count()!=1:
             return fallback('input_ownership_or_thread_contract',args,kwargs)
+        if binding is not None and (not hasattr(os,'sched_getaffinity')
+                or not set(binding.cpu_ids)<=os.sched_getaffinity(0)):
+            return fallback('planned_cpu_allocation_unavailable',args,kwargs)
         if (original.__code__ is not code or original.__defaults__ is not defaults
                 or {k:id(v) for k,v in (original.__kwdefaults__ or {}).items()}!=kwdefaults):
             return fallback('function_state_changed',args,kwargs)
@@ -40,7 +48,9 @@ def guarded_function(original,artifact,*,exclusive_inputs=False,selection=None,t
         values=[bound.arguments[p] for p in artifact.plan.region.parameters]
         if not trial:
             if (not selection or selection.get('decision')!='TRANSFORM_UNDER_CONTRACT'
-                    or selection.get('artifact',{}).get('plan_sha256')!=plan_sha256):
+                    or selection.get('artifact',{}).get('plan_sha256')!=plan_sha256
+                    or selection.get('artifact',{}).get('build_id')!=artifact.report['build_id']
+                    or selection.get('artifact',{}).get('resource_schedule_sha256')!=artifact.report.get('resource_schedule_sha256')):
                 return fallback('no_measured_selection_for_plan',args,kwargs)
             shape=tuple(selection.get('shape',()))
             import numpy as np

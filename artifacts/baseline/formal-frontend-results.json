@@ -4103,5 +4103,182 @@
       "path": "/home/zyf/AAA/scar-testcases/cpu_science/compiler_validate.py",
       "sha256": "9dcf6d1e63727b24025ec1bfb98794c8b870aefa56be58262f6b9de7d67a210c"
     }
+  },
+  "model_driven_hardware_progress": {
+    "status": "VERIFIED_GRAPH_RESOURCE_NATIVE_CHAIN_AND_MODEL_SOLVER_FOUNDATIONS",
+    "scope": "INCOMPLETE_THREE_STAGE_MACRO_COMPILER",
+    "original_f4_discovery": true,
+    "ast_semantics_reparsed": false,
+    "source_functions_accepted": 1,
+    "source_functions_rejected": 10,
+    "source_nodes": 12,
+    "source_origins": 189,
+    "compile_seconds": 94.20275106400368,
+    "original_source": "/home/zyf/AAA/gray-scott/python/gray_scott.py",
+    "source_code_key": "pycode-v2:1182ec62112c4dd5235518423cd6533a6a14c313f7e07860e612ed7228b06809",
+    "graph": "artifacts/current/experiments/compiler-graph-hardware-v1/build/graph.json",
+    "build": "artifacts/current/experiments/compiler-graph-hardware-v1/build/result.json",
+    "resource_schedule": "artifacts/current/experiments/compiler-graph-hardware-v1/build/region-0/resource-plan.json",
+    "graph_hardware_cpu_allocation": {
+      "cpu_affinity": "NATIVE_ENFORCED_PER_CALL",
+      "cpu_ids": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "worker_assignment": "worker_i_to_cpu_ids_i",
+      "affinity_lifetime": "save_bind_verify_execute_verify_restore_verify",
+      "affinity_failure": "GuardFailure",
+      "placement_optimality": "not established",
+      "memory_policy": "UNBOUND",
+      "memory_domain_id": "target_resource:memory/numa0",
+      "memory_domain_role": "candidate_reference_only",
+      "numa_page_binding": false
+    },
+    "pipeline_allocation": "EXPLICIT_FIXED_THREAD_UNRANKED_PREVIEW",
+    "black_box_variant_search": false,
+    "region_validation": {
+      "report": "artifacts/current/experiments/compiler-graph-hardware-v1/region-benchmark-clean.json",
+      "shape": [
+        258,
+        258
+      ],
+      "baseline": {
+        "median": 0.000426166,
+        "min": 0.00039937,
+        "max": 0.000448059,
+        "stdev": 1.778713644041671e-05,
+        "samples": [
+          0.00042783,
+          0.000431128,
+          0.000414158,
+          0.000448059,
+          0.000401484,
+          0.000437634,
+          0.000399739,
+          0.000426166,
+          0.00039937
+        ]
+      },
+      "native": {
+        "median": 0.000212119,
+        "min": 0.000190298,
+        "max": 0.000244944,
+        "stdev": 1.580678703911708e-05,
+        "samples": [
+          0.000244944,
+          0.000203545,
+          0.000221423,
+          0.000200265,
+          0.000212119,
+          0.000190298,
+          0.000204673,
+          0.000221406,
+          0.000214256
+        ]
+      },
+      "speedup": 2.0090892376449068,
+      "decision": "TRANSFORM_UNDER_CONTRACT",
+      "warmup": 3,
+      "repetitions": 9
+    },
+    "full_program_validation": {
+      "report": "artifacts/current/experiments/compiler-graph-hardware-v1/program-validation/result.json",
+      "speedup": 1.046588097174336,
+      "baseline": {
+        "median": 0.5475267410074593,
+        "min": 0.5451652909978293,
+        "max": 0.5607278910028981,
+        "stdev": 0.008386907716473161,
+        "samples": [
+          0.5475267410074593,
+          0.5607278910028981,
+          0.5451652909978293
+        ]
+      },
+      "native": {
+        "median": 0.5231539919914212,
+        "min": 0.5226202659978298,
+        "max": 0.5251394740043906,
+        "stdev": 0.0013274920740742877,
+        "samples": [
+          0.5231539919914212,
+          0.5226202659978298,
+          0.5251394740043906
+        ]
+      },
+      "correctness": {
+        "region": true,
+        "single_step": true,
+        "trajectory_20_steps": true,
+        "full_integrate": true,
+        "required_state": true,
+        "stdout": true,
+        "files": true
+      },
+      "decision": "NO_OP",
+      "native_fallbacks": 0,
+      "warmup": 1,
+      "repetitions": 3
+    },
+    "cost_model_gap": {
+      "report": "artifacts/current/experiments/compiler-graph-hardware-v1/analytical-unresolved.json",
+      "status": "UNRESOLVED",
+      "fields": [
+        {
+          "field": "task_costs.allocate:output.duration_ticks",
+          "reason": "nonnegative integer ticks required; unknown is not zero"
+        },
+        {
+          "field": "task_costs.compute:region.duration_ticks",
+          "reason": "nonnegative integer ticks required; unknown is not zero"
+        },
+        {
+          "field": "task_costs.export:output.duration_ticks",
+          "reason": "nonnegative integer ticks required; unknown is not zero"
+        },
+        {
+          "field": "memory_capacities.host-address-space:$CALL_PROCESS",
+          "reason": "explicit incremental byte budget required; total capacity is not free budget"
+        }
+      ],
+      "scope": "Three task durations and explicit incremental host-memory budget"
+    },
+    "analytical_fixture": {
+      "report": "artifacts/current/experiments/compiler-graph-hardware-v1/declared-model/planning-report.json",
+      "status": "OPTIMAL_WITHIN_MODEL",
+      "lower_bound_ticks": 10,
+      "solution_ticks": 10,
+      "basis": "ILLUSTRATIVE_INTEGER_TICKS_NOT_HARDWARE_CALIBRATION",
+      "backend_admission": "artifacts/current/experiments/compiler-graph-hardware-v1/declared-model/backend-admission.json",
+      "execution_linked": false,
+      "deployment_authorized": false
+    },
+    "solver_review": "artifacts/current/experiments/compiler-graph-hardware-v1/solver-review.json",
+    "native_guard_review": "artifacts/current/experiments/compiler-bound-guard-review-v1/guard-review.json",
+    "schedule_native_review": "artifacts/current/experiments/compiler-resource-schedule-review-v1/validation.json",
+    "tests": {
+      "result": "68 passed in 3.79s",
+      "log": "artifacts/current/experiments/compiler-graph-hardware-v1/final-tests.log"
+    },
+    "software_world_return_fix": "Compiled-context caller reuses original F4 material; two-level focused test passed; no content-preservation claim",
+    "environment": {
+      "scar": "editable 0.1.0 installed with --no-deps --no-build-isolation into existing lewm",
+      "torch_cuda_upgraded": false
+    },
+    "unimplemented": [
+      "joint_graph_rewrite_placement_and_scheduling",
+      "calibrated_hardware_cost_model",
+      "general_timed_plan_execution",
+      "GPU_transfers_and_async_runtime",
+      "whole_program_CPP_delivery",
+      "complete_call_scoped_content_state_and_effect_bindings"
+    ],
+    "first_stage_complete": false,
+    "whole_program_compiled": false,
+    "physical_optimality_proven": false,
+    "goal_complete": false,
+    "lewm_modified": false
   }
 }
